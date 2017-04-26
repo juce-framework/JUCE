@@ -536,16 +536,10 @@ private:
 
     void writeModuleCppWrappers (const OwnedArray<LibraryModule>& modules)
     {
-        for (int j = 0; j < modules.size(); ++j)
+        for (auto* module : modules)
         {
-            const LibraryModule& module = *modules.getUnchecked(j);
-
-            Array<LibraryModule::CompileUnit> units = module.getAllCompileUnits();
-
-            for (int i = 0; i < units.size(); ++i)
+            for (auto& cu : module->getAllCompileUnits())
             {
-                const LibraryModule::CompileUnit& cu = units.getReference(i);
-
                 MemoryOutputStream mem;
 
                 writeAutoGenWarningComment (mem);
@@ -555,17 +549,12 @@ private:
                     << "#include " << project.getAppConfigFilename().quoted() << newLine
                     << "#include <";
 
-                auto moduleWrapperFilename = cu.file.getFileName();
-
-                // .r files require a different include scheme, with a different file name
-                if (cu.file.getFileExtension() == ".r")
-                    moduleWrapperFilename = cu.file.getFileNameWithoutExtension() + "_r.r";
-                else
-                     mem << module.getID() << "/";
+                if (cu.file.getFileExtension() != ".r")   // .r files are included without the path
+                    mem << module->getID() << "/";
 
                 mem << cu.file.getFileName() << ">" << newLine;
 
-                replaceFileIfDifferent (generatedCodeFolder.getChildFile (moduleWrapperFilename), mem);
+                replaceFileIfDifferent (generatedCodeFolder.getChildFile (cu.getFilenameForProxyFile()), mem);
             }
         }
     }

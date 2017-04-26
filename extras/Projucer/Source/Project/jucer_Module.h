@@ -112,6 +112,7 @@ public:
 
         void writeInclude (MemoryOutputStream&) const;
         bool isNeededForExporter (ProjectExporter&) const;
+        String getFilenameForProxyFile() const;
         static bool hasSuffix (const File&, const char*);
     };
 

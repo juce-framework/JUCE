@@ -199,7 +199,7 @@ Result ModuleList::addAllModulesInSubfoldersRecursively (const File& path, int d
     {
         for (DirectoryIterator iter (path, false, "*", File::findDirectories); iter.next();)
         {
-            const File& childPath = iter.getFile().getLinkedTarget();
+            auto childPath = iter.getFile().getLinkedTarget();
 
             if (! tryToAddModuleFromFolder (childPath))
                 addAllModulesInSubfoldersRecursively (childPath, depth - 1);
@@ -231,9 +231,9 @@ static Array<File> getAllPossibleModulePaths (Project& project)
 
     Array<File> files;
 
-    for (int i = 0; i < paths.size(); ++i)
+    for (auto& path : paths)
     {
-        const File f (project.resolveFilename (paths[i]));
+        auto f = project.resolveFilename (path);
 
         if (f.isDirectory())
         {
@@ -252,11 +252,9 @@ Result ModuleList::scanAllKnownFolders (Project& project)
     modules.clear();
     Result result (Result::ok());
 
-    const Array<File> modulePaths (getAllPossibleModulePaths (project));
-
-    for (int i = 0; i < modulePaths.size(); ++i)
+    for (auto& m : getAllPossibleModulePaths (project))
     {
-        result = addAllModulesInFolder (modulePaths.getReference(i));
+        result = addAllModulesInFolder (m);
 
         if (result.failed())
             break;
@@ -297,7 +295,7 @@ void LibraryModule::writeIncludes (ProjectSaver& projectSaver, OutputStream& out
 //==============================================================================
 static void parseAndAddLibs (StringArray& libList, const String& libs)
 {
-    libList.addTokens (libs, ", ", StringRef());
+    libList.addTokens (libs, ", ", {});
     libList.trim();
     libList.sort (false);
     libList.removeDuplicates (false);
@@ -357,13 +355,13 @@ void LibraryModule::addSettingsForModuleToExporter (ProjectExporter& exporter, P
 
     if (exporter.isXcode())
     {
-        XCodeProjectExporter& xcodeExporter = dynamic_cast<XCodeProjectExporter&> (exporter);
+        auto& xcodeExporter = dynamic_cast<XCodeProjectExporter&> (exporter);
 
         if (project.isAUPluginHost())
             xcodeExporter.xcodeFrameworks.addTokens (xcodeExporter.isOSX() ? "AudioUnit CoreAudioKit" : "CoreAudioKit", false);
 
         const String frameworks (moduleInfo.moduleInfo [xcodeExporter.isOSX() ? "OSXFrameworks" : "iOSFrameworks"].toString());
-        xcodeExporter.xcodeFrameworks.addTokens (frameworks, ", ", StringRef());
+        xcodeExporter.xcodeFrameworks.addTokens (frameworks, ", ", {});
 
         parseAndAddLibs (xcodeExporter.xcodeLibs, moduleInfo.moduleInfo [exporter.isOSX() ? "OSXLibs" : "iOSLibs"].toString());
     }
@@ -430,7 +428,7 @@ struct FileSorter
 
 bool LibraryModule::CompileUnit::hasSuffix (const File& f, const char* suffix)
 {
-    String fileWithoutSuffix = f.getFileNameWithoutExtension() + String (".");
+    auto fileWithoutSuffix = f.getFileNameWithoutExtension() + ".";
 
     return fileWithoutSuffix.containsIgnoreCase (suffix + String ("."))
              || fileWithoutSuffix.containsIgnoreCase (suffix + String ("_"));
@@ -449,12 +447,18 @@ bool LibraryModule::CompileUnit::isNeededForExporter (ProjectExporter& exporter)
      || (hasSuffix (file, "_Android")    && ! exporter.isAndroid()))
         return false;
 
-    const ProjectType::Target::Type targetType = Project::getTargetTypeFromFilePath (file, false);
+    auto targetType = Project::getTargetTypeFromFilePath (file, false);
+
     if (targetType != ProjectType::Target::unspecified && ! exporter.shouldBuildTargetType (targetType))
         return false;
 
     return exporter.usesMMFiles() ? isCompiledForObjC
                                   : isCompiledForNonObjC;
+}
+
+String LibraryModule::CompileUnit::getFilenameForProxyFile() const
+{
+    return "include_" + file.getFileName();
 }
 
 Array<LibraryModule::CompileUnit> LibraryModule::getAllCompileUnits() const
@@ -467,22 +471,19 @@ Array<LibraryModule::CompileUnit> LibraryModule::getAllCompileUnits() const
 
     Array<LibraryModule::CompileUnit> units;
 
-    for (int i = 0; i < files.size(); ++i)
+    for (auto& file : files)
     {
-        CompileUnit cu;
-        cu.file = files.getReference(i);
-
-        if (cu.file.getFileName().startsWithIgnoreCase (getID())
-              && cu.file.hasFileExtension (sourceFileExtensions))
+        if (file.getFileName().startsWithIgnoreCase (getID())
+              && file.hasFileExtension (sourceFileExtensions))
         {
+            CompileUnit cu;
+            cu.file = file;
             units.add (cu);
         }
     }
 
-    for (int i = 0; i < units.size(); ++i)
+    for (auto& cu : units)
     {
-        CompileUnit& cu = units.getReference(i);
-
         cu.isCompiledForObjC = true;
         cu.isCompiledForNonObjC = ! cu.file.hasFileExtension ("mm;m");
 
@@ -500,20 +501,12 @@ void LibraryModule::findAndAddCompiledUnits (ProjectExporter& exporter,
                                              ProjectSaver* projectSaver,
                                              Array<File>& result) const
 {
-    Array<CompileUnit> units = getAllCompileUnits();
-
-    for (int i = 0; i < units.size(); ++i)
+    for (auto& cu : getAllCompileUnits())
     {
-        const CompileUnit& cu = units.getReference(i);
-
         if (cu.isNeededForExporter (exporter))
         {
-            // .r files require a different include scheme, with a different file name
-            auto filename = cu.file.getFileName();
-            if (cu.file.getFileExtension() == ".r")
-                filename = cu.file.getFileNameWithoutExtension() + "_r.r";
-
-            File localFile = exporter.getProject().getGeneratedCodeFolder().getChildFile (filename);
+            auto localFile = exporter.getProject().getGeneratedCodeFolder()
+                                                  .getChildFile (cu.getFilenameForProxyFile());
             result.add (localFile);
 
             if (projectSaver != nullptr)
@@ -558,20 +551,20 @@ void LibraryModule::findBrowseableFiles (const File& folder, Array<File>& filesF
 
 void LibraryModule::addBrowseableCode (ProjectExporter& exporter, const Array<File>& compiled, const File& localModuleFolder) const
 {
-    if (sourceFiles.size() == 0)
+    if (sourceFiles.isEmpty())
         findBrowseableFiles (localModuleFolder, sourceFiles);
 
     Project::Item sourceGroup (Project::Item::createGroup (exporter.getProject(), getID(), "__mainsourcegroup" + getID(), false));
 
     const RelativePath moduleFromProject (exporter.getModuleFolderRelativeToProject (getID()));
 
-    for (int i = 0; i < sourceFiles.size(); ++i)
+    for (auto& sourceFile : sourceFiles)
     {
-        const String pathWithinModule (FileHelpers::getRelativePathFrom (sourceFiles.getReference(i), localModuleFolder));
+        auto pathWithinModule = FileHelpers::getRelativePathFrom (sourceFile, localModuleFolder);
 
         // (Note: in exporters like MSVC we have to avoid adding the same file twice, even if one of those instances
         // is flagged as being excluded from the build, because this overrides the other and it fails to compile)
-        if (exporter.canCopeWithDuplicateFiles() || ! compiled.contains (sourceFiles.getReference(i)))
+        if (exporter.canCopeWithDuplicateFiles() || ! compiled.contains (sourceFile))
             addFileWithGroups (sourceGroup,
                                moduleFromProject.getChildFile (pathWithinModule),
                                pathWithinModule);
@@ -597,11 +590,7 @@ ModuleDescription EnabledModuleList::getModuleInfo (const String& moduleID)
 
 bool EnabledModuleList::isModuleEnabled (const String& moduleID) const
 {
-    for (int i = 0; i < state.getNumChildren(); ++i)
-        if (state.getChild(i) [Ids::ID] == moduleID)
-            return true;
-
-    return false;
+    return state.getChildWithProperty (Ids::ID, moduleID).isValid();
 }
 
 bool EnabledModuleList::isAudioPluginModuleMissing() const
@@ -622,18 +611,18 @@ File EnabledModuleList::findLocalModuleFolder (const String& moduleID, bool useE
     {
         if (useExportersForOtherOSes || exporter->mayCompileOnCurrentOS())
         {
-            const String path (exporter->getPathForModuleString (moduleID));
+            auto path = exporter->getPathForModuleString (moduleID);
 
             if (path.isNotEmpty())
             {
-                const File moduleFolder (project.resolveFilename (path));
+                auto moduleFolder = project.resolveFilename (path);
 
                 if (moduleFolder.exists())
                 {
                     if (ModuleDescription (moduleFolder).isValid())
                         return moduleFolder;
 
-                    File f = moduleFolder.getChildFile (moduleID);
+                    auto f = moduleFolder.getChildFile (moduleID);
 
                     if (ModuleDescription (f).isValid())
                         return f;
@@ -810,7 +799,7 @@ void EnabledModuleList::addModuleInteractive (const String& moduleID)
     ModuleList list;
     list.scanAllKnownFolders (project);
 
-    if (const ModuleDescription* info = list.getModuleWithID (moduleID))
+    if (auto* info = list.getModuleWithID (moduleID))
         addModule (info->moduleFolder, areMostModulesCopiedLocally());
     else
         addModuleFromUserSelectedFile();
