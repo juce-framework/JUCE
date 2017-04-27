@@ -63,6 +63,30 @@ String SystemStats::getJUCEVersion()
  static JuceVersionPrinter juceVersionPrinter;
 #endif
 
+StringArray SystemStats::getDeviceIdentifiers()
+{
+    StringArray ids;
+
+   #if JUCE_WINDOWS
+    File f (File::getSpecialLocation (File::windowsSystemDirectory));
+   #else
+    File f ("~");
+   #endif
+    if (auto num = f.getFileIdentifier())
+    {
+        ids.add (String::toHexString ((int64) num));
+    }
+    else
+    {
+        Array<MACAddress> addresses;
+        MACAddress::findAllAddresses (addresses);
+        for (auto& address : addresses)
+            ids.add (address.toString());
+    }
+
+    jassert (ids.size() > 0); // Failed to create any IDs!
+    return ids;
+}
 
 //==============================================================================
 struct CPUInformation

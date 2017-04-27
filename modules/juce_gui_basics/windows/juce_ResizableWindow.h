@@ -380,14 +380,14 @@ protected:
 
 private:
     //==============================================================================
-    Component::SafePointer<Component> contentComponent;
-    bool ownsContentComponent, resizeToFitContent, fullscreen, canDrag, dragStarted;
+    Component::SafePointer<Component> contentComponent, splashScreen;
+    bool ownsContentComponent = false, resizeToFitContent = false, fullscreen = false, canDrag = true, dragStarted = false;
     ComponentDragger dragger;
     Rectangle<int> lastNonFullScreenPos;
     ComponentBoundsConstrainer defaultConstrainer;
-    ComponentBoundsConstrainer* constrainer;
+    ComponentBoundsConstrainer* constrainer = nullptr;
    #if JUCE_DEBUG
-    bool hasBeenResized;
+    bool hasBeenResized = false;
    #endif
 
     void initialise (bool addToDesktop);

@@ -253,6 +253,7 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
 #include "application/juce_Application.cpp"
 #include "misc/juce_BubbleComponent.cpp"
 #include "misc/juce_DropShadower.cpp"
+#include "misc/juce_JUCESplashScreen.cpp"
 
 // these classes are C++11-only
 #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS && JUCE_COMPILER_SUPPORTS_LAMBDAS

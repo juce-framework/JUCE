@@ -94,6 +94,10 @@ public:
     Value getCompanyWebsite()                           { return getProjectValue (Ids::companyWebsite); }
     Value getCompanyEmail()                             { return getProjectValue (Ids::companyEmail); }
 
+    Value shouldDisplaySplashScreen()                   { return getProjectValue (Ids::displaySplashScreen); }
+    Value shouldReportAppUsage()                        { return getProjectValue (Ids::reportAppUsage); }
+    Value splashScreenColour()                          { return getProjectValue (Ids::splashScreenColour); }
+
     //==============================================================================
     Value getProjectValue (const Identifier& name)       { return projectRoot.getPropertyAsValue (name, getUndoManagerFor (projectRoot)); }
     var   getProjectVar   (const Identifier& name) const { return projectRoot.getProperty        (name); }

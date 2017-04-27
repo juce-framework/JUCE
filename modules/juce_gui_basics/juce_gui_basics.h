@@ -245,6 +245,7 @@ class FlexBox;
 #include "widgets/juce_ToolbarItemPalette.h"
 #include "buttons/juce_ToolbarButton.h"
 #include "misc/juce_DropShadower.h"
+#include "misc/juce_JUCESplashScreen.h"
 #include "widgets/juce_TreeView.h"
 #include "windows/juce_TopLevelWindow.h"
 #include "windows/juce_AlertWindow.h"

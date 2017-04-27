@@ -107,6 +107,8 @@ public:
     void licenseStateChanged (const LicenseState&) override;
     void doLogout();
 
+    bool isPaidOrGPL() const              { return licenseController == nullptr || licenseController->getState().isPaidOrGPL(); }
+
     //==============================================================================
     ProjucerLookAndFeel lookAndFeel;
 

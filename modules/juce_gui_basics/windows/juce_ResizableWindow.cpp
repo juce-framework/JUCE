@@ -23,31 +23,13 @@
 */
 
 ResizableWindow::ResizableWindow (const String& name, bool shouldAddToDesktop)
-    : TopLevelWindow (name, shouldAddToDesktop),
-      ownsContentComponent (false),
-      resizeToFitContent (false),
-      fullscreen (false),
-      canDrag (true),
-      dragStarted (false),
-      constrainer (nullptr)
-     #if JUCE_DEBUG
-      , hasBeenResized (false)
-     #endif
+    : TopLevelWindow (name, shouldAddToDesktop)
 {
     initialise (shouldAddToDesktop);
 }
 
 ResizableWindow::ResizableWindow (const String& name, Colour bkgnd, bool shouldAddToDesktop)
-    : TopLevelWindow (name, shouldAddToDesktop),
-      ownsContentComponent (false),
-      resizeToFitContent (false),
-      fullscreen (false),
-      canDrag (true),
-      dragStarted (false),
-      constrainer (nullptr)
-     #if JUCE_DEBUG
-      , hasBeenResized (false)
-     #endif
+    : TopLevelWindow (name, shouldAddToDesktop)
 {
     setBackgroundColour (bkgnd);
 
@@ -56,6 +38,8 @@ ResizableWindow::ResizableWindow (const String& name, Colour bkgnd, bool shouldA
 
 ResizableWindow::~ResizableWindow()
 {
+    splashScreen.deleteAndZero();
+
     // Don't delete or remove the resizer components yourself! They're managed by the
     // ResizableWindow, and you should leave them alone! You may have deleted them
     // accidentally by careless use of deleteAllChildren()..?
@@ -73,6 +57,25 @@ ResizableWindow::~ResizableWindow()
 
 void ResizableWindow::initialise (const bool shouldAddToDesktop)
 {
+    /*
+      ==========================================================================
+       In accordance with the terms of the JUCE 5 End-Use License Agreement, the
+       JUCE Code in SECTION A cannot be removed, changed or otherwise rendered
+       ineffective unless you have a JUCE Indie or Pro license, or are using
+       JUCE under the GPL v3 license.
+
+       End User License Agreement: www.juce.com/juce-5-licence
+      ==========================================================================
+    */
+
+    // BEGIN SECTION A
+
+   #if ! JucePlugin_Build_Standalone
+    splashScreen = new JUCESplashScreen (*this);
+   #endif
+
+    // END SECTION A
+
     defaultConstrainer.setMinimumOnscreenAmounts (0x10000, 16, 24, 16);
 
     lastNonFullScreenPos.setBounds (50, 50, 256, 256);

@@ -110,6 +110,19 @@ void Project::setMissingDefaultValues()
     if (getDocumentTitle().isEmpty())
         setTitle ("JUCE Project");
 
+    {
+        auto defaultSplashScreenAndReporting = ! ProjucerApplication::getApp().isPaidOrGPL();
+
+        if (shouldDisplaySplashScreen() == var() || defaultSplashScreenAndReporting)
+            shouldDisplaySplashScreen() = defaultSplashScreenAndReporting;
+
+        if (shouldReportAppUsage() == var() || defaultSplashScreenAndReporting)
+            shouldReportAppUsage() = defaultSplashScreenAndReporting;
+    }
+
+    if (splashScreenColour() == var())
+        splashScreenColour() = "Dark";
+
     if (! projectRoot.hasProperty (Ids::projectType))
         getProjectTypeValue() = ProjectType_GUIApp::getTypeName();
 
@@ -554,6 +567,55 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 
     props.add (new TextPropertyComponent (getCompanyEmail(), "Company E-mail", 256, false),
                "Your company e-mail, which will be added to the properties of the binary where possible");
+
+    {
+        const String licenseRequiredTagline ("Required for closed source applications without an Indie or Pro JUCE license");
+        const String licenseRequiredInfo ("In accordance with the terms of the JUCE 5 End-Use License Agreement (www.juce.com/juce-5-licence), "
+                                          "this option can only be disabled for closed source applications if you have a JUCE Indie or Pro "
+                                          "license, or are using JUCE under the GPL v3 license.");
+
+        StringPairArray description;
+        description.set ("Report JUCE app usage", "This option controls the collection of usage data from users of this JUCE application.");
+        description.set ("Display the JUCE splash screen", "This option controls the display of the standard JUCE splash screen.");
+
+        if (ProjucerApplication::getApp().isPaidOrGPL())
+        {
+            props.add (new BooleanPropertyComponent (shouldReportAppUsage(), "Report JUCE app usage", licenseRequiredTagline),
+                       description["Report JUCE app usage"] + " " + licenseRequiredInfo);
+
+            props.add (new BooleanPropertyComponent (shouldDisplaySplashScreen(), "Display the JUCE splash screen", licenseRequiredTagline),
+                       description["Display the JUCE splash screen"] + " " + licenseRequiredInfo);
+        }
+        else
+        {
+            StringArray options;
+            Array<var> vars;
+
+            options.add (licenseRequiredTagline);
+            vars.add (var());
+
+            props.add (new ChoicePropertyComponent (Value(), "Report JUCE app usage", options, vars),
+                       description["Report JUCE app usage"] + " " + licenseRequiredInfo);
+
+            props.add (new ChoicePropertyComponent (Value(), "Display the JUCE splash screen", options, vars),
+                       description["Display the JUCE splash screen"] + " " + licenseRequiredInfo);
+        }
+    }
+
+    {
+        StringArray splashScreenColours;
+
+        splashScreenColours.add ("Dark");
+        splashScreenColours.add ("Light");
+
+        Array<var> splashScreenCodes;
+
+        for (auto& splashScreenColour : splashScreenColours)
+            splashScreenCodes.add (splashScreenColour);
+
+        props.add (new ChoicePropertyComponent (splashScreenColour(), "Splash screen colour", splashScreenColours, splashScreenCodes),
+                   "Choose the colour of the JUCE splash screen.");
+    }
 
     {
         StringArray projectTypeNames;

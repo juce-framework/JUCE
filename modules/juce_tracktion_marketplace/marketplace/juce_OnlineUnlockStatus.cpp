@@ -310,22 +310,11 @@ void OnlineUnlockStatus::MachineIDUtilities::addMACAddressesToList (StringArray&
 
 StringArray OnlineUnlockStatus::MachineIDUtilities::getLocalMachineIDs()
 {
-    StringArray ids;
+    auto identifiers = SystemStats::getDeviceIdentifiers();
+    for (auto& identifier : identifiers)
+        identifier = getEncodedIDString (identifier);
 
-    // First choice for an ID number is a filesystem ID for the user's home
-    // folder or windows directory.
-   #if JUCE_WINDOWS
-    MachineIDUtilities::addFileIDToList (ids, File::getSpecialLocation (File::windowsSystemDirectory));
-   #else
-    MachineIDUtilities::addFileIDToList (ids, File ("~"));
-   #endif
-
-    // ..if that fails, use the MAC addresses..
-    if (ids.size() == 0)
-        MachineIDUtilities::addMACAddressesToList (ids);
-
-    jassert (ids.size() > 0); // failed to create any IDs!
-    return ids;
+    return identifiers;
 }
 
 StringArray OnlineUnlockStatus::getLocalMachineIDs()

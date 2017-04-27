@@ -43,6 +43,9 @@ namespace Ids
     DECLARE_ID (companyName);
     DECLARE_ID (companyWebsite);
     DECLARE_ID (companyEmail);
+    DECLARE_ID (displaySplashScreen);
+    DECLARE_ID (reportAppUsage);
+    DECLARE_ID (splashScreenColour);
     DECLARE_ID (position);
     DECLARE_ID (source);
     DECLARE_ID (width);
