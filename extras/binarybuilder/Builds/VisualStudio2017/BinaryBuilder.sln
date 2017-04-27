@@ -321,7 +321,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Juce Library Code", "Juce Library Code", "{B1E33BF4-EA8D-4371-52E9-7A62B5843215}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\JuceLibraryCode\AppConfig.h = ..\..\JuceLibraryCode\AppConfig.h
-		..\..\JuceLibraryCode\juce_core.cpp = ..\..\JuceLibraryCode\juce_core.cpp
+		..\..\JuceLibraryCode\include_juce_core.cpp = ..\..\JuceLibraryCode\include_juce_core.cpp
 		..\..\JuceLibraryCode\JuceHeader.h = ..\..\JuceLibraryCode\JuceHeader.h
 	EndProjectSection
 EndProject

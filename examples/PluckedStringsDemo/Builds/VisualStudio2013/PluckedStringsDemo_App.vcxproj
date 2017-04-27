@@ -140,17 +140,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\Main.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_audio_basics.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_audio_devices.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_audio_formats.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_audio_processors.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_audio_utils.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_core.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_data_structures.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_events.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_graphics.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_gui_basics.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_gui_extra.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_basics.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_devices.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_formats.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_processors.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_utils.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_core.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_data_structures.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_events.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_graphics.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_basics.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_extra.cpp"/>
   </ItemGroup>
   <ItemGroup/>
   <ItemGroup>

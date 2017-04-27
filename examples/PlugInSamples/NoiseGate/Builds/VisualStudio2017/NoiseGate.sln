@@ -1442,6 +1442,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lookandfeel", "lookandfeel"
 		..\..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V2.h = ..\..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V2.h
 		..\..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V3.cpp = ..\..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V3.cpp
 		..\..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V3.h = ..\..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V3.h
+		..\..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V4.cpp = ..\..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V4.cpp
+		..\..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V4.h = ..\..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V4.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "menus", "menus", "{806CB070-E860-0A3A-CDA1-F6AEA5A961F1}"
@@ -1460,6 +1462,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "misc", "misc", "{55DD5543-1
 		..\..\..\..\..\modules\juce_gui_basics\misc\juce_BubbleComponent.h = ..\..\..\..\..\modules\juce_gui_basics\misc\juce_BubbleComponent.h
 		..\..\..\..\..\modules\juce_gui_basics\misc\juce_DropShadower.cpp = ..\..\..\..\..\modules\juce_gui_basics\misc\juce_DropShadower.cpp
 		..\..\..\..\..\modules\juce_gui_basics\misc\juce_DropShadower.h = ..\..\..\..\..\modules\juce_gui_basics\misc\juce_DropShadower.h
+		..\..\..\..\..\modules\juce_gui_basics\misc\juce_JUCESplashScreen.cpp = ..\..\..\..\..\modules\juce_gui_basics\misc\juce_JUCESplashScreen.cpp
+		..\..\..\..\..\modules\juce_gui_basics\misc\juce_JUCESplashScreen.h = ..\..\..\..\..\modules\juce_gui_basics\misc\juce_JUCESplashScreen.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mouse", "mouse", "{4F197470-F555-0160-9A03-5DC709BDF137}"
@@ -1763,23 +1767,23 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Juce Library Code", "Juce Library Code", "{B1E33BF4-EA8D-4371-52E9-7A62B5843215}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\JuceLibraryCode\AppConfig.h = ..\..\JuceLibraryCode\AppConfig.h
-		..\..\JuceLibraryCode\juce_audio_basics.cpp = ..\..\JuceLibraryCode\juce_audio_basics.cpp
-		..\..\JuceLibraryCode\juce_audio_devices.cpp = ..\..\JuceLibraryCode\juce_audio_devices.cpp
-		..\..\JuceLibraryCode\juce_audio_formats.cpp = ..\..\JuceLibraryCode\juce_audio_formats.cpp
-		..\..\JuceLibraryCode\juce_audio_plugin_client_AAX.cpp = ..\..\JuceLibraryCode\juce_audio_plugin_client_AAX.cpp
-		..\..\JuceLibraryCode\juce_audio_plugin_client_utils.cpp = ..\..\JuceLibraryCode\juce_audio_plugin_client_utils.cpp
-		..\..\JuceLibraryCode\juce_audio_plugin_client_VST2.cpp = ..\..\JuceLibraryCode\juce_audio_plugin_client_VST2.cpp
-		..\..\JuceLibraryCode\juce_audio_plugin_client_VST3.cpp = ..\..\JuceLibraryCode\juce_audio_plugin_client_VST3.cpp
-		..\..\JuceLibraryCode\juce_audio_processors.cpp = ..\..\JuceLibraryCode\juce_audio_processors.cpp
-		..\..\JuceLibraryCode\juce_core.cpp = ..\..\JuceLibraryCode\juce_core.cpp
-		..\..\JuceLibraryCode\juce_cryptography.cpp = ..\..\JuceLibraryCode\juce_cryptography.cpp
-		..\..\JuceLibraryCode\juce_data_structures.cpp = ..\..\JuceLibraryCode\juce_data_structures.cpp
-		..\..\JuceLibraryCode\juce_events.cpp = ..\..\JuceLibraryCode\juce_events.cpp
-		..\..\JuceLibraryCode\juce_graphics.cpp = ..\..\JuceLibraryCode\juce_graphics.cpp
-		..\..\JuceLibraryCode\juce_gui_basics.cpp = ..\..\JuceLibraryCode\juce_gui_basics.cpp
-		..\..\JuceLibraryCode\juce_gui_extra.cpp = ..\..\JuceLibraryCode\juce_gui_extra.cpp
-		..\..\JuceLibraryCode\juce_opengl.cpp = ..\..\JuceLibraryCode\juce_opengl.cpp
-		..\..\JuceLibraryCode\juce_video.cpp = ..\..\JuceLibraryCode\juce_video.cpp
+		..\..\JuceLibraryCode\include_juce_audio_basics.cpp = ..\..\JuceLibraryCode\include_juce_audio_basics.cpp
+		..\..\JuceLibraryCode\include_juce_audio_devices.cpp = ..\..\JuceLibraryCode\include_juce_audio_devices.cpp
+		..\..\JuceLibraryCode\include_juce_audio_formats.cpp = ..\..\JuceLibraryCode\include_juce_audio_formats.cpp
+		..\..\JuceLibraryCode\include_juce_audio_plugin_client_AAX.cpp = ..\..\JuceLibraryCode\include_juce_audio_plugin_client_AAX.cpp
+		..\..\JuceLibraryCode\include_juce_audio_plugin_client_utils.cpp = ..\..\JuceLibraryCode\include_juce_audio_plugin_client_utils.cpp
+		..\..\JuceLibraryCode\include_juce_audio_plugin_client_VST2.cpp = ..\..\JuceLibraryCode\include_juce_audio_plugin_client_VST2.cpp
+		..\..\JuceLibraryCode\include_juce_audio_plugin_client_VST3.cpp = ..\..\JuceLibraryCode\include_juce_audio_plugin_client_VST3.cpp
+		..\..\JuceLibraryCode\include_juce_audio_processors.cpp = ..\..\JuceLibraryCode\include_juce_audio_processors.cpp
+		..\..\JuceLibraryCode\include_juce_core.cpp = ..\..\JuceLibraryCode\include_juce_core.cpp
+		..\..\JuceLibraryCode\include_juce_cryptography.cpp = ..\..\JuceLibraryCode\include_juce_cryptography.cpp
+		..\..\JuceLibraryCode\include_juce_data_structures.cpp = ..\..\JuceLibraryCode\include_juce_data_structures.cpp
+		..\..\JuceLibraryCode\include_juce_events.cpp = ..\..\JuceLibraryCode\include_juce_events.cpp
+		..\..\JuceLibraryCode\include_juce_graphics.cpp = ..\..\JuceLibraryCode\include_juce_graphics.cpp
+		..\..\JuceLibraryCode\include_juce_gui_basics.cpp = ..\..\JuceLibraryCode\include_juce_gui_basics.cpp
+		..\..\JuceLibraryCode\include_juce_gui_extra.cpp = ..\..\JuceLibraryCode\include_juce_gui_extra.cpp
+		..\..\JuceLibraryCode\include_juce_opengl.cpp = ..\..\JuceLibraryCode\include_juce_opengl.cpp
+		..\..\JuceLibraryCode\include_juce_video.cpp = ..\..\JuceLibraryCode\include_juce_video.cpp
 		..\..\JuceLibraryCode\JuceHeader.h = ..\..\JuceLibraryCode\JuceHeader.h
 	EndProjectSection
 EndProject
