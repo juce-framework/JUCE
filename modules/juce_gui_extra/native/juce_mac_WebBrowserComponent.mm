@@ -86,7 +86,7 @@ private:
     {
         if ([frame isEqual: [sender mainFrame]])
         {
-            const char* errorString = [[error localizedDescription] UTF8String];
+            String errorString (nsStringToJuce ([error localizedDescription]));
 
             bool proceedToErrorPage = getOwner (self)->pageLoadHadNetworkError (errorString);
 
