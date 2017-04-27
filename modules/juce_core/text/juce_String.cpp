@@ -713,7 +713,7 @@ static int naturalStringCompare (String::CharPointerType s1, String::CharPointer
             if (isAlphaNum2 && ! isAlphaNum1) return -1;
             if (isAlphaNum1 && ! isAlphaNum2) return 1;
 
-            return c1 < c2 ? -1 : 1;
+            return CharacterFunctions::toUpperCase (c1) < CharacterFunctions::toUpperCase (c2) ? -1 : 1;
         }
 
         jassert (c1 != 0 && c2 != 0);
