@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -287,7 +289,7 @@ public:
     //==============================================================================
     struct BypassParam  : public Vst::Parameter
     {
-        BypassParam (AudioProcessor& p, Vst::ParamID vstParamID)  : owner (p)
+        BypassParam (Vst::ParamID vstParamID)
         {
             info.id = vstParamID;
             toString128 (info.title, "Bypass");
@@ -362,9 +364,6 @@ public:
 
         Vst::ParamValue toPlain (Vst::ParamValue v) const override       { return v; }
         Vst::ParamValue toNormalized (Vst::ParamValue v) const override  { return v; }
-
-    private:
-        AudioProcessor& owner;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BypassParam)
     };
@@ -638,7 +637,7 @@ private:
                 }
 
                 bypassParamID = static_cast<Vst::ParamID> (usingManagedParameter ? paramBypass : numParameters);
-                parameters.addParameter (new BypassParam (*pluginInstance, bypassParamID));
+                parameters.addParameter (new BypassParam (bypassParamID));
 
                 if (pluginInstance->getNumPrograms() > 1)
                     parameters.addParameter (new ProgramChangeParameter (*pluginInstance));
@@ -865,7 +864,7 @@ private:
     private:
         void timerCallback() override
         {
-            stopTimer ();
+            stopTimer();
 
             ViewRect viewRect;
             getSize (&viewRect);
@@ -889,7 +888,10 @@ private:
                 if (pluginEditor != nullptr)
                 {
                     addAndMakeVisible (pluginEditor);
-                    setBounds (pluginEditor->getLocalBounds());
+
+                    lastBounds = pluginEditor->getLocalBounds();
+                    setBounds (lastBounds);
+
                     resizeHostWindow();
                 }
 
@@ -910,15 +912,22 @@ private:
                 g.fillAll (Colours::black);
             }
 
-            void childBoundsChanged (Component*) override
+            void childBoundsChanged (Component* childComponent) override
             {
-                resizeHostWindow();
+                if (lastBounds != childComponent->getLocalBounds())
+                {
+                    lastBounds = childComponent->getLocalBounds();
+                    resizeHostWindow();
+                }
             }
 
             void resized() override
             {
                 if (pluginEditor != nullptr)
-                    pluginEditor->setBounds (getLocalBounds());
+                {
+                    lastBounds = getLocalBounds();
+                    pluginEditor->setBounds (lastBounds);
+                }
             }
 
             void resizeHostWindow()
@@ -956,6 +965,7 @@ private:
         private:
             JuceVST3Editor& owner;
             FakeMouseMoveGenerator fakeMouseGenerator;
+            Rectangle<int> lastBounds;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentWrapperComponent)
         };
@@ -1356,19 +1366,35 @@ public:
 
     bool readFromMemoryStream (IBStream* state)
     {
-        FUnknownPtr<MemoryStream> s (state);
+        FUnknownPtr<ISizeableStream> s (state);
+        Steinberg::int64 size = 0;
 
         if (s != nullptr
-             && s->getData() != nullptr
-             && s->getSize() > 0
-             && s->getSize() < 1024 * 1024 * 100) // (some hosts seem to return junk for the size)
+             && s->getStreamSize (size) == kResultOk
+             && size > 0
+             && size < 1024 * 1024 * 100) // (some hosts seem to return junk for the size)
         {
+            MemoryBlock block (static_cast<size_t> (size));
+
+            // turns out that Cubase 9 might give you the incorrect stream size :-(
+            Steinberg::int32 bytesRead = 1;
+            int len;
+
+            for (len = 0; bytesRead > 0 && len < static_cast<int> (block.getSize()); len += bytesRead)
+                if (state->read (block.getData(), static_cast<int32> (block.getSize()), &bytesRead) != kResultOk)
+                    break;
+
+            if (len == 0)
+                return false;
+
+            block.setSize (static_cast<size_t> (len));
+
             // Adobe Audition CS6 hack to avoid trying to use corrupted streams:
             if (getHostType().isAdobeAudition())
-                if (s->getSize() >= 5 && memcmp (s->getData(), "VC2!E", 5) == 0)
+                if (block.getSize() >= 5 && memcmp (block.getData(), "VC2!E", 5) == 0)
                     return false;
 
-            return loadStateData (s->getData(), (int) s->getSize());
+            return loadStateData (block.getData(), (int) block.getSize());
         }
 
         return false;
@@ -1990,12 +2016,14 @@ private:
         // Wavelab workaround: wave-lab lies on the number of inputs/outputs so re-count here
         int vstInputs;
         for (vstInputs = 0; vstInputs < data.numInputs; ++vstInputs)
-            if (getPointerForAudioBus<FloatType> (data.inputs[vstInputs]) == nullptr)
+            if (getPointerForAudioBus<FloatType> (data.inputs[vstInputs]) == nullptr
+                  && data.inputs[vstInputs].numChannels > 0)
                 break;
 
         int vstOutputs;
         for (vstOutputs = 0; vstOutputs < data.numOutputs; ++vstOutputs)
-            if (getPointerForAudioBus<FloatType> (data.outputs[vstOutputs]) == nullptr)
+            if (getPointerForAudioBus<FloatType> (data.outputs[vstOutputs]) == nullptr
+                  && data.outputs[vstOutputs].numChannels > 0)
                 break;
 
         {
@@ -2647,5 +2675,10 @@ JUCE_EXPORTED_FUNCTION IPluginFactory* PLUGIN_API GetPluginFactory()
 
     return dynamic_cast<IPluginFactory*> (globalFactory);
 }
+
+//==============================================================================
+#if _MSC_VER || JUCE_MINGW
+extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID) { if (reason == DLL_PROCESS_ATTACH) Process::setCurrentModuleInstanceHandle (instance); return true; }
+#endif
 
 #endif //JucePlugin_Build_VST3

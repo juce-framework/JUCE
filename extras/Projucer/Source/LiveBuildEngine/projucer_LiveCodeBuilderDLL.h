@@ -2,28 +2,29 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#ifndef PROJUCER_LIVECODEBUILDERDLL_H_INCLUDED
-#define PROJUCER_LIVECODEBUILDERDLL_H_INCLUDED
+#pragma once
 
 
 extern "C"
@@ -34,7 +35,6 @@ extern "C"
     typedef void (*QuitCallbackFunction)();
     typedef void (*SetPropertyFunction) (const char* key, const char* value);
     typedef void (*GetPropertyFunction) (const char* key, char* value, size_t size);
-    typedef void (*LoginCallbackFunction) (void* userInfo, const char* errorMessage, const char* username, const char* apiKey);
 
     // We've used an X macro to define the DLL functions rather than just declaring them, so that
     // we can load the DLL and its functions dynamically and cope with it not being there.
@@ -46,15 +46,6 @@ extern "C"
         X (projucer_shutdown,       void, ()) \
         X (projucer_createBuilder,  LiveCodeBuilder, (SendMessageFunction, void* userInfo, const char* projectID, const char* cacheFolder)) \
         X (projucer_sendMessage,    void, (LiveCodeBuilder, const void* messageData, size_t messageDataSize)) \
-        X (projucer_deleteBuilder,  void, (LiveCodeBuilder)) \
-        X (projucer_login,          void, (const char* userLoginName, const char* userPassword, bool remainLoggedIn, LoginCallbackFunction, void* callbackUserInfo)) \
-        X (projucer_logout,         void, ()) \
-        X (projucer_isLoggedIn,     bool, ()) \
-        X (projucer_getLoginName,   void, (char*)) \
-        X (projucer_hasLicense,     bool, (const char* featureName)) \
-        X (projucer_hasLiveCodingLicence, bool, ())
+        X (projucer_deleteBuilder,  void, (LiveCodeBuilder))
 
 }
-
-
-#endif  // PROJUCER_LIVECODEBUILDERDLL_H_INCLUDED

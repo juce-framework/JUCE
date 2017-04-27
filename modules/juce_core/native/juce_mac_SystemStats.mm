@@ -2,28 +2,20 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -91,7 +83,16 @@ void CPUInformation::initialise() noexcept
     hasAVX2  = (b & (1u <<  5)) != 0;
    #endif
 
-    numCpus = (int) [[NSProcessInfo processInfo] activeProcessorCount];
+    numLogicalCPUs = (int) [[NSProcessInfo processInfo] activeProcessorCount];
+
+    unsigned int physicalcpu = 0;
+    size_t len = sizeof (physicalcpu);
+
+    if (sysctlbyname ("hw.physicalcpu", &physicalcpu, &len, nullptr, 0) >= 0)
+        numPhysicalCPUs = (int) physicalcpu;
+
+    if (numPhysicalCPUs <= 0)
+        numPhysicalCPUs = numLogicalCPUs;
 }
 
 //==============================================================================
@@ -138,7 +139,14 @@ String SystemStats::getDeviceDescription()
    #if JUCE_IOS
     return nsStringToJuce ([[UIDevice currentDevice] model]);
    #else
-    return String();
+    size_t size;
+    if (sysctlbyname ("hw.model", nullptr, &size, nullptr, 0) >= 0)
+    {
+        HeapBlock<char> model (size);
+        if (sysctlbyname ("hw.model", model,   &size, nullptr, 0) >= 0)
+            return model.getData();
+    }
+    return {};
    #endif
 }
 
@@ -172,8 +180,19 @@ String SystemStats::getCpuVendor()
 
     return String (reinterpret_cast<const char*> (vendor), 12);
    #else
-    return String();
+    return {};
    #endif
+}
+
+String SystemStats::getCpuModel()
+{
+    char name[65] = { 0 };
+    size_t size = sizeof (name) - 1;
+
+    if (sysctlbyname ("machdep.cpu.brand_string", &name, &size, nullptr, 0) >= 0)
+        return String (name);
+
+    return {};
 }
 
 int SystemStats::getCpuSpeedInMegaherz()
@@ -204,11 +223,11 @@ String SystemStats::getFullUserName()
 
 String SystemStats::getComputerName()
 {
-    char name [256] = { 0 };
+    char name[256] = { 0 };
     if (gethostname (name, sizeof (name) - 1) == 0)
         return String (name).upToLastOccurrenceOf (".local", false, true);
 
-    return String();
+    return {};
 }
 
 static String getLocaleValue (CFStringRef key)

@@ -2,28 +2,29 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#ifndef JUCE_COMPONENT_H_INCLUDED
-#define JUCE_COMPONENT_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -1209,6 +1210,11 @@ public:
           parent instead, unless it's a top-level component without a parent,
           in which case it just takes the focus itself.
 
+        Important note! It's obviously not possible for a component to be focused
+        unless it's actually visible, on-screen, and inside a window that is also
+        visible. So there's no point trying to call this in the component's own
+        constructor or before all of its parent hierarchy has been fully instantiated.
+
         @see setWantsKeyboardFocus, getWantsKeyboardFocus, hasKeyboardFocus,
              getCurrentlyFocusedComponent, focusGained, focusLost,
              keyPressed, keyStateChanged
@@ -2224,7 +2230,18 @@ public:
     /** Returns the object that was set by setCachedComponentImage().
         @see setCachedComponentImage
     */
-    CachedComponentImage* getCachedComponentImage() const noexcept  { return cachedImage; }
+    CachedComponentImage* getCachedComponentImage() const noexcept      { return cachedImage; }
+
+    /** Sets a flag to indicate whether mouse drag events on this Component should be ignored when it is inside a
+        Viewport with drag-to-scroll functionality enabled. This is useful for Components such as sliders that
+        should not move their parent Viewport when dragged.
+    */
+    void setViewportIgnoreDragFlag (bool ignoreDrag) noexcept           { flags.viewportIgnoreDragFlag = ignoreDrag; }
+
+    /** Retrieves the current state of the Viewport drag-to-scroll functionality flag.
+        @see setViewportIgnoreDragFlag
+    */
+    bool getViewportIgnoreDragFlag() const noexcept                     { return flags.viewportIgnoreDragFlag; }
 
     //==============================================================================
     // These methods are deprecated - use localPointToGlobal, getLocalPoint, getLocalPoint, etc instead.
@@ -2284,6 +2301,7 @@ private:
         bool mouseDownWasBlocked        : 1;
         bool isMoveCallbackPending      : 1;
         bool isResizeCallbackPending    : 1;
+        bool viewportIgnoreDragFlag     : 1;
        #if JUCE_DEBUG
         bool isInsidePaintCall          : 1;
        #endif
@@ -2300,9 +2318,9 @@ private:
     //==============================================================================
     void internalMouseEnter (MouseInputSource, Point<float>, Time);
     void internalMouseExit  (MouseInputSource, Point<float>, Time);
-    void internalMouseDown  (MouseInputSource, Point<float>, Time, float);
-    void internalMouseUp    (MouseInputSource, Point<float>, Time, const ModifierKeys oldModifiers, float);
-    void internalMouseDrag  (MouseInputSource, Point<float>, Time, float);
+    void internalMouseDown  (MouseInputSource, Point<float>, Time, float, float, float, float, float);
+    void internalMouseUp    (MouseInputSource, Point<float>, Time, const ModifierKeys oldModifiers, float, float, float, float, float);
+    void internalMouseDrag  (MouseInputSource, Point<float>, Time, float, float, float, float, float);
     void internalMouseMove  (MouseInputSource, Point<float>, Time);
     void internalMouseWheel (MouseInputSource, Point<float>, Time, const MouseWheelDetails&);
     void internalMagnifyGesture (MouseInputSource, Point<float>, Time, float);
@@ -2358,6 +2376,3 @@ protected:
     virtual ComponentPeer* createNewPeer (int styleFlags, void* nativeWindowToAttachTo);
    #endif
 };
-
-
-#endif   // JUCE_COMPONENT_H_INCLUDED

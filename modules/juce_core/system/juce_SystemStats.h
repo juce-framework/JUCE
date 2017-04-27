@@ -2,34 +2,25 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#ifndef JUCE_SYSTEMSTATS_H_INCLUDED
-#define JUCE_SYSTEMSTATS_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -138,11 +129,21 @@ public:
     */
     static String getDeviceDescription();
 
+    /** This method calculates some IDs to uniquely identify the device.
+
+        The first choice for an ID is a filesystem ID for the user's home folder or
+        windows directory. If that fails then this function returns the MAC addresses.
+    */
+    static StringArray getDeviceIdentifiers();
+
     //==============================================================================
     // CPU and memory information..
 
-    /** Returns the number of CPU cores. */
+    /** Returns the number of logical CPU cores. */
     static int getNumCpus() noexcept;
+
+    /** Returns the number of physical CPU cores. */
+    static int getNumPhysicalCpus() noexcept;
 
     /** Returns the approximate CPU speed.
         @returns    the speed in megahertz, e.g. 1500, 2500, 32000 (depending on
@@ -154,6 +155,11 @@ public:
         Might not be known on some systems.
     */
     static String getCpuVendor();
+
+    /** Attempts to return a string describing the CPU model.
+        May not be available on some systems.
+    */
+    static String getCpuModel();
 
     static bool hasMMX() noexcept;    /**< Returns true if Intel MMX instructions are available. */
     static bool has3DNow() noexcept;  /**< Returns true if AMD 3DNOW instructions are available. */
@@ -185,8 +191,10 @@ public:
     */
     static String getStackBacktrace();
 
-    /** A void() function type, used by setApplicationCrashHandler(). */
-    typedef void (*CrashHandlerFunction)();
+    /** A function type for use in setApplicationCrashHandler(). The parameter will contain
+        platform-specific data about the crash.
+    */
+    typedef void (*CrashHandlerFunction) (void*);
 
     /** Sets up a global callback function that will be called if the application
         executes some kind of illegal instruction.
@@ -208,6 +216,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (SystemStats)
 };
-
-
-#endif   // JUCE_SYSTEMSTATS_H_INCLUDED

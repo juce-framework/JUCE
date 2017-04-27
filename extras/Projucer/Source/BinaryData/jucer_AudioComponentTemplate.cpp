@@ -6,9 +6,6 @@
   ==============================================================================
 */
 
-#ifndef MAINCOMPONENT_H_INCLUDED
-#define MAINCOMPONENT_H_INCLUDED
-
 INCLUDE_JUCE
 
 //==============================================================================
@@ -68,8 +65,7 @@ public:
     void paint (Graphics& g) override
     {
         // (Our component is opaque, so we must completely fill the background with a solid colour)
-        g.fillAll (Colours::black);
-
+        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
 
         // You can add your drawing code here!
     }
@@ -94,6 +90,3 @@ private:
 
 // (This function is called by the app startup code to create our main component)
 Component* createMainContentComponent()     { return new MainContentComponent(); }
-
-
-#endif  // MAINCOMPONENT_H_INCLUDED

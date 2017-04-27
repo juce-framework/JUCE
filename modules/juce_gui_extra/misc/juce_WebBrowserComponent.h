@@ -2,28 +2,29 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#ifndef JUCE_WEBBROWSERCOMPONENT_H_INCLUDED
-#define JUCE_WEBBROWSERCOMPONENT_H_INCLUDED
+#pragma once
 
 #if JUCE_WEB_BROWSER || DOXYGEN
 
@@ -80,6 +81,9 @@ public:
     /** Refreshes the browser. */
     void refresh();
 
+    /** Clear cookies that the OS has stored for the WebComponents of this application */
+    static void clearCookies();
+
     //==============================================================================
     /** This callback is called when the browser is about to navigate
         to a new location.
@@ -92,6 +96,18 @@ public:
 
     /** This callback happens when the browser has finished loading a page. */
     virtual void pageFinishedLoading (const String& url);
+
+    /** This callback happens when a network error was encountered while
+        trying to load a page.
+
+        You can override this method to show some other error page by calling
+        goToURL. Return true to allow the browser to carry on to the internal
+        browser error page.
+
+        The errorInfo contains some platform dependent string describing the
+        error.
+    */
+    virtual bool pageLoadHadNetworkError (const String& errorInfo);
 
     /** This callback occurs when a script or other activity in the browser asks for
         the window to be closed.
@@ -133,4 +149,3 @@ private:
 
 
 #endif
-#endif   // JUCE_WEBBROWSERCOMPONENT_H_INCLUDED

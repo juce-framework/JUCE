@@ -2,28 +2,29 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#ifndef JUCE_VALUETREE_H_INCLUDED
-#define JUCE_VALUETREE_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -75,8 +76,6 @@ public:
         A ValueTree that is created with this constructor can't actually be used for anything,
         it's just a default 'null' ValueTree that can be returned to indicate some sort of failure.
         To create a real one, use the constructor that takes a string.
-
-        @see ValueTree::invalid
     */
     ValueTree() noexcept;
 
@@ -92,9 +91,8 @@ public:
     /** Makes this object reference another node. */
     ValueTree& operator= (const ValueTree&);
 
-   #if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
+    /** Move constructor */
     ValueTree (ValueTree&&) noexcept;
-   #endif
 
     /** Destructor. */
     ~ValueTree();
@@ -329,7 +327,7 @@ public:
 
         The delta specifies how far to move through the list, so a value of 1 would return the node
         that follows this one, -1 would return the node before it, 0 will return this node itself, etc.
-        If the requested position is beyond the range of available nodes, this will return ValueTree::invalid.
+        If the requested position is beyond the range of available nodes, this will return an empty ValueTree().
     */
     ValueTree getSibling (int delta) const noexcept;
 
@@ -576,6 +574,3 @@ private:
 
     explicit ValueTree (SharedObject*) noexcept;
 };
-
-
-#endif   // JUCE_VALUETREE_H_INCLUDED

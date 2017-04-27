@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -119,7 +121,6 @@ public:
     bool isCodeBlocks() const override               { return false; }
     bool isMakefile() const override                 { return false; }
     bool isAndroidStudio() const override            { return false; }
-    bool isAndroidAnt() const override               { return false; }
 
     bool isAndroid() const override                  { return false; }
     bool isWindows() const override                  { return false; }
@@ -127,13 +128,31 @@ public:
     bool isOSX() const override                      { return ! iOS; }
     bool isiOS() const override                      { return iOS; }
 
-    bool supportsVST() const override                { return ! iOS; }
-    bool supportsVST3() const override               { return ! iOS; }
-    bool supportsAAX() const override                { return ! iOS; }
-    bool supportsRTAS() const override               { return ! iOS; }
-    bool supportsAU()   const override               { return ! iOS; }
-    bool supportsAUv3() const override               { return true;  }
-    bool supportsStandalone() const override         { return true;  }
+    bool supportsTargetType (ProjectType::Target::Type type) const override
+    {
+        switch (type)
+        {
+            case ProjectType::Target::AudioUnitv3PlugIn:
+            case ProjectType::Target::StandalonePlugIn:
+            case ProjectType::Target::GUIApp:
+            case ProjectType::Target::StaticLibrary:
+            case ProjectType::Target::SharedCodeTarget:
+            case ProjectType::Target::AggregateTarget:
+                return true;
+            case ProjectType::Target::ConsoleApp:
+            case ProjectType::Target::VSTPlugIn:
+            case ProjectType::Target::VST3PlugIn:
+            case ProjectType::Target::AAXPlugIn:
+            case ProjectType::Target::RTASPlugIn:
+            case ProjectType::Target::AudioUnitPlugIn:
+            case ProjectType::Target::DynamicLibrary:
+                return ! iOS;
+            default:
+                break;
+        }
+
+        return false;
+    }
 
     void createExporterProperties (PropertyListBuilder& props) override
     {
@@ -206,7 +225,8 @@ public:
                    "You can find this string in the OS X app Keychain Access under \"Certificates\".");
 
         props.add (new BooleanPropertyComponent (getSetting ("keepCustomXcodeSchemes"), "Keep custom Xcode schemes", "Enabled"),
-                   "Enable this to keep any Xcode schemes you have created for debugging or running, e.g. to launch a plug-in in various hosts. If disabled, all schemes are replaced by a default set.");
+                   "Enable this to keep any Xcode schemes you have created for debugging or running, e.g. to launch a plug-in in"
+                   "various hosts. If disabled, all schemes are replaced by a default set.");
     }
 
     bool launchProject() override
@@ -231,7 +251,7 @@ public:
     void create (const OwnedArray<LibraryModule>&) const override
     {
         for (auto& target : targets)
-            if (target->xcodeCreatePList)
+            if (target->shouldCreatePList())
                 target->infoPlistFile = getTargetFolder().getChildFile (target->getInfoPlistName());
 
         menuNibFile = getTargetFolder().getChildFile ("RecentFilesMenuTemplate.nib");
@@ -265,52 +285,18 @@ public:
     }
 
     //==============================================================================
-    void addPlatformSpecificSettingsForProjectType (const ProjectType& type) override
+    void addPlatformSpecificSettingsForProjectType (const ProjectType&) override
     {
-        if (type.isGUIApplication())
-            targets.add (new Target (Target::GUIApp, *this));
-
-        else if (type.isCommandLineApp())
-            targets.add (new Target (Target::ConsoleApp, *this));
-
-        else if (type.isStaticLibrary())
-            targets.add (new Target (Target::StaticLibrary, *this));
-
-        else if (type.isDynamicLibrary())
-            targets.add (new Target (Target::DynamicLibrary, *this));
-
-        else if (type.isAudioPlugin())
-        {
-            if (project.shouldBuildVST().getValue() && supportsVST())
-                targets.add (new Target (Target::VSTPlugIn, *this));
-
-            if (project.shouldBuildVST3().getValue() && supportsVST3())
-                targets.add (new Target (Target::VST3PlugIn, *this));
-
-            if (project.shouldBuildAU().getValue() && supportsAU())
-                targets.add (new Target (Target::AudioUnitPlugIn, *this));
-
-            if (project.shouldBuildAUv3().getValue())
-                targets.add (new Target (Target::AudioUnitv3PlugIn, *this));
-
-            if (project.shouldBuildAAX().getValue() && supportsAAX())
-                targets.add (new Target (Target::AAXPlugIn, *this));
-
-            if (project.shouldBuildStandalone().getValue())
-                targets.add (new Target (Target::StandalonePlugIn, *this));
-
-            if (project.shouldBuildRTAS().getValue() && supportsRTAS())
-            {
-                targets.add (new Target (Target::RTASPlugIn, *this));
-                addRTASPluginSettings();
-            }
-
-            if (targets.size() > 0)
-                targets.add (new Target (Target::SharedCodeTarget, *this));
-        }
-
-        if (targets.size() > 1)
-            targets.insert (0, new Target (Target::AggregateTarget, *this));
+        callForAllSupportedTargets ([this] (ProjectType::Target::Type targetType)
+                                    {
+                                        if (XCodeTarget* target = new XCodeTarget (targetType, *this))
+                                        {
+                                            if (targetType == ProjectType::Target::AggregateTarget)
+                                                targets.insert (0, target);
+                                            else
+                                                targets.add (target);
+                                        }
+                                    });
 
         // If you hit this assert, you tried to generate a project for an exporter
         // that does not support any of your targets!
@@ -427,11 +413,9 @@ protected:
                        "A comma-separated list of custom Xcode setting flags which will be appended to the list of generated flags, "
                        "e.g. MACOSX_DEPLOYMENT_TARGET_i386 = 10.5, VALID_ARCHS = \"ppc i386 x86_64\"");
 
-            const char* cppLanguageStandardNames[] = { "Use Default", "C++98", "GNU++98", "C++11", "GNU++11", "C++14", "GNU++14", nullptr };
+            const char* cppLanguageStandardNames[] = { "Use Default", "C++11", "GNU++11", "C++14", "GNU++14", nullptr };
             Array<var> cppLanguageStandardValues;
             cppLanguageStandardValues.add (var());
-            cppLanguageStandardValues.add ("c++98");
-            cppLanguageStandardValues.add ("gnu++98");
             cppLanguageStandardValues.add ("c++11");
             cppLanguageStandardValues.add ("gnu++11");
             cppLanguageStandardValues.add ("c++14");
@@ -463,27 +447,32 @@ protected:
                        "Enable this to strip any locally defined symbols resulting in a smaller binary size. Enabling this will also remove any function names from crash logs. Must be disabled for static library projects.");
         }
 
+        String getLibrarySubdirPath() const override
+        {
+            return "${CURRENT_ARCH}";
+        }
+
     private:
         //==========================================================================
         void addXcodePluginInstallPathProperties (PropertyListBuilder& props)
         {
-            if (project.shouldBuildVST().getValue())
+            if (project.shouldBuildVST())
                 props.add (new TextWithDefaultPropertyComponent<String> (vstBinaryLocation, "VST Binary location", 1024),
                            "The folder in which the compiled VST binary should be placed.");
 
-            if (project.shouldBuildVST3().getValue())
+            if (project.shouldBuildVST3())
                 props.add (new TextWithDefaultPropertyComponent<String> (vst3BinaryLocation, "VST3 Binary location", 1024),
                            "The folder in which the compiled VST3 binary should be placed.");
 
-            if (project.shouldBuildAU().getValue())
+            if (project.shouldBuildAU())
                 props.add (new TextWithDefaultPropertyComponent<String> (auBinaryLocation, "AU Binary location", 1024),
                            "The folder in which the compiled AU binary should be placed.");
 
-            if (project.shouldBuildRTAS().getValue())
+            if (project.shouldBuildRTAS())
                 props.add (new TextWithDefaultPropertyComponent<String> (rtasBinaryLocation, "RTAS Binary location", 1024),
                            "The folder in which the compiled RTAS binary should be placed.");
 
-            if (project.shouldBuildAAX().getValue())
+            if (project.shouldBuildAAX())
                 props.add (new TextWithDefaultPropertyComponent<String> (aaxBinaryLocation, "AAX Binary location", 1024),
                            "The folder in which the compiled AAX binary should be placed.");
         }
@@ -513,40 +502,16 @@ public:
     };
 
     //==============================================================================
-    struct Target
+    struct XCodeTarget : ProjectType::Target
     {
-        enum Type
-        {
-            GUIApp            = 0,
-            ConsoleApp        = 1,
-            StaticLibrary     = 2,
-            DynamicLibrary    = 3,
-
-            VSTPlugIn         = 10,
-            VST3PlugIn        = 11,
-            AAXPlugIn         = 12,
-            RTASPlugIn        = 13,
-            AudioUnitPlugIn   = 14,
-            AudioUnitv3PlugIn = 15,
-            StandalonePlugIn  = 16,
-
-            SharedCodeTarget  = 20, // internal
-            AggregateTarget   = 21,
-
-            unspecified       = 30
-        };
-
         //==============================================================================
-        Target (Type targetType, const XCodeProjectExporter& exporter)
-            : type (targetType),
+        XCodeTarget (ProjectType::Target::Type targetType, const XCodeProjectExporter& exporter)
+            : ProjectType::Target (targetType),
               owner (exporter)
         {
             switch (type)
             {
                 case GUIApp:
-                    xcodeIsBundle = false;
-                    xcodeIsExecutable = true;
-                    xcodeCreatePList = true;
                     xcodePackageType = "APPL";
                     xcodeBundleSignature = "????";
                     xcodeFileType = "wrapper.application";
@@ -556,9 +521,6 @@ public:
                     break;
 
                 case ConsoleApp:
-                    xcodeIsBundle = false;
-                    xcodeIsExecutable = true;
-                    xcodeCreatePList = false;
                     xcodeFileType = "compiled.mach-o.executable";
                     xcodeBundleExtension = String();
                     xcodeProductType = "com.apple.product-type.tool";
@@ -566,55 +528,37 @@ public:
                     break;
 
                 case StaticLibrary:
-                    xcodeIsBundle = false;
-                    xcodeIsExecutable = false;
-                    xcodeCreatePList = false;
                     xcodeFileType = "archive.ar";
                     xcodeProductType = "com.apple.product-type.library.static";
                     xcodeCopyToProductInstallPathAfterBuild = false;
                     break;
 
                 case DynamicLibrary:
-                    xcodeIsBundle = false;
-                    xcodeIsExecutable = false;
-                    xcodeCreatePList = false;
                     xcodeFileType = "compiled.mach-o.dylib";
                     xcodeProductType = "com.apple.product-type.library.dynamic";
                     xcodeBundleExtension = ".dylib";
                     xcodeCopyToProductInstallPathAfterBuild = false;
-
                     break;
 
                 case VSTPlugIn:
-                    xcodeIsBundle = true;
-                    xcodeIsExecutable = false;
-                    xcodeCreatePList = true;
                     xcodePackageType = "BNDL";
                     xcodeBundleSignature = "????";
                     xcodeFileType = "wrapper.cfbundle";
                     xcodeBundleExtension = ".vst";
                     xcodeProductType = "com.apple.product-type.bundle";
                     xcodeCopyToProductInstallPathAfterBuild = true;
-
                     break;
 
                 case VST3PlugIn:
-                    xcodeIsBundle = true;
-                    xcodeIsExecutable = false;
-                    xcodeCreatePList = true;
                     xcodePackageType = "BNDL";
                     xcodeBundleSignature = "????";
                     xcodeFileType = "wrapper.cfbundle";
                     xcodeBundleExtension = ".vst3";
                     xcodeProductType = "com.apple.product-type.bundle";
                     xcodeCopyToProductInstallPathAfterBuild = true;
-
                     break;
 
                 case AudioUnitPlugIn:
-                    xcodeIsBundle = true;
-                    xcodeIsExecutable = false;
-                    xcodeCreatePList = true;
                     xcodePackageType = "BNDL";
                     xcodeBundleSignature = "????";
                     xcodeFileType = "wrapper.cfbundle";
@@ -626,12 +570,8 @@ public:
                     break;
 
                 case StandalonePlugIn:
-                    xcodeIsBundle = false;
-                    xcodeIsExecutable = true;
-                    xcodeCreatePList = true;
                     xcodePackageType = "APPL";
                     xcodeBundleSignature = "????";
-                    xcodeCreatePList = true;
                     xcodeFileType = "wrapper.application";
                     xcodeBundleExtension = ".app";
                     xcodeProductType = "com.apple.product-type.application";
@@ -639,9 +579,6 @@ public:
                     break;
 
                 case AudioUnitv3PlugIn:
-                    xcodeIsBundle = false;
-                    xcodeIsExecutable = false;
-                    xcodeCreatePList = true;
                     xcodePackageType = "XPC!";
                     xcodeBundleSignature = "????";
                     xcodeFileType = "wrapper.app-extension";
@@ -654,46 +591,30 @@ public:
                     break;
 
                 case AAXPlugIn:
-                    xcodeIsBundle = true;
-                    xcodeIsExecutable = false;
-                    xcodeCreatePList = true;
                     xcodePackageType = "TDMw";
                     xcodeBundleSignature = "PTul";
                     xcodeFileType = "wrapper.cfbundle";
                     xcodeBundleExtension = ".aaxplugin";
                     xcodeProductType = "com.apple.product-type.bundle";
                     xcodeCopyToProductInstallPathAfterBuild = true;
-
-                    addExtraAAXTargetSettings();
                     break;
 
                 case RTASPlugIn:
-                    xcodeIsBundle = true;
-                    xcodeIsExecutable = false;
-                    xcodeCreatePList = true;
                     xcodePackageType = "TDMw";
                     xcodeBundleSignature = "PTul";
                     xcodeFileType = "wrapper.cfbundle";
                     xcodeBundleExtension = ".dpm";
                     xcodeProductType = "com.apple.product-type.bundle";
                     xcodeCopyToProductInstallPathAfterBuild = true;
-
-                    addExtraRTASTargetSettings();
                     break;
 
                 case SharedCodeTarget:
-                    xcodeIsBundle = false;
-                    xcodeIsExecutable = false;
-                    xcodeCreatePList = false;
                     xcodeFileType = "archive.ar";
                     xcodeProductType = "com.apple.product-type.library.static";
                     xcodeCopyToProductInstallPathAfterBuild = false;
                     break;
 
                 case AggregateTarget:
-                    xcodeIsBundle = false;
-                    xcodeIsExecutable = false;
-                    xcodeCreatePList = false;
                     xcodeCopyToProductInstallPathAfterBuild = false;
                     break;
 
@@ -704,39 +625,10 @@ public:
             }
         }
 
-        const char* getName() const noexcept
-        {
-            switch (type)
-            {
-                case GUIApp:            return "App";
-                case ConsoleApp:        return "ConsoleApp";
-                case StaticLibrary:     return "Static Library";
-                case DynamicLibrary:    return "Dynamic Library";
-                case VSTPlugIn:         return "VST";
-                case VST3PlugIn:        return "VST3";
-                case AudioUnitPlugIn:   return "AU";
-                case StandalonePlugIn:  return "AUv3 Standalone";
-                case AudioUnitv3PlugIn: return "AUv3 AppExtension";
-                case AAXPlugIn:         return "AAX";
-                case RTASPlugIn:        return "RTAS";
-                case SharedCodeTarget:  return "Shared Code";
-                case AggregateTarget:   return "All";
-                default:                return "undefined";
-            }
-        }
-
         String getXCodeSchemeName() const
         {
-            return owner.projectName + " (" + getName() + ")";
+            return owner.projectName + " - " + getName();
         }
-
-        bool shouldBuildVST()  const                      { return owner.supportsVST()  && owner.project.shouldBuildVST().getValue()  && (type == SharedCodeTarget || type == VSTPlugIn); }
-        bool shouldBuildVST3() const                      { return owner.supportsVST3() && owner.project.shouldBuildVST3().getValue() && (type == SharedCodeTarget || type == VST3PlugIn); }
-        bool shouldBuildAAX()  const                      { return owner.supportsAAX()  && owner.project.shouldBuildAAX().getValue()  && (type == SharedCodeTarget || type == AAXPlugIn); }
-        bool shouldBuildRTAS() const                      { return owner.supportsRTAS() && owner.project.shouldBuildRTAS().getValue() && (type == SharedCodeTarget || type == RTASPlugIn); }
-        bool shouldBuildAU()   const                      { return owner.supportsAU()   && owner.project.shouldBuildAU().getValue()   && (type == SharedCodeTarget || type == AudioUnitPlugIn); }
-        bool shouldBuildAUv3() const                      { return owner.supportsAUv3() && owner.project.shouldBuildAUv3().getValue() && (type == SharedCodeTarget || type == AudioUnitv3PlugIn); }
-        bool shouldBuildStandalone() const                { return owner.project.shouldBuildStandalone().getValue()                   && (type == SharedCodeTarget || type == StandalonePlugIn); }
 
         String getID() const
         {
@@ -751,9 +643,8 @@ public:
         String xcodePackageType, xcodeBundleSignature, xcodeBundleExtension;
         String xcodeProductType, xcodeFileType;
         String xcodeOtherRezFlags, xcodeExcludedFiles64Bit, xcodeBundleIDSubPath;
-        bool xcodeIsBundle, xcodeCreatePList, xcodeIsExecutable, xcodeCopyToProductInstallPathAfterBuild;
+        bool xcodeCopyToProductInstallPathAfterBuild;
         StringArray xcodeFrameworks, xcodeLibs;
-        Type type;
         Array<XmlElement> xcodeExtraPListEntries;
         Array<RelativePath> xcodeExtraLibrariesDebug, xcodeExtraLibrariesRelease;
 
@@ -772,7 +663,7 @@ public:
                 String productName (owner.replacePreprocessorTokens (*config, config->getTargetBinaryNameString()));
 
                 if (xcodeFileType == "archive.ar")
-                    productName = getLibbedFilename (productName);
+                    productName = getStaticLibbedFilename (productName);
                 else
                     productName += xcodeBundleExtension;
 
@@ -839,10 +730,14 @@ public:
                 attributes << "DevelopmentTeam = " << developmentTeamID << "; ";
 
             const int inAppPurchasesEnabled = (owner.iOS && owner.isInAppPurchasesEnabled()) ? 1 : 0;
+            const int interAppAudioEnabled  = (owner.iOS
+                                               && type == Target::StandalonePlugIn
+                                               && owner.getProject().shouldEnableIAA()) ? 1 : 0;
             const int sandboxEnabled = (type == Target::AudioUnitv3PlugIn ? 1 : 0);
 
             attributes << "SystemCapabilities = {";
             attributes << "com.apple.InAppPurchase = { enabled = " << inAppPurchasesEnabled << "; }; ";
+            attributes << "com.apple.InterAppAudio = { enabled = " << interAppAudioEnabled << "; }; ";
             attributes << "com.apple.Sandbox = { enabled = " << sandboxEnabled << "; }; ";
             attributes << "}; };";
 
@@ -874,13 +769,19 @@ public:
             return *v;
         }
 
+        bool shouldCreatePList() const
+        {
+            const ProjectType::Target::TargetFileType fileType = getTargetFileType();
+            return (fileType == executable && type != ConsoleApp) || fileType == pluginBundle || fileType == macOSAppex;
+        }
+
         //==============================================================================
         StringArray getTargetSettings (const XcodeBuildConfiguration& config) const
         {
             if (type == AggregateTarget)
                 // the aggregate target should not specify any settings at all!
                 // it just defines dependencies on the other targets.
-                return StringArray();
+                return {};
 
             StringArray s;
 
@@ -901,10 +802,10 @@ public:
             else if (arch == osxArch_64BitUniversal)   s.add ("ARCHS = \"$(ARCHS_STANDARD_32_64_BIT)\"");
             else if (arch == osxArch_64Bit)            s.add ("ARCHS = \"$(ARCHS_STANDARD_64_BIT)\"");
 
-            s.add ("HEADER_SEARCH_PATHS = " + owner.getHeaderSearchPaths (config));
+            s.add ("HEADER_SEARCH_PATHS = " + getHeaderSearchPaths (config));
             s.add ("GCC_OPTIMIZATION_LEVEL = " + config.getGCCOptimisationFlag());
 
-            if (xcodeCreatePList)
+            if (shouldCreatePList())
                 s.add ("INFOPLIST_FILE = " + infoPlistFile.getFileName());
 
             if (config.linkTimeOptimisationEnabled.get())
@@ -930,7 +831,7 @@ public:
                 }
             }
 
-            if (xcodeIsBundle)
+            if (getTargetFileType() == pluginBundle)
             {
                 s.add ("LIBRARY_STYLE = Bundle");
                 s.add ("WRAPPER_EXTENSION = " + xcodeBundleExtension.substring (1));
@@ -964,21 +865,11 @@ public:
             }
             else
             {
-                const String sdk (config.osxSDKVersion.get());
-                const String sdkCompat (config.osxDeploymentTarget.get());
+                String sdkRoot;
+                s.add ("MACOSX_DEPLOYMENT_TARGET = " + getOSXDeploymentTarget(config, &sdkRoot));
 
-                // if the user doesn't set it, then use the last known version that works well with JUCE
-                String deploymentTarget = "10.11";
-
-                int oldestAllowedSDKVersion = (type == AudioUnitv3PlugIn || type == StandalonePlugIn) ? minimumAUv3SDKVersion : oldestSDKVersion;
-
-                for (int ver = oldestAllowedSDKVersion; ver <= currentSDKVersion; ++ver)
-                {
-                    if (sdk == getSDKName (ver))         s.add ("SDKROOT = macosx10." + String (ver));
-                    if (sdkCompat == getSDKName (ver))   deploymentTarget = "10." + String (ver);
-                }
-
-                s.add ("MACOSX_DEPLOYMENT_TARGET = " + deploymentTarget);
+                if (sdkRoot.isNotEmpty())
+                    s.add ("SDKROOT = " + sdkRoot);
 
                 s.add ("MACOSX_DEPLOYMENT_TARGET_ppc = 10.4");
                 s.add ("SDKROOT_ppc = macosx10.5");
@@ -1052,24 +943,12 @@ public:
                 s.add ("SEPARATE_STRIP = YES");
             }
 
-            if (type == Target::SharedCodeTarget)
-                defines.set ("JUCE_SHARED_CODE", "1");
-
-            if (owner.project.getProjectType().isAudioPlugin() && type == Target::AudioUnitv3PlugIn &&  owner.isOSX())
+            if (owner.project.getProjectType().isAudioPlugin()
+                && (   (owner.isOSX() && type == Target::AudioUnitv3PlugIn)
+                    || (owner.isiOS() && type == Target::StandalonePlugIn && owner.getProject().shouldEnableIAA())))
                 s.add (String ("CODE_SIGN_ENTITLEMENTS = \"") + owner.getEntitlementsFileName() + String ("\""));
 
-            if (owner.project.getProjectType().isAudioPlugin())
-            {
-                defines.set ("JucePlugin_Build_VST",        (shouldBuildVST()        ? "1" : "0"));
-                defines.set ("JucePlugin_Build_VST3",       (shouldBuildVST3()       ? "1" : "0"));
-                defines.set ("JucePlugin_Build_AU",         (shouldBuildAU()         ? "1" : "0"));
-                defines.set ("JucePlugin_Build_AUv3",       (shouldBuildAUv3()       ? "1" : "0"));
-                defines.set ("JucePlugin_Build_RTAS",       (shouldBuildRTAS()       ? "1" : "0"));
-                defines.set ("JucePlugin_Build_AAX",        (shouldBuildAAX()        ? "1" : "0"));
-                defines.set ("JucePlugin_Build_Standalone", (shouldBuildStandalone() ? "1" : "0"));
-            }
-
-            defines = mergePreprocessorDefs (defines, owner.getAllPreprocessorDefs (config));
+            defines = mergePreprocessorDefs (defines, owner.getAllPreprocessorDefs (config, type));
 
             StringArray defsList;
 
@@ -1102,18 +981,20 @@ public:
                 case RTASPlugIn:        return config.rtasBinaryLocation.get();
                 case AAXPlugIn:         return config.aaxBinaryLocation.get();
                 case SharedCodeTarget:  return owner.isiOS() ? "@executable_path/Frameworks" : "@executable_path/../Frameworks";
-                default:                return String();
+                default:                return {};
             }
         }
 
         //==============================================================================
         void getLinkerSettings (const BuildConfiguration& config, StringArray& flags, StringArray& librarySearchPaths) const
         {
-            if (xcodeIsBundle)
+            if (getTargetFileType() == pluginBundle)
                 flags.add (owner.isiOS() ? "-bitcode_bundle" : "-bundle");
 
-            const Array<RelativePath>& extraLibs = config.isDebug() ? xcodeExtraLibrariesDebug
-                                                                    : xcodeExtraLibrariesRelease;
+            Array<RelativePath> extraLibs (config.isDebug() ? xcodeExtraLibrariesDebug
+                                                            : xcodeExtraLibrariesRelease);
+
+            addExtraLibsForTargetType (config, extraLibs);
 
             for (auto& lib : extraLibs)
             {
@@ -1125,7 +1006,7 @@ public:
             {
                 if (owner.getTargetOfType (Target::SharedCodeTarget) != nullptr)
                 {
-                    String productName (getLibbedFilename (owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString())));
+                    String productName (getStaticLibbedFilename (owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString())));
 
                     RelativePath sharedCodelib (productName, RelativePath::buildTargetFolder);
                     flags.add (getLinkerFlagForLib (sharedCodelib.getFileNameWithoutExtension()));
@@ -1147,7 +1028,7 @@ public:
         //========================================================================== c
         void writeInfoPlistFile() const
         {
-            if (! xcodeCreatePList)
+            if (! shouldCreatePList())
                 return;
 
             ScopedPointer<XmlElement> plist (XmlDocument::parse (owner.getPListToMergeString()));
@@ -1225,14 +1106,36 @@ public:
             if (owner.settings ["UIStatusBarHidden"] && type != AudioUnitv3PlugIn)
                 addPlistDictionaryKeyBool (dict, "UIStatusBarHidden", true);
 
-            if (owner.iOS && type != AudioUnitv3PlugIn)
+            if (owner.iOS)
             {
-                // Forcing full screen disables the split screen feature and prevents error ITMS-90475
-                addPlistDictionaryKeyBool (dict, "UIRequiresFullScreen", true);
-                addPlistDictionaryKeyBool (dict, "UIStatusBarHidden", true);
+                if (type != AudioUnitv3PlugIn)
+                {
+                    // Forcing full screen disables the split screen feature and prevents error ITMS-90475
+                    addPlistDictionaryKeyBool (dict, "UIRequiresFullScreen", true);
+                    addPlistDictionaryKeyBool (dict, "UIStatusBarHidden", true);
 
-                addIosScreenOrientations (dict);
-                addIosBackgroundModes (dict);
+                    addIosScreenOrientations (dict);
+                    addIosBackgroundModes (dict);
+                }
+
+                if (type == StandalonePlugIn && owner.getProject().shouldEnableIAA())
+                {
+                    XmlElement audioComponentsPlistKey ("key");
+                    audioComponentsPlistKey.addTextElement ("AudioComponents");
+
+                    dict->addChildElement (new XmlElement (audioComponentsPlistKey));
+
+                    XmlElement audioComponentsPlistEntry ("array");
+                    XmlElement* audioComponentsDict = audioComponentsPlistEntry.createNewChildElement ("dict");
+
+                    addPlistDictionaryKey    (audioComponentsDict, "name",         owner.project.getIAAPluginName());
+                    addPlistDictionaryKey    (audioComponentsDict, "manufacturer", owner.project.getPluginManufacturerCode().toString().trim().substring (0, 4));
+                    addPlistDictionaryKey    (audioComponentsDict, "type",         owner.project.getIAATypeCode());
+                    addPlistDictionaryKey    (audioComponentsDict, "subtype",      owner.project.getPluginCode().toString().trim().substring (0, 4));
+                    addPlistDictionaryKeyInt (audioComponentsDict, "version",      owner.project.getVersionAsHexInteger());
+
+                    dict->addChildElement (new XmlElement (audioComponentsPlistEntry));
+                }
             }
 
             for (auto& e : xcodeExtraPListEntries)
@@ -1297,6 +1200,35 @@ public:
             ValueTree& v = addBuildPhase ("PBXCopyFilesBuildPhase", files, phaseName);
             v.setProperty ("dstPath", "", nullptr);
             v.setProperty ("dstSubfolderSpec", (int) dst, nullptr);
+        }
+
+        //==============================================================================
+        String getHeaderSearchPaths (const BuildConfiguration& config) const
+        {
+            StringArray paths (owner.extraSearchPaths);
+            paths.addArray (config.getHeaderSearchPaths());
+            paths.addArray (getTargetExtraHeaderSearchPaths());
+
+            // Always needed to compile .r files
+            paths.add (owner.getModuleFolderRelativeToProject ("juce_audio_plugin_client")
+                            .rebased (owner.projectFolder, owner.getTargetFolder(), RelativePath::buildTargetFolder)
+                            .toUnixStyle());
+
+            paths.add ("$(inherited)");
+
+            paths = getCleanedStringArray (paths);
+
+            for (auto& s : paths)
+            {
+                s = owner.replacePreprocessorTokens (config, s);
+
+                if (s.containsChar (' '))
+                    s = "\"\\\"" + s + "\\\"\""; // crazy double quotes required when there are spaces..
+                else
+                    s = "\"" + s + "\"";
+            }
+
+            return "(" + paths.joinIntoString (", ") + ")";
         }
 
     private:
@@ -1381,20 +1313,113 @@ public:
             xcodeExtraPListEntries.add (plistEntry);
         }
 
-        void addExtraAAXTargetSettings()
+        void addExtraLibsForTargetType  (const BuildConfiguration& config, Array<RelativePath>& extraLibs) const
         {
-            auto aaxLibsFolder = RelativePath (owner.getAAXPathValue().toString(), RelativePath::projectFolder).getChildFile ("Libs");
+            if (type == AAXPlugIn)
+            {
+                 auto aaxLibsFolder
+                    = RelativePath (owner.getAAXPathValue().toString(), RelativePath::projectFolder)
+                        .getChildFile ("Libs");
 
-            xcodeExtraLibrariesDebug.add   (aaxLibsFolder.getChildFile ("Debug/libAAXLibrary.a"));
-            xcodeExtraLibrariesRelease.add (aaxLibsFolder.getChildFile ("Release/libAAXLibrary.a"));
+                String libraryPath (config.isDebug() ? "Debug/libAAXLibrary" : "Release/libAAXLibrary");
+                libraryPath += (isUsingClangCppLibrary (config) ? "_libcpp.a" : ".a");
+
+                extraLibs.add   (aaxLibsFolder.getChildFile (libraryPath));
+            }
+            else if (type == RTASPlugIn)
+            {
+                RelativePath rtasFolder (owner.getRTASPathValue().toString(), RelativePath::projectFolder);
+
+                extraLibs.add (rtasFolder.getChildFile ("MacBag/Libs/Debug/libPluginLibrary.a"));
+                extraLibs.add (rtasFolder.getChildFile ("MacBag/Libs/Release/libPluginLibrary.a"));
+            }
         }
 
-        void addExtraRTASTargetSettings()
+        StringArray getTargetExtraHeaderSearchPaths() const
         {
-            RelativePath rtasFolder (owner.getRTASPathValue().toString(), RelativePath::projectFolder);
+            StringArray targetExtraSearchPaths;
 
-            xcodeExtraLibrariesDebug.add   (rtasFolder.getChildFile ("MacBag/Libs/Debug/libPluginLibrary.a"));
-            xcodeExtraLibrariesRelease.add (rtasFolder.getChildFile ("MacBag/Libs/Release/libPluginLibrary.a"));
+            if (type == RTASPlugIn)
+            {
+                RelativePath rtasFolder (owner.getRTASPathValue().toString(), RelativePath::projectFolder);
+
+                targetExtraSearchPaths.add ("$(DEVELOPER_DIR)/Headers/FlatCarbon");
+                targetExtraSearchPaths.add ("$(SDKROOT)/Developer/Headers/FlatCarbon");
+
+                static const char* p[] = { "AlturaPorts/TDMPlugIns/PlugInLibrary/Controls",
+                    "AlturaPorts/TDMPlugIns/PlugInLibrary/CoreClasses",
+                    "AlturaPorts/TDMPlugIns/PlugInLibrary/DSPClasses",
+                    "AlturaPorts/TDMPlugIns/PlugInLibrary/EffectClasses",
+                    "AlturaPorts/TDMPlugIns/PlugInLibrary/MacBuild",
+                    "AlturaPorts/TDMPlugIns/PlugInLibrary/Meters",
+                    "AlturaPorts/TDMPlugIns/PlugInLibrary/ProcessClasses",
+                    "AlturaPorts/TDMPlugIns/PlugInLibrary/ProcessClasses/Interfaces",
+                    "AlturaPorts/TDMPlugIns/PlugInLibrary/RTASP_Adapt",
+                    "AlturaPorts/TDMPlugIns/PlugInLibrary/Utilities",
+                    "AlturaPorts/TDMPlugIns/PlugInLibrary/ViewClasses",
+                    "AlturaPorts/TDMPlugIns/DSPManager/**",
+                    "AlturaPorts/TDMPlugIns/SupplementalPlugInLib/Encryption",
+                    "AlturaPorts/TDMPlugIns/SupplementalPlugInLib/GraphicsExtensions",
+                    "AlturaPorts/TDMPlugIns/common/**",
+                    "AlturaPorts/TDMPlugIns/common/PI_LibInterface",
+                    "AlturaPorts/TDMPlugIns/PACEProtection/**",
+                    "AlturaPorts/TDMPlugIns/SignalProcessing/**",
+                    "AlturaPorts/OMS/Headers",
+                    "AlturaPorts/Fic/Interfaces/**",
+                    "AlturaPorts/Fic/Source/SignalNets",
+                    "AlturaPorts/DSIPublicInterface/PublicHeaders",
+                    "DAEWin/Include",
+                    "AlturaPorts/DigiPublic/Interfaces",
+                    "AlturaPorts/DigiPublic",
+                    "AlturaPorts/NewFileLibs/DOA",
+                    "AlturaPorts/NewFileLibs/Cmn",
+                    "xplat/AVX/avx2/avx2sdk/inc",
+                    "xplat/AVX/avx2/avx2sdk/utils" };
+
+                for (auto* path : p)
+                    owner.addProjectPathToBuildPathList (targetExtraSearchPaths, rtasFolder.getChildFile (path));
+            }
+
+            return targetExtraSearchPaths;
+        }
+
+        bool isUsingClangCppLibrary (const BuildConfiguration& config) const
+        {
+            if (auto xcodeConfig = dynamic_cast<const XcodeBuildConfiguration*> (&config))
+            {
+                const String& configValue = xcodeConfig->cppStandardLibrary.get();
+
+                if (configValue.isNotEmpty())
+                    return (configValue == "libc++");
+
+                const int minorOSXDeploymentTarget
+                    = getOSXDeploymentTarget (*xcodeConfig).fromLastOccurrenceOf (".", false, false).getIntValue();
+
+                return (minorOSXDeploymentTarget > 8);
+            }
+
+            return false;
+        }
+
+        String getOSXDeploymentTarget (const XcodeBuildConfiguration& config, String* sdkRoot = nullptr) const
+        {
+            const String sdk (config.osxSDKVersion.get());
+            const String sdkCompat (config.osxDeploymentTarget.get());
+
+            // The AUv3 target always needs to be at least 10.11
+            int oldestAllowedDeploymentTarget = (type == Target::AudioUnitv3PlugIn ? minimumAUv3SDKVersion
+                                                 : oldestSDKVersion);
+
+            // if the user doesn't set it, then use the last known version that works well with JUCE
+            String deploymentTarget = "10.11";
+
+            for (int ver = oldestAllowedDeploymentTarget; ver <= currentSDKVersion; ++ver)
+            {
+                if (sdk == getSDKName (ver) && sdkRoot != nullptr) *sdkRoot = String ("macosx10." + String (ver));
+                if (sdkCompat == getSDKName (ver))   deploymentTarget = "10." + String (ver);
+            }
+
+            return deploymentTarget;
         }
 
         //==============================================================================
@@ -1409,7 +1434,7 @@ public:
 private:
     //==============================================================================
     bool xcodeCanUseDwarf;
-    OwnedArray<Target> targets;
+    OwnedArray<XCodeTarget> targets;
 
     mutable OwnedArray<ValueTree> pbxBuildFiles, pbxFileReferences, pbxGroups, misc, projectConfigs, targetConfigs;
     mutable StringArray resourceIDs, sourceIDs, targetIDs;
@@ -1471,7 +1496,7 @@ private:
     {
         for (auto* target : targets)
         {
-            if (target->type == Target::AggregateTarget)
+            if (target->type == XCodeTarget::AggregateTarget)
                 continue;
 
             target->addMainBuildProduct();
@@ -1495,10 +1520,10 @@ private:
     {
         for (auto* target : targets)
         {
-            if (target->type == Target::AggregateTarget)
+            if (target->type == XCodeTarget::AggregateTarget)
                 continue;
 
-            if (target->xcodeCreatePList)
+            if (target->shouldCreatePList())
             {
                 RelativePath plistPath (target->infoPlistFile, getTargetFolder(), RelativePath::buildTargetFolder);
                 addFileReference (plistPath.toUnixStyle());
@@ -1542,8 +1567,9 @@ private:
 
     void addFilesAndGroupsToProject (StringArray& topLevelGroupIDs) const
     {
-        if (! isiOS() && project.getProjectType().isAudioPlugin())
-            topLevelGroupIDs.add (addEntitlementsFile());
+        StringArray entitlements = getEntitlements();
+        if (! entitlements.isEmpty())
+            topLevelGroupIDs.add (addEntitlementsFile (entitlements));
 
         for (auto& group : getAllGroups())
             if (group.getNumChildren() > 0)
@@ -1576,7 +1602,7 @@ private:
         // add build phases
         for (auto* target : targets)
         {
-            if (target->type != Target::AggregateTarget)
+            if (target->type != XCodeTarget::AggregateTarget)
                 buildProducts.add (createID (String ("__productFileID") + String (target->getName())));
 
             for (ConstConfigIterator config (*this); config.next();)
@@ -1589,11 +1615,11 @@ private:
 
             target->addShellScriptBuildPhase ("Pre-build script", getPreBuildScript());
 
-            if (target->type != Target::AggregateTarget)
+            if (target->type != XCodeTarget::AggregateTarget)
             {
                 // TODO: ideally resources wouldn't be copied into the AUv3 bundle as well.
                 // However, fixing this requires supporting App groups -> TODO: add app groups
-                if (! projectType.isStaticLibrary() && target->type != Target::SharedCodeTarget)
+                if (! projectType.isStaticLibrary() && target->type != XCodeTarget::SharedCodeTarget)
                     target->addBuildPhase ("PBXResourcesBuildPhase", resourceIDs);
 
                 StringArray rezFiles (rezFileIDs);
@@ -1604,20 +1630,20 @@ private:
 
                 StringArray sourceFiles (target->sourceIDs);
 
-                if (target->type == Target::SharedCodeTarget
+                if (target->type == XCodeTarget::SharedCodeTarget
                      || (! project.getProjectType().isAudioPlugin()))
                     sourceFiles.addArray (sourceIDs);
 
                 target->addBuildPhase ("PBXSourcesBuildPhase", sourceFiles);
 
-                if (! projectType.isStaticLibrary() && target->type != Target::SharedCodeTarget)
+                if (! projectType.isStaticLibrary() && target->type != XCodeTarget::SharedCodeTarget)
                     target->addBuildPhase ("PBXFrameworksBuildPhase", target->frameworkIDs);
             }
 
             target->addShellScriptBuildPhase ("Post-build script", getPostBuildScript());
 
-            if (project.getProjectType().isAudioPlugin() && project.shouldBuildAUv3().getValue()
-                && project.shouldBuildStandalone().getValue() && target->type == Target::StandalonePlugIn)
+            if (project.getProjectType().isAudioPlugin() && project.shouldBuildAUv3()
+                && project.shouldBuildStandalonePlugin() && target->type == XCodeTarget::StandalonePlugIn)
                 embedAppExtension();
 
             addTargetObject (*target);
@@ -1626,9 +1652,9 @@ private:
 
     void embedAppExtension() const
     {
-        if (auto* standaloneTarget = getTargetOfType (Target::StandalonePlugIn))
+        if (auto* standaloneTarget = getTargetOfType (XCodeTarget::StandalonePlugIn))
         {
-            if (auto* auv3Target = getTargetOfType (Target::AudioUnitv3PlugIn))
+            if (auto* auv3Target   = getTargetOfType (XCodeTarget::AudioUnitv3PlugIn))
             {
                 StringArray files;
                 files.add (auv3Target->mainBuildProductID);
@@ -1662,7 +1688,7 @@ private:
     }
 
     //==============================================================================
-    Target* getTargetOfType (Target::Type type) const
+    XCodeTarget* getTargetOfType (ProjectType::Target::Type type) const
     {
         for (auto& target : targets)
             if (target->type == type)
@@ -1671,13 +1697,13 @@ private:
         return nullptr;
     }
 
-    void addTargetObject (Target& target) const
+    void addTargetObject (XCodeTarget& target) const
     {
         String targetName = target.getName();
 
         String targetID = target.getID();
         ValueTree* const v = new ValueTree (targetID);
-        v->setProperty ("isa", target.type == Target::AggregateTarget ? "PBXAggregateTarget" : "PBXNativeTarget", nullptr);
+        v->setProperty ("isa", target.type == XCodeTarget::AggregateTarget ? "PBXAggregateTarget" : "PBXNativeTarget", nullptr);
         v->setProperty ("buildConfigurationList", createID (String ("__configList") + targetName), nullptr);
 
         v->setProperty ("buildPhases", indentParenthesisedList (target.buildPhaseIDs), nullptr);
@@ -1687,7 +1713,7 @@ private:
         v->setProperty (Ids::name, target.getXCodeSchemeName(), nullptr);
         v->setProperty ("productName", projectName, nullptr);
 
-        if (target.type != Target::AggregateTarget)
+        if (target.type != XCodeTarget::AggregateTarget)
         {
             v->setProperty ("productReference", createID (String ("__productFileID") + targetName), nullptr);
 
@@ -1699,28 +1725,28 @@ private:
         misc.add (v);
     }
 
-    StringArray getTargetDependencies (const Target& target) const
+    StringArray getTargetDependencies (const XCodeTarget& target) const
     {
         StringArray dependencies;
 
         if (project.getProjectType().isAudioPlugin())
         {
-            if (target.type == Target::StandalonePlugIn) // depends on AUv3 and shared code
+            if (target.type == XCodeTarget::StandalonePlugIn) // depends on AUv3 and shared code
             {
-                if (Target* auv3Target = getTargetOfType (Target::AudioUnitv3PlugIn))
+                if (XCodeTarget* auv3Target = getTargetOfType (XCodeTarget::AudioUnitv3PlugIn))
                     dependencies.add (auv3Target->getDependencyID());
 
-                if (Target* sharedCodeTarget = getTargetOfType (Target::SharedCodeTarget))
+                if (XCodeTarget* sharedCodeTarget = getTargetOfType (XCodeTarget::SharedCodeTarget))
                     dependencies.add (sharedCodeTarget->getDependencyID());
             }
-            else if (target.type == Target::AggregateTarget) // depends on all other targets
+            else if (target.type == XCodeTarget::AggregateTarget) // depends on all other targets
             {
                 for (int i = 1; i < targets.size(); ++i)
                     dependencies.add (targets[i]->getDependencyID());
             }
-            else if (target.type != Target::SharedCodeTarget) // shared code doesn't depend on anything; all other targets depend only on the shared code
+            else if (target.type != XCodeTarget::SharedCodeTarget) // shared code doesn't depend on anything; all other targets depend only on the shared code
             {
-                if (Target* sharedCodeTarget = getTargetOfType (Target::SharedCodeTarget))
+                if (XCodeTarget* sharedCodeTarget = getTargetOfType (XCodeTarget::SharedCodeTarget))
                     dependencies.add (sharedCodeTarget->getDependencyID());
             }
         }
@@ -1885,27 +1911,6 @@ private:
         }
     }
 
-    String getHeaderSearchPaths (const BuildConfiguration& config) const
-    {
-        StringArray paths (extraSearchPaths);
-        paths.addArray (config.getHeaderSearchPaths());
-        paths.add ("$(inherited)");
-
-        paths = getCleanedStringArray (paths);
-
-        for (auto& s : paths)
-        {
-            s = replacePreprocessorTokens (config, s);
-
-            if (s.containsChar (' '))
-                s = "\"\\\"" + s + "\\\"\""; // crazy double quotes required when there are spaces..
-            else
-                s = "\"" + s + "\"";
-        }
-
-        return "(" + paths.joinIntoString (", ") + ")";
-    }
-
     static String getLinkerFlagForLib (String library)
     {
         if (library.substring (0, 3) == "lib")
@@ -1935,7 +1940,7 @@ private:
     {
         StringArray s;
         s.add ("ALWAYS_SEARCH_USER_PATHS = NO");
-        s.add ("GCC_C_LANGUAGE_STANDARD = c99");
+        s.add ("GCC_C_LANGUAGE_STANDARD = c11");
         s.add ("GCC_WARN_ABOUT_RETURN_TYPE = YES");
         s.add ("GCC_WARN_CHECK_SWITCH_STATEMENTS = YES");
         s.add ("GCC_WARN_UNUSED_VARIABLE = YES");
@@ -2099,7 +2104,7 @@ private:
         output << "\t};\n\trootObject = " << createID ("__root") << ";\n}\n";
     }
 
-    String addBuildFile (const String& path, const String& fileRefID, bool addToSourceBuildPhase, bool inhibitWarnings, Target* xcodeTarget = nullptr) const
+    String addBuildFile (const String& path, const String& fileRefID, bool addToSourceBuildPhase, bool inhibitWarnings, XCodeTarget* xcodeTarget = nullptr) const
     {
         String fileID (createID (path + "buildref"));
 
@@ -2120,7 +2125,7 @@ private:
         return fileID;
     }
 
-    String addBuildFile (const RelativePath& path, bool addToSourceBuildPhase, bool inhibitWarnings, Target* xcodeTarget = nullptr) const
+    String addBuildFile (const RelativePath& path, bool addToSourceBuildPhase, bool inhibitWarnings, XCodeTarget* xcodeTarget = nullptr) const
     {
         return addBuildFile (path.toUnixStyle(), createFileRefID (path), addToSourceBuildPhase, inhibitWarnings, xcodeTarget);
     }
@@ -2204,7 +2209,7 @@ private:
     }
 
     String addFile (const RelativePath& path, bool shouldBeCompiled, bool shouldBeAddedToBinaryResources,
-                    bool shouldBeAddedToXcodeResources, bool inhibitWarnings, Target* xcodeTarget) const
+                    bool shouldBeAddedToXcodeResources, bool inhibitWarnings, XCodeTarget* xcodeTarget) const
     {
         const String pathAsString (path.toUnixStyle());
         const String refID (addFileReference (path.toUnixStyle()));
@@ -2234,7 +2239,7 @@ private:
 
         if (projectItem.isModuleCode())
         {
-            if (Target* xcodeTarget = getTargetOfType (getTargetTypeFromFilePath (projectItem.getFile(), false)))
+            if (XCodeTarget* xcodeTarget = getTargetOfType (getProject().getTargetTypeFromFilePath (projectItem.getFile(), false)))
             {
                 String rezFileID = addBuildFile (pathAsString, refID, false, false, xcodeTarget);
                 xcodeTarget->rezFileIDs.add (rezFileID);
@@ -2243,7 +2248,7 @@ private:
             }
         }
 
-        return String();
+        return {};
     }
 
     String getEntitlementsFileName() const
@@ -2251,20 +2256,41 @@ private:
         return project.getProjectFilenameRoot() + String (".entitlements");
     }
 
-    String addEntitlementsFile() const
+    StringArray getEntitlements() const
     {
-        const char* sandboxEntitlement =
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-            "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">"
-            "<plist version=\"1.0\">"
-            "<dict>"
-            " <key>com.apple.security.app-sandbox</key>"
-            "  <true/>"
-            "</dict>"
-            "</plist>";
+        StringArray keys;
+        if (project.getProjectType().isAudioPlugin())
+        {
+            if (isiOS())
+            {
+                if (project.shouldEnableIAA())
+                    keys.add ("inter-app-audio");
+            }
+            else
+            {
+                keys.add ("com.apple.security.app-sandbox");
+            }
+        }
+        return keys;
+    }
+
+    String addEntitlementsFile (StringArray keys) const
+    {
+        String content =
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+            "<plist version=\"1.0\">\n"
+            "<dict>\n";
+        for (auto& key : keys)
+        {
+            content += "\t<key>" + key + "</key>\n"
+                       "\t<true/>\n";
+        }
+        content += "</dict>\n"
+                   "</plist>\n";
 
         File entitlementsFile = getTargetFolder().getChildFile (getEntitlementsFileName());
-        overwriteFileIfDifferentOrThrow (entitlementsFile, sandboxEntitlement);
+        overwriteFileIfDifferentOrThrow (entitlementsFile, content);
 
         RelativePath plistPath (entitlementsFile, getTargetFolder(), RelativePath::buildTargetFolder);
         return addFile (plistPath, false, false, false, false, nullptr);
@@ -2272,6 +2298,9 @@ private:
 
     String addProjectItem (const Project::Item& projectItem) const
     {
+        if (modulesGroup != nullptr && projectItem.getParent() == *modulesGroup)
+            return addFileReference (rebaseFromProjectFolderToBuildTarget (getModuleFolderRelativeToProject (projectItem.getName())).toUnixStyle());
+
         if (projectItem.isGroup())
         {
             StringArray childIDs;
@@ -2299,9 +2328,9 @@ private:
             if (path.hasFileExtension (".r"))
                 return addRezFile (projectItem, path);
 
-            Target* xcodeTarget = nullptr;
+            XCodeTarget* xcodeTarget = nullptr;
             if (projectItem.isModuleCode() && projectItem.shouldBeCompiled())
-                xcodeTarget = getTargetOfType (getTargetTypeFromFilePath (projectItem.getFile(), false));
+                xcodeTarget = getTargetOfType (project.getTargetTypeFromFilePath (projectItem.getFile(), false));
 
             return addFile (path, projectItem.shouldBeCompiled(),
                             projectItem.shouldBeAddedToBinaryResources(),
@@ -2310,7 +2339,7 @@ private:
                             xcodeTarget);
         }
 
-        return String();
+        return {};
     }
 
     String addFramework (const String& frameworkName) const
@@ -2357,7 +2386,7 @@ private:
         projectConfigs.add (v);
     }
 
-    void addConfigList (Target& target, const OwnedArray<ValueTree>& configsToUse, const String& listID) const
+    void addConfigList (XCodeTarget& target, const OwnedArray <ValueTree>& configsToUse, const String& listID) const
     {
         ValueTree* v = new ValueTree (listID);
         v->setProperty ("isa", "XCConfigurationList", nullptr);
@@ -2370,7 +2399,7 @@ private:
         misc.add (v);
     }
 
-    void addProjectConfigList (const OwnedArray<ValueTree>& configsToUse, const String& listID) const
+    void addProjectConfigList (const OwnedArray <ValueTree>& configsToUse, const String& listID) const
     {
         StringArray configIDs;
 
@@ -2403,19 +2432,6 @@ private:
         String targetString = "(" + targetIDs.joinIntoString (", ") + ")";
         v->setProperty ("targets", targetString, nullptr);
         misc.add (v);
-    }
-
-    static Target::Type getTargetTypeFromFilePath (const File& file, bool returnSharedTargetIfNoValidSuffic)
-    {
-        if      (LibraryModule::CompileUnit::hasSuffix (file, "_AU"))         return Target::AudioUnitPlugIn;
-        else if (LibraryModule::CompileUnit::hasSuffix (file, "_AUv3"))       return Target::AudioUnitv3PlugIn;
-        else if (LibraryModule::CompileUnit::hasSuffix (file, "_AAX"))        return Target::AAXPlugIn;
-        else if (LibraryModule::CompileUnit::hasSuffix (file, "_RTAS"))       return Target::RTASPlugIn;
-        else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST2"))       return Target::VSTPlugIn;
-        else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST3"))       return Target::VST3PlugIn;
-        else if (LibraryModule::CompileUnit::hasSuffix (file, "_Standalone")) return Target::StandalonePlugIn;
-
-        return (returnSharedTargetIfNoValidSuffic ? Target::SharedCodeTarget : Target::unspecified);
     }
 
     //==============================================================================
@@ -2470,7 +2486,7 @@ private:
             }
         }
 
-        return StringArray();
+        return {};
     }
 
     StringArray getNamesOfTargets() const
@@ -2555,7 +2571,7 @@ private:
     {
         String attributes;
 
-        attributes << "{ LastUpgradeCheck = 0440; ";
+        attributes << "{ LastUpgradeCheck = 0830; ";
 
         if (projectType.isGUIApplication() || projectType.isAudioPlugin())
         {
@@ -2728,49 +2744,6 @@ private:
         vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder), Ids::vst3Path, TargetOS::osx)));
         aaxPath. referTo (Value (new DependencyPathValueSource (getSetting (Ids::aaxFolder),  Ids::aaxPath,  TargetOS::osx)));
         rtasPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::rtasFolder), Ids::rtasPath, TargetOS::osx)));
-    }
-
-    void addRTASPluginSettings()
-    {
-        xcodeCanUseDwarf = false;
-
-        extraSearchPaths.add ("$(DEVELOPER_DIR)/Headers/FlatCarbon");
-        extraSearchPaths.add ("$(SDKROOT)/Developer/Headers/FlatCarbon");
-
-        static const char* p[] = { "AlturaPorts/TDMPlugIns/PlugInLibrary/Controls",
-                                   "AlturaPorts/TDMPlugIns/PlugInLibrary/CoreClasses",
-                                   "AlturaPorts/TDMPlugIns/PlugInLibrary/DSPClasses",
-                                   "AlturaPorts/TDMPlugIns/PlugInLibrary/EffectClasses",
-                                   "AlturaPorts/TDMPlugIns/PlugInLibrary/MacBuild",
-                                   "AlturaPorts/TDMPlugIns/PlugInLibrary/Meters",
-                                   "AlturaPorts/TDMPlugIns/PlugInLibrary/ProcessClasses",
-                                   "AlturaPorts/TDMPlugIns/PlugInLibrary/ProcessClasses/Interfaces",
-                                   "AlturaPorts/TDMPlugIns/PlugInLibrary/RTASP_Adapt",
-                                   "AlturaPorts/TDMPlugIns/PlugInLibrary/Utilities",
-                                   "AlturaPorts/TDMPlugIns/PlugInLibrary/ViewClasses",
-                                   "AlturaPorts/TDMPlugIns/DSPManager/**",
-                                   "AlturaPorts/TDMPlugIns/SupplementalPlugInLib/Encryption",
-                                   "AlturaPorts/TDMPlugIns/SupplementalPlugInLib/GraphicsExtensions",
-                                   "AlturaPorts/TDMPlugIns/common/**",
-                                   "AlturaPorts/TDMPlugIns/common/PI_LibInterface",
-                                   "AlturaPorts/TDMPlugIns/PACEProtection/**",
-                                   "AlturaPorts/TDMPlugIns/SignalProcessing/**",
-                                   "AlturaPorts/OMS/Headers",
-                                   "AlturaPorts/Fic/Interfaces/**",
-                                   "AlturaPorts/Fic/Source/SignalNets",
-                                   "AlturaPorts/DSIPublicInterface/PublicHeaders",
-                                   "DAEWin/Include",
-                                   "AlturaPorts/DigiPublic/Interfaces",
-                                   "AlturaPorts/DigiPublic",
-                                   "AlturaPorts/NewFileLibs/DOA",
-                                   "AlturaPorts/NewFileLibs/Cmn",
-                                   "xplat/AVX/avx2/avx2sdk/inc",
-                                   "xplat/AVX/avx2/avx2sdk/utils" };
-
-        RelativePath rtasFolder (getRTASPathValue().toString(), RelativePath::projectFolder);
-
-        for (auto* path : p)
-            addToExtraSearchPaths (rtasFolder.getChildFile (path));
     }
 
     JUCE_DECLARE_NON_COPYABLE (XCodeProjectExporter)

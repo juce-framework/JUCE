@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -25,6 +27,8 @@
 #include "../jucer_Headers.h"
 #include "../Project/jucer_Project.h"
 #include "../Project/jucer_Module.h"
+#include "../Utility/jucer_TranslationHelpers.h"
+
 #include "jucer_CommandLine.h"
 
 
@@ -359,7 +363,7 @@ namespace
     {
         const String content (file.loadFileAsString());
 
-        if (content.contains ("%%") && content.contains ("//["))
+        if (content.contains ("%""%") && content.contains ("//["))
             return; // ignore projucer GUI template files
 
         StringArray lines;
@@ -379,7 +383,7 @@ namespace
                     const int tabPos = line.indexOfChar ('\t');
                     if (tabPos < 0)
                         break;
-                    
+
                     const int spacesPerTab = 4;
                     const int spacesNeeded = spacesPerTab - (tabPos % spacesPerTab);
                     line = line.replaceSection (tabPos, 1, String::repeatedString (" ", spacesNeeded));
@@ -421,17 +425,20 @@ namespace
     {
         checkArgumentCount (args, 2);
 
-        const File target (getFileCheckingForExistence (args[1]));
+        for (auto it = args.begin() + 1; it < args.end(); ++it)
+        {
+            const File target (getFileCheckingForExistence (*it));
 
-        Array<File> files;
+            Array<File> files;
 
-        if (target.isDirectory())
-            files = findAllSourceFiles (target);
-        else
-            files.add (target);
+            if (target.isDirectory())
+                files = findAllSourceFiles (target);
+            else
+                files.add (target);
 
-        for (int i = 0; i < files.size(); ++i)
-            cleanWhitespace (files.getReference(i), options);
+            for (int i = 0; i < files.size(); ++i)
+                cleanWhitespace (files.getReference(i), options);
+        }
     }
 
     static void cleanWhitespace (const StringArray& args, bool replaceTabs)
@@ -451,14 +458,12 @@ namespace
     {
         File result;
 
-        for (int i = 0; i < allFiles.size(); ++i)
+        for (auto& f : allFiles)
         {
-            const File& f = allFiles.getReference(i);
-
             if (f.getFileName().equalsIgnoreCase (name) && f != sourceFile)
             {
                 if (result.exists())
-                    return File(); // multiple possible results, so don't change it!
+                    return {}; // multiple possible results, so don't change it!
 
                 result = f;
             }
@@ -597,6 +602,95 @@ namespace
         std::cout << out.toString() << std::endl;
     }
 
+    static void scanFoldersForTranslationFiles (const StringArray& args)
+    {
+        checkArgumentCount (args, 2);
+
+        StringArray translations;
+
+        for (auto it = args.begin() + 1; it != args.end(); ++it)
+        {
+            const File directoryToSearch (getDirectoryCheckingForExistence (*it));
+            TranslationHelpers::scanFolderForTranslations (translations, directoryToSearch);
+        }
+
+        std::cout << TranslationHelpers::mungeStrings (translations) << std::endl;
+    }
+
+    static void createFinishedTranslationFile (const StringArray& args)
+    {
+        checkArgumentCount (args, 3);
+
+        auto preTranslated  = getFileCheckingForExistence (args[1]).loadFileAsString();
+        auto postTranslated = getFileCheckingForExistence (args[2]).loadFileAsString();
+
+        auto localisedContent = (args.size() > 3 ? getFileCheckingForExistence (args[3]).loadFileAsString() : String());
+        auto localised        = LocalisedStrings (localisedContent, false);
+
+        using TH = TranslationHelpers;
+        std::cout << TH::createFinishedTranslationFile (TH::withTrimmedEnds (TH::breakApart (preTranslated)),
+                                                        TH::withTrimmedEnds (TH::breakApart (postTranslated)),
+                                                        localised) << std::endl;
+    }
+
+    //==============================================================================
+    static void encodeBinary (const StringArray& args)
+    {
+        checkArgumentCount (args, 3);
+        const File source (getFileCheckingForExistence (args[1]));
+        const File target (getFile (args[2]));
+
+        MemoryOutputStream literal;
+        size_t dataSize = 0;
+
+        {
+            MemoryBlock data;
+            FileInputStream input (source);
+            input.readIntoMemoryBlock (data);
+            CodeHelpers::writeDataAsCppLiteral (data, literal, true, true);
+            dataSize = data.getSize();
+        }
+
+        auto variableName = CodeHelpers::makeBinaryDataIdentifierName (source);
+
+        MemoryOutputStream header, cpp;
+
+        header << "// Auto-generated binary data by the Projucer" << newLine
+               << "// Source file: " << source.getRelativePathFrom (target.getParentDirectory()) << newLine
+               << newLine;
+
+        cpp << header.toString();
+
+        if (target.hasFileExtension (headerFileExtensions))
+        {
+            header << "static constexpr unsigned char " << variableName << "[] =" << newLine
+                   << literal.toString() << newLine
+                   << newLine;
+
+            replaceFile (target, header.toString(), "Writing: ");
+        }
+        else if (target.hasFileExtension (cppFileExtensions))
+        {
+            header << "extern const char*  " << variableName << ";" << newLine
+                   << "const unsigned int  " << variableName << "Size = " << (int) dataSize << ";" << newLine
+                   << newLine;
+
+            cpp << CodeHelpers::createIncludeStatement (target.withFileExtension (".h").getFileName()) << newLine
+                << newLine
+                << "static constexpr unsigned char " << variableName << "_local[] =" << newLine
+                << literal.toString() << newLine
+                << newLine
+                << "const char* " << variableName << " = (const char*) " << variableName << "_local;" << newLine;
+
+            replaceFile (target, cpp.toString(), "Writing: ");
+            replaceFile (target.withFileExtension (".h"), header.toString(), "Writing: ");
+        }
+        else
+        {
+            throw CommandLineError ("You need to specify a .h or .cpp file as the target");
+        }
+    }
+
     //==============================================================================
     static void showHelp()
     {
@@ -649,6 +743,15 @@ namespace
                   << std::endl
                   << " " << appName << " --obfuscated-string-code string_to_obfuscate" << std::endl
                   << "    Generates a C++ function which returns the given string, but in an obfuscated way." << std::endl
+                  << std::endl
+                  << " " << appName << " --encode-binary source_binary_file target_cpp_file" << std::endl
+                  << "    Converts a binary file to a C++ file containing its contents as a block of data. Provide a .h file as the target if you want a single output file, or a .cpp file if you want a pair of .h/.cpp files." << std::endl
+                  << std::endl
+                  << " " << appName << " --trans target_folders..." << std::endl
+                  << "    Scans each of the given folders (recursively) for any NEEDS_TRANS macros, and generates a translation file that can be used with Projucer's translation file builder" << std::endl
+                  << std::endl
+                  << " " << appName << " --trans-finish pre_translated_file post_translated_file optional_existing_translation_file" << std::endl
+                  << "    Creates a completed translations mapping file, that can be used to initialise a LocalisedStrings object. This allows you to localise the strings in your project" << std::endl
                   << std::endl;
     }
 }
@@ -680,6 +783,9 @@ int performCommandLine (const String& commandLine)
         if (matchArgument (command, "tidy-divider-comments"))    { tidyDividerComments (args); return 0; }
         if (matchArgument (command, "fix-broken-include-paths")) { fixRelativeIncludePaths (args); return 0; }
         if (matchArgument (command, "obfuscated-string-code"))   { generateObfuscatedStringCode (args); return 0; }
+        if (matchArgument (command, "encode-binary"))            { encodeBinary (args); return 0; }
+        if (matchArgument (command, "trans"))                    { scanFoldersForTranslationFiles (args); return 0; }
+        if (matchArgument (command, "trans-finish"))             { createFinishedTranslationFile (args); return 0; }
     }
     catch (const CommandLineError& error)
     {

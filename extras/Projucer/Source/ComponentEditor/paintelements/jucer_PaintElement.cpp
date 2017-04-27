@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -113,7 +115,6 @@ public:
         return true;
     }
 
-private:
     RelativePositionedRectangle newState, oldState;
 };
 
@@ -236,32 +237,35 @@ void PaintElement::drawExtraEditorGraphics (Graphics&, const Rectangle<int>& /*r
 
 void PaintElement::paint (Graphics& g)
 {
-    Rectangle<int> area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
-
-    g.saveState();
-    g.setOrigin (area.getPosition() - Component::getPosition());
-    area.setPosition (0, 0);
-
-    g.saveState();
-    g.reduceClipRegion (0, 0, area.getWidth(), area.getHeight());
-
-    draw (g, getDocument()->getComponentLayout(), area);
-
-    g.restoreState();
-
-    drawExtraEditorGraphics (g, area);
-    g.restoreState();
-
-    if (selected)
+    if (auto* pe = dynamic_cast<PaintRoutineEditor*> (getParentComponent()))
     {
-        const BorderSize<int> borderSize (border->getBorderThickness());
+        auto area = pe->getComponentArea();
 
-        drawResizableBorder (g, getWidth(), getHeight(), borderSize,
-                             (isMouseOverOrDragging() || border->isMouseOverOrDragging()));
-    }
-    else if (isMouseOverOrDragging())
-    {
-        drawMouseOverCorners (g, getWidth(), getHeight());
+        g.saveState();
+        g.setOrigin (area.getPosition() - Component::getPosition());
+        area.setPosition (0, 0);
+
+        g.saveState();
+        g.reduceClipRegion (0, 0, area.getWidth(), area.getHeight());
+
+        draw (g, getDocument()->getComponentLayout(), area);
+
+        g.restoreState();
+
+        drawExtraEditorGraphics (g, area);
+        g.restoreState();
+
+        if (selected)
+        {
+            const BorderSize<int> borderSize (border->getBorderThickness());
+
+            drawResizableBorder (g, getWidth(), getHeight(), borderSize,
+                                 (isMouseOverOrDragging() || border->isMouseOverOrDragging()));
+        }
+        else if (isMouseOverOrDragging())
+        {
+            drawMouseOverCorners (g, getWidth(), getHeight());
+        }
     }
 }
 
@@ -291,31 +295,36 @@ void PaintElement::mouseDrag (const MouseEvent& e)
 {
     if (! e.mods.isPopupMenu())
     {
-        jassert (dynamic_cast<PaintRoutineEditor*> (getParentComponent()) != nullptr);
-        const Rectangle<int> area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
-
-        if (selected && ! dragging)
+        if (auto* pe = dynamic_cast<PaintRoutineEditor*> (getParentComponent()))
         {
-            dragging = e.mouseWasDraggedSinceMouseDown();
+            auto area = pe->getComponentArea();
+
+            if (selected && ! dragging)
+            {
+                dragging = e.mouseWasDraggedSinceMouseDown();
+
+                if (dragging)
+                    owner->startDragging (area);
+            }
 
             if (dragging)
-                owner->startDragging (area);
+                owner->dragSelectedComps (e.getDistanceFromDragStartX(),
+                                          e.getDistanceFromDragStartY(),
+                                          area);
         }
-
-        if (dragging)
-            owner->dragSelectedComps (e.getDistanceFromDragStartX(),
-                                      e.getDistanceFromDragStartY(),
-                                      area);
     }
 }
 
 void PaintElement::mouseUp (const MouseEvent& e)
 {
-    if (dragging)
-        owner->endDragging();
-
     if (owner != nullptr)
-        owner->getSelectedElements().addToSelectionOnMouseUp (this, e.mods, dragging, mouseDownSelectStatus);
+    {
+        if (dragging)
+            owner->endDragging();
+
+        if (owner != nullptr)
+            owner->getSelectedElements().addToSelectionOnMouseUp (this, e.mods, dragging, mouseDownSelectStatus);
+    }
 }
 
 void PaintElement::resizeStart()
@@ -345,44 +354,47 @@ void PaintElement::checkBounds (Rectangle<int>& b,
 
     ComponentBoundsConstrainer::checkBounds (b, previousBounds, limits, isStretchingTop, isStretchingLeft, isStretchingBottom, isStretchingRight);
 
-    JucerDocument* document = getDocument();
-
-    if (document != nullptr && document->isSnapActive (true))
+    if (auto* document = getDocument())
     {
-        jassert (getParentComponent() != nullptr);
-        const Rectangle<int> area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
+        if (document->isSnapActive (true))
+        {
+            if (auto* pe = dynamic_cast<PaintRoutineEditor*> (getParentComponent()))
+            {
+                auto area = pe->getComponentArea();
 
-        int x = b.getX();
-        int y = b.getY();
-        int w = b.getWidth();
-        int h = b.getHeight();
+                int x = b.getX();
+                int y = b.getY();
+                int w = b.getWidth();
+                int h = b.getHeight();
 
-        x += borderThickness - area.getX();
-        y += borderThickness - area.getY();
-        w -= borderThickness * 2;
-        h -= borderThickness * 2;
+                x += borderThickness - area.getX();
+                y += borderThickness - area.getY();
+                w -= borderThickness * 2;
+                h -= borderThickness * 2;
 
-        int right = x + w;
-        int bottom = y + h;
+                int right = x + w;
+                int bottom = y + h;
 
-        if (isStretchingRight)
-            right = document->snapPosition (right);
+                if (isStretchingRight)
+                    right = document->snapPosition (right);
 
-        if (isStretchingBottom)
-            bottom = document->snapPosition (bottom);
+                if (isStretchingBottom)
+                    bottom = document->snapPosition (bottom);
 
-        if (isStretchingLeft)
-            x = document->snapPosition (x);
+                if (isStretchingLeft)
+                    x = document->snapPosition (x);
 
-        if (isStretchingTop)
-            y = document->snapPosition (y);
+                if (isStretchingTop)
+                    y = document->snapPosition (y);
 
-        w = (right - x) + borderThickness * 2;
-        h = (bottom - y) + borderThickness * 2;
-        x -= borderThickness - area.getX();
-        y -= borderThickness - area.getY();
+                w = (right - x) + borderThickness * 2;
+                h = (bottom - y) + borderThickness * 2;
+                x -= borderThickness - area.getX();
+                y -= borderThickness - area.getY();
 
-        b = Rectangle<int> (x, y, w, h);
+                b = { x, y, w, h };
+            }
+        }
     }
 }
 
@@ -392,28 +404,24 @@ void PaintElement::applyBoundsToComponent (Component*, const Rectangle<int>& new
     {
         getDocument()->getUndoManager().undoCurrentTransactionOnly();
 
-        jassert (dynamic_cast<PaintRoutineEditor*> (getParentComponent()) != nullptr);
-
-        setCurrentBounds (newBounds.expanded (-borderThickness, -borderThickness),
-                          ((PaintRoutineEditor*) getParentComponent())->getComponentArea(),
-                          true);
+        if (auto* pe = dynamic_cast<PaintRoutineEditor*> (getParentComponent()))
+            setCurrentBounds (newBounds.expanded (-borderThickness, -borderThickness),
+              pe->getComponentArea(), true);
     }
 }
 
 Rectangle<int> PaintElement::getCurrentAbsoluteBounds() const
 {
-    jassert (dynamic_cast<PaintRoutineEditor*> (getParentComponent()) != nullptr);
-    const Rectangle<int> area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
+    if (auto* pe = dynamic_cast<PaintRoutineEditor*> (getParentComponent()))
+        return position.getRectangle (pe->getComponentArea(), getDocument()->getComponentLayout());
 
-    return position.getRectangle (area, getDocument()->getComponentLayout());
+    return {};
 }
 
 void PaintElement::getCurrentAbsoluteBoundsDouble (double& x, double& y, double& w, double& h) const
 {
-    jassert (dynamic_cast<PaintRoutineEditor*> (getParentComponent()) != nullptr);
-    const Rectangle<int> area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
-
-    position.getRectangleDouble (x, y, w, h, area, getDocument()->getComponentLayout());
+    if (auto* pe = dynamic_cast<PaintRoutineEditor*> (getParentComponent()))
+        position.getRectangleDouble (x, y, w, h, pe->getComponentArea(), getDocument()->getComponentLayout());
 }
 
 void PaintElement::changeListenerCallback (ChangeBroadcaster*)
@@ -465,7 +473,7 @@ void PaintElement::updateSiblingComps()
 
 void PaintElement::showPopupMenu()
 {
-    ApplicationCommandManager* commandManager = &ProjucerApplication::getCommandManager();
+    auto* commandManager = &ProjucerApplication::getCommandManager();
 
     PopupMenu m;
 

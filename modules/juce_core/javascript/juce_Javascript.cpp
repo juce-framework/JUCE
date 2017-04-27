@@ -2,28 +2,20 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -144,41 +136,41 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         var findFunctionCall (const CodeLocation& location, const var& targetObject, const Identifier& functionName) const
         {
-            if (DynamicObject* o = targetObject.getDynamicObject())
+            if (auto* o = targetObject.getDynamicObject())
             {
-                if (const var* prop = getPropertyPointer (o, functionName))
+                if (auto* prop = getPropertyPointer (o, functionName))
                     return *prop;
 
-                for (DynamicObject* p = o->getProperty (getPrototypeIdentifier()).getDynamicObject(); p != nullptr;
+                for (auto* p = o->getProperty (getPrototypeIdentifier()).getDynamicObject(); p != nullptr;
                      p = p->getProperty (getPrototypeIdentifier()).getDynamicObject())
                 {
-                    if (const var* prop = getPropertyPointer (p, functionName))
+                    if (auto* prop = getPropertyPointer (p, functionName))
                         return *prop;
                 }
 
                 // if there's a class with an overridden DynamicObject::hasMethod, this avoids an error
                 if (o->hasMethod (functionName))
-                    return var();
+                    return {};
             }
 
             if (targetObject.isString())
-                if (var* m = findRootClassProperty (StringClass::getClassName(), functionName))
+                if (auto* m = findRootClassProperty (StringClass::getClassName(), functionName))
                     return *m;
 
             if (targetObject.isArray())
-                if (var* m = findRootClassProperty (ArrayClass::getClassName(), functionName))
+                if (auto* m = findRootClassProperty (ArrayClass::getClassName(), functionName))
                     return *m;
 
-            if (var* m = findRootClassProperty (ObjectClass::getClassName(), functionName))
+            if (auto* m = findRootClassProperty (ObjectClass::getClassName(), functionName))
                 return *m;
 
             location.throwError ("Unknown function '" + functionName.toString() + "'");
-            return var();
+            return {};
         }
 
         var* findRootClassProperty (const Identifier& className, const Identifier& propName) const
         {
-            if (DynamicObject* cls = root->getProperty (className).getDynamicObject())
+            if (auto* cls = root->getProperty (className).getDynamicObject())
                 return getPropertyPointer (cls, propName);
 
             return nullptr;
@@ -186,7 +178,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         var findSymbolInParentScopes (const Identifier& name) const
         {
-            if (const var* v = getPropertyPointer (scope, name))
+            if (auto* v = getPropertyPointer (scope, name))
                 return *v;
 
             return parent != nullptr ? parent->findSymbolInParentScopes (name)
@@ -195,13 +187,13 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         bool findAndInvokeMethod (const Identifier& function, const var::NativeFunctionArgs& args, var& result) const
         {
-            DynamicObject* target = args.thisObject.getDynamicObject();
+            auto* target = args.thisObject.getDynamicObject();
 
             if (target == nullptr || target == scope)
             {
-                if (const var* m = getPropertyPointer (scope, function))
+                if (auto* m = getPropertyPointer (scope, function))
                 {
-                    if (FunctionObject* fo = dynamic_cast<FunctionObject*> (m->getObject()))
+                    if (auto fo = dynamic_cast<FunctionObject*> (m->getObject()))
                     {
                         result = fo->invoke (*this, args);
                         return true;
@@ -209,12 +201,31 @@ struct JavascriptEngine::RootObject   : public DynamicObject
                 }
             }
 
-            const NamedValueSet& props = scope->getProperties();
+            const auto& props = scope->getProperties();
 
             for (int i = 0; i < props.size(); ++i)
-                if (DynamicObject* o = props.getValueAt (i).getDynamicObject())
+                if (auto* o = props.getValueAt (i).getDynamicObject())
                     if (Scope (this, root, o).findAndInvokeMethod (function, args, result))
                         return true;
+
+            return false;
+        }
+
+        bool invokeMethod (const var& m, const var::NativeFunctionArgs& args, var& result) const
+        {
+            if (isFunction (m))
+            {
+                auto* target = args.thisObject.getDynamicObject();
+
+                if (target == nullptr || target == scope)
+                {
+                    if (auto fo = dynamic_cast<FunctionObject*> (m.getObject()))
+                    {
+                        result = fo->invoke (*this, args);
+                        return true;
+                    }
+                }
+            }
 
             return false;
         }
@@ -222,7 +233,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         void checkTimeOut (const CodeLocation& location) const
         {
             if (Time::getCurrentTime() > root->timeout)
-                location.throwError ("Execution timed-out");
+                location.throwError (root->timeout == Time() ? "Interrupted" : "Execution timed-out");
         }
     };
 
@@ -498,7 +509,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         }
 
         var throwError (const char* typeName) const
-            { location.throwError (getTokenName (operation) + " is not allowed on the " + typeName + " type"); return var(); }
+            { location.throwError (getTokenName (operation) + " is not allowed on the " + typeName + " type"); return {}; }
     };
 
     struct EqualsOp  : public BinaryOperator
@@ -578,8 +589,8 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     struct DivideOp  : public BinaryOperator
     {
         DivideOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::divide) {}
-        var getWithDoubles (double a, double b) const override  { return b != 0 ? a / b : std::numeric_limits<double>::infinity(); }
-        var getWithInts (int64 a, int64 b) const override       { return b != 0 ? var (a / (double) b) : var (std::numeric_limits<double>::infinity()); }
+        var getWithDoubles (double a, double b) const override  { return b != 0.0 ? a / b : std::numeric_limits<double>::infinity(); }
+        var getWithInts (int64 a, int64 b) const override       { return b != 0   ? var (a / (double) b) : var (std::numeric_limits<double>::infinity()); }
     };
 
     struct ModuloOp  : public BinaryOperator
@@ -738,7 +749,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
                     if (o->hasMethod (dot->child)) // allow an overridden DynamicObject::invokeMethod to accept a method call.
                         return o->invokeMethod (dot->child, args);
 
-            location.throwError ("This expression is not a function!"); return var();
+            location.throwError ("This expression is not a function!"); return {};
         }
 
         ExpPtr object;
@@ -1314,10 +1325,12 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
                 while (currentType != TokenTypes::closeBrace)
                 {
-                    e->names.add (currentValue.toString());
+                    auto memberName = currentValue.toString();
                     match ((currentType == TokenTypes::literal && currentValue.isString())
                              ? TokenTypes::literal : TokenTypes::identifier);
                     match (TokenTypes::colon);
+
+                    e->names.add (memberName);
                     e->initialisers.add (parseExpression());
 
                     if (currentType != TokenTypes::closeBrace)
@@ -1372,7 +1385,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         template <typename OpType>
         Expression* parsePreIncDec()
         {
-            Expression* e = parseFactor(); // careful - bare pointer is deliberately alised
+            Expression* e = parseFactor(); // careful - bare pointer is deliberately aliased
             ExpPtr lhs (e), one (new LiteralValue (location, (int) 1));
             return new SelfAssignment (location, e, new OpType (location, lhs, one));
         }
@@ -1380,7 +1393,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         template <typename OpType>
         Expression* parsePostIncDec (ExpPtr& lhs)
         {
-            Expression* e = lhs.release(); // careful - bare pointer is deliberately alised
+            Expression* e = lhs.release(); // careful - bare pointer is deliberately aliased
             ExpPtr lhs2 (e), one (new LiteralValue (location, (int) 1));
             return new PostAssignment (location, e, new OpType (location, lhs2, one));
         }
@@ -1636,7 +1649,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         static Identifier getClassName()  { static const Identifier i ("String"); return i; }
 
-        static var fromCharCode (Args a)  { return String::charToString (getInt (a, 0)); }
+        static var fromCharCode (Args a)  { return String::charToString (static_cast<juce_wchar> (getInt (a, 0))); }
         static var substring (Args a)     { return a.thisObject.toString().substring (getInt (a, 0), getInt (a, 1)); }
         static var indexOf (Args a)       { return a.thisObject.toString().indexOf (getString (a, 0)); }
         static var charCodeAt (Args a)    { return (int) a.thisObject.toString() [getInt (a, 0)]; }
@@ -1794,6 +1807,7 @@ JavascriptEngine::JavascriptEngine()  : maximumExecutionTime (15.0), root (new R
 JavascriptEngine::~JavascriptEngine() {}
 
 void JavascriptEngine::prepareTimeout() const noexcept   { root->timeout = Time::getCurrentTime() + maximumExecutionTime; }
+void JavascriptEngine::stop() noexcept                   { root->timeout = {}; }
 
 void JavascriptEngine::registerNativeObject (const Identifier& name, DynamicObject* object)
 {
@@ -1840,6 +1854,26 @@ var JavascriptEngine::callFunction (const Identifier& function, const var::Nativ
         prepareTimeout();
         if (result != nullptr) *result = Result::ok();
         RootObject::Scope (nullptr, root, root).findAndInvokeMethod (function, args, returnVal);
+    }
+    catch (String& error)
+    {
+        if (result != nullptr) *result = Result::fail (error);
+    }
+
+    return returnVal;
+}
+
+var JavascriptEngine::callFunctionObject (DynamicObject* objectScope, const var& functionObject,
+                                          const var::NativeFunctionArgs& args, Result* result)
+{
+    var returnVal (var::undefined());
+
+    try
+    {
+        prepareTimeout();
+        if (result != nullptr) *result = Result::ok();
+        RootObject::Scope rootScope (nullptr, root, root);
+        RootObject::Scope (&rootScope, root, objectScope).invokeMethod (functionObject, args, returnVal);
     }
     catch (String& error)
     {

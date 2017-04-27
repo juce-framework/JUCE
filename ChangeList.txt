@@ -4,6 +4,25 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 5.0.0
+  - New licensing model
+  - Projucer UI/UX overhaul
+  - New look and feel (version 4)
+  - New standalone plug-in format
+  - Added support for Visual Studio 2017
+  - Added support for VST3 SDK 3.6.7
+  - Added support for Apple Inter-App Audio on iOS
+  - Various Android stability and performance improvements
+  - Added support for non-experimental gradle plug-in versions >= 2.2 and Android Studio 2.3
+  - Added support for closed-source third-party modules
+  - Added support for Windows 10 Bluetooth LE MIDI devices
+  - Modernised JUCE codebase to use C++11/14 features
+  - Added support for Linux embedded platforms
+  - Added support for WebBrowserComponent on Linux
+  - Added support for IPv6
+  - Various minor improvements and bug fixes
+  - Various documentation improvements
+ 
 Version 4.3.1
   - Added support for iOS download tasks
   - Added support for AAX plug-in meters

@@ -2,28 +2,20 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -32,15 +24,15 @@ String SystemStats::getJUCEVersion()
 {
     // Some basic tests, to keep an eye on things and make sure these types work ok
     // on all platforms. Let me know if any of these assertions fail on your system!
-    static_jassert (sizeof (pointer_sized_int) == sizeof (void*));
-    static_jassert (sizeof (int8) == 1);
-    static_jassert (sizeof (uint8) == 1);
-    static_jassert (sizeof (int16) == 2);
-    static_jassert (sizeof (uint16) == 2);
-    static_jassert (sizeof (int32) == 4);
-    static_jassert (sizeof (uint32) == 4);
-    static_jassert (sizeof (int64) == 8);
-    static_jassert (sizeof (uint64) == 8);
+    static_assert (sizeof (pointer_sized_int) == sizeof (void*), "Basic sanity test failed: please report!");
+    static_assert (sizeof (int8) == 1,                           "Basic sanity test failed: please report!");
+    static_assert (sizeof (uint8) == 1,                          "Basic sanity test failed: please report!");
+    static_assert (sizeof (int16) == 2,                          "Basic sanity test failed: please report!");
+    static_assert (sizeof (uint16) == 2,                         "Basic sanity test failed: please report!");
+    static_assert (sizeof (int32) == 4,                          "Basic sanity test failed: please report!");
+    static_assert (sizeof (uint32) == 4,                         "Basic sanity test failed: please report!");
+    static_assert (sizeof (int64) == 8,                          "Basic sanity test failed: please report!");
+    static_assert (sizeof (uint64) == 8,                         "Basic sanity test failed: please report!");
 
     return "JUCE v" JUCE_STRINGIFY(JUCE_MAJOR_VERSION)
                 "." JUCE_STRINGIFY(JUCE_MINOR_VERSION)
@@ -63,23 +55,43 @@ String SystemStats::getJUCEVersion()
  static JuceVersionPrinter juceVersionPrinter;
 #endif
 
+StringArray SystemStats::getDeviceIdentifiers()
+{
+    StringArray ids;
+
+   #if JUCE_WINDOWS
+    File f (File::getSpecialLocation (File::windowsSystemDirectory));
+   #else
+    File f ("~");
+   #endif
+    if (auto num = f.getFileIdentifier())
+    {
+        ids.add (String::toHexString ((int64) num));
+    }
+    else
+    {
+        Array<MACAddress> addresses;
+        MACAddress::findAllAddresses (addresses);
+        for (auto& address : addresses)
+            ids.add (address.toString());
+    }
+
+    jassert (ids.size() > 0); // Failed to create any IDs!
+    return ids;
+}
 
 //==============================================================================
 struct CPUInformation
 {
-    CPUInformation() noexcept
-        : numCpus (0), hasMMX (false), hasSSE (false),
-          hasSSE2 (false), hasSSE3 (false), has3DNow (false),
-          hasSSSE3 (false), hasSSE41 (false), hasSSE42 (false),
-          hasAVX (false), hasAVX2 (false)
-    {
-        initialise();
-    }
+    CPUInformation() noexcept    { initialise(); }
 
     void initialise() noexcept;
 
-    int numCpus;
-    bool hasMMX, hasSSE, hasSSE2, hasSSE3, has3DNow, hasSSSE3, hasSSE41, hasSSE42, hasAVX, hasAVX2;
+    int numLogicalCPUs = 0, numPhysicalCPUs = 0;
+
+    bool hasMMX = false, hasSSE = false, hasSSE2 = false, hasSSE3 = false,
+         has3DNow = false, hasSSSE3 = false, hasSSE41 = false,
+         hasSSE42 = false, hasAVX = false, hasAVX2 = false;
 };
 
 static const CPUInformation& getCPUInformation() noexcept
@@ -88,17 +100,18 @@ static const CPUInformation& getCPUInformation() noexcept
     return info;
 }
 
-int SystemStats::getNumCpus() noexcept        { return getCPUInformation().numCpus; }
-bool SystemStats::hasMMX() noexcept           { return getCPUInformation().hasMMX; }
-bool SystemStats::has3DNow() noexcept         { return getCPUInformation().has3DNow; }
-bool SystemStats::hasSSE() noexcept           { return getCPUInformation().hasSSE; }
-bool SystemStats::hasSSE2() noexcept          { return getCPUInformation().hasSSE2; }
-bool SystemStats::hasSSE3() noexcept          { return getCPUInformation().hasSSE3; }
-bool SystemStats::hasSSSE3() noexcept         { return getCPUInformation().hasSSSE3; }
-bool SystemStats::hasSSE41() noexcept         { return getCPUInformation().hasSSE41; }
-bool SystemStats::hasSSE42() noexcept         { return getCPUInformation().hasSSE42; }
-bool SystemStats::hasAVX() noexcept           { return getCPUInformation().hasAVX; }
-bool SystemStats::hasAVX2() noexcept          { return getCPUInformation().hasAVX2; }
+int SystemStats::getNumCpus() noexcept          { return getCPUInformation().numLogicalCPUs; }
+int SystemStats::getNumPhysicalCpus() noexcept  { return getCPUInformation().numPhysicalCPUs; }
+bool SystemStats::hasMMX() noexcept             { return getCPUInformation().hasMMX; }
+bool SystemStats::has3DNow() noexcept           { return getCPUInformation().has3DNow; }
+bool SystemStats::hasSSE() noexcept             { return getCPUInformation().hasSSE; }
+bool SystemStats::hasSSE2() noexcept            { return getCPUInformation().hasSSE2; }
+bool SystemStats::hasSSE3() noexcept            { return getCPUInformation().hasSSE3; }
+bool SystemStats::hasSSSE3() noexcept           { return getCPUInformation().hasSSSE3; }
+bool SystemStats::hasSSE41() noexcept           { return getCPUInformation().hasSSE41; }
+bool SystemStats::hasSSE42() noexcept           { return getCPUInformation().hasSSE42; }
+bool SystemStats::hasAVX() noexcept             { return getCPUInformation().hasAVX; }
+bool SystemStats::hasAVX2() noexcept            { return getCPUInformation().hasAVX2; }
 
 
 //==============================================================================
@@ -158,15 +171,15 @@ String SystemStats::getStackBacktrace()
 static SystemStats::CrashHandlerFunction globalCrashHandler = nullptr;
 
 #if JUCE_WINDOWS
-static LONG WINAPI handleCrash (LPEXCEPTION_POINTERS)
+static LONG WINAPI handleCrash (LPEXCEPTION_POINTERS ep)
 {
-    globalCrashHandler();
+    globalCrashHandler (ep);
     return EXCEPTION_EXECUTE_HANDLER;
 }
 #else
-static void handleCrash (int)
+static void handleCrash (int signum)
 {
-    globalCrashHandler();
+    globalCrashHandler ((void*) (pointer_sized_int) signum);
     kill (getpid(), SIGKILL);
 }
 

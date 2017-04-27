@@ -2,28 +2,29 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#ifndef JUCER_TEMPLATETHUMBNAILSCOMPONENT_H_INCLUDED
-#define JUCER_TEMPLATETHUMBNAILSCOMPONENT_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /**
@@ -56,7 +57,7 @@ public:
     void paintButton (Graphics& g, bool isMouseOverButton, bool /*isButtonDown*/) override
     {
         const Rectangle<float> r (getLocalBounds().toFloat());
-        const Colour buttonColour (0xfff29300);
+        const Colour buttonColour (0xffA35E93);
 
         if (isMouseOverButton)
         {
@@ -99,7 +100,7 @@ public:
             textTarget = textTarget.removeFromBottom (textTarget.getHeight() * 0.3f);
         }
 
-        g.setColour (findColour (mainBackgroundColourId).contrasting());
+        g.setColour (findColour (defaultTextColourId));
         g.drawText (name, textTarget, Justification::centred, true);
     }
 
@@ -169,18 +170,16 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.setColour (Colours::black.withAlpha (0.2f));
+        g.setColour (findColour (contentHeaderBackgroundColourId));
         g.fillRect (getLocalBounds().removeFromTop (60));
 
         g.setColour (Colours::white);
         g.setFont (20.0f);
         g.drawText ("Create New Project", 0, 0, getWidth(), 60, Justification::centred, true);
 
-        // draw the descriptions of each template if hovered;
-        // (repaint is called by the button listener on change state)
-        Rectangle<int> descriptionBox (getLocalBounds().reduced (30).removeFromBottom (50));
+        auto descriptionBox = (getLocalBounds().reduced (30).removeFromBottom (50));
 
-        g.setColour (Colours::white.withAlpha (0.4f));
+        g.setColour (findColour (defaultTextColourId));
         g.setFont (15.0f);
 
         for (int i = 0; i < optionButtons.size(); ++i)
@@ -190,15 +189,15 @@ public:
 
     void resized() override
     {
-        Rectangle<int> allOpts = getLocalBounds().reduced (40, 60);
+        auto allOpts = getLocalBounds().reduced (40, 60);
         allOpts.removeFromBottom (allOpts.getHeight() / 4);
 
-        const int numHorizIcons = 4;
-        const int optStep = allOpts.getWidth() / numHorizIcons;
+        const auto numHorizIcons = 4;
+        const auto optStep = allOpts.getWidth() / numHorizIcons;
 
         for (int i = 0; i < optionButtons.size(); ++i)
         {
-            const int yShift = i < numHorizIcons ? 0 : 1;
+            const auto yShift = i < numHorizIcons ? 0 : 1;
 
             optionButtons.getUnchecked(i)->setBounds (Rectangle<int> (allOpts.getX() + (i % numHorizIcons) * optStep,
                                                                       allOpts.getY() + yShift * allOpts.getHeight() / 2,
@@ -206,7 +205,7 @@ public:
                                                         .reduced (10, 10));
         }
 
-        Rectangle<int> openButtonBounds = getLocalBounds();
+        auto openButtonBounds = getLocalBounds();
         openButtonBounds.removeFromBottom (proportionOfHeight (0.12f));
         openButtonBounds = openButtonBounds.removeFromBottom (120);
         openButtonBounds.reduce (50, 40);
@@ -254,7 +253,7 @@ public:
             appFolder = appFolder.getParentDirectory();
         }
 
-        return File();
+        return {};
     }
 
 private:
@@ -279,6 +278,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TemplateTileBrowser)
 };
-
-
-#endif   // JUCER_TEMPLATETHUMBNAILSCOMPONENT_H_INCLUDED

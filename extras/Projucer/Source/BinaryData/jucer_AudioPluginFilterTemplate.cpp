@@ -76,7 +76,7 @@ void FILTERCLASSNAME::setCurrentProgram (int index)
 
 const String FILTERCLASSNAME::getProgramName (int index)
 {
-    return String();
+    return {};
 }
 
 void FILTERCLASSNAME::changeProgramName (int index, const String& newName)

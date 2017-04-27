@@ -33,10 +33,10 @@ def add_doxygen_group(path, group_name):
     filename = os.path.basename(path)
     if filename.startswith("juce_") and filename.endswith(".h"):
 
-        group_definition_start = ("\n/** @weakgroup "
+        group_definition_start = ("\r\n/** @weakgroup "
                                   + group_name
-                                  + "\n *  @{\n */\n")
-        group_definition_end = "\n/** @}*/\n"
+                                  + "\r\n *  @{\r\n */\r\n")
+        group_definition_end = "\r\n/** @}*/\r\n"
 
         with open(path, "r") as f:
             content = f.read()
@@ -71,10 +71,8 @@ def add_doxygen_group(path, group_name):
 ###############################################################################
 
 # Get the list of JUCE modules to include.
-juce_modules = []
-with open("../juce_modules.txt", "r") as f:
-    for line in f:
-        juce_modules.append(line.strip())
+juce_modules = ("juce_audio_basics", "juce_audio_devices",
+                "juce_blocks_basics", "juce_core", "juce_events")
 
 # A temporary directory to hold our preprocessed source files.
 build_directory = "build"
@@ -94,13 +92,14 @@ module_definitions = []
 for module_name in juce_modules:
 
     # Copy the required modules.
-    original_module_dir = os.path.join("..", "..", "..", "modules", module_name)
+    original_module_dir = os.path.join("..", "..", "..", "modules",
+                                       module_name)
     module_path = os.path.join(build_directory, module_name)
     shutil.copytree(original_module_dir, module_path)
 
     # Parse the module header to get module information.
     module_header = os.path.join(module_path, module_name + ".h")
-    with open (module_header, "r") as f:
+    with open(module_header, "r") as f:
         content = f.read()
     block_info_result = re.match(r".*BEGIN_JUCE_MODULE_DECLARATION"
                                  "(.*)"
@@ -138,7 +137,7 @@ for module_name in juce_modules:
                if os.path.isdir(os.path.join(module_path, x))]
     module_groups = {}
     for subdir in subdirs:
-        subgroup_name = "{n}-{s}".format(n=module_name, s=subdir) 
+        subgroup_name = "{n}-{s}".format(n=module_name, s=subdir)
         module_groups[subgroup_name] = os.path.join(module_path, subdir)
         module_definiton.append("")
         module_definiton.append(
@@ -147,7 +146,7 @@ for module_name in juce_modules:
     module_definiton.append("")
     module_definiton.append("/** @} */")
 
-    module_definitions.append("\n".join(module_definiton))
+    module_definitions.append("\r\n".join(module_definiton))
 
     # Put the top level files into the main group.
     for filename in (set(dir_contents) - set(subdirs)):
@@ -161,4 +160,4 @@ for module_name in juce_modules:
 
 # Create an extra header file containing the module hierarchy.
 with open(os.path.join(build_directory, "juce_modules.dox"), "w") as f:
-    f.write("\n\n".join(module_definitions))
+    f.write("\r\n\r\n".join(module_definitions))
