@@ -82,7 +82,6 @@ JuceDemoPluginAudioProcessorEditor::JuceDemoPluginAudioProcessorEditor (JuceDemo
 
     // add a label that will display the current timecode and status..
     addAndMakeVisible (timecodeDisplayLabel);
-    timecodeDisplayLabel.setColour (Label::textColourId, Colours::blue);
     timecodeDisplayLabel.setFont (Font (Font::getDefaultMonospacedFontName(), 15.0f, Font::plain));
 
     // set resize limits for this plug-in
@@ -103,8 +102,7 @@ JuceDemoPluginAudioProcessorEditor::~JuceDemoPluginAudioProcessorEditor()
 //==============================================================================
 void JuceDemoPluginAudioProcessorEditor::paint (Graphics& g)
 {
-    g.setGradientFill (ColourGradient (Colours::white, 0, 0,
-                                       Colours::lightgrey, 0, (float) getHeight(), false));
+    g.setColour (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
     g.fillAll();
 }
 
@@ -117,8 +115,8 @@ void JuceDemoPluginAudioProcessorEditor::resized()
     timecodeDisplayLabel.setBounds (r.removeFromTop (26));
     midiKeyboard.setBounds (r.removeFromBottom (70));
 
-    r.removeFromTop (30);
-    Rectangle<int> sliderArea (r.removeFromTop (50));
+    r.removeFromTop (20);
+    Rectangle<int> sliderArea (r.removeFromTop (60));
     gainSlider->setBounds (sliderArea.removeFromLeft (jmin (180, sliderArea.getWidth() / 2)));
     delaySlider->setBounds (sliderArea.removeFromLeft (jmin (180, sliderArea.getWidth())));
 

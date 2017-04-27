@@ -36,6 +36,7 @@ public:
     //==============================================================================
     void initialise (const String& commandLine) override
     {
+        // (This function call is for one of the demos, which involves launching a child process)
         if (invokeChildProcessDemo (commandLine))
             return;
 

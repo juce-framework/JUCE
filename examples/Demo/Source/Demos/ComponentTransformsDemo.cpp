@@ -48,7 +48,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        fillStandardDemoBackground (g);
+        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
 
         g.setColour (Colours::white);
         g.setFont (15.0f);

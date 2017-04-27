@@ -70,7 +70,10 @@ public:
     {
     public:
         MainWindow (String name)
-            : DocumentWindow (name, Colours::lightgrey, DocumentWindow::allButtons)
+            : DocumentWindow (name,
+                              LookAndFeel::getDefaultLookAndFeel()
+                                           .findColour (ResizableWindow::backgroundColourId),
+                              DocumentWindow::allButtons)
         {
             setUsingNativeTitleBar (true);
             setContentOwned (new MPETestClasses::MainComponent(), true);

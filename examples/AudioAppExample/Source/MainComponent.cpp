@@ -76,7 +76,7 @@ public:
     void paint (Graphics& g) override
     {
         // (Our component is opaque, so we must completely fill the background with a solid colour)
-        g.fillAll (Colours::black);
+        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
 
         const float centreY = getHeight() / 2.0f;
         const float radius = amplitude * 200.0f;
@@ -95,7 +95,7 @@ public:
             wavePath.lineTo (x, centreY + amplitude * getHeight() * 2.0f
                                             * std::sin (x * frequency * 0.0001f));
 
-        g.setColour (Colours::grey);
+        g.setColour (getLookAndFeel().findColour (Slider::thumbColourId));
         g.strokePath (wavePath, PathStrokeType (2.0f));
     }
 

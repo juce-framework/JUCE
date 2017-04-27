@@ -770,13 +770,11 @@ public:
             return items.size();
         }
 
-        void paintListBoxItem (int row, Graphics& g, int width, int height, bool rowIsSelected) override
+        void paintListBoxItem (int row, Graphics& g, int width, int height, bool) override
         {
             if (isPositiveAndBelow (row, items.size()))
             {
-                if (rowIsSelected)
-                    g.fillAll (findColour (TextEditor::highlightColourId)
-                                   .withMultipliedAlpha (0.3f));
+                g.fillAll (findColour (ListBox::backgroundColourId));
 
                 const String item (items [row]);
                 bool enabled = false;

@@ -22,7 +22,7 @@ public:
     //==============================================================================
     HelloWorldWindow()
         : DocumentWindow ("JUCE Hello World!",
-                          Colours::lightgrey,
+                          LookAndFeel::getDefaultLookAndFeel().findColour (ResizableWindow::backgroundColourId),
                           DocumentWindow::allButtons,
                           true)
     {

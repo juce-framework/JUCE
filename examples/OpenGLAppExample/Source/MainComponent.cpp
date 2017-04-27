@@ -60,11 +60,10 @@ public:
 
     void render() override
     {
-
         jassert (OpenGLHelpers::isContextActive());
 
         const float desktopScale = (float) openGLContext.getRenderingScale();
-        OpenGLHelpers::clear (Colour::greyLevel (0.1f));
+        OpenGLHelpers::clear (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
 
         glEnable (GL_BLEND);
         glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -92,7 +91,7 @@ public:
         // You can add your component specific drawing code here!
         // This will draw over the top of the openGL background.
 
-        g.setColour(Colours::white);
+        g.setColour (getLookAndFeel().findColour (Label::textColourId));
         g.setFont (20);
         g.drawText ("OpenGL Example", 25, 20, 300, 30, Justification::left);
         g.drawLine (20, 20, 170, 20);

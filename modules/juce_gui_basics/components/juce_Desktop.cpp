@@ -93,7 +93,7 @@ LookAndFeel& Desktop::getDefaultLookAndFeel() noexcept
     if (currentLookAndFeel == nullptr)
     {
         if (defaultLookAndFeel == nullptr)
-            defaultLookAndFeel = new LookAndFeel_V3();
+            defaultLookAndFeel = new LookAndFeel_V4();
 
         currentLookAndFeel = defaultLookAndFeel;
     }

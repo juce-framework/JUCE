@@ -24,12 +24,10 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::black);
-
         // Only shows the red ellipse when the button is on.
         if (isOn)
         {
-            g.setColour (Colours::red);
+            g.setColour (getLookAndFeel().findColour (Slider::thumbColourId));
             g.fillEllipse (getLocalBounds().toFloat());
         }
     }

@@ -58,7 +58,10 @@ public:
     {
     public:
         MainWindow (const String& name)
-            : DocumentWindow (name, Colours::lightgrey, DocumentWindow::allButtons)
+            : DocumentWindow (name,
+                              LookAndFeel::getDefaultLookAndFeel()
+                                           .findColour (ResizableWindow::backgroundColourId),
+                              DocumentWindow::allButtons)
         {
             setUsingNativeTitleBar (true);
             setContentOwned (createMainContentComponent(), true);

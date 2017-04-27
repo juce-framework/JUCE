@@ -84,7 +84,7 @@ public:
     void paint (Graphics& g) override
     {
         // (Our component is opaque, so we must completely fill the background with a solid colour)
-        g.fillAll (Colours::black);
+        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
 
         Point<float> nextPos = pos + delta;
 
@@ -111,7 +111,7 @@ public:
         }
 
         // draw a circle
-        g.setColour (Colours::grey);
+        g.setColour (getLookAndFeel().findColour (Slider::thumbColourId));
         g.fillEllipse (pos.x, pos.y, 20, 20);
 
         drawWaveform (g, 20.0f, 0);

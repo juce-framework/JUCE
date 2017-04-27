@@ -32,7 +32,7 @@
     It's a good idea not to hard code your colours, use the findColour method along with appropriate
     ColourIds so you can set these on a per-component basis.
  */
-struct CustomLookAndFeel    : public LookAndFeel_V3
+struct CustomLookAndFeel    : public LookAndFeel_V4
 {
     void drawRoundThumb (Graphics& g, const float x, const float y,
                          const float diameter, const Colour& colour, float outlineThickness)
@@ -116,7 +116,7 @@ struct CustomLookAndFeel    : public LookAndFeel_V3
 
         if (ticked)
         {
-            const Path tick (LookAndFeel_V2::getTickShape (6.0f));
+            const Path tick (LookAndFeel_V4::getTickShape (6.0f));
             g.setColour (isEnabled ? findColour (TextButton::buttonOnColourId) : Colours::grey);
 
             const float scale = 9.0f;
@@ -315,7 +315,7 @@ struct SquareLookAndFeel    : public CustomLookAndFeel
 
         if (ticked)
         {
-            const Path tick (LookAndFeel_V3::getTickShape (6.0f));
+            const Path tick (LookAndFeel_V4::getTickShape (6.0f));
             g.setColour (isEnabled ? findColour (TextButton::buttonColourId) : Colours::grey);
 
             const AffineTransform trans (RectanglePlacement (RectanglePlacement::centred)
@@ -509,6 +509,10 @@ public:
         addLookAndFeel (new LookAndFeel_V1(), "LookAndFeel_V1");
         addLookAndFeel (new LookAndFeel_V2(), "LookAndFeel_V2");
         addLookAndFeel (new LookAndFeel_V3(), "LookAndFeel_V3");
+        addLookAndFeel (new LookAndFeel_V4(), "LookAndFeel_V4 (Dark)");
+        addLookAndFeel (new LookAndFeel_V4 (LookAndFeel_V4::getMidnightColourScheme()), "LookAndFeel_V4 (Midnight)");
+        addLookAndFeel (new LookAndFeel_V4 (LookAndFeel_V4::getGreyColourScheme()), "LookAndFeel_V4 (Grey)");
+        addLookAndFeel (new LookAndFeel_V4 (LookAndFeel_V4::getLightColourScheme()), "LookAndFeel_V4 (Light)");
 
         CustomLookAndFeel* claf = new CustomLookAndFeel();
         addLookAndFeel (claf, "Custom Look And Feel");
@@ -528,7 +532,8 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colour::greyLevel (0.4f));
+        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
+                                           Colour::greyLevel (0.4f)));
     }
 
     void resized() override

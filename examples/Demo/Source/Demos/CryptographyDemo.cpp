@@ -33,8 +33,16 @@ public:
     {
         addAndMakeVisible (rsaGroup);
         rsaGroup.setText ("RSA Encryption");
-        rsaGroup.setColour (GroupComponent::outlineColourId, Colours::grey);
-        rsaGroup.setColour (GroupComponent::textColourId, Colours::white);
+
+        rsaGroup.setColour (GroupComponent::outlineColourId,
+                            getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::outline,
+                                                    Colours::grey));
+        rsaGroup.setColour (GroupComponent::textColourId,
+                            getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::defaultText,
+                                                    Colours::white));
+        rsaResultBox.setColour (TextEditor::backgroundColourId,
+                                getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::widgetBackground,
+                                                        Colours::white.withAlpha (0.5f)));
 
         bitSizeLabel.setText ("Num Bits to Use:", dontSendNotification);
         bitSizeLabel.attachToComponent (&bitSize, true);
@@ -47,7 +55,6 @@ public:
         generateRSAButton.addListener (this);
 
         addAndMakeVisible (rsaResultBox);
-        rsaResultBox.setColour (TextEditor::backgroundColourId, Colours::white.withAlpha (0.5f));
         rsaResultBox.setReadOnly (true);
         rsaResultBox.setMultiLine (true);
     }
@@ -123,12 +130,19 @@ public:
     {
         addAndMakeVisible (hashGroup);
         hashGroup.setText ("Hashes");
-        hashGroup.setColour (GroupComponent::outlineColourId, Colours::grey);
-        hashGroup.setColour (GroupComponent::textColourId, Colours::white);
+
+        hashGroup.setColour (GroupComponent::outlineColourId,
+                             getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::outline,
+                                                     Colours::grey));
+        hashGroup.setColour (GroupComponent::textColourId,
+                             getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::defaultText,
+                                                     Colours::white));
+        hashEntryBox.setColour (TextEditor::backgroundColourId,
+                                getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::widgetBackground,
+                                                        Colours::white.withAlpha (0.5f)));
 
         addAndMakeVisible (hashEntryBox);
         hashEntryBox.setMultiLine (true);
-        hashEntryBox.setColour (TextEditor::backgroundColourId, Colours::white.withAlpha (0.5f));
 
         hashEntryBox.setReturnKeyStartsNewLine (true);
         hashEntryBox.setText ("Type some text in this box and the resulting MD5, SHA and Whirlpool hashes will update below");
@@ -213,7 +227,8 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colour::greyLevel (0.4f));
+        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
+                                           Colour::greyLevel (0.4f)));
     }
 
     void resized() override

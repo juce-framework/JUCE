@@ -52,7 +52,8 @@ public:
     {
     public:
         MainWindow()  : DocumentWindow (ProjectInfo::projectName,
-                                        Colours::lightgrey,
+                                        LookAndFeel::getDefaultLookAndFeel()
+                                                     .findColour (ResizableWindow::backgroundColourId),
                                         DocumentWindow::allButtons)
         {
             setUsingNativeTitleBar (true);

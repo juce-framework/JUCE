@@ -21,13 +21,13 @@ namespace BinaryData
     const int            LICENSESize = 11325;
 
     extern const char*   jucer_AnimatedComponentTemplate_cpp;
-    const int            jucer_AnimatedComponentTemplate_cppSize = 1838;
+    const int            jucer_AnimatedComponentTemplate_cppSize = 1887;
 
     extern const char*   jucer_AudioComponentTemplate_cpp;
-    const int            jucer_AudioComponentTemplate_cppSize = 3092;
+    const int            jucer_AudioComponentTemplate_cppSize = 3141;
 
     extern const char*   jucer_AudioPluginEditorTemplate_cpp;
-    const int            jucer_AudioPluginEditorTemplate_cppSize = 1162;
+    const int            jucer_AudioPluginEditorTemplate_cppSize = 1310;
 
     extern const char*   jucer_AudioPluginEditorTemplate_h;
     const int            jucer_AudioPluginEditorTemplate_hSize = 938;
@@ -45,13 +45,13 @@ namespace BinaryData
     const int            jucer_ComponentTemplate_hSize = 2064;
 
     extern const char*   jucer_ContentCompTemplate_cpp;
-    const int            jucer_ContentCompTemplate_cppSize = 886;
+    const int            jucer_ContentCompTemplate_cppSize = 1029;
 
     extern const char*   jucer_ContentCompTemplate_h;
     const int            jucer_ContentCompTemplate_hSize = 886;
 
     extern const char*   jucer_InlineComponentTemplate_h;
-    const int            jucer_InlineComponentTemplate_hSize = 1161;
+    const int            jucer_InlineComponentTemplate_hSize = 1208;
 
     extern const char*   jucer_MainConsoleAppTemplate_cpp;
     const int            jucer_MainConsoleAppTemplate_cppSize = 470;
@@ -66,7 +66,7 @@ namespace BinaryData
     const int            jucer_MainTemplate_Window_cppSize = 3913;
 
     extern const char*   jucer_NewComponentTemplate_cpp;
-    const int            jucer_NewComponentTemplate_cppSize = 1389;
+    const int            jucer_NewComponentTemplate_cppSize = 1436;
 
     extern const char*   jucer_NewComponentTemplate_h;
     const int            jucer_NewComponentTemplate_hSize = 610;
@@ -78,7 +78,7 @@ namespace BinaryData
     const int            jucer_NewCppFileTemplate_hSize = 246;
 
     extern const char*   jucer_NewInlineComponentTemplate_h;
-    const int            jucer_NewInlineComponentTemplate_hSize = 1588;
+    const int            jucer_NewInlineComponentTemplate_hSize = 1635;
 
     extern const char*   jucer_OpenGLComponentTemplate_cpp;
     const int            jucer_OpenGLComponentTemplate_cppSize = 1716;

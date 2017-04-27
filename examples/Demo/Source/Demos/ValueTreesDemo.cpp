@@ -48,7 +48,8 @@ public:
 
     void paintItem (Graphics& g, int width, int height) override
     {
-        g.setColour (Colours::black);
+        g.setColour (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::defaultText,
+                                             Colours::black));
         g.setFont (15.0f);
 
         g.drawText (tree["name"].toString(),
@@ -168,7 +169,6 @@ public:
         tree.setDefaultOpenness (true);
         tree.setMultiSelectEnabled (true);
         tree.setRootItem (rootItem = new ValueTreeItem (createRootValueTree(), undoManager));
-        tree.setColour (TreeView::backgroundColourId, Colours::white);
 
         addAndMakeVisible (undoButton);
         addAndMakeVisible (redoButton);
@@ -185,7 +185,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        fillStandardDemoBackground (g);
+        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
     }
 
     void resized() override

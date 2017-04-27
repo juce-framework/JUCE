@@ -96,7 +96,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::white);
+        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
     }
 
     //==============================================================================

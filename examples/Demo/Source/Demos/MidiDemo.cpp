@@ -42,7 +42,8 @@ public:
 
         if (isPositiveAndBelow (row, midiMessageList.size()))
         {
-            g.setColour (Colours::black);
+            g.setColour (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::defaultText,
+                                                 Colours::black));
 
             const MidiMessage& message = midiMessageList.getReference (row);
             double time = message.getTimeStamp();
@@ -120,8 +121,6 @@ public:
 
         addAndMakeVisible (messageListBox);
         messageListBox.setModel (&midiLogListBoxModel);
-        messageListBox.setColour (ListBox::backgroundColourId, Colour (0x32ffffff));
-        messageListBox.setColour (ListBox::outlineColourId, Colours::black);
     }
 
     ~MidiDemo()
@@ -133,7 +132,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        fillStandardDemoBackground (g);
+        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
     }
 
     void resized() override

@@ -192,7 +192,8 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::darkgrey);
+        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
+                                           Colours::darkgrey));
     }
 
     void paintOverChildren (Graphics& g) override
@@ -205,7 +206,8 @@ public:
         s.append ("Click the \"Set Random Colour\" button to change the colour of one of the circles.");
         s.append (newLine);
         s.setFont (Font (16.0f));
-        s.setColour (Colours::lightgrey);
+        s.setColour (getUIColourIfAvailable(LookAndFeel_V4::ColourScheme::UIColour::defaultText,
+                                            Colours::lightgrey));
         s.draw (g, explanationArea.reduced (10).toFloat());
     }
 

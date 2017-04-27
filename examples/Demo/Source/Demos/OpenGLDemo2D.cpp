@@ -43,7 +43,6 @@ public:
 
         addAndMakeVisible (statusLabel);
         statusLabel.setJustificationType (Justification::topLeft);
-        statusLabel.setColour (Label::textColourId, Colours::black);
         statusLabel.setFont (Font (14.0f));
 
         Array<ShaderPreset> presets (getPresets());
@@ -59,8 +58,6 @@ public:
         addAndMakeVisible (presetBox);
         presetBox.addListener (this);
 
-        Colour editorBackground (Colours::white.withAlpha (0.6f));
-        fragmentEditorComp.setColour (CodeEditorComponent::backgroundColourId, editorBackground);
         fragmentEditorComp.setOpaque (false);
         fragmentDocument.addListener (this);
         addAndMakeVisible (fragmentEditorComp);

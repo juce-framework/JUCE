@@ -55,10 +55,9 @@ Array<JuceDemoTypeBase*>& JuceDemoTypeBase::getDemoTypeList()
 #if JUCE_WINDOWS || JUCE_LINUX || JUCE_MAC
 
 // Just add a simple icon to the Window system tray area or Mac menu bar..
-class DemoTaskbarComponent  : public SystemTrayIconComponent,
-                              private Timer
+struct DemoTaskbarComponent  : public SystemTrayIconComponent,
+                               private Timer
 {
-public:
     DemoTaskbarComponent()
     {
         setIconImage (ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize));
@@ -83,7 +82,6 @@ public:
             JUCEApplication::getInstance()->systemRequestedQuit();
     }
 
-private:
     void timerCallback() override
     {
         stopTimer();
@@ -113,13 +111,17 @@ public:
         lookAndFeelV3.setColour (Label::textColourId, Colours::white);
         lookAndFeelV3.setColour (Label::textColourId, Colours::white);
         lookAndFeelV3.setColour (ToggleButton::textColourId, Colours::white);
-        LookAndFeel::setDefaultLookAndFeel (&lookAndFeelV3);
+
+        LookAndFeel::setDefaultLookAndFeel (&lookAndFeelV4);
 
         demoList.setModel (this);
-        demoList.setColour (ListBox::backgroundColourId, Colour::greyLevel (0.2f));
+        updateDemoListColours();
         demoList.selectRow (0);
-        addAndMakeVisible (demoList);
 
+        if (Desktop::getInstance().getMainMouseSource().isTouch())
+            demoList.getViewport()->setScrollOnDragEnabled (true);
+
+        addAndMakeVisible (demoList);
     }
 
     void clearCurrentDemo()
@@ -129,7 +131,7 @@ public:
 
     void resized() override
     {
-        Rectangle<int> r (getLocalBounds());
+        auto r = getLocalBounds();
 
         if (r.getWidth() > 600)
         {
@@ -156,9 +158,9 @@ public:
         if (rowIsSelected)
             g.fillAll (Colours::deepskyblue);
 
-        if (JuceDemoTypeBase* type = JuceDemoTypeBase::getDemoTypeList() [rowNumber])
+        if (auto* type = JuceDemoTypeBase::getDemoTypeList() [rowNumber])
         {
-            String name (type->name.trimCharactersAtStart ("0123456789").trimStart());
+            auto name = type->name.trimCharactersAtStart ("0123456789").trimStart();
 
             AttributedString a;
             a.setJustification (Justification::centredLeft);
@@ -176,10 +178,13 @@ public:
                     category << " ";
             }
 
-            if (category.isNotEmpty())
-                a.append (category, Font (10.0f), Colour::greyLevel (0.5f));
+            auto categoryColour = demoList.findColour (ListBox::outlineColourId);
+            auto nameColour     = demoList.findColour (ListBox::textColourId);
 
-            a.append (name, Font (13.0f), Colours::white.withAlpha (0.9f));
+            if (category.isNotEmpty())
+                a.append (category, Font (10.0f), categoryColour);
+
+            a.append (name, Font (13.0f), nameColour);
 
             a.draw (g, Rectangle<int> (width + 10, height).reduced (6, 0).toFloat());
         }
@@ -187,7 +192,7 @@ public:
 
     void selectedRowsChanged (int lastRowSelected) override
     {
-        if (JuceDemoTypeBase* selectedDemoType = JuceDemoTypeBase::getDemoTypeList() [lastRowSelected])
+        if (auto* selectedDemoType = JuceDemoTypeBase::getDemoTypeList() [lastRowSelected])
         {
             currentDemo = nullptr;
             addAndMakeVisible (currentDemo = selectedDemoType->createComponent());
@@ -206,7 +211,7 @@ public:
         if (currentDemo == nullptr)
             return -1;
 
-        Array<JuceDemoTypeBase*>& demos (JuceDemoTypeBase::getDemoTypeList());
+        auto& demos = JuceDemoTypeBase::getDemoTypeList();
 
         for (int i = demos.size(); --i >= 0;)
             if (demos.getUnchecked (i)->name == currentDemo->getName())
@@ -217,10 +222,8 @@ public:
 
     void moveDemoPages (int numPagesToMove)
     {
-        const int newIndex = negativeAwareModulo (getCurrentPageIndex() + numPagesToMove,
-                                                  JuceDemoTypeBase::getDemoTypeList().size());
-        demoList.selectRow (newIndex);
-        // we have to go through our demo list here or it won't be updated to reflect the current demo
+        demoList.selectRow (negativeAwareModulo (getCurrentPageIndex() + numPagesToMove,
+                                                 JuceDemoTypeBase::getDemoTypeList().size()));
     }
 
     bool isShowingOpenGLDemo() const
@@ -242,6 +245,7 @@ private:
     LookAndFeel_V1 lookAndFeelV1;
     LookAndFeel_V2 lookAndFeelV2;
     LookAndFeel_V3 lookAndFeelV3;
+    LookAndFeel_V4 lookAndFeelV4;
 
     //==============================================================================
     // The following methods implement the ApplicationCommandTarget interface, allowing
@@ -272,6 +276,10 @@ private:
                                   MainAppWindow::useLookAndFeelV1,
                                   MainAppWindow::useLookAndFeelV2,
                                   MainAppWindow::useLookAndFeelV3,
+                                  MainAppWindow::useLookAndFeelV4Dark,
+                                  MainAppWindow::useLookAndFeelV4Midnight,
+                                  MainAppWindow::useLookAndFeelV4Grey,
+                                  MainAppWindow::useLookAndFeelV4Light,
                                   MainAppWindow::toggleRepaintDebugging,
                                  #if ! JUCE_LINUX
                                   MainAppWindow::goToKioskMode,
@@ -285,7 +293,7 @@ private:
                                         MainAppWindow::renderingEngineTwo,
                                         MainAppWindow::renderingEngineThree };
 
-        StringArray renderingEngines (MainAppWindow::getMainAppWindow()->getRenderingEngines());
+        auto renderingEngines = MainAppWindow::getMainAppWindow()->getRenderingEngines();
         commands.addArray (engineIDs, renderingEngines.size());
     }
 
@@ -355,8 +363,8 @@ private:
             case MainAppWindow::renderingEngineTwo:
             case MainAppWindow::renderingEngineThree:
             {
-                MainAppWindow& mainWindow = *MainAppWindow::getMainAppWindow();
-                const StringArray engines (mainWindow.getRenderingEngines());
+                auto& mainWindow = *MainAppWindow::getMainAppWindow();
+                auto engines = mainWindow.getRenderingEngines();
                 const int index = commandID - MainAppWindow::renderingEngineOne;
 
                 result.setInfo ("Use " + engines[index], "Uses the " + engines[index] + " engine to render the UI", generalCategory, 0);
@@ -384,6 +392,27 @@ private:
                 result.setTicked (isLookAndFeelSelected<LookAndFeel_V3>());
                 break;
 
+            case MainAppWindow::useLookAndFeelV4Dark:
+                result.setInfo ("Use LookAndFeel_V4 Dark", String(), generalCategory, 0);
+                result.addDefaultKeypress ('k', ModifierKeys::commandModifier);
+                result.setTicked (isColourSchemeActive (LookAndFeel_V4::getDarkColourScheme()));
+                break;
+
+            case MainAppWindow::useLookAndFeelV4Midnight:
+                result.setInfo ("Use LookAndFeel_V4 Midnight", String(), generalCategory, 0);
+                result.setTicked (isColourSchemeActive (LookAndFeel_V4::getMidnightColourScheme()));
+                break;
+
+            case MainAppWindow::useLookAndFeelV4Grey:
+                result.setInfo ("Use LookAndFeel_V4 Grey", String(), generalCategory, 0);
+                result.setTicked (isColourSchemeActive (LookAndFeel_V4::getGreyColourScheme()));
+                break;
+
+            case MainAppWindow::useLookAndFeelV4Light:
+                result.setInfo ("Use LookAndFeel_V4 Light", String(), generalCategory, 0);
+                result.setTicked (isColourSchemeActive (LookAndFeel_V4::getLightColourScheme()));
+                break;
+
             case MainAppWindow::toggleRepaintDebugging:
                 result.setInfo ("Toggle repaint display", String(), generalCategory, 0);
                 result.addDefaultKeypress ('r', ModifierKeys());
@@ -396,8 +425,8 @@ private:
                 result.addDefaultKeypress ('n', ModifierKeys::commandModifier);
                 bool nativeTitlebar = false;
 
-                if (MainAppWindow* map = MainAppWindow::getMainAppWindow())
-                    nativeTitlebar = map->isUsingNativeTitleBar();
+                if (auto* mainWindow = MainAppWindow::getMainAppWindow())
+                    nativeTitlebar = mainWindow->isUsingNativeTitleBar();
 
                 result.setTicked (nativeTitlebar);
                 break;
@@ -418,63 +447,90 @@ private:
 
     bool perform (const InvocationInfo& info) override
     {
-        MainAppWindow* mainWindow = MainAppWindow::getMainAppWindow();
-
-        if (mainWindow == nullptr)
-            return true;
-
-        switch (info.commandID)
+        if (auto* mainWindow = MainAppWindow::getMainAppWindow())
         {
-            case MainAppWindow::showPreviousDemo:   moveDemoPages (-1); break;
-            case MainAppWindow::showNextDemo:       moveDemoPages ( 1); break;
+            switch (info.commandID)
+            {
+                case MainAppWindow::showPreviousDemo:   moveDemoPages (-1); break;
+                case MainAppWindow::showNextDemo:       moveDemoPages ( 1); break;
 
-            case MainAppWindow::welcome:
-            case MainAppWindow::componentsAnimation:
-            case MainAppWindow::componentsDialogBoxes:
-            case MainAppWindow::componentsKeyMappings:
-            case MainAppWindow::componentsMDI:
-            case MainAppWindow::componentsPropertyEditors:
-            case MainAppWindow::componentsTransforms:
-            case MainAppWindow::componentsWebBrowsers:
-            case MainAppWindow::componentsWidgets:
-                demoList.selectRow (info.commandID - MainAppWindow::welcome);
-                break;
-
-            case MainAppWindow::renderingEngineOne:
-            case MainAppWindow::renderingEngineTwo:
-            case MainAppWindow::renderingEngineThree:
-                mainWindow->setRenderingEngine (info.commandID - MainAppWindow::renderingEngineOne);
-                break;
-
-            case MainAppWindow::useLookAndFeelV1:  LookAndFeel::setDefaultLookAndFeel (&lookAndFeelV1); break;
-            case MainAppWindow::useLookAndFeelV2:  LookAndFeel::setDefaultLookAndFeel (&lookAndFeelV2); break;
-            case MainAppWindow::useLookAndFeelV3:  LookAndFeel::setDefaultLookAndFeel (&lookAndFeelV3); break;
-
-            case MainAppWindow::toggleRepaintDebugging:
-                juceDemoRepaintDebuggingActive = ! juceDemoRepaintDebuggingActive;
-                mainWindow->repaint();
-                break;
-
-            case MainAppWindow::useNativeTitleBar:
-                mainWindow->setUsingNativeTitleBar (! mainWindow->isUsingNativeTitleBar());
-                break;
-
-           #if ! JUCE_LINUX
-            case MainAppWindow::goToKioskMode:
-                {
-                    Desktop& desktop = Desktop::getInstance();
-
-                    if (desktop.getKioskModeComponent() == nullptr)
-                        desktop.setKioskModeComponent (getTopLevelComponent());
-                    else
-                        desktop.setKioskModeComponent (nullptr);
-
+                case MainAppWindow::welcome:
+                case MainAppWindow::componentsAnimation:
+                case MainAppWindow::componentsDialogBoxes:
+                case MainAppWindow::componentsKeyMappings:
+                case MainAppWindow::componentsMDI:
+                case MainAppWindow::componentsPropertyEditors:
+                case MainAppWindow::componentsTransforms:
+                case MainAppWindow::componentsWebBrowsers:
+                case MainAppWindow::componentsWidgets:
+                    demoList.selectRow (info.commandID - MainAppWindow::welcome);
                     break;
-                }
-           #endif
 
-            default:
-                return false;
+                case MainAppWindow::renderingEngineOne:
+                case MainAppWindow::renderingEngineTwo:
+                case MainAppWindow::renderingEngineThree:
+                    mainWindow->setRenderingEngine (info.commandID - MainAppWindow::renderingEngineOne);
+                    break;
+
+                case MainAppWindow::useLookAndFeelV1:
+                    LookAndFeel::setDefaultLookAndFeel (&lookAndFeelV1);
+                    updateDemoListColours();
+                    break;
+                case MainAppWindow::useLookAndFeelV2:
+                    LookAndFeel::setDefaultLookAndFeel (&lookAndFeelV2);
+                    updateDemoListColours();
+                    break;
+                case MainAppWindow::useLookAndFeelV3:
+                    LookAndFeel::setDefaultLookAndFeel (&lookAndFeelV3);
+                    updateDemoListColours();
+                    break;
+                case MainAppWindow::useLookAndFeelV4Dark:
+                    lookAndFeelV4.setColourScheme (LookAndFeel_V4::getDarkColourScheme());
+                    LookAndFeel::setDefaultLookAndFeel (&lookAndFeelV4);
+                    updateDemoListColours();
+                    break;
+                case MainAppWindow::useLookAndFeelV4Midnight:
+                    lookAndFeelV4.setColourScheme (LookAndFeel_V4::getMidnightColourScheme());
+                    LookAndFeel::setDefaultLookAndFeel (&lookAndFeelV4);
+                    updateDemoListColours();
+                    break;
+                case MainAppWindow::useLookAndFeelV4Grey:
+                    lookAndFeelV4.setColourScheme (LookAndFeel_V4::getGreyColourScheme());
+                    LookAndFeel::setDefaultLookAndFeel (&lookAndFeelV4);
+                    updateDemoListColours();
+                    break;
+                case MainAppWindow::useLookAndFeelV4Light:
+                    lookAndFeelV4.setColourScheme (LookAndFeel_V4::getLightColourScheme());
+                    LookAndFeel::setDefaultLookAndFeel (&lookAndFeelV4);
+                    updateDemoListColours();
+                    break;
+
+                case MainAppWindow::toggleRepaintDebugging:
+                    juceDemoRepaintDebuggingActive = ! juceDemoRepaintDebuggingActive;
+                    mainWindow->repaint();
+                    break;
+
+                case MainAppWindow::useNativeTitleBar:
+                    mainWindow->setUsingNativeTitleBar (! mainWindow->isUsingNativeTitleBar());
+                    break;
+
+               #if ! JUCE_LINUX
+                case MainAppWindow::goToKioskMode:
+                    {
+                        auto& desktop = Desktop::getInstance();
+
+                        if (desktop.getKioskModeComponent() == nullptr)
+                            desktop.setKioskModeComponent (getTopLevelComponent());
+                        else
+                            desktop.setKioskModeComponent (nullptr);
+
+                        break;
+                    }
+               #endif
+
+                default:
+                    return false;
+            }
         }
 
         return true;
@@ -486,6 +542,28 @@ private:
         LookAndFeel& lf = getLookAndFeel();
         return typeid (LookAndFeelType) == typeid (lf);
     }
+
+    bool isColourSchemeActive (LookAndFeel_V4::ColourScheme scheme)
+    {
+        if (auto* v4 = dynamic_cast<LookAndFeel_V4*> (&LookAndFeel::getDefaultLookAndFeel()))
+            if (v4->getCurrentColourScheme() == scheme)
+                return true;
+
+        return false;
+    }
+
+
+    void updateDemoListColours()
+    {
+        demoList.setColour (ListBox::backgroundColourId,
+                            getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::widgetBackground, Colour::greyLevel (0.2f)));
+        demoList.setColour (ListBox::textColourId,
+                            getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::defaultText,
+                                                    Colours::white.withAlpha (0.9f)));
+        demoList.setColour (ListBox::outlineColourId,
+                            getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::defaultText,
+                                                    Colour::greyLevel (0.5f)).interpolatedWith (Colours::red, 0.4f));
+    }
 };
 
 //==============================================================================
@@ -494,7 +572,7 @@ static ScopedPointer<AudioDeviceManager> sharedAudioDeviceManager;
 
 MainAppWindow::MainAppWindow()
     : DocumentWindow (JUCEApplication::getInstance()->getApplicationName(),
-                      Colours::lightgrey,
+                      LookAndFeel::getDefaultLookAndFeel().findColour (ResizableWindow::backgroundColourId),
                       DocumentWindow::allButtons)
 {
     setUsingNativeTitleBar (true);
@@ -574,7 +652,7 @@ void MainAppWindow::runtimePermissionsCallback (bool wasGranted)
 MainAppWindow* MainAppWindow::getMainAppWindow()
 {
     for (int i = TopLevelWindow::getNumTopLevelWindows(); --i >= 0;)
-        if (MainAppWindow* maw = dynamic_cast<MainAppWindow*> (TopLevelWindow::getTopLevelWindow (i)))
+        if (auto* maw = dynamic_cast<MainAppWindow*> (TopLevelWindow::getTopLevelWindow (i)))
             return maw;
 
     return nullptr;
@@ -584,7 +662,8 @@ void MainAppWindow::handleAsyncUpdate()
 {
     // This registers all of our commands with the command manager but has to be done after the window has
     // been created so we can find the number of rendering engines available
-    ApplicationCommandManager& commandManager = MainAppWindow::getApplicationCommandManager();
+    auto& commandManager = MainAppWindow::getApplicationCommandManager();
+
     commandManager.registerAllCommandsForTarget (contentComponent);
     commandManager.registerAllCommandsForTarget (JUCEApplication::getInstance());
 }
@@ -597,7 +676,7 @@ void MainAppWindow::showMessageBubble (const String& text)
     AttributedString attString;
     attString.append (text, Font (15.0f));
 
-    currentBubbleMessage->showAt (Rectangle<int> (getLocalBounds().getCentreX(), 10, 1, 1),
+    currentBubbleMessage->showAt ({ getLocalBounds().getCentreX(), 10, 1, 1 },
                                   attString,
                                   500,  // numMillisecondsBeforeRemoving
                                   true,  // removeWhenMouseClicked
@@ -610,7 +689,7 @@ StringArray MainAppWindow::getRenderingEngines() const
 {
     StringArray renderingEngines;
 
-    if (ComponentPeer* peer = getPeer())
+    if (auto* peer = getPeer())
         renderingEngines = peer->getAvailableRenderingEngines();
 
    #if JUCE_OPENGL
@@ -636,7 +715,7 @@ void MainAppWindow::setRenderingEngine (int index)
     openGLContext.detach();
    #endif
 
-    if (ComponentPeer* peer = getPeer())
+    if (auto* peer = getPeer())
         peer->setCurrentRenderingEngine (index);
 }
 
@@ -652,7 +731,7 @@ int MainAppWindow::getActiveRenderingEngine() const
         return getRenderingEngines().indexOf (openGLRendererName);
    #endif
 
-    if (ComponentPeer* peer = getPeer())
+    if (auto* peer = getPeer())
         return peer->getCurrentRenderingEngine();
 
     return 0;

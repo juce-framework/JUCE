@@ -72,13 +72,13 @@ public:
     void paintListBoxItem (int rowNumber, Graphics &g,
                            int width, int height, bool rowIsSelected) override
     {
+        const auto textColour = getLookAndFeel().findColour (ListBox::textColourId);
+
         if (rowIsSelected)
-            g.fillAll (Colours::lightblue);
-        else if (rowNumber % 2)
-            g.fillAll (Colour (0xffeeeeee));
+            g.fillAll (textColour.interpolatedWith (getLookAndFeel().findColour (ListBox::backgroundColourId), 0.5));
 
 
-        g.setColour (Colours::black);
+        g.setColour (textColour);
         g.setFont (height * 0.7f);
 
         if (isInput)
@@ -209,9 +209,8 @@ MainContentComponent::~MainContentComponent()
 }
 
 //==============================================================================
-void MainContentComponent::paint (Graphics& g)
+void MainContentComponent::paint (Graphics&)
 {
-    g.fillAll (Colours::white);
 }
 
 //==============================================================================

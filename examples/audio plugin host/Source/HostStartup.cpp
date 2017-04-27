@@ -50,8 +50,6 @@ public:
         appProperties = new ApplicationProperties();
         appProperties->setStorageParameters (options);
 
-        LookAndFeel::setDefaultLookAndFeel (&lookAndFeel);
-
         mainWindow = new MainHostWindow();
         mainWindow->setUsingNativeTitleBar (true);
 
@@ -119,7 +117,6 @@ public:
 
     ApplicationCommandManager commandManager;
     ScopedPointer<ApplicationProperties> appProperties;
-    LookAndFeel_V3 lookAndFeel;
 
 private:
     ScopedPointer<MainHostWindow> mainWindow;

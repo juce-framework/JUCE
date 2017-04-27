@@ -32,7 +32,8 @@ class MainHostWindow::PluginListWindow  : public DocumentWindow
 {
 public:
     PluginListWindow (MainHostWindow& owner_, AudioPluginFormatManager& pluginFormatManager)
-        : DocumentWindow ("Available Plugins", Colours::white,
+        : DocumentWindow ("Available Plugins",
+                          LookAndFeel::getDefaultLookAndFeel().findColour (ResizableWindow::backgroundColourId),
                           DocumentWindow::minimiseButton | DocumentWindow::closeButton),
           owner (owner_)
     {
@@ -72,7 +73,8 @@ private:
 
 //==============================================================================
 MainHostWindow::MainHostWindow()
-    : DocumentWindow (JUCEApplication::getInstance()->getApplicationName(), Colours::lightgrey,
+    : DocumentWindow (JUCEApplication::getInstance()->getApplicationName(),
+                      LookAndFeel::getDefaultLookAndFeel().findColour (ResizableWindow::backgroundColourId),
                       DocumentWindow::allButtons)
 {
     formatManager.addDefaultFormats();
@@ -502,7 +504,7 @@ void MainHostWindow::showAudioSettings()
     o.content.setNonOwned (&audioSettingsComp);
     o.dialogTitle                   = "Audio Settings";
     o.componentToCentreAround       = this;
-    o.dialogBackgroundColour        = Colours::azure;
+    o.dialogBackgroundColour        = getLookAndFeel().findColour (ResizableWindow::backgroundColourId);
     o.escapeKeyTriggersCloseButton  = true;
     o.useNativeTitleBar             = false;
     o.resizable                     = false;

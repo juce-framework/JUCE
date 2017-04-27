@@ -38,7 +38,6 @@ public:
           zoneLayoutComp (colourPicker),
           visualiserComp (colourPicker)
     {
-        setLookAndFeel (&lookAndFeel);
         setSize (880, 720);
         audioDeviceManager.initialise (0, 2, 0, true, String(), 0);
         audioDeviceManager.addMidiInputCallback (String(), this);
@@ -175,7 +174,6 @@ private:
     }
 
     //==============================================================================
-    LookAndFeel_V3 lookAndFeel;
     AudioDeviceManager audioDeviceManager;
 
     MPEZoneLayout zoneLayout;

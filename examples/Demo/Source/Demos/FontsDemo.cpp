@@ -34,12 +34,6 @@ class FontsDemo  : public Component,
 {
 public:
     FontsDemo()
-        : heightLabel (String(), "Height:"),
-          kerningLabel (String(), "Kerning:"),
-          scaleLabel  (String(), "Scale:"),
-          styleLabel ("Style"),
-          boldToggle ("Bold"),
-          italicToggle ("Italic")
     {
         setOpaque (true);
 
@@ -71,6 +65,9 @@ public:
 
         listBox.setRowHeight (20);
         listBox.setModel (this);   // Tell the listbox where to get its data model
+        listBox.setColour (ListBox::textColourId, Colours::black);
+        listBox.setColour (ListBox::backgroundColourId, Colours::white);
+
 
         heightSlider.setRange (3.0, 150.0, 0.01);
         scaleSlider.setRange (0.2, 3.0, 0.01);
@@ -106,17 +103,19 @@ public:
                              "non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
 
         demoTextBox.setCaretPosition (0);
+        demoTextBox.setColour (TextEditor::textColourId, Colours::black);
+        demoTextBox.setColour (TextEditor::backgroundColourId, Colours::white);
     }
 
     //==============================================================================
     void paint (Graphics& g) override
     {
-        fillStandardDemoBackground (g);
+        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
     }
 
     void resized() override
     {
-        Rectangle<int> r (getLocalBounds().reduced (5));
+        auto r = getLocalBounds().reduced (5);
 
         // lay out the list box and vertical divider..
         Component* vcomps[] = { &listBox, verticalDividerBar, nullptr };
@@ -134,7 +133,7 @@ public:
 
         const int labelWidth = 60;
 
-        Rectangle<int> row (r.removeFromBottom (30));
+        auto row = r.removeFromBottom (30);
         row.removeFromLeft (labelWidth);
         boldToggle.setBounds (row.removeFromLeft (row.getWidth() / 2));
         italicToggle.setBounds (row);
@@ -174,7 +173,7 @@ public:
         if (rowIsSelected)
             g.fillAll (Colours::lightblue);
 
-        Font font (fonts [rowNumber]);
+        Font font (fonts[rowNumber]);
 
         AttributedString s;
         s.setWordWrap (AttributedString::none);
@@ -196,9 +195,16 @@ private:
 
     ListBox listBox;
     TextEditor demoTextBox;
-    Label heightLabel, kerningLabel, scaleLabel, styleLabel;
+
+    Label heightLabel {{}, "Height:" },
+          kerningLabel {{}, "Kerning:" },
+          scaleLabel { "Scale:" },
+          styleLabel { "Style" };
+
+    ToggleButton boldToggle { "Bold" },
+                 italicToggle { "Italic" };
+
     Slider heightSlider, kerningSlider, scaleSlider;
-    ToggleButton boldToggle, italicToggle;
     ComboBox styleBox;
 
     StretchableLayoutManager verticalLayout;

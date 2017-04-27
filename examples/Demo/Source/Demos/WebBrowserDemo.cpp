@@ -100,7 +100,8 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::grey);
+        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
+                                           Colours::grey));
     }
 
     void resized() override

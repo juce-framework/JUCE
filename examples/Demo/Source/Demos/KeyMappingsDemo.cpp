@@ -34,11 +34,16 @@ public:
     {
         setOpaque (true);
         addAndMakeVisible (keyMappingEditor);
+
+        LookAndFeel* lf = &LookAndFeel::getDefaultLookAndFeel();
+        keyMappingEditor.setColours (lf->findColour (KeyMappingEditorComponent::backgroundColourId),
+                                     lf->findColour (KeyMappingEditorComponent::textColourId));
     }
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colour::greyLevel (0.93f));
+        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
+                                           Colour::greyLevel (0.93f)));
     }
 
     void resized() override

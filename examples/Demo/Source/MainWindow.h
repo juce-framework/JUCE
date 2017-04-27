@@ -81,11 +81,15 @@ public:
         renderingEngineTwo          = 0x2301,
         renderingEngineThree        = 0x2302, // these must be contiguous!
 
-        useLookAndFeelV1            = 0x200b,
-        useLookAndFeelV2            = 0x200c,
-        useLookAndFeelV3            = 0x200d,
+        useLookAndFeelV1            = 0x300a,
+        useLookAndFeelV2            = 0x300b,
+        useLookAndFeelV3            = 0x300c,
+        useLookAndFeelV4Dark        = 0x300d,
+        useLookAndFeelV4Midnight    = 0x300e,
+        useLookAndFeelV4Grey        = 0x300f,
+        useLookAndFeelV4Light       = 0x3010,
 
-        toggleRepaintDebugging      = 0x200e,
+        toggleRepaintDebugging      = 0x201a,
 
         useNativeTitleBar           = 0x201d,
         goToKioskMode               = 0x200f

@@ -344,7 +344,6 @@ struct OpenGLDemoClasses
         {
             addAndMakeVisible (statusLabel);
             statusLabel.setJustificationType (Justification::topLeft);
-            statusLabel.setColour (Label::textColourId, Colours::black);
             statusLabel.setFont (Font (14.0f));
 
             addAndMakeVisible (sizeSlider);
@@ -367,7 +366,9 @@ struct OpenGLDemoClasses
             addAndMakeVisible (showBackgroundToggle);
             showBackgroundToggle.addListener (this);
 
-            Colour editorBackground (Colours::white.withAlpha (0.6f));
+            Colour editorBackground = dynamic_cast<LookAndFeel_V4*> (&LookAndFeel::getDefaultLookAndFeel())
+                                          ? getLookAndFeel().findColour (ResizableWindow::backgroundColourId)
+                                          : Colours::white;
 
             addAndMakeVisible (tabbedComp);
             tabbedComp.setTabBarDepth (25);
@@ -645,7 +646,9 @@ struct OpenGLDemoClasses
             jassert (OpenGLHelpers::isContextActive());
 
             const float desktopScale = (float) openGLContext.getRenderingScale();
-            OpenGLHelpers::clear (Colours::lightblue);
+
+            OpenGLHelpers::clear (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
+                                                          Colours::lightblue));
 
             if (textureToUse != nullptr)
                 if (! textureToUse->applyTo (texture))

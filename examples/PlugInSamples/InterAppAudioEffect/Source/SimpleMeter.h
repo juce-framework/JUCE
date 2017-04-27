@@ -16,17 +16,17 @@ public:
     //==============================================================================
     void paint (Graphics& g) override
     {
-        g.fillAll(Colours::transparentBlack);
+        g.fillAll (Colours::transparentBlack);
 
         auto area = g.getClipBounds();
-        g.setColour (Colours::skyblue);
-        g.fillRoundedRectangle(area.toFloat(), 6.0);
+        g.setColour (getLookAndFeel().findColour (Slider::thumbColourId));
+        g.fillRoundedRectangle (area.toFloat(), 6.0);
 
         auto unfilledHeight = area.getHeight() * (1.0 - level);
         g.reduceClipRegion (area.getX(), area.getY(),
                             area.getWidth(), (int) unfilledHeight);
-        g.setColour (Colours::grey);
-        g.fillRoundedRectangle(area.toFloat(), 6.0);
+        g.setColour (getLookAndFeel().findColour (Slider::trackColourId));
+        g.fillRoundedRectangle (area.toFloat(), 6.0);
     }
 
     void resized() override {}

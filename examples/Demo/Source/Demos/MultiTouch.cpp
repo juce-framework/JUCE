@@ -36,9 +36,11 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colour::greyLevel (0.4f));
+        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
+                                           Colour::greyLevel (0.4f)));
 
-        g.setColour (Colours::lightgrey);
+        g.setColour (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::defaultText,
+                                             Colours::lightgrey));
         g.setFont (14.0f);
         g.drawFittedText ("Drag here with as many fingers as you have!",
                           getLocalBounds().reduced (30), Justification::centred, 4);

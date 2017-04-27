@@ -305,9 +305,13 @@ public:
         resultsBox.setScrollbarsShown (true);
         resultsBox.setCaretVisible (false);
         resultsBox.setPopupMenuEnabled (true);
-        resultsBox.setColour (TextEditor::backgroundColourId, Colour (0x32ffffff));
+
+        resultsBox.setColour (TextEditor::backgroundColourId,
+                              getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::widgetBackground,
+                                                      Colour (0x32ffffff)));
         resultsBox.setColour (TextEditor::outlineColourId, Colour (0x1c000000));
         resultsBox.setColour (TextEditor::shadowColourId, Colour (0x16000000));
+
         resultsBox.setText ("Running this test measures the round-trip latency between the audio output and input "
                             "devices you\'ve got selected.\n\n"
                             "It\'ll play a sound, then try to measure the time at which the sound arrives "
@@ -339,7 +343,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        fillStandardDemoBackground (g);
+        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
     }
 
     void resized() override

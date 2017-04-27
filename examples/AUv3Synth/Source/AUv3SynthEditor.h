@@ -9,9 +9,9 @@
 
 //==============================================================================
 class AUv3SynthEditor   : public AudioProcessorEditor,
-                           public ButtonListener,
-                           public Slider::Listener,
-                           private Timer
+                          public ButtonListener,
+                          public Slider::Listener,
+                          private Timer
 {
 public:
     //==============================================================================

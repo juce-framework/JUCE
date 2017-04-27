@@ -41,7 +41,7 @@ public:
         directoryThread.startThread (1);
 
         fileTree.addListener (this);
-        fileTree.setColour (TreeView::backgroundColourId, Colours::lightgrey.withAlpha (0.6f));
+        fileTree.setColour (TreeView::backgroundColourId, Colours::grey);
         addAndMakeVisible (fileTree);
 
         addAndMakeVisible (resizerBar);
@@ -68,12 +68,12 @@ public:
 
     void paint (Graphics& g) override
     {
-        fillStandardDemoBackground (g);
+        g.fillAll (Colours::white);
     }
 
     void resized() override
     {
-        Rectangle<int> r (getLocalBounds().reduced (4));
+        auto r = getLocalBounds().reduced (4);
 
         // make a list of two of our child components that we want to reposition
         Component* comps[] = { &fileTree, &resizerBar, &imagePreview };

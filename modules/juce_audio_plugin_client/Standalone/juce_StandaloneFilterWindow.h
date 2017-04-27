@@ -212,7 +212,7 @@ public:
         o.content->setSize (500, 450);
 
         o.dialogTitle                   = TRANS("Audio/MIDI Settings");
-        o.dialogBackgroundColour        = Colour (0xfff0f0f0);
+        o.dialogBackgroundColour        = o.content->getLookAndFeel().findColour (ResizableWindow::backgroundColourId);
         o.escapeKeyTriggersCloseButton  = true;
         o.useNativeTitleBar             = true;
         o.resizable                     = false;
@@ -396,7 +396,7 @@ public:
                             const String& preferredDefaultDeviceName = String(),
                             const AudioDeviceManager::AudioDeviceSetup* preferredSetupOptions = nullptr)
         : DocumentWindow (title, backgroundColour, DocumentWindow::minimiseButton | DocumentWindow::closeButton),
-          optionsButton ("options")
+          optionsButton ("Options")
     {
         setTitleBarButtonsRequired (DocumentWindow::minimiseButton | DocumentWindow::closeButton, false);
 

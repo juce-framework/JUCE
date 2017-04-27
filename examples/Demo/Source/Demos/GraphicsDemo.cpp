@@ -45,17 +45,17 @@ public:
 
     void paint (Graphics& g) override
     {
-        fillStandardDemoBackground (g);
+        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
     }
 
     void resized() override
     {
-        Rectangle<int> r (getLocalBounds().reduced (4));
+        auto r = getLocalBounds().reduced (4);
 
         int buttonHeight = 22;
 
-        Rectangle<int> columns (r.removeFromTop (buttonHeight * 4));
-        Rectangle<int> col (columns.removeFromLeft (200));
+        auto columns = r.removeFromTop (buttonHeight * 4);
+        auto col = columns.removeFromLeft (200);
 
         animatePosition.setBounds (col.removeFromTop (buttonHeight));
         animateRotation.setBounds (col.removeFromTop (buttonHeight));
@@ -630,7 +630,6 @@ public:
         addAndMakeVisible (listBox);
         listBox.setModel (this);
         listBox.selectRow (0);
-        listBox.setColour (ListBox::backgroundColourId, Colour::greyLevel (0.9f));
     }
 
     void resized()
@@ -645,14 +644,13 @@ public:
 
     void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected)
     {
-        Component* demo = demos [rowNumber];
-
-        if (demo != nullptr)
+        if (auto* demo = demos[rowNumber])
         {
             if (rowIsSelected)
-                g.fillAll (findColour (TextEditor::highlightColourId));
+                g.fillAll (Colour::contrasting (findColour (ListBox::textColourId),
+                                                findColour (ListBox::backgroundColourId)));
 
-            g.setColour (Colours::black);
+            g.setColour (findColour (ListBox::textColourId));
             g.setFont (14.0f);
             g.drawFittedText (demo->getName(), 8, 0, width - 10, height, Justification::centredLeft, 2);
         }
@@ -693,7 +691,7 @@ public:
 
     void resized() override
     {
-        Rectangle<int> area (getLocalBounds());
+        auto area = getLocalBounds();
         controllersComponent.setBounds (area.removeFromBottom (150));
         testList.setBounds (area.removeFromRight (150));
         demoHolder.setBounds (area);

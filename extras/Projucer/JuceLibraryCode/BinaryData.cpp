@@ -1269,8 +1269,7 @@ static const unsigned char temp_binary_data_4[] =
 "    void paint (Graphics& g) override\r\n"
 "    {\r\n"
 "        // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
-"        g.fillAll (Colours::black);\r\n"
-"\r\n"
+"        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));\r\n"
 "\r\n"
 "        // You can add your drawing code here!\r\n"
 "    }\r\n"
@@ -1368,8 +1367,7 @@ static const unsigned char temp_binary_data_5[] =
 "    void paint (Graphics& g) override\r\n"
 "    {\r\n"
 "        // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
-"        g.fillAll (Colours::black);\r\n"
-"\r\n"
+"        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));\r\n"
 "\r\n"
 "        // You can add your drawing code here!\r\n"
 "    }\r\n"
@@ -1428,9 +1426,10 @@ static const unsigned char temp_binary_data_6[] =
 "//==============================================================================\r\n"
 "void EDITORCLASSNAME::paint (Graphics& g)\r\n"
 "{\r\n"
-"    g.fillAll (Colours::white);\r\n"
+"    // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
+"    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));\r\n"
 "\r\n"
-"    g.setColour (Colours::black);\r\n"
+"    g.setColour (Colours::white);\r\n"
 "    g.setFont (15.0f);\r\n"
 "    g.drawFittedText (\"Hello World!\", getLocalBounds(), Justification::centred, 1);\r\n"
 "}\r\n"
@@ -1901,7 +1900,8 @@ static const unsigned char temp_binary_data_12[] =
 "\r\n"
 "void CONTENTCOMPCLASS::paint (Graphics& g)\r\n"
 "{\r\n"
-"    g.fillAll (Colour (0xff001F36));\r\n"
+"    // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
+"    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));\r\n"
 "\r\n"
 "    g.setFont (Font (16.0f));\r\n"
 "    g.setColour (Colours::white);\r\n"
@@ -1975,12 +1975,12 @@ static const unsigned char temp_binary_data_14[] =
 "    {\r\n"
 "        // You should replace everything in this method with your own drawing code..\r\n"
 "\r\n"
-"        g.fillAll (Colours::white);   // clear the background\r\n"
+"        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));   // clear the background\r\n"
 "\r\n"
 "        g.setColour (Colours::grey);\r\n"
 "        g.drawRect (getLocalBounds(), 1);   // draw an outline around the component\r\n"
 "\r\n"
-"        g.setColour (Colours::lightblue);\r\n"
+"        g.setColour (Colours::white);\r\n"
 "        g.setFont (14.0f);\r\n"
 "        g.drawText (\"COMPONENTCLASS\", getLocalBounds(),\r\n"
 "                    Justification::centred, true);   // draw some placeholder text\r\n"
@@ -2333,12 +2333,12 @@ static const unsigned char temp_binary_data_19[] =
 "       drawing code..\r\n"
 "    */\r\n"
 "\r\n"
-"    g.fillAll (Colours::white);   // clear the background\r\n"
+"    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));   // clear the background\r\n"
 "\r\n"
 "    g.setColour (Colours::grey);\r\n"
 "    g.drawRect (getLocalBounds(), 1);   // draw an outline around the component\r\n"
 "\r\n"
-"    g.setColour (Colours::lightblue);\r\n"
+"    g.setColour (Colours::white);\r\n"
 "    g.setFont (14.0f);\r\n"
 "    g.drawText (\"COMPONENTCLASS\", getLocalBounds(),\r\n"
 "                Justification::centred, true);   // draw some placeholder text\r\n"
@@ -2461,12 +2461,12 @@ static const unsigned char temp_binary_data_23[] =
 "           drawing code..\r\n"
 "        */\r\n"
 "\r\n"
-"        g.fillAll (Colours::white);   // clear the background\r\n"
+"        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));   // clear the background\r\n"
 "\r\n"
 "        g.setColour (Colours::grey);\r\n"
 "        g.drawRect (getLocalBounds(), 1);   // draw an outline around the component\r\n"
 "\r\n"
-"        g.setColour (Colours::lightblue);\r\n"
+"        g.setColour (Colours::white);\r\n"
 "        g.setFont (14.0f);\r\n"
 "        g.drawText (\"COMPONENTCLASS\", getLocalBounds(),\r\n"
 "                    Justification::centred, true);   // draw some placeholder text\r\n"
@@ -5235,26 +5235,26 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x10b04d10:  numBytes = 4971; return gradlew;
         case 0x76cff066:  numBytes = 2404; return gradlew_bat;
         case 0x34bc1021:  numBytes = 11325; return LICENSE;
-        case 0x6cf2645e:  numBytes = 1838; return jucer_AnimatedComponentTemplate_cpp;
-        case 0xafccbd3f:  numBytes = 3092; return jucer_AudioComponentTemplate_cpp;
-        case 0x27c5a93a:  numBytes = 1162; return jucer_AudioPluginEditorTemplate_cpp;
+        case 0x6cf2645e:  numBytes = 1887; return jucer_AnimatedComponentTemplate_cpp;
+        case 0xafccbd3f:  numBytes = 3141; return jucer_AudioComponentTemplate_cpp;
+        case 0x27c5a93a:  numBytes = 1310; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 938; return jucer_AudioPluginEditorTemplate_h;
         case 0x51b49ac5:  numBytes = 5469; return jucer_AudioPluginFilterTemplate_cpp;
         case 0x488afa0a:  numBytes = 2203; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2151; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2064; return jucer_ComponentTemplate_h;
-        case 0x0b66646c:  numBytes = 886; return jucer_ContentCompTemplate_cpp;
+        case 0x0b66646c:  numBytes = 1029; return jucer_ContentCompTemplate_cpp;
         case 0x6fa10171:  numBytes = 886; return jucer_ContentCompTemplate_h;
-        case 0x28d496ad:  numBytes = 1161; return jucer_InlineComponentTemplate_h;
+        case 0x28d496ad:  numBytes = 1208; return jucer_InlineComponentTemplate_h;
         case 0x8905395b:  numBytes = 470; return jucer_MainConsoleAppTemplate_cpp;
         case 0x5e5ea047:  numBytes = 1992; return jucer_MainTemplate_NoWindow_cpp;
         case 0xda2391f8:  numBytes = 4001; return jucer_MainTemplate_SimpleWindow_cpp;
         case 0x400bc026:  numBytes = 3913; return jucer_MainTemplate_Window_cpp;
-        case 0xf4842835:  numBytes = 1389; return jucer_NewComponentTemplate_cpp;
+        case 0xf4842835:  numBytes = 1436; return jucer_NewComponentTemplate_cpp;
         case 0xe7bf237a:  numBytes = 610; return jucer_NewComponentTemplate_h;
         case 0x02a2a077:  numBytes = 262; return jucer_NewCppFileTemplate_cpp;
         case 0x0842c43c:  numBytes = 246; return jucer_NewCppFileTemplate_h;
-        case 0x36e634a1:  numBytes = 1588; return jucer_NewInlineComponentTemplate_h;
+        case 0x36e634a1:  numBytes = 1635; return jucer_NewInlineComponentTemplate_h;
         case 0x7fbac252:  numBytes = 1716; return jucer_OpenGLComponentTemplate_cpp;
         case 0x406db5c1:  numBytes = 3117; return background_logo_svg;
         case 0x4a0cfd09:  numBytes = 151; return background_tile_png;

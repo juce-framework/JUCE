@@ -100,7 +100,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::lightgrey);
+        g.setColour (getLookAndFeel().findColour (Label::textColourId));
         g.drawText ("Connect a Lightpad Block to play.",
                     getLocalBounds(), Justification::centred, false);
     }

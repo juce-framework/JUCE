@@ -30,49 +30,26 @@ inline float32 RandomFloat (float32 lo, float32 hi) { return Random::getSystemRa
 
 struct Settings
 {
-    Settings()
-        : viewCenter (0.0f, 20.0f),
-          hz (60.0f),
-          velocityIterations (8),
-          positionIterations (3),
-          drawShapes (1),
-          drawJoints (1),
-          drawAABBs (0),
-          drawPairs (0),
-          drawContactPoints (0),
-          drawContactNormals (0),
-          drawContactForces (0),
-          drawFrictionForces (0),
-          drawCOMs (0),
-          drawStats (0),
-          drawProfile (0),
-          enableWarmStarting (1),
-          enableContinuous (1),
-          enableSubStepping (0),
-          pause (0),
-          singleStep (0)
-    {}
-
-    b2Vec2 viewCenter;
-    float32 hz;
-    int velocityIterations;
-    int positionIterations;
-    int drawShapes;
-    int drawJoints;
-    int drawAABBs;
-    int drawPairs;
-    int drawContactPoints;
-    int drawContactNormals;
-    int drawContactForces;
-    int drawFrictionForces;
-    int drawCOMs;
-    int drawStats;
-    int drawProfile;
-    int enableWarmStarting;
-    int enableContinuous;
-    int enableSubStepping;
-    int pause;
-    int singleStep;
+    b2Vec2 viewCenter { 0.0f, 20.0f };
+    float32 hz = 60.0f;
+    int velocityIterations = 8;
+    int positionIterations = 3;
+    int drawShapes = 1;
+    int drawJoints = 1;
+    int drawAABBs = 0;
+    int drawPairs = 0;
+    int drawContactPoints = 0;
+    int drawContactNormals = 0;
+    int drawContactForces = 0;
+    int drawFrictionForces = 0;
+    int drawCOMs = 0;
+    int drawStats = 0;
+    int drawProfile = 0;
+    int enableWarmStarting = 1;
+    int enableContinuous = 1;
+    int enableSubStepping = 0;
+    int pause = 0;
+    int singleStep = 0;
 };
 
 struct Test
@@ -107,11 +84,14 @@ public:
 
     void paintListBoxItem (int row, Graphics& g, int w, int h, bool rowIsSelected) override
     {
+        auto& lf = LookAndFeel::getDefaultLookAndFeel();
+
         if (rowIsSelected)
-            g.fillAll (LookAndFeel::getDefaultLookAndFeel().findColour (TextEditor::highlightColourId));
+            g.fillAll (Colour::contrasting (lf.findColour (ListBox::textColourId),
+                                            lf.findColour (ListBox::backgroundColourId)));
 
         const Font f (h * 0.7f);
-        g.setColour (Colours::black);
+        g.setColour (lf.findColour (ListBox::textColourId));
         g.setFont (f);
         g.drawText (tests[row], Rectangle<int> (0, 0, w, h).reduced (2),
                     Justification::centredLeft, true);
@@ -182,12 +162,10 @@ public:
         addAndMakeVisible (testsListBox);
         testsListBox.setModel (&testsListModel);
         testsListBox.selectRow (dominoes);
-        testsListBox.setColour (ListBox::backgroundColourId, Colours::lightgrey);
 
         addAndMakeVisible (instructions);
         instructions.setMultiLine (true);
         instructions.setReadOnly (true);
-        instructions.setColour (TextEditor::backgroundColourId, Colours::lightgrey);
 
         startTimerHz (60);
     }
@@ -199,14 +177,14 @@ public:
 
     void paint (Graphics& g) override
     {
-        fillStandardDemoBackground (g);
+        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
     }
 
     void resized() override
     {
-        Rectangle<int> r (getLocalBounds().reduced (4));
+        auto r = getLocalBounds().reduced (4);
 
-        Rectangle<int> area (r.removeFromBottom (150));
+        auto area = r.removeFromBottom (150);
         testsListBox.setBounds (area.removeFromLeft (150));
         area.removeFromLeft (4);
         instructions.setBounds (area);

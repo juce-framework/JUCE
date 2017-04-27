@@ -36,7 +36,8 @@ static Array <PluginWindow*> activePluginWindows;
 PluginWindow::PluginWindow (Component* const pluginEditor,
                             AudioProcessorGraph::Node* const o,
                             WindowFormatType t)
-    : DocumentWindow (pluginEditor->getName(), Colours::lightblue,
+    : DocumentWindow (pluginEditor->getName(),
+                      LookAndFeel::getDefaultLookAndFeel().findColour (ResizableWindow::backgroundColourId),
                       DocumentWindow::minimiseButton | DocumentWindow::closeButton),
       owner (o),
       type (t)
@@ -440,7 +441,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.setColour (Colours::lightgrey);
+        g.setColour (findColour (TextEditor::backgroundColourId));
 
         const int x = 4;
         const int y = pinSize;
@@ -449,12 +450,9 @@ public:
 
         g.fillRect (x, y, w, h);
 
-        g.setColour (Colours::black);
+        g.setColour (findColour (TextEditor::textColourId));
         g.setFont (font);
         g.drawFittedText (getName(), getLocalBounds().reduced (4, 2), Justification::centred, 2);
-
-        g.setColour (Colours::grey);
-        g.drawRect (x, y, w, h);
     }
 
     void resized() override
@@ -839,7 +837,7 @@ GraphEditorPanel::~GraphEditorPanel()
 
 void GraphEditorPanel::paint (Graphics& g)
 {
-    g.fillAll (Colours::white);
+    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
 }
 
 void GraphEditorPanel::mouseDown (const MouseEvent& e)

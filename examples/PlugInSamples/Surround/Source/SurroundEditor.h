@@ -74,7 +74,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::white);
+        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
     }
 
     void buttonClicked (Button* btn) override
@@ -127,11 +127,14 @@ public:
 
             if (ChannelClickListener* listener = dynamic_cast<ChannelClickListener*> (getAudioProcessor()))
             {
+                const auto   activeColour = getLookAndFeel().findColour (Slider::thumbColourId);
+                const auto inactiveColour = getLookAndFeel().findColour (Slider::trackColourId);
+
                 for (int i = 0; i < activeChannels.size(); ++i)
                 {
                     bool isActive = listener->isChannelActive (i);
                     activeChannels.getReference (i) = isActive;
-                    channelButtons [i]->setColour (TextButton::buttonColourId, isActive ? Colours::lightsalmon : Colours::lightgrey);
+                    channelButtons [i]->setColour (TextButton::buttonColourId, isActive ? activeColour : inactiveColour);
                     channelButtons [i]->repaint();
                 }
             }
@@ -159,13 +162,16 @@ private:
         {
             if (ChannelClickListener* listener = dynamic_cast<ChannelClickListener*> (getAudioProcessor()))
             {
+                const auto   activeColour = getLookAndFeel().findColour (Slider::thumbColourId);
+                const auto inactiveColour = getLookAndFeel().findColour (Slider::trackColourId);
+
                 for (int i = 0; i < activeChannels.size(); ++i)
                 {
                     bool isActive = listener->isChannelActive (i);
                     if (activeChannels.getReference (i) != isActive)
                     {
                         activeChannels.getReference (i) = isActive;
-                        channelButtons [i]->setColour (TextButton::buttonColourId, isActive ? Colours::lightsalmon : Colours::lightgrey);
+                        channelButtons [i]->setColour (TextButton::buttonColourId, isActive ? activeColour : inactiveColour);
                         channelButtons [i]->repaint();
                     }
                 }

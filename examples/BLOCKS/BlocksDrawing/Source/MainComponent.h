@@ -148,7 +148,6 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::lightgrey);
     }
 
     void resized() override

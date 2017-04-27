@@ -9,7 +9,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 
 //==============================================================================
-class MaterialLookAndFeel : public LookAndFeel_V3
+class MaterialLookAndFeel : public LookAndFeel_V4
 {
 public:
     //==============================================================================
@@ -24,16 +24,10 @@ public:
     void drawButtonBackground (Graphics& g,
                                Button& button,
                                const Colour& /*backgroundColour*/,
-                               bool isMouseOverButton,
+                               bool /*isMouseOverButton*/,
                                bool isButtonDown) override
     {
-        ignoreUnused (isMouseOverButton);
-
-        const int width = button.getWidth();
-        const int height = button.getHeight();
-
-        Rectangle<float> buttonRect (0, 0, width, height);
-        buttonRect.reduce (haloRadius, 0.0f);
+        const auto buttonRect = button.getLocalBounds().toFloat();
 
         if (isButtonDown)
             g.setColour (brightButtonColour.withAlpha (0.7f));
@@ -58,7 +52,7 @@ public:
         else
             g.setColour (backgroundColour);
 
-        g.drawFittedText (button.getButtonText(), 0, 1,
+        g.drawFittedText (button.getButtonText(), 0, 0,
                           button.getWidth(),
                           button.getHeight(),
                           Justification::centred, 2);

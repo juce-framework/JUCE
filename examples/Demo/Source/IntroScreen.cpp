@@ -30,7 +30,6 @@ class IntroScreen   : public Component
 {
 public:
     IntroScreen()
-        : linkButton ("www.juce.com", URL ("http://www.juce.com"))
     {
         setOpaque (true);
 
@@ -38,7 +37,7 @@ public:
         addAndMakeVisible (linkButton);
         addAndMakeVisible (logo);
 
-        versionLabel.setColour (Label::textColourId, Colours::white);
+//        versionLabel.setColour (Label::textColourId, Colours::white);
         versionLabel.setText (String ("{version}  built on {date}")
                                   .replace ("{version}", SystemStats::getJUCEVersion())
                                   .replace ("{date}",    String (__DATE__).replace ("  ", " ")),
@@ -49,12 +48,12 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colour (0xff4d4d4d));
+        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
     }
 
     void resized() override
     {
-        Rectangle<int> area (getLocalBounds().reduced (10));
+        auto area = getLocalBounds().reduced (10);
         logo.setBounds (area);
         area = area.removeFromBottom (24);
         linkButton.setBounds (area.removeFromRight (getWidth() / 4));
@@ -63,13 +62,13 @@ public:
 
 private:
     Label versionLabel;
-    HyperlinkButton linkButton;
+    HyperlinkButton linkButton { "www.juce.com", URL ("http://www.juce.com") };
 
     //==============================================================================
     struct LogoDrawComponent  : public Component,
                                 private Timer
     {
-        LogoDrawComponent()   : logoPath (MainAppWindow::getJUCELogoPath()), elapsed (0.0f)
+        LogoDrawComponent()
         {
             startTimerHz (30); // repaint at 30 fps
         }
@@ -103,19 +102,17 @@ private:
                                                         getLocalBounds().reduced (20, getHeight() / 4).toFloat()));
         }
 
-    private:
         void timerCallback() override
         {
             repaint();
             elapsed += 0.02f;
         }
 
-        Path logoPath;
-        float elapsed;
+        Path logoPath { MainAppWindow::getJUCELogoPath() };
+        float elapsed = 0;
     };
 
     LogoDrawComponent logo;
-
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (IntroScreen)
 };

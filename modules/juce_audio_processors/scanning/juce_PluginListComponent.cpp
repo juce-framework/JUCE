@@ -34,8 +34,11 @@ public:
 
     void paintRowBackground (Graphics& g, int /*rowNumber*/, int /*width*/, int /*height*/, bool rowIsSelected) override
     {
-        if (rowIsSelected)
-            g.fillAll (owner.findColour (TextEditor::highlightColourId));
+        const auto defaultColour = owner.findColour (ListBox::backgroundColourId);
+        const auto c = rowIsSelected ? defaultColour.interpolatedWith (owner.findColour (ListBox::textColourId), 0.5f)
+                                     : defaultColour;
+
+        g.fillAll (c);
     }
 
     enum
@@ -75,9 +78,10 @@ public:
 
         if (text.isNotEmpty())
         {
+            const auto defaultTextColour = owner.findColour (ListBox::textColourId);
             g.setColour (isBlacklisted ? Colours::red
-                                       : columnId == nameCol ? Colours::black
-                                                             : Colours::grey);
+                                       : columnId == nameCol ? defaultTextColour
+                                                             : defaultTextColour.interpolatedWith (Colours::transparentBlack, 0.3f));
             g.setFont (Font (height * 0.7f, Font::bold));
             g.drawFittedText (text, 4, 0, width - 6, height, Justification::centredLeft, 1, 0.9f);
         }

@@ -158,7 +158,8 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colour::greyLevel (0.8f));
+        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
+                                           Colour::greyLevel (0.8f)));
     }
 
     void resized() override
@@ -212,7 +213,8 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colour::greyLevel (0.8f));
+        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
+                                           Colour::greyLevel (0.8f)));
     }
 
     void resized() override
@@ -223,7 +225,7 @@ public:
     void timerCallback() override
     {
         stopTimer();
-        concertinaPanel.expandPanelFully (concertinaPanel.getPanel(0), true);
+        concertinaPanel.expandPanelFully (concertinaPanel.getPanel (0), true);
     }
 
 private:

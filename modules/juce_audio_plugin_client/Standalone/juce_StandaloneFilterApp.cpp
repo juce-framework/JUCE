@@ -79,7 +79,10 @@ public:
 
     virtual StandaloneFilterWindow* createWindow()
     {
-        return new StandaloneFilterWindow (getApplicationName(), Colours::white, appProperties.getUserSettings(), false);
+        return new StandaloneFilterWindow (getApplicationName(),
+                                           LookAndFeel::getDefaultLookAndFeel().findColour (ResizableWindow::backgroundColourId),
+                                           appProperties.getUserSettings(),
+                                           false);
     }
 
     //==============================================================================

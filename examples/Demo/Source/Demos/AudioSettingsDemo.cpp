@@ -44,10 +44,6 @@ public:
         diagnosticsBox.setScrollbarsShown (true);
         diagnosticsBox.setCaretVisible (false);
         diagnosticsBox.setPopupMenuEnabled (true);
-        diagnosticsBox.setColour (TextEditor::textColourId, Colours::white);
-        diagnosticsBox.setColour (TextEditor::backgroundColourId, Colour (0x32ffffff));
-        diagnosticsBox.setColour (TextEditor::outlineColourId, Colour (0x1c000000));
-        diagnosticsBox.setColour (TextEditor::shadowColourId, Colour (0x16000000));
 
         MainAppWindow::getSharedAudioDeviceManager().addChangeListener (this);
 
@@ -62,7 +58,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        fillStandardDemoBackground (g);
+        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
     }
 
     void resized() override

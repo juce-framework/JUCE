@@ -273,6 +273,7 @@ public:
         startStopButton.setButtonText ("Play/Stop");
         startStopButton.addListener (this);
         startStopButton.setColour (TextButton::buttonColourId, Colour (0xff79ed7f));
+        startStopButton.setColour (TextButton::textColourOffId, Colours::black);
 
         addAndMakeVisible (fileTreeComp);
 
@@ -305,7 +306,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        fillStandardDemoBackground (g);
+        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
     }
 
     void resized() override

@@ -30,7 +30,6 @@ public:
 
         // Configure all the graphics for the transport control.
 
-        transportText.setColour (Label::textColourId, Colours::white);
         transportText.setFont (Font (Font::getDefaultMonospacedFontName(), 18.0f, Font::plain));
         transportText.setJustificationType (Justification::topLeft);
         addChildComponent (transportText);
@@ -56,7 +55,6 @@ public:
 
         // Configure the switch to host button.
 
-        switchToHostButtonLabel.setColour (Label::textColourId, Colours::white);
         switchToHostButtonLabel.setFont (Font (Font::getDefaultMonospacedFontName(), 18.0f, Font::plain));
         switchToHostButtonLabel.setJustificationType (Justification::centredRight);
         switchToHostButtonLabel.setText ("Switch to\nhost app:", dontSendNotification);
@@ -76,12 +74,12 @@ public:
     //==============================================================================
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::darkgrey);
+        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
     }
 
     void resized() override
     {
-        auto area = getBounds().reduced (10);
+        auto area = getBounds().reduced (20);
 
         gainSlider.setBounds (area.removeFromLeft (60));
 
@@ -254,7 +252,7 @@ private:
     AudioProcessorValueTreeState& parameters;
 
     const int buttonSize = 30;
-    const Colour defaultButtonColour = Colours::lightgrey;
+    const Colour defaultButtonColour = Colours::darkgrey;
     ShapeButton rewindButton {"Rewind", defaultButtonColour, defaultButtonColour, defaultButtonColour};
     ShapeButton playButton   {"Play",   defaultButtonColour, defaultButtonColour, defaultButtonColour};
     ShapeButton recordButton {"Record", defaultButtonColour, defaultButtonColour, defaultButtonColour};
