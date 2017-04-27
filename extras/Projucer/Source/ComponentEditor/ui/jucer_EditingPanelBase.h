@@ -46,8 +46,9 @@ public:
     ~EditingPanelBase();
 
     //==============================================================================
-    void resized();
-    void visibilityChanged();
+    void resized() override;
+    void paint (Graphics& g) override;
+    void visibilityChanged() override;
 
     virtual void updatePropertiesList() = 0;
 
@@ -66,7 +67,6 @@ public:
 
 protected:
     JucerDocument& document;
-    LookAndFeel_V2 lookAndFeel;
 
     Viewport* viewport;
     MagnifierComponent* magnifier;

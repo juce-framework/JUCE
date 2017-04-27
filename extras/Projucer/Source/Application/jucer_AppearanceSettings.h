@@ -64,8 +64,6 @@ private:
 
     static void writeDefaultSchemeFile (const String& xml, const String& name);
 
-    void applyToLookAndFeel (LookAndFeel&) const;
-
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override   { updateColourScheme(); }
     void valueTreeChildAdded (ValueTree&, ValueTree&) override               { updateColourScheme(); }
     void valueTreeChildRemoved (ValueTree&, ValueTree&, int) override        { updateColourScheme(); }

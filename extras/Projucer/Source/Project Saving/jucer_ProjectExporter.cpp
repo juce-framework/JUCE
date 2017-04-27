@@ -44,15 +44,15 @@ Array<ProjectExporter::ExporterTypeInfo> ProjectExporter::getExporterTypes()
 {
     Array<ProjectExporter::ExporterTypeInfo> types;
 
-    addType (types, XCodeProjectExporter::getNameMac(),          BinaryData::projectIconXcode_png,          BinaryData::projectIconXcode_pngSize);
-    addType (types, XCodeProjectExporter::getNameiOS(),          BinaryData::projectIconXcodeIOS_png,       BinaryData::projectIconXcodeIOS_pngSize);
-    addType (types, MSVCProjectExporterVC2017::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
-    addType (types, MSVCProjectExporterVC2015::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
-    addType (types, MSVCProjectExporterVC2013::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
-    addType (types, MakefileProjectExporter::getNameLinux(),     BinaryData::projectIconLinuxMakefile_png,  BinaryData::projectIconLinuxMakefile_pngSize);
-    addType (types, AndroidProjectExporter::getName(),           BinaryData::projectIconAndroid_png,        BinaryData::projectIconAndroid_pngSize);
-    addType (types, CodeBlocksProjectExporter::getNameWindows(), BinaryData::projectIconCodeblocks_png,     BinaryData::projectIconCodeblocks_pngSize);
-    addType (types, CodeBlocksProjectExporter::getNameLinux(),   BinaryData::projectIconCodeblocks_png,     BinaryData::projectIconCodeblocks_pngSize);
+    addType (types, XCodeProjectExporter::getNameMac(),          BinaryData::export_xcode_svg,          BinaryData::export_xcode_svgSize);
+    addType (types, XCodeProjectExporter::getNameiOS(),          BinaryData::export_xcode_svg,          BinaryData::export_xcode_svgSize);
+    addType (types, MSVCProjectExporterVC2017::getName(),        BinaryData::export_visualStudio_svg,   BinaryData::export_visualStudio_svgSize);
+    addType (types, MSVCProjectExporterVC2015::getName(),        BinaryData::export_visualStudio_svg,   BinaryData::export_visualStudio_svgSize);
+    addType (types, MSVCProjectExporterVC2013::getName(),        BinaryData::export_visualStudio_svg,   BinaryData::export_visualStudio_svgSize);
+    addType (types, MakefileProjectExporter::getNameLinux(),     BinaryData::export_linux_svg,          BinaryData::export_linux_svgSize);
+    addType (types, AndroidProjectExporter::getName(),           BinaryData::export_android_svg,        BinaryData::export_android_svgSize);
+    addType (types, CodeBlocksProjectExporter::getNameWindows(), BinaryData::export_codeBlocks_svg,     BinaryData::export_codeBlocks_svgSize);
+    addType (types, CodeBlocksProjectExporter::getNameLinux(),   BinaryData::export_codeBlocks_svg,     BinaryData::export_codeBlocks_svgSize);
 
     return types;
 }

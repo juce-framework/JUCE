@@ -33,7 +33,6 @@ extern "C"
     typedef void (*QuitCallbackFunction)();
     typedef void (*SetPropertyFunction) (const char* key, const char* value);
     typedef void (*GetPropertyFunction) (const char* key, char* value, size_t size);
-    typedef void (*LoginCallbackFunction) (void* userInfo, const char* errorMessage, const char* username, const char* apiKey);
 
     // We've used an X macro to define the DLL functions rather than just declaring them, so that
     // we can load the DLL and its functions dynamically and cope with it not being there.
@@ -45,12 +44,6 @@ extern "C"
         X (projucer_shutdown,       void, ()) \
         X (projucer_createBuilder,  LiveCodeBuilder, (SendMessageFunction, void* userInfo, const char* projectID, const char* cacheFolder)) \
         X (projucer_sendMessage,    void, (LiveCodeBuilder, const void* messageData, size_t messageDataSize)) \
-        X (projucer_deleteBuilder,  void, (LiveCodeBuilder)) \
-        X (projucer_login,          void, (const char* userLoginName, const char* userPassword, bool remainLoggedIn, LoginCallbackFunction, void* callbackUserInfo)) \
-        X (projucer_logout,         void, ()) \
-        X (projucer_isLoggedIn,     bool, ()) \
-        X (projucer_getLoginName,   void, (char*)) \
-        X (projucer_hasLicense,     bool, (const char* featureName)) \
-        X (projucer_hasLiveCodingLicence, bool, ())
+        X (projucer_deleteBuilder,  void, (LiveCodeBuilder))
 
 }

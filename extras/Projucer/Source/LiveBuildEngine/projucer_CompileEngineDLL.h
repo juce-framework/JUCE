@@ -24,8 +24,7 @@
 
 #include "projucer_LiveCodeBuilderDLL.h"
 
-
-struct CompileEngineDLL
+struct CompileEngineDLL : DeletedAtShutdown
 {
     CompileEngineDLL()
     {
@@ -37,7 +36,7 @@ struct CompileEngineDLL
         shutdown();
     }
 
-    void tryLoadDll()
+    bool tryLoadDll()
     {
         // never load the dynamic lib multiple times
         if (! isLoaded())
@@ -49,8 +48,14 @@ struct CompileEngineDLL
                #define INIT_LIVE_DLL_FN(name, returnType, params)    name = (name##_type) dll.getFunction (#name);
                 LIVE_DLL_FUNCTIONS (INIT_LIVE_DLL_FN);
                #undef INIT_LIVE_DLL_FN
+
+                return true;
             }
+
+            return false;
         }
+
+        return true;
     }
 
     void initialise (CrashCallbackFunction crashFn, QuitCallbackFunction quitFn, bool setupSignals)
@@ -107,10 +112,12 @@ struct CompileEngineDLL
         return userAppData.getChildFile (String ("Projucer-") + ProjectInfo::versionString);
     }
 
+    juce_DeclareSingleton (CompileEngineDLL, false)
+
 private:
     DynamicLibrary dll;
 
-    enum { requiredVersion = 1 };
+    enum { requiredVersion = 2 };
 
     static File findDLLFile()
     {
@@ -182,4 +189,7 @@ private:
         value[0] = 0;
         getGlobalProperties().getValue (key).copyToUTF8 (value, size);
     }
+
+    static void crashCallback (const char*) {}
+    static void quitCallback() {}
 };

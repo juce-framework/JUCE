@@ -34,7 +34,8 @@
 //==============================================================================
 MainWindow::MainWindow()
     : DocumentWindow (ProjucerApplication::getApp().getApplicationName(),
-                      Colour::greyLevel (0.6f),
+                      ProjucerApplication::getApp().lookAndFeel.getCurrentColourScheme()
+                                                   .getUIColour (LookAndFeel_V4::ColourScheme::UIColour::windowBackground),
                       DocumentWindow::allButtons,
                       false)
 {
@@ -160,7 +161,6 @@ void MainWindow::setProject (Project* newProject)
     createProjectContentCompIfNeeded();
     getProjectContentComponent()->setProject (newProject);
     currentProject = newProject;
-    getProjectContentComponent()->updateMainWindowTitle();
     ProjucerApplication::getCommandManager().commandStatusChanged();
 }
 
@@ -301,26 +301,6 @@ void MainWindow::activeWindowStatusChanged()
     }
 }
 
-void MainWindow::updateTitle (const String& documentName)
-{
-    String name (ProjucerApplication::getApp().getApplicationName());
-
-    if (currentProject != nullptr)
-    {
-        String projectName (currentProject->getDocumentTitle());
-
-        if (currentProject->getFile().getFileNameWithoutExtension() != projectName)
-            projectName = currentProject->getFile().getFileName();
-
-        name << "  -  " << projectName;
-    }
-
-    if (documentName.isNotEmpty())
-        name << "  -  " << documentName;
-
-    setName (name);
-}
-
 void MainWindow::showNewProjectWizard()
 {
     jassert (currentProject == nullptr);
@@ -445,7 +425,7 @@ void MainWindowList::openDocument (OpenDocumentManager::Document* doc, bool grab
         }
     }
 
-    getOrCreateFrontmostWindow()->getProjectContentComponent()->showDocument (doc, grabFocus);
+    getFrontmostWindow()->getProjectContentComponent()->showDocument (doc, grabFocus);
 }
 
 bool MainWindowList::openFile (const File& file)
@@ -473,7 +453,7 @@ bool MainWindowList::openFile (const File& file)
     }
 
     if (file.exists())
-        return getOrCreateFrontmostWindow()->openFile (file);
+        return getFrontmostWindow()->openFile (file);
 
     return false;
 }
@@ -487,14 +467,19 @@ MainWindow* MainWindowList::createNewMainWindow()
     return w;
 }
 
-MainWindow* MainWindowList::getOrCreateFrontmostWindow()
+MainWindow* MainWindowList::getFrontmostWindow (bool createIfNotFound)
 {
     if (windows.size() == 0)
     {
-        MainWindow* w = createNewMainWindow();
-        avoidSuperimposedWindows (w);
-        w->makeVisible();
-        return w;
+        if (createIfNotFound)
+        {
+            MainWindow* w = createNewMainWindow();
+            avoidSuperimposedWindows (w);
+            w->makeVisible();
+            return w;
+        }
+
+        return nullptr;
     }
 
     for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
@@ -520,13 +505,6 @@ MainWindow* MainWindowList::getOrCreateEmptyWindow()
     }
 
     return createNewMainWindow();
-}
-
-void MainWindowList::updateAllWindowTitles()
-{
-    for (int i = 0; i < windows.size(); ++i)
-        if (ProjectContentComponent* pc = windows.getUnchecked(i)->getProjectContentComponent())
-            pc->updateMainWindowTitle();
 }
 
 void MainWindowList::avoidSuperimposedWindows (MainWindow* const mw)

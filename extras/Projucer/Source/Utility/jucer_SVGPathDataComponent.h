@@ -32,21 +32,16 @@ public:
                 "code that will load it as a Path object..")
     {
         desc.setJustificationType (Justification::centred);
-        desc.setColour (Label::textColourId, Colours::white);
         addAndMakeVisible (desc);
-
-        const Colour bkgd (Colours::white.withAlpha (0.6f));
 
         userText.setFont (getAppSettings().appearance.getCodeFont().withHeight (13.0f));
         userText.setMultiLine (true, true);
         userText.setReturnKeyStartsNewLine (true);
-        userText.setColour (TextEditor::backgroundColourId, bkgd);
         addAndMakeVisible (userText);
         userText.addListener (this);
 
         resultText.setFont (getAppSettings().appearance.getCodeFont().withHeight (13.0f));
         resultText.setMultiLine (true, true);
-        resultText.setColour (TextEditor::backgroundColourId, bkgd);
         resultText.setReadOnly (true);
         resultText.setSelectAllWhenFocused (true);
         addAndMakeVisible (resultText);
@@ -106,8 +101,14 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.setColour (Colours::white);
+        g.setColour (findColour (secondaryBackgroundColourId));
         g.fillPath (path, path.getTransformToScaleToFit (previewPathArea.reduced (4).toFloat(), true));
+    }
+
+    void lookAndFeelChanged() override
+    {
+        userText.applyFontToAllText (userText.getFont());
+        resultText.applyFontToAllText (resultText.getFont());
     }
 
 private:

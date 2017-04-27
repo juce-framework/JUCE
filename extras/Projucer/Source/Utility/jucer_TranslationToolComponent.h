@@ -38,8 +38,6 @@ public:
           editorPost (documentPost, nullptr),
           editorResult (documentResult, nullptr)
     {
-        setLookAndFeel (&lf);
-
         instructionsLabel.setText (
             "This utility converts translation files to/from a format that can be passed to automatic translation tools."
             "\n\n"
@@ -82,7 +80,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        ProjucerLookAndFeel::fillWithBackgroundTexture (*this, g);
+        g.fillAll (findColour (backgroundColourId));
     }
 
     void resized() override
@@ -121,14 +119,12 @@ public:
 private:
     CodeDocument documentOriginal, documentPre, documentPost, documentResult;
     CodeEditorComponent editorOriginal, editorPre, editorPost, editorResult;
-    juce::Label label1, label2, label3, label4;
-    juce::TextButton generateButton;
-    juce::Label instructionsLabel;
-    juce::TextButton scanProjectButton;
-    juce::TextButton scanFolderButton;
-    juce::TextButton loadTranslationButton;
-
-    ProjucerLookAndFeel lf;
+    Label label1, label2, label3, label4;
+    TextButton generateButton;
+    Label instructionsLabel;
+    TextButton scanProjectButton;
+    TextButton scanFolderButton;
+    TextButton loadTranslationButton;
 
     void buttonClicked (Button* b) override
     {

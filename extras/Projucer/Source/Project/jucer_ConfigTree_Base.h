@@ -22,125 +22,184 @@
   ==============================================================================
 */
 
+//==============================================================================
+class InfoButton    : public Button
+{
+public:
+    InfoButton (PropertyComponent& comp)
+        : Button (String()),
+          associatedComponent (comp)
+    {
+        tooltip = associatedComponent.getTooltip();
+        auto stringWidth = Font (14.0f).getStringWidthFloat (tooltip);
+
+        int maxWidth = 300;
+
+        if (stringWidth > maxWidth)
+        {
+            width = maxWidth;
+            numLines += static_cast<int> (stringWidth / width);
+        }
+        else
+        {
+            width = roundToInt (stringWidth);
+        }
+    }
+
+    void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown) override
+    {
+        auto bounds = getLocalBounds().toFloat().reduced (2);
+        const auto& icon = getIcons().info;
+
+        g.setColour (findColour (treeIconColourId).withMultipliedAlpha (isMouseOverButton || isButtonDown ? 1.0f : 0.5f));
+
+        if (isButtonDown)
+            g.fillEllipse (bounds);
+        else
+            g.fillPath (icon, RectanglePlacement (RectanglePlacement::centred)
+                              .getTransformToFit (icon.getBounds(), bounds));
+    }
+
+    void clicked() override
+    {
+        auto* w = new InfoWindow (tooltip);
+        w->setSize (width, w->getHeight() * numLines + 10);
+
+        CallOutBox::launchAsynchronously (w, getScreenBounds(), nullptr);
+    }
+
+    PropertyComponent& associatedComponent;
+
+private:
+    String tooltip;
+    int width;
+    int numLines = 1;
+
+    //==============================================================================
+    struct InfoWindow    : public Component
+    {
+        InfoWindow (String s)
+            : stringToDisplay (s)
+        {
+            setSize (150, 14);
+        }
+
+        void paint (Graphics& g) override
+        {
+            g.fillAll (findColour (secondaryBackgroundColourId));
+
+            g.setColour (findColour (defaultTextColourId));
+            g.setFont (Font (14.0f));
+            g.drawFittedText (stringToDisplay, getLocalBounds(), Justification::centred, 10, 1.0f);
+        }
+
+        String stringToDisplay;
+    };
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InfoButton)
+};
+
+//==============================================================================
 class PropertyGroupComponent  : public Component
 {
 public:
-    PropertyGroupComponent()  {}
+    PropertyGroupComponent (String name, Icon icon)
+        : header (name, icon)
+    {
+        addAndMakeVisible (header);
+    }
 
     void setProperties (const PropertyListBuilder& newProps)
     {
+        infoButtons.clear();
         properties.clear();
         properties.addArray (newProps.components);
 
-        for (int i = properties.size(); --i >= 0;)
-            addAndMakeVisible (properties.getUnchecked(i));
+        for (auto i = properties.size(); --i >= 0;)
+        {
+            auto* prop = properties.getUnchecked (i);
+
+            addAndMakeVisible (prop);
+
+            if (! prop->getTooltip().isEmpty())
+            {
+                addAndMakeVisible (infoButtons.add (new InfoButton (*prop)));
+                prop->setTooltip (String()); // set the tooltip to empty so it only displays when its button is clicked
+            }
+        }
     }
 
     int updateSize (int x, int y, int width)
     {
-        int height = 38;
+        header.setBounds (0, 0, width, 40);
 
-        for (int i = 0; i < properties.size(); ++i)
+        auto height = header.getHeight() + 5;
+
+        for (auto i = 0; i < properties.size(); ++i)
         {
-            PropertyComponent* pp = properties.getUnchecked(i);
-            pp->setBounds (10, height, width - 20, pp->getPreferredHeight());
-            height += pp->getHeight();
+            auto* pp = properties.getUnchecked (i);
+            auto propertyHeight = pp->getPreferredHeight() + (getHeightMultiplier (pp) * pp->getPreferredHeight());
+
+            InfoButton* buttonToUse = nullptr;
+
+            for (auto* b : infoButtons)
+                if (&b->associatedComponent == pp)
+                    buttonToUse = b;
+
+            if (buttonToUse != nullptr)
+            {
+                buttonToUse->setSize (20, 20);
+                buttonToUse->setCentrePosition (20, height + (propertyHeight / 2));
+            }
+
+            pp->setBounds (40, height, width - 50, propertyHeight);
+
+            resizeContentIfChoicePropertyComponent (pp);
+
+            height += pp->getHeight() + 10;
         }
 
         height += 16;
-        setBounds (x, y, width, height);
+
+        setBounds (x, y, width, jmax (height, getParentHeight()));
+
         return height;
     }
 
     void paint (Graphics& g) override
     {
-        const Colour bkg (findColour (mainBackgroundColourId));
+        g.setColour (findColour (secondaryBackgroundColourId));
+        g.fillRect (getLocalBounds());
+    }
 
-        g.setColour (Colours::white.withAlpha (0.35f));
-        g.fillRect (0, 30, getWidth(), getHeight() - 38);
+    int getHeightMultiplier (PropertyComponent* pp)
+    {
+        auto availableTextWidth = ProjucerLookAndFeel::getTextWidthForPropertyComponent (pp);
 
-        g.setFont (Font (15.0f, Font::bold));
-        g.setColour (bkg.contrasting (0.7f));
-        g.drawFittedText (getName(), 12, 0, getWidth() - 16, 25, Justification::bottomLeft, 1);
+        auto font = ProjucerLookAndFeel::getPropertyComponentFont();
+        auto nameWidth = font.getStringWidthFloat (pp->getName());
+
+        return static_cast<int> (nameWidth / availableTextWidth);
+    }
+
+    void resizeContentIfChoicePropertyComponent (PropertyComponent* pp)
+    {
+        if (auto* choiceComp = dynamic_cast<ChoicePropertyComponent*> (pp))
+        {
+            auto* box = choiceComp->getChildComponent (0);
+            auto bounds = box->getBounds();
+
+            box->setBounds (bounds.withSizeKeepingCentre (box->getWidth(), pp->getPreferredHeight()));
+        }
     }
 
     OwnedArray<PropertyComponent> properties;
+    OwnedArray<InfoButton> infoButtons;
+    ContentViewHeader header;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertyGroupComponent)
 };
-
-//==============================================================================
-class RolloverHelpComp   : public Component,
-                           private Timer
-{
-public:
-    RolloverHelpComp()  : lastComp (nullptr)
-    {
-        setInterceptsMouseClicks (false, false);
-        startTimer (150);
-    }
-
-    void paint (Graphics& g) override
-    {
-        AttributedString s;
-        s.setJustification (Justification::centredLeft);
-        s.append (lastTip, Font (14.0f), findColour (mainBackgroundColourId).contrasting (0.7f));
-
-        TextLayout tl;
-        tl.createLayoutWithBalancedLineLengths (s, getWidth() - 10.0f);
-        if (tl.getNumLines() > 3)
-            tl.createLayout (s, getWidth() - 10.0f);
-
-        tl.draw (g, getLocalBounds().toFloat());
-    }
-
-private:
-    Component* lastComp;
-    String lastTip;
-
-    void timerCallback() override
-    {
-        Component* newComp = Desktop::getInstance().getMainMouseSource().getComponentUnderMouse();
-
-        if (newComp != nullptr
-             && (newComp->getTopLevelComponent() != getTopLevelComponent()
-                  || newComp->isCurrentlyBlockedByAnotherModalComponent()))
-            newComp = nullptr;
-
-        if (newComp != lastComp)
-        {
-            lastComp = newComp;
-
-            String newTip (findTip (newComp));
-
-            if (newTip != lastTip)
-            {
-                lastTip = newTip;
-                repaint();
-            }
-        }
-    }
-
-    static String findTip (Component* c)
-    {
-        while (c != nullptr)
-        {
-            if (TooltipClient* tc = dynamic_cast<TooltipClient*> (c))
-            {
-                const String tip (tc->getTooltip());
-
-                if (tip.isNotEmpty())
-                    return tip;
-            }
-
-            c = c->getParentComponent();
-        }
-
-        return {};
-    }
-};
-
 
 //==============================================================================
 class ConfigTreeItemBase  : public JucerTreeViewBase,
@@ -156,15 +215,15 @@ public:
         ScopedPointer<Component> comp (content);
 
         if (ProjectContentComponent* pcc = getProjectContentComponent())
-            pcc->setEditorComponent (new PropertyPanelViewport (comp.release()), nullptr);
+            pcc->setEditorComponent (comp.release(), nullptr);
     }
 
     void closeSettingsPage()
     {
         if (ProjectContentComponent* pcc = getProjectContentComponent())
         {
-            if (PropertyPanelViewport* ppv = dynamic_cast<PropertyPanelViewport*> (pcc->getEditorComponent()))
-                if (ppv->viewport.getViewedComponent()->getComponentID() == getUniqueName())
+            if (auto* content = dynamic_cast<Viewport*> (pcc->getEditorComponent()))
+                if (content->getViewedComponent()->getComponentID() == getUniqueName())
                     pcc->hideEditor();
         }
     }
@@ -195,155 +254,15 @@ public:
 
     static void updateSize (Component& comp, PropertyGroupComponent& group)
     {
-        const int width = jmax (550, comp.getParentWidth() - 20);
+        const auto width = jmax (550, comp.getParentWidth() - 12);
 
-        int y = 0;
+        auto y = 0;
         y += group.updateSize (12, y, width - 12);
+
+        y = jmax (comp.getParentHeight(), y);
 
         comp.setSize (width, y);
     }
 
 private:
-    //==============================================================================
-    struct PropertyPanelViewport  : public Component
-    {
-        PropertyPanelViewport (Component* content)
-        {
-            addAndMakeVisible (viewport);
-            addAndMakeVisible (rolloverHelp);
-            viewport.setViewedComponent (content, true);
-        }
-
-        void paint (Graphics& g) override
-        {
-            ProjucerLookAndFeel::fillWithBackgroundTexture (*this, g);
-        }
-
-        void resized() override
-        {
-            Rectangle<int> r (getLocalBounds());
-            rolloverHelp.setBounds (r.removeFromBottom (70).reduced (10, 0));
-            viewport.setBounds (r);
-        }
-
-        Viewport viewport;
-        RolloverHelpComp rolloverHelp;
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertyPanelViewport)
-    };
-};
-
-//==============================================================================
-class RootItem   : public ConfigTreeItemBase
-{
-public:
-    RootItem (Project& p)
-        : project (p), exportersTree (p.getExporters())
-    {
-        exportersTree.addListener (this);
-    }
-
-    bool isRoot() const override              { return true; }
-    bool isProjectSettings() const override   { return true; }
-    String getRenamingName() const override   { return getDisplayName(); }
-    String getDisplayName() const override    { return project.getTitle(); }
-    void setName (const String&) override     {}
-    bool isMissing() override                 { return false; }
-    Icon getIcon() const override             { return project.getMainGroup().getIcon().withContrastingColourTo (getBackgroundColour()); }
-    void showDocument() override              { showSettingsPage (new SettingsComp (project)); }
-    bool canBeSelected() const override       { return true; }
-    bool mightContainSubItems() override      { return project.getNumExporters() > 0; }
-    String getUniqueName() const override     { return "config_root"; }
-
-    void addSubItems() override
-    {
-        addSubItem (new EnabledModulesItem (project));
-        ProjucerApplication::getApp().addLiveBuildConfigItem (project, *this);
-
-        int i = 0;
-        for (Project::ExporterIterator exporter (project); exporter.next(); ++i)
-            addSubItem (new ExporterItem (project, exporter.exporter.release(), i));
-    }
-
-    void showPopupMenu() override
-    {
-        if (ProjectContentComponent* pcc = getProjectContentComponent())
-            pcc->showNewExporterMenu();
-    }
-
-    bool isInterestedInDragSource (const DragAndDropTarget::SourceDetails& dragSourceDetails) override
-    {
-        return dragSourceDetails.description.toString().startsWith (getUniqueName());
-    }
-
-    void itemDropped (const DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex) override
-    {
-        int oldIndex = dragSourceDetails.description.toString().getTrailingIntValue();
-        exportersTree.moveChild (oldIndex, jmax (0, insertIndex - 1), project.getUndoManagerFor (exportersTree));
-    }
-
-    //==============================================================================
-    void valueTreeChildAdded (ValueTree& parentTree, ValueTree&) override         { refreshIfNeeded (parentTree); }
-    void valueTreeChildRemoved (ValueTree& parentTree, ValueTree&, int) override  { refreshIfNeeded (parentTree); }
-    void valueTreeChildOrderChanged (ValueTree& parentTree, int, int) override    { refreshIfNeeded (parentTree); }
-
-    void refreshIfNeeded (ValueTree& changedTree)
-    {
-        if (changedTree == exportersTree)
-            refreshSubItems();
-    }
-
-private:
-    Project& project;
-    ValueTree exportersTree;
-
-    //==============================================================================
-    class SettingsComp  : public Component,
-                          private ChangeListener
-    {
-    public:
-        SettingsComp (Project& p)  : project (p)
-        {
-            addAndMakeVisible (group);
-
-            updatePropertyList();
-            project.addChangeListener (this);
-        }
-
-        ~SettingsComp()
-        {
-            project.removeChangeListener (this);
-        }
-
-        void parentSizeChanged() override
-        {
-            updateSize (*this, group);
-        }
-
-        void updatePropertyList()
-        {
-            PropertyListBuilder props;
-            project.createPropertyEditors (props);
-            group.setProperties (props);
-            group.setName ("Project Settings");
-
-            lastProjectType = project.getProjectTypeValue().getValue();
-            parentSizeChanged();
-        }
-
-        void changeListenerCallback (ChangeBroadcaster*) override
-        {
-            if (lastProjectType != project.getProjectTypeValue().getValue())
-                updatePropertyList();
-        }
-
-    private:
-        Project& project;
-        var lastProjectType;
-        PropertyGroupComponent group;
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SettingsComp)
-    };
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RootItem)
 };

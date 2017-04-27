@@ -27,35 +27,6 @@
 #include "jucer_AppearanceSettings.h"
 #include "jucer_GlobalPreferences.h"
 
-namespace AppearanceColours
-{
-    struct ColourInfo
-    {
-        const char* name;
-        int colourID;
-        bool mustBeOpaque;
-        bool applyToEditorOnly;
-    };
-
-    static const ColourInfo colours[] =
-    {
-        { "Main Window Bkgd",   mainBackgroundColourId, true, false },
-        { "Treeview Highlight", TreeView::selectedItemBackgroundColourId, false, false },
-
-        { "Code Background",    CodeEditorComponent::backgroundColourId, true, false },
-        { "Line Number Bkgd",   CodeEditorComponent::lineNumberBackgroundId, false, false },
-        { "Line Numbers",       CodeEditorComponent::lineNumberTextId, false, false },
-        { "Plain Text",         CodeEditorComponent::defaultTextColourId, false, false },
-        { "Selected Text Bkgd", CodeEditorComponent::highlightColourId, false, false },
-        { "Caret",              CaretComponent::caretColourId, false, true }
-    };
-
-    enum
-    {
-        numColours = sizeof (AppearanceColours::colours) / sizeof (AppearanceColours::colours[0])
-    };
-}
-
 //==============================================================================
 AppearanceSettings::AppearanceSettings (bool updateAppWhenChanged)
     : settings ("COLOUR_SCHEME")
@@ -63,9 +34,6 @@ AppearanceSettings::AppearanceSettings (bool updateAppWhenChanged)
     if (! ProjucerApplication::getApp().isRunningCommandLine)
     {
         ProjucerLookAndFeel lf;
-
-        for (int i = 0; i < AppearanceColours::numColours; ++i)
-            getColourValue (AppearanceColours::colours[i].name) = lf.findColour (AppearanceColours::colours[i].colourID).toString();
 
         CodeDocument doc;
         CPlusPlusCodeTokeniser tokeniser;
@@ -195,26 +163,7 @@ StringArray AppearanceSettings::getColourNames() const
 
 void AppearanceSettings::updateColourScheme()
 {
-    applyToLookAndFeel (LookAndFeel::getDefaultLookAndFeel());
     ProjucerApplication::getApp().mainWindowList.sendLookAndFeelChange();
-}
-
-void AppearanceSettings::applyToLookAndFeel (LookAndFeel& lf) const
-{
-    for (int i = 0; i < AppearanceColours::numColours; ++i)
-    {
-        Colour col;
-        if (getColour (AppearanceColours::colours[i].name, col))
-        {
-            if (AppearanceColours::colours[i].mustBeOpaque)
-                col = Colours::white.overlaidWith (col);
-
-            if (! AppearanceColours::colours[i].applyToEditorOnly)
-                lf.setColour (AppearanceColours::colours[i].colourID, col);
-        }
-    }
-
-    lf.setColour (ScrollBar::thumbColourId, lf.findColour (mainBackgroundColourId).contrasting().withAlpha (0.13f));
 }
 
 void AppearanceSettings::applyToCodeEditor (CodeEditorComponent& editor) const
@@ -229,16 +178,6 @@ void AppearanceSettings::applyToCodeEditor (CodeEditorComponent& editor) const
 
     editor.setColourScheme (cs);
     editor.setFont (getCodeFont());
-
-    for (int i = 0; i < AppearanceColours::numColours; ++i)
-    {
-        if (AppearanceColours::colours[i].applyToEditorOnly)
-        {
-            Colour col;
-            if (getColour (AppearanceColours::colours[i].name, col))
-                editor.setColour (AppearanceColours::colours[i].colourID, col);
-        }
-    }
 
     editor.setColour (ScrollBar::thumbColourId, editor.findColour (CodeEditorComponent::backgroundColourId)
                                                       .contrasting()

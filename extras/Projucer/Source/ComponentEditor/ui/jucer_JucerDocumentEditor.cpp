@@ -71,7 +71,7 @@ public:
         if (rowIsSelected)
             g.fillAll (findColour (TextEditor::highlightColourId));
 
-        g.setColour (Colours::black);
+        g.setColour (findColour (defaultTextColourId));
         g.setFont (height * 0.6f);
         g.drawText (returnValues [row] + " " + baseClasses [row] + "::" + methods [row],
                     30, 0, width - 32, height,
@@ -163,14 +163,19 @@ public:
         document.removeChangeListener (this);
     }
 
-    void resized()
+    void resized() override
     {
         int pw = jmin (getWidth() / 2 - 20, 350);
         panel1.setBounds (10, 6, pw, getHeight() - 12);
         panel2.setBounds (panel1.getRight() + 20, panel1.getY(), pw, panel1.getHeight());
     }
 
-    void changeListenerCallback (ChangeBroadcaster*)
+    void paint (Graphics& g) override
+    {
+        g.fillAll (findColour (secondaryBackgroundColourId));
+    }
+
+    void changeListenerCallback (ChangeBroadcaster*) override
     {
         panel1.refreshAll();
         panel2.refreshAll();
@@ -418,12 +423,12 @@ void JucerDocumentEditor::updateTabs()
 //==============================================================================
 void JucerDocumentEditor::paint (Graphics& g)
 {
-    ProjucerLookAndFeel::fillWithBackgroundTexture (*this, g);
+    g.fillAll (findColour (backgroundColourId));
 }
 
 void JucerDocumentEditor::resized()
 {
-    tabbedComponent.setBounds (getLocalBounds().reduced (4, 2));
+    tabbedComponent.setBounds (getLocalBounds().withTrimmedLeft (12));
 }
 
 void JucerDocumentEditor::changeListenerCallback (ChangeBroadcaster*)

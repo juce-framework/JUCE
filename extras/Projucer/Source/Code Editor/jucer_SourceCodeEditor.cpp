@@ -209,11 +209,19 @@ void SourceCodeEditor::resized()
     editor->setBounds (getLocalBounds());
 }
 
-void SourceCodeEditor::updateColourScheme()     { getAppSettings().appearance.applyToCodeEditor (*editor); }
+void SourceCodeEditor::updateColourScheme()
+{
+    getAppSettings().appearance.applyToCodeEditor (*editor);
+}
 
 void SourceCodeEditor::checkSaveState()
 {
     setEditedState (getDocument()->needsSaving());
+}
+
+void SourceCodeEditor::lookAndFeelChanged()
+{
+    updateColourScheme();
 }
 
 void SourceCodeEditor::valueTreePropertyChanged (ValueTree&, const Identifier&)   { updateColourScheme(); }
@@ -231,6 +239,7 @@ GenericCodeEditorComponent::GenericCodeEditorComponent (const File& f, CodeDocum
                                                         CodeTokeniser* tokeniser)
    : CodeEditorComponent (codeDocument, tokeniser), file (f)
 {
+    setScrollbarThickness (6);
     setCommandManager (&ProjucerApplication::getCommandManager());
 }
 

@@ -147,6 +147,7 @@
     <ClCompile Include="..\..\Source\Application\jucer_Main.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_MainWindow.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_OpenDocumentManager.cpp"/>
+    <ClCompile Include="..\..\Source\Licenses\jucer_LicenseController.cpp"/>
     <ClCompile Include="..\..\Source\LiveBuildEngine\projucer_CompileEngineClient.cpp"/>
     <ClCompile Include="..\..\Source\LiveBuildEngine\projucer_CompileEngineServer.cpp"/>
     <ClCompile Include="..\..\Source\Code Editor\jucer_SourceCodeEditor.cpp"/>

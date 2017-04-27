@@ -154,6 +154,7 @@ public:
 
 private:
     void resized() override;
+    void lookAndFeelChanged() override;
 
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override;
     void valueTreeChildAdded (ValueTree&, ValueTree&) override;

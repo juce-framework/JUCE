@@ -255,7 +255,7 @@ public:
 
         UndoManager* getUndoManager() const              { return project.getUndoManagerFor (state); }
 
-        Icon getIcon() const;
+        Icon getIcon (bool isOpen = false) const;
         bool isIconCrossedOut() const;
 
         Project& project;

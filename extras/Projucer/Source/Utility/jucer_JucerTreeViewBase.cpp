@@ -26,7 +26,6 @@
 #include "jucer_JucerTreeViewBase.h"
 #include "../Project/jucer_ProjectContentComponent.h"
 
-
 //==============================================================================
 void TreePanelBase::setRoot (JucerTreeViewBase* root)
 {
@@ -66,6 +65,7 @@ void TreePanelBase::saveOpenness()
 JucerTreeViewBase::JucerTreeViewBase()  : textX (0)
 {
     setLinesDrawnForSubItems (false);
+    setDrawsInLeftMargin (true);
 }
 
 JucerTreeViewBase::~JucerTreeViewBase()
@@ -87,36 +87,43 @@ Font JucerTreeViewBase::getFont() const
 
 void JucerTreeViewBase::paintOpenCloseButton (Graphics& g, const Rectangle<float>& area, Colour /*backgroundColour*/, bool isMouseOver)
 {
-    TreeViewItem::paintOpenCloseButton (g, area, getOwnerView()->findColour (mainBackgroundColourId), isMouseOver);
+    g.setColour (getOwnerView()->findColour (isSelected() ? defaultHighlightedTextColourId : treeIconColourId));
+    TreeViewItem::paintOpenCloseButton (g, area, getOwnerView()->findColour (defaultIconColourId), isMouseOver);
 }
 
-Colour JucerTreeViewBase::getBackgroundColour() const
+void JucerTreeViewBase::paintIcon (Graphics &g, Rectangle<float> area)
 {
-    Colour background (getOwnerView()->findColour (mainBackgroundColourId));
+    g.setColour (getContentColour (true));
+    getIcon().draw (g, area, isIconCrossedOut());
+}
+
+void JucerTreeViewBase::paintItem (Graphics& g, int width, int height)
+{
+    ignoreUnused (width, height);
+
+    auto bounds = g.getClipBounds().withY (0).withHeight (height).toFloat();
+
+    g.setColour (getOwnerView()->findColour (treeIconColourId).withMultipliedAlpha (0.4f));
+    g.fillRect (bounds.removeFromBottom (0.5f).reduced (5, 0));
+}
+
+Colour JucerTreeViewBase::getContentColour (bool isIcon) const
+{
+    if (isMissing())
+        return Colours::red;
 
     if (isSelected())
-        background = background.overlaidWith (getOwnerView()->findColour (TreeView::selectedItemBackgroundColourId));
+        return getOwnerView()->findColour (defaultHighlightedTextColourId);
 
-    return background;
-}
-
-Colour JucerTreeViewBase::getContrastingColour (float contrast) const
-{
-    return getBackgroundColour().contrasting (contrast);
-}
-
-Colour JucerTreeViewBase::getContrastingColour (Colour target, float minContrast) const
-{
-    return getBackgroundColour().contrasting (target, minContrast);
+    return getOwnerView()->findColour (isIcon ? treeIconColourId : defaultTextColourId);
 }
 
 void JucerTreeViewBase::paintContent (Graphics& g, const Rectangle<int>& area)
 {
     g.setFont (getFont());
-    g.setColour (isMissing() ? getContrastingColour (Colours::red, 0.8f)
-                             : getContrastingColour (0.8f));
+    g.setColour (getContentColour (false));
 
-    g.drawFittedText (getDisplayName(), area, Justification::centredLeft, 1, 0.8f);
+    g.drawFittedText (getDisplayName(), area, Justification::centredLeft, 1, 1.0f);
 }
 
 Component* JucerTreeViewBase::createItemComponent()
@@ -195,6 +202,7 @@ void JucerTreeViewBase::deleteItem()    {}
 void JucerTreeViewBase::deleteAllSelectedItems() {}
 void JucerTreeViewBase::showDocument()  {}
 void JucerTreeViewBase::showPopupMenu() {}
+void JucerTreeViewBase::showPlusMenu()  {}
 void JucerTreeViewBase::showMultiSelectionPopupMenu() {}
 
 static void treeViewMenuItemChosen (int resultCode, WeakReference<JucerTreeViewBase> item)

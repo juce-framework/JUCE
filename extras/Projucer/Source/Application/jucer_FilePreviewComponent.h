@@ -41,7 +41,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        ProjucerLookAndFeel::fillWithBackgroundTexture (*this, g);
+        g.fillAll (findColour (backgroundColourId));
 
         if (drawable != nullptr)
         {
@@ -70,7 +70,7 @@ public:
         }
 
         g.setFont (Font (14.0f, Font::bold));
-        g.setColour (findColour (mainBackgroundColourId).contrasting());
+        g.setColour (findColour (defaultTextColourId));
         g.drawMultiLineText (facts.joinIntoString ("\n"), 10, 15, getWidth() - 16);
     }
 

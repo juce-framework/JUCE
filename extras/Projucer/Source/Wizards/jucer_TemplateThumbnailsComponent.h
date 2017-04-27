@@ -55,7 +55,7 @@ public:
     void paintButton (Graphics& g, bool isMouseOverButton, bool /*isButtonDown*/) override
     {
         const Rectangle<float> r (getLocalBounds().toFloat());
-        const Colour buttonColour (0xfff29300);
+        const Colour buttonColour (0xffA35E93);
 
         if (isMouseOverButton)
         {
@@ -98,7 +98,7 @@ public:
             textTarget = textTarget.removeFromBottom (textTarget.getHeight() * 0.3f);
         }
 
-        g.setColour (findColour (mainBackgroundColourId).contrasting());
+        g.setColour (findColour (defaultTextColourId));
         g.drawText (name, textTarget, Justification::centred, true);
     }
 
@@ -168,18 +168,16 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.setColour (Colours::black.withAlpha (0.2f));
+        g.setColour (findColour (contentHeaderBackgroundColourId));
         g.fillRect (getLocalBounds().removeFromTop (60));
 
         g.setColour (Colours::white);
         g.setFont (20.0f);
         g.drawText ("Create New Project", 0, 0, getWidth(), 60, Justification::centred, true);
 
-        // draw the descriptions of each template if hovered;
-        // (repaint is called by the button listener on change state)
-        Rectangle<int> descriptionBox (getLocalBounds().reduced (30).removeFromBottom (50));
+        auto descriptionBox = (getLocalBounds().reduced (30).removeFromBottom (50));
 
-        g.setColour (Colours::white.withAlpha (0.4f));
+        g.setColour (findColour (defaultTextColourId));
         g.setFont (15.0f);
 
         for (int i = 0; i < optionButtons.size(); ++i)
@@ -189,15 +187,15 @@ public:
 
     void resized() override
     {
-        Rectangle<int> allOpts = getLocalBounds().reduced (40, 60);
+        auto allOpts = getLocalBounds().reduced (40, 60);
         allOpts.removeFromBottom (allOpts.getHeight() / 4);
 
-        const int numHorizIcons = 4;
-        const int optStep = allOpts.getWidth() / numHorizIcons;
+        const auto numHorizIcons = 4;
+        const auto optStep = allOpts.getWidth() / numHorizIcons;
 
         for (int i = 0; i < optionButtons.size(); ++i)
         {
-            const int yShift = i < numHorizIcons ? 0 : 1;
+            const auto yShift = i < numHorizIcons ? 0 : 1;
 
             optionButtons.getUnchecked(i)->setBounds (Rectangle<int> (allOpts.getX() + (i % numHorizIcons) * optStep,
                                                                       allOpts.getY() + yShift * allOpts.getHeight() / 2,
@@ -205,7 +203,7 @@ public:
                                                         .reduced (10, 10));
         }
 
-        Rectangle<int> openButtonBounds = getLocalBounds();
+        auto openButtonBounds = getLocalBounds();
         openButtonBounds.removeFromBottom (proportionOfHeight (0.12f));
         openButtonBounds = openButtonBounds.removeFromBottom (120);
         openButtonBounds.reduce (50, 40);

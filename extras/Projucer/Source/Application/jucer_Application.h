@@ -29,12 +29,14 @@
 #include "jucer_AutoUpdater.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
 #include "../Utility/jucer_ProjucerLookAndFeel.h"
+#include "../Licenses/jucer_LicenseController.h"
+
 struct ChildProcessCache;
 
 //==============================================================================
 class ProjucerApplication   : public JUCEApplication,
-                              private Timer,
-                              private AsyncUpdater
+                              private AsyncUpdater,
+                              private LicenseController::StateChangedCallback
 {
 public:
     ProjucerApplication();
@@ -94,13 +96,16 @@ public:
     void showUTF8ToolWindow();
     void showSVGPathDataToolWindow();
 
-    void addLiveBuildConfigItem (Project&, TreeViewItem&);
+    void showAboutWindow();
 
-    void showLoginForm();
-    void hideLoginForm();
+    void showLoginWindow();
 
     void updateAllBuildTabs();
     LatestVersionChecker* createVersionChecker() const;
+
+    //==============================================================================
+    void licenseStateChanged (const LicenseState&) override;
+    void doLogout();
 
     //==============================================================================
     ProjucerLookAndFeel lookAndFeel;
@@ -115,17 +120,18 @@ public:
     OpenDocumentManager openDocumentManager;
     ScopedPointer<ApplicationCommandManager> commandManager;
 
-    ScopedPointer<Component> appearanceEditorWindow, globalPreferencesWindow, utf8Window, svgPathWindow;
+    ScopedPointer<Component> appearanceEditorWindow, globalPreferencesWindow, utf8Window, svgPathWindow, aboutWindow;
     ScopedPointer<FileLogger> logger;
 
     bool isRunningCommandLine;
     ScopedPointer<ChildProcessCache> childProcessCache;
+    ScopedPointer<LicenseController> licenseController;
 
 private:
     void* server = nullptr;
 
-    Component* loginForm = nullptr;
     ScopedPointer<LatestVersionChecker> versionChecker;
+    TooltipWindow tooltipWindow;
 
     void loginOrLogout();
 
@@ -134,8 +140,6 @@ private:
     String getEULAChecksumProperty() const;
     void setCurrentEULAAccepted (bool hasBeenAccepted) const;
 
-    void showLoginFormAsyncIfNotTriedRecently();
-    void timerCallback() override;
     void handleAsyncUpdate() override;
     void initCommandManager();
 };

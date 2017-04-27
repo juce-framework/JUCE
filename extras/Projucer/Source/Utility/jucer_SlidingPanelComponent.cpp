@@ -33,8 +33,8 @@ struct SlidingPanelComponent::DotButton  : public Button
 
     void paintButton (Graphics& g, bool /*isMouseOverButton*/, bool /*isButtonDown*/) override
     {
-        g.setColour (Colours::white);
-        const Rectangle<float> r (getLocalBounds().reduced (getWidth() / 4).toFloat());
+        g.setColour (findColour (defaultButtonBackgroundColourId));
+        const auto r = getLocalBounds().reduced (getWidth() / 4).toFloat();
 
         if (index == owner.getCurrentTabIndex())
             g.fillEllipse (r);

@@ -65,6 +65,8 @@ private:
 
             addAndMakeVisible (button);
             button.addListener (this);
+
+            lookAndFeelChanged();
         }
 
         void paintOverChildren (Graphics& g) override
@@ -80,7 +82,7 @@ private:
         {
             juce::Rectangle<int> r (getLocalBounds());
 
-            button.setBounds (r.removeFromRight (24));
+            button.setBounds (r.removeFromRight (30));
             textbox.setBounds (r);
         }
 
@@ -123,6 +125,17 @@ private:
         {
             value = (root == File()) ? f.getFullPathName()
                                      : f.getRelativePathFrom (root);
+        }
+
+        void lookAndFeelChanged() override
+        {
+            textbox.setColour (TextEditor::backgroundColourId, findColour (widgetBackgroundColourId));
+            textbox.setColour (TextEditor::outlineColourId, Colours::transparentBlack);
+            textbox.setColour (TextEditor::textColourId, findColour (widgetTextColourId));
+            textbox.applyFontToAllText (textbox.getFont());
+
+            button.setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
+            button.setColour (TextButton::textColourOffId, Colours::white);
         }
 
         Value value;

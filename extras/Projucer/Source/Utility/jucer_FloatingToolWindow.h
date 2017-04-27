@@ -32,15 +32,16 @@ struct FloatingToolWindow  : public DialogWindow
                         const String& windowPosPropertyName,
                         Component* content,
                         ScopedPointer<Component>& ownerPointer,
+                        bool shouldBeResizable,
                         int defaultW, int defaultH,
                         int minW, int minH,
                         int maxW, int maxH)
-        : DialogWindow (title, Colours::darkgrey, true, true),
+        : DialogWindow (title, content->findColour (secondaryBackgroundColourId), true, true),
           windowPosProperty (windowPosPropertyName),
           owner (ownerPointer)
     {
         setUsingNativeTitleBar (true);
-        setResizable (true, true);
+        setResizable (shouldBeResizable, shouldBeResizable);
         setResizeLimits (minW, minH, maxW, maxH);
         setContentOwned (content, false);
 
@@ -69,6 +70,11 @@ struct FloatingToolWindow  : public DialogWindow
     {
         closeButtonPressed();
         return true;
+    }
+
+    void paint (Graphics& g) override
+    {
+        g.fillAll (findColour (secondaryBackgroundColourId));
     }
 
 private:

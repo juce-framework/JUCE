@@ -112,12 +112,6 @@ public:
     {
         PopupMenu m;
 
-        if (GroupItem* parentGroup = dynamic_cast<GroupItem*> (getParentProjectItem()))
-        {
-            parentGroup->addCreateFileMenuItems (m);
-            m.addSeparator();
-        }
-
         m.addItem (1, "Open in external editor");
         m.addItem (2,
                      #if JUCE_MAC
@@ -131,6 +125,12 @@ public:
         m.addItem (3, "Delete");
 
         launchPopupMenu (m);
+    }
+
+    void showPlusMenu() override
+    {
+        if (auto* group = dynamic_cast<GroupItem*> (getParentItem()))
+            group->showPlusMenu();
     }
 
     void handlePopupMenuResult (int resultCode) override

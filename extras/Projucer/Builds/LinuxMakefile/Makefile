@@ -75,6 +75,7 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/jucer_Main_f8488f5b.o \
   $(JUCE_OBJDIR)/jucer_MainWindow_1e163aeb.o \
   $(JUCE_OBJDIR)/jucer_OpenDocumentManager_4c72d210.o \
+  $(JUCE_OBJDIR)/jucer_LicenseController_9abff0cf.o \
   $(JUCE_OBJDIR)/projucer_CompileEngineClient_542e6b2d.o \
   $(JUCE_OBJDIR)/projucer_CompileEngineServer_a5a32aa5.o \
   $(JUCE_OBJDIR)/jucer_SourceCodeEditor_461f5487.o \
@@ -175,6 +176,11 @@ $(JUCE_OBJDIR)/jucer_MainWindow_1e163aeb.o: ../../Source/Application/jucer_MainW
 $(JUCE_OBJDIR)/jucer_OpenDocumentManager_4c72d210.o: ../../Source/Application/jucer_OpenDocumentManager.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling jucer_OpenDocumentManager.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/jucer_LicenseController_9abff0cf.o: ../../Source/Licenses/jucer_LicenseController.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling jucer_LicenseController.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/projucer_CompileEngineClient_542e6b2d.o: ../../Source/LiveBuildEngine/projucer_CompileEngineClient.cpp

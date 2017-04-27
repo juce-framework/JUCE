@@ -36,18 +36,19 @@ public:
     ResourceEditorPanel (JucerDocument& document);
     ~ResourceEditorPanel();
 
-    void resized();
-    void visibilityChanged();
-    void changeListenerCallback (ChangeBroadcaster*);
-    void buttonClicked (Button*);
+    void resized() override;
+    void paint (Graphics& g) override;
+    void visibilityChanged() override;
+    void changeListenerCallback (ChangeBroadcaster*) override;
+    void buttonClicked (Button*) override;
 
-    int getNumRows();
-    void paintRowBackground (Graphics& g, int rowNumber, int width, int height, bool rowIsSelected);
-    void paintCell (Graphics& g, int rowNumber, int columnId, int width, int height, bool rowIsSelected);
-    Component* refreshComponentForCell (int rowNumber, int columnId, bool isRowSelected, Component* existingComponentToUpdate);
-    int getColumnAutoSizeWidth (int columnId);
-    void sortOrderChanged (int newSortColumnId, bool isForwards);
-    void selectedRowsChanged (int lastRowSelected);
+    int getNumRows() override;
+    void paintRowBackground (Graphics& g, int rowNumber, int width, int height, bool rowIsSelected) override;
+    void paintCell (Graphics& g, int rowNumber, int columnId, int width, int height, bool rowIsSelected) override;
+    Component* refreshComponentForCell (int rowNumber, int columnId, bool isRowSelected, Component* existingComponentToUpdate) override;
+    int getColumnAutoSizeWidth (int columnId) override;
+    void sortOrderChanged (int newSortColumnId, bool isForwards) override;
+    void selectedRowsChanged (int lastRowSelected) override;
 
 private:
     JucerDocument& document;

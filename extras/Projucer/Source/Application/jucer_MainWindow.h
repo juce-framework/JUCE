@@ -62,8 +62,6 @@ public:
 
     void activeWindowStatusChanged() override;
 
-    void updateTitle (const String& documentName);
-
     ProjectContentComponent* getProjectContentComponent() const;
 
     //==============================================================================
@@ -98,15 +96,13 @@ public:
     bool openFile (const File& file);
 
     MainWindow* createNewMainWindow();
-    MainWindow* getOrCreateFrontmostWindow();
+    MainWindow* getFrontmostWindow (bool createIfNotFound = true);
     MainWindow* getOrCreateEmptyWindow();
 
     Project* getFrontmostProject();
 
     void reopenLastProjects();
     void saveCurrentlyOpenProjectList();
-
-    void updateAllWindowTitles();
 
     void avoidSuperimposedWindows (MainWindow*);
 

@@ -146,8 +146,6 @@ EditingPanelBase::EditingPanelBase (JucerDocument& doc, Component* props, Compon
     addAndMakeVisible (propsPanel);
 
     viewport->setViewedComponent (magnifier = new MagnifierComponent (editor));
-
-    magnifier->setLookAndFeel (&lookAndFeel);
 }
 
 EditingPanelBase::~EditingPanelBase()
@@ -171,6 +169,11 @@ void EditingPanelBase::resized()
     else
         editor->setSize (viewport->getWidth(),
                          viewport->getHeight());
+}
+
+void EditingPanelBase::paint (Graphics& g)
+{
+    g.fillAll (findColour (secondaryBackgroundColourId));
 }
 
 void EditingPanelBase::visibilityChanged()

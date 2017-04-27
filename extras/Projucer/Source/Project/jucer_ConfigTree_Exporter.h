@@ -27,26 +27,41 @@ class ExporterItem   : public ConfigTreeItemBase
 public:
     ExporterItem (Project& p, ProjectExporter* e, int index)
         : project (p), exporter (e), configListTree (exporter->getConfigurations()),
-          exporterIndex (index), icon (createIcon (exporter->getName()))
+          exporterIndex (index)
     {
         configListTree.addListener (this);
     }
 
-    int getItemHeight() const override        { return 22; }
+    int getItemHeight() const override        { return 25; }
     bool canBeSelected() const override       { return true; }
     bool mightContainSubItems() override      { return exporter->getNumConfigurations() > 0; }
     String getUniqueName() const override     { return "exporter_" + String (exporterIndex); }
     String getRenamingName() const override   { return getDisplayName(); }
     String getDisplayName() const override    { return exporter->getName(); }
     void setName (const String&) override     {}
-    bool isMissing() override                 { return false; }
-    Icon getIcon() const override             { return Icon(); }
-    void showDocument() override              { showSettingsPage (new SettingsComp (exporter)); }
+    bool isMissing() const override           { return false; }
 
-    void paintIcon (Graphics& g, Rectangle<int> area) override
+    static Icon getIconForExporter (ProjectExporter* e)
     {
-        g.setColour (Colours::black);
-        g.drawImage (icon, area.toFloat(), RectanglePlacement::centred);
+        if (e != nullptr)
+        {
+            if         (e->isXcode())        return Icon (getIcons().xcode, Colours::transparentBlack);
+            else if    (e->isVisualStudio()) return Icon (getIcons().visualStudio, Colours::transparentBlack);
+            else if    (e->isAndroid())      return Icon (getIcons().android, Colours::transparentBlack);
+            else if    (e->isLinux())        return Icon (getIcons().linux, Colours::transparentBlack);
+        }
+
+        return Icon();
+    }
+
+    Icon getIcon() const override
+    {
+        return getIconForExporter (exporter).withColour (getContentColour (true));
+    }
+
+    void showDocument() override
+    {
+        showSettingsPage (new SettingsComp (exporter));
     }
 
     void deleteItem() override
@@ -72,6 +87,14 @@ public:
         menu.addItem (1, "Add a new configuration", exporter->supportsUserDefinedConfigurations());
         menu.addSeparator();
         menu.addItem (2, "Delete this exporter");
+
+        launchPopupMenu (menu);
+    }
+
+    void showPlusMenu() override
+    {
+        PopupMenu menu;
+        menu.addItem (1, "Add a new configuration", exporter->supportsUserDefinedConfigurations());
 
         launchPopupMenu (menu);
     }
@@ -128,39 +151,25 @@ private:
     ScopedPointer<ProjectExporter> exporter;
     ValueTree configListTree;
     int exporterIndex;
-    Image icon;
-
-    static Image createIcon (const String& exporterName)
-    {
-        Array<ProjectExporter::ExporterTypeInfo> types (ProjectExporter::getExporterTypes());
-
-        for (int i = 0; i < types.size(); ++i)
-        {
-            const ProjectExporter::ExporterTypeInfo& type = types.getReference (i);
-
-            if (type.name == exporterName)
-                return type.getIcon();
-        }
-
-        return Image();
-    }
 
     //==============================================================================
     class SettingsComp  : public Component
     {
     public:
         SettingsComp (ProjectExporter* exp)
+            : group (exp->getName(), ExporterItem::getIconForExporter (exp))
         {
             addAndMakeVisible (group);
 
             PropertyListBuilder props;
             exp->createPropertyEditors (props);
             group.setProperties (props);
-            group.setName ("Export target: " + exp->getName());
             parentSizeChanged();
         }
 
         void parentSizeChanged() override  { updateSize (*this, group); }
+
+        void resized() override { group.setBounds (getLocalBounds().withTrimmedLeft (12)); }
 
     private:
         PropertyGroupComponent group;
@@ -183,17 +192,20 @@ public:
         configTree.addListener (this);
     }
 
-    bool isMissing() override                       { return false; }
+    bool isMissing() const override                 { return false; }
     bool canBeSelected() const override             { return true; }
     bool mightContainSubItems() override            { return false; }
     String getUniqueName() const override           { return "config_" + config->getName(); }
     String getRenamingName() const override         { return getDisplayName(); }
     String getDisplayName() const override          { return config->getName(); }
     void setName (const String&) override           {}
-    Icon getIcon() const override                   { return Icon (getIcons().config, getContrastingColour (Colours::green, 0.5f)); }
-
-    void showDocument() override                    { showSettingsPage (new SettingsComp (config)); }
+    Icon getIcon() const override                   { return Icon (getIcons().config, getContentColour (true)); }
     void itemOpennessChanged (bool) override        {}
+
+    void showDocument() override
+    {
+        showSettingsPage (new SettingsComp (config));
+    }
 
     void deleteItem() override
     {
@@ -246,17 +258,19 @@ private:
     {
     public:
         SettingsComp (ProjectExporter::BuildConfiguration* conf)
+            : group (conf->exporter.getName() + " - " + conf->getName(), Icon (getIcons().config, Colours::transparentBlack))
         {
             addAndMakeVisible (group);
 
             PropertyListBuilder props;
             conf->createPropertyEditors (props);
             group.setProperties (props);
-            group.setName (conf->exporter.getName() + " / " + conf->getName());
             parentSizeChanged();
         }
 
         void parentSizeChanged() override  { updateSize (*this, group); }
+
+        void resized() override { group.setBounds (getLocalBounds().withTrimmedLeft (12)); }
 
     private:
         PropertyGroupComponent group;

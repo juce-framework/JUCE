@@ -39,7 +39,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        ProjucerLookAndFeel::fillWithBackgroundTexture (*this, g);
+        g.fillAll (findColour (backgroundColourId));
     }
 
     void resized() override

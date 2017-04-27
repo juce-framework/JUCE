@@ -262,7 +262,6 @@ bool OpenDocumentManager::saveAll()
         if (! documents.getUnchecked (i)->save())
             return false;
 
-        ProjucerApplication::getApp().mainWindowList.updateAllWindowTitles();
         ProjucerApplication::getCommandManager().commandStatusChanged();
     }
 

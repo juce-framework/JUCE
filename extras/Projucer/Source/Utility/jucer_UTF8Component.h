@@ -32,20 +32,15 @@ public:
                 "ready to cut-and-paste into your source-code...")
     {
         desc.setJustificationType (Justification::centred);
-        desc.setColour (Label::textColourId, Colours::white);
         addAndMakeVisible (desc);
-
-        const Colour bkgd (Colours::white.withAlpha (0.6f));
 
         userText.setMultiLine (true, true);
         userText.setReturnKeyStartsNewLine (true);
-        userText.setColour (TextEditor::backgroundColourId, bkgd);
         addAndMakeVisible (userText);
         userText.addListener (this);
 
         resultText.setFont (getAppSettings().appearance.getCodeFont().withHeight (13.0f));
         resultText.setMultiLine (true, true);
-        resultText.setColour (TextEditor::backgroundColourId, bkgd);
         resultText.setReadOnly (true);
         resultText.setSelectAllWhenFocused (true);
         addAndMakeVisible (resultText);
@@ -53,12 +48,12 @@ public:
         userText.setText (getLastText());
     }
 
-    void textEditorTextChanged (TextEditor&)
+    void textEditorTextChanged (TextEditor&) override
     {
         update();
     }
 
-    void textEditorEscapeKeyPressed (TextEditor&)
+    void textEditorEscapeKeyPressed (TextEditor&) override
     {
         getTopLevelComponent()->exitModalState (0);
     }
@@ -69,7 +64,7 @@ public:
         resultText.setText (CodeHelpers::stringLiteral (getLastText(), 100), false);
     }
 
-    void resized()
+    void resized() override
     {
         Rectangle<int> r (getLocalBounds().reduced (8));
         desc.setBounds (r.removeFromTop (44));
@@ -77,6 +72,12 @@ public:
         userText.setBounds (r.removeFromTop (r.getHeight() / 2));
         r.removeFromTop (8);
         resultText.setBounds (r);
+    }
+
+    void lookAndFeelChanged() override
+    {
+        userText.applyFontToAllText (userText.getFont());
+        resultText.applyFontToAllText (resultText.getFont());
     }
 
 private:

@@ -55,6 +55,11 @@ struct Icon
         return Icon (path, background.contrasting (colour, 0.6f));
     }
 
+    Icon withColour (Colour newColour)
+    {
+        return Icon (path, newColour);
+    }
+
     const Path* path;
     Colour colour;
 };
@@ -66,13 +71,20 @@ public:
     Icons();
 
     Path folder, document, imageDoc,
-         config, exporter, juceLogo,
+         config, /*exporter,*/ juceLogo,
          graph, jigsaw, info, warning,
-         bug, play, code, box,
+         bug, /*play,*/ code, box,
          mainJuceLogo;
+
+    Path user, closedFolder, exporter, fileExplorer, file,
+         buildTab, modules, openFolder, play, settings, singleModule,
+         buildNow, continuousBuildStart, continuousBuildStop, edit, plus,
+         android, codeBlocks, linux, xcode, visualStudio;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Icons)
 };
 
-const Icons& getIcons();
+#ifndef BUILDING_JUCE_COMPILEENGINE
+ const Icons& getIcons();
+#endif

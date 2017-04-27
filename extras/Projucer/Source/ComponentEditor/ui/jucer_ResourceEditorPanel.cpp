@@ -91,8 +91,8 @@ ResourceEditorPanel::ResourceEditorPanel (JucerDocument& doc)
     listBox->getHeader().addColumn ("reload", 4, 100, 100, 100, TableHeaderComponent::notResizableOrSortable);
     listBox->getHeader().setStretchToFitActive (true);
 
-    listBox->setColour (ListBox::backgroundColourId, Colours::lightgrey);
-    listBox->setColour (ListBox::outlineColourId, Colours::darkgrey);
+    listBox->setColour (ListBox::backgroundColourId, findColour (secondaryBackgroundColourId));
+    listBox->setColour (ListBox::outlineColourId, Colours::transparentBlack);
     listBox->setOutlineThickness (1);
     listBox->updateContent();
 
@@ -114,7 +114,7 @@ void ResourceEditorPanel::paintRowBackground (Graphics& g, int /*rowNumber*/,
                                               int /*width*/, int /*height*/, bool rowIsSelected)
 {
     if (rowIsSelected)
-        g.fillAll (findColour (TextEditor::highlightColourId));
+        g.fillAll (findColour (defaultHighlightColourId));
 }
 
 void ResourceEditorPanel::paintCell (Graphics& g, int rowNumber, int columnId, int width, int height,
@@ -226,6 +226,11 @@ void ResourceEditorPanel::resized()
 
     delButton.changeWidthToFitText (22);
     delButton.setTopRightPosition (getWidth() - 8, getHeight() - 30);
+}
+
+void ResourceEditorPanel::paint (Graphics& g)
+{
+    g.fillAll (findColour (secondaryBackgroundColourId));
 }
 
 void ResourceEditorPanel::visibilityChanged()

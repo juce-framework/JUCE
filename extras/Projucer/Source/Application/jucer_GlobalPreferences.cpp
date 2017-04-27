@@ -61,7 +61,7 @@ void PathSettingsTab::textPropertyComponentChanged (TextPropertyComponent* textP
     Identifier keyName = getKeyForPropertyComponent (textPropertyComponent);
 
     Colour textColour = getAppSettings().isGlobalPathValid (File::getCurrentWorkingDirectory(), keyName, textPropertyComponent->getText())
-                            ? Colours::black
+                            ? findColour (widgetTextColourId)
                             : Colours::red;
 
     textPropertyComponent->setColour (TextPropertyComponent::textColourId, textColour);
@@ -116,10 +116,10 @@ struct AppearanceEditor
 
         void paint (Graphics& g) override
         {
-            g.fillAll (Colours::darkgrey);
+            g.fillAll (findColour (backgroundColourId));
 
             g.setFont (14.0f);
-            g.setColour (Colours::white);
+            g.setColour (findColour (defaultTextColourId));
             g.drawFittedText ("Scanning for fonts..", getLocalBounds(), Justification::centred, 2);
 
             const int size = 30;
@@ -173,11 +173,6 @@ struct AppearanceEditor
         {
             rebuildProperties();
             addAndMakeVisible (panel);
-
-            loadButton.setColour (TextButton::buttonColourId, Colours::lightgrey.withAlpha (0.5f));
-            saveButton.setColour (TextButton::buttonColourId, Colours::lightgrey.withAlpha (0.5f));
-            loadButton.setColour (TextButton::textColourOffId, Colours::white);
-            saveButton.setColour (TextButton::textColourOffId, Colours::white);
 
             addAndMakeVisible (loadButton);
             addAndMakeVisible (saveButton);
@@ -325,7 +320,7 @@ void AppearanceSettings::showGlobalPreferences (ScopedPointer<Component>& ownerP
         new FloatingToolWindow ("Preferences",
                                 "globalPreferencesEditorPos",
                                 new GlobalPreferencesComponent,
-                                ownerPointer,
+                                ownerPointer, false,
                                 500, 500, 500, 500, 500, 500);
 }
 
@@ -370,5 +365,5 @@ GlobalPreferencesComponent::GlobalPreferencesComponent()
     preferenceTabs.add (new AppearanceSettingsTab);
 
     for (GlobalPreferencesTab** tab = preferenceTabs.begin(); tab != preferenceTabs.end(); ++tab)
-        addTab ((*tab)->getName(), findColour(mainBackgroundColourId, true), (*tab)->getContent(), true);
+        addTab ((*tab)->getName(), findColour (backgroundColourId, true), (*tab)->getContent(), true);
 }

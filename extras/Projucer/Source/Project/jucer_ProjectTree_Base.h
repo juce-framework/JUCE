@@ -53,7 +53,7 @@ public:
             item.getNameValue() = newName;
     }
 
-    bool isMissing() override                           { return isFileMissing; }
+    bool isMissing() const override                     { return isFileMissing; }
     virtual File getFile() const                        { return item.getFile(); }
 
     void deleteItem() override                          { item.removeItemFromProject(); }
@@ -67,7 +67,7 @@ public:
 
         for (int i = 0; i < numSelected; ++i)
         {
-            if (const ProjectTreeItemBase* const p = dynamic_cast<ProjectTreeItemBase*> (tree->getSelectedItem (i)))
+            if (auto* p = dynamic_cast<ProjectTreeItemBase*> (tree->getSelectedItem (i)))
             {
                 itemsToRemove.add (new Project::Item (p->item));
 
@@ -140,7 +140,7 @@ public:
     virtual void browseToAddExistingFiles()
     {
         const File location (item.isGroup() ? item.determineGroupFolder() : getFile());
-        FileChooser fc ("Add Files to Jucer Project", location, String(), false);
+        FileChooser fc ("Add Files to Jucer Project", location, String());
 
         if (fc.browseForMultipleFilesOrDirectories())
         {
@@ -337,7 +337,14 @@ protected:
 
     virtual ProjectTreeItemBase* createSubItem (const Project::Item& node) = 0;
 
-    Icon getIcon() const override           { return item.getIcon().withContrastingColourTo (getBackgroundColour()); }
+    Icon getIcon() const override
+    {
+        auto colour = getOwnerView()->findColour (isSelected() ? defaultHighlightedTextColourId
+                                                               : treeIconColourId);
+
+        return item.getIcon (isOpen()).withColour (colour);
+    }
+
     bool isIconCrossedOut() const override  { return item.isIconCrossedOut(); }
 
     void treeChildrenChanged (const ValueTree& parentTree)

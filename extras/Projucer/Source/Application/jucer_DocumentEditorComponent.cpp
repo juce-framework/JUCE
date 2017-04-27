@@ -55,6 +55,4 @@ bool DocumentEditorComponent::documentAboutToClose (OpenDocumentManager::Documen
 
 void DocumentEditorComponent::setEditedState (bool /*hasBeenEdited*/)
 {
-    if (ProjectContentComponent* pcc = findParentComponentOfClass<ProjectContentComponent>())
-        pcc->updateMainWindowTitle();
 }

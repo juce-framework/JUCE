@@ -58,7 +58,7 @@ public:
 
         if (rowNumber >= 0 && rowNumber < activities.size())
         {
-            g.setColour (findColour (mainBackgroundColourId).contrasting (0.7f));
+            g.setColour (findColour (defaultTextColourId));
 
             g.setFont (height * 0.7f);
             g.drawText (activities [rowNumber],

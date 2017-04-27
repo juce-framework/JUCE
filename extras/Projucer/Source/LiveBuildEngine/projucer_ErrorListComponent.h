@@ -92,8 +92,8 @@ private:
         String getRenamingName() const override          { return getDisplayName(); }
         String getDisplayName() const override           { return "Errors and Warnings"; }
         void setName (const String&) override            {}
-        bool isMissing() override                        { return false; }
-        Icon getIcon() const override                    { return Icon (getIcons().bug, getContrastingColour (0.8f)); }
+        bool isMissing() const override                  { return false; }
+        Icon getIcon() const override                    { return Icon (getIcons().bug, getContentColour (true)); }
         bool canBeSelected() const override              { return true; }
         bool mightContainSubItems() override             { return true; }
         String getUniqueName() const override            { return "errors"; }
@@ -141,8 +141,8 @@ private:
 
         void setName (const String&) override    {}
         void addSubItems() override              {}
-        bool isMissing() override                { return false; }
-        Icon getIcon() const override            { return Icon (getIcons().bug, getContrastingColour (0.8f)); }
+        bool isMissing() const override          { return false; }
+        Icon getIcon() const override            { return Icon (getIcons().bug, getContentColour (true)); }
         bool canBeSelected() const override      { return true; }
         bool mightContainSubItems() override     { return true; }
         String getUniqueName() const override    { return String::toHexString (compileUnit.hashCode64()); }
@@ -150,13 +150,16 @@ private:
         String getRenamingName() const override  { return getDisplayName(); }
         String getDisplayName() const override
         {
-            if (File::isAbsolutePath(compileUnit))
+            if (File::isAbsolutePath (compileUnit))
             {
                 File f (compileUnit);
                 return f.exists() ? f.getFileName() : compileUnit;
             }
 
-            return compileUnit;
+            if (! compileUnit.isEmpty())
+                return compileUnit;
+
+            return String ("Global");
         }
 
         void showOverlays()
@@ -204,7 +207,7 @@ private:
     struct ErrorMessageTreeItem  : public JucerTreeViewBase
     {
         ErrorMessageTreeItem (const DiagnosticMessage& m)
-            : message (m), itemHeight (14)
+            : message (m), itemHeight (25)
         {
             setOpenness (Openness::opennessClosed);
             uniqueID << message.message << ':' << message.range.toString();
@@ -218,34 +221,41 @@ private:
         String getRenamingName() const override          { return getDisplayName(); }
         String getDisplayName() const override           { return message.message; }
         void setName (const String&) override            {}
-        bool isMissing() override                        { return false; }
+        bool isMissing() const override                  { return false; }
         Icon getIcon() const override                    { return Icon (message.isNote() ? getIcons().info
-                                                                                         : getIcons().warning, getTextColour()); }
+                                                                                         : getIcons().warning, getContentColour (true)); }
         bool canBeSelected() const override              { return true; }
         bool mightContainSubItems() override             { return getNumSubItems() != 0; }
         String getUniqueName() const override            { return uniqueID; }
-        Component* createItemComponent() override        { return new ErrorItemComponent (*this); }
 
-        struct ErrorItemComponent   : public TreeItemComponent
+        void paintContent (Graphics& g, const Rectangle<int>& area) override
         {
-            ErrorItemComponent (ErrorMessageTreeItem& e)  : TreeItemComponent (e) {}
+            jassert (area.getWidth() >= 0);
 
-            void resized() override
+            AttributedString s (message.message);
+            s.setFont (Font (12.0f));
+            s.setColour (getContentColour (false));
+            s.setJustification (Justification::centredLeft);
+
+            text.createLayout (s, (float) area.getWidth());
+
+            const auto newHeight = 2 + jmax (25, (int) text.getHeight());
+            if (itemHeight != newHeight)
             {
-                TreeItemComponent::resized();
-
-                const int width = getWidth();
-                const int iconWidth = 25; // TODO: this shouldn't be a magic number
-
-                if (width > iconWidth)
-                    static_cast<ErrorMessageTreeItem&> (item).updateTextLayout (getWidth() - 30 /* accounting for icon */);
+                itemHeight = newHeight;
+                treeHasChanged();
             }
 
-            void lookAndFeelChanged() override
-            {
-                resized();
-            }
-        };
+            text.draw (g, area.toFloat());
+        }
+
+        Colour getContentColour (bool isIcon) const override
+        {
+            return message.isError() ? Colours::red
+                                     : message.isWarning() ? Colours::yellow
+                                                           : getOwnerView()->findColour (isIcon ? treeIconColourId
+                                                                                                : defaultTextColourId);
+        }
 
         void showPopupMenu() override
         {
@@ -260,46 +270,9 @@ private:
                 SystemClipboard::copyTextToClipboard (message.toString());
         }
 
-        void paintIcon (Graphics& g, Rectangle<int> area) override
-        {
-            getIcon().draw (g, area.toFloat(), isIconCrossedOut());
-        }
-
-        void paintContent (Graphics& g, const Rectangle<int>& area) override
-        {
-            text.draw (g, area.toFloat());
-        }
-
         int getItemHeight() const override
         {
             return itemHeight;
-        }
-
-        Colour getTextColour() const
-        {
-            Colour bkg (getOwnerView()->findColour (mainBackgroundColourId));
-
-            return bkg.contrasting (message.isError() ? Colours::darkred
-                                                      : message.isWarning() ? Colours::yellow.darker()
-                                                                            : Colours::grey, 0.4f);
-        }
-
-        void updateTextLayout (int width)
-        {
-            jassert (width >= 0);
-
-            AttributedString s (message.message);
-            s.setFont (Font (12.0f));
-            s.setColour (getTextColour());
-
-            text.createLayout (s, (float) width);
-
-            const int newHeight = 2 + jmax (14, (int) text.getHeight());
-            if (itemHeight != newHeight)
-            {
-                itemHeight = newHeight;
-                treeHasChanged();
-            }
         }
 
         SourceCodeEditor* getEditor()

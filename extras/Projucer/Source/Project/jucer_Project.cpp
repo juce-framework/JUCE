@@ -1152,22 +1152,22 @@ bool Project::Item::addRelativeFile (const RelativePath& file, int insertIndex, 
     return false;
 }
 
-Icon Project::Item::getIcon() const
+Icon Project::Item::getIcon (bool isOpen) const
 {
     const Icons& icons = getIcons();
 
     if (isFile())
     {
         if (isImageFile())
-            return Icon (icons.imageDoc, Colours::blue);
+            return Icon (icons.imageDoc, Colours::transparentBlack);
 
-        return Icon (icons.document, Colours::yellow);
+        return Icon (icons.file, Colours::transparentBlack);
     }
 
     if (isMainGroup())
         return Icon (icons.juceLogo, Colours::orange);
 
-    return Icon (icons.folder, Colours::darkgrey);
+    return Icon (isOpen ? icons.openFolder : icons.closedFolder, Colours::transparentBlack);
 }
 
 bool Project::Item::isIconCrossedOut() const

@@ -31,8 +31,8 @@
 #include "../Project/jucer_TreeItemTypes.h"
 #include "../Utility/jucer_UTF8Component.h"
 #include "../Utility/jucer_SVGPathDataComponent.h"
+#include "../Utility/jucer_AboutWindowComponent.h"
 #include "../Utility/jucer_FloatingToolWindow.h"
-#include "../Utility/jucer_DialogLookAndFeel.h"
 
 #include "../LiveBuildEngine/projucer_MessageIDs.h"
 #include "../LiveBuildEngine/projucer_CppHelpers.h"
@@ -47,8 +47,7 @@
 #include "../LiveBuildEngine/projucer_ComponentListComp.h"
 #include "../LiveBuildEngine/projucer_CompileEngineServer.h"
 
-#include "jucer_ProjucerLicenses.h"
-juce_ImplementSingleton (ProjucerLicenses);
+juce_ImplementSingleton (CompileEngineDLL);
 
 struct ProjucerAppClasses
 {
@@ -56,8 +55,6 @@ struct ProjucerAppClasses
     #include "../LiveBuildEngine/projucer_ErrorListComponent.h"
 };
 
-#include "jucer_LoginForm.h"
-#include "jucer_EulaDialogue.h"
 #include "jucer_CommandLine.h"
 
 #include "../Project/jucer_ProjectContentComponent.cpp"

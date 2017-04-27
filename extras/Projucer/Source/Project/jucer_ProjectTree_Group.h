@@ -117,10 +117,13 @@ public:
 
         m.addSeparator();
 
-        if (isOpen())
-            m.addItem (1, "Collapse all Sub-groups");
-        else
-            m.addItem (2, "Expand all Sub-groups");
+        if (! isRoot())
+        {
+            if (isOpen())
+                m.addItem (1, "Collapse all Sub-groups");
+            else
+                m.addItem (2, "Expand all Sub-groups");
+        }
 
         m.addSeparator();
         m.addItem (3, "Enable compiling of all enclosed files");
@@ -130,10 +133,20 @@ public:
         m.addItem (5, "Sort Items Alphabetically");
         m.addItem (6, "Sort Items Alphabetically (Groups first)");
         m.addSeparator();
-        m.addItem (7, "Rename...");
 
         if (! isRoot())
+        {
+            m.addItem (7, "Rename...");
             m.addItem (8, "Delete");
+        }
+
+        launchPopupMenu (m);
+    }
+
+    void showPlusMenu() override
+    {
+        PopupMenu m;
+        addCreateFileMenuItems (m);
 
         launchPopupMenu (m);
     }

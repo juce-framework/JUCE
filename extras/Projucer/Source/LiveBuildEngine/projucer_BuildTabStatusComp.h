@@ -65,8 +65,7 @@ public:
     {
         if (state == errors || state == warnings)
         {
-            g.setColour (findColour (mainBackgroundColourId).contrasting (state == errors ? Colours::red
-                                                                                          : Colours::yellow, 0.4f));
+            g.setColour (state == errors ? Colours::red : Colours::yellow);
             const Path& icon = (state == errors) ? getIcons().warning
                                                  : getIcons().info;
 
@@ -104,10 +103,9 @@ private:
     State state;
 
     //==============================================================================
-    class Spinner  : public Component,
-                     private Timer
+    struct Spinner  : public Component,
+                      private Timer
     {
-    public:
         Spinner()
         {
             setInterceptsMouseClicks (false, false);
@@ -115,9 +113,9 @@ private:
 
         void paint (Graphics& g) override
         {
-            if (TabBarButton* tbb = findParentComponentOfClass<TabBarButton>())
+            if (findParentComponentOfClass<TabBarButton>() != nullptr)
             {
-                getLookAndFeel().drawSpinningWaitAnimation (g, ProjucerLookAndFeel::getTabBackgroundColour (*tbb).contrasting(),
+                getLookAndFeel().drawSpinningWaitAnimation (g, findColour (treeIconColourId),
                                                             0, 0, getWidth(), getHeight());
                 startTimer (1000 / 20);
             }

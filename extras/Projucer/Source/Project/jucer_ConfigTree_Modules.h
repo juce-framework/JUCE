@@ -36,22 +36,33 @@ public:
     String getDisplayName() const override    { return moduleID; }
     String getRenamingName() const override   { return getDisplayName(); }
     void setName (const String&) override     {}
-    bool isMissing() override                 { return hasMissingDependencies(); }
-    void showDocument() override              { showSettingsPage (new ModuleSettingsPanel (project, moduleID)); }
+    bool isMissing() const override           { return hasMissingDependencies(); }
+
+    void showDocument() override
+    {
+        showSettingsPage (new ModuleSettingsPanel (project, moduleID));
+    }
+
     void deleteItem() override                { project.getModules().removeModule (moduleID); }
 
     Icon getIcon() const override
     {
-        auto iconColour = Colours::yellow;
-        auto info = project.getModules().getModuleInfo (moduleID);
-        if (info.isValid() && info.getVendor() == "juce")
+        auto iconColour = getOwnerView()->findColour (isSelected() ? defaultHighlightedTextColourId
+                                                                   : treeIconColourId);
+
+        if (! isSelected())
         {
-            if (info.getLicense() == "ISC")
-                iconColour = Colours::lightblue;
-            else if (info.getLicense() == "GPL/Commercial")
-                iconColour = Colours::orange;
+            auto info = project.getModules().getModuleInfo (moduleID);
+            if (info.isValid() && info.getVendor() == "juce")
+            {
+                if (info.getLicense() == "ISC")
+                    iconColour = Colours::lightblue;
+                else if (info.getLicense() == "GPL/Commercial")
+                    iconColour = Colours::orange;
+            }
         }
-        return Icon (getIcons().jigsaw, getContrastingColour (iconColour, 0.5f));
+
+        return Icon (getIcons().singleModule, iconColour);
     }
 
     void showPopupMenu() override
@@ -81,10 +92,11 @@ private:
     {
     public:
         ModuleSettingsPanel (Project& p, const String& modID)
-            : project (p), moduleID (modID)
+            : group (p.getModules().getModuleInfo (modID).getID(), Icon (getIcons().singleModule, Colours::transparentBlack)),
+              project (p),
+              moduleID (modID)
         {
             addAndMakeVisible (group);
-            group.setName ("Module: " + moduleID);
             refresh();
         }
 
@@ -153,6 +165,8 @@ private:
 
         void parentSizeChanged() override  { updateSize (*this, group); }
 
+        void resized() override { group.setBounds (getLocalBounds().withTrimmedLeft (12)); }
+
     private:
         PropertyGroupComponent group;
         Project& project;
@@ -182,28 +196,28 @@ private:
 
             void paint (Graphics& g) override
             {
-                g.setColour (Colours::white.withAlpha (0.4f));
-                g.fillRect (getLocalBounds().withTrimmedBottom (1));
-
-                AttributedString s;
-                s.setJustification (Justification::topLeft);
-
-                Font f (14.0f);
+                auto bounds = getLocalBounds().reduced (10);
+                bounds.removeFromTop (5);
 
                 if (info.isValid())
                 {
-                    s.append (info.getName() + "\n\n", f.boldened());
-                    s.append ("Version: "  + info.getVersion()
-                                + "\nLicense: " + info.getLicense() + "\n", f.italicised());
-                    s.append ("\n" + info.getDescription(), f);
+                    auto topSlice = bounds.removeFromTop (bounds.getHeight() / 3);
+                    bounds.removeFromTop (bounds.getHeight() / 6);
+                    auto bottomSlice = bounds;
+
+                    g.setColour (findColour (defaultTextColourId));
+
+                    g.drawFittedText (info.getName(),                   topSlice.removeFromTop (topSlice.getHeight() / 3), Justification::centredLeft, 1);
+                    g.drawFittedText ("Version: "  + info.getVersion(), topSlice.removeFromTop (topSlice.getHeight() / 2), Justification::centredLeft, 1);
+                    g.drawFittedText ("License: " + info.getLicense(),  topSlice.removeFromTop (topSlice.getHeight()),     Justification::centredLeft, 1);
+
+                    g.drawFittedText (info.getDescription(), bottomSlice, Justification::topLeft, 3, 1.0f);
                 }
                 else
                 {
-                    s.append ("Cannot find this module at the specified path!", f.boldened());
-                    s.setColour (Colours::darkred);
+                    g.setColour (Colours::red);
+                    g.drawFittedText ("Cannot find this module at the specified path!", bounds, Justification::centred, 1);
                 }
-
-                s.draw (g, getLocalBounds().reduced (6, 5).toFloat());
             }
 
             void valueChanged (Value&) override
@@ -240,17 +254,12 @@ private:
 
             void paint (Graphics& g) override
             {
-                g.setColour (Colours::white.withAlpha (0.4f));
-                g.fillRect (0, 0, getWidth(), getHeight() - 1);
-
                 String text ("This module has missing dependencies!\n\n"
                              "To build correctly, it requires the following modules to be added:\n");
                 text << missingDependencies.joinIntoString (", ");
 
-                AttributedString s;
-                s.setJustification (Justification::topLeft);
-                s.append (text, Font (13.0f), Colours::red.darker());
-                s.draw (g, getLocalBounds().reduced (4, 16).toFloat());
+                g.setColour (Colours::red);
+                g.drawFittedText (text, getLocalBounds().reduced (4, 16), Justification::topLeft, 3);
             }
 
             void buttonClicked (Button*) override
@@ -315,8 +324,8 @@ public:
     String getRenamingName() const override { return getDisplayName(); }
     String getDisplayName() const override  { return "Modules"; }
     void setName (const String&) override   {}
-    bool isMissing() override               { return false; }
-    Icon getIcon() const override           { return Icon (getIcons().graph, getContrastingColour (Colours::orange, 0.5f)); }
+    bool isMissing() const override         { return false; }
+    Icon getIcon() const override           { return Icon (getIcons().graph, getContentColour (true)); }
 
     void showDocument() override
     {
