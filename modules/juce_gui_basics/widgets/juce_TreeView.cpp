@@ -1229,13 +1229,13 @@ void TreeViewItem::addSubItem (TreeViewItem* const newItem, const int insertPosi
     }
 }
 
-void TreeViewItem::removeSubItem (int index, bool deleteItem)
+void TreeViewItem::removeSubItem (int index, bool deleteItem, bool sendTreeHasChanged)
 {
     if (ownerView != nullptr)
     {
         const ScopedLock sl (ownerView->nodeAlterationLock);
 
-        if (removeSubItemFromList (index, deleteItem))
+        if (removeSubItemFromList (index, deleteItem) && sendTreeHasChanged)
             treeHasChanged();
     }
     else
