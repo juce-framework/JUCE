@@ -790,6 +790,9 @@ private:
 
     void initialiseDependencyPathValues()
     {
+        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder),
+                                                                Ids::vst3Path, TargetOS::getThisOS())));
+
         sdkPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::androidSDKPath),
                                                                Ids::androidSDKPath, TargetOS::getThisOS())));
 
