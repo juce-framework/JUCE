@@ -93,7 +93,7 @@ private:
 
             setEnabled (! isLevelMeter);
             setSliderStyle (Slider::LinearBar);
-            setTextBoxIsEditable (false);
+            setTextBoxIsEditable (true);
             setScrollWheelEnabled (true);
         }
 
