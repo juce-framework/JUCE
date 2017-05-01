@@ -139,7 +139,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\Main.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_core.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_core.cpp"/>
   </ItemGroup>
   <ItemGroup/>
   <ItemGroup>

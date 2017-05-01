@@ -1,5 +1,30 @@
-#ifndef IAAEFFECTEDITOR_H_INCLUDED
-#define IAAEFFECTEDITOR_H_INCLUDED
+/*
+  ==============================================================================
+
+   This file is part of the JUCE library.
+   Copyright (c) 2017 - ROLI Ltd.
+
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
+
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
+
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
+
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
+
+  ==============================================================================
+*/
+
+#pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "IAAEffectProcessor.h"
@@ -30,7 +55,6 @@ public:
 
         // Configure all the graphics for the transport control.
 
-        transportText.setColour (Label::textColourId, Colours::white);
         transportText.setFont (Font (Font::getDefaultMonospacedFontName(), 18.0f, Font::plain));
         transportText.setJustificationType (Justification::topLeft);
         addChildComponent (transportText);
@@ -56,7 +80,6 @@ public:
 
         // Configure the switch to host button.
 
-        switchToHostButtonLabel.setColour (Label::textColourId, Colours::white);
         switchToHostButtonLabel.setFont (Font (Font::getDefaultMonospacedFontName(), 18.0f, Font::plain));
         switchToHostButtonLabel.setJustificationType (Justification::centredRight);
         switchToHostButtonLabel.setText ("Switch to\nhost app:", dontSendNotification);
@@ -76,12 +99,12 @@ public:
     //==============================================================================
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::darkgrey);
+        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
     }
 
     void resized() override
     {
-        auto area = getBounds().reduced (10);
+        auto area = getBounds().reduced (20);
 
         gainSlider.setBounds (area.removeFromLeft (60));
 
@@ -254,7 +277,7 @@ private:
     AudioProcessorValueTreeState& parameters;
 
     const int buttonSize = 30;
-    const Colour defaultButtonColour = Colours::lightgrey;
+    const Colour defaultButtonColour = Colours::darkgrey;
     ShapeButton rewindButton {"Rewind", defaultButtonColour, defaultButtonColour, defaultButtonColour};
     ShapeButton playButton   {"Play",   defaultButtonColour, defaultButtonColour, defaultButtonColour};
     ShapeButton recordButton {"Record", defaultButtonColour, defaultButtonColour, defaultButtonColour};
@@ -272,6 +295,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (IAAEffectEditor)
 };
-
-
-#endif  // IAAEFFECTEDITOR_H_INCLUDED

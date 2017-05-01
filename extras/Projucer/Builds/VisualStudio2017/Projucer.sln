@@ -21,18 +21,23 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application"
 		..\..\Source\Application\jucer_DocumentEditorComponent.h = ..\..\Source\Application\jucer_DocumentEditorComponent.h
 		..\..\Source\Application\jucer_DownloadCompileEngineThread.cpp = ..\..\Source\Application\jucer_DownloadCompileEngineThread.cpp
 		..\..\Source\Application\jucer_DownloadCompileEngineThread.h = ..\..\Source\Application\jucer_DownloadCompileEngineThread.h
-		..\..\Source\Application\jucer_EulaDialogue.h = ..\..\Source\Application\jucer_EulaDialogue.h
 		..\..\Source\Application\jucer_FilePreviewComponent.h = ..\..\Source\Application\jucer_FilePreviewComponent.h
 		..\..\Source\Application\jucer_GlobalPreferences.cpp = ..\..\Source\Application\jucer_GlobalPreferences.cpp
 		..\..\Source\Application\jucer_GlobalPreferences.h = ..\..\Source\Application\jucer_GlobalPreferences.h
 		..\..\Source\jucer_Headers.h = ..\..\Source\jucer_Headers.h
-		..\..\Source\Application\jucer_LoginForm.h = ..\..\Source\Application\jucer_LoginForm.h
 		..\..\Source\Application\jucer_Main.cpp = ..\..\Source\Application\jucer_Main.cpp
 		..\..\Source\Application\jucer_MainWindow.cpp = ..\..\Source\Application\jucer_MainWindow.cpp
 		..\..\Source\Application\jucer_MainWindow.h = ..\..\Source\Application\jucer_MainWindow.h
 		..\..\Source\Application\jucer_OpenDocumentManager.cpp = ..\..\Source\Application\jucer_OpenDocumentManager.cpp
 		..\..\Source\Application\jucer_OpenDocumentManager.h = ..\..\Source\Application\jucer_OpenDocumentManager.h
-		..\..\Source\Application\jucer_ProjucerLicenses.h = ..\..\Source\Application\jucer_ProjucerLicenses.h
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Licenses", "Licenses", "{4E60B2C4-39B6-816D-3086-B7B7D0429F8B}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\Source\Licenses\jucer_LicenseController.cpp = ..\..\Source\Licenses\jucer_LicenseController.cpp
+		..\..\Source\Licenses\jucer_LicenseController.h = ..\..\Source\Licenses\jucer_LicenseController.h
+		..\..\Source\Licenses\jucer_LicenseThread.h = ..\..\Source\Licenses\jucer_LicenseThread.h
+		..\..\Source\Licenses\jucer_LicenseWebview.h = ..\..\Source\Licenses\jucer_LicenseWebview.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LiveBuildEngine", "LiveBuildEngine", "{EBA3ED3D-C402-E9A8-36C3-CA4001D9E324}"
@@ -181,6 +186,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Project", "Project", "{BA1A
 		..\..\Source\Project\jucer_DependencyPathPropertyComponent.cpp = ..\..\Source\Project\jucer_DependencyPathPropertyComponent.cpp
 		..\..\Source\Project\jucer_DependencyPathPropertyComponent.h = ..\..\Source\Project\jucer_DependencyPathPropertyComponent.h
 		..\..\Source\Project\jucer_GroupInformationComponent.h = ..\..\Source\Project\jucer_GroupInformationComponent.h
+		..\..\Source\Project\jucer_HeaderComponent.h = ..\..\Source\Project\jucer_HeaderComponent.h
+		..\..\Source\Project\jucer_LiveBuildTab.h = ..\..\Source\Project\jucer_LiveBuildTab.h
 		..\..\Source\Project\jucer_Module.cpp = ..\..\Source\Project\jucer_Module.cpp
 		..\..\Source\Project\jucer_Module.h = ..\..\Source\Project\jucer_Module.h
 		..\..\Source\Project\jucer_ModulesPanel.h = ..\..\Source\Project\jucer_ModulesPanel.h
@@ -188,6 +195,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Project", "Project", "{BA1A
 		..\..\Source\Project\jucer_Project.h = ..\..\Source\Project\jucer_Project.h
 		..\..\Source\Project\jucer_ProjectContentComponent.cpp = ..\..\Source\Project\jucer_ProjectContentComponent.cpp
 		..\..\Source\Project\jucer_ProjectContentComponent.h = ..\..\Source\Project\jucer_ProjectContentComponent.h
+		..\..\Source\Project\jucer_ProjectTab.h = ..\..\Source\Project\jucer_ProjectTab.h
 		..\..\Source\Project\jucer_ProjectTree_Base.h = ..\..\Source\Project\jucer_ProjectTree_Base.h
 		..\..\Source\Project\jucer_ProjectTree_File.h = ..\..\Source\Project\jucer_ProjectTree_File.h
 		..\..\Source\Project\jucer_ProjectTree_Group.h = ..\..\Source\Project\jucer_ProjectTree_Group.h
@@ -212,11 +220,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Project Saving", "Project S
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utility", "Utility", "{5B44064B-7712-DA97-5DC7-473A1921D600}"
 	ProjectSection(SolutionItems) = preProject
+		..\..\Source\Utility\jucer_AboutWindowComponent.h = ..\..\Source\Utility\jucer_AboutWindowComponent.h
 		..\..\Source\Utility\jucer_CodeHelpers.cpp = ..\..\Source\Utility\jucer_CodeHelpers.cpp
 		..\..\Source\Utility\jucer_CodeHelpers.h = ..\..\Source\Utility\jucer_CodeHelpers.h
 		..\..\Source\Utility\jucer_ColourPropertyComponent.h = ..\..\Source\Utility\jucer_ColourPropertyComponent.h
 		..\..\Source\Utility\jucer_Colours.h = ..\..\Source\Utility\jucer_Colours.h
-		..\..\Source\Utility\jucer_DialogLookAndFeel.h = ..\..\Source\Utility\jucer_DialogLookAndFeel.h
 		..\..\Source\Utility\jucer_FileHelpers.cpp = ..\..\Source\Utility\jucer_FileHelpers.cpp
 		..\..\Source\Utility\jucer_FileHelpers.h = ..\..\Source\Utility\jucer_FileHelpers.h
 		..\..\Source\Utility\jucer_FilePathPropertyComponent.h = ..\..\Source\Utility\jucer_FilePathPropertyComponent.h
@@ -269,13 +277,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BinaryData", "BinaryData", 
 		..\..\Source\BinaryData\background_tile.png = ..\..\Source\BinaryData\background_tile.png
 		..\..\Source\BinaryData\colourscheme_dark.xml = ..\..\Source\BinaryData\colourscheme_dark.xml
 		..\..\Source\BinaryData\colourscheme_light.xml = ..\..\Source\BinaryData\colourscheme_light.xml
+		..\..\Source\BinaryData\export_android.svg = ..\..\Source\BinaryData\export_android.svg
+		..\..\Source\BinaryData\export_codeBlocks.svg = ..\..\Source\BinaryData\export_codeBlocks.svg
+		..\..\Source\BinaryData\export_linux.svg = ..\..\Source\BinaryData\export_linux.svg
+		..\..\Source\BinaryData\export_visualStudio.svg = ..\..\Source\BinaryData\export_visualStudio.svg
+		..\..\Source\BinaryData\export_xcode.svg = ..\..\Source\BinaryData\export_xcode.svg
+		..\..\Source\BinaryData\huckleberry_icon.svg = ..\..\Source\BinaryData\huckleberry_icon.svg
+		..\..\Source\BinaryData\juce-logo-with-text.svg = ..\..\Source\BinaryData\juce-logo-with-text.svg
 		..\..\Source\BinaryData\juce_icon.png = ..\..\Source\BinaryData\juce_icon.png
-		..\..\Source\BinaryData\projectIconAndroid.png = ..\..\Source\BinaryData\projectIconAndroid.png
-		..\..\Source\BinaryData\projectIconCodeblocks.png = ..\..\Source\BinaryData\projectIconCodeblocks.png
-		..\..\Source\BinaryData\projectIconLinuxMakefile.png = ..\..\Source\BinaryData\projectIconLinuxMakefile.png
-		..\..\Source\BinaryData\projectIconVisualStudio.png = ..\..\Source\BinaryData\projectIconVisualStudio.png
-		..\..\Source\BinaryData\projectIconXcode.png = ..\..\Source\BinaryData\projectIconXcode.png
-		..\..\Source\BinaryData\projectIconXcodeIOS.png = ..\..\Source\BinaryData\projectIconXcodeIOS.png
+		..\..\Source\BinaryData\offlinepage.html = ..\..\Source\BinaryData\offlinepage.html
 		..\..\Source\BinaryData\projucer_EULA.txt = ..\..\Source\BinaryData\projucer_EULA.txt
 		..\..\Source\BinaryData\projucer_login_bg.svg = ..\..\Source\BinaryData\projucer_login_bg.svg
 		..\..\Source\BinaryData\RecentFilesMenuTemplate.nib = ..\..\Source\BinaryData\RecentFilesMenuTemplate.nib
@@ -1153,6 +1163,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lookandfeel", "lookandfeel"
 		..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V2.h = ..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V2.h
 		..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V3.cpp = ..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V3.cpp
 		..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V3.h = ..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V3.h
+		..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V4.cpp = ..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V4.cpp
+		..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V4.h = ..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V4.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "menus", "menus", "{806CB070-E860-0A3A-CDA1-F6AEA5A961F1}"
@@ -1171,6 +1183,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "misc", "misc", "{55DD5543-1
 		..\..\..\..\modules\juce_gui_basics\misc\juce_BubbleComponent.h = ..\..\..\..\modules\juce_gui_basics\misc\juce_BubbleComponent.h
 		..\..\..\..\modules\juce_gui_basics\misc\juce_DropShadower.cpp = ..\..\..\..\modules\juce_gui_basics\misc\juce_DropShadower.cpp
 		..\..\..\..\modules\juce_gui_basics\misc\juce_DropShadower.h = ..\..\..\..\modules\juce_gui_basics\misc\juce_DropShadower.h
+		..\..\..\..\modules\juce_gui_basics\misc\juce_JUCESplashScreen.cpp = ..\..\..\..\modules\juce_gui_basics\misc\juce_JUCESplashScreen.cpp
+		..\..\..\..\modules\juce_gui_basics\misc\juce_JUCESplashScreen.h = ..\..\..\..\modules\juce_gui_basics\misc\juce_JUCESplashScreen.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mouse", "mouse", "{4F197470-F555-0160-9A03-5DC709BDF137}"
@@ -1393,13 +1407,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Juce Library Code", "Juce L
 		..\..\JuceLibraryCode\AppConfig.h = ..\..\JuceLibraryCode\AppConfig.h
 		..\..\JuceLibraryCode\BinaryData.cpp = ..\..\JuceLibraryCode\BinaryData.cpp
 		..\..\JuceLibraryCode\BinaryData.h = ..\..\JuceLibraryCode\BinaryData.h
-		..\..\JuceLibraryCode\juce_core.cpp = ..\..\JuceLibraryCode\juce_core.cpp
-		..\..\JuceLibraryCode\juce_cryptography.cpp = ..\..\JuceLibraryCode\juce_cryptography.cpp
-		..\..\JuceLibraryCode\juce_data_structures.cpp = ..\..\JuceLibraryCode\juce_data_structures.cpp
-		..\..\JuceLibraryCode\juce_events.cpp = ..\..\JuceLibraryCode\juce_events.cpp
-		..\..\JuceLibraryCode\juce_graphics.cpp = ..\..\JuceLibraryCode\juce_graphics.cpp
-		..\..\JuceLibraryCode\juce_gui_basics.cpp = ..\..\JuceLibraryCode\juce_gui_basics.cpp
-		..\..\JuceLibraryCode\juce_gui_extra.cpp = ..\..\JuceLibraryCode\juce_gui_extra.cpp
+		..\..\JuceLibraryCode\include_juce_core.cpp = ..\..\JuceLibraryCode\include_juce_core.cpp
+		..\..\JuceLibraryCode\include_juce_cryptography.cpp = ..\..\JuceLibraryCode\include_juce_cryptography.cpp
+		..\..\JuceLibraryCode\include_juce_data_structures.cpp = ..\..\JuceLibraryCode\include_juce_data_structures.cpp
+		..\..\JuceLibraryCode\include_juce_events.cpp = ..\..\JuceLibraryCode\include_juce_events.cpp
+		..\..\JuceLibraryCode\include_juce_graphics.cpp = ..\..\JuceLibraryCode\include_juce_graphics.cpp
+		..\..\JuceLibraryCode\include_juce_gui_basics.cpp = ..\..\JuceLibraryCode\include_juce_gui_basics.cpp
+		..\..\JuceLibraryCode\include_juce_gui_extra.cpp = ..\..\JuceLibraryCode\include_juce_gui_extra.cpp
 		..\..\JuceLibraryCode\JuceHeader.h = ..\..\JuceLibraryCode\JuceHeader.h
 	EndProjectSection
 EndProject
@@ -1419,6 +1433,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{81738168-23C9-FF46-BEF6-32B612C5E761} = {A5163566-3141-5B06-2ADC-EA7195B43BF8}
+		{4E60B2C4-39B6-816D-3086-B7B7D0429F8B} = {A5163566-3141-5B06-2ADC-EA7195B43BF8}
 		{EBA3ED3D-C402-E9A8-36C3-CA4001D9E324} = {A5163566-3141-5B06-2ADC-EA7195B43BF8}
 		{B62C4FBD-6BD9-F377-D62F-3E9A18CD3987} = {A5163566-3141-5B06-2ADC-EA7195B43BF8}
 		{ACC8A441-666B-A8E7-83DE-012EE12384F0} = {05138349-80A0-D2ED-8D0D-E28C52612E86}

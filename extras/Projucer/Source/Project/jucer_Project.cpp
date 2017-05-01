@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -109,6 +111,19 @@ void Project::setMissingDefaultValues()
 
     if (getDocumentTitle().isEmpty())
         setTitle ("JUCE Project");
+
+    {
+        auto defaultSplashScreenAndReporting = ! ProjucerApplication::getApp().isPaidOrGPL();
+
+        if (shouldDisplaySplashScreen() == var() || defaultSplashScreenAndReporting)
+            shouldDisplaySplashScreen() = defaultSplashScreenAndReporting;
+
+        if (shouldReportAppUsage() == var() || defaultSplashScreenAndReporting)
+            shouldReportAppUsage() = defaultSplashScreenAndReporting;
+    }
+
+    if (splashScreenColour() == var())
+        splashScreenColour() = "Dark";
 
     if (! projectRoot.hasProperty (Ids::projectType))
         getProjectTypeValue() = ProjectType_GUIApp::getTypeName();
@@ -220,23 +235,23 @@ void Project::removeDefunctExporters()
 {
     ValueTree exporters (projectRoot.getChildWithName (Ids::EXPORTFORMATS));
 
-    for (;;)
-    {
-        ValueTree oldVC6Exporter        (exporters.getChildWithName ("MSVC6"));
-        ValueTree oldAndroidAntExporter (exporters.getChildWithName ("ANDROID"));
+    StringPairArray oldExporters;
+    oldExporters.set ("ANDROID", "Android Ant Exporter");
+    oldExporters.set ("MSVC6", "MSVC6");
+    oldExporters.set ("VS2010", "Visual Studio 2010");
+    oldExporters.set ("VS2012", "Visual Studio 2012");
 
-        if      (oldVC6Exporter.isValid())
-            exporters.removeChild (oldVC6Exporter, nullptr);
-        else if (oldAndroidAntExporter.isValid())
+    for (auto& key : oldExporters.getAllKeys())
+    {
+        ValueTree oldExporter (exporters.getChildWithName (key));
+
+        if (oldExporter.isValid())
         {
             AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                         TRANS("Android Ant Exporter"),
-                                         TRANS("The Android Ant Exporter is deprecated. The exporter will be removed from this project."));
-
-            exporters.removeChild (oldAndroidAntExporter, nullptr);
+                                         TRANS (oldExporters[key]),
+                                         TRANS ("The " + oldExporters[key]  + " Exporter is deprecated. The exporter will be removed from this project."));
+            exporters.removeChild (oldExporter, nullptr);
         }
-        else
-            break;
     }
 }
 
@@ -554,6 +569,55 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 
     props.add (new TextPropertyComponent (getCompanyEmail(), "Company E-mail", 256, false),
                "Your company e-mail, which will be added to the properties of the binary where possible");
+
+    {
+        const String licenseRequiredTagline ("Required for closed source applications without an Indie or Pro JUCE license");
+        const String licenseRequiredInfo ("In accordance with the terms of the JUCE 5 End-Use License Agreement (www.juce.com/juce-5-licence), "
+                                          "this option can only be disabled for closed source applications if you have a JUCE Indie or Pro "
+                                          "license, or are using JUCE under the GPL v3 license.");
+
+        StringPairArray description;
+        description.set ("Report JUCE app usage", "This option controls the collection of usage data from users of this JUCE application.");
+        description.set ("Display the JUCE splash screen", "This option controls the display of the standard JUCE splash screen.");
+
+        if (ProjucerApplication::getApp().isPaidOrGPL())
+        {
+            props.add (new BooleanPropertyComponent (shouldReportAppUsage(), "Report JUCE app usage", licenseRequiredTagline),
+                       description["Report JUCE app usage"] + " " + licenseRequiredInfo);
+
+            props.add (new BooleanPropertyComponent (shouldDisplaySplashScreen(), "Display the JUCE splash screen", licenseRequiredTagline),
+                       description["Display the JUCE splash screen"] + " " + licenseRequiredInfo);
+        }
+        else
+        {
+            StringArray options;
+            Array<var> vars;
+
+            options.add (licenseRequiredTagline);
+            vars.add (var());
+
+            props.add (new ChoicePropertyComponent (Value(), "Report JUCE app usage", options, vars),
+                       description["Report JUCE app usage"] + " " + licenseRequiredInfo);
+
+            props.add (new ChoicePropertyComponent (Value(), "Display the JUCE splash screen", options, vars),
+                       description["Display the JUCE splash screen"] + " " + licenseRequiredInfo);
+        }
+    }
+
+    {
+        StringArray splashScreenColours;
+
+        splashScreenColours.add ("Dark");
+        splashScreenColours.add ("Light");
+
+        Array<var> splashScreenCodes;
+
+        for (auto& splashScreenColour : splashScreenColours)
+            splashScreenCodes.add (splashScreenColour);
+
+        props.add (new ChoicePropertyComponent (splashScreenColour(), "Splash screen colour", splashScreenColours, splashScreenCodes),
+                   "Choose the colour of the JUCE splash screen.");
+    }
 
     {
         StringArray projectTypeNames;
@@ -1152,22 +1216,22 @@ bool Project::Item::addRelativeFile (const RelativePath& file, int insertIndex, 
     return false;
 }
 
-Icon Project::Item::getIcon() const
+Icon Project::Item::getIcon (bool isOpen) const
 {
     const Icons& icons = getIcons();
 
     if (isFile())
     {
         if (isImageFile())
-            return Icon (icons.imageDoc, Colours::blue);
+            return Icon (icons.imageDoc, Colours::transparentBlack);
 
-        return Icon (icons.document, Colours::yellow);
+        return Icon (icons.file, Colours::transparentBlack);
     }
 
     if (isMainGroup())
         return Icon (icons.juceLogo, Colours::orange);
 
-    return Icon (icons.folder, Colours::darkgrey);
+    return Icon (isOpen ? icons.openFolder : icons.closedFolder, Colours::transparentBlack);
 }
 
 bool Project::Item::isIconCrossedOut() const

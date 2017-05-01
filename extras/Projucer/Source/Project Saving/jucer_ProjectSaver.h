@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -369,8 +371,32 @@ private:
             << "//==============================================================================" << newLine
             << "// [BEGIN_USER_CODE_SECTION]" << newLine
             << userContent
-            << "// [END_USER_CODE_SECTION]" << newLine
+            << "// [END_USER_CODE_SECTION]" << newLine;
+
+        out << newLine
+            << "//==============================================================================" << newLine
+            << "/*" << newLine
+            << "  ==============================================================================" << newLine
             << newLine
+            << "   In accordance with the terms of the JUCE 5 End-Use License Agreement, the" << newLine
+            << "   JUCE Code in SECTION A cannot be removed, changed or otherwise rendered" << newLine
+            << "   ineffective unless you have a JUCE Indie or Pro license, or are using JUCE" << newLine
+            << "   under the GPL v3 license." << newLine
+            << newLine
+            << "   End User License Agreement: www.juce.com/juce-5-licence" << newLine
+            << "  ==============================================================================" << newLine
+            << "*/" << newLine
+            << newLine
+            << "// BEGIN SECTION A" << newLine
+            << newLine
+            << "#define JUCE_DISPLAY_SPLASH_SCREEN "   << (project.shouldDisplaySplashScreen().getValue() ? "1" : "0") << newLine
+            << "#define JUCE_REPORT_APP_USAGE "        << (project.shouldReportAppUsage().getValue()      ? "1" : "0") << newLine
+            << newLine
+            << "// END SECTION A" << newLine
+            << newLine
+            << "#define JUCE_USE_DARK_SPLASH_SCREEN "  << (project.splashScreenColour().toString() == "Dark" ? "1" : "0") << newLine;
+
+        out << newLine
             << "//==============================================================================" << newLine;
 
         const int longestName = findLongestModuleName (modules);
@@ -510,16 +536,10 @@ private:
 
     void writeModuleCppWrappers (const OwnedArray<LibraryModule>& modules)
     {
-        for (int j = 0; j < modules.size(); ++j)
+        for (auto* module : modules)
         {
-            const LibraryModule& module = *modules.getUnchecked(j);
-
-            Array<LibraryModule::CompileUnit> units = module.getAllCompileUnits();
-
-            for (int i = 0; i < units.size(); ++i)
+            for (auto& cu : module->getAllCompileUnits())
             {
-                const LibraryModule::CompileUnit& cu = units.getReference(i);
-
                 MemoryOutputStream mem;
 
                 writeAutoGenWarningComment (mem);
@@ -529,17 +549,12 @@ private:
                     << "#include " << project.getAppConfigFilename().quoted() << newLine
                     << "#include <";
 
-                auto moduleWrapperFilename = cu.file.getFileName();
-
-                // .r files require a different include scheme, with a different file name
-                if (cu.file.getFileExtension() == ".r")
-                    moduleWrapperFilename = cu.file.getFileNameWithoutExtension() + "_r.r";
-                else
-                     mem << module.getID() << "/";
+                if (cu.file.getFileExtension() != ".r")   // .r files are included without the path
+                    mem << module->getID() << "/";
 
                 mem << cu.file.getFileName() << ">" << newLine;
 
-                replaceFileIfDifferent (generatedCodeFolder.getChildFile (moduleWrapperFilename), mem);
+                replaceFileIfDifferent (generatedCodeFolder.getChildFile (cu.getFilenameForProxyFile()), mem);
             }
         }
     }

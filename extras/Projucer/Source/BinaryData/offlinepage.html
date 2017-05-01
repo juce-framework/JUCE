@@ -1,0 +1,42 @@
+<html>
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=11">
+    <style>
+      body {
+        background-color: #f1f1f1;
+        color: #101010;
+        font-family: Helvetica, Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .button {
+        display: block;
+        padding: 15px 20px 16px;
+        width: 200px;
+        border: 1px solid #c8c9cb;
+        border-radius: 6px;
+        margin: auto;
+        cursor: pointer;
+        font-size: 20px;
+        margin-top: 30px;
+        color: inherit;
+        text-decoration: none;
+      }
+      #offline {
+        display: block;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div id='offline'>
+      <h1>No internet connection</h1>
+
+      <p>You appear to be offline. An internet connection is required to login to the Projucer.</p>
+      <p>If you want to use JUCE under the GPL without signing-in, you can enable the pre-processor macro JUCER_ENABLE_GPL_MODE=1 and recompile the Projucer yourself.</p>
+
+      <a class='button' href='__URL_PLACEHOLDER__'>Try again</a>
+    </div>
+  </body>
+</html>

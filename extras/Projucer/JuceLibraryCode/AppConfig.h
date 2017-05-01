@@ -16,9 +16,49 @@
 //==============================================================================
 // [BEGIN_USER_CODE_SECTION]
 
-// (You can add your own code in this section, and the Projucer will not overwrite it)
+/*
+ ==============================================================================
+ In accordance with the terms of the JUCE 5 End-Use License Agreement, the
+ JUCE Code in SECTION A cannot be removed, changed or otherwise rendered
+ ineffective unless you have a JUCE Indie or Pro license, or are using JUCE
+ under the GPL v3 license.
+
+ End User License Agreement: www.juce.com/juce-5-licence
+
+ If you are using a GPL v3 license then you can set JUCER_ENABLE_GPL_MODE to
+ 1 to use the Projucer without online license validation.
+ ==============================================================================
+ */
+
+// BEGIN SECTION A
+
+#define JUCER_ENABLE_GPL_MODE 0
+
+// BEGIN SECTION A
 
 // [END_USER_CODE_SECTION]
+
+//==============================================================================
+/*
+  ==============================================================================
+
+   In accordance with the terms of the JUCE 5 End-Use License Agreement, the
+   JUCE Code in SECTION A cannot be removed, changed or otherwise rendered
+   ineffective unless you have a JUCE Indie or Pro license, or are using JUCE
+   under the GPL v3 license.
+
+   End User License Agreement: www.juce.com/juce-5-licence
+  ==============================================================================
+*/
+
+// BEGIN SECTION A
+
+#define JUCE_DISPLAY_SPLASH_SCREEN 1
+#define JUCE_REPORT_APP_USAGE 1
+
+// END SECTION A
+
+#define JUCE_USE_DARK_SPLASH_SCREEN 1
 
 //==============================================================================
 #define JUCE_MODULE_AVAILABLE_juce_core                 1

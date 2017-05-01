@@ -162,7 +162,7 @@ if not exist &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents\x64&quot; mkdir &q
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_audio_plugin_client_AAX.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_plugin_client_AAX.cpp"/>
   </ItemGroup>
   <ItemGroup/>
   <ItemGroup>

@@ -2863,7 +2863,7 @@ png_ascii_from_fp(png_const_structrp png_ptr, png_charp ascii, png_size_t size,
                   fp = 0; /* Guarantees termination below. */
                }
 
-               if (d == 0)
+               if (d == 0.0)
                {
                   ++czero;
                   if (cdigits == 0) ++clead;
