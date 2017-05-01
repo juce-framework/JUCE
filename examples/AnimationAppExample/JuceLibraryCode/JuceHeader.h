@@ -10,8 +10,7 @@
 
 */
 
-#ifndef __APPHEADERFILE_LRATE6__
-#define __APPHEADERFILE_LRATE6__
+#pragma once
 
 #include "AppConfig.h"
 
@@ -44,5 +43,3 @@ namespace ProjectInfo
     const int          versionNumber  = 0x10000;
 }
 #endif
-
-#endif   // __APPHEADERFILE_LRATE6__

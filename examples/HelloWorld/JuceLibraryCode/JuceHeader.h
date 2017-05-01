@@ -10,8 +10,7 @@
 
 */
 
-#ifndef __APPHEADERFILE_TTAKTK1S__
-#define __APPHEADERFILE_TTAKTK1S__
+#pragma once
 
 #include "AppConfig.h"
 
@@ -37,5 +36,3 @@ namespace ProjectInfo
     const int          versionNumber  = 0x10000;
 }
 #endif
-
-#endif   // __APPHEADERFILE_TTAKTK1S__

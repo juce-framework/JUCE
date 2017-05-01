@@ -1,17 +1,31 @@
 /*
   ==============================================================================
 
-    This file was auto-generated!
+   This file is part of the JUCE library.
+   Copyright (c) 2017 - ROLI Ltd.
+
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
+
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
+
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
+
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#ifndef MAINCOMPONENT_H_INCLUDED
-#define MAINCOMPONENT_H_INCLUDED
-
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "Resources/WavefrontObjParser.h"
-
 
 
 //==============================================================================
@@ -64,11 +78,10 @@ public:
 
     void render() override
     {
-
         jassert (OpenGLHelpers::isContextActive());
 
         const float desktopScale = (float) openGLContext.getRenderingScale();
-        OpenGLHelpers::clear (Colour::greyLevel (0.1f));
+        OpenGLHelpers::clear (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
 
         glEnable (GL_BLEND);
         glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -96,7 +109,7 @@ public:
         // You can add your component specific drawing code here!
         // This will draw over the top of the openGL background.
 
-        g.setColour(Colours::white);
+        g.setColour (getLookAndFeel().findColour (Label::textColourId));
         g.setFont (20);
         g.drawText ("OpenGL Example", 25, 20, 300, 30, Justification::left);
         g.drawLine (20, 20, 170, 20);
@@ -142,7 +155,11 @@ public:
             "\n"
             "void main()\n"
             "{\n"
+          #if JUCE_OPENGL_ES
+            "    lowp vec4 colour = vec4(0.95, 0.57, 0.03, 0.7);\n"
+          #else
             "    vec4 colour = vec4(0.95, 0.57, 0.03, 0.7);\n"
+          #endif
             "    gl_FragColor = colour;\n"
             "}\n";
 
@@ -386,6 +403,3 @@ private:
 
 // (This function is called by the app startup code to create our main component)
 Component* createMainContentComponent()    { return new MainContentComponent(); }
-
-
-#endif  // MAINCOMPONENT_H_INCLUDED

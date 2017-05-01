@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -34,33 +36,6 @@ namespace juce
 {
     AudioProcessor::WrapperType PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_Undefined;
 }
-
-#if _MSC_VER || JUCE_MINGW
-
-#if JucePlugin_Build_RTAS
- extern "C" BOOL WINAPI DllMainRTAS (HINSTANCE, DWORD, LPVOID);
-#endif
-
-extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID reserved)
-{
-    if (reason == DLL_PROCESS_ATTACH)
-        Process::setCurrentModuleInstanceHandle (instance);
-
-   #if JucePlugin_Build_RTAS
-    if (GetModuleHandleA ("DAE.DLL") != 0)
-    {
-       #if JucePlugin_Build_AAX
-        if (! File::getSpecialLocation (File::currentExecutableFile).hasFileExtension ("aaxplugin"))
-       #endif
-            return DllMainRTAS (instance, reason, reserved);
-    }
-   #endif
-
-    ignoreUnused (reserved);
-    return TRUE;
-}
-
-#endif
 
 //==============================================================================
 namespace juce
@@ -151,7 +126,7 @@ void JUCE_API getUUIDForVST2ID (bool forControllerUID, uint8 uuid[16])
 #endif
 
 #if JucePlugin_Build_VST
-pointer_sized_int JUCE_API handleManufacturerSpecificVST2Opcode (int32 index, pointer_sized_int value, void* ptr, float)
+bool JUCE_API handleManufacturerSpecificVST2Opcode (int32 index, pointer_sized_int value, void* ptr, float)
 {
    #if VST3_REPLACEMENT_AVAILABLE
     if ((index == 'stCA' || index == 'stCa') && value == 'FUID' && ptr != nullptr)
@@ -159,12 +134,12 @@ pointer_sized_int JUCE_API handleManufacturerSpecificVST2Opcode (int32 index, po
         uint8 fuid[16];
         getUUIDForVST2ID  (false, fuid);
         ::memcpy (ptr, fuid, 16);
-        return 1;
+        return true;
     }
    #else
     ignoreUnused (index, value, ptr);
    #endif
-    return 0;
+    return false;
 }
 #endif
 
@@ -175,6 +150,15 @@ pointer_sized_int JUCE_API handleManufacturerSpecificVST2Opcode (int32 index, po
     and make it return a new instance of the filter subclass that you're building.
 */
 extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
+
+#if JucePlugin_Enable_IAA && JucePlugin_Build_STANDALONE && JUCE_IOS && (! JUCE_USE_CUSTOM_AU3_STANDALONE_APP)
+extern bool JUCE_CALLTYPE juce_isInterAppAudioConnected();
+extern void JUCE_CALLTYPE juce_switchToHostApplication();
+
+#if JUCE_MODULE_AVAILABLE_juce_gui_basics
+extern Image JUCE_CALLTYPE juce_getIAAHostIcon (int);
+#endif
+#endif
 
 AudioProcessor* JUCE_API JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor::WrapperType type)
 {
@@ -187,3 +171,46 @@ AudioProcessor* JUCE_API JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor:
 
     return pluginInstance;
 }
+
+bool PluginHostType::isInterAppAudioConnected() const
+{
+   #if JucePlugin_Enable_IAA && JucePlugin_Build_STANDALONE && JUCE_IOS && (! JUCE_USE_CUSTOM_AU3_STANDALONE_APP)
+    if (getPluginLoadedAs() == AudioProcessor::wrapperType_Standalone)
+        return juce_isInterAppAudioConnected();
+   #endif
+
+    return false;
+}
+
+void PluginHostType::switchToHostApplication() const
+{
+   #if JucePlugin_Enable_IAA && JucePlugin_Build_STANDALONE && JUCE_IOS && (! JUCE_USE_CUSTOM_AU3_STANDALONE_APP)
+    if (getPluginLoadedAs() == AudioProcessor::wrapperType_Standalone)
+        juce_switchToHostApplication();
+   #endif
+}
+
+#if JUCE_MODULE_AVAILABLE_juce_gui_basics
+namespace juce {
+
+extern Image JUCE_API getIconFromApplication (const String&, const int);
+
+Image PluginHostType::getHostIcon (int size) const
+{
+    ignoreUnused (size);
+
+   #if JucePlugin_Enable_IAA && JucePlugin_Build_STANDALONE && JUCE_IOS && (! JUCE_USE_CUSTOM_AU3_STANDALONE_APP)
+    if (isInterAppAudioConnected())
+        return juce_getIAAHostIcon (size);
+   #endif
+
+   #if JUCE_MAC
+    String bundlePath (getHostPath().upToLastOccurrenceOf (".app", true, true));
+    return getIconFromApplication (bundlePath, size);
+   #endif
+
+    return Image();
+}
+
+}
+#endif

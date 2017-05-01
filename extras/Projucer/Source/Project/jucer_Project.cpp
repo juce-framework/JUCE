@@ -2,29 +2,30 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
 #include "../jucer_Headers.h"
 #include "jucer_Project.h"
-#include "jucer_ProjectType.h"
 #include "../Project Saving/jucer_ProjectExporter.h"
 #include "../Project Saving/jucer_ProjectSaver.h"
 #include "../Application/jucer_OpenDocumentManager.h"
@@ -111,6 +112,19 @@ void Project::setMissingDefaultValues()
     if (getDocumentTitle().isEmpty())
         setTitle ("JUCE Project");
 
+    {
+        auto defaultSplashScreenAndReporting = ! ProjucerApplication::getApp().isPaidOrGPL();
+
+        if (shouldDisplaySplashScreen() == var() || defaultSplashScreenAndReporting)
+            shouldDisplaySplashScreen() = defaultSplashScreenAndReporting;
+
+        if (shouldReportAppUsage() == var() || defaultSplashScreenAndReporting)
+            shouldReportAppUsage() = defaultSplashScreenAndReporting;
+    }
+
+    if (splashScreenColour() == var())
+        splashScreenColour() = "Dark";
+
     if (! projectRoot.hasProperty (Ids::projectType))
         getProjectTypeValue() = ProjectType_GUIApp::getTypeName();
 
@@ -147,13 +161,14 @@ void Project::setMissingAudioPluginDefaultValues()
 {
     const String sanitisedProjectName (CodeHelpers::makeValidIdentifier (getTitle(), false, true, false));
 
-    setValueIfVoid (shouldBuildVST(),                   true);
-    setValueIfVoid (shouldBuildVST3(),                  false);
-    setValueIfVoid (shouldBuildAU(),                    true);
-    setValueIfVoid (shouldBuildAUv3(),                  false);
-    setValueIfVoid (shouldBuildRTAS(),                  false);
-    setValueIfVoid (shouldBuildAAX(),                   false);
-    setValueIfVoid (shouldBuildStandalone(),            false);
+    setValueIfVoid (getShouldBuildVSTAsValue(),                   true);
+    setValueIfVoid (getShouldBuildVST3AsValue(),                  false);
+    setValueIfVoid (getShouldBuildAUAsValue(),                    true);
+    setValueIfVoid (getShouldBuildAUv3AsValue(),                  false);
+    setValueIfVoid (getShouldBuildRTASAsValue(),                  false);
+    setValueIfVoid (getShouldBuildAAXAsValue(),                   false);
+    setValueIfVoid (getShouldBuildStandalonePluginAsValue(),      false);
+    setValueIfVoid (getShouldEnableIAAAsValue(),                  false);
 
     setValueIfVoid (getPluginName(),                    getTitle());
     setValueIfVoid (getPluginDesc(),                    getTitle());
@@ -220,14 +235,23 @@ void Project::removeDefunctExporters()
 {
     ValueTree exporters (projectRoot.getChildWithName (Ids::EXPORTFORMATS));
 
-    for (;;)
-    {
-        ValueTree oldVC6Exporter (exporters.getChildWithName ("MSVC6"));
+    StringPairArray oldExporters;
+    oldExporters.set ("ANDROID", "Android Ant Exporter");
+    oldExporters.set ("MSVC6", "MSVC6");
+    oldExporters.set ("VS2010", "Visual Studio 2010");
+    oldExporters.set ("VS2012", "Visual Studio 2012");
 
-        if (oldVC6Exporter.isValid())
-            exporters.removeChild (oldVC6Exporter, nullptr);
-        else
-            break;
+    for (auto& key : oldExporters.getAllKeys())
+    {
+        ValueTree oldExporter (exporters.getChildWithName (key));
+
+        if (oldExporter.isValid())
+        {
+            AlertWindow::showMessageBox (AlertWindow::WarningIcon,
+                                         TRANS (oldExporters[key]),
+                                         TRANS ("The " + oldExporters[key]  + " Exporter is deprecated. The exporter will be removed from this project."));
+            exporters.removeChild (oldExporter, nullptr);
+        }
     }
 }
 
@@ -391,7 +415,7 @@ bool Project::hasProjectBeenModified()
 File Project::resolveFilename (String filename) const
 {
     if (filename.isEmpty())
-        return File();
+        return {};
 
     filename = replacePreprocessorDefs (getPreprocessorDefs(), filename);
 
@@ -436,6 +460,98 @@ const ProjectType& Project::getProjectType() const
     return *guiType;
 }
 
+bool Project::shouldBuildTargetType (ProjectType::Target::Type targetType) const noexcept
+{
+    const ProjectType& projectType = getProjectType();
+
+    if (! projectType.supportsTargetType (targetType))
+        return false;
+
+    switch (targetType)
+    {
+        case ProjectType::Target::VSTPlugIn:
+            return shouldBuildVST();
+        case ProjectType::Target::VST3PlugIn:
+            return shouldBuildVST3();
+        case ProjectType::Target::AAXPlugIn:
+            return shouldBuildAAX();
+        case ProjectType::Target::RTASPlugIn:
+            return shouldBuildRTAS();
+        case ProjectType::Target::AudioUnitPlugIn:
+            return shouldBuildAU();
+        case ProjectType::Target::AudioUnitv3PlugIn:
+            return shouldBuildAUv3();
+        case ProjectType::Target::StandalonePlugIn:
+            return shouldBuildStandalonePlugin();
+        case ProjectType::Target::AggregateTarget:
+        case ProjectType::Target::SharedCodeTarget:
+            return projectType.isAudioPlugin();
+        case ProjectType::Target::unspecified:
+            return false;
+        default:
+            break;
+    }
+
+    return true;
+}
+
+ProjectType::Target::Type Project::getTargetTypeFromFilePath (const File& file, bool returnSharedTargetIfNoValidSuffix)
+{
+    if      (LibraryModule::CompileUnit::hasSuffix (file, "_AU"))         return ProjectType::Target::AudioUnitPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_AUv3"))       return ProjectType::Target::AudioUnitv3PlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_AAX"))        return ProjectType::Target::AAXPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_RTAS"))       return ProjectType::Target::RTASPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST2"))       return ProjectType::Target::VSTPlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_VST3"))       return ProjectType::Target::VST3PlugIn;
+    else if (LibraryModule::CompileUnit::hasSuffix (file, "_Standalone")) return ProjectType::Target::StandalonePlugIn;
+
+    return (returnSharedTargetIfNoValidSuffix ? ProjectType::Target::SharedCodeTarget : ProjectType::Target::unspecified);
+}
+
+const char* ProjectType::Target::getName() const noexcept
+{
+    switch (type)
+    {
+        case GUIApp:            return "App";
+        case ConsoleApp:        return "ConsoleApp";
+        case StaticLibrary:     return "Static Library";
+        case DynamicLibrary:    return "Dynamic Library";
+        case VSTPlugIn:         return "VST";
+        case VST3PlugIn:        return "VST3";
+        case AudioUnitPlugIn:   return "AU";
+        case StandalonePlugIn:  return "Standalone Plugin";
+        case AudioUnitv3PlugIn: return "AUv3 AppExtension";
+        case AAXPlugIn:         return "AAX";
+        case RTASPlugIn:        return "RTAS";
+        case SharedCodeTarget:  return "Shared Code";
+        case AggregateTarget:   return "All";
+        default:                return "undefined";
+    }
+}
+
+ProjectType::Target::TargetFileType ProjectType::Target::getTargetFileType() const noexcept
+{
+    switch (type)
+    {
+        case GUIApp:            return executable;
+        case ConsoleApp:        return executable;
+        case StaticLibrary:     return staticLibrary;
+        case DynamicLibrary:    return sharedLibraryOrDLL;
+        case VSTPlugIn:         return pluginBundle;
+        case VST3PlugIn:        return pluginBundle;
+        case AudioUnitPlugIn:   return pluginBundle;
+        case StandalonePlugIn:  return executable;
+        case AudioUnitv3PlugIn: return macOSAppex;
+        case AAXPlugIn:         return pluginBundle;
+        case RTASPlugIn:        return pluginBundle;
+        case SharedCodeTarget:  return staticLibrary;
+        default:
+            break;
+    }
+
+    return unknown;
+}
+
 //==============================================================================
 void Project::createPropertyEditors (PropertyListBuilder& props)
 {
@@ -453,6 +569,55 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 
     props.add (new TextPropertyComponent (getCompanyEmail(), "Company E-mail", 256, false),
                "Your company e-mail, which will be added to the properties of the binary where possible");
+
+    {
+        const String licenseRequiredTagline ("Required for closed source applications without an Indie or Pro JUCE license");
+        const String licenseRequiredInfo ("In accordance with the terms of the JUCE 5 End-Use License Agreement (www.juce.com/juce-5-licence), "
+                                          "this option can only be disabled for closed source applications if you have a JUCE Indie or Pro "
+                                          "license, or are using JUCE under the GPL v3 license.");
+
+        StringPairArray description;
+        description.set ("Report JUCE app usage", "This option controls the collection of usage data from users of this JUCE application.");
+        description.set ("Display the JUCE splash screen", "This option controls the display of the standard JUCE splash screen.");
+
+        if (ProjucerApplication::getApp().isPaidOrGPL())
+        {
+            props.add (new BooleanPropertyComponent (shouldReportAppUsage(), "Report JUCE app usage", licenseRequiredTagline),
+                       description["Report JUCE app usage"] + " " + licenseRequiredInfo);
+
+            props.add (new BooleanPropertyComponent (shouldDisplaySplashScreen(), "Display the JUCE splash screen", licenseRequiredTagline),
+                       description["Display the JUCE splash screen"] + " " + licenseRequiredInfo);
+        }
+        else
+        {
+            StringArray options;
+            Array<var> vars;
+
+            options.add (licenseRequiredTagline);
+            vars.add (var());
+
+            props.add (new ChoicePropertyComponent (Value(), "Report JUCE app usage", options, vars),
+                       description["Report JUCE app usage"] + " " + licenseRequiredInfo);
+
+            props.add (new ChoicePropertyComponent (Value(), "Display the JUCE splash screen", options, vars),
+                       description["Display the JUCE splash screen"] + " " + licenseRequiredInfo);
+        }
+    }
+
+    {
+        StringArray splashScreenColours;
+
+        splashScreenColours.add ("Dark");
+        splashScreenColours.add ("Light");
+
+        Array<var> splashScreenCodes;
+
+        for (auto& splashScreenColour : splashScreenColours)
+            splashScreenCodes.add (splashScreenColour);
+
+        props.add (new ChoicePropertyComponent (splashScreenColour(), "Splash screen colour", splashScreenColours, splashScreenCodes),
+                   "Choose the colour of the JUCE splash screen.");
+    }
 
     {
         StringArray projectTypeNames;
@@ -515,25 +680,23 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 
 void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
 {
-    props.add (new BooleanPropertyComponent (shouldBuildVST(), "Build VST", "Enabled"),
+    props.add (new BooleanPropertyComponent (getShouldBuildVSTAsValue(), "Build VST", "Enabled"),
                "Whether the project should produce a VST plugin.");
-    props.add (new BooleanPropertyComponent (shouldBuildVST3(), "Build VST3", "Enabled"),
+    props.add (new BooleanPropertyComponent (getShouldBuildVST3AsValue(), "Build VST3", "Enabled"),
                "Whether the project should produce a VST3 plugin.");
-    props.add (new BooleanPropertyComponent (shouldBuildAU(), "Build AudioUnit", "Enabled"),
+    props.add (new BooleanPropertyComponent (getShouldBuildAUAsValue(), "Build AudioUnit", "Enabled"),
                "Whether the project should produce an AudioUnit plugin.");
-    props.add (new BooleanPropertyComponent (shouldBuildAUv3(), "Build AudioUnit v3", "Enabled"),
+    props.add (new BooleanPropertyComponent (getShouldBuildAUv3AsValue(), "Build AudioUnit v3", "Enabled"),
                "Whether the project should produce an AudioUnit version 3 plugin.");
-    props.add (new BooleanPropertyComponent (shouldBuildRTAS(), "Build RTAS", "Enabled"),
+    props.add (new BooleanPropertyComponent (getShouldBuildRTASAsValue(), "Build RTAS", "Enabled"),
                "Whether the project should produce an RTAS plugin.");
-    props.add (new BooleanPropertyComponent (shouldBuildAAX(), "Build AAX", "Enabled"),
+    props.add (new BooleanPropertyComponent (getShouldBuildAAXAsValue(), "Build AAX", "Enabled"),
                "Whether the project should produce an AAX plugin.");
-
-    /* TODO: this property editor is temporarily disabled because right now we build standalone if and only if
-       we also build AUv3. However as soon as targets are supported on non-Xcode exporters as well, we should
-       re-enable this option and allow to build the standalone plug-in independently from AUv3.
-    */
-    // props.add (new BooleanPropertyComponent (shouldBuildStandalone(), "Build Standalone", "Enabled"),
-    //            "Whether the project should produce a standalone version of the plugin. Required for AUv3.");
+    props.add (new BooleanPropertyComponent (getShouldBuildStandalonePluginAsValue(), "Build Standalone Plug-In", "Enabled"),
+               "Whether the project should produce a standalone version of your plugin.");
+    props.add (new BooleanPropertyComponent (getShouldEnableIAAAsValue(), "Enable Inter-App Audio", "Enabled"),
+               "Whether a standalone plug-in should be an Inter-App Audio app. You should also enable the audio "
+               "background capability in the iOS exporter.");
 
     props.add (new TextPropertyComponent (getPluginName(), "Plugin Name", 128, false),
                "The name of your plugin (keep it short!)");
@@ -756,7 +919,7 @@ String Project::Item::getFilePath() const
     if (isFile())
         return state [Ids::file].toString();
 
-    return String();
+    return {};
 }
 
 File Project::Item::getFile() const
@@ -764,7 +927,7 @@ File Project::Item::getFile() const
     if (isFile())
         return project.resolveFilename (state [Ids::file].toString());
 
-    return File();
+    return {};
 }
 
 void Project::Item::setFile (const File& file)
@@ -1053,22 +1216,22 @@ bool Project::Item::addRelativeFile (const RelativePath& file, int insertIndex, 
     return false;
 }
 
-Icon Project::Item::getIcon() const
+Icon Project::Item::getIcon (bool isOpen) const
 {
     const Icons& icons = getIcons();
 
     if (isFile())
     {
         if (isImageFile())
-            return Icon (icons.imageDoc, Colours::blue);
+            return Icon (icons.imageDoc, Colours::transparentBlack);
 
-        return Icon (icons.document, Colours::yellow);
+        return Icon (icons.file, Colours::transparentBlack);
     }
 
     if (isMainGroup())
         return Icon (icons.juceLogo, Colours::orange);
 
-    return Icon (icons.folder, Colours::darkgrey);
+    return Icon (isOpen ? icons.openFolder : icons.closedFolder, Colours::transparentBlack);
 }
 
 bool Project::Item::isIconCrossedOut() const
@@ -1163,6 +1326,34 @@ String Project::getAUMainTypeCode()
     return s;
 }
 
+String Project::getIAATypeCode()
+{
+    String s;
+    if (getPluginWantsMidiInput().getValue())
+    {
+        if (getPluginIsSynth().getValue())
+            s = "auri";
+        else
+            s = "aurm";
+    }
+    else
+    {
+        if (getPluginIsSynth().getValue())
+            s = "aurg";
+        else
+            s = "aurx";
+    }
+    return s;
+}
+
+String Project::getIAAPluginName()
+{
+    String s = getPluginManufacturer().toString();
+    s << ": ";
+    s << getPluginName().toString();
+    return s;
+}
+
 String Project::getPluginVSTCategoryString()
 {
     String s (getPluginVSTCategory().toString().trim());
@@ -1236,7 +1427,7 @@ String Project::getFileTemplate (const String& templateName)
         return String::fromUTF8 (data, dataSize);
 
     jassertfalse;
-    return String();
+    return {};
 
 }
 

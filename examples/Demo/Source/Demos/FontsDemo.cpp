@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -34,12 +36,6 @@ class FontsDemo  : public Component,
 {
 public:
     FontsDemo()
-        : heightLabel (String(), "Height:"),
-          kerningLabel (String(), "Kerning:"),
-          scaleLabel  (String(), "Scale:"),
-          styleLabel ("Style"),
-          boldToggle ("Bold"),
-          italicToggle ("Italic")
     {
         setOpaque (true);
 
@@ -71,6 +67,9 @@ public:
 
         listBox.setRowHeight (20);
         listBox.setModel (this);   // Tell the listbox where to get its data model
+        listBox.setColour (ListBox::textColourId, Colours::black);
+        listBox.setColour (ListBox::backgroundColourId, Colours::white);
+
 
         heightSlider.setRange (3.0, 150.0, 0.01);
         scaleSlider.setRange (0.2, 3.0, 0.01);
@@ -106,17 +105,19 @@ public:
                              "non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
 
         demoTextBox.setCaretPosition (0);
+        demoTextBox.setColour (TextEditor::textColourId, Colours::black);
+        demoTextBox.setColour (TextEditor::backgroundColourId, Colours::white);
     }
 
     //==============================================================================
     void paint (Graphics& g) override
     {
-        fillStandardDemoBackground (g);
+        g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
     }
 
     void resized() override
     {
-        Rectangle<int> r (getLocalBounds().reduced (5));
+        auto r = getLocalBounds().reduced (5);
 
         // lay out the list box and vertical divider..
         Component* vcomps[] = { &listBox, verticalDividerBar, nullptr };
@@ -134,7 +135,7 @@ public:
 
         const int labelWidth = 60;
 
-        Rectangle<int> row (r.removeFromBottom (30));
+        auto row = r.removeFromBottom (30);
         row.removeFromLeft (labelWidth);
         boldToggle.setBounds (row.removeFromLeft (row.getWidth() / 2));
         italicToggle.setBounds (row);
@@ -174,12 +175,12 @@ public:
         if (rowIsSelected)
             g.fillAll (Colours::lightblue);
 
-        Font font (fonts [rowNumber]);
+        Font font (fonts[rowNumber]);
 
         AttributedString s;
         s.setWordWrap (AttributedString::none);
         s.setJustification (Justification::centredLeft);
-        s.append (font.getTypefaceName(), font.withPointHeight (height * 0.7f), Colours::black);
+        s.append (font.getTypefaceName(), font.withHeight (height * 0.7f), Colours::black);
         s.append ("   " + font.getTypefaceName(), Font (height * 0.5f, Font::italic), Colours::grey);
 
         s.draw (g, Rectangle<int> (width, height).expanded (-4, 50).toFloat());
@@ -196,9 +197,16 @@ private:
 
     ListBox listBox;
     TextEditor demoTextBox;
-    Label heightLabel, kerningLabel, scaleLabel, styleLabel;
+
+    Label heightLabel {{}, "Height:" },
+          kerningLabel {{}, "Kerning:" },
+          scaleLabel { "Scale:" },
+          styleLabel { "Style" };
+
+    ToggleButton boldToggle { "Bold" },
+                 italicToggle { "Italic" };
+
     Slider heightSlider, kerningSlider, scaleSlider;
-    ToggleButton boldToggle, italicToggle;
     ComboBox styleBox;
 
     StretchableLayoutManager verticalLayout;

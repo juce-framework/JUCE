@@ -2,28 +2,29 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#ifndef JUCER_PRESETIDS_H_INCLUDED
-#define JUCER_PRESETIDS_H_INCLUDED
+#pragma once
 
 
 // Handy list of static Identifiers..
@@ -44,6 +45,9 @@ namespace Ids
     DECLARE_ID (companyName);
     DECLARE_ID (companyWebsite);
     DECLARE_ID (companyEmail);
+    DECLARE_ID (displaySplashScreen);
+    DECLARE_ID (reportAppUsage);
+    DECLARE_ID (splashScreenColour);
     DECLARE_ID (position);
     DECLARE_ID (source);
     DECLARE_ID (width);
@@ -102,8 +106,11 @@ namespace Ids
     DECLARE_ID (extraDLLs);
     DECLARE_ID (winArchitecture);
     DECLARE_ID (winWarningLevel);
+    DECLARE_ID (msvcManifestFile);
     DECLARE_ID (warningsAreErrors);
     DECLARE_ID (linuxArchitecture);
+    DECLARE_ID (linuxCodeBlocksArchitecture);
+    DECLARE_ID (windowsCodeBlocksArchitecture);
     DECLARE_ID (toolset);
     DECLARE_ID (IPPLibrary);
     DECLARE_ID (msvcModuleDefinitionFile);
@@ -112,7 +119,6 @@ namespace Ids
     DECLARE_ID (jucerVersion);
     DECLARE_ID (prebuildCommand);
     DECLARE_ID (postbuildCommand);
-    DECLARE_ID (internalPostBuildComamnd);
     DECLARE_ID (generateManifest);
     DECLARE_ID (useRuntimeLibDLL);
     DECLARE_ID (wholeProgramOptimisation);
@@ -166,6 +172,7 @@ namespace Ids
     DECLARE_ID (androidStaticLibraries);
     DECLARE_ID (androidSharedLibraries);
     DECLARE_ID (androidScreenOrientation);
+    DECLARE_ID (androidExtraAssetsFolder);
     DECLARE_ID (iosScreenOrientation);
     DECLARE_ID (iosInAppPurchases);
     DECLARE_ID (iosBackgroundAudio);
@@ -173,7 +180,7 @@ namespace Ids
     DECLARE_ID (iosDevelopmentTeamID);
     DECLARE_ID (buildToolsVersion);
     DECLARE_ID (gradleVersion);
-    DECLARE_ID (gradleWrapperVersion);
+    const Identifier androidPluginVersion ("gradleWrapperVersion"); // old name is very confusing, but we need to remain backward compatible
     DECLARE_ID (gradleToolchain);
     DECLARE_ID (gradleToolchainVersion);
     DECLARE_ID (linuxExtraPkgConfig);
@@ -234,5 +241,3 @@ namespace Ids
 
     #undef DECLARE_ID
 }
-
-#endif   // JUCER_PRESETIDS_H_INCLUDED

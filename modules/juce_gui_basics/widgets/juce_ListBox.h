@@ -2,28 +2,29 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#ifndef JUCE_LISTBOX_H_INCLUDED
-#define JUCE_LISTBOX_H_INCLUDED
+#pragma once
 
 
 //==============================================================================
@@ -60,7 +61,7 @@ public:
         and handle mouse clicks with listBoxItemClicked().
 
         This method will be called whenever a custom component might need to be updated - e.g.
-        when the table is changed, or TableListBox::updateContent() is called.
+        when the list is changed, or ListBox::updateContent() is called.
 
         If you don't need a custom component for the specified row, then return nullptr.
         (Bear in mind that even if you're not creating a new component, you may still need to
@@ -578,11 +579,11 @@ private:
     ScopedPointer<ListViewport> viewport;
     ScopedPointer<Component> headerComponent;
     ScopedPointer<MouseListener> mouseMoveSelector;
-    int totalItems, rowHeight, minimumRowWidth;
-    int outlineThickness;
-    int lastRowSelected;
-    bool multipleSelection, alwaysFlipSelection, hasDoneInitialUpdate, selectOnMouseDown;
     SparseSet<int> selected;
+    int totalItems = 0, rowHeight = 22, minimumRowWidth = 0;
+    int outlineThickness = 0;
+    int lastRowSelected = -1;
+    bool multipleSelection = false, alwaysFlipSelection = false, hasDoneInitialUpdate = false, selectOnMouseDown = true;
 
     void selectRowInternal (int rowNumber, bool dontScrollToShowThisRow,
                             bool deselectOthersFirst, bool isMouseClick);
@@ -597,6 +598,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ListBox)
 };
-
-
-#endif   // JUCE_LISTBOX_H_INCLUDED

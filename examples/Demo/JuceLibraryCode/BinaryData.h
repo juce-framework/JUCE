@@ -4,8 +4,7 @@
 
 */
 
-#ifndef BINARYDATA_H_134119534_INCLUDED
-#define BINARYDATA_H_134119534_INCLUDED
+#pragma once
 
 namespace BinaryData
 {
@@ -46,5 +45,3 @@ namespace BinaryData
     // return the corresponding data and its size (or a null pointer if the name isn't found).
     const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes) throw();
 }
-
-#endif

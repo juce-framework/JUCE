@@ -2,34 +2,25 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#ifndef JUCE_PLATFORMDEFS_H_INCLUDED
-#define JUCE_PLATFORMDEFS_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /*  This file defines miscellaneous macros for debugging, assertions, etc.
@@ -63,7 +54,7 @@
 #endif
 
 //==============================================================================
-#if JUCE_IOS || JUCE_LINUX || JUCE_ANDROID
+#if JUCE_IOS || JUCE_LINUX
   /** This will try to break into the debugger if the app is currently being debugged.
       If called by an app that's not being debugged, the behaviour isn't defined - it may
       crash or not, depending on the platform.
@@ -81,6 +72,8 @@
   #else
    #define JUCE_BREAK_IN_DEBUGGER       { asm ("int $3"); }
   #endif
+#elif JUCE_ANDROID
+  #define JUCE_BREAK_IN_DEBUGGER        { __builtin_trap(); }
 #else
   #define JUCE_BREAK_IN_DEBUGGER        { __asm int 3 }
 #endif
@@ -172,30 +165,6 @@
 #define JUCE_STRINGIFY(item)  JUCE_STRINGIFY_MACRO_HELPER (item)
 
 //==============================================================================
-#if JUCE_COMPILER_SUPPORTS_STATIC_ASSERT
-  /** A compile-time assertion macro.
-     If the expression parameter is false, the macro will cause a compile error. (The actual error
-     message that the compiler generates may be completely bizarre and seem to have no relation to
-     the place where you put the static_assert though!)
-  */
-  #define static_jassert(expression) static_assert(expression, #expression);
-#else
- #ifndef DOXYGEN
-  namespace juce
-  {
-     template <bool b> struct JuceStaticAssert;
-     template <>       struct JuceStaticAssert<true> { static void dummy() {} };
-  }
- #endif
-
-  /** A compile-time assertion macro.
-      If the expression parameter is false, the macro will cause a compile error. (The actual error
-      message that the compiler generates may be completely bizarre and seem to have no relation to
-      the place where you put the static_assert though!)
-  */
-  #define static_jassert(expression)      juce::JuceStaticAssert<expression>::dummy();
-#endif
-
 /** This is a shorthand macro for declaring stubs for a class's copy constructor and operator=.
 
     For example, instead of
@@ -324,5 +293,3 @@
 #else
  #define JUCE_NO_ASSOCIATIVE_MATH_OPTIMISATIONS
 #endif
-
-#endif   // JUCE_PLATFORMDEFS_H_INCLUDED

@@ -2,28 +2,29 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#ifndef JUCER_NEWPROJECTWIZARDCOMPONENT_H_INCLUDED
-#define JUCER_NEWPROJECTWIZARDCOMPONENT_H_INCLUDED
+#pragma once
 
 
 class ModulesFolderPathBox  : public Component,
@@ -55,13 +56,10 @@ public:
 
     void resized() override
     {
-        Rectangle<int> r = getLocalBounds();
+        auto r = getLocalBounds();
 
+        openFolderButton.setBounds (r.removeFromRight (30));
         modulesLabel.setBounds (r.removeFromLeft (110));
-
-        openFolderButton.setBounds (r.removeFromRight (40));
-        r.removeFromRight (5);
-
         currentPathBox.setBounds (r);
     }
 
@@ -140,14 +138,15 @@ public:
         {
             const ProjectExporter::ExporterTypeInfo& type = types.getReference (i);
             platforms.add (new PlatformType (type.getIcon(), type.name));
+            addAndMakeVisible (toggles.add (new ToggleButton (String())));
         }
 
-        listBox.setRowHeight (35);
+        listBox.setRowHeight (30);
         listBox.setModel (this);
         listBox.setOpaque (false);
         listBox.setMultipleSelectionEnabled (true);
         listBox.setClickingTogglesRowSelection (true);
-        listBox.setColour (ListBox::backgroundColourId, Colours::white.withAlpha (0.0f));
+        listBox.setColour (ListBox::backgroundColourId, Colours::transparentBlack);
         addAndMakeVisible (listBox);
 
         selectDefaultExporterIfNoneSelected();
@@ -191,34 +190,28 @@ public:
 
     void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected) override
     {
+        ignoreUnused (width);
+
         if (PlatformType* platform = platforms[rowNumber])
         {
-            if (rowIsSelected)
-                g.fillAll (Colour (0x99f29000));
+            auto bounds = getLocalBounds().withHeight (height).withTrimmedBottom (1);
+            g.setColour (findColour (rowNumber % 2 == 0 ? widgetBackgroundColourId
+                                                        : secondaryWidgetBackgroundColourId));
+            g.fillRect (bounds);
 
-            Rectangle<float> dotSelect ((float) height, (float) height);
-            dotSelect.reduce (12, 12);
+            bounds.removeFromLeft (10);
 
-            g.setColour (Colour (0x33ffffff));
-            g.fillEllipse (dotSelect);
+            auto toggleBounds = bounds.removeFromLeft (height);
+            drawToggle (g, toggleBounds, rowIsSelected);
 
-            if (rowIsSelected)
-            {
-                const float tx = dotSelect.getCentreX();
-                const float ty = dotSelect.getCentreY() + 1.0f;
+            auto iconBounds = bounds.removeFromLeft (height).reduced (5);
 
-                Path tick;
-                tick.startNewSubPath (tx - 5.0f, ty - 6.0f);
-                tick.lineTo (tx, ty);
-                tick.lineTo (tx + 8.0f, ty - 13.0f);
+            g.drawImageWithin (platform->icon, iconBounds.getX(), iconBounds.getY(), iconBounds.getWidth(),
+                               iconBounds.getHeight(), RectanglePlacement::fillDestination);
 
-                g.setColour (Colours::white);
-                g.strokePath (tick, PathStrokeType (3.0f));
-            }
-
-            g.setColour (Colours::black);
-            g.drawImageWithin (platform->icon, 40, 0, height, height, RectanglePlacement::stretchToFit);
-            g.drawText (platform->name, 90, 0, width, height, Justification::left);
+            bounds.removeFromLeft (10);
+            g.setColour (findColour (widgetTextColourId));
+            g.drawFittedText (platform->name, bounds, Justification::centredLeft, 1);
         }
     }
 
@@ -239,8 +232,38 @@ private:
         String name;
     };
 
+    void drawToggle (Graphics& g, Rectangle<int> bounds, bool isToggled)
+    {
+        auto sideLength = jmin (bounds.getWidth(), bounds.getHeight());
+
+        bounds = bounds.withSizeKeepingCentre (sideLength, sideLength).reduced (4);
+
+        g.setColour (findColour (ToggleButton::tickDisabledColourId));
+        g.drawRoundedRectangle (bounds.toFloat(), 2.0f, 1.0f);
+
+        if (isToggled)
+        {
+            g.setColour (findColour (ToggleButton::tickColourId));
+            const auto tick = getTickShape (0.75f);
+            g.fillPath (tick, tick.getTransformToScaleToFit (bounds.reduced (4, 5).toFloat(), false));
+        }
+    }
+
+    Path getTickShape (float height)
+    {
+        static const unsigned char pathData[] = { 110,109,32,210,202,64,126,183,148,64,108,39,244,247,64,245,76,124,64,108,178,131,27,65,246,76,252,64,108,175,242,4,65,246,76,252,
+            64,108,236,5,68,65,0,0,160,180,108,240,150,90,65,21,136,52,63,108,48,59,16,65,0,0,32,65,108,32,210,202,64,126,183,148,64, 99,101,0,0 };
+
+        Path path;
+        path.loadPathFromData (pathData, sizeof (pathData));
+        path.scaleToFit (0, 0, height * 2.0f, height, true);
+
+        return path;
+    }
+
     ListBox listBox;
     OwnedArray<PlatformType> platforms;
+    OwnedArray<ToggleButton> toggles;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PlatformTargetsComp)
 };
@@ -321,18 +344,15 @@ public:
         addChildAndSetID (&modulesPathBox, "modulesPathBox");
         modulesPathBox.setBounds ("targetsOutline.left, targetsOutline.top - 45, targetsOutline.right, targetsOutline.top - 20");
 
-
         updateCustomItems();
         updateCreateButton();
+
+        lookAndFeelChanged();
     }
 
     void paint (Graphics& g) override
     {
-        Rectangle<int> rect = getLocalBounds().reduced (10, 10);
-
-        g.setColour (Colours::white.withAlpha (0.3f));
-        g.fillRect (rect);
-        g.fillRect (rect.reduced (10, 10));
+        g.fillAll (findColour (backgroundColourId));
     }
 
     void buttonClicked (Button* b) override
@@ -446,7 +466,14 @@ private:
     {
         createButton.setEnabled (projectName.getText().trim().isNotEmpty());
     }
+
+    void lookAndFeelChanged() override
+    {
+        projectName.setColour (TextEditor::backgroundColourId, findColour (backgroundColourId));
+        projectName.setColour (TextEditor::textColourId, findColour (defaultTextColourId));
+        projectName.setColour (TextEditor::outlineColourId, findColour (defaultTextColourId));
+        projectName.applyFontToAllText (projectName.getFont());
+
+        fileBrowser.resized();
+    }
 };
-
-
-#endif   // JUCER_NEWPROJECTWIZARDCOMPONENT_H_INCLUDED

@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -170,6 +172,29 @@ private:
             if (dispIdMember == DISPID_DOCUMENTCOMPLETE)
             {
                 owner.pageFinishedLoading (getStringFromVariant (pDispParams->rgvarg[0].pvarVal));
+                return S_OK;
+            }
+
+            if (dispIdMember == DISPID_NAVIGATEERROR)
+            {
+                int statusCode = pDispParams->rgvarg[1].pvarVal->intVal;
+                *pDispParams->rgvarg[0].pboolVal = VARIANT_FALSE;
+
+                // IWebBrowser2 also reports http status codes here, we need
+                // report only network erros
+                if (statusCode < 0)
+                {
+                    LPTSTR messageBuffer = nullptr;
+                    size_t size = FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                                                 NULL, statusCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) &messageBuffer, 0, NULL);
+
+                    String message(messageBuffer, size);
+                    LocalFree(messageBuffer);
+
+                    if (!owner.pageLoadHadNetworkError(message))
+                        *pDispParams->rgvarg[0].pboolVal = VARIANT_TRUE;
+                }
+
                 return S_OK;
             }
 
@@ -362,5 +387,41 @@ void WebBrowserComponent::focusGained (FocusChangeType)
         }
 
         oleObject->Release();
+    }
+}
+
+void WebBrowserComponent::clearCookies()
+{
+    HeapBlock<::INTERNET_CACHE_ENTRY_INFO> entry;
+    ::DWORD entrySize = sizeof (::INTERNET_CACHE_ENTRY_INFO);
+    ::HANDLE urlCacheHandle = ::FindFirstUrlCacheEntry (TEXT ("cookie:"), entry.getData(), &entrySize);
+
+    if (urlCacheHandle == nullptr && GetLastError() == ERROR_INSUFFICIENT_BUFFER)
+    {
+        entry.realloc (1, entrySize);
+        urlCacheHandle = ::FindFirstUrlCacheEntry (TEXT ("cookie:"), entry.getData(), &entrySize);
+    }
+
+    if (urlCacheHandle != nullptr)
+    {
+        for (;;)
+        {
+            ::DeleteUrlCacheEntry (entry.getData()->lpszSourceUrlName);
+
+            if (::FindNextUrlCacheEntry (urlCacheHandle, entry.getData(), &entrySize) == 0)
+            {
+                if (GetLastError() == ERROR_INSUFFICIENT_BUFFER)
+                {
+                    entry.realloc (1, entrySize);
+
+                    if (::FindNextUrlCacheEntry (urlCacheHandle, entry.getData(), &entrySize) != 0)
+                        continue;
+                }
+
+                break;
+            }
+        }
+
+        FindCloseUrlCache (urlCacheHandle);
     }
 }

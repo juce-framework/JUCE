@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -35,7 +37,7 @@ namespace PathHelpers
     {
         t = t.findEndOfWhitespace();
 
-        String::CharPointerType start (t);
+        auto start = t;
         size_t numChars = 0;
 
         while (! (t.isEmpty() || t.isWhitespace()))
@@ -44,7 +46,7 @@ namespace PathHelpers
             ++numChars;
         }
 
-        return String (start, numChars);
+        return { start, numChars };
     }
 
     inline double lengthOf (float x1, float y1, float x2, float y2) noexcept
@@ -63,15 +65,19 @@ const float Path::closeSubPathMarker   = 100005.0f;
 const float Path::defaultToleranceForTesting = 1.0f;
 const float Path::defaultToleranceForMeasurement = 0.6f;
 
+static inline bool isMarker (float value, float marker) noexcept
+{
+    return value == marker;
+}
+
 //==============================================================================
 Path::PathBounds::PathBounds() noexcept
-    : pathXMin (0), pathXMax (0), pathYMin (0), pathYMax (0)
 {
 }
 
 Rectangle<float> Path::PathBounds::getRectangle() const noexcept
 {
-    return Rectangle<float> (pathXMin, pathYMin, pathXMax - pathXMin, pathYMax - pathYMin);
+    return { pathXMin, pathYMin, pathXMax - pathXMin, pathYMax - pathYMin };
 }
 
 void Path::PathBounds::reset() noexcept
@@ -120,7 +126,6 @@ void Path::PathBounds::extend (const float x1, const float y1, const float x2, c
 
 //==============================================================================
 Path::Path()
-   : numElements (0), useNonZeroWinding (true)
 {
 }
 
@@ -157,7 +162,6 @@ Path& Path::operator= (const Path& other)
     return *this;
 }
 
-#if JUCE_COMPILER_SUPPORTS_MOVE_SEMANTICS
 Path::Path (Path&& other) noexcept
     : data (static_cast<ArrayAllocationBase <float, DummyCriticalSection>&&> (other.data)),
       numElements (other.numElements),
@@ -174,7 +178,6 @@ Path& Path::operator= (Path&& other) noexcept
     useNonZeroWinding = other.useNonZeroWinding;
     return *this;
 }
-#endif
 
 bool Path::operator== (const Path& other) const noexcept
 {
@@ -216,8 +219,7 @@ void Path::setUsingNonZeroWinding (const bool isNonZero) noexcept
     useNonZeroWinding = isNonZero;
 }
 
-void Path::scaleToFit (const float x, const float y, const float w, const float h,
-                       const bool preserveProportions) noexcept
+void Path::scaleToFit (float x, float y, float w, float h, bool preserveProportions) noexcept
 {
     applyTransform (getTransformToScaleToFit (x, y, w, h, preserveProportions));
 }
@@ -229,15 +231,15 @@ bool Path::isEmpty() const noexcept
 
     while (i < numElements)
     {
-        const float type = data.elements [i++];
+        auto type = data.elements[i++];
 
-        if (type == moveMarker)
+        if (isMarker (type, moveMarker))
         {
             i += 2;
         }
-        else if (type == lineMarker
-                 || type == quadMarker
-                 || type == cubicMarker)
+        else if (isMarker (type, lineMarker)
+                 || isMarker (type, quadMarker)
+                 || isMarker (type, cubicMarker))
         {
             return false;
         }
@@ -273,9 +275,9 @@ void Path::startNewSubPath (const float x, const float y)
 
     preallocateSpace (3);
 
-    data.elements [numElements++] = moveMarker;
-    data.elements [numElements++] = x;
-    data.elements [numElements++] = y;
+    data.elements[numElements++] = moveMarker;
+    data.elements[numElements++] = x;
+    data.elements[numElements++] = y;
 }
 
 void Path::startNewSubPath (const Point<float> start)
@@ -292,9 +294,9 @@ void Path::lineTo (const float x, const float y)
 
     preallocateSpace (3);
 
-    data.elements [numElements++] = lineMarker;
-    data.elements [numElements++] = x;
-    data.elements [numElements++] = y;
+    data.elements[numElements++] = lineMarker;
+    data.elements[numElements++] = x;
+    data.elements[numElements++] = y;
 
     bounds.extend (x, y);
 }
@@ -315,11 +317,11 @@ void Path::quadraticTo (const float x1, const float y1,
 
     preallocateSpace (5);
 
-    data.elements [numElements++] = quadMarker;
-    data.elements [numElements++] = x1;
-    data.elements [numElements++] = y1;
-    data.elements [numElements++] = x2;
-    data.elements [numElements++] = y2;
+    data.elements[numElements++] = quadMarker;
+    data.elements[numElements++] = x1;
+    data.elements[numElements++] = y1;
+    data.elements[numElements++] = x2;
+    data.elements[numElements++] = y2;
 
     bounds.extend (x1, y1, x2, y2);
 }
@@ -344,13 +346,13 @@ void Path::cubicTo (const float x1, const float y1,
 
     preallocateSpace (7);
 
-    data.elements [numElements++] = cubicMarker;
-    data.elements [numElements++] = x1;
-    data.elements [numElements++] = y1;
-    data.elements [numElements++] = x2;
-    data.elements [numElements++] = y2;
-    data.elements [numElements++] = x3;
-    data.elements [numElements++] = y3;
+    data.elements[numElements++] = cubicMarker;
+    data.elements[numElements++] = x1;
+    data.elements[numElements++] = y1;
+    data.elements[numElements++] = x2;
+    data.elements[numElements++] = y2;
+    data.elements[numElements++] = x3;
+    data.elements[numElements++] = y3;
 
     bounds.extend (x1, y1, x2, y2);
     bounds.extend (x3, y3);
@@ -367,11 +369,10 @@ void Path::cubicTo (const Point<float> controlPoint1,
 
 void Path::closeSubPath()
 {
-    if (numElements > 0
-         && data.elements [numElements - 1] != closeSubPathMarker)
+    if (numElements > 0 && ! isMarker (data.elements[numElements - 1], closeSubPathMarker))
     {
         preallocateSpace (1);
-        data.elements [numElements++] = closeSubPathMarker;
+        data.elements[numElements++] = closeSubPathMarker;
     }
 }
 
@@ -379,11 +380,11 @@ Point<float> Path::getCurrentPosition() const
 {
     int i = (int) numElements - 1;
 
-    if (i > 0 && data.elements[i] == closeSubPathMarker)
+    if (i > 0 && isMarker (data.elements[i], closeSubPathMarker))
     {
         while (i >= 0)
         {
-            if (data.elements[i] == moveMarker)
+            if (isMarker (data.elements[i], moveMarker))
             {
                 i += 2;
                 break;
@@ -394,9 +395,9 @@ Point<float> Path::getCurrentPosition() const
     }
 
     if (i > 0)
-        return Point<float> (data.elements [i - 1], data.elements [i]);
+        return { data.elements[i - 1], data.elements[i] };
 
-    return Point<float>();
+    return {};
 }
 
 void Path::addRectangle (const float x, const float y,
@@ -424,19 +425,19 @@ void Path::addRectangle (const float x, const float y,
         bounds.pathYMax = jmax (bounds.pathYMax, y2);
     }
 
-    data.elements [numElements++] = moveMarker;
-    data.elements [numElements++] = x1;
-    data.elements [numElements++] = y2;
-    data.elements [numElements++] = lineMarker;
-    data.elements [numElements++] = x1;
-    data.elements [numElements++] = y1;
-    data.elements [numElements++] = lineMarker;
-    data.elements [numElements++] = x2;
-    data.elements [numElements++] = y1;
-    data.elements [numElements++] = lineMarker;
-    data.elements [numElements++] = x2;
-    data.elements [numElements++] = y2;
-    data.elements [numElements++] = closeSubPathMarker;
+    data.elements[numElements++] = moveMarker;
+    data.elements[numElements++] = x1;
+    data.elements[numElements++] = y2;
+    data.elements[numElements++] = lineMarker;
+    data.elements[numElements++] = x1;
+    data.elements[numElements++] = y1;
+    data.elements[numElements++] = lineMarker;
+    data.elements[numElements++] = x2;
+    data.elements[numElements++] = y1;
+    data.elements[numElements++] = lineMarker;
+    data.elements[numElements++] = x2;
+    data.elements[numElements++] = y2;
+    data.elements[numElements++] = closeSubPathMarker;
 }
 
 void Path::addRoundedRectangle (float x, float y, float w, float h, float csx, float csy)
@@ -451,10 +452,10 @@ void Path::addRoundedRectangle (const float x, const float y, const float w, con
 {
     csx = jmin (csx, w * 0.5f);
     csy = jmin (csy, h * 0.5f);
-    const float cs45x = csx * 0.45f;
-    const float cs45y = csy * 0.45f;
-    const float x2 = x + w;
-    const float y2 = y + h;
+    auto cs45x = csx * 0.45f;
+    auto cs45y = csy * 0.45f;
+    auto x2 = x + w;
+    auto y2 = y + h;
 
     if (curveTopLeft)
     {
@@ -540,12 +541,12 @@ void Path::addEllipse (float x, float y, float w, float h)
 
 void Path::addEllipse (Rectangle<float> area)
 {
-    const float hw = area.getWidth() * 0.5f;
-    const float hw55 = hw * 0.55f;
-    const float hh = area.getHeight() * 0.5f;
-    const float hh55 = hh * 0.55f;
-    const float cx = area.getX() + hw;
-    const float cy = area.getY() + hh;
+    auto hw = area.getWidth() * 0.5f;
+    auto hw55 = hw * 0.55f;
+    auto hh = area.getHeight() * 0.5f;
+    auto hh55 = hh * 0.55f;
+    auto cx = area.getX() + hw;
+    auto cy = area.getY() + hh;
 
     startNewSubPath (cx, cy - hh);
     cubicTo (cx + hw55, cy - hh, cx + hw, cy - hh55, cx + hw, cy);
@@ -561,8 +562,8 @@ void Path::addArc (const float x, const float y,
                    const float toRadians,
                    const bool startAsNewSubPath)
 {
-    const float radiusX = w / 2.0f;
-    const float radiusY = h / 2.0f;
+    auto radiusX = w / 2.0f;
+    auto radiusY = h / 2.0f;
 
     addCentredArc (x + radiusX,
                    y + radiusY,
@@ -582,8 +583,8 @@ void Path::addCentredArc (const float centreX, const float centreY,
     if (radiusX > 0.0f && radiusY > 0.0f)
     {
         const Point<float> centre (centreX, centreY);
-        const AffineTransform rotation (AffineTransform::rotation (rotationOfEllipse, centreX, centreY));
-        float angle = fromRadians;
+        auto rotation = AffineTransform::rotation (rotationOfEllipse, centreX, centreY);
+        auto angle = fromRadians;
 
         if (startAsNewSubPath)
             startNewSubPath (centre.getPointOnCircumference (radiusX, radiusY, angle).transformedBy (rotation));
@@ -676,7 +677,7 @@ void Path::addPieSegment (Rectangle<float> segmentBounds,
 //==============================================================================
 void Path::addLineSegment (const Line<float>& line, float lineThickness)
 {
-    const Line<float> reversed (line.reversed());
+    auto reversed = line.reversed();
     lineThickness *= 0.5f;
 
     startNewSubPath (line.getPointAlongLine (0, lineThickness));
@@ -689,7 +690,7 @@ void Path::addLineSegment (const Line<float>& line, float lineThickness)
 void Path::addArrow (const Line<float>& line, float lineThickness,
                      float arrowheadWidth, float arrowheadLength)
 {
-    const Line<float> reversed (line.reversed());
+    auto reversed = line.reversed();
     lineThickness *= 0.5f;
     arrowheadWidth *= 0.5f;
     arrowheadLength = jmin (arrowheadLength, 0.8f * line.getLength());
@@ -711,12 +712,12 @@ void Path::addPolygon (const Point<float> centre, const int numberOfSides,
 
     if (numberOfSides > 1)
     {
-        const float angleBetweenPoints = float_Pi * 2.0f / numberOfSides;
+        auto angleBetweenPoints = float_Pi * 2.0f / numberOfSides;
 
         for (int i = 0; i < numberOfSides; ++i)
         {
-            const float angle = startAngle + i * angleBetweenPoints;
-            const Point<float> p (centre.getPointOnCircumference (radius, angle));
+            auto angle = startAngle + i * angleBetweenPoints;
+            auto p = centre.getPointOnCircumference (radius, angle);
 
             if (i == 0)
                 startNewSubPath (p);
@@ -735,12 +736,12 @@ void Path::addStar (const Point<float> centre, const int numberOfPoints,
 
     if (numberOfPoints > 1)
     {
-        const float angleBetweenPoints = float_Pi * 2.0f / numberOfPoints;
+        auto angleBetweenPoints = float_Pi * 2.0f / numberOfPoints;
 
         for (int i = 0; i < numberOfPoints; ++i)
         {
-            const float angle = startAngle + i * angleBetweenPoints;
-            const Point<float> p (centre.getPointOnCircumference (outerRadius, angle));
+            auto angle = startAngle + i * angleBetweenPoints;
+            auto p = centre.getPointOnCircumference (outerRadius, angle);
 
             if (i == 0)
                 startNewSubPath (p);
@@ -760,12 +761,12 @@ void Path::addBubble (const Rectangle<float>& bodyArea,
                       const float cornerSize,
                       const float arrowBaseWidth)
 {
-    const float halfW = bodyArea.getWidth() / 2.0f;
-    const float halfH = bodyArea.getHeight() / 2.0f;
-    const float cornerSizeW = jmin (cornerSize, halfW);
-    const float cornerSizeH = jmin (cornerSize, halfH);
-    const float cornerSizeW2 = 2.0f * cornerSizeW;
-    const float cornerSizeH2 = 2.0f * cornerSizeH;
+    auto halfW = bodyArea.getWidth() / 2.0f;
+    auto halfH = bodyArea.getHeight() / 2.0f;
+    auto cornerSizeW = jmin (cornerSize, halfW);
+    auto cornerSizeH = jmin (cornerSize, halfH);
+    auto cornerSizeW2 = 2.0f * cornerSizeW;
+    auto cornerSizeH2 = 2.0f * cornerSizeH;
 
     startNewSubPath (bodyArea.getX() + cornerSizeW, bodyArea.getY());
 
@@ -822,33 +823,33 @@ void Path::addBubble (const Rectangle<float>& bodyArea,
 void Path::addPath (const Path& other)
 {
     size_t i = 0;
-    const float* const d = other.data.elements;
+    const float* d = other.data.elements;
 
     while (i < other.numElements)
     {
-        const float type = d[i++];
+        auto type = d[i++];
 
-        if (type == moveMarker)
+        if (isMarker (type, moveMarker))
         {
             startNewSubPath (d[i], d[i + 1]);
             i += 2;
         }
-        else if (type == lineMarker)
+        else if (isMarker (type, lineMarker))
         {
             lineTo (d[i], d[i + 1]);
             i += 2;
         }
-        else if (type == quadMarker)
+        else if (isMarker (type, quadMarker))
         {
             quadraticTo (d[i], d[i + 1], d[i + 2], d[i + 3]);
             i += 4;
         }
-        else if (type == cubicMarker)
+        else if (isMarker (type, cubicMarker))
         {
             cubicTo (d[i], d[i + 1], d[i + 2], d[i + 3], d[i + 4], d[i + 5]);
             i += 6;
         }
-        else if (type == closeSubPathMarker)
+        else if (isMarker (type, closeSubPathMarker))
         {
             closeSubPath();
         }
@@ -864,44 +865,44 @@ void Path::addPath (const Path& other,
                     const AffineTransform& transformToApply)
 {
     size_t i = 0;
-    const float* const d = other.data.elements;
+    const float* d = other.data.elements;
 
     while (i < other.numElements)
     {
-        const float type = d [i++];
+        auto type = d[i++];
 
-        if (type == closeSubPathMarker)
+        if (isMarker (type, closeSubPathMarker))
         {
             closeSubPath();
         }
         else
         {
-            float x = d[i++];
-            float y = d[i++];
+            auto x = d[i++];
+            auto y = d[i++];
             transformToApply.transformPoint (x, y);
 
-            if (type == moveMarker)
+            if (isMarker (type, moveMarker))
             {
                 startNewSubPath (x, y);
             }
-            else if (type == lineMarker)
+            else if (isMarker (type, lineMarker))
             {
                 lineTo (x, y);
             }
-            else if (type == quadMarker)
+            else if (isMarker (type, quadMarker))
             {
-                float x2 = d [i++];
-                float y2 = d [i++];
+                auto x2 = d[i++];
+                auto y2 = d[i++];
                 transformToApply.transformPoint (x2, y2);
 
                 quadraticTo (x, y, x2, y2);
             }
-            else if (type == cubicMarker)
+            else if (isMarker (type, cubicMarker))
             {
-                float x2 = d [i++];
-                float y2 = d [i++];
-                float x3 = d [i++];
-                float y3 = d [i++];
+                auto x2 = d[i++];
+                auto y2 = d[i++];
+                auto x3 = d[i++];
+                auto y3 = d[i++];
                 transformToApply.transformPoints (x2, y2, x3, y3);
 
                 cubicTo (x, y, x2, y2, x3, y3);
@@ -921,13 +922,13 @@ void Path::applyTransform (const AffineTransform& transform) noexcept
     bounds.reset();
     bool firstPoint = true;
     float* d = data.elements;
-    float* const end = d + numElements;
+    auto* end = d + numElements;
 
     while (d < end)
     {
-        const float type = *d++;
+        auto type = *d++;
 
-        if (type == moveMarker)
+        if (isMarker (type, moveMarker))
         {
             transform.transformPoint (d[0], d[1]);
 
@@ -943,19 +944,19 @@ void Path::applyTransform (const AffineTransform& transform) noexcept
 
             d += 2;
         }
-        else if (type == lineMarker)
+        else if (isMarker (type, lineMarker))
         {
             transform.transformPoint (d[0], d[1]);
             bounds.extend (d[0], d[1]);
             d += 2;
         }
-        else if (type == quadMarker)
+        else if (isMarker (type, quadMarker))
         {
             transform.transformPoints (d[0], d[1], d[2], d[3]);
             bounds.extend (d[0], d[1], d[2], d[3]);
             d += 4;
         }
-        else if (type == cubicMarker)
+        else if (isMarker (type, cubicMarker))
         {
             transform.transformPoints (d[0], d[1], d[2], d[3], d[4], d[5]);
             bounds.extend (d[0], d[1], d[2], d[3]);
@@ -979,7 +980,7 @@ AffineTransform Path::getTransformToScaleToFit (const float x, const float y,
                                                 const bool preserveProportions,
                                                 Justification justification) const
 {
-    Rectangle<float> boundsRect (getBounds());
+    auto boundsRect = getBounds();
 
     if (preserveProportions)
     {
@@ -987,7 +988,7 @@ AffineTransform Path::getTransformToScaleToFit (const float x, const float y,
             return AffineTransform();
 
         float newW, newH;
-        const float srcRatio = boundsRect.getHeight() / boundsRect.getWidth();
+        auto srcRatio = boundsRect.getHeight() / boundsRect.getWidth();
 
         if (srcRatio > h / w)
         {
@@ -1000,8 +1001,8 @@ AffineTransform Path::getTransformToScaleToFit (const float x, const float y,
             newH = w * srcRatio;
         }
 
-        float newXCentre = x;
-        float newYCentre = y;
+        auto newXCentre = x;
+        auto newYCentre = y;
 
         if (justification.testFlags (Justification::left))          newXCentre += newW * 0.5f;
         else if (justification.testFlags (Justification::right))    newXCentre += w - newW * 0.5f;
@@ -1042,7 +1043,7 @@ bool Path::contains (const float x, const float y, const float tolerance) const
     {
         if ((i.y1 <= y && i.y2 > y) || (i.y2 <= y && i.y1 > y))
         {
-            const float intersectX = i.x1 + (i.x2 - i.x1) * (y - i.y1) / (i.y2 - i.y1);
+            auto intersectX = i.x1 + (i.x2 - i.x1) * (y - i.y1) / (i.y2 - i.y1);
 
             if (intersectX <= x)
             {
@@ -1093,7 +1094,7 @@ Line<float> Path::getClippedLine (Line<float> line, const bool keepSectionOutsid
 
         while (i.next())
         {
-            if (line.intersects (Line<float> (i.x1, i.y1, i.x2, i.y2), intersection))
+            if (line.intersects ({ i.x1, i.y1, i.x2, i.y2 }, intersection))
             {
                 if ((startInside && keepSectionOutsidePath) || (endInside && ! keepSectionOutsidePath))
                     result.setStart (intersection);
@@ -1126,7 +1127,7 @@ Point<float> Path::getPointAlongPath (float distanceFromStart,
     while (i.next())
     {
         const Line<float> line (i.x1, i.y1, i.x2, i.y2);
-        const float lineLength = line.getLength();
+        auto lineLength = line.getLength();
 
         if (distanceFromStart <= lineLength)
             return line.getPointAlongLine (distanceFromStart);
@@ -1134,7 +1135,7 @@ Point<float> Path::getPointAlongPath (float distanceFromStart,
         distanceFromStart -= lineLength;
     }
 
-    return Point<float> (i.x2, i.y2);
+    return { i.x2, i.y2 };
 }
 
 float Path::getNearestPoint (const Point<float> targetPoint, Point<float>& pointOnPath,
@@ -1149,7 +1150,7 @@ float Path::getNearestPoint (const Point<float> targetPoint, Point<float>& point
     while (i.next())
     {
         const Line<float> line (i.x1, i.y1, i.x2, i.y2);
-        const float distance = line.getDistanceFromPoint (targetPoint, pointOnLine);
+        auto distance = line.getDistanceFromPoint (targetPoint, pointOnLine);
 
         if (distance < bestDistance)
         {
@@ -1170,73 +1171,73 @@ Path Path::createPathWithRoundedCorners (const float cornerRadius) const
     if (cornerRadius <= 0.01f)
         return *this;
 
+    Path p;
     size_t indexOfPathStart = 0, indexOfPathStartThis = 0;
     size_t n = 0;
     bool lastWasLine = false, firstWasLine = false;
-    Path p;
 
     while (n < numElements)
     {
-        const float type = data.elements [n++];
+        auto type = data.elements[n++];
 
-        if (type == moveMarker)
+        if (isMarker (type, moveMarker))
         {
             indexOfPathStart = p.numElements;
             indexOfPathStartThis = n - 1;
-            const float x = data.elements [n++];
-            const float y = data.elements [n++];
+            auto x = data.elements[n++];
+            auto y = data.elements[n++];
             p.startNewSubPath (x, y);
             lastWasLine = false;
-            firstWasLine = (data.elements [n] == lineMarker);
+            firstWasLine = (isMarker (data.elements[n], lineMarker));
         }
-        else if (type == lineMarker || type == closeSubPathMarker)
+        else if (isMarker (type, lineMarker) || isMarker (type, closeSubPathMarker))
         {
             float startX = 0, startY = 0, joinX = 0, joinY = 0, endX, endY;
 
-            if (type == lineMarker)
+            if (isMarker (type, lineMarker))
             {
-                endX = data.elements [n++];
-                endY = data.elements [n++];
+                endX = data.elements[n++];
+                endY = data.elements[n++];
 
                 if (n > 8)
                 {
-                    startX = data.elements [n - 8];
-                    startY = data.elements [n - 7];
-                    joinX  = data.elements [n - 5];
-                    joinY  = data.elements [n - 4];
+                    startX = data.elements[n - 8];
+                    startY = data.elements[n - 7];
+                    joinX  = data.elements[n - 5];
+                    joinY  = data.elements[n - 4];
                 }
             }
             else
             {
-                endX = data.elements [indexOfPathStartThis + 1];
-                endY = data.elements [indexOfPathStartThis + 2];
+                endX = data.elements[indexOfPathStartThis + 1];
+                endY = data.elements[indexOfPathStartThis + 2];
 
                 if (n > 6)
                 {
-                    startX = data.elements [n - 6];
-                    startY = data.elements [n - 5];
-                    joinX  = data.elements [n - 3];
-                    joinY  = data.elements [n - 2];
+                    startX = data.elements[n - 6];
+                    startY = data.elements[n - 5];
+                    joinX  = data.elements[n - 3];
+                    joinY  = data.elements[n - 2];
                 }
             }
 
             if (lastWasLine)
             {
-                const double len1 = PathHelpers::lengthOf (startX, startY, joinX, joinY);
+                auto len1 = PathHelpers::lengthOf (startX, startY, joinX, joinY);
 
                 if (len1 > 0)
                 {
-                    const double propNeeded = jmin (0.5, cornerRadius / len1);
+                    auto propNeeded = jmin (0.5, cornerRadius / len1);
 
-                    p.data.elements [p.numElements - 2] = (float) (joinX - (joinX - startX) * propNeeded);
-                    p.data.elements [p.numElements - 1] = (float) (joinY - (joinY - startY) * propNeeded);
+                    p.data.elements[p.numElements - 2] = (float) (joinX - (joinX - startX) * propNeeded);
+                    p.data.elements[p.numElements - 1] = (float) (joinY - (joinY - startY) * propNeeded);
                 }
 
-                const double len2 = PathHelpers::lengthOf (endX, endY, joinX, joinY);
+                auto len2 = PathHelpers::lengthOf (endX, endY, joinX, joinY);
 
                 if (len2 > 0)
                 {
-                    const double propNeeded = jmin (0.5, cornerRadius / len2);
+                    auto propNeeded = jmin (0.5, cornerRadius / len2);
 
                     p.quadraticTo (joinX, joinY,
                                    (float) (joinX + (endX - joinX) * propNeeded),
@@ -1245,70 +1246,70 @@ Path Path::createPathWithRoundedCorners (const float cornerRadius) const
 
                 p.lineTo (endX, endY);
             }
-            else if (type == lineMarker)
+            else if (isMarker (type, lineMarker))
             {
                 p.lineTo (endX, endY);
                 lastWasLine = true;
             }
 
-            if (type == closeSubPathMarker)
+            if (isMarker (type, closeSubPathMarker))
             {
                 if (firstWasLine)
                 {
-                    startX = data.elements [n - 3];
-                    startY = data.elements [n - 2];
+                    startX = data.elements[n - 3];
+                    startY = data.elements[n - 2];
                     joinX = endX;
                     joinY = endY;
-                    endX = data.elements [indexOfPathStartThis + 4];
-                    endY = data.elements [indexOfPathStartThis + 5];
+                    endX = data.elements[indexOfPathStartThis + 4];
+                    endY = data.elements[indexOfPathStartThis + 5];
 
-                    const double len1 = PathHelpers::lengthOf (startX, startY, joinX, joinY);
+                    auto len1 = PathHelpers::lengthOf (startX, startY, joinX, joinY);
 
                     if (len1 > 0)
                     {
-                        const double propNeeded = jmin (0.5, cornerRadius / len1);
+                        auto propNeeded = jmin (0.5, cornerRadius / len1);
 
-                        p.data.elements [p.numElements - 2] = (float) (joinX - (joinX - startX) * propNeeded);
-                        p.data.elements [p.numElements - 1] = (float) (joinY - (joinY - startY) * propNeeded);
+                        p.data.elements[p.numElements - 2] = (float) (joinX - (joinX - startX) * propNeeded);
+                        p.data.elements[p.numElements - 1] = (float) (joinY - (joinY - startY) * propNeeded);
                     }
 
-                    const double len2 = PathHelpers::lengthOf (endX, endY, joinX, joinY);
+                    auto len2 = PathHelpers::lengthOf (endX, endY, joinX, joinY);
 
                     if (len2 > 0)
                     {
-                        const double propNeeded = jmin (0.5, cornerRadius / len2);
+                        auto propNeeded = jmin (0.5, cornerRadius / len2);
 
                         endX = (float) (joinX + (endX - joinX) * propNeeded);
                         endY = (float) (joinY + (endY - joinY) * propNeeded);
 
                         p.quadraticTo (joinX, joinY, endX, endY);
 
-                        p.data.elements [indexOfPathStart + 1] = endX;
-                        p.data.elements [indexOfPathStart + 2] = endY;
+                        p.data.elements[indexOfPathStart + 1] = endX;
+                        p.data.elements[indexOfPathStart + 2] = endY;
                     }
                 }
 
                 p.closeSubPath();
             }
         }
-        else if (type == quadMarker)
+        else if (isMarker (type, quadMarker))
         {
             lastWasLine = false;
-            const float x1 = data.elements [n++];
-            const float y1 = data.elements [n++];
-            const float x2 = data.elements [n++];
-            const float y2 = data.elements [n++];
+            auto x1 = data.elements[n++];
+            auto y1 = data.elements[n++];
+            auto x2 = data.elements[n++];
+            auto y2 = data.elements[n++];
             p.quadraticTo (x1, y1, x2, y2);
         }
-        else if (type == cubicMarker)
+        else if (isMarker (type, cubicMarker))
         {
             lastWasLine = false;
-            const float x1 = data.elements [n++];
-            const float y1 = data.elements [n++];
-            const float x2 = data.elements [n++];
-            const float y2 = data.elements [n++];
-            const float x3 = data.elements [n++];
-            const float y3 = data.elements [n++];
+            auto x1 = data.elements[n++];
+            auto y1 = data.elements[n++];
+            auto x2 = data.elements[n++];
+            auto y2 = data.elements[n++];
+            auto x3 = data.elements[n++];
+            auto y3 = data.elements[n++];
             p.cubicTo (x1, y1, x2, y2, x3, y3);
         }
     }
@@ -1325,38 +1326,38 @@ void Path::loadPathFromStream (InputStream& source)
         {
         case 'm':
         {
-            const float x = source.readFloat();
-            const float y = source.readFloat();
+            auto x = source.readFloat();
+            auto y = source.readFloat();
             startNewSubPath (x, y);
             break;
         }
 
         case 'l':
         {
-            const float x = source.readFloat();
-            const float y = source.readFloat();
+            auto x = source.readFloat();
+            auto y = source.readFloat();
             lineTo (x, y);
             break;
         }
 
         case 'q':
         {
-            const float x1 = source.readFloat();
-            const float y1 = source.readFloat();
-            const float x2 = source.readFloat();
-            const float y2 = source.readFloat();
+            auto x1 = source.readFloat();
+            auto y1 = source.readFloat();
+            auto x2 = source.readFloat();
+            auto y2 = source.readFloat();
             quadraticTo (x1, y1, x2, y2);
             break;
         }
 
         case 'b':
         {
-            const float x1 = source.readFloat();
-            const float y1 = source.readFloat();
-            const float x2 = source.readFloat();
-            const float y2 = source.readFloat();
-            const float x3 = source.readFloat();
-            const float y3 = source.readFloat();
+            auto x1 = source.readFloat();
+            auto y1 = source.readFloat();
+            auto x2 = source.readFloat();
+            auto y2 = source.readFloat();
+            auto x3 = source.readFloat();
+            auto y3 = source.readFloat();
             cubicTo (x1, y1, x2, y2, x3, y3);
             break;
         }
@@ -1393,42 +1394,41 @@ void Path::writePathToStream (OutputStream& dest) const
 {
     dest.writeByte (useNonZeroWinding ? 'n' : 'z');
 
-    size_t i = 0;
-    while (i < numElements)
+    for (size_t i = 0; i < numElements;)
     {
-        const float type = data.elements [i++];
+        auto type = data.elements[i++];
 
-        if (type == moveMarker)
+        if (isMarker (type, moveMarker))
         {
             dest.writeByte ('m');
-            dest.writeFloat (data.elements [i++]);
-            dest.writeFloat (data.elements [i++]);
+            dest.writeFloat (data.elements[i++]);
+            dest.writeFloat (data.elements[i++]);
         }
-        else if (type == lineMarker)
+        else if (isMarker (type, lineMarker))
         {
             dest.writeByte ('l');
-            dest.writeFloat (data.elements [i++]);
-            dest.writeFloat (data.elements [i++]);
+            dest.writeFloat (data.elements[i++]);
+            dest.writeFloat (data.elements[i++]);
         }
-        else if (type == quadMarker)
+        else if (isMarker (type, quadMarker))
         {
             dest.writeByte ('q');
-            dest.writeFloat (data.elements [i++]);
-            dest.writeFloat (data.elements [i++]);
-            dest.writeFloat (data.elements [i++]);
-            dest.writeFloat (data.elements [i++]);
+            dest.writeFloat (data.elements[i++]);
+            dest.writeFloat (data.elements[i++]);
+            dest.writeFloat (data.elements[i++]);
+            dest.writeFloat (data.elements[i++]);
         }
-        else if (type == cubicMarker)
+        else if (isMarker (type, cubicMarker))
         {
             dest.writeByte ('b');
-            dest.writeFloat (data.elements [i++]);
-            dest.writeFloat (data.elements [i++]);
-            dest.writeFloat (data.elements [i++]);
-            dest.writeFloat (data.elements [i++]);
-            dest.writeFloat (data.elements [i++]);
-            dest.writeFloat (data.elements [i++]);
+            dest.writeFloat (data.elements[i++]);
+            dest.writeFloat (data.elements[i++]);
+            dest.writeFloat (data.elements[i++]);
+            dest.writeFloat (data.elements[i++]);
+            dest.writeFloat (data.elements[i++]);
+            dest.writeFloat (data.elements[i++]);
         }
-        else if (type == closeSubPathMarker)
+        else if (isMarker (type, closeSubPathMarker))
         {
             dest.writeByte ('c');
         }
@@ -1448,48 +1448,48 @@ String Path::toString() const
 
     while (i < numElements)
     {
-        const float marker = data.elements [i++];
+        auto type = data.elements[i++];
         char markerChar = 0;
         int numCoords = 0;
 
-        if (marker == moveMarker)
+        if (isMarker (type, moveMarker))
         {
             markerChar = 'm';
             numCoords = 2;
         }
-        else if (marker == lineMarker)
+        else if (isMarker (type, lineMarker))
         {
             markerChar = 'l';
             numCoords = 2;
         }
-        else if (marker == quadMarker)
+        else if (isMarker (type, quadMarker))
         {
             markerChar = 'q';
             numCoords = 4;
         }
-        else if (marker == cubicMarker)
+        else if (isMarker (type, cubicMarker))
         {
             markerChar = 'c';
             numCoords = 6;
         }
         else
         {
-            jassert (marker == closeSubPathMarker);
+            jassert (isMarker (type, closeSubPathMarker));
             markerChar = 'z';
         }
 
-        if (marker != lastMarker)
+        if (! isMarker (type, lastMarker))
         {
             if (s.getDataSize() != 0)
                 s << ' ';
 
             s << markerChar;
-            lastMarker = marker;
+            lastMarker = type;
         }
 
         while (--numCoords >= 0 && i < numElements)
         {
-            String coord (data.elements [i++], 3);
+            String coord (data.elements[i++], 3);
 
             while (coord.endsWithChar ('0') && coord != "0")
                 coord = coord.dropLastCharacters (1);
@@ -1512,15 +1512,15 @@ void Path::restoreFromString (StringRef stringVersion)
     clear();
     setUsingNonZeroWinding (true);
 
-    String::CharPointerType t (stringVersion.text);
+    auto t = stringVersion.text;
     juce_wchar marker = 'm';
     int numValues = 2;
-    float values [6];
+    float values[6];
 
     for (;;)
     {
-        const String token (PathHelpers::nextToken (t));
-        const juce_wchar firstChar = token[0];
+        auto token = PathHelpers::nextToken (t);
+        auto firstChar = token[0];
         int startNum = 0;
 
         if (firstChar == 0)
@@ -1574,9 +1574,7 @@ void Path::restoreFromString (StringRef stringVersion)
 
 //==============================================================================
 Path::Iterator::Iterator (const Path& p) noexcept
-    : elementType (startNewSubPath),
-      x1 (0), y1 (0), x2 (0), y2 (0), x3 (0), y3 (0),
-      path (p), index (0)
+    : elementType (startNewSubPath), path (p)
 {
 }
 
@@ -1586,43 +1584,43 @@ Path::Iterator::~Iterator() noexcept
 
 bool Path::Iterator::next() noexcept
 {
-    const float* const elements = path.data.elements;
+    const float* elements = path.data.elements;
 
     if (index < path.numElements)
     {
-        const float type = elements [index++];
+        auto type = elements[index++];
 
-        if (type == moveMarker)
+        if (isMarker (type, moveMarker))
         {
             elementType = startNewSubPath;
-            x1 = elements [index++];
-            y1 = elements [index++];
+            x1 = elements[index++];
+            y1 = elements[index++];
         }
-        else if (type == lineMarker)
+        else if (isMarker (type, lineMarker))
         {
             elementType = lineTo;
-            x1 = elements [index++];
-            y1 = elements [index++];
+            x1 = elements[index++];
+            y1 = elements[index++];
         }
-        else if (type == quadMarker)
+        else if (isMarker (type, quadMarker))
         {
             elementType = quadraticTo;
-            x1 = elements [index++];
-            y1 = elements [index++];
-            x2 = elements [index++];
-            y2 = elements [index++];
+            x1 = elements[index++];
+            y1 = elements[index++];
+            x2 = elements[index++];
+            y2 = elements[index++];
         }
-        else if (type == cubicMarker)
+        else if (isMarker (type, cubicMarker))
         {
             elementType = cubicTo;
-            x1 = elements [index++];
-            y1 = elements [index++];
-            x2 = elements [index++];
-            y2 = elements [index++];
-            x3 = elements [index++];
-            y3 = elements [index++];
+            x1 = elements[index++];
+            y1 = elements[index++];
+            x2 = elements[index++];
+            y2 = elements[index++];
+            x3 = elements[index++];
+            y3 = elements[index++];
         }
-        else if (type == closeSubPathMarker)
+        else if (isMarker (type, closeSubPathMarker))
         {
             elementType = closePath;
         }

@@ -2,28 +2,29 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#ifndef JUCER_PROJECTTYPE_H_INCLUDED
-#define JUCER_PROJECTTYPE_H_INCLUDED
+#pragma once
 
 class Project;
 class ProjectExporter;
@@ -48,6 +49,55 @@ public:
     virtual bool isGUIApplication() const       { return false; }
     virtual bool isCommandLineApp() const       { return false; }
     virtual bool isAudioPlugin() const          { return false; }
+
+    //==============================================================================
+    struct Target
+    {
+        enum Type
+        {
+            GUIApp            = 0,
+            ConsoleApp        = 1,
+            StaticLibrary     = 2,
+            DynamicLibrary    = 3,
+
+            VSTPlugIn         = 10,
+            VST3PlugIn        = 11,
+            AAXPlugIn         = 12,
+            RTASPlugIn        = 13,
+            AudioUnitPlugIn   = 14,
+            AudioUnitv3PlugIn = 15,
+            StandalonePlugIn  = 16,
+
+            SharedCodeTarget  = 20, // internal
+            AggregateTarget   = 21,
+
+            unspecified       = 30
+        };
+
+        enum TargetFileType
+        {
+            executable            = 0,
+            staticLibrary         = 1,
+            sharedLibraryOrDLL    = 2,
+            pluginBundle          = 3,
+            macOSAppex            = 4,
+            unknown               = 5
+        };
+
+        //==============================================================================
+        Target (Type targetType) : type (targetType) {}
+
+        const char* getName() const noexcept;
+        TargetFileType getTargetFileType() const noexcept;
+
+        const Type type;
+
+    private:
+        //==============================================================================
+        Target& operator= (const Target&) JUCE_DELETED_FUNCTION;
+    };
+
+    virtual bool supportsTargetType (Target::Type /*targetType*/) const     { return false; }
 
 protected:
     ProjectType (const String& type, const String& desc);
@@ -86,32 +136,36 @@ struct ProjectType_GUIApp  : public ProjectType
 {
     ProjectType_GUIApp()  : ProjectType (getTypeName(), "GUI Application") {}
 
-    static const char* getTypeName() noexcept   { return "guiapp"; }
-    bool isGUIApplication() const  override     { return true; }
+    static const char* getTypeName() noexcept                          { return "guiapp"; }
+    bool isGUIApplication() const  override                            { return true; }
+    bool supportsTargetType (Target::Type targetType) const override   { return (targetType == Target::GUIApp); }
 };
 
 struct ProjectType_ConsoleApp  : public ProjectType
 {
     ProjectType_ConsoleApp()  : ProjectType (getTypeName(), "Console Application") {}
 
-    static const char* getTypeName() noexcept   { return "consoleapp"; }
-    bool isCommandLineApp() const  override     { return true; }
+    static const char* getTypeName() noexcept                          { return "consoleapp"; }
+    bool isCommandLineApp() const  override                            { return true; }
+    bool supportsTargetType (Target::Type targetType) const override   { return (targetType == Target::ConsoleApp); }
 };
 
 struct ProjectType_StaticLibrary  : public ProjectType
 {
     ProjectType_StaticLibrary()  : ProjectType (getTypeName(), "Static Library") {}
 
-    static const char* getTypeName() noexcept   { return "library"; }
-    bool isStaticLibrary() const  override      { return true; }
+    static const char* getTypeName() noexcept                          { return "library"; }
+    bool isStaticLibrary() const  override                             { return true; }
+    bool supportsTargetType (Target::Type targetType) const override   { return (targetType == Target::StaticLibrary); }
 };
 
 struct ProjectType_DLL  : public ProjectType
 {
     ProjectType_DLL()  : ProjectType (getTypeName(), "Dynamic Library") {}
 
-    static const char* getTypeName() noexcept   { return "dll"; }
-    bool isDynamicLibrary() const override      { return true; }
+    static const char* getTypeName() noexcept                          { return "dll"; }
+    bool isDynamicLibrary() const override                             { return true; }
+    bool supportsTargetType (Target::Type targetType) const override   { return (targetType == Target::DynamicLibrary); }
 };
 
 struct ProjectType_AudioPlugin  : public ProjectType
@@ -120,6 +174,27 @@ struct ProjectType_AudioPlugin  : public ProjectType
 
     static const char* getTypeName() noexcept   { return "audioplug"; }
     bool isAudioPlugin() const override         { return true; }
+
+    bool supportsTargetType (Target::Type targetType) const override
+    {
+        switch (targetType)
+        {
+            case Target::VSTPlugIn:
+            case Target::VST3PlugIn:
+            case Target::AAXPlugIn:
+            case Target::RTASPlugIn:
+            case Target::AudioUnitPlugIn:
+            case Target::AudioUnitv3PlugIn:
+            case Target::StandalonePlugIn:
+            case Target::SharedCodeTarget:
+            case Target::AggregateTarget:
+                return true;
+            default:
+                break;
+        }
+
+        return false;
+    }
 };
 
 //==============================================================================
@@ -135,5 +210,3 @@ inline Array<ProjectType*> ProjectType::getAllTypes()
 
     return  Array<ProjectType*> (allTypes);
 }
-
-#endif   // JUCER_PROJECTTYPE_H_INCLUDED

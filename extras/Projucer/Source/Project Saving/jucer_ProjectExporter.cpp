@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -29,9 +31,7 @@
 #include "jucer_ProjectExport_Make.h"
 #include "jucer_ProjectExport_MSVC.h"
 #include "jucer_ProjectExport_XCode.h"
-#include "jucer_ProjectExport_AndroidBase.h"
-#include "jucer_ProjectExport_AndroidStudio.h"
-#include "jucer_ProjectExport_AndroidAnt.h"
+#include "jucer_ProjectExport_Android.h"
 #include "jucer_ProjectExport_CodeBlocks.h"
 
 //==============================================================================
@@ -46,19 +46,15 @@ Array<ProjectExporter::ExporterTypeInfo> ProjectExporter::getExporterTypes()
 {
     Array<ProjectExporter::ExporterTypeInfo> types;
 
-    addType (types, XCodeProjectExporter::getNameMac(),          BinaryData::projectIconXcode_png,          BinaryData::projectIconXcode_pngSize);
-    addType (types, XCodeProjectExporter::getNameiOS(),          BinaryData::projectIconXcodeIOS_png,       BinaryData::projectIconXcodeIOS_pngSize);
-    addType (types, MSVCProjectExporterVC2015::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
-    addType (types, MSVCProjectExporterVC2013::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
-    addType (types, MSVCProjectExporterVC2012::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
-    addType (types, MSVCProjectExporterVC2010::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
-    addType (types, MSVCProjectExporterVC2008::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
-    addType (types, MSVCProjectExporterVC2005::getName(),        BinaryData::projectIconVisualStudio_png,   BinaryData::projectIconVisualStudio_pngSize);
-    addType (types, MakefileProjectExporter::getNameLinux(),     BinaryData::projectIconLinuxMakefile_png,  BinaryData::projectIconLinuxMakefile_pngSize);
-    addType (types, AndroidStudioProjectExporter::getName(),     BinaryData::projectIconAndroid_png,        BinaryData::projectIconAndroid_pngSize);
-    addType (types, AndroidAntProjectExporter::getName(),        BinaryData::projectIconAndroid_png,        BinaryData::projectIconAndroid_pngSize);
-    addType (types, CodeBlocksProjectExporter::getNameWindows(), BinaryData::projectIconCodeblocks_png,     BinaryData::projectIconCodeblocks_pngSize);
-    addType (types, CodeBlocksProjectExporter::getNameLinux(),   BinaryData::projectIconCodeblocks_png,     BinaryData::projectIconCodeblocks_pngSize);
+    addType (types, XCodeProjectExporter::getNameMac(),          BinaryData::export_xcode_svg,          BinaryData::export_xcode_svgSize);
+    addType (types, XCodeProjectExporter::getNameiOS(),          BinaryData::export_xcode_svg,          BinaryData::export_xcode_svgSize);
+    addType (types, MSVCProjectExporterVC2017::getName(),        BinaryData::export_visualStudio_svg,   BinaryData::export_visualStudio_svgSize);
+    addType (types, MSVCProjectExporterVC2015::getName(),        BinaryData::export_visualStudio_svg,   BinaryData::export_visualStudio_svgSize);
+    addType (types, MSVCProjectExporterVC2013::getName(),        BinaryData::export_visualStudio_svg,   BinaryData::export_visualStudio_svgSize);
+    addType (types, MakefileProjectExporter::getNameLinux(),     BinaryData::export_linux_svg,          BinaryData::export_linux_svgSize);
+    addType (types, AndroidProjectExporter::getName(),           BinaryData::export_android_svg,        BinaryData::export_android_svgSize);
+    addType (types, CodeBlocksProjectExporter::getNameWindows(), BinaryData::export_codeBlocks_svg,     BinaryData::export_codeBlocks_svgSize);
+    addType (types, CodeBlocksProjectExporter::getNameLinux(),   BinaryData::export_codeBlocks_svg,     BinaryData::export_codeBlocks_svgSize);
 
     return types;
 }
@@ -71,17 +67,13 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int
     {
         case 0:     exp = new XCodeProjectExporter         (project, ValueTree (XCodeProjectExporter         ::getValueTreeTypeName (false)), false); break;
         case 1:     exp = new XCodeProjectExporter         (project, ValueTree (XCodeProjectExporter         ::getValueTreeTypeName (true)), true); break;
-        case 2:     exp = new MSVCProjectExporterVC2015    (project, ValueTree (MSVCProjectExporterVC2015    ::getValueTreeTypeName())); break;
-        case 3:     exp = new MSVCProjectExporterVC2013    (project, ValueTree (MSVCProjectExporterVC2013    ::getValueTreeTypeName())); break;
-        case 4:     exp = new MSVCProjectExporterVC2012    (project, ValueTree (MSVCProjectExporterVC2012    ::getValueTreeTypeName())); break;
-        case 5:     exp = new MSVCProjectExporterVC2010    (project, ValueTree (MSVCProjectExporterVC2010    ::getValueTreeTypeName())); break;
-        case 6:     exp = new MSVCProjectExporterVC2008    (project, ValueTree (MSVCProjectExporterVC2008    ::getValueTreeTypeName())); break;
-        case 7:     exp = new MSVCProjectExporterVC2005    (project, ValueTree (MSVCProjectExporterVC2005    ::getValueTreeTypeName())); break;
-        case 8:     exp = new MakefileProjectExporter      (project, ValueTree (MakefileProjectExporter      ::getValueTreeTypeName())); break;
-        case 9:     exp = new AndroidStudioProjectExporter (project, ValueTree (AndroidStudioProjectExporter ::getValueTreeTypeName())); break;
-        case 10:    exp = new AndroidAntProjectExporter    (project, ValueTree (AndroidAntProjectExporter    ::getValueTreeTypeName())); break;
-        case 11:    exp = new CodeBlocksProjectExporter    (project, ValueTree (CodeBlocksProjectExporter    ::getValueTreeTypeName (CodeBlocksProjectExporter::windowsTarget)), CodeBlocksProjectExporter::windowsTarget); break;
-        case 12:    exp = new CodeBlocksProjectExporter    (project, ValueTree (CodeBlocksProjectExporter    ::getValueTreeTypeName (CodeBlocksProjectExporter::linuxTarget)),   CodeBlocksProjectExporter::linuxTarget); break;
+        case 2:     exp = new MSVCProjectExporterVC2017    (project, ValueTree (MSVCProjectExporterVC2017    ::getValueTreeTypeName())); break;
+        case 3:     exp = new MSVCProjectExporterVC2015    (project, ValueTree (MSVCProjectExporterVC2015    ::getValueTreeTypeName())); break;
+        case 4:     exp = new MSVCProjectExporterVC2013    (project, ValueTree (MSVCProjectExporterVC2013    ::getValueTreeTypeName())); break;
+        case 5:     exp = new MakefileProjectExporter      (project, ValueTree (MakefileProjectExporter      ::getValueTreeTypeName())); break;
+        case 6:     exp = new AndroidProjectExporter       (project, ValueTree (AndroidProjectExporter       ::getValueTreeTypeName())); break;
+        case 7:     exp = new CodeBlocksProjectExporter    (project, ValueTree (CodeBlocksProjectExporter    ::getValueTreeTypeName (CodeBlocksProjectExporter::windowsTarget)), CodeBlocksProjectExporter::windowsTarget); break;
+        case 8:     exp = new CodeBlocksProjectExporter    (project, ValueTree (CodeBlocksProjectExporter    ::getValueTreeTypeName (CodeBlocksProjectExporter::linuxTarget)),   CodeBlocksProjectExporter::linuxTarget); break;
         default:    jassertfalse; return 0;
     }
 
@@ -107,7 +99,7 @@ String ProjectExporter::getCurrentPlatformExporterName()
    #if JUCE_MAC
     return XCodeProjectExporter::getNameMac();
    #elif JUCE_WINDOWS
-    return MSVCProjectExporterVC2015::getName();
+    return MSVCProjectExporterVC2017::getName();
    #elif JUCE_LINUX
     return MakefileProjectExporter::getNameLinux();
    #else
@@ -122,16 +114,12 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const Str
 
 ProjectExporter* ProjectExporter::createExporter (Project& project, const ValueTree& settings)
 {
-    ProjectExporter*       exp = MSVCProjectExporterVC2005    ::createForSettings (project, settings);
-    if (exp == nullptr)    exp = MSVCProjectExporterVC2008    ::createForSettings (project, settings);
-    if (exp == nullptr)    exp = MSVCProjectExporterVC2010    ::createForSettings (project, settings);
-    if (exp == nullptr)    exp = MSVCProjectExporterVC2012    ::createForSettings (project, settings);
-    if (exp == nullptr)    exp = MSVCProjectExporterVC2013    ::createForSettings (project, settings);
+    ProjectExporter*       exp = MSVCProjectExporterVC2013    ::createForSettings (project, settings);
     if (exp == nullptr)    exp = MSVCProjectExporterVC2015    ::createForSettings (project, settings);
+    if (exp == nullptr)    exp = MSVCProjectExporterVC2017    ::createForSettings (project, settings);
     if (exp == nullptr)    exp = XCodeProjectExporter         ::createForSettings (project, settings);
     if (exp == nullptr)    exp = MakefileProjectExporter      ::createForSettings (project, settings);
-    if (exp == nullptr)    exp = AndroidStudioProjectExporter ::createForSettings (project, settings);
-    if (exp == nullptr)    exp = AndroidAntProjectExporter    ::createForSettings (project, settings);
+    if (exp == nullptr)    exp = AndroidProjectExporter       ::createForSettings (project, settings);
     if (exp == nullptr)    exp = CodeBlocksProjectExporter    ::createForSettings (project, settings);
 
     jassert (exp != nullptr);
@@ -148,17 +136,14 @@ bool ProjectExporter::canProjectBeLaunched (Project* project)
             XCodeProjectExporter::getValueTreeTypeName (false),
             XCodeProjectExporter::getValueTreeTypeName (true),
            #elif JUCE_WINDOWS
-            MSVCProjectExporterVC2005::getValueTreeTypeName(),
-            MSVCProjectExporterVC2008::getValueTreeTypeName(),
-            MSVCProjectExporterVC2010::getValueTreeTypeName(),
-            MSVCProjectExporterVC2012::getValueTreeTypeName(),
             MSVCProjectExporterVC2013::getValueTreeTypeName(),
             MSVCProjectExporterVC2015::getValueTreeTypeName(),
+            MSVCProjectExporterVC2017::getValueTreeTypeName(),
            #elif JUCE_LINUX
             // (this doesn't currently launch.. not really sure what it would do on linux)
             //MakefileProjectExporter::getValueTreeTypeName(),
            #endif
-            AndroidStudioProjectExporter::getValueTreeTypeName(),
+            AndroidProjectExporter::getValueTreeTypeName(),
 
             nullptr
         };
@@ -173,15 +158,11 @@ bool ProjectExporter::canProjectBeLaunched (Project* project)
 
 //==============================================================================
 ProjectExporter::ProjectExporter (Project& p, const ValueTree& state)
-    : makefileIsDLL (false),
-      msvcIsDLL (false),
-      msvcIsWindowsSubsystem (true),
-      settings (state),
+    : settings (state),
       project (p),
       projectType (p.getProjectType()),
       projectName (p.getTitle()),
-      projectFolder (p.getProjectFolder()),
-      modulesGroup (nullptr)
+      projectFolder (p.getProjectFolder())
 {
 }
 
@@ -242,19 +223,19 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
 
 void ProjectExporter::createDependencyPathProperties (PropertyListBuilder& props)
 {
-    if (supportsVST3() && (project.shouldBuildVST3().getValue() || project.isVST3PluginHost()))
+    if (shouldBuildTargetType (ProjectType::Target::VST3PlugIn) || project.isVST3PluginHost())
     {
         props.add (new DependencyPathPropertyComponent (project.getFile().getParentDirectory(), getVST3PathValue(), "VST3 SDK Folder"),
                    "If you're building a VST3 plugin or host, this must be the folder containing the VST3 SDK. This can be an absolute path, or a path relative to the Projucer project file.");
     }
 
-    if (supportsAAX() && project.shouldBuildAAX().getValue())
+    if (shouldBuildTargetType (ProjectType::Target::AAXPlugIn) && project.shouldBuildAAX())
     {
         props.add (new DependencyPathPropertyComponent (project.getFile().getParentDirectory(), getAAXPathValue(), "AAX SDK Folder"),
                    "If you're building an AAX plugin, this must be the folder containing the AAX SDK. This can be an absolute path, or a path relative to the Projucer project file.");
     }
 
-    if (supportsRTAS() && project.shouldBuildRTAS().getValue())
+    if (shouldBuildTargetType (ProjectType::Target::RTASPlugIn) && project.shouldBuildRTAS())
     {
         props.add (new DependencyPathPropertyComponent (project.getFile().getParentDirectory(), getRTASPathValue(), "RTAS SDK Folder"),
                    "If you're building an RTAS, this must be the folder containing the RTAS SDK. This can be an absolute path, or a path relative to the Projucer project file.");
@@ -300,25 +281,17 @@ void ProjectExporter::addSettingsForProjectType (const ProjectType& type)
 
 void ProjectExporter::addVSTPathsIfPluginOrHost()
 {
-    if (supportsVST() && project.shouldBuildVST().getValue())
-        makefileTargetSuffix = ".so";
-
-    if (supportsVST3())
-    {
-        if (project.shouldBuildVST3().getValue())
-            makefileTargetSuffix = ".so";
-
-        if (project.shouldBuildVST3().getValue() || project.isVST3PluginHost())
-            addVST3FolderToPath();
-    }
+    if (shouldBuildTargetType (ProjectType::Target::VST3PlugIn) || project.isVST3PluginHost())
+        addVST3FolderToPath();
 }
 
 void ProjectExporter::addCommonAudioPluginSettings()
 {
-    if (isLinux() && (getProject().shouldBuildVST().getValue() || getProject().shouldBuildVST3().getValue()))
+    if (isLinux()
+      && (shouldBuildTargetType (ProjectType::Target::VSTPlugIn) || shouldBuildTargetType (ProjectType::Target::VST3PlugIn)))
         makefileExtraLinkerFlags.add ("-Wl,--no-undefined");
 
-    if (supportsAAX() && getProject().shouldBuildAAX().getValue())
+    if (shouldBuildTargetType (ProjectType::Target::AAXPlugIn))
         addAAXFoldersToPath();
 
     // Note: RTAS paths are platform-dependent, impl -> addPlatformSpecificSettingsForProjectType
@@ -347,11 +320,13 @@ void ProjectExporter::addAAXFoldersToPath()
 }
 
 //==============================================================================
-StringPairArray ProjectExporter::getAllPreprocessorDefs (const ProjectExporter::BuildConfiguration& config) const
+StringPairArray ProjectExporter::getAllPreprocessorDefs (const BuildConfiguration& config, const ProjectType::Target::Type targetType) const
 {
     StringPairArray defs (mergePreprocessorDefs (config.getAllPreprocessorDefs(),
                                                  parsePreprocessorDefs (getExporterPreprocessorDefsString())));
     addDefaultPreprocessorDefs (defs);
+    addTargetSpecificPreprocessorDefs (defs, targetType);
+
     return defs;
 }
 
@@ -363,6 +338,32 @@ StringPairArray ProjectExporter::getAllPreprocessorDefs() const
     return defs;
 }
 
+void ProjectExporter::addTargetSpecificPreprocessorDefs (StringPairArray& defs, const ProjectType::Target::Type targetType) const
+{
+    std::pair<String, ProjectType::Target::Type> targetFlags[] = {
+        {"JucePlugin_Build_VST",        ProjectType::Target::VSTPlugIn},
+        {"JucePlugin_Build_VST3",       ProjectType::Target::VST3PlugIn},
+        {"JucePlugin_Build_AU",         ProjectType::Target::AudioUnitPlugIn},
+        {"JucePlugin_Build_AUv3",       ProjectType::Target::AudioUnitv3PlugIn},
+        {"JucePlugin_Build_RTAS",       ProjectType::Target::RTASPlugIn},
+        {"JucePlugin_Build_AAX",        ProjectType::Target::AAXPlugIn},
+        {"JucePlugin_Build_Standalone", ProjectType::Target::StandalonePlugIn}
+    };
+
+    if (targetType == ProjectType::Target::SharedCodeTarget)
+    {
+        for (auto& flag : targetFlags)
+            defs.set (flag.first, (shouldBuildTargetType (flag.second) ? "1" : "0"));
+
+        defs.set ("JUCE_SHARED_CODE", "1");
+    }
+    else if (targetType != ProjectType::Target::unspecified)
+    {
+        for (auto& flag : targetFlags)
+            defs.set (flag.first, (targetType == flag.second ? "1" : "0"));
+    }
+}
+
 void ProjectExporter::addDefaultPreprocessorDefs (StringPairArray& defs) const
 {
     defs.set (getExporterIdentifierMacro(), "1");
@@ -370,9 +371,10 @@ void ProjectExporter::addDefaultPreprocessorDefs (StringPairArray& defs) const
     defs.set ("JUCE_APP_VERSION_HEX", project.getVersionAsHex());
 }
 
-String ProjectExporter::replacePreprocessorTokens (const ProjectExporter::BuildConfiguration& config, const String& sourceString) const
+String ProjectExporter::replacePreprocessorTokens (const ProjectExporter::BuildConfiguration& config,
+                                                   const String& sourceString) const
 {
-    return replacePreprocessorDefs (getAllPreprocessorDefs (config), sourceString);
+    return replacePreprocessorDefs (getAllPreprocessorDefs (config, ProjectType::Target::unspecified), sourceString);
 }
 
 void ProjectExporter::copyMainGroupFromProject()
@@ -393,14 +395,24 @@ Project::Item& ProjectExporter::getModulesGroup()
     return *modulesGroup;
 }
 
+void ProjectExporter::addProjectPathToBuildPathList (StringArray& pathList, const RelativePath& pathFromProjectFolder, int index) const
+{
+    const auto localPath = RelativePath (rebaseFromProjectFolderToBuildTarget (pathFromProjectFolder));
+
+    const auto path = isVisualStudio() ? localPath.toWindowsStyle() : localPath.toUnixStyle();
+
+    if (! pathList.contains (path))
+        pathList.insert (index, path);
+}
+
+void ProjectExporter::addToModuleLibPaths (const RelativePath& pathFromProjectFolder)
+{
+    addProjectPathToBuildPathList (moduleLibSearchPaths, pathFromProjectFolder);
+}
+
 void ProjectExporter::addToExtraSearchPaths (const RelativePath& pathFromProjectFolder, int index)
 {
-    RelativePath localPath (rebaseFromProjectFolderToBuildTarget (pathFromProjectFolder));
-
-    const String path (isVisualStudio() ? localPath.toWindowsStyle() : localPath.toUnixStyle());
-
-    if (! extraSearchPaths.contains (path))
-        extraSearchPaths.insert (index, path);
+    addProjectPathToBuildPathList (extraSearchPaths, pathFromProjectFolder, index);
 }
 
 Value ProjectExporter::getPathForModuleValue (const String& moduleID)
@@ -492,7 +504,7 @@ static bool areCompatibleExporters (const ProjectExporter& p1, const ProjectExpo
     return (p1.isVisualStudio() && p2.isVisualStudio())
         || (p1.isXcode() && p2.isXcode())
         || (p1.isMakefile() && p2.isMakefile())
-        || (p1.isAndroid() && p2.isAndroid())
+        || (p1.isAndroidStudio() && p2.isAndroidStudio())
         || (p1.isCodeBlocks() && p2.isCodeBlocks() && p1.isWindows() != p2.isLinux());
 }
 
@@ -803,6 +815,28 @@ StringPairArray ProjectExporter::BuildConfiguration::getAllPreprocessorDefs() co
                                   parsePreprocessorDefs (getBuildConfigPreprocessorDefsString()));
 }
 
+StringPairArray ProjectExporter::BuildConfiguration::getUniquePreprocessorDefs() const
+{
+    StringPairArray perConfigurationDefs (parsePreprocessorDefs (getBuildConfigPreprocessorDefsString()));
+    const StringPairArray globalDefs (project.getPreprocessorDefs());
+
+    for (int i = 0; i < globalDefs.size(); ++i)
+    {
+        String globalKey   = globalDefs.getAllKeys()[i];
+
+        int idx = perConfigurationDefs.getAllKeys().indexOf (globalKey);
+        if (idx >= 0)
+        {
+            String globalValue = globalDefs.getAllValues()[i];
+
+            if (globalValue == perConfigurationDefs.getAllValues()[idx])
+                perConfigurationDefs.remove (idx);
+        }
+    }
+
+    return perConfigurationDefs;
+}
+
 StringArray ProjectExporter::BuildConfiguration::getHeaderSearchPaths() const
 {
     return getSearchPathsFromString (getHeaderSearchPathString());
@@ -810,16 +844,24 @@ StringArray ProjectExporter::BuildConfiguration::getHeaderSearchPaths() const
 
 StringArray ProjectExporter::BuildConfiguration::getLibrarySearchPaths() const
 {
-    return getSearchPathsFromString (getLibrarySearchPathString());
+    auto separator = exporter.isVisualStudio() ? "\\" : "/";
+    auto s = getSearchPathsFromString (getLibrarySearchPathString());
+    for (auto path : exporter.moduleLibSearchPaths)
+        s.add (path + separator + getLibrarySubdirPath());
+
+    return s;
 }
 
 String ProjectExporter::BuildConfiguration::getGCCLibraryPathFlags() const
 {
     String s;
-    const StringArray libraryPaths (getLibrarySearchPaths());
+    const auto libraryPaths = getSearchPathsFromString (getLibrarySearchPathString());
 
-    for (int i = 0; i < libraryPaths.size(); ++i)
-        s << " -L" << escapeSpaces (libraryPaths[i]).replace ("~", "$(HOME)");
+    for (auto path : libraryPaths)
+        s << " -L" << escapeSpaces (path).replace ("~", "$(HOME)");
+
+    for (auto path : exporter.moduleLibSearchPaths)
+        s << " -L" << escapeSpaces (path).replace ("~", "$(HOME)") << "/" << getLibrarySubdirPath();
 
     return s;
 }
@@ -833,5 +875,5 @@ String ProjectExporter::getExternalLibraryFlags (const BuildConfiguration& confi
     if (libraries.size() != 0)
         return replacePreprocessorTokens (config, "-l" + libraries.joinIntoString (" -l")).trim();
 
-    return String();
+    return {};
 }

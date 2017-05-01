@@ -2,28 +2,29 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#ifndef JUCER_PAINTELEMENTTEXT_H_INCLUDED
-#define JUCER_PAINTELEMENTTEXT_H_INCLUDED
+#pragma once
 
 #include "jucer_ColouredElement.h"
 #include "../properties/jucer_FontPropertyComponent.h"
@@ -73,6 +74,7 @@ public:
         props.add (new FontNameProperty (this));
         props.add (new FontStyleProperty (this));
         props.add (new FontSizeProperty (this));
+        props.add (new FontKerningProperty (this));
         props.add (new TextJustificationProperty (this));
         props.add (new TextToPathProperty (this));
     }
@@ -112,9 +114,14 @@ public:
         e->setAttribute ("text", text);
         e->setAttribute ("fontname", typefaceName);
         e->setAttribute ("fontsize", roundToInt (font.getHeight() * 100.0) / 100.0);
+        e->setAttribute ("kerning", roundToInt (font.getExtraKerningFactor() * 1000.0) / 1000.0);
         e->setAttribute ("bold", font.isBold());
         e->setAttribute ("italic", font.isItalic());
         e->setAttribute ("justification", justification.getFlags());
+        if (font.getTypefaceStyle() != "Regular")
+        {
+            e->setAttribute ("typefaceStyle", font.getTypefaceStyle());
+        }
 
         return e;
     }
@@ -131,7 +138,11 @@ public:
             font.setHeight ((float) xml.getDoubleAttribute ("fontsize", 15.0));
             font.setBold (xml.getBoolAttribute ("bold", false));
             font.setItalic (xml.getBoolAttribute ("italic", false));
+            font.setExtraKerningFactor ((float) xml.getDoubleAttribute ("kerning", 0.0));
             justification = Justification (xml.getIntAttribute ("justification", Justification::centred));
+            auto fontStyle = xml.getStringAttribute ("typefaceStyle");
+            if (! fontStyle.isEmpty())
+                font.setTypefaceStyle (fontStyle);
 
             return true;
         }
@@ -431,10 +442,7 @@ private:
         {
             element->getDocument()->addChangeListener (this);
 
-            choices.add ("normal");
-            choices.add ("bold");
-            choices.add ("italic");
-            choices.add ("bold + italic");
+            updateStylesList (element->getTypefaceName());
         }
 
         ~FontStyleProperty()
@@ -442,29 +450,72 @@ private:
             element->getDocument()->removeChangeListener (this);
         }
 
+        void updateStylesList (const String& name)
+        {
+            if (getNumChildComponents() > 0)
+            {
+                if (auto cb = dynamic_cast<ComboBox*> (getChildComponent (0)))
+                    cb->clear();
+
+                getChildComponent (0)->setVisible (false);
+                removeAllChildren();
+            }
+
+            choices.clear();
+
+            choices.add ("Regular");
+            choices.add ("Bold");
+            choices.add ("Italic");
+            choices.add ("Bold Italic");
+
+            choices.mergeArray (Font::findAllTypefaceStyles (name));
+            refresh();
+        }
+
         void setIndex (int newIndex)
         {
             Font f (element->getFont());
 
-            f.setBold (newIndex == 1 || newIndex == 3);
-            f.setItalic (newIndex == 2 || newIndex == 3);
+            if (f.getAvailableStyles().contains (choices[newIndex]))
+            {
+                f.setBold   (false);
+                f.setItalic (false);
+                f.setTypefaceStyle (choices[newIndex]);
+            }
+            else
+            {
+                f.setTypefaceStyle ("Regular");
+                f.setBold   (newIndex == 1 || newIndex == 3);
+                f.setItalic (newIndex == 2 || newIndex == 3);
+            }
 
             element->setFont (f, true);
         }
 
         int getIndex() const
         {
-            if (element->getFont().isBold() && element->getFont().isItalic())
-                return 3;
-            else if (element->getFont().isBold())
-                return 1;
-            else if (element->getFont().isItalic())
-                return 2;
+            auto f = element->getFont();
 
-            return 0;
+            const auto typefaceIndex = choices.indexOf (f.getTypefaceStyle());
+            if (typefaceIndex == -1)
+            {
+                if (f.isBold() && f.isItalic())
+                    return 3;
+                else if (f.isBold())
+                    return 1;
+                else if (f.isItalic())
+                    return 2;
+
+                return 0;
+            }
+
+            return typefaceIndex;
         }
 
-        void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
+        void changeListenerCallback (ChangeBroadcaster*)
+        {
+            updateStylesList (element->getTypefaceName());
+        }
 
     private:
         PaintElementText* const element;
@@ -503,6 +554,47 @@ private:
         }
 
         void changeListenerCallback (ChangeBroadcaster*)     { refresh(); }
+
+    private:
+        PaintElementText* const element;
+    };
+
+    //==============================================================================
+    class FontKerningProperty  : public SliderPropertyComponent,
+                                 public ChangeListener
+    {
+    public:
+        FontKerningProperty (PaintElementText* const e)
+            : SliderPropertyComponent ("kerning", -0.5, 0.5, 0.001),
+              element (e)
+        {
+            element->getDocument()->addChangeListener (this);
+        }
+
+        ~FontKerningProperty()
+        {
+            element->getDocument()->removeChangeListener (this);
+        }
+
+        void setValue (double newValue)
+        {
+            element->getDocument()->getUndoManager().undoCurrentTransactionOnly();
+
+            Font f (element->getFont());
+            f.setExtraKerningFactor ((float) newValue);
+
+            element->setFont (f, true);
+        }
+
+        double getValue() const
+        {
+            return element->getFont().getExtraKerningFactor();
+        }
+
+        void changeListenerCallback (ChangeBroadcaster*)
+        {
+            refresh();
+        }
 
     private:
         PaintElementText* const element;
@@ -565,6 +657,3 @@ private:
         PaintElementText* const element;
     };
 };
-
-
-#endif   // JUCER_PAINTELEMENTTEXT_H_INCLUDED

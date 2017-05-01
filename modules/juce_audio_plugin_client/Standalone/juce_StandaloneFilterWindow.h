@@ -2,28 +2,29 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#ifndef JUCE_STANDALONEFILTERWINDOW_H_INCLUDED
-#define JUCE_STANDALONEFILTERWINDOW_H_INCLUDED
+#pragma once
 
 //==============================================================================
 /**
@@ -106,7 +107,7 @@ public:
     static String getFilePatterns (const String& fileSuffix)
     {
         if (fileSuffix.isEmpty())
-            return String();
+            return {};
 
         return (fileSuffix.startsWithChar ('.') ? "*" : "*.") + fileSuffix;
     }
@@ -183,6 +184,14 @@ public:
     void startPlaying()
     {
         player.setProcessor (processor);
+
+       #if JucePlugin_Enable_IAA && JUCE_IOS
+        if (auto device = dynamic_cast<iOSAudioIODevice*> (deviceManager.getCurrentAudioDevice()))
+        {
+            processor->setPlayHead                (device->getAudioPlayHead());
+            device->setMidiMessageCollector (&player.getMidiMessageCollector());
+        }
+       #endif
     }
 
     void stopPlaying()
@@ -204,8 +213,8 @@ public:
                                                               true, false));
         o.content->setSize (500, 450);
 
-        o.dialogTitle                   = TRANS("Audio Settings");
-        o.dialogBackgroundColour        = Colour (0xfff0f0f0);
+        o.dialogTitle                   = TRANS("Audio/MIDI Settings");
+        o.dialogBackgroundColour        = o.content->getLookAndFeel().findColour (ResizableWindow::backgroundColourId);
         o.escapeKeyTriggersCloseButton  = true;
         o.useNativeTitleBar             = true;
         o.resizable                     = false;
@@ -260,6 +269,41 @@ public:
                 processor->setStateInformation (data.getData(), (int) data.getSize());
         }
     }
+
+    //==============================================================================
+    void switchToHostApplication()
+    {
+       #if JUCE_IOS
+        if (auto device = dynamic_cast<iOSAudioIODevice*> (deviceManager.getCurrentAudioDevice()))
+            device->switchApplication();
+       #endif
+    }
+
+    bool isInterAppAudioConnected()
+    {
+       #if JUCE_IOS
+        if (auto device = dynamic_cast<iOSAudioIODevice*> (deviceManager.getCurrentAudioDevice()))
+            return device->isInterAppAudioConnected();
+       #endif
+
+        return false;
+    }
+
+   #if JUCE_MODULE_AVAILABLE_juce_gui_basics
+    Image getIAAHostIcon (int size)
+    {
+       #if JUCE_IOS && JucePlugin_Enable_IAA
+        if (auto device = dynamic_cast<iOSAudioIODevice*> (deviceManager.getCurrentAudioDevice()))
+            return device->getIcon (size);
+       #else
+        ignoreUnused (size);
+       #endif
+
+        return Image();
+    }
+   #endif
+
+    static StandalonePluginHolder* getInstance();
 
     //==============================================================================
     OptionalScopedPointer<PropertySet> settings;
@@ -329,7 +373,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandalonePluginHolder)
 };
 
-
 //==============================================================================
 /**
     A class that can be used to run a simple standalone application containing your filter.
@@ -355,7 +398,7 @@ public:
                             const String& preferredDefaultDeviceName = String(),
                             const AudioDeviceManager::AudioDeviceSetup* preferredSetupOptions = nullptr)
         : DocumentWindow (title, backgroundColour, DocumentWindow::minimiseButton | DocumentWindow::closeButton),
-          optionsButton ("options")
+          optionsButton ("Options")
     {
         setTitleBarButtonsRequired (DocumentWindow::minimiseButton | DocumentWindow::closeButton, false);
 
@@ -367,6 +410,11 @@ public:
                                                    preferredDefaultDeviceName, preferredSetupOptions);
 
         createEditorComp();
+
+       #if JUCE_IOS || JUCE_ANDROID
+        setFullScreen (true);
+        Desktop::getInstance().setKioskModeComponent (this, false);
+       #else
 
         if (PropertySet* props = pluginHolder->settings)
         {
@@ -382,15 +430,18 @@ public:
         {
             centreWithSize (getWidth(), getHeight());
         }
+       #endif
     }
 
     ~StandaloneFilterWindow()
     {
+       #if (! JUCE_IOS) && (! JUCE_ANDROID)
         if (PropertySet* props = pluginHolder->settings)
         {
             props->setValue ("windowX", getX());
             props->setValue ("windowY", getY());
         }
+       #endif
 
         pluginHolder->stopPlaying();
         deleteEditorComp();
@@ -439,7 +490,7 @@ public:
     void buttonClicked (Button*) override
     {
         PopupMenu m;
-        m.addItem (1, TRANS("Audio Settings..."));
+        m.addItem (1, TRANS("Audio/MIDI Settings..."));
         m.addSeparator();
         m.addItem (2, TRANS("Save current state..."));
         m.addItem (3, TRANS("Load a saved state..."));
@@ -474,6 +525,8 @@ public:
         optionsButton.setBounds (8, 6, 60, getTitleBarHeight() - 8);
     }
 
+    virtual StandalonePluginHolder* getPluginHolder()    { return pluginHolder; }
+
     ScopedPointer<StandalonePluginHolder> pluginHolder;
 
 private:
@@ -483,5 +536,19 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandaloneFilterWindow)
 };
 
+StandalonePluginHolder* StandalonePluginHolder::getInstance()
+{
+   #if JucePlugin_Enable_IAA || JucePlugin_Build_STANDALONE
+    if (PluginHostType::getPluginLoadedAs() == AudioProcessor::wrapperType_Standalone)
+    {
+        Desktop& desktop (Desktop::getInstance());
+        const int numTopLevelWindows = desktop.getNumComponents();
 
-#endif   // JUCE_STANDALONEFILTERWINDOW_H_INCLUDED
+        for (int i = 0; i < numTopLevelWindows; ++i)
+            if (auto window = dynamic_cast<StandaloneFilterWindow*> (desktop.getComponent (i)))
+                return window->getPluginHolder();
+    }
+   #endif
+
+    return nullptr;
+}
