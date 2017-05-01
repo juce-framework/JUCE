@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -132,7 +134,7 @@ public:
             // interval setting.
             numDecimalPlaces = 7;
 
-            if (newInt != 0)
+            if (newInt != 0.0)
             {
                 int v = std::abs (roundToInt (newInt * 10000000));
 
@@ -177,10 +179,10 @@ public:
 
         if (style == ThreeValueHorizontal || style == ThreeValueVertical)
         {
-            jassert ((double) valueMin.getValue() <= (double) valueMax.getValue());
+            jassert (static_cast<double> (valueMin.getValue()) <= static_cast<double> (valueMax.getValue()));
 
-            newValue = jlimit ((double) valueMin.getValue(),
-                               (double) valueMax.getValue(),
+            newValue = jlimit (static_cast<double> (valueMin.getValue()),
+                               static_cast<double> (valueMax.getValue()),
                                newValue);
         }
 
@@ -217,10 +219,10 @@ public:
 
         if (style == TwoValueHorizontal || style == TwoValueVertical)
         {
-            if (allowNudgingOfOtherValues && newValue > (double) valueMax.getValue())
+            if (allowNudgingOfOtherValues && newValue > static_cast<double> (valueMax.getValue()))
                 setMaxValue (newValue, notification, false);
 
-            newValue = jmin ((double) valueMax.getValue(), newValue);
+            newValue = jmin (static_cast<double> (valueMax.getValue()), newValue);
         }
         else
         {
@@ -254,10 +256,10 @@ public:
 
         if (style == TwoValueHorizontal || style == TwoValueVertical)
         {
-            if (allowNudgingOfOtherValues && newValue < (double) valueMin.getValue())
+            if (allowNudgingOfOtherValues && newValue < static_cast<double> (valueMin.getValue()))
                 setMinValue (newValue, notification, false);
 
-            newValue = jmax ((double) valueMin.getValue(), newValue);
+            newValue = jmax (static_cast<double> (valueMin.getValue()), newValue);
         }
         else
         {
@@ -402,7 +404,7 @@ public:
     {
         const double newValue = owner.snapValue (owner.getValueFromText (label->getText()), notDragging);
 
-        if (newValue != (double) currentValue.getValue())
+        if (newValue != static_cast<double> (currentValue.getValue()))
         {
             DragInProgress drag (*this);
             setValue (newValue, sendNotificationSync);
@@ -791,7 +793,7 @@ public:
         const double maxSpeed = jmax (200, sliderRegionSize);
         double speed = jlimit (0.0, maxSpeed, (double) std::abs (mouseDiff));
 
-        if (speed != 0)
+        if (speed != 0.0)
         {
             speed = 0.2 * velocityModeSensitivity
                       * (1.0 + std::sin (double_Pi * (1.5 + jmin (0.5, velocityModeOffset
@@ -840,7 +842,7 @@ public:
 
                 sliderBeingDragged = getThumbIndexAt (e);
 
-                minMaxDiff = (double) valueMax.getValue() - (double) valueMin.getValue();
+                minMaxDiff = static_cast<double> (valueMax.getValue()) - static_cast<double> (valueMin.getValue());
 
                 lastAngle = rotaryParams.startAngleRadians
                                 + (rotaryParams.endAngleRadians - rotaryParams.startAngleRadians)
@@ -920,7 +922,7 @@ public:
                 if (e.mods.isShiftDown())
                     setMaxValue (getMinValue() + minMaxDiff, dontSendNotification, true);
                 else
-                    minMaxDiff = (double) valueMax.getValue() - (double) valueMin.getValue();
+                    minMaxDiff = static_cast<double> (valueMax.getValue()) - static_cast<double> (valueMin.getValue());
             }
             else if (sliderBeingDragged == 2)
             {
@@ -930,7 +932,7 @@ public:
                 if (e.mods.isShiftDown())
                     setMinValue (getMaxValue() - minMaxDiff, dontSendNotification, true);
                 else
-                    minMaxDiff = (double) valueMax.getValue() - (double) valueMin.getValue();
+                    minMaxDiff = static_cast<double> (valueMax.getValue()) - static_cast<double> (valueMin.getValue());
             }
 
             mousePosWhenLastDragged = e.position;
@@ -946,7 +948,7 @@ public:
         {
             restoreMouseIfHidden();
 
-            if (sendChangeOnlyOnRelease && valueOnMouseDown != (double) currentValue.getValue())
+            if (sendChangeOnlyOnRelease && valueOnMouseDown != static_cast<double> (currentValue.getValue()))
                 triggerChangeMessage (sendNotificationAsync);
 
             currentDrag = nullptr;
@@ -1010,11 +1012,11 @@ public:
                     if (valueBox != nullptr)
                         valueBox->hideEditor (false);
 
-                    const double value = (double) currentValue.getValue();
+                    const double value = static_cast<double> (currentValue.getValue());
                     const double delta = getMouseWheelDelta (value, (std::abs (wheel.deltaX) > std::abs (wheel.deltaY)
                                                                         ? -wheel.deltaX : wheel.deltaY)
                                                                       * (wheel.isReversed ? -1.0f : 1.0f));
-                    if (delta != 0)
+                    if (delta != 0.0)
                     {
                         const double newValue = value + jmax (interval, std::abs (delta)) * (delta < 0 ? -1.0 : 1.0);
 
@@ -1052,7 +1054,7 @@ public:
 
                 const double pos = sliderBeingDragged == 2 ? getMaxValue()
                                                            : (sliderBeingDragged == 1 ? getMinValue()
-                                                                                      : (double) currentValue.getValue());
+                                                                                      : static_cast<double> (currentValue.getValue()));
                 Point<float> mousePos;
 
                 if (isRotary())

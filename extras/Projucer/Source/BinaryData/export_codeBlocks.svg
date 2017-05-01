@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 43.1 (39012) - http://www.bohemiancoding.com/sketch -->
+    <title>Group</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Artboard" transform="translate(-33.000000, -4.000000)">
+            <g id="Group" transform="translate(33.000000, 4.000000)">
+                <polygon id="Rectangle-5-Copy-4" fill="#FD3535" points="7.36842105 -1.87919855e-13 9.47368421 4.21052632 9.47368421 9.47368421 4.21052632 9.47368421 6.83692868e-14 7.36842105 3.55271368e-15 -1.67409946e-14"></polygon>
+                <polygon id="Rectangle-5-Copy-5" fill="#6AC300" transform="translate(15.263158, 4.736842) scale(-1, 1) translate(-15.263158, -4.736842) " points="17.8947368 -1.87919855e-13 20 4.21052632 20 9.47368421 14.7368421 9.47368421 10.5263158 7.36842105 10.5263158 -1.67409946e-14"></polygon>
+                <polygon id="Rectangle-5-Copy-7" fill="#EBBF20" transform="translate(4.736842, 15.263158) scale(1, -1) translate(-4.736842, -15.263158) " points="7.36842105 10.5263158 9.47368421 14.7368421 9.47368421 20 4.21052632 20 6.83692868e-14 17.8947368 3.55271368e-15 10.5263158"></polygon>
+                <polygon id="Rectangle-5-Copy-6" fill="#1F6CE9" transform="translate(15.263158, 15.263158) scale(-1, -1) translate(-15.263158, -15.263158) " points="17.8947368 10.5263158 20 14.7368421 20 20 14.7368421 20 10.5263158 17.8947368 10.5263158 10.5263158"></polygon>
+            </g>
+        </g>
+    </g>
+</svg>

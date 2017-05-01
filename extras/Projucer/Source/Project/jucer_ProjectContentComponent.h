@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -28,7 +30,9 @@
 #include "../Application/jucer_OpenDocumentManager.h"
 
 class CompileEngineChildProcess;
-
+class ProjectTab;
+class LiveBuildTab;
+class HeaderComponent;
 
 //==============================================================================
 class ProjectContentComponent  : public Component,
@@ -56,15 +60,15 @@ public:
 
     bool showDocument (OpenDocumentManager::Document*, bool grabFocus);
     void hideDocument (OpenDocumentManager::Document*);
-    OpenDocumentManager::Document* getCurrentDocument() const   { return currentDocument; }
+    OpenDocumentManager::Document* getCurrentDocument() const    { return currentDocument; }
     void closeDocument();
     void saveDocument();
     void saveAs();
 
     void hideEditor();
     bool setEditorComponent (Component* editor, OpenDocumentManager::Document* doc);
-    Component* getEditorComponent() const                       { return contentView; }
-    Component& getTabsComponent()                               { return treeViewTabs; }
+    Component* getEditorComponent() const    { return contentView; }
+    Component& getSidebarComponent()         { return sidebarTabs; }
 
     bool goToPreviousFile();
     bool goToNextFile();
@@ -73,20 +77,24 @@ public:
 
     bool saveProject();
     void closeProject();
-    void openInIDE (bool saveFirst);
-    void openInIDE (int exporterIndex, bool saveFirst);
+    void openInSelectedIDE (bool saveFirst);
     void showNewExporterMenu();
 
-    void showFilesTab();
-    void showConfigTab();
-    void showBuildTab();
+    void showProjectTab()    { sidebarTabs.setCurrentTabIndex (0); }
+    void showBuildTab()      { sidebarTabs.setCurrentTabIndex (1); }
+
+    void showFilesPanel()        { showProjectPanel (0); }
+    void showModulesPanel()      { showProjectPanel (1); }
+    void showExportersPanel()    { showProjectPanel (2); }
+
     void showProjectSettings();
-    void showModules();
+    void showCurrentExporterSettings();
+    void showExporterSettings (const String& exporterName);
     void showModule (const String& moduleID);
+    void showLiveBuildSettings();
+    void showUserSettings();
 
     void deleteSelectedTreeItems();
-
-    void updateMainWindowTitle();
 
     void updateMissingFileStatuses();
     void createProjectTabs();
@@ -121,7 +129,6 @@ public:
     bool perform (const InvocationInfo&) override;
 
     void paint (Graphics&) override;
-    void paintOverChildren (Graphics&) override;
     void resized() override;
     void childBoundsChanged (Component*) override;
     void lookAndFeelChanged() override;
@@ -129,20 +136,25 @@ public:
     String lastCrashMessage;
 
 private:
+    friend HeaderComponent;
+
     //==============================================================================
     Project* project;
     OpenDocumentManager::Document* currentDocument;
     RecentDocumentList recentDocumentList;
-    ScopedPointer<Component> logo, translationTool, contentView;
+    ScopedPointer<Component> logo, translationTool, contentView, header;
 
-    TabbedComponent treeViewTabs;
+    TabbedComponent sidebarTabs;
     ScopedPointer<ResizableEdgeComponent> resizerBar;
+    ComponentBoundsConstrainer sidebarSizeConstrainer;
 
-    ComponentBoundsConstrainer treeSizeConstrainer;
     BubbleMessageComponent bubbleMessage;
-
     ReferenceCountedObjectPtr<CompileEngineChildProcess> childProcess;
     bool isForeground = false;
+
+    ScopedPointer<Label> fileNameLabel;
+
+    int lastViewedTab = 0;
 
     //==============================================================================
     bool documentAboutToClose (OpenDocumentManager::Document*) override;
@@ -152,21 +164,22 @@ private:
     void globalFocusChanged (Component*) override;
     void timerCallback() override;
 
-    Component* createBuildTab (CompileEngineChildProcess*);
-    Component* createDisabledBuildTabSubscribe (String textPrefix, bool loggedIn, bool dllPresent);
-    Component* createDisabledBuildTabInfoOnly (const char* messsage);
-
     bool isContinuousRebuildEnabled();
     void setContinuousRebuildEnabled (bool b);
+
     void rebuildNow();
     void handleCrash (const String& message);
     void updateWarningState();
     void launchApp();
     void killApp();
-    bool isBuildTabSuitableForLoggedInUser() const;
-    bool isBuildTabLoggedInWithoutLicense() const;
 
     ReferenceCountedObjectPtr<CompileEngineChildProcess> getChildProcess();
+
+    //==============================================================================
+    void showProjectPanel (const int index);
+    ProjectTab* getProjectTab();
+    LiveBuildTab* getLiveBuildTab();
+    bool canSelectedProjectBeLaunch();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectContentComponent)
 };

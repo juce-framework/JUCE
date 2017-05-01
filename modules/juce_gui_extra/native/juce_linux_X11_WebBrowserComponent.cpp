@@ -1,26 +1,32 @@
 /*
   ==============================================================================
 
-  This file is part of the JUCE library.
-  Copyright (c) 2015 - ROLI Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2017 - ROLI Ltd.
 
-  Permission is granted to use this software under the terms of either:
-  a) the GPL v2 (or any later version)
-  b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-  Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-  JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-  A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-  ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-  To release a closed-source product which uses JUCE, commercial licenses are
-  available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
+//==============================================================================
+extern int juce_gtkWebkitMain (int argc, const char* argv[]);
+
 class CommandReceiver
 {
 public:
@@ -150,7 +156,7 @@ public:
         : outChannel (outChannelToUse), receiver (this, inChannel)
     {}
 
-    void entry()
+    int entry()
     {
         CommandReceiver::setBlocking (outChannel,      true);
 
@@ -180,6 +186,9 @@ public:
         g_signal_connect (webview, "load-changed",
                           G_CALLBACK (loadChangedCallback), this);
 
+        g_signal_connect (webview, "load-failed",
+                          G_CALLBACK (loadFailedCallback), this);
+
         gtk_widget_show_all (plug);
         unsigned long wID = (unsigned long) gtk_plug_get_id (GTK_PLUG (plug));
 
@@ -194,6 +203,7 @@ public:
         receiver.tryNextRead();
 
         gtk_main();
+        return 0;
     }
 
     void goToURL (const var& params)
@@ -253,7 +263,7 @@ public:
 
     void quit()
     {
-        exit (-1);
+        gtk_main_quit();
     }
 
     bool onNavigation (String frameName,
@@ -350,6 +360,14 @@ public:
         return false;
     }
 
+    void onLoadFailed (GError* error)
+    {
+        DynamicObject::Ptr params = new DynamicObject;
+
+        params->setProperty ("error", String (error != nullptr ? error->message : "unknown error"));
+        CommandReceiver::sendCommand (outChannel, "pageLoadHadNetworkError", var (params));
+    }
+
 private:
     static gboolean pipeReadyStatic (gint fd, GIOCondition condition, gpointer user)
     {
@@ -371,6 +389,16 @@ private:
     {
         GtkChildProcess& owner = *reinterpret_cast<GtkChildProcess*> (user);
         owner.onLoadChanged (loadEvent);
+    }
+
+    static void loadFailedCallback (WebKitWebView*,
+                                    WebKitLoadEvent /*loadEvent*/,
+                                    gchar*          /*failing_uri*/,
+                                    GError*         error,
+                                    gpointer        user)
+    {
+        GtkChildProcess& owner = *reinterpret_cast<GtkChildProcess*> (user);
+        owner.onLoadFailed (error);
     }
 
     int outChannel;
@@ -481,12 +509,25 @@ private:
         {
             xembed = nullptr;
 
-            kill (childProcess, SIGTERM);
+            int status = 0, result;
 
-            int status = 0;
+            result = waitpid (childProcess, &status, WNOHANG);
+            for (int i = 0; i < 15 && (! WIFEXITED(status) || result != childProcess); ++i)
+            {
+                Thread::sleep (100);
+                result = waitpid (childProcess, &status, WNOHANG);
+            }
 
-            while (! WIFEXITED(status))
-                waitpid (childProcess, &status, 0);
+            // clean-up any zombies
+            status = 0;
+            if (! WIFEXITED(status) || result != childProcess)
+            {
+                do
+                {
+                    kill (childProcess, SIGTERM);
+                    waitpid (childProcess, &status, 0);
+                } while (! WIFEXITED(status));
+            }
 
             childProcess = 0;
         }
@@ -509,8 +550,24 @@ private:
             close (inPipe[0]);
             close (outPipe[1]);
 
-            GtkChildProcess child (outPipe[0], inPipe[1]);
-            child.entry();
+            HeapBlock<const char*> argv (5);
+            StringArray arguments;
+
+            arguments.add (File::getSpecialLocation (File::currentExecutableFile).getFullPathName());
+            arguments.add ("--juce-gtkwebkitfork-child");
+            arguments.add (String (outPipe[0]));
+            arguments.add (String (inPipe [1]));
+
+            for (int i = 0; i < arguments.size(); ++i)
+                argv[i] = arguments[i].toRawUTF8();
+
+            argv[4] = nullptr;
+
+           #if JUCE_STANDALONE_APPLICATION
+            execv (arguments[0].toRawUTF8(), (char**) argv.getData());
+           #else
+            juce_gtkWebkitMain (4, (const char**) argv.getData());
+           #endif
             exit (0);
         }
 
@@ -566,6 +623,7 @@ private:
         else if (cmd == "pageFinishedLoading")       owner.pageFinishedLoading (url);
         else if (cmd == "windowCloseRequest")        owner.windowCloseRequest();
         else if (cmd == "newWindowAttemptingToLoad") owner.newWindowAttemptingToLoad (url);
+        else if (cmd == "pageLoadHadNetworkError")   handlePageLoadHadNetworkError (params);
 
         threadBlocker.signal();
     }
@@ -583,6 +641,14 @@ private:
 
             CommandReceiver::sendCommand (outChannel, "decision", var (params));
         }
+    }
+
+    void handlePageLoadHadNetworkError (const var& params)
+    {
+        String error = params.getProperty ("error", "Unknown error");
+
+        if (owner.pageLoadHadNetworkError (error))
+            goToURL (String ("data:text/plain,") + error, nullptr, nullptr);
     }
 
     void handleCommand (const String& cmd, const var& params) override
@@ -728,4 +794,21 @@ void WebBrowserComponent::visibilityChanged()
 
 void WebBrowserComponent::focusGained (FocusChangeType)
 {
+}
+
+void WebBrowserComponent::clearCookies()
+{
+    // Currently not implemented on linux as WebBrowserComponent currently does not
+    // store cookies on linux
+    jassertfalse;
+}
+
+int juce_gtkWebkitMain (int argc, const char* argv[])
+{
+    if (argc != 4) return -1;
+
+
+    GtkChildProcess child (String (argv[2]).getIntValue(),
+                           String (argv[3]).getIntValue());
+    return child.entry();
 }

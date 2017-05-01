@@ -619,6 +619,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V2.h"
     "../../../../../modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V3.cpp"
     "../../../../../modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V3.h"
+    "../../../../../modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V4.cpp"
+    "../../../../../modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V4.h"
     "../../../../../modules/juce_gui_basics/menus/juce_MenuBarComponent.cpp"
     "../../../../../modules/juce_gui_basics/menus/juce_MenuBarComponent.h"
     "../../../../../modules/juce_gui_basics/menus/juce_MenuBarModel.cpp"
@@ -629,6 +631,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_basics/misc/juce_BubbleComponent.h"
     "../../../../../modules/juce_gui_basics/misc/juce_DropShadower.cpp"
     "../../../../../modules/juce_gui_basics/misc/juce_DropShadower.h"
+    "../../../../../modules/juce_gui_basics/misc/juce_JUCESplashScreen.cpp"
+    "../../../../../modules/juce_gui_basics/misc/juce_JUCESplashScreen.h"
     "../../../../../modules/juce_gui_basics/mouse/juce_ComponentDragger.cpp"
     "../../../../../modules/juce_gui_basics/mouse/juce_ComponentDragger.h"
     "../../../../../modules/juce_gui_basics/mouse/juce_DragAndDropContainer.cpp"
@@ -765,12 +769,12 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_osc/juce_osc.h"
     "../../../../../modules/juce_osc/juce_osc.h"
     "../../../JuceLibraryCode/AppConfig.h"
-    "../../../JuceLibraryCode/juce_core.cpp"
-    "../../../JuceLibraryCode/juce_data_structures.cpp"
-    "../../../JuceLibraryCode/juce_events.cpp"
-    "../../../JuceLibraryCode/juce_graphics.cpp"
-    "../../../JuceLibraryCode/juce_gui_basics.cpp"
-    "../../../JuceLibraryCode/juce_osc.cpp"
+    "../../../JuceLibraryCode/include_juce_core.cpp"
+    "../../../JuceLibraryCode/include_juce_data_structures.cpp"
+    "../../../JuceLibraryCode/include_juce_events.cpp"
+    "../../../JuceLibraryCode/include_juce_graphics.cpp"
+    "../../../JuceLibraryCode/include_juce_gui_basics.cpp"
+    "../../../JuceLibraryCode/include_juce_osc.cpp"
     "../../../JuceLibraryCode/JuceHeader.h"
 )
 
@@ -1368,6 +1372,8 @@ set_source_files_properties("../../../../../modules/juce_gui_basics/lookandfeel/
 set_source_files_properties("../../../../../modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V2.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V3.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V3.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V4.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V4.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/menus/juce_MenuBarComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/menus/juce_MenuBarComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/menus/juce_MenuBarModel.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -1378,6 +1384,8 @@ set_source_files_properties("../../../../../modules/juce_gui_basics/misc/juce_Bu
 set_source_files_properties("../../../../../modules/juce_gui_basics/misc/juce_BubbleComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/misc/juce_DropShadower.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/misc/juce_DropShadower.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/misc/juce_JUCESplashScreen.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/misc/juce_JUCESplashScreen.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/mouse/juce_ComponentDragger.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/mouse/juce_ComponentDragger.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/mouse/juce_DragAndDropContainer.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)

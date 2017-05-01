@@ -180,21 +180,21 @@
     <ClCompile Include="..\..\Source\Demos\WindowsDemo.cpp"/>
     <ClCompile Include="..\..\Source\Demos\XMLandJSONDemo.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\BinaryData.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_audio_basics.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_audio_devices.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_audio_formats.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_audio_processors.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_audio_utils.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_box2d.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_core.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_cryptography.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_data_structures.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_events.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_graphics.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_gui_basics.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_gui_extra.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_opengl.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\juce_video.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_basics.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_devices.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_formats.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_processors.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_utils.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_box2d.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_core.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_cryptography.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_data_structures.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_events.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_graphics.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_basics.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_extra.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_opengl.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_video.cpp"/>
   </ItemGroup>
   <ItemGroup/>
   <ItemGroup>

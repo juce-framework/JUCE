@@ -11,14 +11,14 @@
 		0D53D8B0AEE37C02C147344B = {isa = PBXBuildFile; fileRef = F769CD634476C91F4C9D0596; };
 		542006E949BB022F198DF0F2 = {isa = PBXBuildFile; fileRef = 1A71A586C0F50B6B328D877B; };
 		3C6FF7689E2FD827A48E2303 = {isa = PBXBuildFile; fileRef = 50B7C64414A3E778021F5EC4; };
-		89CFB1C44BB453DF9E5F1599 = {isa = PBXBuildFile; fileRef = 719D978078EB4BB1B60E52E3; };
+		9E4D85A3D54739A0FA80A446 = {isa = PBXBuildFile; fileRef = D186E2D509765FAE0758F17D; };
 		1A71A586C0F50B6B328D877B = {isa = PBXFileReference; lastKnownFileType = file.nib; name = RecentFilesMenuTemplate.nib; path = RecentFilesMenuTemplate.nib; sourceTree = "SOURCE_ROOT"; };
 		50B7C64414A3E778021F5EC4 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Source/Main.cpp; sourceTree = "SOURCE_ROOT"; };
 		57DDB771ED96A256F190ADF8 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
-		719D978078EB4BB1B60E52E3 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "juce_core.mm"; path = "../../JuceLibraryCode/juce_core.mm"; sourceTree = "SOURCE_ROOT"; };
 		799073185F72F5FAD05253C3 = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = BinaryBuilder; sourceTree = "BUILT_PRODUCTS_DIR"; };
 		7E86227B01E504302C234A04 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AppConfig.h; path = ../../JuceLibraryCode/AppConfig.h; sourceTree = "SOURCE_ROOT"; };
 		8702176D2368B6F785546D2B = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_core"; path = "../../../../modules/juce_core"; sourceTree = "SOURCE_ROOT"; };
+		D186E2D509765FAE0758F17D = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_core.mm"; path = "../../JuceLibraryCode/include_juce_core.mm"; sourceTree = "SOURCE_ROOT"; };
 		D6C3594C8BEC94040AF108FE = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JuceHeader.h; path = ../../JuceLibraryCode/JuceHeader.h; sourceTree = "SOURCE_ROOT"; };
 		F769CD634476C91F4C9D0596 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		AF0451FEC95312712E8145CD = {isa = PBXGroup; children = (
@@ -29,7 +29,7 @@
 					8702176D2368B6F785546D2B, ); name = "Juce Modules"; sourceTree = "<group>"; };
 		8905BD956C24F83087634C3A = {isa = PBXGroup; children = (
 					7E86227B01E504302C234A04,
-					719D978078EB4BB1B60E52E3,
+					D186E2D509765FAE0758F17D,
 					D6C3594C8BEC94040AF108FE, ); name = "Juce Library Code"; sourceTree = "<group>"; };
 		87ECE820BF4D73DD50D614CB = {isa = PBXGroup; children = (
 					1A71A586C0F50B6B328D877B, ); name = Resources; sourceTree = "<group>"; };
@@ -145,7 +145,7 @@
 					542006E949BB022F198DF0F2, ); runOnlyForDeploymentPostprocessing = 0; };
 		A69CF4AD8F7015A8D3228FDE = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (
 					3C6FF7689E2FD827A48E2303,
-					89CFB1C44BB453DF9E5F1599, ); runOnlyForDeploymentPostprocessing = 0; };
+					9E4D85A3D54739A0FA80A446, ); runOnlyForDeploymentPostprocessing = 0; };
 		2722C90F3B5DAD661891FDF4 = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (
 					4B72EFB0E9D74CA7227F6CAB,
 					0D53D8B0AEE37C02C147344B, ); runOnlyForDeploymentPostprocessing = 0; };

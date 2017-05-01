@@ -2,28 +2,20 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -67,7 +59,7 @@ namespace TokenTypes
 //==============================================================================
 struct JavascriptEngine::RootObject   : public DynamicObject
 {
-    RootObject()
+    RootObject() : quit(false)
     {
         setMethod ("exec",       exec);
         setMethod ("eval",       eval);
@@ -79,6 +71,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     }
 
     Time timeout;
+    bool quit;
 
     typedef const var::NativeFunctionArgs& Args;
     typedef const char* TokenType;
@@ -243,6 +236,12 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             if (Time::getCurrentTime() > root->timeout)
                 location.throwError (root->timeout == Time() ? "Interrupted" : "Execution timed-out");
         }
+        
+        void checkQuit (const CodeLocation& location) const
+        {
+            if (root->quit)
+                location.throwError ("Execution interrupted");
+        }
     };
 
     //==============================================================================
@@ -324,6 +323,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             while (isDoLoop || condition->getResult (s))
             {
                 s.checkTimeOut (location);
+                s.checkQuit (location);
                 ResultCode r = body->perform (s, returnedValue);
 
                 if (r == returnWasHit)   return r;
@@ -597,8 +597,8 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     struct DivideOp  : public BinaryOperator
     {
         DivideOp (const CodeLocation& l, ExpPtr& a, ExpPtr& b) noexcept : BinaryOperator (l, a, b, TokenTypes::divide) {}
-        var getWithDoubles (double a, double b) const override  { return b != 0 ? a / b : std::numeric_limits<double>::infinity(); }
-        var getWithInts (int64 a, int64 b) const override       { return b != 0 ? var (a / (double) b) : var (std::numeric_limits<double>::infinity()); }
+        var getWithDoubles (double a, double b) const override  { return b != 0.0 ? a / b : std::numeric_limits<double>::infinity(); }
+        var getWithInts (int64 a, int64 b) const override       { return b != 0   ? var (a / (double) b) : var (std::numeric_limits<double>::infinity()); }
     };
 
     struct ModuloOp  : public BinaryOperator
@@ -739,7 +739,8 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         var invokeFunction (const Scope& s, const var& function, const var& thisObject) const
         {
             s.checkTimeOut (location);
-
+            s.checkQuit (location);
+            
             Array<var> argVars;
             for (int i = 0; i < arguments.size(); ++i)
                 argVars.add (arguments.getUnchecked(i)->getResult (s));
@@ -1894,6 +1895,11 @@ var JavascriptEngine::callFunctionObject (DynamicObject* objectScope, const var&
 const NamedValueSet& JavascriptEngine::getRootObjectProperties() const noexcept
 {
     return root->getProperties();
+}
+        
+void JavascriptEngine::stop()
+{
+    root->quit = true;
 }
 
 #if JUCE_MSVC
