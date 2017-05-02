@@ -344,7 +344,7 @@ public:
                 const String macOSDir       = bundleContents + String ("\\") + (is64Bit ? "x64" : "Win32");
                 const String executable     = macOSDir + String ("\\") + config.getOutputFilename (".aaxplugin", true);
 
-                return String ("copy /Y \"") + getOutputFilePath (config) + String ("\" \"") + executable + String ("\"\r\n") +
+                return String ("copy /Y \"") + getOutputFilePath (config) + String ("\" \"") + executable + String ("\"\r\ncall ") +
                     createRebasedPath (bundleScript) + String (" \"") + macOSDir + String ("\" ") + createRebasedPath (iconFilePath);
             }
 
