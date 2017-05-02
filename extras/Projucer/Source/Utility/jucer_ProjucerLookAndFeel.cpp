@@ -173,7 +173,7 @@ void ProjucerLookAndFeel::drawToggleButton (Graphics& g, ToggleButton& button, b
     {
         g.setColour (button.findColour (ToggleButton::tickColourId));
         const auto tick = getTickShape (0.75f);
-        g.fillPath (tick, tick.getTransformToScaleToFit (rectBounds.reduced (4, 5).toFloat(), false));
+        g.fillPath (tick, tick.getTransformToScaleToFit (rectBounds.reduced (2).toFloat(), false));
     }
 
     if (! isTextEmpty)
@@ -501,7 +501,7 @@ void ProjucerLookAndFeel::setupColours()
     setColour (BooleanPropertyComponent::outlineColourId,       Colours::transparentBlack);
     setColour (BooleanPropertyComponent::backgroundColourId,    findColour (widgetBackgroundColourId));
     setColour (ToggleButton::tickDisabledColourId,              Colour (0xffa9a9a9));
-    setColour (ToggleButton::tickColourId,                      findColour (defaultButtonBackgroundColourId));
+    setColour (ToggleButton::tickColourId,                      findColour (defaultButtonBackgroundColourId).withMultipliedBrightness(1.3f));
     setColour (CodeEditorComponent::backgroundColourId,         findColour (secondaryBackgroundColourId));
     setColour (CodeEditorComponent::lineNumberTextId,           findColour (codeEditorLineNumberColourId));
     setColour (CodeEditorComponent::lineNumberBackgroundId,     findColour (backgroundColourId));
