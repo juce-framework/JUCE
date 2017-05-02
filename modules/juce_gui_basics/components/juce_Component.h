@@ -473,28 +473,6 @@ public:
     */
     void setBounds (Rectangle<int> newBounds);
 
-    /** Changes the component's position and size.
-
-        This is similar to the other setBounds() methods, but uses RelativeRectangle::applyToComponent()
-        to set the position, This uses a Component::Positioner to make sure that any dynamic
-        expressions are used in the RelativeRectangle will be automatically re-applied to the
-        component's bounds when the source values change. See RelativeRectangle::applyToComponent()
-        for more details.
-
-        For the syntax of the expressions that are allowed in the string, see the notes
-        for the RelativeCoordinate class.
-
-        @see RelativeCoordinate, setBounds, RelativeRectangle::applyToComponent(), Expression
-    */
-    void setBounds (const RelativeRectangle& newBounds);
-
-    /** Sets the component's bounds with an expression.
-        The string is parsed as a RelativeRectangle expression - see the notes for
-        Component::setBounds (const RelativeRectangle&) for more information. This method is
-        basically just a shortcut for writing setBounds (RelativeRectangle ("..."))
-    */
-    void setBounds (const String& newBoundsExpression);
-
     /** Changes the component's position and size in terms of fractions of its parent's size.
 
         The values are factors of the parent's size, so for example
@@ -2257,6 +2235,10 @@ public:
     JUCE_DEPRECATED (Point<int> relativePositionToGlobal (Point<int>) const);
     JUCE_DEPRECATED (Point<int> globalPositionToRelative (Point<int>) const);
     JUCE_DEPRECATED (Point<int> relativePositionToOtherComponent (const Component*, Point<int>) const);
+
+    // RelativeCoordinates are eventually going to be deprecated
+    JUCE_DEPRECATED (void setBounds (const RelativeRectangle&));
+    JUCE_DEPRECATED (void setBounds (const String&));
 
 private:
     //==============================================================================

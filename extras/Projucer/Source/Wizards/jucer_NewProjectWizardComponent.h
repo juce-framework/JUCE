@@ -134,10 +134,9 @@ public:
 
         const Array<ProjectExporter::ExporterTypeInfo> types (ProjectExporter::getExporterTypes());
 
-        for (int i = 0; i < types.size(); ++i)
+        for (auto& type : types)
         {
-            const ProjectExporter::ExporterTypeInfo& type = types.getReference (i);
-            platforms.add (new PlatformType (type.getIcon(), type.name));
+            platforms.add (new PlatformType { type.getIcon(), type.name });
             addAndMakeVisible (toggles.add (new ToggleButton (String())));
         }
 
@@ -192,7 +191,7 @@ public:
     {
         ignoreUnused (width);
 
-        if (PlatformType* platform = platforms[rowNumber])
+        if (auto* platform = platforms[rowNumber])
         {
             auto bounds = getLocalBounds().withHeight (height).withTrimmedBottom (1);
             g.setColour (findColour (rowNumber % 2 == 0 ? widgetBackgroundColourId
@@ -223,11 +222,6 @@ public:
 private:
     struct PlatformType
     {
-        PlatformType (const Image& platformIcon, const String& platformName)
-            : icon (platformIcon), name (platformName)
-        {
-        }
-
         Image icon;
         String name;
     };
@@ -286,65 +280,49 @@ public:
     WizardComp()
         : platformTargets(),
           projectName (TRANS("Project name")),
-          nameLabel (String(), TRANS("Project Name") + ":"),
-          typeLabel (String(), TRANS("Project Type") + ":"),
-          fileBrowser (FileBrowserComponent::saveMode
-                         | FileBrowserComponent::canSelectDirectories
-                         | FileBrowserComponent::doNotClearFileNameOnRootChange,
-                       NewProjectWizardClasses::getLastWizardFolder(), nullptr, nullptr),
-          fileOutline (String(), TRANS("Project Folder") + ":"),
-          targetsOutline (String(), TRANS("Target Platforms") + ":"),
-          createButton (TRANS("Create") + "..."),
-          cancelButton (TRANS("Cancel")),
           modulesPathBox (findDefaultModulesFolder())
     {
         setOpaque (false);
 
         addChildAndSetID (&projectName, "projectName");
         projectName.setText ("NewProject");
-        projectName.setBounds ("120, 34, parent.width / 2 - 10, top + 22");
         nameLabel.attachToComponent (&projectName, true);
         projectName.addListener (this);
 
         addChildAndSetID (&projectType, "projectType");
         projectType.addItemList (getWizardNames(), 1);
         projectType.setSelectedId (1, dontSendNotification);
-        projectType.setBounds ("120, projectName.bottom + 4, projectName.right, top + 22");
         typeLabel.attachToComponent (&projectType, true);
         projectType.addListener (this);
 
         addChildAndSetID (&fileOutline, "fileOutline");
         fileOutline.setColour (GroupComponent::outlineColourId, Colours::black.withAlpha (0.2f));
         fileOutline.setTextLabelPosition (Justification::centred);
-        fileOutline.setBounds ("30, projectType.bottom + 20, projectType.right, parent.height - 30");
 
         addChildAndSetID (&targetsOutline, "targetsOutline");
         targetsOutline.setColour (GroupComponent::outlineColourId, Colours::black.withAlpha (0.2f));
         targetsOutline.setTextLabelPosition (Justification::centred);
-        targetsOutline.setBounds ("fileOutline.right + 20, projectType.bottom + 20, parent.width - 30, parent.height - 70");
 
         addChildAndSetID (&platformTargets, "platformTargets");
-        platformTargets.setBounds ("targetsOutline.left + 15, projectType.bottom + 45, parent.width - 40, parent.height - 90");
 
         addChildAndSetID (&fileBrowser, "fileBrowser");
-        fileBrowser.setBounds ("fileOutline.left + 10, fileOutline.top + 20, fileOutline.right - 10, fileOutline.bottom - 32");
         fileBrowser.setFilenameBoxLabel ("Folder:");
         fileBrowser.setFileName (File::createLegalFileName (projectName.getText()));
         fileBrowser.addListener (this);
 
         addChildAndSetID (&createButton, "createButton");
-        createButton.setBounds ("right - 130, bottom - 34, parent.width - 30, parent.height - 30");
         createButton.addListener (this);
 
         addChildAndSetID (&cancelButton, "cancelButton");
         cancelButton.addShortcut (KeyPress (KeyPress::escapeKey));
-        cancelButton.setBounds ("right - 130, createButton.top, createButton.left - 10, createButton.bottom");
         cancelButton.addListener (this);
 
         addChildAndSetID (&modulesPathBox, "modulesPathBox");
-        modulesPathBox.setBounds ("targetsOutline.left, targetsOutline.top - 45, targetsOutline.right, targetsOutline.top - 20");
 
-        updateCustomItems();
+        addChildAndSetID (&filesToCreate, "filesToCreate");
+        filesToCreateLabel.attachToComponent (&filesToCreate, true);
+
+        updateFileCreationTypes();
         updateCreateButton();
 
         lookAndFeelChanged();
@@ -353,6 +331,35 @@ public:
     void paint (Graphics& g) override
     {
         g.fillAll (findColour (backgroundColourId));
+    }
+
+    void resized() override
+    {
+        auto r = getLocalBounds();
+
+        auto left = r.removeFromLeft (getWidth() / 2).reduced (15);
+        auto right = r.reduced (15);
+
+        projectName.setBounds (left.removeFromTop (22).withTrimmedLeft (120));
+        left.removeFromTop (20);
+        projectType.setBounds (left.removeFromTop (22).withTrimmedLeft (120));
+        left.removeFromTop (20);
+        fileOutline.setBounds (left);
+        fileBrowser.setBounds (left.reduced (25));
+
+        auto buttons = right.removeFromBottom (30);
+        right.removeFromBottom (10);
+        createButton.setBounds (buttons.removeFromRight (130));
+        buttons.removeFromRight (10);
+        cancelButton.setBounds (buttons.removeFromRight (130));
+
+        filesToCreate.setBounds (right.removeFromTop (22).withTrimmedLeft (150));
+        right.removeFromTop (20);
+        modulesPathBox.setBounds (right.removeFromTop (22));
+        right.removeFromTop (20);
+
+        targetsOutline.setBounds (right);
+        platformTargets.setBounds (right.reduced (25));
     }
 
     void buttonClicked (Button* b) override
@@ -369,7 +376,7 @@ public:
 
     void returnToTemplatesPage()
     {
-        if (SlidingPanelComponent* parent = findParentComponentOfClass<SlidingPanelComponent>())
+        if (auto* parent = findParentComponentOfClass<SlidingPanelComponent>())
         {
             if (parent->getNumTabs() > 0)
                 parent->goToTab (parent->getCurrentTabIndex() - 1);
@@ -382,12 +389,10 @@ public:
 
     void createProject()
     {
-        MainWindow* mw = Component::findParentComponentOfClass<MainWindow>();
+        auto* mw = Component::findParentComponentOfClass<MainWindow>();
         jassert (mw != nullptr);
 
-        ScopedPointer<NewProjectWizardClasses::NewProjectWizard> wizard (createWizard());
-
-        if (wizard != nullptr)
+        if (ScopedPointer<NewProjectWizardClasses::NewProjectWizard> wizard = createWizard())
         {
             Result result (wizard->processResultsFromSetupItems (*this));
 
@@ -405,27 +410,27 @@ public:
                 if (! wizard->selectJuceFolder())
                     return;
 
-            ScopedPointer<Project> project (wizard->runWizard (*this, projectName.getText(),
-                                                               fileBrowser.getSelectedFile (0)));
-
-            if (project != nullptr)
+            if (ScopedPointer<Project> project = wizard->runWizard (*this, projectName.getText(),
+                                                                    fileBrowser.getSelectedFile (0)))
                 mw->setProject (project.release());
         }
     }
 
-    void updateCustomItems()
+    void updateFileCreationTypes()
     {
-        customItems.clear();
+        StringArray items;
 
-        ScopedPointer<NewProjectWizardClasses::NewProjectWizard> wizard (createWizard());
+        if (ScopedPointer<NewProjectWizardClasses::NewProjectWizard> wizard = createWizard())
+            items = wizard->getFileCreationOptions();
 
-        if (wizard != nullptr)
-            wizard->addSetupItems (*this, customItems);
+        filesToCreate.clear();
+        filesToCreate.addItemList (items, 1);
+        filesToCreate.setSelectedId (1, dontSendNotification);
     }
 
     void comboBoxChanged (ComboBox*) override
     {
-        updateCustomItems();
+        updateFileCreationTypes();
     }
 
     void textEditorTextChanged (TextEditor&) override
@@ -444,17 +449,31 @@ public:
         fileBrowser.setFileName (File::createLegalFileName (projectName.getText()));
     }
 
-    ComboBox projectType;
+    int getFileCreationComboID() const
+    {
+        return filesToCreate.getSelectedItemIndex();
+    }
+
+    ComboBox projectType, filesToCreate;
     PlatformTargetsComp platformTargets;
 
 private:
     TextEditor projectName;
-    Label nameLabel, typeLabel;
-    FileBrowserComponent fileBrowser;
-    GroupComponent fileOutline;
-    GroupComponent targetsOutline;
-    TextButton createButton, cancelButton;
-    OwnedArray<Component> customItems;
+
+    Label nameLabel { {}, TRANS("Project Name") + ":" };
+    Label typeLabel { {}, TRANS("Project Type") + ":" };
+    Label filesToCreateLabel { {}, TRANS("Files to Auto-Generate") + ":" };
+
+    FileBrowserComponent fileBrowser { FileBrowserComponent::saveMode
+                                        | FileBrowserComponent::canSelectDirectories
+                                        | FileBrowserComponent::doNotClearFileNameOnRootChange,
+                                       NewProjectWizardClasses::getLastWizardFolder(), nullptr, nullptr };
+
+    GroupComponent fileOutline { {}, TRANS("Project Folder") + ":" };
+    GroupComponent targetsOutline { {}, TRANS("Target Platforms") + ":" };
+
+    TextButton createButton { TRANS("Create") + "..." };
+    TextButton cancelButton { TRANS("Cancel") };
     ModulesFolderPathBox modulesPathBox;
 
     NewProjectWizardClasses::NewProjectWizard* createWizard()
