@@ -96,10 +96,7 @@ public:
     {
         ValueTree tree (this);
 
-        if (listenerToExclude == nullptr)
-            callListenersForAllParents ([&] (ListenerList<Listener>& list) { list.call (&ValueTree::Listener::valueTreePropertyChanged, tree, property); });
-        else
-            callListenersForAllParents ([&] (ListenerList<Listener>& list) { list.callExcluding (*listenerToExclude, &ValueTree::Listener::valueTreePropertyChanged, tree, property); });
+        callListenersForAllParents ([&] (ListenerList<Listener>& list) { list.callExcluding (listenerToExclude, &ValueTree::Listener::valueTreePropertyChanged, tree, property); });
     }
 
     void sendChildAddedMessage (ValueTree child)
