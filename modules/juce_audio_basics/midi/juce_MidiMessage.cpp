@@ -855,7 +855,7 @@ MidiMessage MidiMessage::keySignatureMetaEvent (int numberOfSharpsOrFlats, bool 
 
 MidiMessage MidiMessage::endOfTrack() noexcept
 {
-    return { 0xff, 0x2f };
+    return { 0xff, 0x2f, 0x00 };
 }
 
 //==============================================================================
