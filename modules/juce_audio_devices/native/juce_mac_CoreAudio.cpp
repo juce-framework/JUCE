@@ -1366,21 +1366,7 @@ public:
         }
     }
 
-    void stop() override
-    {
-        AudioIODeviceCallback* lastCallback = nullptr;
-
-        {
-            const ScopedLock sl (callbackLock);
-            std::swap (callback, lastCallback);
-        }
-
-        for (int i = 0; i < devices.size(); ++i)
-            devices.getUnchecked(i)->device->stop();
-
-        if (lastCallback != nullptr)
-            lastCallback->audioDeviceStopped();
-    }
+    void stop() override    { shutdown ({}); }
 
     String getLastError() override
     {
@@ -1453,6 +1439,27 @@ private:
 
                 reset();
             }
+        }
+    }
+
+    void shutdown (const String& error)
+    {
+        AudioIODeviceCallback* lastCallback = nullptr;
+
+        {
+            const ScopedLock sl (callbackLock);
+            std::swap (callback, lastCallback);
+        }
+
+        for (int i = 0; i < devices.size(); ++i)
+            devices.getUnchecked(i)->device->stop();
+
+        if (lastCallback != nullptr)
+        {
+            if (error.isNotEmpty())
+                lastCallback->audioDeviceError (error);
+            else
+                lastCallback->audioDeviceStopped();
         }
     }
 
@@ -1584,21 +1591,8 @@ private:
             callback->audioDeviceAboutToStart (device);
     }
 
-    void handleAudioDeviceStopped()
-    {
-        const ScopedLock sl (callbackLock);
-
-        if (callback != nullptr)
-            callback->audioDeviceStopped();
-    }
-
-    void handleAudioDeviceError (const String& errorMessage)
-    {
-        const ScopedLock sl (callbackLock);
-
-        if (callback != nullptr)
-            callback->audioDeviceError (errorMessage);
-    }
+    void handleAudioDeviceStopped()                            { shutdown ({}); }
+    void handleAudioDeviceError (const String& errorMessage)   { shutdown (errorMessage.isNotEmpty() ? errorMessage : String ("unknown")); }
 
     //==============================================================================
     struct DeviceWrapper  : private AudioIODeviceCallback
