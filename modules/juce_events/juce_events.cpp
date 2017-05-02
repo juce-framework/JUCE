@@ -71,13 +71,24 @@ namespace juce
 #include "interprocess/juce_ConnectedChildProcess.cpp"
 
 //==============================================================================
-#if JUCE_MAC
- #include "native/juce_osx_MessageQueue.h"
- #include "native/juce_mac_MessageManager.mm"
+#if JUCE_MAC || JUCE_IOS
 
-#elif JUCE_IOS
  #include "native/juce_osx_MessageQueue.h"
- #include "native/juce_ios_MessageManager.mm"
+
+ #if JUCE_CLANG
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wundeclared-selector"
+ #endif
+
+ #if JUCE_MAC
+  #include "native/juce_mac_MessageManager.mm"
+ #else
+  #include "native/juce_ios_MessageManager.mm"
+ #endif
+
+ #if JUCE_CLANG
+  #pragma clang diagnostic pop
+ #endif
 
 #elif JUCE_WINDOWS
  #include "native/juce_win32_Messaging.cpp"
