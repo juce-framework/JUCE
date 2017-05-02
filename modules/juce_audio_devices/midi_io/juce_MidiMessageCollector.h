@@ -89,10 +89,13 @@ public:
 
 private:
     //==============================================================================
-    double lastCallbackTime;
+    double lastCallbackTime = 0;
     CriticalSection midiCallbackLock;
     MidiBuffer incomingMessages;
-    double sampleRate;
+    double sampleRate = 44100.0;
+   #if JUCE_DEBUG
+    bool hasCalledReset = false;
+   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiMessageCollector)
 };
