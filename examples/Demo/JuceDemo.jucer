@@ -64,7 +64,7 @@
         <MODULEPATH id="juce_box2d" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_IPHONE>
-    <VS2013 targetFolder="Builds/VisualStudio2013" bigIcon="BvyE0d">
+    <VS2013 targetFolder="Builds/VisualStudio2013" bigIcon="BvyE0d" extraCompilerFlags="/FC">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
                        isDebug="1" optimisation="1" targetName="JuceDemo"/>
@@ -89,7 +89,7 @@
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
       </MODULEPATHS>
     </VS2013>
-    <VS2015 targetFolder="Builds/VisualStudio2015" bigIcon="BvyE0d">
+    <VS2015 targetFolder="Builds/VisualStudio2015" bigIcon="BvyE0d" extraCompilerFlags="/FC">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="1" optimisation="1" targetName="JuceDemo"/>
@@ -114,7 +114,8 @@
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
       </MODULEPATHS>
     </VS2015>
-    <VS2017 targetFolder="Builds/VisualStudio2017" smallIcon="" bigIcon="BvyE0d">
+    <VS2017 targetFolder="Builds/VisualStudio2017" smallIcon="" bigIcon="BvyE0d"
+            extraCompilerFlags="/FC">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="1" optimisation="1" targetName="JuceDemo"/>

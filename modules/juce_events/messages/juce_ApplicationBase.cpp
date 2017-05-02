@@ -69,7 +69,15 @@ void JUCEApplicationBase::sendUnhandledException (const std::exception* const e,
                                                   const int lineNumber)
 {
     if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+    {
+        // If you hit this assertion then the __FILE__ macro is providing a
+        // relative path instead of an absolute path. On Windows this will be
+        // a path relative to the build directory rather than the currently
+        // running application. To fix this you must compile with the /FC flag.
+        jassert (File::isAbsolutePath (sourceFile));
+
         app->unhandledException (e, sourceFile, lineNumber);
+    }
 }
 
 //==============================================================================
