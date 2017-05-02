@@ -442,7 +442,7 @@ void WebBrowserComponent::clearCookies()
 {
     NSHTTPCookieStorage* storage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
 
-    if (NSArray<NSHTTPCookie*>* cookies = [storage cookies])
+    if (NSArray* cookies = [storage cookies])
     {
         const NSUInteger n = [cookies count];
 
