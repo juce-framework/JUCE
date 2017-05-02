@@ -282,8 +282,6 @@ JUCESplashScreen::JUCESplashScreen (Component& parent)
 
 JUCESplashScreen::~JUCESplashScreen()
 {
-    if (auto* p = getParentComponent())
-        p->removeChildComponent (this);
 }
 
 void JUCESplashScreen::paint (Graphics& g)
@@ -292,7 +290,8 @@ void JUCESplashScreen::paint (Graphics& g)
     Point<float> bottomRight (0.9f * r.getWidth(),
                               0.9f * r.getHeight());
 
-    ColourGradient cg (Colour (0x00000000), Line<float> (0.0f, r.getHeight(), r.getWidth(), 0.0f).findNearestPointTo (bottomRight),
+    ColourGradient cg (Colour (0x00000000), Line<float> (0.0f, r.getHeight(), r.getWidth(), 0.0f)
+                                              .findNearestPointTo (bottomRight),
                        Colour (0xff000000), bottomRight, false);
     cg.addColour (0.25f, Colour (0x10000000));
     cg.addColour (0.50f, Colour (0x30000000));
@@ -311,6 +310,7 @@ void JUCESplashScreen::paint (Graphics& g)
 
 void JUCESplashScreen::timerCallback()
 {
+   #if JUCE_DISPLAY_SPLASH_SCREEN
     if (isVisible() && ! hasStartedFading)
     {
         hasStartedFading = true;
@@ -318,6 +318,7 @@ void JUCESplashScreen::timerCallback()
     }
 
     if (hasStartedFading && ! fader.isAnimating())
+   #endif
         delete this;
 }
 
