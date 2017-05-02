@@ -124,6 +124,14 @@ struct DemoFlexPanel   : public juce::Component,
                           r.reduced (4), Justification::bottomRight, 2);
     }
 
+    void lookAndFeelChanged() override
+    {
+        flexOrderEditor.applyFontToAllText  (flexOrderEditor.getFont());
+        flexGrowEditor.applyFontToAllText   (flexGrowEditor.getFont());
+        flexShrinkEditor.applyFontToAllText (flexShrinkEditor.getFont());
+        flexBasisEditor.applyFontToAllText  (flexBasisEditor.getFont());
+    }
+
     FlexItem& flexItem;
 
     TextEditor flexOrderEditor, flexGrowEditor, flexShrinkEditor, flexBasisEditor;

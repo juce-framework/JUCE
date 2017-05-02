@@ -36,16 +36,6 @@ public:
         addAndMakeVisible (rsaGroup);
         rsaGroup.setText ("RSA Encryption");
 
-        rsaGroup.setColour (GroupComponent::outlineColourId,
-                            getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::outline,
-                                                    Colours::grey));
-        rsaGroup.setColour (GroupComponent::textColourId,
-                            getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::defaultText,
-                                                    Colours::white));
-        rsaResultBox.setColour (TextEditor::backgroundColourId,
-                                getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::widgetBackground,
-                                                        Colours::white.withAlpha (0.5f)));
-
         bitSizeLabel.setText ("Num Bits to Use:", dontSendNotification);
         bitSizeLabel.attachToComponent (&bitSize, true);
 
@@ -120,6 +110,22 @@ private:
             createRSAKey();
     }
 
+    void lookAndFeelChanged() override
+    {
+        rsaGroup.setColour (GroupComponent::outlineColourId,
+                            getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::outline,
+                                                    Colours::grey));
+        rsaGroup.setColour (GroupComponent::textColourId,
+                            getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::defaultText,
+                                                    Colours::white));
+        rsaResultBox.setColour (TextEditor::backgroundColourId,
+                                getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::widgetBackground,
+                                                        Colours::white.withAlpha (0.5f)));
+
+        bitSize.applyFontToAllText (bitSize.getFont());
+        rsaResultBox.applyFontToAllText (rsaResultBox.getFont());
+    }
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RSAComponent)
 };
 
@@ -132,16 +138,6 @@ public:
     {
         addAndMakeVisible (hashGroup);
         hashGroup.setText ("Hashes");
-
-        hashGroup.setColour (GroupComponent::outlineColourId,
-                             getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::outline,
-                                                     Colours::grey));
-        hashGroup.setColour (GroupComponent::textColourId,
-                             getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::defaultText,
-                                                     Colours::white));
-        hashEntryBox.setColour (TextEditor::backgroundColourId,
-                                getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::widgetBackground,
-                                                        Colours::white.withAlpha (0.5f)));
 
         addAndMakeVisible (hashEntryBox);
         hashEntryBox.setMultiLine (true);
@@ -213,6 +209,21 @@ private:
     void textEditorReturnKeyPressed (TextEditor&) override   { updateHashes(); }
     void textEditorEscapeKeyPressed (TextEditor&) override   { updateHashes(); }
     void textEditorFocusLost (TextEditor&) override          { updateHashes(); }
+
+    void lookAndFeelChanged() override
+    {
+        hashGroup.setColour (GroupComponent::outlineColourId,
+                             getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::outline,
+                                                     Colours::grey));
+        hashGroup.setColour (GroupComponent::textColourId,
+                             getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::defaultText,
+                                                     Colours::white));
+        hashEntryBox.setColour (TextEditor::backgroundColourId,
+                                getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::widgetBackground,
+                                                        Colours::white.withAlpha (0.5f)));
+
+        hashEntryBox.applyFontToAllText (hashEntryBox.getFont());
+    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HashesComponent)
 };

@@ -368,18 +368,11 @@ struct OpenGLDemoClasses
             addAndMakeVisible (showBackgroundToggle);
             showBackgroundToggle.addListener (this);
 
-            Colour editorBackground = dynamic_cast<LookAndFeel_V4*> (&LookAndFeel::getDefaultLookAndFeel())
-                                          ? getLookAndFeel().findColour (ResizableWindow::backgroundColourId)
-                                          : Colours::white;
-
             addAndMakeVisible (tabbedComp);
             tabbedComp.setTabBarDepth (25);
             tabbedComp.setColour (TabbedButtonBar::tabTextColourId, Colours::grey);
-            tabbedComp.addTab ("Vertex", editorBackground, &vertexEditorComp, false);
-            tabbedComp.addTab ("Fragment", editorBackground, &fragmentEditorComp, false);
-
-            vertexEditorComp.setColour (CodeEditorComponent::backgroundColourId, editorBackground);
-            fragmentEditorComp.setColour (CodeEditorComponent::backgroundColourId, editorBackground);
+            tabbedComp.addTab ("Vertex", Colours::transparentBlack, &vertexEditorComp, false);
+            tabbedComp.addTab ("Fragment", Colours::transparentBlack, &fragmentEditorComp, false);
 
             vertexDocument.addListener (this);
             fragmentDocument.addListener (this);
@@ -409,6 +402,8 @@ struct OpenGLDemoClasses
             addAndMakeVisible (textureLabel);
             textureLabel.setText ("Texture:", dontSendNotification);
             textureLabel.attachToComponent (&textureBox, true);
+
+            lookAndFeelChanged();
         }
 
         void initialise()
@@ -560,6 +555,18 @@ struct OpenGLDemoClasses
                 selectPreset (presetBox.getSelectedItemIndex());
             else if (box == &textureBox)
                 selectTexture (textureBox.getSelectedId());
+        }
+
+        void lookAndFeelChanged() override
+        {
+            auto editorBackground = getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
+                                                            Colours::white);
+
+            for (int i = tabbedComp.getNumTabs(); i >= 0; --i)
+                tabbedComp.setTabBackgroundColour (i, editorBackground);
+
+            vertexEditorComp.setColour (CodeEditorComponent::backgroundColourId, editorBackground);
+            fragmentEditorComp.setColour (CodeEditorComponent::backgroundColourId, editorBackground);
         }
 
         OpenGLDemo& demo;
