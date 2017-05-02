@@ -844,10 +844,10 @@ void CompileEngineChildProcess::handleClassListChanged (const ValueTree& newList
 
 void CompileEngineChildProcess::handleBuildFailed()
 {
-    // check that the command will be processed
     auto* mcm = ModalComponentManager::getInstance();
+    auto* pcc = findProjectContentComponent();
 
-    if (mcm->getNumModalComponents() != 0 || findProjectContentComponent() == nullptr)
+    if (mcm->getNumModalComponents() > 0 || pcc == nullptr || pcc->getCurrentTabIndex() == 1)
         return;
 
     if (errorList.getNumErrors() > 0)

@@ -80,8 +80,9 @@ public:
     void openInSelectedIDE (bool saveFirst);
     void showNewExporterMenu();
 
-    void showProjectTab()    { sidebarTabs.setCurrentTabIndex (0); }
-    void showBuildTab()      { sidebarTabs.setCurrentTabIndex (1); }
+    void showProjectTab()       { sidebarTabs.setCurrentTabIndex (0); }
+    void showBuildTab()         { sidebarTabs.setCurrentTabIndex (1); }
+    int getCurrentTabIndex()    { return sidebarTabs.getCurrentTabIndex(); }
 
     void showFilesPanel()        { showProjectPanel (0); }
     void showModulesPanel()      { showProjectPanel (1); }
