@@ -36,7 +36,7 @@ class JUCE_API  RelativeCoordinatePositionerBase  : public Component::Positioner
                                                     public MarkerList::Listener
 {
 public:
-    RelativeCoordinatePositionerBase (Component& component);
+    RelativeCoordinatePositionerBase (Component&);
     ~RelativeCoordinatePositionerBase();
 
     void componentMovedOrResized (Component&, bool, bool);
@@ -44,31 +44,28 @@ public:
     void componentChildrenChanged (Component&);
     void componentBeingDeleted (Component&);
     void markersChanged (MarkerList*);
-    void markerListBeingDeleted (MarkerList* markerList);
+    void markerListBeingDeleted (MarkerList*);
 
     void apply();
 
-    bool addCoordinate (const RelativeCoordinate& coord);
-    bool addPoint (const RelativePoint& point);
+    bool addCoordinate (const RelativeCoordinate&);
+    bool addPoint (const RelativePoint&);
 
     //==============================================================================
     /** Used for resolving a RelativeCoordinate expression in the context of a component. */
     class ComponentScope  : public Expression::Scope
     {
     public:
-        ComponentScope (Component& component);
+        ComponentScope (Component&);
 
         Expression getSymbolValue (const String& symbol) const;
-        void visitRelativeScope (const String& scopeName, Visitor& visitor) const;
+        void visitRelativeScope (const String& scopeName, Visitor&) const;
         String getScopeUID() const;
 
     protected:
         Component& component;
 
         Component* findSiblingComponent (const String& componentID) const;
-
-    private:
-        JUCE_DECLARE_NON_COPYABLE (ComponentScope)
     };
 
 protected:
@@ -78,12 +75,12 @@ protected:
 private:
     class DependencyFinderScope;
     friend class DependencyFinderScope;
-    Array <Component*> sourceComponents;
-    Array <MarkerList*> sourceMarkerLists;
+    Array<Component*> sourceComponents;
+    Array<MarkerList*> sourceMarkerLists;
     bool registeredOk;
 
-    void registerComponentListener (Component& comp);
-    void registerMarkerListListener (MarkerList* const list);
+    void registerComponentListener (Component&);
+    void registerMarkerListListener (MarkerList*);
     void unregisterListeners();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RelativeCoordinatePositionerBase)

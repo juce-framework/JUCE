@@ -50,8 +50,6 @@ public:
         const var& thisObject;
         const var* arguments;
         int numArguments;
-
-        JUCE_DECLARE_NON_COPYABLE (NativeFunctionArgs)
     };
 
    #if JUCE_COMPILER_SUPPORTS_LAMBDAS
