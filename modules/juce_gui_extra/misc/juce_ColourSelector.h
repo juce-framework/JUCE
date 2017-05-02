@@ -110,7 +110,7 @@ public:
         setSwatchColour(), to return the number of colours you want, and to set and retrieve
         their values.
     */
-    virtual void setSwatchColour (int index, const Colour& newColour) const;
+    virtual void setSwatchColour (int index, const Colour& newColour);
 
 
     //==============================================================================

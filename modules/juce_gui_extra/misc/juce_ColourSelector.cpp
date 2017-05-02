@@ -429,7 +429,7 @@ void ColourSelector::paint (Graphics& g)
 
     if ((flags & showColourAtTop) != 0)
     {
-        const Colour currentColour (getCurrentColour());
+        auto currentColour = getCurrentColour();
 
         g.fillCheckerBoard (previewArea, 10, 10,
                             Colour (0xffdddddd).overlaidWith (currentColour),
@@ -446,14 +446,11 @@ void ColourSelector::paint (Graphics& g)
         g.setColour (findColour (labelTextColourId));
         g.setFont (11.0f);
 
-        for (int i = 4; --i >= 0;)
-        {
-            if (sliders[i]->isVisible())
-                g.drawText (sliders[i]->getName() + ":",
-                            0, sliders[i]->getY(),
-                            sliders[i]->getX() - 8, sliders[i]->getHeight(),
+        for (auto* s : sliders)
+            if (s->isVisible())
+                g.drawText (s->getName() + ":",
+                            0, s->getY(), s->getX() - 8, s->getHeight(),
                             Justification::centredRight, false);
-        }
     }
 }
 
@@ -515,7 +512,7 @@ void ColourSelector::resized()
 
             for (int i = 0; i < numSwatches; ++i)
             {
-                SwatchComponent* const sc = new SwatchComponent (*this, i);
+                auto* sc = new SwatchComponent (*this, i);
                 swatchComponents.add (sc);
                 addAndMakeVisible (sc);
             }
@@ -566,7 +563,7 @@ Colour ColourSelector::getSwatchColour (const int) const
     return Colours::black;
 }
 
-void ColourSelector::setSwatchColour (const int, const Colour&) const
+void ColourSelector::setSwatchColour (int, const Colour&)
 {
     jassertfalse; // if you've overridden getNumSwatches(), you also need to implement this method
 }
