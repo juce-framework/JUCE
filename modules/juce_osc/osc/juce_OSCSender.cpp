@@ -233,14 +233,16 @@ struct OSCSender::Pimpl
     bool send (const OSCMessage& message, const String& hostName, int portNumber)
     {
         OSCOutputStream outStream;
-        outStream.writeMessage (message);
+        if (!outStream.writeMessage (message))
+            return false;
         return sendOutputStream (outStream, hostName, portNumber);
     }
 
     bool send (const OSCBundle& bundle, const String& hostName, int portNumber)
     {
         OSCOutputStream outStream;
-        outStream.writeBundle (bundle);
+        if (!outStream.writeBundle (bundle))
+            return false;
         return sendOutputStream (outStream, hostName, portNumber);
     }
 
