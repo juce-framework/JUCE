@@ -92,7 +92,7 @@ private:
 
             // WebKit doesn't have an internal error page, so make a really simple one ourselves
             if (proceedToErrorPage)
-                getOwner(self)->goToURL (String ("data:text/plain,") + errorString);
+                getOwner(self)->goToURL (String ("data:text/plain;charset=UTF-8,") + errorString);
         }
     }
 
