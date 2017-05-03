@@ -1883,7 +1883,7 @@ public:
         addToolsetProperty (props, toolsetNames, toolsets, numElementsInArray (toolsets));
         addIPPLibraryProperty (props);
 
-        static const char* cppStandardNames[]  = { "(default)", "C++14",    "Latest C++ Standard" };
+        static const char* cppStandardNames[]  = { "(default)", "C++14",    "Latest C++ Standard", nullptr };
 
         Array<var> cppStandardValues;
         cppStandardValues.add (var());
@@ -1894,16 +1894,11 @@ public:
                                                 StringArray (cppStandardNames), cppStandardValues),
                                                 "The C++ language standard to use");
 
-        static const char* targetPlatformNames[] = { "(default)", "8.1", "10.0.10240.0", "10.0.10586.0", "10.0.14393.0", "10.0.15063.0" };
-
-        Array<var> targetPlatforms;
-        targetPlatforms.add (var());
-
-        for (int i = 1; i < numElementsInArray (targetPlatformNames); ++i)
-            targetPlatforms.add (var (targetPlatformNames[i]));
+        static const char* targetPlatformNames[] = { "(default)", "8.1", "10.0.10240.0", "10.0.10586.0", "10.0.14393.0", "10.0.15063.0", nullptr };
+        const var targetPlatforms[]              = { var(),       "8.1", "10.0.10240.0", "10.0.10586.0", "10.0.14393.0", "10.0.15063.0" };
 
         props.add (new ChoicePropertyComponent (getWindowsTargetPlatformVersionValue(), "VS2017 Windows Target Platform",
-                                                StringArray (targetPlatformNames), targetPlatforms),
+                                                StringArray (targetPlatformNames), Array<var> (targetPlatforms, numElementsInArray (targetPlatforms))),
                                                 "The Windows target platform to use");
     }
 
