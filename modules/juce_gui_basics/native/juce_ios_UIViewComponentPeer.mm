@@ -729,7 +729,7 @@ void UIViewComponentPeer::updateTransformAndScreenBounds()
         const int x = ((int) (newDesktop.getWidth()  * centreRelX)) - (oldArea.getWidth()  / 2);
         const int y = ((int) (newDesktop.getHeight() * centreRelY)) - (oldArea.getHeight() / 2);
 
-        setBounds (oldArea.withPosition (x, y), false);
+        component.setBounds (oldArea.withPosition (x, y));
     }
 
     [view setNeedsDisplay];
