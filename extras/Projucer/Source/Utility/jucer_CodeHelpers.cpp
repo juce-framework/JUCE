@@ -46,6 +46,28 @@ namespace CodeHelpers
             String s (lines[i].trimEnd());
             if (s.isNotEmpty())
                 s = space + s;
+            
+            lines.set (i, s);
+        }
+        
+        return lines.joinIntoString (newLine);
+    }
+    
+    String unindent (const String& code, const int numSpaces)
+    {
+        if (numSpaces == 0)
+            return code;
+
+        const String space (String::repeatedString (" ", numSpaces));
+
+        StringArray lines;
+        lines.addLines (code);
+
+        for (int i = 0; i < lines.size(); ++i)
+        {
+            String s (lines[i].trimEnd());
+            if (s.startsWith(space))
+                s = s.substring(space.length());
 
             lines.set (i, s);
         }

@@ -432,24 +432,50 @@ void PaintElementPath::fillInGeneratedCode (GeneratedCode& code, String& paintMe
     else
         code.constructorCode << r;
 
+    String s;
+    s << "{\n"
+      << "    float x = 0, y = 0;\n";
     if (! fillType.isInvisible())
     {
-        fillType.fillInGeneratedCode (code, paintMethodCode);
-
-        paintMethodCode << "g.fillPath (" << pathVariable << ");\n";
+        s << "    " << fillType.generateVariablesCode ("fill");
+    }
+    if (isStrokePresent && ! strokeType.isInvisible())
+    {
+        s << "    " << strokeType.fill.generateVariablesCode ("stroke");
+    }
+    s << "    //[UserPaintCustomArguments] Customize the painting arguments here..\n"
+      << customPaintCode
+      << "    //[/UserPaintCustomArguments]\n";
+    
+    RelativePositionedRectangle zero;
+    if (! fillType.isInvisible())
+    {
+        s << "    ";
+        fillType.fillInGeneratedCode ("fill", zero, code, s);
+        s << "    g.fillPath (" << pathVariable << ", AffineTransform::translation(x, y));\n";
     }
 
     if (isStrokePresent && ! strokeType.isInvisible())
     {
-        String s;
-
-        strokeType.fill.fillInGeneratedCode (code, s);
-        s << "g.strokePath (" << pathVariable << ", " << strokeType.getPathStrokeCode() << ");\n";
-
-        paintMethodCode += s;
+        s << "    ";
+        strokeType.fill.fillInGeneratedCode ("stroke", zero, code, s);
+        s << "    g.strokePath (" << pathVariable << ", " << strokeType.getPathStrokeCode() << ", AffineTransform::translation(x, y));\n";
     }
+    
+    s << "}\n\n";
 
-    paintMethodCode += "\n";
+    paintMethodCode += s;
+}
+
+void PaintElementPath::applyCustomPaintSnippets (StringArray& snippets)
+{
+    customPaintCode.clear();
+    
+    if (! snippets.isEmpty() && (! fillType.isInvisible() || (isStrokePresent && ! strokeType.isInvisible())))
+    {
+        customPaintCode = snippets[0];
+        snippets.remove(0);
+    }
 }
 
 //==============================================================================

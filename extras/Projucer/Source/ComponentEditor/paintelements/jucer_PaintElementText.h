@@ -83,24 +83,34 @@ public:
     {
         if (! fillType.isInvisible())
         {
-            String r;
-
-            fillType.fillInGeneratedCode (code, paintMethodCode);
-
-            String x, y, w, h;
+            String x, y, w, h, r;
             positionToCode (position, code.document->getComponentLayout(), x, y, w, h);
-
-            r << "g.setFont ("
-              << FontPropertyComponent::getCompleteFontCode (font, typefaceName)
-              << ");\ng.drawText ("
-              << quotedString (text, code.shouldUseTransMacro())
-              << ",\n            "
-              << x << ", " << y << ", " << w << ", " << h
-              << ",\n            "
-              << CodeHelpers::justificationToCode (justification)
-              << ", true);\n\n";
-
+            r << "{\n"
+              << "    int x = " << x << ", y = " << y << ", width = " << w << ", height = " << h << ";\n"
+              << "    String text (" << quotedString (text, code.shouldUseTransMacro()) << ");\n"
+              << "    " << fillType.generateVariablesCode ("fill")
+              << "    //[UserPaintCustomArguments] Customize the painting arguments here..\n"
+              << customPaintCode
+              << "    //[/UserPaintCustomArguments]\n"
+              << "    ";
+            fillType.fillInGeneratedCode ("fill", position, code, r);
+            r << "    g.setFont (" << FontPropertyComponent::getCompleteFontCode (font, typefaceName) << ");\n"
+              << "    g.drawText (text, x, y, width, height,\n"
+              << "                " << CodeHelpers::justificationToCode (justification) << ", true);\n"
+              << "}\n\n";
+            
             paintMethodCode += r;
+        }
+    }
+
+    void applyCustomPaintSnippets (StringArray& snippets)
+    {
+        customPaintCode.clear();
+        
+        if (! snippets.isEmpty() && ! fillType.isInvisible())
+        {
+            customPaintCode = snippets[0];
+            snippets.remove(0);
         }
     }
 
@@ -376,7 +386,8 @@ private:
     Font font;
     String typefaceName;
     Justification justification;
-
+    String customPaintCode;
+    
     Array <Justification> justificationTypes;
 
     //==============================================================================

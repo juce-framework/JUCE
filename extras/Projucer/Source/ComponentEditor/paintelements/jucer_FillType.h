@@ -116,21 +116,51 @@ public:
                                                mode == radialGradient));
         }
     }
-
-    void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode) const
+    
+    String generateVariablesCode (String type) const
+    {
+        String s;
+        switch (mode)
+        {
+            case solidColour:
+                s << "Colour " << type << "Colour = " << CodeHelpers::colourToCode (colour) << ";\n";
+                break;
+                
+            case linearGradient:
+            case radialGradient:
+            {
+                s << "Colour " << type << "Colour1 = " << CodeHelpers::colourToCode (gradCol1) << ", " << type << "Colour2 = " << CodeHelpers::colourToCode (gradCol2) << ";\n";
+                break;
+            }
+                
+            case imageBrush:
+            {
+                break;
+            }
+                
+            default:
+                jassertfalse;
+                break;
+        }
+        
+        return s;
+    }
+    
+    void fillInGeneratedCode (String type, RelativePositionedRectangle relativeTo, GeneratedCode& code, String& paintMethodCode) const
     {
         String s;
 
         switch (mode)
         {
         case solidColour:
-            s << "g.setColour (" << CodeHelpers::colourToCode (colour) << ");\n";
+            s << "g.setColour (" << type << "Colour);\n";
             break;
 
         case linearGradient:
         case radialGradient:
             {
-                String x1, y1, w, h, x2, y2;
+                String x0, y0, x1, y1, w, h, x2, y2;
+                positionToCode (relativeTo, code.document->getComponentLayout(), x0, y0, w, h);
                 positionToCode (gradPos1, code.document->getComponentLayout(), x1, y1, w, h);
                 positionToCode (gradPos2, code.document->getComponentLayout(), x2, y2, w, h);
 
@@ -138,10 +168,12 @@ public:
 
                 const String indent (String::repeatedString (" ", s.length()));
 
-                s << CodeHelpers::colourToCode (gradCol1) << ",\n"
-                  << indent << castToFloat (x1) << ", " << castToFloat (y1) << ",\n"
-                  << indent << CodeHelpers::colourToCode (gradCol2) << ",\n"
-                  << indent << castToFloat (x2) << ", " << castToFloat (y2) << ",\n"
+                s << type << "Colour1,\n"
+                  << indent << castToFloat (x1) << " - " << castToFloat (x0) << " + x,\n"
+                  << indent << castToFloat (y1) << " - " << castToFloat (y0) << " + y,\n"
+                  << indent << type << "Colour2,\n"
+                  << indent << castToFloat (x2) << " - " << castToFloat (x0) << " + x,\n"
+                  << indent << castToFloat (y2) << " - " << castToFloat (y0) << " + y,\n"
                   << indent << CodeHelpers::boolLiteral (mode == radialGradient) << "));\n";
                 break;
             }
@@ -152,15 +184,17 @@ public:
 
                 code.addImageResourceLoader (imageVariable, imageResourceName);
 
-                String x, y, w, h;
-                positionToCode (imageAnchor, code.document->getComponentLayout(), x, y, w, h);
+                String x0, y0, x1, y1, w, h;
+                positionToCode (relativeTo, code.document->getComponentLayout(), x0, y0, w, h);
+                positionToCode (imageAnchor, code.document->getComponentLayout(), x1, y1, w, h);
 
                 s << "g.setTiledImageFill (";
 
                 const String indent (String::repeatedString (" ", s.length()));
 
                 s << imageVariable << ",\n"
-                  << indent << x << ", " << y << ",\n"
+                  << indent << x1 << " - " << x0 << " + x,\n"
+                  << indent << y1 << " - " << y0 << " + y,\n"
                   << indent << CodeHelpers::floatLiteral (imageOpacity, 4) << ");\n";
 
                 break;

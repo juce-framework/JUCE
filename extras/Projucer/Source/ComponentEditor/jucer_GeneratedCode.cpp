@@ -294,7 +294,8 @@ static void copyAcrossUserSections (String& dest, const String& src)
                 {
                     StringArray sourceLines;
 
-                    if (getUserSection (srcLines, tag, sourceLines))
+                    if (tag != "UserPaintCustomArguments" &&
+                        getUserSection (srcLines, tag, sourceLines))
                     {
                         for (int j = endLine - i; --j > 0;)
                             dstLines.remove (i + 1);

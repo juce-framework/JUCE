@@ -209,6 +209,14 @@ public:
         return false;
     }
 
+    void applyCustomPaintSnippets (StringArray& snippets)
+    {
+        for (int i = 0; i < subElements.size(); ++i)
+        {
+            subElements.getUnchecked(i)->applyCustomPaintSnippets(snippets);
+        }
+    }
+    
 private:
     OwnedArray <PaintElement> subElements;
 
