@@ -1444,6 +1444,7 @@ public:
             }
 
             getOwner().addPlatformToolsetToPropertyGroup (projectXml);
+            getOwner().addWindowsTargetPlatformVersionToPropertyGroup (projectXml);
             getOwner().addIPPSettingToPropertyGroup (projectXml);
         }
 
@@ -1688,7 +1689,8 @@ protected:
         }
     };
 
-    virtual void addPlatformToolsetToPropertyGroup (XmlElement&) const {}
+    virtual void addPlatformToolsetToPropertyGroup              (XmlElement&) const {}
+    virtual void addWindowsTargetPlatformVersionToPropertyGroup (XmlElement&) const {}
 
     void addIPPSettingToPropertyGroup (XmlElement& p) const
     {
@@ -1868,6 +1870,9 @@ public:
     Value getCppStandardValue()                         { return getSetting (Ids::cppLanguageStandard); }
     String getCppLanguageStandard() const override      { return settings [Ids::cppLanguageStandard];  }
 
+    Value getWindowsTargetPlatformVersionValue()        { return getSetting (Ids::windowsTargetPlatformVersion); }
+    String getWindowsTargetPlatformVersion() const      { return settings [Ids::windowsTargetPlatformVersion]; }
+
     void createExporterProperties (PropertyListBuilder& props) override
     {
         MSVCProjectExporterBase::createExporterProperties (props);
@@ -1889,6 +1894,26 @@ public:
                                                 StringArray (cppStandardNames), cppStandardValues),
                                                 "The C++ language standard to use");
 
+        static const char* targetPlatformNames[] = { "(default)", "8.1", "10.0.10240.0", "10.0.10586.0", "10.0.14393.0", "10.0.15063.0" };
+
+        Array<var> targetPlatforms;
+        targetPlatforms.add (var());
+
+        for (int i = 1; i < numElementsInArray (targetPlatformNames); ++i)
+            targetPlatforms.add (var (targetPlatformNames[i]));
+
+        props.add (new ChoicePropertyComponent (getWindowsTargetPlatformVersionValue(), "VS2017 Windows Target Platform",
+                                                StringArray (targetPlatformNames), targetPlatforms),
+                                                "The Windows target platform to use");
+    }
+
+    void addWindowsTargetPlatformVersionToPropertyGroup (XmlElement& p) const override
+    {
+        const String& targetVersion = getWindowsTargetPlatformVersion();
+
+        if (targetVersion.isNotEmpty())
+            forEachXmlChildElementWithTagName (p, e, "PropertyGroup")
+                e->createNewChildElement ("WindowsTargetPlatformVersion")->addTextElement (getWindowsTargetPlatformVersion());
     }
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2017)
