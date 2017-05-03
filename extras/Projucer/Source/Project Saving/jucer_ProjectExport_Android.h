@@ -770,7 +770,7 @@ private:
     //==============================================================================
     String createDefaultClassName() const
     {
-        String s (project.getBundleIdentifier().toString().toLowerCase());
+        auto s = project.getBundleIdentifier().toString().toLowerCase();
 
         if (s.length() > 5
             && s.containsChar ('.')
@@ -790,11 +790,8 @@ private:
 
     void initialiseDependencyPathValues()
     {
-        sdkPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::androidSDKPath),
-                                                               Ids::androidSDKPath, TargetOS::getThisOS())));
-
-        ndkPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::androidNDKPath),
-                                                               Ids::androidNDKPath, TargetOS::getThisOS())));
+        sdkPath.referTo  (Value (new DependencyPathValueSource (getSetting (Ids::androidSDKPath), Ids::androidSDKPath, TargetOS::getThisOS())));
+        ndkPath.referTo  (Value (new DependencyPathValueSource (getSetting (Ids::androidNDKPath), Ids::androidNDKPath, TargetOS::getThisOS())));
     }
 
     //==============================================================================
@@ -807,9 +804,7 @@ private:
 
         createDirectoryOrThrow (targetFolder);
 
-        LibraryModule* const coreModule = getCoreModule (modules);
-
-        if (coreModule != nullptr)
+        if (auto* coreModule = getCoreModule (modules))
         {
             File javaDestFile (targetFolder.getChildFile (className + ".java"));
 
@@ -840,16 +835,14 @@ private:
                                    .replace ("JuceAppActivity", className);
             }
 
-            File javaSourceFile (javaSourceFolder.getChildFile ("JuceAppActivity.java"));
-            StringArray javaSourceLines (StringArray::fromLines (javaSourceFile.loadFileAsString()));
+            auto javaSourceFile = javaSourceFolder.getChildFile ("JuceAppActivity.java");
+            auto javaSourceLines = StringArray::fromLines (javaSourceFile.loadFileAsString());
 
             {
                 MemoryOutputStream newFile;
 
-                for (int i = 0; i < javaSourceLines.size(); ++i)
+                for (const auto& line : javaSourceLines)
                 {
-                    const String& line = javaSourceLines[i];
-
                     if (line.contains ("$$JuceAndroidMidiImports$$"))
                         newFile << juceMidiImports;
                     else if (line.contains ("$$JuceAndroidMidiCode$$"))
