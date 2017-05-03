@@ -105,7 +105,6 @@ public:
     */
     struct JUCE_API  Connection
     {
-    public:
         //==============================================================================
         Connection (uint32 sourceNodeId, int sourceChannelIndex,
                     uint32 destNodeId, int destChannelIndex) noexcept;

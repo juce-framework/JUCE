@@ -69,14 +69,25 @@ int FilterGraph::getNumFilters() const noexcept
     return graph.getNumNodes();
 }
 
-const AudioProcessorGraph::Node::Ptr FilterGraph::getNode (const int index) const noexcept
+AudioProcessorGraph::Node::Ptr FilterGraph::getNode (const int index) const noexcept
 {
     return graph.getNode (index);
 }
 
-const AudioProcessorGraph::Node::Ptr FilterGraph::getNodeForId (const uint32 uid) const noexcept
+AudioProcessorGraph::Node::Ptr FilterGraph::getNodeForId (const uint32 uid) const
 {
     return graph.getNodeForId (uid);
+}
+
+AudioProcessorGraph::Node::Ptr FilterGraph::getNodeForName (const String& name) const
+{
+    for (int i = 0; i < graph.getNumNodes(); i++)
+        if (auto node = graph.getNode (i))
+            if (auto p = node->getProcessor())
+                if (p->getName().equalsIgnoreCase (name))
+                    return node;
+
+    return nullptr;
 }
 
 void FilterGraph::addFilter (const PluginDescription* desc, double x, double y)

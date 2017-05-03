@@ -110,7 +110,7 @@ MainHostWindow::MainHostWindow()
 
     knownPluginList.addChangeListener (this);
 
-    if (FilterGraph* filterGraph = getGraphEditor()->graph.get())
+    if (auto* filterGraph = getGraphEditor()->graph.get())
         filterGraph->addChangeListener (this);
 
     addKeyListener (getCommandManager().getKeyMappings());
@@ -131,7 +131,7 @@ MainHostWindow::~MainHostWindow()
     pluginListWindow = nullptr;
     knownPluginList.removeChangeListener (this);
 
-    if (FilterGraph* filterGraph = getGraphEditor()->graph.get())
+    if (auto* filterGraph = getGraphEditor()->graph.get())
         filterGraph->removeChangeListener (this);
 
     getAppProperties().getUserSettings()->setValue ("mainWindowPos", getWindowStateAsString());
@@ -198,9 +198,7 @@ void MainHostWindow::changeListenerCallback (ChangeBroadcaster* changed)
 
 StringArray MainHostWindow::getMenuBarNames()
 {
-    const char* const names[] = { "File", "Plugins", "Options", "Windows", nullptr };
-
-    return StringArray (names);
+    return { "File", "Plugins", "Options", "Windows" };
 }
 
 PopupMenu MainHostWindow::getMenuForIndex (int topLevelMenuIndex, const String& /*menuName*/)
@@ -266,12 +264,10 @@ PopupMenu MainHostWindow::getMenuForIndex (int topLevelMenuIndex, const String& 
 
 void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/)
 {
-    GraphDocumentComponent* const graphEditor = getGraphEditor();
-
     if (menuItemID == 250)
     {
-        if (graphEditor != nullptr)
-            if (FilterGraph* filterGraph = getGraphEditor()->graph.get())
+        if (auto* graphEditor = getGraphEditor())
+            if (auto* filterGraph = graphEditor->graph.get())
                 filterGraph->clear();
     }
     else if (menuItemID >= 100 && menuItemID < 200)
@@ -280,10 +276,9 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
         recentFiles.restoreFromString (getAppProperties().getUserSettings()
                                             ->getValue ("recentFilterGraphFiles"));
 
-        if (graphEditor != nullptr
-              && getGraphEditor()->graph != nullptr
-              && graphEditor->graph->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
-            graphEditor->graph->loadFrom (recentFiles.getFile (menuItemID - 100), true);
+        if (auto* graphEditor = getGraphEditor())
+            if (graphEditor->graph != nullptr && graphEditor->graph->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
+                graphEditor->graph->loadFrom (recentFiles.getFile (menuItemID - 100), true);
     }
     else if (menuItemID >= 200 && menuItemID < 210)
     {
@@ -307,24 +302,26 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
 
 void MainHostWindow::menuBarActivated (bool isActivated)
 {
-    GraphDocumentComponent* const graphEditor = getGraphEditor();
-
-    if (graphEditor != nullptr && isActivated)
-        graphEditor->unfocusKeyboardComponent();
+    if (auto* graphEditor = getGraphEditor())
+        if (isActivated)
+            graphEditor->unfocusKeyboardComponent();
 }
 
 void MainHostWindow::createPlugin (const PluginDescription* desc, int x, int y)
 {
-    GraphDocumentComponent* const graphEditor = getGraphEditor();
-
-    if (graphEditor != nullptr)
+    if (auto* graphEditor = getGraphEditor())
         graphEditor->createNewPlugin (desc, x, y);
 }
 
 void MainHostWindow::addPluginsToMenu (PopupMenu& m) const
 {
-    for (int i = 0; i < internalTypes.size(); ++i)
-        m.addItem (i + 1, internalTypes.getUnchecked(i)->name);
+    if (auto* graphEditor = getGraphEditor())
+    {
+        int i = 0;
+
+        for (auto* t : internalTypes)
+            m.addItem (++i, t->name, graphEditor->graph->getNodeForName (t->name) == nullptr);
+    }
 
     m.addSeparator();
 
@@ -345,7 +342,7 @@ ApplicationCommandTarget* MainHostWindow::getNextCommandTarget()
     return findFirstTargetParentComponent();
 }
 
-void MainHostWindow::getAllCommands (Array <CommandID>& commands)
+void MainHostWindow::getAllCommands (Array<CommandID>& commands)
 {
     // this returns the set of all commands that this target can perform..
     const CommandID ids[] = { CommandIDs::newFile,
@@ -420,7 +417,7 @@ void MainHostWindow::getCommandInfo (const CommandID commandID, ApplicationComma
 
 bool MainHostWindow::perform (const InvocationInfo& info)
 {
-    GraphDocumentComponent* const graphEditor = getGraphEditor();
+    auto* graphEditor = getGraphEditor();
 
     switch (info.commandID)
     {
@@ -456,7 +453,7 @@ bool MainHostWindow::perform (const InvocationInfo& info)
         break;
 
     case CommandIDs::toggleDoublePrecision:
-        if (PropertiesFile* props = getAppProperties().getUserSettings())
+        if (auto* props = getAppProperties().getUserSettings())
         {
             bool newIsDoublePrecision = ! isDoublePrecisionProcessing();
             props->setValue ("doublePrecisionProcessing", var (newIsDoublePrecision));
@@ -478,7 +475,7 @@ bool MainHostWindow::perform (const InvocationInfo& info)
 
     case CommandIDs::allWindowsForward:
     {
-        Desktop& desktop = Desktop::getInstance();
+        auto& desktop = Desktop::getInstance();
 
         for (int i = 0; i < desktop.getNumComponents(); ++i)
             desktop.getComponent (i)->toBehind (this);
@@ -518,10 +515,9 @@ void MainHostWindow::showAudioSettings()
     getAppProperties().getUserSettings()->setValue ("audioDeviceState", audioState);
     getAppProperties().getUserSettings()->saveIfNeeded();
 
-    GraphDocumentComponent* const graphEditor = getGraphEditor();
-
-    if (graphEditor != nullptr && graphEditor->graph != nullptr)
-        graphEditor->graph->removeIllegalConnections();
+    if (auto* graphEditor = getGraphEditor())
+        if (graphEditor->graph != nullptr)
+            graphEditor->graph->removeIllegalConnections();
 }
 
 bool MainHostWindow::isInterestedInFileDrag (const StringArray&)
@@ -543,25 +539,23 @@ void MainHostWindow::fileDragExit (const StringArray&)
 
 void MainHostWindow::filesDropped (const StringArray& files, int x, int y)
 {
-    GraphDocumentComponent* const graphEditor = getGraphEditor();
-
-    if (graphEditor != nullptr)
+    if (auto* graphEditor = getGraphEditor())
     {
         if (files.size() == 1 && File (files[0]).hasFileExtension (filenameSuffix))
         {
-            if (FilterGraph* filterGraph = graphEditor->graph.get())
-            if (filterGraph->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
-                filterGraph->loadFrom (File (files[0]), true);
+            if (auto* filterGraph = graphEditor->graph.get())
+                if (filterGraph->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
+                    filterGraph->loadFrom (File (files[0]), true);
         }
         else
         {
-            OwnedArray <PluginDescription> typesFound;
+            OwnedArray<PluginDescription> typesFound;
             knownPluginList.scanAndAddDragAndDroppedFiles (formatManager, files, typesFound);
 
-            Point<int> pos (graphEditor->getLocalPoint (this, Point<int> (x, y)));
+            auto pos = graphEditor->getLocalPoint (this, Point<int> (x, y));
 
             for (int i = 0; i < jmin (5, typesFound.size()); ++i)
-                createPlugin (typesFound.getUnchecked(i), pos.getX(), pos.getY());
+                createPlugin (typesFound.getUnchecked(i), pos.x, pos.y);
         }
     }
 }
@@ -573,7 +567,7 @@ GraphDocumentComponent* MainHostWindow::getGraphEditor() const
 
 bool MainHostWindow::isDoublePrecisionProcessing()
 {
-    if (PropertiesFile* props = getAppProperties().getUserSettings())
+    if (auto* props = getAppProperties().getUserSettings())
         return props->getBoolValue ("doublePrecisionProcessing", false);
 
     return false;
