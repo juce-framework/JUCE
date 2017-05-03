@@ -164,6 +164,8 @@ public:
 
         if (syncAudioUnitWithProcessor() != noErr)
             jassertfalse;
+
+        AddPropertyListener (kAudioUnitProperty_ContextName, &JuceAU::AudioUnitPropertyChanged, this);
     }
 
     ~JuceAU()
@@ -242,6 +244,14 @@ public:
 
             prepared = true;
         }
+    }
+
+    static void AudioUnitPropertyChanged (void* inRefCon, AudioUnit, AudioUnitPropertyID inID, AudioUnitScope, AudioUnitElement)
+    {
+        jassert (inRefCon != nullptr);
+        JuceAU* juceAU = (JuceAU*) inRefCon;
+        if (inID == kAudioUnitProperty_ContextName)
+            juceAU->juceFilter->setTrackName (String::fromCFString (juceAU->mContextName));
     }
 
     //==============================================================================

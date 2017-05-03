@@ -818,6 +818,12 @@ public:
     /** Returns true if this is a midi effect plug-in and does no audio processing. */
     virtual bool isMidiEffect() const                           { return false; }
 
+    /** Called by the host to tell this processor that the track- or context name changed.
+
+        This is currently only supported by AudioUnits, AAX and VST3.
+    */
+    virtual void setTrackName (const String&) {}
+
     //==============================================================================
     /** This returns a critical section that will automatically be locked while the host
         is calling the processBlock() method.

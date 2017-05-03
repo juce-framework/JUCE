@@ -935,6 +935,12 @@ namespace AAXClasses
             if (type == AAX_eNotificationEvent_EnteringOfflineMode)  pluginInstance->setNonRealtime (true);
             if (type == AAX_eNotificationEvent_ExitingOfflineMode)   pluginInstance->setNonRealtime (false);
 
+            if (type == AAX_eNotificationEvent_TrackNameChanged)
+            {
+                jassert (data);
+                pluginInstance->setTrackName (((AAX_IString*)data)->Get());
+            }
+
             return AAX_CEffectParameters::NotificationReceived (type, data, size);
         }
 

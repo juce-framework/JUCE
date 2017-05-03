@@ -1011,6 +1011,7 @@ class JuceVST3Component : public Vst::IComponent,
                           public Vst::IAudioProcessor,
                           public Vst::IUnitInfo,
                           public Vst::IConnectionPoint,
+                          public Vst::ChannelContext::IInfoListener,
                           public AudioPlayHead
 {
 public:
@@ -1962,6 +1963,21 @@ public:
         if (data.outputEvents != nullptr)
             MidiEventList::toEventList (*data.outputEvents, midiBuffer);
        #endif
+
+        return kResultTrue;
+    }
+
+    tresult PLUGIN_API setChannelContextInfos (Vst::IAttributeList* list) override
+    {
+        if (pluginInstance == nullptr)
+            return kResultFalse;
+
+        if (list == nullptr)
+            return kResultTrue;
+
+        Vst::String128 name;
+        if (list->getString (Vst::ChannelContext::kChannelNameKey, name, sizeof (name)) == kResultTrue)
+            pluginInstance->setTrackName (toString (name));
 
         return kResultTrue;
     }
