@@ -168,7 +168,6 @@ void AudioPluginFormat::createPluginInstanceAsync (const PluginDescription& desc
     (new InvokeOnMessageThread (this, description, initialSampleRate, initialBufferSize, callback))->post();
 }
 
-#if JUCE_COMPILER_SUPPORTS_LAMBDAS
 void AudioPluginFormat::createPluginInstanceAsync (const PluginDescription& description,
                                                    double initialSampleRate,
                                                    int initialBufferSize,
@@ -190,7 +189,6 @@ void AudioPluginFormat::createPluginInstanceAsync (const PluginDescription& desc
 
     createPluginInstanceAsync (description, initialSampleRate, initialBufferSize, new CallbackInvoker (f));
 }
-#endif
 
 void AudioPluginFormat::createPluginInstanceOnMessageThread (const PluginDescription& description,
                                                              double initialSampleRate,

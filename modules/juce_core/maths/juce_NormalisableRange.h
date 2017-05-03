@@ -107,7 +107,6 @@ public:
         checkInvariants();
     }
 
-   #if JUCE_COMPILER_SUPPORTS_LAMBDAS
     /** Creates a NormalisableRange with a given range and an injective mapping function.
 
         @param rangeStart           The minimum value in the range.
@@ -135,17 +134,14 @@ public:
     {
         checkInvariants();
     }
-   #endif
 
     /** Uses the properties of this mapping to convert a non-normalised value to
         its 0->1 representation.
     */
     ValueType convertTo0to1 (ValueType v) const noexcept
     {
-       #if JUCE_COMPILER_SUPPORTS_LAMBDAS
         if (convertTo0To1Function != nullptr)
             return convertTo0To1Function (start, end, v);
-       #endif
 
         ValueType proportion = (v - start) / (end - start);
 
@@ -168,10 +164,8 @@ public:
     */
     ValueType convertFrom0to1 (ValueType proportion) const noexcept
     {
-       #if JUCE_COMPILER_SUPPORTS_LAMBDAS
         if (convertFrom0To1Function != nullptr)
             return convertFrom0To1Function (start, end, proportion);
-       #endif
 
         if (! symmetricSkew)
         {
@@ -196,10 +190,8 @@ public:
     */
     ValueType snapToLegalValue (ValueType v) const noexcept
     {
-       #if JUCE_COMPILER_SUPPORTS_LAMBDAS
         if (snapToLegalValueFunction != nullptr)
             return snapToLegalValueFunction (start, end, v);
-       #endif
 
         if (interval > ValueType())
             v = start + interval * std::floor ((v - start) / interval + static_cast<ValueType> (0.5));
@@ -274,9 +266,7 @@ private:
         jassert (skew > ValueType());
     }
 
-   #if JUCE_COMPILER_SUPPORTS_LAMBDAS
     std::function<ValueType (ValueType, ValueType, ValueType)> convertFrom0To1Function  = nullptr,
                                                                convertTo0To1Function    = nullptr,
                                                                snapToLegalValueFunction = nullptr;
-   #endif
 };

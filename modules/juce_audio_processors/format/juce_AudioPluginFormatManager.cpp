@@ -40,7 +40,6 @@ namespace PluginFormatManagerHelpers
         ScopedPointer<AudioPluginFormat::InstantiationCompletionCallback> callback;
     };
 
-   #if JUCE_COMPILER_SUPPORTS_LAMBDAS
     struct ErrorLambdaOnMessageThread : public CallbackMessage
     {
         ErrorLambdaOnMessageThread (const String& inError,
@@ -54,7 +53,6 @@ namespace PluginFormatManagerHelpers
         String error;
         std::function<void (AudioPluginInstance*, const String&)> lambda;
     };
-   #endif
 }
 
 AudioPluginFormatManager::AudioPluginFormatManager() {}
@@ -139,7 +137,6 @@ void AudioPluginFormatManager::createPluginInstanceAsync (const PluginDescriptio
     (new PluginFormatManagerHelpers::ErrorCallbackOnMessageThread (error, callback))->post();
 }
 
-#if JUCE_COMPILER_SUPPORTS_LAMBDAS
 void AudioPluginFormatManager::createPluginInstanceAsync (const PluginDescription& description,
                                                           double initialSampleRate,
                                                           int initialBufferSize,
@@ -152,7 +149,6 @@ void AudioPluginFormatManager::createPluginInstanceAsync (const PluginDescriptio
 
     (new PluginFormatManagerHelpers::ErrorLambdaOnMessageThread (error, f))->post();
 }
-#endif
 
 AudioPluginFormat* AudioPluginFormatManager::findFormatForDescription (const PluginDescription& description, String& errorMessage) const
 {

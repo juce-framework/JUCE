@@ -52,11 +52,7 @@ public:
         int numArguments;
     };
 
-   #if JUCE_COMPILER_SUPPORTS_LAMBDAS
     using NativeFunction = std::function<var (const NativeFunctionArgs&)>;
-   #else
-    typedef var (*NativeFunction) (const NativeFunctionArgs&);
-   #endif
 
     //==============================================================================
     /** Creates a void variant. */

@@ -383,6 +383,10 @@ private:
             if (exporter->canLaunchProject())
                 defs << " " << exporter->getExporterIdentifierMacro() << "=1";
 
+        // Use the JUCE implementation of std::function until the live build
+        // engine can compile the one from the standard library
+        defs << " _LIBCPP_FUNCTIONAL=1";
+
         return defs;
     }
 

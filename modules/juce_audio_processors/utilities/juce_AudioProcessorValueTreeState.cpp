@@ -24,8 +24,6 @@
   ==============================================================================
 */
 
-#if JUCE_COMPILER_SUPPORTS_LAMBDAS
-
 //==============================================================================
 struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParameterWithID,
                                                    private ValueTree::Listener
@@ -556,5 +554,3 @@ AudioProcessorValueTreeState::ButtonAttachment::ButtonAttachment (AudioProcessor
 }
 
 AudioProcessorValueTreeState::ButtonAttachment::~ButtonAttachment() {}
-
-#endif

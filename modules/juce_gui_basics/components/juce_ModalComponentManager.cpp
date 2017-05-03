@@ -297,7 +297,6 @@ int ModalComponentManager::runEventLoopForCurrentComponent()
 #endif
 
 //==============================================================================
-#if JUCE_COMPILER_SUPPORTS_LAMBDAS
 struct LambdaCallback  : public ModalComponentManager::Callback
 {
     LambdaCallback (std::function<void(int)> fn) noexcept : function (fn) {}
@@ -312,4 +311,3 @@ ModalComponentManager::Callback* ModalCallbackFunction::create (std::function<vo
 {
     return new LambdaCallback (f);
 }
-#endif

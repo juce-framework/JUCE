@@ -107,6 +107,12 @@
 #undef minor
 #undef KeyPress
 
+// Include a replacement for std::function on older platforms and the live
+// build
+#if JUCE_PROJUCER_LIVE_BUILD || ! defined (JUCE_STDLIB_HAS_STD_FUNCTION_SUPPORT)
+ #include "../misc/juce_StdFunctionCompat.h"
+#endif
+
 //==============================================================================
 // DLL building settings on Windows
 #if JUCE_MSVC
