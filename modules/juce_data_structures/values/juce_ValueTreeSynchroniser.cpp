@@ -116,7 +116,7 @@ void ValueTreeSynchroniser::valueTreePropertyChanged (ValueTree& vt, const Ident
     {
         ValueTreeSynchroniserHelpers::writeHeader (*this, m, ValueTreeSynchroniserHelpers::propertyChanged, vt);
         m.writeString (property.toString());
-        vt.getProperty (property).writeToStream (m);
+        value->writeToStream (m);
     }
     else
     {
