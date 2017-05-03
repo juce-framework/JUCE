@@ -84,7 +84,7 @@ private:
 
     static void didFailLoadWithError (id self, SEL, WebView* sender, NSError* error, WebFrame* frame)
     {
-        if ([frame isEqual: [sender mainFrame]])
+        if ([frame isEqual: [sender mainFrame]] && error != nullptr && [error code] != NSURLErrorCancelled)
         {
             String errorString (nsStringToJuce ([error localizedDescription]));
 
