@@ -48,6 +48,20 @@ Uuid& Uuid::operator= (const Uuid& other) noexcept
 bool Uuid::operator== (const Uuid& other) const noexcept    { return memcmp (uuid, other.uuid, sizeof (uuid)) == 0; }
 bool Uuid::operator!= (const Uuid& other) const noexcept    { return ! operator== (other); }
 
+bool Uuid::operator<  (const Uuid& other) const noexcept    { return compare (other) < 0; }
+bool Uuid::operator>  (const Uuid& other) const noexcept    { return compare (other) > 0; }
+bool Uuid::operator<= (const Uuid& other) const noexcept    { return compare (other) <= 0; }
+bool Uuid::operator>= (const Uuid& other) const noexcept    { return compare (other) >= 0; }
+
+int Uuid::compare (Uuid other) const noexcept
+{
+    for (size_t i = 0; i < sizeof (uuid); ++i)
+        if (int diff = uuid[i] - (int) other.uuid[i])
+            return diff > 0 ? 1 : -1;
+
+    return 0;
+}
+
 Uuid Uuid::null() noexcept
 {
     return Uuid ((const uint8*) nullptr);
@@ -55,8 +69,8 @@ Uuid Uuid::null() noexcept
 
 bool Uuid::isNull() const noexcept
 {
-    for (size_t i = 0; i < sizeof (uuid); ++i)
-        if (uuid[i] != 0)
+    for (auto i : uuid)
+        if (i != 0)
             return false;
 
     return true;
@@ -109,3 +123,10 @@ Uuid& Uuid::operator= (const uint8* const rawData) noexcept
 
     return *this;
 }
+
+uint32 Uuid::getTimeLow() const noexcept                  { return ByteOrder::bigEndianInt (uuid); }
+uint16 Uuid::getTimeMid() const noexcept                  { return ByteOrder::bigEndianShort (uuid + 4); }
+uint16 Uuid::getTimeHighAndVersion() const noexcept       { return ByteOrder::bigEndianShort (uuid + 6); }
+uint8  Uuid::getClockSeqAndReserved() const noexcept      { return uuid[8]; }
+uint8  Uuid::getClockSeqLow() const noexcept              { return uuid[9]; }
+uint64 Uuid::getNode() const noexcept                     { return (((uint64) ByteOrder::bigEndianShort (uuid + 10)) << 32) + ByteOrder::bigEndianInt (uuid + 12); }
