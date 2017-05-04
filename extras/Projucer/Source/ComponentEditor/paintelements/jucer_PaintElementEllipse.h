@@ -62,38 +62,56 @@ public:
 
     void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode)
     {
+        if (fillType.isInvisible() && (strokeType.isInvisible() || ! isStrokePresent))
+            return;
+        
+        String x, y, w, h, s;
+        positionToCode (position, code.document->getComponentLayout(), x, y, w, h);
+        s << "{\n"
+          << "    float x = " << castToFloat (x) << ", y = " << castToFloat (y) << ", "
+          <<           "width = " << castToFloat (w) << ", height = " << castToFloat (h) << ";\n";
         if (! fillType.isInvisible())
         {
-            String x, y, w, h, s;
-            positionToCode (position, code.document->getComponentLayout(), x, y, w, h);
-
-            fillType.fillInGeneratedCode (code, paintMethodCode);
-            s << "g.fillEllipse ("
-              << castToFloat (x) << ", "
-              << castToFloat (y) << ", "
-              << castToFloat (w) << ", "
-              << castToFloat (h) << ");\n\n";
-
-            paintMethodCode += s;
+            s << "    " << fillType.generateVariablesCode ("fill");
+        }
+        if (isStrokePresent && ! strokeType.isInvisible())
+        {
+            s << "    " << strokeType.fill.generateVariablesCode ("stroke");
+        }
+        s << "    //[UserPaintCustomArguments] Customize the painting arguments here..\n"
+          << customPaintCode
+          << "    //[/UserPaintCustomArguments]\n";
+        
+        if (! fillType.isInvisible())
+        {
+            s << "    ";
+            fillType.fillInGeneratedCode ("fill", position, code, s);
+            s << "    g.fillEllipse (x, y, width, height);\n";
         }
 
         if (isStrokePresent && ! strokeType.isInvisible())
         {
-            String x, y, w, h, s;
-            positionToCode (position, code.document->getComponentLayout(), x, y, w, h);
-
-            strokeType.fill.fillInGeneratedCode (code, paintMethodCode);
-            s << "g.drawEllipse ("
-              << castToFloat (x) << ", "
-              << castToFloat (y) << ", "
-              << castToFloat (w) << ", "
-              << castToFloat (h) << ", "
-              << CodeHelpers::floatLiteral (strokeType.stroke.getStrokeThickness(), 3) << ");\n\n";
-
-            paintMethodCode += s;
+            s << "    ";
+            strokeType.fill.fillInGeneratedCode ("stroke", position, code, s);
+            s << "    g.drawEllipse (x, y, width, height, " << CodeHelpers::floatLiteral (strokeType.stroke.getStrokeThickness(), 3) << ");\n";
         }
+        
+        s << "}\n\n";
+        
+        paintMethodCode += s;
     }
 
+    void applyCustomPaintSnippets (StringArray& snippets)
+    {
+        customPaintCode.clear();
+        
+        if (! snippets.isEmpty() && (! fillType.isInvisible() || (isStrokePresent && ! strokeType.isInvisible())))
+        {
+            customPaintCode = snippets[0];
+            snippets.remove(0);
+        }
+    }
+    
     static const char* getTagName() noexcept        { return "ELLIPSE"; }
 
     XmlElement* createXml() const
@@ -131,6 +149,8 @@ public:
     }
 
 private:
+    String customPaintCode;
+ 
     //==============================================================================
     class ShapeToPathProperty  : public ButtonPropertyComponent
     {

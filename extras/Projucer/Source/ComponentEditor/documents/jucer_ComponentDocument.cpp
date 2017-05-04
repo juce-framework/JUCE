@@ -93,6 +93,11 @@ bool ComponentDocument::loadFromXml (const XmlElement& xml)
     return false;
 }
 
+void ComponentDocument::applyCustomPaintSnippets (StringArray& snippets)
+{
+    backgroundGraphics->applyCustomPaintSnippets (snippets);
+}
+
 //==============================================================================
 class NormalTestComponent   : public Component
 {

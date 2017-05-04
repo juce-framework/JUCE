@@ -598,8 +598,44 @@ bool JucerDocument::reloadFromDocument()
     stopTimer();
 
     resources.loadFromCpp (getCppFile(), cppContent);
+    
+    bool result = loadFromXml (*currentXML);
+    extractCustomPaintSnippetsFromCppFile (cppContent);
+    return result;
+}
 
-    return loadFromXml (*currentXML);
+void JucerDocument::refreshCustomCodeFromDocument()
+{
+    const String cppContent (cpp->getCodeDocument().getAllContent());
+    extractCustomPaintSnippetsFromCppFile (cppContent);
+}
+
+void JucerDocument::extractCustomPaintSnippetsFromCppFile (const String& cppContent)
+{
+    StringArray customPaintSnippets;
+    
+    StringArray lines;
+    lines.addLines (cppContent);
+    
+    int last = 0;
+    while (last >= 0)
+    {
+        const int start = indexOfLineStartingWith(lines, "//[UserPaintCustomArguments]", last);
+        if (start == -1) break;
+        const int end = indexOfLineStartingWith (lines, "//[/UserPaintCustomArguments]", start);
+        if (end == -1) break;
+        last = end + 1;
+
+        String result;
+        for (int i = start + 1; i < end; ++i)
+        {
+            result << lines [i] << newLine;
+        }
+        
+        customPaintSnippets.add (CodeHelpers::unindent(result, 4));
+    }
+    
+    applyCustomPaintSnippets(customPaintSnippets);
 }
 
 XmlElement* JucerDocument::pullMetaDataFromCppFile (const String& cpp)

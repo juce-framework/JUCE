@@ -94,6 +94,8 @@ public:
     void changeListenerCallback (ChangeBroadcaster*);
     void parentHierarchyChanged();
 
+    virtual void applyCustomPaintSnippets (StringArray&) {}
+
     int borderThickness;
 
 protected:
@@ -159,7 +161,7 @@ public:
     void changeListenerCallback (ChangeBroadcaster*)
     {
         jassert (propToRefresh != nullptr);
-        if (propToRefresh != nullptr)
+        if (propToRefresh != nullptr && owner != nullptr)
             propToRefresh->refresh();
     }
 
