@@ -47,6 +47,9 @@ public:
     {
         NativeFunctionArgs (const var& thisObject, const var* args, int numArgs) noexcept;
 
+        // Suppress a VS2013 compiler warning
+        NativeFunctionArgs& operator= (const NativeFunctionArgs&) = delete;
+
         const var& thisObject;
         const var* arguments;
         int numArguments;

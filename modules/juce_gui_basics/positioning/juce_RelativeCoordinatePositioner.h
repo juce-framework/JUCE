@@ -58,6 +58,9 @@ public:
     public:
         ComponentScope (Component&);
 
+        // Suppress a VS2013 compiler warning
+        ComponentScope& operator= (const ComponentScope&) = delete;
+
         Expression getSymbolValue (const String& symbol) const;
         void visitRelativeScope (const String& scopeName, Visitor&) const;
         String getScopeUID() const;

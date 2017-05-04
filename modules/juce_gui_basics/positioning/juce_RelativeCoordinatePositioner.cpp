@@ -28,6 +28,9 @@ struct MarkerListScope  : public Expression::Scope
 {
     MarkerListScope (Component& comp) : component (comp) {}
 
+    // Suppress a VS2013 compiler warning
+    MarkerListScope& operator= (const MarkerListScope&) = delete;
+
     Expression getSymbolValue (const String& symbol) const override
     {
         switch (RelativeCoordinate::StandardStrings::getTypeOf (symbol))
