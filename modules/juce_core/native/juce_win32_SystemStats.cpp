@@ -99,10 +99,10 @@ static int findNumberOfPhysicalCores() noexcept
 {
     int numPhysicalCores = 0;
     DWORD bufferSize = 0;
+    GetLogicalProcessorInformation (nullptr, &bufferSize);
 
-    if (GetLogicalProcessorInformation (nullptr, &bufferSize))
+    if (auto numBuffers = (size_t) (bufferSize / sizeof (SYSTEM_LOGICAL_PROCESSOR_INFORMATION)))
     {
-        const size_t numBuffers = (size_t) (bufferSize / sizeof (SYSTEM_LOGICAL_PROCESSOR_INFORMATION));
         HeapBlock<SYSTEM_LOGICAL_PROCESSOR_INFORMATION> buffer (numBuffers);
 
         if (GetLogicalProcessorInformation (buffer, &bufferSize))
