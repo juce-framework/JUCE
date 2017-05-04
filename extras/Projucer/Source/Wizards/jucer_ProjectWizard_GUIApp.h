@@ -45,8 +45,8 @@ struct GUIAppWizard   : public NewProjectWizard
 
         switch (setupComp.getFileCreationComboID())
         {
-            case 0:     createMainCpp = true;  break;
-            case 1:     createMainCpp = createWindow = true;  break;
+            case 0:     createMainCpp = createWindow = true;  break;
+            case 1:     createMainCpp = true;  break;
             case 2:     break;
             default:    jassertfalse; break;
         }
