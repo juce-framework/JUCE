@@ -491,7 +491,7 @@ private:
     {
         if (LicenseController* controller = ProjucerApplication::getApp().licenseController)
         {
-            auto& state = controller->getState();
+            auto state = controller->getState();
 
             userSettingsButton->iconImage = state.avatar;
             userSettingsButton->repaint();

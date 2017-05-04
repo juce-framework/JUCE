@@ -49,6 +49,7 @@ namespace CommandIDs
         showTranslationTool     = 0x300022,
         showSVGPathTool         = 0x300023,
         showAboutWindow         = 0x300024,
+        showAppUsageWindow      = 0x300025,
 
         showProjectSettings     = 0x300030,
         showProjectTab          = 0x300031,

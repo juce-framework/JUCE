@@ -82,9 +82,13 @@ void ProjucerApplication::initialise (const String& commandLine)
 
         initialiseBasics();
 
-        if (commandLine.isNotEmpty())
+        isRunningCommandLine = commandLine.isNotEmpty();
+
+        licenseController = new LicenseController;
+        licenseController->addLicenseStatusChangedCallback (this);
+
+        if (isRunningCommandLine)
         {
-            isRunningCommandLine = true;
             const int appReturnCode = performCommandLine (commandLine);
 
             if (appReturnCode != commandLineNotPerformed)
@@ -149,9 +153,8 @@ bool ProjucerApplication::initialiseLogger (const char* filePrefix)
 
 void ProjucerApplication::handleAsyncUpdate()
 {
-    licenseController = new LicenseController;
-    licenseController->addLicenseStatusChangedCallback (this);
-    licenseStateChanged (licenseController->getState());
+    if (licenseController != nullptr)
+        licenseController->startWebviewIfNeeded();
 
    #if JUCE_MAC
     PopupMenu extraAppleMenuItems;
@@ -175,6 +178,9 @@ void ProjucerApplication::initialiseWindows (const String& commandLine)
         mainWindowList.reopenLastProjects();
 
     mainWindowList.createWindowIfNoneAreOpen();
+
+    if (licenseController->getState().applicationUsageDataState == LicenseState::ApplicationUsageData::notChosenYet)
+        showApplicationUsageDataAgreementPopup();
 }
 
 void ProjucerApplication::shutdown()
@@ -255,8 +261,12 @@ void ProjucerApplication::systemRequestedQuit()
 //==============================================================================
 void ProjucerApplication::licenseStateChanged (const LicenseState& state)
 {
+   #if ! JUCER_ENABLE_GPL_MODE
     if (state.type != LicenseState::Type::notLoggedIn
      && state.type != LicenseState::Type::noLicenseChosenYet)
+   #else
+    ignoreUnused (state);
+   #endif
     {
         initialiseWindows (getCommandLineParameters());
     }
@@ -370,6 +380,7 @@ void ProjucerApplication::createFileMenu (PopupMenu& menu)
 
     #if ! JUCE_MAC
       menu.addCommandItem (commandManager, CommandIDs::showAboutWindow);
+      menu.addCommandItem (commandManager, CommandIDs::showAppUsageWindow);
       menu.addCommandItem (commandManager, CommandIDs::showGlobalPreferences);
       menu.addSeparator();
       menu.addCommandItem (commandManager, StandardApplicationCommandIDs::quit);
@@ -467,6 +478,7 @@ void ProjucerApplication::createToolsMenu (PopupMenu& menu)
 void ProjucerApplication::createExtraAppleMenuItems (PopupMenu& menu)
 {
     menu.addCommandItem (commandManager, CommandIDs::showAboutWindow);
+    menu.addCommandItem (commandManager, CommandIDs::showAppUsageWindow);
     menu.addSeparator();
     menu.addCommandItem (commandManager, CommandIDs::showGlobalPreferences);
 }
@@ -508,10 +520,11 @@ void ProjucerApplication::handleMainMenuCommand (int menuItemID)
         lookAndFeel.setupColours();
         mainWindowList.sendLookAndFeelChange();
 
-        if (utf8Window != nullptr)                 utf8Window->sendLookAndFeelChange();
-        if (svgPathWindow != nullptr)              svgPathWindow->sendLookAndFeelChange();
-        if (globalPreferencesWindow != nullptr)    globalPreferencesWindow->sendLookAndFeelChange();
-        if (aboutWindow != nullptr)                aboutWindow->sendLookAndFeelChange();
+        if (utf8Window != nullptr)                  utf8Window->sendLookAndFeelChange();
+        if (svgPathWindow != nullptr)               svgPathWindow->sendLookAndFeelChange();
+        if (globalPreferencesWindow != nullptr)     globalPreferencesWindow->sendLookAndFeelChange();
+        if (aboutWindow != nullptr)                 aboutWindow->sendLookAndFeelChange();
+        if (applicationUsageDataWindow != nullptr)  applicationUsageDataWindow->sendLookAndFeelChange();
     }
     else
     {
@@ -532,6 +545,7 @@ void ProjucerApplication::getAllCommands (Array <CommandID>& commands)
                               CommandIDs::showUTF8Tool,
                               CommandIDs::showSVGPathTool,
                               CommandIDs::showAboutWindow,
+                              CommandIDs::showAppUsageWindow,
                               CommandIDs::loginLogout };
 
     commands.addArray (ids, numElementsInArray (ids));
@@ -578,6 +592,10 @@ void ProjucerApplication::getCommandInfo (CommandID commandID, ApplicationComman
         result.setInfo ("About Projucer", "Shows the Projucer's 'About' page.", CommandCategories::general, 0);
         break;
 
+    case CommandIDs::showAppUsageWindow:
+        result.setInfo ("Application Usage Data", "Shows the application usage data agreement window", CommandCategories::general, 0);
+        break;
+
     case CommandIDs::loginLogout:
         {
             bool isLoggedIn = false;
@@ -615,6 +633,7 @@ bool ProjucerApplication::perform (const InvocationInfo& info)
         case CommandIDs::showSVGPathTool:           showSVGPathDataToolWindow(); break;
         case CommandIDs::showGlobalPreferences:     AppearanceSettings::showGlobalPreferences (globalPreferencesWindow); break;
         case CommandIDs::showAboutWindow:           showAboutWindow(); break;
+        case CommandIDs::showAppUsageWindow:        showApplicationUsageDataAgreementPopup(); break;
         case CommandIDs::loginLogout:               doLogout(); break;
         default:                                    return JUCEApplication::perform (info);
     }
@@ -686,10 +705,26 @@ void ProjucerApplication::showAboutWindow()
     if (aboutWindow != nullptr)
         aboutWindow->toFront (true);
     else
-        new FloatingToolWindow ("",
-                                "aboutWindowPos",
-                                new AboutWindowComponent(), aboutWindow, false,
+        new FloatingToolWindow ({}, {}, new AboutWindowComponent(),
+                                aboutWindow, false,
                                 500, 300, 500, 300, 500, 300);
+}
+
+void ProjucerApplication::showApplicationUsageDataAgreementPopup()
+{
+    if (applicationUsageDataWindow != nullptr)
+        applicationUsageDataWindow->toFront (true);
+    else
+        new FloatingToolWindow ("Application Usage Analytics",
+                                {}, new ApplicationUsageDataWindowComponent (isPaidOrGPL()),
+                                applicationUsageDataWindow, false,
+                                400, 300, 400, 300, 400, 300);
+}
+
+void ProjucerApplication::dismissApplicationUsageDataAgreementPopup()
+{
+    if (applicationUsageDataWindow != nullptr)
+        applicationUsageDataWindow = nullptr;
 }
 
 //==============================================================================

@@ -113,13 +113,19 @@ void Project::setMissingDefaultValues()
         setTitle ("JUCE Project");
 
     {
-        auto defaultSplashScreenAndReporting = ! ProjucerApplication::getApp().isPaidOrGPL();
+        auto defaultSplashScreen = ! ProjucerApplication::getApp().isPaidOrGPL();
 
-        if (shouldDisplaySplashScreen() == var() || defaultSplashScreenAndReporting)
-            shouldDisplaySplashScreen() = defaultSplashScreenAndReporting;
+        if (shouldDisplaySplashScreen() == var() || defaultSplashScreen)
+            shouldDisplaySplashScreen() = defaultSplashScreen;
 
-        if (shouldReportAppUsage() == var() || defaultSplashScreenAndReporting)
-            shouldReportAppUsage() = defaultSplashScreenAndReporting;
+        if (ProjucerApplication::getApp().isPaidOrGPL())
+        {
+            if (shouldReportAppUsage() == var())
+                shouldReportAppUsage() = ProjucerApplication::getApp().licenseController->getState().applicationUsageDataState
+                                             == LicenseState::ApplicationUsageData::enabled;
+        }
+        else
+            shouldReportAppUsage() = true;
     }
 
     if (splashScreenColour() == var())
