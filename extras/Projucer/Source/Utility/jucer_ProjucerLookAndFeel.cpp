@@ -159,10 +159,14 @@ void ProjucerLookAndFeel::drawToggleButton (Graphics& g, ToggleButton& button, b
         g.setOpacity (0.5f);
 
     bool isTextEmpty = button.getButtonText().isEmpty();
+    bool isPropertyComponentChild = (dynamic_cast<BooleanPropertyComponent*> (button.getParentComponent()) != nullptr);
+
     auto bounds = button.getLocalBounds();
+
+    auto sideLength = isPropertyComponentChild ? 25 : bounds.getHeight();
+
     auto rectBounds = isTextEmpty ? bounds
-                                  : bounds.removeFromLeft (jmin (bounds.getHeight(), bounds.getWidth() / 3));
-    auto sideLength = jmin (rectBounds.getWidth(), rectBounds.getHeight());
+                                  : bounds.removeFromLeft (jmin (sideLength, bounds.getWidth() / 3));
 
     rectBounds = rectBounds.withSizeKeepingCentre (sideLength, sideLength).reduced (4);
 
@@ -179,8 +183,6 @@ void ProjucerLookAndFeel::drawToggleButton (Graphics& g, ToggleButton& button, b
     if (! isTextEmpty)
     {
         bounds.removeFromLeft (5);
-
-        auto isPropertyComponentChild = (button.findParentComponentOfClass<BooleanPropertyComponent>() != nullptr);
 
         const auto fontSize = jmin (15.0f, button.getHeight() * 0.75f);
 

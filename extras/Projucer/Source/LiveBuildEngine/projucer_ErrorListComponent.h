@@ -253,10 +253,22 @@ private:
 
         Colour getContentColour (bool isIcon) const override
         {
-            return message.isError() ? Colours::red
-                                     : message.isWarning() ? Colours::yellow
-                                                           : getOwnerView()->findColour (isIcon ? treeIconColourId
-                                                                                                : defaultTextColourId);
+            if (isIcon)
+            {
+                if (isSelected())
+                    return getOwnerView()->findColour (defaultHighlightedTextColourId);
+
+                if (message.isError())
+                    return Colours::red;
+
+                if (message.isWarning())
+                    return Colours::yellow;
+
+                return getOwnerView()->findColour (treeIconColourId);
+            }
+
+            return getOwnerView()->findColour (isSelected() ? defaultHighlightedTextColourId
+                                                            : defaultTextColourId);
         }
 
         void showPopupMenu() override

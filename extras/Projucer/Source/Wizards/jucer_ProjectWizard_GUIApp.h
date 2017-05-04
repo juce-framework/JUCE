@@ -34,8 +34,8 @@ struct GUIAppWizard   : public NewProjectWizard
 
     StringArray getFileCreationOptions() override
     {
-        return { "Create a Main.cpp file",
-                 "Create a Main.cpp file and a basic window",
+        return { "Create a Main.cpp file and a basic window",
+                 "Create a Main.cpp file",
                  "Don't create any files" };
     }
 

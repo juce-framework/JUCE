@@ -411,9 +411,8 @@ void ProjucerApplication::createViewMenu (PopupMenu& menu)
 void ProjucerApplication::createBuildMenu (PopupMenu& menu)
 {
     menu.addCommandItem (commandManager, CommandIDs::toggleBuildEnabled);
-    menu.addCommandItem (commandManager, CommandIDs::toggleContinuousBuild);
     menu.addCommandItem (commandManager, CommandIDs::buildNow);
-
+    menu.addCommandItem (commandManager, CommandIDs::toggleContinuousBuild);
     menu.addSeparator();
     menu.addCommandItem (commandManager, CommandIDs::launchApp);
     menu.addCommandItem (commandManager, CommandIDs::killApp);
