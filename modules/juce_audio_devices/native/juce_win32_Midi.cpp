@@ -61,9 +61,8 @@ class WindowsMidiService  : public MidiServiceType
 private:
     struct WindowsInputWrapper  : public InputWrapper
     {
-        class MidiInCollector
+        struct MidiInCollector
         {
-        public:
             MidiInCollector (WindowsMidiService& s,
                              MidiInput* const inputDevice,
                              MidiInputCallback& cb)
@@ -155,7 +154,7 @@ private:
             static void CALLBACK midiInCallback (HMIDIIN, UINT uMsg, DWORD_PTR dwInstance,
                                                  DWORD_PTR midiMessage, DWORD_PTR timeStamp)
             {
-                MidiInCollector* const collector = reinterpret_cast<MidiInCollector*> (dwInstance);
+                auto* collector = reinterpret_cast<MidiInCollector*> (dwInstance);
 
                 if (collector->midiService.activeMidiCollectors.contains (collector))
                 {
@@ -176,9 +175,8 @@ private:
             bool volatile isStarted = false;
             double startTime = 0;
 
-            class MidiHeader
+            struct MidiHeader
             {
-            public:
                 MidiHeader() {}
 
                 void prepare (HMIDIIN device)
@@ -214,7 +212,6 @@ private:
                         write (device);
                 }
 
-            private:
                 MIDIHDR hdr;
                 char data [256];
 
@@ -238,9 +235,9 @@ private:
 
             double convertTimeStamp (uint32 timeStamp)
             {
-                double t = startTime + timeStamp;
+                auto t = startTime + timeStamp;
+                auto now = Time::getMillisecondCounterHiRes();
 
-                const double now = Time::getMillisecondCounterHiRes();
                 if (t > now)
                 {
                     if (t > now + 2.0)
@@ -255,31 +252,19 @@ private:
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInCollector)
         };
 
+        //==============================================================================
         WindowsInputWrapper (WindowsMidiService& parentService,
                              MidiInput* const input,
                              const int index,
                              MidiInputCallback* const callback)
         {
+            auto names = getDevices();
             UINT deviceId = MIDI_MAPPER;
-            int n = 0;
 
-            const UINT num = midiInGetNumDevs();
-
-            for (UINT i = 0; i < num; ++i)
+            if (isPositiveAndBelow (index, names.size()))
             {
-                MIDIINCAPS mc = { 0 };
-
-                if (midiInGetDevCaps (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
-                {
-                    if (index == n)
-                    {
-                        deviceId = i;
-                        deviceName = String (mc.szPname, (size_t) numElementsInArray (mc.szPname));
-                        break;
-                    }
-
-                    ++n;
-                }
+                deviceName = names[index];
+                deviceId = index;
             }
 
             collector = new MidiInCollector (parentService, input, *callback);
@@ -308,9 +293,10 @@ private:
                 MIDIINCAPS mc = { 0 };
 
                 if (midiInGetDevCaps (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
-                    s.add (String (mc.szPname, sizeof (mc.szPname)));
+                    s.add (String (mc.szPname, (size_t) numElementsInArray (mc.szPname)));
             }
 
+            s.appendNumbersToDuplicates (false, false, CharPointer_UTF8 ("-"), CharPointer_UTF8 (""));
             return s;
         }
 
@@ -333,6 +319,7 @@ private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowsInputWrapper)
     };
 
+    //==============================================================================
     struct WindowsOutputWrapper  : public OutputWrapper
     {
         struct MidiOutHandle
@@ -341,39 +328,27 @@ private:
             UINT deviceId;
             HMIDIOUT handle;
 
-        private:
             JUCE_LEAK_DETECTOR (MidiOutHandle)
         };
 
-        WindowsOutputWrapper (WindowsMidiService& p, const int index)
-            : parent (p)
+        WindowsOutputWrapper (WindowsMidiService& p, int index) : parent (p)
         {
+            auto names = getDevices();
             UINT deviceId = MIDI_MAPPER;
-            const UINT num = midiOutGetNumDevs();
-            int n = 0;
 
-            for (UINT i = 0; i < num; ++i)
+            if (isPositiveAndBelow (index, names.size()))
             {
-                MIDIOUTCAPS mc = { 0 };
+                deviceName = names[index];
+                deviceId = index;
+            }
 
-                if (midiOutGetDevCaps (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
-                {
-                    String name = String (mc.szPname, sizeof (mc.szPname));
-
-                    // use the microsoft sw synth as a default - best not to allow deviceId
-                    // to be MIDI_MAPPER, or else device sharing breaks
-                    if (name.containsIgnoreCase ("microsoft"))
-                        deviceId = i;
-
-                    if (index == n)
-                    {
-                        deviceName = name;
-                        deviceId = i;
-                        break;
-                    }
-
-                    ++n;
-                }
+            if (deviceId == MIDI_MAPPER)
+            {
+                // use the microsoft sw synth as a default - best not to allow deviceId
+                // to be MIDI_MAPPER, or else device sharing breaks
+                for (int i = 0; i < names.size(); ++i)
+                    if (names[i].containsIgnoreCase ("microsoft"))
+                        deviceId = (UINT) i;
             }
 
             for (int i = parent.activeOutputHandles.size(); --i >= 0;)
@@ -384,7 +359,6 @@ private:
                 {
                     activeHandle->refCount++;
                     han = activeHandle;
-
                     return;
                 }
             }
@@ -401,17 +375,13 @@ private:
                     han->refCount = 1;
                     han->handle = h;
                     parent.activeOutputHandles.add (han);
-
                     return;
                 }
-                else if (res == MMSYSERR_ALLOCATED)
-                {
+
+                if (res == MMSYSERR_ALLOCATED)
                     Sleep (100);
-                }
                 else
-                {
                     break;
-                }
             }
 
             throw std::runtime_error ("Failed to create Windows output device wrapper");
@@ -470,9 +440,9 @@ private:
             }
         }
 
-        static StringArray getDevices()
+        static Array<MIDIOUTCAPS> getDeviceCaps()
         {
-            StringArray s;
+            Array<MIDIOUTCAPS> devices;
             const UINT num = midiOutGetNumDevs();
 
             for (UINT i = 0; i < num; ++i)
@@ -480,28 +450,33 @@ private:
                 MIDIOUTCAPS mc = { 0 };
 
                 if (midiOutGetDevCaps (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
-                    s.add (String (mc.szPname, sizeof (mc.szPname)));
+                    devices.add (mc);
             }
 
+            return devices;
+        }
+
+        static StringArray getDevices()
+        {
+            StringArray s;
+
+            for (auto& mc : getDeviceCaps())
+                s.add (String (mc.szPname, (size_t) numElementsInArray (mc.szPname)));
+
+            s.appendNumbersToDuplicates (false, false, CharPointer_UTF8 ("-"), CharPointer_UTF8 (""));
             return s;
         }
 
         static int getDefaultDeviceIndex()
         {
-            const UINT num = midiOutGetNumDevs();
             int n = 0;
 
-            for (UINT i = 0; i < num; ++i)
+            for (auto& mc : getDeviceCaps())
             {
-                MIDIOUTCAPS mc = { 0 };
+                if ((mc.wTechnology & MOD_MAPPER) != 0)
+                    return n;
 
-                if (midiOutGetDevCaps (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
-                {
-                    if ((mc.wTechnology & MOD_MAPPER) != 0)
-                        return n;
-
-                    ++n;
-                }
+                ++n;
             }
 
             return 0;
