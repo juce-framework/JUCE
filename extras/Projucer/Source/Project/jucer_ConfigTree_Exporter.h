@@ -155,9 +155,8 @@ private:
     int exporterIndex;
 
     //==============================================================================
-    class SettingsComp  : public Component
+    struct SettingsComp  : public Component
     {
-    public:
         SettingsComp (ProjectExporter* exp)
             : group (exp->getName(), ExporterItem::getIconForExporter (exp))
         {
@@ -169,11 +168,9 @@ private:
             parentSizeChanged();
         }
 
-        void parentSizeChanged() override  { updateSize (*this, group); }
+        void parentSizeChanged() override   { updateSize (*this, group); }
+        void resized() override             { group.setBounds (getLocalBounds().withTrimmedLeft (12)); }
 
-        void resized() override { group.setBounds (getLocalBounds().withTrimmedLeft (12)); }
-
-    private:
         PropertyGroupComponent group;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SettingsComp)

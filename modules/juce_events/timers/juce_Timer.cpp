@@ -341,7 +341,6 @@ void JUCE_CALLTYPE Timer::callPendingTimersSynchronously()
         TimerThread::instance->callTimersSynchronously();
 }
 
-#if JUCE_COMPILER_SUPPORTS_LAMBDAS
 struct LambdaInvoker  : private Timer
 {
     LambdaInvoker (int milliseconds, std::function<void()> f)  : function (f)
@@ -365,4 +364,3 @@ void JUCE_CALLTYPE Timer::callAfterDelay (int milliseconds, std::function<void()
 {
     new LambdaInvoker (milliseconds, f);
 }
-#endif

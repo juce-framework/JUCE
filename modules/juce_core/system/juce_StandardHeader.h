@@ -29,7 +29,7 @@
 */
 #define JUCE_MAJOR_VERSION      5
 #define JUCE_MINOR_VERSION      0
-#define JUCE_BUILDNUMBER        0
+#define JUCE_BUILDNUMBER        1
 
 /** Current Juce version number.
 
@@ -106,6 +106,12 @@
 #undef major
 #undef minor
 #undef KeyPress
+
+// Include a replacement for std::function on older platforms and the live
+// build
+#if JUCE_PROJUCER_LIVE_BUILD || ! defined (JUCE_STDLIB_HAS_STD_FUNCTION_SUPPORT)
+ #include "../misc/juce_StdFunctionCompat.h"
+#endif
 
 //==============================================================================
 // DLL building settings on Windows

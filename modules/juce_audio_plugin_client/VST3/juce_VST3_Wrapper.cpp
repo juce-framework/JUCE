@@ -1483,7 +1483,7 @@ public:
         zerostruct (bank);
         bank.magic1         = (int32) htonl ('CcnK');
         bank.size           = (int32) htonl (bankBlockSize - 8 + (unsigned int) mem.getSize());
-        bank.magic1         = (int32) htonl ('FBCh');
+        bank.magic2         = (int32) htonl ('FBCh');
         bank.version1       = (int32) htonl (2);
         bank.fxID           = (int32) htonl (JucePlugin_VSTUniqueID);
         bank.version2       = (int32) htonl (JucePlugin_VersionCode);

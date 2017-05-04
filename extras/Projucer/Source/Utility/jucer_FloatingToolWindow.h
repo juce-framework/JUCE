@@ -47,7 +47,9 @@ struct FloatingToolWindow  : public DialogWindow
         setResizeLimits (minW, minH, maxW, maxH);
         setContentOwned (content, false);
 
-        const String windowState (getGlobalProperties().getValue (windowPosProperty));
+        String windowState;
+        if (windowPosProperty.isNotEmpty())
+            windowState = getGlobalProperties().getValue (windowPosProperty);
 
         if (windowState.isNotEmpty())
             restoreWindowStateFromString (windowState);
@@ -60,7 +62,8 @@ struct FloatingToolWindow  : public DialogWindow
 
     ~FloatingToolWindow()
     {
-        getGlobalProperties().setValue (windowPosProperty, getWindowStateAsString());
+        if (windowPosProperty.isNotEmpty())
+            getGlobalProperties().setValue (windowPosProperty, getWindowStateAsString());
     }
 
     void closeButtonPressed() override

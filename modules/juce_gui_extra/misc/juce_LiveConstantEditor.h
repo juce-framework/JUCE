@@ -238,6 +238,12 @@ namespace LiveConstantEditor
     template <typename Type>
     inline LiveValue<Type>& getValue (const char* file, int line, const Type& initialValue)
     {
+        // If you hit this assertion then the __FILE__ macro is providing a
+        // relative path instead of an absolute path. On Windows this will be
+        // a path relative to the build directory rather than the currently
+        // running application. To fix this you must compile with the /FC flag.
+        jassert (File::isAbsolutePath (file));
+
         return ValueList::getInstance()->getValue (file, line, initialValue);
     }
 

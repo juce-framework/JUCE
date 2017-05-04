@@ -57,7 +57,7 @@ public:
 
         int getNumSwatches() const override;
         Colour getSwatchColour (int index) const override;
-        void setSwatchColour (int index, const Colour& newColour) const override;
+        void setSwatchColour (int index, const Colour& newColour) override;
     };
 
     //==============================================================================

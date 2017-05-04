@@ -38,7 +38,6 @@
 
 // [END_USER_CODE_SECTION]
 
-//==============================================================================
 /*
   ==============================================================================
 
@@ -53,8 +52,8 @@
 
 // BEGIN SECTION A
 
-#define JUCE_DISPLAY_SPLASH_SCREEN 1
-#define JUCE_REPORT_APP_USAGE 1
+#define JUCE_DISPLAY_SPLASH_SCREEN 0
+#define JUCE_REPORT_APP_USAGE 0
 
 // END SECTION A
 

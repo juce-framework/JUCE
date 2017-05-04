@@ -44,6 +44,7 @@
 
  #if (__GNUC__ * 100 + __GNUC_MINOR__) >= 406 && ! defined (JUCE_COMPILER_SUPPORTS_LAMBDAS)
   #define JUCE_COMPILER_SUPPORTS_LAMBDAS 1
+  #define JUCE_STDLIB_HAS_STD_FUNCTION_SUPPORT 1
  #endif
 
  #ifndef JUCE_EXCEPTIONS_DISABLED
@@ -65,8 +66,12 @@
   #define JUCE_DELETED_FUNCTION = delete
  #endif
 
- #if __has_feature (cxx_lambdas) && (defined (_LIBCPP_VERSION) || ! (JUCE_MAC || JUCE_IOS))
+ #if __has_feature (cxx_lambdas)
   #define JUCE_COMPILER_SUPPORTS_LAMBDAS 1
+ #endif
+
+ #if (defined (_LIBCPP_VERSION) || ! (JUCE_MAC || JUCE_IOS))
+  #define JUCE_STDLIB_HAS_STD_FUNCTION_SUPPORT 1
  #endif
 
  #if __has_feature (cxx_generalized_initializers) && (defined (_LIBCPP_VERSION) || ! (JUCE_MAC || JUCE_IOS))
@@ -106,6 +111,7 @@
   #define JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS 1
   #define JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES 1
   #define JUCE_DELETED_FUNCTION = delete
+  #define JUCE_STDLIB_HAS_STD_FUNCTION_SUPPORT 1
  #endif
 
  #if _MSC_VER >= 1900

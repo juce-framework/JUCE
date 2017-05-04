@@ -77,16 +77,16 @@ public:
     PopupMenu getMenuForIndex (int topLevelMenuIndex, const String& menuName);
     void menuItemSelected (int menuItemID, int topLevelMenuIndex);
     ApplicationCommandTarget* getNextCommandTarget();
-    void getAllCommands (Array <CommandID>& commands);
+    void getAllCommands (Array<CommandID>& commands);
     void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result);
     bool perform (const InvocationInfo& info);
 
     bool tryToQuitApplication();
 
-    void createPlugin (const PluginDescription* desc, int x, int y);
+    void createPlugin (const PluginDescription*, int x, int y);
 
-    void addPluginsToMenu (PopupMenu& m) const;
-    const PluginDescription* getChosenType (const int menuID) const;
+    void addPluginsToMenu (PopupMenu&) const;
+    const PluginDescription* getChosenType (int menuID) const;
 
     GraphDocumentComponent* getGraphEditor() const;
 
@@ -98,7 +98,7 @@ private:
     AudioDeviceManager deviceManager;
     AudioPluginFormatManager formatManager;
 
-    OwnedArray <PluginDescription> internalTypes;
+    OwnedArray<PluginDescription> internalTypes;
     KnownPluginList knownPluginList;
     KnownPluginList::SortMethod pluginSortMethod;
 

@@ -111,6 +111,12 @@ namespace juce
 
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
+
+ #if JUCE_CLANG
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wundeclared-selector"
+ #endif
+
  #if JUCE_MAC
   #include "native/juce_mac_NSViewComponent.mm"
   #include "native/juce_mac_AppleRemote.mm"
@@ -123,6 +129,10 @@ namespace juce
 
  #if JUCE_WEB_BROWSER
   #include "native/juce_mac_WebBrowserComponent.mm"
+ #endif
+
+ #if JUCE_CLANG
+  #pragma clang diagnostic pop
  #endif
 
 //==============================================================================

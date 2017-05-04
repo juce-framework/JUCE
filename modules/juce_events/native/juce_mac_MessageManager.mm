@@ -52,7 +52,8 @@ public:
             [[NSDistributedNotificationCenter defaultCenter] addObserver: delegate
                                                                 selector: @selector (broadcastMessageCallback:)
                                                                     name: getBroadcastEventName()
-                                                                  object: nil];
+                                                                  object: nil
+                                                      suspensionBehavior: NSNotificationSuspensionBehaviorDeliverImmediately];
         }
         else
         {
@@ -126,7 +127,7 @@ private:
 
         static NSApplicationTerminateReply applicationShouldTerminate (id /*self*/, SEL, NSApplication*)
         {
-            if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+            if (auto* app = JUCEApplicationBase::getInstance())
             {
                 app->systemRequestedQuit();
 
@@ -144,7 +145,7 @@ private:
 
         static BOOL application_openFile (id /*self*/, SEL, NSApplication*, NSString* filename)
         {
-            if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+            if (auto* app = JUCEApplicationBase::getInstance())
             {
                 app->anotherInstanceStarted (quotedIfContainsSpaces (filename));
                 return YES;
@@ -155,7 +156,7 @@ private:
 
         static void application_openFiles (id /*self*/, SEL, NSApplication*, NSArray* filenames)
         {
-            if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+            if (auto* app = JUCEApplicationBase::getInstance())
             {
                 StringArray files;
 
@@ -200,7 +201,7 @@ private:
 
         static void getUrl_withReplyEvent (id /*self*/, SEL, NSAppleEventDescriptor* event, NSAppleEventDescriptor*)
         {
-            if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+            if (auto* app = JUCEApplicationBase::getInstance())
                 app->anotherInstanceStarted (quotedIfContainsSpaces ([[event paramDescriptorForKeyword: keyDirectObject] stringValue]));
         }
 

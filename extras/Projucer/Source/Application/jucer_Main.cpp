@@ -34,6 +34,7 @@
 #include "../Utility/jucer_UTF8Component.h"
 #include "../Utility/jucer_SVGPathDataComponent.h"
 #include "../Utility/jucer_AboutWindowComponent.h"
+#include "../Utility/jucer_ApplicationUsageDataWindowComponent.h"
 #include "../Utility/jucer_FloatingToolWindow.h"
 
 #include "../LiveBuildEngine/projucer_MessageIDs.h"

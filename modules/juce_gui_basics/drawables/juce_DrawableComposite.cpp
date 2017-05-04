@@ -28,10 +28,7 @@ DrawableComposite::DrawableComposite()
     : bounds (Point<float>(), Point<float> (100.0f, 0.0f), Point<float> (0.0f, 100.0f)),
       updateBoundsReentrant (false)
 {
-    setContentArea (RelativeRectangle (RelativeCoordinate (0.0),
-                                       RelativeCoordinate (100.0),
-                                       RelativeCoordinate (0.0),
-                                       RelativeCoordinate (100.0)));
+    setContentArea (RelativeRectangle (Rectangle<float> (0.0f, 0.0f, 100.0f, 100.0f)));
 }
 
 DrawableComposite::DrawableComposite (const DrawableComposite& other)
@@ -122,12 +119,7 @@ void DrawableComposite::resetBoundingBoxToContentArea()
 
 void DrawableComposite::resetContentAreaAndBoundingBoxToFitChildren()
 {
-    const Rectangle<float> activeArea (getDrawableBounds());
-
-    setContentArea (RelativeRectangle (RelativeCoordinate (activeArea.getX()),
-                                       RelativeCoordinate (activeArea.getRight()),
-                                       RelativeCoordinate (activeArea.getY()),
-                                       RelativeCoordinate (activeArea.getBottom())));
+    setContentArea (RelativeRectangle (getDrawableBounds()));
     resetBoundingBoxToContentArea();
 }
 

@@ -516,17 +516,13 @@ static void performPixelOp (const Image::BitmapData& data, const PixelOperation&
 
 struct AlphaMultiplyOp
 {
-    AlphaMultiplyOp (float alpha_) noexcept : alpha (alpha_) {}
-
-    const float alpha;
+    float alpha;
 
     template <class PixelType>
     void operator() (PixelType& pixel) const
     {
         pixel.multiplyAlpha (alpha);
     }
-
-    JUCE_DECLARE_NON_COPYABLE (AlphaMultiplyOp)
 };
 
 void Image::multiplyAllAlphas (const float amountToMultiplyBy)
@@ -534,7 +530,7 @@ void Image::multiplyAllAlphas (const float amountToMultiplyBy)
     jassert (hasAlphaChannel());
 
     const BitmapData destData (*this, 0, 0, getWidth(), getHeight(), BitmapData::readWrite);
-    performPixelOp (destData, AlphaMultiplyOp (amountToMultiplyBy));
+    performPixelOp (destData, AlphaMultiplyOp { amountToMultiplyBy });
 }
 
 struct DesaturateOp

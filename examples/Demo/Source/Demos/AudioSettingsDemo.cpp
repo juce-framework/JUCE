@@ -113,6 +113,11 @@ private:
         dumpDeviceInfo();
     }
 
+    void lookAndFeelChanged() override
+    {
+        diagnosticsBox.applyFontToAllText (diagnosticsBox.getFont());
+    }
+
     static String getListOfActiveBits (const BitArray& b)
     {
         StringArray bits;

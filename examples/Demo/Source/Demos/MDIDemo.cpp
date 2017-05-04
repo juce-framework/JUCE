@@ -114,6 +114,11 @@ private:
             changed();
     }
 
+    void lookAndFeelChanged() override
+    {
+        editor.applyFontToAllText (editor.getFont());
+    }
+
     void textEditorReturnKeyPressed (TextEditor&) override {}
     void textEditorEscapeKeyPressed (TextEditor&) override {}
     void textEditorFocusLost (TextEditor&) override {}

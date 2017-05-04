@@ -118,6 +118,11 @@ private:
         fetchButton.triggerClick();
     }
 
+    void lookAndFeelChanged() override
+    {
+        urlBox.applyFontToAllText (urlBox.getFont());
+    }
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NetworkingDemo)
 };
 

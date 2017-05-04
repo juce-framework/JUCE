@@ -110,7 +110,7 @@ public:
     }
 
     template <typename... Args>
-    void callExcludingHelper (ListenerBase& listenerToExclude,
+    void callExcludingHelper (ListenerBase* listenerToExclude,
                               std::vector<int>& expectedCounterValues)
     {
         counter = 0;
@@ -125,7 +125,7 @@ public:
     }
 
     template<typename T, typename... Args>
-    void callExcludingHelper (ListenerBase& listenerToExclude,
+    void callExcludingHelper (ListenerBase* listenerToExclude,
                               std::vector<int>& expectedCounterValues, T first, Args... args)
     {
         const int expected = expectedCounterValues[sizeof... (args) + 1];
@@ -165,7 +165,7 @@ public:
         for (int i = 1; i < 8; ++i)
             expectedCounterValues.push_back (i);
 
-        callExcludingHelper (listener2, expectedCounterValues, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+        callExcludingHelper (&listener2, expectedCounterValues, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     }
 
     int counter = 0;

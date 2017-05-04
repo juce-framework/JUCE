@@ -32,22 +32,18 @@ struct GUIAppWizard   : public NewProjectWizard
     String getDescription() const override  { return TRANS("Creates a blank JUCE application with a single window component."); }
     const char* getIcon() const override    { return BinaryData::wizard_GUI_svg; }
 
-    void addSetupItems (Component& setupComp, OwnedArray<Component>& itemsCreated) override
+    StringArray getFileCreationOptions() override
     {
-        const String fileOptions[] = { TRANS("Create a Main.cpp file"),
-                                       TRANS("Create a Main.cpp file and a basic window"),
-                                       TRANS("Don't create any files") };
-
-        createFileCreationOptionComboBox (setupComp, itemsCreated,
-                                          StringArray (fileOptions, numElementsInArray (fileOptions)))
-            .setSelectedId (2);
+        return { "Create a Main.cpp file and a basic window",
+                 "Create a Main.cpp file",
+                 "Don't create any files" };
     }
 
     Result processResultsFromSetupItems (WizardComp& setupComp) override
     {
         createMainCpp = createWindow = false;
 
-        switch (getFileCreationComboResult (setupComp))
+        switch (setupComp.getFileCreationComboID())
         {
             case 0:     createMainCpp = true;  break;
             case 1:     createMainCpp = createWindow = true;  break;

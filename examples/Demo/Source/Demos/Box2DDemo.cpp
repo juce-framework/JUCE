@@ -299,6 +299,11 @@ private:
         }
     }
 
+    void lookAndFeelChanged() override
+    {
+        instructions.applyFontToAllText (instructions.getFont());
+    }
+
     static StringArray getTestsList()
     {
         const char* tests[] =

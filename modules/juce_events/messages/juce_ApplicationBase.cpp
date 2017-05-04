@@ -69,7 +69,15 @@ void JUCEApplicationBase::sendUnhandledException (const std::exception* const e,
                                                   const int lineNumber)
 {
     if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+    {
+        // If you hit this assertion then the __FILE__ macro is providing a
+        // relative path instead of an absolute path. On Windows this will be
+        // a path relative to the build directory rather than the currently
+        // running application. To fix this you must compile with the /FC flag.
+        jassert (File::isAbsolutePath (sourceFile));
+
         app->unhandledException (e, sourceFile, lineNumber);
+    }
 }
 
 //==============================================================================
@@ -169,7 +177,7 @@ StringArray JUCE_CALLTYPE JUCEApplicationBase::getCommandLineParameterArray()
  extern void initialiseNSApplication();
 #endif
 
-#if JUCE_LINUX && JUCE_MODULE_AVAILABLE_juce_gui_extra
+#if JUCE_LINUX && JUCE_MODULE_AVAILABLE_juce_gui_extra && (! defined(JUCE_WEB_BROWSER) || JUCE_WEB_BROWSER)
  extern int juce_gtkWebkitMain (int argc, const char* argv[]);
 #endif
 
@@ -214,7 +222,7 @@ int JUCEApplicationBase::main (int argc, const char* argv[], void* customDelegat
         initialiseNSApplication();
        #endif
 
-       #if JUCE_LINUX && JUCE_MODULE_AVAILABLE_juce_gui_extra
+       #if JUCE_LINUX && JUCE_MODULE_AVAILABLE_juce_gui_extra && (! defined(JUCE_WEB_BROWSER) || JUCE_WEB_BROWSER)
         if (argc >= 2 && String (argv[1]) == "--juce-gtkwebkitfork-child")
             return juce_gtkWebkitMain (argc, argv);
        #endif

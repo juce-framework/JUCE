@@ -44,7 +44,16 @@ struct LicenseState
         pro
     };
 
+    enum class ApplicationUsageData
+    {
+        notChosenYet,
+
+        enabled,
+        disabled
+    };
+
     Type type = Type::notLoggedIn;
+    ApplicationUsageData applicationUsageDataState = ApplicationUsageData::notChosenYet;
     String username;
     String email;
     String authToken;
@@ -71,10 +80,13 @@ public:
     LicenseController();
     ~LicenseController();
 
+    void startWebviewIfNeeded();
+
     //==============================================================================
-    const LicenseState& getState() const noexcept { return state; }
+    LicenseState getState() const noexcept;
     void logout();
     void chooseNewLicense();
+    void setApplicationUsageDataState (LicenseState::ApplicationUsageData newState);
 
     //==============================================================================
     void addLicenseStatusChangedCallback    (StateChangedCallback* callback) { listeners.add    (callback); }
@@ -103,6 +115,7 @@ private:
     ScopedPointer<LicenseThread> thread;
     LicenseWebview* licenseWebview = nullptr;
     ListenerList<LicenseController::StateChangedCallback> listeners;
+    bool guiNotInitialisedYet = true;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LicenseController)
 };

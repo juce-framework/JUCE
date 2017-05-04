@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="M70qfTRRk" name="Projucer" projectType="guiapp" juceFolder="../../juce"
-              jucerVersion="5.0.0" version="5.0.0" bundleIdentifier="com.juce.theprojucer"
-              defines="" includeBinaryInAppConfig="1" displaySplashScreen="1"
-              reportAppUsage="1" useDarkSplashScreen="1" splashScreenColour="Dark">
+              jucerVersion="5.0.1" version="5.0.1" bundleIdentifier="com.juce.theprojucer"
+              defines="" includeBinaryInAppConfig="1" splashScreenColour="Dark"
+              displaySplashScreen="0" reportAppUsage="0">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                documentExtensions=".jucer" objCExtraSuffix="zkVtji" bigIcon="OCyr5F"
@@ -664,8 +664,7 @@
     <MODULE id="juce_gui_extra" showAllCode="1"/>
   </MODULES>
   <LIVE_SETTINGS>
-    <OSX headerPath="~/SDKs/llvm/include&#10;~/SDKs/llvm/tools/clang/include"
-         enableCxx11="1" systemHeaderPath="/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/c++/v1&#10;/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/4.2/include"/>
+    <OSX headerPath="" enableCxx11="1" systemHeaderPath=""/>
     <WINDOWS enableCxx11="1"/>
     <LINUX/>
   </LIVE_SETTINGS>

@@ -410,7 +410,7 @@ struct Component::ComponentHelpers
 
             if (child.isVisible() && ! child.isTransformed())
             {
-                const Rectangle<int> newClip (clipRect.getIntersection (child.boundsRelativeToParent));
+                auto newClip = clipRect.getIntersection (child.boundsRelativeToParent);
 
                 if (! newClip.isEmpty())
                 {
@@ -1070,7 +1070,7 @@ Point<float> Component::getLocalPoint (const Component* source, Point<float> poi
     return ComponentHelpers::convertCoordinate (this, source, point);
 }
 
-Rectangle<int> Component::getLocalArea (const Component* source, const Rectangle<int>& area) const
+Rectangle<int> Component::getLocalArea (const Component* source, Rectangle<int> area) const
 {
     return ComponentHelpers::convertCoordinate (this, source, area);
 }
@@ -1085,7 +1085,7 @@ Point<float> Component::localPointToGlobal (Point<float> point) const
     return ComponentHelpers::convertCoordinate (nullptr, this, point);
 }
 
-Rectangle<int> Component::localAreaToGlobal (const Rectangle<int>& area) const
+Rectangle<int> Component::localAreaToGlobal (Rectangle<int> area) const
 {
     return ComponentHelpers::convertCoordinate (nullptr, this, area);
 }
@@ -1215,12 +1215,12 @@ void Component::sendMovedResizedMessages (const bool wasMoved, const bool wasRes
                                         *this, wasMoved, wasResized);
 }
 
-void Component::setSize (const int w, const int h)
+void Component::setSize (int w, int h)
 {
     setBounds (getX(), getY(), w, h);
 }
 
-void Component::setTopLeftPosition (const int x, const int y)
+void Component::setTopLeftPosition (int x, int y)
 {
     setBounds (x, y, getWidth(), getHeight());
 }
@@ -1235,7 +1235,7 @@ void Component::setTopRightPosition (const int x, const int y)
     setTopLeftPosition (x - getWidth(), y);
 }
 
-void Component::setBounds (const Rectangle<int>& r)
+void Component::setBounds (Rectangle<int> r)
 {
     setBounds (r.getX(), r.getY(), r.getWidth(), r.getHeight());
 }
@@ -1247,7 +1247,7 @@ void Component::setBounds (const RelativeRectangle& newBounds)
 
 void Component::setBounds (const String& newBoundsExpression)
 {
-    setBounds (RelativeRectangle (newBoundsExpression));
+    RelativeRectangle (newBoundsExpression).applyToComponent (*this);
 }
 
 void Component::setBoundsRelative (const float x, const float y,
@@ -1262,13 +1262,10 @@ void Component::setBoundsRelative (const float x, const float y,
                roundToInt (h * ph));
 }
 
-void Component::setCentrePosition (const int x, const int y)
-{
-    setTopLeftPosition (x - getWidth() / 2,
-                        y - getHeight() / 2);
-}
+void Component::setCentrePosition (Point<int> p)    { setBounds (getBounds().withCentre (p)); }
+void Component::setCentrePosition (int x, int y)    { setCentrePosition ({x, y}); }
 
-void Component::setCentreRelative (const float x, const float y)
+void Component::setCentreRelative (float x, float y)
 {
     setCentrePosition (roundToInt (getParentWidth() * x),
                        roundToInt (getParentHeight() * y));
@@ -1276,14 +1273,14 @@ void Component::setCentreRelative (const float x, const float y)
 
 void Component::centreWithSize (const int width, const int height)
 {
-    const Rectangle<int> parentArea (ComponentHelpers::getParentOrMainMonitorBounds (*this));
+    auto parentArea = ComponentHelpers::getParentOrMainMonitorBounds (*this);
 
     setBounds (parentArea.getCentreX() - width / 2,
                parentArea.getCentreY() - height / 2,
                width, height);
 }
 
-void Component::setBoundsInset (const BorderSize<int>& borders)
+void Component::setBoundsInset (BorderSize<int> borders)
 {
     setBounds (borders.subtractedFrom (ComponentHelpers::getParentOrMainMonitorBounds (*this)));
 }
@@ -1886,7 +1883,7 @@ void Component::repaint (const int x, const int y, const int w, const int h)
     internalRepaint (Rectangle<int> (x, y, w, h));
 }
 
-void Component::repaint (const Rectangle<int>& area)
+void Component::repaint (Rectangle<int> area)
 {
     internalRepaint (area);
 }
@@ -1923,9 +1920,9 @@ void Component::internalRepaintUnchecked (Rectangle<int> area, const bool isEnti
             if (auto* peer = getPeer())
             {
                 // Tweak the scaling so that the component's integer size exactly aligns with the peer's scaled size
-                const Rectangle<int> peerBounds (peer->getBounds());
-                const Rectangle<int> scaled (area * Point<float> (peerBounds.getWidth()  / (float) getWidth(),
-                                                                  peerBounds.getHeight() / (float) getHeight()));
+                auto peerBounds = peer->getBounds();
+                auto scaled = area * Point<float> (peerBounds.getWidth()  / (float) getWidth(),
+                                                   peerBounds.getHeight() / (float) getHeight());
 
                 peer->repaint (affineTransform != nullptr ? scaled.transformedBy (*affineTransform) : scaled);
             }
@@ -1964,7 +1961,7 @@ void Component::paintWithinParentContext (Graphics& g)
 
 void Component::paintComponentAndChildren (Graphics& g)
 {
-    const Rectangle<int> clipBounds (g.getClipBounds());
+    auto clipBounds = g.getClipBounds();
 
     if (flags.dontClipGraphicsFlag)
     {
@@ -2049,9 +2046,9 @@ void Component::paintEntireComponent (Graphics& g, const bool ignoreAlphaLevel)
 
     if (effect != nullptr)
     {
-        const float scale = g.getInternalContext().getPhysicalPixelScaleFactor();
+        auto scale = g.getInternalContext().getPhysicalPixelScaleFactor();
 
-        const Rectangle<int> scaledBounds (getLocalBounds() * scale);
+        auto scaledBounds = getLocalBounds() * scale;
 
         Image effectImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
                            scaledBounds.getWidth(), scaledBounds.getHeight(), ! flags.opaqueFlag);
@@ -2092,10 +2089,10 @@ void Component::setPaintingIsUnclipped (const bool shouldPaintWithoutClipping) n
 }
 
 //==============================================================================
-Image Component::createComponentSnapshot (const Rectangle<int>& areaToGrab,
+Image Component::createComponentSnapshot (Rectangle<int> areaToGrab,
                                           bool clipImageToComponentBounds, float scaleFactor)
 {
-    Rectangle<int> r (areaToGrab);
+    auto r = areaToGrab;
 
     if (clipImageToComponentBounds)
         r = r.getIntersection (getLocalBounds());
@@ -2132,7 +2129,7 @@ void Component::setComponentEffect (ImageEffectFilter* const newEffect)
 //==============================================================================
 LookAndFeel& Component::getLookAndFeel() const noexcept
 {
-    for (const Component* c = this; c != nullptr; c = c->parentComponent)
+    for (auto* c = this; c != nullptr; c = c->parentComponent)
         if (c->lookAndFeel != nullptr)
             return *(c->lookAndFeel);
 

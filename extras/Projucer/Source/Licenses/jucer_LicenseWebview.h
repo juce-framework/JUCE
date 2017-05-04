@@ -138,7 +138,7 @@ private:
                 }
             }
 
-            static constexpr uint32 backgroundColour = 0xff414141;
+            const uint32 backgroundColour = 0xff414141;
             ScopedPointer<Drawable> juceLogo
                 = Drawable::createFromImageData (BinaryData::jucelogowithtext_svg,
                                                  BinaryData::jucelogowithtext_svgSize);

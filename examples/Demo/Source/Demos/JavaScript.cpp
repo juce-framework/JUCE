@@ -152,6 +152,11 @@ private:
         outputDisplay.setBounds (r.withTrimmedTop (8));
     }
 
+    void lookAndFeelChanged() override
+    {
+        outputDisplay.applyFontToAllText (outputDisplay.getFont());
+    }
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JavaScriptDemo)
 };
 

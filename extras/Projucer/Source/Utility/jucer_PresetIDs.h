@@ -83,6 +83,7 @@ namespace Ids
     DECLARE_ID (defines);
     DECLARE_ID (headerPath);
     DECLARE_ID (systemHeaderPath);
+    DECLARE_ID (liveWindowsTargetPlatformVersion);
     DECLARE_ID (libraryPath);
     DECLARE_ID (customXcodeFlags);
     DECLARE_ID (customXcassetsFolder);
@@ -112,6 +113,7 @@ namespace Ids
     DECLARE_ID (linuxCodeBlocksArchitecture);
     DECLARE_ID (windowsCodeBlocksArchitecture);
     DECLARE_ID (toolset);
+    DECLARE_ID (windowsTargetPlatformVersion);
     DECLARE_ID (IPPLibrary);
     DECLARE_ID (msvcModuleDefinitionFile);
     DECLARE_ID (bigIcon);

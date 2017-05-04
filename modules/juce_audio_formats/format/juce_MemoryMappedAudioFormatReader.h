@@ -63,7 +63,7 @@ public:
     bool mapEntireFile();
 
     /** Attempts to map a section of the file into memory. */
-    bool mapSectionOfFile (Range<int64> samplesToMap);
+    virtual bool mapSectionOfFile (Range<int64> samplesToMap);
 
     /** Returns the sample range that's currently memory-mapped and available for reading. */
     Range<int64> getMappedSection() const noexcept          { return mappedSection; }

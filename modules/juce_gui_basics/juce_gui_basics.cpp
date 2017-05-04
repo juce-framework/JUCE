@@ -268,6 +268,11 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
 
 #if JUCE_MAC || JUCE_IOS
 
+ #if JUCE_CLANG
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wundeclared-selector"
+ #endif
+
  #if JUCE_IOS
   #include "native/juce_ios_UIViewComponentPeer.mm"
   #include "native/juce_ios_Windowing.mm"
@@ -275,6 +280,10 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
   #include "native/juce_mac_NSViewComponentPeer.mm"
   #include "native/juce_mac_Windowing.mm"
   #include "native/juce_mac_MainMenu.mm"
+ #endif
+
+ #if JUCE_CLANG
+  #pragma clang diagnostic pop
  #endif
 
  #include "native/juce_mac_MouseCursor.mm"

@@ -71,6 +71,23 @@ static LicenseState::Type getLicenseTypeFromValue (const String& d)
     return LicenseState::Type::noLicenseChosenYet;
 }
 
+static const char* getApplicationUsageDataStateValue (LicenseState::ApplicationUsageData type)
+{
+    switch (type)
+    {
+        case LicenseState::ApplicationUsageData::enabled:   return "enabled";
+        case LicenseState::ApplicationUsageData::disabled:  return "disabled";
+        default:                                            return "notChosen";
+    }
+}
+
+static LicenseState::ApplicationUsageData getApplicationUsageDataTypeFromValue (const String& value)
+{
+    if (value == getApplicationUsageDataStateValue (LicenseState::ApplicationUsageData::enabled))   return LicenseState::ApplicationUsageData::enabled;
+    if (value == getApplicationUsageDataStateValue (LicenseState::ApplicationUsageData::disabled))  return LicenseState::ApplicationUsageData::disabled;
+    return LicenseState::ApplicationUsageData::notChosenYet;
+}
+
 //==============================================================================
 struct LicenseController::ModalCompletionCallback : ModalComponentManager::Callback
 {
@@ -83,15 +100,11 @@ struct LicenseController::ModalCompletionCallback : ModalComponentManager::Callb
 
 //==============================================================================
 LicenseController::LicenseController()
-   #if (! JUCER_ENABLE_GPL_MODE)
     : state (licenseStateFromSettings (ProjucerApplication::getApp().settings->getGlobalProperties()))
-   #endif
 {
    #if JUCER_ENABLE_GPL_MODE
     state.type     = LicenseState::Type::GPL;
     state.username = "GPL mode";
-   #else
-    thread = new LicenseThread (*this, false);
    #endif
 }
 
@@ -99,6 +112,37 @@ LicenseController::~LicenseController()
 {
     thread = nullptr;
     closeWebview (-1);
+}
+
+LicenseState LicenseController::getState() const noexcept
+{
+    LicenseState projucerState = state;
+
+    // if the user has never logged in before and the user is running from command line
+    // then we have no way to ask the user to log in, so fallback to GPL mode
+    if (guiNotInitialisedYet
+        && (state.type == LicenseState::Type::notLoggedIn
+         || state.type == LicenseState::Type::noLicenseChosenYet))
+    {
+        projucerState.type = LicenseState::Type::GPL;
+        projucerState.username = "GPL mode";
+    }
+
+    return projucerState;
+}
+
+void LicenseController::startWebviewIfNeeded()
+{
+    if (guiNotInitialisedYet)
+    {
+        guiNotInitialisedYet = false;
+        listeners.call (&StateChangedCallback::licenseStateChanged, getState());
+    }
+
+   #if ! JUCER_ENABLE_GPL_MODE
+    if (thread == nullptr)
+        thread = new LicenseThread (*this, false);
+   #endif
 }
 
 void LicenseController::logout()
@@ -125,6 +169,15 @@ void LicenseController::chooseNewLicense()
     thread = nullptr;
     thread = new LicenseThread (*this, true);
    #endif
+}
+
+void LicenseController::setApplicationUsageDataState (LicenseState::ApplicationUsageData newState)
+{
+    if (state.applicationUsageDataState != newState)
+    {
+        state.applicationUsageDataState = newState;
+        updateState (state);
+    }
 }
 
 //==============================================================================
@@ -198,7 +251,7 @@ void LicenseController::updateState (const LicenseState& newState)
 
     state = newState;
     licenseStateToSettings (state, props);
-    listeners.call (&StateChangedCallback::licenseStateChanged, state);
+    listeners.call (&StateChangedCallback::licenseStateChanged, getState());
 }
 
 LicenseState LicenseController::licenseStateFromSettings (PropertiesFile& props)
@@ -208,10 +261,11 @@ LicenseState LicenseController::licenseStateFromSettings (PropertiesFile& props)
     if (licenseXml != nullptr)
     {
         LicenseState result;
-        result.type      = getLicenseTypeFromValue (licenseXml->getChildElementAllSubText ("type", {}));
-        result.username  = licenseXml->getChildElementAllSubText ("username", {});
-        result.email     = licenseXml->getChildElementAllSubText ("email", {});
-        result.authToken = licenseXml->getChildElementAllSubText ("authToken", {});
+        result.type                        = getLicenseTypeFromValue    (licenseXml->getChildElementAllSubText ("type", {}));
+        result.applicationUsageDataState   = getApplicationUsageDataTypeFromValue (licenseXml->getChildElementAllSubText ("applicationUsageData", {}));
+        result.username                    = licenseXml->getChildElementAllSubText ("username", {});
+        result.email                       = licenseXml->getChildElementAllSubText ("email", {});
+        result.authToken                   = licenseXml->getChildElementAllSubText ("authToken", {});
 
         MemoryOutputStream imageData;
         Base64::convertFromBase64 (imageData, licenseXml->getChildElementAllSubText ("avatar", {}));
@@ -227,13 +281,14 @@ void LicenseController::licenseStateToSettings (const LicenseState& state, Prope
 {
     props.removeValue ("license");
 
-    if (state.type != LicenseState::Type::notLoggedIn
-          && state.username.isNotEmpty() && state.authToken.isNotEmpty())
+    if (state.type != LicenseState::Type::notLoggedIn && state.username.isNotEmpty())
     {
         XmlElement licenseXml ("license");
 
         if (auto* typeString = getLicenseStateValue (state.type))
             licenseXml.createNewChildElement ("type")->addTextElement (typeString);
+
+        licenseXml.createNewChildElement ("applicationUsageData")->addTextElement (getApplicationUsageDataStateValue (state.applicationUsageDataState));
 
         licenseXml.createNewChildElement ("username")->addTextElement (state.username);
         licenseXml.createNewChildElement ("email")   ->addTextElement (state.email);

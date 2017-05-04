@@ -344,7 +344,7 @@ public:
                 const String macOSDir       = bundleContents + String ("\\") + (is64Bit ? "x64" : "Win32");
                 const String executable     = macOSDir + String ("\\") + config.getOutputFilename (".aaxplugin", true);
 
-                return String ("copy /Y \"") + getOutputFilePath (config) + String ("\" \"") + executable + String ("\"\r\n") +
+                return String ("copy /Y \"") + getOutputFilePath (config) + String ("\" \"") + executable + String ("\"\r\ncall ") +
                     createRebasedPath (bundleScript) + String (" \"") + macOSDir + String ("\" ") + createRebasedPath (iconFilePath);
             }
 
@@ -1444,6 +1444,7 @@ public:
             }
 
             getOwner().addPlatformToolsetToPropertyGroup (projectXml);
+            getOwner().addWindowsTargetPlatformVersionToPropertyGroup (projectXml);
             getOwner().addIPPSettingToPropertyGroup (projectXml);
         }
 
@@ -1688,7 +1689,8 @@ protected:
         }
     };
 
-    virtual void addPlatformToolsetToPropertyGroup (XmlElement&) const {}
+    virtual void addPlatformToolsetToPropertyGroup              (XmlElement&) const {}
+    virtual void addWindowsTargetPlatformVersionToPropertyGroup (XmlElement&) const {}
 
     void addIPPSettingToPropertyGroup (XmlElement& p) const
     {
@@ -1732,6 +1734,8 @@ public:
     int getVisualStudioVersion() const override { return 11; }
     String getSolutionComment() const override  { return "# Visual Studio 2012"; }
     String getDefaultToolset() const override   { return "v110"; }
+    Value getWindowsTargetPlatformVersionValue()        { return getSetting (Ids::windowsTargetPlatformVersion); }
+    String getWindowsTargetPlatformVersion() const      { return settings [Ids::windowsTargetPlatformVersion]; }
 
     static MSVCProjectExporterVC2012* createForSettings (Project& project, const ValueTree& settings)
     {
@@ -1752,11 +1756,30 @@ public:
         addIPPLibraryProperty (props);
     }
 
+    void addWindowsTargetPlatformProperties (PropertyListBuilder& props)
+    {
+        static const char* targetPlatformNames[] = { "(default)", "8.1", "10.0.10240.0", "10.0.10586.0", "10.0.14393.0", "10.0.15063.0", nullptr };
+        const var targetPlatforms[]              = { var(),       "8.1", "10.0.10240.0", "10.0.10586.0", "10.0.14393.0", "10.0.15063.0" };
+
+        props.add (new ChoicePropertyComponent (getWindowsTargetPlatformVersionValue(), "Windows Target Platform",
+                                                StringArray (targetPlatformNames), Array<var> (targetPlatforms, numElementsInArray (targetPlatforms))),
+                                                "The Windows target platform version to use");
+    }
+
 private:
     void addPlatformToolsetToPropertyGroup (XmlElement& p) const override
     {
         forEachXmlChildElementWithTagName (p, e, "PropertyGroup")
             e->createNewChildElement ("PlatformToolset")->addTextElement (getPlatformToolset());
+    }
+
+    void addWindowsTargetPlatformVersionToPropertyGroup (XmlElement& p) const override
+    {
+        const String& targetVersion = getWindowsTargetPlatformVersion();
+
+        if (targetVersion.isNotEmpty())
+            forEachXmlChildElementWithTagName (p, e, "PropertyGroup")
+                e->createNewChildElement ("WindowsTargetPlatformVersion")->addTextElement (getWindowsTargetPlatformVersion());
     }
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2012)
@@ -1796,6 +1819,7 @@ public:
 
         addToolsetProperty (props, toolsetNames, toolsets, numElementsInArray (toolsets));
         addIPPLibraryProperty (props);
+        addWindowsTargetPlatformProperties (props);
     }
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2013)
@@ -1835,6 +1859,7 @@ public:
 
         addToolsetProperty (props, toolsetNames, toolsets, numElementsInArray (toolsets));
         addIPPLibraryProperty (props);
+        addWindowsTargetPlatformProperties (props);
     }
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2015)
@@ -1877,8 +1902,9 @@ public:
 
         addToolsetProperty (props, toolsetNames, toolsets, numElementsInArray (toolsets));
         addIPPLibraryProperty (props);
+        addWindowsTargetPlatformProperties (props);
 
-        static const char* cppStandardNames[]  = { "(default)", "C++14",    "Latest C++ Standard" };
+        static const char* cppStandardNames[]  = { "(default)", "C++14",    "Latest C++ Standard", nullptr };
 
         Array<var> cppStandardValues;
         cppStandardValues.add (var());
@@ -1888,7 +1914,6 @@ public:
         props.add (new ChoicePropertyComponent (getCppStandardValue(), "C++ standard to use",
                                                 StringArray (cppStandardNames), cppStandardValues),
                                                 "The C++ language standard to use");
-
     }
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2017)

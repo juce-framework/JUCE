@@ -57,7 +57,7 @@ namespace
         size_t getDataSize() const noexcept         { return input.getDataSize(); }
 
         /** Returns the current position of the stream. */
-        uint64 getPosition()                         { return uint64 (input.getPosition()); }
+        uint64 getPosition()                        { return uint64 (input.getPosition()); }
 
         /** Attempts to set the current position of the stream. Returns true if this was successful. */
         bool setPosition (int64 pos)                { return input.setPosition (pos); }
@@ -174,7 +174,7 @@ namespace
                 typeList.add (type);
             }
 
-            size_t bytesRead = (size_t) typeList.size() + 2;
+            auto bytesRead = (size_t) typeList.size() + 2;
             readPaddingZeros (bytesRead);
 
             return typeList;
@@ -205,8 +205,8 @@ namespace
 
             OSCMessage msg (ap);
 
-            for (OSCType* type = types.begin(); type != types.end(); ++type)
-                msg.addArgument (readArgument (*type));
+            for (auto& type : types)
+                msg.addArgument (readArgument (type));
 
             return msg;
         }
@@ -227,13 +227,13 @@ namespace
             OSCBundle bundle (readTimeTag());
 
             size_t bytesRead = 16; // already read "#bundle" and timeTag
-            size_t pos = getPosition();
+            auto pos = getPosition();
 
             while (! isExhausted() && bytesRead < maxBytesToRead)
             {
                 bundle.addElement (readElement());
 
-                const size_t newPos = getPosition();
+                auto newPos = getPosition();
                 bytesRead += newPos - pos;
                 pos = newPos;
             }
@@ -245,12 +245,12 @@ namespace
         OSCBundle::Element readElement()
         {
             if (input.getNumBytesRemaining() < 4)
-                throw OSCFormatError("OSC input stream exhausted while reading bundle element size");
+                throw OSCFormatError ("OSC input stream exhausted while reading bundle element size");
 
-            const size_t elementSize = (size_t) readInt32();
+            auto elementSize = (size_t) readInt32();
 
             if (elementSize < 4)
-                throw OSCFormatError("OSC input stream format error: invalid bundle element size");
+                throw OSCFormatError ("OSC input stream format error: invalid bundle element size");
 
             return readElementWithKnownSize (elementSize);
         }
@@ -261,7 +261,7 @@ namespace
             if ((uint64) input.getNumBytesRemaining() < elementSize)
                 throw OSCFormatError ("OSC input stream exhausted while reading bundle element content");
 
-            const char firstContentChar = static_cast<const char*> (getData()) [getPosition()];
+            auto firstContentChar = static_cast<const char*> (getData()) [getPosition()];
 
             if (firstContentChar == '/')  return OSCBundle::Element (readMessageWithCheckedSize (elementSize));
             if (firstContentChar == '#')  return OSCBundle::Element (readBundleWithCheckedSize (elementSize));
@@ -288,8 +288,8 @@ namespace
 
         OSCBundle readBundleWithCheckedSize (size_t size)
         {
-            const size_t begin = (size_t) getPosition();
-            const size_t maxBytesToRead = size - 4; // we've already read 4 bytes (the bundle size)
+            auto begin = (size_t) getPosition();
+            auto maxBytesToRead = size - 4; // we've already read 4 bytes (the bundle size)
 
             OSCBundle bundle (readBundle (maxBytesToRead));
 
@@ -301,7 +301,7 @@ namespace
 
         OSCMessage readMessageWithCheckedSize (size_t size)
         {
-            const size_t begin = (size_t) getPosition();
+            auto begin = (size_t) getPosition();
             OSCMessage message (readMessage());
 
             if (getPosition() - begin != size)
@@ -456,7 +456,7 @@ private:
             if (threadShouldExit())
                 return;
 
-            const size_t bytesRead = (size_t) socket->read (buffer, (int) sizeof (buffer), false);
+            auto bytesRead = (size_t) socket->read (buffer, (int) sizeof (buffer), false);
 
             if (bytesRead >= 4)
                 handleBuffer (buffer, bytesRead);
@@ -469,8 +469,8 @@ private:
                                  OSCAddress address,
                                  Array<std::pair<OSCAddress, ListenerType*> >& array)
     {
-        for (int i = 0; i < array.size(); ++i)
-            if (address == array.getReference (i).first && listenerToAdd == array.getReference (i).second)
+        for (auto& i : array)
+            if (address == i.first && listenerToAdd == i.second)
                 return;
 
         array.add (std::make_pair (address, listenerToAdd));
@@ -498,9 +498,9 @@ private:
     //==============================================================================
     void handleMessage (const Message& msg) override
     {
-        if (const CallbackMessage* callbackMessage = dynamic_cast<const CallbackMessage*> (&msg))
+        if (auto* callbackMessage = dynamic_cast<const CallbackMessage*> (&msg))
         {
-            const OSCBundle::Element& content = callbackMessage->content;
+            auto& content = callbackMessage->content;
 
             callListeners (content);
 
@@ -533,30 +533,18 @@ private:
     //==============================================================================
     void callListenersWithAddress (const OSCMessage& message)
     {
-        typedef OSCReceiver::ListenerWithOSCAddress<OSCReceiver::MessageLoopCallback> Listener;
-
-        for (std::pair<OSCAddress, Listener*>* entry = listenersWithAddress.begin();
-             entry != listenersWithAddress.end();
-             ++entry)
-        {
-            if (Listener* listener = entry->second)
-                if (message.getAddressPattern().matches (entry->first))
+        for (auto& entry : listenersWithAddress)
+            if (auto* listener = entry.second)
+                if (message.getAddressPattern().matches (entry.first))
                     listener->oscMessageReceived (message);
-        }
     }
 
     void callRealtimeListenersWithAddress (const OSCMessage& message)
     {
-        typedef OSCReceiver::ListenerWithOSCAddress<OSCReceiver::RealtimeCallback> Listener;
-
-        for (std::pair<OSCAddress, Listener*>* entry = realtimeListenersWithAddress.begin();
-             entry != realtimeListenersWithAddress.end();
-             ++entry)
-        {
-            if (Listener* listener = entry->second)
-                if (message.getAddressPattern().matches (entry->first))
+        for (auto& entry : listenersWithAddress)
+            if (auto* listener = entry.second)
+                if (message.getAddressPattern().matches (entry.first))
                     listener->oscMessageReceived (message);
-        }
     }
 
     //==============================================================================
@@ -567,7 +555,7 @@ private:
     Array<std::pair<OSCAddress, OSCReceiver::ListenerWithOSCAddress<OSCReceiver::RealtimeCallback>* > >    realtimeListenersWithAddress;
 
     ScopedPointer<DatagramSocket> socket;
-    int portNumber;
+    int portNumber = 0;
     OSCReceiver::FormatErrorHandler formatErrorHandler;
     enum { oscBufferSize = 4098 };
 

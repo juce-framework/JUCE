@@ -35,7 +35,7 @@
 
   ID:               juce_audio_utils
   vendor:           juce
-  version:          5.0.0
+  version:          5.0.1
   name:             JUCE extra audio utility classes
   description:      Classes for audio-related GUI and miscellaneous tasks.
   website:          http://www.juce.com/juce
@@ -60,15 +60,15 @@
 
 //==============================================================================
 /** Config: JUCE_USE_CDREADER
- Enables the AudioCDReader class (on supported platforms).
- */
+    Enables the AudioCDReader class (on supported platforms).
+*/
 #ifndef JUCE_USE_CDREADER
 #define JUCE_USE_CDREADER 0
 #endif
 
 /** Config: JUCE_USE_CDBURNER
- Enables the AudioCDBurner class (on supported platforms).
- */
+    Enables the AudioCDBurner class (on supported platforms).
+*/
 #ifndef JUCE_USE_CDBURNER
 #define JUCE_USE_CDBURNER 0
 #endif

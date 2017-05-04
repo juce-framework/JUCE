@@ -4,6 +4,14 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 5.0.1
+  - Fixed Windows live build engine on Visual Studio 2017
+  - Fixed memory-leak in Projucer live build engine
+  - Fixed an issue where you could not paste your redeem serial number with Cmd+V on macOS
+  - Fixed an issue where the Projucer would crash on linux due to missing symbols in WebKit
+  - Minor Projucer UI improvements
+  - Various minor improvements and bug fixes
+
 Version 5.0.0
   - New licensing model
   - Projucer UI/UX overhaul

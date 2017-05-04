@@ -163,7 +163,7 @@ public:
                     return getAppSettings().swatchColours [index];
                 }
 
-                void setSwatchColour (int index, const Colour& newColour) const override
+                void setSwatchColour (int index, const Colour& newColour) override
                 {
                     getAppSettings().swatchColours.set (index, newColour);
                 }

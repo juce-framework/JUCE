@@ -91,5 +91,8 @@ struct ProjectBuildInfo
     StringArray getExtraDLLs() const                { return separateJoinedStrings (tree [Ids::extraDLLs]); }
     void setExtraDLLs (const StringArray& s)        { tree.setProperty (Ids::extraDLLs, concatenateListOfStrings (s), nullptr); }
 
+    String getWindowsTargetPlatformVersion() const            { return tree [Ids::liveWindowsTargetPlatformVersion]; }
+    void setWindowsTargetPlatformVersion (const String& s)    { tree.setProperty (Ids::liveWindowsTargetPlatformVersion, s, nullptr); }
+
     ValueTree tree;
 };

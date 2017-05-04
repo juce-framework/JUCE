@@ -26,6 +26,31 @@
 
 #if JUCE_MAC
 
+struct WebViewKeyEquivalentResponder : public ObjCClass<WebView>
+{
+    WebViewKeyEquivalentResponder() : ObjCClass<WebView> ("WebViewKeyEquivalentResponder_")
+    {
+        addMethod (@selector (performKeyEquivalent:), performKeyEquivalent, @encode (BOOL), "@:@");
+        registerClass();
+    }
+
+private:
+    static BOOL performKeyEquivalent (id self, SEL selector, NSEvent* event)
+    {
+        NSResponder* first = [[self window] firstResponder];
+        if (([event modifierFlags] & NSDeviceIndependentModifierFlagsMask) == NSCommandKeyMask)
+        {
+            if ([[event charactersIgnoringModifiers] isEqualToString:@"x"]) return [NSApp sendAction:@selector(cut:)       to:first from:self];
+            if ([[event charactersIgnoringModifiers] isEqualToString:@"c"]) return [NSApp sendAction:@selector(copy:)      to:first from:self];
+            if ([[event charactersIgnoringModifiers] isEqualToString:@"v"]) return [NSApp sendAction:@selector(paste:)     to:first from:self];
+            if ([[event charactersIgnoringModifiers] isEqualToString:@"a"]) return [NSApp sendAction:@selector(selectAll:) to:first from:self];
+        }
+
+        objc_super s = { self, [WebView class] };
+        return ObjCMsgSendSuper<BOOL, NSEvent*> (&s, selector, event);
+    }
+};
+
 struct DownloadClickDetectorClass  : public ObjCClass<NSObject>
 {
     DownloadClickDetectorClass()  : ObjCClass<NSObject> ("JUCEWebClickDetector_")
@@ -84,15 +109,15 @@ private:
 
     static void didFailLoadWithError (id self, SEL, WebView* sender, NSError* error, WebFrame* frame)
     {
-        if ([frame isEqual: [sender mainFrame]])
+        if ([frame isEqual: [sender mainFrame]] && error != nullptr && [error code] != NSURLErrorCancelled)
         {
-            const char* errorString = [[error localizedDescription] UTF8String];
+            String errorString (nsStringToJuce ([error localizedDescription]));
 
             bool proceedToErrorPage = getOwner (self)->pageLoadHadNetworkError (errorString);
 
             // WebKit doesn't have an internal error page, so make a really simple one ourselves
             if (proceedToErrorPage)
-                getOwner(self)->goToURL (String ("data:text/plain,") + errorString);
+                getOwner(self)->goToURL (String ("data:text/plain;charset=UTF-8,") + errorString);
         }
     }
 
@@ -194,9 +219,12 @@ public:
     Pimpl (WebBrowserComponent* owner)
     {
        #if JUCE_MAC
-        webView = [[WebView alloc] initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)
-                                       frameName: nsEmptyString()
-                                       groupName: nsEmptyString()];
+        static WebViewKeyEquivalentResponder webviewClass;
+        webView = (WebView*) webviewClass.createInstance();
+
+        webView = [webView initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)
+                               frameName: nsEmptyString()
+                               groupName: nsEmptyString()];
         setView (webView);
 
         static DownloadClickDetectorClass cls;
@@ -442,7 +470,7 @@ void WebBrowserComponent::clearCookies()
 {
     NSHTTPCookieStorage* storage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
 
-    if (NSArray<NSHTTPCookie*>* cookies = [storage cookies])
+    if (NSArray* cookies = [storage cookies])
     {
         const NSUInteger n = [cookies count];
 

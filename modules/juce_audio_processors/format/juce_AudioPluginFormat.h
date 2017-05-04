@@ -92,12 +92,10 @@ public:
                                     int initialBufferSize,
                                     InstantiationCompletionCallback* completionCallback);
 
-   #if JUCE_COMPILER_SUPPORTS_LAMBDAS
     void createPluginInstanceAsync (const PluginDescription& description,
                                     double initialSampleRate,
                                     int initialBufferSize,
                                     std::function<void (AudioPluginInstance*, const String&)> completionCallback);
-   #endif
 
     /** Should do a quick check to see if this file or directory might be a plugin of
         this format.

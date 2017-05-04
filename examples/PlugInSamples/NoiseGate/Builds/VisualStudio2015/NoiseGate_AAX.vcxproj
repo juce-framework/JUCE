@@ -106,7 +106,7 @@ if not exist &quot;$(OutDir)\NoiseGate.aaxplugin\Contents\Win32&quot; mkdir &quo
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>copy /Y &quot;$(OutDir)\NoiseGate.aaxdll&quot; &quot;$(OutDir)\NoiseGate.aaxplugin\Contents\Win32\NoiseGate.aaxplugin&quot;
-&quot;c:\\SDKs\\AAX\\Utilities\\CreatePackage.bat&quot; &quot;$(OutDir)\NoiseGate.aaxplugin\Contents\Win32&quot; &quot;c:\\SDKs\\AAX\\Utilities\\PlugIn.ico&quot;</Command>
+call &quot;c:\\SDKs\\AAX\\Utilities\\CreatePackage.bat&quot; &quot;$(OutDir)\NoiseGate.aaxplugin\Contents\Win32&quot; &quot;c:\\SDKs\\AAX\\Utilities\\PlugIn.ico&quot;</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -159,7 +159,7 @@ if not exist &quot;$(OutDir)\NoiseGate.aaxplugin\Contents\Win32&quot; mkdir &quo
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>copy /Y &quot;$(OutDir)\NoiseGate.aaxdll&quot; &quot;$(OutDir)\NoiseGate.aaxplugin\Contents\Win32\NoiseGate.aaxplugin&quot;
-&quot;c:\\SDKs\\AAX\\Utilities\\CreatePackage.bat&quot; &quot;$(OutDir)\NoiseGate.aaxplugin\Contents\Win32&quot; &quot;c:\\SDKs\\AAX\\Utilities\\PlugIn.ico&quot;</Command>
+call &quot;c:\\SDKs\\AAX\\Utilities\\CreatePackage.bat&quot; &quot;$(OutDir)\NoiseGate.aaxplugin\Contents\Win32&quot; &quot;c:\\SDKs\\AAX\\Utilities\\PlugIn.ico&quot;</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

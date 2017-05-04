@@ -28,35 +28,6 @@
 
 
 //==============================================================================
-static ComboBox& createFileCreationOptionComboBox (Component& setupComp,
-                                              OwnedArray<Component>& itemsCreated,
-                                              const StringArray& fileOptions)
-{
-    ComboBox* c = new ComboBox();
-    itemsCreated.add (c);
-    setupComp.addChildAndSetID (c, "filesToCreate");
-
-    c->addItemList (fileOptions, 1);
-    c->setSelectedId (1, dontSendNotification);
-
-    Label* l = new Label (String(), TRANS("Files to Auto-Generate") + ":");
-    l->attachToComponent (c, true);
-    itemsCreated.add (l);
-
-    c->setBounds ("parent.width / 2 + 160, 30, parent.width - 30, top + 22");
-
-    return *c;
-}
-
-static int getFileCreationComboResult (WizardComp& setupComp)
-{
-    if (ComboBox* cb = dynamic_cast<ComboBox*> (setupComp.findChildWithID ("filesToCreate")))
-        return cb->getSelectedItemIndex();
-
-    jassertfalse;
-    return 0;
-}
-
 static void setExecutableNameForAllTargets (Project& project, const String& exeName)
 {
     for (Project::ExporterIterator exporter (project); exporter.next();)
@@ -91,7 +62,7 @@ struct NewProjectWizard
     virtual String getDescription() const = 0;
     virtual const char* getIcon() const = 0;
 
-    virtual void addSetupItems (Component&, OwnedArray<Component>&)     {}
+    virtual StringArray getFileCreationOptions()                        { return {}; }
     virtual Result processResultsFromSetupItems (WizardComp&)           { return Result::ok(); }
 
     virtual bool initialiseProject (Project& project) = 0;

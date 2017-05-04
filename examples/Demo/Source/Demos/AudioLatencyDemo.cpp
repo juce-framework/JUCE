@@ -308,9 +308,6 @@ public:
         resultsBox.setCaretVisible (false);
         resultsBox.setPopupMenuEnabled (true);
 
-        resultsBox.setColour (TextEditor::backgroundColourId,
-                              getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::widgetBackground,
-                                                      Colour (0x32ffffff)));
         resultsBox.setColour (TextEditor::outlineColourId, Colour (0x1c000000));
         resultsBox.setColour (TextEditor::shadowColourId, Colour (0x16000000));
 
@@ -366,6 +363,13 @@ private:
     {
         if (buttonThatWasClicked == &startTestButton)
             startTest();
+    }
+
+    void lookAndFeelChanged() override
+    {
+        resultsBox.setColour (TextEditor::backgroundColourId,
+                              getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::widgetBackground,
+                                                      Colour (0x32ffffff)));
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioLatencyDemo)

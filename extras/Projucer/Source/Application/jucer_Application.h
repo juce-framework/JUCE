@@ -99,8 +99,8 @@ public:
     void showSVGPathDataToolWindow();
 
     void showAboutWindow();
-
-    void showLoginWindow();
+    void showApplicationUsageDataAgreementPopup();
+    void dismissApplicationUsageDataAgreementPopup();
 
     void updateAllBuildTabs();
     LatestVersionChecker* createVersionChecker() const;
@@ -124,7 +124,9 @@ public:
     OpenDocumentManager openDocumentManager;
     ScopedPointer<ApplicationCommandManager> commandManager;
 
-    ScopedPointer<Component> appearanceEditorWindow, globalPreferencesWindow, utf8Window, svgPathWindow, aboutWindow;
+    ScopedPointer<Component> appearanceEditorWindow, globalPreferencesWindow, utf8Window,
+                             svgPathWindow, aboutWindow, applicationUsageDataWindow;
+
     ScopedPointer<FileLogger> logger;
 
     bool isRunningCommandLine;

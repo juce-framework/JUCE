@@ -36,10 +36,6 @@ public:
     {
         setOpaque (true);
         addAndMakeVisible (keyMappingEditor);
-
-        LookAndFeel* lf = &LookAndFeel::getDefaultLookAndFeel();
-        keyMappingEditor.setColours (lf->findColour (KeyMappingEditorComponent::backgroundColourId),
-                                     lf->findColour (KeyMappingEditorComponent::textColourId));
     }
 
     void paint (Graphics& g) override
@@ -55,6 +51,13 @@ public:
 
 private:
     KeyMappingEditorComponent keyMappingEditor;
+
+    void lookAndFeelChanged() override
+    {
+        auto* lf = &LookAndFeel::getDefaultLookAndFeel();
+        keyMappingEditor.setColours (lf->findColour (KeyMappingEditorComponent::backgroundColourId),
+                                     lf->findColour (KeyMappingEditorComponent::textColourId));
+    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KeyMappingsDemo)
 };

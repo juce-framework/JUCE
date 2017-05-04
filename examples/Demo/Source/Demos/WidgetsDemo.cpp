@@ -447,6 +447,12 @@ struct MiscPage   : public Component
         comboBox.setSelectedId (1);
     }
 
+    void lookAndFeelChanged() override
+    {
+        textEditor1.applyFontToAllText (textEditor1.getFont());
+        textEditor2.applyFontToAllText (textEditor2.getFont());
+    }
+
     TextEditor textEditor1, textEditor2;
     ComboBox comboBox;
 };
@@ -1571,6 +1577,11 @@ private:
             else
                 setTabBackgroundColour (i, getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
         }
+    }
+
+    void lookAndFeelChanged() override
+    {
+        updateTabColours();
     }
 };
 

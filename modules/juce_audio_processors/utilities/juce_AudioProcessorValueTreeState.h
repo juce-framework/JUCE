@@ -26,8 +26,6 @@
 
 #pragma once
 
-#if JUCE_COMPILER_SUPPORTS_LAMBDAS
-
 /**
     This class contains a ValueTree which is used to manage an AudioProcessor's entire state.
 
@@ -227,5 +225,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorValueTreeState)
 };
-
-#endif

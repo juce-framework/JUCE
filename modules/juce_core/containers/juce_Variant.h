@@ -47,18 +47,15 @@ public:
     {
         NativeFunctionArgs (const var& thisObject, const var* args, int numArgs) noexcept;
 
+        // Suppress a VS2013 compiler warning
+        NativeFunctionArgs& operator= (const NativeFunctionArgs&) = delete;
+
         const var& thisObject;
         const var* arguments;
         int numArguments;
-
-        JUCE_DECLARE_NON_COPYABLE (NativeFunctionArgs)
     };
 
-   #if JUCE_COMPILER_SUPPORTS_LAMBDAS
     using NativeFunction = std::function<var (const NativeFunctionArgs&)>;
-   #else
-    typedef var (*NativeFunction) (const NativeFunctionArgs&);
-   #endif
 
     //==============================================================================
     /** Creates a void variant. */

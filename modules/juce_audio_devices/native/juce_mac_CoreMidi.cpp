@@ -66,6 +66,22 @@ namespace CoreMidiHelpers
         return result;
     }
 
+    void enableSimulatorMidiSession()
+    {
+       #if TARGET_OS_SIMULATOR
+        static bool hasEnabledNetworkSession = false;
+
+        if (! hasEnabledNetworkSession)
+        {
+            MIDINetworkSession* session = [MIDINetworkSession defaultSession];
+            session.enabled = YES;
+            session.connectionPolicy = MIDINetworkConnectionPolicy_Anyone;
+
+            hasEnabledNetworkSession = true;
+        }
+       #endif
+    }
+
     static String getEndpointName (MIDIEndpointRef endpoint, bool isExternal)
     {
         String result (getMidiObjectName (endpoint));
@@ -173,6 +189,8 @@ namespace CoreMidiHelpers
         // search for devices. It's safest to use the message thread for calling this.
         jassert (MessageManager::getInstance()->isThisTheMessageThread());
 
+        enableSimulatorMidiSession();
+
         const ItemCount num = forInput ? MIDIGetNumberOfSources()
                                        : MIDIGetNumberOfDestinations();
         StringArray s;
@@ -218,13 +236,7 @@ namespace CoreMidiHelpers
             // correctly when called from the message thread!
             jassert (MessageManager::getInstance()->isThisTheMessageThread());
 
-           #if TARGET_OS_SIMULATOR
-            // Enable MIDI for iOS simulator
-            MIDINetworkSession* session = [MIDINetworkSession defaultSession];
-            session.enabled = YES;
-            session.connectionPolicy = MIDINetworkConnectionPolicy_Anyone;
-           #endif
-
+            enableSimulatorMidiSession();
 
             CoreMidiHelpers::ScopedCFString name;
             name.cfString = getGlobalMidiClientName().toCFString();

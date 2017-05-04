@@ -252,6 +252,7 @@
  #include <dirent.h>
  #include <fnmatch.h>
  #include <sys/wait.h>
+ #include <android/api-level.h>
 #endif
 
 // Need to clear various moronic redefinitions made by system headers..

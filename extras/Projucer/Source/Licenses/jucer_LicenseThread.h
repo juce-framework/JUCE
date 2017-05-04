@@ -263,7 +263,7 @@ struct LicenseThread : NetWorkerThread
                 DynamicObject::Ptr redeamObject = new DynamicObject();
                 redeamObject->setProperty (serialIdentifier, productKey);
 
-                String postData (JSON::toString (var (redeamObject)));
+                String postData (JSON::toString (var (redeamObject.get())));
 
                 ScopedPointer<WebInputStream> shared = getSharedWebInputStream (URL ("https://api.roli.com/api/v1/user/products").withPOSTData (postData),
                                                                                 true);
@@ -292,11 +292,11 @@ struct LicenseThread : NetWorkerThread
 
 
                 DynamicObject::Ptr jsonLicenseRequest = new DynamicObject();
-                jsonLicenseRequest->setProperty (licenseIdentifier, var (jsonLicenseObject));
+                jsonLicenseRequest->setProperty (licenseIdentifier, var (jsonLicenseObject.get()));
                 jsonLicenseRequest->setProperty (searchInternalIdentifier, "com.roli.projucer");
                 jsonLicenseRequest->setProperty (licenseTypeIdentifier, "software");
 
-                String postData (JSON::toString (var (jsonLicenseRequest)));
+                String postData (JSON::toString (var (jsonLicenseRequest.get())));
                 ScopedPointer<WebInputStream> shared
                     = getSharedWebInputStream (URL ("https://api.roli.com/api/v1/user/products/redeem").withPOSTData (postData), true);
 

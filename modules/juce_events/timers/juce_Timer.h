@@ -114,10 +114,8 @@ public:
     int getTimerInterval() const noexcept                   { return timerPeriodMs; }
 
     //==============================================================================
-   #if JUCE_COMPILER_SUPPORTS_LAMBDAS
     /** Invokes a lambda after a given number of milliseconds. */
     static void JUCE_CALLTYPE callAfterDelay (int milliseconds, std::function<void()> functionToCall);
-   #endif
 
     //==============================================================================
     /** For internal use only: invokes any timers that need callbacks.

@@ -34,7 +34,7 @@ namespace
 
         This class implements the Open Sound Control 1.0 Specification for
         the format in which the OSC data will be written into the buffer.
-     */
+    */
     struct OSCOutputStream
     {
         OSCOutputStream() noexcept {}
@@ -136,14 +136,14 @@ namespace
 
             OSCTypeList typeList;
 
-            for (OSCArgument* arg = msg.begin(); arg != msg.end(); ++arg)
-                typeList.add (arg->getType());
+            for (auto& arg : msg)
+                typeList.add (arg.getType());
 
             if (! writeTypeTagString (typeList))
                 return false;
 
-            for (OSCArgument* arg = msg.begin(); arg != msg.end(); ++arg)
-                if (! writeArgument (*arg))
+            for (auto& arg : msg)
+                if (! writeArgument (arg))
                     return false;
 
             return true;
@@ -157,8 +157,8 @@ namespace
             if (! writeTimeTag (bundle.getTimeTag()))
                 return false;
 
-            for (OSCBundle::Element* element = bundle.begin(); element != bundle.end(); ++element)
-                if (! writeBundleElement (*element))
+            for (auto& element : bundle)
+                if (! writeBundleElement (element))
                     return false;
 
             return true;
@@ -203,7 +203,7 @@ namespace
 //==============================================================================
 struct OSCSender::Pimpl
 {
-    Pimpl() noexcept : targetPortNumber (0) {}
+    Pimpl() noexcept  {}
     ~Pimpl() noexcept { disconnect(); }
 
     //==============================================================================
@@ -233,15 +233,17 @@ struct OSCSender::Pimpl
     bool send (const OSCMessage& message, const String& hostName, int portNumber)
     {
         OSCOutputStream outStream;
-        outStream.writeMessage (message);
-        return sendOutputStream (outStream, hostName, portNumber);
+
+        return outStream.writeMessage (message)
+            && sendOutputStream (outStream, hostName, portNumber);
     }
 
     bool send (const OSCBundle& bundle, const String& hostName, int portNumber)
     {
         OSCOutputStream outStream;
-        outStream.writeBundle (bundle);
-        return sendOutputStream (outStream, hostName, portNumber);
+
+        return outStream.writeBundle (bundle)
+            && sendOutputStream (outStream, hostName, portNumber);
     }
 
     bool send (const OSCMessage& message)   { return send (message, targetHostName, targetPortNumber); }
@@ -270,7 +272,7 @@ private:
     //==============================================================================
     ScopedPointer<DatagramSocket> socket;
     String targetHostName;
-    int targetPortNumber;
+    int targetPortNumber = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };

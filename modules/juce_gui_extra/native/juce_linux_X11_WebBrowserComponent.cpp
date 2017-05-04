@@ -156,6 +156,8 @@ public:
         : outChannel (outChannelToUse), receiver (this, inChannel)
     {}
 
+    typedef void (*SetHardwareAcclPolicyFunctionPtr) (WebKitSettings*, int);
+
     int entry()
     {
         CommandReceiver::setBlocking (outChannel,      true);
@@ -163,7 +165,14 @@ public:
         gtk_init (nullptr, nullptr);
 
         WebKitSettings* settings = webkit_settings_new();
-        webkit_settings_set_hardware_acceleration_policy (settings, WEBKIT_HARDWARE_ACCELERATION_POLICY_NEVER);
+
+        // webkit_settings_set_hardware_acceleration_policy was only added recently to webkit2
+        // but is needed when running a WebBrowserComponent in a Parallels VM with 3D acceleration enabled
+        auto setHardwarePolicy
+            = reinterpret_cast<SetHardwareAcclPolicyFunctionPtr> (dlsym (RTLD_DEFAULT, "webkit_settings_set_hardware_acceleration_policy"));
+
+        if (setHardwarePolicy != nullptr)
+            setHardwarePolicy (settings, 2 /*WEBKIT_HARDWARE_ACCELERATION_POLICY_NEVER*/);
 
         GtkWidget *plug;
 

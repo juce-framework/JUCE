@@ -32,7 +32,8 @@ namespace ValueTreeSynchroniserHelpers
         fullSync         = 2,
         childAdded       = 3,
         childRemoved     = 4,
-        childMoved       = 5
+        childMoved       = 5,
+        propertyRemoved  = 6
     };
 
     static void getValueTreePath (ValueTree v, const ValueTree& topLevelTree, Array<int>& path)
@@ -73,14 +74,14 @@ namespace ValueTreeSynchroniserHelpers
         const int numLevels = input.readCompressedInt();
 
         if (! isPositiveAndBelow (numLevels, 65536)) // sanity-check
-            return ValueTree();
+            return {};
 
         for (int i = numLevels; --i >= 0;)
         {
             const int index = input.readCompressedInt();
 
             if (! isPositiveAndBelow (index, v.getNumChildren()))
-                return ValueTree();
+                return {};
 
             v = v.getChild (index);
         }
@@ -110,9 +111,19 @@ void ValueTreeSynchroniser::sendFullSyncCallback()
 void ValueTreeSynchroniser::valueTreePropertyChanged (ValueTree& vt, const Identifier& property)
 {
     MemoryOutputStream m;
-    ValueTreeSynchroniserHelpers::writeHeader (*this, m, ValueTreeSynchroniserHelpers::propertyChanged, vt);
-    m.writeString (property.toString());
-    vt.getProperty (property).writeToStream (m);
+
+    if (auto* value = vt.getPropertyPointer (property))
+    {
+        ValueTreeSynchroniserHelpers::writeHeader (*this, m, ValueTreeSynchroniserHelpers::propertyChanged, vt);
+        m.writeString (property.toString());
+        value->writeToStream (m);
+    }
+    else
+    {
+        ValueTreeSynchroniserHelpers::writeHeader (*this, m, ValueTreeSynchroniserHelpers::propertyRemoved, vt);
+        m.writeString (property.toString());
+    }
+
     stateChanged (m.getData(), m.getDataSize());
 }
 
@@ -170,6 +181,13 @@ bool ValueTreeSynchroniser::applyChange (ValueTree& root, const void* data, size
         {
             Identifier property (input.readString());
             v.setProperty (property, var::readFromStream (input), undoManager);
+            return true;
+        }
+
+        case ValueTreeSynchroniserHelpers::propertyRemoved:
+        {
+            Identifier property (input.readString());
+            v.removeProperty (property, undoManager);
             return true;
         }
 

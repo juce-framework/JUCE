@@ -1244,6 +1244,9 @@ void ProjectContentComponent::setBuildEnabled (bool b)
         LiveBuildProjectSettings::setBuildDisabled (*project, ! b);
         killChildProcess();
         refreshTabsIfBuildStatusChanged();
+
+        if (auto* h = dynamic_cast<HeaderComponent*> (header.get()))
+            h->updateBuildButtons (b, isContinuousRebuildEnabled());
     }
 }
 
@@ -1382,10 +1385,17 @@ bool ProjectContentComponent::isContinuousRebuildEnabled()
 
 void ProjectContentComponent::setContinuousRebuildEnabled (bool b)
 {
-    getAppSettings().getGlobalProperties().setValue ("continuousRebuild", b);
-
     if (childProcess != nullptr)
+    {
         childProcess->setContinuousRebuild (b);
+
+        if (auto* h = dynamic_cast<HeaderComponent*> (header.get()))
+            h->updateBuildButtons (isBuildEnabled(), b);
+
+        getAppSettings().getGlobalProperties().setValue ("continuousRebuild", b);
+
+        ProjucerApplication::getCommandManager().commandStatusChanged();
+    }
 }
 
 ReferenceCountedObjectPtr<CompileEngineChildProcess> ProjectContentComponent::getChildProcess()

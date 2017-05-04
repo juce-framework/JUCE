@@ -515,7 +515,7 @@ void ColourSelector::resized()
 
             for (int i = 0; i < numSwatches; ++i)
             {
-                SwatchComponent* const sc = new SwatchComponent (*this, i);
+                auto* sc = new SwatchComponent (*this, i);
                 swatchComponents.add (sc);
                 addAndMakeVisible (sc);
             }
@@ -525,7 +525,7 @@ void ColourSelector::resized()
 
         for (int i = 0; i < swatchComponents.size(); ++i)
         {
-            SwatchComponent* const sc = swatchComponents.getUnchecked(i);
+            auto* sc = swatchComponents.getUnchecked(i);
 
             sc->setBounds (x + xGap / 2,
                            y + yGap / 2,
@@ -566,7 +566,7 @@ Colour ColourSelector::getSwatchColour (const int) const
     return Colours::black;
 }
 
-void ColourSelector::setSwatchColour (const int, const Colour&) const
+void ColourSelector::setSwatchColour (int, const Colour&)
 {
     jassertfalse; // if you've overridden getNumSwatches(), you also need to implement this method
 }

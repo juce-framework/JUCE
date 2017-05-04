@@ -54,7 +54,11 @@ static void callCPUID (int result[4], uint32 type)
 #else
 static void callCPUID (int result[4], int infoType)
 {
+   #if JUCE_PROJUCER_LIVE_BUILD
+    std::fill (result, result + 4, 0);
+   #else
     __cpuid (result, infoType);
+   #endif
 }
 #endif
 
@@ -99,10 +103,10 @@ static int findNumberOfPhysicalCores() noexcept
 {
     int numPhysicalCores = 0;
     DWORD bufferSize = 0;
+    GetLogicalProcessorInformation (nullptr, &bufferSize);
 
-    if (GetLogicalProcessorInformation (nullptr, &bufferSize))
+    if (auto numBuffers = (size_t) (bufferSize / sizeof (SYSTEM_LOGICAL_PROCESSOR_INFORMATION)))
     {
-        const size_t numBuffers = (size_t) (bufferSize / sizeof (SYSTEM_LOGICAL_PROCESSOR_INFORMATION));
         HeapBlock<SYSTEM_LOGICAL_PROCESSOR_INFORMATION> buffer (numBuffers);
 
         if (GetLogicalProcessorInformation (buffer, &bufferSize))

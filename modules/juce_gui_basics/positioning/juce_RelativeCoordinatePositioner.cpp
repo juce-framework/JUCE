@@ -24,10 +24,12 @@
   ==============================================================================
 */
 
-class MarkerListScope  : public Expression::Scope
+struct MarkerListScope  : public Expression::Scope
 {
-public:
     MarkerListScope (Component& comp) : component (comp) {}
+
+    // Suppress a VS2013 compiler warning
+    MarkerListScope& operator= (const MarkerListScope&) = delete;
 
     Expression getSymbolValue (const String& symbol) const override
     {
@@ -40,7 +42,7 @@ public:
 
         MarkerList* list;
 
-        if (const MarkerList::Marker* const marker = findMarker (component, symbol, list))
+        if (auto* marker = findMarker (component, symbol, list))
             return Expression (marker->position.getExpression().evaluate (*this));
 
         return Expression::Scope::getSymbolValue (symbol);
@@ -50,7 +52,7 @@ public:
     {
         if (scopeName == RelativeCoordinate::Strings::parent)
         {
-            if (Component* const parent = component.getParentComponent())
+            if (auto* parent = component.getParentComponent())
             {
                 visitor.visit (MarkerListScope (*parent));
                 return;
@@ -84,10 +86,7 @@ public:
         return marker;
     }
 
-private:
     Component& component;
-
-    JUCE_DECLARE_NON_COPYABLE (MarkerListScope)
 };
 
 //==============================================================================
@@ -127,9 +126,9 @@ Expression RelativeCoordinatePositionerBase::ComponentScope::getSymbolValue (con
 
 void RelativeCoordinatePositionerBase::ComponentScope::visitRelativeScope (const String& scopeName, Visitor& visitor) const
 {
-    if (Component* const targetComp = (scopeName == RelativeCoordinate::Strings::parent)
-                                           ? component.getParentComponent()
-                                           : findSiblingComponent (scopeName))
+    if (auto* targetComp = (scopeName == RelativeCoordinate::Strings::parent)
+                               ? component.getParentComponent()
+                               : findSiblingComponent (scopeName))
         visitor.visit (ComponentScope (*targetComp));
     else
         Expression::Scope::visitRelativeScope (scopeName, visitor);
@@ -217,8 +216,6 @@ public:
 private:
     RelativeCoordinatePositionerBase& positioner;
     bool& ok;
-
-    JUCE_DECLARE_NON_COPYABLE (DependencyFinderScope)
 };
 
 //==============================================================================

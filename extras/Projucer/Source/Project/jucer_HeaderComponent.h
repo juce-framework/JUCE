@@ -307,11 +307,8 @@ public:
         project->addChangeListener (this);
         updateName();
 
-        continuousRebuildButton->setEnabled (true);
-        updateContinuousRebuildButtonIcon();
-
         if (auto* pcc = findParentComponentOfClass<ProjectContentComponent>())
-            buildNowButton->setEnabled (! pcc->isContinuousRebuildEnabled() || ! pcc->isBuildEnabled());
+            updateBuildButtons (pcc->isBuildEnabled(), pcc->isContinuousRebuildEnabled());
     }
 
     void updateExporters()
@@ -373,6 +370,16 @@ public:
         userSettingsWindow = &CallOutBox::launchAsynchronously (content, userSettingsButton->getScreenBounds(), nullptr);
     }
 
+    void updateBuildButtons (bool isBuildEnabled, bool isContinuousRebuildEnabled)
+    {
+        buildNowButton->setEnabled (isBuildEnabled && ! isContinuousRebuildEnabled);
+        continuousRebuildButton->setEnabled (isBuildEnabled);
+
+        continuousRebuildButton->icon = Icon (isContinuousRebuildEnabled ? &getIcons().continuousBuildStop : &getIcons().continuousBuildStart,
+                                              Colours::transparentBlack);
+        repaint();
+    }
+
     void lookAndFeelChanged() override
     {
         if (userSettingsWindow != nullptr)
@@ -399,40 +406,12 @@ private:
     {
         auto* pcc = findParentComponentOfClass<ProjectContentComponent>();
 
-        if (b == projectSettingsButton)
-        {
-            pcc->showProjectSettings();
-        }
-        else if (b == continuousRebuildButton)
-        {
-            if (! pcc->isBuildEnabled())
-                pcc->setBuildEnabled (true);
-
-            auto newState = ! pcc->isContinuousRebuildEnabled();
-            pcc->setContinuousRebuildEnabled (newState);
-
-            updateContinuousRebuildButtonIcon();
-            buildNowButton->setEnabled (! pcc->isContinuousRebuildEnabled() || ! pcc->isBuildEnabled());
-        }
-        else if (b == buildNowButton)
-        {
-            if (! pcc->isBuildEnabled())
-                pcc->setBuildEnabled (true);
-
-            pcc->rebuildNow();
-        }
-        else if (b == exporterSettingsButton)
-        {
-            pcc->showExporterSettings (getSelectedExporterName());
-        }
-        else if (b == saveAndOpenInIDEButton)
-        {
-            pcc->openInSelectedIDE (true);
-        }
-        else if (b == userSettingsButton)
-        {
-            showUserSettings();
-        }
+        if      (b == projectSettingsButton)      pcc->showProjectSettings();
+        else if (b == continuousRebuildButton)    pcc->setContinuousRebuildEnabled (! pcc->isContinuousRebuildEnabled());
+        else if (b == buildNowButton)             pcc->rebuildNow();
+        else if (b == exporterSettingsButton)     pcc->showExporterSettings (getSelectedExporterName());
+        else if (b == saveAndOpenInIDEButton)     pcc->openInSelectedIDE (true);
+        else if (b == userSettingsButton)         showUserSettings();
     }
 
     void comboBoxChanged (ComboBox* c) override
@@ -463,11 +442,9 @@ private:
 
         addAndMakeVisible (continuousRebuildButton = new IconButton ("Continuous Rebuild", &icons.continuousBuildStart));
         continuousRebuildButton->addListener (this);
-        continuousRebuildButton->setEnabled (false);
 
         addAndMakeVisible (buildNowButton = new IconButton ("Build Now", &icons.buildNow));
         buildNowButton->addListener (this);
-        buildNowButton->setEnabled (false);
 
         addAndMakeVisible (exporterSettingsButton = new IconButton ("Exporter Settings", &icons.edit));
         exporterSettingsButton->addListener (this);
@@ -514,20 +491,10 @@ private:
     {
         if (LicenseController* controller = ProjucerApplication::getApp().licenseController)
         {
-            auto& state = controller->getState();
+            auto state = controller->getState();
 
             userSettingsButton->iconImage = state.avatar;
             userSettingsButton->repaint();
-        }
-    }
-
-    void updateContinuousRebuildButtonIcon()
-    {
-        if (auto* pcc = findParentComponentOfClass<ProjectContentComponent>())
-        {
-            continuousRebuildButton->setEnabled (pcc->isBuildEnabled());
-            continuousRebuildButton->icon = Icon (pcc->isContinuousRebuildEnabled() ? &getIcons().continuousBuildStop
-                                                                                    : &getIcons().continuousBuildStart, Colours::transparentBlack);
         }
     }
 

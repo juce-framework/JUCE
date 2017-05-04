@@ -140,6 +140,11 @@ private:
             webView->goToURL (addressTextBox.getText());
     }
 
+    void lookAndFeelChanged() override
+    {
+        addressTextBox.applyFontToAllText (addressTextBox.getFont());
+    }
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebBrowserDemo)
 };
 

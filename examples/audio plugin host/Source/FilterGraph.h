@@ -47,10 +47,12 @@ public:
     AudioProcessorGraph& getGraph() noexcept         { return graph; }
 
     int getNumFilters() const noexcept;
-    const AudioProcessorGraph::Node::Ptr getNode (const int index) const noexcept;
-    const AudioProcessorGraph::Node::Ptr getNodeForId (const uint32 uid) const noexcept;
+    AudioProcessorGraph::Node::Ptr getNode (int index) const noexcept;
 
-    void addFilter (const PluginDescription* desc, double x, double y);
+    AudioProcessorGraph::Node::Ptr getNodeForId (uint32 uid) const;
+    AudioProcessorGraph::Node::Ptr getNodeForName (const String& name) const;
+
+    void addFilter (const PluginDescription*, double x, double y);
 
     void addFilterCallback (AudioPluginInstance* instance, const String& error, double x, double y);
 

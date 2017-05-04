@@ -62,7 +62,10 @@ private:
     ScopedPointer<Drawable> content;
     CriticalSection appUsageReporting;
     ComponentAnimator fader;
+
+   #if JUCE_DISPLAY_SPLASH_SCREEN
     bool hasStartedFading = false;
+   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JUCESplashScreen)
 };
