@@ -41,7 +41,7 @@ public:
     //==============================================================================
     bool isPlaying() override                             { return isRunning && callback != nullptr; }
     bool isOpen() override                                { return isRunning; }
-    String getLastError() override                        { return lastError; };
+    String getLastError() override                        { return lastError; }
 
     //==============================================================================
     StringArray getOutputChannelNames() override          { return { "Left", "Right" }; }
