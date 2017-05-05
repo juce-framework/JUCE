@@ -988,7 +988,6 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Shows the tab containing the build panel",
                         CommandCategories::general, 0);
         result.setActive (project != nullptr);
-        result.defaultKeypresses.add (KeyPress ('b', ModifierKeys::commandModifier, 0));
         break;
 
     case CommandIDs::showFileExplorerPanel:
