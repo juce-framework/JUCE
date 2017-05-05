@@ -154,8 +154,6 @@ public:
 
     private:
         //==============================================================================
-        friend class Ref;
-
         SharedKeyWindow (ComponentPeer* peerToUse)
             : keyPeer (peerToUse),
               keyProxy (juce_createKeyProxyWindow (keyPeer)),
@@ -366,10 +364,17 @@ private:
                     XMoveResizeWindow (dpy, host, newBounds.getX(), newBounds.getY(),
                                        static_cast<unsigned int> (newBounds.getWidth()),
                                        static_cast<unsigned int> (newBounds.getHeight()));
+                }
+            }
 
-                    if (client != 0 && (currentBounds.getWidth() != newBounds.getWidth()
-                                        || currentBounds.getHeight() != newBounds.getHeight()))
-                        XResizeWindow (dpy, client,
+            if (client != 0 && XGetWindowAttributes (dpy, client, &attr))
+            {
+                Rectangle<int> currentBounds (attr.x, attr.y, attr.width, attr.height);
+
+                if ((currentBounds.getWidth() != newBounds.getWidth()
+                     || currentBounds.getHeight() != newBounds.getHeight()))
+                {
+                    XMoveResizeWindow (dpy, client, 0, 0,
                                        static_cast<unsigned int> (newBounds.getWidth()),
                                        static_cast<unsigned int> (newBounds.getHeight()));
                 }
