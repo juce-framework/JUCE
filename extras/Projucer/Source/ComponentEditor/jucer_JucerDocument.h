@@ -135,6 +135,9 @@ public:
     void setTemplateFile (const String&);
 
     static bool shouldUseTransMacro() noexcept                              { return true; }
+    
+    //==============================================================================
+    void refreshCustomCodeFromDocument();
 
 protected:
     SourceCodeDocument* cpp;
@@ -152,6 +155,8 @@ protected:
 
     virtual void fillInGeneratedCode (GeneratedCode&) const;
     virtual void fillInPaintCode (GeneratedCode&) const;
+    
+    virtual void applyCustomPaintSnippets (StringArray&) {}
 
     static void addMethod (const String& base, const String& returnVal,
                            const String& method, const String& initialContent,
@@ -172,6 +177,7 @@ private:
     void codeDocumentTextDeleted (int startIndex, int endIndex) override;
     void userEditedCpp();
     bool documentAboutToClose (OpenDocumentManager::Document*) override;
+    void extractCustomPaintSnippetsFromCppFile (const String& cpp);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JucerDocument)
 };

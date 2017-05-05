@@ -31,6 +31,7 @@
 namespace CodeHelpers
 {
     String indent (const String& code, const int numSpaces, bool indentFirstLine);
+    String unindent (const String& code, const int numSpaces);
     String makeValidIdentifier (String s, bool capitalise, bool removeColons, bool allowTemplates);
     String createIncludeStatement (const File& includedFile, const File& targetFile);
     String createIncludeStatement (const String& includePath);
