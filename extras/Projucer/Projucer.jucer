@@ -458,6 +458,8 @@
     <GROUP id="{58EB50D9-0F01-AF9B-087B-93DB283A339D}" name="Utility">
       <FILE id="yhZzRW" name="jucer_AboutWindowComponent.h" compile="0" resource="0"
             file="Source/Utility/jucer_AboutWindowComponent.h"/>
+      <FILE id="zOjz65" name="jucer_ApplicationUsageDataWindowComponent.h"
+            compile="0" resource="0" file="Source/Utility/jucer_ApplicationUsageDataWindowComponent.h"/>
       <FILE id="TX2oGI" name="jucer_CodeHelpers.cpp" compile="1" resource="0"
             file="Source/Utility/jucer_CodeHelpers.cpp"/>
       <FILE id="mpDJct" name="jucer_CodeHelpers.h" compile="0" resource="0"

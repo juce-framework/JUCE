@@ -221,6 +221,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utility", "Utility", "{5B44064B-7712-DA97-5DC7-473A1921D600}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\Source\Utility\jucer_AboutWindowComponent.h = ..\..\Source\Utility\jucer_AboutWindowComponent.h
+		..\..\Source\Utility\jucer_ApplicationUsageDataWindowComponent.h = ..\..\Source\Utility\jucer_ApplicationUsageDataWindowComponent.h
 		..\..\Source\Utility\jucer_CodeHelpers.cpp = ..\..\Source\Utility\jucer_CodeHelpers.cpp
 		..\..\Source\Utility\jucer_CodeHelpers.h = ..\..\Source\Utility\jucer_CodeHelpers.h
 		..\..\Source\Utility\jucer_ColourPropertyComponent.h = ..\..\Source\Utility\jucer_ColourPropertyComponent.h
