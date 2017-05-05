@@ -1146,6 +1146,7 @@ public:
             case plugInOpcodeGetEditorBounds:             return handleGetEditorBounds (args);
             case plugInOpcodeOpenEditor:                  return handleOpenEditor (args);
             case plugInOpcodeCloseEditor:                 return handleCloseEditor (args);
+            case plugInOpcodeIdentify:                    return (pointer_sized_int) ByteOrder::bigEndianInt ("NvEf");
             case plugInOpcodeGetData:                     return handleGetData (args);
             case plugInOpcodeSetData:                     return handleSetData (args);
             case plugInOpcodePreAudioProcessingEvents:    return handlePreAudioProcessingEvents (args);
