@@ -103,6 +103,8 @@ public:
 
     void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode) const;
 
+    void applyCustomPaintSnippets (StringArray&);
+
     //==============================================================================
 private:
     OwnedArray <PaintElement> elements;

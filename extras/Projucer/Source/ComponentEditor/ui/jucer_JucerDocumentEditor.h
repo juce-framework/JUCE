@@ -58,28 +58,37 @@ public:
     Image createComponentLayerSnapshot() const;
 
     //==============================================================================
-    void paint (Graphics& g);
-    void resized();
-    void changeListenerCallback (ChangeBroadcaster*);
-    bool keyPressed (const KeyPress&);
+    void paint (Graphics& g) override;
+    void resized() override;
+    void changeListenerCallback (ChangeBroadcaster*) override;
+    bool keyPressed (const KeyPress&) override;
 
     //==============================================================================
-    ApplicationCommandTarget* getNextCommandTarget();
-    void getAllCommands (Array <CommandID>&);
-    void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result);
-    bool perform (const InvocationInfo&);
+    ApplicationCommandTarget* getNextCommandTarget() override;
+    void getAllCommands (Array<CommandID>&) override;
+    void getCommandInfo (CommandID, ApplicationCommandInfo&) override;
+    bool perform (const InvocationInfo&) override;
 
     static JucerDocumentEditor* getActiveDocumentHolder();
 
 private:
     ScopedPointer<JucerDocument> document;
-    TabbedComponent tabbedComponent;
-    ComponentLayoutPanel* compLayoutPanel;
+    ComponentLayoutPanel* compLayoutPanel = nullptr;
+
+    struct JucerDocumentTabs  : public TabbedComponent
+    {
+        JucerDocumentTabs (JucerDocument* d)  : TabbedComponent (TabbedButtonBar::TabsAtTop), document (d) {}
+        void currentTabChanged (int, const String&) override    { document->refreshCustomCodeFromDocument(); }
+
+        JucerDocument* document;
+    };
+
+    JucerDocumentTabs tabbedComponent;
+
+    int lastViewportX = 0, lastViewportY = 0;
+    double currentZoomLevel = 1.0;
 
     bool isSomethingSelected() const;
-    int lastViewportX, lastViewportY;
-
-    double currentZoomLevel;
 
     // only non-zero if a layout tab is selected
     ComponentLayout* getCurrentLayout() const;
@@ -89,6 +98,6 @@ private:
     void setZoom (double scale);
     double getZoom() const;
 
-    void addElement (const int index);
-    void addComponent (const int index);
+    void addElement (int index);
+    void addComponent (int index);
 };

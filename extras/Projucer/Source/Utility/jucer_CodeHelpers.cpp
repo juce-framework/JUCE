@@ -36,19 +36,35 @@ namespace CodeHelpers
         if (numSpaces == 0)
             return code;
 
-        const String space (String::repeatedString (" ", numSpaces));
+        auto space = String::repeatedString (" ", numSpaces);
+        auto lines = StringArray::fromLines (code);
 
-        StringArray lines;
-        lines.addLines (code);
-
-        for (int i = (indentFirstLine ? 0 : 1); i < lines.size(); ++i)
+        for (auto& line : lines)
         {
-            String s (lines[i].trimEnd());
-            if (s.isNotEmpty())
-                s = space + s;
+            if (! indentFirstLine)
+            {
+                indentFirstLine = true;
+                continue;
+            }
 
-            lines.set (i, s);
+            if (line.trimEnd().isNotEmpty())
+                line = space + line;
         }
+
+        return lines.joinIntoString (newLine);
+    }
+
+    String unindent (const String& code, const int numSpaces)
+    {
+        if (numSpaces == 0)
+            return code;
+
+        auto space = String::repeatedString (" ", numSpaces);
+        auto lines = StringArray::fromLines (code);
+
+        for (auto& line : lines)
+            if (line.startsWith (space))
+                line = line.substring (numSpaces);
 
         return lines.joinIntoString (newLine);
     }

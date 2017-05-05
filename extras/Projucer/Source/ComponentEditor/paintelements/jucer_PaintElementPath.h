@@ -101,6 +101,7 @@ public:
     void getEditableProperties (Array<PropertyComponent*>& props);
 
     void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode);
+    void applyCustomPaintSnippets (StringArray& snippets);
 
     //==============================================================================
     static const char* getTagName() noexcept                            { return "PATH"; }
@@ -132,6 +133,7 @@ private:
     mutable Rectangle<int> lastPathBounds;
     int mouseDownOnSegment;
     bool mouseDownSelectSegmentStatus;
+    String customPaintCode;
 
     String pathToString() const;
     void restorePathFromString (const String& s);
