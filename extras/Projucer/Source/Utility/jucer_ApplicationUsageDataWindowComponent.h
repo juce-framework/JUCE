@@ -66,7 +66,13 @@ public:
         if (showCheckbox)
         {
             addAndMakeVisible (shareApplicationUsageDataToggle = new ToggleButton());
-            shareApplicationUsageDataToggle->setToggleState (true, dontSendNotification);
+
+            LicenseController* controller = ProjucerApplication::getApp().licenseController;
+
+            if (controller != nullptr && controller->getState().applicationUsageDataState == LicenseState::ApplicationUsageData::disabled)
+                shareApplicationUsageDataToggle->setToggleState (false, dontSendNotification);
+            else
+                shareApplicationUsageDataToggle->setToggleState (true, dontSendNotification);
 
             addAndMakeVisible(shareApplicationUsageDataLabel = new Label ({}, "Help JUCE to improve its software and services by sharing my application usage data"));
             shareApplicationUsageDataLabel->setFont (Font (14.0f));
