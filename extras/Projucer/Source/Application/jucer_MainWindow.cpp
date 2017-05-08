@@ -165,7 +165,7 @@ void MainWindow::setProject (Project* newProject)
     currentProject = newProject;
 
     if (currentProject != nullptr)
-        setName ("Projucer - " + currentProject->getProjectFilenameRoot());
+        setName (currentProject->getProjectFilenameRoot() + " - Projucer");
     else
         setName ("Projucer");
 
