@@ -163,6 +163,12 @@ void MainWindow::setProject (Project* newProject)
     createProjectContentCompIfNeeded();
     getProjectContentComponent()->setProject (newProject);
     currentProject = newProject;
+
+    if (currentProject != nullptr)
+        setName ("Projucer - " + currentProject->getProjectFilenameRoot());
+    else
+        setName ("Projucer");
+
     ProjucerApplication::getCommandManager().commandStatusChanged();
 }
 
