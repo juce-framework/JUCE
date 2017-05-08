@@ -364,6 +364,72 @@ void ProjucerLookAndFeel::drawTreeviewPlusMinusBox (Graphics& g, const Rectangle
     g.strokePath (getArrowPath (area, isOpen ? 2 : 1, false, Justification::centredRight), PathStrokeType (2.0f));
 }
 
+void ProjucerLookAndFeel::drawProgressBar (Graphics& g, ProgressBar& progressBar,
+                                           int width, int height, double progress, const String& textToShow)
+{
+    ignoreUnused (width, height, progress);
+
+    const auto background = progressBar.findColour (ProgressBar::backgroundColourId);
+    const auto foreground = progressBar.findColour (defaultButtonBackgroundColourId);
+
+    const auto sideLength = jmin (width, height);
+
+    auto barBounds = progressBar.getLocalBounds().withSizeKeepingCentre (sideLength, sideLength).reduced (1).toFloat();
+
+    auto rotationInDegrees  = static_cast<float> ((Time::getMillisecondCounter() / 10) % 360);
+    auto normalisedRotation = rotationInDegrees / 360.0f;
+
+    const auto rotationOffset = 22.5f;
+    const auto maxRotation    = 315.0f;
+
+    auto startInDegrees = rotationInDegrees;
+    auto endInDegrees   = startInDegrees + rotationOffset;
+
+    if (normalisedRotation >= 0.25f && normalisedRotation < 0.5f)
+    {
+        const auto rescaledRotation = (normalisedRotation * 4.0f) - 1.0f;
+        endInDegrees = startInDegrees + rotationOffset + (maxRotation * rescaledRotation);
+    }
+    else if (normalisedRotation >= 0.5f && normalisedRotation <= 1.0f)
+    {
+        endInDegrees = startInDegrees + rotationOffset + maxRotation;
+        const auto rescaledRotation = 1.0f - ((normalisedRotation * 2.0f) - 1.0f);
+        startInDegrees = endInDegrees - rotationOffset - (maxRotation * rescaledRotation);
+    }
+
+    g.setColour (background);
+    Path arcPath2;
+    arcPath2.addCentredArc (barBounds.getCentreX(),
+                            barBounds.getCentreY(),
+                            barBounds.getWidth() * 0.5f,
+                            barBounds.getHeight() * 0.5f, 0.0f,
+                            0.0f,
+                            2.0f * float_Pi,
+                            true);
+    g.strokePath (arcPath2, PathStrokeType (2.0f));
+
+    g.setColour (foreground);
+    Path arcPath;
+    arcPath.addCentredArc (barBounds.getCentreX(),
+                           barBounds.getCentreY(),
+                           barBounds.getWidth() * 0.5f,
+                           barBounds.getHeight() * 0.5f,
+                           0.0f,
+                           degreesToRadians (startInDegrees),
+                           degreesToRadians (endInDegrees),
+                           true);
+
+    arcPath.applyTransform (AffineTransform::rotation (normalisedRotation * float_Pi * 2.25f, barBounds.getCentreX(), barBounds.getCentreY()));
+    g.strokePath (arcPath, PathStrokeType (2.0f));
+
+    if (textToShow.isNotEmpty())
+    {
+        g.setColour (progressBar.findColour (TextButton::textColourOffId));
+        g.setFont (Font (12.0f, 2));
+        g.drawText (textToShow, barBounds, Justification::centred, false);
+    }
+}
+
 //==============================================================================
 Path ProjucerLookAndFeel::getArrowPath (Rectangle<float> arrowZone, const int direction,
                                         bool filled, const Justification justification)
