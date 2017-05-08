@@ -39,7 +39,7 @@
 // You can set this flag in your build if you need to specify a different
 // standalone JUCEApplication class for your app to use. If you don't
 // set it then by default we'll just create a simple one as below.
-#if ! JUCE_USE_CUSTOM_AU3_STANDALONE_APP
+#if ! JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP
 
 extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 
