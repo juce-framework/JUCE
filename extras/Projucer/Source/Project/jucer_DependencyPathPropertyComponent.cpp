@@ -77,12 +77,13 @@ try : TextPropertyComponent (propertyName, 1024, false),
         getValue().setValue (String());
 
     getValue().addListener (this);
-    setColour (textColourId, getTextColourToDisplay());
 
     if (Label* label = dynamic_cast<Label*> (getChildComponent (0)))
         label->addListener (this);
     else
         jassertfalse;
+
+    lookAndFeelChanged();
 }
 catch (const std::bad_cast&)
 {
@@ -109,10 +110,10 @@ void DependencyPathPropertyComponent::textWasEdited()
 Colour DependencyPathPropertyComponent::getTextColourToDisplay() const
 {
     if (! pathValueSource.isUsingProjectSettings())
-        return pathValueSource.isValidPath (pathRelativeTo) ? Colours::grey
-                                                            : Colours::lightpink;
+        return pathValueSource.isValidPath (pathRelativeTo) ? findColour (widgetTextColourId).withMultipliedAlpha (0.5f)
+                                                            : Colours::red.withMultipliedAlpha (0.5f);
 
-    return pathValueSource.isValidPath (pathRelativeTo) ? Colours::black
+    return pathValueSource.isValidPath (pathRelativeTo) ? findColour (widgetTextColourId)
                                                         : Colours::red;
 }
 
@@ -128,4 +129,9 @@ void DependencyPathPropertyComponent::editorShown (Label* /*label*/, TextEditor&
 
 void DependencyPathPropertyComponent::editorHidden (Label*, TextEditor&)
 {
+}
+
+void DependencyPathPropertyComponent::lookAndFeelChanged()
+{
+    textWasEdited();
 }

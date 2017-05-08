@@ -177,5 +177,7 @@ private:
     void editorShown (Label*, TextEditor&) override;
     void editorHidden (Label*, TextEditor&) override;
 
+    void lookAndFeelChanged() override;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DependencyPathPropertyComponent)
 };

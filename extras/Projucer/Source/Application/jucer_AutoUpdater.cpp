@@ -264,7 +264,6 @@ public:
         addAndMakeVisible (cancelButton = new TextButton ("Cancel Button"));
         cancelButton->setButtonText (TRANS("Cancel"));
         cancelButton->addListener (this);
-        cancelButton->setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
 
         addAndMakeVisible (changeLogLabel = new Label ("Change Log Label",
                                                        TRANS("Release Notes:")));
@@ -303,6 +302,8 @@ public:
                                                   BinaryData::juce_icon_pngSize);
 
         setSize (518, overwritePath ? 345 : 269);
+
+        lookAndFeelChanged();
     }
 
     ~UpdateUserDialog()
@@ -393,6 +394,13 @@ private:
     ScopedPointer<TextEditor> changeLog;
     ScopedPointer<TextButton> overwriteButton;
     ScopedPointer<Drawable> juceIcon;
+
+    void lookAndFeelChanged() override
+    {
+        cancelButton->setColour (TextButton::buttonColourId,
+                                 findColour (secondaryButtonBackgroundColourId));
+        changeLog->applyFontToAllText (changeLog->getFont());
+    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UpdateUserDialog)
 };

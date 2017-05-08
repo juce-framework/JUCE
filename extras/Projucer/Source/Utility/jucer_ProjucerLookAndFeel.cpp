@@ -554,7 +554,7 @@ void ProjucerLookAndFeel::setupColours()
     }
 
     setColour (Label::textColourId,                             findColour (defaultTextColourId));
-    setColour (Label::textColourId,                             findColour (defaultTextColourId));
+    setColour (Label::textWhenEditingColourId,                  findColour (widgetTextColourId));
     setColour (TextEditor::highlightColourId,                   findColour (defaultHighlightColourId));
     setColour (TextEditor::highlightedTextColourId,             findColour (defaultHighlightedTextColourId));
     setColour (TextEditor::outlineColourId,                     Colours::transparentBlack);

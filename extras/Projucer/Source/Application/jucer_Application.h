@@ -148,4 +148,6 @@ private:
 
     void handleAsyncUpdate() override;
     void initCommandManager();
+
+    void setColourScheme (int index, bool saveSetting);
 };

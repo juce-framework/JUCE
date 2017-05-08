@@ -117,6 +117,8 @@ void ProjucerApplication::initialise (const String& commandLine)
 
         settings->appearance.refreshPresetSchemeList();
 
+        setColourScheme (settings->getGlobalProperties().getIntValue ("COLOUR SCHEME"), false);
+
         // do further initialisation in a moment when the message loop has started
         triggerAsyncUpdate();
     }
@@ -499,32 +501,7 @@ void ProjucerApplication::handleMainMenuCommand (int menuItemID)
     }
     else if (menuItemID >= colourSchemeBaseID && menuItemID < colourSchemeBaseID + 3)
     {
-        auto& appearanceSettings = getAppSettings().appearance;
-
-        if (menuItemID == colourSchemeBaseID)
-        {
-            lookAndFeel.setColourScheme (LookAndFeel_V4::getDarkColourScheme());
-            appearanceSettings.selectPresetScheme (0);
-        }
-        else if (menuItemID == colourSchemeBaseID + 1)
-        {
-            lookAndFeel.setColourScheme (LookAndFeel_V4::getGreyColourScheme());
-            appearanceSettings.selectPresetScheme (0);
-        }
-        else if (menuItemID == colourSchemeBaseID + 2)
-        {
-            lookAndFeel.setColourScheme (LookAndFeel_V4::getLightColourScheme());
-            appearanceSettings.selectPresetScheme (1);
-        }
-
-        lookAndFeel.setupColours();
-        mainWindowList.sendLookAndFeelChange();
-
-        if (utf8Window != nullptr)                  utf8Window->sendLookAndFeelChange();
-        if (svgPathWindow != nullptr)               svgPathWindow->sendLookAndFeelChange();
-        if (globalPreferencesWindow != nullptr)     globalPreferencesWindow->sendLookAndFeelChange();
-        if (aboutWindow != nullptr)                 aboutWindow->sendLookAndFeelChange();
-        if (applicationUsageDataWindow != nullptr)  applicationUsageDataWindow->sendLookAndFeelChange();
+        setColourScheme (menuItemID - colourSchemeBaseID, true);
     }
     else
     {
@@ -800,4 +777,44 @@ void ProjucerApplication::initCommandManager()
     }
 
     registerGUIEditorCommands();
+}
+
+void ProjucerApplication::setColourScheme (int index, bool saveSetting)
+{
+    auto& appearanceSettings = getAppSettings().appearance;
+
+    if (index == 0)
+    {
+        lookAndFeel.setColourScheme (LookAndFeel_V4::getDarkColourScheme());
+        appearanceSettings.selectPresetScheme (0);
+    }
+    else if (index == 1)
+    {
+        lookAndFeel.setColourScheme (LookAndFeel_V4::getGreyColourScheme());
+        appearanceSettings.selectPresetScheme (0);
+    }
+    else if (index == 2)
+    {
+        lookAndFeel.setColourScheme (LookAndFeel_V4::getLightColourScheme());
+        appearanceSettings.selectPresetScheme (1);
+    }
+
+    lookAndFeel.setupColours();
+    mainWindowList.sendLookAndFeelChange();
+
+    if (utf8Window != nullptr)                  utf8Window->sendLookAndFeelChange();
+    if (svgPathWindow != nullptr)               svgPathWindow->sendLookAndFeelChange();
+    if (globalPreferencesWindow != nullptr)     globalPreferencesWindow->sendLookAndFeelChange();
+    if (aboutWindow != nullptr)                 aboutWindow->sendLookAndFeelChange();
+    if (applicationUsageDataWindow != nullptr)  applicationUsageDataWindow->sendLookAndFeelChange();
+
+    auto* mcm = ModalComponentManager::getInstance();
+    for (auto i = 0; i < mcm->getNumModalComponents(); ++i)
+        mcm->getModalComponent (i)->sendLookAndFeelChange();
+
+    if (saveSetting)
+    {
+        auto& properties = settings->getGlobalProperties();
+        properties.setValue ("COLOUR SCHEME", index);
+    }
 }

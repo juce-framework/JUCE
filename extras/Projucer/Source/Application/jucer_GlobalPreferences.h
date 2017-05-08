@@ -63,6 +63,8 @@ private:
 
     Identifier getKeyForPropertyComponent (TextPropertyComponent*) const;
 
+    void lookAndFeelChanged() override;
+
     OwnedArray<TextPropertyComponent> pathComponents;
 
     TextPropertyComponent* vst3PathComponent;
@@ -103,8 +105,11 @@ class GlobalPreferencesComponent  : public TabbedComponent
 {
 public:
     GlobalPreferencesComponent();
+    void paint (Graphics&) override;
 
 private:
+    void lookAndFeelChanged() override;
+
     OwnedArray<GlobalPreferencesTab> preferenceTabs;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlobalPreferencesComponent)

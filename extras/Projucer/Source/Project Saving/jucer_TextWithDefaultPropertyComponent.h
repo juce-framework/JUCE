@@ -123,9 +123,9 @@ public:
     void refresh() override
     {
         if (cachedValue.isUsingDefault())
-            setColour (textColourId, Colours::grey);
+            setColour (textColourId, findColour (widgetTextColourId).withMultipliedAlpha (0.5f));
         else
-            setColour (textColourId, Colours::black);
+            setColour (textColourId, findColour (widgetTextColourId));
 
         textEditor->setText (getText(), dontSendNotification);
     }
@@ -163,6 +163,8 @@ private:
     }
 
     void editorHidden (Label*, TextEditor&) override {}
+
+    void lookAndFeelChanged() override { refresh(); }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextWithDefaultPropertyComponent)
 };

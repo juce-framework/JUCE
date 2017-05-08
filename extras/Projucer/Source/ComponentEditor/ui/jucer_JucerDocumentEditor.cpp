@@ -71,9 +71,15 @@ public:
             return;
 
         if (rowIsSelected)
+        {
             g.fillAll (findColour (TextEditor::highlightColourId));
+            g.setColour (findColour (defaultHighlightedTextColourId));
+        }
+        else
+        {
+            g.setColour (findColour (defaultTextColourId));
+        }
 
-        g.setColour (findColour (defaultTextColourId));
         g.setFont (height * 0.6f);
         g.drawText (returnValues [row] + " " + baseClasses [row] + "::" + methods [row],
                     30, 0, width - 32, height,

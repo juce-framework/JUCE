@@ -34,7 +34,7 @@ PathSettingsTab::PathSettingsTab (DependencyPathOS os)
 {
     const int maxChars = 1024;
 
-    StoredSettings& settings = getAppSettings();
+    auto& settings = getAppSettings();
 
     vst3PathComponent       = pathComponents.add (new TextPropertyComponent (settings.getGlobalPath (Ids::vst3Path, os), "VST3 SDK", maxChars, false));
 
@@ -46,11 +46,11 @@ PathSettingsTab::PathSettingsTab (DependencyPathOS os)
     androidSdkPathComponent = pathComponents.add (new TextPropertyComponent (settings.getGlobalPath (Ids::androidSDKPath, os), "Android SDK", maxChars, false));
     androidNdkPathComponent = pathComponents.add (new TextPropertyComponent (settings.getGlobalPath (Ids::androidNDKPath, os), "Android NDK", maxChars, false));
 
-    for (TextPropertyComponent** component = pathComponents.begin(); component != pathComponents.end(); ++component)
+    for (auto component : pathComponents)
     {
-        addAndMakeVisible (**component);
-        (*component)->addListener (this);
-        textPropertyComponentChanged (*component);
+        addAndMakeVisible (component);
+        component->addListener (this);
+        textPropertyComponentChanged (component);
     }
 }
 
@@ -60,9 +60,9 @@ PathSettingsTab::~PathSettingsTab()
 
 void PathSettingsTab::textPropertyComponentChanged (TextPropertyComponent* textPropertyComponent)
 {
-    Identifier keyName = getKeyForPropertyComponent (textPropertyComponent);
+    auto keyName = getKeyForPropertyComponent (textPropertyComponent);
 
-    Colour textColour = getAppSettings().isGlobalPathValid (File::getCurrentWorkingDirectory(), keyName, textPropertyComponent->getText())
+    auto textColour = getAppSettings().isGlobalPathValid (File::getCurrentWorkingDirectory(), keyName, textPropertyComponent->getText())
                             ? findColour (widgetTextColourId)
                             : Colours::red;
 
@@ -96,13 +96,18 @@ void PathSettingsTab::resized()
 {
     const int componentHeight = 25;
 
-    for (TextPropertyComponent** component = pathComponents.begin(); component != pathComponents.end(); ++component)
+    for (auto component : pathComponents)
     {
-        const int elementNumber = pathComponents.indexOf (*component);
-        (*component)->setBounds (0, componentHeight * elementNumber, getWidth(), componentHeight);
+        const auto elementNumber = pathComponents.indexOf (component);
+        component->setBounds (10, componentHeight * elementNumber, getWidth() - 20, componentHeight);
     }
 }
 
+void PathSettingsTab::lookAndFeelChanged()
+{
+    for (auto* comp : pathComponents)
+        textPropertyComponentChanged (comp);
+}
 
 //==============================================================================
 struct AppearanceEditor
@@ -124,7 +129,7 @@ struct AppearanceEditor
             g.setColour (findColour (defaultTextColourId));
             g.drawFittedText ("Scanning for fonts..", getLocalBounds(), Justification::centred, 2);
 
-            const int size = 30;
+            const auto size = 30;
             getLookAndFeel().drawSpinningWaitAnimation (g, Colours::white, (getWidth() - size) / 2, getHeight() / 2 - 50, size, size);
         }
 
@@ -136,7 +141,7 @@ struct AppearanceEditor
             {
                 getAppSettings().monospacedFontNames = fontsFound;
 
-                if (AppearanceSettingsTab* tab = findParentComponentOfClass<AppearanceSettingsTab>())
+                if (auto* tab = findParentComponentOfClass<AppearanceSettingsTab>())
                     tab->changeContent (new EditorPanel());
             }
             else
@@ -154,7 +159,7 @@ struct AppearanceEditor
         {
             const Font font (name, 20.0f, Font::plain);
 
-            const int width = font.getStringWidth ("....");
+            const auto width = font.getStringWidth ("....");
 
             return width == font.getStringWidth ("WWWW")
             && width == font.getStringWidth ("0000")
@@ -185,14 +190,14 @@ struct AppearanceEditor
 
         void rebuildProperties()
         {
-            AppearanceSettings& scheme = getAppSettings().appearance;
+            auto& scheme = getAppSettings().appearance;
 
             Array<PropertyComponent*> props;
-            Value fontValue (scheme.getCodeFontValue());
+            auto fontValue = scheme.getCodeFontValue();
             props.add (FontNameValueSource::createProperty ("Code Editor Font", fontValue));
             props.add (FontSizeValueSource::createProperty ("Font Size", fontValue));
 
-            const StringArray colourNames (scheme.getColourNames());
+            const auto colourNames = scheme.getColourNames();
 
             for (int i = 0; i < colourNames.size(); ++i)
                 props.add (new ColourPropertyComponent (nullptr, colourNames[i],
@@ -205,8 +210,8 @@ struct AppearanceEditor
 
         void resized() override
         {
-            Rectangle<int> r (getLocalBounds());
-            panel.setBounds (r.removeFromTop (getHeight() - 28).reduced (4, 2));
+            auto r = getLocalBounds();
+            panel.setBounds (r.removeFromTop (getHeight() - 28).reduced (10, 2));
             loadButton.setBounds (r.removeFromLeft (getWidth() / 2).reduced (10, 4));
             saveButton.setBounds (r.reduced (10, 3));
         }
@@ -249,6 +254,12 @@ struct AppearanceEditor
                     rebuildProperties();
         }
 
+        void lookAndFeelChanged() override
+        {
+            loadButton.setColour (TextButton::buttonColourId,
+                                  findColour (secondaryButtonBackgroundColourId));
+        }
+
         JUCE_DECLARE_NON_COPYABLE (EditorPanel)
     };
 
@@ -264,7 +275,7 @@ struct AppearanceEditor
 
         void setValue (const var& newValue) override
         {
-            Font font (Font::fromString (sourceValue.toString()));
+            auto font = Font::fromString (sourceValue.toString());
             font.setTypefaceName (newValue.toString().isEmpty() ? Font::getDefaultMonospacedFontName()
                                                                 : newValue.toString());
             sourceValue = font.toString();
@@ -272,7 +283,7 @@ struct AppearanceEditor
 
         static ChoicePropertyComponent* createProperty (const String& title, const Value& value)
         {
-            StringArray fontNames = getAppSettings().monospacedFontNames;
+            auto fontNames = getAppSettings().monospacedFontNames;
 
             Array<var> values;
             values.add (Font::getDefaultMonospacedFontName());
@@ -321,7 +332,7 @@ void AppearanceSettings::showGlobalPreferences (ScopedPointer<Component>& ownerP
     else
         new FloatingToolWindow ("Preferences",
                                 "globalPreferencesEditorPos",
-                                new GlobalPreferencesComponent,
+                                new GlobalPreferencesComponent(),
                                 ownerPointer, false,
                                 500, 500, 500, 500, 500, 500);
 }
@@ -368,4 +379,15 @@ GlobalPreferencesComponent::GlobalPreferencesComponent()
 
     for (GlobalPreferencesTab** tab = preferenceTabs.begin(); tab != preferenceTabs.end(); ++tab)
         addTab ((*tab)->getName(), findColour (backgroundColourId, true), (*tab)->getContent(), true);
+}
+
+void GlobalPreferencesComponent::paint (Graphics& g)
+{
+    g.fillAll (findColour (backgroundColourId));
+}
+
+void GlobalPreferencesComponent::lookAndFeelChanged()
+{
+    for (auto* tab : preferenceTabs)
+        tab->getContent()->sendLookAndFeelChange();
 }
