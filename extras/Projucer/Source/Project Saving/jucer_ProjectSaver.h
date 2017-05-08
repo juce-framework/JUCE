@@ -79,22 +79,26 @@ public:
         const File oldFile (project.getFile());
         project.setFile (projectFile);
 
-        writeMainProjectFile();
-
         OwnedArray<LibraryModule> modules;
         project.getModules().createRequiredModules (modules);
 
         checkModuleValidity (modules);
 
-        if (errors.size() == 0) writeAppConfigFile (modules, appConfigUserContent);
-        if (errors.size() == 0) writeBinaryDataFiles();
-        if (errors.size() == 0) writeAppHeader (modules);
-        if (errors.size() == 0) writeModuleCppWrappers (modules);
-        if (errors.size() == 0) writeProjects (modules);
-        if (errors.size() == 0) writeAppConfigFile (modules, appConfigUserContent); // (this is repeated in case the projects added anything to it)
+        if (errors.size() == 0)
+        {
+            writeMainProjectFile();
+            project.updateModificationTime();
 
-        if (errors.size() == 0 && generatedCodeFolder.exists())
-            writeReadmeFile();
+            writeAppConfigFile (modules, appConfigUserContent);
+            writeBinaryDataFiles();
+            writeAppHeader (modules);
+            writeModuleCppWrappers (modules);
+            writeProjects (modules);
+            writeAppConfigFile (modules, appConfigUserContent); // (this is repeated in case the projects added anything to it)
+
+            if (generatedCodeFolder.exists())
+                writeReadmeFile();
+        }
 
         if (generatedCodeFolder.exists())
             deleteUnwantedFilesIn (generatedCodeFolder);
@@ -104,8 +108,6 @@ public:
             project.setFile (oldFile);
             return Result::fail (errors[0]);
         }
-
-        project.updateModificationTime();
 
         return Result::ok();
     }
@@ -335,6 +337,13 @@ private:
 
     void checkModuleValidity (OwnedArray<LibraryModule>& modules)
     {
+        if (project.getNumExporters() == 0)
+        {
+            addError ("No exporters found!\n"
+                      "Please add an exporter before saving.");
+            return;
+        }
+
         for (LibraryModule** moduleIter = modules.begin(); moduleIter != modules.end(); ++moduleIter)
         {
             if (const LibraryModule* const module = *moduleIter)
@@ -342,7 +351,7 @@ private:
                 if (! module->isValid())
                 {
                     addError ("At least one of your JUCE module paths is invalid!\n"
-                              "Please go to Config -> Modules and ensure each path points to the correct JUCE modules folder.");
+                              "Please go to the Modules settings page and ensure each path points to the correct JUCE modules folder.");
                     return;
                 }
             }
