@@ -227,6 +227,11 @@ public:
         props.add (new BooleanPropertyComponent (getSetting ("keepCustomXcodeSchemes"), "Keep custom Xcode schemes", "Enabled"),
                    "Enable this to keep any Xcode schemes you have created for debugging or running, e.g. to launch a plug-in in"
                    "various hosts. If disabled, all schemes are replaced by a default set.");
+
+        props.add (new BooleanPropertyComponent (getSetting ("useHeaderMap"), "USE_HEADERMAP", "Enabled"),
+                   "Enable this to make Xcode search all the projects folders for include files. This means you can be lazy "
+                   "and not bother using relative paths to include your headers, but it means your code won't be "
+                   "compatible with other build systems");
     }
 
     bool launchProject() override
@@ -333,17 +338,17 @@ protected:
         XcodeBuildConfiguration (Project& p, const ValueTree& t, const bool isIOS, const ProjectExporter& e)
             : BuildConfiguration (p, t, e),
               iOS (isIOS),
-              osxSDKVersion               (config, Ids::osxSDK,               nullptr, "default"),
-              osxDeploymentTarget         (config, Ids::osxCompatibility,     nullptr, "default"),
-              iosDeploymentTarget         (config, Ids::iosCompatibility,     nullptr, "default"),
-              osxArchitecture             (config, Ids::osxArchitecture,      nullptr, "default"),
-              customXcodeFlags            (config, Ids::customXcodeFlags,     nullptr),
-              cppLanguageStandard         (config, Ids::cppLanguageStandard,  nullptr),
-              cppStandardLibrary          (config, Ids::cppLibType,           nullptr),
-              codeSignIdentity            (config, Ids::codeSigningIdentity,  nullptr, iOS ? "iPhone Developer" : "Mac Developer"),
-              fastMathEnabled             (config, Ids::fastMath,             nullptr),
-              linkTimeOptimisationEnabled (config, Ids::linkTimeOptimisation, nullptr),
-              stripLocalSymbolsEnabled    (config, Ids::stripLocalSymbols,    nullptr),
+              osxSDKVersion               (config, Ids::osxSDK,                       nullptr, "default"),
+              osxDeploymentTarget         (config, Ids::osxCompatibility,             nullptr, "default"),
+              iosDeploymentTarget         (config, Ids::iosCompatibility,             nullptr, "default"),
+              osxArchitecture             (config, Ids::osxArchitecture,              nullptr, "default"),
+              customXcodeFlags            (config, Ids::customXcodeFlags,             nullptr),
+              cppLanguageStandard         (config, Ids::cppLanguageStandard,          nullptr),
+              cppStandardLibrary          (config, Ids::cppLibType,                   nullptr),
+              codeSignIdentity            (config, Ids::codeSigningIdentity,          nullptr, iOS ? "iPhone Developer" : "Mac Developer"),
+              fastMathEnabled             (config, Ids::fastMath,                     nullptr),
+              linkTimeOptimisationEnabled (config, Ids::linkTimeOptimisation,         nullptr),
+              stripLocalSymbolsEnabled    (config, Ids::stripLocalSymbols,            nullptr),
               vstBinaryLocation           (config, Ids::xcodeVstBinaryLocation,       nullptr, "$(HOME)/Library/Audio/Plug-Ins/VST/"),
               vst3BinaryLocation          (config, Ids::xcodeVst3BinaryLocation,      nullptr, "$(HOME)/Library/Audio/Plug-Ins/VST3/"),
               auBinaryLocation            (config, Ids::xcodeAudioUnitBinaryLocation, nullptr, "$(HOME)/Library/Audio/Plug-Ins/Components/"),
@@ -444,7 +449,8 @@ protected:
                        "Enable this to perform link-time code generation. This is recommended for release builds.");
 
             props.add (new BooleanPropertyComponent (stripLocalSymbolsEnabled.getPropertyAsValue(), "Strip local symbols", "Enabled"),
-                       "Enable this to strip any locally defined symbols resulting in a smaller binary size. Enabling this will also remove any function names from crash logs. Must be disabled for static library projects.");
+                       "Enable this to strip any locally defined symbols resulting in a smaller binary size. Enabling this "
+                       "will also remove any function names from crash logs. Must be disabled for static library projects.");
         }
 
         String getLibrarySubdirPath() const override
@@ -803,6 +809,8 @@ public:
             else if (arch == osxArch_64Bit)            s.add ("ARCHS = \"$(ARCHS_STANDARD_64_BIT)\"");
 
             s.add ("HEADER_SEARCH_PATHS = " + getHeaderSearchPaths (config));
+            s.add ("USE_HEADERMAP = " + String (static_cast<bool> (config.exporter.settings.getProperty ("useHeaderMap")) ? "YES" : "NO"));
+
             s.add ("GCC_OPTIMIZATION_LEVEL = " + config.getGCCOptimisationFlag());
 
             if (shouldCreatePList())
