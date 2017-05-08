@@ -144,6 +144,7 @@ void ReportingThreadContainer::changeListenerCallback (ChangeBroadcaster*)
 //==============================================================================
 JUCESplashScreen::JUCESplashScreen (Component& parent)
 {
+    ignoreUnused (hasStartedFading);
     ignoreUnused (parent);
 
    #if JUCE_REPORT_APP_USAGE
