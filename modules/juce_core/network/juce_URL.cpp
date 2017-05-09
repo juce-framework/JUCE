@@ -63,7 +63,7 @@ struct FallbackDownloadTask  : public URL::DownloadTask,
 
             const int actual = stream->read (buffer.getData(), max);
 
-            if (threadShouldExit() || stream->isError())
+            if (actual < 0 || threadShouldExit() || stream->isError())
                 break;
 
             if (! fileStream->write (buffer.getData(), static_cast<size_t> (actual)))
