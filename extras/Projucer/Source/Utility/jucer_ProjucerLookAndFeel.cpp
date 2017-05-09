@@ -143,7 +143,7 @@ void ProjucerLookAndFeel::drawButtonText (Graphics& g, TextButton& button, bool 
                                    .withMultipliedAlpha (button.isEnabled() ? 1.0f
                                                                             : 0.5f));
 
-    auto xIndent = jmin (12, button.getWidth() / 10);
+    auto xIndent = jmin (8, button.getWidth() / 10);
     auto yIndent = jmin (3,  button.getHeight() / 6);
 
     auto textBounds = button.getLocalBounds().reduced (xIndent, yIndent);

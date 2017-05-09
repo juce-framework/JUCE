@@ -229,16 +229,18 @@ void ResourceEditorPanel::selectedRowsChanged (int /*lastRowSelected*/)
 
 void ResourceEditorPanel::resized()
 {
-    listBox->setBounds (6, 4, getWidth() - 12, getHeight() - 38);
+    auto bounds = getLocalBounds();
 
-    addButton.changeWidthToFitText (22);
-    addButton.setTopLeftPosition (8, getHeight() - 30);
+    auto buttonSlice = bounds.removeFromBottom (40).reduced (5, 5);
 
-    reloadAllButton.changeWidthToFitText (22);
-    reloadAllButton.setTopLeftPosition (addButton.getRight() + 10, getHeight() - 30);
+    addButton.setBounds (buttonSlice.removeFromLeft (125));
+    buttonSlice.removeFromLeft (10);
 
-    delButton.changeWidthToFitText (22);
-    delButton.setTopRightPosition (getWidth() - 8, getHeight() - 30);
+    reloadAllButton.setBounds (buttonSlice.removeFromLeft (125));
+
+    delButton.setBounds (buttonSlice.removeFromRight (125));
+
+    listBox->setBounds (bounds);
 }
 
 void ResourceEditorPanel::paint (Graphics& g)
