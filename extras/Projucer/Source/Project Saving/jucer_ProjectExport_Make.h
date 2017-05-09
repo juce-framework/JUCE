@@ -590,6 +590,23 @@ private:
             << newLine;
     }
 
+    void writeIncludeLines (OutputStream& out) const
+    {
+        const int n = targets.size();
+
+        for (int i = 0; i < n; ++i)
+        {
+            if (MakefileTarget* target = targets.getUnchecked (i))
+            {
+                if (target->type == ProjectType::Target::AggregateTarget)
+                    continue;
+
+                out << "-include $(OBJECTS_" << target->getTargetVarName()
+                    << ":%.o=%.d)" << newLine;
+            }
+        }
+    }
+
     void writeMakefile (OutputStream& out) const
     {
         out << "# Automatically generated makefile, created by the Projucer" << newLine
@@ -670,7 +687,7 @@ private:
             << "\t-$(V_AT)$(STRIP) --strip-unneeded $(JUCE_OUTDIR)/$(TARGET)" << newLine
             << newLine;
 
-        out << "-include $(OBJECTS:%.o=%.d)" << newLine;
+        writeIncludeLines (out);
     }
 
     String getArchFlags (const BuildConfiguration& config) const
