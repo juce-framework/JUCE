@@ -51,6 +51,8 @@ public:
     JUCESplashScreen (Component& parentToAddTo);
     ~JUCESplashScreen();
 
+    static Drawable* getSplashScreenLogo();
+
 private:
     void paint (Graphics&) override;
     void timerCallback() override;
