@@ -209,4 +209,5 @@ strip:
 	@echo Stripping Surround
 	-$(V_AT)$(STRIP) --strip-unneeded $(JUCE_OUTDIR)/$(TARGET)
 
--include $(OBJECTS:%.o=%.d)
+-include $(OBJECTS_VST:%.o=%.d)
+-include $(OBJECTS_SHARED_CODE:%.o=%.d)

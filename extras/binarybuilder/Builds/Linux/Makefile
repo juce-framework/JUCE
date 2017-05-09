@@ -100,4 +100,4 @@ strip:
 	@echo Stripping BinaryBuilder
 	-$(V_AT)$(STRIP) --strip-unneeded $(JUCE_OUTDIR)/$(TARGET)
 
--include $(OBJECTS:%.o=%.d)
+-include $(OBJECTS_CONSOLEAPP:%.o=%.d)

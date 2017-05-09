@@ -142,4 +142,4 @@ strip:
 	@echo Stripping OSCReceiver
 	-$(V_AT)$(STRIP) --strip-unneeded $(JUCE_OUTDIR)/$(TARGET)
 
--include $(OBJECTS:%.o=%.d)
+-include $(OBJECTS_APP:%.o=%.d)
