@@ -177,6 +177,15 @@ void FileChooser::showPlatformDialog (Array<File>& results,
 
     if (child.start (args, ChildProcess::wantStdOut))
     {
+        if (MessageManager::getInstance()->isThisTheMessageThread())
+        {
+            while (child.isRunning())
+            {
+                if (! MessageManager::getInstance()->runDispatchLoopUntil(20))
+                    break;
+            }
+        }
+
         const String result (child.readAllProcessOutput().trim());
 
         if (result.isNotEmpty())
