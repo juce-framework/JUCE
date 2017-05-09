@@ -351,7 +351,7 @@ private:
 
                 snd_midi_event_free (midiParser);
             }
-        };
+        }
 
     private:
         AlsaClient& client;
