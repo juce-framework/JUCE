@@ -164,7 +164,7 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
     auto parentDirectory = currentFileOrDirectory.getParentDirectory();
 
     // Handle nonexistent root directories in the same way as existing ones
-    if (currentFileOrDirectory.isDirectory() || parentDirectory == currentFileOrDirectory)
+    if (currentFileOrDirectory.isDirectory() || currentFileOrDirectory.isRoot())
     {
         info.initialPath = currentFileOrDirectory.getFullPathName();
     }

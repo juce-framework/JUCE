@@ -120,6 +120,14 @@ public:
     */
     bool isDirectory() const;
 
+    /** Checks whether the path of this file represents the root of a file system,
+        irrespective of its existance.
+
+        This will return true for "C:", "D:", etc on Windows and "/" on other
+        platforms.
+    */
+    bool isRoot() const;
+
     /** Returns the size of the file in bytes.
 
         @returns    the number of bytes in the file, or 0 if it doesn't exist.

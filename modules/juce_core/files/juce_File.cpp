@@ -103,6 +103,11 @@ static String removeEllipsis (const String& path)
     return path;
 }
 
+bool File::isRoot() const
+{
+    return fullPath.isNotEmpty() && *this == getParentDirectory();
+}
+
 String File::parseAbsolutePath (const String& p)
 {
     if (p.isEmpty())
