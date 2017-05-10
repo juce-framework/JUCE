@@ -173,6 +173,15 @@ void MidiKeyboardComponent::setScrollButtonsVisible (bool newCanScroll)
     }
 }
 
+void MidiKeyboardComponent::setScrollButtonsWidth (int width)
+{
+    if (scrollButtonWidth != width) {
+        scrollButtonWidth = width;
+        resized();
+    }
+}
+
+
 void MidiKeyboardComponent::colourChanged()
 {
     setOpaque (findColour (whiteNoteColourId).isOpaque());

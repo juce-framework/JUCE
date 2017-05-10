@@ -201,6 +201,12 @@ public:
     */
     void setScrollButtonsVisible (bool canScroll);
 
+    /** Sets width of scroll buttons */
+    void setScrollButtonsWidth (int width);
+
+    /** Returns width of scroll buttons */
+    int getScrollButtonsWidth () const { return scrollButtonWidth; }
+
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the keyboard.
 
@@ -416,6 +422,7 @@ private:
     float firstKey = 12 * 4.0f;
     bool canScroll = true, useMousePositionForVelocity = true, shouldCheckMousePos = false;
     std::unique_ptr<Button> scrollDown, scrollUp;
+    int scrollButtonWidth = 12;
 
     Array<KeyPress> keyPresses;
     Array<int> keyPressNotes;
