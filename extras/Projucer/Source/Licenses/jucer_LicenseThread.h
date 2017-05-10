@@ -236,6 +236,13 @@ struct LicenseThread : NetWorkerThread
                         }
                     }
                 }
+                else
+                {
+                    // no internet -> then use the last valid license
+                    if (stateToUpdate.type != LicenseState::Type::notLoggedIn
+                     && stateToUpdate.type != LicenseState::Type::noLicenseChosenYet)
+                        return;
+                }
 
                 if (! licenses.isEmpty())
                     break;
