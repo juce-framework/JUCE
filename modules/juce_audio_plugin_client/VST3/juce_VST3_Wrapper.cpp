@@ -231,6 +231,8 @@ public:
                 info.flags = Vst::ParameterInfo::kIsReadOnly;
             else
                 info.flags = p.isParameterAutomatable (index) ? Vst::ParameterInfo::kCanAutomate : 0;
+
+            valueNormalized = info.defaultNormalizedValue;
         }
 
         virtual ~Param() {}
