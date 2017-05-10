@@ -1,0 +1,9 @@
+diff a/modules/juce_opengl/opengl/juce_OpenGLContext.h b/modules/juce_opengl/opengl/juce_OpenGLContext.h	(rejected hunks)
+@@ -288,6 +292,7 @@ private:
+     OpenGLVersion versionRequired;
+     size_t imageCacheMaxSize;
+     bool renderComponents, useMultisampling, continuousRepaint;
++    bool mobileBufferBugMitigation;
+ 
+     CachedImage* getCachedImage() const noexcept;
+ 

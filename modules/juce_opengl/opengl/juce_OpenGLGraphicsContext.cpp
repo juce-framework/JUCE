@@ -1208,8 +1208,18 @@ struct StateHelpers
 
             numVertices += 4;
 
-            if (numVertices > maxVertices)
-                draw();
+            if (context.getMobileBufferBugMitigation()) {
+                if (numVertices >= maxVertices) {
+                    //DBG("Shader quad queue: " << ((uint64)this) << " numbverts: " << numVertices << "   " << numQuads);
+                    draw();
+                }
+            }
+            else {
+                if (numVertices > maxVertices) {
+                    //DBG("Shader quad queue: " << ((uint64)this) << " numbverts: " << numVertices << "   " << numQuads);
+                    draw();
+                }
+            }
         }
 
         void add (Rectangle<int> r, PixelARGB colour) noexcept
