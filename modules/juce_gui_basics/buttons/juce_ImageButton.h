@@ -127,6 +127,9 @@ public:
     */
     Image getDownImage() const;
 
+    void setHitTestAlphaThreshold(float thresh);
+    float getHitTestAlphaThreshold() const;
+    
     //==============================================================================
     /** This abstract base class is implemented by LookAndFeel classes. */
     struct JUCE_API  LookAndFeelMethods

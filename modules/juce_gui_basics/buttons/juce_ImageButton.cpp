@@ -80,6 +80,16 @@ void ImageButton::setImages (const bool resizeButtonNowToFitThisImage,
     repaint();
 }
 
+void ImageButton::setHitTestAlphaThreshold(float thresh)
+{
+    alphaThreshold = (uint8) jlimit (0, 0xff, roundToInt (255.0f * thresh));
+}
+
+float ImageButton::getHitTestAlphaThreshold() const
+{
+    return alphaThreshold / 255.0f;
+}
+
 Image ImageButton::getCurrentImage() const
 {
     if (isDown() || getToggleState())
