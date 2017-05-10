@@ -428,7 +428,8 @@ public:
             if (filter->isSuspended())
             {
                 for (int i = 0; i < numOut; ++i)
-                    FloatVectorOperations::clear (outputs[i], numSamples);
+                    if (outputs[i] != nullptr)
+                        FloatVectorOperations::clear (outputs[i], numSamples);
             }
             else
             {
@@ -441,17 +442,25 @@ public:
                     {
                         chan = outputs[i];
 
-                        // if some output channels are disabled, some hosts supply the same buffer
-                        // for multiple channels - this buggers up our method of copying the
-                        // inputs over the outputs, so we need to create unique temp buffers in this case..
+                        bool bufferPointerReusedForOtherChannels = false;
+
                         for (int j = i; --j >= 0;)
                         {
                             if (outputs[j] == chan)
                             {
-                                chan = new FloatType [(size_t) blockSize * 2];
-                                tmpBuffers.tempChannels.set (i, chan);
+                                bufferPointerReusedForOtherChannels = true;
                                 break;
                             }
+                        }
+
+                        // if some output channels are disabled, some hosts supply the same buffer
+                        // for multiple channels or supply a nullptr - this buggers up our method
+                        // of copying the inputs over the outputs, so we need to create unique temp
+                        // buffers in this case..
+                        if (bufferPointerReusedForOtherChannels || chan == nullptr)
+                        {
+                            chan = new FloatType [(size_t) blockSize * 2];
+                            tmpBuffers.tempChannels.set (i, chan);
                         }
                     }
 
