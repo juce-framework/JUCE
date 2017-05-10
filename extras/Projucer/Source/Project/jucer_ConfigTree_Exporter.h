@@ -51,6 +51,7 @@ public:
             else if    (e->isVisualStudio()) return Icon (getIcons().visualStudio, Colours::transparentBlack);
             else if    (e->isAndroid())      return Icon (getIcons().android, Colours::transparentBlack);
             else if    (e->isLinux())        return Icon (getIcons().linux, Colours::transparentBlack);
+            else if    (e->isCodeBlocks())   return Icon (getIcons().codeBlocks, Colours::transparentBlack);
         }
 
         return Icon();
