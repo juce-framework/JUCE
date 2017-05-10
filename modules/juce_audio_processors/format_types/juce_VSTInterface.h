@@ -143,7 +143,9 @@ enum VstHostToPlugInOpcodes
     plugInOpcodeStopProcess,
     plugInOpcodeSetNumberOfSamplesToProcess,
     plugInOpcodeSetSampleFloatType = plugInOpcodeSetNumberOfSamplesToProcess + 4,
-    plugInOpcodeMaximum = plugInOpcodeSetSampleFloatType
+    pluginOpcodeGetNumMidiInputChannels,
+    pluginOpcodeGetNumMidiOutputChannels,
+    plugInOpcodeMaximum = pluginOpcodeGetNumMidiOutputChannels
 };
 
 

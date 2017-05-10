@@ -1171,6 +1171,8 @@ public:
             case plugInOpcodeGetSpeakerArrangement:       return handleGetSpeakerConfiguration (args);
             case plugInOpcodeSetNumberOfSamplesToProcess: return handleSetNumberOfSamplesToProcess (args);
             case plugInOpcodeSetSampleFloatType:          return handleSetSampleFloatType (args);
+            case pluginOpcodeGetNumMidiInputChannels:     return handleGetNumMidiInputChannels();
+            case pluginOpcodeGetNumMidiOutputChannels:    return handleGetNumMidiOutputChannels();
             default:                                      return 0;
         }
     }
@@ -2008,6 +2010,25 @@ private:
         }
 
         return 0;
+    }
+
+    //==============================================================================
+    pointer_sized_int handleGetNumMidiInputChannels()
+    {
+       #if JucePlugin_WantsMidiInput || JucePlugin_IsMidiEffect
+        return 16;
+       #else
+        return 0;
+       #endif
+    }
+
+    pointer_sized_int handleGetNumMidiOutputChannels()
+    {
+       #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
+        return 16;
+       #else
+        return 0;
+       #endif
     }
 
     //==============================================================================
