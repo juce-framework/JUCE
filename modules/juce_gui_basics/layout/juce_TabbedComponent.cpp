@@ -159,6 +159,11 @@ void TabbedComponent::addTab (const String& tabName,
     resized();
 }
 
+void TabbedComponent::setTabDeleteComponentWhenNotNeeded (int tabIndex, bool flag)
+{
+    contentComponents [tabIndex]->getProperties().set (TabbedComponentHelpers::deleteComponentId, flag);
+}
+
 void TabbedComponent::setTabName (int tabIndex, const String& newName)
 {
     tabs->setTabName (tabIndex, newName);

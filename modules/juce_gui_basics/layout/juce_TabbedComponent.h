@@ -142,6 +142,10 @@ public:
     /** Changes the background colour of one of the tabs. */
     void setTabBackgroundColour (int tabIndex, Colour newColour);
 
+    /** Set deletion policy on removal */
+    void setTabDeleteComponentWhenNotNeeded (int tabIndex, bool flag);
+
+
     //==============================================================================
     /** Changes the currently-selected tab.
         To deselect all the tabs, pass -1 as the index.
