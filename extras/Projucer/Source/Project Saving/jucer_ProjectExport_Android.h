@@ -797,6 +797,9 @@ private:
     //==============================================================================
     void copyActivityJavaFiles (const OwnedArray<LibraryModule>& modules, const File& targetFolder, const String& package) const
     {
+        if (androidActivityClass.get().contains ("_"))
+            throw SaveError ("Your Android activity class name or path may not contain any underscores! Try a project name without underscores.");
+
         const String className (getActivityName());
 
         if (className.isEmpty())
