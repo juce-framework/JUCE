@@ -196,6 +196,9 @@ struct AppearanceEditor
             auto fontValue = scheme.getCodeFontValue();
             props.add (FontNameValueSource::createProperty ("Code Editor Font", fontValue));
             props.add (FontSizeValueSource::createProperty ("Font Size", fontValue));
+            
+            Value lineSpacingValue (scheme.getLineSpacingValue());
+            props.add (LineSpacingValueSource::createProperty ("Line Spacing", lineSpacingValue));
 
             const auto colourNames = scheme.getColourNames();
 
@@ -321,6 +324,28 @@ struct AppearanceEditor
         {
             return new SliderPropertyComponent (Value (new FontSizeValueSource (value)),
                                                 title, 5.0, 40.0, 0.1, 0.5);
+        }
+    };
+
+    //==============================================================================
+    struct LineSpacingValueSource : public ValueSourceFilter
+    {
+        LineSpacingValueSource(const Value& source) : ValueSourceFilter(source) {}
+
+        var getValue() const override
+        {
+            return sourceValue.toString();
+        }
+
+        void setValue (const var& newValue) override
+        {
+            sourceValue = newValue.toString();
+        }
+
+        static PropertyComponent* createProperty (const String& title, const Value& value)
+        {
+            return new SliderPropertyComponent (Value (new LineSpacingValueSource (value)),
+                                                title, 1.0, 1.6, 0.1, 1.0);
         }
     };
 };

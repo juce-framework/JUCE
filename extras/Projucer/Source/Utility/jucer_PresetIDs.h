@@ -236,6 +236,7 @@ namespace Ids
     DECLARE_ID (classDecl);
     DECLARE_ID (initialisers);
     DECLARE_ID (destructors);
+    DECLARE_ID (lineSpacing);
 
     const Identifier ID ("id");
     const Identifier ID_uppercase ("ID");

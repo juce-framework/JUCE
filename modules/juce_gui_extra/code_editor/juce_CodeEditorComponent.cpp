@@ -338,6 +338,7 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& doc, CodeTokeniser* cons
       firstLineOnScreen (0),
       spacesPerTab (4),
       lineHeight (0),
+      lineSpacing (1.0f),
       linesOnScreen (0),
       columnsOnScreen (0),
       scrollbarThickness (16),
@@ -407,6 +408,16 @@ void CodeEditorComponent::loadContent (const String& newContent)
     selectionStart.setPosition (0);
     selectionEnd.setPosition (0);
     scrollToLine (0);
+}
+
+void CodeEditorComponent::setLineSpacing(float factor)
+{
+    if (factor >= 0.2f && factor <= 3.0f)
+        lineSpacing = factor;
+    else
+        lineSpacing = 1.0f;
+
+    lineHeight = roundToInt (font.getHeight() * lineSpacing);
 }
 
 bool CodeEditorComponent::isTextInputActive() const
@@ -1512,7 +1523,7 @@ void CodeEditorComponent::setFont (const Font& newFont)
 {
     font = newFont;
     charWidth = font.getStringWidthFloat ("0");
-    lineHeight = roundToInt (font.getHeight());
+    lineHeight = roundToInt (font.getHeight() * lineSpacing);
     resized();
 }
 

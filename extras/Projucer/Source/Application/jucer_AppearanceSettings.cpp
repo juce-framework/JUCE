@@ -148,6 +148,11 @@ Font AppearanceSettings::getDefaultCodeFont()
     return Font (Font::getDefaultMonospacedFontName(), Font::getDefaultStyle(), 13.0f);
 }
 
+float AppearanceSettings::getDefaultLineSpacing()
+{
+    return 1.0f;
+}
+
 StringArray AppearanceSettings::getColourNames() const
 {
     StringArray s;
@@ -180,6 +185,7 @@ void AppearanceSettings::applyToCodeEditor (CodeEditorComponent& editor) const
 
     editor.setColourScheme (cs);
     editor.setFont (getCodeFont());
+    editor.setLineSpacing (getLineSpacing());
 
     editor.setColour (ScrollBar::thumbColourId, editor.findColour (CodeEditorComponent::backgroundColourId)
                                                       .contrasting()
@@ -199,6 +205,21 @@ Font AppearanceSettings::getCodeFont() const
 Value AppearanceSettings::getCodeFontValue()
 {
     return settings.getPropertyAsValue (Ids::font, nullptr);
+}
+
+float AppearanceSettings::getLineSpacing() const
+{
+    const String lineSpacingString (settings[Ids::lineSpacing].toString());
+
+    if (lineSpacingString.isEmpty())
+        return getDefaultLineSpacing();
+
+    return lineSpacingString.getFloatValue();
+}
+
+Value AppearanceSettings::getLineSpacingValue()
+{
+    return settings.getPropertyAsValue (Ids::lineSpacing, nullptr);
 }
 
 Value AppearanceSettings::getColourValue (const String& colourName)
