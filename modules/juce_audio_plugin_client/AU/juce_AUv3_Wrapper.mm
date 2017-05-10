@@ -337,8 +337,7 @@ public:
         auto& processor = getAudioProcessor();
         processor.removeListener (this);
 
-        if (AudioProcessorEditor* editor = processor.getActiveEditor())
-            processor.editorBeingDeleted (editor);
+        removeEditor (processor);
 
         if (editorObserverToken != nullptr)
         {
@@ -786,6 +785,17 @@ public:
             lastAudioHead = info;
 
         return true;
+    }
+
+    static void removeEditor (AudioProcessor& processor)
+    {
+        ScopedLock editorLock (processor.getCallbackLock());
+
+        if (AudioProcessorEditor* editor = processor.getActiveEditor())
+        {
+            processor.editorBeingDeleted (editor);
+            delete editor;
+        }
     }
 
 private:
@@ -1308,6 +1318,9 @@ public:
     ~JuceAUViewController()
     {
         jassert (MessageManager::getInstance()->isThisTheMessageThread());
+
+        if (processorHolder != nullptr)
+            JuceAudioUnitv3::removeEditor (getAudioProcessor());
     }
 
     //==============================================================================
