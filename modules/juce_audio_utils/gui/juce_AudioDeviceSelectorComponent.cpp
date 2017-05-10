@@ -1094,6 +1094,9 @@ void AudioDeviceSelectorComponent::resized()
 
     if (midiOutputSelector != nullptr)
         midiOutputSelector->setBounds (r.removeFromTop (itemHeight));
+
+    r.removeFromTop (itemHeight);
+    setSize (getWidth(), r.getY());
 }
 
 void AudioDeviceSelectorComponent::timerCallback()
