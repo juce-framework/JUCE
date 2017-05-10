@@ -53,7 +53,7 @@ template <typename ElementType,
 class Array
 {
 private:
-    typedef PARAMETER_TYPE (ElementType) ParameterType;
+    typedef typename TypeHelpers::ParameterType<ElementType>::type ParameterType;
 
 public:
     //==============================================================================
