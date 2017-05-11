@@ -971,9 +971,9 @@ private:
     void copyWithRounding (Rectangle<double>& result) const noexcept { result = toDouble(); }
 
     static int floorAsInt (int n) noexcept     { return n; }
-    static int floorAsInt (float n) noexcept   { return n > (float)  std::numeric_limits<int>::min() ? std::floor (n) : (int) std::numeric_limits<int>::min(); }
-    static int floorAsInt (double n) noexcept  { return n > (double) std::numeric_limits<int>::min() ? std::floor (n) : (int) std::numeric_limits<int>::min(); }
+    static int floorAsInt (float n) noexcept   { return n > (float)  std::numeric_limits<int>::min() ? (int) std::floor (n) : std::numeric_limits<int>::min(); }
+    static int floorAsInt (double n) noexcept  { return n > (double) std::numeric_limits<int>::min() ? (int) std::floor (n) : std::numeric_limits<int>::min(); }
     static int ceilAsInt (int n) noexcept      { return n; }
-    static int ceilAsInt (float n) noexcept    { return n < (float)  std::numeric_limits<int>::max() ? std::ceil (n) : (int) std::numeric_limits<int>::max(); }
-    static int ceilAsInt (double n) noexcept   { return n < (double) std::numeric_limits<int>::max() ? std::ceil (n) : (int) std::numeric_limits<int>::max(); }
+    static int ceilAsInt (float n) noexcept    { return n < (float)  std::numeric_limits<int>::max() ? (int) std::ceil (n) : std::numeric_limits<int>::max(); }
+    static int ceilAsInt (double n) noexcept   { return n < (double) std::numeric_limits<int>::max() ? (int) std::ceil (n) : std::numeric_limits<int>::max(); }
 };
