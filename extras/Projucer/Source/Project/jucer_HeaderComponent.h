@@ -316,6 +316,7 @@ public:
         auto selectedName = getSelectedExporterName();
 
         exporterBox.clear();
+        int preferredExporterIndex = 0;
 
         int i = 0;
         for (Project::ExporterIterator exporter (*project); exporter.next(); ++i)
@@ -324,10 +325,13 @@ public:
 
             if (selectedName == exporter->getName())
                 exporterBox.setSelectedId (i + 1);
+
+            if (exporter->canLaunchProject())
+                preferredExporterIndex = i;
         }
 
         if (exporterBox.getSelectedItemIndex() == -1)
-            exporterBox.setSelectedItemIndex (0);
+            exporterBox.setSelectedItemIndex (preferredExporterIndex);
 
         updateExporterButton();
     }
