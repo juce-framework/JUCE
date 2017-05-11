@@ -434,6 +434,8 @@ private:
         scanProjectItem (proj.getMainGroup(), compileUnits, userFiles);
 
         {
+            const bool isPluginProject = proj.getProjectType().isAudioPlugin();
+
             OwnedArray<LibraryModule> modules;
             proj.getModules().createRequiredModules (modules);
 
@@ -447,7 +449,13 @@ private:
                                                           ? proj.getLocalModuleFolder (m->moduleInfo.getID())
                                                           : m->moduleInfo.getFolder();
 
-                        m->findAndAddCompiledUnits (*exporter, nullptr, compileUnits);
+
+                        m->findAndAddCompiledUnits (*exporter, nullptr, compileUnits,
+                                                    isPluginProject ? ProjectType::Target::SharedCodeTarget
+                                                                    : ProjectType::Target::unspecified);
+
+                        if (isPluginProject)
+                            m->findAndAddCompiledUnits (*exporter, nullptr, compileUnits, ProjectType::Target::StandalonePlugIn);
                     }
 
                     break;

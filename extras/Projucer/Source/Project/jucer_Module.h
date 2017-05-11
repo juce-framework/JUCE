@@ -116,8 +116,9 @@ public:
         static bool hasSuffix (const File&, const char*);
     };
 
-    Array<CompileUnit> getAllCompileUnits() const;
-    void findAndAddCompiledUnits (ProjectExporter&, ProjectSaver*, Array<File>& result) const;
+    Array<CompileUnit> getAllCompileUnits (ProjectType::Target::Type forTarget = ProjectType::Target::unspecified) const;
+    void findAndAddCompiledUnits (ProjectExporter&, ProjectSaver*, Array<File>& result,
+                                  ProjectType::Target::Type forTarget = ProjectType::Target::unspecified) const;
 
     ModuleDescription moduleInfo;
 

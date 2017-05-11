@@ -461,7 +461,7 @@ String LibraryModule::CompileUnit::getFilenameForProxyFile() const
     return "include_" + file.getFileName();
 }
 
-Array<LibraryModule::CompileUnit> LibraryModule::getAllCompileUnits() const
+Array<LibraryModule::CompileUnit> LibraryModule::getAllCompileUnits (ProjectType::Target::Type forTarget) const
 {
     Array<File> files;
     getFolder().findChildFiles (files, File::findFiles, false);
@@ -476,9 +476,13 @@ Array<LibraryModule::CompileUnit> LibraryModule::getAllCompileUnits() const
         if (file.getFileName().startsWithIgnoreCase (getID())
               && file.hasFileExtension (sourceFileExtensions))
         {
-            CompileUnit cu;
-            cu.file = file;
-            units.add (cu);
+            if (forTarget == ProjectType::Target::unspecified
+             || forTarget == Project::getTargetTypeFromFilePath (file, true))
+            {
+                CompileUnit cu;
+                cu.file = file;
+                units.add (cu);
+            }
         }
     }
 
@@ -499,9 +503,10 @@ Array<LibraryModule::CompileUnit> LibraryModule::getAllCompileUnits() const
 
 void LibraryModule::findAndAddCompiledUnits (ProjectExporter& exporter,
                                              ProjectSaver* projectSaver,
-                                             Array<File>& result) const
+                                             Array<File>& result,
+                                             ProjectType::Target::Type forTarget) const
 {
-    for (auto& cu : getAllCompileUnits())
+    for (auto& cu : getAllCompileUnits (forTarget))
     {
         if (cu.isNeededForExporter (exporter))
         {
