@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="PAnJXP" name="AudioAppExample" projectType="guiapp" version="1.0.0"
-              bundleIdentifier="com.yourcompany.AudioAppExample" includeBinaryInAppConfig="1"
+              bundleIdentifier="com.roli.AudioAppExample" includeBinaryInAppConfig="1"
               jucerVersion="5.0.1" displaySplashScreen="0" reportAppUsage="0"
-              splashScreenColour="Dark">
+              splashScreenColour="Dark" companyName="ROLI Ltd.">
   <MAINGROUP id="GaJIge" name="AudioAppExample">
     <GROUP id="{168FC5D4-FA65-8320-F83E-C14C416638E1}" name="Source">
       <FILE id="aHvhJ2" name="MainComponent.cpp" compile="1" resource="0"

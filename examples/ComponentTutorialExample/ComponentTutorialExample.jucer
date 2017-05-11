@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="oNvA5C" name="ComponentTutorialExample" projectType="guiapp"
-              version="1.0.0" bundleIdentifier="com.yourcompany.ComponentTutorialExample"
+              version="1.0.0" bundleIdentifier="com.roli.ComponentTutorialExample"
               includeBinaryInAppConfig="1" jucerVersion="5.0.1" displaySplashScreen="0"
-              reportAppUsage="0" splashScreenColour="Dark">
+              reportAppUsage="0" splashScreenColour="Dark" companyName="ROLI Ltd.">
   <MAINGROUP id="WydTVz" name="ComponentTutorialExample">
     <GROUP id="{F2C8112A-EE4B-7AF1-A0A9-16152D1EF1A7}" name="Source">
       <FILE id="t4ngZQ" name="ToggleLightGridComponent.h" compile="0" resource="0"
