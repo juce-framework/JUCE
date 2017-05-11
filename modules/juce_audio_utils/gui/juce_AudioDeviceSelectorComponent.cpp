@@ -488,8 +488,13 @@ public:
         {
             jassert (setup.manager->getCurrentAudioDevice() == nullptr); // not the correct device type!
 
+            inputChanLabel = nullptr;
+            outputChanLabel = nullptr;
             sampleRateLabel = nullptr;
             bufferSizeLabel = nullptr;
+
+            inputChanList = nullptr;
+            outputChanList = nullptr;
             sampleRateDropDown = nullptr;
             bufferSizeDropDown = nullptr;
 
