@@ -492,8 +492,12 @@ public:
 
                 // copy back any temp channels that may have been used..
                 for (i = 0; i < numOut; ++i)
-                    if (const FloatType* const chan = tmpBuffers.tempChannels.getUnchecked(i))
+                {
+                    const FloatType* const chan = tmpBuffers.tempChannels.getUnchecked(i);
+
+                    if (chan != nullptr && outputs[i] != nullptr)
                         memcpy (outputs[i], chan, sizeof (FloatType) * (size_t) numSamples);
+                }
             }
         }
 
