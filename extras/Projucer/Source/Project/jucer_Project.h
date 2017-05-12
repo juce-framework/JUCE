@@ -341,6 +341,9 @@ public:
     bool hasProjectBeenModified();
     void updateModificationTime() { modificationTime = getFile().getLastModificationTime(); }
 
+    //==============================================================================
+    bool shouldWaitAfterSaving = false;
+
 private:
     //==============================================================================
     void setMissingAudioPluginDefaultValues();

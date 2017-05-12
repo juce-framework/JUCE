@@ -280,13 +280,6 @@ public:
 
         // Deleting the .rsrc files can be needed to force Xcode to update the version number.
         deleteRsrcFiles (getTargetFolder().getChildFile ("build"));
-
-        if (! ProjucerApplication::getApp().isRunningCommandLine)
-        {
-            // Workaround for a bug where Xcode thinks the project is invalid if opened immedietely
-            // after writing
-            Thread::sleep (2000);
-        }
     }
 
     //==============================================================================

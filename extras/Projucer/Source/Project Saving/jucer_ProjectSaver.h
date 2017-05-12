@@ -48,28 +48,29 @@ public:
     struct SaveThread  : public ThreadWithProgressWindow
     {
     public:
-        SaveThread (ProjectSaver& ps)
+        SaveThread (ProjectSaver& ps, bool wait = false)
             : ThreadWithProgressWindow ("Saving...", true, false),
-              saver (ps), result (Result::ok())
+              saver (ps), result (Result::ok()), shouldWaitAfterSaving (wait)
         {}
 
         void run() override
         {
             setProgress (-1);
-            result = saver.save (false);
+            result = saver.save (false, shouldWaitAfterSaving);
         }
 
         ProjectSaver& saver;
         Result result;
+        bool shouldWaitAfterSaving;
 
         JUCE_DECLARE_NON_COPYABLE (SaveThread)
     };
 
-    Result save (bool showProgressBox)
+    Result save (bool showProgressBox, bool waitAfterSaving)
     {
         if (showProgressBox)
         {
-            SaveThread thread (*this);
+            SaveThread thread (*this, waitAfterSaving);
             thread.runThread();
             return thread.result;
         }
@@ -108,6 +109,11 @@ public:
             project.setFile (oldFile);
             return Result::fail (errors[0]);
         }
+
+        // Workaround for a bug where Xcode thinks the project is invalid if opened immedietely
+        // after writing
+        if (waitAfterSaving)
+            Thread::sleep (2000);
 
         return Result::ok();
     }
