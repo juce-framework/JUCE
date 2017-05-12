@@ -602,7 +602,8 @@ class VSTPluginInstance     : public AudioPluginInstance,
                               private AsyncUpdater
 {
 private:
-    VSTPluginInstance (const ModuleHandle::Ptr& mh, const BusesProperties& ioConfig, VstEffectInterface* effect)
+    VSTPluginInstance (const ModuleHandle::Ptr& mh, const BusesProperties& ioConfig, VstEffectInterface* effect,
+                       double sampleRateToUse, int blockSizeToUse)
         : AudioPluginInstance (ioConfig),
           vstEffect (effect),
           vstModule (mh),
@@ -611,7 +612,9 @@ private:
           wantsMidiMessages (false),
           initialised (false),
           isPowerOn (false)
-    {}
+    {
+        setRateAndBufferSizeDetails (sampleRateToUse, blockSizeToUse);
+    }
 
 public:
     ~VSTPluginInstance()
@@ -678,17 +681,15 @@ public:
 
             newEffect->dispatchFunction (newEffect, plugInOpcodeIdentify, 0, 0, 0, 0);
 
+            auto blockSize = jmax (32, initialBlockSize);
+
             newEffect->dispatchFunction (newEffect, plugInOpcodeSetSampleRate, 0, 0, 0, static_cast<float> (initialSampleRate));
-            newEffect->dispatchFunction (newEffect, plugInOpcodeSetBlockSize,  0, jmax (32, initialBlockSize), 0, 0);
+            newEffect->dispatchFunction (newEffect, plugInOpcodeSetBlockSize,  0, blockSize, 0, 0);
 
             newEffect->dispatchFunction (newEffect, plugInOpcodeOpen, 0, 0, 0, 0);
             BusesProperties ioConfig = queryBusIO (newEffect);
-            newEffect->dispatchFunction (newEffect, plugInOpcodeClose, 0, 0, 0, 0);
 
-            newEffect = constructEffect (newModule);
-
-            if (newEffect != nullptr)
-                return new VSTPluginInstance (newModule, ioConfig, newEffect);
+            return new VSTPluginInstance (newModule, ioConfig, newEffect, initialSampleRate, blockSize);
         }
 
         return nullptr;
