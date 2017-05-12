@@ -126,7 +126,7 @@ namespace std
         {
             virtual ~FunctorHolderBase() {};
             virtual size_t getSize() const noexcept = 0;
-            virtual FunctorHolderBase* copy (void*) const = 0;
+            virtual void copy (void*) const = 0;
             virtual ReturnType operator()(Args...) = 0;
         };
 
@@ -140,9 +140,9 @@ namespace std
                 return sizeof (*this);
             }
 
-            FunctorHolder* copy (void* destination) const override final
+            void copy (void* destination) const override final
             {
-                return new (destination) FunctorHolder (f);
+                new (destination) FunctorHolder (f);
             }
 
             ReturnType operator()(Args... args) override final
