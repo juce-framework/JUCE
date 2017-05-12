@@ -110,6 +110,18 @@ private:
 
     File getFakeFile() const
     {
+        if (FileHelpers::isAbsolutePath (path))
+        {
+          #if JUCE_WINDOWS
+            // This is a hack to convert unix-style absolute paths into valid absolute Windows paths to avoid hitting
+            // an assertion in File::parseAbsolutePath().
+            if (path.startsWithChar (L'/') || path.startsWithChar (L'$') || path.startsWithChar (L'~'))
+                return File (String ("C:\\") + FileHelpers::windowsStylePath (path.substring (1)));
+          #endif
+
+            return File (path);
+        }
+
         // This method gets called very often, so we'll cache this directory.
         static const File currentWorkingDirectory (File::getCurrentWorkingDirectory());
         return currentWorkingDirectory.getChildFile (path);
