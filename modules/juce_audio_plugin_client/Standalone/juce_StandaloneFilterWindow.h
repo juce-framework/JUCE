@@ -35,9 +35,9 @@
     computer's audio/MIDI devices using AudioDeviceManager and AudioProcessorPlayer.
 */
 class StandalonePluginHolder
-   #if JUCE_IOS || JUCE_ANDROID
-    : private Timer
-   #endif
+                               #if JUCE_IOS || JUCE_ANDROID
+                                : private Timer
+                               #endif
 {
 public:
     /** Creates an instance of the default plugin.
@@ -95,7 +95,7 @@ public:
         jassert (processor != nullptr); // Your createPluginFilter() function must return a valid object!
 
         processor->disableNonMainBuses();
-        processor->setRateAndBufferSizeDetails(44100, 512);
+        processor->setRateAndBufferSizeDetails (44100, 512);
     }
 
     virtual void deletePlugin()
@@ -188,7 +188,7 @@ public:
        #if JucePlugin_Enable_IAA && JUCE_IOS
         if (auto device = dynamic_cast<iOSAudioIODevice*> (deviceManager.getCurrentAudioDevice()))
         {
-            processor->setPlayHead                (device->getAudioPlayHead());
+            processor->setPlayHead (device->getAudioPlayHead());
             device->setMidiMessageCollector (&player.getMidiMessageCollector());
         }
        #endif
@@ -299,7 +299,7 @@ public:
         ignoreUnused (size);
        #endif
 
-        return Image();
+        return {};
     }
    #endif
 
@@ -320,7 +320,7 @@ private:
                             const AudioDeviceManager::AudioDeviceSetup* preferredSetupOptions)
     {
         deviceManager.addAudioCallback (&player);
-        deviceManager.addMidiInputCallback (String(), &player);
+        deviceManager.addMidiInputCallback ({}, &player);
 
         reloadAudioDeviceState (preferredDefaultDeviceName, preferredSetupOptions);
     }
@@ -329,41 +329,32 @@ private:
     {
         saveAudioDeviceState();
 
-        deviceManager.removeMidiInputCallback (String(), &player);
+        deviceManager.removeMidiInputCallback ({}, &player);
         deviceManager.removeAudioCallback (&player);
     }
 
    #if JUCE_IOS || JUCE_ANDROID
     void timerCallback() override
     {
-        StringArray midiInputDevices = MidiInput::getDevices();
-        if (midiInputDevices != lastMidiDevices)
-        {
-            {
-                const int n = lastMidiDevices.size();
-                for (int i = 0; i < n; ++i)
-                {
-                    const String& oldDevice = lastMidiDevices[i];
+        auto newMidiDevices = MidiInput::getDevices();
 
-                    if (! midiInputDevices.contains (oldDevice))
-                    {
-                        deviceManager.setMidiInputEnabled (oldDevice, false);
-                        deviceManager.removeMidiInputCallback (oldDevice, &player);
-                    }
+        if (newMidiDevices != lastMidiDevices)
+        {
+            for (auto& oldDevice : lastMidiDevices)
+            {
+                if (! newMidiDevices.contains (oldDevice))
+                {
+                    deviceManager.setMidiInputEnabled (oldDevice, false);
+                    deviceManager.removeMidiInputCallback (oldDevice, &player);
                 }
             }
 
+            for (auto& newDevice : newMidiDevices)
             {
-                const int n = midiInputDevices.size();
-                for (int i = 0; i < n; ++i)
+                if (! lastMidiDevices.contains (newDevice))
                 {
-                    const String& newDevice = midiInputDevices[i];
-
-                    if (! lastMidiDevices.contains (newDevice))
-                    {
-                        deviceManager.addMidiInputCallback (newDevice, &player);
-                        deviceManager.setMidiInputEnabled (newDevice, true);
-                    }
+                    deviceManager.addMidiInputCallback (newDevice, &player);
+                    deviceManager.setMidiInputEnabled (newDevice, true);
                 }
             }
         }
@@ -416,13 +407,13 @@ public:
         Desktop::getInstance().setKioskModeComponent (this, false);
        #else
 
-        if (PropertySet* props = pluginHolder->settings)
+        if (auto* props = pluginHolder->settings.get())
         {
             const int x = props->getIntValue ("windowX", -100);
             const int y = props->getIntValue ("windowY", -100);
 
             if (x != -100 && y != -100)
-                setBoundsConstrained (juce::Rectangle<int> (x, y, getWidth(), getHeight()));
+                setBoundsConstrained ({ x, y, getWidth(), getHeight() });
             else
                 centreWithSize (getWidth(), getHeight());
         }
@@ -436,7 +427,7 @@ public:
     ~StandaloneFilterWindow()
     {
        #if (! JUCE_IOS) && (! JUCE_ANDROID)
-        if (PropertySet* props = pluginHolder->settings)
+        if (auto* props = pluginHolder->settings.get())
         {
             props->setValue ("windowX", getX());
             props->setValue ("windowY", getY());
@@ -459,7 +450,7 @@ public:
 
     void deleteEditorComp()
     {
-        if (AudioProcessorEditor* ed = dynamic_cast<AudioProcessorEditor*> (getContentComponent()))
+        if (auto* ed = dynamic_cast<AudioProcessorEditor*> (getContentComponent()))
         {
             pluginHolder->processor->editorBeingDeleted (ed);
             clearContentComponent();
@@ -473,7 +464,7 @@ public:
         deleteEditorComp();
         pluginHolder->deletePlugin();
 
-        if (PropertySet* props = pluginHolder->settings)
+        if (auto* props = pluginHolder->settings.get())
             props->removeValue ("filterState");
 
         pluginHolder->createPlugin();
@@ -541,7 +532,7 @@ StandalonePluginHolder* StandalonePluginHolder::getInstance()
    #if JucePlugin_Enable_IAA || JucePlugin_Build_STANDALONE
     if (PluginHostType::getPluginLoadedAs() == AudioProcessor::wrapperType_Standalone)
     {
-        Desktop& desktop (Desktop::getInstance());
+        auto& desktop = Desktop::getInstance();
         const int numTopLevelWindows = desktop.getNumComponents();
 
         for (int i = 0; i < numTopLevelWindows; ++i)
