@@ -35,9 +35,40 @@ namespace FunctionTestsHelpers
     void incrementArgument (int& x) { x++; };
     double multiply (double x, double a) noexcept { return a * x; };
 
-    struct AddOne
+    struct BigData
     {
-        int operator()(int i) const { return i + 1; }
+        BigData()
+        {
+            for (auto i = 0; i < bigDataSize; ++i)
+                content[i] = i + 1;
+        }
+
+        int sum() const
+        {
+            int result = 0;
+            for (auto i = 0; i < bigDataSize; ++i)
+                result += content[i];
+
+            return result;
+        }
+
+        static const int bigDataSize = 32,
+                         bigDataSum = bigDataSize * (bigDataSize + 1) / 2;
+        int content[bigDataSize];
+    };
+
+    struct FunctionObject
+    {
+        FunctionObject() {}
+
+        FunctionObject (const FunctionObject& other)
+        {
+            bigData = new BigData (*other.bigData);
+        }
+
+        int operator()(int i) const { return bigData->sum() + i; }
+
+        ScopedPointer<BigData> bigData { new BigData() };
     };
 }
 
@@ -48,12 +79,7 @@ public:
 
     void runTest() override
     {
-        struct BigData
-        {
-            int content[32];
-        };
-        BigData bigData;
-        bigData.content[0] = 8;
+        FunctionTestsHelpers::BigData bigData;
 
         {
             beginTest ("Functions");
@@ -71,8 +97,8 @@ public:
 
         {
             beginTest ("Function objects");
-            std::function<int(int)> f1 = FunctionTestsHelpers::AddOne();
-            expectEquals (f1 (5), 6);
+            std::function<int(int)> f1 = FunctionTestsHelpers::FunctionObject();
+            expectEquals (f1 (5), FunctionTestsHelpers::BigData::bigDataSum + 5);
         }
 
         {
@@ -81,8 +107,8 @@ public:
             std::function<int()> fStack ([]() { return 3; });
             expectEquals (fStack(), 3);
 
-            std::function<int()> fHeap ([=]() { return bigData.content[0]; });
-            expectEquals (fHeap(), 8);
+            std::function<int()> fHeap ([=]() { return bigData.sum(); });
+            expectEquals (fHeap(), FunctionTestsHelpers::BigData::bigDataSum);
         }
 
         {
@@ -103,7 +129,7 @@ public:
 
         std::function<int()> fStack ([]() { return 3; });
 
-        std::function<int()> fHeap ([=]() { return bigData.content[0]; });
+        std::function<int()> fHeap ([=]() { return bigData.sum(); });
 
         {
             beginTest ("copy constructor");
@@ -112,7 +138,7 @@ public:
             expectEquals (f1(), 3);
 
             std::function<int()> f2 (fHeap);
-            expectEquals (f2(), 8);
+            expectEquals (f2(), FunctionTestsHelpers::BigData::bigDataSum);
 
             std::function<int()> f3 (fEmpty);
             if (f3)
@@ -128,10 +154,10 @@ public:
 
             std::function<int()> f2;
             f2 = fHeap;
-            expectEquals (f2(), 8);
+            expectEquals (f2(), FunctionTestsHelpers::BigData::bigDataSum);
 
             f1 = fHeap;
-            expectEquals (f1(), 8);
+            expectEquals (f1(), FunctionTestsHelpers::BigData::bigDataSum);
 
             f2 = fStack;
             expectEquals (f2(), 3);
@@ -144,21 +170,21 @@ public:
         {
             beginTest ("move constructor");
 
-            ScopedPointer<std::function<int()>> fStackTmp = new std::function<int()> (fStack);
+            ScopedPointer<std::function<int()>> fStackTmp (new std::function<int()> (fStack));
             std::function<int()> f1 (static_cast<std::function<int()>&&> (*fStackTmp));
 
             fStackTmp = nullptr;
             expectEquals (f1(), 3);
 
-            ScopedPointer<std::function<int()>> fHeapTmp = new std::function<int()> (fHeap);
+            ScopedPointer<std::function<int()>> fHeapTmp (new std::function<int()> (fHeap));
             std::function<int()> f2 (static_cast<std::function<int()>&&> (*fHeapTmp));
             if (*fHeapTmp)
                 expect (false);
 
             fHeapTmp = nullptr;
-            expectEquals (f2(), 8);
+            expectEquals (f2(), FunctionTestsHelpers::BigData::bigDataSum);
 
-            ScopedPointer<std::function<int()>> fEmptyTmp = new std::function<int()>();
+            ScopedPointer<std::function<int()>> fEmptyTmp (new std::function<int()>());
             std::function<int()> f3 (static_cast<std::function<int()>&&> (*fEmptyTmp));
             fEmptyTmp = nullptr;
             if (f3)
@@ -169,23 +195,23 @@ public:
             beginTest ("move assignment");
 
             std::function<int()> f1 (fHeap);
-            ScopedPointer<std::function<int()>> fStackTmp = new std::function<int()> (fStack);
+            ScopedPointer<std::function<int()>> fStackTmp (new std::function<int()> (fStack));
             f1 = static_cast<std::function<int()>&&> (*fStackTmp);
 
             fStackTmp = nullptr;
             expectEquals (f1(), 3);
 
             std::function<int()> f2 (fStack);
-            ScopedPointer<std::function<int()>> fHeapTmp = new std::function<int()> (fHeap);
+            ScopedPointer<std::function<int()>> fHeapTmp (new std::function<int()> (fHeap));
             f2 = static_cast<std::function<int()>&&> (*fHeapTmp);
             if (*fHeapTmp)
                 expect (false);
 
             fHeapTmp = nullptr;
-            expectEquals (f2(), 8);
+            expectEquals (f2(), FunctionTestsHelpers::BigData::bigDataSum);
 
             std::function<int()> f3 (fHeap);
-            ScopedPointer<std::function<int()>> fEmptyTmp = new std::function<int()> ();
+            ScopedPointer<std::function<int()>> fEmptyTmp (new std::function<int()>());
             f3 = static_cast<std::function<int()>&&> (*fEmptyTmp);
             fEmptyTmp = nullptr;
             if (f3)
@@ -218,7 +244,7 @@ public:
             std::function<int()> f3 (fHeap);
             f3.swap (f1);
             expectEquals (f3(), 3);
-            expectEquals (f1(), 8);
+            expectEquals (f1(), FunctionTestsHelpers::BigData::bigDataSum);
         }
     }
 };
