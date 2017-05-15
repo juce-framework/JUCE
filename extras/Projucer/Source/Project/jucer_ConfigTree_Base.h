@@ -156,7 +156,7 @@ public:
 
             pp->setBounds (40, height, width - 50, propertyHeight);
 
-            resizeContentIfChoicePropertyComponent (pp);
+            resizePropertyComponent (pp);
 
             height += pp->getHeight() + 10;
         }
@@ -184,14 +184,13 @@ public:
         return static_cast<int> (nameWidth / availableTextWidth);
     }
 
-    void resizeContentIfChoicePropertyComponent (PropertyComponent* pp)
+    void resizePropertyComponent (PropertyComponent* pp)
     {
-        if (auto* choiceComp = dynamic_cast<ChoicePropertyComponent*> (pp))
+        if (auto* propertyChild = pp->getChildComponent (0))
         {
-            auto* box = choiceComp->getChildComponent (0);
-            auto bounds = box->getBounds();
+            auto bounds = propertyChild->getBounds();
 
-            box->setBounds (bounds.withSizeKeepingCentre (box->getWidth(), pp->getPreferredHeight()));
+            propertyChild->setBounds (bounds.withSizeKeepingCentre (propertyChild->getWidth(), pp->getPreferredHeight()));
         }
     }
 
