@@ -186,6 +186,9 @@ public:
 
     void resizePropertyComponent (PropertyComponent* pp)
     {
+        if (pp->getName() == "Dependencies")
+            return;
+
         if (auto* propertyChild = pp->getChildComponent (0))
         {
             auto bounds = propertyChild->getBounds();
