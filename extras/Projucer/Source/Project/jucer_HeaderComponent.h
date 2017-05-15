@@ -486,7 +486,7 @@ private:
 
         for (auto info : ProjectExporter::getExporterTypes())
         {
-            if (info.name == currentExporterName)
+            if (currentExporterName.contains (info.name))
             {
                 saveAndOpenInIDEButton->iconImage = info.getIcon();
                 saveAndOpenInIDEButton->repaint();
