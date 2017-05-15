@@ -566,6 +566,7 @@ void ProjucerLookAndFeel::setupColours()
     setColour (CodeEditorComponent::backgroundColourId,         findColour (secondaryBackgroundColourId));
     setColour (CodeEditorComponent::lineNumberTextId,           findColour (codeEditorLineNumberColourId));
     setColour (CodeEditorComponent::lineNumberBackgroundId,     findColour (backgroundColourId));
+    setColour (CodeEditorComponent::highlightColourId,          findColour (defaultHighlightColourId).withAlpha (0.5f));
     setColour (CaretComponent::caretColourId,                   findColour (defaultButtonBackgroundColourId));
     setColour (TreeView::selectedItemBackgroundColourId,        findColour (defaultHighlightColourId));
 }
