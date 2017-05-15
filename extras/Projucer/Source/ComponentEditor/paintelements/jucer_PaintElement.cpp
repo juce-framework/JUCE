@@ -260,7 +260,8 @@ void PaintElement::paint (Graphics& g)
             const BorderSize<int> borderSize (border->getBorderThickness());
 
             drawResizableBorder (g, getWidth(), getHeight(), borderSize,
-                                 (isMouseOverOrDragging() || border->isMouseOverOrDragging()));
+                                 (isMouseOverOrDragging() || border->isMouseOverOrDragging()),
+                                 findColour (defaultHighlightColourId));
         }
         else if (isMouseOverOrDragging())
         {

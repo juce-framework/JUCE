@@ -317,14 +317,7 @@ void ProjucerLookAndFeel::drawMenuBarItem (Graphics& g, int width, int height,
 
 void ProjucerLookAndFeel::drawResizableFrame (Graphics& g, int w, int h, const BorderSize<int>& border)
 {
-    if (! border.isEmpty())
-    {
-        const Rectangle<int> fullSize (0, 0, w, h);
-        const Rectangle<int> centreArea (border.subtractedFrom (fullSize));
-
-        g.excludeClipRegion (centreArea);
-        g.fillAll (getCurrentColourScheme().getUIColour (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
-    }
+    ignoreUnused (g, w, h, border);
 }
 
 void ProjucerLookAndFeel::drawComboBox (Graphics& g, int width, int height, bool,

@@ -85,9 +85,10 @@ inline String castToFloat (const String& expression)
 
 inline void drawResizableBorder (Graphics& g, int w, int h,
                                  const BorderSize<int> borderSize,
-                                 const bool isMouseOver)
+                                 const bool isMouseOver,
+                                 Colour borderColour)
 {
-    g.setColour (Colours::orange.withAlpha (isMouseOver ? 0.4f : 0.3f));
+    g.setColour (borderColour.withAlpha (isMouseOver ? 0.6f : 0.5f));
 
     g.fillRect (0, 0, w, borderSize.getTop());
     g.fillRect (0, 0, borderSize.getLeft(), h);
@@ -108,7 +109,7 @@ inline void drawMouseOverCorners (Graphics& g, int w, int h)
     r.subtract (Rectangle<int> (size, 0, w - size - size, h));
     r.subtract (Rectangle<int> (0, size, w, h - size - size));
 
-    g.setColour (Colours::darkgrey);
+    g.setColour (Colours::black);
 
     for (int i = r.getNumRectangles(); --i >= 0;)
         g.fillRect (r.getRectangle (i));

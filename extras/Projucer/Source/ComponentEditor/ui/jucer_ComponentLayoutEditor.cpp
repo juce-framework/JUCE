@@ -57,7 +57,9 @@ public:
                 grid.draw (g, background);
             }
             else
+            {
                 grid.draw (g, nullptr);
+            }
         }
     }
 
@@ -97,6 +99,12 @@ public:
     void moved() override
     {
         ((ComponentLayoutEditor*) getParentComponent())->updateOverlayPositions();
+    }
+
+    void lookAndFeelChanged() override
+    {
+        if (auto* pr = document.getPaintRoutine (0))
+            pr->setBackgroundColour (findColour (backgroundColourId));
     }
 
     JucerDocument& document;

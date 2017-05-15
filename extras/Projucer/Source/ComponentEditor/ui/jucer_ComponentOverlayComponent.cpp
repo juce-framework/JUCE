@@ -78,11 +78,14 @@ void ComponentOverlayComponent::paint (Graphics& g)
 {
     jassert (target != nullptr);
 
+    border->setColour (backgroundColourId, Colours::transparentBlack);
     if (selected)
     {
         const BorderSize<int> borderSize (border->getBorderThickness());
 
-        drawResizableBorder (g, getWidth(), getHeight(), borderSize, (isMouseOverOrDragging() || border->isMouseOverOrDragging()));
+        drawResizableBorder (g, getWidth(), getHeight(), borderSize,
+                             (isMouseOverOrDragging() || border->isMouseOverOrDragging()),
+                             findColour (defaultHighlightColourId));
     }
     else if (isMouseOverOrDragging())
     {
