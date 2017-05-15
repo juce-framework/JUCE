@@ -1413,13 +1413,48 @@ void Project::addNewExporter (const String& exporterName)
 {
     ScopedPointer<ProjectExporter> exp (ProjectExporter::createNewExporter (*this, exporterName));
 
-    ValueTree exporters (getExporters());
-    exporters.addChild (exp->settings, -1, getUndoManagerFor (exporters));
+    exp->getTargetLocationValue() = exp->getTargetLocationString()
+                                       + getUniqueTargetFolderSuffixForExporter (exp->getName(), exp->getTargetLocationString());
+
+    auto exportersTree = getExporters();
+    exportersTree.addChild (exp->settings, -1, getUndoManagerFor (exportersTree));
 }
 
 void Project::createExporterForCurrentPlatform()
 {
     addNewExporter (ProjectExporter::getCurrentPlatformExporterName());
+}
+
+String Project::getUniqueTargetFolderSuffixForExporter (const String& exporterName, const String& base)
+{
+    StringArray buildFolders;
+
+    auto exportersTree = getExporters();
+    auto type = ProjectExporter::getValueTreeNameForExporter (exporterName);
+
+    for (int i = 0; i < exportersTree.getNumChildren(); ++i)
+    {
+        auto exporterNode = exportersTree.getChild (i);
+
+        if (exporterNode.getType() == Identifier (type))
+            buildFolders.add (exporterNode.getProperty ("targetFolder").toString());
+    }
+
+    if (buildFolders.size() == 0 || ! buildFolders.contains (base))
+        return {};
+
+    buildFolders.remove (buildFolders.indexOf (base));
+
+    auto num = 1;
+    for (auto f : buildFolders)
+    {
+        if (! f.endsWith ("_" + String (num)))
+            break;
+
+        ++num;
+    }
+
+    return "_" + String (num);
 }
 
 //==============================================================================

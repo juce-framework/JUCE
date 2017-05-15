@@ -316,7 +316,7 @@ public:
         auto selectedName = getSelectedExporterName();
 
         exporterBox.clear();
-        int preferredExporterIndex = 0;
+        auto preferredExporterIndex = -1;
 
         int i = 0;
         for (Project::ExporterIterator exporter (*project); exporter.next(); ++i)
@@ -326,12 +326,13 @@ public:
             if (selectedName == exporter->getName())
                 exporterBox.setSelectedId (i + 1);
 
-            if (exporter->canLaunchProject())
+            if (exporter->canLaunchProject() && preferredExporterIndex == -1)
                 preferredExporterIndex = i;
         }
 
         if (exporterBox.getSelectedItemIndex() == -1)
-            exporterBox.setSelectedItemIndex (preferredExporterIndex);
+            exporterBox.setSelectedItemIndex (preferredExporterIndex != -1 ? preferredExporterIndex
+                                                                           : 0);
 
         updateExporterButton();
     }
@@ -427,7 +428,10 @@ private:
     void changeListenerCallback (ChangeBroadcaster* source) override
     {
         if (source == project)
+        {
             updateName();
+            updateExporters();
+        }
     }
 
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override       {}

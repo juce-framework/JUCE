@@ -342,6 +342,9 @@ public:
     void updateModificationTime() { modificationTime = getFile().getLastModificationTime(); }
 
     //==============================================================================
+    String getUniqueTargetFolderSuffixForExporter (const String& exporterName, const String& baseTargetFolder);
+
+    //==============================================================================
     bool shouldWaitAfterSaving = false;
 
 private:

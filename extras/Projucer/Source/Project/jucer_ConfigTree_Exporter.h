@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-class ExporterItem   : public ConfigTreeItemBase
+class ExporterItem   : public ConfigTreeItemBase,
+                       private Value::Listener
 {
 public:
     ExporterItem (Project& p, ProjectExporter* e, int index)
@@ -32,6 +33,8 @@ public:
           exporterIndex (index)
     {
         configListTree.addListener (this);
+        targetLocationValue.referTo (exporter->getTargetLocationValue());
+        targetLocationValue.addListener (this);
     }
 
     int getItemHeight() const override        { return 25; }
@@ -42,6 +45,7 @@ public:
     String getDisplayName() const override    { return exporter->getName(); }
     void setName (const String&) override     {}
     bool isMissing() const override           { return false; }
+    String getTooltip() override              { return getDisplayName(); }
 
     static Icon getIconForExporter (ProjectExporter* e)
     {
@@ -154,6 +158,14 @@ private:
     ScopedPointer<ProjectExporter> exporter;
     ValueTree configListTree;
     int exporterIndex;
+
+    Value targetLocationValue;
+
+    void valueChanged (Value& value) override
+    {
+        if (value == exporter->getTargetLocationValue())
+            refreshSubItems();
+    }
 
     //==============================================================================
     struct SettingsComp  : public Component

@@ -30,7 +30,8 @@ class ProjectContentComponent;
 class Project;
 
 //==============================================================================
-class JucerTreeViewBase   : public TreeViewItem
+class JucerTreeViewBase   : public TreeViewItem,
+                            public TooltipClient
 {
 public:
     JucerTreeViewBase();
@@ -75,6 +76,8 @@ public:
     virtual void showPopupMenu();
     virtual void showPlusMenu();
     virtual void handlePopupMenuResult (int resultCode);
+
+    String getTooltip() override    { return {}; }
 
     //==============================================================================
     // To handle situations where an item gets deleted before openness is

@@ -60,6 +60,8 @@ public:
 
     static StringArray getExporterNames();
     static Array<ExporterTypeInfo> getExporterTypes();
+    static String getValueTreeNameForExporter (const String& exporterName);
+    static StringArray getAllDefaultBuildsFolders();
 
     static ProjectExporter* createNewExporter (Project&, const int index);
     static ProjectExporter* createNewExporter (Project&, const String& name);
@@ -125,7 +127,7 @@ public:
     }
 
     //==============================================================================
-    String getName() const                      { return name; }
+    String getName() const;
     File getTargetFolder() const;
 
     Project& getProject() noexcept              { return project; }
