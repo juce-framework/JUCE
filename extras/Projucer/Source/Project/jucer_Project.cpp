@@ -383,7 +383,7 @@ Result Project::saveProject (const File& file, bool isCommandLineApp)
     const ScopedValueSetter<bool> vs (isSaving, true, false);
 
     ProjectSaver saver (*this, file);
-    return saver.save (! isCommandLineApp, shouldWaitAfterSaving);
+    return saver.save (! isCommandLineApp, shouldWaitAfterSaving, specifiedExporterToSave);
 }
 
 Result Project::saveResourcesOnly (const File& file)

@@ -92,8 +92,9 @@ public:
     {
         PopupMenu menu;
         menu.addItem (1, "Add a new configuration", exporter->supportsUserDefinedConfigurations());
+        menu.addItem (2, "Save this exporter");
         menu.addSeparator();
-        menu.addItem (2, "Delete this exporter");
+        menu.addItem (3, "Delete this exporter");
 
         launchPopupMenu (menu);
     }
@@ -108,10 +109,19 @@ public:
 
     void handlePopupMenuResult (int resultCode) override
     {
-        if (resultCode == 2)
-            deleteAllSelectedItems();
-        else if (resultCode == 1)
+        if (resultCode == 1)
+        {
             exporter->addNewConfiguration (nullptr);
+        }
+        else if (resultCode == 2)
+        {
+            const ScopedValueSetter<String> valueSetter (project.specifiedExporterToSave, exporter->getName(), {});
+            project.save (true, true);
+        }
+        else if (resultCode == 3)
+        {
+            deleteAllSelectedItems();
+        }
     }
 
     var getDragSourceDescription() override
@@ -243,14 +253,10 @@ public:
 
     void handlePopupMenuResult (int resultCode) override
     {
-        if (resultCode == 2)
-        {
-            deleteAllSelectedItems();
-        }
-        else if (resultCode == 1)
-        {
+        if (resultCode == 1)
             exporter.addNewConfiguration (config);
-        }
+        else if (resultCode == 2)
+            deleteAllSelectedItems();
     }
 
     var getDragSourceDescription() override

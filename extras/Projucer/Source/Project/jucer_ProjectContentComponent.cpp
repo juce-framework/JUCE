@@ -546,6 +546,7 @@ bool ProjectContentComponent::setEditorComponent (Component* editor,
         {
             contentView = editor;
             currentDocument = doc;
+            fileNameLabel->setText (doc->getFile().getFileName(), dontSendNotification);
             fileNameLabel->setVisible (true);
 
             addAndMakeVisible (editor);

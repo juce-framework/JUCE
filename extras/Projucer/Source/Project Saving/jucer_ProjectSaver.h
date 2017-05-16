@@ -48,29 +48,32 @@ public:
     struct SaveThread  : public ThreadWithProgressWindow
     {
     public:
-        SaveThread (ProjectSaver& ps, bool wait = false)
+        SaveThread (ProjectSaver& ps, bool wait, const String& exp)
             : ThreadWithProgressWindow ("Saving...", true, false),
-              saver (ps), result (Result::ok()), shouldWaitAfterSaving (wait)
+              saver (ps), result (Result::ok()),
+              shouldWaitAfterSaving (wait),
+              specifiedExporterToSave (exp)
         {}
 
         void run() override
         {
             setProgress (-1);
-            result = saver.save (false, shouldWaitAfterSaving);
+            result = saver.save (false, shouldWaitAfterSaving, specifiedExporterToSave);
         }
 
         ProjectSaver& saver;
         Result result;
         bool shouldWaitAfterSaving;
+        String specifiedExporterToSave;
 
         JUCE_DECLARE_NON_COPYABLE (SaveThread)
     };
 
-    Result save (bool showProgressBox, bool waitAfterSaving)
+    Result save (bool showProgressBox, bool waitAfterSaving, const String& specifiedExporterToSave)
     {
         if (showProgressBox)
         {
-            SaveThread thread (*this, waitAfterSaving);
+            SaveThread thread (*this, waitAfterSaving, specifiedExporterToSave);
             thread.runThread();
             return thread.result;
         }
@@ -94,7 +97,7 @@ public:
             writeBinaryDataFiles();
             writeAppHeader (modules);
             writeModuleCppWrappers (modules);
-            writeProjects (modules);
+            writeProjects (modules, specifiedExporterToSave);
             writeAppConfigFile (modules, appConfigUserContent); // (this is repeated in case the projects added anything to it)
 
             if (generatedCodeFolder.exists())
@@ -648,7 +651,7 @@ private:
 
     void writePluginCharacteristicsFile();
 
-    void writeProjects (const OwnedArray<LibraryModule>& modules)
+    void writeProjects (const OwnedArray<LibraryModule>& modules, const String& specifiedExporterToSave)
     {
         ThreadPool threadPool;
 
@@ -659,6 +662,9 @@ private:
         {
             for (Project::ExporterIterator exporter (project); exporter.next();)
             {
+                if (specifiedExporterToSave.isNotEmpty() && exporter->getName() != specifiedExporterToSave)
+                    continue;
+
                 if (exporter->getTargetFolder().createDirectory())
                 {
                     exporter->copyMainGroupFromProject();
