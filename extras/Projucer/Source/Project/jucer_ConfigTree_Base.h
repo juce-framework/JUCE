@@ -224,9 +224,9 @@ public:
 
     void closeSettingsPage()
     {
-        if (ProjectContentComponent* pcc = getProjectContentComponent())
+        if (auto* pcc = getProjectContentComponent())
         {
-            if (auto* content = dynamic_cast<Viewport*> (pcc->getEditorComponent()))
+            if (auto* content = dynamic_cast<Viewport*> (pcc->getEditorComponent()->getChildComponent (0)))
                 if (content->getViewedComponent()->getComponentID() == getUniqueName())
                     pcc->hideEditor();
         }
