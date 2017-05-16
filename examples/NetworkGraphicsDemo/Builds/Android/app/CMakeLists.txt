@@ -5,11 +5,14 @@ cmake_minimum_required(VERSION 3.4.1)
 
 SET(BINARY_NAME "juce_jni")
 
+add_library("cpufeatures" STATIC "${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c")
+
 add_definitions("-DJUCE_ANDROID=1" "-DJUCE_ANDROID_API_VERSION=10" "-DJUCE_ANDROID_ACTIVITY_CLASSNAME=com_juce_networkgraphicsdemo_JUCENetworkGraphicsDemo" "-DJUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/juce/networkgraphicsdemo/JUCENetworkGraphicsDemo\"")
 
 include_directories( AFTER
     "../../../JuceLibraryCode"
     "../../../../../modules"
+    "${ANDROID_NDK}/sources/android/cpufeatures"
 )
 
 IF(JUCE_BUILD_CONFIGFURATION MATCHES "DEBUG")
@@ -2468,4 +2471,5 @@ target_link_libraries( ${BINARY_NAME}
     ${android}
     ${glesv2}
     ${egl}
+    "cpufeatures"
 )
