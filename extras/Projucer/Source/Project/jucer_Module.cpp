@@ -563,20 +563,22 @@ void LibraryModule::addBrowseableCode (ProjectExporter& exporter, const Array<Fi
 
     const RelativePath moduleFromProject (exporter.getModuleFolderRelativeToProject (getID()));
 
+    auto moduleHeader = moduleInfo.getHeader();
+
     for (auto& sourceFile : sourceFiles)
     {
         auto pathWithinModule = FileHelpers::getRelativePathFrom (sourceFile, localModuleFolder);
 
         // (Note: in exporters like MSVC we have to avoid adding the same file twice, even if one of those instances
         // is flagged as being excluded from the build, because this overrides the other and it fails to compile)
-        if (exporter.canCopeWithDuplicateFiles() || ! compiled.contains (sourceFile))
+        if ((exporter.canCopeWithDuplicateFiles() || ! compiled.contains (sourceFile)) && sourceFile != moduleHeader)
             addFileWithGroups (sourceGroup,
                                moduleFromProject.getChildFile (pathWithinModule),
                                pathWithinModule);
     }
 
     sourceGroup.sortAlphabetically (true, true);
-    sourceGroup.addFileAtIndex (moduleInfo.getHeader(), -1, false);
+    sourceGroup.addFileAtIndex (moduleHeader, -1, false);
 
     exporter.getModulesGroup().state.addChild (sourceGroup.state.createCopy(), -1, nullptr);
 }

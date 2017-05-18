@@ -196,12 +196,21 @@ public:
         //==============================================================================
         void writeProjectFile()
         {
-            XmlElement projectXml (getTopLevelXmlEntity());
-            fillInProjectXml (projectXml);
-            writeXmlOrThrow (projectXml, getVCProjFile(), "UTF-8", 10);
+            {
+                XmlElement projectXml (getTopLevelXmlEntity());
+                fillInProjectXml (projectXml);
+                writeXmlOrThrow (projectXml, getVCProjFile(), "UTF-8", 10);
+            }
+
+            {
+                XmlElement filtersXml (getTopLevelXmlEntity());
+                fillInFiltersXml (filtersXml);
+                writeXmlOrThrow (filtersXml, getVCProjFiltersFile(), "UTF-8", 100);
+            }
         }
 
         virtual void fillInProjectXml (XmlElement& projectXml) const = 0;
+        virtual void fillInFiltersXml (XmlElement& filtersXml) const = 0;
 
         String getSolutionTargetPath (const BuildConfiguration& config) const
         {
@@ -542,8 +551,10 @@ public:
         }
 
         virtual String getProjectFileSuffix() const = 0;
+        virtual String getFiltersFileSuffix() const = 0;
 
-        File getVCProjFile() const    { return getOwner().getProjectFile (getProjectFileSuffix(), getName()); }
+        File getVCProjFile() const            { return getOwner().getProjectFile (getProjectFileSuffix(), getName()); }
+        File getVCProjFiltersFile() const     { return getOwner().getProjectFile (getFiltersFileSuffix(), getName()); }
 
         String createRebasedPath (const RelativePath& path) const    {  return getOwner().createRebasedPath (path); }
 
@@ -761,36 +772,36 @@ protected:
     }
 
     //==============================================================================
-    virtual void addSolutionFiles (OutputStream&, StringArray&) const
-    {
-         // older VS targets do not support solution files, so do nothing!
-    }
-
     void writeProjectDependencies (OutputStream& out) const
     {
         const String sharedCodeGuid = getSharedCodeGuid();
-        for (int i = 0; i < targets.size(); ++i)
+
+        for (int addingOtherTargets = 0; addingOtherTargets < (sharedCodeGuid.isNotEmpty() ? 2 : 1); ++addingOtherTargets)
         {
-            if (MSVCTargetBase* target = targets[i])
+            for (int i = 0; i < targets.size(); ++i)
             {
-                out << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" << projectName << " - "
-                    << target->getName() << "\", \""
-                    << target->getVCProjFile().getFileName() << "\", \"" << target->getProjectGuid() << '"' << newLine;
+                if (MSVCTargetBase* target = targets[i])
+                {
+                    if (sharedCodeGuid.isEmpty() || (addingOtherTargets != 0) == (target->type != ProjectType::Target::StandalonePlugIn))
+                    {
+                        out << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" << projectName << " - "
+                            << target->getName() << "\", \""
+                            << target->getVCProjFile().getFileName() << "\", \"" << target->getProjectGuid() << '"' << newLine;
 
-                if (sharedCodeGuid.isNotEmpty() && target->type != ProjectType::Target::SharedCodeTarget)
-                    out << "\tProjectSection(ProjectDependencies) = postProject" << newLine
-                        << "\t\t" << sharedCodeGuid << " = " << sharedCodeGuid << newLine
-                        << "\tEndProjectSection" << newLine;
+                        if (sharedCodeGuid.isNotEmpty() && target->type != ProjectType::Target::SharedCodeTarget)
+                            out << "\tProjectSection(ProjectDependencies) = postProject" << newLine
+                                << "\t\t" << sharedCodeGuid << " = " << sharedCodeGuid << newLine
+                                << "\tEndProjectSection" << newLine;
 
-                out << "EndProject" << newLine;
+                        out << "EndProject" << newLine;
+                    }
+                }
             }
         }
     }
 
     void writeSolutionFile (OutputStream& out, const String& versionString, String commentString) const
     {
-        StringArray nestedProjects;
-
         if (commentString.isNotEmpty())
             commentString += newLine;
 
@@ -798,7 +809,6 @@ protected:
             << commentString << newLine;
 
         writeProjectDependencies (out);
-        addSolutionFiles (out, nestedProjects);
 
         out << "Global" << newLine
             << "\tGlobalSection(SolutionConfigurationPlatforms) = preSolution" << newLine;
@@ -826,13 +836,6 @@ protected:
             << "\tGlobalSection(SolutionProperties) = preSolution" << newLine
             << "\t\tHideSolutionNode = FALSE" << newLine
             << "\tEndGlobalSection" << newLine;
-
-        if (nestedProjects.size() > 0)
-        {
-            out << "\tGlobalSection(NestedProjects) = preSolution" << newLine << "\t\t";
-            out << nestedProjects.joinIntoString ("\n\t\t") << newLine;
-            out << "\tEndGlobalSection" << newLine;
-        }
 
         out << "EndGlobal" << newLine;
     }
@@ -1110,6 +1113,7 @@ public:
         const MSVCProjectExporterVC2010& getOwner() const  { return dynamic_cast<const MSVCProjectExporterVC2010&> (owner); }
         String getProjectVersionString() const override    { return "10.00"; }
         String getProjectFileSuffix() const override       { return ".vcxproj"; }
+        String getFiltersFileSuffix() const override       { return ".vcxproj.filters"; }
         String getTopLevelXmlEntity() const override       { return "Project"; }
 
         //==============================================================================
@@ -1473,20 +1477,34 @@ public:
                 for (int i = 0; i < projectItem.getNumChildren(); ++i)
                     addFilesToCompile (projectItem.getChild (i), cpps, headers, otherFiles);
             }
-            else if (projectItem.shouldBeAddedToTargetProject())
+            else if (projectItem.shouldBeAddedToTargetProject()
+                     && getOwner().getProject().getTargetTypeFromFilePath (projectItem.getFile(), true) == targetType)
             {
                 const RelativePath path (projectItem.getFile(), getOwner().getTargetFolder(), RelativePath::buildTargetFolder);
 
                 jassert (path.getRoot() == RelativePath::buildTargetFolder);
 
-                if (projectItem.shouldBeCompiled() && (path.hasFileExtension (cOrCppFileExtensions) || path.hasFileExtension (asmFileExtensions))
-                    && getOwner().getProject().getTargetTypeFromFilePath (projectItem.getFile(), true) == targetType)
+                if (path.hasFileExtension (cOrCppFileExtensions) || path.hasFileExtension (asmFileExtensions))
                 {
-                    XmlElement* e = cpps.createNewChildElement ("ClCompile");
-                    e->setAttribute ("Include", path.toWindowsStyle());
+                    if (targetType == SharedCodeTarget || projectItem.shouldBeCompiled())
+                    {
+                        auto* e = cpps.createNewChildElement ("ClCompile");
+                        e->setAttribute ("Include", path.toWindowsStyle());
 
-                    if (shouldUseStdCall (path))
-                        e->createNewChildElement ("CallingConvention")->addTextElement ("StdCall");
+                        if (shouldUseStdCall (path))
+                            e->createNewChildElement ("CallingConvention")->addTextElement ("StdCall");
+
+                        if (! projectItem.shouldBeCompiled())
+                            e->createNewChildElement ("ExcludedFromBuild")->addTextElement ("true");
+                    }
+                }
+                else if (path.hasFileExtension (headerFileExtensions))
+                {
+                    headers.createNewChildElement ("ClInclude")->setAttribute ("Include", path.toWindowsStyle());
+                }
+                else if (! path.hasFileExtension (objCFileExtensions))
+                {
+                    otherFiles.createNewChildElement ("None")->setAttribute ("Include", path.toWindowsStyle());
                 }
             }
         }
@@ -1495,6 +1513,121 @@ public:
         {
             const MSVCBuildConfiguration& msvcConfig = dynamic_cast<const MSVCBuildConfiguration&> (config);
             xml.setAttribute ("Condition", "'$(Configuration)|$(Platform)'=='" + msvcConfig.createMSVCConfigName() + "'");
+        }
+
+        //==============================================================================
+        void addFilterGroup (XmlElement& groups, const String& path) const
+        {
+            XmlElement* e = groups.createNewChildElement ("Filter");
+            e->setAttribute ("Include", path);
+            e->createNewChildElement ("UniqueIdentifier")->addTextElement (createGUID (path + "_guidpathsaltxhsdf"));
+        }
+
+        void addFileToFilter (const RelativePath& file, const String& groupPath,
+                              XmlElement& cpps, XmlElement& headers, XmlElement& otherFiles) const
+        {
+            XmlElement* e;
+
+            if (file.hasFileExtension (headerFileExtensions))
+                e = headers.createNewChildElement ("ClInclude");
+            else if (file.hasFileExtension (sourceFileExtensions))
+                e = cpps.createNewChildElement ("ClCompile");
+            else
+                e = otherFiles.createNewChildElement ("None");
+
+            jassert (file.getRoot() == RelativePath::buildTargetFolder);
+            e->setAttribute ("Include", file.toWindowsStyle());
+            e->createNewChildElement ("Filter")->addTextElement (groupPath);
+        }
+
+        bool addFilesToFilter (const Project::Item& projectItem, const String& path,
+                               XmlElement& cpps, XmlElement& headers, XmlElement& otherFiles, XmlElement& groups) const
+        {
+            const Type targetType = (getOwner().getProject().getProjectType().isAudioPlugin() ? type : SharedCodeTarget);
+
+            if (projectItem.isGroup())
+            {
+                bool filesWereAdded = false;
+
+                for (int i = 0; i < projectItem.getNumChildren(); ++i)
+                    if (addFilesToFilter (projectItem.getChild(i),
+                                          (path.isEmpty() ? String() : (path + "\\")) + projectItem.getChild(i).getName(),
+                                          cpps, headers, otherFiles, groups))
+                        filesWereAdded = true;
+
+                if (filesWereAdded)
+                    addFilterGroup (groups, path);
+
+                return filesWereAdded;
+            }
+            else if (projectItem.shouldBeAddedToTargetProject())
+            {
+                const RelativePath relativePath (projectItem.getFile(), getOwner().getTargetFolder(), RelativePath::buildTargetFolder);
+
+                jassert (relativePath.getRoot() == RelativePath::buildTargetFolder);
+
+                if (getOwner().getProject().getTargetTypeFromFilePath (projectItem.getFile(), true) == targetType
+                    && (targetType == SharedCodeTarget || projectItem.shouldBeCompiled()))
+                {
+                    addFileToFilter (relativePath, path.upToLastOccurrenceOf ("\\", false, false), cpps, headers, otherFiles);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        bool addFilesToFilter (const Array<RelativePath>& files, const String& path,
+                               XmlElement& cpps, XmlElement& headers, XmlElement& otherFiles, XmlElement& groups)
+        {
+            if (files.size() > 0)
+            {
+                addFilterGroup (groups, path);
+
+                for (int i = 0; i < files.size(); ++i)
+                    addFileToFilter (files.getReference(i), path, cpps, headers, otherFiles);
+
+                return true;
+            }
+
+            return false;
+        }
+
+        void fillInFiltersXml (XmlElement& filterXml) const override
+        {
+            filterXml.setAttribute ("ToolsVersion", getOwner().getToolsVersion());
+            filterXml.setAttribute ("xmlns", "http://schemas.microsoft.com/developer/msbuild/2003");
+
+            XmlElement* groupsXml  = filterXml.createNewChildElement ("ItemGroup");
+            XmlElement* cpps       = filterXml.createNewChildElement ("ItemGroup");
+            XmlElement* headers    = filterXml.createNewChildElement ("ItemGroup");
+            ScopedPointer<XmlElement> otherFilesGroup (new XmlElement ("ItemGroup"));
+
+            for (int i = 0; i < getOwner().getAllGroups().size(); ++i)
+            {
+                const Project::Item& group = getOwner().getAllGroups().getReference(i);
+
+                if (group.getNumChildren() > 0)
+                    addFilesToFilter (group, group.getName(), *cpps, *headers, *otherFilesGroup, *groupsXml);
+            }
+
+            if (getOwner().iconFile.exists())
+            {
+                XmlElement* e = otherFilesGroup->createNewChildElement ("None");
+                e->setAttribute ("Include", prependDot (getOwner().iconFile.getFileName()));
+                e->createNewChildElement ("Filter")->addTextElement (ProjectSaver::getJuceCodeGroupName());
+            }
+
+            if (otherFilesGroup->getFirstChildElement() != nullptr)
+                filterXml.addChildElement (otherFilesGroup.release());
+
+            if (getOwner().hasResourceFile())
+            {
+                XmlElement* rcGroup = filterXml.createNewChildElement ("ItemGroup");
+                XmlElement* e = rcGroup->createNewChildElement ("ResourceCompile");
+                e->setAttribute ("Include", prependDot (getOwner().rcFile.getFileName()));
+                e->createNewChildElement ("Filter")->addTextElement (ProjectSaver::getJuceCodeGroupName());
+            }
         }
 
     };
@@ -1549,71 +1682,6 @@ public:
 
         addToolsetProperty (props, toolsetNames, toolsets, numElementsInArray (toolsets));
         addIPPLibraryProperty (props);
-    }
-
-    //==============================================================================
-    void addSolutionFiles (OutputStream& out, StringArray& nestedProjects) const override
-    {
-        const bool ignoreRootGroup = (getAllGroups().size() == 1);
-        const int numberOfGroups = (ignoreRootGroup ? getAllGroups().getReference (0).getNumChildren()
-                                    : getAllGroups().size());
-        for (int i = 0; i < numberOfGroups; ++i)
-        {
-            const Project::Item& group = (ignoreRootGroup ? getAllGroups().getReference (0).getChild (i)
-                                          : getAllGroups().getReference (i));
-
-            if (group.getNumChildren() > 0)
-                addSolutionFiles (out, group, nestedProjects, String());
-        }
-    }
-
-    void addSolutionFiles (OutputStream& out, const Project::Item& item, StringArray& nestedProjectList, const String& parentGuid) const
-    {
-        jassert (item.isGroup());
-
-        const String groupGuid = createGUID (item.getID());
-
-        out << "Project(\"{2150E333-8FDC-42A3-9474-1A3956D46DE8}\") = \"" << item.getName() << "\""
-            << ", \"" << item.getName() << "\", \"" << groupGuid << "\"" << newLine;
-
-        bool hasSubFiles = false;
-        const int n = item.getNumChildren();
-
-        for (int i = 0; i < n; ++i)
-        {
-            const Project::Item& child = item.getChild (i);
-
-            if (child.isFile())
-            {
-                if (! hasSubFiles)
-                {
-                    out << "\tProjectSection(SolutionItems) = preProject" << newLine;
-                    hasSubFiles = true;
-                }
-
-                const RelativePath path = RelativePath (child.getFilePath(), RelativePath::projectFolder)
-                    .rebased (getProject().getProjectFolder(), getSLNFile().getParentDirectory(),
-                              RelativePath::buildTargetFolder);
-
-                out << "\t\t" << path.toWindowsStyle() << " = " << path.toWindowsStyle() << newLine;
-            }
-        }
-
-        if (hasSubFiles)
-            out << "\tEndProjectSection" << newLine;
-
-        out << "EndProject" << newLine;
-
-        for (int i = 0; i < n; ++i)
-        {
-            const Project::Item& child = item.getChild (i);
-
-            if (child.isGroup())
-                addSolutionFiles (out, child, nestedProjectList, groupGuid);
-        }
-
-        if (parentGuid.isNotEmpty())
-            nestedProjectList.add (groupGuid + String (" = ") + parentGuid);
     }
 
     //==============================================================================
