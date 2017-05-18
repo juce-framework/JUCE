@@ -41,13 +41,18 @@ namespace
         {
             if (numHookUsers++ == 0)
             {
+#ifndef SERATO_JUCE_DISABLE_HOOKS
+                // [CUD-612] These hooks are a JUCE workaround to handle mouse wheel/keyboard events on Windows, and they are conflicting
+                // with the hooks used by QT, since they are not calling the next hook in the chain in those cases. If we leave these hooks
+                // in the chain and properly call the next one, it introduces a significant overhead, so instead we are removing it.
                 mouseWheelHook = SetWindowsHookEx (WH_MOUSE, mouseWheelHookCallback,
                                                    (HINSTANCE) Process::getCurrentModuleInstanceHandle(),
                                                    GetCurrentThreadId());
-
+                // Keyboard hooks were disabled for Cuddlefish as part of [CUD-1125]
                 keyboardHook = SetWindowsHookEx (WH_GETMESSAGE, keyboardHookCallback,
                                                  (HINSTANCE) Process::getCurrentModuleInstanceHandle(),
                                                  GetCurrentThreadId());
+#endif
             }
         }
 
