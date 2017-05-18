@@ -164,7 +164,9 @@ call &quot;c:\\SDKs\\AAX\\Utilities\\CreatePackage.bat&quot; &quot;$(OutDir)\Mul
   <ItemGroup>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_plugin_client_AAX.cpp"/>
   </ItemGroup>
-  <ItemGroup/>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\..\modules\juce_audio_plugin_client\AAX\juce_AAX_Modifier_Injector.h"/>
+  </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include=".\resources.rc"/>
   </ItemGroup>

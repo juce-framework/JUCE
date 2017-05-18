@@ -178,7 +178,8 @@
 				HEADER_SEARCH_PATHS = ("../../JuceLibraryCode", "../../../../modules", "/juce_audio_plugin_client", "$(inherited)");
 				INFOPLIST_FILE = Info-App.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.OpenGLAppExample; }; name = Debug; };
+				PRODUCT_BUNDLE_IDENTIFIER = com.roli.OpenGLAppExample;
+				USE_HEADERMAP = NO; }; name = Debug; };
 		B1560FC01F28141593B7C16C = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
@@ -207,7 +208,8 @@
 				HEADER_SEARCH_PATHS = ("../../JuceLibraryCode", "../../../../modules", "/juce_audio_plugin_client", "$(inherited)");
 				INFOPLIST_FILE = Info-App.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.OpenGLAppExample; }; name = Release; };
+				PRODUCT_BUNDLE_IDENTIFIER = com.roli.OpenGLAppExample;
+				USE_HEADERMAP = NO; }; name = Release; };
 		3132BF724B47EEFACACC0FF2 = {isa = XCBuildConfiguration; buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				ALWAYS_SEARCH_USER_PATHS = NO;

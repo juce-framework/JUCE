@@ -13,6 +13,7 @@ BEGIN
   BEGIN
     BLOCK "040904E4"
     BEGIN
+      VALUE "CompanyName",  "ROLI Ltd.\0"
       VALUE "FileDescription",  "PluckedStringsDemo\0"
       VALUE "FileVersion",  "1.0.0\0"
       VALUE "ProductName",  "PluckedStringsDemo\0"

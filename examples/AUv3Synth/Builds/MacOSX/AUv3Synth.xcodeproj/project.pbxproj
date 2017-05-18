@@ -225,6 +225,7 @@
 				OTHER_LDFLAGS = "-bundle -lAUv3Synth";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.development.AUv3Synth;
 				SDKROOT_ppc = macosx10.5;
+				USE_HEADERMAP = NO;
 				WRAPPER_EXTENSION = vst; }; name = Debug; };
 		19D80348287645B624E0C6B8 = {isa = XCBuildConfiguration; buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
@@ -261,6 +262,7 @@
 				OTHER_LDFLAGS = "-bundle -lAUv3Synth";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.development.AUv3Synth;
 				SDKROOT_ppc = macosx10.5;
+				USE_HEADERMAP = NO;
 				WRAPPER_EXTENSION = vst; }; name = Release; };
 		D36AB79B01E390C59B2BBE9E = {isa = XCBuildConfiguration; buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
@@ -296,6 +298,7 @@
 				OTHER_LDFLAGS = "-bundle -lAUv3Synth";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.development.AUv3Synth;
 				SDKROOT_ppc = macosx10.5;
+				USE_HEADERMAP = NO;
 				WRAPPER_EXTENSION = vst3; }; name = Debug; };
 		11C129F26625007CE9DFD618 = {isa = XCBuildConfiguration; buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
@@ -332,6 +335,7 @@
 				OTHER_LDFLAGS = "-bundle -lAUv3Synth";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.development.AUv3Synth;
 				SDKROOT_ppc = macosx10.5;
+				USE_HEADERMAP = NO;
 				WRAPPER_EXTENSION = vst3; }; name = Release; };
 		DC95EAEBECC74A55CADCD887 = {isa = XCBuildConfiguration; buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
@@ -363,7 +367,8 @@
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_LDFLAGS = "-lAUv3Synth";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.development.AUv3Synth.AUv3SynthAUv3;
-				SDKROOT_ppc = macosx10.5; }; name = Debug; };
+				SDKROOT_ppc = macosx10.5;
+				USE_HEADERMAP = NO; }; name = Debug; };
 		5FAC649347835B831BAE3C41 = {isa = XCBuildConfiguration; buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
@@ -395,7 +400,8 @@
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_LDFLAGS = "-lAUv3Synth";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.development.AUv3Synth.AUv3SynthAUv3;
-				SDKROOT_ppc = macosx10.5; }; name = Release; };
+				SDKROOT_ppc = macosx10.5;
+				USE_HEADERMAP = NO; }; name = Release; };
 		B3D851DD41548F02C540B34A = {isa = XCBuildConfiguration; buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_LINK_OBJC_RUNTIME = NO;
@@ -424,7 +430,8 @@
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_LDFLAGS = "-lAUv3Synth";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.development.AUv3Synth;
-				SDKROOT_ppc = macosx10.5; }; name = Debug; };
+				SDKROOT_ppc = macosx10.5;
+				USE_HEADERMAP = NO; }; name = Debug; };
 		635F6CAD05365F797820B5D7 = {isa = XCBuildConfiguration; buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_LINK_OBJC_RUNTIME = NO;
@@ -454,7 +461,8 @@
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_LDFLAGS = "-lAUv3Synth";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.development.AUv3Synth;
-				SDKROOT_ppc = macosx10.5; }; name = Release; };
+				SDKROOT_ppc = macosx10.5;
+				USE_HEADERMAP = NO; }; name = Release; };
 		DBCA8A687AB8CE4F0FDE4C3D = {isa = XCBuildConfiguration; buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_LINK_OBJC_RUNTIME = NO;
@@ -483,7 +491,8 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.development.AUv3Synth;
-				SDKROOT_ppc = macosx10.5; }; name = Debug; };
+				SDKROOT_ppc = macosx10.5;
+				USE_HEADERMAP = NO; }; name = Debug; };
 		5DA389BE0C844A1A9E20FD7C = {isa = XCBuildConfiguration; buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_LINK_OBJC_RUNTIME = NO;
@@ -513,7 +522,8 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.development.AUv3Synth;
-				SDKROOT_ppc = macosx10.5; }; name = Release; };
+				SDKROOT_ppc = macosx10.5;
+				USE_HEADERMAP = NO; }; name = Release; };
 		D32671708EF2662A51A6335A = {isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf";

@@ -19,7 +19,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.yourcompany.jucedemo"
+        applicationId "com.roli.jucedemo"
         minSdkVersion    10
         targetSdkVersion 10
         externalNativeBuild {

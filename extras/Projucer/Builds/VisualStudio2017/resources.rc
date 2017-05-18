@@ -13,6 +13,7 @@ BEGIN
   BEGIN
     BLOCK "040904E4"
     BEGIN
+      VALUE "CompanyName",  "ROLI Ltd.\0"
       VALUE "FileDescription",  "Projucer\0"
       VALUE "FileVersion",  "5.0.1\0"
       VALUE "ProductName",  "Projucer\0"

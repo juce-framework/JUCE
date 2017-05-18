@@ -19,7 +19,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.yourcompany.miditest"
+        applicationId "com.roli.miditest"
         minSdkVersion    23
         targetSdkVersion 23
         externalNativeBuild {

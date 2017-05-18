@@ -71,8 +71,9 @@
 				INSTALL_PATH = "/usr/bin";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
-				PRODUCT_BUNDLE_IDENTIFIER = com.rawmaterialsoftware.binarybuilder;
-				SDKROOT_ppc = macosx10.5; }; name = Debug; };
+				PRODUCT_BUNDLE_IDENTIFIER = com.roli.binarybuilder;
+				SDKROOT_ppc = macosx10.5;
+				USE_HEADERMAP = NO; }; name = Debug; };
 		8A190EF24B99F557190320DA = {isa = XCBuildConfiguration; buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_LINK_OBJC_RUNTIME = NO;
@@ -100,8 +101,9 @@
 				INSTALL_PATH = "/usr/bin";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
-				PRODUCT_BUNDLE_IDENTIFIER = com.rawmaterialsoftware.binarybuilder;
-				SDKROOT_ppc = macosx10.5; }; name = Release; };
+				PRODUCT_BUNDLE_IDENTIFIER = com.roli.binarybuilder;
+				SDKROOT_ppc = macosx10.5;
+				USE_HEADERMAP = NO; }; name = Release; };
 		D9552CAECBA3D7D5725848E5 = {isa = XCBuildConfiguration; buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf";
