@@ -43,7 +43,7 @@ public:
         AdobePremierePro,
         AppleLogic,
         Ardour,
-        BitwigStudio,
+        Bitwig,
         CakewalkSonar8,
         CakewalkSonarGeneric,
         DaVinciResolve,
@@ -52,6 +52,8 @@ public:
         FinalCut,
         FruityLoops,
         MagixSamplitude,
+        Maschine2,
+        MaschineGeneric,
         MergingPyramix,
         MuseReceptorGeneric,
         Reaper,
@@ -86,7 +88,7 @@ public:
     bool isAbletonLive() const noexcept       { return type == AbletonLive6 || type == AbletonLive7 || type == AbletonLive8 || type == AbletonLiveGeneric; }
     bool isAdobeAudition() const noexcept     { return type == AdobeAudition; }
     bool isArdour() const noexcept            { return type == Ardour; }
-    bool isBitwigStudio() const noexcept      { return type == BitwigStudio; }
+	bool isBitwig() const noexcept            { return type == Bitwig; }
     bool isCubase() const noexcept            { return type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase5Bridged || type == SteinbergCubase6 || type == SteinbergCubase7 || type == SteinbergCubase8 || type == SteinbergCubaseGeneric; }
     bool isCubase7orLater() const noexcept    { return isCubase() && ! (type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase6); }
     bool isCubaseBridged() const noexcept     { return type == SteinbergCubase5Bridged; }
@@ -95,6 +97,8 @@ public:
     bool isFinalCut() const noexcept          { return type == FinalCut; }
     bool isFruityLoops() const noexcept       { return type == FruityLoops; }
     bool isLogic() const noexcept             { return type == AppleLogic; }
+	bool isMaschine2() const noexcept         { return type == Maschine2; }
+	bool isMaschineGeneric() const noexcept   { return type == MaschineGeneric; }
     bool isNuendo() const noexcept            { return type == SteinbergNuendo3 || type == SteinbergNuendo4  || type == SteinbergNuendo5 ||  type == SteinbergNuendoGeneric; }
     bool isPremiere() const noexcept          { return type == AdobePremierePro; }
     bool isProTools() const noexcept          { return type == DigidesignProTools; }
@@ -125,7 +129,8 @@ public:
             case AdobeAudition:            return "Adobe Audition";
             case AdobePremierePro:         return "Adobe Premiere";
             case AppleLogic:               return "Apple Logic";
-            case BitwigStudio:             return "Bitwig Studio";
+            case Ardour:                   return "Ardour";
+            case Bitwig:                   return "Bitwig";
             case CakewalkSonar8:           return "Cakewalk Sonar 8";
             case CakewalkSonarGeneric:     return "Cakewalk Sonar";
             case DaVinciResolve:           return "DaVinci Resolve";
@@ -134,6 +139,8 @@ public:
             case FinalCut:                 return "Final Cut";
             case FruityLoops:              return "FruityLoops";
             case MagixSamplitude:          return "Magix Samplitude";
+            case Maschine2:                return "Maschine 2";
+            case MaschineGeneric:          return "Maschine";
             case MergingPyramix:           return "Pyramix";
             case MuseReceptorGeneric:      return "Muse Receptor";
             case Reaper:                   return "Reaper";
@@ -205,7 +212,10 @@ private:
         if (hostFilename.containsIgnoreCase ("Live"))              return AbletonLiveGeneric;
         if (hostFilename.containsIgnoreCase ("Adobe Premiere"))    return AdobePremierePro;
         if (hostFilename.contains           ("Logic"))             return AppleLogic;
+		if (hostFilename.contains           ("Bitwig"))            return Bitwig;
         if (hostFilename.containsIgnoreCase ("Pro Tools"))         return DigidesignProTools;
+		if (hostFilename.containsIgnoreCase ("Maschine 2"))        return Maschine2;
+		if (hostFilename.containsIgnoreCase ("Maschine"))          return MaschineGeneric;
         if (hostFilename.containsIgnoreCase ("Nuendo 3"))          return SteinbergNuendo3;
         if (hostFilename.containsIgnoreCase ("Nuendo 4"))          return SteinbergNuendo4;
         if (hostFilename.containsIgnoreCase ("Nuendo 5"))          return SteinbergNuendo5;
@@ -227,7 +237,6 @@ private:
         if (hostFilename.containsIgnoreCase ("Tracktion"))         return TracktionGeneric;
         if (hostFilename.containsIgnoreCase ("Renoise"))           return Renoise;
         if (hostFilename.containsIgnoreCase ("Resolve"))           return DaVinciResolve;
-        if (hostFilename.startsWith         ("Bitwig"))            return BitwigStudio;
 
        #elif JUCE_WINDOWS
         if (hostFilename.containsIgnoreCase ("Live 6."))           return AbletonLive6;
@@ -236,7 +245,10 @@ private:
         if (hostFilename.containsIgnoreCase ("Live "))             return AbletonLiveGeneric;
         if (hostFilename.containsIgnoreCase ("Audition"))          return AdobeAudition;
         if (hostFilename.containsIgnoreCase ("Adobe Premiere"))    return AdobePremierePro;
+		if (hostFilename.contains           ("Bitwig"))            return Bitwig;
         if (hostFilename.containsIgnoreCase ("ProTools"))          return DigidesignProTools;
+		if (hostFilename.containsIgnoreCase ("Maschine 2"))        return Maschine2;
+		if (hostFilename.containsIgnoreCase ("Maschine"))          return MaschineGeneric;
         if (hostPath.containsIgnoreCase     ("SONAR 8"))           return CakewalkSonar8;
         if (hostFilename.containsIgnoreCase ("SONAR"))             return CakewalkSonarGeneric;
         if (hostFilename.containsIgnoreCase ("Logic"))             return AppleLogic;
@@ -267,12 +279,9 @@ private:
         if (hostFilename.startsWithIgnoreCase ("Sam"))             return MagixSamplitude;
         if (hostFilename.containsIgnoreCase ("Renoise"))           return Renoise;
         if (hostFilename.containsIgnoreCase ("Resolve"))           return DaVinciResolve;
-        if (hostPath.containsIgnoreCase     ("Bitwig Studio"))     return BitwigStudio;
 
        #elif JUCE_LINUX
         if (hostFilename.containsIgnoreCase ("Ardour"))            return Ardour;
-        if (hostFilename.startsWith         ("Bitwig"))            return BitwigStudio;
-
        #elif JUCE_IOS
        #else
         #error
