@@ -51,6 +51,7 @@ public:
         DigitalPerformer,
         FinalCut,
         FruityLoops,
+		GarageBand,
         MagixSamplitude,
         Maschine2,
         MaschineGeneric,
@@ -96,6 +97,7 @@ public:
     bool isDigitalPerformer() const noexcept  { return type == DigitalPerformer; }
     bool isFinalCut() const noexcept          { return type == FinalCut; }
     bool isFruityLoops() const noexcept       { return type == FruityLoops; }
+	bool isGarageBand() const noexcept        { return type == GarageBand; }
     bool isLogic() const noexcept             { return type == AppleLogic; }
 	bool isMaschine2() const noexcept         { return type == Maschine2; }
 	bool isMaschineGeneric() const noexcept   { return type == MaschineGeneric; }
@@ -138,6 +140,7 @@ public:
             case DigitalPerformer:         return "DigitalPerformer";
             case FinalCut:                 return "Final Cut";
             case FruityLoops:              return "FruityLoops";
+			case GarageBand:			   return "GarageBand";
             case MagixSamplitude:          return "Magix Samplitude";
             case Maschine2:                return "Maschine 2";
             case MaschineGeneric:          return "Maschine";
@@ -214,6 +217,8 @@ private:
         if (hostFilename.contains           ("Logic"))             return AppleLogic;
 		if (hostFilename.contains           ("Bitwig"))            return Bitwig;
         if (hostFilename.containsIgnoreCase ("Pro Tools"))         return DigidesignProTools;
+		if (hostFilename.startsWith         ("OsxFL"))             return FruityLoops;
+		if (hostFilename.containsIgnoreCase ("GarageBand"))        return GarageBand;
 		if (hostFilename.containsIgnoreCase ("Maschine 2"))        return Maschine2;
 		if (hostFilename.containsIgnoreCase ("Maschine"))          return MaschineGeneric;
         if (hostFilename.containsIgnoreCase ("Nuendo 3"))          return SteinbergNuendo3;
