@@ -43,7 +43,6 @@
 
   dependencies:     juce_gui_basics
   OSXFrameworks:    WebKit
-  linuxPackages:    webkit2gtk-4.0 gtk+-x11-3.0
 
  END_JUCE_MODULE_DECLARATION
 

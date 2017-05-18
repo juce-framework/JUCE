@@ -278,6 +278,25 @@ public:
         return nullptr;
     }
 
+    StringArray getPackages() const
+    {
+        StringArray packages;
+        packages.addTokens (getExtraPkgConfigString(), " ", "\"'");
+        packages.removeEmptyStrings();
+
+        packages.addArray (linuxPackages);
+
+        if (isWebBrowserComponentEnabled())
+        {
+            packages.add ("webkit2gtk-4.0");
+            packages.add ("gtk+-x11-3.0");
+        }
+
+        packages.removeDuplicates (false);
+
+        return packages;
+    }
+
 
     //==============================================================================
     MakefileProjectExporter (Project& p, const ValueTree& t)   : ProjectExporter (p, t)
@@ -390,6 +409,14 @@ public:
     }
 
 private:
+    bool isWebBrowserComponentEnabled() const
+    {
+        static String guiExtrasModule ("juce_gui_extra");
+
+        return (project.getModules().isModuleEnabled (guiExtrasModule)
+                && project.isConfigFlagEnabled ("JUCE_WEB_BROWSER", true));
+    }
+
     //==============================================================================
     void writeDefineFlags (OutputStream& out, const BuildConfiguration& config) const
     {
@@ -414,16 +441,10 @@ private:
         StringArray searchPaths (extraSearchPaths);
         searchPaths.addArray (config.getHeaderSearchPaths());
 
-        StringArray packages;
-        packages.addTokens (getExtraPkgConfigString(), " ", "\"'");
-        packages.removeEmptyStrings();
-
-        if (linuxPackages.size() > 0 || packages.size() > 0)
+        auto packages = getPackages();
+        if (packages.size() > 0)
         {
             out << " $(shell pkg-config --cflags";
-
-            for (int i = 0; i < linuxPackages.size(); ++i)
-                out << " " << linuxPackages[i];
 
             for (int i = 0; i < packages.size(); ++i)
                 out << " " << packages[i];
@@ -465,16 +486,10 @@ private:
 
         out << config.getGCCLibraryPathFlags();
 
-        StringArray packages;
-        packages.addTokens (getExtraPkgConfigString(), " ", "\"'");
-        packages.removeEmptyStrings();
-
-        if (linuxPackages.size() > 0  || packages.size() > 0)
+        auto packages = getPackages();
+        if (packages.size() > 0 )
         {
             out << " $(shell pkg-config --libs";
-
-            for (int i = 0; i < linuxPackages.size(); ++i)
-                out << " " << linuxPackages[i];
 
             for (int i = 0; i < packages.size(); ++i)
                 out << " " << packages[i];

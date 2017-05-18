@@ -1267,9 +1267,14 @@ Value Project::getConfigFlag (const String& name)
     return v;
 }
 
-bool Project::isConfigFlagEnabled (const String& name) const
+bool Project::isConfigFlagEnabled (const String& name, bool defaultIsEnabled) const
 {
-    return projectRoot.getChildWithName (Ids::JUCEOPTIONS).getProperty (name) == configFlagEnabled;
+    String configValue = projectRoot.getChildWithName (Ids::JUCEOPTIONS).getProperty (name);
+
+    if (configValue == configFlagDefault)
+        return defaultIsEnabled;
+
+    return (configValue == configFlagEnabled);
 }
 
 void Project::sanitiseConfigFlags()

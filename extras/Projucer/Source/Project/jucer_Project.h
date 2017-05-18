@@ -313,7 +313,7 @@ public:
     static const char* const configFlagDisabled;
 
     Value getConfigFlag (const String& name);
-    bool isConfigFlagEnabled (const String& name) const;
+    bool isConfigFlagEnabled (const String& name, bool defaultIsEnabled = false) const;
 
     //==============================================================================
     EnabledModuleList& getModules();
