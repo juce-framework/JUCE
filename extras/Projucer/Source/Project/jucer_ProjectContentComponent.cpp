@@ -510,6 +510,10 @@ void ProjectContentComponent::hideEditor()
 {
     currentDocument = nullptr;
     contentView = nullptr;
+
+    if (fileNameLabel != nullptr)
+        fileNameLabel->setVisible (false);
+
     ProjucerApplication::getCommandManager().commandStatusChanged();
     resized();
 }
