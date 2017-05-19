@@ -49,10 +49,16 @@ public:
     virtual void newOpenGLContextCreated() = 0;
 
     /** Called when you should render the next openGL frame.
-        Note that this callback will be made on a background thread, not the message
-        thread, so make sure that your implementation is thread-safe.
+
+        Note that this callback will be made on a background thread.
+
         If the context is attached to a component in order to do component rendering,
-        then the MessageManager may be locked when this callback is made.
+        then the MessageManager will be locked when this callback is made.
+
+        If no component rendering is being done, then the MessageManager will not be
+        locked, and you'll need to make sure your code is thread-safe in any
+        interactions it has with your GUI classes.
+
         For information about how to trigger a render callback, see
         OpenGLContext::triggerRepaint() and OpenGLContext::setContinuousRepainting().
     */
