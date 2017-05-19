@@ -116,7 +116,7 @@ public:
     bool mayCompileOnCurrentOS() const
     {
        #if JUCE_MAC
-        return isOSX() || isAndroid();
+        return isOSX() || isAndroid() || isiOS();
        #elif JUCE_WINDOWS
         return isWindows() || isAndroid();
        #elif JUCE_LINUX
