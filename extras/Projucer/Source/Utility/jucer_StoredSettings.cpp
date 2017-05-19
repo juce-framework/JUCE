@@ -83,18 +83,9 @@ PropertiesFile& StoredSettings::getProjectProperties (const String& projectUID)
 
 void StoredSettings::updateGlobalPreferences()
 {
-    // update global settings editable from the global preferences window
-    updateAppearanceSettings();
-
     // update 'invisible' global settings
     updateRecentFiles();
     updateKeyMappings();
-}
-
-void StoredSettings::updateAppearanceSettings()
-{
-    const ScopedPointer<XmlElement> xml (appearance.settings.createXml());
-    getGlobalProperties().setValue ("editorColours", xml);
 }
 
 void StoredSettings::updateRecentFiles()
@@ -138,11 +129,6 @@ void StoredSettings::reload()
     recentFiles.restoreFromString (getGlobalProperties().getValue ("recentFiles"));
     recentFiles.removeNonExistentFiles();
 
-    ScopedPointer<XmlElement> xml = XmlDocument::parse (BinaryData::colourscheme_dark_xml);
-
-    appearance.readFromXML (*xml);
-
-    appearance.updateColourScheme();
     loadSwatchColours();
 }
 

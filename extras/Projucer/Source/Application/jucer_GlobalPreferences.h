@@ -77,7 +77,7 @@ private:
 };
 
 //==============================================================================
-/** This component implements the "Code Editor" tabl in the global preferences window,
+/** This component implements the "Code Editor" tab in the global preferences window,
     which sets font sizes and colours for the Projucer's code editor.
     The content is either an EditorPanel (the actual settings tab) or a FontScanPanel
     (shown if the tab is scanning for available fonts before showing the EditorPanel).

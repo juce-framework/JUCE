@@ -82,7 +82,6 @@ private:
     }
 
     void updateGlobalPreferences();
-    void updateAppearanceSettings();
     void updateRecentFiles();
     void updateKeyMappings();
 

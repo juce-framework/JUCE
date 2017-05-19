@@ -28,6 +28,7 @@
 #include "jucer_GlobalPreferences.h"
 #include "../Utility/jucer_FloatingToolWindow.h"
 #include "../Utility/jucer_ColourPropertyComponent.h"
+#include "jucer_Application.h"
 
 //==============================================================================
 PathSettingsTab::PathSettingsTab (DependencyPathOS os)
@@ -186,6 +187,16 @@ struct AppearanceEditor
 
             loadButton.addListener (this);
             saveButton.addListener (this);
+
+            lookAndFeelChanged();
+
+            saveSchemeState();
+        }
+
+        ~EditorPanel()
+        {
+            if (hasSchemeBeenModifiedSinceSave())
+                saveScheme (true);
         }
 
         void rebuildProperties()
@@ -212,23 +223,26 @@ struct AppearanceEditor
         {
             auto r = getLocalBounds();
             panel.setBounds (r.removeFromTop (getHeight() - 28).reduced (10, 2));
-            loadButton.setBounds (r.removeFromLeft (getWidth() / 2).reduced (10, 4));
-            saveButton.setBounds (r.reduced (10, 3));
+            loadButton.setBounds (r.removeFromLeft (getWidth() / 2).reduced (10, 1));
+            saveButton.setBounds (r.reduced (10, 1));
         }
 
     private:
         PropertyPanel panel;
         TextButton loadButton, saveButton;
 
+        Font codeFont;
+        Array<var> colourValues;
+
         void buttonClicked (Button* b) override
         {
             if (b == &loadButton)
                 loadScheme();
             else
-                saveScheme();
+                saveScheme (false);
         }
 
-        void saveScheme()
+        void saveScheme (bool isExit)
         {
             FileChooser fc ("Select a file in which to save this colour-scheme...",
                             getAppSettings().appearance.getSchemesFolder()
@@ -240,6 +254,13 @@ struct AppearanceEditor
                 File file (fc.getResult().withFileExtension (AppearanceSettings::getSchemeFileSuffix()));
                 getAppSettings().appearance.writeToFile (file);
                 getAppSettings().appearance.refreshPresetSchemeList();
+
+                saveSchemeState();
+                ProjucerApplication::getApp().selectEditorColourSchemeWithName (file.getFileNameWithoutExtension());
+            }
+            else if (isExit)
+            {
+                restorePreviousScheme();
             }
         }
 
@@ -250,8 +271,13 @@ struct AppearanceEditor
                             AppearanceSettings::getSchemeFileWildCard());
 
             if (fc.browseForFileToOpen())
+            {
                 if (getAppSettings().appearance.readFromFile (fc.getResult()))
+                {
                     rebuildProperties();
+                    saveSchemeState();
+                }
+            }
         }
 
         void lookAndFeelChanged() override
@@ -259,6 +285,45 @@ struct AppearanceEditor
             loadButton.setColour (TextButton::buttonColourId,
                                   findColour (secondaryButtonBackgroundColourId));
         }
+
+        void saveSchemeState()
+        {
+            auto& appearance = getAppSettings().appearance;
+            const auto colourNames = appearance.getColourNames();
+
+            codeFont = appearance.getCodeFont();
+
+            colourValues.clear();
+            for (int i = 0; i < colourNames.size(); ++i)
+                colourValues.add (appearance.getColourValue (colourNames[i]).getValue());
+        }
+
+        bool hasSchemeBeenModifiedSinceSave()
+        {
+            auto& appearance = getAppSettings().appearance;
+            const auto colourNames = appearance.getColourNames();
+
+            if (codeFont != appearance.getCodeFont())
+                return true;
+
+            for (int i = 0; i < colourNames.size(); ++i)
+                if (colourValues[i] != appearance.getColourValue (colourNames[i]).getValue())
+                    return true;
+
+            return false;
+        }
+
+        void restorePreviousScheme()
+        {
+            auto& appearance = getAppSettings().appearance;
+            const auto colourNames = appearance.getColourNames();
+
+            appearance.getCodeFontValue().setValue (codeFont.toString());
+
+            for (int i = 0; i < colourNames.size(); ++i)
+                appearance.getColourValue (colourNames[i]).setValue (colourValues[i]);
+        }
+
 
         JUCE_DECLARE_NON_COPYABLE (EditorPanel)
     };
@@ -325,16 +390,23 @@ struct AppearanceEditor
     };
 };
 
-void AppearanceSettings::showGlobalPreferences (ScopedPointer<Component>& ownerPointer)
+void AppearanceSettings::showGlobalPreferences (ScopedPointer<Component>& ownerPointer, bool showCodeEditorTab)
 {
     if (ownerPointer != nullptr)
         ownerPointer->toFront (true);
     else
+    {
+        auto* prefs = new GlobalPreferencesComponent();
+
         new FloatingToolWindow ("Preferences",
                                 "globalPreferencesEditorPos",
-                                new GlobalPreferencesComponent(),
+                                prefs,
                                 ownerPointer, false,
                                 500, 500, 500, 500, 500, 500);
+
+        if (showCodeEditorTab)
+            prefs->setCurrentTabIndex (1);
+    }
 }
 
 //==============================================================================
