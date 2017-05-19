@@ -265,7 +265,7 @@ namespace XRender
 
                 ScopedXLock xlock (display);
 
-                if (void* h = dlopen ("libXrender.so", RTLD_GLOBAL | RTLD_NOW))
+                if (void* h = dlopen ("libXrender.so.1", RTLD_GLOBAL | RTLD_NOW))
                 {
                     xRenderQueryVersion         = (tXRenderQueryVersion)        dlsym (h, "XRenderQueryVersion");
                     xRenderFindStandardFormat   = (tXRenderFindStandardFormat)  dlsym (h, "XRenderFindStandardFormat");
@@ -966,7 +966,7 @@ private:
                 libXrandr = dlopen ("libXrandr.so", RTLD_GLOBAL | RTLD_NOW);
 
                 if (libXrandr == nullptr)
-                    libXrandr = dlopen ("libXinerama.so.2", RTLD_GLOBAL | RTLD_NOW);
+                    libXrandr = dlopen ("libXrandr.so.2", RTLD_GLOBAL | RTLD_NOW);
 
                 if (libXrandr != nullptr)
                 {
@@ -3996,7 +3996,7 @@ void Desktop::setScreenSaverEnabled (const bool isEnabled)
             static tXScreenSaverSuspend xScreenSaverSuspend = nullptr;
 
             if (xScreenSaverSuspend == nullptr)
-                if (void* h = dlopen ("libXss.so", RTLD_GLOBAL | RTLD_NOW))
+                if (void* h = dlopen ("libXss.so.1", RTLD_GLOBAL | RTLD_NOW))
                     xScreenSaverSuspend = (tXScreenSaverSuspend) dlsym (h, "XScreenSaverSuspend");
 
             ScopedXLock xlock (display);
@@ -4137,7 +4137,7 @@ void* CustomMouseCursorInfo::create() const
         {
             hasBeenLoaded = true;
 
-            if (void* h = dlopen ("libXcursor.so", RTLD_GLOBAL | RTLD_NOW))
+            if (void* h = dlopen ("libXcursor.so.1", RTLD_GLOBAL | RTLD_NOW))
             {
                 xcursorSupportsARGB    = (tXcursorSupportsARGB)    dlsym (h, "XcursorSupportsARGB");
                 xcursorImageCreate     = (tXcursorImageCreate)     dlsym (h, "XcursorImageCreate");
