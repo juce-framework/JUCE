@@ -43,6 +43,11 @@ public:
         setInterceptsMouseClicks (false, false);
         setWantsKeyboardFocus (false);
         setFocusContainer (true);
+
+        lfBackground = findColour (backgroundColourId);
+
+        if (auto* pr = doc.getPaintRoutine (0))
+            pr->setBackgroundColour (lfBackground);
     }
 
     void paint (Graphics& g) override
@@ -103,12 +108,21 @@ public:
 
     void lookAndFeelChanged() override
     {
+        auto currentLfBackground = findColour (backgroundColourId);
+
+        if (lfBackground == currentLfBackground)
+            return;
+
         if (auto* pr = document.getPaintRoutine (0))
-            pr->setBackgroundColour (findColour (backgroundColourId));
+            pr->setBackgroundColour (currentLfBackground);
+
+        lfBackground = findColour (backgroundColourId);
     }
 
     JucerDocument& document;
     SnapGridPainter& grid;
+
+    Colour lfBackground;
     bool dontFillBackground;
 };
 
