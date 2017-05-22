@@ -216,7 +216,7 @@ public:
         {
             const String binaryPath (config.getTargetBinaryRelativePathString().trim());
             if (binaryPath.isEmpty())
-                return "$(SolutionDir)\\$(Platform)\\$(Configuration)";
+                return "$(SolutionDir)$(Platform)\\$(Configuration)";
 
             RelativePath binaryRelPath (binaryPath, RelativePath::projectFolder);
 
