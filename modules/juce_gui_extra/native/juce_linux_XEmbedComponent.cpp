@@ -33,10 +33,9 @@ unsigned long juce_createKeyProxyWindow (ComponentPeer*);
 void juce_deleteKeyProxyWindow (ComponentPeer*);
 
 //==============================================================================
-class XEmbedComponent::Pimpl : private ComponentListener
+class XEmbedComponent::Pimpl  : private ComponentListener
 {
 public:
-    //==============================================================================
     enum
     {
         maxXEmbedVersionToSupport = 0
@@ -76,24 +75,25 @@ public:
     {
     public:
         //==============================================================================
-        class Ref
+        struct Ref
         {
-        public:
-            Ref() : keyWindow (nullptr) {}
-            Ref (Pimpl& p) { keyWindow = getKeyWindowForPeer (p.owner.getPeer()); }
-            ~Ref() { free(); }
+            Ref() {}
+            Ref (Pimpl& p)      { keyWindow = getKeyWindowForPeer (p.owner.getPeer()); }
+            ~Ref()              { free(); }
 
             //==============================================================================
             Ref (const Ref& o)   : keyWindow (o.keyWindow) { if (keyWindow != nullptr) keyWindow->numRefs++; }
-            Ref (Ref && o)       : keyWindow (o.keyWindow) { o.keyWindow = nullptr; }
-            Ref (std::nullptr_t) : keyWindow (nullptr) {}
+            Ref (Ref&& o)        : keyWindow (o.keyWindow) { o.keyWindow = nullptr; }
+            Ref (std::nullptr_t) {}
 
             //==============================================================================
-            Ref& operator= (std::nullptr_t) { free(); return *this; }
+            Ref& operator= (std::nullptr_t)     { free(); return *this; }
+
             Ref& operator= (const Ref& o)
             {
                 free();
                 keyWindow = o.keyWindow;
+
                 if (keyWindow != nullptr)
                     keyWindow->numRefs++;
 
@@ -119,6 +119,7 @@ public:
             //==============================================================================
             bool operator== (std::nullptr_t) const noexcept  { return (keyWindow == nullptr); }
             bool operator!= (std::nullptr_t) const noexcept  { return (keyWindow != nullptr); }
+
         private:
             //==============================================================================
             void free()
@@ -132,7 +133,7 @@ public:
                 }
             }
 
-            SharedKeyWindow* keyWindow;
+            SharedKeyWindow* keyWindow = nullptr;
         };
 
     public:
@@ -142,22 +143,17 @@ public:
         static Window getCurrentFocusWindow (ComponentPeer* peerToLookFor)
         {
             if (keyWindows != nullptr && peerToLookFor != nullptr)
-            {
-                SharedKeyWindow* foundKeyWindow = (*keyWindows)[peerToLookFor];
-
-                if (foundKeyWindow != nullptr)
+                if (auto* foundKeyWindow = (*keyWindows)[peerToLookFor])
                     return foundKeyWindow->keyProxy;
-            }
 
-            return (Window)0;
+            return {};
         }
 
     private:
         //==============================================================================
         SharedKeyWindow (ComponentPeer* peerToUse)
             : keyPeer (peerToUse),
-              keyProxy (juce_createKeyProxyWindow (keyPeer)),
-              numRefs (1)
+              keyProxy (juce_createKeyProxyWindow (keyPeer))
         {}
 
         ~SharedKeyWindow()
@@ -167,6 +163,7 @@ public:
             if (keyWindows != nullptr)
             {
                 keyWindows->remove (keyPeer);
+
                 if (keyWindows->size() == 0)
                 {
                     delete keyWindows;
@@ -177,7 +174,7 @@ public:
 
         ComponentPeer* keyPeer;
         Window keyProxy;
-        int numRefs;
+        int numRefs = 1;
 
         static SharedKeyWindow* getKeyWindowForPeer (ComponentPeer* peerToLookFor)
         {
@@ -186,7 +183,8 @@ public:
             if (keyWindows == nullptr)
                 keyWindows = new HashMap<ComponentPeer*,SharedKeyWindow*>;
 
-            SharedKeyWindow* foundKeyWindow = (*keyWindows)[peerToLookFor];
+            auto foundKeyWindow = (*keyWindows)[peerToLookFor];
+
             if (foundKeyWindow == nullptr)
             {
                 foundKeyWindow = new SharedKeyWindow (peerToLookFor);
@@ -198,20 +196,17 @@ public:
 
         //==============================================================================
         friend class Ref;
-        static HashMap<ComponentPeer*,SharedKeyWindow*>* keyWindows;
+        static HashMap<ComponentPeer*, SharedKeyWindow*>* keyWindows;
     };
 
 public:
     //==============================================================================
     Pimpl (XEmbedComponent& parent, Window x11Window,
            bool wantsKeyboardFocus, bool isClientInitiated, bool shouldAllowResize)
-        : owner (parent), atoms (x11display.get()), clientInitiated (isClientInitiated),
+        : owner (parent), atoms (x11display.display), clientInitiated (isClientInitiated),
           wantsFocus (wantsKeyboardFocus), allowResize (shouldAllowResize)
     {
-        if (widgets == nullptr)
-            widgets = new Array<Pimpl*>;
-
-        widgets->add (this);
+        getWidgets().add (this);
 
         createHostWindow();
 
@@ -229,7 +224,7 @@ public:
 
         if (host != 0)
         {
-            Display* dpy = getDisplay();
+            auto dpy = getDisplay();
             XDestroyWindow (dpy, host);
             XSync (dpy, false);
 
@@ -245,17 +240,9 @@ public:
             host = 0;
         }
 
-        if (widgets != nullptr)
-        {
-            widgets->removeAllInstancesOf (this);
-
-            if (widgets->size() == 0)
-            {
-                delete widgets;
-                widgets = nullptr;
-            }
-        }
+        getWidgets().removeAllInstancesOf (this);
     }
+
     //==============================================================================
     void setClient (Window xembedClient, bool shouldReparent)
     {
@@ -263,7 +250,7 @@ public:
 
         if (xembedClient != 0)
         {
-            Display* dpy = getDisplay();
+            auto dpy = getDisplay();
 
             client = xembedClient;
 
@@ -275,7 +262,7 @@ public:
             }
             else
             {
-                Rectangle<int> newBounds = getX11BoundsFromJuce();
+                auto newBounds = getX11BoundsFromJuce();
                 XResizeWindow (dpy, client, static_cast<unsigned int> (newBounds.getWidth()),
                                             static_cast<unsigned int> (newBounds.getHeight()));
             }
@@ -352,8 +339,8 @@ private:
     {
         if (host != 0 && lastPeer != nullptr)
         {
-            Display* dpy = getDisplay();
-            Rectangle<int> newBounds = getX11BoundsFromJuce();
+            auto dpy = getDisplay();
+            auto newBounds = getX11BoundsFromJuce();
             XWindowAttributes attr;
 
             if (XGetWindowAttributes (dpy, host, &attr))
@@ -385,7 +372,7 @@ private:
     //==============================================================================
     void createHostWindow()
     {
-        Display* dpy = getDisplay();
+        auto dpy = getDisplay();
         int defaultScreen = XDefaultScreen (dpy);
         Window root = RootWindow (dpy, defaultScreen);
 
@@ -405,7 +392,7 @@ private:
     {
         if (client != 0)
         {
-            Display* dpy = getDisplay();
+            auto dpy = getDisplay();
             XSelectInput (dpy, client, 0);
 
             keyWindow = nullptr;
@@ -429,6 +416,7 @@ private:
         if (client != 0)
         {
             const bool shouldBeMapped = getXEmbedMappedFlag();
+
             if (shouldBeMapped != hasBeenMapped)
             {
                 hasBeenMapped = shouldBeMapped;
@@ -443,10 +431,10 @@ private:
 
     Window getParentX11Window()
     {
-        if (ComponentPeer* peer = owner.getPeer())
+        if (auto peer = owner.getPeer())
             return reinterpret_cast<Window> (peer->getNativeHandle());
 
-        return 0;
+        return {};
     }
 
     Display* getDisplay()   { return reinterpret_cast<Display*> (x11display.display); }
@@ -454,11 +442,12 @@ private:
     //==============================================================================
     bool getXEmbedMappedFlag()
     {
-        GetXProperty embedInfo (x11display.get(), client, atoms.XembedInfo, 0, 2, false, atoms.XembedInfo);
+        GetXProperty embedInfo (x11display.display, client, atoms.XembedInfo, 0, 2, false, atoms.XembedInfo);
+
         if (embedInfo.success && embedInfo.actualFormat == 32
-            && embedInfo.numItems >= 2 && embedInfo.data != nullptr)
+             && embedInfo.numItems >= 2 && embedInfo.data != nullptr)
         {
-            long* buffer = (long*) embedInfo.data;
+            auto* buffer = (long*) embedInfo.data;
 
             supportsXembed = true;
             xembedVersion = jmin ((int) maxXEmbedVersionToSupport, (int) buffer[0]);
@@ -484,7 +473,7 @@ private:
     void configureNotify()
     {
         XWindowAttributes attr;
-        Display* dpy = getDisplay();
+        auto dpy = getDisplay();
 
         if (XGetWindowAttributes (dpy, client, &attr))
         {
@@ -496,8 +485,8 @@ private:
 
             // as the client window is not on any screen yet, we need to guess
             // on which screen it might appear to get a scaling factor :-(
-            const Desktop::Displays& displays = Desktop::getInstance().getDisplays();
-            ComponentPeer* peer = owner.getPeer();
+            auto& displays = Desktop::getInstance().getDisplays();
+            auto* peer = owner.getPeer();
             const double scale = (peer != nullptr ? displays.getDisplayContaining (peer->getBounds().getCentre())
                                   : displays.getMainDisplay()).scale;
 
@@ -527,7 +516,7 @@ private:
             if (lastPeer != nullptr)
                 keyWindow = nullptr;
 
-            Display* dpy = getDisplay();
+            auto dpy = getDisplay();
             Window rootWindow = RootWindow (dpy, DefaultScreen (dpy));
             Rectangle<int> newBounds = getX11BoundsFromJuce();
 
@@ -566,18 +555,20 @@ private:
     {
         switch (opcode)
         {
-        case XEMBED_REQUEST_FOCUS:
-            if (wantsFocus)
-                owner.grabKeyboardFocus();
-            break;
-        case XEMBED_FOCUS_NEXT:
-            if (wantsFocus)
-                owner.moveKeyboardFocusToSibling (true);
-            break;
-        case XEMBED_FOCUS_PREV:
-            if (wantsFocus)
-                owner.moveKeyboardFocusToSibling (false);
-            break;
+            case XEMBED_REQUEST_FOCUS:
+                if (wantsFocus)
+                    owner.grabKeyboardFocus();
+                break;
+
+            case XEMBED_FOCUS_NEXT:
+                if (wantsFocus)
+                    owner.moveKeyboardFocusToSibling (true);
+                break;
+
+            case XEMBED_FOCUS_PREV:
+                if (wantsFocus)
+                    owner.moveKeyboardFocusToSibling (false);
+                break;
         }
     }
 
@@ -587,50 +578,53 @@ private:
         {
             switch (e.type)
             {
-            case PropertyNotify:
-                propertyChanged (e.xproperty.atom);
-                return true;
-            case ConfigureNotify:
-                if (allowResize)
-                    configureNotify();
-                else
-                    MessageManager::callAsync([this] () {componentMovedOrResized (owner, true, true);});
+                case PropertyNotify:
+                    propertyChanged (e.xproperty.atom);
+                    return true;
 
-                return true;
+                case ConfigureNotify:
+                    if (allowResize)
+                        configureNotify();
+                    else
+                        MessageManager::callAsync([this] () {componentMovedOrResized (owner, true, true);});
+
+                    return true;
             }
         }
         else if (e.xany.window == host && host != 0)
         {
             switch (e.type)
             {
-            case ReparentNotify:
-                if (e.xreparent.parent == host && e.xreparent.window != client)
-                {
-                    setClient (e.xreparent.window, false);
-                    return true;
-                }
-                break;
-            case CreateNotify:
-                if (e.xcreatewindow.parent != e.xcreatewindow.window && e.xcreatewindow.parent == host && e.xcreatewindow.window != client)
-                {
-                    setClient (e.xcreatewindow.window, false);
-                    return true;
-                }
-                break;
-            case GravityNotify:
-                componentMovedOrResized (owner, true, true);
-                return true;
-            case ClientMessage:
-                if (e.xclient.message_type == atoms.XembedMsgType && e.xclient.format == 32)
-                {
-                    handleXembedCmd ((::Time) e.xclient.data.l[0], e.xclient.data.l[1],
-                                     e.xclient.data.l[2], e.xclient.data.l[3],
-                                     e.xclient.data.l[4]);
+                case ReparentNotify:
+                    if (e.xreparent.parent == host && e.xreparent.window != client)
+                    {
+                        setClient (e.xreparent.window, false);
+                        return true;
+                    }
+                    break;
 
-                    return true;
-                }
-                break;
+                case CreateNotify:
+                    if (e.xcreatewindow.parent != e.xcreatewindow.window && e.xcreatewindow.parent == host && e.xcreatewindow.window != client)
+                    {
+                        setClient (e.xcreatewindow.window, false);
+                        return true;
+                    }
+                    break;
 
+                case GravityNotify:
+                    componentMovedOrResized (owner, true, true);
+                    return true;
+
+                case ClientMessage:
+                    if (e.xclient.message_type == atoms.XembedMsgType && e.xclient.format == 32)
+                    {
+                        handleXembedCmd ((::Time) e.xclient.data.l[0], e.xclient.data.l[1],
+                                         e.xclient.data.l[2], e.xclient.data.l[3],
+                                         e.xclient.data.l[4]);
+
+                        return true;
+                    }
+                    break;
             }
         }
 
@@ -641,7 +635,7 @@ private:
                           long opcodeMinor = 0, long data1 = 0, long data2 = 0)
     {
         XClientMessageEvent msg;
-        Display* dpy = getDisplay();
+        auto dpy = getDisplay();
 
         ::memset (&msg, 0, sizeof (XClientMessageEvent));
         msg.window = client;
@@ -660,13 +654,10 @@ private:
 
     Rectangle<int> getX11BoundsFromJuce()
     {
-        if (ComponentPeer* peer = owner.getPeer())
+        if (auto* peer = owner.getPeer())
         {
-            Rectangle<int> r
-                = peer->getComponent().getLocalArea (&owner, owner.getLocalBounds());
-
-            const double scale
-                = Desktop::getInstance().getDisplays().getDisplayContaining (peer->localToGlobal (r.getCentre())).scale;
+            auto r = peer->getComponent().getLocalArea (&owner, owner.getLocalBounds());
+            auto scale = Desktop::getInstance().getDisplays().getDisplayContaining (peer->localToGlobal (r.getCentre())).scale;
 
             return r * scale;
         }
@@ -678,31 +669,28 @@ private:
     friend bool juce::juce_handleXEmbedEvent (ComponentPeer*, void*);
     friend unsigned long juce::juce_getCurrentFocusWindow (ComponentPeer*);
 
-    static Array<Pimpl*>* widgets;
+    static Array<Pimpl*>& getWidgets()
+    {
+        static Array<Pimpl*> i;
+        return i;
+    }
 
     static bool dispatchX11Event (ComponentPeer* p, const XEvent* eventArg)
     {
-        if (widgets != nullptr)
+        if (eventArg != nullptr)
         {
-            if (eventArg != nullptr)
-            {
-                const XEvent& e = *eventArg;
-                Window w = e.xany.window;
+            auto& e = *eventArg;
 
-                if (w == 0) return false;
-
-                for (auto && widget : *widgets)
+            if (auto w = e.xany.window)
+                for (auto* widget : getWidgets())
                     if (w == widget->host || w == widget->client)
                         return widget->handleX11Event (e);
-            }
-            else
-            {
-                for (auto && widget : *widgets)
-                {
-                    if (widget->owner.getPeer() == p)
-                        widget->peerChanged (nullptr);
-                }
-            }
+        }
+        else
+        {
+            for (auto* widget : getWidgets())
+                if (widget->owner.getPeer() == p)
+                    widget->peerChanged (nullptr);
         }
 
         return false;
@@ -710,9 +698,9 @@ private:
 
     static Window getCurrentFocusWindow (ComponentPeer* p)
     {
-        if (widgets != nullptr && p != nullptr)
+        if (p != nullptr)
         {
-            for (auto && widget : *widgets)
+            for (auto* widget : getWidgets())
                 if (widget->owner.getPeer() == p && widget->owner.hasKeyboardFocus (false))
                     return widget->client;
         }
@@ -722,7 +710,6 @@ private:
 };
 
 //==============================================================================
-Array<XEmbedComponent::Pimpl*>* XEmbedComponent::Pimpl::widgets = nullptr;
 HashMap<ComponentPeer*,XEmbedComponent::Pimpl::SharedKeyWindow*>* XEmbedComponent::Pimpl::SharedKeyWindow::keyWindows = nullptr;
 
 //==============================================================================
