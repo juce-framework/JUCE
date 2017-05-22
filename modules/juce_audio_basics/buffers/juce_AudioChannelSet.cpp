@@ -29,7 +29,7 @@ bool AudioChannelSet::operator<  (const AudioChannelSet& other) const noexcept  
 String AudioChannelSet::getChannelTypeName (AudioChannelSet::ChannelType type)
 {
     if (type >= discreteChannel0)
-        return String ("Discrete ") + String (type - discreteChannel0 + 1);
+        return "Discrete " + String (type - discreteChannel0 + 1);
 
     switch (type)
     {
@@ -54,8 +54,8 @@ String AudioChannelSet::getChannelTypeName (AudioChannelSet::ChannelType type)
         case wideLeft:            return NEEDS_TRANS("Wide Left");
         case wideRight:           return NEEDS_TRANS("Wide Right");
         case LFE2:                return NEEDS_TRANS("LFE 2");
-        case leftSurroundSide:    return NEEDS_TRANS ("Left Surround Side");
-        case rightSurroundSide:   return NEEDS_TRANS ("Right Surround Side");
+        case leftSurroundSide:    return NEEDS_TRANS("Left Surround Side");
+        case rightSurroundSide:   return NEEDS_TRANS("Right Surround Side");
         case ambisonicW:          return NEEDS_TRANS("Ambisonic W");
         case ambisonicX:          return NEEDS_TRANS("Ambisonic X");
         case ambisonicY:          return NEEDS_TRANS("Ambisonic Y");
@@ -103,7 +103,7 @@ String AudioChannelSet::getAbbreviatedChannelTypeName (AudioChannelSet::ChannelT
         default:                  break;
     }
 
-    return "";
+    return {};
 }
 
 AudioChannelSet::ChannelType AudioChannelSet::getChannelTypeFromAbbreviation (const String& abbr)
@@ -112,33 +112,33 @@ AudioChannelSet::ChannelType AudioChannelSet::getChannelTypeFromAbbreviation (co
         return static_cast<AudioChannelSet::ChannelType> (static_cast<int> (discreteChannel0)
                                                                + abbr.getIntValue() + 1);
 
-    if      (abbr == "L")    return left;
-    else if (abbr == "R")    return right;
-    else if (abbr == "C")    return centre;
-    else if (abbr == "Lfe")  return LFE;
-    else if (abbr == "Ls")   return leftSurround;
-    else if (abbr == "Rs")   return rightSurround;
-    else if (abbr == "Lc")   return leftCentre;
-    else if (abbr == "Rc")   return rightCentre;
-    else if (abbr == "Cs")   return centreSurround;
-    else if (abbr == "Lrs")  return leftSurroundRear;
-    else if (abbr == "Rrs")  return rightSurroundRear;
-    else if (abbr == "Tm")   return topMiddle;
-    else if (abbr == "Tfl")  return topFrontLeft;
-    else if (abbr == "Tfc")  return topFrontCentre;
-    else if (abbr == "Tfr")  return topFrontRight;
-    else if (abbr == "Trl")  return topRearLeft;
-    else if (abbr == "Trc")  return topRearCentre;
-    else if (abbr == "Trr")  return topRearRight;
-    else if (abbr == "Wl")   return wideLeft;
-    else if (abbr == "Wr")   return wideRight;
-    else if (abbr == "Lfe2") return LFE2;
-    else if (abbr == "Lss")  return leftSurroundSide;
-    else if (abbr == "Rss")  return rightSurroundSide;
-    else if (abbr == "W")    return ambisonicW;
-    else if (abbr == "X")    return ambisonicX;
-    else if (abbr == "Y")    return ambisonicY;
-    else if (abbr == "Z")    return ambisonicZ;
+    if (abbr == "L")    return left;
+    if (abbr == "R")    return right;
+    if (abbr == "C")    return centre;
+    if (abbr == "Lfe")  return LFE;
+    if (abbr == "Ls")   return leftSurround;
+    if (abbr == "Rs")   return rightSurround;
+    if (abbr == "Lc")   return leftCentre;
+    if (abbr == "Rc")   return rightCentre;
+    if (abbr == "Cs")   return centreSurround;
+    if (abbr == "Lrs")  return leftSurroundRear;
+    if (abbr == "Rrs")  return rightSurroundRear;
+    if (abbr == "Tm")   return topMiddle;
+    if (abbr == "Tfl")  return topFrontLeft;
+    if (abbr == "Tfc")  return topFrontCentre;
+    if (abbr == "Tfr")  return topFrontRight;
+    if (abbr == "Trl")  return topRearLeft;
+    if (abbr == "Trc")  return topRearCentre;
+    if (abbr == "Trr")  return topRearRight;
+    if (abbr == "Wl")   return wideLeft;
+    if (abbr == "Wr")   return wideRight;
+    if (abbr == "Lfe2") return LFE2;
+    if (abbr == "Lss")  return leftSurroundSide;
+    if (abbr == "Rss")  return rightSurroundSide;
+    if (abbr == "W")    return ambisonicW;
+    if (abbr == "X")    return ambisonicX;
+    if (abbr == "Y")    return ambisonicY;
+    if (abbr == "Z")    return ambisonicZ;
 
     return unknown;
 }
@@ -146,11 +146,10 @@ AudioChannelSet::ChannelType AudioChannelSet::getChannelTypeFromAbbreviation (co
 String AudioChannelSet::getSpeakerArrangementAsString() const
 {
     StringArray speakerTypes;
-    Array<AudioChannelSet::ChannelType> speakers = getChannelTypes();
 
-    for (int i = 0; i < speakers.size(); ++i)
+    for (auto& speaker : getChannelTypes())
     {
-        String name = getAbbreviatedChannelTypeName (speakers.getReference (i));
+        auto name = getAbbreviatedChannelTypeName (speaker);
 
         if (name.isNotEmpty())
             speakerTypes.add (name);
@@ -161,12 +160,11 @@ String AudioChannelSet::getSpeakerArrangementAsString() const
 
 AudioChannelSet AudioChannelSet::fromAbbreviatedString (const String& str)
 {
-    StringArray abbr = StringArray::fromTokens(str, true);
     AudioChannelSet set;
 
-    for (int i = 0; i < abbr.size(); ++i)
+    for (auto& abbr : StringArray::fromTokens (str, true))
     {
-        AudioChannelSet::ChannelType type = getChannelTypeFromAbbreviation (abbr[i]);
+        auto type = getChannelTypeFromAbbreviation (abbr);
 
         if (type != unknown)
             set.addChannel (type);
@@ -177,7 +175,7 @@ AudioChannelSet AudioChannelSet::fromAbbreviatedString (const String& str)
 
 String AudioChannelSet::getDescription() const
 {
-    if (isDiscreteLayout())            return String ("Discrete #") + String (size());
+    if (isDiscreteLayout())            return "Discrete #" + String (size());
     if (*this == disabled())           return "Disabled";
     if (*this == mono())               return "Mono";
     if (*this == stereo())             return "Stereo";
@@ -203,16 +201,13 @@ String AudioChannelSet::getDescription() const
     if (*this == octagonal())          return "Octagonal";
     if (*this == ambisonic())          return "Ambisonic";
 
-
-
     return "Unknown";
 }
 
 bool AudioChannelSet::isDiscreteLayout() const noexcept
 {
-    Array<AudioChannelSet::ChannelType> speakers = getChannelTypes();
-    for (int i = 0; i < speakers.size(); ++i)
-        if (speakers.getReference (i) > ambisonicZ)
+    for (auto& speaker : getChannelTypes())
+        if (speaker > ambisonicZ)
             return true;
 
     return false;
@@ -236,6 +231,7 @@ AudioChannelSet::ChannelType AudioChannelSet::getTypeOfChannel (int index) const
 int AudioChannelSet::getChannelIndexForType (AudioChannelSet::ChannelType type) const noexcept
 {
     int idx = 0;
+
     for (int bit = channels.findNextSetBit (0); bit >= 0; bit = channels.findNextSetBit (bit + 1))
     {
         if (static_cast<ChannelType> (bit) == type)
@@ -271,7 +267,7 @@ void AudioChannelSet::removeChannel (ChannelType newChannel)
     channels.clearBit (bit);
 }
 
-AudioChannelSet AudioChannelSet::disabled()           { return AudioChannelSet(); }
+AudioChannelSet AudioChannelSet::disabled()           { return {}; }
 AudioChannelSet AudioChannelSet::mono()               { return AudioChannelSet (1u << centre); }
 AudioChannelSet AudioChannelSet::stereo()             { return AudioChannelSet ((1u << left) | (1u << right)); }
 AudioChannelSet AudioChannelSet::createLCR()          { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre)); }
@@ -303,30 +299,30 @@ AudioChannelSet AudioChannelSet::discreteChannels (int numChannels)
 
 AudioChannelSet AudioChannelSet::canonicalChannelSet (int numChannels)
 {
-    if (numChannels == 1) return AudioChannelSet::mono();
-    if (numChannels == 2) return AudioChannelSet::stereo();
-    if (numChannels == 3) return AudioChannelSet::createLCR();
-    if (numChannels == 4) return AudioChannelSet::quadraphonic();
-    if (numChannels == 5) return AudioChannelSet::create5point0();
-    if (numChannels == 6) return AudioChannelSet::create5point1();
-    if (numChannels == 7) return AudioChannelSet::create7point0();
-    if (numChannels == 8) return AudioChannelSet::create7point1();
+    if (numChannels == 1)  return AudioChannelSet::mono();
+    if (numChannels == 2)  return AudioChannelSet::stereo();
+    if (numChannels == 3)  return AudioChannelSet::createLCR();
+    if (numChannels == 4)  return AudioChannelSet::quadraphonic();
+    if (numChannels == 5)  return AudioChannelSet::create5point0();
+    if (numChannels == 6)  return AudioChannelSet::create5point1();
+    if (numChannels == 7)  return AudioChannelSet::create7point0();
+    if (numChannels == 8)  return AudioChannelSet::create7point1();
 
     return discreteChannels (numChannels);
 }
 
 AudioChannelSet AudioChannelSet::namedChannelSet (int numChannels)
 {
-    if (numChannels == 1) return AudioChannelSet::mono();
-    if (numChannels == 2) return AudioChannelSet::stereo();
-    if (numChannels == 3) return AudioChannelSet::createLCR();
-    if (numChannels == 4) return AudioChannelSet::quadraphonic();
-    if (numChannels == 5) return AudioChannelSet::create5point0();
-    if (numChannels == 6) return AudioChannelSet::create5point1();
-    if (numChannels == 7) return AudioChannelSet::create7point0();
-    if (numChannels == 8) return AudioChannelSet::create7point1();
+    if (numChannels == 1)  return AudioChannelSet::mono();
+    if (numChannels == 2)  return AudioChannelSet::stereo();
+    if (numChannels == 3)  return AudioChannelSet::createLCR();
+    if (numChannels == 4)  return AudioChannelSet::quadraphonic();
+    if (numChannels == 5)  return AudioChannelSet::create5point0();
+    if (numChannels == 6)  return AudioChannelSet::create5point1();
+    if (numChannels == 7)  return AudioChannelSet::create7point0();
+    if (numChannels == 8)  return AudioChannelSet::create7point1();
 
-    return AudioChannelSet();
+    return {};
 }
 
 Array<AudioChannelSet> AudioChannelSet::channelSetsWithNumberOfChannels (int numChannels)
