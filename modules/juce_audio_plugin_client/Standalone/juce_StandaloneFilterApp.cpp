@@ -84,7 +84,11 @@ public:
         return new StandaloneFilterWindow (getApplicationName(),
                                            LookAndFeel::getDefaultLookAndFeel().findColour (ResizableWindow::backgroundColourId),
                                            appProperties.getUserSettings(),
-                                           false);
+                                           false, {}, nullptr
+                                          #ifdef JucePlugin_PreferredChannelConfigurations
+                                           , { JucePlugin_PreferredChannelConfigurations }
+                                          #endif
+                                           );
     }
 
     //==============================================================================
