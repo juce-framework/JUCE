@@ -1345,8 +1345,7 @@ public:
 
                 {
                     ScopedXDisplay xDisplay;
-                    ::Display* display = xDisplay.get();
-                    XResizeWindow (display, (Window) getWindowHandle(), childBounds.getWidth(), childBounds.getHeight());
+                    XResizeWindow (xDisplay.display, (Window) getWindowHandle(), childBounds.getWidth(), childBounds.getHeight());
                 }
                #endif
 

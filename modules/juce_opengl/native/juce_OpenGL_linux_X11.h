@@ -169,8 +169,7 @@ public:
     static void deactivateCurrentContext()
     {
         ScopedXDisplay xDisplay;
-        ::Display* display = xDisplay.get();
-        glXMakeCurrent (display, None, 0);
+        glXMakeCurrent (xDisplay.display, None, 0);
     }
 
     void swapBuffers()
@@ -245,8 +244,12 @@ private:
 bool OpenGLHelpers::isContextActive()
 {
     ScopedXDisplay xDisplay;
-    ::Display* display = xDisplay.get();
 
-    ScopedXLock xlock (display);
-    return glXGetCurrentContext() != 0;
+    if (auto display = xDisplay.display)
+    {
+        ScopedXLock xlock (xDisplay.display);
+        return glXGetCurrentContext() != 0;
+    }
+
+    return false;
 }

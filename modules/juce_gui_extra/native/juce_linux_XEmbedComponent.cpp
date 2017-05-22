@@ -449,7 +449,7 @@ private:
         return 0;
     }
 
-    Display* getDisplay()   { return reinterpret_cast<Display*> (x11display.get()); }
+    Display* getDisplay()   { return reinterpret_cast<Display*> (x11display.display); }
 
     //==============================================================================
     bool getXEmbedMappedFlag()

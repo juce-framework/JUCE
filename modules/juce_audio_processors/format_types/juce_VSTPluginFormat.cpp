@@ -250,9 +250,8 @@ namespace
 
         {
             ScopedXDisplay xDisplay;
-            ::Display* display = xDisplay.get();
 
-            XGetWindowProperty (display, handle, atom, 0, 1, false, AnyPropertyType,
+            XGetWindowProperty (xDisplay.display, handle, atom, 0, 1, false, AnyPropertyType,
                                 &userType,  &userSize, &userCount, &bytes, &data);
         }
 
@@ -269,9 +268,7 @@ namespace
 
         {
             ScopedXDisplay xDisplay;
-            ::Display* display = xDisplay.get();
-
-            XQueryTree (display, windowToCheck, &rootWindow, &parentWindow, &childWindows, &numChildren);
+            XQueryTree (xDisplay.display, windowToCheck, &rootWindow, &parentWindow, &childWindows, &numChildren);
         }
 
         if (numChildren > 0)

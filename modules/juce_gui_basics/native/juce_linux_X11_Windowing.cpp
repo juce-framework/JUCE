@@ -68,37 +68,38 @@ namespace Keys
 bool KeyPress::isKeyCurrentlyDown (const int keyCode)
 {
     ScopedXDisplay xDisplay;
-    ::Display* display = xDisplay.get();
 
-    if (display == nullptr)
-        return false;
-
-    int keysym;
-
-    if (keyCode & Keys::extendedKeyModifier)
+    if (auto display = xDisplay.display)
     {
-        keysym = 0xff00 | (keyCode & 0xff);
-    }
-    else
-    {
-        keysym = keyCode;
+        int keysym;
 
-        if (keysym == (XK_Tab & 0xff)
-            || keysym == (XK_Return & 0xff)
-            || keysym == (XK_Escape & 0xff)
-            || keysym == (XK_BackSpace & 0xff))
+        if (keyCode & Keys::extendedKeyModifier)
         {
-            keysym |= 0xff00;
+            keysym = 0xff00 | (keyCode & 0xff);
         }
+        else
+        {
+            keysym = keyCode;
+
+            if (keysym == (XK_Tab & 0xff)
+                || keysym == (XK_Return & 0xff)
+                || keysym == (XK_Escape & 0xff)
+                || keysym == (XK_BackSpace & 0xff))
+            {
+                keysym |= 0xff00;
+            }
+        }
+
+        ScopedXLock xlock (display);
+
+        const int keycode = XKeysymToKeycode (display, (KeySym) keysym);
+
+        const int keybyte = keycode >> 3;
+        const int keybit = (1 << (keycode & 7));
+        return (Keys::keyStates [keybyte] & keybit) != 0;
     }
 
-    ScopedXLock xlock (display);
-
-    const int keycode = XKeysymToKeycode (display, (KeySym) keysym);
-
-    const int keybyte = keycode >> 3;
-    const int keybit = (1 << (keycode & 7));
-    return (Keys::keyStates [keybyte] & keybit) != 0;
+    return false;
 }
 
 //==============================================================================
@@ -3798,9 +3799,8 @@ void ModifierKeys::updateCurrentModifiers() noexcept
 ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
 {
     ScopedXDisplay xDisplay;
-    ::Display* display = xDisplay.get();
 
-    if (display != nullptr)
+    if (auto display = xDisplay.display)
     {
         Window root, child;
         int x, y, winx, winy;
@@ -3843,56 +3843,57 @@ ComponentPeer* Component::createNewPeer (int styleFlags, void* nativeWindowToAtt
 void Desktop::Displays::findDisplays (float masterScale)
 {
     ScopedXDisplay xDisplay;
-    ::Display* display = xDisplay.get();
 
-    DisplayGeometry& geometry = DisplayGeometry::getOrCreateInstance (display, masterScale);
-
-    // add the main display first
-    int mainDisplayIdx;
-    for (mainDisplayIdx = 0; mainDisplayIdx < geometry.infos.size(); ++mainDisplayIdx)
+    if (auto display = xDisplay.display)
     {
-        const DisplayGeometry::ExtendedInfo& info = geometry.infos.getReference (mainDisplayIdx);
-        if (info.isMain)
-        break;
-    }
+        auto& geometry = DisplayGeometry::getOrCreateInstance (display, masterScale);
 
-    // no main display found then use the first
-    if (mainDisplayIdx >= geometry.infos.size())
-        mainDisplayIdx = 0;
+        // add the main display first
+        int mainDisplayIdx;
 
-    // add the main display
-    {
-        const DisplayGeometry::ExtendedInfo& info =
-      geometry.infos.getReference (mainDisplayIdx);
-        Desktop::Displays::Display d;
+        for (mainDisplayIdx = 0; mainDisplayIdx < geometry.infos.size(); ++mainDisplayIdx)
+        {
+            auto& info = geometry.infos.getReference (mainDisplayIdx);
 
-        d.isMain = true;
-        d.scale = masterScale * info.scale;
-        d.dpi = info.dpi;
+            if (info.isMain)
+                break;
+        }
 
-        d.totalArea = DisplayGeometry::physicalToScaled (info.totalBounds);
-        d.userArea = (info.usableBounds / d.scale) + info.topLeftScaled;
+        // no main display found then use the first
+        if (mainDisplayIdx >= geometry.infos.size())
+            mainDisplayIdx = 0;
 
-        displays.add (d);
-    }
+        // add the main display
+        {
+            auto& info = geometry.infos.getReference (mainDisplayIdx);
 
-    for (int i = 0; i < geometry.infos.size(); ++i)
-    {
-        // don't add the main display a second time
-        if (i == mainDisplayIdx)
-            continue;
+            Desktop::Displays::Display d;
+            d.isMain = true;
+            d.scale = masterScale * info.scale;
+            d.dpi = info.dpi;
+            d.totalArea = DisplayGeometry::physicalToScaled (info.totalBounds);
+            d.userArea = (info.usableBounds / d.scale) + info.topLeftScaled;
 
-        const DisplayGeometry::ExtendedInfo& info = geometry.infos.getReference (i);
-        Desktop::Displays::Display d;
+            displays.add (d);
+        }
 
-        d.isMain = false;
-        d.scale = masterScale * info.scale;
-        d.dpi = info.dpi;
+        for (int i = 0; i < geometry.infos.size(); ++i)
+        {
+            // don't add the main display a second time
+            if (i == mainDisplayIdx)
+                continue;
 
-        d.totalArea = DisplayGeometry::physicalToScaled (info.totalBounds);
-        d.userArea = (info.usableBounds / d.scale) + info.topLeftScaled;
+            auto& info = geometry.infos.getReference (i);
 
-        displays.add (d);
+            Desktop::Displays::Display d;
+            d.isMain = false;
+            d.scale = masterScale * info.scale;
+            d.dpi = info.dpi;
+            d.totalArea = DisplayGeometry::physicalToScaled (info.totalBounds);
+            d.userArea = (info.usableBounds / d.scale) + info.topLeftScaled;
+
+            displays.add (d);
+        }
     }
 }
 
@@ -3931,10 +3932,10 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
 Point<float> MouseInputSource::getCurrentRawMousePosition()
 {
     ScopedXDisplay xDisplay;
-    ::Display* display = xDisplay.get();
+    auto display = xDisplay.display;
 
     if (display == nullptr)
-        return Point<float>();
+        return {};
 
     Window root, child;
     int x, y, winx, winy;
@@ -3957,9 +3958,8 @@ Point<float> MouseInputSource::getCurrentRawMousePosition()
 void MouseInputSource::setRawMousePosition (Point<float> newPosition)
 {
     ScopedXDisplay xDisplay;
-    ::Display* display = xDisplay.get();
 
-    if (display != nullptr)
+    if (auto display = xDisplay.display)
     {
         ScopedXLock xlock (display);
         Window root = RootWindow (display, DefaultScreen (display));
@@ -3988,9 +3988,8 @@ void Desktop::setScreenSaverEnabled (const bool isEnabled)
         screenSaverAllowed = isEnabled;
 
         ScopedXDisplay xDisplay;
-        ::Display* display = xDisplay.get();
 
-        if (display != nullptr)
+        if (auto display = xDisplay.display)
         {
             typedef void (*tXScreenSaverSuspend) (Display*, Bool);
             static tXScreenSaverSuspend xScreenSaverSuspend = nullptr;
@@ -4109,7 +4108,7 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (AlertWindow::AlertIconType ico
 void* CustomMouseCursorInfo::create() const
 {
     ScopedXDisplay xDisplay;
-    ::Display* display = xDisplay.get();
+    auto display = xDisplay.display;
 
     if (display == nullptr)
         return nullptr;
@@ -4236,20 +4235,22 @@ void* CustomMouseCursorInfo::create() const
 
 void MouseCursor::deleteMouseCursor (void* const cursorHandle, const bool)
 {
-    ScopedXDisplay xDisplay;
-    ::Display* display = xDisplay.get();
-
-    if (cursorHandle != nullptr && display != nullptr)
+    if (cursorHandler != nullptr)
     {
-        ScopedXLock xlock (display);
-        XFreeCursor (display, (Cursor) cursorHandle);
+        ScopedXDisplay xDisplay;
+
+        if (auto display = xDisplay.display)
+        {
+            ScopedXLock xlock (display);
+            XFreeCursor (display, (Cursor) cursorHandle);
+        }
     }
 }
 
 void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType type)
 {
     ScopedXDisplay xDisplay;
-    ::Display* display = xDisplay.get();
+    auto display = xDisplay.display;
 
     if (display == nullptr)
         return None;

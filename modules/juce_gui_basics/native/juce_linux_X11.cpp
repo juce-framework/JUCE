@@ -225,23 +225,17 @@ void XWindowSystem::destroyXDisplay() noexcept
 juce_ImplementSingleton (XWindowSystem)
 
 //==============================================================================
-ScopedXDisplay::ScopedXDisplay()
+ScopedXDisplay::ScopedXDisplay() : display (XWindowSystem::getInstance()->displayRef())
 {
-    display = XWindowSystem::getInstance()->displayRef();
 }
+
 ScopedXDisplay::~ScopedXDisplay()
 {
     XWindowSystem::getInstance()->displayUnref();
 }
 
-::Display* ScopedXDisplay::get()
-{
-    return display;
-}
-
 //==============================================================================
-ScopedXLock::ScopedXLock(::Display* _display)
-    : display (_display)
+ScopedXLock::ScopedXLock(::Display* d) : display (d)
 {
     if (display != nullptr) XLockDisplay (display);
 }
