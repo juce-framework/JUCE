@@ -124,19 +124,77 @@ struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give e
         return vstSpeakerConfigTypeUser;
     }
 
-    static void channelSetToVstArrangement (const AudioChannelSet& channels, VstSpeakerConfiguration& result)
+    class VstSpeakerConfigurationHolder
     {
-        result.type = channelSetToVstArrangementType (channels);
-        result.numberOfChannels = channels.size();
+    public:
+        VstSpeakerConfigurationHolder ()                                           { clear(); }
+        VstSpeakerConfigurationHolder (const VstSpeakerConfiguration& vstConfig)   { operator= (vstConfig); }
+        VstSpeakerConfigurationHolder (const VstSpeakerConfigurationHolder& other) { operator= (other.get()); }
+        VstSpeakerConfigurationHolder (VstSpeakerConfigurationHolder&& other) : storage (static_cast<HeapBlock<VstSpeakerConfiguration>&&> (other.storage)) { other.clear(); }
 
-        for (int i = 0; i < result.numberOfChannels; ++i)
+        VstSpeakerConfigurationHolder (const AudioChannelSet& channels)
         {
-            VstIndividualSpeakerInfo& speaker = result.speakers[i];
+            auto numberOfChannels = channels.size();
+            VstSpeakerConfiguration& dst = *allocate (numberOfChannels);
 
-            zeromem (&speaker, sizeof (VstIndividualSpeakerInfo));
-            speaker.type = getSpeakerType (channels.getTypeOfChannel (i));
+            dst.type = channelSetToVstArrangementType (channels);
+            dst.numberOfChannels = numberOfChannels;
+
+            for (int i = 0; i < dst.numberOfChannels; ++i)
+            {
+                VstIndividualSpeakerInfo& speaker = dst.speakers[i];
+
+                zeromem (&speaker, sizeof (VstIndividualSpeakerInfo));
+                speaker.type = getSpeakerType (channels.getTypeOfChannel (i));
+            }
         }
-    }
+
+        VstSpeakerConfigurationHolder& operator= (const VstSpeakerConfigurationHolder& vstConfig) { return operator=(vstConfig.get()); }
+        VstSpeakerConfigurationHolder& operator= (const VstSpeakerConfiguration& vstConfig)
+        {
+            VstSpeakerConfiguration& dst = *allocate (vstConfig.numberOfChannels);
+
+            dst.type             = vstConfig.type;
+            dst.numberOfChannels = vstConfig.numberOfChannels;
+
+            for (int i = 0; i < dst.numberOfChannels; ++i)
+                dst.speakers[i] = vstConfig.speakers[i];
+
+            return *this;
+        }
+
+        VstSpeakerConfigurationHolder& operator= (VstSpeakerConfigurationHolder && vstConfig)
+        {
+            storage = static_cast<HeapBlock<VstSpeakerConfiguration>&&> (vstConfig.storage);
+            vstConfig.clear();
+
+            return *this;
+        }
+
+        const VstSpeakerConfiguration& get() const { return *storage.getData(); }
+
+    private:
+        JUCE_LEAK_DETECTOR (VstSpeakerConfigurationHolder)
+
+        HeapBlock<VstSpeakerConfiguration> storage;
+
+        VstSpeakerConfiguration* allocate (int numChannels)
+        {
+            auto arrangementSize = (sizeof (VstSpeakerConfiguration) - sizeof(VstSpeakerConfiguration::speakers))
+                                     + (sizeof (VstIndividualSpeakerInfo) * static_cast<size_t> (numChannels));
+
+            storage.malloc (1, arrangementSize);
+            return storage.getData();
+        }
+
+        void clear()
+        {
+            VstSpeakerConfiguration& dst = *allocate (0);
+
+            dst.type = vstSpeakerConfigTypeEmpty;
+            dst.numberOfChannels = 0;
+        }
+    };
 
     static const Mapping* getMappings() noexcept
     {
