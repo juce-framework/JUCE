@@ -4235,7 +4235,7 @@ void* CustomMouseCursorInfo::create() const
 
 void MouseCursor::deleteMouseCursor (void* const cursorHandle, const bool)
 {
-    if (cursorHandler != nullptr)
+    if (cursorHandle != nullptr)
     {
         ScopedXDisplay xDisplay;
 
