@@ -71,86 +71,45 @@ public:
     };
 
     //==============================================================================
-    class SharedKeyWindow
+    class SharedKeyWindow : public ReferenceCountedObject
     {
     public:
-        //==============================================================================
-        struct Ref
-        {
-            Ref() {}
-            Ref (Pimpl& p)      { keyWindow = getKeyWindowForPeer (p.owner.getPeer()); }
-            ~Ref()              { free(); }
+        typedef ReferenceCountedObjectPtr<SharedKeyWindow> Ptr;
 
-            //==============================================================================
-            Ref (const Ref& o)   : keyWindow (o.keyWindow) { if (keyWindow != nullptr) keyWindow->numRefs++; }
-            Ref (Ref&& o)        : keyWindow (o.keyWindow) { o.keyWindow = nullptr; }
-            Ref (std::nullptr_t) {}
-
-            //==============================================================================
-            Ref& operator= (std::nullptr_t)     { free(); return *this; }
-
-            Ref& operator= (const Ref& o)
-            {
-                free();
-                keyWindow = o.keyWindow;
-
-                if (keyWindow != nullptr)
-                    keyWindow->numRefs++;
-
-                return *this;
-            }
-
-            Ref& operator= (Ref && o)
-            {
-                if (keyWindow != o.keyWindow)
-                {
-                    free();
-                    keyWindow = o.keyWindow;
-                }
-
-                o.keyWindow = nullptr;
-                return *this;
-            }
-
-            //==============================================================================
-            SharedKeyWindow& operator*()  noexcept  { return *keyWindow; }
-            SharedKeyWindow* operator->() noexcept  { return  keyWindow; }
-
-            //==============================================================================
-            bool operator== (std::nullptr_t) const noexcept  { return (keyWindow == nullptr); }
-            bool operator!= (std::nullptr_t) const noexcept  { return (keyWindow != nullptr); }
-
-        private:
-            //==============================================================================
-            void free()
-            {
-                if (keyWindow != nullptr)
-                {
-                    if (--keyWindow->numRefs == 0)
-                        delete keyWindow;
-
-                    keyWindow = nullptr;
-                }
-            }
-
-            SharedKeyWindow* keyWindow = nullptr;
-        };
-
-    public:
         //==============================================================================
         Window getHandle()    { return keyProxy; }
 
         static Window getCurrentFocusWindow (ComponentPeer* peerToLookFor)
         {
-            if (keyWindows != nullptr && peerToLookFor != nullptr)
-                if (auto* foundKeyWindow = (*keyWindows)[peerToLookFor])
+            auto& keyWindows = getKeyWindows();
+
+            if (peerToLookFor != nullptr)
+                if (auto* foundKeyWindow = keyWindows[peerToLookFor])
                     return foundKeyWindow->keyProxy;
 
             return {};
         }
 
+        static SharedKeyWindow::Ptr getKeyWindowForPeer (ComponentPeer* peerToLookFor)
+        {
+            jassert (peerToLookFor != nullptr);
+
+            auto& keyWindows = getKeyWindows();
+            auto foundKeyWindow = keyWindows[peerToLookFor];
+
+            if (foundKeyWindow == nullptr)
+            {
+                foundKeyWindow = new SharedKeyWindow (peerToLookFor);
+                keyWindows.set (peerToLookFor, foundKeyWindow);
+            }
+
+            return foundKeyWindow;
+        }
+
     private:
         //==============================================================================
+        friend struct ContainerDeletePolicy<SharedKeyWindow>;
+
         SharedKeyWindow (ComponentPeer* peerToUse)
             : keyPeer (peerToUse),
               keyProxy (juce_createKeyProxyWindow (keyPeer))
@@ -160,43 +119,19 @@ public:
         {
             juce_deleteKeyProxyWindow (keyPeer);
 
-            if (keyWindows != nullptr)
-            {
-                keyWindows->remove (keyPeer);
-
-                if (keyWindows->size() == 0)
-                {
-                    delete keyWindows;
-                    keyWindows = nullptr;
-                }
-            }
+            auto& keyWindows = getKeyWindows();
+            keyWindows.remove (keyPeer);
         }
 
         ComponentPeer* keyPeer;
         Window keyProxy;
-        int numRefs = 1;
 
-        static SharedKeyWindow* getKeyWindowForPeer (ComponentPeer* peerToLookFor)
+        static HashMap<ComponentPeer*, SharedKeyWindow*>& getKeyWindows()
         {
-            jassert (peerToLookFor != nullptr);
-
-            if (keyWindows == nullptr)
-                keyWindows = new HashMap<ComponentPeer*,SharedKeyWindow*>;
-
-            auto foundKeyWindow = (*keyWindows)[peerToLookFor];
-
-            if (foundKeyWindow == nullptr)
-            {
-                foundKeyWindow = new SharedKeyWindow (peerToLookFor);
-                keyWindows->set (peerToLookFor, foundKeyWindow);
-            }
-
-            return foundKeyWindow;
+            // store a weak reference to the shared key windows
+            static HashMap<ComponentPeer*, SharedKeyWindow*> keyWindows;
+            return keyWindows;
         }
-
-        //==============================================================================
-        friend struct Ref;
-        static HashMap<ComponentPeer*, SharedKeyWindow*>* keyWindows;
     };
 
 public:
@@ -331,7 +266,7 @@ private:
     int xembedVersion      = maxXEmbedVersionToSupport;
 
     ComponentPeer* lastPeer = nullptr;
-    SharedKeyWindow::Ref keyWindow;
+    SharedKeyWindow::Ptr keyWindow;
 
     //==============================================================================
     void componentParentHierarchyChanged (Component&) override   { peerChanged (owner.getPeer()); }
@@ -532,7 +467,7 @@ private:
             {
                 if (wantsFocus)
                 {
-                    keyWindow = SharedKeyWindow::Ref (*this);
+                    keyWindow = SharedKeyWindow::getKeyWindowForPeer (newPeer);
                     updateKeyFocus();
                 }
 
@@ -708,9 +643,6 @@ private:
         return SharedKeyWindow::getCurrentFocusWindow (p);
     }
 };
-
-//==============================================================================
-HashMap<ComponentPeer*,XEmbedComponent::Pimpl::SharedKeyWindow*>* XEmbedComponent::Pimpl::SharedKeyWindow::keyWindows = nullptr;
 
 //==============================================================================
 XEmbedComponent::XEmbedComponent (bool wantsKeyboardFocus, bool allowForeignWidgetToResizeComponent)
