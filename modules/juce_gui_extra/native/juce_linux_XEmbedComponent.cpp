@@ -195,7 +195,7 @@ public:
         }
 
         //==============================================================================
-        friend class Ref;
+        friend struct Ref;
         static HashMap<ComponentPeer*, SharedKeyWindow*>* keyWindows;
     };
 
