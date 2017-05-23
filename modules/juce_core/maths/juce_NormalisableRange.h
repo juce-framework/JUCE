@@ -138,25 +138,40 @@ public:
     /** Uses the properties of this mapping to convert a non-normalised value to
         its 0->1 representation.
     */
-    ValueType convertTo0to1 (ValueType v) const noexcept
+    ValueType convertTo0to1 (ValueType v, bool shouldSaturate = false) const noexcept
     {
-        if (convertTo0To1Function != nullptr)
-            return convertTo0To1Function (start, end, v);
-
         ValueType proportion = (v - start) / (end - start);
+        ValueType result;
+        
+        if (convertTo0To1Function != nullptr)
+            result = convertTo0To1Function (start, end, v);
 
-        if (skew == static_cast<ValueType> (1))
-            return proportion;
+        else if (skew == static_cast<ValueType> (1))
+            result = proportion;
 
-        if (! symmetricSkew)
-            return std::pow (proportion, skew);
+        else if (! symmetricSkew)
+            result = std::pow (proportion, skew);
 
-        ValueType distanceFromMiddle = static_cast<ValueType> (2) * proportion - static_cast<ValueType> (1);
-
-        return (static_cast<ValueType> (1) + std::pow (std::abs (distanceFromMiddle), skew)
+        else
+        {
+            ValueType distanceFromMiddle = static_cast<ValueType> (2) * proportion - static_cast<ValueType> (1);
+            result = (static_cast<ValueType> (1) + std::pow (std::abs (distanceFromMiddle), skew)
                                            * (distanceFromMiddle < static_cast<ValueType> (0) ? static_cast<ValueType> (-1)
                                                                                               : static_cast<ValueType> (1)))
                / static_cast<ValueType> (2);
+        }
+        
+        if (shouldSaturate)
+        {
+            if (result >= static_cast<ValueType> (1))
+                result = static_cast<ValueType> (1);;
+                
+            if (result <= static_cast<ValueType> (0))
+                result = static_cast<ValueType> (0);;
+        }
+        
+        return result;
+        
     }
 
     /** Uses the properties of this mapping to convert a normalised 0->1 value to
