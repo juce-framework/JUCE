@@ -35,7 +35,6 @@ public:
                    void* contextToShareWith,
                    bool /*useMultisampling*/,
                    OpenGLVersion)
-        : context (nullptr)
     {
         dummyComponent = new DummyComponent (*this);
         createNativeWindow (component);
@@ -43,7 +42,8 @@ public:
         PIXELFORMATDESCRIPTOR pfd;
         initialisePixelFormatDescriptor (pfd, pixelFormat);
 
-        const int pixFormat = ChoosePixelFormat (dc, &pfd);
+        auto pixFormat = ChoosePixelFormat (dc, &pfd);
+
         if (pixFormat != 0)
             SetPixelFormat (dc, pixFormat, &pfd);
 
@@ -54,7 +54,7 @@ public:
             makeActive();
             initialiseGLExtensions();
 
-            const int wglFormat = wglChoosePixelFormatExtension (pixelFormat);
+            auto wglFormat = wglChoosePixelFormatExtension (pixelFormat);
             deactivateCurrentContext();
 
             if (wglFormat != pixFormat && wglFormat != 0)
@@ -106,7 +106,7 @@ public:
         return wglGetSwapIntervalEXT != nullptr ? wglGetSwapIntervalEXT() : 0;
     }
 
-    void updateWindowPosition (const Rectangle<int>& bounds)
+    void updateWindowPosition (Rectangle<int> bounds)
     {
         if (nativeWindow != nullptr)
             SetWindowPos ((HWND) nativeWindow->getNativeHandle(), 0,
@@ -141,7 +141,7 @@ private:
     ScopedPointer<ComponentPeer> nativeWindow;
     HGLRC renderContext;
     HDC dc;
-    OpenGLContext* context;
+    OpenGLContext* context = {};
 
     #define JUCE_DECLARE_WGL_EXTENSION_FUNCTION(name, returnType, params) \
         typedef returnType (__stdcall *type_ ## name) params; type_ ## name name;
@@ -162,10 +162,10 @@ private:
 
     void createNativeWindow (Component& component)
     {
-        Component* topComp = component.getTopLevelComponent();
+        auto* topComp = component.getTopLevelComponent();
         nativeWindow = createNonRepaintingEmbeddedWindowsPeer (*dummyComponent, topComp->getWindowHandle());
 
-        if (ComponentPeer* peer = topComp->getPeer())
+        if (auto* peer = topComp->getPeer())
             updateWindowPosition (peer->getAreaCoveredBy (component));
 
         nativeWindow->setVisible (true);

@@ -170,7 +170,7 @@ public:
     GLuint getFrameBufferID() const noexcept    { return 0; }
 
     //==============================================================================
-    void updateWindowPosition (const Rectangle<int>& bounds)
+    void updateWindowPosition (Rectangle<int> bounds)
     {
         if (lastBounds != bounds)
         {
