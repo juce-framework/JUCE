@@ -213,6 +213,7 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
 #include "text/juce_String.h"
 #include "text/juce_StringRef.h"
 #include "logging/juce_Logger.h"
+#include "logging/juce_LogString.h"
 #include "memory/juce_LeakedObjectDetector.h"
 #include "memory/juce_ContainerDeletePolicy.h"
 #include "memory/juce_HeapBlock.h"
