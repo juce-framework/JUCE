@@ -102,7 +102,7 @@ public:
         auto menuNames = currentModel->getMenuBarNames();
         auto indexOfMenu = (int) [superMenu indexOfItemWithSubmenu: menu];
         [menu removeAllItems];
-        auto updatedPopup = currentModel->getMenuForIndex (indexOfMenu, menuNames[indexOfMenu - 1]);
+        auto updatedPopup = currentModel->getMenuForIndex (indexOfMenu - 1, menuNames[indexOfMenu - 1]);
 
         for (PopupMenu::MenuItemIterator iter (updatedPopup); iter.next();)
             addMenuItem (iter, menu, 1, indexOfMenu);
@@ -133,7 +133,7 @@ public:
 
         for (int i = 0; i < menuNames.size(); ++i)
         {
-            const PopupMenu menu (currentModel->getMenuForIndex (i, menuNames [i]));
+            const PopupMenu menu (currentModel->getMenuForIndex (i, menuNames[i]));
 
             if (i >= [menuBar numberOfItems] - 1)
                 addTopLevelMenu (menuBar, menu, menuNames[i], menuId, i);
