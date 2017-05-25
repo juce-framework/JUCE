@@ -88,6 +88,8 @@ private:
     void loadSwatchColours();
     void saveSwatchColours();
 
+    void updateOldProjectSettingsFiles();
+
     //==============================================================================
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override  { changed(); }
     void valueTreeChildAdded (ValueTree&, ValueTree&) override              { changed(); }

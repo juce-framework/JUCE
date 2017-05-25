@@ -781,7 +781,7 @@ void ProjucerApplication::deleteLogger()
     logger = nullptr;
 }
 
-PropertiesFile::Options ProjucerApplication::getPropertyFileOptionsFor (const String& filename)
+PropertiesFile::Options ProjucerApplication::getPropertyFileOptionsFor (const String& filename, bool isProjectSettings)
 {
     PropertiesFile::Options options;
     options.applicationName     = filename;
@@ -792,6 +792,9 @@ PropertiesFile::Options ProjucerApplication::getPropertyFileOptionsFor (const St
    #else
     options.folderName          = "Projucer";
    #endif
+
+    if (isProjectSettings)
+        options.folderName += "/ProjectSettings";
 
     return options;
 }

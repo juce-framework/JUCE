@@ -92,7 +92,7 @@ public:
     bool closeAllDocuments (bool askUserToSave);
     bool closeAllMainWindows();
 
-    PropertiesFile::Options getPropertyFileOptionsFor (const String& filename);
+    PropertiesFile::Options getPropertyFileOptionsFor (const String& filename, bool isProjectSettings);
 
     //==============================================================================
     void showUTF8ToolWindow();

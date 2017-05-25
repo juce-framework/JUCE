@@ -44,6 +44,7 @@ PropertiesFile& getGlobalProperties()
 StoredSettings::StoredSettings()
     : appearance (true), projectDefaults ("PROJECT_DEFAULT_SETTINGS")
 {
+    updateOldProjectSettingsFiles();
     reload();
     projectDefaults.addListener (this);
 }
@@ -59,24 +60,24 @@ PropertiesFile& StoredSettings::getGlobalProperties()
     return *propertyFiles.getUnchecked (0);
 }
 
-static PropertiesFile* createPropsFile (const String& filename)
+static PropertiesFile* createPropsFile (const String& filename, bool isProjectSettings)
 {
     return new PropertiesFile (ProjucerApplication::getApp()
-                                .getPropertyFileOptionsFor (filename));
+                                .getPropertyFileOptionsFor (filename, isProjectSettings));
 }
 
 PropertiesFile& StoredSettings::getProjectProperties (const String& projectUID)
 {
-    const String filename ("Introjucer_Project_" + projectUID);
+    const auto filename = String ("Projucer_Project_" + projectUID);
 
-    for (int i = propertyFiles.size(); --i >= 0;)
+    for (auto i = propertyFiles.size(); --i >= 0;)
     {
-        PropertiesFile* const props = propertyFiles.getUnchecked(i);
+        auto* const props = propertyFiles.getUnchecked(i);
         if (props->getFile().getFileNameWithoutExtension() == filename)
             return *props;
     }
 
-    PropertiesFile* p = createPropsFile (filename);
+    auto* p = createPropsFile (filename, true);
     propertyFiles.add (p);
     return *p;
 }
@@ -97,7 +98,7 @@ void StoredSettings::updateKeyMappings()
 {
     getGlobalProperties().removeValue ("keyMappings");
 
-    if (ApplicationCommandManager* commandManager = ProjucerApplication::getApp().commandManager)
+    if (auto* commandManager = ProjucerApplication::getApp().commandManager.get())
     {
         const ScopedPointer<XmlElement> keys (commandManager->getKeyMappings()->createXml (true));
 
@@ -111,14 +112,14 @@ void StoredSettings::flush()
     updateGlobalPreferences();
     saveSwatchColours();
 
-    for (int i = propertyFiles.size(); --i >= 0;)
+    for (auto i = propertyFiles.size(); --i >= 0;)
         propertyFiles.getUnchecked(i)->saveIfNeeded();
 }
 
 void StoredSettings::reload()
 {
     propertyFiles.clear();
-    propertyFiles.add (createPropsFile ("Introjucer"));
+    propertyFiles.add (createPropsFile ("Projucer", false));
 
     ScopedPointer<XmlElement> projectDefaultsXml (propertyFiles.getFirst()->getXmlValue ("PROJECT_DEFAULT_SETTINGS"));
 
@@ -153,6 +154,33 @@ void StoredSettings::setLastProjects (const Array<File>& files)
     getGlobalProperties().setValue ("lastProjects", s.joinIntoString ("|"));
 }
 
+void StoredSettings::updateOldProjectSettingsFiles()
+{
+    // Global properties file hasn't been created yet so create a dummy file
+    auto projucerSettingsDirectory = ProjucerApplication::getApp().getPropertyFileOptionsFor ("Dummy", false)
+                                                                  .getDefaultFile().getParentDirectory();
+
+    auto newProjectSettingsDir = projucerSettingsDirectory.getChildFile ("ProjectSettings");
+    newProjectSettingsDir.createDirectory();
+
+    DirectoryIterator iter (projucerSettingsDirectory, false, "*.settings");
+    while (iter.next())
+    {
+        auto f = iter.getFile();
+        auto oldFileName = f.getFileName();
+
+        if (oldFileName.contains ("Introjucer"))
+        {
+            auto newFileName = oldFileName.replace ("Introjucer", "Projucer");
+
+            if (oldFileName.contains ("_Project"))
+                f.moveFileTo (f.getSiblingFile (newProjectSettingsDir.getFileName()).getChildFile (newFileName));
+            else
+                f.moveFileTo (f.getSiblingFile (newFileName));
+        }
+    }
+}
+
 //==============================================================================
 void StoredSettings::loadSwatchColours()
 {
@@ -168,19 +196,19 @@ void StoredSettings::loadSwatchColours()
 
     #undef COL
 
-    const int numSwatchColours = 24;
-    PropertiesFile& props = getGlobalProperties();
+    const auto numSwatchColours = 24;
+    auto& props = getGlobalProperties();
 
-    for (int i = 0; i < numSwatchColours; ++i)
+    for (auto i = 0; i < numSwatchColours; ++i)
         swatchColours.add (Colour::fromString (props.getValue ("swatchColour" + String (i),
                                                                colours [2 + i].toString())));
 }
 
 void StoredSettings::saveSwatchColours()
 {
-    PropertiesFile& props = getGlobalProperties();
+    auto& props = getGlobalProperties();
 
-    for (int i = 0; i < swatchColours.size(); ++i)
+    for (auto i = 0; i < swatchColours.size(); ++i)
         props.setValue ("swatchColour" + String (i), swatchColours.getReference(i).toString());
 }
 
@@ -202,13 +230,13 @@ void StoredSettings::ColourSelectorWithSwatches::setSwatchColour (int index, con
 //==============================================================================
 static bool doesSDKPathContainFile (const File& relativeTo, const String& path, const String& fileToCheckFor)
 {
-    String actualPath = path.replace ("${user.home}", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
+    auto actualPath = path.replace ("${user.home}", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
     return relativeTo.getChildFile (actualPath + "/" + fileToCheckFor).existsAsFile();
 }
 
 Value StoredSettings::getGlobalPath (const Identifier& key, DependencyPathOS os)
 {
-    Value v (projectDefaults.getPropertyAsValue (key, nullptr));
+    auto v = projectDefaults.getPropertyAsValue (key, nullptr);
 
     if (v.toString().isEmpty())
     {
