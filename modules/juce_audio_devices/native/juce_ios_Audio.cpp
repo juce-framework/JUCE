@@ -639,10 +639,6 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                     handleStreamFormatChange();
 
                 return;
-            case kAudioUnitProperty_MaximumFramesPerSlice:
-                JUCE_IOS_AUDIO_LOG ("buffer size change");
-                triggerAsyncUpdate();
-                return;
             default:
                 jassertfalse;
                 return;
@@ -902,7 +898,6 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
         }
 
         AudioUnitAddPropertyListener (audioUnit, kAudioUnitProperty_StreamFormat,          dispatchAudioUnitPropertyChange, this);
-        AudioUnitAddPropertyListener (audioUnit, kAudioUnitProperty_MaximumFramesPerSlice, dispatchAudioUnitPropertyChange, this);
 
         return true;
     }
