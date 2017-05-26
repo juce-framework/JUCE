@@ -682,6 +682,14 @@ void AudioProcessor::addParameter (AudioProcessorParameter* p)
     // if you're using parameter objects, then you must not override the
     // deprecated getNumParameters() method!
     jassert (getNumParameters() == AudioProcessor::getNumParameters());
+
+    // check that no two parameters have the same id
+   #ifdef JUCE_DEBUG
+    auto paramId = getParameterID (p->parameterIndex);
+
+    for (auto q : managedParameters)
+        jassert (q == nullptr || q == p || paramId != getParameterID (q->parameterIndex));
+   #endif
 }
 
 void AudioProcessor::suspendProcessing (const bool shouldBeSuspended)
