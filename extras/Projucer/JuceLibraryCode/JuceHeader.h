@@ -34,7 +34,7 @@
 namespace ProjectInfo
 {
     const char* const  projectName    = "Projucer";
-    const char* const  versionString  = "5.0.1";
-    const int          versionNumber  = 0x50001;
+    const char* const  versionString  = "5.0.2";
+    const int          versionNumber  = 0x50002;
 }
 #endif
