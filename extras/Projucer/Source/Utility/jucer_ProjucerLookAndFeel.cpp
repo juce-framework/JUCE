@@ -532,7 +532,7 @@ void ProjucerLookAndFeel::setupColours()
         setColour (widgetTextColourId,                   Colours::black);
         setColour (defaultButtonBackgroundColourId,      Colour (0xff42a2c8));
         setColour (secondaryButtonBackgroundColourId,    Colour (0xffa1c677));
-        setColour (userButtonBackgroundColourId,         Colour (0xffff5b5b));
+        setColour (userButtonBackgroundColourId,         Colour (0xff42a2c8));
         setColour (defaultIconColourId,                  Colours::white);
         setColour (treeIconColourId,                     Colour (0xffa9a9a9));
         setColour (defaultHighlightColourId,             Colour (0xffffd05b));
