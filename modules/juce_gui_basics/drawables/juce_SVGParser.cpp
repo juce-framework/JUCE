@@ -407,13 +407,18 @@ private:
     AffineTransform transform;
     String cssStyleText;
 
+    static bool isNone (const String& s) noexcept
+    {
+        return s.equalsIgnoreCase ("none");
+    }
+
     static void setCommonAttributes (Drawable& d, const XmlPath& xml)
     {
         auto compID = xml->getStringAttribute ("id");
         d.setName (compID);
         d.setComponentID (compID);
 
-        if (xml->getStringAttribute ("display") == "none")
+        if (isNone (xml->getStringAttribute ("display")))
             d.setVisible (false);
     }
 
@@ -421,7 +426,17 @@ private:
     void parseSubElements (const XmlPath& xml, DrawableComposite& parentDrawable)
     {
         forEachXmlChildElement (*xml, e)
-            parentDrawable.addAndMakeVisible (parseSubElement (xml.getChild (e)));
+        {
+            const XmlPath child (xml.getChild (e));
+
+            if (auto* drawable = parseSubElement (child))
+            {
+                parentDrawable.addChildComponent (drawable);
+
+                if (! isNone (getStyleAttribute (child, "display")))
+                    drawable->setVisible (true);
+            }
+        }
     }
 
     Drawable* parseSubElement (const XmlPath& xml)
@@ -536,29 +551,29 @@ private:
 
     void parseCircle (const XmlPath& xml, Path& circle) const
     {
-        const float cx = getCoordLength (xml, "cx", viewBoxW);
-        const float cy = getCoordLength (xml, "cy", viewBoxH);
-        const float radius = getCoordLength (xml, "r", viewBoxW);
+        auto cx = getCoordLength (xml, "cx", viewBoxW);
+        auto cy = getCoordLength (xml, "cy", viewBoxH);
+        auto radius = getCoordLength (xml, "r", viewBoxW);
 
         circle.addEllipse (cx - radius, cy - radius, radius * 2.0f, radius * 2.0f);
     }
 
     void parseEllipse (const XmlPath& xml, Path& ellipse) const
     {
-        const float cx      = getCoordLength (xml, "cx", viewBoxW);
-        const float cy      = getCoordLength (xml, "cy", viewBoxH);
-        const float radiusX = getCoordLength (xml, "rx", viewBoxW);
-        const float radiusY = getCoordLength (xml, "ry", viewBoxH);
+        auto cx      = getCoordLength (xml, "cx", viewBoxW);
+        auto cy      = getCoordLength (xml, "cy", viewBoxH);
+        auto radiusX = getCoordLength (xml, "rx", viewBoxW);
+        auto radiusY = getCoordLength (xml, "ry", viewBoxH);
 
         ellipse.addEllipse (cx - radiusX, cy - radiusY, radiusX * 2.0f, radiusY * 2.0f);
     }
 
     void parseLine (const XmlPath& xml, Path& line) const
     {
-        const float x1 = getCoordLength (xml, "x1", viewBoxW);
-        const float y1 = getCoordLength (xml, "y1", viewBoxH);
-        const float x2 = getCoordLength (xml, "x2", viewBoxW);
-        const float y2 = getCoordLength (xml, "y2", viewBoxH);
+        auto x1 = getCoordLength (xml, "x1", viewBoxW);
+        auto y1 = getCoordLength (xml, "y1", viewBoxH);
+        auto x2 = getCoordLength (xml, "x2", viewBoxW);
+        auto y2 = getCoordLength (xml, "y2", viewBoxH);
 
         line.startNewSubPath (x1, y1);
         line.lineTo (x2, y2);
@@ -636,7 +651,7 @@ private:
 
         auto strokeType = getStyleAttribute (xml, "stroke");
 
-        if (strokeType.isNotEmpty() && ! strokeType.equalsIgnoreCase ("none"))
+        if (strokeType.isNotEmpty() && ! isNone (strokeType))
         {
             dp->setStrokeFill (getPathFillType (path, xml, "stroke",
                                                 getStyleAttribute (xml, "stroke-opacity"),
@@ -666,7 +681,7 @@ private:
 
     void parseDashArray (const String& dashList, DrawablePath& dp) const
     {
-        if (dashList.equalsIgnoreCase ("null") || dashList.equalsIgnoreCase ("none"))
+        if (dashList.equalsIgnoreCase ("null") || isNone (dashList))
             return;
 
         Array<float> dashLengths;
@@ -907,7 +922,7 @@ private:
                 return op.fillType;
         }
 
-        if (fill.equalsIgnoreCase ("none"))
+        if (isNone (fill))
             return Colours::transparentBlack;
 
         return parseColour (xml, fillAttribute, defaultColour).withMultipliedAlpha (opacity);
@@ -1179,7 +1194,7 @@ private:
         if (align.isEmpty())
             return 0;
 
-        if (align.containsIgnoreCase ("none"))
+        if (isNone (align))
             return RectanglePlacement::stretchToFit;
 
         return (align.containsIgnoreCase ("slice") ? RectanglePlacement::fillDestination : 0)
