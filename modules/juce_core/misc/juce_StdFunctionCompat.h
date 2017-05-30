@@ -55,7 +55,7 @@ namespace std
         template <typename Functor>
         function (Functor f)
         {
-            functorHolderHelper = createFunctorStorage (sizeof (FunctorHolder<Functor, Result, Arguments...>));
+            functorHolderHelper = getFunctorStorage (sizeof (FunctorHolder<Functor, Result, Arguments...>));
             new (functorHolderHelper) FunctorHolder<Functor, Result, Arguments...> (f);
         }
 
@@ -125,24 +125,24 @@ namespace std
         struct FunctorHolderBase
         {
             virtual ~FunctorHolderBase() {};
-            virtual size_t getSize() const noexcept = 0;
-            virtual FunctorHolderBase* copy (void*) const = 0;
+            virtual int getSize() const noexcept = 0;
+            virtual void copy (void*) const = 0;
             virtual ReturnType operator()(Args...) = 0;
         };
 
         template <typename Functor, typename ReturnType, typename... Args>
-        struct FunctorHolder  : FunctorHolderBase<Result, Arguments...>
+        struct FunctorHolder : FunctorHolderBase<Result, Arguments...>
         {
             FunctorHolder (Functor func) : f (func) {}
 
-            size_t getSize() const noexcept override final
+            int getSize() const noexcept override final
             {
                 return sizeof (*this);
             }
 
-            FunctorHolder* copy (void* destination) const override final
+            void copy (void* destination) const override final
             {
-                return new (destination) FunctorHolder (f);
+                new (destination) FunctorHolder (f);
             }
 
             ReturnType operator()(Args... args) override final
@@ -153,48 +153,29 @@ namespace std
             Functor f;
         };
 
-        FunctorHolderBase<Result, Arguments...>* createFunctorStorage (size_t size)
+        FunctorHolderBase<Result, Arguments...>* getFunctorStorage (int size)
         {
-            void* storagePointer;
-
-            if (size > functorHolderStackSize)
-            {
-                if (heapFunctorStorage != nullptr)
-                {
-                    delete [] heapFunctorStorage;
-                    heapFunctorStorage = nullptr;
-                }
-
-                heapFunctorStorage = new char [size];
-                storagePointer = heapFunctorStorage;
-            }
-            else
-            {
-                storagePointer = &(stackFunctorStorage[0]);
-            }
-
-            return reinterpret_cast<FunctorHolderBase<Result, Arguments...>*> (storagePointer);
+            return reinterpret_cast<FunctorHolderBase<Result, Arguments...>*>
+                       (size > functorHolderStackSize ? new char [size]
+                                                      : &(stackFunctorStorage[0]));
         }
 
         void copy (function const& other)
         {
             if (other.functorHolderHelper != nullptr)
             {
-                functorHolderHelper = createFunctorStorage (other.functorHolderHelper->getSize());
+                functorHolderHelper = getFunctorStorage (other.functorHolderHelper->getSize());
                 other.functorHolderHelper->copy (functorHolderHelper);
             }
         }
 
         void move (function& other)
         {
-            functorHolderHelper = other.functorHolderHelper;
-
-            if (functorHolderHelper != nullptr)
+            if (other.functorHolderHelper != nullptr)
             {
-                if (functorHolderHelper->getSize() > functorHolderStackSize)
+                if (other.functorHolderHelper->getSize() > functorHolderStackSize)
                 {
-                    heapFunctorStorage = other.heapFunctorStorage;
-                    other.heapFunctorStorage = nullptr;
+                    functorHolderHelper = other.functorHolderHelper;
                 }
                 else
                 {
@@ -211,14 +192,17 @@ namespace std
         {
             if (functorHolderHelper != nullptr)
             {
-                functorHolderHelper->~FunctorHolderBase<Result, Arguments...>();
+                if (functorHolderHelper->getSize() > functorHolderStackSize)
+                    delete[] reinterpret_cast<char*> (functorHolderHelper);
+                else
+                    functorHolderHelper->~FunctorHolderBase<Result, Arguments...>();
+
                 functorHolderHelper = nullptr;
             }
         }
 
         static const int functorHolderStackSize = 24;
         char stackFunctorStorage[functorHolderStackSize];
-        char* heapFunctorStorage = nullptr;
 
         FunctorHolderBase<Result, Arguments...>* functorHolderHelper = nullptr;
     };

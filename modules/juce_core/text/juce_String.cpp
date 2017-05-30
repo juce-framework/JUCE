@@ -1637,26 +1637,23 @@ String String::upToLastOccurrenceOf (StringRef sub,
     return substring (0, includeSubString ? i + sub.length() : i);
 }
 
+static bool isQuoteCharacter (juce_wchar c) noexcept
+{
+    return c == '"' || c == '\'';
+}
+
 bool String::isQuotedString() const
 {
-    const juce_wchar trimmedStart = trimStart()[0];
-
-    return trimmedStart == '"'
-        || trimmedStart == '\'';
+    return isQuoteCharacter (*text.findEndOfWhitespace());
 }
 
 String String::unquoted() const
 {
-    const int len = length();
+    if (! isQuoteCharacter (*text))
+        return *this;
 
-    if (len == 0)
-        return {};
-
-    const juce_wchar lastChar = text [len - 1];
-    const int dropAtStart = (*text == '"' || *text == '\'') ? 1 : 0;
-    const int dropAtEnd = (lastChar == '"' || lastChar == '\'') ? 1 : 0;
-
-    return substring (dropAtStart, len - dropAtEnd);
+    auto len = length();
+    return substring (1, len - (isQuoteCharacter (text[len - 1]) ? 1 : 0));
 }
 
 String String::quoted (const juce_wchar quoteCharacter) const
@@ -1933,8 +1930,8 @@ template <typename Type>
 static String hexToString (Type v)
 {
     String::CharPointerType::CharType buffer[32];
-    String::CharPointerType::CharType* const end = buffer + numElementsInArray (buffer) - 1;
-    String::CharPointerType::CharType* t = end;
+    auto* end = buffer + numElementsInArray (buffer) - 1;
+    auto* t = end;
     *t = 0;
 
     do
@@ -1948,9 +1945,10 @@ static String hexToString (Type v)
                    String::CharPointerType (end));
 }
 
-String String::toHexString (int number)       { return hexToString ((unsigned int) number); }
-String String::toHexString (int64 number)     { return hexToString ((uint64) number); }
-String String::toHexString (short number)     { return toHexString ((int) (unsigned short) number); }
+String String::createHex (uint8 n)    { return hexToString (n); }
+String String::createHex (uint16 n)   { return hexToString (n); }
+String String::createHex (uint32 n)   { return hexToString (n); }
+String String::createHex (uint64 n)   { return hexToString (n); }
 
 String String::toHexString (const void* const d, const int size, const int groupSize)
 {
@@ -1963,7 +1961,7 @@ String String::toHexString (const void* const d, const int size, const int group
 
     String s (PreallocationBytes (sizeof (CharPointerType::CharType) * (size_t) numChars));
 
-    const unsigned char* data = static_cast<const unsigned char*> (d);
+    auto* data = static_cast<const unsigned char*> (d);
     CharPointerType dest (s.text);
 
     for (int i = 0; i < size; ++i)
@@ -1997,7 +1995,7 @@ static String getStringFromWindows1252Codepage (const char* data, size_t num)
 
 String String::createStringFromData (const void* const unknownData, int size)
 {
-    const uint8* const data = static_cast<const uint8*> (unknownData);
+    auto* data = static_cast<const uint8*> (unknownData);
 
     if (size <= 0 || data == nullptr)
         return {};
@@ -2029,7 +2027,7 @@ String String::createStringFromData (const void* const unknownData, int size)
         return builder.result;
     }
 
-    const char* start = (const char*) data;
+    auto* start = (const char*) data;
 
     if (size >= 3 && CharPointer_UTF8::isByteOrderMark (data))
     {
@@ -2052,7 +2050,7 @@ struct StringEncodingConverter
 {
     static CharPointerType_Dest convert (const String& s)
     {
-        String& source = const_cast<String&> (s);
+        auto& source = const_cast<String&> (s);
 
         typedef typename CharPointerType_Dest::CharType DestChar;
 
@@ -2504,6 +2502,12 @@ public:
             expect (String::toHexString (0x1234abcd).equalsIgnoreCase ("1234abcd"));
             expect (String::toHexString ((int64) 0x1234abcd).equalsIgnoreCase ("1234abcd"));
             expect (String::toHexString ((short) 0x12ab).equalsIgnoreCase ("12ab"));
+            expect (String::toHexString ((size_t) 0x12ab).equalsIgnoreCase ("12ab"));
+            expect (String::toHexString ((long) 0x12ab).equalsIgnoreCase ("12ab"));
+            expect (String::toHexString ((int8)  -1).equalsIgnoreCase ("ff"));
+            expect (String::toHexString ((int16) -1).equalsIgnoreCase ("ffff"));
+            expect (String::toHexString ((int32) -1).equalsIgnoreCase ("ffffffff"));
+            expect (String::toHexString ((int64) -1).equalsIgnoreCase ("ffffffffffffffff"));
 
             unsigned char data[] = { 1, 2, 3, 4, 0xa, 0xb, 0xc, 0xd };
             expect (String::toHexString (data, 8, 0).equalsIgnoreCase ("010203040a0b0c0d"));

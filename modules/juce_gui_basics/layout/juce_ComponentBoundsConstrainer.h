@@ -165,7 +165,7 @@ public:
 
     /** Checks the given bounds, and then sets the component to the corrected size. */
     void setBoundsForComponent (Component* component,
-                                const Rectangle<int>& bounds,
+                                Rectangle<int> bounds,
                                 bool isStretchingTop,
                                 bool isStretchingLeft,
                                 bool isStretchingBottom,
@@ -182,14 +182,13 @@ public:
         By default this just calls setBounds(), but is virtual in case it's needed for
         extremely cunning purposes.
     */
-    virtual void applyBoundsToComponent (Component* component,
-                                         const Rectangle<int>& bounds);
+    virtual void applyBoundsToComponent (Component&, Rectangle<int> bounds);
 
 private:
     //==============================================================================
-    int minW, maxW, minH, maxH;
-    int minOffTop, minOffLeft, minOffBottom, minOffRight;
-    double aspectRatio;
+    int minW = 0, maxW = 0x3fffffff, minH = 0, maxH = 0x3fffffff;
+    int minOffTop = 0, minOffLeft = 0, minOffBottom = 0, minOffRight = 0;
+    double aspectRatio = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentBoundsConstrainer)
 };

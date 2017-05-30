@@ -117,6 +117,10 @@ void ProjucerApplication::initialise (const String& commandLine)
 
         settings->appearance.refreshPresetSchemeList();
 
+        setColourScheme (settings->getGlobalProperties().getIntValue ("COLOUR SCHEME"), false);
+        setEditorColourScheme (settings->getGlobalProperties().getIntValue ("EDITOR COLOUR SCHEME"), false);
+        updateEditorColourSchemeIfNeeded();
+
         // do further initialisation in a moment when the message loop has started
         triggerAsyncUpdate();
     }
@@ -325,12 +329,13 @@ enum
 {
     recentProjectsBaseID = 100,
     activeDocumentsBaseID = 300,
-    colourSchemeBaseID = 1000
+    colourSchemeBaseID = 1000,
+    codeEditorColourSchemeBaseID = 2000,
 };
 
 MenuBarModel* ProjucerApplication::getMenuModel()
 {
-  return menuModel.get();
+    return menuModel.get();
 }
 
 StringArray ProjucerApplication::getMenuNames()
@@ -439,11 +444,37 @@ void ProjucerApplication::createBuildMenu (PopupMenu& menu)
 void ProjucerApplication::createColourSchemeItems (PopupMenu& menu)
 {
     PopupMenu colourSchemes;
-    colourSchemes.addItem (colourSchemeBaseID + 0, "Dark");
-    colourSchemes.addItem (colourSchemeBaseID + 1, "Grey");
-    colourSchemes.addItem (colourSchemeBaseID + 2, "Light");
+
+    colourSchemes.addItem (colourSchemeBaseID + 0, "Dark", true, selectedColourSchemeIndex == 0);
+    colourSchemes.addItem (colourSchemeBaseID + 1, "Grey", true, selectedColourSchemeIndex == 1);
+    colourSchemes.addItem (colourSchemeBaseID + 2, "Light", true, selectedColourSchemeIndex == 2);
 
     menu.addSubMenu ("Colour Scheme", colourSchemes);
+
+    //==========================================================================
+    PopupMenu editorColourSchemes;
+
+    auto& appearanceSettings = getAppSettings().appearance;
+
+    appearanceSettings.refreshPresetSchemeList();
+    auto schemes = appearanceSettings.getPresetSchemes();
+
+    auto i = 0;
+    for (auto s : schemes)
+    {
+        editorColourSchemes.addItem (codeEditorColourSchemeBaseID + i, s,
+                                     globalPreferencesWindow == nullptr,
+                                     selectedEditorColourSchemeIndex == i);
+        ++i;
+    }
+
+    numEditorColourSchemes = i;
+
+    editorColourSchemes.addSeparator();
+    editorColourSchemes.addItem (codeEditorColourSchemeBaseID + numEditorColourSchemes,
+                                 "Create...", globalPreferencesWindow == nullptr);
+
+    menu.addSubMenu ("Editor Colour Scheme", editorColourSchemes);
 }
 
 void ProjucerApplication::createWindowMenu (PopupMenu& menu)
@@ -485,46 +516,30 @@ void ProjucerApplication::createExtraAppleMenuItems (PopupMenu& menu)
 
 void ProjucerApplication::handleMainMenuCommand (int menuItemID)
 {
-    if (menuItemID >= recentProjectsBaseID && menuItemID < recentProjectsBaseID + 100)
+    if (menuItemID >= recentProjectsBaseID && menuItemID < (recentProjectsBaseID + 100))
     {
         // open a file from the "recent files" menu
         openFile (settings->recentFiles.getFile (menuItemID - recentProjectsBaseID));
     }
-    else if (menuItemID >= activeDocumentsBaseID && menuItemID < activeDocumentsBaseID + 200)
+    else if (menuItemID >= activeDocumentsBaseID && menuItemID < (activeDocumentsBaseID + 200))
     {
         if (OpenDocumentManager::Document* doc = openDocumentManager.getOpenDocument (menuItemID - activeDocumentsBaseID))
             mainWindowList.openDocument (doc, true);
         else
             jassertfalse;
     }
-    else if (menuItemID >= colourSchemeBaseID && menuItemID < colourSchemeBaseID + 3)
+    else if (menuItemID >= colourSchemeBaseID && menuItemID < (colourSchemeBaseID + 3))
     {
-        auto& appearanceSettings = getAppSettings().appearance;
-
-        if (menuItemID == colourSchemeBaseID)
-        {
-            lookAndFeel.setColourScheme (LookAndFeel_V4::getDarkColourScheme());
-            appearanceSettings.selectPresetScheme (0);
-        }
-        else if (menuItemID == colourSchemeBaseID + 1)
-        {
-            lookAndFeel.setColourScheme (LookAndFeel_V4::getGreyColourScheme());
-            appearanceSettings.selectPresetScheme (0);
-        }
-        else if (menuItemID == colourSchemeBaseID + 2)
-        {
-            lookAndFeel.setColourScheme (LookAndFeel_V4::getLightColourScheme());
-            appearanceSettings.selectPresetScheme (1);
-        }
-
-        lookAndFeel.setupColours();
-        mainWindowList.sendLookAndFeelChange();
-
-        if (utf8Window != nullptr)                  utf8Window->sendLookAndFeelChange();
-        if (svgPathWindow != nullptr)               svgPathWindow->sendLookAndFeelChange();
-        if (globalPreferencesWindow != nullptr)     globalPreferencesWindow->sendLookAndFeelChange();
-        if (aboutWindow != nullptr)                 aboutWindow->sendLookAndFeelChange();
-        if (applicationUsageDataWindow != nullptr)  applicationUsageDataWindow->sendLookAndFeelChange();
+        setColourScheme (menuItemID - colourSchemeBaseID, true);
+        updateEditorColourSchemeIfNeeded();
+    }
+    else if (menuItemID >= codeEditorColourSchemeBaseID && menuItemID < (codeEditorColourSchemeBaseID + numEditorColourSchemes))
+    {
+        setEditorColourScheme (menuItemID - codeEditorColourSchemeBaseID, true);
+    }
+    else if (menuItemID == (codeEditorColourSchemeBaseID + numEditorColourSchemes))
+    {
+        AppearanceSettings::showGlobalPreferences (globalPreferencesWindow, true);
     }
     else
     {
@@ -766,7 +781,7 @@ void ProjucerApplication::deleteLogger()
     logger = nullptr;
 }
 
-PropertiesFile::Options ProjucerApplication::getPropertyFileOptionsFor (const String& filename)
+PropertiesFile::Options ProjucerApplication::getPropertyFileOptionsFor (const String& filename, bool isProjectSettings)
 {
     PropertiesFile::Options options;
     options.applicationName     = filename;
@@ -777,6 +792,9 @@ PropertiesFile::Options ProjucerApplication::getPropertyFileOptionsFor (const St
    #else
     options.folderName          = "Projucer";
    #endif
+
+    if (isProjectSettings)
+        options.folderName += "/ProjectSettings";
 
     return options;
 }
@@ -800,4 +818,95 @@ void ProjucerApplication::initCommandManager()
     }
 
     registerGUIEditorCommands();
+}
+
+void ProjucerApplication::selectEditorColourSchemeWithName (const String& schemeName)
+{
+    auto& appearanceSettings = getAppSettings().appearance;
+    auto schemes = appearanceSettings.getPresetSchemes();
+
+    auto schemeIndex = schemes.indexOf (schemeName);
+
+    if (schemeIndex >= 0)
+        setEditorColourScheme (schemeIndex, true);
+}
+
+void ProjucerApplication::setColourScheme (int index, bool saveSetting)
+{
+    switch (index)
+    {
+        case 0: lookAndFeel.setColourScheme (LookAndFeel_V4::getDarkColourScheme());  break;
+        case 1: lookAndFeel.setColourScheme (LookAndFeel_V4::getGreyColourScheme());  break;
+        case 2: lookAndFeel.setColourScheme (LookAndFeel_V4::getLightColourScheme()); break;
+        default: break;
+    }
+
+    lookAndFeel.setupColours();
+    mainWindowList.sendLookAndFeelChange();
+
+    if (utf8Window != nullptr)                  utf8Window->sendLookAndFeelChange();
+    if (svgPathWindow != nullptr)               svgPathWindow->sendLookAndFeelChange();
+    if (globalPreferencesWindow != nullptr)     globalPreferencesWindow->sendLookAndFeelChange();
+    if (aboutWindow != nullptr)                 aboutWindow->sendLookAndFeelChange();
+    if (applicationUsageDataWindow != nullptr)  applicationUsageDataWindow->sendLookAndFeelChange();
+
+    auto* mcm = ModalComponentManager::getInstance();
+    for (auto i = 0; i < mcm->getNumModalComponents(); ++i)
+        mcm->getModalComponent (i)->sendLookAndFeelChange();
+
+    if (saveSetting)
+    {
+        auto& properties = settings->getGlobalProperties();
+        properties.setValue ("COLOUR SCHEME", index);
+    }
+
+    selectedColourSchemeIndex = index;
+
+    getCommandManager().commandStatusChanged();
+}
+
+void ProjucerApplication::setEditorColourScheme (int index, bool saveSetting)
+{
+    auto& appearanceSettings = getAppSettings().appearance;
+    auto schemes = appearanceSettings.getPresetSchemes();
+
+    index = jmin (index, schemes.size() - 1);
+
+    appearanceSettings.selectPresetScheme (index);
+
+    if (saveSetting)
+    {
+        auto& properties = settings->getGlobalProperties();
+        properties.setValue ("EDITOR COLOUR SCHEME", index);
+    }
+
+    selectedEditorColourSchemeIndex = index;
+
+    getCommandManager().commandStatusChanged();
+}
+
+bool ProjucerApplication::isEditorColourSchemeADefaultScheme (const StringArray& schemes, int editorColourSchemeIndex)
+{
+    auto& schemeName = schemes[editorColourSchemeIndex];
+    return (schemeName == "Default (Dark)" || schemeName == "Default (Light)");
+}
+
+int ProjucerApplication::getEditorColourSchemeForGUIColourScheme (const StringArray& schemes, int guiColourSchemeIndex)
+{
+    auto defaultDarkEditorIndex  = schemes.indexOf ("Default (Dark)");
+    auto defaultLightEditorIndex = schemes.indexOf ("Default (Light)");
+
+    // Can't find default code editor colour schemes!
+    jassert (defaultDarkEditorIndex != -1 && defaultLightEditorIndex != -1);
+
+    return (guiColourSchemeIndex == 2 ? defaultLightEditorIndex : defaultDarkEditorIndex);
+}
+
+void ProjucerApplication::updateEditorColourSchemeIfNeeded()
+{
+    auto& appearanceSettings = getAppSettings().appearance;
+    auto schemes = appearanceSettings.getPresetSchemes();
+
+    if (isEditorColourSchemeADefaultScheme (schemes, selectedEditorColourSchemeIndex))
+        setEditorColourScheme (getEditorColourSchemeForGUIColourScheme (schemes, selectedColourSchemeIndex), true);
 }

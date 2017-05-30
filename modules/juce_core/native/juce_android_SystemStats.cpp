@@ -343,7 +343,36 @@ String SystemStats::getDisplayLanguage() { return getUserLanguage() + "-" + getU
 //==============================================================================
 void CPUInformation::initialise() noexcept
 {
-    numPhysicalCPUs = numLogicalCPUs = jmax ((int) 1, (int) sysconf (_SC_NPROCESSORS_ONLN));
+    numPhysicalCPUs = numLogicalCPUs = jmax ((int) 1, (int) android_getCpuCount());
+
+    auto cpuFamily   = android_getCpuFamily();
+    auto cpuFeatures = android_getCpuFeatures();
+
+    if (cpuFamily == ANDROID_CPU_FAMILY_X86 || cpuFamily == ANDROID_CPU_FAMILY_X86_64)
+    {
+        hasMMX = hasSSE = hasSSE2 = (cpuFamily == ANDROID_CPU_FAMILY_X86_64);
+
+        hasSSSE3 = ((cpuFeatures & ANDROID_CPU_X86_FEATURE_SSSE3)  != 0);
+        hasSSE41 = ((cpuFeatures & ANDROID_CPU_X86_FEATURE_SSE4_1) != 0);
+        hasSSE42 = ((cpuFeatures & ANDROID_CPU_X86_FEATURE_SSE4_2) != 0);
+        hasAVX   = ((cpuFeatures & ANDROID_CPU_X86_FEATURE_AVX)    != 0);
+        hasAVX2  = ((cpuFeatures & ANDROID_CPU_X86_FEATURE_AVX2)   != 0);
+
+        // Google does not distinguish between MMX, SSE, SSE2, SSE3 and SSSE3. So
+        // I assume (and quick Google searches seem to confirm this) that there are
+        // only devices out there that either support all of this or none of this.
+        if (hasSSSE3)
+            hasMMX = hasSSE = hasSSE2 = hasSSE3 = true;
+    }
+    else if (cpuFamily == ANDROID_CPU_FAMILY_ARM)
+    {
+        hasNeon = ((cpuFeatures & ANDROID_CPU_ARM_FEATURE_NEON) != 0);
+    }
+    else if (cpuFamily == ANDROID_CPU_FAMILY_ARM64)
+    {
+        // all arm 64-bit cpus have neon
+        hasNeon = true;
+    }
 }
 
 //==============================================================================

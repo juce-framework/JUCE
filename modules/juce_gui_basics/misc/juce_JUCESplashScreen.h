@@ -51,6 +51,8 @@ public:
     JUCESplashScreen (Component& parentToAddTo);
     ~JUCESplashScreen();
 
+    static Drawable* getSplashScreenLogo();
+
 private:
     void paint (Graphics&) override;
     void timerCallback() override;
@@ -62,10 +64,7 @@ private:
     ScopedPointer<Drawable> content;
     CriticalSection appUsageReporting;
     ComponentAnimator fader;
-
-   #if JUCE_DISPLAY_SPLASH_SCREEN
     bool hasStartedFading = false;
-   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JUCESplashScreen)
 };

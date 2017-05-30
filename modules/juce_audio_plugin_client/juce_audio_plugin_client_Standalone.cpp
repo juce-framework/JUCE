@@ -30,6 +30,15 @@
 
 #include "Standalone/juce_StandaloneFilterApp.cpp"
 
-#if ! JUCE_USE_CUSTOM_AU3_STANDALONE_APP
- START_JUCE_APPLICATION (StandaloneFilterApp);
+#if JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP
+ extern juce::JUCEApplicationBase* juce_CreateApplication();
+
+ #if JUCE_IOS
+  extern void* juce_GetIOSCustomDelegateClass();
+ #endif
+
+#else
+ JUCE_CREATE_APPLICATION_DEFINE(StandaloneFilterApp);
 #endif
+
+JUCE_MAIN_FUNCTION_DEFINITION

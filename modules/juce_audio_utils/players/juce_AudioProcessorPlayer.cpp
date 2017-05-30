@@ -24,14 +24,8 @@
   ==============================================================================
 */
 
-AudioProcessorPlayer::AudioProcessorPlayer(bool doDoublePrecisionProcessing)
-    : processor (nullptr),
-      sampleRate (0),
-      blockSize (0),
-      isPrepared (false),
-      isDoublePrecision (doDoublePrecisionProcessing),
-      numInputChans (0),
-      numOutputChans (0)
+AudioProcessorPlayer::AudioProcessorPlayer (bool doDoublePrecisionProcessing)
+    : isDoublePrecision (doDoublePrecisionProcessing)
 {
 }
 
@@ -48,11 +42,11 @@ void AudioProcessorPlayer::setProcessor (AudioProcessor* const processorToPlay)
         if (processorToPlay != nullptr && sampleRate > 0 && blockSize > 0)
         {
             processorToPlay->setPlayConfigDetails(numInputChans, numOutputChans, sampleRate, blockSize);
-            const bool supportsDouble = processorToPlay->supportsDoublePrecisionProcessing() && isDoublePrecision;
-            AudioProcessor::ProcessingPrecision precision = supportsDouble ? AudioProcessor::doublePrecision
-                                                                           : AudioProcessor::singlePrecision;
 
-            processorToPlay->setProcessingPrecision (precision);
+            bool supportsDouble = processorToPlay->supportsDoublePrecisionProcessing() && isDoublePrecision;
+
+            processorToPlay->setProcessingPrecision (supportsDouble ? AudioProcessor::doublePrecision
+                                                                    : AudioProcessor::singlePrecision);
             processorToPlay->prepareToPlay (sampleRate, blockSize);
         }
 
@@ -80,11 +74,10 @@ void AudioProcessorPlayer::setDoublePrecisionProcessing (bool doublePrecision)
         {
             processor->releaseResources();
 
-            const bool supportsDouble = processor->supportsDoublePrecisionProcessing() && doublePrecision;
-            AudioProcessor::ProcessingPrecision precision = supportsDouble ? AudioProcessor::doublePrecision
-                                                                           : AudioProcessor::singlePrecision;
+            bool supportsDouble = processor->supportsDoublePrecisionProcessing() && doublePrecision;
 
-            processor->setProcessingPrecision (precision);
+            processor->setProcessingPrecision (supportsDouble ? AudioProcessor::doublePrecision
+                                                              : AudioProcessor::singlePrecision);
             processor->prepareToPlay (sampleRate, blockSize);
         }
 
@@ -178,10 +171,10 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChann
 
 void AudioProcessorPlayer::audioDeviceAboutToStart (AudioIODevice* const device)
 {
-    const double newSampleRate = device->getCurrentSampleRate();
-    const int newBlockSize     = device->getCurrentBufferSizeSamples();
-    const int numChansIn       = device->getActiveInputChannels().countNumberOfSetBits();
-    const int numChansOut      = device->getActiveOutputChannels().countNumberOfSetBits();
+    auto newSampleRate = device->getCurrentSampleRate();
+    auto newBlockSize  = device->getCurrentBufferSizeSamples();
+    auto numChansIn    = device->getActiveInputChannels().countNumberOfSetBits();
+    auto numChansOut   = device->getActiveOutputChannels().countNumberOfSetBits();
 
     const ScopedLock sl (lock);
 
@@ -198,7 +191,7 @@ void AudioProcessorPlayer::audioDeviceAboutToStart (AudioIODevice* const device)
         if (isPrepared)
             processor->releaseResources();
 
-        AudioProcessor* const oldProcessor = processor;
+        auto* oldProcessor = processor;
         setProcessor (nullptr);
         setProcessor (oldProcessor);
     }

@@ -250,9 +250,8 @@ namespace
 
         {
             ScopedXDisplay xDisplay;
-            ::Display* display = xDisplay.get();
 
-            XGetWindowProperty (display, handle, atom, 0, 1, false, AnyPropertyType,
+            XGetWindowProperty (xDisplay.display, handle, atom, 0, 1, false, AnyPropertyType,
                                 &userType,  &userSize, &userCount, &bytes, &data);
         }
 
@@ -269,9 +268,7 @@ namespace
 
         {
             ScopedXDisplay xDisplay;
-            ::Display* display = xDisplay.get();
-
-            XQueryTree (display, windowToCheck, &rootWindow, &parentWindow, &childWindows, &numChildren);
+            XQueryTree (xDisplay.display, windowToCheck, &rootWindow, &parentWindow, &childWindows, &numChildren);
         }
 
         if (numChildren > 0)
@@ -602,7 +599,8 @@ class VSTPluginInstance     : public AudioPluginInstance,
                               private AsyncUpdater
 {
 private:
-    VSTPluginInstance (const ModuleHandle::Ptr& mh, const BusesProperties& ioConfig, VstEffectInterface* effect)
+    VSTPluginInstance (const ModuleHandle::Ptr& mh, const BusesProperties& ioConfig, VstEffectInterface* effect,
+                       double sampleRateToUse, int blockSizeToUse)
         : AudioPluginInstance (ioConfig),
           vstEffect (effect),
           vstModule (mh),
@@ -611,7 +609,9 @@ private:
           wantsMidiMessages (false),
           initialised (false),
           isPowerOn (false)
-    {}
+    {
+        setRateAndBufferSizeDetails (sampleRateToUse, blockSizeToUse);
+    }
 
 public:
     ~VSTPluginInstance()
@@ -678,17 +678,15 @@ public:
 
             newEffect->dispatchFunction (newEffect, plugInOpcodeIdentify, 0, 0, 0, 0);
 
+            auto blockSize = jmax (32, initialBlockSize);
+
             newEffect->dispatchFunction (newEffect, plugInOpcodeSetSampleRate, 0, 0, 0, static_cast<float> (initialSampleRate));
-            newEffect->dispatchFunction (newEffect, plugInOpcodeSetBlockSize,  0, jmax (32, initialBlockSize), 0, 0);
+            newEffect->dispatchFunction (newEffect, plugInOpcodeSetBlockSize,  0, blockSize, 0, 0);
 
             newEffect->dispatchFunction (newEffect, plugInOpcodeOpen, 0, 0, 0, 0);
             BusesProperties ioConfig = queryBusIO (newEffect);
-            newEffect->dispatchFunction (newEffect, plugInOpcodeClose, 0, 0, 0, 0);
 
-            newEffect = constructEffect (newModule);
-
-            if (newEffect != nullptr)
-                return new VSTPluginInstance (newModule, ioConfig, newEffect);
+            return new VSTPluginInstance (newModule, ioConfig, newEffect, initialSampleRate, blockSize);
         }
 
         return nullptr;
@@ -847,12 +845,10 @@ public:
     {
         setRateAndBufferSizeDetails (rate, samplesPerBlockExpected);
 
-        VstSpeakerConfiguration inArr, outArr;
+        SpeakerMappings::VstSpeakerConfigurationHolder inArr  (getChannelLayoutOfBus (true,  0));
+        SpeakerMappings::VstSpeakerConfigurationHolder outArr (getChannelLayoutOfBus (false, 0));
 
-        SpeakerMappings::channelSetToVstArrangement (getChannelLayoutOfBus (true,  0), inArr);
-        SpeakerMappings::channelSetToVstArrangement (getChannelLayoutOfBus (false, 0), outArr);
-
-        dispatch (plugInOpcodeSetSpeakerConfiguration, 0, reinterpret_cast<pointer_sized_int> (&inArr), &outArr, 0.0f);
+        dispatch (plugInOpcodeSetSpeakerConfiguration, 0, (pointer_sized_int) &inArr.get(), (void*) &outArr.get(), 0.0f);
 
         vstHostTime.tempoBPM = 120.0;
         vstHostTime.timeSignatureNumerator = 4;

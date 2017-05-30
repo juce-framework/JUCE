@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="wHE0ay" name="MidiTest" projectType="guiapp" version="1.0.0"
-              bundleIdentifier="com.yourcompany.MidiTest" includeBinaryInAppConfig="1"
-              jucerVersion="5.0.1" displaySplashScreen="0" reportAppUsage="0"
-              splashScreenColour="Dark">
+              bundleIdentifier="com.roli.MidiTest" includeBinaryInAppConfig="1"
+              jucerVersion="5.0.2" displaySplashScreen="0" reportAppUsage="0"
+              splashScreenColour="Dark" companyName="ROLI Ltd.">
   <MAINGROUP id="s3xxCh" name="MidiTest">
     <GROUP id="{7D29F5BC-1B05-AE8F-9202-5CF152AB1103}" name="Source">
       <FILE id="kpmJ3T" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>

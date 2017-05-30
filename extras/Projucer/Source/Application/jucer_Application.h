@@ -92,7 +92,7 @@ public:
     bool closeAllDocuments (bool askUserToSave);
     bool closeAllMainWindows();
 
-    PropertiesFile::Options getPropertyFileOptionsFor (const String& filename);
+    PropertiesFile::Options getPropertyFileOptionsFor (const String& filename, bool isProjectSettings);
 
     //==============================================================================
     void showUTF8ToolWindow();
@@ -110,6 +110,11 @@ public:
     void doLogout();
 
     bool isPaidOrGPL() const              { return licenseController == nullptr || licenseController->getState().isPaidOrGPL(); }
+
+    //==============================================================================
+    void selectEditorColourSchemeWithName (const String& schemeName);
+    static bool isEditorColourSchemeADefaultScheme (const StringArray& schemes, int editorColourSchemeIndex);
+    static int getEditorColourSchemeForGUIColourScheme (const StringArray& schemes, int guiColourSchemeIndex);
 
     //==============================================================================
     ProjucerLookAndFeel lookAndFeel;
@@ -148,4 +153,15 @@ private:
 
     void handleAsyncUpdate() override;
     void initCommandManager();
+
+    //==============================================================================
+    void setColourScheme (int index, bool saveSetting);
+
+    void setEditorColourScheme (int index, bool saveSetting);
+    void updateEditorColourSchemeIfNeeded();
+
+    int selectedColourSchemeIndex;
+
+    int selectedEditorColourSchemeIndex;
+    int numEditorColourSchemes;
 };

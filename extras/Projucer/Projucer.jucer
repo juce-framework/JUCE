@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="M70qfTRRk" name="Projucer" projectType="guiapp" juceFolder="../../juce"
-              jucerVersion="5.0.1" version="5.0.1" bundleIdentifier="com.juce.theprojucer"
+              jucerVersion="5.0.2" version="5.0.2" bundleIdentifier="com.juce.theprojucer"
               defines="" includeBinaryInAppConfig="1" splashScreenColour="Dark"
-              displaySplashScreen="0" reportAppUsage="0">
+              displaySplashScreen="0" reportAppUsage="0" companyName="ROLI Ltd.">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                documentExtensions=".jucer" objCExtraSuffix="zkVtji" bigIcon="OCyr5F"
@@ -458,6 +458,8 @@
     <GROUP id="{58EB50D9-0F01-AF9B-087B-93DB283A339D}" name="Utility">
       <FILE id="yhZzRW" name="jucer_AboutWindowComponent.h" compile="0" resource="0"
             file="Source/Utility/jucer_AboutWindowComponent.h"/>
+      <FILE id="zOjz65" name="jucer_ApplicationUsageDataWindowComponent.h"
+            compile="0" resource="0" file="Source/Utility/jucer_ApplicationUsageDataWindowComponent.h"/>
       <FILE id="TX2oGI" name="jucer_CodeHelpers.cpp" compile="1" resource="0"
             file="Source/Utility/jucer_CodeHelpers.cpp"/>
       <FILE id="mpDJct" name="jucer_CodeHelpers.h" compile="0" resource="0"

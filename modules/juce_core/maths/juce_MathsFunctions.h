@@ -585,10 +585,7 @@ namespace TypeHelpers
 
         Of course, this is only likely to be useful in certain esoteric template situations.
 
-        Because "typename TypeHelpers::ParameterType<SomeClass>::type" is a bit of a mouthful, there's
-        a PARAMETER_TYPE(SomeClass) macro that you can use to get the same effect.
-
-        E.g. "myFunction (PARAMETER_TYPE (int), PARAMETER_TYPE (MyObject))"
+        E.g. "myFunction (typename TypeHelpers::ParameterType<int>::type, typename TypeHelpers::ParameterType<MyObject>::type)"
         would evaluate to "myfunction (int, const MyObject&)", keeping any primitive types as
         pass-by-value, but passing objects as a const reference, to avoid copying.
     */
@@ -612,16 +609,21 @@ namespace TypeHelpers
     template <>              struct ParameterType <double>          { typedef double type; };
    #endif
 
-    /** A helpful macro to simplify the use of the ParameterType template.
-        @see ParameterType
-    */
-    #define PARAMETER_TYPE(a)    typename TypeHelpers::ParameterType<a>::type
-
     /** These templates are designed to take a type, and if it's a double, they return a double
         type; for anything else, they return a float type.
     */
-    template <typename Type> struct SmallestFloatType             { typedef float  type; };
-    template <>              struct SmallestFloatType <double>    { typedef double type; };
+    template <typename Type> struct SmallestFloatType               { typedef float  type; };
+    template <>              struct SmallestFloatType <double>      { typedef double type; };
+
+
+    /** These templates are designed to take an integer type, and return an unsigned int
+        version with the same size.
+    */
+    template <int bytes>     struct UnsignedTypeWithSize            {};
+    template <>              struct UnsignedTypeWithSize<1>         { typedef uint8  type; };
+    template <>              struct UnsignedTypeWithSize<2>         { typedef uint16 type; };
+    template <>              struct UnsignedTypeWithSize<4>         { typedef uint32 type; };
+    template <>              struct UnsignedTypeWithSize<8>         { typedef uint64 type; };
 }
 
 

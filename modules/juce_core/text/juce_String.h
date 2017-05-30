@@ -246,12 +246,12 @@ public:
 
         size_t extraBytesNeeded = 0, numChars = 1;
 
-        for (CharPointer t (startOfTextToAppend); t != endOfTextToAppend && ! t.isEmpty(); ++numChars)
+        for (auto t = startOfTextToAppend; t != endOfTextToAppend && ! t.isEmpty(); ++numChars)
             extraBytesNeeded += CharPointerType::getBytesRequiredFor (t.getAndAdvance());
 
         if (extraBytesNeeded > 0)
         {
-            const size_t byteOffsetOfNull = getByteOffsetOfEnd();
+            auto byteOffsetOfNull = getByteOffsetOfEnd();
 
             preallocateBytes (byteOffsetOfNull + extraBytesNeeded);
             CharPointerType (addBytesToPointer (text.getAddress(), (int) byteOffsetOfNull))
@@ -274,12 +274,12 @@ public:
         {
             size_t extraBytesNeeded = 0, numChars = 1;
 
-            for (CharPointer t (textToAppend); numChars <= maxCharsToTake && ! t.isEmpty(); ++numChars)
+            for (auto t = textToAppend; numChars <= maxCharsToTake && ! t.isEmpty(); ++numChars)
                 extraBytesNeeded += CharPointerType::getBytesRequiredFor (t.getAndAdvance());
 
             if (extraBytesNeeded > 0)
             {
-                const size_t byteOffsetOfNull = getByteOffsetOfEnd();
+                auto byteOffsetOfNull = getByteOffsetOfEnd();
 
                 preallocateBytes (byteOffsetOfNull + extraBytesNeeded);
                 CharPointerType (addBytesToPointer (text.getAddress(), (int) byteOffsetOfNull))
@@ -1046,16 +1046,11 @@ public:
     */
     int64 getHexValue64() const noexcept;
 
-    /** Creates a string representing this 32-bit value in hexadecimal. */
-    static String toHexString (int number);
+    /** Returns a string representing this numeric value in hexadecimal. */
+    template <typename IntegerType>
+    static String toHexString (IntegerType number)      { return createHex (number); }
 
-    /** Creates a string representing this 64-bit value in hexadecimal. */
-    static String toHexString (int64 number);
-
-    /** Creates a string representing this 16-bit value in hexadecimal. */
-    static String toHexString (short number);
-
-    /** Creates a string containing a hex dump of a block of binary data.
+    /** Returns a string containing a hex dump of a block of binary data.
 
         @param data         the binary data to use as input
         @param size         how many bytes of data to use
@@ -1270,6 +1265,14 @@ private:
 
     //==============================================================================
     static String formattedRaw (const char*, ...);
+
+    static String createHex (uint8);
+    static String createHex (uint16);
+    static String createHex (uint32);
+    static String createHex (uint64);
+
+    template <typename Type>
+    static String createHex (Type n)  { return createHex (static_cast<typename TypeHelpers::UnsignedTypeWithSize<sizeof (n)>::type> (n)); }
 };
 
 //==============================================================================

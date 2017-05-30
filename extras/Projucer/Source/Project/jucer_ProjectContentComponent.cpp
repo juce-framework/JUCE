@@ -510,6 +510,10 @@ void ProjectContentComponent::hideEditor()
 {
     currentDocument = nullptr;
     contentView = nullptr;
+
+    if (fileNameLabel != nullptr)
+        fileNameLabel->setVisible (false);
+
     ProjucerApplication::getCommandManager().commandStatusChanged();
     resized();
 }
@@ -546,6 +550,7 @@ bool ProjectContentComponent::setEditorComponent (Component* editor,
         {
             contentView = editor;
             currentDocument = doc;
+            fileNameLabel->setText (doc->getFile().getFileName(), dontSendNotification);
             fileNameLabel->setVisible (true);
 
             addAndMakeVisible (editor);
@@ -628,10 +633,15 @@ bool ProjectContentComponent::goToCounterpart()
     return false;
 }
 
-bool ProjectContentComponent::saveProject()
+bool ProjectContentComponent::saveProject (bool shouldWait)
 {
-    return project != nullptr
-            && project->save (true, true) == FileBasedDocument::savedOk;
+    if (project != nullptr)
+    {
+        const ScopedValueSetter<bool> valueSetter (project->shouldWaitAfterSaving, shouldWait, false);
+        return (project->save (true, true) == FileBasedDocument::savedOk);
+    }
+
+    return false;
 }
 
 void ProjectContentComponent::closeProject()
@@ -737,7 +747,7 @@ void ProjectContentComponent::openInSelectedIDE (bool saveFirst)
                 if (exporter->canLaunchProject() && exporter->getName() == selectedIDE)
                 {
                     if (saveFirst)
-                        saveProject();
+                        saveProject (exporter->isXcode());
 
                     exporter->launchProject();
                     break;

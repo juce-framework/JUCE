@@ -4,6 +4,29 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 5.0.2
+  - Improved project save speed in the Projucer
+  - Added option to save individual exporters in the Projucer
+  - Added the ability to create custom colour schemes for the Projucer’s code editor
+  - Minor fixes to JUCE’s SVG parser
+  - Various bug fixes in the way JUCE handles Hi-DPI monitors
+  - Improved code browsing in Visual Studio Exports
+  - Improved the handling of audio device buffer size changes on iOS
+  - Fixed bug in the Win32 FileChooser dialog when selecting a nonexistent root drive
+  - Fixed a Projucer crash when saving projects with no targets
+  - Fixed a bug where Projucer generated Makefiles would not trigger a recompilation when header files had changed
+  - The standalone plugin target is now compatible with effect plug-ins
+  - Fixed an issue where it was not possible to use the live build engine on plugin projects
+  - Improved the way the Projucer’s live-build engine searches for platform headers on Windows
+  - Fixed an issue where the Projucer would complain about not having internet even if the user had a license
+  - Fixed a use-after-free in the AUv3 wrapper
+  - Fixed an issue where the channel layout would not be reported correctly in the AUv3 wrapper
+  - Fixed a potential memory overrun issue when hosting VST2 plugins with more than eight channels
+  - Fixed a problem with the Mac main menu bar showing menus in the wrong position
+  - Various Projucer UI fixes
+  - Various documentation fixes
+  - Various minor improvements and bug fixes
+
 Version 5.0.1
   - Fixed Windows live build engine on Visual Studio 2017
   - Fixed memory-leak in Projucer live build engine

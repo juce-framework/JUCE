@@ -93,6 +93,55 @@ StringArray ProjectExporter::getExporterNames()
     return s;
 }
 
+String ProjectExporter::getValueTreeNameForExporter (const String& exporterName)
+{
+    if (exporterName == XCodeProjectExporter::getNameMac())
+        return XCodeProjectExporter::getValueTreeTypeName (false);
+
+    if (exporterName == XCodeProjectExporter::getNameiOS())
+        return XCodeProjectExporter::getValueTreeTypeName (true);
+
+    if (exporterName == MSVCProjectExporterVC2013::getName())
+        return MSVCProjectExporterVC2013::getValueTreeTypeName();
+
+    if (exporterName == MSVCProjectExporterVC2015::getName())
+        return MSVCProjectExporterVC2015::getValueTreeTypeName();
+
+    if (exporterName == MSVCProjectExporterVC2017::getName())
+        return MSVCProjectExporterVC2017::getValueTreeTypeName();
+
+    if (exporterName == MakefileProjectExporter::getNameLinux())
+        return MakefileProjectExporter::getValueTreeTypeName();
+
+    if (exporterName == AndroidProjectExporter::getName())
+        return AndroidProjectExporter::getValueTreeTypeName();
+
+    if (exporterName == CodeBlocksProjectExporter::getNameLinux())
+        return CodeBlocksProjectExporter::getValueTreeTypeName (CodeBlocksProjectExporter::CodeBlocksOS::linuxTarget);
+
+    if (exporterName == CodeBlocksProjectExporter::getNameWindows())
+        return CodeBlocksProjectExporter::getValueTreeTypeName (CodeBlocksProjectExporter::CodeBlocksOS::windowsTarget);
+
+    return {};
+}
+
+StringArray ProjectExporter::getAllDefaultBuildsFolders()
+{
+    StringArray folders;
+
+    folders.add (getDefaultBuildsRootFolder() + "iOS");
+    folders.add (getDefaultBuildsRootFolder() + "MacOSX");
+    folders.add (getDefaultBuildsRootFolder() + "VisualStudio2013");
+    folders.add (getDefaultBuildsRootFolder() + "VisualStudio2015");
+    folders.add (getDefaultBuildsRootFolder() + "VisualStudio2017");
+    folders.add (getDefaultBuildsRootFolder() + "LinuxMakefile");
+    folders.add (getDefaultBuildsRootFolder() + "CodeBlocksWindows");
+    folders.add (getDefaultBuildsRootFolder() + "CodeBlocksLinux");
+    folders.add (getDefaultBuildsRootFolder() + "Android");
+
+    return folders;
+}
+
 String ProjectExporter::getCurrentPlatformExporterName()
 {
    #if JUCE_MAC
@@ -170,6 +219,14 @@ ProjectExporter::~ProjectExporter()
 }
 
 void ProjectExporter::updateDeprecatedProjectSettingsInteractively() {}
+
+String ProjectExporter::getName() const
+{
+    if (! getAllDefaultBuildsFolders().contains (getTargetLocationString()))
+        return name + " - " + getTargetLocationString();
+
+    return name;
+}
 
 File ProjectExporter::getTargetFolder() const
 {

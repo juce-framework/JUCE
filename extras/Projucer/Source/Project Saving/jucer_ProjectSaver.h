@@ -48,28 +48,32 @@ public:
     struct SaveThread  : public ThreadWithProgressWindow
     {
     public:
-        SaveThread (ProjectSaver& ps)
+        SaveThread (ProjectSaver& ps, bool wait, const String& exp)
             : ThreadWithProgressWindow ("Saving...", true, false),
-              saver (ps), result (Result::ok())
+              saver (ps), result (Result::ok()),
+              shouldWaitAfterSaving (wait),
+              specifiedExporterToSave (exp)
         {}
 
         void run() override
         {
             setProgress (-1);
-            result = saver.save (false);
+            result = saver.save (false, shouldWaitAfterSaving, specifiedExporterToSave);
         }
 
         ProjectSaver& saver;
         Result result;
+        bool shouldWaitAfterSaving;
+        String specifiedExporterToSave;
 
         JUCE_DECLARE_NON_COPYABLE (SaveThread)
     };
 
-    Result save (bool showProgressBox)
+    Result save (bool showProgressBox, bool waitAfterSaving, const String& specifiedExporterToSave)
     {
         if (showProgressBox)
         {
-            SaveThread thread (*this);
+            SaveThread thread (*this, waitAfterSaving, specifiedExporterToSave);
             thread.runThread();
             return thread.result;
         }
@@ -79,22 +83,26 @@ public:
         const File oldFile (project.getFile());
         project.setFile (projectFile);
 
-        writeMainProjectFile();
-
         OwnedArray<LibraryModule> modules;
         project.getModules().createRequiredModules (modules);
 
         checkModuleValidity (modules);
 
-        if (errors.size() == 0) writeAppConfigFile (modules, appConfigUserContent);
-        if (errors.size() == 0) writeBinaryDataFiles();
-        if (errors.size() == 0) writeAppHeader (modules);
-        if (errors.size() == 0) writeModuleCppWrappers (modules);
-        if (errors.size() == 0) writeProjects (modules);
-        if (errors.size() == 0) writeAppConfigFile (modules, appConfigUserContent); // (this is repeated in case the projects added anything to it)
+        if (errors.size() == 0)
+        {
+            writeMainProjectFile();
+            project.updateModificationTime();
 
-        if (errors.size() == 0 && generatedCodeFolder.exists())
-            writeReadmeFile();
+            writeAppConfigFile (modules, appConfigUserContent);
+            writeBinaryDataFiles();
+            writeAppHeader (modules);
+            writeModuleCppWrappers (modules);
+            writeProjects (modules, specifiedExporterToSave);
+            writeAppConfigFile (modules, appConfigUserContent); // (this is repeated in case the projects added anything to it)
+
+            if (generatedCodeFolder.exists())
+                writeReadmeFile();
+        }
 
         if (generatedCodeFolder.exists())
             deleteUnwantedFilesIn (generatedCodeFolder);
@@ -105,7 +113,10 @@ public:
             return Result::fail (errors[0]);
         }
 
-        project.updateModificationTime();
+        // Workaround for a bug where Xcode thinks the project is invalid if opened immedietely
+        // after writing
+        if (waitAfterSaving)
+            Thread::sleep (2000);
 
         return Result::ok();
     }
@@ -335,6 +346,13 @@ private:
 
     void checkModuleValidity (OwnedArray<LibraryModule>& modules)
     {
+        if (project.getNumExporters() == 0)
+        {
+            addError ("No exporters found!\n"
+                      "Please add an exporter before saving.");
+            return;
+        }
+
         for (LibraryModule** moduleIter = modules.begin(); moduleIter != modules.end(); ++moduleIter)
         {
             if (const LibraryModule* const module = *moduleIter)
@@ -342,7 +360,7 @@ private:
                 if (! module->isValid())
                 {
                     addError ("At least one of your JUCE module paths is invalid!\n"
-                              "Please go to Config -> Modules and ensure each path points to the correct JUCE modules folder.");
+                              "Please go to the Modules settings page and ensure each path points to the correct JUCE modules folder.");
                     return;
                 }
             }
@@ -633,7 +651,7 @@ private:
 
     void writePluginCharacteristicsFile();
 
-    void writeProjects (const OwnedArray<LibraryModule>& modules)
+    void writeProjects (const OwnedArray<LibraryModule>& modules, const String& specifiedExporterToSave)
     {
         ThreadPool threadPool;
 
@@ -644,6 +662,9 @@ private:
         {
             for (Project::ExporterIterator exporter (project); exporter.next();)
             {
+                if (specifiedExporterToSave.isNotEmpty() && exporter->getName() != specifiedExporterToSave)
+                    continue;
+
                 if (exporter->getTargetFolder().createDirectory())
                 {
                     exporter->copyMainGroupFromProject();

@@ -55,7 +55,8 @@ public:
 
     static Font getDefaultCodeFont();
 
-    static void showGlobalPreferences (ScopedPointer<Component>& ownerPointer);
+    static void showGlobalPreferences (ScopedPointer<Component>& ownerPointer,
+                                       bool showCodeEditorTab = false);
 
     static const char* getSchemeFileSuffix()      { return ".scheme"; }
     static const char* getSchemeFileWildCard()    { return "*.scheme"; }

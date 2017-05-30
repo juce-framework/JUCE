@@ -975,7 +975,7 @@ public:
 
         if (dropTarget != nullptr)
         {
-            dropTarget->clear();
+            dropTarget->peerIsDeleted = true;
             dropTarget->Release();
             dropTarget = nullptr;
         }
@@ -1356,102 +1356,86 @@ public:
     static ModifierKeys modifiersAtLastCallback;
 
     //==============================================================================
-    class JuceDropTarget    : public ComBaseClassHelper<IDropTarget>
+    struct FileDropTarget    : public ComBaseClassHelper<IDropTarget>
     {
-    public:
-        JuceDropTarget (HWNDComponentPeer& p)   : ownerInfo (new OwnerInfo (p)) {}
+        FileDropTarget (HWNDComponentPeer& p)   : peer (p) {}
 
-        void clear()
+        JUCE_COMRESULT DragEnter (IDataObject* pDataObject, DWORD grfKeyState, POINTL mousePos, DWORD* pdwEffect) override
         {
-            ownerInfo = nullptr;
-        }
-
-        JUCE_COMRESULT DragEnter (IDataObject* pDataObject, DWORD grfKeyState, POINTL mousePos, DWORD* pdwEffect)
-        {
-            HRESULT hr = updateFileList (pDataObject);
+            auto hr = updateFileList (pDataObject);
             if (FAILED (hr))
                 return hr;
 
             return DragOver (grfKeyState, mousePos, pdwEffect);
         }
 
-        JUCE_COMRESULT DragLeave()
+        JUCE_COMRESULT DragLeave() override
         {
-            if (ownerInfo == nullptr)
+            if (peerIsDeleted)
                 return S_FALSE;
 
-            ownerInfo->owner.handleDragExit (ownerInfo->dragInfo);
+            peer.handleDragExit (dragInfo);
             return S_OK;
         }
 
-        JUCE_COMRESULT DragOver (DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
+        JUCE_COMRESULT DragOver (DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect) override
         {
-            if (ownerInfo == nullptr)
+            if (peerIsDeleted)
                 return S_FALSE;
 
-            ownerInfo->dragInfo.position = ownerInfo->getMousePos (mousePos).roundToInt();
-            const bool wasWanted = ownerInfo->owner.handleDragMove (ownerInfo->dragInfo);
-            *pdwEffect = wasWanted ? (DWORD) DROPEFFECT_COPY : (DWORD) DROPEFFECT_NONE;
+            dragInfo.position = getMousePos (mousePos).roundToInt();
+            *pdwEffect = peer.handleDragMove (dragInfo) ? (DWORD) DROPEFFECT_COPY
+                                                        : (DWORD) DROPEFFECT_NONE;
             return S_OK;
         }
 
-        JUCE_COMRESULT Drop (IDataObject* pDataObject, DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
+        JUCE_COMRESULT Drop (IDataObject* pDataObject, DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect) override
         {
             HRESULT hr = updateFileList (pDataObject);
-            if (SUCCEEDED (hr))
-            {
-                ownerInfo->dragInfo.position = ownerInfo->getMousePos (mousePos).roundToInt();
-                const bool wasWanted = ownerInfo->owner.handleDragDrop (ownerInfo->dragInfo);
-                *pdwEffect = wasWanted ? (DWORD) DROPEFFECT_COPY : (DWORD) DROPEFFECT_NONE;
-                hr = S_OK;
-            }
+            if (FAILED (hr))
+                return hr;
 
-            return hr;
+            dragInfo.position = getMousePos (mousePos).roundToInt();
+            *pdwEffect = peer.handleDragDrop (dragInfo) ? (DWORD) DROPEFFECT_COPY
+                                                        : (DWORD) DROPEFFECT_NONE;
+            return S_OK;
         }
 
+        HWNDComponentPeer& peer;
+        ComponentPeer::DragInfo dragInfo;
+        bool peerIsDeleted = false;
+
     private:
-        struct OwnerInfo
+        Point<float> getMousePos (POINTL mousePos) const
         {
-            OwnerInfo (HWNDComponentPeer& p) : owner (p) {}
+            auto& comp = peer.getComponent();
+            return comp.getLocalPoint (nullptr, ScalingHelpers::unscaledScreenPosToScaled (comp.getDesktopScaleFactor(),
+                                                                                           Point<float> (static_cast<float> (mousePos.x),
+                                                                                                         static_cast<float> (mousePos.y))));
+        }
 
-            Point<float> getMousePos (const POINTL& mousePos) const
+        template <typename CharType>
+        void parseFileList (const CharType* names, const SIZE_T totalLen)
+        {
+            unsigned int i = 0;
+
+            for (;;)
             {
-                return owner.globalToLocal (ScalingHelpers::unscaledScreenPosToScaled (owner.getComponent().getDesktopScaleFactor(),
-                                                                                       Point<float> (static_cast<float> (mousePos.x),
-                                                                                                     static_cast<float> (mousePos.y))));
+                unsigned int len = 0;
+                while (i + len < totalLen && names [i + len] != 0)
+                    ++len;
+
+                if (len == 0)
+                    break;
+
+                dragInfo.files.add (String (names + i, len));
+                i += len + 1;
             }
-
-            template <typename CharType>
-            void parseFileList (const CharType* names, const SIZE_T totalLen)
-            {
-                unsigned int i = 0;
-
-                for (;;)
-                {
-                    unsigned int len = 0;
-                    while (i + len < totalLen && names [i + len] != 0)
-                        ++len;
-
-                    if (len == 0)
-                        break;
-
-                    dragInfo.files.add (String (names + i, len));
-                    i += len + 1;
-                }
-            }
-
-            HWNDComponentPeer& owner;
-            ComponentPeer::DragInfo dragInfo;
-
-            JUCE_DECLARE_NON_COPYABLE (OwnerInfo)
-        };
-
-        ScopedPointer<OwnerInfo> ownerInfo;
+        }
 
         struct DroppedData
         {
-            DroppedData (IDataObject* const dataObject, const CLIPFORMAT type)
-                : data (nullptr)
+            DroppedData (IDataObject* dataObject, CLIPFORMAT type)
             {
                 FORMATETC format = { type, 0, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
                 STGMEDIUM resetMedium = { TYMED_HGLOBAL, { 0 }, 0 };
@@ -1472,16 +1456,16 @@ public:
 
             HRESULT error;
             STGMEDIUM medium;
-            void* data;
+            void* data = {};
             SIZE_T dataSize;
         };
 
         HRESULT updateFileList (IDataObject* const dataObject)
         {
-            if (ownerInfo == nullptr)
+            if (peerIsDeleted)
                 return S_FALSE;
 
-            ownerInfo->dragInfo.clear();
+            dragInfo.clear();
 
             {
                 DroppedData fileData (dataObject, CF_HDROP);
@@ -1492,9 +1476,9 @@ public:
                     const void* const names = addBytesToPointer (dropFiles, sizeof (DROPFILES));
 
                     if (dropFiles->fWide)
-                        ownerInfo->parseFileList (static_cast<const WCHAR*> (names), fileData.dataSize);
+                        parseFileList (static_cast<const WCHAR*> (names), fileData.dataSize);
                     else
-                        ownerInfo->parseFileList (static_cast<const char*>  (names), fileData.dataSize);
+                        parseFileList (static_cast<const char*>  (names), fileData.dataSize);
 
                     return S_OK;
                 }
@@ -1504,15 +1488,15 @@ public:
 
             if (SUCCEEDED (textData.error))
             {
-                ownerInfo->dragInfo.text = String (CharPointer_UTF16 ((const WCHAR*) textData.data),
-                                                   CharPointer_UTF16 ((const WCHAR*) addBytesToPointer (textData.data, textData.dataSize)));
+                dragInfo.text = String (CharPointer_UTF16 ((const WCHAR*) textData.data),
+                                        CharPointer_UTF16 ((const WCHAR*) addBytesToPointer (textData.data, textData.dataSize)));
                 return S_OK;
             }
 
             return textData.error;
         }
 
-        JUCE_DECLARE_NON_COPYABLE (JuceDropTarget)
+        JUCE_DECLARE_NON_COPYABLE (FileDropTarget)
     };
 
     static bool offerKeyMessageToJUCEWindow (MSG& m)
@@ -1539,7 +1523,7 @@ private:
          hasCreatedCaret = false, constrainerIsResizing = false;
     BorderSize<int> windowBorder;
     HICON currentWindowIcon = 0;
-    JuceDropTarget* dropTarget = nullptr;
+    FileDropTarget* dropTarget = nullptr;
     uint8 updateLayeredWindowAlpha = 255;
     UWPUIViewSettings uwpViewSettings;
     MultiTouchMapper<DWORD> currentTouches;
@@ -1771,7 +1755,7 @@ private:
                 if (peer == nullptr)
                     peer = this;
 
-                dropTarget = new JuceDropTarget (*peer);
+                dropTarget = new FileDropTarget (*peer);
             }
 
             RegisterDragDrop (hwnd, dropTarget);

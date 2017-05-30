@@ -29,8 +29,10 @@
 #include "../Project/jucer_HeaderComponent.h"
 #include "jucer_LicenseController.h"
 
+#if ! JUCER_ENABLE_GPL_MODE
 #include "jucer_LicenseWebview.h"
 #include "jucer_LicenseThread.h"
+#endif
 
 //==============================================================================
 const char* LicenseState::licenseTypeToString (LicenseState::Type type)
@@ -88,7 +90,7 @@ static LicenseState::ApplicationUsageData getApplicationUsageDataTypeFromValue (
     return LicenseState::ApplicationUsageData::notChosenYet;
 }
 
-//==============================================================================
+#if !JUCER_ENABLE_GPL_MODE
 struct LicenseController::ModalCompletionCallback : ModalComponentManager::Callback
 {
     ModalCompletionCallback (LicenseController& controller) : owner (controller) {}
@@ -97,6 +99,7 @@ struct LicenseController::ModalCompletionCallback : ModalComponentManager::Callb
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ModalCompletionCallback)
 };
+#endif
 
 //==============================================================================
 LicenseController::LicenseController()
@@ -110,8 +113,10 @@ LicenseController::LicenseController()
 
 LicenseController::~LicenseController()
 {
+   #if !JUCER_ENABLE_GPL_MODE
     thread = nullptr;
     closeWebview (-1);
+   #endif
 }
 
 LicenseState LicenseController::getState() const noexcept
@@ -181,6 +186,7 @@ void LicenseController::setApplicationUsageDataState (LicenseState::ApplicationU
 }
 
 //==============================================================================
+#if ! JUCER_ENABLE_GPL_MODE
 void LicenseController::closeWebview (int result)
 {
     if (licenseWebview != nullptr)
@@ -244,6 +250,7 @@ void LicenseController::queryWebview (const String& startURL, const String& valu
         }
     });
 }
+#endif
 
 void LicenseController::updateState (const LicenseState& newState)
 {

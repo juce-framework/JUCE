@@ -316,6 +316,7 @@ public:
         auto selectedName = getSelectedExporterName();
 
         exporterBox.clear();
+        auto preferredExporterIndex = -1;
 
         int i = 0;
         for (Project::ExporterIterator exporter (*project); exporter.next(); ++i)
@@ -324,10 +325,14 @@ public:
 
             if (selectedName == exporter->getName())
                 exporterBox.setSelectedId (i + 1);
+
+            if (exporter->canLaunchProject() && preferredExporterIndex == -1)
+                preferredExporterIndex = i;
         }
 
         if (exporterBox.getSelectedItemIndex() == -1)
-            exporterBox.setSelectedItemIndex (0);
+            exporterBox.setSelectedItemIndex (preferredExporterIndex != -1 ? preferredExporterIndex
+                                                                           : 0);
 
         updateExporterButton();
     }
@@ -423,7 +428,10 @@ private:
     void changeListenerCallback (ChangeBroadcaster* source) override
     {
         if (source == project)
+        {
             updateName();
+            updateExporters();
+        }
     }
 
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override       {}
@@ -478,7 +486,7 @@ private:
 
         for (auto info : ProjectExporter::getExporterTypes())
         {
-            if (info.name == currentExporterName)
+            if (currentExporterName.contains (info.name))
             {
                 saveAndOpenInIDEButton->iconImage = info.getIcon();
                 saveAndOpenInIDEButton->repaint();

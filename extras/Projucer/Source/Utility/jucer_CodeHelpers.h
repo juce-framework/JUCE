@@ -30,7 +30,8 @@
 //==============================================================================
 namespace CodeHelpers
 {
-    String indent (const String& code, const int numSpaces, bool indentFirstLine);
+    String indent (const String& code, int numSpaces, bool indentFirstLine);
+    String unindent (const String& code, int numSpaces);
     String makeValidIdentifier (String s, bool capitalise, bool removeColons, bool allowTemplates);
     String createIncludeStatement (const File& includedFile, const File& targetFile);
     String createIncludeStatement (const String& includePath);
@@ -41,7 +42,7 @@ namespace CodeHelpers
     String floatLiteral (double value, int numDecPlaces);
     String boolLiteral (bool value);
 
-    String colourToCode (Colour col);
+    String colourToCode (Colour);
     String justificationToCode (Justification);
 
     String alignFunctionCallParams (const String& call, const StringArray& parameters, int maxLineLength);
@@ -50,7 +51,7 @@ namespace CodeHelpers
                                 bool breakAtNewLines, bool allowStringBreaks);
 
     void createStringMatcher (OutputStream& out, const String& utf8PointerVariable,
-                              const StringArray& strings, const StringArray& codeToExecute, const int indentLevel);
+                              const StringArray& strings, const StringArray& codeToExecute, int indentLevel);
 
     String getLeadingWhitespace (String line);
     int getBraceCount (String::CharPointerType line);

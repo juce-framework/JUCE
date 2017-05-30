@@ -253,6 +253,10 @@
  #include <fnmatch.h>
  #include <sys/wait.h>
  #include <android/api-level.h>
+
+ // If you are getting include errors here, then you to re-build the Projucer
+ // and re-save your .jucer file.
+ #include <cpu-features.h>
 #endif
 
 // Need to clear various moronic redefinitions made by system headers..

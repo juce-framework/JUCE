@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="rgYEL2" name="InterAppAudioEffect" projectType="audioplug"
-              version="1.0.0" bundleIdentifier="com.yourcompany.InterAppAudioEffect"
+              version="1.0.0" bundleIdentifier="com.roli.InterAppAudioEffect"
               includeBinaryInAppConfig="1" buildVST="0" buildVST3="0" buildAU="0"
               buildAUv3="0" buildRTAS="0" buildAAX="0" enableIAA="1" pluginName="InterAppAudioEffect"
               pluginDesc="InterAppAudioEffect" pluginManufacturer="ROLI Ltd."
@@ -9,7 +9,7 @@
               pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
               pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="InterAppAudioEffectAU"
               pluginRTASCategory="" aaxIdentifier="com.yourcompany.InterAppAudioEffect"
-              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.0.1"
+              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.0.2"
               companyName="ROLI Ltd." buildStandalone="1" displaySplashScreen="0"
               reportAppUsage="0" splashScreenColour="Dark">
   <MAINGROUP id="BhTVmm" name="InterAppAudioEffect">

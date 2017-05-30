@@ -161,14 +161,17 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
     if (extraInfoComponent == nullptr)
         parentWindow.enterModalState();
 
-    if (currentFileOrDirectory.isDirectory())
+    auto parentDirectory = currentFileOrDirectory.getParentDirectory();
+
+    // Handle nonexistent root directories in the same way as existing ones
+    if (currentFileOrDirectory.isDirectory() || currentFileOrDirectory.isRoot())
     {
         info.initialPath = currentFileOrDirectory.getFullPathName();
     }
     else
     {
         currentFileOrDirectory.getFileName().copyToUTF16 (files, charsAvailableForResult * sizeof (WCHAR));
-        info.initialPath = currentFileOrDirectory.getParentDirectory().getFullPathName();
+        info.initialPath = parentDirectory.getFullPathName();
     }
 
     if (selectsDirectory)

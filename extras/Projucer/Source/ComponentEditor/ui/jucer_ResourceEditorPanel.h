@@ -53,6 +53,8 @@ public:
     void selectedRowsChanged (int lastRowSelected) override;
 
 private:
+    void lookAndFeelChanged() override;
+
     JucerDocument& document;
     ScopedPointer<TableListBox> listBox;
     TextButton addButton, reloadAllButton, delButton;

@@ -43,7 +43,7 @@ struct CompileEngineDLL : DeletedAtShutdown
         // never load the dynamic lib multiple times
         if (! isLoaded())
         {
-            File f = findDLLFile();
+            auto f = findDLLFile();
 
             if (f != File() && dll.open (f.getLinkedTarget().getFullPathName()))
             {
@@ -105,13 +105,13 @@ struct CompileEngineDLL : DeletedAtShutdown
 
     static File getVersionedUserAppSupportFolder()
     {
-        File userAppData (File::getSpecialLocation (File::userApplicationDataDirectory));
+        auto userAppData = File::getSpecialLocation (File::userApplicationDataDirectory);
 
        #if JUCE_MAC
         userAppData = userAppData.getChildFile ("Application Support");
        #endif
 
-        return userAppData.getChildFile (String ("Projucer-") + ProjectInfo::versionString);
+        return userAppData.getChildFile ("Projucer").getChildFile (String ("CompileEngine-") + ProjectInfo::versionString);
     }
 
     juce_DeclareSingleton (CompileEngineDLL, false)
@@ -123,9 +123,9 @@ private:
 
     static File findDLLFile()
     {
-        File dllFile;
+        auto dllFile = File();
 
-        if (tryFindDLLFileInAppFolder(dllFile))
+        if (tryFindDLLFileInAppFolder (dllFile))
             return dllFile;
 
        #if JUCE_MAC
@@ -133,7 +133,7 @@ private:
             return dllFile;
        #endif
 
-        if (tryFindDLLFileInAppConfigFolder(dllFile))
+        if (tryFindDLLFileInAppConfigFolder (dllFile))
             return dllFile;
 
         return {};
@@ -149,19 +149,19 @@ private:
 
     static bool tryFindDLLFileInAppFolder(File &outFile)
     {
-        File currentAppFile (File::getSpecialLocation (File::currentApplicationFile));
+        auto currentAppFile = File::getSpecialLocation (File::currentApplicationFile);
         return tryFindDLLFileInFolder (currentAppFile.getParentDirectory(), outFile);
     }
 
     static bool tryFindDLLFileInAppConfigFolder(File &outFile)
     {
-        File userAppDataFolder (getVersionedUserAppSupportFolder());
+        auto userAppDataFolder = getVersionedUserAppSupportFolder();
         return tryFindDLLFileInFolder (userAppDataFolder, outFile);
     }
 
     static bool tryFindDLLFileInFolder(File folder, File& outFile)
     {
-        File file = folder.getChildFile (getDLLName());
+        auto file = folder.getChildFile (getDLLName());
         if (isDLLFile (file))
         {
             outFile = file;
@@ -178,7 +178,8 @@ private:
 
     static void setPropertyCallback (const char* key, const char* value)
     {
-        if (String (key).isNotEmpty())
+        auto keyStr = String (key);
+        if (keyStr.isNotEmpty())
             getGlobalProperties().setValue (key, value);
         else
             jassertfalse;

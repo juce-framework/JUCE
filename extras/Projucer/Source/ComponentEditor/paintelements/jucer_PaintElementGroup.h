@@ -209,12 +209,17 @@ public:
         return false;
     }
 
-private:
-    OwnedArray <PaintElement> subElements;
-
-    class UngroupProperty  : public ButtonPropertyComponent
+    void applyCustomPaintSnippets (StringArray& snippets)
     {
-    public:
+        for (auto* e : subElements)
+            e->applyCustomPaintSnippets (snippets);
+    }
+
+private:
+    OwnedArray<PaintElement> subElements;
+
+    struct UngroupProperty  : public ButtonPropertyComponent
+    {
         UngroupProperty (PaintElementGroup* const e)
             : ButtonPropertyComponent ("ungroup", false),
               element (e)
@@ -231,7 +236,6 @@ private:
             return "Ungroup";
         }
 
-    private:
-        PaintElementGroup* const element;
+        PaintElementGroup* element;
     };
 };

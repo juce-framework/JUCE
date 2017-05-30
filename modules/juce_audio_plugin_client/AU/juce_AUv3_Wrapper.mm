@@ -337,8 +337,7 @@ public:
         auto& processor = getAudioProcessor();
         processor.removeListener (this);
 
-        if (AudioProcessorEditor* editor = processor.getActiveEditor())
-            processor.editorBeingDeleted (editor);
+        removeEditor (processor);
 
         if (editorObserverToken != nullptr)
         {
@@ -556,8 +555,11 @@ public:
                 AVAudioFormat* format = [[auBuses objectAtIndexedSubscript:static_cast<NSUInteger> (busIdx)] format];
 
                 AudioChannelSet newLayout;
-                if (const AVAudioChannelLayout* layout = [format channelLayout])
-                    newLayout = AudioUnitHelpers::CALayoutTagToChannelSet ([layout layoutTag]);
+                const AVAudioChannelLayout* layout    = [format channelLayout];
+                const AudioChannelLayoutTag layoutTag = (layout != nullptr ? [layout layoutTag] : 0);
+
+                if (layoutTag != 0)
+                    newLayout = AudioUnitHelpers::CALayoutTagToChannelSet (layoutTag);
                 else
                     newLayout = bus->supportedLayoutWithChannels (static_cast<int> ([format channelCount]));
 
@@ -654,9 +656,12 @@ public:
             if (! AudioUnitHelpers::isLayoutSupported (processor, isInput, busIdx, newNumChannels, configs))
                 return false;
           #else
-            if (const AVAudioChannelLayout* layout = [format channelLayout])
+            const AVAudioChannelLayout* layout    = [format channelLayout];
+            const AudioChannelLayoutTag layoutTag = (layout != nullptr ? [layout layoutTag] : 0);
+
+            if (layoutTag != 0)
             {
-                AudioChannelSet newLayout = AudioUnitHelpers::CALayoutTagToChannelSet ([layout layoutTag]);
+                AudioChannelSet newLayout = AudioUnitHelpers::CALayoutTagToChannelSet (layoutTag);
 
                 if (newLayout.size() != newNumChannels)
                     return false;
@@ -780,6 +785,17 @@ public:
             lastAudioHead = info;
 
         return true;
+    }
+
+    static void removeEditor (AudioProcessor& processor)
+    {
+        ScopedLock editorLock (processor.getCallbackLock());
+
+        if (AudioProcessorEditor* editor = processor.getActiveEditor())
+        {
+            processor.editorBeingDeleted (editor);
+            delete editor;
+        }
     }
 
 private:
@@ -1302,6 +1318,9 @@ public:
     ~JuceAUViewController()
     {
         jassert (MessageManager::getInstance()->isThisTheMessageThread());
+
+        if (processorHolder != nullptr)
+            JuceAudioUnitv3::removeEditor (getAudioProcessor());
     }
 
     //==============================================================================

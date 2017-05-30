@@ -45,7 +45,11 @@ public:
         showSettingsPage (new ModuleSettingsPanel (project, moduleID));
     }
 
-    void deleteItem() override                { project.getModules().removeModule (moduleID); }
+    void deleteItem() override
+    {
+        closeSettingsPage();
+        project.getModules().removeModule (moduleID);
+    }
 
     Icon getIcon() const override
     {

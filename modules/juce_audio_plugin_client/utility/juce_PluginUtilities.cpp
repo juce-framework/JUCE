@@ -151,7 +151,7 @@ bool JUCE_API handleManufacturerSpecificVST2Opcode (int32 index, pointer_sized_i
 */
 extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 
-#if JucePlugin_Enable_IAA && JucePlugin_Build_STANDALONE && JUCE_IOS && (! JUCE_USE_CUSTOM_AU3_STANDALONE_APP)
+#if JucePlugin_Enable_IAA && JucePlugin_Build_STANDALONE && JUCE_IOS && (! JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP)
 extern bool JUCE_CALLTYPE juce_isInterAppAudioConnected();
 extern void JUCE_CALLTYPE juce_switchToHostApplication();
 
@@ -174,7 +174,7 @@ AudioProcessor* JUCE_API JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor:
 
 bool PluginHostType::isInterAppAudioConnected() const
 {
-   #if JucePlugin_Enable_IAA && JucePlugin_Build_STANDALONE && JUCE_IOS && (! JUCE_USE_CUSTOM_AU3_STANDALONE_APP)
+   #if JucePlugin_Enable_IAA && JucePlugin_Build_STANDALONE && JUCE_IOS && (! JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP)
     if (getPluginLoadedAs() == AudioProcessor::wrapperType_Standalone)
         return juce_isInterAppAudioConnected();
    #endif
@@ -184,7 +184,7 @@ bool PluginHostType::isInterAppAudioConnected() const
 
 void PluginHostType::switchToHostApplication() const
 {
-   #if JucePlugin_Enable_IAA && JucePlugin_Build_STANDALONE && JUCE_IOS && (! JUCE_USE_CUSTOM_AU3_STANDALONE_APP)
+   #if JucePlugin_Enable_IAA && JucePlugin_Build_STANDALONE && JUCE_IOS && (! JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP)
     if (getPluginLoadedAs() == AudioProcessor::wrapperType_Standalone)
         juce_switchToHostApplication();
    #endif
@@ -199,7 +199,7 @@ Image PluginHostType::getHostIcon (int size) const
 {
     ignoreUnused (size);
 
-   #if JucePlugin_Enable_IAA && JucePlugin_Build_STANDALONE && JUCE_IOS && (! JUCE_USE_CUSTOM_AU3_STANDALONE_APP)
+   #if JucePlugin_Enable_IAA && JucePlugin_Build_STANDALONE && JUCE_IOS && (! JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP)
     if (isInterAppAudioConnected())
         return juce_getIAAHostIcon (size);
    #endif

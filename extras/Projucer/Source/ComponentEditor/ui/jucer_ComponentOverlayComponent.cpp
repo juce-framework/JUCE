@@ -78,11 +78,14 @@ void ComponentOverlayComponent::paint (Graphics& g)
 {
     jassert (target != nullptr);
 
+    border->setColour (backgroundColourId, Colours::transparentBlack);
     if (selected)
     {
         const BorderSize<int> borderSize (border->getBorderThickness());
 
-        drawResizableBorder (g, getWidth(), getHeight(), borderSize, (isMouseOverOrDragging() || border->isMouseOverOrDragging()));
+        drawResizableBorder (g, getWidth(), getHeight(), borderSize,
+                             (isMouseOverOrDragging() || border->isMouseOverOrDragging()),
+                             findColour (defaultHighlightColourId));
     }
     else if (isMouseOverOrDragging())
     {
@@ -231,15 +234,15 @@ void ComponentOverlayComponent::checkBounds (Rectangle<int>& b,
     }
 }
 
-void ComponentOverlayComponent::applyBoundsToComponent (Component* component, const Rectangle<int>& b)
+void ComponentOverlayComponent::applyBoundsToComponent (Component& component, Rectangle<int> b)
 {
-    if (component->getBounds() != b)
+    if (component.getBounds() != b)
     {
         layout.getDocument()->getUndoManager().undoCurrentTransactionOnly();
 
-        component->setBounds (b);
+        component.setBounds (b);
 
-        if (Component* const parent = target->getParentComponent())
+        if (auto* parent = target->getParentComponent())
             target->setBounds (b.getX() + borderThickness - parent->getX(),
                                b.getY() + borderThickness - parent->getY(),
                                b.getWidth() - borderThickness * 2,

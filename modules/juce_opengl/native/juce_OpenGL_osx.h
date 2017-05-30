@@ -192,7 +192,7 @@ public:
         lastSwapTime = now;
     }
 
-    void updateWindowPosition (const Rectangle<int>&) {}
+    void updateWindowPosition (Rectangle<int>) {}
 
     bool setSwapInterval (int numFramesPerSwap)
     {

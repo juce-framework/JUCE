@@ -104,6 +104,8 @@ public:
     void paint (Graphics& g) override
     {
         g.setColour (findColour (secondaryBackgroundColourId));
+
+        g.setColour (findColour (defaultTextColourId));
         g.fillPath (path, path.getTransformToScaleToFit (previewPathArea.reduced (4).toFloat(), true));
     }
 

@@ -43,7 +43,7 @@ TestComponent::TestComponent (JucerDocument* const doc,
     updateContents();
     testComponents.add (this);
 
-    setLookAndFeel (&lookAndFeel);
+    setLookAndFeel (&getLookAndFeel());
 }
 
 TestComponent::~TestComponent()

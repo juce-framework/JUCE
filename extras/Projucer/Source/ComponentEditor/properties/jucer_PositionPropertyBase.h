@@ -419,17 +419,10 @@ protected:
               owner (owner_)
         {
             setEditable (true, true, false);
-
-            setColour (backgroundColourId, Colours::white);
-            setColour (textColourId, Colours::black);
-            setColour (outlineColourId, findColour (ComboBox::outlineColourId));
-
-            setColour (TextEditor::textColourId, Colours::black);
-            setColour (TextEditor::backgroundColourId, Colours::white);
-            setColour (TextEditor::outlineColourId, findColour (ComboBox::outlineColourId));
+            lookAndFeelChanged();
         }
 
-        TextEditor* createEditorComponent()
+        TextEditor* createEditorComponent() override
         {
             TextEditor* ed = Label::createEditorComponent();
             ed->setInputRestrictions (14, "0123456789.-%");
@@ -437,9 +430,15 @@ protected:
             return ed;
         }
 
-        void textWasEdited()
+        void textWasEdited() override
         {
             owner.textWasEdited();
+        }
+
+        void lookAndFeelChanged() override
+        {
+            setColour (backgroundColourId, findColour (widgetBackgroundColourId));
+            setColour (textColourId, findColour (widgetTextColourId));
         }
     };
 

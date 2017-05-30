@@ -143,7 +143,7 @@ void ProjucerLookAndFeel::drawButtonText (Graphics& g, TextButton& button, bool 
                                    .withMultipliedAlpha (button.isEnabled() ? 1.0f
                                                                             : 0.5f));
 
-    auto xIndent = jmin (12, button.getWidth() / 10);
+    auto xIndent = jmin (8, button.getWidth() / 10);
     auto yIndent = jmin (3,  button.getHeight() / 6);
 
     auto textBounds = button.getLocalBounds().reduced (xIndent, yIndent);
@@ -317,14 +317,7 @@ void ProjucerLookAndFeel::drawMenuBarItem (Graphics& g, int width, int height,
 
 void ProjucerLookAndFeel::drawResizableFrame (Graphics& g, int w, int h, const BorderSize<int>& border)
 {
-    if (! border.isEmpty())
-    {
-        const Rectangle<int> fullSize (0, 0, w, h);
-        const Rectangle<int> centreArea (border.subtractedFrom (fullSize));
-
-        g.excludeClipRegion (centreArea);
-        g.fillAll (getCurrentColourScheme().getUIColour (LookAndFeel_V4::ColourScheme::UIColour::windowBackground));
-    }
+    ignoreUnused (g, w, h, border);
 }
 
 void ProjucerLookAndFeel::drawComboBox (Graphics& g, int width, int height, bool,
@@ -362,6 +355,72 @@ void ProjucerLookAndFeel::drawTreeviewPlusMinusBox (Graphics& g, const Rectangle
                                                     Colour, bool isOpen, bool /**isMouseOver*/)
 {
     g.strokePath (getArrowPath (area, isOpen ? 2 : 1, false, Justification::centredRight), PathStrokeType (2.0f));
+}
+
+void ProjucerLookAndFeel::drawProgressBar (Graphics& g, ProgressBar& progressBar,
+                                           int width, int height, double progress, const String& textToShow)
+{
+    ignoreUnused (width, height, progress);
+
+    const auto background = progressBar.findColour (ProgressBar::backgroundColourId);
+    const auto foreground = progressBar.findColour (defaultButtonBackgroundColourId);
+
+    const auto sideLength = jmin (width, height);
+
+    auto barBounds = progressBar.getLocalBounds().withSizeKeepingCentre (sideLength, sideLength).reduced (1).toFloat();
+
+    auto rotationInDegrees  = static_cast<float> ((Time::getMillisecondCounter() / 10) % 360);
+    auto normalisedRotation = rotationInDegrees / 360.0f;
+
+    const auto rotationOffset = 22.5f;
+    const auto maxRotation    = 315.0f;
+
+    auto startInDegrees = rotationInDegrees;
+    auto endInDegrees   = startInDegrees + rotationOffset;
+
+    if (normalisedRotation >= 0.25f && normalisedRotation < 0.5f)
+    {
+        const auto rescaledRotation = (normalisedRotation * 4.0f) - 1.0f;
+        endInDegrees = startInDegrees + rotationOffset + (maxRotation * rescaledRotation);
+    }
+    else if (normalisedRotation >= 0.5f && normalisedRotation <= 1.0f)
+    {
+        endInDegrees = startInDegrees + rotationOffset + maxRotation;
+        const auto rescaledRotation = 1.0f - ((normalisedRotation * 2.0f) - 1.0f);
+        startInDegrees = endInDegrees - rotationOffset - (maxRotation * rescaledRotation);
+    }
+
+    g.setColour (background);
+    Path arcPath2;
+    arcPath2.addCentredArc (barBounds.getCentreX(),
+                            barBounds.getCentreY(),
+                            barBounds.getWidth() * 0.5f,
+                            barBounds.getHeight() * 0.5f, 0.0f,
+                            0.0f,
+                            2.0f * float_Pi,
+                            true);
+    g.strokePath (arcPath2, PathStrokeType (2.0f));
+
+    g.setColour (foreground);
+    Path arcPath;
+    arcPath.addCentredArc (barBounds.getCentreX(),
+                           barBounds.getCentreY(),
+                           barBounds.getWidth() * 0.5f,
+                           barBounds.getHeight() * 0.5f,
+                           0.0f,
+                           degreesToRadians (startInDegrees),
+                           degreesToRadians (endInDegrees),
+                           true);
+
+    arcPath.applyTransform (AffineTransform::rotation (normalisedRotation * float_Pi * 2.25f, barBounds.getCentreX(), barBounds.getCentreY()));
+    g.strokePath (arcPath, PathStrokeType (2.0f));
+
+    if (textToShow.isNotEmpty())
+    {
+        g.setColour (progressBar.findColour (TextButton::textColourOffId));
+        g.setFont (Font (12.0f, 2));
+        g.drawText (textToShow, barBounds, Justification::centred, false);
+    }
 }
 
 //==============================================================================
@@ -488,7 +547,7 @@ void ProjucerLookAndFeel::setupColours()
     }
 
     setColour (Label::textColourId,                             findColour (defaultTextColourId));
-    setColour (Label::textColourId,                             findColour (defaultTextColourId));
+    setColour (Label::textWhenEditingColourId,                  findColour (widgetTextColourId));
     setColour (TextEditor::highlightColourId,                   findColour (defaultHighlightColourId));
     setColour (TextEditor::highlightedTextColourId,             findColour (defaultHighlightedTextColourId));
     setColour (TextEditor::outlineColourId,                     Colours::transparentBlack);
@@ -507,6 +566,7 @@ void ProjucerLookAndFeel::setupColours()
     setColour (CodeEditorComponent::backgroundColourId,         findColour (secondaryBackgroundColourId));
     setColour (CodeEditorComponent::lineNumberTextId,           findColour (codeEditorLineNumberColourId));
     setColour (CodeEditorComponent::lineNumberBackgroundId,     findColour (backgroundColourId));
+    setColour (CodeEditorComponent::highlightColourId,          findColour (defaultHighlightColourId).withAlpha (0.5f));
     setColour (CaretComponent::caretColourId,                   findColour (defaultButtonBackgroundColourId));
     setColour (TreeView::selectedItemBackgroundColourId,        findColour (defaultHighlightColourId));
 }

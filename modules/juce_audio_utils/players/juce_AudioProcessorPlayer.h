@@ -43,7 +43,7 @@ class JUCE_API  AudioProcessorPlayer    : public AudioIODeviceCallback,
 {
 public:
     //==============================================================================
-    AudioProcessorPlayer(bool doDoublePrecisionProcessing = false);
+    AudioProcessorPlayer (bool doDoublePrecisionProcessing = false);
 
     /** Destructor. */
     virtual ~AudioProcessorPlayer();
@@ -91,13 +91,13 @@ public:
 
 private:
     //==============================================================================
-    AudioProcessor* processor;
+    AudioProcessor* processor = nullptr;
     CriticalSection lock;
-    double sampleRate;
-    int blockSize;
-    bool isPrepared, isDoublePrecision;
+    double sampleRate = 0;
+    int blockSize = 0;
+    bool isPrepared = false, isDoublePrecision = false;
 
-    int numInputChans, numOutputChans;
+    int numInputChans = 0, numOutputChans = 0;
     HeapBlock<float*> channels;
     AudioBuffer<float> tempBuffer;
     AudioBuffer<double> conversionBuffer;

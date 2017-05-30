@@ -541,7 +541,7 @@ private:
 
     void callRealtimeListenersWithAddress (const OSCMessage& message)
     {
-        for (auto& entry : listenersWithAddress)
+        for (auto& entry : realtimeListenersWithAddress)
             if (auto* listener = entry.second)
                 if (message.getAddressPattern().matches (entry.first))
                     listener->oscMessageReceived (message);

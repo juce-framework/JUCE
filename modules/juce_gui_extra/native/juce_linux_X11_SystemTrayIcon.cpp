@@ -31,7 +31,7 @@ public:
     Pimpl (const Image& im, Window windowH)  : image (im)
     {
         ScopedXDisplay xDisplay;
-        ::Display* display = xDisplay.get();
+        auto display = xDisplay.display;
 
         ScopedXLock xlock (display);
 

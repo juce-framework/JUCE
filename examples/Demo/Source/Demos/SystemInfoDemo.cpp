@@ -140,6 +140,7 @@ static String getAllSystemInfo()
       << "CPU has 3DNOW:   " << (SystemStats::has3DNow()  ? "yes" : "no") << newLine
       << "CPU has AVX:     " << (SystemStats::hasAVX()    ? "yes" : "no") << newLine
       << "CPU has AVX2:    " << (SystemStats::hasAVX2()   ? "yes" : "no") << newLine
+      << "CPU has Neon:    " << (SystemStats::hasNeon()   ? "yes" : "no") << newLine
       << newLine;
 
     systemInfo

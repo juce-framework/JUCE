@@ -120,6 +120,14 @@ public:
     */
     bool isDirectory() const;
 
+    /** Checks whether the path of this file represents the root of a file system,
+        irrespective of its existance.
+
+        This will return true for "C:", "D:", etc on Windows and "/" on other
+        platforms.
+    */
+    bool isRoot() const;
+
     /** Returns the size of the file in bytes.
 
         @returns    the number of bytes in the file, or 0 if it doesn't exist.
@@ -869,10 +877,21 @@ public:
        #endif
 
         /** The directory in which applications normally get installed.
-            So on windows, this would be something like "c:\program files", on the
+            So on windows, this would be something like "C:\Program Files", on the
             Mac "/Applications", or "/usr" on linux.
         */
-        globalApplicationsDirectory
+        globalApplicationsDirectory,
+
+       #if JUCE_WINDOWS
+        /** On a Windows machine, returns the directory in which 32 bit applications
+            normally get installed. On a 64 bit machine this would be something like
+            "C:\Program Files (x86)", whereas for 32 bit machines this would match
+            globalApplicationsDirectory and be something like "C:\Program Files".
+
+            @see globalApplicationsDirectory
+        */
+        globalApplicationsDirectoryX86
+       #endif
     };
 
     /** Finds the location of a special type of file or directory, such as a home folder or

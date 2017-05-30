@@ -71,9 +71,15 @@ public:
             return;
 
         if (rowIsSelected)
+        {
             g.fillAll (findColour (TextEditor::highlightColourId));
+            g.setColour (findColour (defaultHighlightedTextColourId));
+        }
+        else
+        {
+            g.setColour (findColour (defaultTextColourId));
+        }
 
-        g.setColour (findColour (defaultTextColourId));
         g.setFont (height * 0.6f);
         g.drawText (returnValues [row] + " " + baseClasses [row] + "::" + methods [row],
                     30, 0, width - 32, height,
@@ -318,11 +324,7 @@ static SourceCodeEditor* createCodeEditor (const File& file, SourceCodeDocument&
 //==============================================================================
 JucerDocumentEditor::JucerDocumentEditor (JucerDocument* const doc)
     : document (doc),
-      tabbedComponent (TabbedButtonBar::TabsAtTop),
-      compLayoutPanel (0),
-      lastViewportX (0),
-      lastViewportY (0),
-      currentZoomLevel (1.0)
+      tabbedComponent (doc)
 {
     setOpaque (true);
 
@@ -1028,9 +1030,7 @@ bool JucerDocumentEditor::perform (const InvocationInfo& info)
 
         case StandardApplicationCommandIDs::paste:
             {
-                ScopedPointer<XmlElement> doc (XmlDocument::parse (SystemClipboard::getTextFromClipboard()));
-
-                if (doc != nullptr)
+                if (ScopedPointer<XmlElement> doc = XmlDocument::parse (SystemClipboard::getTextFromClipboard()))
                 {
                     if (doc->hasTagName (ComponentLayout::clipboardXmlTag))
                     {
@@ -1095,9 +1095,8 @@ bool JucerDocumentEditor::keyPressed (const KeyPress& key)
 JucerDocumentEditor* JucerDocumentEditor::getActiveDocumentHolder()
 {
     ApplicationCommandInfo info (0);
-    ApplicationCommandTarget* target = ProjucerApplication::getCommandManager().getTargetForCommand (JucerCommandIDs::editCompLayout, info);
-
-    return dynamic_cast<JucerDocumentEditor*> (target);
+    return dynamic_cast<JucerDocumentEditor*> (ProjucerApplication::getCommandManager()
+                                                  .getTargetForCommand (JucerCommandIDs::editCompLayout, info));
 }
 
 Image JucerDocumentEditor::createComponentLayerSnapshot() const
@@ -1105,7 +1104,7 @@ Image JucerDocumentEditor::createComponentLayerSnapshot() const
     if (compLayoutPanel != nullptr)
         return compLayoutPanel->createComponentSnapshot();
 
-    return Image();
+    return {};
 }
 
 const int gridSnapMenuItemBase = 0x8723620;
@@ -1187,13 +1186,13 @@ void createGUIEditorMenu (PopupMenu& menu)
 
 void handleGUIEditorMenuCommand (int menuItemID)
 {
-    if (JucerDocumentEditor* ed = JucerDocumentEditor::getActiveDocumentHolder())
+    if (auto* ed = JucerDocumentEditor::getActiveDocumentHolder())
     {
         int gridIndex = menuItemID - gridSnapMenuItemBase;
 
         if (isPositiveAndBelow (gridIndex, numElementsInArray (snapSizes)))
         {
-            JucerDocument& doc = *ed->getDocument();
+            auto& doc = *ed->getDocument();
 
             doc.setSnappingGrid (snapSizes [gridIndex],
                                  doc.isSnapActive (false),

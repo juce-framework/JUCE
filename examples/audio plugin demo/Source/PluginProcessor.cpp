@@ -204,7 +204,7 @@ bool JuceDemoPluginAudioProcessor::isBusesLayoutSupported (const BusesLayout& la
     const AudioChannelSet& mainOutput = layouts.getMainOutputChannelSet();
 
     // input and output layout must be the same
-    if (wrapperType != wrapperType_Standalone && layouts.getMainInputChannelSet() != mainOutput)
+    if (layouts.getMainInputChannelSet() != mainOutput)
         return false;
 
     // do not allow disabling the main buses
@@ -218,13 +218,8 @@ bool JuceDemoPluginAudioProcessor::isBusesLayoutSupported (const BusesLayout& la
 
 AudioProcessor::BusesProperties JuceDemoPluginAudioProcessor::getBusesProperties()
 {
-    // This plug-in should not have any inputs when run as a standalone plug-in
-
-    if (PluginHostType::getPluginLoadedAs() == wrapperType_Standalone)
-        return BusesProperties().withOutput ("Output", AudioChannelSet::stereo(), true);
-    else
-        return BusesProperties().withInput  ("Input",  AudioChannelSet::stereo(), true)
-                                .withOutput ("Output", AudioChannelSet::stereo(), true);
+    return BusesProperties().withInput  ("Input",  AudioChannelSet::stereo(), true)
+                            .withOutput ("Output", AudioChannelSet::stereo(), true);
 }
 
 //==============================================================================
@@ -271,9 +266,6 @@ void JuceDemoPluginAudioProcessor::process (AudioBuffer<FloatType>& buffer,
 {
     const int numSamples = buffer.getNumSamples();
 
-    if (wrapperType == wrapperType_Standalone)
-        buffer.clear();
-
     // Now pass any incoming midi messages to our keyboard state object, and let it
     // add messages to the buffer if the user is clicking on the on-screen keys
     keyboardState.processNextMidiBuffer (midiMessages, 0, numSamples, true);
@@ -284,14 +276,11 @@ void JuceDemoPluginAudioProcessor::process (AudioBuffer<FloatType>& buffer,
     // Apply our delay effect to the new output..
     applyDelay (buffer, delayBuffer);
 
-    if (wrapperType != wrapperType_Standalone)
-    {
-        // In case we have more outputs than inputs, we'll clear any output
-        // channels that didn't contain input data, (because these aren't
-        // guaranteed to be empty - they may contain garbage).
-        for (int i = getTotalNumInputChannels(); i < getTotalNumOutputChannels(); ++i)
-            buffer.clear (i, 0, numSamples);
-    }
+    // In case we have more outputs than inputs, we'll clear any output
+    // channels that didn't contain input data, (because these aren't
+    // guaranteed to be empty - they may contain garbage).
+    for (int i = getTotalNumInputChannels(); i < getTotalNumOutputChannels(); ++i)
+        buffer.clear (i, 0, numSamples);
 
     applyGain (buffer, delayBuffer); // apply our gain-change to the outgoing data..
 

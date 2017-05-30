@@ -313,7 +313,7 @@ public:
     static const char* const configFlagDisabled;
 
     Value getConfigFlag (const String& name);
-    bool isConfigFlagEnabled (const String& name) const;
+    bool isConfigFlagEnabled (const String& name, bool defaultIsEnabled = false) const;
 
     //==============================================================================
     EnabledModuleList& getModules();
@@ -340,6 +340,13 @@ public:
     //==============================================================================
     bool hasProjectBeenModified();
     void updateModificationTime() { modificationTime = getFile().getLastModificationTime(); }
+
+    //==============================================================================
+    String getUniqueTargetFolderSuffixForExporter (const String& exporterName, const String& baseTargetFolder);
+
+    //==============================================================================
+    bool shouldWaitAfterSaving = false;
+    String specifiedExporterToSave = {};
 
 private:
     //==============================================================================

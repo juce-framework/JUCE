@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-class ExporterItem   : public ConfigTreeItemBase
+class ExporterItem   : public ConfigTreeItemBase,
+                       private Value::Listener
 {
 public:
     ExporterItem (Project& p, ProjectExporter* e, int index)
@@ -32,6 +33,8 @@ public:
           exporterIndex (index)
     {
         configListTree.addListener (this);
+        targetLocationValue.referTo (exporter->getTargetLocationValue());
+        targetLocationValue.addListener (this);
     }
 
     int getItemHeight() const override        { return 25; }
@@ -42,6 +45,7 @@ public:
     String getDisplayName() const override    { return exporter->getName(); }
     void setName (const String&) override     {}
     bool isMissing() const override           { return false; }
+    String getTooltip() override              { return getDisplayName(); }
 
     static Icon getIconForExporter (ProjectExporter* e)
     {
@@ -50,7 +54,8 @@ public:
             if         (e->isXcode())        return Icon (getIcons().xcode, Colours::transparentBlack);
             else if    (e->isVisualStudio()) return Icon (getIcons().visualStudio, Colours::transparentBlack);
             else if    (e->isAndroid())      return Icon (getIcons().android, Colours::transparentBlack);
-            else if    (e->isLinux())        return Icon (getIcons().linux, Colours::transparentBlack);
+            else if    (e->isCodeBlocks())   return Icon (getIcons().codeBlocks, Colours::transparentBlack);
+            else if    (e->isMakefile())     return Icon (getIcons().linux, Colours::transparentBlack);
         }
 
         return Icon();
@@ -87,8 +92,9 @@ public:
     {
         PopupMenu menu;
         menu.addItem (1, "Add a new configuration", exporter->supportsUserDefinedConfigurations());
+        menu.addItem (2, "Save this exporter");
         menu.addSeparator();
-        menu.addItem (2, "Delete this exporter");
+        menu.addItem (3, "Delete this exporter");
 
         launchPopupMenu (menu);
     }
@@ -103,10 +109,19 @@ public:
 
     void handlePopupMenuResult (int resultCode) override
     {
-        if (resultCode == 2)
-            deleteAllSelectedItems();
-        else if (resultCode == 1)
+        if (resultCode == 1)
+        {
             exporter->addNewConfiguration (nullptr);
+        }
+        else if (resultCode == 2)
+        {
+            const ScopedValueSetter<String> valueSetter (project.specifiedExporterToSave, exporter->getName(), {});
+            project.save (true, true);
+        }
+        else if (resultCode == 3)
+        {
+            deleteAllSelectedItems();
+        }
     }
 
     var getDragSourceDescription() override
@@ -153,6 +168,14 @@ private:
     ScopedPointer<ProjectExporter> exporter;
     ValueTree configListTree;
     int exporterIndex;
+
+    Value targetLocationValue;
+
+    void valueChanged (Value& value) override
+    {
+        if (value == exporter->getTargetLocationValue())
+            refreshSubItems();
+    }
 
     //==============================================================================
     struct SettingsComp  : public Component
@@ -230,14 +253,10 @@ public:
 
     void handlePopupMenuResult (int resultCode) override
     {
-        if (resultCode == 2)
-        {
-            deleteAllSelectedItems();
-        }
-        else if (resultCode == 1)
-        {
+        if (resultCode == 1)
             exporter.addNewConfiguration (config);
-        }
+        else if (resultCode == 2)
+            deleteAllSelectedItems();
     }
 
     var getDragSourceDescription() override

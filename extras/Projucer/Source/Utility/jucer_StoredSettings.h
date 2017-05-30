@@ -82,12 +82,13 @@ private:
     }
 
     void updateGlobalPreferences();
-    void updateAppearanceSettings();
     void updateRecentFiles();
     void updateKeyMappings();
 
     void loadSwatchColours();
     void saveSwatchColours();
+
+    void updateOldProjectSettingsFiles();
 
     //==============================================================================
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override  { changed(); }

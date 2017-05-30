@@ -156,7 +156,7 @@ public:
 
             pp->setBounds (40, height, width - 50, propertyHeight);
 
-            resizeContentIfChoicePropertyComponent (pp);
+            resizePropertyComponent (pp);
 
             height += pp->getHeight() + 10;
         }
@@ -184,14 +184,16 @@ public:
         return static_cast<int> (nameWidth / availableTextWidth);
     }
 
-    void resizeContentIfChoicePropertyComponent (PropertyComponent* pp)
+    void resizePropertyComponent (PropertyComponent* pp)
     {
-        if (auto* choiceComp = dynamic_cast<ChoicePropertyComponent*> (pp))
-        {
-            auto* box = choiceComp->getChildComponent (0);
-            auto bounds = box->getBounds();
+        if (pp->getName() == "Dependencies")
+            return;
 
-            box->setBounds (bounds.withSizeKeepingCentre (box->getWidth(), pp->getPreferredHeight()));
+        if (auto* propertyChild = pp->getChildComponent (0))
+        {
+            auto bounds = propertyChild->getBounds();
+
+            propertyChild->setBounds (bounds.withSizeKeepingCentre (propertyChild->getWidth(), pp->getPreferredHeight()));
         }
     }
 
@@ -222,9 +224,9 @@ public:
 
     void closeSettingsPage()
     {
-        if (ProjectContentComponent* pcc = getProjectContentComponent())
+        if (auto* pcc = getProjectContentComponent())
         {
-            if (auto* content = dynamic_cast<Viewport*> (pcc->getEditorComponent()))
+            if (auto* content = dynamic_cast<Viewport*> (pcc->getEditorComponent()->getChildComponent (0)))
                 if (content->getViewedComponent()->getComponentID() == getUniqueName())
                     pcc->hideEditor();
         }

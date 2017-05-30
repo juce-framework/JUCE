@@ -488,8 +488,13 @@ public:
         {
             jassert (setup.manager->getCurrentAudioDevice() == nullptr); // not the correct device type!
 
+            inputChanLabel = nullptr;
+            outputChanLabel = nullptr;
             sampleRateLabel = nullptr;
             bufferSizeLabel = nullptr;
+
+            inputChanList = nullptr;
+            outputChanList = nullptr;
             sampleRateDropDown = nullptr;
             bufferSizeDropDown = nullptr;
 
@@ -807,7 +812,7 @@ public:
 
                 g.setFont (height * 0.6f);
                 g.setColour (findColour (ListBox::textColourId, true).withMultipliedAlpha (enabled ? 1.0f : 0.6f));
-                g.drawText (item, x, 0, width - x - 2, height, Justification::centredLeft, true);
+                g.drawText (item, x + 5, 0, width - x - 5, height, Justification::centredLeft, true);
             }
         }
 
@@ -954,7 +959,7 @@ public:
 
         int getTickX() const
         {
-            return getRowHeight() + 5;
+            return getRowHeight();
         }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChannelSelectorListBox)
@@ -1094,6 +1099,9 @@ void AudioDeviceSelectorComponent::resized()
 
     if (midiOutputSelector != nullptr)
         midiOutputSelector->setBounds (r.removeFromTop (itemHeight));
+
+    r.removeFromTop (itemHeight);
+    setSize (getWidth(), r.getY());
 }
 
 void AudioDeviceSelectorComponent::timerCallback()

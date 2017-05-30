@@ -383,7 +383,7 @@ Result Project::saveProject (const File& file, bool isCommandLineApp)
     const ScopedValueSetter<bool> vs (isSaving, true, false);
 
     ProjectSaver saver (*this, file);
-    return saver.save (! isCommandLineApp);
+    return saver.save (! isCommandLineApp, shouldWaitAfterSaving, specifiedExporterToSave);
 }
 
 Result Project::saveResourcesOnly (const File& file)
@@ -409,12 +409,10 @@ void Project::valueTreeParentChanged (ValueTree&)                   {}
 //==============================================================================
 bool Project::hasProjectBeenModified()
 {
-    Time newModificationTime = getFile().getLastModificationTime();
     Time oldModificationTime = modificationTime;
+    modificationTime = getFile().getLastModificationTime();
 
-    modificationTime = newModificationTime;
-
-    return (newModificationTime.toMilliseconds() > (oldModificationTime.toMilliseconds() + 1000LL));
+    return (modificationTime.toMilliseconds() > (oldModificationTime.toMilliseconds() + 1000LL));
 }
 
 //==============================================================================
@@ -1269,9 +1267,14 @@ Value Project::getConfigFlag (const String& name)
     return v;
 }
 
-bool Project::isConfigFlagEnabled (const String& name) const
+bool Project::isConfigFlagEnabled (const String& name, bool defaultIsEnabled) const
 {
-    return projectRoot.getChildWithName (Ids::JUCEOPTIONS).getProperty (name) == configFlagEnabled;
+    String configValue = projectRoot.getChildWithName (Ids::JUCEOPTIONS).getProperty (name);
+
+    if (configValue == configFlagDefault)
+        return defaultIsEnabled;
+
+    return (configValue == configFlagEnabled);
 }
 
 void Project::sanitiseConfigFlags()
@@ -1415,13 +1418,48 @@ void Project::addNewExporter (const String& exporterName)
 {
     ScopedPointer<ProjectExporter> exp (ProjectExporter::createNewExporter (*this, exporterName));
 
-    ValueTree exporters (getExporters());
-    exporters.addChild (exp->settings, -1, getUndoManagerFor (exporters));
+    exp->getTargetLocationValue() = exp->getTargetLocationString()
+                                       + getUniqueTargetFolderSuffixForExporter (exp->getName(), exp->getTargetLocationString());
+
+    auto exportersTree = getExporters();
+    exportersTree.addChild (exp->settings, -1, getUndoManagerFor (exportersTree));
 }
 
 void Project::createExporterForCurrentPlatform()
 {
     addNewExporter (ProjectExporter::getCurrentPlatformExporterName());
+}
+
+String Project::getUniqueTargetFolderSuffixForExporter (const String& exporterName, const String& base)
+{
+    StringArray buildFolders;
+
+    auto exportersTree = getExporters();
+    auto type = ProjectExporter::getValueTreeNameForExporter (exporterName);
+
+    for (int i = 0; i < exportersTree.getNumChildren(); ++i)
+    {
+        auto exporterNode = exportersTree.getChild (i);
+
+        if (exporterNode.getType() == Identifier (type))
+            buildFolders.add (exporterNode.getProperty ("targetFolder").toString());
+    }
+
+    if (buildFolders.size() == 0 || ! buildFolders.contains (base))
+        return {};
+
+    buildFolders.remove (buildFolders.indexOf (base));
+
+    auto num = 1;
+    for (auto f : buildFolders)
+    {
+        if (! f.endsWith ("_" + String (num)))
+            break;
+
+        ++num;
+    }
+
+    return "_" + String (num);
 }
 
 //==============================================================================

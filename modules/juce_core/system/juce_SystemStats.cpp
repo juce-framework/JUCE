@@ -91,7 +91,7 @@ struct CPUInformation
 
     bool hasMMX = false, hasSSE = false, hasSSE2 = false, hasSSE3 = false,
          has3DNow = false, hasSSSE3 = false, hasSSE41 = false,
-         hasSSE42 = false, hasAVX = false, hasAVX2 = false;
+         hasSSE42 = false, hasAVX = false, hasAVX2 = false, hasNeon = false;
 };
 
 static const CPUInformation& getCPUInformation() noexcept
@@ -112,6 +112,7 @@ bool SystemStats::hasSSE41() noexcept           { return getCPUInformation().has
 bool SystemStats::hasSSE42() noexcept           { return getCPUInformation().hasSSE42; }
 bool SystemStats::hasAVX() noexcept             { return getCPUInformation().hasAVX; }
 bool SystemStats::hasAVX2() noexcept            { return getCPUInformation().hasAVX2; }
+bool SystemStats::hasNeon() noexcept            { return getCPUInformation().hasNeon; }
 
 
 //==============================================================================

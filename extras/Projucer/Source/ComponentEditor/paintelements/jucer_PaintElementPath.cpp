@@ -382,10 +382,8 @@ void PaintElementPath::fillInGeneratedCode (GeneratedCode& code, String& paintMe
     if (! nonZeroWinding)
         r << pathVariable << ".setUsingNonZeroWinding (false);\n";
 
-    for (int i = 0; i < points.size(); ++i)
+    for (auto* p : points)
     {
-        const PathPoint* const p = points.getUnchecked(i);
-
         switch (p->type)
         {
         case Path::Iterator::startNewSubPath:
@@ -400,15 +398,17 @@ void PaintElementPath::fillInGeneratedCode (GeneratedCode& code, String& paintMe
 
         case Path::Iterator::quadraticTo:
             r << pathVariable << ".quadraticTo (" << positionToPairOfValues (p->pos[0], layout)
-                << ", " << positionToPairOfValues (p->pos[1], layout) << ");\n";
+              << ", " << positionToPairOfValues (p->pos[1], layout) << ");\n";
+
             somePointsAreRelative = somePointsAreRelative || ! p->pos[0].rect.isPositionAbsolute();
             somePointsAreRelative = somePointsAreRelative || ! p->pos[1].rect.isPositionAbsolute();
             break;
 
         case Path::Iterator::cubicTo:
             r << pathVariable << ".cubicTo (" << positionToPairOfValues (p->pos[0], layout)
-                << ", " << positionToPairOfValues (p->pos[1], layout)
-                << ", " << positionToPairOfValues (p->pos[2], layout) << ");\n";
+              << ", " << positionToPairOfValues (p->pos[1], layout)
+              << ", " << positionToPairOfValues (p->pos[2], layout) << ");\n";
+
             somePointsAreRelative = somePointsAreRelative || ! p->pos[0].rect.isPositionAbsolute();
             somePointsAreRelative = somePointsAreRelative || ! p->pos[1].rect.isPositionAbsolute();
             somePointsAreRelative = somePointsAreRelative || ! p->pos[2].rect.isPositionAbsolute();
@@ -432,24 +432,50 @@ void PaintElementPath::fillInGeneratedCode (GeneratedCode& code, String& paintMe
     else
         code.constructorCode << r;
 
+    String s;
+    s << "{\n"
+      << "    float x = 0, y = 0;\n";
+
+    if (! fillType.isInvisible())
+        s << "    " << fillType.generateVariablesCode ("fill");
+
+    if (isStrokePresent && ! strokeType.isInvisible())
+        s << "    " << strokeType.fill.generateVariablesCode ("stroke");
+
+    s << "    //[UserPaintCustomArguments] Customize the painting arguments here..\n"
+      << customPaintCode
+      << "    //[/UserPaintCustomArguments]\n";
+
+    RelativePositionedRectangle zero;
+
     if (! fillType.isInvisible())
     {
-        fillType.fillInGeneratedCode (code, paintMethodCode);
-
-        paintMethodCode << "g.fillPath (" << pathVariable << ");\n";
+        s << "    ";
+        fillType.fillInGeneratedCode ("fill", zero, code, s);
+        s << "    g.fillPath (" << pathVariable << ", AffineTransform::translation(x, y));\n";
     }
 
     if (isStrokePresent && ! strokeType.isInvisible())
     {
-        String s;
-
-        strokeType.fill.fillInGeneratedCode (code, s);
-        s << "g.strokePath (" << pathVariable << ", " << strokeType.getPathStrokeCode() << ");\n";
-
-        paintMethodCode += s;
+        s << "    ";
+        strokeType.fill.fillInGeneratedCode ("stroke", zero, code, s);
+        s << "    g.strokePath (" << pathVariable << ", " << strokeType.getPathStrokeCode() << ", AffineTransform::translation(x, y));\n";
     }
 
-    paintMethodCode += "\n";
+    s << "}\n\n";
+
+    paintMethodCode += s;
+}
+
+void PaintElementPath::applyCustomPaintSnippets (StringArray& snippets)
+{
+    customPaintCode.clear();
+
+    if (! snippets.isEmpty() && (! fillType.isInvisible() || (isStrokePresent && ! strokeType.isInvisible())))
+    {
+        customPaintCode = snippets[0];
+        snippets.remove(0);
+    }
 }
 
 //==============================================================================

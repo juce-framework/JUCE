@@ -93,8 +93,8 @@ template <typename KeyType,
 class HashMap
 {
 private:
-    typedef PARAMETER_TYPE (KeyType)   KeyTypeParameter;
-    typedef PARAMETER_TYPE (ValueType) ValueTypeParameter;
+    typedef typename TypeHelpers::ParameterType<KeyType>::type   KeyTypeParameter;
+    typedef typename TypeHelpers::ParameterType<ValueType>::type ValueTypeParameter;
 
 public:
     //==============================================================================

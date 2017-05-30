@@ -260,7 +260,8 @@ void PaintElement::paint (Graphics& g)
             const BorderSize<int> borderSize (border->getBorderThickness());
 
             drawResizableBorder (g, getWidth(), getHeight(), borderSize,
-                                 (isMouseOverOrDragging() || border->isMouseOverOrDragging()));
+                                 (isMouseOverOrDragging() || border->isMouseOverOrDragging()),
+                                 findColour (defaultHighlightColourId));
         }
         else if (isMouseOverOrDragging())
         {
@@ -398,7 +399,7 @@ void PaintElement::checkBounds (Rectangle<int>& b,
     }
 }
 
-void PaintElement::applyBoundsToComponent (Component*, const Rectangle<int>& newBounds)
+void PaintElement::applyBoundsToComponent (Component&, Rectangle<int> newBounds)
 {
     if (getBounds() != newBounds)
     {

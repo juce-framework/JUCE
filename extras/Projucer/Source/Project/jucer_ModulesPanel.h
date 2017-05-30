@@ -75,15 +75,27 @@ public:
         bounds.reduce (10, 0);
         list.setBounds (bounds.removeFromTop (list.getRowPosition (getNumRows() - 1, true).getBottom() + 20));
 
-        auto buttonRow = bounds.removeFromTop (35);
-        setCopyModeButton.setBounds (buttonRow.removeFromLeft (jmin (200, bounds.getWidth() / 3)));
-        buttonRow.removeFromLeft (8);
-        copyPathButton.setBounds (buttonRow.removeFromLeft (jmin (200, bounds.getWidth() / 3)));
+        if (bounds.getHeight() < 35)
+        {
+            parentSizeChanged();
+        }
+        else
+        {
+            auto buttonRow = bounds.removeFromTop (35);
+            setCopyModeButton.setBounds (buttonRow.removeFromLeft (jmin (200, bounds.getWidth() / 3)));
+            buttonRow.removeFromLeft (8);
+            copyPathButton.setBounds (buttonRow.removeFromLeft (jmin (200, bounds.getWidth() / 3)));
+        }
     }
 
     void parentSizeChanged() override
     {
-        setSize (jmax (550, getParentWidth()), getParentHeight());
+        const auto width = jmax (550, getParentWidth());
+        auto y = list.getRowPosition (getNumRows() - 1, true).getBottom() + 100;
+
+        y = jmax (getParentHeight(), y);
+
+        setSize (width, y);
     }
 
     int getNumRows() override

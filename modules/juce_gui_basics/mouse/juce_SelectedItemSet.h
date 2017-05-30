@@ -47,7 +47,7 @@ public:
     //==============================================================================
     typedef SelectableItemType ItemType;
     typedef Array<SelectableItemType> ItemArray;
-    typedef PARAMETER_TYPE (SelectableItemType) ParameterType;
+    typedef typename TypeHelpers::ParameterType<SelectableItemType>::type ParameterType;
 
     //==============================================================================
     /** Creates an empty set. */

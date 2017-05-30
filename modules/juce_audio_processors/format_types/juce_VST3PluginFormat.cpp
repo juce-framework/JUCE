@@ -1124,10 +1124,11 @@ struct DLLHandle
         typedef bool (PLUGIN_API *ExitModuleFn) ();
 
        #if JUCE_WINDOWS
+        releaseFactory();
+
         if (ExitModuleFn exitFn = (ExitModuleFn) getFunction ("ExitDll"))
             exitFn();
 
-        releaseFactory();
         library.close();
 
        #else

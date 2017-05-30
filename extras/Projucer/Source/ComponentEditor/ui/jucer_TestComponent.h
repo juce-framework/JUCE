@@ -70,7 +70,6 @@ private:
     ScopedPointer<JucerDocument> loadedDocument;
     String filename, constructorParams;
     Time lastModificationTime;
-    LookAndFeel_V2 lookAndFeel;
     const bool alwaysFillBackground;
 
     void updateContents();

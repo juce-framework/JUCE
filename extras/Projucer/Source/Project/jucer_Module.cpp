@@ -461,7 +461,7 @@ String LibraryModule::CompileUnit::getFilenameForProxyFile() const
     return "include_" + file.getFileName();
 }
 
-Array<LibraryModule::CompileUnit> LibraryModule::getAllCompileUnits() const
+Array<LibraryModule::CompileUnit> LibraryModule::getAllCompileUnits (ProjectType::Target::Type forTarget) const
 {
     Array<File> files;
     getFolder().findChildFiles (files, File::findFiles, false);
@@ -476,9 +476,13 @@ Array<LibraryModule::CompileUnit> LibraryModule::getAllCompileUnits() const
         if (file.getFileName().startsWithIgnoreCase (getID())
               && file.hasFileExtension (sourceFileExtensions))
         {
-            CompileUnit cu;
-            cu.file = file;
-            units.add (cu);
+            if (forTarget == ProjectType::Target::unspecified
+             || forTarget == Project::getTargetTypeFromFilePath (file, true))
+            {
+                CompileUnit cu;
+                cu.file = file;
+                units.add (cu);
+            }
         }
     }
 
@@ -499,9 +503,10 @@ Array<LibraryModule::CompileUnit> LibraryModule::getAllCompileUnits() const
 
 void LibraryModule::findAndAddCompiledUnits (ProjectExporter& exporter,
                                              ProjectSaver* projectSaver,
-                                             Array<File>& result) const
+                                             Array<File>& result,
+                                             ProjectType::Target::Type forTarget) const
 {
-    for (auto& cu : getAllCompileUnits())
+    for (auto& cu : getAllCompileUnits (forTarget))
     {
         if (cu.isNeededForExporter (exporter))
         {
@@ -558,20 +563,22 @@ void LibraryModule::addBrowseableCode (ProjectExporter& exporter, const Array<Fi
 
     const RelativePath moduleFromProject (exporter.getModuleFolderRelativeToProject (getID()));
 
+    auto moduleHeader = moduleInfo.getHeader();
+
     for (auto& sourceFile : sourceFiles)
     {
         auto pathWithinModule = FileHelpers::getRelativePathFrom (sourceFile, localModuleFolder);
 
         // (Note: in exporters like MSVC we have to avoid adding the same file twice, even if one of those instances
         // is flagged as being excluded from the build, because this overrides the other and it fails to compile)
-        if (exporter.canCopeWithDuplicateFiles() || ! compiled.contains (sourceFile))
+        if ((exporter.canCopeWithDuplicateFiles() || ! compiled.contains (sourceFile)) && sourceFile != moduleHeader)
             addFileWithGroups (sourceGroup,
                                moduleFromProject.getChildFile (pathWithinModule),
                                pathWithinModule);
     }
 
     sourceGroup.sortAlphabetically (true, true);
-    sourceGroup.addFileAtIndex (moduleInfo.getHeader(), -1, false);
+    sourceGroup.addFileAtIndex (moduleHeader, -1, false);
 
     exporter.getModulesGroup().state.addChild (sourceGroup.state.createCopy(), -1, nullptr);
 }

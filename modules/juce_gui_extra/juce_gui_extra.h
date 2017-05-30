@@ -35,7 +35,7 @@
 
   ID:               juce_gui_extra
   vendor:           juce
-  version:          5.0.1
+  version:          5.0.2
   name:             JUCE extended GUI classes
   description:      Miscellaneous GUI classes for specialised tasks.
   website:          http://www.juce.com/juce
@@ -43,7 +43,6 @@
 
   dependencies:     juce_gui_basics
   OSXFrameworks:    WebKit
-  linuxPackages:    webkit2gtk-4.0 gtk+-x11-3.0
 
  END_JUCE_MODULE_DECLARATION
 

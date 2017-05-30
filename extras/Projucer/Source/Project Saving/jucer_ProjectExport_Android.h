@@ -349,13 +349,23 @@ private:
         if (! isLibrary())
             mo << "SET(BINARY_NAME \"juce_jni\")" << newLine << newLine;
 
+        mo << "add_library(\"cpufeatures\" STATIC \"${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c\")" << newLine << newLine;
+
         {
             StringArray projectDefines (getEscapedPreprocessorDefs (getProjectPreprocessorDefs()));
             if (projectDefines.size() > 0)
                 mo << "add_definitions(" << projectDefines.joinIntoString (" ") << ")" << newLine << newLine;
         }
 
-        writeCmakePathLines (mo, "", "include_directories( AFTER", extraSearchPaths);
+        {
+            mo << "include_directories( AFTER" << newLine;
+
+            for (auto& path : extraSearchPaths)
+                mo << "    \"" << escapeDirectoryForCmake (path) << "\"" << newLine;
+
+            mo << "    \"${ANDROID_NDK}/sources/android/cpufeatures\"" << newLine;
+            mo << ")" << newLine << newLine;
+        }
 
         const String& cfgExtraLinkerFlags = getExtraLinkerFlagsString();
         if (cfgExtraLinkerFlags.isNotEmpty())
@@ -460,6 +470,8 @@ private:
 
             for (auto& lib : libraries)
                 mo << "    ${" << lib.toLowerCase().replaceCharacter (L' ', L'_') << "}" << newLine;
+
+            mo << "    \"cpufeatures\"" << newLine;
         }
         mo << ")" << newLine;
 
@@ -797,6 +809,9 @@ private:
     //==============================================================================
     void copyActivityJavaFiles (const OwnedArray<LibraryModule>& modules, const File& targetFolder, const String& package) const
     {
+        if (androidActivityClass.get().contains ("_"))
+            throw SaveError ("Your Android activity class name or path may not contain any underscores! Try a project name without underscores.");
+
         const String className (getActivityName());
 
         if (className.isEmpty())

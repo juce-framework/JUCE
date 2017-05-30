@@ -19,7 +19,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.yourcompany.oscreceiver"
+        applicationId "com.roli.oscreceiver"
         minSdkVersion    10
         targetSdkVersion 10
         externalNativeBuild {

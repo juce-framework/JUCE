@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="pdocPt" name="OSCReceiver" projectType="guiapp" version="1.0.0"
-              bundleIdentifier="com.yourcompany.OSCReceiver" includeBinaryInAppConfig="1"
-              jucerVersion="5.0.1" displaySplashScreen="0" reportAppUsage="0"
-              splashScreenColour="Dark">
+              bundleIdentifier="com.roli.OSCReceiver" includeBinaryInAppConfig="1"
+              jucerVersion="5.0.2" displaySplashScreen="0" reportAppUsage="0"
+              splashScreenColour="Dark" companyName="ROLI Ltd.">
   <MAINGROUP id="Y6Q0O9" name="OSCReceiver">
     <GROUP id="{9F303ECD-83DE-CA91-97B4-C083DA897F49}" name="Source">
       <FILE id="HHuoMc" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
