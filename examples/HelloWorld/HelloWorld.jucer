@@ -71,7 +71,7 @@
         <MODULEPATH id="juce_core" path="../../modules"/>
       </MODULEPATHS>
     </VS2017>
-    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4">
+    <LINUX_MAKE targetFolder="Builds/LinuxMakefile" vstFolder="~/SDKs/vstsdk2.4">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="HelloWorld"
                        libraryPath="/usr/X11R6/lib/"/>
