@@ -1007,7 +1007,7 @@ private:
         if (getStyleAttribute (xml, "font-weight").containsIgnoreCase ("bold"))
             style |= Font::bold;
 
-        auto family = getStyleAttribute (xml, "font-family");
+        auto family = getStyleAttribute (xml, "font-family").unquoted();
 
         return family.isEmpty() ? Font (fontSize, style)
                                 : Font (family, fontSize, style);
