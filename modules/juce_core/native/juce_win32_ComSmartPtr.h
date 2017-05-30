@@ -23,22 +23,30 @@
 #pragma once
 
 #if JUCE_MINGW || (! (defined (_MSC_VER) || defined (__uuidof)))
-#ifdef __uuidof
- #undef __uuidof
-#endif
+ #ifdef __uuidof
+  #undef __uuidof
+ #endif
 
-template<typename Type> struct UUIDGetter { static CLSID get() { jassertfalse; return CLSID(); } };
-#define __uuidof(x)  UUIDGetter<x>::get()
+ template<typename Type> struct UUIDGetter { static CLSID get() { jassertfalse; return {}; } };
+ #define __uuidof(x)  UUIDGetter<x>::get()
 
  template <>
  struct UUIDGetter<::IUnknown>
  {
-     static CLSID get()
-     {
-       GUID g = { 0, 0, 0, { 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46 } };
-       return g;
-     }
+     static CLSID get()     { return { 0, 0, 0, { 0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46 } }; }
  };
+
+ #define JUCE_DECLARE_UUID_GETTER(name, uuid) \
+    template<> struct UUIDGetter<name> { static CLSID get()  { return uuidFromString (uuid); } };
+
+ #define JUCE_COMCLASS(name, guid) \
+    struct name; \
+    JUCE_DECLARE_UUID_GETTER (name, guid) \
+    struct name
+
+#else
+ #define JUCE_DECLARE_UUID_GETTER(name, uuid)
+ #define JUCE_COMCLASS(name, guid)       struct __declspec (uuid (guid)) name
 #endif
 
 inline GUID uuidFromString (const char* const s) noexcept
@@ -54,9 +62,8 @@ inline GUID uuidFromString (const char* const s) noexcept
         (s, "%08lX-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X",
               &p0, &p1, &p2, &p3, &p4, &p5, &p6, &p7, &p8, &p9, &p10);
 
-    GUID g = { p0, (uint16) p1, (uint16) p2, { (uint8) p3, (uint8) p4, (uint8) p5, (uint8) p6,
-                                               (uint8) p7, (uint8) p8, (uint8) p9, (uint8) p10 }};
-    return g;
+    return { p0, (uint16) p1, (uint16) p2, { (uint8) p3, (uint8) p4, (uint8) p5, (uint8) p6,
+                                             (uint8) p7, (uint8) p8, (uint8) p9, (uint8) p10 }};
 }
 
 //==============================================================================
@@ -66,18 +73,18 @@ template <class ComClass>
 class ComSmartPtr
 {
 public:
-    ComSmartPtr() throw() : p (0)                                  {}
+    ComSmartPtr() noexcept {}
     ComSmartPtr (ComClass* const obj) : p (obj)                    { if (p) p->AddRef(); }
     ComSmartPtr (const ComSmartPtr<ComClass>& other) : p (other.p) { if (p) p->AddRef(); }
     ~ComSmartPtr()                                                 { release(); }
 
-    operator ComClass*() const throw()     { return p; }
-    ComClass& operator*() const throw()    { return *p; }
-    ComClass* operator->() const throw()   { return p; }
+    operator ComClass*() const noexcept     { return p; }
+    ComClass& operator*() const noexcept    { return *p; }
+    ComClass* operator->() const noexcept   { return p; }
 
     ComSmartPtr& operator= (ComClass* const newP)
     {
-        if (newP != 0)  newP->AddRef();
+        if (newP != nullptr)  newP->AddRef();
         release();
         p = newP;
         return *this;
@@ -89,13 +96,13 @@ public:
     ComClass** resetAndGetPointerAddress()
     {
         release();
-        p = 0;
+        p = nullptr;
         return &p;
     }
 
     HRESULT CoCreateInstance (REFCLSID classUUID, DWORD dwClsContext = CLSCTX_INPROC_SERVER)
     {
-        HRESULT hr = ::CoCreateInstance (classUUID, 0, dwClsContext, __uuidof (ComClass), (void**) resetAndGetPointerAddress());
+        auto hr = ::CoCreateInstance (classUUID, 0, dwClsContext, __uuidof (ComClass), (void**) resetAndGetPointerAddress());
         jassert (hr != CO_E_NOTINITIALIZED); // You haven't called CoInitialize for the current thread!
         return hr;
     }
@@ -103,7 +110,7 @@ public:
     template <class OtherComClass>
     HRESULT QueryInterface (REFCLSID classUUID, ComSmartPtr<OtherComClass>& destObject) const
     {
-        if (p == 0)
+        if (p == nullptr)
             return E_POINTER;
 
         return p->QueryInterface (classUUID, (void**) destObject.resetAndGetPointerAddress());
@@ -116,11 +123,11 @@ public:
     }
 
 private:
-    ComClass* p;
+    ComClass* p = nullptr;
 
-    void release()  { if (p != 0) p->Release(); }
+    void release()  { if (p != nullptr) p->Release(); }
 
-    ComClass** operator&() throw(); // private to avoid it being used accidentally
+    ComClass** operator&() noexcept; // private to avoid it being used accidentally
 };
 
 //==============================================================================
@@ -135,7 +142,7 @@ public:
     virtual ~ComBaseClassHelperBase() {}
 
     ULONG __stdcall AddRef()    { return ++refCount; }
-    ULONG __stdcall Release()   { const ULONG r = --refCount; if (r == 0) delete this; return r; }
+    ULONG __stdcall Release()   { auto r = --refCount; if (r == 0) delete this; return r; }
 
 protected:
     ULONG refCount;
@@ -143,9 +150,9 @@ protected:
     JUCE_COMRESULT QueryInterface (REFIID refId, void** result)
     {
         if (refId == __uuidof (IUnknown))
-            return castToType <IUnknown> (result);
+            return castToType<IUnknown> (result);
 
-        *result = 0;
+        *result = nullptr;
         return E_NOINTERFACE;
     }
 
@@ -159,17 +166,17 @@ protected:
 /** Handy base class for writing COM objects, providing ref-counting and a basic QueryInterface method.
 */
 template <class ComClass>
-class ComBaseClassHelper   : public ComBaseClassHelperBase <ComClass>
+class ComBaseClassHelper   : public ComBaseClassHelperBase<ComClass>
 {
 public:
-    ComBaseClassHelper (unsigned int initialRefCount = 1) : ComBaseClassHelperBase <ComClass> (initialRefCount) {}
+    ComBaseClassHelper (unsigned int initialRefCount = 1) : ComBaseClassHelperBase<ComClass> (initialRefCount) {}
     ~ComBaseClassHelper() {}
 
     JUCE_COMRESULT QueryInterface (REFIID refId, void** result)
     {
         if (refId == __uuidof (ComClass))
-            return this->template castToType <ComClass> (result);
+            return this->template castToType<ComClass> (result);
 
-        return ComBaseClassHelperBase <ComClass>::QueryInterface (refId, result);
+        return ComBaseClassHelperBase<ComClass>::QueryInterface (refId, result);
     }
 };
