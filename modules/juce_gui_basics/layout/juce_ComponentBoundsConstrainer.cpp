@@ -129,7 +129,7 @@ void ComponentBoundsConstrainer::setBoundsForComponent (Component* component,
 
     border.subtractFrom (bounds);
 
-    applyBoundsToComponent (component, bounds);
+    applyBoundsToComponent (*component, bounds);
 }
 
 void ComponentBoundsConstrainer::checkComponentBounds (Component* component)
@@ -138,14 +138,12 @@ void ComponentBoundsConstrainer::checkComponentBounds (Component* component)
                            false, false, false, false);
 }
 
-void ComponentBoundsConstrainer::applyBoundsToComponent (Component* component, Rectangle<int> bounds)
+void ComponentBoundsConstrainer::applyBoundsToComponent (Component& component, Rectangle<int> bounds)
 {
-    jassert (component != nullptr);
-
-    if (auto* positioner = component->getPositioner())
+    if (auto* positioner = component.getPositioner())
         positioner->applyNewBounds (bounds);
     else
-        component->setBounds (bounds);
+        component.setBounds (bounds);
 }
 
 //==============================================================================

@@ -86,13 +86,13 @@ public:
     bool perform (UndoableAction* action, const String& actionName);
 
     //==============================================================================
-    void paint (Graphics& g);
-    void resized();
-    void mouseDown (const MouseEvent& e);
-    void mouseDrag (const MouseEvent& e);
-    void mouseUp (const MouseEvent& e);
-    void changeListenerCallback (ChangeBroadcaster*);
-    void parentHierarchyChanged();
+    void paint (Graphics&) override;
+    void resized() override;
+    void mouseDown (const MouseEvent&) override;
+    void mouseDrag (const MouseEvent&) override;
+    void mouseUp (const MouseEvent&) override;
+    void changeListenerCallback (ChangeBroadcaster*) override;
+    void parentHierarchyChanged() override;
 
     virtual void applyCustomPaintSnippets (StringArray&) {}
 
@@ -102,17 +102,17 @@ protected:
     PaintRoutine* const owner;
     RelativePositionedRectangle position;
 
-    void resizeStart();
-    void resizeEnd();
+    void resizeStart() override;
+    void resizeEnd() override;
     void checkBounds (Rectangle<int>& bounds,
                       const Rectangle<int>& previousBounds,
                       const Rectangle<int>& limits,
                       bool isStretchingTop,
                       bool isStretchingLeft,
                       bool isStretchingBottom,
-                      bool isStretchingRight);
+                      bool isStretchingRight) override;
 
-    void applyBoundsToComponent (Component* component, const Rectangle<int>& bounds);
+    void applyBoundsToComponent (Component&, Rectangle<int>) override;
 
     Rectangle<int> getCurrentAbsoluteBounds() const;
     void getCurrentAbsoluteBoundsDouble (double& x, double& y, double& w, double& h) const;

@@ -182,7 +182,7 @@ public:
         By default this just calls setBounds(), but is virtual in case it's needed for
         extremely cunning purposes.
     */
-    virtual void applyBoundsToComponent (Component* component, Rectangle<int> bounds);
+    virtual void applyBoundsToComponent (Component&, Rectangle<int> bounds);
 
 private:
     //==============================================================================

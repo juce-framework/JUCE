@@ -72,7 +72,7 @@ public:
                       bool isStretchingBottom,
                       bool isStretchingRight) override;
 
-    void applyBoundsToComponent (Component*, const Rectangle<int>&) override;
+    void applyBoundsToComponent (Component&, Rectangle<int>) override;
 
     //==============================================================================
     Component::SafePointer<Component> target;
