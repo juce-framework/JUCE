@@ -673,7 +673,9 @@ public:
 
 private:
     //==============================================================================
-    class MainContentComponent : public Component, private Value::Listener, Button::Listener
+    class MainContentComponent : public Component, private Value::Listener,
+                                                           Button::Listener,
+                                                           ComponentListener
     {
     public:
         MainContentComponent (StandaloneFilterWindow& filterWindow)
@@ -683,7 +685,14 @@ private:
         {
             Value& inputMutedValue = owner.pluginHolder->getMuteInputValue();
 
-            addAndMakeVisible (editor);
+            if (editor != nullptr)
+            {
+                editor->addComponentListener (this);
+                componentMovedOrResized (*editor, false, true);
+
+                addAndMakeVisible (editor);
+            }
+
             addChildComponent (notification);
 
             if (owner.pluginHolder->getProcessorHasPotentialFeedbackLoop())
@@ -699,6 +708,7 @@ private:
         {
             if (editor != nullptr)
             {
+                editor->removeComponentListener (this);
                 owner.pluginHolder->processor->editorBeingDeleted (editor);
                 editor = nullptr;
             }
@@ -781,6 +791,14 @@ private:
            #else
             owner.pluginHolder->showAudioSettingsDialog();
            #endif
+        }
+
+        //==============================================================================
+        void componentMovedOrResized (Component&, bool, bool wasResized) override
+        {
+            if (wasResized && editor != nullptr)
+                setSize (editor->getWidth(),
+                         editor->getHeight() + (shouldShowNotification ? NotificationArea::height : 0));
         }
 
         //==============================================================================
