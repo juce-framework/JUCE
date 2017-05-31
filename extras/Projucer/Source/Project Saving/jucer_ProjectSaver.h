@@ -425,27 +425,7 @@ private:
                 << String::repeatedString (" ", longestName + 5 - m->getID().length()) << " 1" << newLine;
         }
 
-        out << newLine;
-
-        {
-            int isStandaloneApplication = 1;
-            const ProjectType& type = project.getProjectType();
-
-            if (type.isAudioPlugin() || type.isDynamicLibrary())
-                isStandaloneApplication = 0;
-
-            // Fabian TODO
-            out << "//==============================================================================" << newLine
-                << "#ifndef    JUCE_STANDALONE_APPLICATION" << newLine
-                << " #if defined(JucePlugin_Name) && defined(JucePlugin_Build_Standalone)" << newLine
-                << "  #define  JUCE_STANDALONE_APPLICATION JucePlugin_Build_Standalone" << newLine
-                << " #else" << newLine
-                << "  #define  JUCE_STANDALONE_APPLICATION " << isStandaloneApplication << newLine
-                << " #endif" << newLine
-                << "#endif" << newLine
-                << newLine
-                << "#define JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED 1" << newLine;
-        }
+        out << newLine << "#define JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED 1" << newLine;
 
         for (int j = 0; j < modules.size(); ++j)
         {
@@ -483,6 +463,23 @@ private:
                         << "#endif" << newLine;
                 }
             }
+        }
+
+        {
+            int isStandaloneApplication = 1;
+            const ProjectType& type = project.getProjectType();
+
+            if (type.isAudioPlugin() || type.isDynamicLibrary())
+                isStandaloneApplication = 0;
+
+            out << "//==============================================================================" << newLine
+                << "#ifndef    JUCE_STANDALONE_APPLICATION" << newLine
+                << " #if defined(JucePlugin_Name) && defined(JucePlugin_Build_Standalone)" << newLine
+                << "  #define  JUCE_STANDALONE_APPLICATION JucePlugin_Build_Standalone" << newLine
+                << " #else" << newLine
+                << "  #define  JUCE_STANDALONE_APPLICATION " << isStandaloneApplication << newLine
+                << " #endif" << newLine
+                << "#endif" << newLine;
         }
 
         if (extraAppConfigContent.isNotEmpty())

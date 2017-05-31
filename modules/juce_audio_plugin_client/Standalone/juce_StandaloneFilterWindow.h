@@ -818,7 +818,7 @@ private:
 
 StandalonePluginHolder* StandalonePluginHolder::getInstance()
 {
-   #if JucePlugin_Enable_IAA || JucePlugin_Build_STANDALONE
+   #if JucePlugin_Enable_IAA || JucePlugin_Build_Standalone
     if (PluginHostType::getPluginLoadedAs() == AudioProcessor::wrapperType_Standalone)
     {
         auto& desktop = Desktop::getInstance();
