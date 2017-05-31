@@ -49,21 +49,30 @@
  #define JUCE_COMCLASS(name, guid)       struct __declspec (uuid (guid)) name
 #endif
 
-inline GUID uuidFromString (const char* const s) noexcept
+inline GUID uuidFromString (const char* s) noexcept
 {
-    unsigned long p0;
-    unsigned int p1, p2, p3, p4, p5, p6, p7, p8, p9, p10;
+    uint32 ints[4] = {};
 
-  #ifndef _MSC_VER
-    sscanf
-  #else
-    sscanf_s
-  #endif
-        (s, "%08lX-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X",
-              &p0, &p1, &p2, &p3, &p4, &p5, &p6, &p7, &p8, &p9, &p10);
+    for (uint32 digitIndex = 0; digitIndex < 32;)
+    {
+        auto c = *s++;
+        uint32 digit;
 
-    return { p0, (uint16) p1, (uint16) p2, { (uint8) p3, (uint8) p4, (uint8) p5, (uint8) p6,
-                                             (uint8) p7, (uint8) p8, (uint8) p9, (uint8) p10 }};
+        if (c >= '0' && c <= '9')       digit = c - '0';
+        else if (c >= 'a' && c <= 'f')  digit = c - 'a' + 10;
+        else if (c >= 'A' && c <= 'F')  digit = c - 'A' + 10;
+        else if (c == '-')              continue;
+        else break;
+
+        ints[digitIndex / 8] |= (digit << 4 * (7 - (digitIndex & 7)));
+        ++digitIndex;
+    }
+
+    return { ints[0],
+             (uint16) (ints[1] >> 16),
+             (uint16) ints[1],
+             { (uint8) (ints[2] >> 24), (uint8) (ints[2] >> 16), (uint8) (ints[2] >> 8), (uint8) ints[2],
+               (uint8) (ints[3] >> 24), (uint8) (ints[3] >> 16), (uint8) (ints[3] >> 8), (uint8) ints[3] }};
 }
 
 //==============================================================================
@@ -74,9 +83,9 @@ class ComSmartPtr
 {
 public:
     ComSmartPtr() noexcept {}
-    ComSmartPtr (ComClass* const obj) : p (obj)                    { if (p) p->AddRef(); }
-    ComSmartPtr (const ComSmartPtr<ComClass>& other) : p (other.p) { if (p) p->AddRef(); }
-    ~ComSmartPtr()                                                 { release(); }
+    ComSmartPtr (ComClass* obj) : p (obj)                   { if (p) p->AddRef(); }
+    ComSmartPtr (const ComSmartPtr& other) : p (other.p)    { if (p) p->AddRef(); }
+    ~ComSmartPtr()                                          { release(); }
 
     operator ComClass*() const noexcept     { return p; }
     ComClass& operator*() const noexcept    { return *p; }
@@ -90,7 +99,7 @@ public:
         return *this;
     }
 
-    ComSmartPtr& operator= (const ComSmartPtr<ComClass>& newP)  { return operator= (newP.p); }
+    ComSmartPtr& operator= (const ComSmartPtr& newP)  { return operator= (newP.p); }
 
     // Releases and nullifies this pointer and returns its address
     ComClass** resetAndGetPointerAddress()
