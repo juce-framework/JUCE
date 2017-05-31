@@ -1015,17 +1015,19 @@ private:
 
     Font getFont (const XmlPath& xml) const
     {
-        auto fontSize = getCoordLength (getStyleAttribute (xml, "font-size"), 1.0f);
-
-        int style = getStyleAttribute (xml, "font-style").containsIgnoreCase ("italic") ? Font::italic : Font::plain;
-
-        if (getStyleAttribute (xml, "font-weight").containsIgnoreCase ("bold"))
-            style |= Font::bold;
-
+        Font f;
         auto family = getStyleAttribute (xml, "font-family").unquoted();
 
-        return family.isEmpty() ? Font (fontSize, style)
-                                : Font (family, fontSize, style);
+        if (family.isNotEmpty())
+            f.setTypefaceName (family);
+
+        if (getStyleAttribute (xml, "font-style").containsIgnoreCase ("italic"))
+            f.setItalic (true);
+
+        if (getStyleAttribute (xml, "font-weight").containsIgnoreCase ("bold"))
+            f.setBold (true);
+
+        return f.withPointHeight (getCoordLength (getStyleAttribute (xml, "font-size"), 1.0f));
     }
 
     //==============================================================================
