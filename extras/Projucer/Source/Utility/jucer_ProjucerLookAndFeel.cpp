@@ -258,7 +258,7 @@ void ProjucerLookAndFeel::drawFileBrowserRow (Graphics& g, int width, int height
                                  findColour (isItemSelected ? defaultHighlightedTextColourId : defaultTextColourId));
 
         fileListComp->setColour (DirectoryContentsDisplayComponent::highlightColourId,
-                                 findColour (defaultHighlightColourId));
+                                 findColour (defaultHighlightColourId).withAlpha (0.75f));
     }
 
 
@@ -303,7 +303,7 @@ void ProjucerLookAndFeel::drawMenuBarItem (Graphics& g, int width, int height,
     }
     else if (isMenuOpen || isMouseOverItem)
     {
-        g.fillAll   (menuBar.findColour (defaultHighlightColourId));
+        g.fillAll   (menuBar.findColour (defaultHighlightColourId).withAlpha (0.75f));
         g.setColour (menuBar.findColour (defaultHighlightedTextColourId));
     }
     else
@@ -548,7 +548,7 @@ void ProjucerLookAndFeel::setupColours()
 
     setColour (Label::textColourId,                             findColour (defaultTextColourId));
     setColour (Label::textWhenEditingColourId,                  findColour (widgetTextColourId));
-    setColour (TextEditor::highlightColourId,                   findColour (defaultHighlightColourId));
+    setColour (TextEditor::highlightColourId,                   findColour (defaultHighlightColourId).withAlpha (0.75f));
     setColour (TextEditor::highlightedTextColourId,             findColour (defaultHighlightedTextColourId));
     setColour (TextEditor::outlineColourId,                     Colours::transparentBlack);
     setColour (TextEditor::focusedOutlineColourId,              Colours::transparentBlack);
@@ -569,4 +569,6 @@ void ProjucerLookAndFeel::setupColours()
     setColour (CodeEditorComponent::highlightColourId,          findColour (defaultHighlightColourId).withAlpha (0.5f));
     setColour (CaretComponent::caretColourId,                   findColour (defaultButtonBackgroundColourId));
     setColour (TreeView::selectedItemBackgroundColourId,        findColour (defaultHighlightColourId));
+    setColour (PopupMenu::highlightedBackgroundColourId,        findColour (defaultHighlightColourId).withAlpha (0.75f));
+    setColour (PopupMenu::highlightedTextColourId,              findColour (defaultHighlightedTextColourId));
 }
