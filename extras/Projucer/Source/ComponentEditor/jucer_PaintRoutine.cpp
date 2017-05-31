@@ -33,12 +33,12 @@
 #include "paintelements/jucer_PaintElementImage.h"
 #include "paintelements/jucer_PaintElementGroup.h"
 #include "ui/jucer_JucerDocumentEditor.h"
-
+#include "../Application/jucer_Application.h"
 
 //==============================================================================
 PaintRoutine::PaintRoutine()
     : document (nullptr),
-      backgroundColour (Colours::white)
+      backgroundColour (ProjucerApplication::getApp().lookAndFeel.findColour (backgroundColourId))
 {
     clear();
 }
