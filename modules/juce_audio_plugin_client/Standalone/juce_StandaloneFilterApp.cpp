@@ -81,12 +81,16 @@ public:
 
     virtual StandaloneFilterWindow* createWindow()
     {
+       #ifdef JucePlugin_PreferredChannelConfigurations
+        StandalonePluginHolder::PluginInOuts channels[] = { JucePlugin_PreferredChannelConfigurations };
+       #endif
+
         return new StandaloneFilterWindow (getApplicationName(),
                                            LookAndFeel::getDefaultLookAndFeel().findColour (ResizableWindow::backgroundColourId),
                                            appProperties.getUserSettings(),
                                            false, {}, nullptr
                                           #ifdef JucePlugin_PreferredChannelConfigurations
-                                           , { JucePlugin_PreferredChannelConfigurations }
+                                           , juce::Array<StandalonePluginHolder::PluginInOuts> (channels, juce::numElementsInArray (channels))
                                           #endif
                                            );
     }

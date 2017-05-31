@@ -40,6 +40,10 @@ class StandalonePluginHolder    : private AudioIODeviceCallback
                                #endif
 {
 public:
+    //==============================================================================
+    struct PluginInOuts   { short numIns, numOuts; };
+
+    //==============================================================================
     /** Creates an instance of the default plugin.
 
         The settings object can be a PropertySet that the class should use to store its
@@ -58,7 +62,7 @@ public:
                             bool takeOwnershipOfSettings = true,
                             const String& preferredDefaultDeviceName = String(),
                             const AudioDeviceManager::AudioDeviceSetup* preferredSetupOptions = nullptr,
-                            const std::initializer_list<const short[2]>& constrainToConfiguration = {})
+                            const Array<PluginInOuts>& constrainToConfiguration = Array<PluginInOuts>())
 
         : settings (settingsToUse, takeOwnershipOfSettings),
           channelConfiguration (constrainToConfiguration),
@@ -100,10 +104,10 @@ public:
         processor->disableNonMainBuses();
         processor->setRateAndBufferSizeDetails (44100, 512);
 
-        int inChannels = (channelConfiguration.size() > 0 ? (*channelConfiguration.begin())[0]
+        int inChannels = (channelConfiguration.size() > 0 ? channelConfiguration[0].numIns
                                                           : processor->getMainBusNumInputChannels());
 
-        int outChannels = (channelConfiguration.size() > 0 ? (*channelConfiguration.begin())[1]
+        int outChannels = (channelConfiguration.size() > 0 ? channelConfiguration[0].numOuts
                                                            : processor->getMainBusNumOutputChannels());
 
         processorHasPotentialFeedbackLoop = (inChannels > 0 && outChannels > 0);
@@ -224,9 +228,9 @@ public:
 
         if (channelConfiguration.size() > 0)
         {
-            auto defaultConfig = *channelConfiguration.begin();
-            totalInChannels  = defaultConfig[0];
-            totalOutChannels = defaultConfig[1];
+            auto defaultConfig = channelConfiguration.getReference (0);
+            totalInChannels  = defaultConfig.numIns;
+            totalOutChannels = defaultConfig.numOuts;
         }
 
         o.content.setOwned (new SettingsComponent (*this, deviceManager,
@@ -278,9 +282,9 @@ public:
 
         if (channelConfiguration.size() > 0)
         {
-            auto defaultConfig = *channelConfiguration.begin();
-            totalInChannels  = defaultConfig[0];
-            totalOutChannels = defaultConfig[1];
+            auto defaultConfig = channelConfiguration.getReference (0);
+            totalInChannels  = defaultConfig.numIns;
+            totalOutChannels = defaultConfig.numOuts;
         }
 
         deviceManager.initialise (totalInChannels,
@@ -354,7 +358,7 @@ public:
     ScopedPointer<AudioProcessor> processor;
     AudioDeviceManager deviceManager;
     AudioProcessorPlayer player;
-    std::initializer_list<const short[2]> channelConfiguration;
+    Array<PluginInOuts> channelConfiguration;
 
     // avoid feedback loop by default
     bool processorHasPotentialFeedbackLoop = true;
@@ -533,6 +537,9 @@ class StandaloneFilterWindow    : public DocumentWindow,
 {
 public:
     //==============================================================================
+    typedef StandalonePluginHolder::PluginInOuts PluginInOuts;
+
+    //==============================================================================
     /** Creates a window with a given title and colour.
         The settings object can be a PropertySet that the class should use to
         store its settings (it can also be null). If takeOwnershipOfSettings is
@@ -544,7 +551,7 @@ public:
                             bool takeOwnershipOfSettings,
                             const String& preferredDefaultDeviceName = String(),
                             const AudioDeviceManager::AudioDeviceSetup* preferredSetupOptions = nullptr,
-                            const std::initializer_list<const short[2]>& constrainToConfiguration = {})
+                            const Array<PluginInOuts>& constrainToConfiguration = Array<PluginInOuts> ())
         : DocumentWindow (title, backgroundColour, DocumentWindow::minimiseButton | DocumentWindow::closeButton),
           optionsButton ("Options")
     {
