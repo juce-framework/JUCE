@@ -36,6 +36,8 @@ struct AudioPluginAppWizard   : public NewProjectWizard
     {
         StringArray s (NewProjectWizard::getDefaultModules());
         s.add ("juce_audio_plugin_client");
+        s.add ("juce_audio_utils");
+
         return s;
     }
 
@@ -53,6 +55,7 @@ struct AudioPluginAppWizard   : public NewProjectWizard
         File editorHFile   = editorCppFile.withFileExtension (".h");
 
         project.getProjectTypeValue() = ProjectType_AudioPlugin::getTypeName();
+        project.getShouldBuildStandalonePluginAsValue().setValue (true);
 
         Project::Item sourceGroup (createSourceGroup (project));
         project.getConfigFlag ("JUCE_QUICKTIME") = Project::configFlagDisabled; // disabled because it interferes with RTAS build on PC
