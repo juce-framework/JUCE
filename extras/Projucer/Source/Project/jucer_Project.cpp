@@ -718,7 +718,7 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
                "This list is a comma-separated set list in the form {numIns, numOuts} and each pair indicates a valid plug-in "
                "configuration. For example {1, 1}, {2, 2} means that the plugin can be used either with 1 input and 1 output, "
                "or with 2 inputs and 2 outputs. If your plug-in requires side-chains, aux output buses etc., then you must leave "
-               "this field empty and override the setPreferredBusArrangement method in your AudioProcessor.");
+               "this field empty and override the isBusesLayoutSupported callback in your AudioProcessor.");
 
     props.add (new BooleanPropertyComponent (getPluginIsSynth(), "Plugin is a Synth", "Is a Synth"),
                "Enable this if you want your plugin to be treated as a synth or generator. It doesn't make much difference to the plugin itself, but some hosts treat synths differently to other plugins.");
