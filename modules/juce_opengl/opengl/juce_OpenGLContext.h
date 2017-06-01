@@ -308,7 +308,7 @@ private:
     void* contextToShareWith;
     OpenGLVersion versionRequired;
     size_t imageCacheMaxSize;
-    bool renderComponents, useMultisampling, continuousRepaint;
+    bool renderComponents, useMultisampling, continuousRepaint, overrideCanAttach;
 
     //==============================================================================
     struct AsyncWorker : ReferenceCountedObject
@@ -327,6 +327,10 @@ private:
 
         JUCE_DECLARE_NON_COPYABLE(AsyncWorkerFunctor)
     };
+
+    //==============================================================================
+    friend void componentPeerAboutToChange (ComponentPeer&, bool);
+    void overrideCanBeAttached (bool);
 
     //==============================================================================
     CachedImage* getCachedImage() const noexcept;
