@@ -454,7 +454,7 @@ private:
                     else if (value == Project::configFlagDisabled)
                         out << " #define   " << f->symbol << " 0";
                     else if (f->defaultValue.isEmpty())
-                        out << " //#define " << f->symbol;
+                        out << " //#define " << f->symbol << " 1";
                     else
                         out << " #define " << f->symbol << " " << f->defaultValue;
 
