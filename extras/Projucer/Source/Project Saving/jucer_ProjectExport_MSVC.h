@@ -1797,13 +1797,18 @@ public:
         name = getName();
     }
 
-    static const char* getName()                { return "Visual Studio 2012"; }
-    static const char* getValueTreeTypeName()   { return "VS2012"; }
-    int getVisualStudioVersion() const override { return 11; }
-    String getSolutionComment() const override  { return "# Visual Studio 2012"; }
-    String getDefaultToolset() const override   { return "v110"; }
-    Value getWindowsTargetPlatformVersionValue()        { return getSetting (Ids::windowsTargetPlatformVersion); }
-    String getWindowsTargetPlatformVersion() const      { return settings [Ids::windowsTargetPlatformVersion]; }
+    static const char* getName()                 { return "Visual Studio 2012"; }
+    static const char* getValueTreeTypeName()    { return "VS2012"; }
+    int getVisualStudioVersion() const override  { return 11; }
+    String getSolutionComment() const override   { return "# Visual Studio 2012"; }
+    String getDefaultToolset() const override    { return "v110"; }
+    Value getWindowsTargetPlatformVersionValue() { return getSetting (Ids::windowsTargetPlatformVersion); }
+
+    String getWindowsTargetPlatformVersion() const
+    {
+        String targetPlatform = settings [Ids::windowsTargetPlatformVersion];
+        return (targetPlatform.isNotEmpty() ? targetPlatform : String ("10.0.14393.0"));
+    }
 
     static MSVCProjectExporterVC2012* createForSettings (Project& project, const ValueTree& settings)
     {
