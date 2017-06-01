@@ -34,18 +34,18 @@
 //==============================================================================
 const int FilterGraph::midiChannelNumber = 0x1000;
 
-FilterGraph::FilterGraph (AudioPluginFormatManager& formatManager_)
+FilterGraph::FilterGraph (AudioPluginFormatManager& fm)
     : FileBasedDocument (filenameSuffix,
                          filenameWildcard,
                          "Load a filter graph",
                          "Save a filter graph"),
-      formatManager (formatManager_), lastUID (0)
+      formatManager (fm)
 {
     InternalPluginFormat internalFormat;
 
-    addFilter (internalFormat.getDescriptionFor (InternalPluginFormat::audioInputFilter),  0.5f,  0.1f);
-    addFilter (internalFormat.getDescriptionFor (InternalPluginFormat::midiInputFilter),   0.25f, 0.1f);
-    addFilter (internalFormat.getDescriptionFor (InternalPluginFormat::audioOutputFilter), 0.5f,  0.9f);
+    addFilter (internalFormat.audioInDesc,  { 0.5,  0.1 });
+    addFilter (internalFormat.midiInDesc,   { 0.25, 0.1 });
+    addFilter (internalFormat.audioOutDesc, { 0.5,  0.9 });
 
     graph.addListener (this);
 
@@ -69,12 +69,12 @@ int FilterGraph::getNumFilters() const noexcept
     return graph.getNumNodes();
 }
 
-AudioProcessorGraph::Node::Ptr FilterGraph::getNode (const int index) const noexcept
+AudioProcessorGraph::Node::Ptr FilterGraph::getNode (int index) const noexcept
 {
     return graph.getNode (index);
 }
 
-AudioProcessorGraph::Node::Ptr FilterGraph::getNodeForId (const uint32 uid) const
+AudioProcessorGraph::Node::Ptr FilterGraph::getNodeForId (uint32 uid) const
 {
     return graph.getNodeForId (uid);
 }
@@ -90,31 +90,27 @@ AudioProcessorGraph::Node::Ptr FilterGraph::getNodeForName (const String& name) 
     return nullptr;
 }
 
-void FilterGraph::addFilter (const PluginDescription* desc, double x, double y)
+void FilterGraph::addFilter (const PluginDescription& desc, Point<double> p)
 {
-    if (desc != nullptr)
+    struct AsyncCallback : public AudioPluginFormat::InstantiationCompletionCallback
     {
-        struct AsyncCallback : public AudioPluginFormat::InstantiationCompletionCallback
+        AsyncCallback (FilterGraph& g, Point<double> pos)  : owner (g), position (pos)
+        {}
+
+        void completionCallback (AudioPluginInstance* instance, const String& error) override
         {
-            AsyncCallback (FilterGraph* myself, double inX, double inY)
-                : owner (myself), posX (inX), posY (inY)
-            {}
+            owner.addFilterCallback (instance, error, position);
+        }
 
-            void completionCallback (AudioPluginInstance* instance, const String& error) override
-            {
-                owner->addFilterCallback (instance, error, posX, posY);
-            }
+        FilterGraph& owner;
+        Point<double> position;
+    };
 
-            FilterGraph* owner;
-            double posX, posY;
-        };
-
-        formatManager.createPluginInstanceAsync (*desc, graph.getSampleRate(), graph.getBlockSize(),
-                                                 new AsyncCallback (this, x, y));
-    }
+    formatManager.createPluginInstanceAsync (desc, graph.getSampleRate(), graph.getBlockSize(),
+                                             new AsyncCallback (*this, p));
 }
 
-void FilterGraph::addFilterCallback (AudioPluginInstance* instance, const String& error, double x, double y)
+void FilterGraph::addFilterCallback (AudioPluginInstance* instance, const String& error, Point<double> pos)
 {
     if (instance == nullptr)
     {
@@ -125,12 +121,11 @@ void FilterGraph::addFilterCallback (AudioPluginInstance* instance, const String
     else
     {
         instance->enableAllBuses();
-        AudioProcessorGraph::Node* node = graph.addNode (instance);
 
-        if (node != nullptr)
+        if (auto* node = graph.addNode (instance))
         {
-            node->properties.set ("x", x);
-            node->properties.set ("y", y);
+            node->properties.set ("x", pos.x);
+            node->properties.set ("y", pos.y);
             changed();
         }
     }
@@ -167,11 +162,11 @@ void FilterGraph::setNodePosition (const uint32 nodeId, double x, double y)
 
 Point<double> FilterGraph::getNodePosition (const uint32 nodeId) const
 {
-    if (AudioProcessorGraph::Node::Ptr n = graph.getNodeForId (nodeId))
-        return Point<double> (static_cast<double> (n->properties ["x"]),
-                              static_cast<double> (n->properties ["y"]));
+    if (auto n = graph.getNodeForId (nodeId))
+        return { static_cast<double> (n->properties ["x"]),
+                 static_cast<double> (n->properties ["y"]) };
 
-    return Point<double>();
+    return {};
 }
 
 //==============================================================================
@@ -245,14 +240,13 @@ String FilterGraph::getDocumentTitle()
 void FilterGraph::newDocument()
 {
     clear();
-
-    setFile (File());
+    setFile ({});
 
     InternalPluginFormat internalFormat;
 
-    addFilter (internalFormat.getDescriptionFor (InternalPluginFormat::audioInputFilter),  0.5f,  0.1f);
-    addFilter (internalFormat.getDescriptionFor (InternalPluginFormat::midiInputFilter),   0.25f, 0.1f);
-    addFilter (internalFormat.getDescriptionFor (InternalPluginFormat::audioOutputFilter), 0.5f,  0.9f);
+    addFilter (internalFormat.audioInDesc,  { 0.5,  0.1 });
+    addFilter (internalFormat.midiInDesc,   { 0.25, 0.1 });
+    addFilter (internalFormat.audioOutDesc, { 0.5,  0.9 });
 
     setChangedFlag (false);
 }

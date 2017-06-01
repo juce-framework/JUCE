@@ -54,17 +54,13 @@ void InternalPluginFormat::createPluginInstance (const PluginDescription& desc,
                                                  void* userData,
                                                  void (*callback) (void*, AudioPluginInstance*, const String&))
 {
-    AudioPluginInstance* retval = nullptr;
-    if (desc.name == audioOutDesc.name)
-        retval = new AudioProcessorGraph::AudioGraphIOProcessor (AudioProcessorGraph::AudioGraphIOProcessor::audioOutputNode);
+    AudioPluginInstance* p = nullptr;
 
-    if (desc.name == audioInDesc.name)
-        retval = new AudioProcessorGraph::AudioGraphIOProcessor (AudioProcessorGraph::AudioGraphIOProcessor::audioInputNode);
+    if (desc.name == audioOutDesc.name) p = new AudioProcessorGraph::AudioGraphIOProcessor (AudioProcessorGraph::AudioGraphIOProcessor::audioOutputNode);
+    if (desc.name == audioInDesc.name)  p = new AudioProcessorGraph::AudioGraphIOProcessor (AudioProcessorGraph::AudioGraphIOProcessor::audioInputNode);
+    if (desc.name == midiInDesc.name)   p = new AudioProcessorGraph::AudioGraphIOProcessor (AudioProcessorGraph::AudioGraphIOProcessor::midiInputNode);
 
-    if (desc.name == midiInDesc.name)
-        retval = new AudioProcessorGraph::AudioGraphIOProcessor (AudioProcessorGraph::AudioGraphIOProcessor::midiInputNode);
-
-    callback (userData, retval, retval == nullptr ? NEEDS_TRANS ("Invalid internal filter name") : String());
+    callback (userData, p, p == nullptr ? NEEDS_TRANS ("Invalid internal filter name") : String());
 }
 
 bool InternalPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const noexcept
@@ -72,21 +68,9 @@ bool InternalPluginFormat::requiresUnblockedMessageThreadDuringCreation (const P
     return false;
 }
 
-const PluginDescription* InternalPluginFormat::getDescriptionFor (const InternalFilterType type)
+void InternalPluginFormat::getAllTypes (OwnedArray<PluginDescription>& results)
 {
-    switch (type)
-    {
-        case audioInputFilter:      return &audioInDesc;
-        case audioOutputFilter:     return &audioOutDesc;
-        case midiInputFilter:       return &midiInDesc;
-        default:                    break;
-    }
-
-    return 0;
-}
-
-void InternalPluginFormat::getAllTypes (OwnedArray <PluginDescription>& results)
-{
-    for (int i = 0; i < (int) endOfFilterTypes; ++i)
-        results.add (new PluginDescription (*getDescriptionFor ((InternalFilterType) i)));
+    results.add (new PluginDescription (audioInDesc));
+    results.add (new PluginDescription (audioOutDesc));
+    results.add (new PluginDescription (midiInDesc));
 }

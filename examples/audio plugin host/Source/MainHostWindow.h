@@ -83,7 +83,7 @@ public:
 
     bool tryToQuitApplication();
 
-    void createPlugin (const PluginDescription*, int x, int y);
+    void createPlugin (const PluginDescription&, Point<int> pos);
 
     void addPluginsToMenu (PopupMenu&) const;
     const PluginDescription* getChosenType (int menuID) const;

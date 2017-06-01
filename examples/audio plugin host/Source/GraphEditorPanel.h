@@ -28,9 +28,9 @@
 
 #include "FilterGraph.h"
 
-class FilterComponent;
-class ConnectorComponent;
-class PinComponent;
+struct FilterComponent;
+struct ConnectorComponent;
+struct PinComponent;
 
 
 //==============================================================================
@@ -47,11 +47,11 @@ public:
     void paint (Graphics& g);
     void mouseDown (const MouseEvent& e);
 
-    void createNewPlugin (const PluginDescription* desc, int x, int y);
+    void createNewPlugin (const PluginDescription&, Point<int> position);
 
     FilterComponent* getComponentForFilter (uint32 filterID) const;
     ConnectorComponent* getComponentForConnection (const AudioProcessorGraph::Connection& conn) const;
-    PinComponent* findPinAt (int x, int y) const;
+    PinComponent* findPinAt (Point<float>) const;
 
     void resized();
     void changeListenerCallback (ChangeBroadcaster*);
@@ -84,12 +84,12 @@ class GraphDocumentComponent  : public Component
 public:
     //==============================================================================
     GraphDocumentComponent (AudioPluginFormatManager& formatManager,
-                            AudioDeviceManager* deviceManager);
+                            AudioDeviceManager& deviceManager);
     ~GraphDocumentComponent();
 
     //==============================================================================
-    void createNewPlugin (const PluginDescription* desc, int x, int y);
-    inline void setDoublePrecision (bool doublePrecision) { graphPlayer.setDoublePrecisionProcessing (doublePrecision); }
+    void createNewPlugin (const PluginDescription&, Point<int> position);
+    void setDoublePrecision (bool doublePrecision);
 
     //==============================================================================
     ScopedPointer<FilterGraph> graph;
@@ -105,7 +105,7 @@ public:
 
 private:
     //==============================================================================
-    AudioDeviceManager* deviceManager;
+    AudioDeviceManager& deviceManager;
     AudioProcessorPlayer graphPlayer;
     MidiKeyboardState keyState;
 
@@ -134,7 +134,7 @@ public:
         NumTypes
     };
 
-    PluginWindow (Component* pluginEditor, AudioProcessorGraph::Node*, WindowFormatType);
+    PluginWindow (AudioProcessorEditor*, AudioProcessorGraph::Node*, WindowFormatType);
     ~PluginWindow();
 
     static PluginWindow* getWindowFor (AudioProcessorGraph::Node*, WindowFormatType);
