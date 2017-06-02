@@ -351,7 +351,7 @@ private:
     Array<int> channels;
     Array<uint32> nodeIds, midiNodeIds;
 
-    enum { freeNodeID = 0xffffffff, zeroNodeID = 0xfffffffe };
+    enum { freeNodeID = 0xffffffff, zeroNodeID = 0xfffffffe, anonymousNodeID = 0xfffffffd };
 
     static bool isNodeBusy (uint32 nodeID) noexcept     { return nodeID != freeNodeID && nodeID != zeroNodeID; }
 
@@ -509,6 +509,8 @@ private:
                     // can't re-use any of our input chans, so get a new one and copy everything into it..
                     bufIndex = getFreeBuffer (false);
                     jassert (bufIndex != 0);
+
+                    markBufferAsContaining (bufIndex, anonymousNodeID, 0);
 
                     const int srcIndex = getBufferContaining (sourceNodes.getUnchecked (0),
                                                               sourceOutputChans.getUnchecked (0));
