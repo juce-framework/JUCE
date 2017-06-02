@@ -1027,14 +1027,15 @@ void TextEditor::setFont (const Font& newFont)
     scrollToMakeSureCursorIsVisible();
 }
 
-void TextEditor::applyFontToAllText (const Font& newFont)
+void TextEditor::applyFontToAllText (const Font& newFont, bool changeCurrentFont)
 {
-    currentFont = newFont;
+    if (changeCurrentFont)
+        currentFont = newFont;
+
     auto overallColour = findColour (textColourId);
 
-    for (int i = sections.size(); --i >= 0;)
+    for (auto* uts : sections)
     {
-        auto* uts = sections.getUnchecked (i);
         uts->setFont (newFont, passwordCharacter);
         uts->colour = overallColour;
     }
@@ -1045,11 +1046,21 @@ void TextEditor::applyFontToAllText (const Font& newFont)
     repaint();
 }
 
+void TextEditor::applyColourToAllText (const Colour& newColour, bool changeCurrentTextColour)
+{
+    for (auto* uts : sections)
+        uts->colour = newColour;
+
+    if (changeCurrentTextColour)
+        setColour (TextEditor::textColourId, newColour);
+    else
+        repaint();
+}
+
 void TextEditor::colourChanged()
 {
     setOpaque (findColour (backgroundColourId).isOpaque());
     repaint();
-    styleChanged = true;
 }
 
 void TextEditor::lookAndFeelChanged()
@@ -1163,7 +1174,7 @@ void TextEditor::setText (const String& newText,
 {
     const int newLength = newText.length();
 
-    if (newLength != getTotalNumChars() || getText() != newText || styleChanged)
+    if (newLength != getTotalNumChars() || getText() != newText)
     {
         if (! sendTextChangeMessage)
             textValue.removeListener (textHolder);
@@ -1193,8 +1204,6 @@ void TextEditor::setText (const String& newText,
         updateTextHolderSize();
         scrollToMakeSureCursorIsVisible();
         undoManager.clearUndoHistory();
-
-        styleChanged = false;
 
         repaint();
     }

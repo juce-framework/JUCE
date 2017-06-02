@@ -207,8 +207,8 @@ public:
 
         textColourId             = 0x1000201, /**< The colour that will be used when text is added to the editor. Note
                                                    that because the editor can contain multiple colours, calling this
-                                                   method won't change the colour of existing text - to do that, call
-                                                   applyFontToAllText() after calling this method.*/
+                                                   method won't change the colour of existing text - to do that, use
+                                                   the applyColourToAllText() method */
 
         highlightColourId        = 0x1000202, /**< The colour with which to fill the background of highlighted sections of
                                                    the text - this can be transparent if you don't want to show any
@@ -238,15 +238,26 @@ public:
     void setFont (const Font& newFont);
 
     /** Applies a font to all the text in the editor.
-        This will also set the current font to use for any new text that's added.
+
+        If the changeCurrentFont argument is true then this will also set the
+        new font as the font to be used for any new text that's added.
+
         @see setFont
     */
-    void applyFontToAllText (const Font& newFont);
+    void applyFontToAllText (const Font& newFont, bool changeCurrentFont = true);
 
     /** Returns the font that's currently being used for new text.
+
         @see setFont
     */
     const Font& getFont() const noexcept            { return currentFont; }
+
+    /** Applies a colour to all the text in the editor.
+
+        If the changeCurrentTextColour argument is true then this will also set the
+        new colour as the colour to be used for any new text that's added.
+    */
+    void applyColourToAllText (const Colour& newColour, bool changeCurrentTextColour = true);
 
     //==============================================================================
     /** If set to true, focusing on the editor will highlight all its text.
@@ -697,7 +708,6 @@ private:
     bool menuActive = false;
     bool valueTextNeedsUpdating = false;
     bool consumeEscAndReturnKeys = true;
-    bool styleChanged = false;
 
     UndoManager undoManager;
     ScopedPointer<CaretComponent> caret;
