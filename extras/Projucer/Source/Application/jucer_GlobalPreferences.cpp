@@ -443,11 +443,48 @@ void AppearanceSettingsTab::resized()
 }
 
 //==============================================================================
+MiscSettingsTab::MiscSettingsTab()
+{
+    addAndMakeVisible (recentMaxNumItemsLabel = new Label("RecentMaxNumItems", "Maximum number of recent projects:"));
+    recentMaxNumItemsLabel->setColour (Label::textColourId, Colours::lightgrey);
+    recentMaxNumItemsLabel->setColour (Label::backgroundColourId, Colours::darkgrey);
+    
+    recentMaxNumItemsComponent = new Slider (Slider::IncDecButtons, Slider::TextBoxLeft);
+    recentMaxNumItemsComponent->setRange (5, 50, 1);
+    recentMaxNumItemsComponent->setValue (getAppSettings().recentFiles.getMaxNumberOfItems(), dontSendNotification);
+    recentMaxNumItemsComponent->addListener (this);
+    addAndMakeVisible (recentMaxNumItemsComponent);
+}
+
+Component* MiscSettingsTab::getContent()
+{
+    return this;
+}
+
+String MiscSettingsTab::getName() const noexcept
+{
+    return "Misc";
+}
+
+void MiscSettingsTab::resized()
+{
+    recentMaxNumItemsLabel->setBounds(0, 0, getWidth() / 2, 25);
+    recentMaxNumItemsComponent->setBounds (getWidth() / 2, 0, getWidth() / 2, 25);
+}
+
+void MiscSettingsTab::sliderValueChanged (Slider* slider)
+{
+    getAppSettings().recentFiles.setMaxNumberOfItems (roundToInt (slider->getValue()));
+    getAppSettings().flush();
+}
+
+//==============================================================================
 GlobalPreferencesComponent::GlobalPreferencesComponent()
    : TabbedComponent (TabbedButtonBar::TabsAtTop)
 {
     preferenceTabs.add (new PathSettingsTab (TargetOS::getThisOS()));
     preferenceTabs.add (new AppearanceSettingsTab);
+    preferenceTabs.add (new MiscSettingsTab);
 
     for (GlobalPreferencesTab** tab = preferenceTabs.begin(); tab != preferenceTabs.end(); ++tab)
         addTab ((*tab)->getName(), findColour (backgroundColourId, true), (*tab)->getContent(), true);

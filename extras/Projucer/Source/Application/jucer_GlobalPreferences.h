@@ -101,6 +101,30 @@ private:
 };
 
 //==============================================================================
+/** This components implements the "Misc" tab in the global preferences window
+*/
+class MiscSettingsTab  : public GlobalPreferencesTab,
+                         public Component,
+                         public SliderListener
+{
+public:
+    MiscSettingsTab();
+    
+    Component* getContent() override;
+    String getName() const noexcept override;
+    
+    void resized() override;
+    
+    void sliderValueChanged (Slider* slider) override;
+    
+private:
+    ScopedPointer<Label>  recentMaxNumItemsLabel;
+    ScopedPointer<Slider> recentMaxNumItemsComponent;
+    
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MiscSettingsTab)
+};
+
+//==============================================================================
 class GlobalPreferencesComponent  : public TabbedComponent
 {
 public:
