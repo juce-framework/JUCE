@@ -345,7 +345,7 @@ enum VstTimingInformationFlags
     vstTimingInfoFlagNanosecondsValid          = 256,
     vstTimingInfoFlagMusicalPositionValid      = 512,
     vstTimingInfoFlagTempoValid                = 1024,
-    vstTimingInfoFlagLastBarPositionValid      = 2056,
+    vstTimingInfoFlagLastBarPositionValid      = 2048,
     vstTimingInfoFlagLoopPositionValid         = 4096,
     vstTimingInfoFlagTimeSignatureValid        = 8192,
     vstTimingInfoFlagSmpteValid                = 16384,
