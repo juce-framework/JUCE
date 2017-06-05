@@ -114,7 +114,7 @@ void ComponentBoundsConstrainer::setBoundsForComponent (Component* component,
         if (auto* peer = component->getPeer())
             border = peer->getFrameSize();
 
-        auto targetScreenArea = component->localAreaToGlobal (targetBounds.withZeroOrigin());
+        auto targetScreenArea = component->localAreaToGlobal (targetBounds);
         auto screenBounds = Desktop::getInstance().getDisplays().getDisplayContaining (targetScreenArea.getCentre()).userArea;
 
         limits = component->getLocalArea (nullptr, screenBounds) + component->getPosition();
