@@ -162,6 +162,18 @@ PluginWindow* PluginWindow::getWindowFor (AudioProcessorGraph::Node* const node,
     auto* processor = node->getProcessor();
     AudioProcessorEditor* ui = nullptr;
 
+    if (auto* pluginInstance = dynamic_cast<AudioPluginInstance*> (processor))
+    {
+        auto description = pluginInstance->getPluginDescription();
+
+        if (description.pluginFormatName == "Internal")
+        {
+            getCommandManager().invokeDirectly (CommandIDs::showAudioSettings, false);
+
+            return nullptr;
+        }
+    }
+
     if (type == Normal)
     {
         ui = processor->createEditorIfNeeded();
