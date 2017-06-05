@@ -2009,7 +2009,7 @@ private:
     template <typename FloatType>
     void processAudio (Vst::ProcessData& data, Array<FloatType*>& channelList)
     {
-        int totalInputChans = 0;
+        int totalInputChans = 0, totalOutputChans = 0;
         bool tmpBufferNeedsClearing = false;
 
         const int plugInInputChannels  = pluginInstance->getTotalNumInputChannels();
@@ -2029,42 +2029,6 @@ private:
                 break;
 
         {
-            const int n = jmax (vstInputs, getNumAudioBuses (true));
-
-            for (int bus = 0; bus < n && totalInputChans < plugInInputChannels; ++bus)
-            {
-                if (bus < vstInputs)
-                {
-                    if (FloatType** const busChannels = getPointerForAudioBus<FloatType> (data.inputs[bus]))
-                    {
-                        const int numChans = jmin ((int) data.inputs[bus].numChannels, plugInInputChannels - totalInputChans);
-
-                        for (int i = 0; i < numChans; ++i)
-                            if (busChannels[i] != nullptr)
-                                channelList.set (totalInputChans++, busChannels[i]);
-                    }
-                }
-                else
-                {
-                    const int numChans = jmin (pluginInstance->getChannelCountOfBus (true, bus), plugInInputChannels - totalInputChans);
-
-                    for (int i = 0; i < numChans; ++i)
-                    {
-                        if (FloatType* tmpBuffer = getTmpBufferForChannel<FloatType> (totalInputChans, data.numSamples))
-                        {
-                            tmpBufferNeedsClearing = true;
-                            channelList.set (totalInputChans++, tmpBuffer);
-                        }
-                        else
-                            return;
-                    }
-                }
-            }
-        }
-
-        int totalOutputChans = 0;
-
-        {
             const int n = jmax (vstOutputs, getNumAudioBuses (false));
 
             for (int bus = 0; bus < n && totalOutputChans < plugInOutputChannels; ++bus)
@@ -2077,15 +2041,14 @@ private:
 
                         for (int i = 0; i < numChans; ++i)
                         {
-                            if (busChannels[i] != nullptr)
-                            {
-                                if (totalOutputChans >= totalInputChans)
-                                {
-                                    FloatVectorOperations::clear (busChannels[i], data.numSamples);
-                                    channelList.set (totalOutputChans, busChannels[i]);
-                                }
+                            auto dst = busChannels[i];
 
-                                ++totalOutputChans;
+                            if (dst != nullptr)
+                            {
+                                if (totalOutputChans >= plugInInputChannels)
+                                    FloatVectorOperations::clear (dst, (int) data.numSamples);
+
+                                channelList.set (totalOutputChans++, busChannels[i]);
                             }
                         }
                     }
@@ -2096,15 +2059,59 @@ private:
 
                     for (int i = 0; i < numChans; ++i)
                     {
-                        if (FloatType* tmpBuffer = getTmpBufferForChannel<FloatType> (totalOutputChans, data.numSamples))
+                        if (FloatType* tmpBuffer = getTmpBufferForChannel<FloatType> (totalOutputChans, data.numSamples))\
                         {
-                            if (totalOutputChans >= totalInputChans)
+                            tmpBufferNeedsClearing = true;
+                            channelList.set (totalOutputChans++, tmpBuffer);
+                        }
+                        else
+                            return;
+                    }
+                }
+            }
+        }
+
+        {
+            const int n = jmax (vstInputs, getNumAudioBuses (true));
+
+            for (int bus = 0; bus < n && totalInputChans < plugInInputChannels; ++bus)
+            {
+                if (bus < vstInputs)
+                {
+                    if (FloatType** const busChannels = getPointerForAudioBus<FloatType> (data.inputs[bus]))
+                    {
+                        const int numChans = jmin ((int) data.inputs[bus].numChannels, plugInInputChannels - totalInputChans);
+
+                        for (int i = 0; i < numChans; ++i)
+                        {
+                            if (busChannels[i] != nullptr)
                             {
-                                tmpBufferNeedsClearing = true;
-                                channelList.set (totalOutputChans, tmpBuffer);
+                                if (totalInputChans >= totalOutputChans)
+                                    channelList.set (totalInputChans, busChannels[i]);
+                                else
+                                {
+                                    auto* dst = channelList.getReference (totalInputChans);
+                                    auto* src = busChannels[i];
+
+                                    if (dst != src)
+                                        FloatVectorOperations::copy (dst, src, (int) data.numSamples);
+                                }
                             }
 
-                            ++totalOutputChans;
+                            ++totalInputChans;
+                        }
+                    }
+                }
+                else
+                {
+                    const int numChans = jmin (pluginInstance->getChannelCountOfBus (true, bus), plugInInputChannels - totalInputChans);
+
+                    for (int i = 0; i < numChans; ++i)
+                    {
+                        if (FloatType* tmpBuffer = getTmpBufferForChannel<FloatType> (totalInputChans, data.numSamples))
+                        {
+                            tmpBufferNeedsClearing = true;
+                            channelList.set (totalInputChans++, tmpBuffer);
                         }
                         else
                             return;
@@ -2166,29 +2173,6 @@ private:
             */
             jassert (midiBuffer.getNumEvents() <= numMidiEventsComingIn);
            #endif
-        }
-
-        if (data.outputs != nullptr)
-        {
-            int outChanIndex = 0;
-
-            for (int bus = 0; bus < data.numOutputs; ++bus)
-            {
-                if (FloatType** const busChannels = getPointerForAudioBus<FloatType> (data.outputs[bus]))
-                {
-                    const int numChans = (int) data.outputs[bus].numChannels;
-
-                    for (int i = 0; i < numChans; ++i)
-                    {
-                        if (outChanIndex < totalInputChans && busChannels[i] != nullptr)
-                            FloatVectorOperations::copy (busChannels[i], buffer.getReadPointer (outChanIndex), (int) data.numSamples);
-                        else if (outChanIndex >= totalOutputChans && busChannels[i] != nullptr)
-                            FloatVectorOperations::clear (busChannels[i], (int) data.numSamples);
-
-                        ++outChanIndex;
-                    }
-                }
-            }
         }
     }
 
