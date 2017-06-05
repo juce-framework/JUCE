@@ -510,7 +510,7 @@ private:
                     bufIndex = getFreeBuffer (false);
                     jassert (bufIndex != 0);
 
-                    markBufferAsContaining (bufIndex, anonymousNodeID, 0);
+                    markBufferAsContaining (bufIndex, static_cast<uint32> (anonymousNodeID), 0);
 
                     const int srcIndex = getBufferContaining (sourceNodes.getUnchecked (0),
                                                               sourceOutputChans.getUnchecked (0));
