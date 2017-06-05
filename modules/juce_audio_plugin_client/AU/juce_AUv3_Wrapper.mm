@@ -978,7 +978,7 @@ private:
                                                                                        address: address
                                                                                            min: 0.0f
                                                                                            max: 1.0f
-                                                                                          unit: kAudioUnitParameterUnit_Generic
+                                                                                          unit: unit
                                                                                       unitName: nullptr
                                                                                          flags: flags
                                                                                   valueStrings: nullptr
