@@ -186,8 +186,6 @@ static bool checkPeerIsValid (OpenGLContext* context)
             }
         }
     }
-    else
-        jassertfalse;
 
     return false;
 }
