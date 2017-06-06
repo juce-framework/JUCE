@@ -34,8 +34,8 @@ class FileListTreeItem   : public TreeViewItem,
 {
 public:
     FileListTreeItem (FileTreeComponent& treeComp,
-                      DirectoryContentsList* const parentContents,
-                      const int indexInContents,
+                      DirectoryContentsList* parentContents,
+                      int indexInContents,
                       const File& f,
                       TimeSliceThread& t)
         : file (f),
@@ -135,7 +135,7 @@ public:
             for (int maxRetries = 500; --maxRetries > 0;)
             {
                 for (int i = 0; i < getNumSubItems(); ++i)
-                    if (FileListTreeItem* f = dynamic_cast<FileListTreeItem*> (getSubItem (i)))
+                    if (auto* f = dynamic_cast<FileListTreeItem*> (getSubItem (i)))
                         if (f->selectFile (target))
                             return true;
 
@@ -233,8 +233,8 @@ private:
     {
         if (icon.isNull())
         {
-            const int hashCode = (file.getFullPathName() + "_iconCacheSalt").hashCode();
-            Image im (ImageCache::getFromHashCode (hashCode));
+            auto hashCode = (file.getFullPathName() + "_iconCacheSalt").hashCode();
+            auto im = ImageCache::getFromHashCode (hashCode);
 
             if (im.isNull() && ! onlyUpdateIfCached)
             {
@@ -273,11 +273,10 @@ void FileTreeComponent::refresh()
 {
     deleteRootItem();
 
-    FileListTreeItem* const root
-        = new FileListTreeItem (*this, nullptr, 0, fileList.getDirectory(),
-                                fileList.getTimeSliceThread());
+    auto root = new FileListTreeItem (*this, nullptr, 0, directoryContentsList.getDirectory(),
+                                      directoryContentsList.getTimeSliceThread());
 
-    root->setSubContentsList (&fileList, false);
+    root->setSubContentsList (&directoryContentsList, false);
     setRootItem (root);
 }
 
@@ -307,7 +306,7 @@ void FileTreeComponent::setDragAndDropDescription (const String& description)
 
 void FileTreeComponent::setSelectedFile (const File& target)
 {
-    if (FileListTreeItem* t = dynamic_cast<FileListTreeItem*> (getRootItem()))
+    if (auto* t = dynamic_cast<FileListTreeItem*> (getRootItem()))
         if (! t->selectFile (target))
             clearSelectedItems();
 }
@@ -318,7 +317,7 @@ void FileTreeComponent::setItemHeight (int newHeight)
     {
         itemHeight = newHeight;
 
-        if (TreeViewItem* root = getRootItem())
+        if (auto* root = getRootItem())
             root->treeHasChanged();
     }
 }

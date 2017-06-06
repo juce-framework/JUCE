@@ -33,12 +33,12 @@ FileListComponent::FileListComponent (DirectoryContentsList& listToShow)
       DirectoryContentsDisplayComponent (listToShow)
 {
     setModel (this);
-    fileList.addChangeListener (this);
+    directoryContentsList.addChangeListener (this);
 }
 
 FileListComponent::~FileListComponent()
 {
-    fileList.removeChangeListener (this);
+    directoryContentsList.removeChangeListener (this);
 }
 
 int FileListComponent::getNumSelectedFiles() const
@@ -48,7 +48,7 @@ int FileListComponent::getNumSelectedFiles() const
 
 File FileListComponent::getSelectedFile (int index) const
 {
-    return fileList.getFile (getSelectedRow (index));
+    return directoryContentsList.getFile (getSelectedRow (index));
 }
 
 void FileListComponent::deselectAllFiles()
@@ -63,9 +63,9 @@ void FileListComponent::scrollToTop()
 
 void FileListComponent::setSelectedFile (const File& f)
 {
-    for (int i = fileList.getNumFiles(); --i >= 0;)
+    for (int i = directoryContentsList.getNumFiles(); --i >= 0;)
     {
-        if (fileList.getFile(i) == f)
+        if (directoryContentsList.getFile(i) == f)
         {
             selectRow (i);
             return;
@@ -80,9 +80,9 @@ void FileListComponent::changeListenerCallback (ChangeBroadcaster*)
 {
     updateContent();
 
-    if (lastDirectory != fileList.getDirectory())
+    if (lastDirectory != directoryContentsList.getDirectory())
     {
-        lastDirectory = fileList.getDirectory();
+        lastDirectory = directoryContentsList.getDirectory();
         deselectAllRows();
     }
 }
@@ -218,7 +218,7 @@ private:
 //==============================================================================
 int FileListComponent::getNumRows()
 {
-    return fileList.getNumFiles();
+    return directoryContentsList.getNumFiles();
 }
 
 void FileListComponent::paintListBoxItem (int, Graphics&, int, int, bool)
@@ -232,11 +232,11 @@ Component* FileListComponent::refreshComponentForRow (int row, bool isSelected, 
     auto comp = static_cast<ItemComponent*> (existingComponentToUpdate);
 
     if (comp == nullptr)
-        comp = new ItemComponent (*this, fileList.getTimeSliceThread());
+        comp = new ItemComponent (*this, directoryContentsList.getTimeSliceThread());
 
     DirectoryContentsList::FileInfo fileInfo;
-    comp->update (fileList.getDirectory(),
-                  fileList.getFileInfo (row, fileInfo) ? &fileInfo : nullptr,
+    comp->update (directoryContentsList.getDirectory(),
+                  directoryContentsList.getFileInfo (row, fileInfo) ? &fileInfo : nullptr,
                   row, isSelected);
 
     return comp;
@@ -253,5 +253,5 @@ void FileListComponent::deleteKeyPressed (int /*currentSelectedRow*/)
 
 void FileListComponent::returnKeyPressed (int currentSelectedRow)
 {
-    sendDoubleClickMessage (fileList.getFile (currentSelectedRow));
+    sendDoubleClickMessage (directoryContentsList.getFile (currentSelectedRow));
 }
