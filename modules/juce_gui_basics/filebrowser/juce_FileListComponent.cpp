@@ -29,7 +29,7 @@ Image juce_createIconForFile (const File& file);
 
 //==============================================================================
 FileListComponent::FileListComponent (DirectoryContentsList& listToShow)
-    : ListBox (String(), nullptr),
+    : ListBox ({}, nullptr),
       DirectoryContentsDisplayComponent (listToShow)
 {
     setModel (this);
@@ -94,7 +94,7 @@ class FileListComponent::ItemComponent  : public Component,
 {
 public:
     ItemComponent (FileListComponent& fc, TimeSliceThread& t)
-        : owner (fc), thread (t), index (0), highlighted (false)
+        : owner (fc), thread (t)
     {
     }
 
@@ -124,17 +124,15 @@ public:
         owner.sendDoubleClickMessage (file);
     }
 
-    void update (const File& root,
-                 const DirectoryContentsList::FileInfo* const fileInfo,
-                 const int index_,
-                 const bool highlighted_)
+    void update (const File& root, const DirectoryContentsList::FileInfo* fileInfo,
+                 int newIndex, bool nowHighlighted)
     {
         thread.removeTimeSliceClient (this);
 
-        if (highlighted_ != highlighted || index_ != index)
+        if (nowHighlighted != highlighted || newIndex != index)
         {
-            index = index_;
-            highlighted = highlighted_;
+            index = newIndex;
+            highlighted = nowHighlighted;
             repaint();
         }
 
@@ -188,15 +186,15 @@ private:
     File file;
     String fileSize, modTime;
     Image icon;
-    int index;
-    bool highlighted, isDirectory;
+    int index = 0;
+    bool highlighted = false, isDirectory = false;
 
     void updateIcon (const bool onlyUpdateIfCached)
     {
         if (icon.isNull())
         {
-            const int hashCode = (file.getFullPathName() + "_iconCacheSalt").hashCode();
-            Image im (ImageCache::getFromHashCode (hashCode));
+            auto hashCode = (file.getFullPathName() + "_iconCacheSalt").hashCode();
+            auto im = ImageCache::getFromHashCode (hashCode);
 
             if (im.isNull() && ! onlyUpdateIfCached)
             {
@@ -231,7 +229,7 @@ Component* FileListComponent::refreshComponentForRow (int row, bool isSelected, 
 {
     jassert (existingComponentToUpdate == nullptr || dynamic_cast<ItemComponent*> (existingComponentToUpdate) != nullptr);
 
-    ItemComponent* comp = static_cast<ItemComponent*> (existingComponentToUpdate);
+    auto comp = static_cast<ItemComponent*> (existingComponentToUpdate);
 
     if (comp == nullptr)
         comp = new ItemComponent (*this, fileList.getTimeSliceThread());

@@ -44,6 +44,10 @@ public:
     virtual ~DirectoryContentsDisplayComponent();
 
     //==============================================================================
+    /** The list that this component is displaying */
+    DirectoryContentsList& directoryContentsList;
+
+    //==============================================================================
     /** Returns the number of files the user has got selected.
         @see getSelectedFile
     */
@@ -95,14 +99,13 @@ public:
     /** @internal */
     void sendSelectionChangeMessage();
     /** @internal */
-    void sendDoubleClickMessage (const File& file);
+    void sendDoubleClickMessage (const File&);
     /** @internal */
-    void sendMouseClickMessage (const File& file, const MouseEvent& e);
+    void sendMouseClickMessage (const File&, const MouseEvent&);
 
 protected:
     //==============================================================================
-    DirectoryContentsList& fileList;
-    ListenerList <FileBrowserListener> listeners;
+    ListenerList<FileBrowserListener> listeners;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectoryContentsDisplayComponent)

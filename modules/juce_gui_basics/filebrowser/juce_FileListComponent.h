@@ -46,8 +46,7 @@ class JUCE_API  FileListComponent  : public ListBox,
 {
 public:
     //==============================================================================
-    /** Creates a listbox to show the contents of a specified directory.
-    */
+    /** Creates a listbox to show the contents of a specified directory. */
     FileListComponent (DirectoryContentsList& listToShow);
 
     /** Destructor. */
@@ -78,11 +77,9 @@ public:
 private:
     //==============================================================================
     File lastDirectory;
-
     class ItemComponent;
 
     void changeListenerCallback (ChangeBroadcaster*) override;
-
     int getNumRows() override;
     void paintListBoxItem (int, Graphics&, int, int, bool) override;
     Component* refreshComponentForRow (int rowNumber, bool isRowSelected, Component*) override;
