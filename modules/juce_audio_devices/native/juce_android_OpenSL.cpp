@@ -262,6 +262,11 @@ struct BufferHelpers<float>
 };
 
 //==============================================================================
+// need this from juce_core without asserting
+struct JniEnvThreadHolder { static JNIEnv* getEnv(); };
+extern JavaVM* androidJNIJavaVM;
+
+//==============================================================================
 class OpenSLAudioIODevice  : public AudioIODevice
 {
 public:
@@ -320,6 +325,14 @@ public:
 
         void finished (SLAndroidSimpleBufferQueueItf)
         {
+            if (JniEnvThreadHolder::getEnv() == nullptr)
+            {
+                JNIEnv* env;
+
+                androidJNIJavaVM->AttachCurrentThread (&env, nullptr);
+                setEnv (env);
+            }
+
             --numBlocksOut;
             owner.doSomeWorkOnAudioThread();
         }
