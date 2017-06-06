@@ -45,7 +45,7 @@ namespace CommandIDs
         createNewExporter       = 0x300015,
 
         showUTF8Tool            = 0x300020,
-        showGlobalPreferences   = 0x300021,
+        showGlobalPathsWindow   = 0x300021,
         showTranslationTool     = 0x300022,
         showSVGPathTool         = 0x300023,
         showAboutWindow         = 0x300024,

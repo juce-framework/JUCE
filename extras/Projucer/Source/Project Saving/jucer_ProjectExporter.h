@@ -28,7 +28,7 @@
 
 #include "../Project/jucer_Project.h"
 #include "../Project/jucer_ProjectType.h"
-#include "../Application/jucer_GlobalPreferences.h"
+#include "../Project/jucer_DependencyPathPropertyComponent.h"
 
 class ProjectSaver;
 
@@ -159,6 +159,8 @@ public:
     Value getPathForModuleValue (const String& moduleID);
     String getPathForModuleString (const String& moduleID) const;
     void removePathForModule (const String& moduleID);
+
+    TargetOS::OS getTargetOSForExporter() const;
 
     RelativePath getLegacyModulePath (const String& moduleID) const;
     String getLegacyModulePath() const;

@@ -59,6 +59,11 @@ namespace Ids
     DECLARE_ID (intermediatesPath);
     DECLARE_ID (modulePaths);
     DECLARE_ID (searchpaths);
+    DECLARE_ID (osxFallback);
+    DECLARE_ID (windowsFallback);
+    DECLARE_ID (linuxFallback);
+    DECLARE_ID (defaultJuceModulePath);
+    DECLARE_ID (defaultUserModulePath);
     DECLARE_ID (vst3Folder);
     DECLARE_ID (rtasFolder);
     DECLARE_ID (auFolder);
@@ -152,6 +157,7 @@ namespace Ids
     DECLARE_ID (focusOrder);
     DECLARE_ID (hidden);
     DECLARE_ID (useStdCall);
+    DECLARE_ID (useGlobalPath);
     DECLARE_ID (showAllCode);
     DECLARE_ID (useLocalCopy);
     DECLARE_ID (overwriteOnSave);

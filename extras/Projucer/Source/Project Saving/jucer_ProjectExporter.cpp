@@ -493,8 +493,26 @@ Value ProjectExporter::getPathForModuleValue (const String& moduleID)
 
 String ProjectExporter::getPathForModuleString (const String& moduleID) const
 {
-    return settings.getChildWithName (Ids::MODULEPATHS)
-                .getChildWithProperty (Ids::ID, moduleID) [Ids::path].toString();
+    auto exporterPath = settings.getChildWithName (Ids::MODULEPATHS)
+                                .getChildWithProperty (Ids::ID, moduleID) [Ids::path].toString();
+
+    if (exporterPath.isEmpty() || project.getModules().shouldUseGlobalPath (moduleID).getValue())
+    {
+        auto id = EnabledModuleList::isJuceModule (moduleID) ? Ids::defaultJuceModulePath
+                                                             : Ids::defaultUserModulePath;
+
+        if (TargetOS::getThisOS() != getTargetOSForExporter())
+            return getAppSettings().getFallbackPathForOS (id, getTargetOSForExporter()).toString();
+
+        if (id == Ids::defaultJuceModulePath)
+            return getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString();
+
+        return EnabledModuleList::findUserModuleFolder (moduleID,
+                                                        getAppSettings().getStoredPath (Ids::defaultUserModulePath).toString(),
+                                                        project).getFullPathName();
+    }
+
+    return exporterPath;
 }
 
 void ProjectExporter::removePathForModule (const String& moduleID)
@@ -502,6 +520,18 @@ void ProjectExporter::removePathForModule (const String& moduleID)
     ValueTree paths (settings.getChildWithName (Ids::MODULEPATHS));
     ValueTree m (paths.getChildWithProperty (Ids::ID, moduleID));
     paths.removeChild (m, project.getUndoManagerFor (settings));
+}
+
+TargetOS::OS ProjectExporter::getTargetOSForExporter() const
+{
+    auto targetOS = TargetOS::unknown;
+
+    if      (isWindows())            targetOS = TargetOS::windows;
+    else if (isOSX() || isiOS())     targetOS = TargetOS::osx;
+    else if (isLinux())              targetOS = TargetOS::linux;
+    else if (isAndroid())            targetOS = TargetOS::getThisOS();
+
+    return targetOS;
 }
 
 RelativePath ProjectExporter::getModuleFolderRelativeToProject (const String& moduleID) const

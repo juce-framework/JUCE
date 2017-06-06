@@ -28,24 +28,11 @@
 class InfoButton    : public Button
 {
 public:
-    InfoButton (PropertyComponent& comp)
-        : Button (String()),
-          associatedComponent (comp)
+    InfoButton (const String& infoToDisplay = String())
+        : Button (String())
     {
-        tooltip = associatedComponent.getTooltip();
-        auto stringWidth = Font (14.0f).getStringWidthFloat (tooltip);
-
-        int maxWidth = 300;
-
-        if (stringWidth > maxWidth)
-        {
-            width = maxWidth;
-            numLines += static_cast<int> (stringWidth / width);
-        }
-        else
-        {
-            width = roundToInt (stringWidth);
-        }
+        if (infoToDisplay.isNotEmpty())
+            setInfoToDisplay (infoToDisplay);
     }
 
     void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown) override
@@ -64,23 +51,38 @@ public:
 
     void clicked() override
     {
-        auto* w = new InfoWindow (tooltip);
+        auto* w = new InfoWindow (info);
         w->setSize (width, w->getHeight() * numLines + 10);
 
         CallOutBox::launchAsynchronously (w, getScreenBounds(), nullptr);
     }
 
-    PropertyComponent& associatedComponent;
+    void setInfoToDisplay (const String& infoToDisplay)
+    {
+        if (infoToDisplay.isNotEmpty())
+        {
+            info = infoToDisplay;
+
+            auto stringWidth = roundToInt (Font (14.0f).getStringWidthFloat (info));
+            width = jmin (300, stringWidth);
+
+            numLines += static_cast<int> (stringWidth / width);
+        }
+    }
+
+    void setAssociatedComponent (Component* comp)    { associatedComponent = comp; }
+    Component* getAssociatedComponent()              { return associatedComponent; }
 
 private:
-    String tooltip;
+    String info;
+    Component* associatedComponent = nullptr;
     int width;
     int numLines = 1;
 
     //==============================================================================
     struct InfoWindow    : public Component
     {
-        InfoWindow (String s)
+        InfoWindow (const String& s)
             : stringToDisplay (s)
         {
             setSize (150, 14);
@@ -125,7 +127,8 @@ public:
 
             if (! prop->getTooltip().isEmpty())
             {
-                addAndMakeVisible (infoButtons.add (new InfoButton (*prop)));
+                addAndMakeVisible (infoButtons.add (new InfoButton (prop->getTooltip())));
+                infoButtons.getLast()->setAssociatedComponent (prop);
                 prop->setTooltip (String()); // set the tooltip to empty so it only displays when its button is clicked
             }
         }
@@ -145,7 +148,7 @@ public:
             InfoButton* buttonToUse = nullptr;
 
             for (auto* b : infoButtons)
-                if (&b->associatedComponent == pp)
+                if (b->getAssociatedComponent() == pp)
                     buttonToUse = b;
 
             if (buttonToUse != nullptr)
@@ -189,11 +192,12 @@ public:
         if (pp->getName() == "Dependencies")
             return;
 
-        if (auto* propertyChild = pp->getChildComponent (0))
+        for (int i = pp->getNumChildComponents() - 1; i >= 0; --i)
         {
-            auto bounds = propertyChild->getBounds();
+            auto* child = pp->getChildComponent (i);
 
-            propertyChild->setBounds (bounds.withSizeKeepingCentre (propertyChild->getWidth(), pp->getPreferredHeight()));
+            auto bounds = child->getBounds();
+            child->setBounds (bounds.withSizeKeepingCentre (child->getWidth(), pp->getPreferredHeight()));
         }
     }
 

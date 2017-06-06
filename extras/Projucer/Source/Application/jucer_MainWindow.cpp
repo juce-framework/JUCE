@@ -580,39 +580,3 @@ Project* MainWindowList::getFrontmostProject()
 
     return nullptr;
 }
-
-File findDefaultModulesFolder (bool mustContainJuceCoreModule)
-{
-    auto& windows = ProjucerApplication::getApp().mainWindowList;
-
-    for (int i = windows.windows.size(); --i >= 0;)
-    {
-        if (auto* p = windows.windows.getUnchecked (i)->getProject())
-        {
-            const File f (EnabledModuleList::findDefaultModulesFolder (*p));
-
-            if (isJuceModulesFolder (f) || (f.isDirectory() && ! mustContainJuceCoreModule))
-                return f;
-        }
-    }
-
-    if (mustContainJuceCoreModule)
-        return findDefaultModulesFolder (false);
-
-    auto f = File::getSpecialLocation (File::currentApplicationFile);
-
-    for (;;)
-    {
-        auto parent = f.getParentDirectory();
-
-        if (parent == f || ! parent.isDirectory())
-            break;
-
-        if (isJuceFolder (parent))
-            return parent.getChildFile ("modules");
-
-        f = parent;
-    }
-
-    return {};
-}

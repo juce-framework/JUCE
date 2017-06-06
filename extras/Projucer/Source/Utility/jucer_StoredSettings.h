@@ -62,23 +62,27 @@ public:
 
     //==============================================================================
     AppearanceSettings appearance;
-
     StringArray monospacedFontNames;
 
     //==============================================================================
-    Value getGlobalPath (const Identifier& key, DependencyPathOS);
-    String getFallbackPath (const Identifier& key, DependencyPathOS);
+    Value getStoredPath (const Identifier& key);
+    Value getFallbackPathForOS (const Identifier& key, DependencyPathOS);
 
     bool isGlobalPathValid (const File& relativeTo, const Identifier& key, const String& path);
 
 private:
     OwnedArray<PropertiesFile> propertyFiles;
     ValueTree projectDefaults;
+    ValueTree fallbackPaths;
 
-    void changed()
+    void changed (bool isProjectDefaults)
     {
-        ScopedPointer<XmlElement> data (projectDefaults.createXml());
-        propertyFiles.getUnchecked (0)->setValue ("PROJECT_DEFAULT_SETTINGS", data);
+        ScopedPointer<XmlElement> data (isProjectDefaults ? projectDefaults.createXml()
+                                                          : fallbackPaths.createXml());
+
+        propertyFiles.getUnchecked (0)->setValue (isProjectDefaults ? "PROJECT_DEFAULT_SETTINGS"
+                                                                    : "FALLBACK_PATHS",
+                                                  data);
     }
 
     void updateGlobalPreferences();
@@ -91,11 +95,11 @@ private:
     void updateOldProjectSettingsFiles();
 
     //==============================================================================
-    void valueTreePropertyChanged (ValueTree&, const Identifier&) override  { changed(); }
-    void valueTreeChildAdded (ValueTree&, ValueTree&) override              { changed(); }
-    void valueTreeChildRemoved (ValueTree&, ValueTree&, int) override       { changed(); }
-    void valueTreeChildOrderChanged (ValueTree&, int, int) override         { changed(); }
-    void valueTreeParentChanged (ValueTree&) override                       { changed(); }
+    void valueTreePropertyChanged (ValueTree& vt, const Identifier&) override  { changed (vt == projectDefaults); }
+    void valueTreeChildAdded (ValueTree& vt, ValueTree&) override              { changed (vt == projectDefaults); }
+    void valueTreeChildRemoved (ValueTree& vt, ValueTree&, int) override       { changed (vt == projectDefaults); }
+    void valueTreeChildOrderChanged (ValueTree& vt, int, int) override         { changed (vt == projectDefaults); }
+    void valueTreeParentChanged (ValueTree& vt) override                       { changed (vt == projectDefaults); }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StoredSettings)
 };

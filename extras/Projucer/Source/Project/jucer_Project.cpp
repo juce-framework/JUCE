@@ -307,20 +307,28 @@ static bool isAnyModuleNewerThanProjucer (const OwnedArray<ModuleDescription>& m
 void Project::warnAboutOldProjucerVersion()
 {
     ModuleList available;
-    available.scanAllKnownFolders (*this);
 
-    if (isAnyModuleNewerThanProjucer (available.modules))
-    {
-        if (ProjucerApplication::getApp().isRunningCommandLine)
-            std::cout <<  "WARNING! This version of the Projucer is out-of-date!" << std::endl;
-        else
-            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                              "Projucer",
-                                              "This version of the Projucer is out-of-date!"
-                                              "\n\n"
-                                              "Always make sure that you're running the very latest version, "
-                                              "preferably compiled directly from the JUCE repository that you're working with!");
-    }
+    available.scanGlobalJuceModulePath();
+
+    if (! isAnyModuleNewerThanProjucer (available.modules))
+        available.scanGlobalUserModulePath();
+
+    if (! isAnyModuleNewerThanProjucer (available.modules))
+        available.scanProjectExporterModulePaths (*this);
+
+    if (! isAnyModuleNewerThanProjucer (available.modules))
+        return;
+
+    // Projucer is out of date!
+    if (ProjucerApplication::getApp().isRunningCommandLine)
+        std::cout <<  "WARNING! This version of the Projucer is out-of-date!" << std::endl;
+    else
+        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                          "Projucer",
+                                          "This version of the Projucer is out-of-date!"
+                                          "\n\n"
+                                          "Always make sure that you're running the very latest version, "
+                                          "preferably compiled directly from the JUCE repository that you're working with!");
 }
 
 //==============================================================================
@@ -422,6 +430,11 @@ File Project::resolveFilename (String filename) const
         return {};
 
     filename = replacePreprocessorDefs (getPreprocessorDefs(), filename);
+
+   #if ! JUCE_WINDOWS
+    if (filename.startsWith ("~"))
+        return File::getSpecialLocation (File::userHomeDirectory).getChildFile (filename.trimCharactersAtStart ("~/"));
+   #endif
 
     if (FileHelpers::isAbsolutePath (filename))
         return File::createFileWithoutCheckingPath (FileHelpers::currentOSStylePath (filename)); // (avoid assertions for windows-style paths)

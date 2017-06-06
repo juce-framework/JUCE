@@ -26,8 +26,6 @@
 
 #include "../jucer_Headers.h"
 #include "jucer_DependencyPathPropertyComponent.h"
-#include "../Application/jucer_GlobalPreferences.h"
-
 
 //==============================================================================
 DependencyPathValueSource::DependencyPathValueSource (const Value& projectSettingsPath,
@@ -36,10 +34,11 @@ DependencyPathValueSource::DependencyPathValueSource (const Value& projectSettin
   : projectSettingsValue (projectSettingsPath),
     globalKey (globalSettingsKey),
     os (osThisSettingAppliesTo),
-    globalSettingsValue (getAppSettings().getGlobalPath (globalKey, os)),
-    fallbackValue (getAppSettings().getFallbackPath (globalKey, os))
+    globalSettingsValue (getAppSettings().getStoredPath (globalKey)),
+    fallbackValue (getAppSettings().getFallbackPathForOS (globalKey, os))
 {
     globalSettingsValue.addListener (this);
+    fallbackValue.addListener (this);
 }
 
 bool DependencyPathValueSource::isValidPath (const File& relativeTo) const
@@ -134,4 +133,154 @@ void DependencyPathPropertyComponent::editorHidden (Label*, TextEditor&)
 void DependencyPathPropertyComponent::lookAndFeelChanged()
 {
     textWasEdited();
+}
+
+//==============================================================================
+DependencyFilePathPropertyComponent::DependencyFilePathPropertyComponent (Value& value,
+                                                                          const String& propertyDescription,
+                                                                          bool isDir,
+                                                                          const String& wc,
+                                                                          const File& rootToUseForRelativePaths)
+try : TextPropertyComponent (propertyDescription, 1024, false),
+      pathRelativeTo (rootToUseForRelativePaths),
+      pathValue (value),
+      pathValueSource (dynamic_cast<DependencyPathValueSource&> (pathValue.getValueSource())),
+      browseButton ("..."),
+      isDirectory (isDir),
+      wildcards (wc)
+{
+    auto initialValueIsEmpty = ! pathValueSource.isUsingProjectSettings();
+
+    getValue().referTo (pathValue);
+
+    if (initialValueIsEmpty)
+        getValue().setValue (String());
+
+    getValue().addListener (this);
+
+    if (auto* label = dynamic_cast<Label*> (getChildComponent (0)))
+        label->addListener (this);
+    else
+        jassertfalse;
+
+    setInterestedInFileDrag (false);
+
+    addAndMakeVisible (browseButton);
+    browseButton.addListener (this);
+
+    lookAndFeelChanged();
+}
+catch (const std::bad_cast&)
+{
+    // a DependencyPathPropertyComponent must be initialised with a Value
+    // that is referring to a DependencyPathValueSource!
+    jassertfalse;
+    throw;
+}
+
+void DependencyFilePathPropertyComponent::resized()
+{
+    auto bounds = getLookAndFeel().getPropertyComponentContentPosition (*this);
+
+    browseButton.setBounds (bounds.removeFromRight (30));
+    getChildComponent (0)->setBounds (bounds);
+}
+
+void DependencyFilePathPropertyComponent::paintOverChildren (Graphics& g)
+{
+    if (highlightForDragAndDrop)
+    {
+        g.setColour (findColour (defaultHighlightColourId).withAlpha (0.5f));
+        g.fillRect (getChildComponent (0)->getBounds());
+    }
+}
+
+void DependencyFilePathPropertyComponent::filesDropped (const StringArray& files, int, int)
+{
+    const File firstFile (files[0]);
+
+    if (isDirectory)
+        setTo (firstFile.isDirectory() ? firstFile
+                                       : firstFile.getParentDirectory());
+    else
+        setTo (firstFile);
+
+    highlightForDragAndDrop = false;
+}
+
+void DependencyFilePathPropertyComponent::setTo (const File& f)
+{
+    pathValue = (pathRelativeTo == File()) ? f.getFullPathName()
+                                           : f.getRelativePathFrom (pathRelativeTo);
+
+    textWasEdited();
+}
+
+void DependencyFilePathPropertyComponent::enablementChanged()
+{
+    getValue().referTo (isEnabled() ? pathValue
+                                    : pathValueSource.appliesToThisOS() ? pathValueSource.getGlobalSettingsValue()
+                                                                        : pathValueSource.getFallbackSettingsValue());
+    textWasEdited();
+    repaint();
+}
+
+void DependencyFilePathPropertyComponent::textWasEdited()
+{
+    setColour (textColourId, getTextColourToDisplay());
+    TextPropertyComponent::textWasEdited();
+}
+
+void DependencyFilePathPropertyComponent::valueChanged (Value& value)
+{
+    if ((value.refersToSameSourceAs (pathValue) && pathValueSource.isUsingGlobalSettings())
+             || value.refersToSameSourceAs (pathValueSource.getGlobalSettingsValue()))
+        textWasEdited();
+}
+
+void DependencyFilePathPropertyComponent::editorShown (Label*, TextEditor& editor)
+{
+    if (! pathValueSource.isUsingProjectSettings())
+        editor.setText (String(), dontSendNotification);
+}
+
+void DependencyFilePathPropertyComponent::buttonClicked (Button*)
+{
+    auto currentFile = pathRelativeTo.getChildFile (pathValue.toString());
+
+    if (isDirectory)
+    {
+        FileChooser chooser ("Select directory", currentFile);
+
+        if (chooser.browseForDirectory())
+            setTo (chooser.getResult());
+    }
+    else
+    {
+        FileChooser chooser ("Select file", currentFile, wildcards);
+
+        if (chooser.browseForFileToOpen())
+            setTo (chooser.getResult());
+    }
+}
+
+Colour DependencyFilePathPropertyComponent::getTextColourToDisplay() const
+{
+    auto alpha = 1.0f;
+    auto key = pathValueSource.getKey();
+    const auto& globalSettingsValue = pathValueSource.getGlobalSettingsValue();
+
+    if (! pathValueSource.isUsingProjectSettings() && isEnabled())
+        alpha = 0.5f;
+
+    if ((key == Ids::defaultUserModulePath && getValue().toString().contains (";")) || ! pathValueSource.appliesToThisOS())
+        return findColour (widgetTextColourId).withMultipliedAlpha (alpha);
+
+    auto usingGlobalPath = (getValue().refersToSameSourceAs (globalSettingsValue));
+
+    auto isValidPath = getAppSettings().isGlobalPathValid (pathRelativeTo, key,
+                                                           (usingGlobalPath ? globalSettingsValue : pathValue).toString());
+
+    return isValidPath ? findColour (widgetTextColourId).withMultipliedAlpha (alpha)
+                       : Colours::red.withMultipliedAlpha (alpha);
 }

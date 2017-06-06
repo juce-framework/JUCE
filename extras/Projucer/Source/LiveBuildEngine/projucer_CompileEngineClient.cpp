@@ -519,9 +519,7 @@ private:
         paths.addArray (getSearchPathsFromString (ProjectProperties::getSystemHeaderPathString (project)));
 
         if (project.getProjectType().isAudioPlugin())
-        {
-            paths.add (getAppSettings().getGlobalPath (Ids::vst3Path, TargetOS::getThisOS()).toString());
-        }
+            paths.add (getAppSettings().getStoredPath (Ids::vst3Path).toString());
 
         OwnedArray<LibraryModule> modules;
         project.getModules().createRequiredModules (modules);

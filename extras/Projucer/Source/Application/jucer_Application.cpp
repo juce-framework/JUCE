@@ -196,11 +196,11 @@ void ProjucerApplication::shutdown()
     }
 
     versionChecker = nullptr;
-    appearanceEditorWindow = nullptr;
-    globalPreferencesWindow = nullptr;
     utf8Window = nullptr;
     svgPathWindow = nullptr;
     aboutWindow = nullptr;
+    pathsWindow = nullptr;
+    editorColourSchemeWindow = nullptr;
 
     if (licenseController != nullptr)
     {
@@ -386,7 +386,7 @@ void ProjucerApplication::createFileMenu (PopupMenu& menu)
     #if ! JUCE_MAC
       menu.addCommandItem (commandManager, CommandIDs::showAboutWindow);
       menu.addCommandItem (commandManager, CommandIDs::showAppUsageWindow);
-      menu.addCommandItem (commandManager, CommandIDs::showGlobalPreferences);
+      menu.addCommandItem (commandManager, CommandIDs::showGlobalPathsWindow);
       menu.addSeparator();
       menu.addCommandItem (commandManager, StandardApplicationCommandIDs::quit);
     #endif
@@ -463,7 +463,7 @@ void ProjucerApplication::createColourSchemeItems (PopupMenu& menu)
     for (auto s : schemes)
     {
         editorColourSchemes.addItem (codeEditorColourSchemeBaseID + i, s,
-                                     globalPreferencesWindow == nullptr,
+                                     editorColourSchemeWindow == nullptr,
                                      selectedEditorColourSchemeIndex == i);
         ++i;
     }
@@ -472,7 +472,7 @@ void ProjucerApplication::createColourSchemeItems (PopupMenu& menu)
 
     editorColourSchemes.addSeparator();
     editorColourSchemes.addItem (codeEditorColourSchemeBaseID + numEditorColourSchemes,
-                                 "Create...", globalPreferencesWindow == nullptr);
+                                 "Create...", editorColourSchemeWindow == nullptr);
 
     menu.addSubMenu ("Editor Colour Scheme", editorColourSchemes);
 }
@@ -511,7 +511,7 @@ void ProjucerApplication::createExtraAppleMenuItems (PopupMenu& menu)
     menu.addCommandItem (commandManager, CommandIDs::showAboutWindow);
     menu.addCommandItem (commandManager, CommandIDs::showAppUsageWindow);
     menu.addSeparator();
-    menu.addCommandItem (commandManager, CommandIDs::showGlobalPreferences);
+    menu.addCommandItem (commandManager, CommandIDs::showGlobalPathsWindow);
 }
 
 void ProjucerApplication::handleMainMenuCommand (int menuItemID)
@@ -539,7 +539,7 @@ void ProjucerApplication::handleMainMenuCommand (int menuItemID)
     }
     else if (menuItemID == (codeEditorColourSchemeBaseID + numEditorColourSchemes))
     {
-        AppearanceSettings::showGlobalPreferences (globalPreferencesWindow, true);
+        showEditorColourSchemeWindow();
     }
     else
     {
@@ -556,7 +556,7 @@ void ProjucerApplication::getAllCommands (Array <CommandID>& commands)
                               CommandIDs::open,
                               CommandIDs::closeAllDocuments,
                               CommandIDs::saveAll,
-                              CommandIDs::showGlobalPreferences,
+                              CommandIDs::showGlobalPathsWindow,
                               CommandIDs::showUTF8Tool,
                               CommandIDs::showSVGPathTool,
                               CommandIDs::showAboutWindow,
@@ -580,9 +580,10 @@ void ProjucerApplication::getCommandInfo (CommandID commandID, ApplicationComman
         result.defaultKeypresses.add (KeyPress ('o', ModifierKeys::commandModifier, 0));
         break;
 
-    case CommandIDs::showGlobalPreferences:
-        result.setInfo ("Preferences...", "Shows the preferences window.", CommandCategories::general, 0);
-        result.defaultKeypresses.add (KeyPress (',', ModifierKeys::commandModifier, 0));
+    case CommandIDs::showGlobalPathsWindow:
+        result.setInfo ("Global Search Paths...",
+                        "Shows the window to change the global search paths.",
+                        CommandCategories::general, 0);
         break;
 
     case CommandIDs::closeAllDocuments:
@@ -646,7 +647,7 @@ bool ProjucerApplication::perform (const InvocationInfo& info)
         case CommandIDs::closeAllDocuments:         closeAllDocuments (true); break;
         case CommandIDs::showUTF8Tool:              showUTF8ToolWindow(); break;
         case CommandIDs::showSVGPathTool:           showSVGPathDataToolWindow(); break;
-        case CommandIDs::showGlobalPreferences:     AppearanceSettings::showGlobalPreferences (globalPreferencesWindow); break;
+        case CommandIDs::showGlobalPathsWindow:     showPathsWindow(); break;
         case CommandIDs::showAboutWindow:           showAboutWindow(); break;
         case CommandIDs::showAppUsageWindow:        showApplicationUsageDataAgreementPopup(); break;
         case CommandIDs::loginLogout:               doLogout(); break;
@@ -740,6 +741,32 @@ void ProjucerApplication::dismissApplicationUsageDataAgreementPopup()
 {
     if (applicationUsageDataWindow != nullptr)
         applicationUsageDataWindow = nullptr;
+}
+
+void ProjucerApplication::showPathsWindow()
+{
+    if (pathsWindow != nullptr)
+        pathsWindow->toFront (true);
+    else
+        new FloatingToolWindow ("Global Search Paths",
+                                "pathsWindowPos",
+                                new GlobalSearchPathsWindowComponent(), pathsWindow, false,
+                                600, 500, 600, 500, 600, 500);
+}
+
+void ProjucerApplication::showEditorColourSchemeWindow()
+{
+    if (editorColourSchemeWindow != nullptr)
+        editorColourSchemeWindow->toFront (true);
+    else
+    {
+        new FloatingToolWindow ("Editor Colour Scheme",
+                                "editorColourSchemeWindowPos",
+                                new EditorColourSchemeWindowComponent(),
+                                editorColourSchemeWindow,
+                                false,
+                                500, 500, 500, 500, 500, 500);
+    }
 }
 
 //==============================================================================
@@ -846,9 +873,10 @@ void ProjucerApplication::setColourScheme (int index, bool saveSetting)
 
     if (utf8Window != nullptr)                  utf8Window->sendLookAndFeelChange();
     if (svgPathWindow != nullptr)               svgPathWindow->sendLookAndFeelChange();
-    if (globalPreferencesWindow != nullptr)     globalPreferencesWindow->sendLookAndFeelChange();
     if (aboutWindow != nullptr)                 aboutWindow->sendLookAndFeelChange();
     if (applicationUsageDataWindow != nullptr)  applicationUsageDataWindow->sendLookAndFeelChange();
+    if (pathsWindow != nullptr)                 pathsWindow->sendLookAndFeelChange();
+    if (editorColourSchemeWindow != nullptr)    editorColourSchemeWindow->sendLookAndFeelChange();
 
     auto* mcm = ModalComponentManager::getInstance();
     for (auto i = 0; i < mcm->getNumModalComponents(); ++i)

@@ -136,10 +136,6 @@
             resource="0" file="Source/Application/jucer_DownloadCompileEngineThread.h"/>
       <FILE id="eo4r70" name="jucer_FilePreviewComponent.h" compile="0" resource="0"
             file="Source/Application/jucer_FilePreviewComponent.h"/>
-      <FILE id="Hq3STq" name="jucer_GlobalPreferences.cpp" compile="1" resource="0"
-            file="Source/Application/jucer_GlobalPreferences.cpp"/>
-      <FILE id="Ym81lY" name="jucer_GlobalPreferences.h" compile="0" resource="0"
-            file="Source/Application/jucer_GlobalPreferences.h"/>
       <FILE id="YVE38f" name="jucer_Headers.h" compile="0" resource="0" file="Source/jucer_Headers.h"/>
       <FILE id="eMFQFu" name="jucer_Main.cpp" compile="1" resource="0" file="Source/Application/jucer_Main.cpp"/>
       <FILE id="WuEh1e" name="jucer_MainWindow.cpp" compile="1" resource="0"
@@ -467,6 +463,8 @@
       <FILE id="ZZK5JV" name="jucer_ColourPropertyComponent.h" compile="0"
             resource="0" file="Source/Utility/jucer_ColourPropertyComponent.h"/>
       <FILE id="Y5kN1C" name="jucer_Colours.h" compile="0" resource="0" file="Source/Utility/jucer_Colours.h"/>
+      <FILE id="DYaDr0" name="jucer_EditorColourSchemeWindowComponent.h"
+            compile="0" resource="0" file="Source/Utility/jucer_EditorColourSchemeWindowComponent.h"/>
       <FILE id="Wmahr3" name="jucer_FileHelpers.cpp" compile="1" resource="0"
             file="Source/Utility/jucer_FileHelpers.cpp"/>
       <FILE id="UhuxIZ" name="jucer_FileHelpers.h" compile="0" resource="0"
@@ -475,6 +473,8 @@
             resource="0" file="Source/Utility/jucer_FilePathPropertyComponent.h"/>
       <FILE id="bFaUy6" name="jucer_FloatingToolWindow.h" compile="0" resource="0"
             file="Source/Utility/jucer_FloatingToolWindow.h"/>
+      <FILE id="AZcyKs" name="jucer_GlobalSearchPathsWindowComponent.h" compile="0"
+            resource="0" file="Source/Utility/jucer_GlobalSearchPathsWindowComponent.h"/>
       <FILE id="alvpK9" name="jucer_Icons.cpp" compile="1" resource="0" file="Source/Utility/jucer_Icons.cpp"/>
       <FILE id="iTXdnI" name="jucer_Icons.h" compile="0" resource="0" file="Source/Utility/jucer_Icons.h"/>
       <FILE id="umjCJo" name="jucer_JucerTreeViewBase.cpp" compile="1" resource="0"

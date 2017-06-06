@@ -31,7 +31,6 @@ class ProjectExporter;
 class ProjectSaver;
 
 //==============================================================================
-File findDefaultModulesFolder (bool mustContainJuceCoreModule = true);
 bool isJuceModulesFolder (const File&);
 bool isJuceFolder (const File&);
 
@@ -79,7 +78,9 @@ struct ModuleList
 
     Result addAllModulesInFolder (const File&);
     Result addAllModulesInSubfoldersRecursively (const File&, int depth);
-    Result scanAllKnownFolders (Project&);
+    Result scanProjectExporterModulePaths (Project&);
+    void scanGlobalJuceModulePath();
+    void scanGlobalUserModulePath();
 
     OwnedArray<ModuleDescription> modules;
 };
@@ -135,17 +136,24 @@ class EnabledModuleList
 public:
     EnabledModuleList (Project&, const ValueTree&);
 
+    static File findGlobalModulesFolder();
+    static File findDefaultModulesFolder (Project&);
+    static File findUserModuleFolder (const String& moduleID, const String& possiblePaths, const Project&);
+    static bool isJuceModule (const String& moduleID);
+
     bool isModuleEnabled (const String& moduleID) const;
+
+    Value shouldUseGlobalPath (const String& moduleID) const;
     Value shouldShowAllModuleFilesInProject (const String& moduleID);
     Value shouldCopyModuleFilesLocally (const String& moduleID) const;
+
     void removeModule (String moduleID);
     bool isAudioPluginModuleMissing() const;
 
     ModuleDescription getModuleInfo (const String& moduleID);
-
     File getModuleFolder (const String& moduleID);
 
-    void addModule (const File& moduleManifestFile, bool copyLocally);
+    void addModule (const File& moduleManifestFile, bool copyLocally, bool useGlobalPath);
     void addModuleInteractive (const String& moduleID);
     void addModuleFromUserSelectedFile();
     void addModuleOfferingToCopy (const File&);
@@ -157,11 +165,12 @@ public:
     int getNumModules() const               { return state.getNumChildren(); }
     String getModuleID (int index) const    { return state.getChild (index) [Ids::ID].toString(); }
 
+    bool areMostModulesUsingGlobalPath() const;
     bool areMostModulesCopiedLocally() const;
-    void setLocalCopyModeForAllModules (bool copyLocally);
-    void sortAlphabetically();
 
-    static File findDefaultModulesFolder (Project&);
+    void setLocalCopyModeForAllModules (bool copyLocally);
+
+    void sortAlphabetically();
 
     Project& project;
     ValueTree state;
@@ -169,7 +178,7 @@ public:
 private:
     UndoManager* getUndoManager() const     { return project.getUndoManagerFor (state); }
 
-    File findLocalModuleFolder (const String& moduleID, bool useExportersForOtherOSes);
+    static File getModuleFolderFromPathIfItExists (const String& path, const String& moduleID, const Project&);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnabledModuleList)
 };

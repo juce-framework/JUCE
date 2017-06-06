@@ -102,6 +102,9 @@ public:
     void showApplicationUsageDataAgreementPopup();
     void dismissApplicationUsageDataAgreementPopup();
 
+    void showPathsWindow();
+    void showEditorColourSchemeWindow();
+
     void updateAllBuildTabs();
     LatestVersionChecker* createVersionChecker() const;
 
@@ -129,8 +132,8 @@ public:
     OpenDocumentManager openDocumentManager;
     ScopedPointer<ApplicationCommandManager> commandManager;
 
-    ScopedPointer<Component> appearanceEditorWindow, globalPreferencesWindow, utf8Window,
-                             svgPathWindow, aboutWindow, applicationUsageDataWindow;
+    ScopedPointer<Component> utf8Window, svgPathWindow, aboutWindow, applicationUsageDataWindow,
+                             pathsWindow, editorColourSchemeWindow;
 
     ScopedPointer<FileLogger> logger;
 

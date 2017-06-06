@@ -35,10 +35,11 @@ public:
     ModulesFolderPathBox (File initialFileOrDirectory)
         : currentPathBox ("currentPathBox"),
           openFolderButton (TRANS("...")),
-          modulesLabel (String(), TRANS("Modules Folder") + ":")
+          modulesLabel (String(), TRANS("Modules Folder") + ":"),
+          useGlobalPathsToggle ("Use global module path")
     {
         if (initialFileOrDirectory == File())
-            initialFileOrDirectory = findDefaultModulesFolder();
+            initialFileOrDirectory = EnabledModuleList::findGlobalModulesFolder();
 
         setModulesFolder (initialFileOrDirectory);
 
@@ -52,15 +53,24 @@ public:
 
         addAndMakeVisible (modulesLabel);
         modulesLabel.attachToComponent (&currentPathBox, true);
+
+        addAndMakeVisible (useGlobalPathsToggle);
+        useGlobalPathsToggle.addListener (this);
+        useGlobalPathsToggle.setToggleState (true, sendNotification);
     }
 
     void resized() override
     {
-        auto r = getLocalBounds();
+        auto b = getLocalBounds();
 
-        openFolderButton.setBounds (r.removeFromRight (30));
-        modulesLabel.setBounds (r.removeFromLeft (110));
-        currentPathBox.setBounds (r);
+        auto topSlice = b.removeFromTop (b.getHeight() / 2);
+
+        openFolderButton.setBounds (topSlice.removeFromRight (30));
+        modulesLabel.setBounds (topSlice.removeFromLeft (110));
+        currentPathBox.setBounds (topSlice);
+
+        b.removeFromTop (5);
+        useGlobalPathsToggle.setBounds (b.translated (20, 0));
     }
 
     static bool selectJuceFolder (File& result)
@@ -68,7 +78,7 @@ public:
         for (;;)
         {
             FileChooser fc ("Select your JUCE modules folder...",
-                            findDefaultModulesFolder(),
+                            EnabledModuleList::findGlobalModulesFolder(),
                             "*");
 
             if (! fc.browseForDirectory())
@@ -104,9 +114,21 @@ public:
         }
     }
 
-    void buttonClicked (Button*) override
+    void buttonClicked (Button* b) override
     {
-        selectJuceFolder();
+        if (b == &openFolderButton)
+        {
+            selectJuceFolder();
+        }
+        else if (b == &useGlobalPathsToggle)
+        {
+            isUsingGlobalPaths = useGlobalPathsToggle.getToggleState();
+
+            currentPathBox.setEnabled   (! isUsingGlobalPaths);
+            openFolderButton.setEnabled (! isUsingGlobalPaths);
+            modulesLabel.setEnabled     (! isUsingGlobalPaths);
+        }
+
     }
 
     void comboBoxChanged (ComboBox*) override
@@ -115,11 +137,13 @@ public:
     }
 
     File modulesFolder;
+    bool isUsingGlobalPaths;
 
 private:
     ComboBox currentPathBox;
     TextButton openFolderButton;
     Label modulesLabel;
+    ToggleButton useGlobalPathsToggle;
 };
 
 
@@ -280,7 +304,7 @@ public:
     WizardComp()
         : platformTargets(),
           projectName (TRANS("Project name")),
-          modulesPathBox (findDefaultModulesFolder())
+          modulesPathBox (EnabledModuleList::findGlobalModulesFolder())
     {
         setOpaque (false);
 
@@ -355,7 +379,7 @@ public:
 
         filesToCreate.setBounds (right.removeFromTop (22).withTrimmedLeft (150));
         right.removeFromTop (20);
-        modulesPathBox.setBounds (right.removeFromTop (22));
+        modulesPathBox.setBounds (right.removeFromTop (50));
         right.removeFromTop (20);
 
         targetsOutline.setBounds (right);
@@ -404,14 +428,27 @@ public:
                 return;
             }
 
-            wizard->modulesFolder = modulesPathBox.modulesFolder;
+
+            wizard->modulesFolder = modulesPathBox.isUsingGlobalPaths ? File (getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString())
+                                                                      : modulesPathBox.modulesFolder;
 
             if (! isJuceModulesFolder (wizard->modulesFolder))
+            {
+                if (modulesPathBox.isUsingGlobalPaths)
+                    AlertWindow::showMessageBox (AlertWindow::AlertIconType::WarningIcon, "Invalid Global Path",
+                                                 "Your global JUCE module search path is invalid. Please select the folder containing your JUCE modules "
+                                                 "to set as the default path.");
+
                 if (! wizard->selectJuceFolder())
                     return;
 
+                if (modulesPathBox.isUsingGlobalPaths)
+                    getAppSettings().getStoredPath (Ids::defaultJuceModulePath).setValue (wizard->modulesFolder.getFullPathName());
+            }
+
             if (ScopedPointer<Project> project = wizard->runWizard (*this, projectName.getText(),
-                                                                    fileBrowser.getSelectedFile (0)))
+                                                                    fileBrowser.getSelectedFile (0),
+                                                                    modulesPathBox.isUsingGlobalPaths))
                 mw->setProject (project.release());
         }
     }

@@ -27,7 +27,6 @@
 #include "../jucer_Headers.h"
 #include "jucer_Application.h"
 #include "jucer_AppearanceSettings.h"
-#include "jucer_GlobalPreferences.h"
 
 //==============================================================================
 AppearanceSettings::AppearanceSettings (bool updateAppWhenChanged)
