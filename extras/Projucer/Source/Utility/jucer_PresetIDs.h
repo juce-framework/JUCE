@@ -164,6 +164,8 @@ namespace Ids
     DECLARE_ID (androidInternetNeeded);
     DECLARE_ID (androidArchitectures);
     DECLARE_ID (androidBluetoothNeeded);
+    DECLARE_ID (androidExternalReadNeeded);
+    DECLARE_ID (androidExternalWriteNeeded);
     DECLARE_ID (androidMinimumSDK);
     DECLARE_ID (androidOtherPermissions);
     DECLARE_ID (androidKeyStore);

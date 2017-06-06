@@ -92,7 +92,8 @@ public:
                         androidVersionCode, androidMinimumSDK, androidTheme,
                         androidSharedLibraries, androidStaticLibraries, androidExtraAssetsFolder;
 
-    CachedValue<bool>   androidInternetNeeded, androidMicNeeded, androidBluetoothNeeded;
+    CachedValue<bool>   androidInternetNeeded, androidMicNeeded, androidBluetoothNeeded,
+                        androidExternalReadPermission, androidExternalWritePermission;
     CachedValue<String> androidOtherPermissions;
 
     CachedValue<String> androidKeyStore, androidKeyStorePass, androidKeyAlias, androidKeyAliasPass;
@@ -114,6 +115,8 @@ public:
           androidInternetNeeded (settings, Ids::androidInternetNeeded, nullptr, true),
           androidMicNeeded (settings, Ids::microphonePermissionNeeded, nullptr, false),
           androidBluetoothNeeded (settings, Ids::androidBluetoothNeeded, nullptr, true),
+          androidExternalReadPermission  (settings, Ids::androidExternalReadNeeded, nullptr, true),
+          androidExternalWritePermission (settings, Ids::androidExternalWriteNeeded, nullptr, true),
           androidOtherPermissions (settings, Ids::androidOtherPermissions, nullptr),
           androidKeyStore (settings, Ids::androidKeyStore, nullptr, "${user.home}/.android/debug.keystore"),
           androidKeyStorePass (settings, Ids::androidKeyStorePass, nullptr, "android"),
@@ -741,6 +744,12 @@ private:
         props.add (new BooleanPropertyComponent (androidBluetoothNeeded.getPropertyAsValue(), "Bluetooth permissions Required", "Specify bluetooth permission (required for Bluetooth MIDI)"),
                    "If enabled, this will set the android.permission.BLUETOOTH and  android.permission.BLUETOOTH_ADMIN flag in the manifest. This is required for Bluetooth MIDI on Android.");
 
+        props.add (new BooleanPropertyComponent (androidExternalReadPermission.getPropertyAsValue(), "Read from external storage", "Specify permissions to read from external storage"),
+                   "If enabled, this will set the android.permission.READ_EXTERNAL_STORAGE flag in the manifest.");
+
+        props.add (new BooleanPropertyComponent (androidExternalWritePermission.getPropertyAsValue(), "Write to external storage", "Specify permissions to write to external storage"),
+                   "If enabled, this will set the android.permission.WRITE_EXTERNAL_STORAGE flag in the manifest.");
+
         props.add (new TextPropertyComponent (androidOtherPermissions.getPropertyAsValue(), "Custom permissions", 2048, false),
                    "A space-separated list of other permission flags that should be added to the manifest.");
     }
@@ -1295,6 +1304,12 @@ private:
             s.add ("android.permission.BLUETOOTH_ADMIN");
             s.add ("android.permission.ACCESS_COARSE_LOCATION");
         }
+
+        if (androidExternalReadPermission.get())
+            s.add ("android.permission.READ_EXTERNAL_STORAGE");
+
+        if (androidExternalWritePermission.get())
+            s.add ("android.permission.WRITE_EXTERNAL_STORAGE");
 
         return getCleanedStringArray (s);
     }
