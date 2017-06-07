@@ -70,7 +70,7 @@ void PluginWindow::closeAllCurrentlyOpenWindows()
             delete activePluginWindows.getUnchecked (i);
 
         Component dummyModalComp;
-        dummyModalComp.enterModalState();
+        dummyModalComp.enterModalState (false);
         MessageManager::getInstance()->runDispatchLoopUntil (50);
     }
 }
@@ -79,10 +79,8 @@ void PluginWindow::closeAllCurrentlyOpenWindows()
 struct ProcessorProgramPropertyComp  : public PropertyComponent,
                                        private AudioProcessorListener
 {
-public:
     ProcessorProgramPropertyComp (const String& name, AudioProcessor& p)
-        : PropertyComponent (name),
-          owner (p)
+        : PropertyComponent (name), owner (p)
     {
         owner.addListener (this);
     }
@@ -142,22 +140,19 @@ struct ProgramAudioProcessorEditor  : public AudioProcessorEditor
         panel.setBounds (getLocalBounds());
     }
 
-private:
     PropertyPanel panel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProgramAudioProcessorEditor)
 };
 
 //==============================================================================
-PluginWindow* PluginWindow::getWindowFor (AudioProcessorGraph::Node* const node,
-                                          WindowFormatType type)
+PluginWindow* PluginWindow::getWindowFor (AudioProcessorGraph::Node* node, WindowFormatType type)
 {
     jassert (node != nullptr);
 
-    for (int i = activePluginWindows.size(); --i >= 0;)
-        if (activePluginWindows.getUnchecked(i)->owner == node
-             && activePluginWindows.getUnchecked(i)->type == type)
-            return activePluginWindows.getUnchecked(i);
+    for (auto* w : activePluginWindows)
+        if (w->owner == node && w->type == type)
+            return w;
 
     auto* processor = node->getProcessor();
     AudioProcessorEditor* ui = nullptr;
@@ -223,8 +218,7 @@ struct PinComponent   : public Component,
                         public SettableTooltipClient
 {
     PinComponent (FilterGraph& g, uint32 id, int i, bool isIn)
-        : graph (g), pluginID (id),
-          index (i), isInput (isIn)
+        : graph (g), pluginID (id), index (i), isInput (isIn)
     {
         if (auto node = graph.getNodeForId (pluginID))
         {
@@ -261,10 +255,9 @@ struct PinComponent   : public Component,
 
         Path p;
         p.addEllipse (w * 0.25f, h * 0.25f, w * 0.5f, h * 0.5f);
-
         p.addRectangle (w * 0.4f, isInput ? (0.5f * h) : 0.0f, w * 0.2f, h * 0.5f);
 
-        Colour colour = (index == FilterGraph::midiChannelNumber ? Colours::red : Colours::green);
+        auto colour = (index == FilterGraph::midiChannelNumber ? Colours::red : Colours::green);
 
         g.setColour (colour.withRotatedHue (static_cast<float> (busIdx) / 5.0f));
         g.fillPath (p);

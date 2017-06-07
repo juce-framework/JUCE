@@ -321,7 +321,8 @@ void MainHostWindow::addPluginsToMenu (PopupMenu& m) const
         int i = 0;
 
         for (auto* t : internalTypes)
-            m.addItem (++i, t->name, graphEditor->graph->getNodeForName (t->name) == nullptr);
+            m.addItem (++i, t->name + " (" + t->pluginFormatName + ")",
+                       graphEditor->graph->getNodeForName (t->name) == nullptr);
     }
 
     m.addSeparator();

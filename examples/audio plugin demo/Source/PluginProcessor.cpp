@@ -47,8 +47,6 @@ class SineWaveVoice  : public SynthesiserVoice
 {
 public:
     SineWaveVoice()
-        : angleDelta (0.0),
-          tailOff (0.0)
     {
     }
 
@@ -112,7 +110,6 @@ public:
     }
 
 private:
-
     template <typename FloatType>
     void processBlock (AudioBuffer<FloatType>& outputBuffer, int startSample, int numSamples)
     {
@@ -122,8 +119,7 @@ private:
             {
                 while (--numSamples >= 0)
                 {
-                    const FloatType currentSample =
-                        static_cast<FloatType> (std::sin (currentAngle) * level * tailOff);
+                    auto currentSample = static_cast<FloatType> (std::sin (currentAngle) * level * tailOff);
 
                     for (int i = outputBuffer.getNumChannels(); --i >= 0;)
                         outputBuffer.addSample (i, startSample, currentSample);
@@ -146,7 +142,7 @@ private:
             {
                 while (--numSamples >= 0)
                 {
-                    const FloatType currentSample = static_cast<FloatType> (std::sin (currentAngle) * level);
+                    auto currentSample = static_cast<FloatType> (std::sin (currentAngle) * level);
 
                     for (int i = outputBuffer.getNumChannels(); --i >= 0;)
                         outputBuffer.addSample (i, startSample, currentSample);
@@ -158,17 +154,12 @@ private:
         }
     }
 
-    double currentAngle, angleDelta, level, tailOff;
+    double currentAngle = 0, angleDelta = 0, level = 0, tailOff = 0;
 };
 
 //==============================================================================
 JuceDemoPluginAudioProcessor::JuceDemoPluginAudioProcessor()
-    : AudioProcessor (getBusesProperties()),
-      lastUIWidth (400),
-      lastUIHeight (200),
-      gainParam (nullptr),
-      delayParam (nullptr),
-      delayPosition (0)
+    : AudioProcessor (getBusesProperties())
 {
     lastPosInfo.resetToDefault();
 
@@ -208,10 +199,12 @@ bool JuceDemoPluginAudioProcessor::isBusesLayoutSupported (const BusesLayout& la
         return false;
 
     // do not allow disabling the main buses
-    if (mainOutput.isDisabled()) return false;
+    if (mainOutput.isDisabled())
+        return false;
 
     // only allow stereo and mono
-    if (mainOutput.size() > 2) return false;
+    if (mainOutput.size() > 2)
+        return false;
 
     return true;
 }
@@ -308,13 +301,13 @@ void JuceDemoPluginAudioProcessor::applyDelay (AudioBuffer<FloatType>& buffer, A
 
     for (int channel = 0; channel < getTotalNumOutputChannels(); ++channel)
     {
-        FloatType* const channelData = buffer.getWritePointer (channel);
-        FloatType* const delayData = delayBuffer.getWritePointer (jmin (channel, delayBuffer.getNumChannels() - 1));
+        auto channelData = buffer.getWritePointer (channel);
+        auto delayData = delayBuffer.getWritePointer (jmin (channel, delayBuffer.getNumChannels() - 1));
         delayPos = delayPosition;
 
         for (int i = 0; i < numSamples; ++i)
         {
-            const FloatType in = channelData[i];
+            auto in = channelData[i];
             channelData[i] += delayData[delayPos];
             delayData[delayPos] = (delayData[delayPos] + in) * delayLevel;
 
@@ -363,8 +356,8 @@ void JuceDemoPluginAudioProcessor::getStateInformation (MemoryBlock& destData)
     xml.setAttribute ("uiHeight", lastUIHeight);
 
     // Store the values of all our parameters, using their param ID as the XML attribute
-    for (int i = 0; i < getNumParameters(); ++i)
-        if (AudioProcessorParameterWithID* p = dynamic_cast<AudioProcessorParameterWithID*> (getParameters().getUnchecked(i)))
+    for (auto* param : getParameters())
+        if (auto* p = dynamic_cast<AudioProcessorParameterWithID*> (param))
             xml.setAttribute (p->paramID, p->getValue());
 
     // then use this helper function to stuff it into the binary blob and return it..
@@ -389,8 +382,8 @@ void JuceDemoPluginAudioProcessor::setStateInformation (const void* data, int si
             lastUIHeight = jmax (xmlState->getIntAttribute ("uiHeight", lastUIHeight), 200);
 
             // Now reload our parameters..
-            for (int i = 0; i < getNumParameters(); ++i)
-                if (AudioProcessorParameterWithID* p = dynamic_cast<AudioProcessorParameterWithID*> (getParameters().getUnchecked(i)))
+            for (auto* param : getParameters())
+                if (auto* p = dynamic_cast<AudioProcessorParameterWithID*> (param))
                     p->setValue ((float) xmlState->getDoubleAttribute (p->paramID, p->getValue()));
         }
     }
