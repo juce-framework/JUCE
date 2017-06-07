@@ -2833,12 +2833,11 @@ FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
     const String programFiles (File::getSpecialLocation (File::globalApplicationsDirectory).getFullPathName());
 
     FileSearchPath paths;
-    paths.add (WindowsRegistry::getValue ("HKEY_LOCAL_MACHINE\\Software\\VST\\VSTPluginsPath",
-                                          programFiles + "\\Steinberg\\VstPlugins"));
+    paths.add (WindowsRegistry::getValue ("HKEY_LOCAL_MACHINE\\Software\\VST\\VSTPluginsPath"));
+    paths.addIfNotAlreadyThere (programFiles + "\\Steinberg\\VstPlugins");
     paths.removeNonExistentPaths();
-
-    paths.add (WindowsRegistry::getValue ("HKEY_LOCAL_MACHINE\\Software\\VST\\VSTPluginsPath",
-                                          programFiles + "\\VstPlugins"));
+    paths.addIfNotAlreadyThere (programFiles + "\\VstPlugins");
+    paths.removeRedundantPaths();
     return paths;
    #elif JUCE_IOS
     // on iOS you can only load plug-ins inside the hosts bundle folder
