@@ -1561,7 +1561,7 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
         if(op.granulepos!=-1){
           vf->pcm_offset=op.granulepos-vf->pcmlengths[vf->current_link*2];
           if(vf->pcm_offset<0)vf->pcm_offset=0;
-          vf->pcm_offset+=total;
+            vf->pcm_offset+=total;
           break;
         }else
           result=ogg_stream_packetout(&vf->os,NULL);
