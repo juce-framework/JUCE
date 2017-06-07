@@ -44,7 +44,7 @@
  #define __cdecl
 #endif
 
-#ifdef __clang__
+#if JUCE_CLANG
  #pragma clang diagnostic push
  #pragma clang diagnostic ignored "-Wconversion"
  #pragma clang diagnostic ignored "-Wshadow"
@@ -65,7 +65,7 @@
  #pragma warning (pop)
 #endif
 
-#ifdef __clang__
+#if JUCE_CLANG
  #pragma clang diagnostic pop
 #endif
 
@@ -121,7 +121,7 @@ namespace
 
         while (w != 0)
         {
-            HWND parent = getWindowParent (w);
+            auto parent = getWindowParent (w);
 
             if (parent == 0)
                 break;
@@ -136,8 +136,8 @@ namespace
             GetWindowRect (w, &windowPos);
             GetWindowRect (parent, &parentPos);
 
-            const int dw = (parentPos.right - parentPos.left) - (windowPos.right - windowPos.left);
-            const int dh = (parentPos.bottom - parentPos.top) - (windowPos.bottom - windowPos.top);
+            auto dw = (parentPos.right - parentPos.left) - (windowPos.right - windowPos.left);
+            auto dh = (parentPos.bottom - parentPos.top) - (windowPos.bottom - windowPos.top);
 
             if (dw > 100 || dh > 100)
                 break;
@@ -159,9 +159,7 @@ namespace
 
 struct SharedMessageThread  : public Thread
 {
-    SharedMessageThread()
-      : Thread ("VstMessageThread"),
-        initialised (false)
+    SharedMessageThread()  : Thread ("VstMessageThread")
     {
         startThread (7);
 
@@ -190,8 +188,7 @@ struct SharedMessageThread  : public Thread
 
     juce_DeclareSingleton (SharedMessageThread, false)
 
-private:
-    bool initialised;
+    bool initialised = false;
 };
 
 juce_ImplementSingleton (SharedMessageThread)
@@ -314,10 +311,6 @@ public:
 
         vstEffect.flags |= vstEffectFlagDataInChunks;
 
-       #if JUCE_LINUX
-        display = XWindowSystem::getInstance()->displayRef();
-       #endif
-
         activePlugins.add (this);
     }
 
@@ -356,10 +349,6 @@ public:
                 messageThreadIsDefinitelyCorrect = false;
                #endif
             }
-
-           #if JUCE_LINUX
-            display = XWindowSystem::getInstance()->displayUnref();
-           #endif
         }
     }
 
@@ -484,7 +473,7 @@ public:
         if (! midiEvents.isEmpty())
         {
            #if JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect
-            const int numEvents = midiEvents.getNumEvents();
+            auto numEvents = midiEvents.getNumEvents();
 
             outgoingEvents.ensureSize (numEvents);
             outgoingEvents.clear();
@@ -1042,10 +1031,8 @@ public:
             chunkMemoryTime = 0;
         }
 
-       #if JUCE_MAC
-        if (hostWindow != 0)
-            checkWindowVisibilityVST (hostWindow, editorComp, useNSView);
-       #endif
+        if (editorComp != nullptr)
+            editorComp->checkVisibility();
     }
 
     void createEditorComp()
@@ -1058,10 +1045,8 @@ public:
             if (auto* ed = processor->createEditorIfNeeded())
             {
                 vstEffect.flags |= vstEffectFlagHasEditor;
-                ed->setOpaque (true);
-                ed->setVisible (true);
-
                 editorComp = new EditorCompWrapper (*this, *ed);
+                ed->setScaleFactor (editorScaleFactor);
             }
             else
             {
@@ -1094,15 +1079,10 @@ public:
                     }
                 }
 
-               #if JUCE_MAC
-                if (hostWindow != 0)
-                {
-                    detachComponentFromWindowRefVST (editorComp, hostWindow, useNSView);
-                    hostWindow = 0;
-                }
-               #endif
+                editorComp->detachHostWindow();
 
-                processor->editorBeingDeleted (editorComp->getEditorComp());
+                if (auto* ed = editorComp->getEditorComp())
+                    processor->editorBeingDeleted (ed);
 
                 editorComp = nullptr;
 
@@ -1110,10 +1090,6 @@ public:
                 // is trying to delete our plugin. You should try to avoid this happening..
                 jassert (Component::getCurrentlyModalComponent() == nullptr);
             }
-
-           #if JUCE_LINUX
-            hostWindow = 0;
-           #endif
         }
     }
 
@@ -1186,18 +1162,164 @@ public:
         return wrapper->dispatcher (opCode, args);
     }
 
-    void resizeHostWindow (int newWidth, int newHeight)
+    //==============================================================================
+    // A component to hold the AudioProcessorEditor, and cope with some housekeeping
+    // chores when it changes or repaints.
+    struct EditorCompWrapper  : public Component
     {
-        if (editorComp != nullptr)
+        EditorCompWrapper (JuceVSTWrapper& w, AudioProcessorEditor& editor)  : wrapper (w)
+        {
+            editor.setOpaque (true);
+            editor.setVisible (true);
+            setOpaque (true);
+
+            setTopLeftPosition (editor.getPosition());
+            editor.setTopLeftPosition (0, 0);
+            auto b = getLocalArea (&editor, editor.getLocalBounds());
+            setSize (b.getWidth(), b.getHeight());
+
+            addAndMakeVisible (editor);
+
+           #if JUCE_WINDOWS
+            if (! getHostType().isReceptor())
+                addMouseListener (this, true);
+           #endif
+
+            ignoreUnused (fakeMouseGenerator);
+        }
+
+        ~EditorCompWrapper()
+        {
+            deleteAllChildren(); // note that we can't use a ScopedPointer because the editor may
+                                 // have been transferred to another parent which takes over ownership.
+        }
+
+        void paint (Graphics&) override {}
+
+        void getEditorBounds (VstEditorBounds& bounds)
+        {
+            auto b = getSizeToContainChild();
+
+            bounds.upper     = 0;
+            bounds.leftmost  = 0;
+            bounds.lower     = (int16) b.getHeight();
+            bounds.rightmost = (int16) b.getWidth();
+        }
+
+        void attachToHost (VstOpCodeArguments args)
+        {
+            setOpaque (true);
+            setVisible (false);
+
+           #if JUCE_WINDOWS
+            addToDesktop (0, args.ptr);
+            hostWindow = (HWND) args.ptr;
+           #elif JUCE_LINUX
+            addToDesktop (0, args.ptr);
+            hostWindow = (Window) args.ptr;
+            XReparentWindow (display.display, (Window) getWindowHandle(), hostWindow, 0, 0);
+           #else
+            hostWindow = attachComponentToWindowRefVST (this, args.ptr, wrapper.useNSView);
+           #endif
+
+            setVisible (true);
+        }
+
+        void detachHostWindow()
+        {
+           #if JUCE_MAC
+            if (hostWindow != 0)
+            {
+                detachComponentFromWindowRefVST (this, hostWindow, wrapper.useNSView);
+                hostWindow = 0;
+            }
+           #endif
+
+           #if JUCE_LINUX
+            hostWindow = 0;
+           #endif
+        }
+
+        void checkVisibility()
+        {
+           #if JUCE_MAC
+            if (hostWindow != 0)
+                checkWindowVisibilityVST (hostWindow, this, wrapper.useNSView);
+           #endif
+        }
+
+        AudioProcessorEditor* getEditorComp() const noexcept
+        {
+            return dynamic_cast<AudioProcessorEditor*> (getChildComponent(0));
+        }
+
+        void resized() override
+        {
+            if (auto* ed = getEditorComp())
+            {
+                ed->setTopLeftPosition (0, 0);
+                ed->setBounds (ed->getLocalArea (this, getLocalBounds()));
+                updateWindowSize();
+            }
+
+           #if JUCE_MAC && ! JUCE_64BIT
+            if (! wrapper.useNSView)
+                updateEditorCompBoundsVST (this);
+           #endif
+        }
+
+        void childBoundsChanged (Component*) override
+        {
+            updateWindowSize();
+        }
+
+        juce::Rectangle<int> getSizeToContainChild()
+        {
+            if (auto* ed = getEditorComp())
+                return getLocalArea (ed, ed->getLocalBounds());
+
+            return {};
+        }
+
+        void updateWindowSize()
+        {
+            if (! isInSizeWindow)
+            {
+                if (auto* ed = getEditorComp())
+                {
+                    ed->setTopLeftPosition (0, 0);
+                    auto pos = getSizeToContainChild();
+
+                   #if JUCE_MAC
+                    if (wrapper.useNSView)
+                        setTopLeftPosition (0, getHeight() - pos.getHeight());
+                   #endif
+
+                    resizeHostWindow (pos.getWidth(), pos.getHeight());
+
+                   #if ! JUCE_LINUX // setSize() on linux causes renoise and energyxt to fail.
+                    setSize (pos.getWidth(), pos.getHeight());
+                   #else
+                    XResizeWindow (display.display, (Window) getWindowHandle(), pos.getWidth(), pos.getHeight());
+                   #endif
+
+                   #if JUCE_MAC
+                    resizeHostWindow (pos.getWidth(), pos.getHeight()); // (doing this a second time seems to be necessary in tracktion)
+                   #endif
+                }
+            }
+        }
+
+        void resizeHostWindow (int newWidth, int newHeight)
         {
             bool sizeWasSuccessful = false;
 
-            if (hostCallback != nullptr)
+            if (auto host = wrapper.hostCallback)
             {
-                if (hostCallback (&vstEffect, hostOpcodeCanHostDo, 0, 0, const_cast<char*> ("sizeWindow"), 0))
+                if (host (wrapper.getVstEffectInterface(), hostOpcodeCanHostDo, 0, 0, const_cast<char*> ("sizeWindow"), 0))
                 {
                     isInSizeWindow = true;
-                    sizeWasSuccessful = (hostCallback (&vstEffect, hostOpcodeWindowSize, newWidth, newHeight, 0, 0) != 0);
+                    sizeWasSuccessful = (host (wrapper.getVstEffectInterface(), hostOpcodeWindowSize, newWidth, newHeight, 0, 0) != 0);
                     isInSizeWindow = false;
                 }
             }
@@ -1206,18 +1328,18 @@ public:
             {
                 // some hosts don't support the sizeWindow call, so do it manually..
                #if JUCE_MAC
-                setNativeHostWindowSizeVST (hostWindow, editorComp, newWidth, newHeight, useNSView);
+                setNativeHostWindowSizeVST (hostWindow, this, newWidth, newHeight, wrapper.useNSView);
 
                #elif JUCE_LINUX
                 // (Currently, all linux hosts support sizeWindow, so this should never need to happen)
-                editorComp->setSize (newWidth, newHeight);
+                setSize (newWidth, newHeight);
 
                #else
                 int dw = 0;
                 int dh = 0;
                 const int frameThickness = GetSystemMetrics (SM_CYFIXEDFRAME);
 
-                HWND w = (HWND) editorComp->getWindowHandle();
+                HWND w = (HWND) getWindowHandle();
 
                 while (w != 0)
                 {
@@ -1257,101 +1379,10 @@ public:
                #endif
             }
 
-            if (auto* peer = editorComp->getPeer())
+            if (auto* peer = getPeer())
             {
                 peer->handleMovedOrResized();
-                peer->getComponent().repaint();
-            }
-        }
-    }
-
-    //==============================================================================
-    // A component to hold the AudioProcessorEditor, and cope with some housekeeping
-    // chores when it changes or repaints.
-    struct EditorCompWrapper  : public Component
-    {
-        EditorCompWrapper (JuceVSTWrapper& w, AudioProcessorEditor& editor)  : wrapper (w)
-        {
-            setOpaque (true);
-            editor.setOpaque (true);
-
-            setBounds (editor.getBounds());
-            editor.setTopLeftPosition (0, 0);
-            addAndMakeVisible (editor);
-
-           #if JUCE_WINDOWS
-            if (! getHostType().isReceptor())
-                addMouseListener (this, true);
-           #endif
-
-            ignoreUnused (fakeMouseGenerator);
-        }
-
-        ~EditorCompWrapper()
-        {
-            deleteAllChildren(); // note that we can't use a ScopedPointer because the editor may
-                                 // have been transferred to another parent which takes over ownership.
-        }
-
-        void paint (Graphics&) override {}
-
-       #if JUCE_MAC
-        bool keyPressed (const KeyPress&) override
-        {
-            // If we have an unused keypress, move the key-focus to a host window
-            // and re-inject the event..
-            return forwardCurrentKeyEventToHostVST (this, wrapper.useNSView);
-        }
-       #endif
-
-        AudioProcessorEditor* getEditorComp() const
-        {
-            return dynamic_cast<AudioProcessorEditor*> (getChildComponent(0));
-        }
-
-        void resized() override
-        {
-            if (auto* editorChildComp = getChildComponent(0))
-                editorChildComp->setBounds (getLocalBounds());
-
-           #if JUCE_MAC && ! JUCE_64BIT
-            if (! wrapper.useNSView)
-                updateEditorCompBoundsVST (this);
-           #endif
-        }
-
-        void childBoundsChanged (Component* child) override
-        {
-            if (! wrapper.isInSizeWindow)
-            {
-                child->setTopLeftPosition (0, 0);
-
-                const int cw = child->getWidth();
-                const int ch = child->getHeight();
-
-               #if JUCE_MAC
-                if (wrapper.useNSView)
-                    setTopLeftPosition (0, getHeight() - ch);
-               #endif
-
-                wrapper.resizeHostWindow (cw, ch);
-
-               #if ! JUCE_LINUX // setSize() on linux causes renoise and energyxt to fail.
-                setSize (cw, ch);
-               #else
-                const double scale = Desktop::getInstance().getDisplays().getDisplayContaining (getScreenBounds().getCentre()).scale;
-                Rectangle<int> childBounds (child->getWidth(), child->getHeight());
-                childBounds *= scale;
-
-                {
-                    ScopedXDisplay xDisplay;
-                    XResizeWindow (xDisplay.display, (Window) getWindowHandle(), childBounds.getWidth(), childBounds.getHeight());
-                }
-               #endif
-
-               #if JUCE_MAC
-                wrapper.resizeHostWindow (cw, ch);  // (doing this a second time seems to be necessary in tracktion)
-               #endif
+                repaint();
             }
         }
 
@@ -1371,12 +1402,27 @@ public:
         }
        #endif
 
-    private:
+       #if JUCE_MAC
+        bool keyPressed (const KeyPress&) override
+        {
+            // If we have an unused keypress, move the key-focus to a host window
+            // and re-inject the event..
+            return forwardCurrentKeyEventToHostVST (this, wrapper.useNSView);
+        }
+       #endif
+
         //==============================================================================
         JuceVSTWrapper& wrapper;
         FakeMouseMoveGenerator fakeMouseGenerator;
+        bool isInSizeWindow = false;
 
-       #if JUCE_WINDOWS
+       #if JUCE_MAC
+        void* hostWindow = {};
+       #elif JUCE_LINUX
+        ScopedXDisplay display;
+        Window hostWindow = {};
+       #else
+        HWND hostWindow = {};
         WindowsHooks hooks;
        #endif
 
@@ -1396,8 +1442,9 @@ private:
     VstEditorBounds editorBounds;
     MidiBuffer midiEvents;
     VSTMidiEventList outgoingEvents;
+    float editorScaleFactor = 1.0f;
 
-    bool isProcessing = false, isBypassed = false, hasShutdown = false, isInSizeWindow = false;
+    bool isProcessing = false, isBypassed = false, hasShutdown = false;
     bool firstProcessCallback = true, shouldDeleteEditor = false;
 
    #if JUCE_64BIT
@@ -1411,15 +1458,6 @@ private:
     int maxNumInChannels = 0, maxNumOutChannels = 0;
 
     HeapBlock<VstSpeakerConfiguration> cachedInArrangement, cachedOutArrangement;
-
-   #if JUCE_MAC
-    void* hostWindow = {};
-   #elif JUCE_LINUX
-    ::Display* display = {};
-    Window hostWindow = {};
-   #else
-    HWND hostWindow = {};
-   #endif
 
     static JuceVSTWrapper* getWrapper (VstEffectInterface* v) noexcept  { return static_cast<JuceVSTWrapper*> (v->effectPointer); }
 
@@ -1643,13 +1681,8 @@ private:
 
         if (editorComp != nullptr)
         {
-            editorBounds.upper     = 0;
-            editorBounds.leftmost  = 0;
-            editorBounds.lower     = (int16) editorComp->getHeight();
-            editorBounds.rightmost = (int16) editorComp->getWidth();
-
+            editorComp->getEditorBounds (editorBounds);
             *((VstEditorBounds**) args.ptr) = &editorBounds;
-
             return (pointer_sized_int) &editorBounds;
         }
 
@@ -1669,24 +1702,10 @@ private:
 
         if (editorComp != nullptr)
         {
-            editorComp->setOpaque (true);
-            editorComp->setVisible (false);
-
-           #if JUCE_WINDOWS
-            editorComp->addToDesktop (0, args.ptr);
-            hostWindow = (HWND) args.ptr;
-           #elif JUCE_LINUX
-            editorComp->addToDesktop (0, args.ptr);
-            hostWindow = (Window) args.ptr;
-            Window editorWnd = (Window) editorComp->getWindowHandle();
-            XReparentWindow (display, editorWnd, hostWindow, 0, 0);
-           #else
-            hostWindow = attachComponentToWindowRefVST (editorComp, args.ptr, useNSView);
-           #endif
-            editorComp->setVisible (true);
-
+            editorComp->attachToHost (args);
             return 1;
         }
+
         return 0;
     }
 
@@ -1882,6 +1901,9 @@ private:
         if (handleManufacturerSpecificVST2Opcode (args.index, args.value, args.ptr, args.opt))
             return 1;
 
+        if (args.index == presonusVendorID && args.value == presonusSetContentScaleFactor)
+            return handleSetContentScaleFactor (args.opt);
+
         if (auto callbackHandler = dynamic_cast<VSTCallbackHandler*> (processor))
             return callbackHandler->handleVstManufacturerSpecific (args.index, args.value, args.ptr, args.opt);
 
@@ -2011,6 +2033,25 @@ private:
         }
 
         return 0;
+    }
+
+    pointer_sized_int handleSetContentScaleFactor (float scale)
+    {
+        if (editorScaleFactor != scale)
+        {
+            editorScaleFactor = scale;
+
+            if (editorComp != nullptr)
+            {
+                if (auto* ed = editorComp->getEditorComp())
+                    ed->setScaleFactor (editorScaleFactor);
+
+                if (editorComp != nullptr)
+                    editorComp->updateWindowSize();
+            }
+        }
+
+        return 1;
     }
 
     //==============================================================================
