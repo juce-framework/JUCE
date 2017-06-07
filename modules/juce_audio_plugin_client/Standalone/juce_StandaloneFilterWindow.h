@@ -62,14 +62,31 @@ public:
                             bool takeOwnershipOfSettings = true,
                             const String& preferredDefaultDeviceName = String(),
                             const AudioDeviceManager::AudioDeviceSetup* preferredSetupOptions = nullptr,
-                            const Array<PluginInOuts>& constrainToConfiguration = Array<PluginInOuts>())
+                            const Array<PluginInOuts>& channels = Array<PluginInOuts>())
 
         : settings (settingsToUse, takeOwnershipOfSettings),
-          channelConfiguration (constrainToConfiguration),
+          channelConfiguration (channels),
           shouldMuteInput (! isInterAppAudioConnected())
     {
         createPlugin();
-        setupAudioDevices (preferredDefaultDeviceName, preferredSetupOptions);
+
+        auto inChannels = (channelConfiguration.size() > 0 ? channelConfiguration[0].numIns
+                                                           : processor->getMainBusNumInputChannels());
+
+        if (preferredSetupOptions != nullptr)
+            options = new AudioDeviceManager::AudioDeviceSetup (*preferredSetupOptions);
+
+        if (inChannels > 0 && RuntimePermissions::isRequired (RuntimePermissions::recordAudio)
+            && ! RuntimePermissions::isGranted (RuntimePermissions::recordAudio))
+            RuntimePermissions::request (RuntimePermissions::recordAudio,
+                                         [this, preferredDefaultDeviceName] (bool granted) { init (granted, preferredDefaultDeviceName); });
+        else
+            init (true, preferredDefaultDeviceName);
+    }
+
+    void init (bool enableAudioInput, const String& preferredDefaultDeviceName)
+    {
+        setupAudioDevices (enableAudioInput, preferredDefaultDeviceName, options);
         reloadPluginState();
         startPlaying();
 
@@ -263,7 +280,8 @@ public:
         }
     }
 
-    void reloadAudioDeviceState (const String& preferredDefaultDeviceName,
+    void reloadAudioDeviceState (bool enableAudioInput,
+                                 const String& preferredDefaultDeviceName,
                                  const AudioDeviceManager::AudioDeviceSetup* preferredSetupOptions)
     {
         ScopedPointer<XmlElement> savedState;
@@ -287,7 +305,7 @@ public:
             totalOutChannels = defaultConfig.numOuts;
         }
 
-        deviceManager.initialise (totalInChannels,
+        deviceManager.initialise (enableAudioInput ? totalInChannels : 0,
                                   totalOutChannels,
                                   savedState,
                                   true,
@@ -364,6 +382,8 @@ public:
     bool processorHasPotentialFeedbackLoop = true;
     Value shouldMuteInput;
     AudioSampleBuffer emptyBuffer;
+
+    ScopedPointer<AudioDeviceManager::AudioDeviceSetup> options;
 
    #if JUCE_IOS || JUCE_ANDROID
     StringArray lastMidiDevices;
@@ -476,13 +496,14 @@ private:
     }
 
     //==============================================================================
-    void setupAudioDevices (const String& preferredDefaultDeviceName,
+    void setupAudioDevices (bool enableAudioInput,
+                            const String& preferredDefaultDeviceName,
                             const AudioDeviceManager::AudioDeviceSetup* preferredSetupOptions)
     {
         deviceManager.addAudioCallback (this);
         deviceManager.addMidiInputCallback ({}, &player);
 
-        reloadAudioDeviceState (preferredDefaultDeviceName, preferredSetupOptions);
+        reloadAudioDeviceState (enableAudioInput, preferredDefaultDeviceName, preferredSetupOptions);
     }
 
     void shutDownAudioDevices()

@@ -193,9 +193,10 @@ bool JuceDemoPluginAudioProcessor::isBusesLayoutSupported (const BusesLayout& la
 {
     // Only mono/stereo and input/output must have same layout
     const AudioChannelSet& mainOutput = layouts.getMainOutputChannelSet();
+    const AudioChannelSet& mainInput  = layouts.getMainInputChannelSet();
 
-    // input and output layout must be the same
-    if (layouts.getMainInputChannelSet() != mainOutput)
+    // input and output layout must either be the same or the input must be disabled altogether
+    if (! mainInput.isDisabled() && mainInput != mainOutput)
         return false;
 
     // do not allow disabling the main buses

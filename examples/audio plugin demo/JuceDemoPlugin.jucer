@@ -129,7 +129,7 @@
     </XCODE_IPHONE>
     <ANDROIDSTUDIO targetFolder="Builds/Android" androidSDKPath="" androidNDKPath=""
                    androidTheme="@android:style/Theme.NoTitleBar" androidScreenOrientation="landscape"
-                   androidMinimumSDK="23">
+                   androidMinimumSDK="23" microphonePermissionNeeded="1" androidInternetNeeded="0">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi x86" isDebug="1" optimisation="1"
                        targetName="JuceDemoPlugin"/>
