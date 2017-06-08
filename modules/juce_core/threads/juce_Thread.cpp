@@ -308,8 +308,6 @@ public:
         AtomicTester <uint32>::testInteger (*this);
         beginTest ("Atomic long");
         AtomicTester <long>::testInteger (*this);
-        beginTest ("Atomic void*");
-        AtomicTester <void*>::testInteger (*this);
         beginTest ("Atomic int*");
         AtomicTester <int*>::testInteger (*this);
         beginTest ("Atomic float");
@@ -322,6 +320,21 @@ public:
         beginTest ("Atomic double");
         AtomicTester <double>::testFloat (*this);
       #endif
+        beginTest ("Atomic pointer increment/decrement");
+        Atomic<int*> a (a2); int* b (a2);
+        expect (++a == ++b);
+
+        {
+            beginTest ("Atomic void*");
+            Atomic<void*> atomic;
+            void* c;
+
+            atomic.set ((void*) 10);
+            c = (void*) 10;
+
+            expect (atomic.value == c);
+            expect (atomic.get() == c);
+        }
     }
 
     template <typename Type>
@@ -333,22 +346,34 @@ public:
         static void testInteger (UnitTest& test)
         {
             Atomic<Type> a, b;
+            Type c;
+
             a.set ((Type) 10);
-            test.expect (a.value == (Type) 10);
-            test.expect (a.get() == (Type) 10);
-            a += (Type) 15;
-            test.expect (a.get() == (Type) 25);
+            c = (Type) 10;
+
+            test.expect (a.value == c);
+            test.expect (a.get() == c);
+
+            a += 15;
+            c += 15;
+            test.expect (a.get() == c);
             a.memoryBarrier();
-            a -= (Type) 5;
-            test.expect (a.get() == (Type) 20);
-            test.expect (++a == (Type) 21);
+
+            a -= 5;
+            c -= 5;
+            test.expect (a.get() == c);
+
+            test.expect (++a == ++c);
             ++a;
-            test.expect (--a == (Type) 21);
-            test.expect (a.get() == (Type) 21);
+            ++c;
+            test.expect (--a == --c);
+            test.expect (a.get() == c);
             a.memoryBarrier();
 
             testFloat (test);
         }
+
+
 
         static void testFloat (UnitTest& test)
         {

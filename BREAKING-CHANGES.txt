@@ -1,6 +1,31 @@
 JUCE breaking changes
 =====================
 
+Develop Branch
+==============
+
+Change
+------
+Pointer arithmetic on a pointer will have the same result regardless if it is wrapped in JUCE's Atomic class or not
+
+Possible Issues
+---------------
+Any code using pointer arithmetic on Atomic<T*> will now have a different result leading to undefined behaviour or crashes.
+
+Workaround
+----------
+Re-write your code in a way that it does not depend on your pointer being wrapped in JUCE's Atomic or not. See rationale.
+
+Rationale
+---------
+Before this change, pointer arithmetic with JUCE's Atomic type would yield confusing results. For example, the following code would assert before this change:
+
+int* a; Atomic<int*> b;
+
+jassert (++a == ++b);
+
+Pointer a in the above code would be advanced by sizeof(int) whereas the JUCE's Atomic always advances it's underlying pointer by a single byte. The same is true for operator+=/operator-= and operator--. The difference in behaviour is confusing and unintuitive. Furthermore, this aligns JUCE's Atomic type with std::atomic.
+
 
 Version 4.3.1
 =============
