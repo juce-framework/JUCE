@@ -219,7 +219,7 @@ void FileBrowserComponent::setRoot (const File& newRootDirectory)
         String path (newRootDirectory.getFullPathName());
 
         if (path.isEmpty())
-            path = File::separatorString;
+            path = File::getSeparatorString();
 
         StringArray rootNames, rootPaths;
         getRoots (rootNames, rootPaths);
@@ -250,7 +250,7 @@ void FileBrowserComponent::setRoot (const File& newRootDirectory)
 
     String currentRootName (currentRoot.getFullPathName());
     if (currentRootName.isEmpty())
-        currentRootName = File::separatorString;
+        currentRootName = File::getSeparatorString();
 
     currentPathBox.setText (currentRootName, dontSendNotification);
 
@@ -428,7 +428,7 @@ void FileBrowserComponent::textEditorTextChanged (TextEditor&)
 
 void FileBrowserComponent::textEditorReturnKeyPressed (TextEditor&)
 {
-    if (filenameBox.getText().containsChar (File::separator))
+    if (filenameBox.getText().containsChar (File::getSeparator()))
     {
         const File f (currentRoot.getChildFile (filenameBox.getText()));
 

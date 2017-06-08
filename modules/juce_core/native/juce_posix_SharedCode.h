@@ -184,8 +184,16 @@ static MaxNumFileHandlesInitialiser maxNumFileHandlesInitialiser;
 #endif
 
 //==============================================================================
-const juce_wchar File::separator = '/';
-const String File::separatorString ("/");
+juce_wchar File::getSeparator()
+{
+    return '/';
+}
+
+String File::getSeparatorString()
+{
+    static const String separator("/");
+    return separator;
+}
 
 //==============================================================================
 File File::getCurrentWorkingDirectory()
@@ -348,7 +356,7 @@ bool File::hasWriteAccess() const
         return (hasEffectiveRootFilePermissions()
              || access (fullPath.toUTF8(), W_OK) == 0);
 
-    if ((! isDirectory()) && fullPath.containsChar (separator))
+    if ((! isDirectory()) && fullPath.containsChar (getSeparator()))
         return getParentDirectory().hasWriteAccess();
 
     return false;
@@ -1105,7 +1113,7 @@ public:
         // Looks like you're trying to launch a non-existent exe or a folder (perhaps on OSX
         // you're trying to launch the .app folder rather than the actual binary inside it?)
         jassert (File::getCurrentWorkingDirectory().getChildFile (exe).existsAsFile()
-                  || ! exe.containsChar (File::separator));
+                  || ! exe.containsChar (File::getSeparator()));
 
         int pipeHandles[2] = { 0 };
 

@@ -927,12 +927,12 @@ public:
     /** The system-specific file separator character.
         On Windows, this will be '\', on Mac/Linux, it'll be '/'
     */
-    static const juce_wchar separator;
+    static juce_wchar getSeparator();
 
     /** The system-specific file separator character, as a string.
         On Windows, this will be '\', on Mac/Linux, it'll be '/'
     */
-    static const String separatorString;
+    static String getSeparatorString();
 
     //==============================================================================
     /** Returns a version of a filename with any illegal characters removed.
