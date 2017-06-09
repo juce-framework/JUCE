@@ -542,7 +542,7 @@ public:
                 if (old == callbackToUse)
                     break;
 
-                if (callback.compareAndSetValue (callbackToUse, old) == old)
+                if (callback.compareAndSetBool (callbackToUse, old))
                     break;
 
                 Thread::sleep (1);

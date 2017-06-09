@@ -378,16 +378,12 @@ public:
         static void testFloat (UnitTest& test)
         {
             Atomic<Type> a, b;
-            a = (Type) 21;
+            a = (Type) 101;
             a.memoryBarrier();
 
             /*  These are some simple test cases to check the atomics - let me know
                 if any of these assertions fail on your system!
             */
-            test.expect (a.get() == (Type) 21);
-            test.expect (a.compareAndSetValue ((Type) 100, (Type) 50) == (Type) 21);
-            test.expect (a.get() == (Type) 21);
-            test.expect (a.compareAndSetValue ((Type) 101, a.get()) == (Type) 21);
             test.expect (a.get() == (Type) 101);
             test.expect (! a.compareAndSetBool ((Type) 300, (Type) 200));
             test.expect (a.get() == (Type) 101);

@@ -113,6 +113,11 @@
  #include "../misc/juce_StdFunctionCompat.h"
 #endif
 
+// Include std::atomic if it's supported by the compiler
+#if JUCE_ATOMIC_AVAILABLE
+ #include <atomic>
+#endif
+
 //==============================================================================
 // DLL building settings on Windows
 #if JUCE_MSVC
