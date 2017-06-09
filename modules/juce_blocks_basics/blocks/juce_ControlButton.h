@@ -70,7 +70,17 @@ public:
         button4,
         button5,
         button6,
-        button7
+        button7,
+
+        // touch block buttons
+        velocitySensitivity,
+        glideSensitivity,
+        slideSensitivity,
+        pressSensitivity,
+        liftSensitivity,
+        fixedVelocity,
+        glideLock,
+        pianoMode
     };
 
     /** Returns the button's type. */

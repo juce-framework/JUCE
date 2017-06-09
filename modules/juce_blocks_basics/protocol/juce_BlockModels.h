@@ -32,6 +32,8 @@ struct BlockDataSheet
         if (serialNumber.isLiveBlock())     initialiseForControlBlockLive();
         if (serialNumber.isLoopBlock())     initialiseForControlBlockLoop();
         if (serialNumber.isDevCtrlBlock())  initialiseForControlBlockDeveloper();
+        if (serialNumber.isTouchBlock())    initialiseForControlBlockTouch();
+        if (serialNumber.isSeaboardBlock()) initialiseForSeaboardBlock();
     }
 
     Block::ConnectionPort convertPortIndexToConnectorPort (BlocksProtocol::ConnectorPort port) const noexcept
@@ -139,6 +141,21 @@ private:
                                 ControlButton::ButtonFunction::up);
     }
 
+    void initialiseForControlBlockTouch()
+    {
+        initialiseControlBlock ("Touch BLOCK", Block::Type::touchBlock,
+                                ControlButton::ButtonFunction::velocitySensitivity,
+                                ControlButton::ButtonFunction::glideSensitivity,
+                                ControlButton::ButtonFunction::slideSensitivity,
+                                ControlButton::ButtonFunction::pressSensitivity,
+                                ControlButton::ButtonFunction::liftSensitivity,
+                                ControlButton::ButtonFunction::fixedVelocity,
+                                ControlButton::ButtonFunction::glideLock,
+                                ControlButton::ButtonFunction::pianoMode,
+                                ControlButton::ButtonFunction::down,
+                                ControlButton::ButtonFunction::up);
+    }
+
     void initialiseControlBlock (const char* name, Block::Type type,
                                  ControlButton::ButtonFunction b1, ControlButton::ButtonFunction b2,
                                  ControlButton::ButtonFunction b3, ControlButton::ButtonFunction b4,
@@ -177,6 +194,27 @@ private:
                     b10, x5, y2);
 
         numLEDRowLEDs = 15;
+    }
+
+    void initialiseForSeaboardBlock()
+    {
+        apiType = Block::Type::seaboardBlock;
+
+        description = "Seaboard BLOCK (6x3)";
+
+        widthUnits  = 6;
+        heightUnits = 3;
+
+        lightGridWidth = 0;
+        lightGridHeight = 0;
+        numKeywaves = 24;
+
+        addPorts (2, 1, 0, 1);
+
+        hasTouchSurface = true;
+        programAndHeapSize = BlocksProtocol::padBlockProgramAndHeapSize;
+
+        addModeButton();
     }
 
     //==============================================================================
@@ -258,6 +296,15 @@ static const char* getButtonNameForFunction (ControlButton::ButtonFunction fn) n
         case BF::button5:       return "5";
         case BF::button6:       return "6";
         case BF::button7:       return "7";
+
+        case BF::velocitySensitivity:   return "Velocity Sensitivity";
+        case BF::glideSensitivity:      return "Glide Sensitivity";
+        case BF::slideSensitivity:      return "Slide Sensitivity";
+        case BF::pressSensitivity:      return "Press Sensitivity";
+        case BF::liftSensitivity:       return "Lift Sensitivity";
+        case BF::fixedVelocity: return "Fixed Velocity";
+        case BF::glideLock:     return "Glide Lock";
+        case BF::pianoMode:     return "Piano Mode";
     }
 
     jassertfalse;

@@ -309,6 +309,7 @@ struct PhysicalTopologySource::Internal
         Block::UID uid;
         BlocksProtocol::TopologyIndex index;
         BlocksProtocol::BlockSerialNumber serial;
+        BlocksProtocol::VersionNumber version;
         bool isMaster;
     };
 
@@ -324,9 +325,12 @@ struct PhysicalTopologySource::Internal
 
         for (auto& device : devices)
         {
+            BlocksProtocol::VersionNumber version;
+
             result.add ({ getBlockUIDFromSerialNumber (device.serialNumber),
                           device.index,
                           device.serialNumber,
+                          version,
                           isFirst });
 
             isFirst = false;
@@ -351,6 +355,23 @@ struct PhysicalTopologySource::Internal
                 return true;
 
         return false;
+    }
+
+    static bool versionNumberAddedToBlock (const juce::Array<DeviceInfo>& devices, Block::UID uid, juce::String version) noexcept
+    {
+        if (version.length() == 0)
+            for (auto&& d : devices)
+                if (d.uid == uid && d.version.length)
+                    return true;
+
+        return false;
+    }
+
+    static void setVersionNumberForBlock (const juce::Array<DeviceInfo>& devices, Block& block) noexcept
+    {
+        for (auto&& d : devices)
+            if (d.uid == block.uid)
+                block.versionNumber = juce::String ((const char*) d.version.version, d.version.length);
     }
 
     //==============================================================================
@@ -468,6 +489,12 @@ struct PhysicalTopologySource::Internal
             incomingTopologyConnections.ensureStorageAllocated (numConnections);
         }
 
+        void extendTopology (int numDevices, int numConnections)
+        {
+            incomingTopologyDevices.ensureStorageAllocated (incomingTopologyDevices.size() + numDevices);
+            incomingTopologyConnections.ensureStorageAllocated (incomingTopologyConnections.size() + numConnections);
+        }
+
         void handleTopologyDevice (BlocksProtocol::DeviceStatus status)
         {
             incomingTopologyDevices.add (status);
@@ -488,6 +515,19 @@ struct PhysicalTopologySource::Internal
 
             lastTopologyReceiveTime = juce::Time::getCurrentTime();
             blockPings.clear();
+        }
+
+        void handleVersion (BlocksProtocol::DeviceVersion version)
+        {
+            for (auto& d : currentDeviceInfo)
+            {
+                if (d.index == version.index)
+                {
+                    d.version = version.version;
+                    detector.handleTopologyChange();
+                    return;
+                }
+            }
         }
 
         void handleControlButtonUpDown (BlocksProtocol::TopologyIndex deviceIndex, uint32 timestamp,
@@ -553,6 +593,24 @@ struct PhysicalTopologySource::Internal
         {
             if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
                 detector.handleFirmwareUpdateACK (deviceID, (uint8) resultCode.get());
+        }
+
+        void handleConfigUpdateMessage (BlocksProtocol::TopologyIndex deviceIndex, int32 item, int32 value, int32 min, int32 max)
+        {
+            if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
+                detector.handleConfigUpdateMessage (deviceID, item, value, min, max);
+        }
+
+        void handleConfigSetMessage (BlocksProtocol::TopologyIndex deviceIndex, int32 item, int32 value)
+        {
+            if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
+                detector.handleConfigSetMessage (deviceID, item, value);
+        }
+
+        void handleConfigFactorySyncEndMessage (BlocksProtocol::TopologyIndex deviceIndex)
+        {
+            if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
+                detector.handleConfigFactorySyncEndMessage (deviceID);
         }
 
         void handleLogMessage (BlocksProtocol::TopologyIndex deviceIndex, const String& message)
@@ -828,12 +886,16 @@ struct PhysicalTopologySource::Internal
 
                         currentTopology.blocks.remove (i);
                     }
+                    else if (versionNumberAddedToBlock (newDeviceInfo, block->uid, block->versionNumber))
+                    {
+                        setVersionNumberForBlock (newDeviceInfo, *block);
+                    }
                 }
 
                 for (auto& info : newDeviceInfo)
                     if (info.serial.isValid())
                         if (! containsBlockWithUID (currentTopology.blocks, getBlockUIDFromSerialNumber (info.serial)))
-                            currentTopology.blocks.add (new BlockImplementation (info.serial, *this, info.isMaster));
+                            currentTopology.blocks.add (new BlockImplementation (info.serial, *this, info.version, info.isMaster));
 
                 currentTopology.connections.swapWith (newDeviceConnections);
             }
@@ -862,6 +924,48 @@ struct PhysicalTopologySource::Internal
                 if (b->uid == deviceID)
                     if (auto bi = BlockImplementation::getFrom (*b))
                         bi->handleFirmwareUpdateACK (resultCode);
+        }
+
+        void handleConfigUpdateMessage (Block::UID deviceID, int32 item, int32 value, int32 min, int32 max)
+        {
+            for (auto&& b : currentTopology.blocks)
+                if (b->uid == deviceID)
+                    if (auto bi = BlockImplementation::getFrom (*b))
+                        bi->handleConfigUpdateMessage (item, value, min, max);
+        }
+
+        void notifyBlockOfConfigChange (BlockImplementation& bi, uint32 item)
+        {
+            if (auto configChangedCallback = bi.configChangedCallback)
+            {
+                if (item >= bi.getMaxConfigIndex())
+                    configChangedCallback (bi, {}, item);
+                else
+                    configChangedCallback (bi, bi.getLocalConfigMetaData (item), item);
+            }
+        }
+
+        void handleConfigSetMessage (Block::UID deviceID, int32 item, int32 value)
+        {
+            for (auto&& b : currentTopology.blocks)
+            {
+                if (b->uid == deviceID)
+                {
+                    if (auto bi = BlockImplementation::getFrom (*b))
+                    {
+                        bi->handleConfigSetMessage (item, value);
+                        notifyBlockOfConfigChange (*bi, uint32 (item));
+                    }
+                }
+            }
+        }
+
+        void handleConfigFactorySyncEndMessage (Block::UID deviceID)
+        {
+            for (auto&& b : currentTopology.blocks)
+                if (b->uid == deviceID)
+                    if (auto bi = BlockImplementation::getFrom (*b))
+                        notifyBlockOfConfigChange (*bi, bi->getMaxConfigIndex());
         }
 
         void handleLogMessage (Block::UID deviceID, const String& message) const
@@ -930,9 +1034,9 @@ struct PhysicalTopologySource::Internal
         //==============================================================================
         int getIndexFromDeviceID (Block::UID deviceID) const noexcept
         {
-            for (auto c : connectedDeviceGroups)
+            for (auto* c : connectedDeviceGroups)
             {
-                const int index = c->getIndexFromDeviceID (deviceID);
+                auto index = c->getIndexFromDeviceID (deviceID);
 
                 if (index >= 0)
                     return index;
@@ -944,7 +1048,7 @@ struct PhysicalTopologySource::Internal
         template <typename PacketBuilder>
         bool sendMessageToDevice (Block::UID deviceID, const PacketBuilder& builder) const
         {
-            for (auto c : connectedDeviceGroups)
+            for (auto* c : connectedDeviceGroups)
                 if (c->getIndexFromDeviceID (deviceID) >= 0)
                     return c->sendMessageToDevice (builder);
 
@@ -953,7 +1057,7 @@ struct PhysicalTopologySource::Internal
 
         static Detector* getFrom (Block& b) noexcept
         {
-            if (auto bi = BlockImplementation::getFrom (b))
+            if (auto* bi = BlockImplementation::getFrom (b))
                 return &(bi->detector);
 
             jassertfalse;
@@ -1050,9 +1154,13 @@ struct PhysicalTopologySource::Internal
                                   private MIDIDeviceConnection::Listener,
                                   private Timer
     {
-        BlockImplementation (const BlocksProtocol::BlockSerialNumber& serial, Detector& detectorToUse, bool master)
-            : Block (juce::String ((const char*) serial.serial, sizeof (serial.serial))), modelData (serial),
-              remoteHeap (modelData.programAndHeapSize), detector (detectorToUse), isMaster (master)
+        BlockImplementation (const BlocksProtocol::BlockSerialNumber& serial, Detector& detectorToUse, BlocksProtocol::VersionNumber version, bool master)
+            : Block (juce::String ((const char*) serial.serial, sizeof (serial.serial)),
+                     juce::String ((const char*) version.version, version.length)),
+              modelData (serial),
+              remoteHeap (modelData.programAndHeapSize),
+              detector (detectorToUse),
+              isMaster (master)
         {
             sendCommandMessage (BlocksProtocol::beginAPIMode);
 
@@ -1060,21 +1168,24 @@ struct PhysicalTopologySource::Internal
                 touchSurface.reset (new TouchSurfaceImplementation (*this));
 
             int i = 0;
-            for (auto b : modelData.buttons)
+            for (auto&& b : modelData.buttons)
                 controlButtons.add (new ControlButtonImplementation (*this, i++, b));
 
             if (modelData.lightGridWidth > 0 && modelData.lightGridHeight > 0)
                 ledGrid.reset (new LEDGridImplementation (*this));
 
-            for (auto s : modelData.statusLEDs)
+            for (auto&& s : modelData.statusLEDs)
                 statusLights.add (new StatusLightImplementation (*this, s));
 
             if (modelData.numLEDRowLEDs > 0)
                 ledRow.reset (new LEDRowImplementation (*this));
 
             listenerToMidiConnection = dynamic_cast<MIDIDeviceConnection*> (detector.getDeviceConnectionFor (*this));
+
             if (listenerToMidiConnection != nullptr)
                 listenerToMidiConnection->addListener (this);
+
+            config.setDeviceComms (listenerToMidiConnection);
         }
 
         ~BlockImplementation()
@@ -1189,6 +1300,7 @@ struct PhysicalTopologySource::Internal
 
             return type == Block::Type::liveBlock
                 || type == Block::Type::loopBlock
+                || type == Block::Type::touchBlock
                 || type == Block::Type::developerControlBlock;
         }
 
@@ -1242,7 +1354,7 @@ struct PhysicalTopologySource::Internal
                     if (compiler.getCompiledProgram().getTotalSpaceNeeded() > getMemorySize())
                         return Result::fail ("Program too large!");
 
-                    size_t size = (size_t) compiler.compiledObjectCode.size();
+                    auto size = (size_t) compiler.compiledObjectCode.size();
                     programSize = (uint32) size;
 
                     remoteHeap.resetDataRangeToUnknown (0, remoteHeap.blockSize);
@@ -1252,6 +1364,11 @@ struct PhysicalTopologySource::Internal
                     remoteHeap.resetDataRangeToUnknown (0, (uint32) size);
                     remoteHeap.setBytes (0, compiler.compiledObjectCode.begin(), size);
                     remoteHeap.sendChanges (*this, true);
+
+                    this->resetConfigListActiveStatus();
+
+                    if (auto changeCallback = this->configChangedCallback)
+                        changeCallback (*this, {}, this->getMaxConfigIndex());
                 }
                 else
                 {
@@ -1383,6 +1500,16 @@ struct PhysicalTopologySource::Internal
             }
         }
 
+        void handleConfigUpdateMessage (int32 item, int32 value, int32 min, int32 max)
+        {
+            config.handleConfigUpdateMessage (item, value, min, max);
+        }
+
+        void handleConfigSetMessage(int32 item, int32 value)
+        {
+            config.handleConfigSetMessage (item, value);
+        }
+
         void pingFromDevice()
         {
             lastMessageReceiveTime = juce::Time::getCurrentTime();
@@ -1424,6 +1551,71 @@ struct PhysicalTopologySource::Internal
         }
 
         //==============================================================================
+        int32 getLocalConfigValue (uint32 item) override
+        {
+            config.setDeviceIndex ((TopologyIndex) getDeviceIndex());
+            return config.getItemValue ((BlocksProtocol::ConfigItemId) item);
+        }
+
+        void setLocalConfigValue (uint32 item, int32 value) override
+        {
+            config.setDeviceIndex ((TopologyIndex) getDeviceIndex());
+            config.setItemValue ((BlocksProtocol::ConfigItemId) item, value);
+        }
+
+        void setLocalConfigRange (uint32 item, int32 min, int32 max) override
+        {
+            config.setDeviceIndex ((TopologyIndex) getDeviceIndex());
+            config.setItemMin ((BlocksProtocol::ConfigItemId) item, min);
+            config.setItemMax ((BlocksProtocol::ConfigItemId) item, max);
+        }
+
+        void setLocalConfigItemActive (uint32 item, bool isActive) override
+        {
+            config.setDeviceIndex ((TopologyIndex) getDeviceIndex());
+            config.setItemActive ((BlocksProtocol::ConfigItemId) item, isActive);
+        }
+
+        bool isLocalConfigItemActive (uint32 item) override
+        {
+            config.setDeviceIndex ((TopologyIndex) getDeviceIndex());
+            return config.getItemActive ((BlocksProtocol::ConfigItemId) item);
+        }
+
+        uint32 getMaxConfigIndex () override
+        {
+            return uint32 (BlocksProtocol::maxConfigIndex);
+        }
+
+        bool isValidUserConfigIndex (uint32 item) override
+        {
+            return item >= (uint32) BlocksProtocol::ConfigItemId::user0
+                && item < (uint32) (BlocksProtocol::ConfigItemId::user0 + numberOfUserConfigs);
+        }
+
+        ConfigMetaData getLocalConfigMetaData (uint32 item) override
+        {
+            config.setDeviceIndex ((TopologyIndex) getDeviceIndex());
+            return config.getMetaData ((BlocksProtocol::ConfigItemId) item);
+        }
+
+        void requestFactoryConfigSync() override
+        {
+            config.setDeviceIndex ((TopologyIndex) getDeviceIndex());
+            config.requestFactoryConfigSync();
+        }
+
+        void resetConfigListActiveStatus() override
+        {
+            config.resetConfigListActiveStatus();
+        }
+
+        void setConfigChangedCallback (std::function<void(Block&, const ConfigMetaData&, uint32)> configChanged) override
+        {
+            configChangedCallback = configChanged;
+        }
+
+        //==============================================================================
         std::unique_ptr<TouchSurface> touchSurface;
         juce::OwnedArray<ControlButton> controlButtons;
         std::unique_ptr<LEDGridImplementation> ledGrid;
@@ -1448,11 +1640,14 @@ struct PhysicalTopologySource::Internal
         Detector& detector;
         juce::Time lastMessageSendTime, lastMessageReceiveTime;
 
+        BlockConfigManager config;
+        std::function<void(Block&, const ConfigMetaData&, uint32)> configChangedCallback;
+
     private:
         std::unique_ptr<Program> program;
         uint32 programSize = 0;
 
-        std::function<void (uint8)> firmwarePacketAckCallback;
+        std::function<void(uint8)> firmwarePacketAckCallback;
 
         uint32 resetMessagesSent = 0;
         bool isStillConnected = true;

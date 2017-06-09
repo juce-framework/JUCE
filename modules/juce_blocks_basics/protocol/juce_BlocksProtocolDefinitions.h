@@ -47,6 +47,7 @@ enum class MessageFromDevice
     firmwareUpdateACK       = 0x03,
     deviceTopologyExtend    = 0x04,
     deviceTopologyEnd       = 0x05,
+    deviceVersionList       = 0x06,
 
     touchStart              = 0x10,
     touchMove               = 0x11,
@@ -55,6 +56,8 @@ enum class MessageFromDevice
     touchStartWithVelocity  = 0x13,
     touchMoveWithVelocity   = 0x14,
     touchEndWithVelocity    = 0x15,
+
+    configMessage           = 0x18,
 
     controlButtonDown       = 0x20,
     controlButtonUp         = 0x21,
@@ -70,7 +73,9 @@ enum class MessageFromHost
     deviceCommandMessage    = 0x01,
     sharedDataChange        = 0x02,
     programEventMessage     = 0x03,
-    firmwareUpdatePacket    = 0x04
+    firmwareUpdatePacket    = 0x04,
+
+    configMessage           = 0x10
 };
 
 
@@ -120,17 +125,25 @@ struct BlockSerialNumber
             if (c == 0)
                 return false;
 
-        return isAnyControlBlock() || isPadBlock();
+        return isAnyControlBlock() || isPadBlock() || isSeaboardBlock();
     }
 
     bool isPadBlock() const noexcept            { return hasPrefix ("LPB"); }
     bool isLiveBlock() const noexcept           { return hasPrefix ("LIC"); }
     bool isLoopBlock() const noexcept           { return hasPrefix ("LOC"); }
     bool isDevCtrlBlock() const noexcept        { return hasPrefix ("DCB"); }
+    bool isTouchBlock() const noexcept          { return hasPrefix ("TCB"); }
+    bool isSeaboardBlock() const noexcept       { return hasPrefix ("SBB"); }
 
-    bool isAnyControlBlock() const noexcept     { return isLiveBlock() || isLoopBlock() || isDevCtrlBlock(); }
+    bool isAnyControlBlock() const noexcept     { return isLiveBlock() || isLoopBlock() || isDevCtrlBlock() || isTouchBlock(); }
 
     bool hasPrefix (const char* prefix) const noexcept  { return memcmp (serial, prefix, 3) == 0; }
+};
+
+struct VersionNumber
+{
+    uint8 version[21] = {};
+    uint8 length = 0;
 };
 
 struct DeviceStatus
@@ -147,8 +160,92 @@ struct DeviceConnection
     ConnectorPort port1, port2;
 };
 
+struct DeviceVersion
+{
+    TopologyIndex index;
+    VersionNumber version;
+};
+
 static constexpr uint8 maxBlocksInTopologyPacket = 6;
 static constexpr uint8 maxConnectionsInTopologyPacket = 24;
+
+//==============================================================================
+/** Configuration Item Identifiers. */
+enum ConfigItemId
+{
+    // MIDI
+    midiStartChannel    = 0,
+    midiEndChannel      = 1,
+    midiUseMPE          = 2,
+    pitchBendRange      = 3,
+    octave              = 4,
+    transpose           = 5,
+    slideCC             = 6,
+    slideMode           = 7,
+    octaveTopology      = 8,
+    // Touch
+    velocitySensitivity = 10,
+    glideSensitivity    = 11,
+    slideSensitivity    = 12,
+    pressureSensitivity = 13,
+    liftSensitivity     = 14,
+    fixedVelocity       = 15,
+    fixedVelocityValue  = 16,
+    pianoMode           = 17,
+    glideLock           = 18,
+    // Live
+    mode                = 20,
+    volume              = 21,
+    scale               = 22,
+    hideMode            = 23,
+    chord               = 24,
+    arpPattern          = 25,
+    tempo               = 26,
+    // Tracking
+    xTrackingMode       = 30,
+    yTrackingMode       = 31,
+    zTrackingMode       = 32,
+    // User
+    user0               = 64,
+    user1               = 65,
+    user2               = 66,
+    user3               = 67,
+    user4               = 68,
+    user5               = 69,
+    user6               = 70,
+    user7               = 71,
+    user8               = 72,
+    user9               = 73,
+    user10              = 74,
+    user11              = 75,
+    user12              = 76,
+    user13              = 77,
+    user14              = 78,
+    user15              = 79,
+    user16              = 80,
+    user17              = 81,
+    user18              = 82,
+    user19              = 83,
+    user20              = 84,
+    user21              = 85,
+    user22              = 86,
+    user23              = 87,
+    user24              = 88,
+    user25              = 89,
+    user26              = 90,
+    user27              = 91,
+    user28              = 92,
+    user29              = 93,
+    user30              = 94,
+    user31              = 95
+};
+
+static constexpr uint8 numberOfUserConfigs = 32;
+static constexpr uint8 maxConfigIndex = uint8 (ConfigItemId::user0) + numberOfUserConfigs;
+
+static constexpr uint8 configUserConfigNameLength = 32;
+static constexpr uint8 configMaxOptions = 8;
+static constexpr uint8 configOptionNameLength = 16;
 
 //==============================================================================
 /** The coordinates of a touch. */
@@ -196,6 +293,23 @@ enum DeviceCommands
 };
 
 using DeviceCommand = IntegerWithBitSize<9>;
+
+//==============================================================================
+enum ConfigCommands
+{
+    setConfig                   = 0x00,
+    requestConfig               = 0x01, // Request a config update
+    requestFactorySync          = 0x02, // Requests all active factory config data
+    requestUserSync             = 0x03, // Requests all active user config data
+    updateConfig                = 0x04, // Set value, min and max
+    updateUserConfig            = 0x05, // As above but contains user config metadata
+    setConfigState              = 0x06, // Set config activation state and whether it is saved in flash
+    factorySyncEnd              = 0x07
+};
+
+using ConfigCommand = IntegerWithBitSize<4>;
+using ConfigItemIndex = IntegerWithBitSize<8>;
+using ConfigItemValue = IntegerWithBitSize<32>;
 
 //==============================================================================
 /** An ID for a control-block button type */
@@ -259,6 +373,10 @@ enum BitSizes
     firmwareUpdateACK        = MessageType::bits + FirmwareUpdateACKCode::bits,
 
     controlButtonMessage     = typeDeviceAndTime + ControlButtonID::bits,
+
+    configSetMessage         = MessageType::bits + ConfigCommand::bits + ConfigItemIndex::bits + ConfigItemValue::bits,
+    configRespMessage        = MessageType::bits + ConfigCommand::bits + ConfigItemIndex::bits + (ConfigItemValue::bits * 3),
+    configSyncEndMessage     = MessageType::bits + ConfigCommand::bits,
 };
 
 //==============================================================================
@@ -299,10 +417,14 @@ static constexpr const char* ledProgramLittleFootFunctions[] =
     "getVerticalDistFromMaster/i",
     "getAngleFromMaster/i",
     "setAutoRotate/vb",
+    "getClusterIndex/i",
     "getClusterWidth/i",
     "getClusterHeight/i",
     "getClusterXpos/i",
     "getClusterYpos/i",
+    "getNumBlocksInCurrentCluster/i",
+    "getBlockIdForBlockInCluster/ii",
+    "isMasterInCurrentCluster/b",
     "makeARGB/iiiii",
     "blendARGB/iii",
     "fillPixel/viii",
@@ -317,6 +439,7 @@ static constexpr const char* ledProgramLittleFootFunctions[] =
     "drawNumber/viiii",
     "clearDisplay/v",
     "clearDisplay/vi",
+    "displayBatteryLevel/v",
     "sendMIDI/vi",
     "sendMIDI/vii",
     "sendMIDI/viii",
@@ -331,5 +454,19 @@ static constexpr const char* ledProgramLittleFootFunctions[] =
     "deassignChannel/vii",
     "getControlChannel/i",
     "useMPEDuplicateFilter/vb",
+    "getSensorValue/iii",
+    "handleTouchAsSeaboard/vi",
+    "setPowerSavingEnabled/vb",
+    "getLocalConfig/ii",
+    "setLocalConfig/vii",
+    "requestRemoteConfig/vii",
+    "setRemoteConfig/viii",
+    "setLocalConfigItemRange/viii",
+    "setLocalConfigActiveState/vibb",
+    "linkBlockIDtoController/vi",
+    "repaintControl/v",
+    "onControlPress/vi",
+    "onControlRelease/vi",
+    "initControl/viiiiiiiii",
     nullptr
 };

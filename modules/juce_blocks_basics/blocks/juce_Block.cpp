@@ -52,6 +52,11 @@ Block::Block (const juce::String& serial)
 {
 }
 
+Block::Block (const juce::String& serial, const juce::String& version)
+   : serialNumber (serial), versionNumber (version), uid (getBlockUIDFromSerialNumber (serial))
+{
+}
+
 Block::~Block() {}
 
 void Block::addDataInputPortListener (DataInputPortListener* listener)      { dataInputPortListeners.add (listener); }

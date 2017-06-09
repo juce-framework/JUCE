@@ -225,6 +225,39 @@ struct HostPacketBuilder
     }
 
     //==============================================================================
+    bool addConfigSetMessage (int32 item, int32 value)
+    {
+        writeMessageType (MessageFromHost::configMessage);
+        ConfigCommand type = ConfigCommands::setConfig;
+        data << type << IntegerWithBitSize<8> ((uint32) item) << IntegerWithBitSize<32> ((uint32) value);
+        return true;
+    }
+
+    bool addRequestMessage (int32 item)
+    {
+        writeMessageType (MessageFromHost::configMessage);
+        ConfigCommand type = ConfigCommands::requestConfig;
+        data << type << IntegerWithBitSize<32> (0) << IntegerWithBitSize<8> ((uint32) item);
+        return true;
+    }
+
+    bool addRequestFactorySyncMessage()
+    {
+        writeMessageType (MessageFromHost::configMessage);
+        ConfigCommand type = ConfigCommands::requestFactorySync;
+        data << type;
+        return true;
+    }
+
+    bool addRequestUserSyncMessage()
+    {
+        writeMessageType (MessageFromHost::configMessage);
+        ConfigCommand type = ConfigCommands::requestUserSync;
+        data << type;
+        return true;
+    }
+
+    //==============================================================================
 private:
     Packed7BitArrayBuilder<maxPacketBytes> data;
 
