@@ -93,6 +93,7 @@ namespace Ids
     DECLARE_ID (customXcodeFlags);
     DECLARE_ID (customXcassetsFolder);
     DECLARE_ID (customXcodeResourceFolders);
+    DECLARE_ID (plistPreprocessorDefinitions);
     DECLARE_ID (cppLanguageStandard);
     DECLARE_ID (cppLibType);
     DECLARE_ID (codeSigningIdentity);
@@ -162,6 +163,9 @@ namespace Ids
     DECLARE_ID (useLocalCopy);
     DECLARE_ID (overwriteOnSave);
     DECLARE_ID (microphonePermissionNeeded);
+    DECLARE_ID (androidRepositories);
+    DECLARE_ID (androidDependencies);
+    DECLARE_ID (androidAdditionalXmlValueResources);
     DECLARE_ID (androidActivityClass);
     DECLARE_ID (androidActivitySubClassName);
     DECLARE_ID (androidVersionCode);
@@ -169,6 +173,8 @@ namespace Ids
     DECLARE_ID (androidNDKPath);
     DECLARE_ID (androidInternetNeeded);
     DECLARE_ID (androidArchitectures);
+    DECLARE_ID (androidManifestCustomXmlElements);
+    DECLARE_ID (androidCustomStringXmlElements);
     DECLARE_ID (androidBluetoothNeeded);
     DECLARE_ID (androidExternalReadNeeded);
     DECLARE_ID (androidExternalWriteNeeded);
