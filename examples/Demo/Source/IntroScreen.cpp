@@ -39,7 +39,6 @@ public:
         addAndMakeVisible (linkButton);
         addAndMakeVisible (logo);
 
-//        versionLabel.setColour (Label::textColourId, Colours::white);
         versionLabel.setText (String ("{version}  built on {date}")
                                   .replace ("{version}", SystemStats::getJUCEVersion())
                                   .replace ("{date}",    String (__DATE__).replace ("  ", " ")),
