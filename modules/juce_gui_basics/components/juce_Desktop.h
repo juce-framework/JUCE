@@ -312,6 +312,11 @@ public:
     */
     void setOrientationsEnabled (int allowedOrientations);
 
+    /** Returns the set of orientations the display is allowed to rotate to.
+        @see setOrientationsEnabled
+    */
+    int getOrientationsEnabled() const noexcept;
+
     /** Returns whether the display is allowed to auto-rotate to the given orientation.
         Each orientation can be enabled using setOrientationEnabled(). By default, all orientations are allowed.
     */
