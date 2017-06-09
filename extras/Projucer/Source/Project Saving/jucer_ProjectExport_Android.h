@@ -88,8 +88,9 @@ public:
     }
 
     //==============================================================================
-    CachedValue<String> androidScreenOrientation, androidActivityClass, androidActivitySubClassName,
-                        androidVersionCode, androidMinimumSDK, androidTheme,
+    CachedValue<String> androidRepositories, androidDependencies,
+                        androidScreenOrientation, androidActivityClass, androidActivitySubClassName,
+                        androidManifestCustomXmlElements, androidVersionCode, androidMinimumSDK, androidTheme,
                         androidSharedLibraries, androidStaticLibraries, androidExtraAssetsFolder;
 
     CachedValue<bool>   androidInternetNeeded, androidMicNeeded, androidBluetoothNeeded,
@@ -103,9 +104,12 @@ public:
     //==============================================================================
     AndroidProjectExporter (Project& p, const ValueTree& t)
         : ProjectExporter (p, t),
+          androidRepositories (settings, Ids::androidRepositories, nullptr, ""),
+          androidDependencies (settings, Ids::androidDependencies, nullptr, ""),
           androidScreenOrientation (settings, Ids::androidScreenOrientation, nullptr, "unspecified"),
           androidActivityClass (settings, Ids::androidActivityClass, nullptr, createDefaultClassName()),
           androidActivitySubClassName (settings, Ids::androidActivitySubClassName, nullptr),
+          androidManifestCustomXmlElements (settings, Ids::androidManifestCustomXmlElements, nullptr, ""),
           androidVersionCode (settings, Ids::androidVersionCode, nullptr, "1"),
           androidMinimumSDK (settings, Ids::androidMinimumSDK, nullptr, "10"),
           androidTheme (settings, Ids::androidTheme, nullptr),
@@ -199,6 +203,8 @@ public:
             if (! isLibrary())
                 copyActivityJavaFiles (modules, javaTarget, package);
         }
+
+        copyExtraResourceFiles();
 
         writeFile (targetFolder, "settings.gradle",  isLibrary() ? "include ':lib'" : "include ':app'");
         writeFile (targetFolder, "build.gradle",     getProjectBuildGradleFileContent());
@@ -312,6 +318,12 @@ protected:
         Value getArchitecturesValue()           { return getValue (Ids::androidArchitectures); }
         String getArchitectures() const         { return config [Ids::androidArchitectures]; }
 
+        Value getAdditionalXmlResourcesValue()    { return getValue (Ids::androidAdditionalXmlValueResources); }
+        String getAdditionalXmlResources() const  { return config [Ids::androidAdditionalXmlValueResources]; }
+
+        Value getCustomStringsXmlValue()        { return getValue (Ids::androidCustomStringXmlElements); }
+        String getCustomStringsXml() const      { return config [Ids::androidCustomStringXmlElements]; }
+
         var getDefaultOptimisationLevel() const override    { return var ((int) (isDebug() ? gccO0 : gccO3)); }
 
         void createConfigProperties (PropertyListBuilder& props) override
@@ -320,6 +332,13 @@ protected:
 
             props.add (new TextPropertyComponent (getArchitecturesValue(), "Architectures", 256, false),
                        "A list of the ARM architectures to build (for a fat binary). Leave empty to build for all possible android archiftectures.");
+
+            props.add (new TextPropertyComponent (getAdditionalXmlResourcesValue(), "Extra Android XML Value Resources", 2048, true),
+                       "Paths to additional \"value resource\" files in XML format that should be included in the app (one per line). "
+                       "If you have additional XML resources that should be treated as value resources, add them here.");
+
+            props.add (new TextPropertyComponent (getCustomStringsXmlValue(), "Custom string.xml elements", 8192, true),
+                       "You can specify custom XML elements that will be added to string.xml as children of <resources> element.");
         }
 
         String getProductFlavourNameIdentifier() const
@@ -525,8 +544,10 @@ private:
         mo << getAndroidProductFlavours()                                         << newLine;
         mo << getAndroidVariantFilter()                                           << newLine;
 
+        mo << getAndroidRepositories()                                            << newLine;
+        mo << getAndroidDependencies()                                            << newLine;
 
-        mo << "}" << newLine;
+        mo << "}"                                                                 << newLine << newLine;
 
         return mo.toString();
     }
@@ -679,6 +700,40 @@ private:
         return mo.toString();
     }
 
+    String getAndroidRepositories() const
+    {
+        MemoryOutputStream mo;
+
+        juce::StringArray  repositories;
+        repositories.addLines (androidRepositories.get());
+
+        mo << "repositories {"                << newLine;
+
+        for (const auto& r : repositories)
+            mo << "    " << r << newLine;
+
+        mo << "}"                             << newLine;
+
+        return mo.toString();
+    }
+
+    String getAndroidDependencies() const
+    {
+        MemoryOutputStream mo;
+
+        juce::StringArray  dependencies;
+        dependencies.addLines (androidDependencies.get());
+
+        mo << "dependencies {"                << newLine;
+
+        for (const auto& d : dependencies)
+            mo << "    " << d << newLine;
+
+        mo << "}"                             << newLine;
+
+        return mo.toString();
+    }
+
     //==============================================================================
     String getLocalPropertiesFileContent() const
     {
@@ -705,6 +760,12 @@ private:
     {
         static const char* orientations[] = { "Portrait and Landscape", "Portrait", "Landscape", nullptr };
         static const char* orientationValues[] = { "unspecified", "portrait", "landscape", nullptr };
+
+        props.add (new TextPropertyComponent (androidRepositories.getPropertyAsValue(), "Module repositories", 32768, true),
+                   "Module repositories (one per line). These will be added to module-level gradle file repositories section. ");
+
+        props.add (new TextPropertyComponent (androidDependencies.getPropertyAsValue(), "Module dependencies", 32768, true),
+                   "Module dependencies (one per line). These will be added to module-level gradle file dependencies section. ");
 
         props.add (new ChoicePropertyComponent (androidScreenOrientation.getPropertyAsValue(), "Screen orientation", StringArray (orientations), Array<var> (orientationValues)),
                    "The screen orientations that this app should support");
@@ -752,6 +813,9 @@ private:
 
         props.add (new TextPropertyComponent (androidOtherPermissions.getPropertyAsValue(), "Custom permissions", 2048, false),
                    "A space-separated list of other permission flags that should be added to the manifest.");
+
+        props.add (new TextPropertyComponent (androidManifestCustomXmlElements.getPropertyAsValue(), "Custom manifest xml elements", 8192, true),
+                   "You can specify custom XML elements that will be added to AndroidManifest.xml as children of <application> element.");
     }
 
     //==============================================================================
@@ -890,6 +954,37 @@ private:
         }
     }
 
+    void copyExtraResourceFiles() const
+    {
+        for (ConstConfigIterator config (*this); config.next();)
+        {
+            const auto& cfg = dynamic_cast<const AndroidBuildConfiguration&> (*config);
+            const juce::String path = cfg.isDebug() ? "app/src/debug/res/values" : "app/src/release/res/values";
+
+            copyExtraResourceFiles (cfg.getAdditionalXmlResources(), path);
+        }
+    }
+
+    void copyExtraResourceFiles (const juce::String& xmlResources, const juce::String& dstRelativePath) const
+    {
+        juce::StringArray resourcePaths;
+        resourcePaths.addTokens (xmlResources, true);
+
+        const File parentFolder (getTargetFolder().getChildFile (dstRelativePath));
+
+        parentFolder.createDirectory();
+
+        for (const auto& path : resourcePaths)
+        {
+            juce::File file (getProject().getFile().getChildFile(path));
+
+            jassert (file.existsAsFile());
+
+            if (file.existsAsFile())
+                file.copyFileTo (parentFolder.getChildFile (file.getFileName()));
+        }
+    }
+
     String getActivityName() const
     {
         return androidActivityClass.get().fromLastOccurrenceOf (".", false, false);
@@ -939,13 +1034,24 @@ private:
     //==============================================================================
     void writeStringsXML (const File& folder) const
     {
-        XmlElement strings ("resources");
-        XmlElement* resourceName = strings.createNewChildElement ("string");
+        for (ConstConfigIterator config (*this); config.next();)
+        {
+            XmlElement strings ("resources");
+            XmlElement* resourceName = strings.createNewChildElement ("string");
 
-        resourceName->setAttribute ("name", "app_name");
-        resourceName->addTextElement (projectName);
+            resourceName->setAttribute ("name", "app_name");
+            resourceName->addTextElement (projectName);
 
-        writeXmlOrThrow (strings, folder.getChildFile ("app/src/main/res/values/string.xml"), "utf-8", 100, true);
+            const auto& cfg = dynamic_cast<const AndroidBuildConfiguration&> (*config);
+
+            for (XmlElement* e = XmlDocument::parse (cfg.getCustomStringsXml()); e != nullptr; e = e->getNextElement())
+                strings.addChildElement (e);
+
+            const juce::String dir     = cfg.isDebug() ? "debug" : "release";
+            const juce::String subPath = "app/src/" + dir + "/res/values/string.xml";
+
+            writeXmlOrThrow (strings, folder.getChildFile (subPath), "utf-8", 100, true);
+        }
     }
 
     void writeAndroidManifest (const File& folder) const
@@ -1282,6 +1388,9 @@ private:
             XmlElement* intent = act->createNewChildElement ("intent-filter");
             intent->createNewChildElement ("action")->setAttribute ("android:name", "android.intent.action.MAIN");
             intent->createNewChildElement ("category")->setAttribute ("android:name", "android.intent.category.LAUNCHER");
+
+            for (XmlElement* e = XmlDocument::parse (androidManifestCustomXmlElements.get()); e != nullptr; e = e->getNextElement())
+                app->addChildElement (e);
         }
 
         return manifest;
