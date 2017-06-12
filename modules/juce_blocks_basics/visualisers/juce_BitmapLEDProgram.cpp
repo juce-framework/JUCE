@@ -64,10 +64,10 @@ juce::String BitmapLEDProgram::getLittleFootProgram()
             {
                 int bit = (x + y * NUM_COLUMNS) * 16;
 
-                setLED (x, y, makeARGB (255,
-                                        getHeapBits (bit,      5) << 3,
-                                        getHeapBits (bit + 5,  6) << 2,
-                                        getHeapBits (bit + 11, 5) << 3));
+                fillPixel (makeARGB (255,
+                                     getHeapBits (bit,      5) << 3,
+                                     getHeapBits (bit + 5,  6) << 2,
+                                     getHeapBits (bit + 11, 5) << 3), x, y);
             }
         }
     }
