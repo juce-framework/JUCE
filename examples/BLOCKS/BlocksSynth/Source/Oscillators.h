@@ -61,7 +61,7 @@ public:
     void pitchWheelMoved (int newValue) override
     {
         // Change the phase increment based on pitch bend amount
-        double frequencyOffset = ((newValue > 0 ? maxFreq : minFreq) * (newValue / 127.0));
+        auto frequencyOffset = ((newValue > 0 ? maxFreq : minFreq) * (newValue / 127.0));
         phaseIncrement.setValue (((2.0 * double_Pi) * (frequency + frequencyOffset)) / sampleRate);
     }
 
@@ -79,9 +79,9 @@ public:
     {
         while (--numSamples >= 0)
         {
-            double output = getSample() * amplitude.getNextValue();
+            auto output = getSample() * amplitude.getNextValue();
 
-            for (int i = outputBuffer.getNumChannels(); --i >= 0;)
+            for (auto i = outputBuffer.getNumChannels(); --i >= 0;)
                 outputBuffer.addSample (i, startSample, static_cast<float> (output));
 
             ++startSample;
@@ -91,7 +91,7 @@ public:
     /** Returns the next sample */
     double getSample()
     {
-        double output = renderWaveShape (phasePos);
+        auto output = renderWaveShape (phasePos);
 
         phasePos += phaseIncrement.getNextValue();
 
