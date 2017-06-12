@@ -370,6 +370,9 @@
     <ClCompile Include="..\..\Source\Main.cpp">
       <Filter>BlocksDrawing\Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\MainComponent.cpp">
+      <Filter>BlocksDrawing\Source</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioChannelSet.cpp">
       <Filter>Juce Modules\juce_audio_basics\buffers</Filter>
     </ClCompile>
@@ -2677,6 +2680,9 @@
       <Filter>Juce Modules\juce_audio_utils</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\modules\juce_blocks_basics\blocks\juce_Block.h">
+      <Filter>Juce Modules\juce_blocks_basics\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\modules\juce_blocks_basics\blocks\juce_BlockConfigManager.h">
       <Filter>Juce Modules\juce_blocks_basics\blocks</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\..\modules\juce_blocks_basics\blocks\juce_ControlButton.h">

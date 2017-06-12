@@ -8,8 +8,10 @@
     <GROUP id="{092A4D5B-31E2-5D03-9B41-81C10EC447E8}" name="Source">
       <FILE id="qnbQP7" name="LightpadComponent.h" compile="0" resource="0"
             file="Source/LightpadComponent.h"/>
-      <FILE id="yiP4mu" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
       <FILE id="RyfWDq" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
+      <FILE id="RVdh1i" name="MainComponent.cpp" compile="1" resource="0"
+            file="Source/MainComponent.cpp"/>
+      <FILE id="yiP4mu" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
