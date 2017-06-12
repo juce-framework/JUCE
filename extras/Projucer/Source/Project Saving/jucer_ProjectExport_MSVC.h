@@ -1642,6 +1642,7 @@ public:
     Value getIPPLibraryValue()                    { return getSetting (Ids::IPPLibrary); }
     String getIPPLibrary() const                  { return settings [Ids::IPPLibrary]; }
     virtual String getCppLanguageStandard() const { return {}; }
+    virtual String getDefaultWindowsTargetPlatformVersion() const { return "8.1"; }
 
     String getPlatformToolset() const
     {
@@ -1807,7 +1808,7 @@ public:
     String getWindowsTargetPlatformVersion() const
     {
         String targetPlatform = settings [Ids::windowsTargetPlatformVersion];
-        return (targetPlatform.isNotEmpty() ? targetPlatform : String ("10.0.14393.0"));
+        return (targetPlatform.isNotEmpty() ? targetPlatform : getDefaultWindowsTargetPlatformVersion());
     }
 
     static MSVCProjectExporterVC2012* createForSettings (Project& project, const ValueTree& settings)
@@ -1836,7 +1837,8 @@ public:
 
         props.add (new ChoicePropertyComponent (getWindowsTargetPlatformVersionValue(), "Windows Target Platform",
                                                 StringArray (targetPlatformNames), Array<var> (targetPlatforms, numElementsInArray (targetPlatforms))),
-                                                "The Windows target platform version to use");
+                                                "Specifies the version of the Windows SDK that will be used when building this project. "
+                                                "The default value for this exporter is " + getDefaultWindowsTargetPlatformVersion());
     }
 
 private:
@@ -1954,6 +1956,8 @@ public:
     String getSolutionComment() const override  { return "# Visual Studio 2017"; }
     String getToolsVersion() const override     { return "15.0"; }
     String getDefaultToolset() const override   { return "v141"; }
+
+    String getDefaultWindowsTargetPlatformVersion() const override { return "10.0.15063.0"; }
 
     static MSVCProjectExporterVC2017* createForSettings (Project& project, const ValueTree& settings)
     {
