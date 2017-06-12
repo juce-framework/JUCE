@@ -84,8 +84,6 @@ OBJECTS_APP := \
 
 .PHONY: clean all
 
-all : $(JUCE_OUTDIR)/$(JUCE_TARGET_APP)
-
 $(JUCE_OUTDIR)/$(JUCE_TARGET_APP) : check-pkg-config $(OBJECTS_APP) $(RESOURCES)
 	@echo Linking "BlocksDrawing - App"
 	-$(V_AT)mkdir -p $(JUCE_BINDIR)
