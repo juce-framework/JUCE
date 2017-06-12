@@ -2037,7 +2037,7 @@ private:
 
     static OSStatus hardwareListenerProc (AudioDeviceID, UInt32, const AudioObjectPropertyAddress*, void* clientData)
     {
-        static_cast<CoreAudioIODeviceType*> (clientData)->audioDeviceListChanged();
+        static_cast<CoreAudioIODeviceType*> (clientData)->triggerAsyncAudioDeviceListChange();
         return noErr;
     }
 
