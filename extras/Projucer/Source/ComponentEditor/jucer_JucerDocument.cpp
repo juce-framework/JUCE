@@ -171,7 +171,7 @@ void JucerDocument::setParentClasses (const String& classes)
                     type = s = String();
             }
 
-            s = type + CodeHelpers::makeValidIdentifier (s.trim(), false, false, true);
+            s = type + CodeHelpers::makeValidIdentifier (s.trim(), false, false, true, true);
 
             parentClassLines.set (i, s);
         }
