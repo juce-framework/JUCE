@@ -79,10 +79,10 @@ void MainComponent::resized()
 {
     infoLabel.centreWithSize (getWidth(), 100);
 
-    Rectangle<int> bounds = getLocalBounds().reduced (20);
+    auto bounds = getLocalBounds().reduced (20);
 
     // top buttons
-    Rectangle<int> topButtonArea = bounds.removeFromTop (getHeight() / 20);
+    auto topButtonArea = bounds.removeFromTop (getHeight() / 20);
 
     topButtonArea.removeFromLeft (20);
     clearButton.setBounds (topButtonArea.removeFromLeft (80));
@@ -94,15 +94,12 @@ void MainComponent::resized()
 
     bounds.removeFromTop (20);
 
-    // brightness controls
-    Rectangle<int> brightnessControlBounds;
-
-    Desktop::DisplayOrientation orientation = Desktop::getInstance().getCurrentOrientation();
+    auto orientation = Desktop::getInstance().getCurrentOrientation();
 
     if (orientation == Desktop::DisplayOrientation::upright
            || orientation == Desktop::DisplayOrientation::upsideDown)
     {
-        brightnessControlBounds = bounds.removeFromBottom (getHeight() / 10);
+        auto brightnessControlBounds = bounds.removeFromBottom (getHeight() / 10);
 
         brightnessSlider.setSliderStyle (Slider::SliderStyle::LinearHorizontal);
         brightnessLED.setBounds (brightnessControlBounds.removeFromLeft (getHeight() / 10));
@@ -110,7 +107,7 @@ void MainComponent::resized()
     }
     else
     {
-        brightnessControlBounds = bounds.removeFromRight (getWidth() / 10);
+        auto brightnessControlBounds = bounds.removeFromRight (getWidth() / 10);
 
         brightnessSlider.setSliderStyle (Slider::SliderStyle::LinearVertical);
         brightnessLED.setBounds (brightnessControlBounds.removeFromTop (getWidth() / 10));
@@ -118,7 +115,7 @@ void MainComponent::resized()
     }
 
     // lightpad component
-    int sideLength = jmin (bounds.getWidth() - 40, bounds.getHeight() - 40);
+    auto sideLength = jmin (bounds.getWidth() - 40, bounds.getHeight() - 40);
     lightpadComponent.centreWithSize (sideLength, sideLength);
 }
 
@@ -132,7 +129,7 @@ void MainComponent::topologyChanged()
         detachActiveBlock();
 
     // Get the array of currently connected Block objects from the PhysicalTopologySource
-    Block::Array blocks = topologySource.getCurrentTopology().blocks;
+    auto blocks = topologySource.getCurrentTopology().blocks;
 
     // Iterate over the array of Block objects
     for (auto b : blocks)
@@ -154,8 +151,8 @@ void MainComponent::topologyChanged()
             if (auto grid = activeBlock->getLEDGrid())
             {
                 // Work out scale factors to translate X and Y touches to LED indexes
-                scaleX = (float) (grid->getNumColumns()) / activeBlock->getWidth();
-                scaleY = (float) (grid->getNumRows())    / activeBlock->getHeight();
+                scaleX = (float) (grid->getNumColumns() - 1) / activeBlock->getWidth();
+                scaleY = (float) (grid->getNumRows() - 1)    / activeBlock->getHeight();
 
                 setLEDProgram (*activeBlock);
             }
@@ -173,8 +170,8 @@ void MainComponent::topologyChanged()
 void MainComponent::touchChanged (TouchSurface&, const TouchSurface::Touch& touch)
 {
     // Translate X and Y touch events to LED indexes
-    int xLed = roundToInt (touch.x * scaleX);
-    int yLed = roundToInt (touch.y * scaleY);
+    auto xLed = roundToInt (touch.x * scaleX);
+    auto yLed = roundToInt (touch.y * scaleY);
 
     if (currentMode == colourPalette)
     {
@@ -183,8 +180,9 @@ void MainComponent::touchChanged (TouchSurface&, const TouchSurface::Touch& touc
             if (auto* colourPaletteProgram = getPaletteProgram())
             {
                 colourPaletteProgram->setGridFills (layout.numColumns, layout.numRows, layout.gridFillArray);
-                brightnessLED.setColour (layout.currentColour.withBrightness (layout.currentColour == Colours::black ? 0.0f
-                                                                              : static_cast<float> (brightnessSlider.getValue())));
+                brightnessLED.setColour (layout.currentColour
+                                               .withBrightness (layout.currentColour == Colours::black ? 0.0f
+                                                                                                       : static_cast<float> (brightnessSlider.getValue())));
             }
         }
     }
@@ -230,8 +228,9 @@ void MainComponent::buttonClicked (Button* b)
 void MainComponent::sliderValueChanged (Slider* s)
 {
     if (s == &brightnessSlider)
-        brightnessLED.setColour (layout.currentColour.withBrightness (layout.currentColour == Colours::black ? 0.0f
-                                                                      : static_cast<float> (brightnessSlider.getValue())));
+        brightnessLED.setColour (layout.currentColour
+                                       .withBrightness (layout.currentColour == Colours::black ? 0.0f
+                                                                                               : static_cast<float> (brightnessSlider.getValue())));
 }
 
 void MainComponent::timerCallback()

@@ -49,11 +49,11 @@ struct ColourGrid
     {
         gridFillArray.clear();
 
-        int counter = 0;
+        auto counter = 0;
 
-        for (int i = 0; i < numColumns; ++i)
+        for (auto i = 0; i < numColumns; ++i)
         {
-            for (int j = 0; j < numRows; ++j)
+            for (auto j = 0; j < numRows; ++j)
             {
                 DrumPadGridProgram::GridFill fill;
                 Colour colourToUse = colourArray.getUnchecked (counter);
@@ -78,12 +78,12 @@ struct ColourGrid
     */
     bool setActiveColourForTouch (int x, int y)
     {
-        bool colourHasChanged = false;
+        auto colourHasChanged = false;
 
-        int xindex = x / 5;
-        int yindex = y / 5;
+        auto xindex = x / 5;
+        auto yindex = y / 5;
 
-        Colour newColour = colourArray.getUnchecked ((yindex * 3) + xindex);
+        auto newColour = colourArray.getUnchecked ((yindex * 3) + xindex);
         if (currentColour != newColour)
         {
             currentColour = newColour;
