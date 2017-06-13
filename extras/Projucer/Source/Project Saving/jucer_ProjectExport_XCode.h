@@ -1253,10 +1253,13 @@ public:
             paths.addArray (config.getHeaderSearchPaths());
             paths.addArray (getTargetExtraHeaderSearchPaths());
 
-            // Always needed to compile .r files
-            paths.add (owner.getModuleFolderRelativeToProject ("juce_audio_plugin_client")
-                            .rebased (owner.projectFolder, owner.getTargetFolder(), RelativePath::buildTargetFolder)
-                            .toUnixStyle());
+            if (owner.project.getModules().isModuleEnabled ("juce_audio_plugin_client"))
+            {
+                // Needed to compile .r files
+                paths.add (owner.getModuleFolderRelativeToProject ("juce_audio_plugin_client")
+                                .rebased (owner.projectFolder, owner.getTargetFolder(), RelativePath::buildTargetFolder)
+                                .toUnixStyle());
+            }
 
             paths.add ("$(inherited)");
 
