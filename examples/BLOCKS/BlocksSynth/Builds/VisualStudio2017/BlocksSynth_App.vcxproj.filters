@@ -2688,6 +2688,9 @@
     <ClInclude Include="..\..\..\..\..\modules\juce_blocks_basics\blocks\juce_Block.h">
       <Filter>Juce Modules\juce_blocks_basics\blocks</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\..\modules\juce_blocks_basics\blocks\juce_BlockConfigManager.h">
+      <Filter>Juce Modules\juce_blocks_basics\blocks</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\..\modules\juce_blocks_basics\blocks\juce_ControlButton.h">
       <Filter>Juce Modules\juce_blocks_basics\blocks</Filter>
     </ClInclude>

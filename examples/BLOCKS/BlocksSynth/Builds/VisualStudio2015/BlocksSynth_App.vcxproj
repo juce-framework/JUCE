@@ -16,6 +16,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CB640A07-7531-1DE6-BD35-4AC4E7641B33}</ProjectGuid>
     <PlatformToolset>v140</PlatformToolset>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'"
@@ -23,6 +24,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <PlatformToolset>v140</PlatformToolset>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"
                  Label="Configuration">
@@ -30,6 +32,7 @@
     <UseOfMfc>false</UseOfMfc>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <PlatformToolset>v140</PlatformToolset>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props"/>
   <ImportGroup Label="ExtensionSettings"/>
@@ -40,6 +43,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros">
     <PlatformToolset>v140</PlatformToolset>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
@@ -53,6 +57,7 @@
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">BlocksSynth</TargetName>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</GenerateManifest>
     <PlatformToolset>v140</PlatformToolset>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Midl>
@@ -1926,6 +1931,7 @@
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_utils\players\juce_SoundPlayer.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_audio_utils\juce_audio_utils.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_blocks_basics\blocks\juce_Block.h"/>
+    <ClInclude Include="..\..\..\..\..\modules\juce_blocks_basics\blocks\juce_BlockConfigManager.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_blocks_basics\blocks\juce_ControlButton.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_blocks_basics\blocks\juce_LEDGrid.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_blocks_basics\blocks\juce_LEDRow.h"/>

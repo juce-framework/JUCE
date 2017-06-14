@@ -184,6 +184,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = ("../../JuceLibraryCode", "../../../../modules", "../../../../modules/juce_audio_plugin_client", "$(inherited)");
 				INFOPLIST_FILE = Info-AUv3_AppExtension.plist;
+				INFOPLIST_PREPROCESS = NO;
 				OTHER_LDFLAGS = "-lJuceDemoPlugin";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.JuceDemoPlugin.JuceDemoPluginAUv3;
 				USE_HEADERMAP = NO; }; name = Debug; };
@@ -214,6 +215,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = ("../../JuceLibraryCode", "../../../../modules", "../../../../modules/juce_audio_plugin_client", "$(inherited)");
 				INFOPLIST_FILE = Info-AUv3_AppExtension.plist;
+				INFOPLIST_PREPROCESS = NO;
 				OTHER_LDFLAGS = "-lJuceDemoPlugin";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.JuceDemoPlugin.JuceDemoPluginAUv3;
 				USE_HEADERMAP = NO; }; name = Release; };
@@ -243,6 +245,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = ("../../JuceLibraryCode", "../../../../modules", "../../../../modules/juce_audio_plugin_client", "$(inherited)");
 				INFOPLIST_FILE = Info-Standalone_Plugin.plist;
+				INFOPLIST_PREPROCESS = NO;
 				OTHER_LDFLAGS = "-lJuceDemoPlugin";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.JuceDemoPlugin;
 				USE_HEADERMAP = NO; }; name = Debug; };
@@ -273,6 +276,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = ("../../JuceLibraryCode", "../../../../modules", "../../../../modules/juce_audio_plugin_client", "$(inherited)");
 				INFOPLIST_FILE = Info-Standalone_Plugin.plist;
+				INFOPLIST_PREPROCESS = NO;
 				OTHER_LDFLAGS = "-lJuceDemoPlugin";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.JuceDemoPlugin;
 				USE_HEADERMAP = NO; }; name = Release; };

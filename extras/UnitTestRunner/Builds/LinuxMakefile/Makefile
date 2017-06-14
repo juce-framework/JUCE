@@ -84,6 +84,8 @@ OBJECTS_CONSOLEAPP := \
 
 .PHONY: clean all
 
+all : $(JUCE_OUTDIR)/$(JUCE_TARGET_CONSOLEAPP)
+
 $(JUCE_OUTDIR)/$(JUCE_TARGET_CONSOLEAPP) : check-pkg-config $(OBJECTS_CONSOLEAPP) $(RESOURCES)
 	@echo Linking "UnitTestRunner - ConsoleApp"
 	-$(V_AT)mkdir -p $(JUCE_BINDIR)

@@ -97,13 +97,17 @@ public class JUCENetworkGraphicsDemo   extends Activity
     // these have to match the values of enum PermissionID in C++ class RuntimePermissions:
     private static final int JUCE_PERMISSIONS_RECORD_AUDIO = 1;
     private static final int JUCE_PERMISSIONS_BLUETOOTH_MIDI = 2;
+    private static final int JUCE_PERMISSIONS_READ_EXTERNAL_STORAGE = 3;
+    private static final int JUCE_PERMISSIONS_WRITE_EXTERNAL_STORAGE = 4;
 
     private static String getAndroidPermissionName (int permissionID)
     {
         switch (permissionID)
         {
-            case JUCE_PERMISSIONS_RECORD_AUDIO:     return Manifest.permission.RECORD_AUDIO;
-            case JUCE_PERMISSIONS_BLUETOOTH_MIDI:   return Manifest.permission.ACCESS_COARSE_LOCATION;
+            case JUCE_PERMISSIONS_RECORD_AUDIO:           return Manifest.permission.RECORD_AUDIO;
+            case JUCE_PERMISSIONS_BLUETOOTH_MIDI:         return Manifest.permission.ACCESS_COARSE_LOCATION;
+            case JUCE_PERMISSIONS_READ_EXTERNAL_STORAGE:  return Manifest.permission.READ_EXTERNAL_STORAGE;
+            case JUCE_PERMISSIONS_WRITE_EXTERNAL_STORAGE: return Manifest.permission.WRITE_EXTERNAL_STORAGE;
         }
 
         // unknown permission ID!
