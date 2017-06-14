@@ -2323,14 +2323,14 @@ private:
             modsToSend = currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
         }
 
+        handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, modsToSend, pressure, orientation, time, PenDetails(), touchIndex);
+
         if (isCancel)
         {
             currentTouches.clear();
             Desktop::getInstance().clearAllTouchSources();
             currentModifiers = currentModifiers.withoutMouseButtons();
         }
-
-        handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, modsToSend, pressure, orientation, time, PenDetails(), touchIndex);
 
         if (! isValidPeer (this)) // (in case this component was deleted by the event)
             return false;
