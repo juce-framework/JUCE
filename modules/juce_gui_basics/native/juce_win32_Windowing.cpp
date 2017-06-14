@@ -2326,6 +2326,7 @@ private:
         if (isCancel)
         {
             currentTouches.clear();
+            Desktop::getInstance().clearAllTouchSources();
             currentModifiers = currentModifiers.withoutMouseButtons();
         }
 

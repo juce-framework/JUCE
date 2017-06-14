@@ -288,6 +288,8 @@ public:
     */
     void beginDragAutoRepeat (int millisecondsBetweenCallbacks);
 
+    /** Removes all touch input sources from the mouse sources array. */
+    void clearAllTouchSources();
     //==============================================================================
     /** In a tablet device which can be turned around, this is used to inidicate the orientation. */
     enum DisplayOrientation
