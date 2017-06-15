@@ -323,7 +323,7 @@ private:
         const TCHAR* mimeTypes[] = { _T("*/*"), nullptr };
 
         DWORD flags = INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_NO_COOKIES
-                        | INTERNET_FLAG_NO_AUTO_REDIRECT | SECURITY_SET_MASK;
+                        | INTERNET_FLAG_NO_AUTO_REDIRECT;
 
         if (address.startsWithIgnoreCase ("https:"))
             flags |= INTERNET_FLAG_SECURE;  // (this flag only seems necessary if the OS is running IE6 -
@@ -334,8 +334,6 @@ private:
 
         if (request != 0)
         {
-            setSecurityFlags();
-
             INTERNET_BUFFERS buffers = { 0 };
             buffers.dwStructSize = sizeof (INTERNET_BUFFERS);
             buffers.lpcszHeader = headers.toWideCharPointer();
@@ -377,14 +375,6 @@ private:
         }
 
         close();
-    }
-
-    void setSecurityFlags()
-    {
-        DWORD dwFlags = 0, dwBuffLen = sizeof (DWORD);
-        InternetQueryOption (request, INTERNET_OPTION_SECURITY_FLAGS, &dwFlags, &dwBuffLen);
-        dwFlags |= SECURITY_FLAG_IGNORE_UNKNOWN_CA | SECURITY_SET_MASK;
-        InternetSetOption (request, INTERNET_OPTION_SECURITY_FLAGS, &dwFlags, sizeof (dwFlags));
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
