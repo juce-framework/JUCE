@@ -2290,14 +2290,13 @@ private:
                            const float touchPressure = MouseInputSource::invalidPressure,
                            const float orientation = 0.0f)
     {
-        bool isCancel = false;
+        auto isCancel = false;
 
-        const int touchIndex = currentTouches.getIndexOfTouch (touch.dwID);
-        auto time = getMouseEventTime();
-        auto pos = globalToLocal (Point<float> (touch.x / 100.0f,
-                                                touch.y / 100.0f));
-        const float pressure = touchPressure;
-        ModifierKeys modsToSend (currentModifiers);
+        const auto touchIndex = currentTouches.getIndexOfTouch (touch.dwID);
+        const auto time = getMouseEventTime();
+        const auto pos = globalToLocal ({ touch.x / 100.0f, touch.y / 100.0f });
+        const auto pressure = touchPressure;
+        auto modsToSend = currentModifiers;
 
         if (isDown)
         {
@@ -2305,7 +2304,8 @@ private:
             modsToSend = currentModifiers;
 
             // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
-            handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, modsToSend.withoutMouseButtons(), pressure, orientation, time, PenDetails(), touchIndex);
+            handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, modsToSend.withoutMouseButtons(),
+                              pressure, orientation, time, {}, touchIndex);
 
             if (! isValidPeer (this)) // (in case this component was deleted by the event)
                 return false;
@@ -2323,24 +2323,25 @@ private:
             modsToSend = currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
         }
 
-        handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, modsToSend, pressure, orientation, time, PenDetails(), touchIndex);
+        handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, modsToSend,
+                          pressure, orientation, time, {}, touchIndex);
 
-        if (isCancel)
-        {
-            currentTouches.clear();
-            Desktop::getInstance().clearAllTouchSources();
-            currentModifiers = currentModifiers.withoutMouseButtons();
-        }
-
-        if (! isValidPeer (this)) // (in case this component was deleted by the event)
+        if (! isValidPeer (this))
             return false;
 
-        if (isUp || isCancel)
+        if (isUp)
         {
-            handleMouseEvent (MouseInputSource::InputSourceType::touch, Point<float> (-10.0f, -10.0f), currentModifiers, pressure, orientation, time, PenDetails(), touchIndex);
+            handleMouseEvent (MouseInputSource::InputSourceType::touch, { -10.0f, -10.0f }, currentModifiers.withoutMouseButtons(),
+                              pressure, orientation, time, {}, touchIndex);
 
             if (! isValidPeer (this))
                 return false;
+
+            if (isCancel)
+            {
+                currentTouches.clear();
+                currentModifiers = currentModifiers.withoutMouseButtons();
+            }
         }
 
         return true;

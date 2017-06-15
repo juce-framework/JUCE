@@ -183,7 +183,6 @@ MouseInputSource* Desktop::getMouseSource (int index) const noexcept            
 MouseInputSource* Desktop::getDraggingMouseSource (int index) const noexcept    { return mouseSources->getDraggingMouseSource (index); }
 MouseInputSource Desktop::getMainMouseSource() const noexcept                   { return MouseInputSource (mouseSources->sources.getUnchecked(0)); }
 void Desktop::beginDragAutoRepeat (int interval)                                { mouseSources->beginDragAutoRepeat (interval); }
-void Desktop::clearAllTouchSources()                                            { mouseSources->clearTouches(); }
 
 //==============================================================================
 void Desktop::addFocusChangeListener    (FocusChangeListener* const listener)   { focusListeners.add (listener); }

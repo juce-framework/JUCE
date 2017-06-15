@@ -684,21 +684,6 @@ struct MouseInputSource::SourceList  : public Timer
         return nullptr;
     }
 
-    void clearTouches()
-    {
-        for (auto i = sourceArray.size(); --i >= 0;)
-        {
-            if (sourceArray.getUnchecked (i).getType() == MouseInputSource::InputSourceType::touch)
-                sourceArray.remove (i);
-        }
-
-        for (auto i = sources.size(); --i >= 0;)
-        {
-            if (sources.getUnchecked (i)->inputType == MouseInputSource::InputSourceType::touch)
-                sources.remove (i);
-        }
-    }
-
     int getNumDraggingMouseSources() const noexcept
     {
         int num = 0;
