@@ -2214,7 +2214,7 @@ public:
     {
         updateKeyModifiers ((int) buttonPressEvent.state);
 
-        auto mapIndex = (uint32) (buttonPressEvent.button - Button1)
+        auto mapIndex = (uint32) (buttonPressEvent.button - Button1);
 
         if (mapIndex < numElementsInArray (pointerMap))
         {
@@ -2239,7 +2239,7 @@ public:
         if (parentWindow != 0)
             updateWindowBounds();
 
-        auto mapIndex = (uint32) (buttonRelEvent.button - Button1)
+        auto mapIndex = (uint32) (buttonRelEvent.button - Button1);
 
         if (mapIndex < numElementsInArray (pointerMap))
         {
