@@ -6,6 +6,23 @@ Develop Branch
 
 Change
 ------
+Removed the setSecurityFlags() method from the Windows implementation of WebInputStream as it disabled HTTPS security features
+
+Possible Issues
+---------------
+Any code previously relying on connections to insecure webpages succeeding will no longer work
+
+Workaround
+----------
+Check network connectivity on Windows and re-write any code that relied on insecure connections
+
+Rationale
+---------
+The previous behaviour resulted in network connections on Windows having all the HTTPS security features disabled, exposing users to network attacks. HTTPS connections on Windows are now secure and will fail when connecting to an insecure web address
+
+
+Change
+------
 Pointer arithmetic on a pointer will have the same result regardless if it is wrapped in JUCE's Atomic class or not
 
 Possible Issues
@@ -25,6 +42,7 @@ int* a; Atomic<int*> b;
 jassert (++a == ++b);
 
 Pointer a in the above code would be advanced by sizeof(int) whereas the JUCE's Atomic always advances it's underlying pointer by a single byte. The same is true for operator+=/operator-= and operator--. The difference in behaviour is confusing and unintuitive. Furthermore, this aligns JUCE's Atomic type with std::atomic.
+
 
 
 Version 4.3.1
@@ -68,7 +86,6 @@ Rationale
 A flawed multi-bus API was introduced with JUCE versions 4.0.0 up until version 4.2.4 (inclusive) which was not API compatible with pre JUCE 4 plug-ins. JUCE 4.3.0 releases a revised multi-bus API which restores pre JUCE 4 API compatibility. However, the new multi-bus API is not compatible with the flawed multi-bus API (JUCE version 4.0.0 - 4.2.4).
 
 
-
 Change
 ------
 JUCE now generates the AAX plug-in bus layout configuration id independent from the position as it appears in the Projucer’s legacy “Channel layout configuration” field.
@@ -87,9 +104,9 @@ The new multi-bus API offers more features, flexibility and accuracy in specifyi
 
 
 
-
 Version 4.2.1
 =============
+
 Change
 ------
 JUCE now uses the paramID property used in AudioProcessorParameterWithID to uniquely identify parameters to the host
