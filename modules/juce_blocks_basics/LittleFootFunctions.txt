@@ -1,4 +1,41 @@
+//=============================== HEAP =========================================
+/** Reads and returns the value of a single byte from the heap. 
+    
+    @param byteIndex    the index (in bytes) of the byte to read
+    @returns            the value of the byte
+*/
+int getHeapByte (int byteIndex);
 
+/** Reads 4 bytes from the heap and returns the value as an integer. 
+
+    @param byteIndex    the index (in bytes) of the start of the 4 bytes to read
+    @returns            the value of the 4 bytes as an integer
+*/
+int getHeapInt (int byteIndex);
+
+/** Reads a sequence of bits from the heap and returns the value as an integer. 
+    
+    @param startBitIndex    the index (in bits) of the start of the sequence of bits to read
+    @param numBits          how many bits to read
+    @returns                the value of the sequence of bits as an integer
+*/
+int getHeapBits (int startBitIndex, int numBits);
+
+/** Writes a single byte to the heap. 
+    
+    @param byteIndex    the index (in bytes) of the byte to set
+    @param newValue     the new value to set this byte to
+*/
+void setHeapByte (int byteIndex, int newValue);
+
+/** Writes 4 bytes to the heap. 
+    
+    @param byteIndex    the index (in bytes) of the start of the 4 bytes to set
+    @param newValue     the new value to set the 4 bytes to
+*/
+void setHeapInt (int byteIndex, int newValue);
+
+//=============================== GENERAL/UTILITY ==============================
 /** Returns the smaller of two integer values. */
 int min (int a, int b);
 
@@ -13,23 +50,21 @@ float max (float a, float b);
 
 /** Constrains an integer value to keep it within a given range.
  
-    @param lowerLimit           the minimum value to return
-    @param upperLimit           the maximum value to return
-    @param valueToConstrain     the value to try to return
- 
-    @returns    the closest value to valueToConstrain which lies between lowerLimit
-                and upperLimit (inclusive)
+    @param lowerLimit          the minimum value to return
+    @param upperLimit          the maximum value to return
+    @param valueToConstrain    the value to try to return
+    @returns                   the closest value to valueToConstrain which lies between lowerLimit
+                               and upperLimit (inclusive)
 */
 int clamp (int lowerLimit, int upperLimit, int valueToConstrain);
 
 /** Constrains a floating point value to keep it within a given range.
  
-    @param lowerLimit           the minimum value to return
-    @param upperLimit           the maximum value to return
-    @param valueToConstrain     the value to try to return
- 
-    @returns    the closest value to valueToConstrain which lies between lowerLimit
-                and upperLimit (inclusive)
+    @param lowerLimit          the minimum value to return
+    @param upperLimit          the maximum value to return
+    @param valueToConstrain    the value to try to return
+    @returns                   the closest value to valueToConstrain which lies between lowerLimit
+                               and upperLimit (inclusive)
 */
 float clamp (float lowerLimit, float upperLimit, float valueToConstrain);
 
@@ -46,8 +81,7 @@ float abs (float arg);
     @param sourceMax    the maximum value of the source range
     @param destMin      the minumum value of the destination range
     @param destMax      the maximum value of the destination range
- 
-    @returns    the original value mapped to the destination range
+    @returns            the original value mapped to the destination range
 */
 float map (float value, float sourceMin, float sourceMax, float destMin, float destMax);
 
@@ -56,37 +90,38 @@ float map (float value, float sourceMin, float sourceMax, float destMin, float d
     @param value        the value within the source range to map
     @param sourceMin    the minimum value of the source range
     @param sourceMax    the maximum value of the source range
- 
-    @returns    the original value mapped to the range 0 - 1.0
+    @returns            the original value mapped to the range 0 - 1.0
 */
 float map (float value, float sourceMin, float sourceMax);
 
 /** Performs a modulo operation (can cope with the dividend being negative).
     The divisor must be greater than zero.
+
+    @returns    the result of the modulo operation
 */
 int mod (int dividend, int divisor);
 
 /** Returns a random floating-point number.
 
-    @returns a random value in the range 0 (inclusive) to 1.0 (exclusive)
+    @returns    a random value in the range 0 (inclusive) to 1.0 (exclusive)
 */
 float getRandomFloat();
 
 /** Returns a random integer, limited to a given range.
 
-    @returns a random integer between 0 (inclusive) and maxValue (exclusive).
+    @returns    a random integer between 0 (inclusive) and maxValue (exclusive).
 */
-int getRandomInt (int maxValue)
+int getRandomInt (int maxValue);
 
 /** Returns the number of milliseconds since a fixed event (usually system startup).
  
-    This returns a monotonically increasing value which it unaffected by changes to the
+    This returns a monotonically increasing value which is unaffected by changes to the
     system clock. It should be accurate to within a few millisecseconds.
- */
+*/
 int getMillisecondCounter();
 
-/** Returns the current firmware version. */
-int getFirmwareVersion();
+/** Returns the length of time spent in the current function call in milliseconds. */
+int getTimeInCurrentFunctionCall();
 
 /** Logs an integer value to the console. */
 void log (int data);
@@ -94,65 +129,185 @@ void log (int data);
 /** Logs a hexadecimal value to the console. */
 void logHex (int data);
 
-/** Returns the length of time spent in the function call in milliseconds. */
-int getTimeInCurrentFunctionCall();
+//=============================== MIDI/MPE =====================================
+/** Sends a 1-byte short midi message. */
+void sendMIDI (int byte0);
 
-/** Returns the battery level between 0 and 1.0. */
-float getBatteryLevel();
+/** Sends a 2-byte short midi message. */
+void sendMIDI (int byte0, int byte1);
 
-/** Returns true if the battery is charging. */
-bool isBatteryCharging();
+/** Sends a 3-byte short midi message. */
+void sendMIDI  (int byte0, int byte1, int byte2);
 
-/** Returns true if this block is directly connected to the application,
-    as opposed to only being connected to a different block via a connection port.
+/** Sends a key-down message.
+ 
+    @param channel       the midi channel, in the range 0 to 15
+    @param noteNumber    the key number, in the range 0 to 127
+    @param velocity      the velocity, in the range 0 to 127
 */
-bool isMasterBlock();
+void sendNoteOn (int channel, int noteNumber, int velocity);
 
-/** Returns true if this block is directly connected to the host computer. */
-bool isConnectedToHost();
+/** Sends a key-up message.
+ 
+    @param channel       the midi channel, in the range 0 to 15
+    @param noteNumber    the key number, in the range 0 to 127
+    @param velocity      the velocity, in the range 0 to 127
+*/
+void sendNoteOff (int channel, int noteNumber, int velocity);
 
-/** Sets whether status overlays should be displayed. */
-void setStatusOverlayActive (bool active);
+/** Sends an aftertouch message.
+ 
+    @param channel       the midi channel, in the range 0 to 15
+    @param noteNumber    the key number, in the range 0 to 127
+    @param level         the amount of aftertouch, in the range 0 to 127
+*/
+void sendAftertouch (int channel, int noteNumber, int level);
 
-/** Returns the number of blocks in the current topology. */
-int getNumBlocksInTopology();
+/** Sends a controller message.
+ 
+    @param channel       the midi channel, in the range 0 to 15
+    @param controller    the type of controller
+    @param value         the controller value
+*/
+void sendCC (int channel, int controller, int value);
 
-/** Returns the ID of the block at a given index in the topology. */
-int getBlockIDForIndex (int index);
+/** Sends a pitch bend message.
+ 
+    @param channel     the midi channel, in the range 0 to 15
+    @param position    the wheel position, in the range 0 to 16383
+*/
+void sendPitchBend (int channel, int position);
 
-/** Returns the ID of the block connected to a specified port. */
-int getBlockIDOnPort (int port);
+/** Sends a channel-pressure change event.
+ 
+    @param channel     the midi channel, in the range 0 to 15
+    @param pressure    the pressure, in the range 0 to 127
+*/
+void sendChannelPressure (int channel, int pressure);
 
-/** Returns the port number that is connected to the master block. Returns 0xFF if there is no path. */
-int getPortToMaster();
+/** Sets the MIDI channel range. 
 
-/** Returns the block type of the block with this ID. */
-int getBlockTypeForID (int blockID);
+    @param useMPE        
+    @param lowChannel
+    @param highChannel   
+*/
+void setChannelRange (bool useMPE, int lowChannel, int highChannel);
 
-/** Sends a message to the block with the specified ID. 
-    This will be processed in the handleMessage() callback.
+/** Assigns a MIDI channel to a note number.
     
-    @param blockID     the ID of the block to send this message to
-    @param param1      the first chunk of data to send
-    @param param2      the second chunk of data to send
-    @param param3      the third chunk of data to send
+    @param noteNumber    the note number to assign the channel to
+    @returns             the MIDI channel that has been assigned
 */
-void sendMessageToBlock (int blockID, int param1, int param2, int param3);
+int assignChannel (int noteNumber);
 
-/** Sends a message to the host. 
-    To receive this the host will need to implement the Block::ProgramEventListener::handleProgramEvent() method.
+/** Deassigns a channel from a note number.
     
-    @param param1      the first chunk of data to send
-    @param param2      the second chunk of data to send
-    @param param3      the third chunk of data to send
+    @param noteNumber    the note number to deassign
+    @param channel       the MIDI channel
 */
-void sendMessageToHost (int param1, int param2, int param3);
+void deassignChannel (int noteNumber, int channel);
 
+/** Returns the channel that is being used for control messages. 
+    If MPE is enabled then this will be the first channel. 
+*/
+int getControlChannel();
+
+/** Sets whether duplicate notes should be filtered out when MPE is enabled. */
+void useMPEDuplicateFilter (bool active);
+
+//=============================== CALLBACKS ====================================
+/** Use this method to draw the display.
+    The block will call this approximately 25 times per second.
+*/
+void repaint()
+
+/** Called when a button is pushed.
+ 
+    @param index    the index of the button that was pushed
+*/
+void handleButtonDown (int index);
+
+/** Called when a button is released.
+ 
+    @param index    the index of the button that was released
+*/
+void handleButtonUp (int index);
+
+/** Called when a control block button is pressed.
+ 
+    @param buttonIndex    the index of the button
+ */
+void onControlPress (int buttonIndex);
+
+/** Called when a control block button is released.
+ 
+    @param buttonIndex    the index of the button
+ */
+void onControlRelease (int buttonIndex);
+
+/** Called when a touch event starts.
+ 
+    @param index    the touch index, which will stay constant for each finger as it is tracked
+    @param x        the X position of this touch on the device, in block units starting from 0 (left)
+    @param y        the Y position of this touch on the device, in block units starting from 0 (top)
+    @param z        the current pressure of this touch, in the range 0.0 (no pressure) to 1.0 (very hard)
+    @param vz       the rate at which pressure is currently changing, measured in units/second
+*/
+void touchStart (int index, float x, float y, float z, float vz);
+
+/** Called when a touch event moves.
+ 
+    @param index    the touch index, which will stay constant for each finger as it is tracked
+    @param x        the X position of this touch on the device, in block units starting from 0 (left)
+    @param y        the Y position of this touch on the device, in block units starting from 0 (top)
+    @param z        the current pressure of this touch, in the range 0.0 (no pressure) to 1.0 (very hard)
+    @param vz       the rate at which pressure is currently changing, measured in units/second
+*/
+void touchMove (int index, float x, float y, float z, float vz);
+
+/** Called when a touch event ends.
+ 
+    @param index    the touch index, which will stay constant for each finger as it is tracked
+    @param x        the X position of this touch on the device, in block units starting from 0 (left)
+    @param y        the Y position of this touch on the device, in block units starting from 0 (top)
+    @param z        the current pressure of this touch, in the range 0.0 (no pressure) to 1.0 (very hard)
+    @param vz       the rate at which pressure is currently changing, measured in units/second
+*/
+void touchEnd (int index, float x, float y, float z, float vz);
+
+/** Called when a program is loaded onto the block and is about to start. Do any setup here. */
+void initialise();
+
+/** Called when a block receives a MIDI message. */
+void handleMIDI (int byte0, int byte1, int byte2);
+
+/** Called when a block receives a message.
+
+    @see sendMessageToBlock
+*/
+void handleMessage (int param1, int param2, int param3);
+
+//=============================== GRAPHICS =====================================
 /** Combines a set of 8-bit ARGB values into a 32-bit colour and returns the result. */
 int makeARGB (int alpha, int red, int green, int blue);
 
 /** Blends the overlaid ARGB colour onto the base one and returns the new colour. */
 int blendARGB (int baseColour, int overlaidColour);
+
+/** Displays an animation indicating the current battery level of this block. 
+    A control block will light up its top LEDs indicating battery level and a lightpad
+    block will draw the battery level on the display.
+*/
+void displayBatteryLevel();
+
+/** Clears the display and sets all the LEDs to black. */
+void clearDisplay();
+
+/** Clears the display and sets all the LEDs to a specified colour. 
+    
+    @param rgb    the colour to use (0xff...)
+*/
+void clearDisplay (int rgb);
 
 /** Sets a pixel to a specified colour with full alpha.
     
@@ -162,7 +317,7 @@ int blendARGB (int baseColour, int overlaidColour);
 */
 void fillPixel (int rgb, int x, int y);
 
-/** Blends a the current pixel colour with a specified colour. 
+/** Blends the current pixel colour with a specified colour. 
    
     @param argb    the colour to use
     @param x       the x coordinate of the pixel to blend
@@ -190,7 +345,7 @@ void fillRect (int rgb, int x, int y, int width, int height);
 */
 void blendRect (int argb, int x, int y, int width, int height);
 
-/** Draws a rectangle on the block display with four corner colours blended together. 
+/** Fills a rectangle on the display with four corner colours blended together. 
  
     @param colourNW    the colour to use in the north west corner of the rectangle
     @param colourNE    the colour to use in the north east corner of the rectangle
@@ -203,22 +358,17 @@ void blendRect (int argb, int x, int y, int width, int height);
 */
 void blendGradientRect (int colourNW, int colourNE, int colourSE, int colourSW, int x, int y, int width, int height);
 
-/** Draws a pressure point at a given centre LED with a specified colour and pressure. 
- 
-    @param argb      the colour to use
-    @param touchX    the x position of the touch
-    @param touchY    the y position of the touch
-    @param touchZ    the pressure value of the touch
+/** Blends a circle on the display with a specified colour.
+
+    @param argb       the colour to use
+    @param xCentre    the x position of the circle's centre in block units
+    @param yCentre    the y position of the circle's centre in block units
+    @param radius     the radius of the circle in block units
+    @param fill       if true then the circle will be filled, if false the circle will be an outline
 */
-void addPressurePoint (int argb, float touchX, float touchY, float touchZ);
+void blendCircle (int argb, float xCentre, float yCentre, float radius, bool fill);
 
-/** Draws the pressure map on the block display. */
-void drawPressureMap();
-
-/** Fades the pressure map on the block display. */
-void fadePressureMap();
-
-/** Draws a number on the block display.
+/** Draws a number on the display.
  
     @param value     the number to draw between 0 and 99
     @param colour    the colour to use
@@ -227,124 +377,216 @@ void fadePressureMap();
 */
 void drawNumber (int value, int colour, int x, int y);
 
-/** Clears the display setting all the LEDs to black. */
-void clearDisplay();
+//=============================== BLOCK GENERAL =================================
+/** Returns the current firmware version of this block. */
+int getFirmwareVersion();
 
-/** Clears the display setting all the LEDs to a specified colour. */
-void clearDisplay (int rgb);
+/** Returns the battery level of this block, between 0 and 1.0. */
+float getBatteryLevel();
 
-/** Sends a 1-byte short midi message. */
-void sendMIDI (int byte0);
+/** Returns true if this block's battery is charging. */
+bool isBatteryCharging();
 
-/** Sends a 2-byte short midi message. */
-void sendMIDI (int byte0, int byte1);
+/** Sets whether status overlays should be displayed on this block. */
+void setStatusOverlayActive (bool active);
 
-/** Sends a 3-byte short midi message. */
-void sendMIDI  (int byte0, int byte1, int byte2);
+/** Sets whether power saving mode should be enabled on this block. */
+void setPowerSavingEnabled (bool enabled);
 
-/** Sends a key-down message.
+/** Returns the type of the block with a given ID.
  
-    @param channel      the midi channel, in the range 0 to 15
-    @param noteNumber   the key number, in the range 0 to 127
-    @param velocity     the velocity, in the range 0 to 127
+    @returns    an enum indicating the type of block @see Block::Type
 */
-void sendNoteOn (int channel, int noteNumber, int velocity);
+int getBlockTypeForID (int blockID);
 
-/** Sends a key-up message.
+/** Sends a message to the block with the specified ID.
+    This will be processed in the handleMessage() callback.
  
-    @param channel      the midi channel, in the range 0 to 15
-    @param noteNumber   the key number, in the range 0 to 127
-    @param velocity     the velocity, in the range 0 to 127
+    @param blockID    the ID of the block to send this message to
+    @param param1     the first chunk of data to send
+    @param param2     the second chunk of data to send
+    @param param3     the third chunk of data to send
 */
-void sendNoteOff (int channel, int noteNumber, int velocity);
+void sendMessageToBlock (int blockID, int param1, int param2, int param3);
 
-/** Sends an aftertouch message.
+/** Sends a message to the host. To receive this the host will need to implement
+    the Block::ProgramEventListener::handleProgramEvent() method.
  
-    @param channel              the midi channel, in the range 0 to 15
-    @param noteNumber           the key number, in the range 0 to 127
-    @param level                the amount of aftertouch, in the range 0 to 127
+    @param param1    the first chunk of data to send
+    @param param2    the second chunk of data to send
+    @param param3    the third chunk of data to send
 */
-void sendAftertouch (int channel, int noteNumber, int level);
+void sendMessageToHost (int param1, int param2, int param3);
 
-/** Sends a controller message.
+//=============================== LIGHTPAD =====================================
+/** Draws a pressure point with a specified colour and pressure.
  
-    @param channel          the midi channel, in the range 0 to 15
-    @param controller       the type of controller
-    @param value            the controller value
- */
-void sendCC (int channel, int controller, int value);
-
-/** Sends a pitch bend message.
- 
-    @param channel      the midi channel, in the range 0 to 15
-    @param position     the wheel position, in the range 0 to 16383
+    @param argb      the colour to use
+    @param touchX    the x position of the touch in block units
+    @param touchY    the y position of the touch in block units
+    @param touchZ    the pressure value of the touch
 */
-void sendPitchBend (int channel, int position);
+void addPressurePoint (int argb, float touchX, float touchY, float touchZ);
 
-/** Sends a channel-pressure change event.
- 
-    @param channel              the midi channel, in the range 0 to 15
-    @param pressure             the pressure, in the range 0 to 127
+/** Draws the pressure map on the display. */
+void drawPressureMap();
+
+/** Fades the pressure map on the display. */
+void fadePressureMap();
+
+//=============================== CONTROL ======================================
+/** Links a another block to this control block. 
+    
+    @param blockID    the ID of the block to link
 */
-void sendChannelPressure (int channel, int pressure);
+void linkBlockIDtoController (int blockID);
 
-//==============================================================================
-/**  
-    Use this method to draw the display. 
-    The Block will call this approximately 25 times per second.
+/** Repaints the control block display. */
+void repaintControl();
+
+/** Initialises one of the control block buttons.
+
+    @param buttonIndex       the index of the button to initialise
+    @param modeToUse         the mode to use for this button @see ControlMode
+    @param outputType        the control type to use @see ControlType
+    @param val               the current value to set this button to
+    @param min               the minimum value for this button
+    @param max               the maximum value for this button
+    @param index             the item index
+    @param onColourToUse     the colour to use when this button is on  
+    @param offColourToUse    the colour to use when this button is off
 */
-void repaint()
+void initControl (int buttonIndex, int modeToUse, int outputType, int val, int min, int max, 
+                  int index,  int onColourToUse, int offColourToUse);
 
-/** Called when a button is pushed.
- 
-    @param index    the index of the button that was pushed
+enum ControlType
+{
+    internalConfig = 0,
+    midiCC,
+    sysex
+};
+
+enum ControlMode
+{
+    toggle = 0,
+    togglePulse,
+    gate,
+    trigger,
+    cycle,
+    incDec,
+    triState
+};
+
+//=============================== SEABOARD =====================================
+/** Forces a touch event to be handled as seaboard playing.
+
+    @param touchIndex    the index of the touch event
 */
-void handleButtonDown (int index);
+void handleTouchAsSeaboard (int touchIndex);
 
-/** Called when a button is released.
- 
-    @param index    the index of the button that was released
+//=============================== TOPOLOGY AND CLUSTERS ========================
+/** Returns the number of blocks in the current topology. */
+int getNumBlocksInTopology();
+
+/** Returns the ID of a block at a given index in the topology. */
+int getBlockIDForIndex (int index);
+
+/** Returns true if this block is directly connected to the host,
+    as opposed to only being connected to a different block via a connection port.
 */
-void handleButtonUp (int index);
+bool isMasterBlock();
 
-/** Called when a touch event starts.
- 
-    @param index    the touch index, which will stay constant for each finger as it is tracked
-    @param x        the X position of this touch on the device, in logical units starting from 0 (left)
-    @param y        the Y position of this touch on the device, in logical units starting from 0 (top)
-    @param z        the current pressure of this touch, in the range 0.0 (no pressure) to 1.0 (very hard)
-    @param vz       the rate at which pressure is currently changing, measured in units/second
- */
-void touchStart (int index, float x, float y, float z, float vz);
+/** Returns true if this block is connected to the host computer, this can be
+    directly or through connections to other blocks. */
+bool isConnectedToHost();
 
-/** Called when a touch event moves.
- 
-    @param index    the touch index, which will stay constant for each finger as it is tracked
-    @param x        the X position of this touch on the device, in logical units starting from 0 (left)
-    @param y        the Y position of this touch on the device, in logical units starting from 0 (top)
-    @param z        the current pressure of this touch, in the range 0.0 (no pressure) to 1.0 (very hard)
-    @param vz       the rate at which pressure is currently changing, measured in units/second
+/** Returns the ID of a block connected to a specified port on this block. */
+int getBlockIDOnPort (int port);
+
+/** Returns the port number that is connected to the master block. Returns 0xFF if there is
+    no port connected to master. */
+int getPortToMaster();
+
+/** Returns the horizontal distance between this block and the master block in block units. */
+int getHorizontalDistFromMaster();
+
+/** Returns the vertical distance between this block and the master block in block units. */
+int getVerticalDistFromMaster();
+
+/** Returns the angle of this block relative to the master block in degrees. */
+int getAngleFromMaster();
+
+/** Sets whether this block should auto-rotate when its angle relative to the master block changes. */
+void setAutoRotate (bool enabled);
+
+/** Returns the index of this block in the current cluster. */
+int getClusterIndex();
+
+/** Returns how many blocks wide the current cluster is. */
+int getClusterWidth();
+
+/** Returns how many blocks high the current cluster is. */
+int getClusterHeight(); 
+
+/** Returns the x index of this block in the current cluster. */
+int getClusterXpos();
+
+/** Returns the y index of this block in the current cluster. */
+int getClusterYpos();
+
+/** Returns the number of blocks in the current cluster. */
+int getNumBlocksInCurrentCluster();
+
+/** Returns the block ID for a block in the current cluster.
+
+    @param index    the cluster index of the block to get the ID of
 */
-void touchMove (int index, float x, float y, float z, float vz);
+int getBlockIdForBlockInCluster (int index);
 
-/** Called when a touch event ends.
- 
-    @param index    the touch index, which will stay constant for each finger as it is tracked
-    @param x        the X position of this touch on the device, in logical units starting from 0 (left)
-    @param y        the Y position of this touch on the device, in logical units starting from 0 (top)
-    @param z        the current pressure of this touch, in the range 0.0 (no pressure) to 1.0 (very hard)
-    @param vz       the rate at which pressure is currently changing, measured in units/second
+/** Returns true if the master block is in the current cluster. */
+bool isMasterInCurrentCluster();
+
+//=============================== CONFIG =======================================
+/** Returns current value of one of the local config items.
+    
+    @param item    the config item to get (see ConfigItemId enum in juce_BlocksProtocolDefinitions.h)
 */
-void touchEnd (int index, float x, float y, float z, float vz);
+int getLocalConfig (int item);
 
-/** Called when a program is loaded onto the block and is about to start. Do any setup here. */
-void initialise();
+/** Sets the current value of one of the local config items.
 
-/** Called when a block receives a MIDI message. */
-void handleMIDI (int byte0, int byte1, int byte2);
-
-/** Called when a block receives a message.
-
-    @see sendMessageToBlock
+    @param item     the config item to set the value of (see ConfigItemId enum in juce_BlocksProtocolDefinitions.h)
+    @param value    the value to set the config to
 */
-void handleMessage (int param1, int param2, int param3);
+void setLocalConfig (int item, int value);
+
+/** Sets the local config of a block to the config item of a remote block.
+    
+    @param longAddress    the address of the remote block
+    @param item           the config item (see ConfigItemId enum in juce_BlocksProtocolDefinitions.h)
+*/
+void requestRemoteConfig (int longAddress, int item);
+
+/** Sets the config of a remote block.
+
+    @param longAddress    the address of the remote block
+    @param item           the config item (see ConfigItemId enum in juce_BlocksProtocolDefinitions.h)    
+    @param value          the value to set the config to
+*/
+void setRemoteConfig (int longAddress, int item, int value);
+
+/** Sets the range of one of the local config items.
+    
+    @param item    the config item to set the range of (see ConfigItemId enum in juce_BlocksProtocolDefinitions.h)
+    @param min     the minimum value this config item should use
+    @param max     the maximum value this config item should use
+*/
+void setLocalConfigItemRange (int item, int min, int max);
+
+/** Sets whether a local config item should be active.
+    
+    @param item           the config item to set active (see ConfigItemId enum in juce_BlocksProtocolDefinitions.h)
+    @param isActive       sets whether the config should be active or not
+    @param saveToFlash    if true then this config item will be saved to the flash memory of the block
+*/
+void setLocalConfigActiveState (int item, bool isActive, bool saveToFlash);
