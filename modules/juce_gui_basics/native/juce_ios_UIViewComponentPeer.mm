@@ -285,7 +285,7 @@ public:
         return r;
     }
 
-    MultiTouchMapper<UITouch*> currentTouches;
+    static MultiTouchMapper<UITouch*> currentTouches;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIViewComponentPeer)
@@ -323,6 +323,8 @@ static bool isKioskModeView (JuceUIViewController* c)
 
     return Desktop::getInstance().getKioskModeComponent() == &(juceView->owner->getComponent());
 }
+
+MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
 
 
 } // (juce namespace)

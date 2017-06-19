@@ -1461,10 +1461,11 @@ private:
     FileDropTarget* dropTarget = nullptr;
     uint8 updateLayeredWindowAlpha = 255;
     UWPUIViewSettings uwpViewSettings;
-    MultiTouchMapper<DWORD> currentTouches;
    #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
     ModifierKeyProvider* modProvider = nullptr;
    #endif
+
+    static MultiTouchMapper<DWORD> currentTouches;
 
     //==============================================================================
     struct TemporaryImage    : private Timer
@@ -3498,6 +3499,8 @@ private:
 
 ModifierKeys HWNDComponentPeer::currentModifiers;
 ModifierKeys HWNDComponentPeer::modifiersAtLastCallback;
+
+MultiTouchMapper<DWORD> HWNDComponentPeer::currentTouches;
 
 ComponentPeer* Component::createNewPeer (int styleFlags, void* parentHWND)
 {
