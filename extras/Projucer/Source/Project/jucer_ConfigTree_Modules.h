@@ -30,23 +30,25 @@ public:
     ModuleItem (Project& p, const String& modID)
         : project (p), moduleID (modID)
     {
-        auto moduleVersionNum = project.getModules().getModuleInfo (moduleID).getVersion();
-
-        if (moduleVersionNum != ProjucerApplication::getApp().getApplicationVersion())
-            moduleVersion = moduleVersionNum;
     }
 
     bool canBeSelected() const override       { return true; }
     bool mightContainSubItems() override      { return false; }
     String getUniqueName() const override     { return "module_" + moduleID; }
-    String getDisplayName() const override    { return moduleID + (moduleVersion.isNotEmpty() ? String (" (" + moduleVersion + ")") : ""); }
+
+    String getDisplayName() const override
+    {
+        auto versionNum = project.getModules().getModuleInfo (moduleID).getVersion();
+        return moduleID + (versionNum != ProjucerApplication::getApp().getApplicationVersion() ? String (" (" + versionNum + ")") : "");
+    }
+
     String getRenamingName() const override   { return getDisplayName(); }
     void setName (const String&) override     {}
     bool isMissing() const override           { return hasMissingDependencies(); }
 
     void showDocument() override
     {
-        showSettingsPage (new ModuleSettingsPanel (project, moduleID));
+        showSettingsPage (new ModuleSettingsPanel (project, moduleID, *this));
     }
 
     void deleteItem() override
@@ -90,7 +92,6 @@ public:
 
     Project& project;
     String moduleID;
-    String moduleVersion;
 
 private:
     bool hasMissingDependencies() const
@@ -103,10 +104,10 @@ private:
                                  private Value::Listener
     {
     public:
-        ModuleSettingsPanel (Project& p, const String& modID)
-            : group (p.getModules().getModuleInfo (modID).getID(), Icon (getIcons().singleModule, Colours::transparentBlack)),
-              project (p),
-              moduleID (modID)
+        ModuleSettingsPanel (Project& p, const String& modID, ModuleItem& o)
+            : group (p.getModules().getModuleInfo (modID).getID(),
+                     Icon (getIcons().singleModule, Colours::transparentBlack)),
+              project (p), owner (o), moduleID (modID)
         {
             defaultJuceModulePathValue.referTo (getAppSettings().getStoredPath (Ids::defaultJuceModulePath));
             defaultUserModulePathValue.referTo (getAppSettings().getStoredPath (Ids::defaultUserModulePath));
@@ -217,6 +218,7 @@ private:
     private:
         PropertyGroupComponent group;
         Project& project;
+        ModuleItem& owner;
         String moduleID;
         Value globalPathValue;
         Value defaultJuceModulePathValue, defaultUserModulePathValue;
@@ -239,6 +241,8 @@ private:
 
             if (auto* moduleInfo = dynamic_cast<ModuleInfoComponent*> (group.properties.getUnchecked (0)))
                 moduleInfo->refresh();
+
+            owner.treeHasChanged();
         }
 
         //==============================================================================
