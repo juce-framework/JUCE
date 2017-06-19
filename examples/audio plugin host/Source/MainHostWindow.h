@@ -81,7 +81,7 @@ public:
     void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result);
     bool perform (const InvocationInfo& info);
 
-    bool tryToQuitApplication();
+    void tryToQuitApplication();
 
     void createPlugin (const PluginDescription&, Point<int> pos);
 

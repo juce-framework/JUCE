@@ -149,22 +149,37 @@ void MainHostWindow::closeButtonPressed()
     tryToQuitApplication();
 }
 
-bool MainHostWindow::tryToQuitApplication()
+struct AsyncQuitRetrier  : private Timer
+{
+    AsyncQuitRetrier()   { startTimer (500); }
+
+    void timerCallback() override
+    {
+        stopTimer();
+        delete this;
+
+        if (auto app = JUCEApplicationBase::getInstance())
+            app->systemRequestedQuit();
+    }
+};
+
+void MainHostWindow::tryToQuitApplication()
 {
     PluginWindow::closeAllCurrentlyOpenWindows();
 
-    if (getGraphEditor() == nullptr
-         || getGraphEditor()->graph->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
+    if (ModalComponentManager::getInstance()->cancelAllModalComponents())
+    {
+        new AsyncQuitRetrier();
+    }
+    else if (getGraphEditor() == nullptr
+              || getGraphEditor()->graph->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
     {
         // Some plug-ins do not want [NSApp stop] to be called
         // before the plug-ins are not deallocated.
         getGraphEditor()->releaseGraph();
 
         JUCEApplication::quit();
-        return true;
     }
-
-    return false;
 }
 
 void MainHostWindow::changeListenerCallback (ChangeBroadcaster* changed)
