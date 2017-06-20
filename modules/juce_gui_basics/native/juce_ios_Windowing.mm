@@ -99,15 +99,7 @@ Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
             }
         }];
 
-        MessageManager::callAsync ([self,application,app] ()
-                                   {
-                                       app->suspended();
-                                       if (appSuspendTask != UIBackgroundTaskInvalid)
-                                       {
-                                           [application endBackgroundTask:appSuspendTask];
-                                           appSuspendTask = UIBackgroundTaskInvalid;
-                                       }
-                                   });
+        MessageManager::callAsync ([self,application,app] ()  { app->suspended(); });
        #else
         ignoreUnused (application);
         app->suspended();
