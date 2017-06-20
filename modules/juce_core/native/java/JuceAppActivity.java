@@ -630,6 +630,7 @@ public class JuceAppActivity   extends Activity
         //==============================================================================
         private native void handleKeyDown (long host, int keycode, int textchar);
         private native void handleKeyUp (long host, int keycode, int textchar);
+        private native void handleBackButton (long host);
 
         public void showKeyboard (String type)
         {
@@ -657,8 +658,14 @@ public class JuceAppActivity   extends Activity
                 case KeyEvent.KEYCODE_VOLUME_UP:
                 case KeyEvent.KEYCODE_VOLUME_DOWN:
                     return super.onKeyDown (keyCode, event);
+                case KeyEvent.KEYCODE_BACK:
+                {
+                    handleBackButton (host);
+                    return true;
+                }
 
-                default: break;
+                default:
+                    break;
             }
 
             handleKeyDown (host, keyCode, event.getUnicodeChar());

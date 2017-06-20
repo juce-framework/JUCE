@@ -437,6 +437,12 @@ public:
     {
     }
 
+    void handleBackButtonCallback()
+    {
+        if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+            app->backButtonPressed();
+    }
+
     //==============================================================================
     bool isFocused() const override
     {
@@ -664,6 +670,7 @@ JUCE_VIEW_CALLBACK (void, viewSizeChanged,  (JNIEnv* env, jobject /*view*/, jlon
 JUCE_VIEW_CALLBACK (void, focusChanged,     (JNIEnv* env, jobject /*view*/, jlong host, jboolean hasFocus),                       handleFocusChangeCallback (hasFocus))
 JUCE_VIEW_CALLBACK (void, handleKeyDown,    (JNIEnv* env, jobject /*view*/, jlong host, jint k, jint kc),                         handleKeyDownCallback ((int) k, (int) kc))
 JUCE_VIEW_CALLBACK (void, handleKeyUp,      (JNIEnv* env, jobject /*view*/, jlong host, jint k, jint kc),                         handleKeyUpCallback ((int) k, (int) kc))
+JUCE_VIEW_CALLBACK (void, handleBackButton, (JNIEnv* env, jobject /*view*/, jlong host),                                          handleBackButtonCallback())
 
 //==============================================================================
 ComponentPeer* Component::createNewPeer (int styleFlags, void*)
