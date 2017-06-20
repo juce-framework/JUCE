@@ -319,3 +319,16 @@ ValueTree DrawableComposite::createValueTree (ComponentBuilder::ImageProvider* i
 
     return tree;
 }
+
+Path DrawableComposite::getOutlineAsPath() const
+{
+    Path p;
+
+    for (int i = 0; i < getNumChildComponents(); ++i)
+        if (auto* childDrawable = dynamic_cast<Drawable*> (getChildComponent (i)))
+            p.addPath (childDrawable->getOutlineAsPath());
+
+    p.applyTransform (getTransform());
+
+    return p;
+}
