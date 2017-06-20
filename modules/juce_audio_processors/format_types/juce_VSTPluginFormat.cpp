@@ -1606,14 +1606,30 @@ private:
     {
         BusesProperties returnValue;
 
+        if (effect->numInputChannels == 0 && effect->numOutputChannels == 0)
+            return returnValue;
+
+        // Workaround for old broken JUCE plug-ins which would return an invalid
+        // speaker arrangement if the host didn't ask for a specific arrangement
+        // beforehand.
+        // Check if the plug-in reports any default layouts. If it doesn't, then
+        // try setting a default layout compatible with the number of pins this
+        // plug-in is reporting.
+        if (! pluginHasDefaultChannelLayouts (effect))
+        {
+            SpeakerMappings::VstSpeakerConfigurationHolder canonicalIn  (AudioChannelSet::canonicalChannelSet (effect->numInputChannels));
+            SpeakerMappings::VstSpeakerConfigurationHolder canonicalOut (AudioChannelSet::canonicalChannelSet (effect->numOutputChannels));
+
+            effect->dispatchFunction (effect, plugInOpcodeSetSpeakerConfiguration, 0,
+                                      (pointer_sized_int) &canonicalIn.get(), (void*) &canonicalOut.get(), 0.0f);
+        }
+
         HeapBlock<VstSpeakerConfiguration> inArrBlock (1, true), outArrBlock (1, true);
 
         auto* inArr  = inArrBlock.getData();
         auto* outArr = outArrBlock.getData();
 
-        if (effect->numInputChannels == 0
-             || effect->dispatchFunction (effect, plugInOpcodeGetSpeakerArrangement, 0,
-                                          reinterpret_cast<pointer_sized_int> (&inArr), &outArr, 0.0f) == 0)
+        if (! getSpeakerArrangementWrapper (effect, inArr, outArr))
             inArr = outArr = nullptr;
 
         for (int dir = 0; dir < 2; ++dir)
@@ -1635,13 +1651,16 @@ private:
                 if ((pinProps.flags & vstPinInfoFlagValid) != 0)
                 {
                     layout = SpeakerMappings::vstArrangementTypeToChannelSet (pinProps.configurationType, 0);
+
                     if (layout.isDisabled())
                         break;
                 }
-                else
+                else if (arr == nullptr)
                 {
                     layout = ((pinProps.flags & vstPinInfoFlagIsStereo) != 0 ? AudioChannelSet::stereo() : AudioChannelSet::mono());
                 }
+                else
+                    break;
 
                 busAdded = true;
                 returnValue.addBus (isInput, pinProps.text, layout, true);
@@ -1665,6 +1684,56 @@ private:
         }
 
         return returnValue;
+    }
+
+    static bool pluginHasDefaultChannelLayouts (VstEffectInterface* effect)
+    {
+        HeapBlock<VstSpeakerConfiguration> inArrBlock (1, true), outArrBlock (1, true);
+
+        auto* inArr  = inArrBlock.getData();
+        auto* outArr = outArrBlock.getData();
+
+        if (getSpeakerArrangementWrapper (effect, inArr, outArr))
+            return true;
+
+        for (int dir = 0; dir < 2; ++dir)
+        {
+            const bool isInput = (dir == 0);
+            const int opcode = (isInput ? plugInOpcodeGetInputPinProperties : plugInOpcodeGetOutputPinProperties);
+            const int maxChannels = (isInput ? effect->numInputChannels : effect->numOutputChannels);
+
+            int channels = 1;
+
+            for (int ch = 0; ch < maxChannels; ch += channels)
+            {
+                VstPinInfo pinProps;
+
+                if (effect->dispatchFunction (effect, opcode, ch, 0, &pinProps, 0.0f) == 0)
+                    return false;
+
+                if ((pinProps.flags & vstPinInfoFlagValid) != 0)
+                    return true;
+
+                channels = (pinProps.flags & vstPinInfoFlagIsStereo) != 0 ? 2 : 1;
+            }
+        }
+
+        return false;
+    }
+
+    static bool getSpeakerArrangementWrapper (VstEffectInterface* effect,
+                                              VstSpeakerConfiguration* inArr,
+                                              VstSpeakerConfiguration* outArr)
+    {
+        // Workaround: unfortunately old JUCE VST-2 plug-ins had a bug and would crash if
+        // you try to get the speaker arrangement when there are no input channels present.
+        // Hopefully, one day (when there are no more old JUCE plug-ins around), we can
+        // commment out the next two lines.
+        if (effect->numInputChannels == 0)
+            return false;
+
+        return (effect->dispatchFunction (effect, plugInOpcodeGetSpeakerArrangement, 0,
+                                          reinterpret_cast<pointer_sized_int> (&inArr), &outArr, 0.0f) != 0);
     }
 
     //==============================================================================
