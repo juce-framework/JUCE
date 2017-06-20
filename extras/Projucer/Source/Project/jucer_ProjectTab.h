@@ -517,19 +517,13 @@ public:
 
     bool perform (const InvocationInfo& info) override
     {
-        switch (info.commandID)
+        if (info.commandID == CommandIDs::showFindPanel)
         {
-            case CommandIDs::showFindPanel:
-            {
-                find();
-                return true;
-            }
-
-            default:
-                return false;
+            find();
+            return true;
         }
 
-        return true;
+        return false;
     }
 
 
