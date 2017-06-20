@@ -161,59 +161,45 @@ static DebugFlagsInitialiser debugFlagsInitialiser;
 #endif
 
 //==============================================================================
-static bool isWindowsVersionOrLater (SystemStats::OperatingSystemType target)
+static uint32 getWindowsVersion()
 {
-    OSVERSIONINFOEX info;
-    zerostruct (info);
-    info.dwOSVersionInfoSize = sizeof (OSVERSIONINFOEX);
+    auto filename = _T("kernel32.dll");
+    DWORD handle = 0;
 
-    if (target >= SystemStats::Windows10)
+    if (auto size = GetFileVersionInfoSize (filename, &handle))
     {
-        info.dwMajorVersion = 10;
-        info.dwMinorVersion = 0;
-    }
-    else if (target >= SystemStats::WinVista)
-    {
-        info.dwMajorVersion = 6;
+        HeapBlock<char> data (size);
 
-        switch (target)
+        if (GetFileVersionInfo (filename, handle, size, data))
         {
-            case SystemStats::WinVista:    break;
-            case SystemStats::Windows7:    info.dwMinorVersion = 1; break;
-            case SystemStats::Windows8_0:  info.dwMinorVersion = 2; break;
-            case SystemStats::Windows8_1:  info.dwMinorVersion = 3; break;
-            default:                       jassertfalse; break;
+            VS_FIXEDFILEINFO* info = nullptr;
+            UINT verSize = 0;
+
+            if (VerQueryValue (data, (LPCTSTR) _T("\\"), (void**) &info, &verSize))
+                if (size > 0 && info != nullptr && info->dwSignature == 0xfeef04bd)
+                    return (uint32) info->dwFileVersionMS;
         }
     }
-    else
-    {
-        info.dwMajorVersion = 5;
-        info.dwMinorVersion = target >= SystemStats::WinXP ? 1 : 0;
-    }
 
-    DWORDLONG mask = 0;
-
-    VER_SET_CONDITION (mask, VER_MAJORVERSION,     VER_GREATER_EQUAL);
-    VER_SET_CONDITION (mask, VER_MINORVERSION,     VER_GREATER_EQUAL);
-    VER_SET_CONDITION (mask, VER_SERVICEPACKMAJOR, VER_GREATER_EQUAL);
-    VER_SET_CONDITION (mask, VER_SERVICEPACKMINOR, VER_GREATER_EQUAL);
-
-    return VerifyVersionInfo (&info,
-                              VER_MAJORVERSION | VER_MINORVERSION
-                               | VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR,
-                              mask) != FALSE;
+    return 0;
 }
 
 SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
 {
-    const SystemStats::OperatingSystemType types[]
-            = { Windows10, Windows8_1, Windows8_0, Windows7, WinVista, WinXP, Win2000 };
+    auto v = getWindowsVersion();
+    auto major = (v >> 16);
 
-    for (int i = 0; i < numElementsInArray (types); ++i)
-        if (isWindowsVersionOrLater (types[i]))
-            return types[i];
+    jassert (major <= 10); // need to add support for new version!
 
-    jassertfalse;  // need to support whatever new version is running!
+    if (major == 10)       return Windows10;
+    if (v == 0x00060003)   return Windows8_1;
+    if (v == 0x00060002)   return Windows8_0;
+    if (v == 0x00060001)   return Windows7;
+    if (v == 0x00060000)   return WinVista;
+    if (v == 0x00050000)   return Win2000;
+    if (major == 5)        return WinXP;
+
+    jassertfalse;
     return UnknownOS;
 }
 
