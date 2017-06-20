@@ -135,10 +135,10 @@ class JUCE_API WebInputStream : public InputStream
     */
     bool connect (Listener* listener);
 
-    /** Returns true if there was an error during the connection attempt */
+    /** Returns true if there was an error during the connection attempt. */
     bool isError() const;
 
-    /** Will cancel a blocking read. */
+    /** Will cancel a blocking read and prevent any subsequent connection attempts. */
     void cancel();
 
     //==============================================================================

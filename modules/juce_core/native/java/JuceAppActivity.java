@@ -58,6 +58,16 @@ import android.media.AudioManager;
 import android.media.MediaScannerConnection;
 import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 import android.Manifest;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.Future;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.*;
 $$JuceAndroidMidiImports$$ // If you get an error here, you need to re-save your project with the Projucer!
 
 
@@ -868,43 +878,136 @@ public class JuceAppActivity   extends Activity
     public static class HTTPStream
     {
         public HTTPStream (HttpURLConnection connection_,
-                           int[] statusCode, StringBuffer responseHeaders) throws IOException
+                           int[] statusCode_,
+                           StringBuffer responseHeaders_)
         {
             connection = connection_;
+            statusCode = statusCode_;
+            responseHeaders = responseHeaders_;
+        }
+
+        private final InputStream getCancellableStream (final boolean isInput) throws ExecutionException
+        {
+            synchronized (createFutureLock)
+            {
+                if (hasBeenCancelled.get())
+                    return null;
+
+                streamFuture = executor.submit (new Callable<BufferedInputStream>()
+                {
+                    @Override
+                    public BufferedInputStream call() throws IOException
+                    {
+                        return new BufferedInputStream (isInput ? connection.getInputStream()
+                                                                : connection.getErrorStream());
+                    }
+                });
+            }
 
             try
             {
-                inputStream = new BufferedInputStream (connection.getInputStream());
+                if (connection.getConnectTimeout() > 0)
+                    return streamFuture.get (connection.getConnectTimeout(), TimeUnit.MILLISECONDS);
+                else
+                    return streamFuture.get();
+            }
+            catch (InterruptedException e)
+            {
+                return null;
+            }
+            catch (TimeoutException e)
+            {
+                return null;
+            }
+            catch (CancellationException e)
+            {
+                return null;
+            }
+        }
+
+        public final boolean connect()
+        {
+            try
+            {
+                try
+                {
+                    synchronized (createStreamLock)
+                    {
+                        if (hasBeenCancelled.get())
+                            return false;
+
+                        inputStream = getCancellableStream (true);
+                    }
+                }
+                catch (ExecutionException e)
+                {
+                    if (connection.getResponseCode() < 400)
+                    {
+                        statusCode[0] = connection.getResponseCode();
+                        connection.disconnect();
+                        return false;
+                    }
+                }
+                finally
+                {
+                    statusCode[0] = connection.getResponseCode();
+                }
+
+                synchronized (createStreamLock)
+                {
+                    if (hasBeenCancelled.get())
+                        return false;
+
+                    try
+                    {
+                        if (statusCode[0] >= 400)
+                            inputStream = getCancellableStream (false);
+                        else
+                            inputStream = getCancellableStream (true);
+                    }
+                    catch (ExecutionException e)
+                    {}
+                }
+
+                for (java.util.Map.Entry<String, java.util.List<String>> entry : connection.getHeaderFields().entrySet())
+                    if (entry.getKey() != null && entry.getValue() != null)
+                        responseHeaders.append (entry.getKey() + ": "
+                                                + android.text.TextUtils.join (",", entry.getValue()) + "\n");
+
+                return true;
             }
             catch (IOException e)
             {
-                if (connection.getResponseCode() < 400)
-                    throw e;
+                return false;
             }
-            finally
-            {
-                statusCode[0] = connection.getResponseCode();
-            }
-
-            if (statusCode[0] >= 400)
-                inputStream = connection.getErrorStream();
-            else
-                inputStream = connection.getInputStream();
-
-            for (java.util.Map.Entry<String, java.util.List<String>> entry : connection.getHeaderFields().entrySet())
-                if (entry.getKey() != null && entry.getValue() != null)
-                    responseHeaders.append (entry.getKey() + ": "
-                                             + android.text.TextUtils.join (",", entry.getValue()) + "\n");
         }
 
         public final void release()
         {
+            hasBeenCancelled.set (true);
+
             try
             {
-                inputStream.close();
+                if (! createStreamLock.tryLock())
+                {
+                    synchronized (createFutureLock)
+                    {
+                        if (streamFuture != null)
+                            streamFuture.cancel (true);
+                    }
+
+                    createStreamLock.lock();
+                }
+
+                if (inputStream != null)
+                    inputStream.close();
             }
             catch (IOException e)
             {}
+            finally
+            {
+                createStreamLock.unlock();
+            }
 
             connection.disconnect();
         }
@@ -915,7 +1018,11 @@ public class JuceAppActivity   extends Activity
 
             try
             {
-                num = inputStream.read (buffer, 0, numBytes);
+                synchronized (createStreamLock)
+                {
+                    if (inputStream != null)
+                        num = inputStream.read (buffer, 0, numBytes);
+                }
             }
             catch (IOException e)
             {}
@@ -932,8 +1039,16 @@ public class JuceAppActivity   extends Activity
         public final boolean setPosition (long newPos)  { return false; }
 
         private HttpURLConnection connection;
+        private int[] statusCode;
+        private StringBuffer responseHeaders;
         private InputStream inputStream;
         private long position;
+        private final ReentrantLock createStreamLock = new ReentrantLock();
+        private final Object createFutureLock = new Object();
+        private AtomicBoolean hasBeenCancelled = new AtomicBoolean();
+
+        private final ExecutorService executor = Executors.newCachedThreadPool (Executors.defaultThreadFactory());
+        Future<BufferedInputStream> streamFuture;
     }
 
     public static final HTTPStream createHTTPStream (String address, boolean isPost, byte[] postData,

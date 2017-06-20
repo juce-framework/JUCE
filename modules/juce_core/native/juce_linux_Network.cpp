@@ -116,6 +116,13 @@ public:
 
     bool connect (WebInputStream::Listener* listener)
     {
+        {
+            const ScopedLock lock (createSocketLock);
+
+            if (hasBeenCancelled)
+                return false;
+        }
+
         address = url.toString (! isPost);
         statusCode = createConnection (listener, numRedirectsToFollow);
 
@@ -124,6 +131,10 @@ public:
 
     void cancel()
     {
+        const ScopedLock lock (createSocketLock);
+
+        hasBeenCancelled = true;
+
         statusCode = -1;
         finished = true;
 
@@ -253,7 +264,8 @@ private:
     String httpRequestCmd;
     int64 chunkEnd = 0;
     bool isChunked = false, readingChunk = false;
-    CriticalSection closeSocketLock;
+    CriticalSection closeSocketLock, createSocketLock;
+    bool hasBeenCancelled = false;
 
     void closeSocket (bool resetLevelsOfRedirection = true)
     {
@@ -323,7 +335,12 @@ private:
         if (getaddrinfo (serverName.toUTF8(), String (port).toUTF8(), &hints, &result) != 0 || result == 0)
             return 0;
 
-        socketHandle = socket (result->ai_family, result->ai_socktype, 0);
+        {
+            const ScopedLock lock (createSocketLock);
+
+            socketHandle = hasBeenCancelled ? -1
+                                            : socket (result->ai_family, result->ai_socktype, 0);
+        }
 
         if (socketHandle == -1)
         {
