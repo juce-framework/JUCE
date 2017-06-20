@@ -208,7 +208,7 @@ private:
         lightGridWidth = 0;
         lightGridHeight = 0;
         numKeywaves = 24;
-        
+
         addPortsSW (Block::ConnectionPort::DeviceEdge::west,  1);
         addPortsNE (Block::ConnectionPort::DeviceEdge::north, 2);
         addPortsNE (Block::ConnectionPort::DeviceEdge::east,  1);
