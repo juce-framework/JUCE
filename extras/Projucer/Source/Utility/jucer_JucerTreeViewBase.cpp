@@ -97,6 +97,7 @@ void JucerTreeViewBase::paintIcon (Graphics &g, Rectangle<float> area)
 {
     g.setColour (getContentColour (true));
     getIcon().draw (g, area, isIconCrossedOut());
+    textX = roundToInt (area.getRight());
 }
 
 void JucerTreeViewBase::paintItem (Graphics& g, int width, int height)
