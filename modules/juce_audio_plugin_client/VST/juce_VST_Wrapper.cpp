@@ -187,15 +187,11 @@ struct SharedMessageThread  : public Thread
 
         while ((! threadShouldExit()) && MessageManager::getInstance()->runDispatchLoopUntil (250))
         {}
-
-        if (hasEditor)
-            XWindowSystem::getInstance()->displayRef();
     }
 
     juce_DeclareSingleton (SharedMessageThread, false)
 
     bool initialised = false;
-    bool hasEditor;
 };
 
 juce_ImplementSingleton (SharedMessageThread)
