@@ -159,7 +159,8 @@ namespace
 
 struct SharedMessageThread  : public Thread
 {
-    SharedMessageThread()  : Thread ("VstMessageThread")
+    SharedMessageThread ()
+        : Thread ("VstMessageThread")
     {
         startThread (7);
 
@@ -182,13 +183,19 @@ struct SharedMessageThread  : public Thread
 
         MessageManager::getInstance()->setCurrentThreadAsMessageThread();
 
+        ScopedXDisplay xDisplay;
+
         while ((! threadShouldExit()) && MessageManager::getInstance()->runDispatchLoopUntil (250))
         {}
+
+        if (hasEditor)
+            XWindowSystem::getInstance()->displayRef();
     }
 
     juce_DeclareSingleton (SharedMessageThread, false)
 
     bool initialised = false;
+    bool hasEditor;
 };
 
 juce_ImplementSingleton (SharedMessageThread)
