@@ -48,6 +48,7 @@ enum class MessageFromDevice
     deviceTopologyExtend    = 0x04,
     deviceTopologyEnd       = 0x05,
     deviceVersionList       = 0x06,
+    deviceNameList          = 0x07,
 
     touchStart              = 0x10,
     touchMove               = 0x11,
@@ -75,7 +76,11 @@ enum class MessageFromHost
     programEventMessage     = 0x03,
     firmwareUpdatePacket    = 0x04,
 
-    configMessage           = 0x10
+    configMessage           = 0x10,
+    factoryReset            = 0x11,
+    blockReset              = 0x12,
+
+    setName                 = 0x20
 };
 
 
@@ -146,6 +151,12 @@ struct VersionNumber
     uint8 length = 0;
 };
 
+struct BlockName
+{
+    uint8 name[33] = {};
+    uint8 length = 0;
+};
+
 struct DeviceStatus
 {
     BlockSerialNumber serialNumber;
@@ -164,6 +175,12 @@ struct DeviceVersion
 {
     TopologyIndex index;
     VersionNumber version;
+};
+
+struct DeviceName
+{
+    TopologyIndex index;
+    BlockName name;
 };
 
 static constexpr uint8 maxBlocksInTopologyPacket = 6;
@@ -425,6 +442,7 @@ static constexpr const char* ledProgramLittleFootFunctions[] =
     "getNumBlocksInCurrentCluster/i",
     "getBlockIdForBlockInCluster/ii",
     "isMasterInCurrentCluster/b",
+    "setClusteringActive/vb",
     "makeARGB/iiiii",
     "blendARGB/iii",
     "fillPixel/viii",

@@ -52,8 +52,8 @@ Block::Block (const juce::String& serial)
 {
 }
 
-Block::Block (const juce::String& serial, const juce::String& version)
-   : serialNumber (serial), versionNumber (version), uid (getBlockUIDFromSerialNumber (serial))
+Block::Block (const juce::String& serial, const juce::String& version, const juce::String& blockName)
+   : serialNumber (serial), versionNumber (version), name (blockName), uid (getBlockUIDFromSerialNumber (serial))
 {
 }
 

@@ -310,6 +310,7 @@ struct PhysicalTopologySource::Internal
         BlocksProtocol::TopologyIndex index;
         BlocksProtocol::BlockSerialNumber serial;
         BlocksProtocol::VersionNumber version;
+        BlocksProtocol::BlockName name;
         bool isMaster;
     };
 
@@ -326,11 +327,13 @@ struct PhysicalTopologySource::Internal
         for (auto& device : devices)
         {
             BlocksProtocol::VersionNumber version;
+            BlocksProtocol::BlockName name;
 
             result.add ({ getBlockUIDFromSerialNumber (device.serialNumber),
                           device.index,
                           device.serialNumber,
                           version,
+                          name,
                           isFirst });
 
             isFirst = false;
@@ -367,11 +370,27 @@ struct PhysicalTopologySource::Internal
         return false;
     }
 
+    static bool nameAddedToBlock (const juce::Array<DeviceInfo>& devices, Block::UID uid) noexcept
+    {
+        for (auto&& d : devices)
+            if (d.uid == uid && d.name.length)
+                return true;
+
+        return false;
+    }
+
     static void setVersionNumberForBlock (const juce::Array<DeviceInfo>& devices, Block& block) noexcept
     {
         for (auto&& d : devices)
             if (d.uid == block.uid)
                 block.versionNumber = juce::String ((const char*) d.version.version, d.version.length);
+    }
+
+    static void setNameForBlock (const juce::Array<DeviceInfo>& devices, Block& block) noexcept
+    {
+        for (auto&& d : devices)
+            if (d.uid == block.uid)
+                block.name = juce::String ((const char*) d.name.name, d.name.length);
     }
 
     //==============================================================================
@@ -519,13 +538,30 @@ struct PhysicalTopologySource::Internal
 
         void handleVersion (BlocksProtocol::DeviceVersion version)
         {
-            for (auto& d : currentDeviceInfo)
+            for (auto i = 0; i < currentDeviceInfo.size(); ++i)
             {
-                if (d.index == version.index)
+                if (currentDeviceInfo[i].index == version.index && version.version.length > 1)
                 {
-                    d.version = version.version;
-                    detector.handleTopologyChange();
-                    return;
+                    if (memcmp (currentDeviceInfo.getReference (i).version.version, version.version.version, sizeof (version.version)))
+                    {
+                        currentDeviceInfo.getReference(i).version = version.version;
+                        detector.handleTopologyChange();
+                    }
+                }
+            }
+        }
+
+        void handleName (BlocksProtocol::DeviceName name)
+        {
+            for (auto i = 0; i < currentDeviceInfo.size(); ++i)
+            {
+                if (currentDeviceInfo[i].index == name.index && name.name.length > 1)
+                {
+                    if (memcmp (currentDeviceInfo.getReference (i).name.name, name.name.name, sizeof (name.name)))
+                    {
+                        currentDeviceInfo.getReference (i).name = name.name;
+                        detector.handleTopologyChange();
+                    }
                 }
             }
         }
@@ -886,16 +922,20 @@ struct PhysicalTopologySource::Internal
 
                         currentTopology.blocks.remove (i);
                     }
-                    else if (versionNumberAddedToBlock (newDeviceInfo, block->uid, block->versionNumber))
+                    else
                     {
-                        setVersionNumberForBlock (newDeviceInfo, *block);
+                        if (versionNumberAddedToBlock (newDeviceInfo, block->uid, block->versionNumber))
+                            setVersionNumberForBlock (newDeviceInfo, *block);
+
+                        if (nameAddedToBlock (newDeviceInfo, block->uid))
+                            setNameForBlock (newDeviceInfo, *block);
                     }
                 }
 
                 for (auto& info : newDeviceInfo)
                     if (info.serial.isValid())
                         if (! containsBlockWithUID (currentTopology.blocks, getBlockUIDFromSerialNumber (info.serial)))
-                            currentTopology.blocks.add (new BlockImplementation (info.serial, *this, info.version, info.isMaster));
+                            currentTopology.blocks.add (new BlockImplementation (info.serial, *this, info.version, info.name, info.isMaster));
 
                 currentTopology.connections.swapWith (newDeviceConnections);
             }
@@ -1154,9 +1194,10 @@ struct PhysicalTopologySource::Internal
                                   private MIDIDeviceConnection::Listener,
                                   private Timer
     {
-        BlockImplementation (const BlocksProtocol::BlockSerialNumber& serial, Detector& detectorToUse, BlocksProtocol::VersionNumber version, bool master)
+        BlockImplementation (const BlocksProtocol::BlockSerialNumber& serial, Detector& detectorToUse, BlocksProtocol::VersionNumber version, BlocksProtocol::BlockName name, bool master)
             : Block (juce::String ((const char*) serial.serial, sizeof (serial.serial)),
-                     juce::String ((const char*) version.version, version.length)),
+                     juce::String ((const char*) version.version, version.length),
+                     juce::String ((const char*) name.name, name.length)),
               modelData (serial),
               remoteHeap (modelData.programAndHeapSize),
               detector (detectorToUse),
@@ -1613,6 +1654,67 @@ struct PhysicalTopologySource::Internal
         void setConfigChangedCallback (std::function<void(Block&, const ConfigMetaData&, uint32)> configChanged) override
         {
             configChangedCallback = configChanged;
+        }
+
+        void factoryReset() override
+        {
+            auto index = getDeviceIndex();
+
+            if (index >= 0)
+            {
+                BlocksProtocol::HostPacketBuilder<32> p;
+                p.writePacketSysexHeaderBytes ((BlocksProtocol::TopologyIndex) index);
+                p.addFactoryReset();
+                p.writePacketSysexFooter();
+                sendMessageToDevice (p);
+            }
+            else
+            {
+                jassertfalse;
+            }
+        }
+
+        void blockReset() override
+        {
+            auto index = getDeviceIndex();
+
+            if (index >= 0)
+            {
+                BlocksProtocol::HostPacketBuilder<32> p;
+                p.writePacketSysexHeaderBytes ((BlocksProtocol::TopologyIndex) index);
+                p.addBlockReset();
+                p.writePacketSysexFooter();
+                sendMessageToDevice (p);
+            }
+            else
+            {
+                jassertfalse;
+            }
+        }
+
+        bool setName (const juce::String& name) override
+        {
+            auto index = getDeviceIndex();
+
+            if (index >= 0)
+            {
+                BlocksProtocol::HostPacketBuilder<128> p;
+                p.writePacketSysexHeaderBytes ((BlocksProtocol::TopologyIndex) index);
+
+                if (p.addSetBlockName (name))
+                {
+                    p.writePacketSysexFooter();
+
+                    if (sendMessageToDevice (p))
+                        return true;
+                }
+            }
+            else
+            {
+                jassertfalse;
+            }
+
+            return false;
         }
 
         //==============================================================================

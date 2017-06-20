@@ -65,6 +65,7 @@ struct HostPacketDecoder
             case MessageFromDevice::deviceTopologyExtend:     return handleTopology (handler, reader, false);
             case MessageFromDevice::deviceTopologyEnd:        return handleTopologyEnd (handler, reader);
             case MessageFromDevice::deviceVersionList:        return handleVersion (handler, reader);
+            case MessageFromDevice::deviceNameList:           return handleName (handler, reader);
             case MessageFromDevice::touchStart:               return handleTouch (handler, reader, deviceIndex, packetTimestamp, true, false);
             case MessageFromDevice::touchMove:                return handleTouch (handler, reader, deviceIndex, packetTimestamp, false, false);
             case MessageFromDevice::touchEnd:                 return handleTouch (handler, reader, deviceIndex, packetTimestamp, false, true);
@@ -181,6 +182,20 @@ struct HostPacketDecoder
             version.version.version[i] = (uint8) reader.readBits (7);
 
         handler.handleVersion (version);
+        return true;
+    }
+
+    static bool handleName (Handler& handler, Packed7BitArrayReader& reader)
+    {
+        DeviceName name;
+
+        name.index = (TopologyIndex) reader.readBits (topologyIndexBits);
+        name.name.length = (uint8) reader.readBits (7);
+
+        for (uint32 i = 0; i < name.name.length; ++i)
+            name.name.name[i] = (uint8) reader.readBits (7);
+
+        handler.handleName (name);
         return true;
     }
 

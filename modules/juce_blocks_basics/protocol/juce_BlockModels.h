@@ -208,8 +208,10 @@ private:
         lightGridWidth = 0;
         lightGridHeight = 0;
         numKeywaves = 24;
-
-        addPorts (2, 1, 0, 1);
+        
+        addPortsSW (Block::ConnectionPort::DeviceEdge::west,  1);
+        addPortsNE (Block::ConnectionPort::DeviceEdge::north, 2);
+        addPortsNE (Block::ConnectionPort::DeviceEdge::east,  1);
 
         hasTouchSurface = true;
         programAndHeapSize = BlocksProtocol::padBlockProgramAndHeapSize;

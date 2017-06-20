@@ -62,6 +62,9 @@ public:
     /** The Block's version number */
     juce::String versionNumber;
 
+    /** The Block's name */
+    juce::String name;
+
     using UID = uint64;
 
     /** This Block's UID.
@@ -371,6 +374,15 @@ public:
     /** Reset all items active status */
     virtual void resetConfigListActiveStatus() = 0;
 
+    /** Perform factory reset on Block */
+    virtual void factoryReset() = 0;
+
+    /** Reset this Block */
+    virtual void blockReset() = 0;
+
+    /** Set Block name */
+    virtual bool setName (const juce::String& name) = 0;
+
     //==============================================================================
     /** Allows the user to provide a function that will receive log messages from the block. */
     virtual void setLogger (std::function<void(const String&)> loggingCallback) = 0;
@@ -410,7 +422,7 @@ public:
 protected:
     //==============================================================================
     Block (const juce::String& serialNumberToUse);
-    Block (const juce::String& serial, const juce::String& version);
+    Block (const juce::String& serial, const juce::String& version, const juce::String& name);
 
     juce::ListenerList<DataInputPortListener> dataInputPortListeners;
     juce::ListenerList<ProgramEventListener> programEventListeners;
