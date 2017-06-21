@@ -116,7 +116,8 @@ public class JuceAppActivity   extends Activity
         {
             case JUCE_PERMISSIONS_RECORD_AUDIO:           return Manifest.permission.RECORD_AUDIO;
             case JUCE_PERMISSIONS_BLUETOOTH_MIDI:         return Manifest.permission.ACCESS_COARSE_LOCATION;
-            case JUCE_PERMISSIONS_READ_EXTERNAL_STORAGE:  return Manifest.permission.READ_EXTERNAL_STORAGE;
+                                                          // use string value as this is not defined in SDKs < 16
+            case JUCE_PERMISSIONS_READ_EXTERNAL_STORAGE:  return "android.permission.READ_EXTERNAL_STORAGE";
             case JUCE_PERMISSIONS_WRITE_EXTERNAL_STORAGE: return Manifest.permission.WRITE_EXTERNAL_STORAGE;
         }
 
