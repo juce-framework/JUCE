@@ -71,7 +71,17 @@
  #ifndef GL_GLEXT_PROTOTYPES
   #define GL_GLEXT_PROTOTYPES 1
  #endif
- #include <GLES2/gl2.h>
+
+ #if JUCE_ANDROID_GL_ES_VERSION_3_0
+  #include <GLES3/gl3.h>
+
+  // workaround for a bug in SDK 18 and 19
+  // see: https://stackoverflow.com/questions/31003863/gles-3-0-including-gl2ext-h
+  #define __gl2_h_
+  #include <GLES2/gl2ext.h>
+ #else
+  #include <GLES2/gl2.h>
+ #endif
 #endif
 
 namespace juce
