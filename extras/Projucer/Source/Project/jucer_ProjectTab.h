@@ -251,6 +251,8 @@ public:
     {
         treeToDisplay = nullptr;
         popupMenuButton = nullptr;
+        findPanel = nullptr;
+        settingsButton = nullptr;
     }
 
     void resized() override
@@ -340,6 +342,11 @@ private:
             lookAndFeelChanged();
         }
 
+        ~FindPanel()
+        {
+            Desktop::getInstance().removeFocusChangeListener (this);
+        }
+
         void paintOverChildren (Graphics& g) override
         {
             if (! isFocused)
@@ -402,7 +409,6 @@ private:
 
 //==============================================================================
 class ProjectTab    : public Component,
-                      public ApplicationCommandTarget,
                       private ChangeListener
 {
 public:
@@ -491,42 +497,6 @@ public:
         return ((float) (concertinaPanel.getPanel (panelIndex)->getHeight()) / (concertinaPanel.getHeight() - 90));
     }
 
-    //==============================================================================
-    ApplicationCommandTarget* getNextCommandTarget() override   { return nullptr; }
-
-    void getAllCommands (Array <CommandID>& commands) override
-    {
-        const CommandID ids[] = { CommandIDs::showFindPanel };
-
-        commands.addArray (ids, numElementsInArray (ids));
-    }
-
-    void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result) override
-    {
-        switch (commandID)
-        {
-            case CommandIDs::showFindPanel:
-                result.setInfo (TRANS ("Find"), TRANS ("Searches for ."), "Editing", 0);
-                result.defaultKeypresses.add (KeyPress ('f', ModifierKeys::commandModifier, 0));
-                break;
-
-            default:
-                break;
-        }
-    }
-
-    bool perform (const InvocationInfo& info) override
-    {
-        if (info.commandID == CommandIDs::showFindPanel)
-        {
-            find();
-            return true;
-        }
-
-        return false;
-    }
-
-
 private:
     ConcertinaPanel concertinaPanel;
     OwnedArray<ConcertinaHeader> headers;
@@ -591,14 +561,6 @@ private:
                     base->tree.clearSelectedItems();
             }
         }
-    }
-
-    void find()
-    {
-        showPanel (0);
-
-        if (auto* treeComponent = dynamic_cast<ConcertinaTreeComponent*> (concertinaPanel.getPanel (0)))
-            treeComponent->grabFindFocus();
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectTab)
