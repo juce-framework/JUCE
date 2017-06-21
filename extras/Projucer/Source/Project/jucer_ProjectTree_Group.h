@@ -82,19 +82,16 @@ public:
 
     bool isGroupEmpty (const Project::Item& group) // recursive
     {
-        bool isEmpty = true;
-
         for (auto i = 0; i < group.getNumChildren(); ++i)
         {
             auto child = group.getChild (i);
 
-            if (child.isGroup())
-                isEmpty = isGroupEmpty (child);
-            else if (child.isFile() && child.getName().containsIgnoreCase (searchFilter))
-                isEmpty = false;
+            if ((child.isGroup() && ! isGroupEmpty (child))
+                   || (child.isFile() && child.getName().containsIgnoreCase (searchFilter)))
+                return false;
         }
 
-        return isEmpty;
+        return true;
     }
 
     ProjectTreeItemBase* createSubItem (const Project::Item& child) override
