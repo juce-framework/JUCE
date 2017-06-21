@@ -107,7 +107,7 @@ public:
     void paint (Graphics& g) override
     {
         getLookAndFeel().drawFileBrowserRow (g, getWidth(), getHeight(),
-                                             file.getFileName(),
+                                             file, file.getFileName(),
                                              &icon, fileSize, modTime,
                                              isDirectory, highlighted,
                                              index, owner);

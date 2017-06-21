@@ -53,7 +53,7 @@ public:
     void layoutFileBrowserComponent (FileBrowserComponent&, DirectoryContentsDisplayComponent*,
                                      FilePreviewComponent*, ComboBox* currentPathBox,
                                      TextEditor* filenameBox,Button* goUpButton) override;
-    void drawFileBrowserRow (Graphics&, int width, int height, const String& filename, Image* icon,
+    void drawFileBrowserRow (Graphics&, int width, int height, const File&, const String& filename, Image* icon,
                              const String& fileSizeDescription, const String& fileTimeDescription,
                              bool isDirectory, bool isItemSelected, int itemIndex, DirectoryContentsDisplayComponent&) override;
 

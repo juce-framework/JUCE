@@ -724,18 +724,18 @@ void LookAndFeel_V4::layoutFileBrowserComponent (FileBrowserComponent& browserCo
 }
 
 void LookAndFeel_V4::drawFileBrowserRow (Graphics& g, int width, int height,
-                                         const String& filename, Image* icon,
+                                         const File& file, const String& filename, Image* icon,
                                          const String& fileSizeDescription,
                                          const String& fileTimeDescription,
-                                         const bool isDirectory, const bool isItemSelected,
-                                         const int itemIndex, DirectoryContentsDisplayComponent& dcc)
+                                         bool isDirectory, bool isItemSelected,
+                                         int itemIndex, DirectoryContentsDisplayComponent& dcc)
 {
     if (auto fileListComp = dynamic_cast<Component*> (&dcc))
         fileListComp->setColour (DirectoryContentsDisplayComponent::textColourId,
                                  currentColourScheme.getUIColour (isItemSelected ? ColourScheme::UIColour::highlightedText
                                                                                  : ColourScheme::UIColour::menuText));
 
-    LookAndFeel_V2::drawFileBrowserRow (g, width, height, filename, icon,
+    LookAndFeel_V2::drawFileBrowserRow (g, width, height, file, filename, icon,
                                         fileSizeDescription, fileTimeDescription,
                                         isDirectory, isItemSelected, itemIndex, dcc);
 }

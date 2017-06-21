@@ -129,7 +129,7 @@ public:
     AttributedString createFileChooserHeaderText (const String& title, const String& instructions) override;
 
     void drawFileBrowserRow (Graphics&, int width, int height,
-                             const String& filename, Image* icon,
+                             const File& file, const String& filename, Image* icon,
                              const String& fileSizeDescription, const String& fileTimeDescription,
                              bool isDirectory, bool isItemSelected, int itemIndex,
                              DirectoryContentsDisplayComponent&) override;

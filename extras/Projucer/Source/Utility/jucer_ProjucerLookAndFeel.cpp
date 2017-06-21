@@ -246,11 +246,11 @@ void ProjucerLookAndFeel::layoutFileBrowserComponent (FileBrowserComponent& brow
 }
 
 void ProjucerLookAndFeel::drawFileBrowserRow (Graphics& g, int width, int height,
-                                              const String& filename, Image* icon,
+                                              const File& file, const String& filename, Image* icon,
                                               const String& fileSizeDescription,
                                               const String& fileTimeDescription,
-                                              const bool isDirectory, const bool isItemSelected,
-                                              const int itemIndex, DirectoryContentsDisplayComponent& dcc)
+                                              bool isDirectory, bool isItemSelected,
+                                              int itemIndex, DirectoryContentsDisplayComponent& dcc)
 {
     if (auto fileListComp = dynamic_cast<Component*> (&dcc))
     {
@@ -262,7 +262,7 @@ void ProjucerLookAndFeel::drawFileBrowserRow (Graphics& g, int width, int height
     }
 
 
-    LookAndFeel_V2::drawFileBrowserRow (g, width, height, filename, icon,
+    LookAndFeel_V2::drawFileBrowserRow (g, width, height, file, filename, icon,
                                         fileSizeDescription, fileTimeDescription,
                                         isDirectory, isItemSelected, itemIndex, dcc);
 }

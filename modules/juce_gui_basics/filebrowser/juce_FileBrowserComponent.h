@@ -195,6 +195,7 @@ public:
                                                               const String& instructions) = 0;
 
         virtual void drawFileBrowserRow (Graphics&, int width, int height,
+                                         const File& file,
                                          const String& filename,
                                          Image* optionalIcon,
                                          const String& fileSizeDescription,
