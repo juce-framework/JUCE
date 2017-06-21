@@ -37,7 +37,7 @@ class CharPointer_ASCII
 public:
     typedef char CharType;
 
-    inline explicit CharPointer_ASCII (const CharType* const rawPointer) noexcept
+    inline explicit CharPointer_ASCII (const CharType* rawPointer) noexcept
         : data (const_cast<CharType*> (rawPointer))
     {
     }
@@ -76,6 +76,9 @@ public:
     /** Returns true if this pointer is pointing to a null character. */
     inline bool isEmpty() const noexcept                { return *data == 0; }
 
+    /** Returns true if this pointer is not pointing to a null character. */
+    inline bool isNotEmpty() const noexcept             { return *data != 0; }
+
     /** Returns the unicode character that this pointer is pointing to. */
     inline juce_wchar operator*() const noexcept        { return (juce_wchar) (uint8) *data; }
 
@@ -100,7 +103,7 @@ public:
     /** Moves this pointer along to the next character in the string. */
     CharPointer_ASCII operator++ (int) noexcept
     {
-        CharPointer_ASCII temp (*this);
+        auto temp (*this);
         ++data;
         return temp;
     }
@@ -119,7 +122,7 @@ public:
     /** Returns the character at a given character index from the start of the string. */
     inline juce_wchar operator[] (const int characterIndex) const noexcept
     {
-        return (juce_wchar) (unsigned char) data [characterIndex];
+        return (juce_wchar) (uint8) data [characterIndex];
     }
 
     /** Returns a pointer which is moved forwards from this one by the specified number of characters. */
@@ -310,25 +313,25 @@ public:
     }
 
     /** Returns true if the first character of this string is whitespace. */
-    bool isWhitespace() const               { return CharacterFunctions::isWhitespace (*data) != 0; }
+    bool isWhitespace() const                   { return CharacterFunctions::isWhitespace (*data) != 0; }
     /** Returns true if the first character of this string is a digit. */
-    bool isDigit() const                    { return CharacterFunctions::isDigit (*data) != 0; }
+    bool isDigit() const                        { return CharacterFunctions::isDigit (*data) != 0; }
     /** Returns true if the first character of this string is a letter. */
-    bool isLetter() const                   { return CharacterFunctions::isLetter (*data) != 0; }
+    bool isLetter() const                       { return CharacterFunctions::isLetter (*data) != 0; }
     /** Returns true if the first character of this string is a letter or digit. */
-    bool isLetterOrDigit() const            { return CharacterFunctions::isLetterOrDigit (*data) != 0; }
+    bool isLetterOrDigit() const                { return CharacterFunctions::isLetterOrDigit (*data) != 0; }
     /** Returns true if the first character of this string is upper-case. */
-    bool isUpperCase() const                { return CharacterFunctions::isUpperCase ((juce_wchar) (uint8) *data) != 0; }
+    bool isUpperCase() const                    { return CharacterFunctions::isUpperCase ((juce_wchar) (uint8) *data) != 0; }
     /** Returns true if the first character of this string is lower-case. */
-    bool isLowerCase() const                { return CharacterFunctions::isLowerCase ((juce_wchar) (uint8) *data) != 0; }
+    bool isLowerCase() const                    { return CharacterFunctions::isLowerCase ((juce_wchar) (uint8) *data) != 0; }
 
     /** Returns an upper-case version of the first character of this string. */
-    juce_wchar toUpperCase() const noexcept { return CharacterFunctions::toUpperCase ((juce_wchar) (uint8) *data); }
+    juce_wchar toUpperCase() const noexcept     { return CharacterFunctions::toUpperCase ((juce_wchar) (uint8) *data); }
     /** Returns a lower-case version of the first character of this string. */
-    juce_wchar toLowerCase() const noexcept { return CharacterFunctions::toLowerCase ((juce_wchar) (uint8) *data); }
+    juce_wchar toLowerCase() const noexcept     { return CharacterFunctions::toLowerCase ((juce_wchar) (uint8) *data); }
 
     /** Parses this string as a 32-bit integer. */
-    int getIntValue32() const noexcept      { return atoi (data); }
+    int getIntValue32() const noexcept          { return atoi (data); }
 
     /** Parses this string as a 64-bit integer. */
     int64 getIntValue64() const noexcept
@@ -343,10 +346,10 @@ public:
     }
 
     /** Parses this string as a floating point double. */
-    double getDoubleValue() const noexcept  { return CharacterFunctions::getDoubleValue (*this); }
+    double getDoubleValue() const noexcept                      { return CharacterFunctions::getDoubleValue (*this); }
 
     /** Returns the first non-whitespace character in the string. */
-    CharPointer_ASCII findEndOfWhitespace() const noexcept   { return CharacterFunctions::findEndOfWhitespace (*this); }
+    CharPointer_ASCII findEndOfWhitespace() const noexcept      { return CharacterFunctions::findEndOfWhitespace (*this); }
 
     /** Returns true if the given unicode character can be represented in this encoding. */
     static bool canRepresent (juce_wchar character) noexcept
