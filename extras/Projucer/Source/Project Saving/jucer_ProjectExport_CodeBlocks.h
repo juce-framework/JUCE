@@ -216,7 +216,7 @@ private:
                                                     Array<var> (archFlags, numElementsInArray (archFlags))));
         }
 
-        String getLibrarySubdirPath() const override
+        String getModuleLibraryArchName() const override
         {
             const String archFlag = getArchitectureTypeVar();
 

@@ -465,7 +465,7 @@ protected:
                        "will also remove any function names from crash logs. Must be disabled for static library projects.");
         }
 
-        String getLibrarySubdirPath() const override
+        String getModuleLibraryArchName() const override
         {
             return "${CURRENT_ARCH}";
         }

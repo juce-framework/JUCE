@@ -356,12 +356,13 @@ void LibraryModule::addSettingsForModuleToExporter (ProjectExporter& exporter, P
         libDirPlatform = exporter.getTargetFolder().getFileName();
 
     const auto libSubdirPath = String (moduleRelativePath.toUnixStyle() + "/libs/") + libDirPlatform;
-
     const auto moduleLibDir = File (project.getProjectFolder().getFullPathName() + "/" + libSubdirPath);
+
     if (moduleLibDir.exists())
         exporter.addToModuleLibPaths (RelativePath (libSubdirPath, moduleRelativePath.getRoot()));
 
     const auto extraInternalSearchPaths = moduleInfo.getExtraSearchPaths().trim();
+
     if (extraInternalSearchPaths.isNotEmpty())
     {
         StringArray paths;
@@ -416,6 +417,10 @@ void LibraryModule::addSettingsForModuleToExporter (ProjectExporter& exporter, P
             parseAndAddLibs (exporter.mingwLibs, moduleInfo.moduleInfo ["mingwLibs"].toString());
         else
             parseAndAddLibs (exporter.windowsLibs, moduleInfo.moduleInfo ["windowsLibs"].toString());
+    }
+    else if (exporter.isAndroid())
+    {
+        parseAndAddLibs (exporter.androidLibs, moduleInfo.moduleInfo ["androidLibs"].toString());
     }
 }
 

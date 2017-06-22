@@ -935,8 +935,9 @@ StringArray ProjectExporter::BuildConfiguration::getLibrarySearchPaths() const
 {
     auto separator = exporter.isVisualStudio() ? "\\" : "/";
     auto s = getSearchPathsFromString (getLibrarySearchPathString());
+
     for (auto path : exporter.moduleLibSearchPaths)
-        s.add (path + separator + getLibrarySubdirPath());
+        s.add (path + separator + getModuleLibraryArchName());
 
     return s;
 }
@@ -950,7 +951,7 @@ String ProjectExporter::BuildConfiguration::getGCCLibraryPathFlags() const
         s << " -L" << escapeSpaces (path).replace ("~", "$(HOME)");
 
     for (auto path : exporter.moduleLibSearchPaths)
-        s << " -L" << escapeSpaces (path).replace ("~", "$(HOME)") << "/" << getLibrarySubdirPath();
+        s << " -L" << escapeSpaces (path).replace ("~", "$(HOME)") << "/" << getModuleLibraryArchName();
 
     return s;
 }

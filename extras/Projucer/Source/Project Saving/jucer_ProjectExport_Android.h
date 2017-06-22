@@ -350,6 +350,11 @@ protected:
         {
             return getName().toUpperCase().replaceCharacter (L' ', L'_');
         }
+
+        String getModuleLibraryArchName() const override
+        {
+            return "${ANDROID_ABI}";
+        }
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
@@ -396,7 +401,9 @@ private:
             mo << "SET( CMAKE_SHARED_LINKER_FLAGS  \"${CMAKE_EXE_LINKER_FLAGS} ${JUCE_LDFLAGS}\")" << newLine << newLine;
         }
 
-        const StringArray userLibraries = StringArray::fromTokens(getExternalLibrariesString(), ";", "");
+        StringArray userLibraries = StringArray::fromTokens(getExternalLibrariesString(), ";", "");
+        userLibraries.addArray (androidLibs);
+
         if (getNumConfigurations() > 0)
         {
             bool first = true;

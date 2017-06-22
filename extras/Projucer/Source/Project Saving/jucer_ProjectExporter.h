@@ -219,6 +219,9 @@ public:
     StringArray mingwLibs, windowsLibs;
 
     //==============================================================================
+    StringArray androidLibs;
+
+    //==============================================================================
     StringArray extraSearchPaths;
     StringArray moduleLibSearchPaths;
 
@@ -234,7 +237,7 @@ public:
         //==============================================================================
         virtual void createConfigProperties (PropertyListBuilder&) = 0;
         virtual var getDefaultOptimisationLevel() const = 0;
-        virtual String getLibrarySubdirPath() const         { return {}; }
+        virtual String getModuleLibraryArchName() const = 0;
 
 
         //==============================================================================

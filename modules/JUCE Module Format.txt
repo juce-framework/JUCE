@@ -124,6 +124,10 @@ iOS:
     libs/iOS/{arch}, where {arch} is the architecture you are targeting in Xcode ("arm64" or
     "x86_64", for example).
 
+Android:
+    libs/Android/{arch}, where {arch} is the architecture provided by the Android Studio variable
+    "${ANDROID_ABI}" ("x86", "armeabi-v7a", "mips", for example).
+
                         The BEGIN_JUCE_MODULE_DECLARATION block
                         =======================================
 

@@ -165,7 +165,7 @@ public:
             }
         }
 
-        String getLibrarySubdirPath() const override
+        String getModuleLibraryArchName() const override
         {
             String result ("$(Platform)\\");
             result += isUsingRuntimeLibDLL() ? "MD" : "MT";

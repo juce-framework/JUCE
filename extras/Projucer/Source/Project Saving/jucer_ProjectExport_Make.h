@@ -53,7 +53,7 @@ protected:
                                                     Array<var> (archFlags, numElementsInArray (archFlags))));
         }
 
-        String getLibrarySubdirPath() const override
+        String getModuleLibraryArchName() const override
         {
             String archFlag = getArchitectureTypeVar();
             String prefix ("-march=");
