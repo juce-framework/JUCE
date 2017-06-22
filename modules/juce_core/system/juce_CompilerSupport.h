@@ -42,8 +42,7 @@
   #define JUCE_DELETED_FUNCTION = delete
  #endif
 
- #if (__GNUC__ * 100 + __GNUC_MINOR__) >= 406 && ! defined (JUCE_COMPILER_SUPPORTS_LAMBDAS)
-  #define JUCE_COMPILER_SUPPORTS_LAMBDAS 1
+ #if (__GNUC__ * 100 + __GNUC_MINOR__) >= 406
   #define JUCE_STDLIB_HAS_STD_FUNCTION_SUPPORT 1
  #endif
 
@@ -64,10 +63,6 @@
 
  #if __has_feature (cxx_deleted_functions)
   #define JUCE_DELETED_FUNCTION = delete
- #endif
-
- #if __has_feature (cxx_lambdas)
-  #define JUCE_COMPILER_SUPPORTS_LAMBDAS 1
  #endif
 
  #if (defined (_LIBCPP_VERSION) || ! (JUCE_MAC || JUCE_IOS))
@@ -104,7 +99,6 @@
 
  #if _MSC_VER >= 1700
   #define JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL 1
-  #define JUCE_COMPILER_SUPPORTS_LAMBDAS 1
  #endif
 
  #if _MSC_VER >= 1800
