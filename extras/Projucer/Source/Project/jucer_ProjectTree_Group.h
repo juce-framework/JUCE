@@ -98,7 +98,7 @@ public:
     {
         if (child.isGroup())
         {
-            if (isGroupEmpty (child))
+            if (searchFilter.isNotEmpty() && isGroupEmpty (child))
                 return nullptr;
 
             return new GroupItem (child, searchFilter);
