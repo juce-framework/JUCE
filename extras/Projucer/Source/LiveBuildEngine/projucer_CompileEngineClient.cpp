@@ -434,7 +434,10 @@ private:
         scanProjectItem (proj.getMainGroup(), compileUnits, userFiles);
 
         {
-            const bool isPluginProject = proj.getProjectType().isAudioPlugin();
+            auto isVST3Host = project.getModules().isModuleEnabled ("juce_audio_processors")
+                           && project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3");
+
+            auto isPluginProject = proj.getProjectType().isAudioPlugin();
 
             OwnedArray<LibraryModule> modules;
             proj.getModules().createRequiredModules (modules);
@@ -451,10 +454,10 @@ private:
 
 
                         m->findAndAddCompiledUnits (*exporter, nullptr, compileUnits,
-                                                    isPluginProject ? ProjectType::Target::SharedCodeTarget
-                                                                    : ProjectType::Target::unspecified);
+                                                    isPluginProject || isVST3Host ? ProjectType::Target::SharedCodeTarget
+                                                                                  : ProjectType::Target::unspecified);
 
-                        if (isPluginProject)
+                        if (isPluginProject || isVST3Host)
                             m->findAndAddCompiledUnits (*exporter, nullptr, compileUnits, ProjectType::Target::StandalonePlugIn);
                     }
 
@@ -518,7 +521,10 @@ private:
         StringArray paths;
         paths.addArray (getSearchPathsFromString (ProjectProperties::getSystemHeaderPathString (project)));
 
-        if (project.getProjectType().isAudioPlugin())
+        auto isVST3Host = project.getModules().isModuleEnabled ("juce_audio_processors")
+                       && project.isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3");
+
+        if (project.getProjectType().isAudioPlugin() || isVST3Host)
             paths.add (getAppSettings().getStoredPath (Ids::vst3Path).toString());
 
         OwnedArray<LibraryModule> modules;
