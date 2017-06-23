@@ -193,6 +193,7 @@ namespace Ids
     DECLARE_ID (iosInAppPurchases);
     DECLARE_ID (iosBackgroundAudio);
     DECLARE_ID (iosBackgroundBle);
+    DECLARE_ID (iosPushNotifications);
     DECLARE_ID (iosDevelopmentTeamID);
     DECLARE_ID (buildToolsVersion);
     DECLARE_ID (gradleVersion);

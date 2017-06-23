@@ -114,6 +114,8 @@ public:
     bool   isBackgroundAudioEnabled() const          { return settings   [Ids::iosBackgroundAudio]; }
     Value  getBackgroundBleValue()                   { return getSetting (Ids::iosBackgroundBle); }
     bool   isBackgroundBleEnabled() const            { return settings   [Ids::iosBackgroundBle]; }
+    Value  getPushNotificationsValue()               { return getSetting (Ids::iosPushNotifications); }
+    bool   isPushNotificationsEnabled() const        { return settings   [Ids::iosPushNotifications]; }
 
     Value  getIosDevelopmentTeamIDValue()            { return getSetting (Ids::iosDevelopmentTeamID); }
     String getIosDevelopmentTeamIDString() const     { return settings   [Ids::iosDevelopmentTeamID]; }
@@ -202,6 +204,9 @@ public:
 
             props.add (new BooleanPropertyComponent (getBackgroundBleValue(), "Bluetooth MIDI background capability", "Enabled"),
                        "Enable this to grant your app the capability to connect to Bluetooth LE devices when in background mode.");
+
+            props.add (new BooleanPropertyComponent (getPushNotificationsValue(), "Push Notifications capability", "Enabled"),
+                       "Enable this to grant your app the capability to receive push notifications.");
         }
         else if (projectType.isGUIApplication())
         {
@@ -751,11 +756,14 @@ public:
             const int interAppAudioEnabled  = (owner.iOS
                                                && type == Target::StandalonePlugIn
                                                && owner.getProject().shouldEnableIAA()) ? 1 : 0;
+
+            const int pushNotificationsEnabled = (owner.iOS && owner.isPushNotificationsEnabled()) ? 1 : 0;
             const int sandboxEnabled = (type == Target::AudioUnitv3PlugIn ? 1 : 0);
 
             attributes << "SystemCapabilities = {";
             attributes << "com.apple.InAppPurchase = { enabled = " << inAppPurchasesEnabled << "; }; ";
             attributes << "com.apple.InterAppAudio = { enabled = " << interAppAudioEnabled << "; }; ";
+            attributes << "com.apple.Push = { enabled = " << pushNotificationsEnabled << "; }; ";
             attributes << "com.apple.Sandbox = { enabled = " << sandboxEnabled << "; }; ";
             attributes << "}; };";
 
@@ -931,6 +939,9 @@ public:
 
             if (! config.codeSignIdentity.isUsingDefault())
                 s.add ("CODE_SIGN_IDENTITY = " + config.codeSignIdentity.get().quoted());
+
+            if (owner.isPushNotificationsEnabled())
+                s.add ("CODE_SIGN_ENTITLEMENTS = " + owner.getProject().getTitle() + ".entitlements");
 
             if (config.cppLanguageStandard.get().isNotEmpty())
                 s.add ("CLANG_CXX_LANGUAGE_STANDARD = " + config.cppLanguageStandard.get().quoted());
@@ -1210,6 +1221,7 @@ public:
             StringArray iosBackgroundModes;
             if (owner.isBackgroundAudioEnabled())     iosBackgroundModes.add ("audio");
             if (owner.isBackgroundBleEnabled())       iosBackgroundModes.add ("bluetooth-central");
+            if (owner.isPushNotificationsEnabled())   iosBackgroundModes.add ("remote-notification");
 
             addArrayToPlist (dict, "UIBackgroundModes", iosBackgroundModes);
         }
@@ -1614,8 +1626,8 @@ private:
 
     void addFilesAndGroupsToProject (StringArray& topLevelGroupIDs) const
     {
-        StringArray entitlements = getEntitlements();
-        if (! entitlements.isEmpty())
+        StringPairArray entitlements = getEntitlements();
+        if (entitlements.size() > 0)
             topLevelGroupIDs.add (addEntitlementsFile (entitlements));
 
         for (auto& group : getAllGroups())
@@ -2303,35 +2315,44 @@ private:
         return project.getProjectFilenameRoot() + String (".entitlements");
     }
 
-    StringArray getEntitlements() const
+    StringPairArray getEntitlements() const
     {
-        StringArray keys;
+        StringPairArray entitlements;
         if (project.getProjectType().isAudioPlugin())
         {
             if (isiOS())
             {
                 if (project.shouldEnableIAA())
-                    keys.add ("inter-app-audio");
+                    entitlements.set ("inter-app-audio", "<true/>");
             }
             else
             {
-                keys.add ("com.apple.security.app-sandbox");
+                entitlements.set ("com.apple.security.app-sandbox", "<true/>");
             }
         }
-        return keys;
+        else
+        {
+            if (isiOS() && isPushNotificationsEnabled())
+                entitlements.set ("aps-environment", "<string>development</string>");
+        }
+
+        return entitlements;
     }
 
-    String addEntitlementsFile (StringArray keys) const
+    String addEntitlementsFile (StringPairArray entitlements) const
     {
         String content =
             "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
             "<plist version=\"1.0\">\n"
             "<dict>\n";
+
+        const auto keys = entitlements.getAllKeys();
+
         for (auto& key : keys)
         {
             content += "\t<key>" + key + "</key>\n"
-                       "\t<true/>\n";
+                       "\t" + entitlements[key] + "\n";
         }
         content += "</dict>\n"
                    "</plist>\n";
