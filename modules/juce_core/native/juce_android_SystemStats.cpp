@@ -158,6 +158,19 @@ private:
 JniEnvThreadHolder* JniEnvThreadHolder::instance = nullptr;
 
 //==============================================================================
+JNIEnv* attachAndroidJNI() noexcept
+{
+    auto* env = JniEnvThreadHolder::getEnv();
+
+    if (env == nullptr)
+    {
+        androidJNIJavaVM->AttachCurrentThread (&env, nullptr);
+        setEnv (env);
+    }
+
+    return env;
+}
+
 JNIEnv* getEnv() noexcept
 {
     auto* env = JniEnvThreadHolder::getEnv();
