@@ -828,8 +828,9 @@ protected:
             {
                 const MSVCBuildConfiguration& config = dynamic_cast<const MSVCBuildConfiguration&> (*i);
                 const String configName = config.createMSVCConfigName();
-                for (auto& suffix : { ".Build.0", ".ActiveCfg" })
-                    out << "\t\t" << target->getProjectGuid() << "." << configName << suffix << " = " << configName << newLine;
+
+                for (auto& suffix : { "ActiveCfg", "Build.0", "Deploy.0" })
+                    out << "\t\t" << target->getProjectGuid() << "." << configName << "." << suffix << " = " << configName << newLine;
             }
 
         out << "\tEndGlobalSection" << newLine
