@@ -142,4 +142,8 @@ class LowLevelGraphicsContext;
  #include "native/juce_mac_CoreGraphicsContext.h"
 #endif
 
+#if JUCE_DIRECT2D && JUCE_WINDOWS
+#include "native/juce_win32_Direct2DGraphicsContext.h"
+#endif
+
 }

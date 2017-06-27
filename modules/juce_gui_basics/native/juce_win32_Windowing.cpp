@@ -1837,33 +1837,35 @@ private:
         }
         else
        #endif
-
-        HRGN rgn = CreateRectRgn (0, 0, 0, 0);
-        const int regionType = GetUpdateRgn (hwnd, rgn, false);
-
-        PAINTSTRUCT paintStruct;
-        HDC dc = BeginPaint (hwnd, &paintStruct); // Note this can immediately generate a WM_NCPAINT
-                                                  // message and become re-entrant, but that's OK
-
-        // if something in a paint handler calls, e.g. a message box, this can become reentrant and
-        // corrupt the image it's using to paint into, so do a check here.
-        static bool reentrant = false;
-        if (! reentrant)
         {
-            const ScopedValueSetter<bool> setter (reentrant, true, false);
+            HRGN rgn = CreateRectRgn (0, 0, 0, 0);
+            const int regionType = GetUpdateRgn (hwnd, rgn, false);
 
-            if (dontRepaint)
-                component.handleCommandMessage (0); // (this triggers a repaint in the openGL context)
-            else
-                performPaint (dc, rgn, regionType, paintStruct);
+            PAINTSTRUCT paintStruct;
+            HDC dc = BeginPaint (hwnd, &paintStruct); // Note this can immediately generate a WM_NCPAINT
+                                                      // message and become re-entrant, but that's OK
+
+            // if something in a paint handler calls, e.g. a message box, this can become reentrant and
+            // corrupt the image it's using to paint into, so do a check here.
+            static bool reentrant = false;
+            if (! reentrant)
+            {
+                const ScopedValueSetter<bool> setter (reentrant, true, false);
+
+                if (dontRepaint)
+                    component.handleCommandMessage (0); // (this triggers a repaint in the openGL context)
+                else
+                    performPaint (dc, rgn, regionType, paintStruct);
+            }
+
+            DeleteObject (rgn);
+            EndPaint (hwnd, &paintStruct);
+
+           #if JUCE_MSVC
+            _fpreset(); // because some graphics cards can unmask FP exceptions
+           #endif
+
         }
-
-        DeleteObject (rgn);
-        EndPaint (hwnd, &paintStruct);
-
-       #if JUCE_MSVC
-        _fpreset(); // because some graphics cards can unmask FP exceptions
-       #endif
 
         lastPaintTime = Time::getMillisecondCounter();
     }
@@ -1993,8 +1995,8 @@ private:
     void updateDirect2DContext()
     {
         if (currentRenderingEngine != direct2DRenderingEngine)
-            direct2DContext = 0;
-        else if (direct2DContext == 0)
+            direct2DContext = nullptr;
+        else if (direct2DContext == nullptr)
             direct2DContext = new Direct2DLowLevelGraphicsContext (hwnd);
     }
    #endif
