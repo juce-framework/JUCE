@@ -154,7 +154,7 @@ static String timeToTimecodeString (double seconds)
     const int absMillisecs = std::abs (millisecs);
 
     return String::formatted ("%02d:%02d:%02d.%03d",
-                              millisecs / 360000,
+                              millisecs / 3600000,
                               (absMillisecs / 60000) % 60,
                               (absMillisecs / 1000) % 60,
                               absMillisecs % 1000);
