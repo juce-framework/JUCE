@@ -1232,7 +1232,10 @@ struct PhysicalTopologySource::Internal
         ~BlockImplementation()
         {
             if (listenerToMidiConnection != nullptr)
+            {
+                config.setDeviceComms (nullptr);
                 listenerToMidiConnection->removeListener (this);
+            }
         }
 
         void invalidate()
@@ -1594,32 +1597,32 @@ struct PhysicalTopologySource::Internal
         //==============================================================================
         int32 getLocalConfigValue (uint32 item) override
         {
-            config.setDeviceIndex ((TopologyIndex) getDeviceIndex());
+            initialiseDeviceIndexAndConnection();
             return config.getItemValue ((BlocksProtocol::ConfigItemId) item);
         }
 
         void setLocalConfigValue (uint32 item, int32 value) override
         {
-            config.setDeviceIndex ((TopologyIndex) getDeviceIndex());
+            initialiseDeviceIndexAndConnection();
             config.setItemValue ((BlocksProtocol::ConfigItemId) item, value);
         }
 
         void setLocalConfigRange (uint32 item, int32 min, int32 max) override
         {
-            config.setDeviceIndex ((TopologyIndex) getDeviceIndex());
+            initialiseDeviceIndexAndConnection();
             config.setItemMin ((BlocksProtocol::ConfigItemId) item, min);
             config.setItemMax ((BlocksProtocol::ConfigItemId) item, max);
         }
 
         void setLocalConfigItemActive (uint32 item, bool isActive) override
         {
-            config.setDeviceIndex ((TopologyIndex) getDeviceIndex());
+            initialiseDeviceIndexAndConnection();
             config.setItemActive ((BlocksProtocol::ConfigItemId) item, isActive);
         }
 
         bool isLocalConfigItemActive (uint32 item) override
         {
-            config.setDeviceIndex ((TopologyIndex) getDeviceIndex());
+            initialiseDeviceIndexAndConnection();
             return config.getItemActive ((BlocksProtocol::ConfigItemId) item);
         }
 
@@ -1636,13 +1639,13 @@ struct PhysicalTopologySource::Internal
 
         ConfigMetaData getLocalConfigMetaData (uint32 item) override
         {
-            config.setDeviceIndex ((TopologyIndex) getDeviceIndex());
+            initialiseDeviceIndexAndConnection();
             return config.getMetaData ((BlocksProtocol::ConfigItemId) item);
         }
 
         void requestFactoryConfigSync() override
         {
-            config.setDeviceIndex ((TopologyIndex) getDeviceIndex());
+            initialiseDeviceIndexAndConnection();
             config.requestFactoryConfigSync();
         }
 
@@ -1755,6 +1758,12 @@ struct PhysicalTopologySource::Internal
         bool isStillConnected = true;
         bool isMaster = false;
 
+        void initialiseDeviceIndexAndConnection()
+        {
+            config.setDeviceIndex ((TopologyIndex) getDeviceIndex());
+            config.setDeviceComms (listenerToMidiConnection);
+        }
+
         const juce::MidiInput* getMidiInput() const
         {
             if (auto c = dynamic_cast<MIDIDeviceConnection*> (detector.getDeviceConnectionFor (*this)))
@@ -1795,6 +1804,7 @@ struct PhysicalTopologySource::Internal
             juce::ignoreUnused (c);
             listenerToMidiConnection->removeListener (this);
             listenerToMidiConnection = nullptr;
+            config.setDeviceComms (nullptr);
         }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BlockImplementation)
