@@ -63,6 +63,9 @@ public:
 
 
     //==============================================================================
+    /** Returns the next byte that would be read by a call to readByte() */
+    char peekByte();
+
     int64 getTotalLength() override;
     int64 getPosition() override;
     bool setPosition (int64 newPosition) override;
@@ -75,7 +78,7 @@ private:
     //==============================================================================
     OptionalScopedPointer<InputStream> source;
     int bufferSize;
-    int64 position, lastReadPos, bufferStart, bufferOverlap;
+    int64 position, lastReadPos = 0, bufferStart, bufferOverlap = 128;
     HeapBlock<char> buffer;
     void ensureBuffered();
 
