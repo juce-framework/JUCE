@@ -613,29 +613,18 @@ namespace AAXClasses
             return AAX_SUCCESS;
         }
 
-        juce::MemoryBlock& getTemporaryChunkMemory() const
-        {
-            ScopedLock sl (perThreadDataLock);
-            const Thread::ThreadID currentThread = Thread::getCurrentThreadId();
-
-            if (ChunkMemoryBlock::Ptr m = perThreadFilterData [currentThread])
-                return m->data;
-
-            ChunkMemoryBlock::Ptr m (new ChunkMemoryBlock());
-            perThreadFilterData.set (currentThread, m);
-            return m->data;
-        }
-
         AAX_Result GetChunkSize (AAX_CTypeID chunkID, uint32_t* oSize) const override
         {
             if (chunkID != juceChunkType)
                 return AAX_CEffectParameters::GetChunkSize (chunkID, oSize);
 
-            juce::MemoryBlock& tempFilterData = getTemporaryChunkMemory();
-            tempFilterData.reset();
-            pluginInstance->getStateInformation (tempFilterData);
+            auto& chunkMemoryBlock = perThreadFilterData.get();
 
-            *oSize = (uint32_t) tempFilterData.getSize();
+            chunkMemoryBlock.data.reset();
+            pluginInstance->getStateInformation (chunkMemoryBlock.data);
+            chunkMemoryBlock.isValid = true;
+
+            *oSize = (uint32_t) chunkMemoryBlock.data.getSize();
             return AAX_SUCCESS;
         }
 
@@ -644,14 +633,15 @@ namespace AAXClasses
             if (chunkID != juceChunkType)
                 return AAX_CEffectParameters::GetChunk (chunkID, oChunk);
 
-            juce::MemoryBlock& tempFilterData = getTemporaryChunkMemory();
 
-            if (tempFilterData.getSize() == 0)
+            auto& chunkMemoryBlock = perThreadFilterData.get();
+
+            if (! chunkMemoryBlock.isValid)
                 return 20700; // AAX_ERROR_PLUGIN_API_INVALID_THREAD
 
-            oChunk->fSize = (int32_t) tempFilterData.getSize();
-            tempFilterData.copyTo (oChunk->fData, 0, tempFilterData.getSize());
-            tempFilterData.reset();
+            oChunk->fSize = (int32_t) chunkMemoryBlock.data.getSize();
+            chunkMemoryBlock.data.copyTo (oChunk->fData, 0, chunkMemoryBlock.data.getSize());
+            chunkMemoryBlock.isValid = false;
 
             return AAX_SUCCESS;
         }
@@ -1622,11 +1612,10 @@ namespace AAXClasses
 
         Array<int> aaxMeters;
 
-        struct ChunkMemoryBlock  : public ReferenceCountedObject
+        struct ChunkMemoryBlock
         {
             juce::MemoryBlock data;
-
-            typedef ReferenceCountedObjectPtr<ChunkMemoryBlock> Ptr;
+            bool isValid;
         };
 
         // temporary filter data is generated in GetChunkSize
@@ -1635,7 +1624,7 @@ namespace AAXClasses
         // However, as GetChunkSize and GetChunk can be called
         // on different threads, we store it in thread dependant storage
         // in a hash map with the thread id as a key.
-        mutable HashMap<Thread::ThreadID, ChunkMemoryBlock::Ptr> perThreadFilterData;
+        mutable ThreadLocalValue<ChunkMemoryBlock> perThreadFilterData;
         CriticalSection perThreadDataLock;
 
         JUCE_DECLARE_NON_COPYABLE (JuceAAX_Processor)
