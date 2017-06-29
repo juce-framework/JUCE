@@ -259,7 +259,7 @@
 					28277E0496F9A366F1E8A121,
 					5EDB4F61A6B9E9073901673E,
 					922CC2B83A0B55C36D188E46, ); buildRules = ( ); dependencies = (  ); name = "PluckedStringsDemo - App"; productName = PluckedStringsDemo; productReference = 3A8608CBA979E2BD17B50D0E; productType = "com.apple.product-type.application"; };
-		209D68C0E5F80B54B99D6435 = {isa = PBXProject; buildConfigurationList = DE12D5F044F75EB7B3CF17BB; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { B15B6C659E27D8982A94F805 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = B4D11720461A13D5D9F3E047; projectDirPath = ""; projectRoot = ""; targets = (B15B6C659E27D8982A94F805); };
+		209D68C0E5F80B54B99D6435 = {isa = PBXProject; buildConfigurationList = DE12D5F044F75EB7B3CF17BB; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { B15B6C659E27D8982A94F805 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = B4D11720461A13D5D9F3E047; projectDirPath = ""; projectRoot = ""; targets = (B15B6C659E27D8982A94F805); };
 	};
 	rootObject = 209D68C0E5F80B54B99D6435;
 }

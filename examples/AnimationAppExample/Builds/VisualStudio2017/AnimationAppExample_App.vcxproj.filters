@@ -3261,6 +3261,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_RenderingHelpers.h">
       <Filter>Juce Modules\juce_graphics\native</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_win32_Direct2DGraphicsContext.h">
+      <Filter>Juce Modules\juce_graphics\native</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\placement\juce_Justification.h">
       <Filter>Juce Modules\juce_graphics\placement</Filter>
     </ClInclude>

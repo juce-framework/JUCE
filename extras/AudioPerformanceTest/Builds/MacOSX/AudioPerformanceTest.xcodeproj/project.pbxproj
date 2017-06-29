@@ -255,7 +255,7 @@
 					C86DD529EC94922C2AB61742,
 					6C2BE2DE2ECC96615ED827AB,
 					409D569C572B6EF7F4F1702D, ); buildRules = ( ); dependencies = (  ); name = "AudioPerformanceTest - App"; productName = AudioPerformanceTest; productReference = 614F2084407B35D62101F69F; productType = "com.apple.product-type.application"; };
-		9CE2A44801B5B4BE7A9667DA = {isa = PBXProject; buildConfigurationList = 7097CF6AC086DAC346ACCCD9; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { E9FD2656EC625C9C8DE30219 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 3BA1BA0CAFE969E99950C06B; projectDirPath = ""; projectRoot = ""; targets = (E9FD2656EC625C9C8DE30219); };
+		9CE2A44801B5B4BE7A9667DA = {isa = PBXProject; buildConfigurationList = 7097CF6AC086DAC346ACCCD9; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { E9FD2656EC625C9C8DE30219 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 3BA1BA0CAFE969E99950C06B; projectDirPath = ""; projectRoot = ""; targets = (E9FD2656EC625C9C8DE30219); };
 	};
 	rootObject = 9CE2A44801B5B4BE7A9667DA;
 }

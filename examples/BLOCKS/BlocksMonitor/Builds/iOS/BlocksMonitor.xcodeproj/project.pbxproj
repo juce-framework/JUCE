@@ -287,7 +287,7 @@
 					D08BB290D5F778E1450AD3F3,
 					9C2AF708958E95C688544D95,
 					2410311707C8C7B9E6CFE23D, ); buildRules = ( ); dependencies = (  ); name = "BlocksMonitor - App"; productName = BlocksMonitor; productReference = 00558AF4AA37DD00B15B21A8; productType = "com.apple.product-type.application"; };
-		B42B7651E1352BD7921E5754 = {isa = PBXProject; buildConfigurationList = 61CDB68D74329CF066EA57D6; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { 9C6BA11D1261B15A2F52EB60 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 5D6DAC6A0A862ED325F1DB34; projectDirPath = ""; projectRoot = ""; targets = (9C6BA11D1261B15A2F52EB60); };
+		B42B7651E1352BD7921E5754 = {isa = PBXProject; buildConfigurationList = 61CDB68D74329CF066EA57D6; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { 9C6BA11D1261B15A2F52EB60 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 5D6DAC6A0A862ED325F1DB34; projectDirPath = ""; projectRoot = ""; targets = (9C6BA11D1261B15A2F52EB60); };
 	};
 	rootObject = B42B7651E1352BD7921E5754;
 }

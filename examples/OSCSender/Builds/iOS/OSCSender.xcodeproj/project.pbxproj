@@ -215,7 +215,7 @@
 					1E9F219D82037569524E98CF,
 					CDCF3ED48FB54EFBE0DD9046,
 					53E02F5676BF451851C9C06E, ); buildRules = ( ); dependencies = (  ); name = "OSCSender - App"; productName = OSCSender; productReference = E6F7F38EEF1BA55231F5B1D4; productType = "com.apple.product-type.application"; };
-		9CD8E1E30EDAF4E86990F260 = {isa = PBXProject; buildConfigurationList = ABFD3DA91CD9955D1FEC14F5; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { 3D76C0E767055A9B4699DD95 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 168BF90B7EF8C12090B0A9B2; projectDirPath = ""; projectRoot = ""; targets = (3D76C0E767055A9B4699DD95); };
+		9CD8E1E30EDAF4E86990F260 = {isa = PBXProject; buildConfigurationList = ABFD3DA91CD9955D1FEC14F5; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { 3D76C0E767055A9B4699DD95 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 168BF90B7EF8C12090B0A9B2; projectDirPath = ""; projectRoot = ""; targets = (3D76C0E767055A9B4699DD95); };
 	};
 	rootObject = 9CD8E1E30EDAF4E86990F260;
 }

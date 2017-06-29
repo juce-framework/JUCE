@@ -475,6 +475,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_graphics/native/juce_mac_IconHelpers.cpp"
     "../../../../../modules/juce_graphics/native/juce_RenderingHelpers.h"
     "../../../../../modules/juce_graphics/native/juce_win32_Direct2DGraphicsContext.cpp"
+    "../../../../../modules/juce_graphics/native/juce_win32_Direct2DGraphicsContext.h"
     "../../../../../modules/juce_graphics/native/juce_win32_DirectWriteTypeface.cpp"
     "../../../../../modules/juce_graphics/native/juce_win32_DirectWriteTypeLayout.cpp"
     "../../../../../modules/juce_graphics/native/juce_win32_Fonts.cpp"
@@ -1224,6 +1225,7 @@ set_source_files_properties("../../../../../modules/juce_graphics/native/juce_ma
 set_source_files_properties("../../../../../modules/juce_graphics/native/juce_mac_IconHelpers.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/native/juce_RenderingHelpers.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/native/juce_win32_Direct2DGraphicsContext.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_graphics/native/juce_win32_Direct2DGraphicsContext.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/native/juce_win32_DirectWriteTypeface.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/native/juce_win32_DirectWriteTypeLayout.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/native/juce_win32_Fonts.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
