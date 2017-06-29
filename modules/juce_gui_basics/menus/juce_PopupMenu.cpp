@@ -202,7 +202,8 @@ public:
          dismissOnMouseUp (shouldDismissOnMouseUp),
          windowCreationTime (Time::getMillisecondCounter()),
          lastFocusedTime (windowCreationTime),
-         timeEnteredCurrentChildComp (windowCreationTime)
+         timeEnteredCurrentChildComp (windowCreationTime),
+         scaleFactor (1.0f)
     {
         setWantsKeyboardFocus (false);
         setMouseClickGrabsKeyboardFocus (false);
@@ -215,6 +216,9 @@ public:
 
         parentComponent = lf.getParentComponentForMenuOptions (options);
 
+        if (parentComponent == nullptr && lf.shouldPopupMenuScaleWithTargetComponent (options))
+            scaleFactor = getApproximateScaleFactorForTargetComponent (options.getTargetComponent());
+
         setOpaque (lf.findColour (PopupMenu::backgroundColourId).isOpaque()
                      || ! Desktop::canUseSemiTransparentWindows());
 
@@ -226,14 +230,16 @@ public:
                 items.add (new ItemComponent (*item, options.standardHeight, *this));
         }
 
-        calculateWindowPos (options.targetArea, alignToRectangle);
+        Rectangle<int> targetArea = options.targetArea / scaleFactor;
+
+        calculateWindowPos (targetArea, alignToRectangle);
         setTopLeftPosition (windowPos.getPosition());
         updateYPositions();
 
         if (options.visibleItemID != 0)
         {
-            auto targetPosition = parentComponent != nullptr ? parentComponent->getLocalPoint (nullptr, options.targetArea.getTopLeft())
-                                                             : options.targetArea.getTopLeft();
+            auto targetPosition = parentComponent != nullptr ? parentComponent->getLocalPoint (nullptr, targetArea.getTopLeft())
+                                                             : targetArea.getTopLeft();
 
             auto y = targetPosition.getY() - windowPos.getY();
             ensureItemIsVisible (options.visibleItemID,
@@ -355,6 +361,8 @@ public:
             }
         }
     }
+
+    float getDesktopScaleFactor() const override    { return scaleFactor * Desktop::getInstance().getGlobalScaleFactor(); }
 
     //==============================================================================
     bool keyPressed (const KeyPress& key) override
@@ -947,6 +955,22 @@ public:
     bool isBottomScrollZoneActive() const noexcept  { return canScroll() && childYOffset < contentHeight - windowPos.getHeight(); }
 
     //==============================================================================
+    static float getApproximateScaleFactorForTargetComponent (Component* targetComponent)
+    {
+        AffineTransform transform;
+
+        for (auto* target = targetComponent; target != nullptr; target = target->getParentComponent())
+        {
+            transform = transform.followedBy (target->getTransform());
+
+            if (target->isOnDesktop())
+                transform = transform.scaled (target->getDesktopScaleFactor());
+        }
+
+        return (transform.getScaleFactor() / Desktop::getInstance().getGlobalScaleFactor());
+    }
+
+    //==============================================================================
     MenuWindow* parent;
     const Options options;
     OwnedArray<ItemComponent> items;
@@ -962,6 +986,7 @@ public:
     Array<int> columnWidths;
     uint32 windowCreationTime, lastFocusedTime, timeEnteredCurrentChildComp;
     OwnedArray<MouseSourceState> mouseSourceStates;
+    float scaleFactor;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuWindow)
 };

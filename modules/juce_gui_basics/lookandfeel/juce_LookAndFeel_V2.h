@@ -180,6 +180,8 @@ public:
 
     Component* getParentComponentForMenuOptions (const PopupMenu::Options& options) override;
 
+    bool shouldPopupMenuScaleWithTargetComponent (const PopupMenu::Options& options) override;
+
     //==============================================================================
     void drawComboBox (Graphics&, int width, int height, bool isButtonDown,
                        int buttonX, int buttonY, int buttonW, int buttonH,

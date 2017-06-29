@@ -6,6 +6,28 @@ Develop Branch
 
 Change
 ------
+PopupMenus now scale according to the AffineTransform and scaling factor of their target components
+
+Possible Issues
+---------------
+Developers who have manually scaled their PopupMenus to fit the scaling factor of the parent UI will now have the scaling applied two times in a row.
+
+Workaround
+---------- 
+1. Do not apply your own manual scaling to make your popups match the UI scaling
+
+or
+
+2. Override the Look&Feel method PopupMenu::LookAndFeelMethods::shouldPopupMenuScaleWithTargetComponent and return false.
+   See https://github.com/WeAreROLI/JUCE/blob/c288c94c2914af20f36c03ca9c5401fcb555e4e9/modules/juce_gui_basics/menus/juce_PopupMenu.h#725
+
+Rationale
+---------
+Previously, PopupMenus would not scale if the GUI of the target component (or any of it’s parents) were scaled. The only way to scale PopupMenus was via the global scaling factor. This had several drawbacks as the global scaling factor would scale everything. This was especially problematic in plug-in editors.
+
+
+Change
+------
 Removed the setSecurityFlags() method from the Windows implementation of WebInputStream as it disabled HTTPS security features
 
 Possible Issues
