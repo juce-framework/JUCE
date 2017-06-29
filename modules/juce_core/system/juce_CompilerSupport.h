@@ -44,6 +44,7 @@
 
  #if (__GNUC__ * 100 + __GNUC_MINOR__) >= 406
   #define JUCE_STDLIB_HAS_STD_FUNCTION_SUPPORT 1
+  #define JUCE_COMPILER_SUPPORTS_THREAD_LOCAL 1
  #endif
 
  #ifndef JUCE_EXCEPTIONS_DISABLED
@@ -67,6 +68,7 @@
 
  #if (defined (_LIBCPP_VERSION) || ! (JUCE_MAC || JUCE_IOS))
   #define JUCE_STDLIB_HAS_STD_FUNCTION_SUPPORT 1
+  #define JUCE_COMPILER_SUPPORTS_THREAD_LOCAL 1
  #endif
 
  #if __has_feature (cxx_generalized_initializers) && (defined (_LIBCPP_VERSION) || ! (JUCE_MAC || JUCE_IOS))
@@ -106,6 +108,7 @@
   #define JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES 1
   #define JUCE_DELETED_FUNCTION = delete
   #define JUCE_STDLIB_HAS_STD_FUNCTION_SUPPORT 1
+  #define JUCE_COMPILER_SUPPORTS_THREAD_LOCAL 1
  #endif
 
  #if _MSC_VER >= 1900

@@ -22,13 +22,6 @@
 
 #pragma once
 
-// (NB: on win32, native thread-locals aren't possible in a dynamically loaded DLL in XP).
-#if ! ((JUCE_MSVC && (JUCE_64BIT || ! defined (JucePlugin_PluginCode))) \
-       || (JUCE_MAC && JUCE_CLANG && defined (MAC_OS_X_VERSION_10_7) \
-             && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7))
- #define JUCE_NO_COMPILER_THREAD_LOCAL 1
-#endif
-
 //==============================================================================
 /**
     Provides cross-platform support for thread-local objects.
@@ -61,7 +54,7 @@ public:
     */
     ~ThreadLocalValue()
     {
-       #if JUCE_NO_COMPILER_THREAD_LOCAL
+       #if ! JUCE_COMPILER_SUPPORTS_THREAD_LOCAL
         for (ObjectHolder* o = first.value; o != nullptr;)
         {
             ObjectHolder* const next = o->next;
@@ -102,7 +95,10 @@ public:
     */
     Type& get() const noexcept
     {
-       #if JUCE_NO_COMPILER_THREAD_LOCAL
+       #if JUCE_COMPILER_SUPPORTS_THREAD_LOCAL
+        static thread_local HashMap<const void*, Type> holder;
+        return holder.getReference (this);
+       #else
         const Thread::ThreadID threadId = Thread::getCurrentThreadId();
 
         for (ObjectHolder* o = first.get(); o != nullptr; o = o->next)
@@ -136,12 +132,6 @@ public:
         while (! first.compareAndSetBool (newObject, newObject->next));
 
         return newObject->object;
-       #elif JUCE_MAC
-        static __thread Type object;
-        return object;
-       #elif JUCE_MSVC
-        static __declspec(thread) Type object;
-        return object;
        #endif
     }
 
@@ -150,7 +140,7 @@ public:
     */
     void releaseCurrentThreadStorage()
     {
-       #if JUCE_NO_COMPILER_THREAD_LOCAL
+       #if ! JUCE_COMPILER_SUPPORTS_THREAD_LOCAL
         const Thread::ThreadID threadId = Thread::getCurrentThreadId();
 
         for (ObjectHolder* o = first.get(); o != nullptr; o = o->next)
@@ -166,7 +156,7 @@ public:
 
 private:
     //==============================================================================
-   #if JUCE_NO_COMPILER_THREAD_LOCAL
+   #if ! JUCE_COMPILER_SUPPORTS_THREAD_LOCAL
     struct ObjectHolder
     {
         ObjectHolder (const Thread::ThreadID& tid)

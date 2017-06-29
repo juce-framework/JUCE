@@ -277,9 +277,9 @@ bool JUCE_CALLTYPE Process::isRunningUnderDebugger() noexcept
     return juce_isRunningUnderDebugger();
 }
 
-//==============================================================================
 #if JUCE_UNIT_TESTS
 
+//==============================================================================
 class AtomicTests  : public UnitTest
 {
 public:
@@ -400,5 +400,61 @@ public:
 };
 
 static AtomicTests atomicUnitTests;
+
+//==============================================================================
+class ThreadLocalValueUnitTest : public UnitTest, private Thread
+{
+public:
+    ThreadLocalValueUnitTest()
+        : UnitTest ("ThreadLocalValue"),
+          Thread ("ThreadLocalValue Thread")
+    {}
+
+    void runTest() override
+    {
+        beginTest ("values are thread local");
+
+        {
+            ThreadLocalValue<int> threadLocal;
+
+            sharedThreadLocal = &threadLocal;
+
+            sharedThreadLocal.get()->get() = 1;
+
+            startThread();
+            signalThreadShouldExit();
+            waitForThreadToExit (-1);
+
+            mainThreadResult = sharedThreadLocal.get()->get();
+
+            expectEquals (mainThreadResult.get(), 1);
+            expectEquals (auxThreadResult.get(), 2);
+        }
+
+        beginTest ("values are per-instance");
+
+        {
+            ThreadLocalValue<int> a, b;
+
+            a.get() = 1;
+            b.get() = 2;
+
+            expectEquals (a.get(), 1);
+            expectEquals (b.get(), 2);
+        }
+    }
+
+private:
+    Atomic<int> mainThreadResult, auxThreadResult;
+    Atomic<ThreadLocalValue<int>*> sharedThreadLocal;
+
+    void run() override
+    {
+        sharedThreadLocal.get()->get() = 2;
+        auxThreadResult = sharedThreadLocal.get()->get();
+    }
+};
+
+ThreadLocalValueUnitTest threadLocalValueUnitTest;
 
 #endif
