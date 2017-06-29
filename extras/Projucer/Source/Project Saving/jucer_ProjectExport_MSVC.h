@@ -91,7 +91,7 @@ public:
 
     void addWindowsTargetPlatformProperties (PropertyListBuilder& props)
     {
-        static const char* targetPlatformNames[] = { "(default)", "8.1", "10.0.10240.0", "10.0.10586.0", "10.0.14393.0", "10.0.15063.0", nullptr };
+        static const char* targetPlatformNames[] = { "(default)", "8.1", "10.0.10240.0", "10.0.10586.0", "10.0.14393.0", "10.0.15063.0" };
         const var targetPlatforms[]              = { var(),       "8.1", "10.0.10240.0", "10.0.10586.0", "10.0.14393.0", "10.0.15063.0" };
 
         props.add (new ChoicePropertyComponent (getWindowsTargetPlatformVersionValue(), "Windows Target Platform",
@@ -132,12 +132,12 @@ public:
             if (MSVCTargetBase* target = targets[i])
                 target->writeProjectFile();
 
-            {
-                MemoryOutputStream mo;
-                writeSolutionFile (mo, "11.00", getSolutionComment());
+        {
+            MemoryOutputStream mo;
+            writeSolutionFile (mo, "11.00", getSolutionComment());
 
-                overwriteFileIfDifferentOrThrow (getSLNFile(), mo);
-            }
+            overwriteFileIfDifferentOrThrow (getSLNFile(), mo);
+        }
     }
 
     //==============================================================================
@@ -196,7 +196,7 @@ public:
 
         String createMSVCConfigName() const
         {
-            return getName() + "|" + (config [Ids::winArchitecture] == "x64" ? "x64" : "Win32");
+            return getName() + "|" + (config [Ids::winArchitecture] == get64BitArchName() ? "x64" : "Win32");
         }
 
         String getOutputFilename (const String& suffix, bool forceSuffix) const
@@ -353,15 +353,15 @@ public:
                 if (charSet.isNotEmpty())
                     e->createNewChildElement ("CharacterSet")->addTextElement (charSet);
 
-                    if (! (config.isDebug() || config.shouldDisableWholeProgramOpt()))
-                        e->createNewChildElement ("WholeProgramOptimization")->addTextElement ("true");
+                if (! (config.isDebug() || config.shouldDisableWholeProgramOpt()))
+                    e->createNewChildElement ("WholeProgramOptimization")->addTextElement ("true");
 
-                        if (config.shouldLinkIncremental())
-                            e->createNewChildElement ("LinkIncremental")->addTextElement ("true");
+                if (config.shouldLinkIncremental())
+                    e->createNewChildElement ("LinkIncremental")->addTextElement ("true");
 
-                            if (config.is64Bit())
-                                e->createNewChildElement ("PlatformToolset")->addTextElement (getOwner().getPlatformToolset());
-                                }
+                if (config.is64Bit())
+                    e->createNewChildElement ("PlatformToolset")->addTextElement (getOwner().getPlatformToolset());
+            }
 
             {
                 XmlElement* e = projectXml.createNewChildElement ("Import");
@@ -449,7 +449,7 @@ public:
                 {
                     XmlElement* midl = group->createNewChildElement ("Midl");
                     midl->createNewChildElement ("PreprocessorDefinitions")->addTextElement (isDebug ? "_DEBUG;%(PreprocessorDefinitions)"
-                                                                                             : "NDEBUG;%(PreprocessorDefinitions)");
+                                                                                                     : "NDEBUG;%(PreprocessorDefinitions)");
                     midl->createNewChildElement ("MkTypLibCompatible")->addTextElement ("true");
                     midl->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
                     midl->createNewChildElement ("TargetEnvironment")->addTextElement ("Win32");
@@ -468,8 +468,8 @@ public:
                         isUsingEditAndContinue = ! config.is64Bit();
 
                         cl->createNewChildElement ("DebugInformationFormat")
-                        ->addTextElement (isUsingEditAndContinue ? "EditAndContinue"
-                                          : "ProgramDatabase");
+                          ->addTextElement (isUsingEditAndContinue ? "EditAndContinue"
+                                                                   : "ProgramDatabase");
                     }
 
                     StringArray includePaths (getOwner().getHeaderSearchPaths (config));
@@ -494,22 +494,22 @@ public:
                     if (config.isFastMathEnabled())
                         cl->createNewChildElement ("FloatingPointModel")->addTextElement ("Fast");
 
-                        const String extraFlags (getOwner().replacePreprocessorTokens (config, getOwner().getExtraCompilerFlagsString()).trim());
-                        if (extraFlags.isNotEmpty())
-                            cl->createNewChildElement ("AdditionalOptions")->addTextElement (extraFlags + " %(AdditionalOptions)");
+                    const String extraFlags (getOwner().replacePreprocessorTokens (config, getOwner().getExtraCompilerFlagsString()).trim());
+                    if (extraFlags.isNotEmpty())
+                        cl->createNewChildElement ("AdditionalOptions")->addTextElement (extraFlags + " %(AdditionalOptions)");
 
-                            if (config.areWarningsTreatedAsErrors())
-                                cl->createNewChildElement ("TreatWarningAsError")->addTextElement ("true");
+                    if (config.areWarningsTreatedAsErrors())
+                        cl->createNewChildElement ("TreatWarningAsError")->addTextElement ("true");
 
-                                String cppLanguageStandard = getOwner().getCppLanguageStandard();
-                                if (cppLanguageStandard.isNotEmpty())
-                                    cl->createNewChildElement ("LanguageStandard")->addTextElement (cppLanguageStandard);
-                                    }
+                    String cppLanguageStandard = getOwner().getCppLanguageStandard();
+                    if (cppLanguageStandard.isNotEmpty())
+                        cl->createNewChildElement ("LanguageStandard")->addTextElement (cppLanguageStandard);
+                }
 
                 {
                     XmlElement* res = group->createNewChildElement ("ResourceCompile");
                     res->createNewChildElement ("PreprocessorDefinitions")->addTextElement (isDebug ? "_DEBUG;%(PreprocessorDefinitions)"
-                                                                                            : "NDEBUG;%(PreprocessorDefinitions)");
+                                                                                                    : "NDEBUG;%(PreprocessorDefinitions)");
                 }
 
                 {
@@ -517,7 +517,7 @@ public:
                     link->createNewChildElement ("OutputFile")->addTextElement (getOutputFilePath (config));
                     link->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
                     link->createNewChildElement ("IgnoreSpecificDefaultLibraries")->addTextElement (isDebug ? "libcmt.lib; msvcrt.lib;;%(IgnoreSpecificDefaultLibraries)"
-                                                                                                    : "%(IgnoreSpecificDefaultLibraries)");
+                                                                                                            : "%(IgnoreSpecificDefaultLibraries)");
                     link->createNewChildElement ("GenerateDebugInformation")->addTextElement ((isDebug || config.shouldGenerateDebugSymbols()) ? "true" : "false");
                     link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (getOwner().getIntDirFile (config, config.getOutputFilename (".pdb", true)));
                     link->createNewChildElement ("SubSystem")->addTextElement (type == ConsoleApp ? "Console" : "Windows");
@@ -525,41 +525,41 @@ public:
                     if (! config.is64Bit())
                         link->createNewChildElement ("TargetMachine")->addTextElement ("MachineX86");
 
-                        if (isUsingEditAndContinue)
-                            link->createNewChildElement ("ImageHasSafeExceptionHandlers")->addTextElement ("false");
+                    if (isUsingEditAndContinue)
+                        link->createNewChildElement ("ImageHasSafeExceptionHandlers")->addTextElement ("false");
 
-                            if (! isDebug)
-                            {
-                                link->createNewChildElement ("OptimizeReferences")->addTextElement ("true");
-                                link->createNewChildElement ("EnableCOMDATFolding")->addTextElement ("true");
-                            }
+                    if (! isDebug)
+                    {
+                        link->createNewChildElement ("OptimizeReferences")->addTextElement ("true");
+                        link->createNewChildElement ("EnableCOMDATFolding")->addTextElement ("true");
+                    }
 
                     const StringArray librarySearchPaths (config.getLibrarySearchPaths());
                     if (librarySearchPaths.size() > 0)
                         link->createNewChildElement ("AdditionalLibraryDirectories")->addTextElement (getOwner().replacePreprocessorTokens (config, librarySearchPaths.joinIntoString (";"))
                                                                                                       + ";%(AdditionalLibraryDirectories)");
 
-                        link->createNewChildElement ("LargeAddressAware")->addTextElement ("true");
+                    link->createNewChildElement ("LargeAddressAware")->addTextElement ("true");
 
-                        const String externalLibraries (getExternalLibraries (config, getOwner().getExternalLibrariesString()));
-                        if (externalLibraries.isNotEmpty())
-                            link->createNewChildElement ("AdditionalDependencies")->addTextElement (getOwner().replacePreprocessorTokens (config, externalLibraries).trim()
-                                                                                                    + ";%(AdditionalDependencies)");
+                    const String externalLibraries (getExternalLibraries (config, getOwner().getExternalLibrariesString()));
+                    if (externalLibraries.isNotEmpty())
+                        link->createNewChildElement ("AdditionalDependencies")->addTextElement (getOwner().replacePreprocessorTokens (config, externalLibraries).trim()
+                                                                                                + ";%(AdditionalDependencies)");
 
-                            String extraLinkerOptions (getOwner().getExtraLinkerFlagsString());
-                            if (extraLinkerOptions.isNotEmpty())
-                                link->createNewChildElement ("AdditionalOptions")->addTextElement (getOwner().replacePreprocessorTokens (config, extraLinkerOptions).trim()
-                                                                                                   + " %(AdditionalOptions)");
+                    String extraLinkerOptions (getOwner().getExtraLinkerFlagsString());
+                    if (extraLinkerOptions.isNotEmpty())
+                        link->createNewChildElement ("AdditionalOptions")->addTextElement (getOwner().replacePreprocessorTokens (config, extraLinkerOptions).trim()
+                                                                                           + " %(AdditionalOptions)");
 
-                                const String delayLoadedDLLs (getDelayLoadedDLLs());
-                                if (delayLoadedDLLs.isNotEmpty())
-                                    link->createNewChildElement ("DelayLoadDLLs")->addTextElement (delayLoadedDLLs);
+                    const String delayLoadedDLLs (getDelayLoadedDLLs());
+                    if (delayLoadedDLLs.isNotEmpty())
+                        link->createNewChildElement ("DelayLoadDLLs")->addTextElement (delayLoadedDLLs);
 
-                                    const String moduleDefinitionsFile (getModuleDefinitions (config));
-                                    if (moduleDefinitionsFile.isNotEmpty())
-                                        link->createNewChildElement ("ModuleDefinitionFile")
-                                        ->addTextElement (moduleDefinitionsFile);
-                                        }
+                    const String moduleDefinitionsFile (getModuleDefinitions (config));
+                    if (moduleDefinitionsFile.isNotEmpty())
+                        link->createNewChildElement ("ModuleDefinitionFile")
+                            ->addTextElement (moduleDefinitionsFile);
+                }
 
                 {
                     XmlElement* bsc = group->createNewChildElement ("Bscmake");
@@ -572,9 +572,9 @@ public:
                 {
                     XmlElement* bsc = group->createNewChildElement ("Manifest");
                     bsc->createNewChildElement ("AdditionalManifestFiles")
-                    ->addTextElement (manifestFile.rebased (getOwner().getProject().getFile().getParentDirectory(),
-                                                            getOwner().getTargetFolder(),
-                                                            RelativePath::buildTargetFolder).toWindowsStyle());
+                       ->addTextElement (manifestFile.rebased (getOwner().getProject().getFile().getParentDirectory(),
+                                                               getOwner().getTargetFolder(),
+                                                               RelativePath::buildTargetFolder).toWindowsStyle());
                 }
 
                 if (getTargetFileType() == staticLibrary && ! config.is64Bit())
@@ -586,15 +586,15 @@ public:
                 const String preBuild = getPreBuildSteps (config);
                 if (preBuild.isNotEmpty())
                     group->createNewChildElement ("PreBuildEvent")
-                    ->createNewChildElement ("Command")
-                    ->addTextElement (preBuild);
+                         ->createNewChildElement ("Command")
+                         ->addTextElement (preBuild);
 
-                    const String postBuild = getPostBuildSteps (config);
-                    if (postBuild.isNotEmpty())
-                        group->createNewChildElement ("PostBuildEvent")
-                        ->createNewChildElement ("Command")
-                        ->addTextElement (postBuild);
-                        }
+                const String postBuild = getPostBuildSteps (config);
+                if (postBuild.isNotEmpty())
+                    group->createNewChildElement ("PostBuildEvent")
+                         ->createNewChildElement ("Command")
+                         ->addTextElement (postBuild);
+            }
 
             ScopedPointer<XmlElement> otherFilesGroup (new XmlElement ("ItemGroup"));
 
@@ -608,7 +608,7 @@ public:
 
                     if (group.getNumChildren() > 0)
                         addFilesToCompile (group, *cppFiles, *headerFiles, *otherFilesGroup);
-                        }
+                }
             }
 
             if (getOwner().iconFile != File())
@@ -873,9 +873,9 @@ public:
         {
             switch (level)
             {
-            case optimiseMaxSpeed:  return "Full";
-            case optimiseMinSize:   return "MinSpace";
-            default:                return "Disabled";
+                case optimiseMaxSpeed:  return "Full";
+                case optimiseMinSize:   return "MinSpace";
+                default:                return "Disabled";
             }
         }
 
