@@ -51,7 +51,7 @@ struct HashMapTest : public UnitTest
                 auto value = valueOracle.nextInt();
 
                 bool contains = (groundTruth.find (key) != nullptr);
-                u.expectEquals (contains, hashMap.contains (key));
+                u.expectEquals ((int) contains, (int) hashMap.contains (key));
 
                 groundTruth.add (key, value);
                 hashMap.set (key, value);
