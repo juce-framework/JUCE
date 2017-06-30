@@ -857,7 +857,7 @@ private:
     //==============================================================================
     struct DelegateClass  : public ObjCClass<NSObject>
     {
-        DelegateClass()  : ObjCClass<NSObject> ("JUCEAppDelegate_")
+        DelegateClass()  : ObjCClass<NSObject> ("JUCENetworkDelegate_")
         {
             addIvar<URLConnectionState*> ("state");
 
