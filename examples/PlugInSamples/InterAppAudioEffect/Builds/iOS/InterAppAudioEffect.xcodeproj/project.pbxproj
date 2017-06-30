@@ -26,6 +26,7 @@
 		0E026EE54B36795F4F77515A = {isa = PBXBuildFile; fileRef = 0F3042AB2BAEE0EC5457645F; };
 		84598523747D55CB777888F2 = {isa = PBXBuildFile; fileRef = 77951CA64AAA0680E6D1E12D; };
 		4F7A927DB4DA2E1E97DA74A4 = {isa = PBXBuildFile; fileRef = BF84B6C400483E92E912D64D; };
+		CDB1A4C456EB24F3ED5B0652 = {isa = PBXBuildFile; fileRef = A8C00FF5E11897C4FC77F7B8; };
 		5E4611B5666DE0EA4AEB3085 = {isa = PBXBuildFile; fileRef = 1867AF96FAD8E984651D1CEF; };
 		A4703B30F19268B6B572B97D = {isa = PBXBuildFile; fileRef = 9A4973AD24CF4666139E1AEC; };
 		4CBDEF6C6472EE15D7D2C3FA = {isa = PBXBuildFile; fileRef = 560FFA3E4AA82A8E33CB2874; };
@@ -63,6 +64,7 @@
 		82F310E23852E0C002F5A2D1 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		9A4973AD24CF4666139E1AEC = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_audio_processors.mm"; path = "../../JuceLibraryCode/include_juce_audio_processors.mm"; sourceTree = "SOURCE_ROOT"; };
 		9C809DD426D6B660393427D4 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SimpleMeter.h; path = ../../Source/SimpleMeter.h; sourceTree = "SOURCE_ROOT"; };
+		A8C00FF5E11897C4FC77F7B8 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "include_juce_audio_plugin_client_utils.cpp"; path = "../../JuceLibraryCode/include_juce_audio_plugin_client_utils.cpp"; sourceTree = "SOURCE_ROOT"; };
 		AD9B42ED650058295A747510 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = System/Library/Frameworks/CoreMIDI.framework; sourceTree = SDKROOT; };
 		B3D01A391D4DF11709AE5688 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JuceHeader.h; path = ../../JuceLibraryCode/JuceHeader.h; sourceTree = "SOURCE_ROOT"; };
 		B69C94CF64688C5270D8122C = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
@@ -109,6 +111,7 @@
 					0F3042AB2BAEE0EC5457645F,
 					77951CA64AAA0680E6D1E12D,
 					BF84B6C400483E92E912D64D,
+					A8C00FF5E11897C4FC77F7B8,
 					1867AF96FAD8E984651D1CEF,
 					9A4973AD24CF4666139E1AEC,
 					560FFA3E4AA82A8E33CB2874,
@@ -358,6 +361,7 @@
 					67B1C010E9354F24FE07FD47,
 					0E026EE54B36795F4F77515A,
 					84598523747D55CB777888F2,
+					CDB1A4C456EB24F3ED5B0652,
 					5E4611B5666DE0EA4AEB3085,
 					A4703B30F19268B6B572B97D,
 					4CBDEF6C6472EE15D7D2C3FA,

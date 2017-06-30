@@ -33,6 +33,7 @@
 		50D015AFB4853731AB8D45A3 = {isa = PBXBuildFile; fileRef = 3F96318499BA2580780842AB; };
 		0AA050E349D02DAE82BECF71 = {isa = PBXBuildFile; fileRef = 11D9CFC87E75163357606DA8; };
 		54C7A6FD684A1DF585D5C5CC = {isa = PBXBuildFile; fileRef = DE03327637A503DEB70DFF75; };
+		0A090C0CE0B0590DEB6B3C58 = {isa = PBXBuildFile; fileRef = 2E1227BEF17A267ED6C2419A; };
 		40CB2DAFFD0EA567F118C59F = {isa = PBXBuildFile; fileRef = 6CC4D6C98E0CEFD30ABDB838; };
 		F718B5590B023470F3CB7EF9 = {isa = PBXBuildFile; fileRef = 4B9F0ABDCBB3C33CCC72608C; };
 		1378088F158B5ACD762CEB86 = {isa = PBXBuildFile; fileRef = 00E36F5E0D67695B5C4A0FBD; };
@@ -58,6 +59,7 @@
 		28754784774E7974CF215965 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		2B186C698E4525FF67DC068E = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudioKit.framework; path = System/Library/Frameworks/CoreAudioKit.framework; sourceTree = SDKROOT; };
 		2C29E6A7967E9244FC3CDE85 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JuceHeader.h; path = ../../JuceLibraryCode/JuceHeader.h; sourceTree = "SOURCE_ROOT"; };
+		2E1227BEF17A267ED6C2419A = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "include_juce_audio_plugin_client_utils.cpp"; path = "../../JuceLibraryCode/include_juce_audio_plugin_client_utils.cpp"; sourceTree = "SOURCE_ROOT"; };
 		3011D9B18FF9AE4F53DBE7D6 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_gui_basics"; path = "../../../../../modules/juce_gui_basics"; sourceTree = "SOURCE_ROOT"; };
 		380D7D8ABD419DB53E620E2B = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_audio_devices.mm"; path = "../../JuceLibraryCode/include_juce_audio_devices.mm"; sourceTree = "SOURCE_ROOT"; };
 		3F96318499BA2580780842AB = {isa = PBXFileReference; lastKnownFileType = file.r; name = "include_juce_audio_plugin_client_AU.r"; path = "../../JuceLibraryCode/include_juce_audio_plugin_client_AU.r"; sourceTree = "SOURCE_ROOT"; };
@@ -133,6 +135,7 @@
 					3F96318499BA2580780842AB,
 					11D9CFC87E75163357606DA8,
 					DE03327637A503DEB70DFF75,
+					2E1227BEF17A267ED6C2419A,
 					6CC4D6C98E0CEFD30ABDB838,
 					4B9F0ABDCBB3C33CCC72608C,
 					00E36F5E0D67695B5C4A0FBD,
@@ -618,6 +621,7 @@
 					EC209736C29D8C6461375889,
 					8CBD735EEDDEA0B21BE313D1,
 					2336EC665223825FA5FB2F9D,
+					0A090C0CE0B0590DEB6B3C58,
 					40CB2DAFFD0EA567F118C59F,
 					707AB353716F42ED6BC03D2A,
 					F2BD260A57133C938B1A2ED1,

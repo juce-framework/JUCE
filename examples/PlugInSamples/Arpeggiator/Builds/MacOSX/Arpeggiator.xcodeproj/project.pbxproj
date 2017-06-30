@@ -32,6 +32,7 @@
 		D42548E813E707CD0A82E82B = {isa = PBXBuildFile; fileRef = 5D388CC3880062CA7D34DAC7; };
 		816D2235A8E8DCD2F2223F6E = {isa = PBXBuildFile; fileRef = 6D6B8C8C2F02E290AAFF57D1; };
 		C0B574019E715C73CEDDE0C9 = {isa = PBXBuildFile; fileRef = 6ECD836FD092E8A2D3398C53; };
+		7362A0D6144BF4FFDE9C3F5A = {isa = PBXBuildFile; fileRef = F0CFFA787B89ADA2DEAB3044; };
 		0BED0E26C94260A9831351B0 = {isa = PBXBuildFile; fileRef = 4CD86AD12C974AF8686B6F9E; };
 		276A615FDB5F13C678CA1462 = {isa = PBXBuildFile; fileRef = 6FBF6878792BE8B7A8EB8C56; };
 		3350A4D9C50AE7E10C742E8F = {isa = PBXBuildFile; fileRef = 992A0CD210174F34CDA91A7B; };
@@ -96,6 +97,7 @@
 		DE6DA39AFE9EBCB7C2EBADA8 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_gui_basics"; path = "../../../../../modules/juce_gui_basics"; sourceTree = "SOURCE_ROOT"; };
 		E04FB656F412B7AABBCE8391 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_gui_extra"; path = "../../../../../modules/juce_gui_extra"; sourceTree = "SOURCE_ROOT"; };
 		E39E8398B8A26F3F99A37341 = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Info-AU.plist"; path = "Info-AU.plist"; sourceTree = "SOURCE_ROOT"; };
+		F0CFFA787B89ADA2DEAB3044 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "include_juce_audio_plugin_client_utils.cpp"; path = "../../JuceLibraryCode/include_juce_audio_plugin_client_utils.cpp"; sourceTree = "SOURCE_ROOT"; };
 		F0EA8B0A23C9C5AD2DA5C3FD = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_gui_extra.mm"; path = "../../JuceLibraryCode/include_juce_gui_extra.mm"; sourceTree = "SOURCE_ROOT"; };
 		F175178B06C128804FE8B2DD = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		F4AFD4E9AEACE1644C6E9A38 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JuceHeader.h; path = ../../JuceLibraryCode/JuceHeader.h; sourceTree = "SOURCE_ROOT"; };
@@ -128,6 +130,7 @@
 					5D388CC3880062CA7D34DAC7,
 					6D6B8C8C2F02E290AAFF57D1,
 					6ECD836FD092E8A2D3398C53,
+					F0CFFA787B89ADA2DEAB3044,
 					4CD86AD12C974AF8686B6F9E,
 					6FBF6878792BE8B7A8EB8C56,
 					992A0CD210174F34CDA91A7B,
@@ -505,6 +508,7 @@
 					479348D0BFE26AB4A7222B31,
 					BC057D99A97434445E795118,
 					6A5902A0FE5470669F2F15FE,
+					7362A0D6144BF4FFDE9C3F5A,
 					0BED0E26C94260A9831351B0,
 					3350A4D9C50AE7E10C742E8F,
 					6E6A09F94CB884C580BBA4B7,

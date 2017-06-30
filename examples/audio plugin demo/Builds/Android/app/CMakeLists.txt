@@ -387,6 +387,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_RTAS_utils.cpp"
     "../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_RTAS_utils.mm"
     "../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_Standalone.cpp"
+    "../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_utils.cpp"
     "../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_VST_utils.mm"
     "../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_VST2.cpp"
     "../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_VST3.cpp"
@@ -1254,6 +1255,7 @@ add_library( ${BINARY_NAME}
     "../../../JuceLibraryCode/include_juce_audio_devices.cpp"
     "../../../JuceLibraryCode/include_juce_audio_formats.cpp"
     "../../../JuceLibraryCode/include_juce_audio_plugin_client_Standalone.cpp"
+    "../../../JuceLibraryCode/include_juce_audio_plugin_client_utils.cpp"
     "../../../JuceLibraryCode/include_juce_audio_processors.cpp"
     "../../../JuceLibraryCode/include_juce_audio_utils.cpp"
     "../../../JuceLibraryCode/include_juce_core.cpp"
@@ -1623,6 +1625,7 @@ set_source_files_properties("../../../../../modules/juce_audio_plugin_client/juc
 set_source_files_properties("../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_RTAS_utils.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_RTAS_utils.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_Standalone.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_utils.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_VST_utils.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_VST2.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_plugin_client/juce_audio_plugin_client_VST3.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)

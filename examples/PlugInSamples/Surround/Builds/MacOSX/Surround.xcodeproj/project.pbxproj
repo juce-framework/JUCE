@@ -35,6 +35,7 @@
 		23725124430EA1F38813F7E7 = {isa = PBXBuildFile; fileRef = B7AEFBCEF0B40E7A0B82BF09; };
 		FD44D2CA47FCDF0FD2CB616A = {isa = PBXBuildFile; fileRef = 2424E7A9AD711B1C265B4C65; };
 		E91D828343243E9D44F7061C = {isa = PBXBuildFile; fileRef = 20F20F0F4198C1C360F27DCC; };
+		343A4660CB674F1FD442CBAB = {isa = PBXBuildFile; fileRef = 3F3CE19DD83C2D516EEECB06; };
 		7C1CD234D93B496AD3B03772 = {isa = PBXBuildFile; fileRef = 391B816C0D4D54B7964B4059; };
 		1A101C20D0AC821CF74E2024 = {isa = PBXBuildFile; fileRef = 3029DE6EE1F42700F4B6592C; };
 		2898D4AE7B6ABC66B813AADA = {isa = PBXBuildFile; fileRef = 852EC4107648F2C474985AC3; };
@@ -63,6 +64,7 @@
 		3029DE6EE1F42700F4B6592C = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "include_juce_audio_plugin_client_VST2.cpp"; path = "../../JuceLibraryCode/include_juce_audio_plugin_client_VST2.cpp"; sourceTree = "SOURCE_ROOT"; };
 		391B816C0D4D54B7964B4059 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_audio_plugin_client_VST_utils.mm"; path = "../../JuceLibraryCode/include_juce_audio_plugin_client_VST_utils.mm"; sourceTree = "SOURCE_ROOT"; };
 		3E67AEA9A0FD3291E8C1B486 = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Info-VST3.plist"; path = "Info-VST3.plist"; sourceTree = "SOURCE_ROOT"; };
+		3F3CE19DD83C2D516EEECB06 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "include_juce_audio_plugin_client_utils.cpp"; path = "../../JuceLibraryCode/include_juce_audio_plugin_client_utils.cpp"; sourceTree = "SOURCE_ROOT"; };
 		407B6CB925E1B5FAA7E3914E = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		499621E04BA626F64944B0D4 = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Surround.vst; sourceTree = "BUILT_PRODUCTS_DIR"; };
 		4F1AF1D850DBBFB581EAE294 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SurroundProcessor.cpp; path = ../../Source/SurroundProcessor.cpp; sourceTree = "SOURCE_ROOT"; };
@@ -141,6 +143,7 @@
 					B7AEFBCEF0B40E7A0B82BF09,
 					2424E7A9AD711B1C265B4C65,
 					20F20F0F4198C1C360F27DCC,
+					3F3CE19DD83C2D516EEECB06,
 					391B816C0D4D54B7964B4059,
 					3029DE6EE1F42700F4B6592C,
 					852EC4107648F2C474985AC3,
@@ -745,6 +748,7 @@
 					DF36C21AE8098DDBBA721398,
 					7E12C0915AEC650E0F0DE75A,
 					3FA71C26E0ADDB94DA622288,
+					343A4660CB674F1FD442CBAB,
 					7C1CD234D93B496AD3B03772,
 					1857E8A1B9272919D6452192,
 					CD5DDE43DC460ED00610018C,
