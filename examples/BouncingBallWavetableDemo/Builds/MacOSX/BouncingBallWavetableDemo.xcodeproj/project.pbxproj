@@ -10,6 +10,7 @@
 		2D79087465BE4742CCA6A9B6 = {isa = PBXBuildFile; fileRef = 30C1898CB24713677FE38922; };
 		BA1F0D76D823878766369C94 = {isa = PBXBuildFile; fileRef = A3E3503CDB7F6FF5C16ACC90; };
 		5641B7544BB1E2460B53A471 = {isa = PBXBuildFile; fileRef = 81D8C6E40C1E1781AE7059D9; };
+		9C814731D34A682990AE17CA = {isa = PBXBuildFile; fileRef = 76D3818D1F0E86B333AA1F99; };
 		46CA5521603725FBBFE65242 = {isa = PBXBuildFile; fileRef = 5CB6432630E43D9F5DE84F27; };
 		A38DDE1419820904238C218A = {isa = PBXBuildFile; fileRef = 35B0E3511789B97455F23A2A; };
 		E216A7A51124469BAAA36C2F = {isa = PBXBuildFile; fileRef = FAB47C0E7947D33D360FDC31; };
@@ -62,6 +63,7 @@
 		698ADE3639E5C47795657FCE = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		6A9EFC3AB24BA57FFB496DED = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_data_structures"; path = "../../../../modules/juce_data_structures"; sourceTree = "SOURCE_ROOT"; };
 		742111BC1D219E531E8E32F3 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_gui_basics"; path = "../../../../modules/juce_gui_basics"; sourceTree = "SOURCE_ROOT"; };
+		76D3818D1F0E86B333AA1F99 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		81D8C6E40C1E1781AE7059D9 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		825A7DCA8A93CD2E51463992 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		8CB18E1E2503AE0EC4B73675 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_cryptography"; path = "../../../../modules/juce_cryptography"; sourceTree = "SOURCE_ROOT"; };
@@ -122,6 +124,7 @@
 					30C1898CB24713677FE38922,
 					A3E3503CDB7F6FF5C16ACC90,
 					81D8C6E40C1E1781AE7059D9,
+					76D3818D1F0E86B333AA1F99,
 					5CB6432630E43D9F5DE84F27,
 					35B0E3511789B97455F23A2A,
 					FAB47C0E7947D33D360FDC31,
@@ -264,6 +267,7 @@
 					2D79087465BE4742CCA6A9B6,
 					BA1F0D76D823878766369C94,
 					5641B7544BB1E2460B53A471,
+					9C814731D34A682990AE17CA,
 					46CA5521603725FBBFE65242,
 					A38DDE1419820904238C218A,
 					E216A7A51124469BAAA36C2F,

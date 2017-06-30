@@ -10,6 +10,7 @@
 		A70F7F4891DB1CF67653BE74 = {isa = PBXBuildFile; fileRef = B38A1AC42B002115350C0268; };
 		96EFF7BA261F57DD829324D8 = {isa = PBXBuildFile; fileRef = 7898C73DCA6FA9D9CF669D32; };
 		6EB1A3B818863EF1787A9CCE = {isa = PBXBuildFile; fileRef = 4B427AF10E722F9A362CEB73; };
+		D82BA4D40F5686DAFF5E11FB = {isa = PBXBuildFile; fileRef = 99527F36B4484133087435CD; };
 		59004CE43AE081B4A6CE9E17 = {isa = PBXBuildFile; fileRef = 1932D54A7FAE13BADBA3E9B5; };
 		AA207299991F85938465BF65 = {isa = PBXBuildFile; fileRef = 2030A589A9355FE6A0F72428; };
 		66FC7F44EEC9044E5C4A21C3 = {isa = PBXBuildFile; fileRef = C0531453A002C480280C5F05; };
@@ -64,6 +65,7 @@
 		8C449538B266A891147103D6 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		8EBA9CF0874619A8FA0B4E74 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_osc"; path = "../../../../modules/juce_osc"; sourceTree = "SOURCE_ROOT"; };
 		8ED5AB2E4E106FB97C033C5B = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
+		99527F36B4484133087435CD = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		A40A2A0B2841A622C53047CD = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_audio_processors"; path = "../../../../modules/juce_audio_processors"; sourceTree = "SOURCE_ROOT"; };
 		A59D9064C3A2D7EC3DC45420 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "include_juce_osc.cpp"; path = "../../JuceLibraryCode/include_juce_osc.cpp"; sourceTree = "SOURCE_ROOT"; };
 		A76DD7182C290A9020C96CA7 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_audio_formats.mm"; path = "../../JuceLibraryCode/include_juce_audio_formats.mm"; sourceTree = "SOURCE_ROOT"; };
@@ -122,6 +124,7 @@
 					B38A1AC42B002115350C0268,
 					7898C73DCA6FA9D9CF669D32,
 					4B427AF10E722F9A362CEB73,
+					99527F36B4484133087435CD,
 					1932D54A7FAE13BADBA3E9B5,
 					2030A589A9355FE6A0F72428,
 					C0531453A002C480280C5F05,
@@ -264,6 +267,7 @@
 					A70F7F4891DB1CF67653BE74,
 					96EFF7BA261F57DD829324D8,
 					6EB1A3B818863EF1787A9CCE,
+					D82BA4D40F5686DAFF5E11FB,
 					59004CE43AE081B4A6CE9E17,
 					AA207299991F85938465BF65,
 					66FC7F44EEC9044E5C4A21C3,

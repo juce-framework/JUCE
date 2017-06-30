@@ -11,6 +11,7 @@
 		21D330A5B13178B12BEAFC3C = {isa = PBXBuildFile; fileRef = D4EBC17BDB7F88CCBC76730B; };
 		B288A89F96704F142ED8E939 = {isa = PBXBuildFile; fileRef = 5ACC21AA45BBF48C3C64D56D; };
 		851C1165C9E4ACDD19C56A96 = {isa = PBXBuildFile; fileRef = 942A0F04EFB8D0B2FF9780BA; };
+		AF42316D915057E930A5624E = {isa = PBXBuildFile; fileRef = A4B568E26157FC282214976F; };
 		2B4B9CF71F94BDD1E3AC89AE = {isa = PBXBuildFile; fileRef = B0935EBBA4F6E2B05F3D1C0A; };
 		AC3BED74AC7C6D9F5739F38B = {isa = PBXBuildFile; fileRef = 9794142D24966F93FFDE51A1; };
 		E3CB85BA817BC9E3942A8AB0 = {isa = PBXBuildFile; fileRef = 9F9B445E6755CAA19E4344ED; };
@@ -83,6 +84,7 @@
 		9794142D24966F93FFDE51A1 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		9BA1DD697B98005D24F7EC3C = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FilterGraph.cpp; path = ../../Source/FilterGraph.cpp; sourceTree = "SOURCE_ROOT"; };
 		9F9B445E6755CAA19E4344ED = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
+		A4B568E26157FC282214976F = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		A5E7CA8A71D049BE2BD33861 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JuceHeader.h; path = ../../JuceLibraryCode/JuceHeader.h; sourceTree = "SOURCE_ROOT"; };
 		A66EFAC64B1B67B536C73415 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = HostStartup.cpp; path = ../../Source/HostStartup.cpp; sourceTree = "SOURCE_ROOT"; };
 		B0935EBBA4F6E2B05F3D1C0A = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
@@ -154,6 +156,7 @@
 					D4EBC17BDB7F88CCBC76730B,
 					5ACC21AA45BBF48C3C64D56D,
 					942A0F04EFB8D0B2FF9780BA,
+					A4B568E26157FC282214976F,
 					B0935EBBA4F6E2B05F3D1C0A,
 					9794142D24966F93FFDE51A1,
 					9F9B445E6755CAA19E4344ED,
@@ -306,6 +309,7 @@
 					21D330A5B13178B12BEAFC3C,
 					B288A89F96704F142ED8E939,
 					851C1165C9E4ACDD19C56A96,
+					AF42316D915057E930A5624E,
 					2B4B9CF71F94BDD1E3AC89AE,
 					AC3BED74AC7C6D9F5739F38B,
 					E3CB85BA817BC9E3942A8AB0,

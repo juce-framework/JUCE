@@ -234,18 +234,6 @@
 //==============================================================================
 // juce_video flags:
 
-#ifndef    JUCE_DIRECTSHOW
- //#define JUCE_DIRECTSHOW 1
-#endif
-
-#ifndef    JUCE_MEDIAFOUNDATION
- //#define JUCE_MEDIAFOUNDATION 1
-#endif
-
-#ifndef    JUCE_QUICKTIME
- //#define JUCE_QUICKTIME 1
-#endif
-
 #ifndef    JUCE_USE_CAMERA
  //#define JUCE_USE_CAMERA 1
 #endif

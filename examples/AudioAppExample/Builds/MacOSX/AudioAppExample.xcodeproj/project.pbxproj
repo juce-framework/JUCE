@@ -10,6 +10,7 @@
 		3286435E3CC944A630866B89 = {isa = PBXBuildFile; fileRef = 92CABA9C9B5148FCA22A0503; };
 		7AC823C6BFA28E49D004E0E0 = {isa = PBXBuildFile; fileRef = BD70FA4626657FF1DEBB10DA; };
 		558C49788C323F72C879C219 = {isa = PBXBuildFile; fileRef = 440774261ADCDDE62F8611DE; };
+		6295E63A310FB635AC0C1BE1 = {isa = PBXBuildFile; fileRef = FE0301E74455B9D70088792D; };
 		32D0B845ED45381A3B0D3286 = {isa = PBXBuildFile; fileRef = C751B4E213343FF77A0681B6; };
 		7D74E1C0A7CA9488CCB8FD5D = {isa = PBXBuildFile; fileRef = EA07D9E1051E8FBBB8C21064; };
 		2414893F5F6D7096A1350F6B = {isa = PBXBuildFile; fileRef = 0C37646FCADAFC29F28333C0; };
@@ -85,6 +86,7 @@
 		ED96DF5BB1BAA94746049FE4 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_gui_basics.mm"; path = "../../JuceLibraryCode/include_juce_gui_basics.mm"; sourceTree = "SOURCE_ROOT"; };
 		FA016D0A7169A84A182C404B = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		FB092AF48A13F4F473734F66 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_video.mm"; path = "../../JuceLibraryCode/include_juce_video.mm"; sourceTree = "SOURCE_ROOT"; };
+		FE0301E74455B9D70088792D = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		C366FD2226833583ECDE68D2 = {isa = PBXGroup; children = (
 					2545022A0EE088A0C46EBD13,
 					D78365C74082A1253E12AF17, ); name = Source; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 					92CABA9C9B5148FCA22A0503,
 					BD70FA4626657FF1DEBB10DA,
 					440774261ADCDDE62F8611DE,
+					FE0301E74455B9D70088792D,
 					C751B4E213343FF77A0681B6,
 					EA07D9E1051E8FBBB8C21064,
 					0C37646FCADAFC29F28333C0,
@@ -273,6 +276,7 @@
 					3286435E3CC944A630866B89,
 					7AC823C6BFA28E49D004E0E0,
 					558C49788C323F72C879C219,
+					6295E63A310FB635AC0C1BE1,
 					32D0B845ED45381A3B0D3286,
 					7D74E1C0A7CA9488CCB8FD5D,
 					2414893F5F6D7096A1350F6B,

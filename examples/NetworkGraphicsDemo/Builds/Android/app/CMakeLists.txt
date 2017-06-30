@@ -270,8 +270,6 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_formats/codecs/juce_MP3AudioFormat.h"
     "../../../../../modules/juce_audio_formats/codecs/juce_OggVorbisAudioFormat.cpp"
     "../../../../../modules/juce_audio_formats/codecs/juce_OggVorbisAudioFormat.h"
-    "../../../../../modules/juce_audio_formats/codecs/juce_QuickTimeAudioFormat.cpp"
-    "../../../../../modules/juce_audio_formats/codecs/juce_QuickTimeAudioFormat.h"
     "../../../../../modules/juce_audio_formats/codecs/juce_WavAudioFormat.cpp"
     "../../../../../modules/juce_audio_formats/codecs/juce_WavAudioFormat.h"
     "../../../../../modules/juce_audio_formats/codecs/juce_WindowsMediaAudioFormat.cpp"
@@ -386,6 +384,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/containers/juce_DynamicObject.h"
     "../../../../../modules/juce_core/containers/juce_ElementComparator.h"
     "../../../../../modules/juce_core/containers/juce_HashMap.h"
+    "../../../../../modules/juce_core/containers/juce_HashMap_test.cpp"
     "../../../../../modules/juce_core/containers/juce_LinkedListPointer.h"
     "../../../../../modules/juce_core/containers/juce_ListenerList.cpp"
     "../../../../../modules/juce_core/containers/juce_ListenerList.h"
@@ -1481,8 +1480,6 @@ set_source_files_properties("../../../../../modules/juce_audio_formats/codecs/ju
 set_source_files_properties("../../../../../modules/juce_audio_formats/codecs/juce_MP3AudioFormat.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_formats/codecs/juce_OggVorbisAudioFormat.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_formats/codecs/juce_OggVorbisAudioFormat.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_formats/codecs/juce_QuickTimeAudioFormat.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_formats/codecs/juce_QuickTimeAudioFormat.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_formats/codecs/juce_WavAudioFormat.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_formats/codecs/juce_WavAudioFormat.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_formats/codecs/juce_WindowsMediaAudioFormat.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -1597,6 +1594,7 @@ set_source_files_properties("../../../../../modules/juce_core/containers/juce_Dy
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_DynamicObject.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_ElementComparator.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_HashMap.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_core/containers/juce_HashMap_test.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_LinkedListPointer.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_ListenerList.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_ListenerList.h" PROPERTIES HEADER_FILE_ONLY TRUE)

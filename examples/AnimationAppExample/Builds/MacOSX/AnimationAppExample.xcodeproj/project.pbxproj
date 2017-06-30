@@ -10,6 +10,7 @@
 		E3498B080326636A372B74AE = {isa = PBXBuildFile; fileRef = 859E13C66F2193112084D1B9; };
 		828D4B32ECB7ECE234A5A1A9 = {isa = PBXBuildFile; fileRef = 66DE43B56D8670C78DD3998D; };
 		ACC6D859315761144D4178A0 = {isa = PBXBuildFile; fileRef = 717FA33AC0AA2629302F0314; };
+		D56389F7C2F211D97510A51F = {isa = PBXBuildFile; fileRef = F41993809470A0FF0DC7076E; };
 		97CBB80DA6775AEF4872168B = {isa = PBXBuildFile; fileRef = 8F7B1F20EA4F07C9D37D5260; };
 		2CDBA22DB877B521681B03C3 = {isa = PBXBuildFile; fileRef = 7DF561FC0400DD7E678CD690; };
 		3B937846DB65393DE597ABDE = {isa = PBXBuildFile; fileRef = C9F7ABDA09635BC3FAB0B008; };
@@ -78,6 +79,7 @@
 		D7AE43E118954402DE85705F = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_graphics"; path = "../../../../modules/juce_graphics"; sourceTree = "SOURCE_ROOT"; };
 		E86F8ACE887901A756775C0C = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_data_structures"; path = "../../../../modules/juce_data_structures"; sourceTree = "SOURCE_ROOT"; };
 		EE948FB708041B74B8597E68 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_audio_processors"; path = "../../../../modules/juce_audio_processors"; sourceTree = "SOURCE_ROOT"; };
+		F41993809470A0FF0DC7076E = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		F7B6DBDC7439C90B4E01752E = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Source/Main.cpp; sourceTree = "SOURCE_ROOT"; };
 		FE7F391D915BD5CE849883A8 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		9F41B5C4D3F9CE9C17373AB3 = {isa = PBXGroup; children = (
@@ -122,6 +124,7 @@
 					859E13C66F2193112084D1B9,
 					66DE43B56D8670C78DD3998D,
 					717FA33AC0AA2629302F0314,
+					F41993809470A0FF0DC7076E,
 					8F7B1F20EA4F07C9D37D5260,
 					7DF561FC0400DD7E678CD690,
 					C9F7ABDA09635BC3FAB0B008,
@@ -264,6 +267,7 @@
 					E3498B080326636A372B74AE,
 					828D4B32ECB7ECE234A5A1A9,
 					ACC6D859315761144D4178A0,
+					D56389F7C2F211D97510A51F,
 					97CBB80DA6775AEF4872168B,
 					2CDBA22DB877B521681B03C3,
 					3B937846DB65393DE597ABDE,

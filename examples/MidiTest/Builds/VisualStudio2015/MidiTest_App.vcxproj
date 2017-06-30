@@ -437,9 +437,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_OggVorbisAudioFormat.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_QuickTimeAudioFormat.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_WavAudioFormat.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -573,6 +570,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_DynamicObject.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_HashMap_test.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_ListenerList.cpp">
@@ -1823,7 +1823,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_LAMEEncoderAudioFormat.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_MP3AudioFormat.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_OggVorbisAudioFormat.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_QuickTimeAudioFormat.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_WavAudioFormat.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_WindowsMediaAudioFormat.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\format\juce_AudioFormat.h"/>

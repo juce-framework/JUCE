@@ -150,6 +150,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_DynamicObject.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_HashMap_test.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_ListenerList.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>

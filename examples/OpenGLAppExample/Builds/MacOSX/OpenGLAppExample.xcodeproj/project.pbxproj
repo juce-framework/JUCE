@@ -10,6 +10,7 @@
 		F2E327A47E10F43D6991A306 = {isa = PBXBuildFile; fileRef = 50151F5E1EA38C0768AD9AC8; };
 		7FF434A451FC85BF1B79BC7F = {isa = PBXBuildFile; fileRef = 3948321FE783006946DC8F1F; };
 		F9B99B7794442B691803718A = {isa = PBXBuildFile; fileRef = CC144EDF680633EC54BB6C7C; };
+		1D983C056C6ECFB00C81D961 = {isa = PBXBuildFile; fileRef = F791D9DE9743A0D2CA3E81AD; };
 		96CB0F03F9B80A334DEA2147 = {isa = PBXBuildFile; fileRef = DB3D37600C745E6F62C5A04B; };
 		8A6D37A2A20E92532DE4CDE6 = {isa = PBXBuildFile; fileRef = A2A8888BB2A9B1BF61955BEA; };
 		2A954B85CEC7CB6CDDE645AF = {isa = PBXBuildFile; fileRef = 8E5DB762FF5447085518EB85; };
@@ -84,6 +85,7 @@
 		DCA070129A9B3031E7342AF7 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_opengl"; path = "../../../../modules/juce_opengl"; sourceTree = "SOURCE_ROOT"; };
 		E388431BD28744CBA815E6D7 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_audio_basics"; path = "../../../../modules/juce_audio_basics"; sourceTree = "SOURCE_ROOT"; };
 		EE9163FBAA413EB537932E47 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_video.mm"; path = "../../JuceLibraryCode/include_juce_video.mm"; sourceTree = "SOURCE_ROOT"; };
+		F791D9DE9743A0D2CA3E81AD = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		FD8B62AE07B555A19D70A4A3 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_graphics.mm"; path = "../../JuceLibraryCode/include_juce_graphics.mm"; sourceTree = "SOURCE_ROOT"; };
 		A4D3B14A21B5F8202D2A49AE = {isa = PBXGroup; children = (
 					7D21460B496E5E03FA58654B, ); name = Resources; sourceTree = "<group>"; };
@@ -133,6 +135,7 @@
 					50151F5E1EA38C0768AD9AC8,
 					3948321FE783006946DC8F1F,
 					CC144EDF680633EC54BB6C7C,
+					F791D9DE9743A0D2CA3E81AD,
 					DB3D37600C745E6F62C5A04B,
 					A2A8888BB2A9B1BF61955BEA,
 					8E5DB762FF5447085518EB85,
@@ -276,6 +279,7 @@
 					F2E327A47E10F43D6991A306,
 					7FF434A451FC85BF1B79BC7F,
 					F9B99B7794442B691803718A,
+					1D983C056C6ECFB00C81D961,
 					96CB0F03F9B80A334DEA2147,
 					8A6D37A2A20E92532DE4CDE6,
 					2A954B85CEC7CB6CDDE645AF,

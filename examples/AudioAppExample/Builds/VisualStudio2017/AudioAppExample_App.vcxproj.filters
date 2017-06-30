@@ -673,9 +673,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_OggVorbisAudioFormat.cpp">
       <Filter>Juce Modules\juce_audio_formats\codecs</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_QuickTimeAudioFormat.cpp">
-      <Filter>Juce Modules\juce_audio_formats\codecs</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_WavAudioFormat.cpp">
       <Filter>Juce Modules\juce_audio_formats\codecs</Filter>
     </ClCompile>
@@ -833,6 +830,9 @@
       <Filter>Juce Modules\juce_core\containers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_DynamicObject.cpp">
+      <Filter>Juce Modules\juce_core\containers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_HashMap_test.cpp">
       <Filter>Juce Modules\juce_core\containers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_ListenerList.cpp">
@@ -2071,20 +2071,11 @@
     <ClCompile Include="..\..\..\..\modules\juce_video\capture\juce_CameraDevice.cpp">
       <Filter>Juce Modules\juce_video\capture</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_video\native\juce_android_CameraDevice.cpp">
-      <Filter>Juce Modules\juce_video\native</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_video\native\juce_mac_CameraDevice.mm">
-      <Filter>Juce Modules\juce_video\native</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_video\native\juce_mac_MovieComponent.mm">
       <Filter>Juce Modules\juce_video\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_video\native\juce_win32_CameraDevice.cpp">
-      <Filter>Juce Modules\juce_video\native</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_video\native\juce_win32_DirectShowComponent.cpp">
-      <Filter>Juce Modules\juce_video\native</Filter>
+    <ClCompile Include="..\..\..\..\modules\juce_video\playback\juce_VideoComponent.cpp">
+      <Filter>Juce Modules\juce_video\playback</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_video\juce_video.cpp">
       <Filter>Juce Modules\juce_video</Filter>
@@ -2542,9 +2533,6 @@
       <Filter>Juce Modules\juce_audio_formats\codecs</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_OggVorbisAudioFormat.h">
-      <Filter>Juce Modules\juce_audio_formats\codecs</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_QuickTimeAudioFormat.h">
       <Filter>Juce Modules\juce_audio_formats\codecs</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_WavAudioFormat.h">
@@ -3936,10 +3924,28 @@
     <ClInclude Include="..\..\..\..\modules\juce_video\capture\juce_CameraDevice.h">
       <Filter>Juce Modules\juce_video\capture</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_video\playback\juce_DirectShowComponent.h">
-      <Filter>Juce Modules\juce_video\playback</Filter>
+    <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_android_CameraDevice.h">
+      <Filter>Juce Modules\juce_video\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_android_Video.h">
+      <Filter>Juce Modules\juce_video\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_mac_CameraDevice.h">
+      <Filter>Juce Modules\juce_video\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_mac_Video.h">
+      <Filter>Juce Modules\juce_video\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_win32_CameraDevice.h">
+      <Filter>Juce Modules\juce_video\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_win32_Video.h">
+      <Filter>Juce Modules\juce_video\native</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_video\playback\juce_MovieComponent.h">
+      <Filter>Juce Modules\juce_video\playback</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_video\playback\juce_VideoComponent.h">
       <Filter>Juce Modules\juce_video\playback</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_video\juce_video.h">

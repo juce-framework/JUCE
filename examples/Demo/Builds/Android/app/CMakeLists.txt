@@ -319,8 +319,6 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_formats/codecs/juce_MP3AudioFormat.h"
     "../../../../../modules/juce_audio_formats/codecs/juce_OggVorbisAudioFormat.cpp"
     "../../../../../modules/juce_audio_formats/codecs/juce_OggVorbisAudioFormat.h"
-    "../../../../../modules/juce_audio_formats/codecs/juce_QuickTimeAudioFormat.cpp"
-    "../../../../../modules/juce_audio_formats/codecs/juce_QuickTimeAudioFormat.h"
     "../../../../../modules/juce_audio_formats/codecs/juce_WavAudioFormat.cpp"
     "../../../../../modules/juce_audio_formats/codecs/juce_WavAudioFormat.h"
     "../../../../../modules/juce_audio_formats/codecs/juce_WindowsMediaAudioFormat.cpp"
@@ -531,6 +529,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/containers/juce_DynamicObject.h"
     "../../../../../modules/juce_core/containers/juce_ElementComparator.h"
     "../../../../../modules/juce_core/containers/juce_HashMap.h"
+    "../../../../../modules/juce_core/containers/juce_HashMap_test.cpp"
     "../../../../../modules/juce_core/containers/juce_LinkedListPointer.h"
     "../../../../../modules/juce_core/containers/juce_ListenerList.cpp"
     "../../../../../modules/juce_core/containers/juce_ListenerList.h"
@@ -1348,13 +1347,16 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_opengl/juce_opengl.h"
     "../../../../../modules/juce_video/capture/juce_CameraDevice.cpp"
     "../../../../../modules/juce_video/capture/juce_CameraDevice.h"
-    "../../../../../modules/juce_video/native/juce_android_CameraDevice.cpp"
-    "../../../../../modules/juce_video/native/juce_mac_CameraDevice.mm"
+    "../../../../../modules/juce_video/native/juce_android_CameraDevice.h"
+    "../../../../../modules/juce_video/native/juce_android_Video.h"
+    "../../../../../modules/juce_video/native/juce_mac_CameraDevice.h"
     "../../../../../modules/juce_video/native/juce_mac_MovieComponent.mm"
-    "../../../../../modules/juce_video/native/juce_win32_CameraDevice.cpp"
-    "../../../../../modules/juce_video/native/juce_win32_DirectShowComponent.cpp"
-    "../../../../../modules/juce_video/playback/juce_DirectShowComponent.h"
+    "../../../../../modules/juce_video/native/juce_mac_Video.h"
+    "../../../../../modules/juce_video/native/juce_win32_CameraDevice.h"
+    "../../../../../modules/juce_video/native/juce_win32_Video.h"
     "../../../../../modules/juce_video/playback/juce_MovieComponent.h"
+    "../../../../../modules/juce_video/playback/juce_VideoComponent.cpp"
+    "../../../../../modules/juce_video/playback/juce_VideoComponent.h"
     "../../../../../modules/juce_video/juce_video.cpp"
     "../../../../../modules/juce_video/juce_video.mm"
     "../../../../../modules/juce_video/juce_video.h"
@@ -1630,8 +1632,6 @@ set_source_files_properties("../../../../../modules/juce_audio_formats/codecs/ju
 set_source_files_properties("../../../../../modules/juce_audio_formats/codecs/juce_MP3AudioFormat.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_formats/codecs/juce_OggVorbisAudioFormat.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_formats/codecs/juce_OggVorbisAudioFormat.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_formats/codecs/juce_QuickTimeAudioFormat.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_formats/codecs/juce_QuickTimeAudioFormat.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_formats/codecs/juce_WavAudioFormat.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_formats/codecs/juce_WavAudioFormat.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_formats/codecs/juce_WindowsMediaAudioFormat.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -1842,6 +1842,7 @@ set_source_files_properties("../../../../../modules/juce_core/containers/juce_Dy
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_DynamicObject.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_ElementComparator.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_HashMap.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_core/containers/juce_HashMap_test.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_LinkedListPointer.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_ListenerList.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_ListenerList.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2659,13 +2660,16 @@ set_source_files_properties("../../../../../modules/juce_opengl/juce_opengl.mm" 
 set_source_files_properties("../../../../../modules/juce_opengl/juce_opengl.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_video/capture/juce_CameraDevice.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_video/capture/juce_CameraDevice.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_video/native/juce_android_CameraDevice.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_video/native/juce_mac_CameraDevice.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_video/native/juce_android_CameraDevice.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_video/native/juce_android_Video.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_video/native/juce_mac_CameraDevice.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_video/native/juce_mac_MovieComponent.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_video/native/juce_win32_CameraDevice.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_video/native/juce_win32_DirectShowComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_video/playback/juce_DirectShowComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_video/native/juce_mac_Video.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_video/native/juce_win32_CameraDevice.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_video/native/juce_win32_Video.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_video/playback/juce_MovieComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_video/playback/juce_VideoComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_video/playback/juce_VideoComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_video/juce_video.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_video/juce_video.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_video/juce_video.h" PROPERTIES HEADER_FILE_ONLY TRUE)

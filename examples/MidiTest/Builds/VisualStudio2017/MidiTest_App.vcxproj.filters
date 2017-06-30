@@ -637,9 +637,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_OggVorbisAudioFormat.cpp">
       <Filter>Juce Modules\juce_audio_formats\codecs</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_QuickTimeAudioFormat.cpp">
-      <Filter>Juce Modules\juce_audio_formats\codecs</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_WavAudioFormat.cpp">
       <Filter>Juce Modules\juce_audio_formats\codecs</Filter>
     </ClCompile>
@@ -797,6 +794,9 @@
       <Filter>Juce Modules\juce_core\containers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_DynamicObject.cpp">
+      <Filter>Juce Modules\juce_core\containers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_HashMap_test.cpp">
       <Filter>Juce Modules\juce_core\containers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_ListenerList.cpp">
@@ -2419,9 +2419,6 @@
       <Filter>Juce Modules\juce_audio_formats\codecs</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_OggVorbisAudioFormat.h">
-      <Filter>Juce Modules\juce_audio_formats\codecs</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_QuickTimeAudioFormat.h">
       <Filter>Juce Modules\juce_audio_formats\codecs</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_formats\codecs\juce_WavAudioFormat.h">

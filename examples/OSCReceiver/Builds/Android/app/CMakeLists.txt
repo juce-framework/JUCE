@@ -37,6 +37,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/containers/juce_DynamicObject.h"
     "../../../../../modules/juce_core/containers/juce_ElementComparator.h"
     "../../../../../modules/juce_core/containers/juce_HashMap.h"
+    "../../../../../modules/juce_core/containers/juce_HashMap_test.cpp"
     "../../../../../modules/juce_core/containers/juce_LinkedListPointer.h"
     "../../../../../modules/juce_core/containers/juce_ListenerList.cpp"
     "../../../../../modules/juce_core/containers/juce_ListenerList.h"
@@ -858,6 +859,7 @@ set_source_files_properties("../../../../../modules/juce_core/containers/juce_Dy
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_DynamicObject.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_ElementComparator.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_HashMap.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_core/containers/juce_HashMap_test.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_LinkedListPointer.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_ListenerList.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_ListenerList.h" PROPERTIES HEADER_FILE_ONLY TRUE)
