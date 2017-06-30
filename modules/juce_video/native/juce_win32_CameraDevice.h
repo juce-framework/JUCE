@@ -494,9 +494,8 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
         return devs;
     }
 
-    class GrabberCallback   : public ComBaseClassHelperBase<ISampleGrabberCB>
+    struct GrabberCallback   : public ComBaseClassHelperBase<ISampleGrabberCB>
     {
-    public:
         GrabberCallback (Pimpl& p)
             : ComBaseClassHelperBase<ISampleGrabberCB> (0), owner (p) {}
 
@@ -516,7 +515,6 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
             return S_OK;
         }
 
-    private:
         Pimpl& owner;
 
         JUCE_DECLARE_NON_COPYABLE (GrabberCallback)

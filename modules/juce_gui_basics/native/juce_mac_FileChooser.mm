@@ -213,7 +213,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
         }
 
        #if defined (MAC_OS_X_VERSION_10_6) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6)
-        [panel setDirectoryURL: [NSURL fileURLWithPath: juceStringToNS (directory)]];
+        [panel setDirectoryURL: createNSURLFromFile (directory)];
         [panel setNameFieldStringValue: juceStringToNS (filename)];
 
         if ([panel runModal] == 1 /*NSModalResponseOK*/)

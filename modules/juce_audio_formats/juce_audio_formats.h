@@ -128,7 +128,6 @@ class AudioFormat;
 #include "codecs/juce_LAMEEncoderAudioFormat.h"
 #include "codecs/juce_MP3AudioFormat.h"
 #include "codecs/juce_OggVorbisAudioFormat.h"
-#include "codecs/juce_QuickTimeAudioFormat.h"
 #include "codecs/juce_WavAudioFormat.h"
 #include "codecs/juce_WindowsMediaAudioFormat.h"
 #include "sampler/juce_Sampler.h"

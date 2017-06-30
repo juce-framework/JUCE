@@ -32,9 +32,7 @@ struct MovieComponent::Pimpl
         {
             close();
 
-            NSString* videoFile = [NSString stringWithUTF8String: newPath.toUTF8()];
-            NSURL* url = [NSURL fileURLWithPath: videoFile];
-
+            NSURL* url = createNSURLFromFile (newPath);
             AVAsset* asset = [AVAsset assetWithURL: url];
             duration = CMTimeGetSeconds (asset.duration);
             nativeSize = [[[asset tracksWithMediaType: AVMediaTypeVideo] objectAtIndex: 0] naturalSize];

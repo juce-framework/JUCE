@@ -49,6 +49,16 @@ namespace
         return [NSString string];
     }
 
+    static inline NSURL* createNSURLFromFile (const String& f)
+    {
+        return [NSURL fileURLWithPath: juceStringToNS (f)];
+    }
+
+    static inline NSURL* createNSURLFromFile (const File& f)
+    {
+        return createNSURLFromFile (f.getFullPathName());
+    }
+
    #if JUCE_MAC
     template <typename RectangleType>
     static NSRect makeNSRect (const RectangleType& r) noexcept

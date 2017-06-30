@@ -24,9 +24,18 @@
   ==============================================================================
 */
 
-CameraDevice::CameraDevice (const String& nm, int index, int minWidth, int minHeight, int maxWidth, int maxHeight,
-                            bool highQuality)
-   : name (nm), pimpl (new Pimpl (name, index, minWidth, minHeight, maxWidth, maxHeight, highQuality))
+
+#if JUCE_MAC || JUCE_IOS
+ #include "../native/juce_mac_CameraDevice.h"
+#elif JUCE_WINDOWS
+ #include "../native/juce_win32_CameraDevice.h"
+#elif JUCE_ANDROID
+ #include "../native/juce_android_CameraDevice.h"
+#endif
+
+//==============================================================================
+CameraDevice::CameraDevice (const String& nm, int index, int minWidth, int minHeight, int maxWidth, int maxHeight, bool useHighQuality)
+   : name (nm), pimpl (new Pimpl (name, index, minWidth, minHeight, maxWidth, maxHeight, useHighQuality))
 {
 }
 
@@ -81,14 +90,12 @@ StringArray CameraDevice::getAvailableDevices()
 CameraDevice* CameraDevice::openDevice (int index,
                                         int minWidth, int minHeight,
                                         int maxWidth, int maxHeight,
-                                        bool highQuality)
+                                        bool useHighQuality)
 {
-    ScopedPointer<CameraDevice> d (new CameraDevice (getAvailableDevices() [index], index,
-                                                     minWidth, minHeight, maxWidth, maxHeight,
-                                                     highQuality));
-
-    if (d->pimpl->openedOk())
-        return d.release();
+    if (ScopedPointer<CameraDevice> d = new CameraDevice (getAvailableDevices() [index], index,
+                                                          minWidth, minHeight, maxWidth, maxHeight, useHighQuality))
+        if (d->pimpl->openedOk())
+            return d.release();
 
     return nullptr;
 }

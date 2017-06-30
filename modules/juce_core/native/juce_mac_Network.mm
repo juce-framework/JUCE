@@ -503,7 +503,7 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
     {
         NSFileManager* fileManager = [[NSFileManager alloc] init];
         error = ([fileManager moveItemAtURL: location
-                                      toURL: [NSURL fileURLWithPath:juceStringToNS (targetLocation.getFullPathName())]
+                                      toURL: createNSURLFromFile (targetLocation)
                                       error: nil] == NO);
         httpCode = 200;
         finished = true;
