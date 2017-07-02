@@ -68,7 +68,10 @@
 
  #if (defined (_LIBCPP_VERSION) || ! (JUCE_MAC || JUCE_IOS))
   #define JUCE_STDLIB_HAS_STD_FUNCTION_SUPPORT 1
-  #define JUCE_COMPILER_SUPPORTS_THREAD_LOCAL 1
+
+  #if ! JUCE_PROJUCER_LIVE_BUILD
+   #define JUCE_COMPILER_SUPPORTS_THREAD_LOCAL 1
+  #endif
  #endif
 
  #if __has_feature (cxx_generalized_initializers) && (defined (_LIBCPP_VERSION) || ! (JUCE_MAC || JUCE_IOS))
