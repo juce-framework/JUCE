@@ -193,7 +193,7 @@ class MenuWindow  : public Component
 public:
     MenuWindow (const PopupMenu& menu, MenuWindow* parentWindow,
                 const Options& opts, bool alignToRectangle, bool shouldDismissOnMouseUp,
-                ApplicationCommandManager** manager)
+                ApplicationCommandManager** manager, float parentScaleFactor = 1.0f)
        : Component ("menu"),
          parent (parentWindow),
          options (opts),
@@ -203,7 +203,7 @@ public:
          windowCreationTime (Time::getMillisecondCounter()),
          lastFocusedTime (windowCreationTime),
          timeEnteredCurrentChildComp (windowCreationTime),
-         scaleFactor (1.0f)
+         scaleFactor (parentWindow != nullptr ? parentScaleFactor : 1.0f)
     {
         setWantsKeyboardFocus (false);
         setMouseClickGrabsKeyboardFocus (false);
@@ -216,7 +216,7 @@ public:
 
         parentComponent = lf.getParentComponentForMenuOptions (options);
 
-        if (parentComponent == nullptr && lf.shouldPopupMenuScaleWithTargetComponent (options))
+        if (parentComponent == nullptr && parentWindow == nullptr && lf.shouldPopupMenuScaleWithTargetComponent (options))
             scaleFactor = getApproximateScaleFactorForTargetComponent (options.getTargetComponent());
 
         setOpaque (lf.findColour (PopupMenu::backgroundColourId).isOpaque()
@@ -899,7 +899,7 @@ public:
                                                            options.withTargetScreenArea (childComp->getScreenBounds())
                                                                   .withMinimumWidth (0)
                                                                   .withTargetComponent (nullptr),
-                                                           false, dismissOnMouseUp, managerOfChosenCommand);
+                                                           false, dismissOnMouseUp, managerOfChosenCommand, scaleFactor);
 
             activeSubMenu->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)
             activeSubMenu->enterModalState (false);
