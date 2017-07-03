@@ -746,8 +746,8 @@ void ProjectContentComponent::openInSelectedIDE (bool saveFirst)
             {
                 if (exporter->canLaunchProject() && exporter->getName() == selectedIDE)
                 {
-                    if (saveFirst)
-                        saveProject (exporter->isXcode());
+                    if (saveFirst && ! saveProject (exporter->isXcode()))
+                        return;
 
                     exporter->launchProject();
                     break;
