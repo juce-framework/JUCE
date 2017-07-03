@@ -231,7 +231,7 @@ void ProjucerLookAndFeel::layoutFileBrowserComponent (FileBrowserComponent& brow
     topSlice.removeFromLeft (6);
     goUpButton->setBounds (topSlice);
 
-    bottomSlice.removeFromLeft (20);
+    bottomSlice.removeFromLeft (50);
     filenameBox->setBounds (bottomSlice);
     filenameBox->setColour (TextEditor::backgroundColourId, findColour (backgroundColourId));
     filenameBox->setColour (TextEditor::textColourId,       findColour (defaultTextColourId));
