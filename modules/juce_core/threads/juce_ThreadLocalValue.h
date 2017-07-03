@@ -54,14 +54,12 @@ public:
     */
     ~ThreadLocalValue()
     {
-       #if ! JUCE_COMPILER_SUPPORTS_THREAD_LOCAL
-        for (ObjectHolder* o = first.value; o != nullptr;)
+        for (auto* o = first.get(); o != nullptr;)
         {
-            ObjectHolder* const next = o->next;
+            auto* next = o->next;
             delete o;
             o = next;
         }
-       #endif
     }
 
     /** Returns a reference to this thread's instance of the value.
@@ -95,44 +93,25 @@ public:
     */
     Type& get() const noexcept
     {
-       #if JUCE_COMPILER_SUPPORTS_THREAD_LOCAL
-        static thread_local HashMap<const void*, Type> holder;
-        return holder.getReference (this);
-       #else
-        const Thread::ThreadID threadId = Thread::getCurrentThreadId();
+        auto threadId = Thread::getCurrentThreadId();
+        ObjectHolder* o = nullptr;
 
-        for (ObjectHolder* o = first.get(); o != nullptr; o = o->next)
-            if (o->threadId == threadId)
+        for (o = first.get(); o != nullptr; o = o->next)
+            if (o->threadId.get() == threadId)
                 return o->object;
 
-        for (ObjectHolder* o = first.get(); o != nullptr; o = o->next)
-        {
-            if (o->threadId == nullptr)
-            {
-                {
-                    SpinLock::ScopedLockType sl (lock);
+        for (o = first.get(); o != nullptr; o = o->next)
+            if (o->threadId.compareAndSetBool (threadId, nullptr))
+                break;
 
-                    if (o->threadId != nullptr)
-                        continue;
+        if (o != nullptr)
+            o->object = Type();
+        else
+            for (o = new ObjectHolder {threadId, first.get(), Type()};
+                 ! first.compareAndSetBool (o, o->next);
+                 o->next = first.get());
 
-                    o->threadId = threadId;
-                }
-
-                o->object = Type();
-                return o->object;
-            }
-        }
-
-        ObjectHolder* const newObject = new ObjectHolder (threadId);
-
-        do
-        {
-            newObject->next = first.get();
-        }
-        while (! first.compareAndSetBool (newObject, newObject->next));
-
-        return newObject->object;
-       #endif
+        return o->object;
     }
 
     /** Called by a thread before it terminates, to allow this class to release
@@ -140,30 +119,18 @@ public:
     */
     void releaseCurrentThreadStorage()
     {
-       #if ! JUCE_COMPILER_SUPPORTS_THREAD_LOCAL
-        const Thread::ThreadID threadId = Thread::getCurrentThreadId();
+        auto threadId = Thread::getCurrentThreadId();
 
-        for (ObjectHolder* o = first.get(); o != nullptr; o = o->next)
-        {
-            if (o->threadId == threadId)
-            {
-                SpinLock::ScopedLockType sl (lock);
-                o->threadId = nullptr;
-            }
-        }
-       #endif
+        for (auto* o = first.get(); o != nullptr; o = o->next)
+            if (o->threadId.compareAndSetBool (nullptr, threadId))
+                return;
     }
 
 private:
     //==============================================================================
-   #if ! JUCE_COMPILER_SUPPORTS_THREAD_LOCAL
     struct ObjectHolder
     {
-        ObjectHolder (const Thread::ThreadID& tid)
-            : threadId (tid), next (nullptr), object()
-        {}
-
-        Thread::ThreadID threadId;
+        Atomic<Thread::ThreadID> threadId;
         ObjectHolder* next;
         Type object;
 
@@ -171,8 +138,6 @@ private:
     };
 
     mutable Atomic<ObjectHolder*> first;
-    SpinLock lock;
-   #endif
 
     JUCE_DECLARE_NON_COPYABLE (ThreadLocalValue)
 };
