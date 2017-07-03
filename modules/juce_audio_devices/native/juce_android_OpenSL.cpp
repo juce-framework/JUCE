@@ -261,6 +261,8 @@ struct BufferHelpers<float>
     }
 };
 
+class SLRealtimeThread;
+
 //==============================================================================
 class OpenSLAudioIODevice  : public AudioIODevice
 {
@@ -952,6 +954,9 @@ public:
 
 private:
     //==============================================================================
+    friend class SLRealtimeThread;
+
+    //==============================================================================
     DynamicLibrary slLibrary;
     int actualBufferSize, sampleRate;
     int inputLatency, outputLatency;
@@ -1086,4 +1091,183 @@ bool isOpenSLAvailable()  { return OpenSLAudioDeviceType::isOpenSLAvailable(); }
 AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_OpenSLES()
 {
     return isOpenSLAvailable() ? new OpenSLAudioDeviceType() : nullptr;
+}
+
+//==============================================================================
+class SLRealtimeThread
+{
+public:
+    static constexpr int numBuffers = 4;
+
+    SLRealtimeThread()
+    {
+        if (auto createEngine = (OpenSLAudioIODevice::OpenSLSession::CreateEngineFunc) slLibrary.getFunction ("slCreateEngine"))
+        {
+            SLObjectItf obj = nullptr;
+            auto err = createEngine (&obj, 0, nullptr, 0, nullptr, nullptr);
+
+            if (err != SL_RESULT_SUCCESS || obj == nullptr)
+                return;
+
+            if ((*obj)->Realize (obj, 0) != SL_RESULT_SUCCESS)
+            {
+                (*obj)->Destroy (obj);
+                return;
+            }
+
+            engine = SlRef<SLEngineItf_>::cast (SlObjectRef (obj));
+
+            if (engine == nullptr)
+            {
+                (*obj)->Destroy (obj);
+                return;
+            }
+
+            obj = nullptr;
+            err = (*engine)->CreateOutputMix (engine, &obj, 0, nullptr, nullptr);
+
+            if (err != SL_RESULT_SUCCESS || obj == nullptr || (*obj)->Realize (obj, 0) != SL_RESULT_SUCCESS)
+            {
+                (*obj)->Destroy (obj);
+                return;
+            }
+
+            outputMix = SlRef<SLOutputMixItf_>::cast (SlObjectRef (obj));
+
+            if (outputMix == nullptr)
+            {
+                (*obj)->Destroy (obj);
+                return;
+            }
+
+            SLDataLocator_AndroidSimpleBufferQueue queueLocator = {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, static_cast<SLuint32> (numBuffers)};
+            SLDataLocator_OutputMix outputMixLocator = {SL_DATALOCATOR_OUTPUTMIX, outputMix};
+
+            PCMDataFormatEx dataFormat;
+            BufferHelpers<int16>::initPCMDataFormat (dataFormat, 1, OpenSLAudioIODevice::getNativeSampleRate());
+
+            SLDataSource source = { &queueLocator, &dataFormat };
+            SLDataSink   sink   = { &outputMixLocator, nullptr };
+
+            SLInterfaceID queueInterfaces[] = { &IntfIID<SLAndroidSimpleBufferQueueItf_>::iid };
+            SLboolean trueFlag = SL_BOOLEAN_TRUE;
+
+            obj = nullptr;
+            err = (*engine)->CreateAudioPlayer (engine, &obj, &source, &sink, 1, queueInterfaces, &trueFlag);
+
+            if (err != SL_RESULT_SUCCESS || obj == nullptr)
+                return;
+
+            if ((*obj)->Realize (obj, 0) != SL_RESULT_SUCCESS)
+            {
+                (*obj)->Destroy (obj);
+                return;
+            }
+
+            player = SlRef<SLPlayItf_>::cast (SlObjectRef (obj));
+
+            if (player == nullptr)
+            {
+                (*obj)->Destroy (obj);
+                return;
+            }
+
+            queue = SlRef<SLAndroidSimpleBufferQueueItf_>::cast (player);
+            if (queue == nullptr)
+                return;
+
+            if ((*queue)->RegisterCallback (queue, staticFinished, this) != SL_RESULT_SUCCESS)
+            {
+                queue = nullptr;
+                return;
+            }
+
+            pthread_cond_init (&threadReady, nullptr);
+            pthread_mutex_init (&threadReadyMutex, nullptr);
+        }
+    }
+
+    bool isOK() const      { return queue != nullptr; }
+
+    pthread_t startThread (void* (*entry) (void*), void* userPtr)
+    {
+        memset (buffer.getData(), 0, static_cast<size_t> (sizeof (int16) * static_cast<size_t> (bufferSize * numBuffers)));
+
+        for (int i = 0; i < numBuffers; ++i)
+        {
+            int16* dst = buffer.getData() + (bufferSize * i);
+            (*queue)->Enqueue (queue, dst, static_cast<SLuint32> (static_cast<size_t> (bufferSize) * sizeof (int16)));
+        }
+
+        pthread_mutex_lock (&threadReadyMutex);
+
+        threadEntryProc = entry;
+        threadUserPtr  = userPtr;
+
+        (*player)->SetPlayState (player, SL_PLAYSTATE_PLAYING);
+
+        pthread_cond_wait (&threadReady, &threadReadyMutex);
+        pthread_mutex_unlock (&threadReadyMutex);
+
+        return threadID;
+    }
+
+    void finished()
+    {
+        if (threadEntryProc != nullptr)
+        {
+            pthread_mutex_lock (&threadReadyMutex);
+
+            threadID = pthread_self();
+
+            pthread_cond_signal (&threadReady);
+            pthread_mutex_unlock (&threadReadyMutex);
+
+            threadEntryProc (threadUserPtr);
+            threadEntryProc = nullptr;
+
+            (*player)->SetPlayState (player, SL_PLAYSTATE_STOPPED);
+            MessageManager::callAsync ([this] () { delete this; });
+        }
+    }
+
+private:
+    //=============================================================================
+    static void staticFinished (SLAndroidSimpleBufferQueueItf, void* context)
+    {
+        static_cast<SLRealtimeThread*> (context)->finished();
+    }
+
+    //=============================================================================
+    DynamicLibrary slLibrary { "libOpenSLES.so" };
+
+    SlRef<SLEngineItf_>    engine;
+    SlRef<SLOutputMixItf_> outputMix;
+    SlRef<SLPlayItf_>      player;
+    SlRef<SLAndroidSimpleBufferQueueItf_> queue;
+
+    int bufferSize = OpenSLAudioIODevice::getNativeBufferSize();
+    HeapBlock<int16> buffer { HeapBlock<int16> (static_cast<size_t> (1 * bufferSize * numBuffers)) };
+
+    void* (*threadEntryProc) (void*) = nullptr;
+    void* threadUserPtr              = nullptr;
+
+    pthread_cond_t  threadReady;
+    pthread_mutex_t threadReadyMutex;
+    pthread_t       threadID;
+};
+
+pthread_t juce_createRealtimeAudioThread (void* (*entry) (void*), void* userPtr)
+{
+    ScopedPointer<SLRealtimeThread> thread (new SLRealtimeThread);
+
+    if (! thread->isOK())
+        return 0;
+
+    pthread_t threadID = thread->startThread (entry, userPtr);
+
+    // the thread will de-allocate itself
+    thread.release();
+
+    return threadID;
 }

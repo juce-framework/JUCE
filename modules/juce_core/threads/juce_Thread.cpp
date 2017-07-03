@@ -20,14 +20,8 @@
   ==============================================================================
 */
 
-Thread::Thread (const String& threadName_, const size_t stackSize)
-    : threadName (threadName_),
-      threadHandle (nullptr),
-      threadId (0),
-      threadPriority (5),
-      threadStackSize (stackSize),
-      affinityMask (0),
-      shouldExit (false)
+Thread::Thread (const String& name, const size_t stackSize)
+   : threadName (name), threadStackSize (stackSize)
 {
 }
 
@@ -126,12 +120,21 @@ void Thread::startThread()
     }
 }
 
-void Thread::startThread (const int priority)
+void Thread::startThread (int priority)
 {
     const ScopedLock sl (startStopLock);
 
     if (threadHandle == nullptr)
     {
+        auto isRealtime = (priority == realtimeAudioPriority);
+
+       #if JUCE_ANDROID
+        isAndroidRealtimeThread = isRealtime;
+       #endif
+
+        if (isRealtime)
+            priority = 9;
+
         threadPriority = priority;
         startThread();
     }
@@ -218,14 +221,27 @@ bool Thread::stopThread (const int timeOutMilliseconds)
 }
 
 //==============================================================================
-bool Thread::setPriority (const int newPriority)
+bool Thread::setPriority (int newPriority)
 {
+    bool isRealtime = (newPriority == realtimeAudioPriority);
+
+    if (isRealtime)
+        newPriority = 9;
+
     // NB: deadlock possible if you try to set the thread prio from the thread itself,
     // so using setCurrentThreadPriority instead in that case.
     if (getCurrentThreadId() == getThreadId())
         return setCurrentThreadPriority (newPriority);
 
     const ScopedLock sl (startStopLock);
+
+   #if JUCE_ANDROID
+    // you cannot switch from or to an Android realtime thread once the
+    // thread is already running!
+    jassert (isThreadRunning() && (isRealtime == isAndroidRealtimeThread));
+
+    isAndroidRealtimeThread = isRealtime;
+   #endif
 
     if ((! isThreadRunning()) || setThreadPriority (threadHandle, newPriority))
     {
