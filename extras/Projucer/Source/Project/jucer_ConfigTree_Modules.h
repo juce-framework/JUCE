@@ -35,20 +35,14 @@ public:
     bool canBeSelected() const override       { return true; }
     bool mightContainSubItems() override      { return false; }
     String getUniqueName() const override     { return "module_" + moduleID; }
-
-    String getDisplayName() const override
-    {
-        auto versionNum = project.getModules().getModuleInfo (moduleID).getVersion();
-        return moduleID + (versionNum != ProjucerApplication::getApp().getApplicationVersion() ? String (" (" + versionNum + ")") : "");
-    }
-
+    String getDisplayName() const override    { return moduleID; }
     String getRenamingName() const override   { return getDisplayName(); }
     void setName (const String&) override     {}
     bool isMissing() const override           { return hasMissingDependencies(); }
 
     void showDocument() override
     {
-        showSettingsPage (new ModuleSettingsPanel (project, moduleID, *this));
+        showSettingsPage (new ModuleSettingsPanel (project, moduleID, getOwnerView()));
     }
 
     void deleteItem() override
@@ -104,10 +98,12 @@ private:
                                  private Value::Listener
     {
     public:
-        ModuleSettingsPanel (Project& p, const String& modID, ModuleItem& o)
+        ModuleSettingsPanel (Project& p, const String& modID, TreeView* tree)
             : group (p.getModules().getModuleInfo (modID).getID(),
                      Icon (getIcons().singleModule, Colours::transparentBlack)),
-              project (p), owner (o), moduleID (modID)
+              project (p),
+              modulesTree (tree),
+              moduleID (modID)
         {
             defaultJuceModulePathValue.referTo (getAppSettings().getStoredPath (Ids::defaultJuceModulePath));
             defaultUserModulePathValue.referTo (getAppSettings().getStoredPath (Ids::defaultUserModulePath));
@@ -144,7 +140,7 @@ private:
                                                                                       key, exporter->getTargetOSForExporter())));
 
                 auto* pathComponent = new DependencyFilePathPropertyComponent (src, "Path for " + exporter->getName().quoted(),
-                                                                              true, "*", project.getProjectFolder());
+                                                                               true, "*", project.getProjectFolder());
 
                 props.add (pathComponent,
                            "A path to the folder that contains the " + moduleID + " module when compiling the "
@@ -154,6 +150,7 @@ private:
                            "is empty then the global path will be used.");
 
                 pathComponent->setEnabled (! isUsingGlobalPathValue.getValue());
+                pathComponent->getValue().addListener (this);
             }
 
             globalPathValue.referTo (isUsingGlobalPathValue);
@@ -218,7 +215,7 @@ private:
     private:
         PropertyGroupComponent group;
         Project& project;
-        ModuleItem& owner;
+        SafePointer<TreeView> modulesTree;
         String moduleID;
         Value globalPathValue;
         Value defaultJuceModulePathValue, defaultUserModulePathValue;
@@ -241,8 +238,6 @@ private:
 
             if (auto* moduleInfo = dynamic_cast<ModuleInfoComponent*> (group.properties.getUnchecked (0)))
                 moduleInfo->refresh();
-
-            owner.treeHasChanged();
         }
 
         //==============================================================================
@@ -344,21 +339,26 @@ private:
                 list.scanGlobalJuceModulePath();
 
                 if (! tryToFix (list))
+                {
                     list.scanGlobalUserModulePath();
 
-                if (! tryToFix (list))
-                    list.scanProjectExporterModulePaths (project);
+                    if (! tryToFix (list))
+                    {
+                        list.scanProjectExporterModulePaths (project);
 
-                bool fixed = tryToFix (list);
+                        if (! tryToFix (list))
+                        {
+                            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                                              "Adding Missing Dependencies",
+                                                              "Couldn't locate some of these modules - you'll need to find their "
+                                                              "folders manually and add them to the list.");
 
-                if (ModuleSettingsPanel* p = findParentComponentOfClass<ModuleSettingsPanel>())
-                    p->refresh();
+                            return;
+                        }
+                    }
+                }
 
-                if (! fixed)
-                    AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                                      "Adding Missing Dependencies",
-                                                      "Couldn't locate some of these modules - you'll need to find their "
-                                                      "folders manually and add them to the list.");
+                refreshAndReselectItem();
             }
 
             void resized() override
@@ -390,6 +390,32 @@ private:
 
                 missingDependencies.swapWith (missing);
                 return (missingDependencies.size() == 0);
+            }
+
+            void refreshAndReselectItem()
+            {
+                if (auto* settingsPanel = findParentComponentOfClass<ModuleSettingsPanel>())
+                {
+                    if (settingsPanel->modulesTree == nullptr)
+                        return;
+
+                    auto* rootItem = settingsPanel->modulesTree->getRootItem();
+
+                    if (rootItem == nullptr)
+                        return;
+
+                    for (auto i = 0; i < rootItem->getNumSubItems(); ++i)
+                    {
+                        if (auto* subItem = dynamic_cast<ConfigTreeItemBase*> (rootItem->getSubItem (i)))
+                        {
+                            if (subItem->getDisplayName() == moduleID)
+                            {
+                                subItem->setSelected (true, true);
+                                return;
+                            }
+                        }
+                    }
+                }
             }
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MissingDependenciesComponent)
@@ -474,28 +500,20 @@ public:
         PopupMenu knownModules, jucePathModules, userPathModules, exporterPathsModules;
 
         auto index = 100;
-        auto globalJucePathModules = getAvailableModulesInGlobalJucePath();
-        for (auto m : globalJucePathModules)
+        for (auto m : getAvailableModulesInGlobalJucePath())
             jucePathModules.addItem (index++, m, ! modules.isModuleEnabled (m));
 
         knownModules.addSubMenu ("Global JUCE modules path", jucePathModules);
 
         index = 200;
-        auto globalUserPathModules = getAvailableModulesInGlobalUserPath();
         for (auto m : getAvailableModulesInGlobalUserPath())
-        {
-            if (! globalJucePathModules.contains (m))
-                userPathModules.addItem (index++, m, ! modules.isModuleEnabled (m));
-        }
+            userPathModules.addItem (index++, m, ! modules.isModuleEnabled (m));
 
         knownModules.addSubMenu ("Global user modules path", userPathModules);
 
         index = 300;
         for (auto m : getAvailableModulesInExporterPaths())
-        {
-            if (! globalJucePathModules.contains (m) && ! globalUserPathModules.contains (m))
-                exporterPathsModules.addItem (index++, m, ! modules.isModuleEnabled (m));
-        }
+            exporterPathsModules.addItem (index++, m, ! modules.isModuleEnabled (m));
 
         knownModules.addSubMenu ("Exporter paths", exporterPathsModules);
 
@@ -526,14 +544,6 @@ public:
         }
     }
 
-    StringArray getAvailableModulesInExporterPaths()
-    {
-        ModuleList list;
-        list.scanProjectExporterModulePaths (project);
-
-        return list.getIDs();
-    }
-
     StringArray getAvailableModulesInGlobalJucePath()
     {
         ModuleList list;
@@ -554,7 +564,28 @@ public:
                 list.addAllModulesInFolder (f);
         }
 
-        return list.getIDs();
+        auto ids = list.getIDs();
+
+        for (auto m : getAvailableModulesInGlobalJucePath())
+            ids.removeString (m);
+
+        return ids;
+    }
+
+    StringArray getAvailableModulesInExporterPaths()
+    {
+        ModuleList list;
+        list.scanProjectExporterModulePaths (project);
+
+        auto ids = list.getIDs();
+
+        for (auto m : getAvailableModulesInGlobalJucePath())
+            ids.removeString (m);
+
+        for (auto m : getAvailableModulesInGlobalUserPath())
+            ids.removeString (m);
+
+        return ids;
     }
 
     //==============================================================================
