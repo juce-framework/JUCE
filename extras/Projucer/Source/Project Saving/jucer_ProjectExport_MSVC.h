@@ -152,6 +152,7 @@ public:
                 getWarningLevelValue() = 4;
 
             setValueIfVoid (shouldGenerateManifestValue(), true);
+            setValueIfVoid (getArchitectureType(), get64BitArchName());
         }
 
         Value getWarningLevelValue()                { return getValue (Ids::winWarningLevel); }
@@ -214,6 +215,15 @@ public:
 
         void createConfigProperties (PropertyListBuilder& props) override
         {
+            const String archTypes[] = { get32BitArchName(), get64BitArchName() };
+            props.add (new ChoicePropertyComponent (getArchitectureType(), "Architecture",
+                                                    StringArray (archTypes, numElementsInArray (archTypes)),
+                                                    Array<var>  (archTypes, numElementsInArray (archTypes))));
+
+            props.add (new BooleanPropertyComponent (getFastMathValue(), "Relax IEEE compliance", "Enabled"),
+                       "Enable this to use FAST_MATH non-IEEE mode. (Warning: this can have unexpected results!)");
+
+
             static const char* optimisationLevels[] = { "No optimisation", "Minimise size", "Maximise speed", 0 };
             const int optimisationLevelValues[]     = { optimisationOff, optimiseMinSize, optimiseMaxSpeed, 0 };
 
