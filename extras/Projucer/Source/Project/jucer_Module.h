@@ -138,7 +138,6 @@ public:
 
     static File findGlobalModulesFolder();
     static File findDefaultModulesFolder (Project&);
-    static File findUserModuleFolder (const String& moduleID, const String& possiblePaths, const Project&);
     static bool isJuceModule (const String& moduleID);
 
     bool isModuleEnabled (const String& moduleID) const;
@@ -179,6 +178,7 @@ private:
     UndoManager* getUndoManager() const     { return project.getUndoManagerFor (state); }
 
     static File getModuleFolderFromPathIfItExists (const String& path, const String& moduleID, const Project&);
+    File findUserModuleFolder (const String& possiblePaths, const String& moduleID);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnabledModuleList)
 };

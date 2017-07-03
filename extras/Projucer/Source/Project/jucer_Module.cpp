@@ -684,6 +684,24 @@ File EnabledModuleList::getModuleFolderFromPathIfItExists (const String& path, c
     return {};
 }
 
+File EnabledModuleList::findUserModuleFolder (const String& possiblePaths, const String& moduleID)
+{
+    auto paths = StringArray::fromTokens (possiblePaths, ";", {});
+
+    for (auto p : paths)
+    {
+        auto f = File::createFileWithoutCheckingPath (p.trim());
+        if (f.exists())
+        {
+            auto moduleFolder = getModuleFolderFromPathIfItExists (f.getFullPathName(), moduleID, project);
+            if (moduleFolder != File())
+                return moduleFolder;
+        }
+    }
+
+    return {};
+}
+
 File EnabledModuleList::getModuleFolder (const String& moduleID)
 {
     if (shouldUseGlobalPath (moduleID).getValue())
@@ -691,7 +709,7 @@ File EnabledModuleList::getModuleFolder (const String& moduleID)
         if (isJuceModule (moduleID))
             return getModuleFolderFromPathIfItExists (getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString(), moduleID, project);
 
-        return findUserModuleFolder (moduleID, getAppSettings().getStoredPath (Ids::defaultUserModulePath).toString(), project);
+        return findUserModuleFolder (moduleID, getAppSettings().getStoredPath (Ids::defaultUserModulePath).toString());
     }
 
     auto paths = getAllPossibleModulePathsFromExporters (project);
@@ -872,24 +890,6 @@ File EnabledModuleList::findDefaultModulesFolder (Project& project)
     }
 
     return File::getCurrentWorkingDirectory();
-}
-
-File EnabledModuleList::findUserModuleFolder (const String& moduleID, const String& possiblePaths, const Project& project)
-{
-    auto paths = StringArray::fromTokens (possiblePaths, ";", {});
-
-    for (auto p : paths)
-    {
-        auto f = File::createFileWithoutCheckingPath (p.trim());
-        if (f.exists())
-        {
-            auto moduleFolder = getModuleFolderFromPathIfItExists (f.getFullPathName(), moduleID, project);
-            if (moduleFolder != File())
-                return moduleFolder;
-        }
-    }
-
-    return {};
 }
 
 bool EnabledModuleList::isJuceModule (const String& moduleID)

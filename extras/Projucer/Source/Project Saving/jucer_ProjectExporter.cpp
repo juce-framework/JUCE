@@ -507,9 +507,7 @@ String ProjectExporter::getPathForModuleString (const String& moduleID) const
         if (id == Ids::defaultJuceModulePath)
             return getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString();
 
-        return EnabledModuleList::findUserModuleFolder (moduleID,
-                                                        getAppSettings().getStoredPath (Ids::defaultUserModulePath).toString(),
-                                                        project).getFullPathName();
+        return getAppSettings().getStoredPath (Ids::defaultUserModulePath).toString();
     }
 
     return exporterPath;
