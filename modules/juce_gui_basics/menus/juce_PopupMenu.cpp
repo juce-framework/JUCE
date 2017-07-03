@@ -217,7 +217,8 @@ public:
         parentComponent = lf.getParentComponentForMenuOptions (options);
 
         if (parentComponent == nullptr && parentWindow == nullptr && lf.shouldPopupMenuScaleWithTargetComponent (options))
-            scaleFactor = getApproximateScaleFactorForTargetComponent (options.getTargetComponent());
+            if (auto* targetComponent = options.getTargetComponent())
+                scaleFactor = getApproximateScaleFactorForTargetComponent (targetComponent);
 
         setOpaque (lf.findColour (PopupMenu::backgroundColourId).isOpaque()
                      || ! Desktop::canUseSemiTransparentWindows());
