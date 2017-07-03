@@ -36,7 +36,7 @@ public:
           header ("Modules", Icon (getIcons().modules, Colours::transparentBlack)),
           setCopyModeButton  ("Set copy-mode for all modules..."),
           copyPathButton ("Set paths for all modules..."),
-          globalPathsButton ("Enable/disable global path for all modules...")
+          globalPathsButton ("Enable/disable global path for modules...")
     {
         listHeader = new ListBoxHeader ( { "Module", "Version", "Make Local Copy", "Paths" },
                                         { 0.25f, 0.2f, 0.2f, 0.35f } );
@@ -234,18 +234,31 @@ private:
         PopupMenu m;
         m.addItem (1, "Set all modules to use global paths");
         m.addItem (2, "Set all modules to not use global paths");
+        m.addItem (3, "Set selected modules to use global paths");
+        m.addItem (4, "Set selected modules to not use global paths");
 
         auto res = m.showAt (&globalPathsButton);
 
         if (res != 0)
         {
-            auto enableGlobalPaths = (res == 1);
+            auto enableGlobalPaths = (res % 2 == 1);
 
-            auto& modules = project.getModules();
-            auto moduleIDs = modules.getAllModules();
+            auto& moduleList = project.getModules();
 
-            for (auto id : moduleIDs)
-                modules.shouldUseGlobalPath (id).setValue (enableGlobalPaths);
+            if (res < 3)
+            {
+                auto moduleIDs = moduleList.getAllModules();
+
+                for (auto id : moduleIDs)
+                    moduleList.shouldUseGlobalPath (id).setValue (enableGlobalPaths);
+            }
+            else
+            {
+                auto selected = list.getSelectedRows();
+
+                for (auto i = 0; i < selected.size(); ++i)
+                    moduleList.shouldUseGlobalPath (moduleList.getModuleID (selected[i])).setValue (enableGlobalPaths);
+            }
         }
     }
 
