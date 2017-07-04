@@ -579,7 +579,7 @@ private:
         void graphEventProc()
         {
             LONG ec = 0;
-            LONG_PTR p1 = nullptr, p2 = nullptr;
+            LONG_PTR p1 = {}, p2 = {};
 
             jassert (mediaEvent != nullptr);
 

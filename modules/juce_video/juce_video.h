@@ -44,6 +44,7 @@
 
   dependencies:     juce_data_structures juce_cryptography
   OSXFrameworks:    AVKit AVFoundation CoreMedia
+  iOSFrameworks:    AVKit AVFoundation
 
  END_JUCE_MODULE_DECLARATION
 

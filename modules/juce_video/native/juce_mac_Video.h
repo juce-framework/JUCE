@@ -22,23 +22,34 @@
   ==============================================================================
 */
 
-struct VideoComponent::Pimpl   : public NSViewComponent
+#if JUCE_IOS
+ using BaseClass = UIViewComponent;
+#else
+ using BaseClass = NSViewComponent;
+#endif
+
+struct VideoComponent::Pimpl   : public BaseClass
 {
     Pimpl()
     {
         setVisible (true);
 
-        AVPlayerView* view = [[AVPlayerView alloc] init];
-        setView (view);
-        [view setNextResponder: [view superview]];
-        [view setWantsLayer: YES];
-        [view release];
+       #if JUCE_MAC
+        controller = [[AVPlayerView alloc] init];
+        setView (controller);
+        [controller setNextResponder: [controller superview]];
+        [controller setWantsLayer: YES];
+       #else
+        controller = [[AVPlayerViewController alloc] init];
+        setView ([controller view]);
+       #endif
     }
 
     ~Pimpl()
     {
         close();
         setView (nil);
+        [controller release];
     }
 
     Result load (const File& file)
@@ -53,7 +64,7 @@ struct VideoComponent::Pimpl   : public NSViewComponent
 
     Result load (const URL& url)
     {
-        Result r = load ([NSURL URLWithString: juceStringToNS (url.toString (true))]);
+        auto r = load ([NSURL URLWithString: juceStringToNS (url.toString (true))]);
 
         if (r.wasOk())
             currentURL = url;
@@ -67,9 +78,9 @@ struct VideoComponent::Pimpl   : public NSViewComponent
         {
             close();
 
-            if (AVPlayer* player = [AVPlayer playerWithURL: url])
+            if (auto* player = [AVPlayer playerWithURL: url])
             {
-                [getAVPlayerView() setPlayer: player];
+                [controller setPlayer: player];
                 return Result::ok();
             }
         }
@@ -80,34 +91,20 @@ struct VideoComponent::Pimpl   : public NSViewComponent
     void close()
     {
         stop();
-        [getAVPlayerView() setPlayer: nil];
+        [controller setPlayer: nil];
         currentFile = File();
-        currentURL = URL();
+        currentURL = {};
     }
 
-    bool isOpen() const
-    {
-        return getAVPlayer() != nil;
-    }
+    bool isOpen() const noexcept        { return getAVPlayer() != nil; }
+    bool isPlaying() const noexcept     { return getSpeed() != 0; }
 
-    bool isPlaying() const
-    {
-        return getSpeed() != 0;
-    }
-
-    void play()
-    {
-        [getAVPlayer() play];
-    }
-
-    void stop()
-    {
-        [getAVPlayer() pause];
-    }
+    void play() noexcept                { [getAVPlayer() play]; }
+    void stop() noexcept                { [getAVPlayer() pause]; }
 
     void setPosition (double newPosition)
     {
-        if (AVPlayer* p = getAVPlayer())
+        if (auto* p = getAVPlayer())
         {
             CMTime t = { (CMTimeValue) (100000.0 * newPosition),
                          (CMTimeScale) 100000, kCMTimeFlags_Valid };
@@ -118,7 +115,7 @@ struct VideoComponent::Pimpl   : public NSViewComponent
 
     double getPosition() const
     {
-        if (AVPlayer* p = getAVPlayer())
+        if (auto* p = getAVPlayer())
             return toSeconds ([p currentTime]);
 
         return 0.0;
@@ -131,7 +128,7 @@ struct VideoComponent::Pimpl   : public NSViewComponent
 
     double getSpeed() const
     {
-        if (AVPlayer* p = getAVPlayer())
+        if (auto* p = getAVPlayer())
             return [p rate];
 
         return 0.0;
@@ -139,18 +136,18 @@ struct VideoComponent::Pimpl   : public NSViewComponent
 
     Rectangle<int> getNativeSize() const
     {
-        if (AVPlayer* player = getAVPlayer())
+        if (auto* player = getAVPlayer())
         {
-            CGSize s = [[player currentItem] presentationSize];
-            return Rectangle<int> ((int) s.width, (int) s.height);
+            auto s = [[player currentItem] presentationSize];
+            return { (int) s.width, (int) s.height };
         }
 
-        return Rectangle<int>();
+        return {};
     }
 
     double getDuration() const
     {
-        if (AVPlayer* player = getAVPlayer())
+        if (auto* player = getAVPlayer())
             return toSeconds ([[player currentItem] duration]);
 
         return 0.0;
@@ -163,7 +160,7 @@ struct VideoComponent::Pimpl   : public NSViewComponent
 
     float getVolume() const
     {
-        if (AVPlayer* p = getAVPlayer())
+        if (auto* p = getAVPlayer())
             return [p volume];
 
         return 0.0f;
@@ -173,8 +170,13 @@ struct VideoComponent::Pimpl   : public NSViewComponent
     URL currentURL;
 
 private:
-    AVPlayerView* getAVPlayerView() const   { return (AVPlayerView*) getView(); }
-    AVPlayer* getAVPlayer() const           { return [getAVPlayerView() player]; }
+   #if JUCE_IOS
+    AVPlayerViewController* controller = nil;
+   #else
+    AVPlayerView* controller = nil;
+   #endif
+
+    AVPlayer* getAVPlayer() const noexcept   { return [controller player]; }
 
     static double toSeconds (const CMTime& t) noexcept
     {
