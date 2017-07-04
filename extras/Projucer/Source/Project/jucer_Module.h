@@ -155,7 +155,7 @@ public:
     void addModule (const File& moduleManifestFile, bool copyLocally, bool useGlobalPath);
     void addModuleInteractive (const String& moduleID);
     void addModuleFromUserSelectedFile();
-    void addModuleOfferingToCopy (const File&);
+    void addModuleOfferingToCopy (const File&, bool isFromUserSpecifiedFolder);
 
     StringArray getAllModules() const;
     StringArray getExtraDependenciesNeeded (const String& moduleID) const;

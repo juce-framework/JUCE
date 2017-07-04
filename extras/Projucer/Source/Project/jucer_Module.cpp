@@ -929,7 +929,7 @@ void EnabledModuleList::addModuleFromUserSelectedFile()
     if (fc.browseForDirectory())
     {
         lastLocation = fc.getResult();
-        addModuleOfferingToCopy (lastLocation);
+        addModuleOfferingToCopy (lastLocation, true);
     }
 }
 
@@ -958,7 +958,7 @@ void EnabledModuleList::addModuleInteractive (const String& moduleID)
         addModuleFromUserSelectedFile();
 }
 
-void EnabledModuleList::addModuleOfferingToCopy (const File& f)
+void EnabledModuleList::addModuleOfferingToCopy (const File& f, bool isFromUserSpecifiedFolder)
 {
     ModuleDescription m (f);
 
@@ -976,7 +976,8 @@ void EnabledModuleList::addModuleOfferingToCopy (const File& f)
         return;
     }
 
-    addModule (m.moduleFolder, areMostModulesCopiedLocally(), areMostModulesUsingGlobalPath());
+    addModule (m.moduleFolder, areMostModulesCopiedLocally(), isFromUserSpecifiedFolder ? false
+                                                                                        : areMostModulesUsingGlobalPath());
 }
 
 bool isJuceFolder (const File& f)
