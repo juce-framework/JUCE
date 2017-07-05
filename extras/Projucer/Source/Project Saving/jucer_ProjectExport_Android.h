@@ -1307,10 +1307,10 @@ private:
                 if (value.containsChar (L' '))
                     value = "\\\"" + value + "\\\"";
 
-                escaped += ("=" + value + "\"");
+                escaped += ("=" + value);
             }
 
-            escapedDefs.add (escaped);
+            escapedDefs.add (escaped + "\"");
         }
 
         return escapedDefs;
