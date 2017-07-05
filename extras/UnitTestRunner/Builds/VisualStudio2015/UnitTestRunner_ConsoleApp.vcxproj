@@ -517,6 +517,72 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\juce_audio_processors.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\audio_cd\juce_AudioCDReader.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioAppComponent.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioDeviceSelectorComponent.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioThumbnail.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioThumbnailCache.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioVisualiserComponent.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\gui\juce_MidiKeyboardComponent.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\native\juce_android_BluetoothMidiDevicePairingDialogue.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\native\juce_linux_AudioCDReader.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\native\juce_linux_BluetoothMidiDevicePairingDialogue.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\native\juce_win_BluetoothMidiDevicePairingDialogue.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\native\juce_win32_AudioCDBurner.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\native\juce_win32_AudioCDReader.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\players\juce_AudioProcessorPlayer.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\players\juce_SoundPlayer.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\juce_audio_utils.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_Block.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\juce_PhysicalTopologySource.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\juce_RuleBasedTopologySource.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\visualisers\juce_BitmapLEDProgram.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\visualisers\juce_DrumPadLEDProgram.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\juce_blocks_basics.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_AbstractFifo.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1702,6 +1768,18 @@
     <ClCompile Include="..\..\..\..\modules\juce_osc\juce_osc.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_product_unlocking\marketplace\juce_OnlineUnlockForm.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_product_unlocking\marketplace\juce_OnlineUnlockStatus.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_product_unlocking\marketplace\juce_TracktionMarketplaceStatus.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_product_unlocking\juce_product_unlocking.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_video\capture\juce_CameraDevice.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1715,6 +1793,8 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_devices.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_formats.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_processors.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_utils.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_blocks_basics.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_core.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_cryptography.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_data_structures.cpp"/>
@@ -1724,6 +1804,7 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_extra.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_opengl.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_osc.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_product_unlocking.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_video.cpp"/>
   </ItemGroup>
   <ItemGroup>
@@ -1904,6 +1985,42 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioProcessorParameterWithID.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioProcessorValueTreeState.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\juce_audio_processors.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\audio_cd\juce_AudioCDBurner.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\audio_cd\juce_AudioCDReader.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioAppComponent.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioDeviceSelectorComponent.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioThumbnail.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioThumbnailBase.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioThumbnailCache.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioVisualiserComponent.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_BluetoothMidiDevicePairingDialogue.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_MidiKeyboardComponent.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\players\juce_AudioProcessorPlayer.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\players\juce_SoundPlayer.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\juce_audio_utils.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_Block.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_BlockConfigManager.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_ControlButton.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_LEDGrid.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_LEDRow.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_StatusLight.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_TouchList.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_TouchSurface.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\littlefoot\juce_LittleFootCompiler.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\littlefoot\juce_LittleFootRemoteHeap.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\littlefoot\juce_LittleFootRunner.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\protocol\juce_BitPackingUtilities.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\protocol\juce_BlockModels.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\protocol\juce_BlocksProtocolDefinitions.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\protocol\juce_HostPacketBuilder.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\protocol\juce_HostPacketDecoder.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\topology\juce_PhysicalTopologySource.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\topology\juce_RuleBasedTopologySource.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\topology\juce_Topology.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\topology\juce_TopologySource.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\visualisers\juce_BitmapLEDProgram.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\visualisers\juce_DrumPadLEDProgram.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\juce_blocks_basics.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_AbstractFifo.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_Array.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_ArrayAllocationBase.h"/>
@@ -2321,6 +2438,11 @@
     <ClInclude Include="..\..\..\..\modules\juce_osc\osc\juce_OSCTimeTag.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_osc\osc\juce_OSCTypes.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_osc\juce_osc.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_product_unlocking\marketplace\juce_KeyFileGeneration.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_product_unlocking\marketplace\juce_OnlineUnlockForm.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_product_unlocking\marketplace\juce_OnlineUnlockStatus.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_product_unlocking\marketplace\juce_TracktionMarketplaceStatus.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_product_unlocking\juce_product_unlocking.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_video\capture\juce_CameraDevice.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_android_CameraDevice.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_android_Video.h"/>
@@ -2337,6 +2459,10 @@
   <ItemGroup>
     <None Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\Flac Licence.txt"/>
     <None Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\Ogg Vorbis Licence.txt"/>
+    <None Include="..\..\..\..\modules\juce_blocks_basics\littlefoot\LittleFoot Language README.txt"/>
+    <None Include="..\..\..\..\modules\juce_blocks_basics\protocol\Protocol Format.txt"/>
+    <None Include="..\..\..\..\modules\juce_blocks_basics\LittleFootFunctions.txt"/>
+    <None Include="..\..\..\..\modules\juce_blocks_basics\README.txt"/>
     <None Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\changes to libjpeg for JUCE.txt"/>
     <None Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\libpng_readme.txt"/>
   </ItemGroup>

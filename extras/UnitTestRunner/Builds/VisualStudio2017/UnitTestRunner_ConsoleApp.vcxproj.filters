@@ -116,6 +116,39 @@
     <Filter Include="Juce Modules\juce_audio_processors">
       <UniqueIdentifier>{0B0E7392-324B-088C-FBEB-5FE999D61782}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Juce Modules\juce_audio_utils\audio_cd">
+      <UniqueIdentifier>{C396369E-8C55-88E9-5D19-5D3772B773D3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juce Modules\juce_audio_utils\gui">
+      <UniqueIdentifier>{8167E753-09C7-5D1C-EF2B-32D297557443}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juce Modules\juce_audio_utils\native">
+      <UniqueIdentifier>{B48C883A-8483-AF6D-808C-1D9A749048D8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juce Modules\juce_audio_utils\players">
+      <UniqueIdentifier>{AEDCB7F7-7A36-5392-8E9A-715F5BDE35CB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juce Modules\juce_audio_utils">
+      <UniqueIdentifier>{B63F69FD-8A40-8E1E-E7ED-419B8DC1C12B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juce Modules\juce_blocks_basics\blocks">
+      <UniqueIdentifier>{F00B1208-CE3A-EE5C-C33C-9A016BAD5E70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juce Modules\juce_blocks_basics\littlefoot">
+      <UniqueIdentifier>{31632996-AC68-BCF8-B244-110FC6087A6E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juce Modules\juce_blocks_basics\protocol">
+      <UniqueIdentifier>{65A9A26C-02FC-34D8-BEAC-C30A1E255B44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juce Modules\juce_blocks_basics\topology">
+      <UniqueIdentifier>{F61978A2-275C-CD64-3724-AE5945CB8970}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juce Modules\juce_blocks_basics\visualisers">
+      <UniqueIdentifier>{3BF28565-4A19-23EA-96D6-910B5646D6B9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juce Modules\juce_blocks_basics">
+      <UniqueIdentifier>{DFA2DC59-3B2E-1F2A-8661-79D25C3D7F1B}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Juce Modules\juce_core\containers">
       <UniqueIdentifier>{0608ADE9-66EF-1A19-6D57-12D07F76EB53}</UniqueIdentifier>
     </Filter>
@@ -340,6 +373,12 @@
     </Filter>
     <Filter Include="Juce Modules\juce_osc">
       <UniqueIdentifier>{1A62F82C-C14A-E14A-94DE-8A27E0F8A090}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juce Modules\juce_product_unlocking\marketplace">
+      <UniqueIdentifier>{802F7556-25D6-FBCE-3D15-32F3E1E65513}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juce Modules\juce_product_unlocking">
+      <UniqueIdentifier>{2ECAF0DC-881F-89B5-FBAD-78FDEE1907FB}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_video\capture">
       <UniqueIdentifier>{7F11E7D2-54C0-2A36-5F15-BEC0A5374A08}</UniqueIdentifier>
@@ -750,6 +789,87 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\juce_audio_processors.mm">
       <Filter>Juce Modules\juce_audio_processors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\audio_cd\juce_AudioCDReader.cpp">
+      <Filter>Juce Modules\juce_audio_utils\audio_cd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioAppComponent.cpp">
+      <Filter>Juce Modules\juce_audio_utils\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioDeviceSelectorComponent.cpp">
+      <Filter>Juce Modules\juce_audio_utils\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioThumbnail.cpp">
+      <Filter>Juce Modules\juce_audio_utils\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioThumbnailCache.cpp">
+      <Filter>Juce Modules\juce_audio_utils\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioVisualiserComponent.cpp">
+      <Filter>Juce Modules\juce_audio_utils\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\gui\juce_MidiKeyboardComponent.cpp">
+      <Filter>Juce Modules\juce_audio_utils\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\native\juce_android_BluetoothMidiDevicePairingDialogue.cpp">
+      <Filter>Juce Modules\juce_audio_utils\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\native\juce_ios_BluetoothMidiDevicePairingDialogue.mm">
+      <Filter>Juce Modules\juce_audio_utils\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\native\juce_linux_AudioCDReader.cpp">
+      <Filter>Juce Modules\juce_audio_utils\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\native\juce_linux_BluetoothMidiDevicePairingDialogue.cpp">
+      <Filter>Juce Modules\juce_audio_utils\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\native\juce_mac_AudioCDBurner.mm">
+      <Filter>Juce Modules\juce_audio_utils\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\native\juce_mac_AudioCDReader.mm">
+      <Filter>Juce Modules\juce_audio_utils\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\native\juce_mac_BluetoothMidiDevicePairingDialogue.mm">
+      <Filter>Juce Modules\juce_audio_utils\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\native\juce_win_BluetoothMidiDevicePairingDialogue.cpp">
+      <Filter>Juce Modules\juce_audio_utils\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\native\juce_win32_AudioCDBurner.cpp">
+      <Filter>Juce Modules\juce_audio_utils\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\native\juce_win32_AudioCDReader.cpp">
+      <Filter>Juce Modules\juce_audio_utils\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\players\juce_AudioProcessorPlayer.cpp">
+      <Filter>Juce Modules\juce_audio_utils\players</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\players\juce_SoundPlayer.cpp">
+      <Filter>Juce Modules\juce_audio_utils\players</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\juce_audio_utils.cpp">
+      <Filter>Juce Modules\juce_audio_utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_utils\juce_audio_utils.mm">
+      <Filter>Juce Modules\juce_audio_utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_Block.cpp">
+      <Filter>Juce Modules\juce_blocks_basics\blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\juce_PhysicalTopologySource.cpp">
+      <Filter>Juce Modules\juce_blocks_basics\topology</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\juce_RuleBasedTopologySource.cpp">
+      <Filter>Juce Modules\juce_blocks_basics\topology</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\visualisers\juce_BitmapLEDProgram.cpp">
+      <Filter>Juce Modules\juce_blocks_basics\visualisers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\visualisers\juce_DrumPadLEDProgram.cpp">
+      <Filter>Juce Modules\juce_blocks_basics\visualisers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\juce_blocks_basics.cpp">
+      <Filter>Juce Modules\juce_blocks_basics</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_AbstractFifo.cpp">
       <Filter>Juce Modules\juce_core\containers</Filter>
@@ -2020,6 +2140,18 @@
     <ClCompile Include="..\..\..\..\modules\juce_osc\juce_osc.cpp">
       <Filter>Juce Modules\juce_osc</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_product_unlocking\marketplace\juce_OnlineUnlockForm.cpp">
+      <Filter>Juce Modules\juce_product_unlocking\marketplace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_product_unlocking\marketplace\juce_OnlineUnlockStatus.cpp">
+      <Filter>Juce Modules\juce_product_unlocking\marketplace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_product_unlocking\marketplace\juce_TracktionMarketplaceStatus.cpp">
+      <Filter>Juce Modules\juce_product_unlocking\marketplace</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_product_unlocking\juce_product_unlocking.cpp">
+      <Filter>Juce Modules\juce_product_unlocking</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_video\capture\juce_CameraDevice.cpp">
       <Filter>Juce Modules\juce_video\capture</Filter>
     </ClCompile>
@@ -2047,6 +2179,12 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_processors.cpp">
       <Filter>Juce Library Code</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_utils.cpp">
+      <Filter>Juce Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_blocks_basics.cpp">
+      <Filter>Juce Library Code</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_core.cpp">
       <Filter>Juce Library Code</Filter>
     </ClCompile>
@@ -2072,6 +2210,9 @@
       <Filter>Juce Library Code</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_osc.cpp">
+      <Filter>Juce Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_product_unlocking.cpp">
       <Filter>Juce Library Code</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_video.cpp">
@@ -2609,6 +2750,114 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\juce_audio_processors.h">
       <Filter>Juce Modules\juce_audio_processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\audio_cd\juce_AudioCDBurner.h">
+      <Filter>Juce Modules\juce_audio_utils\audio_cd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\audio_cd\juce_AudioCDReader.h">
+      <Filter>Juce Modules\juce_audio_utils\audio_cd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioAppComponent.h">
+      <Filter>Juce Modules\juce_audio_utils\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioDeviceSelectorComponent.h">
+      <Filter>Juce Modules\juce_audio_utils\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioThumbnail.h">
+      <Filter>Juce Modules\juce_audio_utils\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioThumbnailBase.h">
+      <Filter>Juce Modules\juce_audio_utils\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioThumbnailCache.h">
+      <Filter>Juce Modules\juce_audio_utils\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_AudioVisualiserComponent.h">
+      <Filter>Juce Modules\juce_audio_utils\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_BluetoothMidiDevicePairingDialogue.h">
+      <Filter>Juce Modules\juce_audio_utils\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\gui\juce_MidiKeyboardComponent.h">
+      <Filter>Juce Modules\juce_audio_utils\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\players\juce_AudioProcessorPlayer.h">
+      <Filter>Juce Modules\juce_audio_utils\players</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\players\juce_SoundPlayer.h">
+      <Filter>Juce Modules\juce_audio_utils\players</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_utils\juce_audio_utils.h">
+      <Filter>Juce Modules\juce_audio_utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_Block.h">
+      <Filter>Juce Modules\juce_blocks_basics\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_BlockConfigManager.h">
+      <Filter>Juce Modules\juce_blocks_basics\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_ControlButton.h">
+      <Filter>Juce Modules\juce_blocks_basics\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_LEDGrid.h">
+      <Filter>Juce Modules\juce_blocks_basics\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_LEDRow.h">
+      <Filter>Juce Modules\juce_blocks_basics\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_StatusLight.h">
+      <Filter>Juce Modules\juce_blocks_basics\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_TouchList.h">
+      <Filter>Juce Modules\juce_blocks_basics\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_TouchSurface.h">
+      <Filter>Juce Modules\juce_blocks_basics\blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\littlefoot\juce_LittleFootCompiler.h">
+      <Filter>Juce Modules\juce_blocks_basics\littlefoot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\littlefoot\juce_LittleFootRemoteHeap.h">
+      <Filter>Juce Modules\juce_blocks_basics\littlefoot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\littlefoot\juce_LittleFootRunner.h">
+      <Filter>Juce Modules\juce_blocks_basics\littlefoot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\protocol\juce_BitPackingUtilities.h">
+      <Filter>Juce Modules\juce_blocks_basics\protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\protocol\juce_BlockModels.h">
+      <Filter>Juce Modules\juce_blocks_basics\protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\protocol\juce_BlocksProtocolDefinitions.h">
+      <Filter>Juce Modules\juce_blocks_basics\protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\protocol\juce_HostPacketBuilder.h">
+      <Filter>Juce Modules\juce_blocks_basics\protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\protocol\juce_HostPacketDecoder.h">
+      <Filter>Juce Modules\juce_blocks_basics\protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\topology\juce_PhysicalTopologySource.h">
+      <Filter>Juce Modules\juce_blocks_basics\topology</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\topology\juce_RuleBasedTopologySource.h">
+      <Filter>Juce Modules\juce_blocks_basics\topology</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\topology\juce_Topology.h">
+      <Filter>Juce Modules\juce_blocks_basics\topology</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\topology\juce_TopologySource.h">
+      <Filter>Juce Modules\juce_blocks_basics\topology</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\visualisers\juce_BitmapLEDProgram.h">
+      <Filter>Juce Modules\juce_blocks_basics\visualisers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\visualisers\juce_DrumPadLEDProgram.h">
+      <Filter>Juce Modules\juce_blocks_basics\visualisers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\juce_blocks_basics.h">
+      <Filter>Juce Modules\juce_blocks_basics</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_AbstractFifo.h">
       <Filter>Juce Modules\juce_core\containers</Filter>
@@ -3861,6 +4110,21 @@
     <ClInclude Include="..\..\..\..\modules\juce_osc\juce_osc.h">
       <Filter>Juce Modules\juce_osc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_product_unlocking\marketplace\juce_KeyFileGeneration.h">
+      <Filter>Juce Modules\juce_product_unlocking\marketplace</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_product_unlocking\marketplace\juce_OnlineUnlockForm.h">
+      <Filter>Juce Modules\juce_product_unlocking\marketplace</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_product_unlocking\marketplace\juce_OnlineUnlockStatus.h">
+      <Filter>Juce Modules\juce_product_unlocking\marketplace</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_product_unlocking\marketplace\juce_TracktionMarketplaceStatus.h">
+      <Filter>Juce Modules\juce_product_unlocking\marketplace</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_product_unlocking\juce_product_unlocking.h">
+      <Filter>Juce Modules\juce_product_unlocking</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_video\capture\juce_CameraDevice.h">
       <Filter>Juce Modules\juce_video\capture</Filter>
     </ClInclude>
@@ -3904,6 +4168,18 @@
     </None>
     <None Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\Ogg Vorbis Licence.txt">
       <Filter>Juce Modules\juce_audio_formats\codecs\oggvorbis</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_blocks_basics\littlefoot\LittleFoot Language README.txt">
+      <Filter>Juce Modules\juce_blocks_basics\littlefoot</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_blocks_basics\protocol\Protocol Format.txt">
+      <Filter>Juce Modules\juce_blocks_basics\protocol</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_blocks_basics\LittleFootFunctions.txt">
+      <Filter>Juce Modules\juce_blocks_basics</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_blocks_basics\README.txt">
+      <Filter>Juce Modules\juce_blocks_basics</Filter>
     </None>
     <None Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\changes to libjpeg for JUCE.txt">
       <Filter>Juce Modules\juce_graphics\image_formats\jpglib</Filter>

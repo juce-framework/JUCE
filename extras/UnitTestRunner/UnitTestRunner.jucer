@@ -10,12 +10,14 @@
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" extraCompilerFlags="-pedantic-errors -Wreorder -Wconstant-conversion -Wint-conversion -Woverloaded-virtual -Wuninitialized -Wunused-parameter -Wshorten-64-to-32 -Wstrict-aliasing -Wshadow -Wconversion -Wsign-compare -Wsign-conversion">
+    <XCODE_MAC targetFolder="Builds/MacOSX" extraCompilerFlags="-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion -Wextra-semi"
+               extraDefs="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" osxSDK="default" osxCompatibility="10.10 SDK" osxArchitecture="default"
-                       isDebug="1" optimisation="1" targetName="UnitTestRunner"/>
+                       isDebug="1" optimisation="1" targetName="UnitTestRunner" customXcodeFlags="GCC_TREAT_WARNINGS_AS_ERRORS=YES"/>
         <CONFIGURATION name="Release" osxSDK="default" osxCompatibility="10.10 SDK"
-                       osxArchitecture="default" isDebug="0" optimisation="3" targetName="UnitTestRunner"/>
+                       osxArchitecture="default" isDebug="0" optimisation="3" targetName="UnitTestRunner"
+                       customXcodeFlags="GCC_TREAT_WARNINGS_AS_ERRORS=YES"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -32,6 +34,9 @@
         <MODULEPATH id="juce_audio_formats" path="../../modules"/>
         <MODULEPATH id="juce_audio_processors" path="../../modules"/>
         <MODULEPATH id="juce_osc" path="../../modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../modules"/>
+        <MODULEPATH id="juce_blocks_basics" path="../../modules"/>
+        <MODULEPATH id="juce_product_unlocking" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile">
@@ -56,6 +61,9 @@
         <MODULEPATH id="juce_audio_formats" path="../../modules"/>
         <MODULEPATH id="juce_audio_processors" path="../../modules"/>
         <MODULEPATH id="juce_osc" path="../../modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../modules"/>
+        <MODULEPATH id="juce_blocks_basics" path="../../modules"/>
+        <MODULEPATH id="juce_product_unlocking" path="../../modules"/>
       </MODULEPATHS>
     </LINUX_MAKE>
     <VS2015 targetFolder="Builds/VisualStudio2015">
@@ -80,6 +88,9 @@
         <MODULEPATH id="juce_audio_formats" path="../../modules"/>
         <MODULEPATH id="juce_audio_devices" path="../../modules"/>
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../modules"/>
+        <MODULEPATH id="juce_blocks_basics" path="../../modules"/>
+        <MODULEPATH id="juce_product_unlocking" path="../../modules"/>
       </MODULEPATHS>
     </VS2015>
     <VS2017 targetFolder="Builds/VisualStudio2017">
@@ -104,6 +115,9 @@
         <MODULEPATH id="juce_audio_formats" path="../../modules"/>
         <MODULEPATH id="juce_audio_devices" path="../../modules"/>
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../modules"/>
+        <MODULEPATH id="juce_blocks_basics" path="../../modules"/>
+        <MODULEPATH id="juce_product_unlocking" path="../../modules"/>
       </MODULEPATHS>
     </VS2017>
   </EXPORTFORMATS>
@@ -112,6 +126,8 @@
     <MODULES id="juce_audio_devices" showAllCode="1" useLocalCopy="0"/>
     <MODULES id="juce_audio_formats" showAllCode="1" useLocalCopy="0"/>
     <MODULES id="juce_audio_processors" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_blocks_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULES id="juce_core" showAllCode="1" useLocalCopy="0"/>
     <MODULES id="juce_cryptography" showAllCode="1" useLocalCopy="0"/>
     <MODULES id="juce_data_structures" showAllCode="1" useLocalCopy="0"/>
@@ -121,6 +137,8 @@
     <MODULES id="juce_gui_extra" showAllCode="1" useLocalCopy="0"/>
     <MODULES id="juce_opengl" showAllCode="1" useLocalCopy="0"/>
     <MODULES id="juce_osc" showAllCode="1" useLocalCopy="0"/>
+    <MODULE id="juce_product_unlocking" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="0"/>
     <MODULES id="juce_video" showAllCode="1" useLocalCopy="0"/>
   </MODULES>
   <JUCEOPTIONS/>
