@@ -29,6 +29,11 @@
  #define JUCE_STATE_DICTIONARY_KEY   "jucePluginState"
 #endif
 
+static inline bool operator== (const AUChannelInfo& a, const AUChannelInfo& b) noexcept
+{
+    return (a.inChannels == b.inChannels && a.outChannels == b.outChannels);
+}
+
 struct AudioUnitHelpers
 {
     // maps a channel index into an AU format to an index of a juce format
@@ -613,8 +618,8 @@ struct AudioUnitHelpers
     {
         Array<AUChannelInfo> channelInfo;
 
-        const bool hasMainInputBus  = (AudioUnitHelpers::getBusCount (&processor, true)  > 0);
-        const bool hasMainOutputBus = (AudioUnitHelpers::getBusCount (&processor, false) > 0);
+        auto hasMainInputBus  = (AudioUnitHelpers::getBusCount (&processor, true)  > 0);
+        auto hasMainOutputBus = (AudioUnitHelpers::getBusCount (&processor, false) > 0);
 
         if ((! hasMainInputBus) && (! hasMainOutputBus))
         {
@@ -623,73 +628,48 @@ struct AudioUnitHelpers
             info.inChannels = 0;
             info.outChannels = 0;
 
-            channelInfo.add (info);
-            return channelInfo;
+            return {&info, 1};
         }
         else
         {
-            const uint32_t maxNumChanToCheckFor = 9;
+            auto layout = processor.getBusesLayout();
+            auto maxNumChanToCheckFor = 9;
 
-            uint32_t defaultInputs  = static_cast<uint32_t> (processor.getChannelCountOfBus (true,  0));
-            uint32_t defaultOutputs = static_cast<uint32_t> (processor.getChannelCountOfBus (false, 0));
+            auto defaultInputs  = processor.getChannelCountOfBus (true,  0);
+            auto defaultOutputs = processor.getChannelCountOfBus (false, 0);
 
-            uint32_t lastInputs  = defaultInputs;
-            uint32_t lastOutputs = defaultOutputs;
-
-            SortedSet<uint32_t> supportedChannels;
+            SortedSet<int> supportedChannels;
 
             // add the current configuration
-            if (lastInputs != 0 || lastOutputs != 0)
-                supportedChannels.add ((lastInputs << 16) | lastOutputs);
+            if (defaultInputs != 0 || defaultOutputs != 0)
+                supportedChannels.add ((defaultInputs << 16) | defaultOutputs);
 
-            for (uint32_t inChanNum = hasMainInputBus ? 1 : 0; inChanNum <= (hasMainInputBus ? maxNumChanToCheckFor : 0); ++inChanNum)
+            for (auto inChanNum = hasMainInputBus ? 1 : 0; inChanNum <= (hasMainInputBus ? maxNumChanToCheckFor : 0); ++inChanNum)
             {
-                const AudioProcessor::Bus* inBus = processor.getBus (true, 0);
+                auto inLayout = layout;
 
-                if (inBus != nullptr && (! inBus->isNumberOfChannelsSupported ((int) inChanNum)))
-                    continue;
-
-                for (uint32_t outChanNum = hasMainOutputBus ? 1 : 0; outChanNum <= (hasMainOutputBus ? maxNumChanToCheckFor : 0); ++outChanNum)
-                {
-                    const AudioProcessor::Bus* outBus = processor.getBus (false, 0);
-
-                    if (outBus != nullptr && (! outBus->isNumberOfChannelsSupported ((int) outChanNum)))
+                if (auto* inBus = processor.getBus (true, 0))
+                    if (! isNumberOfChannelsSupported (inBus, inChanNum, inLayout))
                         continue;
 
-                    uint32_t channelConfiguration = (inChanNum << 16) | outChanNum;
+                for (auto outChanNum = hasMainOutputBus ? 1 : 0; outChanNum <= (hasMainOutputBus ? maxNumChanToCheckFor : 0); ++outChanNum)
+                {
+                    auto outLayout = inLayout;
 
-                    // did we already try this configuration?
-                    if (supportedChannels.contains (channelConfiguration)) continue;
+                    if (auto* outBus = processor.getBus (false, 0))
+                        if (! isNumberOfChannelsSupported (outBus, outChanNum, outLayout))
+                            continue;
 
-                    if (lastInputs != inChanNum && (inChanNum > 0 && inBus != nullptr))
-                    {
-                        AudioChannelSet set = inBus->supportedLayoutWithChannels ((int) inChanNum);
-                        AudioProcessor::BusesLayout layouts = inBus->getBusesLayoutForLayoutChangeOfBus (set);
-
-                        lastInputs = inChanNum;
-                        lastOutputs = hasMainOutputBus ? static_cast<uint32_t> (layouts.outputBuses.getReference (0).size()) : 0;
-
-                        supportedChannels.add ((lastInputs << 16) | lastOutputs);
-                    }
-
-                    if (lastOutputs != outChanNum && (outChanNum > 0 && outBus != nullptr))
-                    {
-                        AudioChannelSet set = outBus->supportedLayoutWithChannels ((int) outChanNum);
-                        AudioProcessor::BusesLayout layouts = outBus->getBusesLayoutForLayoutChangeOfBus (set);
-
-                        lastOutputs = outChanNum;
-                        lastInputs = hasMainInputBus ? static_cast<uint32_t> (layouts.inputBuses.getReference (0).size()) : 0;
-
-                        supportedChannels.add ((lastInputs << 16) | lastOutputs);
-                    }
+                    supportedChannels.add (((hasMainInputBus  ? outLayout.getMainInputChannels()  : 0) << 16)
+                                          | (hasMainOutputBus ? outLayout.getMainOutputChannels() : 0));
                 }
             }
 
-            bool hasInOutMismatch = false;
-            for (int i = 0; i < supportedChannels.size(); ++i)
+            auto hasInOutMismatch = false;
+            for (auto supported : supportedChannels)
             {
-                const uint32_t numInputs  = (supportedChannels[i] >> 16) & 0xffff;
-                const uint32_t numOutputs = (supportedChannels[i] >> 0)  & 0xffff;
+                auto numInputs  = (supported >> 16) & 0xffff;
+                auto numOutputs = (supported >> 0)  & 0xffff;
 
                 if (numInputs != numOutputs)
                 {
@@ -698,10 +678,11 @@ struct AudioUnitHelpers
                 }
             }
 
-            bool hasUnsupportedInput = ! hasMainOutputBus, hasUnsupportedOutput = ! hasMainInputBus;
-            for (uint32_t inChanNum = hasMainInputBus ? 1 : 0; inChanNum <= (hasMainInputBus ? maxNumChanToCheckFor : 0); ++inChanNum)
+            auto hasUnsupportedInput = ! hasMainOutputBus, hasUnsupportedOutput = ! hasMainInputBus;
+            for (auto inChanNum = hasMainInputBus ? 1 : 0; inChanNum <= (hasMainInputBus ? maxNumChanToCheckFor : 0); ++inChanNum)
             {
-                uint32_t channelConfiguration = (inChanNum << 16) | (hasInOutMismatch ? defaultOutputs : inChanNum);
+                auto channelConfiguration = (inChanNum << 16) | (hasInOutMismatch ? defaultOutputs : inChanNum);
+
                 if (! supportedChannels.contains (channelConfiguration))
                 {
                     hasUnsupportedInput = true;
@@ -709,9 +690,10 @@ struct AudioUnitHelpers
                 }
             }
 
-            for (uint32_t outChanNum = hasMainOutputBus ? 1 : 0; outChanNum <= (hasMainOutputBus ? maxNumChanToCheckFor : 0); ++outChanNum)
+            for (auto outChanNum = hasMainOutputBus ? 1 : 0; outChanNum <= (hasMainOutputBus ? maxNumChanToCheckFor : 0); ++outChanNum)
             {
-                uint32_t channelConfiguration = ((hasInOutMismatch ? defaultInputs : outChanNum) << 16) | outChanNum;
+                auto channelConfiguration = ((hasInOutMismatch ? defaultInputs : outChanNum) << 16) | outChanNum;
+
                 if (! supportedChannels.contains (channelConfiguration))
                 {
                     hasUnsupportedOutput = true;
@@ -719,10 +701,10 @@ struct AudioUnitHelpers
                 }
             }
 
-            for (int i = 0; i < supportedChannels.size(); ++i)
+            for (auto supported : supportedChannels)
             {
-                const int numInputs  = (supportedChannels[i] >> 16) & 0xffff;
-                const int numOutputs = (supportedChannels[i] >> 0)  & 0xffff;
+                auto numInputs  = (supported >> 16) & 0xffff;
+                auto numOutputs = (supported >> 0)  & 0xffff;
 
                 AUChannelInfo info;
 
@@ -733,17 +715,30 @@ struct AudioUnitHelpers
                 if (info.inChannels == -2 && info.outChannels == -2)
                     info.inChannels = -1;
 
-                int j;
-                for (j = 0; j < channelInfo.size(); ++j)
-                    if (channelInfo[j].inChannels == info.inChannels && channelInfo[j].outChannels == info.outChannels)
-                        break;
-
-                if (j >= channelInfo.size())
-                    channelInfo.add (info);
+                channelInfo.addIfNotAlreadyThere (info);
             }
         }
 
         return channelInfo;
+    }
+
+    static bool isNumberOfChannelsSupported (const AudioProcessor::Bus* b, int numChannels, AudioProcessor::BusesLayout& inOutCurrentLayout)
+    {
+        auto potentialSets = AudioChannelSet::channelSetsWithNumberOfChannels (static_cast<int> (numChannels));
+
+
+        for (auto set : potentialSets)
+        {
+            auto copy = inOutCurrentLayout;
+
+            if (b->isLayoutSupported (set, &copy))
+            {
+                inOutCurrentLayout = copy;
+                return true;
+            }
+        }
+
+        return false;
     }
 
     //==============================================================================
