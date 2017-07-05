@@ -1226,7 +1226,7 @@ private:
     {
         StringPairArray defines (getAndroidPreprocessorDefs());
 
-        return mergePreprocessorDefs (defines, getProject().getPreprocessorDefs());
+        return mergePreprocessorDefs (defines, getAllPreprocessorDefs());
     }
 
     StringPairArray getConfigPreprocessorDefs (const BuildConfiguration& config) const
