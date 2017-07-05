@@ -432,23 +432,21 @@ private:
 
         void resized() override
         {
-            auto itemHeight      = deviceSelector.getItemHeight();
-            auto seperatorHeight = (itemHeight >> 1);
-
             auto r = getLocalBounds();
-            auto extra = r.removeFromBottom (itemHeight + seperatorHeight);
-            deviceSelector.setBounds (r);
 
             if (owner.getProcessorHasPotentialFeedbackLoop())
             {
-                auto bottom = 0;
-                for (int i = 0; i < deviceSelector.getNumChildComponents(); ++i)
-                    bottom = jmax (bottom, deviceSelector.getChildComponent (i)->getBottom());
+                auto itemHeight = deviceSelector.getItemHeight();
+                auto extra = r.removeFromTop (itemHeight);
 
-                shouldMuteButton.setBounds (Rectangle<int> (r.proportionOfWidth (0.35f), bottom + seperatorHeight,
-                                                            r.proportionOfWidth (0.60f), deviceSelector.getItemHeight()));
+                auto seperatorHeight = (itemHeight >> 1);
+                shouldMuteButton.setBounds (Rectangle<int> (extra.proportionOfWidth (0.35f), seperatorHeight,
+                                                            extra.proportionOfWidth (0.60f), deviceSelector.getItemHeight()));
+
+                r.removeFromTop (seperatorHeight);
             }
 
+            deviceSelector.setBounds (r);
         }
 
     private:
