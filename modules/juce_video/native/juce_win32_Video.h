@@ -177,7 +177,7 @@ struct VideoComponent::Pimpl  : public Component
     Result loadFromString (const String& fileOrURLPath)
     {
         close();
-        Result r = context->loadFile (fileOrURLPath);
+        auto r = context->loadFile (fileOrURLPath);
 
         if (r.wasOk())
         {
@@ -190,7 +190,7 @@ struct VideoComponent::Pimpl  : public Component
 
     Result load (const File& file)
     {
-        Result r = loadFromString (file.getFullPathName());
+        auto r = loadFromString (file.getFullPathName());
 
         if (r.wasOk())
             currentFile = file;
@@ -200,7 +200,7 @@ struct VideoComponent::Pimpl  : public Component
 
     Result load (const URL& url)
     {
-        Result r = loadFromString (url.toString (true));
+        auto r = loadFromString (url.toString (true));
 
         if (r.wasOk())
             currentURL = url;
@@ -215,7 +215,7 @@ struct VideoComponent::Pimpl  : public Component
 
         videoLoaded = false;
         currentFile = File();
-        currentURL = URL();
+        currentURL = {};
     }
 
     bool isOpen() const
@@ -292,7 +292,7 @@ struct VideoComponent::Pimpl  : public Component
         context->updateContextPosition();
 
         if (getWidth() > 0 && getHeight() > 0)
-            if (ComponentPeer* peer = getTopLevelComponent()->getPeer())
+            if (auto* peer = getTopLevelComponent()->getPeer())
                 context->updateWindowPosition (peer->getAreaCoveredBy (*this));
     }
 
@@ -348,12 +348,7 @@ private:
     //======================================================================
     struct DirectShowContext    : public AsyncUpdater
     {
-        DirectShowContext (Pimpl& c)
-            : component (c), hwnd(), hdc(),
-              state (uninitializedState),
-              hasVideo (false),
-              needToUpdateViewport (true),
-              needToRecreateNativeWindow (false)
+        DirectShowContext (Pimpl& c)  : component (c)
         {
             CoInitialize (0);
         }
@@ -636,7 +631,7 @@ private:
             if (hasVideo)
                 videoRenderer->getVideoSize (width, height);
 
-            return Rectangle<int> ((int) width, (int) height);
+            return { (int) width, (int) height };
         }
 
         //======================================================================
@@ -675,15 +670,15 @@ private:
         }
 
         enum State { uninitializedState, runningState, pausedState, stoppedState };
-        State state;
+        State state = uninitializedState;
 
     private:
         //======================================================================
         enum { graphEventID = WM_APP + 0x43f0 };
 
         Pimpl& component;
-        HWND hwnd;
-        HDC hdc;
+        HWND hwnd = {};
+        HDC hdc = {};
 
         ComSmartPtr<IGraphBuilder> graphBuilder;
         ComSmartPtr<IMediaControl> mediaControl;
@@ -694,14 +689,14 @@ private:
 
         ScopedPointer<VideoRenderers::Base> videoRenderer;
 
-        bool hasVideo, needToUpdateViewport, needToRecreateNativeWindow;
+        bool hasVideo = false, needToUpdateViewport = true, needToRecreateNativeWindow = false;
 
         //======================================================================
         bool createNativeWindow()
         {
             jassert (nativeWindow == nullptr);
 
-            if (ComponentPeer* const topLevelPeer = component.getTopLevelComponent()->getPeer())
+            if (auto* topLevelPeer = component.getTopLevelComponent()->getPeer())
             {
                 nativeWindow = new NativeWindow ((HWND) topLevelPeer->getNativeHandle(), this);
 
@@ -729,8 +724,8 @@ private:
         {
             jassert (nativeWindow != nullptr);
             ReleaseDC (hwnd, hdc);
-            hwnd = 0;
-            hdc = 0;
+            hwnd = {};
+            hdc = {};
             nativeWindow = nullptr;
         }
 
@@ -773,12 +768,12 @@ private:
         struct NativeWindowClass   : private DeletedAtShutdown
         {
             bool isRegistered() const noexcept              { return atom != 0; }
-            LPCTSTR getWindowClassName() const noexcept     { return (LPCTSTR) MAKELONG (atom, 0); }
+            LPCTSTR getWindowClassName() const noexcept     { return (LPCTSTR) (pointer_sized_uint) MAKELONG (atom, 0); }
 
             juce_DeclareSingleton_SingleThreaded_Minimal (NativeWindowClass)
 
         private:
-            NativeWindowClass()  : atom()
+            NativeWindowClass()
             {
                 String windowClassName ("JUCE_DIRECTSHOW_");
                 windowClassName << (int) (Time::currentTimeMillis() & 0x7fffffff);
@@ -809,8 +804,7 @@ private:
 
             static LRESULT CALLBACK wndProc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             {
-                if (DirectShowContext* const c
-                      = (DirectShowContext*) GetWindowLongPtr (hwnd, GWLP_USERDATA))
+                if (auto* c = (DirectShowContext*) GetWindowLongPtr (hwnd, GWLP_USERDATA))
                 {
                     switch (msg)
                     {
@@ -825,7 +819,7 @@ private:
                 return DefWindowProc (hwnd, msg, wParam, lParam);
             }
 
-            ATOM atom;
+            ATOM atom = {};
 
             JUCE_DECLARE_NON_COPYABLE (NativeWindowClass)
         };
@@ -833,9 +827,9 @@ private:
         //======================================================================
         struct NativeWindow
         {
-            NativeWindow (HWND parentToAddTo, void* userData)  : hwnd(), hdc()
+            NativeWindow (HWND parentToAddTo, void* userData)
             {
-                NativeWindowClass* wc = NativeWindowClass::getInstance();
+                auto* wc = NativeWindowClass::getInstance();
 
                 if (wc->isRegistered())
                 {
@@ -872,13 +866,13 @@ private:
                               SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
             }
 
-            void showWindow (const bool shouldBeVisible)
+            void showWindow (bool shouldBeVisible)
             {
                 ShowWindow (hwnd, shouldBeVisible ? SW_SHOWNA : SW_HIDE);
             }
 
-            HWND hwnd;
-            HDC hdc;
+            HWND hwnd = {};
+            HDC hdc = {};
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeWindow)
         };

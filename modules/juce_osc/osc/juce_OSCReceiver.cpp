@@ -234,7 +234,7 @@ namespace
                 bundle.addElement (readElement());
 
                 auto newPos = getPosition();
-                bytesRead += newPos - pos;
+                bytesRead += (size_t) (newPos - pos);
                 pos = newPos;
             }
 
