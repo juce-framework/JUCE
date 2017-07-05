@@ -123,7 +123,7 @@ struct VideoComponent::Pimpl   : public BaseClass
 
     void setSpeed (double newSpeed)
     {
-        [getAVPlayer() setRate: newSpeed];
+        [getAVPlayer() setRate: (float) newSpeed];
     }
 
     double getSpeed() const
