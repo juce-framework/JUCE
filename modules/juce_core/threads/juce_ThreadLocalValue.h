@@ -107,7 +107,7 @@ public:
         if (o != nullptr)
             o->object = Type();
         else
-            for (o = new ObjectHolder {threadId, first.get(), Type()};
+            for (o = new ObjectHolder (threadId, first.get());
                  ! first.compareAndSetBool (o, o->next);
                  o->next = first.get());
 
@@ -130,6 +130,8 @@ private:
     //==============================================================================
     struct ObjectHolder
     {
+        ObjectHolder (Thread::ThreadID idToUse, ObjectHolder* n) : threadId (idToUse), next (n), object() {}
+
         Atomic<Thread::ThreadID> threadId;
         ObjectHolder* next;
         Type object;
