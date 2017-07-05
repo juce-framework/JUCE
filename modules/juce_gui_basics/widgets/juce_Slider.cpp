@@ -138,11 +138,12 @@ public:
             {
                 int v = std::abs (roundToInt (newInt * 10000000));
 
-                while ((v % 10) == 0)
-                {
-                    --numDecimalPlaces;
-                    v /= 10;
-                }
+                if (v > 0)
+                    while ((v % 10) == 0)
+                    {
+                        --numDecimalPlaces;
+                        v /= 10;
+                    }
             }
 
             // keep the current values inside the new range..
