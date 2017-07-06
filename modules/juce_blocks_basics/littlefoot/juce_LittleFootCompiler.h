@@ -20,6 +20,11 @@
   ==============================================================================
 */
 
+#if JUCE_MSVC
+ #pragma warning (push)
+ #pragma warning (disable: 4702)
+#endif
+
 namespace littlefoot
 {
 
@@ -2172,3 +2177,7 @@ private:
 };
 
 }
+
+#if JUCE_MSVC
+ #pragma warning (pop)
+#endif

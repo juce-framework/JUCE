@@ -69,9 +69,11 @@
     <VS2015 targetFolder="Builds/VisualStudio2015">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="1" optimisation="1" targetName="UnitTestRunner"/>
+                       isDebug="1" optimisation="1" targetName="UnitTestRunner" warningsAreErrors="1"
+                       wholeProgramOptimisation="1"/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="0" optimisation="3" targetName="UnitTestRunner"/>
+                       isDebug="0" optimisation="3" targetName="UnitTestRunner" wholeProgramOptimisation="1"
+                       warningsAreErrors="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_video" path="../../modules"/>
@@ -96,9 +98,11 @@
     <VS2017 targetFolder="Builds/VisualStudio2017">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="UnitTestRunner"/>
+                       isDebug="1" optimisation="1" targetName="UnitTestRunner" warningsAreErrors="1"
+                       wholeProgramOptimisation="1"/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="UnitTestRunner"/>
+                       isDebug="0" optimisation="3" targetName="UnitTestRunner" warningsAreErrors="1"
+                       wholeProgramOptimisation="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_video" path="../../modules"/>

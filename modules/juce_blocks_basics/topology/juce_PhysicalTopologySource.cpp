@@ -1695,7 +1695,7 @@ struct PhysicalTopologySource::Internal
             }
         }
 
-        bool setName (const juce::String& name) override
+        bool setName (const juce::String& newName) override
         {
             auto index = getDeviceIndex();
 
@@ -1704,7 +1704,7 @@ struct PhysicalTopologySource::Internal
                 BlocksProtocol::HostPacketBuilder<128> p;
                 p.writePacketSysexHeaderBytes ((BlocksProtocol::TopologyIndex) index);
 
-                if (p.addSetBlockName (name))
+                if (p.addSetBlockName (newName))
                 {
                     p.writePacketSysexFooter();
 
