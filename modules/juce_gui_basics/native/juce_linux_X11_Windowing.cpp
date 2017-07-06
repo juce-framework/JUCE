@@ -2216,7 +2216,7 @@ public:
 
         auto mapIndex = (uint32) (buttonPressEvent.button - Button1);
 
-        if (mapIndex < numElementsInArray (pointerMap))
+        if (mapIndex < (uint32) numElementsInArray (pointerMap))
         {
             switch (pointerMap[mapIndex])
             {
@@ -2241,7 +2241,7 @@ public:
 
         auto mapIndex = (uint32) (buttonRelEvent.button - Button1);
 
-        if (mapIndex < numElementsInArray (pointerMap))
+        if (mapIndex < (uint32) numElementsInArray (pointerMap))
         {
             switch (pointerMap[mapIndex])
             {

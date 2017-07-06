@@ -191,6 +191,7 @@ static bool checkPeerIsValid (OpenGLContext* context)
                     }
                 }
                #else
+                ignoreUnused (peer);
                 return true;
                #endif
             }
