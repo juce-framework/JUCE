@@ -301,9 +301,10 @@ namespace AAXClasses
 
         PluginInstanceInfo* pluginInstance;
         int32_t* isPrepared;
-        int32_t* sideChainBuffers;
 
         float* const* meterTapBuffers;
+
+        int32_t* sideChainBuffers;
     };
 
     struct JUCEAlgorithmIDs
@@ -326,9 +327,9 @@ namespace AAXClasses
             pluginInstance    = AAX_FIELD_INDEX (JUCEAlgorithmContext, pluginInstance),
             preparedFlag      = AAX_FIELD_INDEX (JUCEAlgorithmContext, isPrepared),
 
-            sideChainBuffers  = AAX_FIELD_INDEX (JUCEAlgorithmContext, sideChainBuffers),
+            meterTapBuffers   = AAX_FIELD_INDEX (JUCEAlgorithmContext, meterTapBuffers),
 
-            meterTapBuffers   = AAX_FIELD_INDEX (JUCEAlgorithmContext, meterTapBuffers)
+            sideChainBuffers  = AAX_FIELD_INDEX (JUCEAlgorithmContext, sideChainBuffers)
         };
     };
 
@@ -695,6 +696,20 @@ namespace AAXClasses
                     for (size_t i = 0; i < numObjects; ++i)
                         new (objects + i) uint32_t (1);
 
+                    break;
+                }
+                case JUCEAlgorithmIDs::meterTapBuffers:
+                {
+                    // this is a dummy field only when there are no aaxMeters
+                    jassert (aaxMeters.size() == 0);
+
+                    {
+                        const size_t numObjects = dataSize / sizeof (float*);
+                        float** const objects = static_cast<float**> (data);
+
+                        for (size_t i = 0; i < numObjects; ++i)
+                            new (objects + i) (float*) (nullptr);
+                    }
                     break;
                 }
             }
@@ -1771,6 +1786,12 @@ namespace AAXClasses
                 meterIDs[i] = 'Metr' + static_cast<AAX_CTypeID> (i);
 
             check (desc.AddMeters (JUCEAlgorithmIDs::meterTapBuffers, meterIDs.getData(), static_cast<uint32_t> (numMeters)));
+        }
+        else
+        {
+            // AAX does not allow there to be any gaps in the fields of the algorithm context structure
+            // so just add a dummy one here if there aren't any meters
+            check (desc.AddPrivateData (JUCEAlgorithmIDs::meterTapBuffers, sizeof (uintptr_t)));
         }
 
         // Create a property map
