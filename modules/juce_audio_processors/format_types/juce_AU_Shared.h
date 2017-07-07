@@ -29,11 +29,6 @@
  #define JUCE_STATE_DICTIONARY_KEY   "jucePluginState"
 #endif
 
-static inline bool operator== (const AUChannelInfo& a, const AUChannelInfo& b) noexcept
-{
-    return (a.inChannels == b.inChannels && a.outChannels == b.outChannels);
-}
-
 struct AudioUnitHelpers
 {
     // maps a channel index into an AU format to an index of a juce format
@@ -715,7 +710,14 @@ struct AudioUnitHelpers
                 if (info.inChannels == -2 && info.outChannels == -2)
                     info.inChannels = -1;
 
-                channelInfo.addIfNotAlreadyThere (info);
+                int j;
+                for (j = 0; j < supportedChannels.size(); ++j)
+                    if (info.inChannels == channelInfo.getReference (j).inChannels
+                          && info.outChannels == channelInfo.getReference (j).outChannels)
+                        break;
+
+                if (j < supportedChannels.size())
+                    channelInfo.add (info);
             }
         }
 
