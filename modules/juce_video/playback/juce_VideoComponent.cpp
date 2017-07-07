@@ -22,7 +22,7 @@
   ==============================================================================
 */
 
-#if JUCE_MAC || JUCE_IOS || JUCE_WINDOWS || JUCE_ANDROID
+#if JUCE_MAC || JUCE_IOS || JUCE_MSVC || JUCE_ANDROID
 
 #if JUCE_MAC || JUCE_IOS
  #include "../native/juce_mac_Video.h"

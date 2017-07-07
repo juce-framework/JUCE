@@ -788,7 +788,7 @@ struct UWPUIViewSettings
 
             auto status = roInitialize (1);
 
-            if (status != S_OK && status != S_FALSE && status != 0x80010106L)
+            if (status != S_OK && status != S_FALSE && (unsigned) status != 0x80010106L)
                 return;
 
             LPCWSTR uwpClassName = L"Windows.UI.ViewManagement.UIViewSettings";

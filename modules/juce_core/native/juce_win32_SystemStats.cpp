@@ -20,6 +20,11 @@
   ==============================================================================
 */
 
+#if ! JUCE_MINGW
+ #pragma intrinsic (__cpuid)
+ #pragma intrinsic (__rdtsc)
+#endif
+
 void Logger::outputDebugString (const String& text)
 {
     OutputDebugString ((text + "\n").toWideCharPointer());
@@ -32,8 +37,6 @@ void Logger::outputDebugString (const String& text)
 #endif
 
 //==============================================================================
-#pragma intrinsic (__cpuid)
-#pragma intrinsic (__rdtsc)
 
 #if JUCE_MINGW
 static void callCPUID (int result[4], uint32 type)
@@ -84,7 +87,7 @@ String SystemStats::getCpuModel()
 
     const int numExtIDs = info[0];
 
-    if (numExtIDs < 0x80000004)  // if brand string is unsupported
+    if ((unsigned) numExtIDs < 0x80000004)  // if brand string is unsupported
         return {};
 
     callCPUID (info, 0x80000002);

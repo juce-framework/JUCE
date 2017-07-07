@@ -178,7 +178,6 @@ class FlexBox;
 #include "mouse/juce_DragAndDropContainer.h"
 #include "mouse/juce_FileDragAndDropTarget.h"
 #include "mouse/juce_SelectedItemSet.h"
-#include "mouse/juce_LassoComponent.h"
 #include "mouse/juce_MouseInactivityDetector.h"
 #include "mouse/juce_TextDragAndDropTarget.h"
 #include "mouse/juce_TooltipClient.h"
@@ -286,6 +285,7 @@ class FlexBox;
 #include "lookandfeel/juce_LookAndFeel_V1.h"
 #include "lookandfeel/juce_LookAndFeel_V3.h"
 #include "lookandfeel/juce_LookAndFeel_V4.h"
+#include "mouse/juce_LassoComponent.h"
 
 #if JUCE_LINUX
  #include "native/juce_linux_X11.h"

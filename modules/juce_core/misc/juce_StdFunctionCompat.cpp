@@ -225,8 +225,8 @@ public:
             if (f1)
                 expect (false);
 
-                std::function<int()> f2 ([]() { return 11; });
-                f2 = nullptr;
+            std::function<int()> f2 ([]() { return 11; });
+            f2 = nullptr;
             if (f2)
                 expect (false);
         }
