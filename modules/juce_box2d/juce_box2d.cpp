@@ -33,6 +33,12 @@
  #error "Incorrect use of JUCE cpp file"
 #endif
 
+#ifdef __clang__
+ #pragma clang diagnostic push
+ #pragma clang diagnostic ignored "-Wsign-conversion"
+ #pragma clang diagnostic ignored "-Wfloat-conversion"
+#endif
+
 #include "juce_box2d.h"
 
 #include "box2d/Collision/b2BroadPhase.cpp"
@@ -85,3 +91,7 @@ namespace juce
 {
 #include "utils/juce_Box2DRenderer.cpp"
 }
+
+#if JUCE_CLANG
+ #pragma clang diagnostic pop
+#endif
