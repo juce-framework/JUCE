@@ -10,6 +10,7 @@
 		E16EA7E816B50766F3AE4F88 = {isa = PBXBuildFile; fileRef = 8D7BDA5CDDCCD2F7BE67037A; };
 		BB7001D6FD448E6C0AAE4F30 = {isa = PBXBuildFile; fileRef = 8452076B5EAE822DD445458F; };
 		5CA55A61B4ECF6BE53DB459A = {isa = PBXBuildFile; fileRef = ED6ADC3F084F9F3B6177B0C8; };
+		3A0436B207425DCD0CB3E3AD = {isa = PBXBuildFile; fileRef = BC6DF66E6767EBF159E86906; };
 		3A285384585A5F664BB4C652 = {isa = PBXBuildFile; fileRef = A078E4C69AFA4FAE8DCC66BD; };
 		213167931DD11DF54592222E = {isa = PBXBuildFile; fileRef = 5FAB9E7F62B84DBAA98A0004; };
 		D8AC2AB9573F991BFDFB431E = {isa = PBXBuildFile; fileRef = 37CB4A819F38E7AF9C77A8CB; };
@@ -156,6 +157,7 @@
 		B731664FB9EEEBC618BAB5A0 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TimersAndEventsDemo.cpp; path = ../../Source/Demos/TimersAndEventsDemo.cpp; sourceTree = "SOURCE_ROOT"; };
 		B84A6E341207FA1F60EB5AF1 = {isa = PBXFileReference; lastKnownFileType = image.png; name = "juce_icon.png"; path = "../../Resources/juce_icon.png"; sourceTree = "SOURCE_ROOT"; };
 		BA0689752E29259BBD3AECAA = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_gui_basics"; path = "../../../../modules/juce_gui_basics"; sourceTree = "SOURCE_ROOT"; };
+		BC6DF66E6767EBF159E86906 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		C0C8D6D7D14DFAFB169FFDCF = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ValueTreesDemo.cpp; path = ../../Source/Demos/ValueTreesDemo.cpp; sourceTree = "SOURCE_ROOT"; };
 		C542454A6B0F43AFAEA63092 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_graphics"; path = "../../../../modules/juce_graphics"; sourceTree = "SOURCE_ROOT"; };
 		C68A1D6B6EAA0B70553FF6D3 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -291,6 +293,7 @@
 					8D7BDA5CDDCCD2F7BE67037A,
 					8452076B5EAE822DD445458F,
 					ED6ADC3F084F9F3B6177B0C8,
+					BC6DF66E6767EBF159E86906,
 					A078E4C69AFA4FAE8DCC66BD,
 					5FAB9E7F62B84DBAA98A0004,
 					37CB4A819F38E7AF9C77A8CB,
@@ -485,6 +488,7 @@
 					E16EA7E816B50766F3AE4F88,
 					BB7001D6FD448E6C0AAE4F30,
 					5CA55A61B4ECF6BE53DB459A,
+					3A0436B207425DCD0CB3E3AD,
 					3A285384585A5F664BB4C652,
 					213167931DD11DF54592222E,
 					D8AC2AB9573F991BFDFB431E,
