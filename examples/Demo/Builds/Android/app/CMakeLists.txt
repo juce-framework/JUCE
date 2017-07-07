@@ -1350,11 +1350,9 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_video/native/juce_android_CameraDevice.h"
     "../../../../../modules/juce_video/native/juce_android_Video.h"
     "../../../../../modules/juce_video/native/juce_mac_CameraDevice.h"
-    "../../../../../modules/juce_video/native/juce_mac_MovieComponent.mm"
     "../../../../../modules/juce_video/native/juce_mac_Video.h"
     "../../../../../modules/juce_video/native/juce_win32_CameraDevice.h"
     "../../../../../modules/juce_video/native/juce_win32_Video.h"
-    "../../../../../modules/juce_video/playback/juce_MovieComponent.h"
     "../../../../../modules/juce_video/playback/juce_VideoComponent.cpp"
     "../../../../../modules/juce_video/playback/juce_VideoComponent.h"
     "../../../../../modules/juce_video/juce_video.cpp"
@@ -2663,11 +2661,9 @@ set_source_files_properties("../../../../../modules/juce_video/capture/juce_Came
 set_source_files_properties("../../../../../modules/juce_video/native/juce_android_CameraDevice.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_video/native/juce_android_Video.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_video/native/juce_mac_CameraDevice.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_video/native/juce_mac_MovieComponent.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_video/native/juce_mac_Video.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_video/native/juce_win32_CameraDevice.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_video/native/juce_win32_Video.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_video/playback/juce_MovieComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_video/playback/juce_VideoComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_video/playback/juce_VideoComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_video/juce_video.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)

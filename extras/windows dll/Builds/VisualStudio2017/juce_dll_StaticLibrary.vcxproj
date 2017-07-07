@@ -2351,7 +2351,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_mac_Video.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_win32_CameraDevice.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_win32_Video.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_video\playback\juce_MovieComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_video\playback\juce_VideoComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_video\juce_video.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\AppConfig.h"/>
