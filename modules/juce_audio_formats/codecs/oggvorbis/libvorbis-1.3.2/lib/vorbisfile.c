@@ -19,7 +19,7 @@
  #pragma warning (disable: 4456 4457 4459)
 #endif
 
-#if JUCE_GCC
+#if JUCE_GCC && __GNUC__ > 6
  #pragma GCC diagnostic push
  #pragma GCC diagnostic ignored "-Wmisleading-indentation"
 #endif
@@ -2353,6 +2353,6 @@ int ov_time_seek_page_lap(OggVorbis_File *vf,double pos){
   return _ov_d_seek_lap(vf,pos,ov_time_seek_page);
 }
 
-#if JUCE_GCC
+#if JUCE_GCC && __GNUC__ > 6
  #pragma GCC diagnostic pop
 #endif
