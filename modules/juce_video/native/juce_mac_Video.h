@@ -109,7 +109,9 @@ struct VideoComponent::Pimpl   : public BaseClass
             CMTime t = { (CMTimeValue) (100000.0 * newPosition),
                          (CMTimeScale) 100000, kCMTimeFlags_Valid };
 
-            [p seekToTime: t];
+            [p seekToTime: t
+          toleranceBefore: kCMTimeZero
+           toleranceAfter: kCMTimeZero];
         }
     }
 
