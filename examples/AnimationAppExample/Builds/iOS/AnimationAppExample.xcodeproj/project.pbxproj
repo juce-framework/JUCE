@@ -14,6 +14,7 @@
 		3B937846DB65393DE597ABDE = {isa = PBXBuildFile; fileRef = C9F7ABDA09635BC3FAB0B008; };
 		96B761E33D6CA3700F0A9A51 = {isa = PBXBuildFile; fileRef = 287976618152E4BA76D627FA; };
 		3BDC668C74D7BE65921F24F3 = {isa = PBXBuildFile; fileRef = 894CC76489B4BE25D85811AB; };
+		E9042B79DDA8424594F1AB16 = {isa = PBXBuildFile; fileRef = FE7F391D915BD5CE849883A8; };
 		139AEB224F22582CF606327F = {isa = PBXBuildFile; fileRef = 732EEC584A4CE3ED07C5BEFB; };
 		0DE5F0C9D8D826AF3EEBAC04 = {isa = PBXBuildFile; fileRef = 888284627B1FEA22193130AB; };
 		F3F1AF2E0D45882BFE3EDE07 = {isa = PBXBuildFile; fileRef = AF947B0E188B6EA57EB0109B; };
@@ -82,6 +83,7 @@
 		EE948FB708041B74B8597E68 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_audio_processors"; path = "../../../../modules/juce_audio_processors"; sourceTree = "SOURCE_ROOT"; };
 		F41993809470A0FF0DC7076E = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
 		F7B6DBDC7439C90B4E01752E = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../Source/Main.cpp; sourceTree = "SOURCE_ROOT"; };
+		FE7F391D915BD5CE849883A8 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		9F41B5C4D3F9CE9C17373AB3 = {isa = PBXGroup; children = (
 					B766DBADE0BD743FAC004870,
 					F7B6DBDC7439C90B4E01752E, ); name = Source; sourceTree = "<group>"; };
@@ -128,6 +130,7 @@
 					C9F7ABDA09635BC3FAB0B008,
 					287976618152E4BA76D627FA,
 					894CC76489B4BE25D85811AB,
+					FE7F391D915BD5CE849883A8,
 					732EEC584A4CE3ED07C5BEFB,
 					888284627B1FEA22193130AB,
 					AF947B0E188B6EA57EB0109B,
@@ -277,6 +280,7 @@
 					3B937846DB65393DE597ABDE,
 					96B761E33D6CA3700F0A9A51,
 					3BDC668C74D7BE65921F24F3,
+					E9042B79DDA8424594F1AB16,
 					139AEB224F22582CF606327F,
 					0DE5F0C9D8D826AF3EEBAC04,
 					F3F1AF2E0D45882BFE3EDE07,

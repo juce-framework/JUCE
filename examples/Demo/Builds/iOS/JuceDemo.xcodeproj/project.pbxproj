@@ -15,6 +15,7 @@
 		213167931DD11DF54592222E = {isa = PBXBuildFile; fileRef = 5FAB9E7F62B84DBAA98A0004; };
 		D8AC2AB9573F991BFDFB431E = {isa = PBXBuildFile; fileRef = 37CB4A819F38E7AF9C77A8CB; };
 		299539A945CB87F73C5ECB0B = {isa = PBXBuildFile; fileRef = 4C1FFE22514EB2A178750B86; };
+		0F5AD903C71E59F29293F952 = {isa = PBXBuildFile; fileRef = 809501824B7BBD3A378DEB61; };
 		4E306BFA283851066E0DA96E = {isa = PBXBuildFile; fileRef = EACCBFA17F4D07ECE058EEBB; };
 		78A2A3F0D3D555397E3C3CF7 = {isa = PBXBuildFile; fileRef = FBCD860CD7113A3136B127C8; };
 		21C66018A589DB4DCCA7B48B = {isa = PBXBuildFile; fileRef = 8E87696FD85E6134968D4341; };
@@ -128,6 +129,7 @@
 		7AEEF2EE40D3B8AE687C6618 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FlexBoxDemo.cpp; path = ../../Source/Demos/FlexBoxDemo.cpp; sourceTree = "SOURCE_ROOT"; };
 		7D639D6C81A57F107F3FA3D6 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_gui_basics.mm"; path = "../../JuceLibraryCode/include_juce_gui_basics.mm"; sourceTree = "SOURCE_ROOT"; };
 		7DBF83B26277D13CB3FC1479 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ImagesDemo.cpp; path = ../../Source/Demos/ImagesDemo.cpp; sourceTree = "SOURCE_ROOT"; };
+		809501824B7BBD3A378DEB61 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		8413B0A6941430B8CEE7A573 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AudioRecordingDemo.cpp; path = ../../Source/Demos/AudioRecordingDemo.cpp; sourceTree = "SOURCE_ROOT"; };
 		8452076B5EAE822DD445458F = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		84BAF97675BE522B63DC9A4B = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SystemInfoDemo.cpp; path = ../../Source/Demos/SystemInfoDemo.cpp; sourceTree = "SOURCE_ROOT"; };
@@ -298,6 +300,7 @@
 					5FAB9E7F62B84DBAA98A0004,
 					37CB4A819F38E7AF9C77A8CB,
 					4C1FFE22514EB2A178750B86,
+					809501824B7BBD3A378DEB61,
 					EACCBFA17F4D07ECE058EEBB,
 					FBCD860CD7113A3136B127C8,
 					8E87696FD85E6134968D4341,
@@ -493,6 +496,7 @@
 					213167931DD11DF54592222E,
 					D8AC2AB9573F991BFDFB431E,
 					299539A945CB87F73C5ECB0B,
+					0F5AD903C71E59F29293F952,
 					4E306BFA283851066E0DA96E,
 					78A2A3F0D3D555397E3C3CF7,
 					21C66018A589DB4DCCA7B48B,
