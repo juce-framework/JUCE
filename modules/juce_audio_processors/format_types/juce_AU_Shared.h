@@ -716,7 +716,7 @@ struct AudioUnitHelpers
                           && info.outChannels == channelInfo.getReference (j).outChannels)
                         break;
 
-                if (j < channelInfo.size())
+                if (j >= channelInfo.size())
                     channelInfo.add (info);
             }
         }
