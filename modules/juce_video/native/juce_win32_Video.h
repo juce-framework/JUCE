@@ -483,10 +483,12 @@ private:
 
                 if (FAILED (hr))
                 {
+                   #if JUCE_MODAL_LOOPS_PERMITTED
                     // Annoyingly, if we don't run the msg loop between failing and deleting the window, the
                     // whole OS message-dispatch system gets itself into a state, and refuses to deliver any
                     // more messages for the whole app. (That's what happens in Win7, anyway)
                     MessageManager::getInstance()->runDispatchLoopUntil (200);
+                   #endif
                 }
             }
 
