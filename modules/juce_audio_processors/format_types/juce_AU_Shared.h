@@ -711,12 +711,12 @@ struct AudioUnitHelpers
                     info.inChannels = -1;
 
                 int j;
-                for (j = 0; j < supportedChannels.size(); ++j)
+                for (j = 0; j < channelInfo.size(); ++j)
                     if (info.inChannels == channelInfo.getReference (j).inChannels
                           && info.outChannels == channelInfo.getReference (j).outChannels)
                         break;
 
-                if (j < supportedChannels.size())
+                if (j < channelInfo.size())
                     channelInfo.add (info);
             }
         }
