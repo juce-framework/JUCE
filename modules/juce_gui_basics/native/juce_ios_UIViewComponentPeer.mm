@@ -216,7 +216,7 @@ public:
     UIWindow* window;
     JuceUIView* view;
     JuceUIViewController* controller;
-    bool isSharedWindow, fullScreen, insideDrawRect;
+    bool isSharedWindow, fullScreen, insideDrawRect, isAppex;
     static ModifierKeys currentModifiers;
 
     static int64 getMouseTime (UIEvent* e) noexcept
@@ -555,7 +555,8 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, const int windowStyle
       controller (nil),
       isSharedWindow (viewToAttachTo != nil),
       fullScreen (false),
-      insideDrawRect (false)
+      insideDrawRect (false),
+      isAppex (SystemStats::isRunningInAppExtensionSandbox())
 {
     CGRect r = convertToCGRect (component.getBounds());
 
@@ -922,6 +923,9 @@ void UIViewComponentPeer::viewFocusLoss()
 
 bool UIViewComponentPeer::isFocused() const
 {
+    if (isAppex)
+        return true;
+
     return isSharedWindow ? this == currentlyFocusedPeer
                           : (window != nil && [window isKeyWindow]);
 }
