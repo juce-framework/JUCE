@@ -34,7 +34,15 @@ struct VideoComponent::Pimpl   : public BaseClass
     {
         setVisible (true);
 
-       #if JUCE_MAC
+       #if JUCE_MAC && JUCE_32BIT
+        auto view = [[NSView alloc] init];  // 32-bit builds don't have AVPlayerView, so need to use a layer
+        controller = [[AVPlayerLayer alloc] init];
+        setView (view);
+        [view setNextResponder: [view superview]];
+        [view setWantsLayer: YES];
+        [view setLayer: controller];
+        [view release];
+       #elif JUCE_MAC
         controller = [[AVPlayerView alloc] init];
         setView (controller);
         [controller setNextResponder: [controller superview]];
@@ -174,6 +182,8 @@ struct VideoComponent::Pimpl   : public BaseClass
 private:
    #if JUCE_IOS
     AVPlayerViewController* controller = nil;
+   #elif JUCE_32BIT
+    AVPlayerLayer* controller = nil;
    #else
     AVPlayerView* controller = nil;
    #endif
