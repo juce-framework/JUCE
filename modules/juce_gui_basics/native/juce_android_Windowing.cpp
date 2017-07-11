@@ -902,12 +902,13 @@ void MouseCursor::showInWindow (ComponentPeer*) const   {}
 void MouseCursor::showInAllWindows() const  {}
 
 //==============================================================================
-bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& /*files*/, const bool /*canMove*/)
+bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& /*files*/, const bool /*canMove*/,
+                                                           Component* /*srcComp*/)
 {
     return false;
 }
 
-bool DragAndDropContainer::performExternalDragDropOfText (const String& /*text*/)
+bool DragAndDropContainer::performExternalDragDropOfText (const String& /*text*/, Component* /*srcComp*/)
 {
     return false;
 }

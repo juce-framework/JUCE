@@ -4295,31 +4295,41 @@ void MouseCursor::showInAllWindows() const
 }
 
 //=================================== X11 - DND ================================
+static LinuxComponentPeer* getPeerForDragEvent (Component* sourceComp)
+{
+    if (sourceComp == nullptr)
+        if (auto* draggingSource = Desktop::getInstance().getDraggingMouseSource(0))
+            sourceComp = draggingSource->getComponentUnderMouse();
 
-bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& files, const bool canMoveFiles)
+    if (sourceComp != nullptr)
+        if (auto* lp = dynamic_cast<LinuxComponentPeer*> (sourceComp->getPeer()))
+            return lp;
+
+    jassertfalse;  // This method must be called in response to a component's mouseDown or mouseDrag event!
+    return nullptr;
+}
+
+bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& files, const bool canMoveFiles,
+                                                           Component* sourceComp)
 {
     if (files.size() == 0)
         return false;
 
-    if (auto* draggingSource = Desktop::getInstance().getDraggingMouseSource (0))
-        if (auto* sourceComp = draggingSource->getComponentUnderMouse())
-            if (auto* lp = dynamic_cast<LinuxComponentPeer*> (sourceComp->getPeer()))
-                return lp->externalDragFileInit (files, canMoveFiles);
+    if (auto* lp = getPeerForDragEvent (sourceComp))
+        return lp->externalDragFileInit (files, canMoveFiles);
 
     // This method must be called in response to a component's mouseDown or mouseDrag event!
     jassertfalse;
     return false;
 }
 
-bool DragAndDropContainer::performExternalDragDropOfText (const String& text)
+bool DragAndDropContainer::performExternalDragDropOfText (const String& text, Component* sourceComp)
 {
     if (text.isEmpty())
         return false;
 
-    if (auto* draggingSource = Desktop::getInstance().getDraggingMouseSource (0))
-        if (auto* sourceComp = draggingSource->getComponentUnderMouse())
-            if (auto* lp = dynamic_cast<LinuxComponentPeer*> (sourceComp->getPeer()))
-                return lp->externalDragTextInit (text);
+    if (auto* lp = getPeerForDragEvent (sourceComp))
+        return lp->externalDragTextInit (text);
 
     // This method must be called in response to a component's mouseDown or mouseDrag event!
     jassertfalse;

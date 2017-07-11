@@ -369,13 +369,13 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (AlertWindow::AlertIconType /*i
 }
 
 //==============================================================================
-bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray&, bool)
+bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray&, bool, Component*)
 {
     jassertfalse;    // no such thing on iOS!
     return false;
 }
 
-bool DragAndDropContainer::performExternalDragDropOfText (const String&)
+bool DragAndDropContainer::performExternalDragDropOfText (const String&, Component*)
 {
     jassertfalse;    // no such thing on iOS!
     return false;

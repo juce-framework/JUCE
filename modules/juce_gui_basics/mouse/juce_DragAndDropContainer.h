@@ -131,11 +131,14 @@ public:
         @param files            a list of filenames to drag
         @param canMoveFiles     if true, the app that receives the files is allowed to move the files to a new location
                                 (if this is appropriate). If false, the receiver is expected to make a copy of them.
+        @param sourceComponent  Normally, JUCE will assume that the component under the mouse is the source component
+                                of the drag, but you can use this parameter to override this.
         @returns                true if the files were successfully dropped somewhere, or false if it
                                 was interrupted
         @see performExternalDragDropOfText
     */
-    static bool performExternalDragDropOfFiles (const StringArray& files, bool canMoveFiles);
+    static bool performExternalDragDropOfFiles (const StringArray& files, bool canMoveFiles,
+                                                Component* sourceComponent = nullptr);
 
     /** This performs a synchronous drag-and-drop of a block of text to some external
         application.
@@ -145,12 +148,14 @@ public:
         uses a native operating system drag-and-drop operation to move or copy some
         text to another application.
 
-        @param text     the text to copy
-        @returns        true if the text was successfully dropped somewhere, or false if it
-                        was interrupted
+        @param text             the text to copy
+        @param sourceComponent  Normally, JUCE will assume that the component under the mouse is the source component
+                                of the drag, but you can use this parameter to override this.
+        @returns                true if the text was successfully dropped somewhere, or false if it
+                                was interrupted
         @see performExternalDragDropOfFiles
     */
-    static bool performExternalDragDropOfText (const String& text);
+    static bool performExternalDragDropOfText (const String& text, Component* sourceComponent = nullptr);
 
 protected:
     /** Override this if you want to be able to perform an external drag of a set of files
