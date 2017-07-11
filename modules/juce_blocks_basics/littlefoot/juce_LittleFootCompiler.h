@@ -1559,7 +1559,9 @@ private:
 
         StatementPtr simplify (SyntaxTreeBuilder& stb) override
         {
-            returnValue = returnValue->simplify (stb);
+            if (returnValue != nullptr)
+                returnValue = returnValue->simplify (stb);
+
             return this;
         }
 
