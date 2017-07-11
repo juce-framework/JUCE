@@ -1917,7 +1917,7 @@ public:
                     else if (vstParamID == JuceVST3EditController::paramPreset)
                     {
                         auto numPrograms  = pluginInstance->getNumPrograms();
-                        auto programValue = roundToInt (value * numPrograms);
+                        auto programValue = roundToInt (value * (jmax (0, numPrograms - 1)));
 
                         if (numPrograms > 1 && isPositiveAndBelow (programValue, numPrograms)
                              && programValue != pluginInstance->getCurrentProgram())
