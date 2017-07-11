@@ -22,14 +22,12 @@
   ==============================================================================
 */
 
-#if JUCE_MAC || JUCE_IOS || JUCE_MSVC || JUCE_ANDROID
+#if JUCE_MAC || JUCE_IOS || JUCE_MSVC
 
 #if JUCE_MAC || JUCE_IOS
  #include "../native/juce_mac_Video.h"
 #elif JUCE_WINDOWS
  #include "../native/juce_win32_Video.h"
-#elif JUCE_ANDROID
- #include "../native/juce_android_Video.h"
 #endif
 
 //==============================================================================
