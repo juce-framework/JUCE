@@ -98,7 +98,7 @@ private:
 
         void setText (const String& newText) override
         {
-            document.perform (new HyperlinkURLChangeAction (component, *document.getComponentLayout(), URL (newText)),
+            document.perform (new HyperlinkURLChangeAction (component, *document.getComponentLayout(), URL::createWithoutParsing (newText)),
                               "Change hyperlink URL");
         }
 
