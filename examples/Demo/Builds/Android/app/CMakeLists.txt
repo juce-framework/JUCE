@@ -1348,7 +1348,6 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_video/capture/juce_CameraDevice.cpp"
     "../../../../../modules/juce_video/capture/juce_CameraDevice.h"
     "../../../../../modules/juce_video/native/juce_android_CameraDevice.h"
-    "../../../../../modules/juce_video/native/juce_android_Video.h"
     "../../../../../modules/juce_video/native/juce_mac_CameraDevice.h"
     "../../../../../modules/juce_video/native/juce_mac_Video.h"
     "../../../../../modules/juce_video/native/juce_win32_CameraDevice.h"
@@ -2659,7 +2658,6 @@ set_source_files_properties("../../../../../modules/juce_opengl/juce_opengl.h" P
 set_source_files_properties("../../../../../modules/juce_video/capture/juce_CameraDevice.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_video/capture/juce_CameraDevice.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_video/native/juce_android_CameraDevice.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_video/native/juce_android_Video.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_video/native/juce_mac_CameraDevice.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_video/native/juce_mac_Video.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_video/native/juce_win32_CameraDevice.h" PROPERTIES HEADER_FILE_ONLY TRUE)

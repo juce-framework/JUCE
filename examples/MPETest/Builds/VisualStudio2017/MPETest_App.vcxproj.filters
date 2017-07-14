@@ -3939,9 +3939,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_android_CameraDevice.h">
       <Filter>Juce Modules\juce_video\native</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_android_Video.h">
-      <Filter>Juce Modules\juce_video\native</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_mac_CameraDevice.h">
       <Filter>Juce Modules\juce_video\native</Filter>
     </ClInclude>

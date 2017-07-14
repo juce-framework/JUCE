@@ -2585,7 +2585,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_opengl\juce_opengl.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_video\capture\juce_CameraDevice.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_android_CameraDevice.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_android_Video.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_mac_CameraDevice.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_mac_Video.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_win32_CameraDevice.h"/>
