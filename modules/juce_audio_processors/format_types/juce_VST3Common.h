@@ -190,8 +190,8 @@ static inline Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set
             break;
     }
 
-    auto channelIndex = static_cast<int> (type) - (static_cast<int> (AudioChannelSet::discreteChannel0) + 6);
-    return (1 << (channelIndex + 33 /* last speaker in vst layout + 1 */));
+    auto channelIndex = static_cast<Steinberg::Vst::Speaker> (type) - (static_cast<Steinberg::Vst::Speaker> (AudioChannelSet::discreteChannel0) + 6ull);
+    return (1ull << (channelIndex + 33ull /* last speaker in vst layout + 1 */));
 }
 
 static inline AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::SpeakerArrangement arr, Steinberg::Vst::Speaker type) noexcept
