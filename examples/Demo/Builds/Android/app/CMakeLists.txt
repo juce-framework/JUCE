@@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 3.4.1)
 SET(BINARY_NAME "juce_jni")
 
 add_library("cpufeatures" STATIC "${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c")
+set_source_files_properties("${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c" PROPERTIES COMPILE_FLAGS "-Wno-sign-conversion -Wno-gnu-statement-expression")
 
 add_definitions("-DJUCE_ANDROID=1" "-DJUCE_ANDROID_API_VERSION=10" "-DJUCE_ANDROID_ACTIVITY_CLASSNAME=com_yourcompany_jucedemo_JuceDemo" "-DJUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/yourcompany/jucedemo/JuceDemo\"" "-DJUCE_UNIT_TESTS=1" "-DJUCER_ANDROIDSTUDIO_7F0E4A25=1" "-DJUCE_APP_VERSION=3.0.0" "-DJUCE_APP_VERSION_HEX=0x30000")
 

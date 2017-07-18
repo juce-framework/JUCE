@@ -126,6 +126,7 @@ void FilenameComponent::buttonClicked (Button*)
         setCurrentFile (fc.getResult(), true);
     }
    #else
+    ignoreUnused (isSaving);
     jassertfalse; // needs rewriting to deal with non-modal environments
    #endif
 }

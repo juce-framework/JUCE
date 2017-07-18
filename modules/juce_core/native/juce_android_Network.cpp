@@ -58,19 +58,12 @@ JUCE_API bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& /*t
     return false;
 }
 
-/* Pimpl (String address, bool isPost, const MemoryBlock& postData,
- URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
- const String& headers, int timeOutMs, StringPairArray* responseHeaders,
- const int numRedirectsToFollow, const String& httpRequest)
- : statusCode (0)
-
-*/
 //==============================================================================
 class WebInputStream::Pimpl
 {
 public:
-    Pimpl (WebInputStream& pimplOwner, const URL& urlToCopy, bool shouldBePost)
-        : owner (pimplOwner), url (urlToCopy), isPost (shouldBePost),
+    Pimpl (WebInputStream&, const URL& urlToCopy, bool shouldBePost)
+        : url (urlToCopy), isPost (shouldBePost),
           httpRequest (isPost ? "POST" : "GET")
     {}
 
@@ -228,7 +221,6 @@ public:
     int statusCode = 0;
 
 private:
-    WebInputStream& owner;
     const URL url;
     bool isPost;
     int numRedirectsToFollow = 5, timeOutMs = 0;

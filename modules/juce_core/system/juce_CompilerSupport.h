@@ -155,7 +155,9 @@
 #endif
 
 //==============================================================================
-#if defined(_LIBCPP_VERSION)
+#if JUCE_ANDROID
+ #define JUCE_ATOMIC_AVAILABLE 0
+#elif defined(_LIBCPP_VERSION)
  #define JUCE_ATOMIC_AVAILABLE (_LIBCPP_VERSION >= 3700)
 #elif defined (__GLIBCXX__)
  #define JUCE_ATOMIC_AVAILABLE (__GLIBCXX__ >= 20130322) // GCC versions 4.8 and later

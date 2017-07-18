@@ -345,6 +345,7 @@
 				INFOPLIST_FILE = Info-App.plist;
 				INFOPLIST_PREPROCESS = NO;
 				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_CPLUSPLUSFLAGS = "-pedantic -Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion -Wextra-semi";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.JuceDemo;
 				USE_HEADERMAP = NO; }; name = Debug; };
 		903E7C1C8383FB576E8BA554 = {isa = XCBuildConfiguration; buildSettings = {
@@ -377,6 +378,7 @@
 				INFOPLIST_FILE = Info-App.plist;
 				INFOPLIST_PREPROCESS = NO;
 				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_CPLUSPLUSFLAGS = "-pedantic -Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion -Wextra-semi";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.JuceDemo;
 				USE_HEADERMAP = NO; }; name = Release; };
 		A16C0416417EF9DF7B09973F = {isa = XCBuildConfiguration; buildSettings = {

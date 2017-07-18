@@ -121,7 +121,6 @@ class AndroidComponentPeer  : public ComponentPeer,
 public:
     AndroidComponentPeer (Component& comp, const int windowStyleFlags)
         : ComponentPeer (comp, windowStyleFlags),
-          usingAndroidGraphics (false),
           fullScreen (false),
           sizeAllocated (0),
           scale ((float) Desktop::getInstance().getDisplays().getMainDisplay().scale)
@@ -589,7 +588,7 @@ private:
     //==============================================================================
     GlobalRef view;
     GlobalRef buffer;
-    bool usingAndroidGraphics, fullScreen;
+    bool fullScreen;
     int sizeAllocated;
     float scale;
     static AndroidComponentPeer* frontWindow;

@@ -376,7 +376,9 @@ private:
         if (! isLibrary())
             mo << "SET(BINARY_NAME \"juce_jni\")" << newLine << newLine;
 
-        mo << "add_library(\"cpufeatures\" STATIC \"${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c\")" << newLine << newLine;
+        String cpufeaturesPath ("${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c");
+        mo << "add_library(\"cpufeatures\" STATIC \"" << cpufeaturesPath << "\")" << newLine
+           << "set_source_files_properties(\"" << cpufeaturesPath << "\" PROPERTIES COMPILE_FLAGS \"-Wno-sign-conversion -Wno-gnu-statement-expression\")" << newLine << newLine;
 
         {
             StringArray projectDefines (getEscapedPreprocessorDefs (getProjectPreprocessorDefs()));

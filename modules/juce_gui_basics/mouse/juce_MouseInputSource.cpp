@@ -611,9 +611,9 @@ void MouseInputSource::forceMouseCursorUpdate()                          { pimpl
 void MouseInputSource::setScreenPosition (Point<float> p)                { pimpl->setScreenPosition (p); }
 
 void MouseInputSource::handleEvent (ComponentPeer& peer, Point<float> pos, int64 time, ModifierKeys mods,
-                                    float pressure, float orientation, const PenDetails& pen)
+                                    float pressure, float orientation, const PenDetails& penDetails)
 {
-    pimpl->handleEvent (peer, pos, Time (time), mods.withOnlyMouseButtons(), pressure, orientation, pen);
+    pimpl->handleEvent (peer, pos, Time (time), mods.withOnlyMouseButtons(), pressure, orientation, penDetails);
 }
 
 void MouseInputSource::handleWheel (ComponentPeer& peer, Point<float> pos, int64 time, const MouseWheelDetails& wheel)

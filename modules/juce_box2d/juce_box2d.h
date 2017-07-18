@@ -54,7 +54,16 @@
 //==============================================================================
 #include <juce_graphics/juce_graphics.h>
 
+#if __GNUC__
+ #pragma GCC diagnostic push
+ #pragma GCC diagnostic ignored "-Wconversion"
+#endif
+
 #include "box2d/Box2D.h"
+
+#if __GNUC__
+ #pragma GCC diagnostic pop
+#endif
 
 #ifndef DOXYGEN // for some reason, Doxygen sees this as a re-definition of Box2DRenderer
 namespace juce

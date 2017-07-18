@@ -25,8 +25,8 @@ android {
         externalNativeBuild {
             cmake {
                 arguments "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-10", "-DANDROID_STL=c++_static", "-DANDROID_CPP_FEATURES=exceptions rtti", "-DANDROID_ARM_MODE=arm", "-DANDROID_ARM_NEON=TRUE"
-                cFlags "-fsigned-char"
-                cppFlags "-fsigned-char", "-std=c++11"
+                cFlags "-fsigned-char", "-pedantic", "-Wall", "-Wshadow", "-Wno-missing-field-initializers", "-Wshadow", "-Wshorten-64-to-32", "-Wstrict-aliasing", "-Wuninitialized", "-Wunused-parameter", "-Wconversion", "-Wsign-compare", "-Wint-conversion", "-Woverloaded-virtual", "-Wreorder", "-Wconstant-conversion", "-Wsign-conversion", "-Wextra-semi"
+                cppFlags "-fsigned-char", "-std=c++11", "-pedantic", "-Wall", "-Wshadow", "-Wno-missing-field-initializers", "-Wshadow", "-Wshorten-64-to-32", "-Wstrict-aliasing", "-Wuninitialized", "-Wunused-parameter", "-Wconversion", "-Wsign-compare", "-Wint-conversion", "-Woverloaded-virtual", "-Wreorder", "-Wconstant-conversion", "-Wsign-conversion", "-Wextra-semi"
             }
         }
     }

@@ -871,7 +871,7 @@ namespace WavFileHelpers
 
             return xml.getMemoryBlock();
         }
-    };
+    }
 
     //==============================================================================
     struct ExtensibleWavSubFormat

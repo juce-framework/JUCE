@@ -50,14 +50,14 @@ private:
 struct AutoRemovingTransportSource : public AudioTransportSource, private Timer
 {
     AutoRemovingTransportSource (MixerAudioSource& mixerToUse, AudioTransportSource* ts, bool ownSource,
-                                 int samplesPerBlock, double sampleRate)
+                                 int samplesPerBlock, double requiredSampleRate)
         : mixer (mixerToUse), transportSource (ts, ownSource)
     {
         jassert (ts != nullptr);
 
         setSource (transportSource);
 
-        prepareToPlay (samplesPerBlock, sampleRate);
+        prepareToPlay (samplesPerBlock, requiredSampleRate);
         start();
 
         mixer.addInputSource (this, true);
