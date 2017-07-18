@@ -584,9 +584,11 @@ private:
             if (getProject().getProjectType().isStaticLibrary())
                 mo << "                    targets \"" << getNativeModuleBinaryName (cfg) << "\"" << newLine;
 
-            mo << "                    arguments \"-DJUCE_BUILD_CONFIGFURATION=" << cfg.getProductFlavourCMakeIdentifier() << "\""  << newLine;
-            mo << "                    cFlags    \"-O"  << cfg.getGCCOptimisationFlag() << "\"" << newLine;
-            mo << "                    cppFlags  \"-O"  << cfg.getGCCOptimisationFlag() << "\"" << newLine;
+            mo << "                    arguments \"-DJUCE_BUILD_CONFIGFURATION=" << cfg.getProductFlavourCMakeIdentifier() << "\""
+                                           << ", \"-DCMAKE_CXX_FLAGS_" << (cfg.isDebug() ? "DEBUG" : "RELEASE")
+                                           << "=-O" << cfg.getGCCOptimisationFlag() << "\""
+                                           << ", \"-DCMAKE_C_FLAGS_"   << (cfg.isDebug() ? "DEBUG" : "RELEASE")
+                                           << "=-O" << cfg.getGCCOptimisationFlag() << "\"" << newLine;
             mo << "                }"                   << newLine;
             mo << "            }"                       << newLine;
             mo << "       }"                            << newLine;
