@@ -245,3 +245,26 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DependencyFilePathPropertyComponent)
 };
+
+//==============================================================================
+class TextPropertyComponentWithEnablement    : public TextPropertyComponent,
+                                               private Value::Listener
+{
+public:
+    TextPropertyComponentWithEnablement (const Value& valueToControl, const Value& valueToListenTo,
+                                         const String& propertyName, int maxNumChars, bool isMultiLine)
+        : TextPropertyComponent (valueToControl, propertyName, maxNumChars, isMultiLine),
+          value (valueToListenTo)
+    {
+        value.addListener (this);
+        setEnabled (value.getValue());
+    }
+
+private:
+    Value value;
+
+    void valueChanged (Value& v) override
+    {
+        setEnabled (v.getValue());
+    }
+};

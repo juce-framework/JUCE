@@ -97,6 +97,9 @@ public:
     Value  getPreBuildScriptValue()         { return getSetting (Ids::prebuildCommand); }
     String getPreBuildScript() const        { return settings   [Ids::prebuildCommand]; }
 
+    Value getDuplicateResourcesFolderForAppExtensionValue()     { return getSetting (Ids::iosAppExtensionDuplicateResourcesFolder); }
+    bool  shouldDuplicateResourcesFolderForAppExtension() const { return settings   [Ids::iosAppExtensionDuplicateResourcesFolder]; }
+
     Value  getScreenOrientationValue()               { return getSetting (Ids::iosScreenOrientation); }
     String getScreenOrientationString() const        { return settings   [Ids::iosScreenOrientation]; }
 
@@ -116,9 +119,13 @@ public:
     bool   isBackgroundBleEnabled() const            { return settings   [Ids::iosBackgroundBle]; }
     Value  getPushNotificationsValue()               { return getSetting (Ids::iosPushNotifications); }
     bool   isPushNotificationsEnabled() const        { return settings   [Ids::iosPushNotifications]; }
+    Value  getAppGroupsEnabledValue()                { return getSetting (Ids::iosAppGroups); }
+    bool   isAppGroupsEnabled() const                { return settings   [Ids::iosAppGroups]; }
 
     Value  getIosDevelopmentTeamIDValue()            { return getSetting (Ids::iosDevelopmentTeamID); }
     String getIosDevelopmentTeamIDString() const     { return settings   [Ids::iosDevelopmentTeamID]; }
+    Value  getAppGroupIdValue()                      { return getSetting (Ids::iosAppGroupsId); }
+    String getAppGroupIdString() const               { return settings   [Ids::iosAppGroupsId]; }
 
     bool usesMMFiles() const override                { return true; }
     bool canCopeWithDuplicateFiles() override        { return true; }
@@ -179,6 +186,11 @@ public:
 
         if (iOS)
         {
+            if (getProject().getProjectType().isAudioPlugin())
+                props.add (new BooleanPropertyComponent (getDuplicateResourcesFolderForAppExtensionValue(),
+                                                         "Don't add resources folder to app extension", "Enabled"),
+                           "Enable this to prevent the Projucer from creating a resources folder for AUv3 app extensions.");
+
             static const char* orientations[] = { "Portrait and Landscape", "Portrait", "Landscape", nullptr };
             static const char* orientationValues[] = { "portraitlandscape", "portrait", "landscape", nullptr };
 
@@ -207,6 +219,9 @@ public:
 
             props.add (new BooleanPropertyComponent (getPushNotificationsValue(), "Push Notifications capability", "Enabled"),
                        "Enable this to grant your app the capability to receive push notifications.");
+
+            props.add (new BooleanPropertyComponent (getAppGroupsEnabledValue(), "App groups capability", "Enabled"),
+                       "Enable this to grant your app the capability to share resources between apps using the same app group ID.");
         }
         else if (projectType.isGUIApplication())
         {
@@ -242,6 +257,11 @@ public:
                    "The Development Team ID to be used for setting up code-signing your iOS app. This is a ten-character "
                    "string (for example, \"S7B6T5XJ2Q\") that describes the distribution certificate Apple issued to you. "
                    "You can find this string in the OS X app Keychain Access under \"Certificates\".");
+
+        if (iOS)
+            props.add (new TextPropertyComponentWithEnablement (getAppGroupIdValue(), getAppGroupsEnabledValue(), "App Group ID", 256, false),
+                       "The App Group ID to be used for allowing multiple apps to access a shared resource folder. Multiple IDs can be "
+                       "added seperated by a semicolon.");
 
         props.add (new BooleanPropertyComponent (getSetting ("keepCustomXcodeSchemes"), "Keep custom Xcode schemes", "Enabled"),
                    "Enable this to keep any Xcode schemes you have created for debugging or running, e.g. to launch a plug-in in"
@@ -744,23 +764,23 @@ public:
         //==============================================================================
         String getTargetAttributes() const
         {
-            String attributes;
+            auto attributes = getID() + " = { ";
 
-            attributes << getID() << " = { ";
-
-            String developmentTeamID = owner.getIosDevelopmentTeamIDString();
+            auto developmentTeamID = owner.getIosDevelopmentTeamIDString();
             if (developmentTeamID.isNotEmpty())
                 attributes << "DevelopmentTeam = " << developmentTeamID << "; ";
 
-            const int inAppPurchasesEnabled = (owner.iOS && owner.isInAppPurchasesEnabled()) ? 1 : 0;
-            const int interAppAudioEnabled  = (owner.iOS
-                                               && type == Target::StandalonePlugIn
-                                               && owner.getProject().shouldEnableIAA()) ? 1 : 0;
+            auto appGroupsEnabled      = (owner.iOS && owner.isAppGroupsEnabled() ? 1 : 0);
+            auto inAppPurchasesEnabled = (owner.iOS && owner.isInAppPurchasesEnabled()) ? 1 : 0;
+            auto interAppAudioEnabled  = (owner.iOS
+                                          && type == Target::StandalonePlugIn
+                                          && owner.getProject().shouldEnableIAA()) ? 1 : 0;
 
-            const int pushNotificationsEnabled = (owner.iOS && owner.isPushNotificationsEnabled()) ? 1 : 0;
-            const int sandboxEnabled = (type == Target::AudioUnitv3PlugIn ? 1 : 0);
+            auto pushNotificationsEnabled = (owner.iOS && owner.isPushNotificationsEnabled()) ? 1 : 0;
+            auto sandboxEnabled = (type == Target::AudioUnitv3PlugIn ? 1 : 0);
 
             attributes << "SystemCapabilities = {";
+            attributes << "com.apple.ApplicationGroups.iOS = { enabled = " << appGroupsEnabled << "; }; ";
             attributes << "com.apple.InAppPurchase = { enabled = " << inAppPurchasesEnabled << "; }; ";
             attributes << "com.apple.InterAppAudio = { enabled = " << interAppAudioEnabled << "; }; ";
             attributes << "com.apple.Push = { enabled = " << pushNotificationsEnabled << "; }; ";
@@ -1676,9 +1696,10 @@ private:
 
             if (target->type != XCodeTarget::AggregateTarget)
             {
-                // TODO: ideally resources wouldn't be copied into the AUv3 bundle as well.
-                // However, fixing this requires supporting App groups -> TODO: add app groups
-                if (! projectType.isStaticLibrary() && target->type != XCodeTarget::SharedCodeTarget)
+                auto skipAUv3 = (target->type == XCodeTarget::AudioUnitv3PlugIn
+                                 && ! shouldDuplicateResourcesFolderForAppExtension());
+
+                if (! projectType.isStaticLibrary() && target->type != XCodeTarget::SharedCodeTarget && ! skipAUv3)
                     target->addBuildPhase ("PBXResourcesBuildPhase", resourceIDs);
 
                 StringArray rezFiles (rezFileIDs);
@@ -2334,6 +2355,19 @@ private:
         {
             if (isiOS() && isPushNotificationsEnabled())
                 entitlements.set ("aps-environment", "<string>development</string>");
+        }
+
+        if (isAppGroupsEnabled())
+        {
+            auto appGroups = StringArray::fromTokens (getAppGroupIdString(), ";", { });
+            auto groups = String ("<array>");
+
+            for (auto group : appGroups)
+                groups += "\n\t\t<string>" + group.trim() + "</string>";
+
+            groups += "\n\t</array>";
+
+            entitlements.set ("com.apple.security.application-groups", groups);
         }
 
         return entitlements;
