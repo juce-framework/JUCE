@@ -155,6 +155,8 @@ template <typename T> struct BufferHelpers {};
 template <>
 struct BufferHelpers<int16>
 {
+    enum { isFloatingPoint = 0 };
+
     static void initPCMDataFormat (PCMDataFormatEx& dataFormat, int numChannels, double sampleRate)
     {
         dataFormat.formatType     = SL_DATAFORMAT_PCM;
@@ -202,6 +204,8 @@ struct BufferHelpers<int16>
 template <>
 struct BufferHelpers<float>
 {
+    enum { isFloatingPoint = 1 };
+
     static void initPCMDataFormat (PCMDataFormatEx& dataFormat, int numChannels, double sampleRate)
     {
         dataFormat.formatType     = SL_ANDROID_DATAFORMAT_PCM_EX;
@@ -514,6 +518,7 @@ public:
         virtual void start()             { stop(); jassert (callback.get() != nullptr); running = true; }
         virtual void stop()              { running = false; }
         virtual bool setAudioPreprocessingEnabled (bool shouldEnable) = 0;
+        virtual bool supportsFloatingPoint() const noexcept = 0;
 
         void setCallback (AudioIODeviceCallback* callbackToUse)
         {
@@ -557,8 +562,7 @@ public:
         static OpenSLSession* create (DynamicLibrary& slLibrary,
                                       int numInputChannels, int numOutputChannels,
                                       double samleRateToUse, int bufferSizeToUse,
-                                      int numBuffersToUse,
-                                      bool floatingPointSupport);
+                                      int numBuffersToUse);
 
         //==============================================================================
         typedef SLresult (*CreateEngineFunc)(SLObjectItf*,SLuint32,const SLEngineOption*,SLuint32,const SLInterfaceID*,const SLboolean*);
@@ -667,6 +671,8 @@ public:
             return true;
         }
 
+        bool supportsFloatingPoint() const noexcept override          { return (BufferHelpers<T>::isFloatingPoint != 0); }
+
         void doSomeWorkOnAudioThread()
         {
             // only the player or the recorder should enter this section at any time
@@ -737,8 +743,6 @@ public:
         const int64 totalLatency = inputLatency + outputLatency;
         inputLatency  = (int) ((longestLatency * inputLatency)  / totalLatency) & ~15;
         outputLatency = (int) ((longestLatency * outputLatency) / totalLatency) & ~15;
-
-        supportsFloatingPoint = getSupportsFloatingPoint();
 
         bool success = slLibrary.open ("libOpenSLES.so");
 
@@ -824,15 +828,6 @@ public:
         const int audioBuffersToEnqueue = hasLowLatencyAudioPath() ? buffersToEnqueueForLowLatency
                                                                    : buffersToEnqueueSlowAudio;
 
-        DBG ("OpenSL: numInputChannels = " << numInputChannels
-              << ", numOutputChannels = " << numOutputChannels
-              << ", nativeBufferSize = " << getNativeBufferSize()
-              << ", nativeSampleRate = " << getNativeSampleRate()
-              << ", actualBufferSize = " << actualBufferSize
-              << ", audioBuffersToEnqueue = " << audioBuffersToEnqueue
-              << ", sampleRate = " << sampleRate
-              << ", supportsFloatingPoint = " << (supportsFloatingPoint ? "true" : "false"));
-
         if (numInputChannels > 0 && (! RuntimePermissions::isGranted (RuntimePermissions::recordAudio)))
         {
             // If you hit this assert, you probably forgot to get RuntimePermissions::recordAudio
@@ -842,8 +837,7 @@ public:
         }
 
         session = OpenSLSession::create (slLibrary, numInputChannels, numOutputChannels,
-                                         sampleRate, actualBufferSize, audioBuffersToEnqueue,
-                                         supportsFloatingPoint);
+                                         sampleRate, actualBufferSize, audioBuffersToEnqueue);
         if (session != nullptr)
             session->setAudioPreprocessingEnabled (audioProcessingEnabled);
         else
@@ -855,10 +849,18 @@ public:
                 numInputChannels = 0;
 
                 session = OpenSLSession::create(slLibrary, numInputChannels, numOutputChannels,
-                                                sampleRate, actualBufferSize, audioBuffersToEnqueue,
-                                                supportsFloatingPoint);
+                                                sampleRate, actualBufferSize, audioBuffersToEnqueue);
             }
         }
+
+        DBG ("OpenSL: numInputChannels = " << numInputChannels
+             << ", numOutputChannels = " << numOutputChannels
+             << ", nativeBufferSize = " << getNativeBufferSize()
+             << ", nativeSampleRate = " << getNativeSampleRate()
+             << ", actualBufferSize = " << actualBufferSize
+             << ", audioBuffersToEnqueue = " << audioBuffersToEnqueue
+             << ", sampleRate = " << sampleRate
+             << ", supportsFloatingPoint = " << (session != nullptr && session->supportsFloatingPoint() ? "true" : "false"));
 
         if (session == nullptr)
             lastError = "Unknown error initializing opensl session";
@@ -878,7 +880,7 @@ public:
     int getInputLatencyInSamples() override             { return inputLatency; }
     bool isOpen() override                              { return deviceOpen; }
     int getCurrentBufferSizeSamples() override          { return actualBufferSize; }
-    int getCurrentBitDepth() override                   { return supportsFloatingPoint ? 32 : 16; }
+    int getCurrentBitDepth() override                   { return (session != nullptr && session->supportsFloatingPoint() ? 32 : 16); }
     BigInteger getActiveOutputChannels() const override { return activeOutputChans; }
     BigInteger getActiveInputChannels() const override  { return activeInputChans; }
     String getLastError() override                      { return lastError; }
@@ -960,7 +962,7 @@ private:
     DynamicLibrary slLibrary;
     int actualBufferSize, sampleRate;
     int inputLatency, outputLatency;
-    bool deviceOpen, supportsFloatingPoint, audioProcessingEnabled;
+    bool deviceOpen, audioProcessingEnabled;
     String lastError;
     BigInteger activeOutputChans, activeInputChans;
     AudioIODeviceCallback* callback;
@@ -1015,31 +1017,36 @@ private:
         return androidHasSystemFeature ("android.hardware.audio.low_latency");
     }
 
-    static bool getSupportsFloatingPoint()
-    {
-        return (getEnv()->GetStaticIntField (AndroidBuildVersion, AndroidBuildVersion.SDK_INT) >= 21);
-    }
-
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenSLAudioIODevice)
 };
 
 OpenSLAudioIODevice::OpenSLSession* OpenSLAudioIODevice::OpenSLSession::create (DynamicLibrary& slLibrary,
                                                                                 int numInputChannels, int numOutputChannels,
                                                                                 double samleRateToUse, int bufferSizeToUse,
-                                                                                int numBuffersToUse,
-                                                                                bool floatingPointSupport)
+                                                                                int numBuffersToUse)
 {
     ScopedPointer<OpenSLSession> retval;
+    auto sdkVersion = getEnv()->GetStaticIntField (AndroidBuildVersion, AndroidBuildVersion.SDK_INT);
 
-    if (floatingPointSupport)
+    // SDK versions 21 and higher should natively support floating point...
+    if (sdkVersion >= 21)
+    {
         retval = new OpenSLSessionT<float> (slLibrary, numInputChannels, numOutputChannels, samleRateToUse,
                                             bufferSizeToUse, numBuffersToUse);
-    else
+
+        // ...however, some devices lie so re-try without floating point
+        if (retval != nullptr && (! retval->openedOK()))
+            retval = nullptr;
+    }
+
+    if (retval == nullptr)
+    {
         retval = new OpenSLSessionT<int16> (slLibrary, numInputChannels, numOutputChannels, samleRateToUse,
                                             bufferSizeToUse, numBuffersToUse);
 
-    if (retval != nullptr && (! retval->openedOK()))
-        retval = nullptr;
+        if (retval != nullptr && (! retval->openedOK()))
+            retval = nullptr;
+    }
 
     return retval.release();
 }
