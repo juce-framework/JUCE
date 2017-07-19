@@ -41,10 +41,14 @@ public:
         return hb;
     }
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
+    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props, bool multipleSelected)
     {
         HyperlinkButton* const hb = (HyperlinkButton*) component;
-        ButtonHandler::getEditableProperties (component, document, props);
+        ButtonHandler::getEditableProperties (component, document, props, multipleSelected);
+
+        if ( multipleSelected)  // D STENNING
+            return;
+
         props.add (new HyperlinkURLProperty (hb, document));
         addColourProperties (component, document, props);
     }

@@ -574,8 +574,193 @@ void ComponentLayout::setComponentPosition (Component* comp,
             changed();
         }
     }
+
 }
 
+
+
+void ComponentLayout::setComponentSingleDimension( Component* comp, const bool undoable, const double value, ComponentLayout::ComponentPositionDimension dimension) // D STENNING)
+{
+    RelativePositionedRectangle newPos = ComponentTypeHandler::getComponentPosition (comp);
+    PositionedRectangle p (newPos.rect);
+
+    switch (dimension)
+    {
+        case ComponentLayout::componentX:
+            if (p.getPositionModeX() == PositionedRectangle::proportionOfParentSize)
+                p.setX (value / 100.0);
+            else
+                p.setX (value);
+            break;
+
+        case ComponentLayout::componentY:
+            if (p.getPositionModeY() == PositionedRectangle::proportionOfParentSize)
+                p.setY (value / 100.0);
+            else
+                p.setY (value);
+            break;
+
+        case ComponentLayout::componentWidth:
+            if (p.getWidthMode() == PositionedRectangle::proportionalSize)
+                p.setWidth (value / 100.0);
+            else
+                p.setWidth (value);
+            break;
+
+        case ComponentLayout::componentHeight:
+            if (p.getHeightMode() == PositionedRectangle::proportionalSize)
+                p.setHeight (value / 100.0);
+            else
+                p.setHeight (value);
+            break;
+
+        default:
+            jassertfalse;
+            break;
+    };
+
+    if (p != newPos.rect)
+    {
+        newPos.rect = p;
+
+        if (undoable)
+        {
+            perform (new ChangeCompPositionAction (comp, *this, newPos), "Move components");
+        }
+        else
+        {
+            ComponentTypeHandler::setComponentPosition (comp, newPos, this);
+            changed();
+        }
+    }
+}
+
+void ComponentLayout::setSingleDimension(const bool undoable,const double value ,ComponentPositionDimension dimension) // D STENNING
+{
+    for (auto c : selected)
+    {
+        setComponentSingleDimension( c,undoable, value, dimension);
+    }
+
+}
+
+void ComponentLayout::alignLeft()  // D STENNING
+{
+    ComponentPositionDimension dimension = componentX;
+    if ( components.size() > -1 )
+    {
+        Component* const comp = components[0];
+        RelativePositionedRectangle newPos (ComponentTypeHandler::getComponentPosition (comp));
+        double value;
+        PositionedRectangle p (newPos.rect);
+
+        if (p.getPositionModeX() == PositionedRectangle::proportionOfParentSize)
+            value =  p.getX() * 100.0;
+        else
+            value =  p.getX();
+
+        setSingleDimension( true, value, dimension );
+
+    }
+
+}
+void ComponentLayout::alignRight()
+{
+    ComponentPositionDimension dimension = componentX;
+
+    if ( selected.getNumSelected() > -1 )
+    {
+        Component* const comp = selected.getSelectedItem(0);
+        RelativePositionedRectangle newPos (ComponentTypeHandler::getComponentPosition (comp));
+        PositionedRectangle p (newPos.rect);
+
+        double rightX =  p.getX()+p.getWidth();
+
+        if (p.getPositionModeX() == PositionedRectangle::proportionOfParentSize)
+            rightX =  (p.getX()+p.getWidth()) * 100.0;
+
+
+
+        for (auto c : selected)
+        {
+            if (c != comp)
+            {
+                RelativePositionedRectangle compPos (ComponentTypeHandler::getComponentPosition (c));
+                PositionedRectangle oldPR (compPos.rect);
+
+                double oldW =  oldPR.getWidth();
+                if (oldPR.getPositionModeX() == PositionedRectangle::proportionOfParentSize)
+                {
+                    oldW *=  100.0;
+                }
+
+                double value = rightX - oldW;
+
+                setComponentSingleDimension( c,true, value, dimension);
+            }
+        }
+
+    }
+
+
+}
+void ComponentLayout::alignTop()
+{
+    ComponentPositionDimension dimension = componentY;
+    if ( selected.getNumSelected()  > -1 )
+    {
+        Component* const comp = selected.getSelectedItem(0);
+        RelativePositionedRectangle newPos (ComponentTypeHandler::getComponentPosition (comp));
+        double value;
+        PositionedRectangle p (newPos.rect);
+
+        if (p.getPositionModeY() == PositionedRectangle::proportionOfParentSize)
+            value =  p.getY() * 100.0;
+        else
+            value =  p.getY();
+
+        setSingleDimension( true, value, dimension );
+
+    }
+
+}
+void ComponentLayout::alignBottom() // D STENNING
+{
+    ComponentPositionDimension dimension = componentY;
+
+    if ( selected.getNumSelected() > -1 )
+    {
+        Component* const comp = selected.getSelectedItem(0);
+        RelativePositionedRectangle newPos (ComponentTypeHandler::getComponentPosition (comp));
+        PositionedRectangle p (newPos.rect);
+
+        double bottomY =  p.getY()+p.getHeight();
+
+        if (p.getPositionModeX() == PositionedRectangle::proportionOfParentSize)
+            bottomY *= 100.0;
+
+        for (auto c : selected)
+        {
+            if (c != comp)
+            {
+                RelativePositionedRectangle compPos (ComponentTypeHandler::getComponentPosition (c));
+                PositionedRectangle oldPR (compPos.rect);
+
+                double oldH =  oldPR.getHeight();
+                if (oldPR.getPositionModeX() == PositionedRectangle::proportionOfParentSize)
+                    oldH *=  100.0;
+
+                double value = bottomY - oldH;
+
+                setComponentSingleDimension( c,true, value, dimension);
+            }
+        }
+    }
+
+}
+
+
+//=========================================================================================
 void ComponentLayout::updateStoredComponentPosition (Component* comp, const bool undoable)
 {
     RelativePositionedRectangle newPos (ComponentTypeHandler::getComponentPosition (comp));

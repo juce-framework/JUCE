@@ -172,9 +172,12 @@ struct SliderHandler  : public ComponentTypeHandler
         }
     }
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props) override
+    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props, bool multipleSelected) override
     {
-        ComponentTypeHandler::getEditableProperties (component, document, props);
+        ComponentTypeHandler::getEditableProperties (component, document, props, multipleSelected);
+
+        if ( multipleSelected)  // D STENNING
+            return;
 
         Slider* s = dynamic_cast<Slider*> (component);
         jassert (s != 0);

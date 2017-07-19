@@ -39,7 +39,7 @@ public:
         cornerSize = 10.0;
     }
 
-    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle<int>& parentArea)
+    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle<int>& parentArea) override
     {
         double x, y, w, h;
         position.getRectangleDouble (x, y, w, h, parentArea, layout);
@@ -56,11 +56,11 @@ public:
         }
     }
 
-    void getEditableProperties (Array<PropertyComponent*>& props)
+    void getEditableProperties (Array<PropertyComponent*>& props, bool multipleSelection ) override // D STENNING
     {
         props.add (new CornerSizeProperty (this));
 
-        ColouredElement::getEditableProperties (props);
+        ColouredElement::getEditableProperties (props,multipleSelection);
 
         props.add (new ShapeToPathProperty (this));
     }
@@ -114,7 +114,7 @@ public:
     double getCornerSize() const noexcept                         { return cornerSize; }
 
     //==============================================================================
-    void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode)
+    void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode) override
     {
         if (fillType.isInvisible() && (strokeType.isInvisible() || ! isStrokePresent))
             return;
@@ -156,7 +156,7 @@ public:
         paintMethodCode += s;
     }
 
-    void applyCustomPaintSnippets (StringArray& snippets)
+    void applyCustomPaintSnippets (StringArray& snippets) override
     {
         customPaintCode.clear();
 

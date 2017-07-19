@@ -102,14 +102,17 @@ private:
         {
             clear();
 
-            if (layout.getSelectedSet().getNumSelected() == 1) // xxx need to cope with multiple
-            {
-                if (Component* comp = layout.getSelectedSet().getSelectedItem (0))
-                    if (ComponentTypeHandler* const type = ComponentTypeHandler::getHandlerFor (*comp))
-                        type->addPropertiesToPropertyPanel (comp, document, propsPanel);
-            }
-        }
+            if (layout.getSelectedSet().getNumSelected() == 0)
+                return;
 
+            bool multipleSelected = ( layout.getSelectedSet().getNumSelected() > 1 );
+
+            // D STENNING 30/6/17
+            if (Component* comp = layout.getSelectedSet().getSelectedItem (0))
+                if (ComponentTypeHandler* const type = ComponentTypeHandler::getHandlerFor (*comp))
+                    type->addPropertiesToPropertyPanel (comp, document, propsPanel,multipleSelected);
+
+        }
     private:
         JucerDocument& document;
         ComponentLayout& layout;

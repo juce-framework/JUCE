@@ -67,9 +67,9 @@ public:
         }
     }
 
-    void getEditableProperties (Array <PropertyComponent*>& props)
+    void getEditableProperties (Array <PropertyComponent*>& props, bool multipleSelected) // D STENNING
     {
-        ColouredElement::getEditableProperties (props);
+        ColouredElement::getEditableProperties (props,multipleSelected);
 
         props.add (new ShapeToPathProperty (this));
     }

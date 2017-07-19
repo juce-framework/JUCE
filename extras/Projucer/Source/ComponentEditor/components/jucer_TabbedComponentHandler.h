@@ -90,9 +90,12 @@ public:
         return true;
     }
 
-    void getEditableProperties (Component* component, JucerDocument& doc, Array<PropertyComponent*>& props)
+    void getEditableProperties (Component* component, JucerDocument& doc, Array<PropertyComponent*>& props, bool multipleSelected)
     {
-        ComponentTypeHandler::getEditableProperties (component, doc, props);
+        ComponentTypeHandler::getEditableProperties (component, doc, props, multipleSelected);
+
+        if ( multipleSelected)  // D STENNING
+            return;
 
         TabbedComponent* const t = dynamic_cast<TabbedComponent*> (component);
 
@@ -108,9 +111,9 @@ public:
             props.add (new TabRemoveTabProperty (t, doc));
     }
 
-    void addPropertiesToPropertyPanel (Component* comp, JucerDocument& doc, PropertyPanel& panel)
+    void addPropertiesToPropertyPanel (Component* comp, JucerDocument& doc, PropertyPanel& panel, bool multipleSelected)
     {
-        ComponentTypeHandler::addPropertiesToPropertyPanel (comp, doc, panel);
+        ComponentTypeHandler::addPropertiesToPropertyPanel(comp, doc, panel, multipleSelected);
 
         TabbedComponent* const t = dynamic_cast<TabbedComponent*> (comp);
 

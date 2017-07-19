@@ -83,9 +83,9 @@ public:
     }
 
     //==============================================================================
-    void getEditableProperties (Array <PropertyComponent*>& props)
+    void getEditableProperties (Array <PropertyComponent*>& props, bool multipleSelected)
     {
-        PaintElement::getEditableProperties (props);
+        PaintElement::getEditableProperties (props, multipleSelected);
 
         props.add (new ImageElementResourceProperty (this));
         props.add (new StretchModeProperty (this));

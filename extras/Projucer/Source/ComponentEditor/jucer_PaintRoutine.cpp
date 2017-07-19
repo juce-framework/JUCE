@@ -360,6 +360,180 @@ void PaintRoutine::selectAll()
     }
 }
 
+
+void PaintRoutine::setSingleDimension(const bool undoable,const double value, ComponentLayout::ComponentPositionDimension dimension) // D STENNING
+{
+    for (auto e : selectedElements)
+    {
+        setElementSingleDimension( e,undoable, value, dimension);
+    }
+
+}
+
+void PaintRoutine::setElementSingleDimension(PaintElement* e,const bool undoable, const double value , ComponentLayout::ComponentPositionDimension dimension)// D STENNING)
+{
+    RelativePositionedRectangle newPos = e->getPosition();
+    PositionedRectangle p (newPos.rect);
+
+    switch (dimension)
+    {
+        case ComponentLayout::componentX:
+            if (p.getPositionModeX() == PositionedRectangle::proportionOfParentSize)
+                p.setX (value / 100.0);
+            else
+                p.setX (value);
+            break;
+
+        case ComponentLayout::componentY:
+            if (p.getPositionModeY() == PositionedRectangle::proportionOfParentSize)
+                p.setY (value / 100.0);
+            else
+                p.setY (value);
+            break;
+
+        case ComponentLayout::componentWidth:
+            if (p.getWidthMode() == PositionedRectangle::proportionalSize)
+                p.setWidth (value / 100.0);
+            else
+                p.setWidth (value);
+            break;
+
+        case ComponentLayout::componentHeight:
+            if (p.getHeightMode() == PositionedRectangle::proportionalSize)
+                p.setHeight (value / 100.0);
+            else
+                p.setHeight (value);
+            break;
+
+        default:
+            jassertfalse;
+            break;
+    };
+
+    if (p != newPos.rect)
+    {
+        newPos.rect = p;
+        e->setPosition(newPos, undoable);
+    }
+}
+
+void PaintRoutine::alignLeft()  // D STENNING
+{
+    ComponentLayout::ComponentPositionDimension dimension = ComponentLayout::componentX;
+    if ( selectedElements.getNumSelected() > -1 )
+    {
+        auto e = selectedElements.getSelectedItem(0);
+        RelativePositionedRectangle newPos = e->getPosition();
+        double value;
+        PositionedRectangle p (newPos.rect);
+
+        if (p.getPositionModeX() == PositionedRectangle::proportionOfParentSize)
+            value =  p.getX() * 100.0;
+        else
+            value =  p.getX();
+
+        setSingleDimension( true, value, dimension );
+
+    }
+
+}
+
+
+void PaintRoutine::alignRight()
+{
+    ComponentLayout::ComponentPositionDimension dimension = ComponentLayout::componentX;
+
+    if ( selectedElements.getNumSelected() > -1 )
+    {
+        auto e = selectedElements.getSelectedItem(0);
+        RelativePositionedRectangle newPos = e->getPosition();
+        PositionedRectangle p (newPos.rect);
+
+        double rightX =  p.getX()+p.getWidth();
+
+        if (p.getPositionModeX() == PositionedRectangle::proportionOfParentSize)
+            rightX =  (p.getX()+p.getWidth()) * 100.0;
+
+        for (auto c : selectedElements)
+        {
+            if (c != e)
+            {
+                RelativePositionedRectangle compPos = c->getPosition();
+                PositionedRectangle oldPR (compPos.rect);
+
+                double oldW =  oldPR.getWidth();
+                if (oldPR.getPositionModeX() == PositionedRectangle::proportionOfParentSize)
+                {
+                    oldW *=  100.0;
+                }
+
+                double value = rightX - oldW;
+
+                setElementSingleDimension( c,true, value, dimension);
+            }
+        }
+
+    }
+
+
+}
+void PaintRoutine::alignTop()
+{
+    ComponentLayout::ComponentPositionDimension dimension = ComponentLayout::componentY;
+    if ( selectedElements.getNumSelected() > -1 )
+    {
+        auto e = selectedElements.getSelectedItem(0);
+        RelativePositionedRectangle newPos = e->getPosition();
+        PositionedRectangle p (newPos.rect);
+        double value;
+
+        if (p.getPositionModeY() == PositionedRectangle::proportionOfParentSize)
+            value =  p.getY() * 100.0;
+        else
+            value =  p.getY();
+
+        setSingleDimension( true, value, dimension );
+
+    }
+
+}
+void PaintRoutine::alignBottom() // D STENNING
+{
+    ComponentLayout::ComponentPositionDimension dimension = ComponentLayout::componentY;
+    if ( selectedElements.getNumSelected() > -1 )
+    {
+        auto e = selectedElements.getSelectedItem(0);
+        RelativePositionedRectangle newPos = e->getPosition();
+        PositionedRectangle p (newPos.rect);
+
+        double bottomY =  p.getY()+p.getHeight();
+
+        if (p.getPositionModeX() == PositionedRectangle::proportionOfParentSize)
+            bottomY *= 100.0;
+
+        for (auto c : selectedElements)
+        {
+            if (c != e)
+            {
+                RelativePositionedRectangle compPos =  c->getPosition();
+                PositionedRectangle oldPR (compPos.rect);
+
+                double oldH =  oldPR.getHeight();
+                if (oldPR.getPositionModeX() == PositionedRectangle::proportionOfParentSize)
+                    oldH *=  100.0;
+
+                double value = bottomY - oldH;
+
+                setElementSingleDimension( c,true, value, dimension);
+            }
+        }
+    }
+
+}
+
+//=========================================================================================
+
+
 void PaintRoutine::selectedToFront()
 {
     const SelectedItemSet<PaintElement*> temp (selectedElements);

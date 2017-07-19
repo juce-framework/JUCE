@@ -52,7 +52,7 @@ public:
                           const bool undoable);
 
     void deleteFromPath();
-    void getEditableProperties (Array<PropertyComponent*>& props);
+    void getEditableProperties (Array<PropertyComponent*>& props, bool multipleSelected );  // D STENNING);
 
 private:
     PathPoint withChangedPointType (const Path::Iterator::PathElementType newType,
@@ -98,7 +98,7 @@ public:
     void setNonZeroWinding (const bool nonZero, const bool undoable);
 
     //==============================================================================
-    void getEditableProperties (Array<PropertyComponent*>& props);
+    void getEditableProperties (Array<PropertyComponent*>& props, bool multipleSelected);
 
     void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode);
     void applyCustomPaintSnippets (StringArray& snippets);

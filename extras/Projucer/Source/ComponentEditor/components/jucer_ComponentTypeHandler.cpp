@@ -87,6 +87,11 @@ void ComponentTypeHandler::showPopupMenu (Component*, ComponentLayout&)
     m.addCommandItem (commandManager, JucerCommandIDs::toFront);
     m.addCommandItem (commandManager, JucerCommandIDs::toBack);
     m.addSeparator();
+    m.addCommandItem (commandManager, JucerCommandIDs::alignLeft);
+    m.addCommandItem (commandManager, JucerCommandIDs::alignRight);
+    m.addCommandItem (commandManager, JucerCommandIDs::alignTop);
+    m.addCommandItem (commandManager, JucerCommandIDs::alignBottom);
+    m.addSeparator();
     m.addCommandItem (commandManager, StandardApplicationCommandIDs::cut);
     m.addCommandItem (commandManager, StandardApplicationCommandIDs::copy);
     m.addCommandItem (commandManager, StandardApplicationCommandIDs::paste);
@@ -330,7 +335,7 @@ public:
     ComponentPositionProperty (Component* comp,
                                JucerDocument& doc,
                                const String& name,
-                               ComponentPositionDimension dimension_)
+                               ComponentLayout::ComponentPositionDimension dimension_) // D STENNING
         : PositionPropertyBase (comp, name, dimension_,
                                 true, true,
                                 doc.getComponentLayout()),
@@ -347,6 +352,11 @@ public:
     void setPosition (const RelativePositionedRectangle& newPos)
     {
         document.getComponentLayout()->setComponentPosition (component, newPos, true);
+    }
+
+    void setSingleDimension(bool undoable, const double newValue , ComponentLayout::ComponentPositionDimension dim)// D STENNING
+    {
+        document.getComponentLayout()->setSingleDimension ( undoable, newValue,dim );
     }
 
     RelativePositionedRectangle getPosition() const
@@ -413,27 +423,33 @@ private:
 //==============================================================================
 void ComponentTypeHandler::getEditableProperties (Component* component,
                                                   JucerDocument& document,
-                                                  Array<PropertyComponent*>& props)
+                                                  Array<PropertyComponent*>& props, bool multipleSelected)
 {
-    props.add (new ComponentMemberNameProperty (component, document));
-    props.add (new ComponentNameProperty (component, document));
-    props.add (new ComponentVirtualClassProperty (component, document));
+    if ( ! multipleSelected )
+    {
+        props.add (new ComponentMemberNameProperty (component, document));
+        props.add (new ComponentNameProperty (component, document));
+        props.add (new ComponentVirtualClassProperty (component, document));
+    }
 
-    props.add (new ComponentPositionProperty (component, document, "x", ComponentPositionProperty::componentX));
-    props.add (new ComponentPositionProperty (component, document, "y", ComponentPositionProperty::componentY));
-    props.add (new ComponentPositionProperty (component, document, "width", ComponentPositionProperty::componentWidth));
-    props.add (new ComponentPositionProperty (component, document, "height", ComponentPositionProperty::componentHeight));
+    props.add (new ComponentPositionProperty (component, document, "x", ComponentLayout::componentX));  // D STENNING
+    props.add (new ComponentPositionProperty (component, document, "y", ComponentLayout::componentY));
+    props.add (new ComponentPositionProperty (component, document, "width", ComponentLayout::componentWidth));
+    props.add (new ComponentPositionProperty (component, document, "height", ComponentLayout::componentHeight));
 
-    if (dynamic_cast<SettableTooltipClient*> (component) != nullptr)
-        props.add (new TooltipProperty (component, document));
+    if ( ! multipleSelected )
+    {
+        if (dynamic_cast<SettableTooltipClient*> (component) != nullptr)
+            props.add (new TooltipProperty (component, document));
 
-    props.add (new FocusOrderProperty (component, document));
+        props.add (new FocusOrderProperty (component, document));
+    }
 }
 
-void ComponentTypeHandler::addPropertiesToPropertyPanel (Component* comp, JucerDocument& document, PropertyPanel& panel)
+void ComponentTypeHandler::addPropertiesToPropertyPanel (Component* comp, JucerDocument& document, PropertyPanel& panel, bool multipleSelected)  //  D STENNING
 {
     Array <PropertyComponent*> props;
-    getEditableProperties (comp, document, props);
+    getEditableProperties (comp, document, props, multipleSelected);
 
     panel.addSection (getClassName (comp), props);
 }
