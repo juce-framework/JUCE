@@ -625,10 +625,10 @@ struct PhysicalTopologySource::Internal
                 detector.handleSharedDataACK (deviceID, counter);
         }
 
-        void handleFirmwareUpdateACK (BlocksProtocol::TopologyIndex deviceIndex, BlocksProtocol::FirmwareUpdateACKCode resultCode)
+        void handleFirmwareUpdateACK (BlocksProtocol::TopologyIndex deviceIndex, BlocksProtocol::FirmwareUpdateACKCode resultCode, BlocksProtocol::FirmwareUpdateACKDetail resultDetail)
         {
             if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
-                detector.handleFirmwareUpdateACK (deviceID, (uint8) resultCode.get());
+                detector.handleFirmwareUpdateACK (deviceID, (uint8) resultCode.get(), (uint32) resultDetail.get());
         }
 
         void handleConfigUpdateMessage (BlocksProtocol::TopologyIndex deviceIndex, int32 item, int32 value, int32 min, int32 max)
@@ -958,12 +958,12 @@ struct PhysicalTopologySource::Internal
                         bi->handleSharedDataACK (packetCounter);
         }
 
-        void handleFirmwareUpdateACK (Block::UID deviceID, uint8 resultCode)
+        void handleFirmwareUpdateACK (Block::UID deviceID, uint8 resultCode, uint32 resultDetail)
         {
             for (auto&& b : currentTopology.blocks)
                 if (b->uid == deviceID)
                     if (auto bi = BlockImplementation::getFrom (*b))
-                        bi->handleFirmwareUpdateACK (resultCode);
+                        bi->handleFirmwareUpdateACK (resultCode, resultDetail);
         }
 
         void handleConfigUpdateMessage (Block::UID deviceID, int32 item, int32 value, int32 min, int32 max)
@@ -1505,7 +1505,7 @@ struct PhysicalTopologySource::Internal
             remoteHeap.handleACKFromDevice (*this, packetCounter);
         }
 
-        bool sendFirmwareUpdatePacket (const uint8* data, uint8 size, std::function<void (uint8)> callback) override
+        bool sendFirmwareUpdatePacket (const uint8* data, uint8 size, std::function<void (uint8, uint32)> callback) override
         {
             firmwarePacketAckCallback = {};
 
@@ -1535,11 +1535,11 @@ struct PhysicalTopologySource::Internal
             return false;
         }
 
-        void handleFirmwareUpdateACK (uint8 resultCode)
+        void handleFirmwareUpdateACK (uint8 resultCode, uint32 resultDetail)
         {
             if (firmwarePacketAckCallback != nullptr)
             {
-                firmwarePacketAckCallback (resultCode);
+                firmwarePacketAckCallback (resultCode, resultDetail);
                 firmwarePacketAckCallback = {};
             }
         }
@@ -1752,7 +1752,7 @@ struct PhysicalTopologySource::Internal
         std::unique_ptr<Program> program;
         uint32 programSize = 0;
 
-        std::function<void(uint8)> firmwarePacketAckCallback;
+        std::function<void(uint8, uint32)> firmwarePacketAckCallback;
 
         uint32 resetMessagesSent = 0;
         bool isStillConnected = true;

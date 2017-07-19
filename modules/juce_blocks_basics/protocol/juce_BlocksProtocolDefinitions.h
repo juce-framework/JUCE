@@ -321,7 +321,8 @@ enum ConfigCommands
     updateConfig                = 0x04, // Set value, min and max
     updateUserConfig            = 0x05, // As above but contains user config metadata
     setConfigState              = 0x06, // Set config activation state and whether it is saved in flash
-    factorySyncEnd              = 0x07
+    factorySyncEnd              = 0x07,
+    clusterConfigSync           = 0x08
 };
 
 using ConfigCommand = IntegerWithBitSize<4>;
@@ -358,6 +359,7 @@ using ByteValue              = IntegerWithBitSize<8>;
 using ByteSequenceContinues  = IntegerWithBitSize<1>;
 
 using FirmwareUpdateACKCode    = IntegerWithBitSize<7>;
+using FirmwareUpdateACKDetail  = IntegerWithBitSize<32>;
 using FirmwareUpdatePacketSize = IntegerWithBitSize<7>;
 
 static constexpr uint32 numProgramMessageInts = 3;
@@ -387,7 +389,7 @@ enum BitSizes
     programEventMessage      = MessageType::bits + 32 * numProgramMessageInts,
     packetACK                = MessageType::bits + PacketCounter::bits,
 
-    firmwareUpdateACK        = MessageType::bits + FirmwareUpdateACKCode::bits,
+    firmwareUpdateACK        = MessageType::bits + FirmwareUpdateACKCode::bits + FirmwareUpdateACKDetail::bits,
 
     controlButtonMessage     = typeDeviceAndTime + ControlButtonID::bits,
 
@@ -466,6 +468,7 @@ static constexpr const char* ledProgramLittleFootFunctions[] =
     "sendAftertouch/viii",
     "sendCC/viii",
     "sendPitchBend/vii",
+    "sendPitchBend/viii",
     "sendChannelPressure/vii",
     "setChannelRange/vbii",
     "assignChannel/ii",

@@ -389,7 +389,7 @@ public:
 
     /** Sends a firmware update packet to a block, and waits for a reply. Returns an error code. */
     virtual bool sendFirmwareUpdatePacket (const uint8* data, uint8 size,
-                                           std::function<void (uint8)> packetAckCallback) = 0;
+                                           std::function<void (uint8, uint32)> packetAckCallback) = 0;
 
     /** Provides a callback that will be called when a config changes. */
     virtual void setConfigChangedCallback (std::function<void(Block&, const ConfigMetaData&, uint32)>) = 0;
