@@ -39,6 +39,7 @@ namespace Ids
     DECLARE_ID (vendor);
     DECLARE_ID (version);
     DECLARE_ID (license);
+    DECLARE_ID (minimumCppStandard);
     DECLARE_ID (include);
     DECLARE_ID (info);
     DECLARE_ID (description);
@@ -95,6 +96,7 @@ namespace Ids
     DECLARE_ID (customXcodeResourceFolders);
     DECLARE_ID (plistPreprocessorDefinitions);
     DECLARE_ID (cppLanguageStandard);
+    DECLARE_ID (enableGNUExtensions);
     DECLARE_ID (cppLibType);
     DECLARE_ID (codeSigningIdentity);
     DECLARE_ID (fastMath);

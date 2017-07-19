@@ -39,6 +39,7 @@ public:
     String getRenamingName() const override   { return getDisplayName(); }
     void setName (const String&) override     {}
     bool isMissing() const override           { return hasMissingDependencies(); }
+    bool hasWarnings() const override         { return hasHigherCppStandardThanProject(); }
 
     void showDocument() override
     {
@@ -93,6 +94,11 @@ private:
         return project.getModules().getExtraDependenciesNeeded (moduleID).size() > 0;
     }
 
+    bool hasHigherCppStandardThanProject() const
+    {
+        return project.getModules().doesModuleHaveHigherCppStandardThanProject (moduleID);
+    }
+
     //==============================================================================
     class ModuleSettingsPanel  : public Component,
                                  private Value::Listener
@@ -128,6 +134,9 @@ private:
 
             if (modules.getExtraDependenciesNeeded (moduleID).size() > 0)
                 props.add (new MissingDependenciesComponent (project, moduleID));
+
+            if (modules.doesModuleHaveHigherCppStandardThanProject (moduleID))
+                props.add (new CppStandardWarningComponent());
 
             modulePathValueSources.clear();
 
@@ -329,7 +338,7 @@ private:
                 text << missingDependencies.joinIntoString (", ");
 
                 g.setColour (Colours::red);
-                g.drawFittedText (text, getLocalBounds().reduced (4, 16), Justification::topLeft, 3);
+                g.drawFittedText (text, getLocalBounds().reduced (10), Justification::topLeft, 3);
             }
 
             void buttonClicked (Button*) override
@@ -419,6 +428,30 @@ private:
             }
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MissingDependenciesComponent)
+        };
+
+        //==============================================================================
+        struct CppStandardWarningComponent    : public PropertyComponent
+        {
+            CppStandardWarningComponent()
+                : PropertyComponent ("CppStandard", 100)
+            {
+            }
+
+            void refresh() override {}
+
+            void paint (Graphics& g) override
+            {
+                auto text = String ("This module has a higher C++ language standard requirement than your project!\n\n"
+                                    "To use this module you need to increase the C++ standard of the project.\n");
+
+                g.setColour (findColour (defaultHighlightColourId));
+                g.drawFittedText (text, getLocalBounds().reduced (10), Justification::topLeft, 3);
+            }
+
+            StringArray configsToWarnAbout;
+
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CppStandardWarningComponent)
         };
     };
 

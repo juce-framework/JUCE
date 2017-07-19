@@ -824,6 +824,18 @@ StringArray EnabledModuleList::getExtraDependenciesNeeded (const String& moduleI
     return extraDepsNeeded;
 }
 
+bool EnabledModuleList::doesModuleHaveHigherCppStandardThanProject (const String& moduleID)
+{
+    auto projectCppStandard = project.getCppStandardValue().toString();
+
+    if (projectCppStandard == "latest")
+        return false;
+
+    auto moduleCppStandard = getModuleInfo (moduleID).getMinimumCppStandard();
+
+    return (moduleCppStandard.getIntValue() > projectCppStandard.getIntValue());
+}
+
 bool EnabledModuleList::areMostModulesUsingGlobalPath() const
 {
     auto numYes = 0, numNo = 0;

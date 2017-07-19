@@ -269,6 +269,10 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
                "Additional libraries to link (one per line). You should not add any platform specific decoration to these names. "
                "This string can contain references to preprocessor definitions in the form ${NAME_OF_VALUE}, which will be replaced with their values.");
 
+    if (! isVisualStudio())
+        props.add (new BooleanPropertyComponent (getShouldUseGNUExtensionsValue(), "GNU Compiler Extensions", "Enabled"),
+                   "Enabling this will use the GNU C++ language standard variant for compilation.");
+
     createIconProperties (props);
 
     createExporterProperties (props);

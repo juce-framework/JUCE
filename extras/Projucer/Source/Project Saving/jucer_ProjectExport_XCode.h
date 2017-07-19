@@ -88,14 +88,14 @@ public:
     Value getPListPreprocessValue()           { return getSetting ("PListPreprocess"); }
     bool  isPListPreprocessEnabled() const    { return settings   ["PListPreprocess"]; }
 
-    Value getExtraFrameworksValue()         { return getSetting (Ids::extraFrameworks); }
-    String getExtraFrameworksString() const { return settings   [Ids::extraFrameworks]; }
+    Value getExtraFrameworksValue()           { return getSetting (Ids::extraFrameworks); }
+    String getExtraFrameworksString() const   { return settings   [Ids::extraFrameworks]; }
 
-    Value  getPostBuildScriptValue()        { return getSetting (Ids::postbuildCommand); }
-    String getPostBuildScript() const       { return settings   [Ids::postbuildCommand]; }
+    Value  getPostBuildScriptValue()          { return getSetting (Ids::postbuildCommand); }
+    String getPostBuildScript() const         { return settings   [Ids::postbuildCommand]; }
 
-    Value  getPreBuildScriptValue()         { return getSetting (Ids::prebuildCommand); }
-    String getPreBuildScript() const        { return settings   [Ids::prebuildCommand]; }
+    Value  getPreBuildScriptValue()           { return getSetting (Ids::prebuildCommand); }
+    String getPreBuildScript() const          { return settings   [Ids::prebuildCommand]; }
 
     Value getDuplicateResourcesFolderForAppExtensionValue()     { return getSetting (Ids::iosAppExtensionDuplicateResourcesFolder); }
     bool  shouldDuplicateResourcesFolderForAppExtension() const { return settings   [Ids::iosAppExtensionDuplicateResourcesFolder]; }
@@ -376,7 +376,6 @@ protected:
               osxArchitecture              (config, Ids::osxArchitecture,              nullptr, "default"),
               customXcodeFlags             (config, Ids::customXcodeFlags,             nullptr),
               plistPreprocessorDefinitions (config, Ids::plistPreprocessorDefinitions, nullptr),
-              cppLanguageStandard          (config, Ids::cppLanguageStandard,          nullptr),
               cppStandardLibrary           (config, Ids::cppLibType,                   nullptr),
               codeSignIdentity             (config, Ids::codeSigningIdentity,          nullptr, iOS ? "iPhone Developer" : "Mac Developer"),
               fastMathEnabled              (config, Ids::fastMath,                     nullptr),
@@ -394,8 +393,7 @@ protected:
         bool iOS;
 
         CachedValue<String> osxSDKVersion, osxDeploymentTarget, iosDeploymentTarget, osxArchitecture,
-                            customXcodeFlags, plistPreprocessorDefinitions,
-                            cppLanguageStandard, cppStandardLibrary, codeSignIdentity;
+                            customXcodeFlags, plistPreprocessorDefinitions, cppStandardLibrary, codeSignIdentity;
         CachedValue<bool>   fastMathEnabled, linkTimeOptimisationEnabled, stripLocalSymbolsEnabled;
         CachedValue<String> vstBinaryLocation, vst3BinaryLocation, auBinaryLocation, rtasBinaryLocation, aaxBinaryLocation;
 
@@ -455,26 +453,15 @@ protected:
             props.add (new TextPropertyComponent (plistPreprocessorDefinitions.getPropertyAsValue(), "PList Preprocessor Definitions", 2048, true),
                        "Preprocessor definitions used during PList preprocessing (see PList Preprocess).");
 
-            const char* cppLanguageStandardNames[] = { "Use Default", "C++11", "GNU++11", "C++14", "GNU++14", nullptr };
-            Array<var> cppLanguageStandardValues;
-            cppLanguageStandardValues.add (var());
-            cppLanguageStandardValues.add ("c++11");
-            cppLanguageStandardValues.add ("gnu++11");
-            cppLanguageStandardValues.add ("c++14");
-            cppLanguageStandardValues.add ("gnu++14");
+            {
+                static const char* cppLibNames[] = { "Use Default", "LLVM libc++", "GNU libstdc++", nullptr };
+                static const var cppLibValues[] =  { var(),         "libc++",      "libstdc++" };
 
-            props.add (new ChoicePropertyComponent (cppLanguageStandard.getPropertyAsValue(), "C++ Language Standard",
-                                                    StringArray (cppLanguageStandardNames), cppLanguageStandardValues),
-                       "The standard of the C++ language that will be used for compilation.");
-
-            const char* cppLibNames[] = { "Use Default", "LLVM libc++", "GNU libstdc++", nullptr };
-            Array<var> cppLibValues;
-            cppLibValues.add (var());
-            cppLibValues.add ("libc++");
-            cppLibValues.add ("libstdc++");
-
-            props.add (new ChoicePropertyComponent (cppStandardLibrary.getPropertyAsValue(), "C++ Library", StringArray (cppLibNames), cppLibValues),
-                       "The type of C++ std lib that will be linked.");
+                props.add (new ChoicePropertyComponent (cppStandardLibrary.getPropertyAsValue(), "C++ Library",
+                                                        StringArray (cppLibNames),
+                                                        Array<var> (cppLibValues, numElementsInArray (cppLibValues))),
+                           "The type of C++ std lib that will be linked.");
+            }
 
             props.add (new TextWithDefaultPropertyComponent<String> (codeSignIdentity, "Code-signing Identity", 1024),
                        "The name of a code-signing identity for Xcode to apply.");
@@ -954,7 +941,6 @@ public:
             }
 
             s.add ("GCC_VERSION = " + gccVersion);
-            s.add ("CLANG_CXX_LANGUAGE_STANDARD = \"c++0x\"");
             s.add ("CLANG_LINK_OBJC_RUNTIME = NO");
 
             if (! config.codeSignIdentity.isUsingDefault())
@@ -963,8 +949,15 @@ public:
             if (owner.isPushNotificationsEnabled())
                 s.add ("CODE_SIGN_ENTITLEMENTS = " + owner.getProject().getTitle() + ".entitlements");
 
-            if (config.cppLanguageStandard.get().isNotEmpty())
-                s.add ("CLANG_CXX_LANGUAGE_STANDARD = " + config.cppLanguageStandard.get().quoted());
+            {
+                auto cppStandard = owner.project.getCppStandardValue().toString();
+
+                if (cppStandard == "latest")
+                    cppStandard = "1z";
+
+                s.add ("CLANG_CXX_LANGUAGE_STANDARD = " + (String (owner.shouldUseGNUExtensions() ? "gnu++"
+                                                                                                  : "c++") + cppStandard).quoted());
+            }
 
             if (config.cppStandardLibrary.get().isNotEmpty())
                 s.add ("CLANG_CXX_LIBRARY = " + config.cppStandardLibrary.get().quoted());
@@ -1466,13 +1459,14 @@ public:
         {
             if (auto xcodeConfig = dynamic_cast<const XcodeBuildConfiguration*> (&config))
             {
-                const String& configValue = xcodeConfig->cppStandardLibrary.get();
+                const auto& configValue = xcodeConfig->cppStandardLibrary.get();
 
                 if (configValue.isNotEmpty())
                     return (configValue == "libc++");
 
-                const int minorOSXDeploymentTarget
-                    = getOSXDeploymentTarget (*xcodeConfig).fromLastOccurrenceOf (".", false, false).getIntValue();
+                auto minorOSXDeploymentTarget = getOSXDeploymentTarget (*xcodeConfig)
+                                               .fromLastOccurrenceOf (".", false, false)
+                                               .getIntValue();
 
                 return (minorOSXDeploymentTarget > 8);
             }

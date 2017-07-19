@@ -154,6 +154,9 @@ public:
     Value getRTASPathValue() const              { return rtasPath; }
     Value getAAXPathValue() const               { return aaxPath; }
 
+    Value getShouldUseGNUExtensionsValue()      { return getSetting (Ids::enableGNUExtensions); }
+    bool shouldUseGNUExtensions() const         { return (getSettingString (Ids::enableGNUExtensions) == "1");}
+
     // NB: this is the path to the parent "modules" folder that contains the named module, not the
     // module folder itself.
     Value getPathForModuleValue (const String& moduleID);

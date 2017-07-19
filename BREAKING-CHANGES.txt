@@ -6,7 +6,24 @@ Develop Branch
 
 Change
 ------
-PopupMenus now scale according to the AffineTransform and scaling factor of their target components
+The option to set the C++ language standard is now located in the project settings instead of the build configuration settings.
+
+Possible Issues
+---------------
+Projects that had a specific verison of the C++ language standard set for exporter build configurations will instead use the default (C++11) when re-saving with the new Projucer. 
+
+Workaround
+---------- 
+Change the "C++ Language Standard" setting in the main project settings to the required version - the Projucer will add this value to the exported project as a compiler flag when saving exporters.
+
+Rationale
+---------
+Having a different C++ language standard option for each build configuration was unnecessary and was not fully implemented for all exporters. Changing it to a per-project settings means that the preference will propagate to all exporters and only needs to be set in one place.
+
+
+Change
+------
+PopupMenus now scale according to the AffineTransform and scaling factor of their target components.
 
 Possible Issues
 ---------------
@@ -28,24 +45,24 @@ Previously, PopupMenus would not scale if the GUI of the target component (or an
 
 Change
 ------
-Removed the setSecurityFlags() method from the Windows implementation of WebInputStream as it disabled HTTPS security features
+Removed the setSecurityFlags() method from the Windows implementation of WebInputStream as it disabled HTTPS security features.
 
 Possible Issues
 ---------------
-Any code previously relying on connections to insecure webpages succeeding will no longer work
+Any code previously relying on connections to insecure webpages succeeding will no longer work.
 
 Workaround
 ----------
-Check network connectivity on Windows and re-write any code that relied on insecure connections
+Check network connectivity on Windows and re-write any code that relied on insecure connections.
 
 Rationale
 ---------
-The previous behaviour resulted in network connections on Windows having all the HTTPS security features disabled, exposing users to network attacks. HTTPS connections on Windows are now secure and will fail when connecting to an insecure web address
+The previous behaviour resulted in network connections on Windows having all the HTTPS security features disabled, exposing users to network attacks. HTTPS connections on Windows are now secure and will fail when connecting to an insecure web address.
 
 
 Change
 ------
-Pointer arithmetic on a pointer will have the same result regardless if it is wrapped in JUCE's Atomic class or not
+Pointer arithmetic on a pointer will have the same result regardless if it is wrapped in JUCE's Atomic class or not.
 
 Possible Issues
 ---------------
@@ -72,11 +89,11 @@ Version 4.3.1
 
 Change
 ------
-JUCE has changed the way native VST3/AudioUnit parameter ids are calculated
+JUCE has changed the way native VST3/AudioUnit parameter ids are calculated.
 
 Possible Issues
 ---------------
-DAW projects with automation data written by an AudioUnit or VST3 plug-in built with pre JUCE 4.3.1 versions will load incorrectly when opened by an AudioUnit or VST3 built with JUCE versions 4.3.1 and later. Plug-ins using JUCE_FORCE_USE_LEGACY_IDS are not affected 
+DAW projects with automation data written by an AudioUnit or VST3 plug-in built with pre JUCE 4.3.1 versions will load incorrectly when opened by an AudioUnit or VST3 built with JUCE versions 4.3.1 and later. Plug-ins using JUCE_FORCE_USE_LEGACY_IDS are not affected.
 
 Workaround
 ----------
@@ -93,7 +110,7 @@ Version 4.3.0
 
 Change
 ------
-A revised multi-bus API was released which supersedes the previously flawed multi-bus API - JUCE versions 4.0.0 - 4.2.4 (inclusive)
+A revised multi-bus API was released which supersedes the previously flawed multi-bus API - JUCE versions 4.0.0 - 4.2.4 (inclusive).
 
 Possible Issues
 ---------------
@@ -101,7 +118,7 @@ If you have developed a plug-in with JUCE versions 4.0.0 - 4.2.4 (inclusive), th
 
 Woraround
 ---------
-None
+None.
 
 Rationale
 --------
@@ -131,7 +148,7 @@ Version 4.2.1
 
 Change
 ------
-JUCE now uses the paramID property used in AudioProcessorParameterWithID to uniquely identify parameters to the host
+JUCE now uses the paramID property used in AudioProcessorParameterWithID to uniquely identify parameters to the host.
 
 Possible Issues
 ---------------

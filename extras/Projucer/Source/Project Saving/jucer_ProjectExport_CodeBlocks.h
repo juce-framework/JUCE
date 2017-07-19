@@ -343,7 +343,18 @@ private:
             flags.add (codeBlocksConfig->getArchitectureTypeVar());
 
         flags.add ("-O" + config.getGCCOptimisationFlag());
-        flags.add ("-std=c++11");
+
+        {
+            auto cppStandard = config.project.getCppStandardValue().toString();
+
+            if (cppStandard == "latest")
+                cppStandard = "1z";
+
+            cppStandard = "-std=" + String (shouldUseGNUExtensions() ? "gnu++" : "c++") + cppStandard;
+
+            flags.add (cppStandard);
+        }
+
         flags.add ("-mstackrealign");
 
         if (config.isDebug())

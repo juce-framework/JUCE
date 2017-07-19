@@ -850,18 +850,7 @@ private:
     {
         props.add (new TextPropertyComponent (androidTheme.getPropertyAsValue(), "Android Theme", 256, false),
                    "E.g. @android:style/Theme.NoTitleBar or leave blank for default");
-
-        static const char* cppStandardNames[]  = { "C++03",       "C++11",       "C++14",        nullptr };
-        static const char* cppStandardValues[] = { "-std=c++03",  "-std=c++11",  "-std=c++14",   nullptr };
-
-        props.add (new ChoicePropertyComponent (getCppStandardValue(), "C++ standard to use",
-                                                StringArray (cppStandardNames), Array<var>  (cppStandardValues)),
-                                                "The C++ standard to specify in the makefile");
     }
-
-    //==============================================================================
-    Value getCppStandardValue()                         { return getSetting (Ids::cppLanguageStandard); }
-    String getCppStandardString() const                 { return settings[Ids::cppLanguageStandard]; }
 
     //==============================================================================
     String createDefaultClassName() const
@@ -1183,13 +1172,16 @@ private:
 
     StringArray getAndroidCxxCompilerFlags() const
     {
-        StringArray cxxFlags (getAndroidCompilerFlags());
-        String cppStandardToUse (getCppStandardString());
+        auto cxxFlags = getAndroidCompilerFlags();
 
-        if (cppStandardToUse.isEmpty())
-            cppStandardToUse = "-std=c++11";
+        auto cppStandard = project.getCppStandardValue().toString();
 
-        cxxFlags.add ("\"" + cppStandardToUse + "\"");
+        if (cppStandard == "latest")
+            cppStandard = "1z";
+
+        cppStandard = "-std=" + String (shouldUseGNUExtensions() ? "gnu++" : "c++") + cppStandard;
+
+        cxxFlags.add (cppStandard.quoted());
 
         return cxxFlags;
     }

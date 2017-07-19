@@ -152,6 +152,9 @@ void Project::setMissingDefaultValues()
     if (shouldIncludeBinaryInAppConfig() == var())
         shouldIncludeBinaryInAppConfig() = true;
 
+    if (! projectRoot.hasType (Ids::cppLanguageStandard))
+        getCppStandardValue() = "11";
+
     ProjucerApplication::getApp().updateNewlyOpenedProject (*this);
 }
 
@@ -686,6 +689,16 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 
     props.add (new TextPropertyComponent (binaryDataNamespace(), "BinaryData Namespace", 256, false),
                                           "The namespace containing the binary assests. If left empty this defaults to \"BinaryData\".");
+
+    {
+        static const char* cppLanguageStandardNames[] = { "C++11", "C++14", "Use Latest", nullptr };
+        static const var cppLanguageStandardValues[]  = { "11",    "14",    "latest" };
+
+        props.add (new ChoicePropertyComponent (getCppStandardValue(), "C++ Language Standard",
+                                                StringArray (cppLanguageStandardNames),
+                                                Array<var>  (cppLanguageStandardValues, numElementsInArray (cppLanguageStandardValues))),
+                   "The standard of the C++ language that will be used for compilation.");
+    }
 
     props.add (new TextPropertyComponent (getProjectPreprocessorDefs(), "Preprocessor definitions", 32768, true),
                "Global preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace, commas, or "

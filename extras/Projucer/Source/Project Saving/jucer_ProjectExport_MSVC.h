@@ -63,9 +63,6 @@ public:
         return (targetPlatform.isNotEmpty() ? targetPlatform : getDefaultWindowsTargetPlatformVersion());
     }
 
-    Value getCppStandardValue()                    { return getSetting (Ids::cppLanguageStandard); }
-    String getCppLanguageStandard() const          { return settings [Ids::cppLanguageStandard]; }
-
     //==============================================================================
     void addToolsetProperty (PropertyListBuilder& props, const char** names, const var* values, int num)
     {
@@ -81,12 +78,6 @@ public:
         props.add (new ChoicePropertyComponent (getIPPLibraryValue(), "Use IPP Library",
                                                 StringArray (ippOptions, numElementsInArray (ippValues)),
                                                 Array<var>  (ippValues,  numElementsInArray (ippValues))));
-    }
-
-    void addCppStandardProperty (PropertyListBuilder& props, const char** names, const var* values, int num)
-    {
-        props.add (new ChoicePropertyComponent (getCppStandardValue(), "C++ standard to use",
-                                                StringArray (names, num), Array<var> (values, num)));
     }
 
     void addWindowsTargetPlatformProperties (PropertyListBuilder& props)
@@ -512,9 +503,8 @@ public:
                     if (config.areWarningsTreatedAsErrors())
                         cl->createNewChildElement ("TreatWarningAsError")->addTextElement ("true");
 
-                    String cppLanguageStandard = getOwner().getCppLanguageStandard();
-                    if (cppLanguageStandard.isNotEmpty())
-                        cl->createNewChildElement ("LanguageStandard")->addTextElement (cppLanguageStandard);
+                    auto cppStandard = owner.project.getCppStandardValue().toString();
+                    cl->createNewChildElement ("LanguageStandard")->addTextElement ("stdcpp" + cppStandard);
                 }
 
                 {
@@ -1859,10 +1849,6 @@ public:
         addIPPLibraryProperty (props);
 
         addWindowsTargetPlatformProperties (props);
-
-        static const char* cppStandardNames[]  = { "(default)", "C++14",    "Latest C++ Standard"};
-        const var standards[]                  = { var(),       "stdcpp14", "stdcpplatest" };
-        addCppStandardProperty (props, cppStandardNames, standards, numElementsInArray (standards));
     }
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2017)
