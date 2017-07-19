@@ -30,46 +30,40 @@ namespace KeyboardFocusHelpers
     // left-to-right and then top-to-bottom.
     struct ScreenPositionComparator
     {
-        static int compareElements (const Component* const first, const Component* const second)
+        static int compareElements (const Component* first, const Component* second)
         {
-            const int explicitOrder1 = getOrder (first);
-            const int explicitOrder2 = getOrder (second);
+            auto explicitOrder1 = getOrder (first);
+            auto explicitOrder2 = getOrder (second);
 
             if (explicitOrder1 != explicitOrder2)
                 return explicitOrder1 - explicitOrder2;
 
-            const int yDiff = first->getY() - second->getY();
+            auto yDiff = first->getY() - second->getY();
 
             return yDiff == 0 ? first->getX() - second->getX()
                               : yDiff;
         }
 
-        static int getOrder (const Component* const c)
+        static int getOrder (const Component* c)
         {
-            const int order = c->getExplicitFocusOrder();
+            auto order = c->getExplicitFocusOrder();
             return order > 0 ? order : (std::numeric_limits<int>::max() / 2);
         }
     };
 
-    static void findAllFocusableComponents (Component* const parent, Array <Component*>& comps)
+    static void findAllFocusableComponents (Component* parent, Array<Component*>& comps)
     {
-        if (parent->getNumChildComponents() > 0)
+        if (parent->getNumChildComponents() != 0)
         {
-            Array <Component*> localComps;
+            Array<Component*> localComps;
             ScreenPositionComparator comparator;
 
-            for (int i = parent->getNumChildComponents(); --i >= 0;)
-            {
-                Component* const c = parent->getChildComponent (i);
-
+            for (auto* c : parent->getChildren())
                 if (c->isVisible() && c->isEnabled())
                     localComps.addSorted (comparator, c);
-            }
 
-            for (int i = 0; i < localComps.size(); ++i)
+            for (auto* c : localComps)
             {
-                Component* const c = localComps.getUnchecked (i);
-
                 if (c->getWantsKeyboardFocus())
                     comps.add (c);
 
@@ -90,18 +84,16 @@ namespace KeyboardFocusHelpers
         return c;
     }
 
-    static Component* getIncrementedComponent (Component* const current, const int delta)
+    static Component* getIncrementedComponent (Component* current, int delta)
     {
-        Component* focusContainer = findFocusContainer (current);
-
-        if (focusContainer != nullptr)
+        if (auto* focusContainer = findFocusContainer (current))
         {
-            Array <Component*> comps;
+            Array<Component*> comps;
             KeyboardFocusHelpers::findAllFocusableComponents (focusContainer, comps);
 
-            if (comps.size() > 0)
+            if (! comps.isEmpty())
             {
-                const int index = comps.indexOf (current);
+                auto index = comps.indexOf (current);
                 return comps [(index + comps.size() + delta) % comps.size()];
             }
         }
@@ -128,7 +120,7 @@ Component* KeyboardFocusTraverser::getPreviousComponent (Component* current)
 
 Component* KeyboardFocusTraverser::getDefaultComponent (Component* parentComponent)
 {
-    Array <Component*> comps;
+    Array<Component*> comps;
 
     if (parentComponent != nullptr)
         KeyboardFocusHelpers::findAllFocusableComponents (parentComponent, comps);

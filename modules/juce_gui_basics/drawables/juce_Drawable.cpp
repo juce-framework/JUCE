@@ -140,8 +140,8 @@ bool Drawable::replaceColour (Colour original, Colour replacement)
 {
     bool changed = false;
 
-    for (int i = getNumChildComponents(); --i >= 0;)
-        if (auto* d = dynamic_cast<Drawable*> (getChildComponent(i)))
+    for (auto* c : getChildren())
+        if (auto* d = dynamic_cast<Drawable*> (c))
             changed = d->replaceColour (original, replacement) || changed;
 
     return changed;

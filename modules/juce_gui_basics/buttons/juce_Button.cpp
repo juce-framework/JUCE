@@ -242,19 +242,17 @@ void Button::setRadioGroupId (const int newGroupId, NotificationType notificatio
 
 void Button::turnOffOtherButtonsInGroup (const NotificationType notification)
 {
-    if (Component* const p = getParentComponent())
+    if (auto* p = getParentComponent())
     {
         if (radioGroupId != 0)
         {
             WeakReference<Component> deletionWatcher (this);
 
-            for (int i = p->getNumChildComponents(); --i >= 0;)
+            for (auto* c : p->getChildren())
             {
-                Component* const c = p->getChildComponent (i);
-
                 if (c != this)
                 {
-                    if (Button* const b = dynamic_cast<Button*> (c))
+                    if (auto b = dynamic_cast<Button*> (c))
                     {
                         if (b->getRadioGroupId() == radioGroupId)
                         {

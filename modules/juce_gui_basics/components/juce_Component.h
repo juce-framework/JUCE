@@ -613,7 +613,7 @@ public:
     //==============================================================================
     /** Returns the number of child components that this component contains.
 
-        @see getChildComponent, getIndexOfChildComponent
+        @see getChildren, getChildComponent, getIndexOfChildComponent
     */
     int getNumChildComponents() const noexcept;
 
@@ -624,7 +624,7 @@ public:
 
         If the index is out-of-range, this will return a null pointer.
 
-        @see getNumChildComponents, getIndexOfChildComponent
+        @see getChildren, getNumChildComponents, getIndexOfChildComponent
     */
     Component* getChildComponent (int index) const noexcept;
 
@@ -635,9 +635,14 @@ public:
 
         Returns -1 if the component passed-in is not a child of this component.
 
-        @see getNumChildComponents, getChildComponent, addChildComponent, toFront, toBack, toBehind
+        @see getChildren, getNumChildComponents, getChildComponent, addChildComponent, toFront, toBack, toBehind
     */
     int getIndexOfChildComponent (const Component* child) const noexcept;
+
+    /** Provides access to the underlying array of child components.
+        The most likely reason you may want to use this is for iteration in a range-based for loop.
+    */
+    const Array<Component*>& getChildren() const noexcept          { return childComponentList; }
 
     /** Looks for a child component with the specified ID.
         @see setComponentID, getComponentID
@@ -2251,14 +2256,14 @@ private:
 
     //==============================================================================
     String componentName, componentID;
-    Component* parentComponent;
+    Component* parentComponent = nullptr;
     Rectangle<int> boundsRelativeToParent;
     ScopedPointer<Positioner> positioner;
     ScopedPointer<AffineTransform> affineTransform;
     Array<Component*> childComponentList;
-    LookAndFeel* lookAndFeel;
+    LookAndFeel* lookAndFeel = nullptr;
     MouseCursor cursor;
-    ImageEffectFilter* effect;
+    ImageEffectFilter* effect = nullptr;
     ScopedPointer<CachedComponentImage> cachedImage;
 
     class MouseListenerList;
@@ -2304,7 +2309,7 @@ private:
         ComponentFlags flags;
     };
 
-    uint8 componentTransparency;
+    uint8 componentTransparency = 0;
 
     //==============================================================================
     void internalMouseEnter (MouseInputSource, Point<float>, Time);

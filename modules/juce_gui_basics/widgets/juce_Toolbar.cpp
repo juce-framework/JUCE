@@ -177,7 +177,7 @@ public:
         {
             for (int i = 0; i < getNumChildComponents(); ++i)
             {
-                if (ToolbarItemComponent* const tc = dynamic_cast<ToolbarItemComponent*> (getChildComponent (i)))
+                if (auto* tc = dynamic_cast<ToolbarItemComponent*> (getChildComponent (i)))
                 {
                     tc->setVisible (false);
                     const int index = oldIndexes.removeAndReturn (i);
@@ -197,9 +197,9 @@ public:
         int y = indent;
         int maxX = 0;
 
-        for (int i = 0; i < getNumChildComponents(); ++i)
+        for (auto* c : getChildren())
         {
-            if (ToolbarItemComponent* const tc = dynamic_cast<ToolbarItemComponent*> (getChildComponent (i)))
+            if (auto* tc = dynamic_cast<ToolbarItemComponent*> (c))
             {
                 int preferredSize = 1, minSize = 1, maxSize = 1;
 

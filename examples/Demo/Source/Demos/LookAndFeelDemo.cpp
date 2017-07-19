@@ -596,9 +596,8 @@ private:
 
     void setAllLookAndFeels (LookAndFeel* laf)
     {
-        for (int i = 0; i < demoComp.getNumChildComponents(); ++i)
-            if (Component* c = demoComp.getChildComponent (i))
-                c->setLookAndFeel (laf);
+        for (auto* child : demoComp.getChildren())
+            child->setLookAndFeel (laf);
     }
 
     void comboBoxChanged (ComboBox* comboBoxThatHasChanged) override

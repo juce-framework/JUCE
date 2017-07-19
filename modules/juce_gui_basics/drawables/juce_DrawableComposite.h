@@ -148,7 +148,7 @@ private:
     //==============================================================================
     RelativeParallelogram bounds;
     MarkerList markersX, markersY;
-    bool updateBoundsReentrant;
+    bool updateBoundsReentrant = false;
 
     friend class Drawable::Positioner<DrawableComposite>;
     bool registerCoordinates (RelativeCoordinatePositionerBase&);

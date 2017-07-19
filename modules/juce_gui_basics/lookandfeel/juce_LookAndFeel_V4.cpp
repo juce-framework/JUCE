@@ -378,9 +378,9 @@ AlertWindow* LookAndFeel_V4::createAlertWindow (const String& title, const Strin
     bounds = bounds.withSizeKeepingCentre (bounds.getWidth() + boundsOffset, bounds.getHeight() + boundsOffset);
     aw->setBounds (bounds);
 
-    for (int i = 0, maxI = aw->getNumChildComponents(); i < maxI; ++i)
-        if (auto button = dynamic_cast<TextButton*> (aw->getChildComponent(i)))
-            button->setBounds (button->getBounds().withPosition (button->getX() + 25, button->getY() + 40));
+    for (auto* child : aw->getChildren())
+        if (auto button = dynamic_cast<TextButton*> (child))
+            button->setBounds (button->getBounds() + Point<int> (25, 40));
 
     return aw;
 }

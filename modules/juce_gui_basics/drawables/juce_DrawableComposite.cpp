@@ -25,8 +25,7 @@
 */
 
 DrawableComposite::DrawableComposite()
-    : bounds (Point<float>(), Point<float> (100.0f, 0.0f), Point<float> (0.0f, 100.0f)),
-      updateBoundsReentrant (false)
+    : bounds (Point<float>(), Point<float> (100.0f, 0.0f), Point<float> (0.0f, 100.0f))
 {
     setContentArea (RelativeRectangle (Rectangle<float> (0.0f, 0.0f, 100.0f, 100.0f)));
 }
@@ -35,11 +34,10 @@ DrawableComposite::DrawableComposite (const DrawableComposite& other)
     : Drawable (other),
       bounds (other.bounds),
       markersX (other.markersX),
-      markersY (other.markersY),
-      updateBoundsReentrant (false)
+      markersY (other.markersY)
 {
-    for (int i = 0; i < other.getNumChildComponents(); ++i)
-        if (const Drawable* const d = dynamic_cast<const Drawable*> (other.getChildComponent(i)))
+    for (auto* c : other.getChildren())
+        if (auto* d = dynamic_cast<const Drawable*> (c))
             addAndMakeVisible (d->createCopy());
 }
 
@@ -58,8 +56,8 @@ Rectangle<float> DrawableComposite::getDrawableBounds() const
 {
     Rectangle<float> r;
 
-    for (int i = getNumChildComponents(); --i >= 0;)
-        if (const Drawable* const d = dynamic_cast<const Drawable*> (getChildComponent(i)))
+    for (auto* c : getChildren())
+        if (auto* d = dynamic_cast<const Drawable*> (c))
             r = r.getUnion (d->isTransformed() ? d->getDrawableBounds().transformedBy (d->getTransform())
                                                : d->getDrawableBounds());
 
@@ -96,7 +94,7 @@ void DrawableComposite::setBoundingBox (const RelativeParallelogram& newBounds)
 
         if (bounds.isDynamic())
         {
-            Drawable::Positioner<DrawableComposite>* const p = new Drawable::Positioner<DrawableComposite> (*this);
+            auto p = new Drawable::Positioner<DrawableComposite> (*this);
             setPositioner (p);
             p->apply();
         }
@@ -135,11 +133,11 @@ void DrawableComposite::recalculateCoordinates (Expression::Scope* scope)
     Point<float> resolved[3];
     bounds.resolveThreePoints (resolved, scope);
 
-    const Rectangle<float> content (getContentArea().resolve (scope));
+    auto content = getContentArea().resolve (scope);
 
-    AffineTransform t (AffineTransform::fromTargetPoints (content.getX(),     content.getY(),      resolved[0].x, resolved[0].y,
-                                                          content.getRight(), content.getY(),      resolved[1].x, resolved[1].y,
-                                                          content.getX(),     content.getBottom(), resolved[2].x, resolved[2].y));
+    auto t = AffineTransform::fromTargetPoints (content.getX(),     content.getY(),      resolved[0].x, resolved[0].y,
+                                                content.getRight(), content.getY(),      resolved[1].x, resolved[1].y,
+                                                content.getX(),     content.getBottom(), resolved[2].x, resolved[2].y);
 
     if (t.isSingularity())
         t = AffineTransform();
@@ -149,8 +147,7 @@ void DrawableComposite::recalculateCoordinates (Expression::Scope* scope)
 
 void DrawableComposite::parentHierarchyChanged()
 {
-    DrawableComposite* parent = getParent();
-    if (parent != nullptr)
+    if (auto* parent = getParent())
         originRelativeToComponent = parent->originRelativeToComponent - getPosition();
 }
 
@@ -172,10 +169,10 @@ void DrawableComposite::updateBoundsToFitChildren()
 
         Rectangle<int> childArea;
 
-        for (int i = getNumChildComponents(); --i >= 0;)
-            childArea = childArea.getUnion (getChildComponent(i)->getBoundsInParent());
+        for (auto* c : getChildren())
+            childArea = childArea.getUnion (c->getBoundsInParent());
 
-        const Point<int> delta (childArea.getPosition());
+        auto delta = childArea.getPosition();
         childArea += getPosition();
 
         if (childArea != getBounds())
@@ -184,9 +181,8 @@ void DrawableComposite::updateBoundsToFitChildren()
             {
                 originRelativeToComponent -= delta;
 
-                for (int i = getNumChildComponents(); --i >= 0;)
-                    if (Component* const c = getChildComponent(i))
-                        c->setBounds (c->getBounds() - delta);
+                for (auto* c : getChildren())
+                    c->setBounds (c->getBounds() - delta);
             }
 
             setBounds (childArea);
@@ -306,9 +302,9 @@ ValueTree DrawableComposite::createValueTree (ComponentBuilder::ImageProvider* i
 
     ValueTree childList (v.getChildListCreating (nullptr));
 
-    for (int i = 0; i < getNumChildComponents(); ++i)
+    for (auto* c : getChildren())
     {
-        const Drawable* const d = dynamic_cast<const Drawable*> (getChildComponent(i));
+        auto* d = dynamic_cast<const Drawable*> (c);
         jassert (d != nullptr); // You can't save a mix of Drawables and normal components!
 
         childList.addChild (d->createValueTree (imageProvider), -1, nullptr);
@@ -324,11 +320,10 @@ Path DrawableComposite::getOutlineAsPath() const
 {
     Path p;
 
-    for (int i = 0; i < getNumChildComponents(); ++i)
-        if (auto* childDrawable = dynamic_cast<Drawable*> (getChildComponent (i)))
-            p.addPath (childDrawable->getOutlineAsPath());
+    for (auto* c : getChildren())
+        if (auto* d = dynamic_cast<Drawable*> (c))
+            p.addPath (d->getOutlineAsPath());
 
     p.applyTransform (getTransform());
-
     return p;
 }

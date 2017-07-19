@@ -411,8 +411,8 @@ struct FilterComponent   : public Component
 
     bool hitTest (int x, int y) override
     {
-        for (int i = getNumChildComponents(); --i >= 0;)
-            if (getChildComponent(i)->getBounds().contains (x, y))
+        for (auto* child : getChildren())
+            if (child->getBounds().contains (x, y))
                 return true;
 
         return x >= 3 && x < getWidth() - 6 && y >= pinSize && y < getHeight() - pinSize;
@@ -440,9 +440,9 @@ struct FilterComponent   : public Component
         {
             if (auto* processor = f->getProcessor())
             {
-                for (int i = 0; i < getNumChildComponents(); ++i)
+                for (auto* child : getChildren())
                 {
-                    if (auto* pin = dynamic_cast<PinComponent*> (getChildComponent(i)))
+                    if (auto* pin = dynamic_cast<PinComponent*> (child))
                     {
                         const bool isInput = pin->isInput;
                         int busIdx = 0;
@@ -465,8 +465,8 @@ struct FilterComponent   : public Component
 
     Point<float> getPinPos (int index, bool isInput) const
     {
-        for (int i = 0; i < getNumChildComponents(); ++i)
-            if (auto* pin = dynamic_cast<PinComponent*> (getChildComponent(i)))
+        for (auto* child : getChildren())
+            if (auto* pin = dynamic_cast<PinComponent*> (child))
                 if (pin->index == index && isInput == pin->isInput)
                     return getPosition().toFloat() + pin->getBounds().getCentre().toFloat();
 
@@ -804,21 +804,19 @@ void GraphEditorPanel::createNewPlugin (const PluginDescription& desc, Point<int
 
 FilterComponent* GraphEditorPanel::getComponentForFilter (const uint32 filterID) const
 {
-    for (int i = getNumChildComponents(); --i >= 0;)
-    {
-        if (auto* fc = dynamic_cast<FilterComponent*> (getChildComponent (i)))
+    for (auto* child : getChildren())
+        if (auto* fc = dynamic_cast<FilterComponent*> (child))
             if (fc->pluginID == filterID)
                 return fc;
-    }
 
     return nullptr;
 }
 
 ConnectorComponent* GraphEditorPanel::getComponentForConnection (const AudioProcessorGraph::Connection& conn) const
 {
-    for (int i = getNumChildComponents(); --i >= 0;)
+    for (auto* child : getChildren())
     {
-        if (auto* c = dynamic_cast<ConnectorComponent*> (getChildComponent (i)))
+        if (auto* c = dynamic_cast<ConnectorComponent*> (child))
             if (c->sourceFilterID == conn.sourceNodeId
                  && c->destFilterID == conn.destNodeId
                  && c->sourceFilterChannel == conn.sourceChannelIndex
@@ -831,8 +829,8 @@ ConnectorComponent* GraphEditorPanel::getComponentForConnection (const AudioProc
 
 PinComponent* GraphEditorPanel::findPinAt (Point<float> pos) const
 {
-    for (int i = getNumChildComponents(); --i >= 0;)
-        if (auto* fc = dynamic_cast<FilterComponent*> (getChildComponent (i)))
+    for (auto* child : getChildren())
+        if (auto* fc = dynamic_cast<FilterComponent*> (child))
             if (auto* pin = dynamic_cast<PinComponent*> (fc->getComponentAt (pos.toInt() - fc->getPosition())))
                 return pin;
 
@@ -851,11 +849,9 @@ void GraphEditorPanel::changeListenerCallback (ChangeBroadcaster*)
 
 void GraphEditorPanel::updateComponents()
 {
-    for (int i = getNumChildComponents(); --i >= 0;)
-    {
-        if (auto* fc = dynamic_cast<FilterComponent*> (getChildComponent (i)))
+    for (auto* child : getChildren())
+        if (auto* fc = dynamic_cast<FilterComponent*> (child))
             fc->update();
-    }
 
     for (int i = getNumChildComponents(); --i >= 0;)
     {

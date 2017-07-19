@@ -61,7 +61,7 @@ static NSRect flippedScreenRect (NSRect r) noexcept
 }
 
 #if JUCE_MODULE_AVAILABLE_juce_opengl
-void componentPeerAboutToChange (ComponentPeer&, bool);
+void componentPeerAboutToChange (Component&, bool);
 #endif
 
 //==============================================================================
@@ -672,7 +672,7 @@ public:
     {
        #if JUCE_MODULE_AVAILABLE_juce_opengl
         if ([view window] == window)
-            componentPeerAboutToChange (*this, (newWindow == nullptr));
+            componentPeerAboutToChange (getComponent(), newWindow == nullptr);
        #else
         ignoreUnused (newWindow);
        #endif

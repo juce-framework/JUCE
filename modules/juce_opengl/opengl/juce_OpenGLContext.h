@@ -322,14 +322,14 @@ private:
     struct AsyncWorkerFunctor : AsyncWorker
     {
         AsyncWorkerFunctor (T functorToUse) : functor (functorToUse) {}
-        void operator() (OpenGLContext& callerContext) override { functor (callerContext); }
+        void operator() (OpenGLContext& callerContext) override     { functor (callerContext); }
         T functor;
 
-        JUCE_DECLARE_NON_COPYABLE(AsyncWorkerFunctor)
+        JUCE_DECLARE_NON_COPYABLE (AsyncWorkerFunctor)
     };
 
     //==============================================================================
-    friend void componentPeerAboutToChange (ComponentPeer&, bool);
+    friend void componentPeerAboutToChange (Component&, bool);
     void overrideCanBeAttached (bool);
 
     //==============================================================================
