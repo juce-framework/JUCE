@@ -688,6 +688,7 @@ public:
         ignoreUnused (processor);
 
         [au willChangeValueForKey: @"allParameterValues"];
+        addPresets();
         [au didChangeValueForKey: @"allParameterValues"];
     }
 
