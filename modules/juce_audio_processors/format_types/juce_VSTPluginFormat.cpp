@@ -2218,6 +2218,10 @@ public:
     {
         closePluginWindow();
         openPluginWindow();
+
+       #if JUCE_LINUX
+        componentMovedOrResized (true, true);
+       #endif
     }
    #endif
 
