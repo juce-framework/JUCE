@@ -127,19 +127,19 @@ public:
     template <typename CharPointerType>
     static double readDoubleValue (CharPointerType& text) noexcept
     {
-        double result[3] = { 0 }, accumulator[2] = { 0 };
-        int exponentAdjustment[2] = { 0 }, exponentAccumulator[2] = { -1, -1 };
-        int exponent = 0, decPointIndex = 0, digit = 0;
-        int lastDigit = 0, numSignificantDigits = 0;
-        bool isNegative = false, digitsFound = false;
-        const int maxSignificantDigits = 15 + 2;
+        const int maxSignificantDigits = 17 + 1; // An additional digit for rounding
+        const int bufferSize = maxSignificantDigits + 7 + 1; // -.E-XXX and a trailing null-terminator
+        char buffer[bufferSize] = {};
+        char* currentCharacter = &(buffer[0]);
+        int numSigFigs = 0;
+        bool decimalPointFound = false;
 
         text = text.findEndOfWhitespace();
         juce_wchar c = *text;
 
         switch (c)
         {
-            case '-':   isNegative = true; // fall-through..
+            case '-':   *currentCharacter++ = '-'; // Fall-through..
             case '+':   c = *++text;
         }
 
@@ -162,61 +162,20 @@ public:
         {
             if (text.isDigit())
             {
-                lastDigit = digit;
-                digit = (int) text.getAndAdvance() - '0';
-                digitsFound = true;
+                int digit = (int) text.getAndAdvance() - '0';
 
-                if (decPointIndex != 0)
-                    exponentAdjustment[1]++;
-
-                if (numSignificantDigits == 0 && digit == 0)
+                if (numSigFigs >= maxSignificantDigits
+                 || ((numSigFigs == 0 && (! decimalPointFound)) && digit == 0))
                     continue;
 
-                if (++numSignificantDigits > maxSignificantDigits)
-                {
-                    if (digit > 5)
-                        ++accumulator [decPointIndex];
-                    else if (digit == 5 && (lastDigit & 1) != 0)
-                        ++accumulator [decPointIndex];
-
-                    if (decPointIndex > 0)
-                        exponentAdjustment[1]--;
-                    else
-                        exponentAdjustment[0]++;
-
-                    while (text.isDigit())
-                    {
-                        ++text;
-                        if (decPointIndex == 0)
-                            exponentAdjustment[0]++;
-                    }
-                }
-                else
-                {
-                    const double maxAccumulatorValue = (double) ((std::numeric_limits<unsigned int>::max() - 9) / 10);
-                    if (accumulator [decPointIndex] > maxAccumulatorValue)
-                    {
-                        result [decPointIndex] = mulexp10 (result [decPointIndex], exponentAccumulator [decPointIndex])
-                                                    + accumulator [decPointIndex];
-                        accumulator [decPointIndex] = 0;
-                        exponentAccumulator [decPointIndex] = 0;
-                    }
-
-                    accumulator [decPointIndex] = accumulator[decPointIndex] * 10 + digit;
-                    exponentAccumulator [decPointIndex]++;
-                }
+                *currentCharacter++ = '0' + (char) digit;
+                numSigFigs++;
             }
-            else if (decPointIndex == 0 && *text == '.')
+            else if ((! decimalPointFound) && *text == '.')
             {
                 ++text;
-                decPointIndex = 1;
-
-                if (numSignificantDigits > maxSignificantDigits)
-                {
-                    while (text.isDigit())
-                        ++text;
-                    break;
-                }
+                *currentCharacter++ = '.';
+                decimalPointFound = true;
             }
             else
             {
@@ -224,34 +183,38 @@ public:
             }
         }
 
-        result[0] = mulexp10 (result[0], exponentAccumulator[0]) + accumulator[0];
-
-        if (decPointIndex != 0)
-            result[1] = mulexp10 (result[1], exponentAccumulator[1]) + accumulator[1];
-
         c = *text;
-        if ((c == 'e' || c == 'E') && digitsFound)
+        if ((c == 'e' || c == 'E') && numSigFigs > 0)
         {
-            bool negativeExponent = false;
+            *currentCharacter++ = 'e';
 
             switch (*++text)
             {
-                case '-':   negativeExponent = true; // fall-through..
+                case '-':   *currentCharacter++ = '-'; // fall-through..
                 case '+':   ++text;
             }
 
-            while (text.isDigit())
-                exponent = (exponent * 10) + ((int) text.getAndAdvance() - '0');
+            int exponentMagnitude = 0;
 
-            if (negativeExponent)
-                exponent = -exponent;
+            while (text.isDigit())
+            {
+                if (currentCharacter == std::end (buffer) - 1)
+                    return std::numeric_limits<double>::quiet_NaN();
+
+                int digit = (int) text.getAndAdvance() - '0';
+
+                if (digit != 0 || exponentMagnitude != 0)
+                {
+                    *currentCharacter++ = '0' + (char) digit;
+                    exponentMagnitude = (exponentMagnitude * 10) + digit;
+                }
+            }
+
+            if (exponentMagnitude > std::numeric_limits<double>::max_exponent10)
+                return std::numeric_limits<double>::quiet_NaN();
         }
 
-        double r = mulexp10 (result[0], exponent + exponentAdjustment[0]);
-        if (decPointIndex != 0)
-            r += mulexp10 (result[1], exponent - exponentAdjustment[1]);
-
-        return isNegative ? -r : r;
+        return strtod (&buffer[0], nullptr);
     }
 
     /** Parses a character string, to read a floating-point value. */
