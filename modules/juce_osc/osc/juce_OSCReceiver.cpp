@@ -635,7 +635,7 @@ void OSCReceiver::registerFormatErrorHandler (FormatErrorHandler handler)
 class OSCInputStreamTests  : public UnitTest
 {
 public:
-    OSCInputStreamTests() : UnitTest ("OSCInputStream class") {}
+    OSCInputStreamTests() : UnitTest ("OSCInputStream class", "OSC") {}
 
     void runTest()
     {

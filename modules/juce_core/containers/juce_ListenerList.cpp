@@ -76,7 +76,7 @@ struct Listener2 : public ListenerBase
 class ListenerListTests : public UnitTest
 {
 public:
-    ListenerListTests() : UnitTest ("ListenerList") {}
+    ListenerListTests() : UnitTest ("ListenerList", "Containers") {}
 
     template <typename... Args>
     void callHelper (std::vector<int>& expectedCounterValues)

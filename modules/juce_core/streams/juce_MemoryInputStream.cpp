@@ -98,7 +98,7 @@ int64 MemoryInputStream::getPosition()
 class MemoryStreamTests  : public UnitTest
 {
 public:
-    MemoryStreamTests() : UnitTest ("MemoryInputStream & MemoryOutputStream") {}
+    MemoryStreamTests() : UnitTest ("MemoryInputStream & MemoryOutputStream", "Memory Streams") {}
 
     void runTest() override
     {

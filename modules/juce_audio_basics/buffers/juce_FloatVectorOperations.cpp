@@ -1016,7 +1016,7 @@ void JUCE_CALLTYPE FloatVectorOperations::disableDenormalisedNumberSupport() noe
 class FloatVectorOperationsTests  : public UnitTest
 {
 public:
-    FloatVectorOperationsTests() : UnitTest ("FloatVectorOperations") {}
+    FloatVectorOperationsTests() : UnitTest ("FloatVectorOperations", "Audio") {}
 
     template <typename ValueType>
     struct TestRunner

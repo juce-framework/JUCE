@@ -22,7 +22,7 @@
 
 struct HashMapTest : public UnitTest
 {
-    HashMapTest() : UnitTest ("HashMap") {}
+    HashMapTest() : UnitTest ("HashMap", "Containers") {}
 
     void runTest() override
     {

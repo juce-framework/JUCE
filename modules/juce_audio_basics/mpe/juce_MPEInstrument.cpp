@@ -695,7 +695,7 @@ class MPEInstrumentTests : public UnitTest
 {
 public:
     MPEInstrumentTests()
-        : UnitTest ("MPEInstrument class")
+        : UnitTest ("MPEInstrument class", "MIDI/MPE")
     {
         // using two MPE zones with the following layout for testing
         //

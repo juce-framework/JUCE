@@ -299,7 +299,7 @@ bool JUCE_CALLTYPE Process::isRunningUnderDebugger() noexcept
 class AtomicTests  : public UnitTest
 {
 public:
-    AtomicTests() : UnitTest ("Atomics") {}
+    AtomicTests() : UnitTest ("Atomics", "Threads") {}
 
     void runTest() override
     {
@@ -422,7 +422,7 @@ class ThreadLocalValueUnitTest : public UnitTest, private Thread
 {
 public:
     ThreadLocalValueUnitTest()
-        : UnitTest ("ThreadLocalValue"),
+        : UnitTest ("ThreadLocalValue", "Threads"),
           Thread ("ThreadLocalValue Thread")
     {}
 

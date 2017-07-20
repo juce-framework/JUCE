@@ -75,7 +75,7 @@ namespace FunctionTestsHelpers
 class FunctionTests  : public UnitTest
 {
 public:
-    FunctionTests() : UnitTest ("Function") {}
+    FunctionTests() : UnitTest ("Function", "Function") {}
 
     void runTest() override
     {

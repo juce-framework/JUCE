@@ -368,7 +368,7 @@ int BlowFish::unpad (const void* data, size_t size) noexcept
 class BlowFishTests  : public UnitTest
 {
 public:
-    BlowFishTests() : UnitTest ("BlowFish") {}
+    BlowFishTests() : UnitTest ("BlowFish", "Cryptography") {}
 
     static void fillMemoryBlockWithRandomData (MemoryBlock& block, Random& random)
     {

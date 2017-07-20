@@ -81,7 +81,7 @@ String ChildProcess::readAllProcessOutput()
 class ChildProcessTests  : public UnitTest
 {
 public:
-    ChildProcessTests() : UnitTest ("ChildProcess") {}
+    ChildProcessTests() : UnitTest ("ChildProcess", "Threads") {}
 
     void runTest() override
     {

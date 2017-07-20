@@ -111,7 +111,7 @@ const OSCBundle& OSCBundle::Element::getBundle() const
 class OSCBundleTests  : public UnitTest
 {
 public:
-    OSCBundleTests() : UnitTest ("OSCBundle class") {}
+    OSCBundleTests() : UnitTest ("OSCBundle class", "OSC") {}
 
     void runTest()
     {
@@ -214,7 +214,7 @@ static OSCBundleTests OSCBundleUnitTests;
 class OSCBundleElementTests  : public UnitTest
 {
 public:
-    OSCBundleElementTests() : UnitTest ("OSCBundle::Element class") {}
+    OSCBundleElementTests() : UnitTest ("OSCBundle::Element class", "OSC") {}
 
     void runTest()
     {

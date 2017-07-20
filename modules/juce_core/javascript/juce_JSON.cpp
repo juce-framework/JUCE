@@ -529,7 +529,7 @@ Result JSON::parseQuotedString (String::CharPointerType& t, var& result)
 class JSONTests  : public UnitTest
 {
 public:
-    JSONTests() : UnitTest ("JSON") {}
+    JSONTests() : UnitTest ("JSON", "JSON") {}
 
     static String createRandomWideCharString (Random& r)
     {

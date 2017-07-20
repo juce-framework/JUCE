@@ -89,7 +89,7 @@ bool MPEValue::operator!= (const MPEValue& other) const noexcept
 class MPEValueTests  : public UnitTest
 {
 public:
-    MPEValueTests() : UnitTest ("MPEValue class") {}
+    MPEValueTests() : UnitTest ("MPEValue class", "MIDI/MPE") {}
 
     void runTest() override
     {

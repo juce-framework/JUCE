@@ -1057,7 +1057,7 @@ void ValueTree::Listener::valueTreeRedirected (ValueTree&) {}
 class ValueTreeTests  : public UnitTest
 {
 public:
-    ValueTreeTests() : UnitTest ("ValueTrees") {}
+    ValueTreeTests() : UnitTest ("ValueTrees", "Values") {}
 
     static String createRandomIdentifier (Random& r)
     {
