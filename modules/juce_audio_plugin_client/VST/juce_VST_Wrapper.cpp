@@ -2044,6 +2044,7 @@ private:
         {
             editorScaleFactor = scale;
 
+           #if ! (JUCE_MAC || JUCE_IOS)
             if (editorComp != nullptr)
             {
                 if (auto* ed = editorComp->getEditorComp())
@@ -2052,6 +2053,7 @@ private:
                 if (editorComp != nullptr)
                     editorComp->updateWindowSize();
             }
+           #endif
         }
 
         return 1;
