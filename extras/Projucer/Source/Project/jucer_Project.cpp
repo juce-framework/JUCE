@@ -152,7 +152,7 @@ void Project::setMissingDefaultValues()
     if (shouldIncludeBinaryInAppConfig() == var())
         shouldIncludeBinaryInAppConfig() = true;
 
-    if (! projectRoot.hasType (Ids::cppLanguageStandard))
+    if (! projectRoot.hasProperty (Ids::cppLanguageStandard))
         getCppStandardValue() = "11";
 
     ProjucerApplication::getApp().updateNewlyOpenedProject (*this);
