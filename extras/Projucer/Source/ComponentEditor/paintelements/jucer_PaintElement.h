@@ -28,6 +28,8 @@
 
 #include "../jucer_GeneratedCode.h"
 #include "../ui/jucer_RelativePositionedRectangle.h"
+#include "../jucer_ComponentLayout.h" // D STENNING
+
 class FillType;
 class PaintRoutine;
 class JucerDocument;
@@ -56,6 +58,7 @@ public:
 
     const RelativePositionedRectangle& getPosition() const;
     void setPosition (const RelativePositionedRectangle& newPosition, const bool undoable);
+    void setSingleDimension( const bool undoable, const double value , ComponentLayout::ComponentPositionDimension dim); // D STENNING
 
     void updateBounds (const Rectangle<int>& activeArea);
 
@@ -69,7 +72,7 @@ public:
 
     virtual void drawExtraEditorGraphics (Graphics& g, const Rectangle<int>& relativeTo);
 
-    virtual void getEditableProperties (Array<PropertyComponent*>& props);
+    virtual void getEditableProperties (Array<PropertyComponent*>& props, bool multipleSelected);
 
     virtual void showPopupMenu();
 

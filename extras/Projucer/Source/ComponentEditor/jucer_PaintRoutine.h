@@ -62,6 +62,16 @@ public:
     void elementToFront (PaintElement* element, const bool undoable);
     void elementToBack (PaintElement* element, const bool undoable);
 
+
+    void setSingleDimension(const bool undoable,const double value, ComponentLayout::ComponentPositionDimension dimension); // D STENNING
+    void setElementSingleDimension(PaintElement* e,const bool undoable, const double value , ComponentLayout::ComponentPositionDimension dim); // D STENNING)
+
+    void alignLeft();  // D STENNING
+    void alignRight();
+    void alignTop();
+    void alignBottom();
+
+
     const Colour getBackgroundColour() const noexcept                       { return backgroundColour; }
     void setBackgroundColour (Colour newColour) noexcept;
 

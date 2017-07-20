@@ -630,6 +630,12 @@ void JucerDocumentEditor::getAllCommands (Array <CommandID>& commands)
         JucerCommandIDs::compOverlay33,
         JucerCommandIDs::compOverlay66,
         JucerCommandIDs::compOverlay100,
+
+        JucerCommandIDs::alignRight,  // D STENNING
+        JucerCommandIDs::alignLeft,
+        JucerCommandIDs::alignTop,
+        JucerCommandIDs::alignBottom, // D STENNING
+
         StandardApplicationCommandIDs::undo,
         StandardApplicationCommandIDs::redo,
         StandardApplicationCommandIDs::cut,
@@ -637,7 +643,8 @@ void JucerDocumentEditor::getAllCommands (Array <CommandID>& commands)
         StandardApplicationCommandIDs::paste,
         StandardApplicationCommandIDs::del,
         StandardApplicationCommandIDs::selectAll,
-        StandardApplicationCommandIDs::deselectAll
+        StandardApplicationCommandIDs::deselectAll,
+
     };
 
     commands.addArray (ids, numElementsInArray (ids));
@@ -810,6 +817,24 @@ void JucerDocumentEditor::getCommandInfo (const CommandID commandID, Application
             result.setActive (currentPaintRoutine != nullptr && document->getComponentLayout() != nullptr);
             result.setTicked (amount == currentAmount);
         }
+        break;
+
+
+    case JucerCommandIDs::alignTop:       // D STENNING
+        result.setInfo (TRANS("Align Top"), TRANS("xxxxxx"), CommandCategories::editing, 0);
+        result.setActive (isSomethingSelected());
+        break;
+    case JucerCommandIDs::alignBottom:
+        result.setInfo (TRANS("Align Bottom"), TRANS("xxxx"), CommandCategories::editing, 0);
+        result.setActive (isSomethingSelected());
+        break;
+    case JucerCommandIDs::alignLeft:
+        result.setInfo (TRANS("Align Left"), TRANS("xxxxxx."), CommandCategories::editing, 0);
+        result.setActive (isSomethingSelected());
+        break;
+    case JucerCommandIDs::alignRight:
+        result.setInfo (TRANS("Align Right"), TRANS("xxxxxx"), CommandCategories::editing, 0);
+        result.setActive (isSomethingSelected());
         break;
 
     case StandardApplicationCommandIDs::undo:
@@ -994,6 +1019,33 @@ bool JucerDocumentEditor::perform (const InvocationInfo& info)
                 currentPaintRoutine->selectedToBack();
 
             break;
+
+
+        case JucerCommandIDs::alignLeft:    // D STENNING
+            if (currentLayout != nullptr)
+                currentLayout->alignLeft();
+            else if (currentPaintRoutine != nullptr)
+                currentPaintRoutine->alignLeft();
+            break;
+        case JucerCommandIDs::alignRight:    // D STENNING
+            if (currentLayout != nullptr)
+                currentLayout->alignRight();
+            else if (currentPaintRoutine != nullptr)
+                currentPaintRoutine->alignRight();
+            break;
+        case JucerCommandIDs::alignTop:    // D STENNING
+            if (currentLayout != nullptr)
+                currentLayout->alignTop();
+            else if (currentPaintRoutine != nullptr)
+                currentPaintRoutine->alignTop();
+            break;
+        case JucerCommandIDs::alignBottom:    // D STENNING
+            if (currentLayout != nullptr)
+                currentLayout->alignBottom();
+            else if (currentPaintRoutine != nullptr)
+                currentPaintRoutine->alignBottom();
+            break;
+
 
         case JucerCommandIDs::group:
             if (currentPaintRoutine != nullptr)

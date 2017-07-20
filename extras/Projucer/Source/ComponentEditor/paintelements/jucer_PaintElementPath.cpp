@@ -349,10 +349,13 @@ void PaintElementPath::pointListChanged()
 }
 
 //==============================================================================
-void PaintElementPath::getEditableProperties (Array <PropertyComponent*>& props)
+void PaintElementPath::getEditableProperties (Array <PropertyComponent*>& props, bool multipleSelected)
 {
-    props.add (new PathWindingModeProperty (this));
-    getColourSpecificProperties (props);
+    if( !multipleSelected)
+    {
+        props.add (new PathWindingModeProperty (this));
+        getColourSpecificProperties (props);
+    }
 }
 
 //==============================================================================
@@ -1253,7 +1256,7 @@ public:
     PathPointPositionProperty (PaintElementPath* const owner_,
                                const int index_, const int pointNumber_,
                                const String& name,
-                               ComponentPositionDimension dimension_)
+                               ComponentLayout::ComponentPositionDimension dimension_) // D STENNING
         : PositionPropertyBase (owner_, name, dimension_, false, false,
                                 owner_->getDocument()->getComponentLayout()),
           owner (owner_),
@@ -1271,6 +1274,15 @@ public:
     void setPosition (const RelativePositionedRectangle& newPos)
     {
         owner->setPoint (index, pointNumber, newPos, true);
+    }
+
+    void setSingleDimension( bool undoable,const double value , ComponentLayout::ComponentPositionDimension dim)
+    {
+        // control shouldnt be getting here
+        (void)undoable;
+        (void)value;
+        (void)dim;
+        JUCE_BREAK_IN_DEBUGGER;
     }
 
     RelativePositionedRectangle getPosition() const
@@ -1453,16 +1465,20 @@ void PathPoint::changePointType (const Path::Iterator::PathElementType newType,
     }
 }
 
-void PathPoint::getEditableProperties (Array<PropertyComponent*>& props)
+void PathPoint::getEditableProperties (Array<PropertyComponent*>& props, bool multipleSelected )  // D STENNING
 {
+
+    if ( multipleSelected) // D STENNING
+        return;
+
     const int index = owner->points.indexOf (this);
     jassert (index >= 0);
 
     switch (type)
     {
         case Path::Iterator::startNewSubPath:
-            props.add (new PathPointPositionProperty (owner, index, 0, "x", PositionPropertyBase::componentX));
-            props.add (new PathPointPositionProperty (owner, index, 0, "y", PositionPropertyBase::componentY));
+            props.add (new PathPointPositionProperty (owner, index, 0, "x", ComponentLayout::componentX));  // D STENNING
+            props.add (new PathPointPositionProperty (owner, index, 0, "y", ComponentLayout::componentY));
 
             props.add (new PathPointClosedProperty (owner, index));
             props.add (new AddNewPointProperty (owner, index));
@@ -1470,28 +1486,28 @@ void PathPoint::getEditableProperties (Array<PropertyComponent*>& props)
 
         case Path::Iterator::lineTo:
             props.add (new PathPointTypeProperty (owner, index));
-            props.add (new PathPointPositionProperty (owner, index, 0, "x", PositionPropertyBase::componentX));
-            props.add (new PathPointPositionProperty (owner, index, 0, "y", PositionPropertyBase::componentY));
+            props.add (new PathPointPositionProperty (owner, index, 0, "x", ComponentLayout::componentX));
+            props.add (new PathPointPositionProperty (owner, index, 0, "y", ComponentLayout::componentY));
             props.add (new AddNewPointProperty (owner, index));
             break;
 
         case Path::Iterator::quadraticTo:
             props.add (new PathPointTypeProperty (owner, index));
-            props.add (new PathPointPositionProperty (owner, index, 0, "control pt x", PositionPropertyBase::componentX));
-            props.add (new PathPointPositionProperty (owner, index, 0, "control pt y", PositionPropertyBase::componentY));
-            props.add (new PathPointPositionProperty (owner, index, 1, "x", PositionPropertyBase::componentX));
-            props.add (new PathPointPositionProperty (owner, index, 1, "y", PositionPropertyBase::componentY));
+            props.add (new PathPointPositionProperty (owner, index, 0, "control pt x", ComponentLayout::componentX));
+            props.add (new PathPointPositionProperty (owner, index, 0, "control pt y", ComponentLayout::componentY));
+            props.add (new PathPointPositionProperty (owner, index, 1, "x", ComponentLayout::componentX));
+            props.add (new PathPointPositionProperty (owner, index, 1, "y", ComponentLayout::componentY));
             props.add (new AddNewPointProperty (owner, index));
             break;
 
         case Path::Iterator::cubicTo:
             props.add (new PathPointTypeProperty (owner, index));
-            props.add (new PathPointPositionProperty (owner, index, 0, "control pt1 x", PositionPropertyBase::componentX));
-            props.add (new PathPointPositionProperty (owner, index, 0, "control pt1 y", PositionPropertyBase::componentY));
-            props.add (new PathPointPositionProperty (owner, index, 1, "control pt2 x", PositionPropertyBase::componentX));
-            props.add (new PathPointPositionProperty (owner, index, 1, "control pt2 y", PositionPropertyBase::componentY));
-            props.add (new PathPointPositionProperty (owner, index, 2, "x", PositionPropertyBase::componentX));
-            props.add (new PathPointPositionProperty (owner, index, 2, "y", PositionPropertyBase::componentY));
+            props.add (new PathPointPositionProperty (owner, index, 0, "control pt1 x", ComponentLayout::componentX));
+            props.add (new PathPointPositionProperty (owner, index, 0, "control pt1 y", ComponentLayout::componentY));
+            props.add (new PathPointPositionProperty (owner, index, 1, "control pt2 x", ComponentLayout::componentX));
+            props.add (new PathPointPositionProperty (owner, index, 1, "control pt2 y", ComponentLayout::componentY));
+            props.add (new PathPointPositionProperty (owner, index, 2, "x", ComponentLayout::componentX));
+            props.add (new PathPointPositionProperty (owner, index, 2, "y", ComponentLayout::componentY));
             props.add (new AddNewPointProperty (owner, index));
             break;
 
