@@ -204,6 +204,15 @@ public:
         numUsed = 0;
     }
 
+    /** Fills the Array with the provided value. */
+    void fill (const ParameterType& newValue) noexcept
+    {
+		auto n = size();
+
+        for (int i = 0; i < n; ++i)
+            setUnchecked (i, newValue);
+    }
+
     //==============================================================================
     /** Returns the current number of elements in the array. */
     inline int size() const noexcept
@@ -379,7 +388,6 @@ public:
 
     //==============================================================================
     /** Appends a new element at the end of the array.
-
         @param newElement       the new object to add to the array
         @see set, insert, addIfNotAlreadyThere, addSorted, addUsingDefaultSort, addArray
     */
@@ -391,7 +399,6 @@ public:
     }
 
     /** Appends a new element at the end of the array.
-
         @param newElement       the new object to add to the array
         @see set, insert, addIfNotAlreadyThere, addSorted, addUsingDefaultSort, addArray
     */
@@ -400,6 +407,24 @@ public:
         const ScopedLockType lock (getLock());
         data.ensureAllocatedSize (numUsed + 1);
         new (data.elements + numUsed++) ElementType (static_cast<ElementType&&> (newElement));
+    }
+
+    /** Appends multiple new elements at the end of the array. */
+    template <typename... OtherElements>
+    void add (const ElementType& firstNewElement, OtherElements... otherElements)
+    {
+        const ScopedLockType lock (getLock());
+        data.ensureAllocatedSize (numUsed + 1 + (int) sizeof... (otherElements));
+        addAssumingCapacityIsReady (firstNewElement, otherElements...);
+    }
+
+    /** Appends multiple new elements at the end of the array. */
+    template <typename... OtherElements>
+    void add (ElementType&& firstNewElement, OtherElements... otherElements)
+    {
+        const ScopedLockType lock (getLock());
+        data.ensureAllocatedSize (numUsed + 1 + (int) sizeof... (otherElements));
+        addAssumingCapacityIsReady (static_cast<ElementType&&> (firstNewElement), otherElements...);
     }
 
     /** Inserts a new element into the array at a given position.
@@ -1221,5 +1246,22 @@ private:
     {
         if (data.numAllocated > jmax (minimumAllocatedSize, numUsed * 2))
             data.shrinkToNoMoreThan (jmax (numUsed, jmax (minimumAllocatedSize, 64 / (int) sizeof (ElementType))));
+    }
+
+    void addAssumingCapacityIsReady (const ElementType& e)  { new (data.elements + numUsed++) ElementType (e); }
+    void addAssumingCapacityIsReady (ElementType&& e)       { new (data.elements + numUsed++) ElementType (static_cast<ElementType&&> (e)); }
+
+    template <typename... OtherElements>
+    void addAssumingCapacityIsReady (const ElementType& firstNewElement, OtherElements... otherElements)
+    {
+        addAssumingCapacityIsReady (firstNewElement);
+        addAssumingCapacityIsReady (otherElements...);
+    }
+
+    template <typename... OtherElements>
+    void addAssumingCapacityIsReady (ElementType&& firstNewElement, OtherElements... otherElements)
+    {
+        addAssumingCapacityIsReady (static_cast<ElementType&&> (firstNewElement));
+        addAssumingCapacityIsReady (otherElements...);
     }
 };
