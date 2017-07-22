@@ -198,7 +198,7 @@ public:
 
             while (text.isDigit())
             {
-                if (currentCharacter == std::end (buffer) - 1)
+                if (currentCharacter == &buffer[bufferSize - 1])
                     return std::numeric_limits<double>::quiet_NaN();
 
                 int digit = (int) text.getAndAdvance() - '0';
