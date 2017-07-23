@@ -114,15 +114,18 @@ bool CharacterFunctions::isPrintable (const juce_wchar character) noexcept
 
 int CharacterFunctions::getHexDigitValue (const juce_wchar digit) noexcept
 {
-    unsigned int d = (unsigned int) digit - '0';
+    auto d = (unsigned int) (digit - '0');
+
     if (d < (unsigned int) 10)
         return (int) d;
 
     d += (unsigned int) ('0' - 'a');
+
     if (d < (unsigned int) 6)
         return (int) d + 10;
 
     d += (unsigned int) ('a' - 'A');
+
     if (d < (unsigned int) 6)
         return (int) d + 10;
 
@@ -138,19 +141,23 @@ double CharacterFunctions::mulexp10 (const double value, int exponent) noexcept
         return 0;
 
     const bool negative = (exponent < 0);
+
     if (negative)
         exponent = -exponent;
 
     double result = 1.0, power = 10.0;
+
     for (int bit = 1; exponent != 0; bit <<= 1)
     {
         if ((exponent & bit) != 0)
         {
             exponent ^= bit;
             result *= power;
+
             if (exponent == 0)
                 break;
         }
+
         power *= power;
     }
 

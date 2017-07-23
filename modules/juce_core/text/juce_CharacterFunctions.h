@@ -135,7 +135,7 @@ public:
         bool decimalPointFound = false;
 
         text = text.findEndOfWhitespace();
-        juce_wchar c = *text;
+        auto c = *text;
 
         switch (c)
         {
@@ -165,7 +165,7 @@ public:
                 int digit = (int) text.getAndAdvance() - '0';
 
                 if (numSigFigs >= maxSignificantDigits
-                 || ((numSigFigs == 0 && (! decimalPointFound)) && digit == 0))
+                     || ((numSigFigs == 0 && (! decimalPointFound)) && digit == 0))
                     continue;
 
                 *currentCharacter++ = '0' + (char) digit;
@@ -184,6 +184,7 @@ public:
         }
 
         c = *text;
+
         if ((c == 'e' || c == 'E') && numSigFigs > 0)
         {
             *currentCharacter++ = 'e';
@@ -201,7 +202,7 @@ public:
                 if (currentCharacter == &buffer[bufferSize - 1])
                     return std::numeric_limits<double>::quiet_NaN();
 
-                int digit = (int) text.getAndAdvance() - '0';
+                auto digit = (int) text.getAndAdvance() - '0';
 
                 if (digit != 0 || exponentMagnitude != 0)
                 {
@@ -230,15 +231,15 @@ public:
     static IntType getIntValue (const CharPointerType text) noexcept
     {
         IntType v = 0;
-        CharPointerType s (text.findEndOfWhitespace());
-
+        auto s = text.findEndOfWhitespace();
         const bool isNeg = *s == '-';
+
         if (isNeg)
             ++s;
 
         for (;;)
         {
-            const juce_wchar c = s.getAndAdvance();
+            auto c = s.getAndAdvance();
 
             if (c >= '0' && c <= '9')
                 v = v * 10 + (IntType) (c - '0');
@@ -259,7 +260,7 @@ public:
 
             while (! t.isEmpty())
             {
-                const int hexValue = CharacterFunctions::getHexDigitValue (t.getAndAdvance());
+                auto hexValue = CharacterFunctions::getHexDigitValue (t.getAndAdvance());
 
                 if (hexValue >= 0)
                     result = (result << 4) | hexValue;
@@ -311,16 +312,16 @@ public:
     template <typename DestCharPointerType, typename SrcCharPointerType>
     static size_t copyWithDestByteLimit (DestCharPointerType& dest, SrcCharPointerType src, size_t maxBytesToWrite) noexcept
     {
-        typename DestCharPointerType::CharType const* const startAddress = dest.getAddress();
-        ssize_t maxBytes = (ssize_t) maxBytesToWrite;
+        auto startAddress = dest.getAddress();
+        auto maxBytes = (ssize_t) maxBytesToWrite;
         maxBytes -= sizeof (typename DestCharPointerType::CharType); // (allow for a terminating null)
 
         for (;;)
         {
-            const juce_wchar c = src.getAndAdvance();
-            const size_t bytesNeeded = DestCharPointerType::getBytesRequiredFor (c);
-
+            auto c = src.getAndAdvance();
+            auto bytesNeeded = DestCharPointerType::getBytesRequiredFor (c);
             maxBytes -= bytesNeeded;
+
             if (c == 0 || maxBytes < 0)
                 break;
 
@@ -340,7 +341,8 @@ public:
     {
         while (--maxChars > 0)
         {
-            const juce_wchar c = src.getAndAdvance();
+            auto c = src.getAndAdvance();
+
             if (c == 0)
                 break;
 
@@ -353,7 +355,7 @@ public:
     /** Compares two characters. */
     static inline int compare (juce_wchar char1, juce_wchar char2) noexcept
     {
-        if (int diff = static_cast<int> (char1) - static_cast<int> (char2))
+        if (auto diff = static_cast<int> (char1) - static_cast<int> (char2))
             return diff < 0 ? -1 : 1;
 
         return 0;
@@ -365,9 +367,9 @@ public:
     {
         for (;;)
         {
-            const juce_wchar c1 = s1.getAndAdvance();
+            auto c1 = s1.getAndAdvance();
 
-            if (int diff = compare (c1, s2.getAndAdvance()))
+            if (auto diff = compare (c1, s2.getAndAdvance()))
                 return diff;
 
             if (c1 == 0)
@@ -383,9 +385,9 @@ public:
     {
         while (--maxChars >= 0)
         {
-            const juce_wchar c1 = s1.getAndAdvance();
+            auto c1 = s1.getAndAdvance();
 
-            if (int diff = compare (c1, s2.getAndAdvance()))
+            if (auto diff = compare (c1, s2.getAndAdvance()))
                 return diff;
 
             if (c1 == 0)
@@ -407,9 +409,9 @@ public:
     {
         for (;;)
         {
-            const juce_wchar c1 = s1.getAndAdvance();
+            auto c1 = s1.getAndAdvance();
 
-            if (int diff = compareIgnoreCase (c1, s2.getAndAdvance()))
+            if (auto diff = compareIgnoreCase (c1, s2.getAndAdvance()))
                 return diff;
 
             if (c1 == 0)
@@ -425,9 +427,9 @@ public:
     {
         while (--maxChars >= 0)
         {
-            const juce_wchar c1 = s1.getAndAdvance();
+            auto c1 = s1.getAndAdvance();
 
-            if (int diff = compareIgnoreCase (c1, s2.getAndAdvance()))
+            if (auto diff = compareIgnoreCase (c1, s2.getAndAdvance()))
                 return diff;
 
             if (c1 == 0)
@@ -444,7 +446,7 @@ public:
     static int indexOf (CharPointerType1 textToSearch, const CharPointerType2 substringToLookFor) noexcept
     {
         int index = 0;
-        const int substringLength = (int) substringToLookFor.length();
+        auto substringLength = (int) substringToLookFor.length();
 
         for (;;)
         {
@@ -465,7 +467,7 @@ public:
     template <typename CharPointerType1, typename CharPointerType2>
     static CharPointerType1 find (CharPointerType1 textToSearch, const CharPointerType2 substringToLookFor) noexcept
     {
-        const int substringLength = (int) substringToLookFor.length();
+        auto substringLength = (int) substringToLookFor.length();
 
         while (textToSearch.compareUpTo (substringToLookFor, substringLength) != 0
                  && ! textToSearch.isEmpty())
@@ -483,7 +485,7 @@ public:
     {
         for (;; ++textToSearch)
         {
-            const juce_wchar c = *textToSearch;
+            auto c = *textToSearch;
 
             if (c == charToLookFor || c == 0)
                 break;
@@ -500,7 +502,7 @@ public:
     static int indexOfIgnoreCase (CharPointerType1 haystack, const CharPointerType2 needle) noexcept
     {
         int index = 0;
-        const int needleLength = (int) needle.length();
+        auto needleLength = (int) needle.length();
 
         for (;;)
         {
@@ -572,13 +574,13 @@ public:
         the breakCharacters string.
     */
     template <typename Type, typename BreakType>
-    static Type findEndOfToken (Type text, const BreakType breakCharacters, const Type quoteCharacters)
+    static Type findEndOfToken (Type text, BreakType breakCharacters, Type quoteCharacters)
     {
         juce_wchar currentQuoteChar = 0;
 
         while (! text.isEmpty())
         {
-            const juce_wchar c = text.getAndAdvance();
+            auto c = text.getAndAdvance();
 
             if (currentQuoteChar == 0 && breakCharacters.indexOf (c) >= 0)
             {
@@ -599,5 +601,5 @@ public:
     }
 
 private:
-    static double mulexp10 (const double value, int exponent) noexcept;
+    static double mulexp10 (double value, int exponent) noexcept;
 };
