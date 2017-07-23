@@ -207,10 +207,10 @@ public:
     /** Fills the Array with the provided value. */
     void fill (const ParameterType& newValue) noexcept
     {
-		auto n = size();
+        const ScopedLockType lock (getLock());
 
-        for (int i = 0; i < n; ++i)
-            setUnchecked (i, newValue);
+        for (auto& e : *this)
+            e = newValue;
     }
 
     //==============================================================================
