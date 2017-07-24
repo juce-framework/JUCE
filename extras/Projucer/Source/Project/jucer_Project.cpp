@@ -152,10 +152,60 @@ void Project::setMissingDefaultValues()
     if (shouldIncludeBinaryInAppConfig() == var())
         shouldIncludeBinaryInAppConfig() = true;
 
-    if (! projectRoot.hasProperty (Ids::cppLanguageStandard))
+    if (! projectRoot.hasProperty (Ids::cppLanguageStandard) && ! setCppVersionFromOldExporterSettings())
         getCppStandardValue() = "11";
 
     ProjucerApplication::getApp().updateNewlyOpenedProject (*this);
+}
+
+bool Project::setCppVersionFromOldExporterSettings()
+{
+    auto highestLanguageStandard = -1;
+
+    for (Project::ExporterIterator exporter (*this); exporter.next();)
+    {
+        if (exporter->isXcode()) // cpp version was per-build configuration for xcode exporters
+        {
+            for (ProjectExporter::ConfigIterator config (*exporter); config.next();)
+            {
+                auto cppLanguageStandard = config->getValue (Ids::cppLanguageStandard).getValue();
+
+                if (cppLanguageStandard != var())
+                {
+                    auto versionNum = cppLanguageStandard.toString().getLastCharacters (2).getIntValue();
+
+                    if (versionNum > highestLanguageStandard)
+                        highestLanguageStandard = versionNum;
+                }
+            }
+        }
+        else
+        {
+            auto cppLanguageStandard = exporter->getSetting (Ids::cppLanguageStandard).getValue();
+
+            if (cppLanguageStandard != var())
+            {
+                if (cppLanguageStandard.toString().containsIgnoreCase ("latest"))
+                {
+                    getCppStandardValue() = "latest";
+                    return true;
+                }
+
+                auto versionNum = cppLanguageStandard.toString().getLastCharacters (2).getIntValue();
+
+                if (versionNum > highestLanguageStandard)
+                    highestLanguageStandard = versionNum;
+            }
+        }
+    }
+
+    if (highestLanguageStandard != -1 && highestLanguageStandard >= 11)
+    {
+        getCppStandardValue() = highestLanguageStandard;
+        return true;
+    }
+
+    return false;
 }
 
 void Project::updateDeprecatedProjectSettingsInteractively()

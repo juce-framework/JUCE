@@ -354,6 +354,7 @@ private:
     //==============================================================================
     void setMissingAudioPluginDefaultValues();
     void createAudioPluginPropertyEditors (PropertyListBuilder& props);
+    bool setCppVersionFromOldExporterSettings();
 
     //==============================================================================
     friend class Item;
