@@ -38,7 +38,7 @@ public:
     {
     }
 
-    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle<int>& parentArea)
+    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle<int>& parentArea) override
     {
         fillType.setFillType (g, getDocument(), parentArea);
 
@@ -54,13 +54,13 @@ public:
         }
     }
 
-    void getEditableProperties (Array<PropertyComponent*>& props)
+    void getEditableProperties (Array<PropertyComponent*>& props,bool multipleSelection) override // D STENNING
     {
-        ColouredElement::getEditableProperties (props);
+        ColouredElement::getEditableProperties (props,multipleSelection);
         props.add (new ShapeToPathProperty (this));
     }
 
-    void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode)
+    void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode) override
     {
         if (fillType.isInvisible() && (strokeType.isInvisible() || ! isStrokePresent))
             return;

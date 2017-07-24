@@ -81,9 +81,13 @@ public:
         return true;
     }
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
+    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props, bool multipleSelected)
     {
-        ComponentTypeHandler::getEditableProperties (component, document, props);
+        ComponentTypeHandler::getEditableProperties (component, document, props, multipleSelected);
+
+        if ( multipleSelected)  // D STENNING
+            return;
+
 
         TextEditor* const t = dynamic_cast<TextEditor*> (component);
         jassert (t != nullptr);

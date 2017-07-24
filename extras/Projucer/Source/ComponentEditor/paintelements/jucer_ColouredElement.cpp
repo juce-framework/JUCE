@@ -167,7 +167,7 @@ class ElementFillPositionProperty   : public PositionPropertyBase
 public:
     ElementFillPositionProperty (ColouredElement* const owner_,
                                  const String& name,
-                                 ComponentPositionDimension dimension_,
+                                 ComponentLayout::ComponentPositionDimension dimension_,
                                  const bool isStart_,
                                  const bool isForStroke_)
      : PositionPropertyBase (owner_, name, dimension_, false, false,
@@ -193,6 +193,15 @@ public:
             listener.owner->setFillType (fill, true);
         else
             listener.owner->setStrokeFill (fill, true);
+    }
+
+    void setSingleDimension( bool undoable,const double value , ComponentLayout::ComponentPositionDimension dim)
+    {
+        // control shouldnt be getting here
+        (void)undoable;
+        (void)value;
+        (void)dim;
+        JUCE_BREAK_IN_DEBUGGER;
     }
 
     RelativePositionedRectangle getPosition() const
@@ -397,7 +406,7 @@ class ImageBrushPositionProperty    : public PositionPropertyBase
 public:
     ImageBrushPositionProperty (ColouredElement* const owner_,
                                 const String& name,
-                                ComponentPositionDimension dimension_,
+                                ComponentLayout::ComponentPositionDimension dimension_,
                                 const bool isForStroke_)
         : PositionPropertyBase (owner_, name, dimension_, false, false,
                                 owner_->getDocument()->getComponentLayout()),
@@ -421,6 +430,15 @@ public:
             type.imageAnchor = newPos;
             listener.owner->setFillType (type, true);
         }
+    }
+
+    void setSingleDimension( bool undoable,const double value , ComponentLayout::ComponentPositionDimension dim)
+    {
+        // control shouldnt be getting here
+        (void)undoable;
+        (void)value;
+        (void)dim;
+        JUCE_BREAK_IN_DEBUGGER;
     }
 
     RelativePositionedRectangle getPosition() const
@@ -506,10 +524,11 @@ ColouredElement::~ColouredElement()
 }
 
 //==============================================================================
-void ColouredElement::getEditableProperties (Array <PropertyComponent*>& props)
+void ColouredElement::getEditableProperties (Array <PropertyComponent*>& props, bool multipleSelected) // D STENNING
 {
-    PaintElement::getEditableProperties (props);
-    getColourSpecificProperties (props);
+    PaintElement::getEditableProperties (props, multipleSelected);
+    if( !multipleSelected)
+        getColourSpecificProperties (props);
 }
 
 void ColouredElement::getColourSpecificProperties (Array <PropertyComponent*>& props)
@@ -525,17 +544,17 @@ void ColouredElement::getColourSpecificProperties (Array <PropertyComponent*>& p
     case JucerFillType::linearGradient:
     case JucerFillType::radialGradient:
         props.add (new ElementFillColourProperty ("colour 1", this, ElementFillColourProperty::gradientColour1, false));
-        props.add (new ElementFillPositionProperty (this, "x1", PositionPropertyBase::componentX, true, false));
-        props.add (new ElementFillPositionProperty (this, "y1", PositionPropertyBase::componentY, true, false));
+        props.add (new ElementFillPositionProperty (this, "x1", ComponentLayout::componentX, true, false));
+        props.add (new ElementFillPositionProperty (this, "y1", ComponentLayout::componentY, true, false));
         props.add (new ElementFillColourProperty ("colour 2", this, ElementFillColourProperty::gradientColour2, false));
-        props.add (new ElementFillPositionProperty (this, "x2", PositionPropertyBase::componentX, false, false));
-        props.add (new ElementFillPositionProperty (this, "y2", PositionPropertyBase::componentY, false, false));
+        props.add (new ElementFillPositionProperty (this, "x2", ComponentLayout::componentX, false, false));
+        props.add (new ElementFillPositionProperty (this, "y2", ComponentLayout::componentY, false, false));
         break;
 
     case JucerFillType::imageBrush:
         props.add (new ImageBrushResourceProperty (this, false));
-        props.add (new ImageBrushPositionProperty (this, "anchor x", PositionPropertyBase::componentX, false));
-        props.add (new ImageBrushPositionProperty (this, "anchor y", PositionPropertyBase::componentY, false));
+        props.add (new ImageBrushPositionProperty (this, "anchor x", ComponentLayout::componentX, false));
+        props.add (new ImageBrushPositionProperty (this, "anchor y", ComponentLayout::componentY, false));
         props.add (new ImageBrushOpacityProperty (this, false));
         break;
 
@@ -569,17 +588,17 @@ void ColouredElement::getColourSpecificProperties (Array <PropertyComponent*>& p
                 case JucerFillType::linearGradient:
                 case JucerFillType::radialGradient:
                     props.add (new ElementFillColourProperty ("colour 1", this, ElementFillColourProperty::gradientColour1, true));
-                    props.add (new ElementFillPositionProperty (this, "x1", PositionPropertyBase::componentX, true, true));
-                    props.add (new ElementFillPositionProperty (this, "y1", PositionPropertyBase::componentY, true, true));
+                    props.add (new ElementFillPositionProperty (this, "x1", ComponentLayout::componentX, true, true)); // D STENNING
+                    props.add (new ElementFillPositionProperty (this, "y1", ComponentLayout::componentY, true, true));
                     props.add (new ElementFillColourProperty ("colour 2", this, ElementFillColourProperty::gradientColour2, true));
-                    props.add (new ElementFillPositionProperty (this, "x2", PositionPropertyBase::componentX, false, true));
-                    props.add (new ElementFillPositionProperty (this, "y2", PositionPropertyBase::componentY, false, true));
+                    props.add (new ElementFillPositionProperty (this, "x2", ComponentLayout::componentX, false, true));
+                    props.add (new ElementFillPositionProperty (this, "y2", ComponentLayout::componentY, false, true));
                     break;
 
                 case JucerFillType::imageBrush:
                     props.add (new ImageBrushResourceProperty (this, true));
-                    props.add (new ImageBrushPositionProperty (this, "stroke anchor x", PositionPropertyBase::componentX, true));
-                    props.add (new ImageBrushPositionProperty (this, "stroke anchor y", PositionPropertyBase::componentY, true));
+                    props.add (new ImageBrushPositionProperty (this, "stroke anchor x", ComponentLayout::componentX, true));
+                    props.add (new ImageBrushPositionProperty (this, "stroke anchor y", ComponentLayout::componentY, true));
                     props.add (new ImageBrushOpacityProperty (this, true));
                     break;
 

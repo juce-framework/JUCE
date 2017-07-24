@@ -66,9 +66,12 @@ public:
         return s;
     }
 
-    void getEditableProperties (Array<PropertyComponent*>& props)
+    void getEditableProperties (Array<PropertyComponent*>& props, bool multipleSelected)
     {
-        ColouredElement::getEditableProperties (props);
+        ColouredElement::getEditableProperties (props, multipleSelected);
+
+        if ( multipleSelected ) // D STENNING
+            return;
 
         props.add (new TextProperty (this));
         props.add (new FontNameProperty (this));

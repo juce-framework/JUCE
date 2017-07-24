@@ -168,9 +168,10 @@ public:
             subElements.getUnchecked(i)->draw (g, layout, parentArea);
     }
 
-    void getEditableProperties (Array<PropertyComponent*>& props)
+    void getEditableProperties (Array<PropertyComponent*>& props, bool multipleSelection) // D STENNING
     {
-        props.add (new UngroupProperty (this));
+        if( !multipleSelection )
+            props.add (new UngroupProperty (this));
     }
 
     void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode)

@@ -39,6 +39,16 @@ class JucerDocument;
 class ComponentLayout
 {
 public:
+
+    enum ComponentPositionDimension // D STENNING
+    {
+        componentX          = 0,
+        componentY          = 1,
+        componentWidth      = 2,
+        componentHeight     = 3
+    };
+
+
     //==============================================================================
     ComponentLayout();
     ~ComponentLayout();
@@ -66,6 +76,9 @@ public:
 
     void setComponentPosition (Component* comp, const RelativePositionedRectangle& newPos, const bool undoable);
     void updateStoredComponentPosition (Component* comp, const bool undoable);
+
+    void setComponentSingleDimension(Component* comp,const bool undoable, const double value , ComponentPositionDimension dim); // D STENNING)
+    void setSingleDimension( const bool undoable, const double value , ComponentPositionDimension dim); // D STENNING
 
     //==============================================================================
     Component* getComponentRelativePosTarget (Component* comp, int whichDimension) const;
@@ -95,6 +108,11 @@ public:
 
     void selectedToFront();
     void selectedToBack();
+
+    void alignLeft();  // D STENNING
+    void alignRight();
+    void alignTop();
+    void alignBottom();
 
     void startDragging();
     void dragSelectedComps (int dxFromDragStart, int dyFromDragStart, const bool allowSnap = true);

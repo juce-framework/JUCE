@@ -45,9 +45,12 @@ public:
         return new ImageButton ("new button");
     }
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
+    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props, bool multipleSelected)
     {
-        ButtonHandler::getEditableProperties (component, document, props);
+        ButtonHandler::getEditableProperties (component, document, props, multipleSelected);
+
+        if ( multipleSelected)  // D STENNING
+            return;
 
         addColourProperties (component, document, props);
 

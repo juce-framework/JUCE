@@ -137,6 +137,17 @@ void PaintElement::setPosition (const RelativePositionedRectangle& newPosition, 
     }
 }
 
+
+void PaintElement::setSingleDimension( const bool undoable, const double value , ComponentLayout::ComponentPositionDimension dim) // D STENNING
+{
+    (void)undoable;
+    (void)value;
+    (void)dim;
+
+    JUCE_BREAK_IN_DEBUGGER;
+
+}
+
 //==============================================================================
 Rectangle<int> PaintElement::getCurrentBounds (const Rectangle<int>& parentArea) const
 {
@@ -178,7 +189,7 @@ class ElementPositionProperty   : public PositionPropertyBase
 {
 public:
     ElementPositionProperty (PaintElement* e, const String& name,
-                             ComponentPositionDimension dimension_)
+                             ComponentLayout::ComponentPositionDimension dimension_) // D STENNING
        : PositionPropertyBase (e, name, dimension_, true, false,
                                e->getDocument()->getComponentLayout()),
          listener (e)
@@ -191,6 +202,14 @@ public:
         listener.owner->setPosition (newPos, true);
     }
 
+    void setSingleDimension( bool undoable,const double value , ComponentLayout::ComponentPositionDimension dim)
+    {
+        // control shouldnt be getting here
+        JucerDocument* jd = listener.owner->getDocument();
+        jd->getPaintRoutine(0)->setSingleDimension ( undoable, value,dim );
+
+    }
+
     RelativePositionedRectangle getPosition() const
     {
         return listener.owner->getPosition();
@@ -200,12 +219,14 @@ public:
 };
 
 //==============================================================================
-void PaintElement::getEditableProperties (Array <PropertyComponent*>& props)
+void PaintElement::getEditableProperties (Array <PropertyComponent*>& props, bool multipleSelected)
 {
-    props.add (new ElementPositionProperty (this, "x", PositionPropertyBase::componentX));
-    props.add (new ElementPositionProperty (this, "y", PositionPropertyBase::componentY));
-    props.add (new ElementPositionProperty (this, "width", PositionPropertyBase::componentWidth));
-    props.add (new ElementPositionProperty (this, "height", PositionPropertyBase::componentHeight));
+    (void)multipleSelected;
+
+    props.add (new ElementPositionProperty (this, "x", ComponentLayout::componentX));
+    props.add (new ElementPositionProperty (this, "y", ComponentLayout::componentY));
+    props.add (new ElementPositionProperty (this, "width", ComponentLayout::componentWidth));
+    props.add (new ElementPositionProperty (this, "height", ComponentLayout::componentHeight));
 }
 
 //==============================================================================
@@ -480,6 +501,11 @@ void PaintElement::showPopupMenu()
 
     m.addCommandItem (commandManager, JucerCommandIDs::toFront);
     m.addCommandItem (commandManager, JucerCommandIDs::toBack);
+    m.addSeparator();
+    m.addCommandItem (commandManager, JucerCommandIDs::alignTop); // D STENNING
+    m.addCommandItem (commandManager, JucerCommandIDs::alignBottom);
+    m.addCommandItem (commandManager, JucerCommandIDs::alignLeft);
+    m.addCommandItem (commandManager, JucerCommandIDs::alignRight);
     m.addSeparator();
     m.addCommandItem (commandManager, StandardApplicationCommandIDs::cut);
     m.addCommandItem (commandManager, StandardApplicationCommandIDs::copy);

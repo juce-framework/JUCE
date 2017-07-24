@@ -36,9 +36,12 @@ public:
                                 defaultWidth_, defaultHeight_)
     {}
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
+    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props, bool multipleSelected)
     {
-        ComponentTypeHandler::getEditableProperties (component, document, props);
+        ComponentTypeHandler::getEditableProperties (component, document, props, multipleSelected);
+
+        if ( multipleSelected)  // D STENNING
+            return;
 
         Button* const b = dynamic_cast<Button*> (component);
 

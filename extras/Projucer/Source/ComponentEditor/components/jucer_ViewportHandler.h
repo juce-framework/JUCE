@@ -76,9 +76,12 @@ public:
         return true;
     }
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
+    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props, bool multipleSelected)
     {
-        ComponentTypeHandler::getEditableProperties (component, document, props);
+        ComponentTypeHandler::getEditableProperties (component, document, props, multipleSelected);
+
+        if ( multipleSelected)  // D STENNING
+            return;
 
         Viewport* const v = dynamic_cast<Viewport*> (component);
 

@@ -47,9 +47,8 @@ public:
     ~ColouredElement();
 
     //==============================================================================
-    void getEditableProperties (Array<PropertyComponent*>& props);
+    void getEditableProperties (Array<PropertyComponent*>& props, bool multipleSelected); //D STENNING
     void getColourSpecificProperties (Array<PropertyComponent*>& props);
-
     //==============================================================================
     const JucerFillType& getFillType() noexcept;
     void setFillType (const JucerFillType& newType, const bool undoable);

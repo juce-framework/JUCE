@@ -29,6 +29,8 @@
 #include "../ui/jucer_PaintRoutineEditor.h"
 #include "../ui/jucer_ComponentLayoutEditor.h"
 
+#include "../jucer_ComponentLayout.h"  // D STENNING
+
 //==============================================================================
 /**
     Base class for a property that edits the x, y, w, or h of a PositionedRectangle.
@@ -38,17 +40,17 @@ class PositionPropertyBase  : public PropertyComponent,
                               private ButtonListener
 {
 public:
-    enum ComponentPositionDimension
-    {
-        componentX          = 0,
-        componentY          = 1,
-        componentWidth      = 2,
-        componentHeight     = 3
-    };
+    //    enum ComponentPositionDimension  D STENNING
+    //    {
+    //        componentX          = 0,
+    //        componentY          = 1,
+    //        componentWidth      = 2,
+    //        componentHeight     = 3
+    //    };
 
     PositionPropertyBase (Component* comp,
                           const String& name,
-                          ComponentPositionDimension dimension_,
+                          ComponentLayout::ComponentPositionDimension dimension_, //D STENNING
                           const bool includeAnchorOptions_,
                           const bool allowRelativeOptions_,
                           ComponentLayout* layout_)
@@ -76,28 +78,28 @@ public:
 
         switch (dimension)
         {
-        case componentX:
+        case ComponentLayout::componentX:
             if (p.getPositionModeX() == PositionedRectangle::proportionOfParentSize)
                 s << valueToString (p.getX() * 100.0) << '%';
             else
                 s << valueToString (p.getX());
             break;
 
-        case componentY:
+        case ComponentLayout::componentY:
             if (p.getPositionModeY() == PositionedRectangle::proportionOfParentSize)
                 s << valueToString (p.getY() * 100.0) << '%';
             else
                 s << valueToString (p.getY());
             break;
 
-        case componentWidth:
+        case ComponentLayout::componentWidth:
             if (p.getWidthMode() == PositionedRectangle::proportionalSize)
                 s << valueToString (p.getWidth() * 100.0) << '%';
             else
                 s << valueToString (p.getWidth());
             break;
 
-        case componentHeight:
+        case ComponentLayout::componentHeight:
             if (p.getHeightMode() == PositionedRectangle::proportionalSize)
                 s << valueToString (p.getHeight() * 100.0) << '%';
             else
@@ -125,28 +127,28 @@ public:
 
         switch (dimension)
         {
-        case componentX:
+        case ComponentLayout::componentX:
             if (p.getPositionModeX() == PositionedRectangle::proportionOfParentSize)
                 p.setX (value / 100.0);
             else
                 p.setX (value);
             break;
 
-        case componentY:
+        case ComponentLayout::componentY:
             if (p.getPositionModeY() == PositionedRectangle::proportionOfParentSize)
                 p.setY (value / 100.0);
             else
                 p.setY (value);
             break;
 
-        case componentWidth:
+        case ComponentLayout::componentWidth:
             if (p.getWidthMode() == PositionedRectangle::proportionalSize)
                 p.setWidth (value / 100.0);
             else
                 p.setWidth (value);
             break;
 
-        case componentHeight:
+        case ComponentLayout::componentHeight:
             if (p.getHeightMode() == PositionedRectangle::proportionalSize)
                 p.setHeight (value / 100.0);
             else
@@ -161,7 +163,9 @@ public:
         if (p != rpr.rect)
         {
             rpr.rect = p;
-            setPosition (rpr);
+            //  setPosition (rpr);  // OLD D STENNING
+            setSingleDimension(true,value , dimension);  // NEW D STENNING
+
         }
     }
 
@@ -192,56 +196,56 @@ public:
 
         PopupMenu m;
 
-        if (dimension == componentX || dimension == componentY)
+        if (dimension == ComponentLayout::componentX || dimension == ComponentLayout::componentY)
         {
-            const PositionedRectangle::PositionMode posMode = (dimension == componentX) ? xMode : yMode;
+            const PositionedRectangle::PositionMode posMode = (dimension == ComponentLayout::componentX) ? xMode : yMode;
 
-            m.addItem (10, ((dimension == componentX) ? "Absolute distance from left of "
-                                                      : "Absolute distance from top of ") + relCompName,
+            m.addItem (10, ((dimension == ComponentLayout::componentX) ? "Absolute distance from left of "
+                                                                       : "Absolute distance from top of ") + relCompName,
                        true, posMode == PositionedRectangle::absoluteFromParentTopLeft);
 
-            m.addItem (11, ((dimension == componentX) ? "Absolute distance from right of "
-                                                      : "Absolute distance from bottom of ") + relCompName,
+            m.addItem (11, ((dimension == ComponentLayout::componentX) ? "Absolute distance from right of "
+                                                                       : "Absolute distance from bottom of ") + relCompName,
                        true, posMode == PositionedRectangle::absoluteFromParentBottomRight);
 
             m.addItem (12, "Absolute distance from centre of " + relCompName,
                        true, posMode == PositionedRectangle::absoluteFromParentCentre);
 
-            m.addItem (13, ((dimension == componentX) ? "Percentage of width of "
-                                                      : "Percentage of height of ") + relCompName,
+            m.addItem (13, ((dimension == ComponentLayout::componentX) ? "Percentage of width of "
+                                                                       : "Percentage of height of ") + relCompName,
                        true, posMode == PositionedRectangle::proportionOfParentSize);
 
             m.addSeparator();
 
             if (includeAnchorOptions)
             {
-                const PositionedRectangle::AnchorPoint anchor = (dimension == componentX) ? xAnchor : yAnchor;
+                const PositionedRectangle::AnchorPoint anchor = (dimension == ComponentLayout::componentX) ? xAnchor : yAnchor;
 
-                m.addItem (14, (dimension == componentX) ? "Anchored at left of component"
-                                                         : "Anchored at top of component",
+                m.addItem (14, (dimension == ComponentLayout::componentX) ? "Anchored at left of component"
+                                                                          : "Anchored at top of component",
                            true, anchor == PositionedRectangle::anchorAtLeftOrTop);
 
                 m.addItem (15, "Anchored at centre of component", true, anchor == PositionedRectangle::anchorAtCentre);
 
-                m.addItem (16, (dimension == componentX) ? "Anchored at right of component"
-                                                         : "Anchored at bottom of component",
+                m.addItem (16, (dimension == ComponentLayout::componentX) ? "Anchored at right of component"
+                                                                          : "Anchored at bottom of component",
                            true, anchor == PositionedRectangle::anchorAtRightOrBottom);
             }
         }
         else
         {
-            const PositionedRectangle::SizeMode sizeMode = (dimension == componentWidth) ? sizeW : sizeH;
+            const PositionedRectangle::SizeMode sizeMode = (dimension == ComponentLayout::componentWidth) ? sizeW : sizeH;
 
-            m.addItem (20, (dimension == componentWidth) ? "Absolute width"
-                                                         : "Absolute height",
+            m.addItem (20, (dimension == ComponentLayout::componentWidth) ? "Absolute width"
+                                                                          : "Absolute height",
                        true, sizeMode == PositionedRectangle::absoluteSize);
 
-            m.addItem (21, ((dimension == componentWidth) ? "Percentage of width of "
-                                                          : "Percentage of height of ") + relCompName,
+            m.addItem (21, ((dimension == ComponentLayout::componentWidth) ? "Percentage of width of "
+                                                                           : "Percentage of height of ") + relCompName,
                        true, sizeMode == PositionedRectangle::proportionalSize);
 
-            m.addItem (22, ((dimension == componentWidth) ? "Subtracted from width of "
-                                                          : "Subtracted from height of ") + relCompName,
+            m.addItem (22, ((dimension == ComponentLayout::componentWidth) ? "Subtracted from width of "
+                                                                           : "Subtracted from height of ") + relCompName,
                        true, sizeMode == PositionedRectangle::parentSizeMinusAbsolute);
         }
 
@@ -262,70 +266,70 @@ public:
         switch (menuResult)
         {
         case 10:
-            if (dimension == componentX)
+            if (dimension == ComponentLayout::componentX)
                 xMode = PositionedRectangle::absoluteFromParentTopLeft;
             else
                 yMode = PositionedRectangle::absoluteFromParentTopLeft;
             break;
 
         case 11:
-            if (dimension == componentX)
+            if (dimension == ComponentLayout::componentX)
                 xMode = PositionedRectangle::absoluteFromParentBottomRight;
             else
                 yMode = PositionedRectangle::absoluteFromParentBottomRight;
             break;
 
         case 12:
-            if (dimension == componentX)
+            if (dimension == ComponentLayout::componentX)
                 xMode = PositionedRectangle::absoluteFromParentCentre;
             else
                 yMode = PositionedRectangle::absoluteFromParentCentre;
             break;
 
         case 13:
-            if (dimension == componentX)
+            if (dimension == ComponentLayout::componentX)
                 xMode = PositionedRectangle::proportionOfParentSize;
             else
                 yMode = PositionedRectangle::proportionOfParentSize;
             break;
 
         case 14:
-            if (dimension == componentX)
+            if (dimension == ComponentLayout::componentX)
                 xAnchor = PositionedRectangle::anchorAtLeftOrTop;
             else
                 yAnchor = PositionedRectangle::anchorAtLeftOrTop;
             break;
 
         case 15:
-            if (dimension == componentX)
+            if (dimension == ComponentLayout::componentX)
                 xAnchor = PositionedRectangle::anchorAtCentre;
             else
                 yAnchor = PositionedRectangle::anchorAtCentre;
             break;
 
         case 16:
-            if (dimension == componentX)
+            if (dimension == ComponentLayout::componentX)
                 xAnchor = PositionedRectangle::anchorAtRightOrBottom;
             else
                 yAnchor = PositionedRectangle::anchorAtRightOrBottom;
             break;
 
         case 20:
-            if (dimension == componentWidth)
+            if (dimension == ComponentLayout::componentWidth)
                 sizeW = PositionedRectangle::absoluteSize;
             else
                 sizeH = PositionedRectangle::absoluteSize;
             break;
 
         case 21:
-            if (dimension == componentWidth)
+            if (dimension == ComponentLayout::componentWidth)
                 sizeW = PositionedRectangle::proportionalSize;
             else
                 sizeH = PositionedRectangle::proportionalSize;
             break;
 
         case 22:
-            if (dimension == componentWidth)
+            if (dimension == ComponentLayout::componentWidth)
                 sizeW = PositionedRectangle::parentSizeMinusAbsolute;
             else
                 sizeH = PositionedRectangle::parentSizeMinusAbsolute;
@@ -406,6 +410,15 @@ public:
     //==============================================================================
     virtual void setPosition (const RelativePositionedRectangle& newPos) = 0;
 
+    virtual void setSingleDimension( bool undoable,const double value , ComponentLayout::ComponentPositionDimension dim) =0;
+    //    {
+    //        // control shouldnt be getting here
+    //        (void)undoable;
+    //        (void)value;
+    //        (void)dim;
+    //        JUCE_BREAK_IN_DEBUGGER;
+    //    }
+
     virtual RelativePositionedRectangle getPosition() const = 0;
 
 protected:
@@ -447,6 +460,6 @@ protected:
     TextButton button;
 
     Component* component;
-    ComponentPositionDimension dimension;
+    ComponentLayout::ComponentPositionDimension dimension;  // D STENNING
     const bool includeAnchorOptions, allowRelativeOptions;
 };
