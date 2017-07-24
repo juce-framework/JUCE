@@ -1,28 +1,28 @@
 /*
-  ==============================================================================
+ ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+ This file is part of the JUCE library.
+ Copyright (c) 2017 - ROLI Ltd.
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+ JUCE is an open source library subject to commercial or open-source
+ licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+ By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+ Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+ 27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+ End User License Agreement: www.juce.com/juce-5-licence
+ Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+ Or: You may also use this code under the terms of the GPL v3 (see
+ www.gnu.org/licenses).
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+ JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+ EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+ DISCLAIMED.
 
-  ==============================================================================
-*/
+ ==============================================================================
+ */
 
 #include "../../jucer_Headers.h"
 #include "jucer_ColouredElement.h"
@@ -39,8 +39,8 @@ class ElementFillModeProperty   : public ChoicePropertyComponent
 {
 public:
     ElementFillModeProperty (ColouredElement* const e, const bool isForStroke_)
-        : ChoicePropertyComponent ("fill mode"), listener (e),
-          isForStroke (isForStroke_)
+    : ChoicePropertyComponent ("fill mode"), listener (e),
+    isForStroke (isForStroke_)
     {
         listener.setPropertyToRefresh (*this);
 
@@ -53,7 +53,7 @@ public:
     void setIndex (int newIndex)
     {
         JucerFillType fill (isForStroke ? listener.owner->getStrokeType().fill
-                                        : listener.owner->getFillType());
+                            : listener.owner->getFillType());
 
         switch (newIndex)
         {
@@ -73,7 +73,7 @@ public:
     int getIndex() const
     {
         switch (isForStroke ? listener.owner->getStrokeType().fill.mode
-                            : listener.owner->getFillType().mode)
+                : listener.owner->getFillType().mode)
         {
             case JucerFillType::solidColour:    return 0;
             case JucerFillType::linearGradient: return 1;
@@ -105,10 +105,10 @@ public:
                                ColouredElement* const owner_,
                                const ColourType type_,
                                const bool isForStroke_)
-        : JucerColourPropertyComponent (name, false),
-          listener (owner_),
-          type (type_),
-          isForStroke (isForStroke_)
+    : JucerColourPropertyComponent (name, false),
+    listener (owner_),
+    type (type_),
+    isForStroke (isForStroke_)
     {
         listener.setPropertyToRefresh (*this);
     }
@@ -118,7 +118,7 @@ public:
         listener.owner->getDocument()->getUndoManager().undoCurrentTransactionOnly();
 
         JucerFillType fill (isForStroke ? listener.owner->getStrokeType().fill
-                                        : listener.owner->getFillType());
+                            : listener.owner->getFillType());
 
         switch (type)
         {
@@ -137,7 +137,7 @@ public:
     Colour getColour() const override
     {
         const JucerFillType fill (isForStroke ? listener.owner->getStrokeType().fill
-                                              : listener.owner->getFillType());
+                                  : listener.owner->getFillType());
 
         switch (type)
         {
@@ -170,11 +170,11 @@ public:
                                  ComponentLayout::ComponentPositionDimension dimension_,
                                  const bool isStart_,
                                  const bool isForStroke_)
-     : PositionPropertyBase (owner_, name, dimension_, false, false,
-                             owner_->getDocument()->getComponentLayout()),
-       listener (owner_),
-       isStart (isStart_),
-       isForStroke (isForStroke_)
+    : PositionPropertyBase (owner_, name, dimension_, false, false,
+                            owner_->getDocument()->getComponentLayout()),
+    listener (owner_),
+    isStart (isStart_),
+    isForStroke (isForStroke_)
     {
         listener.setPropertyToRefresh (*this);
     }
@@ -182,7 +182,7 @@ public:
     void setPosition (const RelativePositionedRectangle& newPos)
     {
         JucerFillType fill (isForStroke ? listener.owner->getStrokeType().fill
-                                        : listener.owner->getFillType());
+                            : listener.owner->getFillType());
 
         if (isStart)
             fill.gradPos1 = newPos;
@@ -207,10 +207,10 @@ public:
     RelativePositionedRectangle getPosition() const
     {
         const JucerFillType fill (isForStroke ? listener.owner->getStrokeType().fill
-                                              : listener.owner->getFillType());
+                                  : listener.owner->getFillType());
 
         return isStart ? fill.gradPos1
-                       : fill.gradPos2;
+        : fill.gradPos2;
     }
 
 private:
@@ -223,8 +223,8 @@ class EnableStrokeProperty : public BooleanPropertyComponent
 {
 public:
     EnableStrokeProperty (ColouredElement* const owner_)
-        : BooleanPropertyComponent ("outline", "Outline enabled", "No outline"),
-          listener (owner_)
+    : BooleanPropertyComponent ("outline", "Outline enabled", "No outline"),
+    listener (owner_)
     {
         listener.setPropertyToRefresh (*this);
     }
@@ -241,8 +241,8 @@ class StrokeThicknessProperty   : public SliderPropertyComponent
 {
 public:
     StrokeThicknessProperty (ColouredElement* const owner_)
-        : SliderPropertyComponent ("outline thickness", 0.1, 200.0, 0.1, 0.3),
-          listener (owner_)
+    : SliderPropertyComponent ("outline thickness", 0.1, 200.0, 0.1, 0.3),
+    listener (owner_)
     {
         listener.setPropertyToRefresh (*this);
     }
@@ -267,8 +267,8 @@ class StrokeJointProperty : public ChoicePropertyComponent
 {
 public:
     StrokeJointProperty (ColouredElement* const owner_)
-        : ChoicePropertyComponent ("joint style"),
-          listener (owner_)
+    : ChoicePropertyComponent ("joint style"),
+    listener (owner_)
     {
         listener.setPropertyToRefresh (*this);
 
@@ -280,8 +280,8 @@ public:
     void setIndex (int newIndex)
     {
         const PathStrokeType::JointStyle joints[] = { PathStrokeType::mitered,
-                                                      PathStrokeType::curved,
-                                                      PathStrokeType::beveled };
+            PathStrokeType::curved,
+            PathStrokeType::beveled };
 
         jassert (newIndex >= 0 && newIndex < 3);
 
@@ -312,8 +312,8 @@ class StrokeEndCapProperty   : public ChoicePropertyComponent
 {
 public:
     StrokeEndCapProperty (ColouredElement* const owner_)
-        : ChoicePropertyComponent ("end-cap style"),
-          listener (owner_)
+    : ChoicePropertyComponent ("end-cap style"),
+    listener (owner_)
     {
         listener.setPropertyToRefresh (*this);
 
@@ -325,8 +325,8 @@ public:
     void setIndex (int newIndex)
     {
         const PathStrokeType::EndCapStyle ends[] = { PathStrokeType::butt,
-                                                     PathStrokeType::square,
-                                                     PathStrokeType::rounded };
+            PathStrokeType::square,
+            PathStrokeType::rounded };
 
         jassert (newIndex >= 0 && newIndex < 3);
 
@@ -357,9 +357,9 @@ class ImageBrushResourceProperty    : public ImageResourceProperty <ColouredElem
 {
 public:
     ImageBrushResourceProperty (ColouredElement* const e, const bool isForStroke_)
-        : ImageResourceProperty <ColouredElement> (e, isForStroke_ ? "stroke image"
-                                                                   : "fill image"),
-          isForStroke (isForStroke_)
+    : ImageResourceProperty <ColouredElement> (e, isForStroke_ ? "stroke image"
+                                               : "fill image"),
+    isForStroke (isForStroke_)
     {
     }
 
@@ -408,10 +408,10 @@ public:
                                 const String& name,
                                 ComponentLayout::ComponentPositionDimension dimension_,
                                 const bool isForStroke_)
-        : PositionPropertyBase (owner_, name, dimension_, false, false,
-                                owner_->getDocument()->getComponentLayout()),
-          listener (owner_),
-          isForStroke (isForStroke_)
+    : PositionPropertyBase (owner_, name, dimension_, false, false,
+                            owner_->getDocument()->getComponentLayout()),
+    listener (owner_),
+    isForStroke (isForStroke_)
     {
         listener.setPropertyToRefresh (*this);
     }
@@ -459,9 +459,9 @@ class ImageBrushOpacityProperty  : public SliderPropertyComponent
 {
 public:
     ImageBrushOpacityProperty (ColouredElement* const e, const bool isForStroke_)
-        : SliderPropertyComponent ("opacity", 0.0, 1.0, 0.001),
-          listener (e),
-          isForStroke (isForStroke_)
+    : SliderPropertyComponent ("opacity", 0.0, 1.0, 0.001),
+    listener (e),
+    isForStroke (isForStroke_)
     {
         listener.setPropertyToRefresh (*this);
     }
@@ -512,10 +512,10 @@ ColouredElement::ColouredElement (PaintRoutine* owner_,
                                   const String& name,
                                   const bool showOutline_,
                                   const bool showJointAndEnd_)
-    : PaintElement (owner_, name),
-      isStrokePresent (false),
-      showOutline (showOutline_),
-      showJointAndEnd (showJointAndEnd_)
+: PaintElement (owner_, name),
+isStrokePresent (false),
+showOutline (showOutline_),
+showJointAndEnd (showJointAndEnd_)
 {
 }
 
@@ -537,9 +537,9 @@ void ColouredElement::getColourSpecificProperties (Array <PropertyComponent*>& p
 
     switch (getFillType().mode)
     {
-    case JucerFillType::solidColour:
-        props.add (new ElementFillColourProperty ("colour", this, ElementFillColourProperty::solidColour, false));
-        break;
+        case JucerFillType::solidColour:
+            props.add (new ElementFillColourProperty ("colour", this, ElementFillColourProperty::solidColour, false));
+            break;
 
     case JucerFillType::linearGradient:
     case JucerFillType::radialGradient:
@@ -558,9 +558,9 @@ void ColouredElement::getColourSpecificProperties (Array <PropertyComponent*>& p
         props.add (new ImageBrushOpacityProperty (this, false));
         break;
 
-    default:
-        jassertfalse;
-        break;
+        default:
+            jassertfalse;
+            break;
     }
 
     if (showOutline)
@@ -620,8 +620,8 @@ class FillTypeChangeAction  : public PaintElementUndoableAction <ColouredElement
 {
 public:
     FillTypeChangeAction (ColouredElement* const element, const JucerFillType& newState_)
-        : PaintElementUndoableAction <ColouredElement> (element),
-          newState (newState_)
+    : PaintElementUndoableAction <ColouredElement> (element),
+    newState (newState_)
     {
         oldState = element->getFillType();
     }
@@ -679,8 +679,8 @@ class StrokeEnableChangeAction  : public PaintElementUndoableAction <ColouredEle
 {
 public:
     StrokeEnableChangeAction (ColouredElement* const element, const bool newState_)
-        : PaintElementUndoableAction <ColouredElement> (element),
-          newState (newState_)
+    : PaintElementUndoableAction <ColouredElement> (element),
+    newState (newState_)
     {
         oldState = element->isStrokeEnabled();
     }
@@ -736,9 +736,9 @@ class StrokeTypeChangeAction  : public PaintElementUndoableAction <ColouredEleme
 {
 public:
     StrokeTypeChangeAction (ColouredElement* const element, const PathStrokeType& newState_)
-        : PaintElementUndoableAction <ColouredElement> (element),
-          newState (newState_),
-          oldState (element->getStrokeType().stroke)
+    : PaintElementUndoableAction <ColouredElement> (element),
+    newState (newState_),
+    oldState (element->getStrokeType().stroke)
     {
     }
 
@@ -782,8 +782,8 @@ class StrokeFillTypeChangeAction  : public PaintElementUndoableAction <ColouredE
 {
 public:
     StrokeFillTypeChangeAction (ColouredElement* const element, const JucerFillType& newState_)
-        : PaintElementUndoableAction <ColouredElement> (element),
-          newState (newState_)
+    : PaintElementUndoableAction <ColouredElement> (element),
+    newState (newState_)
     {
         oldState = element->getStrokeType().fill;
     }
@@ -872,7 +872,7 @@ Rectangle<int> ColouredElement::getCurrentBounds (const Rectangle<int>& parentAr
         borderSize = (int) strokeType.stroke.getStrokeThickness() / 2 + 1;
 
     return position.getRectangle (parentArea, getDocument()->getComponentLayout())
-                   .expanded (borderSize);
+    .expanded (borderSize);
 }
 
 void ColouredElement::setCurrentBounds (const Rectangle<int>& newBounds,

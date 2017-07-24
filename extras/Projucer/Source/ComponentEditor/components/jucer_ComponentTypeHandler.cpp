@@ -1,28 +1,28 @@
 /*
-  ==============================================================================
+ ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+ This file is part of the JUCE library.
+ Copyright (c) 2017 - ROLI Ltd.
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+ JUCE is an open source library subject to commercial or open-source
+ licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+ By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+ Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+ 27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+ End User License Agreement: www.juce.com/juce-5-licence
+ Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+ Or: You may also use this code under the terms of the GPL v3 (see
+ www.gnu.org/licenses).
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+ JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+ EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+ DISCLAIMED.
 
-  ==============================================================================
-*/
+ ==============================================================================
+ */
 
 #include "../../jucer_Headers.h"
 #include "../../Application/jucer_Application.h"
@@ -37,11 +37,11 @@
 
 static String getTypeInfoName (const std::type_info& info)
 {
-   #if JUCE_MSVC
+#if JUCE_MSVC
     return info.raw_name();
-   #else
+#else
     return info.name();
-   #endif
+#endif
 }
 
 //==============================================================================
@@ -50,11 +50,11 @@ ComponentTypeHandler::ComponentTypeHandler (const String& typeName_,
                                             const std::type_info& componentClass_,
                                             const int defaultWidth_,
                                             const int defaultHeight_)
-    : typeName (typeName_),
-      className (className_),
-      componentClassRawName (getTypeInfoName (componentClass_)),
-      defaultWidth (defaultWidth_),
-      defaultHeight (defaultHeight_)
+: typeName (typeName_),
+className (className_),
+componentClassRawName (getTypeInfoName (componentClass_)),
+defaultWidth (defaultWidth_),
+defaultHeight (defaultHeight_)
 {
 }
 
@@ -262,12 +262,13 @@ void ComponentTypeHandler::setComponentPosition (Component* comp,
                                           layout));
 }
 
+
 //==============================================================================
 class TooltipProperty   : public ComponentTextProperty <Component>
 {
 public:
     TooltipProperty (Component* comp, JucerDocument& doc)
-        : ComponentTextProperty<Component> ("tooltip", 1024, true, comp, doc)
+    : ComponentTextProperty<Component> ("tooltip", 1024, true, comp, doc)
     {
     }
 
@@ -288,8 +289,8 @@ private:
     {
     public:
         SetTooltipAction (Component* const comp, ComponentLayout& l, const String& newValue_)
-            : ComponentUndoableAction<Component> (comp, l),
-              newValue (newValue_)
+        : ComponentUndoableAction<Component> (comp, l),
+        newValue (newValue_)
         {
             SettableTooltipClient* ttc = dynamic_cast<SettableTooltipClient*> (comp);
             jassert (ttc != nullptr);
@@ -374,7 +375,7 @@ class FocusOrderProperty   : public ComponentTextProperty <Component>
 {
 public:
     FocusOrderProperty (Component* comp, JucerDocument& doc)
-        : ComponentTextProperty <Component> ("focus order", 8, false, comp, doc)
+    : ComponentTextProperty <Component> ("focus order", 8, false, comp, doc)
     {
     }
 
@@ -394,8 +395,8 @@ private:
     {
     public:
         SetFocusOrderAction (Component* const comp, ComponentLayout& l, const int newOrder_)
-            : ComponentUndoableAction <Component> (comp, l),
-              newValue (newOrder_)
+        : ComponentUndoableAction <Component> (comp, l),
+        newValue (newOrder_)
         {
             oldValue = comp->getExplicitFocusOrder();
         }
@@ -489,10 +490,10 @@ String ComponentTypeHandler::getColourIntialisationCode (Component* component,
         if (component->isColourSpecified (colours[i]->colourId))
         {
             s << objectName << "->setColour ("
-              << colours[i]->colourIdCode
-              << ", "
-              << CodeHelpers::colourToCode (component->findColour (colours[i]->colourId))
-              << ");\n";
+            << colours[i]->colourIdCode
+            << ", "
+            << CodeHelpers::colourToCode (component->findColour (colours[i]->colourId))
+            << ");\n";
         }
     }
 
@@ -520,7 +521,7 @@ void ComponentTypeHandler::fillInMemberVariableDeclarations (GeneratedCode& code
         clsName = getClassName (component);
 
     code.privateMemberDeclarations
-        << "ScopedPointer<" << clsName << "> " << memberVariableName << ";\n";
+    << "ScopedPointer<" << clsName << "> " << memberVariableName << ";\n";
 }
 
 void ComponentTypeHandler::fillInResizeCode (GeneratedCode& code, Component* component, const String& memberVariableName)
@@ -531,7 +532,7 @@ void ComponentTypeHandler::fillInResizeCode (GeneratedCode& code, Component* com
     positionToCode (pos, code.document->getComponentLayout(), x, y, w, h);
 
     r << memberVariableName << "->setBounds ("
-      << x << ", " << y << ", " << w << ", " << h << ");\n";
+    << x << ", " << y << ", " << w << ", " << h << ");\n";
 
     if (pos.rect.isPositionAbsolute())
         code.constructorCode += r + "\n";
@@ -574,15 +575,15 @@ void ComponentTypeHandler::fillInCreationCode (GeneratedCode& code, Component* c
         if (ttc->getTooltip().isNotEmpty())
         {
             s << memberVariableName << "->setTooltip ("
-              << quotedString (ttc->getTooltip(), code.shouldUseTransMacro())
-              << ");\n";
+            << quotedString (ttc->getTooltip(), code.shouldUseTransMacro())
+            << ");\n";
         }
     }
 
     if (component->getExplicitFocusOrder() > 0)
         s << memberVariableName << "->setExplicitFocusOrder ("
-          << component->getExplicitFocusOrder()
-          << ");\n";
+        << component->getExplicitFocusOrder()
+        << ");\n";
 
     code.constructorCode += s;
 }
@@ -591,5 +592,5 @@ void ComponentTypeHandler::fillInDeletionCode (GeneratedCode& code, Component*,
                                                const String& memberVariableName)
 {
     code.destructorCode
-        << memberVariableName << " = nullptr;\n";
+    << memberVariableName << " = nullptr;\n";
 }

@@ -1,28 +1,28 @@
 /*
-  ==============================================================================
+ ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+ This file is part of the JUCE library.
+ Copyright (c) 2017 - ROLI Ltd.
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+ JUCE is an open source library subject to commercial or open-source
+ licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+ By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+ Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+ 27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+ End User License Agreement: www.juce.com/juce-5-licence
+ Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+ Or: You may also use this code under the terms of the GPL v3 (see
+ www.gnu.org/licenses).
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+ JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+ EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+ DISCLAIMED.
 
-  ==============================================================================
-*/
+ ==============================================================================
+ */
 
 #include "../../jucer_Headers.h"
 #include "../../Application/jucer_Application.h"
@@ -38,12 +38,12 @@
 //==============================================================================
 PaintElement::PaintElement (PaintRoutine* owner_,
                             const String& typeName_)
-    : borderThickness (4),
-      owner (owner_),
-      typeName (typeName_),
-      selected (false),
-      dragging (false),
-      originalAspectRatio (1.0)
+: borderThickness (4),
+owner (owner_),
+typeName (typeName_),
+selected (false),
+dragging (false),
+originalAspectRatio (1.0)
 {
     setRepaintsOnMouseActivity (true);
 
@@ -95,9 +95,9 @@ class PaintElementMoveAction  : public PaintElementUndoableAction <PaintElement>
 {
 public:
     PaintElementMoveAction (PaintElement* const element, const RelativePositionedRectangle& newState_)
-        : PaintElementUndoableAction <PaintElement> (element),
-          newState (newState_),
-          oldState (element->getPosition())
+    : PaintElementUndoableAction <PaintElement> (element),
+    newState (newState_),
+    oldState (element->getPosition())
     {
     }
 
@@ -176,8 +176,8 @@ void PaintElement::updateBounds (const Rectangle<int>& parentArea)
     if (! parentArea.isEmpty())
     {
         setBounds (getCurrentBounds (parentArea)
-                        .expanded (borderThickness,
-                                   borderThickness));
+                   .expanded (borderThickness,
+                              borderThickness));
 
         for (int i = siblingComponents.size(); --i >= 0;)
             siblingComponents.getUnchecked(i)->updatePosition();
@@ -428,7 +428,7 @@ void PaintElement::applyBoundsToComponent (Component&, Rectangle<int> newBounds)
 
         if (auto* pe = dynamic_cast<PaintRoutineEditor*> (getParentComponent()))
             setCurrentBounds (newBounds.expanded (-borderThickness, -borderThickness),
-              pe->getComponentArea(), true);
+                              pe->getComponentArea(), true);
     }
 }
 

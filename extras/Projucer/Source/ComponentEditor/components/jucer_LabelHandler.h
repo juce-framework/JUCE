@@ -1,34 +1,34 @@
 /*
-  ==============================================================================
+ ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+ This file is part of the JUCE library.
+ Copyright (c) 2017 - ROLI Ltd.
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+ JUCE is an open source library subject to commercial or open-source
+ licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+ By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+ Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+ 27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+ End User License Agreement: www.juce.com/juce-5-licence
+ Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+ Or: You may also use this code under the terms of the GPL v3 (see
+ www.gnu.org/licenses).
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+ JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+ EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+ DISCLAIMED.
 
-  ==============================================================================
-*/
+ ==============================================================================
+ */
 
 class LabelHandler  : public ComponentTypeHandler
 {
 public:
     LabelHandler()
-        : ComponentTypeHandler ("Label", "Label", typeid (Label), 150, 24)
+    : ComponentTypeHandler ("Label", "Label", typeid (Label), 150, 24)
     {
         registerColour (Label::backgroundColourId, "background", "bkgCol");
         registerColour (Label::textColourId, "text", "textCol");
@@ -114,8 +114,8 @@ public:
         Label* const l = dynamic_cast<Label*> (component);
 
         return quotedString (component->getName(), false)
-                 + ",\n"
-                 + quotedString (l->getText(), code.shouldUseTransMacro());
+        + ",\n"
+        + quotedString (l->getText(), code.shouldUseTransMacro());
     }
 
     void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
@@ -127,16 +127,16 @@ public:
         String s;
 
         s << memberVariableName << "->setFont ("
-          << FontPropertyComponent::getCompleteFontCode (l->getFont(), l->getProperties().getWithDefault ("typefaceName", FontPropertyComponent::getDefaultFont()))
-          << ");\n"
-          << memberVariableName << "->setJustificationType ("
-          << CodeHelpers::justificationToCode (l->getJustificationType())
-          << ");\n"
-          << memberVariableName << "->setEditable ("
-          << CodeHelpers::boolLiteral (l->isEditableOnSingleClick()) << ", "
-          << CodeHelpers::boolLiteral (l->isEditableOnDoubleClick()) << ", "
-          << CodeHelpers::boolLiteral (l->doesLossOfFocusDiscardChanges()) << ");\n"
-          << getColourIntialisationCode (component, memberVariableName);
+        << FontPropertyComponent::getCompleteFontCode (l->getFont(), l->getProperties().getWithDefault ("typefaceName", FontPropertyComponent::getDefaultFont()))
+        << ");\n"
+        << memberVariableName << "->setJustificationType ("
+        << CodeHelpers::justificationToCode (l->getJustificationType())
+        << ");\n"
+        << memberVariableName << "->setEditable ("
+        << CodeHelpers::boolLiteral (l->isEditableOnSingleClick()) << ", "
+        << CodeHelpers::boolLiteral (l->isEditableOnDoubleClick()) << ", "
+        << CodeHelpers::boolLiteral (l->doesLossOfFocusDiscardChanges()) << ");\n"
+        << getColourIntialisationCode (component, memberVariableName);
 
         if (needsCallback (component))
             s << memberVariableName << "->addListener (this);\n";
@@ -164,8 +164,8 @@ public:
             const String userCodeComment ("UserLabelCode_" + memberVariableName);
 
             callback
-                << "if (labelThatHasChanged == " << memberVariableName
-                << ")\n{\n    //[" << userCodeComment << "] -- add your label text handling code here..\n    //[/" << userCodeComment << "]\n}\n";
+            << "if (labelThatHasChanged == " << memberVariableName
+            << ")\n{\n    //[" << userCodeComment << "] -- add your label text handling code here..\n    //[/" << userCodeComment << "]\n}\n";
         }
     }
 
@@ -195,7 +195,7 @@ public:
     static bool needsCallback (Component* label)
     {
         return ((Label*) label)->isEditableOnSingleClick()
-                 || ((Label*) label)->isEditableOnDoubleClick(); // xxx should be configurable
+        || ((Label*) label)->isEditableOnDoubleClick(); // xxx should be configurable
     }
 
 private:
@@ -205,7 +205,7 @@ private:
     {
     public:
         LabelTextProperty (Label* comp, JucerDocument& doc)
-            : ComponentTextProperty <Label> ("text", 10000, true, comp, doc)
+        : ComponentTextProperty <Label> ("text", 10000, true, comp, doc)
         {}
 
         void setText (const String& newText) override
@@ -224,8 +224,8 @@ private:
         {
         public:
             LabelTextChangeAction (Label* const comp, ComponentLayout& l, const String& newState_)
-                : ComponentUndoableAction <Label> (comp, l),
-                  newState (newState_)
+            : ComponentUndoableAction <Label> (comp, l),
+            newState (newState_)
             {
                 oldState = comp->getText();
             }
@@ -255,7 +255,7 @@ private:
     {
     public:
         LabelEditableProperty (Label* comp, JucerDocument& doc)
-           : ComponentChoiceProperty <Label> ("editing", comp, doc)
+        : ComponentChoiceProperty <Label> ("editing", comp, doc)
         {
             choices.add ("read-only");
             choices.add ("edit on single-click");
@@ -271,8 +271,8 @@ private:
         int getIndex() const
         {
             return component->isEditableOnSingleClick()
-                    ? 1
-                    : (component->isEditableOnDoubleClick() ? 2 : 0);
+            ? 1
+            : (component->isEditableOnDoubleClick() ? 2 : 0);
         }
 
     private:
@@ -280,12 +280,12 @@ private:
         {
         public:
             LabelEditableChangeAction (Label* const comp, ComponentLayout& l, const int newState_)
-                : ComponentUndoableAction <Label> (comp, l),
-                  newState (newState_)
+            : ComponentUndoableAction <Label> (comp, l),
+            newState (newState_)
             {
                 oldState = comp->isEditableOnSingleClick()
-                            ? 1
-                            : (comp->isEditableOnDoubleClick() ? 2 : 0);
+                ? 1
+                : (comp->isEditableOnDoubleClick() ? 2 : 0);
             }
 
             bool perform()
@@ -315,7 +315,7 @@ private:
     {
     public:
         LabelLossOfFocusProperty (Label* comp, JucerDocument& doc)
-           : ComponentChoiceProperty <Label> ("focus", comp, doc)
+        : ComponentChoiceProperty <Label> ("focus", comp, doc)
         {
             choices.add ("loss of focus discards changes");
             choices.add ("loss of focus commits changes");
@@ -337,8 +337,8 @@ private:
         {
         public:
             LabelFocusLossChangeAction (Label* const comp, ComponentLayout& l, const bool newState_)
-                : ComponentUndoableAction <Label> (comp, l),
-                  newState (newState_)
+            : ComponentUndoableAction <Label> (comp, l),
+            newState (newState_)
             {
                 oldState = comp->doesLossOfFocusDiscardChanges();
             }
@@ -369,13 +369,13 @@ private:
 
     //==============================================================================
     class LabelJustificationProperty  : public JustificationProperty,
-                                        public ChangeListener
+    public ChangeListener
     {
     public:
         LabelJustificationProperty (Label* const label_, JucerDocument& doc)
-            : JustificationProperty ("layout", false),
-              label (label_),
-              document (doc)
+        : JustificationProperty ("layout", false),
+        label (label_),
+        document (doc)
         {
             document.addChangeListener (this);
         }
@@ -406,9 +406,9 @@ private:
         {
         public:
             LabelJustifyChangeAction (Label* const comp, ComponentLayout& l, Justification newState_)
-                : ComponentUndoableAction <Label> (comp, l),
-                  newState (newState_),
-                  oldState (comp->getJustificationType())
+            : ComponentUndoableAction <Label> (comp, l),
+            newState (newState_),
+            oldState (comp->getJustificationType())
             {
             }
 
@@ -434,13 +434,13 @@ private:
 
     //==============================================================================
     class FontNameProperty  : public FontPropertyComponent,
-                              public ChangeListener
+    public ChangeListener
     {
     public:
         FontNameProperty (Label* const label_, JucerDocument& doc)
-            : FontPropertyComponent ("font"),
-              label (label_),
-              document (doc)
+        : FontPropertyComponent ("font"),
+        label (label_),
+        document (doc)
         {
             document.addChangeListener (this);
         }
@@ -471,8 +471,8 @@ private:
         {
         public:
             FontNameChangeAction (Label* const comp, ComponentLayout& l, const String& newState_)
-                : ComponentUndoableAction <Label> (comp, l),
-                  newState (newState_)
+            : ComponentUndoableAction <Label> (comp, l),
+            newState (newState_)
             {
                 oldState = comp->getProperties().getWithDefault ("typefaceName", FontPropertyComponent::getDefaultFont());
             }
@@ -501,13 +501,13 @@ private:
 
     //==============================================================================
     class FontSizeProperty  : public SliderPropertyComponent,
-                              public ChangeListener
+    public ChangeListener
     {
     public:
         FontSizeProperty (Label* const label_, JucerDocument& doc)
-            : SliderPropertyComponent ("size", 1.0, 250.0, 0.1, 0.3),
-              label (label_),
-              document (doc)
+        : SliderPropertyComponent ("size", 1.0, 250.0, 0.1, 0.3),
+        label (label_),
+        document (doc)
         {
             document.addChangeListener (this);
         }
@@ -540,8 +540,8 @@ private:
         {
         public:
             FontSizeChangeAction (Label* const comp, ComponentLayout& l, const float newState_)
-                : ComponentUndoableAction <Label> (comp, l),
-                  newState (newState_)
+            : ComponentUndoableAction <Label> (comp, l),
+            newState (newState_)
             {
                 oldState = comp->getFont().getHeight();
             }
@@ -572,13 +572,13 @@ private:
 
     //==============================================================================
     class FontStyleProperty  : public ChoicePropertyComponent,
-                               public ChangeListener
+    public ChangeListener
     {
     public:
         FontStyleProperty (Label* const label_, JucerDocument& doc)
-            : ChoicePropertyComponent ("style"),
-              label (label_),
-              document (doc)
+        : ChoicePropertyComponent ("style"),
+        label (label_),
+        document (doc)
         {
             document.addChangeListener (this);
 
@@ -666,8 +666,8 @@ private:
         {
         public:
             FontStyleChangeAction (Label* const comp, ComponentLayout& l, const Font& newState_)
-                : ComponentUndoableAction <Label> (comp, l),
-                  newState (newState_)
+            : ComponentUndoableAction <Label> (comp, l),
+            newState (newState_)
             {
                 oldState = comp->getFont();
             }
@@ -694,13 +694,13 @@ private:
 
     //==============================================================================
     class FontKerningProperty  : public SliderPropertyComponent,
-                                 public ChangeListener
+    public ChangeListener
     {
     public:
         FontKerningProperty (Label* const label_, JucerDocument& doc)
-            : SliderPropertyComponent ("kerning", -0.5, 0.5, 0.001),
-              label (label_),
-              document (doc)
+        : SliderPropertyComponent ("kerning", -0.5, 0.5, 0.001),
+        label (label_),
+        document (doc)
         {
             document.addChangeListener (this);
         }
@@ -736,8 +736,8 @@ private:
         {
         public:
             FontKerningChangeAction (Label* const comp, ComponentLayout& l, const float newState_)
-                : ComponentUndoableAction <Label> (comp, l),
-                  newState (newState_)
+            : ComponentUndoableAction <Label> (comp, l),
+            newState (newState_)
             {
                 oldState = comp->getFont().getExtraKerningFactor();
             }

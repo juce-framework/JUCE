@@ -1,34 +1,34 @@
 /*
-  ==============================================================================
+ ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+ This file is part of the JUCE library.
+ Copyright (c) 2017 - ROLI Ltd.
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+ JUCE is an open source library subject to commercial or open-source
+ licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+ By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+ Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+ 27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+ End User License Agreement: www.juce.com/juce-5-licence
+ Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+ Or: You may also use this code under the terms of the GPL v3 (see
+ www.gnu.org/licenses).
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+ JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+ EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+ DISCLAIMED.
 
-  ==============================================================================
-*/
+ ==============================================================================
+ */
 
 class TextEditorHandler  : public ComponentTypeHandler
 {
 public:
     TextEditorHandler()
-        : ComponentTypeHandler ("Text Editor", "TextEditor", typeid (TextEditor), 150, 24)
+    : ComponentTypeHandler ("Text Editor", "TextEditor", typeid (TextEditor), 150, 24)
     {
         registerColour (TextEditor::textColourId, "text", "textcol");
         registerColour (TextEditor::backgroundColourId, "background", "bkgcol");
@@ -116,13 +116,13 @@ public:
 
         String s;
         s << memberVariableName << "->setMultiLine (" << CodeHelpers::boolLiteral (te->isMultiLine()) << ");\n"
-          << memberVariableName << "->setReturnKeyStartsNewLine (" << CodeHelpers::boolLiteral (te->getReturnKeyStartsNewLine()) << ");\n"
-          << memberVariableName << "->setReadOnly (" << CodeHelpers::boolLiteral (te->isReadOnly()) << ");\n"
-          << memberVariableName << "->setScrollbarsShown (" << CodeHelpers::boolLiteral (te->areScrollbarsShown()) << ");\n"
-          << memberVariableName << "->setCaretVisible (" << CodeHelpers::boolLiteral (te->isCaretVisible()) << ");\n"
-          << memberVariableName << "->setPopupMenuEnabled (" << CodeHelpers::boolLiteral (te->isPopupMenuEnabled()) << ");\n"
-          << getColourIntialisationCode (component, memberVariableName)
-          << memberVariableName << "->setText (" << quotedString (te->getProperties() ["initialText"].toString(), code.shouldUseTransMacro()) << ");\n\n";
+        << memberVariableName << "->setReturnKeyStartsNewLine (" << CodeHelpers::boolLiteral (te->getReturnKeyStartsNewLine()) << ");\n"
+        << memberVariableName << "->setReadOnly (" << CodeHelpers::boolLiteral (te->isReadOnly()) << ");\n"
+        << memberVariableName << "->setScrollbarsShown (" << CodeHelpers::boolLiteral (te->areScrollbarsShown()) << ");\n"
+        << memberVariableName << "->setCaretVisible (" << CodeHelpers::boolLiteral (te->isCaretVisible()) << ");\n"
+        << memberVariableName << "->setPopupMenuEnabled (" << CodeHelpers::boolLiteral (te->isPopupMenuEnabled()) << ");\n"
+        << getColourIntialisationCode (component, memberVariableName)
+        << memberVariableName << "->setText (" << quotedString (te->getProperties() ["initialText"].toString(), code.shouldUseTransMacro()) << ");\n\n";
 
         code.constructorCode += s;
     }
@@ -133,7 +133,7 @@ private:
     {
     public:
         TextEditorMultiLineProperty (TextEditor* comp, JucerDocument& doc)
-            : ComponentChoiceProperty <TextEditor> ("mode", comp, doc)
+        : ComponentChoiceProperty <TextEditor> ("mode", comp, doc)
         {
             choices.add ("single line");
             choices.add ("multi-line, return key starts new line");
@@ -156,8 +156,8 @@ private:
         {
         public:
             TextEditorMultilineChangeAction (TextEditor* const comp, ComponentLayout& l, const int newState_)
-                : ComponentUndoableAction <TextEditor> (comp, l),
-                  newState (newState_)
+            : ComponentUndoableAction <TextEditor> (comp, l),
+            newState (newState_)
             {
                 oldState = comp->isMultiLine() ? (comp->getReturnKeyStartsNewLine() ? 1 : 2) : 0;
             }
@@ -189,7 +189,7 @@ private:
     {
     public:
         TextEditorReadOnlyProperty (TextEditor* comp, JucerDocument& doc)
-            : ComponentBooleanProperty <TextEditor> ("editable", "Editable", "Editable", comp, doc)
+        : ComponentBooleanProperty <TextEditor> ("editable", "Editable", "Editable", comp, doc)
         {
         }
 
@@ -206,8 +206,8 @@ private:
         {
         public:
             TextEditorReadonlyChangeAction (TextEditor* const comp, ComponentLayout& l, const bool newState_)
-                : ComponentUndoableAction <TextEditor> (comp, l),
-                  newState (newState_)
+            : ComponentUndoableAction <TextEditor> (comp, l),
+            newState (newState_)
             {
                 oldState = comp->isReadOnly();
             }
@@ -237,7 +237,7 @@ private:
     {
     public:
         TextEditorScrollbarsProperty (TextEditor* comp, JucerDocument& doc)
-            : ComponentBooleanProperty <TextEditor> ("scrollbars", "Scrollbars enabled", "Scrollbars enabled", comp, doc)
+        : ComponentBooleanProperty <TextEditor> ("scrollbars", "Scrollbars enabled", "Scrollbars enabled", comp, doc)
         {
         }
 
@@ -254,8 +254,8 @@ private:
         {
         public:
             TextEditorScrollbarChangeAction (TextEditor* const comp, ComponentLayout& l, const bool newState_)
-                : ComponentUndoableAction <TextEditor> (comp, l),
-                  newState (newState_)
+            : ComponentUndoableAction <TextEditor> (comp, l),
+            newState (newState_)
             {
                 oldState = comp->areScrollbarsShown();
             }
@@ -285,7 +285,7 @@ private:
     {
     public:
         TextEditorCaretProperty (TextEditor* comp, JucerDocument& doc)
-            : ComponentBooleanProperty <TextEditor> ("caret", "Caret visible", "Caret visible", comp, doc)
+        : ComponentBooleanProperty <TextEditor> ("caret", "Caret visible", "Caret visible", comp, doc)
         {
         }
 
@@ -302,8 +302,8 @@ private:
         {
         public:
             TextEditorCaretChangeAction (TextEditor* const comp, ComponentLayout& l, const bool newState_)
-                : ComponentUndoableAction <TextEditor> (comp, l),
-                  newState (newState_)
+            : ComponentUndoableAction <TextEditor> (comp, l),
+            newState (newState_)
             {
                 oldState = comp->isCaretVisible();
             }
@@ -333,7 +333,7 @@ private:
     {
     public:
         TextEditorPopupMenuProperty (TextEditor* comp, JucerDocument& doc)
-            : ComponentBooleanProperty <TextEditor> ("popup menu", "Popup menu enabled", "Popup menu enabled", comp, doc)
+        : ComponentBooleanProperty <TextEditor> ("popup menu", "Popup menu enabled", "Popup menu enabled", comp, doc)
         {
         }
 
@@ -350,8 +350,8 @@ private:
         {
         public:
             TextEditorPopupMenuChangeAction (TextEditor* const comp, ComponentLayout& l, const bool newState_)
-                : ComponentUndoableAction <TextEditor> (comp, l),
-                  newState (newState_)
+            : ComponentUndoableAction <TextEditor> (comp, l),
+            newState (newState_)
             {
                 oldState = comp->isPopupMenuEnabled();
             }
@@ -381,7 +381,7 @@ private:
     {
     public:
         TextEditorInitialTextProperty (TextEditor* comp, JucerDocument& doc)
-            : ComponentTextProperty <TextEditor> ("initial text", 10000, true, comp, doc)
+        : ComponentTextProperty <TextEditor> ("initial text", 10000, true, comp, doc)
         {}
 
         void setText (const String& newText) override
@@ -400,8 +400,8 @@ private:
         {
         public:
             TextEditorInitialTextChangeAction (TextEditor* const comp, ComponentLayout& l, const String& newState_)
-                : ComponentUndoableAction <TextEditor> (comp, l),
-                  newState (newState_)
+            : ComponentUndoableAction <TextEditor> (comp, l),
+            newState (newState_)
             {
                 oldState = comp->getProperties() ["initialText"];
             }

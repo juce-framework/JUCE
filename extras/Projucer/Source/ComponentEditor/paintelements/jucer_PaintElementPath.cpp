@@ -1,28 +1,28 @@
 /*
-  ==============================================================================
+ ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+ This file is part of the JUCE library.
+ Copyright (c) 2017 - ROLI Ltd.
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+ JUCE is an open source library subject to commercial or open-source
+ licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+ By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+ Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+ 27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+ End User License Agreement: www.juce.com/juce-5-licence
+ Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+ Or: You may also use this code under the terms of the GPL v3 (see
+ www.gnu.org/licenses).
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+ JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+ EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+ DISCLAIMED.
 
-  ==============================================================================
-*/
+ ==============================================================================
+ */
 
 #include "../../jucer_Headers.h"
 #include "jucer_PaintElementPath.h"
@@ -37,19 +37,19 @@ public:
     ChangePointAction (PathPoint* const point,
                        const int pointIndex,
                        const PathPoint& newValue_)
-        : PaintElementUndoableAction <PaintElementPath> (point->owner),
-          index (pointIndex),
-          newValue (newValue_),
-          oldValue (*point)
+    : PaintElementUndoableAction <PaintElementPath> (point->owner),
+    index (pointIndex),
+    newValue (newValue_),
+    oldValue (*point)
     {
     }
 
     ChangePointAction (PathPoint* const point,
                        const PathPoint& newValue_)
-        : PaintElementUndoableAction <PaintElementPath> (point->owner),
-          index (point->owner->indexOfPoint (point)),
-          newValue (newValue_),
-          oldValue (*point)
+    : PaintElementUndoableAction <PaintElementPath> (point->owner),
+    index (point->owner->indexOfPoint (point)),
+    newValue (newValue_),
+    oldValue (*point)
     {
     }
 
@@ -99,12 +99,12 @@ private:
 
 //==============================================================================
 class PathWindingModeProperty    : public ChoicePropertyComponent,
-                                   public ChangeListener
+public ChangeListener
 {
 public:
     PathWindingModeProperty (PaintElementPath* const owner_)
-        : ChoicePropertyComponent ("winding rule"),
-          owner (owner_)
+    : ChoicePropertyComponent ("winding rule"),
+    owner (owner_)
     {
         choices.add ("Non-zero winding");
         choices.add ("Even/odd winding");
@@ -129,8 +129,8 @@ private:
 
 //==============================================================================
 PaintElementPath::PaintElementPath (PaintRoutine* pr)
-    : ColouredElement (pr, "Path", true, true),
-      nonZeroWinding (true)
+: ColouredElement (pr, "Path", true, true),
+nonZeroWinding (true)
 {
 }
 
@@ -151,9 +151,9 @@ void PaintElementPath::setInitialBounds (int w, int h)
     int y = randomPos (h);
 
     s << "s "
-      << x << " " << y << " l "
-      << (x + 30) << " " << (y + 50) << " l "
-      << (x - 30) << " " << (y + 50) << " x";
+    << x << " " << y << " l "
+    << (x + 30) << " " << (y + 50) << " l "
+    << (x - 30) << " " << (y + 50) << " x";
 
     restorePathFromString (s);
 }
@@ -162,7 +162,7 @@ void PaintElementPath::setInitialBounds (int w, int h)
 int PaintElementPath::getBorderSize() const
 {
     return isStrokePresent ? 1 + roundFloatToInt (strokeType.stroke.getStrokeThickness())
-                           : 0;
+    : 0;
 }
 
 Rectangle<int> PaintElementPath::getCurrentBounds (const Rectangle<int>& parentArea) const
@@ -377,7 +377,7 @@ void PaintElementPath::fillInGeneratedCode (GeneratedCode& code, String& paintMe
     const ComponentLayout* layout = code.document->getComponentLayout();
 
     code.privateMemberDeclarations
-        << "Path " << pathVariable << ";\n";
+    << "Path " << pathVariable << ";\n";
 
     String r;
     bool somePointsAreRelative = false;
@@ -389,41 +389,41 @@ void PaintElementPath::fillInGeneratedCode (GeneratedCode& code, String& paintMe
     {
         switch (p->type)
         {
-        case Path::Iterator::startNewSubPath:
-            r << pathVariable << ".startNewSubPath (" << positionToPairOfValues (p->pos[0], layout) << ");\n";
-            somePointsAreRelative = somePointsAreRelative || ! p->pos[0].rect.isPositionAbsolute();
-            break;
+            case Path::Iterator::startNewSubPath:
+                r << pathVariable << ".startNewSubPath (" << positionToPairOfValues (p->pos[0], layout) << ");\n";
+                somePointsAreRelative = somePointsAreRelative || ! p->pos[0].rect.isPositionAbsolute();
+                break;
 
-        case Path::Iterator::lineTo:
-            r << pathVariable << ".lineTo (" << positionToPairOfValues (p->pos[0], layout) << ");\n";
-            somePointsAreRelative = somePointsAreRelative || ! p->pos[0].rect.isPositionAbsolute();
-            break;
+            case Path::Iterator::lineTo:
+                r << pathVariable << ".lineTo (" << positionToPairOfValues (p->pos[0], layout) << ");\n";
+                somePointsAreRelative = somePointsAreRelative || ! p->pos[0].rect.isPositionAbsolute();
+                break;
 
-        case Path::Iterator::quadraticTo:
-            r << pathVariable << ".quadraticTo (" << positionToPairOfValues (p->pos[0], layout)
-              << ", " << positionToPairOfValues (p->pos[1], layout) << ");\n";
+            case Path::Iterator::quadraticTo:
+                r << pathVariable << ".quadraticTo (" << positionToPairOfValues (p->pos[0], layout)
+                << ", " << positionToPairOfValues (p->pos[1], layout) << ");\n";
 
-            somePointsAreRelative = somePointsAreRelative || ! p->pos[0].rect.isPositionAbsolute();
-            somePointsAreRelative = somePointsAreRelative || ! p->pos[1].rect.isPositionAbsolute();
-            break;
+                somePointsAreRelative = somePointsAreRelative || ! p->pos[0].rect.isPositionAbsolute();
+                somePointsAreRelative = somePointsAreRelative || ! p->pos[1].rect.isPositionAbsolute();
+                break;
 
-        case Path::Iterator::cubicTo:
-            r << pathVariable << ".cubicTo (" << positionToPairOfValues (p->pos[0], layout)
-              << ", " << positionToPairOfValues (p->pos[1], layout)
-              << ", " << positionToPairOfValues (p->pos[2], layout) << ");\n";
+            case Path::Iterator::cubicTo:
+                r << pathVariable << ".cubicTo (" << positionToPairOfValues (p->pos[0], layout)
+                << ", " << positionToPairOfValues (p->pos[1], layout)
+                << ", " << positionToPairOfValues (p->pos[2], layout) << ");\n";
 
-            somePointsAreRelative = somePointsAreRelative || ! p->pos[0].rect.isPositionAbsolute();
-            somePointsAreRelative = somePointsAreRelative || ! p->pos[1].rect.isPositionAbsolute();
-            somePointsAreRelative = somePointsAreRelative || ! p->pos[2].rect.isPositionAbsolute();
-            break;
+                somePointsAreRelative = somePointsAreRelative || ! p->pos[0].rect.isPositionAbsolute();
+                somePointsAreRelative = somePointsAreRelative || ! p->pos[1].rect.isPositionAbsolute();
+                somePointsAreRelative = somePointsAreRelative || ! p->pos[2].rect.isPositionAbsolute();
+                break;
 
-        case Path::Iterator::closePath:
-            r << pathVariable << ".closeSubPath();\n";
-            break;
+            case Path::Iterator::closePath:
+                r << pathVariable << ".closeSubPath();\n";
+                break;
 
-        default:
-            jassertfalse;
-            break;
+            default:
+                jassertfalse;
+                break;
         }
     }
 
@@ -431,13 +431,13 @@ void PaintElementPath::fillInGeneratedCode (GeneratedCode& code, String& paintMe
 
     if (somePointsAreRelative)
         code.getCallbackCode (String(), "void", "resized()", false)
-            << pathVariable << ".clear();\n" << r;
+        << pathVariable << ".clear();\n" << r;
     else
         code.constructorCode << r;
 
     String s;
     s << "{\n"
-      << "    float x = 0, y = 0;\n";
+    << "    float x = 0, y = 0;\n";
 
     if (! fillType.isInvisible())
         s << "    " << fillType.generateVariablesCode ("fill");
@@ -446,8 +446,8 @@ void PaintElementPath::fillInGeneratedCode (GeneratedCode& code, String& paintMe
         s << "    " << strokeType.fill.generateVariablesCode ("stroke");
 
     s << "    //[UserPaintCustomArguments] Customize the painting arguments here..\n"
-      << customPaintCode
-      << "    //[/UserPaintCustomArguments]\n";
+    << customPaintCode
+    << "    //[/UserPaintCustomArguments]\n";
 
     RelativePositionedRectangle zero;
 
@@ -568,12 +568,12 @@ String PaintElementPath::pathToString() const
                 break;
             case Path::Iterator::quadraticTo:
                 s << "q " << p->pos[0].toString()
-                  << ' '  << p->pos[1].toString() << ' ';
+                << ' '  << p->pos[1].toString() << ' ';
                 break;
             case Path::Iterator::cubicTo:
                 s << "c " << p->pos[0].toString()
-                  << ' '  << p->pos[1].toString() << ' '
-                  << ' '  << p->pos[2].toString() << ' ';
+                << ' '  << p->pos[1].toString() << ' '
+                << ' '  << p->pos[2].toString() << ' ';
                 break;
             case Path::Iterator::closePath:
                 s << "x ";
@@ -742,9 +742,9 @@ class ChangeWindingAction     : public PaintElementUndoableAction <PaintElementP
 {
 public:
     ChangeWindingAction (PaintElementPath* const path, const bool newValue_)
-        : PaintElementUndoableAction <PaintElementPath> (path),
-          newValue (newValue_),
-          oldValue (path->isNonZeroWinding())
+    : PaintElementUndoableAction <PaintElementPath> (path),
+    newValue (newValue_),
+    oldValue (path->isNonZeroWinding())
     {
     }
 
@@ -840,9 +840,9 @@ class AddPointAction   : public PaintElementUndoableAction <PaintElementPath>
 {
 public:
     AddPointAction (PaintElementPath* path, int pointIndexToAddItAfter_)
-        : PaintElementUndoableAction <PaintElementPath> (path),
-          indexAdded (-1),
-          pointIndexToAddItAfter (pointIndexToAddItAfter_)
+    : PaintElementUndoableAction <PaintElementPath> (path),
+    indexAdded (-1),
+    pointIndexToAddItAfter (pointIndexToAddItAfter_)
     {
     }
 
@@ -903,7 +903,7 @@ PathPoint* PaintElementPath::addPoint (int pointIndexToAddItAfter, const bool un
     if (points [pointIndexToAddItAfter + 1] != nullptr)
     {
         if (points [pointIndexToAddItAfter + 1]->type == Path::Iterator::closePath
-             || points [pointIndexToAddItAfter + 1]->type == Path::Iterator::startNewSubPath)
+            || points [pointIndexToAddItAfter + 1]->type == Path::Iterator::startNewSubPath)
         {
             int i = pointIndexToAddItAfter;
             while (i > 0)
@@ -945,9 +945,9 @@ class DeletePointAction   : public PaintElementUndoableAction <PaintElementPath>
 {
 public:
     DeletePointAction (PaintElementPath* const path, const int indexToRemove_)
-        : PaintElementUndoableAction <PaintElementPath> (path),
-          indexToRemove (indexToRemove_),
-          oldValue (*path->getPoint (indexToRemove))
+    : PaintElementUndoableAction <PaintElementPath> (path),
+    indexToRemove (indexToRemove_),
+    oldValue (*path->getPoint (indexToRemove))
     {
     }
 
@@ -1040,66 +1040,66 @@ int PaintElementPath::findSegmentAtXY (int x, int y) const
 
         switch (p->type)
         {
-        case Path::Iterator::startNewSubPath:
-            p->pos[0].getXY (lastX, lastY, area, layout);
-            subPathStartX = lastX;
-            subPathStartY = lastY;
-            subpathStartIndex = i;
-            break;
+            case Path::Iterator::startNewSubPath:
+                p->pos[0].getXY (lastX, lastY, area, layout);
+                subPathStartX = lastX;
+                subPathStartY = lastY;
+                subpathStartIndex = i;
+                break;
 
-        case Path::Iterator::lineTo:
-            p->pos[0].getXY (x1, y1, area, layout);
+            case Path::Iterator::lineTo:
+                p->pos[0].getXY (x1, y1, area, layout);
 
-            segmentPath.addLineSegment (Line<float> ((float) lastX, (float) lastY, (float) x1, (float) y1), thickness);
-            if (segmentPath.contains ((float) x, (float) y))
-                return i;
+                segmentPath.addLineSegment (Line<float> ((float) lastX, (float) lastY, (float) x1, (float) y1), thickness);
+                if (segmentPath.contains ((float) x, (float) y))
+                    return i;
 
-            lastX = x1;
-            lastY = y1;
-            break;
+                lastX = x1;
+                lastY = y1;
+                break;
 
-        case Path::Iterator::quadraticTo:
-            p->pos[0].getXY (x1, y1, area, layout);
-            p->pos[1].getXY (x2, y2, area, layout);
+            case Path::Iterator::quadraticTo:
+                p->pos[0].getXY (x1, y1, area, layout);
+                p->pos[1].getXY (x2, y2, area, layout);
 
-            segmentPath.startNewSubPath ((float) lastX, (float) lastY);
-            segmentPath.quadraticTo ((float) x1, (float) y1, (float) x2, (float) y2);
-            PathStrokeType (thickness).createStrokedPath (segmentPath, segmentPath);
+                segmentPath.startNewSubPath ((float) lastX, (float) lastY);
+                segmentPath.quadraticTo ((float) x1, (float) y1, (float) x2, (float) y2);
+                PathStrokeType (thickness).createStrokedPath (segmentPath, segmentPath);
 
-            if (segmentPath.contains ((float) x, (float) y))
-                return i;
+                if (segmentPath.contains ((float) x, (float) y))
+                    return i;
 
-            lastX = x2;
-            lastY = y2;
-            break;
+                lastX = x2;
+                lastY = y2;
+                break;
 
-        case Path::Iterator::cubicTo:
-            p->pos[0].getXY (x1, y1, area, layout);
-            p->pos[1].getXY (x2, y2, area, layout);
-            p->pos[2].getXY (x3, y3, area, layout);
+            case Path::Iterator::cubicTo:
+                p->pos[0].getXY (x1, y1, area, layout);
+                p->pos[1].getXY (x2, y2, area, layout);
+                p->pos[2].getXY (x3, y3, area, layout);
 
-            segmentPath.startNewSubPath ((float) lastX, (float) lastY);
-            segmentPath.cubicTo ((float) x1, (float) y1, (float) x2, (float) y2, (float) x3, (float) y3);
-            PathStrokeType (thickness).createStrokedPath (segmentPath, segmentPath);
+                segmentPath.startNewSubPath ((float) lastX, (float) lastY);
+                segmentPath.cubicTo ((float) x1, (float) y1, (float) x2, (float) y2, (float) x3, (float) y3);
+                PathStrokeType (thickness).createStrokedPath (segmentPath, segmentPath);
 
-            if (segmentPath.contains ((float) x, (float) y))
-                return i;
+                if (segmentPath.contains ((float) x, (float) y))
+                    return i;
 
-            lastX = x3;
-            lastY = y3;
-            break;
+                lastX = x3;
+                lastY = y3;
+                break;
 
-        case Path::Iterator::closePath:
-            segmentPath.addLineSegment (Line<float> ((float) lastX, (float) lastY, (float) subPathStartX, (float) subPathStartY), thickness);
-            if (segmentPath.contains ((float) x, (float) y))
-                return subpathStartIndex;
+            case Path::Iterator::closePath:
+                segmentPath.addLineSegment (Line<float> ((float) lastX, (float) lastY, (float) subPathStartX, (float) subPathStartY), thickness);
+                if (segmentPath.contains ((float) x, (float) y))
+                    return subpathStartIndex;
 
-            lastX = subPathStartX;
-            lastY = subPathStartY;
-            break;
+                lastX = subPathStartX;
+                lastY = subPathStartY;
+                break;
 
-        default:
-            jassertfalse; break;
+            default:
+                jassertfalse; break;
         }
     }
 
@@ -1182,14 +1182,14 @@ void PaintElementPath::setPoint (int index, int pointNumber, const RelativePosit
 
 //==============================================================================
 class PathPointTypeProperty : public ChoicePropertyComponent,
-                              public ChangeListener
+public ChangeListener
 {
 public:
     PathPointTypeProperty (PaintElementPath* const owner_,
                            const int index_)
-        : ChoicePropertyComponent ("point type"),
-          owner (owner_),
-          index (index_)
+    : ChoicePropertyComponent ("point type"),
+    owner (owner_),
+    index (index_)
     {
         choices.add ("Start of sub-path");
         choices.add ("Line");
@@ -1297,13 +1297,13 @@ private:
 
 //==============================================================================
 class PathPointClosedProperty   : public ChoicePropertyComponent,
-                                  private ChangeListener
+private ChangeListener
 {
 public:
     PathPointClosedProperty (PaintElementPath* const owner_, const int index_)
-        : ChoicePropertyComponent ("openness"),
-          owner (owner_),
-          index (index_)
+    : ChoicePropertyComponent ("openness"),
+    owner (owner_),
+    index (index_)
     {
         owner->getDocument()->addChangeListener (this);
 
@@ -1341,9 +1341,9 @@ class AddNewPointProperty   : public ButtonPropertyComponent
 {
 public:
     AddNewPointProperty (PaintElementPath* const owner_, const int index_)
-        : ButtonPropertyComponent ("new point", false),
-          owner (owner_),
-          index (index_)
+    : ButtonPropertyComponent ("new point", false),
+    owner (owner_),
+    index (index_)
     {
     }
 
@@ -1362,13 +1362,13 @@ private:
 
 //==============================================================================
 PathPoint::PathPoint (PaintElementPath* const owner_)
-    : owner (owner_)
+: owner (owner_)
 {
 }
 
 PathPoint::PathPoint (const PathPoint& other)
-    : owner (other.owner),
-      type (other.type)
+: owner (other.owner),
+type (other.type)
 {
     pos [0] = other.pos [0];
     pos [1] = other.pos [1];
@@ -1422,7 +1422,7 @@ PathPoint PathPoint::withChangedPointType (const Path::Iterator::PathElementType
             if (PathPoint* lastPoint = owner->points [index - 1])
             {
                 lastPoint->pos [lastPoint->getNumPoints() - 1]
-                            .getRectangleDouble (lastX, lastY, w, h, parentArea, owner->getDocument()->getComponentLayout());
+                .getRectangleDouble (lastX, lastY, w, h, parentArea, owner->getDocument()->getComponentLayout());
             }
             else
             {
@@ -1529,12 +1529,12 @@ void PathPoint::deleteFromPath()
 PathPointComponent::PathPointComponent (PaintElementPath* const path_,
                                         const int index_,
                                         const int pointNumber_)
-    : ElementSiblingComponent (path_),
-      path (path_),
-      routine (path_->getOwner()),
-      index (index_),
-      pointNumber (pointNumber_),
-      selected (false)
+: ElementSiblingComponent (path_),
+path (path_),
+routine (path_->getOwner()),
+index (index_),
+pointNumber (pointNumber_),
+selected (false)
 {
     setSize (11, 11);
     setRepaintsOnMouseActivity (true);

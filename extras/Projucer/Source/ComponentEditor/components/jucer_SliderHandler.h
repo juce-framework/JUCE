@@ -1,28 +1,28 @@
 /*
-  ==============================================================================
+ ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+ This file is part of the JUCE library.
+ Copyright (c) 2017 - ROLI Ltd.
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+ JUCE is an open source library subject to commercial or open-source
+ licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+ By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+ Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+ 27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+ End User License Agreement: www.juce.com/juce-5-licence
+ Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+ Or: You may also use this code under the terms of the GPL v3 (see
+ www.gnu.org/licenses).
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+ JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+ EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+ DISCLAIMED.
 
-  ==============================================================================
-*/
+ ==============================================================================
+ */
 
 static const Slider::SliderStyle sliderStyleTypes[] =
 {
@@ -54,7 +54,7 @@ static const Slider::TextEntryBoxPosition sliderTextBoxPositions[] =
 struct SliderHandler  : public ComponentTypeHandler
 {
     SliderHandler()
-        : ComponentTypeHandler ("Slider", "Slider", typeid (Slider), 150, 24)
+    : ComponentTypeHandler ("Slider", "Slider", typeid (Slider), 150, 24)
     {
         registerColour (Slider::backgroundColourId, "background", "bkgcol");
         registerColour (Slider::thumbColourId, "thumb", "thumbcol");
@@ -129,15 +129,15 @@ struct SliderHandler  : public ComponentTypeHandler
 
         String r;
         r << memberVariableName << "->setRange ("
-          << s->getMinimum() << ", " << s->getMaximum() << ", " << s->getInterval()
-          << ");\n"
-          << memberVariableName << "->setSliderStyle (Slider::"
-          << sliderStyleToString (s->getSliderStyle()) << ");\n"
-          << memberVariableName << "->setTextBoxStyle (Slider::"
-          << textBoxPosToString (s->getTextBoxPosition())
-          << ", " << CodeHelpers::boolLiteral (! s->isTextBoxEditable())
-          << ", " << s->getTextBoxWidth() << ", " << s->getTextBoxHeight() << ");\n"
-          << getColourIntialisationCode (component, memberVariableName);
+        << s->getMinimum() << ", " << s->getMaximum() << ", " << s->getInterval()
+        << ");\n"
+        << memberVariableName << "->setSliderStyle (Slider::"
+        << sliderStyleToString (s->getSliderStyle()) << ");\n"
+        << memberVariableName << "->setTextBoxStyle (Slider::"
+        << textBoxPosToString (s->getTextBoxPosition())
+        << ", " << CodeHelpers::boolLiteral (! s->isTextBoxEditable())
+        << ", " << s->getTextBoxWidth() << ", " << s->getTextBoxHeight() << ");\n"
+        << getColourIntialisationCode (component, memberVariableName);
 
         if (needsSliderListener (component))
             r << memberVariableName << "->addListener (this);\n";
@@ -167,8 +167,8 @@ struct SliderHandler  : public ComponentTypeHandler
             const String userCodeComment ("UserSliderCode_" + memberVariableName);
 
             callback
-                << "if (sliderThatWasMoved == " << memberVariableName
-                << ")\n{\n    //[" << userCodeComment << "] -- add your slider handling code here..\n    //[/" << userCodeComment << "]\n}\n";
+            << "if (sliderThatWasMoved == " << memberVariableName
+            << ")\n{\n    //[" << userCodeComment << "] -- add your slider handling code here..\n    //[/" << userCodeComment << "]\n}\n";
         }
     }
 
@@ -211,7 +211,7 @@ private:
     struct SliderTypeProperty  : public ComponentChoiceProperty<Slider>
     {
         SliderTypeProperty (Slider* slider, JucerDocument& doc)
-            : ComponentChoiceProperty<Slider> ("type", slider, doc)
+        : ComponentChoiceProperty<Slider> ("type", slider, doc)
         {
             choices.add ("Linear Horizontal");
             choices.add ("Linear Vertical");
@@ -249,8 +249,8 @@ private:
         struct SliderTypeChangeAction  : public ComponentUndoableAction<Slider>
         {
             SliderTypeChangeAction (Slider* comp, ComponentLayout& l, Slider::SliderStyle newState_)
-                : ComponentUndoableAction<Slider> (comp, l),
-                  newState (newState_)
+            : ComponentUndoableAction<Slider> (comp, l),
+            newState (newState_)
             {
                 oldState = comp->getSliderStyle();
             }
@@ -279,7 +279,7 @@ private:
     struct SliderTextboxProperty  : public ComponentChoiceProperty<Slider>
     {
         SliderTextboxProperty (Slider* slider, JucerDocument& doc)
-            : ComponentChoiceProperty<Slider> ("text position", slider, doc)
+        : ComponentChoiceProperty<Slider> ("text position", slider, doc)
         {
             choices.add ("No text box");
             choices.add ("Text box on left");
@@ -309,8 +309,8 @@ private:
         struct SliderTextBoxChangeAction  : public ComponentUndoableAction<Slider>
         {
             SliderTextBoxChangeAction (Slider* comp, ComponentLayout& l, Slider::TextEntryBoxPosition newState_)
-                : ComponentUndoableAction<Slider> (comp, l),
-                  newState (newState_)
+            : ComponentUndoableAction<Slider> (comp, l),
+            newState (newState_)
             {
                 oldState = comp->getTextBoxPosition();
             }
@@ -345,7 +345,7 @@ private:
     struct SliderTextboxEditableProperty  : public ComponentBooleanProperty<Slider>
     {
         SliderTextboxEditableProperty (Slider* slider, JucerDocument& doc)
-            : ComponentBooleanProperty<Slider> ("text box mode", "Editable", "Editable", slider, doc)
+        : ComponentBooleanProperty<Slider> ("text box mode", "Editable", "Editable", slider, doc)
         {
         }
 
@@ -364,8 +364,8 @@ private:
         struct SliderEditableChangeAction  : public ComponentUndoableAction<Slider>
         {
             SliderEditableChangeAction (Slider* const comp, ComponentLayout& l, bool newState_)
-                : ComponentUndoableAction<Slider> (comp, l),
-                  newState (newState_)
+            : ComponentUndoableAction<Slider> (comp, l),
+            newState (newState_)
             {
                 oldState = comp->isTextBoxEditable();
             }
@@ -394,8 +394,8 @@ private:
     struct SliderCallbackProperty  : public ComponentBooleanProperty<Slider>
     {
         SliderCallbackProperty (Slider* s, JucerDocument& doc)
-            : ComponentBooleanProperty<Slider> ("callback", "Generate SliderListener",
-                                                "Generate SliderListener", s, doc)
+        : ComponentBooleanProperty<Slider> ("callback", "Generate SliderListener",
+                                            "Generate SliderListener", s, doc)
         {
         }
 
@@ -410,8 +410,8 @@ private:
         struct SliderCallbackChangeAction  : public ComponentUndoableAction<Slider>
         {
             SliderCallbackChangeAction (Slider* comp, ComponentLayout& l, bool newState_)
-                : ComponentUndoableAction<Slider> (comp, l),
-                  newState (newState_)
+            : ComponentUndoableAction<Slider> (comp, l),
+            newState (newState_)
             {
                 oldState = needsSliderListener (comp);
             }
@@ -440,9 +440,9 @@ private:
     struct SliderTextboxSizeProperty  : public ComponentTextProperty<Slider>
     {
         SliderTextboxSizeProperty (Slider* slider, JucerDocument& doc, bool isWidth_)
-            : ComponentTextProperty<Slider> (isWidth_ ? "text box width" : "text box height",
-                                             12, false, slider, doc),
-              isWidth (isWidth_)
+        : ComponentTextProperty<Slider> (isWidth_ ? "text box width" : "text box height",
+                                         12, false, slider, doc),
+        isWidth (isWidth_)
         {
         }
 
@@ -455,7 +455,7 @@ private:
         String getText() const override
         {
             return String (isWidth ? component->getTextBoxWidth()
-                                   : component->getTextBoxHeight());
+                           : component->getTextBoxHeight());
         }
 
     private:
@@ -464,12 +464,12 @@ private:
         struct SliderBoxSizeChangeAction  : public ComponentUndoableAction<Slider>
         {
             SliderBoxSizeChangeAction (Slider* const comp, ComponentLayout& l, bool isWidth_, int newSize_)
-                : ComponentUndoableAction<Slider> (comp, l),
-                  isWidth (isWidth_),
-                  newSize (newSize_)
+            : ComponentUndoableAction<Slider> (comp, l),
+            isWidth (isWidth_),
+            newSize (newSize_)
             {
                 oldSize = isWidth ? comp->getTextBoxWidth()
-                                  : comp->getTextBoxHeight();
+                : comp->getTextBoxHeight();
             }
 
             bool perform() override
@@ -520,8 +520,8 @@ private:
     {
         SliderRangeProperty (Slider* slider, JucerDocument& doc,
                              const String& name, int rangeParam_)
-            : ComponentTextProperty<Slider> (name, 15, false, slider, doc),
-              rangeParam (rangeParam_)
+        : ComponentTextProperty<Slider> (name, 15, false, slider, doc),
+        rangeParam (rangeParam_)
         {
         }
 
@@ -560,7 +560,7 @@ private:
         struct SliderRangeChangeAction  : public ComponentUndoableAction<Slider>
         {
             SliderRangeChangeAction (Slider* comp, ComponentLayout& l, const double newState_[3])
-                : ComponentUndoableAction<Slider> (comp, l)
+            : ComponentUndoableAction<Slider> (comp, l)
             {
                 newState[0] = newState_ [0];
                 newState[1] = newState_ [1];
@@ -595,7 +595,7 @@ private:
     struct SliderSkewProperty  : public ComponentTextProperty<Slider>
     {
         SliderSkewProperty (Slider* slider, JucerDocument& doc)
-            : ComponentTextProperty<Slider> ("skew factor", 12, false, slider, doc)
+        : ComponentTextProperty<Slider> ("skew factor", 12, false, slider, doc)
         {
         }
 
@@ -618,7 +618,7 @@ private:
         struct SliderSkewChangeAction  : public ComponentUndoableAction<Slider>
         {
             SliderSkewChangeAction (Slider* comp, ComponentLayout& l, double newValue_)
-                : ComponentUndoableAction<Slider> (comp, l)
+            : ComponentUndoableAction<Slider> (comp, l)
             {
                 newValue = newValue_;
                 oldValue = comp->getSkewFactor();

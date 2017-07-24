@@ -1,28 +1,28 @@
 /*
-  ==============================================================================
+ ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+ This file is part of the JUCE library.
+ Copyright (c) 2017 - ROLI Ltd.
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+ JUCE is an open source library subject to commercial or open-source
+ licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+ By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+ Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+ 27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+ End User License Agreement: www.juce.com/juce-5-licence
+ Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+ Or: You may also use this code under the terms of the GPL v3 (see
+ www.gnu.org/licenses).
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+ JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+ EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+ DISCLAIMED.
 
-  ==============================================================================
-*/
+ ==============================================================================
+ */
 
 class ButtonHandler  : public ComponentTypeHandler
 {
@@ -32,8 +32,8 @@ public:
                    const std::type_info& componentClass,
                    const int defaultWidth_,
                    const int defaultHeight_)
-        : ComponentTypeHandler (typeDescription_, className_, componentClass,
-                                defaultWidth_, defaultHeight_)
+    : ComponentTypeHandler (typeDescription_, className_, componentClass,
+                            defaultWidth_, defaultHeight_)
     {}
 
     void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props, bool multipleSelected)
@@ -99,8 +99,8 @@ public:
         if (b->getButtonText() != b->getName())
         {
             code.constructorCode
-              << memberVariableName << "->setButtonText ("
-              << quotedString (b->getButtonText(), code.shouldUseTransMacro()) << ");\n";
+            << memberVariableName << "->setButtonText ("
+            << quotedString (b->getButtonText(), code.shouldUseTransMacro()) << ");\n";
         }
 
         if (b->getConnectedEdgeFlags() != 0)
@@ -121,14 +121,14 @@ public:
 
             String s;
             s << memberVariableName << "->setConnectedEdges ("
-              << flags.joinIntoString (" | ") << ");\n";
+            << flags.joinIntoString (" | ") << ");\n";
 
             code.constructorCode += s;
         }
 
         if (b->getRadioGroupId() != 0)
             code.constructorCode << memberVariableName << "->setRadioGroupId ("
-                                 << b->getRadioGroupId() << ");\n";
+            << b->getRadioGroupId() << ");\n";
 
         if (needsButtonListener (component))
             code.constructorCode << memberVariableName << "->addListener (this);\n";
@@ -152,8 +152,8 @@ public:
             const String userCodeComment ("UserButtonCode_" + memberVariableName);
 
             callback
-                << "if (buttonThatWasClicked == " << memberVariableName
-                << ")\n{\n    //[" << userCodeComment << "] -- add your button handler code here..\n    //[/" << userCodeComment << "]\n}\n";
+            << "if (buttonThatWasClicked == " << memberVariableName
+            << ")\n{\n    //[" << userCodeComment << "] -- add your button handler code here..\n    //[/" << userCodeComment << "]\n}\n";
         }
     }
 
@@ -173,7 +173,7 @@ private:
     {
     public:
         ButtonTextProperty (Button* button_, JucerDocument& doc)
-            : ComponentTextProperty <Button> ("text", 100, false, button_, doc)
+        : ComponentTextProperty <Button> ("text", 100, false, button_, doc)
         {
         }
 
@@ -193,8 +193,8 @@ private:
         {
         public:
             ButtonTextChangeAction (Button* const comp, ComponentLayout& l, const String& newName_)
-                : ComponentUndoableAction <Button> (comp, l),
-                  newName (newName_)
+            : ComponentUndoableAction <Button> (comp, l),
+            newName (newName_)
             {
                 oldName = comp->getButtonText();
             }
@@ -223,7 +223,7 @@ private:
     {
     public:
         ButtonCallbackProperty (Button* b, JucerDocument& doc)
-            : ComponentBooleanProperty <Button> ("callback", "Generate ButtonListener", "Generate ButtonListener", b, doc)
+        : ComponentBooleanProperty <Button> ("callback", "Generate ButtonListener", "Generate ButtonListener", b, doc)
         {
         }
 
@@ -240,8 +240,8 @@ private:
         {
         public:
             ButtonCallbackChangeAction (Button* const comp, ComponentLayout& l, const bool newState_)
-                : ComponentUndoableAction <Button> (comp, l),
-                  newState (newState_)
+            : ComponentUndoableAction <Button> (comp, l),
+            newState (newState_)
             {
                 oldState = needsButtonListener (comp);
             }
@@ -270,7 +270,7 @@ private:
     {
     public:
         ButtonRadioGroupProperty (Button* const button_, JucerDocument& doc)
-            : ComponentTextProperty <Button> ("radio group", 10, false, button_, doc)
+        : ComponentTextProperty <Button> ("radio group", 10, false, button_, doc)
         {
         }
 
@@ -290,8 +290,8 @@ private:
         {
         public:
             ButtonRadioGroupChangeAction (Button* const comp, ComponentLayout& l, const int newId_)
-                : ComponentUndoableAction <Button> (comp, l),
-                  newId (newId_)
+            : ComponentUndoableAction <Button> (comp, l),
+            newId (newId_)
             {
                 oldId = comp->getRadioGroupId();
             }
@@ -321,8 +321,8 @@ private:
     public:
         ButtonConnectedEdgeProperty (const String& name, const int flag_,
                                      Button* b, JucerDocument& doc)
-            : ComponentBooleanProperty <Button> (name, "Connected", "Connected", b, doc),
-              flag (flag_)
+        : ComponentBooleanProperty <Button> (name, "Connected", "Connected", b, doc),
+        flag (flag_)
         {
         }
 
@@ -344,9 +344,9 @@ private:
         {
         public:
             ButtonConnectedChangeAction (Button* const comp, ComponentLayout& l, const int flag_, const bool newState_)
-                : ComponentUndoableAction <Button> (comp, l),
-                  flag (flag_),
-                  newState (newState_)
+            : ComponentUndoableAction <Button> (comp, l),
+            flag (flag_),
+            newState (newState_)
             {
                 oldState = ((comp->getConnectedEdgeFlags() & flag) != 0);
             }

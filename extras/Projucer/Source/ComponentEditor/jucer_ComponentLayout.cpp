@@ -1,28 +1,28 @@
 /*
-  ==============================================================================
+ ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+ This file is part of the JUCE library.
+ Copyright (c) 2017 - ROLI Ltd.
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+ JUCE is an open source library subject to commercial or open-source
+ licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+ By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+ Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+ 27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+ End User License Agreement: www.juce.com/juce-5-licence
+ Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+ Or: You may also use this code under the terms of the GPL v3 (see
+ www.gnu.org/licenses).
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+ JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+ EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+ DISCLAIMED.
 
-  ==============================================================================
-*/
+ ==============================================================================
+ */
 
 #include "../jucer_Headers.h"
 #include "jucer_JucerDocument.h"
@@ -33,8 +33,8 @@
 
 //==============================================================================
 ComponentLayout::ComponentLayout()
-    : document (nullptr),
-      nextCompUID (1)
+: document (nullptr),
+nextCompUID (1)
 {
 }
 
@@ -79,9 +79,9 @@ class AddCompAction  : public UndoableAction
 {
 public:
     AddCompAction (XmlElement* const xml_, ComponentLayout& layout_)
-       : indexAdded (-1),
-         xml (xml_),
-         layout (layout_)
+    : indexAdded (-1),
+    xml (xml_),
+    layout (layout_)
     {
     }
 
@@ -126,8 +126,8 @@ class DeleteCompAction  : public ComponentUndoableAction <Component>
 {
 public:
     DeleteCompAction (Component* const comp, ComponentLayout& l)
-       : ComponentUndoableAction <Component> (comp, l),
-         oldIndex (-1)
+    : ComponentUndoableAction <Component> (comp, l),
+    oldIndex (-1)
     {
         if (ComponentTypeHandler* const h = ComponentTypeHandler::getHandlerFor (*comp))
             xml = h->createXmlFor (comp, &layout);
@@ -184,8 +184,8 @@ class FrontBackCompAction  : public ComponentUndoableAction <Component>
 {
 public:
     FrontBackCompAction (Component* const comp, ComponentLayout& l, int newIndex_)
-       : ComponentUndoableAction <Component> (comp, l),
-         newIndex (newIndex_)
+    : ComponentUndoableAction <Component> (comp, l),
+    newIndex (newIndex_)
     {
         oldIndex = l.indexOfComponent (comp);
     }
@@ -280,8 +280,8 @@ void ComponentLayout::paste()
         selected.deselectAll();
 
         forEachXmlChildElement (*doc, e)
-            if (Component* newComp = addComponentFromXml (*e, true))
-                selected.addToSelection (newComp);
+        if (Component* newComp = addComponentFromXml (*e, true))
+            selected.addToSelection (newComp);
 
         startDragging();
         dragSelectedComps (Random::getSystemRandom().nextInt (40),
@@ -305,7 +305,7 @@ void ComponentLayout::deleteSelected()
 
         if (document != nullptr)
             document->dispatchPendingMessages(); // forces the change to propagate before a paint() callback can happen,
-                                                 // in case there are components floating around that are now dangling pointers
+        // in case there are components floating around that are now dangling pointers
     }
 }
 
@@ -330,6 +330,7 @@ void ComponentLayout::selectedToBack()
     for (int i = 0; i < temp.getNumSelected(); ++i)
         componentToBack (temp.getSelectedItem(i), true);
 }
+
 
 void ComponentLayout::bringLostItemsBackOnScreen (int width, int height)
 {
@@ -382,7 +383,7 @@ Component* ComponentLayout::addComponentFromXml (const XmlElement& xml, const bo
     }
 
     if (ComponentTypeHandler* const type
-           = ComponentTypeHandler::getHandlerForXmlTag (xml.getTagName()))
+        = ComponentTypeHandler::getHandlerForXmlTag (xml.getTagName()))
     {
         ScopedPointer<Component> newComp (type->createNewComponent (getDocument()));
 
@@ -433,7 +434,7 @@ Component* ComponentLayout::getComponentRelativePosTarget (Component* comp, int 
     }
 
     return findComponentWithId (comp->getProperties() [String ("relativeTo") + dimensionSuffixes [whichDimension]]
-                                    .toString().getHexValue64());
+                                .toString().getHexValue64());
 }
 
 void ComponentLayout::setComponentRelativeTarget (Component* comp, int whichDimension, Component* compToBeRelativeTo)
@@ -446,7 +447,7 @@ void ComponentLayout::setComponentRelativeTarget (Component* comp, int whichDime
     jassert (compToBeRelativeTo == 0 || ! dependsOnComponentForRelativePos (compToBeRelativeTo, comp));
 
     if (compToBeRelativeTo != getComponentRelativePosTarget (comp, whichDimension)
-         && (compToBeRelativeTo == 0 || ! dependsOnComponentForRelativePos (compToBeRelativeTo, comp)))
+        && (compToBeRelativeTo == 0 || ! dependsOnComponentForRelativePos (compToBeRelativeTo, comp)))
     {
         const int64 compId = ComponentTypeHandler::getComponentId (compToBeRelativeTo);
 
@@ -512,7 +513,7 @@ PopupMenu ComponentLayout::getRelativeTargetMenu (Component* comp, int whichDime
         if (c != comp)
             m.addItem (menuIdBase + i + 1,
                        "Relative to " + getComponentMemberVariableName (c)
-                        + " (class: " + ComponentTypeHandler::getHandlerFor (*c)->getClassName (c) + ")",
+                       + " (class: " + ComponentTypeHandler::getHandlerFor (*c)->getClassName (c) + ")",
                        ! dependsOnComponentForRelativePos (c, comp),
                        current == c);
     }
@@ -535,8 +536,8 @@ class ChangeCompPositionAction  : public ComponentUndoableAction <Component>
 public:
     ChangeCompPositionAction (Component* const comp, ComponentLayout& l,
                               const RelativePositionedRectangle& newPos_)
-       : ComponentUndoableAction <Component> (comp, l),
-         newPos (newPos_), oldPos (ComponentTypeHandler::getComponentPosition (comp))
+    : ComponentUndoableAction <Component> (comp, l),
+    newPos (newPos_), oldPos (ComponentTypeHandler::getComponentPosition (comp))
     {
     }
 
@@ -558,10 +559,12 @@ private:
     RelativePositionedRectangle newPos, oldPos;
 };
 
+
 void ComponentLayout::setComponentPosition (Component* comp,
                                             const RelativePositionedRectangle& newPos,
                                             const bool undoable)
 {
+
     if (ComponentTypeHandler::getComponentPosition (comp) != newPos)
     {
         if (undoable)
@@ -649,7 +652,7 @@ void ComponentLayout::alignLeft()  // D STENNING
     ComponentPositionDimension dimension = componentX;
     if ( components.size() > -1 )
     {
-        Component* const comp = components[0];
+        Component* const comp =  selected.getSelectedItem(0);
         RelativePositionedRectangle newPos (ComponentTypeHandler::getComponentPosition (comp));
         double value;
         PositionedRectangle p (newPos.rect);
@@ -782,6 +785,8 @@ void ComponentLayout::startDragging()
 
     jassert (document != nullptr);
     document->beginTransaction();
+
+
 }
 
 void ComponentLayout::dragSelectedComps (int dx, int dy, const bool allowSnap)
@@ -942,7 +947,7 @@ String ComponentLayout::getUnusedMemberName (String nameRoot, Component* comp) c
         for (int i = 0; i < components.size(); ++i)
         {
             if (components[i] != comp
-                 && components[i]->getProperties() ["memberName"] == n)
+                && components[i]->getProperties() ["memberName"] == n)
             {
                 alreadyUsed = true;
                 break;
@@ -1010,13 +1015,13 @@ void positionToCode (const RelativePositionedRectangle& position,
     String wrx, wry, wrw, wrh;
 
     if (Component* const relCompW = (layout != nullptr && position.rect.getWidthMode() != PositionedRectangle::absoluteSize)
-                                        ? layout->findComponentWithId (position.relativeToW) : nullptr)
+        ? layout->findComponentWithId (position.relativeToW) : nullptr)
         positionToCode (ComponentTypeHandler::getComponentPosition (relCompW), layout, wrx, wry, wrw, wrh);
 
     String hrx, hry, hrw, hrh;
 
     if (Component* const relCompH = (layout != nullptr && position.rect.getHeightMode() != PositionedRectangle::absoluteSize)
-                                        ? layout->findComponentWithId (position.relativeToH) : nullptr)
+        ? layout->findComponentWithId (position.relativeToH) : nullptr)
         positionToCode (ComponentTypeHandler::getComponentPosition (relCompH), layout, hrx, hry, hrw, hrh);
 
     // width

@@ -1,34 +1,34 @@
 /*
-  ==============================================================================
+ ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+ This file is part of the JUCE library.
+ Copyright (c) 2017 - ROLI Ltd.
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+ JUCE is an open source library subject to commercial or open-source
+ licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+ By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+ Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+ 27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+ End User License Agreement: www.juce.com/juce-5-licence
+ Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+ Or: You may also use this code under the terms of the GPL v3 (see
+ www.gnu.org/licenses).
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+ JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+ EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+ DISCLAIMED.
 
-  ==============================================================================
-*/
+ ==============================================================================
+ */
 
 class ViewportHandler  : public ComponentTypeHandler
 {
 public:
     ViewportHandler()
-        : ComponentTypeHandler ("Viewport", "Viewport", typeid (UpdatingViewport), 150, 150)
+    : ComponentTypeHandler ("Viewport", "Viewport", typeid (UpdatingViewport), 150, 150)
     {}
 
     Component* createNewComponent (JucerDocument*)
@@ -115,19 +115,19 @@ public:
         ComponentTypeHandler::fillInCreationCode (code, component, memberVariableName);
 
         if (defaultViewport.isVerticalScrollBarShown() != v->isVerticalScrollBarShown()
-             || defaultViewport.isHorizontalScrollBarShown() != v->isHorizontalScrollBarShown())
+            || defaultViewport.isHorizontalScrollBarShown() != v->isHorizontalScrollBarShown())
         {
             code.constructorCode
-                << memberVariableName << "->setScrollBarsShown ("
-                << CodeHelpers::boolLiteral (v->isVerticalScrollBarShown()) << ", "
-                << CodeHelpers::boolLiteral (v->isHorizontalScrollBarShown()) << ");\n";
+            << memberVariableName << "->setScrollBarsShown ("
+            << CodeHelpers::boolLiteral (v->isVerticalScrollBarShown()) << ", "
+            << CodeHelpers::boolLiteral (v->isHorizontalScrollBarShown()) << ");\n";
         }
 
         if (defaultViewport.getScrollBarThickness() != v->getScrollBarThickness())
         {
             code.constructorCode
-                << memberVariableName << "->setScrollBarThickness ("
-                << v->getScrollBarThickness() << ");\n";
+            << memberVariableName << "->setScrollBarThickness ("
+            << v->getScrollBarThickness() << ");\n";
         }
 
         if (getViewportContentType (v) != 0)
@@ -148,8 +148,8 @@ public:
                 if (doc != nullptr)
                 {
                     code.includeFilesCPP.add (doc->getHeaderFile()
-                                                .getRelativePathFrom (code.document->getCppFile().getParentDirectory())
-                                                .replaceCharacter ('\\', '/'));
+                                              .getRelativePathFrom (code.document->getCppFile().getParentDirectory())
+                                              .replaceCharacter ('\\', '/'));
 
                     classNm = doc->getClassName();
                 }
@@ -162,8 +162,8 @@ public:
             if (classNm.isNotEmpty())
             {
                 code.constructorCode
-                    << memberVariableName << "->setViewedComponent (new "
-                    << classNm;
+                << memberVariableName << "->setViewedComponent (new "
+                << classNm;
 
                 if (getViewportConstructorParams (v).trim().isNotEmpty())
                 {
@@ -259,7 +259,7 @@ private:
     {
     public:
         UpdatingViewport (const String& name)
-            : Viewport (name)
+        : Viewport (name)
         {
         }
 
@@ -291,10 +291,10 @@ private:
     {
     public:
         ViewportScrollbarShownProperty (Viewport* comp, JucerDocument& doc, const bool vertical_)
-            : ComponentBooleanProperty <Viewport> (vertical_ ? "V scrollbar" : "H scrollbar",
-                                                   "enabled", "enabled",
-                                                   comp, doc),
-               vertical (vertical_)
+        : ComponentBooleanProperty <Viewport> (vertical_ ? "V scrollbar" : "H scrollbar",
+                                               "enabled", "enabled",
+                                               comp, doc),
+        vertical (vertical_)
         {
         }
 
@@ -307,7 +307,7 @@ private:
         bool getState() const
         {
             return vertical ? component->isVerticalScrollBarShown()
-                            : component->isHorizontalScrollBarShown();
+            : component->isHorizontalScrollBarShown();
         }
 
         const bool vertical;
@@ -317,12 +317,12 @@ private:
         {
         public:
             ViewportScrollbarChangeAction (Viewport* const comp, ComponentLayout& l, const bool vertical_, const bool newState_)
-                : ComponentUndoableAction <Viewport> (comp, l),
-                  vertical (vertical_),
-                  newState (newState_)
+            : ComponentUndoableAction <Viewport> (comp, l),
+            vertical (vertical_),
+            newState (newState_)
             {
                 oldState = vertical ? comp->isVerticalScrollBarShown()
-                                    : comp->isHorizontalScrollBarShown();
+                : comp->isHorizontalScrollBarShown();
             }
 
             bool perform()
@@ -355,13 +355,13 @@ private:
 
     //==============================================================================
     class ViewportScrollbarSizeProperty  : public SliderPropertyComponent,
-                                           public ChangeListener
+    public ChangeListener
     {
     public:
         ViewportScrollbarSizeProperty (Viewport* comp, JucerDocument& doc)
-            : SliderPropertyComponent ("scrollbar size", 3.0, 30.0, 1.0, 1.0),
-              component (comp),
-              document (doc)
+        : SliderPropertyComponent ("scrollbar size", 3.0, 30.0, 1.0, 1.0),
+        component (comp),
+        document (doc)
         {
             document.addChangeListener (this);
         }
@@ -397,8 +397,8 @@ private:
         {
         public:
             ViewportScrollbarSizeChangeAction (Viewport* const comp, ComponentLayout& l, const int newState_)
-                : ComponentUndoableAction <Viewport> (comp, l),
-                  newState (newState_)
+            : ComponentUndoableAction <Viewport> (comp, l),
+            newState (newState_)
             {
                 oldState = comp->getScrollBarThickness();
             }
@@ -428,7 +428,7 @@ private:
     {
     public:
         ViewportContentTypeProperty (Viewport* comp, JucerDocument& doc)
-            : ComponentChoiceProperty <Viewport> ("content", comp, doc)
+        : ComponentChoiceProperty <Viewport> ("content", comp, doc)
         {
             choices.add ("No content component");
             choices.add ("Jucer content component");
@@ -451,8 +451,8 @@ private:
         {
         public:
             ViewportContentTypeChangeAction (Viewport* const comp, ComponentLayout& l, const int newValue_)
-                : ComponentUndoableAction <Viewport> (comp, l),
-                  newValue (newValue_)
+            : ComponentUndoableAction <Viewport> (comp, l),
+            newValue (newValue_)
             {
                 oldValue = getViewportContentType (comp);
             }
@@ -481,13 +481,13 @@ private:
 
     //==============================================================================
     class ViewportJucerFileProperty   : public FilePropertyComponent,
-                                        public ChangeListener
+    public ChangeListener
     {
     public:
         ViewportJucerFileProperty (Viewport* const comp, JucerDocument& doc)
-            : FilePropertyComponent ("Jucer file", false, true),
-              component (comp),
-              document (doc)
+        : FilePropertyComponent ("Jucer file", false, true),
+        component (comp),
+        document (doc)
         {
             document.addChangeListener (this);
         }
@@ -501,7 +501,7 @@ private:
         {
             document.perform (new JucerCompFileChangeAction (component, *document.getComponentLayout(),
                                                              newFile.getRelativePathFrom (document.getCppFile().getParentDirectory())
-                                                                    .replaceCharacter ('\\', '/')),
+                                                             .replaceCharacter ('\\', '/')),
                               "Change Projucer component file");
         }
 
@@ -528,8 +528,8 @@ private:
         {
         public:
             JucerCompFileChangeAction (Viewport* const comp, ComponentLayout& l, const String& newState_)
-                : ComponentUndoableAction <Viewport> (comp, l),
-                  newState (newState_)
+            : ComponentUndoableAction <Viewport> (comp, l),
+            newState (newState_)
             {
                 oldState = getViewportJucerComponentFile (comp);
             }
@@ -559,7 +559,7 @@ private:
     {
     public:
         ViewportContentClassProperty (Viewport* comp, JucerDocument& doc)
-            : ComponentTextProperty <Viewport> ("content class", 256, false, comp, doc)
+        : ComponentTextProperty <Viewport> ("content class", 256, false, comp, doc)
         {
         }
 
@@ -579,8 +579,8 @@ private:
         {
         public:
             ViewportClassNameChangeAction (Viewport* const comp, ComponentLayout& l, const String& newValue_)
-                : ComponentUndoableAction <Viewport> (comp, l),
-                  newValue (newValue_)
+            : ComponentUndoableAction <Viewport> (comp, l),
+            newValue (newValue_)
             {
                 oldValue = getViewportGenericComponentClass (comp);
             }
@@ -612,7 +612,7 @@ private:
     {
     public:
         ConstructorParamsProperty (Viewport* comp, JucerDocument& doc)
-            : ComponentTextProperty <Viewport> ("constructor params", 512, false, comp, doc)
+        : ComponentTextProperty <Viewport> ("constructor params", 512, false, comp, doc)
         {
         }
 
@@ -632,8 +632,8 @@ private:
         {
         public:
             ConstructorParamChangeAction (Viewport* const comp, ComponentLayout& l, const String& newValue_)
-                : ComponentUndoableAction <Viewport> (comp, l),
-                  newValue (newValue_)
+            : ComponentUndoableAction <Viewport> (comp, l),
+            newValue (newValue_)
             {
                 oldValue = getViewportConstructorParams (comp);
             }

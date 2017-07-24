@@ -1,28 +1,28 @@
 /*
-  ==============================================================================
+ ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+ This file is part of the JUCE library.
+ Copyright (c) 2017 - ROLI Ltd.
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+ JUCE is an open source library subject to commercial or open-source
+ licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+ By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+ Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+ 27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+ End User License Agreement: www.juce.com/juce-5-licence
+ Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+ Or: You may also use this code under the terms of the GPL v3 (see
+ www.gnu.org/licenses).
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+ JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+ EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+ DISCLAIMED.
 
-  ==============================================================================
-*/
+ ==============================================================================
+ */
 
 class ImageButtonHandler  : public ButtonHandler
 {
@@ -36,7 +36,7 @@ public:
 
     //==============================================================================
     ImageButtonHandler()
-        : ButtonHandler ("Image Button", "ImageButton", typeid (ImageButton), 150, 24)
+    : ButtonHandler ("Image Button", "ImageButton", typeid (ImageButton), 150, 24)
     {
     }
 
@@ -130,25 +130,25 @@ public:
         String s;
 
         s << getColourIntialisationCode (component, memberVariableName)
-          << '\n';
+        << '\n';
 
         const String indent (String::repeatedString (" ", memberVariableName.length() + 13));
 
         s << memberVariableName << "->setImages (false, true, "
-          << CodeHelpers::boolLiteral (doesImageKeepProportions (ib)) << ",\n"
-          << indent
-          << getImageCreationCode (ib, normalImage) << ", "
-          << CodeHelpers::floatLiteral (getImageOpacity (ib, normalImage), 3) << ", "
-          << CodeHelpers::colourToCode (getImageColour (ib, normalImage)) << ",\n"
-          << indent
-          << getImageCreationCode (ib, overImage) << ", "
-          << CodeHelpers::floatLiteral (getImageOpacity (ib, overImage), 3) << ", "
-          << CodeHelpers::colourToCode (getImageColour (ib, overImage)) << ",\n"
-          << indent
-          << getImageCreationCode (ib, downImage) << ", "
-          << CodeHelpers::floatLiteral (getImageOpacity (ib, downImage), 3) << ", "
-          << CodeHelpers::colourToCode (getImageColour (ib, downImage))
-          << ");\n";
+        << CodeHelpers::boolLiteral (doesImageKeepProportions (ib)) << ",\n"
+        << indent
+        << getImageCreationCode (ib, normalImage) << ", "
+        << CodeHelpers::floatLiteral (getImageOpacity (ib, normalImage), 3) << ", "
+        << CodeHelpers::colourToCode (getImageColour (ib, normalImage)) << ",\n"
+        << indent
+        << getImageCreationCode (ib, overImage) << ", "
+        << CodeHelpers::floatLiteral (getImageOpacity (ib, overImage), 3) << ", "
+        << CodeHelpers::colourToCode (getImageColour (ib, overImage)) << ",\n"
+        << indent
+        << getImageCreationCode (ib, downImage) << ", "
+        << CodeHelpers::floatLiteral (getImageOpacity (ib, downImage), 3) << ", "
+        << CodeHelpers::colourToCode (getImageColour (ib, downImage))
+        << ");\n";
 
         code.constructorCode += s;
     }
@@ -168,9 +168,9 @@ public:
     {
     public:
         ImageButtonResourceProperty (ComponentLayout& layout_, ImageButton* const owner_, const ImageRole role_, const String& name)
-            : ImageResourceProperty <ImageButton> (*layout_.getDocument(), owner_, name, true),
-              role (role_),
-              layout (layout_)
+        : ImageResourceProperty <ImageButton> (*layout_.getDocument(), owner_, name, true),
+        role (role_),
+        layout (layout_)
         {
         }
 
@@ -196,10 +196,10 @@ public:
                                 ComponentLayout& layout_,
                                 const ImageRole role_,
                                 const String& newResource_)
-            : ComponentUndoableAction <ImageButton> (button, layout_),
-              newResource (newResource_),
-              role (role_),
-              layout (layout_)
+        : ComponentUndoableAction <ImageButton> (button, layout_),
+        newResource (newResource_),
+        role (role_),
+        layout (layout_)
         {
             oldResource = ImageButtonHandler::getImageResource (button, role_);
         }
@@ -258,9 +258,9 @@ public:
         SetImageKeepsPropAction (ImageButton* const button,
                                  ComponentLayout& layout_,
                                  const bool newState_)
-            : ComponentUndoableAction <ImageButton> (button, layout_),
-              newState (newState_),
-              layout (layout_)
+        : ComponentUndoableAction <ImageButton> (button, layout_),
+        newState (newState_),
+        layout (layout_)
         {
             oldState = ImageButtonHandler::doesImageKeepProportions (button);
         }
@@ -307,9 +307,9 @@ public:
     {
     public:
         ImageButtonProportionProperty (ComponentLayout& layout_, ImageButton* const owner_)
-            : ComponentBooleanProperty <ImageButton> ("proportional", "maintain image proportions", "scale to fit",
-                                                      owner_, *layout_.getDocument()),
-              layout (layout_)
+        : ComponentBooleanProperty <ImageButton> ("proportional", "maintain image proportions", "scale to fit",
+                                                  owner_, *layout_.getDocument()),
+        layout (layout_)
         {
         }
 
@@ -335,10 +335,10 @@ public:
                                ComponentLayout& layout_,
                                const ImageRole role_,
                                const float newState_)
-            : ComponentUndoableAction <ImageButton> (button, layout_),
-              role (role_),
-              newState (newState_),
-              layout (layout_)
+        : ComponentUndoableAction <ImageButton> (button, layout_),
+        role (role_),
+        newState (newState_),
+        layout (layout_)
         {
             oldState = ImageButtonHandler::getImageOpacity (button, role_);
         }
@@ -387,10 +387,10 @@ public:
     public:
         ImageButtonOpacityProperty (ComponentLayout& layout_, ImageButton* const owner_,
                                     const String& name, const ImageRole role_)
-            : SliderPropertyComponent (name, 0.0, 1.0, 0.0),
-              owner (owner_),
-              layout (layout_),
-              role (role_)
+        : SliderPropertyComponent (name, 0.0, 1.0, 0.0),
+        owner (owner_),
+        layout (layout_),
+        role (role_)
         {
         }
 
@@ -418,10 +418,10 @@ public:
                               ComponentLayout& layout_,
                               const ImageRole role_,
                               Colour newState_)
-            : ComponentUndoableAction<ImageButton> (button, layout_),
-              role (role_),
-              newState (newState_),
-              layout (layout_)
+        : ComponentUndoableAction<ImageButton> (button, layout_),
+        role (role_),
+        newState (newState_),
+        layout (layout_)
         {
             oldState = ImageButtonHandler::getImageColour (button, role_);
         }
@@ -467,15 +467,15 @@ public:
     }
 
     class ImageButtonColourProperty    : public JucerColourPropertyComponent,
-                                         public ChangeListener
+    public ChangeListener
     {
     public:
         ImageButtonColourProperty (ComponentLayout& layout_, ImageButton* const owner_,
                                    const String& name, const ImageRole role_)
-            : JucerColourPropertyComponent (name, false),
-              owner (owner_),
-              layout (layout_),
-              role (role_)
+        : JucerColourPropertyComponent (name, false),
+        owner (owner_),
+        layout (layout_),
+        role (role_)
         {
             layout_.getDocument()->addChangeListener (this);
         }

@@ -1,28 +1,28 @@
 /*
-  ==============================================================================
+ ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+ This file is part of the JUCE library.
+ Copyright (c) 2017 - ROLI Ltd.
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+ JUCE is an open source library subject to commercial or open-source
+ licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+ By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+ Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+ 27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+ End User License Agreement: www.juce.com/juce-5-licence
+ Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+ Or: You may also use this code under the terms of the GPL v3 (see
+ www.gnu.org/licenses).
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+ JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+ EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+ DISCLAIMED.
 
-  ==============================================================================
-*/
+ ==============================================================================
+ */
 
 #include "../jucer_Headers.h"
 #include "jucer_PaintRoutine.h"
@@ -37,8 +37,8 @@
 
 //==============================================================================
 PaintRoutine::PaintRoutine()
-    : document (nullptr),
-      backgroundColour (ProjucerApplication::getApp().lookAndFeel.findColour (backgroundColourId))
+: document (nullptr),
+backgroundColour (ProjucerApplication::getApp().lookAndFeel.findColour (backgroundColourId))
 {
     clear();
 }
@@ -46,7 +46,7 @@ PaintRoutine::PaintRoutine()
 PaintRoutine::~PaintRoutine()
 {
     elements.clear(); // do this explicitly before the scalar destructor because these
-                      // objects will be listeners on this object
+    // objects will be listeners on this object
 }
 
 //==============================================================================
@@ -86,7 +86,7 @@ class AddXmlElementAction   : public UndoableAction
 {
 public:
     AddXmlElementAction (PaintRoutine& routine_, XmlElement* xml_)
-        : routine (routine_), xml (xml_)
+    : routine (routine_), xml (xml_)
     {
     }
 
@@ -166,8 +166,8 @@ class DeleteElementAction   : public PaintElementUndoableAction <PaintElement>
 {
 public:
     DeleteElementAction (PaintElement* const element)
-        : PaintElementUndoableAction <PaintElement> (element),
-          oldIndex (-1)
+    : PaintElementUndoableAction <PaintElement> (element),
+    oldIndex (-1)
     {
         xml = element->createXml();
         oldIndex = routine.indexOfElement (element);
@@ -223,8 +223,8 @@ class FrontOrBackElementAction  : public PaintElementUndoableAction <PaintElemen
 {
 public:
     FrontOrBackElementAction (PaintElement* const element, int newIndex_)
-        : PaintElementUndoableAction <PaintElement> (element),
-          newIndex (newIndex_)
+    : PaintElementUndoableAction <PaintElement> (element),
+    newIndex (newIndex_)
     {
         oldIndex = routine.indexOfElement (element);
     }
@@ -311,8 +311,8 @@ void PaintRoutine::paste()
         selectedPoints.deselectAll();
 
         forEachXmlChildElement (*doc, e)
-            if (PaintElement* newElement = addElementFromXml (*e, -1, true))
-                selectedElements.addToSelection (newElement);
+        if (PaintElement* newElement = addElementFromXml (*e, -1, true))
+            selectedElements.addToSelection (newElement);
     }
 }
 
@@ -726,8 +726,8 @@ bool PaintRoutine::loadFromXml (const XmlElement& xml)
         clear();
 
         forEachXmlChildElement (xml, e)
-            if (auto* newElement = ObjectTypes::createElementForXml (e, this))
-                elements.add (newElement);
+        if (auto* newElement = ObjectTypes::createElementForXml (e, this))
+            elements.add (newElement);
 
         return true;
     }

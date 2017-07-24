@@ -1,34 +1,34 @@
 /*
-  ==============================================================================
+ ==============================================================================
 
-   This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+ This file is part of the JUCE library.
+ Copyright (c) 2017 - ROLI Ltd.
 
-   JUCE is an open source library subject to commercial or open-source
-   licensing.
+ JUCE is an open source library subject to commercial or open-source
+ licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+ By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+ Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+ 27th April 2017).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+ End User License Agreement: www.juce.com/juce-5-licence
+ Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   Or: You may also use this code under the terms of the GPL v3 (see
-   www.gnu.org/licenses).
+ Or: You may also use this code under the terms of the GPL v3 (see
+ www.gnu.org/licenses).
 
-   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
-   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
-   DISCLAIMED.
+ JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+ EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+ DISCLAIMED.
 
-  ==============================================================================
-*/
+ ==============================================================================
+ */
 
 class ToggleButtonHandler  : public ButtonHandler
 {
 public:
     ToggleButtonHandler()
-        : ButtonHandler ("Toggle Button", "ToggleButton", typeid (ToggleButton), 150, 24)
+    : ButtonHandler ("Toggle Button", "ToggleButton", typeid (ToggleButton), 150, 24)
     {
         registerColour (ToggleButton::textColourId, "text colour", "txtcol");
     }
@@ -83,7 +83,7 @@ public:
             s << memberVariableName << "->setToggleState (true, dontSendNotification);\n";
 
         s << getColourIntialisationCode (component, memberVariableName)
-          << '\n';
+        << '\n';
 
         code.constructorCode += s;
     }
@@ -93,7 +93,7 @@ private:
     {
     public:
         ToggleButtonStateProperty (ToggleButton* button_, JucerDocument& doc)
-            : ComponentBooleanProperty <ToggleButton> ("initial state", "on", "off", button_, doc)
+        : ComponentBooleanProperty <ToggleButton> ("initial state", "on", "off", button_, doc)
         {
         }
 
@@ -113,8 +113,8 @@ private:
         {
         public:
             ToggleStateChangeAction (ToggleButton* const comp, ComponentLayout& l, const bool newState_)
-                : ComponentUndoableAction <ToggleButton> (comp, l),
-                  newState (newState_)
+            : ComponentUndoableAction <ToggleButton> (comp, l),
+            newState (newState_)
             {
                 oldState = comp->getToggleState();
             }
