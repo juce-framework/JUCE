@@ -178,7 +178,7 @@
 					D1C4804CD275CB57A5C89A2D,
 					D85C0D11EE4F6C73B9EB5BCD, ); name = Source; sourceTree = "<group>"; };
 		C8B793AC1BEFBE7A99BE8352 = {isa = XCBuildConfiguration; buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -210,7 +210,7 @@
 				SDKROOT_ppc = macosx10.5;
 				USE_HEADERMAP = NO; }; name = Debug; };
 		49453CC5AD9F08D2738464AC = {isa = XCBuildConfiguration; buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -325,7 +325,7 @@
 					2429BB4D705CC57F49418CFB,
 					E8E94B3C187DA578BFCBDA98,
 					C515A1FE1A53D3968C22FAEF, ); buildRules = ( ); dependencies = (  ); name = "Plugin Host - App"; productName = "Plugin Host"; productReference = 8D8BBC353637DA442C5575DA; productType = "com.apple.product-type.application"; };
-		ADE6E539DB98A302483A82D0 = {isa = PBXProject; buildConfigurationList = 493C2C5E457692E5149C5525; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { DE12B7643D374BFF7E4FEB1C = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 65BEFC705A89E5C8A9E35C97; projectDirPath = ""; projectRoot = ""; targets = (DE12B7643D374BFF7E4FEB1C); };
+		ADE6E539DB98A302483A82D0 = {isa = PBXProject; buildConfigurationList = 493C2C5E457692E5149C5525; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { DE12B7643D374BFF7E4FEB1C = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 65BEFC705A89E5C8A9E35C97; projectDirPath = ""; projectRoot = ""; targets = (DE12B7643D374BFF7E4FEB1C); };
 	};
 	rootObject = ADE6E539DB98A302483A82D0;
 }

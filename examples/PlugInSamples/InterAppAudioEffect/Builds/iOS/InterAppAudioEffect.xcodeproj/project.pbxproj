@@ -154,7 +154,7 @@
 		8DA1E39A676F877EB549B8CA = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				CODE_SIGN_ENTITLEMENTS = "InterAppAudioEffect.entitlements";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -186,7 +186,7 @@
 		07EA55A19B872E1F49C62539 = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				CODE_SIGN_ENTITLEMENTS = "InterAppAudioEffect.entitlements";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -219,7 +219,7 @@
 		E6FA0B75AC78727D8A3F1888 = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -249,7 +249,7 @@
 		665044AFDC3F0D4E11643857 = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -373,7 +373,7 @@
 					FAC41C26E955C024553DC96C, ); runOnlyForDeploymentPostprocessing = 0; };
 		A3401CC1AC6C5B89EFBAEF01 = {isa = PBXNativeTarget; buildConfigurationList = AA6F190D4FECB06C7A7A0658; buildPhases = (
 					177DC2A7A303F23EDDE5183A, ); buildRules = ( ); dependencies = (  ); name = "InterAppAudioEffect - Shared Code"; productName = InterAppAudioEffect; productReference = 873711620EC157BCCFFF80B1; productType = "com.apple.product-type.library.static"; };
-		DF3D0C1B88ADC0274AE6BD73 = {isa = PBXProject; buildConfigurationList = 016ACE6B9EC6F47020502F4F; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { 03BD5476C606A5BA65CD4FDF = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };51FB6E6A2D0998D38E999826 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 1; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };A3401CC1AC6C5B89EFBAEF01 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = EC01685A042C62251C5AF093; projectDirPath = ""; projectRoot = ""; targets = (03BD5476C606A5BA65CD4FDF, 51FB6E6A2D0998D38E999826, A3401CC1AC6C5B89EFBAEF01); };
+		DF3D0C1B88ADC0274AE6BD73 = {isa = PBXProject; buildConfigurationList = 016ACE6B9EC6F47020502F4F; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { 03BD5476C606A5BA65CD4FDF = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };51FB6E6A2D0998D38E999826 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 1; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };A3401CC1AC6C5B89EFBAEF01 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = EC01685A042C62251C5AF093; projectDirPath = ""; projectRoot = ""; targets = (03BD5476C606A5BA65CD4FDF, 51FB6E6A2D0998D38E999826, A3401CC1AC6C5B89EFBAEF01); };
 	};
 	rootObject = DF3D0C1B88ADC0274AE6BD73;
 }

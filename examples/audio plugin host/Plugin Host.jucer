@@ -4,7 +4,7 @@
               juceFolder="../../../juce" vstFolderMac="~/SDKs/vstsdk2.4" vstFolderPC="c:\SDKs\vstsdk2.4"
               bundleIdentifier="com.roli.pluginhost" jucerVersion="5.0.2" companyName="ROLI Ltd."
               includeBinaryInAppConfig="1" displaySplashScreen="0" reportAppUsage="0"
-              splashScreenColour="Dark">
+              splashScreenColour="Dark" cppLanguageStandard="11">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="" rtasFolder="~/SDKs/PT_80_SDK"
                objCExtraSuffix="M73TRi" vst3Folder="" extraCompilerFlags="-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion">

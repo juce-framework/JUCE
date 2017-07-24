@@ -314,7 +314,7 @@
 					9439CB46EE08D16AAA26A203,
 					9EB09FCC1FD3F263F24203C5, ); name = Source; sourceTree = "<group>"; };
 		963FEEC67CA1488B71067091 = {isa = XCBuildConfiguration; buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -347,7 +347,7 @@
 				SDKROOT_ppc = macosx10.5;
 				USE_HEADERMAP = NO; }; name = Debug; };
 		903E7C1C8383FB576E8BA554 = {isa = XCBuildConfiguration; buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -499,7 +499,7 @@
 					8A0460E8E406AB26F4BA09A8,
 					DB71CE9A0FCC9F1D4DB88011,
 					8B042CD6831F0E9BD5C0815E, ); buildRules = ( ); dependencies = (  ); name = "JuceDemo - App"; productName = JuceDemo; productReference = 90B1185950EF7670F87EAA3F; productType = "com.apple.product-type.application"; };
-		A97F75347E57A9C1AF731F1D = {isa = PBXProject; buildConfigurationList = E3E8152B5B6326971AA2F802; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { 00C030852F071EE5DCA3C532 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 605D88E415A9989447F78548; projectDirPath = ""; projectRoot = ""; targets = (00C030852F071EE5DCA3C532); };
+		A97F75347E57A9C1AF731F1D = {isa = PBXProject; buildConfigurationList = E3E8152B5B6326971AA2F802; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { 00C030852F071EE5DCA3C532 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 605D88E415A9989447F78548; projectDirPath = ""; projectRoot = ""; targets = (00C030852F071EE5DCA3C532); };
 	};
 	rootObject = A97F75347E57A9C1AF731F1D;
 }

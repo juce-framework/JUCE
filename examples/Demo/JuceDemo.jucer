@@ -3,7 +3,7 @@
 <JUCERPROJECT id="sBBIzr" name="JuceDemo" projectType="guiapp" version="3.0.0"
               bundleIdentifier="com.roli.JuceDemo" jucerVersion="5.0.2" defines="JUCE_UNIT_TESTS=1"
               includeBinaryInAppConfig="1" displaySplashScreen="0" reportAppUsage="0"
-              splashScreenColour="Dark" companyName="ROLI Ltd.">
+              splashScreenColour="Dark" companyName="ROLI Ltd." cppLanguageStandard="11">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                objCExtraSuffix="hZh0GG" bigIcon="BvyE0d" extraCompilerFlags="-pedantic -Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion -Wextra-semi"

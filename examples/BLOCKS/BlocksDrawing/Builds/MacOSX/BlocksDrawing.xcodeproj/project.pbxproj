@@ -142,7 +142,7 @@
 					EB0D13905DE35B7EECA09529,
 					31F4C36D3B12DC4E69F5D5A7, ); name = Source; sourceTree = "<group>"; };
 		DF3B86DBD39059B08B65FFDE = {isa = XCBuildConfiguration; buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -173,7 +173,7 @@
 				SDKROOT_ppc = macosx10.5;
 				USE_HEADERMAP = NO; }; name = Debug; };
 		D1EA6139431E47DBB7B1986D = {isa = XCBuildConfiguration; buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -277,7 +277,7 @@
 					B64F4B6419098A6C579D0EDB,
 					6F1EAB6EC19EDAB88EF14DE0,
 					704E8CB52C968D24DAE2ABD5, ); buildRules = ( ); dependencies = (  ); name = "BlocksDrawing - App"; productName = BlocksDrawing; productReference = 7A425A86C84D843976582BAF; productType = "com.apple.product-type.application"; };
-		46C68557D30B3B44D3FE037B = {isa = PBXProject; buildConfigurationList = DD23365E44ACBF007DC85D46; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { F0C1DAFB0E78213F565F044F = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 0E79852FE469702C8F99D6F3; projectDirPath = ""; projectRoot = ""; targets = (F0C1DAFB0E78213F565F044F); };
+		46C68557D30B3B44D3FE037B = {isa = PBXProject; buildConfigurationList = DD23365E44ACBF007DC85D46; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { F0C1DAFB0E78213F565F044F = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 0E79852FE469702C8F99D6F3; projectDirPath = ""; projectRoot = ""; targets = (F0C1DAFB0E78213F565F044F); };
 	};
 	rootObject = 46C68557D30B3B44D3FE037B;
 }

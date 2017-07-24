@@ -173,7 +173,7 @@
 		DC95EAEBECC74A55CADCD887 = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -204,7 +204,7 @@
 		5FAC649347835B831BAE3C41 = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -236,7 +236,7 @@
 		B3D851DD41548F02C540B34A = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -267,7 +267,7 @@
 		635F6CAD05365F797820B5D7 = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -299,7 +299,7 @@
 		DBCA8A687AB8CE4F0FDE4C3D = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -329,7 +329,7 @@
 		5DA389BE0C844A1A9E20FD7C = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -413,9 +413,6 @@
 		3A7896DB2C11717D9046CE5B = {isa = XCConfigurationList; buildConfigurations = (
 					DC95EAEBECC74A55CADCD887,
 					5FAC649347835B831BAE3C41, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
-		0306890051760AEBAFEA2099 = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (
-					6F585AC4628EC14C9F757022,
-					78704983DFEA5408FC5767D8, ); runOnlyForDeploymentPostprocessing = 0; };
 		E60CDCD59C66D98FB19938F1 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (
 					EC1B7357C105DC8BC06A0CD4, ); runOnlyForDeploymentPostprocessing = 0; };
 		671E50F4F02FC98293270CFC = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (
@@ -432,7 +429,6 @@
 					F452B8399A32BE4F1074F596,
 					E4236DCEE707C3855C2E3B22, ); runOnlyForDeploymentPostprocessing = 0; };
 		7A046597FDDDB82B78C64AAC = {isa = PBXNativeTarget; buildConfigurationList = 3A7896DB2C11717D9046CE5B; buildPhases = (
-					0306890051760AEBAFEA2099,
 					E60CDCD59C66D98FB19938F1,
 					671E50F4F02FC98293270CFC, ); buildRules = ( ); dependencies = (
 					017B214D817BF0DF53051BB2, ); name = "AUv3Synth - AUv3 AppExtension"; productName = AUv3Synth; productReference = 746B19364297E7D489749B70; productType = "com.apple.product-type.app-extension"; };
@@ -487,7 +483,7 @@
 					9ABBEEC4C47DAD09F4B221C1, ); runOnlyForDeploymentPostprocessing = 0; };
 		CD6892FED0DB19C0DDD9AD37 = {isa = PBXNativeTarget; buildConfigurationList = AF907C78A0D17B741F5F8944; buildPhases = (
 					1F4A8812AAE49E02F3215F48, ); buildRules = ( ); dependencies = (  ); name = "AUv3Synth - Shared Code"; productName = AUv3Synth; productReference = 9536B5A780A03F6BACB24144; productType = "com.apple.product-type.library.static"; };
-		D0E003364F0BE3205BD9243E = {isa = PBXProject; buildConfigurationList = 444EA74CE26BF416566E542C; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { EF49DCC88B5FC3C6E67ED2A4 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };7A046597FDDDB82B78C64AAC = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 1; }; }; };D493488C4B5B9D9B5990FEE2 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };CD6892FED0DB19C0DDD9AD37 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 4BFA153CE4E8A774C67EC642; projectDirPath = ""; projectRoot = ""; targets = (EF49DCC88B5FC3C6E67ED2A4, 7A046597FDDDB82B78C64AAC, D493488C4B5B9D9B5990FEE2, CD6892FED0DB19C0DDD9AD37); };
+		D0E003364F0BE3205BD9243E = {isa = PBXProject; buildConfigurationList = 444EA74CE26BF416566E542C; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { EF49DCC88B5FC3C6E67ED2A4 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };7A046597FDDDB82B78C64AAC = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 1; }; }; };D493488C4B5B9D9B5990FEE2 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };CD6892FED0DB19C0DDD9AD37 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 4BFA153CE4E8A774C67EC642; projectDirPath = ""; projectRoot = ""; targets = (EF49DCC88B5FC3C6E67ED2A4, 7A046597FDDDB82B78C64AAC, D493488C4B5B9D9B5990FEE2, CD6892FED0DB19C0DDD9AD37); };
 	};
 	rootObject = D0E003364F0BE3205BD9243E;
 }

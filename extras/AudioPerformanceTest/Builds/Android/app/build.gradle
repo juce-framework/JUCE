@@ -52,9 +52,7 @@ android {
             }
             externalNativeBuild {
                 cmake {
-                    arguments "-DJUCE_BUILD_CONFIGFURATION=DEBUG"
-                    cFlags    "-O0"
-                    cppFlags  "-O0"
+                    arguments "-DJUCE_BUILD_CONFIGFURATION=DEBUG", "-DCMAKE_CXX_FLAGS_DEBUG=-O0", "-DCMAKE_C_FLAGS_DEBUG=-O0"
                 }
             }
        }
@@ -64,9 +62,7 @@ android {
             }
             externalNativeBuild {
                 cmake {
-                    arguments "-DJUCE_BUILD_CONFIGFURATION=RELEASE"
-                    cFlags    "-Ofast"
-                    cppFlags  "-Ofast"
+                    arguments "-DJUCE_BUILD_CONFIGFURATION=RELEASE", "-DCMAKE_CXX_FLAGS_RELEASE=-Ofast", "-DCMAKE_C_FLAGS_RELEASE=-Ofast"
                 }
             }
        }

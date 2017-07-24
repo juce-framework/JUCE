@@ -192,7 +192,7 @@
 		7007C784A0219490DFD18C27 = {isa = XCBuildConfiguration; buildSettings = {  }; name = Debug; };
 		0ADE306E346FE4F925722F86 = {isa = XCBuildConfiguration; buildSettings = {  }; name = Release; };
 		653C6C73C56BA201AB6F094C = {isa = XCBuildConfiguration; buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -229,7 +229,7 @@
 				USE_HEADERMAP = NO;
 				WRAPPER_EXTENSION = vst; }; name = Debug; };
 		19D80348287645B624E0C6B8 = {isa = XCBuildConfiguration; buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -267,7 +267,7 @@
 				USE_HEADERMAP = NO;
 				WRAPPER_EXTENSION = vst; }; name = Release; };
 		D36AB79B01E390C59B2BBE9E = {isa = XCBuildConfiguration; buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -304,7 +304,7 @@
 				USE_HEADERMAP = NO;
 				WRAPPER_EXTENSION = vst3; }; name = Debug; };
 		11C129F26625007CE9DFD618 = {isa = XCBuildConfiguration; buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -343,7 +343,7 @@
 				WRAPPER_EXTENSION = vst3; }; name = Release; };
 		DC95EAEBECC74A55CADCD887 = {isa = XCBuildConfiguration; buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				CODE_SIGN_ENTITLEMENTS = "AUv3Synth.entitlements";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -376,7 +376,7 @@
 				USE_HEADERMAP = NO; }; name = Debug; };
 		5FAC649347835B831BAE3C41 = {isa = XCBuildConfiguration; buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				CODE_SIGN_ENTITLEMENTS = "AUv3Synth.entitlements";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -409,7 +409,7 @@
 				SDKROOT_ppc = macosx10.5;
 				USE_HEADERMAP = NO; }; name = Release; };
 		B3D851DD41548F02C540B34A = {isa = XCBuildConfiguration; buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -440,7 +440,7 @@
 				SDKROOT_ppc = macosx10.5;
 				USE_HEADERMAP = NO; }; name = Debug; };
 		635F6CAD05365F797820B5D7 = {isa = XCBuildConfiguration; buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -472,7 +472,7 @@
 				SDKROOT_ppc = macosx10.5;
 				USE_HEADERMAP = NO; }; name = Release; };
 		DBCA8A687AB8CE4F0FDE4C3D = {isa = XCBuildConfiguration; buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -502,7 +502,7 @@
 				SDKROOT_ppc = macosx10.5;
 				USE_HEADERMAP = NO; }; name = Debug; };
 		5DA389BE0C844A1A9E20FD7C = {isa = XCBuildConfiguration; buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -632,9 +632,6 @@
 		3A7896DB2C11717D9046CE5B = {isa = XCConfigurationList; buildConfigurations = (
 					DC95EAEBECC74A55CADCD887,
 					5FAC649347835B831BAE3C41, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
-		0306890051760AEBAFEA2099 = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (
-					F56A47BDEEC76681EE80A15E,
-					78704983DFEA5408FC5767D8, ); runOnlyForDeploymentPostprocessing = 0; };
 		E60CDCD59C66D98FB19938F1 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (
 					EC1B7357C105DC8BC06A0CD4, ); runOnlyForDeploymentPostprocessing = 0; };
 		671E50F4F02FC98293270CFC = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (
@@ -652,7 +649,6 @@
 					F452B8399A32BE4F1074F596,
 					69856794EB88963828DDECC6, ); runOnlyForDeploymentPostprocessing = 0; };
 		7A046597FDDDB82B78C64AAC = {isa = PBXNativeTarget; buildConfigurationList = 3A7896DB2C11717D9046CE5B; buildPhases = (
-					0306890051760AEBAFEA2099,
 					E60CDCD59C66D98FB19938F1,
 					671E50F4F02FC98293270CFC, ); buildRules = ( ); dependencies = (
 					017B214D817BF0DF53051BB2, ); name = "AUv3Synth - AUv3 AppExtension"; productName = AUv3Synth; productReference = 746B19364297E7D489749B70; productType = "com.apple.product-type.app-extension"; };
@@ -705,7 +701,7 @@
 					9ABBEEC4C47DAD09F4B221C1, ); runOnlyForDeploymentPostprocessing = 0; };
 		CD6892FED0DB19C0DDD9AD37 = {isa = PBXNativeTarget; buildConfigurationList = AF907C78A0D17B741F5F8944; buildPhases = (
 					1F4A8812AAE49E02F3215F48, ); buildRules = ( ); dependencies = (  ); name = "AUv3Synth - Shared Code"; productName = AUv3Synth; productReference = 9536B5A780A03F6BACB24144; productType = "com.apple.product-type.library.static"; };
-		D0E003364F0BE3205BD9243E = {isa = PBXProject; buildConfigurationList = 444EA74CE26BF416566E542C; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { EF49DCC88B5FC3C6E67ED2A4 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };73F4C13CDCAC7EE5914F2E61 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };386D3CCDC878EC299C56FB39 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };7A046597FDDDB82B78C64AAC = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 1; }; }; };D493488C4B5B9D9B5990FEE2 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };CD6892FED0DB19C0DDD9AD37 = { SystemCapabilities = {com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 4BFA153CE4E8A774C67EC642; projectDirPath = ""; projectRoot = ""; targets = (EF49DCC88B5FC3C6E67ED2A4, 73F4C13CDCAC7EE5914F2E61, 386D3CCDC878EC299C56FB39, 7A046597FDDDB82B78C64AAC, D493488C4B5B9D9B5990FEE2, CD6892FED0DB19C0DDD9AD37); };
+		D0E003364F0BE3205BD9243E = {isa = PBXProject; buildConfigurationList = 444EA74CE26BF416566E542C; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { EF49DCC88B5FC3C6E67ED2A4 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };73F4C13CDCAC7EE5914F2E61 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };386D3CCDC878EC299C56FB39 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };7A046597FDDDB82B78C64AAC = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 1; }; }; };D493488C4B5B9D9B5990FEE2 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };CD6892FED0DB19C0DDD9AD37 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 4BFA153CE4E8A774C67EC642; projectDirPath = ""; projectRoot = ""; targets = (EF49DCC88B5FC3C6E67ED2A4, 73F4C13CDCAC7EE5914F2E61, 386D3CCDC878EC299C56FB39, 7A046597FDDDB82B78C64AAC, D493488C4B5B9D9B5990FEE2, CD6892FED0DB19C0DDD9AD37); };
 	};
 	rootObject = D0E003364F0BE3205BD9243E;
 }
