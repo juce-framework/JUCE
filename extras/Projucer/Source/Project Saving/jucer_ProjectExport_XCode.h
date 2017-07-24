@@ -2014,15 +2014,36 @@ private:
     {
         StringArray s;
         s.add ("ALWAYS_SEARCH_USER_PATHS = NO");
+        s.add ("ENABLE_STRICT_OBJC_MSGSEND = YES");
         s.add ("GCC_C_LANGUAGE_STANDARD = c11");
+        s.add ("GCC_NO_COMMON_BLOCKS = YES");
+        s.add ("GCC_MODEL_TUNING = G5");
         s.add ("GCC_WARN_ABOUT_RETURN_TYPE = YES");
         s.add ("GCC_WARN_CHECK_SWITCH_STATEMENTS = YES");
         s.add ("GCC_WARN_UNUSED_VARIABLE = YES");
         s.add ("GCC_WARN_MISSING_PARENTHESES = YES");
         s.add ("GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES");
         s.add ("GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES");
+        s.add ("GCC_WARN_64_TO_32_BIT_CONVERSION = YES");
+        s.add ("GCC_WARN_UNDECLARED_SELECTOR = YES");
+        s.add ("GCC_WARN_UNINITIALIZED_AUTOS = YES");
+        s.add ("GCC_WARN_UNUSED_FUNCTION = YES");
+        s.add ("CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES");
+        s.add ("CLANG_WARN_BOOL_CONVERSION = YES");
+        s.add ("CLANG_WARN_COMMA = YES");
+        s.add ("CLANG_WARN_CONSTANT_CONVERSION = YES");
+        s.add ("CLANG_WARN_EMPTY_BODY = YES");
+        s.add ("CLANG_WARN_ENUM_CONVERSION = YES");
+        s.add ("CLANG_WARN_INFINITE_RECURSION = YES");
+        s.add ("CLANG_WARN_INT_CONVERSION = YES");
+        s.add ("CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES");
+        s.add ("CLANG_WARN_OBJC_LITERAL_CONVERSION = YES");
+        s.add ("CLANG_WARN_RANGE_LOOP_ANALYSIS = YES");
+        s.add ("CLANG_WARN_STRICT_PROTOTYPES = YES");
+        s.add ("CLANG_WARN_SUSPICIOUS_MOVE = YES");
+        s.add ("CLANG_WARN_UNREACHABLE_CODE = YES");
+        s.add ("CLANG_WARN__DUPLICATE_METHOD_MATCH = YES");
         s.add ("WARNING_CFLAGS = -Wreorder");
-        s.add ("GCC_MODEL_TUNING = G5");
 
         if (projectType.isStaticLibrary())
         {

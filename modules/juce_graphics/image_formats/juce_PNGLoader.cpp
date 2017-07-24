@@ -63,6 +63,9 @@ namespace pnglibNamespace
   #if JUCE_CLANG
    #pragma clang diagnostic push
    #pragma clang diagnostic ignored "-Wsign-conversion"
+   #if __has_warning("-Wcomma")
+    #pragma clang diagnostic ignored "-Wcomma"
+   #endif
   #endif
 
   #undef check

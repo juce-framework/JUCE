@@ -361,7 +361,7 @@ private:
         expectEquals (result.channel, expected.channel);
         expectEquals (result.parameterNumber, expected.parameterNumber);
         expectEquals (result.value, expected.value);
-        expect (result.isNRPN == expected.isNRPN),
+        expect (result.isNRPN == expected.isNRPN);
         expect (result.is14BitValue == expected.is14BitValue);
     }
 };
