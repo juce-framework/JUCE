@@ -4,6 +4,18 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 5.1.0
+  - Release of the JUCE DSP module
+  - Multichannel audio readers and writers
+  - Plugin editor Hi-DPI scaling support
+  - Major improvements to Projucer module search paths
+  - Added Projucer support for iOS app groups
+  - Added support for AVFoundation and deprecated the use of Quicktime
+  - Added a new real-time audio thread priority for Android
+  - Various Projucer UI fixes
+  - Various documentation fixes
+  - Various minor improvements and bug fixes
+
 Version 5.0.2
   - Improved project save speed in the Projucer
   - Added option to save individual exporters in the Projucer
