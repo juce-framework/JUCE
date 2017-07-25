@@ -351,12 +351,40 @@ public:
     /** Intersect two channel layouts. */
     void intersect (const AudioChannelSet& other)      { channels &= other.channels; }
 
+    /** Creates a channel set for a list of channel types. This function will assert
+        if you supply a duplicate channel.
+
+        Note that this method ignores the order in which the channels are given, i.e.
+        two arrays with the same elements but in a different order will still result
+        in the same channel set.
+    */
+    static AudioChannelSet JUCE_CALLTYPE channelSetWithChannels (const Array<ChannelType>&);
+
+    //==============================================================================
+    // Conversion between wave and juce channel layout identifiers
+
+    /** Create an AudioChannelSet from a WAVEFORMATEXTENSIBLE channelMask (typically used
+        in .wav files). */
+    static AudioChannelSet JUCE_CALLTYPE fromWaveChannelMask (int32 dwChannelMask);
+
+    /** Returns a WAVEFORMATEXTENSIBLE channelMask representation (typically used in .wav
+        files) of the receiver.
+
+        Returns -1 if the receiver cannot be represented in a WAVEFORMATEXTENSIBLE channelMask
+        representation.
+    */
+    int32 getWaveChannelMask() const noexcept;
+
     //==============================================================================
     bool operator== (const AudioChannelSet&) const noexcept;
     bool operator!= (const AudioChannelSet&) const noexcept;
     bool operator<  (const AudioChannelSet&) const noexcept;
+
 private:
+    //==============================================================================
     BigInteger channels;
 
+    //==============================================================================
     explicit AudioChannelSet (uint32);
+    explicit AudioChannelSet (const Array<ChannelType>&);
 };

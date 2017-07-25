@@ -66,6 +66,7 @@ namespace juce
 
 #include "../../juce_core/native/juce_osx_ObjCHelpers.h"
 
+#include "../../juce_audio_basics/native/juce_mac_CoreAudioLayouts.h"
 #include "juce_AU_Shared.h"
 
 // Change this to disable logging of various activities
@@ -558,7 +559,7 @@ public:
 
                 if (! set.isDiscreteLayout())
                 {
-                    const AudioChannelLayoutTag requestedTag = AudioUnitHelpers::ChannelSetToCALayoutTag (set);
+                    const AudioChannelLayoutTag requestedTag = CoreAudioLayouts::toCoreAudio (set);
 
                     AudioChannelLayout layout;
                     const UInt32 minDataSize = sizeof (layout) - sizeof (AudioChannelDescription);
@@ -583,7 +584,8 @@ public:
                         if (err != noErr || dataSize < expectedSize)
                             return false;
 
-                        actualTag = AudioUnitHelpers::ChannelSetToCALayoutTag (AudioUnitHelpers::CoreAudioChannelLayoutToJuceType (layout));
+                        // try to convert the layout into a tag
+                        actualTag = CoreAudioLayouts::toCoreAudio (CoreAudioLayouts::fromCoreAudio (layout));
                     }
 
                     if (actualTag != requestedTag)
@@ -1636,7 +1638,7 @@ private:
                 propertySize = sizeof (auLayout);
 
                 if (AudioUnitGetProperty (comp, kAudioUnitProperty_AudioChannelLayout, scope, static_cast<UInt32> (busIdx), &auLayout, &propertySize) == noErr)
-                    currentLayout = AudioUnitHelpers::CoreAudioChannelLayoutToJuceType (auLayout);
+                    currentLayout = CoreAudioLayouts::fromCoreAudio (auLayout);
             }
 
             if (currentLayout.isDisabled())
@@ -1679,7 +1681,7 @@ private:
                     UInt32 propertySize = sizeof (auLayout);
 
                     if (AudioUnitGetProperty (audioUnit, kAudioUnitProperty_AudioChannelLayout, scope, static_cast<UInt32> (busIdx), &auLayout, &propertySize) == noErr)
-                        currentLayout = AudioUnitHelpers::CoreAudioChannelLayoutToJuceType (auLayout);
+                        currentLayout = CoreAudioLayouts::fromCoreAudio (auLayout);
                 }
 
                 if (currentLayout.isDisabled())
@@ -1711,7 +1713,12 @@ private:
                                 const AudioChannelLayoutTag tag = layoutTags[j];
 
                                 if (tag != kAudioChannelLayoutTag_UseChannelDescriptions)
-                                    supported.addIfNotAlreadyThere (AudioUnitHelpers::CALayoutTagToChannelSet (tag));
+                                {
+                                    AudioChannelLayout caLayout;
+
+                                    caLayout.mChannelLayoutTag = tag;
+                                    supported.addIfNotAlreadyThere (CoreAudioLayouts::fromCoreAudio (caLayout));
+                                }
                             }
 
                             if (supported.size() > 0)
