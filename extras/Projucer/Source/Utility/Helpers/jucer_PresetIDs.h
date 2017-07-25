@@ -171,6 +171,7 @@ namespace Ids
     DECLARE_ID (androidRepositories);
     DECLARE_ID (androidDependencies);
     DECLARE_ID (androidAdditionalXmlValueResources);
+    DECLARE_ID (androidAdditionalRawValueResources);
     DECLARE_ID (androidActivityClass);
     DECLARE_ID (androidActivitySubClassName);
     DECLARE_ID (androidVersionCode);
@@ -184,6 +185,9 @@ namespace Ids
     DECLARE_ID (androidExternalReadNeeded);
     DECLARE_ID (androidExternalWriteNeeded);
     DECLARE_ID (androidInAppBilling);
+    DECLARE_ID (androidVibratePermissionNeeded);
+    DECLARE_ID (androidEnableRemoteNotifications);
+    DECLARE_ID (androidRemoteNotificationsConfigFile);
     DECLARE_ID (androidMinimumSDK);
     DECLARE_ID (androidOtherPermissions);
     DECLARE_ID (androidKeyStore);

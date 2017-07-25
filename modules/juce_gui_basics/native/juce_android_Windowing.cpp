@@ -30,6 +30,16 @@ namespace juce
 {
 
 //==============================================================================
+#if JUCE_PUSH_NOTIFICATIONS && JUCE_MODULE_AVAILABLE_juce_gui_extra
+ // Returns true if the intent was handled.
+ extern bool juce_handleNotificationIntent (void*);
+ extern void juce_firebaseDeviceNotificationsTokenRefreshed (void*);
+ extern void juce_firebaseRemoteNotificationReceived (void*);
+ extern void juce_firebaseRemoteMessagesDeleted();
+ extern void juce_firebaseRemoteMessageSent(void*);
+ extern void juce_firebaseRemoteMessageSendError (void*, void*);
+#endif
+
 #if JUCE_IN_APP_PURCHASES && JUCE_MODULE_AVAILABLE_juce_product_unlocking
  extern void juce_inAppPurchaseCompleted (void*);
 #endif
@@ -97,6 +107,75 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, appActivityResult, void, (JN
     ignoreUnused (intentData, requestCode);
    #endif
 }
+
+JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, appNewIntent, void, (JNIEnv* env, jobject, jobject intentData))
+{
+    setEnv (env);
+
+  #if JUCE_PUSH_NOTIFICATIONS && JUCE_MODULE_AVAILABLE_juce_gui_extra
+    if (juce_handleNotificationIntent ((void *)intentData))
+        return;
+
+    // Add other functions processing intents here as needed.
+  #else
+    ignoreUnused (intentData);
+  #endif
+}
+
+#if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
+JUCE_JNI_CALLBACK (JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME, firebaseInstanceIdTokenRefreshed, void, (JNIEnv* env, jobject /*activity*/, jstring token))
+{
+    setEnv (env);
+
+  #if JUCE_MODULE_AVAILABLE_juce_gui_extra
+    juce_firebaseDeviceNotificationsTokenRefreshed (token);
+  #else
+    ignoreUnused (token);
+  #endif
+}
+
+JUCE_JNI_CALLBACK (JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME, firebaseRemoteMessageReceived, void, (JNIEnv* env, jobject /*activity*/, jobject remoteMessage))
+{
+    setEnv (env);
+
+  #if JUCE_MODULE_AVAILABLE_juce_gui_extra
+    juce_firebaseRemoteNotificationReceived (remoteMessage);
+  #else
+    ignoreUnused (remoteMessage);
+  #endif
+}
+
+JUCE_JNI_CALLBACK (JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME, firebaseRemoteMessagesDeleted, void, (JNIEnv* env, jobject /*activity*/))
+{
+    setEnv (env);
+
+  #if JUCE_MODULE_AVAILABLE_juce_gui_extra
+    juce_firebaseRemoteMessagesDeleted();
+  #endif
+}
+
+JUCE_JNI_CALLBACK (JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME, firebaseRemoteMessageSent, void, (JNIEnv* env, jobject /*activity*/, jstring messageId))
+{
+    setEnv (env);
+
+  #if JUCE_MODULE_AVAILABLE_juce_gui_extra
+    juce_firebaseRemoteMessageSent (messageId);
+  #else
+    ignoreUnused (messageId);
+  #endif
+}
+
+JUCE_JNI_CALLBACK (JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME, firebaseRemoteMessageSendError, void, (JNIEnv* env, jobject /*activity*/, jstring messageId, jstring error))
+{
+    setEnv (env);
+
+  #if JUCE_MODULE_AVAILABLE_juce_gui_extra
+    juce_firebaseRemoteMessageSendError (messageId, error);
+  #else
+    ignoreUnused (messageId, error);
+  #endif
+}
+#endif
 
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \

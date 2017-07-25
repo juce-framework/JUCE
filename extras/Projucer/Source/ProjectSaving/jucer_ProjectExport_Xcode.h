@@ -1134,6 +1134,9 @@ public:
             if (owner.isInAppPurchasesEnabled())
                 defines.set ("JUCE_IN_APP_PURCHASES", "1");
 
+            if (owner.iOS && owner.isPushNotificationsEnabled())
+                defines.set ("JUCE_PUSH_NOTIFICATIONS", "1");
+
             defines = mergePreprocessorDefs (defines, owner.getAllPreprocessorDefs (config, type));
 
             StringArray defsList;
@@ -2242,6 +2245,9 @@ private:
         {
             if (isInAppPurchasesEnabled())
                 xcodeFrameworks.addIfNotAlreadyThere ("StoreKit");
+
+            if (iOS && isPushNotificationsEnabled())
+                xcodeFrameworks.addIfNotAlreadyThere ("UserNotifications");
 
             xcodeFrameworks.addTokens (getExtraFrameworksString(), ",;", "\"'");
             xcodeFrameworks.trim();

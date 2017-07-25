@@ -107,8 +107,11 @@ public:
 
     CachedValue<bool>   androidInternetNeeded, androidMicNeeded, androidBluetoothNeeded,
                         androidExternalReadPermission, androidExternalWritePermission,
-                        androidInAppBillingPermission;
+                        androidInAppBillingPermission, androidVibratePermission;
     CachedValue<String> androidOtherPermissions;
+
+    CachedValue<bool>   androidEnableRemoteNotifications;
+    CachedValue<String> androidRemoteNotificationsConfigFile;
 
     CachedValue<String> androidKeyStore, androidKeyStorePass, androidKeyAlias, androidKeyAliasPass;
 
@@ -135,7 +138,10 @@ public:
           androidExternalReadPermission  (settings, Ids::androidExternalReadNeeded, nullptr, true),
           androidExternalWritePermission (settings, Ids::androidExternalWriteNeeded, nullptr, true),
           androidInAppBillingPermission (settings, Ids::androidInAppBilling, nullptr, false),
+          androidVibratePermission (settings, Ids::androidVibratePermissionNeeded, nullptr, false),
           androidOtherPermissions (settings, Ids::androidOtherPermissions, nullptr),
+          androidEnableRemoteNotifications (settings, Ids::androidEnableRemoteNotifications, nullptr, false),
+          androidRemoteNotificationsConfigFile (settings, Ids::androidRemoteNotificationsConfigFile, nullptr, ""),
           androidKeyStore (settings, Ids::androidKeyStore, nullptr, "${user.home}/.android/debug.keystore"),
           androidKeyStorePass (settings, Ids::androidKeyStorePass, nullptr, "android"),
           androidKeyAlias (settings, Ids::androidKeyAlias, nullptr, "androiddebugkey"),
@@ -327,6 +333,9 @@ protected:
         Value getAdditionalXmlResourcesValue()    { return getValue (Ids::androidAdditionalXmlValueResources); }
         String getAdditionalXmlResources() const  { return config [Ids::androidAdditionalXmlValueResources]; }
 
+        Value getAdditionalRawResourcesValue()    { return getValue (Ids::androidAdditionalRawValueResources); }
+        String getAdditionalRawResources() const  { return config [Ids::androidAdditionalRawValueResources]; }
+
         Value getCustomStringsXmlValue()        { return getValue (Ids::androidCustomStringXmlElements); }
         String getCustomStringsXml() const      { return config [Ids::androidCustomStringXmlElements]; }
 
@@ -343,8 +352,14 @@ protected:
                        "Paths to additional \"value resource\" files in XML format that should be included in the app (one per line). "
                        "If you have additional XML resources that should be treated as value resources, add them here.");
 
-            props.add (new TextPropertyComponent (getCustomStringsXmlValue(), "Custom string.xml elements", 8192, true),
-                       "You can specify custom XML elements that will be added to string.xml as children of <resources> element.");
+            props.add (new TextPropertyComponent (getAdditionalRawResourcesValue(), "Extra Android Raw Resources", 2048, true),
+                       "Paths to additional \"raw resource\" files that should be included in the app (one per line). "
+                       "Resource file names must contain only lowercase a-z, 0-9 or underscore.");
+
+            props.add (new TextPropertyComponent (getCustomStringsXmlValue(), "Custom string resources", 8192, true),
+                       "Custom XML resources that will be added to string.xml as children of <resources> element. "
+                       "Example: \n<string name=\"value\">text</string>\n"
+                       "<string name2=\"value2\">text2</string>\n");
         }
 
         String getProductFlavourNameIdentifier() const
@@ -533,12 +548,24 @@ private:
         mo << "   }"                                                                                   << newLine;
         mo << "   dependencies {"                                                                      << newLine;
         mo << "       classpath 'com.android.tools.build:gradle:" << androidPluginVersion.get() << "'" << newLine;
+
+        if (androidEnableRemoteNotifications.get())
+            mo << "       classpath 'com.google.gms:google-services:3.1.0'" << newLine;
+
         mo << "   }"                                                                                   << newLine;
         mo << "}"                                                                                      << newLine;
         mo << ""                                                                                       << newLine;
         mo << "allprojects {"                                                                          << newLine;
         mo << "   repositories {"                                                                      << newLine;
         mo << "       jcenter()"                                                                       << newLine;
+
+        if (androidEnableRemoteNotifications.get())
+        {
+            mo << "       maven {"                                                                     << newLine;
+            mo << "           url \"https://maven.google.com\""                                        << newLine;
+            mo << "       }"                                                                           << newLine;
+        }
+
         mo << "   }"                                                                                   << newLine;
         mo << "}"                                                                                      << newLine;
 
@@ -568,6 +595,7 @@ private:
 
         mo << getAndroidRepositories()                                            << newLine;
         mo << getAndroidDependencies()                                            << newLine;
+        mo << getApplyPlugins()                                                   << newLine;
 
         mo << "}"                                                                 << newLine << newLine;
 
@@ -748,12 +776,28 @@ private:
         juce::StringArray  dependencies;
         dependencies.addLines (androidDependencies.get());
 
-        mo << "dependencies {"                << newLine;
+        mo << "dependencies {" << newLine;
+
+        if (androidEnableRemoteNotifications.get())
+        {
+            mo << "    'com.google.firebase:firebase-core:11.4.0'" << newLine;
+            mo << "    compile 'com.google.firebase:firebase-messaging:11.4.0'" << newLine;
+        }
 
         for (const auto& d : dependencies)
             mo << "    " << d << newLine;
 
-        mo << "}"                             << newLine;
+        mo << "}" << newLine;
+
+        return mo.toString();
+    }
+
+    String getApplyPlugins() const
+    {
+        MemoryOutputStream mo;
+
+        if (androidEnableRemoteNotifications.get())
+            mo << "apply plugin: 'com.google.gms.google-services'" << newLine;
 
         return mo.toString();
     }
@@ -838,8 +882,18 @@ private:
         props.add (new BooleanPropertyComponent (androidInAppBillingPermission.getPropertyAsValue(), "In-App Billing", "Specify In-App Billing permission in the manifest"),
                    "If enabled, this will set the com.android.vending.BILLING flag in the manifest.");
 
+        props.add (new BooleanPropertyComponent (androidVibratePermission.getPropertyAsValue(), "Vibrate", "Specify permissions to vibrate"),
+                   "If enabled, this will set the android.permission.VIBRATE flag in the manifest.");
+
         props.add (new TextPropertyComponent (androidOtherPermissions.getPropertyAsValue(), "Custom permissions", 2048, false),
                    "A space-separated list of other permission flags that should be added to the manifest.");
+
+        props.add (new BooleanPropertyComponent (androidEnableRemoteNotifications.getPropertyAsValue(), "Remote Notifications", "Enabled"),
+                   "Enable to be able to send remote notifications to devices running your app (min API level 14). Provide Remote Notifications Config File, "
+                   "configure your app in Firebase Console and ensure you have the latest Google Repository in Android Studio's SDK Manager.");
+
+        props.add (new TextPropertyComponent (androidRemoteNotificationsConfigFile.getPropertyAsValue(), "Remote Notifications Config File", 2048, false),
+                   "Path to google-services.json file. This will be the file provided by Firebase when creating a new app in Firebase console.");
 
         props.add (new TextPropertyComponent (androidManifestCustomXmlElements.getPropertyAsValue(), "Custom manifest XML content", 8192, true),
                    "You can specify custom AndroidManifest.xml content overriding the default one generated by Projucer. "
@@ -902,10 +956,11 @@ private:
             auto inAppBillingPath = String ("com.android.vending.billing").replaceCharacter ('.', File::getSeparatorChar());
             auto javaSourceFolder = coreModule->getFolder().getChildFile ("native").getChildFile ("java");
             auto javaInAppBillingTarget = targetFolder.getChildFile ("app/src/main/java").getChildFile (inAppBillingPath);
-            auto javaActivityTarget = targetFolder.getChildFile ("app/src/main/java")
-                                                  .getChildFile (package.replaceCharacter ('.', File::getSeparatorChar()));
+            auto javaTarget = targetFolder.getChildFile ("app/src/main/java")
+                                          .getChildFile (package.replaceCharacter ('.', File::getSeparatorChar()));
 
-            copyActivityJavaFiles (javaSourceFolder, javaActivityTarget, package);
+            copyActivityJavaFiles (javaSourceFolder, javaTarget, package);
+            copyServicesJavaFiles (javaSourceFolder, javaTarget, package);
             copyAdditionalJavaFiles (javaSourceFolder, javaInAppBillingTarget);
         }
     }
@@ -994,21 +1049,69 @@ private:
             inAppBillingJavaSrcFile.copyFileTo (inAppBillingJavaDestFile);
     }
 
+    void copyServicesJavaFiles (const File& javaSourceFolder, const File& targetFolder, const String& package) const
+    {
+        if (androidEnableRemoteNotifications.get())
+        {
+            String instanceIdFileName = "JuceFirebaseInstanceIdService.java";
+            String messagingFileName  = "JuceFirebaseMessagingService.java";
+
+            File instanceIdFile (javaSourceFolder.getChildFile (instanceIdFileName));
+            File messagingFile  (javaSourceFolder.getChildFile (messagingFileName));
+
+            jassert (instanceIdFile.existsAsFile());
+            jassert (messagingFile .existsAsFile());
+
+            Array<File> files;
+            files.add (instanceIdFile);
+            files.add (messagingFile);
+
+            for (const auto& file : files)
+            {
+                auto javaSourceLines = StringArray::fromLines (file.loadFileAsString());
+
+                {
+                    MemoryOutputStream newFile;
+
+                    for (const auto& line : javaSourceLines)
+                        newFile << line.replace ("package com.juce;", "package " + package + ";") << newLine;
+
+                    javaSourceLines = StringArray::fromLines (newFile.toString());
+                }
+
+                auto targetFile = targetFolder.getChildFile (file.getFileName());
+
+                overwriteFileIfDifferentOrThrow (targetFile, javaSourceLines.joinIntoString (newLine));
+            }
+        }
+    }
+
     void copyExtraResourceFiles() const
     {
         for (ConstConfigIterator config (*this); config.next();)
         {
             const auto& cfg = dynamic_cast<const AndroidBuildConfiguration&> (*config);
-            const juce::String path = cfg.isDebug() ? "app/src/debug/res/values" : "app/src/release/res/values";
+            const String xmlValuesPath = cfg.isDebug() ? "app/src/debug/res/values" : "app/src/release/res/values";
+            const String rawPath = cfg.isDebug() ? "app/src/debug/res/raw" : "app/src/release/res/raw";
 
-            copyExtraResourceFiles (cfg.getAdditionalXmlResources(), path);
+            copyExtraResourceFiles (cfg.getAdditionalXmlResources(), xmlValuesPath);
+            copyExtraResourceFiles (cfg.getAdditionalRawResources(), rawPath);
+        }
+
+        if (androidEnableRemoteNotifications.get())
+        {
+            File file (getProject().getFile().getChildFile (androidRemoteNotificationsConfigFile.get()));
+            // Settings file must be present for remote notifications to work and it must be called google-services.json.
+            jassert (file.existsAsFile() && file.getFileName() == "google-services.json");
+
+            copyExtraResourceFiles (androidRemoteNotificationsConfigFile.get(), "app");
         }
     }
 
-    void copyExtraResourceFiles (const juce::String& xmlResources, const juce::String& dstRelativePath) const
+    void copyExtraResourceFiles (const String& resources, const String& dstRelativePath) const
     {
-        juce::StringArray resourcePaths;
-        resourcePaths.addTokens (xmlResources, true);
+        StringArray resourcePaths;
+        resourcePaths.addTokens (resources, true);
 
         const File parentFolder (getTargetFolder().getChildFile (dstRelativePath));
 
@@ -1016,7 +1119,7 @@ private:
 
         for (const auto& path : resourcePaths)
         {
-            juce::File file (getProject().getFile().getChildFile(path));
+            File file (getProject().getFile().getChildFile (path));
 
             jassert (file.existsAsFile());
 
@@ -1076,21 +1179,19 @@ private:
     {
         for (ConstConfigIterator config (*this); config.next();)
         {
-            XmlElement strings ("resources");
-            XmlElement* resourceName = strings.createNewChildElement ("string");
-
-            resourceName->setAttribute ("name", "app_name");
-            resourceName->addTextElement (projectName);
-
             const auto& cfg = dynamic_cast<const AndroidBuildConfiguration&> (*config);
 
-            for (XmlElement* e = XmlDocument::parse (cfg.getCustomStringsXml()); e != nullptr; e = e->getNextElement())
-                strings.addChildElement (e);
+            String customStringsXmlContent = "<resources>\n";
+            customStringsXmlContent << "<string name=\"app_name\">" << projectName << "</string>\n";
+            customStringsXmlContent << cfg.getCustomStringsXml();
+            customStringsXmlContent << "\n</resources>";
+
+            ScopedPointer<XmlElement> strings = XmlDocument::parse (customStringsXmlContent);
 
             const juce::String dir     = cfg.isDebug() ? "debug" : "release";
             const juce::String subPath = "app/src/" + dir + "/res/values/string.xml";
 
-            writeXmlOrThrow (strings, folder.getChildFile (subPath), "utf-8", 100, true);
+            writeXmlOrThrow (*strings, folder.getChildFile (subPath), "utf-8", 100, true);
         }
     }
 
@@ -1251,9 +1352,18 @@ private:
         defines.set ("JUCE_ANDROID_API_VERSION", androidMinimumSDK.get());
         defines.set ("JUCE_ANDROID_ACTIVITY_CLASSNAME", getJNIActivityClassName().replaceCharacter ('/', '_'));
         defines.set ("JUCE_ANDROID_ACTIVITY_CLASSPATH", "\"" + getJNIActivityClassName() + "\"");
+        defines.set ("JUCE_PUSH_NOTIFICATIONS", "1");
 
         if (androidInAppBillingPermission.get())
             defines.set ("JUCE_IN_APP_PURCHASES", "1");
+
+        if (androidEnableRemoteNotifications.get())
+        {
+            auto instanceIdClassName = getActivityClassPackage() + ".JuceFirebaseInstanceIdService";
+            auto messagingClassName  = getActivityClassPackage() + ".JuceFirebaseMessagingService";
+            defines.set ("JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME", instanceIdClassName.replaceCharacter ('.', '_'));
+            defines.set ("JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME", messagingClassName.replaceCharacter ('.', '_'));
+        }
 
         if (supportsGLv3())
             defines.set ("JUCE_ANDROID_GL_ES_VERSION_3_0", "1");
@@ -1475,6 +1585,7 @@ private:
             }
 
             setAttributeIfNotPresent (*act, "android:screenOrientation", androidScreenOrientation.get());
+            setAttributeIfNotPresent (*act, "android:launchMode", "singleTask");
 
             auto* intent = getOrCreateChildWithName (*act, "intent-filter");
 
@@ -1483,6 +1594,23 @@ private:
 
             auto* category = getOrCreateChildWithName (*intent, "category");
             setAttributeIfNotPresent (*category, "android:name", "android.intent.category.LAUNCHER");
+
+            if (androidEnableRemoteNotifications.get())
+            {
+                auto* service = app->createNewChildElement ("service");
+                service->setAttribute ("android:name", ".JuceFirebaseMessagingService");
+                auto* intentFilter = service->createNewChildElement ("intent-filter");
+                intentFilter->createNewChildElement ("action")->setAttribute ("android:name", "com.google.firebase.MESSAGING_EVENT");
+
+                service = app->createNewChildElement ("service");
+                service->setAttribute ("android:name", ".JuceFirebaseInstanceIdService");
+                intentFilter = service->createNewChildElement ("intent-filter");
+                intentFilter->createNewChildElement ("action")->setAttribute ("android:name", "com.google.firebase.INSTANCE_ID_EVENT");
+
+                auto* metaData = app->createNewChildElement ("meta-data");
+                metaData->setAttribute ("android:name", "firebase_analytics_collection_deactivated");
+                metaData->setAttribute ("android:value", "true");
+            }
         }
 
         return manifest;
@@ -1530,6 +1658,9 @@ private:
 
         if (androidInAppBillingPermission.get())
             s.add ("com.android.vending.BILLING");
+
+        if (androidVibratePermission.get())
+            s.add ("android.permission.VIBRATE");
 
         return getCleanedStringArray (s);
     }
