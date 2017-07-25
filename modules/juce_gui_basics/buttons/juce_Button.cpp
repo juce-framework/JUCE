@@ -329,6 +329,11 @@ void Button::setTriggeredOnMouseDown (const bool isTriggeredOnMouseDown) noexcep
     triggerOnMouseDown = isTriggeredOnMouseDown;
 }
 
+bool Button::getTriggeredOnMouseDown() const noexcept
+{
+    return triggerOnMouseDown;
+}
+
 //==============================================================================
 void Button::clicked()
 {
