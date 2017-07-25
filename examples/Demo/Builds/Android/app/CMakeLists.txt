@@ -130,6 +130,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_basics/mpe/juce_MPEZone.h"
     "../../../../../modules/juce_audio_basics/mpe/juce_MPEZoneLayout.cpp"
     "../../../../../modules/juce_audio_basics/mpe/juce_MPEZoneLayout.h"
+    "../../../../../modules/juce_audio_basics/native/juce_mac_CoreAudioLayouts.h"
     "../../../../../modules/juce_audio_basics/sources/juce_AudioSource.h"
     "../../../../../modules/juce_audio_basics/sources/juce_BufferingAudioSource.cpp"
     "../../../../../modules/juce_audio_basics/sources/juce_BufferingAudioSource.h"
@@ -1440,6 +1441,7 @@ set_source_files_properties("../../../../../modules/juce_audio_basics/mpe/juce_M
 set_source_files_properties("../../../../../modules/juce_audio_basics/mpe/juce_MPEZone.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/mpe/juce_MPEZoneLayout.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/mpe/juce_MPEZoneLayout.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/native/juce_mac_CoreAudioLayouts.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/sources/juce_AudioSource.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/sources/juce_BufferingAudioSource.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/sources/juce_BufferingAudioSource.h" PROPERTIES HEADER_FILE_ONLY TRUE)

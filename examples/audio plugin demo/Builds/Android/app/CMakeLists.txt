@@ -44,8 +44,6 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_basics/effects/juce_CatmullRomInterpolator.cpp"
     "../../../../../modules/juce_audio_basics/effects/juce_CatmullRomInterpolator.h"
     "../../../../../modules/juce_audio_basics/effects/juce_Decibels.h"
-    "../../../../../modules/juce_audio_basics/effects/juce_FFT.cpp"
-    "../../../../../modules/juce_audio_basics/effects/juce_FFT.h"
     "../../../../../modules/juce_audio_basics/effects/juce_IIRFilter.cpp"
     "../../../../../modules/juce_audio_basics/effects/juce_IIRFilter.h"
     "../../../../../modules/juce_audio_basics/effects/juce_LagrangeInterpolator.cpp"
@@ -82,6 +80,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_basics/mpe/juce_MPEZone.h"
     "../../../../../modules/juce_audio_basics/mpe/juce_MPEZoneLayout.cpp"
     "../../../../../modules/juce_audio_basics/mpe/juce_MPEZoneLayout.h"
+    "../../../../../modules/juce_audio_basics/native/juce_mac_CoreAudioLayouts.h"
     "../../../../../modules/juce_audio_basics/sources/juce_AudioSource.h"
     "../../../../../modules/juce_audio_basics/sources/juce_BufferingAudioSource.cpp"
     "../../../../../modules/juce_audio_basics/sources/juce_BufferingAudioSource.h"
@@ -89,6 +88,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_basics/sources/juce_ChannelRemappingAudioSource.h"
     "../../../../../modules/juce_audio_basics/sources/juce_IIRFilterAudioSource.cpp"
     "../../../../../modules/juce_audio_basics/sources/juce_IIRFilterAudioSource.h"
+    "../../../../../modules/juce_audio_basics/sources/juce_MemoryAudioSource.cpp"
+    "../../../../../modules/juce_audio_basics/sources/juce_MemoryAudioSource.h"
     "../../../../../modules/juce_audio_basics/sources/juce_MixerAudioSource.cpp"
     "../../../../../modules/juce_audio_basics/sources/juce_MixerAudioSource.h"
     "../../../../../modules/juce_audio_basics/sources/juce_PositionableAudioSource.h"
@@ -1281,8 +1282,6 @@ set_source_files_properties("../../../../../modules/juce_audio_basics/buffers/ju
 set_source_files_properties("../../../../../modules/juce_audio_basics/effects/juce_CatmullRomInterpolator.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/effects/juce_CatmullRomInterpolator.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/effects/juce_Decibels.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_basics/effects/juce_FFT.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_basics/effects/juce_FFT.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/effects/juce_IIRFilter.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/effects/juce_IIRFilter.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/effects/juce_LagrangeInterpolator.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -1319,6 +1318,7 @@ set_source_files_properties("../../../../../modules/juce_audio_basics/mpe/juce_M
 set_source_files_properties("../../../../../modules/juce_audio_basics/mpe/juce_MPEZone.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/mpe/juce_MPEZoneLayout.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/mpe/juce_MPEZoneLayout.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/native/juce_mac_CoreAudioLayouts.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/sources/juce_AudioSource.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/sources/juce_BufferingAudioSource.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/sources/juce_BufferingAudioSource.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -1326,6 +1326,8 @@ set_source_files_properties("../../../../../modules/juce_audio_basics/sources/ju
 set_source_files_properties("../../../../../modules/juce_audio_basics/sources/juce_ChannelRemappingAudioSource.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/sources/juce_IIRFilterAudioSource.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/sources/juce_IIRFilterAudioSource.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/sources/juce_MemoryAudioSource.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/sources/juce_MemoryAudioSource.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/sources/juce_MixerAudioSource.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/sources/juce_MixerAudioSource.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/sources/juce_PositionableAudioSource.h" PROPERTIES HEADER_FILE_ONLY TRUE)
