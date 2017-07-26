@@ -922,7 +922,6 @@ void LookAndFeel_V4::positionComboBoxText (ComboBox& box, Label& label)
                      box.getHeight() - 2);
 
     label.setFont (getComboBoxFont (box));
-    label.setJustificationType (Justification::centredLeft);
 }
 
 //==============================================================================
