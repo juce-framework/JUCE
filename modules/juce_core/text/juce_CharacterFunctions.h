@@ -191,7 +191,7 @@ public:
 
             switch (*++text)
             {
-                case '-':   *currentCharacter++ = '-'; // fall-through..
+                case '-':   *currentCharacter++ = '-'; // Fall-through..
                 case '+':   ++text;
             }
 
