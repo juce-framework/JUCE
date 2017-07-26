@@ -72,7 +72,6 @@
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnullability-completeness"
-#pragma clang diagnostic ignored "-Wundeclared-selector"
 
 // TODO: ask Timur: use SFINAE to automatically generate this for all NSObjects
 template <> struct ContainerDeletePolicy<AUAudioUnitBusArray>                   { static void destroy (NSObject* o) { [o release]; } };
@@ -199,10 +198,13 @@ private:
         {
             addIvar<JuceAudioUnitv3Base*> ("cppObject");
 
+           #pragma clang diagnostic push
+           #pragma clang diagnostic ignored "-Wundeclared-selector"
             addMethod (@selector (initWithComponentDescription:options:error:juceClass:),
                        initWithComponentDescriptionAndJuceClass, "@@:",
                        @encode (AudioComponentDescription),
                        @encode (AudioComponentInstantiationOptions), "^@@");
+           #pragma clang diagnostic pop
 
             addMethod (@selector (initWithComponentDescription:options:error:),
                        initWithComponentDescription, "@@:",
