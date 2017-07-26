@@ -866,11 +866,15 @@ private:
 
         tresult PLUGIN_API setContentScaleFactor (Steinberg::IPlugViewContentScaleSupport::ScaleFactor factor) override
         {
+           #if (JUCE_MAC || JUCE_IOS)
+            ignoreUnused (factor);
+           #else
             if (auto* editor = component->pluginEditor.get())
             {
                 editor->setScaleFactor (factor);
                 return kResultTrue;
             }
+           #endif
 
             return kResultFalse;
         }

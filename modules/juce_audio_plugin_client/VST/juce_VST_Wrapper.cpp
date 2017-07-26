@@ -1049,7 +1049,10 @@ public:
             {
                 vstEffect.flags |= vstEffectFlagHasEditor;
                 editorComp = new EditorCompWrapper (*this, *ed);
+
+               #if ! (JUCE_MAC || JUCE_IOS)
                 ed->setScaleFactor (editorScaleFactor);
+               #endif
             }
             else
             {
