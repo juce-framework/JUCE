@@ -176,7 +176,10 @@ struct FocusRestorer
     ~FocusRestorer()
     {
         if (lastFocus != nullptr && ! lastFocus->isCurrentlyBlockedByAnotherModalComponent())
-            lastFocus->grabKeyboardFocus();
+        {
+            if (lastFocus != nullptr && lastFocus->isShowing())
+                lastFocus->grabKeyboardFocus();
+        }
     }
 
     WeakReference<Component> lastFocus;
