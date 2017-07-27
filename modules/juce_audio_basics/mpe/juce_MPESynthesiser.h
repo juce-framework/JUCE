@@ -301,7 +301,7 @@ protected:
     OwnedArray<MPESynthesiserVoice> voices;
     CriticalSection voicesLock;
 
-private:
+protected:
     //==============================================================================
     bool shouldStealVoices = false;
     uint32 lastNoteOnCounter = 0;
