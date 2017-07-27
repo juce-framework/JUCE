@@ -71,6 +71,7 @@ const char* const WavAudioFormat::riffInfoArtist                = "IART";
 const char* const WavAudioFormat::riffInfoBaseURL               = "IBSU";
 const char* const WavAudioFormat::riffInfoCinematographer       = "ICNM";
 const char* const WavAudioFormat::riffInfoComment               = "CMNT";
+const char* const WavAudioFormat::riffInfoComment2              = "ICMT";
 const char* const WavAudioFormat::riffInfoComments              = "COMM";
 const char* const WavAudioFormat::riffInfoCommissioned          = "ICMS";
 const char* const WavAudioFormat::riffInfoCopyright             = "ICOP";
@@ -111,6 +112,7 @@ const char* const WavAudioFormat::riffInfoNumberOfParts         = "PRT2";
 const char* const WavAudioFormat::riffInfoOrganisation          = "TORG";
 const char* const WavAudioFormat::riffInfoPart                  = "PRT1";
 const char* const WavAudioFormat::riffInfoProducedBy            = "IPRO";
+const char* const WavAudioFormat::riffInfoProductName		    = "IPRD";
 const char* const WavAudioFormat::riffInfoProductionDesigner    = "IPDS";
 const char* const WavAudioFormat::riffInfoProductionStudio      = "ISDT";
 const char* const WavAudioFormat::riffInfoRate                  = "RATE";
@@ -136,6 +138,7 @@ const char* const WavAudioFormat::riffInfoTechnician            = "ITCH";
 const char* const WavAudioFormat::riffInfoThirdLanguage         = "IAS3";
 const char* const WavAudioFormat::riffInfoTimeCode              = "ISMP";
 const char* const WavAudioFormat::riffInfoTitle                 = "INAM";
+const char* const WavAudioFormat::riffInfoTrackNo				= "IPRT";
 const char* const WavAudioFormat::riffInfoTrackNumber           = "TRCK";
 const char* const WavAudioFormat::riffInfoURL                   = "TURL";
 const char* const WavAudioFormat::riffInfoVegasVersionMajor     = "VMAJ";
@@ -562,6 +565,7 @@ namespace WavFileHelpers
             WavAudioFormat::riffInfoCinematographer,
             WavAudioFormat::riffInfoComment,
             WavAudioFormat::riffInfoComments,
+			WavAudioFormat::riffInfoComment2,
             WavAudioFormat::riffInfoCommissioned,
             WavAudioFormat::riffInfoCopyright,
             WavAudioFormat::riffInfoCostumeDesigner,
@@ -601,6 +605,7 @@ namespace WavFileHelpers
             WavAudioFormat::riffInfoOrganisation,
             WavAudioFormat::riffInfoPart,
             WavAudioFormat::riffInfoProducedBy,
+            WavAudioFormat::riffInfoProductName,
             WavAudioFormat::riffInfoProductionDesigner,
             WavAudioFormat::riffInfoProductionStudio,
             WavAudioFormat::riffInfoRate,
@@ -626,6 +631,7 @@ namespace WavFileHelpers
             WavAudioFormat::riffInfoThirdLanguage,
             WavAudioFormat::riffInfoTimeCode,
             WavAudioFormat::riffInfoTitle,
+            WavAudioFormat::riffInfoTrackNo,
             WavAudioFormat::riffInfoTrackNumber,
             WavAudioFormat::riffInfoURL,
             WavAudioFormat::riffInfoVegasVersionMajor,
