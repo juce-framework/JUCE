@@ -36,18 +36,20 @@ class LinearSmoothedValue
 public:
     /** Constructor. */
     LinearSmoothedValue() noexcept
-        : currentValue (0), target (0), step (0), countdown (0), stepsToTarget (0)
     {
     }
 
     /** Constructor. */
     LinearSmoothedValue (FloatType initialValue) noexcept
-        : currentValue (initialValue), target (initialValue), step (0), countdown (0), stepsToTarget (0)
+        : currentValue (initialValue), target (initialValue)
     {
     }
 
     //==============================================================================
-    /** Reset to a new sample rate and ramp length. */
+    /** Reset to a new sample rate and ramp length.
+        @param sampleRate The sampling rate
+        @param rampLengthInSeconds The duration of the ramp in seconds
+    */
     void reset (double sampleRate, double rampLengthInSeconds) noexcept
     {
         jassert (sampleRate > 0 && rampLengthInSeconds >= 0);
@@ -56,7 +58,10 @@ public:
         countdown = 0;
     }
 
-    /** Set a new target value. */
+    //==============================================================================
+    /** Set a new target value.
+        @param newValue New target value
+    */
     void setValue (FloatType newValue) noexcept
     {
         if (target != newValue)
@@ -71,7 +76,10 @@ public:
         }
     }
 
-    /** Compute the next value. */
+    //==============================================================================
+    /** Compute the next value.
+        @returns Smoothed value
+    */
     FloatType getNextValue() noexcept
     {
         if (countdown <= 0)
@@ -94,8 +102,83 @@ public:
         return target;
     }
 
+    //==============================================================================
+    /** Applies a linear smoothed gain to a stream of samples
+        S[i] *= gain
+        @param samples Pointer to a raw array of samples
+        @param numSamples Length of array of samples
+    */
+    void applyGain (FloatType *samples, int numSamples) noexcept
+    {
+        jassert(numSamples >= 0);
+
+        if (isSmoothing())
+        {
+            for (int i = 0; i < numSamples; i++)
+                samples[i] *= getNextValue();
+        }
+        else
+        {
+            FloatVectorOperations::multiply (samples, target, numSamples);
+        }
+    }
+
+    //==============================================================================
+    /** Computes output as linear smoothed gain applied to a stream of samples.
+        Sout[i] = Sin[i] * gain
+        @param samples Pointer to a raw array of samples
+        @param numSamples Length of sample array
+        @param numSamples Length of array of samples
+    */
+    void applyGain (FloatType *samplesOut, const FloatType *samplesIn, int numSamples) noexcept
+    {
+        jassert (numSamples >= 0);
+
+        if (isSmoothing())
+        {
+            for (int i = 0; i < numSamples; i++)
+                samplesOut[i] = samplesIn[i] * getNextValue();
+        }
+        else
+        {
+            FloatVectorOperations::multiply (samplesOut, samplesIn, target, numSamples);
+        }
+    }
+
+    //==============================================================================
+    /** Applies a linear smoothed gain to a buffer */
+    void applyGain(AudioBuffer<FloatType> buffer, int numSamples) noexcept
+    {
+        jassert (numSamples >= 0);
+
+        if (isSmoothing())
+        {
+            if (buffer.getNumChannels() == 1)
+            {
+                FloatType *samples = buffer.getWritePointer(0);
+
+                for (int i = 0; i < numSamples; i++)
+                    samples[i] *= getNextValue();
+            }
+            else
+            {
+                for (int i = 0; i < numSamples; i++)
+                {
+                    const FloatType gain = getNextValue();
+
+                    for (int channel = 0; channel < buffer.getNumChannels(); channel++)
+                        buffer.setSample (channel, i, buffer.getSample (channel, i) * gain);
+                }
+            }
+        }
+        else
+        {
+            buffer.applyGain (0, numSamples, target);
+        }
+    }
+
 private:
     //==============================================================================
-    FloatType currentValue, target, step;
-    int countdown, stepsToTarget;
+    FloatType currentValue = 0, target = 0, step = 0;
+    int countdown = 0, stepsToTarget = 0;
 };
