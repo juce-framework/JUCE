@@ -98,11 +98,11 @@ public:
     // these are used to persist the UI's size - the values are stored along with the
     // filter's other parameters, and the UI component will update them when it gets
     // resized.
-    int lastUIWidth, lastUIHeight;
+    int lastUIWidth = 400, lastUIHeight = 200;
 
     // Our parameters
-    AudioParameterFloat* gainParam;
-    AudioParameterFloat* delayParam;
+    AudioParameterFloat* gainParam = nullptr;
+    AudioParameterFloat* delayParam = nullptr;
 
 private:
     //==============================================================================
@@ -115,7 +115,8 @@ private:
 
     AudioBuffer<float> delayBufferFloat;
     AudioBuffer<double> delayBufferDouble;
-    int delayPosition;
+
+    int delayPosition = 0;
 
     Synthesiser synth;
 

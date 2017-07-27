@@ -114,15 +114,18 @@ bool CharacterFunctions::isPrintable (const juce_wchar character) noexcept
 
 int CharacterFunctions::getHexDigitValue (const juce_wchar digit) noexcept
 {
-    unsigned int d = (unsigned int) digit - '0';
+    auto d = (unsigned int) (digit - '0');
+
     if (d < (unsigned int) 10)
         return (int) d;
 
     d += (unsigned int) ('0' - 'a');
+
     if (d < (unsigned int) 6)
         return (int) d + 10;
 
     d += (unsigned int) ('a' - 'A');
+
     if (d < (unsigned int) 6)
         return (int) d + 10;
 
@@ -138,19 +141,23 @@ double CharacterFunctions::mulexp10 (const double value, int exponent) noexcept
         return 0;
 
     const bool negative = (exponent < 0);
+
     if (negative)
         exponent = -exponent;
 
     double result = 1.0, power = 10.0;
+
     for (int bit = 1; exponent != 0; bit <<= 1)
     {
         if ((exponent & bit) != 0)
         {
             exponent ^= bit;
             result *= power;
+
             if (exponent == 0)
                 break;
         }
+
         power *= power;
     }
 
@@ -169,3 +176,107 @@ juce_wchar CharacterFunctions::getUnicodeCharFromWindows1252Codepage (const uint
 
     return (juce_wchar) lookup[c - 0x80];
 }
+
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+#define QUOTE(x) #x
+#define STR(value) QUOTE(value)
+#define ASYM_STRING_DOUBLE_PAIR(str, value) std::pair<String, double> (STR(str), value)
+#define STRING_DOUBLE_PAIR(value) ASYM_STRING_DOUBLE_PAIR(value, value)
+#define STRING_DOUBLE_PAIR_COMBOS(value) \
+    STRING_DOUBLE_PAIR(value), \
+    STRING_DOUBLE_PAIR(-value), \
+    ASYM_STRING_DOUBLE_PAIR(+value, value), \
+    ASYM_STRING_DOUBLE_PAIR(000000 ## value, value), \
+    ASYM_STRING_DOUBLE_PAIR(+000 ## value, value), \
+    ASYM_STRING_DOUBLE_PAIR(-0 ## value, -value)
+
+class CharacterFunctionsTests  : public UnitTest
+{
+public:
+    CharacterFunctionsTests() : UnitTest ("CharacterFunctions", "Text") {}
+
+    void runTest() override
+    {
+        beginTest ("readDoubleValue");
+
+        static const std::pair<String, double> testValues[] =
+        {
+            // Integers
+            STRING_DOUBLE_PAIR_COMBOS (0),
+            STRING_DOUBLE_PAIR_COMBOS (3),
+            STRING_DOUBLE_PAIR_COMBOS (4931),
+            STRING_DOUBLE_PAIR_COMBOS (5000),
+            STRING_DOUBLE_PAIR_COMBOS (9862097),
+
+            // Floating point numbers
+            STRING_DOUBLE_PAIR_COMBOS (7.000),
+            STRING_DOUBLE_PAIR_COMBOS (0.2),
+            STRING_DOUBLE_PAIR_COMBOS (.298630),
+            STRING_DOUBLE_PAIR_COMBOS (1.118),
+            STRING_DOUBLE_PAIR_COMBOS (0.9000),
+            STRING_DOUBLE_PAIR_COMBOS (0.0000001),
+            STRING_DOUBLE_PAIR_COMBOS (500.0000001),
+            STRING_DOUBLE_PAIR_COMBOS (9862098.2398604),
+
+            // Exponents
+            STRING_DOUBLE_PAIR_COMBOS (0e0),
+            STRING_DOUBLE_PAIR_COMBOS (0.e0),
+            STRING_DOUBLE_PAIR_COMBOS (0.00000e0),
+            STRING_DOUBLE_PAIR_COMBOS (.0e7),
+            STRING_DOUBLE_PAIR_COMBOS (0e-5),
+            STRING_DOUBLE_PAIR_COMBOS (2E0),
+            STRING_DOUBLE_PAIR_COMBOS (4.E0),
+            STRING_DOUBLE_PAIR_COMBOS (1.2000000E0),
+            STRING_DOUBLE_PAIR_COMBOS (1.2000000E6),
+            STRING_DOUBLE_PAIR_COMBOS (.398e3),
+            STRING_DOUBLE_PAIR_COMBOS (10e10),
+            STRING_DOUBLE_PAIR_COMBOS (1.4962e+2),
+            STRING_DOUBLE_PAIR_COMBOS (3198693.0973e4),
+            STRING_DOUBLE_PAIR_COMBOS (10973097.2087e-4),
+            STRING_DOUBLE_PAIR_COMBOS (1.3986e00006),
+            STRING_DOUBLE_PAIR_COMBOS (2087.3087e+00006),
+            STRING_DOUBLE_PAIR_COMBOS (6.0872e-00006),
+
+            // Too many sig figs
+            STRING_DOUBLE_PAIR_COMBOS (1.23456789012345678901234567890),
+            STRING_DOUBLE_PAIR_COMBOS (1.23456789012345678901234567890e-111)
+
+           #if ! JUCE_LINUX
+            // Limits
+          , STRING_DOUBLE_PAIR (DBL_MAX),
+            STRING_DOUBLE_PAIR (-DBL_MAX),
+            STRING_DOUBLE_PAIR (DBL_MIN)
+           #endif
+        };
+
+        for (auto trial : testValues)
+        {
+            auto charPtr = trial.first.getCharPointer();
+            expectEquals (CharacterFunctions::readDoubleValue (charPtr), trial.second);
+        }
+
+        {
+            String nans[] = { "NaN", "-nan", "+NAN", "1.0E1024", "-1.0E-999", "1.23456789012345678901234567890e123456789"};
+            for (auto nan : nans)
+            {
+                auto charPtr = nan.getCharPointer();
+                expect (std::isnan (CharacterFunctions::readDoubleValue (charPtr)));
+            }
+        }
+
+        {
+            String infs[] = { "Inf", "-inf",  "INF"};
+            for (auto inf : infs)
+            {
+                auto charPtr = inf.getCharPointer();
+                expect (std::isinf (CharacterFunctions::readDoubleValue (charPtr)));
+            }
+        }
+    }
+};
+
+static CharacterFunctionsTests characterFunctionsTests;
+
+#endif

@@ -103,7 +103,8 @@ struct NewProjectWizard
     //==============================================================================
     Project* runWizard (WizardComp& wc,
                         const String& projectName,
-                        const File& target)
+                        const File& target,
+                        bool useGlobalPath)
     {
         ownerWizardComp = &wc;
         appTitle = projectName;
@@ -140,7 +141,7 @@ struct NewProjectWizard
                 return nullptr;
 
             addExporters (*project, wc);
-            addDefaultModules (*project, false);
+            addDefaultModules (*project, useGlobalPath);
 
             if (project->save (false, true) != FileBasedDocument::savedOk)
                 return nullptr;
@@ -173,7 +174,7 @@ struct NewProjectWizard
             failedFiles.add (getSourceFilesFolder().getFullPathName());
     }
 
-    void addDefaultModules (Project& project, bool areModulesCopiedLocally)
+    void addDefaultModules (Project& project, bool useGlobalPath)
     {
         StringArray mods (getDefaultModules());
 
@@ -182,7 +183,7 @@ struct NewProjectWizard
 
         for (int i = 0; i < mods.size(); ++i)
             if (const ModuleDescription* info = list.getModuleWithID (mods[i]))
-                project.getModules().addModule (info->moduleFolder, areModulesCopiedLocally);
+                project.getModules().addModule (info->moduleFolder, false, useGlobalPath);
     }
 
     void addExporters (Project& project, WizardComp& wizardComp)

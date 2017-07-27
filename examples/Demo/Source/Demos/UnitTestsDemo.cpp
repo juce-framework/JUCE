@@ -63,16 +63,21 @@ struct UnitTestClasses
                               private Timer
     {
     public:
-        TestRunnerThread (UnitTestsDemo& utd)
+        TestRunnerThread (UnitTestsDemo& utd, const String& ctg)
             : Thread ("Unit Tests"),
-              owner (utd)
+              owner (utd),
+              category (ctg)
         {
         }
 
         void run() override
         {
             CustomTestRunner runner (*this);
-            runner.runAllTests();
+
+            if (category == "All Tests")
+                runner.runAllTests();
+            else
+                runner.runTestsInCategory (category);
 
             startTimer (50); // when finished, start the timer which will
                              // wait for the thread to end, then tell our component.
@@ -94,6 +99,7 @@ struct UnitTestClasses
 
     private:
         UnitTestsDemo& owner;
+        const String category;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TestRunnerThread)
     };
@@ -110,13 +116,22 @@ struct UnitTestClasses
             setOpaque (true);
 
             addAndMakeVisible (startTestButton);
+            startTestButton.addListener (this);
+
             addAndMakeVisible (testResultsBox);
             testResultsBox.setMultiLine (true);
             testResultsBox.setFont (Font (Font::getDefaultMonospacedFontName(), 12.0f, Font::plain));
 
-            startTestButton.addListener (this);
+            addAndMakeVisible (categoriesBox);
+            categoriesBox.addItem ("All Tests", 1);
 
-            logMessage ("This panel runs all the built-in JUCE unit-tests.\n");
+            auto categories = UnitTest::getAllCategories();
+            categories.sort (true);
+
+            categoriesBox.addItemList (categories, 2);
+            categoriesBox.setSelectedId (1);
+
+            logMessage ("This panel runs the built-in JUCE unit-tests from the selected category.\n");
             logMessage ("To add your own unit-tests, see the JUCE_UNIT_TESTS macro.");
         }
 
@@ -134,26 +149,29 @@ struct UnitTestClasses
 
         void resized() override
         {
-            Rectangle<int> r (getLocalBounds().reduced (6));
+            auto bounds = getLocalBounds().reduced (6);
 
-            startTestButton.setBounds (r.removeFromTop (25).removeFromLeft (200));
-            testResultsBox.setBounds (r.withTrimmedTop (5));
+            auto topSlice = bounds.removeFromTop (25);
+            startTestButton.setBounds (topSlice.removeFromLeft (200));
+            topSlice.removeFromLeft (10);
+            categoriesBox.setBounds (topSlice.removeFromLeft (250));
+
+            bounds.removeFromTop (5);
+            testResultsBox.setBounds (bounds);
         }
 
         void buttonClicked (Button* buttonThatWasClicked) override
         {
             if (buttonThatWasClicked == &startTestButton)
-            {
-                startTest();
-            }
+                startTest (categoriesBox.getText());
         }
 
-        void startTest()
+        void startTest (const String& category)
         {
             testResultsBox.clear();
             startTestButton.setEnabled (false);
 
-            currentTestThread = new TestRunnerThread (*this);
+            currentTestThread = new TestRunnerThread (*this, category);
             currentTestThread->startThread();
         }
 
@@ -184,6 +202,7 @@ struct UnitTestClasses
         ScopedPointer<TestRunnerThread> currentTestThread;
 
         TextButton startTestButton;
+        ComboBox categoriesBox;
         TextEditor testResultsBox;
 
         void lookAndFeelChanged() override

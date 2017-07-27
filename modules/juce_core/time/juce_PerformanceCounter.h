@@ -115,3 +115,43 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PerformanceCounter)
 };
+
+
+//==============================================================================
+/**
+    Simple RAII class for measuring the time spent in a scope.
+
+    Example:
+
+    {
+        double timeSec;
+
+        {
+            ScopedTimeMeasurement m (timeSec);
+            doSomething();
+        }
+
+        Logger::writeToLog (String ("doSomething() took ") + String (timeSec) + "seconds");
+    }
+
+    @param resultInSeconds The result of the measurement will be stored in this variable.
+*/
+class JUCE_API  ScopedTimeMeasurement
+{
+public:
+    ScopedTimeMeasurement (double& resultInSeconds)
+        : result (resultInSeconds)
+    {
+        result = 0.0;
+    }
+
+    ~ScopedTimeMeasurement()
+    {
+        static auto scaler = 1.0 / static_cast<double> (Time::getHighResolutionTicksPerSecond());
+        result = static_cast<double> (Time::getHighResolutionTicks() - startTimeTicks) * scaler;
+    }
+
+private:
+    int64 startTimeTicks = Time::getHighResolutionTicks();
+    double& result;
+};

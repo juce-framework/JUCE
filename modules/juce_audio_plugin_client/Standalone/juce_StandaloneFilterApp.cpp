@@ -124,7 +124,7 @@ protected:
     ScopedPointer<StandaloneFilterWindow> mainWindow;
 };
 
-#if JucePlugin_Build_STANDALONE && JUCE_IOS
+#if JucePlugin_Build_Standalone && JUCE_IOS
 
 bool JUCE_CALLTYPE juce_isInterAppAudioConnected()
 {

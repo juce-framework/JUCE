@@ -167,9 +167,9 @@ public:
     ~XmlElement() noexcept;
 
     //==============================================================================
-    /** Compares two XmlElements to see if they contain the same text and attiributes.
+    /** Compares two XmlElements to see if they contain the same text and attributes.
 
-        The elements are only considered equivalent if they contain the same attiributes
+        The elements are only considered equivalent if they contain the same attributes
         with the same values, and have the same sub-nodes.
 
         @param other                    the other element to compare to

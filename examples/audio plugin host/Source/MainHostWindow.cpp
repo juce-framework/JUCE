@@ -91,7 +91,7 @@ MainHostWindow::MainHostWindow()
     setResizeLimits (500, 400, 10000, 10000);
     centreWithSize (800, 600);
 
-    setContentOwned (new GraphDocumentComponent (formatManager, &deviceManager), false);
+    setContentOwned (new GraphDocumentComponent (formatManager, deviceManager), false);
 
     restoreWindowStateFromString (getAppProperties().getUserSettings()->getValue ("mainWindowPos"));
 
@@ -149,22 +149,37 @@ void MainHostWindow::closeButtonPressed()
     tryToQuitApplication();
 }
 
-bool MainHostWindow::tryToQuitApplication()
+struct AsyncQuitRetrier  : private Timer
+{
+    AsyncQuitRetrier()   { startTimer (500); }
+
+    void timerCallback() override
+    {
+        stopTimer();
+        delete this;
+
+        if (auto app = JUCEApplicationBase::getInstance())
+            app->systemRequestedQuit();
+    }
+};
+
+void MainHostWindow::tryToQuitApplication()
 {
     PluginWindow::closeAllCurrentlyOpenWindows();
 
-    if (getGraphEditor() == nullptr
-         || getGraphEditor()->graph->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
+    if (ModalComponentManager::getInstance()->cancelAllModalComponents())
+    {
+        new AsyncQuitRetrier();
+    }
+    else if (getGraphEditor() == nullptr
+              || getGraphEditor()->graph->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
     {
         // Some plug-ins do not want [NSApp stop] to be called
         // before the plug-ins are not deallocated.
         getGraphEditor()->releaseGraph();
 
         JUCEApplication::quit();
-        return true;
     }
-
-    return false;
 }
 
 void MainHostWindow::changeListenerCallback (ChangeBroadcaster* changed)
@@ -294,9 +309,10 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
     }
     else
     {
-        createPlugin (getChosenType (menuItemID),
-                      proportionOfWidth  (0.3f + Random::getSystemRandom().nextFloat() * 0.6f),
-                      proportionOfHeight (0.3f + Random::getSystemRandom().nextFloat() * 0.6f));
+        if (auto* desc = getChosenType (menuItemID))
+            createPlugin (*desc,
+                          { proportionOfWidth  (0.3f + Random::getSystemRandom().nextFloat() * 0.6f),
+                            proportionOfHeight (0.3f + Random::getSystemRandom().nextFloat() * 0.6f) });
     }
 }
 
@@ -307,10 +323,10 @@ void MainHostWindow::menuBarActivated (bool isActivated)
             graphEditor->unfocusKeyboardComponent();
 }
 
-void MainHostWindow::createPlugin (const PluginDescription* desc, int x, int y)
+void MainHostWindow::createPlugin (const PluginDescription& desc, Point<int> pos)
 {
     if (auto* graphEditor = getGraphEditor())
-        graphEditor->createNewPlugin (desc, x, y);
+        graphEditor->createNewPlugin (desc, pos);
 }
 
 void MainHostWindow::addPluginsToMenu (PopupMenu& m) const
@@ -320,7 +336,8 @@ void MainHostWindow::addPluginsToMenu (PopupMenu& m) const
         int i = 0;
 
         for (auto* t : internalTypes)
-            m.addItem (++i, t->name, graphEditor->graph->getNodeForName (t->name) == nullptr);
+            m.addItem (++i, t->name + " (" + t->pluginFormatName + ")",
+                       graphEditor->graph->getNodeForName (t->name) == nullptr);
     }
 
     m.addSeparator();
@@ -555,7 +572,8 @@ void MainHostWindow::filesDropped (const StringArray& files, int x, int y)
             auto pos = graphEditor->getLocalPoint (this, Point<int> (x, y));
 
             for (int i = 0; i < jmin (5, typesFound.size()); ++i)
-                createPlugin (typesFound.getUnchecked(i), pos.x, pos.y);
+                if (auto* desc = typesFound.getUnchecked(i))
+                    createPlugin (*desc, pos);
         }
     }
 }

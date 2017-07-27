@@ -41,6 +41,12 @@ public:
     */
     DynamicLibrary (const String& name) : handle (nullptr) { open (name); }
 
+    /** Move constructor */
+    DynamicLibrary (DynamicLibrary&& other) noexcept : handle (nullptr)
+    {
+        std::swap (handle, other.handle);
+    }
+
     /** Destructor.
         If a library is currently open, it will be closed when this object is destroyed.
     */

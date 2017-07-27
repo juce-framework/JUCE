@@ -54,6 +54,7 @@
 #include "../../juce_core/native/juce_osx_ObjCHelpers.h"
 #include "../../juce_graphics/native/juce_mac_CoreGraphicsHelpers.h"
 
+#include "../../juce_audio_basics/native/juce_mac_CoreAudioLayouts.h"
 #include "../../juce_audio_processors/format_types/juce_AU_Shared.h"
 
 #define JUCE_VIEWCONTROLLER_OBJC_NAME(x) JUCE_JOIN_MACRO (x, FactoryAUv3)
@@ -198,10 +199,13 @@ private:
         {
             addIvar<JuceAudioUnitv3Base*> ("cppObject");
 
+           #pragma clang diagnostic push
+           #pragma clang diagnostic ignored "-Wundeclared-selector"
             addMethod (@selector (initWithComponentDescription:options:error:juceClass:),
                        initWithComponentDescriptionAndJuceClass, "@@:",
                        @encode (AudioComponentDescription),
                        @encode (AudioComponentInstantiationOptions), "^@@");
+           #pragma clang diagnostic pop
 
             addMethod (@selector (initWithComponentDescription:options:error:),
                        initWithComponentDescription, "@@:",
@@ -559,7 +563,13 @@ public:
                 const AudioChannelLayoutTag layoutTag = (layout != nullptr ? [layout layoutTag] : 0);
 
                 if (layoutTag != 0)
-                    newLayout = AudioUnitHelpers::CALayoutTagToChannelSet (layoutTag);
+                {
+                    AudioChannelLayout caLayout;
+
+                    zerostruct (caLayout);
+                    caLayout.mChannelLayoutTag = layoutTag;
+                    newLayout = CoreAudioLayouts::fromCoreAudio (caLayout);
+                }
                 else
                     newLayout = bus->supportedLayoutWithChannels (static_cast<int> ([format channelCount]));
 
@@ -661,7 +671,11 @@ public:
 
             if (layoutTag != 0)
             {
-                AudioChannelSet newLayout = AudioUnitHelpers::CALayoutTagToChannelSet (layoutTag);
+                AudioChannelLayout caLayout;
+
+                zerostruct (caLayout);
+                caLayout.mChannelLayoutTag = layoutTag;
+                AudioChannelSet newLayout = CoreAudioLayouts::fromCoreAudio (caLayout);
 
                 if (newLayout.size() != newNumChannels)
                     return false;
@@ -688,6 +702,7 @@ public:
         ignoreUnused (processor);
 
         [au willChangeValueForKey: @"allParameterValues"];
+        addPresets();
         [au didChangeValueForKey: @"allParameterValues"];
     }
 
@@ -978,7 +993,7 @@ private:
                                                                                        address: address
                                                                                            min: 0.0f
                                                                                            max: 1.0f
-                                                                                          unit: kAudioUnitParameterUnit_Generic
+                                                                                          unit: unit
                                                                                       unitName: nullptr
                                                                                          flags: flags
                                                                                   valueStrings: nullptr

@@ -8,13 +8,13 @@
               pluginProducesMidiOut="1" pluginSilenceInIsSilenceOut="0" pluginTailLength="0"
               pluginEditorRequiresKeys="1" pluginAUExportPrefix="JuceDemoProjectAU"
               pluginAUViewClass="JuceDemoProjectAU_V1" pluginRTASCategory=""
-              bundleIdentifier="com.juce.JuceDemoPlugin" jucerVersion="5.0.2"
+              bundleIdentifier="com.juce.JuceDemoPlugin" jucerVersion="5.1.0"
               companyName="ROLI Ltd." aaxIdentifier="com.yourcompany.JuceDemoPlugin"
               buildAAX="0" pluginAAXCategory="AAX_ePlugInCategory_Dynamics"
               includeBinaryInAppConfig="1" buildVST3="0" pluginManufacturerEmail="support@yourcompany.com"
               companyWebsite="www.juce.com" companyEmail="info@juce.com" pluginIsMidiEffectPlugin="0"
               buildAUv3="1" buildStandalone="1" enableIAA="0" displaySplashScreen="0"
-              reportAppUsage="0" splashScreenColour="Dark">
+              reportAppUsage="0" splashScreenColour="Dark" cppLanguageStandard="11">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="" rtasFolder="~/SDKs/PT_80_SDK"
                objCExtraSuffix="JuceDemo" aaxFolder="" postbuildCommand="" vst3Folder="">
@@ -129,7 +129,7 @@
     </XCODE_IPHONE>
     <ANDROIDSTUDIO targetFolder="Builds/Android" androidSDKPath="" androidNDKPath=""
                    androidTheme="@android:style/Theme.NoTitleBar" androidScreenOrientation="landscape"
-                   androidMinimumSDK="23">
+                   androidMinimumSDK="23" microphonePermissionNeeded="1" androidInternetNeeded="0">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi x86" isDebug="1" optimisation="1"
                        targetName="JuceDemoPlugin"/>

@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-UnitTest::UnitTest (const String& nm)
-    : name (nm), runner (nullptr)
+UnitTest::UnitTest (const String& nm, const String& ctg)
+    : name (nm), category (ctg), runner (nullptr)
 {
     getAllTests().add (this);
 }
@@ -35,6 +35,31 @@ Array<UnitTest*>& UnitTest::getAllTests()
 {
     static Array<UnitTest*> tests;
     return tests;
+}
+
+Array<UnitTest*> UnitTest::getTestsInCategory (const String& category)
+{
+    if (category.isEmpty())
+        return getAllTests();
+
+    Array<UnitTest*> unitTests;
+
+    for (auto* test : getAllTests())
+        if (test->getCategory() == category)
+            unitTests.add (test);
+
+    return unitTests;
+}
+
+StringArray UnitTest::getAllCategories()
+{
+    StringArray categories;
+
+    for (auto* test : getAllTests())
+        if (test->getCategory().isNotEmpty())
+            categories.addIfNotAlreadyThere (test->getCategory());
+
+    return categories;
 }
 
 void UnitTest::initialise()  {}
@@ -157,6 +182,11 @@ void UnitTestRunner::runTests (const Array<UnitTest*>& tests, int64 randomSeed)
 void UnitTestRunner::runAllTests (int64 randomSeed)
 {
     runTests (UnitTest::getAllTests(), randomSeed);
+}
+
+void UnitTestRunner::runTestsInCategory (const String& category, int64 randomSeed)
+{
+    runTests (UnitTest::getTestsInCategory (category), randomSeed);
 }
 
 void UnitTestRunner::logMessage (const String& message)

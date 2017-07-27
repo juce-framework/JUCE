@@ -33,6 +33,9 @@ extern JNIEnv* getEnv() noexcept;
 // on a java thread which you did not create yourself.
 extern void setEnv (JNIEnv* env) noexcept;
 
+/* @internal */
+extern JNIEnv* attachAndroidJNI() noexcept;
+
 //==============================================================================
 class GlobalRef
 {
@@ -219,7 +222,7 @@ private:
             JNI_CLASS_MEMBERS (CREATE_JNI_METHOD, CREATE_JNI_STATICMETHOD, CREATE_JNI_FIELD, CREATE_JNI_STATICFIELD); \
         } \
     \
-        JNI_CLASS_MEMBERS (DECLARE_JNI_METHOD, DECLARE_JNI_METHOD, DECLARE_JNI_FIELD, DECLARE_JNI_FIELD); \
+        JNI_CLASS_MEMBERS (DECLARE_JNI_METHOD, DECLARE_JNI_METHOD, DECLARE_JNI_FIELD, DECLARE_JNI_FIELD) \
     }; \
     static CppClassName ## _Class CppClassName;
 

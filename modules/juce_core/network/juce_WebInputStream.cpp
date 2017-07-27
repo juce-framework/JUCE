@@ -21,7 +21,7 @@
 */
 
 WebInputStream::WebInputStream (const URL& url, const bool usePost)
-    : pimpl (new Pimpl(*this, url, usePost)), hasCalledConnect (false)
+    : pimpl (new Pimpl (*this, url, usePost)), hasCalledConnect (false)
 {}
 
 WebInputStream::~WebInputStream()
@@ -29,7 +29,7 @@ WebInputStream::~WebInputStream()
     delete pimpl;
 }
 
-WebInputStream& WebInputStream::withExtraHeaders (const String& extra)         { pimpl->withExtraHeaders (extra);        return *this; }
+WebInputStream& WebInputStream::withExtraHeaders (const String& extra)         { pimpl->withExtraHeaders (extra);       return *this; }
 WebInputStream& WebInputStream::withCustomRequestCommand (const String& cmd)   { pimpl->withCustomRequestCommand(cmd);  return *this; }
 WebInputStream& WebInputStream::withConnectionTimeout (int t)                  { pimpl->withConnectionTimeout (t);      return *this; }
 WebInputStream& WebInputStream::withNumRedirectsToFollow (int num)             { pimpl->withNumRedirectsToFollow (num); return *this; }
@@ -65,7 +65,7 @@ StringPairArray WebInputStream::parseHttpHeaders (const String& headerData)
 
         if (headersEntry.isNotEmpty())
         {
-            const String key (headersEntry.upToFirstOccurrenceOf (": ", false, false));
+            const String key   (headersEntry.upToFirstOccurrenceOf (": ", false, false));
             const String value (headersEntry.fromFirstOccurrenceOf (": ", false, false));
             const String previousValue (headerPairs [key]);
             headerPairs.set (key, previousValue.isEmpty() ? value : (previousValue + "," + value));

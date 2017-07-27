@@ -20,6 +20,11 @@
   ==============================================================================
 */
 
+#if JUCE_MSVC
+ #pragma warning (push)
+ #pragma warning (disable: 4702)
+#endif
+
 namespace littlefoot
 {
 
@@ -1511,6 +1516,15 @@ private:
             cg.continueTarget = oldContinueTarget;
         }
 
+        StatementPtr simplify (SyntaxTreeBuilder& stb) override
+        {
+            initialiser = initialiser->simplify (stb);
+            iterator = iterator->simplify (stb);
+            body = body->simplify (stb);
+            condition = condition->simplify (stb);
+            return this;
+        }
+
         void visitSubStatements (Statement::Visitor& visit) const override
         {
             visit (condition); visit (initialiser); visit (iterator); visit (body);
@@ -1542,6 +1556,14 @@ private:
         }
 
         bool alwaysReturns() const override     { return true; }
+
+        StatementPtr simplify (SyntaxTreeBuilder& stb) override
+        {
+            if (returnValue != nullptr)
+                returnValue = returnValue->simplify (stb);
+
+            return this;
+        }
 
         void visitSubStatements (Statement::Visitor& visit) const override
         {
@@ -2172,3 +2194,7 @@ private:
 };
 
 }
+
+#if JUCE_MSVC
+ #pragma warning (pop)
+#endif

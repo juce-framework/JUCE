@@ -529,7 +529,7 @@ Result JSON::parseQuotedString (String::CharPointerType& t, var& result)
 class JSONTests  : public UnitTest
 {
 public:
-    JSONTests() : UnitTest ("JSON") {}
+    JSONTests() : UnitTest ("JSON", "JSON") {}
 
     static String createRandomWideCharString (Random& r)
     {
@@ -565,17 +565,11 @@ public:
         return CharPointer_ASCII (buffer);
     }
 
-    // (creates a random double that can be easily stringified, to avoid
-    // false failures when decimal places are rounded or truncated slightly)
+    // Creates a random double that can be easily stringified, to avoid
+    // false failures when decimal places are rounded or truncated slightly
     static var createRandomDouble (Random& r)
     {
-        for (;;)
-        {
-            var v (String (r.nextDouble() * 1000.0, 20).getDoubleValue());
-
-            if (v.toString() == String (static_cast<double> (v), 20))
-                return v;
-        }
+        return var ((r.nextDouble() * 1000.0) + 0.1);
     }
 
     static var createRandomVar (Random& r, int depth)

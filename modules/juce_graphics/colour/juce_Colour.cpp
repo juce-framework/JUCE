@@ -103,7 +103,7 @@ namespace ColourHelpers
             if (h < 3.0f)   return PixelARGB (alpha, x, intV, (uint8) roundToInt (v * (1.0f - (s * (1.0f - f)))));
             if (h < 4.0f)   return PixelARGB (alpha, x,       (uint8) roundToInt (v * (1.0f - s * f)), intV);
             if (h < 5.0f)   return PixelARGB (alpha,          (uint8) roundToInt (v * (1.0f - (s * (1.0f - f)))), x, intV);
-                            return PixelARGB (alpha, intV, x, (uint8) roundToInt (v * (1.0f - s * f)));
+            return                 PixelARGB (alpha, intV, x, (uint8) roundToInt (v * (1.0f - s * f)));
         }
 
         float hue, saturation, brightness;

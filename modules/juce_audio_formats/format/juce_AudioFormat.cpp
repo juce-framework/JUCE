@@ -62,3 +62,26 @@ MemoryMappedAudioFormatReader* AudioFormat::createMemoryMappedReader (FileInputS
     delete fin;
     return nullptr;
 }
+
+bool AudioFormat::isChannelLayoutSupported (const AudioChannelSet& channelSet)
+{
+    if (channelSet == AudioChannelSet::mono())      return canDoMono();
+    if (channelSet == AudioChannelSet::stereo())    return canDoStereo();
+
+    return false;
+}
+
+AudioFormatWriter* AudioFormat::createWriterFor (OutputStream* streamToWriteTo,
+                                                 double sampleRateToUse,
+                                                 const AudioChannelSet& channelLayout,
+                                                 int bitsPerSample,
+                                                 const StringPairArray& metadataValues,
+                                                 int qualityOptionIndex)
+{
+    if (isChannelLayoutSupported (channelLayout))
+        return createWriterFor (streamToWriteTo, sampleRateToUse,
+                                static_cast<unsigned int> (channelLayout.size()),
+                                bitsPerSample, metadataValues, qualityOptionIndex);
+
+    return nullptr;
+}

@@ -92,7 +92,7 @@ public:
         Launches the thread with a given priority, where 0 = lowest, 10 = highest.
         If the thread is already running, its priority will be changed.
 
-        @see startThread, setPriority
+        @see startThread, setPriority, realtimeAudioPriority
     */
     void startThread (int priority);
 
@@ -164,11 +164,38 @@ public:
     bool waitForThreadToExit (int timeOutMilliseconds) const;
 
     //==============================================================================
+    /** Special realtime audio thread priority
+
+        This priority will create a high-priority thread which is best suited
+        for realtime audio processing.
+
+        Currently, this priority is identical to priority 9, except when building
+        for Android with OpenSL support.
+
+        In this case, JUCE will ask OpenSL to consturct a super high priority thread
+        specifically for realtime audio processing.
+
+        Note that this priority can only be set **before** the thread has
+        started. Switching to this priority, or from this priority to a different
+        priority, is not supported under Android and will assert.
+
+        For best performance this thread should yield at regular intervals
+        and not call any blocking APIS.
+
+        @see startThread, setPriority, sleep, WaitableEvent
+     */
+    enum
+    {
+        realtimeAudioPriority = -1
+    };
+
     /** Changes the thread's priority.
         May return false if for some reason the priority can't be changed.
 
         @param priority     the new priority, in the range 0 (lowest) to 10 (highest). A priority
                             of 5 is normal.
+
+        @see realtimeAudioPriority
     */
     bool setPriority (int priority);
 
@@ -272,14 +299,18 @@ public:
 private:
     //==============================================================================
     const String threadName;
-    void* volatile threadHandle;
-    ThreadID threadId;
+    void* volatile threadHandle = nullptr;
+    ThreadID threadId = {};
     CriticalSection startStopLock;
     WaitableEvent startSuspensionEvent, defaultEvent;
-    int threadPriority;
+    int threadPriority = 5;
     size_t threadStackSize;
-    uint32 affinityMask;
-    bool volatile shouldExit;
+    uint32 affinityMask = 0;
+    bool volatile shouldExit = false;
+
+   #if JUCE_ANDROID
+    bool isAndroidRealtimeThread = false;
+   #endif
 
    #ifndef DOXYGEN
     friend void JUCE_API juce_threadEntryPoint (void*);

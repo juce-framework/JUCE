@@ -97,7 +97,8 @@ StringPairArray parsePreprocessorDefs (const String& text)
         {
             ++s;
 
-            s = s.findEndOfWhitespace();
+            while ((! s.isEmpty()) && *s == ' ')
+                ++s;
 
             while ((! s.isEmpty()) && ! s.isWhitespace())
             {

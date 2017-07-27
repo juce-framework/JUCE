@@ -58,6 +58,16 @@ import android.media.AudioManager;
 import android.media.MediaScannerConnection;
 import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 import android.Manifest;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.Future;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.*;
 
 
 
@@ -97,13 +107,18 @@ public class OSCSender   extends Activity
     // these have to match the values of enum PermissionID in C++ class RuntimePermissions:
     private static final int JUCE_PERMISSIONS_RECORD_AUDIO = 1;
     private static final int JUCE_PERMISSIONS_BLUETOOTH_MIDI = 2;
+    private static final int JUCE_PERMISSIONS_READ_EXTERNAL_STORAGE = 3;
+    private static final int JUCE_PERMISSIONS_WRITE_EXTERNAL_STORAGE = 4;
 
     private static String getAndroidPermissionName (int permissionID)
     {
         switch (permissionID)
         {
-            case JUCE_PERMISSIONS_RECORD_AUDIO:     return Manifest.permission.RECORD_AUDIO;
-            case JUCE_PERMISSIONS_BLUETOOTH_MIDI:   return Manifest.permission.ACCESS_COARSE_LOCATION;
+            case JUCE_PERMISSIONS_RECORD_AUDIO:           return Manifest.permission.RECORD_AUDIO;
+            case JUCE_PERMISSIONS_BLUETOOTH_MIDI:         return Manifest.permission.ACCESS_COARSE_LOCATION;
+                                                          // use string value as this is not defined in SDKs < 16
+            case JUCE_PERMISSIONS_READ_EXTERNAL_STORAGE:  return "android.permission.READ_EXTERNAL_STORAGE";
+            case JUCE_PERMISSIONS_WRITE_EXTERNAL_STORAGE: return Manifest.permission.WRITE_EXTERNAL_STORAGE;
         }
 
         // unknown permission ID!
@@ -699,6 +714,7 @@ public class OSCSender   extends Activity
         //==============================================================================
         private native void handleKeyDown (long host, int keycode, int textchar);
         private native void handleKeyUp (long host, int keycode, int textchar);
+        private native void handleBackButton (long host);
 
         public void showKeyboard (String type)
         {
@@ -726,8 +742,14 @@ public class OSCSender   extends Activity
                 case KeyEvent.KEYCODE_VOLUME_UP:
                 case KeyEvent.KEYCODE_VOLUME_DOWN:
                     return super.onKeyDown (keyCode, event);
+                case KeyEvent.KEYCODE_BACK:
+                {
+                    handleBackButton (host);
+                    return true;
+                }
 
-                default: break;
+                default:
+                    break;
             }
 
             handleKeyDown (host, keyCode, event.getUnicodeChar());
@@ -947,43 +969,136 @@ public class OSCSender   extends Activity
     public static class HTTPStream
     {
         public HTTPStream (HttpURLConnection connection_,
-                           int[] statusCode, StringBuffer responseHeaders) throws IOException
+                           int[] statusCode_,
+                           StringBuffer responseHeaders_)
         {
             connection = connection_;
+            statusCode = statusCode_;
+            responseHeaders = responseHeaders_;
+        }
+
+        private final InputStream getCancellableStream (final boolean isInput) throws ExecutionException
+        {
+            synchronized (createFutureLock)
+            {
+                if (hasBeenCancelled.get())
+                    return null;
+
+                streamFuture = executor.submit (new Callable<BufferedInputStream>()
+                {
+                    @Override
+                    public BufferedInputStream call() throws IOException
+                    {
+                        return new BufferedInputStream (isInput ? connection.getInputStream()
+                                                                : connection.getErrorStream());
+                    }
+                });
+            }
 
             try
             {
-                inputStream = new BufferedInputStream (connection.getInputStream());
+                if (connection.getConnectTimeout() > 0)
+                    return streamFuture.get (connection.getConnectTimeout(), TimeUnit.MILLISECONDS);
+                else
+                    return streamFuture.get();
+            }
+            catch (InterruptedException e)
+            {
+                return null;
+            }
+            catch (TimeoutException e)
+            {
+                return null;
+            }
+            catch (CancellationException e)
+            {
+                return null;
+            }
+        }
+
+        public final boolean connect()
+        {
+            try
+            {
+                try
+                {
+                    synchronized (createStreamLock)
+                    {
+                        if (hasBeenCancelled.get())
+                            return false;
+
+                        inputStream = getCancellableStream (true);
+                    }
+                }
+                catch (ExecutionException e)
+                {
+                    if (connection.getResponseCode() < 400)
+                    {
+                        statusCode[0] = connection.getResponseCode();
+                        connection.disconnect();
+                        return false;
+                    }
+                }
+                finally
+                {
+                    statusCode[0] = connection.getResponseCode();
+                }
+
+                synchronized (createStreamLock)
+                {
+                    if (hasBeenCancelled.get())
+                        return false;
+
+                    try
+                    {
+                        if (statusCode[0] >= 400)
+                            inputStream = getCancellableStream (false);
+                        else
+                            inputStream = getCancellableStream (true);
+                    }
+                    catch (ExecutionException e)
+                    {}
+                }
+
+                for (java.util.Map.Entry<String, java.util.List<String>> entry : connection.getHeaderFields().entrySet())
+                    if (entry.getKey() != null && entry.getValue() != null)
+                        responseHeaders.append (entry.getKey() + ": "
+                                                + android.text.TextUtils.join (",", entry.getValue()) + "\n");
+
+                return true;
             }
             catch (IOException e)
             {
-                if (connection.getResponseCode() < 400)
-                    throw e;
+                return false;
             }
-            finally
-            {
-                statusCode[0] = connection.getResponseCode();
-            }
-
-            if (statusCode[0] >= 400)
-                inputStream = connection.getErrorStream();
-            else
-                inputStream = connection.getInputStream();
-
-            for (java.util.Map.Entry<String, java.util.List<String>> entry : connection.getHeaderFields().entrySet())
-                if (entry.getKey() != null && entry.getValue() != null)
-                    responseHeaders.append (entry.getKey() + ": "
-                                             + android.text.TextUtils.join (",", entry.getValue()) + "\n");
         }
 
         public final void release()
         {
+            hasBeenCancelled.set (true);
+
             try
             {
-                inputStream.close();
+                if (! createStreamLock.tryLock())
+                {
+                    synchronized (createFutureLock)
+                    {
+                        if (streamFuture != null)
+                            streamFuture.cancel (true);
+                    }
+
+                    createStreamLock.lock();
+                }
+
+                if (inputStream != null)
+                    inputStream.close();
             }
             catch (IOException e)
             {}
+            finally
+            {
+                createStreamLock.unlock();
+            }
 
             connection.disconnect();
         }
@@ -994,7 +1109,11 @@ public class OSCSender   extends Activity
 
             try
             {
-                num = inputStream.read (buffer, 0, numBytes);
+                synchronized (createStreamLock)
+                {
+                    if (inputStream != null)
+                        num = inputStream.read (buffer, 0, numBytes);
+                }
             }
             catch (IOException e)
             {}
@@ -1011,8 +1130,16 @@ public class OSCSender   extends Activity
         public final boolean setPosition (long newPos)  { return false; }
 
         private HttpURLConnection connection;
+        private int[] statusCode;
+        private StringBuffer responseHeaders;
         private InputStream inputStream;
         private long position;
+        private final ReentrantLock createStreamLock = new ReentrantLock();
+        private final Object createFutureLock = new Object();
+        private AtomicBoolean hasBeenCancelled = new AtomicBoolean();
+
+        private final ExecutorService executor = Executors.newCachedThreadPool (Executors.defaultThreadFactory());
+        Future<BufferedInputStream> streamFuture;
     }
 
     public static final HTTPStream createHTTPStream (String address, boolean isPost, byte[] postData,

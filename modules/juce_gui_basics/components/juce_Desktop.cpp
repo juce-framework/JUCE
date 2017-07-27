@@ -401,6 +401,11 @@ void Desktop::setOrientationsEnabled (const int newOrientations)
     }
 }
 
+int Desktop::getOrientationsEnabled() const noexcept
+{
+    return allowedOrientations;
+}
+
 bool Desktop::isOrientationEnabled (const DisplayOrientation orientation) const noexcept
 {
     // Make sure you only pass one valid flag in here...

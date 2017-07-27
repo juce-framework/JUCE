@@ -14,14 +14,14 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7B4A2CB7-0625-C36D-39FB-C651743A206F}.Debug|Win32.Build.0 = Debug|Win32
 		{7B4A2CB7-0625-C36D-39FB-C651743A206F}.Debug|Win32.ActiveCfg = Debug|Win32
-		{7B4A2CB7-0625-C36D-39FB-C651743A206F}.Release|Win32.Build.0 = Release|Win32
+		{7B4A2CB7-0625-C36D-39FB-C651743A206F}.Debug|Win32.Build.0 = Debug|Win32
 		{7B4A2CB7-0625-C36D-39FB-C651743A206F}.Release|Win32.ActiveCfg = Release|Win32
-		{7B14DB3F-59CC-58D2-4DC7-03A1BD2836FB}.Debug|Win32.Build.0 = Debug|Win32
+		{7B4A2CB7-0625-C36D-39FB-C651743A206F}.Release|Win32.Build.0 = Release|Win32
 		{7B14DB3F-59CC-58D2-4DC7-03A1BD2836FB}.Debug|Win32.ActiveCfg = Debug|Win32
-		{7B14DB3F-59CC-58D2-4DC7-03A1BD2836FB}.Release|Win32.Build.0 = Release|Win32
+		{7B14DB3F-59CC-58D2-4DC7-03A1BD2836FB}.Debug|Win32.Build.0 = Debug|Win32
 		{7B14DB3F-59CC-58D2-4DC7-03A1BD2836FB}.Release|Win32.ActiveCfg = Release|Win32
+		{7B14DB3F-59CC-58D2-4DC7-03A1BD2836FB}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

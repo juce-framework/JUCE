@@ -38,7 +38,7 @@
 
     It also includes a callback that lets you know when the top-level peer is changed.
 
-    This class is used by specialised components like WebBrowserComponent or QuickTimeComponent
+    This class is used by specialised components like WebBrowserComponent
     because they need to keep their custom windows in the right place and respond to
     changes in the peer.
 */

@@ -71,7 +71,17 @@
  #ifndef GL_GLEXT_PROTOTYPES
   #define GL_GLEXT_PROTOTYPES 1
  #endif
- #include <GLES2/gl2.h>
+
+ #if JUCE_ANDROID_GL_ES_VERSION_3_0
+  #include <GLES3/gl3.h>
+
+  // workaround for a bug in SDK 18 and 19
+  // see: https://stackoverflow.com/questions/31003863/gles-3-0-including-gl2ext-h
+  #define __gl2_h_
+  #include <GLES2/gl2ext.h>
+ #else
+  #include <GLES2/gl2.h>
+ #endif
 #endif
 
 namespace juce
@@ -142,6 +152,55 @@ static const char* getGLErrorMessage (const GLenum e) noexcept
     return "Unknown error";
 }
 
+#if JUCE_MAC || JUCE_IOS
+
+ #ifndef JUCE_IOS_MAC_VIEW
+  #if JUCE_IOS
+   #define JUCE_IOS_MAC_VIEW    UIView
+   #define JUCE_IOS_MAC_WINDOW  UIWindow
+  #else
+   #define JUCE_IOS_MAC_VIEW    NSView
+   #define JUCE_IOS_MAC_WINDOW  NSWindow
+  #endif
+ #endif
+
+#endif
+
+static bool checkPeerIsValid (OpenGLContext* context)
+{
+    jassert (context != nullptr);
+
+    if (context != nullptr)
+    {
+        if (auto* comp = context->getTargetComponent())
+        {
+            if (auto* peer = comp->getPeer())
+            {
+               #if JUCE_MAC || JUCE_IOS
+                if (auto* nsView = (JUCE_IOS_MAC_VIEW*) peer->getNativeHandle())
+                {
+                    if (auto* nsWindow = [nsView window])
+                    {
+                       #if JUCE_MAC
+                        return ([nsWindow isVisible]
+                                  && (! [nsWindow hidesOnDeactivate] || [NSApp isActive]));
+                       #else
+                        ignoreUnused (nsWindow);
+                        return true;
+                       #endif
+                    }
+                }
+               #else
+                ignoreUnused (peer);
+                return true;
+               #endif
+            }
+        }
+    }
+
+    return false;
+}
+
 static void checkGLError (const char* file, const int line)
 {
     for (;;)
@@ -150,6 +209,10 @@ static void checkGLError (const char* file, const int line)
 
         if (e == GL_NO_ERROR)
             break;
+
+        // if the peer is not valid then ignore errors
+        if (! checkPeerIsValid (OpenGLContext::getCurrentContext()))
+            continue;
 
         DBG ("***** " << getGLErrorMessage (e) << "  at " << file << " : " << line);
         jassertfalse;

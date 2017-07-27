@@ -88,7 +88,7 @@ const MemoryBlock& OSCArgument::getBlob() const noexcept
 class OSCArgumentTests  : public UnitTest
 {
 public:
-    OSCArgumentTests() : UnitTest ("OSCArgument class") {}
+    OSCArgumentTests() : UnitTest ("OSCArgument class", "OSC") {}
 
 
     MemoryBlock getMemoryBlockWithRandomData (size_t numBytes)

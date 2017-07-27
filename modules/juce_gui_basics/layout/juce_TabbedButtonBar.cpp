@@ -221,8 +221,8 @@ void TabbedButtonBar::setOrientation (const Orientation newOrientation)
 {
     orientation = newOrientation;
 
-    for (int i = getNumChildComponents(); --i >= 0;)
-        getChildComponent (i)->resized();
+    for (auto* child : getChildren())
+        child->resized();
 
     resized();
 }

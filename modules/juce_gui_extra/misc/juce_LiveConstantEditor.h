@@ -123,13 +123,13 @@ namespace LiveConstantEditor
         LiveValueBase& value;
         Label name;
         TextEditor valueEditor;
-        TextButton resetButton;
+        TextButton resetButton { "reset" };
         CodeDocument& document;
         CPlusPlusCodeTokeniser tokeniser;
         CodeEditorComponent sourceEditor;
         CodeDocument::Position valueStart, valueEnd;
         ScopedPointer<Component> customComp;
-        bool wasHex;
+        bool wasHex = false;
 
         JUCE_DECLARE_NON_COPYABLE (LivePropertyEditorBase)
     };

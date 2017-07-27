@@ -27,7 +27,7 @@
 #include "../JuceDemoHeader.h"
 
 // these classes are C++11-only
-#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS && JUCE_COMPILER_SUPPORTS_LAMBDAS
+#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
 
 struct DemoFlexPanel   : public juce::Component,
                          private juce::TextEditor::Listener,

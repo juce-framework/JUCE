@@ -152,7 +152,60 @@ void Project::setMissingDefaultValues()
     if (shouldIncludeBinaryInAppConfig() == var())
         shouldIncludeBinaryInAppConfig() = true;
 
+    if (! projectRoot.hasProperty (Ids::cppLanguageStandard) && ! setCppVersionFromOldExporterSettings())
+        getCppStandardValue() = "11";
+
     ProjucerApplication::getApp().updateNewlyOpenedProject (*this);
+}
+
+bool Project::setCppVersionFromOldExporterSettings()
+{
+    auto highestLanguageStandard = -1;
+
+    for (Project::ExporterIterator exporter (*this); exporter.next();)
+    {
+        if (exporter->isXcode()) // cpp version was per-build configuration for xcode exporters
+        {
+            for (ProjectExporter::ConfigIterator config (*exporter); config.next();)
+            {
+                auto cppLanguageStandard = config->getValue (Ids::cppLanguageStandard).getValue();
+
+                if (cppLanguageStandard != var())
+                {
+                    auto versionNum = cppLanguageStandard.toString().getLastCharacters (2).getIntValue();
+
+                    if (versionNum > highestLanguageStandard)
+                        highestLanguageStandard = versionNum;
+                }
+            }
+        }
+        else
+        {
+            auto cppLanguageStandard = exporter->getSetting (Ids::cppLanguageStandard).getValue();
+
+            if (cppLanguageStandard != var())
+            {
+                if (cppLanguageStandard.toString().containsIgnoreCase ("latest"))
+                {
+                    getCppStandardValue() = "latest";
+                    return true;
+                }
+
+                auto versionNum = cppLanguageStandard.toString().getLastCharacters (2).getIntValue();
+
+                if (versionNum > highestLanguageStandard)
+                    highestLanguageStandard = versionNum;
+            }
+        }
+    }
+
+    if (highestLanguageStandard != -1 && highestLanguageStandard >= 11)
+    {
+        getCppStandardValue() = highestLanguageStandard;
+        return true;
+    }
+
+    return false;
 }
 
 void Project::updateDeprecatedProjectSettingsInteractively()
@@ -307,20 +360,28 @@ static bool isAnyModuleNewerThanProjucer (const OwnedArray<ModuleDescription>& m
 void Project::warnAboutOldProjucerVersion()
 {
     ModuleList available;
-    available.scanAllKnownFolders (*this);
 
-    if (isAnyModuleNewerThanProjucer (available.modules))
-    {
-        if (ProjucerApplication::getApp().isRunningCommandLine)
-            std::cout <<  "WARNING! This version of the Projucer is out-of-date!" << std::endl;
-        else
-            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                              "Projucer",
-                                              "This version of the Projucer is out-of-date!"
-                                              "\n\n"
-                                              "Always make sure that you're running the very latest version, "
-                                              "preferably compiled directly from the JUCE repository that you're working with!");
-    }
+    available.scanGlobalJuceModulePath();
+
+    if (! isAnyModuleNewerThanProjucer (available.modules))
+        available.scanGlobalUserModulePath();
+
+    if (! isAnyModuleNewerThanProjucer (available.modules))
+        available.scanProjectExporterModulePaths (*this);
+
+    if (! isAnyModuleNewerThanProjucer (available.modules))
+        return;
+
+    // Projucer is out of date!
+    if (ProjucerApplication::getApp().isRunningCommandLine)
+        std::cout <<  "WARNING! This version of the Projucer is out-of-date!" << std::endl;
+    else
+        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                          "Projucer",
+                                          "This version of the Projucer is out-of-date!"
+                                          "\n\n"
+                                          "Always make sure that you're running the very latest version, "
+                                          "preferably compiled directly from the JUCE repository that you're working with!");
 }
 
 //==============================================================================
@@ -422,6 +483,11 @@ File Project::resolveFilename (String filename) const
         return {};
 
     filename = replacePreprocessorDefs (getPreprocessorDefs(), filename);
+
+   #if ! JUCE_WINDOWS
+    if (filename.startsWith ("~"))
+        return File::getSpecialLocation (File::userHomeDirectory).getChildFile (filename.trimCharactersAtStart ("~/"));
+   #endif
 
     if (FileHelpers::isAbsolutePath (filename))
         return File::createFileWithoutCheckingPath (FileHelpers::currentOSStylePath (filename)); // (avoid assertions for windows-style paths)
@@ -674,6 +740,16 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
     props.add (new TextPropertyComponent (binaryDataNamespace(), "BinaryData Namespace", 256, false),
                                           "The namespace containing the binary assests. If left empty this defaults to \"BinaryData\".");
 
+    {
+        static const char* cppLanguageStandardNames[] = { "C++11", "C++14", "Use Latest", nullptr };
+        static const var cppLanguageStandardValues[]  = { "11",    "14",    "latest" };
+
+        props.add (new ChoicePropertyComponent (getCppStandardValue(), "C++ Language Standard",
+                                                StringArray (cppLanguageStandardNames),
+                                                Array<var>  (cppLanguageStandardValues, numElementsInArray (cppLanguageStandardValues))),
+                   "The standard of the C++ language that will be used for compilation.");
+    }
+
     props.add (new TextPropertyComponent (getProjectPreprocessorDefs(), "Preprocessor definitions", 32768, true),
                "Global preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace, commas, or "
                "new-lines to separate the items - to include a space or comma in a definition, precede it with a backslash.");
@@ -718,7 +794,7 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
                "This list is a comma-separated set list in the form {numIns, numOuts} and each pair indicates a valid plug-in "
                "configuration. For example {1, 1}, {2, 2} means that the plugin can be used either with 1 input and 1 output, "
                "or with 2 inputs and 2 outputs. If your plug-in requires side-chains, aux output buses etc., then you must leave "
-               "this field empty and override the setPreferredBusArrangement method in your AudioProcessor.");
+               "this field empty and override the isBusesLayoutSupported callback in your AudioProcessor.");
 
     props.add (new BooleanPropertyComponent (getPluginIsSynth(), "Plugin is a Synth", "Is a Synth"),
                "Enable this if you want your plugin to be treated as a synth or generator. It doesn't make much difference to the plugin itself, but some hosts treat synths differently to other plugins.");

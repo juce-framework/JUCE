@@ -49,20 +49,21 @@ public:
     void cancelDelayedSelectionTimer();
 
     //==============================================================================
-    virtual bool isRoot() const                                 { return false; }
+    virtual bool isRoot() const                                   { return false; }
     virtual Font getFont() const;
     virtual String getRenamingName() const = 0;
     virtual String getDisplayName() const = 0;
     virtual void setName (const String& newName) = 0;
     virtual bool isMissing() const = 0;
+    virtual bool hasWarnings() const                              { return false; }
     virtual Icon getIcon() const = 0;
     virtual bool isIconCrossedOut() const                         { return false; }
     virtual void paintIcon (Graphics& g, Rectangle<float> area);
     virtual void paintContent (Graphics& g, const Rectangle<int>& area);
     virtual int getRightHandButtonSpace() { return 0; }
     virtual Colour getContentColour (bool isIcon) const;
-    virtual int getMillisecsAllowedForDragGesture()             { return 120; }
-    virtual File getDraggableFile() const                       { return {}; }
+    virtual int getMillisecsAllowedForDragGesture()               { return 120; }
+    virtual File getDraggableFile() const                         { return {}; }
     virtual Component* createItemComponent() override;
 
     void refreshSubItems();

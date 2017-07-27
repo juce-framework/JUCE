@@ -81,9 +81,9 @@ public:
     void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result);
     bool perform (const InvocationInfo& info);
 
-    bool tryToQuitApplication();
+    void tryToQuitApplication();
 
-    void createPlugin (const PluginDescription*, int x, int y);
+    void createPlugin (const PluginDescription&, Point<int> pos);
 
     void addPluginsToMenu (PopupMenu&) const;
     const PluginDescription* getChosenType (int menuID) const;

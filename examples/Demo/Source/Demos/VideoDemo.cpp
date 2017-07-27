@@ -63,9 +63,7 @@ public:
 
     void resized() override
     {
-        videoComp.setBoundsWithCorrectAspectRatio (Rectangle<int> (0, 0, getWidth(), getHeight() - 30),
-                                                   Justification::centred);
-        fileChooser.setBounds (0, getHeight() - 24, getWidth(), 24);
+        videoComp.setBounds (getLocalBounds().reduced (10));
     }
 
     bool isInterestedInDragSource (const SourceDetails&) override   { return true; }
@@ -90,11 +88,7 @@ public:
     }
 
 private:
-   #if JUCE_MAC
-    MovieComponent videoComp;
-   #elif JUCE_DIRECTSHOW
-    DirectShowComponent videoComp;
-   #endif
+    VideoComponent videoComp;
 
     bool isDragOver;
     FilenameComponent fileChooser;
@@ -102,7 +96,9 @@ private:
     void filenameComponentChanged (FilenameComponent*) override
     {
         // this is called when the user changes the filename in the file chooser box
-        if (videoComp.loadMovie (fileChooser.getCurrentFile()))
+        auto result = videoComp.load (fileChooser.getCurrentFile());
+
+        if (result.wasOk())
         {
             // loaded the file ok, so let's start it playing..
 
@@ -112,7 +108,8 @@ private:
         else
         {
             AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                              "Couldn't load the file!", String());
+                                              "Couldn't load the file!",
+                                              result.getErrorMessage());
         }
     }
 

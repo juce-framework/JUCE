@@ -35,6 +35,8 @@
 #include "../Utility/jucer_SVGPathDataComponent.h"
 #include "../Utility/jucer_AboutWindowComponent.h"
 #include "../Utility/jucer_ApplicationUsageDataWindowComponent.h"
+#include "../Utility/jucer_EditorColourSchemeWindowComponent.h"
+#include "../Utility/jucer_GlobalSearchPathsWindowComponent.h"
 #include "../Utility/jucer_FloatingToolWindow.h"
 
 #include "../LiveBuildEngine/projucer_MessageIDs.h"

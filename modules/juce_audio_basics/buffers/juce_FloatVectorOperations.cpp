@@ -689,9 +689,13 @@ void JUCE_CALLTYPE FloatVectorOperations::addWithMultiply (float* dest, const fl
 
 void JUCE_CALLTYPE FloatVectorOperations::addWithMultiply (double* dest, const double* src, double multiplier, int num) noexcept
 {
+   #if JUCE_USE_VDSP_FRAMEWORK
+    vDSP_vsmaD (src, 1, &multiplier, dest, 1, dest, 1, (vDSP_Length) num);
+   #else
     JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] += src[i] * multiplier, Mode::add (d, Mode::mul (mult, s)),
                                   JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST,
                                   const Mode::ParallelType mult = Mode::load1 (multiplier);)
+   #endif
 }
 
 void JUCE_CALLTYPE FloatVectorOperations::addWithMultiply (float* dest, const float* src1, const float* src2, int num) noexcept
@@ -714,6 +718,34 @@ void JUCE_CALLTYPE FloatVectorOperations::addWithMultiply (double* dest, const d
                                              JUCE_LOAD_SRC1_SRC2_DEST,
                                              JUCE_INCREMENT_SRC1_SRC2_DEST, )
    #endif
+}
+
+void JUCE_CALLTYPE FloatVectorOperations::subtractWithMultiply (float* dest, const float* src, float multiplier, int num) noexcept
+{
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] -= src[i] * multiplier, Mode::sub (d, Mode::mul (mult, s)),
+                                  JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST,
+                                  const Mode::ParallelType mult = Mode::load1 (multiplier);)
+}
+
+void JUCE_CALLTYPE FloatVectorOperations::subtractWithMultiply (double* dest, const double* src, double multiplier, int num) noexcept
+{
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] -= src[i] * multiplier, Mode::sub (d, Mode::mul (mult, s)),
+                                  JUCE_LOAD_SRC_DEST, JUCE_INCREMENT_SRC_DEST,
+                                  const Mode::ParallelType mult = Mode::load1 (multiplier);)
+}
+
+void JUCE_CALLTYPE FloatVectorOperations::subtractWithMultiply (float* dest, const float* src1, const float* src2, int num) noexcept
+{
+    JUCE_PERFORM_VEC_OP_SRC1_SRC2_DEST_DEST (dest[i] -= src1[i] * src2[i], Mode::sub (d, Mode::mul (s1, s2)),
+                                             JUCE_LOAD_SRC1_SRC2_DEST,
+                                             JUCE_INCREMENT_SRC1_SRC2_DEST, )
+}
+
+void JUCE_CALLTYPE FloatVectorOperations::subtractWithMultiply (double* dest, const double* src1, const double* src2, int num) noexcept
+{
+    JUCE_PERFORM_VEC_OP_SRC1_SRC2_DEST_DEST (dest[i] -= src1[i] * src2[i], Mode::sub (d, Mode::mul (s1, s2)),
+                                             JUCE_LOAD_SRC1_SRC2_DEST,
+                                             JUCE_INCREMENT_SRC1_SRC2_DEST, )
 }
 
 void JUCE_CALLTYPE FloatVectorOperations::multiply (float* dest, const float* src, int num) noexcept
@@ -1016,7 +1048,7 @@ void JUCE_CALLTYPE FloatVectorOperations::disableDenormalisedNumberSupport() noe
 class FloatVectorOperationsTests  : public UnitTest
 {
 public:
-    FloatVectorOperationsTests() : UnitTest ("FloatVectorOperations") {}
+    FloatVectorOperationsTests() : UnitTest ("FloatVectorOperations", "Audio") {}
 
     template <typename ValueType>
     struct TestRunner

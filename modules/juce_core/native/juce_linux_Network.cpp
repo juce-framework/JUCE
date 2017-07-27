@@ -47,7 +47,7 @@ void MACAddress::findAllAddresses (Array<MACAddress>& result)
             freeifaddrs (addrs);
         }
 
-        close (s);
+        ::close (s);
     }
 }
 
@@ -66,19 +66,9 @@ bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& /* targetEma
 class WebInputStream::Pimpl
 {
 public:
-    /*    WebInputStream (const String& address_, bool isPost_, const MemoryBlock& postData_,
-                    URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
-                    const String& headers_, int timeOutMs_, StringPairArray* responseHeaders,
-                    const int maxRedirects, const String& httpRequestCmd_)
-      : statusCode (0), socketHandle (-1), levelsOfRedirection (0),
-        address (address_), headers (headers_), postData (postData_), contentLength (-1), position (0),
-        finished (false), isPost (isPost_), timeOutMs (timeOutMs_), numRedirectsToFollow (maxRedirects),
-        httpRequestCmd (httpRequestCmd_), chunkEnd (0), isChunked (false), readingChunk (false)*/
     Pimpl (WebInputStream& pimplOwner, const URL& urlToCopy, const bool shouldUsePost)
-        : statusCode (0), owner (pimplOwner), url (urlToCopy), socketHandle (-1), levelsOfRedirection (0),
-          contentLength (-1), position (0), finished  (false), isPost (shouldUsePost), timeOutMs (0),
-          numRedirectsToFollow (5), httpRequestCmd (shouldUsePost ? "POST" : "GET"), chunkEnd (0),
-          isChunked (false), readingChunk (false)
+        : owner (pimplOwner), url (urlToCopy),
+          isPost (shouldUsePost), httpRequestCmd (shouldUsePost ? "POST" : "GET")
     {}
 
     ~Pimpl()
@@ -126,6 +116,13 @@ public:
 
     bool connect (WebInputStream::Listener* listener)
     {
+        {
+            const ScopedLock lock (createSocketLock);
+
+            if (hasBeenCancelled)
+                return false;
+        }
+
         address = url.toString (! isPost);
         statusCode = createConnection (listener, numRedirectsToFollow);
 
@@ -134,13 +131,17 @@ public:
 
     void cancel()
     {
+        const ScopedLock lock (createSocketLock);
+
+        hasBeenCancelled = true;
+
         statusCode = -1;
         finished = true;
 
         closeSocket();
     }
 
-    //==============================================================================w
+    //==============================================================================
     bool isError() const                 { return socketHandle < 0; }
     bool isExhausted()                   { return finished; }
     int64 getPosition()                  { return position; }
@@ -246,30 +247,38 @@ public:
     }
 
     //==============================================================================
-    int statusCode;
+    int statusCode = 0;
 
 private:
     WebInputStream& owner;
     URL url;
-    int socketHandle, levelsOfRedirection;
+    int socketHandle = -1, levelsOfRedirection = 0;
     StringArray headerLines;
     String address, headers;
     MemoryBlock postData;
-    int64 contentLength, position;
-    bool finished;
+    int64 contentLength = -1, position = 0;
+    bool finished = false;
     const bool isPost;
-    int timeOutMs;
-    int numRedirectsToFollow;
+    int timeOutMs = 0;
+    int numRedirectsToFollow = 5;
     String httpRequestCmd;
-    int64 chunkEnd;
-    bool isChunked, readingChunk;
+    int64 chunkEnd = 0;
+    bool isChunked = false, readingChunk = false;
+    CriticalSection closeSocketLock, createSocketLock;
+    bool hasBeenCancelled = false;
 
     void closeSocket (bool resetLevelsOfRedirection = true)
     {
+        const ScopedLock lock (closeSocketLock);
+
         if (socketHandle >= 0)
-            close (socketHandle);
+        {
+            ::shutdown (socketHandle, SHUT_RDWR);
+            ::close (socketHandle);
+        }
 
         socketHandle = -1;
+
         if (resetLevelsOfRedirection)
             levelsOfRedirection = 0;
     }
@@ -326,7 +335,12 @@ private:
         if (getaddrinfo (serverName.toUTF8(), String (port).toUTF8(), &hints, &result) != 0 || result == 0)
             return 0;
 
-        socketHandle = socket (result->ai_family, result->ai_socktype, 0);
+        {
+            const ScopedLock lock (createSocketLock);
+
+            socketHandle = hasBeenCancelled ? -1
+                                            : socket (result->ai_family, result->ai_socktype, 0);
+        }
 
         if (socketHandle == -1)
         {
@@ -478,7 +492,7 @@ private:
         if (userHeaders.isNotEmpty())
             header << "\r\n" << userHeaders;
 
-        header << "\r\n";
+        header << "\r\n\r\n";
 
         if (isPost)
             header << postData;

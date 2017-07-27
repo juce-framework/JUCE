@@ -67,14 +67,17 @@ class JUCE_API  UnitTest
 {
 public:
     //==============================================================================
-    /** Creates a test with the given name. */
-    explicit UnitTest (const String& name);
+    /** Creates a test with the given name and optionally places it in a category. */
+    explicit UnitTest (const String& name, const String& category = String());
 
     /** Destructor. */
     virtual ~UnitTest();
 
     /** Returns the name of the test. */
     const String& getName() const noexcept       { return name; }
+
+    /** Returns the category of the test. */
+    const String& getCategory() const noexcept   { return category; }
 
     /** Runs the test, using the specified UnitTestRunner.
         You shouldn't need to call this method directly - use
@@ -84,6 +87,12 @@ public:
 
     /** Returns the set of all UnitTest objects that currently exist. */
     static Array<UnitTest*>& getAllTests();
+
+    /** Returns the set of UnitTests in a specified category. */
+    static Array<UnitTest*> getTestsInCategory (const String& category);
+
+    /** Returns a StringArray containing all of the categories of UnitTests that have been registered. */
+    static StringArray getAllCategories();
 
     //==============================================================================
     /** You can optionally implement this method to set up your test.
@@ -289,6 +298,7 @@ private:
 
     //==============================================================================
     const String name;
+    const String category;
     UnitTestRunner* runner;
 
     JUCE_DECLARE_NON_COPYABLE (UnitTest)
@@ -334,6 +344,14 @@ public:
         the randomSeed argument, or pass 0 to have a randomly-generated seed chosen.
     */
     void runAllTests (int64 randomSeed = 0);
+
+    /** Runs all the UnitTest objects within a specified category.
+        This calls runTests() for all the objects listed in UnitTest::getTestsInCategory().
+
+        If you want to run the tests with a predetermined seed, you can pass that into
+        the randomSeed argument, or pass 0 to have a randomly-generated seed chosen.
+    */
+    void runTestsInCategory (const String& category, int64 randomSeed = 0);
 
     /** Sets a flag to indicate whether an assertion should be triggered if a test fails.
         This is true by default.

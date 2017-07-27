@@ -506,7 +506,19 @@ Time Time::fromISO8601 (StringRef iso) noexcept
         if (minutes < 0)
             return {};
 
-        milliseconds = (int) (1000.0 * CharacterFunctions::readDoubleValue (t));
+        auto seconds = parseFixedSizeIntAndSkip (t, 2, 0);
+        if (seconds < 0)
+             return {};
+
+        if (*t == '.')
+        {
+            ++t;
+            milliseconds = parseFixedSizeIntAndSkip (t, 3, 0);
+            if (milliseconds < 0)
+                return {};
+        }
+
+        milliseconds += 1000 * seconds;
     }
 
     const juce_wchar nextChar = t.getAndAdvance();
@@ -616,7 +628,7 @@ Time Time::getCompilationDate()
 class TimeTests  : public UnitTest
 {
 public:
-    TimeTests() : UnitTest ("Time") {}
+    TimeTests() : UnitTest ("Time", "Time") {}
 
     void runTest() override
     {

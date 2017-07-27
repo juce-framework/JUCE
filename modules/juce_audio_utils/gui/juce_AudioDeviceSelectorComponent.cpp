@@ -563,8 +563,8 @@ private:
     {
         int y = 0;
 
-        for (int i = getNumChildComponents(); --i >= 0;)
-            y = jmax (y, getChildComponent (i)->getBottom());
+        for (auto* c : getChildren())
+            y = jmax (y, c->getBottom());
 
         return y;
     }

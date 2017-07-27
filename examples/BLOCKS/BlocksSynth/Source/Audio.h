@@ -92,7 +92,7 @@ public:
     /** Called to turn all synthesiser notes off */
     void allNotesOff()
     {
-        for (int i = 1; i < 5; ++i)
+        for (auto i = 1; i < 5; ++i)
             synthesiser.allNotesOff (i, false);
     }
 

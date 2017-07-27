@@ -34,15 +34,6 @@
  #define JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY 1
 #endif
 
-#if (_WIN32 || _WIN64)
- #if (_MSC_VER <= 1500)
-  // old VS2008 needs this to include the VST3 SDK
-  #ifndef nullptr
-   #define nullptr (0)
-  #endif
- #endif
-#endif
-
 #include "../../juce_audio_processors/format_types/juce_VST3Headers.h"
 
 #undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
@@ -98,9 +89,7 @@ using namespace Steinberg;
 class JuceAudioProcessor  : public FUnknown
 {
 public:
-    JuceAudioProcessor (AudioProcessor* source) noexcept
-        : isBypassed (false), refCount (0), audioProcessor (source) {}
-
+    JuceAudioProcessor (AudioProcessor* source) noexcept  : audioProcessor (source) {}
     virtual ~JuceAudioProcessor() {}
 
     AudioProcessor* get() const noexcept      { return audioProcessor; }
@@ -110,7 +99,7 @@ public:
 
     static const FUID iid;
 
-    bool isBypassed;
+    bool isBypassed = false;
 
 private:
     Atomic<int> refCount;
@@ -130,9 +119,6 @@ class JuceVST3EditController : public Vst::EditController,
 {
 public:
     JuceVST3EditController (Vst::IHostApplication* host)
-       #if ! JUCE_FORCE_USE_LEGACY_PARAM_IDS
-        : usingManagedParameter (false)
-       #endif
     {
         if (host != nullptr)
             host->queryInterface (FUnknown::iid, (void**) &hostContext);
@@ -195,7 +181,7 @@ public:
 
     tresult PLUGIN_API terminate() override
     {
-        if (AudioProcessor* const pluginInstance = getPluginInstance())
+        if (auto* pluginInstance = getPluginInstance())
             pluginInstance->removeListener (this);
 
         audioProcessor = nullptr;
@@ -255,7 +241,7 @@ public:
 
         void toString (Vst::ParamValue value, Vst::String128 result) const override
         {
-            if (AudioProcessorParameter* p = owner.getParameters()[paramIndex])
+            if (auto* p = owner.getParameters()[paramIndex])
                 toString128 (result, p->getText ((float) value, 128));
             else
                 // remain backward-compatible with old JUCE code
@@ -264,7 +250,7 @@ public:
 
         bool fromString (const Vst::TChar* text, Vst::ParamValue& outValueNormalized) const override
         {
-            if (AudioProcessorParameter* p = owner.getParameters()[paramIndex])
+            if (auto* p = owner.getParameters()[paramIndex])
             {
                 outValueNormalized = p->getValueForText (getStringFromVstTChars (text));
                 return true;
@@ -328,7 +314,7 @@ public:
 
         bool fromString (const Vst::TChar* text, Vst::ParamValue& outValueNormalized) const override
         {
-            const String paramValueString (getStringFromVstTChars (text));
+            auto paramValueString = getStringFromVstTChars (text);
 
             if (paramValueString.equalsIgnoreCase ("on")
                  || paramValueString.equalsIgnoreCase ("yes")
@@ -382,7 +368,8 @@ public:
             toString128 (info.shortTitle, "Program");
             toString128 (info.units, "");
             info.stepCount = owner.getNumPrograms() - 1;
-            info.defaultNormalizedValue = static_cast<Vst::ParamValue> (owner.getCurrentProgram()) / static_cast<Vst::ParamValue> (info.stepCount);
+            info.defaultNormalizedValue = static_cast<Vst::ParamValue> (owner.getCurrentProgram())
+                                            / static_cast<Vst::ParamValue> (info.stepCount);
             info.unitId = Vst::kRootUnitId;
             info.flags = Vst::ParameterInfo::kIsProgramChange | Vst::ParameterInfo::kCanAutomate;
         }
@@ -408,15 +395,14 @@ public:
 
         void toString (Vst::ParamValue value, Vst::String128 result) const override
         {
-            Vst::ParamValue program = value * info.stepCount;
-            toString128 (result, owner.getProgramName ((int) program));
+            toString128 (result, owner.getProgramName (static_cast<int> (value * info.stepCount)));
         }
 
         bool fromString (const Vst::TChar* text, Vst::ParamValue& outValueNormalized) const override
         {
-            const String paramValueString (getStringFromVstTChars (text));
+            auto paramValueString = getStringFromVstTChars (text);
+            auto n = owner.getNumPrograms();
 
-            const int n = owner.getNumPrograms();
             for (int i = 0; i < n; ++i)
             {
                 if (paramValueString == owner.getProgramName (i))
@@ -431,7 +417,7 @@ public:
 
         static String getStringFromVstTChars (const Vst::TChar* text)
         {
-            return juce::String (juce::CharPointer_UTF16 (reinterpret_cast<const juce::CharPointer_UTF16::CharType*> (text)));
+            return String (CharPointer_UTF16 (reinterpret_cast<const CharPointer_UTF16::CharType*> (text)));
         }
 
         Vst::ParamValue toPlain (Vst::ParamValue v) const override       { return v * info.stepCount; }
@@ -447,21 +433,23 @@ public:
     tresult PLUGIN_API setComponentState (IBStream* stream) override
     {
         // Cubase and Nuendo need to inform the host of the current parameter values
-        if (AudioProcessor* const pluginInstance = getPluginInstance())
+        if (auto* pluginInstance = getPluginInstance())
         {
-            const int numParameters = pluginInstance->getNumParameters();
+            auto numParameters = pluginInstance->getNumParameters();
 
             for (int i = 0; i < numParameters; ++i)
                 setParamNormalized (getVSTParamIDForIndex (i), (double) pluginInstance->getParameter (i));
 
             setParamNormalized (bypassParamID, audioProcessor->isBypassed ? 1.0f : 0.0f);
 
-            const int numPrograms = pluginInstance->getNumPrograms();
+            auto numPrograms = pluginInstance->getNumPrograms();
+
             if (numPrograms > 1)
-                setParamNormalized (paramPreset, static_cast<Vst::ParamValue> (pluginInstance->getCurrentProgram()) / static_cast<Vst::ParamValue> (numPrograms - 1));
+                setParamNormalized (paramPreset, static_cast<Vst::ParamValue> (pluginInstance->getCurrentProgram())
+                                                  / static_cast<Vst::ParamValue> (numPrograms - 1));
         }
 
-        if (Vst::IComponentHandler* handler = getComponentHandler())
+        if (auto* handler = getComponentHandler())
             handler->restartComponent (Vst::kParamValuesChanged);
 
         return Vst::EditController::setComponentState (stream);
@@ -480,7 +468,7 @@ public:
     {
         if (other != nullptr && audioProcessor == nullptr)
         {
-            const tresult result = ComponentBase::connect (other);
+            auto result = ComponentBase::connect (other);
 
             if (! audioProcessor.loadFrom (other))
                 sendIntMessage ("JuceVST3EditController", (Steinberg::int64) (pointer_sized_int) this);
@@ -506,15 +494,15 @@ public:
     // Converts an incoming parameter index to a MIDI controller:
     bool getMidiControllerForParameter (Vst::ParamID index, int& channel, int& ctrlNumber)
     {
-        const int mappedIndex = static_cast<int> (index - parameterToMidiControllerOffset);
+        auto mappedIndex = static_cast<int> (index - parameterToMidiControllerOffset);
 
         if (isPositiveAndBelow (mappedIndex, numElementsInArray (parameterToMidiController)))
         {
-            const MidiController& mc = parameterToMidiController[mappedIndex];
+            auto& mc = parameterToMidiController[mappedIndex];
 
             if (mc.channel != -1 && mc.ctrlNumber != -1)
             {
-                channel    = jlimit (1, 16, mc.channel + 1);
+                channel = jlimit (1, 16, mc.channel + 1);
                 ctrlNumber = mc.ctrlNumber;
                 return true;
             }
@@ -533,7 +521,7 @@ public:
     //==============================================================================
     IPlugView* PLUGIN_API createView (const char* name) override
     {
-        if (AudioProcessor* const pluginInstance = getPluginInstance())
+        if (auto* pluginInstance = getPluginInstance())
         {
             if (pluginInstance->hasEditor() && name != nullptr
                  && strcmp (name, Vst::ViewType::kEditor) == 0)
@@ -547,6 +535,7 @@ public:
 
     //==============================================================================
     void audioProcessorParameterChangeGestureBegin (AudioProcessor*, int index) override        { beginEdit (getVSTParamIDForIndex (index)); }
+    void audioProcessorParameterChangeGestureEnd (AudioProcessor*, int index) override          { endEdit (getVSTParamIDForIndex (index)); }
 
     void audioProcessorParameterChanged (AudioProcessor*, int index, float newValue) override
     {
@@ -555,11 +544,9 @@ public:
         performEdit (getVSTParamIDForIndex (index), (double) newValue);
     }
 
-    void audioProcessorParameterChangeGestureEnd (AudioProcessor*, int index) override          { endEdit (getVSTParamIDForIndex (index)); }
-
     void audioProcessorChanged (AudioProcessor*) override
     {
-        if (AudioProcessor* pluginInstance = getPluginInstance())
+        if (auto* pluginInstance = getPluginInstance())
         {
             if (pluginInstance->getNumPrograms() > 1)
                 EditController::setParamNormalized (paramPreset, static_cast<Vst::ParamValue> (pluginInstance->getCurrentProgram())
@@ -580,7 +567,6 @@ public:
     }
 
 private:
-
     friend class JuceVST3Component;
 
     //==============================================================================
@@ -589,9 +575,7 @@ private:
 
     struct MidiController
     {
-        MidiController() noexcept  : channel (-1), ctrlNumber (-1) {}
-
-        int channel, ctrlNumber;
+        int channel = -1, ctrlNumber = -1;
     };
 
     enum { numMIDIChannels = 16 };
@@ -601,7 +585,7 @@ private:
 
     //==============================================================================
    #if ! JUCE_FORCE_USE_LEGACY_PARAM_IDS
-    bool usingManagedParameter;
+    bool usingManagedParameter = false;
     Array<Vst::ParamID> vstParamIDs;
    #endif
     Vst::ParamID bypassParamID;
@@ -610,7 +594,7 @@ private:
     //==============================================================================
     void setupParameters()
     {
-        if (AudioProcessor* const pluginInstance = getPluginInstance())
+        if (auto* pluginInstance = getPluginInstance())
         {
             pluginInstance->addListener (this);
 
@@ -620,7 +604,7 @@ private:
 
             if (parameters.getParameterCount() <= 0)
             {
-                const int numParameters = pluginInstance->getNumParameters();
+                auto numParameters = pluginInstance->getNumParameters();
 
               #if ! JUCE_FORCE_USE_LEGACY_PARAM_IDS
                 usingManagedParameter = (pluginInstance->getParameters().size() == numParameters);
@@ -677,7 +661,7 @@ private:
     {
         jassert (hostContext != nullptr);
 
-        if (Vst::IMessage* message = allocateMessage())
+        if (auto* message = allocateMessage())
         {
             const FReleaser releaser (message);
             message->setMessageID (idTag);
@@ -699,9 +683,9 @@ private:
 
         if (isPositiveAndBelow (paramIndex, n))
         {
-            const String& juceParamID = pluginFilter->getParameterID (paramIndex);
+            auto juceParamID = pluginFilter->getParameterID (paramIndex);
+            auto paramHash = static_cast<Vst::ParamID> (juceParamID.hashCode());
 
-            Vst::ParamID paramHash = static_cast<Vst::ParamID> (juceParamID.hashCode());
            #if JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS
             // studio one doesn't like negative parameters
             paramHash &= ~(1 << (sizeof (Vst::ParamID) * 8 - 1));
@@ -722,20 +706,25 @@ private:
    #endif
 
     //==============================================================================
-    class JuceVST3Editor : public Vst::EditorView, private Timer
+    class JuceVST3Editor  : public Vst::EditorView,
+                            public Steinberg::IPlugViewContentScaleSupport,
+                            private Timer
     {
     public:
         JuceVST3Editor (JuceVST3EditController& ec, AudioProcessor& p)
           : Vst::EditorView (&ec, nullptr),
             owner (&ec), pluginInstance (p)
         {
-           #if JUCE_MAC
-            macHostWindow = nullptr;
-            isNSView = false;
-           #endif
-
             component = new ContentWrapperComponent (*this, p);
         }
+
+        tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
+        {
+            TEST_FOR_AND_RETURN_IF_VALID (targetIID, Steinberg::IPlugViewContentScaleSupport)
+            return Vst::EditorView::queryInterface (targetIID, obj);
+        }
+
+        REFCOUNT_METHODS (Vst::EditorView)
 
         //==============================================================================
         tresult PLUGIN_API isPlatformTypeSupported (FIDString type) override
@@ -810,7 +799,8 @@ private:
                 if (component != nullptr)
                 {
                     component->setSize (rect.getWidth(), rect.getHeight());
-                    if (ComponentPeer* const peer = component->getPeer())
+
+                    if (auto* peer = component->getPeer())
                         peer->updateBounds();
                 }
 
@@ -835,7 +825,7 @@ private:
         tresult PLUGIN_API canResize() override
         {
             if (component != nullptr)
-                if (AudioProcessorEditor* editor = component->pluginEditor)
+                if (auto* editor = component->pluginEditor.get())
                     return editor->isResizable() ? kResultTrue : kResultFalse;
 
             return kResultFalse;
@@ -846,12 +836,23 @@ private:
             if (rectToCheck != nullptr && component != nullptr)
             {
                 // checkSizeConstraint
-                Rectangle<int> juceRect = Rectangle<int>::leftTopRightBottom (rectToCheck->left, rectToCheck->top,
-                                                                              rectToCheck->right, rectToCheck->bottom);
-                if (AudioProcessorEditor* editor = component->pluginEditor)
-                    if (ComponentBoundsConstrainer* constrainer = editor->getConstrainer())
-                        juceRect.setSize (jlimit (constrainer->getMinimumWidth(),  constrainer->getMaximumWidth(),  juceRect.getWidth()),
-                                          jlimit (constrainer->getMinimumHeight(), constrainer->getMaximumHeight(), juceRect.getHeight()));
+                auto juceRect = Rectangle<int>::leftTopRightBottom (rectToCheck->left, rectToCheck->top,
+                                                                    rectToCheck->right, rectToCheck->bottom);
+
+                if (auto* editor = component->pluginEditor.get())
+                {
+                    if (auto* constrainer = editor->getConstrainer())
+                    {
+                        auto scaledMin = component->getLocalArea (editor, Rectangle<int> (constrainer->getMinimumWidth(),
+                                                                                          constrainer->getMinimumHeight()));
+
+                        auto scaledMax = component->getLocalArea (editor, Rectangle<int> (constrainer->getMaximumWidth(),
+                                                                                          constrainer->getMaximumHeight()));
+
+                        juceRect.setSize (jlimit (scaledMin.getWidth(),  scaledMax.getWidth(),  juceRect.getWidth()),
+                                          jlimit (scaledMin.getHeight(), scaledMax.getHeight(), juceRect.getHeight()));
+                    }
+                }
 
                 rectToCheck->right  = rectToCheck->left + juceRect.getWidth();
                 rectToCheck->bottom = rectToCheck->top  + juceRect.getHeight();
@@ -860,6 +861,21 @@ private:
             }
 
             jassertfalse;
+            return kResultFalse;
+        }
+
+        tresult PLUGIN_API setContentScaleFactor (Steinberg::IPlugViewContentScaleSupport::ScaleFactor factor) override
+        {
+           #if (JUCE_MAC || JUCE_IOS)
+            ignoreUnused (factor);
+           #else
+            if (auto* editor = component->pluginEditor.get())
+            {
+                editor->setScaleFactor (factor);
+                return kResultTrue;
+            }
+           #endif
+
             return kResultFalse;
         }
 
@@ -874,9 +890,8 @@ private:
         }
 
         //==============================================================================
-        class ContentWrapperComponent  : public Component
+        struct ContentWrapperComponent  : public Component
         {
-        public:
             ContentWrapperComponent (JuceVST3Editor& editor, AudioProcessor& plugin)
                : pluginEditor (plugin.createEditorIfNeeded()),
                  owner (editor)
@@ -891,8 +906,11 @@ private:
                 {
                     addAndMakeVisible (pluginEditor);
 
-                    lastBounds = pluginEditor->getLocalBounds();
+                    pluginEditor->setTopLeftPosition (0, 0);
+                    lastBounds = getSizeToContainChild();
+                    isResizingParentToFitChild = true;
                     setBounds (lastBounds);
+                    isResizingParentToFitChild = false;
 
                     resizeHostWindow();
                 }
@@ -914,12 +932,27 @@ private:
                 g.fillAll (Colours::black);
             }
 
-            void childBoundsChanged (Component* childComponent) override
+            juce::Rectangle<int> getSizeToContainChild()
             {
-                if (lastBounds != childComponent->getLocalBounds())
+                if (pluginEditor != nullptr)
+                    return getLocalArea (pluginEditor, pluginEditor->getLocalBounds());
+
+                return {};
+            }
+
+            void childBoundsChanged (Component*) override
+            {
+                if (isResizingChildToFitParent)
+                    return;
+
+                auto b = getSizeToContainChild();
+
+                if (lastBounds != b)
                 {
-                    lastBounds = childComponent->getLocalBounds();
+                    lastBounds = b;
+                    isResizingParentToFitChild = true;
                     resizeHostWindow();
+                    isResizingParentToFitChild = false;
                 }
             }
 
@@ -927,8 +960,14 @@ private:
             {
                 if (pluginEditor != nullptr)
                 {
-                    lastBounds = getLocalBounds();
-                    pluginEditor->setBounds (lastBounds);
+                    if (! isResizingParentToFitChild)
+                    {
+                        lastBounds = getLocalBounds();
+                        isResizingChildToFitParent = true;
+                        pluginEditor->setTopLeftPosition (0, 0);
+                        pluginEditor->setBounds (pluginEditor->getLocalArea (this, getLocalBounds()));
+                        isResizingChildToFitParent = false;
+                    }
                 }
             }
 
@@ -936,9 +975,10 @@ private:
             {
                 if (pluginEditor != nullptr)
                 {
-                    const int w = pluginEditor->getWidth();
-                    const int h = pluginEditor->getHeight();
-                    const PluginHostType host (getHostType());
+                    auto b = getSizeToContainChild();
+                    auto w = b.getWidth();
+                    auto h = b.getHeight();
+                    auto host = getHostType();
 
                    #if JUCE_WINDOWS
                     setSize (w, h);
@@ -950,7 +990,9 @@ private:
                     if (owner.plugFrame != nullptr)
                     {
                         ViewRect newSize (0, 0, w, h);
+                        isResizingParentToFitChild = true;
                         owner.plugFrame->resizeView (&owner, &newSize);
+                        isResizingParentToFitChild = false;
 
                        #if JUCE_MAC
                         if (host.isWavelab() || host.isReaper())
@@ -968,6 +1010,8 @@ private:
             JuceVST3Editor& owner;
             FakeMouseMoveGenerator fakeMouseGenerator;
             Rectangle<int> lastBounds;
+            bool isResizingChildToFitParent = false;
+            bool isResizingParentToFitChild = false;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentWrapperComponent)
         };
@@ -977,11 +1021,11 @@ private:
         AudioProcessor& pluginInstance;
 
         ScopedPointer<ContentWrapperComponent> component;
-        friend class ContentWrapperComponent;
+        friend struct ContentWrapperComponent;
 
        #if JUCE_MAC
-        void* macHostWindow;
-        bool isNSView;
+        void* macHostWindow = nullptr;
+        bool isNSView = false;
        #endif
 
        #if JUCE_WINDOWS
@@ -1018,22 +1062,11 @@ class JuceVST3Component : public Vst::IComponent,
 {
 public:
     JuceVST3Component (Vst::IHostApplication* h)
-      : refCount (1),
-        pluginInstance (createPluginFilterOfType (AudioProcessor::wrapperType_VST3)),
-        host (h),
-        isMidiInputBusEnabled (false),
-        isMidiOutputBusEnabled (false)
+      : pluginInstance (createPluginFilterOfType (AudioProcessor::wrapperType_VST3)),
+        host (h)
     {
-       #if JucePlugin_WantsMidiInput
-        isMidiInputBusEnabled = true;
-       #endif
-
-       #if JucePlugin_ProducesMidiOutput
-        isMidiOutputBusEnabled = true;
-       #endif
-
        #ifdef JucePlugin_PreferredChannelConfigurations
-        short configs[][2] = {JucePlugin_PreferredChannelConfigurations};
+        short configs[][2] = { JucePlugin_PreferredChannelConfigurations };
         const int numConfigs = sizeof (configs) / sizeof (short[2]);
 
         jassert (numConfigs > 0 && (configs[0][0] > 0 || configs[0][1] > 0));
@@ -1171,8 +1204,8 @@ public:
         }
         else
         {
-            double sampleRate = getPluginInstance().getSampleRate();
-            int bufferSize = getPluginInstance().getBlockSize();
+            auto sampleRate = getPluginInstance().getSampleRate();
+            auto bufferSize = getPluginInstance().getBlockSize();
 
             sampleRate = processSetup.sampleRate > 0.0
                             ? processSetup.sampleRate
@@ -1194,8 +1227,8 @@ public:
     tresult PLUGIN_API setIoMode (Vst::IoMode) override                                 { return kNotImplemented; }
     tresult PLUGIN_API getRoutingInfo (Vst::RoutingInfo&, Vst::RoutingInfo&) override   { return kNotImplemented; }
 
-    bool isBypassed()                { return comPluginInstance->isBypassed; }
-    void setBypassed (bool bypassed) { comPluginInstance->isBypassed = bypassed; }
+    bool isBypassed()                   { return comPluginInstance->isBypassed; }
+    void setBypassed (bool bypassed)    { comPluginInstance->isBypassed = bypassed; }
 
     //==============================================================================
     void writeJucePrivateStateInformation (MemoryOutputStream& out)
@@ -1210,7 +1243,7 @@ public:
 
     void setJucePrivateStateInformation (const void* data, int sizeInBytes)
     {
-        ValueTree privateData = ValueTree::readFromData (data, static_cast<size_t> (sizeInBytes));
+        auto privateData = ValueTree::readFromData (data, static_cast<size_t> (sizeInBytes));
         setBypassed (static_cast<bool> (privateData.getProperty ("Bypass", var (false))));
     }
 
@@ -1228,7 +1261,7 @@ public:
 
         extraData.writeInt64 (0);
         writeJucePrivateStateInformation (extraData);
-        const int64 privateDataSize = (int64) (extraData.getDataSize() - sizeof (int64));
+        auto privateDataSize = (int64) (extraData.getDataSize() - sizeof (int64));
         extraData.writeInt64 (privateDataSize);
         extraData << kJucePrivateDataIdentifier;
 
@@ -1242,11 +1275,11 @@ public:
 
         // Check if this data was written with a newer JUCE version
         // and if it has the JUCE private data magic code at the end
-        const size_t jucePrivDataIdentifierSize = std::strlen (kJucePrivateDataIdentifier);
+        auto jucePrivDataIdentifierSize = std::strlen (kJucePrivateDataIdentifier);
 
         if ((size_t) size >= jucePrivDataIdentifierSize + sizeof (int64))
         {
-            const char* buffer = static_cast<const char*> (data);
+            auto buffer = static_cast<const char*> (data);
 
             String magic (CharPointer_UTF8 (buffer + size - jucePrivDataIdentifierSize),
                           CharPointer_UTF8 (buffer + size));
@@ -1278,9 +1311,9 @@ public:
    #if JUCE_VST3_CAN_REPLACE_VST2
     void loadVST2VstWBlock (const char* data, int size)
     {
-        const int headerLen = static_cast<int> (htonl (*(juce::int32*) (data + 4)));
-        const vst2FxBank* bank = (const vst2FxBank*) (data + (8 + headerLen));
-        const int version = static_cast<int> (htonl (bank->version1)); ignoreUnused (version);
+        auto headerLen = static_cast<int> (htonl (*(juce::int32*) (data + 4)));
+        auto bank = (const vst2FxBank*) (data + (8 + headerLen));
+        auto version = static_cast<int> (htonl (bank->version1)); ignoreUnused (version);
 
         jassert ('VstW' == htonl (*(juce::int32*) data));
         jassert (1 == htonl (*(juce::int32*) (data + 8))); // version should be 1 according to Steinberg's docs
@@ -1301,14 +1334,14 @@ public:
 
         // At offset 4 there's a little-endian version number which seems to typically be 1
         // At offset 8 there's 32 bytes the SDK calls "ASCII-encoded class id"
-        const int chunkListOffset = (int) ByteOrder::littleEndianInt (data + 40);
+        auto chunkListOffset = (int) ByteOrder::littleEndianInt (data + 40);
         jassert (memcmp (data + chunkListOffset, "List", 4) == 0);
-        const int entryCount = (int) ByteOrder::littleEndianInt (data + chunkListOffset + 4);
+        auto entryCount = (int) ByteOrder::littleEndianInt (data + chunkListOffset + 4);
         jassert (entryCount > 0);
 
         for (int i = 0; i < entryCount; ++i)
         {
-            const int entryOffset = chunkListOffset + 8 + 20 * i;
+            auto entryOffset = chunkListOffset + 8 + 20 * i;
 
             if (entryOffset + 20 > size)
                 return false;
@@ -1316,8 +1349,8 @@ public:
             if (memcmp (data + entryOffset, "Comp", 4) == 0)
             {
                 // "Comp" entries seem to contain the data.
-                juce::uint64 chunkOffset = ByteOrder::littleEndianInt64 (data + entryOffset + 4);
-                juce::uint64 chunkSize   = ByteOrder::littleEndianInt64 (data + entryOffset + 12);
+                auto chunkOffset = ByteOrder::littleEndianInt64 (data + entryOffset + 4);
+                auto chunkSize   = ByteOrder::littleEndianInt64 (data + entryOffset + 12);
 
                 if (chunkOffset + chunkSize > static_cast<juce::uint64> (size))
                 {
@@ -1413,7 +1446,7 @@ public:
             for (;;)
             {
                 Steinberg::int32 bytesRead = 0;
-                const Steinberg::tresult status = state->read (buffer, (Steinberg::int32) bytesPerBlock, &bytesRead);
+                auto status = state->read (buffer, (Steinberg::int32) bytesPerBlock, &bytesRead);
 
                 if (bytesRead <= 0 || (status != kResultTrue && ! getHostType().isWavelab()))
                     break;
@@ -1439,6 +1472,7 @@ public:
         {
             if (! getHostType().isFruityLoops() && readFromMemoryStream (state))
                 return kResultTrue;
+
             if (readFromUnknownStream (state))
                 return kResultTrue;
         }
@@ -1664,7 +1698,7 @@ public:
             if (index < 0 || index >= getNumAudioBuses (dir == Vst::kInput))
                 return kResultFalse;
 
-            if (const AudioProcessor::Bus* bus = pluginInstance->getBus (dir == Vst::kInput, index))
+            if (auto* bus = pluginInstance->getBus (dir == Vst::kInput, index))
             {
                 info.mediaType = Vst::kAudio;
                 info.direction = dir;
@@ -1735,24 +1769,22 @@ public:
             if (index < 0 || index >= getNumAudioBuses (dir == Vst::kInput))
                 return kResultFalse;
 
-            if (AudioProcessor::Bus* bus = pluginInstance->getBus (dir == Vst::kInput, index))
+            if (auto* bus = pluginInstance->getBus (dir == Vst::kInput, index))
             {
                #ifdef JucePlugin_PreferredChannelConfigurations
-                AudioProcessor::BusesLayout newLayout = pluginInstance->getBusesLayout();
-                AudioChannelSet targetLayout
-                    = (state != 0 ? bus->getLastEnabledLayout() : AudioChannelSet::disabled());
+                auto newLayout = pluginInstance->getBusesLayout();
+                auto targetLayout = (state != 0 ? bus->getLastEnabledLayout() : AudioChannelSet::disabled());
 
                 (dir == Vst::kInput ? newLayout.inputBuses : newLayout.outputBuses).getReference (index) = targetLayout;
 
-                short configs[][2] = {JucePlugin_PreferredChannelConfigurations};
-                AudioProcessor::BusesLayout compLayout
-                    = pluginInstance->getNextBestLayoutInLayoutList (newLayout, configs);
+                short configs[][2] = { JucePlugin_PreferredChannelConfigurations };
+                auto compLayout = pluginInstance->getNextBestLayoutInLayoutList (newLayout, configs);
 
                 if ((dir == Vst::kInput ? compLayout.inputBuses : compLayout.outputBuses).getReference (index) != targetLayout)
                     return kResultFalse;
                #endif
 
-                return (bus->enable (state != 0) ? kResultTrue : kResultFalse);
+                return bus->enable (state != 0) ? kResultTrue : kResultFalse;
             }
         }
 
@@ -1761,10 +1793,10 @@ public:
 
     bool checkBusFormatsAreNotDiscrete()
     {
-        const int numInputBuses  = pluginInstance->getBusCount (true);
-        const int numOutputBuses = pluginInstance->getBusCount (false);
+        auto numInputBuses  = pluginInstance->getBusCount (true);
+        auto numOutputBuses = pluginInstance->getBusCount (false);
 
-        for (int i = 0; i < numInputBuses;  ++i)
+        for (int i = 0; i < numInputBuses; ++i)
             if (pluginInstance->getChannelLayoutOfBus (true,  i).isDiscreteLayout())
                 return false;
 
@@ -1778,13 +1810,13 @@ public:
     tresult PLUGIN_API setBusArrangements (Vst::SpeakerArrangement* inputs, Steinberg::int32 numIns,
                                            Vst::SpeakerArrangement* outputs, Steinberg::int32 numOuts) override
     {
-        const int numInputBuses  = pluginInstance->getBusCount (true);
-        const int numOutputBuses = pluginInstance->getBusCount (false);
+        auto numInputBuses  = pluginInstance->getBusCount (true);
+        auto numOutputBuses = pluginInstance->getBusCount (false);
 
         if (numIns > numInputBuses || numOuts > numOutputBuses)
             return false;
 
-        AudioProcessor::BusesLayout requested = pluginInstance->getBusesLayout();
+        auto requested = pluginInstance->getBusesLayout();
 
         for (int i = 0; i < numIns; ++i)
             requested.getChannelSet (true,  i) = getChannelSetForSpeakerArrangement (inputs[i]);
@@ -1793,17 +1825,17 @@ public:
             requested.getChannelSet (false, i) = getChannelSetForSpeakerArrangement (outputs[i]);
 
        #ifdef JucePlugin_PreferredChannelConfigurations
-        short configs[][2] = {JucePlugin_PreferredChannelConfigurations};
+        short configs[][2] = { JucePlugin_PreferredChannelConfigurations };
         if (! AudioProcessor::containsLayout (requested, configs))
             return kResultFalse;
        #endif
 
-        return (pluginInstance->setBusesLayoutWithoutEnabling (requested) ? kResultTrue : kResultFalse);
+        return pluginInstance->setBusesLayoutWithoutEnabling (requested) ? kResultTrue : kResultFalse;
     }
 
     tresult PLUGIN_API getBusArrangement (Vst::BusDirection dir, Steinberg::int32 index, Vst::SpeakerArrangement& arr) override
     {
-        if (AudioProcessor::Bus* bus = pluginInstance->getBus (dir == Vst::kInput, index))
+        if (auto* bus = pluginInstance->getBus (dir == Vst::kInput, index))
         {
             arr = getVst3SpeakerArrangement (bus->getLastEnabledLayout());
             return kResultTrue;
@@ -1852,7 +1884,7 @@ public:
 
     Steinberg::uint32 PLUGIN_API getTailSamples() override
     {
-        const double tailLengthSeconds = getPluginInstance().getTailLengthSeconds();
+        auto tailLengthSeconds = getPluginInstance().getTailLengthSeconds();
 
         if (tailLengthSeconds <= 0.0 || processSetup.sampleRate > 0.0)
             return Vst::kNoTail;
@@ -1865,20 +1897,20 @@ public:
     {
         jassert (pluginInstance != nullptr);
 
-        const Steinberg::int32 numParamsChanged = paramChanges.getParameterCount();
+        auto numParamsChanged = paramChanges.getParameterCount();
 
         for (Steinberg::int32 i = 0; i < numParamsChanged; ++i)
         {
-            if (Vst::IParamValueQueue* paramQueue = paramChanges.getParameterData (i))
+            if (auto* paramQueue = paramChanges.getParameterData (i))
             {
-                const Steinberg::int32 numPoints = paramQueue->getPointCount();
+                auto numPoints = paramQueue->getPointCount();
 
-                Steinberg::int32 offsetSamples;
+                Steinberg::int32 offsetSamples = 0;
                 double value = 0.0;
 
-                if (paramQueue->getPoint (numPoints - 1,  offsetSamples, value) == kResultTrue)
+                if (paramQueue->getPoint (numPoints - 1, offsetSamples, value) == kResultTrue)
                 {
-                    const Vst::ParamID vstParamID = paramQueue->getParameterId();
+                    auto vstParamID = paramQueue->getParameterId();
 
                     if (vstParamID == vstBypassParameterId)
                         setBypassed (static_cast<float> (value) != 0.0f);
@@ -1888,16 +1920,17 @@ public:
                    #endif
                     else if (vstParamID == JuceVST3EditController::paramPreset)
                     {
-                        const int numPrograms  = pluginInstance->getNumPrograms();
-                        const int programValue = roundToInt (value * numPrograms);
+                        auto numPrograms  = pluginInstance->getNumPrograms();
+                        auto programValue = roundToInt (value * (jmax (0, numPrograms - 1)));
 
                         if (numPrograms > 1 && isPositiveAndBelow (programValue, numPrograms)
-                                            && programValue != pluginInstance->getCurrentProgram())
+                             && programValue != pluginInstance->getCurrentProgram())
                             pluginInstance->setCurrentProgram (programValue);
                     }
                     else
                     {
-                        const int index = getJuceIndexForVSTParamID (vstParamID);
+                        auto index = getJuceIndexForVSTParamID (vstParamID);
+
                         if (isPositiveAndBelow (index, pluginInstance->getNumParameters()))
                             pluginInstance->setParameter (index, static_cast<float> (value));
                     }
@@ -1928,7 +1961,6 @@ public:
 
     tresult PLUGIN_API process (Vst::ProcessData& data) override
     {
-
         if (pluginInstance == nullptr)
             return kResultFalse;
 
@@ -1971,7 +2003,7 @@ public:
 
 private:
     //==============================================================================
-    Atomic<int> refCount;
+    Atomic<int> refCount { 1 };
 
     AudioProcessor* pluginInstance;
     ComSmartPtr<Vst::IHostApplication> host;
@@ -1992,7 +2024,17 @@ private:
     AudioBuffer<float>  emptyBufferFloat;
     AudioBuffer<double> emptyBufferDouble;
 
-    bool isMidiInputBusEnabled, isMidiOutputBusEnabled;
+   #if JucePlugin_WantsMidiInput
+    bool isMidiInputBusEnabled = true;
+   #else
+    bool isMidiInputBusEnabled = false;
+   #endif
+
+   #if JucePlugin_ProducesMidiOutput
+    bool isMidiOutputBusEnabled = true;
+   #else
+    bool isMidiOutputBusEnabled = false;
+   #endif
 
     ScopedJuceInitialiser_GUI libraryInitialiser;
 
@@ -2009,11 +2051,11 @@ private:
     template <typename FloatType>
     void processAudio (Vst::ProcessData& data, Array<FloatType*>& channelList)
     {
-        int totalInputChans = 0;
+        int totalInputChans = 0, totalOutputChans = 0;
         bool tmpBufferNeedsClearing = false;
 
-        const int plugInInputChannels  = pluginInstance->getTotalNumInputChannels();
-        const int plugInOutputChannels = pluginInstance->getTotalNumOutputChannels();
+        auto plugInInputChannels  = pluginInstance->getTotalNumInputChannels();
+        auto plugInOutputChannels = pluginInstance->getTotalNumOutputChannels();
 
         // Wavelab workaround: wave-lab lies on the number of inputs/outputs so re-count here
         int vstInputs;
@@ -2029,63 +2071,24 @@ private:
                 break;
 
         {
-            const int n = jmax (vstInputs, getNumAudioBuses (true));
-
-            for (int bus = 0; bus < n && totalInputChans < plugInInputChannels; ++bus)
-            {
-                if (bus < vstInputs)
-                {
-                    if (FloatType** const busChannels = getPointerForAudioBus<FloatType> (data.inputs[bus]))
-                    {
-                        const int numChans = jmin ((int) data.inputs[bus].numChannels, plugInInputChannels - totalInputChans);
-
-                        for (int i = 0; i < numChans; ++i)
-                            if (busChannels[i] != nullptr)
-                                channelList.set (totalInputChans++, busChannels[i]);
-                    }
-                }
-                else
-                {
-                    const int numChans = jmin (pluginInstance->getChannelCountOfBus (true, bus), plugInInputChannels - totalInputChans);
-
-                    for (int i = 0; i < numChans; ++i)
-                    {
-                        if (FloatType* tmpBuffer = getTmpBufferForChannel<FloatType> (totalInputChans, data.numSamples))
-                        {
-                            tmpBufferNeedsClearing = true;
-                            channelList.set (totalInputChans++, tmpBuffer);
-                        }
-                        else
-                            return;
-                    }
-                }
-            }
-        }
-
-        int totalOutputChans = 0;
-
-        {
-            const int n = jmax (vstOutputs, getNumAudioBuses (false));
+            auto n = jmax (vstOutputs, getNumAudioBuses (false));
 
             for (int bus = 0; bus < n && totalOutputChans < plugInOutputChannels; ++bus)
             {
                 if (bus < vstOutputs)
                 {
-                    if (FloatType** const busChannels = getPointerForAudioBus<FloatType> (data.outputs[bus]))
+                    if (auto** const busChannels = getPointerForAudioBus<FloatType> (data.outputs[bus]))
                     {
-                        const int numChans = jmin ((int) data.outputs[bus].numChannels, plugInOutputChannels - totalOutputChans);
+                        auto numChans = jmin ((int) data.outputs[bus].numChannels, plugInOutputChannels - totalOutputChans);
 
                         for (int i = 0; i < numChans; ++i)
                         {
-                            if (busChannels[i] != nullptr)
+                            if (auto dst = busChannels[i])
                             {
-                                if (totalOutputChans >= totalInputChans)
-                                {
-                                    FloatVectorOperations::clear (busChannels[i], data.numSamples);
-                                    channelList.set (totalOutputChans, busChannels[i]);
-                                }
+                                if (totalOutputChans >= plugInInputChannels)
+                                    FloatVectorOperations::clear (dst, (int) data.numSamples);
 
-                                ++totalOutputChans;
+                                channelList.set (totalOutputChans++, busChannels[i]);
                             }
                         }
                     }
@@ -2096,15 +2099,59 @@ private:
 
                     for (int i = 0; i < numChans; ++i)
                     {
-                        if (FloatType* tmpBuffer = getTmpBufferForChannel<FloatType> (totalOutputChans, data.numSamples))
+                        if (auto* tmpBuffer = getTmpBufferForChannel<FloatType> (totalOutputChans, data.numSamples))\
                         {
-                            if (totalOutputChans >= totalInputChans)
+                            tmpBufferNeedsClearing = true;
+                            channelList.set (totalOutputChans++, tmpBuffer);
+                        }
+                        else
+                            return;
+                    }
+                }
+            }
+        }
+
+        {
+            auto n = jmax (vstInputs, getNumAudioBuses (true));
+
+            for (int bus = 0; bus < n && totalInputChans < plugInInputChannels; ++bus)
+            {
+                if (bus < vstInputs)
+                {
+                    if (auto** const busChannels = getPointerForAudioBus<FloatType> (data.inputs[bus]))
+                    {
+                        const int numChans = jmin ((int) data.inputs[bus].numChannels, plugInInputChannels - totalInputChans);
+
+                        for (int i = 0; i < numChans; ++i)
+                        {
+                            if (busChannels[i] != nullptr)
                             {
-                                tmpBufferNeedsClearing = true;
-                                channelList.set (totalOutputChans, tmpBuffer);
+                                if (totalInputChans >= totalOutputChans)
+                                    channelList.set (totalInputChans, busChannels[i]);
+                                else
+                                {
+                                    auto* dst = channelList.getReference (totalInputChans);
+                                    auto* src = busChannels[i];
+
+                                    if (dst != src)
+                                        FloatVectorOperations::copy (dst, src, (int) data.numSamples);
+                                }
                             }
 
-                            ++totalOutputChans;
+                            ++totalInputChans;
+                        }
+                    }
+                }
+                else
+                {
+                    auto numChans = jmin (pluginInstance->getChannelCountOfBus (true, bus), plugInInputChannels - totalInputChans);
+
+                    for (int i = 0; i < numChans; ++i)
+                    {
+                        if (auto* tmpBuffer = getTmpBufferForChannel<FloatType> (totalInputChans, data.numSamples))
+                        {
+                            tmpBufferNeedsClearing = true;
+                            channelList.set (totalInputChans++, tmpBuffer);
                         }
                         else
                             return;
@@ -2167,29 +2214,6 @@ private:
             jassert (midiBuffer.getNumEvents() <= numMidiEventsComingIn);
            #endif
         }
-
-        if (data.outputs != nullptr)
-        {
-            int outChanIndex = 0;
-
-            for (int bus = 0; bus < data.numOutputs; ++bus)
-            {
-                if (FloatType** const busChannels = getPointerForAudioBus<FloatType> (data.outputs[bus]))
-                {
-                    const int numChans = (int) data.outputs[bus].numChannels;
-
-                    for (int i = 0; i < numChans; ++i)
-                    {
-                        if (outChanIndex < totalInputChans && busChannels[i] != nullptr)
-                            FloatVectorOperations::copy (busChannels[i], buffer.getReadPointer (outChanIndex), (int) data.numSamples);
-                        else if (outChanIndex >= totalOutputChans && busChannels[i] != nullptr)
-                            FloatVectorOperations::clear (busChannels[i], (int) data.numSamples);
-
-                        ++outChanIndex;
-                    }
-                }
-            }
-        }
     }
 
     //==============================================================================
@@ -2199,7 +2223,7 @@ private:
         channelList.clearQuick();
         channelList.insertMultiple (0, nullptr, 128);
 
-        const AudioProcessor& p = getPluginInstance();
+        auto& p = getPluginInstance();
         buffer.setSize (jmax (p.getTotalNumInputChannels(), p.getTotalNumOutputChannels()), p.getBlockSize() * 4);
         buffer.clear();
     }
@@ -2221,7 +2245,7 @@ private:
     template <typename FloatType>
     FloatType* getTmpBufferForChannel (int channel, int numSamples) noexcept
     {
-        AudioBuffer<FloatType>& buffer = ChooseBufferHelper<FloatType>::impl (emptyBufferFloat, emptyBufferDouble);
+        auto& buffer = ChooseBufferHelper<FloatType>::impl (emptyBufferFloat, emptyBufferDouble);
 
         // we can't do anything if the host requests to render many more samples than the
         // block size, we need to bail out
@@ -2233,7 +2257,7 @@ private:
 
     void preparePlugin (double sampleRate, int bufferSize)
     {
-        AudioProcessor& p = getPluginInstance();
+        auto& p = getPluginInstance();
 
         p.setRateAndBufferSizeDetails (sampleRate, bufferSize);
         p.prepareToPlay (sampleRate, bufferSize);
@@ -2253,12 +2277,11 @@ private:
 
         for (int i = 0; i < numParameters; ++i)
         {
-            const Vst::ParamID paramID = JuceVST3EditController::generateVSTParamIDForIndex (pluginInstance, i);
+            auto paramID = JuceVST3EditController::generateVSTParamIDForIndex (pluginInstance, i);
 
             // Consider yourself very unlucky if you hit this assertion. The hash code of your
             // parameter ids are not unique.
-            jassert (! vstParamIDs.contains (static_cast<Vst::ParamID> (paramID)));
-
+            jassert (! vstParamIDs.contains (paramID));
 
             vstParamIDs.add (paramID);
             paramMap.set (static_cast<int32> (paramID), i);
@@ -2401,25 +2424,23 @@ typedef FUnknown* (*CreateFunction) (Vst::IHostApplication*);
 
 static FUnknown* createComponentInstance (Vst::IHostApplication* host)
 {
-    return (Vst::IAudioProcessor*) new JuceVST3Component (host);
+    return static_cast<Vst::IAudioProcessor*> (new JuceVST3Component (host));
 }
 
 static FUnknown* createControllerInstance (Vst::IHostApplication* host)
 {
-    return (Vst::IEditController*) new JuceVST3EditController (host);
+    return static_cast<Vst::IEditController*> (new JuceVST3EditController (host));
 }
 
 //==============================================================================
-class JucePluginFactory;
+struct JucePluginFactory;
 static JucePluginFactory* globalFactory = nullptr;
 
 //==============================================================================
-class JucePluginFactory : public IPluginFactory3
+struct JucePluginFactory  : public IPluginFactory3
 {
-public:
     JucePluginFactory()
-        : refCount (1),
-          factoryInfo (JucePlugin_Manufacturer, JucePlugin_ManufacturerWebsite,
+        : factoryInfo (JucePlugin_Manufacturer, JucePlugin_ManufacturerWebsite,
                        JucePlugin_ManufacturerEmail, Vst::kDefaultFactoryFlags)
     {
     }
@@ -2439,7 +2460,7 @@ public:
             return false;
         }
 
-        ClassEntry* entry = classes.add (new ClassEntry (info, createFunction));
+        auto* entry = classes.add (new ClassEntry (info, createFunction));
         entry->infoW.fromAscii (info);
 
         return true;
@@ -2498,7 +2519,7 @@ public:
     {
         if (info != nullptr)
         {
-            if (ClassEntry* entry = classes[(int) index])
+            if (auto* entry = classes[(int) index])
             {
                 memcpy (info, &entry->infoW, sizeof (PClassInfoW));
                 return kResultOk;
@@ -2523,13 +2544,11 @@ public:
         TUID iidToQuery;
         sourceFuid.toTUID (iidToQuery);
 
-        for (int i = 0; i < classes.size(); ++i)
+        for (auto* entry : classes)
         {
-            const ClassEntry& entry = *classes.getUnchecked (i);
-
-            if (doUIDsMatch (entry.infoW.cid, cid))
+            if (doUIDsMatch (entry->infoW.cid, cid))
             {
-                if (FUnknown* const instance = entry.createFunction (host))
+                if (auto* instance = entry->createFunction (host))
                 {
                     const FReleaser releaser (instance);
 
@@ -2562,22 +2581,22 @@ public:
 private:
     //==============================================================================
     ScopedJuceInitialiser_GUI libraryInitialiser;
-    Atomic<int> refCount;
+    Atomic<int> refCount { 1 };
     const PFactoryInfo factoryInfo;
     ComSmartPtr<Vst::IHostApplication> host;
 
     //==============================================================================
     struct ClassEntry
     {
-        ClassEntry() noexcept  : createFunction (nullptr), isUnicode (false) {}
+        ClassEntry() noexcept {}
 
         ClassEntry (const PClassInfo2& info, CreateFunction fn) noexcept
-            : info2 (info), createFunction (fn), isUnicode (false) {}
+            : info2 (info), createFunction (fn) {}
 
         PClassInfo2 info2;
         PClassInfoW infoW;
-        CreateFunction createFunction;
-        bool isUnicode;
+        CreateFunction createFunction = {};
+        bool isUnicode = false;
 
     private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ClassEntry)
@@ -2593,7 +2612,7 @@ private:
         {
             zerostruct (*info);
 
-            if (ClassEntry* entry = classes[(int) index])
+            if (auto* entry = classes[(int) index])
             {
                 if (entry->isUnicode)
                     return kResultFalse;

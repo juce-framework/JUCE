@@ -54,6 +54,9 @@ public:
     */
     virtual Drawable* createCopy() const = 0;
 
+    /** Creates a path that describes the outline of this drawable. */
+    virtual Path getOutlineAsPath() const = 0;
+
     //==============================================================================
     /** Renders this Drawable object.
 
@@ -63,7 +66,8 @@ public:
 
         @see drawWithin
     */
-    void draw (Graphics& g, float opacity, const AffineTransform& transform = {}) const;
+    void draw (Graphics& g, float opacity,
+               const AffineTransform& transform = AffineTransform()) const;
 
     /** Renders the Drawable at a given offset within the Graphics context.
 
@@ -116,6 +120,11 @@ public:
     /** Returns the DrawableComposite that contains this object, if there is one. */
     DrawableComposite* getParent() const;
 
+    /** Sets a the clipping region of this drawable using another drawable.
+        The drawbale passed in ill be deleted when no longer needed.
+    */
+    void setClipPath (Drawable* drawableClipPath);
+
     //==============================================================================
     /** Tries to turn some kind of image file into a drawable.
 
@@ -148,6 +157,20 @@ public:
         implementation, but it can return the basic vector objects.
     */
     static Drawable* createFromSVG (const XmlElement& svgDocument);
+
+    /** Attempts to parse an SVG (Scalable Vector Graphics) document from a file,
+        and to turn this into a Drawable tree.
+
+        The object returned must be deleted by the caller. If something goes wrong
+        while parsing, it may return nullptr.
+
+        SVG is a pretty large and complex spec, and this doesn't aim to be a full
+        implementation, but it can return the basic vector objects.
+
+        Any references to references to external image files will be relative to
+        the parent directory of the file passed.
+    */
+    static Drawable* createFromSVGFile (const File& svgFile);
 
     /** Parses an SVG path string and returns it. */
     static Path parseSVGPath (const String& svgPath);
@@ -213,8 +236,11 @@ protected:
     void parentHierarchyChanged() override;
     /** @internal */
     void setBoundsToEnclose (Rectangle<float>);
+    /** @internal */
+    void applyDrawableClipPath (Graphics&);
 
     Point<int> originRelativeToComponent;
+    ScopedPointer<Drawable> drawableClipPath;
 
   #ifndef DOXYGEN
     /** Internal utility class used by Drawables. */

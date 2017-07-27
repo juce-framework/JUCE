@@ -30,6 +30,7 @@ DECLARE_JNI_CLASS (StringBuffer, "java/lang/StringBuffer");
 
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (connect, "connect", "()Z") \
  METHOD (release, "release", "()V") \
  METHOD (read, "read", "([BI)I") \
  METHOD (getPosition, "getPosition", "()J") \
@@ -57,20 +58,13 @@ JUCE_API bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& /*t
     return false;
 }
 
-/* Pimpl (String address, bool isPost, const MemoryBlock& postData,
- URL::OpenStreamProgressCallback* progressCallback, void* progressCallbackContext,
- const String& headers, int timeOutMs, StringPairArray* responseHeaders,
- const int numRedirectsToFollow, const String& httpRequest)
- : statusCode (0)
-
-*/
 //==============================================================================
 class WebInputStream::Pimpl
 {
 public:
-    Pimpl (WebInputStream& pimplOwner, const URL& urlToCopy, bool shouldBePost)
-        : statusCode (0), owner (pimplOwner), url (urlToCopy), isPost (shouldBePost),
-          numRedirectsToFollow (5), timeOutMs (0), httpRequest (isPost ? "POST" : "GET")
+    Pimpl (WebInputStream&, const URL& urlToCopy, bool shouldBePost)
+        : url (urlToCopy), isPost (shouldBePost),
+          httpRequest (isPost ? "POST" : "GET")
     {}
 
     ~Pimpl()
@@ -80,11 +74,15 @@ public:
 
     void cancel()
     {
+        const ScopedLock lock (createStreamLock);
+
         if (stream != 0)
         {
             stream.callVoidMethod (HTTPStream.release);
             stream.clear();
         }
+
+        hasBeenCancelled = true;
     }
 
     bool connect (WebInputStream::Listener* /*listener*/)
@@ -117,17 +115,25 @@ public:
         jintArray statusCodeArray = env->NewIntArray (1);
         jassert (statusCodeArray != 0);
 
-        stream = GlobalRef (env->CallStaticObjectMethod (JuceAppActivity,
-                                                         JuceAppActivity.createHTTPStream,
-                                                         javaString (address).get(),
-                                                         (jboolean) isPost,
-                                                         postDataArray,
-                                                         javaString (headers).get(),
-                                                         (jint) timeOutMs,
-                                                         statusCodeArray,
-                                                         responseHeaderBuffer.get(),
-                                                         (jint) numRedirectsToFollow,
-                                                         javaString (httpRequest).get()));
+        {
+            const ScopedLock lock (createStreamLock);
+
+            if (! hasBeenCancelled)
+                stream = GlobalRef (env->CallStaticObjectMethod (JuceAppActivity,
+                                                                 JuceAppActivity.createHTTPStream,
+                                                                 javaString (address).get(),
+                                                                 (jboolean) isPost,
+                                                                 postDataArray,
+                                                                 javaString (headers).get(),
+                                                                 (jint) timeOutMs,
+                                                                 statusCodeArray,
+                                                                 responseHeaderBuffer.get(),
+                                                                 (jint) numRedirectsToFollow,
+                                                                 javaString (httpRequest).get()));
+        }
+
+        if (stream != 0)
+            stream.callBooleanMethod (HTTPStream.connect);
 
         jint* const statusCodeElements = env->GetIntArrayElements (statusCodeArray, 0);
         statusCode = statusCodeElements[0];
@@ -212,15 +218,16 @@ public:
     }
 
     //==============================================================================
-    int statusCode;
+    int statusCode = 0;
 
 private:
-    WebInputStream& owner;
     const URL url;
     bool isPost;
-    int numRedirectsToFollow, timeOutMs;
+    int numRedirectsToFollow = 5, timeOutMs = 0;
     String httpRequest, headers;
     StringPairArray responseHeaders;
+    CriticalSection createStreamLock;
+    bool hasBeenCancelled = false;
 
     GlobalRef stream;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)

@@ -35,7 +35,8 @@ public:
           modulesValueTree (p.getModules().state),
           header ("Modules", Icon (getIcons().modules, Colours::transparentBlack)),
           setCopyModeButton  ("Set copy-mode for all modules..."),
-          copyPathButton ("Set paths for all modules...")
+          copyPathButton ("Set paths for all modules..."),
+          globalPathsButton ("Enable/disable global path for modules...")
     {
         listHeader = new ListBoxHeader ( { "Module", "Version", "Make Local Copy", "Paths" },
                                         { 0.25f, 0.2f, 0.2f, 0.35f } );
@@ -51,10 +52,12 @@ public:
 
         addAndMakeVisible (setCopyModeButton);
         addAndMakeVisible (copyPathButton);
+        addAndMakeVisible (globalPathsButton);
         setCopyModeButton.addListener (this);
         setCopyModeButton.setTriggeredOnMouseDown (true);
         copyPathButton.addListener (this);
         copyPathButton.setTriggeredOnMouseDown (true);
+        globalPathsButton.addListener (this);
 
         modulesValueTree.addListener (this);
         lookAndFeelChanged();
@@ -85,13 +88,15 @@ public:
             setCopyModeButton.setBounds (buttonRow.removeFromLeft (jmin (200, bounds.getWidth() / 3)));
             buttonRow.removeFromLeft (8);
             copyPathButton.setBounds (buttonRow.removeFromLeft (jmin (200, bounds.getWidth() / 3)));
+            buttonRow.removeFromLeft (8);
+            globalPathsButton.setBounds (buttonRow.removeFromLeft (jmin (200, bounds.getWidth() / 3)));
         }
     }
 
     void parentSizeChanged() override
     {
         const auto width = jmax (550, getParentWidth());
-        auto y = list.getRowPosition (getNumRows() - 1, true).getBottom() + 100;
+        auto y = list.getRowPosition (getNumRows() - 1, true).getBottom() + 200;
 
         y = jmax (getParentHeight(), y);
 
@@ -135,12 +140,21 @@ public:
         g.drawFittedText (copyLocally, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (2) * width)), Justification::centredLeft, 1);
 
         //======================================================================
-        StringArray paths;
+        String pathText;
 
-        for (Project::ExporterIterator exporter (project); exporter.next();)
-            paths.addIfNotAlreadyThere (exporter->getPathForModuleString (moduleID).trim());
+        if (project.getModules().shouldUseGlobalPath (moduleID).getValue())
+        {
+            pathText = "Global";
+        }
+        else
+        {
+            StringArray paths;
 
-        const auto pathText = paths.joinIntoString (", ");
+            for (Project::ExporterIterator exporter (project); exporter.next();)
+                paths.addIfNotAlreadyThere (exporter->getPathForModuleString (moduleID).trim());
+
+            pathText = paths.joinIntoString (", ");
+        }
 
         g.drawFittedText (pathText, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (3) * width)), Justification::centredLeft, 1);
     }
@@ -163,12 +177,14 @@ public:
     {
         if (b == &setCopyModeButton)   showCopyModeMenu();
         if (b == &copyPathButton)      showSetPathsMenu();
+        if (b == &globalPathsButton)   showGlobalPathsMenu();
     }
 
     void lookAndFeelChanged() override
     {
         setCopyModeButton.setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
         copyPathButton.setColour    (TextButton::buttonColourId, findColour (defaultButtonBackgroundColourId));
+        globalPathsButton.setColour (TextButton::buttonColourId, findColour (defaultButtonBackgroundColourId));
     }
 
 private:
@@ -185,7 +201,7 @@ private:
     ContentViewHeader header;
     ListBox list;
     ListBoxHeader* listHeader;
-    TextButton setCopyModeButton, copyPathButton;
+    TextButton setCopyModeButton, copyPathButton, globalPathsButton;
     std::map<String, var> modulePathClipboard;
 
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override    { itemChanged(); }
@@ -207,10 +223,43 @@ private:
         m.addItem (1, "Set all modules to copy locally");
         m.addItem (2, "Set all modules to not copy locally");
 
-        int res = m.showAt (&setCopyModeButton);
+        auto res = m.showAt (&setCopyModeButton);
 
         if (res != 0)
             project.getModules().setLocalCopyModeForAllModules (res == 1);
+    }
+
+    void showGlobalPathsMenu()
+    {
+        PopupMenu m;
+        m.addItem (1, "Set all modules to use global paths");
+        m.addItem (2, "Set all modules to not use global paths");
+        m.addItem (3, "Set selected modules to use global paths");
+        m.addItem (4, "Set selected modules to not use global paths");
+
+        auto res = m.showAt (&globalPathsButton);
+
+        if (res != 0)
+        {
+            auto enableGlobalPaths = (res % 2 == 1);
+
+            auto& moduleList = project.getModules();
+
+            if (res < 3)
+            {
+                auto moduleIDs = moduleList.getAllModules();
+
+                for (auto id : moduleIDs)
+                    moduleList.shouldUseGlobalPath (id).setValue (enableGlobalPaths);
+            }
+            else
+            {
+                auto selected = list.getSelectedRows();
+
+                for (auto i = 0; i < selected.size(); ++i)
+                    moduleList.shouldUseGlobalPath (moduleList.getModuleID (selected[i])).setValue (enableGlobalPaths);
+            }
+        }
     }
 
     void showSetPathsMenu()

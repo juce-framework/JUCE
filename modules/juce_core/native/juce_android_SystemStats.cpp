@@ -116,16 +116,7 @@ public:
         return *instance;
     }
 
-    static JNIEnv* getEnv()
-    {
-        JNIEnv* env = reinterpret_cast<JNIEnv*> (pthread_getspecific (getInstance().threadKey));
-
-        // You are trying to use a JUCE function on a thread that was not created by JUCE.
-        // You need to first call setEnv on this thread before using JUCE
-        jassert (env != nullptr);
-
-        return env;
-    }
+    static JNIEnv* getEnv()   { return reinterpret_cast<JNIEnv*> (pthread_getspecific (getInstance().threadKey)); }
 
     static void setEnv (JNIEnv* env)
     {
@@ -167,7 +158,30 @@ private:
 JniEnvThreadHolder* JniEnvThreadHolder::instance = nullptr;
 
 //==============================================================================
-JNIEnv* getEnv() noexcept            { return JniEnvThreadHolder::getEnv(); }
+JNIEnv* attachAndroidJNI() noexcept
+{
+    auto* env = JniEnvThreadHolder::getEnv();
+
+    if (env == nullptr)
+    {
+        androidJNIJavaVM->AttachCurrentThread (&env, nullptr);
+        setEnv (env);
+    }
+
+    return env;
+}
+
+JNIEnv* getEnv() noexcept
+{
+    auto* env = JniEnvThreadHolder::getEnv();
+
+    // You are trying to use a JUCE function on a thread that was not created by JUCE.
+    // You need to first call setEnv on this thread before using JUCE
+    jassert (env != nullptr);
+
+    return env;
+}
+
 void setEnv (JNIEnv* env) noexcept   { JniEnvThreadHolder::setEnv (env); }
 
 extern "C" jint JNI_OnLoad (JavaVM* vm, void*)

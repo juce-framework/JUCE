@@ -2,14 +2,16 @@
 
 <JUCERPROJECT id="aa4reI" name="BlocksDrawing" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.yourcompany.BlocksDrawing" includeBinaryInAppConfig="1"
-              jucerVersion="5.0.2" displaySplashScreen="0" reportAppUsage="0"
-              splashScreenColour="Dark">
+              jucerVersion="5.1.0" displaySplashScreen="0" reportAppUsage="0"
+              splashScreenColour="Dark" cppLanguageStandard="11">
   <MAINGROUP id="yXiPIx" name="BlocksDrawing">
     <GROUP id="{092A4D5B-31E2-5D03-9B41-81C10EC447E8}" name="Source">
       <FILE id="qnbQP7" name="LightpadComponent.h" compile="0" resource="0"
             file="Source/LightpadComponent.h"/>
-      <FILE id="yiP4mu" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
       <FILE id="RyfWDq" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
+      <FILE id="RVdh1i" name="MainComponent.cpp" compile="1" resource="0"
+            file="Source/MainComponent.cpp"/>
+      <FILE id="yiP4mu" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>

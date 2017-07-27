@@ -158,7 +158,7 @@ bool GZIPCompressorOutputStream::setPosition (int64 /*newPosition*/)
 class GZIPTests  : public UnitTest
 {
 public:
-    GZIPTests()   : UnitTest ("GZIP") {}
+    GZIPTests()   : UnitTest ("GZIP", "Compression") {}
 
     void runTest() override
     {

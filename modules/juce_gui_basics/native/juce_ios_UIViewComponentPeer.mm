@@ -216,7 +216,7 @@ public:
     UIWindow* window;
     JuceUIView* view;
     JuceUIViewController* controller;
-    bool isSharedWindow, fullScreen, insideDrawRect;
+    bool isSharedWindow, fullScreen, insideDrawRect, isAppex;
     static ModifierKeys currentModifiers;
 
     static int64 getMouseTime (UIEvent* e) noexcept
@@ -285,7 +285,7 @@ public:
         return r;
     }
 
-    MultiTouchMapper<UITouch*> currentTouches;
+    static MultiTouchMapper<UITouch*> currentTouches;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIViewComponentPeer)
@@ -323,6 +323,8 @@ static bool isKioskModeView (JuceUIViewController* c)
 
     return Desktop::getInstance().getKioskModeComponent() == &(juceView->owner->getComponent());
 }
+
+MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
 
 
 } // (juce namespace)
@@ -553,7 +555,8 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, const int windowStyle
       controller (nil),
       isSharedWindow (viewToAttachTo != nil),
       fullScreen (false),
-      insideDrawRect (false)
+      insideDrawRect (false),
+      isAppex (SystemStats::isRunningInAppExtensionSandbox())
 {
     CGRect r = convertToCGRect (component.getBounds());
 
@@ -920,6 +923,9 @@ void UIViewComponentPeer::viewFocusLoss()
 
 bool UIViewComponentPeer::isFocused() const
 {
+    if (isAppex)
+        return true;
+
     return isSharedWindow ? this == currentlyFocusedPeer
                           : (window != nil && [window isKeyWindow]);
 }

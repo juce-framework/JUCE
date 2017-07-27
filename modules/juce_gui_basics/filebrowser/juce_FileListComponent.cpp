@@ -29,16 +29,16 @@ Image juce_createIconForFile (const File& file);
 
 //==============================================================================
 FileListComponent::FileListComponent (DirectoryContentsList& listToShow)
-    : ListBox (String(), nullptr),
+    : ListBox ({}, nullptr),
       DirectoryContentsDisplayComponent (listToShow)
 {
     setModel (this);
-    fileList.addChangeListener (this);
+    directoryContentsList.addChangeListener (this);
 }
 
 FileListComponent::~FileListComponent()
 {
-    fileList.removeChangeListener (this);
+    directoryContentsList.removeChangeListener (this);
 }
 
 int FileListComponent::getNumSelectedFiles() const
@@ -48,7 +48,7 @@ int FileListComponent::getNumSelectedFiles() const
 
 File FileListComponent::getSelectedFile (int index) const
 {
-    return fileList.getFile (getSelectedRow (index));
+    return directoryContentsList.getFile (getSelectedRow (index));
 }
 
 void FileListComponent::deselectAllFiles()
@@ -63,9 +63,9 @@ void FileListComponent::scrollToTop()
 
 void FileListComponent::setSelectedFile (const File& f)
 {
-    for (int i = fileList.getNumFiles(); --i >= 0;)
+    for (int i = directoryContentsList.getNumFiles(); --i >= 0;)
     {
-        if (fileList.getFile(i) == f)
+        if (directoryContentsList.getFile(i) == f)
         {
             selectRow (i);
             return;
@@ -80,9 +80,9 @@ void FileListComponent::changeListenerCallback (ChangeBroadcaster*)
 {
     updateContent();
 
-    if (lastDirectory != fileList.getDirectory())
+    if (lastDirectory != directoryContentsList.getDirectory())
     {
-        lastDirectory = fileList.getDirectory();
+        lastDirectory = directoryContentsList.getDirectory();
         deselectAllRows();
     }
 }
@@ -94,7 +94,7 @@ class FileListComponent::ItemComponent  : public Component,
 {
 public:
     ItemComponent (FileListComponent& fc, TimeSliceThread& t)
-        : owner (fc), thread (t), index (0), highlighted (false)
+        : owner (fc), thread (t)
     {
     }
 
@@ -107,7 +107,7 @@ public:
     void paint (Graphics& g) override
     {
         getLookAndFeel().drawFileBrowserRow (g, getWidth(), getHeight(),
-                                             file.getFileName(),
+                                             file, file.getFileName(),
                                              &icon, fileSize, modTime,
                                              isDirectory, highlighted,
                                              index, owner);
@@ -124,17 +124,15 @@ public:
         owner.sendDoubleClickMessage (file);
     }
 
-    void update (const File& root,
-                 const DirectoryContentsList::FileInfo* const fileInfo,
-                 const int index_,
-                 const bool highlighted_)
+    void update (const File& root, const DirectoryContentsList::FileInfo* fileInfo,
+                 int newIndex, bool nowHighlighted)
     {
         thread.removeTimeSliceClient (this);
 
-        if (highlighted_ != highlighted || index_ != index)
+        if (nowHighlighted != highlighted || newIndex != index)
         {
-            index = index_;
-            highlighted = highlighted_;
+            index = newIndex;
+            highlighted = nowHighlighted;
             repaint();
         }
 
@@ -188,15 +186,15 @@ private:
     File file;
     String fileSize, modTime;
     Image icon;
-    int index;
-    bool highlighted, isDirectory;
+    int index = 0;
+    bool highlighted = false, isDirectory = false;
 
     void updateIcon (const bool onlyUpdateIfCached)
     {
         if (icon.isNull())
         {
-            const int hashCode = (file.getFullPathName() + "_iconCacheSalt").hashCode();
-            Image im (ImageCache::getFromHashCode (hashCode));
+            auto hashCode = (file.getFullPathName() + "_iconCacheSalt").hashCode();
+            auto im = ImageCache::getFromHashCode (hashCode);
 
             if (im.isNull() && ! onlyUpdateIfCached)
             {
@@ -220,7 +218,7 @@ private:
 //==============================================================================
 int FileListComponent::getNumRows()
 {
-    return fileList.getNumFiles();
+    return directoryContentsList.getNumFiles();
 }
 
 void FileListComponent::paintListBoxItem (int, Graphics&, int, int, bool)
@@ -231,14 +229,14 @@ Component* FileListComponent::refreshComponentForRow (int row, bool isSelected, 
 {
     jassert (existingComponentToUpdate == nullptr || dynamic_cast<ItemComponent*> (existingComponentToUpdate) != nullptr);
 
-    ItemComponent* comp = static_cast<ItemComponent*> (existingComponentToUpdate);
+    auto comp = static_cast<ItemComponent*> (existingComponentToUpdate);
 
     if (comp == nullptr)
-        comp = new ItemComponent (*this, fileList.getTimeSliceThread());
+        comp = new ItemComponent (*this, directoryContentsList.getTimeSliceThread());
 
     DirectoryContentsList::FileInfo fileInfo;
-    comp->update (fileList.getDirectory(),
-                  fileList.getFileInfo (row, fileInfo) ? &fileInfo : nullptr,
+    comp->update (directoryContentsList.getDirectory(),
+                  directoryContentsList.getFileInfo (row, fileInfo) ? &fileInfo : nullptr,
                   row, isSelected);
 
     return comp;
@@ -255,5 +253,5 @@ void FileListComponent::deleteKeyPressed (int /*currentSelectedRow*/)
 
 void FileListComponent::returnKeyPressed (int currentSelectedRow)
 {
-    sendDoubleClickMessage (fileList.getFile (currentSelectedRow));
+    sendDoubleClickMessage (directoryContentsList.getFile (currentSelectedRow));
 }

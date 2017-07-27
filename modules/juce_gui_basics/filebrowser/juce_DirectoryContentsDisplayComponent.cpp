@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-DirectoryContentsDisplayComponent::DirectoryContentsDisplayComponent (DirectoryContentsList& listToShow)
-    : fileList (listToShow)
+DirectoryContentsDisplayComponent::DirectoryContentsDisplayComponent (DirectoryContentsList& l)
+    : directoryContentsList (l)
 {
 }
 
@@ -38,15 +38,8 @@ FileBrowserListener::~FileBrowserListener()
 {
 }
 
-void DirectoryContentsDisplayComponent::addListener (FileBrowserListener* const listener)
-{
-    listeners.add (listener);
-}
-
-void DirectoryContentsDisplayComponent::removeListener (FileBrowserListener* const listener)
-{
-    listeners.remove (listener);
-}
+void DirectoryContentsDisplayComponent::addListener (FileBrowserListener* l)    { listeners.add (l); }
+void DirectoryContentsDisplayComponent::removeListener (FileBrowserListener* l) { listeners.remove (l); }
 
 void DirectoryContentsDisplayComponent::sendSelectionChangeMessage()
 {
@@ -56,7 +49,7 @@ void DirectoryContentsDisplayComponent::sendSelectionChangeMessage()
 
 void DirectoryContentsDisplayComponent::sendMouseClickMessage (const File& file, const MouseEvent& e)
 {
-    if (fileList.getDirectory().exists())
+    if (directoryContentsList.getDirectory().exists())
     {
         Component::BailOutChecker checker (dynamic_cast<Component*> (this));
         listeners.callChecked (checker, &FileBrowserListener::fileClicked, file, e);
@@ -65,7 +58,7 @@ void DirectoryContentsDisplayComponent::sendMouseClickMessage (const File& file,
 
 void DirectoryContentsDisplayComponent::sendDoubleClickMessage (const File& file)
 {
-    if (fileList.getDirectory().exists())
+    if (directoryContentsList.getDirectory().exists())
     {
         Component::BailOutChecker checker (dynamic_cast<Component*> (this));
         listeners.callChecked (checker, &FileBrowserListener::fileDoubleClicked, file);

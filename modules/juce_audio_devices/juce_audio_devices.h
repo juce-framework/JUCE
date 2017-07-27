@@ -31,7 +31,7 @@
 
   ID:               juce_audio_devices
   vendor:           juce
-  version:          5.0.2
+  version:          5.1.0
   name:             JUCE audio and MIDI I/O device classes
   description:      Classes to play and record from audio and MIDI I/O devices
   website:          http://www.juce.com/juce
@@ -54,8 +54,8 @@
 #include <juce_events/juce_events.h>
 #include <juce_audio_basics/juce_audio_basics.h>
 
-#if JUCE_MODULE_AVAILABLE_juce_gui_extra
-#include <juce_gui_extra/juce_gui_extra.h>
+#if JUCE_MODULE_AVAILABLE_juce_graphics
+#include <juce_graphics/juce_graphics.h>
 #endif
 
 //==============================================================================

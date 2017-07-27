@@ -176,7 +176,10 @@ struct FocusRestorer
     ~FocusRestorer()
     {
         if (lastFocus != nullptr && ! lastFocus->isCurrentlyBlockedByAnotherModalComponent())
-            lastFocus->grabKeyboardFocus();
+        {
+            if (lastFocus != nullptr && lastFocus->isShowing())
+                lastFocus->grabKeyboardFocus();
+        }
     }
 
     WeakReference<Component> lastFocus;
@@ -406,7 +409,7 @@ struct Component::ComponentHelpers
 
         for (int i = comp.childComponentList.size(); --i >= 0;)
         {
-            const Component& child = *comp.childComponentList.getUnchecked(i);
+            auto& child = *comp.childComponentList.getUnchecked(i);
 
             if (child.isVisible() && ! child.isTransformed())
             {
@@ -421,7 +424,8 @@ struct Component::ComponentHelpers
                     }
                     else
                     {
-                        const Point<int> childPos (child.getPosition());
+                        auto childPos = child.getPosition();
+
                         if (clipObscuredRegions (child, g, newClip - childPos, childPos + delta))
                             wasClipped = true;
                     }
@@ -434,7 +438,7 @@ struct Component::ComponentHelpers
 
     static Rectangle<int> getParentOrMainMonitorBounds (const Component& comp)
     {
-        if (Component* p = comp.getParentComponent())
+        if (auto* p = comp.getParentComponent())
             return p->getLocalBounds();
 
         return Desktop::getInstance().getDisplays().getMainDisplay().userArea;
@@ -442,31 +446,22 @@ struct Component::ComponentHelpers
 
     static void releaseAllCachedImageResources (Component& c)
     {
-        if (CachedComponentImage* cached = c.getCachedComponentImage())
+        if (auto* cached = c.getCachedComponentImage())
             cached->releaseResources();
 
-        for (int i = c.getNumChildComponents(); --i >= 0;)
-            releaseAllCachedImageResources (*c.getChildComponent (i));
+        for (auto* child : c.childComponentList)
+            releaseAllCachedImageResources (*child);
     }
 };
 
 //==============================================================================
 Component::Component() noexcept
-  : parentComponent (nullptr),
-    lookAndFeel (nullptr),
-    effect (nullptr),
-    componentFlags (0),
-    componentTransparency (0)
+  : componentFlags (0)
 {
 }
 
 Component::Component (const String& name) noexcept
-  : componentName (name),
-    parentComponent (nullptr),
-    lookAndFeel (nullptr),
-    effect (nullptr),
-    componentFlags (0),
-    componentTransparency (0)
+  : componentName (name), componentFlags (0)
 {
 }
 
@@ -895,11 +890,11 @@ void Component::toFront (const bool setAsForeground)
     }
     else if (parentComponent != nullptr)
     {
-        const Array<Component*>& childList = parentComponent->childComponentList;
+        auto& childList = parentComponent->childComponentList;
 
         if (childList.getLast() != this)
         {
-            const int index = childList.indexOf (this);
+            auto index = childList.indexOf (this);
 
             if (index >= 0)
             {
@@ -936,8 +931,8 @@ void Component::toBehind (Component* const other)
 
         if (parentComponent != nullptr)
         {
-            const Array<Component*>& childList = parentComponent->childComponentList;
-            const int index = childList.indexOf (this);
+            auto& childList = parentComponent->childComponentList;
+            auto index = childList.indexOf (this);
 
             if (index >= 0 && childList [index + 1] != other)
             {
@@ -977,11 +972,11 @@ void Component::toBack()
     }
     else if (parentComponent != nullptr)
     {
-        const Array<Component*>& childList = parentComponent->childComponentList;
+        auto& childList = parentComponent->childComponentList;
 
         if (childList.getFirst() != this)
         {
-            const int index = childList.indexOf (this);
+            auto index = childList.indexOf (this);
 
             if (index > 0)
             {
@@ -1380,7 +1375,7 @@ bool Component::hitTest (int x, int y)
     {
         for (int i = childComponentList.size(); --i >= 0;)
         {
-            Component& child = *childComponentList.getUnchecked (i);
+            auto& child = *childComponentList.getUnchecked (i);
 
             if (child.isVisible()
                  && ComponentHelpers::hitTest (child, ComponentHelpers::convertFromParentSpace (child, Point<int> (x, y))))
@@ -1437,7 +1432,8 @@ Component* Component::getComponentAt (Point<int> position)
     {
         for (int i = childComponentList.size(); --i >= 0;)
         {
-            Component* child = childComponentList.getUnchecked(i);
+            auto* child = childComponentList.getUnchecked(i);
+
             child = child->getComponentAt (ComponentHelpers::convertFromParentSpace (*child, position));
 
             if (child != nullptr)
@@ -1607,7 +1603,7 @@ int Component::getNumChildComponents() const noexcept
 
 Component* Component::getChildComponent (const int index) const noexcept
 {
-    return childComponentList [index];
+    return childComponentList[index];
 }
 
 int Component::getIndexOfChildComponent (const Component* const child) const noexcept
@@ -1617,12 +1613,9 @@ int Component::getIndexOfChildComponent (const Component* const child) const noe
 
 Component* Component::findChildWithID (StringRef targetID) const noexcept
 {
-    for (int i = childComponentList.size(); --i >= 0;)
-    {
-        auto* c = childComponentList.getUnchecked(i);
+    for (auto* c : childComponentList)
         if (c->componentID == targetID)
             return c;
-    }
 
     return nullptr;
 }
@@ -1979,7 +1972,7 @@ void Component::paintComponentAndChildren (Graphics& g)
 
     for (int i = 0; i < childComponentList.size(); ++i)
     {
-        Component& child = *childComponentList.getUnchecked (i);
+        auto& child = *childComponentList.getUnchecked (i);
 
         if (child.isVisible())
         {
@@ -2007,7 +2000,7 @@ void Component::paintComponentAndChildren (Graphics& g)
 
                     for (int j = i + 1; j < childComponentList.size(); ++j)
                     {
-                        const Component& sibling = *childComponentList.getUnchecked (j);
+                        auto& sibling = *childComponentList.getUnchecked (j);
 
                         if (sibling.flags.opaqueFlag && sibling.isVisible() && sibling.affineTransform == nullptr)
                         {

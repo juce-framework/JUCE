@@ -162,6 +162,18 @@ void DrawableText::recalculateCoordinates (Expression::Scope* scope)
 }
 
 //==============================================================================
+Rectangle<int> DrawableText::getTextArea (float w, float h) const
+{
+    return Rectangle<float> (w, h).getSmallestIntegerContainer();
+}
+
+AffineTransform DrawableText::getTextTransform (float w, float h) const
+{
+    return AffineTransform::fromTargetPoints (0, 0, resolvedPoints[0].x, resolvedPoints[0].y,
+                                              w, 0, resolvedPoints[1].x, resolvedPoints[1].y,
+                                              0, h, resolvedPoints[2].x, resolvedPoints[2].y);
+}
+
 void DrawableText::paint (Graphics& g)
 {
     transformContextToCorrectOrigin (g);
@@ -169,13 +181,11 @@ void DrawableText::paint (Graphics& g)
     const float w = Line<float> (resolvedPoints[0], resolvedPoints[1]).getLength();
     const float h = Line<float> (resolvedPoints[0], resolvedPoints[2]).getLength();
 
-    g.addTransform (AffineTransform::fromTargetPoints (0, 0, resolvedPoints[0].x, resolvedPoints[0].y,
-                                                       w, 0, resolvedPoints[1].x, resolvedPoints[1].y,
-                                                       0, h, resolvedPoints[2].x, resolvedPoints[2].y));
+    g.addTransform (getTextTransform (w, h));
     g.setFont (scaledFont);
     g.setColour (colour);
 
-    g.drawFittedText (text, Rectangle<float> (w, h).getSmallestIntegerContainer(), justification, 0x100000);
+    g.drawFittedText (text, getTextArea (w, h), justification, 0x100000);
 }
 
 Rectangle<float> DrawableText::getDrawableBounds() const
@@ -333,4 +343,32 @@ ValueTree DrawableText::createValueTree (ComponentBuilder::ImageProvider*) const
     v.setFontHorizontalScale (fontHScale, nullptr);
 
     return tree;
+}
+
+Path DrawableText::getOutlineAsPath() const
+{
+    auto w = Line<float> (resolvedPoints[0], resolvedPoints[1]).getLength();
+    auto h = Line<float> (resolvedPoints[0], resolvedPoints[2]).getLength();
+    const auto area = getTextArea (w, h).toFloat();
+
+    GlyphArrangement arr;
+    arr.addFittedText (scaledFont, text,
+                       area.getX(), area.getY(),
+                       area.getWidth(), area.getHeight(),
+                       justification,
+                       0x100000);
+
+    Path pathOfAllGlyphs;
+
+    for (int i = 0; i < arr.getNumGlyphs(); ++i)
+    {
+        Path gylphPath;
+        arr.getGlyph (i).createPath (gylphPath);
+        pathOfAllGlyphs.addPath (gylphPath);
+    }
+
+    pathOfAllGlyphs.applyTransform (getTextTransform (w, h)
+                                      .followedBy (getTransform()));
+
+    return pathOfAllGlyphs;
 }

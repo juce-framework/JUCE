@@ -182,6 +182,12 @@ struct FileTreePanel   : public TreePanelBase
         if (auto* p = dynamic_cast<FileTreeItemTypes::ProjectTreeItemBase*> (rootItem.get()))
             p->checkFileStatus();
     }
+
+    void setSearchFilter (const String& filter)
+    {
+        if (auto* p = dynamic_cast<FileTreeItemTypes::GroupItem*> (rootItem.get()))
+            p->setSearchFilter (filter);
+    }
 };
 
 struct ModuleTreePanel    : public TreePanelBase
@@ -216,12 +222,12 @@ struct ExportersTreePanel    : public TreePanelBase
 
 //==============================================================================
 class ConcertinaTreeComponent    : public Component,
-                                   private Button::Listener
+                                   private Button::Listener,
+                                   private ChangeListener
 {
 public:
-    ConcertinaTreeComponent (TreePanelBase* tree, bool showSettings = false)
-         : treeToDisplay (tree),
-           showSettingsButton (showSettings)
+    ConcertinaTreeComponent (TreePanelBase* tree, bool showSettingsButton = false, bool showFindPanel = false)
+         : treeToDisplay (tree)
     {
         addAndMakeVisible (popupMenuButton = new IconButton ("Add", &getIcons().plus));
         popupMenuButton->addListener (this);
@@ -232,6 +238,12 @@ public:
             settingsButton->addListener (this);
         }
 
+        if (showFindPanel)
+        {
+            addAndMakeVisible (findPanel = new FindPanel());
+            findPanel->addChangeListener (this);
+        }
+
         addAndMakeVisible (treeToDisplay);
     }
 
@@ -239,6 +251,8 @@ public:
     {
         treeToDisplay = nullptr;
         popupMenuButton = nullptr;
+        findPanel = nullptr;
+        settingsButton = nullptr;
     }
 
     void resized() override
@@ -249,18 +263,26 @@ public:
         bottomSlice.removeFromRight (5);
         popupMenuButton->setBounds (bottomSlice.removeFromRight (25).reduced (2));
 
-        if (showSettingsButton)
-            settingsButton->setBounds (bottomSlice.removeFromRight(25).reduced (2));
+        if (settingsButton != nullptr)
+            settingsButton->setBounds (bottomSlice.removeFromRight (25).reduced (2));
+
+        if (findPanel != nullptr)
+            findPanel->setBounds (bottomSlice.reduced (2));
 
         treeToDisplay->setBounds (bounds);
     }
 
     TreePanelBase* getTree() const noexcept             { return treeToDisplay.get(); }
 
+    void grabFindFocus()
+    {
+        if (findPanel != nullptr)
+            findPanel->grabKeyboardFocus();
+    }
+
 private:
     ScopedPointer<TreePanelBase> treeToDisplay;
     ScopedPointer<IconButton> popupMenuButton, settingsButton;
-    bool showSettingsButton;
 
     void buttonClicked (Button* b) override
     {
@@ -295,6 +317,92 @@ private:
             }
         }
     }
+
+    void changeListenerCallback (ChangeBroadcaster* source) override
+    {
+        if (source == findPanel)
+            if (auto* fileTree = dynamic_cast<FileTreePanel*> (treeToDisplay.get()))
+                fileTree->setSearchFilter (findPanel->editor.getText());
+    }
+
+    class FindPanel : public Component,
+                      public ChangeBroadcaster,
+                      private TextEditor::Listener,
+                      private Timer,
+                      private FocusChangeListener
+    {
+    public:
+        FindPanel()
+        {
+            addAndMakeVisible (editor);
+            editor.addListener (this);
+
+            Desktop::getInstance().addFocusChangeListener (this);
+
+            lookAndFeelChanged();
+        }
+
+        ~FindPanel()
+        {
+            Desktop::getInstance().removeFocusChangeListener (this);
+        }
+
+        void paintOverChildren (Graphics& g) override
+        {
+            if (! isFocused)
+                return;
+
+            g.setColour (findColour (defaultHighlightColourId));
+
+            Path p;
+            p.addRoundedRectangle (getLocalBounds().reduced (2), 3.0f);
+            g.strokePath (p, PathStrokeType (2.0f));
+        }
+
+
+        void resized() override
+        {
+            editor.setBounds (getLocalBounds().reduced (2));
+        }
+
+        TextEditor editor;
+
+    private:
+
+        void lookAndFeelChanged() override
+        {
+            editor.setTextToShowWhenEmpty ("Filter...", findColour (widgetTextColourId).withAlpha (0.3f));
+        }
+
+        void textEditorTextChanged (TextEditor&) override
+        {
+            startTimer (250);
+        }
+
+        void textEditorFocusLost (TextEditor&) override
+        {
+            isFocused = false;
+            repaint();
+        }
+
+        void globalFocusChanged (Component* focusedComponent) override
+        {
+            if (focusedComponent == &editor)
+            {
+                isFocused = true;
+                repaint();
+            }
+        }
+
+        void timerCallback() override
+        {
+            stopTimer();
+            sendChangeMessage();
+        }
+
+        bool isFocused = false;
+    };
+    ScopedPointer<FindPanel> findPanel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConcertinaTreeComponent)
 };
@@ -389,7 +497,6 @@ public:
         return ((float) (concertinaPanel.getPanel (panelIndex)->getHeight()) / (concertinaPanel.getHeight() - 90));
     }
 
-
 private:
     ConcertinaPanel concertinaPanel;
     OwnedArray<ConcertinaHeader> headers;
@@ -414,7 +521,7 @@ private:
 
         if (project != nullptr)
         {
-            concertinaPanel.addPanel (0, new ConcertinaTreeComponent (new FileTreePanel (*project)), true);
+            concertinaPanel.addPanel (0, new ConcertinaTreeComponent (new FileTreePanel (*project), false, true), true);
             concertinaPanel.addPanel (1, new ConcertinaTreeComponent (new ModuleTreePanel (*project), true), true);
             concertinaPanel.addPanel (2, new ConcertinaTreeComponent (new ExportersTreePanel (*project)), true);
         }

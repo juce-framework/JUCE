@@ -45,6 +45,14 @@ inline void deleteAndZero (Type& pointer)                           { delete poi
 template <typename Type, typename IntegerType>
 inline Type* addBytesToPointer (Type* basePointer, IntegerType bytes) noexcept  { return (Type*) (((char*) basePointer) + bytes); }
 
+/** A handy function to round up a pointer to the nearest multiple of a given number of bytes.
+    alignmentBytes must be a power of two. */
+template <typename Type, typename IntegerType>
+inline Type* snapPointerToAlignment (Type* basePointer, IntegerType alignmentBytes) noexcept
+{
+    return (Type*) ((((size_t) basePointer) + (alignmentBytes - 1)) & ~(alignmentBytes - 1));
+}
+
 /** A handy function which returns the difference between any two pointers, in bytes.
     The address of the second pointer is subtracted from the first, and the difference in bytes is returned.
 */

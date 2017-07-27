@@ -88,11 +88,13 @@ public:
     }
 
     //==============================================================================
-    CachedValue<String> androidScreenOrientation, androidActivityClass, androidActivitySubClassName,
-                        androidVersionCode, androidMinimumSDK, androidTheme,
+    CachedValue<String> androidRepositories, androidDependencies,
+                        androidScreenOrientation, androidActivityClass, androidActivitySubClassName,
+                        androidManifestCustomXmlElements, androidVersionCode, androidMinimumSDK, androidTheme,
                         androidSharedLibraries, androidStaticLibraries, androidExtraAssetsFolder;
 
-    CachedValue<bool>   androidInternetNeeded, androidMicNeeded, androidBluetoothNeeded;
+    CachedValue<bool>   androidInternetNeeded, androidMicNeeded, androidBluetoothNeeded,
+                        androidExternalReadPermission, androidExternalWritePermission;
     CachedValue<String> androidOtherPermissions;
 
     CachedValue<String> androidKeyStore, androidKeyStorePass, androidKeyAlias, androidKeyAliasPass;
@@ -102,9 +104,12 @@ public:
     //==============================================================================
     AndroidProjectExporter (Project& p, const ValueTree& t)
         : ProjectExporter (p, t),
+          androidRepositories (settings, Ids::androidRepositories, nullptr, ""),
+          androidDependencies (settings, Ids::androidDependencies, nullptr, ""),
           androidScreenOrientation (settings, Ids::androidScreenOrientation, nullptr, "unspecified"),
           androidActivityClass (settings, Ids::androidActivityClass, nullptr, createDefaultClassName()),
           androidActivitySubClassName (settings, Ids::androidActivitySubClassName, nullptr),
+          androidManifestCustomXmlElements (settings, Ids::androidManifestCustomXmlElements, nullptr, ""),
           androidVersionCode (settings, Ids::androidVersionCode, nullptr, "1"),
           androidMinimumSDK (settings, Ids::androidMinimumSDK, nullptr, "10"),
           androidTheme (settings, Ids::androidTheme, nullptr),
@@ -114,15 +119,17 @@ public:
           androidInternetNeeded (settings, Ids::androidInternetNeeded, nullptr, true),
           androidMicNeeded (settings, Ids::microphonePermissionNeeded, nullptr, false),
           androidBluetoothNeeded (settings, Ids::androidBluetoothNeeded, nullptr, true),
+          androidExternalReadPermission  (settings, Ids::androidExternalReadNeeded, nullptr, true),
+          androidExternalWritePermission (settings, Ids::androidExternalWriteNeeded, nullptr, true),
           androidOtherPermissions (settings, Ids::androidOtherPermissions, nullptr),
           androidKeyStore (settings, Ids::androidKeyStore, nullptr, "${user.home}/.android/debug.keystore"),
           androidKeyStorePass (settings, Ids::androidKeyStorePass, nullptr, "android"),
           androidKeyAlias (settings, Ids::androidKeyAlias, nullptr, "androiddebugkey"),
           androidKeyAliasPass (settings, Ids::androidKeyAliasPass, nullptr, "android"),
           gradleVersion (settings, Ids::gradleVersion, nullptr, "3.3"),
-          androidPluginVersion (settings, Ids::androidPluginVersion, nullptr, "2.3.1"),
+          androidPluginVersion (settings, Ids::androidPluginVersion, nullptr, "2.3.3"),
           gradleToolchain (settings, Ids::gradleToolchain, nullptr, "clang"),
-          buildToolsVersion (settings, Ids::buildToolsVersion, nullptr, "25.0.2"),
+          buildToolsVersion (settings, Ids::buildToolsVersion, nullptr, "26.0.0"),
           AndroidExecutable (findAndroidExecutable())
     {
         initialiseDependencyPathValues();
@@ -196,6 +203,8 @@ public:
             if (! isLibrary())
                 copyActivityJavaFiles (modules, javaTarget, package);
         }
+
+        copyExtraResourceFiles();
 
         writeFile (targetFolder, "settings.gradle",  isLibrary() ? "include ':lib'" : "include ':app'");
         writeFile (targetFolder, "build.gradle",     getProjectBuildGradleFileContent());
@@ -309,6 +318,12 @@ protected:
         Value getArchitecturesValue()           { return getValue (Ids::androidArchitectures); }
         String getArchitectures() const         { return config [Ids::androidArchitectures]; }
 
+        Value getAdditionalXmlResourcesValue()    { return getValue (Ids::androidAdditionalXmlValueResources); }
+        String getAdditionalXmlResources() const  { return config [Ids::androidAdditionalXmlValueResources]; }
+
+        Value getCustomStringsXmlValue()        { return getValue (Ids::androidCustomStringXmlElements); }
+        String getCustomStringsXml() const      { return config [Ids::androidCustomStringXmlElements]; }
+
         var getDefaultOptimisationLevel() const override    { return var ((int) (isDebug() ? gccO0 : gccO3)); }
 
         void createConfigProperties (PropertyListBuilder& props) override
@@ -317,6 +332,13 @@ protected:
 
             props.add (new TextPropertyComponent (getArchitecturesValue(), "Architectures", 256, false),
                        "A list of the ARM architectures to build (for a fat binary). Leave empty to build for all possible android archiftectures.");
+
+            props.add (new TextPropertyComponent (getAdditionalXmlResourcesValue(), "Extra Android XML Value Resources", 2048, true),
+                       "Paths to additional \"value resource\" files in XML format that should be included in the app (one per line). "
+                       "If you have additional XML resources that should be treated as value resources, add them here.");
+
+            props.add (new TextPropertyComponent (getCustomStringsXmlValue(), "Custom string.xml elements", 8192, true),
+                       "You can specify custom XML elements that will be added to string.xml as children of <resources> element.");
         }
 
         String getProductFlavourNameIdentifier() const
@@ -327,6 +349,11 @@ protected:
         String getProductFlavourCMakeIdentifier() const
         {
             return getName().toUpperCase().replaceCharacter (L' ', L'_');
+        }
+
+        String getModuleLibraryArchName() const override
+        {
+            return "${ANDROID_ABI}";
         }
     };
 
@@ -349,7 +376,9 @@ private:
         if (! isLibrary())
             mo << "SET(BINARY_NAME \"juce_jni\")" << newLine << newLine;
 
-        mo << "add_library(\"cpufeatures\" STATIC \"${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c\")" << newLine << newLine;
+        String cpufeaturesPath ("${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c");
+        mo << "add_library(\"cpufeatures\" STATIC \"" << cpufeaturesPath << "\")" << newLine
+           << "set_source_files_properties(\"" << cpufeaturesPath << "\" PROPERTIES COMPILE_FLAGS \"-Wno-sign-conversion -Wno-gnu-statement-expression\")" << newLine << newLine;
 
         {
             StringArray projectDefines (getEscapedPreprocessorDefs (getProjectPreprocessorDefs()));
@@ -374,7 +403,9 @@ private:
             mo << "SET( CMAKE_SHARED_LINKER_FLAGS  \"${CMAKE_EXE_LINKER_FLAGS} ${JUCE_LDFLAGS}\")" << newLine << newLine;
         }
 
-        const StringArray userLibraries = StringArray::fromTokens(getExternalLibrariesString(), ";", "");
+        StringArray userLibraries = StringArray::fromTokens(getExternalLibrariesString(), ";", "");
+        userLibraries.addArray (androidLibs);
+
         if (getNumConfigurations() > 0)
         {
             bool first = true;
@@ -522,8 +553,10 @@ private:
         mo << getAndroidProductFlavours()                                         << newLine;
         mo << getAndroidVariantFilter()                                           << newLine;
 
+        mo << getAndroidRepositories()                                            << newLine;
+        mo << getAndroidDependencies()                                            << newLine;
 
-        mo << "}" << newLine;
+        mo << "}"                                                                 << newLine << newLine;
 
         return mo.toString();
     }
@@ -553,9 +586,11 @@ private:
             if (getProject().getProjectType().isStaticLibrary())
                 mo << "                    targets \"" << getNativeModuleBinaryName (cfg) << "\"" << newLine;
 
-            mo << "                    arguments \"-DJUCE_BUILD_CONFIGFURATION=" << cfg.getProductFlavourCMakeIdentifier() << "\""  << newLine;
-            mo << "                    cFlags    \"-O"  << cfg.getGCCOptimisationFlag() << "\"" << newLine;
-            mo << "                    cppFlags  \"-O"  << cfg.getGCCOptimisationFlag() << "\"" << newLine;
+            mo << "                    arguments \"-DJUCE_BUILD_CONFIGFURATION=" << cfg.getProductFlavourCMakeIdentifier() << "\""
+                                           << ", \"-DCMAKE_CXX_FLAGS_" << (cfg.isDebug() ? "DEBUG" : "RELEASE")
+                                           << "=-O" << cfg.getGCCOptimisationFlag() << "\""
+                                           << ", \"-DCMAKE_C_FLAGS_"   << (cfg.isDebug() ? "DEBUG" : "RELEASE")
+                                           << "=-O" << cfg.getGCCOptimisationFlag() << "\"" << newLine;
             mo << "                }"                   << newLine;
             mo << "            }"                       << newLine;
             mo << "       }"                            << newLine;
@@ -676,6 +711,40 @@ private:
         return mo.toString();
     }
 
+    String getAndroidRepositories() const
+    {
+        MemoryOutputStream mo;
+
+        juce::StringArray  repositories;
+        repositories.addLines (androidRepositories.get());
+
+        mo << "repositories {"                << newLine;
+
+        for (const auto& r : repositories)
+            mo << "    " << r << newLine;
+
+        mo << "}"                             << newLine;
+
+        return mo.toString();
+    }
+
+    String getAndroidDependencies() const
+    {
+        MemoryOutputStream mo;
+
+        juce::StringArray  dependencies;
+        dependencies.addLines (androidDependencies.get());
+
+        mo << "dependencies {"                << newLine;
+
+        for (const auto& d : dependencies)
+            mo << "    " << d << newLine;
+
+        mo << "}"                             << newLine;
+
+        return mo.toString();
+    }
+
     //==============================================================================
     String getLocalPropertiesFileContent() const
     {
@@ -702,6 +771,12 @@ private:
     {
         static const char* orientations[] = { "Portrait and Landscape", "Portrait", "Landscape", nullptr };
         static const char* orientationValues[] = { "unspecified", "portrait", "landscape", nullptr };
+
+        props.add (new TextPropertyComponent (androidRepositories.getPropertyAsValue(), "Module repositories", 32768, true),
+                   "Module repositories (one per line). These will be added to module-level gradle file repositories section. ");
+
+        props.add (new TextPropertyComponent (androidDependencies.getPropertyAsValue(), "Module dependencies", 32768, true),
+                   "Module dependencies (one per line). These will be added to module-level gradle file dependencies section. ");
 
         props.add (new ChoicePropertyComponent (androidScreenOrientation.getPropertyAsValue(), "Screen orientation", StringArray (orientations), Array<var> (orientationValues)),
                    "The screen orientations that this app should support");
@@ -741,8 +816,17 @@ private:
         props.add (new BooleanPropertyComponent (androidBluetoothNeeded.getPropertyAsValue(), "Bluetooth permissions Required", "Specify bluetooth permission (required for Bluetooth MIDI)"),
                    "If enabled, this will set the android.permission.BLUETOOTH and  android.permission.BLUETOOTH_ADMIN flag in the manifest. This is required for Bluetooth MIDI on Android.");
 
+        props.add (new BooleanPropertyComponent (androidExternalReadPermission.getPropertyAsValue(), "Read from external storage", "Specify permissions to read from external storage"),
+                   "If enabled, this will set the android.permission.READ_EXTERNAL_STORAGE flag in the manifest.");
+
+        props.add (new BooleanPropertyComponent (androidExternalWritePermission.getPropertyAsValue(), "Write to external storage", "Specify permissions to write to external storage"),
+                   "If enabled, this will set the android.permission.WRITE_EXTERNAL_STORAGE flag in the manifest.");
+
         props.add (new TextPropertyComponent (androidOtherPermissions.getPropertyAsValue(), "Custom permissions", 2048, false),
                    "A space-separated list of other permission flags that should be added to the manifest.");
+
+        props.add (new TextPropertyComponent (androidManifestCustomXmlElements.getPropertyAsValue(), "Custom manifest xml elements", 8192, true),
+                   "You can specify custom XML elements that will be added to AndroidManifest.xml as children of <application> element.");
     }
 
     //==============================================================================
@@ -766,18 +850,7 @@ private:
     {
         props.add (new TextPropertyComponent (androidTheme.getPropertyAsValue(), "Android Theme", 256, false),
                    "E.g. @android:style/Theme.NoTitleBar or leave blank for default");
-
-        static const char* cppStandardNames[]  = { "C++03",       "C++11",       "C++14",        nullptr };
-        static const char* cppStandardValues[] = { "-std=c++03",  "-std=c++11",  "-std=c++14",   nullptr };
-
-        props.add (new ChoicePropertyComponent (getCppStandardValue(), "C++ standard to use",
-                                                StringArray (cppStandardNames), Array<var>  (cppStandardValues)),
-                                                "The C++ standard to specify in the makefile");
     }
-
-    //==============================================================================
-    Value getCppStandardValue()                         { return getSetting (Ids::cppLanguageStandard); }
-    String getCppStandardString() const                 { return settings[Ids::cppLanguageStandard]; }
 
     //==============================================================================
     String createDefaultClassName() const
@@ -881,6 +954,37 @@ private:
         }
     }
 
+    void copyExtraResourceFiles() const
+    {
+        for (ConstConfigIterator config (*this); config.next();)
+        {
+            const auto& cfg = dynamic_cast<const AndroidBuildConfiguration&> (*config);
+            const juce::String path = cfg.isDebug() ? "app/src/debug/res/values" : "app/src/release/res/values";
+
+            copyExtraResourceFiles (cfg.getAdditionalXmlResources(), path);
+        }
+    }
+
+    void copyExtraResourceFiles (const juce::String& xmlResources, const juce::String& dstRelativePath) const
+    {
+        juce::StringArray resourcePaths;
+        resourcePaths.addTokens (xmlResources, true);
+
+        const File parentFolder (getTargetFolder().getChildFile (dstRelativePath));
+
+        parentFolder.createDirectory();
+
+        for (const auto& path : resourcePaths)
+        {
+            juce::File file (getProject().getFile().getChildFile(path));
+
+            jassert (file.existsAsFile());
+
+            if (file.existsAsFile())
+                file.copyFileTo (parentFolder.getChildFile (file.getFileName()));
+        }
+    }
+
     String getActivityName() const
     {
         return androidActivityClass.get().fromLastOccurrenceOf (".", false, false);
@@ -930,13 +1034,24 @@ private:
     //==============================================================================
     void writeStringsXML (const File& folder) const
     {
-        XmlElement strings ("resources");
-        XmlElement* resourceName = strings.createNewChildElement ("string");
+        for (ConstConfigIterator config (*this); config.next();)
+        {
+            XmlElement strings ("resources");
+            XmlElement* resourceName = strings.createNewChildElement ("string");
 
-        resourceName->setAttribute ("name", "app_name");
-        resourceName->addTextElement (projectName);
+            resourceName->setAttribute ("name", "app_name");
+            resourceName->addTextElement (projectName);
 
-        writeXmlOrThrow (strings, folder.getChildFile ("app/src/main/res/values/string.xml"), "utf-8", 100, true);
+            const auto& cfg = dynamic_cast<const AndroidBuildConfiguration&> (*config);
+
+            for (XmlElement* e = XmlDocument::parse (cfg.getCustomStringsXml()); e != nullptr; e = e->getNextElement())
+                strings.addChildElement (e);
+
+            const juce::String dir     = cfg.isDebug() ? "debug" : "release";
+            const juce::String subPath = "app/src/" + dir + "/res/values/string.xml";
+
+            writeXmlOrThrow (strings, folder.getChildFile (subPath), "utf-8", 100, true);
+        }
     }
 
     void writeAndroidManifest (const File& folder) const
@@ -1057,13 +1172,16 @@ private:
 
     StringArray getAndroidCxxCompilerFlags() const
     {
-        StringArray cxxFlags (getAndroidCompilerFlags());
-        String cppStandardToUse (getCppStandardString());
+        auto cxxFlags = getAndroidCompilerFlags();
 
-        if (cppStandardToUse.isEmpty())
-            cppStandardToUse = "-std=c++11";
+        auto cppStandard = project.getCppStandardValue().toString();
 
-        cxxFlags.add ("\"" + cppStandardToUse + "\"");
+        if (cppStandard == "latest")
+            cppStandard = "1z";
+
+        cppStandard = "-std=" + String (shouldUseGNUExtensions() ? "gnu++" : "c++") + cppStandard;
+
+        cxxFlags.add (cppStandard.quoted());
 
         return cxxFlags;
     }
@@ -1104,7 +1222,7 @@ private:
     {
         StringPairArray defines (getAndroidPreprocessorDefs());
 
-        return mergePreprocessorDefs (defines, getProject().getPreprocessorDefs());
+        return mergePreprocessorDefs (defines, getAllPreprocessorDefs());
     }
 
     StringPairArray getConfigPreprocessorDefs (const BuildConfiguration& config) const
@@ -1185,10 +1303,10 @@ private:
                 if (value.containsChar (L' '))
                     value = "\\\"" + value + "\\\"";
 
-                escaped += ("=" + value + "\"");
+                escaped += ("=" + value);
             }
 
-            escapedDefs.add (escaped);
+            escapedDefs.add (escaped + "\"");
         }
 
         return escapedDefs;
@@ -1273,6 +1391,9 @@ private:
             XmlElement* intent = act->createNewChildElement ("intent-filter");
             intent->createNewChildElement ("action")->setAttribute ("android:name", "android.intent.action.MAIN");
             intent->createNewChildElement ("category")->setAttribute ("android:name", "android.intent.category.LAUNCHER");
+
+            for (XmlElement* e = XmlDocument::parse (androidManifestCustomXmlElements.get()); e != nullptr; e = e->getNextElement())
+                app->addChildElement (e);
         }
 
         return manifest;
@@ -1295,6 +1416,12 @@ private:
             s.add ("android.permission.BLUETOOTH_ADMIN");
             s.add ("android.permission.ACCESS_COARSE_LOCATION");
         }
+
+        if (androidExternalReadPermission.get())
+            s.add ("android.permission.READ_EXTERNAL_STORAGE");
+
+        if (androidExternalWritePermission.get())
+            s.add ("android.permission.WRITE_EXTERNAL_STORAGE");
 
         return getCleanedStringArray (s);
     }

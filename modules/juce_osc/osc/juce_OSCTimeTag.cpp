@@ -80,7 +80,7 @@ bool OSCTimeTag::isImmediately() const noexcept
 class OSCTimeTagTests  : public UnitTest
 {
 public:
-    OSCTimeTagTests() : UnitTest ("OSCTimeTag class") {}
+    OSCTimeTagTests() : UnitTest ("OSCTimeTag class", "OSC") {}
 
     void runTest()
     {

@@ -100,7 +100,7 @@ namespace SocketHelpers
        #if JUCE_WINDOWS
         ignoreUnused (portNumber, isListener, readLock);
 
-        if (h != SOCKET_ERROR || connected)
+        if (h != (unsigned) SOCKET_ERROR || connected)
             closesocket (h);
 
         // make sure any read process finishes before we delete the socket

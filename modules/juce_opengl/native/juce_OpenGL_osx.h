@@ -247,21 +247,11 @@ bool OpenGLHelpers::isContextActive()
 }
 
 //==============================================================================
-void componentPeerAboutToBeRemovedFromScreen (ComponentPeer& peer)
+void componentPeerAboutToChange (Component& comp, bool shouldSuspend)
 {
-    Array<Component*> stack;
-    stack.add (&peer.getComponent());
+    if (auto* context = OpenGLContext::getContextAttachedTo (comp))
+        context->overrideCanBeAttached (shouldSuspend);
 
-    while (stack.size() != 0)
-    {
-        Component& comp = *stack.removeAndReturn (0);
-
-        const int n = comp.getNumChildComponents();
-        for (int i = 0; i < n; ++i)
-            if (Component* child = comp.getChildComponent (i))
-                stack.add (child);
-
-        if (OpenGLContext* context = OpenGLContext::getContextAttachedTo (comp))
-            context->detach();
-    }
+    for (auto* child : comp.getChildren())
+        componentPeerAboutToChange (*child, shouldSuspend);
 }

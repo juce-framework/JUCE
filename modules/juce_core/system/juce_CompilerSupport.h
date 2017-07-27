@@ -42,9 +42,9 @@
   #define JUCE_DELETED_FUNCTION = delete
  #endif
 
- #if (__GNUC__ * 100 + __GNUC_MINOR__) >= 406 && ! defined (JUCE_COMPILER_SUPPORTS_LAMBDAS)
-  #define JUCE_COMPILER_SUPPORTS_LAMBDAS 1
+ #if (__GNUC__ * 100 + __GNUC_MINOR__) >= 406
   #define JUCE_STDLIB_HAS_STD_FUNCTION_SUPPORT 1
+  #define JUCE_COMPILER_SUPPORTS_THREAD_LOCAL 1
  #endif
 
  #ifndef JUCE_EXCEPTIONS_DISABLED
@@ -66,12 +66,12 @@
   #define JUCE_DELETED_FUNCTION = delete
  #endif
 
- #if __has_feature (cxx_lambdas)
-  #define JUCE_COMPILER_SUPPORTS_LAMBDAS 1
- #endif
-
  #if (defined (_LIBCPP_VERSION) || ! (JUCE_MAC || JUCE_IOS))
   #define JUCE_STDLIB_HAS_STD_FUNCTION_SUPPORT 1
+
+  #if ! JUCE_PROJUCER_LIVE_BUILD
+   #define JUCE_COMPILER_SUPPORTS_THREAD_LOCAL 1
+  #endif
  #endif
 
  #if __has_feature (cxx_generalized_initializers) && (defined (_LIBCPP_VERSION) || ! (JUCE_MAC || JUCE_IOS))
@@ -104,7 +104,6 @@
 
  #if _MSC_VER >= 1700
   #define JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL 1
-  #define JUCE_COMPILER_SUPPORTS_LAMBDAS 1
  #endif
 
  #if _MSC_VER >= 1800
@@ -112,6 +111,7 @@
   #define JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES 1
   #define JUCE_DELETED_FUNCTION = delete
   #define JUCE_STDLIB_HAS_STD_FUNCTION_SUPPORT 1
+  #define JUCE_COMPILER_SUPPORTS_THREAD_LOCAL 1
  #endif
 
  #if _MSC_VER >= 1900
@@ -152,4 +152,17 @@
   #undef  override
   #define override
  #endif
+#endif
+
+//==============================================================================
+#if JUCE_ANDROID
+ #define JUCE_ATOMIC_AVAILABLE 0
+#elif defined(_LIBCPP_VERSION)
+ #define JUCE_ATOMIC_AVAILABLE (_LIBCPP_VERSION >= 3700)
+#elif defined (__GLIBCXX__)
+ #define JUCE_ATOMIC_AVAILABLE (__GLIBCXX__ >= 20130322) // GCC versions 4.8 and later
+#elif defined (_MSC_VER)
+ #define JUCE_ATOMIC_AVAILABLE 1 // Visual Studio 2013 and later
+#else
+ #define JUCE_ATOMIC_AVAILABLE 0
 #endif

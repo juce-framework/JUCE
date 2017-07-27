@@ -75,6 +75,7 @@ public:
                                     AudioProcessorParameter::getText() method. This can be nullptr to use the
                                     default implementation
         @param textToValueFunction  The inverse of valueToTextFunction
+        @param isMetaParameter      Set this value to true if this should be a meta parameter
         @returns the parameter object that was created
     */
     AudioProcessorParameterWithID* createAndAddParameter (const String& parameterID,
@@ -83,7 +84,8 @@ public:
                                                           NormalisableRange<float> valueRange,
                                                           float defaultValue,
                                                           std::function<String (float)> valueToTextFunction,
-                                                          std::function<float (const String&)> textToValueFunction);
+                                                          std::function<float (const String&)> textToValueFunction,
+                                                          bool isMetaParameter = false);
 
     /** Returns a parameter by its ID string. */
     AudioProcessorParameterWithID* getParameter (StringRef parameterID) const noexcept;

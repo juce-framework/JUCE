@@ -26,7 +26,6 @@
 
 #include "../../jucer_Headers.h"
 #include "../../Application/jucer_AppearanceSettings.h"
-#include "../../Application/jucer_GlobalPreferences.h"
 #include "../../Application/jucer_Application.h"
 #include "jucer_JucerDocumentEditor.h"
 #include "jucer_TestComponent.h"

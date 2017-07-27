@@ -88,16 +88,19 @@ AudioProcessor::~AudioProcessor()
 }
 
 //==============================================================================
+StringArray AudioProcessor::getAlternateDisplayNames() const     { return StringArray (getName()); }
+
+//==============================================================================
 bool AudioProcessor::addBus (bool isInput)
 {
     if (! canAddBus (isInput))
         return false;
 
-    BusProperties BusesProperties;
-    if (! canApplyBusCountChange (isInput, true, BusesProperties))
+    BusProperties busesProps;
+    if (! canApplyBusCountChange (isInput, true, busesProps))
         return false;
 
-    createBus (isInput, BusesProperties);
+    createBus (isInput, busesProps);
     return true;
 }
 
@@ -110,8 +113,8 @@ bool AudioProcessor::removeBus (bool inputBus)
     if (! canRemoveBus (inputBus))
         return false;
 
-    BusProperties BusesProperties;
-    if (! canApplyBusCountChange (inputBus, false, BusesProperties))
+    BusProperties busesProps;
+    if (! canApplyBusCountChange (inputBus, false, busesProps))
         return false;
 
     const int busIdx = numBuses - 1;

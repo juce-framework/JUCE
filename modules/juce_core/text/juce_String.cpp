@@ -2223,7 +2223,7 @@ StringRef::StringRef (const String& string) noexcept  : text (string.getCharPoin
 class StringTests  : public UnitTest
 {
 public:
-    StringTests() : UnitTest ("String class") {}
+    StringTests() : UnitTest ("String class", "Text") {}
 
     template <class CharPointerType>
     struct TestUTFConversion

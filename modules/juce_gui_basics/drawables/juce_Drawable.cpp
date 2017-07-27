@@ -44,6 +44,17 @@ Drawable::~Drawable()
 {
 }
 
+void Drawable::applyDrawableClipPath (Graphics& g)
+{
+    if (drawableClipPath != nullptr)
+    {
+        auto clipPath = drawableClipPath->getOutlineAsPath();
+
+        if (! clipPath.isEmpty())
+            g.getInternalContext().clipToPath (clipPath, {});
+    }
+}
+
 //==============================================================================
 void Drawable::draw (Graphics& g, float opacity, const AffineTransform& transform) const
 {
@@ -58,6 +69,8 @@ void Drawable::nonConstDraw (Graphics& g, float opacity, const AffineTransform& 
                                                   (float) -(originRelativeToComponent.y))
                         .followedBy (getTransform())
                         .followedBy (transform));
+
+    applyDrawableClipPath (g);
 
     if (! g.isClipEmpty())
     {
@@ -91,6 +104,15 @@ DrawableComposite* Drawable::getParent() const
     return dynamic_cast<DrawableComposite*> (getParentComponent());
 }
 
+void Drawable::setClipPath (Drawable* clipPath)
+{
+    if (drawableClipPath != clipPath)
+    {
+        drawableClipPath = clipPath;
+        repaint();
+    }
+}
+
 void Drawable::transformContextToCorrectOrigin (Graphics& g)
 {
     g.setOrigin (originRelativeToComponent);
@@ -118,8 +140,8 @@ bool Drawable::replaceColour (Colour original, Colour replacement)
 {
     bool changed = false;
 
-    for (int i = getNumChildComponents(); --i >= 0;)
-        if (auto* d = dynamic_cast<Drawable*> (getChildComponent(i)))
+    for (auto* c : getChildren())
+        if (auto* d = dynamic_cast<Drawable*> (c))
             changed = d->replaceColour (original, replacement) || changed;
 
     return changed;

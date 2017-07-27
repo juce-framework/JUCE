@@ -82,8 +82,8 @@ you have the following functions available:
 
     int makeARGB (int alpha, int red, int green, int blue);         // combines a set of 8-bit ARGB values into a 32-bit colour
     int blendARGB (int baseColour, int overlaidColour);             // blends the overlaid ARGB colour onto the base one and returns the new colour
-    void setLED (int x, int y, int argb);                           // sets a LED colour on the display
-    void fillRect (int argb, int x, int y, int width, int height);  // fills a rectangle on the display
+    void fillPixel (int rgb, int x, int y);                         // sets a LED colour on the display
+    void fillRect (int rgb, int x, int y, int width, int height);   // fills a rectangle on the display
 
 A BLOCKs program needs to provide a repaint() function which the block will call
 at approximately 25Hz to draw the display. For example, here's a simple program that

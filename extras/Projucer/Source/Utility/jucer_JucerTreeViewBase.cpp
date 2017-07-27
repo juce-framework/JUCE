@@ -97,6 +97,7 @@ void JucerTreeViewBase::paintIcon (Graphics &g, Rectangle<float> area)
 {
     g.setColour (getContentColour (true));
     getIcon().draw (g, area, isIconCrossedOut());
+    textX = roundToInt (area.getRight());
 }
 
 void JucerTreeViewBase::paintItem (Graphics& g, int width, int height)
@@ -111,11 +112,9 @@ void JucerTreeViewBase::paintItem (Graphics& g, int width, int height)
 
 Colour JucerTreeViewBase::getContentColour (bool isIcon) const
 {
-    if (isMissing())
-        return Colours::red;
-
-    if (isSelected())
-        return getOwnerView()->findColour (defaultHighlightedTextColourId);
+    if (isMissing())      return Colours::red;
+    if (isSelected())     return getOwnerView()->findColour (defaultHighlightedTextColourId);
+    if (hasWarnings())    return getOwnerView()->findColour (defaultHighlightColourId);
 
     return getOwnerView()->findColour (isIcon ? treeIconColourId : defaultTextColourId);
 }

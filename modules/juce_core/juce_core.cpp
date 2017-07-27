@@ -233,6 +233,11 @@ namespace juce
 #include "network/juce_WebInputStream.cpp"
 
 //==============================================================================
+#if JUCE_UNIT_TESTS
+#include "containers/juce_HashMap_test.cpp"
+#endif
+
+//==============================================================================
 /*
     As the very long class names here try to explain, the purpose of this code is to cause
     a linker error if not all of your compile units are consistent in the options that they

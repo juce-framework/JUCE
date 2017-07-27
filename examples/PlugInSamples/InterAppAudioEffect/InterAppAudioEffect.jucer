@@ -9,9 +9,9 @@
               pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
               pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="InterAppAudioEffectAU"
               pluginRTASCategory="" aaxIdentifier="com.yourcompany.InterAppAudioEffect"
-              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.0.2"
+              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.1.0"
               companyName="ROLI Ltd." buildStandalone="1" displaySplashScreen="0"
-              reportAppUsage="0" splashScreenColour="Dark">
+              reportAppUsage="0" splashScreenColour="Dark" cppLanguageStandard="11">
   <MAINGROUP id="BhTVmm" name="InterAppAudioEffect">
     <GROUP id="{79B2188B-B073-DD2F-F997-AFE1A88B5908}" name="Source">
       <FILE id="s4nZon" name="IAAEffectProcessor.h" compile="0" resource="0"

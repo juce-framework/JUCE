@@ -53,7 +53,7 @@ protected:
                                                     Array<var> (archFlags, numElementsInArray (archFlags))));
         }
 
-        String getLibrarySubdirPath() const override
+        String getModuleLibraryArchName() const override
         {
             String archFlag = getArchitectureTypeVar();
             String prefix ("-march=");
@@ -222,6 +222,11 @@ public:
             return String ("$(JUCE_OUTDIR)/$(JUCE_TARGET_") + getTargetVarName() + String (")");
         }
 
+        String getPhonyName() const
+        {
+            return String (getName()).upToFirstOccurrenceOf (" ", false, false);
+        }
+
         void writeTargetLine (OutputStream& out, const bool useLinuxPackages)
         {
             jassert (type != AggregateTarget);
@@ -348,20 +353,8 @@ public:
         return false;
     }
 
-    Value getCppStandardValue()                         { return getSetting (Ids::cppLanguageStandard); }
-    String getCppStandardString() const                 { return settings[Ids::cppLanguageStandard]; }
-
     void createExporterProperties (PropertyListBuilder& properties) override
     {
-        static const char* cppStandardNames[]  = { "C++03",       "C++11",       "C++14",        nullptr };
-        static const char* cppStandardValues[] = { "-std=c++03",  "-std=c++11",  "-std=c++14",   nullptr };
-
-        properties.add (new ChoicePropertyComponent (getCppStandardValue(),
-                                                     "C++ standard to use",
-                                                     StringArray (cppStandardNames),
-                                                     Array<var>  (cppStandardValues)),
-                        "The C++ standard to specify in the makefile");
-
         properties.add (new TextPropertyComponent (getExtraPkgConfig(), "pkg-config libraries", 8192, false),
                    "Extra pkg-config libraries for you application. Each package should be space separated.");
     }
@@ -522,6 +515,8 @@ private:
                 if (target->type == ProjectType::Target::AggregateTarget)
                 {
                     StringArray dependencies;
+                    MemoryOutputStream subTargetLines;
+
                     for (int j = 0; j < n; ++j)
                     {
                         if (i == j) continue;
@@ -529,14 +524,25 @@ private:
                         if (MakefileTarget* dependency = targets.getUnchecked (j))
                         {
                             if (dependency->type != ProjectType::Target::SharedCodeTarget)
-                                dependencies.add (dependency->getBuildProduct());
+                            {
+                                auto phonyName = dependency->getPhonyName();
+
+                                subTargetLines << phonyName << " : " << dependency->getBuildProduct() << newLine;
+                                dependencies.add (phonyName);
+                            }
                         }
                     }
 
                     out << "all : " << dependencies.joinIntoString (" ") << newLine << newLine;
+                    out << subTargetLines.toString() << newLine << newLine;
                 }
                 else
+                {
+                    if (! getProject().getProjectType().isAudioPlugin())
+                        out << "all : " << target->getBuildProduct() << newLine << newLine;
+
                     target->writeTargetLine (out, useLinuxPackages);
+                }
             }
         }
     }
@@ -588,13 +594,17 @@ private:
             << (" "  + replacePreprocessorTokens (config, getExtraCompilerFlagsString())).trimEnd()
             << " $(CFLAGS)" << newLine;
 
-        String cppStandardToUse (getCppStandardString());
+        {
+            auto cppStandard = config.project.getCppStandardValue().toString();
 
-        if (cppStandardToUse.isEmpty())
-            cppStandardToUse = "-std=c++11";
+            if (cppStandard == "latest")
+                cppStandard = "1z";
 
-        out << "  JUCE_CXXFLAGS += $(CXXFLAGS) $(JUCE_CFLAGS) "
-            << cppStandardToUse << " $(CXXFLAGS)" << newLine;
+            cppStandard = "-std=" + String (shouldUseGNUExtensions() ? "gnu++" : "c++") + cppStandard;
+
+            out << "  JUCE_CXXFLAGS += $(CXXFLAGS) $(JUCE_CFLAGS) "
+                << cppStandard << " $(CXXFLAGS)" << newLine;
+        }
 
         writeLinkerFlags (out, config);
 
@@ -661,8 +671,7 @@ private:
         for (auto target : targets)
             target->writeObjects (out);
 
-        out << ".PHONY: clean all" << newLine
-            << newLine;
+        out << getPhonyTargetLine() << newLine << newLine;
 
         StringArray packages;
         packages.addTokens (getExtraPkgConfigString(), " ", "\"'");
@@ -718,6 +727,23 @@ private:
     {
         return file.getFileNameWithoutExtension()
                 + "_" + String::toHexString (file.toUnixStyle().hashCode()) + ".o";
+    }
+
+    String getPhonyTargetLine() const
+    {
+        MemoryOutputStream phonyTargetLine;
+
+        phonyTargetLine << ".PHONY: clean all";
+
+        if (! getProject().getProjectType().isAudioPlugin())
+            return phonyTargetLine.toString();
+
+        for (auto target : targets)
+            if (target->type != ProjectType::Target::SharedCodeTarget
+                   && target->type != ProjectType::Target::AggregateTarget)
+                phonyTargetLine << " " << target->getPhonyName();
+
+        return phonyTargetLine.toString();
     }
 
     void initialiseDependencyPathValues()

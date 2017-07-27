@@ -75,6 +75,12 @@ public:
             otherwise no devices will be found.
         */
         bluetoothMidi = 2,
+
+        /** Permission to read from external storage such as SD cards */
+        readExternalStorage = 3,
+
+        /** Permission to write to external storage such as SD cards */
+        writeExternalStorage = 4
     };
 
     //==============================================================================

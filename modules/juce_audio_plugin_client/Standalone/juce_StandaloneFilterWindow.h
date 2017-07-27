@@ -62,14 +62,31 @@ public:
                             bool takeOwnershipOfSettings = true,
                             const String& preferredDefaultDeviceName = String(),
                             const AudioDeviceManager::AudioDeviceSetup* preferredSetupOptions = nullptr,
-                            const Array<PluginInOuts>& constrainToConfiguration = Array<PluginInOuts>())
+                            const Array<PluginInOuts>& channels = Array<PluginInOuts>())
 
         : settings (settingsToUse, takeOwnershipOfSettings),
-          channelConfiguration (constrainToConfiguration),
+          channelConfiguration (channels),
           shouldMuteInput (! isInterAppAudioConnected())
     {
         createPlugin();
-        setupAudioDevices (preferredDefaultDeviceName, preferredSetupOptions);
+
+        auto inChannels = (channelConfiguration.size() > 0 ? channelConfiguration[0].numIns
+                                                           : processor->getMainBusNumInputChannels());
+
+        if (preferredSetupOptions != nullptr)
+            options = new AudioDeviceManager::AudioDeviceSetup (*preferredSetupOptions);
+
+        if (inChannels > 0 && RuntimePermissions::isRequired (RuntimePermissions::recordAudio)
+            && ! RuntimePermissions::isGranted (RuntimePermissions::recordAudio))
+            RuntimePermissions::request (RuntimePermissions::recordAudio,
+                                         [this, preferredDefaultDeviceName] (bool granted) { init (granted, preferredDefaultDeviceName); });
+        else
+            init (true, preferredDefaultDeviceName);
+    }
+
+    void init (bool enableAudioInput, const String& preferredDefaultDeviceName)
+    {
+        setupAudioDevices (enableAudioInput, preferredDefaultDeviceName, options);
         reloadPluginState();
         startPlaying();
 
@@ -263,7 +280,8 @@ public:
         }
     }
 
-    void reloadAudioDeviceState (const String& preferredDefaultDeviceName,
+    void reloadAudioDeviceState (bool enableAudioInput,
+                                 const String& preferredDefaultDeviceName,
                                  const AudioDeviceManager::AudioDeviceSetup* preferredSetupOptions)
     {
         ScopedPointer<XmlElement> savedState;
@@ -287,7 +305,7 @@ public:
             totalOutChannels = defaultConfig.numOuts;
         }
 
-        deviceManager.initialise (totalInChannels,
+        deviceManager.initialise (enableAudioInput ? totalInChannels : 0,
                                   totalOutChannels,
                                   savedState,
                                   true,
@@ -365,6 +383,8 @@ public:
     Value shouldMuteInput;
     AudioSampleBuffer emptyBuffer;
 
+    ScopedPointer<AudioDeviceManager::AudioDeviceSetup> options;
+
    #if JUCE_IOS || JUCE_ANDROID
     StringArray lastMidiDevices;
    #endif
@@ -412,23 +432,21 @@ private:
 
         void resized() override
         {
-            auto itemHeight      = deviceSelector.getItemHeight();
-            auto seperatorHeight = (itemHeight >> 1);
-
             auto r = getLocalBounds();
-            auto extra = r.removeFromBottom (itemHeight + seperatorHeight);
-            deviceSelector.setBounds (r);
 
             if (owner.getProcessorHasPotentialFeedbackLoop())
             {
-                auto bottom = 0;
-                for (int i = 0; i < deviceSelector.getNumChildComponents(); ++i)
-                    bottom = jmax (bottom, deviceSelector.getChildComponent (i)->getBottom());
+                auto itemHeight = deviceSelector.getItemHeight();
+                auto extra = r.removeFromTop (itemHeight);
 
-                shouldMuteButton.setBounds (Rectangle<int> (r.proportionOfWidth (0.35f), bottom + seperatorHeight,
-                                                            r.proportionOfWidth (0.60f), deviceSelector.getItemHeight()));
+                auto seperatorHeight = (itemHeight >> 1);
+                shouldMuteButton.setBounds (Rectangle<int> (extra.proportionOfWidth (0.35f), seperatorHeight,
+                                                            extra.proportionOfWidth (0.60f), deviceSelector.getItemHeight()));
+
+                r.removeFromTop (seperatorHeight);
             }
 
+            deviceSelector.setBounds (r);
         }
 
     private:
@@ -476,13 +494,14 @@ private:
     }
 
     //==============================================================================
-    void setupAudioDevices (const String& preferredDefaultDeviceName,
+    void setupAudioDevices (bool enableAudioInput,
+                            const String& preferredDefaultDeviceName,
                             const AudioDeviceManager::AudioDeviceSetup* preferredSetupOptions)
     {
         deviceManager.addAudioCallback (this);
         deviceManager.addMidiInputCallback ({}, &player);
 
-        reloadAudioDeviceState (preferredDefaultDeviceName, preferredSetupOptions);
+        reloadAudioDeviceState (enableAudioInput, preferredDefaultDeviceName, preferredSetupOptions);
     }
 
     void shutDownAudioDevices()
@@ -818,7 +837,7 @@ private:
 
 StandalonePluginHolder* StandalonePluginHolder::getInstance()
 {
-   #if JucePlugin_Enable_IAA || JucePlugin_Build_STANDALONE
+   #if JucePlugin_Enable_IAA || JucePlugin_Build_Standalone
     if (PluginHostType::getPluginLoadedAs() == AudioProcessor::wrapperType_Standalone)
     {
         auto& desktop = Desktop::getInstance();

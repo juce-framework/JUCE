@@ -163,7 +163,7 @@ MidiBuffer MidiRPNGenerator::generate (int midiChannel,
 class MidiRPNDetectorTests   : public UnitTest
 {
 public:
-    MidiRPNDetectorTests()  : UnitTest ("MidiRPNDetector class") {}
+    MidiRPNDetectorTests()  : UnitTest ("MidiRPNDetector class", "MIDI/MPE") {}
 
     void runTest() override
     {
@@ -305,7 +305,7 @@ static MidiRPNDetectorTests MidiRPNDetectorUnitTests;
 class MidiRPNGeneratorTests   : public UnitTest
 {
 public:
-    MidiRPNGeneratorTests()  : UnitTest ("MidiRPNGenerator class") {}
+    MidiRPNGeneratorTests()  : UnitTest ("MidiRPNGenerator class", "MIDI/MPE") {}
 
     void runTest() override
     {
@@ -361,7 +361,7 @@ private:
         expectEquals (result.channel, expected.channel);
         expectEquals (result.parameterNumber, expected.parameterNumber);
         expectEquals (result.value, expected.value);
-        expect (result.isNRPN == expected.isNRPN),
+        expect (result.isNRPN == expected.isNRPN);
         expect (result.is14BitValue == expected.is14BitValue);
     }
 };

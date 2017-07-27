@@ -1,17 +1,99 @@
 JUCE breaking changes
 =====================
 
+Version 5.1.0
+=============
+
+Change
+------
+The option to set the C++ language standard is now located in the project settings instead of the build configuration settings.
+
+Possible Issues
+---------------
+Projects that had a specific verison of the C++ language standard set for exporter build configurations will instead use the default (C++11) when re-saving with the new Projucer. 
+
+Workaround
+---------- 
+Change the "C++ Language Standard" setting in the main project settings to the required version - the Projucer will add this value to the exported project as a compiler flag when saving exporters.
+
+Rationale
+---------
+Having a different C++ language standard option for each build configuration was unnecessary and was not fully implemented for all exporters. Changing it to a per-project settings means that the preference will propagate to all exporters and only needs to be set in one place.
+
+
+Change
+------
+PopupMenus now scale according to the AffineTransform and scaling factor of their target components.
+
+Possible Issues
+---------------
+Developers who have manually scaled their PopupMenus to fit the scaling factor of the parent UI will now have the scaling applied two times in a row.
+
+Workaround
+---------- 
+1. Do not apply your own manual scaling to make your popups match the UI scaling
+
+or
+
+2. Override the Look&Feel method PopupMenu::LookAndFeelMethods::shouldPopupMenuScaleWithTargetComponent and return false.
+   See https://github.com/WeAreROLI/JUCE/blob/c288c94c2914af20f36c03ca9c5401fcb555e4e9/modules/juce_gui_basics/menus/juce_PopupMenu.h#725
+
+Rationale
+---------
+Previously, PopupMenus would not scale if the GUI of the target component (or any of it’s parents) were scaled. The only way to scale PopupMenus was via the global scaling factor. This had several drawbacks as the global scaling factor would scale everything. This was especially problematic in plug-in editors.
+
+
+Change
+------
+Removed the setSecurityFlags() method from the Windows implementation of WebInputStream as it disabled HTTPS security features.
+
+Possible Issues
+---------------
+Any code previously relying on connections to insecure webpages succeeding will no longer work.
+
+Workaround
+----------
+Check network connectivity on Windows and re-write any code that relied on insecure connections.
+
+Rationale
+---------
+The previous behaviour resulted in network connections on Windows having all the HTTPS security features disabled, exposing users to network attacks. HTTPS connections on Windows are now secure and will fail when connecting to an insecure web address.
+
+
+Change
+------
+Pointer arithmetic on a pointer will have the same result regardless if it is wrapped in JUCE's Atomic class or not.
+
+Possible Issues
+---------------
+Any code using pointer arithmetic on Atomic<T*> will now have a different result leading to undefined behaviour or crashes.
+
+Workaround
+----------
+Re-write your code in a way that it does not depend on your pointer being wrapped in JUCE's Atomic or not. See rationale.
+
+Rationale
+---------
+Before this change, pointer arithmetic with JUCE's Atomic type would yield confusing results. For example, the following code would assert before this change:
+
+int* a; Atomic<int*> b;
+
+jassert (++a == ++b);
+
+Pointer a in the above code would be advanced by sizeof(int) whereas the JUCE's Atomic always advances it's underlying pointer by a single byte. The same is true for operator+=/operator-= and operator--. The difference in behaviour is confusing and unintuitive. Furthermore, this aligns JUCE's Atomic type with std::atomic.
+
+
 
 Version 4.3.1
 =============
 
 Change
 ------
-JUCE has changed the way native VST3/AudioUnit parameter ids are calculated
+JUCE has changed the way native VST3/AudioUnit parameter ids are calculated.
 
 Possible Issues
 ---------------
-DAW projects with automation data written by an AudioUnit or VST3 plug-in built with pre JUCE 4.3.1 versions will load incorrectly when opened by an AudioUnit or VST3 built with JUCE versions 4.3.1 and later. Plug-ins using JUCE_FORCE_USE_LEGACY_IDS are not affected 
+DAW projects with automation data written by an AudioUnit or VST3 plug-in built with pre JUCE 4.3.1 versions will load incorrectly when opened by an AudioUnit or VST3 built with JUCE versions 4.3.1 and later. Plug-ins using JUCE_FORCE_USE_LEGACY_IDS are not affected.
 
 Workaround
 ----------
@@ -28,7 +110,7 @@ Version 4.3.0
 
 Change
 ------
-A revised multi-bus API was released which supersedes the previously flawed multi-bus API - JUCE versions 4.0.0 - 4.2.4 (inclusive)
+A revised multi-bus API was released which supersedes the previously flawed multi-bus API - JUCE versions 4.0.0 - 4.2.4 (inclusive).
 
 Possible Issues
 ---------------
@@ -36,12 +118,11 @@ If you have developed a plug-in with JUCE versions 4.0.0 - 4.2.4 (inclusive), th
 
 Woraround
 ---------
-None
+None.
 
 Rationale
 --------
 A flawed multi-bus API was introduced with JUCE versions 4.0.0 up until version 4.2.4 (inclusive) which was not API compatible with pre JUCE 4 plug-ins. JUCE 4.3.0 releases a revised multi-bus API which restores pre JUCE 4 API compatibility. However, the new multi-bus API is not compatible with the flawed multi-bus API (JUCE version 4.0.0 - 4.2.4).
-
 
 
 Change
@@ -62,12 +143,12 @@ The new multi-bus API offers more features, flexibility and accuracy in specifyi
 
 
 
-
 Version 4.2.1
 =============
+
 Change
 ------
-JUCE now uses the paramID property used in AudioProcessorParameterWithID to uniquely identify parameters to the host
+JUCE now uses the paramID property used in AudioProcessorParameterWithID to uniquely identify parameters to the host.
 
 Possible Issues
 ---------------

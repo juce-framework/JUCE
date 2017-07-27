@@ -475,7 +475,7 @@ void AudioDataConverters::deinterleaveSamples (const float* const source,
 class AudioConversionTests  : public UnitTest
 {
 public:
-    AudioConversionTests() : UnitTest ("Audio data conversion") {}
+    AudioConversionTests() : UnitTest ("Audio data conversion", "Audio") {}
 
     template <class F1, class E1, class F2, class E2>
     struct Test5

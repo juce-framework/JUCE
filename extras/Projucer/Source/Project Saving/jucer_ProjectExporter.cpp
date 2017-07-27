@@ -269,6 +269,10 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
                "Additional libraries to link (one per line). You should not add any platform specific decoration to these names. "
                "This string can contain references to preprocessor definitions in the form ${NAME_OF_VALUE}, which will be replaced with their values.");
 
+    if (! isVisualStudio())
+        props.add (new BooleanPropertyComponent (getShouldUseGNUExtensionsValue(), "GNU Compiler Extensions", "Enabled"),
+                   "Enabling this will use the GNU C++ language standard variant for compilation.");
+
     createIconProperties (props);
 
     createExporterProperties (props);
@@ -493,8 +497,24 @@ Value ProjectExporter::getPathForModuleValue (const String& moduleID)
 
 String ProjectExporter::getPathForModuleString (const String& moduleID) const
 {
-    return settings.getChildWithName (Ids::MODULEPATHS)
-                .getChildWithProperty (Ids::ID, moduleID) [Ids::path].toString();
+    auto exporterPath = settings.getChildWithName (Ids::MODULEPATHS)
+                                .getChildWithProperty (Ids::ID, moduleID) [Ids::path].toString();
+
+    if (exporterPath.isEmpty() || project.getModules().shouldUseGlobalPath (moduleID).getValue())
+    {
+        auto id = EnabledModuleList::isJuceModule (moduleID) ? Ids::defaultJuceModulePath
+                                                             : Ids::defaultUserModulePath;
+
+        if (TargetOS::getThisOS() != getTargetOSForExporter())
+            return getAppSettings().getFallbackPathForOS (id, getTargetOSForExporter()).toString();
+
+        if (id == Ids::defaultJuceModulePath)
+            return getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString();
+
+        return getAppSettings().getStoredPath (Ids::defaultUserModulePath).toString();
+    }
+
+    return exporterPath;
 }
 
 void ProjectExporter::removePathForModule (const String& moduleID)
@@ -502,6 +522,18 @@ void ProjectExporter::removePathForModule (const String& moduleID)
     ValueTree paths (settings.getChildWithName (Ids::MODULEPATHS));
     ValueTree m (paths.getChildWithProperty (Ids::ID, moduleID));
     paths.removeChild (m, project.getUndoManagerFor (settings));
+}
+
+TargetOS::OS ProjectExporter::getTargetOSForExporter() const
+{
+    auto targetOS = TargetOS::unknown;
+
+    if      (isWindows())            targetOS = TargetOS::windows;
+    else if (isOSX() || isiOS())     targetOS = TargetOS::osx;
+    else if (isLinux())              targetOS = TargetOS::linux;
+    else if (isAndroid())            targetOS = TargetOS::getThisOS();
+
+    return targetOS;
 }
 
 RelativePath ProjectExporter::getModuleFolderRelativeToProject (const String& moduleID) const
@@ -514,6 +546,11 @@ RelativePath ProjectExporter::getModuleFolderRelativeToProject (const String& mo
 
     if (path.isEmpty())
         return getLegacyModulePath (moduleID).getChildFile (moduleID);
+
+   #if ! JUCE_WINDOWS
+    if (path.startsWith ("~"))
+        path = File::getSpecialLocation (File::userHomeDirectory).getChildFile (path.trimCharactersAtStart ("~/")).getFullPathName();
+   #endif
 
     return RelativePath (path, RelativePath::projectFolder).getChildFile (moduleID);
 }
@@ -905,8 +942,9 @@ StringArray ProjectExporter::BuildConfiguration::getLibrarySearchPaths() const
 {
     auto separator = exporter.isVisualStudio() ? "\\" : "/";
     auto s = getSearchPathsFromString (getLibrarySearchPathString());
+
     for (auto path : exporter.moduleLibSearchPaths)
-        s.add (path + separator + getLibrarySubdirPath());
+        s.add (path + separator + getModuleLibraryArchName());
 
     return s;
 }
@@ -920,7 +958,7 @@ String ProjectExporter::BuildConfiguration::getGCCLibraryPathFlags() const
         s << " -L" << escapeSpaces (path).replace ("~", "$(HOME)");
 
     for (auto path : exporter.moduleLibSearchPaths)
-        s << " -L" << escapeSpaces (path).replace ("~", "$(HOME)") << "/" << getLibrarySubdirPath();
+        s << " -L" << escapeSpaces (path).replace ("~", "$(HOME)") << "/" << getModuleLibraryArchName();
 
     return s;
 }

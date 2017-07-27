@@ -286,9 +286,6 @@
     <ClCompile Include="..\..\Source\Application\jucer_DownloadCompileEngineThread.cpp">
       <Filter>Projucer\Application</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Application\jucer_GlobalPreferences.cpp">
-      <Filter>Projucer\Application</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Application\jucer_Main.cpp">
       <Filter>Projucer\Application</Filter>
     </ClCompile>
@@ -464,6 +461,9 @@
       <Filter>Juce Modules\juce_core\containers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_DynamicObject.cpp">
+      <Filter>Juce Modules\juce_core\containers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_HashMap_test.cpp">
       <Filter>Juce Modules\juce_core\containers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_ListenerList.cpp">
@@ -1719,9 +1719,6 @@
     <ClInclude Include="..\..\Source\Application\jucer_FilePreviewComponent.h">
       <Filter>Projucer\Application</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Application\jucer_GlobalPreferences.h">
-      <Filter>Projucer\Application</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\jucer_Headers.h">
       <Filter>Projucer\Application</Filter>
     </ClInclude>
@@ -2079,6 +2076,9 @@
     <ClInclude Include="..\..\Source\Utility\jucer_Colours.h">
       <Filter>Projucer\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_EditorColourSchemeWindowComponent.h">
+      <Filter>Projucer\Utility</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Utility\jucer_FileHelpers.h">
       <Filter>Projucer\Utility</Filter>
     </ClInclude>
@@ -2086,6 +2086,9 @@
       <Filter>Projucer\Utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\jucer_FloatingToolWindow.h">
+      <Filter>Projucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_GlobalSearchPathsWindowComponent.h">
       <Filter>Projucer\Utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\jucer_Icons.h">
@@ -2866,6 +2869,9 @@
       <Filter>Juce Modules\juce_graphics\native</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_RenderingHelpers.h">
+      <Filter>Juce Modules\juce_graphics\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\native\juce_win32_Direct2DGraphicsContext.h">
       <Filter>Juce Modules\juce_graphics\native</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\placement\juce_Justification.h">

@@ -189,11 +189,7 @@ public:
         The arguments passed are the pointer to and the data of the buffer that
         the OSCReceiver has failed to parse.
     */
-   #if JUCE_COMPILER_SUPPORTS_LAMBDAS
     typedef std::function<void (const char* data, int dataSize)> FormatErrorHandler;
-   #else
-    typedef void (*FormatErrorHandler) (const char* data, int dataSize);
-   #endif
 
     /** Installs a custom error handler which is called in case the receiver
         encounters a stream it cannot parse as an OSC bundle or OSC message.

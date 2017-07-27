@@ -378,9 +378,9 @@ AlertWindow* LookAndFeel_V4::createAlertWindow (const String& title, const Strin
     bounds = bounds.withSizeKeepingCentre (bounds.getWidth() + boundsOffset, bounds.getHeight() + boundsOffset);
     aw->setBounds (bounds);
 
-    for (int i = 0, maxI = aw->getNumChildComponents(); i < maxI; ++i)
-        if (auto button = dynamic_cast<TextButton*> (aw->getChildComponent(i)))
-            button->setBounds (button->getBounds().withPosition (button->getX() + 25, button->getY() + 40));
+    for (auto* child : aw->getChildren())
+        if (auto button = dynamic_cast<TextButton*> (child))
+            button->setBounds (button->getBounds() + Point<int> (25, 40));
 
     return aw;
 }
@@ -724,18 +724,18 @@ void LookAndFeel_V4::layoutFileBrowserComponent (FileBrowserComponent& browserCo
 }
 
 void LookAndFeel_V4::drawFileBrowserRow (Graphics& g, int width, int height,
-                                         const String& filename, Image* icon,
+                                         const File& file, const String& filename, Image* icon,
                                          const String& fileSizeDescription,
                                          const String& fileTimeDescription,
-                                         const bool isDirectory, const bool isItemSelected,
-                                         const int itemIndex, DirectoryContentsDisplayComponent& dcc)
+                                         bool isDirectory, bool isItemSelected,
+                                         int itemIndex, DirectoryContentsDisplayComponent& dcc)
 {
     if (auto fileListComp = dynamic_cast<Component*> (&dcc))
         fileListComp->setColour (DirectoryContentsDisplayComponent::textColourId,
                                  currentColourScheme.getUIColour (isItemSelected ? ColourScheme::UIColour::highlightedText
                                                                                  : ColourScheme::UIColour::menuText));
 
-    LookAndFeel_V2::drawFileBrowserRow (g, width, height, filename, icon,
+    LookAndFeel_V2::drawFileBrowserRow (g, width, height, file, filename, icon,
                                         fileSizeDescription, fileTimeDescription,
                                         isDirectory, isItemSelected, itemIndex, dcc);
 }
@@ -922,7 +922,6 @@ void LookAndFeel_V4::positionComboBoxText (ComboBox& box, Label& label)
                      box.getHeight() - 2);
 
     label.setFont (getComboBoxFont (box));
-    label.setJustificationType (Justification::centredLeft);
 }
 
 //==============================================================================

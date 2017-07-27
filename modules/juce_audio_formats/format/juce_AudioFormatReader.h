@@ -218,6 +218,9 @@ public:
     /** The input stream, for use by subclasses. */
     InputStream* input;
 
+    //==============================================================================
+    /** Get the channel layout of the audio stream. */
+    virtual AudioChannelSet getChannelLayout();
 
     //==============================================================================
     /** Subclasses must implement this method to perform the low-level read operation.

@@ -79,17 +79,26 @@ public:
     }
 
     //==============================================================================
-    Value getPListToMergeValue()            { return getSetting ("customPList"); }
-    String getPListToMergeString() const    { return settings   ["customPList"]; }
+    Value getPListToMergeValue()              { return getSetting ("customPList"); }
+    String getPListToMergeString() const      { return settings   ["customPList"]; }
 
-    Value getExtraFrameworksValue()         { return getSetting (Ids::extraFrameworks); }
-    String getExtraFrameworksString() const { return settings   [Ids::extraFrameworks]; }
+    Value getPListPrefixHeaderValue()         { return getSetting ("PListPrefixHeader"); }
+    String getPListPrefixHeaderString() const { return settings   ["PListPrefixHeader"]; }
 
-    Value  getPostBuildScriptValue()        { return getSetting (Ids::postbuildCommand); }
-    String getPostBuildScript() const       { return settings   [Ids::postbuildCommand]; }
+    Value getPListPreprocessValue()           { return getSetting ("PListPreprocess"); }
+    bool  isPListPreprocessEnabled() const    { return settings   ["PListPreprocess"]; }
 
-    Value  getPreBuildScriptValue()         { return getSetting (Ids::prebuildCommand); }
-    String getPreBuildScript() const        { return settings   [Ids::prebuildCommand]; }
+    Value getExtraFrameworksValue()           { return getSetting (Ids::extraFrameworks); }
+    String getExtraFrameworksString() const   { return settings   [Ids::extraFrameworks]; }
+
+    Value  getPostBuildScriptValue()          { return getSetting (Ids::postbuildCommand); }
+    String getPostBuildScript() const         { return settings   [Ids::postbuildCommand]; }
+
+    Value  getPreBuildScriptValue()           { return getSetting (Ids::prebuildCommand); }
+    String getPreBuildScript() const          { return settings   [Ids::prebuildCommand]; }
+
+    Value getDuplicateResourcesFolderForAppExtensionValue()     { return getSetting (Ids::iosAppExtensionDuplicateResourcesFolder); }
+    bool  shouldDuplicateResourcesFolderForAppExtension() const { return settings   [Ids::iosAppExtensionDuplicateResourcesFolder]; }
 
     Value  getScreenOrientationValue()               { return getSetting (Ids::iosScreenOrientation); }
     String getScreenOrientationString() const        { return settings   [Ids::iosScreenOrientation]; }
@@ -108,9 +117,15 @@ public:
     bool   isBackgroundAudioEnabled() const          { return settings   [Ids::iosBackgroundAudio]; }
     Value  getBackgroundBleValue()                   { return getSetting (Ids::iosBackgroundBle); }
     bool   isBackgroundBleEnabled() const            { return settings   [Ids::iosBackgroundBle]; }
+    Value  getPushNotificationsValue()               { return getSetting (Ids::iosPushNotifications); }
+    bool   isPushNotificationsEnabled() const        { return settings   [Ids::iosPushNotifications]; }
+    Value  getAppGroupsEnabledValue()                { return getSetting (Ids::iosAppGroups); }
+    bool   isAppGroupsEnabled() const                { return settings   [Ids::iosAppGroups]; }
 
     Value  getIosDevelopmentTeamIDValue()            { return getSetting (Ids::iosDevelopmentTeamID); }
     String getIosDevelopmentTeamIDString() const     { return settings   [Ids::iosDevelopmentTeamID]; }
+    Value  getAppGroupIdValue()                      { return getSetting (Ids::iosAppGroupsId); }
+    String getAppGroupIdString() const               { return settings   [Ids::iosAppGroupsId]; }
 
     bool usesMMFiles() const override                { return true; }
     bool canCopeWithDuplicateFiles() override        { return true; }
@@ -171,6 +186,11 @@ public:
 
         if (iOS)
         {
+            if (getProject().getProjectType().isAudioPlugin())
+                props.add (new BooleanPropertyComponent (getDuplicateResourcesFolderForAppExtensionValue(),
+                                                         "Don't add resources folder to app extension", "Enabled"),
+                           "Enable this to prevent the Projucer from creating a resources folder for AUv3 app extensions.");
+
             static const char* orientations[] = { "Portrait and Landscape", "Portrait", "Landscape", nullptr };
             static const char* orientationValues[] = { "portraitlandscape", "portrait", "landscape", nullptr };
 
@@ -196,6 +216,12 @@ public:
 
             props.add (new BooleanPropertyComponent (getBackgroundBleValue(), "Bluetooth MIDI background capability", "Enabled"),
                        "Enable this to grant your app the capability to connect to Bluetooth LE devices when in background mode.");
+
+            props.add (new BooleanPropertyComponent (getPushNotificationsValue(), "Push Notifications capability", "Enabled"),
+                       "Enable this to grant your app the capability to receive push notifications.");
+
+            props.add (new BooleanPropertyComponent (getAppGroupsEnabledValue(), "App groups capability", "Enabled"),
+                       "Enable this to grant your app the capability to share resources between apps using the same app group ID.");
         }
         else if (projectType.isGUIApplication())
         {
@@ -208,6 +234,14 @@ public:
                    "You can paste the contents of an XML PList file in here, and the settings that it contains will override any "
                    "settings that the Projucer creates. BEWARE! When doing this, be careful to remove from the XML any "
                    "values that you DO want the Projucer to change!");
+
+        props.add (new BooleanPropertyComponent (getPListPreprocessValue(), "PList Preprocess", "Enabled"),
+                   "Enable this to preprocess PList file. This will allow you to set values to preprocessor defines,"
+                   " for instance if you define: #define MY_FLAG 1 in a prefix header file (see PList prefix header), you can have"
+                   " a key with MY_FLAG value and it will be replaced with 1.");
+
+        props.add (new TextPropertyComponent (getPListPrefixHeaderValue(), "PList Prefix Header", 512, false),
+                   "Header file containing definitions used in plist file (see PList Preprocess).");
 
         props.add (new TextPropertyComponent (getExtraFrameworksValue(), "Extra Frameworks", 2048, false),
                    "A comma-separated list of extra frameworks that should be added to the build. "
@@ -223,6 +257,11 @@ public:
                    "The Development Team ID to be used for setting up code-signing your iOS app. This is a ten-character "
                    "string (for example, \"S7B6T5XJ2Q\") that describes the distribution certificate Apple issued to you. "
                    "You can find this string in the OS X app Keychain Access under \"Certificates\".");
+
+        if (iOS)
+            props.add (new TextPropertyComponentWithEnablement (getAppGroupIdValue(), getAppGroupsEnabledValue(), "App Group ID", 256, false),
+                       "The App Group ID to be used for allowing multiple apps to access a shared resource folder. Multiple IDs can be "
+                       "added seperated by a semicolon.");
 
         props.add (new BooleanPropertyComponent (getSetting ("keepCustomXcodeSchemes"), "Keep custom Xcode schemes", "Enabled"),
                    "Enable this to keep any Xcode schemes you have created for debugging or running, e.g. to launch a plug-in in"
@@ -331,22 +370,22 @@ protected:
         XcodeBuildConfiguration (Project& p, const ValueTree& t, const bool isIOS, const ProjectExporter& e)
             : BuildConfiguration (p, t, e),
               iOS (isIOS),
-              osxSDKVersion               (config, Ids::osxSDK,                       nullptr, "default"),
-              osxDeploymentTarget         (config, Ids::osxCompatibility,             nullptr, "default"),
-              iosDeploymentTarget         (config, Ids::iosCompatibility,             nullptr, "default"),
-              osxArchitecture             (config, Ids::osxArchitecture,              nullptr, "default"),
-              customXcodeFlags            (config, Ids::customXcodeFlags,             nullptr),
-              cppLanguageStandard         (config, Ids::cppLanguageStandard,          nullptr),
-              cppStandardLibrary          (config, Ids::cppLibType,                   nullptr),
-              codeSignIdentity            (config, Ids::codeSigningIdentity,          nullptr, iOS ? "iPhone Developer" : "Mac Developer"),
-              fastMathEnabled             (config, Ids::fastMath,                     nullptr),
-              linkTimeOptimisationEnabled (config, Ids::linkTimeOptimisation,         nullptr),
-              stripLocalSymbolsEnabled    (config, Ids::stripLocalSymbols,            nullptr),
-              vstBinaryLocation           (config, Ids::xcodeVstBinaryLocation,       nullptr, "$(HOME)/Library/Audio/Plug-Ins/VST/"),
-              vst3BinaryLocation          (config, Ids::xcodeVst3BinaryLocation,      nullptr, "$(HOME)/Library/Audio/Plug-Ins/VST3/"),
-              auBinaryLocation            (config, Ids::xcodeAudioUnitBinaryLocation, nullptr, "$(HOME)/Library/Audio/Plug-Ins/Components/"),
-              rtasBinaryLocation          (config, Ids::xcodeRtasBinaryLocation,      nullptr, "/Library/Application Support/Digidesign/Plug-Ins/"),
-              aaxBinaryLocation           (config, Ids::xcodeAaxBinaryLocation,       nullptr, "/Library/Application Support/Avid/Audio/Plug-Ins/")
+              osxSDKVersion                (config, Ids::osxSDK,                       nullptr, "default"),
+              osxDeploymentTarget          (config, Ids::osxCompatibility,             nullptr, "default"),
+              iosDeploymentTarget          (config, Ids::iosCompatibility,             nullptr, "default"),
+              osxArchitecture              (config, Ids::osxArchitecture,              nullptr, "default"),
+              customXcodeFlags             (config, Ids::customXcodeFlags,             nullptr),
+              plistPreprocessorDefinitions (config, Ids::plistPreprocessorDefinitions, nullptr),
+              cppStandardLibrary           (config, Ids::cppLibType,                   nullptr),
+              codeSignIdentity             (config, Ids::codeSigningIdentity,          nullptr, iOS ? "iPhone Developer" : "Mac Developer"),
+              fastMathEnabled              (config, Ids::fastMath,                     nullptr),
+              linkTimeOptimisationEnabled  (config, Ids::linkTimeOptimisation,         nullptr),
+              stripLocalSymbolsEnabled     (config, Ids::stripLocalSymbols,            nullptr),
+              vstBinaryLocation            (config, Ids::xcodeVstBinaryLocation,       nullptr, "$(HOME)/Library/Audio/Plug-Ins/VST/"),
+              vst3BinaryLocation           (config, Ids::xcodeVst3BinaryLocation,      nullptr, "$(HOME)/Library/Audio/Plug-Ins/VST3/"),
+              auBinaryLocation             (config, Ids::xcodeAudioUnitBinaryLocation, nullptr, "$(HOME)/Library/Audio/Plug-Ins/Components/"),
+              rtasBinaryLocation           (config, Ids::xcodeRtasBinaryLocation,      nullptr, "/Library/Application Support/Digidesign/Plug-Ins/"),
+              aaxBinaryLocation            (config, Ids::xcodeAaxBinaryLocation,       nullptr, "/Library/Application Support/Avid/Audio/Plug-Ins/")
         {
         }
 
@@ -354,7 +393,7 @@ protected:
         bool iOS;
 
         CachedValue<String> osxSDKVersion, osxDeploymentTarget, iosDeploymentTarget, osxArchitecture,
-                            customXcodeFlags, cppLanguageStandard, cppStandardLibrary, codeSignIdentity;
+                            customXcodeFlags, plistPreprocessorDefinitions, cppStandardLibrary, codeSignIdentity;
         CachedValue<bool>   fastMathEnabled, linkTimeOptimisationEnabled, stripLocalSymbolsEnabled;
         CachedValue<String> vstBinaryLocation, vst3BinaryLocation, auBinaryLocation, rtasBinaryLocation, aaxBinaryLocation;
 
@@ -411,26 +450,18 @@ protected:
                        "A comma-separated list of custom Xcode setting flags which will be appended to the list of generated flags, "
                        "e.g. MACOSX_DEPLOYMENT_TARGET_i386 = 10.5, VALID_ARCHS = \"ppc i386 x86_64\"");
 
-            const char* cppLanguageStandardNames[] = { "Use Default", "C++11", "GNU++11", "C++14", "GNU++14", nullptr };
-            Array<var> cppLanguageStandardValues;
-            cppLanguageStandardValues.add (var());
-            cppLanguageStandardValues.add ("c++11");
-            cppLanguageStandardValues.add ("gnu++11");
-            cppLanguageStandardValues.add ("c++14");
-            cppLanguageStandardValues.add ("gnu++14");
+            props.add (new TextPropertyComponent (plistPreprocessorDefinitions.getPropertyAsValue(), "PList Preprocessor Definitions", 2048, true),
+                       "Preprocessor definitions used during PList preprocessing (see PList Preprocess).");
 
-            props.add (new ChoicePropertyComponent (cppLanguageStandard.getPropertyAsValue(), "C++ Language Standard",
-                                                    StringArray (cppLanguageStandardNames), cppLanguageStandardValues),
-                       "The standard of the C++ language that will be used for compilation.");
+            {
+                static const char* cppLibNames[] = { "Use Default", "LLVM libc++", "GNU libstdc++", nullptr };
+                static const var cppLibValues[] =  { var(),         "libc++",      "libstdc++" };
 
-            const char* cppLibNames[] = { "Use Default", "LLVM libc++", "GNU libstdc++", nullptr };
-            Array<var> cppLibValues;
-            cppLibValues.add (var());
-            cppLibValues.add ("libc++");
-            cppLibValues.add ("libstdc++");
-
-            props.add (new ChoicePropertyComponent (cppStandardLibrary.getPropertyAsValue(), "C++ Library", StringArray (cppLibNames), cppLibValues),
-                       "The type of C++ std lib that will be linked.");
+                props.add (new ChoicePropertyComponent (cppStandardLibrary.getPropertyAsValue(), "C++ Library",
+                                                        StringArray (cppLibNames),
+                                                        Array<var> (cppLibValues, numElementsInArray (cppLibValues))),
+                           "The type of C++ std lib that will be linked.");
+            }
 
             props.add (new TextWithDefaultPropertyComponent<String> (codeSignIdentity, "Code-signing Identity", 1024),
                        "The name of a code-signing identity for Xcode to apply.");
@@ -446,7 +477,7 @@ protected:
                        "will also remove any function names from crash logs. Must be disabled for static library projects.");
         }
 
-        String getLibrarySubdirPath() const override
+        String getModuleLibraryArchName() const override
         {
             return "${CURRENT_ARCH}";
         }
@@ -720,23 +751,26 @@ public:
         //==============================================================================
         String getTargetAttributes() const
         {
-            String attributes;
+            auto attributes = getID() + " = { ";
 
-            attributes << getID() << " = { ";
-
-            String developmentTeamID = owner.getIosDevelopmentTeamIDString();
+            auto developmentTeamID = owner.getIosDevelopmentTeamIDString();
             if (developmentTeamID.isNotEmpty())
                 attributes << "DevelopmentTeam = " << developmentTeamID << "; ";
 
-            const int inAppPurchasesEnabled = (owner.iOS && owner.isInAppPurchasesEnabled()) ? 1 : 0;
-            const int interAppAudioEnabled  = (owner.iOS
-                                               && type == Target::StandalonePlugIn
-                                               && owner.getProject().shouldEnableIAA()) ? 1 : 0;
-            const int sandboxEnabled = (type == Target::AudioUnitv3PlugIn ? 1 : 0);
+            auto appGroupsEnabled      = (owner.iOS && owner.isAppGroupsEnabled() ? 1 : 0);
+            auto inAppPurchasesEnabled = (owner.iOS && owner.isInAppPurchasesEnabled()) ? 1 : 0;
+            auto interAppAudioEnabled  = (owner.iOS
+                                          && type == Target::StandalonePlugIn
+                                          && owner.getProject().shouldEnableIAA()) ? 1 : 0;
+
+            auto pushNotificationsEnabled = (owner.iOS && owner.isPushNotificationsEnabled()) ? 1 : 0;
+            auto sandboxEnabled = (type == Target::AudioUnitv3PlugIn ? 1 : 0);
 
             attributes << "SystemCapabilities = {";
+            attributes << "com.apple.ApplicationGroups.iOS = { enabled = " << appGroupsEnabled << "; }; ";
             attributes << "com.apple.InAppPurchase = { enabled = " << inAppPurchasesEnabled << "; }; ";
             attributes << "com.apple.InterAppAudio = { enabled = " << interAppAudioEnabled << "; }; ";
+            attributes << "com.apple.Push = { enabled = " << pushNotificationsEnabled << "; }; ";
             attributes << "com.apple.Sandbox = { enabled = " << sandboxEnabled << "; }; ";
             attributes << "}; };";
 
@@ -807,7 +841,31 @@ public:
             s.add ("GCC_OPTIMIZATION_LEVEL = " + config.getGCCOptimisationFlag());
 
             if (shouldCreatePList())
+            {
                 s.add ("INFOPLIST_FILE = " + infoPlistFile.getFileName());
+
+                if (owner.getPListPrefixHeaderString().isNotEmpty())
+                    s.add ("INFOPLIST_PREFIX_HEADER = " + owner.getPListPrefixHeaderString());
+
+                s.add ("INFOPLIST_PREPROCESS = " + (owner.isPListPreprocessEnabled() ? String ("YES") : String ("NO")));
+
+                auto plistDefs = parsePreprocessorDefs (config.plistPreprocessorDefinitions.get());
+                StringArray defsList;
+
+                for (int i = 0; i < plistDefs.size(); ++i)
+                {
+                    String def (plistDefs.getAllKeys()[i]);
+                    const String value (plistDefs.getAllValues()[i]);
+
+                    if (value.isNotEmpty())
+                        def << "=" << value.replace ("\"", "\\\\\\\"");
+
+                    defsList.add ("\"" + def + "\"");
+                }
+
+                if (defsList.size() > 0)
+                    s.add ("INFOPLIST_PREPROCESSOR_DEFINITIONS = " + indentParenthesisedList (defsList));
+            }
 
             if (config.linkTimeOptimisationEnabled.get())
                 s.add ("LLVM_LTO = YES");
@@ -883,14 +941,23 @@ public:
             }
 
             s.add ("GCC_VERSION = " + gccVersion);
-            s.add ("CLANG_CXX_LANGUAGE_STANDARD = \"c++0x\"");
             s.add ("CLANG_LINK_OBJC_RUNTIME = NO");
 
             if (! config.codeSignIdentity.isUsingDefault())
                 s.add ("CODE_SIGN_IDENTITY = " + config.codeSignIdentity.get().quoted());
 
-            if (config.cppLanguageStandard.get().isNotEmpty())
-                s.add ("CLANG_CXX_LANGUAGE_STANDARD = " + config.cppLanguageStandard.get().quoted());
+            if (owner.isPushNotificationsEnabled())
+                s.add ("CODE_SIGN_ENTITLEMENTS = " + owner.getProject().getTitle() + ".entitlements");
+
+            {
+                auto cppStandard = owner.project.getCppStandardValue().toString();
+
+                if (cppStandard == "latest")
+                    cppStandard = "1z";
+
+                s.add ("CLANG_CXX_LANGUAGE_STANDARD = " + (String (owner.shouldUseGNUExtensions() ? "gnu++"
+                                                                                                  : "c++") + cppStandard).quoted());
+            }
 
             if (config.cppStandardLibrary.get().isNotEmpty())
                 s.add ("CLANG_CXX_LIBRARY = " + config.cppStandardLibrary.get().quoted());
@@ -1167,6 +1234,7 @@ public:
             StringArray iosBackgroundModes;
             if (owner.isBackgroundAudioEnabled())     iosBackgroundModes.add ("audio");
             if (owner.isBackgroundBleEnabled())       iosBackgroundModes.add ("bluetooth-central");
+            if (owner.isPushNotificationsEnabled())   iosBackgroundModes.add ("remote-notification");
 
             addArrayToPlist (dict, "UIBackgroundModes", iosBackgroundModes);
         }
@@ -1210,10 +1278,13 @@ public:
             paths.addArray (config.getHeaderSearchPaths());
             paths.addArray (getTargetExtraHeaderSearchPaths());
 
-            // Always needed to compile .r files
-            paths.add (owner.getModuleFolderRelativeToProject ("juce_audio_plugin_client")
-                            .rebased (owner.projectFolder, owner.getTargetFolder(), RelativePath::buildTargetFolder)
-                            .toUnixStyle());
+            if (owner.project.getModules().isModuleEnabled ("juce_audio_plugin_client"))
+            {
+                // Needed to compile .r files
+                paths.add (owner.getModuleFolderRelativeToProject ("juce_audio_plugin_client")
+                                .rebased (owner.projectFolder, owner.getTargetFolder(), RelativePath::buildTargetFolder)
+                                .toUnixStyle());
+            }
 
             paths.add ("$(inherited)");
 
@@ -1388,13 +1459,14 @@ public:
         {
             if (auto xcodeConfig = dynamic_cast<const XcodeBuildConfiguration*> (&config))
             {
-                const String& configValue = xcodeConfig->cppStandardLibrary.get();
+                const auto& configValue = xcodeConfig->cppStandardLibrary.get();
 
                 if (configValue.isNotEmpty())
                     return (configValue == "libc++");
 
-                const int minorOSXDeploymentTarget
-                    = getOSXDeploymentTarget (*xcodeConfig).fromLastOccurrenceOf (".", false, false).getIntValue();
+                auto minorOSXDeploymentTarget = getOSXDeploymentTarget (*xcodeConfig)
+                                               .fromLastOccurrenceOf (".", false, false)
+                                               .getIntValue();
 
                 return (minorOSXDeploymentTarget > 8);
             }
@@ -1568,8 +1640,8 @@ private:
 
     void addFilesAndGroupsToProject (StringArray& topLevelGroupIDs) const
     {
-        StringArray entitlements = getEntitlements();
-        if (! entitlements.isEmpty())
+        StringPairArray entitlements = getEntitlements();
+        if (entitlements.size() > 0)
             topLevelGroupIDs.add (addEntitlementsFile (entitlements));
 
         for (auto& group : getAllGroups())
@@ -1618,9 +1690,10 @@ private:
 
             if (target->type != XCodeTarget::AggregateTarget)
             {
-                // TODO: ideally resources wouldn't be copied into the AUv3 bundle as well.
-                // However, fixing this requires supporting App groups -> TODO: add app groups
-                if (! projectType.isStaticLibrary() && target->type != XCodeTarget::SharedCodeTarget)
+                auto skipAUv3 = (target->type == XCodeTarget::AudioUnitv3PlugIn
+                                 && ! shouldDuplicateResourcesFolderForAppExtension());
+
+                if (! projectType.isStaticLibrary() && target->type != XCodeTarget::SharedCodeTarget && ! skipAUv3)
                     target->addBuildPhase ("PBXResourcesBuildPhase", resourceIDs);
 
                 StringArray rezFiles (rezFileIDs);
@@ -1941,15 +2014,36 @@ private:
     {
         StringArray s;
         s.add ("ALWAYS_SEARCH_USER_PATHS = NO");
+        s.add ("ENABLE_STRICT_OBJC_MSGSEND = YES");
         s.add ("GCC_C_LANGUAGE_STANDARD = c11");
+        s.add ("GCC_NO_COMMON_BLOCKS = YES");
+        s.add ("GCC_MODEL_TUNING = G5");
         s.add ("GCC_WARN_ABOUT_RETURN_TYPE = YES");
         s.add ("GCC_WARN_CHECK_SWITCH_STATEMENTS = YES");
         s.add ("GCC_WARN_UNUSED_VARIABLE = YES");
         s.add ("GCC_WARN_MISSING_PARENTHESES = YES");
         s.add ("GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES");
         s.add ("GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES");
+        s.add ("GCC_WARN_64_TO_32_BIT_CONVERSION = YES");
+        s.add ("GCC_WARN_UNDECLARED_SELECTOR = YES");
+        s.add ("GCC_WARN_UNINITIALIZED_AUTOS = YES");
+        s.add ("GCC_WARN_UNUSED_FUNCTION = YES");
+        s.add ("CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES");
+        s.add ("CLANG_WARN_BOOL_CONVERSION = YES");
+        s.add ("CLANG_WARN_COMMA = YES");
+        s.add ("CLANG_WARN_CONSTANT_CONVERSION = YES");
+        s.add ("CLANG_WARN_EMPTY_BODY = YES");
+        s.add ("CLANG_WARN_ENUM_CONVERSION = YES");
+        s.add ("CLANG_WARN_INFINITE_RECURSION = YES");
+        s.add ("CLANG_WARN_INT_CONVERSION = YES");
+        s.add ("CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES");
+        s.add ("CLANG_WARN_OBJC_LITERAL_CONVERSION = YES");
+        s.add ("CLANG_WARN_RANGE_LOOP_ANALYSIS = YES");
+        s.add ("CLANG_WARN_STRICT_PROTOTYPES = YES");
+        s.add ("CLANG_WARN_SUSPICIOUS_MOVE = YES");
+        s.add ("CLANG_WARN_UNREACHABLE_CODE = YES");
+        s.add ("CLANG_WARN__DUPLICATE_METHOD_MATCH = YES");
         s.add ("WARNING_CFLAGS = -Wreorder");
-        s.add ("GCC_MODEL_TUNING = G5");
 
         if (projectType.isStaticLibrary())
         {
@@ -2257,35 +2351,57 @@ private:
         return project.getProjectFilenameRoot() + String (".entitlements");
     }
 
-    StringArray getEntitlements() const
+    StringPairArray getEntitlements() const
     {
-        StringArray keys;
+        StringPairArray entitlements;
         if (project.getProjectType().isAudioPlugin())
         {
             if (isiOS())
             {
                 if (project.shouldEnableIAA())
-                    keys.add ("inter-app-audio");
+                    entitlements.set ("inter-app-audio", "<true/>");
             }
             else
             {
-                keys.add ("com.apple.security.app-sandbox");
+                entitlements.set ("com.apple.security.app-sandbox", "<true/>");
             }
         }
-        return keys;
+        else
+        {
+            if (isiOS() && isPushNotificationsEnabled())
+                entitlements.set ("aps-environment", "<string>development</string>");
+        }
+
+        if (isAppGroupsEnabled())
+        {
+            auto appGroups = StringArray::fromTokens (getAppGroupIdString(), ";", { });
+            auto groups = String ("<array>");
+
+            for (auto group : appGroups)
+                groups += "\n\t\t<string>" + group.trim() + "</string>";
+
+            groups += "\n\t</array>";
+
+            entitlements.set ("com.apple.security.application-groups", groups);
+        }
+
+        return entitlements;
     }
 
-    String addEntitlementsFile (StringArray keys) const
+    String addEntitlementsFile (StringPairArray entitlements) const
     {
         String content =
             "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
             "<plist version=\"1.0\">\n"
             "<dict>\n";
+
+        const auto keys = entitlements.getAllKeys();
+
         for (auto& key : keys)
         {
             content += "\t<key>" + key + "</key>\n"
-                       "\t<true/>\n";
+                       "\t" + entitlements[key] + "\n";
         }
         content += "</dict>\n"
                    "</plist>\n";

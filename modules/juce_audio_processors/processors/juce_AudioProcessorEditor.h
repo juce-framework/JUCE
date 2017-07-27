@@ -85,6 +85,11 @@ public:
     */
     virtual int getControlParameterIndex (Component&);
 
+    /** Can be called by a host to tell the editor that it should use a non-unity
+        GUI scale.
+    */
+    virtual void setScaleFactor (float newScale);
+
     //==============================================================================
     /** Marks the host's editor window as resizable
 
@@ -151,24 +156,25 @@ private:
     //==============================================================================
     struct AudioProcessorEditorListener : ComponentListener
     {
-        AudioProcessorEditorListener (AudioProcessorEditor* audioEditor) : e (audioEditor) {}
+        AudioProcessorEditorListener (AudioProcessorEditor& e) : ed (e) {}
 
-        void componentMovedOrResized (Component&, bool, bool wasResized) override   { e->editorResized (wasResized); }
-        void componentParentHierarchyChanged (Component&) override                  { e->updatePeer(); }
-        AudioProcessorEditor* e;
+        void componentMovedOrResized (Component&, bool, bool wasResized) override   { ed.editorResized (wasResized); }
+        void componentParentHierarchyChanged (Component&) override                  { ed.updatePeer(); }
+
+        AudioProcessorEditor& ed;
     };
 
     //==============================================================================
     void initialise();
     void editorResized (bool wasResized);
     void updatePeer();
-    void attachConstrainer (ComponentBoundsConstrainer* newConstrainer);
+    void attachConstrainer (ComponentBoundsConstrainer*);
 
     //==============================================================================
     ScopedPointer<AudioProcessorEditorListener> resizeListener;
     bool resizable;
     ComponentBoundsConstrainer defaultConstrainer;
-    ComponentBoundsConstrainer* constrainer;
+    ComponentBoundsConstrainer* constrainer = {};
     Component::SafePointer<Component> splashScreen;
 
     JUCE_DECLARE_NON_COPYABLE (AudioProcessorEditor)

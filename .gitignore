@@ -43,6 +43,7 @@ profile
 **/VisualStudio2015/x64
 **/VisualStudio2017/Win32
 **/VisualStudio2017/x64
+**/Builds/x64
 **/.vs
 **/CodeBlocks/bin
 **/CodeBlocks/obj

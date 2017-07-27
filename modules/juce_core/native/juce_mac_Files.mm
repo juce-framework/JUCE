@@ -78,9 +78,8 @@ namespace MacFileHelpers
             NSNumber* hidden = nil;
             NSError* err = nil;
 
-            return [[NSURL fileURLWithPath: juceStringToNS (path)]
-                        getResourceValue: &hidden forKey: NSURLIsHiddenKey error: &err]
-                    && [hidden boolValue];
+            return [createNSURLFromFile (path) getResourceValue: &hidden forKey: NSURLIsHiddenKey error: &err]
+                     && [hidden boolValue];
         }
        #elif JUCE_IOS
         return File (path).getFileName().startsWithChar ('.');
@@ -212,7 +211,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
 
             case invokedExecutableFile:
                 if (juce_argv != nullptr && juce_argc > 0)
-                    return File::getCurrentWorkingDirectory().getChildFile (CharPointer_UTF8 (juce_argv[0]));
+                    return File::getCurrentWorkingDirectory().getChildFile (String (juce_argv[0]));
                 // deliberate fall-through...
 
             case currentExecutableFile:
@@ -298,7 +297,7 @@ bool File::moveToTrash() const
    #else
     JUCE_AUTORELEASEPOOL
     {
-        NSURL* url = [NSURL fileURLWithPath: juceStringToNS (getFullPathName())];
+        NSURL* url = createNSURLFromFile (*this);
 
         [[NSWorkspace sharedWorkspace] recycleURLs: [NSArray arrayWithObject: url]
                                  completionHandler: nil];

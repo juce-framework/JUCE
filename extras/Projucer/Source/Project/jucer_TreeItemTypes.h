@@ -32,6 +32,7 @@
 #include "../Wizards/jucer_NewFileWizard.h"
 #include "jucer_GroupInformationComponent.h"
 #include "jucer_ModulesPanel.h"
+#include "jucer_DependencyPathPropertyComponent.h"
 
 
 struct FileTreeItemTypes

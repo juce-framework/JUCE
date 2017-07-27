@@ -146,12 +146,25 @@ public:
 
     void cancel()
     {
+        {
+            const ScopedLock lock (createTaskLock);
+
+            hasBeenCancelled = true;
+        }
+
         signalThreadShouldExit();
         stopThread (10000);
     }
 
     bool start (WebInputStream& inputStream, WebInputStream::Listener* listener)
     {
+        {
+            const ScopedLock lock (createTaskLock);
+
+            if (hasBeenCancelled)
+                return false;
+        }
+
         startThread();
 
         while (isThreadRunning() && ! initialised)
@@ -282,7 +295,12 @@ public:
                                                  delegate: delegate
                                             delegateQueue: [NSOperationQueue currentQueue]] retain];
 
-        task = [session dataTaskWithRequest: request];
+        {
+            const ScopedLock lock (createTaskLock);
+
+            if (! hasBeenCancelled)
+                task = [session dataTaskWithRequest: request];
+        }
 
         if (task == nil)
             return;
@@ -310,6 +328,8 @@ public:
     const int numRedirectsToFollow;
     int numRedirects = 0;
     int64 latestTotalBytes = 0;
+    CriticalSection createTaskLock;
+    bool hasBeenCancelled = false;
 
 private:
     //==============================================================================
@@ -483,7 +503,7 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
     {
         NSFileManager* fileManager = [[NSFileManager alloc] init];
         error = ([fileManager moveItemAtURL: location
-                                      toURL: [NSURL fileURLWithPath:juceStringToNS (targetLocation.getFullPathName())]
+                                      toURL: createNSURLFromFile (targetLocation)
                                       error: nil] == NO);
         httpCode = 200;
         finished = true;
@@ -660,6 +680,7 @@ public:
     ~URLConnectionState()
     {
         stop();
+
         [connection release];
         [request release];
         [headers release];
@@ -686,8 +707,13 @@ public:
     void stop()
     {
         {
-            const ScopedLock sl (dataLock);
-            [connection cancel];
+            const ScopedLock dLock (dataLock);
+            const ScopedLock connectionLock (createConnectionLock);
+
+            hasBeenCancelled = true;
+
+            if (connection != nil)
+                [connection cancel];
         }
 
         stopThread (10000);
@@ -768,8 +794,7 @@ public:
     {
         DBG (nsStringToJuce ([error description])); ignoreUnused (error);
         nsUrlErrorCode = [error code];
-        hasFailed = true;
-        initialised = true;
+        hasFailed = initialised = true;
         signalThreadShouldExit();
     }
 
@@ -787,15 +812,22 @@ public:
 
     void finishedLoading()
     {
-        hasFinished = true;
-        initialised = true;
+        hasFinished = initialised = true;
         signalThreadShouldExit();
     }
 
     void run() override
     {
-        connection = [[NSURLConnection alloc] initWithRequest: request
-                                                     delegate: delegate];
+        {
+            const ScopedLock lock (createConnectionLock);
+
+            if (hasBeenCancelled)
+                return;
+
+            connection = [[NSURLConnection alloc] initWithRequest: request
+                                                         delegate: delegate];
+        }
+
         while (! threadShouldExit())
         {
             JUCE_AUTORELEASEPOOL
@@ -818,12 +850,14 @@ public:
     const int numRedirectsToFollow;
     int numRedirects = 0;
     int latestTotalBytes = 0;
+    CriticalSection createConnectionLock;
+    bool hasBeenCancelled = false;
 
 private:
     //==============================================================================
     struct DelegateClass  : public ObjCClass<NSObject>
     {
-        DelegateClass()  : ObjCClass<NSObject> ("JUCEAppDelegate_")
+        DelegateClass()  : ObjCClass<NSObject> ("JUCENetworkDelegate_")
         {
             addIvar<URLConnectionState*> ("state");
 
@@ -891,9 +925,8 @@ class WebInputStream::Pimpl
 {
 public:
     Pimpl (WebInputStream& pimplOwner, const URL& urlToUse, bool shouldBePost)
-      : statusCode (0), owner (pimplOwner), url (urlToUse), position (0),
-        finished (false), isPost (shouldBePost), timeOutMs (0),
-        numRedirectsToFollow (5), httpRequestCmd (shouldBePost ? "POST" : "GET")
+      : owner (pimplOwner), url (urlToUse), isPost (shouldBePost),
+        httpRequestCmd (shouldBePost ? "POST" : "GET")
     {
     }
 
@@ -905,7 +938,15 @@ public:
     bool connect (WebInputStream::Listener* webInputListener, int numRetries = 0)
     {
         ignoreUnused (numRetries);
-        createConnection();
+
+        {
+            const ScopedLock lock (createConnectionLock);
+
+            if (hasBeenCancelled)
+                return false;
+
+            createConnection();
+        }
 
         if (! connection->start (owner, webInputListener))
         {
@@ -936,6 +977,18 @@ public:
         }
 
         return false;
+    }
+
+    void cancel()
+    {
+        {
+            const ScopedLock lock (createConnectionLock);
+
+            if (connection != nullptr)
+                connection->cancel();
+
+            hasBeenCancelled = true;
+        }
     }
 
     //==============================================================================
@@ -1004,13 +1057,7 @@ public:
         return true;
     }
 
-    void cancel()
-    {
-        if (connection != nullptr)
-            connection->cancel();
-    }
-
-    int statusCode;
+    int statusCode = 0;
 
 private:
     WebInputStream& owner;
@@ -1018,13 +1065,15 @@ private:
     ScopedPointer<URLConnectionState> connection;
     String headers;
     MemoryBlock postData;
-    int64 position;
-    bool finished;
+    int64 position = 0;
+    bool finished = false;
     const bool isPost;
-    int timeOutMs;
-    int numRedirectsToFollow;
+    int timeOutMs = 0;
+    int numRedirectsToFollow = 5;
     String httpRequestCmd;
     StringPairArray responseHeaders;
+    CriticalSection createConnectionLock;
+    bool hasBeenCancelled = false;
 
     void createConnection()
     {

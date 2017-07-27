@@ -1291,7 +1291,7 @@ uint32 readLittleEndianBitsInBuffer (const void* buffer, uint32 startBit, uint32
 class BigIntegerTests  : public UnitTest
 {
 public:
-    BigIntegerTests() : UnitTest ("BigInteger") {}
+    BigIntegerTests() : UnitTest ("BigInteger", "Maths") {}
 
     static BigInteger getBigRandom (Random& r)
     {

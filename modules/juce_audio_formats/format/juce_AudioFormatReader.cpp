@@ -365,6 +365,11 @@ int64 AudioFormatReader::searchForLevel (int64 startSample,
     return -1;
 }
 
+AudioChannelSet AudioFormatReader::getChannelLayout()
+{
+    return AudioChannelSet::canonicalChannelSet (static_cast<int> (numChannels));
+}
+
 //==============================================================================
 MemoryMappedAudioFormatReader::MemoryMappedAudioFormatReader (const File& f, const AudioFormatReader& reader,
                                                               int64 start, int64 length, int frameSize)

@@ -32,7 +32,7 @@ class AboutWindowComponent    : public Component,
 public:
     AboutWindowComponent()
         : titleLabel ("title", "PROJUCER"),
-          versionLabel ("version", "JUCE v" + ProjucerApplication::getApp().getApplicationVersion()),
+          versionLabel ("version"),
           copyrightLabel ("copyright", String (CharPointer_UTF8 ("\xc2\xa9")) + String (" 2017 ROLI Ltd.")),
           aboutButton ("About Us", URL ("https://juce.com"))
     {
@@ -48,7 +48,13 @@ public:
         titleLabel.setJustificationType (Justification::centred);
         titleLabel.setFont (Font (35.0f, Font::FontStyleFlags::bold));
 
+        auto buildDate = Time::getCompilationDate();
         addAndMakeVisible (versionLabel);
+        versionLabel.setText ("JUCE v" + ProjucerApplication::getApp().getApplicationVersion()
+                              + "\nBuild date: " + String (buildDate.getDayOfMonth())
+                                                 + " " + Time::getMonthName (buildDate.getMonth(), true)
+                                                 + " " + String (buildDate.getYear()),
+                              dontSendNotification);
 
         versionLabel.setJustificationType (Justification::centred);
         addAndMakeVisible (copyrightLabel);
@@ -93,7 +99,7 @@ public:
         titleLabel.setBounds (centreSlice.removeFromTop (titleHeight));
 
         centreSlice.removeFromTop (10);
-        versionLabel.setBounds (centreSlice.removeFromTop (25));
+        versionLabel.setBounds (centreSlice.removeFromTop (40));
 
         centreSlice.removeFromTop (10);
 

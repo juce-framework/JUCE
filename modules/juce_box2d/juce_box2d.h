@@ -35,7 +35,7 @@
 
   ID:               juce_box2d
   vendor:           juce
-  version:          5.0.2
+  version:          5.1.0
   name:             JUCE wrapper for the Box2D physics engine
   description:      The Box2D physics engine and some utility classes.
   website:          http://www.juce.com/juce
@@ -54,7 +54,16 @@
 //==============================================================================
 #include <juce_graphics/juce_graphics.h>
 
+#if __GNUC__
+ #pragma GCC diagnostic push
+ #pragma GCC diagnostic ignored "-Wconversion"
+#endif
+
 #include "box2d/Box2D.h"
+
+#if __GNUC__
+ #pragma GCC diagnostic pop
+#endif
 
 #ifndef DOXYGEN // for some reason, Doxygen sees this as a re-definition of Box2DRenderer
 namespace juce

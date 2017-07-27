@@ -129,7 +129,7 @@ public:
     /** Changes the type of slider interface being used.
 
         @param newStyle         the type of interface
-        @see setRotaryParameters, setVelocityBasedMode,
+        @see setRotaryParameters, setVelocityBasedMode
     */
     void setSliderStyle (SliderStyle newStyle);
 
@@ -142,19 +142,22 @@ public:
     struct RotaryParameters
     {
         /** The angle (in radians, clockwise from the top) at which
-            the slider's minimum value is represented. */
+            the slider's minimum value is represented.
+        */
         float startAngleRadians;
 
         /** The angle (in radians, clockwise from the top) at which
             the slider's maximum value is represented. This must be
-            greater than startAngleRadians. */
+            greater than startAngleRadians.
+        */
         float endAngleRadians;
 
         /** Determines what happens when a circular drag action rotates beyond
             the minimum or maximum angle. If true, the value will stop changing
             until the mouse moves back the way it came; if false, the value
             will snap back to the value nearest to the mouse. Note that this has
-            no effect if the drag mode is vertical or horizontal.*/
+            no effect if the drag mode is vertical or horizontal.
+        */
         bool stopAtEnd;
     };
 

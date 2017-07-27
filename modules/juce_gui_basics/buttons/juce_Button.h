@@ -267,6 +267,11 @@ public:
     */
     void setTriggeredOnMouseDown (bool isTriggeredOnMouseDown) noexcept;
 
+    /** Returns whether the button click happens when the mouse is pressed or released.
+        @see setTriggeredOnMouseDown
+    */
+    bool getTriggeredOnMouseDown() const noexcept;
+
     /** Returns the number of milliseconds since the last time the button
         went into the 'down' state.
     */

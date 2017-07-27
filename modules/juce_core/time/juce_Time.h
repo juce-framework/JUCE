@@ -300,7 +300,7 @@ public:
 
     /** Returns the number of millisecs since a fixed event (usually system startup).
 
-        This returns a monotonically increasing value which it unaffected by changes to the
+        This returns a monotonically increasing value which is unaffected by changes to the
         system clock. It should be accurate to within a few millisecs, depending on platform,
         hardware, etc.
 

@@ -363,6 +363,13 @@ private:
                               "Please go to the Modules settings page and ensure each path points to the correct JUCE modules folder.");
                     return;
                 }
+
+                if (project.getModules().getExtraDependenciesNeeded (module->getID()).size() > 0)
+                {
+                    addError ("At least one of your modules has missing dependencies!\n"
+                              "Please go to the settings page of the highlighted modules and add the required dependencies.");
+                    return;
+                }
             }
             else
             {
@@ -406,8 +413,13 @@ private:
             << newLine
             << "// BEGIN SECTION A" << newLine
             << newLine
-            << "#define JUCE_DISPLAY_SPLASH_SCREEN "   << (project.shouldDisplaySplashScreen().getValue() ? "1" : "0") << newLine
-            << "#define JUCE_REPORT_APP_USAGE "        << (project.shouldReportAppUsage().getValue()      ? "1" : "0") << newLine
+            << "#ifndef JUCE_DISPLAY_SPLASH_SCREEN" << newLine
+            << " #define JUCE_DISPLAY_SPLASH_SCREEN "   << (project.shouldDisplaySplashScreen().getValue() ? "1" : "0") << newLine
+            << "#endif" << newLine << newLine
+
+            << "#ifndef JUCE_REPORT_APP_USAGE" << newLine
+            << " #define JUCE_REPORT_APP_USAGE "        << (project.shouldReportAppUsage().getValue()      ? "1" : "0") << newLine
+            << "#endif" << newLine << newLine
             << newLine
             << "// END SECTION A" << newLine
             << newLine
@@ -425,27 +437,7 @@ private:
                 << String::repeatedString (" ", longestName + 5 - m->getID().length()) << " 1" << newLine;
         }
 
-        out << newLine;
-
-        {
-            int isStandaloneApplication = 1;
-            const ProjectType& type = project.getProjectType();
-
-            if (type.isAudioPlugin() || type.isDynamicLibrary())
-                isStandaloneApplication = 0;
-
-            // Fabian TODO
-            out << "//==============================================================================" << newLine
-                << "#ifndef    JUCE_STANDALONE_APPLICATION" << newLine
-                << " #if defined(JucePlugin_Name) && defined(JucePlugin_Build_Standalone)" << newLine
-                << "  #define  JUCE_STANDALONE_APPLICATION JucePlugin_Build_Standalone" << newLine
-                << " #else" << newLine
-                << "  #define  JUCE_STANDALONE_APPLICATION " << isStandaloneApplication << newLine
-                << " #endif" << newLine
-                << "#endif" << newLine
-                << newLine
-                << "#define JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED 1" << newLine;
-        }
+        out << newLine << "#define JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED 1" << newLine;
 
         for (int j = 0; j < modules.size(); ++j)
         {
@@ -474,7 +466,7 @@ private:
                     else if (value == Project::configFlagDisabled)
                         out << " #define   " << f->symbol << " 0";
                     else if (f->defaultValue.isEmpty())
-                        out << " //#define " << f->symbol;
+                        out << " //#define " << f->symbol << " 1";
                     else
                         out << " #define " << f->symbol << " " << f->defaultValue;
 
@@ -483,6 +475,23 @@ private:
                         << "#endif" << newLine;
                 }
             }
+        }
+
+        {
+            int isStandaloneApplication = 1;
+            const ProjectType& type = project.getProjectType();
+
+            if (type.isAudioPlugin() || type.isDynamicLibrary())
+                isStandaloneApplication = 0;
+
+            out << "//==============================================================================" << newLine
+                << "#ifndef    JUCE_STANDALONE_APPLICATION" << newLine
+                << " #if defined(JucePlugin_Name) && defined(JucePlugin_Build_Standalone)" << newLine
+                << "  #define  JUCE_STANDALONE_APPLICATION JucePlugin_Build_Standalone" << newLine
+                << " #else" << newLine
+                << "  #define  JUCE_STANDALONE_APPLICATION " << isStandaloneApplication << newLine
+                << " #endif" << newLine
+                << "#endif" << newLine;
         }
 
         if (extraAppConfigContent.isNotEmpty())

@@ -39,6 +39,7 @@ namespace Ids
     DECLARE_ID (vendor);
     DECLARE_ID (version);
     DECLARE_ID (license);
+    DECLARE_ID (minimumCppStandard);
     DECLARE_ID (include);
     DECLARE_ID (info);
     DECLARE_ID (description);
@@ -59,6 +60,11 @@ namespace Ids
     DECLARE_ID (intermediatesPath);
     DECLARE_ID (modulePaths);
     DECLARE_ID (searchpaths);
+    DECLARE_ID (osxFallback);
+    DECLARE_ID (windowsFallback);
+    DECLARE_ID (linuxFallback);
+    DECLARE_ID (defaultJuceModulePath);
+    DECLARE_ID (defaultUserModulePath);
     DECLARE_ID (vst3Folder);
     DECLARE_ID (rtasFolder);
     DECLARE_ID (auFolder);
@@ -88,7 +94,9 @@ namespace Ids
     DECLARE_ID (customXcodeFlags);
     DECLARE_ID (customXcassetsFolder);
     DECLARE_ID (customXcodeResourceFolders);
+    DECLARE_ID (plistPreprocessorDefinitions);
     DECLARE_ID (cppLanguageStandard);
+    DECLARE_ID (enableGNUExtensions);
     DECLARE_ID (cppLibType);
     DECLARE_ID (codeSigningIdentity);
     DECLARE_ID (fastMath);
@@ -152,10 +160,14 @@ namespace Ids
     DECLARE_ID (focusOrder);
     DECLARE_ID (hidden);
     DECLARE_ID (useStdCall);
+    DECLARE_ID (useGlobalPath);
     DECLARE_ID (showAllCode);
     DECLARE_ID (useLocalCopy);
     DECLARE_ID (overwriteOnSave);
     DECLARE_ID (microphonePermissionNeeded);
+    DECLARE_ID (androidRepositories);
+    DECLARE_ID (androidDependencies);
+    DECLARE_ID (androidAdditionalXmlValueResources);
     DECLARE_ID (androidActivityClass);
     DECLARE_ID (androidActivitySubClassName);
     DECLARE_ID (androidVersionCode);
@@ -163,7 +175,11 @@ namespace Ids
     DECLARE_ID (androidNDKPath);
     DECLARE_ID (androidInternetNeeded);
     DECLARE_ID (androidArchitectures);
+    DECLARE_ID (androidManifestCustomXmlElements);
+    DECLARE_ID (androidCustomStringXmlElements);
     DECLARE_ID (androidBluetoothNeeded);
+    DECLARE_ID (androidExternalReadNeeded);
+    DECLARE_ID (androidExternalWriteNeeded);
     DECLARE_ID (androidMinimumSDK);
     DECLARE_ID (androidOtherPermissions);
     DECLARE_ID (androidKeyStore);
@@ -179,7 +195,11 @@ namespace Ids
     DECLARE_ID (iosInAppPurchases);
     DECLARE_ID (iosBackgroundAudio);
     DECLARE_ID (iosBackgroundBle);
+    DECLARE_ID (iosPushNotifications);
+    DECLARE_ID (iosAppGroups);
     DECLARE_ID (iosDevelopmentTeamID);
+    DECLARE_ID (iosAppGroupsId);
+    DECLARE_ID (iosAppExtensionDuplicateResourcesFolder);
     DECLARE_ID (buildToolsVersion);
     DECLARE_ID (gradleVersion);
     const Identifier androidPluginVersion ("gradleWrapperVersion"); // old name is very confusing, but we need to remain backward compatible

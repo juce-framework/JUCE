@@ -27,7 +27,6 @@
 #include "../jucer_Headers.h"
 #include "jucer_StoredSettings.h"
 #include "../Application/jucer_Application.h"
-#include "../Application/jucer_GlobalPreferences.h"
 
 //==============================================================================
 StoredSettings& getAppSettings()
@@ -42,16 +41,20 @@ PropertiesFile& getGlobalProperties()
 
 //==============================================================================
 StoredSettings::StoredSettings()
-    : appearance (true), projectDefaults ("PROJECT_DEFAULT_SETTINGS")
+    : appearance (true),
+      projectDefaults ("PROJECT_DEFAULT_SETTINGS"),
+      fallbackPaths ("FALLBACK_PATHS")
 {
     updateOldProjectSettingsFiles();
     reload();
     projectDefaults.addListener (this);
+    fallbackPaths.addListener (this);
 }
 
 StoredSettings::~StoredSettings()
 {
     projectDefaults.removeListener (this);
+    fallbackPaths.removeListener (this);
     flush();
 }
 
@@ -122,9 +125,12 @@ void StoredSettings::reload()
     propertyFiles.add (createPropsFile ("Projucer", false));
 
     ScopedPointer<XmlElement> projectDefaultsXml (propertyFiles.getFirst()->getXmlValue ("PROJECT_DEFAULT_SETTINGS"));
-
     if (projectDefaultsXml != nullptr)
         projectDefaults = ValueTree::fromXml (*projectDefaultsXml);
+
+    ScopedPointer<XmlElement> fallbackPathsXml (propertyFiles.getFirst()->getXmlValue ("FALLBACK_PATHS"));
+    if (fallbackPathsXml != nullptr)
+        fallbackPaths = ValueTree::fromXml (*fallbackPathsXml);
 
     // recent files...
     recentFiles.restoreFromString (getGlobalProperties().getValue ("recentFiles"));
@@ -228,61 +234,76 @@ void StoredSettings::ColourSelectorWithSwatches::setSwatchColour (int index, con
 }
 
 //==============================================================================
-static bool doesSDKPathContainFile (const File& relativeTo, const String& path, const String& fileToCheckFor)
-{
-    auto actualPath = path.replace ("${user.home}", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
-    return relativeTo.getChildFile (actualPath + "/" + fileToCheckFor).existsAsFile();
-}
-
-Value StoredSettings::getGlobalPath (const Identifier& key, DependencyPathOS os)
+Value StoredSettings::getStoredPath (const Identifier& key)
 {
     auto v = projectDefaults.getPropertyAsValue (key, nullptr);
 
     if (v.toString().isEmpty())
+        v = getFallbackPathForOS (key, TargetOS::getThisOS()).toString();
+
+    return v;
+}
+
+Value StoredSettings::getFallbackPathForOS (const Identifier& key, DependencyPathOS os)
+{
+    auto id = Identifier();
+
+    if      (os == TargetOS::osx)     id = Ids::osxFallback;
+    else if (os == TargetOS::windows) id = Ids::windowsFallback;
+    else if (os == TargetOS::linux)   id = Ids::linuxFallback;
+
+    if (id == Identifier())
+        jassertfalse;
+
+    auto v = fallbackPaths.getOrCreateChildWithName (id, nullptr)
+                          .getPropertyAsValue (key, nullptr);
+
+    if (v.toString().isEmpty())
     {
-        auto defaultPath = getFallbackPath (key, os);
-        if (os == TargetOS::getThisOS())
-            v = defaultPath;
+        if (key == Ids::defaultJuceModulePath)
+        {
+            v = (os == TargetOS::windows ? "C:\\JUCE\\modules"
+                                         : "~/JUCE/modules");
+        }
+        else if (key == Ids::defaultUserModulePath)
+        {
+            v = (os == TargetOS::windows ? "C:\\modules"
+                                         : "~/modules");
+        }
+        else if (key == Ids::vst3Path)
+        {
+            v = (os == TargetOS::windows ? "C:\\SDKs\\VST_SDK\\VST3_SDK"
+                                         : "~/SDKs/VST_SDK/VST3_SDK");
+        }
+        else if (key == Ids::rtasPath)
+        {
+            if      (os == TargetOS::windows)  v = "C:\\SDKs\\PT_90_SDK";
+            else if (os == TargetOS::osx)      v = "~/SDKs/PT_90_SDK";
+            else                               jassertfalse; // no RTAS on this OS!
+        }
+        else if (key == Ids::aaxPath)
+        {
+            if      (os == TargetOS::windows)  v = "C:\\SDKs\\AAX";
+            else if (os == TargetOS::osx)      v = "~/SDKs/AAX" ;
+            else                               jassertfalse; // no AAX on this OS!
+        }
+        else if (key == Ids::androidSDKPath)
+        {
+            v = "${user.home}/Library/Android/sdk";
+        }
+        else if (key == Ids::androidNDKPath)
+        {
+            v = "${user.home}/Library/Android/sdk/ndk-bundle";
+        }
     }
 
     return v;
 }
 
-String StoredSettings::getFallbackPath (const Identifier& key, DependencyPathOS os)
+static bool doesSDKPathContainFile (const File& relativeTo, const String& path, const String& fileToCheckFor)
 {
-    if (key == Ids::vst3Path)
-        return os == TargetOS::windows ? "c:\\SDKs\\VST_SDK\\VST3_SDK"
-                                       : "~/SDKs/VST_SDK/VST3_SDK";
-
-    if (key == Ids::rtasPath)
-    {
-        if (os == TargetOS::windows)   return "c:\\SDKs\\PT_90_SDK";
-        if (os == TargetOS::osx)       return "~/SDKs/PT_90_SDK";
-
-        // no RTAS on this OS!
-        jassertfalse;
-        return {};
-    }
-
-    if (key == Ids::aaxPath)
-    {
-        if (os == TargetOS::windows)   return "c:\\SDKs\\AAX";
-        if (os == TargetOS::osx)       return "~/SDKs/AAX" ;
-
-        // no AAX on this OS!
-        jassertfalse;
-        return {};
-    }
-
-    if (key == Ids::androidSDKPath)
-        return "${user.home}/Library/Android/sdk";
-
-    if (key == Ids::androidNDKPath)
-        return "${user.home}/Library/Android/sdk/ndk-bundle";
-
-    // didn't recognise the key provided!
-    jassertfalse;
-    return {};
+    auto actualPath = path.replace ("${user.home}", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
+    return relativeTo.getChildFile (actualPath + "/" + fileToCheckFor).exists();
 }
 
 bool StoredSettings::isGlobalPathValid (const File& relativeTo, const Identifier& key, const String& path)
@@ -316,6 +337,14 @@ bool StoredSettings::isGlobalPathValid (const File& relativeTo, const Identifier
        #else
         fileToCheckFor = "ndk-depends";
        #endif
+    }
+    else if (key == Ids::defaultJuceModulePath)
+    {
+        fileToCheckFor = "juce_core";
+    }
+    else if (key == Ids::defaultUserModulePath)
+    {
+        fileToCheckFor = {};
     }
     else
     {

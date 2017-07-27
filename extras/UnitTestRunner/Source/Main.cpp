@@ -45,15 +45,23 @@ class ConsoleUnitTestRunner : public UnitTestRunner
 };
 
 //==============================================================================
-int main (int argc, char* argv[])
+int main()
 {
-    ignoreUnused (argc, argv);
-
-    ScopedPointer<ConsoleLogger> logger;
-    Logger::setCurrentLogger (logger);
+   #if ! JUCE_DEBUG
+    ConsoleLogger logger;
+    Logger::setCurrentLogger (&logger);
+   #endif
 
     ConsoleUnitTestRunner runner;
     runner.runAllTests();
+
+   #if ! JUCE_DEBUG
+    Logger::setCurrentLogger (nullptr);
+   #endif
+
+    for (int i = 0; i < runner.getNumResults(); ++i)
+        if (runner.getResult(i)->failures > 0)
+            return 1;
 
     return 0;
 }

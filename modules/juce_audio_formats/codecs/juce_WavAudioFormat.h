@@ -180,6 +180,7 @@ public:
     Array<int> getPossibleBitDepths() override;
     bool canDoStereo() override;
     bool canDoMono() override;
+    bool isChannelLayoutSupported (const AudioChannelSet& channelSet) override;
 
     //==============================================================================
     AudioFormatReader* createReaderFor (InputStream* sourceStream,
@@ -191,6 +192,13 @@ public:
     AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
                                         double sampleRateToUse,
                                         unsigned int numberOfChannels,
+                                        int bitsPerSample,
+                                        const StringPairArray& metadataValues,
+                                        int qualityOptionIndex) override;
+
+    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
+                                        double sampleRateToUse,
+                                        const AudioChannelSet& channelLayout,
                                         int bitsPerSample,
                                         const StringPairArray& metadataValues,
                                         int qualityOptionIndex) override;

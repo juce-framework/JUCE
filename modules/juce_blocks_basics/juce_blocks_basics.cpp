@@ -34,6 +34,7 @@ namespace juce
         #include "protocol/juce_BlockModels.h"
     }
 
+    #include "blocks/juce_BlockConfigManager.h"
     #include "blocks/juce_Block.cpp"
     #include "topology/juce_PhysicalTopologySource.cpp"
     #include "topology/juce_RuleBasedTopologySource.cpp"

@@ -745,7 +745,7 @@ void LatestVersionChecker::modalStateFinished (int result,
 
 void LatestVersionChecker::askUserForLocationToDownload (URL& newVersionToDownload, const String& extraHeaders)
 {
-    File targetFolder (findDefaultModulesFolder());
+    File targetFolder (EnabledModuleList::findGlobalModulesFolder());
 
     if (isJuceModulesFolder (targetFolder))
         targetFolder = targetFolder.getParentDirectory();

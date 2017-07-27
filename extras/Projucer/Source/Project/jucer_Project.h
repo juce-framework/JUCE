@@ -100,14 +100,16 @@ public:
     Value shouldReportAppUsage()                        { return getProjectValue (Ids::reportAppUsage); }
     Value splashScreenColour()                          { return getProjectValue (Ids::splashScreenColour); }
 
+    Value getCppStandardValue()                         { return getProjectValue (Ids::cppLanguageStandard); }
+
     //==============================================================================
     Value getProjectValue (const Identifier& name)       { return projectRoot.getPropertyAsValue (name, getUndoManagerFor (projectRoot)); }
     var   getProjectVar   (const Identifier& name) const { return projectRoot.getProperty        (name); }
 
-    Value getProjectPreprocessorDefs()                  { return getProjectValue (Ids::defines); }
+    Value getProjectPreprocessorDefs()                   { return getProjectValue (Ids::defines); }
     StringPairArray getPreprocessorDefs() const;
 
-    Value getProjectUserNotes()                         { return getProjectValue (Ids::userNotes); }
+    Value getProjectUserNotes()                          { return getProjectValue (Ids::userNotes); }
 
     //==============================================================================
     File getGeneratedCodeFolder() const                         { return getFile().getSiblingFile ("JuceLibraryCode"); }
@@ -352,6 +354,7 @@ private:
     //==============================================================================
     void setMissingAudioPluginDefaultValues();
     void createAudioPluginPropertyEditors (PropertyListBuilder& props);
+    bool setCppVersionFromOldExporterSettings();
 
     //==============================================================================
     friend class Item;

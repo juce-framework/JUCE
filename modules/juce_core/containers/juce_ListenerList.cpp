@@ -76,7 +76,7 @@ struct Listener2 : public ListenerBase
 class ListenerListTests : public UnitTest
 {
 public:
-    ListenerListTests() : UnitTest ("ListenerList") {}
+    ListenerListTests() : UnitTest ("ListenerList", "Containers") {}
 
     template <typename... Args>
     void callHelper (std::vector<int>& expectedCounterValues)
@@ -144,6 +144,8 @@ public:
 
     void runTest() override
     {
+        counter = 0;
+
         beginTest ("Call single listener");
         listeners.add (&listener1);
         std::vector<int> expectedCounterValues;
@@ -166,6 +168,9 @@ public:
             expectedCounterValues.push_back (i);
 
         callExcludingHelper (&listener2, expectedCounterValues, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+
+        listeners.remove (&listener1);
+        listeners.remove (&listener2);
     }
 
     int counter = 0;

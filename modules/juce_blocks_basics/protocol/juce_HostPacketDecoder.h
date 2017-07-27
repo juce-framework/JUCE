@@ -64,6 +64,8 @@ struct HostPacketDecoder
             case MessageFromDevice::deviceTopology:           return handleTopology (handler, reader, true);
             case MessageFromDevice::deviceTopologyExtend:     return handleTopology (handler, reader, false);
             case MessageFromDevice::deviceTopologyEnd:        return handleTopologyEnd (handler, reader);
+            case MessageFromDevice::deviceVersionList:        return handleVersion (handler, reader);
+            case MessageFromDevice::deviceNameList:           return handleName (handler, reader);
             case MessageFromDevice::touchStart:               return handleTouch (handler, reader, deviceIndex, packetTimestamp, true, false);
             case MessageFromDevice::touchMove:                return handleTouch (handler, reader, deviceIndex, packetTimestamp, false, false);
             case MessageFromDevice::touchEnd:                 return handleTouch (handler, reader, deviceIndex, packetTimestamp, false, true);
@@ -75,6 +77,7 @@ struct HostPacketDecoder
             case MessageFromDevice::programEventMessage:      return handleCustomMessage (handler, reader, deviceIndex, packetTimestamp);
             case MessageFromDevice::packetACK:                return handlePacketACK (handler, reader, deviceIndex);
             case MessageFromDevice::firmwareUpdateACK:        return handleFirmwareUpdateACK (handler, reader, deviceIndex);
+            case MessageFromDevice::configMessage:            return handleConfigMessage (handler, reader, deviceIndex);
             case MessageFromDevice::logMessage:               return handleLogMessage (handler, reader, deviceIndex);
 
             default:
@@ -112,6 +115,8 @@ struct HostPacketDecoder
 
         if (newTopology)
             handler.beginTopology ((int) numDevices, (int) numConnections);
+        else
+            handler.extendTopology ((int) numDevices, (int) numConnections);
 
         for (uint32 i = 0; i < numDevices; ++i)
             handleTopologyDevice (handler, reader);
@@ -164,6 +169,34 @@ struct HostPacketDecoder
         connection.port2   = reader.read<ConnectorPort>();
 
         handler.handleTopologyConnection (connection);
+    }
+
+    static bool handleVersion (Handler& handler, Packed7BitArrayReader& reader)
+    {
+        DeviceVersion version;
+
+        version.index = (TopologyIndex) reader.readBits (topologyIndexBits);
+        version.version.length = (uint8) reader.readBits (7);
+
+        for (uint32 i = 0; i < version.version.length; ++i)
+            version.version.version[i] = (uint8) reader.readBits (7);
+
+        handler.handleVersion (version);
+        return true;
+    }
+
+    static bool handleName (Handler& handler, Packed7BitArrayReader& reader)
+    {
+        DeviceName name;
+
+        name.index = (TopologyIndex) reader.readBits (topologyIndexBits);
+        name.name.length = (uint8) reader.readBits (7);
+
+        for (uint32 i = 0; i < name.name.length; ++i)
+            name.name.name[i] = (uint8) reader.readBits (7);
+
+        handler.handleName (name);
+        return true;
     }
 
     static bool handleTouch (Handler& handler, Packed7BitArrayReader& reader, TopologyIndex deviceIndex,
@@ -269,7 +302,39 @@ struct HostPacketDecoder
             return false;
         }
 
-        handler.handleFirmwareUpdateACK (deviceIndex, reader.read<FirmwareUpdateACKCode>());
+        handler.handleFirmwareUpdateACK (deviceIndex, reader.read<FirmwareUpdateACKCode>(), reader.read<FirmwareUpdateACKDetail>());
+        return true;
+    }
+
+    static bool handleConfigMessage (Handler& handler, Packed7BitArrayReader& reader, TopologyIndex deviceIndex)
+    {
+        ConfigCommand type = reader.read<ConfigCommand>().get();
+
+        if (type == updateConfig)
+        {
+            auto item  = (int32) reader.read<IntegerWithBitSize<8>>().get();
+            auto value = (int32) reader.read<IntegerWithBitSize<32>>().get();
+            auto min   = (int32) reader.read<IntegerWithBitSize<32>>().get();
+            auto max   = (int32) reader.read<IntegerWithBitSize<32>>().get();
+
+            handler.handleConfigUpdateMessage (deviceIndex, item, value, min, max);
+            return true;
+        }
+
+        if (type == setConfig)
+        {
+            auto item  = (int32) reader.read<IntegerWithBitSize<8>>().get();
+            auto value = (int32) reader.read<IntegerWithBitSize<32>>().get();
+
+            handler.handleConfigSetMessage (deviceIndex, item, value);
+            return true;
+        }
+
+        if (type == factorySyncEnd)
+        {
+            handler.handleConfigFactorySyncEndMessage (deviceIndex);
+        }
+
         return true;
     }
 

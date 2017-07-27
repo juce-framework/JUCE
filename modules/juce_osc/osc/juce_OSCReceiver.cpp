@@ -234,7 +234,7 @@ namespace
                 bundle.addElement (readElement());
 
                 auto newPos = getPosition();
-                bytesRead += newPos - pos;
+                bytesRead += (size_t) (newPos - pos);
                 pos = newPos;
             }
 
@@ -635,7 +635,7 @@ void OSCReceiver::registerFormatErrorHandler (FormatErrorHandler handler)
 class OSCInputStreamTests  : public UnitTest
 {
 public:
-    OSCInputStreamTests() : UnitTest ("OSCInputStream class") {}
+    OSCInputStreamTests() : UnitTest ("OSCInputStream class", "OSC") {}
 
     void runTest()
     {

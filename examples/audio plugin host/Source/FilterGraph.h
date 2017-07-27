@@ -52,9 +52,9 @@ public:
     AudioProcessorGraph::Node::Ptr getNodeForId (uint32 uid) const;
     AudioProcessorGraph::Node::Ptr getNodeForName (const String& name) const;
 
-    void addFilter (const PluginDescription*, double x, double y);
+    void addFilter (const PluginDescription&, Point<double>);
 
-    void addFilterCallback (AudioPluginInstance* instance, const String& error, double x, double y);
+    void addFilterCallback (AudioPluginInstance*, const String& error, Point<double> pos);
 
     void removeFilter (const uint32 filterUID);
     void disconnectFilter (const uint32 filterUID);
@@ -113,7 +113,7 @@ private:
     AudioPluginFormatManager& formatManager;
     AudioProcessorGraph graph;
 
-    uint32 lastUID;
+    uint32 lastUID = 0;
     uint32 getNextUID() noexcept;
 
     void createNodeFromXml (const XmlElement& xml);

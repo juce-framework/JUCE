@@ -314,7 +314,7 @@ bool OSCSender::sendToIPAddress (const String& host, int port, const OSCBundle& 
 class OSCBinaryWriterTests  : public UnitTest
 {
 public:
-    OSCBinaryWriterTests() : UnitTest ("OSCBinaryWriter class") {}
+    OSCBinaryWriterTests() : UnitTest ("OSCBinaryWriter class", "OSC") {}
 
     void runTest()
     {
@@ -641,7 +641,7 @@ static OSCBinaryWriterTests OSCBinaryWriterUnitTests;
 class OSCRoundTripTests  : public UnitTest
 {
 public:
-    OSCRoundTripTests() : UnitTest ("OSCRoundTripTests class") {}
+    OSCRoundTripTests() : UnitTest ("OSCRoundTripTests class", "OSC") {}
 
     void runTest()
     {

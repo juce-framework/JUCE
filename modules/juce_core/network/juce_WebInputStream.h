@@ -122,7 +122,7 @@ class JUCE_API WebInputStream : public InputStream
         an error has occurred.
 
         Note that most methods will call connect internally if they are called without
-        an established connection. Therefore, it is not necessary to explicitely
+        an established connection. Therefore, it is not necessary to explicitly
         call connect unless you would like to use a custom listener.
 
         After a successful call to connect, getResponseHeaders, getTotalLength and
@@ -135,10 +135,10 @@ class JUCE_API WebInputStream : public InputStream
     */
     bool connect (Listener* listener);
 
-    /** Returns true if there was an error during the connection attempt */
+    /** Returns true if there was an error during the connection attempt. */
     bool isError() const;
 
-    /** Will cancel a blocking read. */
+    /** Will cancel a blocking read and prevent any subsequent connection attempts. */
     void cancel();
 
     //==============================================================================

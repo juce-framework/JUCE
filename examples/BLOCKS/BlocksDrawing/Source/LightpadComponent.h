@@ -58,8 +58,8 @@ class LightpadComponent : public Component
 public:
     LightpadComponent ()
     {
-        for (int x = 0; x < 15; ++x)
-            for (int y = 0; y < 15; ++y)
+        for (auto x = 0; x < 15; ++x)
+            for (auto y = 0; y < 15; ++y)
                 addAndMakeVisible (leds.add (new LEDComponent()));
     }
 
@@ -81,13 +81,13 @@ public:
 
     void resized() override
     {
-        Rectangle<int> r = getLocalBounds().reduced (10);
+        auto r = getLocalBounds().reduced (10);
 
-        int circleWidth = r.getWidth() / 15;
-        int circleHeight = r.getHeight() / 15;
+        auto circleWidth = r.getWidth() / 15;
+        auto circleHeight = r.getHeight() / 15;
 
-        for (int x = 0; x < 15; ++x)
-            for (int y = 0; y < 15; ++y)
+        for (auto x = 0; x < 15; ++x)
+            for (auto y = 0; y < 15; ++y)
                 leds.getUnchecked ((x * 15) + y)->setBounds (r.getX() + (x * circleWidth),
                                                              r.getY() + (y * circleHeight),
                                                              circleWidth, circleHeight);
@@ -95,9 +95,9 @@ public:
 
     void mouseDown (const MouseEvent& e) override
     {
-        for (int x = 0; x < 15; ++x)
+        for (auto x = 0; x < 15; ++x)
         {
-            for (int y = 0; y < 15; ++y)
+            for (auto y = 0; y < 15; ++y)
             {
                 if (leds.getUnchecked ((x * 15) + y)->getBounds().contains (e.position.toInt()))
                 {
@@ -109,13 +109,13 @@ public:
 
     void mouseDrag (const MouseEvent& e) override
     {
-        for (int x = 0; x < 15; ++x)
+        for (auto x = 0; x < 15; ++x)
         {
-            for (int y = 0; y < 15; ++y)
+            for (auto y = 0; y < 15; ++y)
             {
                 if (leds.getUnchecked ((x * 15) + y)->getBounds().contains (e.position.toInt()))
                 {
-                    const Time t = e.eventTime;
+                    const auto t = e.eventTime;
 
                     if (lastLED == Point<int> (x, y) && t.toMilliseconds() - lastMouseEventTime.toMilliseconds() < 50)
                         return;

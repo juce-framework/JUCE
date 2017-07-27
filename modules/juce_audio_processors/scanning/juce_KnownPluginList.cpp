@@ -31,7 +31,7 @@ void KnownPluginList::clear()
 {
     ScopedLock lock (typesArrayLock);
 
-    if (types.size() > 0)
+    if (! types.isEmpty())
     {
         types.clear();
         sendChangeMessage();
@@ -42,9 +42,9 @@ PluginDescription* KnownPluginList::getTypeForFile (const String& fileOrIdentifi
 {
     ScopedLock lock (typesArrayLock);
 
-    for (int i = 0; i < types.size(); ++i)
-        if (types.getUnchecked(i)->fileOrIdentifier == fileOrIdentifier)
-            return types.getUnchecked(i);
+    for (auto* desc : types)
+        if (desc->fileOrIdentifier == fileOrIdentifier)
+            return desc;
 
     return nullptr;
 }
@@ -53,9 +53,9 @@ PluginDescription* KnownPluginList::getTypeForIdentifierString (const String& id
 {
     ScopedLock lock (typesArrayLock);
 
-    for (int i = 0; i < types.size(); ++i)
-        if (types.getUnchecked(i)->matchesIdentifierString (identifierString))
-            return types.getUnchecked(i);
+    for (auto* desc : types)
+        if (desc->matchesIdentifierString (identifierString))
+            return desc;
 
     return nullptr;
 }
@@ -65,15 +65,15 @@ bool KnownPluginList::addType (const PluginDescription& type)
     {
         ScopedLock lock (typesArrayLock);
 
-        for (int i = types.size(); --i >= 0;)
+        for (auto* desc : types)
         {
-            if (types.getUnchecked(i)->isDuplicateOf (type))
+            if (desc->isDuplicateOf (type))
             {
                 // strange - found a duplicate plugin with different info..
-                jassert (types.getUnchecked(i)->name == type.name);
-                jassert (types.getUnchecked(i)->isInstrument == type.isInstrument);
+                jassert (desc->name == type.name);
+                jassert (desc->isInstrument == type.isInstrument);
 
-                *types.getUnchecked(i) = type;
+                *desc = type;
                 return false;
             }
         }
@@ -89,7 +89,6 @@ void KnownPluginList::removeType (const int index)
 {
     {
         ScopedLock lock (typesArrayLock);
-
         types.remove (index);
     }
 
@@ -104,14 +103,9 @@ bool KnownPluginList::isListingUpToDate (const String& fileOrIdentifier,
 
     ScopedLock lock (typesArrayLock);
 
-    for (int i = types.size(); --i >= 0;)
-    {
-        const PluginDescription* const d = types.getUnchecked(i);
-
-        if (d->fileOrIdentifier == fileOrIdentifier
-             && formatToUse.pluginNeedsRescanning (*d))
+    for (auto* d : types)
+        if (d->fileOrIdentifier == fileOrIdentifier && formatToUse.pluginNeedsRescanning (*d))
             return false;
-    }
 
     return true;
 }
@@ -135,10 +129,8 @@ bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
 
         ScopedLock lock (typesArrayLock);
 
-        for (int i = types.size(); --i >= 0;)
+        for (auto* d : types)
         {
-            const PluginDescription* const d = types.getUnchecked(i);
-
             if (d->fileOrIdentifier == fileOrIdentifier && d->pluginFormatName == format.getName())
             {
                 if (format.pluginNeedsRescanning (*d))
@@ -171,30 +163,27 @@ bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
         }
     }
 
-    for (int i = 0; i < found.size(); ++i)
+    for (auto* desc : found)
     {
-        PluginDescription* const desc = found.getUnchecked(i);
         jassert (desc != nullptr);
-
         addType (*desc);
         typesFound.add (new PluginDescription (*desc));
     }
 
-    return found.size() > 0;
+    return ! found.isEmpty();
 }
 
 void KnownPluginList::scanAndAddDragAndDroppedFiles (AudioPluginFormatManager& formatManager,
                                                      const StringArray& files,
                                                      OwnedArray<PluginDescription>& typesFound)
 {
-    for (int i = 0; i < files.size(); ++i)
+    for (const auto& filenameOrID : files)
     {
-        const String filenameOrID (files[i]);
         bool found = false;
 
         for (int j = 0; j < formatManager.getNumFormats(); ++j)
         {
-            AudioPluginFormat* const format = formatManager.getFormat (j);
+            auto* format = formatManager.getFormat (j);
 
             if (format->fileMightContainThisPluginType (filenameOrID)
                  && scanAndAddFile (filenameOrID, true, typesFound, *format))
@@ -216,8 +205,8 @@ void KnownPluginList::scanAndAddDragAndDroppedFiles (AudioPluginFormatManager& f
                     Array<File> subFiles;
                     f.findChildFiles (subFiles, File::findFilesAndDirectories, false);
 
-                    for (int j = 0; j < subFiles.size(); ++j)
-                        s.add (subFiles.getReference(j).getFullPathName());
+                    for (auto& subFile : subFiles)
+                        s.add (subFile.getFullPathName());
                 }
 
                 scanAndAddDragAndDroppedFiles (formatManager, s, typesFound);
@@ -340,7 +329,7 @@ void KnownPluginList::sort (const SortMethod method, bool forwards)
 //==============================================================================
 XmlElement* KnownPluginList::createXml() const
 {
-    XmlElement* const e = new XmlElement ("KNOWNPLUGINS");
+    auto e = new XmlElement ("KNOWNPLUGINS");
 
     {
         ScopedLock lock (typesArrayLock);
@@ -349,8 +338,8 @@ XmlElement* KnownPluginList::createXml() const
             e->prependChildElement (types.getUnchecked(i)->createXml());
     }
 
-    for (int i = 0; i < blacklist.size(); ++i)
-        e->createNewChildElement ("BLACKLISTED")->setAttribute ("id", blacklist[i]);
+    for (auto& b : blacklist)
+        e->createNewChildElement ("BLACKLISTED")->setAttribute ("id", b);
 
     return e;
 }
@@ -381,12 +370,10 @@ struct PluginTreeUtils
 
     static void buildTreeByFolder (KnownPluginList::PluginTree& tree, const Array<PluginDescription*>& allPlugins)
     {
-        for (int i = 0; i < allPlugins.size(); ++i)
+        for (auto* pd : allPlugins)
         {
-            PluginDescription* const pd = allPlugins.getUnchecked (i);
-
-            String path (pd->fileOrIdentifier.replaceCharacter ('\\', '/')
-                                             .upToLastOccurrenceOf ("/", false, false));
+            auto path = pd->fileOrIdentifier.replaceCharacter ('\\', '/')
+                                            .upToLastOccurrenceOf ("/", false, false);
 
             if (path.substring (1, 2) == ":")
                 path = path.substring (2);
@@ -401,15 +388,13 @@ struct PluginTreeUtils
     {
         for (int i = tree.subFolders.size(); --i >= 0;)
         {
-            KnownPluginList::PluginTree& sub = *tree.subFolders.getUnchecked(i);
+            auto& sub = *tree.subFolders.getUnchecked(i);
             optimiseFolders (sub, concatenateName || (tree.subFolders.size() > 1));
 
-            if (sub.plugins.size() == 0)
+            if (sub.plugins.isEmpty())
             {
-                for (int j = 0; j < sub.subFolders.size(); ++j)
+                for (auto* s : sub.subFolders)
                 {
-                    KnownPluginList::PluginTree* const s = sub.subFolders.getUnchecked(j);
-
                     if (concatenateName)
                         s->folder = sub.folder + "/" + s->folder;
 
@@ -429,10 +414,9 @@ struct PluginTreeUtils
         String lastType;
         ScopedPointer<KnownPluginList::PluginTree> current (new KnownPluginList::PluginTree());
 
-        for (int i = 0; i < sorted.size(); ++i)
+        for (auto* pd : sorted)
         {
-            const PluginDescription* const pd = sorted.getUnchecked(i);
-            String thisType (sortMethod == KnownPluginList::sortByCategory ? pd->category
+            auto thisType = (sortMethod == KnownPluginList::sortByCategory ? pd->category
                                                                            : pd->manufacturerName);
 
             if (! thisType.containsNonWhitespaceChars())
@@ -473,8 +457,8 @@ struct PluginTreeUtils
                 path = path.fromFirstOccurrenceOf (":", false, false); // avoid the special AU formatting nonsense on Mac..
            #endif
 
-            const String firstSubFolder (path.upToFirstOccurrenceOf ("/", false, false));
-            const String remainingPath  (path.fromFirstOccurrenceOf ("/", false, false));
+            auto firstSubFolder = path.upToFirstOccurrenceOf ("/", false, false);
+            auto remainingPath  = path.fromFirstOccurrenceOf ("/", false, false);
 
             for (int i = tree.subFolders.size(); --i >= 0;)
             {
@@ -487,7 +471,7 @@ struct PluginTreeUtils
                 }
             }
 
-            KnownPluginList::PluginTree* const newFolder = new KnownPluginList::PluginTree();
+            auto newFolder = new KnownPluginList::PluginTree();
             newFolder->folder = firstSubFolder;
             tree.subFolders.add (newFolder);
             addPlugin (*newFolder, pd, remainingPath);
@@ -512,22 +496,18 @@ struct PluginTreeUtils
     {
         bool isTicked = false;
 
-        for (int i = 0; i < tree.subFolders.size(); ++i)
+        for (auto* sub : tree.subFolders)
         {
-            const KnownPluginList::PluginTree& sub = *tree.subFolders.getUnchecked(i);
-
             PopupMenu subMenu;
-            const bool isItemTicked = addToMenu (sub, subMenu, allPlugins, currentlyTickedPluginID);
+            const bool isItemTicked = addToMenu (*sub, subMenu, allPlugins, currentlyTickedPluginID);
             isTicked = isTicked || isItemTicked;
 
-            m.addSubMenu (sub.folder, subMenu, true, nullptr, isItemTicked, 0);
+            m.addSubMenu (sub->folder, subMenu, true, nullptr, isItemTicked, 0);
         }
 
-        for (int i = 0; i < tree.plugins.size(); ++i)
+        for (auto* plugin : tree.plugins)
         {
-            const PluginDescription* const plugin = tree.plugins.getUnchecked(i);
-
-            String name (plugin->name);
+            auto name = plugin->name;
 
             if (containsDuplicateNames (tree.plugins, name))
                 name << " (" << plugin->pluginFormatName << ')';
@@ -550,11 +530,11 @@ KnownPluginList::PluginTree* KnownPluginList::createTree (const SortMethod sortM
         ScopedLock lock (typesArrayLock);
         PluginSorter sorter (sortMethod, true);
 
-        for (int i = 0; i < types.size(); ++i)
-            sorted.addSorted (sorter, types.getUnchecked(i));
+        for (auto* t : types)
+            sorted.addSorted (sorter, t);
     }
 
-    PluginTree* tree = new PluginTree();
+    auto* tree = new PluginTree();
 
     if (sortMethod == sortByCategory || sortMethod == sortByManufacturer || sortMethod == sortByFormat)
     {
@@ -566,8 +546,8 @@ KnownPluginList::PluginTree* KnownPluginList::createTree (const SortMethod sortM
     }
     else
     {
-        for (int i = 0; i < sorted.size(); ++i)
-            tree->plugins.add (sorted.getUnchecked(i));
+        for (auto* p : sorted)
+            tree->plugins.add (p);
     }
 
     return tree;
@@ -595,7 +575,7 @@ void KnownPluginList::CustomScanner::scanFinished() {}
 
 bool KnownPluginList::CustomScanner::shouldExit() const noexcept
 {
-    if (ThreadPoolJob* job = ThreadPoolJob::getCurrentThreadPoolJob())
+    if (auto* job = ThreadPoolJob::getCurrentThreadPoolJob())
         return job->shouldExit();
 
     return false;

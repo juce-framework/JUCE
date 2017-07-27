@@ -28,7 +28,7 @@
 
 #include "../Project/jucer_Project.h"
 #include "../Project/jucer_ProjectType.h"
-#include "../Application/jucer_GlobalPreferences.h"
+#include "../Project/jucer_DependencyPathPropertyComponent.h"
 
 class ProjectSaver;
 
@@ -154,11 +154,16 @@ public:
     Value getRTASPathValue() const              { return rtasPath; }
     Value getAAXPathValue() const               { return aaxPath; }
 
+    Value getShouldUseGNUExtensionsValue()      { return getSetting (Ids::enableGNUExtensions); }
+    bool shouldUseGNUExtensions() const         { return (getSettingString (Ids::enableGNUExtensions) == "1");}
+
     // NB: this is the path to the parent "modules" folder that contains the named module, not the
     // module folder itself.
     Value getPathForModuleValue (const String& moduleID);
     String getPathForModuleString (const String& moduleID) const;
     void removePathForModule (const String& moduleID);
+
+    TargetOS::OS getTargetOSForExporter() const;
 
     RelativePath getLegacyModulePath (const String& moduleID) const;
     String getLegacyModulePath() const;
@@ -217,6 +222,9 @@ public:
     StringArray mingwLibs, windowsLibs;
 
     //==============================================================================
+    StringArray androidLibs;
+
+    //==============================================================================
     StringArray extraSearchPaths;
     StringArray moduleLibSearchPaths;
 
@@ -232,7 +240,7 @@ public:
         //==============================================================================
         virtual void createConfigProperties (PropertyListBuilder&) = 0;
         virtual var getDefaultOptimisationLevel() const = 0;
-        virtual String getLibrarySubdirPath() const         { return {}; }
+        virtual String getModuleLibraryArchName() const = 0;
 
 
         //==============================================================================

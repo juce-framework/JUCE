@@ -142,18 +142,15 @@ URL::URL (const String& u)  : url (u)
             const int nextAmp   = url.indexOfChar (i + 1, '&');
             const int equalsPos = url.indexOfChar (i + 1, '=');
 
-            if (equalsPos > i + 1)
+            if (nextAmp < 0)
             {
-                if (nextAmp < 0)
-                {
-                    addParameter (removeEscapeChars (url.substring (i + 1, equalsPos)),
-                                  removeEscapeChars (url.substring (equalsPos + 1)));
-                }
-                else if (nextAmp > 0 && equalsPos < nextAmp)
-                {
-                    addParameter (removeEscapeChars (url.substring (i + 1, equalsPos)),
-                                  removeEscapeChars (url.substring (equalsPos + 1, nextAmp)));
-                }
+                addParameter (removeEscapeChars (equalsPos < 0 ? url.substring (i + 1) : url.substring (i + 1, equalsPos)),
+                              equalsPos < 0 ? String() : removeEscapeChars (url.substring (equalsPos + 1)));
+            }
+            else if (nextAmp > 0 && equalsPos < nextAmp)
+            {
+                addParameter (removeEscapeChars (equalsPos < 0 ? url.substring (i + 1, nextAmp) : url.substring (i + 1, equalsPos)),
+                              equalsPos < 0 ? String() : removeEscapeChars (url.substring (equalsPos + 1, nextAmp)));
             }
 
             i = nextAmp;
@@ -221,9 +218,12 @@ namespace URLHelpers
             if (i > 0)
                 p << '&';
 
-            p << URL::addEscapeChars (url.getParameterNames()[i], true)
-              << '='
-              << URL::addEscapeChars (url.getParameterValues()[i], true);
+            auto val = url.getParameterValues()[i];
+
+            p << URL::addEscapeChars (url.getParameterNames()[i], true);
+
+            if (val.isNotEmpty())
+                p << '=' << URL::addEscapeChars (val, true);
         }
 
         return p;

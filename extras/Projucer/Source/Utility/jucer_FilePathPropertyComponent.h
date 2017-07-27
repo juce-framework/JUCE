@@ -40,9 +40,10 @@ public:
                                const String& propertyDescription,
                                bool isDirectory,
                                const String& wildcards = "*",
-                               const File& rootToUseForRelativePaths = File())
+                               const File& rootToUseForRelativePaths = File(),
+                               const bool supportsMultiplePaths = false)
         : PropertyComponent (propertyDescription),
-          innerComp (valueToControl, isDirectory, wildcards, rootToUseForRelativePaths)
+          innerComp (valueToControl, isDirectory, wildcards, rootToUseForRelativePaths, supportsMultiplePaths)
     {
         addAndMakeVisible (innerComp);
     }
@@ -52,18 +53,21 @@ public:
 private:
     struct InnerComponent   : public Component,
                               public FileDragAndDropTarget,
-                              private Button::Listener
+                              private Button::Listener,
+                              private TextEditor::Listener
     {
-        InnerComponent (Value v, bool isDir, const String& wc, const File& rt)
+        InnerComponent (Value v, bool isDir, const String& wc, const File& rt, const bool multiplePaths)
             : value (v),
               isDirectory (isDir),
               highlightForDragAndDrop (false),
               wildcards (wc),
               root (rt),
-              button ("...")
+              button ("..."),
+              supportsMultiplePaths (multiplePaths)
         {
             addAndMakeVisible (textbox);
             textbox.getTextValue().referTo (value);
+            textbox.addListener (this);
 
             addAndMakeVisible (button);
             button.addListener (this);
@@ -75,8 +79,8 @@ private:
         {
             if (highlightForDragAndDrop)
             {
-                g.setColour (Colours::green.withAlpha (0.1f));
-                g.fillRect (getLocalBounds());
+                g.setColour (findColour (defaultHighlightColourId).withAlpha (0.5f));
+                g.fillRect (textbox.getBounds());
             }
         }
 
@@ -101,6 +105,9 @@ private:
                                                : firstFile.getParentDirectory());
             else
                 setTo (firstFile);
+
+            highlightForDragAndDrop = false;
+            repaint();
         }
 
         void buttonClicked (Button*) override
@@ -123,18 +130,74 @@ private:
             }
         }
 
+        void textEditorReturnKeyPressed (TextEditor& editor) override   { updateEditorColour (editor); }
+        void textEditorFocusLost (TextEditor& editor) override          { updateEditorColour (editor); }
+
+        void updateEditorColour (TextEditor& editor)
+        {
+            if (supportsMultiplePaths)
+            {
+                auto paths = StringArray::fromTokens (editor.getTextValue().toString(), ";", {});
+
+                editor.clear();
+
+                AttributedString str;
+                for (auto p : paths)
+                {
+                    if (root.getChildFile (p.trim()).exists())    editor.setColour (TextEditor::textColourId, findColour (widgetTextColourId));
+                    else                                          editor.setColour (TextEditor::textColourId, Colours::red);
+
+                    editor.insertTextAtCaret (p);
+
+                    if (paths.indexOf (p) < paths.size() - 1)
+                    {
+                        editor.setColour (TextEditor::textColourId, findColour (widgetTextColourId));
+                        editor.insertTextAtCaret (";");
+                    }
+                }
+
+                editor.setColour (TextEditor::textColourId, findColour (widgetTextColourId));
+            }
+            else
+            {
+                auto pathToCheck = editor.getTextValue().toString();
+
+                //android SDK/NDK paths
+                if (pathToCheck.contains ("${user.home}"))
+                    pathToCheck = pathToCheck.replace ("${user.home}", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
+
+              #if JUCE_WINDOWS
+                if (pathToCheck.startsWith ("~"))
+                    pathToCheck = pathToCheck.replace ("~", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
+              #endif
+
+                const auto currentFile = root.getChildFile (pathToCheck);
+
+                if (currentFile.exists())
+                    editor.applyColourToAllText (findColour (widgetTextColourId));
+                else
+                    editor.applyColourToAllText (Colours::red);
+            }
+        }
+
         void setTo (const File& f)
         {
-            value = (root == File()) ? f.getFullPathName()
-                                     : f.getRelativePathFrom (root);
+            auto pathName = (root == File()) ? f.getFullPathName()
+                                             : f.getRelativePathFrom (root);
+
+            if (supportsMultiplePaths && value.toString().isNotEmpty())
+                value = value.toString().trimCharactersAtEnd (" ;") + "; " + pathName;
+            else
+                value = pathName;
+
+            updateEditorColour (textbox);
         }
 
         void lookAndFeelChanged() override
         {
             textbox.setColour (TextEditor::backgroundColourId, findColour (widgetBackgroundColourId));
             textbox.setColour (TextEditor::outlineColourId, Colours::transparentBlack);
-            textbox.setColour (TextEditor::textColourId, findColour (widgetTextColourId));
-            textbox.applyFontToAllText (textbox.getFont());
+            updateEditorColour (textbox);
 
             button.setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
             button.setColour (TextButton::textColourOffId, Colours::white);
@@ -146,6 +209,7 @@ private:
         File root;
         TextEditor textbox;
         TextButton button;
+        bool supportsMultiplePaths;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InnerComponent)
     };

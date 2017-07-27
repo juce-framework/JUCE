@@ -36,14 +36,15 @@
 
   ID:               juce_video
   vendor:           juce
-  version:          5.0.2
+  version:          5.1.0
   name:             JUCE video playback and capture classes
   description:      Classes for playing video and capturing camera input.
   website:          http://www.juce.com/juce
   license:          GPL/Commercial
 
   dependencies:     juce_data_structures juce_cryptography
-  OSXFrameworks:    AVFoundation CoreMedia
+  OSXFrameworks:    AVKit AVFoundation CoreMedia
+  iOSFrameworks:    AVKit AVFoundation CoreMedia
 
  END_JUCE_MODULE_DECLARATION
 
@@ -56,59 +57,26 @@
 //==============================================================================
 #include <juce_gui_extra/juce_gui_extra.h>
 
-//==============================================================================
-/** Config: JUCE_DIRECTSHOW
-    Enables DirectShow media-streaming architecture (MS Windows only).
-*/
-#ifndef JUCE_DIRECTSHOW
- #define JUCE_DIRECTSHOW 0
-#endif
+//=============================================================================
+#include "../juce_gui_extra/juce_gui_extra.h"
 
-/** Config: JUCE_MEDIAFOUNDATION
-    Enables Media Foundation multimedia platform (Windows Vista and above).
-*/
-#ifndef JUCE_MEDIAFOUNDATION
- #define JUCE_MEDIAFOUNDATION 0
-#endif
-
-#if ! JUCE_WINDOWS
- #undef JUCE_DIRECTSHOW
- #undef JUCE_MEDIAFOUNDATION
-#endif
-
-/** Config: JUCE_QUICKTIME
-    Enables the QuickTimeMovieComponent class (Mac and Windows).
-    If you're building on Windows, you'll need to have the Apple QuickTime SDK
-    installed, and its header files will need to be on your include path.
-*/
-#if ! (defined (JUCE_QUICKTIME) || JUCE_LINUX || JUCE_IOS || JUCE_ANDROID || (JUCE_WINDOWS && ! JUCE_MSVC))
- #define JUCE_QUICKTIME 0
-#endif
-
+//=============================================================================
 /** Config: JUCE_USE_CAMERA
     Enables web-cam support using the CameraDevice class (Mac and Windows).
 */
-#if (JUCE_QUICKTIME || JUCE_WINDOWS) && ! defined (JUCE_USE_CAMERA)
+#ifndef JUCE_USE_CAMERA
  #define JUCE_USE_CAMERA 0
 #endif
 
 #if ! (JUCE_MAC || JUCE_WINDOWS)
- #undef JUCE_QUICKTIME
  #undef JUCE_USE_CAMERA
 #endif
 
-//==============================================================================
+//=============================================================================
 namespace juce
 {
 
-#if JUCE_DIRECTSHOW || DOXYGEN
- #include "playback/juce_DirectShowComponent.h"
-#endif
-
-#if JUCE_MAC || DOXYGEN
- #include "playback/juce_MovieComponent.h"
-#endif
-
+#include "playback/juce_VideoComponent.h"
 #include "capture/juce_CameraDevice.h"
 
 }

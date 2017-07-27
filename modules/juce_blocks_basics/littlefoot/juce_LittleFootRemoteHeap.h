@@ -122,12 +122,24 @@ struct LittleFootRemoteHeap
         return ! needsSyncing;
     }
 
+    static bool isAllZero (const uint8* data, size_t size) noexcept
+    {
+        for (size_t i = 0; i < size; ++i)
+            if (data[i] != 0)
+                return false;
+
+        return true;
+    }
+
     void sendChanges (ImplementationClass& bi, bool forceSend)
     {
         if ((needsSyncing && messagesSent.isEmpty()) || forceSend)
         {
             for (int maxChanges = 30; --maxChanges >= 0;)
             {
+                if (isAllZero (targetData, blockSize))
+                    break;
+
                 uint16 data[ImplementationClass::maxBlockSize];
                 auto* latestState = getLatestExpectedDataState();
 
@@ -216,7 +228,7 @@ struct LittleFootRemoteHeap
     static constexpr uint16 unknownByte = 0x100;
 
 private:
-    uint16 deviceState[ImplementationClass::maxBlockSize];
+    uint16 deviceState[ImplementationClass::maxBlockSize] = { 0 };
     uint8 targetData[ImplementationClass::maxBlockSize] = { 0 };
     uint32 programSize = 0;
     bool needsSyncing = true, programStateKnown = true, programLoaded = false;

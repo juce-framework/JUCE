@@ -94,6 +94,8 @@ public:
     ValueTree createValueTree (ComponentBuilder::ImageProvider*) const override;
     /** @internal */
     static const Identifier valueTreeType;
+    /** @internal */
+    Path getOutlineAsPath() const override;
 
     //==============================================================================
     /** Internally-used class for wrapping a DrawableImage's state into a ValueTree. */

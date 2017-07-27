@@ -69,7 +69,7 @@ namespace CodeHelpers
         return lines.joinIntoString (newLine);
     }
 
-    String makeValidIdentifier (String s, bool capitalise, bool removeColons, bool allowTemplates)
+    String makeValidIdentifier (String s, bool capitalise, bool removeColons, bool allowTemplates, bool allowAsterisks)
     {
         if (s.isEmpty())
             return "unknown";
@@ -92,6 +92,9 @@ namespace CodeHelpers
 
         if (! removeColons)
             allowedChars += ":";
+
+        if (allowAsterisks)
+            allowedChars += "*";
 
         StringArray words;
         words.addTokens (s.retainCharacters (allowedChars), false);

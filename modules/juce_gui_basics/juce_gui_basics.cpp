@@ -76,10 +76,6 @@
   #endif
  #endif
 
- #if JUCE_QUICKTIME && JUCE_MSVC && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
-  #pragma comment (lib, "QTMLClient.lib")
- #endif
-
  #if JUCE_DIRECT2D && JUCE_MSVC && ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
   #pragma comment (lib, "Dwrite.lib")
   #pragma comment (lib, "D2d1.lib")
@@ -258,7 +254,7 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
 #include "misc/juce_JUCESplashScreen.cpp"
 
 // these classes are C++11-only
-#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS && JUCE_COMPILER_SUPPORTS_LAMBDAS
+#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
  #include "layout/juce_FlexBox.cpp"
 #endif
 

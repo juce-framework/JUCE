@@ -99,7 +99,7 @@ bool MPENote::operator!= (const MPENote& other) const noexcept
 class MPENoteTests : public UnitTest
 {
 public:
-    MPENoteTests() : UnitTest ("MPENote class") {}
+    MPENoteTests() : UnitTest ("MPENote class", "MIDI/MPE") {}
 
     //==============================================================================
     void runTest() override
