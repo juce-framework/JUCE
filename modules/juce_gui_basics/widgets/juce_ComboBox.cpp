@@ -93,6 +93,23 @@ void ComboBox::addItem (const String& newItemText, int newItemId)
         currentMenu.addItem (newItemId, newItemText, true, false);
 }
 
+void ComboBox::addItem (const String& newItemText, int newItemId, const Image & newItemImage)
+{
+    // you can't add empty strings to the list..
+    //jassert (newItemText.isNotEmpty());
+    
+    // IDs must be non-zero, as zero is used to indicate a lack of selecion.
+    jassert (newItemId != 0);
+    
+    // you shouldn't use duplicate item IDs!
+    jassert (getItemForId (newItemId) == nullptr);
+    
+    if (/*newItemText.isNotEmpty() &&*/ newItemId != 0)
+    {
+        currentMenu.addItem (newItemId, newItemText, true, false, newItemImage);
+    }
+}
+
 void ComboBox::addItemList (const StringArray& itemsToAdd, int firstItemID)
 {
     for (auto& i : itemsToAdd)

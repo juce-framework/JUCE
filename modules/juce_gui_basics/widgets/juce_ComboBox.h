@@ -99,6 +99,18 @@ public:
     */
     void addItem (const String& newItemText, int newItemId);
 
+    /** Adds an item to be shown in the drop-down list.
+     
+     @param newItemText      the text of the item to show in the list
+     @param newItemId        an associated ID number that can be set or retrieved - see
+     getSelectedId() and setSelectedId(). Note that this value can not
+     be 0!
+     @param newItemImage        an icon image that is shown to the left of text
+     @see setItemEnabled, addSeparator, addSectionHeading, getNumItems, getItemText, getItemId
+     */
+    void addItem (const String& newItemText, int newItemId, const Image & newItemImage);
+
+    
     /** Adds an array of items to the drop-down list.
         The item ID of each item will be its index in the StringArray + firstItemIdOffset.
     */
