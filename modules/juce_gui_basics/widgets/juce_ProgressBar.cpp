@@ -83,10 +83,15 @@ void ProgressBar::paint (Graphics& g)
 
 void ProgressBar::visibilityChanged()
 {
-    if (isVisible())
+    if (isVisible()) {
+        lastCallbackTime = Time::getMillisecondCounter();
+        currentValue = progress;
+        currentMessage = displayedMessage;
         startTimer (30);
-    else
+    }
+    else {
         stopTimer();
+    }
 }
 
 void ProgressBar::timerCallback()
@@ -105,7 +110,7 @@ void ProgressBar::timerCallback()
              && newProgress >= 0 && newProgress < 1.0
              && currentValue >= 0 && currentValue < 1.0)
         {
-            newProgress = jmin (currentValue + 0.0008 * timeSinceLastCallback,
+            newProgress = jmin (currentValue + 0.004 * timeSinceLastCallback,
                                 newProgress);
         }
 
