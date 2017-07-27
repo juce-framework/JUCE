@@ -78,6 +78,7 @@ public:
 
     void reset() noexcept
     {
+        bias.reset (sampleRate, rampDurationSeconds);
     }
 
     //==============================================================================
