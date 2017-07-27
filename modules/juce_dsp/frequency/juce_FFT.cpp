@@ -530,6 +530,20 @@ FFT::EngineImpl<AppleFFT> appleFFT;
 //==============================================================================
 //==============================================================================
 #if JUCE_DSP_USE_SHARED_FFTW || JUCE_DSP_USE_STATIC_FFTW
+
+#if JUCE_DSP_USE_STATIC_FFTW
+extern "C"
+{
+    void* fftwf_plan_dft_1d     (int, void*, void*, int, int);
+    void* fftwf_plan_dft_r2c_1d (int, void*, void*, int);
+    void* fftwf_plan_dft_c2r_1d (int, void*, void*, int);
+    void fftwf_destroy_plan     (void*);
+    void fftwf_execute_dft      (void*, void*, void*);
+    void fftwf_execute_dft_r2c  (void*, void*, void*);
+    void fftwf_execute_dft_c2r  (void*, void*, void*);
+}
+#endif
+
 struct FFTWImpl  : public FFT::Instance
 {
    #if JUCE_DSP_USE_STATIC_FFTW
