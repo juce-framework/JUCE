@@ -1322,7 +1322,7 @@ public:
 
             if (auto host = wrapper.hostCallback)
             {
-                if (host (wrapper.getVstEffectInterface(), hostOpcodeCanHostDo, 0, 0, const_cast<char*> ("sizeWindow"), 0))
+                if (host (wrapper.getVstEffectInterface(), hostOpcodeCanHostDo, 0, 0, const_cast<char*> ("sizeWindow"), 0) == (pointer_sized_int) 1)
                 {
                     isInSizeWindow = true;
                     sizeWasSuccessful = (host (wrapper.getVstEffectInterface(), hostOpcodeWindowSize, newWidth, newHeight, 0, 0) != 0);
