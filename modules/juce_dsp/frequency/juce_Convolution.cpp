@@ -1088,7 +1088,7 @@ void Convolution::processSamples (const AudioBlock<float>& input, AudioBlock<flo
     }
     else
     {
-        if (! isBypassed)
+        if (! currentIsBypassed)
             pimpl->processSamples (input, output);
 
         if (isBypassed != currentIsBypassed)
