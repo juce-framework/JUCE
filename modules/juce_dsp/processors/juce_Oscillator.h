@@ -23,16 +23,18 @@
 
   ==============================================================================
 */
+
+
 /**
- Applies a gain to audio samples as single samples or AudioBlocks.
- */
+    Generates a signal based on a user-supplied function.
+*/
 template <typename SampleType>
 class Oscillator
 {
 public:
     /** The NumericType is the underlying primitive type used by the SampleType (which
         could be either a primitive or vector)
-     */
+    */
     using NumericType = typename SampleTypeHelpers::ElementType<SampleType>::Type;
 
     /* Create an oscillator with a periodic input function (-pi..pi).
