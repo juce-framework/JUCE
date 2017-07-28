@@ -101,7 +101,7 @@ JuceDemoPluginAudioProcessorEditor::JuceDemoPluginAudioProcessorEditor (JuceDemo
     timecodeDisplayLabel.setFont (Font (Font::getDefaultMonospacedFontName(), 15.0f, Font::plain));
 
     // set resize limits for this plug-in
-    setResizeLimits (400, 200, 800, 300);
+    setResizeLimits (400, 200, 1024, 700);
 
     // set our component's initial size to be the last one that was stored in the filter's settings
     setSize (owner.lastUIWidth,
@@ -144,6 +144,11 @@ void JuceDemoPluginAudioProcessorEditor::resized()
 void JuceDemoPluginAudioProcessorEditor::timerCallback()
 {
     updateTimecodeDisplay (getProcessor().lastPosInfo);
+}
+
+void JuceDemoPluginAudioProcessorEditor::hostMIDIControllerIsAvailable (bool controllerIsAvailable)
+{
+    midiKeyboard.setVisible (! controllerIsAvailable);
 }
 
 //==============================================================================

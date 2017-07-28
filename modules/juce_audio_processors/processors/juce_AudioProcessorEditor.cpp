@@ -47,7 +47,10 @@ AudioProcessorEditor::~AudioProcessorEditor()
 }
 
 void AudioProcessorEditor::setControlHighlight (ParameterControlHighlightInfo) {}
-int AudioProcessorEditor::getControlParameterIndex (Component&)  { return -1; }
+int AudioProcessorEditor::getControlParameterIndex (Component&)                { return -1; }
+
+bool AudioProcessorEditor::supportsHostMIDIControllerPresence (bool)           { return true; }
+void AudioProcessorEditor::hostMIDIControllerIsAvailable (bool)                {}
 
 void AudioProcessorEditor::initialise()
 {

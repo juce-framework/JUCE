@@ -44,6 +44,7 @@ public:
     void paint (Graphics&) override;
     void resized() override;
     void timerCallback() override;
+    void hostMIDIControllerIsAvailable (bool) override;
 
 private:
     class ParameterSlider;
