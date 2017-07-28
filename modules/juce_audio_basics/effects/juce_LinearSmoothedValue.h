@@ -147,7 +147,7 @@ public:
 
     //==============================================================================
     /** Applies a linear smoothed gain to a buffer */
-    void applyGain(AudioBuffer<FloatType> buffer, int numSamples) noexcept
+    void applyGain (AudioBuffer<FloatType>& buffer, int numSamples) noexcept
     {
         jassert (numSamples >= 0);
 
