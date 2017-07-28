@@ -40,7 +40,7 @@ struct SpecialFunctions
         given double value k, and the associated complete elliptic integral
         of the first kind Kp for the complementary modulus of k.
     */
-    static void ellipicIntegralK (double k, double& K, double& Kp) noexcept;
+    static void ellipticIntegralK (double k, double& K, double& Kp) noexcept;
 
     /** Computes the Jacobian elliptic function cd for the elliptic
         modulus k and the quarter-period units u.

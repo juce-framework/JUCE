@@ -419,8 +419,8 @@ Array<IIR::Coefficients<FloatType>>
     {
         double K, Kp, K1, K1p;
 
-        SpecialFunctions::ellipicIntegralK (k, K, Kp);
-        SpecialFunctions::ellipicIntegralK (k1, K1, K1p);
+        SpecialFunctions::ellipticIntegralK (k, K, Kp);
+        SpecialFunctions::ellipticIntegralK (k1, K1, K1p);
 
         N = roundDoubleToInt (ceil ((K1p * K) / (K1 * Kp)));
     }
