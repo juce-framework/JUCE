@@ -1,3 +1,29 @@
+/*
+  ==============================================================================
+
+   This file is part of the JUCE library.
+   Copyright (c) 2017 - ROLI Ltd.
+
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
+
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
+
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
+
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
+
+  ==============================================================================
+*/
+
 #pragma once
 
 //==============================================================================
@@ -32,8 +58,8 @@ class LightpadComponent : public Component
 public:
     LightpadComponent ()
     {
-        for (int x = 0; x < 15; ++x)
-            for (int y = 0; y < 15; ++y)
+        for (auto x = 0; x < 15; ++x)
+            for (auto y = 0; y < 15; ++y)
                 addAndMakeVisible (leds.add (new LEDComponent()));
     }
 
@@ -55,13 +81,13 @@ public:
 
     void resized() override
     {
-        Rectangle<int> r = getLocalBounds().reduced (10);
+        auto r = getLocalBounds().reduced (10);
 
-        int circleWidth = r.getWidth() / 15;
-        int circleHeight = r.getHeight() / 15;
+        auto circleWidth = r.getWidth() / 15;
+        auto circleHeight = r.getHeight() / 15;
 
-        for (int x = 0; x < 15; ++x)
-            for (int y = 0; y < 15; ++y)
+        for (auto x = 0; x < 15; ++x)
+            for (auto y = 0; y < 15; ++y)
                 leds.getUnchecked ((x * 15) + y)->setBounds (r.getX() + (x * circleWidth),
                                                              r.getY() + (y * circleHeight),
                                                              circleWidth, circleHeight);
@@ -69,9 +95,9 @@ public:
 
     void mouseDown (const MouseEvent& e) override
     {
-        for (int x = 0; x < 15; ++x)
+        for (auto x = 0; x < 15; ++x)
         {
-            for (int y = 0; y < 15; ++y)
+            for (auto y = 0; y < 15; ++y)
             {
                 if (leds.getUnchecked ((x * 15) + y)->getBounds().contains (e.position.toInt()))
                 {
@@ -83,13 +109,13 @@ public:
 
     void mouseDrag (const MouseEvent& e) override
     {
-        for (int x = 0; x < 15; ++x)
+        for (auto x = 0; x < 15; ++x)
         {
-            for (int y = 0; y < 15; ++y)
+            for (auto y = 0; y < 15; ++y)
             {
                 if (leds.getUnchecked ((x * 15) + y)->getBounds().contains (e.position.toInt()))
                 {
-                    const Time t = e.eventTime;
+                    const auto t = e.eventTime;
 
                     if (lastLED == Point<int> (x, y) && t.toMilliseconds() - lastMouseEventTime.toMilliseconds() < 50)
                         return;

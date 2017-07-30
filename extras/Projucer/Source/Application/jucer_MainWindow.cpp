@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -34,7 +36,8 @@
 //==============================================================================
 MainWindow::MainWindow()
     : DocumentWindow (ProjucerApplication::getApp().getApplicationName(),
-                      Colour::greyLevel (0.6f),
+                      ProjucerApplication::getApp().lookAndFeel.getCurrentColourScheme()
+                                                   .getUIColour (LookAndFeel_V4::ColourScheme::UIColour::windowBackground),
                       DocumentWindow::allButtons,
                       false)
 {
@@ -160,7 +163,12 @@ void MainWindow::setProject (Project* newProject)
     createProjectContentCompIfNeeded();
     getProjectContentComponent()->setProject (newProject);
     currentProject = newProject;
-    getProjectContentComponent()->updateMainWindowTitle();
+
+    if (currentProject != nullptr)
+        setName (currentProject->getProjectFilenameRoot() + " - Projucer");
+    else
+        setName ("Projucer");
+
     ProjucerApplication::getCommandManager().commandStatusChanged();
 }
 
@@ -301,26 +309,6 @@ void MainWindow::activeWindowStatusChanged()
     }
 }
 
-void MainWindow::updateTitle (const String& documentName)
-{
-    String name (ProjucerApplication::getApp().getApplicationName());
-
-    if (currentProject != nullptr)
-    {
-        String projectName (currentProject->getDocumentTitle());
-
-        if (currentProject->getFile().getFileNameWithoutExtension() != projectName)
-            projectName = currentProject->getFile().getFileName();
-
-        name << "  -  " << projectName;
-    }
-
-    if (documentName.isNotEmpty())
-        name << "  -  " << documentName;
-
-    setName (name);
-}
-
 void MainWindow::showNewProjectWizard()
 {
     jassert (currentProject == nullptr);
@@ -445,7 +433,7 @@ void MainWindowList::openDocument (OpenDocumentManager::Document* doc, bool grab
         }
     }
 
-    getOrCreateFrontmostWindow()->getProjectContentComponent()->showDocument (doc, grabFocus);
+    getFrontmostWindow()->getProjectContentComponent()->showDocument (doc, grabFocus);
 }
 
 bool MainWindowList::openFile (const File& file)
@@ -473,7 +461,7 @@ bool MainWindowList::openFile (const File& file)
     }
 
     if (file.exists())
-        return getOrCreateFrontmostWindow()->openFile (file);
+        return getFrontmostWindow()->openFile (file);
 
     return false;
 }
@@ -487,14 +475,19 @@ MainWindow* MainWindowList::createNewMainWindow()
     return w;
 }
 
-MainWindow* MainWindowList::getOrCreateFrontmostWindow()
+MainWindow* MainWindowList::getFrontmostWindow (bool createIfNotFound)
 {
     if (windows.size() == 0)
     {
-        MainWindow* w = createNewMainWindow();
-        avoidSuperimposedWindows (w);
-        w->makeVisible();
-        return w;
+        if (createIfNotFound)
+        {
+            MainWindow* w = createNewMainWindow();
+            avoidSuperimposedWindows (w);
+            w->makeVisible();
+            return w;
+        }
+
+        return nullptr;
     }
 
     for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
@@ -520,13 +513,6 @@ MainWindow* MainWindowList::getOrCreateEmptyWindow()
     }
 
     return createNewMainWindow();
-}
-
-void MainWindowList::updateAllWindowTitles()
-{
-    for (int i = 0; i < windows.size(); ++i)
-        if (ProjectContentComponent* pc = windows.getUnchecked(i)->getProjectContentComponent())
-            pc->updateMainWindowTitle();
 }
 
 void MainWindowList::avoidSuperimposedWindows (MainWindow* const mw)
@@ -593,40 +579,4 @@ Project* MainWindowList::getFrontmostProject()
                 return p;
 
     return nullptr;
-}
-
-File findDefaultModulesFolder (bool mustContainJuceCoreModule)
-{
-    const MainWindowList& windows = ProjucerApplication::getApp().mainWindowList;
-
-    for (int i = windows.windows.size(); --i >= 0;)
-    {
-        if (Project* p = windows.windows.getUnchecked (i)->getProject())
-        {
-            const File f (EnabledModuleList::findDefaultModulesFolder (*p));
-
-            if (isJuceModulesFolder (f) || (f.isDirectory() && ! mustContainJuceCoreModule))
-                return f;
-        }
-    }
-
-    if (mustContainJuceCoreModule)
-        return findDefaultModulesFolder (false);
-
-    File f (File::getSpecialLocation (File::currentApplicationFile));
-
-    for (;;)
-    {
-        File parent (f.getParentDirectory());
-
-        if (parent == f || ! parent.isDirectory())
-            break;
-
-        if (isJuceFolder (parent))
-            return parent.getChildFile ("modules");
-
-        f = parent;
-    }
-
-    return File();
 }

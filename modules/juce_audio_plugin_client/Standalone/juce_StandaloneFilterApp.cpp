@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -37,7 +39,7 @@
 // You can set this flag in your build if you need to specify a different
 // standalone JUCEApplication class for your app to use. If you don't
 // set it then by default we'll just create a simple one as below.
-#if ! JUCE_USE_CUSTOM_AU3_STANDALONE_APP
+#if ! JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP
 
 extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 
@@ -79,7 +81,18 @@ public:
 
     virtual StandaloneFilterWindow* createWindow()
     {
-        return new StandaloneFilterWindow (getApplicationName(), Colours::white, appProperties.getUserSettings(), false);
+       #ifdef JucePlugin_PreferredChannelConfigurations
+        StandalonePluginHolder::PluginInOuts channels[] = { JucePlugin_PreferredChannelConfigurations };
+       #endif
+
+        return new StandaloneFilterWindow (getApplicationName(),
+                                           LookAndFeel::getDefaultLookAndFeel().findColour (ResizableWindow::backgroundColourId),
+                                           appProperties.getUserSettings(),
+                                           false, {}, nullptr
+                                          #ifdef JucePlugin_PreferredChannelConfigurations
+                                           , juce::Array<StandalonePluginHolder::PluginInOuts> (channels, juce::numElementsInArray (channels))
+                                          #endif
+                                           );
     }
 
     //==============================================================================
@@ -111,7 +124,7 @@ protected:
     ScopedPointer<StandaloneFilterWindow> mainWindow;
 };
 
-#if JucePlugin_Build_STANDALONE && JUCE_IOS
+#if JucePlugin_Build_Standalone && JUCE_IOS
 
 bool JUCE_CALLTYPE juce_isInterAppAudioConnected()
 {

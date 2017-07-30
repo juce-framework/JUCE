@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -25,7 +27,6 @@
 #include "../jucer_Headers.h"
 #include "jucer_JucerTreeViewBase.h"
 #include "../Project/jucer_ProjectContentComponent.h"
-
 
 //==============================================================================
 void TreePanelBase::setRoot (JucerTreeViewBase* root)
@@ -66,6 +67,7 @@ void TreePanelBase::saveOpenness()
 JucerTreeViewBase::JucerTreeViewBase()  : textX (0)
 {
     setLinesDrawnForSubItems (false);
+    setDrawsInLeftMargin (true);
 }
 
 JucerTreeViewBase::~JucerTreeViewBase()
@@ -87,36 +89,42 @@ Font JucerTreeViewBase::getFont() const
 
 void JucerTreeViewBase::paintOpenCloseButton (Graphics& g, const Rectangle<float>& area, Colour /*backgroundColour*/, bool isMouseOver)
 {
-    TreeViewItem::paintOpenCloseButton (g, area, getOwnerView()->findColour (mainBackgroundColourId), isMouseOver);
+    g.setColour (getOwnerView()->findColour (isSelected() ? defaultHighlightedTextColourId : treeIconColourId));
+    TreeViewItem::paintOpenCloseButton (g, area, getOwnerView()->findColour (defaultIconColourId), isMouseOver);
 }
 
-Colour JucerTreeViewBase::getBackgroundColour() const
+void JucerTreeViewBase::paintIcon (Graphics &g, Rectangle<float> area)
 {
-    Colour background (getOwnerView()->findColour (mainBackgroundColourId));
-
-    if (isSelected())
-        background = background.overlaidWith (getOwnerView()->findColour (TreeView::selectedItemBackgroundColourId));
-
-    return background;
+    g.setColour (getContentColour (true));
+    getIcon().draw (g, area, isIconCrossedOut());
+    textX = roundToInt (area.getRight());
 }
 
-Colour JucerTreeViewBase::getContrastingColour (float contrast) const
+void JucerTreeViewBase::paintItem (Graphics& g, int width, int height)
 {
-    return getBackgroundColour().contrasting (contrast);
+    ignoreUnused (width, height);
+
+    auto bounds = g.getClipBounds().withY (0).withHeight (height).toFloat();
+
+    g.setColour (getOwnerView()->findColour (treeIconColourId).withMultipliedAlpha (0.4f));
+    g.fillRect (bounds.removeFromBottom (0.5f).reduced (5, 0));
 }
 
-Colour JucerTreeViewBase::getContrastingColour (Colour target, float minContrast) const
+Colour JucerTreeViewBase::getContentColour (bool isIcon) const
 {
-    return getBackgroundColour().contrasting (target, minContrast);
+    if (isMissing())      return Colours::red;
+    if (isSelected())     return getOwnerView()->findColour (defaultHighlightedTextColourId);
+    if (hasWarnings())    return getOwnerView()->findColour (defaultHighlightColourId);
+
+    return getOwnerView()->findColour (isIcon ? treeIconColourId : defaultTextColourId);
 }
 
 void JucerTreeViewBase::paintContent (Graphics& g, const Rectangle<int>& area)
 {
     g.setFont (getFont());
-    g.setColour (isMissing() ? getContrastingColour (Colours::red, 0.8f)
-                             : getContrastingColour (0.8f));
+    g.setColour (getContentColour (false));
 
-    g.drawFittedText (getDisplayName(), area, Justification::centredLeft, 1, 0.8f);
+    g.drawFittedText (getDisplayName(), area, Justification::centredLeft, 1, 1.0f);
 }
 
 Component* JucerTreeViewBase::createItemComponent()
@@ -195,6 +203,7 @@ void JucerTreeViewBase::deleteItem()    {}
 void JucerTreeViewBase::deleteAllSelectedItems() {}
 void JucerTreeViewBase::showDocument()  {}
 void JucerTreeViewBase::showPopupMenu() {}
+void JucerTreeViewBase::showPlusMenu()  {}
 void JucerTreeViewBase::showMultiSelectionPopupMenu() {}
 
 static void treeViewMenuItemChosen (int resultCode, WeakReference<JucerTreeViewBase> item)

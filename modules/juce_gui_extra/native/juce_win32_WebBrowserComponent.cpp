@@ -2,40 +2,37 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-JUCE_COMCLASS (DWebBrowserEvents2,        "34A715A0-6587-11D0-924A-0020AFC7AC4D")
-JUCE_COMCLASS (IConnectionPointContainer, "B196B284-BAB4-101A-B69C-00AA00341D07")
-JUCE_COMCLASS (IWebBrowser2,              "D30C1661-CDAF-11D0-8A3E-00C04FC9E26E")
-JUCE_COMCLASS (WebBrowser,                "8856F961-340A-11D0-A96B-00C04FD705A2")
+JUCE_DECLARE_UUID_GETTER (DWebBrowserEvents2,        "34A715A0-6587-11D0-924A-0020AFC7AC4D")
+JUCE_DECLARE_UUID_GETTER (IConnectionPointContainer, "B196B284-BAB4-101A-B69C-00AA00341D07")
+JUCE_DECLARE_UUID_GETTER (IWebBrowser2,              "D30C1661-CDAF-11D0-8A3E-00C04FC9E26E")
+JUCE_DECLARE_UUID_GETTER (WebBrowser,                "8856F961-340A-11D0-A96B-00C04FD705A2")
 
 class WebBrowserComponent::Pimpl   : public ActiveXControlComponent
 {
 public:
-    Pimpl()
-      : browser (nullptr),
-        connectionPoint (nullptr),
-        adviseCookie (0)
-    {
-    }
+    Pimpl() {}
 
     ~Pimpl()
     {
@@ -48,25 +45,24 @@ public:
 
     void createBrowser()
     {
-        CLSID webCLSID = __uuidof (WebBrowser);
+        auto webCLSID = __uuidof (WebBrowser);
         createControl (&webCLSID);
 
-    GUID iidWebBrowser2              = __uuidof (IWebBrowser2);
-    GUID iidConnectionPointContainer = __uuidof (IConnectionPointContainer);
+        auto iidWebBrowser2              = __uuidof (IWebBrowser2);
+        auto iidConnectionPointContainer = __uuidof (IConnectionPointContainer);
 
         browser = (IWebBrowser2*) queryInterface (&iidWebBrowser2);
 
-        if (IConnectionPointContainer* connectionPointContainer
-            = (IConnectionPointContainer*) queryInterface (&iidConnectionPointContainer))
+        if (auto connectionPointContainer = (IConnectionPointContainer*) queryInterface (&iidConnectionPointContainer))
         {
             connectionPointContainer->FindConnectionPoint (__uuidof (DWebBrowserEvents2), &connectionPoint);
 
             if (connectionPoint != nullptr)
             {
-                WebBrowserComponent* const owner = dynamic_cast<WebBrowserComponent*> (getParentComponent());
+                auto* owner = dynamic_cast<WebBrowserComponent*> (getParentComponent());
                 jassert (owner != nullptr);
 
-                EventHandler* handler = new EventHandler (*owner);
+                auto handler = new EventHandler (*owner);
                 connectionPoint->Advise (handler, &adviseCookie);
                 handler->Release();
             }
@@ -118,7 +114,7 @@ public:
                 }
             }
 
-            BSTR urlBSTR = SysAllocString ((const OLECHAR*) url.toWideCharPointer());
+            auto urlBSTR = SysAllocString ((const OLECHAR*) url.toWideCharPointer());
             browser->Navigate (urlBSTR, &headerFlags, &frame, &postDataVar, &headersVar);
             SysFreeString (urlBSTR);
 
@@ -133,11 +129,11 @@ public:
     }
 
     //==============================================================================
-    IWebBrowser2* browser;
+    IWebBrowser2* browser = nullptr;
 
 private:
-    IConnectionPoint* connectionPoint;
-    DWORD adviseCookie;
+    IConnectionPoint* connectionPoint = nullptr;
+    DWORD adviseCookie = 0;
 
     //==============================================================================
     struct EventHandler  : public ComBaseClassHelper<IDispatch>,
@@ -170,6 +166,30 @@ private:
             if (dispIdMember == DISPID_DOCUMENTCOMPLETE)
             {
                 owner.pageFinishedLoading (getStringFromVariant (pDispParams->rgvarg[0].pvarVal));
+                return S_OK;
+            }
+
+            if (dispIdMember == DISPID_NAVIGATEERROR)
+            {
+                int statusCode = pDispParams->rgvarg[1].pvarVal->intVal;
+                *pDispParams->rgvarg[0].pboolVal = VARIANT_FALSE;
+
+                // IWebBrowser2 also reports http status codes here, we need
+                // report only network erros
+                if (statusCode < 0)
+                {
+                    LPTSTR messageBuffer = nullptr;
+                    auto size = FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                                               nullptr, statusCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                                               (LPTSTR) &messageBuffer, 0, nullptr);
+
+                    String message (messageBuffer, size);
+                    LocalFree (messageBuffer);
+
+                    if (! owner.pageLoadHadNetworkError (message))
+                        *pDispParams->rgvarg[0].pboolVal = VARIANT_TRUE;
+                }
+
                 return S_OK;
             }
 
@@ -341,12 +361,12 @@ void WebBrowserComponent::visibilityChanged()
 
 void WebBrowserComponent::focusGained (FocusChangeType)
 {
-    GUID iidOleObject = __uuidof (IOleObject);
-    GUID iidOleWindow = __uuidof (IOleWindow);
+    auto iidOleObject = __uuidof (IOleObject);
+    auto iidOleWindow = __uuidof (IOleWindow);
 
-    if (IOleObject* oleObject = (IOleObject*) browser->queryInterface (&iidOleObject))
+    if (auto oleObject = (IOleObject*) browser->queryInterface (&iidOleObject))
     {
-        if (IOleWindow* oleWindow = (IOleWindow*) browser->queryInterface (&iidOleWindow))
+        if (auto oleWindow = (IOleWindow*) browser->queryInterface (&iidOleWindow))
         {
             IOleClientSite* oleClientSite = nullptr;
 
@@ -362,5 +382,41 @@ void WebBrowserComponent::focusGained (FocusChangeType)
         }
 
         oleObject->Release();
+    }
+}
+
+void WebBrowserComponent::clearCookies()
+{
+    HeapBlock<::INTERNET_CACHE_ENTRY_INFO> entry;
+    ::DWORD entrySize = sizeof (::INTERNET_CACHE_ENTRY_INFO);
+    ::HANDLE urlCacheHandle = ::FindFirstUrlCacheEntry (TEXT ("cookie:"), entry.getData(), &entrySize);
+
+    if (urlCacheHandle == nullptr && GetLastError() == ERROR_INSUFFICIENT_BUFFER)
+    {
+        entry.realloc (1, entrySize);
+        urlCacheHandle = ::FindFirstUrlCacheEntry (TEXT ("cookie:"), entry.getData(), &entrySize);
+    }
+
+    if (urlCacheHandle != nullptr)
+    {
+        for (;;)
+        {
+            ::DeleteUrlCacheEntry (entry.getData()->lpszSourceUrlName);
+
+            if (::FindNextUrlCacheEntry (urlCacheHandle, entry.getData(), &entrySize) == 0)
+            {
+                if (GetLastError() == ERROR_INSUFFICIENT_BUFFER)
+                {
+                    entry.realloc (1, entrySize);
+
+                    if (::FindNextUrlCacheEntry (urlCacheHandle, entry.getData(), &entrySize) != 0)
+                        continue;
+                }
+
+                break;
+            }
+        }
+
+        FindCloseUrlCache (urlCacheHandle);
     }
 }

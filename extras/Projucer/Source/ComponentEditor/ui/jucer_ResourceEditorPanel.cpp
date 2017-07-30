@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -91,13 +93,13 @@ ResourceEditorPanel::ResourceEditorPanel (JucerDocument& doc)
     listBox->getHeader().addColumn ("reload", 4, 100, 100, 100, TableHeaderComponent::notResizableOrSortable);
     listBox->getHeader().setStretchToFitActive (true);
 
-    listBox->setColour (ListBox::backgroundColourId, Colours::lightgrey);
-    listBox->setColour (ListBox::outlineColourId, Colours::darkgrey);
     listBox->setOutlineThickness (1);
     listBox->updateContent();
 
     document.addChangeListener (this);
     handleCommandMessage (1);
+
+    lookAndFeelChanged();
 }
 
 ResourceEditorPanel::~ResourceEditorPanel()
@@ -114,11 +116,11 @@ void ResourceEditorPanel::paintRowBackground (Graphics& g, int /*rowNumber*/,
                                               int /*width*/, int /*height*/, bool rowIsSelected)
 {
     if (rowIsSelected)
-        g.fillAll (findColour (TextEditor::highlightColourId));
+        g.fillAll (findColour (defaultHighlightColourId));
 }
 
 void ResourceEditorPanel::paintCell (Graphics& g, int rowNumber, int columnId, int width, int height,
-                                     bool /*rowIsSelected*/)
+                                     bool rowIsSelected)
 {
     if (const BinaryResources::BinaryResource* const r = document.getResources() [rowNumber])
     {
@@ -130,6 +132,11 @@ void ResourceEditorPanel::paintCell (Graphics& g, int rowNumber, int columnId, i
             text = r->originalFilename;
         else if (columnId == 3)
             text = File::descriptionOfSizeInBytes ((int64) r->data.getSize());
+
+        if (rowIsSelected)
+            g.setColour (findColour (defaultHighlightedTextColourId));
+        else
+            g.setColour (findColour (defaultTextColourId));
 
         g.setFont (13.0f);
         g.drawText (text, 4, 0, width - 6, height, Justification::centredLeft, true);
@@ -177,6 +184,12 @@ int ResourceEditorPanel::getColumnAutoSizeWidth (int columnId)
     return widest + 10;
 }
 
+void ResourceEditorPanel::lookAndFeelChanged()
+{
+    listBox->setColour (ListBox::backgroundColourId, findColour (secondaryBackgroundColourId));
+    listBox->setColour (ListBox::outlineColourId, Colours::transparentBlack);
+}
+
 //==============================================================================
 class ResourceSorter
 {
@@ -216,16 +229,23 @@ void ResourceEditorPanel::selectedRowsChanged (int /*lastRowSelected*/)
 
 void ResourceEditorPanel::resized()
 {
-    listBox->setBounds (6, 4, getWidth() - 12, getHeight() - 38);
+    auto bounds = getLocalBounds();
 
-    addButton.changeWidthToFitText (22);
-    addButton.setTopLeftPosition (8, getHeight() - 30);
+    auto buttonSlice = bounds.removeFromBottom (40).reduced (5, 5);
 
-    reloadAllButton.changeWidthToFitText (22);
-    reloadAllButton.setTopLeftPosition (addButton.getRight() + 10, getHeight() - 30);
+    addButton.setBounds (buttonSlice.removeFromLeft (125));
+    buttonSlice.removeFromLeft (10);
 
-    delButton.changeWidthToFitText (22);
-    delButton.setTopRightPosition (getWidth() - 8, getHeight() - 30);
+    reloadAllButton.setBounds (buttonSlice.removeFromLeft (125));
+
+    delButton.setBounds (buttonSlice.removeFromRight (125));
+
+    listBox->setBounds (bounds);
+}
+
+void ResourceEditorPanel::paint (Graphics& g)
+{
+    g.fillAll (findColour (secondaryBackgroundColourId));
 }
 
 void ResourceEditorPanel::visibilityChanged()

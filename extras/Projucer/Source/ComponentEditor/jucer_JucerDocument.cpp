@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -40,14 +42,7 @@ const char* const defaultParentClasses = "public Component";
 JucerDocument::JucerDocument (SourceCodeDocument* c)
     : cpp (c),
       className (defaultClassName),
-      parentClasses (defaultParentClasses),
-      fixedSize (false),
-      initialWidth (600),
-      initialHeight (400),
-      snapGridPixels (8),
-      snapActive (true),
-      snapShown (true),
-      componentOverlayOpacity (0.33f)
+      parentClasses (defaultParentClasses)
 {
     jassert (cpp != nullptr);
     resources.setDocument (this);
@@ -176,7 +171,7 @@ void JucerDocument::setParentClasses (const String& classes)
                     type = s = String();
             }
 
-            s = type + CodeHelpers::makeValidIdentifier (s.trim(), false, false, true);
+            s = type + CodeHelpers::makeValidIdentifier (s.trim(), false, false, true, true);
 
             parentClassLines.set (i, s);
         }
@@ -597,13 +592,49 @@ bool JucerDocument::reloadFromDocument()
 
     resources.loadFromCpp (getCppFile(), cppContent);
 
-    return loadFromXml (*currentXML);
+    bool result = loadFromXml (*currentXML);
+    extractCustomPaintSnippetsFromCppFile (cppContent);
+    return result;
+}
+
+void JucerDocument::refreshCustomCodeFromDocument()
+{
+    const String cppContent (cpp->getCodeDocument().getAllContent());
+    extractCustomPaintSnippetsFromCppFile (cppContent);
+}
+
+void JucerDocument::extractCustomPaintSnippetsFromCppFile (const String& cppContent)
+{
+    StringArray customPaintSnippets;
+
+    auto lines = StringArray::fromLines (cppContent);
+    int last = 0;
+
+    while (last >= 0)
+    {
+        const int start = indexOfLineStartingWith (lines, "//[UserPaintCustomArguments]", last);
+        if (start < 0)
+            break;
+
+        const int end = indexOfLineStartingWith (lines, "//[/UserPaintCustomArguments]", start);
+        if (end < 0)
+            break;
+
+        last = end + 1;
+        String result;
+
+        for (int i = start + 1; i < end; ++i)
+            result << lines [i] << newLine;
+
+        customPaintSnippets.add (CodeHelpers::unindent (result, 4));
+    }
+
+    applyCustomPaintSnippets (customPaintSnippets);
 }
 
 XmlElement* JucerDocument::pullMetaDataFromCppFile (const String& cpp)
 {
-    StringArray lines;
-    lines.addLines (cpp);
+    auto lines = StringArray::fromLines (cpp);
 
     const int startLine = indexOfLineStartingWith (lines, "BEGIN_JUCER_METADATA", 0);
 
@@ -622,17 +653,15 @@ XmlElement* JucerDocument::pullMetaDataFromCppFile (const String& cpp)
 bool JucerDocument::isValidJucerCppFile (const File& f)
 {
     if (f.hasFileExtension (".cpp"))
-    {
-        const ScopedPointer<XmlElement> xml (pullMetaDataFromCppFile (f.loadFileAsString()));
-        return xml != nullptr && xml->hasTagName (jucerCompXmlTag);
-    }
+        if (ScopedPointer<XmlElement> xml = pullMetaDataFromCppFile (f.loadFileAsString()))
+            return xml->hasTagName (jucerCompXmlTag);
 
     return false;
 }
 
 static JucerDocument* createDocument (SourceCodeDocument* cpp)
 {
-    CodeDocument& codeDoc = cpp->getCodeDocument();
+    auto& codeDoc = cpp->getCodeDocument();
 
     ScopedPointer<XmlElement> xml (JucerDocument::pullMetaDataFromCppFile (codeDoc.getAllContent()));
 
@@ -682,9 +711,9 @@ public:
 
     bool saveHeader()
     {
-        OpenDocumentManager& odm = ProjucerApplication::getApp().openDocumentManager;
+        auto& odm = ProjucerApplication::getApp().openDocumentManager;
 
-        if (OpenDocumentManager::Document* header = odm.openFile (nullptr, getFile().withFileExtension (".h")))
+        if (auto* header = odm.openFile (nullptr, getFile().withFileExtension (".h")))
             return header->save();
 
         return false;
@@ -692,9 +721,7 @@ public:
 
     Component* createEditor() override
     {
-        ScopedPointer<JucerDocument> jucerDoc (JucerDocument::createForCppFile (getProject(), getFile()));
-
-        if (jucerDoc != nullptr)
+        if (ScopedPointer<JucerDocument> jucerDoc = JucerDocument::createForCppFile (getProject(), getFile()))
             return new JucerDocumentEditor (jucerDoc.release());
 
         return SourceCodeDocument::createEditor();
@@ -734,15 +761,13 @@ public:
             headerFile.replaceWithText (String());
             cppFile.replaceWithText (String());
 
-            OpenDocumentManager& odm = ProjucerApplication::getApp().openDocumentManager;
+            auto& odm = ProjucerApplication::getApp().openDocumentManager;
 
-            if (SourceCodeDocument* cpp = dynamic_cast<SourceCodeDocument*> (odm.openFile (nullptr, cppFile)))
+            if (auto* cpp = dynamic_cast<SourceCodeDocument*> (odm.openFile (nullptr, cppFile)))
             {
-                if (SourceCodeDocument* header = dynamic_cast<SourceCodeDocument*> (odm.openFile (nullptr, headerFile)))
+                if (auto* header = dynamic_cast<SourceCodeDocument*> (odm.openFile (nullptr, headerFile)))
                 {
-                    ScopedPointer<JucerDocument> jucerDoc (new ComponentDocument (cpp));
-
-                    if (jucerDoc != nullptr)
+                    if (ScopedPointer<JucerDocument> jucerDoc = new ComponentDocument (cpp))
                     {
                         jucerDoc->setClassName (newFile.getFileNameWithoutExtension());
 

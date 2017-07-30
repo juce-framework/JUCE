@@ -2,28 +2,20 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -66,6 +58,10 @@ public:
 
     bool operator== (const Uuid&) const noexcept;
     bool operator!= (const Uuid&) const noexcept;
+    bool operator<  (const Uuid&) const noexcept;
+    bool operator>  (const Uuid&) const noexcept;
+    bool operator<= (const Uuid&) const noexcept;
+    bool operator>= (const Uuid&) const noexcept;
 
     //==============================================================================
     /** Returns a stringified version of this UUID.
@@ -94,6 +90,20 @@ public:
 
 
     //==============================================================================
+    /** Returns the time-low section of the UUID. */
+    uint32 getTimeLow() const noexcept;
+    /** Returns the time-mid section of the UUID. */
+    uint16 getTimeMid() const noexcept;
+    /** Returns the time-high-and-version section of the UUID. */
+    uint16 getTimeHighAndVersion() const noexcept;
+    /** Returns the clock-seq-and-reserved section of the UUID. */
+    uint8  getClockSeqAndReserved() const noexcept;
+    /** Returns the clock-seq-low section of the UUID. */
+    uint8  getClockSeqLow() const noexcept;
+    /** Returns the node section of the UUID. */
+    uint64 getNode() const noexcept;
+
+    //==============================================================================
     /** Returns a pointer to the internal binary representation of the ID.
 
         This is an array of 16 bytes. To reconstruct a Uuid from its data, use
@@ -114,6 +124,7 @@ private:
     //==============================================================================
     uint8 uuid[16];
     String getHexRegion (int, int) const;
+    int compare (Uuid) const noexcept;
 
     JUCE_LEAK_DETECTOR (Uuid)
 };

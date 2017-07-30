@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -43,7 +45,7 @@ public:
         if (f.hasFileExtension (sourceFileExtensions))  return f.withFileExtension (".h");
         if (f.hasFileExtension (headerFileExtensions))  return f.withFileExtension (".cpp");
 
-        return File();
+        return {};
     }
 
     void setName (const String& newName) override
@@ -112,12 +114,6 @@ public:
     {
         PopupMenu m;
 
-        if (GroupItem* parentGroup = dynamic_cast<GroupItem*> (getParentProjectItem()))
-        {
-            parentGroup->addCreateFileMenuItems (m);
-            m.addSeparator();
-        }
-
         m.addItem (1, "Open in external editor");
         m.addItem (2,
                      #if JUCE_MAC
@@ -128,9 +124,27 @@ public:
 
         m.addItem (4, "Rename File...");
         m.addSeparator();
+
+        if (auto* group = dynamic_cast<GroupItem*> (getParentItem()))
+        {
+            if (group->isRoot())
+            {
+                m.addItem (5, "Binary Resource", true, item.shouldBeAddedToBinaryResources());
+                m.addItem (6, "Xcode Resource",  true, item.shouldBeAddedToXcodeResources());
+                m.addItem (7, "Compile",         true, item.shouldBeCompiled());
+                m.addSeparator();
+            }
+        }
+
         m.addItem (3, "Delete");
 
         launchPopupMenu (m);
+    }
+
+    void showPlusMenu() override
+    {
+        if (auto* group = dynamic_cast<GroupItem*> (getParentItem()))
+            group->showPlusMenu();
     }
 
     void handlePopupMenuResult (int resultCode) override
@@ -141,6 +155,9 @@ public:
             case 2:     revealInFinder(); break;
             case 3:     deleteAllSelectedItems(); break;
             case 4:     triggerAsyncRename (item); break;
+            case 5:     item.getShouldAddToBinaryResourcesValue().setValue (! item.shouldBeAddedToBinaryResources()); break;
+            case 6:     item.getShouldAddToXcodeResourcesValue().setValue (! item.shouldBeAddedToXcodeResources()); break;
+            case 7:     item.getShouldCompileValue().setValue (! item.shouldBeCompiled()); break;
 
             default:
                 if (GroupItem* parentGroup = dynamic_cast<GroupItem*> (getParentProjectItem()))

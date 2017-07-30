@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -247,8 +249,6 @@ public:
         titleLabel->setFont (Font (15.00f, Font::bold));
         titleLabel->setJustificationType (Justification::centredLeft);
         titleLabel->setEditable (false, false, false);
-        titleLabel->setColour (TextEditor::textColourId, Colours::black);
-        titleLabel->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
         addAndMakeVisible (contentLabel = new Label ("Content Label",
                                                      TRANS ("A new version of \"123\" is available - would you like to download it?")
@@ -256,8 +256,6 @@ public:
         contentLabel->setFont (Font (15.00f, Font::plain));
         contentLabel->setJustificationType (Justification::topLeft);
         contentLabel->setEditable (false, false, false);
-        contentLabel->setColour (TextEditor::textColourId, Colours::black);
-        contentLabel->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
         addAndMakeVisible (okButton = new TextButton ("OK Button"));
         okButton->setButtonText (TRANS(hasOverwriteButton ? "Choose Another Folder..." : "OK"));
@@ -272,8 +270,6 @@ public:
         changeLogLabel->setFont (Font (15.00f, Font::plain));
         changeLogLabel->setJustificationType (Justification::topLeft);
         changeLogLabel->setEditable (false, false, false);
-        changeLogLabel->setColour (TextEditor::textColourId, Colours::black);
-        changeLogLabel->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
         addAndMakeVisible (changeLog = new TextEditor ("Change Log"));
         changeLog->setMultiLine (true);
@@ -291,15 +287,11 @@ public:
             overwriteLabel->setFont (Font (15.00f, Font::plain));
             overwriteLabel->setJustificationType (Justification::topLeft);
             overwriteLabel->setEditable (false, false, false);
-            overwriteLabel->setColour (TextEditor::textColourId, Colours::black);
-            overwriteLabel->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
             addAndMakeVisible (overwritePath = new Label ("Overwrite Path", overwriteFolderPath));
             overwritePath->setFont (Font (15.00f, Font::bold));
             overwritePath->setJustificationType (Justification::topLeft);
             overwritePath->setEditable (false, false, false);
-            overwritePath->setColour (TextEditor::textColourId, Colours::black);
-            overwritePath->setColour (TextEditor::backgroundColourId, Colour (0x00000000));
 
             addAndMakeVisible (overwriteButton = new TextButton ("Overwrite Button"));
             overwriteButton->setButtonText (TRANS("Overwrite"));
@@ -310,6 +302,8 @@ public:
                                                   BinaryData::juce_icon_pngSize);
 
         setSize (518, overwritePath ? 345 : 269);
+
+        lookAndFeelChanged();
     }
 
     ~UpdateUserDialog()
@@ -328,8 +322,8 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::lightgrey);
-        g.setColour (Colours::black);
+        g.fillAll (findColour (backgroundColourId));
+        g.setColour (findColour (defaultTextColourId));
 
         if (juceIcon != nullptr)
             juceIcon->drawWithin (g, Rectangle<float> (20, 17, 64, 64),
@@ -382,7 +376,7 @@ public:
         DialogWindow::LaunchOptions lo;
         lo.dialogTitle = TRANS ("Download \"123\" version 456?").replace ("456", version.toString())
                                                                 .replace ("123", productName);
-        lo.dialogBackgroundColour = Colours::lightgrey;
+        lo.dialogBackgroundColour = userDialog->findColour (backgroundColourId);
         lo.content = userDialog;
         lo.componentToCentreAround = nullptr;
         lo.escapeKeyTriggersCloseButton = true;
@@ -400,6 +394,13 @@ private:
     ScopedPointer<TextEditor> changeLog;
     ScopedPointer<TextButton> overwriteButton;
     ScopedPointer<Drawable> juceIcon;
+
+    void lookAndFeelChanged() override
+    {
+        cancelButton->setColour (TextButton::buttonColourId,
+                                 findColour (secondaryButtonBackgroundColourId));
+        changeLog->applyFontToAllText (changeLog->getFont());
+    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UpdateUserDialog)
 };
@@ -744,7 +745,7 @@ void LatestVersionChecker::modalStateFinished (int result,
 
 void LatestVersionChecker::askUserForLocationToDownload (URL& newVersionToDownload, const String& extraHeaders)
 {
-    File targetFolder (findDefaultModulesFolder());
+    File targetFolder (EnabledModuleList::findGlobalModulesFolder());
 
     if (isJuceModulesFolder (targetFolder))
         targetFolder = targetFolder.getParentDirectory();

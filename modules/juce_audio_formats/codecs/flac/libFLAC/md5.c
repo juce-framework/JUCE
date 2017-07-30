@@ -53,7 +53,7 @@
  */
 static void FLAC__MD5Transform(FLAC__uint32 buf[4], FLAC__uint32 const in[16])
 {
-	register FLAC__uint32 a, b, c, d;
+	FLAC__uint32 a, b, c, d;
 
 	a = buf[0];
 	b = buf[1];

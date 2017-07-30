@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -41,7 +43,7 @@
 
 namespace Vst2
 {
-#include "juce_VSTInterface.h"
+ #include "juce_VSTInterface.h"
 }
 
 using namespace Vst2;
@@ -142,8 +144,8 @@ namespace
             || magic == (int32) ByteOrder::bigEndianInt (name);
     }
 
-    static int32 fxbName (const char* name) noexcept   { return (int32) ByteOrder::littleEndianInt (name); }
-    static int32 fxbSwap (const int32 x) noexcept   { return (int32) ByteOrder::swapIfLittleEndian ((uint32) x); }
+    static int32 fxbName (const char* name) noexcept    { return (int32) ByteOrder::littleEndianInt (name); }
+    static int32 fxbSwap (int32 x) noexcept             { return (int32) ByteOrder::swapIfLittleEndian ((uint32) x); }
 
     static float fxbSwapFloat (const float x) noexcept
     {
@@ -207,7 +209,7 @@ namespace
 
 //==============================================================================
 typedef VstEffectInterface* (VSTINTERFACECALL *MainCall) (VstHostCallback);
-static pointer_sized_int VSTINTERFACECALL audioMaster (VstEffectInterface* effect, int32 opcode, int32 index, pointer_sized_int value, void* ptr, float opt);
+static pointer_sized_int VSTINTERFACECALL audioMaster (VstEffectInterface*, int32, int32, pointer_sized_int, void*, float);
 
 //==============================================================================
 // Change this to disable logging of various VST activities
@@ -248,9 +250,8 @@ namespace
 
         {
             ScopedXDisplay xDisplay;
-            ::Display* display = xDisplay.get();
 
-            XGetWindowProperty (display, handle, atom, 0, 1, false, AnyPropertyType,
+            XGetWindowProperty (xDisplay.display, handle, atom, 0, 1, false, AnyPropertyType,
                                 &userType,  &userSize, &userCount, &bytes, &data);
         }
 
@@ -267,9 +268,7 @@ namespace
 
         {
             ScopedXDisplay xDisplay;
-            ::Display* display = xDisplay.get();
-
-            XQueryTree (display, windowToCheck, &rootWindow, &parentWindow, &childWindows, &numChildren);
+            XQueryTree (xDisplay.display, windowToCheck, &rootWindow, &parentWindow, &childWindows, &numChildren);
         }
 
         if (numChildren > 0)
@@ -331,12 +330,10 @@ namespace
 #endif
 
 //==============================================================================
-class ModuleHandle    : public ReferenceCountedObject
+struct ModuleHandle    : public ReferenceCountedObject
 {
-public:
-    //==============================================================================
     File file;
-    MainCall moduleMain, customMain;
+    MainCall moduleMain, customMain = {};
     String pluginName;
     ScopedPointer<XmlElement> vstXml;
 
@@ -351,13 +348,9 @@ public:
     //==============================================================================
     static Ptr findOrCreateModule (const File& file)
     {
-        for (int i = getActiveModules().size(); --i >= 0;)
-        {
-            ModuleHandle* const module = getActiveModules().getUnchecked(i);
-
+        for (auto* module : getActiveModules())
             if (module->file == file)
                 return module;
-        }
 
         const IdleCallRecursionPreventer icrp;
         shellUIDToCreate = 0;
@@ -373,18 +366,12 @@ public:
             return m;
         }
 
-        return nullptr;
+        return {};
     }
 
     //==============================================================================
     ModuleHandle (const File& f, MainCall customMainCall)
-        : file (f), moduleMain (customMainCall), customMain (nullptr)
-         #if JUCE_MAC || JUCE_IOS
-          , resHandle (0), bundleRef (0)
-         #if JUCE_MAC
-          , resFileId (0)
-         #endif
-         #endif
+        : file (f), moduleMain (customMainCall)
     {
         getActiveModules().add (this);
 
@@ -456,29 +443,29 @@ public:
     static String getDLLResource (const File& dllFile, const String& type, int resID)
     {
         DynamicLibrary dll (dllFile.getFullPathName());
-        HMODULE dllModule = (HMODULE) dll.getNativeHandle();
+        auto dllModule = (HMODULE) dll.getNativeHandle();
 
         if (dllModule != INVALID_HANDLE_VALUE)
         {
-            if (HRSRC res = FindResource (dllModule, MAKEINTRESOURCE (resID), type.toWideCharPointer()))
+            if (auto res = FindResource (dllModule, MAKEINTRESOURCE (resID), type.toWideCharPointer()))
             {
-                if (HGLOBAL hGlob = LoadResource (dllModule, res))
+                if (auto hGlob = LoadResource (dllModule, res))
                 {
-                    const char* data = static_cast<const char*> (LockResource (hGlob));
+                    auto* data = static_cast<const char*> (LockResource (hGlob));
                     return String::fromUTF8 (data, SizeofResource (dllModule, res));
                 }
             }
         }
 
-        return String();
+        return {};
     }
    #endif
   #else
-    Handle resHandle;
-    CFBundleRef bundleRef;
+    Handle resHandle = {};
+    CFBundleRef bundleRef = {};
 
    #if JUCE_MAC
-    CFBundleRefNum resFileId;
+    CFBundleRefNum resFileId = {};
     FSSpec parentDirFSSpec;
    #endif
 
@@ -491,7 +478,7 @@ public:
 
         if (file.hasFileExtension (".vst"))
         {
-            const char* const utf8 = file.getFullPathName().toRawUTF8();
+            auto* utf8 = file.getFullPathName().toRawUTF8();
 
             if (CFURLRef url = CFURLCreateFromFileSystemRepresentation (0, (const UInt8*) utf8,
                                                                         (CFIndex) strlen (utf8), file.isDirectory()))
@@ -595,23 +582,20 @@ static const int defaultVSTBlockSizeValue = 512;
 
 //==============================================================================
 //==============================================================================
-class VSTPluginInstance     : public AudioPluginInstance,
-                              private Timer,
-                              private AsyncUpdater
+struct VSTPluginInstance     : public AudioPluginInstance,
+                               private Timer,
+                               private AsyncUpdater
 {
-private:
-    VSTPluginInstance (const ModuleHandle::Ptr& mh, const BusesProperties& ioConfig, VstEffectInterface* effect)
+    VSTPluginInstance (const ModuleHandle::Ptr& mh, const BusesProperties& ioConfig, VstEffectInterface* effect,
+                       double sampleRateToUse, int blockSizeToUse)
         : AudioPluginInstance (ioConfig),
           vstEffect (effect),
           vstModule (mh),
-          usesCocoaNSView (false),
-          name (mh->pluginName),
-          wantsMidiMessages (false),
-          initialised (false),
-          isPowerOn (false)
-    {}
+          name (mh->pluginName)
+    {
+        setRateAndBufferSizeDetails (sampleRateToUse, blockSizeToUse);
+    }
 
-public:
     ~VSTPluginInstance()
     {
         if (vstEffect != nullptr && vstEffect->interfaceIdentifier == juceVstInterfaceIdentifier)
@@ -670,23 +654,21 @@ public:
                                       double initialSampleRate,
                                       int initialBlockSize)
     {
-        if (VstEffectInterface* newEffect = constructEffect (newModule))
+        if (auto* newEffect = constructEffect (newModule))
         {
             newEffect->hostSpace2 = 0;
 
             newEffect->dispatchFunction (newEffect, plugInOpcodeIdentify, 0, 0, 0, 0);
 
+            auto blockSize = jmax (32, initialBlockSize);
+
             newEffect->dispatchFunction (newEffect, plugInOpcodeSetSampleRate, 0, 0, 0, static_cast<float> (initialSampleRate));
-            newEffect->dispatchFunction (newEffect, plugInOpcodeSetBlockSize,  0, jmax (32, initialBlockSize), 0, 0);
+            newEffect->dispatchFunction (newEffect, plugInOpcodeSetBlockSize,  0, blockSize, 0, 0);
 
             newEffect->dispatchFunction (newEffect, plugInOpcodeOpen, 0, 0, 0, 0);
             BusesProperties ioConfig = queryBusIO (newEffect);
-            newEffect->dispatchFunction (newEffect, plugInOpcodeClose, 0, 0, 0, 0);
 
-            newEffect = constructEffect (newModule);
-
-            if (newEffect != nullptr)
-                return new VSTPluginInstance (newModule, ioConfig, newEffect);
+            return new VSTPluginInstance (newModule, ioConfig, newEffect, initialSampleRate, blockSize);
         }
 
         return nullptr;
@@ -823,13 +805,12 @@ public:
         if (vstEffect == nullptr)
             return 0.0;
 
-        const double sampleRate = getSampleRate();
+        auto sampleRate = getSampleRate();
 
         if (sampleRate <= 0)
             return 0.0;
 
-        pointer_sized_int samples = dispatch (plugInOpcodeGetTailSize, 0, 0, 0, 0);
-        return samples / sampleRate;
+        return dispatch (plugInOpcodeGetTailSize, 0, 0, 0, 0) / sampleRate;
     }
 
     bool acceptsMidi() const override    { return wantsMidiMessages; }
@@ -845,16 +826,14 @@ public:
     {
         setRateAndBufferSizeDetails (rate, samplesPerBlockExpected);
 
-        VstSpeakerConfiguration inArr, outArr;
+        SpeakerMappings::VstSpeakerConfigurationHolder inArr  (getChannelLayoutOfBus (true,  0));
+        SpeakerMappings::VstSpeakerConfigurationHolder outArr (getChannelLayoutOfBus (false, 0));
 
-        SpeakerMappings::channelSetToVstArrangement (getChannelLayoutOfBus (true,  0), inArr);
-        SpeakerMappings::channelSetToVstArrangement (getChannelLayoutOfBus (false, 0), outArr);
-
-        dispatch (plugInOpcodeSetSpeakerConfiguration, 0, reinterpret_cast<pointer_sized_int> (&inArr), &outArr, 0.0f);
+        dispatch (plugInOpcodeSetSpeakerConfiguration, 0, (pointer_sized_int) &inArr.get(), (void*) &outArr.get(), 0.0f);
 
         vstHostTime.tempoBPM = 120.0;
         vstHostTime.timeSignatureNumerator = 4;
-        vstHostTime.timeSignatureDenominator    = 4;
+        vstHostTime.timeSignatureDenominator = 4;
         vstHostTime.sampleRate = rate;
         vstHostTime.samplePosition = 0;
         vstHostTime.flags = vstTimingInfoFlagNanosecondsValid
@@ -885,7 +864,15 @@ public:
                 dispatch (plugInOpcodeSetSampleFloatType, 0, (pointer_sized_int) vstPrecision, 0, 0);
             }
 
-            tempBuffer.setSize (jmax (1, vstEffect->numInputChannels), samplesPerBlockExpected);
+            auto maxChannels = jmax (1, jmax (vstEffect->numInputChannels, vstEffect->numOutputChannels));
+
+            tmpBufferFloat .setSize (maxChannels, samplesPerBlockExpected);
+            tmpBufferDouble.setSize (maxChannels, samplesPerBlockExpected);
+
+            channelBufferFloat .calloc (static_cast<size_t> (maxChannels));
+            channelBufferDouble.calloc (static_cast<size_t> (maxChannels));
+
+            outOfPlaceBuffer.setSize (jmax (1, vstEffect->numOutputChannels), samplesPerBlockExpected);
 
             if (! isPowerOn)
                 setPower (true);
@@ -893,7 +880,7 @@ public:
             // dodgy hack to force some plugins to initialise the sample rate..
             if ((! hasEditor()) && getNumParameters() > 0)
             {
-                const float old = getParameter (0);
+                auto old = getParameter (0);
                 setParameter (0, (old < 0.5f) ? 1.0f : 0.0f);
                 setParameter (0, old);
             }
@@ -912,7 +899,13 @@ public:
             setPower (false);
         }
 
-        tempBuffer.setSize (1, 1);
+        channelBufferFloat.free();
+        tmpBufferFloat.setSize (0, 0);
+
+        channelBufferDouble.free();
+        tmpBufferDouble.setSize (0, 0);
+
+        outOfPlaceBuffer.setSize (1, 1);
         incomingMidi.clear();
 
         midiEventsToSend.freeEvents();
@@ -930,13 +923,13 @@ public:
     void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
     {
         jassert (! isUsingDoublePrecision());
-        processAudio (buffer, midiMessages);
+        processAudio (buffer, midiMessages, tmpBufferFloat, channelBufferFloat);
     }
 
     void processBlock (AudioBuffer<double>& buffer, MidiBuffer& midiMessages) override
     {
         jassert (isUsingDoublePrecision());
-        processAudio (buffer, midiMessages);
+        processAudio (buffer, midiMessages, tmpBufferDouble, channelBufferDouble);
     }
 
     bool supportsDoublePrecisionProcessing() const override
@@ -951,8 +944,8 @@ public:
 
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override
     {
-        const int numInputBuses  = getBusCount (true);
-        const int numOutputBuses = getBusCount (false);
+        auto numInputBuses  = getBusCount (true);
+        auto numOutputBuses = getBusCount (false);
 
         // it's not possible to change layout if there are sidechains/aux buses
         if (numInputBuses > 1 || numOutputBuses > 1)
@@ -981,7 +974,7 @@ public:
                 return String (pinProps.text, sizeof (pinProps.text));
         }
 
-        return String();
+        return {};
     }
 
     bool isInputChannelStereoPair (int index) const override
@@ -1005,7 +998,7 @@ public:
                 return String (pinProps.text, sizeof (pinProps.text));
         }
 
-        return String();
+        return {};
     }
 
     bool isOutputChannelStereoPair (int index) const override
@@ -1213,7 +1206,7 @@ public:
     }
 
     //==============================================================================
-    pointer_sized_int dispatch (const int opcode, const int index, const pointer_sized_int value, void* const ptr, float opt) const
+    pointer_sized_int dispatch (int opcode, int index, pointer_sized_int value, void* const ptr, float opt) const
     {
         pointer_sized_int result = 0;
 
@@ -1225,7 +1218,7 @@ public:
             try
             {
                #if JUCE_MAC
-                const ResFileRefNum oldResFile = CurResFile();
+                auto oldResFile = CurResFile();
 
                 if (vstModule->resFileId != 0)
                     UseResFile (vstModule->resFileId);
@@ -1234,7 +1227,8 @@ public:
                 result = vstEffect->dispatchFunction (vstEffect, opcode, index, value, ptr, opt);
 
                #if JUCE_MAC
-                const ResFileRefNum newResFile = CurResFile();
+                auto newResFile = CurResFile();
+
                 if (newResFile != oldResFile)  // avoid confusing the parent app's resource file with the plug-in's
                 {
                     vstModule->resFileId = newResFile;
@@ -1254,7 +1248,7 @@ public:
         if (dataSize < 28)
             return false;
 
-        const fxSet* const set = (const fxSet*) data;
+        auto set = (const fxSet*) data;
 
         if ((! compareMagic (set->chunkMagic, "CcnK")) || fxbSwap (set->version) > fxbVersionNum)
             return false;
@@ -1264,15 +1258,16 @@ public:
             // bank of programs
             if (fxbSwap (set->numPrograms) >= 0)
             {
-                const int oldProg = getCurrentProgram();
-                const int numParams = fxbSwap (((const fxProgram*) (set->programs))->numParams);
-                const int progLen = (int) sizeof (fxProgram) + (numParams - 1) * (int) sizeof (float);
+                auto oldProg = getCurrentProgram();
+                auto numParams = fxbSwap (((const fxProgram*) (set->programs))->numParams);
+                auto progLen = (int) sizeof (fxProgram) + (numParams - 1) * (int) sizeof (float);
 
                 for (int i = 0; i < fxbSwap (set->numPrograms); ++i)
                 {
                     if (i != oldProg)
                     {
-                        const fxProgram* const prog = (const fxProgram*) (((const char*) (set->programs)) + i * progLen);
+                        auto prog = (const fxProgram*) (((const char*) (set->programs)) + i * progLen);
+
                         if (((const char*) prog) - ((const char*) set) >= (ssize_t) dataSize)
                             return false;
 
@@ -1287,7 +1282,8 @@ public:
                 if (fxbSwap (set->numPrograms) > 0)
                     setCurrentProgram (oldProg);
 
-                const fxProgram* const prog = (const fxProgram*) (((const char*) (set->programs)) + oldProg * progLen);
+                auto prog = (const fxProgram*) (((const char*) (set->programs)) + oldProg * progLen);
+
                 if (((const char*) prog) - ((const char*) set) >= (ssize_t) dataSize)
                     return false;
 
@@ -1298,7 +1294,7 @@ public:
         else if (compareMagic (set->fxMagic, "FxCk"))
         {
             // single program
-            const fxProgram* const prog = (const fxProgram*) data;
+            auto prog = (const fxProgram*) data;
 
             if (! compareMagic (prog->chunkMagic, "CcnK"))
                 return false;
@@ -1311,7 +1307,7 @@ public:
         else if (compareMagic (set->fxMagic, "FBCh"))
         {
             // non-preset chunk
-            const fxChunkSet* const cset = (const fxChunkSet*) data;
+            auto cset = (const fxChunkSet*) data;
 
             if ((size_t) fxbSwap (cset->chunkSize) + sizeof (fxChunkSet) - 8 > (size_t) dataSize)
                 return false;
@@ -1321,7 +1317,7 @@ public:
         else if (compareMagic (set->fxMagic, "FPCh"))
         {
             // preset chunk
-            const fxProgramSet* const cset = (const fxProgramSet*) data;
+            auto cset = (const fxProgramSet*) data;
 
             if ((size_t) fxbSwap (cset->chunkSize) + sizeof (fxProgramSet) - 8 > (size_t) dataSize)
                 return false;
@@ -1340,8 +1336,8 @@ public:
 
     bool saveToFXBFile (MemoryBlock& dest, bool isFXB, int maxSizeMB = 128)
     {
-        const int numPrograms = getNumPrograms();
-        const int numParams = getNumParameters();
+        auto numPrograms = getNumPrograms();
+        auto numParams = getNumParameters();
 
         if (usesChunks())
         {
@@ -1350,10 +1346,10 @@ public:
 
             if (isFXB)
             {
-                const size_t totalLen = sizeof (fxChunkSet) + chunk.getSize() - 8;
+                auto totalLen = sizeof (fxChunkSet) + chunk.getSize() - 8;
                 dest.setSize (totalLen, true);
 
-                fxChunkSet* const set = (fxChunkSet*) dest.getData();
+                auto set = (fxChunkSet*) dest.getData();
                 set->chunkMagic = fxbName ("CcnK");
                 set->byteSize = 0;
                 set->fxMagic = fxbName ("FBCh");
@@ -1367,10 +1363,10 @@ public:
             }
             else
             {
-                const size_t totalLen = sizeof (fxProgramSet) + chunk.getSize() - 8;
+                auto totalLen = sizeof (fxProgramSet) + chunk.getSize() - 8;
                 dest.setSize (totalLen, true);
 
-                fxProgramSet* const set = (fxProgramSet*) dest.getData();
+                auto set = (fxProgramSet*) dest.getData();
                 set->chunkMagic = fxbName ("CcnK");
                 set->byteSize = 0;
                 set->fxMagic = fxbName ("FPCh");
@@ -1388,11 +1384,11 @@ public:
         {
             if (isFXB)
             {
-                const int progLen = (int) sizeof (fxProgram) + (numParams - 1) * (int) sizeof (float);
-                const size_t len = (sizeof (fxSet) - sizeof (fxProgram)) + (size_t) (progLen * jmax (1, numPrograms));
+                auto progLen = (int) sizeof (fxProgram) + (numParams - 1) * (int) sizeof (float);
+                auto len = (sizeof (fxSet) - sizeof (fxProgram)) + (size_t) (progLen * jmax (1, numPrograms));
                 dest.setSize (len, true);
 
-                fxSet* const set = (fxSet*) dest.getData();
+                auto set = (fxSet*) dest.getData();
                 set->chunkMagic = fxbName ("CcnK");
                 set->byteSize = 0;
                 set->fxMagic = fxbName ("FxBk");
@@ -1404,7 +1400,7 @@ public:
                 MemoryBlock oldSettings;
                 createTempParameterStore (oldSettings);
 
-                const int oldProgram = getCurrentProgram();
+                auto oldProgram = getCurrentProgram();
 
                 if (oldProgram >= 0)
                     setParamsInProgramBlock ((fxProgram*) (((char*) (set->programs)) + oldProgram * progLen));
@@ -1440,7 +1436,7 @@ public:
         if (usesChunks())
         {
             void* data = nullptr;
-            const size_t bytes = (size_t) dispatch (plugInOpcodeGetData, isPreset ? 1 : 0, 0, &data, 0.0f);
+            auto bytes = (size_t) dispatch (plugInOpcodeGetData, isPreset ? 1 : 0, 0, &data, 0.0f);
 
             if (data != nullptr && bytes <= (size_t) maxSizeMB * 1024 * 1024)
             {
@@ -1473,18 +1469,25 @@ public:
     ModuleHandle::Ptr vstModule;
 
     ScopedPointer<VSTPluginFormat::ExtraFunctions> extraFunctions;
-    bool usesCocoaNSView;
+    bool usesCocoaNSView = false;
 
 private:
     String name;
     CriticalSection lock;
-    bool wantsMidiMessages, initialised, isPowerOn;
+    bool wantsMidiMessages = false, initialised = false, isPowerOn = false;
     mutable StringArray programNames;
-    AudioBuffer<float> tempBuffer;
+    AudioBuffer<float> outOfPlaceBuffer;
+
     CriticalSection midiInLock;
     MidiBuffer incomingMidi;
     VSTMidiEventList midiEventsToSend;
     VstTimingInformation vstHostTime;
+
+    AudioBuffer<float> tmpBufferFloat;
+    HeapBlock<float*> channelBufferFloat;
+
+    AudioBuffer<double> tmpBufferDouble;
+    HeapBlock<double*> channelBufferDouble;
 
     static pointer_sized_int handleCanDo (const char* name)
     {
@@ -1509,7 +1512,7 @@ private:
     {
         String hostName ("Juce VST Host");
 
-        if (JUCEApplicationBase* app = JUCEApplicationBase::getInstance())
+        if (auto* app = JUCEApplicationBase::getInstance())
             hostName = app->getApplicationName();
 
         hostName.copyToUTF8 (name, (size_t) jmin (vstMaxManufacturerStringLength, vstMaxPlugInNameStringLength) - 1);
@@ -1545,14 +1548,14 @@ private:
             handleUpdateNowIfNeeded();
 
             for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
-                if (ComponentPeer* p = ComponentPeer::getPeer(i))
+                if (auto* p = ComponentPeer::getPeer(i))
                     p->performAnyPendingRepaintsNow();
         }
     }
 
     void setWindowSize (int width, int height)
     {
-        if (AudioProcessorEditor* ed = getActiveEditor())
+        if (auto* ed = getActiveEditor())
         {
            #if JUCE_LINUX
             const MessageManagerLock mmLock;
@@ -1603,11 +1606,30 @@ private:
     {
         BusesProperties returnValue;
 
+        if (effect->numInputChannels == 0 && effect->numOutputChannels == 0)
+            return returnValue;
+
+        // Workaround for old broken JUCE plug-ins which would return an invalid
+        // speaker arrangement if the host didn't ask for a specific arrangement
+        // beforehand.
+        // Check if the plug-in reports any default layouts. If it doesn't, then
+        // try setting a default layout compatible with the number of pins this
+        // plug-in is reporting.
+        if (! pluginHasDefaultChannelLayouts (effect))
+        {
+            SpeakerMappings::VstSpeakerConfigurationHolder canonicalIn  (AudioChannelSet::canonicalChannelSet (effect->numInputChannels));
+            SpeakerMappings::VstSpeakerConfigurationHolder canonicalOut (AudioChannelSet::canonicalChannelSet (effect->numOutputChannels));
+
+            effect->dispatchFunction (effect, plugInOpcodeSetSpeakerConfiguration, 0,
+                                      (pointer_sized_int) &canonicalIn.get(), (void*) &canonicalOut.get(), 0.0f);
+        }
+
         HeapBlock<VstSpeakerConfiguration> inArrBlock (1, true), outArrBlock (1, true);
 
-       VstSpeakerConfiguration* inArr = inArrBlock.getData(), *outArr = outArrBlock.getData();
-        if (effect->numInputChannels == 0 ||
-            effect->dispatchFunction (effect, plugInOpcodeGetSpeakerArrangement, 0, reinterpret_cast<pointer_sized_int> (&inArr), &outArr, 0.0f) == 0)
+        auto* inArr  = inArrBlock.getData();
+        auto* outArr = outArrBlock.getData();
+
+        if (! getSpeakerArrangementWrapper (effect, inArr, outArr))
             inArr = outArr = nullptr;
 
         for (int dir = 0; dir < 2; ++dir)
@@ -1620,6 +1642,7 @@ private:
 
             VstPinInfo pinProps;
             AudioChannelSet layout;
+
             for (int ch = 0; ch < maxChannels; ch += layout.size())
             {
                 if (effect->dispatchFunction (effect, opcode, ch, 0, &pinProps, 0.0f) == 0)
@@ -1628,13 +1651,16 @@ private:
                 if ((pinProps.flags & vstPinInfoFlagValid) != 0)
                 {
                     layout = SpeakerMappings::vstArrangementTypeToChannelSet (pinProps.configurationType, 0);
+
                     if (layout.isDisabled())
                         break;
                 }
-                else
+                else if (arr == nullptr)
                 {
                     layout = ((pinProps.flags & vstPinInfoFlagIsStereo) != 0 ? AudioChannelSet::stereo() : AudioChannelSet::mono());
                 }
+                else
+                    break;
 
                 busAdded = true;
                 returnValue.addBus (isInput, pinProps.text, layout, true);
@@ -1644,6 +1670,7 @@ private:
             if (! busAdded && maxChannels > 0)
             {
                 String busName = (isInput ? "Input" : "Output");
+
                 if (effect->dispatchFunction (effect, opcode, 0, 0, &pinProps, 0.0f) != 0)
                     busName = pinProps.text;
 
@@ -1659,15 +1686,68 @@ private:
         return returnValue;
     }
 
+    static bool pluginHasDefaultChannelLayouts (VstEffectInterface* effect)
+    {
+        HeapBlock<VstSpeakerConfiguration> inArrBlock (1, true), outArrBlock (1, true);
+
+        auto* inArr  = inArrBlock.getData();
+        auto* outArr = outArrBlock.getData();
+
+        if (getSpeakerArrangementWrapper (effect, inArr, outArr))
+            return true;
+
+        for (int dir = 0; dir < 2; ++dir)
+        {
+            const bool isInput = (dir == 0);
+            const int opcode = (isInput ? plugInOpcodeGetInputPinProperties : plugInOpcodeGetOutputPinProperties);
+            const int maxChannels = (isInput ? effect->numInputChannels : effect->numOutputChannels);
+
+            int channels = 1;
+
+            for (int ch = 0; ch < maxChannels; ch += channels)
+            {
+                VstPinInfo pinProps;
+
+                if (effect->dispatchFunction (effect, opcode, ch, 0, &pinProps, 0.0f) == 0)
+                    return false;
+
+                if ((pinProps.flags & vstPinInfoFlagValid) != 0)
+                    return true;
+
+                channels = (pinProps.flags & vstPinInfoFlagIsStereo) != 0 ? 2 : 1;
+            }
+        }
+
+        return false;
+    }
+
+    static bool getSpeakerArrangementWrapper (VstEffectInterface* effect,
+                                              VstSpeakerConfiguration* inArr,
+                                              VstSpeakerConfiguration* outArr)
+    {
+        // Workaround: unfortunately old JUCE VST-2 plug-ins had a bug and would crash if
+        // you try to get the speaker arrangement when there are no input channels present.
+        // Hopefully, one day (when there are no more old JUCE plug-ins around), we can
+        // commment out the next two lines.
+        if (effect->numInputChannels == 0)
+            return false;
+
+        return (effect->dispatchFunction (effect, plugInOpcodeGetSpeakerArrangement, 0,
+                                          reinterpret_cast<pointer_sized_int> (&inArr), &outArr, 0.0f) != 0);
+    }
+
     //==============================================================================
     template <typename FloatType>
-    void processAudio (AudioBuffer<FloatType>& buffer, MidiBuffer& midiMessages)
+    void processAudio (AudioBuffer<FloatType>& buffer, MidiBuffer& midiMessages,
+                       AudioBuffer<FloatType>& tmpBuffer,
+                       HeapBlock<FloatType*>& channelBuffer)
     {
-        const int numSamples = buffer.getNumSamples();
+        auto numSamples  = buffer.getNumSamples();
+        auto numChannels = buffer.getNumChannels();
 
         if (initialised)
         {
-            if (AudioPlayHead* const currentPlayHead = getPlayHead())
+            if (auto* currentPlayHead = getPlayHead())
             {
                 AudioPlayHead::CurrentPositionInfo position;
 
@@ -1697,12 +1777,15 @@ private:
 
                     switch (position.frameRate)
                     {
-                        case AudioPlayHead::fps24:       setHostTimeFrameRate (0, 24.0,  position.timeInSeconds); break;
-                        case AudioPlayHead::fps25:       setHostTimeFrameRate (1, 25.0,  position.timeInSeconds); break;
-                        case AudioPlayHead::fps2997:     setHostTimeFrameRate (2, 30.0 * 1000.0 / 1001.0, position.timeInSeconds); break;
-                        case AudioPlayHead::fps30:       setHostTimeFrameRate (3, 30.0,  position.timeInSeconds); break;
-                        case AudioPlayHead::fps2997drop: setHostTimeFrameRate (4, 30.0 * 1000.0 / 1001.0, position.timeInSeconds); break;
-                        case AudioPlayHead::fps30drop:   setHostTimeFrameRate (5, 30.0 * 1000.0 / 1001.0, position.timeInSeconds); break;
+                        case AudioPlayHead::fps24:       setHostTimeFrameRate (vstSmpteRateFps24, 24.0, position.timeInSeconds); break;
+                        case AudioPlayHead::fps25:       setHostTimeFrameRate (vstSmpteRateFps25, 25.0, position.timeInSeconds); break;
+                        case AudioPlayHead::fps30:       setHostTimeFrameRate (vstSmpteRateFps30, 30.0, position.timeInSeconds); break;
+                        case AudioPlayHead::fps60:       setHostTimeFrameRate (vstSmpteRateFps60, 60.0, position.timeInSeconds); break;
+
+                        case AudioPlayHead::fps2997:     setHostTimeFrameRateDrop (vstSmpteRateFps2997,     30.0, position.timeInSeconds); break;
+                        case AudioPlayHead::fps2997drop: setHostTimeFrameRateDrop (vstSmpteRateFps2997drop, 30.0, position.timeInSeconds); break;
+                        case AudioPlayHead::fps30drop:   setHostTimeFrameRateDrop (vstSmpteRateFps30drop,   30.0, position.timeInSeconds); break;
+                        case AudioPlayHead::fps60drop:   setHostTimeFrameRateDrop (vstSmpteRateFps599,      60.0, position.timeInSeconds); break;
                         default: break;
                     }
 
@@ -1731,17 +1814,34 @@ private:
                 int numBytesOfMidiData, samplePosition;
 
                 while (iter.getNextEvent (midiData, numBytesOfMidiData, samplePosition))
-                {
                     midiEventsToSend.addEvent (midiData, numBytesOfMidiData,
                                                jlimit (0, numSamples - 1, samplePosition));
-                }
 
                 vstEffect->dispatchFunction (vstEffect, plugInOpcodePreAudioProcessingEvents, 0, 0, midiEventsToSend.events, 0);
             }
 
             _clearfp();
 
-            invokeProcessFunction (buffer, numSamples);
+            // always ensure that the buffer is at least as large as the maximum number of channels
+            auto maxChannels = jmax (vstEffect->numInputChannels, vstEffect->numOutputChannels);
+            auto channels = channelBuffer.getData();
+
+            if (numChannels < maxChannels)
+            {
+                if (numSamples > tmpBuffer.getNumSamples())
+                    tmpBuffer.setSize (tmpBuffer.getNumChannels(), numSamples);
+
+                tmpBuffer.clear();
+            }
+
+            for (int ch = 0; ch < maxChannels; ++ch)
+                channels[ch] = (ch < numChannels ? buffer.getWritePointer (ch) : tmpBuffer.getWritePointer (ch));
+
+            {
+                AudioBuffer<FloatType> processBuffer (channels, maxChannels, numSamples);
+
+                invokeProcessFunction (processBuffer, numSamples);
+            }
         }
         else
         {
@@ -1764,31 +1864,39 @@ private:
     {
         if ((vstEffect->flags & vstEffectFlagInplaceAudio) != 0)
         {
-            vstEffect->processAudioInplaceFunction (vstEffect, buffer.getArrayOfWritePointers(), buffer.getArrayOfWritePointers(), sampleFrames);
+            vstEffect->processAudioInplaceFunction (vstEffect, buffer.getArrayOfWritePointers(),
+                                                    buffer.getArrayOfWritePointers(), sampleFrames);
         }
         else
         {
-            tempBuffer.setSize (vstEffect->numOutputChannels, sampleFrames);
-            tempBuffer.clear();
+            outOfPlaceBuffer.setSize (vstEffect->numOutputChannels, sampleFrames);
+            outOfPlaceBuffer.clear();
 
-            vstEffect->processAudioFunction (vstEffect, buffer.getArrayOfWritePointers(), tempBuffer.getArrayOfWritePointers(), sampleFrames);
+            vstEffect->processAudioFunction (vstEffect, buffer.getArrayOfWritePointers(),
+                                             outOfPlaceBuffer.getArrayOfWritePointers(), sampleFrames);
 
             for (int i = vstEffect->numOutputChannels; --i >= 0;)
-                buffer.copyFrom (i, 0, tempBuffer.getReadPointer (i), sampleFrames);
+                buffer.copyFrom (i, 0, outOfPlaceBuffer.getReadPointer (i), sampleFrames);
         }
     }
 
     inline void invokeProcessFunction (AudioBuffer<double>& buffer, int32 sampleFrames)
     {
-        vstEffect->processDoubleAudioInplaceFunction (vstEffect, buffer.getArrayOfWritePointers(), buffer.getArrayOfWritePointers(), sampleFrames);
+        vstEffect->processDoubleAudioInplaceFunction (vstEffect, buffer.getArrayOfWritePointers(),
+                                                      buffer.getArrayOfWritePointers(), sampleFrames);
     }
 
     //==============================================================================
     void setHostTimeFrameRate (long frameRateIndex, double frameRate, double currentTime) noexcept
     {
         vstHostTime.flags |= vstTimingInfoFlagSmpteValid;
-        vstHostTime.smpteRate       = (int32) frameRateIndex;
-        vstHostTime.smpteOffset     = (int32) (currentTime * 80.0 * frameRate + 0.5);
+        vstHostTime.smpteRate   = (int32) frameRateIndex;
+        vstHostTime.smpteOffset = (int32) (currentTime * 80.0 * frameRate + 0.5);
+    }
+
+    void setHostTimeFrameRateDrop (long frameRateIndex, double frameRate, double currentTime) noexcept
+    {
+        setHostTimeFrameRate (frameRateIndex, frameRate * 1000.0 / 1001.0, currentTime);
     }
 
     bool restoreProgramSettings (const fxProgram* const prog)
@@ -1810,7 +1918,7 @@ private:
     String getTextForOpcode (const int index, const VstHostToPlugInOpcodes opcode) const
     {
         if (vstEffect == nullptr)
-            return String();
+            return {};
 
         jassert (index >= 0 && index < vstEffect->numParameters);
         char nm[256] = { 0 };
@@ -1844,9 +1952,9 @@ private:
         return progName;
     }
 
-    void setParamsInProgramBlock (fxProgram* const prog)
+    void setParamsInProgramBlock (fxProgram* prog)
     {
-        const int numParams = getNumParameters();
+        auto numParams = getNumParameters();
 
         prog->chunkMagic = fxbName ("CcnK");
         prog->byteSize = 0;
@@ -1871,7 +1979,7 @@ private:
             // only do this if the plugin can't use indexed names..
             if (dispatch (plugInOpcodeGetProgramName, 0, -1, nm, 0) == 0)
             {
-                const int oldProgram = getCurrentProgram();
+                auto oldProgram = getCurrentProgram();
                 MemoryBlock oldSettings;
                 createTempParameterStore (oldSettings);
 
@@ -1887,7 +1995,7 @@ private:
         }
     }
 
-    void handleMidiFromPlugin (const VstEventBlock* const events)
+    void handleMidiFromPlugin (const VstEventBlock* events)
     {
         if (events != nullptr)
         {
@@ -1904,7 +2012,8 @@ private:
 
         getCurrentProgramName().copyToUTF8 ((char*) dest.getData(), 63);
 
-        float* const p = (float*) (((char*) dest.getData()) + 64);
+        auto p = (float*) (((char*) dest.getData()) + 64);
+
         for (int i = 0; i < getNumParameters(); ++i)
             p[i] = getParameter(i);
     }
@@ -1913,7 +2022,8 @@ private:
     {
         changeProgramName (getCurrentProgram(), (const char*) m.getData());
 
-        float* p = (float*) (((char*) m.getData()) + 64);
+        auto p = (float*) (((char*) m.getData()) + 64);
+
         for (int i = 0; i < getNumParameters(); ++i)
             setParameter (i, p[i]);
     }
@@ -1932,7 +2042,7 @@ private:
 
     String getVersion() const
     {
-        unsigned int v = (unsigned int) dispatch (plugInOpcodeGetManufacturerVersion, 0, 0, 0, 0);
+        auto v = (unsigned int) dispatch (plugInOpcodeGetManufacturerVersion, 0, 0, 0, 0);
 
         String s;
 
@@ -1944,14 +2054,14 @@ private:
             int versionBits[32];
             int n = 0;
 
-            for (unsigned int vv = v; vv != 0; vv /= 10)
+            for (auto vv = v; vv != 0; vv /= 10)
                 versionBits [n++] = vv % 10;
 
             if (n > 4) // if the number ends up silly, it's probably encoded as hex instead of decimal..
             {
                 n = 0;
 
-                for (unsigned int vv = v; vv != 0; vv >>= 8)
+                for (auto vv = v; vv != 0; vv >>= 8)
                     versionBits [n++] = vv & 255;
             }
 
@@ -2002,15 +2112,15 @@ private:
 
 //==============================================================================
 #if ! (JUCE_IOS || JUCE_ANDROID)
-class VSTPluginWindow;
+struct VSTPluginWindow;
 static Array<VSTPluginWindow*> activeVSTWindows;
 
 //==============================================================================
-class VSTPluginWindow   : public AudioProcessorEditor,
-                         #if ! JUCE_MAC
-                          public ComponentMovementWatcher,
-                         #endif
-                          public Timer
+struct VSTPluginWindow   : public AudioProcessorEditor,
+                          #if ! JUCE_MAC
+                           private ComponentMovementWatcher,
+                          #endif
+                           private Timer
 {
 public:
     VSTPluginWindow (VSTPluginInstance& plug)
@@ -2018,20 +2128,10 @@ public:
          #if ! JUCE_MAC
           ComponentMovementWatcher (this),
          #endif
-          plugin (plug),
-          isOpen (false),
-          recursiveResize (false),
-          pluginWantsKeys (false),
-          pluginRefusesToResize (false),
-          alreadyInside (false)
+          plugin (plug)
     {
-       #if JUCE_WINDOWS
-        pluginHWND = 0;
-        sizeCheckCount = 0;
-
-       #elif JUCE_LINUX
+       #if JUCE_LINUX
         pluginWindow = None;
-        pluginProc = None;
         display = XWindowSystem::getInstance()->displayRef();
 
        #elif JUCE_MAC
@@ -2076,11 +2176,11 @@ public:
         if (recursiveResize)
             return;
 
-        Component* const topComp = getTopLevelComponent();
+        auto* topComp = getTopLevelComponent();
 
         if (topComp->getPeer() != nullptr)
         {
-            const Point<int> pos (topComp->getLocalPoint (this, Point<int>()));
+            auto pos = topComp->getLocalPoint (this, Point<int>());
 
             recursiveResize = true;
 
@@ -2118,6 +2218,10 @@ public:
     {
         closePluginWindow();
         openPluginWindow();
+
+       #if JUCE_LINUX
+        componentMovedOrResized (true, true);
+       #endif
     }
    #endif
 
@@ -2137,8 +2241,8 @@ public:
     {
         if (cocoaWrapper != nullptr)
         {
-            int w = cocoaWrapper->getWidth();
-            int h = cocoaWrapper->getHeight();
+            auto w = cocoaWrapper->getWidth();
+            auto h = cocoaWrapper->getHeight();
 
             if (w != getWidth() || h != getHeight())
                 setSize (w, h);
@@ -2164,18 +2268,13 @@ public:
            #if JUCE_LINUX
             if (pluginWindow != 0)
             {
-                const Rectangle<int> clip (g.getClipBounds());
+                auto clip = g.getClipBounds();
 
-                XEvent ev = { 0 };
-                ev.xexpose.type = Expose;
-                ev.xexpose.display = display;
-                ev.xexpose.window = pluginWindow;
-                ev.xexpose.x = clip.getX();
-                ev.xexpose.y = clip.getY();
-                ev.xexpose.width = clip.getWidth();
-                ev.xexpose.height = clip.getHeight();
-
-                sendEventToChild (ev);
+                XClearArea (display, pluginWindow,
+                            clip.getX(), clip.getY(),
+                            static_cast<unsigned int> (clip.getWidth()),
+                            static_cast<unsigned int> (clip.getHeight()),
+                            True);
             }
            #endif
         }
@@ -2225,19 +2324,7 @@ public:
     {
         ignoreUnused (e);
 
-       #if JUCE_LINUX
-        if (pluginWindow == 0)
-            return;
-
-        toFront (true);
-
-        XEvent ev;
-        prepareXEvent (ev, e);
-        ev.xbutton.type = ButtonPress;
-        translateJuceToXButtonModifiers (e, ev);
-        sendEventToChild (ev);
-
-       #elif JUCE_WINDOWS
+       #if JUCE_WINDOWS || JUCE_LINUX
         toFront (true);
        #endif
     }
@@ -2252,20 +2339,33 @@ public:
        #endif
     }
 
+    void setScaleFactor (float newScale) override
+    {
+        scaleFactor = newScale;
+        dispatch (plugInOpcodeManufacturerSpecific, presonusVendorID,
+                  presonusSetContentScaleFactor, nullptr, newScale);
+    }
+
+    void sendScaleFactorIfNotUnity()
+    {
+        if (scaleFactor != 1.0f)
+            setScaleFactor (scaleFactor);
+    }
+
     //==============================================================================
 private:
     VSTPluginInstance& plugin;
-    bool isOpen, recursiveResize;
-    bool pluginWantsKeys, pluginRefusesToResize, alreadyInside;
+    float scaleFactor = 1.0f;
+    bool isOpen = false, recursiveResize = false;
+    bool pluginWantsKeys = false, pluginRefusesToResize = false, alreadyInside = false;
 
    #if JUCE_WINDOWS
-    HWND pluginHWND;
-    void* originalWndProc;
-    int sizeCheckCount;
+    HWND pluginHWND = {};
+    void* originalWndProc = {};
+    int sizeCheckCount = 0;
    #elif JUCE_LINUX
     ::Display* display;
     Window pluginWindow;
-    EventProcPtr pluginProc;
    #endif
 
     // This is a workaround for old Mackie plugins that crash if their
@@ -2273,7 +2373,7 @@ private:
     bool shouldAvoidDeletingWindow() const
     {
         return plugin.getPluginDescription()
-            .manufacturerName.containsIgnoreCase ("Loud Technologies");
+                .manufacturerName.containsIgnoreCase ("Loud Technologies");
     }
 
     // This is an old workaround for some plugins that need a repaint when their
@@ -2295,6 +2395,7 @@ private:
         VstEditorBounds* rect = nullptr;
         dispatch (plugInOpcodeGetEditorBounds, 0, 0, &rect, 0);
         dispatch (plugInOpcodeOpenEditor, 0, 0, parentWindow, 0);
+        sendScaleFactorIfNotUnity();
 
         // do this before and after like in the steinberg example
         dispatch (plugInOpcodeGetEditorBounds, 0, 0, &rect, 0);
@@ -2339,6 +2440,7 @@ private:
         VstEditorBounds* rect = nullptr;
         dispatch (plugInOpcodeGetEditorBounds, 0, 0, &rect, 0);
         dispatch (plugInOpcodeOpenEditor, 0, 0, getWindowHandle(), 0);
+        sendScaleFactorIfNotUnity();
 
         // do this before and after like in the steinberg example
         dispatch (plugInOpcodeGetEditorBounds, 0, 0, &rect, 0);
@@ -2463,7 +2565,6 @@ private:
             pluginHWND = 0;
            #elif JUCE_LINUX
             pluginWindow = 0;
-            pluginProc = 0;
            #endif
         }
     }
@@ -2475,13 +2576,13 @@ private:
     }
 
     //==============================================================================
-#if JUCE_WINDOWS
+   #if JUCE_WINDOWS
     void checkPluginWindowSize()
     {
         RECT r;
         GetWindowRect (pluginHWND, &r);
-        const int w = r.right - r.left;
-        const int h = r.bottom - r.top;
+        auto w = r.right - r.left;
+        auto h = r.bottom - r.top;
 
         if (isShowing() && w > 0 && h > 0
              && (w != getWidth() || h != getHeight())
@@ -2521,139 +2622,21 @@ private:
 
         return DefWindowProc (hW, message, wParam, lParam);
     }
-#endif
+   #endif
 
-#if JUCE_LINUX
-    //==============================================================================
-    // overload mouse/keyboard events to forward them to the plugin's inner window..
-    void sendEventToChild (XEvent& event)
-    {
-        if (pluginProc != 0)
-        {
-            // if the plugin publishes an event procedure, pass the event directly..
-            pluginProc (&event);
-        }
-        else if (pluginWindow != 0)
-        {
-            // if the plugin has a window, then send the event to the window so that
-            // its message thread will pick it up..
-            XSendEvent (display, pluginWindow, False, NoEventMask, &event);
-            XFlush (display);
-        }
-    }
-
-    void prepareXEvent (XEvent& ev, const MouseEvent& e) const noexcept
-    {
-        zerostruct (ev);
-        ev.xcrossing.display = display;
-        ev.xcrossing.window = pluginWindow;
-        ev.xcrossing.root = RootWindow (display, DefaultScreen (display));
-        ev.xcrossing.time = CurrentTime;
-        ev.xcrossing.x = e.x;
-        ev.xcrossing.y = e.y;
-        ev.xcrossing.x_root = e.getScreenX();
-        ev.xcrossing.y_root = e.getScreenY();
-    }
-
-    void mouseEnter (const MouseEvent& e) override
-    {
-        if (pluginWindow != 0)
-        {
-            XEvent ev;
-            prepareXEvent (ev, e);
-            ev.xcrossing.type = EnterNotify;
-            ev.xcrossing.mode = NotifyNormal;
-            ev.xcrossing.detail = NotifyAncestor;
-            translateJuceToXCrossingModifiers (e, ev);
-            sendEventToChild (ev);
-        }
-    }
-
-    void mouseExit (const MouseEvent& e) override
-    {
-        if (pluginWindow != 0)
-        {
-            XEvent ev;
-            prepareXEvent (ev, e);
-            ev.xcrossing.type = LeaveNotify;
-            ev.xcrossing.mode = NotifyNormal;
-            ev.xcrossing.detail = NotifyAncestor;
-            ev.xcrossing.focus = hasKeyboardFocus (true);
-            translateJuceToXCrossingModifiers (e, ev);
-            sendEventToChild (ev);
-        }
-    }
-
-    void mouseMove (const MouseEvent& e) override
-    {
-        if (pluginWindow != 0)
-        {
-            XEvent ev;
-            prepareXEvent (ev, e);
-            ev.xmotion.type = MotionNotify;
-            ev.xmotion.is_hint = NotifyNormal;
-            sendEventToChild (ev);
-        }
-    }
-
-    void mouseDrag (const MouseEvent& e) override
-    {
-        if (pluginWindow != 0)
-        {
-            XEvent ev;
-            prepareXEvent (ev, e);
-            ev.xmotion.type = MotionNotify;
-            ev.xmotion.is_hint = NotifyNormal;
-            translateJuceToXMotionModifiers (e, ev);
-            sendEventToChild (ev);
-        }
-    }
-
-    void mouseUp (const MouseEvent& e) override
-    {
-        if (pluginWindow != 0)
-        {
-            XEvent ev;
-            prepareXEvent (ev, e);
-            ev.xbutton.type = ButtonRelease;
-            translateJuceToXButtonModifiers (e, ev);
-            sendEventToChild (ev);
-        }
-    }
-
-    void mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel) override
-    {
-        if (pluginWindow != 0)
-        {
-            XEvent ev;
-            prepareXEvent (ev, e);
-            ev.xbutton.type = ButtonPress;
-            translateJuceToXMouseWheelModifiers (e, wheel.deltaY, ev);
-            sendEventToChild (ev);
-
-            ev.xbutton.type = ButtonRelease;
-            sendEventToChild (ev);
-        }
-    }
-
+   #if JUCE_LINUX
     void updatePluginWindowHandle()
     {
         pluginWindow = getChildWindow ((Window) getWindowHandle());
-
-        if (pluginWindow != 0)
-            pluginProc = (EventProcPtr) getPropertyFromXWindow (pluginWindow,
-                                                                XInternAtom (display, "_XEventProc", False));
     }
-#endif
+   #endif
 
     //==============================================================================
 #if JUCE_MAC
    #if JUCE_SUPPORT_CARBON
-    class CarbonWrapperComponent   : public CarbonViewWrapperComponent
+    struct CarbonWrapperComponent   : public CarbonViewWrapperComponent
     {
-    public:
-        CarbonWrapperComponent (VSTPluginWindow& w)
-            : owner (w), alreadyInside (false)
+        CarbonWrapperComponent (VSTPluginWindow& w)  : owner (w)
         {
             keepPluginWindowWhenHidden = w.shouldAvoidDeletingWindow();
             setRepaintsChildHIViewWhenCreated (w.shouldRepaintCarbonWindowWhenCreated());
@@ -2667,7 +2650,7 @@ private:
         HIViewRef attachView (WindowRef windowRef, HIViewRef /*rootView*/) override
         {
             owner.openPluginWindow (windowRef);
-            return 0;
+            return {};
         }
 
         void removeView (HIViewRef) override
@@ -2706,9 +2689,9 @@ private:
 
         void handlePaint() override
         {
-            if (ComponentPeer* const peer = getPeer())
+            if (auto* peer = getPeer())
             {
-                const Point<int> pos (peer->globalToLocal (getScreenPosition()));
+                auto pos = peer->globalToLocal (getScreenPosition());
                 VstEditorBounds r;
                 r.leftmost  = (int16) pos.getX();
                 r.upper     = (int16) pos.getY();
@@ -2721,12 +2704,12 @@ private:
 
     private:
         VSTPluginWindow& owner;
-        bool alreadyInside;
+        bool alreadyInside = false;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CarbonWrapperComponent)
     };
 
-    friend class CarbonWrapperComponent;
+    friend struct CarbonWrapperComponent;
     ScopedPointer<CarbonWrapperComponent> carbonWrapper;
    #endif
 
@@ -2767,7 +2750,7 @@ AudioProcessorEditor* VSTPluginInstance::createEditor()
 static pointer_sized_int VSTINTERFACECALL audioMaster (VstEffectInterface* effect, int32 opcode, int32 index, pointer_sized_int value, void* ptr, float opt)
 {
     if (effect != nullptr)
-        if (VSTPluginInstance* instance = (VSTPluginInstance*) (effect->hostSpace2))
+        if (auto* instance = (VSTPluginInstance*) (effect->hostSpace2))
             return instance->handleCallback (opcode, index, value, ptr, opt);
 
     return VSTPluginInstance::handleGeneralCallback (opcode, index, value, ptr, opt);
@@ -2779,9 +2762,9 @@ VSTPluginFormat::~VSTPluginFormat() {}
 
 static VSTPluginInstance* createAndUpdateDesc (VSTPluginFormat& format, PluginDescription& desc)
 {
-    if (AudioPluginInstance* p = format.createInstanceFromDescription (desc, 44100.0, 512))
+    if (auto* p = format.createInstanceFromDescription (desc, 44100.0, 512))
     {
-        if (VSTPluginInstance* instance = dynamic_cast<VSTPluginInstance*> (p))
+        if (auto* instance = dynamic_cast<VSTPluginInstance*> (p))
         {
            #if JUCE_MAC
             if (instance->vstModule->resFileId != 0)
@@ -2826,7 +2809,7 @@ void VSTPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& result
         for (;;)
         {
             char shellEffectName [256] = { 0 };
-            const int uid = (int) instance->dispatch (plugInOpcodeNextPlugInUniqueID, 0, 0, shellEffectName, 0);
+            auto uid = (int) instance->dispatch (plugInOpcodeNextPlugInUniqueID, 0, 0, shellEffectName, 0);
 
             if (uid == 0)
                 break;
@@ -2863,10 +2846,10 @@ void VSTPluginFormat::createPluginInstance (const PluginDescription& desc,
     {
         File file (desc.fileOrIdentifier);
 
-        const File previousWorkingDirectory (File::getCurrentWorkingDirectory());
+        auto previousWorkingDirectory = File::getCurrentWorkingDirectory();
         file.getParentDirectory().setAsCurrentWorkingDirectory();
 
-        if (ModuleHandle::Ptr module = ModuleHandle::findOrCreateModule (file))
+        if (auto module = ModuleHandle::findOrCreateModule (file))
         {
             shellUIDToCreate = desc.uid;
 
@@ -2894,7 +2877,7 @@ bool VSTPluginFormat::requiresUnblockedMessageThreadDuringCreation (const Plugin
 
 bool VSTPluginFormat::fileMightContainThisPluginType (const String& fileOrIdentifier)
 {
-    const File f (File::createFileWithoutCheckingPath (fileOrIdentifier));
+    auto f = File::createFileWithoutCheckingPath (fileOrIdentifier);
 
   #if JUCE_MAC || JUCE_IOS
     return f.isDirectory() && f.hasFileExtension (".vst");
@@ -2938,7 +2921,7 @@ void VSTPluginFormat::recursiveFileSearch (StringArray& results, const File& dir
 
     while (iter.next())
     {
-        const File f (iter.getFile());
+        auto f = iter.getFile();
         bool isPlugin = false;
 
         if (fileMightContainThisPluginType (f.getFullPathName()))
@@ -2961,15 +2944,14 @@ FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
                                                                 "/usr/lib/vst;/usr/local/lib/vst;~/.vst")
                              .replace (":", ";"));
    #elif JUCE_WINDOWS
-    const String programFiles (File::getSpecialLocation (File::globalApplicationsDirectory).getFullPathName());
+    auto programFiles = File::getSpecialLocation (File::globalApplicationsDirectory).getFullPathName();
 
     FileSearchPath paths;
-    paths.add (WindowsRegistry::getValue ("HKEY_LOCAL_MACHINE\\Software\\VST\\VSTPluginsPath",
-                                          programFiles + "\\Steinberg\\VstPlugins"));
+    paths.add (WindowsRegistry::getValue ("HKEY_LOCAL_MACHINE\\Software\\VST\\VSTPluginsPath"));
+    paths.addIfNotAlreadyThere (programFiles + "\\Steinberg\\VstPlugins");
     paths.removeNonExistentPaths();
-
-    paths.add (WindowsRegistry::getValue ("HKEY_LOCAL_MACHINE\\Software\\VST\\VSTPluginsPath",
-                                          programFiles + "\\VstPlugins"));
+    paths.addIfNotAlreadyThere (programFiles + "\\VstPlugins");
+    paths.removeRedundantPaths();
     return paths;
    #elif JUCE_IOS
     // on iOS you can only load plug-ins inside the hosts bundle folder
@@ -2989,7 +2971,7 @@ FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
 
 const XmlElement* VSTPluginFormat::getVSTXML (AudioPluginInstance* plugin)
 {
-    if (VSTPluginInstance* const vst = dynamic_cast<VSTPluginInstance*> (plugin))
+    if (auto* vst = dynamic_cast<VSTPluginInstance*> (plugin))
         if (vst->vstModule != nullptr)
             return vst->vstModule->vstXml.get();
 
@@ -2998,7 +2980,7 @@ const XmlElement* VSTPluginFormat::getVSTXML (AudioPluginInstance* plugin)
 
 bool VSTPluginFormat::loadFromFXBFile (AudioPluginInstance* plugin, const void* data, size_t dataSize)
 {
-    if (VSTPluginInstance* vst = dynamic_cast<VSTPluginInstance*> (plugin))
+    if (auto* vst = dynamic_cast<VSTPluginInstance*> (plugin))
         return vst->loadFromFXBFile (data, dataSize);
 
     return false;
@@ -3006,7 +2988,7 @@ bool VSTPluginFormat::loadFromFXBFile (AudioPluginInstance* plugin, const void* 
 
 bool VSTPluginFormat::saveToFXBFile (AudioPluginInstance* plugin, MemoryBlock& dest, bool asFXB)
 {
-    if (VSTPluginInstance* vst = dynamic_cast<VSTPluginInstance*> (plugin))
+    if (auto* vst = dynamic_cast<VSTPluginInstance*> (plugin))
         return vst->saveToFXBFile (dest, asFXB);
 
     return false;
@@ -3014,7 +2996,7 @@ bool VSTPluginFormat::saveToFXBFile (AudioPluginInstance* plugin, MemoryBlock& d
 
 bool VSTPluginFormat::getChunkData (AudioPluginInstance* plugin, MemoryBlock& result, bool isPreset)
 {
-    if (VSTPluginInstance* vst = dynamic_cast<VSTPluginInstance*> (plugin))
+    if (auto* vst = dynamic_cast<VSTPluginInstance*> (plugin))
         return vst->getChunkData (result, isPreset, 128);
 
     return false;
@@ -3022,7 +3004,7 @@ bool VSTPluginFormat::getChunkData (AudioPluginInstance* plugin, MemoryBlock& re
 
 bool VSTPluginFormat::setChunkData (AudioPluginInstance* plugin, const void* data, int size, bool isPreset)
 {
-    if (VSTPluginInstance* vst = dynamic_cast<VSTPluginInstance*> (plugin))
+    if (auto* vst = dynamic_cast<VSTPluginInstance*> (plugin))
         return vst->setChunkData (data, size, isPreset);
 
     return false;
@@ -3034,12 +3016,9 @@ AudioPluginInstance* VSTPluginFormat::createCustomVSTFromMainCall (void* entryPo
     ModuleHandle::Ptr module = new ModuleHandle (File(), (MainCall) entryPointFunction);
 
     if (module->open())
-    {
-        ScopedPointer<VSTPluginInstance> result (VSTPluginInstance::create (module, initialSampleRate, initialBufferSize));
-
-        if (result != nullptr && result->initialiseEffect (initialSampleRate, initialBufferSize))
-            return result.release();
-    }
+        if (ScopedPointer<VSTPluginInstance> result = VSTPluginInstance::create (module, initialSampleRate, initialBufferSize))
+            if (result->initialiseEffect (initialSampleRate, initialBufferSize))
+                return result.release();
 
     return nullptr;
 }
@@ -3048,14 +3027,14 @@ void VSTPluginFormat::setExtraFunctions (AudioPluginInstance* plugin, ExtraFunct
 {
     ScopedPointer<ExtraFunctions> f (functions);
 
-    if (VSTPluginInstance* vst = dynamic_cast<VSTPluginInstance*> (plugin))
+    if (auto* vst = dynamic_cast<VSTPluginInstance*> (plugin))
         vst->extraFunctions = f;
 }
 
 AudioPluginInstance* VSTPluginFormat::getPluginInstanceFromVstEffectInterface (void* aEffect)
 {
-    if (VstEffectInterface* vstAEffect = reinterpret_cast<VstEffectInterface*> (aEffect))
-        if (VSTPluginInstance* instanceVST = reinterpret_cast<VSTPluginInstance*> (vstAEffect->hostSpace2))
+    if (auto* vstAEffect = reinterpret_cast<VstEffectInterface*> (aEffect))
+        if (auto* instanceVST = reinterpret_cast<VSTPluginInstance*> (vstAEffect->hostSpace2))
             return dynamic_cast<AudioPluginInstance*> (instanceVST);
 
     return nullptr;
@@ -3063,10 +3042,10 @@ AudioPluginInstance* VSTPluginFormat::getPluginInstanceFromVstEffectInterface (v
 
 pointer_sized_int JUCE_CALLTYPE VSTPluginFormat::dispatcher (AudioPluginInstance* plugin, int32 opcode, int32 index, pointer_sized_int value, void* ptr, float opt)
 {
-    if (VSTPluginInstance* vst = dynamic_cast<VSTPluginInstance*> (plugin))
+    if (auto* vst = dynamic_cast<VSTPluginInstance*> (plugin))
         return vst->dispatch (opcode, index, value, ptr, opt);
 
-    return 0;
+    return {};
 }
 
 void VSTPluginFormat::aboutToScanVSTShellPlugin (const PluginDescription&) {}

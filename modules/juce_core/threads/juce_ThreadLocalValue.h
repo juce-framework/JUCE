@@ -2,40 +2,25 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
 #pragma once
-
-// (NB: on win32, native thread-locals aren't possible in a dynamically loaded DLL in XP).
-#if ! ((JUCE_MSVC && (JUCE_64BIT || ! defined (JucePlugin_PluginCode))) \
-       || (JUCE_MAC && JUCE_CLANG && defined (MAC_OS_X_VERSION_10_7) \
-             && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7))
- #define JUCE_NO_COMPILER_THREAD_LOCAL 1
-#endif
 
 //==============================================================================
 /**
@@ -69,14 +54,12 @@ public:
     */
     ~ThreadLocalValue()
     {
-       #if JUCE_NO_COMPILER_THREAD_LOCAL
-        for (ObjectHolder* o = first.value; o != nullptr;)
+        for (auto* o = first.get(); o != nullptr;)
         {
-            ObjectHolder* const next = o->next;
+            auto* next = o->next;
             delete o;
             o = next;
         }
-       #endif
     }
 
     /** Returns a reference to this thread's instance of the value.
@@ -110,47 +93,25 @@ public:
     */
     Type& get() const noexcept
     {
-       #if JUCE_NO_COMPILER_THREAD_LOCAL
-        const Thread::ThreadID threadId = Thread::getCurrentThreadId();
+        auto threadId = Thread::getCurrentThreadId();
+        ObjectHolder* o = nullptr;
 
-        for (ObjectHolder* o = first.get(); o != nullptr; o = o->next)
-            if (o->threadId == threadId)
+        for (o = first.get(); o != nullptr; o = o->next)
+            if (o->threadId.get() == threadId)
                 return o->object;
 
-        for (ObjectHolder* o = first.get(); o != nullptr; o = o->next)
-        {
-            if (o->threadId == nullptr)
-            {
-                {
-                    SpinLock::ScopedLockType sl (lock);
+        for (o = first.get(); o != nullptr; o = o->next)
+            if (o->threadId.compareAndSetBool (threadId, nullptr))
+                break;
 
-                    if (o->threadId != nullptr)
-                        continue;
+        if (o != nullptr)
+            o->object = Type();
+        else
+            for (o = new ObjectHolder (threadId, first.get());
+                 ! first.compareAndSetBool (o, o->next);
+                 o->next = first.get());
 
-                    o->threadId = threadId;
-                }
-
-                o->object = Type();
-                return o->object;
-            }
-        }
-
-        ObjectHolder* const newObject = new ObjectHolder (threadId);
-
-        do
-        {
-            newObject->next = first.get();
-        }
-        while (! first.compareAndSetBool (newObject, newObject->next));
-
-        return newObject->object;
-       #elif JUCE_MAC
-        static __thread Type object;
-        return object;
-       #elif JUCE_MSVC
-        static __declspec(thread) Type object;
-        return object;
-       #endif
+        return o->object;
     }
 
     /** Called by a thread before it terminates, to allow this class to release
@@ -158,30 +119,20 @@ public:
     */
     void releaseCurrentThreadStorage()
     {
-       #if JUCE_NO_COMPILER_THREAD_LOCAL
-        const Thread::ThreadID threadId = Thread::getCurrentThreadId();
+        auto threadId = Thread::getCurrentThreadId();
 
-        for (ObjectHolder* o = first.get(); o != nullptr; o = o->next)
-        {
-            if (o->threadId == threadId)
-            {
-                SpinLock::ScopedLockType sl (lock);
-                o->threadId = nullptr;
-            }
-        }
-       #endif
+        for (auto* o = first.get(); o != nullptr; o = o->next)
+            if (o->threadId.compareAndSetBool (nullptr, threadId))
+                return;
     }
 
 private:
     //==============================================================================
-   #if JUCE_NO_COMPILER_THREAD_LOCAL
     struct ObjectHolder
     {
-        ObjectHolder (const Thread::ThreadID& tid)
-            : threadId (tid), next (nullptr), object()
-        {}
+        ObjectHolder (Thread::ThreadID idToUse, ObjectHolder* n) : threadId (idToUse), next (n), object() {}
 
-        Thread::ThreadID threadId;
+        Atomic<Thread::ThreadID> threadId;
         ObjectHolder* next;
         Type object;
 
@@ -189,8 +140,6 @@ private:
     };
 
     mutable Atomic<ObjectHolder*> first;
-    SpinLock lock;
-   #endif
 
     JUCE_DECLARE_NON_COPYABLE (ThreadLocalValue)
 };

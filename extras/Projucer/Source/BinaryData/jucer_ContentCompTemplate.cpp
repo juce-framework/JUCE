@@ -21,7 +21,8 @@ CONTENTCOMPCLASS::~CONTENTCOMPCLASS()
 
 void CONTENTCOMPCLASS::paint (Graphics& g)
 {
-    g.fillAll (Colour (0xff001F36));
+    // (Our component is opaque, so we must completely fill the background with a solid colour)
+    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
 
     g.setFont (Font (16.0f));
     g.setColour (Colours::white);

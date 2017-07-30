@@ -2,28 +2,20 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -254,12 +246,12 @@ public:
 
         size_t extraBytesNeeded = 0, numChars = 1;
 
-        for (CharPointer t (startOfTextToAppend); t != endOfTextToAppend && ! t.isEmpty(); ++numChars)
+        for (auto t = startOfTextToAppend; t != endOfTextToAppend && ! t.isEmpty(); ++numChars)
             extraBytesNeeded += CharPointerType::getBytesRequiredFor (t.getAndAdvance());
 
         if (extraBytesNeeded > 0)
         {
-            const size_t byteOffsetOfNull = getByteOffsetOfEnd();
+            auto byteOffsetOfNull = getByteOffsetOfEnd();
 
             preallocateBytes (byteOffsetOfNull + extraBytesNeeded);
             CharPointerType (addBytesToPointer (text.getAddress(), (int) byteOffsetOfNull))
@@ -282,12 +274,12 @@ public:
         {
             size_t extraBytesNeeded = 0, numChars = 1;
 
-            for (CharPointer t (textToAppend); numChars <= maxCharsToTake && ! t.isEmpty(); ++numChars)
+            for (auto t = textToAppend; numChars <= maxCharsToTake && ! t.isEmpty(); ++numChars)
                 extraBytesNeeded += CharPointerType::getBytesRequiredFor (t.getAndAdvance());
 
             if (extraBytesNeeded > 0)
             {
-                const size_t byteOffsetOfNull = getByteOffsetOfEnd();
+                auto byteOffsetOfNull = getByteOffsetOfEnd();
 
                 preallocateBytes (byteOffsetOfNull + extraBytesNeeded);
                 CharPointerType (addBytesToPointer (text.getAddress(), (int) byteOffsetOfNull))
@@ -919,7 +911,8 @@ public:
         on the platform, it may be using wchar_t or char character types, so that even string
         literals can't be safely used as parameters if you're writing portable code.
     */
-    static String formatted (const String formatString, ... );
+    template <typename... Args>
+    static String formatted (const String& formatStr, Args... args)      { return formattedRaw (formatStr.toRawUTF8(), args...); }
 
     //==============================================================================
     // Numeric conversions..
@@ -1053,16 +1046,11 @@ public:
     */
     int64 getHexValue64() const noexcept;
 
-    /** Creates a string representing this 32-bit value in hexadecimal. */
-    static String toHexString (int number);
+    /** Returns a string representing this numeric value in hexadecimal. */
+    template <typename IntegerType>
+    static String toHexString (IntegerType number)      { return createHex (number); }
 
-    /** Creates a string representing this 64-bit value in hexadecimal. */
-    static String toHexString (int64 number);
-
-    /** Creates a string representing this 16-bit value in hexadecimal. */
-    static String toHexString (short number);
-
-    /** Creates a string containing a hex dump of a block of binary data.
+    /** Returns a string containing a hex dump of a block of binary data.
 
         @param data         the binary data to use as input
         @param size         how many bytes of data to use
@@ -1274,6 +1262,17 @@ private:
     // to bools (this is possible because the compiler can add an implicit cast
     // via a const char*)
     operator bool() const noexcept  { return false; }
+
+    //==============================================================================
+    static String formattedRaw (const char*, ...);
+
+    static String createHex (uint8);
+    static String createHex (uint16);
+    static String createHex (uint32);
+    static String createHex (uint64);
+
+    template <typename Type>
+    static String createHex (Type n)  { return createHex (static_cast<typename TypeHelpers::UnsignedTypeWithSize<sizeof (n)>::type> (n)); }
 };
 
 //==============================================================================
@@ -1330,6 +1329,8 @@ JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, short number);
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, int number);
 /** Appends a decimal number at the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, long number);
+/** Appends a decimal number at the end of a string. */
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, unsigned long number);
 /** Appends a decimal number at the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, int64 number);
 /** Appends a decimal number at the end of a string. */

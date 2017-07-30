@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -25,8 +27,9 @@
 class GroupItem   : public ProjectTreeItemBase
 {
 public:
-    GroupItem (const Project::Item& projectItem)
-        : ProjectTreeItemBase (projectItem)
+    GroupItem (const Project::Item& projectItem, const String& filter = String())
+        : ProjectTreeItemBase (projectItem),
+          searchFilter (filter)
     {
     }
 
@@ -77,10 +80,37 @@ public:
                 p->checkFileStatus();
     }
 
+    bool isGroupEmpty (const Project::Item& group) // recursive
+    {
+        for (auto i = 0; i < group.getNumChildren(); ++i)
+        {
+            auto child = group.getChild (i);
+
+            if ((child.isGroup() && ! isGroupEmpty (child))
+                   || (child.isFile() && child.getName().containsIgnoreCase (searchFilter)))
+                return false;
+        }
+
+        return true;
+    }
+
     ProjectTreeItemBase* createSubItem (const Project::Item& child) override
     {
-        if (child.isGroup())   return new GroupItem (child);
-        if (child.isFile())    return new SourceFileItem (child);
+        if (child.isGroup())
+        {
+            if (searchFilter.isNotEmpty() && isGroupEmpty (child))
+                return nullptr;
+
+            return new GroupItem (child, searchFilter);
+        }
+
+        if (child.isFile())
+        {
+            if (child.getName().containsIgnoreCase (searchFilter))
+                return new SourceFileItem (child);
+
+            return nullptr;
+        }
 
         jassertfalse;
         return nullptr;
@@ -92,12 +122,26 @@ public:
             pcc->setEditorComponent (new GroupInformationComponent (item), nullptr);
     }
 
+    static void openAllGroups (TreeViewItem* root)
+    {
+        for (auto i = 0; i < root->getNumSubItems(); ++i)
+            if (auto* sub = root->getSubItem (i))
+                openOrCloseAllSubGroups (*sub, true);
+    }
+
+    static void closeAllGroups (TreeViewItem* root)
+    {
+        for (auto i = 0; i < root->getNumSubItems(); ++i)
+            if (auto* sub = root->getSubItem (i))
+                openOrCloseAllSubGroups (*sub, false);
+    }
+
     static void openOrCloseAllSubGroups (TreeViewItem& item, bool shouldOpen)
     {
         item.setOpen (shouldOpen);
 
         for (int i = item.getNumSubItems(); --i >= 0;)
-            if (TreeViewItem* sub = item.getSubItem(i))
+            if (auto* sub = item.getSubItem (i))
                 openOrCloseAllSubGroups (*sub, shouldOpen);
     }
 
@@ -117,23 +161,39 @@ public:
 
         m.addSeparator();
 
-        if (isOpen())
-            m.addItem (1, "Collapse all Sub-groups");
-        else
-            m.addItem (2, "Expand all Sub-groups");
-
-        m.addSeparator();
-        m.addItem (3, "Enable compiling of all enclosed files");
-        m.addItem (4, "Disable compiling of all enclosed files");
-
-        m.addSeparator();
-        m.addItem (5, "Sort Items Alphabetically");
-        m.addItem (6, "Sort Items Alphabetically (Groups first)");
-        m.addSeparator();
-        m.addItem (7, "Rename...");
+        m.addItem (1, "Collapse all Groups");
+        m.addItem (2, "Expand all Groups");
 
         if (! isRoot())
-            m.addItem (8, "Delete");
+        {
+            if (isOpen())
+                m.addItem (3, "Collapse all Sub-groups");
+            else
+                m.addItem (4, "Expand all Sub-groups");
+        }
+
+        m.addSeparator();
+        m.addItem (5, "Enable compiling of all enclosed files");
+        m.addItem (6, "Disable compiling of all enclosed files");
+
+        m.addSeparator();
+        m.addItem (7, "Sort Items Alphabetically");
+        m.addItem (8, "Sort Items Alphabetically (Groups first)");
+        m.addSeparator();
+
+        if (! isRoot())
+        {
+            m.addItem (9, "Rename...");
+            m.addItem (10, "Delete");
+        }
+
+        launchPopupMenu (m);
+    }
+
+    void showPlusMenu() override
+    {
+        PopupMenu m;
+        addCreateFileMenuItems (m);
 
         launchPopupMenu (m);
     }
@@ -142,14 +202,16 @@ public:
     {
         switch (resultCode)
         {
-            case 1:     openOrCloseAllSubGroups (*this, false); break;
-            case 2:     openOrCloseAllSubGroups (*this, true); break;
-            case 3:     setFilesToCompile (item, true); break;
-            case 4:     setFilesToCompile (item, false); break;
-            case 5:     item.sortAlphabetically (false, false); break;
-            case 6:     item.sortAlphabetically (true, false); break;
-            case 7:     triggerAsyncRename (item); break;
-            case 8:     deleteAllSelectedItems(); break;
+            case 1:     closeAllGroups (getOwnerView()->getRootItem()); break;
+            case 2:     openAllGroups (getOwnerView()->getRootItem()); break;
+            case 3:     openOrCloseAllSubGroups (*this, false); break;
+            case 4:     openOrCloseAllSubGroups (*this, true); break;
+            case 5:     setFilesToCompile (item, true); break;
+            case 6:     setFilesToCompile (item, false); break;
+            case 7:     item.sortAlphabetically (false, false); break;
+            case 8:     item.sortAlphabetically (true, false); break;
+            case 9:     triggerAsyncRename (item); break;
+            case 10:    deleteAllSelectedItems(); break;
             default:    processCreateFileMenuItem (resultCode); break;
         }
     }
@@ -185,4 +247,12 @@ public:
 
         return nullptr;
     }
+
+    void setSearchFilter (const String& filter)
+    {
+        searchFilter = filter;
+        refreshSubItems();
+    }
+
+    String searchFilter;
 };

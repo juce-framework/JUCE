@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -50,7 +52,7 @@ public:
         if (isUsingGlobalSettings())
             return globalSettingsValue.getValue();
 
-        return fallbackValue;
+        return fallbackValue.getValue();
     }
 
     void setValue (const var& newValue) override
@@ -73,7 +75,7 @@ public:
 
     bool isUsingFallbackValue() const
     {
-        return ! projectSettingsValueIsValid() && !globalSettingsValueIsValid();
+        return ! projectSettingsValueIsValid() && ! globalSettingsValueIsValid();
     }
 
     bool appliesToThisOS() const
@@ -85,10 +87,16 @@ public:
 
     bool isValidPath() const;
 
+    Identifier getKey()                   { return globalKey; }
+
+    Value getGlobalSettingsValue()        { return globalSettingsValue; }
+    Value getFallbackSettingsValue()      { return fallbackValue; }
+
 private:
     void valueChanged (Value& value) override
     {
-        if ((value.refersToSameSourceAs (globalSettingsValue) && isUsingGlobalSettings()))
+        if ((value.refersToSameSourceAs (globalSettingsValue) && isUsingGlobalSettings())
+                || (value.refersToSameSourceAs (fallbackValue) && isUsingFallbackValue()))
         {
             sendChangeMessage (true);
             setValue (String()); // make sure that the project-specific value is still blank
@@ -134,7 +142,7 @@ private:
     /** the dependency path fallback setting. used instead of the global setting
         whenever the latter doesn't apply, e.g. the setting is for another
         OS than the ome this machine is running. */
-    String fallbackValue;
+    Value fallbackValue;
 };
 
 
@@ -175,5 +183,88 @@ private:
     void editorShown (Label*, TextEditor&) override;
     void editorHidden (Label*, TextEditor&) override;
 
+    void lookAndFeelChanged() override;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DependencyPathPropertyComponent)
+};
+
+//==============================================================================
+class DependencyFilePathPropertyComponent    : public TextPropertyComponent,
+                                               public FileDragAndDropTarget,
+                                               private Value::Listener,
+                                               private Label::Listener,
+                                               private Button::Listener
+{
+public:
+    DependencyFilePathPropertyComponent (Value& value,
+                                         const String& propertyDescription,
+                                         bool isDirectory,
+                                         const String& wildcards = "*",
+                                         const File& rootToUseForRelativePaths = File());
+
+    void resized() override;
+    void paintOverChildren (Graphics& g) override;
+
+    bool isInterestedInFileDrag (const StringArray&) override     { return isEnabled(); }
+    void fileDragEnter (const StringArray&, int, int) override    { highlightForDragAndDrop = true;  repaint(); }
+    void fileDragExit (const StringArray&) override               { highlightForDragAndDrop = false; repaint(); }
+    void filesDropped (const StringArray&, int, int) override;
+
+    void setTo (const File& f);
+
+    void enablementChanged() override;
+
+private:
+    void textWasEdited() override;
+
+    void valueChanged (Value&) override;
+
+    void labelTextChanged (Label*) override {}
+    void editorHidden (Label*, TextEditor&) override {}
+    void editorShown (Label*, TextEditor&) override;
+
+    void buttonClicked (Button*) override;
+
+    void lookAndFeelChanged() override
+    {
+        browseButton.setColour (TextButton::buttonColourId,
+                                findColour (secondaryButtonBackgroundColourId));
+        textWasEdited();
+    }
+
+    Colour getTextColourToDisplay() const;
+
+    //==========================================================================
+    File pathRelativeTo;
+    Value pathValue;
+    DependencyPathValueSource& pathValueSource;
+
+    TextButton browseButton;
+    bool isDirectory, highlightForDragAndDrop = false;
+    String wildcards;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DependencyFilePathPropertyComponent)
+};
+
+//==============================================================================
+class TextPropertyComponentWithEnablement    : public TextPropertyComponent,
+                                               private Value::Listener
+{
+public:
+    TextPropertyComponentWithEnablement (const Value& valueToControl, const Value& valueToListenTo,
+                                         const String& propertyName, int maxNumChars, bool isMultiLine)
+        : TextPropertyComponent (valueToControl, propertyName, maxNumChars, isMultiLine),
+          value (valueToListenTo)
+    {
+        value.addListener (this);
+        setEnabled (value.getValue());
+    }
+
+private:
+    Value value;
+
+    void valueChanged (Value& v) override
+    {
+        setEnabled (v.getValue());
+    }
 };

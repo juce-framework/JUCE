@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -110,6 +112,25 @@ void Project::setMissingDefaultValues()
     if (getDocumentTitle().isEmpty())
         setTitle ("JUCE Project");
 
+    {
+        auto defaultSplashScreen = ! ProjucerApplication::getApp().isPaidOrGPL();
+
+        if (shouldDisplaySplashScreen() == var() || defaultSplashScreen)
+            shouldDisplaySplashScreen() = defaultSplashScreen;
+
+        if (ProjucerApplication::getApp().isPaidOrGPL())
+        {
+            if (shouldReportAppUsage() == var())
+                shouldReportAppUsage() = ProjucerApplication::getApp().licenseController->getState().applicationUsageDataState
+                                             == LicenseState::ApplicationUsageData::enabled;
+        }
+        else
+            shouldReportAppUsage() = true;
+    }
+
+    if (splashScreenColour() == var())
+        splashScreenColour() = "Dark";
+
     if (! projectRoot.hasProperty (Ids::projectType))
         getProjectTypeValue() = ProjectType_GUIApp::getTypeName();
 
@@ -131,7 +152,60 @@ void Project::setMissingDefaultValues()
     if (shouldIncludeBinaryInAppConfig() == var())
         shouldIncludeBinaryInAppConfig() = true;
 
+    if (! projectRoot.hasProperty (Ids::cppLanguageStandard) && ! setCppVersionFromOldExporterSettings())
+        getCppStandardValue() = "11";
+
     ProjucerApplication::getApp().updateNewlyOpenedProject (*this);
+}
+
+bool Project::setCppVersionFromOldExporterSettings()
+{
+    auto highestLanguageStandard = -1;
+
+    for (Project::ExporterIterator exporter (*this); exporter.next();)
+    {
+        if (exporter->isXcode()) // cpp version was per-build configuration for xcode exporters
+        {
+            for (ProjectExporter::ConfigIterator config (*exporter); config.next();)
+            {
+                auto cppLanguageStandard = config->getValue (Ids::cppLanguageStandard).getValue();
+
+                if (cppLanguageStandard != var())
+                {
+                    auto versionNum = cppLanguageStandard.toString().getLastCharacters (2).getIntValue();
+
+                    if (versionNum > highestLanguageStandard)
+                        highestLanguageStandard = versionNum;
+                }
+            }
+        }
+        else
+        {
+            auto cppLanguageStandard = exporter->getSetting (Ids::cppLanguageStandard).getValue();
+
+            if (cppLanguageStandard != var())
+            {
+                if (cppLanguageStandard.toString().containsIgnoreCase ("latest"))
+                {
+                    getCppStandardValue() = "latest";
+                    return true;
+                }
+
+                auto versionNum = cppLanguageStandard.toString().getLastCharacters (2).getIntValue();
+
+                if (versionNum > highestLanguageStandard)
+                    highestLanguageStandard = versionNum;
+            }
+        }
+    }
+
+    if (highestLanguageStandard != -1 && highestLanguageStandard >= 11)
+    {
+        getCppStandardValue() = highestLanguageStandard;
+        return true;
+    }
+
+    return false;
 }
 
 void Project::updateDeprecatedProjectSettingsInteractively()
@@ -220,23 +294,23 @@ void Project::removeDefunctExporters()
 {
     ValueTree exporters (projectRoot.getChildWithName (Ids::EXPORTFORMATS));
 
-    for (;;)
-    {
-        ValueTree oldVC6Exporter        (exporters.getChildWithName ("MSVC6"));
-        ValueTree oldAndroidAntExporter (exporters.getChildWithName ("ANDROID"));
+    StringPairArray oldExporters;
+    oldExporters.set ("ANDROID", "Android Ant Exporter");
+    oldExporters.set ("MSVC6", "MSVC6");
+    oldExporters.set ("VS2010", "Visual Studio 2010");
+    oldExporters.set ("VS2012", "Visual Studio 2012");
 
-        if      (oldVC6Exporter.isValid())
-            exporters.removeChild (oldVC6Exporter, nullptr);
-        else if (oldAndroidAntExporter.isValid())
+    for (auto& key : oldExporters.getAllKeys())
+    {
+        ValueTree oldExporter (exporters.getChildWithName (key));
+
+        if (oldExporter.isValid())
         {
             AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                         TRANS("Android Ant Exporter"),
-                                         TRANS("The Android Ant Exporter is deprecated. The exporter will be removed from this project."));
-
-            exporters.removeChild (oldAndroidAntExporter, nullptr);
+                                         TRANS (oldExporters[key]),
+                                         TRANS ("The " + oldExporters[key]  + " Exporter is deprecated. The exporter will be removed from this project."));
+            exporters.removeChild (oldExporter, nullptr);
         }
-        else
-            break;
     }
 }
 
@@ -286,20 +360,28 @@ static bool isAnyModuleNewerThanProjucer (const OwnedArray<ModuleDescription>& m
 void Project::warnAboutOldProjucerVersion()
 {
     ModuleList available;
-    available.scanAllKnownFolders (*this);
 
-    if (isAnyModuleNewerThanProjucer (available.modules))
-    {
-        if (ProjucerApplication::getApp().isRunningCommandLine)
-            std::cout <<  "WARNING! This version of the Projucer is out-of-date!" << std::endl;
-        else
-            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                              "Projucer",
-                                              "This version of the Projucer is out-of-date!"
-                                              "\n\n"
-                                              "Always make sure that you're running the very latest version, "
-                                              "preferably compiled directly from the JUCE repository that you're working with!");
-    }
+    available.scanGlobalJuceModulePath();
+
+    if (! isAnyModuleNewerThanProjucer (available.modules))
+        available.scanGlobalUserModulePath();
+
+    if (! isAnyModuleNewerThanProjucer (available.modules))
+        available.scanProjectExporterModulePaths (*this);
+
+    if (! isAnyModuleNewerThanProjucer (available.modules))
+        return;
+
+    // Projucer is out of date!
+    if (ProjucerApplication::getApp().isRunningCommandLine)
+        std::cout <<  "WARNING! This version of the Projucer is out-of-date!" << std::endl;
+    else
+        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                          "Projucer",
+                                          "This version of the Projucer is out-of-date!"
+                                          "\n\n"
+                                          "Always make sure that you're running the very latest version, "
+                                          "preferably compiled directly from the JUCE repository that you're working with!");
 }
 
 //==============================================================================
@@ -362,7 +444,7 @@ Result Project::saveProject (const File& file, bool isCommandLineApp)
     const ScopedValueSetter<bool> vs (isSaving, true, false);
 
     ProjectSaver saver (*this, file);
-    return saver.save (! isCommandLineApp);
+    return saver.save (! isCommandLineApp, shouldWaitAfterSaving, specifiedExporterToSave);
 }
 
 Result Project::saveResourcesOnly (const File& file)
@@ -388,21 +470,24 @@ void Project::valueTreeParentChanged (ValueTree&)                   {}
 //==============================================================================
 bool Project::hasProjectBeenModified()
 {
-    Time newModificationTime = getFile().getLastModificationTime();
     Time oldModificationTime = modificationTime;
+    modificationTime = getFile().getLastModificationTime();
 
-    modificationTime = newModificationTime;
-
-    return (newModificationTime.toMilliseconds() > (oldModificationTime.toMilliseconds() + 1000LL));
+    return (modificationTime.toMilliseconds() > (oldModificationTime.toMilliseconds() + 1000LL));
 }
 
 //==============================================================================
 File Project::resolveFilename (String filename) const
 {
     if (filename.isEmpty())
-        return File();
+        return {};
 
     filename = replacePreprocessorDefs (getPreprocessorDefs(), filename);
+
+   #if ! JUCE_WINDOWS
+    if (filename.startsWith ("~"))
+        return File::getSpecialLocation (File::userHomeDirectory).getChildFile (filename.trimCharactersAtStart ("~/"));
+   #endif
 
     if (FileHelpers::isAbsolutePath (filename))
         return File::createFileWithoutCheckingPath (FileHelpers::currentOSStylePath (filename)); // (avoid assertions for windows-style paths)
@@ -556,6 +641,55 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
                "Your company e-mail, which will be added to the properties of the binary where possible");
 
     {
+        const String licenseRequiredTagline ("Required for closed source applications without an Indie or Pro JUCE license");
+        const String licenseRequiredInfo ("In accordance with the terms of the JUCE 5 End-Use License Agreement (www.juce.com/juce-5-licence), "
+                                          "this option can only be disabled for closed source applications if you have a JUCE Indie or Pro "
+                                          "license, or are using JUCE under the GPL v3 license.");
+
+        StringPairArray description;
+        description.set ("Report JUCE app usage", "This option controls the collection of usage data from users of this JUCE application.");
+        description.set ("Display the JUCE splash screen", "This option controls the display of the standard JUCE splash screen.");
+
+        if (ProjucerApplication::getApp().isPaidOrGPL())
+        {
+            props.add (new BooleanPropertyComponent (shouldReportAppUsage(), "Report JUCE app usage", licenseRequiredTagline),
+                       description["Report JUCE app usage"] + " " + licenseRequiredInfo);
+
+            props.add (new BooleanPropertyComponent (shouldDisplaySplashScreen(), "Display the JUCE splash screen", licenseRequiredTagline),
+                       description["Display the JUCE splash screen"] + " " + licenseRequiredInfo);
+        }
+        else
+        {
+            StringArray options;
+            Array<var> vars;
+
+            options.add (licenseRequiredTagline);
+            vars.add (var());
+
+            props.add (new ChoicePropertyComponent (Value(), "Report JUCE app usage", options, vars),
+                       description["Report JUCE app usage"] + " " + licenseRequiredInfo);
+
+            props.add (new ChoicePropertyComponent (Value(), "Display the JUCE splash screen", options, vars),
+                       description["Display the JUCE splash screen"] + " " + licenseRequiredInfo);
+        }
+    }
+
+    {
+        StringArray splashScreenColours;
+
+        splashScreenColours.add ("Dark");
+        splashScreenColours.add ("Light");
+
+        Array<var> splashScreenCodes;
+
+        for (auto& splashScreenColour : splashScreenColours)
+            splashScreenCodes.add (splashScreenColour);
+
+        props.add (new ChoicePropertyComponent (splashScreenColour(), "Splash screen colour", splashScreenColours, splashScreenCodes),
+                   "Choose the colour of the JUCE splash screen.");
+    }
+
+    {
         StringArray projectTypeNames;
         Array<var> projectTypeCodes;
 
@@ -606,6 +740,16 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
     props.add (new TextPropertyComponent (binaryDataNamespace(), "BinaryData Namespace", 256, false),
                                           "The namespace containing the binary assests. If left empty this defaults to \"BinaryData\".");
 
+    {
+        static const char* cppLanguageStandardNames[] = { "C++11", "C++14", "Use Latest", nullptr };
+        static const var cppLanguageStandardValues[]  = { "11",    "14",    "latest" };
+
+        props.add (new ChoicePropertyComponent (getCppStandardValue(), "C++ Language Standard",
+                                                StringArray (cppLanguageStandardNames),
+                                                Array<var>  (cppLanguageStandardValues, numElementsInArray (cppLanguageStandardValues))),
+                   "The standard of the C++ language that will be used for compilation.");
+    }
+
     props.add (new TextPropertyComponent (getProjectPreprocessorDefs(), "Preprocessor definitions", 32768, true),
                "Global preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace, commas, or "
                "new-lines to separate the items - to include a space or comma in a definition, precede it with a backslash.");
@@ -650,7 +794,7 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
                "This list is a comma-separated set list in the form {numIns, numOuts} and each pair indicates a valid plug-in "
                "configuration. For example {1, 1}, {2, 2} means that the plugin can be used either with 1 input and 1 output, "
                "or with 2 inputs and 2 outputs. If your plug-in requires side-chains, aux output buses etc., then you must leave "
-               "this field empty and override the setPreferredBusArrangement method in your AudioProcessor.");
+               "this field empty and override the isBusesLayoutSupported callback in your AudioProcessor.");
 
     props.add (new BooleanPropertyComponent (getPluginIsSynth(), "Plugin is a Synth", "Is a Synth"),
                "Enable this if you want your plugin to be treated as a synth or generator. It doesn't make much difference to the plugin itself, but some hosts treat synths differently to other plugins.");
@@ -858,7 +1002,7 @@ String Project::Item::getFilePath() const
     if (isFile())
         return state [Ids::file].toString();
 
-    return String();
+    return {};
 }
 
 File Project::Item::getFile() const
@@ -866,7 +1010,7 @@ File Project::Item::getFile() const
     if (isFile())
         return project.resolveFilename (state [Ids::file].toString());
 
-    return File();
+    return {};
 }
 
 void Project::Item::setFile (const File& file)
@@ -1155,22 +1299,22 @@ bool Project::Item::addRelativeFile (const RelativePath& file, int insertIndex, 
     return false;
 }
 
-Icon Project::Item::getIcon() const
+Icon Project::Item::getIcon (bool isOpen) const
 {
     const Icons& icons = getIcons();
 
     if (isFile())
     {
         if (isImageFile())
-            return Icon (icons.imageDoc, Colours::blue);
+            return Icon (icons.imageDoc, Colours::transparentBlack);
 
-        return Icon (icons.document, Colours::yellow);
+        return Icon (icons.file, Colours::transparentBlack);
     }
 
     if (isMainGroup())
         return Icon (icons.juceLogo, Colours::orange);
 
-    return Icon (icons.folder, Colours::darkgrey);
+    return Icon (isOpen ? icons.openFolder : icons.closedFolder, Colours::transparentBlack);
 }
 
 bool Project::Item::isIconCrossedOut() const
@@ -1202,9 +1346,14 @@ Value Project::getConfigFlag (const String& name)
     return v;
 }
 
-bool Project::isConfigFlagEnabled (const String& name) const
+bool Project::isConfigFlagEnabled (const String& name, bool defaultIsEnabled) const
 {
-    return projectRoot.getChildWithName (Ids::JUCEOPTIONS).getProperty (name) == configFlagEnabled;
+    String configValue = projectRoot.getChildWithName (Ids::JUCEOPTIONS).getProperty (name);
+
+    if (configValue == configFlagDefault)
+        return defaultIsEnabled;
+
+    return (configValue == configFlagEnabled);
 }
 
 void Project::sanitiseConfigFlags()
@@ -1348,13 +1497,48 @@ void Project::addNewExporter (const String& exporterName)
 {
     ScopedPointer<ProjectExporter> exp (ProjectExporter::createNewExporter (*this, exporterName));
 
-    ValueTree exporters (getExporters());
-    exporters.addChild (exp->settings, -1, getUndoManagerFor (exporters));
+    exp->getTargetLocationValue() = exp->getTargetLocationString()
+                                       + getUniqueTargetFolderSuffixForExporter (exp->getName(), exp->getTargetLocationString());
+
+    auto exportersTree = getExporters();
+    exportersTree.addChild (exp->settings, -1, getUndoManagerFor (exportersTree));
 }
 
 void Project::createExporterForCurrentPlatform()
 {
     addNewExporter (ProjectExporter::getCurrentPlatformExporterName());
+}
+
+String Project::getUniqueTargetFolderSuffixForExporter (const String& exporterName, const String& base)
+{
+    StringArray buildFolders;
+
+    auto exportersTree = getExporters();
+    auto type = ProjectExporter::getValueTreeNameForExporter (exporterName);
+
+    for (int i = 0; i < exportersTree.getNumChildren(); ++i)
+    {
+        auto exporterNode = exportersTree.getChild (i);
+
+        if (exporterNode.getType() == Identifier (type))
+            buildFolders.add (exporterNode.getProperty ("targetFolder").toString());
+    }
+
+    if (buildFolders.size() == 0 || ! buildFolders.contains (base))
+        return {};
+
+    buildFolders.remove (buildFolders.indexOf (base));
+
+    auto num = 1;
+    for (auto f : buildFolders)
+    {
+        if (! f.endsWith ("_" + String (num)))
+            break;
+
+        ++num;
+    }
+
+    return "_" + String (num);
 }
 
 //==============================================================================
@@ -1366,7 +1550,7 @@ String Project::getFileTemplate (const String& templateName)
         return String::fromUTF8 (data, dataSize);
 
     jassertfalse;
-    return String();
+    return {};
 
 }
 

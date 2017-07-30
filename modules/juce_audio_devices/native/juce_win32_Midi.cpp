@@ -2,28 +2,20 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -42,7 +34,7 @@ struct MidiServiceType
 
     struct OutputWrapper
     {
-        virtual ~OutputWrapper () {}
+        virtual ~OutputWrapper() {}
 
         virtual String getDeviceName() = 0;
 
@@ -63,32 +55,14 @@ struct MidiServiceType
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiServiceType)
 };
 
-class MidiService :   public DeletedAtShutdown
-{
-public:
-    ~MidiService();
-
-    MidiServiceType* getService();
-
-    juce_DeclareSingleton (MidiService, false)
-
-private:
-    MidiService();
-
-    ScopedPointer<MidiServiceType> internal;
-};
-
-juce_ImplementSingleton (MidiService)
-
 //==============================================================================
-class WindowsMidiService :   public MidiServiceType
+class WindowsMidiService  : public MidiServiceType
 {
 private:
-    struct WindowsInputWrapper :   public InputWrapper
+    struct WindowsInputWrapper  : public InputWrapper
     {
-        class MidiInCollector
+        struct MidiInCollector
         {
-        public:
             MidiInCollector (WindowsMidiService& s,
                              MidiInput* const inputDevice,
                              MidiInputCallback& cb)
@@ -180,7 +154,7 @@ private:
             static void CALLBACK midiInCallback (HMIDIIN, UINT uMsg, DWORD_PTR dwInstance,
                                                  DWORD_PTR midiMessage, DWORD_PTR timeStamp)
             {
-                MidiInCollector* const collector = reinterpret_cast<MidiInCollector*> (dwInstance);
+                auto* collector = reinterpret_cast<MidiInCollector*> (dwInstance);
 
                 if (collector->midiService.activeMidiCollectors.contains (collector))
                 {
@@ -201,9 +175,8 @@ private:
             bool volatile isStarted = false;
             double startTime = 0;
 
-            class MidiHeader
+            struct MidiHeader
             {
-            public:
                 MidiHeader() {}
 
                 void prepare (HMIDIIN device)
@@ -239,7 +212,6 @@ private:
                         write (device);
                 }
 
-            private:
                 MIDIHDR hdr;
                 char data [256];
 
@@ -263,9 +235,9 @@ private:
 
             double convertTimeStamp (uint32 timeStamp)
             {
-                double t = startTime + timeStamp;
+                auto t = startTime + timeStamp;
+                auto now = Time::getMillisecondCounterHiRes();
 
-                const double now = Time::getMillisecondCounterHiRes();
                 if (t > now)
                 {
                     if (t > now + 2.0)
@@ -280,31 +252,19 @@ private:
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInCollector)
         };
 
+        //==============================================================================
         WindowsInputWrapper (WindowsMidiService& parentService,
                              MidiInput* const input,
                              const int index,
                              MidiInputCallback* const callback)
         {
+            auto names = getDevices();
             UINT deviceId = MIDI_MAPPER;
-            int n = 0;
 
-            const UINT num = midiInGetNumDevs();
-
-            for (UINT i = 0; i < num; ++i)
+            if (isPositiveAndBelow (index, names.size()))
             {
-                MIDIINCAPS mc = { 0 };
-
-                if (midiInGetDevCaps (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
-                {
-                    if (index == n)
-                    {
-                        deviceId = i;
-                        deviceName = String (mc.szPname, (size_t) numElementsInArray (mc.szPname));
-                        break;
-                    }
-
-                    ++n;
-                }
+                deviceName = names[index];
+                deviceId = index;
             }
 
             collector = new MidiInCollector (parentService, input, *callback);
@@ -333,9 +293,10 @@ private:
                 MIDIINCAPS mc = { 0 };
 
                 if (midiInGetDevCaps (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
-                    s.add (String (mc.szPname, sizeof (mc.szPname)));
+                    s.add (String (mc.szPname, (size_t) numElementsInArray (mc.szPname)));
             }
 
+            s.appendNumbersToDuplicates (false, false, CharPointer_UTF8 ("-"), CharPointer_UTF8 (""));
             return s;
         }
 
@@ -358,7 +319,8 @@ private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowsInputWrapper)
     };
 
-    struct WindowsOutputWrapper :   public OutputWrapper
+    //==============================================================================
+    struct WindowsOutputWrapper  : public OutputWrapper
     {
         struct MidiOutHandle
         {
@@ -366,49 +328,37 @@ private:
             UINT deviceId;
             HMIDIOUT handle;
 
-        private:
             JUCE_LEAK_DETECTOR (MidiOutHandle)
         };
 
-        WindowsOutputWrapper (WindowsMidiService& p, const int index)
-            : parent (p)
+        WindowsOutputWrapper (WindowsMidiService& p, int index) : parent (p)
         {
+            auto names = getDevices();
             UINT deviceId = MIDI_MAPPER;
-            const UINT num = midiOutGetNumDevs();
-            int n = 0;
 
-            for (UINT i = 0; i < num; ++i)
+            if (isPositiveAndBelow (index, names.size()))
             {
-                MIDIOUTCAPS mc = { 0 };
+                deviceName = names[index];
+                deviceId = index;
+            }
 
-                if (midiOutGetDevCaps (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
-                {
-                    String name = String (mc.szPname, sizeof (mc.szPname));
-
-                    // use the microsoft sw synth as a default - best not to allow deviceId
-                    // to be MIDI_MAPPER, or else device sharing breaks
-                    if (name.containsIgnoreCase ("microsoft"))
-                        deviceId = i;
-
-                    if (index == n)
-                    {
-                        deviceName = name;
-                        deviceId = i;
-                        break;
-                    }
-
-                    ++n;
-                }
+            if (deviceId == MIDI_MAPPER)
+            {
+                // use the microsoft sw synth as a default - best not to allow deviceId
+                // to be MIDI_MAPPER, or else device sharing breaks
+                for (int i = 0; i < names.size(); ++i)
+                    if (names[i].containsIgnoreCase ("microsoft"))
+                        deviceId = (UINT) i;
             }
 
             for (int i = parent.activeOutputHandles.size(); --i >= 0;)
             {
-                han = parent.activeOutputHandles.getUnchecked (i);
+                auto* activeHandle = parent.activeOutputHandles.getUnchecked (i);
 
-                if (han->deviceId == deviceId)
+                if (activeHandle->deviceId == deviceId)
                 {
-                    han->refCount++;
-
+                    activeHandle->refCount++;
+                    han = activeHandle;
                     return;
                 }
             }
@@ -425,17 +375,13 @@ private:
                     han->refCount = 1;
                     han->handle = h;
                     parent.activeOutputHandles.add (han);
-
                     return;
                 }
-                else if (res == MMSYSERR_ALLOCATED)
-                {
+
+                if (res == MMSYSERR_ALLOCATED)
                     Sleep (100);
-                }
                 else
-                {
                     break;
-                }
             }
 
             throw std::runtime_error ("Failed to create Windows output device wrapper");
@@ -468,7 +414,7 @@ private:
                         while ((h.dwFlags & MHDR_DONE) == 0)
                             Sleep (1);
 
-                            int count = 500; // 1 sec timeout
+                        int count = 500; // 1 sec timeout
 
                         while (--count >= 0)
                         {
@@ -494,9 +440,9 @@ private:
             }
         }
 
-        static StringArray getDevices()
+        static Array<MIDIOUTCAPS> getDeviceCaps()
         {
-            StringArray s;
+            Array<MIDIOUTCAPS> devices;
             const UINT num = midiOutGetNumDevs();
 
             for (UINT i = 0; i < num; ++i)
@@ -504,28 +450,33 @@ private:
                 MIDIOUTCAPS mc = { 0 };
 
                 if (midiOutGetDevCaps (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
-                    s.add (String (mc.szPname, sizeof (mc.szPname)));
+                    devices.add (mc);
             }
 
+            return devices;
+        }
+
+        static StringArray getDevices()
+        {
+            StringArray s;
+
+            for (auto& mc : getDeviceCaps())
+                s.add (String (mc.szPname, (size_t) numElementsInArray (mc.szPname)));
+
+            s.appendNumbersToDuplicates (false, false, CharPointer_UTF8 ("-"), CharPointer_UTF8 (""));
             return s;
         }
 
         static int getDefaultDeviceIndex()
         {
-            const UINT num = midiOutGetNumDevs();
             int n = 0;
 
-            for (UINT i = 0; i < num; ++i)
+            for (auto& mc : getDeviceCaps())
             {
-                MIDIOUTCAPS mc = { 0 };
+                if ((mc.wTechnology & MOD_MAPPER) != 0)
+                    return n;
 
-                if (midiOutGetDevCaps (i, &mc, sizeof (mc)) == MMSYSERR_NOERROR)
-                {
-                    if ((mc.wTechnology & MOD_MAPPER) != 0)
-                        return n;
-
-                    ++n;
-                }
+                ++n;
             }
 
             return 0;
@@ -588,7 +539,7 @@ using namespace ABI::Windows::Devices::Midi;
 using namespace ABI::Windows::Devices::Enumeration;
 using namespace ABI::Windows::Storage::Streams;
 
-class WinRTMidiService :   public MidiServiceType
+class WinRTMidiService  : public MidiServiceType
 {
 private:
     template <typename COMFactoryType>
@@ -626,25 +577,51 @@ private:
             if (FAILED (hr))
                 return false;
 
-            hr = watcher->add_Added (
-                Callback<ITypedEventHandler<DeviceWatcher*, DeviceInformation*>>(
-                    [this] (IDeviceWatcher*, IDeviceInformation* info) { return addDevice (info); }
-                ).Get(),
-                &deviceAddedToken);
-            if (FAILED (hr))
-                return false;
+            class DeviceEnumerationThread  : public Thread
+            {
+            public:
+                DeviceEnumerationThread (String threadName, MidiIODeviceWatcher<COMFactoryType>& p)
+                    : Thread (threadName), parent (p)
+                {}
 
-            hr = watcher->add_Removed (
-                Callback<ITypedEventHandler<DeviceWatcher*, DeviceInformationUpdate*>>(
-                    [this] (IDeviceWatcher*, IDeviceInformationUpdate* info) { return removeDevice (info); }
-                ).Get(),
-                &deviceRemovedToken);
-            if (FAILED (hr))
-                return false;
+                void run() override
+                {
+                    auto parentPtr = &parent;
 
-            hr = watcher->Start();
-            if (FAILED (hr))
-                return false;
+                    parent.watcher->add_Added (
+                        Callback<ITypedEventHandler<DeviceWatcher*, DeviceInformation*>> (
+                            [parentPtr](IDeviceWatcher*, IDeviceInformation* info) { return parentPtr->addDevice (info); }
+                        ).Get(),
+                        &parent.deviceAddedToken);
+
+                    parent.watcher->add_Removed (
+                        Callback<ITypedEventHandler<DeviceWatcher*, DeviceInformationUpdate*>> (
+                            [parentPtr](IDeviceWatcher*, IDeviceInformationUpdate* info) { return parentPtr->removeDevice (info); }
+                        ).Get(),
+                        &parent.deviceRemovedToken);
+
+                    EventRegistrationToken deviceEnumerationCompletedToken { 0 };
+                    parent.watcher->add_EnumerationCompleted (
+                        Callback<ITypedEventHandler<DeviceWatcher*, IInspectable*>> (
+                            [this](IDeviceWatcher*, IInspectable*) { enumerationCompleted.signal(); return S_OK; }
+                        ).Get(),
+                        &deviceEnumerationCompletedToken);
+
+                    parent.watcher->Start();
+                    enumerationCompleted.wait();
+
+                    if (deviceEnumerationCompletedToken.value != 0)
+                        parent.watcher->remove_EnumerationCompleted (deviceEnumerationCompletedToken);
+                }
+
+            private:
+                MidiIODeviceWatcher<COMFactoryType>& parent;
+                WaitableEvent enumerationCompleted;
+            };
+
+            DeviceEnumerationThread enumerationThread ("WinRT Device Enumeration Thread", *this);
+            enumerationThread.startThread();
+            enumerationThread.waitForThreadToExit (4000);
 
             return true;
         }
@@ -758,10 +735,8 @@ private:
         {
             auto& lastDevices = lastQueriedConnectedDevices.get();
             for (int i = 0; i < lastDevices.size(); ++i)
-            {
                 if (lastDevices[i].isDefault)
                     return i;
-            }
 
             return 0;
         }
@@ -787,9 +762,11 @@ private:
 
         ComSmartPtr<COMFactoryType>& factory;
 
-        EventRegistrationToken deviceAddedToken { 0 }, deviceRemovedToken { 0 };
+        EventRegistrationToken deviceAddedToken   { 0 },
+                               deviceRemovedToken { 0 };
 
         ComSmartPtr<IDeviceWatcher> watcher;
+
         Array<DeviceInfo> connectedDevices;
         CriticalSection deviceChanges;
         ThreadLocalValue<Array<DeviceInfo>> lastQueriedConnectedDevices;
@@ -798,7 +775,7 @@ private:
     };
 
     template <typename COMFactoryType, typename COMInterfaceType, typename COMType>
-    class OpenMidiPortThread :   public Thread
+    class OpenMidiPortThread  : public Thread
     {
     public:
         OpenMidiPortThread (String threadName,
@@ -852,7 +829,7 @@ private:
         WaitableEvent portOpened { true };
     };
 
-    struct WinRTInputWrapper : public InputWrapper
+    struct WinRTInputWrapper  : public InputWrapper
     {
         WinRTInputWrapper (WinRTMidiService& service,
                            MidiInput* const input,
@@ -997,7 +974,7 @@ private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WinRTInputWrapper);
     };
 
-    struct WinRTOutputWrapper : public OutputWrapper
+    struct WinRTOutputWrapper  : public OutputWrapper
     {
         WinRTOutputWrapper (WinRTMidiService& service, const int index)
         {
@@ -1128,6 +1105,28 @@ public:
 #endif   // JUCE_USE_WINRT_MIDI
 
 //==============================================================================
+class MidiService :  public DeletedAtShutdown
+{
+public:
+    ~MidiService();
+
+    MidiServiceType* getService();
+
+    juce_DeclareSingleton (MidiService, false)
+
+private:
+    MidiService();
+
+    ScopedPointer<MidiServiceType> internal;
+};
+
+juce_ImplementSingleton (MidiService)
+
+MidiService::~MidiService()
+{
+    clearSingletonInstance();
+}
+
 MidiServiceType* MidiService::getService()
 {
     return internal.get();
@@ -1147,11 +1146,6 @@ MidiService::MidiService()
    #endif
 
     internal = new WindowsMidiService();
-}
-
-MidiService::~MidiService()
-{
-    clearSingletonInstance();
 }
 
 //==============================================================================

@@ -2,28 +2,20 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -1179,7 +1171,7 @@ bool String::matchesWildcard (StringRef wildcard, const bool ignoreCase) const n
 String String::repeatedString (StringRef stringToRepeat, int numberOfTimesToRepeat)
 {
     if (numberOfTimesToRepeat <= 0)
-        return String();
+        return {};
 
     String result (PreallocationBytes (findByteOffsetOfEnd (stringToRepeat) * (size_t) numberOfTimesToRepeat));
     CharPointerType n (result.text);
@@ -1291,7 +1283,7 @@ String String::replaceSection (int index, int numCharsToReplace, StringRef strin
 
     const size_t newTotalBytes = initialBytes + newStringBytes + remainderBytes;
     if (newTotalBytes <= 0)
-        return String();
+        return {};
 
     String result (PreallocationBytes ((size_t) newTotalBytes));
 
@@ -1537,7 +1529,7 @@ String String::substring (int start, const int end) const
         start = 0;
 
     if (end <= start)
-        return String();
+        return {};
 
     int i = 0;
     CharPointerType t1 (text);
@@ -1545,7 +1537,7 @@ String String::substring (int start, const int end) const
     while (i < start)
     {
         if (t1.isEmpty())
-            return String();
+            return {};
 
         ++i;
         ++t1;
@@ -1579,7 +1571,7 @@ String String::substring (int start) const
     while (--start >= 0)
     {
         if (t.isEmpty())
-            return String();
+            return {};
 
         ++t;
     }
@@ -1604,7 +1596,7 @@ String String::fromFirstOccurrenceOf (StringRef sub,
     const int i = ignoreCase ? indexOfIgnoreCase (sub)
                              : indexOf (sub);
     if (i < 0)
-        return String();
+        return {};
 
     return substring (includeSubString ? i : i + sub.length());
 }
@@ -1645,26 +1637,23 @@ String String::upToLastOccurrenceOf (StringRef sub,
     return substring (0, includeSubString ? i + sub.length() : i);
 }
 
+static bool isQuoteCharacter (juce_wchar c) noexcept
+{
+    return c == '"' || c == '\'';
+}
+
 bool String::isQuotedString() const
 {
-    const juce_wchar trimmedStart = trimStart()[0];
-
-    return trimmedStart == '"'
-        || trimmedStart == '\'';
+    return isQuoteCharacter (*text.findEndOfWhitespace());
 }
 
 String String::unquoted() const
 {
-    const int len = length();
+    if (! isQuoteCharacter (*text))
+        return *this;
 
-    if (len == 0)
-        return String();
-
-    const juce_wchar lastChar = text [len - 1];
-    const int dropAtStart = (*text == '"' || *text == '\'') ? 1 : 0;
-    const int dropAtEnd = (lastChar == '"' || lastChar == '\'') ? 1 : 0;
-
-    return substring (dropAtStart, len - dropAtEnd);
+    auto len = length();
+    return substring (1, len - (isQuoteCharacter (text[len - 1]) ? 1 : 0));
 }
 
 String String::quoted (const juce_wchar quoteCharacter) const
@@ -1709,7 +1698,7 @@ String String::trim() const
         CharPointerType trimmedEnd (findTrimmedEnd (start, end));
 
         if (trimmedEnd <= start)
-            return String();
+            return {};
 
         if (text < start || trimmedEnd < end)
             return String (start, trimmedEnd);
@@ -1782,7 +1771,7 @@ String String::trimCharactersAtEnd (StringRef charactersToTrim) const
 String String::retainCharacters (StringRef charactersToRetain) const
 {
     if (isEmpty())
-        return String();
+        return {};
 
     StringCreationHelper builder (text);
 
@@ -1804,7 +1793,7 @@ String String::retainCharacters (StringRef charactersToRetain) const
 String String::removeCharacters (StringRef charactersToRemove) const
 {
     if (isEmpty())
-        return String();
+        return {};
 
     StringCreationHelper builder (text);
 
@@ -1867,8 +1856,7 @@ bool String::containsNonWhitespaceChars() const noexcept
     return false;
 }
 
-// Note! The format parameter here MUST NOT be a reference, otherwise MS's va_start macro fails to work (but still compiles).
-String String::formatted (const String pf, ... )
+String String::formattedRaw (const char* pf, ...)
 {
     size_t bufferSize = 256;
 
@@ -1877,19 +1865,22 @@ String String::formatted (const String pf, ... )
         va_list args;
         va_start (args, pf);
 
-       #if JUCE_WINDOWS
-        HeapBlock<wchar_t> temp (bufferSize);
-        const int num = (int) _vsnwprintf (temp.getData(), bufferSize - 1, pf.toWideCharPointer(), args);
-       #elif JUCE_ANDROID
+      #if JUCE_ANDROID
         HeapBlock<char> temp (bufferSize);
-        int num = (int) vsnprintf (temp.getData(), bufferSize - 1, pf.toUTF8(), args);
+        int num = (int) vsnprintf (temp.getData(), bufferSize - 1, pf, args);
         if (num >= static_cast<int> (bufferSize))
             num = -1;
-       #else
+      #else
+        String wideCharVersion (pf);
         HeapBlock<wchar_t> temp (bufferSize);
-        const int num = (int) vswprintf (temp.getData(), bufferSize - 1, pf.toWideCharPointer(), args);
+        const int num = (int)
+       #if JUCE_WINDOWS
+            _vsnwprintf
+       #else
+            vswprintf
        #endif
-
+                (temp.getData(), bufferSize - 1, wideCharVersion.toWideCharPointer(), args);
+      #endif
         va_end (args);
 
         if (num > 0)
@@ -1901,7 +1892,7 @@ String String::formatted (const String pf, ... )
             break;                          // returns -1 because of an error rather than because it needs more space.
     }
 
-    return String();
+    return {};
 }
 
 //==============================================================================
@@ -1939,8 +1930,8 @@ template <typename Type>
 static String hexToString (Type v)
 {
     String::CharPointerType::CharType buffer[32];
-    String::CharPointerType::CharType* const end = buffer + numElementsInArray (buffer) - 1;
-    String::CharPointerType::CharType* t = end;
+    auto* end = buffer + numElementsInArray (buffer) - 1;
+    auto* t = end;
     *t = 0;
 
     do
@@ -1954,14 +1945,15 @@ static String hexToString (Type v)
                    String::CharPointerType (end));
 }
 
-String String::toHexString (int number)       { return hexToString ((unsigned int) number); }
-String String::toHexString (int64 number)     { return hexToString ((uint64) number); }
-String String::toHexString (short number)     { return toHexString ((int) (unsigned short) number); }
+String String::createHex (uint8 n)    { return hexToString (n); }
+String String::createHex (uint16 n)   { return hexToString (n); }
+String String::createHex (uint32 n)   { return hexToString (n); }
+String String::createHex (uint64 n)   { return hexToString (n); }
 
 String String::toHexString (const void* const d, const int size, const int groupSize)
 {
     if (size <= 0)
-        return String();
+        return {};
 
     int numChars = (size * 2) + 2;
     if (groupSize > 0)
@@ -1969,7 +1961,7 @@ String String::toHexString (const void* const d, const int size, const int group
 
     String s (PreallocationBytes (sizeof (CharPointerType::CharType) * (size_t) numChars));
 
-    const unsigned char* data = static_cast<const unsigned char*> (d);
+    auto* data = static_cast<const unsigned char*> (d);
     CharPointerType dest (s.text);
 
     for (int i = 0; i < size; ++i)
@@ -2003,10 +1995,10 @@ static String getStringFromWindows1252Codepage (const char* data, size_t num)
 
 String String::createStringFromData (const void* const unknownData, int size)
 {
-    const uint8* const data = static_cast<const uint8*> (unknownData);
+    auto* data = static_cast<const uint8*> (unknownData);
 
     if (size <= 0 || data == nullptr)
-        return String();
+        return {};
 
     if (size == 1)
         return charToString ((juce_wchar) data[0]);
@@ -2035,7 +2027,7 @@ String String::createStringFromData (const void* const unknownData, int size)
         return builder.result;
     }
 
-    const char* start = (const char*) data;
+    auto* start = (const char*) data;
 
     if (size >= 3 && CharPointer_UTF8::isByteOrderMark (data))
     {
@@ -2058,7 +2050,7 @@ struct StringEncodingConverter
 {
     static CharPointerType_Dest convert (const String& s)
     {
-        String& source = const_cast<String&> (s);
+        auto& source = const_cast<String&> (s);
 
         typedef typename CharPointerType_Dest::CharType DestChar;
 
@@ -2172,7 +2164,7 @@ String String::fromUTF8 (const char* const buffer, int bufferSizeBytes)
         }
     }
 
-    return String();
+    return {};
 }
 
 #if JUCE_MSVC
@@ -2231,7 +2223,7 @@ StringRef::StringRef (const String& string) noexcept  : text (string.getCharPoin
 class StringTests  : public UnitTest
 {
 public:
-    StringTests() : UnitTest ("String class") {}
+    StringTests() : UnitTest ("String class", "Text") {}
 
     template <class CharPointerType>
     struct TestUTFConversion
@@ -2510,6 +2502,12 @@ public:
             expect (String::toHexString (0x1234abcd).equalsIgnoreCase ("1234abcd"));
             expect (String::toHexString ((int64) 0x1234abcd).equalsIgnoreCase ("1234abcd"));
             expect (String::toHexString ((short) 0x12ab).equalsIgnoreCase ("12ab"));
+            expect (String::toHexString ((size_t) 0x12ab).equalsIgnoreCase ("12ab"));
+            expect (String::toHexString ((long) 0x12ab).equalsIgnoreCase ("12ab"));
+            expect (String::toHexString ((int8)  -1).equalsIgnoreCase ("ff"));
+            expect (String::toHexString ((int16) -1).equalsIgnoreCase ("ffff"));
+            expect (String::toHexString ((int32) -1).equalsIgnoreCase ("ffffffff"));
+            expect (String::toHexString ((int64) -1).equalsIgnoreCase ("ffffffffffffffff"));
 
             unsigned char data[] = { 1, 2, 3, 4, 0xa, 0xb, 0xc, 0xd };
             expect (String::toHexString (data, 8, 0).equalsIgnoreCase ("010203040a0b0c0d"));

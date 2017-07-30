@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -32,8 +34,8 @@ class FileListTreeItem   : public TreeViewItem,
 {
 public:
     FileListTreeItem (FileTreeComponent& treeComp,
-                      DirectoryContentsList* const parentContents,
-                      const int indexInContents,
+                      DirectoryContentsList* parentContents,
+                      int indexInContents,
                       const File& f,
                       TimeSliceThread& t)
         : file (f),
@@ -133,7 +135,7 @@ public:
             for (int maxRetries = 500; --maxRetries > 0;)
             {
                 for (int i = 0; i < getNumSubItems(); ++i)
-                    if (FileListTreeItem* f = dynamic_cast<FileListTreeItem*> (getSubItem (i)))
+                    if (auto* f = dynamic_cast<FileListTreeItem*> (getSubItem (i)))
                         if (f->selectFile (target))
                             return true;
 
@@ -181,7 +183,7 @@ public:
         }
 
         owner.getLookAndFeel().drawFileBrowserRow (g, width, height,
-                                                   file.getFileName(),
+                                                   file, file.getFileName(),
                                                    &icon, fileSize, modTime,
                                                    isDirectory, isSelected(),
                                                    indexInContentsList, owner);
@@ -231,8 +233,8 @@ private:
     {
         if (icon.isNull())
         {
-            const int hashCode = (file.getFullPathName() + "_iconCacheSalt").hashCode();
-            Image im (ImageCache::getFromHashCode (hashCode));
+            auto hashCode = (file.getFullPathName() + "_iconCacheSalt").hashCode();
+            auto im = ImageCache::getFromHashCode (hashCode);
 
             if (im.isNull() && ! onlyUpdateIfCached)
             {
@@ -271,21 +273,20 @@ void FileTreeComponent::refresh()
 {
     deleteRootItem();
 
-    FileListTreeItem* const root
-        = new FileListTreeItem (*this, nullptr, 0, fileList.getDirectory(),
-                                fileList.getTimeSliceThread());
+    auto root = new FileListTreeItem (*this, nullptr, 0, directoryContentsList.getDirectory(),
+                                      directoryContentsList.getTimeSliceThread());
 
-    root->setSubContentsList (&fileList, false);
+    root->setSubContentsList (&directoryContentsList, false);
     setRootItem (root);
 }
 
 //==============================================================================
 File FileTreeComponent::getSelectedFile (const int index) const
 {
-    if (const FileListTreeItem* const item = dynamic_cast<const FileListTreeItem*> (getSelectedItem (index)))
+    if (auto* item = dynamic_cast<const FileListTreeItem*> (getSelectedItem (index)))
         return item->file;
 
-    return File();
+    return {};
 }
 
 void FileTreeComponent::deselectAllFiles()
@@ -305,7 +306,7 @@ void FileTreeComponent::setDragAndDropDescription (const String& description)
 
 void FileTreeComponent::setSelectedFile (const File& target)
 {
-    if (FileListTreeItem* t = dynamic_cast<FileListTreeItem*> (getRootItem()))
+    if (auto* t = dynamic_cast<FileListTreeItem*> (getRootItem()))
         if (! t->selectFile (target))
             clearSelectedItems();
 }
@@ -316,7 +317,7 @@ void FileTreeComponent::setItemHeight (int newHeight)
     {
         itemHeight = newHeight;
 
-        if (TreeViewItem* root = getRootItem())
+        if (auto* root = getRootItem())
             root->treeHasChanged();
     }
 }

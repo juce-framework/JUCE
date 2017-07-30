@@ -16,9 +16,9 @@
             return address;
         }
 
-        public boolean isBluetoothDevicePaired (String address)
+        public int getBluetoothDeviceStatus (String address)
         {
-            return false;
+            return 0;
         }
 
         public void startStopScan (boolean shouldStart)

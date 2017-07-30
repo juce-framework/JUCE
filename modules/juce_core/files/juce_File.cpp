@@ -2,28 +2,20 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -111,10 +103,15 @@ static String removeEllipsis (const String& path)
     return path;
 }
 
+bool File::isRoot() const
+{
+    return fullPath.isNotEmpty() && *this == getParentDirectory();
+}
+
 String File::parseAbsolutePath (const String& p)
 {
     if (p.isEmpty())
-        return String();
+        return {};
 
 #if JUCE_WINDOWS
     // Windows..
@@ -548,7 +545,7 @@ bool File::loadFileAsData (MemoryBlock& destBlock) const
 String File::loadFileAsString() const
 {
     if (! existsAsFile())
-        return String();
+        return {};
 
     FileInputStream in (*this);
     return in.openedOk() ? in.readEntireStreamAsString()
@@ -667,7 +664,7 @@ String File::getFileExtension() const
     if (indexOfDot > fullPath.lastIndexOfChar (separator))
         return fullPath.substring (indexOfDot);
 
-    return String();
+    return {};
 }
 
 bool File::hasFileExtension (StringRef possibleSuffix) const
@@ -698,7 +695,7 @@ bool File::hasFileExtension (StringRef possibleSuffix) const
 File File::withFileExtension (StringRef newExtension) const
 {
     if (fullPath.isEmpty())
-        return File();
+        return {};
 
     String filePart (getFileName());
 
@@ -770,8 +767,7 @@ bool File::appendText (const String& text,
     if (out.failedToOpen())
         return false;
 
-    out.writeText (text, asUnicode, writeUnicodeHeaderBytes);
-    return true;
+    return out.writeText (text, asUnicode, writeUnicodeHeaderBytes);
 }
 
 bool File::replaceWithText (const String& textToWrite,
@@ -865,7 +861,7 @@ static int countNumberOfSeparators (String::CharPointerType s)
 
     for (;;)
     {
-        const juce_wchar c = s.getAndAdvance();
+        auto c = s.getAndAdvance();
 
         if (c == 0)
             break;
@@ -877,28 +873,31 @@ static int countNumberOfSeparators (String::CharPointerType s)
     return num;
 }
 
-String File::getRelativePathFrom (const File& dir)  const
+String File::getRelativePathFrom (const File& dir) const
 {
-    String thisPath (fullPath);
+    if (dir == *this)
+        return ".";
+
+    auto thisPath = fullPath;
 
     while (thisPath.endsWithChar (separator))
         thisPath = thisPath.dropLastCharacters (1);
 
-    String dirPath (addTrailingSeparator (dir.existsAsFile() ? dir.getParentDirectory().getFullPathName()
-                                                             : dir.fullPath));
+    auto dirPath = addTrailingSeparator (dir.existsAsFile() ? dir.getParentDirectory().getFullPathName()
+                                                            : dir.fullPath);
 
     int commonBitLength = 0;
-    String::CharPointerType thisPathAfterCommon (thisPath.getCharPointer());
-    String::CharPointerType dirPathAfterCommon  (dirPath.getCharPointer());
+    auto thisPathAfterCommon = thisPath.getCharPointer();
+    auto dirPathAfterCommon  = dirPath.getCharPointer();
 
     {
-        String::CharPointerType thisPathIter (thisPath.getCharPointer());
-        String::CharPointerType dirPathIter  (dirPath.getCharPointer());
+        auto thisPathIter = thisPath.getCharPointer();
+        auto dirPathIter = dirPath.getCharPointer();
 
         for (int i = 0;;)
         {
-            const juce_wchar c1 = thisPathIter.getAndAdvance();
-            const juce_wchar c2 = dirPathIter.getAndAdvance();
+            auto c1 = thisPathIter.getAndAdvance();
+            auto c2 = dirPathIter.getAndAdvance();
 
            #if NAMES_ARE_CASE_SENSITIVE
             if (c1 != c2
@@ -923,7 +922,7 @@ String File::getRelativePathFrom (const File& dir)  const
     if (commonBitLength == 0 || (commonBitLength == 1 && thisPath[1] == separator))
         return fullPath;
 
-    const int numUpDirectoriesNeeded = countNumberOfSeparators (dirPathAfterCommon);
+    auto numUpDirectoriesNeeded = countNumberOfSeparators (dirPathAfterCommon);
 
     if (numUpDirectoriesNeeded == 0)
         return thisPathAfterCommon;
@@ -940,9 +939,9 @@ String File::getRelativePathFrom (const File& dir)  const
 //==============================================================================
 File File::createTempFile (StringRef fileNameEnding)
 {
-    const File tempFile (getSpecialLocation (tempDirectory)
-                            .getChildFile ("temp_" + String::toHexString (Random::getSystemRandom().nextInt()))
-                            .withFileExtension (fileNameEnding));
+    auto tempFile = getSpecialLocation (tempDirectory)
+                      .getChildFile ("temp_" + String::toHexString (Random::getSystemRandom().nextInt()))
+                      .withFileExtension (fileNameEnding);
 
     if (tempFile.exists())
         return createTempFile (fileNameEnding);
@@ -1005,7 +1004,7 @@ MemoryMappedFile::MemoryMappedFile (const File& file, const Range<int64>& fileRa
 class FileTests  : public UnitTest
 {
 public:
-    FileTests() : UnitTest ("Files") {}
+    FileTests() : UnitTest ("Files", "Files") {}
 
     void runTest() override
     {

@@ -2,28 +2,30 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
 class ModulesPanel  : public Component,
-                      private TableListBoxModel,
+                      private ListBoxModel,
                       private ValueTree::Listener,
                       private Button::Listener
 {
@@ -31,27 +33,31 @@ public:
     ModulesPanel (Project& p)
         : project (p),
           modulesValueTree (p.getModules().state),
+          header ("Modules", Icon (getIcons().modules, Colours::transparentBlack)),
           setCopyModeButton  ("Set copy-mode for all modules..."),
-          copyPathButton ("Set paths for all modules...")
+          copyPathButton ("Set paths for all modules..."),
+          globalPathsButton ("Enable/disable global path for modules...")
     {
-        table.getHeader().addColumn ("Module", nameCol, 180, 100, 400, TableHeaderComponent::notSortable);
-        table.getHeader().addColumn ("Version", versionCol, 100, 100, 100, TableHeaderComponent::notSortable);
-        table.getHeader().addColumn ("Make Local Copy", copyCol, 100, 100, 100, TableHeaderComponent::notSortable);
-        table.getHeader().addColumn ("Paths", pathCol, 250, 100, 600, TableHeaderComponent::notSortable);
+        listHeader = new ListBoxHeader ( { "Module", "Version", "Make Local Copy", "Paths" },
+                                        { 0.25f, 0.2f, 0.2f, 0.35f } );
+        list.setHeaderComponent (listHeader);
+        list.setModel (this);
+        list.setColour (ListBox::backgroundColourId, Colours::transparentBlack);
+        addAndMakeVisible (list);
+        list.updateContent();
+        list.setRowHeight (30);
+        list.setMultipleSelectionEnabled (true);
 
-        table.setModel (this);
-        table.setColour (TableListBox::backgroundColourId, Colours::transparentBlack);
-        addAndMakeVisible (table);
-        table.updateContent();
-        table.setRowHeight (20);
-        table.setMultipleSelectionEnabled (true);
+        addAndMakeVisible (header);
 
         addAndMakeVisible (setCopyModeButton);
         addAndMakeVisible (copyPathButton);
+        addAndMakeVisible (globalPathsButton);
         setCopyModeButton.addListener (this);
         setCopyModeButton.setTriggeredOnMouseDown (true);
         copyPathButton.addListener (this);
         copyPathButton.setTriggeredOnMouseDown (true);
+        globalPathsButton.addListener (this);
 
         modulesValueTree.addListener (this);
         lookAndFeelChanged();
@@ -59,19 +65,42 @@ public:
 
     void paint (Graphics& g) override
     {
-        ProjucerLookAndFeel::fillWithBackgroundTexture (*this, g);
+        g.setColour (findColour (secondaryBackgroundColourId));
+        g.fillRect (getLocalBounds().reduced (12, 0));
     }
 
     void resized() override
     {
-        Rectangle<int> r (getLocalBounds().reduced (5, 4));
+        auto bounds = getLocalBounds().reduced (12, 0);
 
-        table.setBounds (r.removeFromTop (table.getRowPosition (getNumRows() - 1, true).getBottom() + 20));
+        header.setBounds (bounds.removeFromTop (40));
 
-        Rectangle<int> buttonRow (r.removeFromTop (32).removeFromBottom (28));
-        setCopyModeButton.setBounds (buttonRow.removeFromLeft (jmin (260, r.getWidth() / 3)));
-        buttonRow.removeFromLeft (8);
-        copyPathButton.setBounds (buttonRow.removeFromLeft (jmin (260, r.getWidth() / 3)));
+        bounds.reduce (10, 0);
+        list.setBounds (bounds.removeFromTop (list.getRowPosition (getNumRows() - 1, true).getBottom() + 20));
+
+        if (bounds.getHeight() < 35)
+        {
+            parentSizeChanged();
+        }
+        else
+        {
+            auto buttonRow = bounds.removeFromTop (35);
+            setCopyModeButton.setBounds (buttonRow.removeFromLeft (jmin (200, bounds.getWidth() / 3)));
+            buttonRow.removeFromLeft (8);
+            copyPathButton.setBounds (buttonRow.removeFromLeft (jmin (200, bounds.getWidth() / 3)));
+            buttonRow.removeFromLeft (8);
+            globalPathsButton.setBounds (buttonRow.removeFromLeft (jmin (200, bounds.getWidth() / 3)));
+        }
+    }
+
+    void parentSizeChanged() override
+    {
+        const auto width = jmax (550, getParentWidth());
+        auto y = list.getRowPosition (getNumRows() - 1, true).getBottom() + 200;
+
+        y = jmax (getParentHeight(), y);
+
+        setSize (width, y);
     }
 
     int getNumRows() override
@@ -79,52 +108,60 @@ public:
         return project.getModules().getNumModules();
     }
 
-    void paintRowBackground (Graphics& g, int /*rowNumber*/, int width, int height, bool rowIsSelected) override
+    void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected) override
     {
-        g.setColour (rowIsSelected ? Colours::lightblue.withAlpha (0.4f)
-                                   : Colours::white.withAlpha (0.4f));
-        g.fillRect (0, 0, width, height - 1);
-    }
+        ignoreUnused (height);
 
-    void paintCell (Graphics& g, int rowNumber, int columnId, int width, int height, bool /*rowIsSelected*/) override
-    {
-        String text;
-        const String moduleID (project.getModules().getModuleID (rowNumber));
+        auto bounds = Rectangle<int> (0, 0, width, height);
 
-        if (columnId == nameCol)
-        {
-            text = moduleID;
-        }
-        else if (columnId == versionCol)
-        {
-            text = project.getModules().getModuleInfo (moduleID).getVersion();
+        g.setColour (rowIsSelected ? findColour (defaultHighlightColourId) : findColour (rowNumber % 2 == 0 ? widgetBackgroundColourId
+                                                                                                            : secondaryWidgetBackgroundColourId));
+        g.fillRect (bounds.withTrimmedBottom (1));
 
-            if (text.isEmpty())
-                text = "?";
-        }
-        else if (columnId == copyCol)
+        bounds.removeFromLeft (5);
+        g.setColour (rowIsSelected ? findColour (defaultHighlightedTextColourId) : findColour (widgetTextColourId));
+
+        //======================================================================
+        const auto moduleID = project.getModules().getModuleID (rowNumber);
+
+        g.drawFittedText (moduleID, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (0) * width)), Justification::centredLeft, 1);
+
+        //======================================================================
+        auto version = project.getModules().getModuleInfo (moduleID).getVersion();
+        if (version.isEmpty())
+            version = "?";
+
+        g.drawFittedText (version, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (1) * width)), Justification::centredLeft, 1);
+
+        //======================================================================
+        const auto copyLocally = project.getModules().shouldCopyModuleFilesLocally (moduleID).getValue()
+                                      ? "Yes" : "No";
+
+        g.drawFittedText (copyLocally, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (2) * width)), Justification::centredLeft, 1);
+
+        //======================================================================
+        String pathText;
+
+        if (project.getModules().shouldUseGlobalPath (moduleID).getValue())
         {
-            text = project.getModules().shouldCopyModuleFilesLocally (moduleID).getValue()
-                        ? "Yes" : "No";
+            pathText = "Global";
         }
-        else if (columnId == pathCol)
+        else
         {
             StringArray paths;
 
             for (Project::ExporterIterator exporter (project); exporter.next();)
                 paths.addIfNotAlreadyThere (exporter->getPathForModuleString (moduleID).trim());
 
-            text = paths.joinIntoString (", ");
+            pathText = paths.joinIntoString (", ");
         }
 
-        g.setColour (Colours::black);
-        g.setFont (height * 0.65f);
-        g.drawText (text, Rectangle<int> (width, height).reduced (4, 0), Justification::centredLeft, true);
+        g.drawFittedText (pathText, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (3) * width)), Justification::centredLeft, 1);
     }
 
-    void cellDoubleClicked (int rowNumber, int, const MouseEvent&) override
+    void listBoxItemDoubleClicked (int row, const MouseEvent&) override
     {
-        const String moduleID (project.getModules().getModuleID (rowNumber));
+        const String moduleID (project.getModules().getModuleID (row));
 
         if (moduleID.isNotEmpty())
             if (ProjectContentComponent* pcc = findParentComponentOfClass<ProjectContentComponent>())
@@ -140,6 +177,14 @@ public:
     {
         if (b == &setCopyModeButton)   showCopyModeMenu();
         if (b == &copyPathButton)      showSetPathsMenu();
+        if (b == &globalPathsButton)   showGlobalPathsMenu();
+    }
+
+    void lookAndFeelChanged() override
+    {
+        setCopyModeButton.setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
+        copyPathButton.setColour    (TextButton::buttonColourId, findColour (defaultButtonBackgroundColourId));
+        globalPathsButton.setColour (TextButton::buttonColourId, findColour (defaultButtonBackgroundColourId));
     }
 
 private:
@@ -153,8 +198,10 @@ private:
 
     Project& project;
     ValueTree modulesValueTree;
-    TableListBox table;
-    TextButton setCopyModeButton, copyPathButton;
+    ContentViewHeader header;
+    ListBox list;
+    ListBoxHeader* listHeader;
+    TextButton setCopyModeButton, copyPathButton, globalPathsButton;
     std::map<String, var> modulePathClipboard;
 
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override    { itemChanged(); }
@@ -165,7 +212,7 @@ private:
 
     void itemChanged()
     {
-        table.updateContent();
+        list.updateContent();
         resized();
         repaint();
     }
@@ -176,10 +223,43 @@ private:
         m.addItem (1, "Set all modules to copy locally");
         m.addItem (2, "Set all modules to not copy locally");
 
-        int res = m.showAt (&setCopyModeButton);
+        auto res = m.showAt (&setCopyModeButton);
 
         if (res != 0)
             project.getModules().setLocalCopyModeForAllModules (res == 1);
+    }
+
+    void showGlobalPathsMenu()
+    {
+        PopupMenu m;
+        m.addItem (1, "Set all modules to use global paths");
+        m.addItem (2, "Set all modules to not use global paths");
+        m.addItem (3, "Set selected modules to use global paths");
+        m.addItem (4, "Set selected modules to not use global paths");
+
+        auto res = m.showAt (&globalPathsButton);
+
+        if (res != 0)
+        {
+            auto enableGlobalPaths = (res % 2 == 1);
+
+            auto& moduleList = project.getModules();
+
+            if (res < 3)
+            {
+                auto moduleIDs = moduleList.getAllModules();
+
+                for (auto id : moduleIDs)
+                    moduleList.shouldUseGlobalPath (id).setValue (enableGlobalPaths);
+            }
+            else
+            {
+                auto selected = list.getSelectedRows();
+
+                for (auto i = 0; i < selected.size(); ++i)
+                    moduleList.shouldUseGlobalPath (moduleList.getModuleID (selected[i])).setValue (enableGlobalPaths);
+            }
+        }
     }
 
     void showSetPathsMenu()
@@ -192,13 +272,13 @@ private:
         };
 
         auto& moduleList = project.getModules();
-        auto moduleToCopy = moduleList.getModuleID (table.getSelectedRow());
+        auto moduleToCopy = moduleList.getModuleID (list.getSelectedRow());
 
         if (moduleToCopy.isNotEmpty())
         {
             PopupMenu m;
             m.addItem (copyPathsToAllModulesID, "Copy the paths from the module '" + moduleToCopy + "' to all other modules");
-            m.addItem (copyPathsID, "Copy paths from selected module", table.getNumSelectedRows() == 1);
+            m.addItem (copyPathsID, "Copy paths from selected module", list.getNumSelectedRows() == 1);
             m.addItem (pastePathsID, "Paste paths to selected modules", ! modulePathClipboard.empty());
 
             int res = m.showAt (&copyPathButton);
@@ -225,9 +305,9 @@ private:
             }
             else if (res == pastePathsID)
             {
-                for (int selectionId = 0; selectionId < table.getNumSelectedRows(); ++selectionId)
+                for (int selectionId = 0; selectionId < list.getNumSelectedRows(); ++selectionId)
                 {
-                    auto rowNumber = table.getSelectedRow (selectionId);
+                    auto rowNumber = list.getSelectedRow (selectionId);
                     auto modID = moduleList.getModuleID (rowNumber);
 
                     for (Project::ExporterIterator exporter (project); exporter.next();)
@@ -235,7 +315,7 @@ private:
                 }
             }
 
-            table.repaint();
+            list.repaint();
         }
         else
         {

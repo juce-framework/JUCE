@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -38,9 +40,10 @@ public:
                                const String& propertyDescription,
                                bool isDirectory,
                                const String& wildcards = "*",
-                               const File& rootToUseForRelativePaths = File())
+                               const File& rootToUseForRelativePaths = File(),
+                               const bool supportsMultiplePaths = false)
         : PropertyComponent (propertyDescription),
-          innerComp (valueToControl, isDirectory, wildcards, rootToUseForRelativePaths)
+          innerComp (valueToControl, isDirectory, wildcards, rootToUseForRelativePaths, supportsMultiplePaths)
     {
         addAndMakeVisible (innerComp);
     }
@@ -50,29 +53,34 @@ public:
 private:
     struct InnerComponent   : public Component,
                               public FileDragAndDropTarget,
-                              private Button::Listener
+                              private Button::Listener,
+                              private TextEditor::Listener
     {
-        InnerComponent (Value v, bool isDir, const String& wc, const File& rt)
+        InnerComponent (Value v, bool isDir, const String& wc, const File& rt, const bool multiplePaths)
             : value (v),
               isDirectory (isDir),
               highlightForDragAndDrop (false),
               wildcards (wc),
               root (rt),
-              button ("...")
+              button ("..."),
+              supportsMultiplePaths (multiplePaths)
         {
             addAndMakeVisible (textbox);
             textbox.getTextValue().referTo (value);
+            textbox.addListener (this);
 
             addAndMakeVisible (button);
             button.addListener (this);
+
+            lookAndFeelChanged();
         }
 
         void paintOverChildren (Graphics& g) override
         {
             if (highlightForDragAndDrop)
             {
-                g.setColour (Colours::green.withAlpha (0.1f));
-                g.fillRect (getLocalBounds());
+                g.setColour (findColour (defaultHighlightColourId).withAlpha (0.5f));
+                g.fillRect (textbox.getBounds());
             }
         }
 
@@ -80,7 +88,7 @@ private:
         {
             juce::Rectangle<int> r (getLocalBounds());
 
-            button.setBounds (r.removeFromRight (24));
+            button.setBounds (r.removeFromRight (30));
             textbox.setBounds (r);
         }
 
@@ -97,6 +105,9 @@ private:
                                                : firstFile.getParentDirectory());
             else
                 setTo (firstFile);
+
+            highlightForDragAndDrop = false;
+            repaint();
         }
 
         void buttonClicked (Button*) override
@@ -119,10 +130,77 @@ private:
             }
         }
 
+        void textEditorReturnKeyPressed (TextEditor& editor) override   { updateEditorColour (editor); }
+        void textEditorFocusLost (TextEditor& editor) override          { updateEditorColour (editor); }
+
+        void updateEditorColour (TextEditor& editor)
+        {
+            if (supportsMultiplePaths)
+            {
+                auto paths = StringArray::fromTokens (editor.getTextValue().toString(), ";", {});
+
+                editor.clear();
+
+                AttributedString str;
+                for (auto p : paths)
+                {
+                    if (root.getChildFile (p.trim()).exists())    editor.setColour (TextEditor::textColourId, findColour (widgetTextColourId));
+                    else                                          editor.setColour (TextEditor::textColourId, Colours::red);
+
+                    editor.insertTextAtCaret (p);
+
+                    if (paths.indexOf (p) < paths.size() - 1)
+                    {
+                        editor.setColour (TextEditor::textColourId, findColour (widgetTextColourId));
+                        editor.insertTextAtCaret (";");
+                    }
+                }
+
+                editor.setColour (TextEditor::textColourId, findColour (widgetTextColourId));
+            }
+            else
+            {
+                auto pathToCheck = editor.getTextValue().toString();
+
+                //android SDK/NDK paths
+                if (pathToCheck.contains ("${user.home}"))
+                    pathToCheck = pathToCheck.replace ("${user.home}", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
+
+              #if JUCE_WINDOWS
+                if (pathToCheck.startsWith ("~"))
+                    pathToCheck = pathToCheck.replace ("~", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
+              #endif
+
+                const auto currentFile = root.getChildFile (pathToCheck);
+
+                if (currentFile.exists())
+                    editor.applyColourToAllText (findColour (widgetTextColourId));
+                else
+                    editor.applyColourToAllText (Colours::red);
+            }
+        }
+
         void setTo (const File& f)
         {
-            value = (root == File()) ? f.getFullPathName()
-                                     : f.getRelativePathFrom (root);
+            auto pathName = (root == File()) ? f.getFullPathName()
+                                             : f.getRelativePathFrom (root);
+
+            if (supportsMultiplePaths && value.toString().isNotEmpty())
+                value = value.toString().trimCharactersAtEnd (" ;") + "; " + pathName;
+            else
+                value = pathName;
+
+            updateEditorColour (textbox);
+        }
+
+        void lookAndFeelChanged() override
+        {
+            textbox.setColour (TextEditor::backgroundColourId, findColour (widgetBackgroundColourId));
+            textbox.setColour (TextEditor::outlineColourId, Colours::transparentBlack);
+            updateEditorColour (textbox);
+
+            button.setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
+            button.setColour (TextButton::textColourOffId, Colours::white);
         }
 
         Value value;
@@ -131,6 +209,7 @@ private:
         File root;
         TextEditor textbox;
         TextButton button;
+        bool supportsMultiplePaths;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InnerComponent)
     };

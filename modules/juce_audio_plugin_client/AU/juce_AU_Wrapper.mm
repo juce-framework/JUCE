@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -40,6 +42,7 @@
  #pragma clang diagnostic ignored "-Wsign-conversion"
  #pragma clang diagnostic ignored "-Wconversion"
  #pragma clang diagnostic ignored "-Woverloaded-virtual"
+ #pragma clang diagnostic ignored "-Wextra-semi"
 #endif
 
 #include "../utility/juce_IncludeSystemHeaders.h"
@@ -77,6 +80,7 @@
 #include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../utility/juce_CarbonVisibility.h"
 
+#include "../../juce_audio_basics/native/juce_mac_CoreAudioLayouts.h"
 #include "../../juce_audio_processors/format_types/juce_AU_Shared.h"
 
 //==============================================================================
@@ -776,7 +780,7 @@ public:
 
         if (const AUIOElement* ioElement = GetIOElement (isInput ? kAudioUnitScope_Input :  kAudioUnitScope_Output, element))
         {
-            const AudioChannelSet newChannelSet = AudioUnitHelpers::CoreAudioChannelLayoutToJuceType (*inLayout);
+            const AudioChannelSet newChannelSet = CoreAudioLayouts::fromCoreAudio (*inLayout);
             const int currentNumChannels = static_cast<int> (ioElement->GetStreamFormat().NumberChannels());
             const int newChannelNum = newChannelSet.size();
 
@@ -794,7 +798,7 @@ public:
                 return kAudioUnitErr_FormatNotSupported;
            #endif
 
-            getCurrentLayout (isInput, busNr) = AudioUnitHelpers::ChannelSetToCALayoutTag (newChannelSet);
+            getCurrentLayout (isInput, busNr) = CoreAudioLayouts::toCoreAudio (newChannelSet);
 
             return noErr;
         }
@@ -940,6 +944,8 @@ public:
             case kSMPTETimeType30:          info.frameRate = AudioPlayHead::fps30; break;
             case kSMPTETimeType2997:        info.frameRate = AudioPlayHead::fps2997; break;
             case kSMPTETimeType2997Drop:    info.frameRate = AudioPlayHead::fps2997drop; break;
+            case kSMPTETimeType60:          info.frameRate = AudioPlayHead::fps60; break;
+            case kSMPTETimeType60Drop:      info.frameRate = AudioPlayHead::fps60drop; break;
             default:                        info.frameRate = AudioPlayHead::fpsUnknown; break;
         }
 
@@ -1096,8 +1102,10 @@ public:
 
         err = MusicDeviceBase::ChangeStreamFormat (scope, element, old, format);
 
+        DBG (set.getDescription());
+
         if (err == noErr)
-            currentTag = AudioUnitHelpers::ChannelSetToCALayoutTag (set);
+            currentTag = CoreAudioLayouts::toCoreAudio (set);
 
         return err;
     }
@@ -1818,7 +1826,12 @@ private:
                 if (numChannels != tagNumChannels)
                     return kAudioUnitErr_FormatNotSupported;
 
-                requestedBuses.add (AudioUnitHelpers::CALayoutTagToChannelSet(currentLayoutTag));
+                AudioChannelLayout layout;
+
+                zerostruct (layout);
+                layout.mChannelLayoutTag = currentLayoutTag;
+
+                requestedBuses.add (CoreAudioLayouts::fromCoreAudio (layout));
             }
         }
 
@@ -1843,7 +1856,7 @@ private:
     {
         const int numChannels = channelSet.size();
 
-        getCurrentLayout (isInput, busNr) = AudioUnitHelpers::ChannelSetToCALayoutTag (channelSet);
+        getCurrentLayout (isInput, busNr) = CoreAudioLayouts::toCoreAudio (channelSet);
 
         // is this bus activated?
         if (numChannels == 0)
@@ -1898,14 +1911,13 @@ private:
     //==============================================================================
     void addSupportedLayoutTagsForBus (bool isInput, int busNum, Array<AudioChannelLayoutTag>& tags)
     {
-        int layoutIndex;
-        AudioChannelLayoutTag tag;
-
         if (AudioProcessor::Bus* bus = juceFilter->getBus (isInput, busNum))
         {
            #ifndef JucePlugin_PreferredChannelConfigurations
-            for (layoutIndex = 0; (tag = AudioUnitHelpers::StreamOrder::auChannelStreamOrder[layoutIndex].auLayoutTag) != 0; ++layoutIndex)
-                if (bus->isLayoutSupported (AudioUnitHelpers::CALayoutTagToChannelSet (tag)))
+            auto& knownTags = CoreAudioLayouts::getKnownCoreAudioTags();
+
+            for (auto tag : knownTags)
+                if (bus->isLayoutSupported (CoreAudioLayouts::fromCoreAudio (AudioChannelLayout {tag})))
                     tags.addIfNotAlreadyThere (tag);
            #endif
 

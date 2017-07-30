@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -37,12 +39,16 @@ namespace Ids
     DECLARE_ID (vendor);
     DECLARE_ID (version);
     DECLARE_ID (license);
+    DECLARE_ID (minimumCppStandard);
     DECLARE_ID (include);
     DECLARE_ID (info);
     DECLARE_ID (description);
     DECLARE_ID (companyName);
     DECLARE_ID (companyWebsite);
     DECLARE_ID (companyEmail);
+    DECLARE_ID (displaySplashScreen);
+    DECLARE_ID (reportAppUsage);
+    DECLARE_ID (splashScreenColour);
     DECLARE_ID (position);
     DECLARE_ID (source);
     DECLARE_ID (width);
@@ -54,6 +60,11 @@ namespace Ids
     DECLARE_ID (intermediatesPath);
     DECLARE_ID (modulePaths);
     DECLARE_ID (searchpaths);
+    DECLARE_ID (osxFallback);
+    DECLARE_ID (windowsFallback);
+    DECLARE_ID (linuxFallback);
+    DECLARE_ID (defaultJuceModulePath);
+    DECLARE_ID (defaultUserModulePath);
     DECLARE_ID (vst3Folder);
     DECLARE_ID (rtasFolder);
     DECLARE_ID (auFolder);
@@ -78,11 +89,14 @@ namespace Ids
     DECLARE_ID (defines);
     DECLARE_ID (headerPath);
     DECLARE_ID (systemHeaderPath);
+    DECLARE_ID (liveWindowsTargetPlatformVersion);
     DECLARE_ID (libraryPath);
     DECLARE_ID (customXcodeFlags);
     DECLARE_ID (customXcassetsFolder);
     DECLARE_ID (customXcodeResourceFolders);
+    DECLARE_ID (plistPreprocessorDefinitions);
     DECLARE_ID (cppLanguageStandard);
+    DECLARE_ID (enableGNUExtensions);
     DECLARE_ID (cppLibType);
     DECLARE_ID (codeSigningIdentity);
     DECLARE_ID (fastMath);
@@ -101,11 +115,13 @@ namespace Ids
     DECLARE_ID (extraDLLs);
     DECLARE_ID (winArchitecture);
     DECLARE_ID (winWarningLevel);
+    DECLARE_ID (msvcManifestFile);
     DECLARE_ID (warningsAreErrors);
     DECLARE_ID (linuxArchitecture);
     DECLARE_ID (linuxCodeBlocksArchitecture);
     DECLARE_ID (windowsCodeBlocksArchitecture);
     DECLARE_ID (toolset);
+    DECLARE_ID (windowsTargetPlatformVersion);
     DECLARE_ID (IPPLibrary);
     DECLARE_ID (msvcModuleDefinitionFile);
     DECLARE_ID (bigIcon);
@@ -144,10 +160,14 @@ namespace Ids
     DECLARE_ID (focusOrder);
     DECLARE_ID (hidden);
     DECLARE_ID (useStdCall);
+    DECLARE_ID (useGlobalPath);
     DECLARE_ID (showAllCode);
     DECLARE_ID (useLocalCopy);
     DECLARE_ID (overwriteOnSave);
     DECLARE_ID (microphonePermissionNeeded);
+    DECLARE_ID (androidRepositories);
+    DECLARE_ID (androidDependencies);
+    DECLARE_ID (androidAdditionalXmlValueResources);
     DECLARE_ID (androidActivityClass);
     DECLARE_ID (androidActivitySubClassName);
     DECLARE_ID (androidVersionCode);
@@ -155,7 +175,11 @@ namespace Ids
     DECLARE_ID (androidNDKPath);
     DECLARE_ID (androidInternetNeeded);
     DECLARE_ID (androidArchitectures);
+    DECLARE_ID (androidManifestCustomXmlElements);
+    DECLARE_ID (androidCustomStringXmlElements);
     DECLARE_ID (androidBluetoothNeeded);
+    DECLARE_ID (androidExternalReadNeeded);
+    DECLARE_ID (androidExternalWriteNeeded);
     DECLARE_ID (androidMinimumSDK);
     DECLARE_ID (androidOtherPermissions);
     DECLARE_ID (androidKeyStore);
@@ -171,7 +195,11 @@ namespace Ids
     DECLARE_ID (iosInAppPurchases);
     DECLARE_ID (iosBackgroundAudio);
     DECLARE_ID (iosBackgroundBle);
+    DECLARE_ID (iosPushNotifications);
+    DECLARE_ID (iosAppGroups);
     DECLARE_ID (iosDevelopmentTeamID);
+    DECLARE_ID (iosAppGroupsId);
+    DECLARE_ID (iosAppExtensionDuplicateResourcesFolder);
     DECLARE_ID (buildToolsVersion);
     DECLARE_ID (gradleVersion);
     const Identifier androidPluginVersion ("gradleWrapperVersion"); // old name is very confusing, but we need to remain backward compatible

@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 10
-    buildToolsVersion "25.0.2"
+    buildToolsVersion "26.0.0"
     externalNativeBuild {
         cmake {
             path "CMakeLists.txt"
@@ -19,14 +19,14 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.yourcompany.jucedemo"
+        applicationId "com.roli.jucedemo"
         minSdkVersion    10
         targetSdkVersion 10
         externalNativeBuild {
             cmake {
                 arguments "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-10", "-DANDROID_STL=c++_static", "-DANDROID_CPP_FEATURES=exceptions rtti", "-DANDROID_ARM_MODE=arm", "-DANDROID_ARM_NEON=TRUE"
-                cFlags "-fsigned-char"
-                cppFlags "-fsigned-char", "-std=gnu++11"
+                cFlags "-fsigned-char", "-pedantic", "-Wall", "-Wshadow", "-Wno-missing-field-initializers", "-Wshadow", "-Wshorten-64-to-32", "-Wstrict-aliasing", "-Wuninitialized", "-Wunused-parameter", "-Wconversion", "-Wsign-compare", "-Wint-conversion", "-Woverloaded-virtual", "-Wreorder", "-Wconstant-conversion", "-Wsign-conversion", "-Wextra-semi"
+                cppFlags "-fsigned-char", "-std=c++11", "-pedantic", "-Wall", "-Wshadow", "-Wno-missing-field-initializers", "-Wshadow", "-Wshorten-64-to-32", "-Wstrict-aliasing", "-Wuninitialized", "-Wunused-parameter", "-Wconversion", "-Wsign-compare", "-Wint-conversion", "-Woverloaded-virtual", "-Wreorder", "-Wconstant-conversion", "-Wsign-conversion", "-Wextra-semi"
             }
         }
     }
@@ -52,18 +52,14 @@ android {
             }
             externalNativeBuild {
                 cmake {
-                    arguments "-DJUCE_BUILD_CONFIGFURATION=DEBUG"
-                    cFlags    "-O0"
-                    cppFlags  "-O0"
+                    arguments "-DJUCE_BUILD_CONFIGFURATION=DEBUG", "-DCMAKE_CXX_FLAGS_DEBUG=-O0", "-DCMAKE_C_FLAGS_DEBUG=-O0"
                 }
             }
        }
         release_ {
             externalNativeBuild {
                 cmake {
-                    arguments "-DJUCE_BUILD_CONFIGFURATION=RELEASE"
-                    cFlags    "-O3"
-                    cppFlags  "-O3"
+                    arguments "-DJUCE_BUILD_CONFIGFURATION=RELEASE", "-DCMAKE_CXX_FLAGS_RELEASE=-O3", "-DCMAKE_C_FLAGS_RELEASE=-O3"
                 }
             }
        }
@@ -81,4 +77,11 @@ android {
         }
     }
 
+repositories {
 }
+
+dependencies {
+}
+
+}
+

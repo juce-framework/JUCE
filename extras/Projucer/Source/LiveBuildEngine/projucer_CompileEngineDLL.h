@@ -2,30 +2,31 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
 #include "projucer_LiveCodeBuilderDLL.h"
 
-
-struct CompileEngineDLL
+struct CompileEngineDLL : DeletedAtShutdown
 {
     CompileEngineDLL()
     {
@@ -37,20 +38,26 @@ struct CompileEngineDLL
         shutdown();
     }
 
-    void tryLoadDll()
+    bool tryLoadDll()
     {
         // never load the dynamic lib multiple times
         if (! isLoaded())
         {
-            File f = findDLLFile();
+            auto f = findDLLFile();
 
             if (f != File() && dll.open (f.getLinkedTarget().getFullPathName()))
             {
                #define INIT_LIVE_DLL_FN(name, returnType, params)    name = (name##_type) dll.getFunction (#name);
                 LIVE_DLL_FUNCTIONS (INIT_LIVE_DLL_FN);
                #undef INIT_LIVE_DLL_FN
+
+                return true;
             }
+
+            return false;
         }
+
+        return true;
     }
 
     void initialise (CrashCallbackFunction crashFn, QuitCallbackFunction quitFn, bool setupSignals)
@@ -78,7 +85,7 @@ struct CompileEngineDLL
         typedef returnType (*name##_type) params; \
         name##_type name = nullptr;
 
-    LIVE_DLL_FUNCTIONS (DECLARE_LIVE_DLL_FN);
+    LIVE_DLL_FUNCTIONS (DECLARE_LIVE_DLL_FN)
 
     #undef DECLARE_LIVE_DLL_FN
 
@@ -98,25 +105,27 @@ struct CompileEngineDLL
 
     static File getVersionedUserAppSupportFolder()
     {
-        File userAppData (File::getSpecialLocation (File::userApplicationDataDirectory));
+        auto userAppData = File::getSpecialLocation (File::userApplicationDataDirectory);
 
        #if JUCE_MAC
         userAppData = userAppData.getChildFile ("Application Support");
        #endif
 
-        return userAppData.getChildFile (String ("Projucer-") + ProjectInfo::versionString);
+        return userAppData.getChildFile ("Projucer").getChildFile (String ("CompileEngine-") + ProjectInfo::versionString);
     }
+
+    juce_DeclareSingleton (CompileEngineDLL, false)
 
 private:
     DynamicLibrary dll;
 
-    enum { requiredVersion = 1 };
+    enum { requiredVersion = 2 };
 
     static File findDLLFile()
     {
-        File dllFile;
+        auto dllFile = File();
 
-        if (tryFindDLLFileInAppFolder(dllFile))
+        if (tryFindDLLFileInAppFolder (dllFile))
             return dllFile;
 
        #if JUCE_MAC
@@ -124,10 +133,10 @@ private:
             return dllFile;
        #endif
 
-        if (tryFindDLLFileInAppConfigFolder(dllFile))
+        if (tryFindDLLFileInAppConfigFolder (dllFile))
             return dllFile;
 
-        return File();
+        return {};
     }
 
    #if JUCE_MAC
@@ -140,19 +149,19 @@ private:
 
     static bool tryFindDLLFileInAppFolder(File &outFile)
     {
-        File currentAppFile (File::getSpecialLocation (File::currentApplicationFile));
+        auto currentAppFile = File::getSpecialLocation (File::currentApplicationFile);
         return tryFindDLLFileInFolder (currentAppFile.getParentDirectory(), outFile);
     }
 
     static bool tryFindDLLFileInAppConfigFolder(File &outFile)
     {
-        File userAppDataFolder (getVersionedUserAppSupportFolder());
+        auto userAppDataFolder = getVersionedUserAppSupportFolder();
         return tryFindDLLFileInFolder (userAppDataFolder, outFile);
     }
 
     static bool tryFindDLLFileInFolder(File folder, File& outFile)
     {
-        File file = folder.getChildFile (getDLLName());
+        auto file = folder.getChildFile (getDLLName());
         if (isDLLFile (file))
         {
             outFile = file;
@@ -169,7 +178,8 @@ private:
 
     static void setPropertyCallback (const char* key, const char* value)
     {
-        if (String (key).isNotEmpty())
+        auto keyStr = String (key);
+        if (keyStr.isNotEmpty())
             getGlobalProperties().setValue (key, value);
         else
             jassertfalse;
@@ -182,4 +192,7 @@ private:
         value[0] = 0;
         getGlobalProperties().getValue (key).copyToUTF8 (value, size);
     }
+
+    static void crashCallback (const char*) {}
+    static void quitCallback() {}
 };

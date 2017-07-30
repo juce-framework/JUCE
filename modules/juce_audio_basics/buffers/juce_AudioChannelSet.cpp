@@ -2,33 +2,30 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
 AudioChannelSet::AudioChannelSet (uint32 c) : channels (c) {}
+AudioChannelSet::AudioChannelSet (const Array<ChannelType>& c)
+{
+    for (auto channel : c)
+        addChannel (channel);
+}
 
 bool AudioChannelSet::operator== (const AudioChannelSet& other) const noexcept  { return channels == other.channels; }
 bool AudioChannelSet::operator!= (const AudioChannelSet& other) const noexcept  { return channels != other.channels; }
@@ -37,7 +34,7 @@ bool AudioChannelSet::operator<  (const AudioChannelSet& other) const noexcept  
 String AudioChannelSet::getChannelTypeName (AudioChannelSet::ChannelType type)
 {
     if (type >= discreteChannel0)
-        return String ("Discrete ") + String (type - discreteChannel0 + 1);
+        return "Discrete " + String (type - discreteChannel0 + 1);
 
     switch (type)
     {
@@ -62,8 +59,8 @@ String AudioChannelSet::getChannelTypeName (AudioChannelSet::ChannelType type)
         case wideLeft:            return NEEDS_TRANS("Wide Left");
         case wideRight:           return NEEDS_TRANS("Wide Right");
         case LFE2:                return NEEDS_TRANS("LFE 2");
-        case leftSurroundSide:    return NEEDS_TRANS ("Left Surround Side");
-        case rightSurroundSide:   return NEEDS_TRANS ("Right Surround Side");
+        case leftSurroundSide:    return NEEDS_TRANS("Left Surround Side");
+        case rightSurroundSide:   return NEEDS_TRANS("Right Surround Side");
         case ambisonicW:          return NEEDS_TRANS("Ambisonic W");
         case ambisonicX:          return NEEDS_TRANS("Ambisonic X");
         case ambisonicY:          return NEEDS_TRANS("Ambisonic Y");
@@ -111,7 +108,7 @@ String AudioChannelSet::getAbbreviatedChannelTypeName (AudioChannelSet::ChannelT
         default:                  break;
     }
 
-    return "";
+    return {};
 }
 
 AudioChannelSet::ChannelType AudioChannelSet::getChannelTypeFromAbbreviation (const String& abbr)
@@ -120,33 +117,33 @@ AudioChannelSet::ChannelType AudioChannelSet::getChannelTypeFromAbbreviation (co
         return static_cast<AudioChannelSet::ChannelType> (static_cast<int> (discreteChannel0)
                                                                + abbr.getIntValue() + 1);
 
-    if      (abbr == "L")    return left;
-    else if (abbr == "R")    return right;
-    else if (abbr == "C")    return centre;
-    else if (abbr == "Lfe")  return LFE;
-    else if (abbr == "Ls")   return leftSurround;
-    else if (abbr == "Rs")   return rightSurround;
-    else if (abbr == "Lc")   return leftCentre;
-    else if (abbr == "Rc")   return rightCentre;
-    else if (abbr == "Cs")   return centreSurround;
-    else if (abbr == "Lrs")  return leftSurroundRear;
-    else if (abbr == "Rrs")  return rightSurroundRear;
-    else if (abbr == "Tm")   return topMiddle;
-    else if (abbr == "Tfl")  return topFrontLeft;
-    else if (abbr == "Tfc")  return topFrontCentre;
-    else if (abbr == "Tfr")  return topFrontRight;
-    else if (abbr == "Trl")  return topRearLeft;
-    else if (abbr == "Trc")  return topRearCentre;
-    else if (abbr == "Trr")  return topRearRight;
-    else if (abbr == "Wl")   return wideLeft;
-    else if (abbr == "Wr")   return wideRight;
-    else if (abbr == "Lfe2") return LFE2;
-    else if (abbr == "Lss")  return leftSurroundSide;
-    else if (abbr == "Rss")  return rightSurroundSide;
-    else if (abbr == "W")    return ambisonicW;
-    else if (abbr == "X")    return ambisonicX;
-    else if (abbr == "Y")    return ambisonicY;
-    else if (abbr == "Z")    return ambisonicZ;
+    if (abbr == "L")    return left;
+    if (abbr == "R")    return right;
+    if (abbr == "C")    return centre;
+    if (abbr == "Lfe")  return LFE;
+    if (abbr == "Ls")   return leftSurround;
+    if (abbr == "Rs")   return rightSurround;
+    if (abbr == "Lc")   return leftCentre;
+    if (abbr == "Rc")   return rightCentre;
+    if (abbr == "Cs")   return centreSurround;
+    if (abbr == "Lrs")  return leftSurroundRear;
+    if (abbr == "Rrs")  return rightSurroundRear;
+    if (abbr == "Tm")   return topMiddle;
+    if (abbr == "Tfl")  return topFrontLeft;
+    if (abbr == "Tfc")  return topFrontCentre;
+    if (abbr == "Tfr")  return topFrontRight;
+    if (abbr == "Trl")  return topRearLeft;
+    if (abbr == "Trc")  return topRearCentre;
+    if (abbr == "Trr")  return topRearRight;
+    if (abbr == "Wl")   return wideLeft;
+    if (abbr == "Wr")   return wideRight;
+    if (abbr == "Lfe2") return LFE2;
+    if (abbr == "Lss")  return leftSurroundSide;
+    if (abbr == "Rss")  return rightSurroundSide;
+    if (abbr == "W")    return ambisonicW;
+    if (abbr == "X")    return ambisonicX;
+    if (abbr == "Y")    return ambisonicY;
+    if (abbr == "Z")    return ambisonicZ;
 
     return unknown;
 }
@@ -154,11 +151,10 @@ AudioChannelSet::ChannelType AudioChannelSet::getChannelTypeFromAbbreviation (co
 String AudioChannelSet::getSpeakerArrangementAsString() const
 {
     StringArray speakerTypes;
-    Array<AudioChannelSet::ChannelType> speakers = getChannelTypes();
 
-    for (int i = 0; i < speakers.size(); ++i)
+    for (auto& speaker : getChannelTypes())
     {
-        String name = getAbbreviatedChannelTypeName (speakers.getReference (i));
+        auto name = getAbbreviatedChannelTypeName (speaker);
 
         if (name.isNotEmpty())
             speakerTypes.add (name);
@@ -169,12 +165,11 @@ String AudioChannelSet::getSpeakerArrangementAsString() const
 
 AudioChannelSet AudioChannelSet::fromAbbreviatedString (const String& str)
 {
-    StringArray abbr = StringArray::fromTokens(str, true);
     AudioChannelSet set;
 
-    for (int i = 0; i < abbr.size(); ++i)
+    for (auto& abbr : StringArray::fromTokens (str, true))
     {
-        AudioChannelSet::ChannelType type = getChannelTypeFromAbbreviation (abbr[i]);
+        auto type = getChannelTypeFromAbbreviation (abbr);
 
         if (type != unknown)
             set.addChannel (type);
@@ -185,7 +180,7 @@ AudioChannelSet AudioChannelSet::fromAbbreviatedString (const String& str)
 
 String AudioChannelSet::getDescription() const
 {
-    if (isDiscreteLayout())            return String ("Discrete #") + String (size());
+    if (isDiscreteLayout())            return "Discrete #" + String (size());
     if (*this == disabled())           return "Disabled";
     if (*this == mono())               return "Mono";
     if (*this == stereo())             return "Stereo";
@@ -211,19 +206,16 @@ String AudioChannelSet::getDescription() const
     if (*this == octagonal())          return "Octagonal";
     if (*this == ambisonic())          return "Ambisonic";
 
-
-
     return "Unknown";
 }
 
 bool AudioChannelSet::isDiscreteLayout() const noexcept
 {
-    Array<AudioChannelSet::ChannelType> speakers = getChannelTypes();
-    for (int i = 0; i < speakers.size(); ++i)
-        if (speakers.getReference (i) > ambisonicZ)
-            return true;
+    for (auto& speaker : getChannelTypes())
+        if (speaker <= ambisonicZ)
+            return false;
 
-    return false;
+    return true;
 }
 
 int AudioChannelSet::size() const noexcept
@@ -244,6 +236,7 @@ AudioChannelSet::ChannelType AudioChannelSet::getTypeOfChannel (int index) const
 int AudioChannelSet::getChannelIndexForType (AudioChannelSet::ChannelType type) const noexcept
 {
     int idx = 0;
+
     for (int bit = channels.findNextSetBit (0); bit >= 0; bit = channels.findNextSetBit (bit + 1))
     {
         if (static_cast<ChannelType> (bit) == type)
@@ -279,27 +272,27 @@ void AudioChannelSet::removeChannel (ChannelType newChannel)
     channels.clearBit (bit);
 }
 
-AudioChannelSet AudioChannelSet::disabled()           { return AudioChannelSet(); }
+AudioChannelSet AudioChannelSet::disabled()           { return {}; }
 AudioChannelSet AudioChannelSet::mono()               { return AudioChannelSet (1u << centre); }
 AudioChannelSet AudioChannelSet::stereo()             { return AudioChannelSet ((1u << left) | (1u << right)); }
 AudioChannelSet AudioChannelSet::createLCR()          { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre)); }
 AudioChannelSet AudioChannelSet::createLRS()          { return AudioChannelSet ((1u << left) | (1u << right) | (1u << surround)); }
 AudioChannelSet AudioChannelSet::createLCRS()         { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << surround)); }
 AudioChannelSet AudioChannelSet::create5point0()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << leftSurround) | (1u << rightSurround)); }
-AudioChannelSet AudioChannelSet::create5point1()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << leftSurround) | (1u << rightSurround) | (1u << LFE)); }
+AudioChannelSet AudioChannelSet::create5point1()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << LFE) | (1u << leftSurround) | (1u << rightSurround)); }
 AudioChannelSet AudioChannelSet::create6point0()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << leftSurround) | (1u << rightSurround) | (1u << centreSurround)); }
-AudioChannelSet AudioChannelSet::create6point1()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << leftSurround) | (1u << rightSurround) | (1u << centreSurround) | (1u << LFE)); }
+AudioChannelSet AudioChannelSet::create6point1()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << LFE) | (1u << leftSurround) | (1u << rightSurround) | (1u << centreSurround)); }
 AudioChannelSet AudioChannelSet::create6point0Music() { return AudioChannelSet ((1u << left) | (1u << right) | (1u << leftSurround) | (1u << rightSurround) | (1u << leftSurroundSide) | (1u << rightSurroundSide)); }
-AudioChannelSet AudioChannelSet::create6point1Music() { return AudioChannelSet ((1u << left) | (1u << right) | (1u << leftSurround) | (1u << rightSurround) | (1u << leftSurroundSide) | (1u << rightSurroundSide) | (1u << LFE)); }
+AudioChannelSet AudioChannelSet::create6point1Music() { return AudioChannelSet ((1u << left) | (1u << right) | (1u << LFE) | (1u << leftSurround) | (1u << rightSurround) | (1u << leftSurroundSide) | (1u << rightSurroundSide)); }
 AudioChannelSet AudioChannelSet::create7point0()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << leftSurroundSide) | (1u << rightSurroundSide) | (1u << leftSurroundRear) | (1u << rightSurroundRear)); }
 AudioChannelSet AudioChannelSet::create7point0SDDS()  { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << leftSurround) | (1u << rightSurround) | (1u << leftCentre) | (1u << rightCentre)); }
-AudioChannelSet AudioChannelSet::create7point1()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << leftSurroundSide) | (1u << rightSurroundSide) | (1u << leftSurroundRear) | (1u << rightSurroundRear) | (1u << LFE)); }
-AudioChannelSet AudioChannelSet::create7point1SDDS()  { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << leftSurround) | (1u << rightSurround) | (1u << leftCentre) | (1u << rightCentre) | (1u << LFE)); }
+AudioChannelSet AudioChannelSet::create7point1()      { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << LFE) | (1u << leftSurroundSide) | (1u << rightSurroundSide) | (1u << leftSurroundRear) | (1u << rightSurroundRear)); }
+AudioChannelSet AudioChannelSet::create7point1SDDS()  { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << LFE) | (1u << leftSurround) | (1u << rightSurround) | (1u << leftCentre) | (1u << rightCentre)); }
 AudioChannelSet AudioChannelSet::ambisonic()          { return AudioChannelSet ((1u << ambisonicW) | (1u << ambisonicX) | (1u << ambisonicY) | (1u << ambisonicZ)); }
 AudioChannelSet AudioChannelSet::quadraphonic()       { return AudioChannelSet ((1u << left) | (1u << right) | (1u << leftSurround) | (1u << rightSurround)); }
 AudioChannelSet AudioChannelSet::pentagonal()         { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << leftSurroundRear) | (1u << rightSurroundRear)); }
-AudioChannelSet AudioChannelSet::hexagonal()          { return AudioChannelSet ((1u << left) | (1u << right) | (1u << leftSurroundRear) | (1u << rightSurroundRear) |  (1u << centre) | (1u << centreSurround)); }
-AudioChannelSet AudioChannelSet::octagonal()          { return AudioChannelSet ((1u << left) | (1u << right) | (1u << leftSurround) | (1u << rightSurround) | (1u << centre) | (1u << centreSurround) | (1u << wideLeft) | (1u << wideRight)); }
+AudioChannelSet AudioChannelSet::hexagonal()          { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << centreSurround) | (1u << leftSurroundRear) | (1u << rightSurroundRear)); }
+AudioChannelSet AudioChannelSet::octagonal()          { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << leftSurround) | (1u << rightSurround) | (1u << centreSurround) | (1u << wideLeft) | (1u << wideRight)); }
 
 
 AudioChannelSet AudioChannelSet::discreteChannels (int numChannels)
@@ -311,30 +304,30 @@ AudioChannelSet AudioChannelSet::discreteChannels (int numChannels)
 
 AudioChannelSet AudioChannelSet::canonicalChannelSet (int numChannels)
 {
-    if (numChannels == 1) return AudioChannelSet::mono();
-    if (numChannels == 2) return AudioChannelSet::stereo();
-    if (numChannels == 3) return AudioChannelSet::createLCR();
-    if (numChannels == 4) return AudioChannelSet::quadraphonic();
-    if (numChannels == 5) return AudioChannelSet::create5point0();
-    if (numChannels == 6) return AudioChannelSet::create5point1();
-    if (numChannels == 7) return AudioChannelSet::create7point0();
-    if (numChannels == 8) return AudioChannelSet::create7point1();
+    if (numChannels == 1)  return AudioChannelSet::mono();
+    if (numChannels == 2)  return AudioChannelSet::stereo();
+    if (numChannels == 3)  return AudioChannelSet::createLCR();
+    if (numChannels == 4)  return AudioChannelSet::quadraphonic();
+    if (numChannels == 5)  return AudioChannelSet::create5point0();
+    if (numChannels == 6)  return AudioChannelSet::create5point1();
+    if (numChannels == 7)  return AudioChannelSet::create7point0();
+    if (numChannels == 8)  return AudioChannelSet::create7point1();
 
     return discreteChannels (numChannels);
 }
 
 AudioChannelSet AudioChannelSet::namedChannelSet (int numChannels)
 {
-    if (numChannels == 1) return AudioChannelSet::mono();
-    if (numChannels == 2) return AudioChannelSet::stereo();
-    if (numChannels == 3) return AudioChannelSet::createLCR();
-    if (numChannels == 4) return AudioChannelSet::quadraphonic();
-    if (numChannels == 5) return AudioChannelSet::create5point0();
-    if (numChannels == 6) return AudioChannelSet::create5point1();
-    if (numChannels == 7) return AudioChannelSet::create7point0();
-    if (numChannels == 8) return AudioChannelSet::create7point1();
+    if (numChannels == 1)  return AudioChannelSet::mono();
+    if (numChannels == 2)  return AudioChannelSet::stereo();
+    if (numChannels == 3)  return AudioChannelSet::createLCR();
+    if (numChannels == 4)  return AudioChannelSet::quadraphonic();
+    if (numChannels == 5)  return AudioChannelSet::create5point0();
+    if (numChannels == 6)  return AudioChannelSet::create5point1();
+    if (numChannels == 7)  return AudioChannelSet::create7point0();
+    if (numChannels == 8)  return AudioChannelSet::create7point1();
 
-    return AudioChannelSet();
+    return {};
 }
 
 Array<AudioChannelSet> AudioChannelSet::channelSetsWithNumberOfChannels (int numChannels)
@@ -392,4 +385,32 @@ Array<AudioChannelSet> AudioChannelSet::channelSetsWithNumberOfChannels (int num
     }
 
     return retval;
+}
+
+AudioChannelSet JUCE_CALLTYPE AudioChannelSet::channelSetWithChannels (const Array<ChannelType>& channelArray)
+{
+    AudioChannelSet set;
+
+    for (auto ch : channelArray)
+    {
+        jassert (! set.channels[static_cast<int> (ch)]);
+
+        set.addChannel (ch);
+    }
+
+    return set;
+}
+
+//==============================================================================
+AudioChannelSet JUCE_CALLTYPE AudioChannelSet::fromWaveChannelMask (int32 dwChannelMask)
+{
+    return AudioChannelSet (static_cast<uint32> ((dwChannelMask & ((1 << 18) - 1)) << 1));
+}
+
+int32 AudioChannelSet::getWaveChannelMask() const noexcept
+{
+    if (channels.getHighestBit() > topRearRight)
+        return -1;
+
+    return (channels.toInteger() >> 1);
 }

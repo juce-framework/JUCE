@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -34,7 +36,7 @@ class JUCE_API  RelativeCoordinatePositionerBase  : public Component::Positioner
                                                     public MarkerList::Listener
 {
 public:
-    RelativeCoordinatePositionerBase (Component& component);
+    RelativeCoordinatePositionerBase (Component&);
     ~RelativeCoordinatePositionerBase();
 
     void componentMovedOrResized (Component&, bool, bool);
@@ -42,31 +44,31 @@ public:
     void componentChildrenChanged (Component&);
     void componentBeingDeleted (Component&);
     void markersChanged (MarkerList*);
-    void markerListBeingDeleted (MarkerList* markerList);
+    void markerListBeingDeleted (MarkerList*);
 
     void apply();
 
-    bool addCoordinate (const RelativeCoordinate& coord);
-    bool addPoint (const RelativePoint& point);
+    bool addCoordinate (const RelativeCoordinate&);
+    bool addPoint (const RelativePoint&);
 
     //==============================================================================
     /** Used for resolving a RelativeCoordinate expression in the context of a component. */
     class ComponentScope  : public Expression::Scope
     {
     public:
-        ComponentScope (Component& component);
+        ComponentScope (Component&);
+
+        // Suppress a VS2013 compiler warning
+        ComponentScope& operator= (const ComponentScope&) = delete;
 
         Expression getSymbolValue (const String& symbol) const;
-        void visitRelativeScope (const String& scopeName, Visitor& visitor) const;
+        void visitRelativeScope (const String& scopeName, Visitor&) const;
         String getScopeUID() const;
 
     protected:
         Component& component;
 
         Component* findSiblingComponent (const String& componentID) const;
-
-    private:
-        JUCE_DECLARE_NON_COPYABLE (ComponentScope)
     };
 
 protected:
@@ -76,12 +78,12 @@ protected:
 private:
     class DependencyFinderScope;
     friend class DependencyFinderScope;
-    Array <Component*> sourceComponents;
-    Array <MarkerList*> sourceMarkerLists;
+    Array<Component*> sourceComponents;
+    Array<MarkerList*> sourceMarkerLists;
     bool registeredOk;
 
-    void registerComponentListener (Component& comp);
-    void registerMarkerListListener (MarkerList* const list);
+    void registerComponentListener (Component&);
+    void registerMarkerListListener (MarkerList*);
     void unregisterListeners();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RelativeCoordinatePositionerBase)

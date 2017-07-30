@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -26,7 +28,7 @@
 
 #include "../Project/jucer_Project.h"
 #include "../Project/jucer_ProjectType.h"
-#include "../Application/jucer_GlobalPreferences.h"
+#include "../Project/jucer_DependencyPathPropertyComponent.h"
 
 class ProjectSaver;
 
@@ -43,11 +45,23 @@ public:
         const void* iconData;
         int iconDataSize;
 
-        Image getIcon() const   { return ImageCache::getFromMemory (iconData, iconDataSize); }
+        Image getIcon() const
+        {
+            Image image (Image::ARGB, 200, 200, true);
+            Graphics g (image);
+
+            ScopedPointer<Drawable> svgDrawable = Drawable::createFromImageData (iconData, (size_t) iconDataSize);
+
+            svgDrawable->drawWithin (g, image.getBounds().toFloat(), RectanglePlacement::fillDestination, 1.0f);
+
+            return image;
+        }
     };
 
     static StringArray getExporterNames();
     static Array<ExporterTypeInfo> getExporterTypes();
+    static String getValueTreeNameForExporter (const String& exporterName);
+    static StringArray getAllDefaultBuildsFolders();
 
     static ProjectExporter* createNewExporter (Project&, const int index);
     static ProjectExporter* createNewExporter (Project&, const String& name);
@@ -102,7 +116,7 @@ public:
     bool mayCompileOnCurrentOS() const
     {
        #if JUCE_MAC
-        return isOSX() || isAndroid();
+        return isOSX() || isAndroid() || isiOS();
        #elif JUCE_WINDOWS
         return isWindows() || isAndroid();
        #elif JUCE_LINUX
@@ -113,7 +127,7 @@ public:
     }
 
     //==============================================================================
-    String getName() const                      { return name; }
+    String getName() const;
     File getTargetFolder() const;
 
     Project& getProject() noexcept              { return project; }
@@ -140,11 +154,16 @@ public:
     Value getRTASPathValue() const              { return rtasPath; }
     Value getAAXPathValue() const               { return aaxPath; }
 
+    Value getShouldUseGNUExtensionsValue()      { return getSetting (Ids::enableGNUExtensions); }
+    bool shouldUseGNUExtensions() const         { return (getSettingString (Ids::enableGNUExtensions) == "1");}
+
     // NB: this is the path to the parent "modules" folder that contains the named module, not the
     // module folder itself.
     Value getPathForModuleValue (const String& moduleID);
     String getPathForModuleString (const String& moduleID) const;
     void removePathForModule (const String& moduleID);
+
+    TargetOS::OS getTargetOSForExporter() const;
 
     RelativePath getLegacyModulePath (const String& moduleID) const;
     String getLegacyModulePath() const;
@@ -199,8 +218,11 @@ public:
 
     //==============================================================================
     StringPairArray msvcExtraPreprocessorDefs;
-    String msvcDelayLoadedDLLs, msvcModuleDefinitionsFile;
+    String msvcDelayLoadedDLLs;
     StringArray mingwLibs, windowsLibs;
+
+    //==============================================================================
+    StringArray androidLibs;
 
     //==============================================================================
     StringArray extraSearchPaths;
@@ -218,7 +240,7 @@ public:
         //==============================================================================
         virtual void createConfigProperties (PropertyListBuilder&) = 0;
         virtual var getDefaultOptimisationLevel() const = 0;
-        virtual String getLibrarySubdirPath() const         { return String(); }
+        virtual String getModuleLibraryArchName() const = 0;
 
 
         //==============================================================================

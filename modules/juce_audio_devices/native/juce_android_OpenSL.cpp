@@ -2,28 +2,20 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -78,7 +70,7 @@ class SlObjectRef
 {
 public:
     //==============================================================================
-    SlObjectRef () noexcept {}
+    SlObjectRef() noexcept {}
     SlObjectRef (const SlObjectRef&  obj) noexcept : cb (obj.cb) {}
     SlObjectRef (SlObjectRef&& obj) noexcept : cb (static_cast<ReferenceCountedObjectPtr<ControlBlock>&&> (obj.cb)) { obj.cb = nullptr; }
     explicit SlObjectRef (SLObjectItf o) : cb (new ControlBlock (o)) {}
@@ -108,7 +100,7 @@ class SlRef : public SlObjectRef
 {
 public:
     //==============================================================================
-    SlRef () noexcept : type (nullptr) {}
+    SlRef() noexcept : type (nullptr) {}
     SlRef (SlRef& r)  noexcept : SlObjectRef (r), type (r.type) {}
     SlRef (SlRef&& r) noexcept : SlObjectRef (static_cast<SlRef&&> (r)), type (r.type) { r.type = nullptr; }
 
@@ -163,6 +155,8 @@ template <typename T> struct BufferHelpers {};
 template <>
 struct BufferHelpers<int16>
 {
+    enum { isFloatingPoint = 0 };
+
     static void initPCMDataFormat (PCMDataFormatEx& dataFormat, int numChannels, double sampleRate)
     {
         dataFormat.formatType     = SL_DATAFORMAT_PCM;
@@ -210,6 +204,8 @@ struct BufferHelpers<int16>
 template <>
 struct BufferHelpers<float>
 {
+    enum { isFloatingPoint = 1 };
+
     static void initPCMDataFormat (PCMDataFormatEx& dataFormat, int numChannels, double sampleRate)
     {
         dataFormat.formatType     = SL_ANDROID_DATAFORMAT_PCM_EX;
@@ -269,6 +265,8 @@ struct BufferHelpers<float>
     }
 };
 
+class SLRealtimeThread;
+
 //==============================================================================
 class OpenSLAudioIODevice  : public AudioIODevice
 {
@@ -315,7 +313,7 @@ public:
             (*queue)->Clear (queue);
         }
 
-        void enqueueBuffer ()
+        void enqueueBuffer()
         {
             (*queue)->Enqueue (queue, getCurrentBuffer(), static_cast<SLuint32> (getBufferSizeInSamples() * sizeof (T)));
             ++numBlocksOut;
@@ -328,6 +326,8 @@ public:
 
         void finished (SLAndroidSimpleBufferQueueItf)
         {
+            attachAndroidJNI();
+
             --numBlocksOut;
             owner.doSomeWorkOnAudioThread();
         }
@@ -518,6 +518,7 @@ public:
         virtual void start()             { stop(); jassert (callback.get() != nullptr); running = true; }
         virtual void stop()              { running = false; }
         virtual bool setAudioPreprocessingEnabled (bool shouldEnable) = 0;
+        virtual bool supportsFloatingPoint() const noexcept = 0;
 
         void setCallback (AudioIODeviceCallback* callbackToUse)
         {
@@ -537,7 +538,7 @@ public:
                 if (old == callbackToUse)
                     break;
 
-                if (callback.compareAndSetValue (callbackToUse, old) == old)
+                if (callback.compareAndSetBool (callbackToUse, old))
                     break;
 
                 Thread::sleep (1);
@@ -561,8 +562,7 @@ public:
         static OpenSLSession* create (DynamicLibrary& slLibrary,
                                       int numInputChannels, int numOutputChannels,
                                       double samleRateToUse, int bufferSizeToUse,
-                                      int numBuffersToUse,
-                                      bool floatingPointSupport);
+                                      int numBuffersToUse);
 
         //==============================================================================
         typedef SLresult (*CreateEngineFunc)(SLObjectItf*,SLuint32,const SLEngineOption*,SLuint32,const SLInterfaceID*,const SLboolean*);
@@ -671,6 +671,8 @@ public:
             return true;
         }
 
+        bool supportsFloatingPoint() const noexcept override          { return (BufferHelpers<T>::isFloatingPoint != 0); }
+
         void doSomeWorkOnAudioThread()
         {
             // only the player or the recorder should enter this section at any time
@@ -724,6 +726,7 @@ public:
     //==============================================================================
     OpenSLAudioIODevice (const String& deviceName)
         : AudioIODevice (deviceName, openSLTypeName),
+          actualBufferSize (0), sampleRate (0),
           audioProcessingEnabled (true),
           callback (nullptr)
     {
@@ -740,8 +743,6 @@ public:
         const int64 totalLatency = inputLatency + outputLatency;
         inputLatency  = (int) ((longestLatency * inputLatency)  / totalLatency) & ~15;
         outputLatency = (int) ((longestLatency * outputLatency) / totalLatency) & ~15;
-
-        supportsFloatingPoint = getSupportsFloatingPoint();
 
         bool success = slLibrary.open ("libOpenSLES.so");
 
@@ -827,15 +828,6 @@ public:
         const int audioBuffersToEnqueue = hasLowLatencyAudioPath() ? buffersToEnqueueForLowLatency
                                                                    : buffersToEnqueueSlowAudio;
 
-        DBG ("OpenSL: numInputChannels = " << numInputChannels
-              << ", numOutputChannels = " << numOutputChannels
-              << ", nativeBufferSize = " << getNativeBufferSize()
-              << ", nativeSampleRate = " << getNativeSampleRate()
-              << ", actualBufferSize = " << actualBufferSize
-              << ", audioBuffersToEnqueue = " << audioBuffersToEnqueue
-              << ", sampleRate = " << sampleRate
-              << ", supportsFloatingPoint = " << (supportsFloatingPoint ? "true" : "false"));
-
         if (numInputChannels > 0 && (! RuntimePermissions::isGranted (RuntimePermissions::recordAudio)))
         {
             // If you hit this assert, you probably forgot to get RuntimePermissions::recordAudio
@@ -845,8 +837,7 @@ public:
         }
 
         session = OpenSLSession::create (slLibrary, numInputChannels, numOutputChannels,
-                                         sampleRate, actualBufferSize, audioBuffersToEnqueue,
-                                         supportsFloatingPoint);
+                                         sampleRate, actualBufferSize, audioBuffersToEnqueue);
         if (session != nullptr)
             session->setAudioPreprocessingEnabled (audioProcessingEnabled);
         else
@@ -858,10 +849,18 @@ public:
                 numInputChannels = 0;
 
                 session = OpenSLSession::create(slLibrary, numInputChannels, numOutputChannels,
-                                                sampleRate, actualBufferSize, audioBuffersToEnqueue,
-                                                supportsFloatingPoint);
+                                                sampleRate, actualBufferSize, audioBuffersToEnqueue);
             }
         }
+
+        DBG ("OpenSL: numInputChannels = " << numInputChannels
+             << ", numOutputChannels = " << numOutputChannels
+             << ", nativeBufferSize = " << getNativeBufferSize()
+             << ", nativeSampleRate = " << getNativeSampleRate()
+             << ", actualBufferSize = " << actualBufferSize
+             << ", audioBuffersToEnqueue = " << audioBuffersToEnqueue
+             << ", sampleRate = " << sampleRate
+             << ", supportsFloatingPoint = " << (session != nullptr && session->supportsFloatingPoint() ? "true" : "false"));
 
         if (session == nullptr)
             lastError = "Unknown error initializing opensl session";
@@ -881,7 +880,7 @@ public:
     int getInputLatencyInSamples() override             { return inputLatency; }
     bool isOpen() override                              { return deviceOpen; }
     int getCurrentBufferSizeSamples() override          { return actualBufferSize; }
-    int getCurrentBitDepth() override                   { return supportsFloatingPoint ? 32 : 16; }
+    int getCurrentBitDepth() override                   { return (session != nullptr && session->supportsFloatingPoint() ? 32 : 16); }
     BigInteger getActiveOutputChannels() const override { return activeOutputChans; }
     BigInteger getActiveInputChannels() const override  { return activeInputChans; }
     String getLastError() override                      { return lastError; }
@@ -957,10 +956,13 @@ public:
 
 private:
     //==============================================================================
+    friend class SLRealtimeThread;
+
+    //==============================================================================
     DynamicLibrary slLibrary;
     int actualBufferSize, sampleRate;
     int inputLatency, outputLatency;
-    bool deviceOpen, supportsFloatingPoint, audioProcessingEnabled;
+    bool deviceOpen, audioProcessingEnabled;
     String lastError;
     BigInteger activeOutputChans, activeInputChans;
     AudioIODeviceCallback* callback;
@@ -971,8 +973,8 @@ private:
     {
         // The number of buffers to enqueue needs to be at least two for the audio to use the low-latency
         // audio path (see "Performance" section in ndk/docs/Additional_library_docs/opensles/index.html)
-        buffersToEnqueueForLowLatency = 2,
-        buffersToEnqueueSlowAudio = 4,
+        buffersToEnqueueForLowLatency = 4,
+        buffersToEnqueueSlowAudio = 8,
         defaultBufferSizeIsMultipleOfNative = 1
     };
 
@@ -985,7 +987,7 @@ private:
         if (text.get() != 0)
             return juceString (text);
 
-        return String();
+        return {};
     }
 
     static bool androidHasSystemFeature (const String& property)
@@ -1015,31 +1017,36 @@ private:
         return androidHasSystemFeature ("android.hardware.audio.low_latency");
     }
 
-    static bool getSupportsFloatingPoint()
-    {
-        return (getEnv()->GetStaticIntField (AndroidBuildVersion, AndroidBuildVersion.SDK_INT) >= 21);
-    }
-
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenSLAudioIODevice)
 };
 
 OpenSLAudioIODevice::OpenSLSession* OpenSLAudioIODevice::OpenSLSession::create (DynamicLibrary& slLibrary,
                                                                                 int numInputChannels, int numOutputChannels,
                                                                                 double samleRateToUse, int bufferSizeToUse,
-                                                                                int numBuffersToUse,
-                                                                                bool floatingPointSupport)
+                                                                                int numBuffersToUse)
 {
     ScopedPointer<OpenSLSession> retval;
+    auto sdkVersion = getEnv()->GetStaticIntField (AndroidBuildVersion, AndroidBuildVersion.SDK_INT);
 
-    if (floatingPointSupport)
+    // SDK versions 21 and higher should natively support floating point...
+    if (sdkVersion >= 21)
+    {
         retval = new OpenSLSessionT<float> (slLibrary, numInputChannels, numOutputChannels, samleRateToUse,
                                             bufferSizeToUse, numBuffersToUse);
-    else
+
+        // ...however, some devices lie so re-try without floating point
+        if (retval != nullptr && (! retval->openedOK()))
+            retval = nullptr;
+    }
+
+    if (retval == nullptr)
+    {
         retval = new OpenSLSessionT<int16> (slLibrary, numInputChannels, numOutputChannels, samleRateToUse,
                                             bufferSizeToUse, numBuffersToUse);
 
-    if (retval != nullptr && (! retval->openedOK()))
-        retval = nullptr;
+        if (retval != nullptr && (! retval->openedOK()))
+            retval = nullptr;
+    }
 
     return retval.release();
 }
@@ -1091,4 +1098,183 @@ bool isOpenSLAvailable()  { return OpenSLAudioDeviceType::isOpenSLAvailable(); }
 AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_OpenSLES()
 {
     return isOpenSLAvailable() ? new OpenSLAudioDeviceType() : nullptr;
+}
+
+//==============================================================================
+class SLRealtimeThread
+{
+public:
+    static constexpr int numBuffers = 4;
+
+    SLRealtimeThread()
+    {
+        if (auto createEngine = (OpenSLAudioIODevice::OpenSLSession::CreateEngineFunc) slLibrary.getFunction ("slCreateEngine"))
+        {
+            SLObjectItf obj = nullptr;
+            auto err = createEngine (&obj, 0, nullptr, 0, nullptr, nullptr);
+
+            if (err != SL_RESULT_SUCCESS || obj == nullptr)
+                return;
+
+            if ((*obj)->Realize (obj, 0) != SL_RESULT_SUCCESS)
+            {
+                (*obj)->Destroy (obj);
+                return;
+            }
+
+            engine = SlRef<SLEngineItf_>::cast (SlObjectRef (obj));
+
+            if (engine == nullptr)
+            {
+                (*obj)->Destroy (obj);
+                return;
+            }
+
+            obj = nullptr;
+            err = (*engine)->CreateOutputMix (engine, &obj, 0, nullptr, nullptr);
+
+            if (err != SL_RESULT_SUCCESS || obj == nullptr || (*obj)->Realize (obj, 0) != SL_RESULT_SUCCESS)
+            {
+                (*obj)->Destroy (obj);
+                return;
+            }
+
+            outputMix = SlRef<SLOutputMixItf_>::cast (SlObjectRef (obj));
+
+            if (outputMix == nullptr)
+            {
+                (*obj)->Destroy (obj);
+                return;
+            }
+
+            SLDataLocator_AndroidSimpleBufferQueue queueLocator = {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, static_cast<SLuint32> (numBuffers)};
+            SLDataLocator_OutputMix outputMixLocator = {SL_DATALOCATOR_OUTPUTMIX, outputMix};
+
+            PCMDataFormatEx dataFormat;
+            BufferHelpers<int16>::initPCMDataFormat (dataFormat, 1, OpenSLAudioIODevice::getNativeSampleRate());
+
+            SLDataSource source = { &queueLocator, &dataFormat };
+            SLDataSink   sink   = { &outputMixLocator, nullptr };
+
+            SLInterfaceID queueInterfaces[] = { &IntfIID<SLAndroidSimpleBufferQueueItf_>::iid };
+            SLboolean trueFlag = SL_BOOLEAN_TRUE;
+
+            obj = nullptr;
+            err = (*engine)->CreateAudioPlayer (engine, &obj, &source, &sink, 1, queueInterfaces, &trueFlag);
+
+            if (err != SL_RESULT_SUCCESS || obj == nullptr)
+                return;
+
+            if ((*obj)->Realize (obj, 0) != SL_RESULT_SUCCESS)
+            {
+                (*obj)->Destroy (obj);
+                return;
+            }
+
+            player = SlRef<SLPlayItf_>::cast (SlObjectRef (obj));
+
+            if (player == nullptr)
+            {
+                (*obj)->Destroy (obj);
+                return;
+            }
+
+            queue = SlRef<SLAndroidSimpleBufferQueueItf_>::cast (player);
+            if (queue == nullptr)
+                return;
+
+            if ((*queue)->RegisterCallback (queue, staticFinished, this) != SL_RESULT_SUCCESS)
+            {
+                queue = nullptr;
+                return;
+            }
+
+            pthread_cond_init (&threadReady, nullptr);
+            pthread_mutex_init (&threadReadyMutex, nullptr);
+        }
+    }
+
+    bool isOK() const      { return queue != nullptr; }
+
+    pthread_t startThread (void* (*entry) (void*), void* userPtr)
+    {
+        memset (buffer.getData(), 0, static_cast<size_t> (sizeof (int16) * static_cast<size_t> (bufferSize * numBuffers)));
+
+        for (int i = 0; i < numBuffers; ++i)
+        {
+            int16* dst = buffer.getData() + (bufferSize * i);
+            (*queue)->Enqueue (queue, dst, static_cast<SLuint32> (static_cast<size_t> (bufferSize) * sizeof (int16)));
+        }
+
+        pthread_mutex_lock (&threadReadyMutex);
+
+        threadEntryProc = entry;
+        threadUserPtr  = userPtr;
+
+        (*player)->SetPlayState (player, SL_PLAYSTATE_PLAYING);
+
+        pthread_cond_wait (&threadReady, &threadReadyMutex);
+        pthread_mutex_unlock (&threadReadyMutex);
+
+        return threadID;
+    }
+
+    void finished()
+    {
+        if (threadEntryProc != nullptr)
+        {
+            pthread_mutex_lock (&threadReadyMutex);
+
+            threadID = pthread_self();
+
+            pthread_cond_signal (&threadReady);
+            pthread_mutex_unlock (&threadReadyMutex);
+
+            threadEntryProc (threadUserPtr);
+            threadEntryProc = nullptr;
+
+            (*player)->SetPlayState (player, SL_PLAYSTATE_STOPPED);
+            MessageManager::callAsync ([this] () { delete this; });
+        }
+    }
+
+private:
+    //=============================================================================
+    static void staticFinished (SLAndroidSimpleBufferQueueItf, void* context)
+    {
+        static_cast<SLRealtimeThread*> (context)->finished();
+    }
+
+    //=============================================================================
+    DynamicLibrary slLibrary { "libOpenSLES.so" };
+
+    SlRef<SLEngineItf_>    engine;
+    SlRef<SLOutputMixItf_> outputMix;
+    SlRef<SLPlayItf_>      player;
+    SlRef<SLAndroidSimpleBufferQueueItf_> queue;
+
+    int bufferSize = OpenSLAudioIODevice::getNativeBufferSize();
+    HeapBlock<int16> buffer { HeapBlock<int16> (static_cast<size_t> (1 * bufferSize * numBuffers)) };
+
+    void* (*threadEntryProc) (void*) = nullptr;
+    void* threadUserPtr              = nullptr;
+
+    pthread_cond_t  threadReady;
+    pthread_mutex_t threadReadyMutex;
+    pthread_t       threadID;
+};
+
+pthread_t juce_createRealtimeAudioThread (void* (*entry) (void*), void* userPtr)
+{
+    ScopedPointer<SLRealtimeThread> thread (new SLRealtimeThread);
+
+    if (! thread->isOK())
+        return 0;
+
+    pthread_t threadID = thread->startThread (entry, userPtr);
+
+    // the thread will de-allocate itself
+    thread.release();
+
+    return threadID;
 }

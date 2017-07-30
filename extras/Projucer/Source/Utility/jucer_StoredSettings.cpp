@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -25,7 +27,6 @@
 #include "../jucer_Headers.h"
 #include "jucer_StoredSettings.h"
 #include "../Application/jucer_Application.h"
-#include "../Application/jucer_GlobalPreferences.h"
 
 //==============================================================================
 StoredSettings& getAppSettings()
@@ -40,15 +41,20 @@ PropertiesFile& getGlobalProperties()
 
 //==============================================================================
 StoredSettings::StoredSettings()
-    : appearance (true), projectDefaults ("PROJECT_DEFAULT_SETTINGS")
+    : appearance (true),
+      projectDefaults ("PROJECT_DEFAULT_SETTINGS"),
+      fallbackPaths ("FALLBACK_PATHS")
 {
+    updateOldProjectSettingsFiles();
     reload();
     projectDefaults.addListener (this);
+    fallbackPaths.addListener (this);
 }
 
 StoredSettings::~StoredSettings()
 {
     projectDefaults.removeListener (this);
+    fallbackPaths.removeListener (this);
     flush();
 }
 
@@ -57,42 +63,33 @@ PropertiesFile& StoredSettings::getGlobalProperties()
     return *propertyFiles.getUnchecked (0);
 }
 
-static PropertiesFile* createPropsFile (const String& filename)
+static PropertiesFile* createPropsFile (const String& filename, bool isProjectSettings)
 {
     return new PropertiesFile (ProjucerApplication::getApp()
-                                .getPropertyFileOptionsFor (filename));
+                                .getPropertyFileOptionsFor (filename, isProjectSettings));
 }
 
 PropertiesFile& StoredSettings::getProjectProperties (const String& projectUID)
 {
-    const String filename ("Introjucer_Project_" + projectUID);
+    const auto filename = String ("Projucer_Project_" + projectUID);
 
-    for (int i = propertyFiles.size(); --i >= 0;)
+    for (auto i = propertyFiles.size(); --i >= 0;)
     {
-        PropertiesFile* const props = propertyFiles.getUnchecked(i);
+        auto* const props = propertyFiles.getUnchecked(i);
         if (props->getFile().getFileNameWithoutExtension() == filename)
             return *props;
     }
 
-    PropertiesFile* p = createPropsFile (filename);
+    auto* p = createPropsFile (filename, true);
     propertyFiles.add (p);
     return *p;
 }
 
 void StoredSettings::updateGlobalPreferences()
 {
-    // update global settings editable from the global preferences window
-    updateAppearanceSettings();
-
     // update 'invisible' global settings
     updateRecentFiles();
     updateKeyMappings();
-}
-
-void StoredSettings::updateAppearanceSettings()
-{
-    const ScopedPointer<XmlElement> xml (appearance.settings.createXml());
-    getGlobalProperties().setValue ("editorColours", xml);
 }
 
 void StoredSettings::updateRecentFiles()
@@ -104,7 +101,7 @@ void StoredSettings::updateKeyMappings()
 {
     getGlobalProperties().removeValue ("keyMappings");
 
-    if (ApplicationCommandManager* commandManager = ProjucerApplication::getApp().commandManager)
+    if (auto* commandManager = ProjucerApplication::getApp().commandManager.get())
     {
         const ScopedPointer<XmlElement> keys (commandManager->getKeyMappings()->createXml (true));
 
@@ -118,35 +115,27 @@ void StoredSettings::flush()
     updateGlobalPreferences();
     saveSwatchColours();
 
-    for (int i = propertyFiles.size(); --i >= 0;)
+    for (auto i = propertyFiles.size(); --i >= 0;)
         propertyFiles.getUnchecked(i)->saveIfNeeded();
 }
 
 void StoredSettings::reload()
 {
     propertyFiles.clear();
-    propertyFiles.add (createPropsFile ("Introjucer"));
+    propertyFiles.add (createPropsFile ("Projucer", false));
 
     ScopedPointer<XmlElement> projectDefaultsXml (propertyFiles.getFirst()->getXmlValue ("PROJECT_DEFAULT_SETTINGS"));
-
     if (projectDefaultsXml != nullptr)
         projectDefaults = ValueTree::fromXml (*projectDefaultsXml);
+
+    ScopedPointer<XmlElement> fallbackPathsXml (propertyFiles.getFirst()->getXmlValue ("FALLBACK_PATHS"));
+    if (fallbackPathsXml != nullptr)
+        fallbackPaths = ValueTree::fromXml (*fallbackPathsXml);
 
     // recent files...
     recentFiles.restoreFromString (getGlobalProperties().getValue ("recentFiles"));
     recentFiles.removeNonExistentFiles();
 
-    ScopedPointer<XmlElement> xml (getGlobalProperties().getXmlValue ("editorColours"));
-
-    if (xml == nullptr)
-    {
-        xml = XmlDocument::parse (BinaryData::colourscheme_dark_xml);
-        jassert (xml != nullptr);
-    }
-
-    appearance.readFromXML (*xml);
-
-    appearance.updateColourScheme();
     loadSwatchColours();
 }
 
@@ -171,6 +160,33 @@ void StoredSettings::setLastProjects (const Array<File>& files)
     getGlobalProperties().setValue ("lastProjects", s.joinIntoString ("|"));
 }
 
+void StoredSettings::updateOldProjectSettingsFiles()
+{
+    // Global properties file hasn't been created yet so create a dummy file
+    auto projucerSettingsDirectory = ProjucerApplication::getApp().getPropertyFileOptionsFor ("Dummy", false)
+                                                                  .getDefaultFile().getParentDirectory();
+
+    auto newProjectSettingsDir = projucerSettingsDirectory.getChildFile ("ProjectSettings");
+    newProjectSettingsDir.createDirectory();
+
+    DirectoryIterator iter (projucerSettingsDirectory, false, "*.settings");
+    while (iter.next())
+    {
+        auto f = iter.getFile();
+        auto oldFileName = f.getFileName();
+
+        if (oldFileName.contains ("Introjucer"))
+        {
+            auto newFileName = oldFileName.replace ("Introjucer", "Projucer");
+
+            if (oldFileName.contains ("_Project"))
+                f.moveFileTo (f.getSiblingFile (newProjectSettingsDir.getFileName()).getChildFile (newFileName));
+            else
+                f.moveFileTo (f.getSiblingFile (newFileName));
+        }
+    }
+}
+
 //==============================================================================
 void StoredSettings::loadSwatchColours()
 {
@@ -186,19 +202,19 @@ void StoredSettings::loadSwatchColours()
 
     #undef COL
 
-    const int numSwatchColours = 24;
-    PropertiesFile& props = getGlobalProperties();
+    const auto numSwatchColours = 24;
+    auto& props = getGlobalProperties();
 
-    for (int i = 0; i < numSwatchColours; ++i)
+    for (auto i = 0; i < numSwatchColours; ++i)
         swatchColours.add (Colour::fromString (props.getValue ("swatchColour" + String (i),
                                                                colours [2 + i].toString())));
 }
 
 void StoredSettings::saveSwatchColours()
 {
-    PropertiesFile& props = getGlobalProperties();
+    auto& props = getGlobalProperties();
 
-    for (int i = 0; i < swatchColours.size(); ++i)
+    for (auto i = 0; i < swatchColours.size(); ++i)
         props.setValue ("swatchColour" + String (i), swatchColours.getReference(i).toString());
 }
 
@@ -212,63 +228,82 @@ Colour StoredSettings::ColourSelectorWithSwatches::getSwatchColour (int index) c
     return getAppSettings().swatchColours [index];
 }
 
-void StoredSettings::ColourSelectorWithSwatches::setSwatchColour (int index, const Colour& newColour) const
+void StoredSettings::ColourSelectorWithSwatches::setSwatchColour (int index, const Colour& newColour)
 {
     getAppSettings().swatchColours.set (index, newColour);
 }
 
 //==============================================================================
-static bool doesSDKPathContainFile (const File& relativeTo, const String& path, const String& fileToCheckFor)
+Value StoredSettings::getStoredPath (const Identifier& key)
 {
-    String actualPath = path.replace ("${user.home}", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
-    return relativeTo.getChildFile (actualPath + "/" + fileToCheckFor).existsAsFile();
-}
-
-Value StoredSettings::getGlobalPath (const Identifier& key, DependencyPathOS os)
-{
-    Value v (projectDefaults.getPropertyAsValue (key, nullptr));
+    auto v = projectDefaults.getPropertyAsValue (key, nullptr);
 
     if (v.toString().isEmpty())
-        v = getFallbackPath (key, os);
+        v = getFallbackPathForOS (key, TargetOS::getThisOS()).toString();
 
     return v;
 }
 
-String StoredSettings::getFallbackPath (const Identifier& key, DependencyPathOS os)
+Value StoredSettings::getFallbackPathForOS (const Identifier& key, DependencyPathOS os)
 {
-    if (key == Ids::vst3Path)
-        return os == TargetOS::windows ? "c:\\SDKs\\VST3 SDK"
-                                       : "~/SDKs/VST3 SDK";
+    auto id = Identifier();
 
-    if (key == Ids::rtasPath)
-    {
-        if (os == TargetOS::windows)   return "c:\\SDKs\\PT_90_SDK";
-        if (os == TargetOS::osx)       return "~/SDKs/PT_90_SDK";
+    if      (os == TargetOS::osx)     id = Ids::osxFallback;
+    else if (os == TargetOS::windows) id = Ids::windowsFallback;
+    else if (os == TargetOS::linux)   id = Ids::linuxFallback;
 
-        // no RTAS on this OS!
+    if (id == Identifier())
         jassertfalse;
-        return String();
+
+    auto v = fallbackPaths.getOrCreateChildWithName (id, nullptr)
+                          .getPropertyAsValue (key, nullptr);
+
+    if (v.toString().isEmpty())
+    {
+        if (key == Ids::defaultJuceModulePath)
+        {
+            v = (os == TargetOS::windows ? "C:\\JUCE\\modules"
+                                         : "~/JUCE/modules");
+        }
+        else if (key == Ids::defaultUserModulePath)
+        {
+            v = (os == TargetOS::windows ? "C:\\modules"
+                                         : "~/modules");
+        }
+        else if (key == Ids::vst3Path)
+        {
+            v = (os == TargetOS::windows ? "C:\\SDKs\\VST_SDK\\VST3_SDK"
+                                         : "~/SDKs/VST_SDK/VST3_SDK");
+        }
+        else if (key == Ids::rtasPath)
+        {
+            if      (os == TargetOS::windows)  v = "C:\\SDKs\\PT_90_SDK";
+            else if (os == TargetOS::osx)      v = "~/SDKs/PT_90_SDK";
+            else                               jassertfalse; // no RTAS on this OS!
+        }
+        else if (key == Ids::aaxPath)
+        {
+            if      (os == TargetOS::windows)  v = "C:\\SDKs\\AAX";
+            else if (os == TargetOS::osx)      v = "~/SDKs/AAX" ;
+            else                               jassertfalse; // no AAX on this OS!
+        }
+        else if (key == Ids::androidSDKPath)
+        {
+            v = "${user.home}/Library/Android/sdk";
+        }
+        else if (key == Ids::androidNDKPath)
+        {
+            v = "${user.home}/Library/Android/sdk/ndk-bundle";
+        }
     }
 
-    if (key == Ids::aaxPath)
-    {
-        if (os == TargetOS::windows)   return "c:\\SDKs\\AAX";
-        if (os == TargetOS::osx)       return "~/SDKs/AAX" ;
+    return v;
+}
 
-        // no AAX on this OS!
-        jassertfalse;
-        return String();
-    }
-
-    if (key == Ids::androidSDKPath)
-        return "${user.home}/Library/Android/sdk";
-
-    if (key == Ids::androidNDKPath)
-        return "${user.home}/Library/Android/sdk/ndk-bundle";
-
-    // didn't recognise the key provided!
-    jassertfalse;
-    return String();
+static bool doesSDKPathContainFile (const File& relativeTo, const String& path, const String& fileToCheckFor)
+{
+    auto actualPath = path.replace ("${user.home}", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
+    return relativeTo.getChildFile (actualPath + "/" + fileToCheckFor).exists();
 }
 
 bool StoredSettings::isGlobalPathValid (const File& relativeTo, const Identifier& key, const String& path)
@@ -302,6 +337,14 @@ bool StoredSettings::isGlobalPathValid (const File& relativeTo, const Identifier
        #else
         fileToCheckFor = "ndk-depends";
        #endif
+    }
+    else if (key == Ids::defaultJuceModulePath)
+    {
+        fileToCheckFor = "juce_core";
+    }
+    else if (key == Ids::defaultUserModulePath)
+    {
+        fileToCheckFor = {};
     }
     else
     {

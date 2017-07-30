@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -119,7 +121,6 @@ class AndroidComponentPeer  : public ComponentPeer,
 public:
     AndroidComponentPeer (Component& comp, const int windowStyleFlags)
         : ComponentPeer (comp, windowStyleFlags),
-          usingAndroidGraphics (false),
           fullScreen (false),
           sizeAllocated (0),
           scale ((float) Desktop::getInstance().getDisplays().getMainDisplay().scale)
@@ -392,7 +393,8 @@ public:
         lastMousePos = pos;
 
         // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
-        handleMouseEvent (index, pos, currentModifiers.withoutMouseButtons(), MouseInputSource::invalidPressure, time);
+        handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, currentModifiers.withoutMouseButtons(),
+                          MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, time, {}, index);
 
         if (isValidPeer (this))
             handleMouseDragCallback (index, sysPos, time);
@@ -406,8 +408,8 @@ public:
         jassert (index < 64);
         touchesDown = (touchesDown | (1 << (index & 63)));
         currentModifiers = currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
-        handleMouseEvent (index, pos, currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier),
-                          MouseInputSource::invalidPressure, time);
+        handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier),
+                          MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, time, {}, index);
     }
 
     void handleMouseUpCallback (int index, Point<float> pos, int64 time)
@@ -421,7 +423,8 @@ public:
         if (touchesDown == 0)
             currentModifiers = currentModifiers.withoutMouseButtons();
 
-        handleMouseEvent (index, pos, currentModifiers.withoutMouseButtons(), MouseInputSource::invalidPressure, time);
+        handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, currentModifiers.withoutMouseButtons(), MouseInputSource::invalidPressure,
+                          MouseInputSource::invalidOrientation, time, {}, index);
     }
 
     void handleKeyDownCallback (int k, int kc)
@@ -433,15 +436,25 @@ public:
     {
     }
 
+    void handleBackButtonCallback()
+    {
+        if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+            app->backButtonPressed();
+    }
+
     //==============================================================================
     bool isFocused() const override
     {
-        return view.callBooleanMethod (ComponentPeerView.hasFocus);
+        if (view != nullptr)
+            return view.callBooleanMethod (ComponentPeerView.hasFocus);
+
+        return false;
     }
 
     void grabFocus() override
     {
-        view.callBooleanMethod (ComponentPeerView.requestFocus);
+        if (view != nullptr)
+            view.callBooleanMethod (ComponentPeerView.requestFocus);
     }
 
     void handleFocusChangeCallback (bool hasFocus)
@@ -575,7 +588,7 @@ private:
     //==============================================================================
     GlobalRef view;
     GlobalRef buffer;
-    bool usingAndroidGraphics, fullScreen;
+    bool fullScreen;
     int sizeAllocated;
     float scale;
     static AndroidComponentPeer* frontWindow;
@@ -656,6 +669,7 @@ JUCE_VIEW_CALLBACK (void, viewSizeChanged,  (JNIEnv* env, jobject /*view*/, jlon
 JUCE_VIEW_CALLBACK (void, focusChanged,     (JNIEnv* env, jobject /*view*/, jlong host, jboolean hasFocus),                       handleFocusChangeCallback (hasFocus))
 JUCE_VIEW_CALLBACK (void, handleKeyDown,    (JNIEnv* env, jobject /*view*/, jlong host, jint k, jint kc),                         handleKeyDownCallback ((int) k, (int) kc))
 JUCE_VIEW_CALLBACK (void, handleKeyUp,      (JNIEnv* env, jobject /*view*/, jlong host, jint k, jint kc),                         handleKeyUpCallback ((int) k, (int) kc))
+JUCE_VIEW_CALLBACK (void, handleBackButton, (JNIEnv* env, jobject /*view*/, jlong host),                                          handleBackButtonCallback())
 
 //==============================================================================
 ComponentPeer* Component::createNewPeer (int styleFlags, void*)
@@ -682,7 +696,12 @@ Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
 
 bool MouseInputSource::SourceList::addSource()
 {
-    addSource (sources.size(), false);
+    addSource (sources.size(), MouseInputSource::InputSourceType::touch);
+    return true;
+}
+
+bool MouseInputSource::SourceList::canUseTouch()
+{
     return true;
 }
 
@@ -739,7 +758,8 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType
     jassert (callback != nullptr); // on android, all alerts must be non-modal!!
 
     android.activity.callVoidMethod (JuceAppActivity.showOkCancelBox, javaString (title).get(),
-                                     javaString (message).get(), (jlong) (pointer_sized_int) callback);
+                                     javaString (message).get(), (jlong) (pointer_sized_int) callback,
+                                     javaString (TRANS ("OK")).get(), javaString (TRANS ("Cancel")).get());
     return false;
 }
 
@@ -752,6 +772,19 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
 
     android.activity.callVoidMethod (JuceAppActivity.showYesNoCancelBox, javaString (title).get(),
                                      javaString (message).get(), (jlong) (pointer_sized_int) callback);
+    return 0;
+}
+
+int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (AlertWindow::AlertIconType /*iconType*/,
+                                                   const String& title, const String& message,
+                                                   Component* /*associatedComponent*/,
+                                                   ModalComponentManager::Callback* callback)
+{
+    jassert (callback != nullptr); // on android, all alerts must be non-modal!!
+
+    android.activity.callVoidMethod (JuceAppActivity.showOkCancelBox, javaString (title).get(),
+                                     javaString (message).get(), (jlong) (pointer_sized_int) callback,
+                                     javaString (TRANS ("Yes")).get(), javaString (TRANS ("No")).get());
     return 0;
 }
 
@@ -870,12 +903,13 @@ void MouseCursor::showInWindow (ComponentPeer*) const   {}
 void MouseCursor::showInAllWindows() const  {}
 
 //==============================================================================
-bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& /*files*/, const bool /*canMove*/)
+bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& /*files*/, const bool /*canMove*/,
+                                                           Component* /*srcComp*/)
 {
     return false;
 }
 
-bool DragAndDropContainer::performExternalDragDropOfText (const String& /*text*/)
+bool DragAndDropContainer::performExternalDragDropOfText (const String& /*text*/, Component* /*srcComp*/)
 {
     return false;
 }

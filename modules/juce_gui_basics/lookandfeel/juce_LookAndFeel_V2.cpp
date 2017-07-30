@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -1102,6 +1104,8 @@ Component* LookAndFeel_V2::getParentComponentForMenuOptions (const PopupMenu::Op
 
 void LookAndFeel_V2::preparePopupMenuWindow (Component&) {}
 
+bool LookAndFeel_V2::shouldPopupMenuScaleWithTargetComponent (const PopupMenu::Options&)    { return true; }
+
 //==============================================================================
 void LookAndFeel_V2::fillTextEditorBackground (Graphics& g, int /*width*/, int /*height*/, TextEditor& textEditor)
 {
@@ -1480,14 +1484,14 @@ Button* LookAndFeel_V2::createSliderButton (Slider&, const bool isIncrement)
 class LookAndFeel_V2::SliderLabelComp  : public Label
 {
 public:
-    SliderLabelComp() : Label (String(), String()) {}
+    SliderLabelComp() : Label ({}, {}) {}
 
     void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) {}
 };
 
 Label* LookAndFeel_V2::createSliderTextBox (Slider& slider)
 {
-    Label* const l = new SliderLabelComp();
+    auto l = new SliderLabelComp();
 
     l->setJustificationType (Justification::centred);
     l->setKeyboardType (TextInputTarget::decimalKeyboard);
@@ -1634,7 +1638,7 @@ void LookAndFeel_V2::layoutFilenameComponent (FilenameComponent& filenameComp,
 {
     browseButton->setSize (80, filenameComp.getHeight());
 
-    if (TextButton* const tb = dynamic_cast<TextButton*> (browseButton))
+    if (auto* tb = dynamic_cast<TextButton*> (browseButton))
         tb->changeWidthToFitText();
 
     browseButton->setTopRightPosition (filenameComp.getWidth(), 0);
@@ -2046,7 +2050,7 @@ int LookAndFeel_V2::getTabButtonBestWidth (TabBarButton& button, int tabDepth)
     int width = Font (tabDepth * 0.6f).getStringWidth (button.getButtonText().trim())
                    + getTabButtonOverlap (tabDepth) * 2;
 
-    if (Component* const extraComponent = button.getExtraComponent())
+    if (auto* extraComponent = button.getExtraComponent())
         width += button.getTabbedButtonBar().isVertical() ? extraComponent->getHeight()
                                                           : extraComponent->getWidth();
 
@@ -2057,7 +2061,7 @@ Rectangle<int> LookAndFeel_V2::getTabButtonExtraComponentBounds (const TabBarBut
 {
     Rectangle<int> extraComp;
 
-    const TabbedButtonBar::Orientation orientation = button.getTabbedButtonBar().getOrientation();
+    auto orientation = button.getTabbedButtonBar().getOrientation();
 
     if (button.getExtraComponentPlacement() == TabBarButton::beforeText)
     {
@@ -2087,7 +2091,7 @@ Rectangle<int> LookAndFeel_V2::getTabButtonExtraComponentBounds (const TabBarBut
 
 void LookAndFeel_V2::createTabButtonShape (TabBarButton& button, Path& p, bool /*isMouseOver*/, bool /*isMouseDown*/)
 {
-    const Rectangle<int> activeArea (button.getActiveArea());
+    auto activeArea = button.getActiveArea();
     const float w = (float) activeArea.getWidth();
     const float h = (float) activeArea.getHeight();
 
@@ -2147,7 +2151,7 @@ void LookAndFeel_V2::createTabButtonShape (TabBarButton& button, Path& p, bool /
 void LookAndFeel_V2::fillTabButtonShape (TabBarButton& button, Graphics& g, const Path& path,
                                          bool /*isMouseOver*/, bool /*isMouseDown*/)
 {
-    const Colour tabBackground (button.getTabBackgroundColour());
+    auto tabBackground = button.getTabBackgroundColour();
     const bool isFrontTab = button.isFrontTab();
 
     g.setColour (isFrontTab ? tabBackground
@@ -2489,7 +2493,7 @@ AttributedString LookAndFeel_V2::createFileChooserHeaderText (const String& titl
     AttributedString s;
     s.setJustification (Justification::centred);
 
-    const Colour colour (findColour (FileChooserDialogBox::titleTextColourId));
+    auto colour = findColour (FileChooserDialogBox::titleTextColourId);
     s.append (title + "\n\n", Font (17.0f, Font::bold), colour);
     s.append (instructions, Font (14.0f), colour);
 
@@ -2497,13 +2501,13 @@ AttributedString LookAndFeel_V2::createFileChooserHeaderText (const String& titl
 }
 
 void LookAndFeel_V2::drawFileBrowserRow (Graphics& g, int width, int height,
-                                         const String& filename, Image* icon,
+                                         const File&, const String& filename, Image* icon,
                                          const String& fileSizeDescription,
                                          const String& fileTimeDescription,
-                                         const bool isDirectory, const bool isItemSelected,
-                                         const int /*itemIndex*/, DirectoryContentsDisplayComponent& dcc)
+                                         bool isDirectory, bool isItemSelected,
+                                         int /*itemIndex*/, DirectoryContentsDisplayComponent& dcc)
 {
-    Component* const fileListComp = dynamic_cast<Component*> (&dcc);
+    auto fileListComp = dynamic_cast<Component*> (&dcc);
 
     if (isItemSelected)
         g.fillAll (fileListComp != nullptr ? fileListComp->findColour (DirectoryContentsDisplayComponent::highlightColourId)
@@ -2520,8 +2524,8 @@ void LookAndFeel_V2::drawFileBrowserRow (Graphics& g, int width, int height,
     }
     else
     {
-        if (const Drawable* d = isDirectory ? getDefaultFolderImage()
-                                            : getDefaultDocumentFileImage())
+        if (auto* d = isDirectory ? getDefaultFolderImage()
+                                  : getDefaultDocumentFileImage())
             d->drawWithin (g, Rectangle<float> (2.0f, 2.0f, x - 4.0f, height - 4.0f),
                            RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, 1.0f);
     }
@@ -2564,10 +2568,10 @@ void LookAndFeel_V2::drawFileBrowserRow (Graphics& g, int width, int height,
 
 Button* LookAndFeel_V2::createFileBrowserGoUpButton()
 {
-    DrawableButton* goUpButton = new DrawableButton ("up", DrawableButton::ImageOnButtonBackground);
+    auto goUpButton = new DrawableButton ("up", DrawableButton::ImageOnButtonBackground);
 
     Path arrowPath;
-    arrowPath.addArrow (Line<float> (50.0f, 100.0f, 50.0f, 0.0f), 40.0f, 100.0f, 50.0f);
+    arrowPath.addArrow ({ 50.0f, 100.0f, 50.0f, 0.0f }, 40.0f, 100.0f, 50.0f);
 
     DrawablePath arrowImage;
     arrowImage.setFill (Colours::black.withAlpha (0.4f));
@@ -2586,11 +2590,11 @@ void LookAndFeel_V2::layoutFileBrowserComponent (FileBrowserComponent& browserCo
                                                  Button* goUpButton)
 {
     const int x = 8;
-    int w = browserComp.getWidth() - x - x;
+    auto w = browserComp.getWidth() - x - x;
 
     if (previewComp != nullptr)
     {
-        const int previewWidth = w / 3;
+        auto previewWidth = w / 3;
         previewComp->setBounds (x + w - previewWidth, 0, previewWidth, browserComp.getHeight());
 
         w -= previewWidth + 4;
@@ -2607,7 +2611,7 @@ void LookAndFeel_V2::layoutFileBrowserComponent (FileBrowserComponent& browserCo
 
     y += controlsHeight + 4;
 
-    if (Component* const listAsComp = dynamic_cast<Component*> (fileListComponent))
+    if (auto listAsComp = dynamic_cast<Component*> (fileListComponent))
     {
         listAsComp->setBounds (x, y, w, browserComp.getHeight() - y - bottomSectionHeight);
         y = listAsComp->getBottom() + 4;

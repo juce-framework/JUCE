@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -80,9 +82,13 @@ void ProjucerApplication::initialise (const String& commandLine)
 
         initialiseBasics();
 
-        if (commandLine.isNotEmpty())
+        isRunningCommandLine = commandLine.isNotEmpty();
+
+        licenseController = new LicenseController;
+        licenseController->addLicenseStatusChangedCallback (this);
+
+        if (isRunningCommandLine)
         {
-            isRunningCommandLine = true;
             const int appReturnCode = performCommandLine (commandLine);
 
             if (appReturnCode != commandLineNotPerformed)
@@ -104,18 +110,16 @@ void ProjucerApplication::initialise (const String& commandLine)
 
         openDocumentManager.registerType (new ProjucerAppClasses::LiveBuildCodeEditorDocument::Type(), 2);
 
-        if (! checkEULA())
-        {
-            quit();
-            return;
-        }
-
         childProcessCache = new ChildProcessCache();
 
         initCommandManager();
         menuModel = new MainMenuModel();
 
         settings->appearance.refreshPresetSchemeList();
+
+        setColourScheme (settings->getGlobalProperties().getIntValue ("COLOUR SCHEME"), false);
+        setEditorColourScheme (settings->getGlobalProperties().getIntValue ("EDITOR COLOUR SCHEME"), false);
+        updateEditorColourSchemeIfNeeded();
 
         // do further initialisation in a moment when the message loop has started
         triggerAsyncUpdate();
@@ -125,9 +129,11 @@ void ProjucerApplication::initialise (const String& commandLine)
 void ProjucerApplication::initialiseBasics()
 {
     LookAndFeel::setDefaultLookAndFeel (&lookAndFeel);
+
     settings = new StoredSettings();
     ImageCache::setCacheTimeout (30 * 1000);
     icons = new Icons();
+    tooltipWindow.setMillisecondsBeforeTipAppears (1200);
 }
 
 bool ProjucerApplication::initialiseLogger (const char* filePrefix)
@@ -151,7 +157,8 @@ bool ProjucerApplication::initialiseLogger (const char* filePrefix)
 
 void ProjucerApplication::handleAsyncUpdate()
 {
-    initialiseWindows (getCommandLineParameters());
+    if (licenseController != nullptr)
+        licenseController->startWebviewIfNeeded();
 
    #if JUCE_MAC
     PopupMenu extraAppleMenuItems;
@@ -163,8 +170,6 @@ void ProjucerApplication::handleAsyncUpdate()
    #endif
 
     versionChecker = new LatestVersionChecker();
-
-    showLoginFormAsyncIfNotTriedRecently();
 }
 
 void ProjucerApplication::initialiseWindows (const String& commandLine)
@@ -177,6 +182,9 @@ void ProjucerApplication::initialiseWindows (const String& commandLine)
         mainWindowList.reopenLastProjects();
 
     mainWindowList.createWindowIfNoneAreOpen();
+
+    if (licenseController->getState().applicationUsageDataState == LicenseState::ApplicationUsageData::notChosenYet)
+        showApplicationUsageDataAgreementPopup();
 }
 
 void ProjucerApplication::shutdown()
@@ -188,10 +196,17 @@ void ProjucerApplication::shutdown()
     }
 
     versionChecker = nullptr;
-    appearanceEditorWindow = nullptr;
-    globalPreferencesWindow = nullptr;
     utf8Window = nullptr;
     svgPathWindow = nullptr;
+    aboutWindow = nullptr;
+    pathsWindow = nullptr;
+    editorColourSchemeWindow = nullptr;
+
+    if (licenseController != nullptr)
+    {
+        licenseController->removeLicenseStatusChangedCallback (this);
+        licenseController = nullptr;
+    }
 
     mainWindowList.forceCloseAllWindows();
     openDocumentManager.clear();
@@ -248,6 +263,31 @@ void ProjucerApplication::systemRequestedQuit()
 }
 
 //==============================================================================
+void ProjucerApplication::licenseStateChanged (const LicenseState& state)
+{
+   #if ! JUCER_ENABLE_GPL_MODE
+    if (state.type != LicenseState::Type::notLoggedIn
+     && state.type != LicenseState::Type::noLicenseChosenYet)
+   #else
+    ignoreUnused (state);
+   #endif
+    {
+        initialiseWindows (getCommandLineParameters());
+    }
+}
+
+void ProjucerApplication::doLogout()
+{
+    if (licenseController != nullptr)
+    {
+        const LicenseState& state = licenseController->getState();
+
+        if (state.type != LicenseState::Type::notLoggedIn && closeAllMainWindows())
+            licenseController->logout();
+    }
+}
+
+//==============================================================================
 String ProjucerApplication::getVersionDescription() const
 {
     String s;
@@ -289,12 +329,13 @@ enum
 {
     recentProjectsBaseID = 100,
     activeDocumentsBaseID = 300,
-    colourSchemeBaseID = 1000
+    colourSchemeBaseID = 1000,
+    codeEditorColourSchemeBaseID = 2000,
 };
 
 MenuBarModel* ProjucerApplication::getMenuModel()
 {
-  return menuModel.get();
+    return menuModel.get();
 }
 
 StringArray ProjucerApplication::getMenuNames()
@@ -337,10 +378,15 @@ void ProjucerApplication::createFileMenu (PopupMenu& menu)
     menu.addCommandItem (commandManager, CommandIDs::openInIDE);
     menu.addCommandItem (commandManager, CommandIDs::saveAndOpenInIDE);
     menu.addSeparator();
+
+   #if ! JUCER_ENABLE_GPL_MODE
     menu.addCommandItem (commandManager, CommandIDs::loginLogout);
+   #endif
 
     #if ! JUCE_MAC
-      menu.addCommandItem (commandManager, CommandIDs::showGlobalPreferences);
+      menu.addCommandItem (commandManager, CommandIDs::showAboutWindow);
+      menu.addCommandItem (commandManager, CommandIDs::showAppUsageWindow);
+      menu.addCommandItem (commandManager, CommandIDs::showGlobalPathsWindow);
       menu.addSeparator();
       menu.addCommandItem (commandManager, StandardApplicationCommandIDs::quit);
     #endif
@@ -366,21 +412,23 @@ void ProjucerApplication::createEditMenu (PopupMenu& menu)
 
 void ProjucerApplication::createViewMenu (PopupMenu& menu)
 {
-    menu.addCommandItem (commandManager, CommandIDs::showFilePanel);
-    menu.addCommandItem (commandManager, CommandIDs::showConfigPanel);
-    menu.addCommandItem (commandManager, CommandIDs::showBuildTab);
     menu.addCommandItem (commandManager, CommandIDs::showProjectSettings);
-    menu.addCommandItem (commandManager, CommandIDs::showProjectModules);
+    menu.addCommandItem (commandManager, CommandIDs::showProjectTab);
+    menu.addCommandItem (commandManager, CommandIDs::showBuildTab);
+    menu.addCommandItem (commandManager, CommandIDs::showFileExplorerPanel);
+    menu.addCommandItem (commandManager, CommandIDs::showModulesPanel);
+    menu.addCommandItem (commandManager, CommandIDs::showExportersPanel);
+    menu.addCommandItem (commandManager, CommandIDs::showExporterSettings);
+
     menu.addSeparator();
     createColourSchemeItems (menu);
 }
 
 void ProjucerApplication::createBuildMenu (PopupMenu& menu)
 {
-    menu.addCommandItem (commandManager, CommandIDs::enableBuild);
-    menu.addCommandItem (commandManager, CommandIDs::toggleContinuousBuild);
+    menu.addCommandItem (commandManager, CommandIDs::toggleBuildEnabled);
     menu.addCommandItem (commandManager, CommandIDs::buildNow);
-
+    menu.addCommandItem (commandManager, CommandIDs::toggleContinuousBuild);
     menu.addSeparator();
     menu.addCommandItem (commandManager, CommandIDs::launchApp);
     menu.addCommandItem (commandManager, CommandIDs::killApp);
@@ -395,17 +443,38 @@ void ProjucerApplication::createBuildMenu (PopupMenu& menu)
 
 void ProjucerApplication::createColourSchemeItems (PopupMenu& menu)
 {
-    const StringArray presetSchemes (settings->appearance.getPresetSchemes());
+    PopupMenu colourSchemes;
 
-    if (presetSchemes.size() > 0)
+    colourSchemes.addItem (colourSchemeBaseID + 0, "Dark", true, selectedColourSchemeIndex == 0);
+    colourSchemes.addItem (colourSchemeBaseID + 1, "Grey", true, selectedColourSchemeIndex == 1);
+    colourSchemes.addItem (colourSchemeBaseID + 2, "Light", true, selectedColourSchemeIndex == 2);
+
+    menu.addSubMenu ("Colour Scheme", colourSchemes);
+
+    //==========================================================================
+    PopupMenu editorColourSchemes;
+
+    auto& appearanceSettings = getAppSettings().appearance;
+
+    appearanceSettings.refreshPresetSchemeList();
+    auto schemes = appearanceSettings.getPresetSchemes();
+
+    auto i = 0;
+    for (auto s : schemes)
     {
-        PopupMenu schemes;
-
-        for (int i = 0; i < presetSchemes.size(); ++i)
-            schemes.addItem (colourSchemeBaseID + i, presetSchemes[i]);
-
-        menu.addSubMenu ("Colour Scheme", schemes);
+        editorColourSchemes.addItem (codeEditorColourSchemeBaseID + i, s,
+                                     editorColourSchemeWindow == nullptr,
+                                     selectedEditorColourSchemeIndex == i);
+        ++i;
     }
+
+    numEditorColourSchemes = i;
+
+    editorColourSchemes.addSeparator();
+    editorColourSchemes.addItem (codeEditorColourSchemeBaseID + numEditorColourSchemes,
+                                 "Create...", editorColourSchemeWindow == nullptr);
+
+    menu.addSubMenu ("Editor Colour Scheme", editorColourSchemes);
 }
 
 void ProjucerApplication::createWindowMenu (PopupMenu& menu)
@@ -439,26 +508,38 @@ void ProjucerApplication::createToolsMenu (PopupMenu& menu)
 
 void ProjucerApplication::createExtraAppleMenuItems (PopupMenu& menu)
 {
-    menu.addCommandItem (commandManager, CommandIDs::showGlobalPreferences);
+    menu.addCommandItem (commandManager, CommandIDs::showAboutWindow);
+    menu.addCommandItem (commandManager, CommandIDs::showAppUsageWindow);
+    menu.addSeparator();
+    menu.addCommandItem (commandManager, CommandIDs::showGlobalPathsWindow);
 }
 
 void ProjucerApplication::handleMainMenuCommand (int menuItemID)
 {
-    if (menuItemID >= recentProjectsBaseID && menuItemID < recentProjectsBaseID + 100)
+    if (menuItemID >= recentProjectsBaseID && menuItemID < (recentProjectsBaseID + 100))
     {
         // open a file from the "recent files" menu
         openFile (settings->recentFiles.getFile (menuItemID - recentProjectsBaseID));
     }
-    else if (menuItemID >= activeDocumentsBaseID && menuItemID < activeDocumentsBaseID + 200)
+    else if (menuItemID >= activeDocumentsBaseID && menuItemID < (activeDocumentsBaseID + 200))
     {
         if (OpenDocumentManager::Document* doc = openDocumentManager.getOpenDocument (menuItemID - activeDocumentsBaseID))
             mainWindowList.openDocument (doc, true);
         else
             jassertfalse;
     }
-    else if (menuItemID >= colourSchemeBaseID && menuItemID < colourSchemeBaseID + 200)
+    else if (menuItemID >= colourSchemeBaseID && menuItemID < (colourSchemeBaseID + 3))
     {
-        settings->appearance.selectPresetScheme (menuItemID - colourSchemeBaseID);
+        setColourScheme (menuItemID - colourSchemeBaseID, true);
+        updateEditorColourSchemeIfNeeded();
+    }
+    else if (menuItemID >= codeEditorColourSchemeBaseID && menuItemID < (codeEditorColourSchemeBaseID + numEditorColourSchemes))
+    {
+        setEditorColourScheme (menuItemID - codeEditorColourSchemeBaseID, true);
+    }
+    else if (menuItemID == (codeEditorColourSchemeBaseID + numEditorColourSchemes))
+    {
+        showEditorColourSchemeWindow();
     }
     else
     {
@@ -475,9 +556,11 @@ void ProjucerApplication::getAllCommands (Array <CommandID>& commands)
                               CommandIDs::open,
                               CommandIDs::closeAllDocuments,
                               CommandIDs::saveAll,
-                              CommandIDs::showGlobalPreferences,
+                              CommandIDs::showGlobalPathsWindow,
                               CommandIDs::showUTF8Tool,
                               CommandIDs::showSVGPathTool,
+                              CommandIDs::showAboutWindow,
+                              CommandIDs::showAppUsageWindow,
                               CommandIDs::loginLogout };
 
     commands.addArray (ids, numElementsInArray (ids));
@@ -497,9 +580,10 @@ void ProjucerApplication::getCommandInfo (CommandID commandID, ApplicationComman
         result.defaultKeypresses.add (KeyPress ('o', ModifierKeys::commandModifier, 0));
         break;
 
-    case CommandIDs::showGlobalPreferences:
-        result.setInfo ("Preferences...", "Shows the preferences window.", CommandCategories::general, 0);
-        result.defaultKeypresses.add (KeyPress (',', ModifierKeys::commandModifier, 0));
+    case CommandIDs::showGlobalPathsWindow:
+        result.setInfo ("Global Search Paths...",
+                        "Shows the window to change the global search paths.",
+                        CommandCategories::general, 0);
         break;
 
     case CommandIDs::closeAllDocuments:
@@ -517,15 +601,34 @@ void ProjucerApplication::getCommandInfo (CommandID commandID, ApplicationComman
         break;
 
     case CommandIDs::showSVGPathTool:
-        result.setInfo ("SVG Path Helper", "Shows the SVG->Path data conversion utility", CommandCategories::general, 0);
+        result.setInfo ("SVG Path Converter", "Shows the SVG->Path data conversion utility", CommandCategories::general, 0);
+        break;
+
+    case CommandIDs::showAboutWindow:
+        result.setInfo ("About Projucer", "Shows the Projucer's 'About' page.", CommandCategories::general, 0);
+        break;
+
+    case CommandIDs::showAppUsageWindow:
+        result.setInfo ("Application Usage Data", "Shows the application usage data agreement window", CommandCategories::general, 0);
         break;
 
     case CommandIDs::loginLogout:
-        result.setInfo (ProjucerLicenses::getInstance()->isLoggedIn()
-                           ? String ("Sign out ") + ProjucerLicenses::getInstance()->getLoginName()
-                           : String ("Sign in..."),
-                        "Log out of your JUCE account", CommandCategories::general, 0);
-        result.setActive (ProjucerLicenses::getInstance()->isDLLPresent());
+        {
+            bool isLoggedIn = false;
+            String username;
+
+            if (licenseController != nullptr)
+            {
+                const LicenseState state = licenseController->getState();
+                isLoggedIn = (state.type != LicenseState::Type::notLoggedIn && state.type != LicenseState::Type::GPL);
+                username = state.username;
+            }
+
+            result.setInfo (isLoggedIn
+                               ? String ("Sign out ") + username + "..."
+                               : String ("Sign in..."),
+                            "Log out of your JUCE account", CommandCategories::general, 0);
+        }
         break;
 
     default:
@@ -544,8 +647,10 @@ bool ProjucerApplication::perform (const InvocationInfo& info)
         case CommandIDs::closeAllDocuments:         closeAllDocuments (true); break;
         case CommandIDs::showUTF8Tool:              showUTF8ToolWindow(); break;
         case CommandIDs::showSVGPathTool:           showSVGPathDataToolWindow(); break;
-        case CommandIDs::showGlobalPreferences:     AppearanceSettings::showGlobalPreferences (globalPreferencesWindow); break;
-        case CommandIDs::loginLogout:               loginOrLogout(); break;
+        case CommandIDs::showGlobalPathsWindow:     showPathsWindow(); break;
+        case CommandIDs::showAboutWindow:           showAboutWindow(); break;
+        case CommandIDs::showAppUsageWindow:        showApplicationUsageDataAgreementPopup(); break;
+        case CommandIDs::loginLogout:               doLogout(); break;
         default:                                    return JUCEApplication::perform (info);
     }
 
@@ -596,7 +701,7 @@ void ProjucerApplication::showUTF8ToolWindow()
     else
         new FloatingToolWindow ("UTF-8 String Literal Converter",
                                 "utf8WindowPos",
-                                new UTF8Component(), utf8Window,
+                                new UTF8Component(), utf8Window, true,
                                 500, 500, 300, 300, 1000, 1000);
 }
 
@@ -607,8 +712,61 @@ void ProjucerApplication::showSVGPathDataToolWindow()
     else
         new FloatingToolWindow ("SVG Path Converter",
                                 "svgPathWindowPos",
-                                new SVGPathDataComponent(), svgPathWindow,
+                                new SVGPathDataComponent(), svgPathWindow, true,
                                 500, 500, 300, 300, 1000, 1000);
+}
+
+void ProjucerApplication::showAboutWindow()
+{
+    if (aboutWindow != nullptr)
+        aboutWindow->toFront (true);
+    else
+        new FloatingToolWindow ({}, {}, new AboutWindowComponent(),
+                                aboutWindow, false,
+                                500, 300, 500, 300, 500, 300);
+}
+
+void ProjucerApplication::showApplicationUsageDataAgreementPopup()
+{
+    if (applicationUsageDataWindow != nullptr)
+        applicationUsageDataWindow->toFront (true);
+    else
+        new FloatingToolWindow ("Application Usage Analytics",
+                                {}, new ApplicationUsageDataWindowComponent (isPaidOrGPL()),
+                                applicationUsageDataWindow, false,
+                                400, 300, 400, 300, 400, 300);
+}
+
+void ProjucerApplication::dismissApplicationUsageDataAgreementPopup()
+{
+    if (applicationUsageDataWindow != nullptr)
+        applicationUsageDataWindow = nullptr;
+}
+
+void ProjucerApplication::showPathsWindow()
+{
+    if (pathsWindow != nullptr)
+        pathsWindow->toFront (true);
+    else
+        new FloatingToolWindow ("Global Search Paths",
+                                "pathsWindowPos",
+                                new GlobalSearchPathsWindowComponent(), pathsWindow, false,
+                                600, 500, 600, 500, 600, 500);
+}
+
+void ProjucerApplication::showEditorColourSchemeWindow()
+{
+    if (editorColourSchemeWindow != nullptr)
+        editorColourSchemeWindow->toFront (true);
+    else
+    {
+        new FloatingToolWindow ("Editor Colour Scheme",
+                                "editorColourSchemeWindowPos",
+                                new EditorColourSchemeWindowComponent(),
+                                editorColourSchemeWindow,
+                                false,
+                                500, 500, 500, 500, 500, 500);
+    }
 }
 
 //==============================================================================
@@ -650,55 +808,7 @@ void ProjucerApplication::deleteLogger()
     logger = nullptr;
 }
 
-struct LiveBuildConfigItem   : public ConfigTreeItemTypes::ConfigTreeItemBase
-{
-    LiveBuildConfigItem (Project& p)  : project (p) {}
-
-    bool isMissing() override                        { return false; }
-    bool canBeSelected() const override              { return true; }
-    bool mightContainSubItems() override             { return false; }
-    String getUniqueName() const override            { return "live_build_settings"; }
-    String getRenamingName() const override          { return getDisplayName(); }
-    String getDisplayName() const override           { return "Live Build Settings"; }
-    void setName (const String&) override            {}
-    Icon getIcon() const override                    { return Icon (getIcons().config, getContrastingColour (Colours::green, 0.5f)); }
-
-    void showDocument() override                     { showSettingsPage (new SettingsComp (project)); }
-    void itemOpennessChanged (bool) override         {}
-
-    Project& project;
-
-    //==============================================================================
-    struct SettingsComp  : public Component
-    {
-        SettingsComp (Project& p)
-        {
-            addAndMakeVisible (&group);
-
-            PropertyListBuilder props;
-            LiveBuildProjectSettings::getLiveSettings (p, props);
-
-            group.setProperties (props);
-            group.setName ("Live Build Settings");
-            parentSizeChanged();
-        }
-
-        void parentSizeChanged() override  { updateSize (*this, group); }
-
-        ConfigTreeItemTypes::PropertyGroupComponent group;
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SettingsComp)
-    };
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LiveBuildConfigItem)
-};
-
-void ProjucerApplication::addLiveBuildConfigItem (Project& project, TreeViewItem& parent)
-{
-    parent.addSubItem (new LiveBuildConfigItem (project));
-}
-
-PropertiesFile::Options ProjucerApplication::getPropertyFileOptionsFor (const String& filename)
+PropertiesFile::Options ProjucerApplication::getPropertyFileOptionsFor (const String& filename, bool isProjectSettings)
 {
     PropertiesFile::Options options;
     options.applicationName     = filename;
@@ -710,64 +820,10 @@ PropertiesFile::Options ProjucerApplication::getPropertyFileOptionsFor (const St
     options.folderName          = "Projucer";
    #endif
 
+    if (isProjectSettings)
+        options.folderName += "/ProjectSettings";
+
     return options;
-}
-
-void ProjucerApplication::hideLoginForm()
-{
-    jassert (MessageManager::getInstance()->isThisTheMessageThread());
-    loginForm = nullptr;
-}
-
-void ProjucerApplication::showLoginForm()
-{
-    if (ProjucerLicenses::getInstance()->isDLLPresent())
-    {
-        jassert (MessageManager::getInstance()->isThisTheMessageThread());
-
-        if (loginForm != nullptr)
-            return;
-
-        DialogWindow::LaunchOptions lo;
-
-        lo.dialogTitle = "Log-in to Projucer";
-        lo.dialogBackgroundColour = Colour (0xffdddddd);
-        lo.content.setOwned (loginForm = new LoginForm());
-        lo.escapeKeyTriggersCloseButton = true;
-        lo.componentToCentreAround = nullptr;
-        lo.escapeKeyTriggersCloseButton = true;
-        lo.resizable = false;
-        lo.useBottomRightCornerResizer = false;
-        lo.useNativeTitleBar = true;
-
-        lo.launchAsync();
-
-        getGlobalProperties().setValue ("lastLoginAttemptTime",
-                                        (int) (Time::getCurrentTime().toMilliseconds() / 1000));
-    }
-}
-
-void ProjucerApplication::showLoginFormAsyncIfNotTriedRecently()
-{
-    if (ProjucerLicenses::getInstance()->isDLLPresent())
-    {
-        Time lastLoginAttempt (getGlobalProperties().getValue ("lastLoginAttemptTime").getIntValue() * (int64) 1000);
-
-        if (Time::getCurrentTime().getDayOfMonth() != lastLoginAttempt.getDayOfMonth())
-            startTimer (1000);
-    }
-    else
-    {
-        getGlobalProperties().removeValue ("lastLoginAttemptTime");
-    }
-}
-
-void ProjucerApplication::timerCallback()
-{
-    stopTimer();
-
-    if (! ProjucerLicenses::getInstance()->isLoggedIn())
-        showLoginForm();
 }
 
 void ProjucerApplication::updateAllBuildTabs()
@@ -775,55 +831,6 @@ void ProjucerApplication::updateAllBuildTabs()
     for (int i = 0; i < mainWindowList.windows.size(); ++i)
         if (ProjectContentComponent* p = mainWindowList.windows.getUnchecked(i)->getProjectContentComponent())
             p->rebuildProjectTabs();
-}
-
-//==============================================================================
-void ProjucerApplication::loginOrLogout()
-{
-    ProjucerLicenses& status = *ProjucerLicenses::getInstance();
-
-    if (status.isLoggedIn())
-        status.logout();
-    else
-        showLoginForm();
-
-    updateAllBuildTabs();
-}
-
-bool ProjucerApplication::checkEULA()
-{
-    if (currentEULAHasBeenAcceptedPreviously()
-          || ! ProjucerLicenses::getInstance()->isDLLPresent())
-        return true;
-
-    ScopedPointer<AlertWindow> eulaDialogue (new EULADialogue());
-    bool hasBeenAccepted = (eulaDialogue->runModalLoop() == EULADialogue::accepted);
-    setCurrentEULAAccepted (hasBeenAccepted);
-    return hasBeenAccepted;
-}
-
-bool ProjucerApplication::currentEULAHasBeenAcceptedPreviously() const
-{
-    return getGlobalProperties().getValue (getEULAChecksumProperty()).getIntValue() != 0;
-}
-
-String ProjucerApplication::getEULAChecksumProperty() const
-{
-    return "eulaChecksum_" + MD5 (BinaryData::projucer_EULA_txt,
-                                  BinaryData::projucer_EULA_txtSize).toHexString();
-}
-
-void ProjucerApplication::setCurrentEULAAccepted (bool hasBeenAccepted) const
-{
-    const String checksum (getEULAChecksumProperty());
-    auto& globals = getGlobalProperties();
-
-    if (hasBeenAccepted)
-        globals.setValue (checksum, 1);
-    else
-        globals.removeValue (checksum);
-
-    globals.saveIfNeeded();
 }
 
 void ProjucerApplication::initCommandManager()
@@ -838,4 +845,96 @@ void ProjucerApplication::initCommandManager()
     }
 
     registerGUIEditorCommands();
+}
+
+void ProjucerApplication::selectEditorColourSchemeWithName (const String& schemeName)
+{
+    auto& appearanceSettings = getAppSettings().appearance;
+    auto schemes = appearanceSettings.getPresetSchemes();
+
+    auto schemeIndex = schemes.indexOf (schemeName);
+
+    if (schemeIndex >= 0)
+        setEditorColourScheme (schemeIndex, true);
+}
+
+void ProjucerApplication::setColourScheme (int index, bool saveSetting)
+{
+    switch (index)
+    {
+        case 0: lookAndFeel.setColourScheme (LookAndFeel_V4::getDarkColourScheme());  break;
+        case 1: lookAndFeel.setColourScheme (LookAndFeel_V4::getGreyColourScheme());  break;
+        case 2: lookAndFeel.setColourScheme (LookAndFeel_V4::getLightColourScheme()); break;
+        default: break;
+    }
+
+    lookAndFeel.setupColours();
+    mainWindowList.sendLookAndFeelChange();
+
+    if (utf8Window != nullptr)                  utf8Window->sendLookAndFeelChange();
+    if (svgPathWindow != nullptr)               svgPathWindow->sendLookAndFeelChange();
+    if (aboutWindow != nullptr)                 aboutWindow->sendLookAndFeelChange();
+    if (applicationUsageDataWindow != nullptr)  applicationUsageDataWindow->sendLookAndFeelChange();
+    if (pathsWindow != nullptr)                 pathsWindow->sendLookAndFeelChange();
+    if (editorColourSchemeWindow != nullptr)    editorColourSchemeWindow->sendLookAndFeelChange();
+
+    auto* mcm = ModalComponentManager::getInstance();
+    for (auto i = 0; i < mcm->getNumModalComponents(); ++i)
+        mcm->getModalComponent (i)->sendLookAndFeelChange();
+
+    if (saveSetting)
+    {
+        auto& properties = settings->getGlobalProperties();
+        properties.setValue ("COLOUR SCHEME", index);
+    }
+
+    selectedColourSchemeIndex = index;
+
+    getCommandManager().commandStatusChanged();
+}
+
+void ProjucerApplication::setEditorColourScheme (int index, bool saveSetting)
+{
+    auto& appearanceSettings = getAppSettings().appearance;
+    auto schemes = appearanceSettings.getPresetSchemes();
+
+    index = jmin (index, schemes.size() - 1);
+
+    appearanceSettings.selectPresetScheme (index);
+
+    if (saveSetting)
+    {
+        auto& properties = settings->getGlobalProperties();
+        properties.setValue ("EDITOR COLOUR SCHEME", index);
+    }
+
+    selectedEditorColourSchemeIndex = index;
+
+    getCommandManager().commandStatusChanged();
+}
+
+bool ProjucerApplication::isEditorColourSchemeADefaultScheme (const StringArray& schemes, int editorColourSchemeIndex)
+{
+    auto& schemeName = schemes[editorColourSchemeIndex];
+    return (schemeName == "Default (Dark)" || schemeName == "Default (Light)");
+}
+
+int ProjucerApplication::getEditorColourSchemeForGUIColourScheme (const StringArray& schemes, int guiColourSchemeIndex)
+{
+    auto defaultDarkEditorIndex  = schemes.indexOf ("Default (Dark)");
+    auto defaultLightEditorIndex = schemes.indexOf ("Default (Light)");
+
+    // Can't find default code editor colour schemes!
+    jassert (defaultDarkEditorIndex != -1 && defaultLightEditorIndex != -1);
+
+    return (guiColourSchemeIndex == 2 ? defaultLightEditorIndex : defaultDarkEditorIndex);
+}
+
+void ProjucerApplication::updateEditorColourSchemeIfNeeded()
+{
+    auto& appearanceSettings = getAppSettings().appearance;
+    auto schemes = appearanceSettings.getPresetSchemes();
+
+    if (isEditorColourSchemeADefaultScheme (schemes, selectedEditorColourSchemeIndex))
+        setEditorColourScheme (getEditorColourSchemeForGUIColourScheme (schemes, selectedColourSchemeIndex), true);
 }
