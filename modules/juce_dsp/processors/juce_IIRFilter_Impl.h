@@ -60,7 +60,7 @@ Filter<SampleType>::Filter (Coefficients<typename Filter<SampleType>::NumericTyp
 }
 
 template <typename SampleType>
-void Filter<SampleType>::reset()
+void Filter<SampleType>::reset (SampleType resetToValue)
 {
     auto newOrder = coefficients->getFilterOrder();
 
@@ -72,7 +72,7 @@ void Filter<SampleType>::reset()
     }
 
     for (size_t i = 0; i < order; ++i)
-        state[i] = SampleType {0};
+        state[i] = resetToValue;
 }
 
 template <typename SampleType>
