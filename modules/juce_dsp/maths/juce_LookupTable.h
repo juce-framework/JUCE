@@ -187,7 +187,7 @@ public:
                                      fail for values lower than this.
         @param maxInputValueToUse    The highest input value used. The approximation will
                                      fail for values higher than this.
-        @param numPointsToUse        The number of pre-calculated values stored.
+        @param numPoints             The number of pre-calculated values stored.
     */
     LookupTableTransform (const std::function<FloatType (FloatType)>& functionToApproximate,
                           FloatType minInputValueToUse,
@@ -206,7 +206,7 @@ public:
                                      fail for values lower than this.
         @param maxInputValueToUse    The highest input value used. The approximation will
                                      fail for values higher than this.
-        @param numPointsToUse        The number of pre-calculated values stored.
+        @param numPoints             The number of pre-calculated values stored.
     */
     void initialise (const std::function<FloatType (FloatType)>& functionToApproximate,
                      FloatType minInputValueToUse,
@@ -280,19 +280,27 @@ public:
     }
 
     //==============================================================================
-    /** Calculates the maximum relative error of the approximation for the specified parameter set.
+    /** Calculates the maximum relative error of the approximation for the specified
+        parameter set.
 
-        The closer the returned value is to zero the more accurate the approximation is.
+        The closer the returned value is to zero the more accurate the approximation
+        is.
 
         This function compares the approximated output of this class to the function
         it approximates at a range of points and returns the maximum relative error.
-        This can be used to determine if the approximatiokn is suitable for the given
-        problem. The accuracy of the approximation can generally be improved by increasing
-        numPoints.
+        This can be used to determine if the approximation is suitable for the given
+        problem. The accuracy of the approximation can generally be improved by
+        increasing numPoints.
 
-        @param numTestPoints The number of input values used for error calculation.
-                             Higher numbers can increase the accuracy of the error
-                             calculation. If it's zero 100 * numPoints will be used.
+        @param functionToApproximate The approximated function. This should be a
+                                     mapping from a FloatType to FloatType.
+        @param minInputValue         The lowest input value used.
+        @param maxInputValue         The highest input value used.
+        @param numPoints             The number of pre-calculated values stored.
+        @param numTestPoints         The number of input values used for error
+                                     calculation. Higher numbers can increase the
+                                     accuracy of the error calculation. If it's zero
+                                     then 100 * numPoints will be used.
     */
     static double calculateMaxRelativeError (const std::function<FloatType (FloatType)>& functionToApproximate,
                                              FloatType minInputValue,

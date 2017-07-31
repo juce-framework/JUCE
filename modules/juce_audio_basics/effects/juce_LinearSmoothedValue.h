@@ -108,7 +108,7 @@ public:
         @param samples Pointer to a raw array of samples
         @param numSamples Length of array of samples
     */
-    void applyGain (FloatType *samples, int numSamples) noexcept
+    void applyGain (FloatType* samples, int numSamples) noexcept
     {
         jassert(numSamples >= 0);
 
@@ -126,11 +126,11 @@ public:
     //==============================================================================
     /** Computes output as linear smoothed gain applied to a stream of samples.
         Sout[i] = Sin[i] * gain
-        @param samples Pointer to a raw array of samples
-        @param numSamples Length of sample array
-        @param numSamples Length of array of samples
+        @param samplesOut A pointer to a raw array of output samples
+        @param samplesIn  A pointer to a raw array of input samples
+        @param numSamples The length of the array of samples
     */
-    void applyGain (FloatType *samplesOut, const FloatType *samplesIn, int numSamples) noexcept
+    void applyGain (FloatType* samplesOut, const FloatType* samplesIn, int numSamples) noexcept
     {
         jassert (numSamples >= 0);
 
@@ -155,7 +155,7 @@ public:
         {
             if (buffer.getNumChannels() == 1)
             {
-                FloatType *samples = buffer.getWritePointer(0);
+                FloatType* samples = buffer.getWritePointer(0);
 
                 for (int i = 0; i < numSamples; i++)
                     samples[i] *= getNextValue();

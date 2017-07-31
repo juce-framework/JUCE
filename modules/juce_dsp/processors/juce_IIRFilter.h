@@ -42,7 +42,7 @@ namespace IIR
         which is designed to prevent artefacts at parameter changes, instead of the
         class Filter.
 
-        @see Filter::Coefficients, FilterAudioSource, @StateVariableFilter
+        @see Filter::Coefficients, FilterAudioSource, StateVariableFilter
     */
     template <typename SampleType>
     class Filter

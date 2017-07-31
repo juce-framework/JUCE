@@ -65,16 +65,16 @@ protected:
     //==============================================================================
     /** Creates an AudioFormatWriter object.
 
-        @param destStream       the stream to write to - this will be deleted
-                                by this object when it is no longer needed
-        @param formatName       the description that will be returned by the getFormatName()
-                                method
-        @param sampleRate       the sample rate to use - the base class just stores
-                                this value, it doesn't do anything with it
-        @param channelLayout    the channel layout to use for the writer - the base class
-                                just stores this value, it doesn't do anything with it
-        @param bitsPerSample    the bit depth of the stream - the base class just stores
-                                this value, it doesn't do anything with it
+        @param destStream            the stream to write to - this will be deleted
+                                     by this object when it is no longer needed
+        @param formatName            the description that will be returned by the getFormatName()
+                                     method
+        @param sampleRate            the sample rate to use - the base class just stores
+                                     this value, it doesn't do anything with it
+        @param audioChannelLayout    the channel layout to use for the writer - the base class
+                                     just stores this value, it doesn't do anything with it
+        @param bitsPerSample         the bit depth of the stream - the base class just stores
+                                     this value, it doesn't do anything with it
     */
     AudioFormatWriter (OutputStream* destStream,
                        const String& formatName,
