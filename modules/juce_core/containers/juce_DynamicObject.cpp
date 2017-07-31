@@ -91,7 +91,7 @@ DynamicObject::Ptr DynamicObject::clone()
     return d;
 }
 
-void DynamicObject::writeAsJSON (OutputStream& out, const int indentLevel, const bool allOnOneLine)
+void DynamicObject::writeAsJSON (OutputStream& out, const int indentLevel, const bool allOnOneLine, int maximumDecimalPlaces)
 {
     out << '{';
     if (! allOnOneLine)
@@ -107,7 +107,7 @@ void DynamicObject::writeAsJSON (OutputStream& out, const int indentLevel, const
         out << '"';
         JSONFormatter::writeString (out, properties.getName (i));
         out << "\": ";
-        JSONFormatter::write (out, properties.getValueAt (i), indentLevel + JSONFormatter::indentSize, allOnOneLine);
+        JSONFormatter::write (out, properties.getValueAt (i), indentLevel + JSONFormatter::indentSize, allOnOneLine, maximumDecimalPlaces);
 
         if (i < numValues - 1)
         {

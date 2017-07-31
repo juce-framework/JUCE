@@ -827,7 +827,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         DynamicObject::Ptr clone() override    { return new FunctionObject (*this); }
 
-        void writeAsJSON (OutputStream& out, int /*indentLevel*/, bool /*allOnOneLine*/) override
+        void writeAsJSON (OutputStream& out, int /*indentLevel*/, bool /*allOnOneLine*/, int /*maximumDecimalPlaces*/) override
         {
             out << "function " << functionCode;
         }

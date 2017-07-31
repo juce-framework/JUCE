@@ -1,6 +1,34 @@
 JUCE breaking changes
 =====================
 
+Develop Branch
+=============
+
+Change
+------
+The writeAsJSON virtual method of the DynamicObject class requires an
+additional parameter, maximumDecimalPlaces, to specify the maximum precision of
+floating point numbers.
+
+Possible Issues
+---------------
+Classes which inherit from DynamicObject and override this method will need to
+update their method signature.
+
+Workaround
+----------
+Your custom DynamicObject class can choose to ignore the additional parameter
+if you don't wish to support this behaviour.
+
+Rationale
+---------
+When serialising the results of calculations to JSON the rounding of floating
+point numbers can result in numbers with 17 significant figures where only a
+few are required. This change to DynamicObject is required to support
+truncating those numbers.
+
+
+
 Version 5.1.0
 =============
 
