@@ -75,12 +75,12 @@ public:
         : ComponentTypeHandler ("Generic Component", "GenericComponent", typeid (GenericComponent), 150, 24)
     {}
 
-    Component* createNewComponent (JucerDocument*)
+    Component* createNewComponent (JucerDocument*) override
     {
         return new GenericComponent();
     }
 
-    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
+    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout) override
     {
         XmlElement* e = ComponentTypeHandler::createXmlFor (comp, layout);
         e->setAttribute ("class", ((GenericComponent*) comp)->actualClassName);
@@ -89,7 +89,7 @@ public:
         return e;
     }
 
-    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout)
+    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout) override
     {
         if (! ComponentTypeHandler::restoreFromXml (xml, comp, layout))
             return false;
@@ -99,25 +99,29 @@ public:
         return true;
     }
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
+    void getEditableProperties (Component* component, JucerDocument& document,
+                                Array<PropertyComponent*>& props, bool multipleSelected) override
     {
-        ComponentTypeHandler::getEditableProperties (component, document, props);
+        ComponentTypeHandler::getEditableProperties (component, document, props, multipleSelected);
+
+        if (multipleSelected)
+            return;
 
         props.add (new GenericCompClassProperty (dynamic_cast<GenericComponent*> (component), document));
         props.add (new GenericCompParamsProperty (dynamic_cast<GenericComponent*> (component), document));
     }
 
-    String getClassName (Component* comp) const
+    String getClassName (Component* comp) const override
     {
         return static_cast<GenericComponent*> (comp)->actualClassName;
     }
 
-    String getCreationParameters (GeneratedCode&, Component* comp)
+    String getCreationParameters (GeneratedCode&, Component* comp) override
     {
         return static_cast<GenericComponent*> (comp)->constructorParams;
     }
 
-    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
+    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName) override
     {
         ComponentTypeHandler::fillInCreationCode (code, component, memberVariableName);
 

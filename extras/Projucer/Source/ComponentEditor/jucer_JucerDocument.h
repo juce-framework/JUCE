@@ -93,6 +93,9 @@ public:
     int getInitialWidth() const noexcept                                    { return initialWidth; }
     int getInitialHeight() const noexcept                                   { return initialHeight; }
 
+    void setLastSelectedTabIndex (int index);
+    int getLastSelectedTabIndex() const noexcept                            { return lastTab; }
+
     //==============================================================================
     virtual int getNumPaintRoutines() const = 0;
     virtual StringArray getPaintRoutineNames() const = 0;
@@ -147,6 +150,7 @@ protected:
 
     bool fixedSize = false;
     int initialWidth = 600, initialHeight = 400;
+    int lastTab = 1;
 
     BinaryResources resources;
 

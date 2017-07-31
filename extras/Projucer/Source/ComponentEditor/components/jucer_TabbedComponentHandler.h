@@ -31,7 +31,7 @@ public:
         : ComponentTypeHandler ("Tabbed Component", "TabbedComponent", typeid (TabbedComponent), 200, 150)
     {}
 
-    Component* createNewComponent (JucerDocument*)
+    Component* createNewComponent (JucerDocument*) override
     {
         TabbedComponent* const t = new TabbedComponent (TabbedButtonBar::TabsAtTop);
         t->setName ("new tabbed component");
@@ -42,7 +42,7 @@ public:
         return t;
     }
 
-    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
+    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout) override
     {
         TabbedComponent* const t = dynamic_cast<TabbedComponent*> (comp);
         XmlElement* const e = ComponentTypeHandler::createXmlFor (comp, layout);
@@ -61,7 +61,7 @@ public:
         return e;
     }
 
-    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout)
+    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout) override
     {
         if (! ComponentTypeHandler::restoreFromXml (xml, comp, layout))
             return false;
@@ -90,27 +90,33 @@ public:
         return true;
     }
 
-    void getEditableProperties (Component* component, JucerDocument& doc, Array<PropertyComponent*>& props)
+    void getEditableProperties (Component* component, JucerDocument& doc,
+                                Array<PropertyComponent*>& props, bool multipleSelected) override
     {
-        ComponentTypeHandler::getEditableProperties (component, doc, props);
+        ComponentTypeHandler::getEditableProperties (component, doc, props, multipleSelected);
 
-        TabbedComponent* const t = dynamic_cast<TabbedComponent*> (component);
+        if (multipleSelected)
+            return;
 
-        props.add (new TabOrientationProperty (t, doc));
-        props.add (new TabDepthProperty (t, doc));
+        if (auto* t = dynamic_cast<TabbedComponent*> (component))
+        {
+            props.add (new TabOrientationProperty (t, doc));
+            props.add (new TabDepthProperty (t, doc));
 
-        if (t->getNumTabs() > 0)
-            props.add (new TabInitialTabProperty (t, doc));
+            if (t->getNumTabs() > 0)
+                props.add (new TabInitialTabProperty (t, doc));
 
-        props.add (new TabAddTabProperty (t, doc));
+            props.add (new TabAddTabProperty (t, doc));
 
-        if (t->getNumTabs() > 0)
-            props.add (new TabRemoveTabProperty (t, doc));
+            if (t->getNumTabs() > 0)
+                props.add (new TabRemoveTabProperty (t, doc));
+        }
     }
 
-    void addPropertiesToPropertyPanel (Component* comp, JucerDocument& doc, PropertyPanel& panel)
+    void addPropertiesToPropertyPanel (Component* comp, JucerDocument& doc,
+                                       PropertyPanel& panel, bool multipleSelected) override
     {
-        ComponentTypeHandler::addPropertiesToPropertyPanel (comp, doc, panel);
+        ComponentTypeHandler::addPropertiesToPropertyPanel (comp, doc, panel, multipleSelected);
 
         TabbedComponent* const t = dynamic_cast<TabbedComponent*> (comp);
 
@@ -136,7 +142,7 @@ public:
         }
     }
 
-    String getCreationParameters (GeneratedCode&, Component* comp)
+    String getCreationParameters (GeneratedCode&, Component* comp) override
     {
         TabbedComponent* const t = dynamic_cast<TabbedComponent*> (comp);
 
@@ -152,7 +158,7 @@ public:
         return {};
     }
 
-    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
+    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName) override
     {
         TabbedComponent* const t = dynamic_cast<TabbedComponent*> (component);
 

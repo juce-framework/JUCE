@@ -349,8 +349,11 @@ void PaintElementPath::pointListChanged()
 }
 
 //==============================================================================
-void PaintElementPath::getEditableProperties (Array <PropertyComponent*>& props)
+void PaintElementPath::getEditableProperties (Array <PropertyComponent*>& props, bool multipleSelected)
 {
+    if (multipleSelected)
+        return;
+
     props.add (new PathWindingModeProperty (this));
     getColourSpecificProperties (props);
 }
@@ -1453,9 +1456,12 @@ void PathPoint::changePointType (const Path::Iterator::PathElementType newType,
     }
 }
 
-void PathPoint::getEditableProperties (Array<PropertyComponent*>& props)
+void PathPoint::getEditableProperties (Array<PropertyComponent*>& props, bool multipleSelected)
 {
-    const int index = owner->points.indexOf (this);
+    if (multipleSelected)
+        return;
+
+    auto index = owner->points.indexOf (this);
     jassert (index >= 0);
 
     switch (type)

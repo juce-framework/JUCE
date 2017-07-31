@@ -34,12 +34,12 @@ public:
         registerColour (GroupComponent::textColourId, "text", "textcol");
     }
 
-    Component* createNewComponent (JucerDocument*)
+    Component* createNewComponent (JucerDocument*) override
     {
         return new GroupComponent ("new group", "group");
     }
 
-    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
+    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout) override
     {
         GroupComponent* const g = (GroupComponent*) comp;
 
@@ -54,7 +54,7 @@ public:
         return e;
     }
 
-    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout)
+    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout) override
     {
         GroupComponent* const g = (GroupComponent*) comp;
 
@@ -67,7 +67,7 @@ public:
         return true;
     }
 
-    String getCreationParameters (GeneratedCode& code, Component* component)
+    String getCreationParameters (GeneratedCode& code, Component* component) override
     {
         GroupComponent* g = dynamic_cast<GroupComponent*> (component);
 
@@ -76,7 +76,7 @@ public:
                 + quotedString (g->getText(), code.shouldUseTransMacro());
     }
 
-    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
+    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName) override
     {
         ComponentTypeHandler::fillInCreationCode (code, component, memberVariableName);
 
@@ -99,12 +99,19 @@ public:
         code.constructorCode += s;
     }
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
+    void getEditableProperties (Component* component, JucerDocument& document,
+                                Array<PropertyComponent*>& props, bool multipleSelected) override
     {
-        ComponentTypeHandler::getEditableProperties (component, document, props);
+        ComponentTypeHandler::getEditableProperties (component, document, props, multipleSelected);
 
-        props.add (new GroupTitleProperty ((GroupComponent*) component, document));
-        props.add (new GroupJustificationProperty ((GroupComponent*) component, document));
+        if (multipleSelected)
+            return;
+
+        if (auto* gc = dynamic_cast<GroupComponent*> (component))
+        {
+            props.add (new GroupTitleProperty (gc, document));
+            props.add (new GroupJustificationProperty (gc, document));
+        }
 
         addColourProperties (component, document, props);
     }

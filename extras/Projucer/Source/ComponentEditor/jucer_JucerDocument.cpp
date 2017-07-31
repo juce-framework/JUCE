@@ -221,6 +221,15 @@ void JucerDocument::setInitialSize (int w, int h)
     }
 }
 
+void JucerDocument::setLastSelectedTabIndex (int index)
+{
+    if (index != lastTab)
+    {
+        lastTab = index;
+        flushChangesToDocuments (nullptr);
+    }
+}
+
 //==============================================================================
 bool JucerDocument::isSnapActive (const bool disableIfCtrlKeyDown) const noexcept
 {
@@ -350,6 +359,7 @@ XmlElement* JucerDocument::createXml() const
     doc->setAttribute ("fixedSize", fixedSize);
     doc->setAttribute ("initialWidth", initialWidth);
     doc->setAttribute ("initialHeight", initialHeight);
+    doc->setAttribute ("lastSelectedTab", lastTab);
 
     if (activeExtraMethods.size() > 0)
     {
@@ -382,6 +392,7 @@ bool JucerDocument::loadFromXml (const XmlElement& xml)
         fixedSize = xml.getBoolAttribute ("fixedSize", false);
         initialWidth = xml.getIntAttribute ("initialWidth", 300);
         initialHeight = xml.getIntAttribute ("initialHeight", 200);
+        lastTab = xml.getIntAttribute ("lastSelectedTab", 1);
 
         snapGridPixels = xml.getIntAttribute ("snapPixels", snapGridPixels);
         snapActive = xml.getBoolAttribute ("snapActive", snapActive);

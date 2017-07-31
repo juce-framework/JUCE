@@ -34,12 +34,12 @@ public:
         registerColour (TreeView::linesColourId, "lines", "linecol");
     }
 
-    Component* createNewComponent (JucerDocument*)
+    Component* createNewComponent (JucerDocument*) override
     {
         return new DemoTreeView();
     }
 
-    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
+    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout) override
     {
         TreeView* const t = dynamic_cast<TreeView*> (comp);
         XmlElement* const e = ComponentTypeHandler::createXmlFor (comp, layout);
@@ -50,7 +50,7 @@ public:
         return e;
     }
 
-    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout)
+    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout) override
     {
         if (! ComponentTypeHandler::restoreFromXml (xml, comp, layout))
             return false;
@@ -64,10 +64,15 @@ public:
         return true;
     }
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
+    void getEditableProperties (Component* component, JucerDocument& document,
+                                Array<PropertyComponent*>& props, bool multipleSelected) override
     {
-        ComponentTypeHandler::getEditableProperties (component, document, props);
-        TreeView* const t = dynamic_cast<TreeView*> (component);
+        ComponentTypeHandler::getEditableProperties (component, document, props, multipleSelected);
+
+        if (multipleSelected)
+            return;
+
+        auto* t = dynamic_cast<TreeView*> (component);
 
         props.add (new TreeViewRootItemProperty (t, document));
         props.add (new TreeViewRootOpennessProperty (t, document));
@@ -75,12 +80,12 @@ public:
         addColourProperties (t, document, props);
     }
 
-    String getCreationParameters (GeneratedCode&, Component* comp)
+    String getCreationParameters (GeneratedCode&, Component* comp) override
     {
         return quotedString (comp->getName(), false);
     }
 
-    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
+    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName) override
     {
         TreeView defaultTreeView;
         TreeView* const t = dynamic_cast<TreeView*> (component);

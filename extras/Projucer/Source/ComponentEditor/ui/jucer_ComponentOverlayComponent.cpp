@@ -81,11 +81,14 @@ void ComponentOverlayComponent::paint (Graphics& g)
     border->setColour (backgroundColourId, Colours::transparentBlack);
     if (selected)
     {
+        auto selectedItems = layout.getSelectedSet();
+        auto baseColour = findColour (defaultHighlightColourId);
+
         const BorderSize<int> borderSize (border->getBorderThickness());
 
         drawResizableBorder (g, getWidth(), getHeight(), borderSize,
                              (isMouseOverOrDragging() || border->isMouseOverOrDragging()),
-                             findColour (defaultHighlightColourId));
+                             baseColour.withAlpha (selectedItems.getSelectedItem (0) == target ? 1.0f : 0.3f));
     }
     else if (isMouseOverOrDragging())
     {
@@ -240,6 +243,11 @@ void ComponentOverlayComponent::applyBoundsToComponent (Component& component, Re
     {
         layout.getDocument()->getUndoManager().undoCurrentTransactionOnly();
 
+        auto dX = b.getX() - component.getX();
+        auto dY = b.getY() - component.getY();
+        auto dW = b.getWidth() - component.getWidth();
+        auto dH = b.getHeight() - component.getHeight();
+
         component.setBounds (b);
 
         if (auto* parent = target->getParentComponent())
@@ -249,6 +257,18 @@ void ComponentOverlayComponent::applyBoundsToComponent (Component& component, Re
                                b.getHeight() - borderThickness * 2);
 
         layout.updateStoredComponentPosition (target, true);
+
+        if (layout.getSelectedSet().getNumSelected() > 1)
+        {
+            for (auto s : layout.getSelectedSet())
+            {
+                if (s != target)
+                {
+                    s->setBounds (s->getX() + dX, s->getY() + dY, s->getWidth() + dW, s->getHeight() + dH);
+                    layout.updateStoredComponentPosition (s, true);
+                }
+            }
+        }
     }
 }
 

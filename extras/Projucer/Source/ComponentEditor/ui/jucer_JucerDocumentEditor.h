@@ -89,6 +89,7 @@ private:
     double currentZoomLevel = 1.0;
 
     bool isSomethingSelected() const;
+    bool areMultipleThingsSelected() const;
 
     // only non-zero if a layout tab is selected
     ComponentLayout* getCurrentLayout() const;

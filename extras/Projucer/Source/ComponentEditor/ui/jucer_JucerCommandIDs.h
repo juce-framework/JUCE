@@ -58,6 +58,11 @@ namespace JucerCommandIDs
 
         newDocumentBase        = 0xf32001,
         newComponentBase       = 0xf30001,
-        newElementBase         = 0xf31001
+        newElementBase         = 0xf31001,
+
+        alignTop               = 0xf33000,
+        alignRight             = 0xf33001,
+        alignBottom            = 0xf33002,
+        alignLeft              = 0xf33003,
     };
 }

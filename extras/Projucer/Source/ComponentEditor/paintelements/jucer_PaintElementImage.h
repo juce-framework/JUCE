@@ -58,7 +58,7 @@ public:
         return nullptr;
     }
 
-    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle<int>& parentArea)
+    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle<int>& parentArea) override
     {
         const Rectangle<int> r (position.getRectangle (parentArea, layout));
 
@@ -83,9 +83,9 @@ public:
     }
 
     //==============================================================================
-    void getEditableProperties (Array <PropertyComponent*>& props)
+    void getEditableProperties (Array <PropertyComponent*>& props, bool multipleSelected) override
     {
-        PaintElement::getEditableProperties (props);
+        PaintElement::getEditableProperties (props, multipleSelected);
 
         props.add (new ImageElementResourceProperty (this));
         props.add (new StretchModeProperty (this));
@@ -93,7 +93,7 @@ public:
         props.add (new ResetSizeProperty (this));
     }
 
-    void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode)
+    void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode) override
     {
         if (opacity > 0)
         {
@@ -177,7 +177,7 @@ public:
         }
     }
 
-    void applyCustomPaintSnippets (StringArray& snippets)
+    void applyCustomPaintSnippets (StringArray& snippets) override
     {
         customPaintCode.clear();
 
@@ -362,7 +362,7 @@ public:
     }
 
     //==============================================================================
-    XmlElement* createXml() const
+    XmlElement* createXml() const override
     {
         XmlElement* e = new XmlElement (getTagName());
         position.applyToXml (*e);
@@ -373,7 +373,7 @@ public:
         return e;
     }
 
-    bool loadFromXml (const XmlElement& xml)
+    bool loadFromXml (const XmlElement& xml) override
     {
         if (xml.hasTagName (getTagName()))
         {

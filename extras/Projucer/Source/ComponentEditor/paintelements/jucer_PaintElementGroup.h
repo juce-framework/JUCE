@@ -106,11 +106,11 @@ public:
     }
 
     //==============================================================================
-    void setInitialBounds (int /*parentWidth*/, int /*parentHeight*/)
+    void setInitialBounds (int /*parentWidth*/, int /*parentHeight*/) override
     {
     }
 
-    Rectangle<int> getCurrentBounds (const Rectangle<int>& parentArea) const
+    Rectangle<int> getCurrentBounds (const Rectangle<int>& parentArea) const override
     {
         Rectangle<int> r;
 
@@ -125,7 +125,7 @@ public:
         return r;
     }
 
-    void setCurrentBounds (const Rectangle<int>& b, const Rectangle<int>& parentArea, const bool undoable)
+    void setCurrentBounds (const Rectangle<int>& b, const Rectangle<int>& parentArea, const bool undoable) override
     {
         Rectangle<int> newBounds (b);
         newBounds.setSize (jmax (1, newBounds.getWidth()),
@@ -162,18 +162,19 @@ public:
     }
 
     //==============================================================================
-    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle<int>& parentArea)
+    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle<int>& parentArea) override
     {
         for (int i = 0; i < subElements.size(); ++i)
             subElements.getUnchecked(i)->draw (g, layout, parentArea);
     }
 
-    void getEditableProperties (Array<PropertyComponent*>& props)
+    void getEditableProperties (Array<PropertyComponent*>& props, bool multipleSelected) override
     {
-        props.add (new UngroupProperty (this));
+        if (! multipleSelected)
+            props.add (new UngroupProperty (this));
     }
 
-    void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode)
+    void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode) override
     {
         for (int i = 0; i < subElements.size(); ++i)
             subElements.getUnchecked(i)->fillInGeneratedCode (code, paintMethodCode);
@@ -181,7 +182,7 @@ public:
 
     static const char* getTagName() noexcept        { return "GROUP"; }
 
-    XmlElement* createXml() const
+    XmlElement* createXml() const override
     {
         XmlElement* e = new XmlElement (getTagName());
 
@@ -194,7 +195,7 @@ public:
         return e;
     }
 
-    bool loadFromXml (const XmlElement& xml)
+    bool loadFromXml (const XmlElement& xml) override
     {
         if (xml.hasTagName (getTagName()))
         {
@@ -209,7 +210,7 @@ public:
         return false;
     }
 
-    void applyCustomPaintSnippets (StringArray& snippets)
+    void applyCustomPaintSnippets (StringArray& snippets) override
     {
         for (auto* e : subElements)
             e->applyCustomPaintSnippets (snippets);

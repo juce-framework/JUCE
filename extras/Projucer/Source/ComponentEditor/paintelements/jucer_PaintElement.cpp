@@ -118,6 +118,74 @@ public:
     RelativePositionedRectangle newState, oldState;
 };
 
+class ChangePaintElementBoundsAction    : public PaintElementUndoableAction <PaintElement>
+{
+public:
+    ChangePaintElementBoundsAction (PaintElement* const element, const Rectangle<int>& bounds)
+        : PaintElementUndoableAction <PaintElement> (element),
+          newBounds (bounds),
+          oldBounds (element->getBounds())
+    {
+    }
+
+    bool perform()
+    {
+        showCorrectTab();
+        getElement()->setBounds (newBounds);
+        return true;
+    }
+
+    bool undo()
+    {
+        showCorrectTab();
+        getElement()->setBounds (oldBounds);
+        return true;
+    }
+
+private:
+    Rectangle<int> newBounds, oldBounds;
+};
+
+class ChangePaintElementBoundsAndPropertiesAction    : public PaintElementUndoableAction <PaintElement>
+{
+public:
+    ChangePaintElementBoundsAndPropertiesAction (PaintElement* const element, const Rectangle<int>& bounds,
+                                                 const NamedValueSet& props)
+        : PaintElementUndoableAction <PaintElement> (element),
+          newBounds (bounds),
+          oldBounds (element->getBounds()),
+          newProps (props),
+          oldProps (element->getProperties())
+    {
+    }
+
+    bool perform()
+    {
+        showCorrectTab();
+
+        if (auto* pe = dynamic_cast<PaintRoutineEditor*> (getElement()->getParentComponent()))
+            getElement()->setCurrentBounds (newBounds, pe->getComponentArea(), false);
+
+        getElement()->getProperties() = newProps;
+        return true;
+    }
+
+    bool undo()
+    {
+        showCorrectTab();
+
+        if (auto* pe = dynamic_cast<PaintRoutineEditor*> (getElement()->getParentComponent()))
+            getElement()->setCurrentBounds (oldBounds, pe->getComponentArea(), false);
+
+        getElement()->getProperties() = oldProps;
+        return true;
+    }
+
+private:
+    Rectangle<int> newBounds, oldBounds;
+    NamedValueSet newProps, oldProps;
+};
+
 void PaintElement::setPosition (const RelativePositionedRectangle& newPosition, const bool undoable)
 {
     if (position != newPosition)
@@ -133,6 +201,60 @@ void PaintElement::setPosition (const RelativePositionedRectangle& newPosition, 
 
             if (owner != nullptr)
                 owner->changed();
+        }
+    }
+}
+
+void PaintElement::setPaintElementBounds (const Rectangle<int>& newBounds, const bool undoable)
+{
+    if (getBounds() != newBounds)
+    {
+        if (undoable)
+        {
+            perform (new ChangePaintElementBoundsAction (this, newBounds), "Change paint element bounds");
+        }
+        else
+        {
+            setBounds (newBounds);
+            changed();
+        }
+    }
+}
+
+void PaintElement::setPaintElementBoundsAndProperties (PaintElement* elementToPosition, const Rectangle<int>& newBounds,
+                                                       PaintElement* referenceElement, const bool undoable)
+{
+    auto props = NamedValueSet (elementToPosition->getProperties());
+
+    auto rect = elementToPosition->getPosition().rect;
+    auto referenceElementPosition = referenceElement->getPosition();
+    auto referenceElementRect = referenceElementPosition.rect;
+
+    rect.setModes (referenceElementRect.getAnchorPointX(), referenceElementRect.getPositionModeX(),
+                   referenceElementRect.getAnchorPointY(), referenceElementRect.getPositionModeY(),
+                   referenceElementRect.getWidthMode(),    referenceElementRect.getHeightMode(),
+                   elementToPosition->getBounds());
+
+    props.set ("pos",         rect.toString());
+    props.set ("relativeToX", String::toHexString (referenceElementPosition.relativeToX));
+    props.set ("relativeToY", String::toHexString (referenceElementPosition.relativeToY));
+    props.set ("relativeToW", String::toHexString (referenceElementPosition.relativeToW));
+    props.set ("relativeToH", String::toHexString (referenceElementPosition.relativeToH));
+
+    if (elementToPosition->getBounds() != newBounds || elementToPosition->getProperties() != props)
+    {
+        if (undoable)
+        {
+            perform (new ChangePaintElementBoundsAndPropertiesAction (elementToPosition, newBounds, props),
+                     "Change paint element bounds");
+        }
+        else
+        {
+            if (auto* pe = dynamic_cast<PaintRoutineEditor*> (elementToPosition->getParentComponent()))
+                elementToPosition->setCurrentBounds (newBounds, pe->getComponentArea(), false);
+
+            elementToPosition->getProperties() = props;
+            owner->changed();
         }
     }
 }
@@ -181,13 +303,17 @@ public:
                              ComponentPositionDimension dimension_)
        : PositionPropertyBase (e, name, dimension_, true, false,
                                e->getDocument()->getComponentLayout()),
-         listener (e)
+         listener (e),
+         element (e)
     {
         listener.setPropertyToRefresh (*this);
     }
 
     void setPosition (const RelativePositionedRectangle& newPos)
     {
+        if (element->getOwner()->getSelectedElements().getNumSelected() > 1)
+            positionOtherSelectedElements (getPosition(), newPos);
+
         listener.owner->setPosition (newPos, true);
     }
 
@@ -196,12 +322,51 @@ public:
         return listener.owner->getPosition();
     }
 
+private:
     ElementListener<PaintElement> listener;
+    PaintElement* element;
+
+    void positionOtherSelectedElements (const RelativePositionedRectangle& oldPos, const RelativePositionedRectangle& newPos)
+    {
+        for (auto* s : element->getOwner()->getSelectedElements())
+        {
+            if (s != element)
+            {
+                auto currentPos = s->getPosition();
+                auto diff = 0.0;
+
+                if (dimension == ComponentPositionDimension::componentX)
+                {
+                    diff = newPos.rect.getX() - oldPos.rect.getX();
+                    currentPos.rect.setX (currentPos.rect.getX() + diff);
+                }
+                else if (dimension == ComponentPositionDimension::componentY)
+                {
+                    diff = newPos.rect.getY() - oldPos.rect.getY();
+                    currentPos.rect.setY (currentPos.rect.getY() + diff);
+                }
+                else if (dimension == ComponentPositionDimension::componentWidth)
+                {
+                    diff = newPos.rect.getWidth() - oldPos.rect.getWidth();
+                    currentPos.rect.setWidth (currentPos.rect.getWidth() + diff);
+                }
+                else if (dimension == ComponentPositionDimension::componentHeight)
+                {
+                    diff = newPos.rect.getHeight() - oldPos.rect.getHeight();
+                    currentPos.rect.setHeight (currentPos.rect.getHeight() + diff);
+                }
+
+                s->setPosition (currentPos, true);
+            }
+        }
+    }
 };
 
 //==============================================================================
-void PaintElement::getEditableProperties (Array <PropertyComponent*>& props)
+void PaintElement::getEditableProperties (Array <PropertyComponent*>& props, bool multipleSelected)
 {
+    ignoreUnused (multipleSelected);
+
     props.add (new ElementPositionProperty (this, "x", PositionPropertyBase::componentX));
     props.add (new ElementPositionProperty (this, "y", PositionPropertyBase::componentY));
     props.add (new ElementPositionProperty (this, "width", PositionPropertyBase::componentWidth));
@@ -258,10 +423,11 @@ void PaintElement::paint (Graphics& g)
         if (selected)
         {
             const BorderSize<int> borderSize (border->getBorderThickness());
+            auto baseColour = findColour (defaultHighlightColourId);
 
             drawResizableBorder (g, getWidth(), getHeight(), borderSize,
                                  (isMouseOverOrDragging() || border->isMouseOverOrDragging()),
-                                 findColour (defaultHighlightColourId));
+                                 baseColour.withAlpha (owner->getSelectedElements().getSelectedItem (0) == this ? 1.0f : 0.3f));
         }
         else if (isMouseOverOrDragging())
         {
@@ -405,9 +571,32 @@ void PaintElement::applyBoundsToComponent (Component&, Rectangle<int> newBounds)
     {
         getDocument()->getUndoManager().undoCurrentTransactionOnly();
 
+        auto dX = newBounds.getX() - getX();
+        auto dY = newBounds.getY() - getY();
+        auto dW = newBounds.getWidth() - getWidth();
+        auto dH = newBounds.getHeight() - getHeight();
+
         if (auto* pe = dynamic_cast<PaintRoutineEditor*> (getParentComponent()))
             setCurrentBounds (newBounds.expanded (-borderThickness, -borderThickness),
-              pe->getComponentArea(), true);
+                              pe->getComponentArea(), true);
+
+        if (owner->getSelectedElements().getNumSelected() > 1)
+        {
+            for (auto selectedElement : owner->getSelectedElements())
+            {
+                if (selectedElement != this)
+                {
+                    if (auto* pe = dynamic_cast<PaintRoutineEditor*> (selectedElement->getParentComponent()))
+                    {
+                        Rectangle<int> r { selectedElement->getX() + dX, selectedElement->getY() + dY,
+                                           selectedElement->getWidth() + dW, selectedElement->getHeight() + dH };
+
+                        selectedElement->setCurrentBounds (r.expanded (-borderThickness, -borderThickness),
+                                                           pe->getComponentArea(), true);
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -481,6 +670,16 @@ void PaintElement::showPopupMenu()
     m.addCommandItem (commandManager, JucerCommandIDs::toFront);
     m.addCommandItem (commandManager, JucerCommandIDs::toBack);
     m.addSeparator();
+
+    if (owner->getSelectedElements().getNumSelected() > 1)
+    {
+        m.addCommandItem (commandManager, JucerCommandIDs::alignTop);
+        m.addCommandItem (commandManager, JucerCommandIDs::alignRight);
+        m.addCommandItem (commandManager, JucerCommandIDs::alignBottom);
+        m.addCommandItem (commandManager, JucerCommandIDs::alignLeft);
+        m.addSeparator();
+    }
+
     m.addCommandItem (commandManager, StandardApplicationCommandIDs::cut);
     m.addCommandItem (commandManager, StandardApplicationCommandIDs::copy);
     m.addCommandItem (commandManager, StandardApplicationCommandIDs::paste);

@@ -47,7 +47,7 @@ public:
     ~ColouredElement();
 
     //==============================================================================
-    void getEditableProperties (Array<PropertyComponent*>& props);
+    void getEditableProperties (Array<PropertyComponent*>& props, bool multipleSelected) override;
     void getColourSpecificProperties (Array<PropertyComponent*>& props);
 
     //==============================================================================
@@ -62,10 +62,10 @@ public:
     void setStrokeFill (const JucerFillType& newType, const bool undoable);
 
     //==============================================================================
-    Rectangle<int> getCurrentBounds (const Rectangle<int>& parentArea) const;
-    void setCurrentBounds (const Rectangle<int>& newBounds, const Rectangle<int>& parentArea, const bool undoable);
+    Rectangle<int> getCurrentBounds (const Rectangle<int>& parentArea) const override;
+    void setCurrentBounds (const Rectangle<int>& newBounds, const Rectangle<int>& parentArea, const bool undoable) override;
 
-    void createSiblingComponents();
+    void createSiblingComponents() override;
 
     //==============================================================================
     void addColourAttributes (XmlElement* const e) const;

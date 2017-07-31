@@ -56,6 +56,9 @@ public:
 
     const RelativePositionedRectangle& getPosition() const;
     void setPosition (const RelativePositionedRectangle& newPosition, const bool undoable);
+    void setPaintElementBounds (const Rectangle<int>& newBounds, const bool undoable);
+    void setPaintElementBoundsAndProperties (PaintElement* elementToPosition, const Rectangle<int>& newBounds,
+                                             PaintElement* referenceElement, const bool undoable);
 
     void updateBounds (const Rectangle<int>& activeArea);
 
@@ -69,7 +72,7 @@ public:
 
     virtual void drawExtraEditorGraphics (Graphics& g, const Rectangle<int>& relativeTo);
 
-    virtual void getEditableProperties (Array<PropertyComponent*>& props);
+    virtual void getEditableProperties (Array<PropertyComponent*>& props, bool multipleSelected);
 
     virtual void showPopupMenu();
 

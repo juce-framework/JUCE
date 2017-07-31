@@ -83,6 +83,11 @@ public:
     void selectedToFront();
     void selectedToBack();
 
+    void alignTop();
+    void alignRight();
+    void alignBottom();
+    void alignLeft();
+
     void groupSelected();
     void ungroupSelected();
 
