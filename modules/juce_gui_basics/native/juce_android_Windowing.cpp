@@ -678,6 +678,18 @@ ComponentPeer* Component::createNewPeer (int styleFlags, void*)
 }
 
 //==============================================================================
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (getRotation, "getRotation", "()I")
+
+DECLARE_JNI_CLASS (Display, "android/view/Display");
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (getDefaultDisplay, "getDefaultDisplay", "()Landroid/view/Display;")
+
+DECLARE_JNI_CLASS (WindowManager, "android/view/WindowManager");
+#undef JNI_CLASS_MEMBERS
+
 bool Desktop::canUseSemiTransparentWindows() noexcept
 {
     return true;
@@ -690,7 +702,37 @@ double Desktop::getDefaultMasterScale()
 
 Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
 {
-    // TODO
+    enum
+    {
+        ROTATION_0   = 0,
+        ROTATION_90  = 1,
+        ROTATION_180 = 2,
+        ROTATION_270 = 3
+    };
+
+    JNIEnv* env = getEnv();
+    LocalRef<jstring> windowServiceString (javaString ("window"));
+    LocalRef<jobject> windowManager = LocalRef<jobject> (env->CallObjectMethod (android.activity, JuceAppActivity.getSystemService, windowServiceString.get()));
+
+    if (windowManager.get() != 0)
+    {
+        LocalRef<jobject> display = LocalRef<jobject> (env->CallObjectMethod (windowManager, WindowManager.getDefaultDisplay));
+
+        if (display.get() != 0)
+        {
+            int rotation = env->CallIntMethod (display, Display.getRotation);
+
+            switch (rotation)
+            {
+                case ROTATION_0:   return upright;
+                case ROTATION_90:  return rotatedAntiClockwise;
+                case ROTATION_180: return upsideDown;
+                case ROTATION_270: return rotatedClockwise;
+            }
+        }
+    }
+
+    jassertfalse;
     return upright;
 }
 
