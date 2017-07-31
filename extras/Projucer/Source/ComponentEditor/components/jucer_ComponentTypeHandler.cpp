@@ -356,12 +356,12 @@ public:
 
     void setPosition (const RelativePositionedRectangle& newPos)
     {
-        auto* layout = document.getComponentLayout();
+        auto* l = document.getComponentLayout();
 
-        if (layout->getSelectedSet().getNumSelected() > 1)
+        if (l->getSelectedSet().getNumSelected() > 1)
             positionOtherSelectedComponents (ComponentTypeHandler::getComponentPosition (component), newPos);
 
-        layout->setComponentPosition (component, newPos, true);
+        l->setComponentPosition (component, newPos, true);
     }
 
     RelativePositionedRectangle getPosition() const

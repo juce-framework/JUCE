@@ -88,6 +88,7 @@ inline void drawResizableBorder (Graphics& g, int w, int h,
                                  const bool isMouseOver,
                                  Colour borderColour)
 {
+    ignoreUnused (isMouseOver);
     g.setColour (borderColour);
 
     g.fillRect (0, 0, w, borderSize.getTop());
