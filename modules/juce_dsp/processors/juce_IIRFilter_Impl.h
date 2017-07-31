@@ -24,6 +24,7 @@
   ==============================================================================
 */
 
+#ifndef DOXYGEN
 
 template <typename Type>
 struct SnapToZeroHelper
@@ -230,3 +231,5 @@ void Filter<SampleType>::check()
     if (order != coefficients->getFilterOrder())
         reset();
 }
+
+#endif

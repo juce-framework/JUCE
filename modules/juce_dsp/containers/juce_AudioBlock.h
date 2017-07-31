@@ -171,8 +171,8 @@ public:
     }
 
     /** Returns a subset of continguous channels
-        @param channelStart First channel of the subset
-        @param channelCount Count of channels in the subset
+        @param channelStart       First channel of the subset
+        @param numChannelsToUse   Count of channels in the subset
     */
     forcedinline AudioBlock<SampleType> getSubsetChannelBlock (size_t channelStart, size_t numChannelsToUse) noexcept
     {

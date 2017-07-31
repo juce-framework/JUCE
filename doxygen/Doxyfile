@@ -838,7 +838,9 @@ EXCLUDE                = ../modules/juce_graphics/image_formats \
                          ../modules/juce_tracktion_marketplace/juce_tracktion_marketplace.h \
                          ../modules/juce_video/juce_video.h \
                          ../modules/juce_video/juce_video.cpp \
-                         ../modules/juce_video/native
+                         ../modules/juce_video/native \
+                         ../modules/juce_dsp/juce_dsp.h \
+                         ../modules/juce_dsp/juce_dsp.cpp
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
