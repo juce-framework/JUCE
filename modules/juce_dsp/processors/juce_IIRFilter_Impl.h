@@ -48,7 +48,7 @@ struct SnapToZeroHelper<SIMDRegister<Type>>      { static void snap (SIMDRegiste
 //==============================================================================
 template <typename SampleType>
 Filter<SampleType>::Filter()
-    : coefficients (new Coefficients<typename Filter<SampleType>::NumericType> (Coefficients<typename Filter<SampleType>::NumericType>::passThrough))
+    : coefficients (new Coefficients<typename Filter<SampleType>::NumericType> (1, 0, 1, 0))
 {
     reset();
 }
