@@ -1353,9 +1353,10 @@ private:
 
         const size_t bytesPerFrame = numChannels * bitsPerSample / 8;
         uint64 audioDataSize = bytesPerFrame * lengthInSamples;
+        auto channelMask = getChannelMaskFromChannelLayout (channelLayout);
 
         const bool isRF64 = (bytesWritten >= 0x100000000LL);
-        const bool isWaveFmtEx = isRF64 || (numChannels > 2);
+        const bool isWaveFmtEx = isRF64 || (channelMask != 0);
 
         int64 riffChunkSize = (int64) (4 /* 'RIFF' */ + 8 + 40 /* WAVEFORMATEX */
                                        + 8 + audioDataSize + (audioDataSize & 1)
@@ -1431,7 +1432,7 @@ private:
         {
             output->writeShort (22); // cbSize (size of the extension)
             output->writeShort ((short) bitsPerSample); // wValidBitsPerSample
-            output->writeInt (getChannelMaskFromChannelLayout (channelLayout));
+            output->writeInt (channelMask);
 
             const ExtensibleWavSubFormat& subFormat = bitsPerSample < 32 ? pcmFormat : IEEEFloatFormat;
 
@@ -1475,6 +1476,9 @@ private:
 
     static int getChannelMaskFromChannelLayout (const AudioChannelSet& channelLayout)
     {
+        if (channelLayout.isDiscreteLayout() || channelLayout == AudioChannelSet::mono())
+            return 0;
+
         auto channels = channelLayout.getChannelTypes();
         auto wavChannelMask = 0;
 
@@ -1609,6 +1613,10 @@ bool WavAudioFormat::canDoMono()    { return true; }
 bool WavAudioFormat::isChannelLayoutSupported (const AudioChannelSet& channelSet)
 {
     auto channelTypes = channelSet.getChannelTypes();
+
+    // When
+    if (channelSet.isDiscreteLayout())
+        return true;
 
     // WAV supports all channel types from left ... topRearRight
     for (auto channel : channelTypes)
