@@ -136,16 +136,16 @@ struct SIMDRegister
 
     //==============================================================================
     /** Broadcasts the scalar to all elements of the receiver. */
-    inline SIMDRegister& JUCE_VECTOR_CALLTYPE operator=  (Type s) noexcept                     { value  = CmplxOps::expand (s); return *this; }
+    inline SIMDRegister& JUCE_VECTOR_CALLTYPE operator=  (Type s) noexcept              { value  = CmplxOps::expand (s); return *this; }
 
     /** Add a scalar to the receiver. */
-    inline SIMDRegister& JUCE_VECTOR_CALLTYPE operator+= (Type s) noexcept                     { value = NativeOps::add (value, CmplxOps::expand (s)); return *this; }
+    inline SIMDRegister& JUCE_VECTOR_CALLTYPE operator+= (Type s) noexcept              { value = NativeOps::add (value, CmplxOps::expand (s)); return *this; }
 
     /** Subtract a scalar to the receiver. */
-    inline SIMDRegister& JUCE_VECTOR_CALLTYPE operator-= (Type s) noexcept                     { value = NativeOps::sub (value, CmplxOps::expand (s)); return *this; }
+    inline SIMDRegister& JUCE_VECTOR_CALLTYPE operator-= (Type s) noexcept              { value = NativeOps::sub (value, CmplxOps::expand (s)); return *this; }
 
     /** Multiply a scalar to the receiver. */
-    inline SIMDRegister& JUCE_VECTOR_CALLTYPE operator*= (Type s) noexcept                     { value = CmplxOps::mul (value, CmplxOps::expand (s)); return *this; }
+    inline SIMDRegister& JUCE_VECTOR_CALLTYPE operator*= (Type s) noexcept              { value = CmplxOps::mul (value, CmplxOps::expand (s)); return *this; }
 
     //==============================================================================
     /** Bit-and the reciver with SIMDRegister v and store the result in the receiver. */
