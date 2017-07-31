@@ -1476,7 +1476,12 @@ private:
 
     static int getChannelMaskFromChannelLayout (const AudioChannelSet& channelLayout)
     {
-        if (channelLayout.isDiscreteLayout() || channelLayout == AudioChannelSet::mono())
+        if (channelLayout.isDiscreteLayout())
+            return 0;
+
+        // Don't add an extended format chunk for mono and stereo. Basically, all wav players
+        // interpret a wav file with only one or two channels to be mono or stereo anyway.
+        if (channelLayout == AudioChannelSet::mono() || channelLayout == AudioChannelSet::stereo())
             return 0;
 
         auto channels = channelLayout.getChannelTypes();
