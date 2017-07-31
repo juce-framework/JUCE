@@ -1789,6 +1789,9 @@ public:
             if (c == &component)
                 break;
 
+            if (! c->isVisible())
+                continue;
+
             if (auto* peer = c->getPeer())
                 if (peer->contains (localPos + bounds.getPosition() - peer->getBounds().getPosition(), true))
                     return false;
