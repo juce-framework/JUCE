@@ -176,7 +176,9 @@ multi-bus API (JUCE version 4.0.0 - 4.2.4).
 
 Change
 ------
-JUCE now generates the AAX plug-in bus layout configuration id independent from the position as it appears in the Projucer’s legacy “Channel layout configuration” field.
+JUCE now generates the AAX plug-in bus layout configuration id independent from
+the position as it appears in the Projucer’s legacy "Channel layout
+configuration" field.
 
 Possible Issues
 ---------------
@@ -195,17 +197,17 @@ Rationale
 --------
 The new multi-bus API offers more features, flexibility and accuracy in
 specifying bus layouts which cannot be expressed by the Projucer’s legacy
-“Channel layout configuration” field. The native plug-in format backends use
+"Channel layout configuration" field. The native plug-in format backends use
 the new multi-bus callback APIs to negotiate channel layouts with the host -
 including the AAX plug-in ids assigned to specific bus layouts. With the
 callback API, there is no notion of an order in which the channel
-configurations appear - as was the case with the legacy “Channel layout
-configuration” field - and therefore cannot be used to generate the AAX plug-in
+configurations appear - as was the case with the legacy "Channel layout
+configuration" field - and therefore cannot be used to generate the AAX plug-in
 id. To remain backward compatible to pre JUCE 4.0.0 plug-ins, JUCE does
-transparently convert the legacy “Channel layout configuration” field to the
+transparently convert the legacy "Channel layout configuration" field to the
 new callback based multi-bus API, but this does not take the order into account
-in which the channel configurations appear in the legacy “Channel layout
-configuration” field.
+in which the channel configurations appear in the legacy "Channel layout
+configuration" field.
 
 
 
