@@ -2253,7 +2253,7 @@ private:
         v->setProperty ("isa", "PBXFileReference", nullptr);
         v->setProperty ("lastKnownFileType", fileType, nullptr);
         v->setProperty (Ids::name, pathString.fromLastOccurrenceOf ("/", false, false), nullptr);
-        v->setProperty ("path", sanitisePath (pathString), nullptr);
+        v->setProperty ("path", pathString, nullptr);
         v->setProperty ("sourceTree", sourceTree, nullptr);
 
         const int existing = pbxFileReferences.indexOfSorted (*this, v);

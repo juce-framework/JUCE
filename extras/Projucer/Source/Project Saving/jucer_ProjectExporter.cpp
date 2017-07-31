@@ -547,11 +547,6 @@ RelativePath ProjectExporter::getModuleFolderRelativeToProject (const String& mo
     if (path.isEmpty())
         return getLegacyModulePath (moduleID).getChildFile (moduleID);
 
-   #if ! JUCE_WINDOWS
-    if (path.startsWith ("~"))
-        path = File::getSpecialLocation (File::userHomeDirectory).getChildFile (path.trimCharactersAtStart ("~/")).getFullPathName();
-   #endif
-
     return RelativePath (path, RelativePath::projectFolder).getChildFile (moduleID);
 }
 
