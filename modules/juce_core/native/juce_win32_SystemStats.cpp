@@ -227,7 +227,19 @@ String SystemStats::getOperatingSystemName()
 
 String SystemStats::getDeviceDescription()
 {
-    return {};
+   #if WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP
+    return "Windows (Desktop)";
+   #elif WINAPI_FAMILY == WINAPI_FAMILY_PC_APP
+    return "Windows (Store)";
+   #elif WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
+    return "Windows (Phone)";
+   #elif WINAPI_FAMILY == WINAPI_FAMILY_SYSTEM
+    return "Windows (System)";
+   #elif WINAPI_FAMILY == WINAPI_FAMILY_SERVER
+    return "Windows (Server)";
+   #else
+    return "Windows";
+   #endif
 }
 
 bool SystemStats::isOperatingSystem64Bit()
