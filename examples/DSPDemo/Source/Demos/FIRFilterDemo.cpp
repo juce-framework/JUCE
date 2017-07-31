@@ -35,7 +35,7 @@ struct FIRFilterDemo
         sampleRate = spec.sampleRate;
 
         fir.state = FilterDesign<float>::designFIRLowpassWindowMethod (440.0f, sampleRate, 21,
-                                                                       WindowingFunction<float>::blackmann);
+                                                                       WindowingFunction<float>::blackman);
         fir.prepare (spec);
     }
 
@@ -66,7 +66,7 @@ struct FIRFilterDemo
     double sampleRate = 0;
 
     SliderParameter cutoffParam { { 20.0, 20000.0 }, 0.4, 440.0f, "Cutoff", "Hz" };
-    ChoiceParameter typeParam { { "Rectangular", "Triangular", "Hann", "Hamming", "Blackmann", "Blackmann-Harris", "Flat Top", "Kaiser" },
+    ChoiceParameter typeParam { { "Rectangular", "Triangular", "Hann", "Hamming", "Blackman", "Blackman-Harris", "Flat Top", "Kaiser" },
                                 5, "Windowing Function" };
 
     std::vector<DSPDemoParameterBase*> parameters { &cutoffParam, &typeParam };

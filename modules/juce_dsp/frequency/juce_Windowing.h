@@ -38,8 +38,8 @@ struct WindowingFunction
         triangular,
         hann,
         hamming,
-        blackmann,
-        blackmannHarris,
+        blackman,
+        blackmanHarris,
         flatTop,
         kaiser,
         numWindowingMethods
