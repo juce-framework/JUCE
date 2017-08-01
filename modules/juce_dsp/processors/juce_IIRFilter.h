@@ -90,7 +90,7 @@ namespace IIR
 
         /** Resets the filter's processing pipeline to a specific value.
 
-            See @reset
+            @see reset
         */
         void reset (SampleType resetToValue);
 

@@ -168,7 +168,7 @@ namespace StateVariableFilter
         /** The type of the IIR filter */
         Type type = Type::lowPass;
 
-        /** Set the cutoff frequency and resonance of the IIR filter.
+        /** Sets the cutoff frequency and resonance of the IIR filter.
             Note : the bandwidth of the resonance increases with the value of the
             parameter. To have a standard 12 dB/octave filter, the value must be set
             at 1 / sqrt(2).
