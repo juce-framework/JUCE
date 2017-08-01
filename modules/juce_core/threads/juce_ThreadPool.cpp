@@ -135,6 +135,32 @@ void ThreadPool::addJob (ThreadPoolJob* const job, const bool deleteJobWhenFinis
     }
 }
 
+void ThreadPool::addJob (std::function<ThreadPoolJob::JobStatus()> jobToRun)
+{
+    struct LambdaJobWrapper  : public ThreadPoolJob
+    {
+        LambdaJobWrapper (std::function<ThreadPoolJob::JobStatus()> j) : ThreadPoolJob ("lambda"), job (j) {}
+        JobStatus runJob() override      { return job(); }
+
+        std::function<ThreadPoolJob::JobStatus()> job;
+    };
+
+    addJob (new LambdaJobWrapper (jobToRun), true);
+}
+
+void ThreadPool::addJob (std::function<void()> jobToRun)
+{
+    struct LambdaJobWrapper  : public ThreadPoolJob
+    {
+        LambdaJobWrapper (std::function<void()> j) : ThreadPoolJob ("lambda"), job (j) {}
+        JobStatus runJob() override      { job(); return ThreadPoolJob::jobHasFinished; }
+
+        std::function<void()> job;
+    };
+
+    addJob (new LambdaJobWrapper (jobToRun), true);
+}
+
 int ThreadPool::getNumJobs() const
 {
     return jobs.size();

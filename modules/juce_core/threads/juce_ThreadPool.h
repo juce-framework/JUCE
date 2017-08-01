@@ -207,6 +207,16 @@ public:
     void addJob (ThreadPoolJob* job,
                  bool deleteJobWhenFinished);
 
+    /** Adds a lambda function to be called as a job.
+        This will create an internal ThreadPoolJob object to encapsulate and call the lambda.
+    */
+    void addJob (std::function<ThreadPoolJob::JobStatus()> job);
+
+    /** Adds a lambda function to be called as a job.
+        This will create an internal ThreadPoolJob object to encapsulate and call the lambda.
+    */
+    void addJob (std::function<void()> job);
+
     /** Tries to remove a job from the pool.
 
         If the job isn't yet running, this will simply remove it. If it is running, it
