@@ -36,7 +36,7 @@
 template <typename MonoProcessorType, typename StateType>
 struct ProcessorDuplicator
 {
-    ProcessorDuplicator() {}
+    ProcessorDuplicator() : state (new StateType()) {}
     ProcessorDuplicator (StateType* stateToUse) : state (stateToUse) {}
     ProcessorDuplicator (const ProcessorDuplicator&) = default;
     ProcessorDuplicator (ProcessorDuplicator&&) = default;
