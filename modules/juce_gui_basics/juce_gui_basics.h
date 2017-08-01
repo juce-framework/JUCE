@@ -157,6 +157,7 @@ class KeyPressMappingSet;
 class ApplicationCommandManagerListener;
 class DrawableButton;
 class FlexBox;
+class Grid;
 
 #include "mouse/juce_MouseCursor.h"
 #include "mouse/juce_MouseListener.h"
@@ -295,6 +296,14 @@ class FlexBox;
 #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
 #include "layout/juce_FlexItem.h"
 #include "layout/juce_FlexBox.h"
+#include "layout/juce_GridItem.h"
+#include "layout/juce_Grid.h"
+
+constexpr Grid::Px operator"" _px (long double px) { return Grid::Px { px }; }
+constexpr Grid::Px operator"" _px (unsigned long long px) { return Grid::Px { px }; }
+
+constexpr Grid::Fr operator"" _fr (unsigned long long fr) { return Grid::Fr { fr }; }
+
 #endif
 
 }

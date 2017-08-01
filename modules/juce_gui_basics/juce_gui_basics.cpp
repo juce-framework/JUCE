@@ -128,6 +128,9 @@
  #undef KeyPress
 #endif
 
+#include <map>
+#include <set>
+
 //==============================================================================
 namespace juce
 {
@@ -256,6 +259,9 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
 // these classes are C++11-only
 #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
  #include "layout/juce_FlexBox.cpp"
+ #include "layout/juce_GridItem.cpp"
+ #include "layout/juce_Grid.cpp"
+ #include "layout/juce_GridUnitTests.cpp"
 #endif
 
 #if JUCE_IOS || JUCE_WINDOWS
