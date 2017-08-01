@@ -35,10 +35,10 @@ public:
      */
     using NumericType = typename SampleTypeHelpers::ElementType<SampleType>::Type;
 
-    /* Create an oscillator with a periodic input function (-pi..pi).
+    /** Creates an oscillator with a periodic input function (-pi..pi).
 
-       If lookup table is not zero, then the function will be approximated
-       with a lookup table.
+        If lookup table is not zero, then the function will be approximated
+        with a lookup table.
     */
     Oscillator (const std::function<NumericType (NumericType)>& function, size_t lookupTableNumPoints = 0)
         : generator (function), frequency (440.0f)

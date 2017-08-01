@@ -420,13 +420,13 @@ public:
         return *this;
     }
 
-    /* negates each value of the receiver */
+    /** Negates each value of the receiver. */
     forcedinline AudioBlock& negate() noexcept
     {
         return multiply (static_cast<SampleType> (-1.0));
     }
 
-    /* Negates each value of source and stores it in the receiver */
+    /** Negates each value of source and stores it in the receiver. */
     forcedinline AudioBlock& replaceWithNegativeOf (const AudioBlock& src) noexcept
     {
         jassert (numChannels == src.numChannels);
@@ -438,7 +438,7 @@ public:
         return *this;
     }
 
-    /* takes the absolute value of each element of src and stores it inside the receiver. */
+    /** Takes the absolute value of each element of src and stores it inside the receiver. */
     forcedinline AudioBlock& replaceWithAbsoluteValueOf (const AudioBlock& src) noexcept
     {
         jassert (numChannels == src.numChannels);
@@ -462,7 +462,7 @@ public:
         return *this;
     }
 
-    /** Each element of receiver will be the maximum of the corresponding element of the source arrays. */
+    /** Each element of the receiver will be the maximum of the corresponding element of the source arrays. */
     forcedinline AudioBlock& max (AudioBlock src1, AudioBlock src2) noexcept
     {
         jassert (numChannels == src1.numChannels && src1.numChannels == src2.numChannels);
@@ -474,7 +474,7 @@ public:
         return *this;
     }
 
-    /** Find minimum and maximum value of the buffer. */
+    /** Finds the minimum and maximum value of the buffer. */
     forcedinline Range<NumericType> findMinAndMax() const noexcept
     {
         Range<NumericType> minmax;
