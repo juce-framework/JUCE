@@ -402,7 +402,12 @@ bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& 
         if (SystemStats::isRunningInAppExtensionSandbox())
             return false;
 
+       #if (! defined __IPHONE_OS_VERSION_MIN_REQUIRED) || (! defined __IPHONE_10_0) || (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_10_0)
         return [[UIApplication sharedApplication] openURL: filenameAsURL];
+       #else
+        [[UIApplication sharedApplication] openURL: filenameAsURL options: @{} completionHandler: nil];
+        return true;
+       #endif
       #else
         NSWorkspace* workspace = [NSWorkspace sharedWorkspace];
 

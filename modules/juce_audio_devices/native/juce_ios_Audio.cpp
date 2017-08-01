@@ -576,7 +576,13 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                                             &hostUrl,
                                             &dataSize);
         if (err == noErr)
-            [[UIApplication sharedApplication] openURL:(NSURL*)hostUrl];
+        {
+           #if (! defined __IPHONE_OS_VERSION_MIN_REQUIRED) || (! defined __IPHONE_10_0) || (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_10_0)
+            [[UIApplication sharedApplication] openURL: (NSURL*)hostUrl];
+           #else
+            [[UIApplication sharedApplication] openURL: (NSURL*)hostUrl options: @{} completionHandler: nil];
+           #endif
+        }
     }
 
     //==============================================================================
