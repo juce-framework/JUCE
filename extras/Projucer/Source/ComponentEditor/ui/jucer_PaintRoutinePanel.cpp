@@ -134,7 +134,7 @@ public:
                 if (paintRoutine.containsElement (pe))
                 {
                     Array <PropertyComponent*> props;
-                    pe->getEditableProperties (props, numSelected);
+                    pe->getEditableProperties (props, numSelected > 1);
 
                     propsPanel->addSection (pe->getTypeName(), props);
                 }
