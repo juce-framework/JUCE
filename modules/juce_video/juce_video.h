@@ -36,7 +36,7 @@
 
   ID:               juce_video
   vendor:           juce
-  version:          5.1.0
+  version:          5.1.1
   name:             JUCE video playback and capture classes
   description:      Classes for playing video and capturing camera input.
   website:          http://www.juce.com/juce
