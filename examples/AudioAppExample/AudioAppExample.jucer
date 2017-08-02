@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="PAnJXP" name="AudioAppExample" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.roli.AudioAppExample" includeBinaryInAppConfig="1"
-              jucerVersion="5.1.0" displaySplashScreen="0" reportAppUsage="0"
+              jucerVersion="5.1.1" displaySplashScreen="0" reportAppUsage="0"
               splashScreenColour="Dark" companyName="ROLI Ltd." cppLanguageStandard="11">
   <MAINGROUP id="GaJIge" name="AudioAppExample">
     <GROUP id="{168FC5D4-FA65-8320-F83E-C14C416638E1}" name="Source">

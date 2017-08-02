@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="AKfc5m" name="AudioPerformanceTest" projectType="guiapp"
               version="1.0.0" bundleIdentifier="com.juce.AudioPerformanceTest"
-              includeBinaryInAppConfig="1" jucerVersion="5.1.0" displaySplashScreen="0"
+              includeBinaryInAppConfig="1" jucerVersion="5.1.1" displaySplashScreen="0"
               reportAppUsage="0" splashScreenColour="Dark" companyName="ROLI Ltd."
               cppLanguageStandard="11">
   <MAINGROUP id="b1eVTe" name="AudioPerformanceTest">

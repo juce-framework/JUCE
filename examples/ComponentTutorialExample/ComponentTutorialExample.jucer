@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="oNvA5C" name="ComponentTutorialExample" projectType="guiapp"
               version="1.0.0" bundleIdentifier="com.roli.ComponentTutorialExample"
-              includeBinaryInAppConfig="1" jucerVersion="5.1.0" displaySplashScreen="0"
+              includeBinaryInAppConfig="1" jucerVersion="5.1.1" displaySplashScreen="0"
               reportAppUsage="0" splashScreenColour="Dark" companyName="ROLI Ltd."
               cppLanguageStandard="11">
   <MAINGROUP id="WydTVz" name="ComponentTutorialExample">

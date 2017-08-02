@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="sBBIzr" name="JuceDemo" projectType="guiapp" version="3.0.0"
-              bundleIdentifier="com.roli.JuceDemo" jucerVersion="5.1.0" defines="JUCE_UNIT_TESTS=1"
+              bundleIdentifier="com.roli.JuceDemo" jucerVersion="5.1.1" defines="JUCE_UNIT_TESTS=1"
               includeBinaryInAppConfig="1" displaySplashScreen="0" reportAppUsage="0"
               splashScreenColour="Dark" companyName="ROLI Ltd." cppLanguageStandard="11">
   <EXPORTFORMATS>

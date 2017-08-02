@@ -1537,10 +1537,10 @@ static const unsigned char temp_binary_data_3[] =
 "        updateParameters();\r\n"
 "    }\r\n"
 "\r\n"
-"    void process (const ProcessContextReplacing<float>& context)\r\n"
+"    void process (ProcessContextReplacing<float> context)\r\n"
 "    {\r\n"
-"        if (! bypass)\r\n"
-"            convolution.process (context);\r\n"
+"        context.isBypassed = bypass;\r\n"
+"        convolution.process (context);\r\n"
 "    }\r\n"
 "\r\n"
 "    void reset()\r\n"
@@ -1865,6 +1865,8 @@ static const unsigned char temp_binary_data_7[] =
 "            oscillator.setFrequency (440.f);\r\n"
 "            oscillator.prepare (spec);\r\n"
 "        }\r\n"
+"\r\n"
+"        updateParameters();\r\n"
 "\r\n"
 "        tempBuffer = AudioBlock<float> (tempBufferMemory, spec.numChannels, spec.maximumBlockSize);\r\n"
 "    }\r\n"
@@ -2323,11 +2325,11 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x409ff6ec:  numBytes = 37902; return cassette_recorder_wav;
         case 0x69523d16:  numBytes = 628; return EditorColourScheme_xml;
         case 0x700ccf3c:  numBytes = 90246; return guitar_amp_wav;
-        case 0x5922ccdf:  numBytes = 2995; return ConvolutionDemo_cpp;
-        case 0x14aa0aae:  numBytes = 2677; return FIRFilterDemo_cpp;
+        case 0x5922ccdf:  numBytes = 2999; return ConvolutionDemo_cpp;
+        case 0x14aa0aae:  numBytes = 2674; return FIRFilterDemo_cpp;
         case 0xab621a06:  numBytes = 1809; return GainDemo_cpp;
         case 0x06a7a4b1:  numBytes = 2819; return IIRFilterDemo_cpp;
-        case 0x6fc33e27:  numBytes = 3943; return OscillatorDemo_cpp;
+        case 0x6fc33e27:  numBytes = 3974; return OscillatorDemo_cpp;
         case 0xdfdc547d:  numBytes = 3039; return OverdriveDemo_cpp;
         case 0x3f21e597:  numBytes = 4849; return SIMDRegisterDemo_cpp;
         case 0x54e9f84c:  numBytes = 2718; return StateVariableFilterDemo_cpp;
