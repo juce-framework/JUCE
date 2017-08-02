@@ -4,6 +4,20 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 5.1.1
+  - Fixed Windows live build engine on Visual Studio 2017
+  - Fixed a compiler error in juce_MathFunctions.h in Visual Studio 2013
+  - Fixed a potential crash when using the ProcessorDuplicator
+  - Fixed a compiler-error in Filter::IIR
+  - Fixed an issue where the WavFileFormatWriter could not create files with discrete channels 
+  - Fixed an issue where a window which is beneath a hidden window would not receive any clicks on Linux
+  - Altered the format of BREAKING-CHANGES.txt to display better on GitHub
+  - Projucer: Fixed an issue in exporter tilde expansion
+  - Fixed compiler errors when building the DSP module with a static version of FFTW
+  - Fixed an audio glitch when bypassing the convolution engine
+  - Fixed an issue where a JUCE VST2 would not correctly report that it supports resizing of it’s plugin editor
+  - Various documentation tweaks and fixes
+
 Version 5.1.0
   - Release of the JUCE DSP module
   - Multichannel audio readers and writers
