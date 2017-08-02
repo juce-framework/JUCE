@@ -122,6 +122,9 @@ public:
     */
     void setEdgeIndent (int numPixelsIndent);
 
+    /** Returns the current edge indent. */
+    int getEdgeIndent() const noexcept          { return edgeIndent; }
+
     //==============================================================================
     /** Returns the image that the button is currently displaying. */
     Drawable* getCurrentImage() const noexcept;
