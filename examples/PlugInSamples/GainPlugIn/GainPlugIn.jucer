@@ -8,7 +8,7 @@
               pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
               pluginSilenceInIsSilenceOut="1" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="GainPlugInAU" pluginRTASCategory="" aaxIdentifier="com.roli.GainPlugIn"
-              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.1.0"
+              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.1.1"
               pluginIsMidiEffectPlugin="0" buildAUv3="0" buildStandalone="0"
               enableIAA="0" displaySplashScreen="0" reportAppUsage="0" splashScreenColour="Dark"
               companyName="ROLI Ltd." cppLanguageStandard="11">

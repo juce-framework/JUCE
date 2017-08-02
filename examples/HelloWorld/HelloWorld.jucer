@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="tTAKTK1s" name="HelloWorld" projectType="guiapp" juceFolder="../../../juce"
-              jucerVersion="5.1.0" version="1.0.0" bundleIdentifier="com.roli.jucehelloworld"
+              jucerVersion="5.1.1" version="1.0.0" bundleIdentifier="com.roli.jucehelloworld"
               companyName="ROLI Ltd." includeBinaryInAppConfig="1" displaySplashScreen="0"
               reportAppUsage="0" splashScreenColour="Dark" cppLanguageStandard="11">
   <EXPORTFORMATS>

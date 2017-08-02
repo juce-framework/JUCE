@@ -8,7 +8,7 @@
               pluginProducesMidiOut="1" pluginSilenceInIsSilenceOut="0" pluginTailLength="0"
               pluginEditorRequiresKeys="1" pluginAUExportPrefix="JuceDemoProjectAU"
               pluginAUViewClass="JuceDemoProjectAU_V1" pluginRTASCategory=""
-              bundleIdentifier="com.juce.JuceDemoPlugin" jucerVersion="5.1.0"
+              bundleIdentifier="com.juce.JuceDemoPlugin" jucerVersion="5.1.1"
               companyName="ROLI Ltd." aaxIdentifier="com.yourcompany.JuceDemoPlugin"
               buildAAX="0" pluginAAXCategory="AAX_ePlugInCategory_Dynamics"
               includeBinaryInAppConfig="1" buildVST3="0" pluginManufacturerEmail="support@yourcompany.com"

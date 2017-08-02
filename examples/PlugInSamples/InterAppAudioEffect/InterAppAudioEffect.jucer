@@ -9,7 +9,7 @@
               pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
               pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="InterAppAudioEffectAU"
               pluginRTASCategory="" aaxIdentifier="com.yourcompany.InterAppAudioEffect"
-              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.1.0"
+              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.1.1"
               companyName="ROLI Ltd." buildStandalone="1" displaySplashScreen="0"
               reportAppUsage="0" splashScreenColour="Dark" cppLanguageStandard="11">
   <MAINGROUP id="BhTVmm" name="InterAppAudioEffect">
