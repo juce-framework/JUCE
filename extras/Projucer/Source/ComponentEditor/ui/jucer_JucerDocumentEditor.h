@@ -88,6 +88,9 @@ private:
     int lastViewportX = 0, lastViewportY = 0;
     double currentZoomLevel = 1.0;
 
+    void saveLastSelectedTab() const;
+    void restoreLastSelectedTab();
+
     bool isSomethingSelected() const;
     bool areMultipleThingsSelected() const;
 

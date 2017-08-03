@@ -347,8 +347,7 @@ JucerDocumentEditor::JucerDocumentEditor (JucerDocument* const doc)
                                                                      document->getCppDocument()), true);
 
         updateTabs();
-
-        tabbedComponent.setCurrentTabIndex (document->getLastSelectedTabIndex());
+        restoreLastSelectedTab();
 
         document->addChangeListener (this);
 
@@ -361,9 +360,7 @@ JucerDocumentEditor::JucerDocumentEditor (JucerDocument* const doc)
 
 JucerDocumentEditor::~JucerDocumentEditor()
 {
-    if (document != nullptr)
-        document->setLastSelectedTabIndex (tabbedComponent.getCurrentTabIndex());
-
+    saveLastSelectedTab();
     tabbedComponent.clearTabs();
 }
 
@@ -595,6 +592,53 @@ void JucerDocumentEditor::addComponent (const int index)
             panel->layout.getSelectedSet().selectOnly (newOne);
 
         document->beginTransaction();
+    }
+}
+//==============================================================================
+void JucerDocumentEditor::saveLastSelectedTab() const
+{
+    if (document != nullptr)
+    {
+        auto* project = document->getCppDocument().getProject();
+        if (project != nullptr)
+        {
+            auto& properties = project->getStoredProperties();
+
+            ScopedPointer<XmlElement> root (properties.getXmlValue ("GUIComponentsLastTab"));
+
+            if (root == nullptr)
+                root = new XmlElement ("FILES");
+
+            auto fileName = document->getCppFile().getFileName();
+
+            auto* child = root->getChildByName (fileName);
+
+            if (child == nullptr)
+                child = root->createNewChildElement (fileName);
+
+            child->setAttribute ("tab", tabbedComponent.getCurrentTabIndex());
+
+            properties.setValue ("GUIComponentsLastTab", root);
+        }
+    }
+}
+
+void JucerDocumentEditor::restoreLastSelectedTab()
+{
+    if (document != nullptr)
+    {
+        auto* project = document->getCppDocument().getProject();
+        if (project != nullptr)
+        {
+            ScopedPointer<XmlElement> root (project->getStoredProperties().getXmlValue ("GUIComponentsLastTab"));
+            if (root != nullptr)
+            {
+                auto* child = root->getChildByName (document->getCppFile().getFileName());
+
+                if (child != nullptr)
+                    tabbedComponent.setCurrentTabIndex (child->getIntAttribute ("tab"));
+            }
+        }
     }
 }
 
