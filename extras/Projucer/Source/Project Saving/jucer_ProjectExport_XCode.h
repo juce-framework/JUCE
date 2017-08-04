@@ -809,6 +809,20 @@ public:
         }
 
         //==============================================================================
+        bool shouldAddEntitlements() const
+        {
+            if (owner.isPushNotificationsEnabled() || owner.isAppGroupsEnabled())
+                return true;
+
+            if (owner.project.getProjectType().isAudioPlugin()
+                && (   (owner.isOSX() && type == Target::AudioUnitv3PlugIn)
+                    || (owner.isiOS() && type == Target::StandalonePlugIn && owner.getProject().shouldEnableIAA())))
+                return true;
+
+            return false;
+        }
+
+        //==============================================================================
         StringArray getTargetSettings (const XcodeBuildConfiguration& config) const
         {
             if (type == AggregateTarget)
@@ -946,8 +960,8 @@ public:
             if (! config.codeSignIdentity.isUsingDefault())
                 s.add ("CODE_SIGN_IDENTITY = " + config.codeSignIdentity.get().quoted());
 
-            if (owner.isPushNotificationsEnabled())
-                s.add ("CODE_SIGN_ENTITLEMENTS = " + owner.getProject().getTitle() + ".entitlements");
+            if (shouldAddEntitlements())
+                s.add (String ("CODE_SIGN_ENTITLEMENTS = \"") + owner.getEntitlementsFileName() + String ("\""));
 
             {
                 auto cppStandard = owner.project.getCppStandardValue().toString();
@@ -1010,11 +1024,6 @@ public:
                 s.add ("DEPLOYMENT_POSTPROCESSING = YES");
                 s.add ("SEPARATE_STRIP = YES");
             }
-
-            if (owner.project.getProjectType().isAudioPlugin()
-                && (   (owner.isOSX() && type == Target::AudioUnitv3PlugIn)
-                    || (owner.isiOS() && type == Target::StandalonePlugIn && owner.getProject().shouldEnableIAA())))
-                s.add (String ("CODE_SIGN_ENTITLEMENTS = \"") + owner.getEntitlementsFileName() + String ("\""));
 
             defines = mergePreprocessorDefs (defines, owner.getAllPreprocessorDefs (config, type));
 
