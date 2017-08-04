@@ -29,7 +29,7 @@ class SpectrogramComponent   : public AudioAppComponent,
 {
 public:
     SpectrogramComponent()
-        : forwardFFT (fftOrder, false),
+        : forwardFFT (fftOrder),
           spectrogramImage (Image::RGB, 512, 512, true),
           fifoIndex (0),
           nextFFTBlockReady (false)
@@ -137,7 +137,7 @@ public:
     };
 
 private:
-    FFT forwardFFT;
+    dsp::FFT forwardFFT;
     Image spectrogramImage;
 
     float fifo [fftSize];
