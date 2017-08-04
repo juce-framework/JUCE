@@ -244,7 +244,6 @@ public:
 
     void removeOldFiles (const File& targetFolder) const
     {
-        targetFolder.getChildFile ("app/src").deleteRecursively();
         targetFolder.getChildFile ("app/build").deleteRecursively();
         targetFolder.getChildFile ("app/build.gradle").deleteFile();
         targetFolder.getChildFile ("gradle").deleteRecursively();
