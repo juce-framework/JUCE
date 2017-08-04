@@ -284,7 +284,7 @@ char OnlineUnlockStatus::MachineIDUtilities::getPlatformPrefix()
 
 String OnlineUnlockStatus::MachineIDUtilities::getEncodedIDString (const String& input)
 {
-    const String platform (String::charToString (getPlatformPrefix()));
+    const String platform (String::charToString (static_cast<juce_wchar> (getPlatformPrefix())));
 
     return platform + MD5 ((input + "salt_1" + platform).toUTF8())
                         .toHexString().substring (0, 9).toUpperCase();

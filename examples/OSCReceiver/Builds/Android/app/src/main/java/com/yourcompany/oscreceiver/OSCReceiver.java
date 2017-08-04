@@ -55,8 +55,6 @@ import java.io.*;
 import java.net.URL;
 import java.net.HttpURLConnection;
 import android.media.AudioManager;
-import android.media.MediaScannerConnection;
-import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 import android.Manifest;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.Future;
@@ -384,23 +382,6 @@ public class OSCReceiver   extends Activity
     private native void suspendApp();
     private native void resumeApp();
     private native void setScreenSize (int screenWidth, int screenHeight, int dpi);
-
-    //==============================================================================
-    public native void deliverMessage (long value);
-    private android.os.Handler messageHandler = new android.os.Handler();
-
-    public final void postMessage (long value)
-    {
-        messageHandler.post (new MessageCallback (value));
-    }
-
-    private final class MessageCallback  implements Runnable
-    {
-        public MessageCallback (long value_)        { value = value_; }
-        public final void run()                     { deliverMessage (value); }
-
-        private long value;
-    }
 
     //==============================================================================
     private ViewHolder viewHolder;
@@ -966,6 +947,38 @@ public class OSCReceiver   extends Activity
     private int[] cachedRenderArray = new int [256];
 
     //==============================================================================
+    public static class NativeInvocationHandler implements InvocationHandler
+    {
+        public NativeInvocationHandler (long nativeContextRef)
+        {
+            nativeContext = nativeContextRef;
+        }
+
+        @Override
+        public void finalize()
+        {
+            dispatchFinalize (nativeContext);
+        }
+
+        @Override
+        public Object invoke (Object proxy, Method method, Object[] args) throws Throwable
+        {
+            return dispatchInvoke (nativeContext, proxy, method, args);
+        }
+
+        //==============================================================================
+        private long nativeContext = 0;
+
+        private native void dispatchFinalize (long nativeContextRef);
+        private native Object dispatchInvoke (long nativeContextRef, Object proxy, Method method, Object[] args);
+    }
+
+    public static InvocationHandler createInvocationHandler (long nativeContextRef)
+    {
+        return new NativeInvocationHandler (nativeContextRef);
+    }
+
+    //==============================================================================
     public static class HTTPStream
     {
         public HTTPStream (HttpURLConnection connection_,
@@ -1268,36 +1281,6 @@ public class OSCReceiver   extends Activity
     public static final String getDownloadsFolder()  { return getFileLocation (Environment.DIRECTORY_DOWNLOADS); }
 
     //==============================================================================
-    private final class SingleMediaScanner  implements MediaScannerConnectionClient
-    {
-        public SingleMediaScanner (Context context, String filename)
-        {
-            file = filename;
-            msc = new MediaScannerConnection (context, this);
-            msc.connect();
-        }
-
-        @Override
-        public void onMediaScannerConnected()
-        {
-            msc.scanFile (file, null);
-        }
-
-        @Override
-        public void onScanCompleted (String path, Uri uri)
-        {
-            msc.disconnect();
-        }
-
-        private MediaScannerConnection msc;
-        private String file;
-    }
-
-    public final void scanFile (String filename)
-    {
-        new SingleMediaScanner (this, filename);
-    }
-
     public final Typeface getTypeFaceFromAsset (String assetName)
     {
         try
