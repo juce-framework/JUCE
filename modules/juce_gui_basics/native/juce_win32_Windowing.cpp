@@ -57,6 +57,46 @@ static bool shouldDeactivateTitleBar = true;
 extern void* getUser32Function (const char*);
 
 //==============================================================================
+#ifndef WM_TOUCH
+ enum
+ {
+     WM_TOUCH         = 0x0240,
+     TOUCHEVENTF_MOVE = 0x0001,
+     TOUCHEVENTF_DOWN = 0x0002,
+     TOUCHEVENTF_UP   = 0x0004
+ };
+
+ typedef HANDLE HTOUCHINPUT;
+ typedef HANDLE HGESTUREINFO;
+
+ struct TOUCHINPUT
+ {
+     LONG         x;
+     LONG         y;
+     HANDLE       hSource;
+     DWORD        dwID;
+     DWORD        dwFlags;
+     DWORD        dwMask;
+     DWORD        dwTime;
+     ULONG_PTR    dwExtraInfo;
+     DWORD        cxContact;
+     DWORD        cyContact;
+ };
+
+ struct GESTUREINFO
+ {
+     UINT         cbSize;
+     DWORD        dwFlags;
+     DWORD        dwID;
+     HWND         hwndTarget;
+     POINTS       ptsLocation;
+     DWORD        dwInstanceID;
+     DWORD        dwSequenceID;
+     ULONGLONG    ullArguments;
+     UINT         cbExtraArgs;
+ };
+#endif
+
 #ifndef WM_NCPOINTERUPDATE
  enum
  {
