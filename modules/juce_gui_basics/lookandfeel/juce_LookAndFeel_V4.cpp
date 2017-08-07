@@ -333,11 +333,9 @@ void LookAndFeel_V4::drawToggleButton (Graphics& g, ToggleButton& button,
     if (! button.isEnabled())
         g.setOpacity (0.5f);
 
-    const auto textX = roundToInt (tickWidth) + 10;
-
     g.drawFittedText (button.getButtonText(),
-                      textX, 0,
-                      button.getWidth() - textX - 2, button.getHeight(),
+                      button.getLocalBounds().withTrimmedLeft (roundToInt (tickWidth) + 10)
+                                             .withTrimmedRight (2),
                       Justification::centredLeft, 10);
 }
 
