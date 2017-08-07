@@ -130,10 +130,10 @@ public:
 
     //==============================================================================
     /** Addition of two matrices */
-    inline Matrix& operator+= (const Matrix& other) noexcept            { return apply (other, std::plus<ElementType>()); }
+    inline Matrix& operator+= (const Matrix& other) noexcept            { return apply (other, [] (ElementType a, ElementType b) { return a + b; } ); }
 
     /** Subtraction of two matrices */
-    inline Matrix& operator-= (const Matrix& other) noexcept            { return apply (other, std::minus<ElementType>()); }
+    inline Matrix& operator-= (const Matrix& other) noexcept            { return apply (other, [] (ElementType a, ElementType b) { return a - b; } ); }
 
     /** Scalar multiplication */
     inline Matrix& operator*= (ElementType scalar) noexcept
@@ -155,7 +155,7 @@ public:
     Matrix operator* (const Matrix& other) const;
 
     /** Does a hadarmard product with the receiver and other and stores the result in the receiver */
-    inline Matrix& hadarmard (const Matrix& other) noexcept             { return apply (other, std::multiplies<ElementType>()); }
+    inline Matrix& hadarmard (const Matrix& other) noexcept             { return apply (other, [] (ElementType a, ElementType b) { return a * b; } ); }
 
     /** Does a hadarmard product with a and b returns the result. */
     static inline Matrix hadarmard (const Matrix& a, const Matrix& b)   { Matrix result (a); result.hadarmard (b); return result; }
