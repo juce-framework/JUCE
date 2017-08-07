@@ -382,9 +382,17 @@ public:
         if (style == IncDecButtons)
         {
             const double delta = (button == incButton) ? interval : -interval;
+            auto newValue = owner.snapValue (getValue() + delta, notDragging);
 
-            DragInProgress drag (*this);
-            setValue (owner.snapValue (getValue() + delta, notDragging), sendNotificationSync);
+            if (currentDrag != nullptr)
+            {
+                setValue (newValue, sendNotificationSync);
+            }
+            else
+            {
+                DragInProgress drag (*this);
+                setValue (newValue, sendNotificationSync);
+            }
         }
     }
 
