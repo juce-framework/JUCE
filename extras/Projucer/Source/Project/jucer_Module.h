@@ -144,7 +144,9 @@ public:
 
     bool isModuleEnabled (const String& moduleID) const;
 
-    Value shouldUseGlobalPath (const String& moduleID) const;
+    bool shouldUseGlobalPath (const String& moduleID) const;
+    Value getShouldUseGlobalPathValue (const String& moduleID) const;
+
     Value shouldShowAllModuleFilesInProject (const String& moduleID);
     Value shouldCopyModuleFilesLocally (const String& moduleID) const;
 

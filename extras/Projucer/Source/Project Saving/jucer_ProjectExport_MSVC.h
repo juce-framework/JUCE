@@ -34,8 +34,6 @@ public:
             getTargetLocationValue() = getDefaultBuildsRootFolder() + folderName;
 
         updateOldSettings();
-
-        initialiseDependencyPathValues();
     }
 
     virtual int getVisualStudioVersion() const = 0;
@@ -130,6 +128,22 @@ public:
 
             overwriteFileIfDifferentOrThrow (getSLNFile(), mo);
         }
+    }
+
+    //==============================================================================
+    void initialiseDependencyPathValues() override
+    {
+        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder),
+                                                                Ids::vst3Path,
+                                                                TargetOS::windows)));
+
+        aaxPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::aaxFolder),
+                                                               Ids::aaxPath,
+                                                               TargetOS::windows)));
+
+        rtasPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::rtasFolder),
+                                                                Ids::rtasPath,
+                                                                TargetOS::windows)));
     }
 
     //==============================================================================
@@ -1696,21 +1710,6 @@ protected:
     {
         return FileHelpers::isAbsolutePath (filename) ? filename
                                                       : (".\\" + filename);
-    }
-
-    void initialiseDependencyPathValues()
-    {
-        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder),
-                                                                Ids::vst3Path,
-                                                                TargetOS::windows)));
-
-        aaxPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::aaxFolder),
-                                                               Ids::aaxPath,
-                                                               TargetOS::windows)));
-
-        rtasPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::rtasFolder),
-                                                                Ids::rtasPath,
-                                                                TargetOS::windows)));
     }
 
     static bool shouldUseStdCall (const RelativePath& path)

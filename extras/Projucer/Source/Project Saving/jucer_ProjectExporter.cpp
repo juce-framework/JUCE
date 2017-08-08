@@ -500,7 +500,7 @@ String ProjectExporter::getPathForModuleString (const String& moduleID) const
     auto exporterPath = settings.getChildWithName (Ids::MODULEPATHS)
                                 .getChildWithProperty (Ids::ID, moduleID) [Ids::path].toString();
 
-    if (exporterPath.isEmpty() || project.getModules().shouldUseGlobalPath (moduleID).getValue())
+    if (exporterPath.isEmpty() || project.getModules().shouldUseGlobalPath (moduleID))
     {
         auto id = EnabledModuleList::isJuceModule (moduleID) ? Ids::defaultJuceModulePath
                                                              : Ids::defaultUserModulePath;

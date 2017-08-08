@@ -310,8 +310,6 @@ public:
 
         if (getTargetLocationString().isEmpty())
             getTargetLocationValue() = getDefaultBuildsRootFolder() + "LinuxMakefile";
-
-        initialiseDependencyPathValues();
     }
 
     //==============================================================================
@@ -399,6 +397,14 @@ public:
         // If you hit this assert, you tried to generate a project for an exporter
         // that does not support any of your targets!
         jassert (targets.size() > 0);
+    }
+
+    //==============================================================================
+    void initialiseDependencyPathValues() override
+    {
+        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder),
+                                                                Ids::vst3Path,
+                                                                TargetOS::linux)));
     }
 
 private:
@@ -744,13 +750,6 @@ private:
                 phonyTargetLine << " " << target->getPhonyName();
 
         return phonyTargetLine.toString();
-    }
-
-    void initialiseDependencyPathValues()
-    {
-        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder),
-                                                                Ids::vst3Path,
-                                                                TargetOS::linux)));
     }
 
     OwnedArray<MakefileTarget> targets;

@@ -88,6 +88,13 @@ public:
     }
 
     //==============================================================================
+    void initialiseDependencyPathValues() override
+    {
+        sdkPath.referTo  (Value (new DependencyPathValueSource (getSetting (Ids::androidSDKPath), Ids::androidSDKPath, TargetOS::getThisOS())));
+        ndkPath.referTo  (Value (new DependencyPathValueSource (getSetting (Ids::androidNDKPath), Ids::androidNDKPath, TargetOS::getThisOS())));
+    }
+
+    //==============================================================================
     CachedValue<String> androidRepositories, androidDependencies,
                         androidScreenOrientation, androidActivityClass, androidActivitySubClassName,
                         androidManifestCustomXmlElements, androidVersionCode, androidMinimumSDK, androidTheme,
@@ -132,7 +139,6 @@ public:
           buildToolsVersion (settings, Ids::buildToolsVersion, nullptr, "26.0.0"),
           AndroidExecutable (findAndroidExecutable())
     {
-        initialiseDependencyPathValues();
         name = getName();
 
         if (getTargetLocationString().isEmpty())
@@ -870,12 +876,6 @@ private:
         }
 
         return s + CodeHelpers::makeValidIdentifier (project.getProjectFilenameRoot(), false, true, false);
-    }
-
-    void initialiseDependencyPathValues()
-    {
-        sdkPath.referTo  (Value (new DependencyPathValueSource (getSetting (Ids::androidSDKPath), Ids::androidSDKPath, TargetOS::getThisOS())));
-        ndkPath.referTo  (Value (new DependencyPathValueSource (getSetting (Ids::androidNDKPath), Ids::androidNDKPath, TargetOS::getThisOS())));
     }
 
     //==============================================================================

@@ -142,7 +142,7 @@ public:
         //======================================================================
         String pathText;
 
-        if (project.getModules().shouldUseGlobalPath (moduleID).getValue())
+        if (project.getModules().shouldUseGlobalPath (moduleID))
         {
             pathText = "Global";
         }
@@ -250,14 +250,14 @@ private:
                 auto moduleIDs = moduleList.getAllModules();
 
                 for (auto id : moduleIDs)
-                    moduleList.shouldUseGlobalPath (id).setValue (enableGlobalPaths);
+                    moduleList.getShouldUseGlobalPathValue (id).setValue (enableGlobalPaths);
             }
             else
             {
                 auto selected = list.getSelectedRows();
 
                 for (auto i = 0; i < selected.size(); ++i)
-                    moduleList.shouldUseGlobalPath (moduleList.getModuleID (selected[i])).setValue (enableGlobalPaths);
+                    moduleList.getShouldUseGlobalPathValue (moduleList.getModuleID (selected[i])).setValue (enableGlobalPaths);
             }
         }
     }

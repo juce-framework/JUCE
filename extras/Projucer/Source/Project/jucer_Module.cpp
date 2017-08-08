@@ -222,7 +222,7 @@ static Array<File> getAllPossibleModulePathsFromExporters (Project& project)
         {
             auto id = modules.getModuleID (i);
 
-            if (modules.shouldUseGlobalPath (id).getValue())
+            if (modules.shouldUseGlobalPath (id))
                 continue;
 
             const auto path = exporter->getPathForModuleString (id);
@@ -651,7 +651,13 @@ bool EnabledModuleList::isAudioPluginModuleMissing() const
             && ! isModuleEnabled ("juce_audio_plugin_client");
 }
 
-Value EnabledModuleList::shouldUseGlobalPath (const String& moduleID) const
+bool EnabledModuleList::shouldUseGlobalPath (const String& moduleID) const
+{
+    return static_cast<bool> (state.getChildWithProperty (Ids::ID, moduleID)
+                                   .getProperty (Ids::useGlobalPath));
+}
+
+Value EnabledModuleList::getShouldUseGlobalPathValue (const String& moduleID) const
 {
     return state.getChildWithProperty (Ids::ID, moduleID)
                 .getPropertyAsValue (Ids::useGlobalPath, getUndoManager());
@@ -704,7 +710,7 @@ File EnabledModuleList::findUserModuleFolder (const String& possiblePaths, const
 
 File EnabledModuleList::getModuleFolder (const String& moduleID)
 {
-    if (shouldUseGlobalPath (moduleID).getValue())
+    if (shouldUseGlobalPath (moduleID))
     {
         if (isJuceModule (moduleID))
             return getModuleFolderFromPathIfItExists (getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString(), moduleID, project);
@@ -761,7 +767,7 @@ void EnabledModuleList::addModule (const File& moduleFolder, bool copyLocally, b
 
             shouldShowAllModuleFilesInProject (moduleID) = true;
             shouldCopyModuleFilesLocally (moduleID) = copyLocally;
-            shouldUseGlobalPath (moduleID) = useGlobalPath;
+            getShouldUseGlobalPathValue (moduleID) = useGlobalPath;
 
             RelativePath path (moduleFolder.getParentDirectory(),
                                project.getProjectFolder(), RelativePath::projectFolder);
@@ -842,7 +848,7 @@ bool EnabledModuleList::areMostModulesUsingGlobalPath() const
 
     for (auto i = getNumModules(); --i >= 0;)
     {
-        if (shouldUseGlobalPath (getModuleID (i)).getValue())
+        if (shouldUseGlobalPath (getModuleID (i)))
             ++numYes;
         else
             ++numNo;

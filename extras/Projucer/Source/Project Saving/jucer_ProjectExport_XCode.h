@@ -61,8 +61,6 @@ public:
         if (getTargetLocationString().isEmpty())
             getTargetLocationValue() = getDefaultBuildsRootFolder() + (iOS ? "iOS" : "MacOSX");
 
-        initialiseDependencyPathValues();
-
         if (iOS)
         {
             if (getScreenOrientationValue().toString().isEmpty())
@@ -360,6 +358,14 @@ public:
     {
         // check whether the script is identical to the old one that the Introjucer used to auto-generate
         return (MD5 (getPostBuildScript().toUTF8()).toHexString() == "265ac212a7e734c5bbd6150e1eae18a1");
+    }
+
+    //==============================================================================
+    void initialiseDependencyPathValues() override
+    {
+        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder), Ids::vst3Path, TargetOS::osx)));
+        aaxPath. referTo (Value (new DependencyPathValueSource (getSetting (Ids::aaxFolder),  Ids::aaxPath,  TargetOS::osx)));
+        rtasPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::rtasFolder), Ids::rtasPath, TargetOS::osx)));
     }
 
 protected:
@@ -2863,13 +2869,6 @@ private:
     static String getSDKName (int version)
     {
         return getOSXVersionName (version) + " SDK";
-    }
-
-    void initialiseDependencyPathValues()
-    {
-        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder), Ids::vst3Path, TargetOS::osx)));
-        aaxPath. referTo (Value (new DependencyPathValueSource (getSetting (Ids::aaxFolder),  Ids::aaxPath,  TargetOS::osx)));
-        rtasPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::rtasFolder), Ids::rtasPath, TargetOS::osx)));
     }
 
     JUCE_DECLARE_NON_COPYABLE (XCodeProjectExporter)
