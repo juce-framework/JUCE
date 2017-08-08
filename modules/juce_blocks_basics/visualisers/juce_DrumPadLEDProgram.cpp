@@ -236,8 +236,8 @@ juce::String DrumPadGridProgram::getLittleFootProgramPre25() const
                 {
                     int gradColour = blendARGB (colour, makeARGB (((xx + yy) * 250) / divisor, 0, 0, 0));
 
-                    setLED (x + xx, y + yy, gradColour);
-                    setLED (x + yy, y + xx, gradColour);
+                    fillPixel (x + xx, y + yy, gradColour);
+                    fillPixel (x + yy, y + xx, gradColour);
                 }
             }
         }
@@ -255,7 +255,7 @@ juce::String DrumPadGridProgram::getLittleFootProgramPre25() const
 
         for (int i = 1; i <= numToDo; ++i)
         {
-            setLED (x, y, colour);
+            fillPixel (x, y, colour);
 
             if (i < w)
                 ++x;
@@ -299,20 +299,20 @@ juce::String DrumPadGridProgram::getLittleFootProgramPre25() const
         {
             int pulseCol = blendARGB (colour, makeARGB (animateProgress, 0, 0, 0));
 
-            setLED (padX + halfW, padY + halfW, pulseCol);
+            fillPixel (padX + halfW, padY + halfW, pulseCol);
         }
 
         else if (fill == 5) // Blinking dot
         {
             int blinkCol = animateProgress > 64 ? makeARGB (255, 0, 0, 0) : colour;
 
-            setLED (padX + halfW, padY + halfW, blinkCol);
+            fillPixel (padX + halfW, padY + halfW, blinkCol);
         }
 
         else if (fill == 6) // Pizza filled
         {
             outlineRect (blendARGB (colour, makeARGB (220, 0, 0, 0)), padX, padY, padW); // Dim outline
-            setLED (padX + halfW, padY + halfW, colour); // Bright centre
+            fillPixel (padX + halfW, padY + halfW, colour); // Bright centre
 
             drawPizzaLED (colour, padX, padY, padW, animateProgress);
         }
@@ -501,7 +501,7 @@ juce::String DrumPadGridProgram::getLittleFootProgramPre25() const
         // Overlay heatmap
         for (int y = 0; y < 15; ++y)
             for (int x = 0; x < 15; ++x)
-                blendLED (x, y, getHeatmapColour (x, y));
+                blendPixel (x, y, getHeatmapColour (x, y));
 
         fadeHeatMap();
     }
