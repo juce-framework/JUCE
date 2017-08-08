@@ -139,7 +139,7 @@ private:
 class JUCE_API  ScopedTimeMeasurement
 {
 public:
-    ScopedTimeMeasurement (double& resultInSeconds)
+    ScopedTimeMeasurement (double& resultInSeconds) noexcept
         : result (resultInSeconds)
     {
         result = 0.0;
@@ -154,4 +154,6 @@ public:
 private:
     int64 startTimeTicks = Time::getHighResolutionTicks();
     double& result;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedTimeMeasurement)
 };
