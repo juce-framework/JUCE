@@ -66,7 +66,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.atomic.*;
-$$JuceAndroidMidiImports$$ // If you get an error here, you need to re-save your project with the Projucer!
+$$JuceAndroidMidiImports$$         // If you get an error here, you need to re-save your project with the Projucer!
 
 
 //==============================================================================
@@ -299,6 +299,7 @@ public class JuceAppActivity   extends Activity
     private native void suspendApp();
     private native void resumeApp();
     private native void setScreenSize (int screenWidth, int screenHeight, int dpi);
+    private native void appActivityResult (int requestCode, int resultCode, Intent data);
 
     //==============================================================================
     private ViewHolder viewHolder;
@@ -1196,6 +1197,13 @@ public class JuceAppActivity   extends Activity
     public static final String getMusicFolder()      { return getFileLocation (Environment.DIRECTORY_MUSIC); }
     public static final String getMoviesFolder()     { return getFileLocation (Environment.DIRECTORY_MOVIES); }
     public static final String getDownloadsFolder()  { return getFileLocation (Environment.DIRECTORY_DOWNLOADS); }
+
+    //==============================================================================
+    @Override
+    protected void onActivityResult (int requestCode, int resultCode, Intent data)
+    {
+        appActivityResult (requestCode, resultCode, data);
+    }
 
     //==============================================================================
     public final Typeface getTypeFaceFromAsset (String assetName)

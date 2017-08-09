@@ -41,7 +41,7 @@
   website:          http://www.juce.com/juce
   license:          GPL/Commercial
 
-  dependencies:     juce_cryptography
+  dependencies:     juce_cryptography juce_core
 
  END_JUCE_MODULE_DECLARATION
 
@@ -60,9 +60,13 @@
     Tracktion Marketplace web-store, the module itself is fully open, and can
     be used to connect to your own web-store instead, if you implement your
     own compatible web-server back-end.
+
+    In additional, the module supports in-app purchases both on iOS and Android
+    platforms.
 */
 
 //==============================================================================
+#include <juce_core/juce_core.h>
 #include <juce_cryptography/juce_cryptography.h>
 
 #if JUCE_MODULE_AVAILABLE_juce_data_structures
@@ -75,6 +79,10 @@
 
 namespace juce
 {
+   #if JUCE_ANDROID || JUCE_IOS
+    #include "in_app_purchases/juce_InAppPurchases.h"
+   #endif
+
    #if JUCE_MODULE_AVAILABLE_juce_data_structures
     #include "marketplace/juce_OnlineUnlockStatus.h"
     #include "marketplace/juce_TracktionMarketplaceStatus.h"
