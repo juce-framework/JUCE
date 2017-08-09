@@ -828,22 +828,22 @@ void LookAndFeel_V2::drawTreeviewPlusMinusBox (Graphics& g, const Rectangle<floa
 
     const int x = ((int) area.getWidth()  - boxSize) / 2 + (int) area.getX();
     const int y = ((int) area.getHeight() - boxSize) / 2 + (int) area.getY();
-    const int w = boxSize;
-    const int h = boxSize;
+
+    Rectangle<float> boxArea ((float) x, (float) y, (float) boxSize, (float) boxSize);
 
     g.setColour (Colour (0xe5ffffff));
-    g.fillRect (x, y, w, h);
+    g.fillRect (boxArea);
 
     g.setColour (Colour (0x80000000));
-    g.drawRect (x, y, w, h);
+    g.drawRect (boxArea);
 
     const float size = boxSize / 2 + 1.0f;
     const float centre = (float) (boxSize / 2);
 
-    g.fillRect (x + (w - size) * 0.5f, y + centre, size, 1.0f);
+    g.fillRect (x + (boxSize - size) * 0.5f, y + centre, size, 1.0f);
 
     if (! isOpen)
-        g.fillRect (x + centre, y + (h - size) * 0.5f, 1.0f, size);
+        g.fillRect (x + centre, y + (boxSize - size) * 0.5f, 1.0f, size);
 }
 
 bool LookAndFeel_V2::areLinesDrawnForTreeView (TreeView&)
