@@ -1126,7 +1126,7 @@ private:
         if (getStyleAttribute (xml, "font-weight").containsIgnoreCase ("bold"))
             f.setBold (true);
 
-        return f.withPointHeight (getCoordLength (getStyleAttribute (xml, "font-size"), 1.0f));
+        return f.withPointHeight (getCoordLength (getStyleAttribute (xml, "font-size", "15"), 1.0f));
     }
 
     //==============================================================================
