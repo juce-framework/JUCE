@@ -148,9 +148,9 @@ static void checkGLError (const char* file, const int line)
 
         if (e == GL_NO_ERROR)
             break;
-		// TODO: Handle GL errors on Install/Run
-        //DBG ("***** " << getGLErrorMessage (e) << "  at " << file << " : " << line);
-        //jassertfalse;
+
+        DBG ("***** " << getGLErrorMessage (e) << "  at " << file << " : " << line);
+        jassertfalse;
     }
 }
 
