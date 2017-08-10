@@ -249,11 +249,11 @@ private:
     //==============================================================================
     friend class Synthesiser;
 
-    double currentSampleRate;
-    int currentlyPlayingNote, currentPlayingMidiChannel;
-    uint32 noteOnTime;
+    double currentSampleRate = 44100.0;
+    int currentlyPlayingNote = -1, currentPlayingMidiChannel = 0;
+    uint32 noteOnTime = 0;
     SynthesiserSound::Ptr currentlyPlayingSound;
-    bool keyIsDown, sustainPedalDown, sostenutoPedalDown;
+    bool keyIsDown = false, sustainPedalDown = false, sostenutoPedalDown = false;
 
     AudioBuffer<float> tempBuffer;
 
@@ -615,11 +615,11 @@ private:
                            int startSample,
                            int numSamples);
     //==============================================================================
-    double sampleRate;
-    uint32 lastNoteOnCounter;
-    int minimumSubBlockSize;
-    bool subBlockSubdivisionIsStrict;
-    bool shouldStealNotes;
+    double sampleRate = 0;
+    uint32 lastNoteOnCounter = 0;
+    int minimumSubBlockSize = 32;
+    bool subBlockSubdivisionIsStrict = false;
+    bool shouldStealNotes = true;
     BigInteger sustainPedalsDown;
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
