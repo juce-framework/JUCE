@@ -610,7 +610,7 @@ private:
                                                        .replace ("/", "${File.separator}");
 
         mo << "    signingConfigs {"                                              << newLine;
-        mo << "        release {"                                                 << newLine;
+        mo << "        juceSigning {"                                             << newLine;
         mo << "            storeFile     file(\"" << keyStoreFilePath << "\")"    << newLine;
         mo << "            storePassword \"" << androidKeyStorePass.get() << "\"" << newLine;
         mo << "            keyAlias      \"" << androidKeyAlias.get() << "\""     << newLine;
@@ -679,9 +679,7 @@ private:
             mo << "             initWith " << (config->isDebug() ? "debug" : "release") << newLine;
             mo << "             debuggable    " << (config->isDebug() ? "true" : "false") << newLine;
             mo << "             jniDebuggable " << (config->isDebug() ? "true" : "false") << newLine;
-
-            if (! config->isDebug())
-                mo << "             signingConfig signingConfigs.release" << newLine;
+            mo << "             signingConfig signingConfigs.juceSigning" << newLine;
 
             mo << "         }" << newLine;
         }
