@@ -148,10 +148,10 @@ static void checkGLError (const char* file, const int line)
 
         if (e == GL_NO_ERROR)
             break;
-
-        DBG ("***** " << getGLErrorMessage (e) << "  at " << file << " : " << line);
-        jassertfalse;
-    }
+		// TODO: Handle GL errors on Install/Run
+		//DBG ("***** " << getGLErrorMessage (e) << "  at " << file << " : " << line);
+		//jassertfalse;
+	}
 }
 
  #define JUCE_CHECK_OPENGL_ERROR checkGLError (__FILE__, __LINE__);
