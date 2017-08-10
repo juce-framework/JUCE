@@ -139,10 +139,15 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
         serviceConnection = GlobalRef (CreateJavaInterface (this, "android/content/ServiceConnection").get());
         android.activity.callBooleanMethod (JuceAppActivity.bindService, intent,
                                             serviceConnection.get(), 1 /*BIND_AUTO_CREATE*/);
+
+        if (threadPool == nullptr)
+            threadPool = new ThreadPool (1);
     }
 
     ~Pimpl()
     {
+        threadPool = nullptr;
+
         if (serviceConnection != nullptr)
         {
             android.activity.callVoidMethod (JuceAppActivity.unbindService, serviceConnection.get());
@@ -157,9 +162,6 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
 
     void getProductsInformation (const StringArray& productIdentifiers)
     {
-        if (! checkIsReady())
-            return;
-
         auto callback = [this](const Array<InAppPurchases::Product>& products)
         {
             const ScopedLock lock (getProductsInformationJobResultsLock);
@@ -167,16 +169,13 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
             triggerAsyncUpdate();
         };
 
-        threadPool->addJob (new GetProductsInformationJob (inAppBillingService, getPackageName(),
+        threadPool->addJob (new GetProductsInformationJob (*this, getPackageName(),
                                                            productIdentifiers, callback), true);
     }
 
     void purchaseProduct (const String& productIdentifier, bool isSubscription,
                           const StringArray& subscriptionIdentifiers, bool creditForUnusedSubscription)
     {
-        if (! checkIsReady())
-            return;
-
         // Upgrading/downgrading only makes sense for subscriptions!
         jassert (subscriptionIdentifiers.isEmpty() || isSubscription);
 
@@ -206,9 +205,6 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
 
     void restoreProductsBoughtList (bool, const juce::String&)
     {
-        if (! checkIsReady())
-            return;
-
         auto callback = [this](const Array<InAppPurchases::Listener::PurchaseInfo>& purchases)
         {
             const ScopedLock lock (getProductsBoughtJobResultsLock);
@@ -216,15 +212,12 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
             triggerAsyncUpdate();
         };
 
-        threadPool->addJob (new GetProductsBoughtJob (inAppBillingService,
+        threadPool->addJob (new GetProductsBoughtJob (*this,
                                                       getPackageName(), callback), true);
     }
 
     void consumePurchase (const String& productIdentifier, const String& purchaseToken)
     {
-        if (! checkIsReady())
-            return;
-
         auto callback = [this](const ConsumePurchaseJob::Result& r)
         {
             const ScopedLock lock (consumePurchaseJobResultsLock);
@@ -232,7 +225,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
             triggerAsyncUpdate();
         };
 
-        threadPool->addJob (new ConsumePurchaseJob (inAppBillingService, getPackageName(), productIdentifier,
+        threadPool->addJob (new ConsumePurchaseJob (*this, getPackageName(), productIdentifier,
                                                     purchaseToken, callback), true);
     }
 
@@ -321,6 +314,10 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
     //==============================================================================
     bool checkIsReady()
     {
+        // It may take a few seconds for the in-app purchase service to connect
+        for (auto retries = 0; retries < 10 && inAppBillingService.get() == 0; ++retries)
+            Thread::sleep (500);
+
         return (inAppBillingService.get() != 0);
     }
 
@@ -347,6 +344,8 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
         // Connecting to the in-app purchase server failed! This could have multiple reasons:
         // 1) Your phone/emulator must support the google play store
         // 2) Your phone must be logged into the google play store and be able to receive updates
+        // 3) It can take a few seconds after instantiation of the InAppPurchase class for
+        //    in-app purchases to be avaialable on Android.
         return false;
     }
 
@@ -360,12 +359,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
                                                                    iBinder));
 
         if (isInAppPurchasesSupported (iapService))
-        {
-            if (threadPool == nullptr)
-                threadPool = new ThreadPool (1);
-
             inAppBillingService = GlobalRef (iapService);
-        }
 
         // If you hit this assert, then in-app purchases is not available on your device,
         // most likely due to too old version of Google Play API (hint: update Google Play on the device).
@@ -374,7 +368,6 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
 
     void onServiceDisconnected (jobject) override
     {
-        threadPool = nullptr;
         inAppBillingService.clear();
     }
 
@@ -389,12 +382,12 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
     {
         using Callback = std::function<void(const Array<InAppPurchases::Product>&)>;
 
-        GetProductsInformationJob (const GlobalRef& inAppBillingServiceToUse,
+        GetProductsInformationJob (Pimpl& parent,
                                    const LocalRef<jstring>& packageNameToUse,
                                    const StringArray& productIdentifiersToUse,
                                    const Callback& callbackToUse)
             : ThreadPoolJob ("GetProductsInformationJob"),
-              inAppBillingService (inAppBillingServiceToUse),
+              owner (parent),
               packageName (packageNameToUse.get()),
               productIdentifiers (productIdentifiersToUse),
               callback (callbackToUse)
@@ -404,7 +397,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
         {
             jassert (callback);
 
-            if (inAppBillingService.get() != 0)
+            if (owner.checkIsReady())
             {
                 // Google's Billing API limitation
                 auto maxQuerySize = 20;
@@ -466,7 +459,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
 
             auto productTypeString = javaString (productType);
 
-            auto productDetails = LocalRef<jobject> (inAppBillingService.callObjectMethod (IInAppBillingService.getSkuDetails,
+            auto productDetails = LocalRef<jobject> (owner.inAppBillingService.callObjectMethod (IInAppBillingService.getSkuDetails,
                                                                                            3, (jstring) packageName.get(),
                                                                                            productTypeString.get(), querySkus.get()));
 
@@ -477,7 +470,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
         {
             Array<InAppPurchases::Product> products;
 
-            if (retrievedProducts.get() != 0)
+            if (owner.checkIsReady())
             {
                 auto* env = getEnv();
 
@@ -542,8 +535,8 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
             return products;
         }
 
-
-        GlobalRef inAppBillingService, packageName;
+        Pimpl& owner;
+        GlobalRef packageName;
         const StringArray productIdentifiers;
         Callback callback;
     };
@@ -553,11 +546,11 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
     {
         using Callback = std::function<void(const Array<InAppPurchases::Listener::PurchaseInfo>&)>;
 
-        GetProductsBoughtJob (const GlobalRef& inAppBillingServiceToUse,
+        GetProductsBoughtJob (Pimpl& parent,
                               const LocalRef<jstring>& packageNameToUse,
                               const Callback& callbackToUse)
             : ThreadPoolJob ("GetProductsBoughtJob"),
-              inAppBillingService (inAppBillingServiceToUse),
+              owner (parent),
               packageName (packageNameToUse.get()),
               callback (callbackToUse)
         {}
@@ -566,7 +559,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
         {
             jassert (callback);
 
-            if (inAppBillingService.get() != 0)
+            if (owner.checkIsReady())
             {
                 auto inAppPurchases = getProductsBought ("inapp", 0);
                 auto subsPurchases  = getProductsBought ("subs", 0);
@@ -597,7 +590,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
             auto* env = getEnv();
 
             auto productTypeString = javaString (productType);
-            auto ownedItems = LocalRef<jobject> (inAppBillingService.callObjectMethod (IInAppBillingService.getPurchases, 3,
+            auto ownedItems = LocalRef<jobject> (owner.inAppBillingService.callObjectMethod (IInAppBillingService.getPurchases, 3,
                                                                                        (jstring) packageName.get(), productTypeString.get(),
                                                                                        continuationToken));
 
@@ -655,7 +648,8 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
             return purchases;
         }
 
-        GlobalRef inAppBillingService, packageName;
+        Pimpl& owner;
+        GlobalRef packageName;
         Callback callback;
     };
 
@@ -672,13 +666,13 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
 
         using Callback = std::function<void(const Result&)>;
 
-        ConsumePurchaseJob (const GlobalRef& inAppBillingServiceToUse,
+        ConsumePurchaseJob (Pimpl& parent,
                             const LocalRef<jstring>& packageNameToUse,
                             const String& productIdentifierToUse,
                             const String& purchaseTokenToUse,
                             const Callback& callbackToUse)
             : ThreadPoolJob ("ConsumePurchaseJob"),
-              inAppBillingService (inAppBillingServiceToUse),
+              owner (parent),
               packageName (packageNameToUse.get()),
               productIdentifier (productIdentifierToUse),
               purchaseToken (purchaseTokenToUse),
@@ -689,21 +683,29 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
         {
             jassert (callback);
 
-            auto token = (! purchaseToken.isEmpty() ? purchaseToken : getPurchaseTokenForProductId (productIdentifier, false, 0));
+            if (owner.checkIsReady())
+            {
+                auto token = (! purchaseToken.isEmpty() ? purchaseToken : getPurchaseTokenForProductId (productIdentifier, false, 0));
 
-            if (token.isEmpty())
+                if (token.isEmpty())
+                {
+                    if (callback)
+                        callback ({ productIdentifier, false, NEEDS_TRANS ("Item not owned") });
+
+                    return jobHasFinished;
+                }
+
+                auto responseCode = owner.inAppBillingService.callIntMethod (IInAppBillingService.consumePurchase, 3,
+                                                                       (jstring)packageName.get(), javaString (token).get());
+
+                if (callback)
+                    callback ({ productIdentifier, responseCode == 0, statusCodeToUserString (responseCode) });
+            }
+            else
             {
                 if (callback)
-                    callback ({ productIdentifier, false, NEEDS_TRANS ("Item not owned") });
-
-                return jobHasFinished;
+                    callback ({{}, false, "In-App purchases unavailable"});
             }
-
-            auto responseCode = inAppBillingService.callIntMethod (IInAppBillingService.consumePurchase, 3,
-                                                                   (jstring)packageName.get(), javaString (token).get());
-
-            if (callback)
-                callback ({ productIdentifier, responseCode == 0, statusCodeToUserString (responseCode) });
 
             return jobHasFinished;
         }
@@ -712,7 +714,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
         String getPurchaseTokenForProductId (const String productIdToLookFor, bool isSubscription, jstring continuationToken)
         {
             auto productTypeString = javaString (isSubscription ? "subs" : "inapp");
-            auto ownedItems = LocalRef<jobject> (inAppBillingService.callObjectMethod (IInAppBillingService.getPurchases, 3,
+            auto ownedItems = LocalRef<jobject> (owner.inAppBillingService.callObjectMethod (IInAppBillingService.getPurchases, 3,
                                                                                        (jstring) packageName.get(), productTypeString.get(),
                                                                                        continuationToken));
 
@@ -758,7 +760,8 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
             return {};
         }
 
-        GlobalRef inAppBillingService, packageName;
+        Pimpl& owner;
+        GlobalRef packageName;
         const String productIdentifier, purchaseToken;
         Callback callback;
     };
