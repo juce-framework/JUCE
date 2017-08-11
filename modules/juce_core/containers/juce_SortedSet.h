@@ -55,31 +55,22 @@ class SortedSet
 public:
     //==============================================================================
     /** Creates an empty set. */
-    SortedSet() noexcept
-    {
-    }
+    SortedSet() noexcept = default;
 
-    /** Creates a copy of another set.
-        @param other    the set to copy
-    */
-    SortedSet (const SortedSet& other)
-        : data (other.data)
-    {
-    }
+    /** Creates a copy of another set. */
+    SortedSet (const SortedSet&) = default;
+
+    /** Creates a copy of another set. */
+    SortedSet (SortedSet&&) noexcept = default;
+
+    /** Makes a copy of another set. */
+    SortedSet& operator= (const SortedSet&) = default;
+
+    /** Makes a copy of another set. */
+    SortedSet& operator= (SortedSet&&) noexcept = default;
 
     /** Destructor. */
-    ~SortedSet() noexcept
-    {
-    }
-
-    /** Copies another set over this one.
-        @param other    the set to copy
-    */
-    SortedSet& operator= (const SortedSet& other) noexcept
-    {
-        data = other.data;
-        return *this;
-    }
+    ~SortedSet() noexcept {}
 
     //==============================================================================
     /** Compares this set to another one.
@@ -234,7 +225,7 @@ public:
             if (elementToLookFor == data.getReference (s))
                 return s;
 
-            const int halfway = (s + e) / 2;
+            auto halfway = (s + e) / 2;
 
             if (halfway == s)
                 return -1;
@@ -277,15 +268,16 @@ public:
 
         while (s < e)
         {
-            ElementType& elem = data.getReference (s);
+            auto& elem = data.getReference (s);
+
             if (newElement == elem)
             {
                 elem = newElement; // force an update in case operator== permits differences.
                 return false;
             }
 
-            const int halfway = (s + e) / 2;
-            const bool isBeforeHalfway = (newElement < data.getReference (halfway));
+            auto halfway = (s + e) / 2;
+            bool isBeforeHalfway = (newElement < data.getReference (halfway));
 
             if (halfway == s)
             {
@@ -335,25 +327,22 @@ public:
                  int numElementsToAdd = -1) noexcept
     {
         const typename OtherSetType::ScopedLockType lock1 (setToAddFrom.getLock());
+        const ScopedLockType lock2 (getLock());
+        jassert (this != &setToAddFrom);
 
+        if (this != &setToAddFrom)
         {
-            const ScopedLockType lock2 (getLock());
-            jassert (this != &setToAddFrom);
-
-            if (this != &setToAddFrom)
+            if (startIndex < 0)
             {
-                if (startIndex < 0)
-                {
-                    jassertfalse;
-                    startIndex = 0;
-                }
-
-                if (numElementsToAdd < 0 || startIndex + numElementsToAdd > setToAddFrom.size())
-                    numElementsToAdd = setToAddFrom.size() - startIndex;
-
-                if (numElementsToAdd > 0)
-                    addArray (&setToAddFrom.data.getReference (startIndex), numElementsToAdd);
+                jassertfalse;
+                startIndex = 0;
             }
+
+            if (numElementsToAdd < 0 || startIndex + numElementsToAdd > setToAddFrom.size())
+                numElementsToAdd = setToAddFrom.size() - startIndex;
+
+            if (numElementsToAdd > 0)
+                addArray (&setToAddFrom.data.getReference (startIndex), numElementsToAdd);
         }
     }
 
@@ -400,7 +389,7 @@ public:
         {
             clear();
         }
-        else if (otherSet.size() > 0)
+        else if (! otherSet.isEmpty())
         {
             for (int i = data.size(); --i >= 0;)
                 if (otherSet.contains (data.getReference (i)))
@@ -423,7 +412,7 @@ public:
 
         if (this != &otherSet)
         {
-            if (otherSet.size() <= 0)
+            if (otherSet.isEmpty())
             {
                 clear();
             }
