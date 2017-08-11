@@ -304,7 +304,7 @@ void Synthesiser::startVoice (SynthesiserVoice* const voice,
         voice->currentPlayingMidiChannel = midiChannel;
         voice->noteOnTime = ++lastNoteOnCounter;
         voice->currentlyPlayingSound = sound;
-        voice->keyIsDown = true;
+        voice->setKeyDown (true);
         voice->sostenutoPedalDown = false;
         voice->sustainPedalDown = sustainPedalsDown[midiChannel];
 
@@ -342,7 +342,7 @@ void Synthesiser::noteOff (const int midiChannel,
                 {
                     jassert (! voice->keyIsDown || voice->sustainPedalDown == sustainPedalsDown [midiChannel]);
 
-                    voice->keyIsDown = false;
+                    voice->setKeyDown (false);
 
                     if (! (voice->sustainPedalDown || voice->sostenutoPedalDown))
                         stopVoice (voice, velocity, allowTailOff);
