@@ -47,6 +47,10 @@
   #define JUCE_COMPILER_SUPPORTS_THREAD_LOCAL 1
  #endif
 
+ #if __cpp_constexpr >= 201304
+  #define JUCE_HAS_CONSTEXPR 1
+ #endif
+
  #ifndef JUCE_EXCEPTIONS_DISABLED
   #if ! __EXCEPTIONS
    #define JUCE_EXCEPTIONS_DISABLED 1
@@ -86,6 +90,10 @@
   #define JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL 1
  #endif
 
+ #if __has_feature(cxx_relaxed_constexpr)
+  #define JUCE_HAS_CONSTEXPR 1
+ #endif
+
  #ifndef JUCE_COMPILER_SUPPORTS_ARC
   #define JUCE_COMPILER_SUPPORTS_ARC 1
  #endif
@@ -118,6 +126,10 @@
   #define JUCE_COMPILER_SUPPORTS_NOEXCEPT 1
  #endif
 
+ #if _MSC_VER >= 1910
+  #define JUCE_HAS_CONSTEXPR 1
+ #endif
+
  #ifndef JUCE_EXCEPTIONS_DISABLED
   #if ! _CPPUNWIND
    #define JUCE_EXCEPTIONS_DISABLED 1
@@ -135,6 +147,12 @@
      older ones it's just an empty definition.
  */
  #define JUCE_DELETED_FUNCTION
+#endif
+
+#if JUCE_HAS_CONSTEXPR
+ #define JUCE_CONSTEXPR constexpr
+#else
+ #define JUCE_CONSTEXPR
 #endif
 
 #if ! DOXYGEN
