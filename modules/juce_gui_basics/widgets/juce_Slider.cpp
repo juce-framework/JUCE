@@ -27,7 +27,7 @@
 class Slider::Pimpl   : public AsyncUpdater,
                         public Button::Listener,
                         public Label::Listener,
-                        public ValueListener
+                        public Value::Listener
 {
 public:
     Pimpl (Slider& s, SliderStyle sliderStyle, TextEntryBoxPosition textBoxPosition)

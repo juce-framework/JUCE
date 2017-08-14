@@ -26,7 +26,7 @@
 
 class Button::CallbackHelper  : public Timer,
                                 public ApplicationCommandManagerListener,
-                                public ValueListener,
+                                public Value::Listener,
                                 public KeyListener
 {
 public:

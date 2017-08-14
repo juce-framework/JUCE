@@ -25,7 +25,7 @@
 */
 
 class SVGPathDataComponent  : public Component,
-                              private TextEditorListener
+                              private TextEditor::Listener
 {
 public:
     SVGPathDataComponent()
