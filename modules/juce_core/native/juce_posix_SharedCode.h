@@ -393,7 +393,11 @@ void File::getFileTimesInternal (int64& modificationTime, int64& accessTime, int
     {
         modificationTime  = (int64) info.st_mtime * 1000;
         accessTime        = (int64) info.st_atime * 1000;
+       #if (JUCE_MAC && MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5) || JUCE_IOS
+        creationTime      = (int64) info.st_birthtime * 1000;
+       #else
         creationTime      = (int64) info.st_ctime * 1000;
+       #endif
     }
 }
 
