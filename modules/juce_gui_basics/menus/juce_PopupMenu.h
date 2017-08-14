@@ -280,6 +280,8 @@ public:
         This will add a user-defined component to use as a menu item. The component
         passed in will be deleted by this menu when it's no longer needed.
 
+        Note that native macOS menus do not support custom components.
+
         @see CustomComponent
     */
     void addCustomItem (int itemResultID,
@@ -296,6 +298,8 @@ public:
         detection of a mouse-click on your component, and use that to trigger the
         menu ID specified in itemResultID. If this is false, the menu item can't
         be triggered, so itemResultID is not used.
+
+        Note that native macOS menus do support custom components.
     */
     void addCustomItem (int itemResultID,
                         Component* customComponent,
