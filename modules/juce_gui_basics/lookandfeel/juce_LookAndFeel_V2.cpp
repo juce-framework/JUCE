@@ -1727,7 +1727,7 @@ void LookAndFeel_V2::drawResizableFrame (Graphics& g, int w, int h, const Border
         const Rectangle<int> fullSize (0, 0, w, h);
         const Rectangle<int> centreArea (border.subtractedFrom (fullSize));
 
-        g.saveState();
+        const Graphics::ScopedSaveState sss (g);
 
         g.excludeClipRegion (centreArea);
 
@@ -1736,8 +1736,6 @@ void LookAndFeel_V2::drawResizableFrame (Graphics& g, int w, int h, const Border
 
         g.setColour (Colour (0x19000000));
         g.drawRect (centreArea.expanded (1, 1));
-
-        g.restoreState();
     }
 }
 
@@ -2780,7 +2778,7 @@ void LookAndFeel_V2::drawBevel (Graphics& g, const int x, const int y, const int
     if (g.clipRegionIntersects (Rectangle<int> (x, y, width, height)))
     {
         LowLevelGraphicsContext& context = g.getInternalContext();
-        context.saveState();
+        const Graphics::ScopedSaveState sss (g);
 
         for (int i = bevelThickness; --i >= 0;)
         {
@@ -2796,8 +2794,6 @@ void LookAndFeel_V2::drawBevel (Graphics& g, const int x, const int y, const int
             context.setFill (bottomRightColour.withMultipliedAlpha (op  * 0.75f));
             context.fillRect (Rectangle<int> (x + width - i - 1, y + i + 1, 1, height - i * 2 - 2), false);
         }
-
-        context.restoreState();
     }
 }
 
@@ -2970,11 +2966,10 @@ void LookAndFeel_V2::drawGlassLozenge (Graphics& g,
 
     if (! (flatOnLeft || flatOnTop || flatOnBottom))
     {
-        g.saveState();
+        const Graphics::ScopedSaveState sss (g);
         g.setGradientFill (cg);
         g.reduceClipRegion (intX, intY, intEdge, intH);
         g.fillPath (outline);
-        g.restoreState();
     }
 
     if (! (flatOnRight || flatOnTop || flatOnBottom))
@@ -2982,11 +2977,10 @@ void LookAndFeel_V2::drawGlassLozenge (Graphics& g,
         cg.point1.setX (x + width - edgeBlurRadius);
         cg.point2.setX (x + width);
 
-        g.saveState();
+        const Graphics::ScopedSaveState sss (g);
         g.setGradientFill (cg);
         g.reduceClipRegion (intX + intW - intEdge, intY, 2 + intEdge, intH);
         g.fillPath (outline);
-        g.restoreState();
     }
 
     {
