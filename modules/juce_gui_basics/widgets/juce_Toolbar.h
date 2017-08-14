@@ -50,7 +50,7 @@ class ToolbarItemFactory;
 class JUCE_API  Toolbar   : public Component,
                             public DragAndDropContainer,
                             public DragAndDropTarget,
-                            private ButtonListener  // (can't use Button::Listener due to idiotic VC2005 bug)
+                            private Button::Listener
 {
 public:
     //==============================================================================

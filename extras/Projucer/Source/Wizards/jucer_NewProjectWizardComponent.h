@@ -28,8 +28,8 @@
 
 
 class ModulesFolderPathBox  : public Component,
-                              private ButtonListener,
-                              private ComboBoxListener
+                              private Button::Listener,
+                              private ComboBox::Listener
 {
 public:
     ModulesFolderPathBox (File initialFileOrDirectory)
@@ -295,9 +295,9 @@ private:
     a list box of platform targets to generate.
 */
 class WizardComp  : public Component,
-                    private ButtonListener,
-                    private ComboBoxListener,
-                    private TextEditorListener,
+                    private Button::Listener,
+                    private ComboBox::Listener,
+                    private TextEditor::Listener,
                     private FileBrowserListener
 {
 public:

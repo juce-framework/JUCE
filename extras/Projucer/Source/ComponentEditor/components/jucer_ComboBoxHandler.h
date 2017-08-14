@@ -136,7 +136,7 @@ public:
 
         if (needsCallback (component))
         {
-            String& callback = code.getCallbackCode ("public ComboBoxListener",
+            String& callback = code.getCallbackCode ("public ComboBox::Listener",
                                                      "void",
                                                      "comboBoxChanged (ComboBox* comboBoxThatHasChanged)",
                                                      true);

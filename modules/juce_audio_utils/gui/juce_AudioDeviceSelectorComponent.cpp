@@ -199,8 +199,8 @@ static String getNoDeviceString()   { return "<< " + TRANS("none") + " >>"; }
 //==============================================================================
 class AudioDeviceSettingsPanel : public Component,
                                  private ChangeListener,
-                                 private ComboBoxListener,  // (can't use ComboBox::Listener due to idiotic VC2005 bug)
-                                 private ButtonListener
+                                 private ComboBox::Listener,
+                                 private Button::Listener
 {
 public:
     AudioDeviceSettingsPanel (AudioIODeviceType& t, AudioDeviceSetupDetails& setupDetails,

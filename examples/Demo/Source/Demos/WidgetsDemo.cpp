@@ -226,7 +226,7 @@ private:
 
 //==============================================================================
 struct ButtonsPage   : public Component,
-                       public ButtonListener
+                       public Button::Listener
 {
     ButtonsPage()
     {
@@ -459,8 +459,8 @@ struct MiscPage   : public Component
 
 //==============================================================================
 class ToolbarDemoComp   : public Component,
-                          public SliderListener,
-                          public ButtonListener
+                          public Slider::Listener,
+                          public Button::Listener
 {
 public:
     ToolbarDemoComp()
@@ -943,7 +943,7 @@ private:
     // This is a custom component containing a combo box, which we're going to put inside
     // our table's "rating" column.
     class RatingColumnCustomComponent    : public Component,
-                                           private ComboBoxListener
+                                           private ComboBox::Listener
     {
     public:
         RatingColumnCustomComponent (TableDemoComponent& td)  : owner (td)

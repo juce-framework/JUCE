@@ -28,7 +28,7 @@
 
 //==============================================================================
 class AUv3SynthEditor   : public AudioProcessorEditor,
-                          public ButtonListener,
+                          public Button::Listener,
                           public Slider::Listener,
                           private Timer
 {

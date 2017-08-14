@@ -333,7 +333,7 @@ private:
 
 //==============================================================================
 class KeyMappingEditorComponent::TopLevelItem   : public TreeViewItem,
-                                                  public ButtonListener,
+                                                  public Button::Listener,
                                                   private ChangeListener
 {
 public:

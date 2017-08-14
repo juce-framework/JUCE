@@ -313,7 +313,7 @@ private:
 
         //==============================================================================
         class MissingDependenciesComponent  : public PropertyComponent,
-                                              public ButtonListener
+                                              public Button::Listener
         {
         public:
             MissingDependenciesComponent (Project& p, const String& modID)

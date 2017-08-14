@@ -107,7 +107,7 @@ namespace LiveConstantEditor
     //==============================================================================
     struct JUCE_API  LivePropertyEditorBase  : public Component,
                                                private TextEditor::Listener,
-                                               private ButtonListener
+                                               private Button::Listener
     {
         LivePropertyEditorBase (LiveValueBase&, CodeDocument&);
 

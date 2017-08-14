@@ -35,7 +35,7 @@
 class JUCE_API  PluginListComponent   : public Component,
                                         public FileDragAndDropTarget,
                                         private ChangeListener,
-                                        private ButtonListener  // (can't use Button::Listener due to idiotic VC2005 bug)
+                                        private Button::Listener
 {
 public:
     //==============================================================================

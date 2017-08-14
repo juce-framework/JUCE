@@ -140,7 +140,7 @@ private:
     struct PopupColourSelector   : public Component,
                                    public ChangeListener,
                                    public Value::Listener,
-                                   public ButtonListener
+                                   public Button::Listener
     {
         PopupColourSelector (const Value& colour,
                              Colour defaultCol,

@@ -33,7 +33,7 @@
 
 class IAAEffectEditor  : public AudioProcessorEditor,
                          private IAAEffectProcessor::MeterListener,
-                         private ButtonListener,
+                         private Button::Listener,
                          private Timer
 {
 public:

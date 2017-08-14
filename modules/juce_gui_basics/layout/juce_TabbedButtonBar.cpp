@@ -169,7 +169,7 @@ void TabBarButton::resized()
 
 //==============================================================================
 class TabbedButtonBar::BehindFrontTabComp  : public Component,
-                                             public ButtonListener // (can't use Button::Listener due to idiotic VC2005 bug)
+                                             public Button::Listener
 {
 public:
     BehindFrontTabComp (TabbedButtonBar& tb)  : owner (tb)

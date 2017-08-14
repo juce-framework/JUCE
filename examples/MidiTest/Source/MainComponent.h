@@ -39,7 +39,7 @@ class MainContentComponent  : public Component,
                               private MidiKeyboardStateListener,
                               private MidiInputCallback,
                               private MessageListener,
-                              private ButtonListener
+                              private Button::Listener
 {
 public:
     //==============================================================================

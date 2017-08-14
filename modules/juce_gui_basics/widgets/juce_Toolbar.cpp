@@ -705,8 +705,8 @@ private:
     Toolbar& toolbar;
 
     class CustomiserPanel  : public Component,
-                             private ComboBoxListener, // (can't use ComboBox::Listener due to idiotic VC2005 bug)
-                             private ButtonListener
+                             private ComboBox::Listener,
+                             private Button::Listener
     {
     public:
         CustomiserPanel (ToolbarItemFactory& tbf, Toolbar& bar, int optionFlags)

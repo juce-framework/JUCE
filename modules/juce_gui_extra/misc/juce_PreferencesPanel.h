@@ -45,7 +45,7 @@
     for each of these pages.
 */
 class JUCE_API  PreferencesPanel  : public Component,
-                                    private ButtonListener // (can't use Button::Listener due to idiotic VC2005 bug)
+                                    private Button::Listener
 {
 public:
     //==============================================================================

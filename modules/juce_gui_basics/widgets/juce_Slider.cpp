@@ -25,36 +25,15 @@
 */
 
 class Slider::Pimpl   : public AsyncUpdater,
-                        public ButtonListener,  // (can't use Button::Listener due to idiotic VC2005 bug)
-                        public LabelListener,
+                        public Button::Listener,
+                        public Label::Listener,
                         public ValueListener
 {
 public:
     Pimpl (Slider& s, SliderStyle sliderStyle, TextEntryBoxPosition textBoxPosition)
       : owner (s),
         style (sliderStyle),
-        lastCurrentValue (0), lastValueMin (0), lastValueMax (0),
-        minimum (0), maximum (10), interval (0), doubleClickReturnValue (0),
-        skewFactor (1.0), symmetricSkew (false), velocityModeSensitivity (1.0),
-        velocityModeOffset (0.0), velocityModeThreshold (1),
-        sliderRegionStart (0), sliderRegionSize (1), sliderBeingDragged (-1),
-        pixelsForFullDragExtent (250),
-        textBoxPos (textBoxPosition),
-        numDecimalPlaces (7),
-        textBoxWidth (80), textBoxHeight (20),
-        incDecButtonMode (incDecButtonsNotDraggable),
-        editableText (true),
-        doubleClickToValue (false),
-        isVelocityBased (false),
-        userKeyOverridesVelocity (true),
-        incDecButtonsSideBySide (false),
-        sendChangeOnlyOnRelease (false),
-        popupDisplayEnabled (false),
-        menuEnabled (false),
-        useDragEvents (false),
-        scrollWheelEnabled (true),
-        snapsToMousePos (true),
-        parentForPopupDisplay (nullptr)
+        textBoxPos (textBoxPosition)
     {
         rotaryParams.startAngleRadians = float_Pi * 1.2f;
         rotaryParams.endAngleRadians   = float_Pi * 2.8f;
@@ -344,7 +323,7 @@ public:
 
         Component::BailOutChecker checker (&owner);
         Slider* slider = &owner; // (must use an intermediate variable here to avoid a VS2005 compiler bug)
-        listeners.callChecked (checker, &SliderListener::sliderValueChanged, slider);  // (can't use Slider::Listener due to idiotic VC2005 bug)
+        listeners.callChecked (checker, &Slider::Listener::sliderValueChanged, slider);
     }
 
     void sendDragStart()
@@ -353,7 +332,7 @@ public:
 
         Component::BailOutChecker checker (&owner);
         Slider* slider = &owner; // (must use an intermediate variable here to avoid a VS2005 compiler bug)
-        listeners.callChecked (checker, &SliderListener::sliderDragStarted, slider);
+        listeners.callChecked (checker, &Slider::Listener::sliderDragStarted, slider);
     }
 
     void sendDragEnd()
@@ -364,7 +343,7 @@ public:
 
         Component::BailOutChecker checker (&owner);
         Slider* slider = &owner; // (must use an intermediate variable here to avoid a VS2005 compiler bug)
-        listeners.callChecked (checker, &SliderListener::sliderDragEnded, slider);
+        listeners.callChecked (checker, &Slider::Listener::sliderDragEnded, slider);
     }
 
     struct DragInProgress
@@ -1188,41 +1167,41 @@ public:
     Slider& owner;
     SliderStyle style;
 
-    ListenerList <SliderListener> listeners;
+    ListenerList<Slider::Listener> listeners;
     Value currentValue, valueMin, valueMax;
-    double lastCurrentValue, lastValueMin, lastValueMax;
-    double minimum, maximum, interval, doubleClickReturnValue;
-    double valueWhenLastDragged, valueOnMouseDown, skewFactor, lastAngle;
-    bool symmetricSkew;
-    double velocityModeSensitivity, velocityModeOffset, minMaxDiff;
-    int velocityModeThreshold;
+    double lastCurrentValue = 0, lastValueMin = 0, lastValueMax = 0;
+    double minimum = 0, maximum = 10, interval = 0, doubleClickReturnValue = 0;
+    double valueWhenLastDragged = 0, valueOnMouseDown = 0, skewFactor = 1.0, lastAngle = 0;
+    bool symmetricSkew = false;
+    double velocityModeSensitivity = 1.0, velocityModeOffset = 0, minMaxDiff = 0;
+    int velocityModeThreshold = 1;
     RotaryParameters rotaryParams;
     Point<float> mouseDragStartPos, mousePosWhenLastDragged;
-    int sliderRegionStart, sliderRegionSize;
-    int sliderBeingDragged;
-    int pixelsForFullDragExtent;
+    int sliderRegionStart = 0, sliderRegionSize = 1;
+    int sliderBeingDragged = -1;
+    int pixelsForFullDragExtent = 250;
     Time lastMouseWheelTime;
     Rectangle<int> sliderRect;
     ScopedPointer<DragInProgress> currentDrag;
 
     TextEntryBoxPosition textBoxPos;
     String textSuffix;
-    int numDecimalPlaces;
-    int textBoxWidth, textBoxHeight;
-    IncDecButtonMode incDecButtonMode;
+    int numDecimalPlaces = 7;
+    int textBoxWidth = 80, textBoxHeight = 20;
+    IncDecButtonMode incDecButtonMode = incDecButtonsNotDraggable;
 
-    bool editableText;
-    bool doubleClickToValue;
-    bool isVelocityBased;
-    bool userKeyOverridesVelocity;
-    bool incDecButtonsSideBySide;
-    bool sendChangeOnlyOnRelease;
-    bool popupDisplayEnabled;
-    bool menuEnabled;
-    bool useDragEvents;
-    bool incDecDragged;
-    bool scrollWheelEnabled;
-    bool snapsToMousePos;
+    bool editableText = true;
+    bool doubleClickToValue = false;
+    bool isVelocityBased = false;
+    bool userKeyOverridesVelocity = true;
+    bool incDecButtonsSideBySide = false;
+    bool sendChangeOnlyOnRelease = false;
+    bool popupDisplayEnabled = false;
+    bool menuEnabled = false;
+    bool useDragEvents = false;
+    bool incDecDragged = false;
+    bool scrollWheelEnabled = true;
+    bool snapsToMousePos = true;
 
     ScopedPointer<Label> valueBox;
     ScopedPointer<Button> incButton, decButton;
@@ -1275,7 +1254,7 @@ public:
     };
 
     ScopedPointer<PopupDisplayComponent> popupDisplay;
-    Component* parentForPopupDisplay;
+    Component* parentForPopupDisplay = nullptr;
 
     //==============================================================================
     static double smallestAngleBetween (const double a1, const double a2) noexcept
@@ -1319,8 +1298,8 @@ void Slider::init (SliderStyle style, TextEntryBoxPosition textBoxPos)
 Slider::~Slider() {}
 
 //==============================================================================
-void Slider::addListener (SliderListener* const listener)       { pimpl->listeners.add (listener); }
-void Slider::removeListener (SliderListener* const listener)    { pimpl->listeners.remove (listener); }
+void Slider::addListener (Listener* l)       { pimpl->listeners.add (l); }
+void Slider::removeListener (Listener* l)    { pimpl->listeners.remove (l); }
 
 //==============================================================================
 Slider::SliderStyle Slider::getSliderStyle() const noexcept     { return pimpl->style; }

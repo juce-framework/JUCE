@@ -70,7 +70,7 @@ private:
 //==============================================================================
 class WebBrowserDemo    : public Component,
                           private TextEditor::Listener,
-                          private ButtonListener
+                          private Button::Listener
 {
 public:
     WebBrowserDemo()

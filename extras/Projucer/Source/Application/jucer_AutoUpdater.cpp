@@ -233,7 +233,7 @@ public:
 
 //==============================================================================
 class UpdateUserDialog   : public Component,
-                           public ButtonListener
+                           public Button::Listener
 {
 public:
     UpdateUserDialog (const LatestVersionChecker::JuceVersionTriple& version,

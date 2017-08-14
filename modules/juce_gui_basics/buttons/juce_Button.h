@@ -397,7 +397,7 @@ protected:
         Subclasses can override this to perform whatever they actions they need
         to do.
 
-        Alternatively, a ButtonListener can be added to the button, and these listeners
+        Alternatively, a Button::Listener can be added to the button, and these listeners
         will be called when the click occurs.
 
         @see triggerClick

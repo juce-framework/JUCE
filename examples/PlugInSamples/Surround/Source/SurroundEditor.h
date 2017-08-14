@@ -33,7 +33,7 @@ public:
 };
 
 class SurroundEditor : public AudioProcessorEditor,
-                       public ButtonListener,
+                       public Button::Listener,
                        private Timer
 {
 public:

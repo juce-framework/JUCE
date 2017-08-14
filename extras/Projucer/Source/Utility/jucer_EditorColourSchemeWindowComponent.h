@@ -123,7 +123,7 @@ private:
 
         //==============================================================================
         struct EditorPanel  : public Component,
-                              private ButtonListener
+                              private Button::Listener
         {
             EditorPanel()
             : loadButton ("Load Scheme..."),
