@@ -163,8 +163,8 @@ private:
     void setEditorColourScheme (int index, bool saveSetting);
     void updateEditorColourSchemeIfNeeded();
 
-    int selectedColourSchemeIndex;
+    int selectedColourSchemeIndex = 0;
 
-    int selectedEditorColourSchemeIndex;
-    int numEditorColourSchemes;
+    int selectedEditorColourSchemeIndex = 0;
+    int numEditorColourSchemes = 0;
 };
