@@ -137,6 +137,8 @@ public:
         [task release];
         [request release];
         [headers release];
+
+        [session finishTasksAndInvalidate];
         [session release];
 
         const ScopedLock sl (dataLock);
