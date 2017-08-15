@@ -75,6 +75,8 @@ MainWindow::MainWindow()
 
     getLookAndFeel().setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
 
+    projectNameValue.addListener (this);
+
     setResizeLimits (600, 500, 32000, 32000);
 }
 
@@ -165,9 +167,9 @@ void MainWindow::setProject (Project* newProject)
     currentProject = newProject;
 
     if (currentProject != nullptr)
-        setName (currentProject->getProjectFilenameRoot() + " - Projucer");
+        projectNameValue.referTo (currentProject->getProjectNameValue());
     else
-        setName ("Projucer");
+        projectNameValue.referTo (Value());
 
     ProjucerApplication::getCommandManager().commandStatusChanged();
 }
@@ -361,6 +363,13 @@ bool MainWindow::perform (const InvocationInfo& info)
     return true;
 }
 
+void MainWindow::valueChanged (Value& v)
+{
+    if (v == Value())
+        setName ("Projucer");
+    else
+        setName (projectNameValue.toString() + " - Projucer");
+}
 
 //==============================================================================
 MainWindowList::MainWindowList()

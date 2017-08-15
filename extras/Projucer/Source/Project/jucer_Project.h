@@ -56,8 +56,8 @@ public:
     //==============================================================================
     File getProjectFolder() const                       { return getFile().getParentDirectory(); }
     ValueTree getProjectRoot() const                    { return projectRoot; }
-    String getTitle() const;
-    Value getProjectNameValue()                         { return getMainGroup().getNameValue(); }
+    String getTitle() const                             { return projectRoot [Ids::name]; }
+    Value getProjectNameValue()                         { return getProjectValue (Ids::name); }
     String getProjectFilenameRoot()                     { return File::createLegalFileName (getDocumentTitle()); }
     String getProjectUID() const                        { return projectRoot [Ids::ID]; }
 

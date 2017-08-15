@@ -46,15 +46,7 @@ public:
     //==============================================================================
     String getDisplayName() const override              { return item.getName(); }
     String getRenamingName() const override             { return getDisplayName(); }
-
-    void setName (const String& newName) override
-    {
-        if (item.isMainGroup())
-            item.project.setTitle (newName);
-        else
-            item.getNameValue() = newName;
-    }
-
+    void setName (const String& newName) override       { item.getNameValue() = newName; }
     bool isMissing() const override                     { return isFileMissing; }
     virtual File getFile() const                        { return item.getFile(); }
 
