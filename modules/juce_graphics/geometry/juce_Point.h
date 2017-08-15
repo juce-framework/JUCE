@@ -55,7 +55,7 @@ public:
 
     //==============================================================================
     /** Copies this point from another one. */
-    Point& operator= (const Point& other) noexcept                  { x = other.x; y = other.y; return *this; }
+    constexpr Point& operator= (const Point& other) noexcept                  { x = other.x; y = other.y; return *this; }
 
     constexpr inline bool operator== (Point other) const noexcept             { return x == other.x && y == other.y; }
     constexpr inline bool operator!= (Point other) const noexcept             { return x != other.x || y != other.y; }
@@ -85,10 +85,10 @@ public:
     constexpr Point withY (ValueType newY) const noexcept                     { return Point (x, newY); }
 
     /** Changes the point's x and y coordinates. */
-    void setXY (ValueType newX, ValueType newY) noexcept            { x = newX; y = newY; }
+    constexpr void setXY (ValueType newX, ValueType newY) noexcept            { x = newX; y = newY; }
 
     /** Adds a pair of coordinates to this value. */
-    void addXY (ValueType xToAdd, ValueType yToAdd) noexcept        { x += xToAdd; y += yToAdd; }
+    constexpr void addXY (ValueType xToAdd, ValueType yToAdd) noexcept        { x += xToAdd; y += yToAdd; }
 
     //==============================================================================
     /** Returns a point with a given offset from this one. */
@@ -98,13 +98,13 @@ public:
     constexpr Point operator+ (Point other) const noexcept                    { return Point (x + other.x, y + other.y); }
 
     /** Adds another point's coordinates to this one */
-    Point& operator+= (Point other) noexcept                        { x += other.x; y += other.y; return *this; }
+    constexpr Point& operator+= (Point other) noexcept                        { x += other.x; y += other.y; return *this; }
 
     /** Subtracts one points from another */
     constexpr Point operator- (Point other) const noexcept                    { return Point (x - other.x, y - other.y); }
 
     /** Subtracts another point's coordinates to this one */
-    Point& operator-= (Point other) noexcept                        { x -= other.x; y -= other.y; return *this; }
+    constexpr Point& operator-= (Point other) noexcept                        { x -= other.x; y -= other.y; return *this; }
 
     /** Multiplies two points together */
     template <typename OtherType>
@@ -120,7 +120,7 @@ public:
 
     /** Divides this point's coordinates by another */
     template <typename OtherType>
-    Point& operator/= (Point<OtherType> other) noexcept             { *this = *this / other; return *this; }
+    constexpr Point& operator/= (Point<OtherType> other) noexcept             { *this = *this / other; return *this; }
 
     /** Returns a point whose coordinates are multiplied by a given scalar value. */
     template <typename FloatType>
@@ -132,11 +132,11 @@ public:
 
     /** Multiplies the point's coordinates by a scalar value. */
     template <typename FloatType>
-    Point& operator*= (FloatType multiplier) noexcept               { x = (ValueType) (x * multiplier); y = (ValueType) (y * multiplier); return *this; }
+    constexpr Point& operator*= (FloatType multiplier) noexcept               { x = (ValueType) (x * multiplier); y = (ValueType) (y * multiplier); return *this; }
 
     /** Divides the point's coordinates by a scalar value. */
     template <typename FloatType>
-    Point& operator/= (FloatType divisor) noexcept                  { x = (ValueType) (x / divisor); y = (ValueType) (y / divisor); return *this; }
+    constexpr Point& operator/= (FloatType divisor) noexcept                  { x = (ValueType) (x / divisor); y = (ValueType) (y / divisor); return *this; }
 
     /** Returns the inverse of this point. */
     constexpr Point operator-() const noexcept                                { return Point (-x, -y); }
@@ -153,10 +153,10 @@ public:
     ValueType getDistanceFrom (Point other) const noexcept          { return juce_hypot (x - other.x, y - other.y); }
 
     /** Returns the square of the straight-line distance between this point and the origin. */
-    ValueType getDistanceSquaredFromOrigin() const noexcept         { return x * x + y * y; }
+    constexpr ValueType getDistanceSquaredFromOrigin() const noexcept         { return x * x + y * y; }
 
     /** Returns the square of the straight-line distance between this point and another one. */
-    ValueType getDistanceSquaredFrom (Point other) const noexcept   { return (*this - other).getDistanceSquaredFromOrigin(); }
+    constexpr ValueType getDistanceSquaredFrom (Point other) const noexcept   { return (*this - other).getDistanceSquaredFromOrigin(); }
 
     /** Returns the angle from this point to another one.
 
@@ -202,7 +202,7 @@ public:
     }
 
     /** Returns the dot-product of two points (x1 * x2 + y1 * y2). */
-    FloatType getDotProduct (Point other) const noexcept          { return x * other.x + y * other.y; }
+    constexpr FloatType getDotProduct (Point other) const noexcept          { return x * other.x + y * other.y; }
 
     //==============================================================================
     /** Uses a transform to change the point's coordinates.
@@ -221,13 +221,13 @@ public:
 
     //==============================================================================
     /** Casts this point to a Point<int> object. */
-    Point<int> toInt() const noexcept                             { return Point<int> (static_cast<int> (x), static_cast<int> (y)); }
+    constexpr Point<int> toInt() const noexcept                             { return Point<int> (static_cast<int> (x), static_cast<int> (y)); }
 
     /** Casts this point to a Point<float> object. */
-    Point<float> toFloat() const noexcept                         { return Point<float> (static_cast<float> (x), static_cast<float> (y)); }
+    constexpr Point<float> toFloat() const noexcept                         { return Point<float> (static_cast<float> (x), static_cast<float> (y)); }
 
     /** Casts this point to a Point<double> object. */
-    Point<double> toDouble() const noexcept                       { return Point<double> (static_cast<double> (x), static_cast<double> (y)); }
+    constexpr Point<double> toDouble() const noexcept                       { return Point<double> (static_cast<double> (x), static_cast<double> (y)); }
 
     /** Casts this point to a Point<int> object using roundToInt() to convert the values. */
     Point<int> roundToInt() const noexcept                        { return Point<int> (juce::roundToInt (x), juce::roundToInt (y)); }
@@ -242,7 +242,7 @@ public:
 
 /** Multiplies the point's coordinates by a scalar value. */
 template <typename ValueType>
-Point<ValueType> operator* (ValueType value, Point<ValueType> p) noexcept       { return p * value; }
+constexpr Point<ValueType> operator* (ValueType value, Point<ValueType> p) noexcept       { return p * value; }
 
 #if defined(_MSC_VER) && _MSC_VER < 1910
 #undef constexpr
