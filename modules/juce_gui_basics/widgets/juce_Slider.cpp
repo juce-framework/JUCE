@@ -24,10 +24,10 @@
   ==============================================================================
 */
 
-class Slider::Pimpl   : public AsyncUpdater,
-                        public Button::Listener,
-                        public Label::Listener,
-                        public Value::Listener
+class Slider::Pimpl   : private AsyncUpdater,
+                        private Button::Listener,
+                        private Label::Listener,
+                        private Value::Listener
 {
 public:
     Pimpl (Slider& s, SliderStyle sliderStyle, TextEntryBoxPosition textBoxPosition)
@@ -118,11 +118,13 @@ public:
                 int v = std::abs (roundToInt (newInt * 10000000));
 
                 if (v > 0)
+                {
                     while ((v % 10) == 0)
                     {
                         --numDecimalPlaces;
                         v /= 10;
                     }
+                }
             }
 
             // keep the current values inside the new range..
@@ -180,9 +182,7 @@ public:
 
             updateText();
             owner.repaint();
-
-            if (popupDisplay != nullptr)
-                popupDisplay->updatePosition (owner.getTextFromValue (newValue));
+            updatePopupDisplay (newValue);
 
             triggerChangeMessage (notification);
         }
@@ -217,9 +217,7 @@ public:
             lastValueMin = newValue;
             valueMin = newValue;
             owner.repaint();
-
-            if (popupDisplay != nullptr)
-                popupDisplay->updatePosition (owner.getTextFromValue (newValue));
+            updatePopupDisplay (newValue);
 
             triggerChangeMessage (notification);
         }
@@ -254,9 +252,7 @@ public:
             lastValueMax = newValue;
             valueMax = newValue;
             owner.repaint();
-
-            if (popupDisplay != nullptr)
-                popupDisplay->updatePosition (owner.getTextFromValue (valueMax.getValue()));
+            updatePopupDisplay (valueMax.getValue());
 
             triggerChangeMessage (notification);
         }
@@ -680,6 +676,7 @@ public:
         if (dx * dx + dy * dy > 25.0f)
         {
             double angle = std::atan2 ((double) dx, (double) -dy);
+
             while (angle < 0.0)
                 angle += double_Pi * 2.0;
 
@@ -730,12 +727,12 @@ public:
             || ((style == LinearHorizontal || style == LinearVertical || style == LinearBar || style == LinearBarVertical)
                 && ! snapsToMousePos))
         {
-            const float mouseDiff = (style == RotaryHorizontalDrag
-                                        || style == LinearHorizontal
-                                        || style == LinearBar
-                                        || (style == IncDecButtons && incDecDragDirectionIsHorizontal()))
-                                      ? e.position.x - mouseDragStartPos.x
-                                      : mouseDragStartPos.y - e.position.y;
+            auto mouseDiff = (style == RotaryHorizontalDrag
+                                || style == LinearHorizontal
+                                || style == LinearBar
+                                || (style == IncDecButtons && incDecDragDirectionIsHorizontal()))
+                              ? e.position.x - mouseDragStartPos.x
+                              : mouseDragStartPos.y - e.position.y;
 
             newPos = owner.valueToProportionOfLength (valueOnMouseDown)
                        + mouseDiff * (1.0 / pixelsForFullDragExtent);
@@ -748,8 +745,8 @@ public:
         }
         else if (style == RotaryHorizontalVerticalDrag)
         {
-            const float mouseDiff = (e.position.x - mouseDragStartPos.x)
-                                      + (mouseDragStartPos.y - e.position.y);
+            auto mouseDiff = (e.position.x - mouseDragStartPos.x)
+                               + (mouseDragStartPos.y - e.position.y);
 
             newPos = owner.valueToProportionOfLength (valueOnMouseDown)
                        + mouseDiff * (1.0 / pixelsForFullDragExtent);
@@ -809,6 +806,7 @@ public:
         useDragEvents = false;
         mouseDragStartPos = mousePosWhenLastDragged = e.position;
         currentDrag = nullptr;
+        popupDisplay = nullptr;
 
         if (owner.isEnabled())
         {
@@ -841,17 +839,10 @@ public:
                                                                                            : currentValue)).getValue();
                 valueOnMouseDown = valueWhenLastDragged;
 
-                if (popupDisplayEnabled)
+                if (showPopupOnDrag || showPopupOnHover)
                 {
-                    PopupDisplayComponent* const popup = new PopupDisplayComponent (owner);
-                    popupDisplay = popup;
-
-                    if (parentForPopupDisplay != nullptr)
-                        parentForPopupDisplay->addChildComponent (popup);
-                    else
-                        popup->addToDesktop (ComponentPeer::windowIsTemporary);
-
-                    popup->setVisible (true);
+                    showPopupDisplay();
+                    popupDisplay->stopTimer();
                 }
 
                 currentDrag = new DragInProgress (*this);
@@ -950,10 +941,55 @@ public:
         }
         else if (popupDisplay != nullptr)
         {
-            popupDisplay->startTimer (2000);
+            popupDisplay->startTimer (200);
         }
 
         currentDrag = nullptr;
+    }
+
+    void mouseMove()
+    {
+        if (showPopupOnHover
+             && style != TwoValueHorizontal
+             && style != TwoValueVertical)
+        {
+            if (owner.isMouseOver (true) && owner.getTopLevelComponent()->hasKeyboardFocus (true))
+            {
+                if (popupDisplay == nullptr)
+                    showPopupDisplay();
+
+                updatePopupDisplay (getValue());
+
+                if (popupDisplay != nullptr)
+                    popupDisplay->startTimer (2000);
+            }
+        }
+    }
+
+    void mouseExit()
+    {
+        popupDisplay = nullptr;
+    }
+
+    void showPopupDisplay()
+    {
+        if (popupDisplay == nullptr)
+        {
+            popupDisplay = new PopupDisplayComponent (owner);
+
+            if (parentForPopupDisplay != nullptr)
+                parentForPopupDisplay->addChildComponent (popupDisplay);
+            else
+                popupDisplay->addToDesktop (ComponentPeer::windowIsTemporary);
+
+            popupDisplay->setVisible (true);
+        }
+    }
+
+    void updatePopupDisplay (double valueToShow)
+    {
+        if (popupDisplay != nullptr)
+            popupDisplay->updatePosition (owner.getTextFromValue (valueToShow));
     }
 
     bool canDoubleClickToValue() const
@@ -1196,7 +1232,8 @@ public:
     bool userKeyOverridesVelocity = true;
     bool incDecButtonsSideBySide = false;
     bool sendChangeOnlyOnRelease = false;
-    bool popupDisplayEnabled = false;
+    bool showPopupOnDrag = false;
+    bool showPopupOnHover = false;
     bool menuEnabled = false;
     bool useDragEvents = false;
     bool incDecDragged = false;
@@ -1207,10 +1244,9 @@ public:
     ScopedPointer<Button> incButton, decButton;
 
     //==============================================================================
-    class PopupDisplayComponent  : public BubbleComponent,
-                                   public Timer
+    struct PopupDisplayComponent  : public BubbleComponent,
+                                    public Timer
     {
-    public:
         PopupDisplayComponent (Slider& s)
             : owner (s),
               font (s.getLookAndFeel().getSliderPopupFont (s))
@@ -1257,7 +1293,7 @@ public:
     Component* parentForPopupDisplay = nullptr;
 
     //==============================================================================
-    static double smallestAngleBetween (const double a1, const double a2) noexcept
+    static double smallestAngleBetween (double a1, double a2) noexcept
     {
         return jmin (std::abs (a1 - a2),
                      std::abs (a1 + double_Pi * 2.0 - a2),
@@ -1391,10 +1427,11 @@ void Slider::setChangeNotificationOnlyOnRelease (bool onlyNotifyOnRelease)
 bool Slider::getSliderSnapsToMousePosition() const noexcept                 { return pimpl->snapsToMousePos; }
 void Slider::setSliderSnapsToMousePosition (const bool shouldSnapToMouse)   { pimpl->snapsToMousePos = shouldSnapToMouse; }
 
-void Slider::setPopupDisplayEnabled (const bool enabled, Component* const parentComponentToUse)
+void Slider::setPopupDisplayEnabled (bool showOnDrag, bool showOnHover, Component* parent)
 {
-    pimpl->popupDisplayEnabled = enabled;
-    pimpl->parentForPopupDisplay = parentComponentToUse;
+    pimpl->showPopupOnDrag = showOnDrag;
+    pimpl->showPopupOnHover = showOnHover;
+    pimpl->parentForPopupDisplay = parent;
 }
 
 Component* Slider::getCurrentPopupDisplay() const noexcept      { return pimpl->popupDisplay.get(); }
@@ -1557,7 +1594,9 @@ void Slider::resized()                  { pimpl->resized (getLookAndFeel()); }
 void Slider::focusOfChildComponentChanged (FocusChangeType)     { repaint(); }
 
 void Slider::mouseDown (const MouseEvent& e)    { pimpl->mouseDown (e); }
-void Slider::mouseUp (const MouseEvent&)        { pimpl->mouseUp(); }
+void Slider::mouseUp   (const MouseEvent&)      { pimpl->mouseUp(); }
+void Slider::mouseMove (const MouseEvent&)      { pimpl->mouseMove(); }
+void Slider::mouseExit (const MouseEvent&)      { pimpl->mouseExit(); }
 
 void Slider::modifierKeysChanged (const ModifierKeys& modifiers)
 {
