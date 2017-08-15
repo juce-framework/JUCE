@@ -68,6 +68,7 @@
  #include <pluginterfaces/base/ipluginbase.h>
  #include <pluginterfaces/base/ustring.h>
  #include <pluginterfaces/gui/iplugview.h>
+ #include <pluginterfaces/gui/iplugviewcontentscalesupport.h>
  #include <pluginterfaces/vst/ivstattributes.h>
  #include <pluginterfaces/vst/ivstaudioprocessor.h>
  #include <pluginterfaces/vst/ivstcomponent.h>
