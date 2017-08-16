@@ -87,7 +87,7 @@ struct ItemComponent  : public Component
         int itemW = 80;
         int itemH = 16;
         getIdealSize (itemW, itemH, standardItemHeight);
-        setSize (itemW, jlimit (2, 600, itemH));
+        setSize (itemW, jlimit (1, 600, itemH));
 
         addMouseListener (&parent, false);
     }
