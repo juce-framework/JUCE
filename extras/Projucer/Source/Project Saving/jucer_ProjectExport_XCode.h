@@ -831,12 +831,21 @@ public:
         //==============================================================================
         StringArray getTargetSettings (const XcodeBuildConfiguration& config) const
         {
-            if (type == AggregateTarget)
-                // the aggregate target should not specify any settings at all!
-                // it just defines dependencies on the other targets.
-                return {};
-
             StringArray s;
+
+            if (type == AggregateTarget && ! owner.isiOS())
+            {
+                // the aggregate target needs to have the deployment target set for
+                // pre-/post-build scripts
+
+                String sdkRoot;
+                s.add ("MACOSX_DEPLOYMENT_TARGET = " + getOSXDeploymentTarget (config, &sdkRoot));
+
+                if (sdkRoot.isNotEmpty())
+                    s.add ("SDKROOT = " + sdkRoot);
+
+                return s;
+            }
 
             String bundleIdentifier = owner.project.getBundleIdentifier().toString();
             if (xcodeBundleIDSubPath.isNotEmpty())
@@ -945,7 +954,7 @@ public:
             else
             {
                 String sdkRoot;
-                s.add ("MACOSX_DEPLOYMENT_TARGET = " + getOSXDeploymentTarget(config, &sdkRoot));
+                s.add ("MACOSX_DEPLOYMENT_TARGET = " + getOSXDeploymentTarget (config, &sdkRoot));
 
                 if (sdkRoot.isNotEmpty())
                     s.add ("SDKROOT = " + sdkRoot);
@@ -1496,7 +1505,7 @@ public:
 
             // The AUv3 target always needs to be at least 10.11
             int oldestAllowedDeploymentTarget = (type == Target::AudioUnitv3PlugIn ? minimumAUv3SDKVersion
-                                                 : oldestSDKVersion);
+                                                                                   : oldestSDKVersion);
 
             // if the user doesn't set it, then use the last known version that works well with JUCE
             String deploymentTarget = "10.11";
