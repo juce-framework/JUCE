@@ -1104,6 +1104,8 @@ void LookAndFeel_V2::preparePopupMenuWindow (Component&) {}
 
 bool LookAndFeel_V2::shouldPopupMenuScaleWithTargetComponent (const PopupMenu::Options&)    { return true; }
 
+int LookAndFeel_V2::getPopupMenuBorderSize()    { return 2; }
+
 //==============================================================================
 void LookAndFeel_V2::fillTextEditorBackground (Graphics& g, int /*width*/, int /*height*/, TextEditor& textEditor)
 {

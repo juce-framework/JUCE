@@ -727,6 +727,8 @@ public:
         /** Return true if you want your popup menus to scale with the target component's AffineTransform
             or scale factor */
         virtual bool shouldPopupMenuScaleWithTargetComponent (const PopupMenu::Options& options) = 0;
+
+        virtual int getPopupMenuBorderSize() = 0;
     };
 
 private:

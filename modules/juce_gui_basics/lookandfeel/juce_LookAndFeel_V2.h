@@ -182,6 +182,8 @@ public:
 
     bool shouldPopupMenuScaleWithTargetComponent (const PopupMenu::Options& options) override;
 
+    int getPopupMenuBorderSize() override;
+
     //==============================================================================
     void drawComboBox (Graphics&, int width, int height, bool isButtonDown,
                        int buttonX, int buttonY, int buttonW, int buttonH,
