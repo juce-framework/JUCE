@@ -265,20 +265,20 @@ public:
             setFullScreen (true);
     }
 
-    Point<int> getScreenPosition() const
+    Point<float> getScreenPosition() const
     {
-        return Point<int> (view.callIntMethod (ComponentPeerView.getLeft),
-                           view.callIntMethod (ComponentPeerView.getTop)) / scale;
+        return Point<float> (view.callIntMethod (ComponentPeerView.getLeft),
+                             view.callIntMethod (ComponentPeerView.getTop)) / scale;
     }
 
     Point<float> localToGlobal (Point<float> relativePosition) override
     {
-        return relativePosition + getScreenPosition().toFloat();
+        return relativePosition + getScreenPosition();
     }
 
     Point<float> globalToLocal (Point<float> screenPosition) override
     {
-        return screenPosition - getScreenPosition().toFloat();
+        return screenPosition - getScreenPosition();
     }
 
     void setMinimised (bool /*shouldBeMinimised*/) override
@@ -407,7 +407,7 @@ public:
     void handleMouseDownCallback (int index, Point<float> sysPos, int64 time)
     {
         Point<float> pos = sysPos / scale;
-        lastMousePos = pos;
+        lastMousePos = localToGlobal (pos);
 
         // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
         handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, currentModifiers.withoutMouseButtons(),
@@ -420,7 +420,7 @@ public:
     void handleMouseDragCallback (int index, Point<float> pos, int64 time)
     {
         pos /= scale;
-        lastMousePos = pos;
+        lastMousePos = localToGlobal (pos);
 
         jassert (index < 64);
         touchesDown = (touchesDown | (1 << (index & 63)));
@@ -432,7 +432,7 @@ public:
     void handleMouseUpCallback (int index, Point<float> pos, int64 time)
     {
         pos /= scale;
-        lastMousePos = pos;
+        lastMousePos = localToGlobal (pos);
 
         jassert (index < 64);
         touchesDown = (touchesDown & ~(1 << (index & 63)));
