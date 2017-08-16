@@ -537,7 +537,7 @@ void TableHeaderComponent::paint (Graphics& g)
                 g.setOrigin (x, 0);
                 g.reduceClipRegion (0, 0, ci->width, getHeight());
 
-                lf.drawTableHeaderColumn (g, ci->name, ci->id, ci->width, getHeight(),
+                lf.drawTableHeaderColumn (g, *this, ci->name, ci->id, ci->width, getHeight(),
                                           ci->id == columnIdUnderMouse,
                                           ci->id == columnIdUnderMouse && isMouseButtonDown(),
                                           ci->propertyFlags);

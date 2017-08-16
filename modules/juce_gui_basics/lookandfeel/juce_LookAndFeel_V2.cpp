@@ -173,6 +173,11 @@ LookAndFeel_V2::LookAndFeel_V2()
         BubbleComponent::backgroundColourId,        0xeeeeeebb,
         BubbleComponent::outlineColourId,           0x77000000,
 
+        TableHeaderComponent::textColourId,         0xff000000,
+        TableHeaderComponent::backgroundColourId,   0xffe8ebf9,
+        TableHeaderComponent::outlineColourId,      0x33000000,
+        TableHeaderComponent::highlightColourId,    0x8899aadd,
+
         DirectoryContentsDisplayComponent::highlightColourId,   textHighlightColour,
         DirectoryContentsDisplayComponent::textColourId,        0xff000000,
 
@@ -2323,26 +2328,33 @@ void LookAndFeel_V2::drawTableHeaderBackground (Graphics& g, TableHeaderComponen
     Rectangle<int> area (header.getLocalBounds());
     area.removeFromTop (area.getHeight() / 2);
 
-    g.setGradientFill (ColourGradient (Colour (0xffe8ebf9), 0.0f, (float) area.getY(),
-                                       Colour (0xfff6f8f9), 0.0f, (float) area.getBottom(),
+    auto backgroundColour = header.findColour (TableHeaderComponent::backgroundColourId);
+
+    g.setGradientFill (ColourGradient (backgroundColour,
+                                       0.0f, (float) area.getY(),
+                                       backgroundColour.withMultipliedSaturation (.5f),
+                                       0.0f, (float) area.getBottom(),
                                        false));
     g.fillRect (area);
 
-    g.setColour (Colour (0x33000000));
+    g.setColour (header.findColour (TableHeaderComponent::outlineColourId));
     g.fillRect (area.removeFromBottom (1));
 
     for (int i = header.getNumColumns (true); --i >= 0;)
         g.fillRect (header.getColumnPosition (i).removeFromRight (1));
 }
 
-void LookAndFeel_V2::drawTableHeaderColumn (Graphics& g, const String& columnName, int /*columnId*/,
+void LookAndFeel_V2::drawTableHeaderColumn (Graphics& g, TableHeaderComponent& header,
+                                            const String& columnName, int /*columnId*/,
                                             int width, int height, bool isMouseOver, bool isMouseDown,
                                             int columnFlags)
 {
+    auto highlightColour = header.findColour (TableHeaderComponent::highlightColourId);
+
     if (isMouseDown)
-        g.fillAll (Colour (0x8899aadd));
+        g.fillAll (highlightColour);
     else if (isMouseOver)
-        g.fillAll (Colour (0x5599aadd));
+        g.fillAll (highlightColour.withMultipliedAlpha (0.625f));
 
     Rectangle<int> area (width, height);
     area.reduce (4, 0);
@@ -2358,7 +2370,7 @@ void LookAndFeel_V2::drawTableHeaderColumn (Graphics& g, const String& columnNam
         g.fillPath (sortArrow, sortArrow.getTransformToScaleToFit (area.removeFromRight (height / 2).reduced (2).toFloat(), true));
     }
 
-    g.setColour (Colours::black);
+    g.setColour (header.findColour (TableHeaderComponent::textColourId));
     g.setFont (Font (height * 0.5f, Font::bold));
     g.drawFittedText (columnName, area, Justification::centredLeft, 1);
 }
