@@ -629,11 +629,7 @@ public:
 
             if (layoutTag != 0)
             {
-                AudioChannelLayout caLayout;
-
-                zerostruct (caLayout);
-                caLayout.mChannelLayoutTag = layoutTag;
-                AudioChannelSet newLayout = CoreAudioLayouts::fromCoreAudio (caLayout);
+                AudioChannelSet newLayout = CoreAudioLayouts::fromCoreAudio (layoutTag);
 
                 if (newLayout.size() != newNumChannels)
                     return false;
@@ -714,13 +710,7 @@ public:
                 const AudioChannelLayoutTag layoutTag = (layout != nullptr ? [layout layoutTag] : 0);
 
                 if (layoutTag != 0)
-                {
-                    AudioChannelLayout caLayout;
-
-                    zerostruct (caLayout);
-                    caLayout.mChannelLayoutTag = layoutTag;
-                    newLayout = CoreAudioLayouts::fromCoreAudio (caLayout);
-                }
+                    newLayout = CoreAudioLayouts::fromCoreAudio (layoutTag);
                 else
                     newLayout = bus->supportedLayoutWithChannels (static_cast<int> ([format channelCount]));
 

@@ -1818,12 +1818,7 @@ private:
                 if (numChannels != tagNumChannels)
                     return kAudioUnitErr_FormatNotSupported;
 
-                AudioChannelLayout layout;
-
-                zerostruct (layout);
-                layout.mChannelLayoutTag = currentLayoutTag;
-
-                requestedBuses.add (CoreAudioLayouts::fromCoreAudio (layout));
+                requestedBuses.add (CoreAudioLayouts::fromCoreAudio (currentLayoutTag));
             }
         }
 
@@ -1909,7 +1904,7 @@ private:
             auto& knownTags = CoreAudioLayouts::getKnownCoreAudioTags();
 
             for (auto tag : knownTags)
-                if (bus->isLayoutSupported (CoreAudioLayouts::fromCoreAudio (AudioChannelLayout {tag})))
+                if (bus->isLayoutSupported (CoreAudioLayouts::fromCoreAudio (tag)))
                     tags.addIfNotAlreadyThere (tag);
            #endif
 
