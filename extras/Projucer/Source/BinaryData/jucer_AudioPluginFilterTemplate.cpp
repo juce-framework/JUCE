@@ -54,6 +54,15 @@ bool FILTERCLASSNAME::producesMidi() const
    #endif
 }
 
+bool FILTERCLASSNAME::isMidiEffect () const
+{
+   #ifdef JucePlugin_IsMidiEffect
+    return true;
+   #else
+    return false;
+   #endif
+}
+
 double FILTERCLASSNAME::getTailLengthSeconds() const
 {
     return 0.0;
