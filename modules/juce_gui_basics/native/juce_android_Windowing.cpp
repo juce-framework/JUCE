@@ -33,7 +33,7 @@ namespace juce
 
 //==============================================================================
 #if JUCE_MODULE_AVAILABLE_juce_product_unlocking
- extern void juce_inAppPurchaseCompleted (jobject intentData);
+ extern void juce_inAppPurchaseCompleted (void*);
 #endif
 
 //==============================================================================

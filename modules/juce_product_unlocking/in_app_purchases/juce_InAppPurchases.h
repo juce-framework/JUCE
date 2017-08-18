@@ -259,7 +259,7 @@ private:
     ListenerList<Listener> listeners;
 
    #if JUCE_ANDROID
-    friend void juce_inAppPurchaseCompleted (jobject);
+    friend void juce_inAppPurchaseCompleted (void*);
    #endif
 
     struct Pimpl;

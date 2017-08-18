@@ -927,7 +927,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
 
 
 //==============================================================================
-void juce_inAppPurchaseCompleted (jobject intentData)
+void juce_inAppPurchaseCompleted (void* intentData)
 {
-    InAppPurchases::Pimpl::inAppPurchaseCompleted (intentData);
+    InAppPurchases::Pimpl::inAppPurchaseCompleted (static_cast<jobject> (intentData));
 }
