@@ -211,7 +211,7 @@ public:
                 << ": " << escapeSpaces (targetFiles.getReference(i).toUnixStyle()) << newLine
                 << "\t-$(V_AT)mkdir -p $(JUCE_OBJDIR)" << newLine
                 << "\t@echo \"Compiling " << targetFiles.getReference(i).getFileName() << "\"" << newLine
-                << (targetFiles.getReference(i).hasFileExtension ("c;s;S") ? "\t$(V_AT)$(CC) $(JUCE_CFLAGS)" : "\t$(V_AT)$(CXX) $(JUCE_CXXFLAGS) ")
+                << (targetFiles.getReference(i).hasFileExtension ("c;s;S") ? "\t$(V_AT)$(CC) $(JUCE_CFLAGS) " : "\t$(V_AT)$(CXX) $(JUCE_CXXFLAGS) ")
                 << "$(" << cppflagsVarName << ") $(" << cflagsVarName << ") -o \"$@\" -c \"$<\""
                 << newLine << newLine;
             }
