@@ -10,8 +10,11 @@ IMAGES := $(shell find images -type f | sed 's/ /\\ /g')
 
 .PHONEY: clean
 
-doc/index.html: build/juce_modules.dox Doxyfile DoxygenLayout.xml footer.html header.html stylesheet.css $(DOCUMENTATION_FILES) $(EXAMPLE_SOURCE_FILES) $(IMAGES)
-	doxygen
+doc/index.html: build/Doxyfile DoxygenLayout.xml footer.html header.html stylesheet.css $(DOCUMENTATION_FILES) $(EXAMPLE_SOURCE_FILES) $(IMAGES)
+	doxygen $<
+
+build/Doxyfile: ../../../doxygen/Doxyfile Doxyfile build/juce_modules.dox
+	cat ../../../doxygen/Doxyfile Doxyfile > $@
 
 build/juce_modules.dox: ../../../doxygen/process_source_files.py $(SOURCE_FILES)
 	rm -rf build
