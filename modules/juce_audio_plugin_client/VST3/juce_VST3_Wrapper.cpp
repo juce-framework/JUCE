@@ -115,6 +115,7 @@ class JuceVST3Component;
 //==============================================================================
 class JuceVST3EditController : public Vst::EditController,
                                public Vst::IMidiMapping,
+                               public Vst::ChannelContext::IInfoListener,
                                public AudioProcessorListener
 {
 public:
@@ -147,6 +148,7 @@ public:
         TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IEditController2)
         TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IConnectionPoint)
         TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IMidiMapping)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::ChannelContext::IInfoListener)
         TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, IPluginBase, Vst::IEditController)
         TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, IDependent, Vst::IEditController)
         TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, FUnknown, Vst::IEditController)
@@ -428,6 +430,41 @@ public:
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProgramChangeParameter)
     };
+
+    //==============================================================================
+    tresult PLUGIN_API setChannelContextInfos (Vst::IAttributeList* list) override
+    {
+        if (auto* instance = getPluginInstance())
+        {
+            if (list != nullptr)
+            {
+                AudioProcessor::TrackProperties trackProperties;
+
+                {
+                    Vst::String128 channelName;
+                    if (list->getString (Vst::ChannelContext::kChannelNameKey, channelName, sizeof (channelName)) == kResultTrue)
+                        trackProperties.name = toString (channelName);
+                }
+
+                {
+                    int64 colour;
+                    if (list->getInt (Vst::ChannelContext::kChannelColorKey, colour) == kResultTrue)
+                        trackProperties.colour = Colour (Vst::ChannelContext::GetRed ((uint32) colour),  Vst::ChannelContext::GetGreen ((uint32) colour),
+                                                         Vst::ChannelContext::GetBlue ((uint32) colour), Vst::ChannelContext::GetAlpha ((uint32) colour));
+                }
+
+
+
+                if (MessageManager::getInstance()->isThisTheMessageThread())
+                    instance->updateTrackProperties (trackProperties);
+                else
+                    MessageManager::callAsync ([trackProperties, instance] ()
+                                               { instance->updateTrackProperties (trackProperties); });
+            }
+        }
+
+        return kResultOk;
+    }
 
     //==============================================================================
     tresult PLUGIN_API setComponentState (IBStream* stream) override
@@ -1120,6 +1157,7 @@ public:
         TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IAudioProcessor)
         TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IUnitInfo)
         TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IConnectionPoint)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::ChannelContext::IInfoListener)
         TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, FUnknown, Vst::IComponent)
 
         if (doUIDsMatch (targetIID, JuceAudioProcessor::iid))

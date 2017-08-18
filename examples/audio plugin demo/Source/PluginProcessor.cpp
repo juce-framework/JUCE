@@ -390,6 +390,14 @@ void JuceDemoPluginAudioProcessor::setStateInformation (const void* data, int si
     }
 }
 
+void JuceDemoPluginAudioProcessor::updateTrackProperties (const TrackProperties& properties)
+{
+    trackProperties = properties;
+
+    if (auto* editor = dynamic_cast<JuceDemoPluginAudioProcessorEditor*> (getActiveEditor()))
+        editor->updateTrackProperties ();
+}
+
 //==============================================================================
 // This creates new instances of the plugin..
 AudioProcessor* JUCE_CALLTYPE createPluginFilter()

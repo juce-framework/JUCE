@@ -107,6 +107,8 @@ JuceDemoPluginAudioProcessorEditor::JuceDemoPluginAudioProcessorEditor (JuceDemo
     setSize (owner.lastUIWidth,
              owner.lastUIHeight);
 
+    updateTrackProperties();
+
     // start a timer which will keep our timecode display updated
     startTimerHz (30);
 }
@@ -118,7 +120,7 @@ JuceDemoPluginAudioProcessorEditor::~JuceDemoPluginAudioProcessorEditor()
 //==============================================================================
 void JuceDemoPluginAudioProcessorEditor::paint (Graphics& g)
 {
-    g.setColour (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+    g.setColour (backgroundColour);
     g.fillAll();
 }
 
@@ -149,6 +151,16 @@ void JuceDemoPluginAudioProcessorEditor::timerCallback()
 void JuceDemoPluginAudioProcessorEditor::hostMIDIControllerIsAvailable (bool controllerIsAvailable)
 {
     midiKeyboard.setVisible (! controllerIsAvailable);
+}
+
+void JuceDemoPluginAudioProcessorEditor::updateTrackProperties ()
+{
+    auto trackColour = getProcessor().trackProperties.colour;
+    auto& lf = getLookAndFeel();
+
+    backgroundColour = (trackColour == Colour() ? lf.findColour (ResizableWindow::backgroundColourId)
+                                                : trackColour.withAlpha (1.0f).withBrightness (0.266f));
+    repaint();
 }
 
 //==============================================================================

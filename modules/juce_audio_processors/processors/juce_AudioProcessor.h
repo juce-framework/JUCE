@@ -1310,6 +1310,32 @@ public:
     */
     WrapperType wrapperType;
 
+    /** A struct containing information about the DAW track inside which your
+        AudioProcessor is loaded. */
+    struct TrackProperties
+    {
+        String name;    // The name of the track - this will be empty if the track name is not known
+        Colour colour;  // The colour of the track - this will be transparentBlack if the colour is not known
+
+        // other properties may be added in the future
+    };
+
+    /** Informs the AudioProcessor that track properties such as the track's name or
+        colour has been changed.
+
+        If you are hosting this AudioProcessor then use this method to inform the
+        AudioProcessor about which track the AudioProcessor is loaded on. This method
+        may only be called on the message thread.
+
+        If you are implemeting an AudioProcessor then you can override this callback
+        to do something useful with the track properties such as changing the colour
+        of your AudioProcessor's editor. It's entirely up to the host when and how
+        often this callback will be called.
+
+        The default implementation of this callback will do nothing.
+    */
+    virtual void updateTrackProperties (const TrackProperties& properties);
+
     //==============================================================================
    #ifndef DOXYGEN
     /** Deprecated: use getTotalNumInputChannels instead. */

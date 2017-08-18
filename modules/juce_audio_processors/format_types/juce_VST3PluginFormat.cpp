@@ -2101,6 +2101,67 @@ struct VST3PluginInstance : public AudioPluginInstance
     }
 
     //==============================================================================
+    void updateTrackProperties (const TrackProperties& properties) override
+    {
+        if (trackInfoListener != nullptr)
+        {
+            ComSmartPtr<Vst::IAttributeList> l (new TrackPropertiesAttributeList (properties));
+            trackInfoListener->setChannelContextInfos (l);
+        }
+    }
+
+    struct TrackPropertiesAttributeList    : public Vst::IAttributeList
+    {
+        TrackPropertiesAttributeList (const TrackProperties& properties) : props (properties) {}
+        virtual ~TrackPropertiesAttributeList() {}
+
+        JUCE_DECLARE_VST3_COM_REF_METHODS
+
+        tresult PLUGIN_API queryInterface (const TUID iid, void** obj) override
+        {
+            TEST_FOR_AND_RETURN_IF_VALID (iid, Vst::IAttributeList)
+            TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (iid, FUnknown, Vst::IAttributeList)
+
+            *obj = nullptr;
+            return kNotImplemented;
+        }
+
+        tresult PLUGIN_API setInt    (AttrID, int64) override                 { return kOutOfMemory; }
+        tresult PLUGIN_API setFloat  (AttrID, double) override                { return kOutOfMemory; }
+        tresult PLUGIN_API setString (AttrID, const Vst::TChar*) override     { return kOutOfMemory; }
+        tresult PLUGIN_API setBinary (AttrID, const void*, uint32) override   { return kOutOfMemory; }
+        tresult PLUGIN_API getFloat  (AttrID, double&) override               { return kResultFalse; }
+        tresult PLUGIN_API getBinary (AttrID, const void*&, uint32&) override { return kResultFalse; }
+
+        tresult PLUGIN_API getString (AttrID id, Vst::TChar* string, uint32 size) override
+        {
+            if (! std::strcmp (id, Vst::ChannelContext::kChannelNameKey))
+            {
+                Steinberg::String str (props.name.toRawUTF8());
+                str.copyTo (string, 0, (Steinberg::int32) jmin (size, (Steinberg::uint32) std::numeric_limits<Steinberg::int32>::max()));
+
+                return kResultTrue;
+            }
+
+            return kResultFalse;
+        }
+
+        tresult PLUGIN_API getInt (AttrID id, int64& value) override
+        {
+            if      (! std::strcmp (Vst::ChannelContext::kChannelNameLengthKey, id)) value = props.name.length();
+            else if (! std::strcmp (Vst::ChannelContext::kChannelColorKey,      id)) value = static_cast<int64> (props.colour.getARGB());
+            else return kResultFalse;
+
+            return kResultTrue;
+        }
+
+        Atomic<int> refCount;
+        TrackProperties props;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TrackPropertiesAttributeList)
+    };
+
+    //==============================================================================
     String getChannelName (int channelIndex, bool forInput, bool forAudioChannel) const
     {
         auto numBuses = getNumSingleDirectionBusesFor (holder->component, forInput, forAudioChannel);
@@ -2449,6 +2510,7 @@ private:
     ComSmartPtr<Vst::IUnitData> unitData;
     ComSmartPtr<Vst::IProgramListData> programListData;
     ComSmartPtr<Vst::IConnectionPoint> componentConnection, editControllerConnection;
+    ComSmartPtr<Vst::ChannelContext::IInfoListener> trackInfoListener;
 
     /** The number of IO buses MUST match that of the plugin,
         even if there aren't enough channels to process,
@@ -2533,6 +2595,7 @@ private:
         editController2.loadFrom (holder->component);
         componentHandler.loadFrom (holder->component);
         componentHandler2.loadFrom (holder->component);
+        trackInfoListener.loadFrom (holder->component);
 
         if (processor == nullptr)           processor.loadFrom (editController);
         if (unitInfo == nullptr)            unitInfo.loadFrom (editController);
@@ -2541,6 +2604,7 @@ private:
         if (editController2 == nullptr)     editController2.loadFrom (editController);
         if (componentHandler == nullptr)    componentHandler.loadFrom (editController);
         if (componentHandler2 == nullptr)   componentHandler2.loadFrom (editController);
+        if (trackInfoListener == nullptr)   trackInfoListener.loadFrom (editController);
     }
 
     void setStateForAllMidiBuses (bool newState)

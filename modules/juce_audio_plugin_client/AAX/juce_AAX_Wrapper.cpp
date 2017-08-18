@@ -942,6 +942,13 @@ namespace AAXClasses
         {
             if (type == AAX_eNotificationEvent_EnteringOfflineMode)  pluginInstance->setNonRealtime (true);
             if (type == AAX_eNotificationEvent_ExitingOfflineMode)   pluginInstance->setNonRealtime (false);
+            if (type == AAX_eNotificationEvent_TrackNameChanged && data != nullptr)
+            {
+                AudioProcessor::TrackProperties props;
+                props.name = static_cast<const AAX_IString*> (data)->Get();
+
+                pluginInstance->updateTrackProperties (props);
+            }
 
             return AAX_CEffectParameters::NotificationReceived (type, data, size);
         }

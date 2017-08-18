@@ -84,6 +84,7 @@
  #include <pluginterfaces/vst/vsttypes.h>
  #include <pluginterfaces/vst/ivstunits.h>
  #include <pluginterfaces/vst/ivstmidicontrollers.h>
+ #include <pluginterfaces/vst/ivstchannelcontextinfo.h>
  #include <public.sdk/source/common/memorystream.h>
  #include <public.sdk/source/vst/vsteditcontroller.h>
 #else
@@ -102,6 +103,7 @@
  #include <pluginterfaces/gui/iplugview.h>
  #include <pluginterfaces/gui/iplugviewcontentscalesupport.h>
  #include <pluginterfaces/vst/ivstmidicontrollers.h>
+ #include <pluginterfaces/vst/ivstchannelcontextinfo.h>
  #include <public.sdk/source/common/memorystream.cpp>
  #include <public.sdk/source/common/pluginview.cpp>
  #include <public.sdk/source/vst/vsteditcontroller.cpp>

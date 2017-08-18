@@ -45,6 +45,7 @@ public:
     void resized() override;
     void timerCallback() override;
     void hostMIDIControllerIsAvailable (bool) override;
+    void updateTrackProperties();
 
 private:
     class ParameterSlider;
@@ -52,6 +53,7 @@ private:
     MidiKeyboardComponent midiKeyboard;
     Label timecodeDisplayLabel, gainLabel, delayLabel;
     ScopedPointer<ParameterSlider> gainSlider, delaySlider;
+    Colour backgroundColour;
 
     //==============================================================================
     JuceDemoPluginAudioProcessor& getProcessor() const

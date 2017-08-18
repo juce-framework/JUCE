@@ -147,6 +147,8 @@ public:
         channelInfo = AudioUnitHelpers::getAUChannelInfo (*juceFilter);
        #endif
 
+        AddPropertyListener (kAudioUnitProperty_ContextName, auPropertyListenerDispatcher, this);
+
         totalInChannels  = juceFilter->getTotalNumInputChannels();
         totalOutChannels = juceFilter->getTotalNumOutputChannels();
 
@@ -1954,6 +1956,25 @@ private:
     static int maxChannelsToProbeFor()
     {
         return (getHostType().isLogic() ? 8 : 64);
+    }
+
+    //==============================================================================
+    void auPropertyListener (AudioUnitPropertyID propId, AudioUnitScope scope, AudioUnitElement)
+    {
+        if (scope == kAudioUnitScope_Global && propId == kAudioUnitProperty_ContextName
+             && juceFilter != nullptr && mContextName != nullptr)
+        {
+            AudioProcessor::TrackProperties props;
+            props.name = String::fromCFString (mContextName);
+
+            juceFilter->updateTrackProperties (props);
+        }
+    }
+
+    static void auPropertyListenerDispatcher (void* inRefCon, AudioUnit, AudioUnitPropertyID propId,
+                                              AudioUnitScope scope, AudioUnitElement element)
+    {
+        static_cast<JuceAU*> (inRefCon)->auPropertyListener (propId, scope, element);
     }
 
     JUCE_DECLARE_NON_COPYABLE (JuceAU)

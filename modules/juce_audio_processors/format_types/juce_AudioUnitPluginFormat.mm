@@ -1066,6 +1066,19 @@ public:
     }
 
     //==============================================================================
+    void updateTrackProperties (const TrackProperties& properties) override
+    {
+        if (properties.name.isNotEmpty())
+        {
+            CFStringRef contextName = properties.name.toCFString();
+            AudioUnitSetProperty (audioUnit, kAudioUnitProperty_ContextName, kAudioUnitScope_Global,
+                                  0, &contextName, sizeof (CFStringRef));
+
+            CFRelease (contextName);
+        }
+    }
+
+    //==============================================================================
     void getStateInformation (MemoryBlock& destData) override
     {
         getCurrentProgramStateInformation (destData);
