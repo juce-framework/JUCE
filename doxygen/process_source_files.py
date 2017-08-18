@@ -140,8 +140,15 @@ if __name__ == "__main__":
         # Create a list of the directories in the module that we can use as
         # subgroups and create the Doxygen group hierarchy string.
         dir_contents = os.listdir(module_path)
-        subdirs = [x for x in dir_contents
-                   if os.path.isdir(os.path.join(module_path, x))]
+        # Ignore "native" folders as these are excluded by doxygen.
+        try:
+            dir_contents.remove("native")
+        except ValueError:
+            pass
+        subdirs = []
+        for item in dir_contents:
+            if (os.path.isdir(os.path.join(module_path, item))):
+                subdirs.append(item)
         module_groups = {}
         for subdir in subdirs:
             subgroup_name = "{n}-{s}".format(n=module_name, s=subdir)
