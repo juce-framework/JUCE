@@ -520,22 +520,12 @@ private:
         if (newMidiDevices != lastMidiDevices)
         {
             for (auto& oldDevice : lastMidiDevices)
-            {
                 if (! newMidiDevices.contains (oldDevice))
-                {
                     deviceManager.setMidiInputEnabled (oldDevice, false);
-                    deviceManager.removeMidiInputCallback (oldDevice, &player);
-                }
-            }
 
             for (auto& newDevice : newMidiDevices)
-            {
                 if (! lastMidiDevices.contains (newDevice))
-                {
-                    deviceManager.addMidiInputCallback (newDevice, &player);
                     deviceManager.setMidiInputEnabled (newDevice, true);
-                }
-            }
         }
     }
    #endif
