@@ -42,7 +42,7 @@ namespace IIR
         which is designed to prevent artefacts at parameter changes, instead of the
         class Filter.
 
-        @see Filter::Coefficients, FilterAudioSource, @StateVariableFilter
+        @see Filter::Coefficients, FilterAudioSource, StateVariableFilter
     */
     template <typename SampleType>
     class Filter
@@ -86,7 +86,13 @@ namespace IIR
             Note that this clears the processing state, but the type of filter and
             its coefficients aren't changed.
         */
-        void reset();
+        void reset()            { reset (SampleType {0}); }
+
+        /** Resets the filter's processing pipeline to a specific value.
+
+            See @reset
+        */
+        void reset (SampleType resetToValue);
 
         //==============================================================================
         /** Called before processing starts. */

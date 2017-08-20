@@ -47,8 +47,8 @@ namespace SIMDInternal
 }
 
 /**
-   Useful fallback routines to use if the native SIMD op is not supported. You
-   should never need to use this directly. Use juce_SIMDRegister instead.
+    Useful fallback routines to use if the native SIMD op is not supported. You
+    should never need to use this directly. Use juce_SIMDRegister instead.
 */
 template <typename ScalarType, typename vSIMDType>
 struct SIMDFallbackOps

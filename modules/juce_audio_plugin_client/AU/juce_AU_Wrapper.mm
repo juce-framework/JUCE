@@ -1927,8 +1927,6 @@ private:
             for (int ch = 0; ch < n; ++ch)
             {
                #ifdef JucePlugin_PreferredChannelConfigurations
-                ignoreUnused (layoutIndex, tag);
-
                 const short configs[][2] = { JucePlugin_PreferredChannelConfigurations };
                 if (AudioUnitHelpers::isLayoutSupported (*juceFilter, isInput, busNum, ch, configs))
                     tags.addIfNotAlreadyThere (static_cast<AudioChannelLayoutTag> ((int) kAudioChannelLayoutTag_DiscreteInOrder | ch));

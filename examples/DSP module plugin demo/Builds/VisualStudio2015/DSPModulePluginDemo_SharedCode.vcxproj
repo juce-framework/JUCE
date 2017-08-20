@@ -101,9 +101,6 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\DSPModulePluginDemo.bsc</OutputFile>
     </Bscmake>
-    <PostBuildEvent>
-      <Command>if &quot;$(ProjectName)&quot;==&quot;$(SolutionName)_VST&quot; copy /Y &quot;$(TargetDir)\$(SolutionName).dll&quot; &quot;c:\vstplugins\musical entropy\$(SolutionName).dll&quot;</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>
@@ -146,9 +143,6 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\DSPModulePluginDemo.bsc</OutputFile>
     </Bscmake>
-    <PostBuildEvent>
-      <Command>if &quot;$(ProjectName)&quot;==&quot;$(SolutionName)_VST&quot; copy /Y &quot;$(TargetDir)\$(SolutionName).dll&quot; &quot;c:\vstplugins\musical entropy\$(SolutionName).dll&quot;</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\PluginProcessor.cpp"/>

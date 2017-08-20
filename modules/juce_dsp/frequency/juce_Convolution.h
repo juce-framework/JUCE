@@ -39,7 +39,7 @@
     efficient in general to do frequency domain convolution when the size of
     the impulse response is higher than 64 samples.
 
-    see @FIRFilter, @FIRFilter::Coefficients, @FFT
+    @see FIRFilter, FIRFilter::Coefficients, FFT
 */
 class JUCE_API  Convolution
 {

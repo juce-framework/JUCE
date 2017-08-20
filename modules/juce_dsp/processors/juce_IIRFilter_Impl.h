@@ -24,6 +24,7 @@
   ==============================================================================
 */
 
+#ifndef DOXYGEN
 
 template <typename Type>
 struct SnapToZeroHelper
@@ -47,7 +48,7 @@ struct SnapToZeroHelper<SIMDRegister<Type>>      { static void snap (SIMDRegiste
 //==============================================================================
 template <typename SampleType>
 Filter<SampleType>::Filter()
-    : coefficients (new Coefficients<typename Filter<SampleType>::NumericType> (Coefficients<typename Filter<SampleType>::NumericType>::passThrough))
+    : coefficients (new Coefficients<typename Filter<SampleType>::NumericType> (1, 0, 1, 0))
 {
     reset();
 }
@@ -60,7 +61,7 @@ Filter<SampleType>::Filter (Coefficients<typename Filter<SampleType>::NumericTyp
 }
 
 template <typename SampleType>
-void Filter<SampleType>::reset()
+void Filter<SampleType>::reset (SampleType resetToValue)
 {
     auto newOrder = coefficients->getFilterOrder();
 
@@ -72,7 +73,7 @@ void Filter<SampleType>::reset()
     }
 
     for (size_t i = 0; i < order; ++i)
-        state[i] = SampleType {0};
+        state[i] = resetToValue;
 }
 
 template <typename SampleType>
@@ -230,3 +231,5 @@ void Filter<SampleType>::check()
     if (order != coefficients->getFilterOrder())
         reset();
 }
+
+#endif

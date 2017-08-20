@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="jKHEJM" name="PluckedStringsDemo" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.roli.PluckedStringsDemo" includeBinaryInAppConfig="1"
-              jucerVersion="5.1.0" displaySplashScreen="0" reportAppUsage="0"
+              jucerVersion="5.1.1" displaySplashScreen="0" reportAppUsage="0"
               splashScreenColour="Dark" companyName="ROLI Ltd." cppLanguageStandard="11">
   <MAINGROUP id="IWdVf7" name="PluckedStringsDemo">
     <GROUP id="{8800CD50-6741-8B75-0305-FAF13427EF5D}" name="Source">

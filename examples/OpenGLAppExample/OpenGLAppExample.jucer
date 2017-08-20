@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="c3KrlE" name="OpenGLAppExample" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.roli.OpenGLAppExample" includeBinaryInAppConfig="1"
-              jucerVersion="5.1.0" displaySplashScreen="0" reportAppUsage="0"
+              jucerVersion="5.1.1" displaySplashScreen="0" reportAppUsage="0"
               splashScreenColour="Dark" companyName="ROLI Ltd." cppLanguageStandard="11">
   <MAINGROUP id="amjEXL" name="OpenGLAppExample">
     <GROUP id="{28FE2D12-A88D-07E2-72CF-CD04014CF225}" name="Source">

@@ -57,6 +57,7 @@ public:
         }
     }
 
+    /** Returns the ramp duration in seconds. */
     double getRampDurationSeconds() const noexcept              { return rampDurationSeconds; }
 
     /** Returns true if the current value is currently being interpolated. */

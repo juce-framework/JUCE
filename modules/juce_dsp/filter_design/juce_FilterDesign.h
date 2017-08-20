@@ -25,12 +25,12 @@
 */
 
 
-/*
+/**
     This class provides a set of functions which generates FIR::Coefficients
     and IIR::Coefficients, of high-order lowpass filters. They can be used
     for processing directly audio as an equalizer, in resampling algorithms etc.
 
-    see @FIRFilter::Coefficients, @FIRFilter, @WindowingFunction, @IIRFilter::Coefficients, @IIRFilter
+    see FIRFilter::Coefficients, FIRFilter, WindowingFunction, IIRFilter::Coefficients, IIRFilter
 */
 template <typename FloatType>
 struct FilterDesign
@@ -41,7 +41,7 @@ struct FilterDesign
     using WindowingMethod    = typename WindowingFunction<FloatType>::WindowingMethod;
 
     //==============================================================================
-    /*  This method generates a FIR::Coefficients for a low-pass filter, using
+    /** This method generates a FIR::Coefficients for a low-pass filter, using
         the windowing design method, applied to a sinc impulse response. It is one
         of the simplest method used to generate a high order low-pass filter, which
         has the downside of needing more coefficients than more complex method to
@@ -56,7 +56,7 @@ struct FilterDesign
         @param frequency            the cutoff frequency of the low-pass filter
         @param sampleRate           the sample rate being used in the filter design
         @param order                the order of the filter
-        @param type                 the type, must be a @WindowingFunction::WindowingType
+        @param type                 the type, must be a WindowingFunction::WindowingType
         @param beta                 an optional additional parameter useful for the Kaiser windowing function
     */
 
@@ -64,7 +64,7 @@ struct FilterDesign
                                                             size_t order, WindowingMethod type,
                                                             FloatType beta = static_cast<FloatType> (2));
 
-    /*  This a variant of the function @designFIRLowpassWindowMethod, which allows the
+    /** This a variant of the function designFIRLowpassWindowMethod, which allows the
         user to specify a transition width and an attenuation in dB,
         to get a low-pass filter using the Kaiser windowing function, with calculated
         values of the filter order and of the beta parameter, to satisfy the constraints.
@@ -83,7 +83,7 @@ struct FilterDesign
                                                             FloatType attenuationdB);
 
 
-    /*  This method is also a variant of the function @designFIRLowpassWindowMethod, using
+    /** This method is also a variant of the function designFIRLowpassWindowMethod, using
         a rectangular window as a basis, and a spline transition between the pass band and
         the stop band, to reduce the Gibbs phenomenon.
 
@@ -102,7 +102,7 @@ struct FilterDesign
                                                                 FloatType normalizedTransitionWidth,
                                                                 FloatType spline);
 
-    /*  This method generates a FIR::Coefficients for a low-pass filter, by
+    /** This method generates a FIR::Coefficients for a low-pass filter, by
         minimizing the average error between the generated filter and an ideal one
         using the least squares error criterion and matrices operations.
 
@@ -113,7 +113,7 @@ struct FilterDesign
         @param order                        the order of the filter
         @param normalizedTransitionWidth    the normalized size between 0 and 0.5 of the transition
                                             between the pass band and the stop band
-        @param stopbandWeight               between 1.0 and 100.0, indicates how much we want
+        @param stopBandWeight               between 1.0 and 100.0, indicates how much we want
                                             attenuation in the stop band, against some oscillation
                                             in the pass band
     */
@@ -121,7 +121,7 @@ struct FilterDesign
                                                                   FloatType normalizedTransitionWidth,
                                                                   FloatType stopBandWeight);
 
-    /*  This method generates a FIR::Coefficients for a low-pass filter, with
+    /** This method generates a FIR::Coefficients for a low-pass filter, with
         a cutoff frequency at half band, using an algorithm described in the article
         "Design of Half-Band FIR Filters for Signal Compression" from Pavel
         Zahradnik, to get an equiripple like high order FIR filter, without the need
@@ -137,7 +137,7 @@ struct FilterDesign
                                                                         FloatType attenuationdB);
 
     //==============================================================================
-    /*  This method returns an array of IIR::Coefficients, made to be used in
+    /** This method returns an array of IIR::Coefficients, made to be used in
         cascaded IIRFilters, providing a minimum phase lowpass filter without any
         ripple in the pass band and in the stop band.
 
@@ -146,6 +146,8 @@ struct FilterDesign
 
         @param frequency                    the cutoff frequency of the low-pass filter
         @param sampleRate                   the sample rate being used in the filter design
+        @param normalizedTransitionWidth    the normalized size between 0 and 0.5 of the transition
+                                            between the pass band and the stop band
         @param passbandAttenuationdB        the lowest attenuation in dB expected in the pass band
         @param stopbandAttenuationdB        the attenuation in dB expected in the stop band
     */
@@ -155,7 +157,7 @@ struct FilterDesign
                                                                               FloatType passbandAttenuationdB,
                                                                               FloatType stopbandAttenuationdB);
 
-    /*  This method returns an array of IIR::Coefficients, made to be used in
+    /** This method returns an array of IIR::Coefficients, made to be used in
         cascaded IIRFilters, providing a minimum phase lowpass filter without any
         ripple in the stop band only.
 
@@ -164,6 +166,8 @@ struct FilterDesign
 
         @param frequency                    the cutoff frequency of the low-pass filter
         @param sampleRate                   the sample rate being used in the filter design
+        @param normalizedTransitionWidth    the normalized size between 0 and 0.5 of the transition
+                                            between the pass band and the stop band
         @param passbandAttenuationdB        the lowest attenuation in dB expected in the pass band
         @param stopbandAttenuationdB        the attenuation in dB expected in the stop band
     */
@@ -172,7 +176,7 @@ struct FilterDesign
                                                                              FloatType passbandAttenuationdB,
                                                                              FloatType stopbandAttenuationdB);
 
-    /*  This method returns an array of IIR::Coefficients, made to be used in
+    /** This method returns an array of IIR::Coefficients, made to be used in
         cascaded IIRFilters, providing a minimum phase lowpass filter without any
         ripple in the pass band only.
 
@@ -181,6 +185,8 @@ struct FilterDesign
 
         @param frequency                    the cutoff frequency of the low-pass filter
         @param sampleRate                   the sample rate being used in the filter design
+        @param normalizedTransitionWidth    the normalized size between 0 and 0.5 of the transition
+                                            between the pass band and the stop band
         @param passbandAttenuationdB        the lowest attenuation in dB expected in the pass band
         @param stopbandAttenuationdB        the attenuation in dB expected in the stop band
     */
@@ -189,7 +195,7 @@ struct FilterDesign
                                                                              FloatType passbandAttenuationdB,
                                                                              FloatType stopbandAttenuationdB);
 
-    /*  This method returns an array of IIR::Coefficients, made to be used in
+    /** This method returns an array of IIR::Coefficients, made to be used in
         cascaded IIR::Filters, providing a minimum phase lowpass filter with ripples
         in both the pass band and in the stop band.
 
@@ -198,6 +204,8 @@ struct FilterDesign
 
         @param frequency                    the cutoff frequency of the low-pass filter
         @param sampleRate                   the sample rate being used in the filter design
+        @param normalizedTransitionWidth    the normalized size between 0 and 0.5 of the transition
+                                            between the pass band and the stop band
         @param passbandAttenuationdB        the lowest attenuation in dB expected in the pass band
         @param stopbandAttenuationdB        the attenuation in dB expected in the stop band
     */
@@ -216,7 +224,7 @@ struct FilterDesign
     */
     struct IIRPolyphaseAllpassStructure { Array<IIRCoefficients> directPath, delayedPath; };
 
-    /*  This method generates arrays of IIR::Coefficients for a low-pass filter, with
+    /** This method generates arrays of IIR::Coefficients for a low-pass filter, with
         a cutoff frequency at half band, using an algorithm described in the article
         "Digital Signal Processing Schemes for efficient interpolation and decimation" from
         Pavel Valenzuela and Constantinides.
@@ -234,7 +242,7 @@ struct FilterDesign
 
         @param normalizedTransitionWidth    the normalized size between 0 and 0.5 of the transition
                                             between the pass band and the stop band
-        @param attenuationdB                the attenuation in dB expected in the stop band
+        @param stopbandAttenuationdB        the attenuation in dB expected in the stop band
     */
     static IIRPolyphaseAllpassStructure designIIRLowpassHalfBandPolyphaseAllpassMethod (FloatType normalizedTransitionWidth,
                                                                                         FloatType stopbandAttenuationdB);

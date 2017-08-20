@@ -71,6 +71,7 @@ const char* const WavAudioFormat::riffInfoArtist                = "IART";
 const char* const WavAudioFormat::riffInfoBaseURL               = "IBSU";
 const char* const WavAudioFormat::riffInfoCinematographer       = "ICNM";
 const char* const WavAudioFormat::riffInfoComment               = "CMNT";
+const char* const WavAudioFormat::riffInfoComment2              = "ICMT";
 const char* const WavAudioFormat::riffInfoComments              = "COMM";
 const char* const WavAudioFormat::riffInfoCommissioned          = "ICMS";
 const char* const WavAudioFormat::riffInfoCopyright             = "ICOP";
@@ -111,6 +112,7 @@ const char* const WavAudioFormat::riffInfoNumberOfParts         = "PRT2";
 const char* const WavAudioFormat::riffInfoOrganisation          = "TORG";
 const char* const WavAudioFormat::riffInfoPart                  = "PRT1";
 const char* const WavAudioFormat::riffInfoProducedBy            = "IPRO";
+const char* const WavAudioFormat::riffInfoProductName           = "IPRD";
 const char* const WavAudioFormat::riffInfoProductionDesigner    = "IPDS";
 const char* const WavAudioFormat::riffInfoProductionStudio      = "ISDT";
 const char* const WavAudioFormat::riffInfoRate                  = "RATE";
@@ -136,6 +138,7 @@ const char* const WavAudioFormat::riffInfoTechnician            = "ITCH";
 const char* const WavAudioFormat::riffInfoThirdLanguage         = "IAS3";
 const char* const WavAudioFormat::riffInfoTimeCode              = "ISMP";
 const char* const WavAudioFormat::riffInfoTitle                 = "INAM";
+const char* const WavAudioFormat::riffInfoTrackNo               = "IPRT";
 const char* const WavAudioFormat::riffInfoTrackNumber           = "TRCK";
 const char* const WavAudioFormat::riffInfoURL                   = "TURL";
 const char* const WavAudioFormat::riffInfoVegasVersionMajor     = "VMAJ";
@@ -577,6 +580,7 @@ namespace WavFileHelpers
             WavAudioFormat::riffInfoCinematographer,
             WavAudioFormat::riffInfoComment,
             WavAudioFormat::riffInfoComments,
+            WavAudioFormat::riffInfoComment2,
             WavAudioFormat::riffInfoCommissioned,
             WavAudioFormat::riffInfoCopyright,
             WavAudioFormat::riffInfoCostumeDesigner,
@@ -616,6 +620,7 @@ namespace WavFileHelpers
             WavAudioFormat::riffInfoOrganisation,
             WavAudioFormat::riffInfoPart,
             WavAudioFormat::riffInfoProducedBy,
+            WavAudioFormat::riffInfoProductName,
             WavAudioFormat::riffInfoProductionDesigner,
             WavAudioFormat::riffInfoProductionStudio,
             WavAudioFormat::riffInfoRate,
@@ -641,6 +646,7 @@ namespace WavFileHelpers
             WavAudioFormat::riffInfoThirdLanguage,
             WavAudioFormat::riffInfoTimeCode,
             WavAudioFormat::riffInfoTitle,
+            WavAudioFormat::riffInfoTrackNo,
             WavAudioFormat::riffInfoTrackNumber,
             WavAudioFormat::riffInfoURL,
             WavAudioFormat::riffInfoVegasVersionMajor,
@@ -1353,9 +1359,10 @@ private:
 
         const size_t bytesPerFrame = numChannels * bitsPerSample / 8;
         uint64 audioDataSize = bytesPerFrame * lengthInSamples;
+        auto channelMask = getChannelMaskFromChannelLayout (channelLayout);
 
         const bool isRF64 = (bytesWritten >= 0x100000000LL);
-        const bool isWaveFmtEx = isRF64 || (numChannels > 2);
+        const bool isWaveFmtEx = isRF64 || (channelMask != 0);
 
         int64 riffChunkSize = (int64) (4 /* 'RIFF' */ + 8 + 40 /* WAVEFORMATEX */
                                        + 8 + audioDataSize + (audioDataSize & 1)
@@ -1431,7 +1438,7 @@ private:
         {
             output->writeShort (22); // cbSize (size of the extension)
             output->writeShort ((short) bitsPerSample); // wValidBitsPerSample
-            output->writeInt (getChannelMaskFromChannelLayout (channelLayout));
+            output->writeInt (channelMask);
 
             const ExtensibleWavSubFormat& subFormat = bitsPerSample < 32 ? pcmFormat : IEEEFloatFormat;
 
@@ -1475,6 +1482,14 @@ private:
 
     static int getChannelMaskFromChannelLayout (const AudioChannelSet& channelLayout)
     {
+        if (channelLayout.isDiscreteLayout())
+            return 0;
+
+        // Don't add an extended format chunk for mono and stereo. Basically, all wav players
+        // interpret a wav file with only one or two channels to be mono or stereo anyway.
+        if (channelLayout == AudioChannelSet::mono() || channelLayout == AudioChannelSet::stereo())
+            return 0;
+
         auto channels = channelLayout.getChannelTypes();
         auto wavChannelMask = 0;
 
@@ -1609,6 +1624,10 @@ bool WavAudioFormat::canDoMono()    { return true; }
 bool WavAudioFormat::isChannelLayoutSupported (const AudioChannelSet& channelSet)
 {
     auto channelTypes = channelSet.getChannelTypes();
+
+    // When
+    if (channelSet.isDiscreteLayout())
+        return true;
 
     // WAV supports all channel types from left ... topRearRight
     for (auto channel : channelTypes)

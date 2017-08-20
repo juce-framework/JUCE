@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="M70qfTRRk" name="Projucer" projectType="guiapp" juceFolder="../../juce"
-              jucerVersion="5.1.0" version="5.1.0" bundleIdentifier="com.juce.theprojucer"
+              jucerVersion="5.1.1" version="5.1.1" bundleIdentifier="com.juce.theprojucer"
               defines="" includeBinaryInAppConfig="1" splashScreenColour="Dark"
               displaySplashScreen="0" reportAppUsage="0" companyName="ROLI Ltd."
               cppLanguageStandard="11">

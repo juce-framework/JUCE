@@ -343,11 +343,18 @@ template <typename FloatType>
 struct MathConstants
 {
     /** A predefined value for Pi */
-    static constexpr FloatType pi    = static_cast<FloatType> (3.141592653589793238L);
+    static const FloatType pi;
 
     /** A predfined value for Euler's number */
-    static constexpr FloatType euler = static_cast<FloatType> (2.71828182845904523536L);
+    static const FloatType euler;
 };
+
+template <typename FloatType>
+const FloatType MathConstants<FloatType>::pi = static_cast<FloatType> (3.141592653589793238L);
+
+template <typename FloatType>
+const FloatType MathConstants<FloatType>::euler = static_cast<FloatType> (2.71828182845904523536L);
+
 
 /** A predefined value for Pi, at double-precision.
     @see float_Pi

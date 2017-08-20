@@ -919,6 +919,7 @@ bool EnabledModuleList::isJuceModule (const String& moduleID)
         "juce_core",
         "juce_cryptography",
         "juce_data_structures",
+        "juce_dsp",
         "juce_events",
         "juce_graphics",
         "juce_gui_basics",

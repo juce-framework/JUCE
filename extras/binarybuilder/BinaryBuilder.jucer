@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="3t6YqETY1" name="BinaryBuilder" projectType="consoleapp"
-              juceFolder="../../../juce" jucerVersion="5.1.0" bundleIdentifier="com.roli.binarybuilder"
+              juceFolder="../../../juce" jucerVersion="5.1.1" bundleIdentifier="com.roli.binarybuilder"
               includeBinaryInAppConfig="1" version="1.0.0" displaySplashScreen="0"
               reportAppUsage="0" splashScreenColour="Dark" companyName="ROLI Ltd."
               cppLanguageStandard="11">

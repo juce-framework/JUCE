@@ -18,10 +18,10 @@ namespace BinaryData
     const int            guitar_amp_wavSize = 90246;
 
     extern const char*   ConvolutionDemo_cpp;
-    const int            ConvolutionDemo_cppSize = 2995;
+    const int            ConvolutionDemo_cppSize = 2999;
 
     extern const char*   FIRFilterDemo_cpp;
-    const int            FIRFilterDemo_cppSize = 2677;
+    const int            FIRFilterDemo_cppSize = 2674;
 
     extern const char*   GainDemo_cpp;
     const int            GainDemo_cppSize = 1809;
@@ -30,7 +30,7 @@ namespace BinaryData
     const int            IIRFilterDemo_cppSize = 2819;
 
     extern const char*   OscillatorDemo_cpp;
-    const int            OscillatorDemo_cppSize = 3943;
+    const int            OscillatorDemo_cppSize = 3974;
 
     extern const char*   OverdriveDemo_cpp;
     const int            OverdriveDemo_cppSize = 3039;
