@@ -1,3 +1,8 @@
+/** @defgroup LittleFootFunctions LittleFoot Functions
+    Functions available in the LittleFoot language
+    @{
+*/
+
 /** Reads and returns the value of a single byte from the heap.
 
     @param byteIndex    the index (in bytes) of the byte to read
@@ -763,3 +768,5 @@ void setLocalConfigItemRange (int item, int min, int max);
     @note Requires >= 0.2.5 firmware
 */
 void setLocalConfigActiveState (int item, bool isActive, bool saveToFlash);
+
+/** @} */
