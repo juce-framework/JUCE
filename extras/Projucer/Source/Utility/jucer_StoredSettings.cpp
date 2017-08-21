@@ -89,12 +89,18 @@ void StoredSettings::updateGlobalPreferences()
 {
     // update 'invisible' global settings
     updateRecentFiles();
+    updateLastWizardFolder();
     updateKeyMappings();
 }
 
 void StoredSettings::updateRecentFiles()
 {
     getGlobalProperties().setValue ("recentFiles", recentFiles.toString());
+}
+
+void StoredSettings::updateLastWizardFolder()
+{
+    getGlobalProperties().setValue ("lastWizardFolder", lastWizardFolder.getFullPathName());
 }
 
 void StoredSettings::updateKeyMappings()
@@ -135,6 +141,8 @@ void StoredSettings::reload()
     // recent files...
     recentFiles.restoreFromString (getGlobalProperties().getValue ("recentFiles"));
     recentFiles.removeNonExistentFiles();
+
+    lastWizardFolder = getGlobalProperties().getValue ("lastWizardFolder");
 
     loadSwatchColours();
 }

@@ -446,10 +446,15 @@ public:
                     getAppSettings().getStoredPath (Ids::defaultJuceModulePath).setValue (wizard->modulesFolder.getFullPathName());
             }
 
+            auto projectDir = fileBrowser.getSelectedFile (0);
+
             if (ScopedPointer<Project> project = wizard->runWizard (*this, projectName.getText(),
-                                                                    fileBrowser.getSelectedFile (0),
+                                                                    projectDir,
                                                                     modulesPathBox.isUsingGlobalPaths))
+            {
                 mw->setProject (project.release());
+                getAppSettings().lastWizardFolder = projectDir.getParentDirectory();
+            }
         }
     }
 
