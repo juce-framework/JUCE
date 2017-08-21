@@ -2117,23 +2117,23 @@ struct VST3PluginInstance : public AudioPluginInstance
 
         JUCE_DECLARE_VST3_COM_REF_METHODS
 
-        tresult PLUGIN_API queryInterface (const TUID iid, void** obj) override
+        tresult PLUGIN_API queryInterface (const TUID queryIid, void** obj) override
         {
-            TEST_FOR_AND_RETURN_IF_VALID (iid, Vst::IAttributeList)
-            TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (iid, FUnknown, Vst::IAttributeList)
+            TEST_FOR_AND_RETURN_IF_VALID (queryIid, Vst::IAttributeList)
+            TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (queryIid, FUnknown, Vst::IAttributeList)
 
             *obj = nullptr;
             return kNotImplemented;
         }
 
-        tresult PLUGIN_API setInt    (AttrID, int64) override                 { return kOutOfMemory; }
-        tresult PLUGIN_API setFloat  (AttrID, double) override                { return kOutOfMemory; }
-        tresult PLUGIN_API setString (AttrID, const Vst::TChar*) override     { return kOutOfMemory; }
-        tresult PLUGIN_API setBinary (AttrID, const void*, uint32) override   { return kOutOfMemory; }
-        tresult PLUGIN_API getFloat  (AttrID, double&) override               { return kResultFalse; }
-        tresult PLUGIN_API getBinary (AttrID, const void*&, uint32&) override { return kResultFalse; }
+        tresult PLUGIN_API setInt    (AttrID, Steinberg::int64) override                 { return kOutOfMemory; }
+        tresult PLUGIN_API setFloat  (AttrID, double) override                           { return kOutOfMemory; }
+        tresult PLUGIN_API setString (AttrID, const Vst::TChar*) override                { return kOutOfMemory; }
+        tresult PLUGIN_API setBinary (AttrID, const void*, Steinberg::uint32) override   { return kOutOfMemory; }
+        tresult PLUGIN_API getFloat  (AttrID, double&) override                          { return kResultFalse; }
+        tresult PLUGIN_API getBinary (AttrID, const void*&, Steinberg::uint32&) override { return kResultFalse; }
 
-        tresult PLUGIN_API getString (AttrID id, Vst::TChar* string, uint32 size) override
+        tresult PLUGIN_API getString (AttrID id, Vst::TChar* string, Steinberg::uint32 size) override
         {
             if (! std::strcmp (id, Vst::ChannelContext::kChannelNameKey))
             {
@@ -2146,10 +2146,10 @@ struct VST3PluginInstance : public AudioPluginInstance
             return kResultFalse;
         }
 
-        tresult PLUGIN_API getInt (AttrID id, int64& value) override
+        tresult PLUGIN_API getInt (AttrID id, Steinberg::int64& value) override
         {
             if      (! std::strcmp (Vst::ChannelContext::kChannelNameLengthKey, id)) value = props.name.length();
-            else if (! std::strcmp (Vst::ChannelContext::kChannelColorKey,      id)) value = static_cast<int64> (props.colour.getARGB());
+            else if (! std::strcmp (Vst::ChannelContext::kChannelColorKey,      id)) value = static_cast<Steinberg::int64> (props.colour.getARGB());
             else return kResultFalse;
 
             return kResultTrue;
