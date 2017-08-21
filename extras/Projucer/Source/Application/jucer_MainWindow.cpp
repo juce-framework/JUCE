@@ -282,31 +282,45 @@ void MainWindow::activeWindowStatusChanged()
 {
     DocumentWindow::activeWindowStatusChanged();
 
-    if (ProjectContentComponent* const pcc = getProjectContentComponent())
+    if (auto* pcc = getProjectContentComponent())
         pcc->updateMissingFileStatuses();
 
     ProjucerApplication::getApp().openDocumentManager.reloadModifiedFiles();
 
-    if (Project* p = getProject())
+    if (auto* p = getProject())
     {
         if (p->hasProjectBeenModified())
         {
-            const int r = AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon,
-                                                           TRANS ("The .jucer file has been modified since the last save."),
-                                                           TRANS ("Do you want to keep the current project or re-load from disk?"),
-                                                           TRANS ("Keep"),
-                                                           TRANS ("Re-load from disk"));
+            Component::SafePointer<Component> safePointer (this);
 
-            if (r == 0)
+            MessageManager::callAsync ([=] ()
             {
-                File projectFile = p->getFile();
-                setProject (nullptr);
-                openFile (projectFile);
-            }
-            else if (r == 1)
-            {
-                ProjucerApplication::getApp().getCommandManager().invokeDirectly (CommandIDs::saveProject, true);
-            }
+                if (safePointer == nullptr)
+                    return; // bail out if the window has been deleted
+
+                auto result = AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon,
+                                                            TRANS ("The .jucer file has been modified since the last save."),
+                                                            TRANS ("Do you want to keep the current project or re-load from disk?"),
+                                                            TRANS ("Keep"),
+                                                            TRANS ("Re-load from disk"));
+
+                if (safePointer == nullptr)
+                    return;
+
+                if (result == 0)
+                {
+                    if (auto* project = getProject())
+                    {
+                        auto projectFile = project->getFile();
+                        setProject (nullptr);
+                        openFile (projectFile);
+                    }
+                }
+                else
+                {
+                    ProjucerApplication::getApp().getCommandManager().invokeDirectly (CommandIDs::saveProject, true);
+                }
+            });
         }
     }
 }
