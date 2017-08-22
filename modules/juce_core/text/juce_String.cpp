@@ -868,6 +868,8 @@ JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const uint64 number)     
 JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const float number)          { return s1 += String (number); }
 JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, const double number)         { return s1 += String (number); }
 
+JUCE_API String& JUCE_CALLTYPE operator<< (String& s1, bool b)                      { return s1 += String (b); }
+
 JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const String& text)
 {
     return operator<< (stream, StringRef (text));

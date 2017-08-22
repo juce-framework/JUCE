@@ -1323,22 +1323,25 @@ JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const String& string
 /** Appends a string to the end of the first one. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, StringRef string2);
 
-/** Appends a decimal number at the end of a string. */
+/** Appends a decimal number to the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, short number);
-/** Appends a decimal number at the end of a string. */
+/** Appends a decimal number to the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, int number);
-/** Appends a decimal number at the end of a string. */
+/** Appends a decimal number to the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, long number);
-/** Appends a decimal number at the end of a string. */
+/** Appends a decimal number to the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, unsigned long number);
-/** Appends a decimal number at the end of a string. */
+/** Appends a decimal number to the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, int64 number);
-/** Appends a decimal number at the end of a string. */
+/** Appends a decimal number to the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, uint64 number);
-/** Appends a decimal number at the end of a string. */
+/** Appends a decimal number to the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, float number);
-/** Appends a decimal number at the end of a string. */
+/** Appends a decimal number to the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, double number);
+
+/** Appends a boolean to the end of a string. */
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, bool boolean);
 
 //==============================================================================
 /** Case-sensitive comparison of two strings. */
