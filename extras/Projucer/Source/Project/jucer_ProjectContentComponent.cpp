@@ -982,7 +982,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Shows the main project options page",
                         CommandCategories::general, 0);
         result.setActive (project != nullptr);
-        result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier | ModifierKeys::ctrlModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('x', cmdCtrl, 0));
         break;
 
     case CommandIDs::showProjectTab:
@@ -990,7 +990,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Shows the tab containing the project information",
                         CommandCategories::general, 0);
         result.setActive (project != nullptr);
-        result.defaultKeypresses.add (KeyPress ('p', ModifierKeys::commandModifier | ModifierKeys::ctrlModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('p', cmdCtrl, 0));
         break;
 
     case CommandIDs::showBuildTab:
@@ -998,7 +998,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Shows the tab containing the build panel",
                         CommandCategories::general, 0);
         result.setActive (project != nullptr);
-        result.defaultKeypresses.add (KeyPress ('b', ModifierKeys::commandModifier | ModifierKeys::ctrlModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('b', cmdCtrl, 0));
         break;
 
     case CommandIDs::showFileExplorerPanel:
@@ -1006,7 +1006,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Shows the panel containing the tree of files for this project",
                         CommandCategories::general, 0);
         result.setActive (project != nullptr);
-        result.defaultKeypresses.add (KeyPress ('f', ModifierKeys::commandModifier | ModifierKeys::ctrlModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('f', cmdCtrl, 0));
         break;
 
     case CommandIDs::showModulesPanel:
@@ -1014,7 +1014,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Shows the panel containing the project's list of modules",
                         CommandCategories::general, 0);
         result.setActive (project != nullptr);
-        result.defaultKeypresses.add (KeyPress ('m', ModifierKeys::commandModifier | ModifierKeys::ctrlModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('m', cmdCtrl, 0));
         break;
 
     case CommandIDs::showExportersPanel:
@@ -1022,7 +1022,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Shows the panel containing the project's list of exporters",
                         CommandCategories::general, 0);
         result.setActive (project != nullptr);
-        result.defaultKeypresses.add (KeyPress ('e', ModifierKeys::commandModifier | ModifierKeys::ctrlModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('e', cmdCtrl, 0));
         break;
 
     case CommandIDs::showExporterSettings:
