@@ -213,9 +213,22 @@ public:
 
             if (exponentMagnitude > std::numeric_limits<double>::max_exponent10)
                 return std::numeric_limits<double>::quiet_NaN();
+
+            if (exponentMagnitude == 0)
+                *currentCharacter++ = '0';
         }
 
-        return strtod (&buffer[0], nullptr);
+        double result = 0;
+        const size_t stringSize = (size_t) (currentCharacter - &buffer[0]) + 1;
+
+        if (stringSize > 1)
+        {
+            std::istringstream is (std::string (&buffer[0], stringSize));
+            is.imbue (std::locale ("C"));
+            is >> result;
+        }
+
+        return result;
     }
 
     /** Parses a character string, to read a floating-point value. */
