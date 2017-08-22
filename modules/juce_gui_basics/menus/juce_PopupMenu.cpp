@@ -666,6 +666,9 @@ public:
             else
                 x = jmax (parentArea.getX() + 4, target.getX() - widthToUse);
 
+            if (getLookAndFeel().getPopupMenuBorderSize() == 0) // workaround for dismissing the window on mouse up when border size is 0
+                x += tendTowardsRight ? 1 : -1;
+
             y = target.getY();
             if (target.getCentreY() > parentArea.getCentreY())
                 y = jmax (parentArea.getY(), target.getBottom() - heightToUse);
