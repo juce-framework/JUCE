@@ -1,32 +1,12 @@
 /** @defgroup LittleFootFunctions LittleFoot Functions
     Functions available in the LittleFoot language
     @{
-
-    @defgroup LittleFootFunctions-Graphics Graphics functions
-    @defgroup LittleFootFunctions-MIDI MIDI functions
-    @defgroup LittleFootFunctions-Callbacks Callbacks from the OS
-    @defgroup LittleFootFunctions-Maths Math functions
-    @defgroup LittleFootFunctions-Memory Memory Access functions
-    @defgroup LittleFootFunctions-Debug Debugging functions
-    @defgroup LittleFootFunctions-Configs Configuration functions
-    @defgroup LittleFootFunctions-Messaging Messaging functions
-    @defgroup LittleFootFunctions-Clustering Cluster functions
-    @defgroup LittleFootFunctions-Topology Topology functions
-    @defgroup LittleFootFunctions-Touch Touch functions
-    @defgroup LittleFootFunctions-Lightpad Lightpad specific functions
-    @defgroup LittleFootFunctions-ControlBlock Control Block specific functions
-    @defgroup LittleFootFunctions-Seaboard Seaboard specific functions
-    @defgroup LittleFootFunctions-Power Power functions
-    @defgroup LittleFootFunctions-Utility Utility functions
-    @defgroup LittleFootFunctions-Internal Internal functions (not for general usage)
 */
 
 /** Reads and returns the value of a single byte from the heap.
 
     @param byteIndex    the index (in bytes) of the byte to read
     @returns            the value of the byte
-
-    @ingroup LittleFootFunctions-Memory
 */
 int getHeapByte (int byteIndex);
 
@@ -34,8 +14,6 @@ int getHeapByte (int byteIndex);
 
     @param byteIndex    the index (in bytes) of the start of the 4 bytes to read
     @returns            the value of the 4 bytes as an integer
-
-    @ingroup LittleFootFunctions-Memory
 */
 int getHeapInt (int byteIndex);
 
@@ -44,8 +22,6 @@ int getHeapInt (int byteIndex);
     @param startBitIndex    the index (in bits) of the start of the sequence of bits to read
     @param numBits          how many bits to read
     @returns                the value of the sequence of bits as an integer
-
-    @ingroup LittleFootFunctions-Memory
 */
 int getHeapBits (int startBitIndex, int numBits);
 
@@ -53,8 +29,6 @@ int getHeapBits (int startBitIndex, int numBits);
 
     @param byteIndex    the index (in bytes) of the byte to set
     @param newValue     the new value to set this byte to
-
-    @ingroup LittleFootFunctions-Memory
 */
 void setHeapByte (int byteIndex, int newValue);
 
@@ -62,8 +36,6 @@ void setHeapByte (int byteIndex, int newValue);
 
     @param byteIndex    the index (in bytes) of the start of the 4 bytes to set
     @param newValue     the new value to set the 4 bytes to
-
-    @ingroup LittleFootFunctions-Memory
 */
 void setHeapInt (int byteIndex, int newValue);
 
@@ -72,8 +44,6 @@ void setHeapInt (int byteIndex, int newValue);
     @param a The first parameter
     @param b The second parameter
     @retval The minimum of a and b
-
-    @ingroup LittleFootFunctions-Maths
 */
 int min (int a, int b);
 
@@ -82,8 +52,6 @@ int min (int a, int b);
     @param a The first parameter
     @param b The second parameter
     @retval The minimum of a and b
-
-    @ingroup LittleFootFunctions-Maths
 */
 float min (float a, float b);
 
@@ -92,8 +60,6 @@ float min (float a, float b);
     @param a The first parameter
     @param b The second parameter
     @retval The maximum of a and b
-
-    @ingroup LittleFootFunctions-Maths
 */
 int max (int a, int b);
 
@@ -102,8 +68,6 @@ int max (int a, int b);
     @param a The first parameter
     @param b The second parameter
     @retval The maximum of a and b
-
-    @ingroup LittleFootFunctions-Maths
 */
 float max (float a, float b);
 
@@ -114,8 +78,6 @@ float max (float a, float b);
     @param valueToConstrain    the value to try to return
     @returns                   the closest value to valueToConstrain which lies between lowerLimit
                                and upperLimit (inclusive)
-
-    @ingroup LittleFootFunctions-Maths
 */
 int clamp (int lowerLimit, int upperLimit, int valueToConstrain);
 
@@ -126,8 +88,6 @@ int clamp (int lowerLimit, int upperLimit, int valueToConstrain);
     @param valueToConstrain    the value to try to return
     @returns                   the closest value to valueToConstrain which lies between lowerLimit
                                and upperLimit (inclusive)
-
-    @ingroup LittleFootFunctions-Maths
 */
 float clamp (float lowerLimit, float upperLimit, float valueToConstrain);
 
@@ -135,8 +95,6 @@ float clamp (float lowerLimit, float upperLimit, float valueToConstrain);
 
     @param arg The argument to compute the absolute value of
     @retval either -arg if arg is negative or arg if arg is positive
-
-    @ingroup LittleFootFunctions-Maths
 */
 int abs (int arg);
 
@@ -144,8 +102,6 @@ int abs (int arg);
 
     @param arg The argument to compute the absolute value of
     @retval either -arg if arg is negative or arg if arg is positive
-
-    @ingroup LittleFootFunctions-Maths
 */
 float abs (float arg);
 
@@ -157,8 +113,6 @@ float abs (float arg);
     @param destMin      the minumum value of the destination range
     @param destMax      the maximum value of the destination range
     @returns            the original value mapped to the destination range
-
-    @ingroup LittleFootFunctions-Maths
 */
 float map (float value, float sourceMin, float sourceMax, float destMin, float destMax);
 
@@ -168,8 +122,6 @@ float map (float value, float sourceMin, float sourceMax, float destMin, float d
     @param sourceMin    the minimum value of the source range
     @param sourceMax    the maximum value of the source range
     @returns            the original value mapped to the range 0 - 1.0
-
-    @ingroup LittleFootFunctions-Maths
 */
 float map (float value, float sourceMin, float sourceMax);
 
@@ -177,24 +129,18 @@ float map (float value, float sourceMin, float sourceMax);
     The divisor must be greater than zero.
 
     @returns    the result of the modulo operation
-
-    @ingroup LittleFootFunctions-Maths
 */
 int mod (int dividend, int divisor);
 
 /** Returns a random floating-point number.
 
     @returns    a random value in the range 0 (inclusive) to 1.0 (exclusive)
-
-    @ingroup LittleFootFunctions-Maths
 */
 float getRandomFloat();
 
 /** Returns a random integer, limited to a given range.
 
     @returns    a random integer between 0 (inclusive) and maxValue (exclusive).
-
-    @ingroup LittleFootFunctions-Maths
 */
 int getRandomInt (int maxValue);
 
@@ -202,48 +148,34 @@ int getRandomInt (int maxValue);
 
     @returns     a monotonically increasing value which is unaffected by changes to the
                  system clock. It should be accurate to within a few millisecseconds.
-
-    @ingroup LittleFootFunctions-Maths
 */
 int getMillisecondCounter();
 
 /** Returns the length of time spent in the current function call in milliseconds.
 
     @returns     the length of time spent in the current function call in milliseconds.
-
-    @ingroup LittleFootFunctions-Maths
 */
 int getTimeInCurrentFunctionCall();
 
 /** Logs an integer value to the console.
 
     @param data The 32 bit signed integer to log to the topology as an integer
-
-    @ingroup LittleFootFunctions-Debug
 */
 void log (int data);
 
 /** Logs a hexadecimal value to the console.
 
     @param data The 32 bit signed integer to log to the topology as a hexidecimal int
-
-    @ingroup LittleFootFunctions-Debug
 */
 void logHex (int data);
 
-/** Sends a 1-byte short midi message.
-    @ingroup LittleFootFunctions-MIDI
-*/
+/** Sends a 1-byte short midi message. */
 void sendMIDI (int byte0);
 
-/** Sends a 2-byte short midi message.
-    @ingroup LittleFootFunctions-MIDI
-*/
+/** Sends a 2-byte short midi message. */
 void sendMIDI (int byte0, int byte1);
 
-/** Sends a 3-byte short midi message.
-    @ingroup LittleFootFunctions-MIDI
-*/
+/** Sends a 3-byte short midi message. */
 void sendMIDI  (int byte0, int byte1, int byte2);
 
 /** Sends a key-down message.
@@ -251,8 +183,6 @@ void sendMIDI  (int byte0, int byte1, int byte2);
     @param channel       the midi channel, in the range 0 to 15
     @param noteNumber    the key number, in the range 0 to 127
     @param velocity      the velocity, in the range 0 to 127
-
-    @ingroup LittleFootFunctions-MIDI
 */
 void sendNoteOn (int channel, int noteNumber, int velocity);
 
@@ -261,8 +191,6 @@ void sendNoteOn (int channel, int noteNumber, int velocity);
     @param channel       the midi channel, in the range 0 to 15
     @param noteNumber    the key number, in the range 0 to 127
     @param velocity      the velocity, in the range 0 to 127
-
-    @ingroup LittleFootFunctions-MIDI
 */
 void sendNoteOff (int channel, int noteNumber, int velocity);
 
@@ -271,8 +199,6 @@ void sendNoteOff (int channel, int noteNumber, int velocity);
     @param channel       the midi channel, in the range 0 to 15
     @param noteNumber    the key number, in the range 0 to 127
     @param level         the amount of aftertouch, in the range 0 to 127
-
-    @ingroup LittleFootFunctions-MIDI
 */
 void sendAftertouch (int channel, int noteNumber, int level);
 
@@ -281,8 +207,6 @@ void sendAftertouch (int channel, int noteNumber, int level);
     @param channel       the midi channel, in the range 0 to 15
     @param controller    the type of controller
     @param value         the controller value
-
-    @ingroup LittleFootFunctions-MIDI
 */
 void sendCC (int channel, int controller, int value);
 
@@ -290,8 +214,6 @@ void sendCC (int channel, int controller, int value);
 
     @param channel     the midi channel, in the range 0 to 15
     @param position    the wheel position, in the range 0 to 16383
-
-    @ingroup LittleFootFunctions-MIDI
 */
 void sendPitchBend (int channel, int position);
 
@@ -299,8 +221,6 @@ void sendPitchBend (int channel, int position);
 
     @param channel     the midi channel, in the range 0 to 15
     @param pressure    the pressure, in the range 0 to 127
-
-    @ingroup LittleFootFunctions-MIDI
 */
 void sendChannelPressure (int channel, int pressure);
 
@@ -309,8 +229,6 @@ void sendChannelPressure (int channel, int pressure);
     @param useMPE
     @param lowChannel
     @param highChannel
-
-    @ingroup LittleFootFunctions-MIDI
 */
 void setChannelRange (bool useMPE, int lowChannel, int highChannel);
 
@@ -318,8 +236,6 @@ void setChannelRange (bool useMPE, int lowChannel, int highChannel);
 
     @param noteNumber    the note number to assign the channel to
     @returns             the MIDI channel that has been assigned
-
-    @ingroup LittleFootFunctions-MIDI
 */
 int assignChannel (int noteNumber);
 
@@ -327,53 +243,38 @@ int assignChannel (int noteNumber);
 
     @param noteNumber    the note number to deassign
     @param channel       the MIDI channel
-
-    @ingroup LittleFootFunctions-MIDI
 */
 void deassignChannel (int noteNumber, int channel);
 
 /** Returns the channel that is being used for control messages.
 
     @returns the channel that is being used for control messages. (If MPE is enabled then this will be the first channel.)
-
-    @ingroup LittleFootFunctions-MIDI
 */
 int getControlChannel();
 
-/** Sets whether duplicate notes should be filtered out when MPE is enabled.
-
-    @ingroup LittleFootFunctions-MIDI
-*/
+/** Sets whether duplicate notes should be filtered out when MPE is enabled. */
 void useMPEDuplicateFilter (bool active);
 
 /** Use this method to draw the display.
     The block will call this approximately 25 times per second.
-
-    @ingroup LittleFootFunctions-Callbacks
 */
 void repaint();
 
 /** Called when a button is pushed.
 
     @param index    the index of the button that was pushed
-
-    @ingroup LittleFootFunctions-Callbacks
 */
 void handleButtonDown (int index);
 
 /** Called when a button is released.
 
     @param index    the index of the button that was released
-
-    @ingroup LittleFootFunctions-Callbacks
 */
 void handleButtonUp (int index);
 
 /** Called when a control block button is pressed.
 
     @param buttonIndex    the index of the button
-
-    @ingroup LittleFootFunctions-Callbacks
 
     @note Requires >= 0.2.5 firmware
     @note Only valid with a control block
@@ -383,8 +284,6 @@ void onControlPress (int buttonIndex);
 /** Called when a control block button is released.
 
     @param buttonIndex    the index of the button
-
-    @ingroup LittleFootFunctions-Callbacks
 
     @note Requires >= 0.2.5 firmware
     @note Only valid with a control block
@@ -398,8 +297,6 @@ void onControlRelease (int buttonIndex);
     @param y        the Y position of this touch on the device, in block units starting from 0 (top)
     @param z        the current pressure of this touch, in the range 0.0 (no pressure) to 1.0 (very hard)
     @param vz       the rate at which pressure is currently changing, measured in units/second
-
-    @ingroup LittleFootFunctions-Touch
 */
 void touchStart (int index, float x, float y, float z, float vz);
 
@@ -410,8 +307,6 @@ void touchStart (int index, float x, float y, float z, float vz);
     @param y        the Y position of this touch on the device, in block units starting from 0 (top)
     @param z        the current pressure of this touch, in the range 0.0 (no pressure) to 1.0 (very hard)
     @param vz       the rate at which pressure is currently changing, measured in units/second
-
-    @ingroup LittleFootFunctions-Touch
 */
 void touchMove (int index, float x, float y, float z, float vz);
 
@@ -422,27 +317,18 @@ void touchMove (int index, float x, float y, float z, float vz);
     @param y        the Y position of this touch on the device, in block units starting from 0 (top)
     @param z        the current pressure of this touch, in the range 0.0 (no pressure) to 1.0 (very hard)
     @param vz       the rate at which pressure is currently changing, measured in units/second
-
-    @ingroup LittleFootFunctions-Touch
 */
 void touchEnd (int index, float x, float y, float z, float vz);
 
-/** Called when a program is loaded onto the block and is about to start. Do any setup here.
-
-    @ingroup LittleFootFunctions-Callbacks
-*/
+/** Called when a program is loaded onto the block and is about to start. Do any setup here. */
 void initialise();
 
-/** Called when a block receives a MIDI message.
-
-    @ingroup LittleFootFunctions-MIDI
-*/
+/** Called when a block receives a MIDI message. */
 void handleMIDI (int byte0, int byte1, int byte2);
 
 /** Called when a block receives a message.
 
     @see sendMessageToBlock
-    @ingroup LittleFootFunctions-Messaging
 */
 void handleMessage (int param1, int param2, int param3);
 
@@ -453,8 +339,6 @@ void handleMessage (int param1, int param2, int param3);
     @param red The red in range 0 - 255 inclusive
     @param green The green in range 0 - 255 inclusive
     @param blue The blue in range 0 - 255 inclusive
-
-    @ingroup LittleFootFunctions-Graphics
 */
 int makeARGB (int alpha, int red, int green, int blue);
 
@@ -463,8 +347,6 @@ int makeARGB (int alpha, int red, int green, int blue);
     @param baseColour the colour to blend on to
     @param overlaidColour The colour to blend in to the baseColour
     @returns The blended colour
-
-    @ingroup LittleFootFunctions-Graphics
 */
 int blendARGB (int baseColour, int overlaidColour);
 
@@ -472,23 +354,16 @@ int blendARGB (int baseColour, int overlaidColour);
     A control block will light up its top LEDs indicating battery level and a lightpad
     block will draw the battery level on the display.
 
-    @ingroup LittleFootFunctions-Graphics
-
     @note Requires >= 0.2.5 firmware
 */
 void displayBatteryLevel();
 
-/** Clears the display and sets all the LEDs to black.
-
-    @ingroup LittleFootFunctions-Graphics
-*/
+/** Clears the display and sets all the LEDs to black. */
 void clearDisplay();
 
 /** Clears the display and sets all the LEDs to a specified colour.
 
     @param rgb    the colour to use (0xff...)
-
-    @ingroup LittleFootFunctions-Graphics
 */
 void clearDisplay (int rgb);
 
@@ -497,8 +372,6 @@ void clearDisplay (int rgb);
     @param rgb    the colour to use (0xff...)
     @param x      the x coordinate of the pixel to fill
     @param y      the y coordinate of the pixel to fill
-
-    @ingroup LittleFootFunctions-Graphics
 */
 void fillPixel (int rgb, int x, int y);
 
@@ -507,8 +380,6 @@ void fillPixel (int rgb, int x, int y);
     @param argb    the colour to use
     @param x       the x coordinate of the pixel to blend
     @param y       the y coordinate of the pixel to blend
-
-    @ingroup LittleFootFunctions-Graphics
 */
 void blendPixel (int argb, int x, int y);
 
@@ -519,8 +390,6 @@ void blendPixel (int argb, int x, int y);
     @param y         the y coordinate of the rectangle to draw
     @param width     the width of the rectangle to draw
     @param height    the height of the rectangle to draw
-
-    @ingroup LittleFootFunctions-Graphics
 */
 void fillRect (int rgb, int x, int y, int width, int height);
 
@@ -531,8 +400,6 @@ void fillRect (int rgb, int x, int y, int width, int height);
     @param y         the y coordinate of the rectangle to blend
     @param width     the width of the rectangle to blend
     @param height    the height of the rectangle to blend
-
-    @ingroup LittleFootFunctions-Graphics
 */
 void blendRect (int argb, int x, int y, int width, int height);
 
@@ -546,8 +413,6 @@ void blendRect (int argb, int x, int y, int width, int height);
     @param y           the y coordinate of the rectangle
     @param width       the width of the rectangle
     @param height      the height of the rectangle
-
-    @ingroup LittleFootFunctions-Graphics
 */
 void blendGradientRect (int colourNW, int colourNE, int colourSE, int colourSW, int x, int y, int width, int height);
 
@@ -559,8 +424,6 @@ void blendGradientRect (int colourNW, int colourNE, int colourSE, int colourSW, 
     @param radius     the radius of the circle in block units
     @param fill       if true then the circle will be filled, if false the circle will be an outline
 
-    @ingroup LittleFootFunctions-Graphics
-
     @note Requires >= 0.2.5 firmware
 */
 void blendCircle (int argb, float xCentre, float yCentre, float radius, bool fill);
@@ -571,16 +434,12 @@ void blendCircle (int argb, float xCentre, float yCentre, float radius, bool fil
     @param colour    the colour to use
     @param x         the x coordinate to use
     @param y         the y coordinate to use
-
-    @ingroup LittleFootFunctions-Graphics
 */
 void drawNumber (int value, int colour, int x, int y);
 
 /** Returns the current firmware version of this block.
 
     @returns The firmware version of the form 0xMJMIRV (where MJ = Major, MI = Minor, RV = Revision)
-
-    @ingroup LittleFootFunctions-Utility
 
     @note Requires >= 0.2.5 firmware
 */
@@ -590,8 +449,6 @@ int getFirmwareVersion();
 
     @returns the battery level of this block, between 0 and 1.0.
 
-    @ingroup LittleFootFunctions-Power
-
     @note Requires >= 0.2.5 firmware
 */
 float getBatteryLevel();
@@ -600,23 +457,17 @@ float getBatteryLevel();
 
     @returns true if this block's battery is charging
 
-    @ingroup LittleFootFunctions-Power
-
     @note Requires >= 0.2.5 firmware
 */
 bool isBatteryCharging();
 
 /** Sets whether status overlays should be displayed on this block.
 
-    @ingroup LittleFootFunctions-Utility
-
     @note Requires >= 0.2.5 firmware
 */
 void setStatusOverlayActive (bool active);
 
 /** Sets whether power saving mode should be enabled on this block.
-
-    @ingroup LittleFootFunctions-Power
 
     @note Requires >= 0.2.5 firmware
 */
@@ -625,8 +476,6 @@ void setPowerSavingEnabled (bool enabled);
 /** Returns the type of the block with a given ID.
 
     @returns    an enum indicating the type of block @see Block::Type
-
-    @ingroup LittleFootFunctions-Clustering
 
     @note Requires >= 0.2.5 firmware
 */
@@ -639,8 +488,6 @@ int getBlockTypeForID (int blockID);
     @param param1     the first chunk of data to send
     @param param2     the second chunk of data to send
     @param param3     the third chunk of data to send
-
-    @ingroup LittleFootFunctions-Messaging
 */
 void sendMessageToBlock (int blockID, int param1, int param2, int param3);
 
@@ -650,8 +497,6 @@ void sendMessageToBlock (int blockID, int param1, int param2, int param3);
     @param param1    the first chunk of data to send
     @param param2    the second chunk of data to send
     @param param3    the third chunk of data to send
-
-    @ingroup LittleFootFunctions-Messaging
 */
 void sendMessageToHost (int param1, int param2, int param3);
 
@@ -661,26 +506,18 @@ void sendMessageToHost (int param1, int param2, int param3);
     @param touchX    the x position of the touch in block units
     @param touchY    the y position of the touch in block units
     @param touchZ    the pressure value of the touch
-
-    @ingroup LittleFootFunctions-Lightpad
 */
 void addPressurePoint (int argb, float touchX, float touchY, float touchZ);
 
-/** Draws the pressure map on the display.
-    @ingroup LittleFootFunctions-Lightpad
-*/
+/** Draws the pressure map on the display. */
 void drawPressureMap();
 
-/** Fades the pressure map on the display.
-    @ingroup LittleFootFunctions-Lightpad
-*/
+/** Fades the pressure map on the display. */
 void fadePressureMap();
 
 /** Links a another block to this control block.
 
     @param blockID    the ID of the block to link
-
-    @ingroup LittleFootFunctions-ControlBlock
 
     @note Requires >= 0.2.5 firmware
     @note Only valid with a control block
@@ -688,8 +525,6 @@ void fadePressureMap();
 void linkBlockIDtoController (int blockID);
 
 /** Repaints the control block display.
-
-    @ingroup LittleFootFunctions-ControlBlock
 
     @note Requires >= 0.2.5 firmware
     @note Only valid with a control block
@@ -708,8 +543,6 @@ void repaintControl();
     @param onColourToUse     the colour to use when this button is on
     @param offColourToUse    the colour to use when this button is off
 
-    @ingroup LittleFootFunctions-ControlBlock
-
     @note Requires >= 0.2.5 firmware
     @note Only valid with a control block
 */
@@ -719,8 +552,6 @@ void initControl (int buttonIndex, int modeToUse, int outputType, int val, int m
 /** Control type for use with initControl
 
     @see initControl
-
-    @ingroup LittleFootFunctions-ControlBlock
 */
 enum ControlType
 {
@@ -732,8 +563,6 @@ enum ControlType
 /** Control mode for use with initControl
 
     @see initControl
-
-    @ingroup LittleFootFunctions-ControlBlock
 */
 enum ControlMode
 {
@@ -750,15 +579,12 @@ enum ControlMode
 
     @param touchIndex    the index of the touch event
 
-    @ingroup LittleFootFunctions-Seaboard
-
     @note Requires >= 0.2.5 firmware
     @note Only valid on a Seaboard
 */
 void handleTouchAsSeaboard (int touchIndex);
 
 /** Returns the number of blocks in the current topology.
-    @ingroup LittleFootFunctions-Topology
 
     @note Requires >= 0.2.5 firmware
 */
@@ -769,16 +595,12 @@ int getNumBlocksInTopology();
     @param index The index of the block to find in the topology
     @returns int The id of the block
 
-    @ingroup LittleFootFunctions-Topology
-
     @note Requires >= 0.2.5 firmware
 */
 int getBlockIDForIndex (int index);
 
 /** Returns true if this block is directly connected to the host,
     as opposed to only being connected to a different block via a connection port.
-
-    @ingroup LittleFootFunctions-Topology
 
     @note Requires >= 0.2.5 firmware
 */
@@ -787,14 +609,11 @@ bool isMasterBlock();
 /** Returns true if this block is connected to the host computer, this can be
     directly or through connections to other blocks.
 
-    @ingroup LittleFootFunctions-Topology
-
     @note Requires >= 0.2.5 firmware
 */
 bool isConnectedToHost();
 
 /** Returns the ID of a block connected to a specified port on this block.
-    @ingroup LittleFootFunctions-Topology
 
     @note Requires >= 0.2.5 firmware
 */
@@ -806,42 +625,35 @@ int getBlockIDOnPort (int port);
     @returns the port number that is connected to the master block. Returns 0xFF if there is
              no port connected to master.
 
-    @ingroup LittleFootFunctions-Topology
-
     @note Requires >= 0.2.5 firmware
 */
 int getPortToMaster();
 
 /** Returns the horizontal distance between this block and the master block in block units.
-    @ingroup LittleFootFunctions-Clustering
 
     @note Requires >= 0.2.5 firmware
 */
 int getHorizontalDistFromMaster();
 
 /** Returns the vertical distance between this block and the master block in block units.
-    @ingroup LittleFootFunctions-Clustering
 
     @note Requires >= 0.2.5 firmware
 */
 int getVerticalDistFromMaster();
 
 /** Returns the angle of this block relative to the master block in degrees.
-    @ingroup LittleFootFunctions-Clustering
 
     @note Requires >= 0.2.5 firmware
 */
 int getAngleFromMaster();
 
 /** Sets whether this block should auto-rotate when its angle relative to the master block changes.
-    @ingroup LittleFootFunctions-Clustering
 
     @note Requires >= 0.2.5 firmware
 */
 void setAutoRotate (bool enabled);
 
 /** Returns the index of this block in the current cluster.
-    @ingroup LittleFootFunctions-Clustering
 
     @note Requires >= 0.2.5 firmware
 */
@@ -851,8 +663,6 @@ int getClusterIndex();
 
     @returns the width of the cluster (note that a single block will return 1 here)
 
-    @ingroup LittleFootFunctions-Clustering
-
     @note Requires >= 0.2.5 firmware
 */
 int getClusterWidth();
@@ -860,8 +670,6 @@ int getClusterWidth();
 /** Returns how many blocks high the current cluster is.
 
     @returns the height of the cluster (note that a single block will return 1 here)
-
-    @ingroup LittleFootFunctions-Clustering
 
     @note Requires >= 0.2.5 firmware
 */
@@ -871,8 +679,6 @@ int getClusterHeight();
 
     @returns int The cluster x position. (0, 0) is considered to be the top left block
 
-    @ingroup LittleFootFunctions-Clustering
-
     @note Requires >= 0.2.5 firmware
 */
 int getClusterXpos();
@@ -880,8 +686,6 @@ int getClusterXpos();
 /** Returns the y index of this block in the current cluster.
 
     @returns int The cluster x position. (0, 0) is considered to be the top left block
-
-    @ingroup LittleFootFunctions-Clustering
 
     @note Requires >= 0.2.5 firmware
 */
@@ -891,8 +695,6 @@ int getClusterYpos();
 
     @returns the number of blocks in the current cluster.
 
-    @ingroup LittleFootFunctions-Clustering
-
     @note Requires >= 0.2.5 firmware
 */
 int getNumBlocksInCurrentCluster();
@@ -901,14 +703,11 @@ int getNumBlocksInCurrentCluster();
 
     @param index    the cluster index of the block to get the ID of
 
-    @ingroup LittleFootFunctions-Clustering
-
     @note Requires >= 0.2.5 firmware
 */
 int getBlockIdForBlockInCluster (int index);
 
 /** Returns true if the master block is in the current cluster.
-    @ingroup LittleFootFunctions-Clustering
 
     @note Requires >= 0.2.5 firmware
 */
@@ -917,8 +716,6 @@ bool isMasterInCurrentCluster();
 /** Returns current value of one of the local config items.
 
     @param item    the config item to get (see ConfigItemId enum in juce_BlocksProtocolDefinitions.h)
-
-    @ingroup LittleFootFunctions-Configs
 
     @note Requires >= 0.2.5 firmware
 */
@@ -929,8 +726,6 @@ int getLocalConfig (int item);
     @param item     the config item to set the value of (see ConfigItemId enum in juce_BlocksProtocolDefinitions.h)
     @param value    the value to set the config to
 
-    @ingroup LittleFootFunctions-Configs
-
     @note Requires >= 0.2.5 firmware
 */
 void setLocalConfig (int item, int value);
@@ -939,8 +734,6 @@ void setLocalConfig (int item, int value);
 
     @param longAddress    the address of the remote block
     @param item           the config item (see ConfigItemId enum in juce_BlocksProtocolDefinitions.h)
-
-    @ingroup LittleFootFunctions-Configs
 
     @note Requires >= 0.2.5 firmware
 */
@@ -952,8 +745,6 @@ void requestRemoteConfig (int longAddress, int item);
     @param item           the config item (see ConfigItemId enum in juce_BlocksProtocolDefinitions.h)
     @param value          the value to set the config to
 
-    @ingroup LittleFootFunctions-Configs
-
     @note Requires >= 0.2.5 firmware
 */
 void setRemoteConfig (int longAddress, int item, int value);
@@ -964,8 +755,6 @@ void setRemoteConfig (int longAddress, int item, int value);
     @param min     the minimum value this config item should use
     @param max     the maximum value this config item should use
 
-    @ingroup LittleFootFunctions-Configs
-
     @note Requires >= 0.2.5 firmware
 */
 void setLocalConfigItemRange (int item, int min, int max);
@@ -975,8 +764,6 @@ void setLocalConfigItemRange (int item, int min, int max);
     @param item           the config item to set active (see ConfigItemId enum in juce_BlocksProtocolDefinitions.h)
     @param isActive       sets whether the config should be active or not
     @param saveToFlash    if true then this config item will be saved to the flash memory of the block
-
-    @ingroup LittleFootFunctions-Configs
 
     @note Requires >= 0.2.5 firmware
 */
