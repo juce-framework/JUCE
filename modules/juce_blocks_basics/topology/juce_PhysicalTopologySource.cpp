@@ -362,10 +362,9 @@ struct PhysicalTopologySource::Internal
 
     static bool versionNumberAddedToBlock (const juce::Array<DeviceInfo>& devices, Block::UID uid, juce::String version) noexcept
     {
-        if (version.length() == 0)
-            for (auto&& d : devices)
-                if (d.uid == uid && d.version.length)
-                    return true;
+        for (auto&& d : devices)
+            if (d.uid == uid && memcmp (d.version.version, version.toRawUTF8(), d.version.length) != 0)
+                return true;
 
         return false;
     }
