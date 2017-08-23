@@ -958,8 +958,6 @@ public:
                 if (popupDisplay == nullptr)
                     showPopupDisplay();
 
-                updatePopupDisplay (getValue());
-
                 if (popupDisplay != nullptr)
                     popupDisplay->startTimer (2000);
             }
@@ -976,6 +974,8 @@ public:
         if (popupDisplay == nullptr)
         {
             popupDisplay = new PopupDisplayComponent (owner);
+
+            updatePopupDisplay (getValue());
 
             if (parentForPopupDisplay != nullptr)
                 parentForPopupDisplay->addChildComponent (popupDisplay);
