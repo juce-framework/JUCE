@@ -115,7 +115,7 @@ public:
 
             if (getTargetFileType() == sharedLibraryOrDLL || getTargetFileType() == pluginBundle)
             {
-                s.add (String ("JUCE_CFLAGS_") + getTargetVarName() + String (" := -fPIC"));
+                s.add (String ("JUCE_CFLAGS_") + getTargetVarName() + String (" := -fPIC -fvisibility=hidden"));
 
                 const String ldflagsVarName = String ("JUCE_LDFLAGS_") + getTargetVarName();
                 String targetLinkOptions = ldflagsVarName  + String (" := -shared");
