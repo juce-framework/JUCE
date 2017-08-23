@@ -160,7 +160,9 @@ public:
     struct Margin
     {
         Margin() noexcept;
+        Margin (int size) noexcept;
         Margin (float size) noexcept;
+        Margin (float top, float right, float bottom, float left) noexcept;   /**< Creates a margin with these sizes. */
 
         float left;
         float right;

@@ -310,8 +310,9 @@ struct Grid::PlacementHelpers
         for (const auto& areaString : areasStrings)
             strings.add (juce::StringArray::fromTokens (areaString, false));
 
-        for (auto s : strings)
-            jassert (s.size() == strings[0].size()); // all rows must have the same number of columns
+        if (strings.size() > 0)
+            for (auto s : strings)
+                jassert (s.size() == strings[0].size()); // all rows must have the same number of columns
 
         return strings;
     }
@@ -629,8 +630,12 @@ struct Grid::AutoPlacement
 
         int getHighestCrossDimension() const
         {
-            return std::max (getCrossDimension ({ occupiedCells.crbegin()->column, occupiedCells.crbegin()->row }),
-                             highestCrossDimension);
+            Cell cell { 1, 1 };
+
+            if (occupiedCells.size() > 0)
+                cell = { occupiedCells.crbegin()->column, occupiedCells.crbegin()->row };
+
+            return std::max (getCrossDimension (cell), highestCrossDimension);
         }
 
         Cell advance (Cell cell) const
