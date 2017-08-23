@@ -651,11 +651,16 @@ public:
         {
             OpenSLSession::stop();
 
+            while (! guard.compareAndSetBool (1, 0))
+                Thread::sleep (1);
+
             if (inputChannels > 0)
                 recorder->setState (false);
 
             if (outputChannels > 0)
                 player->setState (false);
+
+            guard.set (0);
         }
 
         bool setAudioPreprocessingEnabled (bool shouldEnable) override
