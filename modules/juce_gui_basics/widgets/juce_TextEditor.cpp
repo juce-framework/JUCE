@@ -1991,7 +1991,8 @@ void TextEditor::setEscapeAndReturnKeysConsumed (bool shouldBeConsumed) noexcept
 
 bool TextEditor::keyPressed (const KeyPress& key)
 {
-    if (isReadOnly() && key != KeyPress ('c', ModifierKeys::commandModifier, 0))
+    if (isReadOnly() && key != KeyPress ('c', ModifierKeys::commandModifier, 0)
+                     && key != KeyPress ('a', ModifierKeys::commandModifier, 0))
         return false;
 
     if (! TextEditorKeyMapper<TextEditor>::invokeKeyFunction (*this, key))
