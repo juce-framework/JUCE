@@ -213,6 +213,7 @@ namespace juce
         #include "processors/juce_FIRFilter.h"
         #include "processors/juce_Oscillator.h"
         #include "processors/juce_StateVariableFilter.h"
+        #include "processors/juce_Oversampling.h"
         #include "frequency/juce_FFT.h"
         #include "frequency/juce_Convolution.h"
         #include "frequency/juce_Windowing.h"
