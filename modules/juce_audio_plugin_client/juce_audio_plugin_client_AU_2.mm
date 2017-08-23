@@ -35,9 +35,14 @@
  #pragma clang diagnostic ignored "-Wextra-semi"
 #endif
 
-#ifdef _MSC_VER
- #pragma warning (push)
-// #pragma warning (disable : 4127)
+// From MacOS 10.13 and iOS 11 Apple has (sensibly!) stopped defining a whole
+// set of functions with rather generic names. However, we still need a couple
+// of them to compile the files below.
+#ifndef verify
+ #define verify(assertion) __Verify(assertion)
+#endif
+#ifndef verify_noerr
+ #define verify_noerr(errorCode)  __Verify_noErr(errorCode)
 #endif
 
 #include "AU/CoreAudioUtilityClasses/AUBase.cpp"
@@ -60,10 +65,9 @@
 #include "AU/CoreAudioUtilityClasses/ComponentBase.cpp"
 #include "AU/CoreAudioUtilityClasses/MusicDeviceBase.cpp"
 
+#undef verify
+#undef verify_noerr
+
 #ifdef __clang__
  #pragma clang diagnostic pop
-#endif
-
-#ifdef _MSC_VER
- #pragma warning (pop)
 #endif
