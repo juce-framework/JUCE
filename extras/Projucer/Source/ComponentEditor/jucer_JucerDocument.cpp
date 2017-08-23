@@ -77,7 +77,7 @@ struct UserDocChangeTimer  : public Timer
 
 bool JucerDocument::documentAboutToClose (OpenDocumentManager::Document* doc)
 {
-    return doc != cpp;
+    return true;
 }
 
 void JucerDocument::userEditedCpp()
@@ -714,7 +714,13 @@ public:
         auto& odm = ProjucerApplication::getApp().openDocumentManager;
 
         if (auto* header = odm.openFile (nullptr, getFile().withFileExtension (".h")))
-            return header->save();
+        {
+            if (header->save())
+            {
+                odm.closeFile (getFile().withFileExtension(".h"), false);
+                return true;
+            }
+        }
 
         return false;
     }
