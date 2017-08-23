@@ -161,32 +161,45 @@ void ThreadPool::addJob (std::function<void()> jobToRun)
     addJob (new LambdaJobWrapper (jobToRun), true);
 }
 
-int ThreadPool::getNumJobs() const
+int ThreadPool::getNumJobs() const noexcept
 {
     return jobs.size();
 }
 
-int ThreadPool::getNumThreads() const
+int ThreadPool::getNumThreads() const noexcept
 {
     return threads.size();
 }
 
-ThreadPoolJob* ThreadPool::getJob (const int index) const
+ThreadPoolJob* ThreadPool::getJob (int index) const noexcept
 {
     const ScopedLock sl (lock);
     return jobs [index];
 }
 
-bool ThreadPool::contains (const ThreadPoolJob* const job) const
+bool ThreadPool::contains (const ThreadPoolJob* const job) const noexcept
 {
     const ScopedLock sl (lock);
     return jobs.contains (const_cast<ThreadPoolJob*> (job));
 }
 
-bool ThreadPool::isJobRunning (const ThreadPoolJob* const job) const
+bool ThreadPool::isJobRunning (const ThreadPoolJob* const job) const noexcept
 {
     const ScopedLock sl (lock);
     return jobs.contains (const_cast<ThreadPoolJob*> (job)) && job->isActive;
+}
+
+void ThreadPool::moveJobToFront (const ThreadPoolJob* job) noexcept
+{
+    const ScopedLock sl (lock);
+
+    if (! ! job->isActive)
+    {
+        auto index = jobs.indexOf (const_cast<ThreadPoolJob*> (job));
+
+        if (index > 0)
+            jobs.move (index, 0);
+    }
 }
 
 bool ThreadPool::waitForJobToFinish (const ThreadPoolJob* const job, const int timeOutMs) const
@@ -272,7 +285,7 @@ bool ThreadPool::removeAllJobs (const bool interruptRunningJobs, const int timeO
         }
     }
 
-    const uint32 start = Time::getMillisecondCounter();
+    auto start = Time::getMillisecondCounter();
 
     for (;;)
     {
