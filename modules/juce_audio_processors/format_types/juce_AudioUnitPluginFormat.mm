@@ -1141,6 +1141,7 @@ public:
     void refreshParameterList() override
     {
         parameters.clear();
+        paramIDToIndex.clear();
 
         if (audioUnit != nullptr)
         {
@@ -1171,6 +1172,7 @@ public:
                         ParamInfo* const param = new ParamInfo();
                         parameters.add (param);
                         param->paramID = ids[i];
+                        paramIDToIndex[ids[i]] = i;
                         param->minValue = info.minValue;
                         param->maxValue = info.maxValue;
                         param->automatable = (info.flags & kAudioUnitParameterFlag_NonRealTime) == 0;
@@ -1263,6 +1265,7 @@ private:
     };
 
     OwnedArray<ParamInfo> parameters;
+    std::unordered_map<AudioUnitParameterID, int> paramIDToIndex;
 
     MidiDataConcatenator midiConcatenator;
     CriticalSection midiInLock;
@@ -1348,13 +1351,10 @@ private:
          || event.mEventType == kAudioUnitEvent_BeginParameterChangeGesture
          || event.mEventType == kAudioUnitEvent_EndParameterChangeGesture)
         {
-            for (paramIndex = 0; paramIndex < parameters.size(); ++paramIndex)
-            {
-                const ParamInfo& p = *parameters.getUnchecked(paramIndex);
+            auto it = paramIDToIndex.find (event.mArgument.mParameter.mParameterID)
 
-                if (p.paramID == event.mArgument.mParameter.mParameterID)
-                    break;
-            }
+            if (it != paramIDToIndex.end())
+                paramIndex = it->second;
 
             if (! isPositiveAndBelow (paramIndex, parameters.size()))
                 return;
@@ -1364,7 +1364,7 @@ private:
         {
             case kAudioUnitEvent_ParameterValueChange:
                 {
-                    const ParamInfo& p = *parameters.getUnchecked(paramIndex);
+                    auto& p = *parameters.getUnchecked (paramIndex);
                     sendParamChangeMessageToListeners (paramIndex, (newValue - p.minValue) / (p.maxValue - p.minValue));
                 }
                 break;
