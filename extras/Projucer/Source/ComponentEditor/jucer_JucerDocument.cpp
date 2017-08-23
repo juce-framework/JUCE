@@ -49,12 +49,10 @@ JucerDocument::JucerDocument (SourceCodeDocument* c)
 
     ProjucerApplication::getCommandManager().commandStatusChanged();
     cpp->getCodeDocument().addListener (this);
-    ProjucerApplication::getApp().openDocumentManager.addListener (this);
 }
 
 JucerDocument::~JucerDocument()
 {
-    ProjucerApplication::getApp().openDocumentManager.removeListener (this);
     cpp->getCodeDocument().removeListener (this);
     ProjucerApplication::getCommandManager().commandStatusChanged();
 }
@@ -74,11 +72,6 @@ struct UserDocChangeTimer  : public Timer
 
     JucerDocument& doc;
 };
-
-bool JucerDocument::documentAboutToClose (OpenDocumentManager::Document*)
-{
-    return true;
-}
 
 void JucerDocument::userEditedCpp()
 {
