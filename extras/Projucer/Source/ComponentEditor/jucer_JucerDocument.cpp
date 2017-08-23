@@ -75,7 +75,7 @@ struct UserDocChangeTimer  : public Timer
     JucerDocument& doc;
 };
 
-bool JucerDocument::documentAboutToClose (OpenDocumentManager::Document* doc)
+bool JucerDocument::documentAboutToClose (OpenDocumentManager::Document*)
 {
     return true;
 }
