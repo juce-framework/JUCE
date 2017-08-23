@@ -274,6 +274,7 @@ public:
     Rectangle<int> getTabButtonExtraComponentBounds (const TabBarButton&, Rectangle<int>& textArea, Component& extraComp) override;
 
     void drawTabButton (TabBarButton&, Graphics&, bool isMouseOver, bool isMouseDown) override;
+    Font getTabButtonFont (TabBarButton&, float height) override;
     void drawTabButtonText (TabBarButton&, Graphics&, bool isMouseOver, bool isMouseDown) override;
     void drawTabbedButtonBarBackground (TabbedButtonBar&, Graphics&) override;
     void drawTabAreaBehindFrontButton (TabbedButtonBar&, Graphics&, int w, int h) override;

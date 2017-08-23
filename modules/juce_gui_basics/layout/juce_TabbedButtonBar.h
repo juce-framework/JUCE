@@ -311,6 +311,7 @@ public:
         virtual Rectangle<int> getTabButtonExtraComponentBounds (const TabBarButton&, Rectangle<int>& textArea, Component& extraComp) = 0;
 
         virtual void drawTabButton (TabBarButton&, Graphics&, bool isMouseOver, bool isMouseDown) = 0;
+        virtual Font getTabButtonFont (TabBarButton&, float height) = 0;
         virtual void drawTabButtonText (TabBarButton&, Graphics&, bool isMouseOver, bool isMouseDown) = 0;
         virtual void drawTabbedButtonBarBackground (TabbedButtonBar&, Graphics&) = 0;
         virtual void drawTabAreaBehindFrontButton (TabbedButtonBar&, Graphics&, int w, int h) = 0;

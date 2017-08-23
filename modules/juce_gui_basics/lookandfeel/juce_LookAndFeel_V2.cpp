@@ -2171,6 +2171,11 @@ void LookAndFeel_V2::fillTabButtonShape (TabBarButton& button, Graphics& g, cons
     g.strokePath (path, PathStrokeType (isFrontTab ? 1.0f : 0.5f));
 }
 
+Font LookAndFeel_V2::getTabButtonFont (TabBarButton&, float height)
+{
+    return { height * 0.6f };
+}
+
 void LookAndFeel_V2::drawTabButtonText (TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
     const Rectangle<float> area (button.getTextArea().toFloat());
@@ -2181,7 +2186,7 @@ void LookAndFeel_V2::drawTabButtonText (TabBarButton& button, Graphics& g, bool 
     if (button.getTabbedButtonBar().isVertical())
         std::swap (length, depth);
 
-    Font font (depth * 0.6f);
+    Font font (getTabButtonFont (button, depth));
     font.setUnderline (button.hasKeyboardFocus (false));
 
     AffineTransform t;
