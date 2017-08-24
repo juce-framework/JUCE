@@ -1351,10 +1351,10 @@ private:
          || event.mEventType == kAudioUnitEvent_BeginParameterChangeGesture
          || event.mEventType == kAudioUnitEvent_EndParameterChangeGesture)
         {
-            auto it = paramIDToIndex.find (event.mArgument.mParameter.mParameterID)
+            auto it = paramIDToIndex.find (event.mArgument.mParameter.mParameterID);
 
             if (it != paramIDToIndex.end())
-                paramIndex = it->second;
+                paramIndex = (int) it->second;
 
             if (! isPositiveAndBelow (paramIndex, parameters.size()))
                 return;
