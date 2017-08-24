@@ -1032,36 +1032,30 @@ public class JUCENetworkGraphicsDemo   extends Activity
 
         public final boolean connect()
         {
-            try
+            synchronized (createStreamLock)
             {
+                if (hasBeenCancelled.get())
+                    return false;
+
                 try
                 {
-                    synchronized (createStreamLock)
+                    try
                     {
-                        if (hasBeenCancelled.get())
-                            return false;
-
                         inputStream = getCancellableStream (true);
                     }
-                }
-                catch (ExecutionException e)
-                {
-                    if (connection.getResponseCode() < 400)
+                    catch (ExecutionException e)
+                    {
+                        if (connection.getResponseCode() < 400)
+                        {
+                            statusCode[0] = connection.getResponseCode();
+                            connection.disconnect();
+                            return false;
+                        }
+                    }
+                    finally
                     {
                         statusCode[0] = connection.getResponseCode();
-                        connection.disconnect();
-                        return false;
                     }
-                }
-                finally
-                {
-                    statusCode[0] = connection.getResponseCode();
-                }
-
-                synchronized (createStreamLock)
-                {
-                    if (hasBeenCancelled.get())
-                        return false;
 
                     try
                     {
@@ -1072,49 +1066,89 @@ public class JUCENetworkGraphicsDemo   extends Activity
                     }
                     catch (ExecutionException e)
                     {}
+
+                    for (java.util.Map.Entry<String, java.util.List<String>> entry : connection.getHeaderFields().entrySet())
+                        if (entry.getKey() != null && entry.getValue() != null)
+                            responseHeaders.append (entry.getKey() + ": "
+                                                    + android.text.TextUtils.join (",", entry.getValue()) + "\n");
+
+                    return true;
                 }
-
-                for (java.util.Map.Entry<String, java.util.List<String>> entry : connection.getHeaderFields().entrySet())
-                    if (entry.getKey() != null && entry.getValue() != null)
-                        responseHeaders.append (entry.getKey() + ": "
-                                                + android.text.TextUtils.join (",", entry.getValue()) + "\n");
-
-                return true;
+                catch (IOException e)
+                {
+                    return false;
+                }
             }
-            catch (IOException e)
+        }
+
+        static class DisconnectionRunnable implements Runnable
+        {
+            public DisconnectionRunnable (HttpURLConnection theConnection,
+                                          InputStream theInputStream,
+                                          ReentrantLock theCreateStreamLock,
+                                          Object theCreateFutureLock,
+                                          Future<BufferedInputStream> theStreamFuture)
             {
-                return false;
+                connectionToDisconnect = theConnection;
+                inputStream = theInputStream;
+                createStreamLock = theCreateStreamLock;
+                createFutureLock = theCreateFutureLock;
+                streamFuture = theStreamFuture;
             }
+
+            public void run()
+            {
+                try
+                {
+                    if (! createStreamLock.tryLock())
+                    {
+                        synchronized (createFutureLock)
+                        {
+                            if (streamFuture != null)
+                                streamFuture.cancel (true);
+                        }
+
+                        createStreamLock.lock();
+                    }
+
+                    if (connectionToDisconnect != null)
+                        connectionToDisconnect.disconnect();
+
+                    if (inputStream != null)
+                        inputStream.close();
+                }
+                catch (IOException e)
+                {}
+                finally
+                {
+                    createStreamLock.unlock();
+                }
+            }
+
+            private HttpURLConnection connectionToDisconnect;
+            private InputStream inputStream;
+            private ReentrantLock createStreamLock;
+            private Object createFutureLock;
+            Future<BufferedInputStream> streamFuture;
         }
 
         public final void release()
         {
-            hasBeenCancelled.set (true);
+            DisconnectionRunnable disconnectionRunnable = new DisconnectionRunnable (connection,
+                                                                                     inputStream,
+                                                                                     createStreamLock,
+                                                                                     createFutureLock,
+                                                                                     streamFuture);
 
-            try
+            synchronized (createStreamLock)
             {
-                if (! createStreamLock.tryLock())
-                {
-                    synchronized (createFutureLock)
-                    {
-                        if (streamFuture != null)
-                            streamFuture.cancel (true);
-                    }
+                hasBeenCancelled.set (true);
 
-                    createStreamLock.lock();
-                }
-
-                if (inputStream != null)
-                    inputStream.close();
-            }
-            catch (IOException e)
-            {}
-            finally
-            {
-                createStreamLock.unlock();
+                connection = null;
             }
 
-            connection.disconnect();
+            Thread disconnectionThread = new Thread(disconnectionRunnable);
+            disconnectionThread.start();
         }
 
         public final int read (byte[] buffer, int numBytes)

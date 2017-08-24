@@ -192,8 +192,10 @@
 					9B6AD2ED2150F45A460973C6,
 					2D45B9382F864E0FC39A7D86,
 					C54CA0425B4BECD39E226F8F, ); name = Source; sourceTree = "<group>"; };
-		D43C967D02EDDCC29FB7059C = {isa = XCBuildConfiguration; buildSettings = {  }; name = Debug; };
-		EEA93C1E6EEC110939D1685F = {isa = XCBuildConfiguration; buildSettings = {  }; name = Release; };
+		D43C967D02EDDCC29FB7059C = {isa = XCBuildConfiguration; buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 10.10; }; name = Debug; };
+		EEA93C1E6EEC110939D1685F = {isa = XCBuildConfiguration; buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 10.10; }; name = Release; };
 		BA984224A933EC837F514164 = {isa = XCBuildConfiguration; buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
 				CLANG_LINK_OBJC_RUNTIME = NO;
