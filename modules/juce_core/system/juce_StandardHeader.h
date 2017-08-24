@@ -51,7 +51,6 @@
 #include <algorithm>
 #include <limits>
 #include <sstream>
-#include <unordered_map>
 
 //==============================================================================
 #include "juce_CompilerSupport.h"

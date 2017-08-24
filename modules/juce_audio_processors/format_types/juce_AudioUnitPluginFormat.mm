@@ -55,6 +55,8 @@
  #include <CoreAudioKit/AUViewController.h>
 #endif
 
+#include <unordered_map>
+
 namespace juce
 {
 
