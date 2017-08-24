@@ -50,7 +50,6 @@
 #include <functional>
 #include <algorithm>
 #include <limits>
-#include <sstream>
 
 //==============================================================================
 #include "juce_CompilerSupport.h"
@@ -66,6 +65,7 @@
 
 #if JUCE_MAC || JUCE_IOS
  #include <libkern/OSAtomic.h>
+ #include <xlocale.h>
 #endif
 
 #if JUCE_LINUX

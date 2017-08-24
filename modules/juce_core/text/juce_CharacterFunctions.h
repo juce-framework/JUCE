@@ -218,17 +218,17 @@ public:
                 *currentCharacter++ = '0';
         }
 
-        double result = 0;
-        const size_t stringSize = (size_t) (currentCharacter - &buffer[0]) + 1;
-
-        if (stringSize > 1)
-        {
-            std::istringstream is (std::string (&buffer[0], stringSize));
-            is.imbue (std::locale ("C"));
-            is >> result;
-        }
-
-        return result;
+      #if JUCE_MSVC
+        static _locale_t locale = _create_locale (LC_ALL, "C");
+        return _strtod_l (&buffer[0], nullptr, locale);
+      #else
+        static locale_t locale = newlocale (LC_ALL_MASK, "C", nullptr);
+       #if JUCE_ANDROID
+        return (double) strtold_l (&buffer[0], nullptr, locale);
+       #else
+        return strtod_l (&buffer[0], nullptr, locale);
+       #endif
+      #endif
     }
 
     /** Parses a character string, to read a floating-point value. */
