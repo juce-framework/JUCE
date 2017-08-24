@@ -492,7 +492,7 @@ Oversampling<SampleType>::Oversampling (size_t newNumChannels, size_t newFactor,
 {
     jassert (newFactor >= 0 && newFactor <= 4 && newNumChannels > 0);
 
-    factorOversampling = 1 << newFactor;
+    factorOversampling = (size_t) 1 << newFactor;
     isMaximumQuality = newMaxQuality;
     type = newType;
     numChannels = newNumChannels;
@@ -543,7 +543,7 @@ template <typename SampleType>
 SampleType Oversampling<SampleType>::getLatencyInSamples() noexcept
 {
     auto latency = static_cast<SampleType> (0);
-    auto order = 1;
+    size_t order = 1;
 
     for (size_t n = 0; n < numStages; n++)
     {

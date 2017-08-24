@@ -243,7 +243,9 @@ public:
     template <typename IntType, typename CharPointerType>
     static IntType getIntValue (const CharPointerType text) noexcept
     {
-        IntType v = 0;
+        typedef typename std::make_unsigned<IntType>::type UIntType;
+
+        UIntType v = 0;
         auto s = text.findEndOfWhitespace();
         const bool isNeg = *s == '-';
 
@@ -255,12 +257,12 @@ public:
             auto c = s.getAndAdvance();
 
             if (c >= '0' && c <= '9')
-                v = v * 10 + (IntType) (c - '0');
+                v = v * 10 + (UIntType) (c - '0');
             else
                 break;
         }
 
-        return isNeg ? -v : v;
+        return isNeg ? - (IntType) v : (IntType) v;
     }
 
     template <typename ResultType>

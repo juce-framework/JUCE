@@ -1066,6 +1066,8 @@ public:
             ValueType* const data2 = buffer2;
             int* const int1 = buffer3;
            #else
+            // These tests deliberately operate on misaligned memory and will be flagged up by
+            // checks for undefined behavior!
             ValueType* const data1 = addBytesToPointer (buffer1.getData(), random.nextInt (16));
             ValueType* const data2 = addBytesToPointer (buffer2.getData(), random.nextInt (16));
             int* const int1 = addBytesToPointer (buffer3.getData(), random.nextInt (16));
