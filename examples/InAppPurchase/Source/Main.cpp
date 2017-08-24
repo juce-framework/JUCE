@@ -48,15 +48,6 @@ public:
         dm.initialiseWithDefaultDevices (0, 2);
 
         mainWindow = new MainWindow;
-
-        Timer::callAfterDelay(1000, [] ()
-          {
-              AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                                "Your credit card will be charged!",
-                                                "You are running the sample code for JUCE In-App purchases."
-                                                "Although this is only sample code, it will still CHARGE YOUR CREDIT CARD!",
-                                                "Understood!");
-          });
     }
 
     void shutdown() override
