@@ -390,8 +390,7 @@ public:
         Using this method to download files on mobile is less flexible but more reliable
         than using createInputStream or WebInputStreams as it will attempt to download the file
         using a native OS background network task. Such tasks automatically deal with
-        network re-connections and continuing your download while your app is suspended but are
-        limited to simple GET requests.
+        network re-connections and continuing your download while your app is suspended.
     */
     DownloadTask* downloadToFile (const File& targetLocation,
                                   String extraHeaders = String(),
