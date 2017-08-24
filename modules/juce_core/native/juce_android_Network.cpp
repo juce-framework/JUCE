@@ -201,6 +201,8 @@ public:
     {
         jassert (buffer != nullptr && bytesToRead >= 0);
 
+        const ScopedLock lock (createStreamLock);
+
         if (stream == nullptr)
             return 0;
 
