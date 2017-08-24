@@ -106,14 +106,15 @@ URL::DownloadTask::Listener::~Listener() {}
 URL::DownloadTask* URL::DownloadTask::createFallbackDownloader (const URL& urlToUse,
                                                                 const File& targetFileToUse,
                                                                 const String& extraHeadersToUse,
-                                                                Listener* listenerToUse)
+                                                                Listener* listenerToUse,
+                                                                bool usePostRequest)
 {
     const size_t bufferSize = 0x8000;
     targetFileToUse.deleteFile();
 
     if (ScopedPointer<FileOutputStream> outputStream = targetFileToUse.createOutputStream (bufferSize))
     {
-        ScopedPointer<WebInputStream> stream = new WebInputStream (urlToUse, false);
+        ScopedPointer<WebInputStream> stream = new WebInputStream (urlToUse, usePostRequest);
         stream->withExtraHeaders (extraHeadersToUse);
 
         if (stream->connect (nullptr))

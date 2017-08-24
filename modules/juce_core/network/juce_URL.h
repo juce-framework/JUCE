@@ -372,7 +372,7 @@ public:
     private:
         friend class URL;
 
-        static DownloadTask* createFallbackDownloader (const URL&, const File&, const String&, Listener*);
+        static DownloadTask* createFallbackDownloader (const URL&, const File&, const String&, Listener*, bool);
 
     public:
        #if JUCE_IOS
@@ -395,7 +395,8 @@ public:
     */
     DownloadTask* downloadToFile (const File& targetLocation,
                                   String extraHeaders = String(),
-                                  DownloadTask::Listener* listener = nullptr);
+                                  DownloadTask::Listener* listener = nullptr,
+                                  bool usePostCommand = false);
 
     //==============================================================================
     /** Tries to download the entire contents of this URL into a binary data block.

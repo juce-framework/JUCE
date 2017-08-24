@@ -406,7 +406,8 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
     BackgroundDownloadTask (const URL& urlToUse,
                             const File& targetLocationToUse,
                             String extraHeadersToUse,
-                            URL::DownloadTask::Listener* listenerToUse)
+                            URL::DownloadTask::Listener* listenerToUse,
+                            bool shouldUsePostRequest)
          : targetLocation (targetLocationToUse), listener (listenerToUse),
            uniqueIdentifier (String (urlToUse.toString (true).hashCode64()) + String (Random().nextInt64()))
     {
@@ -418,6 +419,9 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
 
         activeSessions.set (uniqueIdentifier, this);
         NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:juceStringToNS (urlToUse.toString (true))]];
+
+        if (shouldUsePostRequest)
+            [request setHTTPMethod: @"POST"];
 
         StringArray headerLines;
         headerLines.addLines (extraHeadersToUse);
@@ -633,9 +637,9 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
 
 HashMap<String, BackgroundDownloadTask*, DefaultHashFunctions, CriticalSection> BackgroundDownloadTask::activeSessions;
 
-URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener)
+URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener, bool usePostRequest)
 {
-    ScopedPointer<BackgroundDownloadTask> downloadTask = new BackgroundDownloadTask (*this, targetLocation, extraHeaders, listener);
+    ScopedPointer<BackgroundDownloadTask> downloadTask = new BackgroundDownloadTask (*this, targetLocation, extraHeaders, listener, usePostRequest);
 
     if (downloadTask->initOK() && downloadTask->connect())
         return downloadTask.release();
@@ -648,9 +652,9 @@ void URL::DownloadTask::juce_iosURLSessionNotify (const String& identifier)
     BackgroundDownloadTask::invokeNotify (identifier);
 }
 #else
-URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener)
+URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener, bool usePost)
 {
-    return URL::DownloadTask::createFallbackDownloader (*this, targetLocation, extraHeaders, listener);
+    return URL::DownloadTask::createFallbackDownloader (*this, targetLocation, extraHeaders, listener, usePost);
 }
 #endif
 
@@ -912,9 +916,9 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (URLConnectionState)
 };
 
-URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener)
+URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener, bool shouldUsePost)
 {
-    return URL::DownloadTask::createFallbackDownloader (*this, targetLocation, extraHeaders, listener);
+    return URL::DownloadTask::createFallbackDownloader (*this, targetLocation, extraHeaders, listener, shouldUsePost);
 }
 
 #pragma clang diagnostic pop
