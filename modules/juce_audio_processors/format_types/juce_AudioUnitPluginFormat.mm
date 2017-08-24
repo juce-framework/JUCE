@@ -1265,7 +1265,7 @@ private:
     };
 
     OwnedArray<ParamInfo> parameters;
-    std::unordered_map<AudioUnitParameterID, int> paramIDToIndex;
+    std::unordered_map<AudioUnitParameterID, size_t> paramIDToIndex;
 
     MidiDataConcatenator midiConcatenator;
     CriticalSection midiInLock;
