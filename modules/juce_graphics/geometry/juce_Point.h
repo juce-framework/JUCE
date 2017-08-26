@@ -41,7 +41,6 @@ class Point
 {
 public:
     /** Creates a point at the origin */
-
     JUCE_CONSTEXPR Point() noexcept : x(), y() {}
 
     /** Creates a copy of another point. */
@@ -76,7 +75,6 @@ public:
     inline void setY (ValueType newY) noexcept                           { y = newY; }
 
     /** Returns a point which has the same Y position as this one, but a new X. */
-
     JUCE_CONSTEXPR Point withX (ValueType newX) const noexcept           { return Point (newX, y); }
 
     /** Returns a point which has the same X position as this one, but a new Y. */
