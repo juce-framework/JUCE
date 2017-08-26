@@ -619,8 +619,7 @@ public:
 
             for (auto tagEntry : knownTags)
             {
-                AudioChannelLayout layout { tagEntry.tag };
-                auto labels = CoreAudioLayouts::fromCoreAudio (layout);
+                auto labels = CoreAudioLayouts::fromCoreAudio (tagEntry.tag);
 
                 expect (! labels.isDiscreteLayout(), String ("Tag \"") + String (tagEntry.name) + "\" is not handled by JUCE");
             }
@@ -631,8 +630,7 @@ public:
 
             for (auto tagEntry : knownTags)
             {
-                AudioChannelLayout layout { tagEntry.tag };
-                auto labels = CoreAudioLayouts::getCoreAudioLayoutChannels (layout);
+                auto labels = CoreAudioLayouts::getSpeakerLayoutForCoreAudioTag (tagEntry.tag);
 
                 expect (labels.size() == (tagEntry.tag & 0xffff), String ("Tag \"") + String (tagEntry.name) + "\" has incorrect channel count");
             }
@@ -643,8 +641,7 @@ public:
 
             for (auto tagEntry : knownTags)
             {
-                AudioChannelLayout layout { tagEntry.tag };
-                auto labels = CoreAudioLayouts::getCoreAudioLayoutChannels (layout);
+                auto labels = CoreAudioLayouts::getSpeakerLayoutForCoreAudioTag (tagEntry.tag);
                 labels.sort();
 
                 for (int i = 0; i < (labels.size() - 1); ++i)
@@ -657,13 +654,9 @@ public:
             beginTest ("CA speaker list and juce layouts are consistent");
 
             for (auto tagEntry : knownTags)
-            {
-                AudioChannelLayout layout { tagEntry.tag };
-
-                expect (AudioChannelSet::channelSetWithChannels (CoreAudioLayouts::getCoreAudioLayoutChannels (layout))
-                            == CoreAudioLayouts::fromCoreAudio (layout),
+                expect (AudioChannelSet::channelSetWithChannels (CoreAudioLayouts::getSpeakerLayoutForCoreAudioTag (tagEntry.tag))
+                            == CoreAudioLayouts::fromCoreAudio (tagEntry.tag),
                         String ("Tag \"") + String (tagEntry.name) + "\" is not converted consistantly by JUCE");
-            }
         }
 
         {
@@ -674,9 +667,7 @@ public:
                 if (tagEntry.equivalentChannelSet.isDisabled())
                     continue;
 
-                AudioChannelLayout layout { tagEntry.tag };
-
-                expect (CoreAudioLayouts::fromCoreAudio (layout) == tagEntry.equivalentChannelSet,
+                expect (CoreAudioLayouts::fromCoreAudio (tagEntry.tag) == tagEntry.equivalentChannelSet,
                         String ("Documentation for tag \"") + String (tagEntry.name) + "\" is incorrect");
             }
         }

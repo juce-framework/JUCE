@@ -34,9 +34,9 @@
 */
 class JUCE_API  Label  : public Component,
                          public SettableTooltipClient,
-                         protected TextEditorListener,
+                         protected TextEditor::Listener,
                          private ComponentListener,
-                         private ValueListener
+                         private Value::Listener
 {
 public:
     //==============================================================================

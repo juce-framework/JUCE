@@ -6,6 +6,29 @@ Develop Branch
 
 Change
 ------
+The String (bool) constructor and operator<< (String&, bool) have been
+explicitly deleted.
+
+Possible Issues
+---------------
+Previous code which relied on an implicit bool to int type conversion to
+produce a String will not compile.
+
+Workaround
+----------
+Cast your bool to an integer to generate a string representation of it.
+
+Rationale
+---------
+Letting things implicitly convert to bool to produce a String opens the door to
+all kinds of nasty type conversion edge cases. Furthermore, before this change,
+MacOS would automatically convert bools to ints but this wouldn't occur on
+different platform. Now the behaviour is consistent across all operating
+systems supported by JUCE.
+
+
+Change
+------
 The writeAsJSON virtual method of the DynamicObject class requires an
 additional parameter, maximumDecimalPlaces, to specify the maximum precision of
 floating point numbers.

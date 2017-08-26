@@ -55,7 +55,7 @@ public:
 
         // currently no other OSes supported by Codeblocks exporter!
         jassertfalse;
-        return "CODEBLOCKS_UNKOWN_OS";
+        return "CODEBLOCKS_UNKNOWN_OS";
     }
 
     //==============================================================================

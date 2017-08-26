@@ -63,6 +63,7 @@ public:
     //==============================================================================
     AppearanceSettings appearance;
     StringArray monospacedFontNames;
+    File lastWizardFolder;
 
     //==============================================================================
     Value getStoredPath (const Identifier& key);
@@ -87,6 +88,7 @@ private:
 
     void updateGlobalPreferences();
     void updateRecentFiles();
+    void updateLastWizardFolder();
     void updateKeyMappings();
 
     void loadSwatchColours();

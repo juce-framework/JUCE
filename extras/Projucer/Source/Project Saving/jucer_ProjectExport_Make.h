@@ -115,7 +115,7 @@ public:
 
             if (getTargetFileType() == sharedLibraryOrDLL || getTargetFileType() == pluginBundle)
             {
-                s.add (String ("JUCE_CFLAGS_") + getTargetVarName() + String (" := -fPIC"));
+                s.add (String ("JUCE_CFLAGS_") + getTargetVarName() + String (" := -fPIC -fvisibility=hidden"));
 
                 const String ldflagsVarName = String ("JUCE_LDFLAGS_") + getTargetVarName();
                 String targetLinkOptions = ldflagsVarName  + String (" := -shared");
@@ -211,7 +211,7 @@ public:
                 << ": " << escapeSpaces (targetFiles.getReference(i).toUnixStyle()) << newLine
                 << "\t-$(V_AT)mkdir -p $(JUCE_OBJDIR)" << newLine
                 << "\t@echo \"Compiling " << targetFiles.getReference(i).getFileName() << "\"" << newLine
-                << (targetFiles.getReference(i).hasFileExtension ("c;s;S") ? "\t$(V_AT)$(CC) $(JUCE_CFLAGS)" : "\t$(V_AT)$(CXX) $(JUCE_CXXFLAGS) ")
+                << (targetFiles.getReference(i).hasFileExtension ("c;s;S") ? "\t$(V_AT)$(CC) $(JUCE_CFLAGS) " : "\t$(V_AT)$(CXX) $(JUCE_CXXFLAGS) ")
                 << "$(" << cppflagsVarName << ") $(" << cflagsVarName << ") -o \"$@\" -c \"$<\""
                 << newLine << newLine;
             }

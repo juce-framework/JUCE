@@ -987,6 +987,10 @@ public:
     */
     String (double doubleValue, int numberOfDecimalPlaces);
 
+    // Automatically creating a String from a bool opens up lots of nasty type conversion edge cases.
+    // If you want a String representation of a bool you can cast the bool to an int first.
+    explicit String (bool) = delete;
+
     /** Reads the value of the string as a decimal number (up to 32 bits in size).
 
         @returns the value of the string as a 32 bit signed base-10 integer.
@@ -1323,22 +1327,26 @@ JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const String& string
 /** Appends a string to the end of the first one. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, StringRef string2);
 
-/** Appends a decimal number at the end of a string. */
+/** Appends a decimal number to the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, short number);
-/** Appends a decimal number at the end of a string. */
+/** Appends a decimal number to the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, int number);
-/** Appends a decimal number at the end of a string. */
+/** Appends a decimal number to the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, long number);
-/** Appends a decimal number at the end of a string. */
+/** Appends a decimal number to the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, unsigned long number);
-/** Appends a decimal number at the end of a string. */
+/** Appends a decimal number to the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, int64 number);
-/** Appends a decimal number at the end of a string. */
+/** Appends a decimal number to the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, uint64 number);
-/** Appends a decimal number at the end of a string. */
+/** Appends a decimal number to the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, float number);
-/** Appends a decimal number at the end of a string. */
+/** Appends a decimal number to the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, double number);
+
+// Automatically creating a String from a bool opens up lots of nasty type conversion edge cases.
+// If you want a String representation of a bool you can cast the bool to an int first.
+JUCE_API String& JUCE_CALLTYPE operator<< (String&, bool) = delete;
 
 //==============================================================================
 /** Case-sensitive comparison of two strings. */

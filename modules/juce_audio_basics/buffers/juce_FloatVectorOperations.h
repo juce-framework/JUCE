@@ -25,7 +25,7 @@
 #if JUCE_INTEL
  #define JUCE_SNAP_TO_ZERO(n)    if (! (n < -1.0e-8f || n > 1.0e-8f)) n = 0;
 #else
- #define JUCE_SNAP_TO_ZERO(n)
+ #define JUCE_SNAP_TO_ZERO(n)    ignoreUnused (n)
 #endif
 
 //==============================================================================

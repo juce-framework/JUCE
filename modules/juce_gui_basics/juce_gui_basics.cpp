@@ -261,7 +261,9 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
  #include "layout/juce_FlexBox.cpp"
  #include "layout/juce_GridItem.cpp"
  #include "layout/juce_Grid.cpp"
- #include "layout/juce_GridUnitTests.cpp"
+ #if JUCE_UNIT_TESTS
+  #include "layout/juce_GridUnitTests.cpp"
+ #endif
 #endif
 
 #if JUCE_IOS || JUCE_WINDOWS

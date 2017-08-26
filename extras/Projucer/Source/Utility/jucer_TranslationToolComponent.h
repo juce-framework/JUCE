@@ -31,7 +31,7 @@
 
 //==============================================================================
 class TranslationToolComponent  : public Component,
-                                  public ButtonListener
+                                  public Button::Listener
 {
 public:
     TranslationToolComponent()

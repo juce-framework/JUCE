@@ -25,7 +25,7 @@
 */
 
 class GenericEditor : public AudioProcessorEditor,
-                      public SliderListener,
+                      public Slider::Listener,
                       private Timer
 {
 public:

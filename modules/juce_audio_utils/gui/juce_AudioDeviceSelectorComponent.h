@@ -37,8 +37,8 @@
     @see AudioDeviceManager
 */
 class JUCE_API  AudioDeviceSelectorComponent  : public Component,
-                                                private ComboBoxListener, // (can't use ComboBox::Listener due to idiotic VC2005 bug)
                                                 private ChangeListener,
+                                                private ComboBox::Listener,
                                                 private Button::Listener,
                                                 private Timer
 {

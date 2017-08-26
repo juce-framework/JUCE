@@ -24,7 +24,7 @@
   ==============================================================================
 */
 
-class DocumentWindow::ButtonListenerProxy  : public ButtonListener // (can't use Button::Listener due to idiotic VC2005 bug)
+class DocumentWindow::ButtonListenerProxy  : public Button::Listener
 {
 public:
     ButtonListenerProxy (DocumentWindow& w) : owner (w) {}

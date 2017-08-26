@@ -129,7 +129,7 @@ struct SlidersPage  : public Component
         s->setSliderStyle (Slider::LinearHorizontal);
         s->setTextBoxStyle (Slider::NoTextBox, false, 0, 0);
         s->setBounds (180, 65, 150, 20);
-        s->setPopupDisplayEnabled (true, this);
+        s->setPopupDisplayEnabled (true, false, this);
         s->setTextValueSuffix (" nuns required to change a lightbulb");
 
         s = createSlider (false);
@@ -170,13 +170,13 @@ struct SlidersPage  : public Component
         s->setSliderStyle (Slider::LinearBarVertical);
         s->setTextBoxStyle (Slider::NoTextBox, false, 0, 0);
         s->setBounds (540, 35, 20, 230);
-        s->setPopupDisplayEnabled (true, this);
+        s->setPopupDisplayEnabled (true, true, this);
         s->setTextValueSuffix (" mickles in a muckle");
 
         for (int i = 7; i <= 10; ++i)
         {
             sliders.getUnchecked(i)->setTextBoxStyle (Slider::NoTextBox, false, 0, 0);
-            sliders.getUnchecked(i)->setPopupDisplayEnabled (true, this);
+            sliders.getUnchecked(i)->setPopupDisplayEnabled (true, false, this);
         }
 
         /* Here, we'll create a Value object, and tell a bunch of our sliders to use it as their
@@ -226,7 +226,7 @@ private:
 
 //==============================================================================
 struct ButtonsPage   : public Component,
-                       public ButtonListener
+                       public Button::Listener
 {
     ButtonsPage()
     {
@@ -459,8 +459,8 @@ struct MiscPage   : public Component
 
 //==============================================================================
 class ToolbarDemoComp   : public Component,
-                          public SliderListener,
-                          public ButtonListener
+                          public Slider::Listener,
+                          public Button::Listener
 {
 public:
     ToolbarDemoComp()
@@ -943,7 +943,7 @@ private:
     // This is a custom component containing a combo box, which we're going to put inside
     // our table's "rating" column.
     class RatingColumnCustomComponent    : public Component,
-                                           private ComboBoxListener
+                                           private ComboBox::Listener
     {
     public:
         RatingColumnCustomComponent (TableDemoComponent& td)  : owner (td)

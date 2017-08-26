@@ -259,11 +259,13 @@ private:
     ListenerList<Listener> listeners;
 
    #if JUCE_ANDROID
-    friend void juce_inAppPurchaseCompleted (jobject);
+    friend void juce_inAppPurchaseCompleted (void*);
    #endif
 
+   #if JUCE_ANDROID || JUCE_IOS
     struct Pimpl;
     friend struct Pimpl;
 
     ScopedPointer<Pimpl> pimpl;
+   #endif
 };

@@ -25,7 +25,7 @@
 */
 
 class UTF8Component  : public Component,
-                       private TextEditorListener
+                       private TextEditor::Listener
 {
 public:
     UTF8Component()

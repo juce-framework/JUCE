@@ -962,6 +962,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_dsp\processors\juce_IIRFilter.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\processors\juce_Oversampling.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_dsp\juce_dsp.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -2261,6 +2264,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_IIRFilter.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_IIRFilter_Impl.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_Oscillator.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_Oversampling.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_ProcessContext.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_ProcessorChain.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_ProcessorDuplicator.h"/>
@@ -2562,7 +2566,6 @@
     <None Include="..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\Ogg Vorbis Licence.txt"/>
     <None Include="..\..\..\..\modules\juce_blocks_basics\littlefoot\LittleFoot Language README.txt"/>
     <None Include="..\..\..\..\modules\juce_blocks_basics\protocol\Protocol Format.txt"/>
-    <None Include="..\..\..\..\modules\juce_blocks_basics\LittleFootFunctions.txt"/>
     <None Include="..\..\..\..\modules\juce_blocks_basics\README.txt"/>
     <None Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\changes to libjpeg for JUCE.txt"/>
     <None Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\libpng_readme.txt"/>

@@ -79,9 +79,7 @@
 
 namespace juce
 {
-   #if JUCE_ANDROID || JUCE_IOS
-    #include "in_app_purchases/juce_InAppPurchases.h"
-   #endif
+   #include "in_app_purchases/juce_InAppPurchases.h"
 
    #if JUCE_MODULE_AVAILABLE_juce_data_structures
     #include "marketplace/juce_OnlineUnlockStatus.h"

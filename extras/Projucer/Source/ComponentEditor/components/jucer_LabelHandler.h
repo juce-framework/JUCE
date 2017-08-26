@@ -152,7 +152,7 @@ public:
 
         if (needsCallback (component))
         {
-            String& callback = code.getCallbackCode ("public LabelListener",
+            String& callback = code.getCallbackCode ("public Label::Listener",
                                                      "void",
                                                      "labelTextChanged (Label* labelThatHasChanged)",
                                                      true);

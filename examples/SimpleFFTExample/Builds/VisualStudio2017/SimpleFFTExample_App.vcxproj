@@ -923,6 +923,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_dsp\processors\juce_IIRFilter.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\processors\juce_Oversampling.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_dsp\juce_dsp.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -2100,6 +2103,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_IIRFilter.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_IIRFilter_Impl.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_Oscillator.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_Oversampling.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_ProcessContext.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_ProcessorChain.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_ProcessorDuplicator.h"/>

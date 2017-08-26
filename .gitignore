@@ -24,6 +24,8 @@ xcuserdata
 contents.xcworkspacedata
 .DS_Store
 .svn
+.deps
+.dirstamp
 profile
 **/MacOSX/build
 **/iOS/build

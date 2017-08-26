@@ -155,7 +155,7 @@ struct SliderHandler  : public ComponentTypeHandler
 
         if (needsSliderListener (component))
         {
-            String& callback = code.getCallbackCode ("public SliderListener",
+            String& callback = code.getCallbackCode ("public Slider::Listener",
                                                      "void",
                                                      "sliderValueChanged (Slider* sliderThatWasMoved)",
                                                      true);

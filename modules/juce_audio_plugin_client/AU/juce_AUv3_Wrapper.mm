@@ -195,6 +195,10 @@ public:
     virtual bool getRenderingOffline()                                     = 0;
     virtual void setRenderingOffline (bool offline)                        = 0;
 
+    //==============================================================================
+    virtual NSString* getContextName()      const                          = 0;
+    virtual void setContextName (NSString*)                                = 0;
+
     virtual bool allocateRenderResourcesAndReturnError (NSError **outError)
     {
         objc_super s = { getAudioUnit(), [AUAudioUnit class] };
@@ -274,6 +278,10 @@ private:
             addMethod (@selector (deallocateRenderResources),       deallocateRenderResources,      "v@:");
 
             //==============================================================================
+            addMethod (@selector (contextName),                     getContextName,                 "@@:");
+            addMethod (@selector (setContextName:),                  setContextName,                 "v@:@");
+
+            //==============================================================================
            #if JUCE_AUV3_VIEW_CONFIG_SUPPORTED
             addMethod (@selector (supportedViewConfigurations:),    getSupportedViewConfigurations, "@@:@");
             addMethod (@selector (selectViewConfiguration:),        selectViewConfiguration,        "v@:@");
@@ -350,6 +358,10 @@ private:
         static void setRenderingOffline (id self, SEL, BOOL renderingOffline)                       { _this (self)->setRenderingOffline (renderingOffline); }
         static BOOL allocateRenderResourcesAndReturnError (id self, SEL, NSError** error)           { return _this (self)->allocateRenderResourcesAndReturnError (error) ? YES : NO; }
         static void deallocateRenderResources (id self, SEL)                                        { _this (self)->deallocateRenderResources(); }
+
+        //==============================================================================
+        static NSString* getContextName (id self, SEL)                                              { return _this (self)->getContextName(); }
+        static void setContextName (id self, SEL, NSString* str)                                    { return _this (self)->setContextName (str); }
 
         //==============================================================================
        #if JUCE_AUV3_VIEW_CONFIG_SUPPORTED
@@ -629,11 +641,7 @@ public:
 
             if (layoutTag != 0)
             {
-                AudioChannelLayout caLayout;
-
-                zerostruct (caLayout);
-                caLayout.mChannelLayoutTag = layoutTag;
-                AudioChannelSet newLayout = CoreAudioLayouts::fromCoreAudio (caLayout);
+                AudioChannelSet newLayout = CoreAudioLayouts::fromCoreAudio (layoutTag);
 
                 if (newLayout.size() != newNumChannels)
                     return false;
@@ -683,6 +691,20 @@ public:
     bool getRenderingOffline() override                       { return getAudioProcessor().isNonRealtime(); }
     void setRenderingOffline (bool offline) override          { getAudioProcessor().setNonRealtime (offline); }
 
+    //==============================================================================
+    NSString* getContextName() const    override              { return juceStringToNS (contextName); }
+    void setContextName (NSString* str) override
+    {
+        if (str != nullptr)
+        {
+            AudioProcessor::TrackProperties props;
+            props.name = nsStringToJuce (str);
+
+            getAudioProcessor().updateTrackProperties (props);
+        }
+    }
+
+    //==============================================================================
     bool allocateRenderResourcesAndReturnError (NSError **outError) override
     {
         AudioProcessor& processor = getAudioProcessor();
@@ -714,13 +736,7 @@ public:
                 const AudioChannelLayoutTag layoutTag = (layout != nullptr ? [layout layoutTag] : 0);
 
                 if (layoutTag != 0)
-                {
-                    AudioChannelLayout caLayout;
-
-                    zerostruct (caLayout);
-                    caLayout.mChannelLayoutTag = layoutTag;
-                    newLayout = CoreAudioLayouts::fromCoreAudio (caLayout);
-                }
+                    newLayout = CoreAudioLayouts::fromCoreAudio (layoutTag);
                 else
                     newLayout = bus->supportedLayoutWithChannels (static_cast<int> ([format channelCount]));
 
@@ -1446,6 +1462,8 @@ private:
 
     AudioTimeStamp lastTimeStamp;
     CurrentPositionInfo lastAudioHead;
+
+    String contextName;
 };
 
 const double JuceAudioUnitv3::kDefaultSampleRate = 44100.0;

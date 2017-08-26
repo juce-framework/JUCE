@@ -849,8 +849,9 @@ void GraphEditorPanel::changeListenerCallback (ChangeBroadcaster*)
 
 void GraphEditorPanel::updateComponents()
 {
-    for (auto* child : getChildren())
-        if (auto* fc = dynamic_cast<FilterComponent*> (child))
+    auto children = getChildren();
+    for (auto child : children)
+        if (auto* fc = dynamic_cast<FilterComponent*> (static_cast<Component*> (child)))
             fc->update();
 
     for (int i = getNumChildComponents(); --i >= 0;)

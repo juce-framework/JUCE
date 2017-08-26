@@ -44,7 +44,7 @@
     @see OnlineUnlockStatus
 */
 class JUCE_API  OnlineUnlockForm  : public Component,
-                                    private ButtonListener
+                                    private Button::Listener
 {
 public:
     /** Creates an unlock form that will work with the given status object.

@@ -133,7 +133,7 @@ struct BlockSerialNumber
         return isAnyControlBlock() || isPadBlock() || isSeaboardBlock();
     }
 
-    bool isPadBlock() const noexcept            { return hasPrefix ("LPB"); }
+    bool isPadBlock() const noexcept            { return hasPrefix ("LPB") || hasPrefix ("LPM"); }
     bool isLiveBlock() const noexcept           { return hasPrefix ("LIC"); }
     bool isLoopBlock() const noexcept           { return hasPrefix ("LOC"); }
     bool isDevCtrlBlock() const noexcept        { return hasPrefix ("DCB"); }

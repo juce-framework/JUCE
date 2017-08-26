@@ -36,7 +36,8 @@
 class MainWindow  : public DocumentWindow,
                     public ApplicationCommandTarget,
                     public FileDragAndDropTarget,
-                    public DragAndDropContainer
+                    public DragAndDropContainer,
+                    private Value::Listener
 {
 public:
     //==============================================================================
@@ -76,9 +77,12 @@ public:
                                                StringArray& files, bool& canMoveFiles) override;
 private:
     ScopedPointer<Project> currentProject;
+    Value projectNameValue;
 
     static const char* getProjectWindowPosName()   { return "projectWindowPos"; }
     void createProjectContentCompIfNeeded();
+
+    void valueChanged (Value&) override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)
 };

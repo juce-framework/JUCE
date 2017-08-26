@@ -79,11 +79,6 @@ void Project::setTitle (const String& newTitle)
     getMainGroup().getNameValue() = newTitle;
 }
 
-String Project::getTitle() const
-{
-    return projectRoot.getChildWithName (Ids::MAINGROUP) [Ids::name];
-}
-
 String Project::getDocumentTitle()
 {
     return getTitle();
@@ -458,6 +453,8 @@ void Project::valueTreePropertyChanged (ValueTree&, const Identifier& property)
 {
     if (property == Ids::projectType)
         setMissingDefaultValues();
+    else if (property == Ids::name)
+        setTitle (projectRoot [Ids::name]);
 
     changed();
 }

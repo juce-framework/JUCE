@@ -83,6 +83,9 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     //==============================================================================
+    void updateTrackProperties (const TrackProperties& properties) override;
+
+    //==============================================================================
     // These properties are public so that our editor component can access them
     // A bit of a hacky way to do it, but it's only a demo! Obviously in your own
     // code you'll do this much more neatly..
@@ -103,6 +106,9 @@ public:
     // Our parameters
     AudioParameterFloat* gainParam = nullptr;
     AudioParameterFloat* delayParam = nullptr;
+
+    // Current track colour and name
+    TrackProperties trackProperties;
 
 private:
     //==============================================================================

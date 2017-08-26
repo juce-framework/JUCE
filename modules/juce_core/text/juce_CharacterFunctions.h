@@ -213,9 +213,22 @@ public:
 
             if (exponentMagnitude > std::numeric_limits<double>::max_exponent10)
                 return std::numeric_limits<double>::quiet_NaN();
+
+            if (exponentMagnitude == 0)
+                *currentCharacter++ = '0';
         }
 
-        return strtod (&buffer[0], nullptr);
+      #if JUCE_MSVC
+        static _locale_t locale = _create_locale (LC_ALL, "C");
+        return _strtod_l (&buffer[0], nullptr, locale);
+      #else
+        static locale_t locale = newlocale (LC_ALL_MASK, "C", nullptr);
+       #if JUCE_ANDROID
+        return (double) strtold_l (&buffer[0], nullptr, locale);
+       #else
+        return strtod_l (&buffer[0], nullptr, locale);
+       #endif
+      #endif
     }
 
     /** Parses a character string, to read a floating-point value. */
@@ -230,7 +243,9 @@ public:
     template <typename IntType, typename CharPointerType>
     static IntType getIntValue (const CharPointerType text) noexcept
     {
-        IntType v = 0;
+        typedef typename std::make_unsigned<IntType>::type UIntType;
+
+        UIntType v = 0;
         auto s = text.findEndOfWhitespace();
         const bool isNeg = *s == '-';
 
@@ -242,12 +257,12 @@ public:
             auto c = s.getAndAdvance();
 
             if (c >= '0' && c <= '9')
-                v = v * 10 + (IntType) (c - '0');
+                v = v * 10 + (UIntType) (c - '0');
             else
                 break;
         }
 
-        return isNeg ? -v : v;
+        return isNeg ? - (IntType) v : (IntType) v;
     }
 
     template <typename ResultType>

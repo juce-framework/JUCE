@@ -42,13 +42,16 @@ static Project::Item createSourceGroup (Project& project)
 
 static File& getLastWizardFolder()
 {
+    if (getAppSettings().lastWizardFolder.isDirectory())
+        return getAppSettings().lastWizardFolder;
+
    #if JUCE_WINDOWS
-    static File lastFolder (File::getSpecialLocation (File::userDocumentsDirectory));
+    static File lastFolderFallback (File::getSpecialLocation (File::userDocumentsDirectory));
    #else
-    static File lastFolder (File::getSpecialLocation (File::userHomeDirectory));
+    static File lastFolderFallback (File::getSpecialLocation (File::userHomeDirectory));
    #endif
 
-    return lastFolder;
+    return lastFolderFallback;
 }
 
 //==============================================================================

@@ -450,13 +450,15 @@ public:
             encryptDecryptTest (bf, data.getData(), data.getSize() - 8, data.getSize());
             encryptDecryptTest (bf, data.getData(), 0, 8);
 
+            {
+                // Test unaligned data encryption/decryption. This will be flagged up by a check for
+                // undefined behaviour!
+                const uintptr_t nudge = static_cast<uintptr_t> (random.nextInt (sizeof(void*) - 1));
+                void* unalignedData = (void*) (reinterpret_cast<uintptr_t> (data.getData()) + nudge);
+                size_t newSize = data.getSize() - nudge;
 
-            // test unaligned data encryption/decryption
-            const uintptr_t nudge = static_cast<uintptr_t> (random.nextInt (sizeof(void*) - 1));
-            void* unalignedData = (void*) (reinterpret_cast<uintptr_t> (data.getData()) + nudge);
-            size_t newSize = data.getSize() - nudge;
-
-            encryptDecryptTest (bf, unalignedData, newSize - 8, newSize);
+                encryptDecryptTest (bf, unalignedData, newSize - 8, newSize);
+            }
         }
     }
 };

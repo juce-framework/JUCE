@@ -27,7 +27,6 @@
 namespace PopupMenuSettings
 {
     const int scrollZone = 24;
-    const int borderSize = 2;
     const int dismissCommandId = 0x6287345f;
 
     static bool menuWasHiddenBecauseOfAppChange = false;
@@ -88,7 +87,7 @@ struct ItemComponent  : public Component
         int itemW = 80;
         int itemH = 16;
         getIdealSize (itemW, itemH, standardItemHeight);
-        setSize (itemW, jlimit (2, 600, itemH));
+        setSize (itemW, jlimit (1, 600, itemH));
 
         addMouseListener (&parent, false);
     }
@@ -290,7 +289,8 @@ public:
         auto& lf = getLookAndFeel();
 
         if (parentComponent != nullptr)
-            lf.drawResizableFrame (g, getWidth(), getHeight(), BorderSize<int> (PopupMenuSettings::borderSize));
+            lf.drawResizableFrame (g, getWidth(), getHeight(),
+                                   BorderSize<int> (getLookAndFeel().getPopupMenuBorderSize()));
 
         if (canScroll())
         {
@@ -598,7 +598,7 @@ public:
 
         return parentComponent->getLocalArea (nullptr,
                                               parentComponent->getScreenBounds()
-                                                    .reduced (PopupMenuSettings::borderSize)
+                                                    .reduced (getLookAndFeel().getPopupMenuBorderSize())
                                                     .getIntersection (parentArea));
     }
 
@@ -666,6 +666,9 @@ public:
             else
                 x = jmax (parentArea.getX() + 4, target.getX() - widthToUse);
 
+            if (getLookAndFeel().getPopupMenuBorderSize() == 0) // workaround for dismissing the window on mouse up when border size is 0
+                x += tendTowardsRight ? 1 : -1;
+
             y = target.getY();
             if (target.getCentreY() > parentArea.getCentreY())
                 y = jmax (parentArea.getY(), target.getBottom() - heightToUse);
@@ -711,7 +714,7 @@ public:
         needsToScroll = contentHeight > actualH;
 
         width = updateYPositions();
-        height = actualH + PopupMenuSettings::borderSize * 2;
+        height = actualH + getLookAndFeel().getPopupMenuBorderSize() * 2;
     }
 
     int workOutBestSize (const int maxMenuW)
@@ -733,7 +736,7 @@ public:
                 colH += items.getUnchecked (childNum + i)->getHeight();
             }
 
-            colW = jmin (maxMenuW / jmax (1, numColumns - 2), colW + PopupMenuSettings::borderSize * 2);
+            colW = jmin (maxMenuW / jmax (1, numColumns - 2), colW + getLookAndFeel().getPopupMenuBorderSize() * 2);
 
             columnWidths.set (col, colW);
             totalW += colW;
@@ -832,7 +835,7 @@ public:
                 childYOffset = jmax (childYOffset, 0);
             else if (delta > 0)
                 childYOffset = jmin (childYOffset,
-                                     contentHeight - windowPos.getHeight() + PopupMenuSettings::borderSize);
+                                     contentHeight - windowPos.getHeight() + getLookAndFeel().getPopupMenuBorderSize());
 
             updateYPositions();
         }
@@ -857,7 +860,7 @@ public:
 
             const int colW = columnWidths [col];
 
-            int y = PopupMenuSettings::borderSize - (childYOffset + (getY() - windowPos.getY()));
+            int y = getLookAndFeel().getPopupMenuBorderSize() - (childYOffset + (getY() - windowPos.getY()));
 
             for (int i = 0; i < numChildren; ++i)
             {

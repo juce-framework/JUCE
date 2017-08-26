@@ -142,7 +142,7 @@ public:
 
         if (needsButtonListener (component))
         {
-            String& callback = code.getCallbackCode ("public ButtonListener",
+            String& callback = code.getCallbackCode ("public Button::Listener",
                                                      "void",
                                                      "buttonClicked (Button* buttonThatWasClicked)",
                                                      true);

@@ -95,7 +95,7 @@ public:
 
         @see ZipFile::ZipEntry
     */
-    int getIndexOfFileName (const String& fileName) const noexcept;
+    int getIndexOfFileName (const String& fileName, bool ignoreCase = false) const noexcept;
 
     /** Returns a structure that describes one of the entries in the zip file.
 
@@ -104,7 +104,7 @@ public:
 
         @see ZipFile::ZipEntry
     */
-    const ZipEntry* getEntry (const String& fileName) const noexcept;
+    const ZipEntry* getEntry (const String& fileName, bool ignoreCase = false) const noexcept;
 
     /** Sorts the list of entries, based on the filename. */
     void sortEntriesByFilename();

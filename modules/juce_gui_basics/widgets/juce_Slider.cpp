@@ -24,37 +24,16 @@
   ==============================================================================
 */
 
-class Slider::Pimpl   : public AsyncUpdater,
-                        public ButtonListener,  // (can't use Button::Listener due to idiotic VC2005 bug)
-                        public LabelListener,
-                        public ValueListener
+class Slider::Pimpl   : private AsyncUpdater,
+                        private Button::Listener,
+                        private Label::Listener,
+                        private Value::Listener
 {
 public:
     Pimpl (Slider& s, SliderStyle sliderStyle, TextEntryBoxPosition textBoxPosition)
       : owner (s),
         style (sliderStyle),
-        lastCurrentValue (0), lastValueMin (0), lastValueMax (0),
-        minimum (0), maximum (10), interval (0), doubleClickReturnValue (0),
-        skewFactor (1.0), symmetricSkew (false), velocityModeSensitivity (1.0),
-        velocityModeOffset (0.0), velocityModeThreshold (1),
-        sliderRegionStart (0), sliderRegionSize (1), sliderBeingDragged (-1),
-        pixelsForFullDragExtent (250),
-        textBoxPos (textBoxPosition),
-        numDecimalPlaces (7),
-        textBoxWidth (80), textBoxHeight (20),
-        incDecButtonMode (incDecButtonsNotDraggable),
-        editableText (true),
-        doubleClickToValue (false),
-        isVelocityBased (false),
-        userKeyOverridesVelocity (true),
-        incDecButtonsSideBySide (false),
-        sendChangeOnlyOnRelease (false),
-        popupDisplayEnabled (false),
-        menuEnabled (false),
-        useDragEvents (false),
-        scrollWheelEnabled (true),
-        snapsToMousePos (true),
-        parentForPopupDisplay (nullptr)
+        textBoxPos (textBoxPosition)
     {
         rotaryParams.startAngleRadians = float_Pi * 1.2f;
         rotaryParams.endAngleRadians   = float_Pi * 2.8f;
@@ -139,11 +118,13 @@ public:
                 int v = std::abs (roundToInt (newInt * 10000000));
 
                 if (v > 0)
+                {
                     while ((v % 10) == 0)
                     {
                         --numDecimalPlaces;
                         v /= 10;
                     }
+                }
             }
 
             // keep the current values inside the new range..
@@ -201,9 +182,7 @@ public:
 
             updateText();
             owner.repaint();
-
-            if (popupDisplay != nullptr)
-                popupDisplay->updatePosition (owner.getTextFromValue (newValue));
+            updatePopupDisplay (newValue);
 
             triggerChangeMessage (notification);
         }
@@ -238,9 +217,7 @@ public:
             lastValueMin = newValue;
             valueMin = newValue;
             owner.repaint();
-
-            if (popupDisplay != nullptr)
-                popupDisplay->updatePosition (owner.getTextFromValue (newValue));
+            updatePopupDisplay (newValue);
 
             triggerChangeMessage (notification);
         }
@@ -275,9 +252,7 @@ public:
             lastValueMax = newValue;
             valueMax = newValue;
             owner.repaint();
-
-            if (popupDisplay != nullptr)
-                popupDisplay->updatePosition (owner.getTextFromValue (valueMax.getValue()));
+            updatePopupDisplay (valueMax.getValue());
 
             triggerChangeMessage (notification);
         }
@@ -344,7 +319,7 @@ public:
 
         Component::BailOutChecker checker (&owner);
         Slider* slider = &owner; // (must use an intermediate variable here to avoid a VS2005 compiler bug)
-        listeners.callChecked (checker, &SliderListener::sliderValueChanged, slider);  // (can't use Slider::Listener due to idiotic VC2005 bug)
+        listeners.callChecked (checker, &Slider::Listener::sliderValueChanged, slider);
     }
 
     void sendDragStart()
@@ -353,7 +328,7 @@ public:
 
         Component::BailOutChecker checker (&owner);
         Slider* slider = &owner; // (must use an intermediate variable here to avoid a VS2005 compiler bug)
-        listeners.callChecked (checker, &SliderListener::sliderDragStarted, slider);
+        listeners.callChecked (checker, &Slider::Listener::sliderDragStarted, slider);
     }
 
     void sendDragEnd()
@@ -364,7 +339,7 @@ public:
 
         Component::BailOutChecker checker (&owner);
         Slider* slider = &owner; // (must use an intermediate variable here to avoid a VS2005 compiler bug)
-        listeners.callChecked (checker, &SliderListener::sliderDragEnded, slider);
+        listeners.callChecked (checker, &Slider::Listener::sliderDragEnded, slider);
     }
 
     struct DragInProgress
@@ -701,6 +676,7 @@ public:
         if (dx * dx + dy * dy > 25.0f)
         {
             double angle = std::atan2 ((double) dx, (double) -dy);
+
             while (angle < 0.0)
                 angle += double_Pi * 2.0;
 
@@ -751,12 +727,12 @@ public:
             || ((style == LinearHorizontal || style == LinearVertical || style == LinearBar || style == LinearBarVertical)
                 && ! snapsToMousePos))
         {
-            const float mouseDiff = (style == RotaryHorizontalDrag
-                                        || style == LinearHorizontal
-                                        || style == LinearBar
-                                        || (style == IncDecButtons && incDecDragDirectionIsHorizontal()))
-                                      ? e.position.x - mouseDragStartPos.x
-                                      : mouseDragStartPos.y - e.position.y;
+            auto mouseDiff = (style == RotaryHorizontalDrag
+                                || style == LinearHorizontal
+                                || style == LinearBar
+                                || (style == IncDecButtons && incDecDragDirectionIsHorizontal()))
+                              ? e.position.x - mouseDragStartPos.x
+                              : mouseDragStartPos.y - e.position.y;
 
             newPos = owner.valueToProportionOfLength (valueOnMouseDown)
                        + mouseDiff * (1.0 / pixelsForFullDragExtent);
@@ -769,8 +745,8 @@ public:
         }
         else if (style == RotaryHorizontalVerticalDrag)
         {
-            const float mouseDiff = (e.position.x - mouseDragStartPos.x)
-                                      + (mouseDragStartPos.y - e.position.y);
+            auto mouseDiff = (e.position.x - mouseDragStartPos.x)
+                               + (mouseDragStartPos.y - e.position.y);
 
             newPos = owner.valueToProportionOfLength (valueOnMouseDown)
                        + mouseDiff * (1.0 / pixelsForFullDragExtent);
@@ -830,6 +806,7 @@ public:
         useDragEvents = false;
         mouseDragStartPos = mousePosWhenLastDragged = e.position;
         currentDrag = nullptr;
+        popupDisplay = nullptr;
 
         if (owner.isEnabled())
         {
@@ -862,17 +839,10 @@ public:
                                                                                            : currentValue)).getValue();
                 valueOnMouseDown = valueWhenLastDragged;
 
-                if (popupDisplayEnabled)
+                if (showPopupOnDrag || showPopupOnHover)
                 {
-                    PopupDisplayComponent* const popup = new PopupDisplayComponent (owner);
-                    popupDisplay = popup;
-
-                    if (parentForPopupDisplay != nullptr)
-                        parentForPopupDisplay->addChildComponent (popup);
-                    else
-                        popup->addToDesktop (ComponentPeer::windowIsTemporary);
-
-                    popup->setVisible (true);
+                    showPopupDisplay();
+                    popupDisplay->stopTimer();
                 }
 
                 currentDrag = new DragInProgress (*this);
@@ -971,10 +941,55 @@ public:
         }
         else if (popupDisplay != nullptr)
         {
-            popupDisplay->startTimer (2000);
+            popupDisplay->startTimer (200);
         }
 
         currentDrag = nullptr;
+    }
+
+    void mouseMove()
+    {
+        if (showPopupOnHover
+             && style != TwoValueHorizontal
+             && style != TwoValueVertical)
+        {
+            if (owner.isMouseOver (true) && owner.getTopLevelComponent()->hasKeyboardFocus (true))
+            {
+                if (popupDisplay == nullptr)
+                    showPopupDisplay();
+
+                if (popupDisplay != nullptr)
+                    popupDisplay->startTimer (2000);
+            }
+        }
+    }
+
+    void mouseExit()
+    {
+        popupDisplay = nullptr;
+    }
+
+    void showPopupDisplay()
+    {
+        if (popupDisplay == nullptr)
+        {
+            popupDisplay = new PopupDisplayComponent (owner);
+
+            updatePopupDisplay (getValue());
+
+            if (parentForPopupDisplay != nullptr)
+                parentForPopupDisplay->addChildComponent (popupDisplay);
+            else
+                popupDisplay->addToDesktop (ComponentPeer::windowIsTemporary);
+
+            popupDisplay->setVisible (true);
+        }
+    }
+
+    void updatePopupDisplay (double valueToShow)
+    {
+        if (popupDisplay != nullptr)
+            popupDisplay->updatePosition (owner.getTextFromValue (valueToShow));
     }
 
     bool canDoubleClickToValue() const
@@ -1188,50 +1203,50 @@ public:
     Slider& owner;
     SliderStyle style;
 
-    ListenerList <SliderListener> listeners;
+    ListenerList<Slider::Listener> listeners;
     Value currentValue, valueMin, valueMax;
-    double lastCurrentValue, lastValueMin, lastValueMax;
-    double minimum, maximum, interval, doubleClickReturnValue;
-    double valueWhenLastDragged, valueOnMouseDown, skewFactor, lastAngle;
-    bool symmetricSkew;
-    double velocityModeSensitivity, velocityModeOffset, minMaxDiff;
-    int velocityModeThreshold;
+    double lastCurrentValue = 0, lastValueMin = 0, lastValueMax = 0;
+    double minimum = 0, maximum = 10, interval = 0, doubleClickReturnValue = 0;
+    double valueWhenLastDragged = 0, valueOnMouseDown = 0, skewFactor = 1.0, lastAngle = 0;
+    bool symmetricSkew = false;
+    double velocityModeSensitivity = 1.0, velocityModeOffset = 0, minMaxDiff = 0;
+    int velocityModeThreshold = 1;
     RotaryParameters rotaryParams;
     Point<float> mouseDragStartPos, mousePosWhenLastDragged;
-    int sliderRegionStart, sliderRegionSize;
-    int sliderBeingDragged;
-    int pixelsForFullDragExtent;
+    int sliderRegionStart = 0, sliderRegionSize = 1;
+    int sliderBeingDragged = -1;
+    int pixelsForFullDragExtent = 250;
     Time lastMouseWheelTime;
     Rectangle<int> sliderRect;
     ScopedPointer<DragInProgress> currentDrag;
 
     TextEntryBoxPosition textBoxPos;
     String textSuffix;
-    int numDecimalPlaces;
-    int textBoxWidth, textBoxHeight;
-    IncDecButtonMode incDecButtonMode;
+    int numDecimalPlaces = 7;
+    int textBoxWidth = 80, textBoxHeight = 20;
+    IncDecButtonMode incDecButtonMode = incDecButtonsNotDraggable;
 
-    bool editableText;
-    bool doubleClickToValue;
-    bool isVelocityBased;
-    bool userKeyOverridesVelocity;
-    bool incDecButtonsSideBySide;
-    bool sendChangeOnlyOnRelease;
-    bool popupDisplayEnabled;
-    bool menuEnabled;
-    bool useDragEvents;
-    bool incDecDragged;
-    bool scrollWheelEnabled;
-    bool snapsToMousePos;
+    bool editableText = true;
+    bool doubleClickToValue = false;
+    bool isVelocityBased = false;
+    bool userKeyOverridesVelocity = true;
+    bool incDecButtonsSideBySide = false;
+    bool sendChangeOnlyOnRelease = false;
+    bool showPopupOnDrag = false;
+    bool showPopupOnHover = false;
+    bool menuEnabled = false;
+    bool useDragEvents = false;
+    bool incDecDragged = false;
+    bool scrollWheelEnabled = true;
+    bool snapsToMousePos = true;
 
     ScopedPointer<Label> valueBox;
     ScopedPointer<Button> incButton, decButton;
 
     //==============================================================================
-    class PopupDisplayComponent  : public BubbleComponent,
-                                   public Timer
+    struct PopupDisplayComponent  : public BubbleComponent,
+                                    public Timer
     {
-    public:
         PopupDisplayComponent (Slider& s)
             : owner (s),
               font (s.getLookAndFeel().getSliderPopupFont (s))
@@ -1275,10 +1290,10 @@ public:
     };
 
     ScopedPointer<PopupDisplayComponent> popupDisplay;
-    Component* parentForPopupDisplay;
+    Component* parentForPopupDisplay = nullptr;
 
     //==============================================================================
-    static double smallestAngleBetween (const double a1, const double a2) noexcept
+    static double smallestAngleBetween (double a1, double a2) noexcept
     {
         return jmin (std::abs (a1 - a2),
                      std::abs (a1 + double_Pi * 2.0 - a2),
@@ -1319,8 +1334,8 @@ void Slider::init (SliderStyle style, TextEntryBoxPosition textBoxPos)
 Slider::~Slider() {}
 
 //==============================================================================
-void Slider::addListener (SliderListener* const listener)       { pimpl->listeners.add (listener); }
-void Slider::removeListener (SliderListener* const listener)    { pimpl->listeners.remove (listener); }
+void Slider::addListener (Listener* l)       { pimpl->listeners.add (l); }
+void Slider::removeListener (Listener* l)    { pimpl->listeners.remove (l); }
 
 //==============================================================================
 Slider::SliderStyle Slider::getSliderStyle() const noexcept     { return pimpl->style; }
@@ -1412,10 +1427,11 @@ void Slider::setChangeNotificationOnlyOnRelease (bool onlyNotifyOnRelease)
 bool Slider::getSliderSnapsToMousePosition() const noexcept                 { return pimpl->snapsToMousePos; }
 void Slider::setSliderSnapsToMousePosition (const bool shouldSnapToMouse)   { pimpl->snapsToMousePos = shouldSnapToMouse; }
 
-void Slider::setPopupDisplayEnabled (const bool enabled, Component* const parentComponentToUse)
+void Slider::setPopupDisplayEnabled (bool showOnDrag, bool showOnHover, Component* parent)
 {
-    pimpl->popupDisplayEnabled = enabled;
-    pimpl->parentForPopupDisplay = parentComponentToUse;
+    pimpl->showPopupOnDrag = showOnDrag;
+    pimpl->showPopupOnHover = showOnHover;
+    pimpl->parentForPopupDisplay = parent;
 }
 
 Component* Slider::getCurrentPopupDisplay() const noexcept      { return pimpl->popupDisplay.get(); }
@@ -1578,7 +1594,9 @@ void Slider::resized()                  { pimpl->resized (getLookAndFeel()); }
 void Slider::focusOfChildComponentChanged (FocusChangeType)     { repaint(); }
 
 void Slider::mouseDown (const MouseEvent& e)    { pimpl->mouseDown (e); }
-void Slider::mouseUp (const MouseEvent&)        { pimpl->mouseUp(); }
+void Slider::mouseUp   (const MouseEvent&)      { pimpl->mouseUp(); }
+void Slider::mouseMove (const MouseEvent&)      { pimpl->mouseMove(); }
+void Slider::mouseExit (const MouseEvent&)      { pimpl->mouseExit(); }
 
 void Slider::modifierKeysChanged (const ModifierKeys& modifiers)
 {

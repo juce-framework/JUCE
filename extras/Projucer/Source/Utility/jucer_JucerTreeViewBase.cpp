@@ -134,7 +134,7 @@ Component* JucerTreeViewBase::createItemComponent()
 
 //==============================================================================
 class RenameTreeItemCallback  : public ModalComponentManager::Callback,
-                                public TextEditorListener
+                                public TextEditor::Listener
 {
 public:
     RenameTreeItemCallback (JucerTreeViewBase& ti, Component& parent, const Rectangle<int>& bounds)

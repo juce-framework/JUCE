@@ -158,7 +158,7 @@ private:
 //==============================================================================
 class ValueTreesDemo   : public Component,
                          public DragAndDropContainer,
-                         private ButtonListener,
+                         private Button::Listener,
                          private Timer
 {
 public:

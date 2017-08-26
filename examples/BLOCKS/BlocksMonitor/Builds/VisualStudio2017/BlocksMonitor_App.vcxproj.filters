@@ -3986,9 +3986,6 @@
     <None Include="..\..\..\..\..\modules\juce_blocks_basics\protocol\Protocol Format.txt">
       <Filter>Juce Modules\juce_blocks_basics\protocol</Filter>
     </None>
-    <None Include="..\..\..\..\..\modules\juce_blocks_basics\LittleFootFunctions.txt">
-      <Filter>Juce Modules\juce_blocks_basics</Filter>
-    </None>
     <None Include="..\..\..\..\..\modules\juce_blocks_basics\README.txt">
       <Filter>Juce Modules\juce_blocks_basics</Filter>
     </None>

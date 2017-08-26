@@ -97,7 +97,25 @@ private:
     //==============================================================================
     void productsInfoReturned (const Array<InAppPurchases::Product>& products) override
     {
-        if (products.size() != 0)
+        if (! inAppPurchases.isInAppPurchasesSupported())
+        {
+            for (auto idx = 1; idx < voiceProducts.size(); ++idx)
+            {
+                auto& voiceProduct = voiceProducts.getReference (idx);
+
+                voiceProduct.isPurchased  = false;
+                voiceProduct.priceIsKnown = false;
+                voiceProduct.purchasePrice = "In-App purcahses unavailable";
+            }
+
+            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                              "In-app purchase is unavailable!",
+                                              "In-App purchases are not available. This either means you are trying "
+                                              "to use IAP on a platform that does not support IAP or you haven't setup "
+                                              "your app correctly to work with IAP.",
+                                              "OK");
+        }
+        else
         {
             for (auto product : products)
             {
@@ -111,17 +129,12 @@ private:
                     voiceProduct.purchasePrice = product.price;
                 }
             }
-        }
-        else if (! inAppPurchases.isInAppPurchasesSupported())
-        {
-            for (auto idx = 1; idx < voiceProducts.size(); ++idx)
-            {
-                auto& voiceProduct = voiceProducts.getReference (idx);
 
-                voiceProduct.isPurchased  = false;
-                voiceProduct.priceIsKnown = false;
-                voiceProduct.purchasePrice = "In-App purcahses unavailable";
-            }
+            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                              "Your credit card will be charged!",
+                                              "You are running the sample code for JUCE In-App purchases. "
+                                              "Although this is only sample code, it will still CHARGE YOUR CREDIT CARD!",
+                                              "Understood!");
         }
 
         guiUpdater.triggerAsyncUpdate();

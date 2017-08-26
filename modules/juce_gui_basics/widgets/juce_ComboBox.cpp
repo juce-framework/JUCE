@@ -627,7 +627,7 @@ void ComboBox::removeListener (ComboBoxListener* listener)    { listeners.remove
 void ComboBox::handleAsyncUpdate()
 {
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, &ComboBoxListener::comboBoxChanged, this);  // (can't use ComboBox::Listener due to idiotic VC2005 bug)
+    listeners.callChecked (checker, &ComboBox::Listener::comboBoxChanged, this);
 }
 
 void ComboBox::sendChange (const NotificationType notification)
