@@ -47,7 +47,7 @@ namespace
 
     template <typename InterpolatorType>
     static int interpolate (float* lastInputSamples, double& subSamplePos, const double actualRatio,
-                            const float* in, float* out, const int numOut) noexcept
+                            const float* in, float* out, const int numOut, int available=std::numeric_limits<int>::max(), const int rewind=0) noexcept
     {
         if (actualRatio == 1.0)
         {
@@ -58,6 +58,7 @@ namespace
 
         const float* const originalIn = in;
         double pos = subSamplePos;
+        bool   exceeded = false;
 
         if (actualRatio < 1.0)
         {
@@ -65,7 +66,24 @@ namespace
             {
                 if (pos >= 1.0)
                 {
-                    pushInterpolationSample (lastInputSamples, *in++);
+                    if (exceeded)
+                    {
+                        pushInterpolationSample (lastInputSamples, 0.0);
+                    }
+                    else
+                    {
+                        pushInterpolationSample (lastInputSamples, *in++);
+                        if (--available < 1)
+                        {
+                            if (rewind > 0) {
+                                in        -= rewind;
+                                available += rewind;
+                            }
+                            else
+                                exceeded = true;
+                        }
+                    }
+
                     pos -= 1.0;
                 }
 
@@ -79,7 +97,25 @@ namespace
             {
                 while (pos < actualRatio)
                 {
-                    pushInterpolationSample (lastInputSamples, *in++);
+                    if (exceeded)
+                    {
+                        pushInterpolationSample (lastInputSamples, 0.0);
+                    }
+                    else
+                    {
+                        pushInterpolationSample (lastInputSamples, *in++);
+                        if (--available < 1)
+                        {
+                            if (rewind > 0)
+                            {
+                                in        -= rewind;
+                                available += rewind;
+                            }
+                            else
+                                exceeded = true;
+                        }
+                    }
+
                     pos += 1.0;
                 }
 
@@ -89,12 +125,13 @@ namespace
         }
 
         subSamplePos = pos;
-        return (int) (in - originalIn);
+        return ((int) (in - originalIn) + rewind) % rewind;
     }
 
     template <typename InterpolatorType>
     static int interpolateAdding (float* lastInputSamples, double& subSamplePos, const double actualRatio,
-                                  const float* in, float* out, const int numOut, const float gain) noexcept
+                                  const float* in, float* out, const int numOut, const float gain,
+                                  int available=std::numeric_limits<int>::max(), const int rewind=0) noexcept
     {
         if (actualRatio == 1.0)
         {
@@ -105,6 +142,7 @@ namespace
 
         const float* const originalIn = in;
         double pos = subSamplePos;
+        bool   exceeded = false;
 
         if (actualRatio < 1.0)
         {
@@ -112,7 +150,24 @@ namespace
             {
                 if (pos >= 1.0)
                 {
-                    pushInterpolationSample (lastInputSamples, *in++);
+                    if (exceeded)
+                    {
+                        pushInterpolationSample (lastInputSamples, 0.0);
+                    }
+                    else
+                    {
+                        pushInterpolationSample (lastInputSamples, *in++);
+                        if (--available < 1)
+                        {
+                            if (rewind > 0) {
+                                in        -= rewind;
+                                available += rewind;
+                            }
+                            else
+                                exceeded = true;
+                        }
+                    }
+
                     pos -= 1.0;
                 }
 
@@ -127,6 +182,17 @@ namespace
                 while (pos < actualRatio)
                 {
                     pushInterpolationSample (lastInputSamples, *in++);
+                    if (--available < 1)
+                    {
+                        if (rewind > 0)
+                        {
+                            in        -= rewind;
+                            available += rewind;
+                        }
+                        else
+                            exceeded = true;
+                    }
+
                     pos += 1.0;
                 }
 
@@ -136,7 +202,7 @@ namespace
         }
 
         subSamplePos = pos;
-        return (int) (in - originalIn);
+        return ((int) (in - originalIn) + rewind) % rewind;
     }
 }
 
@@ -187,12 +253,12 @@ void LagrangeInterpolator::reset() noexcept
         lastInputSamples[i] = 0;
 }
 
-int LagrangeInterpolator::process (double actualRatio, const float* in, float* out, int numOut) noexcept
+int LagrangeInterpolator::process (double actualRatio, const float* in, float* out, int numOut, const int available, const int rewind) noexcept
 {
-    return interpolate<LagrangeAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut);
+    return interpolate<LagrangeAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut, available, rewind);
 }
 
-int LagrangeInterpolator::processAdding (double actualRatio, const float* in, float* out, int numOut, float gain) noexcept
+int LagrangeInterpolator::processAdding (double actualRatio, const float* in, float* out, int numOut, float gain, const int available, const int rewind) noexcept
 {
-    return interpolateAdding<LagrangeAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut, gain);
+    return interpolateAdding<LagrangeAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut, gain, available, rewind);
 }

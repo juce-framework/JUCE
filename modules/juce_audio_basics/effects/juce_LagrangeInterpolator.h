@@ -49,13 +49,19 @@ public:
                                 least (speedRatio * numOutputSamplesToProduce) samples.
         @param outputSamples    the buffer to write the results into
         @param numOutputSamplesToProduce    the number of output samples that should be created
+        @param available        limits the number of input samples. If exceeded, the buffer will
+                                rewind or fill with zeroes
+        @param rewind           if available is exceeded, the inputSamples will rewind. If rewind 
+                                is set to zero, the output will use zeroes instead of reading further
 
         @returns the actual number of input samples that were used
     */
     int process (double speedRatio,
                  const float* inputSamples,
                  float* outputSamples,
-                 int numOutputSamplesToProduce) noexcept;
+                 int numOutputSamplesToProduce,
+                 const int available=std::numeric_limits<int>::max(),
+                 const int rewind=0) noexcept;
 
     /** Resamples a stream of samples, adding the results to the output data
         with a gain.
@@ -76,7 +82,9 @@ public:
                        const float* inputSamples,
                        float* outputSamples,
                        int numOutputSamplesToProduce,
-                       float gain) noexcept;
+                       float gain,
+                       const int available=std::numeric_limits<int>::max(),
+                       const int rewind=0) noexcept;
 
 private:
     float lastInputSamples[5];
