@@ -78,6 +78,7 @@
   #include <GL/gl.h>
  #else
   #include <gl/GL.h>
+  #define JUCE_OPENGL3 1
  #endif
 
  #ifdef CLEAR_TEMP_WINGDIAPI
