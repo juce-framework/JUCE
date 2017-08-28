@@ -61,6 +61,19 @@
 #endif
 
 //==============================================================================
+/** GNU libstdc++ does not have std::make_unsigned */
+namespace internal
+{
+    template <typename Type> struct make_unsigned               { typedef Type type; };
+    template <> struct make_unsigned<signed char>               { typedef unsigned char      type; };
+    template <> struct make_unsigned<char>                      { typedef unsigned char      type; };
+    template <> struct make_unsigned<short>                     { typedef unsigned short     type; };
+    template <> struct make_unsigned<int>                       { typedef unsigned int       type; };
+    template <> struct make_unsigned<long>                      { typedef unsigned long      type; };
+    template <> struct make_unsigned<long long>                 { typedef unsigned long long type; };
+};
+
+//==============================================================================
 /**
     A collection of functions for manipulating characters and character strings.
 
@@ -243,7 +256,7 @@ public:
     template <typename IntType, typename CharPointerType>
     static IntType getIntValue (const CharPointerType text) noexcept
     {
-        typedef typename std::make_unsigned<IntType>::type UIntType;
+        typedef typename internal::make_unsigned<IntType>::type UIntType;
 
         UIntType v = 0;
         auto s = text.findEndOfWhitespace();

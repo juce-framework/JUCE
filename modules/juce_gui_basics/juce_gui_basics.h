@@ -156,8 +156,11 @@ class BubbleComponent;
 class KeyPressMappingSet;
 class ApplicationCommandManagerListener;
 class DrawableButton;
-class FlexBox;
-class Grid;
+
+#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
+ class FlexBox;
+ class Grid;
+#endif
 
 #include "mouse/juce_MouseCursor.h"
 #include "mouse/juce_MouseListener.h"
