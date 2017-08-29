@@ -75,7 +75,7 @@ static void getDeviceNumChannels (snd_pcm_t* handle, unsigned int* minChans, uns
         JUCE_ALSA_LOG ("getDeviceNumChannels: " << (int) *minChans << " " << (int) *maxChans);
 
         // some virtual devices (dmix for example) report 10000 channels , we have to clamp these values
-        *maxChans = jmin (*maxChans, 32u);
+        *maxChans = jmin (*maxChans, 256u);
         *minChans = jmin (*minChans, *maxChans);
     }
     else
