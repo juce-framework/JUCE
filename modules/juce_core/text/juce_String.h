@@ -1328,6 +1328,8 @@ JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, const String& string
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, StringRef string2);
 
 /** Appends a decimal number to the end of a string. */
+JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, uint8 number);
+/** Appends a decimal number to the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, short number);
 /** Appends a decimal number to the end of a string. */
 JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, int number);
