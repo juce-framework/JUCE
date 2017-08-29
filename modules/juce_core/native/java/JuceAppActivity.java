@@ -1226,7 +1226,14 @@ public class JuceAppActivity   extends Activity
         return Environment.getExternalStoragePublicDirectory (type).getAbsolutePath();
     }
 
-    public static final String getDocumentsFolder()  { return Environment.getDataDirectory().getAbsolutePath(); }
+    public static final String getDocumentsFolder()
+    {
+        if (getAndroidSDKVersion() >= android.os.Build.VERSION_CODES.KITKAT)
+            return getFileLocation (Environment.DIRECTORY_DOCUMENTS);
+
+        return Environment.getDataDirectory().getAbsolutePath();
+    }
+
     public static final String getPicturesFolder()   { return getFileLocation (Environment.DIRECTORY_PICTURES); }
     public static final String getMusicFolder()      { return getFileLocation (Environment.DIRECTORY_MUSIC); }
     public static final String getMoviesFolder()     { return getFileLocation (Environment.DIRECTORY_MOVIES); }
@@ -1321,7 +1328,7 @@ public class JuceAppActivity   extends Activity
         return null;
     }
 
-    public final int getAndroidSDKVersion()
+    public static final int getAndroidSDKVersion()
     {
         return android.os.Build.VERSION.SDK_INT;
     }
