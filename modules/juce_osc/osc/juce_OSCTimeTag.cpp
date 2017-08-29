@@ -42,9 +42,6 @@ OSCTimeTag::OSCTimeTag (Time time) noexcept
 {
     const uint64 milliseconds = (uint64) time.toMilliseconds() + millisecondsBetweenOscAndJuceEpochs;
 
-    // something went seriously wrong if the line above didn't render the time nonnegative!
-    jassert (milliseconds >= 0);
-
     uint64 seconds = milliseconds / 1000;
     uint32 fractionalPart = uint32 (4294967.296 * (milliseconds % 1000));
 

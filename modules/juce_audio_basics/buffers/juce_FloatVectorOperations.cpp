@@ -874,7 +874,7 @@ void JUCE_CALLTYPE FloatVectorOperations::convertFixedToFloat (float* dest, cons
                                   vmulq_n_f32 (vcvtq_f32_s32 (vld1q_s32 (src)), multiplier),
                                   JUCE_LOAD_NONE, JUCE_INCREMENT_SRC_DEST, )
    #else
-    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = src[i] * multiplier,
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = (float) src[i] * multiplier,
                                   Mode::mul (mult, _mm_cvtepi32_ps (_mm_loadu_si128 ((const __m128i*) src))),
                                   JUCE_LOAD_NONE, JUCE_INCREMENT_SRC_DEST,
                                   const Mode::ParallelType mult = Mode::load1 (multiplier);)
@@ -1158,7 +1158,7 @@ public:
         static void convertFixed (float* d, const int* s, ValueType multiplier, int num)
         {
             while (--num >= 0)
-                *d++ = *s++ * multiplier;
+                *d++ = (float) *s++ * multiplier;
         }
 
         static bool areAllValuesEqual (const ValueType* d, int num, ValueType target)

@@ -629,7 +629,7 @@ public:
                 jassert (isPositiveAndBelow (channel, numChannels));
                 jassert (startSample >= 0 && numSamples >= 0 && startSample + numSamples <= size);
 
-                const auto increment = (endGain - startGain) / numSamples;
+                const auto increment = (endGain - startGain) / (float) numSamples;
                 auto* d = channels[channel] + startSample;
 
                 while (--numSamples >= 0)

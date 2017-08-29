@@ -228,37 +228,7 @@ static pointer_sized_int VSTINTERFACECALL audioMaster (VstEffectInterface*, int3
 
 namespace
 {
-    static bool xErrorTriggered = false;
-
-    static int temporaryErrorHandler (::Display*, XErrorEvent*)
-    {
-        xErrorTriggered = true;
-        return 0;
-    }
-
     typedef void (*EventProcPtr) (XEvent* ev);
-
-    static EventProcPtr getPropertyFromXWindow (Window handle, Atom atom)
-    {
-        XErrorHandler oldErrorHandler = XSetErrorHandler (temporaryErrorHandler);
-        xErrorTriggered = false;
-
-        int userSize;
-        unsigned long bytes, userCount;
-        unsigned char* data;
-        Atom userType;
-
-        {
-            ScopedXDisplay xDisplay;
-
-            XGetWindowProperty (xDisplay.display, handle, atom, 0, 1, false, AnyPropertyType,
-                                &userType,  &userSize, &userCount, &bytes, &data);
-        }
-
-        XSetErrorHandler (oldErrorHandler);
-
-        return (userCount == 1 && ! xErrorTriggered) ? *reinterpret_cast<EventProcPtr*> (data) : nullptr;
-    }
 
     Window getChildWindow (Window windowToCheck)
     {
@@ -275,55 +245,6 @@ namespace
             return childWindows [0];
 
         return 0;
-    }
-
-    static void translateJuceToXButtonModifiers (const MouseEvent& e, XEvent& ev) noexcept
-    {
-        if (e.mods.isLeftButtonDown())
-        {
-            ev.xbutton.button = Button1;
-            ev.xbutton.state |= Button1Mask;
-        }
-        else if (e.mods.isRightButtonDown())
-        {
-            ev.xbutton.button = Button3;
-            ev.xbutton.state |= Button3Mask;
-        }
-        else if (e.mods.isMiddleButtonDown())
-        {
-            ev.xbutton.button = Button2;
-            ev.xbutton.state |= Button2Mask;
-        }
-    }
-
-    static void translateJuceToXMotionModifiers (const MouseEvent& e, XEvent& ev) noexcept
-    {
-        if (e.mods.isLeftButtonDown())          ev.xmotion.state |= Button1Mask;
-        else if (e.mods.isRightButtonDown())    ev.xmotion.state |= Button3Mask;
-        else if (e.mods.isMiddleButtonDown())   ev.xmotion.state |= Button2Mask;
-    }
-
-    static void translateJuceToXCrossingModifiers (const MouseEvent& e, XEvent& ev) noexcept
-    {
-        if (e.mods.isLeftButtonDown())          ev.xcrossing.state |= Button1Mask;
-        else if (e.mods.isRightButtonDown())    ev.xcrossing.state |= Button3Mask;
-        else if (e.mods.isMiddleButtonDown())   ev.xcrossing.state |= Button2Mask;
-    }
-
-    static void translateJuceToXMouseWheelModifiers (const MouseEvent& e, const float increment, XEvent& ev) noexcept
-    {
-        ignoreUnused (e);
-
-        if (increment < 0)
-        {
-            ev.xbutton.button = Button5;
-            ev.xbutton.state |= Button5Mask;
-        }
-        else if (increment > 0)
-        {
-            ev.xbutton.button = Button4;
-            ev.xbutton.state |= Button4Mask;
-        }
     }
 }
 

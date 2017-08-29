@@ -71,7 +71,7 @@ namespace internal
     template <> struct make_unsigned<int>                       { typedef unsigned int       type; };
     template <> struct make_unsigned<long>                      { typedef unsigned long      type; };
     template <> struct make_unsigned<long long>                 { typedef unsigned long long type; };
-};
+}
 
 //==============================================================================
 /**
@@ -181,7 +181,7 @@ public:
                      || ((numSigFigs == 0 && (! decimalPointFound)) && digit == 0))
                     continue;
 
-                *currentCharacter++ = '0' + (char) digit;
+                *currentCharacter++ = (char) ('0' + (char) digit);
                 numSigFigs++;
             }
             else if ((! decimalPointFound) && *text == '.')
@@ -219,7 +219,7 @@ public:
 
                 if (digit != 0 || exponentMagnitude != 0)
                 {
-                    *currentCharacter++ = '0' + (char) digit;
+                    *currentCharacter++ = (char) ('0' + (char) digit);
                     exponentMagnitude = (exponentMagnitude * 10) + digit;
                 }
             }

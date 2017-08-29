@@ -32,8 +32,8 @@
 
 namespace FunctionTestsHelpers
 {
-    void incrementArgument (int& x) { x++; };
-    double multiply (double x, double a) noexcept { return a * x; };
+    void incrementArgument (int& x) { x++; }
+    double multiply (double x, double a) noexcept { return a * x; }
 
     struct BigData
     {
