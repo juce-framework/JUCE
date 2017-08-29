@@ -360,7 +360,7 @@ void MemoryMappedFile::openInternal (const File& file, AccessMode mode, bool exc
     }
 
     HANDLE h = CreateFile (file.getFullPathName().toWideCharPointer(), accessMode,
-                           exclusive ? 0 : (FILE_SHARE_READ | (mode == readWrite ? FILE_SHARE_WRITE : 0)), 0,
+                           exclusive ? 0 : FILE_SHARE_WRITE, 0,
                            createType, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, 0);
 
     if (h != INVALID_HANDLE_VALUE)
