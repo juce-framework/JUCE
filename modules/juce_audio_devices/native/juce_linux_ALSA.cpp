@@ -155,7 +155,7 @@ public:
           isInput (forInput),
           isInterleaved (true)
     {
-        JUCE_ALSA_LOG ("snd_pcm_open (" << deviceID.toUTF8().getAddress() << ", forInput=" << forInput << ")");
+        JUCE_ALSA_LOG ("snd_pcm_open (" << deviceID.toUTF8().getAddress() << ", forInput=" << (int) forInput << ")");
 
         int err = snd_pcm_open (&handle, deviceID.toUTF8(),
                                 forInput ? SND_PCM_STREAM_CAPTURE : SND_PCM_STREAM_PLAYBACK,
@@ -418,8 +418,8 @@ private:
                                                   bool isFloat, bool isLittleEndian, bool useOnlyLower24Bits,
                                                   int numInterleavedChannels)
     {
-        JUCE_ALSA_LOG ("format: bitDepth=" << bitDepth << ", isFloat=" << isFloat
-                        << ", isLittleEndian=" << isLittleEndian << ", numChannels=" << numInterleavedChannels);
+        JUCE_ALSA_LOG ("format: bitDepth=" << bitDepth << ", isFloat=" << (int) isFloat
+                        << ", isLittleEndian=" << (int) isLittleEndian << ", numChannels=" << numInterleavedChannels);
 
         if (isFloat)         return ConverterHelper <AudioData::Float32>::createConverter (forInput, isLittleEndian, numInterleavedChannels);
         if (bitDepth == 16)  return ConverterHelper <AudioData::Int16>  ::createConverter (forInput, isLittleEndian, numInterleavedChannels);
@@ -1037,7 +1037,7 @@ private:
         if ((isInput || isOutput) && rates.size() > 0)
         {
             JUCE_ALSA_LOG ("testDevice: '" << id.toUTF8().getAddress() << "' -> isInput: "
-                            << isInput << ", isOutput: " << isOutput);
+                            << (int) isInput << ", isOutput: " << (int) isOutput);
 
             if (isInput)
             {
@@ -1128,7 +1128,8 @@ private:
                             }
 
                             JUCE_ALSA_LOG ("Soundcard ID: " << id << ", name: '" << name
-                                            << ", isInput:" << isInput << ", isOutput:" << isOutput << "\n");
+                                            << ", isInput:"  << (int) isInput
+                                            << ", isOutput:" << (int) isOutput << "\n");
 
                             if (isInput)
                             {
