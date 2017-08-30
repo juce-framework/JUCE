@@ -66,6 +66,7 @@ public:
         SteinbergCubase7,
         SteinbergCubase8,
         SteinbergCubase8_5,
+        SteinbergCubase9,
         SteinbergCubaseGeneric,
         SteinbergNuendo3,
         SteinbergNuendo4,
@@ -92,7 +93,7 @@ public:
     bool isAdobeAudition() const noexcept     { return type == AdobeAudition; }
     bool isArdour() const noexcept            { return type == Ardour; }
     bool isBitwigStudio() const noexcept      { return type == BitwigStudio; }
-    bool isCubase() const noexcept            { return type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase5Bridged || type == SteinbergCubase6 || type == SteinbergCubase7 || type == SteinbergCubase8 || type == SteinbergCubase8_5 || type == SteinbergCubaseGeneric; }
+    bool isCubase() const noexcept            { return type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase5Bridged || type == SteinbergCubase6 || type == SteinbergCubase7 || type == SteinbergCubase8 || type == SteinbergCubase8_5 || type == SteinbergCubase9 || type == SteinbergCubaseGeneric; }
     bool isCubase7orLater() const noexcept    { return isCubase() && ! (type == SteinbergCubase4 || type == SteinbergCubase5 || type == SteinbergCubase6); }
     bool isCubaseBridged() const noexcept     { return type == SteinbergCubase5Bridged; }
     bool isDaVinciResolve() const noexcept    { return type == DaVinciResolve; }
@@ -153,6 +154,7 @@ public:
             case SteinbergCubase7:         return "Steinberg Cubase 7";
             case SteinbergCubase8:         return "Steinberg Cubase 8";
             case SteinbergCubase8_5:       return "Steinberg Cubase 8.5";
+            case SteinbergCubase9:         return "Steinberg Cubase 9";
             case SteinbergCubaseGeneric:   return "Steinberg Cubase";
             case SteinbergNuendo3:         return "Steinberg Nuendo 3";
             case SteinbergNuendo4:         return "Steinberg Nuendo 4";
@@ -233,6 +235,7 @@ private:
         if (hostFilename.containsIgnoreCase   ("Cubase 7"))          return SteinbergCubase7;
         if (hostPath.containsIgnoreCase       ("Cubase 8.app"))      return SteinbergCubase8;
         if (hostPath.containsIgnoreCase       ("Cubase 8.5.app"))    return SteinbergCubase8_5;
+        if (hostPath.containsIgnoreCase       ("Cubase 9.app"))      return SteinbergCubase9;   // also matches the scanner inside the Cubase 9.app bundle
         if (hostFilename.containsIgnoreCase   ("Cubase"))            return SteinbergCubaseGeneric;
         if (hostPath.containsIgnoreCase       ("Wavelab 7"))         return SteinbergWavelab7;
         if (hostPath.containsIgnoreCase       ("Wavelab 8"))         return SteinbergWavelab8;
@@ -270,6 +273,9 @@ private:
         if (hostFilename.containsIgnoreCase   ("Cubase7"))           return SteinbergCubase7;
         if (hostFilename.containsIgnoreCase   ("Cubase8.exe"))       return SteinbergCubase8;
         if (hostFilename.containsIgnoreCase   ("Cubase8.5.exe"))     return SteinbergCubase8_5;
+        if (hostFilename.containsIgnoreCase   ("Cubase9.exe")
+            || (hostFilename.containsIgnoreCase ("vst2xscanner.exe")
+                && hostPath.containsIgnoreCase ("Cubase 9")))        return SteinbergCubase9;   // also matches the scanner inside the Cubase 9 folder
         if (hostFilename.containsIgnoreCase   ("Cubase"))            return SteinbergCubaseGeneric;
         if (hostFilename.containsIgnoreCase   ("VSTBridgeApp"))      return SteinbergCubase5Bridged;
         if (hostPath.containsIgnoreCase       ("Wavelab 5"))         return SteinbergWavelab5;
