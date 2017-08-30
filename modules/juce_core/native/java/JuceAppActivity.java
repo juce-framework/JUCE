@@ -1228,8 +1228,8 @@ public class JuceAppActivity   extends Activity
 
     public static final String getDocumentsFolder()
     {
-        if (getAndroidSDKVersion() >= android.os.Build.VERSION_CODES.KITKAT)
-            return getFileLocation (Environment.DIRECTORY_DOCUMENTS);
+        if (getAndroidSDKVersion() >= 19)
+            return getFileLocation ("Documents");
 
         return Environment.getDataDirectory().getAbsolutePath();
     }
