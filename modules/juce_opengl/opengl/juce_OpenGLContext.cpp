@@ -242,14 +242,13 @@ public:
 
         doWorkWhileWaitingForLock (true);
 
+        glViewport (0, 0, viewportArea.getWidth(), viewportArea.getHeight());
+
         if (context.renderer != nullptr)
         {
-            glViewport (0, 0, viewportArea.getWidth(), viewportArea.getHeight());
             context.currentRenderScale = scale;
             context.renderer->renderOpenGL();
             clearGLError();
-
-            bindVertexArray();
         }
 
         if (context.renderComponents)
@@ -265,7 +264,6 @@ public:
                 lastMMLockReleaseTime = Time::getMillisecondCounter();
             }
 
-            glViewport (0, 0, viewportArea.getWidth(), viewportArea.getHeight());
             drawComponentBuffer();
         }
 
