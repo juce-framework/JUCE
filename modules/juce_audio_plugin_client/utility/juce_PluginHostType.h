@@ -265,7 +265,6 @@ private:
         if (hostFilename.startsWithIgnoreCase ("Waveform"))          return TracktionWaveform;
         if (hostPath.containsIgnoreCase       ("Tracktion 3"))       return Tracktion3;
         if (hostFilename.containsIgnoreCase   ("Tracktion"))         return TracktionGeneric;
-        if (hostFilename.containsIgnoreCase   ("Tracktion"))         return TracktionGeneric;
         if (hostFilename.containsIgnoreCase   ("reaper"))            return Reaper;
         if (hostFilename.containsIgnoreCase   ("Cubase4"))           return SteinbergCubase4;
         if (hostFilename.containsIgnoreCase   ("Cubase5"))           return SteinbergCubase5;
