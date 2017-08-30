@@ -58,6 +58,11 @@ void InterprocessConnectionServer::stop()
     socket = nullptr;
 }
 
+int InterprocessConnectionServer::getBoundPort() const noexcept
+{
+    return (socket == nullptr) ? -1 : socket->getBoundPort();
+}
+
 void InterprocessConnectionServer::run()
 {
     while ((! threadShouldExit()) && socket != nullptr)
