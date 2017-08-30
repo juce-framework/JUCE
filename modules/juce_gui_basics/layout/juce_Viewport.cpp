@@ -191,6 +191,8 @@ struct Viewport::DragToScrollListener   : private MouseListener,
         viewport.contentHolder.addMouseListener (this, true);
         offsetX.addListener (this);
         offsetY.addListener (this);
+        offsetX.behaviour.setMinimumVelocity (60);
+        offsetY.behaviour.setMinimumVelocity (60);
     }
 
     ~DragToScrollListener()
@@ -209,6 +211,8 @@ struct Viewport::DragToScrollListener   : private MouseListener,
         if (doesMouseEventComponentBlockViewportDrag (e.eventComponent))
             isViewportDragBlocked = true;
 
+        offsetX.setPosition (offsetX.getPosition());
+        offsetY.setPosition (offsetY.getPosition());
         ++numTouches;
     }
 
