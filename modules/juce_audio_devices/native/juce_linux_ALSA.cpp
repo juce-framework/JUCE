@@ -241,7 +241,8 @@ public:
                                              (type & isFloatBit) != 0,
                                              (type & isLittleEndianBit) != 0,
                                              (type & onlyUseLower24Bits) != 0,
-                                             numChannels);
+                                             numChannels,
+                                             isInterleaved);
                 break;
             }
         }
@@ -393,44 +394,55 @@ private:
     template <class SampleType>
     struct ConverterHelper
     {
-        static AudioData::Converter* createConverter (const bool forInput, const bool isLittleEndian, const int numInterleavedChannels)
+        static AudioData::Converter* createConverter (const bool forInput, const bool isLittleEndian, const int numInterleavedChannels, bool interleaved)
+        {
+            if (interleaved)
+                return create<AudioData::Interleaved> (forInput, isLittleEndian, numInterleavedChannels);
+
+            return create<AudioData::NonInterleaved> (forInput, isLittleEndian, numInterleavedChannels);
+        }
+
+    private:
+        template <class InterleavedType>
+        static AudioData::Converter* create (const bool forInput, const bool isLittleEndian, const int numInterleavedChannels)
         {
             if (forInput)
             {
                 typedef AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst> DestType;
 
                 if (isLittleEndian)
-                    return new AudioData::ConverterInstance <AudioData::Pointer <SampleType, AudioData::LittleEndian, AudioData::Interleaved, AudioData::Const>, DestType> (numInterleavedChannels, 1);
+                    return new AudioData::ConverterInstance <AudioData::Pointer <SampleType, AudioData::LittleEndian, InterleavedType, AudioData::Const>, DestType> (numInterleavedChannels, 1);
 
-                return new AudioData::ConverterInstance <AudioData::Pointer <SampleType, AudioData::BigEndian, AudioData::Interleaved, AudioData::Const>, DestType> (numInterleavedChannels, 1);
+                return new AudioData::ConverterInstance <AudioData::Pointer <SampleType, AudioData::BigEndian, InterleavedType, AudioData::Const>, DestType> (numInterleavedChannels, 1);
             }
 
             typedef AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const> SourceType;
 
             if (isLittleEndian)
-                return new AudioData::ConverterInstance <SourceType, AudioData::Pointer <SampleType, AudioData::LittleEndian, AudioData::Interleaved, AudioData::NonConst> > (1, numInterleavedChannels);
+                return new AudioData::ConverterInstance <SourceType, AudioData::Pointer <SampleType, AudioData::LittleEndian, InterleavedType, AudioData::NonConst> > (1, numInterleavedChannels);
 
-            return new AudioData::ConverterInstance <SourceType, AudioData::Pointer <SampleType, AudioData::BigEndian, AudioData::Interleaved, AudioData::NonConst> > (1, numInterleavedChannels);
+            return new AudioData::ConverterInstance <SourceType, AudioData::Pointer <SampleType, AudioData::BigEndian, InterleavedType, AudioData::NonConst> > (1, numInterleavedChannels);
         }
     };
 
     static AudioData::Converter* createConverter (bool forInput, int bitDepth,
                                                   bool isFloat, bool isLittleEndian, bool useOnlyLower24Bits,
-                                                  int numInterleavedChannels)
+                                                  int numInterleavedChannels,
+                                                  bool interleaved)
     {
         JUCE_ALSA_LOG ("format: bitDepth=" << bitDepth << ", isFloat=" << (int) isFloat
                         << ", isLittleEndian=" << (int) isLittleEndian << ", numChannels=" << numInterleavedChannels);
 
-        if (isFloat)         return ConverterHelper <AudioData::Float32>::createConverter (forInput, isLittleEndian, numInterleavedChannels);
-        if (bitDepth == 16)  return ConverterHelper <AudioData::Int16>  ::createConverter (forInput, isLittleEndian, numInterleavedChannels);
-        if (bitDepth == 24)  return ConverterHelper <AudioData::Int24>  ::createConverter (forInput, isLittleEndian, numInterleavedChannels);
+        if (isFloat)         return ConverterHelper <AudioData::Float32>::createConverter (forInput, isLittleEndian, numInterleavedChannels, interleaved);
+        if (bitDepth == 16)  return ConverterHelper <AudioData::Int16>  ::createConverter (forInput, isLittleEndian, numInterleavedChannels, interleaved);
+        if (bitDepth == 24)  return ConverterHelper <AudioData::Int24>  ::createConverter (forInput, isLittleEndian, numInterleavedChannels, interleaved);
 
         jassert (bitDepth == 32);
 
         if (useOnlyLower24Bits)
-            return ConverterHelper <AudioData::Int24in32>::createConverter (forInput, isLittleEndian, numInterleavedChannels);
+            return ConverterHelper <AudioData::Int24in32>::createConverter (forInput, isLittleEndian, numInterleavedChannels, interleaved);
 
-        return ConverterHelper <AudioData::Int32>::createConverter (forInput, isLittleEndian, numInterleavedChannels);
+        return ConverterHelper <AudioData::Int32>::createConverter (forInput, isLittleEndian, numInterleavedChannels, interleaved);
     }
 
     //==============================================================================
