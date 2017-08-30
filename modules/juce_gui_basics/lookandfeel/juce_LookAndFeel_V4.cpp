@@ -942,7 +942,7 @@ void LookAndFeel_V4::drawLinearSlider (Graphics& g, int x, int y, int width, int
 
         const auto trackWidth = jmin (6.0f, slider.isHorizontal() ? height * 0.25f : width * 0.25f);
 
-        const Point<float> startPoint (slider.isHorizontal() ? x : width * 0.5f,
+        const Point<float> startPoint (slider.isHorizontal() ? x : x + width * 0.5f,
                                        slider.isHorizontal() ? y + height * 0.5f : height + y);
 
         const Point<float> endPoint (slider.isHorizontal() ? width + x : startPoint.x,
