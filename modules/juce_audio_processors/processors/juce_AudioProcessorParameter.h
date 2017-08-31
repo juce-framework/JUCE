@@ -152,9 +152,10 @@ public:
         outputGain       = (1 << 16) | 1,
 
         /** The following categories tell the host that this parameter is a meter level value
-         and therefore read-only. Most hosts will display these type of parameters as
-         a meter in the generic view of your plug-in. Pro-Tools will also show the meter
-         in the mixer view. */
+            and therefore read-only. Most hosts will display these type of parameters as
+            a meter in the generic view of your plug-in. Pro-Tools will also show the meter
+            in the mixer view.
+        */
         inputMeter                          = (2 << 16) | 0,
         outputMeter                         = (2 << 16) | 1,
         compressorLimiterGainReductionMeter = (2 << 16) | 2,
