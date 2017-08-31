@@ -910,6 +910,7 @@ public class JuceAppActivity   extends Activity
             timeOutMs = timeOutMsToUse;
             statusCode = statusCodeToUse;
             responseHeaders = responseHeadersToUse;
+            totalLength = -1;
             numRedirectsToFollow = numRedirectsToFollowToUse;
             httpRequestCmd = httpRequestCmdToUse;
 
@@ -1122,9 +1123,16 @@ public class JuceAppActivity   extends Activity
                     {}
 
                     for (java.util.Map.Entry<String, java.util.List<String>> entry : connection.getHeaderFields().entrySet())
+                    {
                         if (entry.getKey() != null && entry.getValue() != null)
-                            responseHeaders.append (entry.getKey() + ": "
-                                                    + android.text.TextUtils.join (",", entry.getValue()) + "\n");
+                        {
+                            responseHeaders.append(entry.getKey() + ": "
+                                                   + android.text.TextUtils.join(",", entry.getValue()) + "\n");
+
+                            if (entry.getKey().compareTo ("Content-Length") == 0)
+                                totalLength = Integer.decode (entry.getValue().get (0));
+                        }
+                    }
 
                     return true;
                 }
@@ -1227,7 +1235,7 @@ public class JuceAppActivity   extends Activity
         }
 
         public final long getPosition()                 { return position; }
-        public final long getTotalLength()              { return -1; }
+        public final long getTotalLength()              { return totalLength; }
         public final boolean isExhausted()              { return false; }
         public final boolean setPosition (long newPos)  { return false; }
 
@@ -1239,6 +1247,7 @@ public class JuceAppActivity   extends Activity
         private HttpURLConnection connection;
         private int[] statusCode;
         private StringBuffer responseHeaders;
+        private int totalLength;
         private int numRedirectsToFollow;
         private InputStream inputStream;
         private long position;
