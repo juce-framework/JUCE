@@ -312,8 +312,9 @@ private:
 static void sendScreenBoundsUpdate (JuceUIViewController* c)
 {
     JuceUIView* juceView = (JuceUIView*) [c view];
-    jassert (juceView != nil && juceView->owner != nullptr);
-    juceView->owner->updateTransformAndScreenBounds();
+
+    if (juceView != nil && juceView->owner != nullptr)
+        juceView->owner->updateTransformAndScreenBounds();
 }
 
 static bool isKioskModeView (JuceUIViewController* c)
