@@ -309,7 +309,7 @@ void AudioDataConverters::convertInt24BEToFloat (const void* const source, float
 
 void AudioDataConverters::convertInt32LEToFloat (const void* const source, float* const dest, int numSamples, const int srcBytesPerSample)
 {
-    const float scale = 1.0f / 0x7fffffff;
+    const auto scale = 1.0f / (float) 0x7fffffff;
     const char* intData = static_cast<const char*> (source);
 
     if (source != (void*) dest || srcBytesPerSample >= 4)
@@ -334,7 +334,7 @@ void AudioDataConverters::convertInt32LEToFloat (const void* const source, float
 
 void AudioDataConverters::convertInt32BEToFloat (const void* const source, float* const dest, int numSamples, const int srcBytesPerSample)
 {
-    const float scale = 1.0f / 0x7fffffff;
+    const auto scale = 1.0f / (float) 0x7fffffff;
     const char* intData = static_cast<const char*> (source);
 
     if (source != (void*) dest || srcBytesPerSample >= 4)

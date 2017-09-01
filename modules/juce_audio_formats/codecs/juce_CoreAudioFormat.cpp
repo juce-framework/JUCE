@@ -697,7 +697,7 @@ private:
     //==============================================================================
     const Array<CoreAudioChannelLayoutTag>& getAllKnownLayoutTags() const
     {
-        static Array<CoreAudioChannelLayoutTag> knownTags ({
+        static CoreAudioChannelLayoutTag tags[] = {
             DEFINE_CHANNEL_LAYOUT_TAG_ENTRY (kAudioChannelLayoutTag_Mono,   AudioChannelSet::mono()),
             DEFINE_CHANNEL_LAYOUT_TAG_ENTRY (kAudioChannelLayoutTag_Stereo, AudioChannelSet::stereo()),
             DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_StereoHeadphones),
@@ -821,7 +821,8 @@ private:
             DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DTS_8_1_A),
             DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DTS_8_1_B),
             DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DTS_6_1_D)
-        });
+        };
+        static Array<CoreAudioChannelLayoutTag> knownTags (tags, sizeof (tags) / sizeof (CoreAudioChannelLayoutTag));
 
         return knownTags;
     }

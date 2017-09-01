@@ -184,7 +184,7 @@ public:
         : numChannels (other.numChannels),
           size (other.size),
           allocatedBytes (other.allocatedBytes),
-          channels (other.channels),
+          channels (numChannels < (int) numElementsInArray (preallocatedChannelSpace) ? preallocatedChannelSpace : other.channels),
           allocatedData (static_cast<HeapBlock<char, true>&&> (other.allocatedData)),
           isClear (other.isClear)
     {
@@ -200,7 +200,7 @@ public:
         numChannels = other.numChannels;
         size = other.size;
         allocatedBytes = other.allocatedBytes;
-        channels = other.channels;
+        channels = numChannels < (int) numElementsInArray (preallocatedChannelSpace) ? preallocatedChannelSpace : other.channels;
         allocatedData = static_cast<HeapBlock<char, true>&&> (other.allocatedData);
         isClear = other.isClear;
         memcpy (preallocatedChannelSpace, other.preallocatedChannelSpace, sizeof (preallocatedChannelSpace));
@@ -629,7 +629,7 @@ public:
                 jassert (isPositiveAndBelow (channel, numChannels));
                 jassert (startSample >= 0 && numSamples >= 0 && startSample + numSamples <= size);
 
-                const auto increment = (endGain - startGain) / numSamples;
+                const auto increment = (endGain - startGain) / (float) numSamples;
                 auto* d = channels[channel] + startSample;
 
                 while (--numSamples >= 0)

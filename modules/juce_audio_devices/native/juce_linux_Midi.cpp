@@ -137,7 +137,7 @@ public:
                 numBytes -= numSent;
                 data += numSent;
 
-                snd_seq_ev_set_source (&event, portId);
+                snd_seq_ev_set_source (&event, (unsigned char) portId);
                 snd_seq_ev_set_subs (&event);
                 snd_seq_ev_set_direct (&event);
 

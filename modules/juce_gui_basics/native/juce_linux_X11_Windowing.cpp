@@ -135,6 +135,26 @@ const int KeyPress::F13Key                  = (XK_F13 & 0xff) | Keys::extendedKe
 const int KeyPress::F14Key                  = (XK_F14 & 0xff) | Keys::extendedKeyModifier;
 const int KeyPress::F15Key                  = (XK_F15 & 0xff) | Keys::extendedKeyModifier;
 const int KeyPress::F16Key                  = (XK_F16 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F17Key                  = (XK_F17 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F18Key                  = (XK_F18 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F19Key                  = (XK_F19 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F20Key                  = (XK_F20 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F21Key                  = (XK_F21 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F22Key                  = (XK_F22 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F23Key                  = (XK_F23 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F24Key                  = (XK_F24 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F25Key                  = (XK_F25 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F26Key                  = (XK_F26 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F27Key                  = (XK_F27 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F28Key                  = (XK_F28 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F29Key                  = (XK_F29 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F30Key                  = (XK_F30 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F31Key                  = (XK_F31 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F32Key                  = (XK_F32 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F33Key                  = (XK_F33 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F34Key                  = (XK_F34 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F35Key                  = (XK_F35 & 0xff) | Keys::extendedKeyModifier;
+
 const int KeyPress::numberPad0              = (XK_KP_0 & 0xff) | Keys::extendedKeyModifier;
 const int KeyPress::numberPad1              = (XK_KP_1 & 0xff) | Keys::extendedKeyModifier;
 const int KeyPress::numberPad2              = (XK_KP_2 & 0xff) | Keys::extendedKeyModifier;
@@ -2125,7 +2145,7 @@ public:
                     break;
 
                 default:
-                    if (sym >= XK_F1 && sym <= XK_F16)
+                    if (sym >= XK_F1 && sym <= XK_F35)
                     {
                         keyPressed = true;
                         keyCode = (sym & 0xff) | Keys::extendedKeyModifier;

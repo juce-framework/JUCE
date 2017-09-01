@@ -49,7 +49,7 @@ struct BlockConfigManager
         options
     };
 
-    static constexpr uint32 numConfigItems = 59;
+    static constexpr uint32 numConfigItems = 60;
 
     struct ConfigDescription
     {
@@ -115,6 +115,9 @@ struct BlockConfigManager
                                                                                                                   "Lowest",
                                                                                                                   "Disabled",
                                                                                                                   "Hardest" },    "Play mode" },
+
+        { gammaCorrection,      0,      0,      1,      false,  "Gamma Correction",     ConfigType::boolean,    {},               {} },
+
         // These can be defined for unique usage for a given Littlefoot script
         { user0,                0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },
         { user1,                0,    0,      127,      false,  {},                     ConfigType::integer,    {},               {} },

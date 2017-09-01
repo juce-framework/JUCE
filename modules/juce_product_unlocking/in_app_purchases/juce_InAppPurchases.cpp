@@ -48,7 +48,7 @@ void InAppPurchases::getProductsInformation (const StringArray& productIdentifie
    #else
     Array<Product> products;
     for (auto productId : productIdentifiers)
-        products.add (Product {productId});
+        products.add (Product { productId, {}, {}, {}, {}  });
 
     listeners.call (&Listener::productsInfoReturned, products);
    #endif
@@ -63,7 +63,7 @@ void InAppPurchases::purchaseProduct (const String& productIdentifier,
     pimpl->purchaseProduct (productIdentifier, isSubscription,
                             upgradeProductIdentifiers, creditForUnusedSubscription);
    #else
-    Listener::PurchaseInfo purchaseInfo { Purchase {"", productIdentifier}, {} };
+    Listener::PurchaseInfo purchaseInfo { Purchase { "", productIdentifier, {}, {}, {} }, {} };
 
     listeners.call (&Listener::productPurchaseFinished, purchaseInfo, false, "In-app purchases unavailable");
     ignoreUnused (isSubscription, upgradeProductIdentifiers, creditForUnusedSubscription);

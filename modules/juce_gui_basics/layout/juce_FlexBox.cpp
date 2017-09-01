@@ -844,8 +844,8 @@ FlexItem FlexItem::withWidth (float newWidth) const noexcept         { auto fi =
 FlexItem FlexItem::withMinWidth (float newMinWidth) const noexcept   { auto fi = *this; fi.minWidth = newMinWidth; return fi; }
 FlexItem FlexItem::withMaxWidth (float newMaxWidth) const noexcept   { auto fi = *this; fi.maxWidth = newMaxWidth; return fi; }
 
-FlexItem FlexItem::withMinHeight (float newMinHeight) const noexcept { auto fi = *this; fi.minHeight = newMinHeight; return fi; };
-FlexItem FlexItem::withMaxHeight (float newMaxHeight) const noexcept { auto fi = *this; fi.maxHeight = newMaxHeight; return fi; };
+FlexItem FlexItem::withMinHeight (float newMinHeight) const noexcept { auto fi = *this; fi.minHeight = newMinHeight; return fi; }
+FlexItem FlexItem::withMaxHeight (float newMaxHeight) const noexcept { auto fi = *this; fi.maxHeight = newMaxHeight; return fi; }
 FlexItem FlexItem::withHeight (float newHeight) const noexcept       { auto fi = *this; fi.height = newHeight; return fi; }
 
 FlexItem FlexItem::withMargin (Margin m) const noexcept              { auto fi = *this; fi.margin = m; return fi; }

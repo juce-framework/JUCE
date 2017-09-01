@@ -105,7 +105,11 @@ File File::getSpecialLocation (const SpecialLocationType type)
             return File ("/system/app");
 
         case tempDirectory:
-            return File (android.appDataDir).getChildFile (".temp");
+        {
+            File tmp = File (android.appDataDir).getChildFile (".temp");
+            tmp.createDirectory();
+            return File (tmp.getFullPathName());
+        }
 
         case invokedExecutableFile:
         case currentExecutableFile:

@@ -132,8 +132,8 @@ public:
                                                                  javaString (httpRequest).get()));
         }
 
-        if (stream != 0)
-            stream.callBooleanMethod (HTTPStream.connect);
+        if (stream != 0 && ! stream.callBooleanMethod (HTTPStream.connect))
+            stream.clear();
 
         jint* const statusCodeElements = env->GetIntArrayElements (statusCodeArray, 0);
         statusCode = statusCodeElements[0];

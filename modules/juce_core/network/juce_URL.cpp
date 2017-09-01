@@ -73,6 +73,9 @@ struct FallbackDownloadTask  : public URL::DownloadTask,
             }
 
             downloaded += actual;
+
+            if (downloaded == contentLength)
+                break;
         }
 
         fileStream->flush();

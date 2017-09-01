@@ -116,7 +116,16 @@ public:
     //==============================================================================
     void systemRequestedQuit() override
     {
-        quit();
+        if (ModalComponentManager::getInstance()->cancelAllModalComponents())
+        {
+            Timer::callAfterDelay (100, []()
+            {
+                if (auto app = JUCEApplicationBase::getInstance())
+                    app->systemRequestedQuit();
+            });
+        }
+        else
+            quit();
     }
 
 protected:

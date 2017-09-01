@@ -46,14 +46,15 @@ public:
     /** Frame rate types. */
     enum FrameRateType
     {
-        fps24           = 0,
-        fps25           = 1,
-        fps2997         = 2,
-        fps30           = 3,
-        fps2997drop     = 4,
-        fps30drop       = 5,
-        fps60           = 6,
-        fps60drop       = 7,
+        fps23976        = 0,
+        fps24           = 1,
+        fps25           = 2,
+        fps2997         = 3,
+        fps30           = 4,
+        fps2997drop     = 5,
+        fps30drop       = 6,
+        fps60           = 7,
+        fps60drop       = 8,
         fpsUnknown      = 99
     };
 

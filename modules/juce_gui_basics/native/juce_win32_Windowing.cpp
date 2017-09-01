@@ -429,6 +429,26 @@ const int KeyPress::F13Key                  = VK_F13            | extendedKeyMod
 const int KeyPress::F14Key                  = VK_F14            | extendedKeyModifier;
 const int KeyPress::F15Key                  = VK_F15            | extendedKeyModifier;
 const int KeyPress::F16Key                  = VK_F16            | extendedKeyModifier;
+const int KeyPress::F17Key                  = VK_F17            | extendedKeyModifier;
+const int KeyPress::F18Key                  = VK_F18            | extendedKeyModifier;
+const int KeyPress::F19Key                  = VK_F19            | extendedKeyModifier;
+const int KeyPress::F20Key                  = VK_F20            | extendedKeyModifier;
+const int KeyPress::F21Key                  = VK_F21            | extendedKeyModifier;
+const int KeyPress::F22Key                  = VK_F22            | extendedKeyModifier;
+const int KeyPress::F23Key                  = VK_F23            | extendedKeyModifier;
+const int KeyPress::F24Key                  = VK_F24            | extendedKeyModifier;
+const int KeyPress::F25Key                  = 0x31000;          // Windows doesn't support F-keys 25 or higher
+const int KeyPress::F26Key                  = 0x31001;
+const int KeyPress::F27Key                  = 0x31002;
+const int KeyPress::F28Key                  = 0x31003;
+const int KeyPress::F29Key                  = 0x31004;
+const int KeyPress::F30Key                  = 0x31005;
+const int KeyPress::F31Key                  = 0x31006;
+const int KeyPress::F32Key                  = 0x31007;
+const int KeyPress::F33Key                  = 0x31008;
+const int KeyPress::F34Key                  = 0x31009;
+const int KeyPress::F35Key                  = 0x3100a;
+
 const int KeyPress::numberPad0              = VK_NUMPAD0        | extendedKeyModifier;
 const int KeyPress::numberPad1              = VK_NUMPAD1        | extendedKeyModifier;
 const int KeyPress::numberPad2              = VK_NUMPAD2        | extendedKeyModifier;
@@ -2584,6 +2604,14 @@ private:
             case VK_F14:
             case VK_F15:
             case VK_F16:
+            case VK_F17:
+            case VK_F18:
+            case VK_F19:
+            case VK_F20:
+            case VK_F21:
+            case VK_F22:
+            case VK_F23:
+            case VK_F24:
                 used = handleKeyUpOrDown (true);
                 used = handleKeyPress (extendedKeyModifier | (int) key, 0) || used;
                 break;
@@ -3421,7 +3449,7 @@ private:
                 HeapBlock<TCHAR> buffer;
                 buffer.calloc (stringSizeBytes / sizeof (TCHAR) + 1);
                 ImmGetCompositionString (hImc, type, buffer, (DWORD) stringSizeBytes);
-                return String (buffer);
+                return String (buffer.get());
             }
 
             return {};

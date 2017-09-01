@@ -77,7 +77,7 @@ struct ReportingThreadContainer  : public ChangeListener,
     juce_DeclareSingleton_SingleThreaded_Minimal (ReportingThreadContainer)
 };
 
-juce_ImplementSingleton_SingleThreaded (ReportingThreadContainer);
+juce_ImplementSingleton_SingleThreaded (ReportingThreadContainer)
 
 //==============================================================================
 struct ReportingThread  : public Thread,
