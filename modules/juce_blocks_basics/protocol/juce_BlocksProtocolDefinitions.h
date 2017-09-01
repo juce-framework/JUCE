@@ -501,7 +501,5 @@ static constexpr const char* ledProgramLittleFootFunctions[] =
     "onControlPress/vi",
     "onControlRelease/vi",
     "initControl/viiiiiiiii",
-    "setLED/viii",
-    "blendLed/viii",
     nullptr
 };
