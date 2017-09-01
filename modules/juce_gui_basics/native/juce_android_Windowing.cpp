@@ -526,6 +526,10 @@ public:
             sizeAllocated = sizeNeeded;
             buffer = GlobalRef (env->NewIntArray (sizeNeeded));
         }
+        else if (sizeNeeded == 0)
+        {
+            return;
+        }
 
         if (jint* dest = env->GetIntArrayElements ((jintArray) buffer.get(), 0))
         {
