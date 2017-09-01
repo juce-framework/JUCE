@@ -202,7 +202,7 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
 
         if (info.returnedString.isNotEmpty())
         {
-            results.add (File (String (files)).getSiblingFile (info.returnedString));
+            results.add (File (String (files.get())).getSiblingFile (info.returnedString));
             return;
         }
     }
@@ -287,12 +287,12 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
 
         while (*filename != 0)
         {
-            results.add (File (String (files)).getChildFile (String (filename)));
+            results.add (File (String (files.get())).getChildFile (String (filename)));
             filename += wcslen (filename) + 1;
         }
     }
     else if (files[0] != 0)
     {
-        results.add (File (String (files)));
+        results.add (File (String (files.get())));
     }
 }

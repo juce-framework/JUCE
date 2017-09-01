@@ -231,7 +231,7 @@ public:
                 *currentCharacter++ = '0';
         }
 
-      #if JUCE_MSVC
+      #if JUCE_WINDOWS
         static _locale_t locale = _create_locale (LC_ALL, "C");
         return _strtod_l (&buffer[0], nullptr, locale);
       #else
