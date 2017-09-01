@@ -294,9 +294,9 @@ public:
         vstEffect.plugInIdentifier = JucePlugin_VSTUniqueID;
 
        #ifdef JucePlugin_VSTChunkStructureVersion
-        vstEffect.plugInVersion = convertHexVersionToDecimal (JucePlugin_VSTChunkStructureVersion);
+        vstEffect.plugInVersion = JucePlugin_VSTChunkStructureVersion;
        #else
-        vstEffect.plugInVersion = convertHexVersionToDecimal (JucePlugin_VersionCode);
+        vstEffect.plugInVersion = JucePlugin_VersionCode;
        #endif
 
         vstEffect.processAudioInplaceFunction = processReplacingCB;
@@ -1475,16 +1475,60 @@ private:
                 && (int32) hostCallback (&vstEffect, hostOpcodeGetCurrentAudioProcessingLevel, 0, 0, 0, 0) == 4;
     }
 
-    static inline int32 convertHexVersionToDecimal (const unsigned int hexVersion)
+    /** This function takes a `hexVersion` number encoded in the format 0xMMmmBB
+     (for example JucePlugin_VersionCode) and returns a value calculated in a
+     way so that the current DAW will interpret it as the version number
+     originally intended by `hexVersion`.
+
+     At the present moment, only Steinberg DAWs (Cubase, Nuendo) seem to care
+     about displaying a version number for the plug-in, so only their encoding
+     algorithm is currently supported by this method.
+
+     For all other DAWs, the original `hexVersion` value is simply returned as-is.
+
+     To disable any mangling completely, put the following statement in your AppConfig.h
+
+     #define the JUCE_VST_RETURN_HEX_VERSION_NUMBER_DIRECTLY 1
+     */
+    static inline int32 mangleHexVersionForDisplay (const unsigned int hexVersion)
     {
        #if JUCE_VST_RETURN_HEX_VERSION_NUMBER_DIRECTLY
         return (int32) hexVersion;
        #else
-        return (int32) (((hexVersion >> 24) & 0xff) * 1000
-                         + ((hexVersion >> 16) & 0xff) * 100
-                         + ((hexVersion >> 8)  & 0xff) * 10
-                         + (hexVersion & 0xff));
-       #endif
+
+        const PluginHostType hostType;
+
+        if (hostType.isSteinberg ())
+        {
+            const int32 major = (hexVersion >> 16) & 0xff;
+            const int32 minor = (hexVersion >> 8) & 0xff;
+            const int32 bugfix = hexVersion & 0xff;
+
+            // for details, see: https://forum.juce.com/t/issues-with-version-integer-reported-by-vst2/23867
+
+            /* When major is < 1, decimal encoding (Encoding B in the link above)
+             must be used. It interprets e.g. the number 0123 as version 0.1.2.3.
+             It has problems when minor or bugfix are > 9 */
+            if (major < 1)
+                return major * 1000 + minor * 100 + bugfix * 10;
+
+            /* When major is < 1, "extended" decimal encoding (Encoding E in the
+             link above) must be used. It interprets e.g. the number 1112233444
+             as version 111.22.33.444.
+             It has problems when minor or bugfix are > 99 */
+            if (major > 100)
+                return major * 10000000 + minor * 100000 + bugfix * 1000;
+
+            /* When 'major' is between 1 and 100 included, the hexCode is correctly
+             interpreted for display by Cubase and it does not need any change. */
+            return hexVersion;
+        }
+
+        // If more special cases for other DAWs are found, their 'ifs' could go here...
+
+        return hexVersion;
+
+       #endif   // JUCE_VST_RETURN_HEX_VERSION_NUMBER_DIRECTLY
     }
 
     //==============================================================================
@@ -1901,7 +1945,7 @@ private:
 
     pointer_sized_int handleGetManufacturerVersion (VstOpCodeArguments)
     {
-        return convertHexVersionToDecimal (JucePlugin_VersionCode);
+        return mangleHexVersionForDisplay (JucePlugin_VersionCode);
     }
 
     pointer_sized_int handleManufacturerSpecific (VstOpCodeArguments args)
