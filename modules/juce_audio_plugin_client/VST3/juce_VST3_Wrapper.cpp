@@ -1669,7 +1669,14 @@ public:
         {
             switch (processContext.frameRate.framesPerSecond)
             {
-                case 24: info.frameRate = AudioPlayHead::fps24; break;
+                case 24:
+                {
+                    if ((processContext.frameRate.flags & Vst::FrameRate::kPullDownRate) != 0)
+                        info.frameRate = AudioPlayHead::fps23976;
+                    else
+                        info.frameRate = AudioPlayHead::fps24;
+                }
+                break;
                 case 25: info.frameRate = AudioPlayHead::fps25; break;
                 case 29: info.frameRate = AudioPlayHead::fps30drop; break;
 

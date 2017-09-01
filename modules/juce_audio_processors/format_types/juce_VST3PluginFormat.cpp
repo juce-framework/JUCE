@@ -207,6 +207,7 @@ static void toProcessContext (Vst::ProcessContext& context, AudioPlayHead* playH
 
         switch (position.frameRate)
         {
+            case AudioPlayHead::fps23976:    fr.framesPerSecond = 24; fr.flags = FrameRate::kPullDownRate; break;
             case AudioPlayHead::fps24:       fr.framesPerSecond = 24; fr.flags = 0; break;
             case AudioPlayHead::fps25:       fr.framesPerSecond = 25; fr.flags = 0; break;
             case AudioPlayHead::fps2997:     fr.framesPerSecond = 30; fr.flags = FrameRate::kPullDownRate; break;
