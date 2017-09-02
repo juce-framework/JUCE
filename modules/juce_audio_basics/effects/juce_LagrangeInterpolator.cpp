@@ -73,7 +73,8 @@ namespace
                     else
                     {
                         pushInterpolationSample (lastInputSamples, *in++);
-                        if (--available < 1)
+                        --available;
+                        if (available < 1)
                         {
                             if (rewind > 0) {
                                 in        -= rewind;
@@ -104,7 +105,8 @@ namespace
                     else
                     {
                         pushInterpolationSample (lastInputSamples, *in++);
-                        if (--available < 1)
+                        --available;
+                        if (available < 1)
                         {
                             if (rewind > 0)
                             {
