@@ -1236,6 +1236,9 @@ private:
         defines.set ("JUCE_ANDROID_ACTIVITY_CLASSNAME", getJNIActivityClassName().replaceCharacter ('/', '_'));
         defines.set ("JUCE_ANDROID_ACTIVITY_CLASSPATH", "\"" + getJNIActivityClassName() + "\"");
 
+        if (androidInAppBillingPermission.get())
+            defines.set ("JUCE_IN_APP_PURCHASES", "1");
+
         if (supportsGLv3())
             defines.set ("JUCE_ANDROID_GL_ES_VERSION_3_0", "1");
 

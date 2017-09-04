@@ -1040,6 +1040,9 @@ public:
                 s.add ("SEPARATE_STRIP = YES");
             }
 
+            if (owner.iOS && owner.isInAppPurchasesEnabled())
+                defines.set ("JUCE_IN_APP_PURCHASES", "1");
+
             defines = mergePreprocessorDefs (defines, owner.getAllPreprocessorDefs (config, type));
 
             StringArray defsList;

@@ -32,7 +32,7 @@ namespace juce
 {
 
 //==============================================================================
-#if JUCE_MODULE_AVAILABLE_juce_product_unlocking
+#if JUCE_IN_APP_PURCHASES && JUCE_MODULE_AVAILABLE_juce_product_unlocking
  extern void juce_inAppPurchaseCompleted (void*);
 #endif
 
@@ -92,7 +92,7 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, appActivityResult, void, (JN
 {
     setEnv (env);
 
-   #if JUCE_MODULE_AVAILABLE_juce_product_unlocking
+   #if JUCE_IN_APP_PURCHASES && JUCE_MODULE_AVAILABLE_juce_product_unlocking
     if (requestCode == 1001)
         juce_inAppPurchaseCompleted (intentData);
    #else

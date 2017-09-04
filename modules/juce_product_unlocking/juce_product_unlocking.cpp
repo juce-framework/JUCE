@@ -50,6 +50,7 @@
 
 namespace juce
 {
+  #if JUCE_IN_APP_PURCHASES
    #if JUCE_ANDROID
     #include "native/juce_android_InAppPurchases.cpp"
    #elif JUCE_IOS
@@ -57,6 +58,8 @@ namespace juce
    #endif
 
     #include "in_app_purchases/juce_InAppPurchases.cpp"
+  #endif
+
     #include "marketplace/juce_OnlineUnlockStatus.cpp"
 
    #if JUCE_MODULE_AVAILABLE_juce_data_structures
