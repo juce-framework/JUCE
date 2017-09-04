@@ -54,9 +54,9 @@ bool FILTERCLASSNAME::producesMidi() const
    #endif
 }
 
-bool FILTERCLASSNAME::isMidiEffect () const
+bool FILTERCLASSNAME::isMidiEffect() const
 {
-   #ifdef JucePlugin_IsMidiEffect
+   #if JucePlugin_IsMidiEffect
     return true;
    #else
     return false;
