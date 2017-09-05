@@ -1423,4 +1423,3 @@ namespace std
 }
 
 namespace juce {
-
