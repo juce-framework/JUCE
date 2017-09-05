@@ -71,12 +71,12 @@ public:
         /** Time signature denominator, e.g. the 4 of a 3/4 time sig */
         int timeSigDenominator;
 
-        /** The current play position, in samples from the start of the edit. */
+        /** The current play position, in samples from the start of the timeline. */
         int64 timeInSamples;
-        /** The current play position, in seconds from the start of the edit. */
+        /** The current play position, in seconds from the start of the timeline. */
         double timeInSeconds;
 
-        /** For timecode, the position of the start of the edit, in seconds from 00:00:00:00. */
+        /** For timecode, the position of the start of the timeline, in seconds from 00:00:00:00. */
         double editOriginTime;
 
         /** The current play position, in pulses-per-quarter-note. */
@@ -84,7 +84,7 @@ public:
 
         /** The position of the start of the last bar, in pulses-per-quarter-note.
 
-            This is the time from the start of the edit to the start of the current
+            This is the time from the start of the timeline to the start of the current
             bar, in ppq units.
 
             Note - this value may be unavailable on some hosts, e.g. Pro-Tools. If
