@@ -305,8 +305,8 @@ void Synthesiser::startVoice (SynthesiserVoice* const voice,
         voice->noteOnTime = ++lastNoteOnCounter;
         voice->currentlyPlayingSound = sound;
         voice->setKeyDown (true);
-        voice->sostenutoPedalDown = false;
-        voice->sustainPedalDown = sustainPedalsDown[midiChannel];
+        voice->setSostenutoPedalDown (false);
+        voice->setSustainPedalDown (sustainPedalsDown[midiChannel]);
 
         voice->startNote (midiNoteNumber, velocity, sound,
                           lastPitchWheelValues [midiChannel - 1]);
@@ -340,11 +340,11 @@ void Synthesiser::noteOff (const int midiChannel,
                 if (sound->appliesToNote (midiNoteNumber)
                      && sound->appliesToChannel (midiChannel))
                 {
-                    jassert (! voice->keyIsDown || voice->sustainPedalDown == sustainPedalsDown [midiChannel]);
+                    jassert (! voice->keyIsDown || voice->isSustainPedalDown() == sustainPedalsDown [midiChannel]);
 
                     voice->setKeyDown (false);
 
-                    if (! (voice->sustainPedalDown || voice->sostenutoPedalDown))
+                    if (! (voice->isSustainPedalDown() || voice->isSostenutoPedalDown()))
                         stopVoice (voice, velocity, allowTailOff);
                 }
             }
@@ -421,7 +421,7 @@ void Synthesiser::handleSustainPedal (int midiChannel, bool isDown)
 
         for (auto* voice : voices)
             if (voice->isPlayingChannel (midiChannel) && voice->isKeyDown())
-                voice->sustainPedalDown = true;
+                voice->setSustainPedalDown (true);
     }
     else
     {
@@ -429,7 +429,7 @@ void Synthesiser::handleSustainPedal (int midiChannel, bool isDown)
         {
             if (voice->isPlayingChannel (midiChannel))
             {
-                voice->sustainPedalDown = false;
+                voice->setSustainPedalDown (false);
 
                 if (! (voice->isKeyDown() || voice->isSostenutoPedalDown()))
                     stopVoice (voice, 1.0f, true);
@@ -450,8 +450,8 @@ void Synthesiser::handleSostenutoPedal (int midiChannel, bool isDown)
         if (voice->isPlayingChannel (midiChannel))
         {
             if (isDown)
-                voice->sostenutoPedalDown = true;
-            else if (voice->sostenutoPedalDown)
+                voice->setSostenutoPedalDown (true);
+            else if (voice->isSostenutoPedalDown())
                 stopVoice (voice, 1.0f, true);
         }
     }
