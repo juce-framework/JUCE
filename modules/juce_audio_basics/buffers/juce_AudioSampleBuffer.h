@@ -184,11 +184,19 @@ public:
         : numChannels (other.numChannels),
           size (other.size),
           allocatedBytes (other.allocatedBytes),
-          channels (numChannels < (int) numElementsInArray (preallocatedChannelSpace) ? preallocatedChannelSpace : other.channels),
           allocatedData (static_cast<HeapBlock<char, true>&&> (other.allocatedData)),
           isClear (other.isClear)
     {
-        memcpy (preallocatedChannelSpace, other.preallocatedChannelSpace, sizeof (preallocatedChannelSpace));
+        if (numChannels < (int) numElementsInArray (preallocatedChannelSpace))
+        {
+            channels = preallocatedChannelSpace;
+            memcpy (preallocatedChannelSpace, other.channels, sizeof (preallocatedChannelSpace));
+        }
+        else
+        {
+            channels = other.channels;
+        }
+
         other.numChannels = 0;
         other.size = 0;
         other.allocatedBytes = 0;
@@ -200,10 +208,19 @@ public:
         numChannels = other.numChannels;
         size = other.size;
         allocatedBytes = other.allocatedBytes;
-        channels = numChannels < (int) numElementsInArray (preallocatedChannelSpace) ? preallocatedChannelSpace : other.channels;
         allocatedData = static_cast<HeapBlock<char, true>&&> (other.allocatedData);
         isClear = other.isClear;
-        memcpy (preallocatedChannelSpace, other.preallocatedChannelSpace, sizeof (preallocatedChannelSpace));
+
+        if (numChannels < (int) numElementsInArray (preallocatedChannelSpace))
+        {
+            channels = preallocatedChannelSpace;
+            memcpy (preallocatedChannelSpace, other.channels, sizeof (preallocatedChannelSpace));
+        }
+        else
+        {
+            channels = other.channels;
+        }
+
         other.numChannels = 0;
         other.size = 0;
         other.allocatedBytes = 0;
