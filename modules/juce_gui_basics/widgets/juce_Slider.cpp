@@ -953,7 +953,7 @@ public:
              && style != TwoValueHorizontal
              && style != TwoValueVertical)
         {
-            if (owner.isMouseOver (true) && owner.getTopLevelComponent()->hasKeyboardFocus (true))
+            if (owner.isMouseOver (true))
             {
                 if (popupDisplay == nullptr)
                     showPopupDisplay();
