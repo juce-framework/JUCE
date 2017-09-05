@@ -65,15 +65,28 @@
  #define JUCE_FORCE_USE_LEGACY_PARAM_IDS 0
 #endif
 
+/** Config: JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
+
+    Enable this if you want to force JUCE to use a legacy scheme for
+    identifying plug-in parameters as either continuous or discrete.
+    DAW projects with automation data written by an AudioUnit, VST3 or
+    AAX plug-in built with JUCE version 5.1.1 or earlier may load
+    incorrectly when opened by an AudioUnit, VST3 or AAX plug-in built
+    with JUCE version 5.2.0 and later.
+*/
+#ifndef JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
+ #define JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE 0
+#endif
+
 /** Config: JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS
 
     Enable this if you want JUCE to use parameter ids which are compatible
-    to Studio One. Studio One ignores any parameter ids which are negative.
+    with Studio One. Studio One ignores any parameter ids which are negative.
     Enabling this option will make JUCE generate only positive parameter ids.
-    Note that if you have already released a plug-in prio to JUCE 4.3.0 then
+    Note that if you have already released a plug-in prior to JUCE 4.3.0 then
     enabling this will change your parameter ids making your plug-in
     incompatible to old automation data.
- */
+*/
 #ifndef JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS
  #define JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS 1
 #endif

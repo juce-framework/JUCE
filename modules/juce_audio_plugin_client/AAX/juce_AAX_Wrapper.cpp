@@ -1319,12 +1319,14 @@ namespace AAXClasses
 
             for (int parameterIndex = 0; parameterIndex < numParameters; ++parameterIndex)
             {
-                const AudioProcessorParameter::Category category = audioProcessor.getParameterCategory (parameterIndex);
+                auto* processorParam = audioProcessor.getParameters().getUnchecked (parameterIndex);
+
+                const AudioProcessorParameter::Category category = processorParam->getCategory();
 
                 aaxParamIDs.add (usingManagedParameters ? audioProcessor.getParameterID (parameterIndex)
                                                         : String (parameterIndex));
 
-                AAX_CString paramName (audioProcessor.getParameterName (parameterIndex, 31).toRawUTF8());
+                AAX_CString paramName (processorParam->getName (31).toRawUTF8());
                 AAX_CParamID paramID = aaxParamIDs.getReference (parameterIndex).getCharPointer();
 
                 paramMap.set (AAXClasses::getAAXParamHash (paramID), parameterIndex);
@@ -1339,19 +1341,25 @@ namespace AAXClasses
                 AAX_IParameter* parameter
                     = new AAX_CParameter<float> (paramID,
                                                  paramName,
-                                                 audioProcessor.getParameterDefaultValue (parameterIndex),
+                                                 processorParam->getDefaultValue(),
                                                  AAX_CLinearTaperDelegate<float, 0>(),
                                                  AAX_CNumberDisplayDelegate<float, 3>(),
                                                  audioProcessor.isParameterAutomatable (parameterIndex));
 
-                parameter->AddShortenedName (audioProcessor.getParameterName (parameterIndex, 4).toRawUTF8());
+                parameter->AddShortenedName (processorParam->getName (4).toRawUTF8());
 
-                const int parameterNumSteps = audioProcessor.getParameterNumSteps (parameterIndex);
+                const int parameterNumSteps = processorParam->getNumSteps();
                 parameter->SetNumberOfSteps ((uint32_t) parameterNumSteps);
+
+               #if JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
                 parameter->SetType (parameterNumSteps > 1000 ? AAX_eParameterType_Continuous
                                                              : AAX_eParameterType_Discrete);
+               #else
+                parameter->SetType (processorParam->isDiscrete() ? AAX_eParameterType_Discrete
+                                                                 : AAX_eParameterType_Continuous);
+               #endif
 
-                parameter->SetOrientation (audioProcessor.isParameterOrientationInverted (parameterIndex)
+                parameter->SetOrientation (processorParam->isOrientationInverted()
                                             ? (AAX_eParameterOrientation_RightMinLeftMax | AAX_eParameterOrientation_TopMinBottomMax
                                                 | AAX_eParameterOrientation_RotarySingleDotMode | AAX_eParameterOrientation_RotaryRightMinLeftMax)
                                             : (AAX_eParameterOrientation_LeftMinRightMax | AAX_eParameterOrientation_BottomMinTopMax

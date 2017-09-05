@@ -6,14 +6,44 @@ Develop Branch
 
 Change
 ------
-A new FrameRateType fps23976 has been added to AudioPlayHead
+The method used to classify AudioUnit, VST3 and AAX plug-in parameters as
+either continuous or discrete has changed.
 
 Possible Issues
 ---------------
-Previously JUCE would report the FrameRateType fps24 for both 24 and
-23.976 fps. If your code uses switch statements (or similar) to handle
-all possible frame rate types, then this change may cause it to fall
-through.
+Plug-ins: DAW projects with automation data written by an AudioUnit, VST3 or
+AAX plug-in built with JUCE version 5.1.1 or earlier may load incorrectly when
+opened by an AudioUnit, VST3 or AAX plug-in built with JUCE version 5.2.0 and
+later.
+
+Hosts: The AudioPluginInstance::getParameterNumSteps method now returns correct
+values for AU and VST3 plug-ins.
+
+Workaround
+----------
+Plug-ins: Enable JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE in the
+juce_audio_plugin_client module config page in the Projucer.
+
+Hosts: Use AudioPluginInstance::getDefaultNumParameterSteps as the number of
+steps for all parameters.
+
+Rationale
+---------
+The old system for presenting plug-in parameters to a host as either continuous
+or discrete is inconsistent between plug-in types and lacks sufficient
+flexibility. This change harmonises the behaviour and allows individual
+parameters to be marked as continuous or discrete.
+
+
+Change
+------
+A new FrameRateType fps23976 has been added to AudioPlayHead,
+
+Possible Issues
+---------------
+Previously JUCE would report the FrameRateType fps24 for both 24 and 23.976
+fps. If your code uses switch statements (or similar) to handle all possible
+frame rate types, then this change may cause it to fall through.
 
 Workaround
 ----------
@@ -21,8 +51,8 @@ Add fps23976 to your switch statement and handle it appropriately.
 
 Rationale
 ---------
-JUCE should be able to handle all popular frame rate codes but was 
-missing support for 23.976.
+JUCE should be able to handle all popular frame rate codes but was missing
+support for 23.976.
 
 
 Change
@@ -120,7 +150,7 @@ or
 
 2. Override the Look&Feel method
    PopupMenu::LookAndFeelMethods::shouldPopupMenuScaleWithTargetComponent and
-   return false.  See
+   return false. See
    https://github.com/WeAreROLI/JUCE/blob/c288c94c2914af20f36c03ca9c5401fcb555e4e9/modules/juce_gui_basics/menus/juce_PopupMenu.h#725
 
 Rationale

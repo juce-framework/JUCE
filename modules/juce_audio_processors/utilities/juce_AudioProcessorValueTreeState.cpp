@@ -34,13 +34,15 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
                std::function<String (float)> valueToText,
                std::function<float (const String&)> textToValue,
                bool meta,
-               bool automatable)
+               bool automatable,
+               bool discrete)
         : AudioProcessorParameterWithID (parameterID, paramName, labelText),
           owner (s), valueToTextFunction (valueToText), textToValueFunction (textToValue),
           range (r), value (defaultVal), defaultValue (defaultVal),
           listenersNeedCalling (true),
           isMetaParam (meta),
-          isAutomatableParam (automatable)
+          isAutomatableParam (automatable),
+          isDiscreteParam (discrete)
     {
         state.addListener (this);
         needsUpdate.set (1);
@@ -150,6 +152,7 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
 
     bool isMetaParameter() const override      { return isMetaParam; }
     bool isAutomatable() const override        { return isAutomatableParam; }
+    bool isDiscrete() const override           { return isDiscreteParam; }
 
     AudioProcessorValueTreeState& owner;
     ValueTree state;
@@ -160,7 +163,7 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
     float value, defaultValue;
     Atomic<int> needsUpdate;
     bool listenersNeedCalling;
-    const bool isMetaParam, isAutomatableParam;
+    const bool isMetaParam, isAutomatableParam, isDiscreteParam;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Parameter)
 };
@@ -185,7 +188,8 @@ AudioProcessorParameterWithID* AudioProcessorValueTreeState::createAndAddParamet
                                                                                     float defaultVal, std::function<String (float)> valueToTextFunction,
                                                                                     std::function<float (const String&)> textToValueFunction,
                                                                                     bool isMetaParameter,
-                                                                                    bool isAutomatableParameter)
+                                                                                    bool isAutomatableParameter,
+                                                                                    bool isDiscreteParameter)
 {
     // All parameters must be created before giving this manager a ValueTree state!
     jassert (! state.isValid());
@@ -195,7 +199,8 @@ AudioProcessorParameterWithID* AudioProcessorValueTreeState::createAndAddParamet
 
     Parameter* p = new Parameter (*this, paramID, paramName, labelText, r,
                                   defaultVal, valueToTextFunction, textToValueFunction,
-                                  isMetaParameter, isAutomatableParameter);
+                                  isMetaParameter, isAutomatableParameter,
+                                  isDiscreteParameter);
     processor.addParameter (p);
     return p;
 }

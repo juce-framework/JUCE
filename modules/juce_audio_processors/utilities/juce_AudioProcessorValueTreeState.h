@@ -77,6 +77,8 @@ public:
         @param textToValueFunction      The inverse of valueToTextFunction
         @param isMetaParameter          Set this value to true if this should be a meta parameter
         @param isAutomatableParameter   Set this value to false if this parameter should not be automatable
+        @param isDiscrete               Set this value to true to make this parameter take discrete values in a host.
+                                        @see AudioProcessorParameter::isDiscrete
 
         @returns the parameter object that was created
     */
@@ -88,7 +90,8 @@ public:
                                                           std::function<String (float)> valueToTextFunction,
                                                           std::function<float (const String&)> textToValueFunction,
                                                           bool isMetaParameter = false,
-                                                          bool isAutomatableParameter = true);
+                                                          bool isAutomatableParameter = true,
+                                                          bool isDiscrete = false);
 
     /** Returns a parameter by its ID string. */
     AudioProcessorParameterWithID* getParameter (StringRef parameterID) const noexcept;

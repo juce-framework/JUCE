@@ -986,6 +986,22 @@ public:
 
     const String getParameterText (int index) override   { return String (getParameter (index)); }
 
+    int getParameterNumSteps (int index) override
+    {
+        if (auto* p = parameters[index])
+            return p->numSteps;
+
+        return AudioProcessor::getDefaultNumParameterSteps();
+    }
+
+    bool isParameterDiscrete (int index) const override
+    {
+        if (auto* p = parameters[index])
+            return p->discrete;
+
+        return false;
+    }
+
     bool isParameterAutomatable (int index) const override
     {
         if (auto* p = parameters[index])
@@ -1178,6 +1194,8 @@ public:
                         param->minValue = info.minValue;
                         param->maxValue = info.maxValue;
                         param->automatable = (info.flags & kAudioUnitParameterFlag_NonRealTime) == 0;
+                        param->discrete = (info.unit == kAudioUnitParameterUnit_Indexed);
+                        param->numSteps = param->discrete ? (int) (info.maxValue + 1.0f) : AudioProcessor::getDefaultNumParameterSteps();
 
                         if ((info.flags & kAudioUnitParameterFlag_HasCFNameString) != 0)
                         {
@@ -1263,7 +1281,8 @@ private:
         UInt32 paramID;
         String name;
         AudioUnitParameterValue minValue, maxValue;
-        bool automatable;
+        bool automatable, discrete;
+        int numSteps;
     };
 
     OwnedArray<ParamInfo> parameters;

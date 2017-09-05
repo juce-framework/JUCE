@@ -58,6 +58,7 @@ private:
     void setValue (float newValue) override;
     float getDefaultValue() const override;
     int getNumSteps() const override;
+    bool isDiscrete() const override;
     String getText (float, int) const override;
     float getValueForText (const String&) const override;
 

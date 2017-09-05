@@ -204,21 +204,32 @@ public:
         Param (AudioProcessor& p, int index, Vst::ParamID paramID)  : owner (p), paramIndex (index)
         {
             info.id = paramID;
-            toString128 (info.title, p.getParameterName (index));
-            toString128 (info.shortTitle, p.getParameterName (index, 8));
-            toString128 (info.units, p.getParameterLabel (index));
 
-            const int numSteps = p.getParameterNumSteps (index);
-            info.stepCount = (Steinberg::int32) (numSteps > 0 && numSteps < 0x7fffffff ? numSteps - 1 : 0);
-            info.defaultNormalizedValue = p.getParameterDefaultValue (index);
+            auto* param = p.getParameters().getUnchecked (index);
+
+            toString128 (info.title,      param->getName (128));
+            toString128 (info.shortTitle, param->getName (8));
+            toString128 (info.units,      param->getLabel());
+
+            info.stepCount = (Steinberg::int32) 0;
+
+           #if ! JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
+            if (param->isDiscrete())
+           #endif
+            {
+                const int numSteps = param->getNumSteps();
+                info.stepCount = (Steinberg::int32) (numSteps > 0 && numSteps < 0x7fffffff ? numSteps - 1 : 0);
+            }
+
+            info.defaultNormalizedValue = param->getDefaultValue();
             jassert (info.defaultNormalizedValue >= 0 && info.defaultNormalizedValue <= 1.0f);
             info.unitId = Vst::kRootUnitId;
 
-            // is this a meter?
-            if (((p.getParameterCategory (index) & 0xffff0000) >> 16) == 2)
+            // Is this a meter?
+            if (((param->getCategory() & 0xffff0000) >> 16) == 2)
                 info.flags = Vst::ParameterInfo::kIsReadOnly;
             else
-                info.flags = p.isParameterAutomatable (index) ? Vst::ParameterInfo::kCanAutomate : 0;
+                info.flags = param->isAutomatable() ? Vst::ParameterInfo::kCanAutomate : 0;
 
             valueNormalized = info.defaultNormalizedValue;
         }
