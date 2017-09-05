@@ -89,9 +89,9 @@ public:
         jbyte* data = getEnv()->GetByteArrayElements (byteArray, nullptr);
 
         HeapBlock<uint8> buffer (static_cast<size_t> (len));
-        std::memcpy (buffer.getData(), data + offset, static_cast<size_t> (len));
+        std::memcpy (buffer.get(), data + offset, static_cast<size_t> (len));
 
-        midiConcatenator.pushMidiData (buffer.getData(),
+        midiConcatenator.pushMidiData (buffer.get(),
                                        len, static_cast<double> (timestamp) * 1.0e-9,
                                        juceMidiInput, *callback);
 

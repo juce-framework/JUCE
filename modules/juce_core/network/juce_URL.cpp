@@ -61,12 +61,12 @@ struct FallbackDownloadTask  : public URL::DownloadTask,
             const int max = jmin ((int) bufferSize, contentLength < 0 ? std::numeric_limits<int>::max()
                                                                       : static_cast<int> (contentLength - downloaded));
 
-            const int actual = stream->read (buffer.getData(), max);
+            const int actual = stream->read (buffer.get(), max);
 
             if (actual < 0 || threadShouldExit() || stream->isError())
                 break;
 
-            if (! fileStream->write (buffer.getData(), static_cast<size_t> (actual)))
+            if (! fileStream->write (buffer.get(), static_cast<size_t> (actual)))
             {
                 error = true;
                 break;

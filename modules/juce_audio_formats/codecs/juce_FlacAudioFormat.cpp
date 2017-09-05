@@ -449,14 +449,14 @@ public:
                 if (samplesToWrite[i] == nullptr)
                     break;
 
-                int* const destData = temp.getData() + i * (size_t) numSamples;
+                int* const destData = temp.get() + i * (size_t) numSamples;
                 channels[i] = destData;
 
                 for (int j = 0; j < numSamples; ++j)
                     destData[j] = (samplesToWrite[i][j] >> bitsToShift);
             }
 
-            samplesToWrite = const_cast<const int**> (channels.getData());
+            samplesToWrite = const_cast<const int**> (channels.get());
         }
 
         return FLAC__stream_encoder_process (encoder, (const FLAC__int32**) samplesToWrite, (unsigned) numSamples) != 0;

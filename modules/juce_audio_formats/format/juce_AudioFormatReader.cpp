@@ -262,8 +262,8 @@ int64 AudioFormatReader::searchForLevel (int64 startSample,
     HeapBlock<int> tempSpace (bufferSize * 2 + 64);
 
     int* tempBuffer[3];
-    tempBuffer[0] = tempSpace.getData();
-    tempBuffer[1] = tempSpace.getData() + bufferSize;
+    tempBuffer[0] = tempSpace.get();
+    tempBuffer[1] = tempSpace.get() + bufferSize;
     tempBuffer[2] = 0;
 
     int consecutive = 0;

@@ -389,11 +389,11 @@ public:
                     caLayout.malloc (1, static_cast<size_t> (sizeOfLayout));
 
                     status = AudioFileGetProperty (audioFileID, kAudioFilePropertyChannelLayout,
-                                                   &sizeOfLayout, caLayout.getData());
+                                                   &sizeOfLayout, caLayout.get());
 
                     if (status == noErr)
                     {
-                        auto fileLayout = CoreAudioLayouts::fromCoreAudio (*caLayout.getData());
+                        auto fileLayout = CoreAudioLayouts::fromCoreAudio (*caLayout.get());
 
                         if (fileLayout.size() == static_cast<int> (numChannels))
                         {

@@ -51,7 +51,7 @@ PathFlatteningIterator::~PathFlatteningIterator()
 
 bool PathFlatteningIterator::isLastInSubpath() const noexcept
 {
-    return stackPos == stackBase.getData()
+    return stackPos == stackBase.get()
              && (index >= path.numElements || isMarker (points[index], Path::moveMarker));
 }
 

@@ -581,7 +581,7 @@ public:
                         dataSize = expectedSize;
 
                         err = AudioUnitGetProperty (audioUnit, kAudioUnitProperty_AudioChannelLayout, scope,
-                                                    static_cast<UInt32> (i), layoutBuffer.getData(), &dataSize);
+                                                    static_cast<UInt32> (i), layoutBuffer.get(), &dataSize);
 
                         if (err != noErr || dataSize < expectedSize)
                             return false;
@@ -834,7 +834,7 @@ public:
                 AudioUnitRenderActionFlags flags = 0;
 
                 if (AUBuffer* buf = outputBufferList[i])
-                    AudioUnitRender (audioUnit, &flags, &timeStamp, static_cast<UInt32> (i), (UInt32) numSamples, buf->bufferList.getData());
+                    AudioUnitRender (audioUnit, &flags, &timeStamp, static_cast<UInt32> (i), (UInt32) numSamples, buf->bufferList.get());
             }
 
             timeStamp.mSampleTime += numSamples;
@@ -1232,14 +1232,14 @@ private:
         AUBuffer (size_t numBuffers)
         {
             bufferList.calloc (1, (sizeof (AudioBufferList) - sizeof (::AudioBuffer)) + (sizeof (::AudioBuffer) * numBuffers));
-            AudioBufferList& buffer = *bufferList.getData();
+            AudioBufferList& buffer = *bufferList.get();
 
             buffer.mNumberBuffers = static_cast<UInt32> (numBuffers);
         }
 
         operator AudioBufferList&()
         {
-            return *bufferList.getData();
+            return *bufferList.get();
         }
 
         HeapBlock<AudioBufferList> bufferList;
@@ -1721,7 +1721,7 @@ private:
                         propertySize = static_cast<UInt32> (sizeof (AudioChannelLayoutTag) * numElements);
 
                         if (AudioUnitGetProperty (audioUnit, kAudioUnitProperty_SupportedChannelLayoutTags, scope,
-                                                  static_cast<UInt32> (busIdx), layoutTags.getData(), &propertySize) == noErr)
+                                                  static_cast<UInt32> (busIdx), layoutTags.get(), &propertySize) == noErr)
                         {
                             for (int j = 0; j < static_cast<int> (numElements); ++j)
                             {
@@ -1757,15 +1757,15 @@ private:
                 channelInfos.malloc (static_cast<size_t> (numChannelInfos));
                 propertySize = static_cast<UInt32> (sizeof (AUChannelInfo) * static_cast<size_t> (numChannelInfos));
 
-                if (AudioUnitGetProperty (audioUnit, kAudioUnitProperty_SupportedNumChannels, kAudioUnitScope_Global, 0, channelInfos.getData(), &propertySize) != noErr)
+                if (AudioUnitGetProperty (audioUnit, kAudioUnitProperty_SupportedNumChannels, kAudioUnitScope_Global, 0, channelInfos.get(), &propertySize) != noErr)
                     numChannelInfos = 0;
             }
             else
             {
                 numChannelInfos = 1;
                 channelInfos.malloc (static_cast<size_t> (numChannelInfos));
-                channelInfos.getData()->inChannels  = -1;
-                channelInfos.getData()->outChannels = -1;
+                channelInfos.get()->inChannels  = -1;
+                channelInfos.get()->outChannels = -1;
             }
         }
     }

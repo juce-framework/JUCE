@@ -228,7 +228,7 @@ public:
 
                 for (int i = 0; i < numStreams; ++i)
                 {
-                    const ::AudioBuffer& b = bufList->mBuffers[i];
+                    auto& b = bufList->mBuffers[i];
 
                     for (unsigned int j = 0; j < b.mNumberChannels; ++j)
                     {
@@ -733,7 +733,7 @@ public:
                 }
             }
 
-            callback->audioDeviceIOCallback (const_cast<const float**> (tempInputBuffers.getData()),
+            callback->audioDeviceIOCallback (const_cast<const float**> (tempInputBuffers.get()),
                                              numInputChans,
                                              tempOutputBuffers,
                                              numOutputChans,

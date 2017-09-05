@@ -996,10 +996,10 @@ namespace EdgeTableFillers
             }
 
             y = y_;
-            generate (scratchBuffer.getData(), x, width);
+            generate (scratchBuffer.get(), x, width);
 
             et.clipLineToMask (x, y_,
-                               reinterpret_cast<uint8*> (scratchBuffer.getData()) + SrcPixelType::indexA,
+                               reinterpret_cast<uint8*> (scratchBuffer.get()) + SrcPixelType::indexA,
                                sizeof (SrcPixelType), width);
         }
 

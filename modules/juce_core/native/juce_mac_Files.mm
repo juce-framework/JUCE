@@ -237,7 +237,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
                 HeapBlock<char> buffer;
                 buffer.calloc (size + 8);
 
-                _NSGetExecutablePath (buffer.getData(), &size);
+                _NSGetExecutablePath (buffer.get(), &size);
                 return File (String::fromUTF8 (buffer, (int) size));
             }
 

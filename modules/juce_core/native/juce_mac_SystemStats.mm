@@ -144,7 +144,7 @@ String SystemStats::getDeviceDescription()
     {
         HeapBlock<char> model (size);
         if (sysctlbyname ("hw.model", model,   &size, nullptr, 0) >= 0)
-            return model.getData();
+            return model.get();
     }
     return {};
    #endif

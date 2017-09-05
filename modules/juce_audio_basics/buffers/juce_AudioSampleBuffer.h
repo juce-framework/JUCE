@@ -332,7 +332,7 @@ public:
 
                 auto numSamplesToCopy = (size_t) jmin (newNumSamples, size);
 
-                auto newChannels = reinterpret_cast<Type**> (newData.getData());
+                auto newChannels = reinterpret_cast<Type**> (newData.get());
                 auto newChan     = reinterpret_cast<Type*> (newData + channelListSize);
 
                 for (int j = 0; j < newNumChannels; ++j)
@@ -364,7 +364,7 @@ public:
                 {
                     allocatedBytes = newTotalBytes;
                     allocatedData.allocate (newTotalBytes, clearExtraSpace || isClear);
-                    channels = reinterpret_cast<Type**> (allocatedData.getData());
+                    channels = reinterpret_cast<Type**> (allocatedData.get());
                 }
 
                 auto* chan = reinterpret_cast<Type*> (allocatedData + channelListSize);
@@ -1051,7 +1051,7 @@ private:
         auto channelListSize = sizeof (Type*) * (size_t) (numChannels + 1);
         allocatedBytes = (size_t) numChannels * (size_t) size * sizeof (Type) + channelListSize + 32;
         allocatedData.malloc (allocatedBytes);
-        channels = reinterpret_cast<Type**> (allocatedData.getData());
+        channels = reinterpret_cast<Type**> (allocatedData.get());
         auto* chan = (Type*) (allocatedData + channelListSize);
 
         for (int i = 0; i < numChannels; ++i)
@@ -1076,7 +1076,7 @@ private:
         else
         {
             allocatedData.malloc ((size_t) numChannels + 1, sizeof (Type*));
-            channels = reinterpret_cast<Type**> (allocatedData.getData());
+            channels = reinterpret_cast<Type**> (allocatedData.get());
         }
 
         for (int i = 0; i < numChannels; ++i)

@@ -171,7 +171,7 @@ struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give e
             return *this;
         }
 
-        const VstSpeakerConfiguration& get() const { return *storage.getData(); }
+        const VstSpeakerConfiguration& get() const { return *storage.get(); }
 
     private:
         JUCE_LEAK_DETECTOR (VstSpeakerConfigurationHolder)
@@ -184,7 +184,7 @@ struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give e
                                      + sizeof (VstIndividualSpeakerInfo) * static_cast<size_t> (jmax (8, numChannels) - 8);
 
             storage.malloc (1, arrangementSize);
-            return storage.getData();
+            return storage.get();
         }
 
         void clear()

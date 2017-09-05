@@ -1547,8 +1547,8 @@ private:
 
         HeapBlock<VstSpeakerConfiguration> inArrBlock (1, true), outArrBlock (1, true);
 
-        auto* inArr  = inArrBlock.getData();
-        auto* outArr = outArrBlock.getData();
+        auto* inArr  = inArrBlock.get();
+        auto* outArr = outArrBlock.get();
 
         if (! getSpeakerArrangementWrapper (effect, inArr, outArr))
             inArr = outArr = nullptr;
@@ -1611,8 +1611,8 @@ private:
     {
         HeapBlock<VstSpeakerConfiguration> inArrBlock (1, true), outArrBlock (1, true);
 
-        auto* inArr  = inArrBlock.getData();
-        auto* outArr = outArrBlock.getData();
+        auto* inArr  = inArrBlock.get();
+        auto* outArr = outArrBlock.get();
 
         if (getSpeakerArrangementWrapper (effect, inArr, outArr))
             return true;
@@ -1746,7 +1746,7 @@ private:
 
             // always ensure that the buffer is at least as large as the maximum number of channels
             auto maxChannels = jmax (vstEffect->numInputChannels, vstEffect->numOutputChannels);
-            auto channels = channelBuffer.getData();
+            auto channels = channelBuffer.get();
 
             if (numChannels < maxChannels)
             {

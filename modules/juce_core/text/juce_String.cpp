@@ -1868,7 +1868,7 @@ String String::formattedRaw (const char* pf, ...)
 
       #if JUCE_ANDROID
         HeapBlock<char> temp (bufferSize);
-        int num = (int) vsnprintf (temp.getData(), bufferSize - 1, pf, args);
+        int num = (int) vsnprintf (temp.get(), bufferSize - 1, pf, args);
         if (num >= static_cast<int> (bufferSize))
             num = -1;
       #else
@@ -1880,7 +1880,7 @@ String String::formattedRaw (const char* pf, ...)
        #else
             vswprintf
        #endif
-                (temp.getData(), bufferSize - 1, wideCharVersion.toWideCharPointer(), args);
+                (temp.get(), bufferSize - 1, wideCharVersion.toWideCharPointer(), args);
       #endif
         va_end (args);
 

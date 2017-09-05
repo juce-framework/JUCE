@@ -84,12 +84,12 @@ struct AudioUnitHelpers
             layoutMapPtrStorage.calloc (static_cast<size_t> (numBuses));
             layoutMapStorage.calloc (static_cast<size_t> (isInput ? totalInChannels : totalOutChannels));
 
-            layoutMap  = layoutMapPtrStorage. getData();
+            layoutMap  = layoutMapPtrStorage. get();
 
             int ch = 0;
             for (int busIdx = 0; busIdx < numBuses; ++busIdx)
             {
-                layoutMap[busIdx] = layoutMapStorage.getData() + ch;
+                layoutMap[busIdx] = layoutMapStorage.get() + ch;
                 ch += processor.getChannelCountOfBus (isInput, busIdx);
             }
         }
@@ -138,7 +138,7 @@ struct AudioUnitHelpers
         {
             pushIdx = 0;
             popIdx = 0;
-            zeromem (channels.getData(), sizeof(float*) * static_cast<size_t> (scratch.getNumChannels()));
+            zeromem (channels.get(), sizeof(float*) * static_cast<size_t> (scratch.getNumChannels()));
         }
 
         //==============================================================================
