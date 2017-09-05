@@ -727,9 +727,9 @@ void TableHeaderComponent::mouseUp (const MouseEvent& e)
 {
     mouseDrag (e);
 
-    for (int i = columns.size(); --i >= 0;)
-        if (columns.getUnchecked (i)->isVisible())
-            columns.getUnchecked (i)->lastDeliberateWidth = columns.getUnchecked (i)->width;
+    for (auto* c : columns)
+        if (c->isVisible())
+            c->lastDeliberateWidth = c->width;
 
     columnIdBeingResized = 0;
     repaint();
@@ -758,11 +758,11 @@ bool TableHeaderComponent::ColumnInfo::isVisible() const
     return (propertyFlags & TableHeaderComponent::visible) != 0;
 }
 
-TableHeaderComponent::ColumnInfo* TableHeaderComponent::getInfoForId (const int id) const
+TableHeaderComponent::ColumnInfo* TableHeaderComponent::getInfoForId (int id) const
 {
-    for (int i = columns.size(); --i >= 0;)
-        if (columns.getUnchecked(i)->id == id)
-            return columns.getUnchecked(i);
+    for (auto* c : columns)
+        if (c->id == id)
+            return c;
 
     return nullptr;
 }
