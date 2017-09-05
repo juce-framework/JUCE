@@ -1358,11 +1358,11 @@ JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const char* strin
 /** Case-sensitive comparison of two strings. */
 JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const wchar_t* string2) noexcept;
 /** Case-sensitive comparison of two strings. */
-JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const CharPointer_UTF8 string2) noexcept;
+JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, CharPointer_UTF8 string2) noexcept;
 /** Case-sensitive comparison of two strings. */
-JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const CharPointer_UTF16 string2) noexcept;
+JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, CharPointer_UTF16 string2) noexcept;
 /** Case-sensitive comparison of two strings. */
-JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const CharPointer_UTF32 string2) noexcept;
+JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, CharPointer_UTF32 string2) noexcept;
 
 /** Case-sensitive comparison of two strings. */
 JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const String& string2) noexcept;
@@ -1371,11 +1371,11 @@ JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const char* strin
 /** Case-sensitive comparison of two strings. */
 JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const wchar_t* string2) noexcept;
 /** Case-sensitive comparison of two strings. */
-JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const CharPointer_UTF8 string2) noexcept;
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, CharPointer_UTF8 string2) noexcept;
 /** Case-sensitive comparison of two strings. */
-JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const CharPointer_UTF16 string2) noexcept;
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, CharPointer_UTF16 string2) noexcept;
 /** Case-sensitive comparison of two strings. */
-JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const CharPointer_UTF32 string2) noexcept;
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, CharPointer_UTF32 string2) noexcept;
 
 /** Case-sensitive comparison of two strings. */
 JUCE_API bool JUCE_CALLTYPE operator>  (const String& string1, const String& string2) noexcept;
@@ -1410,3 +1410,17 @@ JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const Str
 
 /** Writes a string to an OutputStream as UTF8. */
 JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, StringRef stringToWrite);
+
+
+} // namespace juce
+
+namespace std
+{
+    template <>	struct hash<juce::String>
+    {
+        size_t operator() (const juce::String& s) const noexcept    { return s.hash(); }
+    };
+}
+
+namespace juce {
+
