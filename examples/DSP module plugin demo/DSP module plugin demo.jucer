@@ -59,10 +59,10 @@
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="1" optimisation="1" targetName="DSPModulePluginDemo"
-                       warningsAreErrors="0" postbuildCommand="if &quot;$(ProjectName)&quot;==&quot;$(SolutionName)_VST&quot; copy /Y &quot;$(TargetDir)\$(TargetName).dll&quot; &quot;c:\vstplugins\musical entropy\$(TargetName).dll&quot;"/>
+                       warningsAreErrors="0" postbuildCommand=""/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="0" optimisation="3" targetName="DSPModulePluginDemo"
-                       useRuntimeLibDLL="0" postbuildCommand="if &quot;$(ProjectName)&quot;==&quot;$(SolutionName)_VST&quot; copy /Y &quot;$(TargetDir)\$(TargetName).dll&quot; &quot;c:\vstplugins\musical entropy\$(TargetName).dll&quot;"/>
+                       useRuntimeLibDLL="0" postbuildCommand=""/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
