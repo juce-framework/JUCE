@@ -1416,7 +1416,7 @@ JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, StringRef
 
 namespace std
 {
-    template <>	struct hash<juce::String>
+    template <> struct hash<juce::String>
     {
         size_t operator() (const juce::String& s) const noexcept    { return s.hash(); }
     };
