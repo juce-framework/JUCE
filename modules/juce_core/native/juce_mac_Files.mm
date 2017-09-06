@@ -399,9 +399,6 @@ bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& 
       #if JUCE_IOS
         ignoreUnused (parameters);
 
-        if (SystemStats::isRunningInAppExtensionSandbox())
-            return false;
-
        #if (! defined __IPHONE_OS_VERSION_MIN_REQUIRED) || (! defined __IPHONE_10_0) || (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_10_0)
         return [[UIApplication sharedApplication] openURL: filenameAsURL];
        #else
