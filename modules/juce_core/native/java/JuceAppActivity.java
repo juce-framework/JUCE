@@ -436,11 +436,18 @@ public class JuceAppActivity   extends Activity
         builder.setTitle (title)
                .setMessage (message)
                .setCancelable (true)
+               .setOnCancelListener (new DialogInterface.OnCancelListener()
+                    {
+                        public void onCancel (DialogInterface dialog)
+                        {
+                            JuceAppActivity.this.alertDismissed (callback, 0);
+                        }
+                    })
                .setPositiveButton ("OK", new DialogInterface.OnClickListener()
                     {
                         public void onClick (DialogInterface dialog, int id)
                         {
-                            dialog.cancel();
+                            dialog.dismiss();
                             JuceAppActivity.this.alertDismissed (callback, 0);
                         }
                     });
@@ -455,11 +462,18 @@ public class JuceAppActivity   extends Activity
         builder.setTitle (title)
                .setMessage (message)
                .setCancelable (true)
+               .setOnCancelListener (new DialogInterface.OnCancelListener()
+                    {
+                        public void onCancel (DialogInterface dialog)
+                        {
+                            JuceAppActivity.this.alertDismissed (callback, 0);
+                        }
+                    })
                .setPositiveButton (okButtonText.isEmpty() ? "OK" : okButtonText, new DialogInterface.OnClickListener()
                     {
                         public void onClick (DialogInterface dialog, int id)
                         {
-                            dialog.cancel();
+                            dialog.dismiss();
                             JuceAppActivity.this.alertDismissed (callback, 1);
                         }
                     })
@@ -467,7 +481,7 @@ public class JuceAppActivity   extends Activity
                     {
                         public void onClick (DialogInterface dialog, int id)
                         {
-                            dialog.cancel();
+                            dialog.dismiss();
                             JuceAppActivity.this.alertDismissed (callback, 0);
                         }
                     });
@@ -481,11 +495,18 @@ public class JuceAppActivity   extends Activity
         builder.setTitle (title)
                .setMessage (message)
                .setCancelable (true)
+               .setOnCancelListener (new DialogInterface.OnCancelListener()
+                    {
+                        public void onCancel (DialogInterface dialog)
+                        {
+                            JuceAppActivity.this.alertDismissed (callback, 0);
+                        }
+                    })
                .setPositiveButton ("Yes", new DialogInterface.OnClickListener()
                     {
                         public void onClick (DialogInterface dialog, int id)
                         {
-                            dialog.cancel();
+                            dialog.dismiss();
                             JuceAppActivity.this.alertDismissed (callback, 1);
                         }
                     })
@@ -493,7 +514,7 @@ public class JuceAppActivity   extends Activity
                     {
                         public void onClick (DialogInterface dialog, int id)
                         {
-                            dialog.cancel();
+                            dialog.dismiss();
                             JuceAppActivity.this.alertDismissed (callback, 2);
                         }
                     })
@@ -501,7 +522,7 @@ public class JuceAppActivity   extends Activity
                     {
                         public void onClick (DialogInterface dialog, int id)
                         {
-                            dialog.cancel();
+                            dialog.dismiss();
                             JuceAppActivity.this.alertDismissed (callback, 0);
                         }
                     });
