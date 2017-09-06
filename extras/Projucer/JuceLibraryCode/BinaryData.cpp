@@ -1540,9 +1540,9 @@ static const unsigned char temp_binary_data_8[] =
 "   #endif\r\n"
 "}\r\n"
 "\r\n"
-"bool FILTERCLASSNAME::isMidiEffect () const\r\n"
+"bool FILTERCLASSNAME::isMidiEffect() const\r\n"
 "{\r\n"
-"   #ifdef JucePlugin_IsMidiEffect\r\n"
+"   #if JucePlugin_IsMidiEffect\r\n"
 "    return true;\r\n"
 "   #else\r\n"
 "    return false;\r\n"
@@ -7028,7 +7028,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0xafccbd3f:  numBytes = 3141; return jucer_AudioComponentTemplate_cpp;
         case 0x27c5a93a:  numBytes = 1310; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 938; return jucer_AudioPluginEditorTemplate_h;
-        case 0x51b49ac5:  numBytes = 5615; return jucer_AudioPluginFilterTemplate_cpp;
+        case 0x51b49ac5:  numBytes = 5611; return jucer_AudioPluginFilterTemplate_cpp;
         case 0x488afa0a:  numBytes = 2245; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2151; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2064; return jucer_ComponentTemplate_h;
