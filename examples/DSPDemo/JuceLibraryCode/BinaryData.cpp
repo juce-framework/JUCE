@@ -1565,11 +1565,11 @@ static const unsigned char temp_binary_data_3[] =
 "                if (cabinetTypeParameter->getCurrentSelectedID() == 2)\r\n"
 "                    convolution.loadImpulseResponse (BinaryData::guitar_amp_wav,\r\n"
 "                                                     BinaryData::guitar_amp_wavSize,\r\n"
-"                                                     false, maxSize);\r\n"
+"                                                     false, true, maxSize);\r\n"
 "                else\r\n"
 "                    convolution.loadImpulseResponse (BinaryData::cassette_recorder_wav,\r\n"
 "                                                     BinaryData::cassette_recorder_wavSize,\r\n"
-"                                                     false, maxSize);\r\n"
+"                                                     false, true, maxSize);\r\n"
 "            }\r\n"
 "        }\r\n"
 "    }\r\n"
@@ -2325,7 +2325,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x409ff6ec:  numBytes = 37902; return cassette_recorder_wav;
         case 0x69523d16:  numBytes = 628; return EditorColourScheme_xml;
         case 0x700ccf3c:  numBytes = 90246; return guitar_amp_wav;
-        case 0x5922ccdf:  numBytes = 2999; return ConvolutionDemo_cpp;
+        case 0x5922ccdf:  numBytes = 3011; return ConvolutionDemo_cpp;
         case 0x14aa0aae:  numBytes = 2674; return FIRFilterDemo_cpp;
         case 0xab621a06:  numBytes = 1809; return GainDemo_cpp;
         case 0x06a7a4b1:  numBytes = 2819; return IIRFilterDemo_cpp;

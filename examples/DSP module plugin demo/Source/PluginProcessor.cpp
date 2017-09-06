@@ -240,9 +240,9 @@ void DspModulePluginDemoAudioProcessor::updateParameters()
         auto maxSize = static_cast<size_t> (roundDoubleToInt (8192 * getSampleRate() / 44100));
 
         if (type == 0)
-            convolution.loadImpulseResponse (BinaryData::Impulse1_wav, BinaryData::Impulse1_wavSize, false, maxSize);
+            convolution.loadImpulseResponse (BinaryData::Impulse1_wav, BinaryData::Impulse1_wavSize, false, true, maxSize);
         else
-            convolution.loadImpulseResponse (BinaryData::Impulse2_wav, BinaryData::Impulse2_wavSize, false, maxSize);
+            convolution.loadImpulseResponse (BinaryData::Impulse2_wav, BinaryData::Impulse2_wavSize, false, true, maxSize);
     }
 
     cabinetIsBypassed = ! cabinetSimParam->get();

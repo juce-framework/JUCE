@@ -65,11 +65,11 @@ struct ConvolutionDemo
                 if (cabinetTypeParameter->getCurrentSelectedID() == 2)
                     convolution.loadImpulseResponse (BinaryData::guitar_amp_wav,
                                                      BinaryData::guitar_amp_wavSize,
-                                                     false, maxSize);
+                                                     false, true, maxSize);
                 else
                     convolution.loadImpulseResponse (BinaryData::cassette_recorder_wav,
                                                      BinaryData::cassette_recorder_wavSize,
-                                                     false, maxSize);
+                                                     false, true, maxSize);
             }
         }
     }

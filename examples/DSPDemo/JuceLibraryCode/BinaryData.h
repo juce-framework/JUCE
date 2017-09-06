@@ -18,7 +18,7 @@ namespace BinaryData
     const int            guitar_amp_wavSize = 90246;
 
     extern const char*   ConvolutionDemo_cpp;
-    const int            ConvolutionDemo_cppSize = 2999;
+    const int            ConvolutionDemo_cppSize = 3011;
 
     extern const char*   FIRFilterDemo_cpp;
     const int            FIRFilterDemo_cppSize = 2674;
