@@ -177,6 +177,21 @@ namespace juce
         template <typename Type>
         using Complex = ::std::complex<Type>;
 
+        //==============================================================================
+        namespace util
+        {
+            /** Use this function to prevent denormals on intel CPUs.
+
+                This function will work with both primitives and simple containers.
+            */
+            inline void snapToZero (float&       x) noexcept            { JUCE_SNAP_TO_ZERO (x); }
+           #ifndef DOXYGEN
+            inline void snapToZero (double&      x) noexcept            { JUCE_SNAP_TO_ZERO (x); }
+            inline void snapToZero (long double& x) noexcept            { JUCE_SNAP_TO_ZERO (x); }
+           #endif
+        }
+
+        //==============================================================================
        #if JUCE_USE_SIMD
         #include "native/juce_fallback_SIMDNativeOps.h"
 

@@ -141,6 +141,9 @@ namespace StateVariableFilter
             for (size_t i = 0 ; i < n; ++i)
                 output[i] = processLoop<type> (input[i], state);
 
+            util::snapToZero (s1);
+            util::snapToZero (s2);
+
             *parameters = state;
         }
 

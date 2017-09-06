@@ -386,6 +386,14 @@ struct CmplxSIMDOps<std::complex<Scalar> >
     }
 };
 
+//==============================================================================
+#ifndef DOXYGEN
+ namespace util
+ {
+     template <typename Type>
+     inline void snapToZero (SIMDRegister<Type>&) noexcept      {}
+ }
+#endif
 
 //==============================================================================
 // Extend some common used global functions to SIMDRegister types
