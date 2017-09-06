@@ -1412,6 +1412,7 @@ JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const Str
 JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, StringRef stringToWrite);
 
 
+#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS // just used to avoid compiling this under compilers that lack libc++
 } // namespace juce
 
 namespace std
@@ -1423,3 +1424,4 @@ namespace std
 }
 
 namespace juce {
+#endif
