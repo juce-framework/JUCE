@@ -1082,7 +1082,7 @@ void TreeView::fileDragEnter (const StringArray& files, int x, int y)
 
 void TreeView::fileDragMove (const StringArray& files, int x, int y)
 {
-    handleDrag (files, SourceDetails ({}, this, { x, y }));
+    handleDrag (files, SourceDetails (var(), this, { x, y }));
 }
 
 void TreeView::fileDragExit (const StringArray&)
@@ -1092,7 +1092,7 @@ void TreeView::fileDragExit (const StringArray&)
 
 void TreeView::filesDropped (const StringArray& files, int x, int y)
 {
-    handleDrop (files, SourceDetails ({}, this, { x, y }));
+    handleDrop (files, SourceDetails (var(), this, { x, y }));
 }
 
 bool TreeView::isInterestedInDragSource (const SourceDetails& /*dragSourceDetails*/)
