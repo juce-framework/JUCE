@@ -149,10 +149,10 @@ public:
     ValueType getDistanceFrom (Point other) const noexcept          { return juce_hypot (x - other.x, y - other.y); }
 
     /** Returns the square of the straight-line distance between this point and the origin. */
-    ValueType getDistanceSquaredFromOrigin() const noexcept         { return x * x + y * y; }
+    JUCE_CONSTEXPR ValueType getDistanceSquaredFromOrigin() const noexcept         { return x * x + y * y; }
 
     /** Returns the square of the straight-line distance between this point and another one. */
-    ValueType getDistanceSquaredFrom (Point other) const noexcept   { return (*this - other).getDistanceSquaredFromOrigin(); }
+    JUCE_CONSTEXPR ValueType getDistanceSquaredFrom (Point other) const noexcept   { return (*this - other).getDistanceSquaredFromOrigin(); }
 
     /** Returns the angle from this point to another one.
 
@@ -198,7 +198,7 @@ public:
     }
 
     /** Returns the dot-product of two points (x1 * x2 + y1 * y2). */
-    FloatType getDotProduct (Point other) const noexcept          { return x * other.x + y * other.y; }
+    JUCE_CONSTEXPR FloatType getDotProduct (Point other) const noexcept          { return x * other.x + y * other.y; }
 
     //==============================================================================
     /** Uses a transform to change the point's coordinates.
@@ -217,13 +217,13 @@ public:
 
     //==============================================================================
     /** Casts this point to a Point<int> object. */
-    Point<int> toInt() const noexcept                             { return Point<int> (static_cast<int> (x), static_cast<int> (y)); }
+    JUCE_CONSTEXPR Point<int> toInt() const noexcept                             { return Point<int> (static_cast<int> (x), static_cast<int> (y)); }
 
     /** Casts this point to a Point<float> object. */
-    Point<float> toFloat() const noexcept                         { return Point<float> (static_cast<float> (x), static_cast<float> (y)); }
+    JUCE_CONSTEXPR Point<float> toFloat() const noexcept                         { return Point<float> (static_cast<float> (x), static_cast<float> (y)); }
 
     /** Casts this point to a Point<double> object. */
-    Point<double> toDouble() const noexcept                       { return Point<double> (static_cast<double> (x), static_cast<double> (y)); }
+    JUCE_CONSTEXPR Point<double> toDouble() const noexcept                       { return Point<double> (static_cast<double> (x), static_cast<double> (y)); }
 
     /** Casts this point to a Point<int> object using roundToInt() to convert the values. */
     Point<int> roundToInt() const noexcept                        { return Point<int> (juce::roundToInt (x), juce::roundToInt (y)); }
@@ -238,4 +238,5 @@ public:
 
 /** Multiplies the point's coordinates by a scalar value. */
 template <typename ValueType>
-Point<ValueType> operator* (ValueType value, Point<ValueType> p) noexcept       { return p * value; }
+JUCE_CONSTEXPR Point<ValueType> operator* (ValueType value, Point<ValueType> p) noexcept       { return p * value; }
+
