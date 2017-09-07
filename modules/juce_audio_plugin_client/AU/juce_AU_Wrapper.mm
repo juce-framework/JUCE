@@ -23,7 +23,6 @@
 
   ==============================================================================
 */
-
 #include "../../juce_core/system/juce_TargetPlatform.h"
 #include "../utility/juce_CheckSettingMacros.h"
 
@@ -51,6 +50,7 @@
 #include <AudioUnit/AudioUnit.h>
 #include <AudioToolbox/AudioUnitUtilities.h>
 #include <CoreMIDI/MIDIServices.h>
+#include <QuartzCore/QuartzCore.h>
 #include "CoreAudioUtilityClasses/MusicDeviceBase.h"
 
 /** The BUILD_AU_CARBON_UI flag lets you specify whether old-school carbon hosts are supported as
@@ -1320,8 +1320,15 @@ public:
         r.origin.y = r.origin.y + r.size.height - component.getHeight();
         r.size.width = component.getWidth();
         r.size.height = component.getHeight();
+
+        [CATransaction begin];
+        [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
+
         [[view superview] setFrame: r];
         [view setFrame: makeNSRect (component.getLocalBounds())];
+
+        [CATransaction commit];
+
         [view setNeedsDisplay: YES];
     }
 
@@ -1389,8 +1396,14 @@ public:
                 NSRect r = [[view superview] frame];
                 r.size.width = editor->getWidth();
                 r.size.height = editor->getHeight();
+
+                [CATransaction begin];
+                [CATransaction setValue:(id)kCFBooleanTrue forKey:kCATransactionDisableActions];
+
                 [[view superview] setFrame: r];
                 [view setFrame: makeNSRect (editor->getLocalBounds())];
+                [CATransaction commit];
+
                 [view setNeedsDisplay: YES];
             }
         }
