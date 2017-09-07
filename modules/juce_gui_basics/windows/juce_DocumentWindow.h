@@ -106,8 +106,8 @@ public:
     /** Sets an icon to show in the title bar, next to the title.
 
         A copy is made internally of the image, so the caller can delete the
-        image after calling this. If 0 is passed-in, any existing icon will be
-        removed.
+        image after calling this. If an empty Image is passed-in, any existing icon
+        will be removed.
     */
     void setIcon (const Image& imageToUse);
 
