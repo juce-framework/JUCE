@@ -205,31 +205,29 @@ public:
         {
             info.id = paramID;
 
-            auto* param = p.getParameters().getUnchecked (index);
-
-            toString128 (info.title,      param->getName (128));
-            toString128 (info.shortTitle, param->getName (8));
-            toString128 (info.units,      param->getLabel());
+            toString128 (info.title, p.getParameterName (index));
+            toString128 (info.shortTitle, p.getParameterName (index, 8));
+            toString128 (info.units, p.getParameterLabel (index));
 
             info.stepCount = (Steinberg::int32) 0;
 
            #if ! JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
-            if (param->isDiscrete())
+            if (p.isParameterDiscrete (index))
            #endif
             {
-                const int numSteps = param->getNumSteps();
+                const int numSteps = p.getParameterNumSteps (index);
                 info.stepCount = (Steinberg::int32) (numSteps > 0 && numSteps < 0x7fffffff ? numSteps - 1 : 0);
             }
 
-            info.defaultNormalizedValue = param->getDefaultValue();
+            info.defaultNormalizedValue = p.getParameterDefaultValue (index);
             jassert (info.defaultNormalizedValue >= 0 && info.defaultNormalizedValue <= 1.0f);
             info.unitId = Vst::kRootUnitId;
 
             // Is this a meter?
-            if (((param->getCategory() & 0xffff0000) >> 16) == 2)
+            if (((p.getParameterCategory (index) & 0xffff0000) >> 16) == 2)
                 info.flags = Vst::ParameterInfo::kIsReadOnly;
             else
-                info.flags = param->isAutomatable() ? Vst::ParameterInfo::kCanAutomate : 0;
+                info.flags = p.isParameterAutomatable (index) ? Vst::ParameterInfo::kCanAutomate : 0;
 
             valueNormalized = info.defaultNormalizedValue;
         }

@@ -525,7 +525,7 @@ public:
                             const String text (String::fromCFString (pv->inString));
 
                             if (AudioProcessorParameter* param = juceFilter->getParameters() [paramID])
-                                pv->outValue = param->getValueForText (text) * getMaximumParameterValue (param);
+                                pv->outValue = param->getValueForText (text) * getMaximumParameterValue (paramID);
                             else
                                 pv->outValue = text.getFloatValue();
 
@@ -546,7 +546,7 @@ public:
                             String text;
 
                             if (AudioProcessorParameter* param = juceFilter->getParameters() [paramID])
-                                text = param->getText (value / getMaximumParameterValue (param), 0);
+                                text = param->getText (value / getMaximumParameterValue (paramID), 0);
                             else
                                 text = String (value);
 
@@ -805,13 +805,13 @@ public:
 
     //==============================================================================
     // When parameters are discrete we need to use integer values.
-    static float getMaximumParameterValue (AudioProcessorParameter* param)
+    float getMaximumParameterValue (int parameterIndex)
     {
        #if JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
-        ignoreUnused (param);
+        ignoreUnused (parameterIndex);
         return 1.0f;
        #else
-        return param->isDiscrete() ? (float) (param->getNumSteps() - 1) : 1.0f;
+        return juceFilter->isParameterDiscrete (parameterIndex) ? (float) (juceFilter->getParameterNumSteps (parameterIndex) - 1) : 1.0f;
        #endif
     }
 
@@ -835,22 +835,22 @@ public:
             outParameterInfo.flags |= (UInt32) kAudioUnitParameterFlag_IsHighResolution;
            #endif
 
-            auto* param = juceFilter->getParameters().getUnchecked (index);
-
-            const String name (param->getName (512));
+            const String name (juceFilter->getParameterName (index));
 
             // Set whether the param is automatable (unnamed parameters aren't allowed to be automated)
-            if (name.isEmpty() || ! param->isAutomatable())
+            if (name.isEmpty() || ! juceFilter->isParameterAutomatable (index))
                 outParameterInfo.flags |= kAudioUnitParameterFlag_NonRealTime;
 
-            if (! param->isDiscrete())
+            const bool isParameterDiscrete = juceFilter->isParameterDiscrete (index);
+
+            if (! isParameterDiscrete)
                 outParameterInfo.flags |= kAudioUnitParameterFlag_CanRamp;
 
-            if (param->isMetaParameter())
+            if (juceFilter->isMetaParameter (index))
                 outParameterInfo.flags |= kAudioUnitParameterFlag_IsGlobalMeta;
 
             // Is this a meter?
-            if (((param->getCategory() & 0xffff0000) >> 16) == 2)
+            if (((juceFilter->getParameterCategory (index) & 0xffff0000) >> 16) == 2)
             {
                 outParameterInfo.flags &= ~kAudioUnitParameterFlag_IsWritable;
                 outParameterInfo.flags |= kAudioUnitParameterFlag_MeterReadOnly | kAudioUnitParameterFlag_DisplayLogarithmic;
@@ -859,7 +859,7 @@ public:
             else
             {
                #if ! JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
-                outParameterInfo.unit = param->isDiscrete() ? kAudioUnitParameterUnit_Indexed
+                outParameterInfo.unit = isParameterDiscrete ? kAudioUnitParameterUnit_Indexed
                                                             : kAudioUnitParameterUnit_Generic;
                #endif
             }
@@ -867,8 +867,8 @@ public:
             MusicDeviceBase::FillInParameterName (outParameterInfo, name.toCFString(), true);
 
             outParameterInfo.minValue = 0.0f;
-            outParameterInfo.maxValue = getMaximumParameterValue (param);
-            outParameterInfo.defaultValue = param->getDefaultValue();
+            outParameterInfo.maxValue = getMaximumParameterValue (index);
+            outParameterInfo.defaultValue = juceFilter->getParameterDefaultValue (index);
             jassert (outParameterInfo.defaultValue >= outParameterInfo.minValue
                       && outParameterInfo.defaultValue <= outParameterInfo.maxValue);
 
@@ -885,9 +885,10 @@ public:
     {
         if (inScope == kAudioUnitScope_Global && juceFilter != nullptr)
         {
-            auto* param = juceFilter->getParameters().getUnchecked (getJuceIndexForAUParameterID (inID));
+            const auto index = getJuceIndexForAUParameterID (inID);
+            auto* param = juceFilter->getParameters().getUnchecked (index);
 
-            outValue = param->getValue() * getMaximumParameterValue (param);
+            outValue = param->getValue() * getMaximumParameterValue (index);
             return noErr;
         }
 
@@ -902,9 +903,10 @@ public:
     {
         if (inScope == kAudioUnitScope_Global && juceFilter != nullptr)
         {
-            auto* param = juceFilter->getParameters().getUnchecked (getJuceIndexForAUParameterID (inID));
+            const auto index = getJuceIndexForAUParameterID (inID);
+            auto* param = juceFilter->getParameters().getUnchecked (index);
 
-            param->setValue (inValue / getMaximumParameterValue (param));
+            param->setValue (inValue / getMaximumParameterValue (index));
             return noErr;
         }
 
