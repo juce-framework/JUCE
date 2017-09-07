@@ -259,10 +259,12 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
 // these classes are C++11-only
 #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
  #include "layout/juce_FlexBox.cpp"
- #include "layout/juce_GridItem.cpp"
- #include "layout/juce_Grid.cpp"
- #if JUCE_UNIT_TESTS
-  #include "layout/juce_GridUnitTests.cpp"
+ #if JUCE_HAS_CONSTEXPR
+  #include "layout/juce_GridItem.cpp"
+  #include "layout/juce_Grid.cpp"
+  #if JUCE_UNIT_TESTS
+   #include "layout/juce_GridUnitTests.cpp"
+  #endif
  #endif
 #endif
 

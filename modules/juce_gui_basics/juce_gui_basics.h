@@ -299,6 +299,9 @@ class DrawableButton;
 #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
 #include "layout/juce_FlexItem.h"
 #include "layout/juce_FlexBox.h"
+#endif
+
+#if JUCE_HAS_CONSTEXPR
 #include "layout/juce_GridItem.h"
 #include "layout/juce_Grid.h"
 

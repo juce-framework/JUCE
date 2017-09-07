@@ -27,7 +27,7 @@
 #include "../JuceDemoHeader.h"
 
 // these classes are C++11-only
-#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
+#if JUCE_HAS_CONSTEXPR
 
 struct GridDemo   : public Component
 {
@@ -119,4 +119,4 @@ struct GridDemo   : public Component
 // This static object will register this demo type in a global list of demos..
 static JuceDemoType<GridDemo> demo ("10 Components: GridDemo");
 
-#endif // JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
+#endif // JUCE_HAS_CONSTEXPR

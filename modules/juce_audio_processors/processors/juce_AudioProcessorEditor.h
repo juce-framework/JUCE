@@ -184,6 +184,8 @@ private:
         void componentParentHierarchyChanged (Component&) override                  { ed.updatePeer(); }
 
         AudioProcessorEditor& ed;
+
+        JUCE_DECLARE_NON_COPYABLE (AudioProcessorEditorListener)
     };
 
     //==============================================================================
