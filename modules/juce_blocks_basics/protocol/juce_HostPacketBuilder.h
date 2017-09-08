@@ -20,6 +20,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace BlocksProtocol
+{
 
 /**
     Helper class for constructing a packet for sending to a BLOCKS device
@@ -314,3 +318,6 @@ private:
         data << MessageType ((uint32) type);
     }
 };
+
+} // namespace BlocksProtocol
+} // namespace juce

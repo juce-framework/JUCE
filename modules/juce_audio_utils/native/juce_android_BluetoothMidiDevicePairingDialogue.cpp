@@ -24,7 +24,9 @@
   ==============================================================================
 */
 
-//==============================================================================
+namespace juce
+{
+
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (getMidiBluetoothAddresses, "getMidiBluetoothAddresses", "()[Ljava/lang/String;") \
  METHOD (pairBluetoothMidiDevice, "pairBluetoothMidiDevice", "(Ljava/lang/String;)Z") \
@@ -482,3 +484,5 @@ bool BluetoothMidiDevicePairingDialogue::isAvailable()
     jobject btManager (android.activity.callObjectMethod (JuceAppActivity.getAndroidBluetoothManager));
     return btManager != nullptr;
 }
+
+} // namespace juce

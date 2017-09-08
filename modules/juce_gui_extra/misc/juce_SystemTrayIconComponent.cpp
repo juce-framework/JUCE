@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_WINDOWS || JUCE_LINUX || JUCE_MAC
 
 SystemTrayIconComponent::SystemTrayIconComponent()
@@ -36,3 +39,5 @@ SystemTrayIconComponent::~SystemTrayIconComponent()
 }
 
 #endif
+
+} // namespace juce

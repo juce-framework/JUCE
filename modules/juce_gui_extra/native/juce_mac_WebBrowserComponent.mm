@@ -26,6 +26,9 @@
 
 #if JUCE_MAC
 
+namespace juce
+{
+
 struct WebViewKeyEquivalentResponder : public ObjCClass<WebView>
 {
     WebViewKeyEquivalentResponder() : ObjCClass<WebView> ("WebViewKeyEquivalentResponder_")
@@ -152,8 +155,6 @@ private:
 
 #else
 
-} // (juce namespace)
-
 //==============================================================================
 @interface WebViewTapDetector  : NSObject<UIGestureRecognizerDelegate>
 {
@@ -168,7 +169,7 @@ private:
 - (BOOL) gestureRecognizer: (UIGestureRecognizer*) gestureRecognizer
          shouldRecognizeSimultaneouslyWithGestureRecognizer: (UIGestureRecognizer*) otherGestureRecognizer
 {
-    ignoreUnused (gestureRecognizer, otherGestureRecognizer);
+    juce::ignoreUnused (gestureRecognizer, otherGestureRecognizer);
     return YES;
 }
 
@@ -198,17 +199,18 @@ private:
 - (BOOL) webView: (UIWebView*) webView shouldStartLoadWithRequest: (NSURLRequest*) request
                                                    navigationType: (UIWebViewNavigationType) navigationType
 {
-    ignoreUnused (webView, navigationType);
-    return ownerComponent->pageAboutToLoad (nsStringToJuce (request.URL.absoluteString));
+    juce::ignoreUnused (webView, navigationType);
+    return ownerComponent->pageAboutToLoad (juce::nsStringToJuce (request.URL.absoluteString));
 }
 
 - (void) webViewDidFinishLoad: (UIWebView*) webView
 {
-    ownerComponent->pageFinishedLoading (nsStringToJuce (webView.request.URL.absoluteString));
+    ownerComponent->pageFinishedLoading (juce::nsStringToJuce (webView.request.URL.absoluteString));
 }
 @end
 
-namespace juce {
+namespace juce
+{
 
 #endif
 
@@ -485,3 +487,5 @@ void WebBrowserComponent::clearCookies()
 
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
+
+} // namespace juce

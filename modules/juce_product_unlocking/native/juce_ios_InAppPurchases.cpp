@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 template <> struct ContainerDeletePolicy<SKProductsRequest>                                                { static void destroy (NSObject* o) { [o release]; } };
 template <> struct ContainerDeletePolicy<SKReceiptRefreshRequest>                                          { static void destroy (NSObject* o) { [o release]; } };
 template <> struct ContainerDeletePolicy<NSObject<SKProductsRequestDelegate,SKPaymentTransactionObserver>> { static void destroy (NSObject* o) { [o release]; } };
@@ -677,3 +680,5 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
     OwnedArray<PendingDownloadsTransaction> pendingDownloadsTransactions;
     Array<Listener::PurchaseInfo> restoredPurchases;
 };
+
+} // namespace juce

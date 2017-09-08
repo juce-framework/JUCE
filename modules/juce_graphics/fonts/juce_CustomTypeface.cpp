@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class CustomTypeface::GlyphInfo
 {
 public:
@@ -406,3 +409,5 @@ EdgeTable* CustomTypeface::getEdgeTableForGlyph (int glyphNumber, const AffineTr
 
     return nullptr;
 }
+
+} // namespace juce

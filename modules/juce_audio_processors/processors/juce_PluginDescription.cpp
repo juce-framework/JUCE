@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 PluginDescription::PluginDescription()
     : uid (0),
       isInstrument (false),
@@ -144,3 +147,5 @@ bool PluginDescription::loadFromXml (const XmlElement& xml)
 
     return false;
 }
+
+} // namespace juce

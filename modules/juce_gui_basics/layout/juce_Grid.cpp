@@ -24,6 +24,8 @@
   ==============================================================================
 */
 
+namespace juce
+{
 
 struct Grid::SizeCalculation
 {
@@ -1023,3 +1025,5 @@ void Grid::performLayout (juce::Rectangle<int> targetArea)
             c->setBounds (item->currentBounds.toNearestInt());
     }
 }
+
+} // namespace juce

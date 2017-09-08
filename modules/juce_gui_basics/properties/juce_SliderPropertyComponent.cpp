@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 SliderPropertyComponent::SliderPropertyComponent (const String& name,
                                                   const double rangeMin,
                                                   const double rangeMax,
@@ -82,3 +85,5 @@ void SliderPropertyComponent::sliderValueChanged (Slider*)
     if (getValue() != slider.getValue())
         setValue (slider.getValue());
 }
+
+} // namespace juce

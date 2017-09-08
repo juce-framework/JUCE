@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 DirectoryIterator::DirectoryIterator (const File& directory, bool recursive,
                                       const String& pattern, const int type)
   : wildCards (parseWildcards (pattern)),
@@ -158,3 +161,5 @@ float DirectoryIterator::getEstimatedProgress() const
 
     return jlimit (0.0f, 1.0f, detailedIndex / totalNumFiles);
 }
+
+} // namespace juce

@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -388,3 +388,5 @@ private:
     explicit AudioChannelSet (uint32);
     explicit AudioChannelSet (const Array<ChannelType>&);
 };
+
+} // namespace juce

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 // a word or space that can't be broken down any further
 struct TextAtom
 {
@@ -2519,3 +2522,5 @@ void TextEditor::coalesceSimilarSections()
         }
     }
 }
+
+} // namespace juce

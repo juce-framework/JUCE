@@ -92,14 +92,14 @@
 //==============================================================================
 namespace juce
 {
-
-class Image;
-class AffineTransform;
-class Path;
-class Font;
-class Graphics;
-class FillType;
-class LowLevelGraphicsContext;
+    class Image;
+    class AffineTransform;
+    class Path;
+    class Font;
+    class Graphics;
+    class FillType;
+    class LowLevelGraphicsContext;
+}
 
 #include "geometry/juce_AffineTransform.h"
 #include "geometry/juce_Point.h"
@@ -145,5 +145,3 @@ class LowLevelGraphicsContext;
 #if JUCE_DIRECT2D && JUCE_WINDOWS
 #include "native/juce_win32_Direct2DGraphicsContext.h"
 #endif
-
-}

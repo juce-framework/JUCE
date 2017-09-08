@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 bool File::copyInternal (const File& dest) const
 {
     FileInputStream in (*this);
@@ -145,3 +148,5 @@ bool DirectoryIterator::NativeIterator::next (String& filenameFound,
 {
     return pimpl->next (filenameFound, isDir, isHidden, fileSize, modTime, creationTime, isReadOnly);
 }
+
+} // namespace juce

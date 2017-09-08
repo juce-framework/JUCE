@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 AudioIODevice::AudioIODevice (const String& deviceName, const String& deviceTypeName)
     : name (deviceName), typeName (deviceTypeName)
 {
@@ -37,3 +40,5 @@ bool AudioIODevice::showControlPanel()
                      // their hasControlPanel() method.
     return false;
 }
+
+} // namespace juce

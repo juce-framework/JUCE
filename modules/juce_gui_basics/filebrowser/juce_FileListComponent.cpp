@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 Image juce_createIconForFile (const File& file);
 
 
@@ -255,3 +258,5 @@ void FileListComponent::returnKeyPressed (int currentSelectedRow)
 {
     sendDoubleClickMessage (directoryContentsList.getFile (currentSelectedRow));
 }
+
+} // namespace juce

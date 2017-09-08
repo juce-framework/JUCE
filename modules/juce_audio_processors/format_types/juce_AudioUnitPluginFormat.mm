@@ -26,8 +26,6 @@
 
 #if JUCE_PLUGINHOST_AU && (JUCE_MAC || JUCE_IOS)
 
-} // (juce namespace)
-
 #include <AudioUnit/AudioUnit.h>
 #if JUCE_MAC
 #include <AudioUnit/AUCocoaUIView.h>
@@ -57,19 +55,16 @@
 
 #include <unordered_map>
 
-namespace juce
-{
-
-#include "../../juce_audio_devices/native/juce_MidiDataConcatenator.h"
-
 #if JUCE_SUPPORT_CARBON
  #include "../../juce_gui_extra/native/juce_mac_CarbonViewWrapperComponent.h"
 #endif
 
-#include "../../juce_core/native/juce_osx_ObjCHelpers.h"
-
 #include "../../juce_audio_basics/native/juce_mac_CoreAudioLayouts.h"
+#include "../../juce_audio_devices/native/juce_MidiDataConcatenator.h"
 #include "juce_AU_Shared.h"
+
+namespace juce
+{
 
 // Change this to disable logging of various activities
 #ifndef AU_LOGGING
@@ -2463,9 +2458,11 @@ bool AudioUnitPluginFormat::doesPluginStillExist (const PluginDescription& desc)
 
 FileSearchPath AudioUnitPluginFormat::getDefaultLocationsToSearch()
 {
-    return FileSearchPath();
+    return {};
 }
 
 #undef JUCE_AU_LOG
+
+} // namespace juce
 
 #endif

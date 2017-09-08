@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 MixerAudioSource::MixerAudioSource()
    : currentSampleRate (0.0), bufferSizeExpected (0)
 {
@@ -151,3 +154,5 @@ void MixerAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& info)
         info.clearActiveBufferRegion();
     }
 }
+
+} // namespace juce

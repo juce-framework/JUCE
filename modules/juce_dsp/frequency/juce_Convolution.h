@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 /**
     Performs stereo uniform-partitioned convolution of an input signal with an
@@ -136,3 +140,6 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Convolution)
 };
+
+} // namespace dsp
+} // namespace juce

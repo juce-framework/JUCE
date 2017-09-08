@@ -55,7 +55,6 @@ using namespace Vst2;
  #pragma warning (disable: 4355) // ("this" used in initialiser list warning)
 #endif
 
-//==============================================================================
 #include "juce_VSTMidiEventList.h"
 
 #if JUCE_MINGW
@@ -77,6 +76,10 @@ using namespace Vst2;
 #ifndef JUCE_VST_WRAPPER_INVOKE_MAIN
  #define JUCE_VST_WRAPPER_INVOKE_MAIN  effect = module->moduleMain (&audioMaster);
 #endif
+
+//==============================================================================
+namespace juce
+{
 
 //==============================================================================
 namespace
@@ -2971,5 +2974,7 @@ pointer_sized_int JUCE_CALLTYPE VSTPluginFormat::dispatcher (AudioPluginInstance
 }
 
 void VSTPluginFormat::aboutToScanVSTShellPlugin (const PluginDescription&) {}
+
+} // namespace juce
 
 #endif

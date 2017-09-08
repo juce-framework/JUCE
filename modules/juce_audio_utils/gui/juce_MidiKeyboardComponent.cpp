@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class MidiKeyboardUpDownButton  : public Button
 {
 public:
@@ -936,3 +939,5 @@ void MidiKeyboardComponent::focusLost (FocusChangeType)
 {
     resetAnyKeysInUse();
 }
+
+} // namespace juce

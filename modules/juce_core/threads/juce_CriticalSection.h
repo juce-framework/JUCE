@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -254,3 +254,5 @@ typedef CriticalSection::ScopedUnlockType  ScopedUnlock;
     @see CriticalSection::tryEnter, ScopedLock, ScopedUnlock, ScopedReadLock
 */
 typedef CriticalSection::ScopedTryLockType  ScopedTryLock;
+
+} // namespace juce

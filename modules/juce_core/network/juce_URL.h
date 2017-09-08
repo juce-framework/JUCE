@@ -20,9 +20,11 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 class WebInputStream;
+
 //==============================================================================
 /**
     Represents a URL and has a bunch of useful functions to manipulate it.
@@ -516,3 +518,5 @@ private:
 
     JUCE_LEAK_DETECTOR (URL)
 };
+
+} // namespace juce

@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 CriticalSection::CriticalSection() noexcept
 {
     pthread_mutexattr_t atts;
@@ -1497,3 +1500,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (Pimpl)
 };
+
+} // namespace juce

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 Component* Component::currentlyFocusedComponent = nullptr;
 
 
@@ -3039,3 +3042,5 @@ bool Component::BailOutChecker::shouldBailOut() const noexcept
 {
     return safePointer == nullptr;
 }
+
+} // namespace juce

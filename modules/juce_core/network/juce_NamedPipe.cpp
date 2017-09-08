@@ -20,9 +20,10 @@
   ==============================================================================
 */
 
-NamedPipe::NamedPipe()
+namespace juce
 {
-}
+
+NamedPipe::NamedPipe() {}
 
 NamedPipe::~NamedPipe()
 {
@@ -58,3 +59,5 @@ String NamedPipe::getName() const
 }
 
 // other methods for this class are implemented in the platform-specific files
+
+} // namespace juce

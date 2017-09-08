@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 void FileChooser::showPlatformDialog (Array<File>& /*results*/,
                                       const String& /*title*/,
                                       const File& /*currentFileOrDirectory*/,
@@ -45,3 +48,5 @@ bool FileChooser::isPlatformDialogAvailable()
 {
     return false;
 }
+
+} // namespace juce

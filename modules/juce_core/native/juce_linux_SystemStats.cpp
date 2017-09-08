@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 void Logger::outputDebugString (const String& text)
 {
     std::cerr << text << std::endl;
@@ -199,3 +202,5 @@ JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger() noexcept
              .getIntValue() > 0;
    #endif
 }
+
+} // namespace juce

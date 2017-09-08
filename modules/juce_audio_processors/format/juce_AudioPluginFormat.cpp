@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace AudioPluginFormatHelpers
 {
     struct CallbackInvoker
@@ -207,3 +210,5 @@ void AudioPluginFormat::createPluginInstanceOnMessageThread (const PluginDescrip
     createPluginInstance (description, initialSampleRate, initialBufferSize, completion,
                           AudioPluginFormatHelpers::CallbackInvoker::staticCompletionCallback);
 }
+
+} // namespace juce

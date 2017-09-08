@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 // this will throw an assertion if you try to draw something that's not
 // possible in postscript
 #define WARN_ABOUT_NON_POSTSCRIPT_OPERATIONS 0
@@ -533,3 +536,5 @@ void LowLevelGraphicsPostScriptRenderer::drawGlyph (int glyphNumber, const Affin
     font.getTypeface()->getOutlineForGlyph (glyphNumber, p);
     fillPath (p, AffineTransform::scale (font.getHeight() * font.getHorizontalScale(), font.getHeight()).followedBy (transform));
 }
+
+} // namespace juce

@@ -24,6 +24,8 @@
   ==============================================================================
 */
 
+namespace juce
+{
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
     METHOD (isBillingSupported,      "isBillingSupported",      "(ILjava/lang/String;Ljava/lang/String;)I") \
@@ -931,3 +933,5 @@ void juce_inAppPurchaseCompleted (void* intentData)
 {
     InAppPurchases::Pimpl::inAppPurchaseCompleted (static_cast<jobject> (intentData));
 }
+
+} // namespace juce

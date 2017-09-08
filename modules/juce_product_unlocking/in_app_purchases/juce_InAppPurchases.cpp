@@ -24,12 +24,15 @@
   ==============================================================================
 */
 
+namespace juce
+{
 
 InAppPurchases::InAppPurchases()
    #if JUCE_ANDROID || JUCE_IOS
     : pimpl (new Pimpl (*this))
    #endif
 {}
+
 InAppPurchases::~InAppPurchases() {}
 
 bool InAppPurchases::isInAppPurchasesSupported() const
@@ -128,3 +131,5 @@ void InAppPurchases::cancelDownloads (const Array<Download*>& downloads)
     ignoreUnused (downloads);
    #endif
 }
+
+} // namespace juce

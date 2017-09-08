@@ -24,10 +24,13 @@
   ==============================================================================
 */
 
-
 /**
     Classes for IIR filter processing.
 */
+namespace juce
+{
+namespace dsp
+{
 namespace IIR
 {
     template <typename NumericType>
@@ -276,5 +279,8 @@ namespace IIR
         static constexpr NumericType inverseRootTwo = static_cast<NumericType> (0.70710678118654752440L);
     };
 
-    #include "juce_IIRFilter_Impl.h"
-}
+} // namespace IIR
+} // namespace dsp
+} // namespace juce
+
+#include "juce_IIRFilter_Impl.h"

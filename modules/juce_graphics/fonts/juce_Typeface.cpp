@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct FontStyleHelpers
 {
     static const char* getStyleName (const bool bold,
@@ -260,3 +263,5 @@ void Typeface::applyVerticalHintingTransform (float fontSize, Path& path)
         return hintingParams->applyVerticalHintingTransform (fontSize, path);
     }
 }
+
+} // namespace juce

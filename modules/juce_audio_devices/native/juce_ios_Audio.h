@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 struct iOSAudioIODeviceType;
 
@@ -86,3 +87,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (iOSAudioIODevice)
 };
+
+} // namespace juce

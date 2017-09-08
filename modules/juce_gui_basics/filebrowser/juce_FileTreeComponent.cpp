@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 Image juce_createIconForFile (const File&);
 
 //==============================================================================
@@ -321,3 +324,5 @@ void FileTreeComponent::setItemHeight (int newHeight)
             root->treeHasChanged();
     }
 }
+
+} // namespace juce

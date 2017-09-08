@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -64,3 +64,5 @@ private:
     WeakReference<MessageListener>::Master masterReference;
     friend class WeakReference<MessageListener>;
 };
+
+} // namespace juce

@@ -24,9 +24,13 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 Image getIconFromIcnsFile (const File& icnsFile, const int size)
 {
     FileInputStream stream (icnsFile);
+
     if (! stream.openedOk())
         return {};
 
@@ -44,6 +48,7 @@ Image getIconFromIcnsFile (const File& icnsFile, const int size)
         return {};
 
     const auto dataSize = juce::ByteOrder::bigEndianInt (headerSection);
+
     if (dataSize <= 0)
         return {};
 
@@ -66,6 +71,7 @@ Image getIconFromIcnsFile (const File& icnsFile, const int size)
             break;
 
         const auto sectionSize = ByteOrder::bigEndianInt (headerSection);
+
         if (sectionSize <= 0)
             break;
 
@@ -81,6 +87,7 @@ Image getIconFromIcnsFile (const File& icnsFile, const int size)
 
                 const auto lastImageIndex = images.size() - 1;
                 const auto lastWidth = images.getReference (lastImageIndex).getWidth();
+
                 if (lastWidth > maxWidth)
                 {
                     maxWidthIndex = lastImageIndex;
@@ -122,16 +129,22 @@ Image JUCE_API getIconFromApplication (const String& applicationPath, const int 
                                 hostIcon = getIconFromIcnsFile (icnsFile, size);
                                 CFRelease (iconPath);
                             }
+
                             CFRelease (iconURL);
                         }
                     }
                 }
+
                 CFRelease (appBundle);
             }
+
             CFRelease (url);
         }
+
         CFRelease (pathCFString);
     }
 
     return hostIcon;
 }
+
+} // namespace juce

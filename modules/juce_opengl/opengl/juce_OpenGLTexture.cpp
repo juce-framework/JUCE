@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 static int getAllowedTextureSize (int x)
 {
    #if JUCE_OPENGL_ALLOW_NON_POWER_OF_TWO_TEXTURES
@@ -185,3 +188,5 @@ void OpenGLTexture::unbind() const
 {
     glBindTexture (GL_TEXTURE_2D, 0);
 }
+
+} // namespace juce

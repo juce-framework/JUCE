@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 const Colour Colours::transparentBlack (0);
 const Colour Colours::transparentWhite (0x00ffffff);
 
@@ -328,3 +331,5 @@ Colour Colours::findColourForName (const String& colourName,
 
     return defaultColour;
 }
+
+} // namespace juce

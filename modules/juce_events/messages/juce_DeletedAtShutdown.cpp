@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 static SpinLock deletedAtShutdownLock; // use a spin lock because it can be statically initialised
 
 static Array<DeletedAtShutdown*>& getDeletedAtShutdownObjects()
@@ -87,3 +90,5 @@ void DeletedAtShutdown::deleteAll()
 #if JUCE_MSVC
  #pragma warning (pop)
 #endif
+
+} // namespace juce

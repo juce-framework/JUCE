@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 static File createTempFile (const File& parentDirectory, String name,
                             const String& suffix, const int optionFlags)
 {
@@ -109,3 +112,5 @@ bool TemporaryFile::deleteTemporaryFile() const
 
     return false;
 }
+
+} // namespace juce

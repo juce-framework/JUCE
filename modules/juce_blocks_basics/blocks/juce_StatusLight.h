@@ -20,6 +20,8 @@
   ==============================================================================
 */
 
+namespace juce
+{
 
 /**
     Represents a status LED on a device.
@@ -45,3 +47,5 @@ public:
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StatusLight)
 };
+
+} // namespace juce

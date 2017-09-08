@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 bool juce_performDragDropFiles (const StringArray&, const bool copyFiles, bool& shouldStop);
 bool juce_performDragDropText (const String&, bool& shouldStop);
 
@@ -526,3 +529,5 @@ void FileDragAndDropTarget::fileDragExit  (const StringArray&)            {}
 void TextDragAndDropTarget::textDragEnter (const String&, int, int)  {}
 void TextDragAndDropTarget::textDragMove  (const String&, int, int)  {}
 void TextDragAndDropTarget::textDragExit  (const String&)            {}
+
+} // namespace juce

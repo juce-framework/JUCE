@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 AudioFormat::AudioFormat (String name, StringArray extensions)
    : formatName (name), fileExtensions (extensions)
 {
@@ -85,3 +88,5 @@ AudioFormatWriter* AudioFormat::createWriterFor (OutputStream* streamToWriteTo,
 
     return nullptr;
 }
+
+} // namespace juce

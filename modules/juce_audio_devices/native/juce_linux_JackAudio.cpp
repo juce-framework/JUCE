@@ -20,7 +20,9 @@
   ==============================================================================
 */
 
-//==============================================================================
+namespace juce
+{
+
 static void* juce_libjackHandle = nullptr;
 
 static void* juce_loadJackFunction (const char* const name)
@@ -602,3 +604,5 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_JACK()
 {
     return new JackAudioIODeviceType();
 }
+
+} // namespace juce

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 TooltipWindow::TooltipWindow (Component* parentComp, int delayMs)
     : Component ("tooltip"),
       millisecondsBeforeTipAppears (delayMs)
@@ -175,3 +178,5 @@ void TooltipWindow::timerCallback()
         }
     }
 }
+
+} // namespace juce

@@ -112,55 +112,55 @@
 //==============================================================================
 namespace juce
 {
+    class Component;
+    class LookAndFeel;
+    class MouseInputSource;
+    class MouseInputSourceInternal;
+    class ComponentPeer;
+    class MarkerList;
+    class RelativeRectangle;
+    class MouseEvent;
+    struct MouseWheelDetails;
+    struct PenDetails;
+    class ToggleButton;
+    class TextButton;
+    class AlertWindow;
+    class TextLayout;
+    class ScrollBar;
+    class ComboBox;
+    class Button;
+    class FilenameComponent;
+    class DocumentWindow;
+    class ResizableWindow;
+    class GroupComponent;
+    class MenuBarComponent;
+    class DropShadower;
+    class GlyphArrangement;
+    class PropertyComponent;
+    class TableHeaderComponent;
+    class Toolbar;
+    class ToolbarItemComponent;
+    class PopupMenu;
+    class ProgressBar;
+    class FileBrowserComponent;
+    class DirectoryContentsDisplayComponent;
+    class FilePreviewComponent;
+    class ImageButton;
+    class CallOutBox;
+    class Drawable;
+    class DrawablePath;
+    class DrawableComposite;
+    class CaretComponent;
+    class BubbleComponent;
+    class KeyPressMappingSet;
+    class ApplicationCommandManagerListener;
+    class DrawableButton;
 
-class Component;
-class LookAndFeel;
-class MouseInputSource;
-class MouseInputSourceInternal;
-class ComponentPeer;
-class MarkerList;
-class RelativeRectangle;
-class MouseEvent;
-struct MouseWheelDetails;
-struct PenDetails;
-class ToggleButton;
-class TextButton;
-class AlertWindow;
-class TextLayout;
-class ScrollBar;
-class ComboBox;
-class Button;
-class FilenameComponent;
-class DocumentWindow;
-class ResizableWindow;
-class GroupComponent;
-class MenuBarComponent;
-class DropShadower;
-class GlyphArrangement;
-class PropertyComponent;
-class TableHeaderComponent;
-class Toolbar;
-class ToolbarItemComponent;
-class PopupMenu;
-class ProgressBar;
-class FileBrowserComponent;
-class DirectoryContentsDisplayComponent;
-class FilePreviewComponent;
-class ImageButton;
-class CallOutBox;
-class Drawable;
-class DrawablePath;
-class DrawableComposite;
-class CaretComponent;
-class BubbleComponent;
-class KeyPressMappingSet;
-class ApplicationCommandManagerListener;
-class DrawableButton;
-
-#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
- class FlexBox;
- class Grid;
-#endif
+    #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
+     class FlexBox;
+     class Grid;
+    #endif
+}
 
 #include "mouse/juce_MouseCursor.h"
 #include "mouse/juce_MouseListener.h"
@@ -297,19 +297,11 @@ class DrawableButton;
 
 // these classes are C++11-only
 #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
-#include "layout/juce_FlexItem.h"
-#include "layout/juce_FlexBox.h"
+ #include "layout/juce_FlexItem.h"
+ #include "layout/juce_FlexBox.h"
+
+ #if JUCE_HAS_CONSTEXPR
+  #include "layout/juce_GridItem.h"
+  #include "layout/juce_Grid.h"
+ #endif
 #endif
-
-#if JUCE_HAS_CONSTEXPR
-#include "layout/juce_GridItem.h"
-#include "layout/juce_Grid.h"
-
-constexpr Grid::Px operator"" _px (long double px) { return Grid::Px { px }; }
-constexpr Grid::Px operator"" _px (unsigned long long px) { return Grid::Px { px }; }
-
-constexpr Grid::Fr operator"" _fr (unsigned long long fr) { return Grid::Fr { fr }; }
-
-#endif
-
-}

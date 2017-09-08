@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 MenuBarComponent::MenuBarComponent (MenuBarModel* m)
     : model (nullptr),
       itemUnderMouse (-1),
@@ -352,3 +355,5 @@ void MenuBarComponent::timerCallback()
     stopTimer();
     updateItemUnderMouse (getMouseXYRelative());
 }
+
+} // namespace juce

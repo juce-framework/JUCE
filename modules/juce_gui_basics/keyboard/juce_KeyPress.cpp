@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 KeyPress::KeyPress() noexcept
     : keyCode (0), textCharacter (0)
 {
@@ -302,3 +305,5 @@ String KeyPress::getTextDescriptionWithIcons() const
     return getTextDescription();
    #endif
 }
+
+} // namespace juce

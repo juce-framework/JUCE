@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 MultiDocumentPanelWindow::MultiDocumentPanelWindow (Colour backgroundColour)
     : DocumentWindow (String(), backgroundColour,
                       DocumentWindow::maximiseButton | DocumentWindow::closeButton, false)
@@ -507,3 +510,5 @@ void MultiDocumentPanel::updateOrder()
     if (components != oldList)
         activeDocumentChanged();
 }
+
+} // namespace juce

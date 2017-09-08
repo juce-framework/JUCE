@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class OpenGLFrameBufferImage   : public ImagePixelData
 {
 public:
@@ -200,3 +203,5 @@ OpenGLFrameBuffer* OpenGLImageType::getFrameBufferFrom (const Image& image)
 
     return nullptr;
 }
+
+} // namespace juce

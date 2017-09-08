@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct RegistryKeyWrapper
 {
     RegistryKeyWrapper (String name, bool createForWriting, DWORD wow64Flags)
@@ -244,3 +247,5 @@ bool JUCE_CALLTYPE WindowsRegistry::registerFileAssociation (const String& fileE
 String WindowsRegistry::getValueWow64 (const String& p, const String& defVal)  { return getValue (p, defVal, WoW64_64bit); }
 bool WindowsRegistry::valueExistsWow64 (const String& p)                       { return valueExists (p, WoW64_64bit); }
 bool WindowsRegistry::keyExistsWow64 (const String& p)                         { return keyExists (p, WoW64_64bit); }
+
+} // namespace juce

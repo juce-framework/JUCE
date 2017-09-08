@@ -91,8 +91,5 @@
  #define JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS 1
 #endif
 
-namespace juce
-{
- #include "utility/juce_PluginHostType.h"
- #include "VST/juce_VSTCallbackHandler.h"
-}
+#include "utility/juce_PluginHostType.h"
+#include "VST/juce_VSTCallbackHandler.h"

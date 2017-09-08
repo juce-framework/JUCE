@@ -54,14 +54,9 @@
 //==============================================================================
 #include <juce_core/juce_core.h>
 
-namespace juce
-{
-
 #include "encryption/juce_BlowFish.h"
 #include "encryption/juce_Primes.h"
 #include "encryption/juce_RSAKey.h"
 #include "hashing/juce_MD5.h"
 #include "hashing/juce_SHA256.h"
 #include "hashing/juce_Whirlpool.h"
-
-}

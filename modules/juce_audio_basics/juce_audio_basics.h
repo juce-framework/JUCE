@@ -51,9 +51,6 @@
 
 #include <juce_core/juce_core.h>
 
-namespace juce
-{
-
 #undef Complex  // apparently some C libraries actually define these symbols (!)
 #undef Factor
 
@@ -94,5 +91,3 @@ namespace juce
 #include "sources/juce_ToneGeneratorAudioSource.h"
 #include "synthesisers/juce_Synthesiser.h"
 #include "audio_play_head/juce_AudioPlayHead.h"
-
-}

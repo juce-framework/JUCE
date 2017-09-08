@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 /**
     Provides in-app purchase functionality.
 
@@ -269,3 +272,5 @@ private:
     ScopedPointer<Pimpl> pimpl;
    #endif
 };
+
+} // namespace juce

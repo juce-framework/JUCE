@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 /*
     IMPORTANT DISCLAIMER: By choosing to enable the JUCE_USE_MP3AUDIOFORMAT flag and
     to compile this MP3 code into your software, you do so AT YOUR OWN RISK! By doing so,
@@ -3161,3 +3164,5 @@ AudioFormatWriter* MP3AudioFormat::createWriterFor (OutputStream*, double /*samp
 }
 
 #endif
+
+} // namespace juce

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 static inline void blurDataTriplets (uint8* d, int num, const int delta) noexcept
 {
     uint32 last = d[0];
@@ -182,3 +185,5 @@ void DropShadowEffect::applyEffect (Image& image, Graphics& g, float scaleFactor
     g.setOpacity (alpha);
     g.drawImageAt (image, 0, 0);
 }
+
+} // namespace juce

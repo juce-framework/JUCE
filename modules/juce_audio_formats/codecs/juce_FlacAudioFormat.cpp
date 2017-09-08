@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_USE_FLAC
 
 }
@@ -621,3 +624,5 @@ StringArray FlacAudioFormat::getQualityOptions()
 }
 
 #endif
+
+} // namespace juce

@@ -28,6 +28,9 @@
 
 #include "../../juce_audio_basics/native/juce_mac_CoreAudioLayouts.h"
 
+namespace juce
+{
+
 //==============================================================================
 namespace
 {
@@ -831,4 +834,7 @@ private:
 static CoreAudioLayoutsUnitTest coreAudioLayoutsUnitTest;
 
 #endif
+
+} // namespace juce
+
 #endif

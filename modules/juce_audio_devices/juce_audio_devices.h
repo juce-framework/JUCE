@@ -140,9 +140,6 @@
 
 
 //==============================================================================
-namespace juce
-{
-
 #include "midi_io/juce_MidiInput.h"
 #include "midi_io/juce_MidiMessageCollector.h"
 #include "midi_io/juce_MidiOutput.h"
@@ -156,5 +153,3 @@ namespace juce
 #if JUCE_IOS
  #include "native/juce_ios_Audio.h"
 #endif
-
-}

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ColourGradient::ColourGradient() noexcept
 {
    #if JUCE_DEBUG
@@ -237,3 +240,5 @@ bool ColourGradient::ColourPoint::operator!= (const ColourPoint& other) const no
 {
     return position != other.position || colour != other.colour;
 }
+
+} // namespace juce

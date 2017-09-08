@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct ImageCache::Pimpl     : private Timer,
                                private DeletedAtShutdown
 {
@@ -163,3 +166,5 @@ void ImageCache::releaseUnusedImages()
 {
     Pimpl::getInstance()->releaseUnusedImages();
 }
+
+} // namespace juce

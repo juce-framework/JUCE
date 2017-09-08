@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class ActionBroadcaster::ActionMessage  : public MessageManager::MessageBase
 {
 public:
@@ -87,3 +90,5 @@ void ActionBroadcaster::sendActionMessage (const String& message) const
     for (int i = actionListeners.size(); --i >= 0;)
         (new ActionMessage (this, message, actionListeners.getUnchecked(i)))->post();
 }
+
+} // namespace juce

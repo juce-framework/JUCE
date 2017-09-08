@@ -24,7 +24,9 @@
   ==============================================================================
 */
 
-//==============================================================================
+namespace juce
+{
+
 // This is an AudioTransportSource which will own it's assigned source
 struct AudioSourceOwningTransportSource  : public AudioTransportSource
 {
@@ -273,3 +275,5 @@ void SoundPlayer::audioDeviceError (const String& errorMessage)
 {
     player.audioDeviceError (errorMessage);
 }
+
+} // namespace juce

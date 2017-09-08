@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 MPESynthesiser::MPESynthesiser()
 {
 }
@@ -352,3 +355,5 @@ void MPESynthesiser::renderNextSubBlock (AudioBuffer<double>& buffer, int startS
             voice->renderNextBlock (buffer, startSample, numSamples);
     }
 }
+
+} // namespace juce

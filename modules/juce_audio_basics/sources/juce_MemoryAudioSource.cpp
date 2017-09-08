@@ -20,7 +20,9 @@
   ==============================================================================
 */
 
-//==============================================================================
+namespace juce
+{
+
 MemoryAudioSource::MemoryAudioSource (AudioBuffer<float>& bufferToUse, bool copyMemory, bool shouldLoop)
     : isLooping (shouldLoop)
 {
@@ -64,3 +66,5 @@ void MemoryAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& bufferT
     if (pos < m)
         dst.clear (bufferToFill.startSample + pos, m - pos);
 }
+
+} // namespace juce

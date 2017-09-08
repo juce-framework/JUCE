@@ -24,6 +24,11 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
+
 /**
     General matrix and vectors class, meant for classic math manipulation such as
     additions, multiplications, and linear systems of equations solving.
@@ -243,3 +248,6 @@ private:
     //==============================================================================
     JUCE_LEAK_DETECTOR (Matrix)
 };
+
+} // namespace dsp
+} // namespace juce

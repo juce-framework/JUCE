@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class ModalComponentManager::ModalItem  : public ComponentMovementWatcher
 {
 public:
@@ -311,3 +314,5 @@ ModalComponentManager::Callback* ModalCallbackFunction::create (std::function<vo
 {
     return new LambdaCallback (f);
 }
+
+} // namespace juce

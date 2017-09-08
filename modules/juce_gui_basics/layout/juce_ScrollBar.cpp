@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class ScrollBar::ScrollbarButton  : public Button
 {
 public:
@@ -428,3 +431,5 @@ bool ScrollBar::keyPressed (const KeyPress& key)
 
     return false;
 }
+
+} // namespace juce

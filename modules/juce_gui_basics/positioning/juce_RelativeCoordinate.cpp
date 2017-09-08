@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 const String RelativeCoordinate::Strings::parent ("parent");
 const String RelativeCoordinate::Strings::left ("left");
 const String RelativeCoordinate::Strings::right ("right");
@@ -147,3 +150,5 @@ String RelativeCoordinate::toString() const
 {
     return term.toString();
 }
+
+} // namespace juce

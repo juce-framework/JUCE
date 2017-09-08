@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class TableListBox::RowComp   : public Component,
                                 public TooltipClient
 {
@@ -483,3 +486,5 @@ Component* TableListBoxModel::refreshComponentForCell (int, int, bool, Component
     jassert (existingComponentToUpdate == nullptr); // indicates a failure in the code that recycles the components
     return nullptr;
 }
+
+} // namespace juce

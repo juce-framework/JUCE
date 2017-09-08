@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -182,3 +182,5 @@ private:
     FloatType currentValue = 0, target = 0, step = 0;
     int countdown = 0, stepsToTarget = 0;
 };
+
+} // namespace juce

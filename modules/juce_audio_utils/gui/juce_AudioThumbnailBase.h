@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 class AudioThumbnailCache;
 
@@ -152,3 +153,5 @@ public:
     /** Returns the hash code that was set by setSource() or setReader(). */
     virtual int64 getHashCode() const = 0;
 };
+
+} // namespace juce

@@ -20,6 +20,8 @@
   ==============================================================================
 */
 
+namespace juce
+{
 
 DrumPadGridProgram::DrumPadGridProgram (Block& b)  : Program (b) {}
 
@@ -870,3 +872,5 @@ juce::String DrumPadGridProgram::getLittleFootProgramPost25() const
 
     )littlefoot";
 }
+
+} // namespace juce

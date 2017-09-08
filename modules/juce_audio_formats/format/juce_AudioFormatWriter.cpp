@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 AudioFormatWriter::AudioFormatWriter (OutputStream* const out,
                                       const String& formatName_,
                                       const double rate,
@@ -358,3 +361,5 @@ void AudioFormatWriter::ThreadedWriter::setFlushInterval (int numSamplesPerFlush
 {
     buffer->setFlushInterval (numSamplesPerFlush);
 }
+
+} // namespace juce

@@ -26,6 +26,9 @@
 
 #if (JUCE_PLUGINHOST_VST || DOXYGEN)
 
+namespace juce
+{
+
 //==============================================================================
 /**
     Implements a plugin format manager for VSTs.
@@ -124,5 +127,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VSTPluginFormat)
 };
 
+} // namespace juce
 
 #endif

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 extern void (*clearOpenGLGlyphCache)(); // declared in juce_graphics
 
 namespace OpenGLRendering
@@ -1894,3 +1897,5 @@ Result OpenGLGraphicsContextCustomShader::checkCompilation (LowLevelGraphicsCont
 
     return Result::fail (errorMessage);
 }
+
+} // namespace juce

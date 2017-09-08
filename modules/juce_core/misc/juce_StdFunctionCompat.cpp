@@ -28,6 +28,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_UNIT_TESTS
 
 namespace FunctionTestsHelpers
@@ -252,3 +255,5 @@ public:
 static FunctionTests functionTests;
 
 #endif
+
+} // namespace juce

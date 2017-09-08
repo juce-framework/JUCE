@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 /* Note: there's a bit of light obfuscation in this code, just to make things
    a bit more annoying for crackers who try to reverse-engineer your binaries, but
    nothing particularly foolproof.
@@ -485,3 +488,5 @@ String KeyGeneration::generateExpiringKeyFile (const String& appName,
 
     return KeyFileUtils::createKeyFile (comment, xml, privateKey);
 }
+
+} // namespace juce

@@ -20,6 +20,8 @@
   ==============================================================================
 */
 
+namespace juce
+{
 
 MidiMessageSequence::MidiEventHolder::MidiEventHolder (const MidiMessage& mm) : message (mm) {}
 MidiMessageSequence::MidiEventHolder::MidiEventHolder (MidiMessage&& mm) : message (static_cast<MidiMessage&&> (mm)) {}
@@ -334,3 +336,5 @@ void MidiMessageSequence::createControllerUpdatesForTime (int channelNumber, dou
         }
     }
 }
+
+} // namespace juce

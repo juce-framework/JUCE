@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 const OSCTimeTag OSCTimeTag::immediately;
 
 static const uint64 millisecondsBetweenOscAndJuceEpochs = 2208988800000ULL;
@@ -147,3 +150,5 @@ public:
 static OSCTimeTagTests OSCTimeTagUnitTests;
 
 #endif
+
+} // namespace juce

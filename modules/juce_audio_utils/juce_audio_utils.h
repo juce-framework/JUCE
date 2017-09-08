@@ -74,9 +74,6 @@
 #endif
 
 //==============================================================================
-namespace juce
-{
-
 #include "gui/juce_AudioDeviceSelectorComponent.h"
 #include "gui/juce_AudioThumbnailBase.h"
 #include "gui/juce_AudioThumbnail.h"
@@ -89,5 +86,3 @@ namespace juce
 #include "players/juce_AudioProcessorPlayer.h"
 #include "audio_cd/juce_AudioCDBurner.h"
 #include "audio_cd/juce_AudioCDReader.h"
-
-}

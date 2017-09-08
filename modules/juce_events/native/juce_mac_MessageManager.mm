@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 typedef void (*AppFocusChangeCallback)();
 AppFocusChangeCallback appFocusChangeCallback = nullptr;
 
@@ -423,3 +426,5 @@ private:
 MountedVolumeListChangeDetector::MountedVolumeListChangeDetector()  { pimpl = new Pimpl (*this); }
 MountedVolumeListChangeDetector::~MountedVolumeListChangeDetector() {}
 #endif
+
+} // namespace juce

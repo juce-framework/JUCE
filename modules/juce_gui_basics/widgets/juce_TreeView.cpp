@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class TreeView::ContentComponent  : public Component,
                                     public TooltipClient,
                                     public AsyncUpdater
@@ -1905,3 +1908,5 @@ TreeViewItem::OpennessRestorer::~OpennessRestorer()
     if (oldOpenness != nullptr)
         treeViewItem.restoreOpennessState (*oldOpenness);
 }
+
+} // namespace juce

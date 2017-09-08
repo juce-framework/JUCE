@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class MD5Generator
 {
 public:
@@ -336,3 +339,5 @@ public:
 static MD5Tests MD5UnitTests;
 
 #endif
+
+} // namespace juce

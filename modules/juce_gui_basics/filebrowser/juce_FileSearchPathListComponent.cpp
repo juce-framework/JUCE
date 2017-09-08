@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 FileSearchPathListComponent::FileSearchPathListComponent()
     : addButton ("+"),
       removeButton ("-"),
@@ -266,3 +269,5 @@ void FileSearchPathListComponent::buttonClicked (Button* button)
 
     changed();
 }
+
+} // namespace juce

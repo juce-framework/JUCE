@@ -24,13 +24,9 @@
   ==============================================================================
 */
 
-} // namespace juce
+namespace juce
+{
 
-#include "../../juce_core/native/juce_osx_ObjCHelpers.h"
-
-namespace juce {
-
-//==============================================================================
 void LookAndFeel::playAlertSound()
 {
     NSBeep();
@@ -619,3 +615,5 @@ bool Desktop::isOSXDarkModeActive()
     return [[[NSUserDefaults standardUserDefaults] stringForKey: nsStringLiteral ("AppleInterfaceStyle")]
                 isEqualToString: nsStringLiteral ("Dark")];
 }
+
+} // namespace juce

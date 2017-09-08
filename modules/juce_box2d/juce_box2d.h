@@ -66,8 +66,5 @@
 #endif
 
 #ifndef DOXYGEN // for some reason, Doxygen sees this as a re-definition of Box2DRenderer
-namespace juce
-{
-  #include "utils/juce_Box2DRenderer.h"
-}
+ #include "utils/juce_Box2DRenderer.h"
 #endif // DOXYGEN

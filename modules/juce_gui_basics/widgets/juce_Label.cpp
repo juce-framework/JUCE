@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 Label::Label (const String& name, const String& labelText)
     : Component (name),
       textValue (labelText),
@@ -472,3 +475,5 @@ void Label::textEditorFocusLost (TextEditor& ed)
 {
     textEditorTextChanged (ed);
 }
+
+} // namespace juce

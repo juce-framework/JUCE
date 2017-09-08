@@ -53,9 +53,6 @@
 #endif
 
 //==============================================================================
-namespace juce
-{
-
 #include "format/juce_AudioFormat.cpp"
 #include "format/juce_AudioFormatManager.cpp"
 #include "format/juce_AudioFormatReader.cpp"
@@ -75,5 +72,3 @@ namespace juce
 #if JUCE_WINDOWS && JUCE_USE_WINDOWS_MEDIA_FORMAT
  #include "codecs/juce_WindowsMediaAudioFormat.cpp"
 #endif
-
-}

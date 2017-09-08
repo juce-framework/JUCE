@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -239,3 +239,5 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream&, const Value&);
 
 /** This typedef is just for compatibility with old code - newer code should use the Value::Listener class directly. */
 typedef Value::Listener ValueListener;
+
+} // namespace juce

@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ResamplingAudioSource::ResamplingAudioSource (AudioSource* const inputSource,
                                               const bool deleteInputWhenDeleted,
                                               const int channels)
@@ -259,3 +262,5 @@ void ResamplingAudioSource::applyFilter (float* samples, int num, FilterState& f
         *samples++ = (float) out;
     }
 }
+
+} // namespace juce

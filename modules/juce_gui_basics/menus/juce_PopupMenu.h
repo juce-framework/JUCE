@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /** Creates and displays a popup-menu.
@@ -750,3 +750,5 @@ private:
 
     JUCE_LEAK_DETECTOR (PopupMenu)
 };
+
+} // namespace juce

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class PluginListComponent::TableModel  : public TableListBoxModel
 {
 public:
@@ -586,3 +589,5 @@ void PluginListComponent::scanFinished (const StringArray& failedFiles)
                                             + ":\n\n"
                                             + shortNames.joinIntoString (", "));
 }
+
+} // namespace juce

@@ -56,9 +56,6 @@
 
 
 //==============================================================================
-namespace juce
-{
-
 #include "osc/juce_OSCTypes.h"
 #include "osc/juce_OSCTimeTag.h"
 #include "osc/juce_OSCArgument.h"
@@ -67,5 +64,3 @@ namespace juce
 #include "osc/juce_OSCBundle.h"
 #include "osc/juce_OSCReceiver.h"
 #include "osc/juce_OSCSender.h"
-
-}

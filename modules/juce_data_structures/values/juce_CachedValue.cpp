@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_UNIT_TESTS
 
 class CachedValueTests  : public UnitTest
@@ -152,3 +155,5 @@ public:
 static CachedValueTests cachedValueTests;
 
 #endif
+
+} // namespace juce

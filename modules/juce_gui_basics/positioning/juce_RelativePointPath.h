@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -187,3 +187,5 @@ private:
     RelativePointPath& operator= (const RelativePointPath&);
     JUCE_LEAK_DETECTOR (RelativePointPath)
 };
+
+} // namespace juce

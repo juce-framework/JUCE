@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 void OpenGLHelpers::resetErrorState()
 {
     while (glGetError() != GL_NO_ERROR) {}
@@ -128,3 +131,5 @@ String OpenGLHelpers::translateFragmentShaderToV3 (const String& code)
 
     return code;
 }
+
+} // namespace juce

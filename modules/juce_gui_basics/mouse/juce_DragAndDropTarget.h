@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -149,3 +149,5 @@ private:
     virtual int itemDropped (const String&, Component*, int, int) { return 0; }
    #endif
 };
+
+} // namespace juce

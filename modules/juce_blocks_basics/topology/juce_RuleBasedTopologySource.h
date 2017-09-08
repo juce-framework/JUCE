@@ -20,6 +20,8 @@
   ==============================================================================
 */
 
+namespace juce
+{
 
 /** This topology source holds and applies a set of rules for transforming
     one device topology into another one that may involve virtual and/or
@@ -74,3 +76,5 @@ private:
     struct Internal;
     juce::ScopedPointer<Internal> internal;
 };
+
+} // namespace juce

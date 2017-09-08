@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -708,3 +708,5 @@ private:
     AudioDataConverters();
     JUCE_DECLARE_NON_COPYABLE (AudioDataConverters)
 };
+
+} // namespace juce

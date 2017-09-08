@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 static bool exeIsAvailable (const char* const executable)
 {
      ChildProcess child;
@@ -206,3 +209,5 @@ void FileChooser::showPlatformDialog (Array<File>& results,
 
     previousWorkingDirectory.setAsCurrentWorkingDirectory();
 }
+
+} // namespace juce

@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #define JUCE_JS_OPERATORS(X) \
     X(semicolon,     ";")        X(dot,          ".")       X(comma,        ",") \
     X(openParen,     "(")        X(closeParen,   ")")       X(openBrace,    "{")    X(closeBrace, "}") \
@@ -1891,3 +1894,5 @@ const NamedValueSet& JavascriptEngine::getRootObjectProperties() const noexcept
 #if JUCE_MSVC
  #pragma warning (pop)
 #endif
+
+} // namespace juce

@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -219,3 +219,5 @@ private:
     static ModifierKeys currentModifiers;
     static void updateCurrentModifiers() noexcept;
 };
+
+} // namespace juce

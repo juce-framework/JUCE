@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 #if JUCE_WINDOWS && ! DOXYGEN
@@ -631,3 +631,5 @@ public:
 private:
     static double mulexp10 (double value, int exponent) noexcept;
 };
+
+} // namespace juce

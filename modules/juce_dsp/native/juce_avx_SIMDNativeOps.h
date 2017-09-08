@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 #ifndef DOXYGEN
 
@@ -558,3 +562,6 @@ struct SIMDNativeOps<uint64_t>
 };
 
 #endif
+
+} // namespace dsp
+} // namespace juce

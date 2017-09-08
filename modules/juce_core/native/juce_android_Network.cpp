@@ -20,7 +20,9 @@
   ==============================================================================
 */
 
-//==============================================================================
+namespace juce
+{
+
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (constructor, "<init>", "()V") \
  METHOD (toString, "toString", "()Ljava/lang/String;") \
@@ -298,3 +300,5 @@ void IPAddress::findAllAddresses (Array<IPAddress>& result, bool /*includeIPv6*/
         ::close (sock);
     }
 }
+
+} // namespace juce

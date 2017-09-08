@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 #if JUCE_USE_CDREADER || DOXYGEN
 
@@ -172,3 +173,5 @@ private:
 };
 
 #endif
+
+} // namespace juce

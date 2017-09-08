@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ToneGeneratorAudioSource::ToneGeneratorAudioSource()
     : frequency (1000.0),
       sampleRate (44100.0),
@@ -71,3 +74,5 @@ void ToneGeneratorAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& 
             info.buffer->setSample (j, info.startSample + i, sample);
     }
 }
+
+} // namespace juce

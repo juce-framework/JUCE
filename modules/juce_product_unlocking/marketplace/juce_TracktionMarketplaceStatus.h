@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 /**
     An implementation of the OnlineUnlockStatus class which talks to the
     Tracktion Marketplace server.
@@ -51,3 +54,5 @@ public:
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TracktionMarketplaceStatus)
 };
+
+} // namespace juce

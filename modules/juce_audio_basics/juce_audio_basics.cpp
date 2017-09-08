@@ -76,9 +76,6 @@
  #include <arm_neon.h>
 #endif
 
-namespace juce
-{
-
 #include "buffers/juce_AudioDataConverters.cpp"
 #include "buffers/juce_FloatVectorOperations.cpp"
 #include "buffers/juce_AudioChannelSet.cpp"
@@ -109,5 +106,3 @@ namespace juce
 #include "sources/juce_ReverbAudioSource.cpp"
 #include "sources/juce_ToneGeneratorAudioSource.cpp"
 #include "synthesisers/juce_Synthesiser.cpp"
-
-}

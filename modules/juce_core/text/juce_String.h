@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -1411,10 +1411,9 @@ JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const Str
 /** Writes a string to an OutputStream as UTF8. */
 JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, StringRef stringToWrite);
 
-
-#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS // just used to avoid compiling this under compilers that lack libc++
 } // namespace juce
 
+#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS // just used to avoid compiling this under compilers that lack libc++
 namespace std
 {
     template <> struct hash<juce::String>
@@ -1422,6 +1421,4 @@ namespace std
         size_t operator() (const juce::String& s) const noexcept    { return s.hash(); }
     };
 }
-
-namespace juce {
 #endif

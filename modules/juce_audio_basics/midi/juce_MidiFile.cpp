@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace MidiFileHelpers
 {
     static void writeVariableLengthInt (OutputStream& out, unsigned int v)
@@ -443,3 +446,5 @@ bool MidiFile::writeTrack (OutputStream& mainOut, const int trackNum)
 
     return true;
 }
+
+} // namespace juce

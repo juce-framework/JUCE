@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 /**
     This structure is passed into a DSP algorithm's prepare() method, and contains
@@ -153,3 +157,6 @@ private:
     const AudioBlockType& inputBlock;
     AudioBlockType& outputBlock;
 };
+
+} // namespace dsp
+} // namespace juce

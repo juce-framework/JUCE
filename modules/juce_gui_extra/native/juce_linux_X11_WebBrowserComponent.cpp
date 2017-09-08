@@ -24,7 +24,9 @@
   ==============================================================================
 */
 
-//==============================================================================
+namespace juce
+{
+
 extern int juce_gtkWebkitMain (int argc, const char* argv[]);
 
 class CommandReceiver
@@ -821,3 +823,5 @@ int juce_gtkWebkitMain (int argc, const char* argv[])
                            String (argv[3]).getIntValue());
     return child.entry();
 }
+
+} // namespace juce

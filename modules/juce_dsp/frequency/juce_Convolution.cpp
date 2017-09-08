@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 /** This class is the convolution engine itself, processing only one channel at
     a time of input signal.
@@ -1141,3 +1145,6 @@ void Convolution::processSamples (const AudioBlock<float>& input, AudioBlock<flo
         }
     }
 }
+
+} // namespace dsp
+} // namespace juce

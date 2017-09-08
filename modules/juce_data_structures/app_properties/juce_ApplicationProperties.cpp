@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ApplicationProperties::ApplicationProperties()
     : commonSettingsAreReadOnly (0)
 {
@@ -102,3 +105,5 @@ void ApplicationProperties::closeFiles()
     userProps = nullptr;
     commonProps = nullptr;
 }
+
+} // namespace juce

@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -42,3 +42,5 @@ public:
     */
     virtual void actionListenerCallback (const String& message) = 0;
 };
+
+} // namespace juce

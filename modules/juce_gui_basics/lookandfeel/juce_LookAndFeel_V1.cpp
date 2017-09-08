@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 LookAndFeel_V1::LookAndFeel_V1()
 {
     setColour (TextButton::buttonColourId,          Colour (0xffbbbbff));
@@ -567,3 +570,5 @@ void LookAndFeel_V1::positionDocumentWindowButtons (DocumentWindow&,
     if (minimiseButton != nullptr)
         minimiseButton->setBounds (x, titleBarY - 2, buttonW, titleBarH);
 }
+
+} // namespace juce

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 LookAndFeel_V3::LookAndFeel_V3()
 {
     setColour (TreeView::selectedItemBackgroundColourId, Colour (0x301111ee));
@@ -637,3 +640,5 @@ Path LookAndFeel_V3::getCrossShape (const float height)
     p.scaleToFit (0, 0, height * 2.0f, height, true);
     return p;
 }
+
+} // namespace juce

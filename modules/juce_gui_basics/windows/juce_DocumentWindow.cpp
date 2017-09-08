@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class DocumentWindow::ButtonListenerProxy  : public Button::Listener
 {
 public:
@@ -360,3 +363,5 @@ void DocumentWindow::userTriedToCloseWindow()
 {
     closeButtonPressed();
 }
+
+} // namespace juce

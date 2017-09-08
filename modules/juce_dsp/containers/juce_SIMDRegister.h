@@ -24,6 +24,11 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
+
 #ifndef DOXYGEN
  // This class is needed internally.
  template <typename Scalar>
@@ -395,13 +400,12 @@ struct CmplxSIMDOps<std::complex<Scalar> >
  }
 #endif
 
-//==============================================================================
-// Extend some common used global functions to SIMDRegister types
-} // close namespace dsp
+} // namespace dsp
 
+// Extend some common used global functions to SIMDRegister types
 template <typename Type>
 inline dsp::SIMDRegister<Type> JUCE_VECTOR_CALLTYPE jmin (dsp::SIMDRegister<Type> a, dsp::SIMDRegister<Type> b) { return dsp::SIMDRegister<Type>::min (a, b); }
 template <typename Type>
 inline dsp::SIMDRegister<Type> JUCE_VECTOR_CALLTYPE jmax (dsp::SIMDRegister<Type> a, dsp::SIMDRegister<Type> b) { return dsp::SIMDRegister<Type>::max (a, b); }
 
-namespace dsp {
+} // namespace juce

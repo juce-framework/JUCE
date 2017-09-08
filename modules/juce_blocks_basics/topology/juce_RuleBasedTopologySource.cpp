@@ -20,6 +20,8 @@
   ==============================================================================
 */
 
+namespace juce
+{
 
 struct RuleBasedTopologySource::Internal  : public TopologySource::Listener,
                                             private juce::AsyncUpdater
@@ -100,3 +102,5 @@ BlockTopology RuleBasedTopologySource::getCurrentTopology() const             { 
 
 void RuleBasedTopologySource::clearRules()                                    { internal->clearRules(); }
 void RuleBasedTopologySource::addRule (Rule* r)                               { internal->addRule (r); }
+
+} // namespace juce

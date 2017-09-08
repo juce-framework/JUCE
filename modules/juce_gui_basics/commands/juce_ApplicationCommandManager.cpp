@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ApplicationCommandManager::ApplicationCommandManager()
     : firstTarget (nullptr)
 {
@@ -312,3 +315,5 @@ void ApplicationCommandManager::globalFocusChanged (Component*)
 {
     commandStatusChanged();
 }
+
+} // namespace juce

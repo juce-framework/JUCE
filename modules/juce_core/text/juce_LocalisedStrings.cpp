@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 LocalisedStrings::LocalisedStrings (const String& fileContents, bool ignoreCase)
 {
     loadFromText (fileContents, ignoreCase);
@@ -201,3 +204,5 @@ JUCE_API String translate (const String& text, const String& resultIfNotFound)
 
     return resultIfNotFound;
 }
+
+} // namespace juce

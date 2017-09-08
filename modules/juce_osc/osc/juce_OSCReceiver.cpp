@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace
 {
     //==============================================================================
@@ -1156,3 +1159,5 @@ public:
 static OSCInputStreamTests OSCInputStreamUnitTests;
 
 #endif // JUCE_UNIT_TESTS
+
+} // namespace juce

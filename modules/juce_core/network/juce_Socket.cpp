@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_MSVC
  #pragma warning (push)
  #pragma warning (disable : 4127 4389 4018)
@@ -770,3 +773,5 @@ bool DatagramSocket::setEnablePortReuse (bool enabled)
 #if JUCE_MSVC
  #pragma warning (pop)
 #endif
+
+} // namespace juce

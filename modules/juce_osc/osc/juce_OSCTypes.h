@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 
@@ -95,3 +96,5 @@ struct OSCInternalError : public OSCException
 {
     OSCInternalError (const String& desc) : OSCException (desc) {}
 };
+
+} // namespace juce

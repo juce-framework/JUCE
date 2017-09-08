@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 Thread::Thread (const String& name, size_t stackSize)
    : threadName (name), threadStackSize (stackSize)
 {
@@ -503,3 +506,5 @@ private:
 ThreadLocalValueUnitTest threadLocalValueUnitTest;
 
 #endif
+
+} // namespace juce

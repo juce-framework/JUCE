@@ -24,7 +24,9 @@
   ==============================================================================
 */
 
-//==============================================================================
+namespace juce
+{
+
 static Typeface::Ptr getTypefaceForFontFromLookAndFeel (const Font& font)
 {
     return LookAndFeel::getDefaultLookAndFeel().getTypefaceForFont (font);
@@ -150,3 +152,5 @@ bool LookAndFeel::isUsingNativeAlertWindows()
     return useNativeAlertWindows;
    #endif
 }
+
+} // namespace juce

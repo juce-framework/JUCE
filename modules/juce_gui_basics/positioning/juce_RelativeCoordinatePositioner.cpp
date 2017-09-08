@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct MarkerListScope  : public Expression::Scope
 {
     MarkerListScope (Component& comp) : component (comp) {}
@@ -317,3 +320,5 @@ void RelativeCoordinatePositionerBase::unregisterListeners()
     sourceComponents.clear();
     sourceMarkerLists.clear();
 }
+
+} // namespace juce

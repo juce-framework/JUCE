@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -841,3 +842,5 @@ StandalonePluginHolder* StandalonePluginHolder::getInstance()
 
     return nullptr;
 }
+
+} // namespace juce

@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -203,3 +204,5 @@ private:
     NativeMessageBox() JUCE_DELETED_FUNCTION;
     JUCE_DECLARE_NON_COPYABLE (NativeMessageBox)
 };
+
+} // namespace juce

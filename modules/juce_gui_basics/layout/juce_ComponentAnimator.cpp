@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class ComponentAnimator::AnimationTask
 {
 public:
@@ -345,3 +348,5 @@ void ComponentAnimator::timerCallback()
     if (tasks.size() == 0)
         stopTimer();
 }
+
+} // namespace juce

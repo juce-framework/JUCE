@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -518,3 +518,5 @@ private:
  /** This typedef is just for compatibility with old code and VC6 - newer code should use Button::Listener instead. */
  typedef Button::Listener ButtonListener;
 #endif
+
+} // namespace juce

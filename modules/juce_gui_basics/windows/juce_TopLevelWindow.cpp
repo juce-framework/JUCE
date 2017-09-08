@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 /** Keeps track of the active top level window. */
 class TopLevelWindowManager  : private Timer,
                                private DeletedAtShutdown
@@ -353,3 +356,5 @@ TopLevelWindow* TopLevelWindow::getActiveTopLevelWindow() noexcept
 
     return best;
 }
+
+} // namespace juce

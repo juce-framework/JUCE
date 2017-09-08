@@ -164,14 +164,14 @@
 //==============================================================================
 namespace juce
 {
+    class OpenGLTexture;
+    class OpenGLFrameBuffer;
+    class OpenGLShaderProgram;
+}
 
-class OpenGLTexture;
-class OpenGLFrameBuffer;
-class OpenGLShaderProgram;
-
-#include "geometry/juce_Quaternion.h"
-#include "geometry/juce_Matrix3D.h"
 #include "geometry/juce_Vector3D.h"
+#include "geometry/juce_Matrix3D.h"
+#include "geometry/juce_Quaternion.h"
 #include "geometry/juce_Draggable3DOrientation.h"
 #include "native/juce_MissingGLDefinitions.h"
 #include "opengl/juce_OpenGLHelpers.h"
@@ -181,11 +181,7 @@ class OpenGLShaderProgram;
 #include "opengl/juce_OpenGLContext.h"
 #include "opengl/juce_OpenGLFrameBuffer.h"
 #include "opengl/juce_OpenGLGraphicsContext.h"
-#include "opengl/juce_OpenGLHelpers.h"
 #include "opengl/juce_OpenGLImage.h"
-#include "opengl/juce_OpenGLRenderer.h"
 #include "opengl/juce_OpenGLShaderProgram.h"
 #include "opengl/juce_OpenGLTexture.h"
 #include "utils/juce_OpenGLAppComponent.h"
-
-}

@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class ThreadPool::ThreadPoolThread  : public Thread
 {
 public:
@@ -419,3 +422,5 @@ void ThreadPool::addToDeleteList (OwnedArray<ThreadPoolJob>& deletionList, Threa
     if (job->shouldBeDeleted)
         deletionList.add (job);
 }
+
+} // namespace juce

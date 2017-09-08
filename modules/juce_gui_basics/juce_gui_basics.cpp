@@ -132,16 +132,16 @@
 #include <set>
 
 //==============================================================================
-namespace juce
-{
-
 #define ASSERT_MESSAGE_MANAGER_IS_LOCKED \
     jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
 #define ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN \
     jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager() || getPeer() == nullptr);
 
-extern bool juce_areThereAnyAlwaysOnTopWindows();
+namespace juce
+{
+    extern bool juce_areThereAnyAlwaysOnTopWindows();
+}
 
 #include "components/juce_Component.cpp"
 #include "components/juce_ComponentListener.cpp"
@@ -311,5 +311,3 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
  #include "native/juce_android_FileChooser.cpp"
 
 #endif
-
-}

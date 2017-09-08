@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /** This class is used to invoke a range of text-editor navigation methods on
@@ -118,3 +118,5 @@ struct TextEditorKeyMapper
         return false;
     }
 };
+
+} // namespace juce

@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -212,3 +212,5 @@ public:
     Image decodeImage (InputStream&) override;
     bool writeImageToStream (const Image&, OutputStream&) override;
 };
+
+} // namespace juce

@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -455,3 +455,5 @@ private:
 
 /** This typedef is just for compatibility with old code - newer code should use the TableHeaderComponent::Listener class directly. */
 typedef TableHeaderComponent::Listener TableHeaderListener;
+
+} // namespace juce

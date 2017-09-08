@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 /**
     Generates a signal based on a user-supplied function.
@@ -153,3 +157,6 @@ private:
     LinearSmoothedValue<NumericType> frequency {static_cast<NumericType> (440.0)};
     NumericType sampleRate = 48000.0, pos = 0.0;
 };
+
+} // namespace dsp
+} // namespace juce

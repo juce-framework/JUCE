@@ -175,20 +175,19 @@
 
 namespace juce
 {
+    class StringRef;
+    class MemoryBlock;
+    class File;
+    class InputStream;
+    class OutputStream;
+    class DynamicObject;
+    class FileInputStream;
+    class FileOutputStream;
+    class XmlElement;
 
-class StringRef;
-class MemoryBlock;
-class File;
-class InputStream;
-class OutputStream;
-class DynamicObject;
-class FileInputStream;
-class FileOutputStream;
-class XmlElement;
-class JSONFormatter;
-
-extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger() noexcept;
-extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noexcept;
+    extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger() noexcept;
+    extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noexcept;
+}
 
 #include "memory/juce_Memory.h"
 #include "maths/juce_MathsFunctions.h"
@@ -322,8 +321,9 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
  #include "native/juce_android_JNIHelpers.h"
 #endif
 
-
 #ifndef DOXYGEN
+namespace juce
+{
  /*
     As the very long class names here try to explain, the purpose of this code is to cause
     a linker error if not all of your compile units are consistent in the options that they
@@ -341,9 +341,8 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
   { this_will_fail_to_link_if_some_of_your_compile_units_are_built_in_release_mode() noexcept; };
   static this_will_fail_to_link_if_some_of_your_compile_units_are_built_in_release_mode compileUnitMismatchSentinel;
  #endif
-#endif
-
 }
+#endif
 
 #if JUCE_MSVC
  #pragma warning (pop)

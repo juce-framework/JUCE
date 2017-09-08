@@ -24,14 +24,16 @@
   ==============================================================================
 */
 
-typedef void (*AppFocusChangeCallback)();
-extern AppFocusChangeCallback appFocusChangeCallback;
-typedef bool (*CheckEventBlockedByModalComps) (NSEvent*);
-extern CheckEventBlockedByModalComps isEventBlockedByModalComps;
+namespace juce
+{
+    typedef void (*AppFocusChangeCallback)();
+    extern AppFocusChangeCallback appFocusChangeCallback;
+    typedef bool (*CheckEventBlockedByModalComps) (NSEvent*);
+    extern CheckEventBlockedByModalComps isEventBlockedByModalComps;
+}
 
 //==============================================================================
 #if ! (defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7)
-} // (juce namespace)
 
 @interface NSEvent (JuceDeviceDelta)
  - (CGFloat) scrollingDeltaX;
@@ -40,8 +42,10 @@ extern CheckEventBlockedByModalComps isEventBlockedByModalComps;
  - (BOOL) isDirectionInvertedFromDevice;
 @end
 
-namespace juce {
 #endif
+
+namespace juce
+{
 
 //==============================================================================
 static CGFloat getMainScreenHeight() noexcept
@@ -2193,3 +2197,5 @@ const int KeyPress::playKey         = 0x30000;
 const int KeyPress::stopKey         = 0x30001;
 const int KeyPress::fastForwardKey  = 0x30002;
 const int KeyPress::rewindKey       = 0x30003;
+
+} // namespace juce

@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 class ImageType;
 class ImagePixelData;
@@ -542,3 +543,5 @@ public:
     ImagePixelData::Ptr create (Image::PixelFormat, int width, int height, bool clearImage) const override;
     int getTypeID() const override;
 };
+
+} // namespace juce

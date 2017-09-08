@@ -74,9 +74,6 @@
 #endif
 
 //==============================================================================
-namespace juce
-{
-
 #include "documents/juce_FileBasedDocument.h"
 #include "code_editor/juce_CodeDocument.h"
 #include "code_editor/juce_CodeEditorComponent.h"
@@ -100,5 +97,3 @@ namespace juce
 #include "misc/juce_WebBrowserComponent.h"
 #include "misc/juce_LiveConstantEditor.h"
 #include "misc/juce_AnimatedAppComponent.h"
-
-}

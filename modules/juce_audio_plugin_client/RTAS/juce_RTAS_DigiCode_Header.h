@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 #if JucePlugin_Build_RTAS
 #ifdef _MSC_VER
@@ -67,3 +68,5 @@
 
 #endif
 #endif
+
+} // namespace juce

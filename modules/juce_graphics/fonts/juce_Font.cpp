@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace FontValues
 {
     static float limitFontHeight (const float height) noexcept
@@ -715,3 +718,5 @@ Font Font::fromString (const String& fontDescription)
 
     return Font (name, style, height);
 }
+
+} // namespace juce

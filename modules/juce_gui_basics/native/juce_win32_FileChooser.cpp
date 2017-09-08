@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace FileChooserHelpers
 {
     struct FileChooserCallbackInfo
@@ -296,3 +299,5 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
         results.add (File (String (files.get())));
     }
 }
+
+} // namespace juce

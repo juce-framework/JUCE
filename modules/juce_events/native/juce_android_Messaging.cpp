@@ -20,7 +20,9 @@
   ==============================================================================
 */
 
-//==============================================================================
+namespace juce
+{
+
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   METHOD (constructor,           "<init>",           "()V") \
   METHOD (post,                  "post",             "(Ljava/lang/Runnable;)Z") \
@@ -141,3 +143,5 @@ void MessageManager::stopDispatchLoop()
     (new QuitCallback())->post();
     quitMessagePosted = true;
 }
+
+} // namespace juce

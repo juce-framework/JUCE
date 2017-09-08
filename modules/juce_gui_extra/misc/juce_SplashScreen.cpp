@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 SplashScreen::SplashScreen (const String& title, const Image& image, bool useDropShadow)
     : Component (title),
       backgroundImage (image),
@@ -95,3 +98,5 @@ void SplashScreen::timerCallback()
          || Desktop::getInstance().getMouseButtonClickCounter() > clickCountToDelete)
         delete this;
 }
+
+} // namespace juce

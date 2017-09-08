@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ToolbarItemFactory::ToolbarItemFactory() {}
 ToolbarItemFactory::~ToolbarItemFactory() {}
 
@@ -235,3 +238,5 @@ void ToolbarItemComponent::setEditingMode (const ToolbarEditingMode newMode)
         resized();
     }
 }
+
+} // namespace juce

@@ -26,8 +26,6 @@
 
 #if JUCE_PLUGINHOST_LADSPA && JUCE_LINUX
 
-} // (juce namespace)
-
 #include <ladspa.h>
 
 namespace juce
@@ -714,5 +712,7 @@ FileSearchPath LADSPAPluginFormat::getDefaultLocationsToSearch()
                                                                 "/usr/lib/ladspa;/usr/local/lib/ladspa;~/.ladspa")
                              .replace (":", ";"));
 }
+
+} // namespace juce
 
 #endif

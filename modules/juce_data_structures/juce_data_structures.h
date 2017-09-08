@@ -54,9 +54,6 @@
 //==============================================================================
 #include <juce_events/juce_events.h>
 
-namespace juce
-{
-
 #include "undomanager/juce_UndoableAction.h"
 #include "undomanager/juce_UndoManager.h"
 #include "values/juce_Value.h"
@@ -65,5 +62,3 @@ namespace juce
 #include "values/juce_CachedValue.h"
 #include "app_properties/juce_PropertiesFile.h"
 #include "app_properties/juce_ApplicationProperties.h"
-
-}

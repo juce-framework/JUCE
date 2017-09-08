@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace
 {
 
@@ -1272,3 +1275,5 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_ALSA()
 {
     return createAudioIODeviceType_ALSA_PCMDevices();
 }
+
+} // namespace juce

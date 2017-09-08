@@ -24,6 +24,13 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
+namespace IIR
+{
+
 #ifndef DOXYGEN
 
 //==============================================================================
@@ -214,3 +221,7 @@ void Filter<SampleType>::check()
 }
 
 #endif
+
+} // namespace IIR
+} // namespace dsp
+} // namespace juce

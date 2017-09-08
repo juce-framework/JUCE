@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class iOSAudioIODevice;
 
 static const char* const iOSAudioDeviceName = "iOS Audio";
@@ -183,6 +186,10 @@ bool getNotificationValueForKey (NSNotification* notification, NSString* key, NS
 @end
 
 //==============================================================================
+#if JUCE_MODULE_AVAILABLE_juce_graphics
+ #include <juce_graphics/native/juce_mac_CoreGraphicsHelpers.h>
+#endif
+
 namespace juce {
 
 #ifndef JUCE_IOS_AUDIO_LOGGING
@@ -205,10 +212,6 @@ static void logNSError (NSError* e)
 }
 
 #define JUCE_NSERROR_CHECK(X)     { NSError* error = nil; X; logNSError (error); }
-
-#if JUCE_MODULE_AVAILABLE_juce_graphics
-#include <juce_graphics/native/juce_mac_CoreGraphicsHelpers.h>
-#endif
 
 //==============================================================================
 struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
@@ -1168,3 +1171,5 @@ void AudioSessionHolder::handleRouteChange (const char* reason)
 }
 
 #undef JUCE_NSERROR_CHECK
+
+} // namespace juce

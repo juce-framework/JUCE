@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -97,3 +97,5 @@ public:
     virtual void drawGlyph (int glyphNumber, const AffineTransform&) = 0;
     virtual bool drawTextLayout (const AttributedString&, const Rectangle<float>&)  { return false; }
 };
+
+} // namespace juce

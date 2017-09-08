@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 Value::ValueSource::ValueSource()
 {
 }
@@ -235,3 +238,5 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const Value& value
 {
     return stream << value.toString();
 }
+
+} // namespace juce

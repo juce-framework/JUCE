@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 IPAddress::IPAddress (bool IPv6) noexcept : isIPv6 (IPv6)
 {
     for (int i = 0; i < 16; ++i)
@@ -296,3 +299,5 @@ void IPAddress::findAllAddresses (Array<IPAddress>& result, bool includeIPv6)
     freeifaddrs (ifaddr);
 }
 #endif
+
+} // namespace juce

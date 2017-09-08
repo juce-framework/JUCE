@@ -20,7 +20,9 @@
   ==============================================================================
 */
 
-//==============================================================================
+namespace juce
+{
+
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
 STATICFIELD (SDK_INT, "SDK_INT", "I") \
 
@@ -1283,3 +1285,5 @@ pthread_t juce_createRealtimeAudioThread (void* (*entry) (void*), void* userPtr)
 
     return threadID;
 }
+
+} // namespace juce

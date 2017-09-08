@@ -34,6 +34,7 @@
 #endif
 
 #define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
+#define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
 
 #include "juce_audio_processors.h"
 #include <juce_gui_extra/juce_gui_extra.h>
@@ -65,8 +66,8 @@ namespace juce
 static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& list,
                                         const PluginDescription& desc)
 {
-    for (int i = list.size(); --i >= 0;)
-        if (list.getUnchecked(i)->isDuplicateOf (desc))
+    for (auto* p : list)
+        if (p->isDuplicateOf (desc))
             return true;
 
     return false;
@@ -140,6 +141,8 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
 };
 #endif
 
+} // namespace juce
+
 #if JUCE_CLANG
  #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #endif
@@ -160,5 +163,3 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
 #include "scanning/juce_PluginListComponent.cpp"
 #include "utilities/juce_AudioProcessorParameters.cpp"
 #include "utilities/juce_AudioProcessorValueTreeState.cpp"
-
-}

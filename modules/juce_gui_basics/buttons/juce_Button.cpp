@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class Button::CallbackHelper  : public Timer,
                                 public ApplicationCommandManagerListener,
                                 public Value::Listener,
@@ -692,3 +695,5 @@ void Button::repeatTimerCallback()
         callbackHelper->stopTimer();
     }
 }
+
+} // namespace juce

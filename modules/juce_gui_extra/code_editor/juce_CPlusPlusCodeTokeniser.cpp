@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#include "juce_CPlusPlusCodeTokeniserFunctions.h"
-
+namespace juce
+{
 
 //==============================================================================
 CPlusPlusCodeTokeniser::CPlusPlusCodeTokeniser() {}
@@ -71,3 +71,5 @@ bool CPlusPlusCodeTokeniser::isReservedKeyword (const String& token) noexcept
 {
     return CppTokeniserFunctions::isReservedKeyword (token.getCharPointer(), token.length());
 }
+
+} // namespace juce

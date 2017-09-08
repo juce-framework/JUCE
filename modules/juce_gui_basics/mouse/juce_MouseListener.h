@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -161,3 +161,5 @@ private:
     virtual int mouseWheelMove (const MouseEvent&, float, float) { return 0; }
    #endif
 };
+
+} // namespace juce

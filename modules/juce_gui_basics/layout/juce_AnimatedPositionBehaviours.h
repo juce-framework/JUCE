@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /** Contains classes for different types of physics behaviours - these classes
@@ -153,3 +153,5 @@ namespace AnimatedPositionBehaviours
         double targetSnapPosition;
     };
 }
+
+} // namespace juce

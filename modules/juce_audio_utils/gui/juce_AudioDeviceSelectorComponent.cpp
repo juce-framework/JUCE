@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class SimpleDeviceManagerInputLevelMeter  : public Component,
                                             public Timer
 {
@@ -1217,3 +1220,5 @@ ListBox* AudioDeviceSelectorComponent::getMidiInputSelectorListBox() const noexc
 {
     return midiInputsList;
 }
+
+} // namespace juce

@@ -20,6 +20,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace BlocksProtocol
+{
 
 /**
     All sysex messages to or from a BLOCKS device begin with these header bytes.
@@ -270,3 +274,6 @@ private:
     const uint8* data;
     int totalBits, bitsReadInCurrentByte = 0;
 };
+
+} // namespace BlocksProtocol
+} // namespace juce

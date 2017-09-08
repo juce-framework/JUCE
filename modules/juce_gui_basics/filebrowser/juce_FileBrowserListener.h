@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -53,3 +53,5 @@ public:
     /** Callback when the browser's root folder changes. */
     virtual void browserRootChanged (const File& newRoot) = 0;
 };
+
+} // namespace juce

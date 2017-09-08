@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class ValueTree::SharedObject  : public ReferenceCountedObject
 {
 public:
@@ -1144,3 +1147,5 @@ public:
 static ValueTreeTests valueTreeTests;
 
 #endif
+
+} // namespace juce

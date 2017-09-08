@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 AudioIODeviceType::AudioIODeviceType (const String& name)
     : typeName (name)
 {
@@ -74,3 +77,5 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_Android()         
 #if ! (JUCE_ANDROID && JUCE_USE_ANDROID_OPENSLES)
 AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_OpenSLES()        { return nullptr; }
 #endif
+
+} // namespace juce

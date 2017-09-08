@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -53,3 +53,5 @@ private:
     SystemAudioVolume(); // Don't instantiate this class, just call its static fns.
     JUCE_DECLARE_NON_COPYABLE (SystemAudioVolume)
 };
+
+} // namespace juce

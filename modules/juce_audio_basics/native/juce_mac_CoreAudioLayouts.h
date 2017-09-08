@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 #if JUCE_MAC || JUCE_IOS
 
@@ -304,3 +305,5 @@ private:
 };
 
 #endif
+
+} // namespace juce

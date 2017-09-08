@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ThreadWithProgressWindow::ThreadWithProgressWindow (const String& title,
                                                     const bool hasProgressBar,
                                                     const bool hasCancelButton,
@@ -114,3 +117,5 @@ bool ThreadWithProgressWindow::runThread (const int priority)
     return ! wasCancelledByUser;
 }
 #endif
+
+} // namespace juce

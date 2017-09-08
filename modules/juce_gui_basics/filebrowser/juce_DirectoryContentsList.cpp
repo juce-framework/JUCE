@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 DirectoryContentsList::DirectoryContentsList (const FileFilter* f, TimeSliceThread& t)
    : fileFilter (f), thread (t),
      fileTypeFlags (File::ignoreHiddenFiles | File::findFiles),
@@ -258,3 +261,5 @@ bool DirectoryContentsList::addFile (const File& file, const bool isDir,
 
     return false;
 }
+
+} // namespace juce

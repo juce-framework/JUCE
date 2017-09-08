@@ -20,7 +20,9 @@
   ==============================================================================
 */
 
-//==============================================================================
+namespace juce
+{
+
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  STATICMETHOD (getMinBufferSize,            "getMinBufferSize",             "(III)I") \
  STATICMETHOD (getNativeOutputSampleRate,   "getNativeOutputSampleRate",    "(I)I") \
@@ -472,3 +474,5 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_Android()
 
     return new AndroidAudioIODeviceType();
 }
+
+} // namespace juce

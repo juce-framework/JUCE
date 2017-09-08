@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -127,3 +127,5 @@ private:
 
 /** Copies all the data that has been written to a MemoryOutputStream into another stream. */
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const MemoryOutputStream& streamToRead);
+
+} // namespace juce

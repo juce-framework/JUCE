@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -150,3 +151,5 @@ public:
     /** The 4x4 matrix values. These are stored in the standard OpenGL order. */
     Type mat[16];
 };
+
+} // namespace juce

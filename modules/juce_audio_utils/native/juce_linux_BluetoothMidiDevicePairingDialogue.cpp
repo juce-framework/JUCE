@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 bool BluetoothMidiDevicePairingDialogue::open (ModalComponentManager::Callback* exitCallback)
 {
     ScopedPointer<ModalComponentManager::Callback> cb (exitCallback);
@@ -38,3 +41,5 @@ bool BluetoothMidiDevicePairingDialogue::isAvailable()
 {
     return false;
 }
+
+} // namespace juce

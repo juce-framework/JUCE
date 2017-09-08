@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 void MACAddress::findAllAddresses (Array<MACAddress>& result)
 {
     const int s = socket (AF_INET, SOCK_DGRAM, 0);
@@ -578,3 +581,5 @@ URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extra
     return URL::DownloadTask::createFallbackDownloader (*this, targetLocation, extraHeaders, listener, shouldUsePost);
 }
 #endif
+
+} // namespace juce

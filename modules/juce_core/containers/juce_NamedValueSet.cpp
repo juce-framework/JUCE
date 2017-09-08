@@ -20,7 +20,9 @@
   ==============================================================================
 */
 
-//==============================================================================
+namespace juce
+{
+
 NamedValueSet::NamedValueSet() noexcept
 {
 }
@@ -241,3 +243,5 @@ void NamedValueSet::copyToXmlAttributes (XmlElement& xml) const
         }
     }
 }
+
+} // namespace juce

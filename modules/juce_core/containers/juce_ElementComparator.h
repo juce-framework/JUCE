@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 #ifndef DOXYGEN
 
@@ -183,3 +184,5 @@ public:
         return (first < second) ? -1 : ((second < first) ? 1 : 0);
     }
 };
+
+} // namespace juce

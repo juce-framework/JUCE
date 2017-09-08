@@ -20,6 +20,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace BlocksProtocol
+{
 
 /** This value is incremented when the format of the API changes in a way which
     breaks compatibility.
@@ -503,3 +507,6 @@ static constexpr const char* ledProgramLittleFootFunctions[] =
     "initControl/viiiiiiiii",
     nullptr
 };
+
+} // namespace BlocksProtocol
+} // namespace juce

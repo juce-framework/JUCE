@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace
 {
     inline uint32 bitToMask  (const int bit) noexcept           { return (uint32) 1 << (bit & 31); }
@@ -1370,3 +1373,5 @@ public:
 static BigIntegerTests bigIntegerTests;
 
 #endif
+
+} // namespace juce

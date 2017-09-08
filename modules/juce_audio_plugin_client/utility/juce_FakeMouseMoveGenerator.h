@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 #if JUCE_MAC
 
@@ -88,3 +89,5 @@ private:
 #else
 struct FakeMouseMoveGenerator {};
 #endif
+
+} // namespace juce

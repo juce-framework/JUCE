@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 class MessageManagerLock;
 class ThreadPoolJob;
@@ -376,3 +377,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (MessageManagerLock)
 };
+
+} // namespace juce

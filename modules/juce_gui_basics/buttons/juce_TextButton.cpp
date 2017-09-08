@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 TextButton::TextButton()  : Button (String())
 {
 }
@@ -71,3 +74,5 @@ int TextButton::getBestWidthForHeight (int buttonHeight)
 {
     return getLookAndFeel().getTextButtonWidthToFitText (*this, buttonHeight);
 }
+
+} // namespace juce

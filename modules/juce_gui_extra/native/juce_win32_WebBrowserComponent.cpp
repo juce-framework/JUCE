@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 JUCE_DECLARE_UUID_GETTER (DWebBrowserEvents2,        "34A715A0-6587-11D0-924A-0020AFC7AC4D")
 JUCE_DECLARE_UUID_GETTER (IConnectionPointContainer, "B196B284-BAB4-101A-B69C-00AA00341D07")
 JUCE_DECLARE_UUID_GETTER (IWebBrowser2,              "D30C1661-CDAF-11D0-8A3E-00C04FC9E26E")
@@ -420,3 +423,5 @@ void WebBrowserComponent::clearCookies()
         FindCloseUrlCache (urlCacheHandle);
     }
 }
+
+} // namespace juce

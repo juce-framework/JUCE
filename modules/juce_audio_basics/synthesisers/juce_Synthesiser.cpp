@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 SynthesiserSound::SynthesiserSound() {}
 SynthesiserSound::~SynthesiserSound() {}
 
@@ -567,3 +570,5 @@ SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay,
 
     return low;
 }
+
+} // namespace juce

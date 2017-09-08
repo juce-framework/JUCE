@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 /**
     A class which provides multiple windowing functions useful for filter design
@@ -71,3 +75,6 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowingFunction)
 };
+
+} // namespace dsp
+} // namespace juce

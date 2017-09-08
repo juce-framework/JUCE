@@ -24,6 +24,11 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
+
 template <typename FloatType>
 static inline FloatType ncos (size_t order, size_t i, size_t size) noexcept
 {
@@ -184,3 +189,6 @@ const char* WindowingFunction<FloatType>::getWindowingMethodName (WindowingMetho
 
 template struct WindowingFunction<float>;
 template struct WindowingFunction<double>;
+
+} // namespace dsp
+} // namespace juce

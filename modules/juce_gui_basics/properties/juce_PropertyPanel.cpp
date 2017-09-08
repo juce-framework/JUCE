@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct PropertyPanel::SectionComponent  : public Component
 {
     SectionComponent (const String& sectionTitle,
@@ -374,3 +377,5 @@ const String& PropertyPanel::getMessageWhenEmpty() const noexcept
 {
     return messageWhenEmpty;
 }
+
+} // namespace juce

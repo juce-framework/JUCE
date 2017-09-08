@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #include "../../juce_core/system/juce_TargetPlatform.h"
 #include "../utility/juce_CheckSettingMacros.h"
 
@@ -1043,3 +1046,5 @@ CProcessGroupInterface* CProcessGroup::CreateProcessGroup()
 }
 
 #endif
+
+} // namespace juce

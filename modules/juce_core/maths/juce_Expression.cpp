@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class Expression::Term  : public SingleThreadedReferenceCountedObject
 {
 public:
@@ -1167,3 +1170,5 @@ String Expression::Scope::getScopeUID() const
 {
     return {};
 }
+
+} // namespace juce

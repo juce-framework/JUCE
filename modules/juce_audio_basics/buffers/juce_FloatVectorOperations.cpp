@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace FloatVectorHelpers
 {
     #define JUCE_INCREMENT_SRC_DEST         dest += (16 / sizeof (*dest)); src += (16 / sizeof (*dest));
@@ -1200,3 +1203,5 @@ public:
 static FloatVectorOperationsTests vectorOpTests;
 
 #endif
+
+} // namespace juce

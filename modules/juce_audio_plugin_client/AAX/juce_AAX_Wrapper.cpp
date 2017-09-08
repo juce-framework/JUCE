@@ -96,10 +96,9 @@
 
 #undef check
 
-namespace juce
-{
- #include "juce_AAX_Modifier_Injector.h"
-}
+#include "juce_AAX_Modifier_Injector.h"
+
+using namespace juce;
 
 const int32_t juceChunkType = 'juce';
 const int maxAAXChannels = 8;

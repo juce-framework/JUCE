@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class ChoicePropertyComponent::RemapperValueSource    : public Value::ValueSource,
                                                         private Value::Listener
 {
@@ -152,3 +155,5 @@ void ChoicePropertyComponent::comboBoxChanged (ComboBox*)
             setIndex (newIndex);
     }
 }
+
+} // namespace juce

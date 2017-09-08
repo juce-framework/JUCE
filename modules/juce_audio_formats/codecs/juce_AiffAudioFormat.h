@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 //==============================================================================
 /**
     Reads and Writes AIFF format audio files.
@@ -85,3 +88,5 @@ public:
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AiffAudioFormat)
 };
+
+} // namespace juce

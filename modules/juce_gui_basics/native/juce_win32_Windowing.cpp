@@ -24,6 +24,13 @@
   ==============================================================================
 */
 
+#if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+ #include <juce_audio_plugin_client/AAX/juce_AAX_Modifier_Injector.h>
+#endif
+
+namespace juce
+{
+
 #undef GetSystemMetrics // multimon overrides this for some reason and causes a mess..
 
 // these are in the windows SDK, but need to be repeated here for GCC..
@@ -39,10 +46,6 @@
 
 #ifndef WM_APPCOMMAND
  #define WM_APPCOMMAND                     0x0319
-#endif
-
-#if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
- #include <juce_audio_plugin_client/AAX/juce_AAX_Modifier_Injector.h>
 #endif
 
 extern void juce_repeatLastProcessPriority();
@@ -4173,3 +4176,5 @@ void MouseCursor::showInAllWindows() const
 {
     showInWindow (nullptr);
 }
+
+} // namespace juce

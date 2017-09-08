@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 // This file contains the implementations of the various AudioParameter[XYZ] classes..
 
 
@@ -168,3 +171,5 @@ AudioParameterChoice& AudioParameterChoice::operator= (int newValue)
 
     return *this;
 }
+
+} // namespace juce

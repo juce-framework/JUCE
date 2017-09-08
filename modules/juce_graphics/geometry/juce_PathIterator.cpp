@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_MSVC && JUCE_DEBUG
  #pragma optimize ("t", on)
 #endif
@@ -279,3 +282,5 @@ bool PathFlatteningIterator::next()
 #if JUCE_MSVC && JUCE_DEBUG
   #pragma optimize ("", on)  // resets optimisations to the project defaults
 #endif
+
+} // namespace juce

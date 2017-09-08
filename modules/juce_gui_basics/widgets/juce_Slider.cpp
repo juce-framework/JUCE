@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class Slider::Pimpl   : private AsyncUpdater,
                         private Button::Listener,
                         private Label::Listener,
@@ -1621,3 +1624,5 @@ void Slider::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel
     if (! (isEnabled() && pimpl->mouseWheelMove (e, wheel)))
         Component::mouseWheelMove (e, wheel);
 }
+
+} // namespace juce

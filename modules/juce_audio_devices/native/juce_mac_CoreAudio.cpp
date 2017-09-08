@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_COREAUDIO_LOGGING_ENABLED
  #define JUCE_COREAUDIOLOG(a) { String camsg ("CoreAudio: "); camsg << a; Logger::writeToLog (camsg); }
 #else
@@ -2058,3 +2061,5 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_CoreAudio()
 }
 
 #undef JUCE_COREAUDIOLOG
+
+} // namespace juce

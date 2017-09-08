@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -180,3 +180,5 @@ private:
     //  myPointer.setOwned (myScopedPointer.release())
     void setOwned (const ScopedPointer<ObjectType>&) JUCE_DELETED_FUNCTION;
 };
+
+} // namespace juce

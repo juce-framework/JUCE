@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -91,3 +91,5 @@ public:
     */
     virtual VirtualKeyboardType getKeyboardType()       { return textKeyboard; }
 };
+
+} // namespace juce

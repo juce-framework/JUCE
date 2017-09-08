@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 Viewport::Viewport (const String& name)  : Component (name)
 {
     // content holder is used to clip the contents so they don't overlap the scrollbars
@@ -578,3 +581,5 @@ bool Viewport::respondsToKey (const KeyPress& key)
 {
     return isUpDownKeyPress (key) || isLeftRightKeyPress (key);
 }
+
+} // namespace juce

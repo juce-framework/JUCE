@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 TabBarButton::TabBarButton (const String& name, TabbedButtonBar& owner_)
     : Button (name), owner (owner_), overlapPixels (0), extraCompPlacement (afterText)
 {
@@ -585,3 +588,5 @@ void TabbedButtonBar::currentTabChanged (const int, const String&)
 void TabbedButtonBar::popupMenuClickOnTab (const int, const String&)
 {
 }
+
+} // namespace juce

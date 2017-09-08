@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace PopupMenuSettings
 {
     const int scrollZone = 24;
@@ -1844,3 +1847,5 @@ PopupMenu::Item& PopupMenu::MenuItemIterator::getItem() const noexcept
     jassert (currentItem != nullptr);
     return *(currentItem);
 }
+
+} // namespace juce

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 //==============================================================================
 /**
     Reads and Writes WAV format audio files.
@@ -218,3 +221,5 @@ public:
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WavAudioFormat)
 };
+
+} // namespace juce

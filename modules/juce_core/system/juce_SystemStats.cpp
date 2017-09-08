@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 String SystemStats::getJUCEVersion()
 {
     // Some basic tests, to keep an eye on things and make sure these types work ok
@@ -230,3 +233,5 @@ bool SystemStats::isRunningInAppExtensionSandbox() noexcept
     return false;
    #endif
 }
+
+} // namespace juce

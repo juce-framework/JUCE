@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 /**
     Handles the opening and closing of DLLs.
@@ -35,14 +36,14 @@ public:
     /** Creates an unopened DynamicLibrary object.
         Call open() to actually open one.
     */
-    DynamicLibrary() noexcept : handle (nullptr) {}
+    DynamicLibrary() noexcept {}
 
     /**
     */
-    DynamicLibrary (const String& name) : handle (nullptr) { open (name); }
+    DynamicLibrary (const String& name)  { open (name); }
 
     /** Move constructor */
-    DynamicLibrary (DynamicLibrary&& other) noexcept : handle (nullptr)
+    DynamicLibrary (DynamicLibrary&& other) noexcept
     {
         std::swap (handle, other.handle);
     }
@@ -75,7 +76,9 @@ public:
     void* getNativeHandle() const noexcept     { return handle; }
 
 private:
-    void* handle;
+    void* handle = nullptr;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DynamicLibrary)
 };
+
+} // namespace juce

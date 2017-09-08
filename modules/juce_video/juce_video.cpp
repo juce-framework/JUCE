@@ -67,15 +67,8 @@
 #endif
 
 //==============================================================================
-using namespace juce;
-
-namespace juce
-{
-
 #include "playback/juce_VideoComponent.cpp"
 
 #if JUCE_USE_CAMERA
  #include "capture/juce_CameraDevice.cpp"
 #endif
-
-}

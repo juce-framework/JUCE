@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 static const char* const wavFormatName = "WAV file";
 
 //==============================================================================
@@ -1867,3 +1870,5 @@ private:
 static const WaveAudioFormatTests waveAudioFormatTests;
 
 #endif
+
+} // namespace juce

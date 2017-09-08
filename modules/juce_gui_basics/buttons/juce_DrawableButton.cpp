@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 DrawableButton::DrawableButton (const String& name, const DrawableButton::ButtonStyle buttonStyle)
     : Button (name), style (buttonStyle)
 {
@@ -219,3 +222,5 @@ Drawable* DrawableButton::getDownImage() const noexcept
 
     return getOverImage();
 }
+
+} // namespace juce

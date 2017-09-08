@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 static const char* const aiffFormatName = "AIFF file";
 
 //==============================================================================
@@ -1015,3 +1018,5 @@ AudioFormatWriter* AiffAudioFormat::createWriterFor (OutputStream* out,
 
     return nullptr;
 }
+
+} // namespace juce

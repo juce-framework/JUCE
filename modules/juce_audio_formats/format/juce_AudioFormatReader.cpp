@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 AudioFormatReader::AudioFormatReader (InputStream* const in, const String& name)
     : sampleRate (0),
       bitsPerSample (0),
@@ -419,3 +422,5 @@ void MemoryMappedAudioFormatReader::touchSample (int64 sample) const noexcept
     else
         jassertfalse; // you must make sure that the window contains all the samples you're going to attempt to read.
 }
+
+} // namespace juce

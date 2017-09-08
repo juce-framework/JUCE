@@ -24,7 +24,9 @@
   ==============================================================================
 */
 
-//==============================================================================
+namespace juce
+{
+
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (getParent, "getParent", "()Landroid/view/ViewParent;") \
  METHOD (layout, "layout", "(IIII)V" ) \
@@ -306,3 +308,5 @@ bool OpenGLHelpers::isContextActive()
 {
     return eglGetCurrentContext() != EGL_NO_CONTEXT;
 }
+
+} // namespace juce

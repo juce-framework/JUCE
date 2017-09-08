@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace CDReaderHelpers
 {
     inline const XmlElement* getElementForKey (const XmlElement& xml, const String& key)
@@ -258,5 +261,7 @@ int AudioCDReader::getLastIndex() const
 
 Array<int> AudioCDReader::findIndexesInTrack (const int /*trackNumber*/)
 {
-    return Array<int>();
+    return {};
 }
+
+} // namespace juce

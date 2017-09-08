@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct UndoManager::ActionSet
 {
     ActionSet (const String& transactionName)
@@ -345,3 +348,5 @@ int UndoManager::getNumActionsInCurrentTransaction() const
 
     return 0;
 }
+
+} // namespace juce

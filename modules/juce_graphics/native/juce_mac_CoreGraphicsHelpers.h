@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 namespace
@@ -59,5 +59,7 @@ extern CGImageRef juce_createCoreGraphicsImage (const Image&, CGColorSpaceRef, b
 extern CGContextRef juce_getImageContext (const Image&);
 
 #if JUCE_IOS
-extern Image juce_createImageFromUIImage (UIImage*);
+ extern Image juce_createImageFromUIImage (UIImage*);
 #endif
+
+} // namespace juce

@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class WebInputStream::Pimpl
 {
 public:
@@ -552,3 +555,5 @@ URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extra
 {
     return URL::DownloadTask::createFallbackDownloader (*this, targetLocation, extraHeaders, listener, shouldUsePost);
 }
+
+} // namespace juce

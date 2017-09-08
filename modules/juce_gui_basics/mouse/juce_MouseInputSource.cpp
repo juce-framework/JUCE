@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class MouseInputSourceInternal   : private AsyncUpdater
 {
 public:
@@ -748,3 +751,5 @@ struct MouseInputSource::SourceList  : public Timer
     OwnedArray<MouseInputSourceInternal> sources;
     Array<MouseInputSource> sourceArray;
 };
+
+} // namespace juce

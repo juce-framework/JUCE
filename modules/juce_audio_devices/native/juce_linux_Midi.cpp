@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_ALSA
 
 // You can define these strings in your app if you want to override the default names:
@@ -610,3 +613,5 @@ MidiInput* MidiInput::openDevice (int, MidiInputCallback*)                  { re
 MidiInput* MidiInput::createNewDevice (const String&, MidiInputCallback*)   { return nullptr; }
 
 #endif
+
+} // namespace juce

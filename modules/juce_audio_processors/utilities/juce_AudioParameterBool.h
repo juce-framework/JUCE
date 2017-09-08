@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 /**
     Provides a class of AudioProcessorParameter that can be used as a boolean value.
 
@@ -64,3 +67,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioParameterBool)
 };
+
+} // namespace juce

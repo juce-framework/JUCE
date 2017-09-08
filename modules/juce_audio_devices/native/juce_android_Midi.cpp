@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (getJuceAndroidMidiInputDevices, "getJuceAndroidMidiInputDevices", "()[Ljava/lang/String;") \
  METHOD (getJuceAndroidMidiOutputDevices, "getJuceAndroidMidiOutputDevices", "()[Ljava/lang/String;") \
@@ -357,3 +360,5 @@ MidiInput::~MidiInput()
 {
     delete reinterpret_cast<AndroidMidiInput*> (internal);
 }
+
+} // namespace juce

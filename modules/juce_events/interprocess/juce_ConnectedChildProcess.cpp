@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 enum { magicMastSlaveConnectionHeader = 0x712baf04 };
 
 static const char* startMessage = "__ipc_st";
@@ -260,3 +263,5 @@ bool ChildProcessSlave::initialiseFromCommandLine (const String& commandLine,
 
     return connection != nullptr;
 }
+
+} // namespace juce

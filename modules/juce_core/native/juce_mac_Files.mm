@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 /*
     Note that a lot of methods that you'd expect to find in this file actually
     live in juce_posix_SharedCode.h!
@@ -488,3 +491,5 @@ void File::addToDock() const
     }
 }
 #endif
+
+} // namespace juce

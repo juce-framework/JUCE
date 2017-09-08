@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 KeyPressMappingSet::KeyPressMappingSet (ApplicationCommandManager& cm)
     : commandManager (cm)
 {
@@ -412,3 +415,5 @@ void KeyPressMappingSet::globalFocusChanged (Component* focusedComponent)
     if (focusedComponent != nullptr)
         focusedComponent->keyStateChanged (false);
 }
+
+} // namespace juce

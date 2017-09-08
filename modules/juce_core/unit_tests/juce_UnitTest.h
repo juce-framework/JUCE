@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 class UnitTestRunner;
 
@@ -431,3 +432,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (UnitTestRunner)
 };
+
+} // namespace juce

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace LookAndFeelHelpers
 {
     static Colour createBaseColour (Colour buttonColour,
@@ -3018,3 +3021,5 @@ void LookAndFeel_V2::drawGlassLozenge (Graphics& g,
     g.setColour (colour.darker().withMultipliedAlpha (1.5f));
     g.strokePath (outline, PathStrokeType (outlineThickness));
 }
+
+} // namespace juce

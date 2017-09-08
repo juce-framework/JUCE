@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 class JUCE_API  LookAndFeel_V4   : public LookAndFeel_V3
 {
@@ -238,3 +238,5 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LookAndFeel_V4)
 };
+
+} // namespace juce

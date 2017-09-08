@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 DialogWindow::DialogWindow (const String& name, Colour colour,
                             const bool escapeCloses, const bool onDesktop)
     : DocumentWindow (name, colour, DocumentWindow::closeButton, onDesktop),
@@ -174,3 +177,5 @@ int DialogWindow::showModalDialog (const String& dialogTitle,
     return o.runModal();
 }
 #endif
+
+} // namespace juce

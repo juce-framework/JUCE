@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 template <typename FloatType>
 typename FIR::Coefficients<FloatType>::Ptr
@@ -616,3 +620,6 @@ typename FilterDesign<FloatType>::IIRPolyphaseAllpassStructure
 
 template struct FilterDesign<float>;
 template struct FilterDesign<double>;
+
+} // namespace dsp
+} // namespace juce

@@ -77,19 +77,17 @@
  #include <juce_gui_extra/juce_gui_extra.h>
 #endif
 
-namespace juce
-{
-  #if JUCE_IN_APP_PURCHASES
-   #include "in_app_purchases/juce_InAppPurchases.h"
-  #endif
+#if JUCE_IN_APP_PURCHASES
+ #include "in_app_purchases/juce_InAppPurchases.h"
+#endif
 
-   #if JUCE_MODULE_AVAILABLE_juce_data_structures
-    #include "marketplace/juce_OnlineUnlockStatus.h"
-    #include "marketplace/juce_TracktionMarketplaceStatus.h"
-   #endif
-    #include "marketplace/juce_KeyFileGeneration.h"
+#if JUCE_MODULE_AVAILABLE_juce_data_structures
+ #include "marketplace/juce_OnlineUnlockStatus.h"
+ #include "marketplace/juce_TracktionMarketplaceStatus.h"
+#endif
 
-   #if JUCE_MODULE_AVAILABLE_juce_gui_extra
-    #include "marketplace/juce_OnlineUnlockForm.h"
-   #endif
-}
+#include "marketplace/juce_KeyFileGeneration.h"
+
+#if JUCE_MODULE_AVAILABLE_juce_gui_extra
+ #include "marketplace/juce_OnlineUnlockForm.h"
+#endif

@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -49,3 +49,5 @@ public:
 
     static OpenGLFrameBuffer* getFrameBufferFrom (const Image&);
 };
+
+} // namespace juce

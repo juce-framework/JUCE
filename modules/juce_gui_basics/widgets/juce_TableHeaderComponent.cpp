@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class TableHeaderComponent::DragOverlayComp   : public Component
 {
 public:
@@ -893,3 +896,5 @@ void TableHeaderComponent::showColumnChooserMenu (const int columnIdClicked)
 void TableHeaderComponent::Listener::tableColumnDraggingChanged (TableHeaderComponent*, int)
 {
 }
+
+} // namespace juce

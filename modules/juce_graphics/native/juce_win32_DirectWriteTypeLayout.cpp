@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_USE_DIRECTWRITE
 namespace DirectWriteTypeLayout
 {
@@ -453,3 +456,5 @@ bool TextLayout::createNativeLayout (const AttributedString& text)
 
     return false;
 }
+
+} // namespace juce

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class JuceMainMenuHandler   : private MenuBarModel::Listener,
                               private DeletedAtShutdown
 {
@@ -724,3 +727,5 @@ NSMenu* createNSMenu (const PopupMenu& menu, const String& name,
     jassertfalse; // calling this before making sure the OSX main menu stuff was initialised?
     return nil;
 }
+
+} // namespace juce

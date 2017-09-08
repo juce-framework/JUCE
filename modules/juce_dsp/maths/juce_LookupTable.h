@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 /**
     Class for efficiently approximating expensive arithmetic operations.
@@ -319,3 +323,6 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LookupTableTransform)
 };
+
+} // namespace dsp
+} // namespace juce

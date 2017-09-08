@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace MidiBufferHelpers
 {
     inline int getEventTime (const void* const d) noexcept
@@ -225,3 +228,5 @@ bool MidiBuffer::Iterator::getNextEvent (MidiMessage& result, int& samplePositio
 
     return true;
 }
+
+} // namespace juce

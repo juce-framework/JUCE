@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_MAC
 
 struct FileChooserDelegateClass  : public ObjCClass <NSObject>
@@ -273,3 +276,5 @@ void FileChooser::showPlatformDialog (Array<File>&,
 }
 
 #endif
+
+} // namespace juce

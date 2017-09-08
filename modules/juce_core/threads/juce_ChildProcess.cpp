@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ChildProcess::ChildProcess() {}
 ChildProcess::~ChildProcess() {}
 
@@ -45,7 +48,7 @@ uint32 ChildProcess::getExitCode() const
 
 bool ChildProcess::waitForProcessToFinish (const int timeoutMs) const
 {
-    const uint32 timeoutTime = Time::getMillisecondCounter() + (uint32) timeoutMs;
+    auto timeoutTime = Time::getMillisecondCounter() + (uint32) timeoutMs;
 
     do
     {
@@ -105,3 +108,5 @@ public:
 static ChildProcessTests childProcessUnitTests;
 
 #endif
+
+} // namespace juce

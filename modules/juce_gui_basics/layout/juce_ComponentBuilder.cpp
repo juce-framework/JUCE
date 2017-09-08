@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace ComponentBuilderHelpers
 {
     static String getStateId (const ValueTree& state)
@@ -281,3 +284,5 @@ void ComponentBuilder::updateChildComponents (Component& parent, const ValueTree
             componentsInOrder.getUnchecked(i)->toBehind (componentsInOrder.getUnchecked (i + 1));
     }
 }
+
+} // namespace juce

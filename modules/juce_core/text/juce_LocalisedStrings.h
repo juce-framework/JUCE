@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -235,3 +235,5 @@ JUCE_API String translate (CharPointer_UTF8 stringLiteral);
     @see LocalisedStrings
 */
 JUCE_API String translate (const String& stringLiteral, const String& resultIfNotFound);
+
+} // namespace juce

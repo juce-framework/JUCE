@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 DrawablePath::DrawablePath()
 {
 }
@@ -570,3 +573,5 @@ ValueTree DrawablePath::createValueTree (ComponentBuilder::ImageProvider* imageP
 
     return tree;
 }
+
+} // namespace juce

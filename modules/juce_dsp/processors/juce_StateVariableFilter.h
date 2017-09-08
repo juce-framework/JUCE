@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 /**
     An IIR filter that can perform low, band and high-pass filtering on an audio
@@ -201,3 +205,6 @@ namespace StateVariableFilter
         NumericType h   = static_cast<NumericType> (1.0 / (1.0 + R2 * g + g * g));
     };
 }
+
+} // namespace dsp
+} // namespace juce

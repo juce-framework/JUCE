@@ -24,6 +24,8 @@
   ==============================================================================
 */
 
+namespace juce
+{
 
 #if JUCE_MAC || JUCE_IOS
  #include "../native/juce_mac_CameraDevice.h"
@@ -99,3 +101,5 @@ CameraDevice* CameraDevice::openDevice (int index,
 
     return nullptr;
 }
+
+} // namespace juce

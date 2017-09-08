@@ -24,12 +24,15 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_MAC
 
 //==============================================================================
 namespace MouseCursorHelpers
 {
-    NSImage* createNSImage (const Image&, float scaleFactor = 1.f);
+    NSImage* createNSImage (const Image&, float scaleFactor = 1.0f);
     NSImage* createNSImage (const Image& image, float scaleFactor)
     {
         JUCE_AUTORELEASEPOOL
@@ -207,3 +210,5 @@ void MouseCursor::showInAllWindows() const                                      
 void MouseCursor::showInWindow (ComponentPeer*) const                                    {}
 
 #endif
+
+} // namespace juce

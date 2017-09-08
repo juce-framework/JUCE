@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 #ifndef DOXYGEN
  namespace AtomicHelpers
@@ -472,3 +473,5 @@
  #endif
 
 #endif
+
+} // namespace juce

@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give easier access to items in the namespace)
@@ -293,3 +294,5 @@ struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give e
         return AudioChannelSet::unknown;
     }
 };
+
+} // namespace juce

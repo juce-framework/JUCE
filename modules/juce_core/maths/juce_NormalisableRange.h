@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -266,3 +266,5 @@ private:
                                                                convertTo0To1Function    = nullptr,
                                                                snapToLegalValueFunction = nullptr;
 };
+
+} // namespace juce

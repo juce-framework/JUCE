@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -153,3 +153,5 @@ private:
  /** This typedef is just for compatibility with old code and VC6 - newer code should use TextPropertyComponent::Listener instead. */
  typedef TextPropertyComponent::Listener TextPropertyComponentListener;
 #endif
+
+} // namespace juce

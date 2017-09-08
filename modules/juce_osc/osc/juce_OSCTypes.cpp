@@ -24,7 +24,10 @@
   ==============================================================================
 */
 
-const OSCType OSCTypes::int32   = 'i';
-const OSCType OSCTypes::float32 = 'f';
-const OSCType OSCTypes::string  = 's';
-const OSCType OSCTypes::blob    = 'b';
+namespace juce
+{
+    const OSCType OSCTypes::int32   = 'i';
+    const OSCType OSCTypes::float32 = 'f';
+    const OSCType OSCTypes::string  = 's';
+    const OSCType OSCTypes::blob    = 'b';
+}

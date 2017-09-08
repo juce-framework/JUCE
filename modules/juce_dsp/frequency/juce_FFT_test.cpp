@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 struct FFTUnitTest  : public UnitTest
 {
@@ -204,3 +208,6 @@ struct FFTUnitTest  : public UnitTest
 };
 
 static FFTUnitTest fftUnitTest;
+
+} // namespace dsp
+} // namespace juce

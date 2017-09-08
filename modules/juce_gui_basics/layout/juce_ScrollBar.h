@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -402,3 +402,5 @@ private:
 
 /** This typedef is just for compatibility with old code - newer code should use the ScrollBar::Listener class directly. */
 typedef ScrollBar::Listener ScrollBarListener;
+
+} // namespace juce

@@ -20,8 +20,10 @@
   ==============================================================================
 */
 
-StringPairArray::StringPairArray (const bool ignoreCase_)
-    : ignoreCase (ignoreCase_)
+namespace juce
+{
+
+StringPairArray::StringPairArray (bool shouldIgnoreCase)  : ignoreCase (shouldIgnoreCase)
 {
 }
 
@@ -139,3 +141,5 @@ void StringPairArray::minimiseStorageOverheads()
     keys.minimiseStorageOverheads();
     values.minimiseStorageOverheads();
 }
+
+} // namespace juce

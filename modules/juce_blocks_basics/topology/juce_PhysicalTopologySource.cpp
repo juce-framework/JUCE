@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #define JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED \
     jassert (juce::MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
@@ -2353,3 +2356,5 @@ bool BlockDeviceConnection::operator!= (const BlockDeviceConnection& other) cons
 {
     return ! operator== (other);
 }
+
+} // namespace juce

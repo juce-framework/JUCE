@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class DropShadower::ShadowWindow  : public Component
 {
 public:
@@ -216,3 +219,5 @@ void DropShadower::updateShadows()
         shadowWindows.clear();
     }
 }
+
+} // namespace juce

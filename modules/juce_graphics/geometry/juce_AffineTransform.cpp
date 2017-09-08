@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 AffineTransform::AffineTransform() noexcept
     : mat00 (1.0f), mat01 (0), mat02 (0),
       mat10 (0), mat11 (1.0f), mat12 (0)
@@ -262,3 +265,5 @@ float AffineTransform::getScaleFactor() const noexcept
 {
     return (std::abs (mat00) + std::abs (mat11)) / 2.0f;
 }
+
+} // namespace juce

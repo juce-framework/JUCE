@@ -24,18 +24,19 @@
   ==============================================================================
 */
 
-extern bool isIOSAppActive;
-
-struct AppInactivityCallback // NB: careful, this declaration is duplicated in other modules
+namespace juce
 {
-    virtual ~AppInactivityCallback() {}
-    virtual void appBecomingInactive() = 0;
-};
+    extern bool isIOSAppActive;
 
-// This is an internal list of callbacks (but currently used between modules)
-Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
+    struct AppInactivityCallback // NB: careful, this declaration is duplicated in other modules
+    {
+        virtual ~AppInactivityCallback() {}
+        virtual void appBecomingInactive() = 0;
+    };
 
-} // (juce namespace)
+    // This is an internal list of callbacks (but currently used between modules)
+    Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
+}
 
 @interface JuceAppStartupDelegate : NSObject <UIApplicationDelegate>
 {
@@ -478,3 +479,5 @@ void Desktop::Displays::findDisplays (float masterScale)
         displays.add (d);
     }
 }
+
+} // namespace juce

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_IOS
 struct AppInactivityCallback // NB: this is a duplicate of an internal declaration in juce_core
 {
@@ -1244,3 +1247,5 @@ void OpenGLContext::NativeContext::surfaceDestroyed (jobject holder)
             cachedImage->pause();
 }
 #endif
+
+} // namespace juce

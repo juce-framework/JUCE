@@ -28,7 +28,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 // This file provides interfaces for managing the internal configuration of Blocks
 // and synchronises with the connected Block
@@ -347,3 +348,5 @@ private:
     TopologyIndex deviceIndex;
     PhysicalTopologySource::DeviceConnection* deviceConnection;
 };
+
+} // namespace juce

@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ScopedAutoReleasePool::ScopedAutoReleasePool()
 {
     pool = [[NSAutoreleasePool alloc] init];
@@ -313,3 +316,5 @@ int SystemStats::getPageSize()
 {
     return (int) NSPageSize();
 }
+
+} // namespace juce

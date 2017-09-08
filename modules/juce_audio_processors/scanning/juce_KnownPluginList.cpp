@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 KnownPluginList::KnownPluginList()  {}
 KnownPluginList::~KnownPluginList() {}
 
@@ -580,3 +583,5 @@ bool KnownPluginList::CustomScanner::shouldExit() const noexcept
 
     return false;
 }
+
+} // namespace juce

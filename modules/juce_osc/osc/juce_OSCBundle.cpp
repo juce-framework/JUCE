@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 OSCBundle::OSCBundle()
 {
 }
@@ -237,3 +240,5 @@ public:
 static OSCBundleElementTests OSCBundleElementUnitTests;
 
 #endif // JUCE_UNIT_TESTS
+
+} // namespace juce

@@ -20,7 +20,9 @@
   ==============================================================================
 */
 
-//==============================================================================
+namespace juce
+{
+
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   METHOD (constructor, "<init>",     "(Landroid/content/Context;Landroid/media/MediaScannerConnection$MediaScannerConnectionClient;)V") \
   METHOD (connect,     "connect",    "()V") \
@@ -190,3 +192,5 @@ void FileOutputStream::flushInternal()
         new SingleMediaScanner (file.getFullPathName());
     }
 }
+
+} // namespace juce

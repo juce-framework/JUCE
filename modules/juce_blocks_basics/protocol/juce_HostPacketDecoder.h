@@ -20,6 +20,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace BlocksProtocol
+{
 
 /**
     Parses data packets from a BLOCKS device, and translates them into callbacks
@@ -352,3 +356,6 @@ struct HostPacketDecoder
         return true;
     }
 };
+
+} // namespace BlocksProtocol
+} // namespace juce

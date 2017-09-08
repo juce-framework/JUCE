@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 InterprocessConnectionServer::InterprocessConnectionServer()
     : Thread ("Juce IPC server")
 {
@@ -74,3 +77,5 @@ void InterprocessConnectionServer::run()
                 newConnection->initialiseWithSocket (clientSocket.release());
     }
 }
+
+} // namespace juce

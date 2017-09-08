@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 BubbleMessageComponent::BubbleMessageComponent (int fadeOutLengthMs)
     : fadeOutLength (fadeOutLengthMs), mouseClickCounter (0),
       expiryTime (0), deleteAfterUse (false)
@@ -118,3 +121,5 @@ void BubbleMessageComponent::hide (const bool fadeOut)
     if (deleteAfterUse)
         delete this;
 }
+
+} // namespace juce

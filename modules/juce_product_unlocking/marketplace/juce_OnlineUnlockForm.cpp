@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct Spinner  : public Component, private Timer
 {
     Spinner()                       { startTimer (1000 / 50); }
@@ -283,3 +286,5 @@ void OnlineUnlockForm::dismiss()
 {
     delete this;
 }
+
+} // namespace juce

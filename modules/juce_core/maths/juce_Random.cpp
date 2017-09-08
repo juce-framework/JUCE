@@ -20,7 +20,10 @@
   ==============================================================================
 */
 
-Random::Random (const int64 seedValue) noexcept   : seed (seedValue)
+namespace juce
+{
+
+Random::Random (int64 seedValue) noexcept  : seed (seedValue)
 {
 }
 
@@ -181,3 +184,5 @@ public:
 static RandomTests randomTests;
 
 #endif
+
+} // namespace juce

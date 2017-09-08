@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 AbstractFifo::AbstractFifo (const int capacity) noexcept
     : bufferSize (capacity)
 {
@@ -227,3 +230,5 @@ public:
 static AbstractFifoTests fifoUnitTests;
 
 #endif
+
+} // namespace juce

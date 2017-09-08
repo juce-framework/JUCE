@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if ! JUCE_MINGW
  #pragma intrinsic (__cpuid)
  #pragma intrinsic (__rdtsc)
@@ -479,3 +482,5 @@ String SystemStats::getDisplayLanguage()
 
     return mainLang;
 }
+
+} // namespace juce

@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 /**
     A class representing a polynomial
@@ -160,3 +164,6 @@ private:
 
     JUCE_LEAK_DETECTOR (Polynomial)
 };
+
+} // namespace dsp
+} // namespace juce

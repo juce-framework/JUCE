@@ -112,10 +112,6 @@
 
 //==============================================================================
 //==============================================================================
-namespace juce
-{
-
-class AudioProcessor;
 #include "processors/juce_AudioProcessorEditor.h"
 #include "processors/juce_AudioProcessorListener.h"
 #include "processors/juce_AudioProcessorParameter.h"
@@ -140,5 +136,3 @@ class AudioProcessor;
 #include "utilities/juce_AudioParameterBool.h"
 #include "utilities/juce_AudioParameterChoice.h"
 #include "utilities/juce_AudioProcessorValueTreeState.h"
-
-}

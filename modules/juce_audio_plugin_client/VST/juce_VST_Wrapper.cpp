@@ -59,6 +59,7 @@
  #pragma warning (disable : 4458)
 #endif
 
+#include <juce_core/juce_core.h>
 #include "../../juce_audio_processors/format_types/juce_VSTInterface.h"
 
 #ifdef _MSC_VER

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 BlowFish::BlowFish (const void* const keyData, const int keyBytes)
 {
     jassert (keyData != nullptr);
@@ -466,3 +469,5 @@ public:
 static BlowFishTests blowFishUnitTests;
 
 #endif
+
+} // namespace juce

@@ -20,7 +20,9 @@
   ==============================================================================
 */
 
-//==============================================================================
+namespace juce
+{
+
 #if JUCE_MSVC
  #pragma warning (push)
  #pragma warning (disable: 4514 4996)
@@ -280,3 +282,5 @@ public:
 static CharacterFunctionsTests characterFunctionsTests;
 
 #endif
+
+} // namespace juce

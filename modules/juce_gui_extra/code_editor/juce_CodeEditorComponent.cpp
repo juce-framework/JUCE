@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class CodeEditorComponent::CodeEditorLine
 {
 public:
@@ -1642,3 +1645,5 @@ String CodeEditorComponent::State::toString() const
 {
     return String (lastTopLine) + ":" + String (lastCaretPos) + ":" + String (lastSelectionEnd);
 }
+
+} // namespace juce

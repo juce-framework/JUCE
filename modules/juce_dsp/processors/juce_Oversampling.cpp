@@ -24,8 +24,11 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
-//===============================================================================
 /** Abstract class for the provided oversampling engines used internally in
     the Oversampling class.
 */
@@ -710,3 +713,6 @@ void Oversampling<SampleType>::processSamplesDown (dsp::AudioBlock<SampleType> &
 
 template class Oversampling<float>;
 template class Oversampling<double>;
+
+} // namespace dsp
+} // namespace juce

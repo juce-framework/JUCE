@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 namespace LinuxEventLoop
 {
@@ -50,3 +51,5 @@ namespace LinuxEventLoop
 
     void setWindowSystemFdInternal (int fd, CallbackFunctionBase* readCallback) noexcept;
 }
+
+} // namespace juce

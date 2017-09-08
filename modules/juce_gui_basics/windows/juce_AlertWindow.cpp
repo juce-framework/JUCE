@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 static juce_wchar getDefaultPasswordChar() noexcept
 {
    #if JUCE_LINUX
@@ -721,3 +724,5 @@ bool AlertWindow::showNativeDialogBox (const String& title,
     return true;
 }
 #endif
+
+} // namespace juce

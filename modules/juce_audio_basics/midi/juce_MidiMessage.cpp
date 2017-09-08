@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace MidiHelpers
 {
     inline uint8 initialByte (const int type, const int channel) noexcept
@@ -1119,3 +1122,5 @@ const char* MidiMessage::getControllerName (const int n)
 
     return isPositiveAndBelow (n, numElementsInArray (names)) ? names[n] : nullptr;
 }
+
+} // namespace juce

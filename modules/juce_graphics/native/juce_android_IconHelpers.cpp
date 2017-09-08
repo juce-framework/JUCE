@@ -24,7 +24,7 @@
   ==============================================================================
 */
 
-Image JUCE_API getIconFromApplication (const String&, const int)
+namespace juce
 {
-    return Image();
+    Image JUCE_API getIconFromApplication (const String&, int)  { return {}; }
 }

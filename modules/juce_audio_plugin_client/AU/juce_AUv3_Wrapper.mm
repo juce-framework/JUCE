@@ -57,9 +57,10 @@
  #error AUv3 needs Objective-C 2 support (compile with 64-bit)
 #endif
 
+#define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
+
 #include "../utility/juce_IncludeSystemHeaders.h"
 #include "../utility/juce_IncludeModuleHeaders.h"
-#include "../../juce_core/native/juce_osx_ObjCHelpers.h"
 #include "../../juce_graphics/native/juce_mac_CoreGraphicsHelpers.h"
 
 #include "../../juce_audio_basics/native/juce_mac_CoreAudioLayouts.h"
@@ -82,7 +83,9 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnullability-completeness"
 
-// TODO: ask Timur: use SFINAE to automatically generate this for all NSObjects
+using namespace juce;
+
+// TODO: use SFINAE to automatically generate this for all NSObjects
 template <> struct ContainerDeletePolicy<AUAudioUnitBusArray>                   { static void destroy (NSObject* o) { [o release]; } };
 template <> struct ContainerDeletePolicy<AUParameterTree>                       { static void destroy (NSObject* o) { [o release]; } };
 template <> struct ContainerDeletePolicy<NSMutableArray<AUParameterNode *> >    { static void destroy (NSObject* o) { [o release]; } };

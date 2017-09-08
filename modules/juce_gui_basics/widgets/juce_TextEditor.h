@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -770,3 +770,5 @@ private:
 
 /** This typedef is just for compatibility with old code - newer code should use the TextEditor::Listener class directly. */
 typedef TextEditor::Listener TextEditorListener;
+
+} // namespace juce

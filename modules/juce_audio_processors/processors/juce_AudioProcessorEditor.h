@@ -24,9 +24,12 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
+class AudioProcessor;
 class AudioProcessorEditorListener;
+
 //==============================================================================
 /**
     Base class for the component that acts as the GUI for an AudioProcessor.
@@ -203,3 +206,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (AudioProcessorEditor)
 };
+
+} // namespace juce

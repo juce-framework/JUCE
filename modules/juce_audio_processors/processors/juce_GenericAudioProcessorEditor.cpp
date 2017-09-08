@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class ProcessorParameterPropertyComp   : public PropertyComponent,
                                          private AudioProcessorListener,
                                          private Timer
@@ -185,3 +188,5 @@ void GenericAudioProcessorEditor::resized()
 {
     panel.setBounds (getLocalBounds());
 }
+
+} // namespace juce

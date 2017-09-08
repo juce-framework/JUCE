@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 RectanglePlacement::RectanglePlacement (const RectanglePlacement& other) noexcept
     : flags (other.flags)
 {
@@ -127,3 +130,5 @@ AffineTransform RectanglePlacement::getTransformToFit (const Rectangle<float>& s
                 .scaled (scaleX, scaleY)
                 .translated (newX, newY);
 }
+
+} // namespace juce

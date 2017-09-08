@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_UNIT_TESTS
 
 struct ListenerBase
@@ -182,3 +185,5 @@ public:
 static ListenerListTests listenerListTests;
 
 #endif
+
+} // namespace juce

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 /** Acts as a GUI which asks the user for their details, and calls the approriate
     methods on your OnlineUnlockStatus object to attempt to register the app.
 
@@ -88,3 +91,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OnlineUnlockForm)
 };
+
+} // namespace juce

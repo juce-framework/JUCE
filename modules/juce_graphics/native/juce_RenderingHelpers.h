@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 #if JUCE_MSVC
  #pragma warning (push)
@@ -2685,3 +2686,5 @@ protected:
 #if JUCE_MSVC
  #pragma warning (pop)
 #endif
+
+} // namespace juce

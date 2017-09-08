@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ReverbAudioSource::ReverbAudioSource (AudioSource* const inputSource, const bool deleteInputWhenDeleted)
    : input (inputSource, deleteInputWhenDeleted),
      bypass (false)
@@ -76,3 +79,5 @@ void ReverbAudioSource::setBypassed (bool b) noexcept
         reverb.reset();
     }
 }
+
+} // namespace juce

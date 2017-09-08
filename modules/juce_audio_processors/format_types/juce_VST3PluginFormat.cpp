@@ -26,15 +26,12 @@
 
 #if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS)
 
-} // namespace juce
-
 #include <map>
 #include "juce_VST3Headers.h"
+#include "juce_VST3Common.h"
 
 namespace juce
 {
-
-#include "juce_VST3Common.h"
 
 using namespace Steinberg;
 
@@ -2978,4 +2975,6 @@ FileSearchPath VST3PluginFormat::getDefaultLocationsToSearch()
    #endif
 }
 
-#endif //JUCE_PLUGINHOST_VST3
+} // namespace juce
+
+#endif // JUCE_PLUGINHOST_VST3

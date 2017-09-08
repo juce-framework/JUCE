@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 /**
     This class contains a ValueTree which is used to manage an AudioProcessor's entire state.
@@ -233,3 +234,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorValueTreeState)
 };
+
+} // namespace juce

@@ -84,6 +84,8 @@
 #include "../../juce_audio_processors/format_types/juce_AU_Shared.h"
 
 //==============================================================================
+using namespace juce;
+
 static Array<void*> activePlugins, activeUIs;
 
 static const AudioUnitPropertyID juceFilterObjectPropertyID = 0x1a45ffe9;

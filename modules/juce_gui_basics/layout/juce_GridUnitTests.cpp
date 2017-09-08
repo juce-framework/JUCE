@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct GridTests  : public juce::UnitTest
 {
     GridTests() : juce::UnitTest ("Grid class") {}
@@ -255,3 +258,5 @@ struct GridTests  : public juce::UnitTest
 };
 
 static GridTests gridUnitTests;
+
+} // namespace juce

@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct FallbackDownloadTask  : public URL::DownloadTask,
                                public Thread
 {
@@ -661,3 +664,5 @@ bool URL::launchInDefaultBrowser() const
 
     return Process::openDocument (u, String());
 }
+
+} // namespace juce

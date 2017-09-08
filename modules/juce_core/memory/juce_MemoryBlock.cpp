@@ -20,8 +20,10 @@
   ==============================================================================
 */
 
-MemoryBlock::MemoryBlock() noexcept
-    : size (0)
+namespace juce
+{
+
+MemoryBlock::MemoryBlock() noexcept  : size (0)
 {
 }
 
@@ -405,3 +407,5 @@ bool MemoryBlock::fromBase64Encoding (StringRef s)
         }
     }
 }
+
+} // namespace juce

@@ -110,10 +110,6 @@
 #endif
 
 //==============================================================================
-namespace juce
-{
-
-class AudioFormat;
 #include "format/juce_AudioFormatReader.h"
 #include "format/juce_AudioFormatWriter.h"
 #include "format/juce_MemoryMappedAudioFormatReader.h"
@@ -131,5 +127,3 @@ class AudioFormat;
 #include "codecs/juce_WavAudioFormat.h"
 #include "codecs/juce_WindowsMediaAudioFormat.h"
 #include "sampler/juce_Sampler.h"
-
-}

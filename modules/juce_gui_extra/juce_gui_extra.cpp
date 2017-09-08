@@ -83,9 +83,6 @@
 #endif
 
 //==============================================================================
-namespace juce
-{
-
 #include "documents/juce_FileBasedDocument.cpp"
 #include "code_editor/juce_CodeDocument.cpp"
 #include "code_editor/juce_CodeEditorComponent.cpp"
@@ -101,13 +98,6 @@ namespace juce
 #include "misc/juce_SystemTrayIconComponent.cpp"
 #include "misc/juce_LiveConstantEditor.cpp"
 #include "misc/juce_AnimatedAppComponent.cpp"
-
-}
-
-using namespace juce;
-
-namespace juce
-{
 
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
@@ -159,10 +149,12 @@ namespace juce
 #endif
 
 #if JUCE_WEB_BROWSER
- bool WebBrowserComponent::pageAboutToLoad (const String&)  { return true; }
- void WebBrowserComponent::pageFinishedLoading (const String&) {}
- bool WebBrowserComponent::pageLoadHadNetworkError (const String&) { return true; }
- void WebBrowserComponent::windowCloseRequest() {}
- void WebBrowserComponent::newWindowAttemptingToLoad (const String&) {}
-#endif
+namespace juce
+{
+    bool WebBrowserComponent::pageAboutToLoad (const String&)  { return true; }
+    void WebBrowserComponent::pageFinishedLoading (const String&) {}
+    bool WebBrowserComponent::pageLoadHadNetworkError (const String&) { return true; }
+    void WebBrowserComponent::windowCloseRequest() {}
+    void WebBrowserComponent::newWindowAttemptingToLoad (const String&) {}
 }
+#endif

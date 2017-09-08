@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 MidiMessageCollector::MidiMessageCollector()
 {
 }
@@ -151,3 +154,5 @@ void MidiMessageCollector::handleIncomingMidiMessage (MidiInput*, const MidiMess
 {
     addMessageToQueue (message);
 }
+
+} // namespace juce

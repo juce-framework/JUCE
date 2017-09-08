@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 #if JUCE_USE_CAMERA || DOXYGEN
 
@@ -164,3 +165,5 @@ private:
 #endif
 
 #endif
+
+} // namespace juce

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct NSViewResizeWatcher
 {
     NSViewResizeWatcher() : callback (nil) {}
@@ -240,3 +243,5 @@ ReferenceCountedObject* NSViewComponent::attachViewToComponent (Component& comp,
 {
     return new NSViewAttachment ((NSView*) view, comp);
 }
+
+} // namespace juce

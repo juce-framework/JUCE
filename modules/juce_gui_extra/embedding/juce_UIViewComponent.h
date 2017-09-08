@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 #if JUCE_IOS || DOXYGEN
 
@@ -84,3 +85,5 @@ private:
 };
 
 #endif
+
+} // namespace juce

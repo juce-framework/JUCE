@@ -24,6 +24,8 @@
   ==============================================================================
 */
 
+namespace juce
+{
 
 GridItem::Property::Property() noexcept : isAuto (true)
 {
@@ -180,3 +182,5 @@ GridItem GridItem::withOrder (int newOrder) const noexcept
     gi.order = newOrder;
     return gi;
 }
+
+} // namespace juce

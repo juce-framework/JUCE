@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ComponentBoundsConstrainer::ComponentBoundsConstrainer() noexcept {}
 ComponentBoundsConstrainer::~ComponentBoundsConstrainer() {}
 
@@ -290,3 +293,5 @@ void ComponentBoundsConstrainer::checkBounds (Rectangle<int>& bounds,
 
     jassert (! bounds.isEmpty());
 }
+
+} // namespace juce

@@ -24,6 +24,8 @@
   ==============================================================================
 */
 
+namespace juce
+{
 
 Colour LookAndFeel_V4::ColourScheme::getUIColour (UIColour index) const noexcept
 {
@@ -1429,3 +1431,5 @@ void LookAndFeel_V4::initialiseColours()
     for (int i = 0; i < numElementsInArray (coloursToUse); i += 2)
         setColour ((int) coloursToUse [i], Colour ((uint32) coloursToUse [i + 1]));
 }
+
+} // namespace juce

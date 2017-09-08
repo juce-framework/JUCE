@@ -20,6 +20,8 @@
   ==============================================================================
 */
 
+namespace juce
+{
 
 /**
     This topology source manages the topology of the physical Blocks devices
@@ -80,3 +82,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PhysicalTopologySource)
 };
+
+} // namespace juce

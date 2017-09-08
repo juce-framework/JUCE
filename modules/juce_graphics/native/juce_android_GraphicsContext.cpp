@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace GraphicsHelpers
 {
     jobject createPaint (Graphics::ResamplingQuality quality)
@@ -60,3 +63,5 @@ ImagePixelData::Ptr NativeImageType::create (Image::PixelFormat format, int widt
 {
     return SoftwareImageType().create (format, width, height, clearImage);
 }
+
+} // namespace juce

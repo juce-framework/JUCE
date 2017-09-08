@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 AppleRemoteDevice::AppleRemoteDevice()
     : device (nullptr),
       queue (nullptr),
@@ -262,3 +265,5 @@ void AppleRemoteDevice::handleCallbackInternal()
         ++buttonNum;
     }
 }
+
+} // namespace juce

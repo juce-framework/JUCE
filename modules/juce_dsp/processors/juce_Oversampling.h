@@ -24,6 +24,11 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
+
 template <typename NumericType>
 class OversamplingEngine;
 
@@ -136,3 +141,6 @@ private:
     //===============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Oversampling)
 };
+
+} // namespace dsp
+} // namespace juce

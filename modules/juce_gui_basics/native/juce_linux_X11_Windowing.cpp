@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_DEBUG && ! defined (JUCE_DEBUG_XERRORS)
  #define JUCE_DEBUG_XERRORS 1
 #endif
@@ -4358,3 +4361,5 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& text, Co
     jassertfalse;
     return false;
 }
+
+} // namespace juce

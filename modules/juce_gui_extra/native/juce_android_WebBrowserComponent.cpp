@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 WebBrowserComponent::WebBrowserComponent (const bool unloadPageWhenBrowserIsHidden_)
     : browser (nullptr),
       blankPageShown (false),
@@ -121,3 +124,5 @@ void WebBrowserComponent::focusGained (FocusChangeType)
 void WebBrowserComponent::clearCookies()
 {
 }
+
+} // namespace juce

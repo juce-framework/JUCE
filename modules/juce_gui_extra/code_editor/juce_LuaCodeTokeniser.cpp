@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct LuaTokeniserFunctions
 {
     static bool isReservedKeyword (String::CharPointerType token, const int tokenLength) noexcept
@@ -233,3 +236,5 @@ CodeEditorComponent::ColourScheme LuaTokeniser::getDefaultColourScheme()
 
     return cs;
 }
+
+} // namespace juce

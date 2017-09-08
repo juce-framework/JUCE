@@ -24,6 +24,8 @@
   ==============================================================================
 */
 
+namespace juce
+{
 
 /**
     Defines an item in a Grid
@@ -221,3 +223,5 @@ public:
     /** Returns a copy of this object with a new order. */
     GridItem withOrder (int newOrder) const noexcept;
 };
+
+} // namespace juce

@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 MPEZoneLayout::MPEZoneLayout() noexcept
 {
 }
@@ -378,3 +381,5 @@ static MPEZoneLayoutTests MPEZoneLayoutUnitTests;
 
 
 #endif // JUCE_UNIT_TESTS
+
+} // namespace juce

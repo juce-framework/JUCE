@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 IIRFilterAudioSource::IIRFilterAudioSource (AudioSource* const inputSource,
                                             const bool deleteInputWhenDeleted)
     : input (inputSource, deleteInputWhenDeleted)
@@ -73,3 +76,5 @@ void IIRFilterAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& buff
             ->processSamples (bufferToFill.buffer->getWritePointer (i, bufferToFill.startSample),
                               bufferToFill.numSamples);
 }
+
+} // namespace juce

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace PropertyFileConstants
 {
     JUCE_CONSTEXPR static const int magicNumber            = (int) ByteOrder::littleEndianInt ('P', 'R', 'O', 'P');
@@ -356,3 +359,5 @@ void PropertiesFile::propertyChanged()
     else if (options.millisecondsBeforeSaving == 0)
         saveIfNeeded();
 }
+
+} // namespace juce

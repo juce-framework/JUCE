@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 XmlTokeniser::XmlTokeniser() {}
 XmlTokeniser::~XmlTokeniser() {}
 
@@ -166,3 +169,5 @@ int XmlTokeniser::readNextToken (CodeDocument::Iterator& source)
 
     return tokenType_identifier;
 }
+
+} // namespace juce

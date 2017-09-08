@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class KeyMappingEditorComponent::ChangeKeyButton  : public Button
 {
 public:
@@ -468,3 +471,5 @@ String KeyMappingEditorComponent::getDescriptionForKeyPress (const KeyPress& key
 {
     return key.getTextDescription();
 }
+
+} // namespace juce

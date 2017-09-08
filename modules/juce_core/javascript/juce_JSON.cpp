@@ -20,9 +20,11 @@
   ==============================================================================
 */
 
-class JSONParser
+namespace juce
 {
-public:
+
+struct JSONParser
+{
     static Result parseObjectOrArray (String::CharPointerType t, var& result)
     {
         t = t.findEndOfWhitespace();
@@ -319,9 +321,8 @@ private:
 };
 
 //==============================================================================
-class JSONFormatter
+struct JSONFormatter
 {
-public:
     static void write (OutputStream& out, const var& v,
                        const int indentLevel, const bool allOnOneLine,
                        int maximumDecimalPlaces)
@@ -648,3 +649,5 @@ public:
 static JSONTests JSONUnitTests;
 
 #endif
+
+} // namespace juce
