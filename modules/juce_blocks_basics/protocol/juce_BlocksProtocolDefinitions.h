@@ -214,6 +214,7 @@ enum ConfigItemId
     fixedVelocityValue  = 16,
     pianoMode           = 17,
     glideLock           = 18,
+    glideLockEnable     = 19,
     // Live
     mode                = 20,
     volume              = 21,
@@ -505,6 +506,11 @@ static constexpr const char* ledProgramLittleFootFunctions[] =
     "onControlPress/vi",
     "onControlRelease/vi",
     "initControl/viiiiiiiii",
+    "setButtonMode/vii",
+    "setButtonType/viii",
+    "setButtonMinMaxDefault/viiii",
+    "setButtonColours/viii",
+    "setButtonTriState/vii",
     nullptr
 };
 
