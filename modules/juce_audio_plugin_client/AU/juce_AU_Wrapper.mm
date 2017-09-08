@@ -90,6 +90,8 @@ static Array<void*> activePlugins, activeUIs;
 
 static const AudioUnitPropertyID juceFilterObjectPropertyID = 0x1a45ffe9;
 
+template <> struct ContainerDeletePolicy<const __CFString>   { static void destroy (const __CFString* o) { if (o != nullptr) CFRelease (o); } };
+
 // make sure the audio processor is initialized before the AUBase class
 struct AudioProcessorHolder
 {
@@ -880,6 +882,34 @@ public:
         return kAudioUnitErr_InvalidParameter;
     }
 
+    ComponentResult GetParameterValueStrings (AudioUnitScope inScope,
+                                              AudioUnitParameterID inParameterID,
+                                              CFArrayRef *outStrings) override
+    {
+        if (outStrings == nullptr)
+            return noErr;
+
+        const int index = getJuceIndexForAUParameterID (inParameterID);
+
+        if (inScope == kAudioUnitScope_Global
+            && juceFilter != nullptr
+            && isPositiveAndBelow (index, juceFilter->getNumParameters())
+            && juceFilter->isParameterDiscrete (index))
+        {
+            if (auto* valueStrings = parameterValueStringArrays[index])
+            {
+                *outStrings = CFArrayCreate (NULL,
+                                             (const void **) valueStrings->getRawDataPointer(),
+                                             valueStrings->size(),
+                                             NULL);
+
+                return noErr;
+            }
+        }
+
+        return kAudioUnitErr_InvalidParameter;
+    }
+
     ComponentResult GetParameter (AudioUnitParameterID inID,
                                   AudioUnitScope inScope,
                                   AudioUnitElement inElement,
@@ -1614,6 +1644,9 @@ private:
     AudioUnitHelpers::ChannelRemapper mapper;
 
     //==============================================================================
+    OwnedArray<OwnedArray<const __CFString>> parameterValueStringArrays;
+
+    //==============================================================================
     void pullInputAudio (AudioUnitRenderActionFlags& flags, const AudioTimeStamp& timestamp, const UInt32 nFrames) noexcept
     {
         const unsigned int numInputBuses = GetScope (kAudioUnitScope_Input).GetNumberOfElements();
@@ -1747,9 +1780,7 @@ private:
 
         if (usingManagedParameter)
         {
-            const int n = juceFilter->getNumParameters();
-
-            for (int i = 0; i < n; ++i)
+            for (int i = 0; i < numParams; ++i)
             {
                 const AudioUnitParameterID auParamID = generateAUParameterIDForIndex (i);
 
@@ -1776,6 +1807,32 @@ private:
             if (param->isDiscrete())
                 jassert (param->getNumSteps() != juceFilter->getDefaultNumParameterSteps());
        #endif
+
+        parameterValueStringArrays.ensureStorageAllocated (numParams);
+
+        for (int index = 0; index < numParams; ++index)
+        {
+            OwnedArray<const __CFString>* stringValues = nullptr;
+
+           #if ! JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
+            if (juceFilter->isParameterDiscrete (index))
+            {
+                if (auto* param = juceFilter->getParameters()[index])
+                {
+                    const auto numSteps = juceFilter->getParameterNumSteps (index);
+                    stringValues = new OwnedArray<const __CFString>();
+                    stringValues->ensureStorageAllocated (numSteps);
+
+                    const auto maxValue = getMaximumParameterValue (index);
+
+                    for (int i = 0; i < numSteps; ++i)
+                        stringValues->add (CFStringCreateCopy (nullptr, (param->getText ((float) i / maxValue, 0)).toCFString())); ;
+                }
+            }
+           #endif
+
+            parameterValueStringArrays.add (stringValues);
+        }
     }
 
     //==============================================================================
