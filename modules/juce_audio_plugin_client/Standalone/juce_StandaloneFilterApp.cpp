@@ -43,10 +43,6 @@
 
 extern juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 
-#if JucePlugin_Enable_IAA && JUCE_IOS
- #include "../../juce_audio_devices/native/juce_ios_Audio.h"
-#endif
-
 #include "juce_StandaloneFilterWindow.h"
 
 namespace juce
