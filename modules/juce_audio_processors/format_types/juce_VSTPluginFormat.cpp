@@ -27,11 +27,6 @@
 #if JUCE_PLUGINHOST_VST
 
 //==============================================================================
-#if JUCE_MAC && JUCE_SUPPORT_CARBON
- #include "../../juce_gui_extra/native/juce_mac_CarbonViewWrapperComponent.h"
-#endif
-
-//==============================================================================
 #undef PRAGMA_ALIGN_SUPPORTED
 
 #if JUCE_MSVC
