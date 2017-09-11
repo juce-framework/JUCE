@@ -256,7 +256,7 @@ public:
                                                           totalInChannels,
                                                           totalOutChannels,
                                                           totalOutChannels));
-        o.content->setSize (500, 450);
+        o.content->setSize (500, 550);
 
         o.dialogTitle                   = TRANS("Audio/MIDI Settings");
         o.dialogBackgroundColour        = o.content->getLookAndFeel().findColour (ResizableWindow::backgroundColourId);
