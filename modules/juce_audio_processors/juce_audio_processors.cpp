@@ -60,6 +60,10 @@
  #define JUCE_PLUGINHOST_VST3 0
 #endif
 
+#if JUCE_PLUGINHOST_AU && (JUCE_MAC || JUCE_IOS)
+ #include <AudioUnit/AudioUnit.h>
+#endif
+
 //==============================================================================
 namespace juce
 {

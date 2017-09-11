@@ -26,7 +26,6 @@
 
 #if JUCE_PLUGINHOST_AU && (JUCE_MAC || JUCE_IOS)
 
-#include <AudioUnit/AudioUnit.h>
 #if JUCE_MAC
 #include <AudioUnit/AUCocoaUIView.h>
 #include <CoreAudioKit/AUGenericView.h>
