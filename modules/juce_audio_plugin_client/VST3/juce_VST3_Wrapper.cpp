@@ -1851,12 +1851,20 @@ public:
         auto numOutputBuses = pluginInstance->getBusCount (false);
 
         for (int i = 0; i < numInputBuses; ++i)
-            if (pluginInstance->getChannelLayoutOfBus (true,  i).isDiscreteLayout())
+        {
+            auto& layout = pluginInstance->getChannelLayoutOfBus (true,  i);
+
+            if (layout.isDiscreteLayout() && ! layout.isDisabled())
                 return false;
+        }
 
         for (int i = 0; i < numOutputBuses; ++i)
-            if (pluginInstance->getChannelLayoutOfBus (false, i).isDiscreteLayout())
+        {
+            auto& layout = pluginInstance->getChannelLayoutOfBus (false,  i);
+
+            if (layout.isDiscreteLayout() && ! layout.isDisabled())
                 return false;
+        }
 
         return true;
     }
