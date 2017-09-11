@@ -244,7 +244,7 @@ private:
         if (hostPath.containsIgnoreCase       ("Wavelab 8"))         return SteinbergWavelab8;
         if (hostFilename.containsIgnoreCase   ("Wavelab"))           return SteinbergWavelabGeneric;
         if (hostFilename.containsIgnoreCase   ("WaveBurner"))        return WaveBurner;
-        if (hostFilename.contains             ("Digital Performer")) return DigitalPerformer;
+        if (hostPath.containsIgnoreCase       ("Digital Performer")) return DigitalPerformer;
         if (hostFilename.containsIgnoreCase   ("reaper"))            return Reaper;
         if (hostPath.containsIgnoreCase       ("Studio One"))        return StudioOne;
         if (hostFilename.startsWithIgnoreCase ("Waveform"))          return TracktionWaveform;
@@ -277,7 +277,7 @@ private:
         if (hostFilename.containsIgnoreCase   ("Cubase8.5.exe"))     return SteinbergCubase8_5;
         // Cubase 9 scans plug-ins with a separate executable "vst2xscanner"
         if (hostFilename.containsIgnoreCase   ("Cubase9.exe")
-            || hostPath.containsIgnoreCase ("Cubase 9"))             return SteinbergCubase9;
+            || hostPath.containsIgnoreCase    ("Cubase 9"))          return SteinbergCubase9;
         if (hostFilename.containsIgnoreCase   ("Cubase"))            return SteinbergCubaseGeneric;
         if (hostFilename.containsIgnoreCase   ("VSTBridgeApp"))      return SteinbergCubase5Bridged;
         if (hostPath.containsIgnoreCase       ("Wavelab 5"))         return SteinbergWavelab5;
