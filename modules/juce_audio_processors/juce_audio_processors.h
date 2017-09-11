@@ -56,19 +56,6 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <juce_audio_basics/juce_audio_basics.h>
 
-/** Config: JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
-
-    Enable this if you want to force JUCE to use an old scheme for selecting
-    when parameters are classified as discrete or continuous in a host. If this
-    is not enabled then DAW projects with automation data written by an
-    AudioUnit, VST3 or AAX plug-in built with JUCE version 5.1.1 or earlier may
-    load incorrectly when opened by an AudioUnit, VST3 or AAX plug-in built
-    with JUCE version 5.2.0 and later.
-*/
-#ifndef JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
- #define JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE 0
-#endif
-
 //==============================================================================
 /** Config: JUCE_PLUGINHOST_VST
     Enables the VST audio plugin hosting classes.
@@ -110,7 +97,6 @@
  #define JUCE_SUPPORT_LEGACY_AUDIOPROCESSOR 1
 #endif
 
-//==============================================================================
 //==============================================================================
 #include "processors/juce_AudioProcessorEditor.h"
 #include "processors/juce_AudioProcessorListener.h"
