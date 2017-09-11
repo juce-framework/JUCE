@@ -53,8 +53,6 @@
  #include <CoreAudioKit/AUViewController.h>
 #endif
 
-#include <unordered_map>
-
 #if JUCE_SUPPORT_CARBON
  #include "../../juce_gui_extra/native/juce_mac_CarbonViewWrapperComponent.h"
 #endif
@@ -1185,7 +1183,7 @@ public:
                         ParamInfo* const param = new ParamInfo();
                         parameters.add (param);
                         param->paramID = ids[i];
-                        paramIDToIndex[ids[i]] = i;
+                        paramIDToIndex.getReference (ids[i]) = i;
                         param->minValue = info.minValue;
                         param->maxValue = info.maxValue;
                         param->automatable = (info.flags & kAudioUnitParameterFlag_NonRealTime) == 0;
@@ -1281,7 +1279,7 @@ private:
     };
 
     OwnedArray<ParamInfo> parameters;
-    std::unordered_map<AudioUnitParameterID, size_t> paramIDToIndex;
+    HashMap<AudioUnitParameterID, size_t> paramIDToIndex;
 
     MidiDataConcatenator midiConcatenator;
     CriticalSection midiInLock;
@@ -1367,10 +1365,12 @@ private:
          || event.mEventType == kAudioUnitEvent_BeginParameterChangeGesture
          || event.mEventType == kAudioUnitEvent_EndParameterChangeGesture)
         {
-            auto it = paramIDToIndex.find (event.mArgument.mParameter.mParameterID);
+            auto paramID = event.mArgument.mParameter.mParameterID;
 
-            if (it != paramIDToIndex.end())
-                paramIndex = (int) it->second;
+            if (! paramIDToIndex.contains (paramID))
+                return;
+
+            paramIndex = static_cast<int> (paramIDToIndex [paramID]);
 
             if (! isPositiveAndBelow (paramIndex, parameters.size()))
                 return;
