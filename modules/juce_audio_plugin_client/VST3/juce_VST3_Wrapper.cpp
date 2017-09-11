@@ -1852,7 +1852,7 @@ public:
 
         for (int i = 0; i < numInputBuses; ++i)
         {
-            auto& layout = pluginInstance->getChannelLayoutOfBus (true,  i);
+            auto layout = pluginInstance->getChannelLayoutOfBus (true,  i);
 
             if (layout.isDiscreteLayout() && ! layout.isDisabled())
                 return false;
@@ -1860,7 +1860,7 @@ public:
 
         for (int i = 0; i < numOutputBuses; ++i)
         {
-            auto& layout = pluginInstance->getChannelLayoutOfBus (false,  i);
+            auto layout = pluginInstance->getChannelLayoutOfBus (false,  i);
 
             if (layout.isDiscreteLayout() && ! layout.isDisabled())
                 return false;
