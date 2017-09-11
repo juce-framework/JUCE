@@ -513,13 +513,21 @@ public:
 
     MouseSourceState& getMouseState (MouseInputSource source)
     {
-        for (auto* ms : mouseSourceStates)
-            if (ms->source == source)
-                return *ms;
+        MouseSourceState* mouseState = nullptr;
 
-        auto ms = new MouseSourceState (*this, source);
-        mouseSourceStates.add (ms);
-        return *ms;
+        for (auto* ms : mouseSourceStates)
+        {
+            if      (ms->source == source)                        mouseState = ms;
+            else if (ms->source.getType() != source.getType())    ms->stopTimer();
+        }
+
+        if (mouseState == nullptr)
+        {
+            mouseState = new MouseSourceState (*this, source);
+            mouseSourceStates.add (mouseState);
+        }
+
+        return *mouseState;
     }
 
     //==============================================================================
@@ -999,7 +1007,7 @@ public:
 };
 
 //==============================================================================
-class MouseSourceState  : private Timer
+class MouseSourceState  : public Timer
 {
 public:
     MouseSourceState (MenuWindow& w, MouseInputSource s)

@@ -2379,6 +2379,7 @@ private:
         else if (isUp)
         {
             modsToSend = modsToSend.withoutMouseButtons();
+            currentModifiers = modsToSend;
             currentTouches.clearTouch (touchIndex);
 
             if (! currentTouches.areAnyTouchesActive())
