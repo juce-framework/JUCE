@@ -1275,7 +1275,7 @@ private:
     };
 
     OwnedArray<ParamInfo> parameters;
-    HashMap<AudioUnitParameterID, size_t> paramIDToIndex;
+    HashMap<uint32, size_t> paramIDToIndex;
 
     MidiDataConcatenator midiConcatenator;
     CriticalSection midiInLock;
