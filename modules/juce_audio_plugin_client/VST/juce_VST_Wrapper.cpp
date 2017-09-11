@@ -1266,7 +1266,9 @@ public:
             {
                 ed->setTopLeftPosition (0, 0);
                 ed->setBounds (ed->getLocalArea (this, getLocalBounds()));
-                updateWindowSize();
+
+                if (! getHostType().isBitwigStudio())
+                    updateWindowSize();
             }
 
            #if JUCE_MAC && ! JUCE_64BIT
