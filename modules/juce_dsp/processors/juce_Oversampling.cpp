@@ -444,7 +444,7 @@ public:
                 auto numStages = coefficientsUp.size();
 
                 for (auto n = 0; n < numStages; n++)
-                    JUCE_SNAP_TO_ZERO (lv1[n]);
+                    util::snapToZero (lv1[n]);
             }
         }
         else
@@ -455,7 +455,7 @@ public:
                 auto numStages = coefficientsDown.size();
 
                 for (auto n = 0; n < numStages; n++)
-                    JUCE_SNAP_TO_ZERO (lv1[n]);
+                    util::snapToZero (lv1[n]);
             }
         }
     }

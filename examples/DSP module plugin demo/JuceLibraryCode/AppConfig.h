@@ -130,6 +130,10 @@
  //#define JUCE_FORCE_USE_LEGACY_PARAM_IDS 1
 #endif
 
+#ifndef    JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
+ //#define JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE 1
+#endif
+
 #ifndef    JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS
  //#define JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS 1
 #endif
@@ -212,6 +216,10 @@
 
 #ifndef    JUCE_DSP_USE_STATIC_FFTW
  //#define JUCE_DSP_USE_STATIC_FFTW 1
+#endif
+
+#ifndef    JUCE_DSP_ENABLE_SNAP_TO_ZERO
+ #define   JUCE_DSP_ENABLE_SNAP_TO_ZERO 0
 #endif
 
 //==============================================================================

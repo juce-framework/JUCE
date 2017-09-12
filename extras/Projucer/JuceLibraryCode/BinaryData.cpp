@@ -1617,6 +1617,7 @@ static const unsigned char temp_binary_data_8[] =
 "\r\n"
 "void FILTERCLASSNAME::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)\r\n"
 "{\r\n"
+"    ScopedNoDenormals noDenormals;\r\n"
 "    const int totalNumInputChannels  = getTotalNumInputChannels();\r\n"
 "    const int totalNumOutputChannels = getTotalNumOutputChannels();\r\n"
 "\r\n"
@@ -7028,7 +7029,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0xafccbd3f:  numBytes = 3141; return jucer_AudioComponentTemplate_cpp;
         case 0x27c5a93a:  numBytes = 1310; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 938; return jucer_AudioPluginEditorTemplate_h;
-        case 0x51b49ac5:  numBytes = 5611; return jucer_AudioPluginFilterTemplate_cpp;
+        case 0x51b49ac5:  numBytes = 5647; return jucer_AudioPluginFilterTemplate_cpp;
         case 0x488afa0a:  numBytes = 2245; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2151; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2064; return jucer_ComponentTemplate_h;

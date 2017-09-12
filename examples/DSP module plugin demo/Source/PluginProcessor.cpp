@@ -114,6 +114,8 @@ void DspModulePluginDemoAudioProcessor::releaseResources()
 
 void DspModulePluginDemoAudioProcessor::process (dsp::ProcessContextReplacing<float> context) noexcept
 {
+    ScopedNoDenormals noDenormals;
+
     // Input volume applied with a LinearSmoothedValue
     inputVolume.process (context);
 

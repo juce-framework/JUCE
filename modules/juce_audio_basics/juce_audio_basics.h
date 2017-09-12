@@ -51,6 +51,7 @@
 
 #include <juce_core/juce_core.h>
 
+//==============================================================================
 #undef Complex  // apparently some C libraries actually define these symbols (!)
 #undef Factor
 
