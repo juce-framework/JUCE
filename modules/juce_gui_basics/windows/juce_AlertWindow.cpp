@@ -736,7 +736,7 @@ struct NativeMessageBoxCallback : ModalComponentManager::Callback
 
     std::function<void (int)> callback;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeMessageBoxCallback);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeMessageBoxCallback)
 };
 
 void NativeMessageBox::showMessageBox (MessageBoxType dialogType, AlertWindow::AlertIconType iconType,
