@@ -918,9 +918,9 @@ public:
         if (inScope == kAudioUnitScope_Global && juceFilter != nullptr)
         {
             const auto index = getJuceIndexForAUParameterID (inID);
-            auto* param = juceFilter->getParameters().getUnchecked (index);
+            const auto normValue = juceFilter->getParameter (index);
 
-            outValue = param->getValue() * getMaximumParameterValue (index);
+            outValue = normValue * getMaximumParameterValue (index);
             return noErr;
         }
 
@@ -936,9 +936,7 @@ public:
         if (inScope == kAudioUnitScope_Global && juceFilter != nullptr)
         {
             const auto index = getJuceIndexForAUParameterID (inID);
-            auto* param = juceFilter->getParameters().getUnchecked (index);
-
-            param->setValue (inValue / getMaximumParameterValue (index));
+            juceFilter->setParameter (index, inValue / getMaximumParameterValue (index));
             return noErr;
         }
 
