@@ -34,6 +34,15 @@ namespace juce
 class NativeMessageBox
 {
 public:
+    /** A set of enums describing the type of dialog box */
+    enum MessageBoxType
+    {
+        okType,          /** A message box with a simple ok button. */
+        okCancelType,    /** A message box with an ok and cancel button. */
+        yesNoType,       /** A message box with a yes and no button. */
+        yesNoCancelType, /** A message box with a yes, no and cancel button. */
+    };
+
     /** Shows a dialog box that just has a message and a single 'ok' button to close it.
 
         The box is shown modally, and the method will block until the user has clicked its
@@ -53,6 +62,27 @@ public:
                                               Component* associatedComponent = nullptr);
    #endif
 
+    /** Shows a dialog box asynchronously triggering a lambda when the user dismisses the box.
+
+        The box will be displayed and placed into a modal state, but this method will return
+        immediately, and the lambda will be invoked later when the user dismisses the box.
+
+        @param dialogType   the type of the dialog
+        @param iconType     the type of icon to show
+        @param title        the headline to show at the top of the box
+        @param message      a longer, more descriptive message to show underneath the title
+        @param lambda       a lambda which will be triggered when the box is dismissed
+        @param associatedComponent if this is non-null, it specifies the component that the
+                            alert window should be associated with. Depending on the look
+                            and feel, this might be used for positioning of the alert window.
+    */
+    static void JUCE_CALLTYPE showMessageBox (MessageBoxType dialogType,
+                                              AlertWindow::AlertIconType iconType,
+                                              const String& title,
+                                              const String& message,
+                                              std::function<void (int)> && lambda = {},
+                                              Component* associatedComponent = nullptr);
+
     /** Shows a dialog box that just has a message and a single 'ok' button to close it.
 
         The box will be displayed and placed into a modal state, but this method will return
@@ -71,10 +101,10 @@ public:
                             before it gets called.
     */
     static void JUCE_CALLTYPE showMessageBoxAsync (AlertWindow::AlertIconType iconType,
-                                                    const String& title,
-                                                    const String& message,
-                                                    Component* associatedComponent = nullptr,
-                                                    ModalComponentManager::Callback* callback = nullptr);
+                                                   const String& title,
+                                                   const String& message,
+                                                   Component* associatedComponent = nullptr,
+                                                   ModalComponentManager::Callback* callback = nullptr);
 
     /** Shows a dialog box with two buttons.
 
