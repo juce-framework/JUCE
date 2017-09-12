@@ -1027,6 +1027,13 @@ public:
 
     void timerCallback() override
     {
+       #if JUCE_WINDOWS
+        // touch and pen devices on Windows send an offscreen mouse move after mouse up events
+        // but we don't want to forward these on as they will dismiss the menu
+        if ((source.isTouch() || source.isPen()) && ! isValidMousePosition())
+            return;
+       #endif
+
         if (window.windowIsStillValid())
             handleMousePosition (source.getScreenPosition().roundToInt());
     }
@@ -1217,6 +1224,20 @@ private:
 
         return true;
     }
+
+   #if JUCE_WINDOWS
+    bool isValidMousePosition()
+    {
+        auto screenPos = source.getScreenPosition();
+        auto localPos = (window.activeSubMenu == nullptr) ? window.getLocalPoint (nullptr, screenPos)
+                                                          : window.activeSubMenu->getLocalPoint (nullptr, screenPos);
+
+        if (localPos.x < 0 && localPos.y < 0)
+            return false;
+
+        return true;
+    }
+   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MouseSourceState)
 };
