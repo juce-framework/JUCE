@@ -725,35 +725,4 @@ bool AlertWindow::showNativeDialogBox (const String& title,
 }
 #endif
 
-//==============================================================================
-struct NativeMessageBoxCallback : ModalComponentManager::Callback
-{
-    NativeMessageBoxCallback (std::function<void (int)> && lambda)
-        : callback (static_cast<std::function<void (int)>&&> (lambda))
-    {}
-
-    void modalStateFinished (int returnValue) override   { if (callback) callback (returnValue); }
-
-    std::function<void (int)> callback;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeMessageBoxCallback)
-};
-
-void NativeMessageBox::showMessageBox (MessageBoxType dialogType, AlertWindow::AlertIconType iconType,
-                                       const String& title, const String& message,
-                                       std::function<void (int)> && lambda, Component* associatedComponent)
-{
-    auto* callback = new NativeMessageBoxCallback (static_cast<std::function<void (int)>&&> (lambda));
-
-    switch (dialogType)
-    {
-        case okType:          showMessageBoxAsync (iconType, title, message, associatedComponent, callback); break;
-        case okCancelType:    showOkCancelBox     (iconType, title, message, associatedComponent, callback); break;
-        case yesNoType:       showYesNoBox        (iconType, title, message, associatedComponent, callback); break;
-        case yesNoCancelType: showYesNoCancelBox  (iconType, title, message, associatedComponent, callback); break;
-        default:
-            jassertfalse;
-    }
-}
-
 } // namespace juce
