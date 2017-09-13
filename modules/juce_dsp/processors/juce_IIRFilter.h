@@ -114,9 +114,14 @@ namespace IIR
         */
         SampleType JUCE_VECTOR_CALLTYPE processSample (SampleType sample) noexcept;
 
+        /** Ensure that the state variables are rounded to zero if the state
+            variables are denormals. This is only needed if you are doing
+            sample by sample processing.
+        */
+        void snapToZero() noexcept;
+
     private:
         //==============================================================================
-        void snapToZero() noexcept;
         void check();
 
         //==============================================================================

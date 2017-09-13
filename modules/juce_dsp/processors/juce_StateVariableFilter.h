@@ -74,6 +74,12 @@ namespace StateVariableFilter
         /** Resets the filter's processing pipeline. */
         void reset() noexcept                          { s1 = s2 = SampleType {0}; }
 
+        /** Ensure that the state variables are rounded to zero if the state
+            variables are denormals. This is only needed if you are doing
+            sample by sample processing.
+        */
+        void snapToZero() noexcept                     { util::snapToZero (s1); util::snapToZero (s2); }
+
         //==============================================================================
         /** The parameters of the state variable filter. It's up to the called to ensure
             that these parameters are modified in a thread-safe way. */
@@ -145,9 +151,7 @@ namespace StateVariableFilter
             for (size_t i = 0 ; i < n; ++i)
                 output[i] = processLoop<type> (input[i], state);
 
-            util::snapToZero (s1);
-            util::snapToZero (s2);
-
+            snapToZero();
             *parameters = state;
         }
 
