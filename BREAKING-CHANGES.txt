@@ -7,14 +7,15 @@ Develop Branch
 Change
 ------
 The method used to classify AudioUnit, VST3 and AAX plug-in parameters as
-either continuous or discrete has changed.
+either continuous or discrete has changed, and AudioUnit and AudioUnit v3
+parameters are marked as high precision by default.
 
 Possible Issues
 ---------------
-Plug-ins: DAW projects with automation data written by an AudioUnit, VST3 or
-AAX plug-in built with JUCE version 5.1.1 or earlier may load incorrectly when
-opened by an AudioUnit, VST3 or AAX plug-in built with JUCE version 5.2.0 and
-later.
+Plug-ins: DAW projects with automation data written by an AudioUnit, AudioUnit
+v3 VST3 or AAX plug-in built with JUCE version 5.1.1 or earlier may load
+incorrectly when opened by an AudioUnit, AudioUnit v3, VST3 or AAX plug-in
+built with JUCE version 5.2.0 and later.
 
 Hosts: The AudioPluginInstance::getParameterNumSteps method now returns correct
 values for AU and VST3 plug-ins.
@@ -32,7 +33,10 @@ Rationale
 The old system for presenting plug-in parameters to a host as either continuous
 or discrete is inconsistent between plug-in types and lacks sufficient
 flexibility. This change harmonises the behaviour and allows individual
-parameters to be marked as continuous or discrete.
+parameters to be marked as continuous or discrete. If AudioUnit and AudioUnit
+v3 parameters are not marked as high precision then hosts like Logic Pro only
+offer a limited number of parameter values, which again produces different
+behaviour for different plug-in types.
 
 
 Change
