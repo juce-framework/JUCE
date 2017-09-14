@@ -226,7 +226,7 @@ public:
 
 private:
     //==============================================================================
-    void drawLinearProgressBar (Graphics&, ProgressBar&, int width, int height, double progress);
+    void drawLinearProgressBar (Graphics&, ProgressBar&, int width, int height, double progress, const String&);
     void drawCircularProgressBar (Graphics&, ProgressBar&, const String&);
 
     int getPropertyComponentIndent (PropertyComponent&);

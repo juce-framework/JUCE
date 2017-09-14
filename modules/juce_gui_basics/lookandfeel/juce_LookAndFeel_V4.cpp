@@ -472,10 +472,12 @@ void LookAndFeel_V4::drawProgressBar (Graphics& g, ProgressBar& progressBar,
     if (width == height)
         drawCircularProgressBar (g, progressBar, textToShow);
     else
-        drawLinearProgressBar (g, progressBar, width, height, progress);
+        drawLinearProgressBar (g, progressBar, width, height, progress, textToShow);
 }
 
-void LookAndFeel_V4::drawLinearProgressBar (Graphics& g, ProgressBar& progressBar, int width, int height, double progress)
+void LookAndFeel_V4::drawLinearProgressBar (Graphics& g, ProgressBar& progressBar,
+                                            int width, int height,
+                                            double progress, const String& textToShow)
 {
     const auto background = progressBar.findColour (ProgressBar::backgroundColourId);
     const auto foreground = progressBar.findColour (ProgressBar::foregroundColourId);
@@ -521,6 +523,14 @@ void LookAndFeel_V4::drawLinearProgressBar (Graphics& g, ProgressBar& progressBa
 
         g.setTiledImageFill (im, 0, 0, 0.85f);
         g.fillPath (p);
+    }
+
+    if (textToShow.isNotEmpty())
+    {
+        g.setColour (Colour::contrasting (background, foreground));
+        g.setFont (height * 0.6f);
+
+        g.drawText (textToShow, 0, 0, width, height, Justification::centred, false);
     }
 }
 
