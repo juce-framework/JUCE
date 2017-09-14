@@ -318,6 +318,7 @@ namespace juce
 #endif
 
 #if JUCE_CORE_INCLUDE_JNI_HELPERS && JUCE_ANDROID
+ #include <jni.h>
  #include "native/juce_android_JNIHelpers.h"
 #endif
 
