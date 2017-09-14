@@ -55,9 +55,10 @@ public:
         @param progress     pass in a reference to a double that you're going to
                             update with your task's progress. The ProgressBar will
                             monitor the value of this variable and will redraw itself
-                            when the value changes. The range is from 0 to 1.0. Obviously
-                            you'd better be careful not to delete this variable while the
-                            ProgressBar still exists!
+                            when the value changes. The range is from 0 to 1.0 and JUCE
+                            LookAndFeel classes will draw a spinning animation for values
+                            outside this range. Obviously you'd better be careful not to
+                            delete this variable while the ProgressBar still exists!
     */
     explicit ProgressBar (double& progress);
 
