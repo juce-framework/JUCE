@@ -35,6 +35,10 @@ namespace juce
     to keep an eye on a variable that you give it, and will automatically
     redraw itself when the variable changes.
 
+    If using LookAndFeel_V4 a circular spinning progress bar will be drawn if
+    the width and height of the ProgressBar are equal, otherwise the standard,
+    linear ProgressBar will be drawn.
+
     For an easy way of running a background task with a dialog box showing its
     progress, see the ThreadWithProgressWindow class.
 
