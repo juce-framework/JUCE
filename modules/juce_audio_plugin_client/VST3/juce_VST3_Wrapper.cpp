@@ -881,27 +881,21 @@ private:
         {
             if (rectToCheck != nullptr && component != nullptr)
             {
-                // checkSizeConstraint
-                auto juceRect = Rectangle<int>::leftTopRightBottom (rectToCheck->left, rectToCheck->top,
-                                                                    rectToCheck->right, rectToCheck->bottom);
-
                 if (auto* editor = component->pluginEditor.get())
                 {
+                    // checkSizeConstraint
+                    auto juceRect = editor->getLocalArea (component, Rectangle<int>::leftTopRightBottom (rectToCheck->left, rectToCheck->top,
+                                                                                                         rectToCheck->right, rectToCheck->bottom));
                     if (auto* constrainer = editor->getConstrainer())
                     {
-                        auto scaledMin = component->getLocalArea (editor, Rectangle<int> (constrainer->getMinimumWidth(),
-                                                                                          constrainer->getMinimumHeight()));
+                        Rectangle<int> limits (0, 0, constrainer->getMaximumWidth(), constrainer->getMaximumHeight());
+                        constrainer->checkBounds (juceRect, editor->getBounds(), limits, false, false, false, false);
 
-                        auto scaledMax = component->getLocalArea (editor, Rectangle<int> (constrainer->getMaximumWidth(),
-                                                                                          constrainer->getMaximumHeight()));
-
-                        juceRect.setSize (jlimit (scaledMin.getWidth(),  scaledMax.getWidth(),  juceRect.getWidth()),
-                                          jlimit (scaledMin.getHeight(), scaledMax.getHeight(), juceRect.getHeight()));
+                        juceRect = component->getLocalArea (editor, juceRect);
+                        rectToCheck->right  = rectToCheck->left + juceRect.getWidth();
+                        rectToCheck->bottom = rectToCheck->top  + juceRect.getHeight();
                     }
                 }
-
-                rectToCheck->right  = rectToCheck->left + juceRect.getWidth();
-                rectToCheck->bottom = rectToCheck->top  + juceRect.getHeight();
 
                 return kResultTrue;
             }
