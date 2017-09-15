@@ -243,6 +243,8 @@ public:
     /** If this variant is an object, this returns one of its properties, or a default
         fallback value if the property is not set. */
     var getProperty (const Identifier& propertyName, const var& defaultReturnValue) const;
+    /** Returns true if this variant is an object and if it has the given property. */
+    bool hasProperty (const Identifier& propertyName) const noexcept;
 
     /** Invokes a named method call with no arguments. */
     var call (const Identifier& method) const;
