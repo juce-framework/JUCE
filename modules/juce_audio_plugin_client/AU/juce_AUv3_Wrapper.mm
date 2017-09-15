@@ -1387,7 +1387,7 @@ private:
 
     void valueChangedForObserver(AUParameterAddress, AUValue)
     {
-        // this will have already been handled bny valueChangedFromHost
+        // this will have already been handled by valueChangedFromHost
     }
 
     //==============================================================================

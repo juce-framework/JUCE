@@ -233,7 +233,7 @@ Possible Issues
 DAW projects with automation data written by an AudioUnit or VST3 plug-in built
 with pre JUCE 4.3.1 versions will load incorrectly when opened by an AudioUnit
 or VST3 built with JUCE versions 4.3.1 and later. Plug-ins using
-JUCE_FORCE_USE_LEGACY_IDS are not affected.
+JUCE_FORCE_USE_LEGACY_PARAM_IDS are not affected.
 
 Workaround
 ----------
@@ -333,7 +333,7 @@ JUCE 4.2.1 and later.
 
 Workaround
 ----------
-Enable JUCE_FORCE_USE_LEGACY_IDS in the juce_audio_plugin_client module config
+Enable JUCE_FORCE_USE_LEGACY_PARAM_IDS in the juce_audio_plugin_client module config
 page in the Projucer. For new plug-ins, be sure to disable this property.
 
 Rationale

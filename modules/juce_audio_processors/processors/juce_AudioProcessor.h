@@ -1144,7 +1144,7 @@ public:
         By default, this returns the "generic" category.
 
         NOTE! This method will eventually be deprecated! It's recommended that you use
-        AudioProcessorParameter::isMetaParameter() instead.
+        AudioProcessorParameter::getCategory() instead.
     */
     virtual AudioProcessorParameter::Category getParameterCategory (int parameterIndex) const;
 
