@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="Z2Xzcp" name="UnitTestRunner" projectType="consoleapp" version="1.0.0"
               bundleIdentifier="com.roli.UnitTestRunner" includeBinaryInAppConfig="1"
-              jucerVersion="5.1.1" defines="JUCE_UNIT_TESTS=1" displaySplashScreen="0"
+              jucerVersion="5.1.2" defines="JUCE_UNIT_TESTS=1" displaySplashScreen="0"
               reportAppUsage="0" splashScreenColour="Dark" companyName="ROLI Ltd."
               cppLanguageStandard="14">
   <MAINGROUP id="GZdWCU" name="UnitTestRunner">

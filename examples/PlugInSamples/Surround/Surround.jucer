@@ -9,7 +9,7 @@
               pluginIsMidiEffectPlugin="0" pluginSilenceInIsSilenceOut="0"
               pluginEditorRequiresKeys="0" pluginAUExportPrefix="SurroundAU"
               pluginRTASCategory="" aaxIdentifier="com.roli.Surround" pluginAAXCategory="AAX_ePlugInCategory_Dynamics"
-              jucerVersion="5.1.1" buildAUv3="0" buildStandalone="0" enableIAA="0"
+              jucerVersion="5.1.2" buildAUv3="0" buildStandalone="0" enableIAA="0"
               displaySplashScreen="0" reportAppUsage="0" splashScreenColour="Dark"
               companyName="ROLI Ltd." cppLanguageStandard="11">
   <MAINGROUP id="dEAH7t" name="Surround">

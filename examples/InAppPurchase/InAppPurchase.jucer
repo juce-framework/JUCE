@@ -3,7 +3,7 @@
 <JUCERPROJECT id="bSx0Ct" name="InAppPurchase" displaySplashScreen="0" reportAppUsage="1"
               splashScreenColour="Dark" projectType="guiapp" version="0.0.2"
               bundleIdentifier="com.roli.juceInAppPurchaseSample" includeBinaryInAppConfig="1"
-              cppLanguageStandard="11" jucerVersion="5.1.1" companyName="ROLI Ltd."
+              cppLanguageStandard="11" jucerVersion="5.1.2" companyName="ROLI Ltd."
               companyWebsite="www.juce.com" companyEmail="info@juce.com">
   <MAINGROUP id="y4sxBT" name="InAppPurchase">
     <GROUP id="{D5BB0A26-3258-B6DA-ED7A-A306325E64AE}" name="BinaryData">

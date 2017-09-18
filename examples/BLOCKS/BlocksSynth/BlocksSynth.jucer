@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="XsTycT" name="BlocksSynth" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.yourcompany.BlocksSynth" includeBinaryInAppConfig="1"
-              jucerVersion="5.1.1" displaySplashScreen="0" reportAppUsage="0"
+              jucerVersion="5.1.2" displaySplashScreen="0" reportAppUsage="0"
               splashScreenColour="Dark" cppLanguageStandard="11">
   <MAINGROUP id="onTNql" name="BlocksSynth">
     <GROUP id="{0CEBC63B-4C52-E77F-CD6E-A2E65F0C9B2B}" name="Source">

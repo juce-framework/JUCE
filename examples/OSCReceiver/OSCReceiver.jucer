@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="pdocPt" name="OSCReceiver" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.roli.OSCReceiver" includeBinaryInAppConfig="1"
-              jucerVersion="5.1.1" displaySplashScreen="0" reportAppUsage="0"
+              jucerVersion="5.1.2" displaySplashScreen="0" reportAppUsage="0"
               splashScreenColour="Dark" companyName="ROLI Ltd." cppLanguageStandard="11">
   <MAINGROUP id="Y6Q0O9" name="OSCReceiver">
     <GROUP id="{9F303ECD-83DE-CA91-97B4-C083DA897F49}" name="Source">
