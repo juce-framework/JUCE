@@ -1,7 +1,7 @@
 JUCE breaking changes
 =====================
 
-Develop Branch
+Version 5.1.2
 =============
 
 Change
@@ -15,7 +15,7 @@ Possible Issues
 Plug-ins: DAW projects with automation data written by an AudioUnit, AudioUnit
 v3 VST3 or AAX plug-in built with JUCE version 5.1.1 or earlier may load
 incorrectly when opened by an AudioUnit, AudioUnit v3, VST3 or AAX plug-in
-built with JUCE version 5.2.0 and later.
+built with JUCE version 5.1.2 and later.
 
 Hosts: The AudioPluginInstance::getParameterNumSteps method now returns correct
 values for AU and VST3 plug-ins.
