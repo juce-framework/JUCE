@@ -2183,14 +2183,16 @@ struct VST3PluginInstance : public AudioPluginInstance
 
     bool isInputChannelStereoPair (int channelIndex) const override
     {
-        return isPositiveAndBelow (channelIndex, getTotalNumInputChannels())
-                 && getBusInfo (true, true).channelCount == 2;
+        int busIdx;
+        return getOffsetInBusBufferForAbsoluteChannelIndex (true, channelIndex, busIdx) >= 0
+                 && getBusInfo (true, true, busIdx).channelCount == 2;
     }
 
     bool isOutputChannelStereoPair (int channelIndex) const override
     {
-        return isPositiveAndBelow (channelIndex, getTotalNumOutputChannels())
-                 && getBusInfo (false, true).channelCount == 2;
+        int busIdx;
+        return getOffsetInBusBufferForAbsoluteChannelIndex (false, channelIndex, busIdx) >= 0
+                 && getBusInfo (false, true, busIdx).channelCount == 2;
     }
 
     bool acceptsMidi() const override    { return getBusInfo (true,  false).channelCount > 0; }
