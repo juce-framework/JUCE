@@ -331,6 +331,7 @@ typename IIR::Coefficients<NumericType>::Ptr IIR::Coefficients<NumericType>::mak
     jassert (sampleRate > 0);
     jassert (frequency > 0 && frequency <= static_cast<NumericType> (sampleRate * 0.5));
     jassert (Q > 0);
+    jassert (gainFactor > 0);
 
     auto A = jmax (static_cast<NumericType> (0.0), std::sqrt (gainFactor));
     auto omega = (2 * MathConstants<NumericType>::pi * jmax (frequency, static_cast<NumericType> (2.0))) / static_cast<NumericType> (sampleRate);
@@ -451,6 +452,8 @@ template <typename NumericType>
 void IIR::Coefficients<NumericType>::getPhaseForFrequencyArray (double* frequencies, double* phases,
                                                                 size_t numSamples, double sampleRate) const noexcept
 {
+    jassert (sampleRate > 0);
+
     constexpr Complex<double> j (0, 1);
     const auto order = getFilterOrder();
     const auto* coefs = coefficients.begin();
