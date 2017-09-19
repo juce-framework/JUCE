@@ -160,8 +160,8 @@ public:
     /**
         Used to iterate through the events in a MidiBuffer.
 
-        Note that altering the buffer while an iterator is using it isn't a
-        safe operation.
+        Note that altering the buffer while an iterator is using it will produce 
+        undefined behaviour.
 
         @see MidiBuffer
     */
@@ -171,6 +171,9 @@ public:
         //==============================================================================
         /** Creates an Iterator for this MidiBuffer. */
         Iterator (const MidiBuffer&) noexcept;
+
+        /** Creates a copy of an iterator. */
+        Iterator (const Iterator&) noexcept = default;
 
         /** Destructor. */
         ~Iterator() noexcept;
@@ -214,8 +217,6 @@ public:
         //==============================================================================
         const MidiBuffer& buffer;
         const uint8* data;
-
-        JUCE_DECLARE_NON_COPYABLE (Iterator)
     };
 
     /** The raw data holding this buffer.
