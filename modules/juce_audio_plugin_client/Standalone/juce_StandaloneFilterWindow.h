@@ -788,9 +788,13 @@ private:
             shouldShowNotification = newInputMutedValue;
             notification.setVisible (shouldShowNotification);
 
+           #if JUCE_IOS || JUCE_ANDROID
+            resized();
+           #else
             setSize (editor->getWidth(),
                      editor->getHeight()
                      + (shouldShowNotification ? NotificationArea::height : 0));
+           #endif
         }
 
         void valueChanged (Value& value) override     { inputMutedChanged (value.getValue()); }
