@@ -998,7 +998,7 @@ private:
             if (bufferFactory == nullptr)
                 throw std::runtime_error ("Failed to create output buffer factory");
 
-            HRESULT hr = bufferFactory->Create (static_cast<UINT32> (256), buffer.resetAndGetPointerAddress());
+            HRESULT hr = bufferFactory->Create (static_cast<UINT32> (65536), buffer.resetAndGetPointerAddress());
             if (FAILED (hr))
                 throw std::runtime_error ("Failed to create output buffer");
 
