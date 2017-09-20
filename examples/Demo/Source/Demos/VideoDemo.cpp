@@ -26,7 +26,7 @@
 
 #include "../JuceDemoHeader.h"
 
-#if JUCE_MAC || JUCE_WINDOWS
+#if JUCE_MAC || (JUCE_WINDOWS && ! JUCE_MINGW)
 
 //==============================================================================
 // so that we can easily have two video windows each with a file browser, wrap this up as a class..

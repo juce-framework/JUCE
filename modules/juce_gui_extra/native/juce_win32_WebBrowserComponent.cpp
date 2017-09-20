@@ -30,6 +30,12 @@ namespace juce
 JUCE_DECLARE_UUID_GETTER (DWebBrowserEvents2,        "34A715A0-6587-11D0-924A-0020AFC7AC4D")
 JUCE_DECLARE_UUID_GETTER (IConnectionPointContainer, "B196B284-BAB4-101A-B69C-00AA00341D07")
 JUCE_DECLARE_UUID_GETTER (IWebBrowser2,              "D30C1661-CDAF-11D0-8A3E-00C04FC9E26E")
+
+#if JUCE_MINGW
+ #define DISPID_NAVIGATEERROR 271
+ class WebBrowser;
+#endif
+
 JUCE_DECLARE_UUID_GETTER (WebBrowser,                "8856F961-340A-11D0-A96B-00C04FD705A2")
 
 class WebBrowserComponent::Pimpl   : public ActiveXControlComponent
@@ -392,12 +398,18 @@ void WebBrowserComponent::clearCookies()
 {
     HeapBlock<::INTERNET_CACHE_ENTRY_INFO> entry;
     ::DWORD entrySize = sizeof (::INTERNET_CACHE_ENTRY_INFO);
-    ::HANDLE urlCacheHandle = ::FindFirstUrlCacheEntry (TEXT ("cookie:"), entry.getData(), &entrySize);
+
+   #if JUCE_MINGW
+    const auto searchPattern = "cookie:";
+   #else
+    const auto searchPattern = TEXT ("cookie:");
+   #endif
+    ::HANDLE urlCacheHandle = ::FindFirstUrlCacheEntry (searchPattern, entry.getData(), &entrySize);
 
     if (urlCacheHandle == nullptr && GetLastError() == ERROR_INSUFFICIENT_BUFFER)
     {
         entry.realloc (1, entrySize);
-        urlCacheHandle = ::FindFirstUrlCacheEntry (TEXT ("cookie:"), entry.getData(), &entrySize);
+        urlCacheHandle = ::FindFirstUrlCacheEntry (searchPattern, entry.getData(), &entrySize);
     }
 
     if (urlCacheHandle != nullptr)
