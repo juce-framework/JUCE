@@ -581,6 +581,8 @@ public:
 
         stop (false);
 
+        updateDetailsFromDevice();
+
         activeInputChans = inputChannels;
         activeInputChans.setRange (inChanNames.size(),
                                    activeInputChans.getHighestBit() + 1 - inChanNames.size(),
