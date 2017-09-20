@@ -45,7 +45,7 @@ namespace juce
      Atomic() noexcept  : value (0) {}
 
      /** Creates a new value, with a given initial value. */
-     Atomic (const Type initialValue) noexcept  : value (initialValue) {}
+     Atomic (Type initialValue) noexcept  : value (initialValue) {}
 
      /** Copies another value (atomically). */
      Atomic (const Atomic& other) noexcept  : value (other.get()) {}
@@ -54,7 +54,7 @@ namespace juce
      ~Atomic() noexcept
      {
         #if __cpp_lib_atomic_is_always_lock_free
-         static_assert (std::atomic<Type>::is_always_lock_free(),
+         static_assert (std::atomic<Type>::is_always_lock_free,
                         "This class can only be used for lock-free types");
         #endif
      }
@@ -105,7 +105,7 @@ namespace juce
      }
 
      /** Copies another value into this one (atomically). */
-     Atomic<Type>& operator= (const Type newValue) noexcept
+     Atomic<Type>& operator= (Type newValue) noexcept
      {
          value = newValue;
          return *this;
@@ -128,7 +128,7 @@ namespace juce
          Internally this calls std::atomic_thread_fence with
          memory_order_seq_cst (the strictest std::memory_order).
       */
-     void memoryBarrier() noexcept { atomic_thread_fence (std::memory_order_seq_cst); }
+     void memoryBarrier() noexcept          { atomic_thread_fence (std::memory_order_seq_cst); }
 
      /** The std::atomic object that this class operates on. */
      std::atomic<Type> value;
