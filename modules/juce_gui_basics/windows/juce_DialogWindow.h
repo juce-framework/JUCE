@@ -144,6 +144,8 @@ public:
         */
         int runModal();
        #endif
+
+        JUCE_DECLARE_NON_COPYABLE (LaunchOptions)
     };
 
     //==============================================================================

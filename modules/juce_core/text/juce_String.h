@@ -1348,7 +1348,7 @@ JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, double number);
 
 // Automatically creating a String from a bool opens up lots of nasty type conversion edge cases.
 // If you want a String representation of a bool you can cast the bool to an int first.
-JUCE_API String& JUCE_CALLTYPE operator<< (String&, bool) = delete;
+String& JUCE_CALLTYPE operator<< (String&, bool) = delete;
 
 //==============================================================================
 /** Case-sensitive comparison of two strings. */

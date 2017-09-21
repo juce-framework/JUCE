@@ -27,7 +27,8 @@
 namespace juce
 {
 
-class Slider::Pimpl   : private AsyncUpdater,
+class Slider::Pimpl   : public AsyncUpdater, // this needs to be public otherwise it will cause an
+                                             // error when JUCE_DLL_BUILD=1
                         private Button::Listener,
                         private Label::Listener,
                         private Value::Listener
