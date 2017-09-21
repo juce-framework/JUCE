@@ -266,6 +266,10 @@ public:
         pDirectSound = nullptr;
         pOutputBuffer = nullptr;
         writeOffset = 0;
+        xruns = 0;
+
+        firstPlayTime = true;
+        lastPlayTime = 0;
 
         String error;
         HRESULT hr = E_NOINTERFACE;
@@ -276,6 +280,7 @@ public:
         if (SUCCEEDED (hr))
         {
             bytesPerBuffer = (bufferSizeSamples * (bitDepth >> 2)) & ~15;
+            ticksPerBuffer = bytesPerBuffer * Time::getHighResolutionTicksPerSecond() / (sampleRate * (bitDepth >> 2));
             totalBytesPerBuffer = (blocksPerOverallBuffer * bytesPerBuffer) & ~15;
             const int numChannels = 2;
 
@@ -397,6 +402,18 @@ public:
             return true;
         }
 
+        auto currentPlayTime = Time::getHighResolutionTicks ();
+        if (! firstPlayTime)
+        {
+            auto expectedBuffers = (currentPlayTime - lastPlayTime) / ticksPerBuffer;
+
+            playCursor += static_cast<DWORD> (expectedBuffers * bytesPerBuffer);
+        }
+        else
+            firstPlayTime = false;
+
+        lastPlayTime = currentPlayTime;
+
         int playWriteGap = (int) (writeCursor - playCursor);
         if (playWriteGap < 0)
             playWriteGap += totalBytesPerBuffer;
@@ -409,6 +426,9 @@ public:
         {
             writeOffset = writeCursor;
             bytesEmpty = totalBytesPerBuffer - playWriteGap;
+
+            // buffer underflow
+            xruns++;
         }
 
         if (bytesEmpty >= bytesPerBuffer)
@@ -480,7 +500,7 @@ public:
         }
     }
 
-    int bitDepth;
+    int bitDepth, xruns;
     bool doneFlag;
 
 private:
@@ -495,6 +515,9 @@ private:
     DWORD writeOffset;
     int totalBytesPerBuffer, bytesPerBuffer;
     unsigned int lastPlayCursor;
+
+    bool firstPlayTime;
+    int64 lastPlayTime, ticksPerBuffer;
 
     static inline int convertInputValues (const float l, const float r) noexcept
     {
@@ -853,6 +876,11 @@ public:
 
     bool isPlaying() override            { return isStarted && isOpen_ && isThreadRunning(); }
     String getLastError() override       { return lastError; }
+
+    int getXRunCount () const noexcept override
+    {
+        return (outChans[0] != nullptr ? outChans[0]->xruns : -1);
+    }
 
     //==============================================================================
     StringArray inChannels, outChannels;

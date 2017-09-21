@@ -409,6 +409,8 @@ public:
     Array<int> getAvailableBufferSizes() override       { return bufferSizes; }
     int getDefaultBufferSize() override                 { return preferredBufferSize; }
 
+    int getXRunCount() const noexcept override          { return xruns; }
+
     String open (const BigInteger& inputChannels,
                  const BigInteger& outputChannels,
                  double sr, int bufferSizeSamples) override
@@ -463,6 +465,9 @@ public:
         // (need to get this again in case a sample rate change affected the channel count)
         err = asioObject->getChannels (&totalNumInputChans, &totalNumOutputChans);
         jassert (err == ASE_OK);
+
+        if (asioObject->future (kAsioCanReportOverload, nullptr) != ASE_OK)
+            xruns = -1;
 
         inBuffers.calloc (totalNumInputChans + 8);
         outBuffers.calloc (totalNumOutputChans + 8);
@@ -789,6 +794,7 @@ private:
     bool volatile littleEndian, postOutput, needToReset;
     bool volatile insideControlPanelModalLoop;
     bool volatile shouldUsePreferredSize;
+    int xruns = 0;
 
     //==============================================================================
     static String convertASIOString (char* const text, int length)
@@ -1180,6 +1186,7 @@ private:
         totalNumOutputChans = 0;
         numActiveInputChans = 0;
         numActiveOutputChans = 0;
+        xruns = 0;
         currentCallback = nullptr;
 
         error.clear();
@@ -1349,7 +1356,7 @@ private:
         {
             case kAsioSelectorSupported:
                 if (value == kAsioResetRequest || value == kAsioEngineVersion || value == kAsioResyncRequest
-                     || value == kAsioLatenciesChanged || value == kAsioSupportsInputMonitor)
+                     || value == kAsioLatenciesChanged || value == kAsioSupportsInputMonitor || value == kAsioOverload)
                     return 1;
                 break;
 
@@ -1360,7 +1367,8 @@ private:
             case kAsioEngineVersion:    return 2;
 
             case kAsioSupportsTimeInfo:
-            case kAsioSupportsTimeCode: return 0;
+            case kAsioSupportsTimeCode:  return 0;
+            case kAsioOverload: xruns++; return 1;
         }
 
         return 0;

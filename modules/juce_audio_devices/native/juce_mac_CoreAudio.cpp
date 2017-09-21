@@ -796,6 +796,7 @@ public:
     int inputLatency  = 0;
     int outputLatency = 0;
     int bitDepth = 32;
+    int xruns = 0;
     BigInteger activeInputChans, activeOutputChans;
     StringArray inChanNames, outChanNames;
     Array<double> sampleRates;
@@ -837,6 +838,9 @@ private:
 
         switch (pa->mSelector)
         {
+            case kAudioDeviceProcessorOverload:
+                intern->xruns++;
+                break;
             case kAudioDevicePropertyBufferSize:
             case kAudioDevicePropertyBufferFrameSize:
             case kAudioDevicePropertyNominalSampleRate:
@@ -962,6 +966,7 @@ public:
     double getCurrentSampleRate() override              { return internal->getSampleRate(); }
     int getCurrentBitDepth() override                   { return internal->bitDepth; }
     int getCurrentBufferSizeSamples() override          { return internal->getBufferSize(); }
+    int getXRunCount() const noexcept override          { return internal->xruns; }
 
     int getDefaultBufferSize() override
     {
@@ -982,6 +987,7 @@ public:
     {
         isOpen_ = true;
 
+        internal->xruns = 0;
         if (bufferSizeSamples <= 0)
             bufferSizeSamples = getDefaultBufferSize();
 

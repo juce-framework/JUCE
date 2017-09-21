@@ -33,6 +33,7 @@ namespace juce
  METHOD (release,       "release",  "()V") \
  METHOD (flush,         "flush",    "()V") \
  METHOD (write,         "write",    "([SII)I") \
+ METHOD (getUnderrunCount, "getUnderrunCount", "()I") \
 
 DECLARE_JNI_CLASS (AudioTrack, "android/media/AudioTrack");
 #undef JNI_CLASS_MEMBERS
@@ -280,6 +281,14 @@ public:
     BigInteger getActiveInputChannels() const override   { return activeInputChans; }
     String getLastError() override                       { return lastError; }
     bool isPlaying() override                            { return isRunning && callback != 0; }
+
+    int getXRunCount() const noexcept override
+    {
+        if (outputDevice != nullptr)
+            return getEnv()->CallIntMethod (outputDevice, AudioTrack.getUnderrunCount);
+
+        return -1;
+    }
 
     void start (AudioIODeviceCallback* newCallback) override
     {
