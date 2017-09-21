@@ -80,12 +80,10 @@ public:
 
     void addWindowsTargetPlatformProperties (PropertyListBuilder& props)
     {
-        static const char* targetPlatformNames[] = { "(default)", "8.1", "10.0.10240.0", "10.0.10586.0", "10.0.14393.0", "10.0.15063.0" };
-        static const var targetPlatforms[]       = { var(),       "8.1", "10.0.10240.0", "10.0.10586.0", "10.0.14393.0", "10.0.15063.0" };
+        if (getWindowsTargetPlatformVersionValue() == Value())
+            getWindowsTargetPlatformVersionValue() = getDefaultWindowsTargetPlatformVersion();
 
-        props.add (new ChoicePropertyComponent (getWindowsTargetPlatformVersionValue(), "Windows Target Platform",
-                                                StringArray (targetPlatformNames,  numElementsInArray (targetPlatformNames)),
-                                                Array<var>  (targetPlatforms,      numElementsInArray (targetPlatforms))),
+        props.add (new TextPropertyComponent (getWindowsTargetPlatformVersionValue(), "Windows Target Platform", 20, false),
                    "Specifies the version of the Windows SDK that will be used when building this project. "
                    "The default value for this exporter is " + getDefaultWindowsTargetPlatformVersion());
     }
