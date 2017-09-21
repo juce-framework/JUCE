@@ -651,8 +651,6 @@ public:
     /** @internal */
     void enablementChanged() override;
     /** @internal */
-    void colourChanged() override;
-    /** @internal */
     void lookAndFeelChanged() override;
     /** @internal */
     void parentHierarchyChanged() override;
@@ -723,18 +721,20 @@ private:
     juce_wchar passwordCharacter;
     OptionalScopedPointer<InputFilter> inputFilter;
     Value textValue;
-    VirtualKeyboardType keyboardType;
+    VirtualKeyboardType keyboardType = TextInputTarget::textKeyboard;
     float lineSpacing = 1.0f;
 
-    enum
+    enum DragType
     {
         notDragging,
         draggingSelectionStart,
         draggingSelectionEnd
-    } dragType;
+    };
+
+    DragType dragType = notDragging;
 
     ListenerList<Listener> listeners;
-    Array<Range<int> > underlinedSections;
+    Array<Range<int>> underlinedSections;
 
     void moveCaret (int newCaretPos);
     void moveCaretTo (int newPosition, bool isSelecting);

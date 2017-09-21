@@ -890,14 +890,10 @@ namespace TextEditorDefs
 }
 
 //==============================================================================
-TextEditor::TextEditor (const String& name,
-                        const juce_wchar passwordChar)
+TextEditor::TextEditor (const String& name, juce_wchar passwordChar)
     : Component (name),
-      passwordCharacter (passwordChar),
-      keyboardType (TextInputTarget::textKeyboard),
-      dragType (notDragging)
+      passwordCharacter (passwordChar)
 {
-    setOpaque (true);
     setMouseCursor (MouseCursor::IBeamCursor);
 
     addAndMakeVisible (viewport = new TextEditorViewport (*this));
@@ -1060,16 +1056,8 @@ void TextEditor::applyColourToAllText (const Colour& newColour, bool changeCurre
         repaint();
 }
 
-void TextEditor::colourChanged()
-{
-    setOpaque (findColour (backgroundColourId).isOpaque());
-    repaint();
-}
-
 void TextEditor::lookAndFeelChanged()
 {
-    colourChanged();
-
     caret = nullptr;
     recreateCaret();
     repaint();
