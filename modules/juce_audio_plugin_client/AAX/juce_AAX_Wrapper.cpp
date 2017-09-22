@@ -100,7 +100,11 @@
 
 using namespace juce;
 
-const int32_t juceChunkType = 'juce';
+#ifndef JucePlugin_AAX_Chunk_Identifier
+ #define JucePlugin_AAX_Chunk_Identifier     'juce'
+#endif
+
+const int32_t juceChunkType = JucePlugin_AAX_Chunk_Identifier;
 const int maxAAXChannels = 8;
 
 //==============================================================================
