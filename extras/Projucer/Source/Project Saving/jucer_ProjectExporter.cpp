@@ -350,10 +350,6 @@ void ProjectExporter::addVSTPathsIfPluginOrHost()
 
 void ProjectExporter::addCommonAudioPluginSettings()
 {
-    if (isLinux()
-      && (shouldBuildTargetType (ProjectType::Target::VSTPlugIn) || shouldBuildTargetType (ProjectType::Target::VST3PlugIn)))
-        makefileExtraLinkerFlags.add ("-Wl,--no-undefined");
-
     if (shouldBuildTargetType (ProjectType::Target::AAXPlugIn))
         addAAXFoldersToPath();
 
