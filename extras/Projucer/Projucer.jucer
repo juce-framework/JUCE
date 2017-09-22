@@ -86,8 +86,8 @@
         <MODULEPATH id="juce_core" path="../../modules"/>
       </MODULEPATHS>
     </VS2017>
-    <LINUX_MAKE targetFolder="Builds/LinuxMakefile" extraCompilerFlags="-std=c++11"
-                extraLinkerFlags="" bigIcon="OCyr5F" smallIcon="" vstFolder="">
+    <LINUX_MAKE targetFolder="Builds/LinuxMakefile" extraCompilerFlags="" extraLinkerFlags=""
+                bigIcon="OCyr5F" smallIcon="" vstFolder="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" libraryPath="" isDebug="1" optimisation="1" targetName="Projucer"
                        headerPath=""/>
