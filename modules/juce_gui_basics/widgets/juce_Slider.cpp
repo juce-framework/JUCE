@@ -1602,6 +1602,10 @@ void Slider::mouseUp   (const MouseEvent&)      { pimpl->mouseUp(); }
 void Slider::mouseMove (const MouseEvent&)      { pimpl->mouseMove(); }
 void Slider::mouseExit (const MouseEvent&)      { pimpl->mouseExit(); }
 
+// If popup display is enabled and set to show on mouse hover, this makes sure
+// it is shown when dragging the mouse over a slider and releasing
+void Slider::mouseEnter (const MouseEvent&)     { pimpl->mouseMove(); }
+
 void Slider::modifierKeysChanged (const ModifierKeys& modifiers)
 {
     if (isEnabled())

@@ -910,6 +910,8 @@ public:
     void mouseMove (const MouseEvent&) override;
     /** @internal */
     void mouseExit (const MouseEvent&) override;
+    /** @internal */
+    void mouseEnter (const MouseEvent&) override;
 
 private:
     //==============================================================================
