@@ -114,8 +114,8 @@ public:
 
 private:
     //==============================================================================
+    MemoryBlock internalBlock;    
     MemoryBlock* const blockToUse;
-    MemoryBlock internalBlock;
     void* externalData;
     size_t position, size, availableSize;
 
