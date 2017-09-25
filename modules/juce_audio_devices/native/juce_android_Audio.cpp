@@ -33,7 +33,6 @@ namespace juce
  METHOD (release,       "release",  "()V") \
  METHOD (flush,         "flush",    "()V") \
  METHOD (write,         "write",    "([SII)I") \
- METHOD (getUnderrunCount, "getUnderrunCount", "()I") \
 
 DECLARE_JNI_CLASS (AudioTrack, "android/media/AudioTrack");
 #undef JNI_CLASS_MEMBERS
@@ -49,6 +48,13 @@ DECLARE_JNI_CLASS (AudioTrack, "android/media/AudioTrack");
  METHOD (release,           "release",          "()V") \
 
 DECLARE_JNI_CLASS (AudioRecord, "android/media/AudioRecord");
+#undef JNI_CLASS_MEMBERS
+
+//==============================================================================
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ STATICFIELD (SDK_INT, "SDK_INT", "I") \
+
+ DECLARE_JNI_CLASS (AndroidBuildVersion, "android/os/Build$VERSION");
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
@@ -196,6 +202,9 @@ public:
                                                       STREAM_MUSIC, sampleRate, CHANNEL_OUT_STEREO, ENCODING_PCM_16BIT,
                                                       (jint) (minBufferSizeOut * numDeviceOutputChannels * static_cast<int> (sizeof (int16))), MODE_STREAM));
 
+            const bool supportsUnderrunCount = (getEnv()->GetStaticIntField (AndroidBuildVersion, AndroidBuildVersion.SDK_INT) >= 24);
+            getUnderrunCount = supportsUnderrunCount ? env->GetMethodID (AudioTrack, "getUnderrunCount", "()I") : 0;
+
             int outputDeviceState = env->CallIntMethod (outputDevice, AudioTrack.getState);
             if (outputDeviceState > 0)
             {
@@ -284,8 +293,8 @@ public:
 
     int getXRunCount() const noexcept override
     {
-        if (outputDevice != nullptr)
-            return getEnv()->CallIntMethod (outputDevice, AudioTrack.getUnderrunCount);
+        if (outputDevice != nullptr && getUnderrunCount != 0)
+            return getEnv()->CallIntMethod (outputDevice, getUnderrunCount);
 
         return -1;
     }
@@ -415,6 +424,7 @@ private:
     BigInteger activeOutputChans, activeInputChans;
     GlobalRef outputDevice, inputDevice;
     AudioSampleBuffer inputChannelBuffer, outputChannelBuffer;
+    jmethodID getUnderrunCount = 0;
 
     void closeDevices()
     {

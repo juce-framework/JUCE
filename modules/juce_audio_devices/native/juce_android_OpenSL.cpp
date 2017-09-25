@@ -23,12 +23,6 @@
 namespace juce
 {
 
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
-STATICFIELD (SDK_INT, "SDK_INT", "I") \
-
-DECLARE_JNI_CLASS (AndroidBuildVersion, "android/os/Build$VERSION");
-#undef JNI_CLASS_MEMBERS
-
 //==============================================================================
 #ifndef SL_ANDROID_DATAFORMAT_PCM_EX
  #define SL_ANDROID_DATAFORMAT_PCM_EX                   ((SLuint32) 0x00000004)
@@ -306,15 +300,22 @@ public:
             if (runner == nullptr)
                 return false;
 
-            // may return nullptr on some platforms - that's ok
-            config = SlRef<SLAndroidConfigurationItf_>::cast (runner);
-            if (config != nullptr)
-            {
-                jobject audioRoutingJni;
-                auto status = (*config)->AcquireJavaProxy (config, SL_ANDROID_JAVA_PROXY_ROUTING, &audioRoutingJni);
+            const bool supportsJavaProxy = (getEnv()->GetStaticIntField (AndroidBuildVersion, AndroidBuildVersion.SDK_INT) >= 24);
 
-                if (status == SL_RESULT_SUCCESS && audioRoutingJni != 0)
-                    javaProxy = GlobalRef (audioRoutingJni);
+            if (supportsJavaProxy)
+            {
+                // may return nullptr on some platforms - that's ok
+                config = SlRef<SLAndroidConfigurationItf_>::cast (runner);
+
+                if (config != nullptr)
+                {
+                    jobject audioRoutingJni;
+                    auto status = (*config)->AcquireJavaProxy (config, SL_ANDROID_JAVA_PROXY_ROUTING,
+                                                               &audioRoutingJni);
+
+                    if (status == SL_RESULT_SUCCESS && audioRoutingJni != 0)
+                        javaProxy = GlobalRef (audioRoutingJni);
+                }
             }
 
             queue = SlRef<SLAndroidSimpleBufferQueueItf_>::cast (runner);
@@ -634,6 +635,9 @@ public:
                         player = nullptr;
                         return;
                     }
+
+                    const bool supportsUnderrunCount = (getEnv()->GetStaticIntField (AndroidBuildVersion, AndroidBuildVersion.SDK_INT) >= 24);
+                    getUnderrunCount = supportsUnderrunCount ? getEnv()->GetMethodID (AudioTrack, "getUnderrunCount", "()I") : 0;
                 }
             }
         }
@@ -698,8 +702,8 @@ public:
 
         int getXRunCount() const noexcept override
         {
-            if (player != nullptr && player->javaProxy != nullptr)
-                return getEnv()->CallIntMethod (player->javaProxy, AudioTrack.getUnderrunCount);
+            if (player != nullptr && player->javaProxy != nullptr && getUnderrunCount != 0)
+                return getEnv()->CallIntMethod (player->javaProxy, getUnderrunCount);
 
             return -1;
         }
@@ -754,6 +758,7 @@ public:
         ScopedPointer<OpenSLQueueRunnerPlayer<T> > player;
         ScopedPointer<OpenSLQueueRunnerRecorder<T> > recorder;
         Atomic<int> guard;
+        jmethodID getUnderrunCount = 0;
     };
 
     //==============================================================================
