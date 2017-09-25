@@ -279,8 +279,8 @@ public:
 
 protected:
     //==============================================================================
-    /** Creates the Scrollbar components that will be used for that Viewport.
-        Subclasses can override this if they need to customise the scroolbars in some way.
+    /** Creates the Scrollbar components that will be added to the Viewport.
+        Subclasses can override this if they need to customise the scrollbars in some way.
     */
     virtual ScrollBar* createScrollBarComponent (bool isVertical);
 
