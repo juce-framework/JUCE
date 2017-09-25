@@ -300,30 +300,30 @@ public:
 private:
     class CachedImage;
     class Attachment;
-    NativeContext* nativeContext;
-    OpenGLRenderer* renderer;
-    double currentRenderScale;
+    NativeContext* nativeContext = nullptr;
+    OpenGLRenderer* renderer = nullptr;
+    double currentRenderScale = 1.0;
     ScopedPointer<Attachment> attachment;
     OpenGLPixelFormat openGLPixelFormat;
-    void* contextToShareWith;
-    OpenGLVersion versionRequired;
-    size_t imageCacheMaxSize;
-    bool renderComponents, useMultisampling, continuousRepaint, overrideCanAttach;
+    void* contextToShareWith = nullptr;
+    OpenGLVersion versionRequired = defaultGLVersion;
+    size_t imageCacheMaxSize = 8 * 1024 * 1024;
+    bool renderComponents = true, useMultisampling = false, continuousRepaint = false, overrideCanAttach = false;
 
     //==============================================================================
-    struct AsyncWorker : ReferenceCountedObject
+    struct AsyncWorker  : public ReferenceCountedObject
     {
         typedef ReferenceCountedObjectPtr<AsyncWorker> Ptr;
         virtual void operator() (OpenGLContext&) = 0;
         virtual ~AsyncWorker() {}
     };
 
-    template <typename T>
-    struct AsyncWorkerFunctor : AsyncWorker
+    template <typename FunctionType>
+    struct AsyncWorkerFunctor  : public AsyncWorker
     {
-        AsyncWorkerFunctor (T functorToUse) : functor (functorToUse) {}
+        AsyncWorkerFunctor (FunctionType functorToUse) : functor (functorToUse) {}
         void operator() (OpenGLContext& callerContext) override     { functor (callerContext); }
-        T functor;
+        FunctionType functor;
 
         JUCE_DECLARE_NON_COPYABLE (AsyncWorkerFunctor)
     };
@@ -341,8 +341,8 @@ private:
 
 //==============================================================================
 #ifndef DOXYGEN
-template <typename T>
-void OpenGLContext::executeOnGLThread (T&& f, bool shouldBlock) { execute (new AsyncWorkerFunctor<T> (f), shouldBlock); }
+template <typename FunctionType>
+void OpenGLContext::executeOnGLThread (FunctionType&& f, bool shouldBlock) { execute (new AsyncWorkerFunctor<FunctionType> (f), shouldBlock); }
 #endif
 
 } // namespace juce
