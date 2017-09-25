@@ -95,7 +95,7 @@ private:
     static int pad   (void*, size_t, size_t) noexcept;
     static int unpad (const void*, size_t) noexcept;
 
-    bool apply (void*, size_t, void (BlowFish::*op) (uint32&, uint32&) const noexcept) const;
+    bool apply (void*, size_t, void (BlowFish::*op) (uint32&, uint32&) const) const;
 
     //==============================================================================
     uint32 p[18];
