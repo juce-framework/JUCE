@@ -357,20 +357,18 @@ Component* TableListBox::getCellComponent (int columnId, int rowNumber) const
 
 void TableListBox::scrollToEnsureColumnIsOnscreen (int columnId)
 {
-    if (auto* scrollbar = getHorizontalScrollBar())
-    {
-        auto pos = header->getColumnPosition (header->getIndexOfColumnId (columnId, true));
+    auto& scrollbar = getHorizontalScrollBar();
+    auto pos = header->getColumnPosition (header->getIndexOfColumnId (columnId, true));
 
-        auto x = scrollbar->getCurrentRangeStart();
-        auto w = scrollbar->getCurrentRangeSize();
+    auto x = scrollbar.getCurrentRangeStart();
+    auto w = scrollbar.getCurrentRangeSize();
 
-        if (pos.getX() < x)
-            x = pos.getX();
-        else if (pos.getRight() > x + w)
-            x += jmax (0.0, pos.getRight() - (x + w));
+    if (pos.getX() < x)
+        x = pos.getX();
+    else if (pos.getRight() > x + w)
+        x += jmax (0.0, pos.getRight() - (x + w));
 
-        scrollbar->setCurrentRangeStart (x);
-    }
+    scrollbar.setCurrentRangeStart (x);
 }
 
 int TableListBox::getNumRows()

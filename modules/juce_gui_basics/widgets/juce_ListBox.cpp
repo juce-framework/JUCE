@@ -791,16 +791,16 @@ void ListBox::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& whee
 {
     bool eventWasUsed = false;
 
-    if (wheel.deltaX != 0.0f && viewport->getHorizontalScrollBar()->isVisible())
+    if (wheel.deltaX != 0.0f && getHorizontalScrollBar().isVisible())
     {
         eventWasUsed = true;
-        viewport->getHorizontalScrollBar()->mouseWheelMove (e, wheel);
+        getHorizontalScrollBar().mouseWheelMove (e, wheel);
     }
 
-    if (wheel.deltaY != 0.0f && viewport->getVerticalScrollBar()->isVisible())
+    if (wheel.deltaY != 0.0f && getVerticalScrollBar().isVisible())
     {
         eventWasUsed = true;
-        viewport->getVerticalScrollBar()->mouseWheelMove (e, wheel);
+        getVerticalScrollBar().mouseWheelMove (e, wheel);
     }
 
     if (! eventWasUsed)
@@ -834,8 +834,8 @@ void ListBox::setMinimumContentWidth (const int newMinimumWidth)
 
 int ListBox::getVisibleContentWidth() const noexcept            { return viewport->getMaximumVisibleWidth(); }
 
-ScrollBar* ListBox::getVerticalScrollBar() const noexcept       { return viewport->getVerticalScrollBar(); }
-ScrollBar* ListBox::getHorizontalScrollBar() const noexcept     { return viewport->getHorizontalScrollBar(); }
+ScrollBar& ListBox::getVerticalScrollBar() const noexcept       { return viewport->getVerticalScrollBar(); }
+ScrollBar& ListBox::getHorizontalScrollBar() const noexcept     { return viewport->getHorizontalScrollBar(); }
 
 void ListBox::colourChanged()
 {

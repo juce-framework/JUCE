@@ -1869,8 +1869,7 @@ bool TextEditor::pageDown (bool selecting)
 
 void TextEditor::scrollByLines (int deltaLines)
 {
-    if (auto* scrollbar = viewport->getVerticalScrollBar())
-        scrollbar->moveScrollbarInSteps (deltaLines);
+    viewport->getVerticalScrollBar().moveScrollbarInSteps (deltaLines);
 }
 
 bool TextEditor::scrollDown()
