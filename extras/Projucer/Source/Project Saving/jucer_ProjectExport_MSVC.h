@@ -529,6 +529,13 @@ public:
                                                                                                     : "NDEBUG;%(PreprocessorDefinitions)");
                 }
 
+                const String externalLibraries (getExternalLibraries (config, getOwner().getExternalLibrariesString()));
+                const auto additionalDependencies = externalLibraries.isNotEmpty() ? getOwner().replacePreprocessorTokens (config, externalLibraries).trim() + ";%(AdditionalDependencies)"
+                                                                                   : String();
+                const StringArray librarySearchPaths (config.getLibrarySearchPaths());
+                const auto additionalLibraryDirs = librarySearchPaths.size() > 0 ? getOwner().replacePreprocessorTokens (config, librarySearchPaths.joinIntoString (";")) + ";%(AdditionalLibraryDirectories)"
+                                                                                 : String();
+
                 {
                     XmlElement* link = group->createNewChildElement ("Link");
                     link->createNewChildElement ("OutputFile")->addTextElement (getOutputFilePath (config));
@@ -551,17 +558,13 @@ public:
                         link->createNewChildElement ("EnableCOMDATFolding")->addTextElement ("true");
                     }
 
-                    const StringArray librarySearchPaths (config.getLibrarySearchPaths());
-                    if (librarySearchPaths.size() > 0)
-                        link->createNewChildElement ("AdditionalLibraryDirectories")->addTextElement (getOwner().replacePreprocessorTokens (config, librarySearchPaths.joinIntoString (";"))
-                                                                                                      + ";%(AdditionalLibraryDirectories)");
+                    if (additionalLibraryDirs.isNotEmpty())
+                        link->createNewChildElement ("AdditionalLibraryDirectories")->addTextElement (additionalLibraryDirs);
 
                     link->createNewChildElement ("LargeAddressAware")->addTextElement ("true");
 
-                    const String externalLibraries (getExternalLibraries (config, getOwner().getExternalLibrariesString()));
-                    if (externalLibraries.isNotEmpty())
-                        link->createNewChildElement ("AdditionalDependencies")->addTextElement (getOwner().replacePreprocessorTokens (config, externalLibraries).trim()
-                                                                                                + ";%(AdditionalDependencies)");
+                    if (additionalDependencies.isNotEmpty())
+                        link->createNewChildElement ("AdditionalDependencies")->addTextElement (additionalDependencies);
 
                     String extraLinkerOptions (getOwner().getExtraLinkerFlagsString());
                     if (extraLinkerOptions.isNotEmpty())
@@ -582,6 +585,16 @@ public:
                     XmlElement* bsc = group->createNewChildElement ("Bscmake");
                     bsc->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
                     bsc->createNewChildElement ("OutputFile")->addTextElement (getOwner().getIntDirFile (config, config.getOutputFilename (".bsc", true)));
+                }
+
+                {
+                    XmlElement* lib = group->createNewChildElement ("Lib");
+
+                    if (additionalDependencies.isNotEmpty())
+                        lib->createNewChildElement ("AdditionalDependencies")->addTextElement (additionalDependencies);
+
+                    if (additionalLibraryDirs.isNotEmpty())
+                        lib->createNewChildElement ("AdditionalLibraryDirectories")->addTextElement (additionalLibraryDirs);
                 }
 
                 const RelativePath& manifestFile = getOwner().getManifestPath();
