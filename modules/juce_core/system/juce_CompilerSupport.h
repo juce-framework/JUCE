@@ -47,7 +47,7 @@
   #define JUCE_COMPILER_SUPPORTS_THREAD_LOCAL 1
  #endif
 
- #if __cpp_constexpr >= 201304
+ #if (__GNUC__ * 100 + __GNUC_MINOR__) >= 500
   #define JUCE_HAS_CONSTEXPR 1
  #endif
 
