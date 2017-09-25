@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class UIViewComponentPeer;
 
 // The way rotation works changed in iOS8..
@@ -95,7 +98,7 @@ namespace Orientations
 }
 
 //==============================================================================
-} // (juce namespace)
+} // namespace juce
 
 using namespace juce;
 
@@ -312,8 +315,9 @@ private:
 static void sendScreenBoundsUpdate (JuceUIViewController* c)
 {
     JuceUIView* juceView = (JuceUIView*) [c view];
-    jassert (juceView != nil && juceView->owner != nullptr);
-    juceView->owner->updateTransformAndScreenBounds();
+
+    if (juceView != nil && juceView->owner != nullptr)
+        juceView->owner->updateTransformAndScreenBounds();
 }
 
 static bool isKioskModeView (JuceUIViewController* c)
@@ -326,8 +330,7 @@ static bool isKioskModeView (JuceUIViewController* c)
 
 MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
 
-
-} // (juce namespace)
+} // namespace juce
 
 //==============================================================================
 //==============================================================================
@@ -1127,6 +1130,25 @@ const int KeyPress::F13Key          = 0x200d;
 const int KeyPress::F14Key          = 0x200e;
 const int KeyPress::F15Key          = 0x200f;
 const int KeyPress::F16Key          = 0x2010;
+const int KeyPress::F17Key          = 0x2011;
+const int KeyPress::F18Key          = 0x2012;
+const int KeyPress::F19Key          = 0x2013;
+const int KeyPress::F20Key          = 0x2014;
+const int KeyPress::F21Key          = 0x2015;
+const int KeyPress::F22Key          = 0x2016;
+const int KeyPress::F23Key          = 0x2017;
+const int KeyPress::F24Key          = 0x2018;
+const int KeyPress::F25Key          = 0x2019;
+const int KeyPress::F26Key          = 0x201a;
+const int KeyPress::F27Key          = 0x201b;
+const int KeyPress::F28Key          = 0x201c;
+const int KeyPress::F29Key          = 0x201d;
+const int KeyPress::F30Key          = 0x201e;
+const int KeyPress::F31Key          = 0x201f;
+const int KeyPress::F32Key          = 0x2020;
+const int KeyPress::F33Key          = 0x2021;
+const int KeyPress::F34Key          = 0x2022;
+const int KeyPress::F35Key          = 0x2023;
 const int KeyPress::numberPad0      = 0x30020;
 const int KeyPress::numberPad1      = 0x30021;
 const int KeyPress::numberPad2      = 0x30022;
@@ -1149,3 +1171,5 @@ const int KeyPress::playKey         = 0x30000;
 const int KeyPress::stopKey         = 0x30001;
 const int KeyPress::fastForwardKey  = 0x30002;
 const int KeyPress::rewindKey       = 0x30003;
+
+} // namespace juce

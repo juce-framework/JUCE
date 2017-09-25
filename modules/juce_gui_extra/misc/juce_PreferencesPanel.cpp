@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 PreferencesPanel::PreferencesPanel()
     : buttonSize (70)
 {
@@ -150,3 +153,5 @@ void PreferencesPanel::buttonClicked (Button*)
         }
     }
 }
+
+} // namespace juce

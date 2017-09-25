@@ -106,9 +106,6 @@
 #endif
 
 //==============================================================================
-namespace juce
-{
-
 #include "colour/juce_Colour.cpp"
 #include "colour/juce_ColourGradient.cpp"
 #include "colour/juce_Colours.cpp"
@@ -167,7 +164,6 @@ namespace juce
  #include "native/juce_android_IconHelpers.cpp"
 
 #endif
-}
 
 //==============================================================================
 #if JUCE_USE_FREETYPE && JUCE_USE_FREETYPE_AMALGAMATED

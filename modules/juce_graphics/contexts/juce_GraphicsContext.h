@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -338,12 +338,6 @@ public:
     void drawRoundedRectangle (Rectangle<float> rectangle,
                                float cornerSize, float lineThickness) const;
 
-    /** Fills a 1x1 pixel using the current colour or brush.
-        Note that because the context may be transformed, this is effectively the same as
-        calling fillRect (x, y, 1, 1), and the actual result may involve multiple pixels.
-    */
-    void setPixel (int x, int y) const;
-
     //==============================================================================
     /** Fills an ellipse with the current colour or brush.
         The ellipse is drawn to fit inside the given rectangle.
@@ -388,14 +382,14 @@ public:
         TIP: If you're trying to draw horizontal or vertical lines, don't use this -
         it's better to use fillRect() instead unless you really need an angled line.
     */
-    void drawLine (const Line<float>& line) const;
+    void drawLine (Line<float> line) const;
 
     /** Draws a line between two points with a given thickness.
         @see Path::addLineSegment
         TIP: If you're trying to draw horizontal or vertical lines, don't use this -
         it's better to use fillRect() instead unless you really need an angled line.
     */
-    void drawLine (const Line<float>& line, float lineThickness) const;
+    void drawLine (Line<float> line, float lineThickness) const;
 
     /** Draws a dashed line using a custom set of dash-lengths.
 
@@ -408,7 +402,7 @@ public:
         @param dashIndexToStartFrom     the index in the dash-length array to use for the first segment
         @see PathStrokeType::createDashedStroke
     */
-    void drawDashedLine (const Line<float>& line,
+    void drawDashedLine (Line<float> line,
                          const float* dashLengths, int numDashLengths,
                          float lineThickness = 1.0f,
                          int dashIndexToStartFrom = 0) const;
@@ -441,7 +435,7 @@ public:
     /** Draws a path's outline using the currently selected colour or brush. */
     void strokePath (const Path& path,
                      const PathStrokeType& strokeType,
-                     const AffineTransform& transform = AffineTransform()) const;
+                     const AffineTransform& transform = {}) const;
 
     /** Draws a line with an arrowhead at its end.
 
@@ -450,7 +444,7 @@ public:
         @param arrowheadWidth   the width of the arrow head (perpendicular to the line)
         @param arrowheadLength  the length of the arrow head (along the length of the line)
     */
-    void drawArrow (const Line<float>& line,
+    void drawArrow (Line<float> line,
                     float lineThickness,
                     float arrowheadWidth,
                     float arrowheadLength) const;
@@ -743,8 +737,10 @@ private:
     LowLevelGraphicsContext& context;
     ScopedPointer<LowLevelGraphicsContext> contextToDelete;
 
-    bool saveStatePending;
+    bool saveStatePending = false;
     void saveStateIfPending();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Graphics)
 };
+
+} // namespace juce

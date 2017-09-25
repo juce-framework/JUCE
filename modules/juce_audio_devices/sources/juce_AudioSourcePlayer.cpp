@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 AudioSourcePlayer::AudioSourcePlayer()
     : source (nullptr),
       sampleRate (0),
@@ -178,3 +181,5 @@ void AudioSourcePlayer::audioDeviceStopped()
 
     tempBuffer.setSize (2, 8);
 }
+
+} // namespace juce

@@ -61,8 +61,6 @@ public:
         if (getTargetLocationString().isEmpty())
             getTargetLocationValue() = getDefaultBuildsRootFolder() + (iOS ? "iOS" : "MacOSX");
 
-        initialiseDependencyPathValues();
-
         if (iOS)
         {
             if (getScreenOrientationValue().toString().isEmpty())
@@ -362,6 +360,14 @@ public:
         return (MD5 (getPostBuildScript().toUTF8()).toHexString() == "265ac212a7e734c5bbd6150e1eae18a1");
     }
 
+    //==============================================================================
+    void initialiseDependencyPathValues() override
+    {
+        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder), Ids::vst3Path, TargetOS::osx)));
+        aaxPath. referTo (Value (new DependencyPathValueSource (getSetting (Ids::aaxFolder),  Ids::aaxPath,  TargetOS::osx)));
+        rtasPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::rtasFolder), Ids::rtasPath, TargetOS::osx)));
+    }
+
 protected:
     //==============================================================================
     class XcodeBuildConfiguration  : public BuildConfiguration
@@ -407,8 +413,8 @@ protected:
 
             if (iOS)
             {
-                const char* iosVersions[]      = { "Use Default",     "7.0", "7.1", "8.0", "8.1", "8.2", "8.3", "8.4", "9.0", "9.1", "9.2", "9.3", "10.0", 0 };
-                const char* iosVersionValues[] = { osxVersionDefault, "7.0", "7.1", "8.0", "8.1", "8.2", "8.3", "8.4", "9.0", "9.1", "9.2", "9.3", "10.0", 0 };
+                const char* iosVersions[]      = { "Use Default",     "7.0", "7.1", "8.0", "8.1", "8.2", "8.3", "8.4", "9.0", "9.1", "9.2", "9.3", "10.0", "10.1", "10.2", "10.3", "11.0", nullptr };
+                const char* iosVersionValues[] = { osxVersionDefault, "7.0", "7.1", "8.0", "8.1", "8.2", "8.3", "8.4", "9.0", "9.1", "9.2", "9.3", "10.0", "10.1", "10.2", "10.3", "11.0", nullptr };
 
                 props.add (new ChoicePropertyComponent (iosDeploymentTarget.getPropertyAsValue(), "iOS Deployment Target",
                                                         StringArray (iosVersions), Array<var> (iosVersionValues)),
@@ -809,14 +815,37 @@ public:
         }
 
         //==============================================================================
+        bool shouldAddEntitlements() const
+        {
+            if (owner.isPushNotificationsEnabled() || owner.isAppGroupsEnabled())
+                return true;
+
+            if (owner.project.getProjectType().isAudioPlugin()
+                && (   (owner.isOSX() && type == Target::AudioUnitv3PlugIn)
+                    || (owner.isiOS() && type == Target::StandalonePlugIn && owner.getProject().shouldEnableIAA())))
+                return true;
+
+            return false;
+        }
+
+        //==============================================================================
         StringArray getTargetSettings (const XcodeBuildConfiguration& config) const
         {
-            if (type == AggregateTarget)
-                // the aggregate target should not specify any settings at all!
-                // it just defines dependencies on the other targets.
-                return {};
-
             StringArray s;
+
+            if (type == AggregateTarget && ! owner.isiOS())
+            {
+                // the aggregate target needs to have the deployment target set for
+                // pre-/post-build scripts
+
+                String sdkRoot;
+                s.add ("MACOSX_DEPLOYMENT_TARGET = " + getOSXDeploymentTarget (config, &sdkRoot));
+
+                if (sdkRoot.isNotEmpty())
+                    s.add ("SDKROOT = " + sdkRoot);
+
+                return s;
+            }
 
             String bundleIdentifier = owner.project.getBundleIdentifier().toString();
             if (xcodeBundleIDSubPath.isNotEmpty())
@@ -926,7 +955,7 @@ public:
             else
             {
                 String sdkRoot;
-                s.add ("MACOSX_DEPLOYMENT_TARGET = " + getOSXDeploymentTarget(config, &sdkRoot));
+                s.add ("MACOSX_DEPLOYMENT_TARGET = " + getOSXDeploymentTarget (config, &sdkRoot));
 
                 if (sdkRoot.isNotEmpty())
                     s.add ("SDKROOT = " + sdkRoot);
@@ -947,8 +976,8 @@ public:
             if (! config.codeSignIdentity.isUsingDefault())
                 s.add ("CODE_SIGN_IDENTITY = " + config.codeSignIdentity.get().quoted());
 
-            if (owner.isPushNotificationsEnabled())
-                s.add ("CODE_SIGN_ENTITLEMENTS = " + owner.getProject().getTitle() + ".entitlements");
+            if (shouldAddEntitlements())
+                s.add (String ("CODE_SIGN_ENTITLEMENTS = \"") + owner.getEntitlementsFileName() + String ("\""));
 
             {
                 auto cppStandard = owner.project.getCppStandardValue().toString();
@@ -1012,10 +1041,8 @@ public:
                 s.add ("SEPARATE_STRIP = YES");
             }
 
-            if (owner.project.getProjectType().isAudioPlugin()
-                && (   (owner.isOSX() && type == Target::AudioUnitv3PlugIn)
-                    || (owner.isiOS() && type == Target::StandalonePlugIn && owner.getProject().shouldEnableIAA())))
-                s.add (String ("CODE_SIGN_ENTITLEMENTS = \"") + owner.getEntitlementsFileName() + String ("\""));
+            if (owner.iOS && owner.isInAppPurchasesEnabled())
+                defines.set ("JUCE_IN_APP_PURCHASES", "1");
 
             defines = mergePreprocessorDefs (defines, owner.getAllPreprocessorDefs (config, type));
 
@@ -1490,7 +1517,7 @@ public:
 
             // The AUv3 target always needs to be at least 10.11
             int oldestAllowedDeploymentTarget = (type == Target::AudioUnitv3PlugIn ? minimumAUv3SDKVersion
-                                                 : oldestSDKVersion);
+                                                                                   : oldestSDKVersion);
 
             // if the user doesn't set it, then use the last known version that works well with JUCE
             String deploymentTarget = "10.11";
@@ -2863,13 +2890,6 @@ private:
     static String getSDKName (int version)
     {
         return getOSXVersionName (version) + " SDK";
-    }
-
-    void initialiseDependencyPathValues()
-    {
-        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder), Ids::vst3Path, TargetOS::osx)));
-        aaxPath. referTo (Value (new DependencyPathValueSource (getSetting (Ids::aaxFolder),  Ids::aaxPath,  TargetOS::osx)));
-        rtasPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::rtasFolder), Ids::rtasPath, TargetOS::osx)));
     }
 
     JUCE_DECLARE_NON_COPYABLE (XCodeProjectExporter)

@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -70,3 +70,5 @@ public:
     /** Tells the source whether you'd like it to play in a loop. */
     virtual void setLooping (bool shouldLoop)       { ignoreUnused (shouldLoop); }
 };
+
+} // namespace juce

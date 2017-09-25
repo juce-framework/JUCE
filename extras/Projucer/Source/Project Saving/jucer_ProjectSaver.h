@@ -674,6 +674,8 @@ private:
                 if (specifiedExporterToSave.isNotEmpty() && exporter->getName() != specifiedExporterToSave)
                     continue;
 
+                exporter->initialiseDependencyPathValues();
+
                 if (exporter->getTargetFolder().createDirectory())
                 {
                     exporter->copyMainGroupFromProject();

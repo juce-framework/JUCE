@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class iOSAudioIODevice;
 
 static const char* const iOSAudioDeviceName = "iOS Audio";
@@ -183,6 +186,10 @@ bool getNotificationValueForKey (NSNotification* notification, NSString* key, NS
 @end
 
 //==============================================================================
+#if JUCE_MODULE_AVAILABLE_juce_graphics
+ #include <juce_graphics/native/juce_mac_CoreGraphicsHelpers.h>
+#endif
+
 namespace juce {
 
 #ifndef JUCE_IOS_AUDIO_LOGGING
@@ -205,10 +212,6 @@ static void logNSError (NSError* e)
 }
 
 #define JUCE_NSERROR_CHECK(X)     { NSError* error = nil; X; logNSError (error); }
-
-#if JUCE_MODULE_AVAILABLE_juce_graphics
-#include <juce_graphics/native/juce_mac_CoreGraphicsHelpers.h>
-#endif
 
 //==============================================================================
 struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
@@ -576,7 +579,13 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                                             &hostUrl,
                                             &dataSize);
         if (err == noErr)
-            [[UIApplication sharedApplication] openURL:(NSURL*)hostUrl];
+        {
+           #if (! defined __IPHONE_OS_VERSION_MIN_REQUIRED) || (! defined __IPHONE_10_0) || (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_10_0)
+            [[UIApplication sharedApplication] openURL: (NSURL*)hostUrl];
+           #else
+            [[UIApplication sharedApplication] openURL: (NSURL*)hostUrl options: @{} completionHandler: nil];
+           #endif
+        }
     }
 
     //==============================================================================
@@ -1162,3 +1171,5 @@ void AudioSessionHolder::handleRouteChange (const char* reason)
 }
 
 #undef JUCE_NSERROR_CHECK
+
+} // namespace juce

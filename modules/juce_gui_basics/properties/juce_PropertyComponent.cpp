@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 PropertyComponent::PropertyComponent (const String& name, const int preferredHeight_)
     : Component (name), preferredHeight (preferredHeight_)
 {
@@ -50,3 +53,5 @@ void PropertyComponent::enablementChanged()
 {
     repaint();
 }
+
+} // namespace juce

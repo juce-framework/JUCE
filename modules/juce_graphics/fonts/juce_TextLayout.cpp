@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 TextLayout::Glyph::Glyph (const int glyph, Point<float> anch, float w) noexcept
     : glyphCode (glyph), anchor (anch), width (w)
 {
@@ -583,3 +586,5 @@ void TextLayout::recalculateSize()
         height = 0;
     }
 }
+
+} // namespace juce

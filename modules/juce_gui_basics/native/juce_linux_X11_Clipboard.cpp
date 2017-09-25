@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 extern ::Window juce_messageWindowHandle;
 
 namespace ClipboardHelpers
@@ -273,3 +276,5 @@ String SystemClipboard::getTextFromClipboard()
 
     return content;
 }
+
+} // namespace juce

@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 int64 InputStream::getNumBytesRemaining()
 {
     int64 len = getTotalLength();
@@ -227,3 +230,5 @@ void InputStream::skipNextBytes (int64 numBytesToSkip)
             numBytesToSkip -= read (temp, (int) jmin (numBytesToSkip, (int64) skipBufferSize));
     }
 }
+
+} // namespace juce

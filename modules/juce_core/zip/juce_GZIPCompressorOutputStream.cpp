@@ -20,14 +20,14 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class GZIPCompressorOutputStream::GZIPCompressorHelper
 {
 public:
     GZIPCompressorHelper (const int compressionLevel, const int windowBits)
-        : compLevel ((compressionLevel < 0 || compressionLevel > 9) ? -1 : compressionLevel),
-          isFirstDeflate (true),
-          streamIsValid (false),
-          finished (false)
+        : compLevel ((compressionLevel < 0 || compressionLevel > 9) ? -1 : compressionLevel)
     {
         using namespace zlibNamespace;
         zerostruct (stream);
@@ -70,7 +70,7 @@ private:
 
     zlibNamespace::z_stream stream;
     const int compLevel;
-    bool isFirstDeflate, streamIsValid, finished;
+    bool isFirstDeflate = true, streamIsValid = false, finished = false;
     zlibNamespace::Bytef buffer[32768];
 
     bool doNextBlock (const uint8*& data, size_t& dataSize, OutputStream& out, const int flushMode)
@@ -155,9 +155,8 @@ bool GZIPCompressorOutputStream::setPosition (int64 /*newPosition*/)
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class GZIPTests  : public UnitTest
+struct GZIPTests  : public UnitTest
 {
-public:
     GZIPTests()   : UnitTest ("GZIP", "Compression") {}
 
     void runTest() override
@@ -205,3 +204,5 @@ public:
 static GZIPTests gzipTests;
 
 #endif
+
+} // namespace juce

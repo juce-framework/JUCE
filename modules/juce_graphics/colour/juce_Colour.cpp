@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace ColourHelpers
 {
     static uint8 floatToUInt8 (const float n) noexcept
@@ -461,3 +464,5 @@ String Colour::toDisplayString (const bool includeAlphaValue) const
                   .paddedLeft ('0', includeAlphaValue ? 8 : 6)
                   .toUpperCase();
 }
+
+} // namespace juce

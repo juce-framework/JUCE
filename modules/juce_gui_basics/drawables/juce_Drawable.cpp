@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 Drawable::Drawable()
 {
     setInterceptsMouseClicks (false, false);
@@ -275,3 +278,5 @@ void Drawable::ValueTreeWrapperBase::setID (const String& newID)
     else
         state.setProperty (ComponentBuilder::idProperty, newID, nullptr);
 }
+
+} // namespace juce

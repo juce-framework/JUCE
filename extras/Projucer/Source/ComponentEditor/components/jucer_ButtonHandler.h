@@ -36,25 +36,30 @@ public:
                                 defaultWidth_, defaultHeight_)
     {}
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
+    void getEditableProperties (Component* component, JucerDocument& document,
+                                Array<PropertyComponent*>& props, bool multipleSelected) override
     {
-        ComponentTypeHandler::getEditableProperties (component, document, props);
+        ComponentTypeHandler::getEditableProperties (component, document, props, multipleSelected);
 
-        Button* const b = dynamic_cast<Button*> (component);
+        if (multipleSelected)
+            return;
 
-        props.add (new ButtonTextProperty (b, document));
+        if (auto* b = dynamic_cast<Button*> (component))
+        {
+            props.add (new ButtonTextProperty (b, document));
 
-        props.add (new ButtonCallbackProperty (b, document));
+            props.add (new ButtonCallbackProperty (b, document));
 
-        props.add (new ButtonRadioGroupProperty (b, document));
+            props.add (new ButtonRadioGroupProperty (b, document));
 
-        props.add (new ButtonConnectedEdgeProperty ("connected left", Button::ConnectedOnLeft, b, document));
-        props.add (new ButtonConnectedEdgeProperty ("connected right", Button::ConnectedOnRight, b, document));
-        props.add (new ButtonConnectedEdgeProperty ("connected top", Button::ConnectedOnTop, b, document));
-        props.add (new ButtonConnectedEdgeProperty ("connected bottom", Button::ConnectedOnBottom, b, document));
+            props.add (new ButtonConnectedEdgeProperty ("connected left", Button::ConnectedOnLeft, b, document));
+            props.add (new ButtonConnectedEdgeProperty ("connected right", Button::ConnectedOnRight, b, document));
+            props.add (new ButtonConnectedEdgeProperty ("connected top", Button::ConnectedOnTop, b, document));
+            props.add (new ButtonConnectedEdgeProperty ("connected bottom", Button::ConnectedOnBottom, b, document));
+        }
     }
 
-    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
+    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout) override
     {
         Button* const b = dynamic_cast<Button*> (comp);
 
@@ -67,7 +72,7 @@ public:
         return e;
     }
 
-    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout)
+    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout) override
     {
         Button* const b = dynamic_cast<Button*> (comp);
 
@@ -82,12 +87,12 @@ public:
         return true;
     }
 
-    String getCreationParameters (GeneratedCode&, Component* component)
+    String getCreationParameters (GeneratedCode&, Component* component) override
     {
         return quotedString (component->getName(), false);
     }
 
-    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
+    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName) override
     {
         ComponentTypeHandler::fillInCreationCode (code, component, memberVariableName);
 
@@ -131,13 +136,13 @@ public:
             code.constructorCode << memberVariableName << "->addListener (this);\n";
     }
 
-    void fillInGeneratedCode (Component* component, GeneratedCode& code)
+    void fillInGeneratedCode (Component* component, GeneratedCode& code) override
     {
         ComponentTypeHandler::fillInGeneratedCode (component, code);
 
         if (needsButtonListener (component))
         {
-            String& callback = code.getCallbackCode ("public ButtonListener",
+            String& callback = code.getCallbackCode ("public Button::Listener",
                                                      "void",
                                                      "buttonClicked (Button* buttonThatWasClicked)",
                                                      true);

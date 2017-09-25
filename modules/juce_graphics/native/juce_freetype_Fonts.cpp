@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct FTLibWrapper     : public ReferenceCountedObject
 {
     FTLibWrapper() : library (0)
@@ -455,3 +458,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (FreeTypeTypeface)
 };
+
+} // namespace juce

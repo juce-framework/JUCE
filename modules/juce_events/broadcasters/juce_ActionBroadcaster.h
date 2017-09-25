@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /** Manages a list of ActionListeners, and can send them messages.
@@ -75,3 +75,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (ActionBroadcaster)
 };
+
+} // namespace juce

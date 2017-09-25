@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 /** @internal */
 bool juce_handleXEmbedEvent (ComponentPeer*, void*);
@@ -109,3 +110,5 @@ private:
 };
 
 #endif
+
+} // namespace juce

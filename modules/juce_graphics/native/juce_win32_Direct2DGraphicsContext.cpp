@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 template <typename Type>
 D2D1_RECT_F rectangleToRectF (const Rectangle<Type>& r)
 {
@@ -823,3 +826,5 @@ bool Direct2DLowLevelGraphicsContext::drawTextLayout (const AttributedString& te
     pimpl->renderingTarget->SetTransform (D2D1::IdentityMatrix());
     return true;
 }
+
+} // namespace juce

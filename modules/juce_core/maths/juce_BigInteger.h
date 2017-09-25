@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -342,3 +342,5 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const BigInteger& 
  // For backwards compatibility, BitArray is defined as an alias for BigInteger.
  typedef BigInteger BitArray;
 #endif
+
+} // namespace juce

@@ -24,6 +24,11 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
+
 #ifndef DOXYGEN
 namespace SampleTypeHelpers // Internal classes needed for handling sample type classes
 {
@@ -539,3 +544,6 @@ private:
     ChannelCountType numChannels = 0;
     size_t startSample = 0, numSamples = 0;
 };
+
+} // namespace dsp
+} // namespace juce

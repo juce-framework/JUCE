@@ -1393,6 +1393,15 @@
     <ClCompile Include="..\..\..\..\..\modules\juce_gui_basics\layout\juce_FlexBox.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\..\modules\juce_gui_basics\layout\juce_Grid.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\modules\juce_gui_basics\layout\juce_GridItem.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\modules\juce_gui_basics\layout\juce_GridUnitTests.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\..\modules\juce_gui_basics\layout\juce_GroupComponent.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -2231,6 +2240,8 @@
     <ClInclude Include="..\..\..\..\..\modules\juce_gui_basics\layout\juce_ConcertinaPanel.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_gui_basics\layout\juce_FlexBox.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_gui_basics\layout\juce_FlexItem.h"/>
+    <ClInclude Include="..\..\..\..\..\modules\juce_gui_basics\layout\juce_Grid.h"/>
+    <ClInclude Include="..\..\..\..\..\modules\juce_gui_basics\layout\juce_GridItem.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_gui_basics\layout\juce_GroupComponent.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_gui_basics\layout\juce_MultiDocumentPanel.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_gui_basics\layout\juce_ResizableBorderComponent.h"/>
@@ -2363,7 +2374,6 @@
     <None Include="..\..\..\..\..\modules\juce_audio_formats\codecs\oggvorbis\Ogg Vorbis Licence.txt"/>
     <None Include="..\..\..\..\..\modules\juce_blocks_basics\littlefoot\LittleFoot Language README.txt"/>
     <None Include="..\..\..\..\..\modules\juce_blocks_basics\protocol\Protocol Format.txt"/>
-    <None Include="..\..\..\..\..\modules\juce_blocks_basics\LittleFootFunctions.txt"/>
     <None Include="..\..\..\..\..\modules\juce_blocks_basics\README.txt"/>
     <None Include="..\..\..\..\..\modules\juce_graphics\image_formats\jpglib\changes to libjpeg for JUCE.txt"/>
     <None Include="..\..\..\..\..\modules\juce_graphics\image_formats\pnglib\libpng_readme.txt"/>

@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_MSVC
  #pragma warning (push)
  #pragma warning (disable : 4127 4389 4018)
@@ -130,7 +133,7 @@ namespace SocketHelpers
                 // a chance to process before close is called. On Mac OS X shutdown
                 // does not unblock a select call, so using a lock here will dead-lock
                 // both threads.
-               #if JUCE_LINUX
+               #if JUCE_LINUX || JUCE_ANDROID
                 CriticalSection::ScopedLockType lock (readLock);
                 ::close (h);
                #else
@@ -770,3 +773,5 @@ bool DatagramSocket::setEnablePortReuse (bool enabled)
 #if JUCE_MSVC
  #pragma warning (pop)
 #endif
+
+} // namespace juce

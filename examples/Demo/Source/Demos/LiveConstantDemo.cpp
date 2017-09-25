@@ -58,7 +58,7 @@ struct LiveConstantDemoComponent  : public Component
 
 //==============================================================================
 class LiveConstantEditorDemo   : public Component,
-                                 private ButtonListener
+                                 private Button::Listener
 {
 public:
     LiveConstantEditorDemo()

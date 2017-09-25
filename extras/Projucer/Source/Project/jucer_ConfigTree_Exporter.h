@@ -32,6 +32,7 @@ public:
         : project (p), exporter (e), configListTree (exporter->getConfigurations()),
           exporterIndex (index)
     {
+        exporter->initialiseDependencyPathValues();
         configListTree.addListener (this);
         targetLocationValue.referTo (exporter->getTargetLocationValue());
         targetLocationValue.addListener (this);

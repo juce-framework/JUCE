@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 /**
     Interpolator for resampling a stream of floats using Catmull-Rom interpolation.
 
@@ -84,3 +87,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CatmullRomInterpolator)
 };
+
+} // namespace juce

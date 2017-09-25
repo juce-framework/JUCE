@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace
 {
     const uint8 noLSBValueReceived = 0xff;
@@ -2148,3 +2151,5 @@ private:
 static MPEInstrumentTests MPEInstrumentUnitTests;
 
 #endif // JUCE_UNIT_TESTS
+
+} // namespace juce

@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -265,3 +265,5 @@ JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, InputStre
     @see OutputStream::setNewLineString
 */
 JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const NewLine&);
+
+} // namespace juce

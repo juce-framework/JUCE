@@ -42,13 +42,7 @@ public:
         updateSliderPos();
     }
 
-    void valueChanged() override
-    {
-        if (isMouseButtonDown())
-            param.setValueNotifyingHost ((float) Slider::getValue());
-        else
-            param.setValue ((float) Slider::getValue());
-    }
+    void valueChanged() override        { param.setValueNotifyingHost ((float) Slider::getValue()); }
 
     void timerCallback() override       { updateSliderPos(); }
 
@@ -63,7 +57,7 @@ public:
         const float newValue = param.getValue();
 
         if (newValue != (float) Slider::getValue() && ! isMouseButtonDown())
-            Slider::setValue (newValue);
+            Slider::setValue (newValue, NotificationType::dontSendNotification);
     }
 
     AudioProcessorParameter& param;
@@ -101,11 +95,13 @@ JuceDemoPluginAudioProcessorEditor::JuceDemoPluginAudioProcessorEditor (JuceDemo
     timecodeDisplayLabel.setFont (Font (Font::getDefaultMonospacedFontName(), 15.0f, Font::plain));
 
     // set resize limits for this plug-in
-    setResizeLimits (400, 200, 800, 300);
+    setResizeLimits (400, 200, 1024, 700);
 
     // set our component's initial size to be the last one that was stored in the filter's settings
     setSize (owner.lastUIWidth,
              owner.lastUIHeight);
+
+    updateTrackProperties();
 
     // start a timer which will keep our timecode display updated
     startTimerHz (30);
@@ -118,7 +114,7 @@ JuceDemoPluginAudioProcessorEditor::~JuceDemoPluginAudioProcessorEditor()
 //==============================================================================
 void JuceDemoPluginAudioProcessorEditor::paint (Graphics& g)
 {
-    g.setColour (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+    g.setColour (backgroundColour);
     g.fillAll();
 }
 
@@ -144,6 +140,21 @@ void JuceDemoPluginAudioProcessorEditor::resized()
 void JuceDemoPluginAudioProcessorEditor::timerCallback()
 {
     updateTimecodeDisplay (getProcessor().lastPosInfo);
+}
+
+void JuceDemoPluginAudioProcessorEditor::hostMIDIControllerIsAvailable (bool controllerIsAvailable)
+{
+    midiKeyboard.setVisible (! controllerIsAvailable);
+}
+
+void JuceDemoPluginAudioProcessorEditor::updateTrackProperties ()
+{
+    auto trackColour = getProcessor().trackProperties.colour;
+    auto& lf = getLookAndFeel();
+
+    backgroundColour = (trackColour == Colour() ? lf.findColour (ResizableWindow::backgroundColourId)
+                                                : trackColour.withAlpha (1.0f).withBrightness (0.266f));
+    repaint();
 }
 
 //==============================================================================

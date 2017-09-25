@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 InterprocessConnectionServer::InterprocessConnectionServer()
     : Thread ("Juce IPC server")
 {
@@ -58,6 +61,11 @@ void InterprocessConnectionServer::stop()
     socket = nullptr;
 }
 
+int InterprocessConnectionServer::getBoundPort() const noexcept
+{
+    return (socket == nullptr) ? -1 : socket->getBoundPort();
+}
+
 void InterprocessConnectionServer::run()
 {
     while ((! threadShouldExit()) && socket != nullptr)
@@ -69,3 +77,5 @@ void InterprocessConnectionServer::run()
                 newConnection->initialiseWithSocket (clientSocket.release());
     }
 }
+
+} // namespace juce

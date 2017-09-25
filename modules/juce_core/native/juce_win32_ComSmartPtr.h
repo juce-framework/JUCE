@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 #if JUCE_MINGW || (! (defined (_MSC_VER) || defined (__uuidof)))
  #ifdef __uuidof
@@ -189,3 +190,5 @@ public:
         return ComBaseClassHelperBase<ComClass>::QueryInterface (refId, result);
     }
 };
+
+} // namespace juce

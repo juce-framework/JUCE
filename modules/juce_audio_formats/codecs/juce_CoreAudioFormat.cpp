@@ -28,6 +28,9 @@
 
 #include "../../juce_audio_basics/native/juce_mac_CoreAudioLayouts.h"
 
+namespace juce
+{
+
 //==============================================================================
 namespace
 {
@@ -389,11 +392,11 @@ public:
                     caLayout.malloc (1, static_cast<size_t> (sizeOfLayout));
 
                     status = AudioFileGetProperty (audioFileID, kAudioFilePropertyChannelLayout,
-                                                   &sizeOfLayout, caLayout.getData());
+                                                   &sizeOfLayout, caLayout.get());
 
                     if (status == noErr)
                     {
-                        auto fileLayout = CoreAudioLayouts::fromCoreAudio (*caLayout.getData());
+                        auto fileLayout = CoreAudioLayouts::fromCoreAudio (*caLayout.get());
 
                         if (fileLayout.size() == static_cast<int> (numChannels))
                         {
@@ -619,8 +622,7 @@ public:
 
             for (auto tagEntry : knownTags)
             {
-                AudioChannelLayout layout { tagEntry.tag };
-                auto labels = CoreAudioLayouts::fromCoreAudio (layout);
+                auto labels = CoreAudioLayouts::fromCoreAudio (tagEntry.tag);
 
                 expect (! labels.isDiscreteLayout(), String ("Tag \"") + String (tagEntry.name) + "\" is not handled by JUCE");
             }
@@ -631,8 +633,7 @@ public:
 
             for (auto tagEntry : knownTags)
             {
-                AudioChannelLayout layout { tagEntry.tag };
-                auto labels = CoreAudioLayouts::getCoreAudioLayoutChannels (layout);
+                auto labels = CoreAudioLayouts::getSpeakerLayoutForCoreAudioTag (tagEntry.tag);
 
                 expect (labels.size() == (tagEntry.tag & 0xffff), String ("Tag \"") + String (tagEntry.name) + "\" has incorrect channel count");
             }
@@ -643,8 +644,7 @@ public:
 
             for (auto tagEntry : knownTags)
             {
-                AudioChannelLayout layout { tagEntry.tag };
-                auto labels = CoreAudioLayouts::getCoreAudioLayoutChannels (layout);
+                auto labels = CoreAudioLayouts::getSpeakerLayoutForCoreAudioTag (tagEntry.tag);
                 labels.sort();
 
                 for (int i = 0; i < (labels.size() - 1); ++i)
@@ -657,13 +657,9 @@ public:
             beginTest ("CA speaker list and juce layouts are consistent");
 
             for (auto tagEntry : knownTags)
-            {
-                AudioChannelLayout layout { tagEntry.tag };
-
-                expect (AudioChannelSet::channelSetWithChannels (CoreAudioLayouts::getCoreAudioLayoutChannels (layout))
-                            == CoreAudioLayouts::fromCoreAudio (layout),
+                expect (AudioChannelSet::channelSetWithChannels (CoreAudioLayouts::getSpeakerLayoutForCoreAudioTag (tagEntry.tag))
+                            == CoreAudioLayouts::fromCoreAudio (tagEntry.tag),
                         String ("Tag \"") + String (tagEntry.name) + "\" is not converted consistantly by JUCE");
-            }
         }
 
         {
@@ -674,9 +670,7 @@ public:
                 if (tagEntry.equivalentChannelSet.isDisabled())
                     continue;
 
-                AudioChannelLayout layout { tagEntry.tag };
-
-                expect (CoreAudioLayouts::fromCoreAudio (layout) == tagEntry.equivalentChannelSet,
+                expect (CoreAudioLayouts::fromCoreAudio (tagEntry.tag) == tagEntry.equivalentChannelSet,
                         String ("Documentation for tag \"") + String (tagEntry.name) + "\" is incorrect");
             }
         }
@@ -706,7 +700,7 @@ private:
     //==============================================================================
     const Array<CoreAudioChannelLayoutTag>& getAllKnownLayoutTags() const
     {
-        static Array<CoreAudioChannelLayoutTag> knownTags ({
+        static CoreAudioChannelLayoutTag tags[] = {
             DEFINE_CHANNEL_LAYOUT_TAG_ENTRY (kAudioChannelLayoutTag_Mono,   AudioChannelSet::mono()),
             DEFINE_CHANNEL_LAYOUT_TAG_ENTRY (kAudioChannelLayoutTag_Stereo, AudioChannelSet::stereo()),
             DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_StereoHeadphones),
@@ -830,7 +824,8 @@ private:
             DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DTS_8_1_A),
             DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DTS_8_1_B),
             DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DTS_6_1_D)
-        });
+        };
+        static Array<CoreAudioChannelLayoutTag> knownTags (tags, sizeof (tags) / sizeof (CoreAudioChannelLayoutTag));
 
         return knownTags;
     }
@@ -839,4 +834,7 @@ private:
 static CoreAudioLayoutsUnitTest coreAudioLayoutsUnitTest;
 
 #endif
+
+} // namespace juce
+
 #endif

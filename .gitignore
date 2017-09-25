@@ -23,8 +23,9 @@ xcuserdata
 *.xcscmblueprint
 contents.xcworkspacedata
 .DS_Store
-Thumbs.db
 .svn
+.deps
+.dirstamp
 profile
 **/MacOSX/build
 **/iOS/build
@@ -59,4 +60,3 @@ profile
 **/doxygen/doc
 **/doxygen/build
 extras/Projucer/JUCECompileEngine.dylib
-project.xcworkspace

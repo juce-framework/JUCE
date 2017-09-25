@@ -1,6 +1,112 @@
 JUCE breaking changes
 =====================
 
+Version 5.1.2
+=============
+
+Change
+------
+The method used to classify AudioUnit, VST3 and AAX plug-in parameters as
+either continuous or discrete has changed, and AudioUnit and AudioUnit v3
+parameters are marked as high precision by default.
+
+Possible Issues
+---------------
+Plug-ins: DAW projects with automation data written by an AudioUnit, AudioUnit
+v3 VST3 or AAX plug-in built with JUCE version 5.1.1 or earlier may load
+incorrectly when opened by an AudioUnit, AudioUnit v3, VST3 or AAX plug-in
+built with JUCE version 5.1.2 and later.
+
+Hosts: The AudioPluginInstance::getParameterNumSteps method now returns correct
+values for AU and VST3 plug-ins.
+
+Workaround
+----------
+Plug-ins: Enable JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE in the
+juce_audio_plugin_client module config page in the Projucer.
+
+Hosts: Use AudioPluginInstance::getDefaultNumParameterSteps as the number of
+steps for all parameters.
+
+Rationale
+---------
+The old system for presenting plug-in parameters to a host as either continuous
+or discrete is inconsistent between plug-in types and lacks sufficient
+flexibility. This change harmonises the behaviour and allows individual
+parameters to be marked as continuous or discrete. If AudioUnit and AudioUnit
+v3 parameters are not marked as high precision then hosts like Logic Pro only
+offer a limited number of parameter values, which again produces different
+behaviour for different plug-in types.
+
+
+Change
+------
+A new FrameRateType fps23976 has been added to AudioPlayHead,
+
+Possible Issues
+---------------
+Previously JUCE would report the FrameRateType fps24 for both 24 and 23.976
+fps. If your code uses switch statements (or similar) to handle all possible
+frame rate types, then this change may cause it to fall through.
+
+Workaround
+----------
+Add fps23976 to your switch statement and handle it appropriately.
+
+Rationale
+---------
+JUCE should be able to handle all popular frame rate codes but was missing
+support for 23.976.
+
+
+Change
+------
+The String (bool) constructor and operator<< (String&, bool) have been
+explicitly deleted.
+
+Possible Issues
+---------------
+Previous code which relied on an implicit bool to int type conversion to
+produce a String will not compile.
+
+Workaround
+----------
+Cast your bool to an integer to generate a string representation of it.
+
+Rationale
+---------
+Letting things implicitly convert to bool to produce a String opens the door to
+all kinds of nasty type conversion edge cases. Furthermore, before this change,
+MacOS would automatically convert bools to ints but this wouldn't occur on
+different platform. Now the behaviour is consistent across all operating
+systems supported by JUCE.
+
+
+Change
+------
+The writeAsJSON virtual method of the DynamicObject class requires an
+additional parameter, maximumDecimalPlaces, to specify the maximum precision of
+floating point numbers.
+
+Possible Issues
+---------------
+Classes which inherit from DynamicObject and override this method will need to
+update their method signature.
+
+Workaround
+----------
+Your custom DynamicObject class can choose to ignore the additional parameter
+if you don't wish to support this behaviour.
+
+Rationale
+---------
+When serialising the results of calculations to JSON the rounding of floating
+point numbers can result in numbers with 17 significant figures where only a
+few are required. This change to DynamicObject is required to support
+truncating those numbers.
+
+
+
 Version 5.1.0
 =============
 
@@ -48,7 +154,7 @@ or
 
 2. Override the Look&Feel method
    PopupMenu::LookAndFeelMethods::shouldPopupMenuScaleWithTargetComponent and
-   return false.  See
+   return false. See
    https://github.com/WeAreROLI/JUCE/blob/c288c94c2914af20f36c03ca9c5401fcb555e4e9/modules/juce_gui_basics/menus/juce_PopupMenu.h#725
 
 Rationale
@@ -127,7 +233,7 @@ Possible Issues
 DAW projects with automation data written by an AudioUnit or VST3 plug-in built
 with pre JUCE 4.3.1 versions will load incorrectly when opened by an AudioUnit
 or VST3 built with JUCE versions 4.3.1 and later. Plug-ins using
-JUCE_FORCE_USE_LEGACY_IDS are not affected.
+JUCE_FORCE_USE_LEGACY_PARAM_IDS are not affected.
 
 Workaround
 ----------
@@ -227,7 +333,7 @@ JUCE 4.2.1 and later.
 
 Workaround
 ----------
-Enable JUCE_FORCE_USE_LEGACY_IDS in the juce_audio_plugin_client module config
+Enable JUCE_FORCE_USE_LEGACY_PARAM_IDS in the juce_audio_plugin_client module config
 page in the Projucer. For new plug-ins, be sure to disable this property.
 
 Rationale

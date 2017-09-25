@@ -155,9 +155,6 @@
 
 #endif
 
-namespace juce
-{
-
 #include "audio_io/juce_AudioDeviceManager.cpp"
 #include "audio_io/juce_AudioIODevice.cpp"
 #include "audio_io/juce_AudioIODeviceType.cpp"
@@ -214,14 +211,15 @@ namespace juce
  #if JUCE_USE_ANDROID_OPENSLES
   #include "native/juce_android_OpenSL.cpp"
  #endif
-
 #endif
 
 #if ! JUCE_SYSTEMAUDIOVOL_IMPLEMENTED
- // None of these methods are available. (On Windows you might need to enable WASAPI for this)
- float JUCE_CALLTYPE SystemAudioVolume::getGain()         { jassertfalse; return 0.0f; }
- bool  JUCE_CALLTYPE SystemAudioVolume::setGain (float)   { jassertfalse; return false; }
- bool  JUCE_CALLTYPE SystemAudioVolume::isMuted()         { jassertfalse; return false; }
- bool  JUCE_CALLTYPE SystemAudioVolume::setMuted (bool)   { jassertfalse; return false; }
-#endif
+namespace juce
+{
+    // None of these methods are available. (On Windows you might need to enable WASAPI for this)
+    float JUCE_CALLTYPE SystemAudioVolume::getGain()         { jassertfalse; return 0.0f; }
+    bool  JUCE_CALLTYPE SystemAudioVolume::setGain (float)   { jassertfalse; return false; }
+    bool  JUCE_CALLTYPE SystemAudioVolume::isMuted()         { jassertfalse; return false; }
+    bool  JUCE_CALLTYPE SystemAudioVolume::setMuted (bool)   { jassertfalse; return false; }
 }
+#endif

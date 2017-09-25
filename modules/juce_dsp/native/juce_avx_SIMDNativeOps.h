@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 #ifndef DOXYGEN
 
@@ -198,7 +202,7 @@ struct SIMDNativeOps<int8_t>
         const int8_t* lo_ptr = reinterpret_cast<const int8_t*> (&lo);
         const int8_t* hi_ptr = reinterpret_cast<const int8_t*> (&hi);
 
-        return lo_ptr[0] + hi_ptr[0] + lo_ptr[16] + hi_ptr[16];
+        return (int8_t) (lo_ptr[0] + hi_ptr[0] + lo_ptr[16] + hi_ptr[16]);
     }
 
     static forcedinline __m256i JUCE_VECTOR_CALLTYPE mul (__m256i a, __m256i b)
@@ -257,7 +261,7 @@ struct SIMDNativeOps<uint8_t>
         const uint8_t* lo_ptr = reinterpret_cast<const uint8_t*> (&lo);
         const uint8_t* hi_ptr = reinterpret_cast<const uint8_t*> (&hi);
 
-        return lo_ptr[0] + hi_ptr[0] + lo_ptr[16] + hi_ptr[16];
+        return (uint8_t) (lo_ptr[0] + hi_ptr[0] + lo_ptr[16] + hi_ptr[16]);
     }
 
     static forcedinline __m256i JUCE_VECTOR_CALLTYPE mul (__m256i a, __m256i b)
@@ -308,7 +312,7 @@ struct SIMDNativeOps<int16_t>
         tmp = _mm256_hadd_epi16 (tmp, tmp);
         tmp = _mm256_hadd_epi16 (tmp, tmp);
         int16_t* ptr = reinterpret_cast<int16_t*> (&tmp);
-        return ptr[0] + ptr[8];
+        return (int16_t) (ptr[0] + ptr[8]);
     }
 };
 
@@ -351,7 +355,7 @@ struct SIMDNativeOps<uint16_t>
         tmp = _mm256_hadd_epi16 (tmp, tmp);
         tmp = _mm256_hadd_epi16 (tmp, tmp);
         uint16_t* ptr = reinterpret_cast<uint16_t*> (&tmp);
-        return ptr[0] + ptr[8];
+        return (uint16_t) (ptr[0] + ptr[8]);
     }
 };
 
@@ -558,3 +562,6 @@ struct SIMDNativeOps<uint64_t>
 };
 
 #endif
+
+} // namespace dsp
+} // namespace juce

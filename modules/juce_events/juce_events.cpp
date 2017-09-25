@@ -54,9 +54,6 @@
 #endif
 
 //==============================================================================
-namespace juce
-{
-
 #include "messages/juce_ApplicationBase.cpp"
 #include "messages/juce_DeletedAtShutdown.cpp"
 #include "messages/juce_MessageListener.cpp"
@@ -103,5 +100,3 @@ namespace juce
  #include "native/juce_android_Messaging.cpp"
 
 #endif
-
-}

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 AudioFormatManager::AudioFormatManager()  : defaultFormatIndex (0) {}
 AudioFormatManager::~AudioFormatManager() {}
 
@@ -177,3 +180,5 @@ AudioFormatReader* AudioFormatManager::createReaderFor (InputStream* audioFileSt
 
     return nullptr;
 }
+
+} // namespace juce

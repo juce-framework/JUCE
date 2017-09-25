@@ -8,7 +8,7 @@
               pluginCode="AUv3" pluginChannelConfigs="" pluginIsSynth="1" pluginWantsMidiIn="1"
               pluginProducesMidiOut="0" pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="AUv3SynthAU" pluginRTASCategory="" aaxIdentifier="com.roli.development.AUv3Synth"
-              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.1.1"
+              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.1.2"
               buildStandalone="1" enableIAA="0" displaySplashScreen="0" reportAppUsage="0"
               splashScreenColour="Dark" companyName="ROLI Ltd." cppLanguageStandard="11">
   <MAINGROUP id="h0gx6L" name="AUv3Synth">

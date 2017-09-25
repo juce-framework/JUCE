@@ -31,7 +31,7 @@
 
   ID:               juce_events
   vendor:           juce
-  version:          5.1.1
+  version:          5.1.2
   name:             JUCE message and event handling classes
   description:      Classes for running an application's main event loop and sending/receiving messages, timers, etc.
   website:          http://www.juce.com/juce
@@ -62,9 +62,6 @@
  #include <hstring.h>
 #endif
 
-namespace juce
-{
-
 #include "messages/juce_MessageManager.h"
 #include "messages/juce_Message.h"
 #include "messages/juce_MessageListener.h"
@@ -89,7 +86,6 @@ namespace juce
  #include "native/juce_linux_EventLoop.h"
 #endif
 
-
 #if JUCE_WINDOWS
  #if JUCE_EVENTS_INCLUDE_WIN32_MESSAGE_WINDOW
   #include "native/juce_win32_HiddenMessageWindow.h"
@@ -98,5 +94,3 @@ namespace juce
   #include "native/juce_win32_WinRTWrapper.h"
  #endif
 #endif
-
-}

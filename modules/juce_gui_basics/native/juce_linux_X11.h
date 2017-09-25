@@ -24,13 +24,6 @@
   ==============================================================================
 */
 
-#pragma once
-
-// Hack to forward declare _XDisplay outside the
-// juce namespace
-
-}
-
 struct _XDisplay;
 
 namespace juce
@@ -142,3 +135,5 @@ struct GetXProperty
 };
 
 #undef ATOM_TYPE
+
+} // namespace juce

@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 template <typename NumericType>
 double FIR::Coefficients<NumericType>::Coefficients::getMagnitudeForFrequency (double frequency, double theSampleRate) const noexcept
@@ -153,3 +157,6 @@ void FIR::Coefficients<NumericType>::Coefficients::normalise() noexcept
 //==============================================================================
 template struct FIR::Coefficients<float>;
 template struct FIR::Coefficients<double>;
+
+} // namespace dsp
+} // namespace juce

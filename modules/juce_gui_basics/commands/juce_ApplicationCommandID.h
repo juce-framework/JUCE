@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /** A type used to hold the unique ID for an application command.
@@ -87,3 +87,5 @@ namespace StandardApplicationCommandIDs
         redo           = 0x1009
     };
 }
+
+} // namespace juce

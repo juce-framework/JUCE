@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -46,14 +46,15 @@ public:
     /** Frame rate types. */
     enum FrameRateType
     {
-        fps24           = 0,
-        fps25           = 1,
-        fps2997         = 2,
-        fps30           = 3,
-        fps2997drop     = 4,
-        fps30drop       = 5,
-        fps60           = 6,
-        fps60drop       = 7,
+        fps23976        = 0,
+        fps24           = 1,
+        fps25           = 2,
+        fps2997         = 3,
+        fps30           = 4,
+        fps2997drop     = 5,
+        fps30drop       = 6,
+        fps60           = 7,
+        fps60drop       = 8,
         fpsUnknown      = 99
     };
 
@@ -70,12 +71,12 @@ public:
         /** Time signature denominator, e.g. the 4 of a 3/4 time sig */
         int timeSigDenominator;
 
-        /** The current play position, in samples from the start of the edit. */
+        /** The current play position, in samples from the start of the timeline. */
         int64 timeInSamples;
-        /** The current play position, in seconds from the start of the edit. */
+        /** The current play position, in seconds from the start of the timeline. */
         double timeInSeconds;
 
-        /** For timecode, the position of the start of the edit, in seconds from 00:00:00:00. */
+        /** For timecode, the position of the start of the timeline, in seconds from 00:00:00:00. */
         double editOriginTime;
 
         /** The current play position, in pulses-per-quarter-note. */
@@ -83,7 +84,7 @@ public:
 
         /** The position of the start of the last bar, in pulses-per-quarter-note.
 
-            This is the time from the start of the edit to the start of the current
+            This is the time from the start of the timeline to the start of the current
             bar, in ppq units.
 
             Note - this value may be unavailable on some hosts, e.g. Pro-Tools. If
@@ -150,3 +151,5 @@ public:
     /** Rewinds the audio. */
     virtual void transportRewind()                             {}
 };
+
+} // namespace juce

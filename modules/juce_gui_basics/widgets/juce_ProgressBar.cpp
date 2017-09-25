@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ProgressBar::ProgressBar (double& progress_)
    : progress (progress_),
      displayPercentage (true),
@@ -111,3 +114,5 @@ void ProgressBar::timerCallback()
         repaint();
     }
 }
+
+} // namespace juce

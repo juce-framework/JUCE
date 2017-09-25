@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace KeyboardFocusHelpers
 {
     // This will sort a set of components, so that they are ordered in terms of
@@ -127,3 +130,5 @@ Component* KeyboardFocusTraverser::getDefaultComponent (Component* parentCompone
 
     return comps.getFirst();
 }
+
+} // namespace juce

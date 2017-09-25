@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 GroupComponent::GroupComponent (const String& name,
                                 const String& labelText)
     : Component (name),
@@ -66,3 +69,5 @@ void GroupComponent::paint (Graphics& g)
 
 void GroupComponent::enablementChanged()    { repaint(); }
 void GroupComponent::colourChanged()        { repaint(); }
+
+} // namespace juce

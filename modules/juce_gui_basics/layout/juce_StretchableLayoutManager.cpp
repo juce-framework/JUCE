@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 StretchableLayoutManager::StretchableLayoutManager()
     : totalSize (0)
 {
@@ -342,3 +345,5 @@ int StretchableLayoutManager::sizeToRealSize (double size, int totalSpace)
 
     return roundToInt (size);
 }
+
+} // namespace juce

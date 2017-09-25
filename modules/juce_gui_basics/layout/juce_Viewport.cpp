@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 Viewport::Viewport (const String& name)  : Component (name)
 {
     // content holder is used to clip the contents so they don't overlap the scrollbars
@@ -191,6 +194,8 @@ struct Viewport::DragToScrollListener   : private MouseListener,
         viewport.contentHolder.addMouseListener (this, true);
         offsetX.addListener (this);
         offsetY.addListener (this);
+        offsetX.behaviour.setMinimumVelocity (60);
+        offsetY.behaviour.setMinimumVelocity (60);
     }
 
     ~DragToScrollListener()
@@ -209,6 +214,8 @@ struct Viewport::DragToScrollListener   : private MouseListener,
         if (doesMouseEventComponentBlockViewportDrag (e.eventComponent))
             isViewportDragBlocked = true;
 
+        offsetX.setPosition (offsetX.getPosition());
+        offsetY.setPosition (offsetY.getPosition());
         ++numTouches;
     }
 
@@ -574,3 +581,5 @@ bool Viewport::respondsToKey (const KeyPress& key)
 {
     return isUpDownKeyPress (key) || isLeftRightKeyPress (key);
 }
+
+} // namespace juce

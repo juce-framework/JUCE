@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 // tests that some coordinates aren't NaNs
 #define JUCE_CHECK_COORDS_ARE_VALID(x, y) \
     jassert (x == x && y == y);
@@ -280,7 +283,7 @@ void Path::startNewSubPath (const float x, const float y)
     data.elements[numElements++] = y;
 }
 
-void Path::startNewSubPath (const Point<float> start)
+void Path::startNewSubPath (Point<float> start)
 {
     startNewSubPath (start.x, start.y);
 }
@@ -301,7 +304,7 @@ void Path::lineTo (const float x, const float y)
     bounds.extend (x, y);
 }
 
-void Path::lineTo (const Point<float> end)
+void Path::lineTo (Point<float> end)
 {
     lineTo (end.x, end.y);
 }
@@ -326,8 +329,7 @@ void Path::quadraticTo (const float x1, const float y1,
     bounds.extend (x1, y1, x2, y2);
 }
 
-void Path::quadraticTo (const Point<float> controlPoint,
-                        const Point<float> endPoint)
+void Path::quadraticTo (Point<float> controlPoint, Point<float> endPoint)
 {
     quadraticTo (controlPoint.x, controlPoint.y,
                  endPoint.x, endPoint.y);
@@ -358,9 +360,9 @@ void Path::cubicTo (const float x1, const float y1,
     bounds.extend (x3, y3);
 }
 
-void Path::cubicTo (const Point<float> controlPoint1,
-                    const Point<float> controlPoint2,
-                    const Point<float> endPoint)
+void Path::cubicTo (Point<float> controlPoint1,
+                    Point<float> controlPoint2,
+                    Point<float> endPoint)
 {
     cubicTo (controlPoint1.x, controlPoint1.y,
              controlPoint2.x, controlPoint2.y,
@@ -675,7 +677,7 @@ void Path::addPieSegment (Rectangle<float> segmentBounds,
 }
 
 //==============================================================================
-void Path::addLineSegment (const Line<float>& line, float lineThickness)
+void Path::addLineSegment (Line<float> line, float lineThickness)
 {
     auto reversed = line.reversed();
     lineThickness *= 0.5f;
@@ -687,7 +689,7 @@ void Path::addLineSegment (const Line<float>& line, float lineThickness)
     closeSubPath();
 }
 
-void Path::addArrow (const Line<float>& line, float lineThickness,
+void Path::addArrow (Line<float> line, float lineThickness,
                      float arrowheadWidth, float arrowheadLength)
 {
     auto reversed = line.reversed();
@@ -705,8 +707,8 @@ void Path::addArrow (const Line<float>& line, float lineThickness,
     closeSubPath();
 }
 
-void Path::addPolygon (const Point<float> centre, const int numberOfSides,
-                       const float radius, const float startAngle)
+void Path::addPolygon (Point<float> centre, int numberOfSides,
+                       float radius, float startAngle)
 {
     jassert (numberOfSides > 1); // this would be silly.
 
@@ -729,8 +731,8 @@ void Path::addPolygon (const Point<float> centre, const int numberOfSides,
     }
 }
 
-void Path::addStar (const Point<float> centre, const int numberOfPoints,
-                    const float innerRadius, const float outerRadius, const float startAngle)
+void Path::addStar (Point<float> centre, int numberOfPoints, float innerRadius,
+                    float outerRadius, float startAngle)
 {
     jassert (numberOfPoints > 1); // this would be silly.
 
@@ -755,9 +757,9 @@ void Path::addStar (const Point<float> centre, const int numberOfPoints,
     }
 }
 
-void Path::addBubble (const Rectangle<float>& bodyArea,
-                      const Rectangle<float>& maximumArea,
-                      const Point<float> arrowTip,
+void Path::addBubble (Rectangle<float> bodyArea,
+                      Rectangle<float> maximumArea,
+                      Point<float> arrowTip,
                       const float cornerSize,
                       const float arrowBaseWidth)
 {
@@ -968,8 +970,8 @@ void Path::applyTransform (const AffineTransform& transform) noexcept
 
 
 //==============================================================================
-AffineTransform Path::getTransformToScaleToFit (const Rectangle<float>& area,
-                                                bool preserveProportions, Justification justification) const
+AffineTransform Path::getTransformToScaleToFit (Rectangle<float> area, bool preserveProportions,
+                                                Justification justification) const
 {
     return getTransformToScaleToFit (area.getX(), area.getY(), area.getWidth(), area.getHeight(),
                                      preserveProportions, justification);
@@ -1059,7 +1061,7 @@ bool Path::contains (const float x, const float y, const float tolerance) const
                              : ((negativeCrossings + positiveCrossings) & 1) != 0;
 }
 
-bool Path::contains (const Point<float> point, const float tolerance) const
+bool Path::contains (Point<float> point, const float tolerance) const
 {
     return contains (point.x, point.y, tolerance);
 }
@@ -1138,7 +1140,7 @@ Point<float> Path::getPointAlongPath (float distanceFromStart,
     return { i.x2, i.y2 };
 }
 
-float Path::getNearestPoint (const Point<float> targetPoint, Point<float>& pointOnPath,
+float Path::getNearestPoint (Point<float> targetPoint, Point<float>& pointOnPath,
                              const AffineTransform& transform,
                              float tolerance) const
 {
@@ -1632,3 +1634,5 @@ bool Path::Iterator::next() noexcept
 }
 
 #undef JUCE_CHECK_COORDS_ARE_VALID
+
+} // namespace juce

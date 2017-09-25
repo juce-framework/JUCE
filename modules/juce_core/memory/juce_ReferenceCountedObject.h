@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -407,3 +407,5 @@ bool operator!= (ReferenceCountedObjectClass* object1, const ReferenceCountedObj
 {
     return object1 != object2.get();
 }
+
+} // namespace juce

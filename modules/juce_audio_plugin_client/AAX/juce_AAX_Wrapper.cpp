@@ -32,6 +32,7 @@
 #include "../utility/juce_IncludeSystemHeaders.h"
 #include "../utility/juce_IncludeModuleHeaders.h"
 #include "../utility/juce_WindowsHooks.h"
+#include "../utility/juce_FakeMouseMoveGenerator.h"
 
 #ifdef __clang__
  #pragma clang diagnostic push
@@ -95,10 +96,9 @@
 
 #undef check
 
-namespace juce
-{
- #include "juce_AAX_Modifier_Injector.h"
-}
+#include "juce_AAX_Modifier_Injector.h"
+
+using namespace juce;
 
 const int32_t juceChunkType = 'juce';
 const int maxAAXChannels = 8;
@@ -469,6 +469,8 @@ namespace AAXClasses
                     setBounds (pluginEditor->getLocalBounds());
                     pluginEditor->addMouseListener (this, true);
                 }
+
+                ignoreUnused (fakeMouseGenerator);
             }
 
             ~ContentWrapperComponent()
@@ -526,6 +528,7 @@ namespace AAXClasses
            #if JUCE_WINDOWS
             WindowsHooks hooks;
            #endif
+            FakeMouseMoveGenerator fakeMouseGenerator;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentWrapperComponent)
         };
@@ -900,7 +903,7 @@ namespace AAXClasses
                     case AAX_eFrameRate_2997DropFrame: info.frameRate = AudioPlayHead::fps2997drop; framesPerSec = 30.0 * 1000.0 / 1001.0; break;
                     case AAX_eFrameRate_30NonDrop:     info.frameRate = AudioPlayHead::fps30;       framesPerSec = 30.0; break;
                     case AAX_eFrameRate_30DropFrame:   info.frameRate = AudioPlayHead::fps30drop;   framesPerSec = 30.0; break;
-                    case AAX_eFrameRate_23976:         info.frameRate = AudioPlayHead::fps24;       framesPerSec = 24.0 * 1000.0 / 1001.0; break;
+                    case AAX_eFrameRate_23976:         info.frameRate = AudioPlayHead::fps23976;    framesPerSec = 24.0 * 1000.0 / 1001.0; break;
                     default:                           break;
                 }
 
@@ -942,11 +945,12 @@ namespace AAXClasses
         {
             if (type == AAX_eNotificationEvent_EnteringOfflineMode)  pluginInstance->setNonRealtime (true);
             if (type == AAX_eNotificationEvent_ExitingOfflineMode)   pluginInstance->setNonRealtime (false);
-
-            if (type == AAX_eNotificationEvent_TrackNameChanged)
+            if (type == AAX_eNotificationEvent_TrackNameChanged && data != nullptr)
             {
-                jassert (data);
-                pluginInstance->setTrackName (((AAX_IString*)data)->Get());
+                AudioProcessor::TrackProperties props;
+                props.name = static_cast<const AAX_IString*> (data)->Get();
+
+                pluginInstance->updateTrackProperties (props);
             }
 
             return AAX_CEffectParameters::NotificationReceived (type, data, size);
@@ -1343,8 +1347,14 @@ namespace AAXClasses
 
                 const int parameterNumSteps = audioProcessor.getParameterNumSteps (parameterIndex);
                 parameter->SetNumberOfSteps ((uint32_t) parameterNumSteps);
+
+               #if JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
                 parameter->SetType (parameterNumSteps > 1000 ? AAX_eParameterType_Continuous
                                                              : AAX_eParameterType_Discrete);
+               #else
+                parameter->SetType (audioProcessor.isParameterDiscrete (parameterIndex) ? AAX_eParameterType_Discrete
+                                                                                        : AAX_eParameterType_Continuous);
+               #endif
 
                 parameter->SetOrientation (audioProcessor.isParameterOrientationInverted (parameterIndex)
                                             ? (AAX_eParameterOrientation_RightMinLeftMax | AAX_eParameterOrientation_TopMinBottomMax

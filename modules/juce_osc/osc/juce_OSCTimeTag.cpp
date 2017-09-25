@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 const OSCTimeTag OSCTimeTag::immediately;
 
 static const uint64 millisecondsBetweenOscAndJuceEpochs = 2208988800000ULL;
@@ -41,9 +44,6 @@ OSCTimeTag::OSCTimeTag (uint64 t) noexcept  : rawTimeTag (t)
 OSCTimeTag::OSCTimeTag (Time time) noexcept
 {
     const uint64 milliseconds = (uint64) time.toMilliseconds() + millisecondsBetweenOscAndJuceEpochs;
-
-    // something went seriously wrong if the line above didn't render the time nonnegative!
-    jassert (milliseconds >= 0);
 
     uint64 seconds = milliseconds / 1000;
     uint32 fractionalPart = uint32 (4294967.296 * (milliseconds % 1000));
@@ -150,3 +150,5 @@ public:
 static OSCTimeTagTests OSCTimeTagUnitTests;
 
 #endif
+
+} // namespace juce

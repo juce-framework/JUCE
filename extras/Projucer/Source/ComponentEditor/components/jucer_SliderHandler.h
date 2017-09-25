@@ -155,7 +155,7 @@ struct SliderHandler  : public ComponentTypeHandler
 
         if (needsSliderListener (component))
         {
-            String& callback = code.getCallbackCode ("public SliderListener",
+            String& callback = code.getCallbackCode ("public Slider::Listener",
                                                      "void",
                                                      "sliderValueChanged (Slider* sliderThatWasMoved)",
                                                      true);
@@ -172,23 +172,27 @@ struct SliderHandler  : public ComponentTypeHandler
         }
     }
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props) override
+    void getEditableProperties (Component* component, JucerDocument& document,
+                                Array<PropertyComponent*>& props, bool multipleSelected) override
     {
-        ComponentTypeHandler::getEditableProperties (component, document, props);
+        ComponentTypeHandler::getEditableProperties (component, document, props, multipleSelected);
 
-        Slider* s = dynamic_cast<Slider*> (component);
-        jassert (s != 0);
+        if (multipleSelected)
+            return;
 
-        props.add (new SliderRangeProperty (s, document, "minimum", 0));
-        props.add (new SliderRangeProperty (s, document, "maximum", 1));
-        props.add (new SliderRangeProperty (s, document, "interval", 2));
-        props.add (new SliderTypeProperty (s, document));
-        props.add (new SliderTextboxProperty (s, document));
-        props.add (new SliderTextboxEditableProperty (s, document));
-        props.add (new SliderTextboxSizeProperty (s, document, true));
-        props.add (new SliderTextboxSizeProperty (s, document, false));
-        props.add (new SliderSkewProperty (s, document));
-        props.add (new SliderCallbackProperty (s, document));
+        if (auto* s = dynamic_cast<Slider*> (component))
+        {
+            props.add (new SliderRangeProperty (s, document, "minimum", 0));
+            props.add (new SliderRangeProperty (s, document, "maximum", 1));
+            props.add (new SliderRangeProperty (s, document, "interval", 2));
+            props.add (new SliderTypeProperty (s, document));
+            props.add (new SliderTextboxProperty (s, document));
+            props.add (new SliderTextboxEditableProperty (s, document));
+            props.add (new SliderTextboxSizeProperty (s, document, true));
+            props.add (new SliderTextboxSizeProperty (s, document, false));
+            props.add (new SliderSkewProperty (s, document));
+            props.add (new SliderCallbackProperty (s, document));
+        }
 
         addColourProperties (component, document, props);
     }

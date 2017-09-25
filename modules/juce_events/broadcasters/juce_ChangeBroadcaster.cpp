@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ChangeBroadcaster::ChangeBroadcaster() noexcept
 {
     broadcastCallback.owner = this;
@@ -92,3 +95,5 @@ void ChangeBroadcaster::ChangeBroadcasterCallback::handleAsyncUpdate()
     jassert (owner != nullptr);
     owner->callListeners();
 }
+
+} // namespace juce

@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -397,7 +397,7 @@ protected:
         Subclasses can override this to perform whatever they actions they need
         to do.
 
-        Alternatively, a ButtonListener can be added to the button, and these listeners
+        Alternatively, a Button::Listener can be added to the button, and these listeners
         will be called when the click occurs.
 
         @see triggerClick
@@ -518,3 +518,5 @@ private:
  /** This typedef is just for compatibility with old code and VC6 - newer code should use Button::Listener instead. */
  typedef Button::Listener ButtonListener;
 #endif
+
+} // namespace juce

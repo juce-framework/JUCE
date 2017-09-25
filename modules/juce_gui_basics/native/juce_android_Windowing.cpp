@@ -24,12 +24,15 @@
   ==============================================================================
 */
 
-} // (juce namespace)
-
 extern juce::JUCEApplicationBase* juce_CreateApplication(); // (from START_JUCE_APPLICATION)
 
 namespace juce
 {
+
+//==============================================================================
+#if JUCE_IN_APP_PURCHASES && JUCE_MODULE_AVAILABLE_juce_product_unlocking
+ extern void juce_inAppPurchaseCompleted (void*);
+#endif
 
 //==============================================================================
 JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, launchApp, void, (JNIEnv* env, jobject activity,
@@ -81,6 +84,18 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, quitApp, void, (JNIEnv* env,
     JUCEApplicationBase::appWillTerminateByForce();
 
     android.shutdown (env);
+}
+
+JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, appActivityResult, void, (JNIEnv* env, jobject, jint requestCode, jint /*resultCode*/, jobject intentData))
+{
+    setEnv (env);
+
+   #if JUCE_IN_APP_PURCHASES && JUCE_MODULE_AVAILABLE_juce_product_unlocking
+    if (requestCode == 1001)
+        juce_inAppPurchaseCompleted (intentData);
+   #else
+    ignoreUnused (intentData, requestCode);
+   #endif
 }
 
 //==============================================================================
@@ -248,20 +263,20 @@ public:
             setFullScreen (true);
     }
 
-    Point<int> getScreenPosition() const
+    Point<float> getScreenPosition() const
     {
-        return Point<int> (view.callIntMethod (ComponentPeerView.getLeft),
-                           view.callIntMethod (ComponentPeerView.getTop)) / scale;
+        return Point<float> (view.callIntMethod (ComponentPeerView.getLeft),
+                             view.callIntMethod (ComponentPeerView.getTop)) / scale;
     }
 
     Point<float> localToGlobal (Point<float> relativePosition) override
     {
-        return relativePosition + getScreenPosition().toFloat();
+        return relativePosition + getScreenPosition();
     }
 
     Point<float> globalToLocal (Point<float> screenPosition) override
     {
-        return screenPosition - getScreenPosition().toFloat();
+        return screenPosition - getScreenPosition();
     }
 
     void setMinimised (bool /*shouldBeMinimised*/) override
@@ -390,7 +405,7 @@ public:
     void handleMouseDownCallback (int index, Point<float> sysPos, int64 time)
     {
         Point<float> pos = sysPos / scale;
-        lastMousePos = pos;
+        lastMousePos = localToGlobal (pos);
 
         // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
         handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, currentModifiers.withoutMouseButtons(),
@@ -403,7 +418,7 @@ public:
     void handleMouseDragCallback (int index, Point<float> pos, int64 time)
     {
         pos /= scale;
-        lastMousePos = pos;
+        lastMousePos = localToGlobal (pos);
 
         jassert (index < 64);
         touchesDown = (touchesDown | (1 << (index & 63)));
@@ -415,7 +430,7 @@ public:
     void handleMouseUpCallback (int index, Point<float> pos, int64 time)
     {
         pos /= scale;
-        lastMousePos = pos;
+        lastMousePos = localToGlobal (pos);
 
         jassert (index < 64);
         touchesDown = (touchesDown & ~(1 << (index & 63)));
@@ -510,6 +525,10 @@ public:
             buffer.clear();
             sizeAllocated = sizeNeeded;
             buffer = GlobalRef (env->NewIntArray (sizeNeeded));
+        }
+        else if (sizeNeeded == 0)
+        {
+            return;
         }
 
         if (jint* dest = env->GetIntArrayElements ((jintArray) buffer.get(), 0))
@@ -678,6 +697,18 @@ ComponentPeer* Component::createNewPeer (int styleFlags, void*)
 }
 
 //==============================================================================
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (getRotation, "getRotation", "()I")
+
+DECLARE_JNI_CLASS (Display, "android/view/Display");
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (getDefaultDisplay, "getDefaultDisplay", "()Landroid/view/Display;")
+
+DECLARE_JNI_CLASS (WindowManager, "android/view/WindowManager");
+#undef JNI_CLASS_MEMBERS
+
 bool Desktop::canUseSemiTransparentWindows() noexcept
 {
     return true;
@@ -690,7 +721,37 @@ double Desktop::getDefaultMasterScale()
 
 Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
 {
-    // TODO
+    enum
+    {
+        ROTATION_0   = 0,
+        ROTATION_90  = 1,
+        ROTATION_180 = 2,
+        ROTATION_270 = 3
+    };
+
+    JNIEnv* env = getEnv();
+    LocalRef<jstring> windowServiceString (javaString ("window"));
+    LocalRef<jobject> windowManager = LocalRef<jobject> (env->CallObjectMethod (android.activity, JuceAppActivity.getSystemService, windowServiceString.get()));
+
+    if (windowManager.get() != 0)
+    {
+        LocalRef<jobject> display = LocalRef<jobject> (env->CallObjectMethod (windowManager, WindowManager.getDefaultDisplay));
+
+        if (display.get() != 0)
+        {
+            int rotation = env->CallIntMethod (display, Display.getRotation);
+
+            switch (rotation)
+            {
+                case ROTATION_0:   return upright;
+                case ROTATION_90:  return rotatedAntiClockwise;
+                case ROTATION_180: return upsideDown;
+                case ROTATION_270: return rotatedClockwise;
+            }
+        }
+    }
+
+    jassertfalse;
     return upright;
 }
 
@@ -966,6 +1027,25 @@ const int KeyPress::F13Key          = extendedKeyModifier + 23;
 const int KeyPress::F14Key          = extendedKeyModifier + 24;
 const int KeyPress::F15Key          = extendedKeyModifier + 25;
 const int KeyPress::F16Key          = extendedKeyModifier + 26;
+const int KeyPress::F17Key          = extendedKeyModifier + 50;
+const int KeyPress::F18Key          = extendedKeyModifier + 51;
+const int KeyPress::F19Key          = extendedKeyModifier + 52;
+const int KeyPress::F20Key          = extendedKeyModifier + 53;
+const int KeyPress::F21Key          = extendedKeyModifier + 54;
+const int KeyPress::F22Key          = extendedKeyModifier + 55;
+const int KeyPress::F23Key          = extendedKeyModifier + 56;
+const int KeyPress::F24Key          = extendedKeyModifier + 57;
+const int KeyPress::F25Key          = extendedKeyModifier + 58;
+const int KeyPress::F26Key          = extendedKeyModifier + 59;
+const int KeyPress::F27Key          = extendedKeyModifier + 60;
+const int KeyPress::F28Key          = extendedKeyModifier + 61;
+const int KeyPress::F29Key          = extendedKeyModifier + 62;
+const int KeyPress::F30Key          = extendedKeyModifier + 63;
+const int KeyPress::F31Key          = extendedKeyModifier + 64;
+const int KeyPress::F32Key          = extendedKeyModifier + 65;
+const int KeyPress::F33Key          = extendedKeyModifier + 66;
+const int KeyPress::F34Key          = extendedKeyModifier + 67;
+const int KeyPress::F35Key          = extendedKeyModifier + 68;
 const int KeyPress::numberPad0      = extendedKeyModifier + 27;
 const int KeyPress::numberPad1      = extendedKeyModifier + 28;
 const int KeyPress::numberPad2      = extendedKeyModifier + 29;
@@ -988,3 +1068,5 @@ const int KeyPress::playKey         = extendedKeyModifier + 45;
 const int KeyPress::stopKey         = extendedKeyModifier + 46;
 const int KeyPress::fastForwardKey  = extendedKeyModifier + 47;
 const int KeyPress::rewindKey       = extendedKeyModifier + 48;
+
+} // namespace juce

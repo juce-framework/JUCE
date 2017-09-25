@@ -30,7 +30,7 @@
 
 //==============================================================================
 class ResourceListButton  : public Component,
-                            private ButtonListener
+                            private Button::Listener
 {
 public:
     ResourceListButton (JucerDocument& doc)

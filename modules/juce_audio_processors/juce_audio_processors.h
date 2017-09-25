@@ -35,7 +35,7 @@
 
   ID:               juce_audio_processors
   vendor:           juce
-  version:          5.1.1
+  version:          5.1.2
   name:             JUCE audio processor classes
   description:      Classes for loading and playing VST, AU, or internally-generated audio processors.
   website:          http://www.juce.com/juce
@@ -55,7 +55,6 @@
 
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <juce_audio_basics/juce_audio_basics.h>
-
 
 //==============================================================================
 /** Config: JUCE_PLUGINHOST_VST
@@ -99,11 +98,6 @@
 #endif
 
 //==============================================================================
-//==============================================================================
-namespace juce
-{
-
-class AudioProcessor;
 #include "processors/juce_AudioProcessorEditor.h"
 #include "processors/juce_AudioProcessorListener.h"
 #include "processors/juce_AudioProcessorParameter.h"
@@ -128,5 +122,3 @@ class AudioProcessor;
 #include "utilities/juce_AudioParameterBool.h"
 #include "utilities/juce_AudioParameterChoice.h"
 #include "utilities/juce_AudioProcessorValueTreeState.h"
-
-}

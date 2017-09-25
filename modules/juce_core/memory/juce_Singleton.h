@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -279,3 +279,5 @@
 #define juce_ImplementSingleton_SingleThreaded(classname) \
 \
     classname* classname::_singletonInstance = nullptr;
+
+} // namespace juce

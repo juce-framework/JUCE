@@ -35,9 +35,6 @@
 
 #include "juce_data_structures.h"
 
-namespace juce
-{
-
 #include "values/juce_Value.cpp"
 #include "values/juce_ValueTree.cpp"
 #include "values/juce_ValueTreeSynchroniser.cpp"
@@ -45,5 +42,3 @@ namespace juce
 #include "undomanager/juce_UndoManager.cpp"
 #include "app_properties/juce_ApplicationProperties.cpp"
 #include "app_properties/juce_PropertiesFile.cpp"
-
-}

@@ -24,11 +24,11 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 DrawableButton::DrawableButton (const String& name, const DrawableButton::ButtonStyle buttonStyle)
-    : Button (name),
-      style (buttonStyle),
-      currentImage (nullptr),
-      edgeIndent (3)
+    : Button (name), style (buttonStyle)
 {
 }
 
@@ -85,12 +85,12 @@ void DrawableButton::setEdgeIndent (const int numPixelsIndent)
 
 Rectangle<float> DrawableButton::getImageBounds() const
 {
-    Rectangle<int> r (getLocalBounds());
+    auto r = getLocalBounds();
 
     if (style != ImageStretched)
     {
-        int indentX = jmin (edgeIndent, proportionOfWidth  (0.3f));
-        int indentY = jmin (edgeIndent, proportionOfHeight (0.3f));
+        auto indentX = jmin (edgeIndent, proportionOfWidth  (0.3f));
+        auto indentY = jmin (edgeIndent, proportionOfHeight (0.3f));
 
         if (style == ImageOnButtonBackground)
         {
@@ -178,7 +178,7 @@ void DrawableButton::paintButton (Graphics& g,
                                   const bool isMouseOverButton,
                                   const bool isButtonDown)
 {
-    LookAndFeel& lf = getLookAndFeel();
+    auto& lf = getLookAndFeel();
 
     if (style == ImageOnButtonBackground)
         lf.drawButtonBackground (g, *this,
@@ -217,8 +217,10 @@ Drawable* DrawableButton::getOverImage() const noexcept
 
 Drawable* DrawableButton::getDownImage() const noexcept
 {
-    if (Drawable* const d = getToggleState() ? downImageOn : downImage)
+    if (auto* d = getToggleState() ? downImageOn.get() : downImage.get())
         return d;
 
     return getOverImage();
 }
+
+} // namespace juce

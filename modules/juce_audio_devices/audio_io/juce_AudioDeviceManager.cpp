@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 AudioDeviceManager::AudioDeviceSetup::AudioDeviceSetup()
     : sampleRate (0),
       bufferSize (0),
@@ -929,7 +932,7 @@ void AudioDeviceManager::LevelMeter::updateLevel (const float* const* channelDat
             for (int i = 0; i < numChannels; ++i)
                 s += std::abs (channelData[i][j]);
 
-            s /= numChannels;
+            s /= (float) numChannels;
 
             const double decayFactor = 0.99992;
 
@@ -1000,3 +1003,5 @@ double AudioDeviceManager::getCurrentOutputLevel() const noexcept   { return out
 
 void AudioDeviceManager::enableInputLevelMeasurement  (bool enable) noexcept  { inputLevelMeter.setEnabled (enable); }
 void AudioDeviceManager::enableOutputLevelMeasurement (bool enable) noexcept  { outputLevelMeter.setEnabled (enable); }
+
+} // namespace juce

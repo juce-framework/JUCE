@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class CodeDocumentLine
 {
 public:
@@ -990,3 +993,5 @@ void CodeDocument::remove (const int startPos, const int endPos, const bool undo
         listeners.call (&CodeDocument::Listener::codeDocumentTextDeleted, startPos, endPos);
     }
 }
+
+} // namespace juce

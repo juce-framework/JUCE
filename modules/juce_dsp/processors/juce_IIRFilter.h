@@ -24,10 +24,13 @@
   ==============================================================================
 */
 
-
 /**
     Classes for IIR filter processing.
 */
+namespace juce
+{
+namespace dsp
+{
 namespace IIR
 {
     template <typename NumericType>
@@ -90,7 +93,7 @@ namespace IIR
 
         /** Resets the filter's processing pipeline to a specific value.
 
-            See @reset
+            @see reset
         */
         void reset (SampleType resetToValue);
 
@@ -111,9 +114,14 @@ namespace IIR
         */
         SampleType JUCE_VECTOR_CALLTYPE processSample (SampleType sample) noexcept;
 
+        /** Ensure that the state variables are rounded to zero if the state
+            variables are denormals. This is only needed if you are doing
+            sample by sample processing.
+        */
+        void snapToZero() noexcept;
+
     private:
         //==============================================================================
-        void snapToZero() noexcept;
         void check();
 
         //==============================================================================
@@ -276,5 +284,8 @@ namespace IIR
         static constexpr NumericType inverseRootTwo = static_cast<NumericType> (0.70710678118654752440L);
     };
 
-    #include "juce_IIRFilter_Impl.h"
-}
+} // namespace IIR
+} // namespace dsp
+} // namespace juce
+
+#include "juce_IIRFilter_Impl.h"

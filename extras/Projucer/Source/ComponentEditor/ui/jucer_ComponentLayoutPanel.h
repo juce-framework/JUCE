@@ -102,11 +102,13 @@ private:
         {
             clear();
 
-            if (layout.getSelectedSet().getNumSelected() == 1) // xxx need to cope with multiple
+            auto numSelected = layout.getSelectedSet().getNumSelected();
+
+            if (numSelected > 0) // xxx need to cope with multiple
             {
-                if (Component* comp = layout.getSelectedSet().getSelectedItem (0))
-                    if (ComponentTypeHandler* const type = ComponentTypeHandler::getHandlerFor (*comp))
-                        type->addPropertiesToPropertyPanel (comp, document, propsPanel);
+                if (auto* comp = layout.getSelectedSet().getSelectedItem (0))
+                    if (auto* type = ComponentTypeHandler::getHandlerFor (*comp))
+                        type->addPropertiesToPropertyPanel (comp, document, propsPanel, numSelected > 1);
             }
         }
 

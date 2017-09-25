@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 class WinRTWrapper :   public DeletedAtShutdown
 {
@@ -63,13 +64,9 @@ public:
 
     String hStringToString (HSTRING hstr)
     {
-        const wchar_t* str = nullptr;
         if (isInitialised())
-        {
-            str = getHStringRawBuffer (hstr, nullptr);
-            if (str != nullptr)
+            if (const wchar_t* str = getHStringRawBuffer (hstr, nullptr))
                 return String (str);
-        }
 
         return {};
     }
@@ -130,3 +127,5 @@ private:
     WindowsGetStringRawBufferFuncPtr getHStringRawBuffer = nullptr;
     RoGetActivationFactoryFuncPtr roGetActivationFactory = nullptr;
 };
+
+} // namespace juce

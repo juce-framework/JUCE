@@ -20,12 +20,13 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 #if JUCE_INTEL
  #define JUCE_SNAP_TO_ZERO(n)    if (! (n < -1.0e-8f || n > 1.0e-8f)) n = 0;
 #else
- #define JUCE_SNAP_TO_ZERO(n)
+ #define JUCE_SNAP_TO_ZERO(n)    ignoreUnused (n)
 #endif
 
 //==============================================================================
@@ -218,16 +219,36 @@ public:
         call before audio processing code where you really want to avoid denormalisation performance hits.
     */
     static void JUCE_CALLTYPE disableDenormalisedNumberSupport() noexcept;
-
-    class ScopedNoDenormals
-    {
-        // Based on @chkn's code at
-        // https://forum.juce.com/t/state-of-the-art-denormal-prevention/16802
-    public:
-        ScopedNoDenormals();
-        ~ScopedNoDenormals();
-
-    private:
-        int oldMXCSR;
-    };
 };
+
+//==============================================================================
+/**
+     Helper class providing an RAII-based mechanism for temporarily disabling
+     denormals on your CPU.
+*/
+class ScopedNoDenormals
+{
+public:
+    inline ScopedNoDenormals() noexcept
+    {
+       #if JUCE_USE_SSE_INTRINSICS
+        mxcsr = _mm_getcsr();
+        _mm_setcsr (mxcsr | 0x8040); // add the DAZ and FZ bits
+       #endif
+    }
+
+
+    inline ~ScopedNoDenormals() noexcept
+    {
+       #if JUCE_USE_SSE_INTRINSICS
+        _mm_setcsr (mxcsr);
+       #endif
+    }
+
+private:
+    #if JUCE_USE_SSE_INTRINSICS
+     unsigned int mxcsr;
+    #endif
+};
+
+} // namespace juce

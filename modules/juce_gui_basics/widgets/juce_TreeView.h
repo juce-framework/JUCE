@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 class TreeView;
 
@@ -55,15 +56,12 @@ public:
 
     //==============================================================================
     /** Returns the number of sub-items that have been added to this item.
-
         Note that this doesn't mean much if the node isn't open.
-
         @see getSubItem, mightContainSubItems, addSubItem
     */
     int getNumSubItems() const noexcept;
 
     /** Returns one of the item's sub-items.
-
         Remember that the object returned might get deleted at any time when its parent
         item is closed or refreshed, depending on the nature of the items you're using.
 
@@ -370,7 +368,7 @@ public:
 
         @see itemDoubleClicked
     */
-    virtual void itemClicked (const MouseEvent& e);
+    virtual void itemClicked (const MouseEvent&);
 
     /** Called when the user double-clicks on this item.
 
@@ -386,7 +384,7 @@ public:
 
         @see itemClicked
     */
-    virtual void itemDoubleClicked (const MouseEvent& e);
+    virtual void itemDoubleClicked (const MouseEvent&);
 
     /** Called when the item is selected or deselected.
 
@@ -569,7 +567,7 @@ public:
     class OpennessRestorer
     {
     public:
-        OpennessRestorer (TreeViewItem& treeViewItem);
+        OpennessRestorer (TreeViewItem&);
         ~OpennessRestorer();
 
     private:
@@ -581,11 +579,11 @@ public:
 
 private:
     //==============================================================================
-    TreeView* ownerView;
-    TreeViewItem* parentItem;
+    TreeView* ownerView = nullptr;
+    TreeViewItem* parentItem = nullptr;
     OwnedArray<TreeViewItem> subItems;
-    int y, itemHeight, totalHeight, itemWidth, totalWidth;
-    int uid;
+    int y = 0, itemHeight = 0, totalHeight = 0, itemWidth = 0, totalWidth = 0;
+    int uid = 0;
     bool selected           : 1;
     bool redrawNeeded       : 1;
     bool drawLinesInside    : 1;
@@ -910,12 +908,12 @@ private:
 
     ScopedPointer<TreeViewport> viewport;
     CriticalSection nodeAlterationLock;
-    TreeViewItem* rootItem;
+    TreeViewItem* rootItem = nullptr;
     ScopedPointer<InsertPointHighlight> dragInsertPointHighlight;
     ScopedPointer<TargetGroupHighlight> dragTargetGroupHighlight;
-    int indentSize;
-    bool defaultOpenness, needsRecalculating, rootItemVisible;
-    bool multiSelectEnabled, openCloseButtonsVisible;
+    int indentSize = -1;
+    bool defaultOpenness = false, needsRecalculating = true, rootItemVisible = true;
+    bool multiSelectEnabled = false, openCloseButtonsVisible = true;
 
     void itemsChanged() noexcept;
     void recalculateIfNeeded();
@@ -937,3 +935,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeView)
 };
+
+} // namespace juce

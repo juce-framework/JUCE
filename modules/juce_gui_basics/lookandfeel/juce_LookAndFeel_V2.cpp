@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace LookAndFeelHelpers
 {
     static Colour createBaseColour (Colour buttonColour,
@@ -172,6 +175,11 @@ LookAndFeel_V2::LookAndFeel_V2()
 
         BubbleComponent::backgroundColourId,        0xeeeeeebb,
         BubbleComponent::outlineColourId,           0x77000000,
+
+        TableHeaderComponent::textColourId,         0xff000000,
+        TableHeaderComponent::backgroundColourId,   0xffe8ebf9,
+        TableHeaderComponent::outlineColourId,      0x33000000,
+        TableHeaderComponent::highlightColourId,    0x8899aadd,
 
         DirectoryContentsDisplayComponent::highlightColourId,   textHighlightColour,
         DirectoryContentsDisplayComponent::textColourId,        0xff000000,
@@ -336,11 +344,9 @@ void LookAndFeel_V2::drawToggleButton (Graphics& g, ToggleButton& button,
     if (! button.isEnabled())
         g.setOpacity (0.5f);
 
-    const int textX = (int) tickWidth + 5;
-
     g.drawFittedText (button.getButtonText(),
-                      textX, 0,
-                      button.getWidth() - textX - 2, button.getHeight(),
+                      button.getLocalBounds().withTrimmedLeft (roundToInt (tickWidth) + 5)
+                                             .withTrimmedRight (2),
                       Justification::centredLeft, 10);
 }
 
@@ -830,22 +836,22 @@ void LookAndFeel_V2::drawTreeviewPlusMinusBox (Graphics& g, const Rectangle<floa
 
     const int x = ((int) area.getWidth()  - boxSize) / 2 + (int) area.getX();
     const int y = ((int) area.getHeight() - boxSize) / 2 + (int) area.getY();
-    const int w = boxSize;
-    const int h = boxSize;
+
+    Rectangle<float> boxArea ((float) x, (float) y, (float) boxSize, (float) boxSize);
 
     g.setColour (Colour (0xe5ffffff));
-    g.fillRect (x, y, w, h);
+    g.fillRect (boxArea);
 
     g.setColour (Colour (0x80000000));
-    g.drawRect (x, y, w, h);
+    g.drawRect (boxArea);
 
     const float size = boxSize / 2 + 1.0f;
     const float centre = (float) (boxSize / 2);
 
-    g.fillRect (x + (w - size) * 0.5f, y + centre, size, 1.0f);
+    g.fillRect (x + (boxSize - size) * 0.5f, y + centre, size, 1.0f);
 
     if (! isOpen)
-        g.fillRect (x + centre, y + (h - size) * 0.5f, 1.0f, size);
+        g.fillRect (x + centre, y + (boxSize - size) * 0.5f, 1.0f, size);
 }
 
 bool LookAndFeel_V2::areLinesDrawnForTreeView (TreeView&)
@@ -1105,6 +1111,8 @@ Component* LookAndFeel_V2::getParentComponentForMenuOptions (const PopupMenu::Op
 void LookAndFeel_V2::preparePopupMenuWindow (Component&) {}
 
 bool LookAndFeel_V2::shouldPopupMenuScaleWithTargetComponent (const PopupMenu::Options&)    { return true; }
+
+int LookAndFeel_V2::getPopupMenuBorderSize()    { return 2; }
 
 //==============================================================================
 void LookAndFeel_V2::fillTextEditorBackground (Graphics& g, int /*width*/, int /*height*/, TextEditor& textEditor)
@@ -2166,6 +2174,11 @@ void LookAndFeel_V2::fillTabButtonShape (TabBarButton& button, Graphics& g, cons
     g.strokePath (path, PathStrokeType (isFrontTab ? 1.0f : 0.5f));
 }
 
+Font LookAndFeel_V2::getTabButtonFont (TabBarButton&, float height)
+{
+    return { height * 0.6f };
+}
+
 void LookAndFeel_V2::drawTabButtonText (TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
     const Rectangle<float> area (button.getTextArea().toFloat());
@@ -2176,7 +2189,7 @@ void LookAndFeel_V2::drawTabButtonText (TabBarButton& button, Graphics& g, bool 
     if (button.getTabbedButtonBar().isVertical())
         std::swap (length, depth);
 
-    Font font (depth * 0.6f);
+    Font font (getTabButtonFont (button, depth));
     font.setUnderline (button.hasKeyboardFocus (false));
 
     AffineTransform t;
@@ -2323,26 +2336,33 @@ void LookAndFeel_V2::drawTableHeaderBackground (Graphics& g, TableHeaderComponen
     Rectangle<int> area (header.getLocalBounds());
     area.removeFromTop (area.getHeight() / 2);
 
-    g.setGradientFill (ColourGradient (Colour (0xffe8ebf9), 0.0f, (float) area.getY(),
-                                       Colour (0xfff6f8f9), 0.0f, (float) area.getBottom(),
+    auto backgroundColour = header.findColour (TableHeaderComponent::backgroundColourId);
+
+    g.setGradientFill (ColourGradient (backgroundColour,
+                                       0.0f, (float) area.getY(),
+                                       backgroundColour.withMultipliedSaturation (.5f),
+                                       0.0f, (float) area.getBottom(),
                                        false));
     g.fillRect (area);
 
-    g.setColour (Colour (0x33000000));
+    g.setColour (header.findColour (TableHeaderComponent::outlineColourId));
     g.fillRect (area.removeFromBottom (1));
 
     for (int i = header.getNumColumns (true); --i >= 0;)
         g.fillRect (header.getColumnPosition (i).removeFromRight (1));
 }
 
-void LookAndFeel_V2::drawTableHeaderColumn (Graphics& g, const String& columnName, int /*columnId*/,
+void LookAndFeel_V2::drawTableHeaderColumn (Graphics& g, TableHeaderComponent& header,
+                                            const String& columnName, int /*columnId*/,
                                             int width, int height, bool isMouseOver, bool isMouseDown,
                                             int columnFlags)
 {
+    auto highlightColour = header.findColour (TableHeaderComponent::highlightColourId);
+
     if (isMouseDown)
-        g.fillAll (Colour (0x8899aadd));
+        g.fillAll (highlightColour);
     else if (isMouseOver)
-        g.fillAll (Colour (0x5599aadd));
+        g.fillAll (highlightColour.withMultipliedAlpha (0.625f));
 
     Rectangle<int> area (width, height);
     area.reduce (4, 0);
@@ -2358,7 +2378,7 @@ void LookAndFeel_V2::drawTableHeaderColumn (Graphics& g, const String& columnNam
         g.fillPath (sortArrow, sortArrow.getTransformToScaleToFit (area.removeFromRight (height / 2).reduced (2).toFloat(), true));
     }
 
-    g.setColour (Colours::black);
+    g.setColour (header.findColour (TableHeaderComponent::textColourId));
     g.setFont (Font (height * 0.5f, Font::bold));
     g.drawFittedText (columnName, area, Justification::centredLeft, 1);
 }
@@ -3001,3 +3021,5 @@ void LookAndFeel_V2::drawGlassLozenge (Graphics& g,
     g.setColour (colour.darker().withMultipliedAlpha (1.5f));
     g.strokePath (outline, PathStrokeType (outlineThickness));
 }
+
+} // namespace juce

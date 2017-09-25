@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 SubregionStream::SubregionStream (InputStream* const sourceStream,
                                   const int64 start, const int64 length,
                                   const bool deleteSourceWhenDestroyed)
@@ -74,3 +77,5 @@ bool SubregionStream::isExhausted()
 
     return source->isExhausted();
 }
+
+} // namespace juce

@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 MPEValue::MPEValue() noexcept  : normalisedValue (8192)
 {
 }
@@ -166,3 +169,5 @@ private:
 static MPEValueTests MPEValueUnitTests;
 
 #endif // JUCE_UNIT_TESTS
+
+} // namespace juce

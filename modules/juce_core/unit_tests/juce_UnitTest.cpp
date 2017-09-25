@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 UnitTest::UnitTest (const String& nm, const String& ctg)
     : name (nm), category (ctg), runner (nullptr)
 {
@@ -286,3 +289,5 @@ void UnitTestRunner::addFail (const String& failureMessage)
 
     if (assertOnFailure) { jassertfalse; }
 }
+
+} // namespace juce

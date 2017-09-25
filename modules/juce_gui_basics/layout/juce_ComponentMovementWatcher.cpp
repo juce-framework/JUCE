@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ComponentMovementWatcher::ComponentMovementWatcher (Component* const comp)
     : component (comp),
       lastPeerID (0),
@@ -139,3 +142,5 @@ void ComponentMovementWatcher::unregister()
 
     registeredParentComps.clear();
 }
+
+} // namespace juce

@@ -331,6 +331,68 @@ void ComponentLayout::selectedToBack()
         componentToBack (temp.getSelectedItem(i), true);
 }
 
+void ComponentLayout::alignTop()
+{
+    if (selected.getNumSelected() > 1)
+    {
+        auto* main = selected.getSelectedItem (0);
+        auto yPos = main->getY();
+
+        for (auto* other : selected)
+        {
+            if (other != main)
+                setComponentBoundsAndProperties (other,
+                                                 other->getBounds().withPosition (other->getX(), yPos),
+                                                 main, true);
+        }
+    }
+}
+
+void ComponentLayout::alignRight()
+{
+    if (selected.getNumSelected() > 1)
+    {
+        auto* main = selected.getSelectedItem (0);
+        auto rightPos = main->getRight();
+
+        for (auto* other : selected)
+        {
+            if (other != main)
+                setComponentBoundsAndProperties (other, other->getBounds().withPosition (rightPos - other->getWidth(), other->getY()), main, true);
+        }
+    }
+}
+
+void ComponentLayout::alignBottom()
+{
+    if (selected.getNumSelected() > 1)
+    {
+        auto* main = selected.getSelectedItem (0);
+        auto bottomPos = main->getBottom();
+
+        for (auto* other : selected)
+        {
+            if (other != main)
+                setComponentBoundsAndProperties (other, other->getBounds().withPosition (other->getX(), bottomPos - other->getHeight()), main, true);
+        }
+    }
+}
+
+void ComponentLayout::alignLeft()
+{
+    if (selected.getNumSelected() > 1)
+    {
+        auto* main = selected.getSelectedItem (0);
+        auto xPos = main->getX();
+
+        for (auto* other : selected)
+        {
+            if (other != main)
+                setComponentBoundsAndProperties (other, other->getBounds().withPosition (xPos, other->getY()), main, true);
+        }
+    }
+}
+
 void ComponentLayout::bringLostItemsBackOnScreen (int width, int height)
 {
     for (int i = components.size(); --i >= 0;)
@@ -558,6 +620,42 @@ private:
     RelativePositionedRectangle newPos, oldPos;
 };
 
+class ChangeCompBoundsAndPropertiesAction    : public ComponentUndoableAction<Component>
+{
+public:
+    ChangeCompBoundsAndPropertiesAction (Component* const comp, ComponentLayout& l,
+                                         const Rectangle<int>& bounds, const NamedValueSet& props)
+        : ComponentUndoableAction <Component> (comp, l),
+          newBounds (bounds),
+          oldBounds (comp->getBounds()),
+          newProps (props),
+          oldProps(comp->getProperties())
+    {
+    }
+
+    bool perform()
+    {
+        showCorrectTab();
+        getComponent()->setBounds (newBounds);
+        getComponent()->getProperties() = newProps;
+        layout.updateStoredComponentPosition (getComponent(), false);
+        return true;
+    }
+
+    bool undo()
+    {
+        showCorrectTab();
+        getComponent()->setBounds (oldBounds);
+        getComponent()->getProperties() = oldProps;
+        layout.updateStoredComponentPosition (getComponent(), false);
+        return true;
+    }
+
+private:
+    Rectangle<int> newBounds, oldBounds;
+    NamedValueSet newProps, oldProps;
+};
+
 void ComponentLayout::setComponentPosition (Component* comp,
                                             const RelativePositionedRectangle& newPos,
                                             const bool undoable)
@@ -571,6 +669,42 @@ void ComponentLayout::setComponentPosition (Component* comp,
         else
         {
             ComponentTypeHandler::setComponentPosition (comp, newPos, this);
+            changed();
+        }
+    }
+}
+
+void ComponentLayout::setComponentBoundsAndProperties (Component* componentToPosition, const Rectangle<int>& newBounds,
+                                                       Component* referenceComponent, const bool undoable)
+{
+    auto props = NamedValueSet (componentToPosition->getProperties());
+
+    auto rect = ComponentTypeHandler::getComponentPosition (componentToPosition).rect;
+    auto referenceComponentPosition = ComponentTypeHandler::getComponentPosition (referenceComponent);
+    auto referenceComponentRect = referenceComponentPosition.rect;
+
+    rect.setModes (referenceComponentRect.getAnchorPointX(), referenceComponentRect.getPositionModeX(),
+                   referenceComponentRect.getAnchorPointY(), referenceComponentRect.getPositionModeY(),
+                   referenceComponentRect.getWidthMode(),    referenceComponentRect.getHeightMode(),
+                   componentToPosition->getBounds());
+
+    props.set ("pos",         rect.toString());
+    props.set ("relativeToX", String::toHexString (referenceComponentPosition.relativeToX));
+    props.set ("relativeToY", String::toHexString (referenceComponentPosition.relativeToY));
+    props.set ("relativeToW", String::toHexString (referenceComponentPosition.relativeToW));
+    props.set ("relativeToH", String::toHexString (referenceComponentPosition.relativeToH));
+
+    if (componentToPosition->getBounds() != newBounds || componentToPosition->getProperties() != props)
+    {
+        if (undoable)
+        {
+            perform (new ChangeCompBoundsAndPropertiesAction (componentToPosition, *this, newBounds, props), "Change component bounds");
+        }
+        else
+        {
+            componentToPosition->setBounds (newBounds);
+            componentToPosition->getProperties() = props;
+            updateStoredComponentPosition (componentToPosition, false);
             changed();
         }
     }

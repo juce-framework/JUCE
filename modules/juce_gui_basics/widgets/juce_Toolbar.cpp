@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 const char* const Toolbar::toolbarDragDescriptor = "_toolbarItem_";
 
 //==============================================================================
@@ -705,8 +708,8 @@ private:
     Toolbar& toolbar;
 
     class CustomiserPanel  : public Component,
-                             private ComboBoxListener, // (can't use ComboBox::Listener due to idiotic VC2005 bug)
-                             private ButtonListener
+                             private ComboBox::Listener,
+                             private Button::Listener
     {
     public:
         CustomiserPanel (ToolbarItemFactory& tbf, Toolbar& bar, int optionFlags)
@@ -811,3 +814,5 @@ void Toolbar::showCustomisationDialog (ToolbarItemFactory& factory, const int op
     (new CustomisationDialog (factory, *this, optionFlags))
         ->enterModalState (true, nullptr, true);
 }
+
+} // namespace juce

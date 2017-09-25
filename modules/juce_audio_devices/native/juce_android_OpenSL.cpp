@@ -20,7 +20,9 @@
   ==============================================================================
 */
 
-//==============================================================================
+namespace juce
+{
+
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
 STATICFIELD (SDK_INT, "SDK_INT", "I") \
 
@@ -308,7 +310,7 @@ public:
             nextBlock.set (0);
             numBlocksOut.set (0);
 
-            zeromem (nativeBuffer.getData(), static_cast<size_t> (owner.bufferSize * numChannels * owner.numBuffers) * sizeof (T));
+            zeromem (nativeBuffer.get(), static_cast<size_t> (owner.bufferSize * numChannels * owner.numBuffers) * sizeof (T));
             scratchBuffer.clear();
             (*queue)->Clear (queue);
         }
@@ -321,7 +323,7 @@ public:
 
         bool isBufferAvailable() const         { return (numBlocksOut.get() < owner.numBuffers); }
         T* getNextBuffer()                     { nextBlock.set((nextBlock.get() + 1) % owner.numBuffers); return getCurrentBuffer(); }
-        T* getCurrentBuffer()                  { return nativeBuffer.getData() + (static_cast<size_t> (nextBlock.get()) * getBufferSizeInSamples()); }
+        T* getCurrentBuffer()                  { return nativeBuffer.get() + (static_cast<size_t> (nextBlock.get()) * getBufferSizeInSamples()); }
         size_t getBufferSizeInSamples() const  { return static_cast<size_t> (owner.bufferSize * numChannels); }
 
         void finished (SLAndroidSimpleBufferQueueItf)
@@ -651,11 +653,16 @@ public:
         {
             OpenSLSession::stop();
 
+            while (! guard.compareAndSetBool (1, 0))
+                Thread::sleep (1);
+
             if (inputChannels > 0)
                 recorder->setState (false);
 
             if (outputChannels > 0)
                 player->setState (false);
+
+            guard.set (0);
         }
 
         bool setAudioPreprocessingEnabled (bool shouldEnable) override
@@ -1198,11 +1205,11 @@ public:
 
     pthread_t startThread (void* (*entry) (void*), void* userPtr)
     {
-        memset (buffer.getData(), 0, static_cast<size_t> (sizeof (int16) * static_cast<size_t> (bufferSize * numBuffers)));
+        memset (buffer.get(), 0, static_cast<size_t> (sizeof (int16) * static_cast<size_t> (bufferSize * numBuffers)));
 
         for (int i = 0; i < numBuffers; ++i)
         {
-            int16* dst = buffer.getData() + (bufferSize * i);
+            int16* dst = buffer.get() + (bufferSize * i);
             (*queue)->Enqueue (queue, dst, static_cast<SLuint32> (static_cast<size_t> (bufferSize) * sizeof (int16)));
         }
 
@@ -1278,3 +1285,5 @@ pthread_t juce_createRealtimeAudioThread (void* (*entry) (void*), void* userPtr)
 
     return threadID;
 }
+
+} // namespace juce

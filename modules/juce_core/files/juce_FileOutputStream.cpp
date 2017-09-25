@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 int64 juce_fileSetPosition (void* handle, int64 pos);
 
 //==============================================================================
@@ -126,3 +129,5 @@ bool FileOutputStream::writeRepeatedByte (uint8 byte, size_t numBytes)
 
     return OutputStream::writeRepeatedByte (byte, numBytes);
 }
+
+} // namespace juce

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 OSCArgument::OSCArgument (int32 value) noexcept
     : type (OSCTypes::int32), intValue (value)
 {
@@ -226,3 +229,5 @@ public:
 static OSCArgumentTests OSCArgumentUnitTests;
 
 #endif // JUCE_UNIT_TESTS
+
+} // namespace juce

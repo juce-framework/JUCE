@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace
 {
     int getLength (const Array<AttributedString::Attribute>& atts) noexcept
@@ -349,3 +352,5 @@ void AttributedString::draw (Graphics& g, const Rectangle<float>& area) const
         }
     }
 }
+
+} // namespace juce

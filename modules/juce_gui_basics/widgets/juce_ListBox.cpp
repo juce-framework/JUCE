@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class ListBox::RowComponent  : public Component,
                                public TooltipClient
 {
@@ -950,3 +953,5 @@ void ListBoxModel::listWasScrolled() {}
 var ListBoxModel::getDragSourceDescription (const SparseSet<int>&)      { return {}; }
 String ListBoxModel::getTooltipForRow (int)                             { return {}; }
 MouseCursor ListBoxModel::getMouseCursorForRow (int)                    { return MouseCursor::NormalCursor; }
+
+} // namespace juce

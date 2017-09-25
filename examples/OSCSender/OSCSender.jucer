@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="rysVAr" name="OSCSender" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.roli.OSCSender" includeBinaryInAppConfig="1"
-              jucerVersion="5.1.1" displaySplashScreen="0" reportAppUsage="0"
+              jucerVersion="5.1.2" displaySplashScreen="0" reportAppUsage="0"
               splashScreenColour="Dark" companyName="ROLI Ltd." cppLanguageStandard="11">
   <MAINGROUP id="knnZZJ" name="OSCSender">
     <GROUP id="{F2A0007A-4D24-4DD6-DEC8-6428F36CE45D}" name="Source">

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace CDBurnerHelpers
 {
     IDiscRecorder* enumCDBurners (StringArray* list, int indexToOpen, IDiscMaster** master)
@@ -411,3 +414,5 @@ bool AudioCDBurner::addAudioTrack (AudioSource* audioSource, int numSamples)
     hr = pimpl->redbook->CloseAudioTrack();
     return ok && hr == S_OK;
 }
+
+} // namespace juce

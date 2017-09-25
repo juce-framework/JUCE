@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 KeyPress::KeyPress() noexcept
     : keyCode (0), textCharacter (0)
 {
@@ -269,7 +272,10 @@ String KeyPress::getTextDescription() const
             if (keyCode == KeyPressHelpers::translations[i].code)
                 return desc + KeyPressHelpers::translations[i].name;
 
-        if (keyCode >= F1Key && keyCode <= F16Key)                  desc << 'F' << (1 + keyCode - F1Key);
+        // not all F keys have consecutive key codes on all platforms
+        if      (keyCode >= F1Key  && keyCode <= F16Key)                  desc << 'F' << (1 + keyCode - F1Key);
+        else if (keyCode >= F17Key && keyCode <= F24Key)                  desc << 'F' << (17 + keyCode - F17Key);
+        else if (keyCode >= F25Key && keyCode <= F35Key)                  desc << 'F' << (25 + keyCode - F25Key);
         else if (keyCode >= numberPad0 && keyCode <= numberPad9)    desc << KeyPressHelpers::numberPadPrefix() << (keyCode - numberPad0);
         else if (keyCode >= 33 && keyCode < 176)        desc += CharacterFunctions::toUpperCase ((juce_wchar) keyCode);
         else if (keyCode == numberPadAdd)               desc << KeyPressHelpers::numberPadPrefix() << '+';
@@ -299,3 +305,5 @@ String KeyPress::getTextDescriptionWithIcons() const
     return getTextDescription();
    #endif
 }
+
+} // namespace juce

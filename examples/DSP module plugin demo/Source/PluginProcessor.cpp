@@ -38,6 +38,9 @@ DspModulePluginDemoAudioProcessor::DspModulePluginDemoAudioProcessor()
        waveShapers { {std::tanh}, {dsp::FastMathApproximations::tanh} },
        clipping { clip }
 {
+    // Oversampling 2 times with IIR filtering
+    oversampling = new dsp::Oversampling<float> (2, 1, dsp::Oversampling<float>::filterHalfBandPolyphaseIIR, false);
+
     addParameter (inputVolumeParam        = new AudioParameterFloat ("INPUT",  "Input Volume",       { 0.f, 60.f, 0.f, 1.0f },     0.f,     "dB"));
     addParameter (highPassFilterFreqParam = new AudioParameterFloat ("HPFREQ", "Pre Highpass Freq.", { 20.f, 20000.f, 0.f, 0.5f }, 20.f,    "Hz"));
     addParameter (lowPassFilterFreqParam  = new AudioParameterFloat ("LPFREQ", "Post Lowpass Freq.", { 20.f, 20000.f, 0.f, 0.5f }, 20000.f, "Hz"));
@@ -50,12 +53,11 @@ DspModulePluginDemoAudioProcessor::DspModulePluginDemoAudioProcessor()
                                                                                                    "Cassette recorder cabinet" },          0));
 
     addParameter (cabinetSimParam         = new AudioParameterBool ("CABSIM", "Cabinet Sim", false));
+    addParameter (oversamplingParam       = new AudioParameterBool ("OVERS", "Oversampling", false));
 
     addParameter (outputVolumeParam       = new AudioParameterFloat ("OUTPUT", "Output Volume", { -40.f, 40.f, 0.f, 1.0f }, 0.f, "dB"));
 
     cabinetType.set (0);
-
-
 }
 
 DspModulePluginDemoAudioProcessor::~DspModulePluginDemoAudioProcessor()
@@ -82,8 +84,6 @@ void DspModulePluginDemoAudioProcessor::prepareToPlay (double sampleRate, int sa
     auto channels = static_cast<uint32> (jmin (getMainBusNumInputChannels(), getMainBusNumOutputChannels()));
     dsp::ProcessSpec spec { sampleRate, static_cast<uint32> (samplesPerBlock), channels };
 
-    updateParameters();
-
     lowPassFilter.prepare (spec);
     highPassFilter.prepare (spec);
 
@@ -92,6 +92,11 @@ void DspModulePluginDemoAudioProcessor::prepareToPlay (double sampleRate, int sa
 
     convolution.prepare (spec);
     cabinetType.set (-1);
+
+    oversampling->initProcessing (static_cast<size_t> (samplesPerBlock));
+
+    updateParameters();
+    reset();
 }
 
 void DspModulePluginDemoAudioProcessor::reset()
@@ -99,6 +104,7 @@ void DspModulePluginDemoAudioProcessor::reset()
     lowPassFilter.reset();
     highPassFilter.reset();
     convolution.reset();
+    oversampling->reset();
 }
 
 void DspModulePluginDemoAudioProcessor::releaseResources()
@@ -108,6 +114,8 @@ void DspModulePluginDemoAudioProcessor::releaseResources()
 
 void DspModulePluginDemoAudioProcessor::process (dsp::ProcessContextReplacing<float> context) noexcept
 {
+    ScopedNoDenormals noDenormals;
+
     // Input volume applied with a LinearSmoothedValue
     inputVolume.process (context);
 
@@ -115,19 +123,33 @@ void DspModulePluginDemoAudioProcessor::process (dsp::ProcessContextReplacing<fl
     // Note : try frequencies around 700 Hz
     highPassFilter.process (context);
 
+    // Upsampling
+    dsp::AudioBlock<float> oversampledBlock;
+
+    setLatencySamples (audioCurrentlyOversampled ? roundFloatToInt (oversampling->getLatencyInSamples()) : 0);
+
+    if (audioCurrentlyOversampled)
+        oversampledBlock = oversampling->processSamplesUp (context.getInputBlock());
+
+    dsp::ProcessContextReplacing<float> waveshaperContext = audioCurrentlyOversampled ? dsp::ProcessContextReplacing<float> (oversampledBlock) : context;
+
     // Waveshaper processing, for distortion generation, thanks to the input gain
     // The fast tanh can be used instead of std::tanh to reduce the CPU load
     auto waveshaperIndex = waveshaperParam->getIndex();
 
     if (isPositiveAndBelow (waveshaperIndex, (int) numWaveShapers) )
     {
-        waveShapers[waveshaperIndex].process (context);
+        waveShapers[waveshaperIndex].process (waveshaperContext);
 
         if (waveshaperIndex == 1)
-            clipping.process(context);
+            clipping.process (waveshaperContext);
 
-        context.getOutputBlock() *= 0.7f;
+        waveshaperContext.getOutputBlock() *= 0.7f;
     }
+
+    // Downsampling
+    if (audioCurrentlyOversampled)
+        oversampling->processSamplesDown (context.getOutputBlock());
 
     // Post-lowpass filtering
     lowPassFilter.process (context);
@@ -209,13 +231,20 @@ bool DspModulePluginDemoAudioProcessor::producesMidi() const
 //==============================================================================
 void DspModulePluginDemoAudioProcessor::updateParameters()
 {
+    auto newOversampling = oversamplingParam->get();
+    if (newOversampling != audioCurrentlyOversampled)
+    {
+        audioCurrentlyOversampled = newOversampling;
+        oversampling->reset();
+    }
+
+    //==============================================================================
     auto inputdB  = Decibels::decibelsToGain (inputVolumeParam->get());
     auto outputdB = Decibels::decibelsToGain (outputVolumeParam->get());
 
     if (inputVolume.getGainLinear() != inputdB)     inputVolume.setGainLinear (inputdB);
     if (outputVolume.getGainLinear() != outputdB)   outputVolume.setGainLinear (outputdB);
 
-    dsp::IIR::Coefficients<float>::Ptr newHighPassCoeffs, newLowPassCoeffs;
     auto newSlopeType = slopeParam->getIndex();
 
     if (newSlopeType == 0)
@@ -240,12 +269,13 @@ void DspModulePluginDemoAudioProcessor::updateParameters()
         auto maxSize = static_cast<size_t> (roundDoubleToInt (8192 * getSampleRate() / 44100));
 
         if (type == 0)
-            convolution.loadImpulseResponse (BinaryData::Impulse1_wav, BinaryData::Impulse1_wavSize, false, maxSize);
+            convolution.loadImpulseResponse (BinaryData::Impulse1_wav, BinaryData::Impulse1_wavSize, false, true, maxSize);
         else
-            convolution.loadImpulseResponse (BinaryData::Impulse2_wav, BinaryData::Impulse2_wavSize, false, maxSize);
+            convolution.loadImpulseResponse (BinaryData::Impulse2_wav, BinaryData::Impulse2_wavSize, false, true, maxSize);
     }
 
     cabinetIsBypassed = ! cabinetSimParam->get();
+
 }
 
 //==============================================================================

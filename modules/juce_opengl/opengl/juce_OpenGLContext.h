@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -344,3 +344,5 @@ private:
 template <typename T>
 void OpenGLContext::executeOnGLThread (T&& f, bool shouldBlock) { execute (new AsyncWorkerFunctor<T> (f), shouldBlock); }
 #endif
+
+} // namespace juce

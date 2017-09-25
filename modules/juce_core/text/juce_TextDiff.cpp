@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct TextDiffHelpers
 {
     enum { minLengthToMatch = 3,
@@ -276,3 +279,5 @@ public:
 static DiffTests diffTests;
 
 #endif
+
+} // namespace juce

@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 FileSearchPath::FileSearchPath() {}
 FileSearchPath::~FileSearchPath() {}
 
@@ -165,3 +168,5 @@ bool FileSearchPath::isFileInPath (const File& fileToCheck,
 
     return false;
 }
+
+} // namespace juce

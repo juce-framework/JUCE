@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 Desktop::Desktop()
     : mouseSources (new MouseInputSource::SourceList()),
       mouseClickCounter (0), mouseWheelCounter (0),
@@ -425,3 +428,5 @@ void Desktop::setGlobalScaleFactor (float newScaleFactor) noexcept
         displays->refresh();
     }
 }
+
+} // namespace juce

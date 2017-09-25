@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 enum VariantStreamMarkers
 {
     varMarker_Int       = 1,
@@ -237,7 +240,7 @@ public:
 
     void writeToStream (const ValueUnion& data, OutputStream& output) const override
     {
-        const String* const s = getString (data);
+        auto* s = getString (data);
         const size_t len = s->getNumBytesAsUTF8() + 1;
         HeapBlock<char> temp (len);
         s->copyToUTF8 (temp, len);
@@ -279,7 +282,7 @@ public:
 
     var clone (const var& original) const override
     {
-        if (DynamicObject* d = original.getDynamicObject())
+        if (auto* d = original.getDynamicObject())
             return d->clone().get();
 
         jassertfalse; // can only clone DynamicObjects!
@@ -314,8 +317,8 @@ public:
 
     bool equals (const ValueUnion& data, const ValueUnion& otherData, const VariantType& otherType) const noexcept override
     {
-        const Array<var>* const thisArray = toArray (data);
-        const Array<var>* const otherArray = otherType.toArray (otherData);
+        auto* thisArray = toArray (data);
+        auto* otherArray = otherType.toArray (otherData);
         return thisArray == otherArray || (thisArray != nullptr && otherArray != nullptr && *otherArray == *thisArray);
     }
 
@@ -324,8 +327,12 @@ public:
         Array<var> arrayCopy;
 
         if (auto* array = toArray (original.value))
-            for (int i = 0; i < array->size(); ++i)
-                arrayCopy.add (array->getReference(i).clone());
+        {
+            arrayCopy.ensureStorageAllocated (array->size());
+
+            for (auto& i : *array)
+                arrayCopy.add (i.clone());
+        }
 
         return var (arrayCopy);
     }
@@ -335,11 +342,10 @@ public:
         if (auto* array = toArray (data))
         {
             MemoryOutputStream buffer (512);
-            const int numItems = array->size();
-            buffer.writeCompressedInt (numItems);
+            buffer.writeCompressedInt (array->size());
 
-            for (int i = 0; i < numItems; ++i)
-                array->getReference(i).writeToStream (buffer);
+            for (auto& i : *array)
+                i.writeToStream (buffer);
 
             output.writeCompressedInt (1 + (int) buffer.getDataSize());
             output.writeByte (varMarker_Array);
@@ -454,12 +460,12 @@ var::var (const MemoryBlock& v)       : type (&VariantType_Binary::instance) { v
 var::var (const StringArray& v)       : type (&VariantType_Array::instance)
 {
     Array<var> strings;
+    strings.ensureStorageAllocated (v.size());
 
-    const int n = v.size();
-    for (int i = 0; i < n; ++i)
-        strings.add (var (v[i]));
+    for (auto& i : v)
+        strings.add (var (i));
 
-    value.objectValue = new VariantType_Array::RefCountedArray(strings);
+    value.objectValue = new VariantType_Array::RefCountedArray (strings);
 }
 
 var::var (ReferenceCountedObject* const object)  : type (&VariantType_Object::instance)
@@ -602,6 +608,14 @@ var var::getProperty (const Identifier& propertyName, const var& defaultReturnVa
         return o->getProperties().getWithDefault (propertyName, defaultReturnValue);
 
     return defaultReturnValue;
+}
+
+bool var::hasProperty (const Identifier& propertyName) const noexcept
+{
+    if (auto* o = getDynamicObject())
+        return o->hasProperty (propertyName);
+
+    return false;
 }
 
 var::NativeFunction var::getNativeFunction() const
@@ -785,3 +799,5 @@ var var::readFromStream (InputStream& input)
 var::NativeFunctionArgs::NativeFunctionArgs (const var& t, const var* args, int numArgs) noexcept
     : thisObject (t), arguments (args), numArguments (numArgs)
 {}
+
+} // namespace juce

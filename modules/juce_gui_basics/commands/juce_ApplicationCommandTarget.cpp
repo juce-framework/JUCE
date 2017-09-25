@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class ApplicationCommandTarget::CommandMessage  : public MessageManager::MessageBase
 {
 public:
@@ -186,3 +189,5 @@ ApplicationCommandTarget::InvocationInfo::InvocationInfo (const CommandID comman
       millisecsSinceKeyPressed (0)
 {
 }
+
+} // namespace juce

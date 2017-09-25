@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -38,7 +38,7 @@
 */
 class JUCE_API  ColourSelector  : public Component,
                                   public ChangeBroadcaster,
-                                  protected SliderListener
+                                  protected Slider::Listener
 {
 public:
     //==============================================================================
@@ -167,3 +167,5 @@ private:
     ColourSelector (bool);
    #endif
 };
+
+} // namespace juce

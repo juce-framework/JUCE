@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 template <typename IDType>
 class MultiTouchMapper
@@ -62,8 +63,8 @@ public:
 
     bool areAnyTouchesActive() const noexcept
     {
-        for (int i = currentTouches.size(); --i >= 0;)
-            if (currentTouches.getUnchecked(i) != 0)
+        for (auto& t : currentTouches)
+            if (t != 0)
                 return true;
 
         return false;
@@ -74,3 +75,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MultiTouchMapper)
 };
+
+} // namespace juce

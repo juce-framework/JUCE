@@ -27,11 +27,6 @@
 #if JUCE_PLUGINHOST_VST
 
 //==============================================================================
-#if JUCE_MAC && JUCE_SUPPORT_CARBON
- #include "../../juce_gui_extra/native/juce_mac_CarbonViewWrapperComponent.h"
-#endif
-
-//==============================================================================
 #undef PRAGMA_ALIGN_SUPPORTED
 
 #if JUCE_MSVC
@@ -55,7 +50,6 @@ using namespace Vst2;
  #pragma warning (disable: 4355) // ("this" used in initialiser list warning)
 #endif
 
-//==============================================================================
 #include "juce_VSTMidiEventList.h"
 
 #if JUCE_MINGW
@@ -77,6 +71,10 @@ using namespace Vst2;
 #ifndef JUCE_VST_WRAPPER_INVOKE_MAIN
  #define JUCE_VST_WRAPPER_INVOKE_MAIN  effect = module->moduleMain (&audioMaster);
 #endif
+
+//==============================================================================
+namespace juce
+{
 
 //==============================================================================
 namespace
@@ -228,37 +226,7 @@ static pointer_sized_int VSTINTERFACECALL audioMaster (VstEffectInterface*, int3
 
 namespace
 {
-    static bool xErrorTriggered = false;
-
-    static int temporaryErrorHandler (::Display*, XErrorEvent*)
-    {
-        xErrorTriggered = true;
-        return 0;
-    }
-
     typedef void (*EventProcPtr) (XEvent* ev);
-
-    static EventProcPtr getPropertyFromXWindow (Window handle, Atom atom)
-    {
-        XErrorHandler oldErrorHandler = XSetErrorHandler (temporaryErrorHandler);
-        xErrorTriggered = false;
-
-        int userSize;
-        unsigned long bytes, userCount;
-        unsigned char* data;
-        Atom userType;
-
-        {
-            ScopedXDisplay xDisplay;
-
-            XGetWindowProperty (xDisplay.display, handle, atom, 0, 1, false, AnyPropertyType,
-                                &userType,  &userSize, &userCount, &bytes, &data);
-        }
-
-        XSetErrorHandler (oldErrorHandler);
-
-        return (userCount == 1 && ! xErrorTriggered) ? *reinterpret_cast<EventProcPtr*> (data) : nullptr;
-    }
 
     Window getChildWindow (Window windowToCheck)
     {
@@ -275,55 +243,6 @@ namespace
             return childWindows [0];
 
         return 0;
-    }
-
-    static void translateJuceToXButtonModifiers (const MouseEvent& e, XEvent& ev) noexcept
-    {
-        if (e.mods.isLeftButtonDown())
-        {
-            ev.xbutton.button = Button1;
-            ev.xbutton.state |= Button1Mask;
-        }
-        else if (e.mods.isRightButtonDown())
-        {
-            ev.xbutton.button = Button3;
-            ev.xbutton.state |= Button3Mask;
-        }
-        else if (e.mods.isMiddleButtonDown())
-        {
-            ev.xbutton.button = Button2;
-            ev.xbutton.state |= Button2Mask;
-        }
-    }
-
-    static void translateJuceToXMotionModifiers (const MouseEvent& e, XEvent& ev) noexcept
-    {
-        if (e.mods.isLeftButtonDown())          ev.xmotion.state |= Button1Mask;
-        else if (e.mods.isRightButtonDown())    ev.xmotion.state |= Button3Mask;
-        else if (e.mods.isMiddleButtonDown())   ev.xmotion.state |= Button2Mask;
-    }
-
-    static void translateJuceToXCrossingModifiers (const MouseEvent& e, XEvent& ev) noexcept
-    {
-        if (e.mods.isLeftButtonDown())          ev.xcrossing.state |= Button1Mask;
-        else if (e.mods.isRightButtonDown())    ev.xcrossing.state |= Button3Mask;
-        else if (e.mods.isMiddleButtonDown())   ev.xcrossing.state |= Button2Mask;
-    }
-
-    static void translateJuceToXMouseWheelModifiers (const MouseEvent& e, const float increment, XEvent& ev) noexcept
-    {
-        ignoreUnused (e);
-
-        if (increment < 0)
-        {
-            ev.xbutton.button = Button5;
-            ev.xbutton.state |= Button5Mask;
-        }
-        else if (increment > 0)
-        {
-            ev.xbutton.button = Button4;
-            ev.xbutton.state |= Button4Mask;
-        }
     }
 }
 
@@ -1626,8 +1545,8 @@ private:
 
         HeapBlock<VstSpeakerConfiguration> inArrBlock (1, true), outArrBlock (1, true);
 
-        auto* inArr  = inArrBlock.getData();
-        auto* outArr = outArrBlock.getData();
+        auto* inArr  = inArrBlock.get();
+        auto* outArr = outArrBlock.get();
 
         if (! getSpeakerArrangementWrapper (effect, inArr, outArr))
             inArr = outArr = nullptr;
@@ -1690,8 +1609,8 @@ private:
     {
         HeapBlock<VstSpeakerConfiguration> inArrBlock (1, true), outArrBlock (1, true);
 
-        auto* inArr  = inArrBlock.getData();
-        auto* outArr = outArrBlock.getData();
+        auto* inArr  = inArrBlock.get();
+        auto* outArr = outArrBlock.get();
 
         if (getSpeakerArrangementWrapper (effect, inArr, outArr))
             return true;
@@ -1782,6 +1701,7 @@ private:
                         case AudioPlayHead::fps30:       setHostTimeFrameRate (vstSmpteRateFps30, 30.0, position.timeInSeconds); break;
                         case AudioPlayHead::fps60:       setHostTimeFrameRate (vstSmpteRateFps60, 60.0, position.timeInSeconds); break;
 
+                        case AudioPlayHead::fps23976:    setHostTimeFrameRateDrop (vstSmpteRateFps239,      24.0, position.timeInSeconds); break;
                         case AudioPlayHead::fps2997:     setHostTimeFrameRateDrop (vstSmpteRateFps2997,     30.0, position.timeInSeconds); break;
                         case AudioPlayHead::fps2997drop: setHostTimeFrameRateDrop (vstSmpteRateFps2997drop, 30.0, position.timeInSeconds); break;
                         case AudioPlayHead::fps30drop:   setHostTimeFrameRateDrop (vstSmpteRateFps30drop,   30.0, position.timeInSeconds); break;
@@ -1824,7 +1744,7 @@ private:
 
             // always ensure that the buffer is at least as large as the maximum number of channels
             auto maxChannels = jmax (vstEffect->numInputChannels, vstEffect->numOutputChannels);
-            auto channels = channelBuffer.getData();
+            auto channels = channelBuffer.get();
 
             if (numChannels < maxChannels)
             {
@@ -3049,5 +2969,7 @@ pointer_sized_int JUCE_CALLTYPE VSTPluginFormat::dispatcher (AudioPluginInstance
 }
 
 void VSTPluginFormat::aboutToScanVSTShellPlugin (const PluginDescription&) {}
+
+} // namespace juce
 
 #endif

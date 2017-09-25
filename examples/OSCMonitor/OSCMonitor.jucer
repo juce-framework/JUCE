@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="IhmIkj" name="OSCMonitor" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.roli.OSCMonitor" includeBinaryInAppConfig="1"
-              jucerVersion="5.1.1" displaySplashScreen="0" reportAppUsage="0"
+              jucerVersion="5.1.2" displaySplashScreen="0" reportAppUsage="0"
               splashScreenColour="Dark" companyName="ROLI Ltd." cppLanguageStandard="11">
   <MAINGROUP id="N9NMMk" name="OSCMonitor">
     <GROUP id="{2B92546C-6B49-72D9-ACD0-0F2FCE9AD0D5}" name="Source">

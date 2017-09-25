@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -189,3 +189,5 @@ private:
 
 /** This typedef is just for compatibility with old code - newer code should use the MenuBarModel::Listener class directly. */
 typedef MenuBarModel::Listener MenuBarModelListener;
+
+} // namespace juce

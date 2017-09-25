@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct DefaultFontNames
 {
     DefaultFontNames()
@@ -402,3 +405,5 @@ bool TextLayout::createNativeLayout (const AttributedString&)
 }
 
 #endif
+
+} // namespace juce

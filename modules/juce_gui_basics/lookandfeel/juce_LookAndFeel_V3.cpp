@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 LookAndFeel_V3::LookAndFeel_V3()
 {
     setColour (TreeView::selectedItemBackgroundColourId, Colour (0x301111ee));
@@ -39,6 +42,8 @@ LookAndFeel_V3::LookAndFeel_V3()
     setColour (Slider::thumbColourId, Colour (0xffddddff));
     setColour (BubbleComponent::backgroundColourId, Colour (0xeeeeeedd));
     setColour (ScrollBar::thumbColourId, Colour::greyLevel (0.8f).contrasting().withAlpha (0.13f));
+    setColour (TableHeaderComponent::backgroundColourId, Colours::white.withAlpha (0.6f));
+    setColour (TableHeaderComponent::outlineColourId,    Colours::black.withAlpha (0.5f));
 }
 
 LookAndFeel_V3::~LookAndFeel_V3() {}
@@ -153,14 +158,15 @@ void LookAndFeel_V3::drawButtonBackground (Graphics& g, Button& button, const Co
 void LookAndFeel_V3::drawTableHeaderBackground (Graphics& g, TableHeaderComponent& header)
 {
     Rectangle<int> r (header.getLocalBounds());
+    auto outlineColour = header.findColour (TableHeaderComponent::outlineColourId);
 
-    g.setColour (Colours::black.withAlpha (0.5f));
+    g.setColour (outlineColour);
     g.fillRect (r.removeFromBottom (1));
 
-    g.setColour (Colours::white.withAlpha (0.6f));
+    g.setColour (header.findColour (TableHeaderComponent::backgroundColourId));
     g.fillRect (r);
 
-    g.setColour (Colours::black.withAlpha (0.5f));
+    g.setColour (outlineColour);
 
     for (int i = header.getNumColumns (true); --i >= 0;)
         g.fillRect (header.getColumnPosition (i).removeFromRight (1));
@@ -634,3 +640,5 @@ Path LookAndFeel_V3::getCrossShape (const float height)
     p.scaleToFit (0, 0, height * 2.0f, height, true);
     return p;
 }
+
+} // namespace juce

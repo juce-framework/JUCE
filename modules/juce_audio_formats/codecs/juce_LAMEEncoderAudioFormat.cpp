@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_USE_LAME_AUDIO_FORMAT
 
 class LAMEEncoderAudioFormat::Writer   : public AudioFormatWriter
@@ -225,3 +228,5 @@ AudioFormatWriter* LAMEEncoderAudioFormat::createWriterFor (OutputStream* stream
 }
 
 #endif
+
+} // namespace juce

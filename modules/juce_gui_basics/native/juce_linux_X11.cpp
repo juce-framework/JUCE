@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 typedef void (*WindowMessageReceiveCallback) (XEvent&);
 WindowMessageReceiveCallback dispatchWindowMessage = nullptr;
 
@@ -333,3 +336,5 @@ GetXProperty::~GetXProperty()
     if (data != nullptr)
         XFree (data);
 }
+
+} // namespace juce

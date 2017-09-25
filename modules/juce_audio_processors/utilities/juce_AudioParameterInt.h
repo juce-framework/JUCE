@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 /**
     Provides a class of AudioProcessorParameter that can be used as an
     integer value with a given range.
@@ -77,3 +80,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioParameterInt)
 };
+
+} // namespace juce

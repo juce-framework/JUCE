@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 HWND juce_messageWindowHandle = 0;  // (this is used by other parts of the codebase)
 
 void* getUser32Function (const char* functionName)
@@ -529,7 +532,7 @@ bool ChildProcess::start (const StringArray& args, int streamFlags)
 //==============================================================================
 struct HighResolutionTimer::Pimpl
 {
-    Pimpl (HighResolutionTimer& t) noexcept  : owner (t), periodMs (0)
+    Pimpl (HighResolutionTimer& t) noexcept  : owner (t)
     {
     }
 
@@ -563,7 +566,7 @@ struct HighResolutionTimer::Pimpl
     }
 
     HighResolutionTimer& owner;
-    int periodMs;
+    int periodMs = 0;
 
 private:
     unsigned int timerID;
@@ -577,3 +580,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (Pimpl)
 };
+
+} // namespace juce

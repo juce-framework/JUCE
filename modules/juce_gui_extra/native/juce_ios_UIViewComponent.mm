@@ -24,14 +24,16 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class UIViewComponent::Pimpl  : public ComponentMovementWatcher
 {
 public:
-    Pimpl (UIView* const v, Component& comp)
+    Pimpl (UIView* v, Component& comp)
         : ComponentMovementWatcher (&comp),
           view (v),
-          owner (comp),
-          currentPeer (nullptr)
+          owner (comp)
     {
         [view retain];
 
@@ -47,11 +49,11 @@ public:
 
     void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/) override
     {
-        Component* const topComp = owner.getTopLevelComponent();
+        auto* topComp = owner.getTopLevelComponent();
 
         if (topComp->getPeer() != nullptr)
         {
-            const Point<int> pos (topComp->getLocalPoint (&owner, Point<int>()));
+            auto pos = topComp->getLocalPoint (&owner, Point<int>());
 
             [view setFrame: CGRectMake ((float) pos.x, (float) pos.y,
                                         (float) owner.getWidth(), (float) owner.getHeight())];
@@ -60,7 +62,7 @@ public:
 
     void componentPeerChanged() override
     {
-        ComponentPeer* const peer = owner.getPeer();
+        auto* peer = owner.getPeer();
 
         if (currentPeer != peer)
         {
@@ -95,7 +97,7 @@ public:
 
 private:
     Component& owner;
-    ComponentPeer* currentPeer;
+    ComponentPeer* currentPeer = nullptr;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
@@ -127,3 +129,5 @@ void UIViewComponent::resizeToFitView()
 }
 
 void UIViewComponent::paint (Graphics&) {}
+
+} // namespace juce

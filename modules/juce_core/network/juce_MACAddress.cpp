@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 MACAddress::MACAddress() noexcept
 {
     zeromem (address, sizeof (address));
@@ -86,3 +89,5 @@ bool MACAddress::isNull() const noexcept                                { return
 
 bool MACAddress::operator== (const MACAddress& other) const noexcept    { return memcmp (address, other.address, sizeof (address)) == 0; }
 bool MACAddress::operator!= (const MACAddress& other) const noexcept    { return ! operator== (other); }
+
+} // namespace juce

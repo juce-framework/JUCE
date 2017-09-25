@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 /*
     Note that a lot of methods that you'd expect to find in this file actually
     live in juce_posix_SharedCode.h!
@@ -237,7 +240,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
                 HeapBlock<char> buffer;
                 buffer.calloc (size + 8);
 
-                _NSGetExecutablePath (buffer.getData(), &size);
+                _NSGetExecutablePath (buffer.get(), &size);
                 return File (String::fromUTF8 (buffer, (int) size));
             }
 
@@ -399,10 +402,12 @@ bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& 
       #if JUCE_IOS
         ignoreUnused (parameters);
 
-        if (SystemStats::isRunningInAppExtensionSandbox())
-            return false;
-
+       #if (! defined __IPHONE_OS_VERSION_MIN_REQUIRED) || (! defined __IPHONE_10_0) || (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_10_0)
         return [[UIApplication sharedApplication] openURL: filenameAsURL];
+       #else
+        [[UIApplication sharedApplication] openURL: filenameAsURL options: @{} completionHandler: nil];
+        return true;
+       #endif
       #else
         NSWorkspace* workspace = [NSWorkspace sharedWorkspace];
 
@@ -486,3 +491,5 @@ void File::addToDock() const
     }
 }
 #endif
+
+} // namespace juce

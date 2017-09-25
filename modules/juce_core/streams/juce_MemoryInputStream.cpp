@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 MemoryInputStream::MemoryInputStream (const void* const sourceData,
                                       const size_t sourceDataSize,
                                       const bool keepInternalCopy)
@@ -156,3 +159,5 @@ public:
 static MemoryStreamTests memoryInputStreamUnitTests;
 
 #endif
+
+} // namespace juce

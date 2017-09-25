@@ -35,7 +35,7 @@
 
   ID:               juce_audio_utils
   vendor:           juce
-  version:          5.1.1
+  version:          5.1.2
   name:             JUCE extra audio utility classes
   description:      Classes for audio-related GUI and miscellaneous tasks.
   website:          http://www.juce.com/juce
@@ -74,9 +74,6 @@
 #endif
 
 //==============================================================================
-namespace juce
-{
-
 #include "gui/juce_AudioDeviceSelectorComponent.h"
 #include "gui/juce_AudioThumbnailBase.h"
 #include "gui/juce_AudioThumbnail.h"
@@ -89,5 +86,3 @@ namespace juce
 #include "players/juce_AudioProcessorPlayer.h"
 #include "audio_cd/juce_AudioCDBurner.h"
 #include "audio_cd/juce_AudioCDReader.h"
-
-}

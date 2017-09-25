@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -72,3 +72,5 @@ public:
     */
     virtual bool keyStateChanged (bool isKeyDown, Component* originatingComponent);
 };
+
+} // namespace juce

@@ -1,15 +1,29 @@
 
-﻿== Major JUCE features and updates ==
+== Major JUCE features and updates ==
 
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
+
+Version 5.1.2
+  - Fixed multiple plugin-resizing bugs
+  - Added support for AUv3 MIDI and screen size negotiation
+  - Added support for Xcode 9 and iOS 11
+  - Added an In-App Purchases module
+  - Added backwards compatible constexpr support
+  - Standalone plug-in improvements
+  - Better .jucer file change monitoring in the Projucer
+  - Increased the speed of AU parameter lookup
+  - Improved the Android thread management when dealing with web requests
+  - Better denormal support
+  - Plug-in parameters can be explicitly marked as continuous or discrete
+  - Multiple documentation updates
 
 Version 5.1.1
   - Fixed Windows live build engine on Visual Studio 2017
   - Fixed a compiler error in juce_MathFunctions.h in Visual Studio 2013
   - Fixed a potential crash when using the ProcessorDuplicator
   - Fixed a compiler-error in Filter::IIR
-  - Fixed an issue where the WavFileFormatWriter could not create files with discrete channels 
+  - Fixed an issue where the WavFileFormatWriter could not create files with discrete channels
   - Fixed an issue where a window which is beneath a hidden window would not receive any clicks on Linux
   - Altered the format of BREAKING-CHANGES.txt to display better on GitHub
   - Projucer: Fixed an issue in exporter tilde expansion

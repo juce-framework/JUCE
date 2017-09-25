@@ -125,14 +125,16 @@ public:
         if (state != nullptr)
             propsPanel->restoreOpennessState (*state);
 
-        if (paintRoutine.getSelectedElements().getNumSelected() == 1) // xxx need to cope with multiple
+        auto numSelected = paintRoutine.getSelectedElements().getNumSelected();
+
+        if (numSelected > 0) // xxx need to cope with multiple
         {
-            if (PaintElement* const pe = paintRoutine.getSelectedElements().getSelectedItem (0))
+            if (auto* pe = paintRoutine.getSelectedElements().getSelectedItem (0))
             {
                 if (paintRoutine.containsElement (pe))
                 {
                     Array <PropertyComponent*> props;
-                    pe->getEditableProperties (props);
+                    pe->getEditableProperties (props, numSelected > 1);
 
                     propsPanel->addSection (pe->getTypeName(), props);
                 }
@@ -141,10 +143,10 @@ public:
 
         if (paintRoutine.getSelectedPoints().getNumSelected() == 1) // xxx need to cope with multiple
         {
-            if (PathPoint* const point = paintRoutine.getSelectedPoints().getSelectedItem (0))
+            if (auto* point = paintRoutine.getSelectedPoints().getSelectedItem (0))
             {
                 Array <PropertyComponent*> props;
-                point->getEditableProperties (props);
+                point->getEditableProperties (props, false);
 
                 propsPanel->addSection ("Path segment", props);
             }

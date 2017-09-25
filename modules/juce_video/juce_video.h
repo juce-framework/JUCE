@@ -36,7 +36,7 @@
 
   ID:               juce_video
   vendor:           juce
-  version:          5.1.1
+  version:          5.1.2
   name:             JUCE video playback and capture classes
   description:      Classes for playing video and capturing camera input.
   website:          http://www.juce.com/juce
@@ -58,9 +58,6 @@
 #include <juce_gui_extra/juce_gui_extra.h>
 
 //=============================================================================
-#include "../juce_gui_extra/juce_gui_extra.h"
-
-//=============================================================================
 /** Config: JUCE_USE_CAMERA
     Enables web-cam support using the CameraDevice class (Mac and Windows).
 */
@@ -73,10 +70,5 @@
 #endif
 
 //=============================================================================
-namespace juce
-{
-
 #include "playback/juce_VideoComponent.h"
 #include "capture/juce_CameraDevice.h"
-
-}

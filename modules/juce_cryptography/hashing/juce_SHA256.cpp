@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class SHA256Processor
 {
 public:
@@ -275,3 +278,5 @@ public:
 static SHA256Tests sha256UnitTests;
 
 #endif
+
+} // namespace juce

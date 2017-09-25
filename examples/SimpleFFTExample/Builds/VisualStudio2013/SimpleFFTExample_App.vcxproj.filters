@@ -203,6 +203,27 @@
     <Filter Include="Juce Modules\juce_data_structures">
       <UniqueIdentifier>{928D8FCC-5E00-174B-6538-93E8D75AB396}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Juce Modules\juce_dsp\containers">
+      <UniqueIdentifier>{5E662F89-AD8B-D0D6-9BB6-D42DCFC3C38B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juce Modules\juce_dsp\filter_design">
+      <UniqueIdentifier>{D272EE9B-CA6A-186E-1C62-0DF893C7A34E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juce Modules\juce_dsp\frequency">
+      <UniqueIdentifier>{5C139EFD-6DD2-83E0-C013-24CC03428D81}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juce Modules\juce_dsp\maths">
+      <UniqueIdentifier>{03DBA258-F2EF-EC1D-5A86-2CEE402FE021}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juce Modules\juce_dsp\native">
+      <UniqueIdentifier>{8EE92EFE-883B-A2FA-161D-94AC912BF1DE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juce Modules\juce_dsp\processors">
+      <UniqueIdentifier>{16B24975-5792-03FC-64A8-D04E59D077E1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juce Modules\juce_dsp">
+      <UniqueIdentifier>{362ADBDB-6FDF-5BD4-9F06-0A0270832F67}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Juce Modules\juce_events\broadcasters">
       <UniqueIdentifier>{B098BC87-3298-7E6B-12DC-D26C09CDCAED}</UniqueIdentifier>
     </Filter>
@@ -1120,6 +1141,63 @@
     <ClCompile Include="..\..\..\..\modules\juce_data_structures\juce_data_structures.mm">
       <Filter>Juce Modules\juce_data_structures</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\containers\juce_SIMDRegister_test.cpp">
+      <Filter>Juce Modules\juce_dsp\containers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\filter_design\juce_FilterDesign.cpp">
+      <Filter>Juce Modules\juce_dsp\filter_design</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\frequency\juce_Convolution.cpp">
+      <Filter>Juce Modules\juce_dsp\frequency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\frequency\juce_FFT.cpp">
+      <Filter>Juce Modules\juce_dsp\frequency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\frequency\juce_FFT_test.cpp">
+      <Filter>Juce Modules\juce_dsp\frequency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\frequency\juce_Windowing.cpp">
+      <Filter>Juce Modules\juce_dsp\frequency</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\maths\juce_LookupTable.cpp">
+      <Filter>Juce Modules\juce_dsp\maths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\maths\juce_Matrix.cpp">
+      <Filter>Juce Modules\juce_dsp\maths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\maths\juce_Matrix_test.cpp">
+      <Filter>Juce Modules\juce_dsp\maths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\maths\juce_SpecialFunctions.cpp">
+      <Filter>Juce Modules\juce_dsp\maths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\native\juce_avx_SIMDNativeOps.cpp">
+      <Filter>Juce Modules\juce_dsp\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\native\juce_neon_SIMDNativeOps.cpp">
+      <Filter>Juce Modules\juce_dsp\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\native\juce_sse_SIMDNativeOps.cpp">
+      <Filter>Juce Modules\juce_dsp\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\processors\juce_FIRFilter.cpp">
+      <Filter>Juce Modules\juce_dsp\processors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\processors\juce_FIRFilter_test.cpp">
+      <Filter>Juce Modules\juce_dsp\processors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\processors\juce_IIRFilter.cpp">
+      <Filter>Juce Modules\juce_dsp\processors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\processors\juce_Oversampling.cpp">
+      <Filter>Juce Modules\juce_dsp\processors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\juce_dsp.cpp">
+      <Filter>Juce Modules\juce_dsp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\juce_dsp.mm">
+      <Filter>Juce Modules\juce_dsp</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_events\broadcasters\juce_ActionBroadcaster.cpp">
       <Filter>Juce Modules\juce_events\broadcasters</Filter>
     </ClCompile>
@@ -1636,6 +1714,15 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_FlexBox.cpp">
       <Filter>Juce Modules\juce_gui_basics\layout</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_Grid.cpp">
+      <Filter>Juce Modules\juce_gui_basics\layout</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_GridItem.cpp">
+      <Filter>Juce Modules\juce_gui_basics\layout</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_GridUnitTests.cpp">
+      <Filter>Juce Modules\juce_gui_basics\layout</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_GroupComponent.cpp">
       <Filter>Juce Modules\juce_gui_basics\layout</Filter>
     </ClCompile>
@@ -1994,6 +2081,9 @@
       <Filter>Juce Library Code</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_data_structures.cpp">
+      <Filter>Juce Library Code</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_dsp.cpp">
       <Filter>Juce Library Code</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_events.cpp">
@@ -3006,6 +3096,93 @@
     <ClInclude Include="..\..\..\..\modules\juce_data_structures\juce_data_structures.h">
       <Filter>Juce Modules\juce_data_structures</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\containers\juce_AudioBlock.h">
+      <Filter>Juce Modules\juce_dsp\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\containers\juce_SIMDRegister.h">
+      <Filter>Juce Modules\juce_dsp\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\filter_design\juce_FilterDesign.h">
+      <Filter>Juce Modules\juce_dsp\filter_design</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\frequency\juce_Convolution.h">
+      <Filter>Juce Modules\juce_dsp\frequency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\frequency\juce_FFT.h">
+      <Filter>Juce Modules\juce_dsp\frequency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\frequency\juce_Windowing.h">
+      <Filter>Juce Modules\juce_dsp\frequency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\maths\juce_FastMathApproximations.h">
+      <Filter>Juce Modules\juce_dsp\maths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\maths\juce_LookupTable.h">
+      <Filter>Juce Modules\juce_dsp\maths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\maths\juce_Matrix.h">
+      <Filter>Juce Modules\juce_dsp\maths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\maths\juce_Polynomial.h">
+      <Filter>Juce Modules\juce_dsp\maths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\maths\juce_SpecialFunctions.h">
+      <Filter>Juce Modules\juce_dsp\maths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\native\juce_avx_SIMDNativeOps.h">
+      <Filter>Juce Modules\juce_dsp\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\native\juce_fallback_SIMDNativeOps.h">
+      <Filter>Juce Modules\juce_dsp\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\native\juce_neon_SIMDNativeOps.h">
+      <Filter>Juce Modules\juce_dsp\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\native\juce_sse_SIMDNativeOps.h">
+      <Filter>Juce Modules\juce_dsp\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_Bias.h">
+      <Filter>Juce Modules\juce_dsp\processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_FIRFilter.h">
+      <Filter>Juce Modules\juce_dsp\processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_Gain.h">
+      <Filter>Juce Modules\juce_dsp\processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_IIRFilter.h">
+      <Filter>Juce Modules\juce_dsp\processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_IIRFilter_Impl.h">
+      <Filter>Juce Modules\juce_dsp\processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_Oscillator.h">
+      <Filter>Juce Modules\juce_dsp\processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_Oversampling.h">
+      <Filter>Juce Modules\juce_dsp\processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_ProcessContext.h">
+      <Filter>Juce Modules\juce_dsp\processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_ProcessorChain.h">
+      <Filter>Juce Modules\juce_dsp\processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_ProcessorDuplicator.h">
+      <Filter>Juce Modules\juce_dsp\processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_ProcessorWrapper.h">
+      <Filter>Juce Modules\juce_dsp\processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_StateVariableFilter.h">
+      <Filter>Juce Modules\juce_dsp\processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_WaveShaper.h">
+      <Filter>Juce Modules\juce_dsp\processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\juce_dsp.h">
+      <Filter>Juce Modules\juce_dsp</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_events\broadcasters\juce_ActionBroadcaster.h">
       <Filter>Juce Modules\juce_events\broadcasters</Filter>
     </ClInclude>
@@ -3415,6 +3592,12 @@
       <Filter>Juce Modules\juce_gui_basics\layout</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_FlexItem.h">
+      <Filter>Juce Modules\juce_gui_basics\layout</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_Grid.h">
+      <Filter>Juce Modules\juce_gui_basics\layout</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_GridItem.h">
       <Filter>Juce Modules\juce_gui_basics\layout</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_GroupComponent.h">

@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 #if ! (defined (DOXYGEN) || JUCE_EXCEPTIONS_DISABLED)
 namespace HeapBlockHelper
@@ -148,6 +149,13 @@ public:
         freed by calling the free() method.
     */
     inline operator ElementType*() const noexcept                           { return data; }
+
+
+    /** Returns a raw pointer to the allocated data.
+        This may be a null pointer if the data hasn't yet been allocated, or if it has been
+        freed by calling the free() method.
+    */
+    inline ElementType* get() const noexcept                                { return data; }
 
     /** Returns a raw pointer to the allocated data.
         This may be a null pointer if the data hasn't yet been allocated, or if it has been
@@ -300,3 +308,5 @@ private:
     JUCE_PREVENT_HEAP_ALLOCATION // Creating a 'new HeapBlock' would be missing the point!
    #endif
 };
+
+} // namespace juce

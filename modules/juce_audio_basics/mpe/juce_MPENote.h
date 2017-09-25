@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -172,3 +172,5 @@ struct JUCE_API  MPENote
     /** Returns true if two notes are different notes, determined by their unique ID. */
     bool operator!= (const MPENote& other) const noexcept;
 };
+
+} // namespace juce

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 PathStrokeType::PathStrokeType (float strokeThickness) noexcept
     : thickness (strokeThickness), jointStyle (mitered), endStyle (butt)
 {
@@ -738,3 +741,5 @@ void PathStrokeType::createStrokeWithArrowheads (Path& destPath,
     PathStrokeHelpers::createStroke (thickness, jointStyle, endStyle,
                                      destPath, sourcePath, transform, extraAccuracy, &head);
 }
+
+} // namespace juce

@@ -63,11 +63,13 @@ public:
 
     virtual void getEditableProperties (Component* component,
                                         JucerDocument& document,
-                                        Array<PropertyComponent*>& props);
+                                        Array<PropertyComponent*>& props,
+                                        bool multipleSelected);
 
     virtual void addPropertiesToPropertyPanel (Component* component,
                                                JucerDocument& document,
-                                               PropertyPanel& panel);
+                                               PropertyPanel& panel,
+                                               bool multipleSelected);
 
 
     void registerEditableColour (int colourId,

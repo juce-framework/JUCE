@@ -20,11 +20,14 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class ThreadPool::ThreadPoolThread  : public Thread
 {
 public:
-    ThreadPoolThread (ThreadPool& p, size_t stackSize = 0)
-       : Thread ("Pool", stackSize), currentJob (nullptr), pool (p)
+    ThreadPoolThread (ThreadPool& p, size_t stackSize)
+       : Thread ("Pool", stackSize), pool (p)
     {
     }
 
@@ -35,16 +38,14 @@ public:
                 wait (500);
     }
 
-    ThreadPoolJob* volatile currentJob;
+    ThreadPoolJob* volatile currentJob = nullptr;
     ThreadPool& pool;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPoolThread)
 };
 
 //==============================================================================
-ThreadPoolJob::ThreadPoolJob (const String& name)
-    : jobName (name), pool (nullptr),
-      shouldStop (false), isActive (false), shouldBeDeleted (false)
+ThreadPoolJob::ThreadPoolJob (const String& name)  : jobName (name)
 {
 }
 
@@ -72,7 +73,7 @@ void ThreadPoolJob::signalJobShouldExit()
 
 ThreadPoolJob* ThreadPoolJob::getCurrentThreadPoolJob()
 {
-    if (ThreadPool::ThreadPoolThread* t = dynamic_cast<ThreadPool::ThreadPoolThread*> (Thread::getCurrentThread()))
+    if (auto* t = dynamic_cast<ThreadPool::ThreadPoolThread*> (Thread::getCurrentThread()))
         return t->currentJob;
 
     return nullptr;
@@ -102,17 +103,17 @@ void ThreadPool::createThreads (int numThreads, size_t threadStackSize)
     for (int i = jmax (1, numThreads); --i >= 0;)
         threads.add (new ThreadPoolThread (*this, threadStackSize));
 
-    for (int i = threads.size(); --i >= 0;)
-        threads.getUnchecked(i)->startThread();
+    for (auto* t : threads)
+        t->startThread();
 }
 
 void ThreadPool::stopThreads()
 {
-    for (int i = threads.size(); --i >= 0;)
-        threads.getUnchecked(i)->signalThreadShouldExit();
+    for (auto* t : threads)
+        t->signalThreadShouldExit();
 
-    for (int i = threads.size(); --i >= 0;)
-        threads.getUnchecked(i)->stopThread (500);
+    for (auto* t : threads)
+        t->stopThread (500);
 }
 
 void ThreadPool::addJob (ThreadPoolJob* const job, const bool deleteJobWhenFinished)
@@ -132,44 +133,83 @@ void ThreadPool::addJob (ThreadPoolJob* const job, const bool deleteJobWhenFinis
             jobs.add (job);
         }
 
-        for (int i = threads.size(); --i >= 0;)
-            threads.getUnchecked(i)->notify();
+        for (auto* t : threads)
+            t->notify();
     }
 }
 
-int ThreadPool::getNumJobs() const
+void ThreadPool::addJob (std::function<ThreadPoolJob::JobStatus()> jobToRun)
+{
+    struct LambdaJobWrapper  : public ThreadPoolJob
+    {
+        LambdaJobWrapper (std::function<ThreadPoolJob::JobStatus()> j) : ThreadPoolJob ("lambda"), job (j) {}
+        JobStatus runJob() override      { return job(); }
+
+        std::function<ThreadPoolJob::JobStatus()> job;
+    };
+
+    addJob (new LambdaJobWrapper (jobToRun), true);
+}
+
+void ThreadPool::addJob (std::function<void()> jobToRun)
+{
+    struct LambdaJobWrapper  : public ThreadPoolJob
+    {
+        LambdaJobWrapper (std::function<void()> j) : ThreadPoolJob ("lambda"), job (j) {}
+        JobStatus runJob() override      { job(); return ThreadPoolJob::jobHasFinished; }
+
+        std::function<void()> job;
+    };
+
+    addJob (new LambdaJobWrapper (jobToRun), true);
+}
+
+int ThreadPool::getNumJobs() const noexcept
 {
     return jobs.size();
 }
 
-int ThreadPool::getNumThreads() const
+int ThreadPool::getNumThreads() const noexcept
 {
     return threads.size();
 }
 
-ThreadPoolJob* ThreadPool::getJob (const int index) const
+ThreadPoolJob* ThreadPool::getJob (int index) const noexcept
 {
     const ScopedLock sl (lock);
     return jobs [index];
 }
 
-bool ThreadPool::contains (const ThreadPoolJob* const job) const
+bool ThreadPool::contains (const ThreadPoolJob* const job) const noexcept
 {
     const ScopedLock sl (lock);
     return jobs.contains (const_cast<ThreadPoolJob*> (job));
 }
 
-bool ThreadPool::isJobRunning (const ThreadPoolJob* const job) const
+bool ThreadPool::isJobRunning (const ThreadPoolJob* const job) const noexcept
 {
     const ScopedLock sl (lock);
     return jobs.contains (const_cast<ThreadPoolJob*> (job)) && job->isActive;
+}
+
+void ThreadPool::moveJobToFront (const ThreadPoolJob* job) noexcept
+{
+    const ScopedLock sl (lock);
+
+    if (! job->isActive)
+    {
+        auto index = jobs.indexOf (const_cast<ThreadPoolJob*> (job));
+
+        if (index > 0)
+            jobs.move (index, 0);
+    }
 }
 
 bool ThreadPool::waitForJobToFinish (const ThreadPoolJob* const job, const int timeOutMs) const
 {
     if (job != nullptr)
     {
-        const uint32 start = Time::getMillisecondCounter();
+        auto start = Time::getMillisecondCounter();
 
         while (contains (job))
         {
@@ -217,7 +257,7 @@ bool ThreadPool::removeJob (ThreadPoolJob* const job,
 bool ThreadPool::removeAllJobs (const bool interruptRunningJobs, const int timeOutMs,
                                 ThreadPool::JobSelector* const selectedJobsToRemove)
 {
-    Array <ThreadPoolJob*> jobsToWaitFor;
+    Array<ThreadPoolJob*> jobsToWaitFor;
 
     {
         OwnedArray<ThreadPoolJob> deletionList;
@@ -227,7 +267,7 @@ bool ThreadPool::removeAllJobs (const bool interruptRunningJobs, const int timeO
 
             for (int i = jobs.size(); --i >= 0;)
             {
-                ThreadPoolJob* const job = jobs.getUnchecked(i);
+                auto* job = jobs.getUnchecked(i);
 
                 if (selectedJobsToRemove == nullptr || selectedJobsToRemove->isJobSuitable (job))
                 {
@@ -248,13 +288,13 @@ bool ThreadPool::removeAllJobs (const bool interruptRunningJobs, const int timeO
         }
     }
 
-    const uint32 start = Time::getMillisecondCounter();
+    auto start = Time::getMillisecondCounter();
 
     for (;;)
     {
         for (int i = jobsToWaitFor.size(); --i >= 0;)
         {
-            ThreadPoolJob* const job = jobsToWaitFor.getUnchecked (i);
+            auto* job = jobsToWaitFor.getUnchecked (i);
 
             if (! isJobRunning (job))
                 jobsToWaitFor.remove (i);
@@ -277,12 +317,9 @@ StringArray ThreadPool::getNamesOfAllJobs (const bool onlyReturnActiveJobs) cons
     StringArray s;
     const ScopedLock sl (lock);
 
-    for (int i = 0; i < jobs.size(); ++i)
-    {
-        const ThreadPoolJob* const job = jobs.getUnchecked(i);
+    for (auto* job : jobs)
         if (job->isActive || ! onlyReturnActiveJobs)
             s.add (job->getJobName());
-    }
 
     return s;
 }
@@ -291,8 +328,8 @@ bool ThreadPool::setThreadPriorities (const int newPriority)
 {
     bool ok = true;
 
-    for (int i = threads.size(); --i >= 0;)
-        if (! threads.getUnchecked(i)->setPriority (newPriority))
+    for (auto* t : threads)
+        if (! t->setPriority (newPriority))
             ok = false;
 
     return ok;
@@ -307,20 +344,21 @@ ThreadPoolJob* ThreadPool::pickNextJobToRun()
 
         for (int i = 0; i < jobs.size(); ++i)
         {
-            ThreadPoolJob* job = jobs[i];
-
-            if (job != nullptr && ! job->isActive)
+            if (auto* job = jobs[i])
             {
-                if (job->shouldStop)
+                if (! job->isActive)
                 {
-                    jobs.remove (i);
-                    addToDeleteList (deletionList, job);
-                    --i;
-                    continue;
-                }
+                    if (job->shouldStop)
+                    {
+                        jobs.remove (i);
+                        addToDeleteList (deletionList, job);
+                        --i;
+                        continue;
+                    }
 
-                job->isActive = true;
-                return job;
+                    job->isActive = true;
+                    return job;
+                }
             }
         }
     }
@@ -330,9 +368,9 @@ ThreadPoolJob* ThreadPool::pickNextJobToRun()
 
 bool ThreadPool::runNextJob (ThreadPoolThread& thread)
 {
-    if (ThreadPoolJob* const job = pickNextJobToRun())
+    if (auto* job = pickNextJobToRun())
     {
-        ThreadPoolJob::JobStatus result = ThreadPoolJob::jobHasFinished;
+        auto result = ThreadPoolJob::jobHasFinished;
         thread.currentJob = job;
 
         try
@@ -384,3 +422,5 @@ void ThreadPool::addToDeleteList (OwnedArray<ThreadPoolJob>& deletionList, Threa
     if (job->shouldBeDeleted)
         deletionList.add (job);
 }
+
+} // namespace juce

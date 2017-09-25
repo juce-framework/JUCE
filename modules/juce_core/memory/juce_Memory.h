@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 /** Fills a block of memory with zeros. */
@@ -72,7 +73,6 @@ inline Type readUnaligned (const void* srcPtr) noexcept
 {
     Type value;
     memcpy (&value, srcPtr, sizeof (Type));
-
     return value;
 }
 
@@ -80,7 +80,7 @@ inline Type readUnaligned (const void* srcPtr) noexcept
 template <typename Type>
 inline void writeUnaligned (void* dstPtr, Type value) noexcept
 {
-    memcpy (dstPtr, &value, sizeof(Type));
+    memcpy (dstPtr, &value, sizeof (Type));
 }
 
 //==============================================================================
@@ -140,3 +140,5 @@ inline void writeUnaligned (void* dstPtr, Type value) noexcept
 #ifndef juce_UseDebuggingNewOperator
  #define juce_UseDebuggingNewOperator
 #endif
+
+} // namespace juce

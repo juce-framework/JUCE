@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_USE_CDREADER
 
 int AudioCDReader::getNumTracks() const
@@ -57,3 +60,5 @@ int AudioCDReader::getCDDBId()
 }
 
 #endif
+
+} // namespace juce

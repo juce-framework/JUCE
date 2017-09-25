@@ -20,6 +20,8 @@
   ==============================================================================
 */
 
+namespace juce
+{
 
 BitmapLEDProgram::BitmapLEDProgram (Block& b)  : Program (b) {}
 
@@ -81,3 +83,5 @@ juce::String BitmapLEDProgram::getLittleFootProgram()
     jassertfalse;
     return {};
 }
+
+} // namespace juce

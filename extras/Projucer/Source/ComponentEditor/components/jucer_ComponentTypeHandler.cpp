@@ -78,7 +78,7 @@ ComponentOverlayComponent* ComponentTypeHandler::createOverlayComponent (Compone
 
 static void dummyMenuCallback (int, int) {}
 
-void ComponentTypeHandler::showPopupMenu (Component*, ComponentLayout&)
+void ComponentTypeHandler::showPopupMenu (Component*, ComponentLayout& layout)
 {
     PopupMenu m;
 
@@ -87,6 +87,16 @@ void ComponentTypeHandler::showPopupMenu (Component*, ComponentLayout&)
     m.addCommandItem (commandManager, JucerCommandIDs::toFront);
     m.addCommandItem (commandManager, JucerCommandIDs::toBack);
     m.addSeparator();
+
+    if (layout.getSelectedSet().getNumSelected() > 1)
+    {
+        m.addCommandItem (commandManager, JucerCommandIDs::alignTop);
+        m.addCommandItem (commandManager, JucerCommandIDs::alignRight);
+        m.addCommandItem (commandManager, JucerCommandIDs::alignBottom);
+        m.addCommandItem (commandManager, JucerCommandIDs::alignLeft);
+        m.addSeparator();
+    }
+
     m.addCommandItem (commandManager, StandardApplicationCommandIDs::cut);
     m.addCommandItem (commandManager, StandardApplicationCommandIDs::copy);
     m.addCommandItem (commandManager, StandardApplicationCommandIDs::paste);
@@ -346,7 +356,12 @@ public:
 
     void setPosition (const RelativePositionedRectangle& newPos)
     {
-        document.getComponentLayout()->setComponentPosition (component, newPos, true);
+        auto* l = document.getComponentLayout();
+
+        if (l->getSelectedSet().getNumSelected() > 1)
+            positionOtherSelectedComponents (ComponentTypeHandler::getComponentPosition (component), newPos);
+
+        l->setComponentPosition (component, newPos, true);
     }
 
     RelativePositionedRectangle getPosition() const
@@ -356,6 +371,41 @@ public:
 
 private:
     JucerDocument& document;
+
+    void positionOtherSelectedComponents (const RelativePositionedRectangle& oldPos, const RelativePositionedRectangle& newPos)
+    {
+        for (auto* s : document.getComponentLayout()->getSelectedSet())
+        {
+            if (s != component)
+            {
+                auto currentPos = ComponentTypeHandler::getComponentPosition (s);
+                auto diff = 0.0;
+
+                if (dimension == ComponentPositionDimension::componentX)
+                {
+                    diff = newPos.rect.getX() - oldPos.rect.getX();
+                    currentPos.rect.setX (currentPos.rect.getX() + diff);
+                }
+                else if (dimension == ComponentPositionDimension::componentY)
+                {
+                    diff = newPos.rect.getY() - oldPos.rect.getY();
+                    currentPos.rect.setY (currentPos.rect.getY() + diff);
+                }
+                else if (dimension == ComponentPositionDimension::componentWidth)
+                {
+                    diff = newPos.rect.getWidth() - oldPos.rect.getWidth();
+                    currentPos.rect.setWidth (currentPos.rect.getWidth() + diff);
+                }
+                else if (dimension == ComponentPositionDimension::componentHeight)
+                {
+                    diff = newPos.rect.getHeight() - oldPos.rect.getHeight();
+                    currentPos.rect.setHeight (currentPos.rect.getHeight() + diff);
+                }
+
+                document.getComponentLayout()->setComponentPosition (s, currentPos, true);
+            }
+        }
+    }
 };
 
 
@@ -413,27 +463,32 @@ private:
 //==============================================================================
 void ComponentTypeHandler::getEditableProperties (Component* component,
                                                   JucerDocument& document,
-                                                  Array<PropertyComponent*>& props)
+                                                  Array<PropertyComponent*>& props,
+                                                  bool multipleSelected)
 {
-    props.add (new ComponentMemberNameProperty (component, document));
-    props.add (new ComponentNameProperty (component, document));
-    props.add (new ComponentVirtualClassProperty (component, document));
+    if (! multipleSelected)
+    {
+        props.add (new ComponentMemberNameProperty (component, document));
+        props.add (new ComponentNameProperty (component, document));
+        props.add (new ComponentVirtualClassProperty (component, document));
+
+        if (dynamic_cast<SettableTooltipClient*> (component) != nullptr)
+            props.add (new TooltipProperty (component, document));
+
+        props.add (new FocusOrderProperty (component, document));
+    }
 
     props.add (new ComponentPositionProperty (component, document, "x", ComponentPositionProperty::componentX));
     props.add (new ComponentPositionProperty (component, document, "y", ComponentPositionProperty::componentY));
     props.add (new ComponentPositionProperty (component, document, "width", ComponentPositionProperty::componentWidth));
     props.add (new ComponentPositionProperty (component, document, "height", ComponentPositionProperty::componentHeight));
-
-    if (dynamic_cast<SettableTooltipClient*> (component) != nullptr)
-        props.add (new TooltipProperty (component, document));
-
-    props.add (new FocusOrderProperty (component, document));
 }
 
-void ComponentTypeHandler::addPropertiesToPropertyPanel (Component* comp, JucerDocument& document, PropertyPanel& panel)
+void ComponentTypeHandler::addPropertiesToPropertyPanel (Component* comp, JucerDocument& document,
+                                                         PropertyPanel& panel, bool multipleSelected)
 {
     Array <PropertyComponent*> props;
-    getEditableProperties (comp, document, props);
+    getEditableProperties (comp, document, props, multipleSelected);
 
     panel.addSection (getClassName (comp), props);
 }

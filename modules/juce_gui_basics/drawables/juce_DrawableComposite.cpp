@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 DrawableComposite::DrawableComposite()
     : bounds (Point<float>(), Point<float> (100.0f, 0.0f), Point<float> (0.0f, 100.0f))
 {
@@ -327,3 +330,5 @@ Path DrawableComposite::getOutlineAsPath() const
     p.applyTransform (getTransform());
     return p;
 }
+
+} // namespace juce

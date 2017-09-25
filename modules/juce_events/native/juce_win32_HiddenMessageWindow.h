@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 class HiddenMessageWindow
@@ -80,7 +81,7 @@ public:
 private:
     static LONG_PTR getImprobableWindowNumber() noexcept
     {
-        static LONG_PTR number = (LONG_PTR) Random::getSystemRandom().nextInt64();
+        static auto number = (LONG_PTR) Random().nextInt64();
         return number;
     }
 };
@@ -130,3 +131,5 @@ private:
         systemDeviceChanged();
     }
 };
+
+} // namespace juce

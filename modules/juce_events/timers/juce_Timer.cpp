@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class Timer::TimerThread  : private Thread,
                             private DeletedAtShutdown,
                             private AsyncUpdater
@@ -364,3 +367,5 @@ void JUCE_CALLTYPE Timer::callAfterDelay (int milliseconds, std::function<void()
 {
     new LambdaInvoker (milliseconds, f);
 }
+
+} // namespace juce

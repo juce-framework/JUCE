@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ToolbarButton::ToolbarButton (const int iid, const String& buttonText,
                               Drawable* const normalIm, Drawable* const toggledOnIm)
    : ToolbarItemComponent (iid, buttonText, true),
@@ -107,3 +110,5 @@ void ToolbarButton::buttonStateChanged()
 {
     setCurrentImage (getImageToUse());
 }
+
+} // namespace juce

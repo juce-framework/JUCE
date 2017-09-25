@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 /**
     Components derived from this class can have files dropped onto them by an external application.
@@ -100,3 +101,5 @@ public:
     */
     virtual void filesDropped (const StringArray& files, int x, int y) = 0;
 };
+
+} // namespace juce

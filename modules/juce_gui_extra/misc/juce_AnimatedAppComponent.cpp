@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 AnimatedAppComponent::AnimatedAppComponent()
     : lastUpdateTime (Time::getCurrentTime()), totalUpdates (0)
 {
@@ -48,3 +51,5 @@ void AnimatedAppComponent::timerCallback()
     repaint();
     lastUpdateTime = Time::getCurrentTime();
 }
+
+} // namespace juce

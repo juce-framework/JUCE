@@ -105,10 +105,13 @@ struct SlidersPage  : public Component
         : hintLabel ("hint", "Try right-clicking on a slider for an options menu. \n\n"
                              "Also, holding down CTRL while dragging will turn on a slider's velocity-sensitive mode")
     {
+        Rectangle<int> layoutArea { 20, 20, 580, 430 };
+        auto sliderArea = layoutArea.removeFromTop (320);
+
         Slider* s = createSlider (false);
         s->setSliderStyle (Slider::LinearVertical);
         s->setTextBoxStyle (Slider::TextBoxBelow, false, 100, 20);
-        s->setBounds (10, 25, 70, 200);
+        s->setBounds (sliderArea.removeFromLeft (70));
         s->setDoubleClickReturnValue (true, 50.0); // double-clicking this slider will set it to 50.0
         s->setTextValueSuffix (" units");
 
@@ -117,67 +120,84 @@ struct SlidersPage  : public Component
         s->setVelocityBasedMode (true);
         s->setSkewFactor (0.5);
         s->setTextBoxStyle (Slider::TextBoxAbove, true, 100, 20);
-        s->setBounds (85, 25, 70, 200);
+        s->setBounds (sliderArea.removeFromLeft (70));
         s->setTextValueSuffix (" rels");
+
+        sliderArea.removeFromLeft (20);
+        auto horizonalSliderArea = sliderArea.removeFromLeft (180);
 
         s = createSlider (true);
         s->setSliderStyle (Slider::LinearHorizontal);
         s->setTextBoxStyle (Slider::TextBoxLeft, false, 80, 20);
-        s->setBounds (180, 35, 150, 20);
+        s->setBounds (horizonalSliderArea.removeFromTop (20));
 
         s = createSlider (false);
         s->setSliderStyle (Slider::LinearHorizontal);
         s->setTextBoxStyle (Slider::NoTextBox, false, 0, 0);
-        s->setBounds (180, 65, 150, 20);
-        s->setPopupDisplayEnabled (true, this);
+        horizonalSliderArea.removeFromTop (20);
+        s->setBounds (horizonalSliderArea.removeFromTop (20));
+        s->setPopupDisplayEnabled (true, false, this);
         s->setTextValueSuffix (" nuns required to change a lightbulb");
+
+        s = createSlider (false);
+        s->setSliderStyle (Slider::LinearHorizontal);
+        s->setTextBoxStyle (Slider::TextEntryBoxPosition::TextBoxAbove, false, 70, 20);
+        horizonalSliderArea.removeFromTop (20);
+        s->setBounds (horizonalSliderArea.removeFromTop (50));
+        s->setPopupDisplayEnabled (true, false, this);
 
         s = createSlider (false);
         s->setSliderStyle (Slider::IncDecButtons);
         s->setTextBoxStyle (Slider::TextBoxLeft, false, 50, 20);
-        s->setBounds (180, 105, 100, 20);
+        horizonalSliderArea.removeFromTop (20);
+        s->setBounds (horizonalSliderArea.removeFromTop (20));
         s->setIncDecButtonsMode (Slider::incDecButtonsDraggable_Vertical);
 
         s = createSlider (false);
         s->setSliderStyle (Slider::Rotary);
         s->setRotaryParameters (float_Pi * 1.2f, float_Pi * 2.8f, false);
         s->setTextBoxStyle (Slider::TextBoxRight, false, 70, 20);
-        s->setBounds (190, 145, 120, 40);
+        horizonalSliderArea.removeFromTop (15);
+        s->setBounds (horizonalSliderArea.removeFromTop (70));
         s->setTextValueSuffix (" mm");
 
         s = createSlider (false);
         s->setSliderStyle (Slider::LinearBar);
-        s->setBounds (180, 195, 100, 30);
+        horizonalSliderArea.removeFromTop (10);
+        s->setBounds (horizonalSliderArea.removeFromTop (30));
         s->setTextValueSuffix (" gallons");
+
+        sliderArea.removeFromLeft (20);
+        auto twoValueSliderArea = sliderArea.removeFromLeft (180);
 
         s = createSlider (false);
         s->setSliderStyle (Slider::TwoValueHorizontal);
-        s->setBounds (360, 20, 160, 40);
-
-        s = createSlider (false);
-        s->setSliderStyle (Slider::TwoValueVertical);
-        s->setBounds (360, 110, 40, 160);
+        s->setBounds (twoValueSliderArea.removeFromTop (40));
 
         s = createSlider (false);
         s->setSliderStyle (Slider::ThreeValueHorizontal);
-        s->setBounds (360, 70, 160, 40);
+        s->setPopupDisplayEnabled (true, false, this);
+        twoValueSliderArea.removeFromTop (10);
+        s->setBounds (twoValueSliderArea.removeFromTop (40));
+
+        s = createSlider (false);
+        s->setSliderStyle (Slider::TwoValueVertical);
+        twoValueSliderArea.removeFromLeft (30);
+        s->setBounds (twoValueSliderArea.removeFromLeft (40));
 
         s = createSlider (false);
         s->setSliderStyle (Slider::ThreeValueVertical);
-        s->setBounds (440, 110, 40, 160);
+        s->setPopupDisplayEnabled (true, false, this);
+        twoValueSliderArea.removeFromLeft (30);
+        s->setBounds (twoValueSliderArea.removeFromLeft (40));
 
         s = createSlider (false);
         s->setSliderStyle (Slider::LinearBarVertical);
         s->setTextBoxStyle (Slider::NoTextBox, false, 0, 0);
-        s->setBounds (540, 35, 20, 230);
-        s->setPopupDisplayEnabled (true, this);
+        sliderArea.removeFromLeft (20);
+        s->setBounds (sliderArea.removeFromLeft (20));
+        s->setPopupDisplayEnabled (true, true, this);
         s->setTextValueSuffix (" mickles in a muckle");
-
-        for (int i = 7; i <= 10; ++i)
-        {
-            sliders.getUnchecked(i)->setTextBoxStyle (Slider::NoTextBox, false, 0, 0);
-            sliders.getUnchecked(i)->setPopupDisplayEnabled (true, this);
-        }
 
         /* Here, we'll create a Value object, and tell a bunch of our sliders to use it as their
            value source. By telling them all to share the same Value, they'll stay in sync with
@@ -188,7 +208,7 @@ struct SlidersPage  : public Component
         */
         Value sharedValue;
         sharedValue = Random::getSystemRandom().nextDouble() * 100;
-        for (int i = 0; i < 7; ++i)
+        for (int i = 0; i < 8; ++i)
             sliders.getUnchecked(i)->getValueObject().referTo (sharedValue);
 
         // ..and now we'll do the same for all our min/max slider values..
@@ -196,13 +216,15 @@ struct SlidersPage  : public Component
         sharedValueMin = Random::getSystemRandom().nextDouble() * 40.0;
         sharedValueMax = Random::getSystemRandom().nextDouble() * 40.0 + 60.0;
 
-        for (int i = 7; i <= 10; ++i)
+        for (int i = 8; i <= 11; ++i)
         {
-            sliders.getUnchecked(i)->getMaxValueObject().referTo (sharedValueMax);
-            sliders.getUnchecked(i)->getMinValueObject().referTo (sharedValueMin);
+            auto* selectedSlider = sliders.getUnchecked(i);
+            selectedSlider->setTextBoxStyle (Slider::NoTextBox, false, 0, 0);
+            selectedSlider->getMaxValueObject().referTo (sharedValueMax);
+            selectedSlider->getMinValueObject().referTo (sharedValueMin);
         }
 
-        hintLabel.setBounds (20, 245, 350, 150);
+        hintLabel.setBounds (layoutArea);
         addAndMakeVisible (hintLabel);
     }
 
@@ -226,7 +248,7 @@ private:
 
 //==============================================================================
 struct ButtonsPage   : public Component,
-                       public ButtonListener
+                       public Button::Listener
 {
     ButtonsPage()
     {
@@ -459,8 +481,8 @@ struct MiscPage   : public Component
 
 //==============================================================================
 class ToolbarDemoComp   : public Component,
-                          public SliderListener,
-                          public ButtonListener
+                          public Slider::Listener,
+                          public Button::Listener
 {
 public:
     ToolbarDemoComp()
@@ -943,7 +965,7 @@ private:
     // This is a custom component containing a combo box, which we're going to put inside
     // our table's "rating" column.
     class RatingColumnCustomComponent    : public Component,
-                                           private ComboBoxListener
+                                           private ComboBox::Listener
     {
     public:
         RatingColumnCustomComponent (TableDemoComponent& td)  : owner (td)

@@ -24,10 +24,7 @@
   ==============================================================================
 */
 
-#pragma once
 #define JUCE_VSTINTERFACE_H_INCLUDED
-
-#include "../../juce_core/juce_core.h"
 
 using namespace juce;
 

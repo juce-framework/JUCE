@@ -24,12 +24,16 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 struct FFT::Instance
 {
     virtual ~Instance() {}
     virtual void perform (const Complex<float>* input, Complex<float>* output, bool inverse) const noexcept = 0;
-    virtual void performRealOnlyForwardTransform (float*) const noexcept = 0;
+    virtual void performRealOnlyForwardTransform (float*, bool) const noexcept = 0;
     virtual void performRealOnlyInverseTransform (float*) const noexcept = 0;
 };
 
@@ -131,7 +135,7 @@ struct FFTFallback  : public FFT::Instance
 
     const size_t maxFFTScratchSpaceToAlloca = 256 * 1024;
 
-    void performRealOnlyForwardTransform (float* d) const noexcept override
+    void performRealOnlyForwardTransform (float* d, bool) const noexcept override
     {
         if (size == 1)
             return;
@@ -180,7 +184,12 @@ struct FFTFallback  : public FFT::Instance
 
     void performRealOnlyInverseTransform (Complex<float>* scratch, float* d) const noexcept
     {
-        perform (reinterpret_cast<const Complex<float>*> (d), scratch, true);
+        auto* input = reinterpret_cast<Complex<float>*> (d);
+
+        for (auto i = size >> 1; i < size; ++i)
+            input[i] = std::conj (input[size - i]);
+
+        perform (input, scratch, true);
 
         for (int i = 0; i < size; ++i)
         {
@@ -464,7 +473,7 @@ struct AppleFFT  : public FFT::Instance
         vDSP_vsmul ((float*) output, 1, &factor, (float*) output, 1, static_cast<size_t> (size << 1));
     }
 
-    void performRealOnlyForwardTransform (float* inoutData) const noexcept override
+    void performRealOnlyForwardTransform (float* inoutData, bool ignoreNegativeFreqs) const noexcept override
     {
         auto size = (1 << order);
         auto* inout = reinterpret_cast<Complex<float>*> (inoutData);
@@ -473,7 +482,8 @@ struct AppleFFT  : public FFT::Instance
         inoutData[size] = 0.0f;
         vDSP_fft_zrip (fftSetup, &splitInOut, 2, order, kFFTDirection_Forward);
         vDSP_vsmul (inoutData, 1, &forwardNormalisation, inoutData, 1, static_cast<size_t> (size << 1));
-        mirrorResult (inout);
+
+        mirrorResult (inout, ignoreNegativeFreqs);
     }
 
     void performRealOnlyInverseTransform (float* inoutData) const noexcept override
@@ -495,7 +505,7 @@ struct AppleFFT  : public FFT::Instance
 
 private:
     //==============================================================================
-    void mirrorResult (Complex<float>* out) const noexcept
+    void mirrorResult (Complex<float>* out, bool ignoreNegativeFreqs) const noexcept
     {
         auto size = (1 << order);
         auto i = size >> 1;
@@ -506,8 +516,9 @@ private:
         out[i++] = { out[0].imag(), 0.0 };
         out[0]   = { out[0].real(), 0.0 };
 
-        for (; i < size; ++i)
-            out[i] = std::conj (out[size - i]);
+        if (! ignoreNegativeFreqs)
+            for (; i < size; ++i)
+                out[i] = std::conj (out[size - i]);
     }
 
     static DSPSplitComplex toSplitComplex (Complex<float>* data) noexcept
@@ -671,7 +682,7 @@ struct FFTWImpl  : public FFT::Instance
         }
     }
 
-    void performRealOnlyForwardTransform (float* inputOutputData) const noexcept override
+    void performRealOnlyForwardTransform (float* inputOutputData, bool ignoreNegativeFreqs) const noexcept override
     {
         if (order == 0)
             return;
@@ -682,8 +693,9 @@ struct FFTWImpl  : public FFT::Instance
 
         auto size = (1 << order);
 
-        for (auto i = size >> 1; i < size; ++i)
-            out[i] = std::conj (out[size - i]);
+        if (! ignoreNegativeFreqs)
+            for (auto i = size >> 1; i < size; ++i)
+                out[i] = std::conj (out[size - i]);
     }
 
     void performRealOnlyInverseTransform (float* inputOutputData) const noexcept override
@@ -761,7 +773,7 @@ struct IntelFFT  : public FFT::Instance
             DftiComputeForward (c2c, (void*) input, output);
     }
 
-    void performRealOnlyForwardTransform (float* inputOutputData) const noexcept override
+    void performRealOnlyForwardTransform (float* inputOutputData, bool ignoreNegativeFreqs) const noexcept override
     {
         if (order == 0)
             return;
@@ -771,8 +783,9 @@ struct IntelFFT  : public FFT::Instance
         auto* out = reinterpret_cast<Complex<float>*> (inputOutputData);
         auto size = (1 << order);
 
-        for (auto i = size >> 1; i < size; ++i)
-            out[i] = std::conj (out[size - i]);
+        if (! ignoreNegativeFreqs)
+            for (auto i = size >> 1; i < size; ++i)
+                out[i] = std::conj (out[size - i]);
     }
 
     void performRealOnlyInverseTransform (float* inputOutputData) const noexcept override
@@ -802,10 +815,10 @@ void FFT::perform (const Complex<float>* input, Complex<float>* output, bool inv
         engine->perform (input, output, inverse);
 }
 
-void FFT::performRealOnlyForwardTransform (float* inputOutputData) const noexcept
+void FFT::performRealOnlyForwardTransform (float* inputOutputData, bool ignoreNeagtiveFreqs) const noexcept
 {
     if (engine != nullptr)
-        engine->performRealOnlyForwardTransform (inputOutputData);
+        engine->performRealOnlyForwardTransform (inputOutputData, ignoreNeagtiveFreqs);
 }
 
 void FFT::performRealOnlyInverseTransform (float* inputOutputData) const noexcept
@@ -827,3 +840,6 @@ void FFT::performFrequencyOnlyForwardTransform (float* inputOutputData) const no
 
     zeromem (&inputOutputData[size], sizeof (float) * static_cast<size_t> (size));
 }
+
+} // namespace dsp
+} // namespace juce

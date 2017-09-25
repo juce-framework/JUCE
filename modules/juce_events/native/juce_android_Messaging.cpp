@@ -20,8 +20,63 @@
   ==============================================================================
 */
 
-void MessageManager::doPlatformSpecificInitialisation() {}
-void MessageManager::doPlatformSpecificShutdown() {}
+namespace juce
+{
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  METHOD (constructor,           "<init>",           "()V") \
+  METHOD (post,                  "post",             "(Ljava/lang/Runnable;)Z") \
+
+DECLARE_JNI_CLASS (JNIHandler, "android/os/Handler");
+#undef JNI_CLASS_MEMBERS
+
+
+//==============================================================================
+namespace Android
+{
+    class Runnable : public juce::AndroidInterfaceImplementer
+    {
+    public:
+        virtual void run() = 0;
+
+    private:
+        jobject invoke (jobject proxy, jobject method, jobjectArray args) override
+        {
+            auto* env = getEnv();
+            auto methodName = juce::juceString ((jstring) env->CallObjectMethod (method, Method.getName));
+
+            if (methodName == "run")
+            {
+                run();
+                return nullptr;
+            }
+
+            // invoke base class
+            return AndroidInterfaceImplementer::invoke (proxy, method, args);
+        }
+    };
+
+    struct Handler
+    {
+        juce_DeclareSingleton (Handler, false)
+
+        Handler() : nativeHandler (getEnv()->NewObject (JNIHandler, JNIHandler.constructor)) {}
+
+        bool post (Runnable* runnable)
+        {
+            return (getEnv()->CallBooleanMethod (nativeHandler.get(), JNIHandler.post,
+                                                 CreateJavaInterface (runnable, "java/lang/Runnable").get()) != 0);
+        }
+
+        GlobalRef nativeHandler;
+    };
+
+    juce_ImplementSingleton (Handler);
+}
+
+//==============================================================================
+void MessageManager::doPlatformSpecificInitialisation() { Android::Handler::getInstance(); }
+void MessageManager::doPlatformSpecificShutdown()       {}
 
 //==============================================================================
 bool MessageManager::dispatchNextMessageOnSystemQueue (const bool)
@@ -33,26 +88,37 @@ bool MessageManager::dispatchNextMessageOnSystemQueue (const bool)
 }
 
 //==============================================================================
+struct AndroidMessageCallback : public Android::Runnable
+{
+    AndroidMessageCallback (const MessageManager::MessageBase::Ptr& messageToDeliver)
+        : message (messageToDeliver)
+    {}
+
+    AndroidMessageCallback (MessageManager::MessageBase::Ptr && messageToDeliver)
+        : message (static_cast<MessageManager::MessageBase::Ptr&&> (messageToDeliver))
+    {}
+
+    void run() override
+    {
+        JUCE_TRY
+        {
+            message->messageCallback();
+
+            // delete the message already here as Java will only run the
+            // destructor of this runnable the next time the garbage
+            // collector kicks in.
+            message = nullptr;
+        }
+        JUCE_CATCH_EXCEPTION
+    }
+
+    MessageManager::MessageBase::Ptr message;
+};
+
 bool MessageManager::postMessageToSystemQueue (MessageManager::MessageBase* const message)
 {
-    message->incReferenceCount();
-    android.activity.callVoidMethod (JuceAppActivity.postMessage, (jlong) (pointer_sized_uint) message);
-    return true;
+    return Android::Handler::getInstance()->post (new AndroidMessageCallback (message));
 }
-
-JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, deliverMessage, void, (JNIEnv* env, jobject, jlong value))
-{
-    setEnv (env);
-
-    JUCE_TRY
-    {
-        MessageManager::MessageBase* const message = (MessageManager::MessageBase*) (pointer_sized_uint) value;
-        message->messageCallback();
-        message->decReferenceCount();
-    }
-    JUCE_CATCH_EXCEPTION
-}
-
 //==============================================================================
 void MessageManager::broadcastMessage (const String&)
 {
@@ -77,3 +143,5 @@ void MessageManager::stopDispatchLoop()
     (new QuitCallback())->post();
     quitMessagePosted = true;
 }
+
+} // namespace juce

@@ -33,17 +33,37 @@
  #error "Incorrect use of JUCE cpp file"
 #endif
 
+#define JUCE_CORE_INCLUDE_JNI_HELPERS    1
+#define JUCE_CORE_INCLUDE_OBJC_HELPERS   1
+#define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
+
+// Set this flag to 1 to use test servers on iOS
+#ifndef JUCE_IN_APP_PURCHASES_USE_SANDBOX_ENVIRONMENT
+    #define JUCE_IN_APP_PURCHASES_USE_SANDBOX_ENVIRONMENT 0
+#endif
+
 #include "juce_product_unlocking.h"
 
-namespace juce
-{
-    #include "marketplace/juce_OnlineUnlockStatus.cpp"
+#if JUCE_IOS || JUCE_MAC
+ #import <StoreKit/StoreKit.h>
+#endif
 
-   #if JUCE_MODULE_AVAILABLE_juce_data_structures
-    #include "marketplace/juce_TracktionMarketplaceStatus.cpp"
-   #endif
+#if JUCE_IN_APP_PURCHASES
+ #if JUCE_ANDROID
+  #include "native/juce_android_InAppPurchases.cpp"
+ #elif JUCE_IOS
+ #include "native/juce_ios_InAppPurchases.cpp"
+ #endif
 
-   #if JUCE_MODULE_AVAILABLE_juce_gui_extra
-    #include "marketplace/juce_OnlineUnlockForm.cpp"
-   #endif
-}
+ #include "in_app_purchases/juce_InAppPurchases.cpp"
+#endif
+
+#include "marketplace/juce_OnlineUnlockStatus.cpp"
+
+#if JUCE_MODULE_AVAILABLE_juce_data_structures
+ #include "marketplace/juce_TracktionMarketplaceStatus.cpp"
+#endif
+
+#if JUCE_MODULE_AVAILABLE_juce_gui_extra
+ #include "marketplace/juce_OnlineUnlockForm.cpp"
+#endif

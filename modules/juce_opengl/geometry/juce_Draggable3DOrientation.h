@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -128,8 +128,8 @@ private:
         // calling any of the mouse input methods!
         jassert (scale > 0);
 
-        return Point<float> ((mousePos.x - area.getCentreX()) / scale,
-                             (area.getCentreY() - mousePos.y) / scale);
+        return Point<float> ((mousePos.x - (float) area.getCentreX()) / (float) scale,
+                             ((float) area.getCentreY() - mousePos.y) / (float) scale);
     }
 
     VectorType projectOnSphere (const Point<float> pos) const noexcept
@@ -154,3 +154,5 @@ private:
         return QuaternionType::fromAngle (2.0f * std::asin (d), rotationAxis);
     }
 };
+
+} // namespace juce

@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #ifndef JUCE_LOG_COREMIDI_ERRORS
  #define JUCE_LOG_COREMIDI_ERRORS 1
 #endif
@@ -555,3 +558,5 @@ void MidiInput::stop()
 }
 
 #undef CHECK_ERROR
+
+} // namespace juce

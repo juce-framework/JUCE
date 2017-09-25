@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 /**
     Applies a gain to audio samples as single samples or AudioBlocks.
@@ -126,3 +130,6 @@ private:
     LinearSmoothedValue<FloatType> gain;
     double sampleRate = 0, rampDurationSeconds = 0;
 };
+
+} // namespace dsp
+} // namespace juce

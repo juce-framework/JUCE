@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -122,6 +122,9 @@ public:
     */
     void setEdgeIndent (int numPixelsIndent);
 
+    /** Returns the current edge indent size. */
+    int getEdgeIndent() const noexcept          { return edgeIndent; }
+
     //==============================================================================
     /** Returns the image that the button is currently displaying. */
     Drawable* getCurrentImage() const noexcept;
@@ -179,8 +182,10 @@ private:
     ButtonStyle style;
     ScopedPointer<Drawable> normalImage, overImage, downImage, disabledImage,
                             normalImageOn, overImageOn, downImageOn, disabledImageOn;
-    Drawable* currentImage;
-    int edgeIndent;
+    Drawable* currentImage = nullptr;
+    int edgeIndent = 3;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DrawableButton)
 };
+
+} // namespace juce

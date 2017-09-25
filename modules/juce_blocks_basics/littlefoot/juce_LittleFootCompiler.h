@@ -28,8 +28,6 @@
 namespace littlefoot
 {
 
-using namespace juce;
-
 /**
     This class compiles littlefoot source code into a littlefoot::Program object
     which can be executed by a littlefoot::Runner.

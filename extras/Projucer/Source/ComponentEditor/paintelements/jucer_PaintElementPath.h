@@ -52,7 +52,7 @@ public:
                           const bool undoable);
 
     void deleteFromPath();
-    void getEditableProperties (Array<PropertyComponent*>& props);
+    void getEditableProperties (Array<PropertyComponent*>& props, bool multipleSelected);
 
 private:
     PathPoint withChangedPointType (const Path::Iterator::PathElementType newType,
@@ -68,9 +68,9 @@ public:
     ~PaintElementPath();
 
     //==============================================================================
-    void setInitialBounds (int parentWidth, int parentHeight);
-    Rectangle<int> getCurrentBounds (const Rectangle<int>& parentArea) const;
-    void setCurrentBounds (const Rectangle<int>& b, const Rectangle<int>& parentArea, const bool undoable);
+    void setInitialBounds (int parentWidth, int parentHeight) override;
+    Rectangle<int> getCurrentBounds (const Rectangle<int>& parentArea) const override;
+    void setCurrentBounds (const Rectangle<int>& b, const Rectangle<int>& parentArea, const bool undoable) override;
 
     //==============================================================================
     bool getPoint (int index, int pointNumber, double& x, double& y, const Rectangle<int>& parentArea) const;
@@ -98,31 +98,31 @@ public:
     void setNonZeroWinding (const bool nonZero, const bool undoable);
 
     //==============================================================================
-    void getEditableProperties (Array<PropertyComponent*>& props);
+    void getEditableProperties (Array<PropertyComponent*>& props, bool multipleSelected) override;
 
-    void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode);
-    void applyCustomPaintSnippets (StringArray& snippets);
+    void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode) override;
+    void applyCustomPaintSnippets (StringArray& snippets) override;
 
     //==============================================================================
     static const char* getTagName() noexcept                            { return "PATH"; }
-    XmlElement* createXml() const;
-    bool loadFromXml (const XmlElement& xml);
+    XmlElement* createXml() const override;
+    bool loadFromXml (const XmlElement& xml) override;
 
     void setToPath (const Path& p);
 
     //==============================================================================
-    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle<int>& parentArea);
-    void drawExtraEditorGraphics (Graphics& g, const Rectangle<int>& relativeTo);
+    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle<int>& parentArea) override;
+    void drawExtraEditorGraphics (Graphics& g, const Rectangle<int>& relativeTo) override;
 
-    void resized();
-    void parentSizeChanged();
+    void resized() override;
+    void parentSizeChanged() override;
 
-    void mouseDown (const MouseEvent& e);
-    void mouseDrag (const MouseEvent& e);
-    void mouseUp (const MouseEvent& e);
+    void mouseDown (const MouseEvent& e) override;
+    void mouseDrag (const MouseEvent& e) override;
+    void mouseUp (const MouseEvent& e) override;
 
-    void createSiblingComponents();
-    void changed();
+    void createSiblingComponents() override;
+    void changed() override;
 
 private:
     friend class PathPoint;

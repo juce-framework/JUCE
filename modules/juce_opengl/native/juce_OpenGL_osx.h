@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class OpenGLContext::NativeContext
 {
 public:
@@ -245,3 +248,5 @@ bool OpenGLHelpers::isContextActive()
 {
     return CGLGetCurrentContext() != 0;
 }
+
+} // namespace juce

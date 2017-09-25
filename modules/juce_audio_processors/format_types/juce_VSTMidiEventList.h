@@ -27,7 +27,8 @@
 // NB: this must come first, *before* the header-guard.
 #ifdef JUCE_VSTINTERFACE_H_INCLUDED
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 /** Holds a set of VSTMidiEvent objects and makes it easy to add
@@ -169,8 +170,8 @@ private:
 
     static VstEvent* allocateVSTEvent()
     {
-        VstEvent* const e = (VstEvent*) std::calloc (1, sizeof (VstMidiEvent) > sizeof (VstSysExEvent) ? sizeof (VstMidiEvent)
-                                                                                                           : sizeof (VstSysExEvent));
+        auto e = (VstEvent*) std::calloc (1, sizeof (VstMidiEvent) > sizeof (VstSysExEvent) ? sizeof (VstMidiEvent)
+                                                                                            : sizeof (VstSysExEvent));
         e->type = vstMidiEventType;
         e->size = sizeof (VstMidiEvent);
         return e;
@@ -184,5 +185,7 @@ private:
         std::free (e);
     }
 };
+
+} // namespace juce
 
 #endif // JUCE_VSTINTERFACE_H_INCLUDED

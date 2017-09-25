@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -35,7 +35,7 @@
 class JUCE_API  PluginListComponent   : public Component,
                                         public FileDragAndDropTarget,
                                         private ChangeListener,
-                                        private ButtonListener  // (can't use Button::Listener due to idiotic VC2005 bug)
+                                        private Button::Listener
 {
 public:
     //==============================================================================
@@ -128,3 +128,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginListComponent)
 };
+
+} // namespace juce

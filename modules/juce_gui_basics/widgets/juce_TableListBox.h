@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -336,12 +336,14 @@ private:
     class Header;
     class RowComp;
 
-    TableHeaderComponent* header;
+    TableHeaderComponent* header = nullptr;
     TableListBoxModel* model;
-    int columnIdNowBeingDragged;
-    bool autoSizeOptionsShown;
+    int columnIdNowBeingDragged = 0;
+    bool autoSizeOptionsShown = true;
 
     void updateColumnComponents() const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TableListBox)
 };
+
+} // namespace juce

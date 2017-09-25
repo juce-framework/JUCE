@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 // This file contains the implementations of the various AudioParameter[XYZ] classes..
 
 
@@ -124,6 +127,7 @@ float AudioParameterBool::getValue() const                               { retur
 void AudioParameterBool::setValue (float newValue)                       { value = newValue; }
 float AudioParameterBool::getDefaultValue() const                        { return defaultValue; }
 int AudioParameterBool::getNumSteps() const                              { return 2; }
+bool AudioParameterBool::isDiscrete() const                              { return true; }
 float AudioParameterBool::getValueForText (const String& text) const     { return text.getIntValue() != 0 ? 1.0f : 0.0f; }
 String AudioParameterBool::getText (float v, int /*length*/) const       { return String ((int) (v > 0.5f ? 1 : 0)); }
 
@@ -156,6 +160,7 @@ float AudioParameterChoice::getValue() const                             { retur
 void AudioParameterChoice::setValue (float newValue)                     { value = (float) convertFrom0to1 (newValue); }
 float AudioParameterChoice::getDefaultValue() const                      { return defaultValue; }
 int AudioParameterChoice::getNumSteps() const                            { return choices.size(); }
+bool AudioParameterChoice::isDiscrete() const                            { return true; }
 float AudioParameterChoice::getValueForText (const String& text) const   { return convertTo0to1 (choices.indexOf (text)); }
 String AudioParameterChoice::getText (float v, int /*length*/) const     { return choices [convertFrom0to1 (v)]; }
 
@@ -166,3 +171,5 @@ AudioParameterChoice& AudioParameterChoice::operator= (int newValue)
 
     return *this;
 }
+
+} // namespace juce

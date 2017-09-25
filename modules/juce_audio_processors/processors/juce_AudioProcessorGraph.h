@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -376,6 +377,9 @@ private:
     template <typename floatType>
     void processAudio (AudioBuffer<floatType>& buffer, MidiBuffer& midiMessages);
 
+    template <typename floatType>
+    void sliceAndProcess (AudioBuffer<floatType>& buffer, MidiBuffer& midiMessages);
+
     //==============================================================================
     ReferenceCountedArray<Node> nodes;
     OwnedArray<Connection> connections;
@@ -399,3 +403,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorGraph)
 };
+
+} // namespace juce

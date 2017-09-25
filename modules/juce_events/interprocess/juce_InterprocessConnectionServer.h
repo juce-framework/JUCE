@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -71,6 +71,15 @@ public:
     */
     void stop();
 
+    /** Returns the local port number to which this server is currently bound.
+
+        This is useful if you need to know to which port the OS has actually bound your
+        socket when calling beginWaitingForSocket with a port number of zero.
+
+        Returns -1 if the function fails.
+    */
+    int getBoundPort() const noexcept;
+
 protected:
     /** Creates a suitable connection object for a client process that wants to
         connect to this one.
@@ -83,7 +92,6 @@ protected:
     */
     virtual InterprocessConnection* createConnectionObject() = 0;
 
-
 private:
     //==============================================================================
     ScopedPointer<StreamingSocket> socket;
@@ -92,3 +100,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InterprocessConnectionServer)
 };
+
+} // namespace juce

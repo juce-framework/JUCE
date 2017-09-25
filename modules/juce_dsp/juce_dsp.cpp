@@ -49,41 +49,36 @@
  #include <mkl_dfti.h>
 #endif
 
-namespace juce
-{
-  namespace dsp
-  {
-    #include "processors/juce_FIRFilter.cpp"
-    #include "processors/juce_IIRFilter.cpp"
-    #include "maths/juce_SpecialFunctions.cpp"
-    #include "maths/juce_Matrix.cpp"
-    #include "maths/juce_LookupTable.cpp"
-    #include "frequency/juce_FFT.cpp"
-    #include "frequency/juce_Convolution.cpp"
-    #include "frequency/juce_Windowing.cpp"
-    #include "filter_design/juce_FilterDesign.cpp"
+#include "processors/juce_FIRFilter.cpp"
+#include "processors/juce_IIRFilter.cpp"
+#include "processors/juce_Oversampling.cpp"
+#include "maths/juce_SpecialFunctions.cpp"
+#include "maths/juce_Matrix.cpp"
+#include "maths/juce_LookupTable.cpp"
+#include "frequency/juce_FFT.cpp"
+#include "frequency/juce_Convolution.cpp"
+#include "frequency/juce_Windowing.cpp"
+#include "filter_design/juce_FilterDesign.cpp"
 
-   #if JUCE_USE_SIMD
-    #if defined(__i386__) || defined(__amd64__) || defined(_M_X64) || defined(_X86_) || defined(_M_IX86)
-     #ifdef __AVX2__
-      #include "native/juce_avx_SIMDNativeOps.cpp"
-     #else
-      #include "native/juce_sse_SIMDNativeOps.cpp"
-     #endif
-    #elif defined(__arm__) || defined(_M_ARM) || defined (__arm64__) || defined (__aarch64__)
-      #include "native/juce_neon_SIMDNativeOps.cpp"
-    #else
-      #error "SIMD register support not implemented for this platform"
-    #endif
-   #endif
+#if JUCE_USE_SIMD
+#if defined(__i386__) || defined(__amd64__) || defined(_M_X64) || defined(_X86_) || defined(_M_IX86)
+ #ifdef __AVX2__
+  #include "native/juce_avx_SIMDNativeOps.cpp"
+ #else
+  #include "native/juce_sse_SIMDNativeOps.cpp"
+ #endif
+#elif defined(__arm__) || defined(_M_ARM) || defined (__arm64__) || defined (__aarch64__)
+  #include "native/juce_neon_SIMDNativeOps.cpp"
+#else
+  #error "SIMD register support not implemented for this platform"
+#endif
+#endif
 
-  #if JUCE_UNIT_TESTS
-    #include "maths/juce_Matrix_test.cpp"
-   #if JUCE_USE_SIMD
-    #include "containers/juce_SIMDRegister_test.cpp"
-   #endif
-    #include "frequency/juce_FFT_test.cpp"
-    #include "processors/juce_FIRFilter_test.cpp"
-  #endif
-  }
-}
+#if JUCE_UNIT_TESTS
+#include "maths/juce_Matrix_test.cpp"
+#if JUCE_USE_SIMD
+#include "containers/juce_SIMDRegister_test.cpp"
+#endif
+#include "frequency/juce_FFT_test.cpp"
+#include "processors/juce_FIRFilter_test.cpp"
+#endif

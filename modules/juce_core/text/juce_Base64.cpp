@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 bool Base64::convertToBase64 (OutputStream& base64Result, const void* sourceData, size_t sourceDataSize)
 {
     static const char lookup[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -157,3 +160,5 @@ public:
 static Base64Tests base64Tests;
 
 #endif
+
+} // namespace juce

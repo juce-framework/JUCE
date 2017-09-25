@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 struct PluginBusUtilities;
 
@@ -829,12 +830,6 @@ public:
     /** Returns true if this is a midi effect plug-in and does no audio processing. */
     virtual bool isMidiEffect() const                           { return false; }
 
-    /** Called by the host to tell this processor that the track- or context name changed.
-
-        This is currently only supported by AudioUnits, AAX and VST3.
-    */
-    virtual void setTrackName (const String&) {}
-
     //==============================================================================
     /** This returns a critical section that will automatically be locked while the host
         is calling the processBlock() method.
@@ -958,7 +953,8 @@ public:
     //==============================================================================
     /** Returns if AU should use high resolution (continious) instead of steps for better precision.
 
-     Replace JucePlugin_AUHighResolutionParameters.
+     Use to replace JucePlugin_AUHighResolutionParameters, however that macro was already removed by JUCE which now always uses high resolution parameters, unless JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE is turned on.
+     So in order for this method to take effect, JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE must be on.
 
      This must return the correct value immediately after the object has been
      created, and mustn't change the value later.
@@ -1036,13 +1032,22 @@ public:
     virtual String getParameterText (int parameterIndex, int maximumStringLength);
 
     /** Returns the number of discrete steps that this parameter can represent.
+
         The default return value if you don't implement this method is
         AudioProcessor::getDefaultNumParameterSteps().
+
         If your parameter is boolean, then you may want to make this return 2.
+
+        If you want the host to display stepped automation values, rather than a
+        continuous interpolation between successive values, you should ensure that
+        isParameterDiscrete returns true.
+
         The value that is returned may or may not be used, depending on the host.
 
         NOTE! This method will eventually be deprecated! It's recommended that you use
         AudioProcessorParameter::getNumSteps() instead.
+
+        @see isParameterDiscrete
     */
     virtual int getParameterNumSteps (int parameterIndex);
 
@@ -1050,9 +1055,25 @@ public:
 
         NOTE! This method will eventually be deprecated! It's recommended that you use
         AudioProcessorParameter::getNumSteps() instead.
+
         @see getParameterNumSteps
     */
     static int getDefaultNumParameterSteps() noexcept;
+
+    /** Returns true if the parameter should take discrete, rather than continuous
+        values.
+
+        If the parameter is boolean, this should return true (with getParameterNumSteps
+        returning 2).
+
+        The value that is returned may or may not be used, depending on the host.
+
+        NOTE! This method will eventually be deprecated! It's recommended that you use
+        AudioProcessorParameter::isDiscrete() instead.
+
+        @see getParameterNumSteps
+    */
+    virtual bool isParameterDiscrete (int parameterIndex) const;
 
     /** Returns the default value for the parameter.
         By default, this just returns 0.
@@ -1134,8 +1155,8 @@ public:
         By default, this returns the "generic" category.
 
         NOTE! This method will eventually be deprecated! It's recommended that you use
-        AudioProcessorParameter::isMetaParameter() instead.
-     */
+        AudioProcessorParameter::getCategory() instead.
+    */
     virtual AudioProcessorParameter::Category getParameterCategory (int parameterIndex) const;
 
     /** Sends a signal to the host to tell it that the user is about to start changing this
@@ -1325,6 +1346,32 @@ public:
         of plugin within which the processor is running.
     */
     WrapperType wrapperType;
+
+    /** A struct containing information about the DAW track inside which your
+        AudioProcessor is loaded. */
+    struct TrackProperties
+    {
+        String name;    // The name of the track - this will be empty if the track name is not known
+        Colour colour;  // The colour of the track - this will be transparentBlack if the colour is not known
+
+        // other properties may be added in the future
+    };
+
+    /** Informs the AudioProcessor that track properties such as the track's name or
+        colour has been changed.
+
+        If you are hosting this AudioProcessor then use this method to inform the
+        AudioProcessor about which track the AudioProcessor is loaded on. This method
+        may only be called on the message thread.
+
+        If you are implemeting an AudioProcessor then you can override this callback
+        to do something useful with the track properties such as changing the colour
+        of your AudioProcessor's editor. It's entirely up to the host when and how
+        often this callback will be called.
+
+        The default implementation of this callback will do nothing.
+    */
+    virtual void updateTrackProperties (const TrackProperties& properties);
 
     //==============================================================================
    #ifndef DOXYGEN
@@ -1589,3 +1636,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessor)
 };
+
+} // namespace juce

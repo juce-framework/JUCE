@@ -23,8 +23,6 @@
 namespace littlefoot
 {
 
-using namespace juce;
-
 //==============================================================================
 /**
     This class manages the synchronisation of a remote block of heap memory used

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 OpenGLPixelFormat::OpenGLPixelFormat (const int bitsPerRGBComponent,
                                       const int alphaBits_,
                                       const int depthBufferBits_,
@@ -61,3 +64,5 @@ bool OpenGLPixelFormat::operator!= (const OpenGLPixelFormat& other) const noexce
 {
     return ! operator== (other);
 }
+
+} // namespace juce

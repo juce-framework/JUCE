@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /** A window that displays a message and has buttons for the user to react to it.
@@ -41,7 +41,7 @@
     @see ThreadWithProgressWindow
 */
 class JUCE_API  AlertWindow  : public TopLevelWindow,
-                               private ButtonListener  // (can't use Button::Listener due to idiotic VC2005 bug)
+                               private Button::Listener
 {
 public:
     //==============================================================================
@@ -486,3 +486,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AlertWindow)
 };
+
+} // namespace juce

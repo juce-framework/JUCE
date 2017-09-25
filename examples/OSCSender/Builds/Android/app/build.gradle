@@ -9,7 +9,7 @@ android {
         }
     }
     signingConfigs {
-        release {
+        juceSigning {
             storeFile     file("${System.properties['user.home']}${File.separator}.android${File.separator}debug.keystore")
             storePassword "android"
             keyAlias      "androiddebugkey"
@@ -36,12 +36,13 @@ android {
              initWith debug
              debuggable    true
              jniDebuggable true
+             signingConfig signingConfigs.juceSigning
          }
          release {
              initWith release
              debuggable    false
              jniDebuggable false
-             signingConfig signingConfigs.release
+             signingConfig signingConfigs.juceSigning
          }
     }
 

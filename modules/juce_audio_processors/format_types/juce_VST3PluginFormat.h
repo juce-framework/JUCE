@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 #if (JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS)) || DOXYGEN
 
@@ -65,4 +66,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VST3PluginFormat)
 };
 
-#endif   // JUCE_PLUGINHOST_VST3
+#endif // JUCE_PLUGINHOST_VST3
+
+} // namespace juce

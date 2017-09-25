@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace
 {
     static forcedinline void pushInterpolationSample (float* lastInputSamples, const float newValue) noexcept
@@ -196,3 +199,5 @@ int LagrangeInterpolator::processAdding (double actualRatio, const float* in, fl
 {
     return interpolateAdding<LagrangeAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut, gain);
 }
+
+} // namespace juce

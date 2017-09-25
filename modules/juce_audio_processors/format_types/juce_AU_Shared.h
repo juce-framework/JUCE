@@ -29,6 +29,9 @@
  #define JUCE_STATE_DICTIONARY_KEY   "jucePluginState"
 #endif
 
+namespace juce
+{
+
 struct AudioUnitHelpers
 {
     class ChannelRemapper
@@ -84,12 +87,12 @@ struct AudioUnitHelpers
             layoutMapPtrStorage.calloc (static_cast<size_t> (numBuses));
             layoutMapStorage.calloc (static_cast<size_t> (isInput ? totalInChannels : totalOutChannels));
 
-            layoutMap  = layoutMapPtrStorage. getData();
+            layoutMap  = layoutMapPtrStorage. get();
 
             int ch = 0;
             for (int busIdx = 0; busIdx < numBuses; ++busIdx)
             {
-                layoutMap[busIdx] = layoutMapStorage.getData() + ch;
+                layoutMap[busIdx] = layoutMapStorage.get() + ch;
                 ch += processor.getChannelCountOfBus (isInput, busIdx);
             }
         }
@@ -138,7 +141,7 @@ struct AudioUnitHelpers
         {
             pushIdx = 0;
             popIdx = 0;
-            zeromem (channels.getData(), sizeof(float*) * static_cast<size_t> (scratch.getNumChannels()));
+            zeromem (channels.get(), sizeof(float*) * static_cast<size_t> (scratch.getNumChannels()));
         }
 
         //==============================================================================
@@ -342,102 +345,102 @@ struct AudioUnitHelpers
             info.inChannels = 0;
             info.outChannels = 0;
 
-            return {&info, 1};
+            return { &info, 1 };
         }
-        else
+
+        auto layout = processor.getBusesLayout();
+        auto maxNumChanToCheckFor = 9;
+
+        auto defaultInputs  = processor.getChannelCountOfBus (true,  0);
+        auto defaultOutputs = processor.getChannelCountOfBus (false, 0);
+
+        SortedSet<int> supportedChannels;
+
+        // add the current configuration
+        if (defaultInputs != 0 || defaultOutputs != 0)
+            supportedChannels.add ((defaultInputs << 16) | defaultOutputs);
+
+        for (auto inChanNum = hasMainInputBus ? 1 : 0; inChanNum <= (hasMainInputBus ? maxNumChanToCheckFor : 0); ++inChanNum)
         {
-            auto layout = processor.getBusesLayout();
-            auto maxNumChanToCheckFor = 9;
+            auto inLayout = layout;
 
-            auto defaultInputs  = processor.getChannelCountOfBus (true,  0);
-            auto defaultOutputs = processor.getChannelCountOfBus (false, 0);
-
-            SortedSet<int> supportedChannels;
-
-            // add the current configuration
-            if (defaultInputs != 0 || defaultOutputs != 0)
-                supportedChannels.add ((defaultInputs << 16) | defaultOutputs);
-
-            for (auto inChanNum = hasMainInputBus ? 1 : 0; inChanNum <= (hasMainInputBus ? maxNumChanToCheckFor : 0); ++inChanNum)
-            {
-                auto inLayout = layout;
-
-                if (auto* inBus = processor.getBus (true, 0))
-                    if (! isNumberOfChannelsSupported (inBus, inChanNum, inLayout))
-                        continue;
-
-                for (auto outChanNum = hasMainOutputBus ? 1 : 0; outChanNum <= (hasMainOutputBus ? maxNumChanToCheckFor : 0); ++outChanNum)
-                {
-                    auto outLayout = inLayout;
-
-                    if (auto* outBus = processor.getBus (false, 0))
-                        if (! isNumberOfChannelsSupported (outBus, outChanNum, outLayout))
-                            continue;
-
-                    supportedChannels.add (((hasMainInputBus  ? outLayout.getMainInputChannels()  : 0) << 16)
-                                          | (hasMainOutputBus ? outLayout.getMainOutputChannels() : 0));
-                }
-            }
-
-            auto hasInOutMismatch = false;
-            for (auto supported : supportedChannels)
-            {
-                auto numInputs  = (supported >> 16) & 0xffff;
-                auto numOutputs = (supported >> 0)  & 0xffff;
-
-                if (numInputs != numOutputs)
-                {
-                    hasInOutMismatch = true;
-                    break;
-                }
-            }
-
-            auto hasUnsupportedInput = ! hasMainInputBus, hasUnsupportedOutput = ! hasMainOutputBus;
-            for (auto inChanNum = hasMainInputBus ? 1 : 0; inChanNum <= (hasMainInputBus ? maxNumChanToCheckFor : 0); ++inChanNum)
-            {
-                auto channelConfiguration = (inChanNum << 16) | (hasInOutMismatch ? defaultOutputs : inChanNum);
-
-                if (! supportedChannels.contains (channelConfiguration))
-                {
-                    hasUnsupportedInput = true;
-                    break;
-                }
-            }
+            if (auto* inBus = processor.getBus (true, 0))
+                if (! isNumberOfChannelsSupported (inBus, inChanNum, inLayout))
+                    continue;
 
             for (auto outChanNum = hasMainOutputBus ? 1 : 0; outChanNum <= (hasMainOutputBus ? maxNumChanToCheckFor : 0); ++outChanNum)
             {
-                auto channelConfiguration = ((hasInOutMismatch ? defaultInputs : outChanNum) << 16) | outChanNum;
+                auto outLayout = inLayout;
 
-                if (! supportedChannels.contains (channelConfiguration))
-                {
-                    hasUnsupportedOutput = true;
-                    break;
-                }
+                if (auto* outBus = processor.getBus (false, 0))
+                    if (! isNumberOfChannelsSupported (outBus, outChanNum, outLayout))
+                        continue;
+
+                supportedChannels.add (((hasMainInputBus  ? outLayout.getMainInputChannels()  : 0) << 16)
+                                      | (hasMainOutputBus ? outLayout.getMainOutputChannels() : 0));
             }
+        }
 
-            for (auto supported : supportedChannels)
+        auto hasInOutMismatch = false;
+
+        for (auto supported : supportedChannels)
+        {
+            auto numInputs  = (supported >> 16) & 0xffff;
+            auto numOutputs = (supported >> 0)  & 0xffff;
+
+            if (numInputs != numOutputs)
             {
-                auto numInputs  = (supported >> 16) & 0xffff;
-                auto numOutputs = (supported >> 0)  & 0xffff;
-
-                AUChannelInfo info;
-
-                // see here: https://developer.apple.com/library/mac/documentation/MusicAudio/Conceptual/AudioUnitProgrammingGuide/TheAudioUnit/TheAudioUnit.html
-                info.inChannels  = static_cast<SInt16> (hasMainInputBus  ? (hasUnsupportedInput  ? numInputs :  (hasInOutMismatch && (! hasUnsupportedOutput) ? -2 : -1)) : 0);
-                info.outChannels = static_cast<SInt16> (hasMainOutputBus ? (hasUnsupportedOutput ? numOutputs : (hasInOutMismatch && (! hasUnsupportedInput)  ? -2 : -1)) : 0);
-
-                if (info.inChannels == -2 && info.outChannels == -2)
-                    info.inChannels = -1;
-
-                int j;
-                for (j = 0; j < channelInfo.size(); ++j)
-                    if (info.inChannels == channelInfo.getReference (j).inChannels
-                          && info.outChannels == channelInfo.getReference (j).outChannels)
-                        break;
-
-                if (j >= channelInfo.size())
-                    channelInfo.add (info);
+                hasInOutMismatch = true;
+                break;
             }
+        }
+
+        auto hasUnsupportedInput = ! hasMainInputBus, hasUnsupportedOutput = ! hasMainOutputBus;
+
+        for (auto inChanNum = hasMainInputBus ? 1 : 0; inChanNum <= (hasMainInputBus ? maxNumChanToCheckFor : 0); ++inChanNum)
+        {
+            auto channelConfiguration = (inChanNum << 16) | (hasInOutMismatch ? defaultOutputs : inChanNum);
+
+            if (! supportedChannels.contains (channelConfiguration))
+            {
+                hasUnsupportedInput = true;
+                break;
+            }
+        }
+
+        for (auto outChanNum = hasMainOutputBus ? 1 : 0; outChanNum <= (hasMainOutputBus ? maxNumChanToCheckFor : 0); ++outChanNum)
+        {
+            auto channelConfiguration = ((hasInOutMismatch ? defaultInputs : outChanNum) << 16) | outChanNum;
+
+            if (! supportedChannels.contains (channelConfiguration))
+            {
+                hasUnsupportedOutput = true;
+                break;
+            }
+        }
+
+        for (auto supported : supportedChannels)
+        {
+            auto numInputs  = (supported >> 16) & 0xffff;
+            auto numOutputs = (supported >> 0)  & 0xffff;
+
+            AUChannelInfo info;
+
+            // see here: https://developer.apple.com/library/mac/documentation/MusicAudio/Conceptual/AudioUnitProgrammingGuide/TheAudioUnit/TheAudioUnit.html
+            info.inChannels  = static_cast<SInt16> (hasMainInputBus  ? (hasUnsupportedInput  ? numInputs :  (hasInOutMismatch && (! hasUnsupportedOutput) ? -2 : -1)) : 0);
+            info.outChannels = static_cast<SInt16> (hasMainOutputBus ? (hasUnsupportedOutput ? numOutputs : (hasInOutMismatch && (! hasUnsupportedInput)  ? -2 : -1)) : 0);
+
+            if (info.inChannels == -2 && info.outChannels == -2)
+                info.inChannels = -1;
+
+            int j;
+            for (j = 0; j < channelInfo.size(); ++j)
+                if (info.inChannels == channelInfo.getReference (j).inChannels
+                      && info.outChannels == channelInfo.getReference (j).outChannels)
+                    break;
+
+            if (j >= channelInfo.size())
+                channelInfo.add (info);
         }
 
         return channelInfo;
@@ -446,7 +449,6 @@ struct AudioUnitHelpers
     static bool isNumberOfChannelsSupported (const AudioProcessor::Bus* b, int numChannels, AudioProcessor::BusesLayout& inOutCurrentLayout)
     {
         auto potentialSets = AudioChannelSet::channelSetsWithNumberOfChannels (static_cast<int> (numChannels));
-
 
         for (auto set : potentialSets)
         {
@@ -517,7 +519,7 @@ struct AudioUnitHelpers
 
             const int actualBuses = juceFilter->getBusCount (isInput);
             const int auNumBuses  = getBusCount (juceFilter, isInput);
-            Array<AudioChannelSet>& buses = (isInput ? layout.inputBuses : layout.outputBuses);
+            auto& buses = (isInput ? layout.inputBuses : layout.outputBuses);
 
             for (int i = auNumBuses; i < actualBuses; ++i)
                 buses.removeLast();
@@ -529,3 +531,5 @@ struct AudioUnitHelpers
        #endif
     }
 };
+
+} // namespace juce

@@ -31,7 +31,7 @@ public:
         : ComponentTypeHandler ("Viewport", "Viewport", typeid (UpdatingViewport), 150, 150)
     {}
 
-    Component* createNewComponent (JucerDocument*)
+    Component* createNewComponent (JucerDocument*) override
     {
         Viewport* const v = new UpdatingViewport ("new viewport");
         v->setViewedComponent (new ViewportDemoContentComp());
@@ -39,7 +39,7 @@ public:
         return v;
     }
 
-    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
+    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout) override
     {
         Viewport* const v = dynamic_cast<Viewport*> (comp);
         XmlElement* const e = ComponentTypeHandler::createXmlFor (comp, layout);
@@ -56,7 +56,7 @@ public:
         return e;
     }
 
-    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout)
+    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout) override
     {
         if (! ComponentTypeHandler::restoreFromXml (xml, comp, layout))
             return false;
@@ -76,11 +76,15 @@ public:
         return true;
     }
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
+    void getEditableProperties (Component* component, JucerDocument& document,
+                                Array<PropertyComponent*>& props, bool multipleSelected) override
     {
-        ComponentTypeHandler::getEditableProperties (component, document, props);
+        ComponentTypeHandler::getEditableProperties (component, document, props, multipleSelected);
 
-        Viewport* const v = dynamic_cast<Viewport*> (component);
+        if (multipleSelected)
+            return;
+
+        auto* v = dynamic_cast<Viewport*> (component);
 
         props.add (new ViewportScrollbarShownProperty (v, document, true));
         props.add (new ViewportScrollbarShownProperty (v, document, false));
@@ -99,12 +103,12 @@ public:
         }
     }
 
-    String getCreationParameters (GeneratedCode&, Component* comp)
+    String getCreationParameters (GeneratedCode&, Component* comp) override
     {
         return quotedString (comp->getName(), false);
     }
 
-    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
+    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName) override
     {
         Viewport defaultViewport;
         Viewport* const v = dynamic_cast<Viewport*> (component);

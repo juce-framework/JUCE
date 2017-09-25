@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 File::File (const String& fullPathName)
     : fullPath (parseAbsolutePath (fullPathName))
 {
@@ -1205,3 +1208,5 @@ public:
 static FileTests fileUnitTests;
 
 #endif
+
+} // namespace juce

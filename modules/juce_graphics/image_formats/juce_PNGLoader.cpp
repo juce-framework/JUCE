@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_MSVC
  #pragma warning (push)
  #pragma warning (disable: 4390 4611 4365 4267)
@@ -598,3 +601,5 @@ bool PNGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
 
     return true;
 }
+
+} // namespace juce

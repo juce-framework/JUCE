@@ -24,15 +24,18 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace PropertyFileConstants
 {
-    static const int magicNumber            = (int) ByteOrder::littleEndianInt ("PROP");
-    static const int magicNumberCompressed  = (int) ByteOrder::littleEndianInt ("CPRP");
+    JUCE_CONSTEXPR static const int magicNumber            = (int) ByteOrder::littleEndianInt ('P', 'R', 'O', 'P');
+    JUCE_CONSTEXPR static const int magicNumberCompressed  = (int) ByteOrder::littleEndianInt ('C', 'P', 'R', 'P');
 
-    static const char* const fileTag        = "PROPERTIES";
-    static const char* const valueTag       = "VALUE";
-    static const char* const nameAttribute  = "name";
-    static const char* const valueAttribute = "val";
+    JUCE_CONSTEXPR static const char* const fileTag        = "PROPERTIES";
+    JUCE_CONSTEXPR static const char* const valueTag       = "VALUE";
+    JUCE_CONSTEXPR static const char* const nameAttribute  = "name";
+    JUCE_CONSTEXPR static const char* const valueAttribute = "val";
 }
 
 //==============================================================================
@@ -356,3 +359,5 @@ void PropertiesFile::propertyChanged()
     else if (options.millisecondsBeforeSaving == 0)
         saveIfNeeded();
 }
+
+} // namespace juce

@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 #if JUCE_WINDOWS && ! DOXYGEN
@@ -59,6 +59,19 @@
  */
  #define T(stringLiteral)   JUCE_T(stringLiteral)
 #endif
+
+//==============================================================================
+/** GNU libstdc++ does not have std::make_unsigned */
+namespace internal
+{
+    template <typename Type> struct make_unsigned               { typedef Type type; };
+    template <> struct make_unsigned<signed char>               { typedef unsigned char      type; };
+    template <> struct make_unsigned<char>                      { typedef unsigned char      type; };
+    template <> struct make_unsigned<short>                     { typedef unsigned short     type; };
+    template <> struct make_unsigned<int>                       { typedef unsigned int       type; };
+    template <> struct make_unsigned<long>                      { typedef unsigned long      type; };
+    template <> struct make_unsigned<long long>                 { typedef unsigned long long type; };
+}
 
 //==============================================================================
 /**
@@ -168,7 +181,7 @@ public:
                      || ((numSigFigs == 0 && (! decimalPointFound)) && digit == 0))
                     continue;
 
-                *currentCharacter++ = '0' + (char) digit;
+                *currentCharacter++ = (char) ('0' + (char) digit);
                 numSigFigs++;
             }
             else if ((! decimalPointFound) && *text == '.')
@@ -206,16 +219,29 @@ public:
 
                 if (digit != 0 || exponentMagnitude != 0)
                 {
-                    *currentCharacter++ = '0' + (char) digit;
+                    *currentCharacter++ = (char) ('0' + (char) digit);
                     exponentMagnitude = (exponentMagnitude * 10) + digit;
                 }
             }
 
             if (exponentMagnitude > std::numeric_limits<double>::max_exponent10)
                 return std::numeric_limits<double>::quiet_NaN();
+
+            if (exponentMagnitude == 0)
+                *currentCharacter++ = '0';
         }
 
-        return strtod (&buffer[0], nullptr);
+      #if JUCE_WINDOWS
+        static _locale_t locale = _create_locale (LC_ALL, "C");
+        return _strtod_l (&buffer[0], nullptr, locale);
+      #else
+        static locale_t locale = newlocale (LC_ALL_MASK, "C", nullptr);
+       #if JUCE_ANDROID
+        return (double) strtold_l (&buffer[0], nullptr, locale);
+       #else
+        return strtod_l (&buffer[0], nullptr, locale);
+       #endif
+      #endif
     }
 
     /** Parses a character string, to read a floating-point value. */
@@ -230,7 +256,9 @@ public:
     template <typename IntType, typename CharPointerType>
     static IntType getIntValue (const CharPointerType text) noexcept
     {
-        IntType v = 0;
+        typedef typename internal::make_unsigned<IntType>::type UIntType;
+
+        UIntType v = 0;
         auto s = text.findEndOfWhitespace();
         const bool isNeg = *s == '-';
 
@@ -242,12 +270,12 @@ public:
             auto c = s.getAndAdvance();
 
             if (c >= '0' && c <= '9')
-                v = v * 10 + (IntType) (c - '0');
+                v = v * 10 + (UIntType) (c - '0');
             else
                 break;
         }
 
-        return isNeg ? -v : v;
+        return isNeg ? - (IntType) v : (IntType) v;
     }
 
     template <typename ResultType>
@@ -603,3 +631,5 @@ public:
 private:
     static double mulexp10 (double value, int exponent) noexcept;
 };
+
+} // namespace juce

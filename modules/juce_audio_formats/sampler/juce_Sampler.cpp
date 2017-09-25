@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 SamplerSound::SamplerSound (const String& soundName,
                             AudioFormatReader& source,
                             const BigInteger& notes,
@@ -224,3 +227,5 @@ void SamplerVoice::renderNextBlock (AudioSampleBuffer& outputBuffer, int startSa
         }
     }
 }
+
+} // namespace juce

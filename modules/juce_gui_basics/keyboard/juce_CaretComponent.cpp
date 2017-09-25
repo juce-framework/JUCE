@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 CaretComponent::CaretComponent (Component* const keyFocusOwner)
     : owner (keyFocusOwner)
 {
@@ -58,3 +61,5 @@ bool CaretComponent::shouldBeShown() const
     return owner == nullptr || (owner->hasKeyboardFocus (false)
                                  && ! owner->isCurrentlyBlockedByAnotherModalComponent());
 }
+
+} // namespace juce

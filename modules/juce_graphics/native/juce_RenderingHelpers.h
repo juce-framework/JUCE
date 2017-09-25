@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 #if JUCE_MSVC
  #pragma warning (push)
@@ -996,10 +997,10 @@ namespace EdgeTableFillers
             }
 
             y = y_;
-            generate (scratchBuffer.getData(), x, width);
+            generate (scratchBuffer.get(), x, width);
 
             et.clipLineToMask (x, y_,
-                               reinterpret_cast<uint8*> (scratchBuffer.getData()) + SrcPixelType::indexA,
+                               reinterpret_cast<uint8*> (scratchBuffer.get()) + SrcPixelType::indexA,
                                sizeof (SrcPixelType), width);
         }
 
@@ -2295,11 +2296,11 @@ public:
         }
     }
 
-    void drawLine (const Line<float>& line)
+    void drawLine (Line<float> line)
     {
         Path p;
         p.addLineSegment (line, 1.0f);
-        fillPath (p, AffineTransform());
+        fillPath (p, {});
     }
 
     void drawImage (const Image& sourceImage, const AffineTransform& trans)
@@ -2319,7 +2320,7 @@ public:
     void renderImage (const Image& sourceImage, const AffineTransform& trans,
                       const BaseRegionType* const tiledFillClipRegion)
     {
-        const AffineTransform t (transform.getTransformWith (trans));
+        auto t = transform.getTransformWith (trans);
 
         const int alpha = fillType.colour.getAlpha();
 
@@ -2356,18 +2357,17 @@ public:
         {
             if (tiledFillClipRegion != nullptr)
             {
-                tiledFillClipRegion->renderImageTransformed (getThis(), sourceImage, alpha, t, interpolationQuality, true);
+                tiledFillClipRegion->renderImageTransformed (getThis(), sourceImage, alpha,
+                                                             t, interpolationQuality, true);
             }
             else
             {
                 Path p;
                 p.addRectangle (sourceImage.getBounds());
 
-                typename BaseRegionType::Ptr c (clip->clone());
-                c = c->clipToPath (p, t);
-
-                if (c != nullptr)
-                    c->renderImageTransformed (getThis(), sourceImage, alpha, t, interpolationQuality, false);
+                if (auto c = clip->clone()->clipToPath (p, t))
+                    c->renderImageTransformed (getThis(), sourceImage, alpha,
+                                               t, interpolationQuality, false);
             }
         }
     }
@@ -2386,7 +2386,7 @@ public:
 
                 ColourGradient g2 (*(fillType.gradient));
                 g2.multiplyOpacity (fillType.getOpacity());
-                AffineTransform t (transform.getTransformWith (fillType.transform).translated (-0.5f, -0.5f));
+                auto t = transform.getTransformWith (fillType.transform).translated (-0.5f, -0.5f);
 
                 const bool isIdentity = t.isOnlyTranslation();
 
@@ -2686,3 +2686,5 @@ protected:
 #if JUCE_MSVC
  #pragma warning (pop)
 #endif
+
+} // namespace juce

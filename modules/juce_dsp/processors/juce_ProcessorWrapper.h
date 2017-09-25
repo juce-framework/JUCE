@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 /**
     Acts as a polymorphic base class for processors.
@@ -69,3 +73,6 @@ struct ProcessorWrapper  : public ProcessorBase
 
     ProcessorType processor;
 };
+
+} // namespace dsp
+} // namespace juce

@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -85,6 +85,11 @@ public:
     /** Can be called to manually hide the tip if it's showing. */
     void hideTip();
 
+    /** Asks a component for its tooltip.
+        This can be overridden if you need custom lookup behaviour or to modify the strings.
+    */
+    virtual String getTipFor (Component&);
+
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the tooltip.
 
@@ -121,19 +126,19 @@ public:
 private:
     //==============================================================================
     Point<float> lastMousePos;
-    Component* lastComponentUnderMouse;
+    Component* lastComponentUnderMouse = nullptr;
     String tipShowing, lastTipUnderMouse;
     int millisecondsBeforeTipAppears;
-    int mouseClicks, mouseWheelMoves;
-    unsigned int lastCompChangeTime, lastHideTime;
-    bool reentrant;
+    int mouseClicks = 0, mouseWheelMoves = 0;
+    unsigned int lastCompChangeTime = 0, lastHideTime = 0;
+    bool reentrant = false;
 
     void paint (Graphics&) override;
     void mouseEnter (const MouseEvent&) override;
     void timerCallback() override;
     void updatePosition (const String&, Point<int>, Rectangle<int>);
 
-    static String getTipFor (Component*);
-
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TooltipWindow)
 };
+
+} // namespace juce

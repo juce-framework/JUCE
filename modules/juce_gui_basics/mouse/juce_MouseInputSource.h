@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -104,6 +104,9 @@ public:
 
     /** Returns the last-known screen position of this source. */
     Point<float> getScreenPosition() const noexcept;
+
+    /** Returns the last-known screen position of this source without any scaling applied. */
+    Point<float> getRawScreenPosition() const noexcept;
 
     /** Returns a set of modifiers that indicate which buttons are currently
         held down on this device.
@@ -249,3 +252,5 @@ private:
 
     JUCE_LEAK_DETECTOR (MouseInputSource)
 };
+
+} // namespace juce

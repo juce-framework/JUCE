@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 extern int64 getMouseEventTime();
 
 JUCE_DECLARE_UUID_GETTER (IOleObject,       "00000112-0000-0000-C000-000000000046")
@@ -451,3 +454,5 @@ LRESULT juce_offerEventToActiveXControl (::MSG& msg)
 
     return S_FALSE;
 }
+
+} // namespace juce

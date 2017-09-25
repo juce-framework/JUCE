@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace TimeHelpers
 {
     static std::tm millisToLocal (int64 millis) noexcept
@@ -679,3 +682,5 @@ public:
 static TimeTests timeTests;
 
 #endif
+
+} // namespace juce

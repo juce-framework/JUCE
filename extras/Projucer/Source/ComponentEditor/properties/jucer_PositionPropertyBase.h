@@ -35,7 +35,7 @@
 */
 class PositionPropertyBase  : public PropertyComponent,
                               protected ChangeListener,
-                              private ButtonListener
+                              private Button::Listener
 {
 public:
     enum ComponentPositionDimension

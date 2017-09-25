@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 DrawableRectangle::DrawableRectangle()
 {
 }
@@ -183,3 +186,5 @@ ValueTree DrawableRectangle::createValueTree (ComponentBuilder::ImageProvider* i
 
     return tree;
 }
+
+} // namespace juce

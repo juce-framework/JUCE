@@ -571,4 +571,5 @@ void ProjucerLookAndFeel::setupColours()
     setColour (TreeView::selectedItemBackgroundColourId,        findColour (defaultHighlightColourId));
     setColour (PopupMenu::highlightedBackgroundColourId,        findColour (defaultHighlightColourId).withAlpha (0.75f));
     setColour (PopupMenu::highlightedTextColourId,              findColour (defaultHighlightedTextColourId));
+    setColour (0x1000440, /*LassoComponent::lassoFillColourId*/ findColour (defaultHighlightColourId).withAlpha (0.3f));
 }

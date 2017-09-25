@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 DirectoryContentsDisplayComponent::DirectoryContentsDisplayComponent (DirectoryContentsList& l)
     : directoryContentsList (l)
 {
@@ -64,3 +67,5 @@ void DirectoryContentsDisplayComponent::sendDoubleClickMessage (const File& file
         listeners.callChecked (checker, &FileBrowserListener::fileDoubleClicked, file);
     }
 }
+
+} // namespace juce

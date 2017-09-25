@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ImagePreviewComponent::ImagePreviewComponent()
 {
 }
@@ -114,3 +117,5 @@ void ImagePreviewComponent::paint (Graphics& g)
                           Justification::centredTop, numLines);
     }
 }
+
+} // namespace juce

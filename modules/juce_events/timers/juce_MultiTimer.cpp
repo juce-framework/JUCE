@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct MultiTimerCallback    : public Timer
 {
     MultiTimerCallback (const int tid, MultiTimer& mt) noexcept
@@ -101,3 +104,5 @@ int MultiTimer::getTimerInterval (const int timerID) const noexcept
 
     return 0;
 }
+
+} // namespace juce

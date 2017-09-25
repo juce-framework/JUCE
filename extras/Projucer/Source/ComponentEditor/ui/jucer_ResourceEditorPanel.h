@@ -32,7 +32,7 @@
 class ResourceEditorPanel  : public Component,
                              private TableListBoxModel,
                              private ChangeListener,
-                             private ButtonListener
+                             private Button::Listener
 {
 public:
     ResourceEditorPanel (JucerDocument& document);

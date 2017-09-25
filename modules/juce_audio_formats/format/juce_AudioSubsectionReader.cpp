@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 AudioSubsectionReader::AudioSubsectionReader (AudioFormatReader* const source_,
                                               const int64 startSample_,
                                               const int64 length_,
@@ -66,3 +69,5 @@ void AudioSubsectionReader::readMaxLevels (int64 startSampleInFile, int64 numSam
 
     source->readMaxLevels (startSampleInFile + startSample, numSamples, results, numChannelsToRead);
 }
+
+} // namespace juce

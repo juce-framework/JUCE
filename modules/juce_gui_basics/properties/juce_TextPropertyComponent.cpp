@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class TextPropertyComponent::LabelComp  : public Label,
                                           public FileDragAndDropTarget
 {
@@ -181,3 +184,5 @@ void TextPropertyComponent::setInterestedInFileDrag (bool isInterested)
     if (textEditor != nullptr)
         textEditor->setInterestedInFileDrag (isInterested);
 }
+
+} // namespace juce

@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 class ToolbarItemComponent;
 class ToolbarItemFactory;
@@ -50,7 +51,7 @@ class ToolbarItemFactory;
 class JUCE_API  Toolbar   : public Component,
                             public DragAndDropContainer,
                             public DragAndDropTarget,
-                            private ButtonListener  // (can't use Button::Listener due to idiotic VC2005 bug)
+                            private Button::Listener
 {
 public:
     //==============================================================================
@@ -326,3 +327,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Toolbar)
 };
+
+} // namespace juce

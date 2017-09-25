@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ComboBox::ComboBox (const String& name)
     : Component (name),
       lastCurrentId (0),
@@ -384,7 +387,7 @@ void ComboBox::paint (Graphics& g)
          && ! label->isBeingEdited())
     {
         g.setColour (findColour (textColourId).withMultipliedAlpha (0.5f));
-        g.setFont (label->getFont());
+        g.setFont (label->getLookAndFeel().getLabelFont (*label));
         g.drawFittedText (textWhenNothingSelected, label->getBounds().reduced (2, 1),
                           label->getJustificationType(),
                           jmax (1, (int) (label->getHeight() / label->getFont().getHeight())));
@@ -505,7 +508,14 @@ void ComboBox::showPopupIfNotActive()
     if (! menuActive)
     {
         menuActive = true;
-        showPopup();
+
+        SafePointer<ComboBox> safePointer (this);
+
+        // as this method was triggered by a mouse event, the same mouse event may have
+        // exited the modal state of other popups currently on the screen. By calling
+        // showPopup asynchronously, we are giving the other popups a chance to properly
+        // close themselves
+        MessageManager::callAsync([safePointer] () mutable { if (safePointer != nullptr) safePointer->showPopup(); });
     }
 }
 
@@ -627,7 +637,7 @@ void ComboBox::removeListener (ComboBoxListener* listener)    { listeners.remove
 void ComboBox::handleAsyncUpdate()
 {
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, &ComboBoxListener::comboBoxChanged, this);  // (can't use ComboBox::Listener due to idiotic VC2005 bug)
+    listeners.callChecked (checker, &ComboBox::Listener::comboBoxChanged, this);
 }
 
 void ComboBox::sendChange (const NotificationType notification)
@@ -644,3 +654,5 @@ void ComboBox::clear (const bool dontSendChange)                                
 void ComboBox::setSelectedItemIndex (const int index, const bool dontSendChange) { setSelectedItemIndex (index, dontSendChange ? dontSendNotification : sendNotification); }
 void ComboBox::setSelectedId (const int newItemId, const bool dontSendChange)    { setSelectedId (newItemId, dontSendChange ? dontSendNotification : sendNotification); }
 void ComboBox::setText (const String& newText, const bool dontSendChange)        { setText (newText, dontSendChange ? dontSendNotification : sendNotification); }
+
+} // namespace juce

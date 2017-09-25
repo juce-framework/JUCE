@@ -201,6 +201,10 @@
  //#define JUCE_DSP_USE_STATIC_FFTW 1
 #endif
 
+#ifndef    JUCE_DSP_ENABLE_SNAP_TO_ZERO
+ //#define JUCE_DSP_ENABLE_SNAP_TO_ZERO 1
+#endif
+
 //==============================================================================
 // juce_events flags:
 

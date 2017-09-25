@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 struct LinearAlgebraUnitTest  : public UnitTest
 {
@@ -163,3 +167,6 @@ struct LinearAlgebraUnitTest  : public UnitTest
 };
 
 static LinearAlgebraUnitTest linearAlgebraUnitTest;
+
+} // namespace dsp
+} // namespace juce

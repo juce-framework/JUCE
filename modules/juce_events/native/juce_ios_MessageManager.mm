@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 void MessageManager::runDispatchLoop()
 {
     jassert (isThisTheMessageThread()); // must only be called by the message thread
@@ -96,3 +99,5 @@ void MessageManager::broadcastMessage (const String&)
 {
     // N/A on current iOS
 }
+
+} // namespace juce

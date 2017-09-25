@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ApplicationCommandInfo::ApplicationCommandInfo (const CommandID cid) noexcept
     : commandID (cid), flags (0)
 {
@@ -60,3 +63,5 @@ void ApplicationCommandInfo::addDefaultKeypress (const int keyCode, ModifierKeys
 {
     defaultKeypresses.add (KeyPress (keyCode, modifiers, 0));
 }
+
+} // namespace juce

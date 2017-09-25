@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 extern void* getUser32Function (const char*);
 
 namespace IconConverters
@@ -236,3 +239,5 @@ void* SystemTrayIconComponent::getNativeHandle() const
 {
     return pimpl != nullptr ? &(pimpl->iconData) : nullptr;
 }
+
+} // namespace juce

@@ -36,7 +36,7 @@
 
   ID:                 juce_dsp
   vendor:             juce
-  version:            5.1.1
+  version:            5.1.2
   name:               JUCE DSP classes
   description:        Classes for audio buffer manipulation, digital audio processing, filtering, oversampling, fast math functions etc.
   website:            http://www.juce.com/juce
@@ -166,56 +166,98 @@
  #define JUCE_DSP_USE_STATIC_FFTW 0
 #endif
 
+/** Config: JUCE_DSP_ENABLE_SNAP_TO_ZERO
+
+    Enables code in the dsp module to avoid floating point denormals during the
+    processing of some of the dsp module's filters.
+
+    Enabling this will add a slight performance overhead to the DSP module's
+    filters and algorithms. If your audio app already disables denormals altogether
+    (for exmaple, by using the ScopedNoDenormals class or the
+    FloatVectorOperations::disableDenormalisedNumberSupport method), then you
+    can safely disable this flag to shave off a few cpu cycles from the DSP module's
+    filters and algorithms.
+*/
+#ifndef JUCE_DSP_ENABLE_SNAP_TO_ZERO
+ #define JUCE_DSP_ENABLE_SNAP_TO_ZERO 1
+#endif
+
+
 //==============================================================================
+#undef Complex  // apparently some C libraries actually define these symbols (!)
+#undef Factor
+
 namespace juce
 {
     namespace dsp
     {
-        #undef Complex  // apparently some C libraries actually define these symbols (!)
-        #undef Factor
 
         template <typename Type>
         using Complex = ::std::complex<Type>;
 
-       #if JUCE_USE_SIMD
-        #include "native/juce_fallback_SIMDNativeOps.h"
+        //==============================================================================
+        namespace util
+        {
+            /** Use this function to prevent denormals on intel CPUs.
 
-         // include the correct native file for this build target CPU
-         #if defined(__i386__) || defined(__amd64__) || defined(_M_X64) || defined(_X86_) || defined(_M_IX86)
-          #ifdef __AVX2__
-           #include "native/juce_avx_SIMDNativeOps.h"
+                This function will work with both primitives and simple containers.
+            */
+          #if JUCE_DSP_ENABLE_SNAP_TO_ZERO
+            inline void snapToZero (float&       x) noexcept            { JUCE_SNAP_TO_ZERO (x); }
+           #ifndef DOXYGEN
+            inline void snapToZero (double&      x) noexcept            { JUCE_SNAP_TO_ZERO (x); }
+            inline void snapToZero (long double& x) noexcept            { JUCE_SNAP_TO_ZERO (x); }
+           #endif
           #else
-           #include "native/juce_sse_SIMDNativeOps.h"
+            inline void snapToZero (float&       x) noexcept            { ignoreUnused (x); }
+           #ifndef DOXYGEN
+            inline void snapToZero (double&      x) noexcept            { ignoreUnused (x); }
+            inline void snapToZero (long double& x) noexcept            { ignoreUnused (x); }
+           #endif
           #endif
-         #elif defined(__arm__) || defined(_M_ARM) || defined (__arm64__) || defined (__aarch64__)
-          #include "native/juce_neon_SIMDNativeOps.h"
-         #else
-          #error "SIMD register support not implemented for this platform"
-         #endif
-
-        #include "containers/juce_SIMDRegister.h"
-       #endif
-
-        #include "maths/juce_SpecialFunctions.h"
-        #include "maths/juce_Matrix.h"
-        #include "maths/juce_Polynomial.h"
-        #include "maths/juce_FastMathApproximations.h"
-        #include "maths/juce_LookupTable.h"
-        #include "containers/juce_AudioBlock.h"
-        #include "processors/juce_ProcessContext.h"
-        #include "processors/juce_ProcessorWrapper.h"
-        #include "processors/juce_ProcessorChain.h"
-        #include "processors/juce_ProcessorDuplicator.h"
-        #include "processors/juce_Bias.h"
-        #include "processors/juce_Gain.h"
-        #include "processors/juce_WaveShaper.h"
-        #include "processors/juce_IIRFilter.h"
-        #include "processors/juce_FIRFilter.h"
-        #include "processors/juce_Oscillator.h"
-        #include "processors/juce_StateVariableFilter.h"
-        #include "frequency/juce_FFT.h"
-        #include "frequency/juce_Convolution.h"
-        #include "frequency/juce_Windowing.h"
-        #include "filter_design/juce_FilterDesign.h"
+        }
     }
 }
+
+//==============================================================================
+#if JUCE_USE_SIMD
+ #include "native/juce_fallback_SIMDNativeOps.h"
+
+ // include the correct native file for this build target CPU
+ #if defined(__i386__) || defined(__amd64__) || defined(_M_X64) || defined(_X86_) || defined(_M_IX86)
+  #ifdef __AVX2__
+   #include "native/juce_avx_SIMDNativeOps.h"
+  #else
+   #include "native/juce_sse_SIMDNativeOps.h"
+  #endif
+ #elif defined(__arm__) || defined(_M_ARM) || defined (__arm64__) || defined (__aarch64__)
+  #include "native/juce_neon_SIMDNativeOps.h"
+ #else
+  #error "SIMD register support not implemented for this platform"
+ #endif
+
+ #include "containers/juce_SIMDRegister.h"
+#endif
+
+#include "maths/juce_SpecialFunctions.h"
+#include "maths/juce_Matrix.h"
+#include "maths/juce_Polynomial.h"
+#include "maths/juce_FastMathApproximations.h"
+#include "maths/juce_LookupTable.h"
+#include "containers/juce_AudioBlock.h"
+#include "processors/juce_ProcessContext.h"
+#include "processors/juce_ProcessorWrapper.h"
+#include "processors/juce_ProcessorChain.h"
+#include "processors/juce_ProcessorDuplicator.h"
+#include "processors/juce_Bias.h"
+#include "processors/juce_Gain.h"
+#include "processors/juce_WaveShaper.h"
+#include "processors/juce_IIRFilter.h"
+#include "processors/juce_FIRFilter.h"
+#include "processors/juce_Oscillator.h"
+#include "processors/juce_StateVariableFilter.h"
+#include "processors/juce_Oversampling.h"
+#include "frequency/juce_FFT.h"
+#include "frequency/juce_Convolution.h"
+#include "frequency/juce_Windowing.h"
+#include "filter_design/juce_FilterDesign.h"

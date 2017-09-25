@@ -86,7 +86,7 @@ public:
 private:
     //==============================================================================
     void comboBoxChanged (ComboBox*) override;
-    void buttonClicked (Button*) override    { processor.cabinetSimParam->operator= (cabinetSimButton.getToggleState()); }
+    void buttonClicked (Button*) override;
 
     //==============================================================================
     DspModulePluginDemoAudioProcessor& processor;
@@ -94,7 +94,7 @@ private:
     ScopedPointer<ParameterSlider> inputVolumeSlider, outputVolumeSlider,
                                    lowPassFilterFreqSlider, highPassFilterFreqSlider;
     ComboBox stereoBox, slopeBox, waveshaperBox, cabinetTypeBox;
-    ToggleButton cabinetSimButton;
+    ToggleButton cabinetSimButton, oversamplingButton;
 
     Label inputVolumeLabel, outputVolumeLabel, lowPassFilterFreqLabel,
           highPassFilterFreqLabel, stereoLabel, slopeLabel, waveshaperLabel,

@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (getJuceAndroidMidiInputDevices, "getJuceAndroidMidiInputDevices", "()[Ljava/lang/String;") \
  METHOD (getJuceAndroidMidiOutputDevices, "getJuceAndroidMidiOutputDevices", "()[Ljava/lang/String;") \
@@ -89,9 +92,9 @@ public:
         jbyte* data = getEnv()->GetByteArrayElements (byteArray, nullptr);
 
         HeapBlock<uint8> buffer (static_cast<size_t> (len));
-        std::memcpy (buffer.getData(), data + offset, static_cast<size_t> (len));
+        std::memcpy (buffer.get(), data + offset, static_cast<size_t> (len));
 
-        midiConcatenator.pushMidiData (buffer.getData(),
+        midiConcatenator.pushMidiData (buffer.get(),
                                        len, static_cast<double> (timestamp) * 1.0e-9,
                                        juceMidiInput, *callback);
 
@@ -357,3 +360,5 @@ MidiInput::~MidiInput()
 {
     delete reinterpret_cast<AndroidMidiInput*> (internal);
 }
+
+} // namespace juce

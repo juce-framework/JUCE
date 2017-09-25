@@ -24,10 +24,12 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace PopupMenuSettings
 {
     const int scrollZone = 24;
-    const int borderSize = 2;
     const int dismissCommandId = 0x6287345f;
 
     static bool menuWasHiddenBecauseOfAppChange = false;
@@ -88,7 +90,7 @@ struct ItemComponent  : public Component
         int itemW = 80;
         int itemH = 16;
         getIdealSize (itemW, itemH, standardItemHeight);
-        setSize (itemW, jlimit (2, 600, itemH));
+        setSize (itemW, jlimit (1, 600, itemH));
 
         addMouseListener (&parent, false);
     }
@@ -290,7 +292,8 @@ public:
         auto& lf = getLookAndFeel();
 
         if (parentComponent != nullptr)
-            lf.drawResizableFrame (g, getWidth(), getHeight(), BorderSize<int> (PopupMenuSettings::borderSize));
+            lf.drawResizableFrame (g, getWidth(), getHeight(),
+                                   BorderSize<int> (getLookAndFeel().getPopupMenuBorderSize()));
 
         if (canScroll())
         {
@@ -510,13 +513,21 @@ public:
 
     MouseSourceState& getMouseState (MouseInputSource source)
     {
-        for (auto* ms : mouseSourceStates)
-            if (ms->source == source)
-                return *ms;
+        MouseSourceState* mouseState = nullptr;
 
-        auto ms = new MouseSourceState (*this, source);
-        mouseSourceStates.add (ms);
-        return *ms;
+        for (auto* ms : mouseSourceStates)
+        {
+            if      (ms->source == source)                        mouseState = ms;
+            else if (ms->source.getType() != source.getType())    ms->stopTimer();
+        }
+
+        if (mouseState == nullptr)
+        {
+            mouseState = new MouseSourceState (*this, source);
+            mouseSourceStates.add (mouseState);
+        }
+
+        return *mouseState;
     }
 
     //==============================================================================
@@ -598,7 +609,7 @@ public:
 
         return parentComponent->getLocalArea (nullptr,
                                               parentComponent->getScreenBounds()
-                                                    .reduced (PopupMenuSettings::borderSize)
+                                                    .reduced (getLookAndFeel().getPopupMenuBorderSize())
                                                     .getIntersection (parentArea));
     }
 
@@ -666,6 +677,9 @@ public:
             else
                 x = jmax (parentArea.getX() + 4, target.getX() - widthToUse);
 
+            if (getLookAndFeel().getPopupMenuBorderSize() == 0) // workaround for dismissing the window on mouse up when border size is 0
+                x += tendTowardsRight ? 1 : -1;
+
             y = target.getY();
             if (target.getCentreY() > parentArea.getCentreY())
                 y = jmax (parentArea.getY(), target.getBottom() - heightToUse);
@@ -711,7 +725,7 @@ public:
         needsToScroll = contentHeight > actualH;
 
         width = updateYPositions();
-        height = actualH + PopupMenuSettings::borderSize * 2;
+        height = actualH + getLookAndFeel().getPopupMenuBorderSize() * 2;
     }
 
     int workOutBestSize (const int maxMenuW)
@@ -733,7 +747,7 @@ public:
                 colH += items.getUnchecked (childNum + i)->getHeight();
             }
 
-            colW = jmin (maxMenuW / jmax (1, numColumns - 2), colW + PopupMenuSettings::borderSize * 2);
+            colW = jmin (maxMenuW / jmax (1, numColumns - 2), colW + getLookAndFeel().getPopupMenuBorderSize() * 2);
 
             columnWidths.set (col, colW);
             totalW += colW;
@@ -832,7 +846,7 @@ public:
                 childYOffset = jmax (childYOffset, 0);
             else if (delta > 0)
                 childYOffset = jmin (childYOffset,
-                                     contentHeight - windowPos.getHeight() + PopupMenuSettings::borderSize);
+                                     contentHeight - windowPos.getHeight() + getLookAndFeel().getPopupMenuBorderSize());
 
             updateYPositions();
         }
@@ -857,7 +871,7 @@ public:
 
             const int colW = columnWidths [col];
 
-            int y = PopupMenuSettings::borderSize - (childYOffset + (getY() - windowPos.getY()));
+            int y = getLookAndFeel().getPopupMenuBorderSize() - (childYOffset + (getY() - windowPos.getY()));
 
             for (int i = 0; i < numChildren; ++i)
             {
@@ -993,7 +1007,7 @@ public:
 };
 
 //==============================================================================
-class MouseSourceState  : private Timer
+class MouseSourceState  : public Timer
 {
 public:
     MouseSourceState (MenuWindow& w, MouseInputSource s)
@@ -1013,6 +1027,13 @@ public:
 
     void timerCallback() override
     {
+       #if JUCE_WINDOWS
+        // touch and pen devices on Windows send an offscreen mouse move after mouse up events
+        // but we don't want to forward these on as they will dismiss the menu
+        if ((source.isTouch() || source.isPen()) && ! isValidMousePosition())
+            return;
+       #endif
+
         if (window.windowIsStillValid())
             handleMousePosition (source.getScreenPosition().roundToInt());
     }
@@ -1203,6 +1224,20 @@ private:
 
         return true;
     }
+
+   #if JUCE_WINDOWS
+    bool isValidMousePosition()
+    {
+        auto screenPos = source.getScreenPosition();
+        auto localPos = (window.activeSubMenu == nullptr) ? window.getLocalPoint (nullptr, screenPos)
+                                                          : window.activeSubMenu->getLocalPoint (nullptr, screenPos);
+
+        if (localPos.x < 0 && localPos.y < 0)
+            return false;
+
+        return true;
+    }
+   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MouseSourceState)
 };
@@ -1841,3 +1876,5 @@ PopupMenu::Item& PopupMenu::MenuItemIterator::getItem() const noexcept
     jassert (currentItem != nullptr);
     return *(currentItem);
 }
+
+} // namespace juce

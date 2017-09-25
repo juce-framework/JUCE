@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -37,8 +37,8 @@
     @see AudioDeviceManager
 */
 class JUCE_API  AudioDeviceSelectorComponent  : public Component,
-                                                private ComboBoxListener, // (can't use ComboBox::Listener due to idiotic VC2005 bug)
                                                 private ChangeListener,
+                                                private ComboBox::Listener,
                                                 private Button::Listener,
                                                 private Timer
 {
@@ -120,3 +120,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioDeviceSelectorComponent)
 };
+
+} // namespace juce

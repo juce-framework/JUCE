@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ImageComponent::ImageComponent (const String& name)
     : Component (name),
       placement (RectanglePlacement::centred)
@@ -77,3 +80,5 @@ void ImageComponent::paint (Graphics& g)
     g.setOpacity (1.0f);
     g.drawImage (image, getLocalBounds().toFloat(), placement);
 }
+
+} // namespace juce

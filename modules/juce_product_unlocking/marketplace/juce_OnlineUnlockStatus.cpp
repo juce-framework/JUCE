@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 /* Note: there's a bit of light obfuscation in this code, just to make things
    a bit more annoying for crackers who try to reverse-engineer your binaries, but
    nothing particularly foolproof.
@@ -284,7 +287,7 @@ char OnlineUnlockStatus::MachineIDUtilities::getPlatformPrefix()
 
 String OnlineUnlockStatus::MachineIDUtilities::getEncodedIDString (const String& input)
 {
-    const String platform (String::charToString (getPlatformPrefix()));
+    const String platform (String::charToString (static_cast<juce_wchar> (getPlatformPrefix())));
 
     return platform + MD5 ((input + "salt_1" + platform).toUTF8())
                         .toHexString().substring (0, 9).toUpperCase();
@@ -485,3 +488,5 @@ String KeyGeneration::generateExpiringKeyFile (const String& appName,
 
     return KeyFileUtils::createKeyFile (comment, xml, privateKey);
 }
+
+} // namespace juce

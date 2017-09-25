@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_USE_OGGVORBIS
 
 #if JUCE_MAC && ! defined (__MACOSX__)
@@ -537,3 +540,5 @@ int OggVorbisAudioFormat::estimateOggFileQuality (const File& source)
 }
 
 #endif
+
+} // namespace juce

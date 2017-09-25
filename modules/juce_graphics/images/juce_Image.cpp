@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ImagePixelData::ImagePixelData (const Image::PixelFormat format, const int w, const int h)
     : pixelFormat (format), width (w), height (h)
 {
@@ -443,9 +446,12 @@ void Image::BitmapData::setPixelColour (const int x, const int y, Colour colour)
 //==============================================================================
 void Image::clear (const Rectangle<int>& area, Colour colourToClearTo)
 {
-    const ScopedPointer<LowLevelGraphicsContext> g (image->createLowLevelContext());
-    g->setFill (colourToClearTo);
-    g->fillRect (area, true);
+    if (image != nullptr)
+    {
+        const ScopedPointer<LowLevelGraphicsContext> g (image->createLowLevelContext());
+        g->setFill (colourToClearTo);
+        g->fillRect (area, true);
+    }
 }
 
 //==============================================================================
@@ -670,3 +676,5 @@ void Image::moveImageSection (int dx, int dy,
         }
     }
 }
+
+} // namespace juce

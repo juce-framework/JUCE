@@ -54,6 +54,15 @@ bool FILTERCLASSNAME::producesMidi() const
    #endif
 }
 
+bool FILTERCLASSNAME::isMidiEffect() const
+{
+   #if JucePlugin_IsMidiEffect
+    return true;
+   #else
+    return false;
+   #endif
+}
+
 double FILTERCLASSNAME::getTailLengthSeconds() const
 {
     return 0.0;
@@ -122,11 +131,7 @@ bool FILTERCLASSNAME::isBusesLayoutSupported (const BusesLayout& layouts) const
 
 void FILTERCLASSNAME::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
-    // Disable denormal numbers support for the duration of processBlock.
-    // You probably do not want to remove this.
-    // See: https://en.wikipedia.org/wiki/Denormal_number
-    FloatVectorOperations::ScopedNoDenormals noDenormals;
-
+    ScopedNoDenormals noDenormals;
     const int totalNumInputChannels  = getTotalNumInputChannels();
     const int totalNumOutputChannels = getTotalNumOutputChannels();
 

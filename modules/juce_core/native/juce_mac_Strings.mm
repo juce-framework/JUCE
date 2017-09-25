@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 String String::fromCFString (CFStringRef cfString)
 {
     if (cfString == 0)
@@ -32,8 +35,8 @@ String String::fromCFString (CFStringRef cfString)
     HeapBlock<UInt8> utf8 ((size_t) bytesNeeded + 1);
     CFStringGetBytes (cfString, range, kCFStringEncodingUTF8, 0, false, utf8, bytesNeeded + 1, nullptr);
 
-    return String (CharPointer_UTF8 ((const CharPointer_UTF8::CharType*) utf8.getData()),
-                   CharPointer_UTF8 ((const CharPointer_UTF8::CharType*) utf8.getData() + bytesNeeded));
+    return String (CharPointer_UTF8 ((const CharPointer_UTF8::CharType*) utf8.get()),
+                   CharPointer_UTF8 ((const CharPointer_UTF8::CharType*) utf8.get() + bytesNeeded));
 }
 
 CFStringRef String::toCFString() const
@@ -89,7 +92,7 @@ String String::convertToPrecomposedUnicode() const
                                       bytesNeeded, &bytesRead,
                                       &outputBufferSize, tempOut) == noErr)
         {
-            result = String (CharPointer_UTF16 ((CharPointer_UTF16::CharType*) tempOut.getData()));
+            result = String (CharPointer_UTF16 ((CharPointer_UTF16::CharType*) tempOut.get()));
         }
 
         DisposeUnicodeToTextInfo (&conversionInfo);
@@ -98,3 +101,5 @@ String String::convertToPrecomposedUnicode() const
     return result;
    #endif
 }
+
+} // namespace juce

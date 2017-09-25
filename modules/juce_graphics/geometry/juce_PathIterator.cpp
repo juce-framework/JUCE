@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_MSVC && JUCE_DEBUG
  #pragma optimize ("t", on)
 #endif
@@ -51,7 +54,7 @@ PathFlatteningIterator::~PathFlatteningIterator()
 
 bool PathFlatteningIterator::isLastInSubpath() const noexcept
 {
-    return stackPos == stackBase.getData()
+    return stackPos == stackBase.get()
              && (index >= path.numElements || isMarker (points[index], Path::moveMarker));
 }
 
@@ -279,3 +282,5 @@ bool PathFlatteningIterator::next()
 #if JUCE_MSVC && JUCE_DEBUG
   #pragma optimize ("", on)  // resets optimisations to the project defaults
 #endif
+
+} // namespace juce

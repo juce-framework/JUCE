@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 // a word or space that can't be broken down any further
 struct TextAtom
 {
@@ -794,7 +797,7 @@ private:
 //==============================================================================
 class TextEditor::TextHolderComponent  : public Component,
                                          public Timer,
-                                         public ValueListener
+                                         public Value::Listener
 {
 public:
     TextHolderComponent (TextEditor& ed)  : owner (ed)
@@ -1249,8 +1252,8 @@ void TextEditor::textChanged()
 void TextEditor::returnPressed()    { postCommandMessage (TextEditorDefs::returnKeyMessageId); }
 void TextEditor::escapePressed()    { postCommandMessage (TextEditorDefs::escapeKeyMessageId); }
 
-void TextEditor::addListener (TextEditorListener* const l)      { listeners.add (l); }
-void TextEditor::removeListener (TextEditorListener* const l)   { listeners.remove (l); }
+void TextEditor::addListener (Listener* l)      { listeners.add (l); }
+void TextEditor::removeListener (Listener* l)   { listeners.remove (l); }
 
 //==============================================================================
 void TextEditor::timerCallbackInt()
@@ -1991,7 +1994,8 @@ void TextEditor::setEscapeAndReturnKeysConsumed (bool shouldBeConsumed) noexcept
 
 bool TextEditor::keyPressed (const KeyPress& key)
 {
-    if (isReadOnly() && key != KeyPress ('c', ModifierKeys::commandModifier, 0))
+    if (isReadOnly() && key != KeyPress ('c', ModifierKeys::commandModifier, 0)
+                     && key != KeyPress ('a', ModifierKeys::commandModifier, 0))
         return false;
 
     if (! TextEditorKeyMapper<TextEditor>::invokeKeyFunction (*this, key))
@@ -2108,20 +2112,20 @@ void TextEditor::handleCommandMessage (const int commandId)
     switch (commandId)
     {
     case TextEditorDefs::textChangeMessageId:
-        listeners.callChecked (checker, &TextEditorListener::textEditorTextChanged, (TextEditor&) *this);
+        listeners.callChecked (checker, &Listener::textEditorTextChanged, (TextEditor&) *this);
         break;
 
     case TextEditorDefs::returnKeyMessageId:
-        listeners.callChecked (checker, &TextEditorListener::textEditorReturnKeyPressed, (TextEditor&) *this);
+        listeners.callChecked (checker, &Listener::textEditorReturnKeyPressed, (TextEditor&) *this);
         break;
 
     case TextEditorDefs::escapeKeyMessageId:
-        listeners.callChecked (checker, &TextEditorListener::textEditorEscapeKeyPressed, (TextEditor&) *this);
+        listeners.callChecked (checker, &Listener::textEditorEscapeKeyPressed, (TextEditor&) *this);
         break;
 
     case TextEditorDefs::focusLossMessageId:
         updateValueFromText();
-        listeners.callChecked (checker, &TextEditorListener::textEditorFocusLost, (TextEditor&) *this);
+        listeners.callChecked (checker, &Listener::textEditorFocusLost, (TextEditor&) *this);
         break;
 
     default:
@@ -2518,3 +2522,5 @@ void TextEditor::coalesceSimilarSections()
         }
     }
 }
+
+} // namespace juce

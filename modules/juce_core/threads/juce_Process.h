@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /** Represents the current executable's process.
@@ -150,3 +150,5 @@ private:
     Process();
     JUCE_DECLARE_NON_COPYABLE (Process)
 };
+
+} // namespace juce

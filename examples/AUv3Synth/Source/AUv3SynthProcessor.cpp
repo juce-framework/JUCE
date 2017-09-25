@@ -96,19 +96,16 @@ public:
     const String getName() const override                                       { return "AUv3 Synth"; }
     int getNumPrograms() override                                               { return 4; }
     int getCurrentProgram() override                                            { return currentProgram; }
-    void setCurrentProgram (int index) override                             { currentProgram = index; }
+    void setCurrentProgram (int index) override                                 { currentProgram = index; }
+
     const String getProgramName (int index) override
     {
         switch (index)
         {
-            case 0:
-                return "Piano";
-            case 1:
-                return "Singing";
-            case 2:
-                return "Pinched Balloon";
-            case 3:
-                return "Gazeebo";
+            case 0:  return "Piano";
+            case 1:  return "Singing";
+            case 2:  return "Pinched Balloon";
+            case 3:  return "Gazeebo";
         }
 
         return "<Unknown>";

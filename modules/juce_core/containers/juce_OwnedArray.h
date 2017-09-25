@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /** An array designed for holding objects.
@@ -233,12 +233,12 @@ public:
     int indexOf (const ObjectClass* objectToLookFor) const noexcept
     {
         const ScopedLockType lock (getLock());
-        ObjectClass* const* e = data.elements.getData();
+        ObjectClass* const* e = data.elements.get();
         ObjectClass* const* const end_ = e + numUsed;
 
         for (; e != end_; ++e)
             if (objectToLookFor == *e)
-                return static_cast<int> (e - data.elements.getData());
+                return static_cast<int> (e - data.elements.get());
 
         return -1;
     }
@@ -251,7 +251,7 @@ public:
     bool contains (const ObjectClass* objectToLookFor) const noexcept
     {
         const ScopedLockType lock (getLock());
-        ObjectClass* const* e = data.elements.getData();
+        ObjectClass* const* e = data.elements.get();
         ObjectClass* const* const end_ = e + numUsed;
 
         for (; e != end_; ++e)
@@ -526,7 +526,7 @@ public:
         ignoreUnused (comparator); // if you pass in an object with a static compareElements() method, this
                                    // avoids getting warning messages about the parameter being unused
         const ScopedLockType lock (getLock());
-        const int index = findInsertIndexInSortedArray (comparator, data.elements.getData(), newObject, 0, numUsed);
+        const int index = findInsertIndexInSortedArray (comparator, data.elements.get(), newObject, 0, numUsed);
         insert (index, newObject);
         return index;
     }
@@ -648,7 +648,7 @@ public:
     void removeObject (const ObjectClass* objectToRemove, bool deleteObject = true)
     {
         const ScopedLockType lock (getLock());
-        ObjectClass** const e = data.elements.getData();
+        ObjectClass** const e = data.elements.get();
 
         for (int i = 0; i < numUsed; ++i)
         {
@@ -858,7 +858,7 @@ public:
                                    // avoids getting warning messages about the parameter being unused
 
         const ScopedLockType lock (getLock());
-        sortArray (comparator, data.elements.getData(), 0, size() - 1, retainOrderOfEquivalentItems);
+        sortArray (comparator, data.elements.get(), 0, size() - 1, retainOrderOfEquivalentItems);
     }
 
     //==============================================================================
@@ -892,3 +892,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OwnedArray)
 };
+
+} // namespace juce

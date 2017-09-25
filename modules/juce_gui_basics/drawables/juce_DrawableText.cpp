@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 DrawableText::DrawableText()
     : colour (Colours::black),
       justification (Justification::centredLeft)
@@ -372,3 +375,5 @@ Path DrawableText::getOutlineAsPath() const
 
     return pathOfAllGlyphs;
 }
+
+} // namespace juce

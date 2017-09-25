@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 #if JUCE_WEB_BROWSER || DOXYGEN
 
@@ -149,3 +150,5 @@ private:
 
 
 #endif
+
+} // namespace juce

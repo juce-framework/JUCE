@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /** Contains classes for different types of physics behaviours - these classes
@@ -56,6 +56,13 @@ namespace AnimatedPositionBehaviours
             damping = 1.0 - newFriction;
         }
 
+        /** Sets the minimum velocity of the movement. Any velocity that's slower than
+            this will stop the animation. The default is 0.05. */
+        void setMinimumVelocity (double newMinimumVelocityToUse) noexcept
+        {
+            minimumVelocity = newMinimumVelocityToUse;
+        }
+
         /** Called by the AnimatedPosition class. This tells us the position and
             velocity at which the user is about to release the object.
             The velocity is measured in units/second.
@@ -72,7 +79,7 @@ namespace AnimatedPositionBehaviours
         {
             velocity *= damping;
 
-            if (std::abs (velocity) < 0.05)
+            if (std::abs (velocity) < minimumVelocity)
                 velocity = 0;
 
             return oldPos + velocity * elapsedSeconds;
@@ -87,7 +94,7 @@ namespace AnimatedPositionBehaviours
         }
 
     private:
-        double velocity = 0, damping = 0.92;
+        double velocity = 0, damping = 0.92, minimumVelocity = 0.05;
     };
 
     //==============================================================================
@@ -146,3 +153,5 @@ namespace AnimatedPositionBehaviours
         double targetSnapPosition;
     };
 }
+
+} // namespace juce

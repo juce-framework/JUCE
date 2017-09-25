@@ -20,9 +20,11 @@
   ==============================================================================
 */
 
-class JSONParser
+namespace juce
 {
-public:
+
+struct JSONParser
+{
     static Result parseObjectOrArray (String::CharPointerType t, var& result)
     {
         t = t.findEndOfWhitespace();
@@ -319,11 +321,11 @@ private:
 };
 
 //==============================================================================
-class JSONFormatter
+struct JSONFormatter
 {
-public:
     static void write (OutputStream& out, const var& v,
-                       const int indentLevel, const bool allOnOneLine)
+                       const int indentLevel, const bool allOnOneLine,
+                       int maximumDecimalPlaces)
     {
         if (v.isString())
         {
@@ -343,14 +345,18 @@ public:
         {
             out << (static_cast<bool> (v) ? "true" : "false");
         }
+        else if (v.isDouble())
+        {
+            out << String (static_cast<double> (v), maximumDecimalPlaces);
+        }
         else if (v.isArray())
         {
-            writeArray (out, *v.getArray(), indentLevel, allOnOneLine);
+            writeArray (out, *v.getArray(), indentLevel, allOnOneLine, maximumDecimalPlaces);
         }
         else if (v.isObject())
         {
             if (DynamicObject* object = v.getDynamicObject())
-                object->writeAsJSON (out, indentLevel, allOnOneLine);
+                object->writeAsJSON (out, indentLevel, allOnOneLine, maximumDecimalPlaces);
             else
                 jassertfalse; // Only DynamicObjects can be converted to JSON!
         }
@@ -420,7 +426,8 @@ public:
     }
 
     static void writeArray (OutputStream& out, const Array<var>& array,
-                            const int indentLevel, const bool allOnOneLine)
+                            const int indentLevel, const bool allOnOneLine,
+                            int maximumDecimalPlaces)
     {
         out << '[';
 
@@ -434,7 +441,7 @@ public:
                 if (! allOnOneLine)
                     writeSpaces (out, indentLevel + indentSize);
 
-                write (out, array.getReference(i), indentLevel + indentSize, allOnOneLine);
+                write (out, array.getReference(i), indentLevel + indentSize, allOnOneLine, maximumDecimalPlaces);
 
                 if (i < array.size() - 1)
                 {
@@ -493,16 +500,16 @@ Result JSON::parse (const String& text, var& result)
     return JSONParser::parseObjectOrArray (text.getCharPointer(), result);
 }
 
-String JSON::toString (const var& data, const bool allOnOneLine)
+String JSON::toString (const var& data, const bool allOnOneLine, int maximumDecimalPlaces)
 {
     MemoryOutputStream mo (1024);
-    JSONFormatter::write (mo, data, 0, allOnOneLine);
+    JSONFormatter::write (mo, data, 0, allOnOneLine, maximumDecimalPlaces);
     return mo.toUTF8();
 }
 
-void JSON::writeToStream (OutputStream& output, const var& data, const bool allOnOneLine)
+void JSON::writeToStream (OutputStream& output, const var& data, const bool allOnOneLine, int maximumDecimalPlaces)
 {
-    JSONFormatter::write (output, data, 0, allOnOneLine);
+    JSONFormatter::write (output, data, 0, allOnOneLine, maximumDecimalPlaces);
 }
 
 String JSON::escapeString (StringRef s)
@@ -642,3 +649,5 @@ public:
 static JSONTests JSONUnitTests;
 
 #endif
+
+} // namespace juce

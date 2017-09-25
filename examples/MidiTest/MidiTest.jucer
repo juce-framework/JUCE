@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="wHE0ay" name="MidiTest" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.roli.MidiTest" includeBinaryInAppConfig="1"
-              jucerVersion="5.1.1" displaySplashScreen="0" reportAppUsage="0"
+              jucerVersion="5.1.2" displaySplashScreen="0" reportAppUsage="0"
               splashScreenColour="Dark" companyName="ROLI Ltd." cppLanguageStandard="11">
   <MAINGROUP id="s3xxCh" name="MidiTest">
     <GROUP id="{7D29F5BC-1B05-AE8F-9202-5CF152AB1103}" name="Source">

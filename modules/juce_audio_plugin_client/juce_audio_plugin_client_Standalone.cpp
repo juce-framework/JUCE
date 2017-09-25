@@ -38,7 +38,7 @@
  #endif
 
 #else
- JUCE_CREATE_APPLICATION_DEFINE(StandaloneFilterApp);
+ JUCE_CREATE_APPLICATION_DEFINE(juce::StandaloneFilterApp)
 #endif
 
 JUCE_MAIN_FUNCTION_DEFINITION

@@ -20,22 +20,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 AudioTransportSource::AudioTransportSource()
-    : source (nullptr),
-      resamplerSource (nullptr),
-      bufferingSource (nullptr),
-      positionableSource (nullptr),
-      masterSource (nullptr),
-      gain (1.0f),
-      lastGain (1.0f),
-      playing (false),
-      stopped (true),
-      sampleRate (44100.0),
-      sourceSampleRate (0.0),
-      blockSize (128),
-      readAheadBufferSize (0),
-      isPrepared (false),
-      inputStreamEOF (false)
 {
 }
 
@@ -159,7 +147,7 @@ void AudioTransportSource::setPosition (double newPosition)
 double AudioTransportSource::getCurrentPosition() const
 {
     if (sampleRate > 0.0)
-        return getNextReadPosition() / sampleRate;
+        return (double) getNextReadPosition() / sampleRate;
 
     return 0.0;
 }
@@ -167,7 +155,7 @@ double AudioTransportSource::getCurrentPosition() const
 double AudioTransportSource::getLengthInSeconds() const
 {
     if (sampleRate > 0.0)
-        return getTotalLength() / sampleRate;
+        return (double) getTotalLength() / sampleRate;
 
     return 0.0;
 }
@@ -177,7 +165,7 @@ void AudioTransportSource::setNextReadPosition (int64 newPosition)
     if (positionableSource != nullptr)
     {
         if (sampleRate > 0 && sourceSampleRate > 0)
-            newPosition = (int64) (newPosition * sourceSampleRate / sampleRate);
+            newPosition = (int64) ((double) newPosition * sourceSampleRate / sampleRate);
 
         positionableSource->setNextReadPosition (newPosition);
 
@@ -193,7 +181,7 @@ int64 AudioTransportSource::getNextReadPosition() const
     if (positionableSource != nullptr)
     {
         const double ratio = (sampleRate > 0 && sourceSampleRate > 0) ? sampleRate / sourceSampleRate : 1.0;
-        return (int64) (positionableSource->getNextReadPosition() * ratio);
+        return (int64) ((double) positionableSource->getNextReadPosition() * ratio);
     }
 
     return 0;
@@ -206,7 +194,7 @@ int64 AudioTransportSource::getTotalLength() const
     if (positionableSource != nullptr)
     {
         const double ratio = (sampleRate > 0 && sourceSampleRate > 0) ? sampleRate / sourceSampleRate : 1.0;
-        return (int64) (positionableSource->getTotalLength() * ratio);
+        return (int64) ((double) positionableSource->getTotalLength() * ratio);
     }
 
     return 0;
@@ -294,3 +282,5 @@ void AudioTransportSource::getNextAudioBlock (const AudioSourceChannelInfo& info
 
     lastGain = gain;
 }
+
+} // namespace juce

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class MidiKeyboardUpDownButton  : public Button
 {
 public:
@@ -1016,3 +1019,5 @@ void StickyMidiKeyboardComponent::mouseDownFinishedOnKey (int midiNoteNumber, fl
     if (stuckKeys.getBitRangeAsInt(midiNoteNumber,1) == 0)
         MidiKeyboardComponent::mouseDownFinishedOnKey(midiNoteNumber, velocity);
 }
+
+} // namespace juce

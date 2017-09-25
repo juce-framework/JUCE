@@ -124,7 +124,6 @@ private:
         void refresh()
         {
             auto& modules = project.getModules();
-            const auto& isUsingGlobalPathValue = modules.shouldUseGlobalPath (moduleID);
 
             setEnabled (modules.isModuleEnabled (moduleID));
 
@@ -158,11 +157,11 @@ private:
                            "must be valid on the filesystem of the target machine that will be performing this build. If this "
                            "is empty then the global path will be used.");
 
-                pathComponent->setEnabled (! isUsingGlobalPathValue.getValue());
+                pathComponent->setEnabled (! modules.shouldUseGlobalPath (moduleID));
                 pathComponent->getValue().addListener (this);
             }
 
-            globalPathValue.referTo (isUsingGlobalPathValue);
+            globalPathValue.referTo (modules.getShouldUseGlobalPathValue (moduleID));
 
             auto menuItemString = (TargetOS::getThisOS() == TargetOS::osx ? "\"Projucer->Global Search Paths...\""
                                                                           : "\"File->Global Search Paths...\"");
@@ -314,7 +313,7 @@ private:
 
         //==============================================================================
         class MissingDependenciesComponent  : public PropertyComponent,
-                                              public ButtonListener
+                                              public Button::Listener
         {
         public:
             MissingDependenciesComponent (Project& p, const String& modID)

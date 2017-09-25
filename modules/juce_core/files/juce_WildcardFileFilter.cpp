@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 static void parseWildcard (const String& pattern, StringArray& result)
 {
     result.addTokens (pattern.toLowerCase(), ";,", "\"'");
@@ -68,3 +71,5 @@ bool WildcardFileFilter::isDirectorySuitable (const File& file) const
 {
     return matchWildcard (file, directoryWildcards);
 }
+
+} // namespace juce

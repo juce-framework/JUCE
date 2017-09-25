@@ -22,6 +22,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_MAC || JUCE_IOS || JUCE_MSVC
 
 #if JUCE_MAC || JUCE_IOS
@@ -116,3 +119,5 @@ void VideoComponent::timerCallback()
 }
 
 #endif
+
+} // namespace juce

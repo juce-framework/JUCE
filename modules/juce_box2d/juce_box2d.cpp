@@ -87,10 +87,7 @@
 #include "box2d/Dynamics/Joints/b2WheelJoint.cpp"
 #include "box2d/Rope/b2Rope.cpp"
 
-namespace juce
-{
 #include "utils/juce_Box2DRenderer.cpp"
-}
 
 #if JUCE_CLANG
  #pragma clang diagnostic pop

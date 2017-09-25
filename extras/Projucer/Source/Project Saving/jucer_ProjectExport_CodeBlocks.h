@@ -55,7 +55,7 @@ public:
 
         // currently no other OSes supported by Codeblocks exporter!
         jassertfalse;
-        return "CODEBLOCKS_UNKOWN_OS";
+        return "CODEBLOCKS_UNKNOWN_OS";
     }
 
     //==============================================================================
@@ -91,8 +91,6 @@ public:
 
         if (getTargetLocationString().isEmpty())
             getTargetLocationValue() = getDefaultBuildsRootFolder() + getTargetFolderName (os);
-
-        initialiseDependencyPathValues();
     }
 
     //==============================================================================
@@ -175,6 +173,21 @@ public:
         // If you hit this assert, you tried to generate a project for an exporter
         // that does not support any of your targets!
         jassert (targets.size() > 0);
+    }
+
+    //==============================================================================
+    void initialiseDependencyPathValues() override
+    {
+        DependencyPathOS pathOS = isLinux() ? TargetOS::linux
+        : TargetOS::windows;
+
+        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder), Ids::vst3Path, pathOS)));
+
+        if (! isLinux())
+        {
+            aaxPath.referTo  (Value (new DependencyPathValueSource (getSetting (Ids::aaxFolder), Ids::aaxPath, pathOS)));
+            rtasPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::rtasFolder), Ids::rtasPath, pathOS)));
+        }
     }
 
 private:
@@ -721,20 +734,6 @@ private:
     void setAddOption (XmlElement& xml, const String& nm, const String& value) const
     {
         xml.createNewChildElement ("Add")->setAttribute (nm, value);
-    }
-
-    void initialiseDependencyPathValues()
-    {
-        DependencyPathOS pathOS = isLinux() ? TargetOS::linux
-                                            : TargetOS::windows;
-
-        vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder), Ids::vst3Path, pathOS)));
-
-        if (! isLinux())
-        {
-            aaxPath.referTo  (Value (new DependencyPathValueSource (getSetting (Ids::aaxFolder), Ids::aaxPath, pathOS)));
-            rtasPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::rtasFolder), Ids::rtasPath, pathOS)));
-        }
     }
 
     CodeBlocksOS os;

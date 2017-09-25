@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /** A handy macro to make it easy to iterate all the child elements in an XmlElement.
@@ -762,3 +762,5 @@ private:
 
     JUCE_LEAK_DETECTOR (XmlElement)
 };
+
+} // namespace juce

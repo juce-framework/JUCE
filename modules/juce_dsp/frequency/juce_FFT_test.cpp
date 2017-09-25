@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 struct FFTUnitTest  : public UnitTest
 {
@@ -113,6 +117,14 @@ struct FFTUnitTest  : public UnitTest
                 fft.performRealOnlyForwardTransform ((float*) output.getData());
                 u.expect (checkArrayIsSimilar (reference.getData(), output.getData(), n));
 
+                // fill only first half with real numbers
+                zeromem (output.getData(), n * sizeof (Complex<float>));
+                memcpy (reinterpret_cast<float*> (output.getData()), input.getData(), n * sizeof (float));
+
+                fft.performRealOnlyForwardTransform ((float*) output.getData(), true);
+                std::fill (reference.getData() + ((n >> 1) + 1), reference.getData() + n, std::complex<float> (0.0f));
+                u.expect (checkArrayIsSimilar (reference.getData(), output.getData(), (n >> 1) + 1));
+
                 memcpy (output.getData(), reference.getData(), n * sizeof (Complex<float>));
                 fft.performRealOnlyInverseTransform ((float*) output.getData());
                 u.expect (checkArrayIsSimilar ((float*) output.getData(), input.getData(), n));
@@ -196,3 +208,6 @@ struct FFTUnitTest  : public UnitTest
 };
 
 static FFTUnitTest fftUnitTest;
+
+} // namespace dsp
+} // namespace juce

@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 template <typename ElementType>
 Matrix<ElementType> Matrix<ElementType>::identity (size_t size)
@@ -277,7 +281,7 @@ String Matrix<ElementType>::toString() const
     StringArray entries;
     int sizeMax = 0;
 
-    auto* p = data.getRawDataPointer();
+    auto* p = data.begin();
 
     for (size_t i = 0; i < rows; ++i)
     {
@@ -306,3 +310,9 @@ String Matrix<ElementType>::toString() const
 
     return result.toString();
 }
+
+template class Matrix<float>;
+template class Matrix<double>;
+
+} // namespace dsp
+} // namespace juce

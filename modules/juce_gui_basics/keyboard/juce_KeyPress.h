@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -216,6 +216,25 @@ public:
     static const int F14Key;        /**< key-code for the F14 key */
     static const int F15Key;        /**< key-code for the F15 key */
     static const int F16Key;        /**< key-code for the F16 key */
+    static const int F17Key;        /**< key-code for the F17 key */
+    static const int F18Key;        /**< key-code for the F18 key */
+    static const int F19Key;        /**< key-code for the F19 key */
+    static const int F20Key;        /**< key-code for the F20 key */
+    static const int F21Key;        /**< key-code for the F21 key */
+    static const int F22Key;        /**< key-code for the F22 key */
+    static const int F23Key;        /**< key-code for the F23 key */
+    static const int F24Key;        /**< key-code for the F24 key */
+    static const int F25Key;        /**< key-code for the F25 key */
+    static const int F26Key;        /**< key-code for the F26 key */
+    static const int F27Key;        /**< key-code for the F27 key */
+    static const int F28Key;        /**< key-code for the F28 key */
+    static const int F29Key;        /**< key-code for the F29 key */
+    static const int F30Key;        /**< key-code for the F30 key */
+    static const int F31Key;        /**< key-code for the F31 key */
+    static const int F32Key;        /**< key-code for the F32 key */
+    static const int F33Key;        /**< key-code for the F33 key */
+    static const int F34Key;        /**< key-code for the F34 key */
+    static const int F35Key;        /**< key-code for the F35 key */
 
     static const int numberPad0;     /**< key-code for the 0 on the numeric keypad. */
     static const int numberPad1;     /**< key-code for the 1 on the numeric keypad. */
@@ -250,3 +269,5 @@ private:
 
     JUCE_LEAK_DETECTOR (KeyPress)
 };
+
+} // namespace juce

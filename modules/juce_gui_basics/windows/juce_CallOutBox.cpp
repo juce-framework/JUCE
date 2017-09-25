@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 CallOutBox::CallOutBox (Component& c, const Rectangle<int>& area, Component* const parent)
     : arrowSize (16.0f), content (c), dismissalMouseClicksAreAlwaysConsumed (false)
 {
@@ -259,3 +262,5 @@ void CallOutBox::timerCallback()
     toFront (true);
     stopTimer();
 }
+
+} // namespace juce

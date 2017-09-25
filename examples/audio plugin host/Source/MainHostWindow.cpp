@@ -213,7 +213,12 @@ void MainHostWindow::changeListenerCallback (ChangeBroadcaster* changed)
 
 StringArray MainHostWindow::getMenuBarNames()
 {
-    return { "File", "Plugins", "Options", "Windows" };
+    StringArray names;
+    names.add ("File");
+    names.add ("Plugins");
+    names.add ("Options");
+    names.add ("Windows");
+    return names;
 }
 
 PopupMenu MainHostWindow::getMenuForIndex (int topLevelMenuIndex, const String& /*menuName*/)

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct AudioVisualiserComponent::ChannelInfo
 {
     ChannelInfo (AudioVisualiserComponent& o, int bufferSize)
@@ -220,3 +223,5 @@ void AudioVisualiserComponent::paintChannel (Graphics& g, Rectangle<float> area,
                                                       0.0f, 1.0f,                area.getX(), area.getBottom(),
                                                       (float) numLevels, -1.0f,  area.getRight(), area.getY()));
 }
+
+} // namespace juce

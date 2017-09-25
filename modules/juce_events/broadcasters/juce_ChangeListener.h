@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 class ChangeBroadcaster;
 
@@ -56,3 +57,5 @@ public:
     private: virtual int changeListenerCallback (void*) { return 0; }
    #endif
 };
+
+} // namespace juce

@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace FloatVectorHelpers
 {
     #define JUCE_INCREMENT_SRC_DEST         dest += (16 / sizeof (*dest)); src += (16 / sizeof (*dest));
@@ -874,7 +877,7 @@ void JUCE_CALLTYPE FloatVectorOperations::convertFixedToFloat (float* dest, cons
                                   vmulq_n_f32 (vcvtq_f32_s32 (vld1q_s32 (src)), multiplier),
                                   JUCE_LOAD_NONE, JUCE_INCREMENT_SRC_DEST, )
    #else
-    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = src[i] * multiplier,
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = (float) src[i] * multiplier,
                                   Mode::mul (mult, _mm_cvtepi32_ps (_mm_loadu_si128 ((const __m128i*) src))),
                                   JUCE_LOAD_NONE, JUCE_INCREMENT_SRC_DEST,
                                   const Mode::ParallelType mult = Mode::load1 (multiplier);)
@@ -1041,25 +1044,6 @@ void JUCE_CALLTYPE FloatVectorOperations::disableDenormalisedNumberSupport() noe
    #endif
 }
 
-FloatVectorOperations::ScopedNoDenormals::ScopedNoDenormals()
-{
-    // There is also C99 way of doing this,
-    // but its not widely supported:
-    //   fesetenv (...)
-   #if JUCE_USE_SSE_INTRINSICS
-    oldMXCSR = _mm_getcsr(); /*read the old MXCSR setting */
-    int newMXCSR = oldMXCSR | 0x8040; /* set DAZ and FZ bits */
-    _mm_setcsr (newMXCSR); /*write the new MXCSR setting to the MXCSR */
-   #endif
-}
-
-FloatVectorOperations::ScopedNoDenormals::~ScopedNoDenormals()
-{
-   #if JUCE_USE_SSE_INTRINSICS
-    _mm_setcsr (oldMXCSR);
-   #endif
-};
-
 //==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
@@ -1085,9 +1069,11 @@ public:
             ValueType* const data2 = buffer2;
             int* const int1 = buffer3;
            #else
-            ValueType* const data1 = addBytesToPointer (buffer1.getData(), random.nextInt (16));
-            ValueType* const data2 = addBytesToPointer (buffer2.getData(), random.nextInt (16));
-            int* const int1 = addBytesToPointer (buffer3.getData(), random.nextInt (16));
+            // These tests deliberately operate on misaligned memory and will be flagged up by
+            // checks for undefined behavior!
+            ValueType* const data1 = addBytesToPointer (buffer1.get(), random.nextInt (16));
+            ValueType* const data2 = addBytesToPointer (buffer2.get(), random.nextInt (16));
+            int* const int1 = addBytesToPointer (buffer3.get(), random.nextInt (16));
            #endif
 
             fillRandomly (random, data1, num);
@@ -1175,7 +1161,7 @@ public:
         static void convertFixed (float* d, const int* s, ValueType multiplier, int num)
         {
             while (--num >= 0)
-                *d++ = *s++ * multiplier;
+                *d++ = (float) *s++ * multiplier;
         }
 
         static bool areAllValuesEqual (const ValueType* d, int num, ValueType target)
@@ -1217,3 +1203,5 @@ public:
 static FloatVectorOperationsTests vectorOpTests;
 
 #endif
+
+} // namespace juce

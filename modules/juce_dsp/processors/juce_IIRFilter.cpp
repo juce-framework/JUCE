@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 template <typename NumericType>
 IIR::Coefficients<NumericType>::Coefficients()
@@ -482,3 +486,6 @@ void IIR::Coefficients<NumericType>::getPhaseForFrequencyArray (double* frequenc
 
 template struct IIR::Coefficients<float>;
 template struct IIR::Coefficients<double>;
+
+} // namespace dsp
+} // namespace juce

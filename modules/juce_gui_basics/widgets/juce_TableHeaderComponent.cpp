@@ -24,11 +24,13 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class TableHeaderComponent::DragOverlayComp   : public Component
 {
 public:
-    DragOverlayComp (const Image& image_)
-        : image (image_)
+    DragOverlayComp (const Image& i) : image (i)
     {
         image.duplicateIfShared();
         image.multiplyAllAlphas (0.8f);
@@ -40,7 +42,6 @@ public:
         g.drawImageAt (image, 0, 0);
     }
 
-private:
     Image image;
 
     JUCE_DECLARE_NON_COPYABLE (DragOverlayComp)
@@ -49,15 +50,6 @@ private:
 
 //==============================================================================
 TableHeaderComponent::TableHeaderComponent()
-    : columnsChanged (false),
-      columnsResized (false),
-      sortChanged (false),
-      menuActive (true),
-      stretchToFit (false),
-      columnIdBeingResized (0),
-      columnIdBeingDragged (0),
-      columnIdUnderMouse (0),
-      lastDeliberateWidth (0)
 {
 }
 
@@ -67,12 +59,12 @@ TableHeaderComponent::~TableHeaderComponent()
 }
 
 //==============================================================================
-void TableHeaderComponent::setPopupMenuActive (const bool hasMenu)
+void TableHeaderComponent::setPopupMenuActive (bool hasMenu)
 {
     menuActive = hasMenu;
 }
 
-bool TableHeaderComponent::isPopupMenuActive() const                    { return menuActive; }
+bool TableHeaderComponent::isPopupMenuActive() const    { return menuActive; }
 
 
 //==============================================================================
@@ -82,8 +74,8 @@ int TableHeaderComponent::getNumColumns (const bool onlyCountVisibleColumns) con
     {
         int num = 0;
 
-        for (int i = columns.size(); --i >= 0;)
-            if (columns.getUnchecked(i)->isVisible())
+        for (auto* c : columns)
+            if (c->isVisible())
                 ++num;
 
         return num;
@@ -113,26 +105,24 @@ void TableHeaderComponent::setColumnName (const int columnId, const String& newN
 }
 
 void TableHeaderComponent::addColumn (const String& columnName,
-                                      const int columnId,
-                                      const int width,
-                                      const int minimumWidth,
-                                      const int maximumWidth,
-                                      const int propertyFlags,
-                                      const int insertIndex)
+                                      int columnId,
+                                      int width,
+                                      int minimumWidth,
+                                      int maximumWidth,
+                                      int propertyFlags,
+                                      int insertIndex)
 {
-    // can't have a duplicate or null ID!
+    // can't have a duplicate or zero ID!
     jassert (columnId != 0 && getIndexOfColumnId (columnId, false) < 0);
     jassert (width > 0);
 
-    ColumnInfo* const ci = new ColumnInfo();
+    auto ci = new ColumnInfo();
     ci->name = columnName;
     ci->id = columnId;
     ci->width = width;
     ci->lastDeliberateWidth = width;
     ci->minimumWidth = minimumWidth;
-    ci->maximumWidth = maximumWidth;
-    if (ci->maximumWidth < 0)
-        ci->maximumWidth = std::numeric_limits<int>::max();
+    ci->maximumWidth = maximumWidth >= 0 ? maximumWidth : std::numeric_limits<int>::max();
     jassert (ci->maximumWidth >= ci->minimumWidth);
     ci->propertyFlags = propertyFlags;
 
@@ -142,7 +132,7 @@ void TableHeaderComponent::addColumn (const String& columnName,
 
 void TableHeaderComponent::removeColumn (const int columnIdToRemove)
 {
-    const int index = getIndexOfColumnId (columnIdToRemove, false);
+    auto index = getIndexOfColumnId (columnIdToRemove, false);
 
     if (index >= 0)
     {
@@ -163,7 +153,7 @@ void TableHeaderComponent::removeAllColumns()
 
 void TableHeaderComponent::moveColumn (const int columnId, int newIndex)
 {
-    const int currentIndex = getIndexOfColumnId (columnId, false);
+    auto currentIndex = getIndexOfColumnId (columnId, false);
     newIndex = visibleIndexToTotalIndex (newIndex);
 
     if (columns [currentIndex] != 0 && currentIndex != newIndex)
@@ -175,7 +165,7 @@ void TableHeaderComponent::moveColumn (const int columnId, int newIndex)
 
 int TableHeaderComponent::getColumnWidth (const int columnId) const
 {
-    if (const ColumnInfo* const ci = getInfoForId (columnId))
+    if (auto* ci = getInfoForId (columnId))
         return ci->width;
 
     return 0;
@@ -183,33 +173,34 @@ int TableHeaderComponent::getColumnWidth (const int columnId) const
 
 void TableHeaderComponent::setColumnWidth (const int columnId, const int newWidth)
 {
-    ColumnInfo* const ci = getInfoForId (columnId);
-
-    if (ci != nullptr && ci->width != newWidth)
+    if (auto* ci = getInfoForId (columnId))
     {
-        const int numColumns = getNumColumns (true);
-
-        ci->lastDeliberateWidth = ci->width
-            = jlimit (ci->minimumWidth, ci->maximumWidth, newWidth);
-
-        if (stretchToFit)
+        if (ci->width != newWidth)
         {
-            const int index = getIndexOfColumnId (columnId, true) + 1;
+            auto numColumns = getNumColumns (true);
 
-            if (isPositiveAndBelow (index, numColumns))
+            ci->lastDeliberateWidth = ci->width
+                = jlimit (ci->minimumWidth, ci->maximumWidth, newWidth);
+
+            if (stretchToFit)
             {
-                const int x = getColumnPosition (index).getX();
+                auto index = getIndexOfColumnId (columnId, true) + 1;
 
-                if (lastDeliberateWidth == 0)
-                    lastDeliberateWidth = getTotalWidth();
+                if (isPositiveAndBelow (index, numColumns))
+                {
+                    auto x = getColumnPosition (index).getX();
 
-                resizeColumnsToFit (visibleIndexToTotalIndex (index), lastDeliberateWidth - x);
+                    if (lastDeliberateWidth == 0)
+                        lastDeliberateWidth = getTotalWidth();
+
+                    resizeColumnsToFit (visibleIndexToTotalIndex (index), lastDeliberateWidth - x);
+                }
             }
-        }
 
-        repaint();
-        columnsResized = true;
-        triggerAsyncUpdate();
+            repaint();
+            columnsResized = true;
+            triggerAsyncUpdate();
+        }
     }
 }
 
@@ -218,11 +209,11 @@ int TableHeaderComponent::getIndexOfColumnId (const int columnId, const bool onl
 {
     int n = 0;
 
-    for (int i = 0; i < columns.size(); ++i)
+    for (auto* c : columns)
     {
-        if ((! onlyCountVisibleColumns) || columns.getUnchecked(i)->isVisible())
+        if ((! onlyCountVisibleColumns) || c->isVisible())
         {
-            if (columns.getUnchecked(i)->id == columnId)
+            if (c->id == columnId)
                 return n;
 
             ++n;
@@ -237,7 +228,7 @@ int TableHeaderComponent::getColumnIdOfIndex (int index, const bool onlyCountVis
     if (onlyCountVisibleColumns)
         index = visibleIndexToTotalIndex (index);
 
-    if (const ColumnInfo* const ci = columns [index])
+    if (auto* ci = columns [index])
         return ci->id;
 
     return 0;
@@ -247,13 +238,13 @@ Rectangle<int> TableHeaderComponent::getColumnPosition (const int index) const
 {
     int x = 0, width = 0, n = 0;
 
-    for (int i = 0; i < columns.size(); ++i)
+    for (auto* c : columns)
     {
         x += width;
 
-        if (columns.getUnchecked(i)->isVisible())
+        if (c->isVisible())
         {
-            width = columns.getUnchecked(i)->width;
+            width = c->width;
 
             if (n++ == index)
                 break;
@@ -264,7 +255,7 @@ Rectangle<int> TableHeaderComponent::getColumnPosition (const int index) const
         }
     }
 
-    return Rectangle<int> (x, 0, width, getHeight());
+    return { x, 0, width, getHeight() };
 }
 
 int TableHeaderComponent::getColumnIdAtX (const int xToFind) const
@@ -273,10 +264,8 @@ int TableHeaderComponent::getColumnIdAtX (const int xToFind) const
     {
         int x = 0;
 
-        for (int i = 0; i < columns.size(); ++i)
+        for (auto* ci : columns)
         {
-            const ColumnInfo* const ci = columns.getUnchecked(i);
-
             if (ci->isVisible())
             {
                 x += ci->width;
@@ -294,9 +283,9 @@ int TableHeaderComponent::getTotalWidth() const
 {
     int w = 0;
 
-    for (int i = columns.size(); --i >= 0;)
-        if (columns.getUnchecked(i)->isVisible())
-            w += columns.getUnchecked(i)->width;
+    for (auto* c : columns)
+        if (c->isVisible())
+            w += c->width;
 
     return w;
 }
@@ -326,27 +315,27 @@ void TableHeaderComponent::resizeAllColumnsToFit (int targetTotalWidth)
 void TableHeaderComponent::resizeColumnsToFit (int firstColumnIndex, int targetTotalWidth)
 {
     targetTotalWidth = jmax (targetTotalWidth, 0);
-
     StretchableObjectResizer sor;
+
     for (int i = firstColumnIndex; i < columns.size(); ++i)
     {
-        ColumnInfo* const ci = columns.getUnchecked(i);
+        auto* ci = columns.getUnchecked(i);
 
         if (ci->isVisible())
             sor.addItem (ci->lastDeliberateWidth, ci->minimumWidth, ci->maximumWidth);
     }
 
     sor.resizeToFit (targetTotalWidth);
-
     int visIndex = 0;
+
     for (int i = firstColumnIndex; i < columns.size(); ++i)
     {
-        ColumnInfo* const ci = columns.getUnchecked(i);
+        auto* ci = columns.getUnchecked(i);
 
         if (ci->isVisible())
         {
-            const int newWidth = jlimit (ci->minimumWidth, ci->maximumWidth,
-                                         (int) std::floor (sor.getItemSize (visIndex++)));
+            auto newWidth = jlimit (ci->minimumWidth, ci->maximumWidth,
+                                    (int) std::floor (sor.getItemSize (visIndex++)));
 
             if (newWidth != ci->width)
             {
@@ -361,7 +350,7 @@ void TableHeaderComponent::resizeColumnsToFit (int firstColumnIndex, int targetT
 
 void TableHeaderComponent::setColumnVisible (const int columnId, const bool shouldBeVisible)
 {
-    if (ColumnInfo* const ci = getInfoForId (columnId))
+    if (auto* ci = getInfoForId (columnId))
     {
         if (shouldBeVisible != ci->isVisible())
         {
@@ -378,8 +367,10 @@ void TableHeaderComponent::setColumnVisible (const int columnId, const bool shou
 
 bool TableHeaderComponent::isColumnVisible (const int columnId) const
 {
-    const ColumnInfo* const ci = getInfoForId (columnId);
-    return ci != nullptr && ci->isVisible();
+    if (auto* ci = getInfoForId (columnId))
+        return ci->isVisible();
+
+    return false;
 }
 
 //==============================================================================
@@ -387,10 +378,10 @@ void TableHeaderComponent::setSortColumnId (const int columnId, const bool sortF
 {
     if (getSortColumnId() != columnId || isSortedForwards() != sortForwards)
     {
-        for (int i = columns.size(); --i >= 0;)
-            columns.getUnchecked(i)->propertyFlags &= ~(sortedForwards | sortedBackwards);
+        for (auto* c : columns)
+            c->propertyFlags &= ~(sortedForwards | sortedBackwards);
 
-        if (ColumnInfo* const ci = getInfoForId (columnId))
+        if (auto* ci = getInfoForId (columnId))
             ci->propertyFlags |= (sortForwards ? sortedForwards : sortedBackwards);
 
         reSortTable();
@@ -399,18 +390,18 @@ void TableHeaderComponent::setSortColumnId (const int columnId, const bool sortF
 
 int TableHeaderComponent::getSortColumnId() const
 {
-    for (int i = columns.size(); --i >= 0;)
-        if ((columns.getUnchecked(i)->propertyFlags & (sortedForwards | sortedBackwards)) != 0)
-            return columns.getUnchecked(i)->id;
+    for (auto* c : columns)
+        if ((c->propertyFlags & (sortedForwards | sortedBackwards)) != 0)
+            return c->id;
 
     return 0;
 }
 
 bool TableHeaderComponent::isSortedForwards() const
 {
-    for (int i = columns.size(); --i >= 0;)
-        if ((columns.getUnchecked(i)->propertyFlags & (sortedForwards | sortedBackwards)) != 0)
-            return (columns.getUnchecked(i)->propertyFlags & sortedForwards) != 0;
+    for (auto* c : columns)
+        if ((c->propertyFlags & (sortedForwards | sortedBackwards)) != 0)
+            return (c->propertyFlags & sortedForwards) != 0;
 
     return true;
 }
@@ -432,17 +423,15 @@ String TableHeaderComponent::toString() const
     doc.setAttribute ("sortedCol", getSortColumnId());
     doc.setAttribute ("sortForwards", isSortedForwards());
 
-    for (int i = 0; i < columns.size(); ++i)
+    for (auto* ci : columns)
     {
-        const ColumnInfo* const ci = columns.getUnchecked (i);
-
-        XmlElement* const e = doc.createNewChildElement ("COLUMN");
+        auto* e = doc.createNewChildElement ("COLUMN");
         e->setAttribute ("id", ci->id);
         e->setAttribute ("visible", ci->isVisible());
         e->setAttribute ("width", ci->width);
     }
 
-    return doc.createDocument ("", true, false);
+    return doc.createDocument ({}, true, false);
 }
 
 void TableHeaderComponent::restoreFromString (const String& storedVersion)
@@ -454,9 +443,9 @@ void TableHeaderComponent::restoreFromString (const String& storedVersion)
     {
         forEachXmlChildElement (*storedXml, col)
         {
-            const int tabId = col->getIntAttribute ("id");
+            auto tabId = col->getIntAttribute ("id");
 
-            if (ColumnInfo* const ci = getInfoForId (tabId))
+            if (auto* ci = getInfoForId (tabId))
             {
                 columns.move (columns.indexOf (ci), index);
                 ci->width = col->getIntAttribute ("width");
@@ -488,22 +477,18 @@ void TableHeaderComponent::removeListener (Listener* const listenerToRemove)
 //==============================================================================
 void TableHeaderComponent::columnClicked (int columnId, const ModifierKeys& mods)
 {
-    if (const ColumnInfo* const ci = getInfoForId (columnId))
+    if (auto* ci = getInfoForId (columnId))
         if ((ci->propertyFlags & sortable) != 0 && ! mods.isPopupMenu())
             setSortColumnId (columnId, (ci->propertyFlags & sortedForwards) == 0);
 }
 
 void TableHeaderComponent::addMenuItems (PopupMenu& menu, const int /*columnIdClicked*/)
 {
-    for (int i = 0; i < columns.size(); ++i)
-    {
-        const ColumnInfo* const ci = columns.getUnchecked(i);
-
+    for (auto* ci : columns)
         if ((ci->propertyFlags & appearsOnColumnMenu) != 0)
             menu.addItem (ci->id, ci->name,
                           (ci->propertyFlags & (sortedForwards | sortedBackwards)) == 0,
                           isColumnVisible (ci->id));
-    }
 }
 
 void TableHeaderComponent::reactToMenuItem (const int menuReturnId, const int /*columnIdClicked*/)
@@ -521,10 +506,9 @@ void TableHeaderComponent::paint (Graphics& g)
     const Rectangle<int> clip (g.getClipBounds());
 
     int x = 0;
-    for (int i = 0; i < columns.size(); ++i)
-    {
-        const ColumnInfo* const ci = columns.getUnchecked(i);
 
+    for (auto* ci : columns)
+    {
         if (ci->isVisible())
         {
             if (x + ci->width > clip.getX()
@@ -537,7 +521,7 @@ void TableHeaderComponent::paint (Graphics& g)
                 g.setOrigin (x, 0);
                 g.reduceClipRegion (0, 0, ci->width, getHeight());
 
-                lf.drawTableHeaderColumn (g, ci->name, ci->id, ci->width, getHeight(),
+                lf.drawTableHeaderColumn (g, *this, ci->name, ci->id, ci->width, getHeight(),
                                           ci->id == columnIdUnderMouse,
                                           ci->id == columnIdUnderMouse && isMouseButtonDown(),
                                           ci->propertyFlags);
@@ -551,24 +535,9 @@ void TableHeaderComponent::paint (Graphics& g)
     }
 }
 
-void TableHeaderComponent::resized()
-{
-}
-
-void TableHeaderComponent::mouseMove (const MouseEvent& e)
-{
-    updateColumnUnderMouse (e);
-}
-
-void TableHeaderComponent::mouseEnter (const MouseEvent& e)
-{
-    updateColumnUnderMouse (e);
-}
-
-void TableHeaderComponent::mouseExit (const MouseEvent&)
-{
-    setColumnUnderMouse (0);
-}
+void TableHeaderComponent::mouseMove  (const MouseEvent& e)  { updateColumnUnderMouse (e); }
+void TableHeaderComponent::mouseEnter (const MouseEvent& e)  { updateColumnUnderMouse (e); }
+void TableHeaderComponent::mouseExit  (const MouseEvent&)    { setColumnUnderMouse (0); }
 
 void TableHeaderComponent::mouseDown (const MouseEvent& e)
 {
@@ -601,9 +570,10 @@ void TableHeaderComponent::mouseDrag (const MouseEvent& e)
 
         if (columnIdBeingResized != 0)
         {
-            const ColumnInfo* const ci = getInfoForId (columnIdBeingResized);
-            jassert (ci != nullptr);
-            initialColumnWidth = ci->width;
+            if (auto* ci = getInfoForId (columnIdBeingResized))
+                initialColumnWidth = ci->width;
+            else
+                jassertfalse;
         }
         else
         {
@@ -613,20 +583,21 @@ void TableHeaderComponent::mouseDrag (const MouseEvent& e)
 
     if (columnIdBeingResized != 0)
     {
-        if (const ColumnInfo* const ci = getInfoForId (columnIdBeingResized))
+        if (auto* ci = getInfoForId (columnIdBeingResized))
         {
-            int w = jlimit (ci->minimumWidth, ci->maximumWidth,
-                            initialColumnWidth + e.getDistanceFromDragStartX());
+            auto w = jlimit (ci->minimumWidth, ci->maximumWidth,
+                             initialColumnWidth + e.getDistanceFromDragStartX());
 
             if (stretchToFit)
             {
                 // prevent us dragging a column too far right if we're in stretch-to-fit mode
                 int minWidthOnRight = 0;
+
                 for (int i = getIndexOfColumnId (columnIdBeingResized, false) + 1; i < columns.size(); ++i)
                     if (columns.getUnchecked (i)->isVisible())
                         minWidthOnRight += columns.getUnchecked (i)->minimumWidth;
 
-                const Rectangle<int> currentPos (getColumnPosition (getIndexOfColumnId (columnIdBeingResized, true)));
+                auto currentPos = getColumnPosition (getIndexOfColumnId (columnIdBeingResized, true));
                 w = jmax (ci->minimumWidth, jmin (w, lastDeliberateWidth - minWidthOnRight - currentPos.getX()));
             }
 
@@ -656,15 +627,15 @@ void TableHeaderComponent::mouseDrag (const MouseEvent& e)
                     {
                         // if the previous column isn't draggable, we can't move our column
                         // past it, because that'd change the undraggable column's position..
-                        const ColumnInfo* const previous = columns.getUnchecked (newIndex - 1);
+                        auto* previous = columns.getUnchecked (newIndex - 1);
 
                         if ((previous->propertyFlags & draggable) != 0)
                         {
-                            const int leftOfPrevious = getColumnPosition (newIndex - 1).getX();
-                            const int rightOfCurrent = getColumnPosition (newIndex).getRight();
+                            auto leftOfPrevious = getColumnPosition (newIndex - 1).getX();
+                            auto rightOfCurrent = getColumnPosition (newIndex).getRight();
 
-                            if (abs (dragOverlayComp->getX() - leftOfPrevious)
-                                < abs (dragOverlayComp->getRight() - rightOfCurrent))
+                            if (std::abs (dragOverlayComp->getX() - leftOfPrevious)
+                                 < std::abs (dragOverlayComp->getRight() - rightOfCurrent))
                             {
                                 --newIndex;
                             }
@@ -675,15 +646,15 @@ void TableHeaderComponent::mouseDrag (const MouseEvent& e)
                     {
                         // if the next column isn't draggable, we can't move our column
                         // past it, because that'd change the undraggable column's position..
-                        const ColumnInfo* const nextCol = columns.getUnchecked (newIndex + 1);
+                        auto* nextCol = columns.getUnchecked (newIndex + 1);
 
                         if ((nextCol->propertyFlags & draggable) != 0)
                         {
-                            const int leftOfCurrent = getColumnPosition (newIndex).getX();
-                            const int rightOfNext = getColumnPosition (newIndex + 1).getRight();
+                            auto leftOfCurrent = getColumnPosition (newIndex).getX();
+                            auto rightOfNext = getColumnPosition (newIndex + 1).getRight();
 
-                            if (abs (dragOverlayComp->getX() - leftOfCurrent)
-                                > abs (dragOverlayComp->getRight() - rightOfNext))
+                            if (std::abs (dragOverlayComp->getX() - leftOfCurrent)
+                                 > std::abs (dragOverlayComp->getRight() - rightOfNext))
                             {
                                 ++newIndex;
                             }
@@ -710,7 +681,7 @@ void TableHeaderComponent::beginDrag (const MouseEvent& e)
     {
         columnIdBeingDragged = getColumnIdAtX (e.getMouseDownX());
 
-        const ColumnInfo* const ci = getInfoForId (columnIdBeingDragged);
+        auto* ci = getInfoForId (columnIdBeingDragged);
 
         if (ci == nullptr || (ci->propertyFlags & draggable) == 0)
         {
@@ -720,9 +691,8 @@ void TableHeaderComponent::beginDrag (const MouseEvent& e)
         {
             draggingColumnOriginalIndex = getIndexOfColumnId (columnIdBeingDragged, true);
 
-            const Rectangle<int> columnRect (getColumnPosition (draggingColumnOriginalIndex));
-
-            const int temp = columnIdBeingDragged;
+            auto columnRect = getColumnPosition (draggingColumnOriginalIndex);
+            auto temp = columnIdBeingDragged;
             columnIdBeingDragged = 0;
 
             addAndMakeVisible (dragOverlayComp = new DragOverlayComp (createComponentSnapshot (columnRect, false)));
@@ -760,9 +730,9 @@ void TableHeaderComponent::mouseUp (const MouseEvent& e)
 {
     mouseDrag (e);
 
-    for (int i = columns.size(); --i >= 0;)
-        if (columns.getUnchecked (i)->isVisible())
-            columns.getUnchecked (i)->lastDeliberateWidth = columns.getUnchecked (i)->width;
+    for (auto* c : columns)
+        if (c->isVisible())
+            c->lastDeliberateWidth = c->width;
 
     columnIdBeingResized = 0;
     repaint();
@@ -791,11 +761,11 @@ bool TableHeaderComponent::ColumnInfo::isVisible() const
     return (propertyFlags & TableHeaderComponent::visible) != 0;
 }
 
-TableHeaderComponent::ColumnInfo* TableHeaderComponent::getInfoForId (const int id) const
+TableHeaderComponent::ColumnInfo* TableHeaderComponent::getInfoForId (int id) const
 {
-    for (int i = columns.size(); --i >= 0;)
-        if (columns.getUnchecked(i)->id == id)
-            return columns.getUnchecked(i);
+    for (auto* c : columns)
+        if (c->id == id)
+            return c;
 
     return nullptr;
 }
@@ -872,13 +842,11 @@ int TableHeaderComponent::getResizeDraggerAt (const int mouseX) const
         const int draggableDistance = 3;
         int x = 0;
 
-        for (int i = 0; i < columns.size(); ++i)
+        for (auto* ci : columns)
         {
-            const ColumnInfo* const ci = columns.getUnchecked(i);
-
             if (ci->isVisible())
             {
-                if (abs (mouseX - (x + ci->width)) <= draggableDistance
+                if (std::abs (mouseX - (x + ci->width)) <= draggableDistance
                      && (ci->propertyFlags & resizable) != 0)
                     return ci->id;
 
@@ -928,3 +896,5 @@ void TableHeaderComponent::showColumnChooserMenu (const int columnIdClicked)
 void TableHeaderComponent::Listener::tableColumnDraggingChanged (TableHeaderComponent*, int)
 {
 }
+
+} // namespace juce

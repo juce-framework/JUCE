@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 /** A template specialisation to find corresponding mask type for primitives. */
 namespace SIMDInternal
@@ -82,7 +86,7 @@ struct SIMDFallbackOps
         auto* dst  = reinterpret_cast<MaskType*> (&retval);
         auto* aSrc = reinterpret_cast<const MaskType*> (&a);
 
-        for (int i = 0; i < n; ++i)
+        for (size_t i = 0; i < n; ++i)
             dst [i] = ~aSrc [i];
 
         return retval;
@@ -93,7 +97,7 @@ struct SIMDFallbackOps
         auto retval = static_cast<ScalarType> (0);
         auto* aSrc = reinterpret_cast<const ScalarType*> (&a);
 
-        for (int i = 0; i < n; ++i)
+        for (size_t i = 0; i < n; ++i)
             retval += aSrc [i];
 
         return retval;
@@ -107,7 +111,7 @@ struct SIMDFallbackOps
         auto* bSrc = reinterpret_cast<const ScalarType*> (&b);
         auto* cSrc = reinterpret_cast<const ScalarType*> (&c);
 
-        for (int i = 0; i < n; ++i)
+        for (size_t i = 0; i < n; ++i)
             dst [i] = aSrc [i] + (bSrc [i] * cSrc [i]);
 
         return retval;
@@ -151,7 +155,7 @@ struct SIMDFallbackOps
         auto* aSrc = reinterpret_cast<const ScalarType*> (&a);
         auto* bSrc = reinterpret_cast<const ScalarType*> (&b);
 
-        for (int i = 0; i < n; ++i)
+        for (size_t i = 0; i < n; ++i)
             dst [i] = Op::op (aSrc [i], bSrc [i]);
 
         return retval;
@@ -165,7 +169,7 @@ struct SIMDFallbackOps
         auto* aSrc = reinterpret_cast<const ScalarType*> (&a);
         auto* bSrc = reinterpret_cast<const ScalarType*> (&b);
 
-        for (int i = 0; i < n; ++i)
+        for (size_t i = 0; i < n; ++i)
             dst [i] = Op::op (aSrc [i], bSrc [i]) ? static_cast<MaskType> (-1) : static_cast<MaskType> (0);
 
         return retval;
@@ -179,7 +183,7 @@ struct SIMDFallbackOps
         auto* aSrc = reinterpret_cast<const MaskType*> (&a);
         auto* bSrc = reinterpret_cast<const MaskType*> (&b);
 
-        for (int i = 0; i < n; ++i)
+        for (size_t i = 0; i < n; ++i)
             dst [i] = Op::op (aSrc [i], bSrc [i]);
 
         return retval;
@@ -190,7 +194,7 @@ struct SIMDFallbackOps
         vSIMDType retval;
         auto* dst = reinterpret_cast<ScalarType*> (&retval);
 
-        for (int i = 0; i < n; ++i)
+        for (size_t i = 0; i < n; ++i)
             dst [i] = s;
 
         return retval;
@@ -205,9 +209,12 @@ struct SIMDFallbackOps
 
         // the compiler will unroll this loop and the index can
         // be computed at compile-time, so this will be super fast
-        for (int i = 0; i < n; ++i)
+        for (size_t i = 0; i < n; ++i)
             dst [i] = aSrc [(shuffle_idx >> (bits * i)) & mask];
 
         return retval;
     }
 };
+
+} // namespace dsp
+} // namespace juce

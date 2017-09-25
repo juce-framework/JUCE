@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -34,6 +34,10 @@
     To use this, just create one and make it visible. It'll run its own timer
     to keep an eye on a variable that you give it, and will automatically
     redraw itself when the variable changes.
+
+    If using LookAndFeel_V4 a circular spinning progress bar will be drawn if
+    the width and height of the ProgressBar are equal, otherwise the standard,
+    linear ProgressBar will be drawn.
 
     For an easy way of running a background task with a dialog box showing its
     progress, see the ThreadWithProgressWindow class.
@@ -51,9 +55,10 @@ public:
         @param progress     pass in a reference to a double that you're going to
                             update with your task's progress. The ProgressBar will
                             monitor the value of this variable and will redraw itself
-                            when the value changes. The range is from 0 to 1.0. Obviously
-                            you'd better be careful not to delete this variable while the
-                            ProgressBar still exists!
+                            when the value changes. The range is from 0 to 1.0 and JUCE
+                            LookAndFeel classes will draw a spinning animation for values
+                            outside this range. Obviously you'd better be careful not to
+                            delete this variable while the ProgressBar still exists!
     */
     explicit ProgressBar (double& progress);
 
@@ -133,3 +138,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProgressBar)
 };
+
+} // namespace juce

@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 class FIRFilterTest : public UnitTest
 {
@@ -201,3 +205,6 @@ public:
 };
 
 static FIRFilterTest firFilterUnitTest;
+
+} // namespace dsp
+} // namespace juce

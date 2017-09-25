@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 static const char* const wavFormatName = "WAV file";
 
 //==============================================================================
@@ -154,7 +157,7 @@ const char* const WavAudioFormat::tracktionLoopInfo    = "tracktion loop info";
 //==============================================================================
 namespace WavFileHelpers
 {
-    inline int chunkName (const char* const name) noexcept   { return (int) ByteOrder::littleEndianInt (name); }
+    inline int chunkName (const char* const name) noexcept   { return (int) ByteOrder::littleEndianInt (name[0], name[1], name[2], name[3]); }
     inline size_t roundUpSize (size_t sz) noexcept           { return (sz + 3) & ~3u; }
 
     #if JUCE_MSVC
@@ -892,7 +895,7 @@ namespace WavFileHelpers
 
             return xml.getMemoryBlock();
         }
-    };
+    }
 
     //==============================================================================
     struct ExtensibleWavSubFormat
@@ -1017,15 +1020,7 @@ public:
                             input->skipNextBytes (4); // skip over size and bitsPerSample
                             auto channelMask = input->readInt();
                             metadataValues.set ("ChannelMask", String (channelMask));
-
-                            // AudioChannelSet and wav's dwChannelMask are compatible
-                            BigInteger channelBits (channelMask);
-
-                            for (auto bit = channelBits.findNextSetBit (0); bit >= 0; bit = channelBits.findNextSetBit (bit + 1))
-                                channelLayout.addChannel (static_cast<AudioChannelSet::ChannelType> (bit + 1));
-
-                            // channel layout and number of channels do not match
-                            jassert (channelLayout.size() == static_cast<int> (numChannels));
+                            channelLayout = getChannelLayoutFromMask (channelMask, numChannels);
 
                             ExtensibleWavSubFormat subFormat;
                             subFormat.data1 = (uint32) input->readInt();
@@ -1230,12 +1225,42 @@ public:
         }
     }
 
+    //==============================================================================
     AudioChannelSet getChannelLayout() override
     {
         if (channelLayout.size() == static_cast<int> (numChannels))
             return channelLayout;
 
         return WavFileHelpers::canonicalWavChannelSet (static_cast<int> (numChannels));
+    }
+
+    static AudioChannelSet getChannelLayoutFromMask (int dwChannelMask, size_t totalNumChannels)
+    {
+        AudioChannelSet wavFileChannelLayout;
+
+        // AudioChannelSet and wav's dwChannelMask are compatible
+        BigInteger channelBits (dwChannelMask);
+
+        for (auto bit = channelBits.findNextSetBit (0); bit >= 0; bit = channelBits.findNextSetBit (bit + 1))
+            wavFileChannelLayout.addChannel (static_cast<AudioChannelSet::ChannelType> (bit + 1));
+
+        // channel layout and number of channels do not match
+        if (wavFileChannelLayout.size() != static_cast<int> (totalNumChannels))
+        {
+            // for backward compatibility with old wav files, assume 1 or 2
+            // channel wav files are mono/stereo respectively
+            if (totalNumChannels <= 2 && dwChannelMask == 0)
+                wavFileChannelLayout = AudioChannelSet::canonicalChannelSet (static_cast<int> (totalNumChannels));
+            else
+            {
+                auto discreteSpeaker = static_cast<int> (AudioChannelSet::discreteChannel0);
+
+                while (wavFileChannelLayout.size() < static_cast<int> (totalNumChannels))
+                    wavFileChannelLayout.addChannel (static_cast<AudioChannelSet::ChannelType> (discreteSpeaker++));
+            }
+        }
+
+        return wavFileChannelLayout;
     }
 
     int64 bwavChunkStart = 0, bwavSize = 0;
@@ -1845,3 +1870,5 @@ private:
 static const WaveAudioFormatTests waveAudioFormatTests;
 
 #endif
+
+} // namespace juce

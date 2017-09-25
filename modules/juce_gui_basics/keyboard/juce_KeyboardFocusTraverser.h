@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -85,3 +85,5 @@ public:
     */
     virtual Component* getDefaultComponent (Component* parentComponent);
 };
+
+} // namespace juce

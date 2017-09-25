@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 PositionedGlyph::PositionedGlyph() noexcept
     : character (0), glyph (0), x (0), y (0), w (0), whitespace (false)
 {
@@ -813,3 +816,5 @@ int GlyphArrangement::findGlyphIndexAt (const float x, const float y) const
 
     return -1;
 }
+
+} // namespace juce

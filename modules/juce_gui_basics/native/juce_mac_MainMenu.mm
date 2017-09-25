@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class JuceMainMenuHandler   : private MenuBarModel::Listener,
                               private DeletedAtShutdown
 {
@@ -100,9 +103,9 @@ public:
     {
         NSMenu* superMenu = [menu supermenu];
         auto menuNames = currentModel->getMenuBarNames();
-        auto indexOfMenu = (int) [superMenu indexOfItemWithSubmenu: menu];
+        auto indexOfMenu = (int) [superMenu indexOfItemWithSubmenu: menu] - 1;
         [menu removeAllItems];
-        auto updatedPopup = currentModel->getMenuForIndex (indexOfMenu - 1, menuNames[indexOfMenu - 1]);
+        auto updatedPopup = currentModel->getMenuForIndex (indexOfMenu, menuNames[indexOfMenu]);
 
         for (PopupMenu::MenuItemIterator iter (updatedPopup); iter.next();)
             addMenuItem (iter, menu, 1, indexOfMenu);
@@ -724,3 +727,5 @@ NSMenu* createNSMenu (const PopupMenu& menu, const String& name,
     jassertfalse; // calling this before making sure the OSX main menu stuff was initialised?
     return nil;
 }
+
+} // namespace juce

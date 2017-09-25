@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 #if ! (defined (JUCE_ANDROID_ACTIVITY_CLASSNAME) && defined (JUCE_ANDROID_ACTIVITY_CLASSPATH))
  #error "The JUCE_ANDROID_ACTIVITY_CLASSNAME and JUCE_ANDROID_ACTIVITY_CLASSPATH macros must be set!"
@@ -40,10 +41,11 @@ extern JNIEnv* attachAndroidJNI() noexcept;
 class GlobalRef
 {
 public:
-    inline GlobalRef() noexcept                 : obj (0) {}
-    inline explicit GlobalRef (jobject o)       : obj (retain (o)) {}
-    inline GlobalRef (const GlobalRef& other)   : obj (retain (other.obj)) {}
-    ~GlobalRef()                                { clear(); }
+    inline GlobalRef() noexcept                    : obj (0) {}
+    inline explicit GlobalRef (jobject o)          : obj (retain (o)) {}
+    inline GlobalRef (const GlobalRef& other)      : obj (retain (other.obj)) {}
+    inline GlobalRef (GlobalRef && other) noexcept : obj (0) { std::swap (other.obj, obj); }
+    ~GlobalRef()                                             { clear(); }
 
     inline void clear()
     {
@@ -59,6 +61,14 @@ public:
         jobject newObj = retain (other.obj);
         clear();
         obj = newObj;
+        return *this;
+    }
+
+    inline GlobalRef& operator= (GlobalRef&& other)
+    {
+        clear();
+        std::swap (obj, other.obj);
+
         return *this;
     }
 
@@ -98,7 +108,7 @@ public:
 
 private:
     //==============================================================================
-    jobject obj;
+    jobject obj = 0;
 
     static inline jobject retain (jobject obj)
     {
@@ -111,14 +121,19 @@ template <typename JavaType>
 class LocalRef
 {
 public:
+    explicit inline LocalRef () noexcept                : obj (0) {}
     explicit inline LocalRef (JavaType o) noexcept      : obj (o) {}
     inline LocalRef (const LocalRef& other) noexcept    : obj (retain (other.obj)) {}
+    inline LocalRef (LocalRef&& other) noexcept         : obj (0) { std::swap (obj, other.obj); }
     ~LocalRef()                                         { clear(); }
 
     void clear()
     {
         if (obj != 0)
+        {
             getEnv()->DeleteLocalRef (obj);
+            obj = 0;
+        }
     }
 
     LocalRef& operator= (const LocalRef& other)
@@ -126,6 +141,13 @@ public:
         jobject newObj = retain (other.obj);
         clear();
         obj = newObj;
+        return *this;
+    }
+
+    LocalRef& operator= (LocalRef&& other)
+    {
+        clear();
+        std::swap (other.obj, obj);
         return *this;
     }
 
@@ -258,41 +280,44 @@ extern AndroidSystem android;
 
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
- METHOD (createNewView,          "createNewView",        "(ZJ)L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView;") \
- METHOD (deleteView,             "deleteView",           "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView;)V") \
+ METHOD (createNewView,          "createNewView",         "(ZJ)L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView;") \
+ METHOD (deleteView,             "deleteView",            "(L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView;)V") \
  METHOD (createNativeSurfaceView, "createNativeSurfaceView", "(J)L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$NativeSurfaceView;") \
- METHOD (postMessage,            "postMessage",          "(J)V") \
- METHOD (finish,                 "finish",               "()V") \
+ METHOD (finish,                 "finish",                "()V") \
  METHOD (setRequestedOrientation,"setRequestedOrientation", "(I)V") \
- METHOD (getClipboardContent,    "getClipboardContent",  "()Ljava/lang/String;") \
- METHOD (setClipboardContent,    "setClipboardContent",  "(Ljava/lang/String;)V") \
- METHOD (excludeClipRegion,      "excludeClipRegion",    "(Landroid/graphics/Canvas;FFFF)V") \
- METHOD (renderGlyph,            "renderGlyph",          "(CCLandroid/graphics/Paint;Landroid/graphics/Matrix;Landroid/graphics/Rect;)[I") \
- STATICMETHOD (createHTTPStream, "createHTTPStream",     "(Ljava/lang/String;Z[BLjava/lang/String;I[ILjava/lang/StringBuffer;ILjava/lang/String;)L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$HTTPStream;") \
- METHOD (launchURL,              "launchURL",            "(Ljava/lang/String;)V") \
- METHOD (showMessageBox,         "showMessageBox",       "(Ljava/lang/String;Ljava/lang/String;J)V") \
- METHOD (showOkCancelBox,        "showOkCancelBox",      "(Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;)V") \
- METHOD (showYesNoCancelBox,     "showYesNoCancelBox",   "(Ljava/lang/String;Ljava/lang/String;J)V") \
- STATICMETHOD (getLocaleValue,   "getLocaleValue",       "(Z)Ljava/lang/String;") \
- STATICMETHOD (getDocumentsFolder, "getDocumentsFolder", "()Ljava/lang/String;") \
- STATICMETHOD (getPicturesFolder,  "getPicturesFolder",  "()Ljava/lang/String;") \
- STATICMETHOD (getMusicFolder,     "getMusicFolder",     "()Ljava/lang/String;") \
- STATICMETHOD (getDownloadsFolder, "getDownloadsFolder", "()Ljava/lang/String;") \
- STATICMETHOD (getMoviesFolder,    "getMoviesFolder",    "()Ljava/lang/String;") \
- METHOD (scanFile,               "scanFile",             "(Ljava/lang/String;)V") \
- METHOD (getTypeFaceFromAsset,   "getTypeFaceFromAsset", "(Ljava/lang/String;)Landroid/graphics/Typeface;") \
+ METHOD (getClipboardContent,    "getClipboardContent",   "()Ljava/lang/String;") \
+ METHOD (setClipboardContent,    "setClipboardContent",   "(Ljava/lang/String;)V") \
+ METHOD (excludeClipRegion,      "excludeClipRegion",     "(Landroid/graphics/Canvas;FFFF)V") \
+ METHOD (renderGlyph,            "renderGlyph",           "(CCLandroid/graphics/Paint;Landroid/graphics/Matrix;Landroid/graphics/Rect;)[I") \
+ STATICMETHOD (createHTTPStream, "createHTTPStream",      "(Ljava/lang/String;Z[BLjava/lang/String;I[ILjava/lang/StringBuffer;ILjava/lang/String;)L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$HTTPStream;") \
+ METHOD (launchURL,              "launchURL",             "(Ljava/lang/String;)V") \
+ METHOD (showMessageBox,         "showMessageBox",        "(Ljava/lang/String;Ljava/lang/String;J)V") \
+ METHOD (showOkCancelBox,        "showOkCancelBox",       "(Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;)V") \
+ METHOD (showYesNoCancelBox,     "showYesNoCancelBox",    "(Ljava/lang/String;Ljava/lang/String;J)V") \
+ STATICMETHOD (getLocaleValue,   "getLocaleValue",        "(Z)Ljava/lang/String;") \
+ STATICMETHOD (getDocumentsFolder, "getDocumentsFolder",  "()Ljava/lang/String;") \
+ STATICMETHOD (getPicturesFolder,  "getPicturesFolder",   "()Ljava/lang/String;") \
+ STATICMETHOD (getMusicFolder,     "getMusicFolder",      "()Ljava/lang/String;") \
+ STATICMETHOD (getDownloadsFolder, "getDownloadsFolder",  "()Ljava/lang/String;") \
+ STATICMETHOD (getMoviesFolder,    "getMoviesFolder",     "()Ljava/lang/String;") \
+ METHOD (getTypeFaceFromAsset,   "getTypeFaceFromAsset",  "(Ljava/lang/String;)Landroid/graphics/Typeface;") \
  METHOD (getTypeFaceFromByteArray,"getTypeFaceFromByteArray","([B)Landroid/graphics/Typeface;") \
  METHOD (setScreenSaver,          "setScreenSaver",       "(Z)V") \
  METHOD (getScreenSaver,          "getScreenSaver",       "()Z") \
  METHOD (getAndroidMidiDeviceManager, "getAndroidMidiDeviceManager", "()L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$MidiDeviceManager;") \
  METHOD (getAndroidBluetoothManager, "getAndroidBluetoothManager", "()L" JUCE_ANDROID_ACTIVITY_CLASSPATH "$BluetoothManager;") \
- METHOD (getAndroidSDKVersion,    "getAndroidSDKVersion", "()I") \
+ STATICMETHOD (getAndroidSDKVersion,    "getAndroidSDKVersion", "()I") \
  METHOD (audioManagerGetProperty, "audioManagerGetProperty", "(Ljava/lang/String;)Ljava/lang/String;") \
- METHOD (hasSystemFeature,         "hasSystemFeature", "(Ljava/lang/String;)Z" ) \
+ METHOD (hasSystemFeature,         "hasSystemFeature",    "(Ljava/lang/String;)Z" ) \
  METHOD (requestRuntimePermission, "requestRuntimePermission", "(IJ)V" ) \
- METHOD (isPermissionGranted,     "isPermissionGranted", "(I)Z" ) \
+ METHOD (isPermissionGranted,     "isPermissionGranted",  "(I)Z" ) \
  METHOD (isPermissionDeclaredInManifest, "isPermissionDeclaredInManifest", "(I)Z" ) \
  METHOD (getSystemService,        "getSystemService",     "(Ljava/lang/String;)Ljava/lang/Object;") \
+ STATICMETHOD (createInvocationHandler,  "createInvocationHandler", "(J)Ljava/lang/reflect/InvocationHandler;") \
+ METHOD (bindService,             "bindService",          "(Landroid/content/Intent;Landroid/content/ServiceConnection;I)Z") \
+ METHOD (unbindService,           "unbindService",        "(Landroid/content/ServiceConnection;)V") \
+ METHOD (startIntentSenderForResult, "startIntentSenderForResult", "(Landroid/content/IntentSender;ILandroid/content/Intent;III)V") \
+ METHOD (getPackageName,          "getPackageName",       "()Ljava/lang/String;") \
 
 DECLARE_JNI_CLASS (JuceAppActivity, JUCE_ANDROID_ACTIVITY_CLASSPATH);
 #undef JNI_CLASS_MEMBERS
@@ -332,3 +357,78 @@ DECLARE_JNI_CLASS (Matrix, "android/graphics/Matrix");
 
 DECLARE_JNI_CLASS (RectClass, "android/graphics/Rect");
 #undef JNI_CLASS_MEMBERS
+
+//==============================================================================
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  METHOD (getName,           "getName",           "()Ljava/lang/String;") \
+  METHOD (getModifiers,      "getModifiers",      "()I")            \
+  METHOD (getParameterTypes, "getParameterTypes", "()[Ljava/lang/Class;") \
+  METHOD (getReturnType,     "getReturnType",     "()Ljava/lang/Class;") \
+  METHOD (invoke,            "invoke",            "(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;") \
+  METHOD (hashCode,          "hashCode",          "()I") \
+  METHOD (equals,            "equals",            "(Ljava/lang/Object;)Z") \
+
+DECLARE_JNI_CLASS (Method, "java/lang/reflect/Method");
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  METHOD (getName,           "getName",           "()Ljava/lang/String;") \
+  METHOD (getModifiers,      "getModifiers",      "()I")            \
+  METHOD (isAnnotation,      "isAnnotation",      "()Z") \
+  METHOD (isAnonymousClass,  "isAnonymousClass",  "()Z") \
+  METHOD (isArray,           "isArray",           "()Z") \
+  METHOD (isEnum,            "isEnum",            "()Z") \
+  METHOD (isInterface,       "isInterface",       "()Z") \
+  METHOD (isLocalClass,      "isLocalClass",      "()Z") \
+  METHOD (isMemberClass,     "isMemberClass",     "()Z") \
+  METHOD (isPrimitive,       "isPrimitive",       "()Z") \
+  METHOD (isSynthetic,       "isSynthetic",       "()Z") \
+  METHOD (getComponentType,  "getComponentType",  "()Ljava/lang/Class;") \
+  METHOD (getSuperclass,     "getSuperclass",     "()Ljava/lang/Class;") \
+  METHOD (getClassLoader,    "getClassLoader",    "()Ljava/lang/ClassLoader;") \
+
+DECLARE_JNI_CLASS (JavaClass, "java/lang/Class");
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  METHOD (constructor,           "<init>",           "()V") \
+
+DECLARE_JNI_CLASS (JavaObject, "java/lang/Object");
+#undef JNI_CLASS_MEMBERS
+
+
+//==============================================================================
+class AndroidInterfaceImplementer;
+
+// This function takes ownership of the implementer. When the returned GlobalRef
+// goes out of scope (and no other Java routine has a reference on the return-value)
+// then the implementer will be deleted as well.
+LocalRef<jobject> CreateJavaInterface (AndroidInterfaceImplementer* implementer,
+                                       const StringArray& interfaceNames,
+                                       LocalRef<jobject> subclass);
+
+//==============================================================================
+jobject juce_invokeImplementer (JNIEnv*, jlong, jobject, jobject, jobjectArray);
+void    juce_dispatchDelete    (JNIEnv*, jlong);
+
+//==============================================================================
+class AndroidInterfaceImplementer
+{
+protected:
+    virtual ~AndroidInterfaceImplementer() {}
+    virtual jobject invoke (jobject proxy, jobject method, jobjectArray args);
+
+    //==============================================================================
+    friend LocalRef<jobject> CreateJavaInterface (AndroidInterfaceImplementer*, const StringArray&, LocalRef<jobject>);
+    friend jobject juce_invokeImplementer (JNIEnv*, jlong, jobject, jobject, jobjectArray);
+    friend void juce_dispatchDelete    (JNIEnv*, jlong);
+private:
+    GlobalRef javaSubClass;
+};
+
+LocalRef<jobject> CreateJavaInterface (AndroidInterfaceImplementer* implementer,
+                                       const StringArray& interfaceNames);
+LocalRef<jobject> CreateJavaInterface (AndroidInterfaceImplementer* implementer,
+                                       const String& interfaceName);
+
+} // namespace juce

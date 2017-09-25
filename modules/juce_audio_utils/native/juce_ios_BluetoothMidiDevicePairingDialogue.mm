@@ -31,8 +31,6 @@
 // It is also not available in the iPhone/iPad simulator.
 #if JUCE_MODULE_AVAILABLE_juce_gui_extra && ! TARGET_IPHONE_SIMULATOR
 
-} // (juce namespace)
-
 #include <CoreAudioKit/CoreAudioKit.h>
 
 namespace juce
@@ -118,14 +116,20 @@ bool BluetoothMidiDevicePairingDialogue::isAvailable()
     return NSClassFromString ([NSString stringWithUTF8String: "CABTMIDICentralViewController"]) != nil;
 }
 
+} // namespace juce
+
 //==============================================================================
 #else
 
-bool BluetoothMidiDevicePairingDialogue::open (ModalComponentManager::Callback* exitCallback)
+namespace juce
 {
-    ScopedPointer<ModalComponentManager::Callback> cb (exitCallback);
-    return false;
+    bool BluetoothMidiDevicePairingDialogue::open (ModalComponentManager::Callback* exitCallback)
+    {
+        ScopedPointer<ModalComponentManager::Callback> cb (exitCallback);
+        return false;
+    }
+
+    bool BluetoothMidiDevicePairingDialogue::isAvailable()  { return false; }
 }
-bool BluetoothMidiDevicePairingDialogue::isAvailable()                                         { return false; }
 
 #endif

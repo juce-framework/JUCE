@@ -20,81 +20,88 @@
   ==============================================================================
 */
 
-#pragma once
-
-
 /* This file contains a few helper functions that are used internally but which
    need to be kept away from the public headers because they use obj-C symbols.
 */
-namespace
+namespace juce
 {
-    //==============================================================================
-    static inline String nsStringToJuce (NSString* s)
-    {
-        return CharPointer_UTF8 ([s UTF8String]);
-    }
 
-    static inline NSString* juceStringToNS (const String& s)
-    {
-        return [NSString stringWithUTF8String: s.toUTF8()];
-    }
-
-    static inline NSString* nsStringLiteral (const char* const s) noexcept
-    {
-        return [NSString stringWithUTF8String: s];
-    }
-
-    static inline NSString* nsEmptyString() noexcept
-    {
-        return [NSString string];
-    }
-
-    static inline NSURL* createNSURLFromFile (const String& f)
-    {
-        return [NSURL fileURLWithPath: juceStringToNS (f)];
-    }
-
-    static inline NSURL* createNSURLFromFile (const File& f)
-    {
-        return createNSURLFromFile (f.getFullPathName());
-    }
-
-   #if JUCE_MAC
-    template <typename RectangleType>
-    static NSRect makeNSRect (const RectangleType& r) noexcept
-    {
-        return NSMakeRect (static_cast<CGFloat> (r.getX()),
-                           static_cast<CGFloat> (r.getY()),
-                           static_cast<CGFloat> (r.getWidth()),
-                           static_cast<CGFloat> (r.getHeight()));
-    }
-   #endif
-  #if JUCE_MAC || JUCE_IOS
-   #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
-
-    // This is necessary as on iOS builds, some arguments may be passed on registers
-    // depending on the argument type. The re-cast objc_msgSendSuper to a function
-    // take the same arguments as the target method.
-    template <typename ReturnValue, typename... Params>
-    static inline ReturnValue ObjCMsgSendSuper (struct objc_super* s, SEL sel, Params... params)
-    {
-        typedef ReturnValue (*SuperFn)(struct objc_super*, SEL, Params...);
-        SuperFn fn = reinterpret_cast<SuperFn> (objc_msgSendSuper);
-        return fn (s, sel, params...);
-    }
-
-   #endif
-
-    // These hacks are a workaround for newer Xcode builds which by default prevent calls to these objc functions..
-    typedef id (*MsgSendSuperFn) (struct objc_super*, SEL, ...);
-    static inline MsgSendSuperFn getMsgSendSuperFn() noexcept   { return (MsgSendSuperFn) (void*) objc_msgSendSuper; }
-
-   #if ! JUCE_IOS
-    typedef double (*MsgSendFPRetFn) (id, SEL op, ...);
-    static inline MsgSendFPRetFn getMsgSendFPRetFn() noexcept   { return (MsgSendFPRetFn) (void*) objc_msgSend_fpret; }
-   #endif
-   #endif
+//==============================================================================
+static inline String nsStringToJuce (NSString* s)
+{
+    return CharPointer_UTF8 ([s UTF8String]);
 }
+
+static inline NSString* juceStringToNS (const String& s)
+{
+    return [NSString stringWithUTF8String: s.toUTF8()];
+}
+
+static inline NSString* nsStringLiteral (const char* const s) noexcept
+{
+    return [NSString stringWithUTF8String: s];
+}
+
+static inline NSString* nsEmptyString() noexcept
+{
+    return [NSString string];
+}
+
+static inline NSURL* createNSURLFromFile (const String& f)
+{
+    return [NSURL fileURLWithPath: juceStringToNS (f)];
+}
+
+static inline NSURL* createNSURLFromFile (const File& f)
+{
+    return createNSURLFromFile (f.getFullPathName());
+}
+
+static inline NSArray* createNSArrayFromStringArray (const StringArray& strings)
+{
+    auto* array = [[NSMutableArray alloc] init];
+
+    for (auto string: strings)
+        [array addObject:juceStringToNS (string)];
+
+    return [array autorelease];
+}
+
+#if JUCE_MAC
+template <typename RectangleType>
+static NSRect makeNSRect (const RectangleType& r) noexcept
+{
+    return NSMakeRect (static_cast<CGFloat> (r.getX()),
+                       static_cast<CGFloat> (r.getY()),
+                       static_cast<CGFloat> (r.getWidth()),
+                       static_cast<CGFloat> (r.getHeight()));
+}
+#endif
+#if JUCE_MAC || JUCE_IOS
+#if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
+
+// This is necessary as on iOS builds, some arguments may be passed on registers
+// depending on the argument type. The re-cast objc_msgSendSuper to a function
+// take the same arguments as the target method.
+template <typename ReturnValue, typename... Params>
+static inline ReturnValue ObjCMsgSendSuper (struct objc_super* s, SEL sel, Params... params)
+{
+    typedef ReturnValue (*SuperFn)(struct objc_super*, SEL, Params...);
+    SuperFn fn = reinterpret_cast<SuperFn> (objc_msgSendSuper);
+    return fn (s, sel, params...);
+}
+
+#endif
+
+// These hacks are a workaround for newer Xcode builds which by default prevent calls to these objc functions..
+typedef id (*MsgSendSuperFn) (struct objc_super*, SEL, ...);
+static inline MsgSendSuperFn getMsgSendSuperFn() noexcept   { return (MsgSendSuperFn) (void*) objc_msgSendSuper; }
+
+#if ! JUCE_IOS
+typedef double (*MsgSendFPRetFn) (id, SEL op, ...);
+static inline MsgSendFPRetFn getMsgSendFPRetFn() noexcept   { return (MsgSendFPRetFn) (void*) objc_msgSend_fpret; }
+#endif
+#endif
 
 //==============================================================================
 template <typename ObjectType>
@@ -226,3 +233,5 @@ private:
 };
 
 #endif
+
+} // namespace juce

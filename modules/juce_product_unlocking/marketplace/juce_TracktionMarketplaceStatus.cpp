@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 TracktionMarketplaceStatus::TracktionMarketplaceStatus() {}
 
 URL TracktionMarketplaceStatus::getServerAuthenticationURL()
@@ -54,3 +57,5 @@ String TracktionMarketplaceStatus::readReplyFromWebserver (const String& email, 
 
     return url.readEntireTextStream();
 }
+
+} // namespace juce

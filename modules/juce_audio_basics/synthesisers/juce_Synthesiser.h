@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -182,6 +182,8 @@ public:
     virtual void renderNextBlock (AudioBuffer<float>& outputBuffer,
                                   int startSample,
                                   int numSamples) = 0;
+
+    /** A double-precision version of renderNextBlock() */
     virtual void renderNextBlock (AudioBuffer<double>& outputBuffer,
                                   int startSample,
                                   int numSamples);
@@ -214,11 +216,22 @@ public:
     */
     bool isKeyDown() const noexcept                             { return keyIsDown; }
 
+    /** Allows you to modify the flag indicating that the key that triggered this voice is still held down.
+        @see isKeyDown
+    */
+    void setKeyDown (bool isNowDown) noexcept                   { keyIsDown = isNowDown; }
+
     /** Returns true if the sustain pedal is currently active for this voice. */
     bool isSustainPedalDown() const noexcept                    { return sustainPedalDown; }
 
+    /** Modifies the sustain pedal flag. */
+    void setSustainPedalDown (bool isNowDown) noexcept          { sustainPedalDown = isNowDown; }
+
     /** Returns true if the sostenuto pedal is currently active for this voice. */
     bool isSostenutoPedalDown() const noexcept                  { return sostenutoPedalDown; }
+
+    /** Modifies the sostenuto pedal flag. */
+    void setSostenutoPedalDown (bool isNowDown) noexcept        { sostenutoPedalDown = isNowDown; }
 
     /** Returns true if a voice is sounding in its release phase **/
     bool isPlayingButReleased() const noexcept
@@ -249,11 +262,11 @@ private:
     //==============================================================================
     friend class Synthesiser;
 
-    double currentSampleRate;
-    int currentlyPlayingNote, currentPlayingMidiChannel;
-    uint32 noteOnTime;
+    double currentSampleRate = 44100.0;
+    int currentlyPlayingNote = -1, currentPlayingMidiChannel = 0;
+    uint32 noteOnTime = 0;
     SynthesiserSound::Ptr currentlyPlayingSound;
-    bool keyIsDown, sustainPedalDown, sostenutoPedalDown;
+    bool keyIsDown = false, sustainPedalDown = false, sostenutoPedalDown = false;
 
     AudioBuffer<float> tempBuffer;
 
@@ -507,15 +520,15 @@ public:
         with timestamps outside the specified region will be ignored.
     */
     inline void renderNextBlock (AudioBuffer<float>& outputAudio,
-                          const MidiBuffer& inputMidi,
-                          int startSample,
-                          int numSamples)
+                                 const MidiBuffer& inputMidi,
+                                 int startSample,
+                                 int numSamples)
         { processNextBlock (outputAudio, inputMidi, startSample, numSamples); }
 
     inline void renderNextBlock (AudioBuffer<double>& outputAudio,
-                          const MidiBuffer& inputMidi,
-                          int startSample,
-                          int numSamples)
+                                 const MidiBuffer& inputMidi,
+                                 int startSample,
+                                 int numSamples)
         { processNextBlock (outputAudio, inputMidi, startSample, numSamples); }
 
     /** Returns the current target sample rate at which rendering is being done.
@@ -615,11 +628,11 @@ private:
                            int startSample,
                            int numSamples);
     //==============================================================================
-    double sampleRate;
-    uint32 lastNoteOnCounter;
-    int minimumSubBlockSize;
-    bool subBlockSubdivisionIsStrict;
-    bool shouldStealNotes;
+    double sampleRate = 0;
+    uint32 lastNoteOnCounter = 0;
+    int minimumSubBlockSize = 32;
+    bool subBlockSubdivisionIsStrict = false;
+    bool shouldStealNotes = true;
     BigInteger sustainPedalsDown;
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
@@ -632,3 +645,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Synthesiser)
 };
+
+} // namespace juce

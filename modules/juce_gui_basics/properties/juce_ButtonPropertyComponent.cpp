@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ButtonPropertyComponent::ButtonPropertyComponent (const String& name,
                                                   const bool triggerOnMouseDown)
     : PropertyComponent (name)
@@ -46,3 +49,5 @@ void ButtonPropertyComponent::buttonClicked (Button*)
 {
     buttonClicked();
 }
+
+} // namespace juce

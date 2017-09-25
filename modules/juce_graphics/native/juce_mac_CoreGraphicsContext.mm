@@ -24,9 +24,9 @@
   ==============================================================================
 */
 
-#include "juce_mac_CoreGraphicsContext.h"
+namespace juce
+{
 
-//==============================================================================
 class CoreGraphicsImage   : public ImagePixelData
 {
 public:
@@ -919,3 +919,5 @@ Image juce_createImageFromUIImage (UIImage* img)
     return retval;
 }
 #endif
+
+}

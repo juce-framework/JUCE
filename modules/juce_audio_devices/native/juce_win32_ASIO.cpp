@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #undef WINDOWS
 
 /* The ASIO SDK *should* declare its callback functions as being __cdecl, but different versions seem
@@ -1639,3 +1642,5 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_ASIO()
 {
     return new ASIOAudioIODeviceType();
 }
+
+} // namespace juce

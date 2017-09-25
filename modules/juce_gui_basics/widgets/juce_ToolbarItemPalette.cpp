@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ToolbarItemPalette::ToolbarItemPalette (ToolbarItemFactory& tbf, Toolbar& bar)
     : factory (tbf), toolbar (bar)
 {
@@ -106,3 +109,5 @@ void ToolbarItemPalette::resized()
 
     itemHolder->setSize (maxX, y + height + 8);
 }
+
+} // namespace juce

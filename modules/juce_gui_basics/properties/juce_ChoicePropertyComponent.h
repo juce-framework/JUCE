@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -47,7 +47,7 @@
     @see PropertyComponent, PropertyPanel
 */
 class JUCE_API  ChoicePropertyComponent    : public PropertyComponent,
-                                             private ComboBoxListener  // (can't use ComboBox::Listener due to idiotic VC2005 bug)
+                                             private ComboBox::Listener
 {
 protected:
     /** Creates the component.
@@ -119,3 +119,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChoicePropertyComponent)
 };
+
+} // namespace juce

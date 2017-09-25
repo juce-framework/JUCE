@@ -85,6 +85,7 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/FlexBoxDemo_e4f3d9b7.o \
   $(JUCE_OBJDIR)/FontsDemo_6da1e5e9.o \
   $(JUCE_OBJDIR)/GraphicsDemo_85142ef6.o \
+  $(JUCE_OBJDIR)/GridDemo_63e53631.o \
   $(JUCE_OBJDIR)/ImagesDemo_ecf13aa3.o \
   $(JUCE_OBJDIR)/JavaScript_d6e42eb5.o \
   $(JUCE_OBJDIR)/KeyMappingsDemo_cf05c709.o \
@@ -228,6 +229,11 @@ $(JUCE_OBJDIR)/FontsDemo_6da1e5e9.o: ../../Source/Demos/FontsDemo.cpp
 $(JUCE_OBJDIR)/GraphicsDemo_85142ef6.o: ../../Source/Demos/GraphicsDemo.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling GraphicsDemo.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/GridDemo_63e53631.o: ../../Source/Demos/GridDemo.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling GridDemo.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/ImagesDemo_ecf13aa3.o: ../../Source/Demos/ImagesDemo.cpp

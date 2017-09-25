@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -34,7 +34,7 @@
     @see PropertyComponent, Slider
 */
 class JUCE_API  SliderPropertyComponent   : public PropertyComponent,
-                                            private SliderListener  // (can't use Slider::Listener due to idiotic VC2005 bug)
+                                            private Slider::Listener
 {
 protected:
     //==============================================================================
@@ -105,3 +105,5 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SliderPropertyComponent)
 };
+
+} // namespace juce

@@ -34,6 +34,7 @@
 #endif
 
 #define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
+#define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
 
 #include "juce_audio_processors.h"
 #include <juce_gui_extra/juce_gui_extra.h>
@@ -44,6 +45,7 @@
       && ((JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_AU) \
            || ! (defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6))
   #include <Carbon/Carbon.h>
+  #include "../juce_gui_extra/native/juce_mac_CarbonViewWrapperComponent.h"
  #endif
 #endif
 
@@ -58,6 +60,10 @@
  #define JUCE_PLUGINHOST_VST3 0
 #endif
 
+#if JUCE_PLUGINHOST_AU && (JUCE_MAC || JUCE_IOS)
+ #include <AudioUnit/AudioUnit.h>
+#endif
+
 //==============================================================================
 namespace juce
 {
@@ -65,8 +71,8 @@ namespace juce
 static inline bool arrayContainsPlugin (const OwnedArray<PluginDescription>& list,
                                         const PluginDescription& desc)
 {
-    for (int i = list.size(); --i >= 0;)
-        if (list.getUnchecked(i)->isDuplicateOf (desc))
+    for (auto* p : list)
+        if (p->isDuplicateOf (desc))
             return true;
 
     return false;
@@ -140,6 +146,8 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
 };
 #endif
 
+} // namespace juce
+
 #if JUCE_CLANG
  #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #endif
@@ -160,5 +168,3 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
 #include "scanning/juce_PluginListComponent.cpp"
 #include "utilities/juce_AudioProcessorParameters.cpp"
 #include "utilities/juce_AudioProcessorValueTreeState.cpp"
-
-}

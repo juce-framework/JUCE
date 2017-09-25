@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class ZipFile::ZipEntryHolder
 {
 public:
@@ -263,18 +266,23 @@ const ZipFile::ZipEntry* ZipFile::getEntry (const int index) const noexcept
     return nullptr;
 }
 
-int ZipFile::getIndexOfFileName (const String& fileName) const noexcept
+int ZipFile::getIndexOfFileName (const String& fileName, bool ignoreCase) const noexcept
 {
     for (int i = 0; i < entries.size(); ++i)
-        if (entries.getUnchecked (i)->entry.filename == fileName)
+    {
+        auto& entryFilename = entries.getUnchecked (i)->entry.filename;
+
+        if (ignoreCase ? entryFilename.equalsIgnoreCase (fileName)
+                       : entryFilename == fileName)
             return i;
+    }
 
     return -1;
 }
 
-const ZipFile::ZipEntry* ZipFile::getEntry (const String& fileName) const noexcept
+const ZipFile::ZipEntry* ZipFile::getEntry (const String& fileName, bool ignoreCase) const noexcept
 {
-    return getEntry (getIndexOfFileName (fileName));
+    return getEntry (getIndexOfFileName (fileName, ignoreCase));
 }
 
 InputStream* ZipFile::createStreamForEntry (const int index)
@@ -598,3 +606,5 @@ bool ZipFile::Builder::writeToStream (OutputStream& target, double* const progre
 
     return true;
 }
+
+} // namespace juce

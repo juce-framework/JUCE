@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_COREAUDIO_LOGGING_ENABLED
  #define JUCE_COREAUDIOLOG(a) { String camsg ("CoreAudio: "); camsg << a; Logger::writeToLog (camsg); }
 #else
@@ -228,7 +231,7 @@ public:
 
                 for (int i = 0; i < numStreams; ++i)
                 {
-                    const ::AudioBuffer& b = bufList->mBuffers[i];
+                    auto& b = bufList->mBuffers[i];
 
                     for (unsigned int j = 0; j < b.mNumberChannels; ++j)
                     {
@@ -733,7 +736,7 @@ public:
                 }
             }
 
-            callback->audioDeviceIOCallback (const_cast<const float**> (tempInputBuffers.getData()),
+            callback->audioDeviceIOCallback (const_cast<const float**> (tempInputBuffers.get()),
                                              numInputChans,
                                              tempOutputBuffers,
                                              numOutputChans,
@@ -2058,3 +2061,5 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_CoreAudio()
 }
 
 #undef JUCE_COREAUDIOLOG
+
+} // namespace juce

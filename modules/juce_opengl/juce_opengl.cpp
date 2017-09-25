@@ -84,11 +84,9 @@
  #endif
 #endif
 
+//==============================================================================
 namespace juce
 {
-
-//==============================================================================
-#include "native/juce_OpenGLExtensions.h"
 
 void OpenGLExtensionFunctions::initialise()
 {
@@ -251,6 +249,8 @@ private:
     OpenGLTargetSaver& operator= (const OpenGLTargetSaver&);
 };
 
+} // namespace juce
+
 //==============================================================================
 #include "opengl/juce_OpenGLFrameBuffer.cpp"
 #include "opengl/juce_OpenGLGraphicsContext.cpp"
@@ -291,5 +291,3 @@ private:
 
 #include "opengl/juce_OpenGLContext.cpp"
 #include "utils/juce_OpenGLAppComponent.cpp"
-
-}

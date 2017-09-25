@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -31,16 +31,20 @@
 */
 struct DefaultHashFunctions
 {
+    /** Generates a simple hash from an unsigned int. */
+    static int generateHash (uint32 key, int upperLimit) noexcept           { return (int) (key % (uint32) upperLimit); }
     /** Generates a simple hash from an integer. */
-    int generateHash (const int key, const int upperLimit) const noexcept        { return std::abs (key) % upperLimit; }
+    static int generateHash (int32 key, int upperLimit) noexcept            { return generateHash ((uint32) key, upperLimit); }
+    /** Generates a simple hash from a uint64. */
+    static int generateHash (uint64 key, int upperLimit) noexcept           { return (int) (key % (uint64) upperLimit); }
     /** Generates a simple hash from an int64. */
-    int generateHash (const int64 key, const int upperLimit) const noexcept      { return std::abs ((int) key) % upperLimit; }
+    static int generateHash (int64 key, int upperLimit) noexcept            { return generateHash ((uint64) key, upperLimit); }
     /** Generates a simple hash from a string. */
-    int generateHash (const String& key, const int upperLimit) const noexcept    { return (int) (((uint32) key.hashCode()) % (uint32) upperLimit); }
+    static int generateHash (const String& key, int upperLimit) noexcept    { return generateHash ((uint32) key.hashCode(), upperLimit); }
     /** Generates a simple hash from a variant. */
-    int generateHash (const var& key, const int upperLimit) const noexcept       { return generateHash (key.toString(), upperLimit); }
+    static int generateHash (const var& key, int upperLimit) noexcept       { return generateHash (key.toString(), upperLimit); }
     /** Generates a simple hash from a void ptr. */
-    int generateHash (const void* key, const int upperLimit) const noexcept      { return (int)(((pointer_sized_uint) key) % ((pointer_sized_uint) upperLimit)); }
+    static int generateHash (const void* key, int upperLimit) noexcept      { return generateHash ((pointer_sized_uint) key, upperLimit); }
 };
 
 
@@ -492,3 +496,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HashMap)
 };
+
+} // namespace juce

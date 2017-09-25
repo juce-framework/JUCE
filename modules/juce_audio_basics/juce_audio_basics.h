@@ -31,7 +31,7 @@
 
   ID:               juce_audio_basics
   vendor:           juce
-  version:          5.1.1
+  version:          5.1.2
   name:             JUCE audio and MIDI data classes
   description:      Classes for audio buffer manipulation, midi message handling, synthesis, etc.
   website:          http://www.juce.com/juce
@@ -51,9 +51,7 @@
 
 #include <juce_core/juce_core.h>
 
-namespace juce
-{
-
+//==============================================================================
 #undef Complex  // apparently some C libraries actually define these symbols (!)
 #undef Factor
 
@@ -94,5 +92,3 @@ namespace juce
 #include "sources/juce_ToneGeneratorAudioSource.h"
 #include "synthesisers/juce_Synthesiser.h"
 #include "audio_play_head/juce_AudioPlayHead.h"
-
-}

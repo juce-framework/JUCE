@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 static StringArray readDeadMansPedalFile (const File& file)
 {
     StringArray lines;
@@ -129,3 +132,5 @@ void PluginDirectoryScanner::applyBlacklistingsFromDeadMansPedal (KnownPluginLis
     for (auto& crashedPlugin : readDeadMansPedalFile (file))
         list.addToBlacklist (crashedPlugin);
 }
+
+} // namespace juce

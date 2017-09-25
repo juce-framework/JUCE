@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 #if JUCE_MAC
 
@@ -41,26 +42,52 @@ public:
     void timerCallback() override
     {
         // Workaround for windows not getting mouse-moves...
-        const Point<float> screenPos (Desktop::getInstance().getMainMouseSource().getScreenPosition());
+        auto screenPos = Desktop::getInstance().getMainMouseSource().getScreenPosition();
 
         if (screenPos != lastScreenPos)
         {
             lastScreenPos = screenPos;
-            const ModifierKeys mods (ModifierKeys::getCurrentModifiers());
+            auto mods = ModifierKeys::getCurrentModifiers();
 
             if (! mods.isAnyMouseButtonDown())
-                if (Component* const comp = Desktop::getInstance().findComponentAt (screenPos.roundToInt()))
-                    if (ComponentPeer* const peer = comp->getPeer())
+            {
+                if (auto* comp = Desktop::getInstance().findComponentAt (screenPos.roundToInt()))
+                {
+                    safeOldComponent = comp;
+
+                    if (auto* peer = comp->getPeer())
+                    {
                         if (! peer->isFocused())
+                        {
                             peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, peer->globalToLocal (screenPos), mods,
                                                     MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, Time::currentTimeMillis());
+                        }
+                    }
+                }
+                else
+                {
+                    if (safeOldComponent != nullptr)
+                    {
+                        if (auto* peer = safeOldComponent->getPeer())
+                        {
+                            peer->handleMouseEvent (MouseInputSource::InputSourceType::mouse, { -1.0f, -1.0f }, mods,
+                                                    MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, Time::currentTimeMillis());
+                        }
+                    }
+
+                    safeOldComponent = nullptr;
+                }
+            }
         }
     }
 
 private:
     Point<float> lastScreenPos;
+    WeakReference<Component> safeOldComponent;
 };
 
 #else
 struct FakeMouseMoveGenerator {};
 #endif
+
+} // namespace juce

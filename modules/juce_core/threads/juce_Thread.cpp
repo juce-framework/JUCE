@@ -20,13 +20,19 @@
   ==============================================================================
 */
 
-Thread::Thread (const String& name, const size_t stackSize)
+namespace juce
+{
+
+Thread::Thread (const String& name, size_t stackSize)
    : threadName (name), threadStackSize (stackSize)
 {
 }
 
 Thread::~Thread()
 {
+    if (deleteOnThreadEnd)
+        return;
+
     /* If your thread class's destructor has been called without first stopping the thread, that
        means that this partially destructed object is still performing some work - and that's
        probably a Bad Thing!
@@ -97,6 +103,9 @@ void Thread::threadEntryPoint()
 
     currentThreadHolder->value.releaseCurrentThreadStorage();
     closeThreadHandle();
+
+    if (deleteOnThreadEnd)
+        delete this;
 }
 
 // used to wrap the incoming call from the platform-specific code
@@ -162,7 +171,7 @@ void Thread::signalThreadShouldExit()
 
 bool Thread::currentThreadShouldExit()
 {
-    if (Thread* currentThread = getCurrentThread())
+    if (auto* currentThread = getCurrentThread())
         return currentThread->threadShouldExit();
 
     return false;
@@ -271,6 +280,29 @@ bool Thread::wait (const int timeOutMilliseconds) const
 void Thread::notify() const
 {
     defaultEvent.signal();
+}
+
+//==============================================================================
+struct LambdaThread  : public Thread
+{
+    LambdaThread (std::function<void()> f) : Thread ("anonymous"), fn (f) {}
+
+    void run() override
+    {
+        fn();
+        fn = {}; // free any objects that the lambda might contain while the thread is still active
+    }
+
+    std::function<void()> fn;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LambdaThread)
+};
+
+void Thread::launch (std::function<void()> functionToRun)
+{
+    auto anon = new LambdaThread (functionToRun);
+    anon->deleteOnThreadEnd = true;
+    anon->startThread();
 }
 
 //==============================================================================
@@ -474,3 +506,5 @@ private:
 ThreadLocalValueUnitTest threadLocalValueUnitTest;
 
 #endif
+
+} // namespace juce

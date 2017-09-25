@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 MouseInactivityDetector::MouseInactivityDetector (Component& c)
     : targetComp (c), delayMs (1500), toleranceDistance (15), isActive (true)
 {
@@ -70,3 +73,5 @@ void MouseInactivityDetector::setActive (bool b)
                              : &Listener::mouseBecameInactive);
     }
 }
+
+} // namespace juce

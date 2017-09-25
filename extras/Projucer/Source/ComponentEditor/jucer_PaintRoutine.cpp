@@ -376,6 +376,68 @@ void PaintRoutine::selectedToBack()
         elementToBack (temp.getSelectedItem(i), true);
 }
 
+void PaintRoutine::alignTop()
+{
+    if (selectedElements.getNumSelected() > 1)
+    {
+        auto* main = selectedElements.getSelectedItem (0);
+        auto yPos = main->getY();
+
+        for (auto* other : selectedElements)
+        {
+            if (other != main)
+                other->setPaintElementBoundsAndProperties (other, other->getBounds().withPosition (other->getX(),
+                                                                                                   yPos), main, true);
+        }
+    }
+}
+void PaintRoutine::alignRight()
+{
+    if (selectedElements.getNumSelected() > 1)
+    {
+        auto* main = selectedElements.getSelectedItem (0);
+        auto rightPos = main->getRight();
+
+        for (auto* other : selectedElements)
+        {
+            if (other != main)
+                other->setPaintElementBoundsAndProperties (other, other->getBounds().withPosition (rightPos - other->getWidth(),
+                                                                                                   other->getY()), main, true);
+        }
+    }
+}
+
+void PaintRoutine::alignBottom()
+{
+    if (selectedElements.getNumSelected() > 1)
+    {
+        auto* main = selectedElements.getSelectedItem (0);
+        auto bottomPos = main->getBottom();
+
+        for (auto* other : selectedElements)
+        {
+            if (other != main)
+                other->setPaintElementBoundsAndProperties (other, other->getBounds().withPosition (other->getX(),
+                                                                                                   bottomPos - other->getHeight()), main, true);
+        }
+    }
+}
+void PaintRoutine::alignLeft()
+{
+    if (selectedElements.getNumSelected() > 1)
+    {
+        auto* main = selectedElements.getSelectedItem (0);
+        auto xPos = main->getX();
+
+        for (auto* other : selectedElements)
+        {
+            if (other != main)
+                other->setPaintElementBoundsAndProperties (other, other->getBounds().withPosition (xPos,
+                                                                                                   other->getY()), main, true);
+        }
+    }
+}
+
 void PaintRoutine::groupSelected()
 {
     PaintElementGroup::groupSelected (this);

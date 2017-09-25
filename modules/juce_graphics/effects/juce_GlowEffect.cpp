@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 GlowEffect::GlowEffect() {}
 GlowEffect::~GlowEffect() {}
 
@@ -51,3 +54,5 @@ void GlowEffect::applyEffect (Image& image, Graphics& g, float scaleFactor, floa
     g.setOpacity (alpha);
     g.drawImageAt (image, offset.x, offset.y, false);
 }
+
+} // namespace juce

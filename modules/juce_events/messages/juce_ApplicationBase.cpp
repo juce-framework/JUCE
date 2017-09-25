@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 JUCEApplicationBase::CreateInstanceFunction JUCEApplicationBase::createInstance = 0;
 JUCEApplicationBase* JUCEApplicationBase::appInstance = nullptr;
 
@@ -326,3 +329,5 @@ int JUCEApplicationBase::shutdownApp()
     multipleInstanceHandler = nullptr;
     return getApplicationReturnValue();
 }
+
+} // namespace juce

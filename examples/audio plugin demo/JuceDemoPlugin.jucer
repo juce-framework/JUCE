@@ -8,7 +8,7 @@
               pluginProducesMidiOut="1" pluginSilenceInIsSilenceOut="0" pluginTailLength="0"
               pluginEditorRequiresKeys="1" pluginAUExportPrefix="JuceDemoProjectAU"
               pluginAUViewClass="JuceDemoProjectAU_V1" pluginRTASCategory=""
-              bundleIdentifier="com.juce.JuceDemoPlugin" jucerVersion="5.1.1"
+              bundleIdentifier="com.juce.JuceDemoPlugin" jucerVersion="5.1.2"
               companyName="ROLI Ltd." aaxIdentifier="com.yourcompany.JuceDemoPlugin"
               buildAAX="0" pluginAAXCategory="AAX_ePlugInCategory_Dynamics"
               includeBinaryInAppConfig="1" buildVST3="0" pluginManufacturerEmail="support@yourcompany.com"
@@ -107,7 +107,7 @@
       </MODULEPATHS>
     </LINUX_MAKE>
     <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="landscape" iosBackgroundAudio="1"
-                  iosBackgroundBle="1">
+                  iosBackgroundBle="1" microphonePermissionNeeded="1">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemoPlugin"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="JuceDemoPlugin"/>

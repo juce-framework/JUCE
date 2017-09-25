@@ -20,38 +20,38 @@
   ==============================================================================
 */
 
-namespace
+namespace juce
 {
-    inline bool isValidXmlNameStartCharacter (const juce_wchar character) noexcept
-    {
-        return character == ':'
-            || character == '_'
-            || (character >= 'a'     && character <= 'z')
-            || (character >= 'A'     && character <= 'Z')
-            || (character >= 0xc0    && character <= 0xd6)
-            || (character >= 0xd8    && character <= 0xf6)
-            || (character >= 0xf8    && character <= 0x2ff)
-            || (character >= 0x370   && character <= 0x37d)
-            || (character >= 0x37f   && character <= 0x1fff)
-            || (character >= 0x200c  && character <= 0x200d)
-            || (character >= 0x2070  && character <= 0x218f)
-            || (character >= 0x2c00  && character <= 0x2fef)
-            || (character >= 0x3001  && character <= 0xd7ff)
-            || (character >= 0xf900  && character <= 0xfdcf)
-            || (character >= 0xfdf0  && character <= 0xfffd)
-            || (character >= 0x10000 && character <= 0xeffff);
-    }
 
-    inline bool isValidXmlNameBodyCharacter (const juce_wchar character) noexcept
-    {
-        return isValidXmlNameStartCharacter (character)
-            || character == '-'
-            || character == '.'
-            || character == 0xb7
-            || (character >= '0'    && character <= '9')
-            || (character >= 0x300  && character <= 0x036f)
-            || (character >= 0x203f && character <= 0x2040);
-    }
+inline static bool isValidXmlNameStartCharacter (juce_wchar character) noexcept
+{
+    return character == ':'
+        || character == '_'
+        || (character >= 'a'     && character <= 'z')
+        || (character >= 'A'     && character <= 'Z')
+        || (character >= 0xc0    && character <= 0xd6)
+        || (character >= 0xd8    && character <= 0xf6)
+        || (character >= 0xf8    && character <= 0x2ff)
+        || (character >= 0x370   && character <= 0x37d)
+        || (character >= 0x37f   && character <= 0x1fff)
+        || (character >= 0x200c  && character <= 0x200d)
+        || (character >= 0x2070  && character <= 0x218f)
+        || (character >= 0x2c00  && character <= 0x2fef)
+        || (character >= 0x3001  && character <= 0xd7ff)
+        || (character >= 0xf900  && character <= 0xfdcf)
+        || (character >= 0xfdf0  && character <= 0xfffd)
+        || (character >= 0x10000 && character <= 0xeffff);
+}
+
+inline static bool isValidXmlNameBodyCharacter (juce_wchar character) noexcept
+{
+    return isValidXmlNameStartCharacter (character)
+        || character == '-'
+        || character == '.'
+        || character == 0xb7
+        || (character >= '0'    && character <= '9')
+        || (character >= 0x300  && character <= 0x036f)
+        || (character >= 0x203f && character <= 0x2040);
 }
 
 XmlElement::XmlAttributeNode::XmlAttributeNode (const XmlAttributeNode& other) noexcept
@@ -928,3 +928,5 @@ void XmlElement::deleteAllTextElements() noexcept
         child = next;
     }
 }
+
+} // namespace juce

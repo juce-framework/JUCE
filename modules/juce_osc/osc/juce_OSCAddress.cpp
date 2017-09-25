@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace
 {
     //==============================================================================
@@ -777,3 +780,5 @@ public:
 static OSCPatternMatcherTests OSCPatternMatcherUnitTests;
 
 #endif // JUCE_UNIT_TESTS
+
+} // namespace juce

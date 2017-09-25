@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -201,3 +201,5 @@ private:
         return (o != nullptr) ? o->masterReference.getSharedPointer (o) : nullptr;
     }
 };
+
+} // namespace juce

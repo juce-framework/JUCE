@@ -20,23 +20,16 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 XmlDocument::XmlDocument (const String& documentText)
-    : originalText (documentText),
-      input (nullptr),
-      outOfData (false),
-      errorOccurred (false),
-      needToLoadDTD (false),
-      ignoreEmptyTextElements (true)
+    : originalText (documentText)
 {
 }
 
 XmlDocument::XmlDocument (const File& file)
-    : input (nullptr),
-      outOfData (false),
-      errorOccurred (false),
-      needToLoadDTD (false),
-      ignoreEmptyTextElements (true),
-      inputSource (new FileInputSource (file))
+    : inputSource (new FileInputSource (file))
 {
 }
 
@@ -882,4 +875,6 @@ String XmlDocument::getParameterEntity (const String& entity)
     }
 
     return entity;
+}
+
 }

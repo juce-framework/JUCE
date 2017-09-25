@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct CustomMouseCursorInfo
 {
     CustomMouseCursorInfo (const Image& im, int hsX, int hsY) noexcept
@@ -213,3 +216,5 @@ void MouseCursor::hideWaitCursor()
 {
     Desktop::getInstance().getMainMouseSource().revealCursor();
 }
+
+} // namespace juce

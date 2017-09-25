@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 MidiBuffer MPEMessages::addZone (MPEZone zone)
 {
     MidiBuffer buffer (MidiRPNGenerator::generate (zone.getFirstNoteChannel(),
@@ -193,3 +196,5 @@ private:
 static MPEMessagesTests MPEMessagesUnitTests;
 
 #endif // JUCE_UNIT_TESTS
+
+} // namespace juce

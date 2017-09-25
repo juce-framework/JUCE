@@ -42,14 +42,14 @@ public:
                                 typeid (TestComponent), 300, 200)
     {}
 
-    Component* createNewComponent (JucerDocument* doc)
+    Component* createNewComponent (JucerDocument* doc) override
     {
         return new TestComponent (doc, 0, false);
     }
 
-    String getXmlTagName() const noexcept                 { return "JUCERCOMP"; }
+    String getXmlTagName() const noexcept override               { return "JUCERCOMP"; }
 
-    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
+    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout) override
     {
         TestComponent* const tc = dynamic_cast<TestComponent*> (comp);
 
@@ -60,7 +60,7 @@ public:
         return e;
     }
 
-    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout)
+    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout) override
     {
         TestComponent* const tc = dynamic_cast<TestComponent*> (comp);
 
@@ -73,7 +73,7 @@ public:
         return true;
     }
 
-    String getClassName (Component* comp) const
+    String getClassName (Component* comp) const override
     {
         TestComponent* const tc = dynamic_cast<TestComponent*> (comp);
 
@@ -88,23 +88,28 @@ public:
         return jucerCompClassName;
     }
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
+    void getEditableProperties (Component* component, JucerDocument& document,
+                                Array<PropertyComponent*>& props, bool multipleSelected) override
     {
-        TestComponent* const tc = dynamic_cast<TestComponent*> (component);
+        ComponentTypeHandler::getEditableProperties (component, document, props, multipleSelected);
 
-        ComponentTypeHandler::getEditableProperties (component, document, props);
+        if (multipleSelected)
+            return;
 
-        props.add (new JucerCompFileProperty (tc, document));
-        props.add (new ConstructorParamsProperty (tc, document));
-        props.add (new JucerCompOpenDocProperty (tc));
+        if (auto* const tc = dynamic_cast<TestComponent*> (component))
+        {
+            props.add (new JucerCompFileProperty (tc, document));
+            props.add (new ConstructorParamsProperty (tc, document));
+            props.add (new JucerCompOpenDocProperty (tc));
+        }
     }
 
-    String getCreationParameters (GeneratedCode&, Component* component)
+    String getCreationParameters (GeneratedCode&, Component* component) override
     {
         return dynamic_cast<TestComponent*> (component)->getConstructorParams().trim();
     }
 
-    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
+    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName) override
     {
         ComponentTypeHandler::fillInCreationCode (code, component, memberVariableName);
 

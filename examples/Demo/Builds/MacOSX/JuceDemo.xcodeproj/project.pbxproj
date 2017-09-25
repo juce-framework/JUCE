@@ -42,6 +42,7 @@
 		2BFF2E7E13527E2E764617AA = {isa = PBXBuildFile; fileRef = 7AEEF2EE40D3B8AE687C6618; };
 		E4A67DD76D4D063F547F0844 = {isa = PBXBuildFile; fileRef = 4DB00B418C4F068BC5FC7314; };
 		257CBA785DEDAF53F4E9BF60 = {isa = PBXBuildFile; fileRef = 4D569839066D92C393F58EB4; };
+		EC00D5BAB8AF26746D6AC956 = {isa = PBXBuildFile; fileRef = 3EBB84376D0639930D3ECA78; };
 		9C30D9613D76EEFDB1653F34 = {isa = PBXBuildFile; fileRef = 7DBF83B26277D13CB3FC1479; };
 		B810E94ECBCA231F60EBEA5F = {isa = PBXBuildFile; fileRef = CCEC8F9385AE939B24D27954; };
 		15B2A7314D1E347D65EC664D = {isa = PBXBuildFile; fileRef = F1E995A1E00C6545A4C3297B; };
@@ -105,6 +106,7 @@
 		3375D74953976C15513FA6AE = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_events.mm"; path = "../../JuceLibraryCode/include_juce_events.mm"; sourceTree = "SOURCE_ROOT"; };
 		3482A5FDDEE5E5D405047999 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = WidgetsDemo.cpp; path = ../../Source/Demos/WidgetsDemo.cpp; sourceTree = "SOURCE_ROOT"; };
 		39A06D3252DDA6F97FB09495 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = OpenGLDemo2D.cpp; path = ../../Source/Demos/OpenGLDemo2D.cpp; sourceTree = "SOURCE_ROOT"; };
+		3EBB84376D0639930D3ECA78 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = GridDemo.cpp; path = ../../Source/Demos/GridDemo.cpp; sourceTree = "SOURCE_ROOT"; };
 		4621682C1A4E85A088F7CEE0 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		49412C044B88516D9AF59FDD = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = CryptographyDemo.cpp; path = ../../Source/Demos/CryptographyDemo.cpp; sourceTree = "SOURCE_ROOT"; };
 		4975DB849F14413317E94609 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AppConfig.h; path = ../../JuceLibraryCode/AppConfig.h; sourceTree = "SOURCE_ROOT"; };
@@ -205,6 +207,7 @@
 					7AEEF2EE40D3B8AE687C6618,
 					4DB00B418C4F068BC5FC7314,
 					4D569839066D92C393F58EB4,
+					3EBB84376D0639930D3ECA78,
 					7DBF83B26277D13CB3FC1479,
 					CCEC8F9385AE939B24D27954,
 					F1E995A1E00C6545A4C3297B,
@@ -484,6 +487,7 @@
 					2BFF2E7E13527E2E764617AA,
 					E4A67DD76D4D063F547F0844,
 					257CBA785DEDAF53F4E9BF60,
+					EC00D5BAB8AF26746D6AC956,
 					9C30D9613D76EEFDB1653F34,
 					B810E94ECBCA231F60EBEA5F,
 					15B2A7314D1E347D65EC664D,

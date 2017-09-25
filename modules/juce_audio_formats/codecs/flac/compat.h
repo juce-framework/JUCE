@@ -161,7 +161,7 @@ extern "C" {
 int flac_snprintf(char *str, size_t size, const char *fmt, ...);
 int flac_vsnprintf(char *str, size_t size, const char *fmt, va_list va);
 #ifdef __cplusplus
-};
+}
 #endif
 
 #endif /* FLAC__SHARE__COMPAT_H */

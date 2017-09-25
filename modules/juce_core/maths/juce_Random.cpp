@@ -20,7 +20,10 @@
   ==============================================================================
 */
 
-Random::Random (const int64 seedValue) noexcept   : seed (seedValue)
+namespace juce
+{
+
+Random::Random (int64 seedValue) noexcept  : seed (seedValue)
 {
 }
 
@@ -64,7 +67,7 @@ Random& Random::getSystemRandom() noexcept
 //==============================================================================
 int Random::nextInt() noexcept
 {
-    seed = (seed * 0x5deece66dLL + 11) & 0xffffffffffffLL;
+    seed = (int64) (((((uint64) seed) * 0x5deece66dLL) + 11) & 0xffffffffffffLL);
 
     return (int) (seed >> 16);
 }
@@ -82,7 +85,7 @@ int Random::nextInt (Range<int> range) noexcept
 
 int64 Random::nextInt64() noexcept
 {
-    return (((int64) nextInt()) << 32) | (int64) (uint64) (uint32) nextInt();
+    return (int64) ((((uint64) (unsigned int) nextInt()) << 32) | (uint64) (unsigned int) nextInt());
 }
 
 bool Random::nextBool() noexcept
@@ -181,3 +184,5 @@ public:
 static RandomTests randomTests;
 
 #endif
+
+} // namespace juce

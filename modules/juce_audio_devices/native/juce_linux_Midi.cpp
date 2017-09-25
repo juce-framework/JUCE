@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_ALSA
 
 // You can define these strings in your app if you want to override the default names:
@@ -137,7 +140,7 @@ public:
                 numBytes -= numSent;
                 data += numSent;
 
-                snd_seq_ev_set_source (&event, portId);
+                snd_seq_ev_set_source (&event, (unsigned char) portId);
                 snd_seq_ev_set_subs (&event);
                 snd_seq_ev_set_direct (&event);
 
@@ -610,3 +613,5 @@ MidiInput* MidiInput::openDevice (int, MidiInputCallback*)                  { re
 MidiInput* MidiInput::createNewDevice (const String&, MidiInputCallback*)   { return nullptr; }
 
 #endif
+
+} // namespace juce

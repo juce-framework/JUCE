@@ -24,6 +24,8 @@
   ==============================================================================
 */
 
+namespace juce
+{
 
 /**
     Describes the properties of an item inside a FlexBox container.
@@ -161,3 +163,5 @@ public:
     /** Returns a copy of this object with a new alignSelf value. */
     FlexItem withAlignSelf (AlignSelf newAlignSelf) const noexcept;
 };
+
+} // namespace juce

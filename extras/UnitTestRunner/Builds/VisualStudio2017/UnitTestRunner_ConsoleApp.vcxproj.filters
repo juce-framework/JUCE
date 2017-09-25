@@ -398,8 +398,14 @@
     <Filter Include="Juce Modules\juce_osc">
       <UniqueIdentifier>{1A62F82C-C14A-E14A-94DE-8A27E0F8A090}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Juce Modules\juce_product_unlocking\in_app_purchases">
+      <UniqueIdentifier>{15F5D21A-E649-136B-D66F-7B497452CE15}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Juce Modules\juce_product_unlocking\marketplace">
       <UniqueIdentifier>{802F7556-25D6-FBCE-3D15-32F3E1E65513}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juce Modules\juce_product_unlocking\native">
+      <UniqueIdentifier>{256EBA52-1A43-8D3B-CAC4-CF5DD72861B1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Modules\juce_product_unlocking">
       <UniqueIdentifier>{2ECAF0DC-881F-89B5-FBAD-78FDEE1907FB}</UniqueIdentifier>
@@ -1297,6 +1303,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_dsp\processors\juce_IIRFilter.cpp">
       <Filter>Juce Modules\juce_dsp\processors</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\processors\juce_Oversampling.cpp">
+      <Filter>Juce Modules\juce_dsp\processors</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_dsp\juce_dsp.cpp">
       <Filter>Juce Modules\juce_dsp</Filter>
     </ClCompile>
@@ -1819,6 +1828,15 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_FlexBox.cpp">
       <Filter>Juce Modules\juce_gui_basics\layout</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_Grid.cpp">
+      <Filter>Juce Modules\juce_gui_basics\layout</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_GridItem.cpp">
+      <Filter>Juce Modules\juce_gui_basics\layout</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_GridUnitTests.cpp">
+      <Filter>Juce Modules\juce_gui_basics\layout</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_GroupComponent.cpp">
       <Filter>Juce Modules\juce_gui_basics\layout</Filter>
     </ClCompile>
@@ -2218,6 +2236,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_osc\juce_osc.cpp">
       <Filter>Juce Modules\juce_osc</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_product_unlocking\in_app_purchases\juce_InAppPurchases.cpp">
+      <Filter>Juce Modules\juce_product_unlocking\in_app_purchases</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_product_unlocking\marketplace\juce_OnlineUnlockForm.cpp">
       <Filter>Juce Modules\juce_product_unlocking\marketplace</Filter>
     </ClCompile>
@@ -2227,7 +2248,16 @@
     <ClCompile Include="..\..\..\..\modules\juce_product_unlocking\marketplace\juce_TracktionMarketplaceStatus.cpp">
       <Filter>Juce Modules\juce_product_unlocking\marketplace</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_product_unlocking\native\juce_android_InAppPurchases.cpp">
+      <Filter>Juce Modules\juce_product_unlocking\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_product_unlocking\native\juce_ios_InAppPurchases.cpp">
+      <Filter>Juce Modules\juce_product_unlocking\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_product_unlocking\juce_product_unlocking.cpp">
+      <Filter>Juce Modules\juce_product_unlocking</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_product_unlocking\juce_product_unlocking.mm">
       <Filter>Juce Modules\juce_product_unlocking</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_video\capture\juce_CameraDevice.cpp">
@@ -3444,6 +3474,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_Oscillator.h">
       <Filter>Juce Modules\juce_dsp\processors</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_Oversampling.h">
+      <Filter>Juce Modules\juce_dsp\processors</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_ProcessContext.h">
       <Filter>Juce Modules\juce_dsp\processors</Filter>
     </ClInclude>
@@ -3876,6 +3909,12 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_FlexItem.h">
       <Filter>Juce Modules\juce_gui_basics\layout</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_Grid.h">
+      <Filter>Juce Modules\juce_gui_basics\layout</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_GridItem.h">
+      <Filter>Juce Modules\juce_gui_basics\layout</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_GroupComponent.h">
       <Filter>Juce Modules\juce_gui_basics\layout</Filter>
     </ClInclude>
@@ -4275,6 +4314,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_osc\juce_osc.h">
       <Filter>Juce Modules\juce_osc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_product_unlocking\in_app_purchases\juce_InAppPurchases.h">
+      <Filter>Juce Modules\juce_product_unlocking\in_app_purchases</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_product_unlocking\marketplace\juce_KeyFileGeneration.h">
       <Filter>Juce Modules\juce_product_unlocking\marketplace</Filter>
     </ClInclude>
@@ -4333,9 +4375,6 @@
     </None>
     <None Include="..\..\..\..\modules\juce_blocks_basics\protocol\Protocol Format.txt">
       <Filter>Juce Modules\juce_blocks_basics\protocol</Filter>
-    </None>
-    <None Include="..\..\..\..\modules\juce_blocks_basics\LittleFootFunctions.txt">
-      <Filter>Juce Modules\juce_blocks_basics</Filter>
     </None>
     <None Include="..\..\..\..\modules\juce_blocks_basics\README.txt">
       <Filter>Juce Modules\juce_blocks_basics</Filter>

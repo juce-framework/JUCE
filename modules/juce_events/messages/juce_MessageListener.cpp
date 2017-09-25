@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 Message::Message() noexcept {}
 Message::~Message() {}
 
@@ -45,3 +48,5 @@ void MessageListener::postMessage (Message* const message) const
     message->recipient = const_cast<MessageListener*> (this);
     message->post();
 }
+
+} // namespace juce

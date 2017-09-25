@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct FallbackDownloadTask  : public URL::DownloadTask,
                                public Thread
 {
@@ -61,18 +64,21 @@ struct FallbackDownloadTask  : public URL::DownloadTask,
             const int max = jmin ((int) bufferSize, contentLength < 0 ? std::numeric_limits<int>::max()
                                                                       : static_cast<int> (contentLength - downloaded));
 
-            const int actual = stream->read (buffer.getData(), max);
+            const int actual = stream->read (buffer.get(), max);
 
             if (actual < 0 || threadShouldExit() || stream->isError())
                 break;
 
-            if (! fileStream->write (buffer.getData(), static_cast<size_t> (actual)))
+            if (! fileStream->write (buffer.get(), static_cast<size_t> (actual)))
             {
                 error = true;
                 break;
             }
 
             downloaded += actual;
+
+            if (downloaded == contentLength)
+                break;
         }
 
         fileStream->flush();
@@ -106,14 +112,15 @@ URL::DownloadTask::Listener::~Listener() {}
 URL::DownloadTask* URL::DownloadTask::createFallbackDownloader (const URL& urlToUse,
                                                                 const File& targetFileToUse,
                                                                 const String& extraHeadersToUse,
-                                                                Listener* listenerToUse)
+                                                                Listener* listenerToUse,
+                                                                bool usePostRequest)
 {
     const size_t bufferSize = 0x8000;
     targetFileToUse.deleteFile();
 
     if (ScopedPointer<FileOutputStream> outputStream = targetFileToUse.createOutputStream (bufferSize))
     {
-        ScopedPointer<WebInputStream> stream = new WebInputStream (urlToUse, false);
+        ScopedPointer<WebInputStream> stream = new WebInputStream (urlToUse, usePostRequest);
         stream->withExtraHeaders (extraHeadersToUse);
 
         if (stream->connect (nullptr))
@@ -657,3 +664,5 @@ bool URL::launchInDefaultBrowser() const
 
     return Process::openDocument (u, String());
 }
+
+} // namespace juce

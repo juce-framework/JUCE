@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class OpenGLFrameBuffer::Pimpl
 {
 public:
@@ -347,3 +350,5 @@ bool OpenGLFrameBuffer::writePixels (const PixelARGB* data, const Rectangle<int>
     JUCE_CHECK_OPENGL_ERROR
     return true;
 }
+
+} // namespace juce

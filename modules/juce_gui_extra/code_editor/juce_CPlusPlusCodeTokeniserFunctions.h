@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /** Class containing some basic functions for simple tokenising of C++ code.
@@ -661,3 +661,5 @@ struct CppTokeniserFunctions
         return mo.toString();
     }
 };
+
+} // namespace juce

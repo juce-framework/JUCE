@@ -38,12 +38,12 @@ public:
         registerColour (CaretComponent::caretColourId, "caret", "caretcol");
     }
 
-    Component* createNewComponent (JucerDocument*)
+    Component* createNewComponent (JucerDocument*) override
     {
         return new TextEditor ("new text editor");
     }
 
-    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
+    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout) override
     {
         XmlElement* e = ComponentTypeHandler::createXmlFor (comp, layout);
         TextEditor* te = (TextEditor*) comp;
@@ -60,7 +60,7 @@ public:
         return e;
     }
 
-    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout)
+    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout) override
     {
         if (! ComponentTypeHandler::restoreFromXml (xml, comp, layout))
             return false;
@@ -81,29 +81,33 @@ public:
         return true;
     }
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
+    void getEditableProperties (Component* component, JucerDocument& document,
+                                Array<PropertyComponent*>& props, bool multipleSelected) override
     {
-        ComponentTypeHandler::getEditableProperties (component, document, props);
+        ComponentTypeHandler::getEditableProperties (component, document, props, multipleSelected);
 
-        TextEditor* const t = dynamic_cast<TextEditor*> (component);
-        jassert (t != nullptr);
+        if (multipleSelected)
+            return;
 
-        props.add (new TextEditorInitialTextProperty (t, document));
-        props.add (new TextEditorMultiLineProperty (t, document));
-        props.add (new TextEditorReadOnlyProperty (t, document));
-        props.add (new TextEditorScrollbarsProperty (t, document));
-        props.add (new TextEditorCaretProperty (t, document));
-        props.add (new TextEditorPopupMenuProperty (t, document));
+        if (auto* t = dynamic_cast<TextEditor*> (component))
+        {
+            props.add (new TextEditorInitialTextProperty (t, document));
+            props.add (new TextEditorMultiLineProperty (t, document));
+            props.add (new TextEditorReadOnlyProperty (t, document));
+            props.add (new TextEditorScrollbarsProperty (t, document));
+            props.add (new TextEditorCaretProperty (t, document));
+            props.add (new TextEditorPopupMenuProperty (t, document));
 
-        addColourProperties (t, document, props);
+            addColourProperties (t, document, props);
+        }
     }
 
-    String getCreationParameters (GeneratedCode&, Component* component)
+    String getCreationParameters (GeneratedCode&, Component* component) override
     {
         return quotedString (component->getName(), false);
     }
 
-    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
+    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName) override
     {
         ComponentTypeHandler::fillInCreationCode (code, component, memberVariableName);
 

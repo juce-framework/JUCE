@@ -20,8 +20,6 @@
   ==============================================================================
 */
 
-} // (juce namespace)
-
 extern "C"
 {
     // Declare just the minimum number of interfaces for the DSound objects that we need..
@@ -1271,3 +1269,5 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_DirectSound()
 {
     return new DSoundAudioIODeviceType();
 }
+
+} // namespace juce

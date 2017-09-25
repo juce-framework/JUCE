@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct AudioThumbnail::MinMaxValue
 {
     MinMaxValue() noexcept
@@ -830,3 +833,5 @@ void AudioThumbnail::drawChannels (Graphics& g, const Rectangle<int>& area, doub
                      startTimeSeconds, endTimeSeconds, i, verticalZoomFactor);
     }
 }
+
+} // namespace juce

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 Label::Label (const String& name, const String& labelText)
     : Component (name),
       textValue (labelText),
@@ -416,7 +419,7 @@ void Label::removeListener (LabelListener* const listener)
 void Label::callChangeListeners()
 {
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, &LabelListener::labelTextChanged, this);  // (can't use Label::Listener due to idiotic VC2005 bug)
+    listeners.callChecked (checker, &Label::Listener::labelTextChanged, this);
 }
 
 //==============================================================================
@@ -472,3 +475,5 @@ void Label::textEditorFocusLost (TextEditor& ed)
 {
     textEditorTextChanged (ed);
 }
+
+} // namespace juce

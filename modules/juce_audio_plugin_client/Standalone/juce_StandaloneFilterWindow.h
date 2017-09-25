@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -255,7 +256,7 @@ public:
                                                           totalInChannels,
                                                           totalOutChannels,
                                                           totalOutChannels));
-        o.content->setSize (500, 450);
+        o.content->setSize (500, 550);
 
         o.dialogTitle                   = TRANS("Audio/MIDI Settings");
         o.dialogBackgroundColour        = o.content->getLookAndFeel().findColour (ResizableWindow::backgroundColourId);
@@ -520,22 +521,12 @@ private:
         if (newMidiDevices != lastMidiDevices)
         {
             for (auto& oldDevice : lastMidiDevices)
-            {
                 if (! newMidiDevices.contains (oldDevice))
-                {
                     deviceManager.setMidiInputEnabled (oldDevice, false);
-                    deviceManager.removeMidiInputCallback (oldDevice, &player);
-                }
-            }
 
             for (auto& newDevice : newMidiDevices)
-            {
                 if (! lastMidiDevices.contains (newDevice))
-                {
-                    deviceManager.addMidiInputCallback (newDevice, &player);
                     deviceManager.setMidiInputEnabled (newDevice, true);
-                }
-            }
         }
     }
    #endif
@@ -552,7 +543,7 @@ private:
     that the other plugin wrappers use.
 */
 class StandaloneFilterWindow    : public DocumentWindow,
-                                  public ButtonListener   // (can't use Button::Listener due to VC2005 bug)
+                                  public Button::Listener
 {
 public:
     //==============================================================================
@@ -851,3 +842,5 @@ StandalonePluginHolder* StandalonePluginHolder::getInstance()
 
     return nullptr;
 }
+
+} // namespace juce

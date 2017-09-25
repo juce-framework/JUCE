@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ReadWriteLock::ReadWriteLock() noexcept
     : numWaitingWriters (0),
       numWriters (0),
@@ -142,3 +145,5 @@ void ReadWriteLock::exitWrite() const noexcept
         waitEvent.signal();
     }
 }
+
+} // namespace juce

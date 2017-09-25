@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 OpenGLAppComponent::OpenGLAppComponent()
 {
     setOpaque (true);
@@ -63,3 +66,5 @@ void OpenGLAppComponent::openGLContextClosing()
 {
     shutdown();
 }
+
+} // namespace juce

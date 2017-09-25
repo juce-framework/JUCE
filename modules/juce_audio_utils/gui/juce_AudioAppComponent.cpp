@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 AudioAppComponent::AudioAppComponent()
 {
 }
@@ -50,3 +53,5 @@ void AudioAppComponent::shutdownAudio()
     deviceManager.removeAudioCallback (&audioSourcePlayer);
     deviceManager.closeAudioDevice();
 }
+
+} // namespace juce

@@ -20,7 +20,9 @@
   ==============================================================================
 */
 
-//==============================================================================
+namespace juce
+{
+
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (constructor, "<init>", "()V") \
  METHOD (toString, "toString", "()Ljava/lang/String;") \
@@ -132,8 +134,8 @@ public:
                                                                  javaString (httpRequest).get()));
         }
 
-        if (stream != 0)
-            stream.callBooleanMethod (HTTPStream.connect);
+        if (stream != 0 && ! stream.callBooleanMethod (HTTPStream.connect))
+            stream.clear();
 
         jint* const statusCodeElements = env->GetIntArrayElements (statusCodeArray, 0);
         statusCode = statusCodeElements[0];
@@ -201,6 +203,8 @@ public:
     {
         jassert (buffer != nullptr && bytesToRead >= 0);
 
+        const ScopedLock lock (createStreamLock);
+
         if (stream == nullptr)
             return 0;
 
@@ -233,9 +237,9 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
 
-URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener)
+URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener, bool shouldUsePost)
 {
-    return URL::DownloadTask::createFallbackDownloader (*this, targetLocation, extraHeaders, listener);
+    return URL::DownloadTask::createFallbackDownloader (*this, targetLocation, extraHeaders, listener, shouldUsePost);
 }
 
 //==============================================================================
@@ -296,3 +300,5 @@ void IPAddress::findAllAddresses (Array<IPAddress>& result, bool /*includeIPv6*/
         ::close (sock);
     }
 }
+
+} // namespace juce

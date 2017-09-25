@@ -128,13 +128,12 @@ public:
         else if (arg.isBlob())
         {
             typeAsString = "blob";
-            const MemoryBlock& blob = arg.getBlob();
-            valueAsString = String::fromUTF8( (const char*)blob.getData(), blob.getSize());
+            auto& blob = arg.getBlob();
+            valueAsString = String::fromUTF8 ((const char*) blob.getData(), (int) blob.getSize());
         }
         else
         {
             typeAsString = "(unknown)";
-            valueAsString = "";
         }
 
         oscLogList.add (getIndentationString (level + 1) + "- " + typeAsString.paddedRight(' ', 12) + valueAsString);

@@ -3,7 +3,7 @@
 <JUCERPROJECT id="yVderJ" name="DSPDemo" displaySplashScreen="1" reportAppUsage="1"
               splashScreenColour="Dark" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.roli.DSPDemo" includeBinaryInAppConfig="1"
-              jucerVersion="5.1.1" cppLanguageStandard="14" companyName="ROLI Ltd."
+              jucerVersion="5.1.2" cppLanguageStandard="14" companyName="ROLI Ltd."
               companyWebsite="www.juce.com" companyEmail="info@juce.com">
   <MAINGROUP id="vJBLPL" name="DSPDemo">
     <GROUP id="{EF78091C-1BFD-651B-9BAA-893A127B90F5}" name="Source">

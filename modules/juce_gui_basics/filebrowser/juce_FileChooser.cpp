@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 FileChooser::FileChooser (const String& chooserBoxTitle,
                           const File& currentFileOrDirectory,
                           const String& fileFilters,
@@ -150,3 +153,5 @@ File FileChooser::getResult() const
 //==============================================================================
 FilePreviewComponent::FilePreviewComponent() {}
 FilePreviewComponent::~FilePreviewComponent() {}
+
+} // namespace juce

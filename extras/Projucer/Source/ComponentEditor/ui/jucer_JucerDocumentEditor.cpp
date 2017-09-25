@@ -347,8 +347,7 @@ JucerDocumentEditor::JucerDocumentEditor (JucerDocument* const doc)
                                                                      document->getCppDocument()), true);
 
         updateTabs();
-
-        tabbedComponent.setCurrentTabIndex (1);
+        restoreLastSelectedTab();
 
         document->addChangeListener (this);
 
@@ -361,6 +360,7 @@ JucerDocumentEditor::JucerDocumentEditor (JucerDocument* const doc)
 
 JucerDocumentEditor::~JucerDocumentEditor()
 {
+    saveLastSelectedTab();
     tabbedComponent.clearTabs();
 }
 
@@ -594,15 +594,73 @@ void JucerDocumentEditor::addComponent (const int index)
         document->beginTransaction();
     }
 }
+//==============================================================================
+void JucerDocumentEditor::saveLastSelectedTab() const
+{
+    if (document != nullptr)
+    {
+        auto* project = document->getCppDocument().getProject();
+        if (project != nullptr)
+        {
+            auto& projectProps = project->getStoredProperties();
+
+            ScopedPointer<XmlElement> root (projectProps.getXmlValue ("GUIComponentsLastTab"));
+
+            if (root == nullptr)
+                root = new XmlElement ("FILES");
+
+            auto fileName = document->getCppFile().getFileName();
+
+            auto* child = root->getChildByName (fileName);
+
+            if (child == nullptr)
+                child = root->createNewChildElement (fileName);
+
+            child->setAttribute ("tab", tabbedComponent.getCurrentTabIndex());
+
+            projectProps.setValue ("GUIComponentsLastTab", root);
+        }
+    }
+}
+
+void JucerDocumentEditor::restoreLastSelectedTab()
+{
+    if (document != nullptr)
+    {
+        auto* project = document->getCppDocument().getProject();
+        if (project != nullptr)
+        {
+            ScopedPointer<XmlElement> root (project->getStoredProperties().getXmlValue ("GUIComponentsLastTab"));
+            if (root != nullptr)
+            {
+                auto* child = root->getChildByName (document->getCppFile().getFileName());
+
+                if (child != nullptr)
+                    tabbedComponent.setCurrentTabIndex (child->getIntAttribute ("tab"));
+            }
+        }
+    }
+}
 
 //==============================================================================
 bool JucerDocumentEditor::isSomethingSelected() const
 {
-    if (ComponentLayout* layout = getCurrentLayout())
+    if (auto* layout = getCurrentLayout())
         return layout->getSelectedSet().getNumSelected() > 0;
 
-    if (PaintRoutine* routine = getCurrentPaintRoutine())
+    if (auto* routine = getCurrentPaintRoutine())
         return routine->getSelectedElements().getNumSelected() > 0;
+
+    return false;
+}
+
+bool JucerDocumentEditor::areMultipleThingsSelected() const
+{
+    if (auto* layout = getCurrentLayout())
+        return layout->getSelectedSet().getNumSelected() > 1;
+
+    if (auto* routine = getCurrentPaintRoutine())
+        return routine->getSelectedElements().getNumSelected() > 1;
 
     return false;
 }
@@ -630,6 +688,10 @@ void JucerDocumentEditor::getAllCommands (Array <CommandID>& commands)
         JucerCommandIDs::compOverlay33,
         JucerCommandIDs::compOverlay66,
         JucerCommandIDs::compOverlay100,
+        JucerCommandIDs::alignTop,
+        JucerCommandIDs::alignRight,
+        JucerCommandIDs::alignBottom,
+        JucerCommandIDs::alignLeft,
         StandardApplicationCommandIDs::undo,
         StandardApplicationCommandIDs::redo,
         StandardApplicationCommandIDs::cut,
@@ -810,6 +872,34 @@ void JucerDocumentEditor::getCommandInfo (const CommandID commandID, Application
             result.setActive (currentPaintRoutine != nullptr && document->getComponentLayout() != nullptr);
             result.setTicked (amount == currentAmount);
         }
+        break;
+
+    case JucerCommandIDs::alignTop:
+            result.setInfo (TRANS ("Align top"),
+                            TRANS ("Aligns the top edges of all selected components to the first component that was selected."),
+                            CommandCategories::editing, 0);
+            result.setActive (areMultipleThingsSelected());
+        break;
+
+    case JucerCommandIDs::alignRight:
+            result.setInfo (TRANS ("Align right"),
+                            TRANS ("Aligns the right edges of all selected components to the first component that was selected."),
+                            CommandCategories::editing, 0);
+            result.setActive (areMultipleThingsSelected());
+        break;
+
+    case JucerCommandIDs::alignBottom:
+            result.setInfo (TRANS ("Align bottom"),
+                            TRANS ("Aligns the bottom edges of all selected components to the first component that was selected."),
+                            CommandCategories::editing, 0);
+            result.setActive (areMultipleThingsSelected());
+        break;
+
+    case JucerCommandIDs::alignLeft:
+            result.setInfo (TRANS ("Align left"),
+                            TRANS ("Aligns the left edges of all selected components to the first component that was selected."),
+                            CommandCategories::editing, 0);
+            result.setActive (areMultipleThingsSelected());
         break;
 
     case StandardApplicationCommandIDs::undo:
@@ -1003,6 +1093,38 @@ bool JucerDocumentEditor::perform (const InvocationInfo& info)
         case JucerCommandIDs::ungroup:
             if (currentPaintRoutine != nullptr)
                 currentPaintRoutine->ungroupSelected();
+            break;
+
+        case JucerCommandIDs::alignTop:
+            if (currentLayout != nullptr)
+                currentLayout->alignTop();
+            else if (currentPaintRoutine != nullptr)
+                currentPaintRoutine->alignTop();
+
+            break;
+
+        case JucerCommandIDs::alignRight:
+            if (currentLayout != nullptr)
+                currentLayout->alignRight();
+            else if (currentPaintRoutine != nullptr)
+                currentPaintRoutine->alignRight();
+
+            break;
+
+        case JucerCommandIDs::alignBottom:
+            if (currentLayout != nullptr)
+                currentLayout->alignBottom();
+            else if (currentPaintRoutine != nullptr)
+                currentPaintRoutine->alignBottom();
+
+            break;
+
+        case JucerCommandIDs::alignLeft:
+            if (currentLayout != nullptr)
+                currentLayout->alignLeft();
+            else if (currentPaintRoutine != nullptr)
+                currentPaintRoutine->alignLeft();
+
             break;
 
         case StandardApplicationCommandIDs::cut:

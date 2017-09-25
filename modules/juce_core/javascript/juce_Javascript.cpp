@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #define JUCE_JS_OPERATORS(X) \
     X(semicolon,     ";")        X(dot,          ".")       X(comma,        ",") \
     X(openParen,     "(")        X(closeParen,   ")")       X(openBrace,    "{")    X(closeBrace, "}") \
@@ -827,7 +830,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
         DynamicObject::Ptr clone() override    { return new FunctionObject (*this); }
 
-        void writeAsJSON (OutputStream& out, int /*indentLevel*/, bool /*allOnOneLine*/) override
+        void writeAsJSON (OutputStream& out, int /*indentLevel*/, bool /*allOnOneLine*/, int /*maximumDecimalPlaces*/) override
         {
             out << "function " << functionCode;
         }
@@ -1891,3 +1894,5 @@ const NamedValueSet& JavascriptEngine::getRootObjectProperties() const noexcept
 #if JUCE_MSVC
  #pragma warning (pop)
 #endif
+
+} // namespace juce

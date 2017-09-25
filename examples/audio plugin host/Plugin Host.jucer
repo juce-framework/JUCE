@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="NTe0XB0ij" name="Plugin Host" projectType="guiapp" version="1.0.0"
               juceFolder="../../../juce" vstFolderMac="~/SDKs/vstsdk2.4" vstFolderPC="c:\SDKs\vstsdk2.4"
-              bundleIdentifier="com.roli.pluginhost" jucerVersion="5.1.1" companyName="ROLI Ltd."
+              bundleIdentifier="com.roli.pluginhost" jucerVersion="5.1.2" companyName="ROLI Ltd."
               includeBinaryInAppConfig="1" displaySplashScreen="0" reportAppUsage="0"
               splashScreenColour="Dark" cppLanguageStandard="11">
   <EXPORTFORMATS>

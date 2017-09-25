@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ComponentDragger::ComponentDragger() {}
 ComponentDragger::~ComponentDragger() {}
 
@@ -61,3 +64,5 @@ void ComponentDragger::dragComponent (Component* const componentToDrag, const Mo
             componentToDrag->setBounds (bounds);
     }
 }
+
+} // namespace juce

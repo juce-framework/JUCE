@@ -59,6 +59,7 @@
  #pragma warning (disable : 4458)
 #endif
 
+#include <juce_core/juce_core.h>
 #include "../../juce_audio_processors/format_types/juce_VSTInterface.h"
 
 #ifdef _MSC_VER
@@ -656,6 +657,7 @@ public:
 
             switch (ti->smpteRate)
             {
+                case vstSmpteRateFps239:       rate = AudioPlayHead::fps23976;    fps = 24.0 * 1000.0 / 1001.0; break;
                 case vstSmpteRateFps24:        rate = AudioPlayHead::fps24;       fps = 24.0;  break;
                 case vstSmpteRateFps25:        rate = AudioPlayHead::fps25;       fps = 25.0;  break;
                 case vstSmpteRateFps2997:      rate = AudioPlayHead::fps2997;     fps = 30.0 * 1000.0 / 1001.0; break;
@@ -666,7 +668,6 @@ public:
                 case vstSmpteRate16mmFilm:
                 case vstSmpteRate35mmFilm:     fps = 24.0; break;
 
-                case vstSmpteRateFps239:       fps = 24.0 * 1000.0 / 1001.0; break;
                 case vstSmpteRateFps249:       fps = 25.0 * 1000.0 / 1001.0; break;
                 case vstSmpteRateFps599:       fps = 60.0 * 1000.0 / 1001.0; break;
                 case vstSmpteRateFps60:        fps = 60; break;
@@ -1265,7 +1266,9 @@ public:
             {
                 ed->setTopLeftPosition (0, 0);
                 ed->setBounds (ed->getLocalArea (this, getLocalBounds()));
-                updateWindowSize();
+
+                if (! getHostType().isBitwigStudio())
+                    updateWindowSize();
             }
 
            #if JUCE_MAC && ! JUCE_64BIT
@@ -1322,7 +1325,9 @@ public:
 
             if (auto host = wrapper.hostCallback)
             {
-                if (host (wrapper.getVstEffectInterface(), hostOpcodeCanHostDo, 0, 0, const_cast<char*> ("sizeWindow"), 0) == (pointer_sized_int) 1)
+                auto status = host (wrapper.getVstEffectInterface(), hostOpcodeCanHostDo, 0, 0, const_cast<char*> ("sizeWindow"), 0);
+
+                if (status == (pointer_sized_int) 1 || getHostType().isAbletonLive())
                 {
                     isInSizeWindow = true;
                     sizeWasSuccessful = (host (wrapper.getVstEffectInterface(), hostOpcodeWindowSize, newWidth, newHeight, 0, 0) != 0);

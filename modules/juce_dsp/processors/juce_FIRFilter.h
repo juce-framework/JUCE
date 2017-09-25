@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 /**
     Classes for FIR filter processing.
@@ -274,3 +278,6 @@ namespace FIR
         Array<NumericType> coefficients;
     };
 }
+
+} // namespace dsp
+} // namespace juce

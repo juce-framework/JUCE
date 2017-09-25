@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ImageButton::ImageButton (const String& text_)
     : Button (text_),
       scaleImageToFit (true),
@@ -192,3 +195,5 @@ bool ImageButton::hitTest (int x, int y)
                             && alphaThreshold < im.getPixelAt (((x - imageBounds.getX()) * im.getWidth()) / imageBounds.getWidth(),
                                                                ((y - imageBounds.getY()) * im.getHeight()) / imageBounds.getHeight()).getAlpha());
 }
+
+} // namespace juce

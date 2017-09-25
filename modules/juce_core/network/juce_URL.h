@@ -20,9 +20,11 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 class WebInputStream;
+
 //==============================================================================
 /**
     Represents a URL and has a bunch of useful functions to manipulate it.
@@ -372,7 +374,7 @@ public:
     private:
         friend class URL;
 
-        static DownloadTask* createFallbackDownloader (const URL&, const File&, const String&, Listener*);
+        static DownloadTask* createFallbackDownloader (const URL&, const File&, const String&, Listener*, bool);
 
     public:
        #if JUCE_IOS
@@ -390,12 +392,12 @@ public:
         Using this method to download files on mobile is less flexible but more reliable
         than using createInputStream or WebInputStreams as it will attempt to download the file
         using a native OS background network task. Such tasks automatically deal with
-        network re-connections and continuing your download while your app is suspended but are
-        limited to simple GET requests.
+        network re-connections and continuing your download while your app is suspended.
     */
     DownloadTask* downloadToFile (const File& targetLocation,
                                   String extraHeaders = String(),
-                                  DownloadTask::Listener* listener = nullptr);
+                                  DownloadTask::Listener* listener = nullptr,
+                                  bool usePostCommand = false);
 
     //==============================================================================
     /** Tries to download the entire contents of this URL into a binary data block.
@@ -516,3 +518,5 @@ private:
 
     JUCE_LEAK_DETECTOR (URL)
 };
+
+} // namespace juce

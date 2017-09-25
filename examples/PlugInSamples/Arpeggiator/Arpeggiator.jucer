@@ -9,7 +9,7 @@
               pluginIsMidiEffectPlugin="1" pluginSilenceInIsSilenceOut="0"
               pluginEditorRequiresKeys="0" pluginAUExportPrefix="ArpeggiatorAU"
               pluginRTASCategory="" aaxIdentifier="com.roli.Arpeggiator" pluginAAXCategory="AAX_EPlugInCategory_Effect"
-              jucerVersion="5.1.1" companyName="ROLI Ltd." companyWebsite="www.juce.com"
+              jucerVersion="5.1.2" companyName="ROLI Ltd." companyWebsite="www.juce.com"
               companyEmail="info@juce.com" buildAUv3="0" buildStandalone="0"
               enableIAA="0" displaySplashScreen="0" reportAppUsage="0" splashScreenColour="Dark"
               cppLanguageStandard="11">

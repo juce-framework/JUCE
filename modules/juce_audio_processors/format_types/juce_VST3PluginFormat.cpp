@@ -26,15 +26,12 @@
 
 #if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS)
 
-} // namespace juce
-
 #include <map>
 #include "juce_VST3Headers.h"
+#include "juce_VST3Common.h"
 
 namespace juce
 {
-
-#include "juce_VST3Common.h"
 
 using namespace Steinberg;
 
@@ -207,6 +204,7 @@ static void toProcessContext (Vst::ProcessContext& context, AudioPlayHead* playH
 
         switch (position.frameRate)
         {
+            case AudioPlayHead::fps23976:    fr.framesPerSecond = 24; fr.flags = FrameRate::kPullDownRate; break;
             case AudioPlayHead::fps24:       fr.framesPerSecond = 24; fr.flags = 0; break;
             case AudioPlayHead::fps25:       fr.framesPerSecond = 25; fr.flags = 0; break;
             case AudioPlayHead::fps2997:     fr.framesPerSecond = 30; fr.flags = FrameRate::kPullDownRate; break;
@@ -2101,6 +2099,67 @@ struct VST3PluginInstance : public AudioPluginInstance
     }
 
     //==============================================================================
+    void updateTrackProperties (const TrackProperties& properties) override
+    {
+        if (trackInfoListener != nullptr)
+        {
+            ComSmartPtr<Vst::IAttributeList> l (new TrackPropertiesAttributeList (properties));
+            trackInfoListener->setChannelContextInfos (l);
+        }
+    }
+
+    struct TrackPropertiesAttributeList    : public Vst::IAttributeList
+    {
+        TrackPropertiesAttributeList (const TrackProperties& properties) : props (properties) {}
+        virtual ~TrackPropertiesAttributeList() {}
+
+        JUCE_DECLARE_VST3_COM_REF_METHODS
+
+        tresult PLUGIN_API queryInterface (const TUID queryIid, void** obj) override
+        {
+            TEST_FOR_AND_RETURN_IF_VALID (queryIid, Vst::IAttributeList)
+            TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (queryIid, FUnknown, Vst::IAttributeList)
+
+            *obj = nullptr;
+            return kNotImplemented;
+        }
+
+        tresult PLUGIN_API setInt    (AttrID, Steinberg::int64) override                 { return kOutOfMemory; }
+        tresult PLUGIN_API setFloat  (AttrID, double) override                           { return kOutOfMemory; }
+        tresult PLUGIN_API setString (AttrID, const Vst::TChar*) override                { return kOutOfMemory; }
+        tresult PLUGIN_API setBinary (AttrID, const void*, Steinberg::uint32) override   { return kOutOfMemory; }
+        tresult PLUGIN_API getFloat  (AttrID, double&) override                          { return kResultFalse; }
+        tresult PLUGIN_API getBinary (AttrID, const void*&, Steinberg::uint32&) override { return kResultFalse; }
+
+        tresult PLUGIN_API getString (AttrID id, Vst::TChar* string, Steinberg::uint32 size) override
+        {
+            if (! std::strcmp (id, Vst::ChannelContext::kChannelNameKey))
+            {
+                Steinberg::String str (props.name.toRawUTF8());
+                str.copyTo (string, 0, (Steinberg::int32) jmin (size, (Steinberg::uint32) std::numeric_limits<Steinberg::int32>::max()));
+
+                return kResultTrue;
+            }
+
+            return kResultFalse;
+        }
+
+        tresult PLUGIN_API getInt (AttrID id, Steinberg::int64& value) override
+        {
+            if      (! std::strcmp (Vst::ChannelContext::kChannelNameLengthKey, id)) value = props.name.length();
+            else if (! std::strcmp (Vst::ChannelContext::kChannelColorKey,      id)) value = static_cast<Steinberg::int64> (props.colour.getARGB());
+            else return kResultFalse;
+
+            return kResultTrue;
+        }
+
+        Atomic<int> refCount;
+        TrackProperties props;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TrackPropertiesAttributeList)
+    };
+
+    //==============================================================================
     String getChannelName (int channelIndex, bool forInput, bool forAudioChannel) const
     {
         auto numBuses = getNumSingleDirectionBusesFor (holder->component, forInput, forAudioChannel);
@@ -2185,17 +2244,6 @@ struct VST3PluginInstance : public AudioPluginInstance
         return toString (getParameterInfoForIndex (parameterIndex).title);
     }
 
-    float getParameter (int parameterIndex) override
-    {
-        if (editController != nullptr)
-        {
-            auto id = getParameterInfoForIndex (parameterIndex).id;
-            return (float) editController->getParamNormalized (id);
-        }
-
-        return 0.0f;
-    }
-
     const String getParameterText (int parameterIndex) override
     {
         if (editController != nullptr)
@@ -2209,6 +2257,41 @@ struct VST3PluginInstance : public AudioPluginInstance
         }
 
         return {};
+    }
+
+    int getParameterNumSteps (int parameterIndex) override
+    {
+        if (editController != nullptr)
+        {
+            const auto numSteps = getParameterInfoForIndex (parameterIndex).stepCount;
+
+            if (numSteps > 0)
+                return numSteps;
+        }
+
+        return AudioProcessor::getDefaultNumParameterSteps();
+    }
+
+    bool isParameterDiscrete (int parameterIndex) const override
+    {
+        if (editController != nullptr)
+        {
+            const auto numSteps = getParameterInfoForIndex (parameterIndex).stepCount;
+            return numSteps > 0;
+        }
+
+        return false;
+    }
+
+    float getParameter (int parameterIndex) override
+    {
+        if (editController != nullptr)
+        {
+            auto id = getParameterInfoForIndex (parameterIndex).id;
+            return (float) editController->getParamNormalized (id);
+        }
+
+        return 0.0f;
     }
 
     void setParameter (int parameterIndex, float newValue) override
@@ -2449,6 +2532,7 @@ private:
     ComSmartPtr<Vst::IUnitData> unitData;
     ComSmartPtr<Vst::IProgramListData> programListData;
     ComSmartPtr<Vst::IConnectionPoint> componentConnection, editControllerConnection;
+    ComSmartPtr<Vst::ChannelContext::IInfoListener> trackInfoListener;
 
     /** The number of IO buses MUST match that of the plugin,
         even if there aren't enough channels to process,
@@ -2533,6 +2617,7 @@ private:
         editController2.loadFrom (holder->component);
         componentHandler.loadFrom (holder->component);
         componentHandler2.loadFrom (holder->component);
+        trackInfoListener.loadFrom (holder->component);
 
         if (processor == nullptr)           processor.loadFrom (editController);
         if (unitInfo == nullptr)            unitInfo.loadFrom (editController);
@@ -2541,6 +2626,7 @@ private:
         if (editController2 == nullptr)     editController2.loadFrom (editController);
         if (componentHandler == nullptr)    componentHandler.loadFrom (editController);
         if (componentHandler2 == nullptr)   componentHandler2.loadFrom (editController);
+        if (trackInfoListener == nullptr)   trackInfoListener.loadFrom (editController);
     }
 
     void setStateForAllMidiBuses (bool newState)
@@ -2889,4 +2975,6 @@ FileSearchPath VST3PluginFormat::getDefaultLocationsToSearch()
    #endif
 }
 
-#endif //JUCE_PLUGINHOST_VST3
+} // namespace juce
+
+#endif // JUCE_PLUGINHOST_VST3

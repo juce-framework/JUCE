@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 #if JUCE_MAC || JUCE_IOS
 
@@ -34,6 +35,15 @@ struct CoreAudioLayouts
     static AudioChannelSet fromCoreAudio (const AudioChannelLayout& layout)
     {
         return AudioChannelSet::channelSetWithChannels (getCoreAudioLayoutChannels (layout));
+    }
+
+    /** Convert CoreAudio's native AudioChannelLayoutTag to JUCE's AudioChannelSet.
+
+        Note that this method cannot preserve the order of channels.
+    */
+    static AudioChannelSet fromCoreAudio (AudioChannelLayoutTag layoutTag)
+    {
+        return AudioChannelSet::channelSetWithChannels (getSpeakerLayoutForCoreAudioTag (layoutTag));
     }
 
     /** Convert JUCE's AudioChannelSet to CoreAudio's AudioChannelLayoutTag.
@@ -67,7 +77,7 @@ struct CoreAudioLayouts
     /** Convert CoreAudio's native AudioChannelLayout to an array of JUCE ChannelTypes. */
     static Array<AudioChannelSet::ChannelType> getCoreAudioLayoutChannels (const AudioChannelLayout& layout)
     {
-        switch (layout.mChannelLayoutTag)
+        switch (layout.mChannelLayoutTag & 0xffff0000)
         {
             case kAudioChannelLayoutTag_UseChannelBitmap:
                 return AudioChannelSet::fromWaveChannelMask (static_cast<int> (layout.mChannelBitmap)).getChannelTypes();
@@ -94,30 +104,12 @@ struct CoreAudioLayouts
         return getSpeakerLayoutForCoreAudioTag (layout.mChannelLayoutTag);
     }
 
-    //==============================================================================
-    /* Convert between a CoreAudio and JUCE channel indices - and vice versa. */
-    // TODO: Fabian remove this
-//    static int convertChannelIndex (const AudioChannelLayout& caLayout, const AudioChannelSet& juceLayout, int index, bool fromJUCE)
-//    {
-//        auto coreAudioChannels = getCoreAudioLayoutChannels (caLayout);
-//
-//        jassert (juceLayout.size() == coreAudioChannels.size());
-//        jassert (index >= 0 && index < juceLayout.size());
-//
-//        return (fromJUCE ? coreAudioChannels.indexOf (juceLayout.getTypeOfChannel (index))
-//                         : juceLayout.getChannelIndexForType (coreAudioChannels.getReference (index)));
-//    }
-
-private:
-    //==============================================================================
-    struct LayoutTagSpeakerList
-    {
-        AudioChannelLayoutTag tag;
-        AudioChannelSet::ChannelType channelTypes[16];
-    };
-
     static Array<AudioChannelSet::ChannelType> getSpeakerLayoutForCoreAudioTag (AudioChannelLayoutTag tag)
     {
+        // You need to specify the full AudioChannelLayout when using
+        // the UseChannelBitmap and UseChannelDescriptions layout tag
+        jassert (tag != kAudioChannelLayoutTag_UseChannelBitmap && tag != kAudioChannelLayoutTag_UseChannelDescriptions);
+
         Array<AudioChannelSet::ChannelType> speakers;
 
         for (auto* tbl = SpeakerLayoutTable::get(); tbl->tag != 0; ++tbl)
@@ -138,6 +130,14 @@ private:
 
         return speakers;
     }
+
+private:
+    //==============================================================================
+    struct LayoutTagSpeakerList
+    {
+        AudioChannelLayoutTag tag;
+        AudioChannelSet::ChannelType channelTypes[16];
+    };
 
     static Array<AudioChannelLayoutTag> createKnownCoreAudioTags()
     {
@@ -305,3 +305,5 @@ private:
 };
 
 #endif
+
+} // namespace juce

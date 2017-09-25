@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ResizableCornerComponent::ResizableCornerComponent (Component* const componentToResize,
                                                     ComponentBoundsConstrainer* const constrainer_)
    : component (componentToResize),
@@ -99,3 +102,5 @@ bool ResizableCornerComponent::hitTest (int x, int y)
 
     return y >= yAtX - getHeight() / 4;
 }
+
+} // namespace juce

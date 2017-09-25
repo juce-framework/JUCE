@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 AudioProcessorPlayer::AudioProcessorPlayer (bool doDoublePrecisionProcessing)
     : isDoublePrecision (doDoublePrecisionProcessing)
 {
@@ -214,3 +217,5 @@ void AudioProcessorPlayer::handleIncomingMidiMessage (MidiInput*, const MidiMess
 {
     messageCollector.addMessageToQueue (message);
 }
+
+} // namespace juce

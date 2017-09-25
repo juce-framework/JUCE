@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="sBBIzr" name="JuceDemo" projectType="guiapp" version="3.0.0"
-              bundleIdentifier="com.roli.JuceDemo" jucerVersion="5.1.1" defines="JUCE_UNIT_TESTS=1"
+              bundleIdentifier="com.roli.JuceDemo" jucerVersion="5.1.2" defines="JUCE_UNIT_TESTS=1"
               includeBinaryInAppConfig="1" displaySplashScreen="0" reportAppUsage="0"
               splashScreenColour="Dark" companyName="ROLI Ltd." cppLanguageStandard="11">
   <EXPORTFORMATS>
@@ -235,6 +235,7 @@
         <FILE id="oM20ll" name="FontsDemo.cpp" compile="1" resource="0" file="Source/Demos/FontsDemo.cpp"/>
         <FILE id="emYkSr" name="GraphicsDemo.cpp" compile="1" resource="0"
               file="Source/Demos/GraphicsDemo.cpp"/>
+        <FILE id="PfpwRe" name="GridDemo.cpp" compile="1" resource="0" file="Source/Demos/GridDemo.cpp"/>
         <FILE id="nNKKBo" name="ImagesDemo.cpp" compile="1" resource="0" file="Source/Demos/ImagesDemo.cpp"/>
         <FILE id="L2SbwO" name="JavaScript.cpp" compile="1" resource="0" file="Source/Demos/JavaScript.cpp"/>
         <FILE id="b6ICYv" name="KeyMappingsDemo.cpp" compile="1" resource="0"

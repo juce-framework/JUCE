@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -34,3 +35,5 @@ enum NotificationType
     sendNotificationSync,       /**< Requests a synchronous notification. */
     sendNotificationAsync,      /**< Requests an asynchronous notification. */
 };
+
+} // namespace juce

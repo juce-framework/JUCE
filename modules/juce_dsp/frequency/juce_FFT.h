@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 /**
     Performs a fast fourier transform.
@@ -56,17 +60,31 @@ public:
 
     /** Performs an in-place forward transform on a block of real data.
 
+        As the coefficients of the negative frequences (frequencies higher than
+        N/2 or pi) are the complex conjugate of their positive counterparts,
+        it may not be necessary to calculate them for your particular application.
+        You can use dontCalculateNegativeFrequencies to let the FFT
+        engine know that you do not plan on using them. Note that this is only a
+        hint: some FFT engines (currently only the Fallback engine), will still
+        calculate the negative frequencies even if dontCalculateNegativeFrequencies
+        is true.
+
         The size of the array passed in must be 2 * getSize(), and the first half
-        should contain your raw input sample data. On return, the array will contain
-        size complex real + imaginary parts data interleaved, and can be passed to
+        should contain your raw input sample data. On return, if
+        dontCalculateNegativeFrequencies is false, the array will contain size
+        complex real + imaginary parts data interleaved. If
+        dontCalculateNegativeFrequencies is true, the array will contain at least
+        (size / 2) + 1 complex numbers. Both outputs can be passed to
         performRealOnlyInverseTransform() in order to convert it back to reals.
     */
-    void performRealOnlyForwardTransform (float* inputOutputData) const noexcept;
+    void performRealOnlyForwardTransform (float* inputOutputData,
+                                          bool dontCalculateNegativeFrequencies = false) const noexcept;
 
     /** Performs a reverse operation to data created in performRealOnlyForwardTransform().
 
-        The size of the array passed in must be 2 * getSize(), containing size complex
-        real and imaginary parts interleaved numbers. On return, the first half of the
+        Although performRealOnlyInverseTransform will only use the first ((size / 2) + 1)
+        complex numbers, the size of the array passed in must still be 2 * getSize(), as some
+        FFT engines require the extra space for the calculation. On return, the first half of the
         array will contain the reconstituted samples.
     */
     void performRealOnlyInverseTransform (float* inputOutputData) const noexcept;
@@ -97,3 +115,6 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FFT)
 };
+
+} // namespace dsp
+} // namespace juce

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 MenuBarModel::MenuBarModel() noexcept
     : manager (nullptr)
 {
@@ -93,3 +96,5 @@ void MenuBarModel::handleMenuBarActivate (bool isActive)
 
 void MenuBarModel::menuBarActivated (bool) {}
 void MenuBarModel::Listener::menuBarActivated (MenuBarModel*, bool) {}
+
+} // namespace juce

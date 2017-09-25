@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -63,7 +63,7 @@
     @see FileChooser
 */
 class JUCE_API  FileChooserDialogBox : public ResizableWindow,
-                                       private ButtonListener,  // (can't use Button::Listener due to idiotic VC2005 bug)
+                                       private Button::Listener,
                                        private FileBrowserListener
 {
 public:
@@ -153,3 +153,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileChooserDialogBox)
 };
+
+} // namespace juce

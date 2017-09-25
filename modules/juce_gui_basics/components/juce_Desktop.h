@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -289,13 +289,13 @@ public:
     void beginDragAutoRepeat (int millisecondsBetweenCallbacks);
 
     //==============================================================================
-    /** In a tablet device which can be turned around, this is used to inidicate the orientation. */
+    /** In a tablet/mobile device which can be turned around, this is used to indicate the orientation. */
     enum DisplayOrientation
     {
-        upright                 = 1,  /**< Indicates that the display is the normal way up. */
-        upsideDown              = 2,  /**< Indicates that the display is upside-down. */
-        rotatedClockwise        = 4,  /**< Indicates that the display is turned 90 degrees clockwise from its upright position. */
-        rotatedAntiClockwise    = 8,  /**< Indicates that the display is turned 90 degrees anti-clockwise from its upright position. */
+        upright                 = 1,  /**< Indicates that the device is the normal way up. */
+        upsideDown              = 2,  /**< Indicates that the device is upside-down. */
+        rotatedClockwise        = 4,  /**< Indicates that the device is turned 90 degrees clockwise from its upright position. */
+        rotatedAntiClockwise    = 8,  /**< Indicates that the device is turned 90 degrees anti-clockwise from its upright position. */
 
         allOrientations         = 1 + 2 + 4 + 8   /**< A combination of all the orientation values */
     };
@@ -470,3 +470,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Desktop)
 };
+
+} // namespace juce

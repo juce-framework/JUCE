@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -65,8 +65,8 @@ class JUCE_API  FilenameComponent  : public Component,
                                      public SettableTooltipClient,
                                      public FileDragAndDropTarget,
                                      private AsyncUpdater,
-                                     private ButtonListener,  // (can't use Button::Listener due to idiotic VC2005 bug)
-                                     private ComboBoxListener
+                                     private Button::Listener,
+                                     private ComboBox::Listener
 {
 public:
     //==============================================================================
@@ -229,3 +229,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilenameComponent)
 };
+
+} // namespace juce

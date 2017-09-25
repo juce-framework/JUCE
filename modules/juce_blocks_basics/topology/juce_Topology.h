@@ -20,6 +20,8 @@
   ==============================================================================
 */
 
+namespace juce
+{
 
 /** Describes a phyiscal connection between two ports of two block devices. */
 struct BlockDeviceConnection
@@ -41,3 +43,5 @@ struct BlockTopology
     bool operator== (const BlockTopology&) const noexcept;
     bool operator!= (const BlockTopology&) const noexcept;
 };
+
+} // namespace juce

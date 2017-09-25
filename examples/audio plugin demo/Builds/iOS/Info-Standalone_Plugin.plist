@@ -5,6 +5,8 @@
   <dict>
     <key>LSRequiresIPhoneOS</key>
     <true/>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>This app requires microphone input.</string>
     <key>UIViewControllerBasedStatusBarAppearance</key>
     <false/>
     <key>CFBundleExecutable</key>

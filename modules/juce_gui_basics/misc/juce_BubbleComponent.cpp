@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 BubbleComponent::BubbleComponent()
   : allowablePlacements (above | below | left | right)
 {
@@ -144,3 +147,5 @@ void BubbleComponent::setPosition (Rectangle<int> rectangleToPointTo,
 
     setBounds (targetX - arrowTip.x, targetY - arrowTip.y, totalW, totalH);
 }
+
+} // namespace juce

@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 MidiKeyboardState::MidiKeyboardState()
 {
     zerostruct (noteStates);
@@ -179,3 +182,5 @@ void MidiKeyboardState::removeListener (MidiKeyboardStateListener* const listene
     const ScopedLock sl (lock);
     listeners.removeFirstMatchingValue (listener);
 }
+
+} // namespace juce

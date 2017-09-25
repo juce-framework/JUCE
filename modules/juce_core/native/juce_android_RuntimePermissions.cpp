@@ -20,27 +20,27 @@
   ==============================================================================
 */
 
-namespace
+namespace juce
 {
-    void handleAndroidCallback (bool permissionWasGranted, RuntimePermissions::Callback* callbackPtr)
+
+static void handleAndroidCallback (bool permissionWasGranted, RuntimePermissions::Callback* callbackPtr)
+{
+    if (callbackPtr == nullptr)
     {
-        if (callbackPtr == nullptr)
-        {
-            // got a nullptr passed in from java! this should never happen...
-            jassertfalse;
-            return;
-        }
-
-        std::unique_ptr<RuntimePermissions::Callback> uptr (callbackPtr);
-
-        if (RuntimePermissions::Callback callbackObj = *uptr)
-            callbackObj (permissionWasGranted);
+        // got a nullptr passed in from java! this should never happen...
+        jassertfalse;
+        return;
     }
+
+    std::unique_ptr<RuntimePermissions::Callback> uptr (callbackPtr);
+
+    if (RuntimePermissions::Callback callbackObj = *uptr)
+        callbackObj (permissionWasGranted);
 }
 
 JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME,
                    androidRuntimePermissionsCallback,
-                   void, (JNIEnv* env, jobject /*javaObjectHandle*/, jboolean permissionsGranted, jlong callbackPtr))
+                   void, (JNIEnv* env, jobject, jboolean permissionsGranted, jlong callbackPtr))
 {
     setEnv (env);
     handleAndroidCallback (permissionsGranted != 0,
@@ -84,3 +84,5 @@ bool RuntimePermissions::isGranted (PermissionID permission)
 {
     return android.activity.callBooleanMethod (JuceAppActivity.isPermissionGranted, permission);
 }
+
+} // namespace juce

@@ -88,13 +88,21 @@ public:
     }
 
     //==============================================================================
+    void initialiseDependencyPathValues() override
+    {
+        sdkPath.referTo  (Value (new DependencyPathValueSource (getSetting (Ids::androidSDKPath), Ids::androidSDKPath, TargetOS::getThisOS())));
+        ndkPath.referTo  (Value (new DependencyPathValueSource (getSetting (Ids::androidNDKPath), Ids::androidNDKPath, TargetOS::getThisOS())));
+    }
+
+    //==============================================================================
     CachedValue<String> androidRepositories, androidDependencies,
                         androidScreenOrientation, androidActivityClass, androidActivitySubClassName,
                         androidManifestCustomXmlElements, androidVersionCode, androidMinimumSDK, androidTheme,
                         androidSharedLibraries, androidStaticLibraries, androidExtraAssetsFolder;
 
     CachedValue<bool>   androidInternetNeeded, androidMicNeeded, androidBluetoothNeeded,
-                        androidExternalReadPermission, androidExternalWritePermission;
+                        androidExternalReadPermission, androidExternalWritePermission,
+                        androidInAppBillingPermission;
     CachedValue<String> androidOtherPermissions;
 
     CachedValue<String> androidKeyStore, androidKeyStorePass, androidKeyAlias, androidKeyAliasPass;
@@ -121,6 +129,7 @@ public:
           androidBluetoothNeeded (settings, Ids::androidBluetoothNeeded, nullptr, true),
           androidExternalReadPermission  (settings, Ids::androidExternalReadNeeded, nullptr, true),
           androidExternalWritePermission (settings, Ids::androidExternalWriteNeeded, nullptr, true),
+          androidInAppBillingPermission (settings, Ids::androidInAppBilling, nullptr, false),
           androidOtherPermissions (settings, Ids::androidOtherPermissions, nullptr),
           androidKeyStore (settings, Ids::androidKeyStore, nullptr, "${user.home}/.android/debug.keystore"),
           androidKeyStorePass (settings, Ids::androidKeyStorePass, nullptr, "android"),
@@ -132,7 +141,6 @@ public:
           buildToolsVersion (settings, Ids::buildToolsVersion, nullptr, "26.0.0"),
           AndroidExecutable (findAndroidExecutable())
     {
-        initialiseDependencyPathValues();
         name = getName();
 
         if (getTargetLocationString().isEmpty())
@@ -195,14 +203,8 @@ public:
 
         removeOldFiles (targetFolder);
 
-        {
-            const String package (getActivityClassPackage());
-            const String path (package.replaceCharacter ('.', File::separator));
-            const File javaTarget (targetFolder.getChildFile ("app/src/main/java").getChildFile (path));
-
-            if (! isLibrary())
-                copyActivityJavaFiles (modules, javaTarget, package);
-        }
+        if (! isLibrary())
+            copyJavaFiles (modules);
 
         copyExtraResourceFiles();
 
@@ -244,7 +246,6 @@ public:
 
     void removeOldFiles (const File& targetFolder) const
     {
-        targetFolder.getChildFile ("app/src").deleteRecursively();
         targetFolder.getChildFile ("app/build").deleteRecursively();
         targetFolder.getChildFile ("app/build.gradle").deleteFile();
         targetFolder.getChildFile ("gradle").deleteRecursively();
@@ -609,7 +610,7 @@ private:
                                                        .replace ("/", "${File.separator}");
 
         mo << "    signingConfigs {"                                              << newLine;
-        mo << "        release {"                                                 << newLine;
+        mo << "        juceSigning {"                                             << newLine;
         mo << "            storeFile     file(\"" << keyStoreFilePath << "\")"    << newLine;
         mo << "            storePassword \"" << androidKeyStorePass.get() << "\"" << newLine;
         mo << "            keyAlias      \"" << androidKeyAlias.get() << "\""     << newLine;
@@ -678,9 +679,7 @@ private:
             mo << "             initWith " << (config->isDebug() ? "debug" : "release") << newLine;
             mo << "             debuggable    " << (config->isDebug() ? "true" : "false") << newLine;
             mo << "             jniDebuggable " << (config->isDebug() ? "true" : "false") << newLine;
-
-            if (! config->isDebug())
-                mo << "             signingConfig signingConfigs.release" << newLine;
+            mo << "             signingConfig signingConfigs.juceSigning" << newLine;
 
             mo << "         }" << newLine;
         }
@@ -822,6 +821,9 @@ private:
         props.add (new BooleanPropertyComponent (androidExternalWritePermission.getPropertyAsValue(), "Write to external storage", "Specify permissions to write to external storage"),
                    "If enabled, this will set the android.permission.WRITE_EXTERNAL_STORAGE flag in the manifest.");
 
+        props.add (new BooleanPropertyComponent (androidInAppBillingPermission.getPropertyAsValue(), "In-App Billing", "Specify In-App Billing permission in the manifest"),
+                   "If enabled, this will set the com.android.vending.BILLING flag in the manifest.");
+
         props.add (new TextPropertyComponent (androidOtherPermissions.getPropertyAsValue(), "Custom permissions", 2048, false),
                    "A space-separated list of other permission flags that should be added to the manifest.");
 
@@ -873,85 +875,107 @@ private:
         return s + CodeHelpers::makeValidIdentifier (project.getProjectFilenameRoot(), false, true, false);
     }
 
-    void initialiseDependencyPathValues()
+    //==============================================================================
+    void copyJavaFiles (const OwnedArray<LibraryModule>& modules) const
     {
-        sdkPath.referTo  (Value (new DependencyPathValueSource (getSetting (Ids::androidSDKPath), Ids::androidSDKPath, TargetOS::getThisOS())));
-        ndkPath.referTo  (Value (new DependencyPathValueSource (getSetting (Ids::androidNDKPath), Ids::androidNDKPath, TargetOS::getThisOS())));
+        if (auto* coreModule = getCoreModule (modules))
+        {
+            auto package = getActivityClassPackage();
+            auto targetFolder = getTargetFolder();
+
+            auto inAppBillingPath = String ("com.android.vending.billing").replaceCharacter ('.', File::separator);
+            auto javaSourceFolder = coreModule->getFolder().getChildFile ("native").getChildFile ("java");
+            auto javaInAppBillingTarget = targetFolder.getChildFile ("app/src/main/java").getChildFile (inAppBillingPath);
+            auto javaActivityTarget = targetFolder.getChildFile ("app/src/main/java")
+                                                  .getChildFile (package.replaceCharacter ('.', File::separator));
+
+            copyActivityJavaFiles (javaSourceFolder, javaActivityTarget, package);
+            copyAdditionalJavaFiles (javaSourceFolder, javaInAppBillingTarget);
+        }
     }
 
-    //==============================================================================
-    void copyActivityJavaFiles (const OwnedArray<LibraryModule>& modules, const File& targetFolder, const String& package) const
+    void copyActivityJavaFiles (const File& javaSourceFolder, const File& targetFolder, const String& package) const
     {
         if (androidActivityClass.get().contains ("_"))
             throw SaveError ("Your Android activity class name or path may not contain any underscores! Try a project name without underscores.");
 
-        const String className (getActivityName());
+        auto className = getActivityName();
 
         if (className.isEmpty())
             throw SaveError ("Invalid Android Activity class name: " + androidActivityClass.get());
 
         createDirectoryOrThrow (targetFolder);
 
-        if (auto* coreModule = getCoreModule (modules))
+        auto javaDestFile = targetFolder.getChildFile (className + ".java");
+
+
+        String juceMidiCode, juceMidiImports, juceRuntimePermissionsCode;
+
+        juceMidiImports << newLine;
+
+        if (androidMinimumSDK.get().getIntValue() >= 23)
         {
-            File javaDestFile (targetFolder.getChildFile (className + ".java"));
+            auto javaAndroidMidi = javaSourceFolder.getChildFile ("AndroidMidi.java");
+            auto javaRuntimePermissions = javaSourceFolder.getChildFile ("AndroidRuntimePermissions.java");
 
-            File javaSourceFolder (coreModule->getFolder().getChildFile ("native")
-                                                          .getChildFile ("java"));
+            juceMidiImports << "import android.media.midi.*;" << newLine
+                            << "import android.bluetooth.*;" << newLine
+                            << "import android.bluetooth.le.*;" << newLine;
 
-            String juceMidiCode, juceMidiImports, juceRuntimePermissionsCode;
+            juceMidiCode = javaAndroidMidi.loadFileAsString().replace ("JuceAppActivity", className);
 
-            juceMidiImports << newLine;
-
-            if (androidMinimumSDK.get().getIntValue() >= 23)
-            {
-                File javaAndroidMidi (javaSourceFolder.getChildFile ("AndroidMidi.java"));
-                File javaRuntimePermissions (javaSourceFolder.getChildFile ("AndroidRuntimePermissions.java"));
-
-                juceMidiImports << "import android.media.midi.*;" << newLine
-                                << "import android.bluetooth.*;" << newLine
-                                << "import android.bluetooth.le.*;" << newLine;
-
-                juceMidiCode = javaAndroidMidi.loadFileAsString().replace ("JuceAppActivity", className);
-
-                juceRuntimePermissionsCode = javaRuntimePermissions.loadFileAsString().replace ("JuceAppActivity", className);
-            }
-            else
-            {
-                juceMidiCode = javaSourceFolder.getChildFile ("AndroidMidiFallback.java")
-                                   .loadFileAsString()
-                                   .replace ("JuceAppActivity", className);
-            }
-
-            auto javaSourceFile = javaSourceFolder.getChildFile ("JuceAppActivity.java");
-            auto javaSourceLines = StringArray::fromLines (javaSourceFile.loadFileAsString());
-
-            {
-                MemoryOutputStream newFile;
-
-                for (const auto& line : javaSourceLines)
-                {
-                    if (line.contains ("$$JuceAndroidMidiImports$$"))
-                        newFile << juceMidiImports;
-                    else if (line.contains ("$$JuceAndroidMidiCode$$"))
-                        newFile << juceMidiCode;
-                    else if (line.contains ("$$JuceAndroidRuntimePermissionsCode$$"))
-                        newFile << juceRuntimePermissionsCode;
-                    else
-                        newFile << line.replace ("JuceAppActivity", className)
-                                       .replace ("package com.juce;", "package " + package + ";") << newLine;
-                }
-
-                javaSourceLines = StringArray::fromLines (newFile.toString());
-            }
-
-            while (javaSourceLines.size() > 2
-                    && javaSourceLines[javaSourceLines.size() - 1].trim().isEmpty()
-                    && javaSourceLines[javaSourceLines.size() - 2].trim().isEmpty())
-                javaSourceLines.remove (javaSourceLines.size() - 1);
-
-            overwriteFileIfDifferentOrThrow (javaDestFile, javaSourceLines.joinIntoString (newLine));
+            juceRuntimePermissionsCode = javaRuntimePermissions.loadFileAsString().replace ("JuceAppActivity", className);
         }
+        else
+        {
+            juceMidiCode = javaSourceFolder.getChildFile ("AndroidMidiFallback.java")
+                               .loadFileAsString()
+                               .replace ("JuceAppActivity", className);
+        }
+
+        auto javaSourceFile = javaSourceFolder.getChildFile ("JuceAppActivity.java");
+        auto javaSourceLines = StringArray::fromLines (javaSourceFile.loadFileAsString());
+
+        {
+            MemoryOutputStream newFile;
+
+            for (const auto& line : javaSourceLines)
+            {
+                if (line.contains ("$$JuceAndroidMidiImports$$"))
+                    newFile << juceMidiImports;
+                else if (line.contains ("$$JuceAndroidMidiCode$$"))
+                    newFile << juceMidiCode;
+                else if (line.contains ("$$JuceAndroidRuntimePermissionsCode$$"))
+                    newFile << juceRuntimePermissionsCode;
+                else
+                    newFile << line.replace ("JuceAppActivity", className)
+                                   .replace ("package com.juce;", "package " + package + ";") << newLine;
+            }
+
+            javaSourceLines = StringArray::fromLines (newFile.toString());
+        }
+
+        while (javaSourceLines.size() > 2
+                && javaSourceLines[javaSourceLines.size() - 1].trim().isEmpty()
+                && javaSourceLines[javaSourceLines.size() - 2].trim().isEmpty())
+            javaSourceLines.remove (javaSourceLines.size() - 1);
+
+        overwriteFileIfDifferentOrThrow (javaDestFile, javaSourceLines.joinIntoString (newLine));
+    }
+
+    void copyAdditionalJavaFiles (const File& sourceFolder, const File& targetFolder) const
+    {
+        auto inAppBillingJavaFileName = String ("IInAppBillingService.java");
+
+        auto inAppBillingJavaSrcFile  = sourceFolder.getChildFile (inAppBillingJavaFileName);
+        auto inAppBillingJavaDestFile = targetFolder.getChildFile (inAppBillingJavaFileName);
+
+        createDirectoryOrThrow (targetFolder);
+
+        jassert (inAppBillingJavaSrcFile.existsAsFile());
+
+        if (inAppBillingJavaSrcFile.existsAsFile())
+            inAppBillingJavaSrcFile.copyFileTo (inAppBillingJavaDestFile);
     }
 
     void copyExtraResourceFiles() const
@@ -1212,6 +1236,9 @@ private:
         defines.set ("JUCE_ANDROID_ACTIVITY_CLASSNAME", getJNIActivityClassName().replaceCharacter ('/', '_'));
         defines.set ("JUCE_ANDROID_ACTIVITY_CLASSPATH", "\"" + getJNIActivityClassName() + "\"");
 
+        if (androidInAppBillingPermission.get())
+            defines.set ("JUCE_IN_APP_PURCHASES", "1");
+
         if (supportsGLv3())
             defines.set ("JUCE_ANDROID_GL_ES_VERSION_3_0", "1");
 
@@ -1422,6 +1449,9 @@ private:
 
         if (androidExternalWritePermission.get())
             s.add ("android.permission.WRITE_EXTERNAL_STORAGE");
+
+        if (androidInAppBillingPermission.get())
+            s.add ("com.android.vending.BILLING");
 
         return getCleanedStringArray (s);
     }

@@ -24,13 +24,15 @@
   ==============================================================================
 */
 
-//==============================================================================
+namespace juce
+{
+
 // This is an AudioTransportSource which will own it's assigned source
 struct AudioSourceOwningTransportSource  : public AudioTransportSource
 {
-    AudioSourceOwningTransportSource (PositionableAudioSource* s)  : source (s)
+    AudioSourceOwningTransportSource (PositionableAudioSource* s, double sampleRate)  : source (s)
     {
-        AudioTransportSource::setSource (s);
+        AudioTransportSource::setSource (s, 0, nullptr, sampleRate);
     }
 
     ~AudioSourceOwningTransportSource()
@@ -180,7 +182,7 @@ void SoundPlayer::play (const void* resourceData, size_t resourceSize)
 void SoundPlayer::play (AudioFormatReader* reader, bool deleteWhenFinished)
 {
     if (reader != nullptr)
-        play (new AudioFormatReaderSource (reader, deleteWhenFinished), true);
+        play (new AudioFormatReaderSource (reader, deleteWhenFinished), true, reader->sampleRate);
 }
 
 void SoundPlayer::play (AudioSampleBuffer* buffer, bool deleteWhenFinished, bool playOnAllOutputChannels)
@@ -189,7 +191,7 @@ void SoundPlayer::play (AudioSampleBuffer* buffer, bool deleteWhenFinished, bool
         play (new AudioSampleBufferSource (buffer, deleteWhenFinished, playOnAllOutputChannels), true);
 }
 
-void SoundPlayer::play (PositionableAudioSource* audioSource, bool deleteWhenFinished)
+void SoundPlayer::play (PositionableAudioSource* audioSource, bool deleteWhenFinished, double fileSampleRate)
 {
     if (audioSource != nullptr)
     {
@@ -199,12 +201,12 @@ void SoundPlayer::play (PositionableAudioSource* audioSource, bool deleteWhenFin
         {
             if (deleteWhenFinished)
             {
-                transport = new AudioSourceOwningTransportSource (audioSource);
+                transport = new AudioSourceOwningTransportSource (audioSource, fileSampleRate);
             }
             else
             {
                 transport = new AudioTransportSource();
-                transport->setSource (audioSource);
+                transport->setSource (audioSource, 0, nullptr, fileSampleRate);
                 deleteWhenFinished = true;
             }
         }
@@ -273,3 +275,5 @@ void SoundPlayer::audioDeviceError (const String& errorMessage)
 {
     player.audioDeviceError (errorMessage);
 }
+
+} // namespace juce

@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -56,11 +56,21 @@ public:
 
     /** Implement this method to set up any GL objects that you need for rendering.
         The GL context will be active when this method is called.
+
+        Note that because the GL context could be destroyed and re-created ad-hoc by
+        the underlying platform, the shutdown() and initialise() calls could be called
+        multiple times while your app is running. So don't make your code assume that
+        this will only be called once!
     */
     virtual void initialise() = 0;
 
     /** Implement this method to free any GL objects that you created during rendering.
         The GL context will still be active when this method is called.
+
+        Note that because the GL context could be destroyed and re-created ad-hoc by
+        the underlying platform, the shutdown() and initialise() calls could be called
+        multiple times while your app is running. So don't make your code assume that
+        this will only be called once!
     */
     virtual void shutdown() = 0;
 
@@ -82,3 +92,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenGLAppComponent)
 };
+
+} // namespace juce

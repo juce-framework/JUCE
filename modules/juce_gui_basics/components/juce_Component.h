@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -762,8 +762,8 @@ public:
     template <class TargetClass>
     TargetClass* findParentComponentOfClass() const
     {
-        for (Component* p = parentComponent; p != nullptr; p = p->parentComponent)
-            if (TargetClass* const target = dynamic_cast<TargetClass*> (p))
+        for (auto* p = parentComponent; p != nullptr; p = p->parentComponent)
+            if (auto* target = dynamic_cast<TargetClass*> (p))
                 return target;
 
         return nullptr;
@@ -2372,3 +2372,5 @@ protected:
     virtual ComponentPeer* createNewPeer (int styleFlags, void* nativeWindowToAttachTo);
    #endif
 };
+
+} // namespace juce

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 MouseEvent::MouseEvent (MouseInputSource inputSource,
                         Point<float> pos,
                         ModifierKeys modKeys,
@@ -136,3 +139,5 @@ static int doubleClickTimeOutMs = 400;
 
 int MouseEvent::getDoubleClickTimeout() noexcept                        { return doubleClickTimeOutMs; }
 void MouseEvent::setDoubleClickTimeout (const int newTime) noexcept     { doubleClickTimeOutMs = newTime; }
+
+} // namespace juce

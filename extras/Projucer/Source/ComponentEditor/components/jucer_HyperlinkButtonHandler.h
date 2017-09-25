@@ -33,7 +33,7 @@ public:
         registerColour (HyperlinkButton::textColourId, "text", "textCol");
     }
 
-    Component* createNewComponent (JucerDocument*)
+    Component* createNewComponent (JucerDocument*) override
     {
         HyperlinkButton* hb = new HyperlinkButton ("new hyperlink", URL ("http://www.juce.com"));
 
@@ -41,15 +41,21 @@ public:
         return hb;
     }
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
+    void getEditableProperties (Component* component, JucerDocument& document,
+                                Array<PropertyComponent*>& props, bool multipleSelected) override
     {
-        HyperlinkButton* const hb = (HyperlinkButton*) component;
-        ButtonHandler::getEditableProperties (component, document, props);
-        props.add (new HyperlinkURLProperty (hb, document));
+        ButtonHandler::getEditableProperties (component, document, props, multipleSelected);
+
+        if (multipleSelected)
+            return;
+
+        if (auto* hb = dynamic_cast<HyperlinkButton*> (component))
+            props.add (new HyperlinkURLProperty (hb, document));
+
         addColourProperties (component, document, props);
     }
 
-    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
+    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout) override
     {
         HyperlinkButton* const hb = (HyperlinkButton*) comp;
         XmlElement* const e = ButtonHandler::createXmlFor (comp, layout);
@@ -57,7 +63,7 @@ public:
         return e;
     }
 
-    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout)
+    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout) override
     {
         HyperlinkButton* const hb = (HyperlinkButton*) comp;
 
@@ -69,7 +75,7 @@ public:
         return true;
     }
 
-    String getCreationParameters (GeneratedCode& code, Component* comp)
+    String getCreationParameters (GeneratedCode& code, Component* comp) override
     {
         HyperlinkButton* const hb = dynamic_cast<HyperlinkButton*> (comp);
 
@@ -79,7 +85,7 @@ public:
                 + ")";
     }
 
-    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
+    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName) override
     {
         ButtonHandler::fillInCreationCode (code, component, memberVariableName);
 

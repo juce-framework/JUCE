@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace
 {
     uint16 generateNoteID (int midiChannel, int midiNoteNumber) noexcept
@@ -128,3 +131,5 @@ private:
 static MPENoteTests MPENoteUnitTests;
 
 #endif // JUCE_UNIT_TESTS
+
+} // namespace juce

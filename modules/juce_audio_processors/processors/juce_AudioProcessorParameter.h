@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /** An abstract base class for parameter objects that can be added to an
@@ -106,15 +106,31 @@ public:
     */
     virtual String getLabel() const = 0;
 
-    /** Returns the number of discrete interval steps that this parameter's range
-        should be quantised into.
+    /** Returns the number of steps that this parameter's range should be quantised into.
 
         If you want a continuous range of values, don't override this method, and allow
         the default implementation to return AudioProcessor::getDefaultNumParameterSteps().
+
         If your parameter is boolean, then you may want to make this return 2.
-        The value that is returned may or may not be used, depending on the host.
+
+        The value that is returned may or may not be used, depending on the host. If you
+        want the host to display stepped automation values, rather than a continuous
+        interpolation between successive values, you should override isDiscrete to return true.
+
+        @see isDiscrete
     */
     virtual int getNumSteps() const;
+
+    /** Returns whether the parameter uses discrete values, based on the result of
+        getNumSteps, or allows the host to select values continuously.
+
+        This information may or may not be used, depending on the host. If you
+        want the host to display stepped automation values, rather than a continuous
+        interpolation between successive values, override this method to return true.
+
+        @see getNumSteps
+    */
+    virtual bool isDiscrete() const;
 
     /** Returns a textual version of the supplied parameter value.
         The default implementation just returns the floating point value
@@ -152,9 +168,10 @@ public:
         outputGain       = (1 << 16) | 1,
 
         /** The following categories tell the host that this parameter is a meter level value
-         and therefore read-only. Most hosts will display these type of parameters as
-         a meter in the generic view of your plug-in. Pro-Tools will also show the meter
-         in the mixer view. */
+            and therefore read-only. Most hosts will display these type of parameters as
+            a meter in the generic view of your plug-in. Pro-Tools will also show the meter
+            in the mixer view.
+        */
         inputMeter                          = (2 << 16) | 0,
         outputMeter                         = (2 << 16) | 1,
         compressorLimiterGainReductionMeter = (2 << 16) | 2,
@@ -176,3 +193,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorParameter)
 };
+
+} // namespace juce

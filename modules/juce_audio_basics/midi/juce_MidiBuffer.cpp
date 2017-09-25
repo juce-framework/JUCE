@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace MidiBufferHelpers
 {
     inline int getEventTime (const void* const d) noexcept
@@ -34,7 +37,7 @@ namespace MidiBufferHelpers
 
     inline uint16 getEventTotalSize (const void* const d) noexcept
     {
-        return getEventDataSize (d) + sizeof (int32) + sizeof (uint16);
+        return (uint16) (getEventDataSize (d) + sizeof (int32) + sizeof (uint16));
     }
 
     static int findActualEventLength (const uint8* const data, const int maxBytes) noexcept
@@ -225,3 +228,5 @@ bool MidiBuffer::Iterator::getNextEvent (MidiMessage& result, int& samplePositio
 
     return true;
 }
+
+} // namespace juce

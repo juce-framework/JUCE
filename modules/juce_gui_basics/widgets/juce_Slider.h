@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -616,7 +616,7 @@ public:
     bool getSliderSnapsToMousePosition() const noexcept;
 
     /** If enabled, this gives the slider a pop-up bubble which appears while the
-        slider is being dragged.
+        slider is being dragged or hovered-over.
 
         This can be handy if your slider doesn't have a text-box, so that users can
         see the value just when they're changing it.
@@ -627,7 +627,9 @@ public:
         transparent window, so if you're using an OS that can't do transparent windows
         you'll have to add it to a parent component instead).
     */
-    void setPopupDisplayEnabled (bool isEnabled, Component* parentComponentToUse);
+    void setPopupDisplayEnabled (bool shouldShowOnMouseDrag,
+                                 bool shouldShowOnMouseHover,
+                                 Component* parentComponentToUse);
 
     /** If a popup display is enabled and is currently visible, this returns the component
         that is being shown, or nullptr if none is currently in use.
@@ -904,6 +906,10 @@ public:
     void focusOfChildComponentChanged (FocusChangeType) override;
     /** @internal */
     void colourChanged() override;
+    /** @internal */
+    void mouseMove (const MouseEvent&) override;
+    /** @internal */
+    void mouseExit (const MouseEvent&) override;
 
 private:
     //==============================================================================
@@ -934,3 +940,5 @@ private:
 
 /** This typedef is just for compatibility with old code - newer code should use the Slider::Listener class directly. */
 typedef Slider::Listener SliderListener;
+
+} // namespace juce

@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 CriticalSection::CriticalSection() noexcept
 {
     pthread_mutexattr_t atts;
@@ -393,7 +396,11 @@ void File::getFileTimesInternal (int64& modificationTime, int64& accessTime, int
     {
         modificationTime  = (int64) info.st_mtime * 1000;
         accessTime        = (int64) info.st_atime * 1000;
+       #if (JUCE_MAC && MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5) || JUCE_IOS
+        creationTime      = (int64) info.st_birthtime * 1000;
+       #else
         creationTime      = (int64) info.st_ctime * 1000;
+       #endif
     }
 }
 
@@ -554,23 +561,13 @@ ssize_t FileOutputStream::writeInternal (const void* const data, const size_t nu
     return result;
 }
 
+#ifndef JUCE_ANDROID
 void FileOutputStream::flushInternal()
 {
-    if (fileHandle != 0)
-    {
-        if (fsync (getFD (fileHandle)) == -1)
-            status = getResultForErrno();
-
-       #if JUCE_ANDROID
-        // This stuff tells the OS to asynchronously update the metadata
-        // that the OS has cached aboud the file - this metadata is used
-        // when the device is acting as a USB drive, and unless it's explicitly
-        // refreshed, it'll get out of step with the real file.
-        const LocalRef<jstring> t (javaString (file.getFullPathName()));
-        android.activity.callVoidMethod (JuceAppActivity.scanFile, t.get());
-       #endif
-    }
+    if (fileHandle != 0 && fsync (getFD (fileHandle)) == -1)
+        status = getResultForErrno();
 }
+#endif
 
 Result FileOutputStream::truncate()
 {
@@ -1503,3 +1500,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (Pimpl)
 };
+
+} // namespace juce

@@ -41,16 +41,12 @@
 // set it then by default we'll just create a simple one as below.
 #if ! JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP
 
-extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
+extern juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter();
+
+#include "juce_StandaloneFilterWindow.h"
 
 namespace juce
 {
-   #if JucePlugin_Enable_IAA && JUCE_IOS
-    #include "../../juce_audio_devices/native/juce_ios_Audio.h"
-   #endif
-
-    #include "juce_StandaloneFilterWindow.h"
-}
 
 //==============================================================================
 class StandaloneFilterApp  : public JUCEApplication
@@ -116,7 +112,16 @@ public:
     //==============================================================================
     void systemRequestedQuit() override
     {
-        quit();
+        if (ModalComponentManager::getInstance()->cancelAllModalComponents())
+        {
+            Timer::callAfterDelay (100, []()
+            {
+                if (auto app = JUCEApplicationBase::getInstance())
+                    app->systemRequestedQuit();
+            });
+        }
+        else
+            quit();
     }
 
 protected:
@@ -150,5 +155,7 @@ Image JUCE_CALLTYPE juce_getIAAHostIcon (int size)
 }
 #endif
 #endif
+
+} // namespace juce
 
 #endif

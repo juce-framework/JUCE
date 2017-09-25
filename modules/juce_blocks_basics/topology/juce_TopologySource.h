@@ -20,6 +20,8 @@
   ==============================================================================
 */
 
+namespace juce
+{
 
 /** Base class for an entity that provides access to a blocks topology. */
 class TopologySource
@@ -49,3 +51,5 @@ protected:
     //==========================================================================
     juce::ListenerList<Listener> listeners;
 };
+
+} // namespace juce

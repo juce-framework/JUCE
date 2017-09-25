@@ -33,21 +33,26 @@ public:
         registerColour (ToggleButton::textColourId, "text colour", "txtcol");
     }
 
-    Component* createNewComponent (JucerDocument*)
+    Component* createNewComponent (JucerDocument*) override
     {
         return new ToggleButton ("new toggle button");
     }
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
+    void getEditableProperties (Component* component, JucerDocument& document,
+                                Array<PropertyComponent*>& props, bool multipleSelected) override
     {
-        ButtonHandler::getEditableProperties (component, document, props);
+        ButtonHandler::getEditableProperties (component, document, props, multipleSelected);
 
-        props.add (new ToggleButtonStateProperty ((ToggleButton*) component, document));
+        if (multipleSelected)
+            return;
+
+        if (auto* tb = dynamic_cast<ToggleButton*> (component))
+            props.add (new ToggleButtonStateProperty (tb, document));
 
         addColourProperties (component, document, props);
     }
 
-    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
+    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout) override
     {
         ToggleButton* tb = (ToggleButton*) comp;
 
@@ -57,7 +62,7 @@ public:
         return e;
     }
 
-    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout)
+    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout) override
     {
         ToggleButton* const tb = (ToggleButton*) comp;
 
@@ -68,7 +73,7 @@ public:
         return true;
     }
 
-    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
+    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName) override
     {
         ButtonHandler::fillInCreationCode (code, component, memberVariableName);
 

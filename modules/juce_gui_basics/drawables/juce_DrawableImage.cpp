@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 DrawableImage::DrawableImage()
     : opacity (1.0f),
       overlayColour (0x00000000)
@@ -295,3 +298,5 @@ Path DrawableImage::getOutlineAsPath() const
 {
     return {}; // not applicable for images
 }
+
+} // namespace juce

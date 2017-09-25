@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -249,3 +250,5 @@ template <typename Type>
 void deleteAndZero (ScopedPointer<Type>&)  { static_assert (sizeof (Type) == 12345,
                                                             "Attempt to call deleteAndZero() on a ScopedPointer"); }
 #endif
+
+} // namespace juce

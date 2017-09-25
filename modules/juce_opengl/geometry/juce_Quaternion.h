@@ -24,10 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
-#include "juce_Vector3D.h"
-#include "juce_Matrix3D.h"
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -95,3 +93,5 @@ public:
     /** The scalar part of the quaternion. */
     Type scalar;
 };
+
+} // namespace juce

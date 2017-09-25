@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class MouseInputSourceInternal   : private AsyncUpdater
 {
 public:
@@ -84,13 +87,17 @@ public:
         return nullptr;
     }
 
-    Point<float> getScreenPosition() const
+    Point<float> getScreenPosition() const noexcept
     {
         // This needs to return the live position if possible, but it mustn't update the lastScreenPos
         // value, because that can cause continuity problems.
-        return ScalingHelpers::unscaledScreenPosToScaled
-                    (unboundedMouseOffset + (inputType != MouseInputSource::InputSourceType::touch ? MouseInputSource::getCurrentRawMousePosition()
-                                                                                                   : lastScreenPos));
+        return ScalingHelpers::unscaledScreenPosToScaled (getRawScreenPosition());
+    }
+
+    Point<float> getRawScreenPosition() const noexcept
+    {
+        return unboundedMouseOffset + (inputType != MouseInputSource::InputSourceType::touch ? MouseInputSource::getCurrentRawMousePosition()
+                                                                                             : lastScreenPos);
     }
 
     void setScreenPosition (Point<float> p)
@@ -578,6 +585,7 @@ bool MouseInputSource::hasMouseWheel() const noexcept                           
 int MouseInputSource::getIndex() const noexcept                                 { return pimpl->index; }
 bool MouseInputSource::isDragging() const noexcept                              { return pimpl->isDragging(); }
 Point<float> MouseInputSource::getScreenPosition() const noexcept               { return pimpl->getScreenPosition(); }
+Point<float> MouseInputSource::getRawScreenPosition() const noexcept            { return pimpl->getRawScreenPosition();  }
 ModifierKeys MouseInputSource::getCurrentModifiers() const noexcept             { return pimpl->getCurrentModifiers(); }
 float MouseInputSource::getCurrentPressure() const noexcept                     { return pimpl->pressure; }
 bool MouseInputSource::isPressureValid() const noexcept                         { return pimpl->isPressureValid(); }
@@ -730,7 +738,7 @@ struct MouseInputSource::SourceList  : public Timer
             // because on some OSes the queue can get overloaded with messages so that mouse-events don't get through..
             if (s->isDragging() && ModifierKeys::getCurrentModifiersRealtime().isAnyMouseButtonDown())
             {
-                s->lastScreenPos = s->getScreenPosition();
+                s->lastScreenPos = s->getRawScreenPosition();
                 s->triggerFakeMove();
                 anyDragging = true;
             }
@@ -743,3 +751,5 @@ struct MouseInputSource::SourceList  : public Timer
     OwnedArray<MouseInputSourceInternal> sources;
     Array<MouseInputSource> sourceArray;
 };
+
+} // namespace juce

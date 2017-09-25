@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace
 {
     void checkAndLimitZoneParameters (int minValue,
@@ -312,3 +315,5 @@ private:
 static MPEZoneTests MPEZoneUnitTests;
 
 #endif // JUCE_UNIT_TESTS
+
+} // namespace juce

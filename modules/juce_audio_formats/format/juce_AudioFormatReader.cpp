@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 AudioFormatReader::AudioFormatReader (InputStream* const in, const String& name)
     : sampleRate (0),
       bitsPerSample (0),
@@ -262,8 +265,8 @@ int64 AudioFormatReader::searchForLevel (int64 startSample,
     HeapBlock<int> tempSpace (bufferSize * 2 + 64);
 
     int* tempBuffer[3];
-    tempBuffer[0] = tempSpace.getData();
-    tempBuffer[1] = tempSpace.getData() + bufferSize;
+    tempBuffer[0] = tempSpace.get();
+    tempBuffer[1] = tempSpace.get() + bufferSize;
     tempBuffer[2] = 0;
 
     int consecutive = 0;
@@ -419,3 +422,5 @@ void MemoryMappedAudioFormatReader::touchSample (int64 sample) const noexcept
     else
         jassertfalse; // you must make sure that the window contains all the samples you're going to attempt to read.
 }
+
+} // namespace juce

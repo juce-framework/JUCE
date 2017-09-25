@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 JUCEApplication::JUCEApplication() {}
 JUCEApplication::~JUCEApplication() {}
 
@@ -98,3 +101,5 @@ bool JUCEApplication::initialiseApp()
 
     return false;
 }
+
+} // namespace juce

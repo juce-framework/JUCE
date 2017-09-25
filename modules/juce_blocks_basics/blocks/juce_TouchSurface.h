@@ -20,6 +20,8 @@
   ==============================================================================
 */
 
+namespace juce
+{
 
 /**
     Represents the touch surface of a BLOCKS device.
@@ -129,3 +131,5 @@ protected:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TouchSurface)
 };
+
+} // namespace juce

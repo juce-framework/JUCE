@@ -38,7 +38,8 @@
 
 // BEGIN SECTION A
 
-#pragma once
+namespace juce
+{
 
 /**
     The standard JUCE splash screen component.
@@ -70,3 +71,5 @@ private:
 };
 
 // END SECTION A
+
+} // namespace juce

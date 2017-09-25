@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class FileChooserDialogBox::ContentComponent  : public Component
 {
 public:
@@ -269,3 +272,5 @@ void FileChooserDialogBox::createNewFolderConfirmed (const String& nameFromDialo
         content->chooserComponent.refresh();
     }
 }
+
+} // namespace juce

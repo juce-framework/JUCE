@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 int64 juce_fileSetPosition (void* handle, int64 pos);
 
 
@@ -76,3 +79,5 @@ bool FileInputStream::setPosition (int64 pos)
 
     return currentPosition == pos;
 }
+
+} // namespace juce

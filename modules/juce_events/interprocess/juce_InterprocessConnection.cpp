@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct InterprocessConnection::ConnectionThread  : public Thread
 {
     ConnectionThread (InterprocessConnection& c)  : Thread ("JUCE IPC"), owner (c) {}
@@ -361,3 +364,5 @@ void InterprocessConnection::runThread()
             break;
     }
 }
+
+} // namespace juce

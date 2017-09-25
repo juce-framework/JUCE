@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 MPESynthesiserVoice::MPESynthesiserVoice()
     : currentSampleRate (0), noteStartTime (0)
 {
@@ -49,3 +52,5 @@ void MPESynthesiserVoice::clearCurrentNote() noexcept
 {
     currentlyPlayingNote = MPENote();
 }
+
+} // namespace juce

@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -358,12 +358,12 @@ public:
     int indexOf (ParameterType elementToLookFor) const
     {
         const ScopedLockType lock (getLock());
-        const ElementType* e = data.elements.getData();
+        const ElementType* e = data.elements.get();
         const ElementType* const end_ = e + numUsed;
 
         for (; e != end_; ++e)
             if (elementToLookFor == *e)
-                return static_cast<int> (e - data.elements.getData());
+                return static_cast<int> (e - data.elements.get());
 
         return -1;
     }
@@ -376,7 +376,7 @@ public:
     bool contains (ParameterType elementToLookFor) const
     {
         const ScopedLockType lock (getLock());
-        const ElementType* e = data.elements.getData();
+        const ElementType* e = data.elements.get();
         const ElementType* const end_ = e + numUsed;
 
         for (; e != end_; ++e)
@@ -719,8 +719,8 @@ public:
     void resize (const int targetNumItems)
     {
         jassert (targetNumItems >= 0);
+        auto numToAdd = targetNumItems - numUsed;
 
-        const int numToAdd = targetNumItems - numUsed;
         if (numToAdd > 0)
             insertMultiple (numUsed, ElementType(), numToAdd);
         else if (numToAdd < 0)
@@ -743,7 +743,7 @@ public:
     int addSorted (ElementComparator& comparator, ParameterType newElement)
     {
         const ScopedLockType lock (getLock());
-        const int index = findInsertIndexInSortedArray (comparator, data.elements.getData(), newElement, 0, numUsed);
+        auto index = findInsertIndexInSortedArray (comparator, data.elements.get(), newElement, 0, numUsed);
         insert (index, newElement);
         return index;
     }
@@ -1197,7 +1197,7 @@ public:
         const ScopedLockType lock (getLock());
         ignoreUnused (comparator); // if you pass in an object with a static compareElements() method, this
                                    // avoids getting warning messages about the parameter being unused
-        sortArray (comparator, data.elements.getData(), 0, size() - 1, retainOrderOfEquivalentItems);
+        sortArray (comparator, data.elements.get(), 0, size() - 1, retainOrderOfEquivalentItems);
     }
 
     //==============================================================================
@@ -1265,3 +1265,5 @@ private:
         addAssumingCapacityIsReady (otherElements...);
     }
 };
+
+} // namespace juce

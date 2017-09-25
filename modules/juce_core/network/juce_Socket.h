@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -74,7 +74,8 @@ public:
 
         This is useful if you need to know to which port the OS has actually bound your
         socket when calling the constructor or bindToPort with zero as the
-        localPortNumber argument. Returns -1 if the function fails. */
+        localPortNumber argument. Returns -1 if the function fails.
+    */
     int getBoundPort() const noexcept;
 
     /** Tries to connect the socket to hostname:port.
@@ -348,3 +349,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DatagramSocket)
 };
+
+} // namespace juce

@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -44,8 +44,8 @@
 */
 class JUCE_API  ComboBox  : public Component,
                             public SettableTooltipClient,
-                            public LabelListener,  // (can't use Label::Listener due to idiotic VC2005 bug)
-                            public ValueListener,
+                            public Label::Listener,
+                            public Value::Listener,
                             private AsyncUpdater
 {
 public:
@@ -448,3 +448,5 @@ private:
 
 /** This typedef is just for compatibility with old code - newer code should use the ComboBox::Listener class directly. */
 typedef ComboBox::Listener ComboBoxListener;
+
+} // namespace juce

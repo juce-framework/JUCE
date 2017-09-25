@@ -20,6 +20,8 @@
   ==============================================================================
 */
 
+namespace juce
+{
 
 /**
     Utility class to hold a list of TouchSurface::Touch objects with different
@@ -137,3 +139,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TouchList)
 };
+
+} // namespace juce

@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -243,6 +243,8 @@ public:
     /** If this variant is an object, this returns one of its properties, or a default
         fallback value if the property is not set. */
     var getProperty (const Identifier& propertyName, const var& defaultReturnValue) const;
+    /** Returns true if this variant is an object and if it has the given property. */
+    bool hasProperty (const Identifier& propertyName) const noexcept;
 
     /** Invokes a named method call with no arguments. */
     var call (const Identifier& method) const;
@@ -334,3 +336,5 @@ struct VariantConverter<String>
     static String fromVar (const var& v)           { return v.toString(); }
     static var toVar (const String& s)             { return s; }
 };
+
+} // namespace juce

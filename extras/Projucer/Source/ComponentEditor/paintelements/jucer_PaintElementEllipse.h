@@ -38,7 +38,7 @@ public:
     {
     }
 
-    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle<int>& parentArea)
+    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle<int>& parentArea) override
     {
         fillType.setFillType (g, getDocument(), parentArea);
 
@@ -54,13 +54,13 @@ public:
         }
     }
 
-    void getEditableProperties (Array<PropertyComponent*>& props)
+    void getEditableProperties (Array<PropertyComponent*>& props, bool multipleSelected) override
     {
-        ColouredElement::getEditableProperties (props);
+        ColouredElement::getEditableProperties (props, multipleSelected);
         props.add (new ShapeToPathProperty (this));
     }
 
-    void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode)
+    void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode) override
     {
         if (fillType.isInvisible() && (strokeType.isInvisible() || ! isStrokePresent))
             return;
@@ -101,7 +101,7 @@ public:
         paintMethodCode += s;
     }
 
-    void applyCustomPaintSnippets (StringArray& snippets)
+    void applyCustomPaintSnippets (StringArray& snippets) override
     {
         customPaintCode.clear();
 
@@ -114,7 +114,7 @@ public:
 
     static const char* getTagName() noexcept        { return "ELLIPSE"; }
 
-    XmlElement* createXml() const
+    XmlElement* createXml() const override
     {
         XmlElement* e = new XmlElement (getTagName());
         position.applyToXml (*e);
@@ -123,7 +123,7 @@ public:
         return e;
     }
 
-    bool loadFromXml (const XmlElement& xml)
+    bool loadFromXml (const XmlElement& xml) override
     {
         if (xml.hasTagName (getTagName()))
         {

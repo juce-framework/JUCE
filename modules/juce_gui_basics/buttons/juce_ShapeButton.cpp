@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ShapeButton::ShapeButton (const String& t, Colour n, Colour o, Colour d)
   : Button (t),
     normalColour   (n), overColour   (o), downColour   (d),
@@ -129,3 +132,5 @@ void ShapeButton::paintButton (Graphics& g, bool isMouseOverButton, bool isButto
         g.strokePath (shape, PathStrokeType (outlineWidth), trans);
     }
 }
+
+} // namespace juce

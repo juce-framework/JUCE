@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 AudioChannelSet::AudioChannelSet (uint32 c) : channels (c) {}
 AudioChannelSet::AudioChannelSet (const Array<ChannelType>& c)
 {
@@ -414,3 +417,5 @@ int32 AudioChannelSet::getWaveChannelMask() const noexcept
 
     return (channels.toInteger() >> 1);
 }
+
+} // namespace juce

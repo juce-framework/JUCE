@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 /**
     This class contains a ValueTree which is used to manage an AudioProcessor's entire state.
@@ -66,16 +67,20 @@ public:
         Calling this will create and add a special type of AudioProcessorParameter to the
         AudioProcessor to which this state is attached.
 
-        @param parameterID          A unique string ID for the new parameter
-        @param parameterName        The name that the parameter will return from AudioProcessorParameter::getName()
-        @param labelText            The label that the parameter will return from AudioProcessorParameter::getLabel()
-        @param valueRange           A mapping that will be used to determine the value range which this parameter uses
-        @param defaultValue         A default value for the parameter (in non-normalised units)
-        @param valueToTextFunction  A function that will convert a non-normalised value to a string for the
-                                    AudioProcessorParameter::getText() method. This can be nullptr to use the
-                                    default implementation
-        @param textToValueFunction  The inverse of valueToTextFunction
-        @param isMetaParameter      Set this value to true if this should be a meta parameter
+        @param parameterID              A unique string ID for the new parameter
+        @param parameterName            The name that the parameter will return from AudioProcessorParameter::getName()
+        @param labelText                The label that the parameter will return from AudioProcessorParameter::getLabel()
+        @param valueRange               A mapping that will be used to determine the value range which this parameter uses
+        @param defaultValue             A default value for the parameter (in non-normalised units)
+        @param valueToTextFunction      A function that will convert a non-normalised value to a string for the
+                                        AudioProcessorParameter::getText() method. This can be nullptr to use the
+                                        default implementation
+        @param textToValueFunction      The inverse of valueToTextFunction
+        @param isMetaParameter          Set this value to true if this should be a meta parameter
+        @param isAutomatableParameter   Set this value to false if this parameter should not be automatable
+        @param isDiscrete               Set this value to true to make this parameter take discrete values in a host.
+                                        @see AudioProcessorParameter::isDiscrete
+
         @returns the parameter object that was created
     */
     AudioProcessorParameterWithID* createAndAddParameter (const String& parameterID,
@@ -85,7 +90,9 @@ public:
                                                           float defaultValue,
                                                           std::function<String (float)> valueToTextFunction,
                                                           std::function<float (const String&)> textToValueFunction,
-                                                          bool isMetaParameter = false);
+                                                          bool isMetaParameter = false,
+                                                          bool isAutomatableParameter = true,
+                                                          bool isDiscrete = false);
 
     /** Returns a parameter by its ID string. */
     AudioProcessorParameterWithID* getParameter (StringRef parameterID) const noexcept;
@@ -227,3 +234,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorValueTreeState)
 };
+
+} // namespace juce

@@ -24,7 +24,9 @@
   ==============================================================================
 */
 
-//==============================================================================
+namespace juce
+{
+
 class SystemTrayIconComponent::Pimpl
 {
 public:
@@ -143,3 +145,5 @@ void* SystemTrayIconComponent::getNativeHandle() const
 {
     return getWindowHandle();
 }
+
+} // namespace juce

@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 #if JUCE_ENABLE_LIVE_CONSTANT_EDITOR && ! DOXYGEN
 
@@ -107,7 +108,7 @@ namespace LiveConstantEditor
     //==============================================================================
     struct JUCE_API  LivePropertyEditorBase  : public Component,
                                                private TextEditor::Listener,
-                                               private ButtonListener
+                                               private Button::Listener
     {
         LivePropertyEditorBase (LiveValueBase&, CodeDocument&);
 
@@ -309,3 +310,5 @@ namespace LiveConstantEditor
  #define JUCE_LIVE_CONSTANT(initialValue) \
     (initialValue)
 #endif
+
+} // namespace juce

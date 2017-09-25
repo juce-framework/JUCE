@@ -31,12 +31,12 @@ public:
         : ComponentTypeHandler ("Combo Box", "ComboBox", typeid (ComboBox), 150, 24)
     {}
 
-    Component* createNewComponent (JucerDocument*)
+    Component* createNewComponent (JucerDocument*) override
     {
         return new ComboBox ("new combo box");
     }
 
-    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
+    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout) override
     {
         ComboBox* const c = dynamic_cast<ComboBox*> (comp);
         jassert (c != nullptr);
@@ -52,7 +52,7 @@ public:
         return e;
     }
 
-    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout)
+    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout) override
     {
         if (! ComponentTypeHandler::restoreFromXml (xml, comp, layout))
             return false;
@@ -73,26 +73,30 @@ public:
         return true;
     }
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
+    void getEditableProperties (Component* component, JucerDocument& document,
+                                Array<PropertyComponent*>& props, bool multipleSelected) override
     {
-        ComponentTypeHandler::getEditableProperties (component, document, props);
+        ComponentTypeHandler::getEditableProperties (component, document, props, multipleSelected);
 
-        ComboBox* const c = dynamic_cast<ComboBox*> (component);
-        jassert (c != nullptr);
+        if (multipleSelected)
+            return;
 
-        props.add (new ComboItemsProperty (c, document));
-        props.add (new ComboEditableProperty (c, document));
-        props.add (new ComboJustificationProperty (c, document));
-        props.add (new ComboTextWhenNoneSelectedProperty (c, document));
-        props.add (new ComboTextWhenNoItemsProperty (c, document));
+        if (auto* c = dynamic_cast<ComboBox*> (component))
+        {
+            props.add (new ComboItemsProperty (c, document));
+            props.add (new ComboEditableProperty (c, document));
+            props.add (new ComboJustificationProperty (c, document));
+            props.add (new ComboTextWhenNoneSelectedProperty (c, document));
+            props.add (new ComboTextWhenNoItemsProperty (c, document));
+        }
     }
 
-    String getCreationParameters (GeneratedCode&, Component* component)
+    String getCreationParameters (GeneratedCode&, Component* component) override
     {
         return quotedString (component->getName(), false);
     }
 
-    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
+    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName) override
     {
         ComponentTypeHandler::fillInCreationCode (code, component, memberVariableName);
 
@@ -126,13 +130,13 @@ public:
         code.constructorCode += s;
     }
 
-    void fillInGeneratedCode (Component* component, GeneratedCode& code)
+    void fillInGeneratedCode (Component* component, GeneratedCode& code) override
     {
         ComponentTypeHandler::fillInGeneratedCode (component, code);
 
         if (needsCallback (component))
         {
-            String& callback = code.getCallbackCode ("public ComboBoxListener",
+            String& callback = code.getCallbackCode ("public ComboBox::Listener",
                                                      "void",
                                                      "comboBoxChanged (ComboBox* comboBoxThatHasChanged)",
                                                      true);

@@ -38,17 +38,17 @@ public:
     {
     }
 
-    Rectangle<int> getCurrentBounds (const Rectangle<int>& parentArea) const
+    Rectangle<int> getCurrentBounds (const Rectangle<int>& parentArea) const override
     {
         return PaintElement::getCurrentBounds (parentArea); // bypass the ColouredElement implementation
     }
 
-    void setCurrentBounds (const Rectangle<int>& newBounds, const Rectangle<int>& parentArea, const bool undoable)
+    void setCurrentBounds (const Rectangle<int>& newBounds, const Rectangle<int>& parentArea, const bool undoable) override
     {
         PaintElement::setCurrentBounds (newBounds, parentArea, undoable); // bypass the ColouredElement implementation
     }
 
-    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle<int>& parentArea)
+    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle<int>& parentArea) override
     {
         Component tempParentComp;
         tempParentComp.setBounds (parentArea);
@@ -67,14 +67,14 @@ public:
         }
     }
 
-    void getEditableProperties (Array <PropertyComponent*>& props)
+    void getEditableProperties (Array <PropertyComponent*>& props, bool multipleSelected) override
     {
-        ColouredElement::getEditableProperties (props);
+        ColouredElement::getEditableProperties (props, multipleSelected);
 
         props.add (new ShapeToPathProperty (this));
     }
 
-    void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode)
+    void fillInGeneratedCode (GeneratedCode& code, String& paintMethodCode) override
     {
         if (fillType.isInvisible() && (strokeType.isInvisible() || ! isStrokePresent))
             return;
@@ -114,7 +114,7 @@ public:
         paintMethodCode += s;
     }
 
-    void applyCustomPaintSnippets (StringArray& snippets)
+    void applyCustomPaintSnippets (StringArray& snippets) override
     {
         customPaintCode.clear();
 
@@ -127,7 +127,7 @@ public:
 
     static const char* getTagName() noexcept        { return "RECT"; }
 
-    XmlElement* createXml() const
+    XmlElement* createXml() const override
     {
         XmlElement* e = new XmlElement (getTagName());
         position.applyToXml (*e);
@@ -137,7 +137,7 @@ public:
         return e;
     }
 
-    bool loadFromXml (const XmlElement& xml)
+    bool loadFromXml (const XmlElement& xml) override
     {
         if (xml.hasTagName (getTagName()))
         {

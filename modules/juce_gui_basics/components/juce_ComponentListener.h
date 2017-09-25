@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -107,3 +107,5 @@ public:
     */
     virtual void componentBeingDeleted (Component& component);
 };
+
+} // namespace juce

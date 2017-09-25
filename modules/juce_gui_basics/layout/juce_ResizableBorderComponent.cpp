@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ResizableBorderComponent::Zone::Zone() noexcept
     : zone (0)
 {}
@@ -201,3 +204,5 @@ void ResizableBorderComponent::updateMouseZone (const MouseEvent& e)
         setMouseCursor (newZone.getMouseCursor());
     }
 }
+
+} // namespace juce

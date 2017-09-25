@@ -38,12 +38,12 @@ public:
         registerColour (TextEditor::highlightColourId, "highlight", "hiliteCol");
     }
 
-    Component* createNewComponent (JucerDocument*)
+    Component* createNewComponent (JucerDocument*) override
     {
         return new Label ("new label", "label text");
     }
 
-    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout)
+    XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout) override
     {
         Label* const l = dynamic_cast<Label*> (comp);
 
@@ -68,7 +68,7 @@ public:
         return e;
     }
 
-    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout)
+    bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout) override
     {
         Label* const l = dynamic_cast<Label*> (comp);
 
@@ -109,7 +109,7 @@ public:
         label->setFont (f);
     }
 
-    String getCreationParameters (GeneratedCode& code, Component* component)
+    String getCreationParameters (GeneratedCode& code, Component* component) override
     {
         Label* const l = dynamic_cast<Label*> (component);
 
@@ -118,7 +118,7 @@ public:
                  + quotedString (l->getText(), code.shouldUseTransMacro());
     }
 
-    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
+    void fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName) override
     {
         ComponentTypeHandler::fillInCreationCode (code, component, memberVariableName);
 
@@ -146,13 +146,13 @@ public:
         code.constructorCode += s;
     }
 
-    void fillInGeneratedCode (Component* component, GeneratedCode& code)
+    void fillInGeneratedCode (Component* component, GeneratedCode& code) override
     {
         ComponentTypeHandler::fillInGeneratedCode (component, code);
 
         if (needsCallback (component))
         {
-            String& callback = code.getCallbackCode ("public LabelListener",
+            String& callback = code.getCallbackCode ("public Label::Listener",
                                                      "void",
                                                      "labelTextChanged (Label* labelThatHasChanged)",
                                                      true);
@@ -169,24 +169,30 @@ public:
         }
     }
 
-    void getEditableProperties (Component* component, JucerDocument& document, Array<PropertyComponent*>& props)
+    void getEditableProperties (Component* component, JucerDocument& document,
+                                Array<PropertyComponent*>& props, bool multipleSelected) override
     {
-        ComponentTypeHandler::getEditableProperties (component, document, props);
+        ComponentTypeHandler::getEditableProperties (component, document, props, multipleSelected);
 
-        Label* const l = dynamic_cast<Label*> (component);
-        props.add (new LabelTextProperty          (l, document));
-        props.add (new LabelJustificationProperty (l, document));
-        props.add (new FontNameProperty           (l, document));
-        props.add (new FontStyleProperty          (l, document));
-        props.add (new FontSizeProperty           (l, document));
-        props.add (new FontKerningProperty        (l, document));
+        if (multipleSelected)
+            return;
+
+        if (auto* const l = dynamic_cast<Label*> (component))
+        {
+            props.add (new LabelTextProperty          (l, document));
+            props.add (new LabelJustificationProperty (l, document));
+            props.add (new FontNameProperty           (l, document));
+            props.add (new FontStyleProperty          (l, document));
+            props.add (new FontSizeProperty           (l, document));
+            props.add (new FontKerningProperty        (l, document));
+
+            props.add (new LabelEditableProperty (l, document));
+
+            if (l->isEditableOnDoubleClick() || l->isEditableOnSingleClick())
+                props.add (new LabelLossOfFocusProperty (l, document));
+        }
 
         addColourProperties (component, document, props);
-
-        props.add (new LabelEditableProperty (l, document));
-
-        if (l->isEditableOnDoubleClick() || l->isEditableOnSingleClick())
-            props.add (new LabelLossOfFocusProperty (l, document));
     }
 
     static bool needsCallback (Component* label)

@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 #if JUCE_SUPPORT_CARBON && JUCE_MAC_WINDOW_VISIBITY_BODGE
@@ -76,3 +77,5 @@ inline void removeWindowHidingHooks (Component* comp)
  inline void attachWindowHidingHooks (void*, void*, void*) {}
  inline void removeWindowHidingHooks (void*) {}
 #endif
+
+} // namespace juce

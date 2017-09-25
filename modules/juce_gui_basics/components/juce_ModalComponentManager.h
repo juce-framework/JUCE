@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -370,3 +370,5 @@ private:
     ~ModalCallbackFunction();
     JUCE_DECLARE_NON_COPYABLE (ModalCallbackFunction)
 };
+
+} // namespace juce

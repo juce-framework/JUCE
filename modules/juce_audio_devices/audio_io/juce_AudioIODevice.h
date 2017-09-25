@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 class AudioIODevice;
 
@@ -301,3 +302,5 @@ protected:
     /** @internal */
     String name, typeName;
 };
+
+} // namespace juce

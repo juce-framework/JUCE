@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 class ThreadPool;
 class ThreadPoolThread;
@@ -123,8 +124,8 @@ private:
     friend class ThreadPool;
     friend class ThreadPoolThread;
     String jobName;
-    ThreadPool* pool;
-    bool shouldStop, isActive, shouldBeDeleted;
+    ThreadPool* pool = nullptr;
+    bool shouldStop = false, isActive = false, shouldBeDeleted = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPoolJob)
 };
@@ -207,6 +208,16 @@ public:
     void addJob (ThreadPoolJob* job,
                  bool deleteJobWhenFinished);
 
+    /** Adds a lambda function to be called as a job.
+        This will create an internal ThreadPoolJob object to encapsulate and call the lambda.
+    */
+    void addJob (std::function<ThreadPoolJob::JobStatus()> job);
+
+    /** Adds a lambda function to be called as a job.
+        This will create an internal ThreadPoolJob object to encapsulate and call the lambda.
+    */
+    void addJob (std::function<void()> job);
+
     /** Tries to remove a job from the pool.
 
         If the job isn't yet running, this will simply remove it. If it is running, it
@@ -244,27 +255,26 @@ public:
                         JobSelector* selectedJobsToRemove = nullptr);
 
     /** Returns the number of jobs currently running or queued. */
-    int getNumJobs() const;
+    int getNumJobs() const noexcept;
 
     /** Returns the number of threads assigned to this thread pool. */
-    int getNumThreads() const;
+    int getNumThreads() const noexcept;
 
     /** Returns one of the jobs in the queue.
 
         Note that this can be a very volatile list as jobs might be continuously getting shifted
         around in the list, and this method may return nullptr if the index is currently out-of-range.
     */
-    ThreadPoolJob* getJob (int index) const;
+    ThreadPoolJob* getJob (int index) const noexcept;
 
     /** Returns true if the given job is currently queued or running.
 
         @see isJobRunning()
     */
-    bool contains (const ThreadPoolJob* job) const;
+    bool contains (const ThreadPoolJob* job) const noexcept;
 
-    /** Returns true if the given job is currently being run by a thread.
-    */
-    bool isJobRunning (const ThreadPoolJob* job) const;
+    /** Returns true if the given job is currently being run by a thread. */
+    bool isJobRunning (const ThreadPoolJob* job) const noexcept;
 
     /** Waits until a job has finished running and has been removed from the pool.
 
@@ -277,13 +287,17 @@ public:
     bool waitForJobToFinish (const ThreadPoolJob* job,
                              int timeOutMilliseconds) const;
 
+    /** If the given job is in the queue, this will move it to the front so that it
+        is the next one to be executed.
+    */
+    void moveJobToFront (const ThreadPoolJob* jobToMove) noexcept;
+
     /** Returns a list of the names of all the jobs currently running or queued.
         If onlyReturnActiveJobs is true, only the ones currently running are returned.
     */
     StringArray getNamesOfAllJobs (bool onlyReturnActiveJobs) const;
 
     /** Changes the priority of all the threads.
-
         This will call Thread::setPriority() for each thread in the pool.
         May return false if for some reason the priority can't be changed.
     */
@@ -292,7 +306,7 @@ public:
 
 private:
     //==============================================================================
-    Array <ThreadPoolJob*> jobs;
+    Array<ThreadPoolJob*> jobs;
 
     class ThreadPoolThread;
     friend class ThreadPoolJob;
@@ -315,3 +329,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadPool)
 };
+
+} // namespace juce

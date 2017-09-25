@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 HyperlinkButton::HyperlinkButton (const String& linkText,
                                   const URL& linkURL)
    : Button (linkText),
@@ -109,3 +112,5 @@ void HyperlinkButton::paintButton (Graphics& g,
                 justification.getOnlyHorizontalFlags() | Justification::verticallyCentred,
                 true);
 }
+
+} // namespace juce

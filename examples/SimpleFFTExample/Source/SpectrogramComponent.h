@@ -29,7 +29,7 @@ class SpectrogramComponent   : public AudioAppComponent,
 {
 public:
     SpectrogramComponent()
-        : forwardFFT (fftOrder, false),
+        : forwardFFT (fftOrder),
           spectrogramImage (Image::RGB, 512, 512, true),
           fifoIndex (0),
           nextFFTBlockReady (false)
@@ -124,7 +124,7 @@ public:
         {
             const float skewedProportionY = 1.0f - std::exp (std::log (y / (float) imageHeight) * 0.2f);
             const int fftDataIndex = jlimit (0, fftSize / 2, (int) (skewedProportionY * fftSize / 2));
-            const float level = jmap (fftData[fftDataIndex], 0.0f, maxLevel.getEnd(), 0.0f, 1.0f);
+            const float level = jmap (fftData[fftDataIndex], 0.0f, jmax (maxLevel.getEnd(), 1e-5f), 0.0f, 1.0f);
 
             spectrogramImage.setPixelAt (rightHandEdge, y, Colour::fromHSV (level, 1.0f, level, 1.0f));
         }
@@ -137,7 +137,7 @@ public:
     };
 
 private:
-    FFT forwardFFT;
+    dsp::FFT forwardFFT;
     Image spectrogramImage;
 
     float fifo [fftSize];

@@ -506,10 +506,12 @@ ColouredElement::~ColouredElement()
 }
 
 //==============================================================================
-void ColouredElement::getEditableProperties (Array <PropertyComponent*>& props)
+void ColouredElement::getEditableProperties (Array <PropertyComponent*>& props, bool multipleSelected)
 {
-    PaintElement::getEditableProperties (props);
-    getColourSpecificProperties (props);
+    PaintElement::getEditableProperties (props, multipleSelected);
+
+    if (! multipleSelected)
+        getColourSpecificProperties (props);
 }
 
 void ColouredElement::getColourSpecificProperties (Array <PropertyComponent*>& props)

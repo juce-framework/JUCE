@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -159,3 +159,5 @@ private:
     DrawableComposite& operator= (const DrawableComposite&);
     JUCE_LEAK_DETECTOR (DrawableComposite)
 };
+
+} // namespace juce

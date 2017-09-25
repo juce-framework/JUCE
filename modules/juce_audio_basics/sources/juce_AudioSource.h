@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -173,3 +173,5 @@ public:
     */
     virtual void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) = 0;
 };
+
+} // namespace juce

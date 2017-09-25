@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ResizableWindow::ResizableWindow (const String& name, bool shouldAddToDesktop)
     : TopLevelWindow (name, shouldAddToDesktop)
 {
@@ -644,3 +647,5 @@ void ResizableWindow::addAndMakeVisible (Component* const child, int zOrder)
     Component::addAndMakeVisible (child, zOrder);
 }
 #endif
+
+} // namespace juce

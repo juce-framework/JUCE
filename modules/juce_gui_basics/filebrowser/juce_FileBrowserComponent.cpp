@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 FileBrowserComponent::FileBrowserComponent (int flags_,
                                             const File& initialFileOrDirectory,
                                             const FileFilter* fileFilter_,
@@ -606,3 +609,5 @@ void FileBrowserComponent::timerCallback()
             refresh();
     }
 }
+
+} // namespace juce

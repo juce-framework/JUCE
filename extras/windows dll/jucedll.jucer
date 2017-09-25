@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="IvabE4" name="juce_dll" projectType="library" version="1.0.0"
-              juceLinkage="none" bundleIdentifier="com.roli.jucedll" jucerVersion="5.1.1"
+              juceLinkage="none" bundleIdentifier="com.roli.jucedll" jucerVersion="5.1.2"
               defines="JUCE_DLL_BUILD=1" includeBinaryInAppConfig="1" displaySplashScreen="0"
               reportAppUsage="0" splashScreenColour="Dark" companyName="ROLI Ltd."
               cppLanguageStandard="11">

@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 FileFilter::FileFilter (const String& filterDescription)
     : description (filterDescription)
 {
@@ -33,3 +36,5 @@ const String& FileFilter::getDescription() const noexcept
 {
     return description;
 }
+
+} // namespace juce

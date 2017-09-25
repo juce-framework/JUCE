@@ -24,14 +24,16 @@
   ==============================================================================
 */
 
-typedef void (*AppFocusChangeCallback)();
-extern AppFocusChangeCallback appFocusChangeCallback;
-typedef bool (*CheckEventBlockedByModalComps) (NSEvent*);
-extern CheckEventBlockedByModalComps isEventBlockedByModalComps;
+namespace juce
+{
+    typedef void (*AppFocusChangeCallback)();
+    extern AppFocusChangeCallback appFocusChangeCallback;
+    typedef bool (*CheckEventBlockedByModalComps) (NSEvent*);
+    extern CheckEventBlockedByModalComps isEventBlockedByModalComps;
+}
 
 //==============================================================================
 #if ! (defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7)
-} // (juce namespace)
 
 @interface NSEvent (JuceDeviceDelta)
  - (CGFloat) scrollingDeltaX;
@@ -40,8 +42,10 @@ extern CheckEventBlockedByModalComps isEventBlockedByModalComps;
  - (BOOL) isDirectionInvertedFromDevice;
 @end
 
-namespace juce {
 #endif
+
+namespace juce
+{
 
 //==============================================================================
 static CGFloat getMainScreenHeight() noexcept
@@ -2130,6 +2134,27 @@ const int KeyPress::F13Key          = NSF13FunctionKey;
 const int KeyPress::F14Key          = NSF14FunctionKey;
 const int KeyPress::F15Key          = NSF15FunctionKey;
 const int KeyPress::F16Key          = NSF16FunctionKey;
+const int KeyPress::F17Key          = NSF17FunctionKey;
+const int KeyPress::F18Key          = NSF18FunctionKey;
+const int KeyPress::F19Key          = NSF19FunctionKey;
+const int KeyPress::F20Key          = NSF20FunctionKey;
+const int KeyPress::F21Key          = NSF21FunctionKey;
+const int KeyPress::F22Key          = NSF22FunctionKey;
+const int KeyPress::F23Key          = NSF23FunctionKey;
+const int KeyPress::F24Key          = NSF24FunctionKey;
+const int KeyPress::F25Key          = NSF25FunctionKey;
+const int KeyPress::F26Key          = NSF26FunctionKey;
+const int KeyPress::F27Key          = NSF27FunctionKey;
+const int KeyPress::F28Key          = NSF28FunctionKey;
+const int KeyPress::F29Key          = NSF29FunctionKey;
+const int KeyPress::F30Key          = NSF30FunctionKey;
+const int KeyPress::F31Key          = NSF31FunctionKey;
+const int KeyPress::F32Key          = NSF32FunctionKey;
+const int KeyPress::F33Key          = NSF33FunctionKey;
+const int KeyPress::F34Key          = NSF34FunctionKey;
+const int KeyPress::F35Key          = NSF35FunctionKey;
+
+
 const int KeyPress::numberPad0      = 0x30020;
 const int KeyPress::numberPad1      = 0x30021;
 const int KeyPress::numberPad2      = 0x30022;
@@ -2152,3 +2177,5 @@ const int KeyPress::playKey         = 0x30000;
 const int KeyPress::stopKey         = 0x30001;
 const int KeyPress::fastForwardKey  = 0x30002;
 const int KeyPress::rewindKey       = 0x30003;
+
+} // namespace juce
