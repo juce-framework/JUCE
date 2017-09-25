@@ -37,7 +37,7 @@ public:
         projectCppStandardValue.referTo (project.getCppStandardValue());
         projectCppStandardValue.addListener (this);
 
-        info = project.getModules().getModuleInfo (moduleID);
+        moduleInfo = project.getModules().getModuleInfo (moduleID);
     }
 
     bool canBeSelected() const override       { return true; }
@@ -67,11 +67,11 @@ public:
 
         if (! isSelected())
         {
-            if (info.isValid() && info.getVendor() == "juce")
+            if (moduleInfo.isValid() && moduleInfo.getVendor() == "juce")
             {
-                if (info.getLicense() == "ISC")
+                if (moduleInfo.getLicense() == "ISC")
                     iconColour = Colours::lightblue;
-                else if (info.getLicense() == "GPL/Commercial")
+                else if (moduleInfo.getLicense() == "GPL/Commercial")
                     iconColour = Colours::orange;
             }
         }
@@ -96,7 +96,7 @@ public:
     String moduleID;
 
 private:
-    ModuleDescription info;
+    ModuleDescription moduleInfo;
     bool missingDependencies = false;
     bool cppStandardHigherThanProject = false;
     Value projectCppStandardValue;
@@ -265,8 +265,8 @@ private:
                 }
             }
 
-            if (auto* moduleInfo = dynamic_cast<ModuleInfoComponent*> (group.properties.getUnchecked (0)))
-                moduleInfo->refresh();
+            if (auto* infoComponent = dynamic_cast<ModuleInfoComponent*> (group.properties.getUnchecked (0)))
+                infoComponent->refresh();
         }
 
         //==============================================================================
