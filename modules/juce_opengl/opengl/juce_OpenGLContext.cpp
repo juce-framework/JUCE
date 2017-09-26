@@ -608,6 +608,7 @@ public:
     };
 
     //==============================================================================
+    friend class NativeContext;
     ScopedPointer<NativeContext> nativeContext;
 
     OpenGLContext& context;
@@ -1213,12 +1214,16 @@ void OpenGLContext::NativeContext::surfaceCreated (jobject holder)
 {
     ignoreUnused (holder);
 
-    if (juceContext != nullptr)
+    if (auto* cachedImage = CachedImage::get (component))
     {
-        if (OpenGLContext::CachedImage* cachedImage = juceContext->getCachedImage())
-            cachedImage->resume();
-
-        juceContext->triggerRepaint();
+        if (auto* pool = cachedImage->renderThread.get())
+        {
+            if (! pool->contains (cachedImage))
+            {
+                cachedImage->resume();
+                cachedImage->context.triggerRepaint();
+            }
+        }
     }
 }
 
@@ -1228,9 +1233,13 @@ void OpenGLContext::NativeContext::surfaceDestroyed (jobject holder)
 
     // unlike the name suggests this will be called just before the
     // surface is destroyed. We need to pause the render thread.
-    if (juceContext != nullptr)
-        if (OpenGLContext::CachedImage* cachedImage = juceContext->getCachedImage())
-            cachedImage->pause();
+    if (auto* cachedImage = CachedImage::get (component))
+    {
+        cachedImage->pause();
+
+        if (auto* threadPool = cachedImage->renderThread.get())
+            threadPool->waitForJobToFinish (cachedImage, -1);
+    }
 }
 #endif
 
