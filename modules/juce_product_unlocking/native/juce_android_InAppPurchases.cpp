@@ -203,6 +203,11 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
             android.activity.callVoidMethod (JuceAppActivity.startIntentSenderForResult, intentSender.get(), requestCode,
                                              fillInIntent.get(), flagsMask.get(), flagsValues.get(), extraFlags.get());
         }
+        else if (responseCode == 7)
+        {
+            // Item already bought.
+            notifyAboutPurchaseResult ({ {}, productIdentifier, juceString (getPackageName()), {}, {} }, true, statusCodeToUserString (responseCode));
+        }
     }
 
     void restoreProductsBoughtList (bool, const juce::String&)
