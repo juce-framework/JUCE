@@ -66,8 +66,8 @@ namespace FIR
         Filter (Coefficients<NumericType>* coefficientsToUse)  : coefficients (coefficientsToUse)   { reset(); }
 
         /** Creates a copy of another filter. */
-        Filter (const Filter&) = default;
-
+        Filter (const Filter& cpy) : Filter (cpy.coefficients) {};
+      
         /** Creates a copy of another filter. */
         Filter (Filter&&) = default;
 
@@ -216,7 +216,7 @@ namespace FIR
         Coefficients (size_t size)    { coefficients.resize ((int) size); }
 
         /** Creates a copy of another filter. */
-        Coefficients (const Coefficients&) = default;
+        Coefficients (const Coefficients& cpy) : coefficients (cpy.coefficients) {};
 
         /** Move constructor. */
         Coefficients (Coefficients&&) = default;
