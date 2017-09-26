@@ -188,7 +188,7 @@ public:
         int exponent = 0, decPointIndex = 0, digit = 0;
         int lastDigit = 0, numSignificantDigits = 0;
         bool digitsFound = false;
-        JUCE_CONSTEXPR const int maxSignificantDigits = 15 + 2;
+        JUCE_CONSTEXPR const int maxSignificantDigits = 17 + 1;
 
         for (;;)
         {
