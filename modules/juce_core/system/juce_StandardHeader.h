@@ -114,11 +114,6 @@
  #include "../misc/juce_StdFunctionCompat.h"
 #endif
 
-// The live build fails to compile std::stringstream
-#if ! JUCE_PROJUCER_LIVE_BUILD
- #include <sstream>
-#endif
-
 // Include std::atomic if it's supported by the compiler
 #if JUCE_ATOMIC_AVAILABLE
  #include <atomic>
