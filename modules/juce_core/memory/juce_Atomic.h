@@ -54,7 +54,7 @@ namespace juce
      ~Atomic() noexcept
      {
         #if __cpp_lib_atomic_is_always_lock_free
-         static_assert (std::atomic<Type>::is_always_lock_free(),
+         static_assert (std::atomic<Type>::is_always_lock_free,
                         "This class can only be used for lock-free types");
         #endif
      }
