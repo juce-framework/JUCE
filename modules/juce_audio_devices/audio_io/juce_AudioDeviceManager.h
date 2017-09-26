@@ -436,6 +436,15 @@ public:
     */
     CriticalSection& getMidiCallbackLock() noexcept         { return midiCallbackLock; }
 
+    //==============================================================================
+    /** Returns the number of under- or over runs reported.
+
+        This method will use the underlying device's native getXRunCount if it supports
+        it. Otherwise it will estimate the number of under-/overruns by measuring the
+        time it spent in the audio callback.
+    */
+    int getXRunCount() const noexcept;
+
 private:
     //==============================================================================
     OwnedArray<AudioIODeviceType> availableDeviceTypes;
@@ -468,7 +477,8 @@ private:
     ScopedPointer<AudioSampleBuffer> testSound;
     int testSoundPosition;
 
-    double cpuUsageMs, timeToCpuScale;
+    double cpuUsageMs, timeToCpuScale, msPerBlock;
+    int xruns;
 
     struct LevelMeter
     {
