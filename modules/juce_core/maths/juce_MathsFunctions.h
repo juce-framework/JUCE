@@ -262,9 +262,6 @@ bool isPositiveAndNotGreaterThan (int valueToTest, Type upperLimit) noexcept
 }
 
 //==============================================================================
-/** @deprecated  Just use std::swap instead! */
-JUCE_DEPRECATED_WITH_BODY (template <typename Type> void swapVariables (Type& variable1, Type& variable2), { std::swap (variable1, variable2); })
-
 /** Handy function for avoiding unused variables warning. */
 template <typename Type1>
 void ignoreUnused (const Type1&) noexcept {}
