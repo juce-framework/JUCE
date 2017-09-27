@@ -407,7 +407,7 @@ int SystemStats::getMemorySizeInMegabytes()
     struct sysinfo sysi;
 
     if (sysinfo (&sysi) == 0)
-        return (static_cast<int> (sysi.totalram * sysi.mem_unit) / (1024 * 1024));
+        return static_cast<int> ((sysi.totalram * sysi.mem_unit) / (1024 * 1024));
    #endif
 
     return 0;
