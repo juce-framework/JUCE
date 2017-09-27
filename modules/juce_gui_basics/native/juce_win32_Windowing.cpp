@@ -1179,8 +1179,8 @@ public:
     {
         auto r = getWindowRect (hwnd);
 
-        if (! (isPositiveAndBelow (localPos.x, (int) (r.right - r.left))
-                && isPositiveAndBelow (localPos.y, (int) (r.bottom - r.top))))
+        if (! (isPositiveAndBelow (localPos.x, r.right - r.left)
+                && isPositiveAndBelow (localPos.y, r.bottom - r.top)))
             return false;
 
         POINT p = { localPos.x + r.left + windowBorder.getLeft(),

@@ -1704,7 +1704,7 @@ private:
 
         for (MidiBuffer::Iterator i (midiEvents); i.getNextEvent (midiEventData, midiEventSize, midiEventPosition);)
         {
-            jassert (isPositiveAndBelow (midiEventPosition, (int) nFrames));
+            jassert (isPositiveAndBelow (midiEventPosition, nFrames));
             ignoreUnused (nFrames);
 
             dataSize += (size_t) midiEventSize;

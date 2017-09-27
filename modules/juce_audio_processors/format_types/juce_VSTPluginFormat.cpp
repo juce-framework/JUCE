@@ -943,7 +943,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
 
     float getParameter (int index) override
     {
-        if (vstEffect != nullptr && isPositiveAndBelow (index, (int) vstEffect->numParameters))
+        if (vstEffect != nullptr && isPositiveAndBelow (index, vstEffect->numParameters))
         {
             const ScopedLock sl (lock);
             return vstEffect->getParameterValueFunction (vstEffect, index);
@@ -954,7 +954,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
 
     void setParameter (int index, float newValue) override
     {
-        if (vstEffect != nullptr && isPositiveAndBelow (index, (int) vstEffect->numParameters))
+        if (vstEffect != nullptr && isPositiveAndBelow (index, vstEffect->numParameters))
         {
             const ScopedLock sl (lock);
 

@@ -572,7 +572,7 @@ void EdgeTable::intersectWithEdgeTableLine (const int y, const int* const otherL
             lastX = nextX;
 
             const int nextLevel = (level1 * (level2 + 1)) >> 8;
-            jassert (isPositiveAndBelow (nextLevel, (int) 256));
+            jassert (isPositiveAndBelow (nextLevel, 256));
 
             if (nextLevel != lastLevel)
             {

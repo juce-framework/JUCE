@@ -44,24 +44,24 @@ bool MidiKeyboardState::isNoteOn (const int midiChannel, const int n) const noex
 {
     jassert (midiChannel >= 0 && midiChannel <= 16);
 
-    return isPositiveAndBelow (n, (int) 128)
+    return isPositiveAndBelow (n, 128)
             && (noteStates[n] & (1 << (midiChannel - 1))) != 0;
 }
 
 bool MidiKeyboardState::isNoteOnForChannels (const int midiChannelMask, const int n) const noexcept
 {
-    return isPositiveAndBelow (n, (int) 128)
+    return isPositiveAndBelow (n, 128)
             && (noteStates[n] & midiChannelMask) != 0;
 }
 
 void MidiKeyboardState::noteOn (const int midiChannel, const int midiNoteNumber, const float velocity)
 {
     jassert (midiChannel >= 0 && midiChannel <= 16);
-    jassert (isPositiveAndBelow (midiNoteNumber, (int) 128));
+    jassert (isPositiveAndBelow (midiNoteNumber, 128));
 
     const ScopedLock sl (lock);
 
-    if (isPositiveAndBelow (midiNoteNumber, (int) 128))
+    if (isPositiveAndBelow (midiNoteNumber, 128))
     {
         const int timeNow = (int) Time::getMillisecondCounter();
         eventsToAdd.addEvent (MidiMessage::noteOn (midiChannel, midiNoteNumber, velocity), timeNow);
@@ -73,7 +73,7 @@ void MidiKeyboardState::noteOn (const int midiChannel, const int midiNoteNumber,
 
 void MidiKeyboardState::noteOnInternal  (const int midiChannel, const int midiNoteNumber, const float velocity)
 {
-    if (isPositiveAndBelow (midiNoteNumber, (int) 128))
+    if (isPositiveAndBelow (midiNoteNumber, 128))
     {
         noteStates [midiNoteNumber] |= (1 << (midiChannel - 1));
 

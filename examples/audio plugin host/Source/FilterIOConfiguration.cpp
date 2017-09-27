@@ -312,7 +312,7 @@ private:
 
                     if (selectedNumChannels != bus->getLastEnabledLayout().size())
                     {
-                        if (isPositiveAndBelow (selectedNumChannels, (int) AudioChannelSet::maxChannelsOfNamedLayout)
+                        if (isPositiveAndBelow (selectedNumChannels, AudioChannelSet::maxChannelsOfNamedLayout)
                              && bus->setCurrentLayoutWithoutEnabling (bus->supportedLayoutWithChannels (selectedNumChannels)))
                         {
                             if (auto* config = owner.getConfig (! isInput))

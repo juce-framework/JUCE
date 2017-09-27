@@ -392,8 +392,8 @@ public:
     {
         NSRect viewFrame = [view frame];
 
-        if (! (isPositiveAndBelow (localPos.getX(), (int) viewFrame.size.width)
-             && isPositiveAndBelow (localPos.getY(), (int) viewFrame.size.height)))
+        if (! (isPositiveAndBelow (localPos.getX(), viewFrame.size.width)
+             && isPositiveAndBelow (localPos.getY(), viewFrame.size.height)))
             return false;
 
         if (! SystemStats::isRunningInAppExtensionSandbox())

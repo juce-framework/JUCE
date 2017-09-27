@@ -452,8 +452,8 @@ MidiMessage MidiMessage::aftertouchChange (const int channel,
                                            const int aftertouchValue) noexcept
 {
     jassert (channel > 0 && channel <= 16); // valid channels are numbered 1 to 16
-    jassert (isPositiveAndBelow (noteNum, (int) 128));
-    jassert (isPositiveAndBelow (aftertouchValue, (int) 128));
+    jassert (isPositiveAndBelow (noteNum, 128));
+    jassert (isPositiveAndBelow (aftertouchValue, 128));
 
     return MidiMessage (MidiHelpers::initialByte (0xa0, channel),
                         noteNum & 0x7f,
@@ -474,7 +474,7 @@ int MidiMessage::getChannelPressureValue() const noexcept
 MidiMessage MidiMessage::channelPressureChange (const int channel, const int pressure) noexcept
 {
     jassert (channel > 0 && channel <= 16); // valid channels are numbered 1 to 16
-    jassert (isPositiveAndBelow (pressure, (int) 128));
+    jassert (isPositiveAndBelow (pressure, 128));
 
     return MidiMessage (MidiHelpers::initialByte (0xd0, channel), pressure & 0x7f);
 }
@@ -522,7 +522,7 @@ int MidiMessage::getPitchWheelValue() const noexcept
 MidiMessage MidiMessage::pitchWheel (const int channel, const int position) noexcept
 {
     jassert (channel > 0 && channel <= 16); // valid channels are numbered 1 to 16
-    jassert (isPositiveAndBelow (position, (int) 0x4000));
+    jassert (isPositiveAndBelow (position, 0x4000));
 
     return MidiMessage (MidiHelpers::initialByte (0xe0, channel),
                         position & 127, (position >> 7) & 127);
@@ -563,7 +563,7 @@ MidiMessage MidiMessage::controllerEvent (const int channel, const int controlle
 MidiMessage MidiMessage::noteOn (const int channel, const int noteNumber, const uint8 velocity) noexcept
 {
     jassert (channel > 0 && channel <= 16);
-    jassert (isPositiveAndBelow (noteNumber, (int) 128));
+    jassert (isPositiveAndBelow (noteNumber, 128));
 
     return MidiMessage (MidiHelpers::initialByte (0x90, channel),
                         noteNumber & 127, MidiHelpers::validVelocity (velocity));
@@ -577,7 +577,7 @@ MidiMessage MidiMessage::noteOn (const int channel, const int noteNumber, const 
 MidiMessage MidiMessage::noteOff (const int channel, const int noteNumber, uint8 velocity) noexcept
 {
     jassert (channel > 0 && channel <= 16);
-    jassert (isPositiveAndBelow (noteNumber, (int) 128));
+    jassert (isPositiveAndBelow (noteNumber, 128));
 
     return MidiMessage (MidiHelpers::initialByte (0x80, channel),
                         noteNumber & 127, MidiHelpers::validVelocity (velocity));
@@ -591,7 +591,7 @@ MidiMessage MidiMessage::noteOff (const int channel, const int noteNumber, float
 MidiMessage MidiMessage::noteOff (const int channel, const int noteNumber) noexcept
 {
     jassert (channel > 0 && channel <= 16);
-    jassert (isPositiveAndBelow (noteNumber, (int) 128));
+    jassert (isPositiveAndBelow (noteNumber, 128));
 
     return MidiMessage (MidiHelpers::initialByte (0x80, channel), noteNumber & 127, 0);
 }
@@ -983,7 +983,7 @@ String MidiMessage::getMidiNoteName (int note, bool useSharps, bool includeOctav
     static const char* const sharpNoteNames[] = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
     static const char* const flatNoteNames[]  = { "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B" };
 
-    if (isPositiveAndBelow (note, (int) 128))
+    if (isPositiveAndBelow (note, 128))
     {
         String s (useSharps ? sharpNoteNames [note % 12]
                             : flatNoteNames  [note % 12]);
