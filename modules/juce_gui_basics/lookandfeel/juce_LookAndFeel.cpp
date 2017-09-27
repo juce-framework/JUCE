@@ -37,7 +37,6 @@ extern GetTypefaceForFont juce_getTypefaceForFont;
 
 //==============================================================================
 LookAndFeel::LookAndFeel()
-    : useNativeAlertWindows (false)
 {
     /* if this fails it means you're trying to create a LookAndFeel object before
        the static Colours have been initialised. That ain't gonna work. It probably
@@ -51,7 +50,6 @@ LookAndFeel::LookAndFeel()
 
 LookAndFeel::~LookAndFeel()
 {
-    masterReference.clear();
 }
 
 //==============================================================================

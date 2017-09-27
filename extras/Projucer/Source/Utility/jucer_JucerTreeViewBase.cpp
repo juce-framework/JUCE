@@ -72,7 +72,6 @@ JucerTreeViewBase::JucerTreeViewBase()  : textX (0)
 
 JucerTreeViewBase::~JucerTreeViewBase()
 {
-    masterReference.clear();
 }
 
 void JucerTreeViewBase::refreshSubItems()

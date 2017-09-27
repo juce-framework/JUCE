@@ -110,10 +110,9 @@ private:
     friend class ItemSelectionTimer;
     ScopedPointer<Timer> delayedSelectionTimer;
 
-    WeakReference<JucerTreeViewBase>::Master masterReference;
-    friend class WeakReference<JucerTreeViewBase>;
-
     void invokeShowDocument();
+
+    JUCE_DECLARE_WEAK_REFERENCEABLE (JucerTreeViewBase)
 };
 
 //==============================================================================
