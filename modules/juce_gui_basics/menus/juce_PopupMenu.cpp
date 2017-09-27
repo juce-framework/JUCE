@@ -1621,7 +1621,7 @@ struct PopupMenuCompletionCallback  : public ModalComponentManager::Callback
             if (prevTopLevel != nullptr)
                 prevTopLevel->toFront (true);
 
-            if (prevFocused != nullptr)
+            if (prevFocused != nullptr && prevFocused->isShowing())
                 prevFocused->grabKeyboardFocus();
         }
     }
