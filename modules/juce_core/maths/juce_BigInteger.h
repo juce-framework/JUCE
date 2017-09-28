@@ -337,10 +337,4 @@ private:
 /** Writes a BigInteger to an OutputStream as a UTF8 decimal string. */
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const BigInteger& value);
 
-//==============================================================================
-#ifndef DOXYGEN
- // For backwards compatibility, BitArray is defined as an alias for BigInteger.
- typedef BigInteger BitArray;
-#endif
-
 } // namespace juce
