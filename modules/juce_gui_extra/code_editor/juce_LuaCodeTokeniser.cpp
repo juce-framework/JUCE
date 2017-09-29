@@ -84,7 +84,7 @@ struct LuaTokeniserFunctions
 
         while (CppTokeniserFunctions::isIdentifierBody (source.peekNextChar()))
         {
-            const juce_wchar c = source.nextChar();
+            auto c = source.nextChar();
 
             if (tokenLength < 20)
                 possible.write (c);
@@ -108,7 +108,7 @@ struct LuaTokeniserFunctions
     {
         source.skipWhitespace();
 
-        const juce_wchar firstChar = source.peekNextChar();
+        auto firstChar = source.peekNextChar();
 
         switch (firstChar)
         {
@@ -119,7 +119,7 @@ struct LuaTokeniserFunctions
         case '5':   case '6':   case '7':   case '8':   case '9':
         case '.':
         {
-            int result = CppTokeniserFunctions::parseNumber (source);
+            auto result = CppTokeniserFunctions::parseNumber (source);
 
             if (result == LuaTokeniser::tokenType_error)
             {
@@ -157,7 +157,7 @@ struct LuaTokeniserFunctions
         case '-':
         {
             source.skip();
-            int result = CppTokeniserFunctions::parseNumber (source);
+            auto result = CppTokeniserFunctions::parseNumber (source);
 
             if (source.peekNextChar() == '-')
             {
@@ -231,8 +231,8 @@ CodeEditorComponent::ColourScheme LuaTokeniser::getDefaultColourScheme()
 
     CodeEditorComponent::ColourScheme cs;
 
-    for (unsigned int i = 0; i < sizeof (types) / sizeof (types[0]); ++i)  // (NB: numElementsInArray doesn't work here in GCC4.2)
-        cs.set (types[i].name, types[i].colour);
+    for (auto& t : types)
+        cs.set (t.name, Colour (t.colour));
 
     return cs;
 }
