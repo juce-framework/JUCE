@@ -106,6 +106,9 @@ public:
     Value getProjectValue (const Identifier& name)       { return projectRoot.getPropertyAsValue (name, getUndoManagerFor (projectRoot)); }
     var   getProjectVar   (const Identifier& name) const { return projectRoot.getProperty        (name); }
 
+    Value getProjectHeaderSearchPaths()                  { return getProjectValue (Ids::headerPath); }
+    String getHeaderSearchPaths() const                  { return projectRoot [Ids::headerPath]; }
+
     Value getProjectPreprocessorDefs()                   { return getProjectValue (Ids::defines); }
     StringPairArray getPreprocessorDefs() const;
 

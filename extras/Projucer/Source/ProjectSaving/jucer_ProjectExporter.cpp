@@ -926,7 +926,7 @@ StringPairArray ProjectExporter::BuildConfiguration::getUniquePreprocessorDefs()
 
 StringArray ProjectExporter::BuildConfiguration::getHeaderSearchPaths() const
 {
-    return getSearchPathsFromString (getHeaderSearchPathString());
+    return getSearchPathsFromString (getHeaderSearchPathString() + ';' + project.getHeaderSearchPaths());
 }
 
 StringArray ProjectExporter::BuildConfiguration::getLibrarySearchPaths() const
