@@ -192,7 +192,7 @@ Button* LookAndFeel_V4::createDocumentWindowButton (int buttonType)
     return nullptr;
 }
 
-void LookAndFeel_V4::positionDocumentWindowButtons (DocumentWindow& dw,
+void LookAndFeel_V4::positionDocumentWindowButtons (DocumentWindow&,
                                                     int titleBarX, int titleBarY,
                                                     int titleBarW, int titleBarH,
                                                     Button* minimiseButton,
