@@ -197,6 +197,10 @@ public:
     {
         if (currentModel != nullptr)
         {
+            if (item.customCallback != nullptr)
+                if (! item.customCallback->menuItemTriggered())
+                    return;
+
             if (item.commandManager != nullptr)
             {
                 ApplicationCommandTarget::InvocationInfo info (item.itemID);
