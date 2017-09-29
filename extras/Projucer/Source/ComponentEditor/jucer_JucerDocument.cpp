@@ -24,16 +24,16 @@
   ==============================================================================
 */
 
-#include "../jucer_Headers.h"
+#include "../Application/jucer_Headers.h"
 #include "../Application/jucer_Application.h"
 #include "../Wizards/jucer_NewFileWizard.h"
 #include "jucer_JucerDocument.h"
 #include "jucer_ObjectTypes.h"
-#include "ui/jucer_JucerDocumentEditor.h"
-#include "ui/jucer_TestComponent.h"
+#include "UI/jucer_JucerDocumentEditor.h"
+#include "UI/jucer_TestComponent.h"
 #include "jucer_UtilityFunctions.h"
-#include "documents/jucer_ComponentDocument.h"
-#include "documents/jucer_ButtonDocument.h"
+#include "Documents/jucer_ComponentDocument.h"
+#include "Documents/jucer_ButtonDocument.h"
 
 const char* const defaultClassName = "NewComponent";
 const char* const defaultParentClasses = "public Component";

@@ -24,11 +24,9 @@
   ==============================================================================
 */
 
-#include "../jucer_Headers.h"
+#include "../Application/jucer_Headers.h"
 #include "jucer_Project.h"
-#include "../Project Saving/jucer_ProjectExporter.h"
-#include "../Project Saving/jucer_ProjectSaver.h"
-#include "../Application/jucer_OpenDocumentManager.h"
+#include "../ProjectSaving/jucer_ProjectSaver.h"
 #include "../Application/jucer_Application.h"
 
 namespace

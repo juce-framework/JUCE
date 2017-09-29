@@ -24,14 +24,12 @@
   ==============================================================================
 */
 
-#include "../jucer_Headers.h"
+#include "../Application/jucer_Headers.h"
 #include "jucer_Module.h"
-#include "jucer_ProjectType.h"
-#include "../Project Saving/jucer_ProjectExporter.h"
-#include "../Project Saving/jucer_ProjectSaver.h"
-#include "../Project Saving/jucer_ProjectExport_XCode.h"
+#include "../ProjectSaving/jucer_ProjectSaver.h"
+#include "../ProjectSaving/jucer_ProjectExport_XCode.h"
 
-
+//==============================================================================
 static String trimCommentCharsFromStartOfLine (const String& line)
 {
     return line.trimStart().trimCharactersAtStart ("*/").trimStart();

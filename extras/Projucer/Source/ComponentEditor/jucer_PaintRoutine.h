@@ -26,15 +26,13 @@
 
 #pragma once
 
-#include "paintelements/jucer_PaintElement.h"
+#include "PaintElements/jucer_PaintElement.h"
 class JucerDocument;
 class PathPoint;
-
 
 //==============================================================================
 /**
     Contains a set of PaintElements that constitute some kind of paint() method.
-
 */
 class PaintRoutine
 {

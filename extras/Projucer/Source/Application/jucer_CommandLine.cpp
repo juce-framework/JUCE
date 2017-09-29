@@ -24,10 +24,9 @@
   ==============================================================================
 */
 
-#include "../jucer_Headers.h"
-#include "../Project/jucer_Project.h"
+#include "jucer_Headers.h"
 #include "../Project/jucer_Module.h"
-#include "../Utility/jucer_TranslationHelpers.h"
+#include "../Utility/Helpers/jucer_TranslationHelpers.h"
 
 #include "jucer_CommandLine.h"
 

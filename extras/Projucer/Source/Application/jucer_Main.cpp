@@ -24,45 +24,45 @@
   ==============================================================================
 */
 
-#include "../jucer_Headers.h"
+#include "jucer_Headers.h"
 
 #include "jucer_Application.h"
-#include "jucer_OpenDocumentManager.h"
-#include "../Code Editor/jucer_SourceCodeEditor.h"
-#include "../Utility/jucer_FilePathPropertyComponent.h"
-#include "../Project/jucer_TreeItemTypes.h"
-#include "../Utility/jucer_UTF8Component.h"
-#include "../Utility/jucer_SVGPathDataComponent.h"
-#include "../Utility/jucer_AboutWindowComponent.h"
-#include "../Utility/jucer_ApplicationUsageDataWindowComponent.h"
-#include "../Utility/jucer_EditorColourSchemeWindowComponent.h"
-#include "../Utility/jucer_GlobalSearchPathsWindowComponent.h"
-#include "../Utility/jucer_FloatingToolWindow.h"
+#include "../CodeEditor/jucer_OpenDocumentManager.h"
+#include "../CodeEditor/jucer_SourceCodeEditor.h"
+#include "../Utility/UI/PropertyComponents/jucer_FilePathPropertyComponent.h"
+#include "../Project/UI/Sidebar/jucer_TreeItemTypes.h"
+#include "Windows/jucer_UTF8WindowComponent.h"
+#include "Windows/jucer_SVGPathDataWindowComponent.h"
+#include "Windows/jucer_AboutWindowComponent.h"
+#include "Windows/jucer_ApplicationUsageDataWindowComponent.h"
+#include "Windows/jucer_EditorColourSchemeWindowComponent.h"
+#include "Windows/jucer_GlobalSearchPathsWindowComponent.h"
+#include "Windows/jucer_FloatingToolWindow.h"
 
-#include "../LiveBuildEngine/projucer_MessageIDs.h"
-#include "../LiveBuildEngine/projucer_CppHelpers.h"
-#include "../LiveBuildEngine/projucer_SourceCodeRange.h"
-#include "../LiveBuildEngine/projucer_ClassDatabase.h"
-#include "../LiveBuildEngine/projucer_DiagnosticMessage.h"
+#include "../LiveBuildEngine/jucer_MessageIDs.h"
+#include "../LiveBuildEngine/jucer_CppHelpers.h"
+#include "../LiveBuildEngine/jucer_SourceCodeRange.h"
+#include "../LiveBuildEngine/jucer_ClassDatabase.h"
+#include "../LiveBuildEngine/jucer_DiagnosticMessage.h"
 
-#include "../LiveBuildEngine/projucer_CompileEngineDLL.h"
-#include "../LiveBuildEngine/projucer_CompileEngineClient.h"
-#include "../LiveBuildEngine/projucer_ActivityListComponent.h"
-#include "../LiveBuildEngine/projucer_BuildTabStatusComp.h"
-#include "../LiveBuildEngine/projucer_ComponentListComp.h"
-#include "../LiveBuildEngine/projucer_CompileEngineServer.h"
+#include "../LiveBuildEngine/jucer_CompileEngineDLL.h"
+#include "../LiveBuildEngine/jucer_CompileEngineClient.h"
+#include "../LiveBuildEngine/UI/jucer_ActivityListComponent.h"
+#include "../LiveBuildEngine/UI/jucer_BuildTabStatusComponent.h"
+#include "../LiveBuildEngine/UI/jucer_ComponentListComponent.h"
+#include "../LiveBuildEngine/jucer_CompileEngineServer.h"
 
 juce_ImplementSingleton (CompileEngineDLL);
 
 struct ProjucerAppClasses
 {
-    #include "../Code Editor/jucer_LiveBuildCodeEditor.h"
-    #include "../LiveBuildEngine/projucer_ErrorListComponent.h"
+    #include "../CodeEditor/jucer_LiveBuildCodeEditor.h"
+    #include "../LiveBuildEngine/UI/jucer_ErrorListComponent.h"
 };
 
 #include "jucer_CommandLine.h"
 
-#include "../Project/jucer_ProjectContentComponent.cpp"
+#include "../Project/UI/jucer_ProjectContentComponent.cpp"
 #include "jucer_Application.cpp"
 
 

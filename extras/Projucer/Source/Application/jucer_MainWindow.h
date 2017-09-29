@@ -26,8 +26,7 @@
 
 #pragma once
 
-#include "../Project/jucer_ProjectContentComponent.h"
-
+#include "../Project/UI/jucer_ProjectContentComponent.h"
 
 //==============================================================================
 /**

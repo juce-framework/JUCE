@@ -24,9 +24,8 @@
   ==============================================================================
 */
 
-#include "../jucer_Headers.h"
+#include "../Application/jucer_Headers.h"
 #include "jucer_JucerDocument.h"
-
 
 //==============================================================================
 BinaryResources::BinaryResources()

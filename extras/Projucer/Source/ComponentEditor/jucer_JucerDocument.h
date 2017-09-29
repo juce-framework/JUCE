@@ -26,9 +26,9 @@
 
 #pragma once
 
-#include "../Application/jucer_OpenDocumentManager.h"
-#include "../Code Editor/jucer_SourceCodeEditor.h"
-#include "components/jucer_ComponentTypeHandler.h"
+#include "../CodeEditor/jucer_OpenDocumentManager.h"
+#include "../CodeEditor/jucer_SourceCodeEditor.h"
+#include "Components/jucer_ComponentTypeHandler.h"
 #include "jucer_PaintRoutine.h"
 #include "jucer_ComponentLayout.h"
 #include "jucer_BinaryResources.h"

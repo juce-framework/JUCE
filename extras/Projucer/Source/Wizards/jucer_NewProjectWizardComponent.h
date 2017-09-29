@@ -27,6 +27,7 @@
 #pragma once
 
 
+//==============================================================================
 class ModulesFolderPathBox  : public Component,
                               private Button::Listener,
                               private ComboBox::Listener

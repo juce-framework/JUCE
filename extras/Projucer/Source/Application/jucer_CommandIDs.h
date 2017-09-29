@@ -24,6 +24,8 @@
   ==============================================================================
 */
 
+#pragma once
+
 /**
     A namespace to hold all the possible command IDs.
 */
