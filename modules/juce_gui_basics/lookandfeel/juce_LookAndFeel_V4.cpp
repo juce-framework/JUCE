@@ -192,7 +192,7 @@ Button* LookAndFeel_V4::createDocumentWindowButton (int buttonType)
     return nullptr;
 }
 
-void LookAndFeel_V4::positionDocumentWindowButtons (DocumentWindow&,
+void LookAndFeel_V4::positionDocumentWindowButtons (DocumentWindow& dw,
                                                     int titleBarX, int titleBarY,
                                                     int titleBarW, int titleBarH,
                                                     Button* minimiseButton,
@@ -200,6 +200,8 @@ void LookAndFeel_V4::positionDocumentWindowButtons (DocumentWindow&,
                                                     Button* closeButton,
                                                     bool positionTitleBarButtonsOnLeft)
 {
+    titleBarH = jmin (titleBarH, titleBarH - titleBarY);
+
     const int buttonW = (int) (titleBarH * 1.2);
 
     int x = positionTitleBarButtonsOnLeft ? titleBarX
