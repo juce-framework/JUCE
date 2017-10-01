@@ -49,6 +49,13 @@ Filter<SampleType>::Filter (Coefficients<typename Filter<SampleType>::NumericTyp
 }
 
 template <typename SampleType>
+Filter<SampleType>::Filter (const Filter<SampleType>& cpy)
+:   coefficients (cpy.coefficients)
+{
+    reset();
+}
+  
+template <typename SampleType>
 void Filter<SampleType>::reset (SampleType resetToValue)
 {
     auto newOrder = coefficients->getFilterOrder();
