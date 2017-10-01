@@ -62,8 +62,11 @@ namespace StateVariableFilter
         Filter (Parameters<NumericType>* paramtersToUse) : parameters (paramtersToUse) { reset(); }
 
         /** Creates a copy of another filter. */
-        Filter (const Filter&) = default;
-
+        Filter (const Filter& cpy)
+        :   parameters (cpy.parameters)
+        {
+            reset();
+        };
         /** Move constructor */
         Filter (Filter&&) = default;
 
