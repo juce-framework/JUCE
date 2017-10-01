@@ -69,7 +69,7 @@ namespace IIR
         Filter (Coefficients<NumericType>* coefficientsToUse);
 
         /** Creates a copy of another filter. */
-        Filter (const Filter&) = default;
+        Filter (const Filter&);
 
         /** Move constructor. */
         Filter (Filter&&) = default;
