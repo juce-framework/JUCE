@@ -66,6 +66,7 @@ namespace FIR
         Filter (Coefficients<NumericType>* coefficientsToUse)  : coefficients (coefficientsToUse)   { reset(); }
 
         /** Creates a copy of another filter. */
+        Filter (Filter& cpy)
         :   coefficients (cpy.coefficients)
         {
             reset();
