@@ -28,6 +28,7 @@ namespace juce
 #else
  #define JUCE_SNAP_TO_ZERO(n)    ignoreUnused (n)
 #endif
+class ScopedNoDenormals;
 
 //==============================================================================
 /**
@@ -219,6 +220,12 @@ public:
         call before audio processing code where you really want to avoid denormalisation performance hits.
     */
     static void JUCE_CALLTYPE disableDenormalisedNumberSupport() noexcept;
+
+private:
+    friend ScopedNoDenormals;
+
+    static intptr_t JUCE_CALLTYPE getFpStatusRegister() noexcept;
+    static void JUCE_CALLTYPE setFpStatusRegister (intptr_t) noexcept;
 };
 
 //==============================================================================
@@ -229,26 +236,13 @@ public:
 class ScopedNoDenormals
 {
 public:
-    inline ScopedNoDenormals() noexcept
-    {
-       #if JUCE_USE_SSE_INTRINSICS
-        mxcsr = _mm_getcsr();
-        _mm_setcsr (mxcsr | 0x8040); // add the DAZ and FZ bits
-       #endif
-    }
-
-
-    inline ~ScopedNoDenormals() noexcept
-    {
-       #if JUCE_USE_SSE_INTRINSICS
-        _mm_setcsr (mxcsr);
-       #endif
-    }
+    ScopedNoDenormals() noexcept;
+    ~ScopedNoDenormals() noexcept;
 
 private:
-    #if JUCE_USE_SSE_INTRINSICS
-     unsigned int mxcsr;
-    #endif
+  #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || defined (__arm64__) || defined (__aarch64__))
+    intptr_t fpsr;
+  #endif
 };
 
 } // namespace juce
