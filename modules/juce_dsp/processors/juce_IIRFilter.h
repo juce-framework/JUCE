@@ -68,14 +68,10 @@ namespace IIR
         /** Creates a filter with a given set of coefficients. */
         Filter (Coefficients<NumericType>* coefficientsToUse);
 
-        /** Creates a copy of another filter. */
-        Filter (const Filter& other)  : coefficients (other.coefficients)  { reset(); }
-
-        /** Creates a copy of another filter. */
-        Filter& operator= (const Filter& other)  { coefficients = other.coefficients; reset(); }
-
-        /** Move constructor. */
+        Filter (const Filter&) = default;
         Filter (Filter&&) = default;
+        Filter& operator= (const Filter&) = default;
+        Filter& operator= (Filter&&) = default;
 
         //==============================================================================
         /** The coefficients of the IIR filter. It's up to the called to ensure that
@@ -158,10 +154,10 @@ namespace IIR
         Coefficients (NumericType b0, NumericType, NumericType b2, NumericType b3,
                       NumericType a0, NumericType a1, NumericType a2, NumericType a3);
 
-        Coefficients (const Coefficients&);
-        Coefficients (Coefficients&&);
-        Coefficients& operator= (const Coefficients&);
-        Coefficients& operator= (Coefficients&&);
+        Coefficients (const Coefficients&) = default;
+        Coefficients (Coefficients&&) = default;
+        Coefficients& operator= (const Coefficients&) = default;
+        Coefficients& operator= (Coefficients&&) = default;
 
         /** The Coefficients structure is ref-counted, so this is a handy type that can be used
             as a pointer to one.

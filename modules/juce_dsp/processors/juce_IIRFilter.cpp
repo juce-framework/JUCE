@@ -40,32 +40,6 @@ IIR::Coefficients<NumericType>::Coefficients()
 }
 
 template <typename NumericType>
-IIR::Coefficients<NumericType>::Coefficients (const Coefficients& other)
-    : coefficients (other.coefficients)
-{
-}
-
-template <typename NumericType>
-IIR::Coefficients<NumericType>::Coefficients (Coefficients&& other)
-    : coefficients (static_cast<Array<NumericType>&&> (other.coefficients))
-{
-}
-
-template <typename NumericType>
-IIR::Coefficients<NumericType>& IIR::Coefficients<NumericType>::operator= (const Coefficients& other)
-{
-    coefficients = other.coefficients;
-    return *this;
-}
-
-template <typename NumericType>
-IIR::Coefficients<NumericType>& IIR::Coefficients<NumericType>::operator= (Coefficients&& other)
-{
-    coefficients = static_cast<Array<NumericType>&&> (other.coefficients);
-    return *this;
-}
-
-template <typename NumericType>
 IIR::Coefficients<NumericType>::Coefficients (NumericType b0, NumericType b1,
                                               NumericType a0, NumericType a1)
 {
