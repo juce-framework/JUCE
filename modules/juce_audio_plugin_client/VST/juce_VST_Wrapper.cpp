@@ -1488,9 +1488,9 @@ private:
         // number, that they do so according to yfede's encoding table in the link
         // below. If not, then this code will need an if (isSteinberg()) in the
         // future.
-        auto major = (hexVersion >> 16) & 0xff;
-        auto minor = (hexVersion >> 8) & 0xff;
-        auto bugfix = hexVersion & 0xff;
+        int major = (hexVersion >> 16) & 0xff;
+        int minor = (hexVersion >> 8) & 0xff;
+        int bugfix = hexVersion & 0xff;
 
         // for details, see: https://forum.juce.com/t/issues-with-version-integer-reported-by-vst2/23867
 
@@ -1503,7 +1503,7 @@ private:
             return major * 10000000 + minor * 100000 + bugfix * 1000;
 
         // Encoding D
-        return hexVersion;
+        return static_cast<int32> (hexVersion);
        #endif
     }
 

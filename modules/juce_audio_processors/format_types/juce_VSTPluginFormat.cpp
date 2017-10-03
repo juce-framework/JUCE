@@ -1974,7 +1974,7 @@ private:
             // See yfede's post for the rational on this encoding
             // https://forum.juce.com/t/issues-with-version-integer-reported-by-vst2/23867/6
 
-            auto major = 0, minor = 0, build = 0, bugfix = 0;
+            unsigned int major = 0, minor = 0, build = 0, bugfix = 0;
 
             if (v < 10)            // Encoding A
             {
@@ -2008,7 +2008,7 @@ private:
                 bugfix = (v % 1000);
             }
 
-            s << major << '.' << minor << '.' << build << '.' << bugfix;
+            s << (int) major << '.' << (int) minor << '.' << (int) build << '.' << (int) bugfix;
         }
 
         return s;
