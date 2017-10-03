@@ -1164,7 +1164,7 @@ MidiInput* MidiInput::openDevice (const int index, MidiInputCallback* const call
     if (callback == nullptr)
         return nullptr;
 
-    ScopedPointer<MidiInput> in (new MidiInput ({}));
+    ScopedPointer<MidiInput> in (new MidiInput (String()));
     ScopedPointer<MidiServiceType::InputWrapper> wrapper;
 
     try
