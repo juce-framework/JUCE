@@ -1971,32 +1971,44 @@ private:
 
         if (v != 0)
         {
-            int versionBits[32];
-            int n = 0;
+            // See yfede's post for the rational on this encoding
+            // https://forum.juce.com/t/issues-with-version-integer-reported-by-vst2/23867/6
 
-            for (auto vv = v; vv != 0; vv /= 10)
-                versionBits [n++] = vv % 10;
+            auto major = 0, minor = 0, build = 0, bugfix = 0;
 
-            if (n > 4) // if the number ends up silly, it's probably encoded as hex instead of decimal..
+            if (v < 10)            // Encoding A
             {
-                n = 0;
-
-                for (auto vv = v; vv != 0; vv >>= 8)
-                    versionBits [n++] = vv & 255;
+                major = v;
+            }
+            else if (v < 10000)    // Encoding B
+            {
+                major  = (v / 1000);
+                minor  = (v % 1000) / 100;
+                build  = (v % 100)  / 10;
+                bugfix = (v % 10);
+            }
+            else if (v < 0x10000)  // Encoding C
+            {
+                major  = (v / 10000);
+                minor  = (v % 10000) / 1000;
+                build  = (v % 1000)  / 100;
+                bugfix = (v % 100)   / 10;
+            }
+            else if (v < 0x650000) // Encoding D
+            {
+                major  = (v >> 16) & 0xff;
+                minor  = (v >> 8)  & 0xff;
+                build  = (v >> 0)  & 0xff;
+            }
+            else                  // Encoding E
+            {
+                major  = (v / 10000000);
+                minor  = (v % 10000000) / 100000;
+                build  = (v % 100000)   / 1000;
+                bugfix = (v % 1000);
             }
 
-            while (n > 1 && versionBits [n - 1] == 0)
-                --n;
-
-            s << 'V';
-
-            while (n > 0)
-            {
-                s << versionBits [--n];
-
-                if (n > 0)
-                    s << '.';
-            }
+            s << major << '.' << minor << '.' << build << '.' << bugfix;
         }
 
         return s;
