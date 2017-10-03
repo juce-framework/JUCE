@@ -1974,7 +1974,7 @@ private:
             // See yfede's post for the rational on this encoding
             // https://forum.juce.com/t/issues-with-version-integer-reported-by-vst2/23867/6
 
-            unsigned int major = 0, minor = 0, build = 0, bugfix = 0;
+            unsigned int major = 0, minor = 0, bugfix = 0, build = 0;
 
             if (v < 10)            // Encoding A
             {
@@ -1984,31 +1984,31 @@ private:
             {
                 major  = (v / 1000);
                 minor  = (v % 1000) / 100;
-                build  = (v % 100)  / 10;
-                bugfix = (v % 10);
+                bugfix = (v % 100)  / 10;
+                build  = (v % 10);
             }
             else if (v < 0x10000)  // Encoding C
             {
                 major  = (v / 10000);
                 minor  = (v % 10000) / 1000;
-                build  = (v % 1000)  / 100;
-                bugfix = (v % 100)   / 10;
+                bugfix = (v % 1000)  / 100;
+                build  = (v % 100)   / 10;
             }
             else if (v < 0x650000) // Encoding D
             {
                 major  = (v >> 16) & 0xff;
                 minor  = (v >> 8)  & 0xff;
-                build  = (v >> 0)  & 0xff;
+                bugfix = (v >> 0)  & 0xff;
             }
             else                  // Encoding E
             {
                 major  = (v / 10000000);
                 minor  = (v % 10000000) / 100000;
-                build  = (v % 100000)   / 1000;
-                bugfix = (v % 1000);
+                bugfix = (v % 100000)   / 1000;
+                build  = (v % 1000);
             }
 
-            s << (int) major << '.' << (int) minor << '.' << (int) build << '.' << (int) bugfix;
+            s << (int) major << '.' << (int) minor << '.' << (int) bugfix << '.' << (int) build;
         }
 
         return s;
