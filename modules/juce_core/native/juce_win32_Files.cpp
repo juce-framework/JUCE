@@ -128,8 +128,16 @@ namespace WindowsFileHelpers
 }
 
 //==============================================================================
-const juce_wchar File::separator = '\\';
-const String File::separatorString ("\\");
+juce_wchar File::getSeparator()
+{
+    return '\\';
+}
+
+String File::getSeparatorString()
+{
+    static const String separator("\\");
+    return separator;
+}
 
 void* getUser32Function (const char*);
 
