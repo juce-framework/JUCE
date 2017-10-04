@@ -925,7 +925,7 @@ void ListBox::startDragAndDrop (const MouseEvent& e, const SparseSet<int>& rowsT
         auto dragImage = createSnapshotOfRows (rowsToDrag, x, y);
 
         auto p = Point<int> (x, y) - e.getEventRelativeTo (this).position.toInt();
-        dragContainer->startDragging (dragDescription, this, dragImage, allowDraggingToOtherWindows, &p);
+        dragContainer->startDragging (dragDescription, this, dragImage, allowDraggingToOtherWindows, &p, &e.source);
     }
     else
     {

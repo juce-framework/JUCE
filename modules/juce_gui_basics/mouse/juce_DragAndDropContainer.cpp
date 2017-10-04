@@ -39,13 +39,13 @@ public:
     DragImageComponent (const Image& im,
                         const var& desc,
                         Component* const sourceComponent,
-                        Component* const mouseSource,
+                        const MouseInputSource* draggingSource,
                         DragAndDropContainer& ddc,
                         Point<int> offset)
         : sourceDetails (desc, sourceComponent, Point<int>()),
           image (im), owner (ddc),
-          mouseDragSource (mouseSource),
-          imageOffset (offset)
+          mouseDragSource (draggingSource->getComponentUnderMouse()),
+          imageOffset (offset), originalMouseIndex (draggingSource->getIndex())
     {
         updateSize();
 
@@ -62,8 +62,7 @@ public:
 
     ~DragImageComponent()
     {
-        if (owner.dragImageComponent == this)
-            owner.dragImageComponent.release();
+        owner.dragImageComponents.remove (owner.dragImageComponents.indexOf (this), false);
 
         if (mouseDragSource != nullptr)
         {
@@ -88,7 +87,7 @@ public:
 
     void mouseUp (const MouseEvent& e) override
     {
-        if (e.originalComponent != this)
+        if (e.originalComponent != this && e.source.getIndex() == originalMouseIndex)
         {
             if (mouseDragSource != nullptr)
                 mouseDragSource->removeMouseListener (this);
@@ -98,7 +97,7 @@ public:
             DragAndDropTarget::SourceDetails details (sourceDetails);
             DragAndDropTarget* finalTarget = nullptr;
 
-            const bool wasVisible = isVisible();
+            auto wasVisible = isVisible();
             setVisible (false);
             Component* unused;
             finalTarget = findTarget (e.getScreenPosition(), details.localPosition, unused);
@@ -121,24 +120,24 @@ public:
 
     void mouseDrag (const MouseEvent& e) override
     {
-        if (e.originalComponent != this)
+        if (e.originalComponent != this && e.source.getIndex() == originalMouseIndex)
             updateLocation (true, e.getScreenPosition());
     }
 
     void updateLocation (const bool canDoExternalDrag, Point<int> screenPos)
     {
-        DragAndDropTarget::SourceDetails details (sourceDetails);
+        auto details = sourceDetails;
 
         setNewScreenPos (screenPos);
 
         Component* newTargetComp;
-        DragAndDropTarget* const newTarget = findTarget (screenPos, details.localPosition, newTargetComp);
+        auto* newTarget = findTarget (screenPos, details.localPosition, newTargetComp);
 
         setVisible (newTarget == nullptr || newTarget->shouldDrawDragImageWhenOver());
 
         if (newTargetComp != currentlyOverComp)
         {
-            if (DragAndDropTarget* const lastTarget = getCurrentlyOver())
+            if (auto* lastTarget = getCurrentlyOver())
                 if (details.sourceComponent != nullptr && lastTarget->isInterestedInDragSource (details))
                     lastTarget->itemDragExit (details);
 
@@ -153,7 +152,7 @@ public:
 
         if (canDoExternalDrag)
         {
-            const Time now (Time::getCurrentTime());
+            auto now = Time::getCurrentTime();
 
             if (getCurrentlyOver() != nullptr)
                 lastTimeOverTarget = now;
@@ -179,12 +178,18 @@ public:
         {
             deleteSelf();
         }
-        else if (! isMouseButtonDownAnywhere())
+        else
         {
-            if (mouseDragSource != nullptr)
-                mouseDragSource->removeMouseListener (this);
+            if (auto* ms = Desktop::getInstance().getMouseSource (originalMouseIndex))
+            {
+                if (! ms->isDragging())
+                {
+                    if (mouseDragSource != nullptr)
+                        mouseDragSource->removeMouseListener (this);
 
-            deleteSelf();
+                    deleteSelf();
+                }
+            }
         }
     }
 
@@ -217,6 +222,7 @@ private:
     const Point<int> imageOffset;
     bool hasCheckedForExternalDrag = false;
     Time lastTimeOverTarget;
+    int originalMouseIndex;
 
     void updateSize()
     {
@@ -235,13 +241,13 @@ private:
 
     static Component* findDesktopComponentBelow (Point<int> screenPos)
     {
-        Desktop& desktop = Desktop::getInstance();
+        auto& desktop = Desktop::getInstance();
 
-        for (int i = desktop.getNumComponents(); --i >= 0;)
+        for (auto i = desktop.getNumComponents(); --i >= 0;)
         {
-            Component* c = desktop.getComponent(i);
+            auto* c = desktop.getComponent(i);
 
-            if (Component* hit = c->getComponentAt (c->getLocalPoint (nullptr, screenPos)))
+            if (auto* hit = c->getComponentAt (c->getLocalPoint (nullptr, screenPos)))
                 return hit;
         }
 
@@ -251,7 +257,7 @@ private:
     DragAndDropTarget* findTarget (Point<int> screenPos, Point<int>& relativePos,
                                    Component*& resultComponent) const
     {
-        Component* hit = getParentComponent();
+        auto* hit = getParentComponent();
 
         if (hit == nullptr)
             hit = findDesktopComponentBelow (screenPos);
@@ -260,11 +266,11 @@ private:
 
         // (note: use a local copy of this in case the callback runs
         // a modal loop and deletes this object before the method completes)
-        const DragAndDropTarget::SourceDetails details (sourceDetails);
+        auto details = sourceDetails;
 
         while (hit != nullptr)
         {
-            if (DragAndDropTarget* const ddt = dynamic_cast<DragAndDropTarget*> (hit))
+            if (auto* ddt = dynamic_cast<DragAndDropTarget*> (hit))
             {
                 if (ddt->isInterestedInDragSource (details))
                 {
@@ -283,9 +289,9 @@ private:
 
     void setNewScreenPos (Point<int> screenPos)
     {
-        Point<int> newPos (screenPos - imageOffset);
+        auto newPos = screenPos - imageOffset;
 
-        if (Component* p = getParentComponent())
+        if (auto* p = getParentComponent())
             newPos = p->getLocalPoint (nullptr, newPos);
 
         setTopLeftPosition (newPos);
@@ -293,7 +299,7 @@ private:
 
     void sendDragMove (DragAndDropTarget::SourceDetails& details) const
     {
-        if (DragAndDropTarget* const target = getCurrentlyOver())
+        if (auto* target = getCurrentlyOver())
             if (target->isInterestedInDragSource (details))
                 target->itemDragMove (details);
     }
@@ -309,7 +315,7 @@ private:
                 if (ModifierKeys::getCurrentModifiersRealtime().isAnyMouseButtonDown())
                 {
                     StringArray files;
-                    bool canMoveFiles = false;
+                    auto canMoveFiles = false;
 
                     if (owner.shouldDropFilesWhenDraggedExternally (details, files, canMoveFiles) && ! files.isEmpty())
                     {
@@ -339,12 +345,12 @@ private:
     void dismissWithAnimation (const bool shouldSnapBack)
     {
         setVisible (true);
-        ComponentAnimator& animator = Desktop::getInstance().getAnimator();
+        auto& animator = Desktop::getInstance().getAnimator();
 
         if (shouldSnapBack && sourceDetails.sourceComponent != nullptr)
         {
-            const Point<int> target (sourceDetails.sourceComponent->localPointToGlobal (sourceDetails.sourceComponent->getLocalBounds().getCentre()));
-            const Point<int> ourCentre (localPointToGlobal (getLocalBounds().getCentre()));
+            auto target = sourceDetails.sourceComponent->localPointToGlobal (sourceDetails.sourceComponent->getLocalBounds().getCentre());
+            auto ourCentre = localPointToGlobal (getLocalBounds().getCentre());
 
             animator.animateComponent (this,
                                        getBounds() + (target - ourCentre),
@@ -368,126 +374,141 @@ DragAndDropContainer::DragAndDropContainer()
 
 DragAndDropContainer::~DragAndDropContainer()
 {
-    dragImageComponent = nullptr;
 }
 
 void DragAndDropContainer::startDragging (const var& sourceDescription,
                                           Component* sourceComponent,
                                           Image dragImage,
                                           const bool allowDraggingToExternalWindows,
-                                          const Point<int>* imageOffsetFromMouse)
+                                          const Point<int>* imageOffsetFromMouse,
+                                          const MouseInputSource* inputSourceCausingDrag)
 {
-    if (dragImageComponent == nullptr)
+    auto* draggingSource = getMouseInputSourceForDrag (sourceComponent, inputSourceCausingDrag);
+    auto lastMouseDown = draggingSource->getLastMouseDownPosition().roundToInt();
+    Point<int> imageOffset;
+
+    if (dragImage.isNull())
     {
-        MouseInputSource* const draggingSource = Desktop::getInstance().getDraggingMouseSource (0);
+        dragImage = sourceComponent->createComponentSnapshot (sourceComponent->getLocalBounds())
+                       .convertedToFormat (Image::ARGB);
 
-        if (draggingSource == nullptr || ! draggingSource->isDragging())
+        dragImage.multiplyAllAlphas (0.6f);
+
+        auto lo = 150;
+        auto hi = 400;
+
+        auto relPos = sourceComponent->getLocalPoint (nullptr, lastMouseDown);
+        auto clipped = dragImage.getBounds().getConstrainedPoint (relPos);
+        Random random;
+
+        for (auto y = dragImage.getHeight(); --y >= 0;)
         {
-            jassertfalse;   // You must call startDragging() from within a mouseDown or mouseDrag callback!
-            return;
-        }
+            auto dy = (y - clipped.getY()) * (y - clipped.getY());
 
-        const Point<int> lastMouseDown (draggingSource->getLastMouseDownPosition().roundToInt());
-        Point<int> imageOffset;
-
-        if (dragImage.isNull())
-        {
-            dragImage = sourceComponent->createComponentSnapshot (sourceComponent->getLocalBounds())
-                            .convertedToFormat (Image::ARGB);
-
-            dragImage.multiplyAllAlphas (0.6f);
-
-            const int lo = 150;
-            const int hi = 400;
-
-            Point<int> relPos (sourceComponent->getLocalPoint (nullptr, lastMouseDown));
-            Point<int> clipped (dragImage.getBounds().getConstrainedPoint (relPos));
-            Random random;
-
-            for (int y = dragImage.getHeight(); --y >= 0;)
+            for (auto x = dragImage.getWidth(); --x >= 0;)
             {
-                const double dy = (y - clipped.getY()) * (y - clipped.getY());
+                auto dx = x - clipped.getX();
+                auto distance = roundToInt (std::sqrt (dx * dx + dy));
 
-                for (int x = dragImage.getWidth(); --x >= 0;)
+                if (distance > lo)
                 {
-                    const int dx = x - clipped.getX();
-                    const int distance = roundToInt (std::sqrt (dx * dx + dy));
+                    auto alpha = (distance > hi) ? 0
+                                                 : (hi - distance) / (float) (hi - lo)
+                                                     + random.nextFloat() * 0.008f;
 
-                    if (distance > lo)
-                    {
-                        const float alpha = (distance > hi) ? 0
-                                                            : (hi - distance) / (float) (hi - lo)
-                                                                + random.nextFloat() * 0.008f;
-
-                        dragImage.multiplyAlphaAt (x, y, alpha);
-                    }
+                    dragImage.multiplyAlphaAt (x, y, alpha);
                 }
             }
-
-            imageOffset = clipped;
-        }
-        else
-        {
-            if (imageOffsetFromMouse == nullptr)
-                imageOffset = dragImage.getBounds().getCentre();
-            else
-                imageOffset = dragImage.getBounds().getConstrainedPoint (-*imageOffsetFromMouse);
         }
 
-        dragImageComponent = new DragImageComponent (dragImage, sourceDescription, sourceComponent,
-                                                     draggingSource->getComponentUnderMouse(), *this, imageOffset);
-
-        if (allowDraggingToExternalWindows)
-        {
-            if (! Desktop::canUseSemiTransparentWindows())
-                dragImageComponent->setOpaque (true);
-
-            dragImageComponent->addToDesktop (ComponentPeer::windowIgnoresMouseClicks
-                                               | ComponentPeer::windowIsTemporary
-                                               | ComponentPeer::windowIgnoresKeyPresses);
-        }
-        else
-        {
-            if (Component* const thisComp = dynamic_cast<Component*> (this))
-            {
-                thisComp->addChildComponent (dragImageComponent);
-            }
-            else
-            {
-                jassertfalse;   // Your DragAndDropContainer needs to be a Component!
-                return;
-            }
-        }
-
-        static_cast<DragImageComponent*> (dragImageComponent.get())->updateLocation (false, lastMouseDown);
-        dragImageComponent->enterModalState();
-
-       #if JUCE_WINDOWS
-        // Under heavy load, the layered window's paint callback can often be lost by the OS,
-        // so forcing a repaint at least once makes sure that the window becomes visible..
-        if (ComponentPeer* const peer = dragImageComponent->getPeer())
-            peer->performAnyPendingRepaintsNow();
-       #endif
-
-        dragOperationStarted (dragImageComponent->sourceDetails);
+        imageOffset = clipped;
     }
+    else
+    {
+        if (imageOffsetFromMouse == nullptr)
+            imageOffset = dragImage.getBounds().getCentre();
+        else
+            imageOffset = dragImage.getBounds().getConstrainedPoint (-*imageOffsetFromMouse);
+    }
+
+    auto* dragImageComponent = dragImageComponents.add (new DragImageComponent (dragImage, sourceDescription, sourceComponent,
+                                                                                draggingSource, *this, imageOffset));
+
+    if (allowDraggingToExternalWindows)
+    {
+        if (! Desktop::canUseSemiTransparentWindows())
+            dragImageComponent->setOpaque (true);
+
+        dragImageComponent->addToDesktop (ComponentPeer::windowIgnoresMouseClicks
+                                          | ComponentPeer::windowIsTemporary
+                                          | ComponentPeer::windowIgnoresKeyPresses);
+    }
+    else
+    {
+        if (auto* thisComp = dynamic_cast<Component*> (this))
+        {
+            thisComp->addChildComponent (dragImageComponent);
+        }
+        else
+        {
+            jassertfalse;   // Your DragAndDropContainer needs to be a Component!
+            return;
+        }
+    }
+
+    dragImageComponent->updateLocation (false, lastMouseDown);
+
+   #if JUCE_WINDOWS
+    // Under heavy load, the layered window's paint callback can often be lost by the OS,
+    // so forcing a repaint at least once makes sure that the window becomes visible..
+    if (auto* peer = dragImageComponent->getPeer())
+        peer->performAnyPendingRepaintsNow();
+   #endif
+
+    dragOperationStarted (dragImageComponent->sourceDetails);
 }
 
 bool DragAndDropContainer::isDragAndDropActive() const
 {
-    return dragImageComponent != nullptr;
+    return dragImageComponents.size() > 0;
+}
+
+int DragAndDropContainer::getNumCurrentDrags() const
+{
+    return dragImageComponents.size();
 }
 
 var DragAndDropContainer::getCurrentDragDescription() const
 {
-    return dragImageComponent != nullptr ? dragImageComponent->sourceDetails.description
-                                         : var();
+    // If you are performing drag and drop in a multi-touch environment then
+    // you should use the getDragDescriptionForIndex() method instead!
+    jassert (dragImageComponents.size() < 2);
+
+    return dragImageComponents.size() != 0 ? dragImageComponents[0]->sourceDetails.description
+                                           : var();
+}
+
+var DragAndDropContainer::getDragDescriptionForIndex (int index) const
+{
+    if (! isPositiveAndBelow (index, dragImageComponents.size()))
+        return {};
+
+    return dragImageComponents.getUnchecked (index)->sourceDetails.description;
 }
 
 void DragAndDropContainer::setCurrentDragImage (const Image& newImage)
 {
-    if (dragImageComponent != nullptr)
-        dragImageComponent->updateImage (newImage);
+    // If you are performing drag and drop in a multi-touch environment then
+    // you should use the setDragImageForIndex() method instead!
+    jassert (dragImageComponents.size() < 2);
+
+    dragImageComponents[0]->updateImage (newImage);
+}
+
+void DragAndDropContainer::setDragImageForIndex (int index, const Image& newImage)
+{
+    if (isPositiveAndBelow (index, dragImageComponents.size()))
+        dragImageComponents.getUnchecked (index)->updateImage (newImage);
 }
 
 DragAndDropContainer* DragAndDropContainer::findParentDragContainerFor (Component* c)
@@ -507,6 +528,38 @@ bool DragAndDropContainer::shouldDropTextWhenDraggedExternally (const DragAndDro
 
 void DragAndDropContainer::dragOperationStarted (const DragAndDropTarget::SourceDetails&)  {}
 void DragAndDropContainer::dragOperationEnded (const DragAndDropTarget::SourceDetails&)    {}
+
+const MouseInputSource* DragAndDropContainer::getMouseInputSourceForDrag (Component* sourceComponent,
+                                                                          const MouseInputSource* inputSourceCausingDrag)
+{
+    if (inputSourceCausingDrag == nullptr)
+    {
+        auto minDistance = std::numeric_limits<float>::max();
+        auto& desktop = Desktop::getInstance();
+
+        auto centrePoint = sourceComponent ? sourceComponent->getScreenBounds().getCentre().toFloat() : Point<float>();
+        auto numDragging = desktop.getNumDraggingMouseSources();
+
+        for (auto i = 0; i < numDragging; ++i)
+        {
+            if (auto* ms = desktop.getDraggingMouseSource (i))
+            {
+                auto distance =  ms->getScreenPosition().getDistanceSquaredFrom (centrePoint);
+
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                    inputSourceCausingDrag = ms;
+                }
+            }
+        }
+    }
+
+    // You must call startDragging() from within a mouseDown or mouseDrag callback!
+    jassert (inputSourceCausingDrag != nullptr && inputSourceCausingDrag->isDragging());
+
+    return inputSourceCausingDrag;
+}
 
 //==============================================================================
 DragAndDropTarget::SourceDetails::SourceDetails (const var& desc, Component* comp, Point<int> pos) noexcept
