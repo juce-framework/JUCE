@@ -241,7 +241,7 @@ public:
             {
                 #if JUCE_OPENGL3
                 if (vertexArrayObject != 0)
-                    glBindVertexArray (vertexArrayObject);
+                    context.extensions.glBindVertexArray (vertexArrayObject);
                 #endif
                 paintComponent();
 

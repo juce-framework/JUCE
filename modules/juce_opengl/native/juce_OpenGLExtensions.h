@@ -64,9 +64,6 @@
     USE_FUNCTION (glUniformMatrix2fv,       void, (GLint p1, GLsizei p2, GLboolean p3, const GLfloat* p4), (p1, p2, p3, p4))\
     USE_FUNCTION (glUniformMatrix3fv,       void, (GLint p1, GLsizei p2, GLboolean p3, const GLfloat* p4), (p1, p2, p3, p4))\
     USE_FUNCTION (glUniformMatrix4fv,       void, (GLint p1, GLsizei p2, GLboolean p3, const GLfloat* p4), (p1, p2, p3, p4))\
-    USE_FUNCTION (glGenVertexArrays,        void, (GLsizei p1, GLuint* p2),(p1,p2))\
-    USE_FUNCTION (glBindVertexArray,        void, (GLuint p1),(p1)) \
-    USE_FUNCTION (glDeleteVertexArrays,     void, (GLsizei p1, const GLuint* p2),(p1,p2))\
     USE_FUNCTION (glMapBuffer,              void*, (GLenum p1, GLenum p2),(p1,p2))\
     USE_FUNCTION (glUnmapBuffer,            GLboolean,(GLenum p1),(p1))\
     USE_FUNCTION (glCopyBufferSubData,       void,(GLenum p1, GLenum p2, GLintptr p3,GLintptr p4, GLsizeiptr p5),(p1,p2,p3,p4,p5))\
@@ -102,9 +99,9 @@
     @see OpenGLExtensionFunctions
 */
 #define JUCE_GL_VERTEXBUFFER_FUNCTIONS(USE_FUNCTION) \
-    //USE_FUNCTION (glGenVertexArrays,        void, (GLsizei p1, GLuint* p2), (p1, p2))\
-    //USE_FUNCTION (glDeleteVertexArrays,     void, (GLsizei p1, const GLuint* p2), (p1, p2))\
-    //USE_FUNCTION (glBindVertexArray,        void, (GLuint p1), (p1))
+    USE_FUNCTION (glGenVertexArrays,        void, (GLsizei p1, GLuint* p2), (p1, p2))\
+    USE_FUNCTION (glDeleteVertexArrays,     void, (GLsizei p1, const GLuint* p2), (p1, p2))\
+    USE_FUNCTION (glBindVertexArray,        void, (GLuint p1), (p1))
 
 
 /** This class contains a generated list of OpenGL extension functions, which are either dynamically loaded
