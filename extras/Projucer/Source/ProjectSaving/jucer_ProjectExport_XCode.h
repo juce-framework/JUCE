@@ -67,6 +67,9 @@ public:
         {
             if (getScreenOrientationValue().toString().isEmpty())
                 getScreenOrientationValue() = "portraitlandscape";
+
+            if (getDeviceFamilyValue().toString().isEmpty())
+                getDeviceFamilyValue() = "1,2";
         }
     }
 
@@ -99,6 +102,9 @@ public:
 
     Value getDuplicateResourcesFolderForAppExtensionValue()     { return getSetting (Ids::iosAppExtensionDuplicateResourcesFolder); }
     bool  shouldDuplicateResourcesFolderForAppExtension() const { return settings   [Ids::iosAppExtensionDuplicateResourcesFolder]; }
+
+    Value getDeviceFamilyValue()                     { return getSetting (Ids::iosDeviceFamily); }
+    String getDeviceFamilyString() const             { return settings   [Ids::iosDeviceFamily]; }
 
     Value  getScreenOrientationValue()               { return getSetting (Ids::iosScreenOrientation); }
     String getScreenOrientationString() const        { return settings   [Ids::iosScreenOrientation]; }
@@ -191,11 +197,17 @@ public:
                                                          "Don't add resources folder to app extension", "Enabled"),
                            "Enable this to prevent the Projucer from creating a resources folder for AUv3 app extensions.");
 
+            static const char* deviceFamilies[] = { "iPhone", "iPad", "Universal", nullptr};
+            static const char* deviceFamilyValues[] = { "1", "2", "1,2" };
+
+            props.add (new ChoicePropertyComponent (getDeviceFamilyValue(), "Device Family", StringArray (deviceFamilies), Array<var> (deviceFamilyValues)),
+                       "The device family to target.");
+
             static const char* orientations[] = { "Portrait and Landscape", "Portrait", "Landscape", nullptr };
             static const char* orientationValues[] = { "portraitlandscape", "portrait", "landscape", nullptr };
 
-            props.add (new ChoicePropertyComponent (getScreenOrientationValue(), "Screen orientation",StringArray (orientations), Array<var> (orientationValues)),
-                       "The screen orientations that this app should support");
+            props.add (new ChoicePropertyComponent (getScreenOrientationValue(), "Screen orientation", StringArray (orientations), Array<var> (orientationValues)),
+                       "The screen orientations that this app should support.");
 
             props.add (new BooleanPropertyComponent (getSetting ("UIFileSharingEnabled"), "File Sharing Enabled", "Enabled"),
                        "Enable this to expose your app's files to iTunes.");
@@ -2096,7 +2108,7 @@ private:
         {
             s.add ("\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\" = " + config.codeSignIdentity.get().quoted());
             s.add ("SDKROOT = iphoneos");
-            s.add ("TARGETED_DEVICE_FAMILY = \"1,2\"");
+            s.add (String ("TARGETED_DEVICE_FAMILY = \"") + getDeviceFamilyString() + String ("\""));
 
             const String iosVersion (config.iosDeploymentTarget.get());
             if (iosVersion.isNotEmpty() && iosVersion != osxVersionDefault)
