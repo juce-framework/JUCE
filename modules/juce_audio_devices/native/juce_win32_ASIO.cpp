@@ -508,11 +508,10 @@ public:
         if (err == ASE_OK)
         {
             buffersCreated = true;
-
             tempBuffer.calloc (totalBuffers * currentBlockSizeSamples + 32);
 
             int n = 0;
-            Array <int> types;
+            Array<int> types;
             currentBitDepth = 16;
 
             for (int i = 0; i < (int) totalNumInputChans; ++i)

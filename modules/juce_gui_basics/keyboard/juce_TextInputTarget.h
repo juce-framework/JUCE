@@ -62,7 +62,7 @@ public:
     /** Sets a number of temporarily underlined sections.
         This is needed by MS Windows input method UI.
     */
-    virtual void setTemporaryUnderlining (const Array <Range<int> >& underlinedRegions) = 0;
+    virtual void setTemporaryUnderlining (const Array<Range<int>>& underlinedRegions) = 0;
 
     /** Returns a specified sub-section of the text. */
     virtual String getTextInRange (const Range<int>& range) const = 0;

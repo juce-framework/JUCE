@@ -24,7 +24,7 @@ namespace juce
 {
 
 UnitTest::UnitTest (const String& nm, const String& ctg)
-    : name (nm), category (ctg), runner (nullptr)
+    : name (nm), category (ctg)
 {
     getAllTests().add (this);
 }
@@ -114,16 +114,8 @@ Random UnitTest::getRandom() const
 }
 
 //==============================================================================
-UnitTestRunner::UnitTestRunner()
-    : currentTest (nullptr),
-      assertOnFailure (true),
-      logPasses (false)
-{
-}
-
-UnitTestRunner::~UnitTestRunner()
-{
-}
+UnitTestRunner::UnitTestRunner() {}
+UnitTestRunner::~UnitTestRunner() {}
 
 void UnitTestRunner::setAssertOnFailure (bool shouldAssert) noexcept
 {
@@ -160,17 +152,17 @@ void UnitTestRunner::runTests (const Array<UnitTest*>& tests, int64 randomSeed)
     randomForTest = Random (randomSeed);
     logMessage ("Random seed: 0x" + String::toHexString (randomSeed));
 
-    for (int i = 0; i < tests.size(); ++i)
+    for (auto* t : tests)
     {
         if (shouldAbortTests())
             break;
 
        #if JUCE_EXCEPTIONS_DISABLED
-        tests.getUnchecked(i)->performTest (this);
+        t->performTest (this);
        #else
         try
         {
-            tests.getUnchecked(i)->performTest (this);
+            t->performTest (this);
         }
         catch (...)
         {
@@ -207,7 +199,7 @@ void UnitTestRunner::beginNewTest (UnitTest* const test, const String& subCatego
     endTest();
     currentTest = test;
 
-    TestResult* const r = new TestResult();
+    auto* r = new TestResult();
     results.add (r);
     r->unitTestName = test->getName();
     r->subcategoryName = subCategory;
@@ -222,10 +214,8 @@ void UnitTestRunner::beginNewTest (UnitTest* const test, const String& subCatego
 
 void UnitTestRunner::endTest()
 {
-    if (results.size() > 0)
+    if (auto* r = results.getLast())
     {
-        TestResult* const r = results.getLast();
-
         if (r->failures > 0)
         {
             String m ("FAILED!!  ");
@@ -248,7 +238,7 @@ void UnitTestRunner::addPass()
     {
         const ScopedLock sl (results.getLock());
 
-        TestResult* const r = results.getLast();
+        auto* r = results.getLast();
         jassert (r != nullptr); // You need to call UnitTest::beginTest() before performing any tests!
 
         r->passes++;
@@ -269,7 +259,7 @@ void UnitTestRunner::addFail (const String& failureMessage)
     {
         const ScopedLock sl (results.getLock());
 
-        TestResult* const r = results.getLast();
+        auto* r = results.getLast();
         jassert (r != nullptr); // You need to call UnitTest::beginTest() before performing any tests!
 
         r->failures++;

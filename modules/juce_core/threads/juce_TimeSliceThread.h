@@ -135,7 +135,7 @@ public:
     //==============================================================================
 private:
     CriticalSection callbackLock, listLock;
-    Array <TimeSliceClient*> clients;
+    Array<TimeSliceClient*> clients;
     TimeSliceClient* clientBeingCalled = nullptr;
 
     TimeSliceClient* getNextClient (int index) const;

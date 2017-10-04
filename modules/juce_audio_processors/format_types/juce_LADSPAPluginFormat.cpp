@@ -60,9 +60,9 @@ public:
 
     typedef ReferenceCountedObjectPtr<LADSPAModuleHandle> Ptr;
 
-    static Array <LADSPAModuleHandle*>& getActiveModules()
+    static Array<LADSPAModuleHandle*>& getActiveModules()
     {
-        static Array <LADSPAModuleHandle*> activeModules;
+        static Array<LADSPAModuleHandle*> activeModules;
         return activeModules;
     }
 
@@ -571,7 +571,7 @@ private:
 LADSPAPluginFormat::LADSPAPluginFormat() {}
 LADSPAPluginFormat::~LADSPAPluginFormat() {}
 
-void LADSPAPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& results,
+void LADSPAPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& results,
                                               const String& fileOrIdentifier)
 {
     if (! fileMightContainThisPluginType (fileOrIdentifier))

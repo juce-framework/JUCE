@@ -36,7 +36,6 @@ public:
         : PropertyComponent (name),
           owner (p),
           index (paramIndex),
-          paramHasChanged (false),
           slider (p, paramIndex)
     {
         startTimer (100);
@@ -87,9 +86,9 @@ private:
     public:
         ParamSlider (AudioProcessor& p, int paramIndex)  : owner (p), index (paramIndex)
         {
-            const int steps = owner.getParameterNumSteps (index);
-            const AudioProcessorParameter::Category category = p.getParameterCategory (index);
-            const bool isLevelMeter = (((category & 0xffff0000) >> 16) == 2);
+            auto steps = owner.getParameterNumSteps (index);
+            auto category = p.getParameterCategory (index);
+            bool isLevelMeter = (((category & 0xffff0000) >> 16) == 2);
 
             if (steps > 1 && steps < 0x7fffffff)
                 setRange (0.0, 1.0, 1.0 / (steps - 1.0));
@@ -104,7 +103,7 @@ private:
 
         void valueChanged() override
         {
-            const float newVal = (float) getValue();
+            auto newVal = static_cast<float> (getValue());
 
             if (owner.getParameter (index) != newVal)
             {
@@ -138,7 +137,7 @@ private:
 
     AudioProcessor& owner;
     const int index;
-    bool volatile paramHasChanged;
+    bool volatile paramHasChanged = false;
     ParamSlider slider;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProcessorParameterPropertyComp)
@@ -154,18 +153,19 @@ GenericAudioProcessorEditor::GenericAudioProcessorEditor (AudioProcessor* const 
 
     addAndMakeVisible (panel);
 
-    Array <PropertyComponent*> params;
+    Array<PropertyComponent*> params;
 
-    const int numParams = p->getNumParameters();
+    auto numParams = p->getNumParameters();
     int totalHeight = 0;
 
     for (int i = 0; i < numParams; ++i)
     {
-        String name (p->getParameterName (i));
+        auto name = p->getParameterName (i);
+
         if (name.trim().isEmpty())
             name = "Unnamed";
 
-        ProcessorParameterPropertyComp* const pc = new ProcessorParameterPropertyComp (name, *p, i);
+        auto* pc = new ProcessorParameterPropertyComp (name, *p, i);
         params.add (pc);
         totalHeight += pc->getPreferredHeight();
     }

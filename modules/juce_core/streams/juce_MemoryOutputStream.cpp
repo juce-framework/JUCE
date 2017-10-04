@@ -24,24 +24,21 @@ namespace juce
 {
 
 MemoryOutputStream::MemoryOutputStream (const size_t initialSize)
-  : blockToUse (&internalBlock), externalData (nullptr),
-    position (0), size (0), availableSize (0)
+  : blockToUse (&internalBlock)
 {
     internalBlock.setSize (initialSize, false);
 }
 
 MemoryOutputStream::MemoryOutputStream (MemoryBlock& memoryBlockToWriteTo,
                                         const bool appendToExistingBlockContent)
-  : blockToUse (&memoryBlockToWriteTo), externalData (nullptr),
-    position (0), size (0), availableSize (0)
+  : blockToUse (&memoryBlockToWriteTo)
 {
     if (appendToExistingBlockContent)
         position = size = memoryBlockToWriteTo.getSize();
 }
 
 MemoryOutputStream::MemoryOutputStream (void* destBuffer, size_t destBufferSize)
-  : blockToUse (nullptr), externalData (destBuffer),
-    position (0), size (0), availableSize (destBufferSize)
+  : externalData (destBuffer), availableSize (destBufferSize)
 {
     jassert (externalData != nullptr); // This must be a valid pointer.
 }
@@ -77,7 +74,7 @@ void MemoryOutputStream::reset() noexcept
 char* MemoryOutputStream::prepareToWrite (size_t numBytes)
 {
     jassert ((ssize_t) numBytes >= 0);
-    size_t storageNeeded = position + numBytes;
+    auto storageNeeded = position + numBytes;
 
     char* data;
 
@@ -96,7 +93,7 @@ char* MemoryOutputStream::prepareToWrite (size_t numBytes)
         data = static_cast<char*> (externalData);
     }
 
-    char* const writePointer = data + position;
+    auto* writePointer = data + position;
     position += numBytes;
     size = jmax (size, position);
     return writePointer;
@@ -109,7 +106,7 @@ bool MemoryOutputStream::write (const void* const buffer, size_t howMany)
     if (howMany == 0)
         return true;
 
-    if (char* dest = prepareToWrite (howMany))
+    if (auto* dest = prepareToWrite (howMany))
     {
         memcpy (dest, buffer, howMany);
         return true;
@@ -123,7 +120,7 @@ bool MemoryOutputStream::writeRepeatedByte (uint8 byte, size_t howMany)
     if (howMany == 0)
         return true;
 
-    if (char* dest = prepareToWrite (howMany))
+    if (auto* dest = prepareToWrite (howMany))
     {
         memset (dest, byte, howMany);
         return true;
@@ -134,7 +131,7 @@ bool MemoryOutputStream::writeRepeatedByte (uint8 byte, size_t howMany)
 
 bool MemoryOutputStream::appendUTF8Char (juce_wchar c)
 {
-    if (char* dest = prepareToWrite (CharPointer_UTF8::getBytesRequiredFor (c)))
+    if (auto* dest = prepareToWrite (CharPointer_UTF8::getBytesRequiredFor (c)))
     {
         CharPointer_UTF8 (dest).write (c);
         return true;
@@ -191,7 +188,7 @@ int64 MemoryOutputStream::writeFromInputStream (InputStream& source, int64 maxNu
 
 String MemoryOutputStream::toUTF8() const
 {
-    const char* const d = static_cast<const char*> (getData());
+    auto* d = static_cast<const char*> (getData());
     return String (CharPointer_UTF8 (d), CharPointer_UTF8 (d + getDataSize()));
 }
 
@@ -202,7 +199,7 @@ String MemoryOutputStream::toString() const
 
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const MemoryOutputStream& streamToRead)
 {
-    const size_t dataSize = streamToRead.getDataSize();
+    auto dataSize = streamToRead.getDataSize();
 
     if (dataSize > 0)
         stream.write (streamToRead.getData(), dataSize);

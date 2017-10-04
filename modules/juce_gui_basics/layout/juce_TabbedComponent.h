@@ -211,12 +211,11 @@ protected:
 
 private:
     //==============================================================================
-    Array <WeakReference<Component> > contentComponents;
+    Array<WeakReference<Component>> contentComponents;
     WeakReference<Component> panelComponent;
-    int tabDepth, outlineThickness, edgeIndent;
+    int tabDepth = 30, outlineThickness = 1, edgeIndent = 0;
 
-    class ButtonBar;
-    friend class ButtonBar;
+    struct ButtonBar;
     void changeCallback (int newCurrentTabIndex, const String& newTabName);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TabbedComponent)

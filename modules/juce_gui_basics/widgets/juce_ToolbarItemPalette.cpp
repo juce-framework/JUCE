@@ -30,14 +30,14 @@ namespace juce
 ToolbarItemPalette::ToolbarItemPalette (ToolbarItemFactory& tbf, Toolbar& bar)
     : factory (tbf), toolbar (bar)
 {
-    Component* const itemHolder = new Component();
+    auto* itemHolder = new Component();
     viewport.setViewedComponent (itemHolder);
 
     Array<int> allIds;
     factory.getAllToolbarItemIds (allIds);
 
-    for (int i = 0; i < allIds.size(); ++i)
-        addComponent (allIds.getUnchecked (i), -1);
+    for (auto& i : allIds)
+        addComponent (i, -1);
 
     addAndMakeVisible (viewport);
 }
@@ -49,7 +49,7 @@ ToolbarItemPalette::~ToolbarItemPalette()
 //==============================================================================
 void ToolbarItemPalette::addComponent (const int itemId, const int index)
 {
-    if (ToolbarItemComponent* const tc = Toolbar::createItem (factory, itemId))
+    if (auto* tc = Toolbar::createItem (factory, itemId))
     {
         items.insert (index, tc);
         viewport.getViewedComponent()->addAndMakeVisible (tc, index);
@@ -63,7 +63,7 @@ void ToolbarItemPalette::addComponent (const int itemId, const int index)
 
 void ToolbarItemPalette::replaceComponent (ToolbarItemComponent& comp)
 {
-    const int index = items.indexOf (&comp);
+    auto index = items.indexOf (&comp);
     jassert (index >= 0);
     items.removeObject (&comp, false);
 
@@ -75,19 +75,17 @@ void ToolbarItemPalette::resized()
 {
     viewport.setBoundsInset (BorderSize<int> (1));
 
-    Component* const itemHolder = viewport.getViewedComponent();
+    auto* itemHolder = viewport.getViewedComponent();
 
     const int indent = 8;
     const int preferredWidth = viewport.getWidth() - viewport.getScrollBarThickness() - indent;
     const int height = toolbar.getThickness();
-    int x = indent;
-    int y = indent;
+    auto x = indent;
+    auto y = indent;
     int maxX = 0;
 
-    for (int i = 0; i < items.size(); ++i)
+    for (auto* tc : items)
     {
-        ToolbarItemComponent* const tc = items.getUnchecked(i);
-
         tc->setStyle (toolbar.getStyle());
 
         int preferredSize = 1, minSize = 1, maxSize = 1;

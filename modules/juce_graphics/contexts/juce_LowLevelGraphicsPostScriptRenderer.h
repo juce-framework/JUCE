@@ -94,18 +94,16 @@ protected:
     struct SavedState
     {
         SavedState();
+        SavedState& operator= (const SavedState&) = delete;
         ~SavedState();
 
         RectangleList<int> clip;
         int xOffset, yOffset;
         FillType fillType;
         Font font;
-
-    private:
-        SavedState& operator= (const SavedState&);
     };
 
-    OwnedArray <SavedState> stateStack;
+    OwnedArray<SavedState> stateStack;
 
     void writeClip();
     void writeColour (Colour colour);

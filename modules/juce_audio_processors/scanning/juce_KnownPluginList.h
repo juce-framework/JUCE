@@ -95,7 +95,7 @@ public:
     */
     bool scanAndAddFile (const String& possiblePluginFileOrIdentifier,
                          bool dontRescanIfAlreadyInList,
-                         OwnedArray <PluginDescription>& typesFound,
+                         OwnedArray<PluginDescription>& typesFound,
                          AudioPluginFormat& formatToUse);
 
     /** Tells a custom scanner that a scan has finished, and it can release any resources. */
@@ -112,7 +112,7 @@ public:
     */
     void scanAndAddDragAndDroppedFiles (AudioPluginFormatManager& formatManager,
                                         const StringArray& filenames,
-                                        OwnedArray <PluginDescription>& typesFound);
+                                        OwnedArray<PluginDescription>& typesFound);
 
     //==============================================================================
     /** Returns the list of blacklisted files. */
@@ -194,7 +194,7 @@ public:
             @returns true if the plugin loaded, false if it crashed
         */
         virtual bool findPluginTypesFor (AudioPluginFormat& format,
-                                         OwnedArray <PluginDescription>& result,
+                                         OwnedArray<PluginDescription>& result,
                                          const String& fileOrIdentifier) = 0;
 
         /** Called when a scan has finished, to allow clean-up of resources. */

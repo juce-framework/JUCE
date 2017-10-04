@@ -64,7 +64,7 @@ private:
     ToolbarItemFactory& factory;
     Toolbar& toolbar;
     Viewport viewport;
-    OwnedArray <ToolbarItemComponent> items;
+    OwnedArray<ToolbarItemComponent> items;
 
     friend class Toolbar;
     void replaceComponent (ToolbarItemComponent&);

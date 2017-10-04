@@ -132,7 +132,7 @@ public:
     float getDescent() const override;
     float getHeightToPointsFactor() const override;
     float getStringWidth (const String&) override;
-    void getGlyphPositions (const String&, Array <int>& glyphs, Array<float>& xOffsets) override;
+    void getGlyphPositions (const String&, Array<int>& glyphs, Array<float>& xOffsets) override;
     bool getOutlineForGlyph (int glyphNumber, Path&) override;
     EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform&, float fontHeight) override;
 

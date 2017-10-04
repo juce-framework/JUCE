@@ -174,7 +174,7 @@ public:
     void addElement (ElementBase* newElement);
 
     //==============================================================================
-    OwnedArray <ElementBase> elements;
+    OwnedArray<ElementBase> elements;
     bool usesNonZeroWinding;
 
 private:
