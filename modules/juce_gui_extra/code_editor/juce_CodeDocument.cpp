@@ -720,7 +720,7 @@ CodeDocument::Position CodeDocument::findWordBreakBefore (const Position& positi
 
 void CodeDocument::findTokenContaining (const Position& pos, Position& start, Position& end) const noexcept
 {
-	auto isTokenCharacter = [] (juce_wchar c)  { return CharacterFunctions::isLetterOrDigit (c) || c == '.' || c == '_'; };
+    auto isTokenCharacter = [] (juce_wchar c)  { return CharacterFunctions::isLetterOrDigit (c) || c == '.' || c == '_'; };
 
     end = pos;
     while (isTokenCharacter (end.getCharacter()))
