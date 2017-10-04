@@ -30,6 +30,7 @@ target_compile_definitions(juce PUBLIC
     JUCE_WINDOWS
     JUCE_STANDALONE_APPLICATION
     JUCE_INCLUDE_ZLIB_CODE=0
+    JUCE_OPENGL3
 )
 
 target_include_directories(juce PUBLIC
