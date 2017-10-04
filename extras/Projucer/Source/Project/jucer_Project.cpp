@@ -148,6 +148,9 @@ void Project::setMissingDefaultValues()
     if (! projectRoot.hasProperty (Ids::cppLanguageStandard) && ! setCppVersionFromOldExporterSettings())
         getCppStandardValue() = "11";
 
+    if (getCompanyCopyright().toString().isEmpty())
+        getCompanyCopyright() = getCompanyName().toString();
+
     ProjucerApplication::getApp().updateNewlyOpenedProject (*this);
 }
 
@@ -628,6 +631,9 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 
     props.add (new TextPropertyComponent (getCompanyName(), "Company Name", 256, false),
                "Your company name, which will be added to the properties of the binary where possible");
+
+    props.add (new TextPropertyComponent (getCompanyCopyright(), "Company Copyright", 256, false),
+               "Your company copyright, which will be added to the properties of the binary where possible");
 
     props.add (new TextPropertyComponent (getCompanyWebsite(), "Company Website", 256, false),
                "Your company website, which will be added to the properties of the binary where possible");

@@ -45,6 +45,7 @@ namespace Ids
     DECLARE_ID (info);
     DECLARE_ID (description);
     DECLARE_ID (companyName);
+    DECLARE_ID (companyCopyright);
     DECLARE_ID (companyWebsite);
     DECLARE_ID (companyEmail);
     DECLARE_ID (displaySplashScreen);

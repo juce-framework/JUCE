@@ -93,6 +93,7 @@ public:
     String getDefaultAAXIdentifier()                    { return getDefaultBundleIdentifier(); }
 
     Value getCompanyName()                              { return getProjectValue (Ids::companyName); }
+    Value getCompanyCopyright()                         { return getProjectValue (Ids::companyCopyright); }
     Value getCompanyWebsite()                           { return getProjectValue (Ids::companyWebsite); }
     Value getCompanyEmail()                             { return getProjectValue (Ids::companyEmail); }
 

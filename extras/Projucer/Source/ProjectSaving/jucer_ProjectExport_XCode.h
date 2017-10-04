@@ -1174,7 +1174,7 @@ public:
             addPlistDictionaryKey (dict, "CFBundleSignature",           xcodeBundleSignature);
             addPlistDictionaryKey (dict, "CFBundleShortVersionString",  owner.project.getVersionString());
             addPlistDictionaryKey (dict, "CFBundleVersion",             owner.project.getVersionString());
-            addPlistDictionaryKey (dict, "NSHumanReadableCopyright",    owner.project.getCompanyName().toString());
+            addPlistDictionaryKey (dict, "NSHumanReadableCopyright",    owner.project.getCompanyCopyright().toString());
             addPlistDictionaryKeyBool (dict, "NSHighResolutionCapable", true);
 
             StringArray documentExtensions;

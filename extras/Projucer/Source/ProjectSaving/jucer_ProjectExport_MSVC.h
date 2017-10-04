@@ -1677,6 +1677,7 @@ protected:
            << "    BEGIN" << newLine;
 
         writeRCValue (mo, "CompanyName", project.getCompanyName().toString());
+        writeRCValue (mo, "LegalCopyright", project.getCompanyCopyright().toString());
         writeRCValue (mo, "FileDescription", project.getTitle());
         writeRCValue (mo, "FileVersion", version);
         writeRCValue (mo, "ProductName", project.getTitle());
