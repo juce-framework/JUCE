@@ -953,9 +953,12 @@ public:
 
     void mouseMove()
     {
+        auto isTwoValue   = (style == TwoValueHorizontal   || style == TwoValueVertical);
+        auto isThreeValue = (style == ThreeValueHorizontal || style == ThreeValueVertical);
+
         if (showPopupOnHover
-             && style != TwoValueHorizontal
-             && style != TwoValueVertical)
+             && ! isTwoValue
+             && ! isThreeValue)
         {
             if (owner.isMouseOver (true))
             {
@@ -975,11 +978,23 @@ public:
 
     void showPopupDisplay()
     {
+        if (style == IncDecButtons)
+            return;
+
         if (popupDisplay == nullptr)
         {
             popupDisplay = new PopupDisplayComponent (owner);
 
-            updatePopupDisplay (getValue());
+            if (style == SliderStyle::TwoValueHorizontal
+                || style == SliderStyle::TwoValueVertical)
+            {
+                updatePopupDisplay (sliderBeingDragged == 2 ? getMaxValue()
+                                                            : getMinValue());
+            }
+            else
+            {
+                updatePopupDisplay (getValue());
+            }
 
             if (parentForPopupDisplay != nullptr)
                 parentForPopupDisplay->addChildComponent (popupDisplay);
