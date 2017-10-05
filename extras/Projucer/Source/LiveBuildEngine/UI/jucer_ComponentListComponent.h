@@ -56,6 +56,7 @@ public:
 
     void classListChanged (const ClassDatabase::ClassList& newClasses) override
     {
+        rootItem->clearSubItems();
         static_cast<NamespaceItem*> (rootItem.get())->setNamespace (&newClasses.globalNamespace);
     }
 
