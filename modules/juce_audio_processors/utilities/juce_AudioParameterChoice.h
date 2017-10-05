@@ -67,6 +67,7 @@ public:
 private:
     //==============================================================================
     float value, defaultValue;
+    const int maxIndex;
 
     float getValue() const override;
     void setValue (float newValue) override;
