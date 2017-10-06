@@ -238,6 +238,9 @@ public:
     */
     ScrollBar& getHorizontalScrollBar() noexcept                { return *horizontalScrollBar; }
 
+    /** Re-instantiates the scrollbars, which is only really useful if you've overridden createScrollBarComponent(). */
+    void recreateScrollbars();
+
     /** True if there's any off-screen content that could be scrolled vertically,
         or false if everything is currently visible.
     */

@@ -35,14 +35,10 @@ Viewport::Viewport (const String& name)  : Component (name)
 
     scrollBarThickness = getLookAndFeel().getDefaultScrollbarWidth();
 
-    addChildComponent (verticalScrollBar   = createScrollBarComponent (true));
-    addChildComponent (horizontalScrollBar = createScrollBarComponent (false));
-
-    getVerticalScrollBar().addListener (this);
-    getHorizontalScrollBar().addListener (this);
-
     setInterceptsMouseClicks (false, true);
     setWantsKeyboardFocus (true);
+
+    recreateScrollbars();
 }
 
 Viewport::~Viewport()
@@ -95,6 +91,20 @@ void Viewport::setViewedComponent (Component* const newViewedComponent, const bo
         viewedComponentChanged (contentComp);
         updateVisibleArea();
     }
+}
+
+void Viewport::recreateScrollbars()
+{
+    verticalScrollBar = nullptr;
+    horizontalScrollBar = nullptr;
+
+    addChildComponent (verticalScrollBar   = createScrollBarComponent (true));
+    addChildComponent (horizontalScrollBar = createScrollBarComponent (false));
+
+    getVerticalScrollBar().addListener (this);
+    getHorizontalScrollBar().addListener (this);
+
+    resized();
 }
 
 int Viewport::getMaximumVisibleWidth() const            { return contentHolder.getWidth(); }
