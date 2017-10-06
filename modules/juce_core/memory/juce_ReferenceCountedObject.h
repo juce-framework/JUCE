@@ -212,6 +212,7 @@ private:
     {
         typedef ReferenceCountedObjectPtr<MyClass> Ptr;
         ...
+    }
     @endcode
 
     @see ReferenceCountedObject, ReferenceCountedObjectArray
