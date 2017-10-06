@@ -2127,7 +2127,7 @@
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_MSVC.h">
       <Filter>Projucer\ProjectSaving</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_XCode.h">
+    <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_Xcode.h">
       <Filter>Projucer\ProjectSaving</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExporter.h">

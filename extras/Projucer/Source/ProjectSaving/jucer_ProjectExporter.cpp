@@ -30,7 +30,7 @@
 
 #include "jucer_ProjectExport_Make.h"
 #include "jucer_ProjectExport_MSVC.h"
-#include "jucer_ProjectExport_XCode.h"
+#include "jucer_ProjectExport_Xcode.h"
 #include "jucer_ProjectExport_Android.h"
 #include "jucer_ProjectExport_CodeBlocks.h"
 
@@ -46,8 +46,8 @@ Array<ProjectExporter::ExporterTypeInfo> ProjectExporter::getExporterTypes()
 {
     Array<ProjectExporter::ExporterTypeInfo> types;
 
-    addType (types, XCodeProjectExporter::getNameMac(),          BinaryData::export_xcode_svg,          BinaryData::export_xcode_svgSize);
-    addType (types, XCodeProjectExporter::getNameiOS(),          BinaryData::export_xcode_svg,          BinaryData::export_xcode_svgSize);
+    addType (types, XcodeProjectExporter::getNameMac(),          BinaryData::export_xcode_svg,          BinaryData::export_xcode_svgSize);
+    addType (types, XcodeProjectExporter::getNameiOS(),          BinaryData::export_xcode_svg,          BinaryData::export_xcode_svgSize);
     addType (types, MSVCProjectExporterVC2017::getName(),        BinaryData::export_visualStudio_svg,   BinaryData::export_visualStudio_svgSize);
     addType (types, MSVCProjectExporterVC2015::getName(),        BinaryData::export_visualStudio_svg,   BinaryData::export_visualStudio_svgSize);
     addType (types, MSVCProjectExporterVC2013::getName(),        BinaryData::export_visualStudio_svg,   BinaryData::export_visualStudio_svgSize);
@@ -65,8 +65,8 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int
 
     switch (index)
     {
-        case 0:     exp = new XCodeProjectExporter         (project, ValueTree (XCodeProjectExporter         ::getValueTreeTypeName (false)), false); break;
-        case 1:     exp = new XCodeProjectExporter         (project, ValueTree (XCodeProjectExporter         ::getValueTreeTypeName (true)), true); break;
+        case 0:     exp = new XcodeProjectExporter         (project, ValueTree (XcodeProjectExporter         ::getValueTreeTypeName (false)), false); break;
+        case 1:     exp = new XcodeProjectExporter         (project, ValueTree (XcodeProjectExporter         ::getValueTreeTypeName (true)), true); break;
         case 2:     exp = new MSVCProjectExporterVC2017    (project, ValueTree (MSVCProjectExporterVC2017    ::getValueTreeTypeName())); break;
         case 3:     exp = new MSVCProjectExporterVC2015    (project, ValueTree (MSVCProjectExporterVC2015    ::getValueTreeTypeName())); break;
         case 4:     exp = new MSVCProjectExporterVC2013    (project, ValueTree (MSVCProjectExporterVC2013    ::getValueTreeTypeName())); break;
@@ -95,11 +95,11 @@ StringArray ProjectExporter::getExporterNames()
 
 String ProjectExporter::getValueTreeNameForExporter (const String& exporterName)
 {
-    if (exporterName == XCodeProjectExporter::getNameMac())
-        return XCodeProjectExporter::getValueTreeTypeName (false);
+    if (exporterName == XcodeProjectExporter::getNameMac())
+        return XcodeProjectExporter::getValueTreeTypeName (false);
 
-    if (exporterName == XCodeProjectExporter::getNameiOS())
-        return XCodeProjectExporter::getValueTreeTypeName (true);
+    if (exporterName == XcodeProjectExporter::getNameiOS())
+        return XcodeProjectExporter::getValueTreeTypeName (true);
 
     if (exporterName == MSVCProjectExporterVC2013::getName())
         return MSVCProjectExporterVC2013::getValueTreeTypeName();
@@ -145,7 +145,7 @@ StringArray ProjectExporter::getAllDefaultBuildsFolders()
 String ProjectExporter::getCurrentPlatformExporterName()
 {
    #if JUCE_MAC
-    return XCodeProjectExporter::getNameMac();
+    return XcodeProjectExporter::getNameMac();
    #elif JUCE_WINDOWS
     return MSVCProjectExporterVC2017::getName();
    #elif JUCE_LINUX
@@ -165,7 +165,7 @@ ProjectExporter* ProjectExporter::createExporter (Project& project, const ValueT
     ProjectExporter*       exp = MSVCProjectExporterVC2013    ::createForSettings (project, settings);
     if (exp == nullptr)    exp = MSVCProjectExporterVC2015    ::createForSettings (project, settings);
     if (exp == nullptr)    exp = MSVCProjectExporterVC2017    ::createForSettings (project, settings);
-    if (exp == nullptr)    exp = XCodeProjectExporter         ::createForSettings (project, settings);
+    if (exp == nullptr)    exp = XcodeProjectExporter         ::createForSettings (project, settings);
     if (exp == nullptr)    exp = MakefileProjectExporter      ::createForSettings (project, settings);
     if (exp == nullptr)    exp = AndroidProjectExporter       ::createForSettings (project, settings);
     if (exp == nullptr)    exp = CodeBlocksProjectExporter    ::createForSettings (project, settings);
@@ -181,8 +181,8 @@ bool ProjectExporter::canProjectBeLaunched (Project* project)
         const char* types[] =
         {
            #if JUCE_MAC
-            XCodeProjectExporter::getValueTreeTypeName (false),
-            XCodeProjectExporter::getValueTreeTypeName (true),
+            XcodeProjectExporter::getValueTreeTypeName (false),
+            XcodeProjectExporter::getValueTreeTypeName (true),
            #elif JUCE_WINDOWS
             MSVCProjectExporterVC2013::getValueTreeTypeName(),
             MSVCProjectExporterVC2015::getValueTreeTypeName(),

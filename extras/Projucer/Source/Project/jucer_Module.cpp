@@ -27,7 +27,7 @@
 #include "../Application/jucer_Headers.h"
 #include "jucer_Module.h"
 #include "../ProjectSaving/jucer_ProjectSaver.h"
-#include "../ProjectSaving/jucer_ProjectExport_XCode.h"
+#include "../ProjectSaving/jucer_ProjectExport_Xcode.h"
 
 //==============================================================================
 static String trimCommentCharsFromStartOfLine (const String& line)
@@ -394,7 +394,7 @@ void LibraryModule::addSettingsForModuleToExporter (ProjectExporter& exporter, P
 
     if (exporter.isXcode())
     {
-        auto& xcodeExporter = dynamic_cast<XCodeProjectExporter&> (exporter);
+        auto& xcodeExporter = dynamic_cast<XcodeProjectExporter&> (exporter);
 
         if (project.isAUPluginHost())
             xcodeExporter.xcodeFrameworks.addTokens (xcodeExporter.isOSX() ? "AudioUnit CoreAudioKit" : "CoreAudioKit", false);

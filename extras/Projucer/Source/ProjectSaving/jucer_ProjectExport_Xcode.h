@@ -44,7 +44,7 @@ namespace
 }
 
 //==============================================================================
-class XCodeProjectExporter  : public ProjectExporter
+class XcodeProjectExporter  : public ProjectExporter
 {
 public:
     //==============================================================================
@@ -53,7 +53,7 @@ public:
     static const char* getValueTreeTypeName (bool iOS)      { return iOS ? "XCODE_IPHONE" : "XCODE_MAC"; }
 
     //==============================================================================
-    XCodeProjectExporter (Project& p, const ValueTree& t, const bool isIOS)
+    XcodeProjectExporter (Project& p, const ValueTree& t, const bool isIOS)
         : ProjectExporter (p, t),
           xcodeCanUseDwarf (true),
           iOS (isIOS)
@@ -73,10 +73,10 @@ public:
         }
     }
 
-    static XCodeProjectExporter* createForSettings (Project& project, const ValueTree& settings)
+    static XcodeProjectExporter* createForSettings (Project& project, const ValueTree& settings)
     {
-        if (settings.hasType (getValueTreeTypeName (false)))  return new XCodeProjectExporter (project, settings, false);
-        if (settings.hasType (getValueTreeTypeName (true)))   return new XCodeProjectExporter (project, settings, true);
+        if (settings.hasType (getValueTreeTypeName (false)))  return new XcodeProjectExporter (project, settings, false);
+        if (settings.hasType (getValueTreeTypeName (true)))   return new XcodeProjectExporter (project, settings, true);
 
         return nullptr;
     }
@@ -338,7 +338,7 @@ public:
     {
         callForAllSupportedTargets ([this] (ProjectType::Target::Type targetType)
                                     {
-                                        if (XCodeTarget* target = new XCodeTarget (targetType, *this))
+                                        if (XcodeTarget* target = new XcodeTarget (targetType, *this))
                                         {
                                             if (targetType == ProjectType::Target::AggregateTarget)
                                                 targets.insert (0, target);
@@ -451,7 +451,7 @@ protected:
                 }
 
                 props.add (new ChoicePropertyComponent (osxSDKVersion.getPropertyAsValue(), "OSX Base SDK Version", sdkVersionNames, versionValues),
-                           "The version of OSX to link against in the XCode build.");
+                           "The version of OSX to link against in the Xcode build.");
 
                 props.add (new ChoicePropertyComponent (osxDeploymentTarget.getPropertyAsValue(), "OSX Deployment Target", osxVersionNames, versionValues),
                            "The minimum version of OSX that the target binary will be compatible with.");
@@ -552,10 +552,10 @@ public:
     };
 
     //==============================================================================
-    struct XCodeTarget : ProjectType::Target
+    struct XcodeTarget : ProjectType::Target
     {
         //==============================================================================
-        XCodeTarget (ProjectType::Target::Type targetType, const XCodeProjectExporter& exporter)
+        XcodeTarget (ProjectType::Target::Type targetType, const XcodeProjectExporter& exporter)
             : ProjectType::Target (targetType),
               owner (exporter)
         {
@@ -675,7 +675,7 @@ public:
             }
         }
 
-        String getXCodeSchemeName() const
+        String getXcodeSchemeName() const
         {
             return owner.projectName + " - " + getName();
         }
@@ -1537,7 +1537,7 @@ public:
         }
 
         //==============================================================================
-        const XCodeProjectExporter& owner;
+        const XcodeProjectExporter& owner;
 
         Target& operator= (const Target&) JUCE_DELETED_FUNCTION;
     };
@@ -1548,7 +1548,7 @@ public:
 private:
     //==============================================================================
     bool xcodeCanUseDwarf;
-    OwnedArray<XCodeTarget> targets;
+    OwnedArray<XcodeTarget> targets;
 
     mutable OwnedArray<ValueTree> pbxBuildFiles, pbxFileReferences, pbxGroups, misc, projectConfigs, targetConfigs;
     mutable StringArray resourceIDs, sourceIDs, targetIDs;
@@ -1610,7 +1610,7 @@ private:
     {
         for (auto* target : targets)
         {
-            if (target->type == XCodeTarget::AggregateTarget)
+            if (target->type == XcodeTarget::AggregateTarget)
                 continue;
 
             target->addMainBuildProduct();
@@ -1634,7 +1634,7 @@ private:
     {
         for (auto* target : targets)
         {
-            if (target->type == XCodeTarget::AggregateTarget)
+            if (target->type == XcodeTarget::AggregateTarget)
                 continue;
 
             if (target->shouldCreatePList())
@@ -1716,7 +1716,7 @@ private:
         // add build phases
         for (auto* target : targets)
         {
-            if (target->type != XCodeTarget::AggregateTarget)
+            if (target->type != XcodeTarget::AggregateTarget)
                 buildProducts.add (createID (String ("__productFileID") + String (target->getName())));
 
             for (ConstConfigIterator config (*this); config.next();)
@@ -1729,12 +1729,12 @@ private:
 
             target->addShellScriptBuildPhase ("Pre-build script", getPreBuildScript());
 
-            if (target->type != XCodeTarget::AggregateTarget)
+            if (target->type != XcodeTarget::AggregateTarget)
             {
-                auto skipAUv3 = (target->type == XCodeTarget::AudioUnitv3PlugIn
+                auto skipAUv3 = (target->type == XcodeTarget::AudioUnitv3PlugIn
                                  && ! shouldDuplicateResourcesFolderForAppExtension());
 
-                if (! projectType.isStaticLibrary() && target->type != XCodeTarget::SharedCodeTarget && ! skipAUv3)
+                if (! projectType.isStaticLibrary() && target->type != XcodeTarget::SharedCodeTarget && ! skipAUv3)
                     target->addBuildPhase ("PBXResourcesBuildPhase", resourceIDs);
 
                 StringArray rezFiles (rezFileIDs);
@@ -1745,20 +1745,20 @@ private:
 
                 StringArray sourceFiles (target->sourceIDs);
 
-                if (target->type == XCodeTarget::SharedCodeTarget
+                if (target->type == XcodeTarget::SharedCodeTarget
                      || (! project.getProjectType().isAudioPlugin()))
                     sourceFiles.addArray (sourceIDs);
 
                 target->addBuildPhase ("PBXSourcesBuildPhase", sourceFiles);
 
-                if (! projectType.isStaticLibrary() && target->type != XCodeTarget::SharedCodeTarget)
+                if (! projectType.isStaticLibrary() && target->type != XcodeTarget::SharedCodeTarget)
                     target->addBuildPhase ("PBXFrameworksBuildPhase", target->frameworkIDs);
             }
 
             target->addShellScriptBuildPhase ("Post-build script", getPostBuildScript());
 
             if (project.getProjectType().isAudioPlugin() && project.shouldBuildAUv3()
-                && project.shouldBuildStandalonePlugin() && target->type == XCodeTarget::StandalonePlugIn)
+                && project.shouldBuildStandalonePlugin() && target->type == XcodeTarget::StandalonePlugIn)
                 embedAppExtension();
 
             addTargetObject (*target);
@@ -1767,9 +1767,9 @@ private:
 
     void embedAppExtension() const
     {
-        if (auto* standaloneTarget = getTargetOfType (XCodeTarget::StandalonePlugIn))
+        if (auto* standaloneTarget = getTargetOfType (XcodeTarget::StandalonePlugIn))
         {
-            if (auto* auv3Target   = getTargetOfType (XCodeTarget::AudioUnitv3PlugIn))
+            if (auto* auv3Target   = getTargetOfType (XcodeTarget::AudioUnitv3PlugIn))
             {
                 StringArray files;
                 files.add (auv3Target->mainBuildProductID);
@@ -1803,7 +1803,7 @@ private:
     }
 
     //==============================================================================
-    XCodeTarget* getTargetOfType (ProjectType::Target::Type type) const
+    XcodeTarget* getTargetOfType (ProjectType::Target::Type type) const
     {
         for (auto& target : targets)
             if (target->type == type)
@@ -1812,23 +1812,23 @@ private:
         return nullptr;
     }
 
-    void addTargetObject (XCodeTarget& target) const
+    void addTargetObject (XcodeTarget& target) const
     {
         String targetName = target.getName();
 
         String targetID = target.getID();
         ValueTree* const v = new ValueTree (targetID);
-        v->setProperty ("isa", target.type == XCodeTarget::AggregateTarget ? "PBXAggregateTarget" : "PBXNativeTarget", nullptr);
+        v->setProperty ("isa", target.type == XcodeTarget::AggregateTarget ? "PBXAggregateTarget" : "PBXNativeTarget", nullptr);
         v->setProperty ("buildConfigurationList", createID (String ("__configList") + targetName), nullptr);
 
         v->setProperty ("buildPhases", indentParenthesisedList (target.buildPhaseIDs), nullptr);
         v->setProperty ("buildRules", "( )", nullptr);
 
         v->setProperty ("dependencies", indentParenthesisedList (getTargetDependencies (target)), nullptr);
-        v->setProperty (Ids::name, target.getXCodeSchemeName(), nullptr);
+        v->setProperty (Ids::name, target.getXcodeSchemeName(), nullptr);
         v->setProperty ("productName", projectName, nullptr);
 
-        if (target.type != XCodeTarget::AggregateTarget)
+        if (target.type != XcodeTarget::AggregateTarget)
         {
             v->setProperty ("productReference", createID (String ("__productFileID") + targetName), nullptr);
 
@@ -1840,28 +1840,28 @@ private:
         misc.add (v);
     }
 
-    StringArray getTargetDependencies (const XCodeTarget& target) const
+    StringArray getTargetDependencies (const XcodeTarget& target) const
     {
         StringArray dependencies;
 
         if (project.getProjectType().isAudioPlugin())
         {
-            if (target.type == XCodeTarget::StandalonePlugIn) // depends on AUv3 and shared code
+            if (target.type == XcodeTarget::StandalonePlugIn) // depends on AUv3 and shared code
             {
-                if (XCodeTarget* auv3Target = getTargetOfType (XCodeTarget::AudioUnitv3PlugIn))
+                if (XcodeTarget* auv3Target = getTargetOfType (XcodeTarget::AudioUnitv3PlugIn))
                     dependencies.add (auv3Target->getDependencyID());
 
-                if (XCodeTarget* sharedCodeTarget = getTargetOfType (XCodeTarget::SharedCodeTarget))
+                if (XcodeTarget* sharedCodeTarget = getTargetOfType (XcodeTarget::SharedCodeTarget))
                     dependencies.add (sharedCodeTarget->getDependencyID());
             }
-            else if (target.type == XCodeTarget::AggregateTarget) // depends on all other targets
+            else if (target.type == XcodeTarget::AggregateTarget) // depends on all other targets
             {
                 for (int i = 1; i < targets.size(); ++i)
                     dependencies.add (targets[i]->getDependencyID());
             }
-            else if (target.type != XCodeTarget::SharedCodeTarget) // shared code doesn't depend on anything; all other targets depend only on the shared code
+            else if (target.type != XcodeTarget::SharedCodeTarget) // shared code doesn't depend on anything; all other targets depend only on the shared code
             {
-                if (XCodeTarget* sharedCodeTarget = getTargetOfType (XCodeTarget::SharedCodeTarget))
+                if (XcodeTarget* sharedCodeTarget = getTargetOfType (XcodeTarget::SharedCodeTarget))
                     dependencies.add (sharedCodeTarget->getDependencyID());
             }
         }
@@ -2240,7 +2240,7 @@ private:
         output << "\t};\n\trootObject = " << createID ("__root") << ";\n}\n";
     }
 
-    String addBuildFile (const String& path, const String& fileRefID, bool addToSourceBuildPhase, bool inhibitWarnings, XCodeTarget* xcodeTarget = nullptr) const
+    String addBuildFile (const String& path, const String& fileRefID, bool addToSourceBuildPhase, bool inhibitWarnings, XcodeTarget* xcodeTarget = nullptr) const
     {
         String fileID (createID (path + "buildref"));
 
@@ -2261,7 +2261,7 @@ private:
         return fileID;
     }
 
-    String addBuildFile (const RelativePath& path, bool addToSourceBuildPhase, bool inhibitWarnings, XCodeTarget* xcodeTarget = nullptr) const
+    String addBuildFile (const RelativePath& path, bool addToSourceBuildPhase, bool inhibitWarnings, XcodeTarget* xcodeTarget = nullptr) const
     {
         return addBuildFile (path.toUnixStyle(), createFileRefID (path), addToSourceBuildPhase, inhibitWarnings, xcodeTarget);
     }
@@ -2345,7 +2345,7 @@ private:
     }
 
     String addFile (const RelativePath& path, bool shouldBeCompiled, bool shouldBeAddedToBinaryResources,
-                    bool shouldBeAddedToXcodeResources, bool inhibitWarnings, XCodeTarget* xcodeTarget) const
+                    bool shouldBeAddedToXcodeResources, bool inhibitWarnings, XcodeTarget* xcodeTarget) const
     {
         const String pathAsString (path.toUnixStyle());
         const String refID (addFileReference (path.toUnixStyle()));
@@ -2375,7 +2375,7 @@ private:
 
         if (projectItem.isModuleCode())
         {
-            if (XCodeTarget* xcodeTarget = getTargetOfType (getProject().getTargetTypeFromFilePath (projectItem.getFile(), false)))
+            if (XcodeTarget* xcodeTarget = getTargetOfType (getProject().getTargetTypeFromFilePath (projectItem.getFile(), false)))
             {
                 String rezFileID = addBuildFile (pathAsString, refID, false, false, xcodeTarget);
                 xcodeTarget->rezFileIDs.add (rezFileID);
@@ -2486,7 +2486,7 @@ private:
             if (path.hasFileExtension (".r"))
                 return addRezFile (projectItem, path);
 
-            XCodeTarget* xcodeTarget = nullptr;
+            XcodeTarget* xcodeTarget = nullptr;
             if (projectItem.isModuleCode() && projectItem.shouldBeCompiled())
                 xcodeTarget = getTargetOfType (project.getTargetTypeFromFilePath (projectItem.getFile(), false));
 
@@ -2544,7 +2544,7 @@ private:
         projectConfigs.add (v);
     }
 
-    void addConfigList (XCodeTarget& target, const OwnedArray <ValueTree>& configsToUse, const String& listID) const
+    void addConfigList (XcodeTarget& target, const OwnedArray <ValueTree>& configsToUse, const String& listID) const
     {
         ValueTree* v = new ValueTree (listID);
         v->setProperty ("isa", "XCConfigurationList", nullptr);
@@ -2652,7 +2652,7 @@ private:
         StringArray names;
 
         for (auto& target : targets)
-            names.add (target->getXCodeSchemeName());
+            names.add (target->getXcodeSchemeName());
 
         names.sort (false);
         return names;
@@ -2897,5 +2897,5 @@ private:
         return getOSXVersionName (version) + " SDK";
     }
 
-    JUCE_DECLARE_NON_COPYABLE (XCodeProjectExporter)
+    JUCE_DECLARE_NON_COPYABLE (XcodeProjectExporter)
 };

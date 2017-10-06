@@ -1520,7 +1520,7 @@
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_CodeBlocks.h"/>
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_Make.h"/>
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_MSVC.h"/>
-    <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_XCode.h"/>
+    <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_Xcode.h"/>
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExporter.h"/>
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectSaver.h"/>
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ResourceFile.h"/>

@@ -553,8 +553,8 @@
             file="Source/ProjectSaving/jucer_ProjectExport_Make.h"/>
       <FILE id="rMbSVA" name="jucer_ProjectExport_MSVC.h" compile="0" resource="0"
             file="Source/ProjectSaving/jucer_ProjectExport_MSVC.h"/>
-      <FILE id="aKKWtG" name="jucer_ProjectExport_XCode.h" compile="0" resource="0"
-            file="Source/ProjectSaving/jucer_ProjectExport_XCode.h"/>
+      <FILE id="aKKWtG" name="jucer_ProjectExport_Xcode.h" compile="0" resource="0"
+            file="Source/ProjectSaving/jucer_ProjectExport_Xcode.h"/>
       <FILE id="EqKGRV" name="jucer_ProjectExporter.cpp" compile="1" resource="0"
             file="Source/ProjectSaving/jucer_ProjectExporter.cpp"/>
       <FILE id="FEsoP1" name="jucer_ProjectExporter.h" compile="0" resource="0"
