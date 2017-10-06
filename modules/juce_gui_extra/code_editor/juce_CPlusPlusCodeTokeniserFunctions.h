@@ -47,34 +47,38 @@ struct CppTokeniserFunctions
     static bool isReservedKeyword (String::CharPointerType token, const int tokenLength) noexcept
     {
         static const char* const keywords2Char[] =
-            { "if", "do", "or", nullptr };
+            { "do", "if", "or", nullptr };
 
         static const char* const keywords3Char[] =
-            { "for", "int", "new", "try", "xor", "and", "asm", "not", nullptr };
+            { "and", "asm", "for", "int", "new", "not", "try", "xor", nullptr };
 
         static const char* const keywords4Char[] =
-            { "bool", "void", "this", "true", "long", "else", "char",
-              "enum", "case", "goto", "auto", nullptr };
+            { "auto", "bool", "case", "char", "else", "enum", "goto",
+              "long", "this", "true", "void", nullptr }
 
         static const char* const keywords5Char[] =
-            { "float", "const", "while", "break", "false", "catch", "class", "bitor",
-              "compl", "or_eq", "short", "throw", "union", "using", "final", nullptr };
+            { "bitor", "break", "catch", "class", "compl", "const", "false", "final",
+              "float", "or_eq", "short", "throw", "union", "using", "while", nullptr }
 
         static const char* const keywords6Char[] =
-            { "return", "and_eq", "bitand", "delete", "double", "export", "extern",
-              "friend", "inline", "not_eq", "public", "signed", "sizeof", "static",
-              "struct", "switch", "typeid", "xor_eq", nullptr };
+            { "and_eq", "bitand", "delete", "double", "export", "extern", "friend",
+              "import", "inline", "module", "not_eq", "public", "return", "signed",
+              "sizeof", "static", "struct", "switch", "typeid", "xor_eq", nullptr }
 
         static const char* const keywords7Char[] =
-            { "nullptr", "alignas", "alignof", "default", "mutable", "private",
-              "typedef", "virtual", "wchar_t", "__cdecl", "_Pragma", "uint8_t", nullptr };
+            { "__cdecl", "_Pragma", "alignas", "alignof", "concept", "default",
+              "mutable", "nullptr", "private", "typedef", "uint8_t", "virtual",
+              "wchar_t", nullptr }
 
         static const char* const keywordsOther[] =
-            { "char16_t", "char32_t", "const_cast", "constexpr", "continue", "decltype", "dynamic_cast",
-              "explicit", "namespace", "noexcept", "operator", "protected", "register", "reinterpret_cast",
-              "static_assert", "static_cast", "template", "thread_local", "typename", "unsigned", "volatile",
-              "@class", "@dynamic", "@end", "@implementation", "@interface", "@public", "@private",
-              "@protected", "@property", "@synthesize", "__fastcall", "__stdcall", "override", nullptr };
+            { "@class", "@dynamic", "@end", "@implementation", "@interface", "@public",
+              "@private", "@protected", "@property", "@synthesize", "__fastcall", "__stdcall",
+              "atomic_cancel", "atomic_commit", "atomic_noexcept", "char16_t", "char32_t",
+              "co_await", "co_return", "co_yield", "const_cast", "constexpr", "continue",
+              "decltype", "dynamic_cast", "explicit", "namespace", "noexcept", "operator",
+              "protected", "register", "reinterpret_cast", "requires", "static_assert",
+              "static_cast", "synchronized", "template", "thread_local", "typename", "unsigned",
+              "volatile", nullptr }
 
         const char* const* k;
 
