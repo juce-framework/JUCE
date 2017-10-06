@@ -54,21 +54,21 @@ struct CppTokeniserFunctions
 
         static const char* const keywords4Char[] =
             { "auto", "bool", "case", "char", "else", "enum", "goto",
-              "long", "this", "true", "void", nullptr }
+              "long", "this", "true", "void", nullptr };
 
         static const char* const keywords5Char[] =
             { "bitor", "break", "catch", "class", "compl", "const", "false", "final",
-              "float", "or_eq", "short", "throw", "union", "using", "while", nullptr }
+              "float", "or_eq", "short", "throw", "union", "using", "while", nullptr };
 
         static const char* const keywords6Char[] =
             { "and_eq", "bitand", "delete", "double", "export", "extern", "friend",
               "import", "inline", "module", "not_eq", "public", "return", "signed",
-              "sizeof", "static", "struct", "switch", "typeid", "xor_eq", nullptr }
+              "sizeof", "static", "struct", "switch", "typeid", "xor_eq", nullptr };
 
         static const char* const keywords7Char[] =
             { "__cdecl", "_Pragma", "alignas", "alignof", "concept", "default",
               "mutable", "nullptr", "private", "typedef", "uint8_t", "virtual",
-              "wchar_t", nullptr }
+              "wchar_t", nullptr };
 
         static const char* const keywordsOther[] =
             { "@class", "@dynamic", "@end", "@implementation", "@interface", "@public",
@@ -78,7 +78,7 @@ struct CppTokeniserFunctions
               "decltype", "dynamic_cast", "explicit", "namespace", "noexcept", "operator",
               "protected", "register", "reinterpret_cast", "requires", "static_assert",
               "static_cast", "synchronized", "template", "thread_local", "typename", "unsigned",
-              "volatile", nullptr }
+              "volatile", nullptr };
 
         const char* const* k;
 
