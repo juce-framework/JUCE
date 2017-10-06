@@ -74,7 +74,7 @@ struct CppTokeniserFunctions
               "explicit", "namespace", "noexcept", "operator", "protected", "register", "reinterpret_cast",
               "static_assert", "static_cast", "template", "thread_local", "typename", "unsigned", "volatile",
               "@class", "@dynamic", "@end", "@implementation", "@interface", "@public", "@private",
-              "@protected", "@property", "@synthesize", "__fastcall", "__stdcall", nullptr };
+              "@protected", "@property", "@synthesize", "__fastcall", "__stdcall", "override", nullptr };
 
         const char* const* k;
 
