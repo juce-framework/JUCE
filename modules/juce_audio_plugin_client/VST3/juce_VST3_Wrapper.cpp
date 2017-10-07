@@ -2038,6 +2038,9 @@ public:
 
         midiBuffer.clear();
 
+        if (data.inputParameterChanges != nullptr)
+            processParameterChanges (*data.inputParameterChanges);
+
        #if JucePlugin_WantsMidiInput
         if (data.inputEvents != nullptr)
             MidiEventList::toMidiBuffer (midiBuffer, *data.inputEvents);
@@ -2236,9 +2239,6 @@ private:
             const ScopedLock sl (pluginInstance->getCallbackLock());
 
             pluginInstance->setNonRealtime (data.processMode == Vst::kOffline);
-
-            if (data.inputParameterChanges != nullptr)
-                processParameterChanges (*data.inputParameterChanges);
 
            #if JUCE_DEBUG && ! JucePlugin_ProducesMidiOutput
             const int numMidiEventsComingIn = midiBuffer.getNumEvents();
