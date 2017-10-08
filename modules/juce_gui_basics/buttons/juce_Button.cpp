@@ -2,29 +2,34 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
+namespace juce
+{
+
 class Button::CallbackHelper  : public Timer,
                                 public ApplicationCommandManagerListener,
-                                public ValueListener,
+                                public Value::Listener,
                                 public KeyListener
 {
 public:
@@ -240,19 +245,17 @@ void Button::setRadioGroupId (const int newGroupId, NotificationType notificatio
 
 void Button::turnOffOtherButtonsInGroup (const NotificationType notification)
 {
-    if (Component* const p = getParentComponent())
+    if (auto* p = getParentComponent())
     {
         if (radioGroupId != 0)
         {
             WeakReference<Component> deletionWatcher (this);
 
-            for (int i = p->getNumChildComponents(); --i >= 0;)
+            for (auto* c : p->getChildren())
             {
-                Component* const c = p->getChildComponent (i);
-
                 if (c != this)
                 {
-                    if (Button* const b = dynamic_cast<Button*> (c))
+                    if (auto b = dynamic_cast<Button*> (c))
                     {
                         if (b->getRadioGroupId() == radioGroupId)
                         {
@@ -329,6 +332,11 @@ void Button::setTriggeredOnMouseDown (const bool isTriggeredOnMouseDown) noexcep
     triggerOnMouseDown = isTriggeredOnMouseDown;
 }
 
+bool Button::getTriggeredOnMouseDown() const noexcept
+{
+    return triggerOnMouseDown;
+}
+
 //==============================================================================
 void Button::clicked()
 {
@@ -389,15 +397,8 @@ void Button::handleCommandMessage (int commandId)
 }
 
 //==============================================================================
-void Button::addListener (ButtonListener* const newListener)
-{
-    buttonListeners.add (newListener);
-}
-
-void Button::removeListener (ButtonListener* const listener)
-{
-    buttonListeners.remove (listener);
-}
+void Button::addListener (Listener* l)      { buttonListeners.add (l); }
+void Button::removeListener (Listener* l)   { buttonListeners.remove (l); }
 
 void Button::sendClickMessage (const ModifierKeys& modifiers)
 {
@@ -415,7 +416,7 @@ void Button::sendClickMessage (const ModifierKeys& modifiers)
     clicked (modifiers);
 
     if (! checker.shouldBailOut())
-        buttonListeners.callChecked (checker, &ButtonListener::buttonClicked, this);  // (can't use Button::Listener due to idiotic VC2005 bug)
+        buttonListeners.callChecked (checker, &Button::Listener::buttonClicked, this);
 }
 
 void Button::sendStateMessage()
@@ -425,7 +426,7 @@ void Button::sendStateMessage()
     buttonStateChanged();
 
     if (! checker.shouldBailOut())
-        buttonListeners.callChecked (checker, &ButtonListener::buttonStateChanged, this);
+        buttonListeners.callChecked (checker, &Button::Listener::buttonStateChanged, this);
 }
 
 //==============================================================================
@@ -694,3 +695,5 @@ void Button::repeatTimerCallback()
         callbackHelper->stopTimer();
     }
 }
+
+} // namespace juce

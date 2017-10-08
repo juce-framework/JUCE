@@ -2,34 +2,26 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -66,6 +58,8 @@
         WeakReference<MyObject>::Master masterReference;
         friend class WeakReference<MyObject>;
     };
+
+    OR: just use the handy JUCE_DECLARE_WEAK_REFERENCEABLE macro to do all this for you.
 
     // Here's an example of using a pointer..
 
@@ -209,3 +203,32 @@ private:
         return (o != nullptr) ? o->masterReference.getSharedPointer (o) : nullptr;
     }
 };
+
+
+//==============================================================================
+/**
+     Macro to easily allow a class to be made weak-referenceable.
+     This can be inserted in a class definition to add the requisite weak-ref boilerplate to that class.
+     e.g.
+
+     @code
+     class MyObject
+     {
+     public:
+         MyObject();
+         ~MyObject();
+
+     private:
+         JUCE_DECLARE_WEAK_REFERENCEABLE (MyObject)
+     };
+     @endcode
+
+     @see WeakReference, WeakReference::Master
+*/
+#define JUCE_DECLARE_WEAK_REFERENCEABLE(Class) \
+    struct WeakRefMaster  : public WeakReference<Class>::Master { ~WeakRefMaster() { this->clear(); } }; \
+    WeakRefMaster masterReference; \
+    friend class WeakReference<Class>; \
+
+
+} // namespace juce

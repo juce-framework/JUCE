@@ -2,65 +2,67 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#include "../jucer_Headers.h"
+#include "../Application/jucer_Headers.h"
 
 #include "jucer_JucerDocument.h"
-#include "components/jucer_ComponentUndoableAction.h"
-#include "properties/jucer_JustificationProperty.h"
-#include "properties/jucer_FontPropertyComponent.h"
-#include "properties/jucer_ComponentBooleanProperty.h"
-#include "properties/jucer_ComponentChoiceProperty.h"
-#include "properties/jucer_ComponentTextProperty.h"
-#include "properties/jucer_ComponentColourProperty.h"
-#include "properties/jucer_FilePropertyComponent.h"
-#include "paintelements/jucer_ImageResourceProperty.h"
+#include "Components/jucer_ComponentUndoableAction.h"
+#include "Properties/jucer_JustificationProperty.h"
+#include "Properties/jucer_FontPropertyComponent.h"
+#include "Properties/jucer_ComponentBooleanProperty.h"
+#include "Properties/jucer_ComponentChoiceProperty.h"
+#include "Properties/jucer_ComponentTextProperty.h"
+#include "Properties/jucer_ComponentColourProperty.h"
+#include "Properties/jucer_FilePropertyComponent.h"
+#include "PaintElements/jucer_ImageResourceProperty.h"
 
 #include "jucer_ObjectTypes.h"
 
-#include "paintelements/jucer_PaintElementUndoableAction.h"
-#include "paintelements/jucer_PaintElementRectangle.h"
-#include "paintelements/jucer_PaintElementRoundedRectangle.h"
-#include "paintelements/jucer_PaintElementImage.h"
-#include "paintelements/jucer_PaintElementEllipse.h"
-#include "paintelements/jucer_PaintElementPath.h"
-#include "paintelements/jucer_PaintElementText.h"
-#include "paintelements/jucer_PaintElementGroup.h"
+#include "PaintElements/jucer_PaintElementUndoableAction.h"
+#include "PaintElements/jucer_PaintElementRectangle.h"
+#include "PaintElements/jucer_PaintElementRoundedRectangle.h"
+#include "PaintElements/jucer_PaintElementImage.h"
+#include "PaintElements/jucer_PaintElementEllipse.h"
+#include "PaintElements/jucer_PaintElementPath.h"
+#include "PaintElements/jucer_PaintElementText.h"
+#include "PaintElements/jucer_PaintElementGroup.h"
 
-#include "components/jucer_ButtonHandler.h"
-#include "components/jucer_TextButtonHandler.h"
-#include "components/jucer_ToggleButtonHandler.h"
-#include "components/jucer_SliderHandler.h"
-#include "components/jucer_LabelHandler.h"
-#include "components/jucer_TextEditorHandler.h"
-#include "components/jucer_ComboBoxHandler.h"
-#include "components/jucer_GroupComponentHandler.h"
-#include "components/jucer_JucerComponentHandler.h"
-#include "components/jucer_HyperlinkButtonHandler.h"
-#include "components/jucer_ViewportHandler.h"
-#include "components/jucer_TabbedComponentHandler.h"
-#include "components/jucer_TreeViewHandler.h"
-#include "components/jucer_GenericComponentHandler.h"
-#include "components/jucer_ImageButtonHandler.h"
+#include "Components/jucer_ButtonHandler.h"
+#include "Components/jucer_TextButtonHandler.h"
+#include "Components/jucer_ToggleButtonHandler.h"
+#include "Components/jucer_SliderHandler.h"
+#include "Components/jucer_LabelHandler.h"
+#include "Components/jucer_TextEditorHandler.h"
+#include "Components/jucer_ComboBoxHandler.h"
+#include "Components/jucer_GroupComponentHandler.h"
+#include "Components/jucer_JucerComponentHandler.h"
+#include "Components/jucer_HyperlinkButtonHandler.h"
+#include "Components/jucer_ViewportHandler.h"
+#include "Components/jucer_TabbedComponentHandler.h"
+#include "Components/jucer_TreeViewHandler.h"
+#include "Components/jucer_GenericComponentHandler.h"
+#include "Components/jucer_ImageButtonHandler.h"
 
 namespace ObjectTypes
 {

@@ -2,32 +2,28 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
+namespace juce
+{
+namespace BlocksProtocol
+{
 
 /**
     Helper class for constructing a packet for sending to a BLOCKS device
@@ -218,6 +214,101 @@ struct HostPacketBuilder
         return true;
     }
 
+    bool addFirmwareUpdatePacket (const uint8* packetData, uint8 size)
+    {
+        if (! data.hasCapacity (MessageType::bits + FirmwareUpdatePacketSize::bits + 7 * size))
+            return false;
+
+        writeMessageType (MessageFromHost::firmwareUpdatePacket);
+        data << FirmwareUpdatePacketSize (size);
+
+        for (uint8 i = 0; i < size; ++i)
+            data << IntegerWithBitSize<7> ((uint32) packetData[i]);
+
+        return true;
+    }
+
+    //==============================================================================
+    bool addConfigSetMessage (int32 item, int32 value)
+    {
+        if (! data.hasCapacity (BitSizes::configSetMessage))
+            return false;
+
+        writeMessageType(MessageFromHost::configMessage);
+        ConfigCommand type = ConfigCommands::setConfig;
+        data << type << IntegerWithBitSize<8> ((uint32) item) << IntegerWithBitSize<32>((uint32) value);
+        return true;
+    }
+
+    bool addRequestMessage (int32 item)
+    {
+        if (! data.hasCapacity (BitSizes::configSetMessage))
+            return false;
+
+        writeMessageType(MessageFromHost::configMessage);
+        ConfigCommand type = ConfigCommands::requestConfig;
+        data << type << IntegerWithBitSize<32> (0) << IntegerWithBitSize<8> ((uint32) item);
+        return true;
+    }
+
+    bool addRequestFactorySyncMessage()
+    {
+        if (! data.hasCapacity (MessageType::bits + ConfigCommand::bits))
+            return false;
+
+        writeMessageType (MessageFromHost::configMessage);
+        ConfigCommand type = ConfigCommands::requestFactorySync;
+        data << type;
+        return true;
+    }
+
+    bool addRequestUserSyncMessage()
+    {
+        if (! data.hasCapacity (MessageType::bits + ConfigCommand::bits))
+            return false;
+
+        writeMessageType (MessageFromHost::configMessage);
+        ConfigCommand type = ConfigCommands::requestUserSync;
+        data << type;
+        return true;
+    }
+
+    //==============================================================================
+    bool addFactoryReset()
+    {
+        if (! data.hasCapacity (MessageType::bits))
+            return false;
+
+        writeMessageType(MessageFromHost::factoryReset);
+        return true;
+    }
+
+    bool addBlockReset()
+    {
+        if (! data.hasCapacity (MessageType::bits))
+            return false;
+
+        writeMessageType(MessageFromHost::blockReset);
+        return true;
+    }
+
+    bool addSetBlockName (const juce::String& name)
+    {
+        if (name.length() > 32 || ! data.hasCapacity (MessageType::bits + 7 + (7 * name.length())))
+            return false;
+
+        writeMessageType (MessageFromHost::setName);
+
+        data << IntegerWithBitSize<7> ((uint32) name.length());
+
+        for (auto i = 0; i < name.length(); ++i)
+            data << IntegerWithBitSize<7> ((uint32) name.toRawUTF8()[i]);
+
+        data << IntegerWithBitSize<7> (0);
+
+        return true;
+    }
+
     //==============================================================================
 private:
     Packed7BitArrayBuilder<maxPacketBytes> data;
@@ -227,3 +318,6 @@ private:
         data << MessageType ((uint32) type);
     }
 };
+
+} // namespace BlocksProtocol
+} // namespace juce

@@ -2,25 +2,30 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
+namespace juce
+{
 
 namespace ValueTreeSynchroniserHelpers
 {
@@ -30,7 +35,8 @@ namespace ValueTreeSynchroniserHelpers
         fullSync         = 2,
         childAdded       = 3,
         childRemoved     = 4,
-        childMoved       = 5
+        childMoved       = 5,
+        propertyRemoved  = 6
     };
 
     static void getValueTreePath (ValueTree v, const ValueTree& topLevelTree, Array<int>& path)
@@ -71,14 +77,14 @@ namespace ValueTreeSynchroniserHelpers
         const int numLevels = input.readCompressedInt();
 
         if (! isPositiveAndBelow (numLevels, 65536)) // sanity-check
-            return ValueTree();
+            return {};
 
         for (int i = numLevels; --i >= 0;)
         {
             const int index = input.readCompressedInt();
 
             if (! isPositiveAndBelow (index, v.getNumChildren()))
-                return ValueTree();
+                return {};
 
             v = v.getChild (index);
         }
@@ -108,9 +114,19 @@ void ValueTreeSynchroniser::sendFullSyncCallback()
 void ValueTreeSynchroniser::valueTreePropertyChanged (ValueTree& vt, const Identifier& property)
 {
     MemoryOutputStream m;
-    ValueTreeSynchroniserHelpers::writeHeader (*this, m, ValueTreeSynchroniserHelpers::propertyChanged, vt);
-    m.writeString (property.toString());
-    vt.getProperty (property).writeToStream (m);
+
+    if (auto* value = vt.getPropertyPointer (property))
+    {
+        ValueTreeSynchroniserHelpers::writeHeader (*this, m, ValueTreeSynchroniserHelpers::propertyChanged, vt);
+        m.writeString (property.toString());
+        value->writeToStream (m);
+    }
+    else
+    {
+        ValueTreeSynchroniserHelpers::writeHeader (*this, m, ValueTreeSynchroniserHelpers::propertyRemoved, vt);
+        m.writeString (property.toString());
+    }
+
     stateChanged (m.getData(), m.getDataSize());
 }
 
@@ -171,6 +187,13 @@ bool ValueTreeSynchroniser::applyChange (ValueTree& root, const void* data, size
             return true;
         }
 
+        case ValueTreeSynchroniserHelpers::propertyRemoved:
+        {
+            Identifier property (input.readString());
+            v.removeProperty (property, undoManager);
+            return true;
+        }
+
         case ValueTreeSynchroniserHelpers::childAdded:
         {
             const int index = input.readCompressedInt();
@@ -215,3 +238,5 @@ bool ValueTreeSynchroniser::applyChange (ValueTree& root, const void* data, size
 
     return false;
 }
+
+} // namespace juce

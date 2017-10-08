@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -42,6 +44,7 @@ static void showBubbleMessage (Component* targetComponent, const String& textToS
 
     AttributedString text (textToShow);
     text.setJustification (Justification::centred);
+    text.setColour (targetComponent->findColour (TextButton::textColourOffId));
 
     bmc->showAt (targetComponent, text, 2000, true, false);
 }
@@ -102,10 +105,13 @@ struct SlidersPage  : public Component
         : hintLabel ("hint", "Try right-clicking on a slider for an options menu. \n\n"
                              "Also, holding down CTRL while dragging will turn on a slider's velocity-sensitive mode")
     {
+        Rectangle<int> layoutArea { 20, 20, 580, 430 };
+        auto sliderArea = layoutArea.removeFromTop (320);
+
         Slider* s = createSlider (false);
         s->setSliderStyle (Slider::LinearVertical);
         s->setTextBoxStyle (Slider::TextBoxBelow, false, 100, 20);
-        s->setBounds (10, 25, 70, 200);
+        s->setBounds (sliderArea.removeFromLeft (70));
         s->setDoubleClickReturnValue (true, 50.0); // double-clicking this slider will set it to 50.0
         s->setTextValueSuffix (" units");
 
@@ -114,67 +120,84 @@ struct SlidersPage  : public Component
         s->setVelocityBasedMode (true);
         s->setSkewFactor (0.5);
         s->setTextBoxStyle (Slider::TextBoxAbove, true, 100, 20);
-        s->setBounds (85, 25, 70, 200);
+        s->setBounds (sliderArea.removeFromLeft (70));
         s->setTextValueSuffix (" rels");
+
+        sliderArea.removeFromLeft (20);
+        auto horizonalSliderArea = sliderArea.removeFromLeft (180);
 
         s = createSlider (true);
         s->setSliderStyle (Slider::LinearHorizontal);
         s->setTextBoxStyle (Slider::TextBoxLeft, false, 80, 20);
-        s->setBounds (180, 35, 150, 20);
+        s->setBounds (horizonalSliderArea.removeFromTop (20));
 
         s = createSlider (false);
         s->setSliderStyle (Slider::LinearHorizontal);
         s->setTextBoxStyle (Slider::NoTextBox, false, 0, 0);
-        s->setBounds (180, 65, 150, 20);
-        s->setPopupDisplayEnabled (true, this);
+        horizonalSliderArea.removeFromTop (20);
+        s->setBounds (horizonalSliderArea.removeFromTop (20));
+        s->setPopupDisplayEnabled (true, false, this);
         s->setTextValueSuffix (" nuns required to change a lightbulb");
+
+        s = createSlider (false);
+        s->setSliderStyle (Slider::LinearHorizontal);
+        s->setTextBoxStyle (Slider::TextEntryBoxPosition::TextBoxAbove, false, 70, 20);
+        horizonalSliderArea.removeFromTop (20);
+        s->setBounds (horizonalSliderArea.removeFromTop (50));
+        s->setPopupDisplayEnabled (true, false, this);
 
         s = createSlider (false);
         s->setSliderStyle (Slider::IncDecButtons);
         s->setTextBoxStyle (Slider::TextBoxLeft, false, 50, 20);
-        s->setBounds (180, 105, 100, 20);
+        horizonalSliderArea.removeFromTop (20);
+        s->setBounds (horizonalSliderArea.removeFromTop (20));
         s->setIncDecButtonsMode (Slider::incDecButtonsDraggable_Vertical);
 
         s = createSlider (false);
         s->setSliderStyle (Slider::Rotary);
         s->setRotaryParameters (float_Pi * 1.2f, float_Pi * 2.8f, false);
         s->setTextBoxStyle (Slider::TextBoxRight, false, 70, 20);
-        s->setBounds (190, 145, 120, 40);
+        horizonalSliderArea.removeFromTop (15);
+        s->setBounds (horizonalSliderArea.removeFromTop (70));
         s->setTextValueSuffix (" mm");
 
         s = createSlider (false);
         s->setSliderStyle (Slider::LinearBar);
-        s->setBounds (180, 195, 100, 30);
+        horizonalSliderArea.removeFromTop (10);
+        s->setBounds (horizonalSliderArea.removeFromTop (30));
         s->setTextValueSuffix (" gallons");
+
+        sliderArea.removeFromLeft (20);
+        auto twoValueSliderArea = sliderArea.removeFromLeft (180);
 
         s = createSlider (false);
         s->setSliderStyle (Slider::TwoValueHorizontal);
-        s->setBounds (360, 20, 160, 40);
-
-        s = createSlider (false);
-        s->setSliderStyle (Slider::TwoValueVertical);
-        s->setBounds (360, 110, 40, 160);
+        s->setBounds (twoValueSliderArea.removeFromTop (40));
 
         s = createSlider (false);
         s->setSliderStyle (Slider::ThreeValueHorizontal);
-        s->setBounds (360, 70, 160, 40);
+        s->setPopupDisplayEnabled (true, false, this);
+        twoValueSliderArea.removeFromTop (10);
+        s->setBounds (twoValueSliderArea.removeFromTop (40));
+
+        s = createSlider (false);
+        s->setSliderStyle (Slider::TwoValueVertical);
+        twoValueSliderArea.removeFromLeft (30);
+        s->setBounds (twoValueSliderArea.removeFromLeft (40));
 
         s = createSlider (false);
         s->setSliderStyle (Slider::ThreeValueVertical);
-        s->setBounds (440, 110, 40, 160);
+        s->setPopupDisplayEnabled (true, false, this);
+        twoValueSliderArea.removeFromLeft (30);
+        s->setBounds (twoValueSliderArea.removeFromLeft (40));
 
         s = createSlider (false);
         s->setSliderStyle (Slider::LinearBarVertical);
         s->setTextBoxStyle (Slider::NoTextBox, false, 0, 0);
-        s->setBounds (540, 35, 20, 230);
-        s->setPopupDisplayEnabled (true, this);
+        sliderArea.removeFromLeft (20);
+        s->setBounds (sliderArea.removeFromLeft (20));
+        s->setPopupDisplayEnabled (true, true, this);
         s->setTextValueSuffix (" mickles in a muckle");
-
-        for (int i = 7; i <= 10; ++i)
-        {
-            sliders.getUnchecked(i)->setTextBoxStyle (Slider::NoTextBox, false, 0, 0);
-            sliders.getUnchecked(i)->setPopupDisplayEnabled (true, this);
-        }
 
         /* Here, we'll create a Value object, and tell a bunch of our sliders to use it as their
            value source. By telling them all to share the same Value, they'll stay in sync with
@@ -185,7 +208,7 @@ struct SlidersPage  : public Component
         */
         Value sharedValue;
         sharedValue = Random::getSystemRandom().nextDouble() * 100;
-        for (int i = 0; i < 7; ++i)
+        for (int i = 0; i < 8; ++i)
             sliders.getUnchecked(i)->getValueObject().referTo (sharedValue);
 
         // ..and now we'll do the same for all our min/max slider values..
@@ -193,13 +216,15 @@ struct SlidersPage  : public Component
         sharedValueMin = Random::getSystemRandom().nextDouble() * 40.0;
         sharedValueMax = Random::getSystemRandom().nextDouble() * 40.0 + 60.0;
 
-        for (int i = 7; i <= 10; ++i)
+        for (int i = 8; i <= 11; ++i)
         {
-            sliders.getUnchecked(i)->getMaxValueObject().referTo (sharedValueMax);
-            sliders.getUnchecked(i)->getMinValueObject().referTo (sharedValueMin);
+            auto* selectedSlider = sliders.getUnchecked(i);
+            selectedSlider->setTextBoxStyle (Slider::NoTextBox, false, 0, 0);
+            selectedSlider->getMaxValueObject().referTo (sharedValueMax);
+            selectedSlider->getMinValueObject().referTo (sharedValueMin);
         }
 
-        hintLabel.setBounds (20, 245, 350, 150);
+        hintLabel.setBounds (layoutArea);
         addAndMakeVisible (hintLabel);
     }
 
@@ -223,7 +248,7 @@ private:
 
 //==============================================================================
 struct ButtonsPage   : public Component,
-                       public ButtonListener
+                       public Button::Listener
 {
     ButtonsPage()
     {
@@ -278,6 +303,8 @@ struct ButtonsPage   : public Component,
 
             tb->setClickingTogglesState (true);
             tb->setRadioGroupId (34567);
+            tb->setColour (TextButton::textColourOffId, Colours::black);
+            tb->setColour (TextButton::textColourOnId, Colours::black);
             tb->setColour (TextButton::buttonColourId, Colours::white);
             tb->setColour (TextButton::buttonOnColourId, Colours::blueviolet.brighter());
 
@@ -442,14 +469,20 @@ struct MiscPage   : public Component
         comboBox.setSelectedId (1);
     }
 
+    void lookAndFeelChanged() override
+    {
+        textEditor1.applyFontToAllText (textEditor1.getFont());
+        textEditor2.applyFontToAllText (textEditor2.getFont());
+    }
+
     TextEditor textEditor1, textEditor2;
     ComboBox comboBox;
 };
 
 //==============================================================================
 class ToolbarDemoComp   : public Component,
-                          public SliderListener,
-                          public ButtonListener
+                          public Slider::Listener,
+                          public Button::Listener
 {
 public:
     ToolbarDemoComp()
@@ -745,10 +778,12 @@ public:
     // This is overloaded from TableListBoxModel, and should fill in the background of the whole row
     void paintRowBackground (Graphics& g, int rowNumber, int /*width*/, int /*height*/, bool rowIsSelected) override
     {
+        const Colour alternateColour (getLookAndFeel().findColour (ListBox::backgroundColourId)
+                                                      .interpolatedWith (getLookAndFeel().findColour (ListBox::textColourId), 0.03f));
         if (rowIsSelected)
             g.fillAll (Colours::lightblue);
         else if (rowNumber % 2)
-            g.fillAll (Colour (0xffeeeeee));
+            g.fillAll (alternateColour);
     }
 
     // This is overloaded from TableListBoxModel, and must paint any cells that aren't using custom
@@ -756,7 +791,7 @@ public:
     void paintCell (Graphics& g, int rowNumber, int columnId,
                     int width, int height, bool /*rowIsSelected*/) override
     {
-        g.setColour (Colours::black);
+        g.setColour (getLookAndFeel().findColour (ListBox::textColourId));
         g.setFont (font);
 
         if (const XmlElement* rowElement = dataList->getChildElement (rowNumber))
@@ -766,7 +801,7 @@ public:
             g.drawText (text, 2, 0, width - 4, height, Justification::centredLeft, true);
         }
 
-        g.setColour (Colours::black.withAlpha (0.2f));
+        g.setColour (getLookAndFeel().findColour (ListBox::backgroundColourId));
         g.fillRect (width - 1, 0, 1, height);
     }
 
@@ -888,7 +923,6 @@ private:
         {
             // double click to edit the label text; single click handled below
             setEditable (false, true, false);
-            setColour (textColourId, Colours::black);
         }
 
         void mouseDown (const MouseEvent& event) override
@@ -912,17 +946,26 @@ private:
             setText (owner.getText(columnId, row), dontSendNotification);
         }
 
+        void paint (Graphics& g) override
+        {
+            auto& lf = getLookAndFeel();
+            if (! dynamic_cast<LookAndFeel_V4*> (&lf))
+                lf.setColour (textColourId, Colours::black);
+
+            Label::paint (g);
+        }
+
     private:
         TableDemoComponent& owner;
         int row, columnId;
+        Colour textColour;
     };
-
 
     //==============================================================================
     // This is a custom component containing a combo box, which we're going to put inside
     // our table's "rating" column.
     class RatingColumnCustomComponent    : public Component,
-                                           private ComboBoxListener
+                                           private ComboBox::Listener
     {
     public:
         RatingColumnCustomComponent (TableDemoComponent& td)  : owner (td)
@@ -1063,7 +1106,7 @@ private:
             if (rowIsSelected)
                 g.fillAll (Colours::lightblue);
 
-            g.setColour (Colours::black);
+            g.setColour (LookAndFeel::getDefaultLookAndFeel().findColour (Label::textColourId));
             g.setFont (height * 0.7f);
 
             g.drawText ("Draggable Thing #" + String (rowNumber + 1),
@@ -1110,7 +1153,7 @@ private:
                 g.drawRect (getLocalBounds(), 3);
             }
 
-            g.setColour (Colours::black);
+            g.setColour (getLookAndFeel().findColour (Label::textColourId));
             g.setFont (14.0f);
             g.drawFittedText (message, getLocalBounds().reduced (10, 0), Justification::centred, 4);
         }
@@ -1235,6 +1278,7 @@ private:
 //==============================================================================
 class MenusDemo : public Component,
                   public MenuBarModel,
+                  public ChangeBroadcaster,
                   private Button::Listener
 {
 public:
@@ -1296,6 +1340,15 @@ public:
             menu.addCommandItem (commandManager, MainAppWindow::useLookAndFeelV1);
             menu.addCommandItem (commandManager, MainAppWindow::useLookAndFeelV2);
             menu.addCommandItem (commandManager, MainAppWindow::useLookAndFeelV3);
+
+            PopupMenu v4SubMenu;
+            v4SubMenu.addCommandItem (commandManager, MainAppWindow::useLookAndFeelV4Dark);
+            v4SubMenu.addCommandItem (commandManager, MainAppWindow::useLookAndFeelV4Midnight);
+            v4SubMenu.addCommandItem (commandManager, MainAppWindow::useLookAndFeelV4Grey);
+            v4SubMenu.addCommandItem (commandManager, MainAppWindow::useLookAndFeelV4Light);
+
+            menu.addSubMenu ("Use LookAndFeel_V4", v4SubMenu);
+
             menu.addSeparator();
             menu.addCommandItem (commandManager, MainAppWindow::useNativeTitleBar);
 
@@ -1370,6 +1423,10 @@ public:
 
                 tabs->setOrientation (o);
             }
+        }
+        else if (menuItemID >= 12298 && menuItemID <= 12305)
+        {
+            sendChangeMessage();
         }
     }
 
@@ -1466,26 +1523,35 @@ private:
 };
 
 //==============================================================================
-class DemoTabbedComponent  : public TabbedComponent
+class DemoTabbedComponent  : public TabbedComponent,
+                             private ChangeListener
 {
 public:
     DemoTabbedComponent()
         : TabbedComponent (TabbedButtonBar::TabsAtTop)
     {
-        addTab ("Menus",            getRandomTabBackgroundColour(), new MenusDemo(),           true);
-        addTab ("Buttons",          getRandomTabBackgroundColour(), new ButtonsPage(),         true);
-        addTab ("Sliders",          getRandomTabBackgroundColour(), new SlidersPage(),         true);
-        addTab ("Toolbars",         getRandomTabBackgroundColour(), new ToolbarDemoComp(),     true);
-        addTab ("Misc",             getRandomTabBackgroundColour(), new MiscPage(),            true);
-        addTab ("Tables",           getRandomTabBackgroundColour(), new TableDemoComponent(),  true);
-        addTab ("Drag & Drop",      getRandomTabBackgroundColour(), new DragAndDropDemo(),     true);
+        // Register this class as a ChangeListener to the menus demo so we can update the tab colours when the LookAndFeel is changed
+        menusDemo = new MenusDemo();
+        menusDemo->addChangeListener (this);
+
+        const Colour c;
+        addTab ("Menus",       c, menusDemo,                true);
+        addTab ("Buttons",     c, new ButtonsPage(),        true);
+        addTab ("Sliders",     c, new SlidersPage(),        true);
+        addTab ("Toolbars",    c, new ToolbarDemoComp(),    true);
+        addTab ("Misc",        c, new MiscPage(),           true);
+        addTab ("Tables",      c, new TableDemoComponent(), true);
+        addTab ("Drag & Drop", c, new DragAndDropDemo(),    true);
+
+        updateTabColours();
 
         getTabbedButtonBar().getTabButton (5)->setExtraComponent (new CustomTabButton(), TabBarButton::afterText);
     }
 
-    static Colour getRandomTabBackgroundColour()
+    void changeListenerCallback (ChangeBroadcaster* source) override
     {
-        return Colour (Random::getSystemRandom().nextFloat(), 0.1f, 0.97f, 1.0f);
+        if (dynamic_cast<MenusDemo*> (source) != nullptr)
+            updateTabColours();
     }
 
     // This is a small star button that is put inside one of the tabs. You can
@@ -1519,12 +1585,31 @@ public:
     private:
         ScopedPointer<BubbleMessageComponent> bubbleMessage;
     };
+
+private:
+    ScopedPointer<MenusDemo> menusDemo; //need to have keep a pointer around to register this class as a ChangeListener
+
+    void updateTabColours()
+    {
+        bool randomiseColours = ! dynamic_cast<LookAndFeel_V4*> (&LookAndFeel::getDefaultLookAndFeel());
+        for (int i = 0; i < getNumTabs(); ++i)
+        {
+            if (randomiseColours)
+                setTabBackgroundColour (i, Colour (Random::getSystemRandom().nextFloat(), 0.1f, 0.97f, 1.0f));
+            else
+                setTabBackgroundColour (i, getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+        }
+    }
+
+    void lookAndFeelChanged() override
+    {
+        updateTabColours();
+    }
 };
 
 //==============================================================================
-class WidgetsDemo   : public Component
+struct WidgetsDemo   : public Component
 {
-public:
     WidgetsDemo()
     {
         setOpaque (true);
@@ -1541,7 +1626,6 @@ public:
         tabs.setBounds (getLocalBounds().reduced (4));
     }
 
-private:
     DemoTabbedComponent tabs;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WidgetsDemo)

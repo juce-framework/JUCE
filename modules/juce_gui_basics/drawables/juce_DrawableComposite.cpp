@@ -2,45 +2,45 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-DrawableComposite::DrawableComposite()
-    : bounds (Point<float>(), Point<float> (100.0f, 0.0f), Point<float> (0.0f, 100.0f)),
-      updateBoundsReentrant (false)
+namespace juce
 {
-    setContentArea (RelativeRectangle (RelativeCoordinate (0.0),
-                                       RelativeCoordinate (100.0),
-                                       RelativeCoordinate (0.0),
-                                       RelativeCoordinate (100.0)));
+
+DrawableComposite::DrawableComposite()
+    : bounds (Point<float>(), Point<float> (100.0f, 0.0f), Point<float> (0.0f, 100.0f))
+{
+    setContentArea (RelativeRectangle (Rectangle<float> (0.0f, 0.0f, 100.0f, 100.0f)));
 }
 
 DrawableComposite::DrawableComposite (const DrawableComposite& other)
     : Drawable (other),
       bounds (other.bounds),
       markersX (other.markersX),
-      markersY (other.markersY),
-      updateBoundsReentrant (false)
+      markersY (other.markersY)
 {
-    for (int i = 0; i < other.getNumChildComponents(); ++i)
-        if (const Drawable* const d = dynamic_cast<const Drawable*> (other.getChildComponent(i)))
+    for (auto* c : other.getChildren())
+        if (auto* d = dynamic_cast<const Drawable*> (c))
             addAndMakeVisible (d->createCopy());
 }
 
@@ -59,8 +59,8 @@ Rectangle<float> DrawableComposite::getDrawableBounds() const
 {
     Rectangle<float> r;
 
-    for (int i = getNumChildComponents(); --i >= 0;)
-        if (const Drawable* const d = dynamic_cast<const Drawable*> (getChildComponent(i)))
+    for (auto* c : getChildren())
+        if (auto* d = dynamic_cast<const Drawable*> (c))
             r = r.getUnion (d->isTransformed() ? d->getDrawableBounds().transformedBy (d->getTransform())
                                                : d->getDrawableBounds());
 
@@ -97,7 +97,7 @@ void DrawableComposite::setBoundingBox (const RelativeParallelogram& newBounds)
 
         if (bounds.isDynamic())
         {
-            Drawable::Positioner<DrawableComposite>* const p = new Drawable::Positioner<DrawableComposite> (*this);
+            auto p = new Drawable::Positioner<DrawableComposite> (*this);
             setPositioner (p);
             p->apply();
         }
@@ -120,12 +120,7 @@ void DrawableComposite::resetBoundingBoxToContentArea()
 
 void DrawableComposite::resetContentAreaAndBoundingBoxToFitChildren()
 {
-    const Rectangle<float> activeArea (getDrawableBounds());
-
-    setContentArea (RelativeRectangle (RelativeCoordinate (activeArea.getX()),
-                                       RelativeCoordinate (activeArea.getRight()),
-                                       RelativeCoordinate (activeArea.getY()),
-                                       RelativeCoordinate (activeArea.getBottom())));
+    setContentArea (RelativeRectangle (getDrawableBounds()));
     resetBoundingBoxToContentArea();
 }
 
@@ -141,11 +136,11 @@ void DrawableComposite::recalculateCoordinates (Expression::Scope* scope)
     Point<float> resolved[3];
     bounds.resolveThreePoints (resolved, scope);
 
-    const Rectangle<float> content (getContentArea().resolve (scope));
+    auto content = getContentArea().resolve (scope);
 
-    AffineTransform t (AffineTransform::fromTargetPoints (content.getX(),     content.getY(),      resolved[0].x, resolved[0].y,
-                                                          content.getRight(), content.getY(),      resolved[1].x, resolved[1].y,
-                                                          content.getX(),     content.getBottom(), resolved[2].x, resolved[2].y));
+    auto t = AffineTransform::fromTargetPoints (content.getX(),     content.getY(),      resolved[0].x, resolved[0].y,
+                                                content.getRight(), content.getY(),      resolved[1].x, resolved[1].y,
+                                                content.getX(),     content.getBottom(), resolved[2].x, resolved[2].y);
 
     if (t.isSingularity())
         t = AffineTransform();
@@ -155,8 +150,7 @@ void DrawableComposite::recalculateCoordinates (Expression::Scope* scope)
 
 void DrawableComposite::parentHierarchyChanged()
 {
-    DrawableComposite* parent = getParent();
-    if (parent != nullptr)
+    if (auto* parent = getParent())
         originRelativeToComponent = parent->originRelativeToComponent - getPosition();
 }
 
@@ -178,10 +172,10 @@ void DrawableComposite::updateBoundsToFitChildren()
 
         Rectangle<int> childArea;
 
-        for (int i = getNumChildComponents(); --i >= 0;)
-            childArea = childArea.getUnion (getChildComponent(i)->getBoundsInParent());
+        for (auto* c : getChildren())
+            childArea = childArea.getUnion (c->getBoundsInParent());
 
-        const Point<int> delta (childArea.getPosition());
+        auto delta = childArea.getPosition();
         childArea += getPosition();
 
         if (childArea != getBounds())
@@ -190,9 +184,8 @@ void DrawableComposite::updateBoundsToFitChildren()
             {
                 originRelativeToComponent -= delta;
 
-                for (int i = getNumChildComponents(); --i >= 0;)
-                    if (Component* const c = getChildComponent(i))
-                        c->setBounds (c->getBounds() - delta);
+                for (auto* c : getChildren())
+                    c->setBounds (c->getBounds() - delta);
             }
 
             setBounds (childArea);
@@ -312,9 +305,9 @@ ValueTree DrawableComposite::createValueTree (ComponentBuilder::ImageProvider* i
 
     ValueTree childList (v.getChildListCreating (nullptr));
 
-    for (int i = 0; i < getNumChildComponents(); ++i)
+    for (auto* c : getChildren())
     {
-        const Drawable* const d = dynamic_cast<const Drawable*> (getChildComponent(i));
+        auto* d = dynamic_cast<const Drawable*> (c);
         jassert (d != nullptr); // You can't save a mix of Drawables and normal components!
 
         childList.addChild (d->createValueTree (imageProvider), -1, nullptr);
@@ -325,3 +318,17 @@ ValueTree DrawableComposite::createValueTree (ComponentBuilder::ImageProvider* i
 
     return tree;
 }
+
+Path DrawableComposite::getOutlineAsPath() const
+{
+    Path p;
+
+    for (auto* c : getChildren())
+        if (auto* d = dynamic_cast<Drawable*> (c))
+            p.addPath (d->getOutlineAsPath());
+
+    p.applyTransform (getTransform());
+    return p;
+}
+
+} // namespace juce

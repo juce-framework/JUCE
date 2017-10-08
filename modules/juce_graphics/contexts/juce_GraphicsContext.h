@@ -2,28 +2,30 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -99,10 +101,6 @@ public:
 
     //==============================================================================
     /** Changes the font to use for subsequent text-drawing functions.
-
-        Note there's also a setFont (float, int) method to quickly change the size and
-        style of the current font.
-
         @see drawSingleLineText, drawMultiLineText, drawText, drawFittedText
     */
     void setFont (const Font& newFont);
@@ -340,12 +338,6 @@ public:
     void drawRoundedRectangle (Rectangle<float> rectangle,
                                float cornerSize, float lineThickness) const;
 
-    /** Fills a 1x1 pixel using the current colour or brush.
-        Note that because the context may be transformed, this is effectively the same as
-        calling fillRect (x, y, 1, 1), and the actual result may involve multiple pixels.
-    */
-    void setPixel (int x, int y) const;
-
     //==============================================================================
     /** Fills an ellipse with the current colour or brush.
         The ellipse is drawn to fit inside the given rectangle.
@@ -390,14 +382,14 @@ public:
         TIP: If you're trying to draw horizontal or vertical lines, don't use this -
         it's better to use fillRect() instead unless you really need an angled line.
     */
-    void drawLine (const Line<float>& line) const;
+    void drawLine (Line<float> line) const;
 
     /** Draws a line between two points with a given thickness.
         @see Path::addLineSegment
         TIP: If you're trying to draw horizontal or vertical lines, don't use this -
         it's better to use fillRect() instead unless you really need an angled line.
     */
-    void drawLine (const Line<float>& line, float lineThickness) const;
+    void drawLine (Line<float> line, float lineThickness) const;
 
     /** Draws a dashed line using a custom set of dash-lengths.
 
@@ -410,7 +402,7 @@ public:
         @param dashIndexToStartFrom     the index in the dash-length array to use for the first segment
         @see PathStrokeType::createDashedStroke
     */
-    void drawDashedLine (const Line<float>& line,
+    void drawDashedLine (Line<float> line,
                          const float* dashLengths, int numDashLengths,
                          float lineThickness = 1.0f,
                          int dashIndexToStartFrom = 0) const;
@@ -443,7 +435,7 @@ public:
     /** Draws a path's outline using the currently selected colour or brush. */
     void strokePath (const Path& path,
                      const PathStrokeType& strokeType,
-                     const AffineTransform& transform = AffineTransform()) const;
+                     const AffineTransform& transform = {}) const;
 
     /** Draws a line with an arrowhead at its end.
 
@@ -452,7 +444,7 @@ public:
         @param arrowheadWidth   the width of the arrow head (perpendicular to the line)
         @param arrowheadLength  the length of the arrow head (along the length of the line)
     */
-    void drawArrow (const Line<float>& line,
+    void drawArrow (Line<float> line,
                     float lineThickness,
                     float arrowheadWidth,
                     float arrowheadLength) const;
@@ -745,8 +737,10 @@ private:
     LowLevelGraphicsContext& context;
     ScopedPointer<LowLevelGraphicsContext> contextToDelete;
 
-    bool saveStatePending;
+    bool saveStatePending = false;
     void saveStateIfPending();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Graphics)
 };
+
+} // namespace juce

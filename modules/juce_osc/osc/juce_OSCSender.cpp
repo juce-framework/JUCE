@@ -2,25 +2,30 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
+namespace juce
+{
 
 namespace
 {
@@ -32,7 +37,7 @@ namespace
 
         This class implements the Open Sound Control 1.0 Specification for
         the format in which the OSC data will be written into the buffer.
-     */
+    */
     struct OSCOutputStream
     {
         OSCOutputStream() noexcept {}
@@ -134,14 +139,14 @@ namespace
 
             OSCTypeList typeList;
 
-            for (OSCArgument* arg = msg.begin(); arg != msg.end(); ++arg)
-                typeList.add (arg->getType());
+            for (auto& arg : msg)
+                typeList.add (arg.getType());
 
             if (! writeTypeTagString (typeList))
                 return false;
 
-            for (OSCArgument* arg = msg.begin(); arg != msg.end(); ++arg)
-                if (! writeArgument (*arg))
+            for (auto& arg : msg)
+                if (! writeArgument (arg))
                     return false;
 
             return true;
@@ -155,8 +160,8 @@ namespace
             if (! writeTimeTag (bundle.getTimeTag()))
                 return false;
 
-            for (OSCBundle::Element* element = bundle.begin(); element != bundle.end(); ++element)
-                if (! writeBundleElement (*element))
+            for (auto& element : bundle)
+                if (! writeBundleElement (element))
                     return false;
 
             return true;
@@ -201,7 +206,7 @@ namespace
 //==============================================================================
 struct OSCSender::Pimpl
 {
-    Pimpl() noexcept : targetPortNumber (0) {}
+    Pimpl() noexcept  {}
     ~Pimpl() noexcept { disconnect(); }
 
     //==============================================================================
@@ -231,15 +236,17 @@ struct OSCSender::Pimpl
     bool send (const OSCMessage& message, const String& hostName, int portNumber)
     {
         OSCOutputStream outStream;
-        outStream.writeMessage (message);
-        return sendOutputStream (outStream, hostName, portNumber);
+
+        return outStream.writeMessage (message)
+            && sendOutputStream (outStream, hostName, portNumber);
     }
 
     bool send (const OSCBundle& bundle, const String& hostName, int portNumber)
     {
         OSCOutputStream outStream;
-        outStream.writeBundle (bundle);
-        return sendOutputStream (outStream, hostName, portNumber);
+
+        return outStream.writeBundle (bundle)
+            && sendOutputStream (outStream, hostName, portNumber);
     }
 
     bool send (const OSCMessage& message)   { return send (message, targetHostName, targetPortNumber); }
@@ -268,7 +275,7 @@ private:
     //==============================================================================
     ScopedPointer<DatagramSocket> socket;
     String targetHostName;
-    int targetPortNumber;
+    int targetPortNumber = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
@@ -310,7 +317,7 @@ bool OSCSender::sendToIPAddress (const String& host, int port, const OSCBundle& 
 class OSCBinaryWriterTests  : public UnitTest
 {
 public:
-    OSCBinaryWriterTests() : UnitTest ("OSCBinaryWriter class") {}
+    OSCBinaryWriterTests() : UnitTest ("OSCBinaryWriter class", "OSC") {}
 
     void runTest()
     {
@@ -637,7 +644,7 @@ static OSCBinaryWriterTests OSCBinaryWriterUnitTests;
 class OSCRoundTripTests  : public UnitTest
 {
 public:
-    OSCRoundTripTests() : UnitTest ("OSCRoundTripTests class") {}
+    OSCRoundTripTests() : UnitTest ("OSCRoundTripTests class", "OSC") {}
 
     void runTest()
     {
@@ -840,3 +847,5 @@ static OSCRoundTripTests OSCRoundTripUnitTests;
 
 //==============================================================================
 #endif // JUCE_UNIT_TESTS
+
+} // namespace juce

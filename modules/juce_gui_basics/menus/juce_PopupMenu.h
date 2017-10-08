@@ -2,28 +2,30 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /** Creates and displays a popup-menu.
@@ -87,19 +89,19 @@ public:
     PopupMenu();
 
     /** Creates a copy of another menu. */
-    PopupMenu (const PopupMenu& other);
+    PopupMenu (const PopupMenu&);
 
     /** Destructor. */
     ~PopupMenu();
 
     /** Copies this menu from another one. */
-    PopupMenu& operator= (const PopupMenu& other);
+    PopupMenu& operator= (const PopupMenu&);
 
     /** Move constructor */
-    PopupMenu (PopupMenu&& other) noexcept;
+    PopupMenu (PopupMenu&&) noexcept;
 
     /** Move assignment operator */
-    PopupMenu& operator= (PopupMenu&& other) noexcept;
+    PopupMenu& operator= (PopupMenu&&) noexcept;
 
     //==============================================================================
     /** Resets the menu, removing all its items. */
@@ -123,8 +125,8 @@ public:
         /** The menu item's name. */
         String text;
 
-        /** The menu item's ID. This can not be 0 if you want the item to be triggerable! */
-        int itemID;
+        /** The menu item's ID. This must not be 0 if you want the item to be triggerable! */
+        int itemID = 0;
 
         /** A sub-menu, or nullptr if there isn't one. */
         ScopedPointer<PopupMenu> subMenu;
@@ -139,7 +141,7 @@ public:
         ReferenceCountedObjectPtr<CustomCallback> customCallback;
 
         /** A command manager to use to automatically invoke the command, or nullptr if none is specified. */
-        ApplicationCommandManager* commandManager;
+        ApplicationCommandManager* commandManager = nullptr;
 
         /** An optional string describing the shortcut key for this item.
             This is only used for displaying at the right-hand edge of a menu item - the
@@ -155,16 +157,16 @@ public:
         Colour colour;
 
         /** True if this menu item is enabled. */
-        bool isEnabled;
+        bool isEnabled = true;
 
         /** True if this menu item should have a tick mark next to it. */
-        bool isTicked;
+        bool isTicked = false;
 
         /** True if this menu item is a separator line. */
-        bool isSeparator;
+        bool isSeparator = false;
 
         /** True if this menu item is a section header. */
-        bool isSectionHeader;
+        bool isSectionHeader = false;
     };
 
     /** Adds an item to the menu.
@@ -245,8 +247,6 @@ public:
                          const String& displayName = String(),
                          Drawable* iconToUse = nullptr);
 
-
-
     /** Appends a text item with a special colour.
 
         This is the same as addItem(), but specifies a colour to use for the
@@ -278,6 +278,8 @@ public:
         This will add a user-defined component to use as a menu item. The component
         passed in will be deleted by this menu when it's no longer needed.
 
+        Note that native macOS menus do not support custom components.
+
         @see CustomComponent
     */
     void addCustomItem (int itemResultID,
@@ -294,6 +296,8 @@ public:
         detection of a mouse-click on your component, and use that to trigger the
         menu ID specified in itemResultID. If this is false, the menu item can't
         be triggered, so itemResultID is not used.
+
+        Note that native macOS menus do support custom components.
     */
     void addCustomItem (int itemResultID,
                         Component* customComponent,
@@ -383,11 +387,14 @@ public:
     {
     public:
         Options();
+        Options (const Options&) = default;
+        Options& operator= (const Options&) = default;
 
         //==============================================================================
         Options withTargetComponent (Component* targetComponent) const noexcept;
-        Options withTargetScreenArea (const Rectangle<int>& targetArea) const noexcept;
+        Options withTargetScreenArea (Rectangle<int> targetArea) const noexcept;
         Options withMinimumWidth (int minWidth) const noexcept;
+        Options withMinimumNumColumns (int minNumColumns) const noexcept;
         Options withMaximumNumColumns (int maxNumColumns) const noexcept;
         Options withStandardItemHeight (int standardHeight) const noexcept;
         Options withItemThatMustBeVisible (int idOfItemToBeVisible) const noexcept;
@@ -399,17 +406,16 @@ public:
         Rectangle<int> getTargetScreenArea() const noexcept     { return targetArea; }
         int getMinimumWidth() const noexcept                    { return minWidth; }
         int getMaximumNumColumns() const noexcept               { return maxColumns; }
+        int getMinimumNumColumns() const noexcept               { return minColumns; }
         int getStandardItemHeight() const noexcept              { return standardHeight; }
         int getItemThatMustBeVisible() const noexcept           { return visibleItemID; }
 
     private:
         //==============================================================================
-        friend class PopupMenu;
-        friend class PopupMenu::Window;
         Rectangle<int> targetArea;
-        Component* targetComponent;
-        Component* parentComponent;
-        int visibleItemID, minWidth, maxColumns, standardHeight;
+        Component* targetComponent = nullptr;
+        Component* parentComponent = nullptr;
+        int visibleItemID = 0, minWidth = 0, minColumns = 1, maxColumns = 0, standardHeight = 0;
     };
 
     //==============================================================================
@@ -467,7 +473,7 @@ public:
 
         @see show()
     */
-    int showAt (const Rectangle<int>& screenAreaToAttachTo,
+    int showAt (Rectangle<int> screenAreaToAttachTo,
                 int itemIDThatMustBeVisible = 0,
                 int minimumWidth = 0,
                 int maximumNumColumns = 0,
@@ -579,9 +585,9 @@ public:
         //==============================================================================
         bool searchRecursively;
 
-        Array <int> index;
-        Array <const PopupMenu*> menus;
-        PopupMenu::Item *currentItem;
+        Array<int> index;
+        Array<const PopupMenu*> menus;
+        PopupMenu::Item* currentItem = nullptr;
 
         MenuItemIterator& operator= (const MenuItemIterator&);
         JUCE_LEAK_DETECTOR (MenuItemIterator)
@@ -632,7 +638,7 @@ public:
 
     private:
         //==============================================================================
-        bool isHighlighted, triggeredAutomatically;
+        bool isHighlighted = false, triggeredAutomatically;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomComponent)
     };
@@ -717,6 +723,12 @@ public:
         virtual Component* getParentComponentForMenuOptions (const PopupMenu::Options& options) = 0;
 
         virtual void preparePopupMenuWindow (Component& newWindow) = 0;
+
+        /** Return true if you want your popup menus to scale with the target component's AffineTransform
+            or scale factor */
+        virtual bool shouldPopupMenuScaleWithTargetComponent (const PopupMenu::Options& options) = 0;
+
+        virtual int getPopupMenuBorderSize() = 0;
     };
 
 private:
@@ -738,3 +750,5 @@ private:
 
     JUCE_LEAK_DETECTOR (PopupMenu)
 };
+
+} // namespace juce

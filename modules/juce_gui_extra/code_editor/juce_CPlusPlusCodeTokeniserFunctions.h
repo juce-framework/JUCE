@@ -2,28 +2,30 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /** Class containing some basic functions for simple tokenising of C++ code.
@@ -45,34 +47,38 @@ struct CppTokeniserFunctions
     static bool isReservedKeyword (String::CharPointerType token, const int tokenLength) noexcept
     {
         static const char* const keywords2Char[] =
-            { "if", "do", "or", nullptr };
+            { "do", "if", "or", nullptr };
 
         static const char* const keywords3Char[] =
-            { "for", "int", "new", "try", "xor", "and", "asm", "not", nullptr };
+            { "and", "asm", "for", "int", "new", "not", "try", "xor", nullptr };
 
         static const char* const keywords4Char[] =
-            { "bool", "void", "this", "true", "long", "else", "char",
-              "enum", "case", "goto", "auto", nullptr };
+            { "auto", "bool", "case", "char", "else", "enum", "goto",
+              "long", "this", "true", "void", nullptr };
 
         static const char* const keywords5Char[] =
-            { "float", "const", "while", "break", "false", "catch", "class", "bitor",
-              "compl", "or_eq", "short", "throw", "union", "using", "final", nullptr };
+            { "bitor", "break", "catch", "class", "compl", "const", "false", "final",
+              "float", "or_eq", "short", "throw", "union", "using", "while", nullptr };
 
         static const char* const keywords6Char[] =
-            { "return", "and_eq", "bitand", "delete", "double", "export", "extern",
-              "friend", "inline", "not_eq", "public", "signed", "sizeof", "static",
-              "struct", "switch", "typeid", "xor_eq", nullptr };
+            { "and_eq", "bitand", "delete", "double", "export", "extern", "friend",
+              "import", "inline", "module", "not_eq", "public", "return", "signed",
+              "sizeof", "static", "struct", "switch", "typeid", "xor_eq", nullptr };
 
         static const char* const keywords7Char[] =
-            { "nullptr", "alignas", "alignof", "default", "mutable", "private",
-              "typedef", "virtual", "wchar_t", "__cdecl", "_Pragma", "uint8_t", nullptr };
+            { "__cdecl", "_Pragma", "alignas", "alignof", "concept", "default",
+              "mutable", "nullptr", "private", "typedef", "uint8_t", "virtual",
+              "wchar_t", nullptr };
 
         static const char* const keywordsOther[] =
-            { "char16_t", "char32_t", "const_cast", "constexpr", "continue", "decltype", "dynamic_cast",
-              "explicit", "namespace", "noexcept", "operator", "protected", "register", "reinterpret_cast",
-              "static_assert", "static_cast", "template", "thread_local", "typename", "unsigned", "volatile",
-              "@class", "@dynamic", "@end", "@implementation", "@interface", "@public", "@private",
-              "@protected", "@property", "@synthesize", "__fastcall", "__stdcall", nullptr };
+            { "@class", "@dynamic", "@end", "@implementation", "@interface", "@public",
+              "@private", "@protected", "@property", "@synthesize", "__fastcall", "__stdcall",
+              "atomic_cancel", "atomic_commit", "atomic_noexcept", "char16_t", "char32_t",
+              "co_await", "co_return", "co_yield", "const_cast", "constexpr", "continue",
+              "decltype", "dynamic_cast", "explicit", "namespace", "noexcept", "operator",
+              "protected", "register", "reinterpret_cast", "requires", "static_assert",
+              "static_cast", "synchronized", "template", "thread_local", "typename", "unsigned",
+              "volatile", nullptr };
 
         const char* const* k;
 
@@ -659,3 +665,5 @@ struct CppTokeniserFunctions
         return mo.toString();
     }
 };
+
+} // namespace juce

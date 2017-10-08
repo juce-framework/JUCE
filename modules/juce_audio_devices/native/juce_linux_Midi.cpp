@@ -2,31 +2,26 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
+namespace juce
+{
 
 #if JUCE_ALSA
 
@@ -145,7 +140,7 @@ public:
                 numBytes -= numSent;
                 data += numSent;
 
-                snd_seq_ev_set_source (&event, portId);
+                snd_seq_ev_set_source (&event, (unsigned char) portId);
                 snd_seq_ev_set_subs (&event);
                 snd_seq_ev_set_direct (&event);
 
@@ -212,7 +207,7 @@ public:
         return instance;
     }
 
-    void registerCallback ()
+    void registerCallback()
     {
         if (inputThread == nullptr)
             inputThread = new MidiInputThread (*this);
@@ -221,7 +216,7 @@ public:
             inputThread->startThread();
     }
 
-    void unregisterCallback ()
+    void unregisterCallback()
     {
         jassert (activeCallbacks.get() > 0);
         if (--activeCallbacks == 0 && inputThread->isThreadRunning())
@@ -273,7 +268,7 @@ private:
     friend class ReferenceCountedObjectPtr<AlsaClient>;
     friend struct ContainerDeletePolicy<AlsaClient>;
 
-    AlsaClient ()
+    AlsaClient()
         : handle (nullptr),
           inputThread (nullptr)
     {
@@ -359,7 +354,7 @@ private:
 
                 snd_midi_event_free (midiParser);
             }
-        };
+        }
 
     private:
         AlsaClient& client;
@@ -601,7 +596,7 @@ MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallba
 
 // (These are just stub functions if ALSA is unavailable...)
 
-StringArray MidiOutput::getDevices()                                { return StringArray(); }
+StringArray MidiOutput::getDevices()                                { return {}; }
 int MidiOutput::getDefaultDeviceIndex()                             { return 0; }
 MidiOutput* MidiOutput::openDevice (int)                            { return nullptr; }
 MidiOutput* MidiOutput::createNewDevice (const String&)             { return nullptr; }
@@ -613,8 +608,10 @@ MidiInput::~MidiInput() {}
 void MidiInput::start() {}
 void MidiInput::stop()  {}
 int MidiInput::getDefaultDeviceIndex()      { return 0; }
-StringArray MidiInput::getDevices()         { return StringArray(); }
+StringArray MidiInput::getDevices()         { return {}; }
 MidiInput* MidiInput::openDevice (int, MidiInputCallback*)                  { return nullptr; }
 MidiInput* MidiInput::createNewDevice (const String&, MidiInputCallback*)   { return nullptr; }
 
 #endif
+
+} // namespace juce

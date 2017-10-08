@@ -2,35 +2,29 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 class WebInputStream;
+
 //==============================================================================
 /**
     Represents a URL and has a bunch of useful functions to manipulate it.
@@ -53,13 +47,13 @@ public:
     URL (const String& url);
 
     /** Creates a copy of another URL. */
-    URL (const URL& other);
+    URL (const URL&);
 
     /** Destructor. */
     ~URL();
 
     /** Copies this URL from another one. */
-    URL& operator= (const URL& other);
+    URL& operator= (const URL&);
 
     /** Compares two URLs.
         All aspects of the URLs must be identical for them to match, including any parameters,
@@ -84,19 +78,16 @@ public:
     bool isWellFormed() const;
 
     /** Returns just the domain part of the URL.
-
         E.g. for "http://www.xyz.com/foobar", this will return "www.xyz.com".
     */
     String getDomain() const;
 
     /** Returns the path part of the URL.
-
         E.g. for "http://www.xyz.com/foo/bar?x=1", this will return "foo/bar".
     */
     String getSubPath() const;
 
     /** Returns the scheme of the URL.
-
         E.g. for "http://www.xyz.com/foobar", this will return "http". (It won't
         include the colon).
     */
@@ -108,7 +99,6 @@ public:
     int getPort() const;
 
     /** Returns a new version of this URL with a different domain and path.
-
         E.g. if the URL is "http://www.xyz.com/foo?x=1" and you call this with
         "abc.com/zzz", it'll return "http://abc.com/zzz?x=1".
         @see withNewSubPath
@@ -116,7 +106,6 @@ public:
     URL withNewDomainAndPath (const String& newFullPath) const;
 
     /** Returns a new version of this URL with a different sub-path.
-
         E.g. if the URL is "http://www.xyz.com/foo?x=1" and you call this with
         "bar", it'll return "http://www.xyz.com/bar?x=1".
         @see withNewDomainAndPath
@@ -124,7 +113,6 @@ public:
     URL withNewSubPath (const String& newPath) const;
 
     /** Returns a new URL that refers to a sub-path relative to this one.
-
         E.g. if the URL is "http://www.xyz.com/foo" and you call this with
         "bar", it'll return "http://www.xyz.com/foo/bar". Note that there's no way for
         this method to know whether the original URL is a file or directory, so it's
@@ -140,7 +128,6 @@ public:
     /** Returns a copy of this URL, with a GET or POST parameter added to the end.
 
         Any control characters in the value will be encoded.
-
         e.g. calling "withParameter ("amount", "some fish") for the url "www.fish.com"
         would produce a new url whose toString(true) method would return
         "www.fish.com?amount=some+fish".
@@ -240,27 +227,24 @@ public:
     URL withPOSTData (const MemoryBlock& postData) const;
 
     /** Returns the data that was set using withPOSTData(). */
-    String getPostData() const noexcept                  { return postData.toString(); }
+    String getPostData() const noexcept                             { return postData.toString(); }
 
     /** Returns the data that was set using withPOSTData() as MemoryBlock. */
-    const MemoryBlock& getPostDataAsMemoryBlock() const noexcept { return postData; }
+    const MemoryBlock& getPostDataAsMemoryBlock() const noexcept    { return postData; }
 
     //==============================================================================
     /** Tries to launch the system's default browser to open the URL.
-
         Returns true if this seems to have worked.
     */
     bool launchInDefaultBrowser() const;
 
     //==============================================================================
     /** Takes a guess as to whether a string might be a valid website address.
-
         This isn't foolproof!
     */
     static bool isProbablyAWebsiteURL (const String& possibleURL);
 
     /** Takes a guess as to whether a string might be a valid email address.
-
         This isn't foolproof!
     */
     static bool isProbablyAnEmailAddress (const String& possibleEmailAddress);
@@ -331,7 +315,6 @@ public:
 
     //==============================================================================
     /** Represents a download task.
-
         Returned by downloadToFile to allow querying and controling the download task.
     */
     class DownloadTask
@@ -358,58 +341,57 @@ public:
 
         /** Returns the total length of the download task. This may return -1 if the length
             was not returned by the server. */
-        inline int64 getTotalLength() const               { return contentLength; }
+        int64 getTotalLength() const                      { return contentLength; }
 
         /** Returns the number of bytes that have been downloaded so far. */
-        inline int64 getLengthDownloaded() const          { return downloaded; }
+        int64 getLengthDownloaded() const                 { return downloaded; }
 
         /** Returns true if the download finished or there was an error. */
-        inline bool isFinished() const                    { return finished; }
+        bool isFinished() const                           { return finished; }
 
-        /** Returns the status code of the server's response. This will only be valid
-            after the download has finished.
-
+        /** Returns the status code of the server's response.
+            This will only be valid after the download has finished.
             @see isFinished
         */
-        inline int statusCode() const                     { return httpCode; }
+        int statusCode() const                            { return httpCode; }
 
         /** Returns true if there was an error. */
         inline bool hadError() const                      { return error; }
 
     protected:
-        int64 contentLength, downloaded;
-        bool finished, error;
-        int httpCode;
+        int64 contentLength = -1, downloaded = 0;
+        bool finished = false, error = false;
+        int httpCode = -1;
 
-        DownloadTask ();
+        DownloadTask();
 
     private:
         friend class URL;
-
-        static DownloadTask* createFallbackDownloader (const URL&, const File&, const String&, Listener*);
+        static DownloadTask* createFallbackDownloader (const URL&, const File&, const String&, Listener*, bool);
 
     public:
        #if JUCE_IOS
         /** internal **/
         static void juce_iosURLSessionNotify (const String&);
        #endif
+
     private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DownloadTask)
     };
 
     /** Download the URL to a file.
 
-     This method attempts to download the URL to a given file location.
+        This method attempts to download the URL to a given file location.
 
-     Using this method to download files on mobile is less flexible but more reliable
-     than using createInputStream or WebInputStreams as it will attempt to download the file
-     using a native OS background network task. Such tasks automatically deal with
-     network re-connections and continuing your download while your app is suspended but are
-     limited to simple GET requests.
-     */
+        Using this method to download files on mobile is less flexible but more reliable
+        than using createInputStream or WebInputStreams as it will attempt to download the file
+        using a native OS background network task. Such tasks automatically deal with
+        network re-connections and continuing your download while your app is suspended.
+    */
     DownloadTask* downloadToFile (const File& targetLocation,
                                   String extraHeaders = String(),
-                                  DownloadTask::Listener* listener = nullptr);
+                                  DownloadTask::Listener* listener = nullptr,
+                                  bool usePostCommand = false);
 
     //==============================================================================
     /** Tries to download the entire contents of this URL into a binary data block.
@@ -447,7 +429,7 @@ public:
     /** Tries to download the entire contents of this URL and parse it as XML.
 
         If it fails, or if the text that it reads can't be parsed as XML, this will
-        return 0.
+        return nullptr.
 
         When it returns a valid XmlElement object, the caller is responsibile for deleting
         this object when no longer needed.
@@ -531,3 +513,5 @@ private:
 
     JUCE_LEAK_DETECTOR (URL)
 };
+
+} // namespace juce

@@ -1,0 +1,358 @@
+JUCE breaking changes
+=====================
+
+Version 5.1.2
+=============
+
+Change
+------
+The method used to classify AudioUnit, VST3 and AAX plug-in parameters as
+either continuous or discrete has changed, and AudioUnit and AudioUnit v3
+parameters are marked as high precision by default.
+
+Possible Issues
+---------------
+Plug-ins: DAW projects with automation data written by an AudioUnit, AudioUnit
+v3 VST3 or AAX plug-in built with JUCE version 5.1.1 or earlier may load
+incorrectly when opened by an AudioUnit, AudioUnit v3, VST3 or AAX plug-in
+built with JUCE version 5.1.2 and later.
+
+Hosts: The AudioPluginInstance::getParameterNumSteps method now returns correct
+values for AU and VST3 plug-ins.
+
+Workaround
+----------
+Plug-ins: Enable JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE in the
+juce_audio_plugin_client module config page in the Projucer.
+
+Hosts: Use AudioPluginInstance::getDefaultNumParameterSteps as the number of
+steps for all parameters.
+
+Rationale
+---------
+The old system for presenting plug-in parameters to a host as either continuous
+or discrete is inconsistent between plug-in types and lacks sufficient
+flexibility. This change harmonises the behaviour and allows individual
+parameters to be marked as continuous or discrete. If AudioUnit and AudioUnit
+v3 parameters are not marked as high precision then hosts like Logic Pro only
+offer a limited number of parameter values, which again produces different
+behaviour for different plug-in types.
+
+
+Change
+------
+A new FrameRateType fps23976 has been added to AudioPlayHead,
+
+Possible Issues
+---------------
+Previously JUCE would report the FrameRateType fps24 for both 24 and 23.976
+fps. If your code uses switch statements (or similar) to handle all possible
+frame rate types, then this change may cause it to fall through.
+
+Workaround
+----------
+Add fps23976 to your switch statement and handle it appropriately.
+
+Rationale
+---------
+JUCE should be able to handle all popular frame rate codes but was missing
+support for 23.976.
+
+
+Change
+------
+The String (bool) constructor and operator<< (String&, bool) have been
+explicitly deleted.
+
+Possible Issues
+---------------
+Previous code which relied on an implicit bool to int type conversion to
+produce a String will not compile.
+
+Workaround
+----------
+Cast your bool to an integer to generate a string representation of it.
+
+Rationale
+---------
+Letting things implicitly convert to bool to produce a String opens the door to
+all kinds of nasty type conversion edge cases. Furthermore, before this change,
+MacOS would automatically convert bools to ints but this wouldn't occur on
+different platform. Now the behaviour is consistent across all operating
+systems supported by JUCE.
+
+
+Change
+------
+The writeAsJSON virtual method of the DynamicObject class requires an
+additional parameter, maximumDecimalPlaces, to specify the maximum precision of
+floating point numbers.
+
+Possible Issues
+---------------
+Classes which inherit from DynamicObject and override this method will need to
+update their method signature.
+
+Workaround
+----------
+Your custom DynamicObject class can choose to ignore the additional parameter
+if you don't wish to support this behaviour.
+
+Rationale
+---------
+When serialising the results of calculations to JSON the rounding of floating
+point numbers can result in numbers with 17 significant figures where only a
+few are required. This change to DynamicObject is required to support
+truncating those numbers.
+
+
+
+Version 5.1.0
+=============
+
+Change
+------
+The option to set the C++ language standard is now located in the project
+settings instead of the build configuration settings.
+
+Possible Issues
+---------------
+Projects that had a specific verison of the C++ language standard set for
+exporter build configurations will instead use the default (C++11) when
+re-saving with the new Projucer.
+
+Workaround
+----------
+Change the "C++ Language Standard" setting in the main project settings to the
+required version - the Projucer will add this value to the exported project as
+a compiler flag when saving exporters.
+
+Rationale
+---------
+Having a different C++ language standard option for each build configuration
+was unnecessary and was not fully implemented for all exporters. Changing it to
+a per-project settings means that the preference will propagate to all
+exporters and only needs to be set in one place.
+
+
+Change
+------
+PopupMenus now scale according to the AffineTransform and scaling factor of
+their target components.
+
+Possible Issues
+---------------
+Developers who have manually scaled their PopupMenus to fit the scaling factor
+of the parent UI will now have the scaling applied two times in a row.
+
+Workaround
+----------
+1. Do not apply your own manual scaling to make your popups match the UI
+   scaling
+
+or
+
+2. Override the Look&Feel method
+   PopupMenu::LookAndFeelMethods::shouldPopupMenuScaleWithTargetComponent and
+   return false. See
+   https://github.com/WeAreROLI/JUCE/blob/c288c94c2914af20f36c03ca9c5401fcb555e4e9/modules/juce_gui_basics/menus/juce_PopupMenu.h#725
+
+Rationale
+---------
+Previously, PopupMenus would not scale if the GUI of the target component (or
+any of it’s parents) were scaled. The only way to scale PopupMenus was via the
+global scaling factor. This had several drawbacks as the global scaling factor
+would scale everything. This was especially problematic in plug-in editors.
+
+
+Change
+------
+Removed the setSecurityFlags() method from the Windows implementation of
+WebInputStream as it disabled HTTPS security features.
+
+Possible Issues
+---------------
+Any code previously relying on connections to insecure webpages succeeding will
+no longer work.
+
+Workaround
+----------
+Check network connectivity on Windows and re-write any code that relied on
+insecure connections.
+
+Rationale
+---------
+The previous behaviour resulted in network connections on Windows having all
+the HTTPS security features disabled, exposing users to network attacks. HTTPS
+connections on Windows are now secure and will fail when connecting to an
+insecure web address.
+
+
+Change
+------
+Pointer arithmetic on a pointer will have the same result regardless if it is
+wrapped in JUCE's Atomic class or not.
+
+Possible Issues
+---------------
+Any code using pointer arithmetic on Atomic<T*> will now have a different
+result leading to undefined behaviour or crashes.
+
+Workaround
+----------
+Re-write your code in a way that it does not depend on your pointer being
+wrapped in JUCE's Atomic or not. See rationale.
+
+Rationale
+---------
+Before this change, pointer arithmetic with JUCE's Atomic type would yield
+confusing results. For example, the following code would assert before this
+change:
+
+int* a; Atomic<int*> b;
+
+jassert (++a == ++b);
+
+Pointer a in the above code would be advanced by sizeof(int) whereas the JUCE's
+Atomic always advances it's underlying pointer by a single byte. The same is
+true for operator+=/operator-= and operator--. The difference in behaviour is
+confusing and unintuitive. Furthermore, this aligns JUCE's Atomic type with
+std::atomic.
+
+
+
+Version 4.3.1
+=============
+
+Change
+------
+JUCE has changed the way native VST3/AudioUnit parameter ids are calculated.
+
+Possible Issues
+---------------
+DAW projects with automation data written by an AudioUnit or VST3 plug-in built
+with pre JUCE 4.3.1 versions will load incorrectly when opened by an AudioUnit
+or VST3 built with JUCE versions 4.3.1 and later. Plug-ins using
+JUCE_FORCE_USE_LEGACY_PARAM_IDS are not affected.
+
+Workaround
+----------
+Disable JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS in the
+juce_audio_plugin_client module config page in the Projucer. For new plug-ins,
+be sure to use the default value for this property.
+
+Rationale
+--------
+JUCE needs to convert between its own JUCE parameter id format (strings) to the
+native parameter id formats of the various plug-in backends. For VST3 and
+AudioUnits, JUCE uses a hash function to generate a numeric id. However, some
+VST3/AudioUnit hosts (specifically Studio One) have a bug that ignore any
+parameters that have a negative parameter id. Therefore, the hash function for
+VST3/AudioUnits needed to be changed to only return positive-valued hashes.
+
+
+
+Version 4.3.0
+=============
+
+Change
+------
+A revised multi-bus API was released which supersedes the previously flawed
+multi-bus API - JUCE versions 4.0.0 - 4.2.4 (inclusive).
+
+Possible Issues
+---------------
+If you have developed a plug-in with JUCE versions 4.0.0 - 4.2.4 (inclusive),
+then you will need to update your plug-in to the new multi-bus API. Pre JUCE
+4.0.0 plug-ins are not affected apart from other breaking changes listed in
+this document.
+
+Woraround
+---------
+None.
+
+Rationale
+--------
+A flawed multi-bus API was introduced with JUCE versions 4.0.0 up until version
+4.2.4 (inclusive) which was not API compatible with pre JUCE 4 plug-ins. JUCE
+4.3.0 releases a revised multi-bus API which restores pre JUCE 4 API
+compatibility. However, the new multi-bus API is not compatible with the flawed
+multi-bus API (JUCE version 4.0.0 - 4.2.4).
+
+
+Change
+------
+JUCE now generates the AAX plug-in bus layout configuration id independent from
+the position as it appears in the Projucer’s legacy "Channel layout
+configuration" field.
+
+Possible Issues
+---------------
+ProTools projects generated with a < 4.3.0 JUCE versions of your plug-in, may
+load the incorrect bus configuration when upgrading your plug-in to >= 4.3.0
+versions of JUCE.
+
+Workaround
+----------
+Implement AudioProcessor’s getAAXPluginIDForMainBusConfig callback to manually
+override which AAX plug-in id is associated to a specific bus layout of your
+plug-in. This workaround is only necessary if you have released your plug-in
+built with a version previous to JUCE 4.3.0.
+
+Rationale
+--------
+The new multi-bus API offers more features, flexibility and accuracy in
+specifying bus layouts which cannot be expressed by the Projucer’s legacy
+"Channel layout configuration" field. The native plug-in format backends use
+the new multi-bus callback APIs to negotiate channel layouts with the host -
+including the AAX plug-in ids assigned to specific bus layouts. With the
+callback API, there is no notion of an order in which the channel
+configurations appear - as was the case with the legacy "Channel layout
+configuration" field - and therefore cannot be used to generate the AAX plug-in
+id. To remain backward compatible to pre JUCE 4.0.0 plug-ins, JUCE does
+transparently convert the legacy "Channel layout configuration" field to the
+new callback based multi-bus API, but this does not take the order into account
+in which the channel configurations appear in the legacy "Channel layout
+configuration" field.
+
+
+
+Version 4.2.1
+=============
+
+Change
+------
+JUCE now uses the paramID property used in AudioProcessorParameterWithID to
+uniquely identify parameters to the host.
+
+Possible Issues
+---------------
+DAW projects with automation data written by an audio plug-in built with pre
+JUCE 4.2.1 will load incorrectly when opened by an audio plug-in built with
+JUCE 4.2.1 and later.
+
+Workaround
+----------
+Enable JUCE_FORCE_USE_LEGACY_PARAM_IDS in the juce_audio_plugin_client module config
+page in the Projucer. For new plug-ins, be sure to disable this property.
+
+Rationale
+--------
+Each parameter of the AudioProcessor has an id associated so that the plug-in’s
+host can uniquely identify parameters. The id has a different data-type for
+different plug-in types (for example VST uses integers, AAX uses string
+identifiers). Before 4.2.1, JUCE generated the parameter id by using the index
+of the parameter, i.e. the first parameter had id zero, the second parameter
+had id one, etc. This caused problems for certain plug-in types where JUCE
+needs to add internal parameters to the plug-in (for example VST3 requires the
+bypass control to be a parameter - so JUCE automatically creates this parameter
+for you in the VST3 backend). This causes subtle problems if a parameter is
+added to an update of an already published plug-in. The new parameter’s id
+would be identical to the id of the bypass parameter in old versions of your
+plug-in, causing seemingly random plug-in bypass behaviour when user’s upgrade
+their plug-in.
+
+Most plug-in backends differentiate between a parameter’s id an index, so this
+distinction was adopted starting with JUCE 4.2.1 by deriving the parameter’s
+unique id from the paramID property of AudioProcessorParameterWithID class.
+

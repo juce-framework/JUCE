@@ -2,31 +2,26 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
+namespace juce
+{
 
 #ifndef INTERNET_FLAG_NEED_FILE
  #define INTERNET_FLAG_NEED_FILE 0x00000010
@@ -41,14 +36,13 @@ class WebInputStream::Pimpl
 {
 public:
     Pimpl (WebInputStream& pimplOwner, const URL& urlToCopy, bool shouldBePost)
-        : statusCode (0), owner (pimplOwner), url (urlToCopy), connection (0), request (0),
-          position (0), finished (false), isPost (shouldBePost), timeOutMs (0),
-          httpRequestCmd (isPost ? "POST" : "GET"), numRedirectsToFollow (5)
+        : statusCode (0), owner (pimplOwner), url (urlToCopy), isPost (shouldBePost),
+          httpRequestCmd (isPost ? "POST" : "GET")
     {}
 
     ~Pimpl()
     {
-        close();
+        closeConnection();
     }
 
     //==============================================================================
@@ -74,6 +68,13 @@ public:
     //==============================================================================
     bool connect (WebInputStream::Listener* listener)
     {
+        {
+            const ScopedLock lock (createConnectionLock);
+
+            if (hasBeenCancelled)
+                return false;
+        }
+
         String address = url.toString (! isPost);
 
         while (numRedirectsToFollow-- >= 0)
@@ -189,7 +190,13 @@ public:
 
     void cancel()
     {
-        close();
+        {
+            const ScopedLock lock (createConnectionLock);
+
+            hasBeenCancelled = true;
+
+            closeConnection();
+        }
     }
 
     bool setPosition (int64 wantedPos)
@@ -225,22 +232,25 @@ private:
     //==============================================================================
     WebInputStream& owner;
     const URL url;
-    HINTERNET connection, request;
+    HINTERNET connection = 0, request = 0;
     String headers;
     MemoryBlock postData;
-    int64 position;
-    bool finished;
+    int64 position = 0;
+    bool finished = false;
     const bool isPost;
-    int timeOutMs;
+    int timeOutMs = 0;
     String httpRequestCmd;
-    int numRedirectsToFollow;
+    int numRedirectsToFollow = 5;
     StringPairArray responseHeaders;
+    CriticalSection createConnectionLock;
+    bool hasBeenCancelled = false;
 
-    void close()
+    void closeConnection()
     {
         HINTERNET requestCopy = request;
 
         request = 0;
+
         if (requestCopy != 0)
             InternetCloseHandle (requestCopy);
 
@@ -255,7 +265,7 @@ private:
     {
         static HINTERNET sessionHandle = InternetOpen (_T("juce"), INTERNET_OPEN_TYPE_PRECONFIG, 0, 0, 0);
 
-        close();
+        closeConnection();
 
         if (sessionHandle != 0)
         {
@@ -306,11 +316,18 @@ private:
 
         const bool isFtp = address.startsWithIgnoreCase ("ftp:");
 
-        connection = InternetConnect (sessionHandle, uc.lpszHostName, uc.nPort,
-                                      uc.lpszUserName, uc.lpszPassword,
-                                      isFtp ? (DWORD) INTERNET_SERVICE_FTP
-                                            : (DWORD) INTERNET_SERVICE_HTTP,
-                                      0, 0);
+        {
+            const ScopedLock lock (createConnectionLock);
+
+            connection = hasBeenCancelled ? 0
+                                          : InternetConnect (sessionHandle,
+                                                             uc.lpszHostName, uc.nPort,
+                                                             uc.lpszUserName, uc.lpszPassword,
+                                                             isFtp ? (DWORD) INTERNET_SERVICE_FTP
+                                                                   : (DWORD) INTERNET_SERVICE_HTTP,
+                                                             0, 0);
+        }
+
         if (connection != 0)
         {
             if (isFtp)
@@ -331,19 +348,22 @@ private:
         const TCHAR* mimeTypes[] = { _T("*/*"), nullptr };
 
         DWORD flags = INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_NO_COOKIES
-                        | INTERNET_FLAG_NO_AUTO_REDIRECT | SECURITY_SET_MASK;
+                        | INTERNET_FLAG_NO_AUTO_REDIRECT;
 
         if (address.startsWithIgnoreCase ("https:"))
             flags |= INTERNET_FLAG_SECURE;  // (this flag only seems necessary if the OS is running IE6 -
                                             //  IE7 seems to automatically work out when it's https)
 
-        request = HttpOpenRequest (connection, httpRequestCmd.toWideCharPointer(),
-                                   uc.lpszUrlPath, 0, 0, mimeTypes, flags, 0);
+        {
+            const ScopedLock lock (createConnectionLock);
+
+            request = hasBeenCancelled ? 0
+                                       : HttpOpenRequest (connection, httpRequestCmd.toWideCharPointer(),
+                                                          uc.lpszUrlPath, 0, 0, mimeTypes, flags, 0);
+        }
 
         if (request != 0)
         {
-            setSecurityFlags();
-
             INTERNET_BUFFERS buffers = { 0 };
             buffers.dwStructSize = sizeof (INTERNET_BUFFERS);
             buffers.lpcszHeader = headers.toWideCharPointer();
@@ -384,15 +404,7 @@ private:
             }
         }
 
-        close();
-    }
-
-    void setSecurityFlags()
-    {
-        DWORD dwFlags = 0, dwBuffLen = sizeof (DWORD);
-        InternetQueryOption (request, INTERNET_OPTION_SECURITY_FLAGS, &dwFlags, &dwBuffLen);
-        dwFlags |= SECURITY_FLAG_IGNORE_UNKNOWN_CA | SECURITY_SET_MASK;
-        InternetSetOption (request, INTERNET_OPTION_SECURITY_FLAGS, &dwFlags, sizeof (dwFlags));
+        closeConnection();
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
@@ -491,6 +503,17 @@ namespace MACAddressHelpers
             }
         }
     }
+
+    static void split (const sockaddr_in6* sa_in6, int off, uint8* split)
+    {
+       #if JUCE_MINGW
+        split[0] = sa_in6->sin6_addr._S6_un._S6_u8[off + 1];
+        split[1] = sa_in6->sin6_addr._S6_un._S6_u8[off];
+       #else
+        split[0] = sa_in6->sin6_addr.u.Byte[off + 1];
+        split[1] = sa_in6->sin6_addr.u.Byte[off];
+       #endif
+    }
 }
 
 void MACAddress::findAllAddresses (Array<MACAddress>& result)
@@ -501,7 +524,7 @@ void MACAddress::findAllAddresses (Array<MACAddress>& result)
 
 void IPAddress::findAllAddresses (Array<IPAddress>& result, bool includeIPv6)
 {
-    result.addIfNotAlreadyThere (IPAddress::local ());
+    result.addIfNotAlreadyThere (IPAddress::local());
 
     if (includeIPv6)
         result.addIfNotAlreadyThere (IPAddress::local (true));
@@ -529,9 +552,7 @@ void IPAddress::findAllAddresses (Array<IPAddress>& result, bool includeIPv6)
 
                     for (int i = 0; i < 8; ++i)
                     {
-                        temp.split[0] = sa_in6->sin6_addr.u.Byte[i * 2 + 1];
-                        temp.split[1] = sa_in6->sin6_addr.u.Byte[i * 2];
-
+                        MACAddressHelpers::split (sa_in6, i * 2, temp.split);
                         arr[i] = temp.combined;
                     }
 
@@ -558,9 +579,7 @@ void IPAddress::findAllAddresses (Array<IPAddress>& result, bool includeIPv6)
 
                     for (int i = 0; i < 8; ++i)
                     {
-                        temp.split[0] = sa_in6->sin6_addr.u.Byte[i * 2 + 1];
-                        temp.split[1] = sa_in6->sin6_addr.u.Byte[i * 2];
-
+                        MACAddressHelpers::split (sa_in6, i * 2, temp.split);
                         arr[i] = temp.combined;
                     }
 
@@ -587,9 +606,7 @@ void IPAddress::findAllAddresses (Array<IPAddress>& result, bool includeIPv6)
 
                     for (int i = 0; i < 8; ++i)
                     {
-                        temp.split[0] = sa_in6->sin6_addr.u.Byte[i * 2 + 1];
-                        temp.split[1] = sa_in6->sin6_addr.u.Byte[i * 2];
-
+                        MACAddressHelpers::split (sa_in6, i * 2, temp.split);
                         arr[i] = temp.combined;
                     }
 
@@ -642,7 +659,9 @@ bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& targetEmailA
     return mapiSendMail (0, 0, &message, MAPI_DIALOG | MAPI_LOGON_UI, 0) == SUCCESS_SUCCESS;
 }
 
-URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener)
+URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener, bool shouldUsePost)
 {
-    return URL::DownloadTask::createFallbackDownloader (*this, targetLocation, extraHeaders, listener);
+    return URL::DownloadTask::createFallbackDownloader (*this, targetLocation, extraHeaders, listener, shouldUsePost);
 }
+
+} // namespace juce

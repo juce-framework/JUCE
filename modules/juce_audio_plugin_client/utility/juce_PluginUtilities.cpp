@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -30,14 +32,13 @@
 #include "../utility/juce_CheckSettingMacros.h"
 #include "juce_IncludeModuleHeaders.h"
 
-namespace juce
-{
-    AudioProcessor::WrapperType PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_Undefined;
-}
+using namespace juce;
 
-//==============================================================================
 namespace juce
 {
+
+AudioProcessor::WrapperType PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_Undefined;
+
 #ifndef JUCE_VST3_CAN_REPLACE_VST2
  #define JUCE_VST3_CAN_REPLACE_VST2 1
 #endif
@@ -141,7 +142,7 @@ bool JUCE_API handleManufacturerSpecificVST2Opcode (int32 index, pointer_sized_i
 }
 #endif
 
-}  // namespace juce
+} // namespace juce
 
 //==============================================================================
 /** Somewhere in the codebase of your plugin, you need to implement this function
@@ -149,7 +150,7 @@ bool JUCE_API handleManufacturerSpecificVST2Opcode (int32 index, pointer_sized_i
 */
 extern AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 
-#if JucePlugin_Enable_IAA && JucePlugin_Build_STANDALONE && JUCE_IOS && (! JUCE_USE_CUSTOM_AU3_STANDALONE_APP)
+#if JucePlugin_Enable_IAA && JucePlugin_Build_Standalone && JUCE_IOS && (! JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP)
 extern bool JUCE_CALLTYPE juce_isInterAppAudioConnected();
 extern void JUCE_CALLTYPE juce_switchToHostApplication();
 
@@ -172,7 +173,7 @@ AudioProcessor* JUCE_API JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor:
 
 bool PluginHostType::isInterAppAudioConnected() const
 {
-   #if JucePlugin_Enable_IAA && JucePlugin_Build_STANDALONE && JUCE_IOS && (! JUCE_USE_CUSTOM_AU3_STANDALONE_APP)
+   #if JucePlugin_Enable_IAA && JucePlugin_Build_Standalone && JUCE_IOS && (! JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP)
     if (getPluginLoadedAs() == AudioProcessor::wrapperType_Standalone)
         return juce_isInterAppAudioConnected();
    #endif
@@ -182,7 +183,7 @@ bool PluginHostType::isInterAppAudioConnected() const
 
 void PluginHostType::switchToHostApplication() const
 {
-   #if JucePlugin_Enable_IAA && JucePlugin_Build_STANDALONE && JUCE_IOS && (! JUCE_USE_CUSTOM_AU3_STANDALONE_APP)
+   #if JucePlugin_Enable_IAA && JucePlugin_Build_Standalone && JUCE_IOS && (! JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP)
     if (getPluginLoadedAs() == AudioProcessor::wrapperType_Standalone)
         juce_switchToHostApplication();
    #endif
@@ -197,7 +198,7 @@ Image PluginHostType::getHostIcon (int size) const
 {
     ignoreUnused (size);
 
-   #if JucePlugin_Enable_IAA && JucePlugin_Build_STANDALONE && JUCE_IOS && (! JUCE_USE_CUSTOM_AU3_STANDALONE_APP)
+   #if JucePlugin_Enable_IAA && JucePlugin_Build_Standalone && JUCE_IOS && (! JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP)
     if (isInterAppAudioConnected())
         return juce_getIAAHostIcon (size);
    #endif

@@ -2,13 +2,16 @@
 
 <JUCERPROJECT id="aa4reI" name="BlocksDrawing" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.yourcompany.BlocksDrawing" includeBinaryInAppConfig="1"
-              jucerVersion="4.3.1">
+              jucerVersion="5.1.2" displaySplashScreen="0" reportAppUsage="0"
+              splashScreenColour="Dark" cppLanguageStandard="11">
   <MAINGROUP id="yXiPIx" name="BlocksDrawing">
     <GROUP id="{092A4D5B-31E2-5D03-9B41-81C10EC447E8}" name="Source">
       <FILE id="qnbQP7" name="LightpadComponent.h" compile="0" resource="0"
             file="Source/LightpadComponent.h"/>
-      <FILE id="yiP4mu" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
       <FILE id="RyfWDq" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
+      <FILE id="RVdh1i" name="MainComponent.cpp" compile="1" resource="0"
+            file="Source/MainComponent.cpp"/>
+      <FILE id="yiP4mu" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
@@ -77,6 +80,29 @@
         <MODULEPATH id="juce_audio_processors" path="../../../modules"/>
       </MODULEPATHS>
     </VS2015>
+    <VS2017 targetFolder="Builds/VisualStudio2017">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
+                       isDebug="1" optimisation="1" targetName="BlocksDrawing"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
+                       isDebug="0" optimisation="3" targetName="BlocksDrawing"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_opengl" path="../../../modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../../modules"/>
+        <MODULEPATH id="juce_events" path="../../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../../modules"/>
+        <MODULEPATH id="juce_core" path="../../../modules"/>
+        <MODULEPATH id="juce_blocks_basics" path="../../../modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../../modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../../modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../../modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../../modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../../modules"/>
+      </MODULEPATHS>
+    </VS2017>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="BlocksDrawing"/>

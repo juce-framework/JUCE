@@ -2,49 +2,52 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
+namespace juce
+{
 
 class TableListBox::RowComp   : public Component,
                                 public TooltipClient
 {
 public:
-    RowComp (TableListBox& tlb) noexcept  : owner (tlb), row (-1), isSelected (false)
-    {
-    }
+    RowComp (TableListBox& tlb) noexcept  : owner (tlb) {}
 
     void paint (Graphics& g) override
     {
-        if (TableListBoxModel* const tableModel = owner.getModel())
+        if (auto* tableModel = owner.getModel())
         {
             tableModel->paintRowBackground (g, row, getWidth(), getHeight(), isSelected);
 
-            const TableHeaderComponent& headerComp = owner.getHeader();
-            const int numColumns = headerComp.getNumColumns (true);
-            const Rectangle<int> clipBounds (g.getClipBounds());
+            auto& headerComp = owner.getHeader();
+            auto numColumns = headerComp.getNumColumns (true);
+            auto clipBounds = g.getClipBounds();
 
             for (int i = 0; i < numColumns; ++i)
             {
                 if (columnComponents[i] == nullptr)
                 {
-                    const Rectangle<int> columnRect (headerComp.getColumnPosition(i).withHeight (getHeight()));
+                    auto columnRect = headerComp.getColumnPosition(i).withHeight (getHeight());
 
                     if (columnRect.getX() >= clipBounds.getRight())
                         break;
@@ -65,7 +68,7 @@ public:
         }
     }
 
-    void update (const int newRow, const bool isNowSelected)
+    void update (int newRow, bool isNowSelected)
     {
         jassert (newRow >= 0);
 
@@ -76,19 +79,19 @@ public:
             repaint();
         }
 
-        TableListBoxModel* const tableModel = owner.getModel();
+        auto* tableModel = owner.getModel();
 
         if (tableModel != nullptr && row < owner.getNumRows())
         {
             const Identifier columnProperty ("_tableColumnId");
-            const int numColumns = owner.getHeader().getNumColumns (true);
+            auto numColumns = owner.getHeader().getNumColumns (true);
 
             for (int i = 0; i < numColumns; ++i)
             {
-                const int columnId = owner.getHeader().getColumnIdOfIndex (i, true);
-                Component* comp = columnComponents[i];
+                auto columnId = owner.getHeader().getColumnIdOfIndex (i, true);
+                auto* comp = columnComponents[i];
 
-                if (comp != nullptr && columnId != (int) comp->getProperties() [columnProperty])
+                if (comp != nullptr && columnId != static_cast<int> (comp->getProperties() [columnProperty]))
                 {
                     columnComponents.set (i, nullptr);
                     comp = nullptr;
@@ -120,9 +123,9 @@ public:
             resizeCustomComp (i);
     }
 
-    void resizeCustomComp (const int index)
+    void resizeCustomComp (int index)
     {
-        if (Component* const c = columnComponents.getUnchecked (index))
+        if (auto* c = columnComponents.getUnchecked (index))
             c->setBounds (owner.getHeader().getColumnPosition (index)
                             .withY (0).withHeight (getHeight()));
     }
@@ -138,10 +141,10 @@ public:
             {
                 owner.selectRowsBasedOnModifierKeys (row, e.mods, false);
 
-                const int columnId = owner.getHeader().getColumnIdAtX (e.x);
+                auto columnId = owner.getHeader().getColumnIdAtX (e.x);
 
                 if (columnId != 0)
-                    if (TableListBoxModel* m = owner.getModel())
+                    if (auto* m = owner.getModel())
                         m->cellClicked (row, columnId, e);
             }
             else
@@ -167,7 +170,7 @@ public:
 
             if (rowsToDrag.size() > 0)
             {
-                const var dragDescription (owner.getModel()->getDragSourceDescription (rowsToDrag));
+                auto dragDescription = owner.getModel()->getDragSourceDescription (rowsToDrag);
 
                 if (! (dragDescription.isVoid() || (dragDescription.isString() && dragDescription.toString().isEmpty())))
                 {
@@ -184,7 +187,7 @@ public:
         {
             owner.selectRowsBasedOnModifierKeys (row, e.mods, true);
 
-            const int columnId = owner.getHeader().getColumnIdAtX (e.x);
+            auto columnId = owner.getHeader().getColumnIdAtX (e.x);
 
             if (columnId != 0)
                 if (TableListBoxModel* m = owner.getModel())
@@ -194,25 +197,25 @@ public:
 
     void mouseDoubleClick (const MouseEvent& e) override
     {
-        const int columnId = owner.getHeader().getColumnIdAtX (e.x);
+        auto columnId = owner.getHeader().getColumnIdAtX (e.x);
 
         if (columnId != 0)
-            if (TableListBoxModel* m = owner.getModel())
+            if (auto* m = owner.getModel())
                 m->cellDoubleClicked (row, columnId, e);
     }
 
     String getTooltip() override
     {
-        const int columnId = owner.getHeader().getColumnIdAtX (getMouseXYRelative().getX());
+        auto columnId = owner.getHeader().getColumnIdAtX (getMouseXYRelative().getX());
 
         if (columnId != 0)
-            if (TableListBoxModel* m = owner.getModel())
+            if (auto* m = owner.getModel())
                 return m->getCellTooltip (row, columnId);
 
-        return String();
+        return {};
     }
 
-    Component* findChildComponentForColumn (const int columnId) const
+    Component* findChildComponentForColumn (int columnId) const
     {
         return columnComponents [owner.getHeader().getIndexOfColumnId (columnId, true)];
     }
@@ -220,8 +223,8 @@ public:
 private:
     TableListBox& owner;
     OwnedArray<Component> columnComponents;
-    int row;
-    bool isSelected, isDragging, selectRowOnMouseUp;
+    int row = -1;
+    bool isSelected = false, isDragging = false, selectRowOnMouseUp = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RowComp)
 };
@@ -265,10 +268,7 @@ private:
 
 //==============================================================================
 TableListBox::TableListBox (const String& name, TableListBoxModel* const m)
-    : ListBox (name, nullptr),
-      header (nullptr),
-      model (m),
-      autoSizeOptionsShown (true)
+    : ListBox (name, nullptr), model (m)
 {
     ListBox::model = this;
 
@@ -279,7 +279,7 @@ TableListBox::~TableListBox()
 {
 }
 
-void TableListBox::setModel (TableListBoxModel* const newModel)
+void TableListBox::setModel (TableListBoxModel* newModel)
 {
     if (model != newModel)
     {
@@ -293,6 +293,7 @@ void TableListBox::setHeader (TableHeaderComponent* newHeader)
     jassert (newHeader != nullptr); // you need to supply a real header for a table!
 
     Rectangle<int> newBounds (100, 28);
+
     if (header != nullptr)
         newBounds = header->getBounds();
 
@@ -309,15 +310,15 @@ int TableListBox::getHeaderHeight() const noexcept
     return header->getHeight();
 }
 
-void TableListBox::setHeaderHeight (const int newHeight)
+void TableListBox::setHeaderHeight (int newHeight)
 {
     header->setSize (header->getWidth(), newHeight);
     resized();
 }
 
-void TableListBox::autoSizeColumn (const int columnId)
+void TableListBox::autoSizeColumn (int columnId)
 {
-    const int width = model != nullptr ? model->getColumnAutoSizeWidth (columnId) : 0;
+    auto width = model != nullptr ? model->getColumnAutoSizeWidth (columnId) : 0;
 
     if (width > 0)
         header->setColumnWidth (columnId, width);
@@ -329,15 +330,14 @@ void TableListBox::autoSizeAllColumns()
         autoSizeColumn (header->getColumnIdOfIndex (i, true));
 }
 
-void TableListBox::setAutoSizeMenuOptionShown (const bool shouldBeShown) noexcept
+void TableListBox::setAutoSizeMenuOptionShown (bool shouldBeShown) noexcept
 {
     autoSizeOptionsShown = shouldBeShown;
 }
 
-Rectangle<int> TableListBox::getCellPosition (const int columnId, const int rowNumber,
-                                              const bool relativeToComponentTopLeft) const
+Rectangle<int> TableListBox::getCellPosition (int columnId, int rowNumber, bool relativeToComponentTopLeft) const
 {
-    Rectangle<int> headerCell (header->getColumnPosition (header->getIndexOfColumnId (columnId, true)));
+    auto headerCell = header->getColumnPosition (header->getIndexOfColumnId (columnId, true));
 
     if (relativeToComponentTopLeft)
         headerCell.translate (header->getX(), 0);
@@ -349,28 +349,26 @@ Rectangle<int> TableListBox::getCellPosition (const int columnId, const int rowN
 
 Component* TableListBox::getCellComponent (int columnId, int rowNumber) const
 {
-    if (RowComp* const rowComp = dynamic_cast<RowComp*> (getComponentForRowNumber (rowNumber)))
+    if (auto* rowComp = dynamic_cast<RowComp*> (getComponentForRowNumber (rowNumber)))
         return rowComp->findChildComponentForColumn (columnId);
 
     return nullptr;
 }
 
-void TableListBox::scrollToEnsureColumnIsOnscreen (const int columnId)
+void TableListBox::scrollToEnsureColumnIsOnscreen (int columnId)
 {
-    if (ScrollBar* const scrollbar = getHorizontalScrollBar())
-    {
-        const Rectangle<int> pos (header->getColumnPosition (header->getIndexOfColumnId (columnId, true)));
+    auto& scrollbar = getHorizontalScrollBar();
+    auto pos = header->getColumnPosition (header->getIndexOfColumnId (columnId, true));
 
-        double x = scrollbar->getCurrentRangeStart();
-        const double w = scrollbar->getCurrentRangeSize();
+    auto x = scrollbar.getCurrentRangeStart();
+    auto w = scrollbar.getCurrentRangeSize();
 
-        if (pos.getX() < x)
-            x = pos.getX();
-        else if (pos.getRight() > x + w)
-            x += jmax (0.0, pos.getRight() - (x + w));
+    if (pos.getX() < x)
+        x = pos.getX();
+    else if (pos.getRight() > x + w)
+        x += jmax (0.0, pos.getRight() - (x + w));
 
-        scrollbar->setCurrentRangeStart (x);
-    }
+    scrollbar.setCurrentRangeStart (x);
 }
 
 int TableListBox::getNumRows()
@@ -459,10 +457,10 @@ void TableListBox::resized()
 
 void TableListBox::updateColumnComponents() const
 {
-    const int firstRow = getRowContainingPosition (0, 0);
+    auto firstRow = getRowContainingPosition (0, 0);
 
     for (int i = firstRow + getNumRowsOnScreen() + 2; --i >= firstRow;)
-        if (RowComp* const rowComp = dynamic_cast<RowComp*> (getComponentForRowNumber (i)))
+        if (auto* rowComp = dynamic_cast<RowComp*> (getComponentForRowNumber (i)))
             rowComp->resized();
 }
 
@@ -470,15 +468,15 @@ void TableListBox::updateColumnComponents() const
 void TableListBoxModel::cellClicked (int, int, const MouseEvent&)       {}
 void TableListBoxModel::cellDoubleClicked (int, int, const MouseEvent&) {}
 void TableListBoxModel::backgroundClicked (const MouseEvent&)           {}
-void TableListBoxModel::sortOrderChanged (int, const bool)              {}
+void TableListBoxModel::sortOrderChanged (int, bool)                    {}
 int TableListBoxModel::getColumnAutoSizeWidth (int)                     { return 0; }
 void TableListBoxModel::selectedRowsChanged (int)                       {}
 void TableListBoxModel::deleteKeyPressed (int)                          {}
 void TableListBoxModel::returnKeyPressed (int)                          {}
 void TableListBoxModel::listWasScrolled()                               {}
 
-String TableListBoxModel::getCellTooltip (int /*rowNumber*/, int /*columnId*/)    { return String(); }
-var TableListBoxModel::getDragSourceDescription (const SparseSet<int>&)           { return var(); }
+String TableListBoxModel::getCellTooltip (int /*rowNumber*/, int /*columnId*/)    { return {}; }
+var TableListBoxModel::getDragSourceDescription (const SparseSet<int>&)           { return {}; }
 
 Component* TableListBoxModel::refreshComponentForCell (int, int, bool, Component* existingComponentToUpdate)
 {
@@ -486,3 +484,5 @@ Component* TableListBoxModel::refreshComponentForCell (int, int, bool, Component
     jassert (existingComponentToUpdate == nullptr); // indicates a failure in the code that recycles the components
     return nullptr;
 }
+
+} // namespace juce

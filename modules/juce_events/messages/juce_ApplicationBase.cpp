@@ -2,34 +2,33 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
+namespace juce
+{
+
 JUCEApplicationBase::CreateInstanceFunction JUCEApplicationBase::createInstance = 0;
 JUCEApplicationBase* JUCEApplicationBase::appInstance = nullptr;
+
+#if JUCE_IOS
+void* JUCEApplicationBase::iOSCustomDelegate = nullptr;
+#endif
 
 JUCEApplicationBase::JUCEApplicationBase()
     : appReturnValue (0),
@@ -77,7 +76,15 @@ void JUCEApplicationBase::sendUnhandledException (const std::exception* const e,
                                                   const int lineNumber)
 {
     if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+    {
+        // If you hit this assertion then the __FILE__ macro is providing a
+        // relative path instead of an absolute path. On Windows this will be
+        // a path relative to the build directory rather than the currently
+        // running application. To fix this you must compile with the /FC flag.
+        jassert (File::isAbsolutePath (sourceFile));
+
         app->unhandledException (e, sourceFile, lineNumber);
+    }
 }
 
 //==============================================================================
@@ -139,8 +146,8 @@ struct JUCEApplicationBase::MultipleInstanceHandler {};
 //==============================================================================
 #if JUCE_ANDROID
 
-StringArray JUCEApplicationBase::getCommandLineParameterArray() { return StringArray(); }
-String JUCEApplicationBase::getCommandLineParameters()          { return String(); }
+StringArray JUCEApplicationBase::getCommandLineParameterArray() { return {}; }
+String JUCEApplicationBase::getCommandLineParameters()          { return {}; }
 
 #else
 
@@ -177,6 +184,10 @@ StringArray JUCE_CALLTYPE JUCEApplicationBase::getCommandLineParameterArray()
  extern void initialiseNSApplication();
 #endif
 
+#if JUCE_LINUX && JUCE_MODULE_AVAILABLE_juce_gui_extra && (! defined(JUCE_WEB_BROWSER) || JUCE_WEB_BROWSER)
+ extern int juce_gtkWebkitMain (int argc, const char* argv[]);
+#endif
+
 #if JUCE_WINDOWS
  const char* const* juce_argv = nullptr;
  int juce_argc = 0;
@@ -207,7 +218,7 @@ StringArray JUCEApplicationBase::getCommandLineParameterArray()
     return StringArray (juce_argv + 1, juce_argc - 1);
 }
 
-int JUCEApplicationBase::main (int argc, const char* argv[], void* customDelegate)
+int JUCEApplicationBase::main (int argc, const char* argv[])
 {
     JUCE_AUTORELEASEPOOL
     {
@@ -218,10 +229,14 @@ int JUCEApplicationBase::main (int argc, const char* argv[], void* customDelegat
         initialiseNSApplication();
        #endif
 
+       #if JUCE_LINUX && JUCE_MODULE_AVAILABLE_juce_gui_extra && (! defined(JUCE_WEB_BROWSER) || JUCE_WEB_BROWSER)
+        if (argc >= 2 && String (argv[1]) == "--juce-gtkwebkitfork-child")
+            return juce_gtkWebkitMain (argc, argv);
+       #endif
+
        #if JUCE_IOS
-        return juce_iOSMain (argc, argv, customDelegate);
+        return juce_iOSMain (argc, argv, iOSCustomDelegate);
        #else
-        ignoreUnused (customDelegate);
 
         return JUCEApplicationBase::main();
        #endif
@@ -314,3 +329,5 @@ int JUCEApplicationBase::shutdownApp()
     multipleInstanceHandler = nullptr;
     return getApplicationReturnValue();
 }
+
+} // namespace juce

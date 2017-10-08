@@ -2,25 +2,30 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -92,6 +97,7 @@ public:
     static const char* const riffInfoBaseURL;               /**< Metadata property name used in INFO chunks. */
     static const char* const riffInfoCinematographer;       /**< Metadata property name used in INFO chunks. */
     static const char* const riffInfoComment;               /**< Metadata property name used in INFO chunks. */
+    static const char* const riffInfoComment2;              /**< Metadata property name used in INFO chunks. */
     static const char* const riffInfoComments;              /**< Metadata property name used in INFO chunks. */
     static const char* const riffInfoCommissioned;          /**< Metadata property name used in INFO chunks. */
     static const char* const riffInfoCopyright;             /**< Metadata property name used in INFO chunks. */
@@ -132,6 +138,7 @@ public:
     static const char* const riffInfoOrganisation;          /**< Metadata property name used in INFO chunks. */
     static const char* const riffInfoPart;                  /**< Metadata property name used in INFO chunks. */
     static const char* const riffInfoProducedBy;            /**< Metadata property name used in INFO chunks. */
+    static const char* const riffInfoProductName;           /**< Metadata property name used in INFO chunks. */
     static const char* const riffInfoProductionDesigner;    /**< Metadata property name used in INFO chunks. */
     static const char* const riffInfoProductionStudio;      /**< Metadata property name used in INFO chunks. */
     static const char* const riffInfoRate;                  /**< Metadata property name used in INFO chunks. */
@@ -157,6 +164,7 @@ public:
     static const char* const riffInfoThirdLanguage;         /**< Metadata property name used in INFO chunks. */
     static const char* const riffInfoTimeCode;              /**< Metadata property name used in INFO chunks. */
     static const char* const riffInfoTitle;                 /**< Metadata property name used in INFO chunks. */
+    static const char* const riffInfoTrackNo;               /**< Metadata property name used in INFO chunks. */
     static const char* const riffInfoTrackNumber;           /**< Metadata property name used in INFO chunks. */
     static const char* const riffInfoURL;                   /**< Metadata property name used in INFO chunks. */
     static const char* const riffInfoVegasVersionMajor;     /**< Metadata property name used in INFO chunks. */
@@ -178,6 +186,7 @@ public:
     Array<int> getPossibleBitDepths() override;
     bool canDoStereo() override;
     bool canDoMono() override;
+    bool isChannelLayoutSupported (const AudioChannelSet& channelSet) override;
 
     //==============================================================================
     AudioFormatReader* createReaderFor (InputStream* sourceStream,
@@ -189,6 +198,13 @@ public:
     AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
                                         double sampleRateToUse,
                                         unsigned int numberOfChannels,
+                                        int bitsPerSample,
+                                        const StringPairArray& metadataValues,
+                                        int qualityOptionIndex) override;
+
+    AudioFormatWriter* createWriterFor (OutputStream* streamToWriteTo,
+                                        double sampleRateToUse,
+                                        const AudioChannelSet& channelLayout,
                                         int bitsPerSample,
                                         const StringPairArray& metadataValues,
                                         int qualityOptionIndex) override;
@@ -205,3 +221,5 @@ public:
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WavAudioFormat)
 };
+
+} // namespace juce

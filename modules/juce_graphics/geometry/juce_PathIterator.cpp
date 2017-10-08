@@ -2,25 +2,30 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
+namespace juce
+{
 
 #if JUCE_MSVC && JUCE_DEBUG
  #pragma optimize ("t", on)
@@ -38,12 +43,7 @@ PathFlatteningIterator::PathFlatteningIterator (const Path& path_,
       transform (transform_),
       points (path_.data.elements),
       toleranceSquared (tolerance * tolerance),
-      subPathCloseX (0),
-      subPathCloseY (0),
-      isIdentityTransform (transform_.isIdentity()),
-      stackBase (32),
-      index (0),
-      stackSize (32)
+      isIdentityTransform (transform_.isIdentity())
 {
     stackPos = stackBase;
 }
@@ -54,8 +54,8 @@ PathFlatteningIterator::~PathFlatteningIterator()
 
 bool PathFlatteningIterator::isLastInSubpath() const noexcept
 {
-    return stackPos == stackBase.getData()
-             && (index >= path.numElements || points [index] == Path::moveMarker);
+    return stackPos == stackBase.get()
+             && (index >= path.numElements || isMarker (points[index], Path::moveMarker));
 }
 
 bool PathFlatteningIterator::next()
@@ -79,12 +79,12 @@ bool PathFlatteningIterator::next()
 
             type = points [index++];
 
-            if (type != Path::closeSubPathMarker)
+            if (! isMarker (type, Path::closeSubPathMarker))
             {
                 x2 = points [index++];
                 y2 = points [index++];
 
-                if (type == Path::quadMarker)
+                if (isMarker (type, Path::quadMarker))
                 {
                     x3 = points [index++];
                     y3 = points [index++];
@@ -92,7 +92,7 @@ bool PathFlatteningIterator::next()
                     if (! isIdentityTransform)
                         transform.transformPoints (x2, y2, x3, y3);
                 }
-                else if (type == Path::cubicMarker)
+                else if (isMarker (type, Path::cubicMarker))
                 {
                     x3 = points [index++];
                     y3 = points [index++];
@@ -113,17 +113,17 @@ bool PathFlatteningIterator::next()
         {
             type = *--stackPos;
 
-            if (type != Path::closeSubPathMarker)
+            if (! isMarker (type, Path::closeSubPathMarker))
             {
                 x2 = *--stackPos;
                 y2 = *--stackPos;
 
-                if (type == Path::quadMarker)
+                if (isMarker (type, Path::quadMarker))
                 {
                     x3 = *--stackPos;
                     y3 = *--stackPos;
                 }
-                else if (type == Path::cubicMarker)
+                else if (isMarker (type, Path::cubicMarker))
                 {
                     x3 = *--stackPos;
                     y3 = *--stackPos;
@@ -133,7 +133,7 @@ bool PathFlatteningIterator::next()
             }
         }
 
-        if (type == Path::lineMarker)
+        if (isMarker (type, Path::lineMarker))
         {
             ++subPathIndex;
 
@@ -146,7 +146,7 @@ bool PathFlatteningIterator::next()
             return true;
         }
 
-        if (type == Path::quadMarker)
+        if (isMarker (type, Path::quadMarker))
         {
             const size_t offset = (size_t) (stackPos - stackBase);
 
@@ -157,15 +157,15 @@ bool PathFlatteningIterator::next()
                 stackPos = stackBase + offset;
             }
 
-            const float m1x = (x1 + x2) * 0.5f;
-            const float m1y = (y1 + y2) * 0.5f;
-            const float m2x = (x2 + x3) * 0.5f;
-            const float m2y = (y2 + y3) * 0.5f;
-            const float m3x = (m1x + m2x) * 0.5f;
-            const float m3y = (m1y + m2y) * 0.5f;
+            auto m1x = (x1 + x2) * 0.5f;
+            auto m1y = (y1 + y2) * 0.5f;
+            auto m2x = (x2 + x3) * 0.5f;
+            auto m2y = (y2 + y3) * 0.5f;
+            auto m3x = (m1x + m2x) * 0.5f;
+            auto m3y = (m1y + m2y) * 0.5f;
 
-            const float errorX = m3x - x2;
-            const float errorY = m3y - y2;
+            auto errorX = m3x - x2;
+            auto errorY = m3y - y2;
 
             if (errorX * errorX + errorY * errorY > toleranceSquared)
             {
@@ -194,7 +194,7 @@ bool PathFlatteningIterator::next()
 
             jassert (stackPos < stackBase + stackSize);
         }
-        else if (type == Path::cubicMarker)
+        else if (isMarker (type, Path::cubicMarker))
         {
             const size_t offset = (size_t) (stackPos - stackBase);
 
@@ -205,21 +205,21 @@ bool PathFlatteningIterator::next()
                 stackPos = stackBase + offset;
             }
 
-            const float m1x = (x1 + x2) * 0.5f;
-            const float m1y = (y1 + y2) * 0.5f;
-            const float m2x = (x3 + x2) * 0.5f;
-            const float m2y = (y3 + y2) * 0.5f;
-            const float m3x = (x3 + x4) * 0.5f;
-            const float m3y = (y3 + y4) * 0.5f;
-            const float m4x = (m1x + m2x) * 0.5f;
-            const float m4y = (m1y + m2y) * 0.5f;
-            const float m5x = (m3x + m2x) * 0.5f;
-            const float m5y = (m3y + m2y) * 0.5f;
+            auto m1x = (x1 + x2) * 0.5f;
+            auto m1y = (y1 + y2) * 0.5f;
+            auto m2x = (x3 + x2) * 0.5f;
+            auto m2y = (y3 + y2) * 0.5f;
+            auto m3x = (x3 + x4) * 0.5f;
+            auto m3y = (y3 + y4) * 0.5f;
+            auto m4x = (m1x + m2x) * 0.5f;
+            auto m4y = (m1y + m2y) * 0.5f;
+            auto m5x = (m3x + m2x) * 0.5f;
+            auto m5y = (m3y + m2y) * 0.5f;
 
-            const float error1X = m4x - x2;
-            const float error1Y = m4y - y2;
-            const float error2X = m5x - x3;
-            const float error2Y = m5y - y3;
+            auto error1X = m4x - x2;
+            auto error1Y = m4y - y2;
+            auto error2X = m5x - x3;
+            auto error2Y = m5y - y3;
 
             if (error1X * error1X + error1Y * error1Y > toleranceSquared
                  || error2X * error2X + error2Y * error2Y > toleranceSquared)
@@ -255,7 +255,7 @@ bool PathFlatteningIterator::next()
                 *stackPos++ = Path::lineMarker;
             }
         }
-        else if (type == Path::closeSubPathMarker)
+        else if (isMarker (type, Path::closeSubPathMarker))
         {
             if (x2 != subPathCloseX || y2 != subPathCloseY)
             {
@@ -270,7 +270,7 @@ bool PathFlatteningIterator::next()
         }
         else
         {
-            jassert (type == Path::moveMarker);
+            jassert (isMarker (type, Path::moveMarker));
 
             subPathIndex = -1;
             subPathCloseX = x1 = x2;
@@ -282,3 +282,5 @@ bool PathFlatteningIterator::next()
 #if JUCE_MSVC && JUCE_DEBUG
   #pragma optimize ("", on)  // resets optimisations to the project defaults
 #endif
+
+} // namespace juce

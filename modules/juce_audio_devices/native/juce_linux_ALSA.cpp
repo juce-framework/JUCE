@@ -2,31 +2,26 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
+namespace juce
+{
 
 namespace
 {
@@ -83,7 +78,7 @@ static void getDeviceNumChannels (snd_pcm_t* handle, unsigned int* minChans, uns
         JUCE_ALSA_LOG ("getDeviceNumChannels: " << (int) *minChans << " " << (int) *maxChans);
 
         // some virtual devices (dmix for example) report 10000 channels , we have to clamp these values
-        *maxChans = jmin (*maxChans, 32u);
+        *maxChans = jmin (*maxChans, 256u);
         *minChans = jmin (*minChans, *maxChans);
     }
     else
@@ -163,7 +158,7 @@ public:
           isInput (forInput),
           isInterleaved (true)
     {
-        JUCE_ALSA_LOG ("snd_pcm_open (" << deviceID.toUTF8().getAddress() << ", forInput=" << forInput << ")");
+        JUCE_ALSA_LOG ("snd_pcm_open (" << deviceID.toUTF8().getAddress() << ", forInput=" << (int) forInput << ")");
 
         int err = snd_pcm_open (&handle, deviceID.toUTF8(),
                                 forInput ? SND_PCM_STREAM_CAPTURE : SND_PCM_STREAM_PLAYBACK,
@@ -249,7 +244,8 @@ public:
                                              (type & isFloatBit) != 0,
                                              (type & isLittleEndianBit) != 0,
                                              (type & onlyUseLower24Bits) != 0,
-                                             numChannels);
+                                             numChannels,
+                                             isInterleaved);
                 break;
             }
         }
@@ -337,8 +333,14 @@ public:
             numDone = snd_pcm_writen (handle, (void**) data, (snd_pcm_uframes_t) numSamples);
         }
 
-        if (numDone < 0 && JUCE_ALSA_FAILED (snd_pcm_recover (handle, (int) numDone, 1 /* silent */)))
-            return false;
+        if (numDone < 0)
+        {
+            if (numDone == -(EPIPE))
+                underrunCount++;
+
+            if (JUCE_ALSA_FAILED (snd_pcm_recover (handle, (int) numDone, 1 /* silent */)))
+                return false;
+        }
 
         if (numDone < numSamples)
             JUCE_ALSA_LOG ("Did not write all samples: numDone: " << numDone << ", numSamples: " << numSamples);
@@ -358,8 +360,15 @@ public:
 
             snd_pcm_sframes_t num = snd_pcm_readi (handle, scratch.getData(), (snd_pcm_uframes_t) numSamples);
 
-            if (num < 0 && JUCE_ALSA_FAILED (snd_pcm_recover (handle, (int) num, 1 /* silent */)))
-                return false;
+            if (num < 0)
+            {
+                if (num == -(EPIPE))
+                    overrunCount++;
+
+                if (JUCE_ALSA_FAILED (snd_pcm_recover (handle, (int) num, 1 /* silent */)))
+                    return false;
+            }
+
 
             if (num < numSamples)
                 JUCE_ALSA_LOG ("Did not read all samples: num: " << num << ", numSamples: " << numSamples);
@@ -371,8 +380,14 @@ public:
         {
             snd_pcm_sframes_t num = snd_pcm_readn (handle, (void**) data, (snd_pcm_uframes_t) numSamples);
 
-            if (num < 0 && JUCE_ALSA_FAILED (snd_pcm_recover (handle, (int) num, 1 /* silent */)))
-                return false;
+            if (num < 0)
+            {
+                if (num == -(EPIPE))
+                    overrunCount++;
+
+                if (JUCE_ALSA_FAILED (snd_pcm_recover (handle, (int) num, 1 /* silent */)))
+                    return false;
+            }
 
             if (num < numSamples)
                 JUCE_ALSA_LOG ("Did not read all samples: num: " << num << ", numSamples: " << numSamples);
@@ -388,6 +403,7 @@ public:
     snd_pcm_t* handle;
     String error;
     int bitDepth, numChannelsRunning, latency;
+    int underrunCount = 0, overrunCount = 0;
 
 private:
     //==============================================================================
@@ -401,44 +417,55 @@ private:
     template <class SampleType>
     struct ConverterHelper
     {
-        static AudioData::Converter* createConverter (const bool forInput, const bool isLittleEndian, const int numInterleavedChannels)
+        static AudioData::Converter* createConverter (const bool forInput, const bool isLittleEndian, const int numInterleavedChannels, bool interleaved)
+        {
+            if (interleaved)
+                return create<AudioData::Interleaved> (forInput, isLittleEndian, numInterleavedChannels);
+
+            return create<AudioData::NonInterleaved> (forInput, isLittleEndian, numInterleavedChannels);
+        }
+
+    private:
+        template <class InterleavedType>
+        static AudioData::Converter* create (const bool forInput, const bool isLittleEndian, const int numInterleavedChannels)
         {
             if (forInput)
             {
                 typedef AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst> DestType;
 
                 if (isLittleEndian)
-                    return new AudioData::ConverterInstance <AudioData::Pointer <SampleType, AudioData::LittleEndian, AudioData::Interleaved, AudioData::Const>, DestType> (numInterleavedChannels, 1);
+                    return new AudioData::ConverterInstance <AudioData::Pointer <SampleType, AudioData::LittleEndian, InterleavedType, AudioData::Const>, DestType> (numInterleavedChannels, 1);
 
-                return new AudioData::ConverterInstance <AudioData::Pointer <SampleType, AudioData::BigEndian, AudioData::Interleaved, AudioData::Const>, DestType> (numInterleavedChannels, 1);
+                return new AudioData::ConverterInstance <AudioData::Pointer <SampleType, AudioData::BigEndian, InterleavedType, AudioData::Const>, DestType> (numInterleavedChannels, 1);
             }
 
             typedef AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const> SourceType;
 
             if (isLittleEndian)
-                return new AudioData::ConverterInstance <SourceType, AudioData::Pointer <SampleType, AudioData::LittleEndian, AudioData::Interleaved, AudioData::NonConst> > (1, numInterleavedChannels);
+                return new AudioData::ConverterInstance <SourceType, AudioData::Pointer <SampleType, AudioData::LittleEndian, InterleavedType, AudioData::NonConst> > (1, numInterleavedChannels);
 
-            return new AudioData::ConverterInstance <SourceType, AudioData::Pointer <SampleType, AudioData::BigEndian, AudioData::Interleaved, AudioData::NonConst> > (1, numInterleavedChannels);
+            return new AudioData::ConverterInstance <SourceType, AudioData::Pointer <SampleType, AudioData::BigEndian, InterleavedType, AudioData::NonConst> > (1, numInterleavedChannels);
         }
     };
 
     static AudioData::Converter* createConverter (bool forInput, int bitDepth,
                                                   bool isFloat, bool isLittleEndian, bool useOnlyLower24Bits,
-                                                  int numInterleavedChannels)
+                                                  int numInterleavedChannels,
+                                                  bool interleaved)
     {
-        JUCE_ALSA_LOG ("format: bitDepth=" << bitDepth << ", isFloat=" << isFloat
-                        << ", isLittleEndian=" << isLittleEndian << ", numChannels=" << numInterleavedChannels);
+        JUCE_ALSA_LOG ("format: bitDepth=" << bitDepth << ", isFloat=" << (int) isFloat
+                        << ", isLittleEndian=" << (int) isLittleEndian << ", numChannels=" << numInterleavedChannels);
 
-        if (isFloat)         return ConverterHelper <AudioData::Float32>::createConverter (forInput, isLittleEndian, numInterleavedChannels);
-        if (bitDepth == 16)  return ConverterHelper <AudioData::Int16>  ::createConverter (forInput, isLittleEndian, numInterleavedChannels);
-        if (bitDepth == 24)  return ConverterHelper <AudioData::Int24>  ::createConverter (forInput, isLittleEndian, numInterleavedChannels);
+        if (isFloat)         return ConverterHelper <AudioData::Float32>::createConverter (forInput, isLittleEndian, numInterleavedChannels, interleaved);
+        if (bitDepth == 16)  return ConverterHelper <AudioData::Int16>  ::createConverter (forInput, isLittleEndian, numInterleavedChannels, interleaved);
+        if (bitDepth == 24)  return ConverterHelper <AudioData::Int24>  ::createConverter (forInput, isLittleEndian, numInterleavedChannels, interleaved);
 
         jassert (bitDepth == 32);
 
         if (useOnlyLower24Bits)
-            return ConverterHelper <AudioData::Int24in32>::createConverter (forInput, isLittleEndian, numInterleavedChannels);
+            return ConverterHelper <AudioData::Int24in32>::createConverter (forInput, isLittleEndian, numInterleavedChannels, interleaved);
 
-        return ConverterHelper <AudioData::Int32>::createConverter (forInput, isLittleEndian, numInterleavedChannels);
+        return ConverterHelper <AudioData::Int32>::createConverter (forInput, isLittleEndian, numInterleavedChannels, interleaved);
     }
 
     //==============================================================================
@@ -742,6 +769,19 @@ public:
         return 16;
     }
 
+    int getXRunCount() const noexcept
+    {
+        int result = 0;
+
+        if (outputDevice != nullptr)
+            result += outputDevice->underrunCount;
+
+        if (inputDevice != nullptr)
+            result += inputDevice->overrunCount;
+
+        return result;
+    }
+
     //==============================================================================
     String error;
     double sampleRate;
@@ -901,6 +941,8 @@ public:
     int getOutputLatencyInSamples() override         { return internal.outputLatency; }
     int getInputLatencyInSamples() override          { return internal.inputLatency; }
 
+    int getXRunCount() const noexcept override       { return internal.getXRunCount(); }
+
     void start (AudioIODeviceCallback* callback) override
     {
         if (! isOpen_)
@@ -1045,7 +1087,7 @@ private:
         if ((isInput || isOutput) && rates.size() > 0)
         {
             JUCE_ALSA_LOG ("testDevice: '" << id.toUTF8().getAddress() << "' -> isInput: "
-                            << isInput << ", isOutput: " << isOutput);
+                            << (int) isInput << ", isOutput: " << (int) isOutput);
 
             if (isInput)
             {
@@ -1136,7 +1178,8 @@ private:
                             }
 
                             JUCE_ALSA_LOG ("Soundcard ID: " << id << ", name: '" << name
-                                            << ", isInput:" << isInput << ", isOutput:" << isOutput << "\n");
+                                            << ", isInput:"  << (int) isInput
+                                            << ", isOutput:" << (int) isOutput << "\n");
 
                             if (isInput)
                             {
@@ -1267,3 +1310,5 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_ALSA()
 {
     return createAudioIODeviceType_ALSA_PCMDevices();
 }
+
+} // namespace juce

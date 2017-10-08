@@ -2,25 +2,30 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
+namespace juce
+{
 
 class UIViewComponentPeer;
 
@@ -93,7 +98,7 @@ namespace Orientations
 }
 
 //==============================================================================
-} // (juce namespace)
+} // namespace juce
 
 using namespace juce;
 
@@ -214,7 +219,7 @@ public:
     UIWindow* window;
     JuceUIView* view;
     JuceUIViewController* controller;
-    bool isSharedWindow, fullScreen, insideDrawRect;
+    bool isSharedWindow, fullScreen, insideDrawRect, isAppex;
     static ModifierKeys currentModifiers;
 
     static int64 getMouseTime (UIEvent* e) noexcept
@@ -283,7 +288,7 @@ public:
         return r;
     }
 
-    MultiTouchMapper<UITouch*> currentTouches;
+    static MultiTouchMapper<UITouch*> currentTouches;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIViewComponentPeer)
@@ -310,8 +315,9 @@ private:
 static void sendScreenBoundsUpdate (JuceUIViewController* c)
 {
     JuceUIView* juceView = (JuceUIView*) [c view];
-    jassert (juceView != nil && juceView->owner != nullptr);
-    juceView->owner->updateTransformAndScreenBounds();
+
+    if (juceView != nil && juceView->owner != nullptr)
+        juceView->owner->updateTransformAndScreenBounds();
 }
 
 static bool isKioskModeView (JuceUIViewController* c)
@@ -322,8 +328,9 @@ static bool isKioskModeView (JuceUIViewController* c)
     return Desktop::getInstance().getKioskModeComponent() == &(juceView->owner->getComponent());
 }
 
+MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
 
-} // (juce namespace)
+} // namespace juce
 
 //==============================================================================
 //==============================================================================
@@ -551,7 +558,8 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, const int windowStyle
       controller (nil),
       isSharedWindow (viewToAttachTo != nil),
       fullScreen (false),
-      insideDrawRect (false)
+      insideDrawRect (false),
+      isAppex (SystemStats::isRunningInAppExtensionSandbox())
 {
     CGRect r = convertToCGRect (component.getBounds());
 
@@ -727,7 +735,7 @@ void UIViewComponentPeer::updateTransformAndScreenBounds()
         const int x = ((int) (newDesktop.getWidth()  * centreRelX)) - (oldArea.getWidth()  / 2);
         const int y = ((int) (newDesktop.getHeight() * centreRelY)) - (oldArea.getHeight() / 2);
 
-        setBounds (oldArea.withPosition (x, y), false);
+        component.setBounds (oldArea.withPosition (x, y));
     }
 
     [view setNeedsDisplay];
@@ -846,8 +854,8 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
             modsToSend = currentModifiers;
 
             // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
-            handleMouseEvent (touchIndex, pos, modsToSend.withoutMouseButtons(),
-                              MouseInputSource::invalidPressure, time);
+            handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, modsToSend.withoutMouseButtons(),
+                              MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, time, {}, touchIndex);
 
             if (! isValidPeer (this)) // (in case this component was deleted by the event)
                 return;
@@ -874,15 +882,16 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
         float pressure = maximumForce > 0 ? jlimit (0.0001f, 0.9999f, getTouchForce (touch) / maximumForce)
                                           : MouseInputSource::invalidPressure;
 
-        handleMouseEvent (touchIndex, pos, modsToSend, pressure, time);
+        handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, modsToSend, pressure,
+                          MouseInputSource::invalidOrientation, time, { }, touchIndex);
 
         if (! isValidPeer (this)) // (in case this component was deleted by the event)
             return;
 
         if (isUp || isCancel)
         {
-            handleMouseEvent (touchIndex, Point<float> (-1.0f, -1.0f),
-                              modsToSend, MouseInputSource::invalidPressure, time);
+            handleMouseEvent (MouseInputSource::InputSourceType::touch, Point<float> (-1.0f, -1.0f), modsToSend,
+                              MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, time, {}, touchIndex);
 
             if (! isValidPeer (this))
                 return;
@@ -917,6 +926,9 @@ void UIViewComponentPeer::viewFocusLoss()
 
 bool UIViewComponentPeer::isFocused() const
 {
+    if (isAppex)
+        return true;
+
     return isSharedWindow ? this == currentlyFocusedPeer
                           : (window != nil && [window isKeyWindow]);
 }
@@ -1118,6 +1130,25 @@ const int KeyPress::F13Key          = 0x200d;
 const int KeyPress::F14Key          = 0x200e;
 const int KeyPress::F15Key          = 0x200f;
 const int KeyPress::F16Key          = 0x2010;
+const int KeyPress::F17Key          = 0x2011;
+const int KeyPress::F18Key          = 0x2012;
+const int KeyPress::F19Key          = 0x2013;
+const int KeyPress::F20Key          = 0x2014;
+const int KeyPress::F21Key          = 0x2015;
+const int KeyPress::F22Key          = 0x2016;
+const int KeyPress::F23Key          = 0x2017;
+const int KeyPress::F24Key          = 0x2018;
+const int KeyPress::F25Key          = 0x2019;
+const int KeyPress::F26Key          = 0x201a;
+const int KeyPress::F27Key          = 0x201b;
+const int KeyPress::F28Key          = 0x201c;
+const int KeyPress::F29Key          = 0x201d;
+const int KeyPress::F30Key          = 0x201e;
+const int KeyPress::F31Key          = 0x201f;
+const int KeyPress::F32Key          = 0x2020;
+const int KeyPress::F33Key          = 0x2021;
+const int KeyPress::F34Key          = 0x2022;
+const int KeyPress::F35Key          = 0x2023;
 const int KeyPress::numberPad0      = 0x30020;
 const int KeyPress::numberPad1      = 0x30021;
 const int KeyPress::numberPad2      = 0x30022;
@@ -1140,3 +1171,5 @@ const int KeyPress::playKey         = 0x30000;
 const int KeyPress::stopKey         = 0x30001;
 const int KeyPress::fastForwardKey  = 0x30002;
 const int KeyPress::rewindKey       = 0x30003;
+
+} // namespace juce

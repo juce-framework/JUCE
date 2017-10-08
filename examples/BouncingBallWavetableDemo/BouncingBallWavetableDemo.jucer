@@ -2,7 +2,9 @@
 
 <JUCERPROJECT id="fyUrFS" name="BouncingBallWavetableDemo" projectType="guiapp"
               version="1.0.0" bundleIdentifier="com.juce.BouncingBallWavetableDemo"
-              includeBinaryInAppConfig="1" jucerVersion="4.3.1">
+              includeBinaryInAppConfig="1" jucerVersion="5.1.2" displaySplashScreen="0"
+              reportAppUsage="0" splashScreenColour="Dark" companyName="ROLI Ltd."
+              cppLanguageStandard="11">
   <MAINGROUP id="MgjqDB" name="BouncingBallWavetableDemo">
     <GROUP id="{D35F88A0-C242-1CAA-21A9-6D01F78F4128}" name="Source">
       <FILE id="M5GUDX" name="MainComponent.cpp" compile="1" resource="0"
@@ -57,7 +59,30 @@
         <MODULEPATH id="juce_audio_utils" path="../../modules"/>
       </MODULEPATHS>
     </VS2013>
-    <LINUX_MAKE targetFolder="Builds/Linux">
+    <VS2017 targetFolder="Builds/VisualStudio2017">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
+                       isDebug="1" optimisation="1" targetName="BouncingBallWavetableDemo"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
+                       isDebug="0" optimisation="3" targetName="BouncingBallWavetableDemo"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_video" path="../../modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../modules"/>
+      </MODULEPATHS>
+    </VS2017>
+    <LINUX_MAKE targetFolder="Builds/LinuxMakefile">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" optimisation="1"
                        targetName="WavetableBouncingEditor"/>

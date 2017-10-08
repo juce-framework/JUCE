@@ -2,41 +2,45 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
+namespace juce
+{
 
 extern XContext windowHandleXContext;
 
 //==============================================================================
 // Defined juce_linux_Windowing.cpp
-Rectangle<int> juce_LinuxScaledToPhysicalBounds (ComponentPeer* peer, const Rectangle<int>& bounds);
-void juce_LinuxAddRepaintListener (ComponentPeer* peer, Component* dummy);
-void juce_LinuxRemoveRepaintListener (ComponentPeer* peer, Component* dummy);
+Rectangle<int> juce_LinuxScaledToPhysicalBounds (ComponentPeer*, Rectangle<int>);
+void juce_LinuxAddRepaintListener (ComponentPeer*, Component* dummy);
+void juce_LinuxRemoveRepaintListener (ComponentPeer*, Component* dummy);
 
 //==============================================================================
 class OpenGLContext::NativeContext
 {
 private:
-    class DummyComponent : public Component
+    struct DummyComponent  : public Component
     {
-    public:
         DummyComponent (OpenGLContext::NativeContext& nativeParentContext)
             : native (nativeParentContext)
         {
@@ -47,7 +51,7 @@ private:
             if (commandId == 0)
                 native.triggerRepaint();
         }
-    private:
+
         OpenGLContext::NativeContext& native;
     };
 
@@ -57,8 +61,7 @@ public:
                    void* shareContext,
                    bool /*useMultisampling*/,
                    OpenGLVersion)
-        : component (comp), renderContext (0), embeddedWindow (0), swapFrames (0), bestVisual (0),
-          contextToShareWith (shareContext), context (nullptr), dummy (*this)
+        : component (comp), contextToShareWith (shareContext), dummy (*this)
     {
         display = XWindowSystem::getInstance()->displayRef();
 
@@ -86,17 +89,19 @@ public:
         if (bestVisual == nullptr)
             return;
 
-        ComponentPeer* const peer = component.getPeer();
-        Window windowH = (Window) peer->getNativeHandle();
+        auto* peer = component.getPeer();
+        jassert (peer != nullptr);
 
-        Colormap colourMap = XCreateColormap (display, windowH, bestVisual->visual, AllocNone);
+        auto windowH = (Window) peer->getNativeHandle();
+        auto colourMap = XCreateColormap (display, windowH, bestVisual->visual, AllocNone);
+
         XSetWindowAttributes swa;
         swa.colormap = colourMap;
         swa.border_pixel = 0;
         swa.event_mask = ExposureMask | StructureNotifyMask;
 
-        Rectangle<int> glBounds (component.getTopLevelComponent()
-                               ->getLocalArea (&component, component.getLocalBounds()));
+        auto glBounds = component.getTopLevelComponent()
+                           ->getLocalArea (&component, component.getLocalBounds());
 
         glBounds = juce_LinuxScaledToPhysicalBounds (peer, glBounds);
 
@@ -167,8 +172,7 @@ public:
     static void deactivateCurrentContext()
     {
         ScopedXDisplay xDisplay;
-        ::Display* display = xDisplay.get();
-        glXMakeCurrent (display, None, 0);
+        glXMakeCurrent (xDisplay.display, None, 0);
     }
 
     void swapBuffers()
@@ -176,12 +180,10 @@ public:
         glXSwapBuffers (display, embeddedWindow);
     }
 
-    void updateWindowPosition (const Rectangle<int>& newBounds)
+    void updateWindowPosition (Rectangle<int> newBounds)
     {
         bounds = newBounds;
-
-        const Rectangle<int> physicalBounds =
-            juce_LinuxScaledToPhysicalBounds (component.getPeer(), bounds);
+        auto physicalBounds = juce_LinuxScaledToPhysicalBounds (component.getPeer(), bounds);
 
         ScopedXLock xlock (display);
         XMoveResizeWindow (display, embeddedWindow,
@@ -195,10 +197,8 @@ public:
         if (numFramesPerSwap == swapFrames)
             return true;
 
-        PFNGLXSWAPINTERVALSGIPROC GLXSwapIntervalSGI
-            = (PFNGLXSWAPINTERVALSGIPROC) OpenGLHelpers::getExtensionFunction ("glXSwapIntervalSGI");
-
-        if (GLXSwapIntervalSGI != nullptr)
+        if (auto GLXSwapIntervalSGI
+              = (PFNGLXSWAPINTERVALSGIPROC) OpenGLHelpers::getExtensionFunction ("glXSwapIntervalSGI"))
         {
             swapFrames = numFramesPerSwap;
             GLXSwapIntervalSGI (numFramesPerSwap);
@@ -223,18 +223,18 @@ public:
 
 private:
     Component& component;
-    GLXContext renderContext;
-    Window embeddedWindow;
+    GLXContext renderContext = {};
+    Window embeddedWindow = {};
 
-    int swapFrames;
+    int swapFrames = 0;
     Rectangle<int> bounds;
-    XVisualInfo* bestVisual;
+    XVisualInfo* bestVisual = {};
     void* contextToShareWith;
 
-    OpenGLContext* context;
+    OpenGLContext* context = {};
     DummyComponent dummy;
 
-    ::Display* display;
+    ::Display* display = {};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeContext)
 };
@@ -243,8 +243,14 @@ private:
 bool OpenGLHelpers::isContextActive()
 {
     ScopedXDisplay xDisplay;
-    ::Display* display = xDisplay.get();
 
-    ScopedXLock xlock (display);
-    return glXGetCurrentContext() != 0;
+    if (xDisplay.display)
+    {
+        ScopedXLock xlock (xDisplay.display);
+        return glXGetCurrentContext() != 0;
+    }
+
+    return false;
 }
+
+} // namespace juce

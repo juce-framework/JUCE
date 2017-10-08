@@ -2,30 +2,37 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
+namespace juce
+{
 
 MouseEvent::MouseEvent (MouseInputSource inputSource,
                         Point<float> pos,
                         ModifierKeys modKeys,
                         float force,
+                        float o, float r,
+                        float tX, float tY,
                         Component* const eventComp,
                         Component* const originator,
                         Time time,
@@ -38,6 +45,8 @@ MouseEvent::MouseEvent (MouseInputSource inputSource,
       y (roundToInt (pos.y)),
       mods (modKeys),
       pressure (force),
+      orientation (o), rotation (r),
+      tiltX (tX), tiltY (tY),
       eventComponent (eventComp),
       originalComponent (originator),
       eventTime (time),
@@ -59,23 +68,24 @@ MouseEvent MouseEvent::getEventRelativeTo (Component* const otherComponent) cons
     jassert (otherComponent != nullptr);
 
     return MouseEvent (source, otherComponent->getLocalPoint (eventComponent, position),
-                       mods, pressure, otherComponent, originalComponent, eventTime,
+                       mods, pressure, orientation, rotation, tiltX, tiltY,
+                       otherComponent, originalComponent, eventTime,
                        otherComponent->getLocalPoint (eventComponent, mouseDownPos),
                        mouseDownTime, numberOfClicks, wasMovedSinceMouseDown != 0);
 }
 
 MouseEvent MouseEvent::withNewPosition (Point<float> newPosition) const noexcept
 {
-    return MouseEvent (source, newPosition, mods, pressure, eventComponent,
-                       originalComponent, eventTime, mouseDownPos, mouseDownTime,
+    return MouseEvent (source, newPosition, mods, pressure, orientation, rotation, tiltX, tiltY,
+                       eventComponent, originalComponent, eventTime, mouseDownPos, mouseDownTime,
                        numberOfClicks, wasMovedSinceMouseDown != 0);
 }
 
 MouseEvent MouseEvent::withNewPosition (Point<int> newPosition) const noexcept
 {
-    return MouseEvent (source, newPosition.toFloat(), mods, pressure, eventComponent,
-                       originalComponent, eventTime, mouseDownPos, mouseDownTime,
-                       numberOfClicks, wasMovedSinceMouseDown != 0);
+    return MouseEvent (source, newPosition.toFloat(), mods, pressure, orientation, rotation,
+                       tiltX, tiltY, eventComponent,  originalComponent, eventTime, mouseDownPos,
+                       mouseDownTime, numberOfClicks, wasMovedSinceMouseDown != 0);
 }
 
 //==============================================================================
@@ -120,9 +130,14 @@ int MouseEvent::getMouseDownScreenX() const                     { return getMous
 int MouseEvent::getMouseDownScreenY() const                     { return getMouseDownScreenPosition().y; }
 
 bool MouseEvent::isPressureValid() const noexcept               { return pressure > 0.0f && pressure < 1.0f; }
+bool MouseEvent::isOrientationValid() const noexcept            { return orientation >= 0.0f && orientation <= 2.0f * float_Pi; }
+bool MouseEvent::isRotationValid() const noexcept               { return rotation >= 0 && rotation <= 2.0f * float_Pi; }
+bool MouseEvent::isTiltValid (bool isX) const noexcept          { return isX ? (tiltX >= -1.0f && tiltX <= 1.0f) : (tiltY >= -1.0f && tiltY <= 1.0f); }
 
 //==============================================================================
 static int doubleClickTimeOutMs = 400;
 
 int MouseEvent::getDoubleClickTimeout() noexcept                        { return doubleClickTimeOutMs; }
 void MouseEvent::setDoubleClickTimeout (const int newTime) noexcept     { doubleClickTimeOutMs = newTime; }
+
+} // namespace juce

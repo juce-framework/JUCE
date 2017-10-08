@@ -2,27 +2,34 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
 #if JUCE_MAC || JUCE_IOS
+
+#include "../../juce_audio_basics/native/juce_mac_CoreAudioLayouts.h"
+
+namespace juce
+{
 
 //==============================================================================
 namespace
@@ -374,6 +381,31 @@ public:
                                          &sizeOfLengthProperty,
                                          &lengthInSamples);
 
+                HeapBlock<AudioChannelLayout> caLayout;
+                bool hasLayout = false;
+                UInt32 sizeOfLayout = 0, isWritable = 0;
+
+                status = AudioFileGetPropertyInfo (audioFileID, kAudioFilePropertyChannelLayout, &sizeOfLayout, &isWritable);
+
+                if (status == noErr)
+                {
+                    caLayout.malloc (1, static_cast<size_t> (sizeOfLayout));
+
+                    status = AudioFileGetProperty (audioFileID, kAudioFilePropertyChannelLayout,
+                                                   &sizeOfLayout, caLayout.get());
+
+                    if (status == noErr)
+                    {
+                        auto fileLayout = CoreAudioLayouts::fromCoreAudio (*caLayout.get());
+
+                        if (fileLayout.size() == static_cast<int> (numChannels))
+                        {
+                            hasLayout = true;
+                            channelSet = fileLayout;
+                        }
+                    }
+                }
+
                 destinationAudioFormat.mSampleRate       = sampleRate;
                 destinationAudioFormat.mFormatID         = kAudioFormatLinearPCM;
                 destinationAudioFormat.mFormatFlags      = kLinearPCMFormatFlagIsFloat | kLinearPCMFormatFlagIsNonInterleaved | kAudioFormatFlagsNativeEndian;
@@ -391,6 +423,26 @@ public:
                 {
                     bufferList.malloc (1, sizeof (AudioBufferList) + numChannels * sizeof (::AudioBuffer));
                     bufferList->mNumberBuffers = numChannels;
+                    channelMap.malloc (numChannels);
+
+                    if (hasLayout && caLayout != nullptr)
+                    {
+                        auto caOrder = CoreAudioLayouts::getCoreAudioLayoutChannels (*caLayout);
+
+                        for (int i = 0; i < static_cast<int> (numChannels); ++i)
+                        {
+                            auto idx = channelSet.getChannelIndexForType (caOrder.getReference (i));
+                            jassert (isPositiveAndBelow (idx, static_cast<int> (numChannels)));
+
+                            channelMap[i] = idx;
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < static_cast<int> (numChannels); ++i)
+                            channelMap[i] = i;
+                    }
+
                     ok = true;
                 }
             }
@@ -445,12 +497,14 @@ public:
 
             for (int i = numDestChannels; --i >= 0;)
             {
-                if (destSamples[i] != nullptr)
+                int* dest = destSamples[(i < (int) numChannels ? channelMap[i] : i)];
+
+                if (dest != nullptr)
                 {
                     if (i < (int) numChannels)
-                        memcpy (destSamples[i] + startOffsetInDestBuffer, bufferList->mBuffers[i].mData, numBytes);
+                        memcpy (dest + startOffsetInDestBuffer, bufferList->mBuffers[i].mData, numBytes);
                     else
-                        zeromem (destSamples[i] + startOffsetInDestBuffer, numBytes);
+                        zeromem (dest + startOffsetInDestBuffer, numBytes);
                 }
             }
 
@@ -462,15 +516,24 @@ public:
         return true;
     }
 
+    AudioChannelSet getChannelLayout() override
+    {
+        if (channelSet.size() == static_cast<int> (numChannels)) return channelSet;
+
+        return AudioFormatReader::getChannelLayout();
+    }
+
     bool ok;
 
 private:
     AudioFileID audioFileID;
     ExtAudioFileRef audioFileRef;
+    AudioChannelSet channelSet;
     AudioStreamBasicDescription destinationAudioFormat;
     MemoryBlock audioDataBlock;
     HeapBlock<AudioBufferList> bufferList;
     int64 lastReadPosition;
+    HeapBlock<int> channelMap;
 
     static SInt64 getSizeCallback (void* inClientData)
     {
@@ -533,5 +596,245 @@ AudioFormatWriter* CoreAudioFormat::createWriterFor (OutputStream*,
     jassertfalse; // not yet implemented!
     return nullptr;
 }
+
+//==============================================================================
+// Unit tests for Core Audio layout conversions
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+#define DEFINE_CHANNEL_LAYOUT_DFL_ENTRY(x) CoreAudioChannelLayoutTag { x, #x, AudioChannelSet() }
+#define DEFINE_CHANNEL_LAYOUT_TAG_ENTRY(x, y) CoreAudioChannelLayoutTag { x, #x, y }
+
+class CoreAudioLayoutsUnitTest  : public UnitTest
+{
+public:
+    CoreAudioLayoutsUnitTest() : UnitTest ("Core Audio Layout <-> JUCE channel layout conversion", "Audio") {}
+
+    void runTest() override
+    {
+        auto& knownTags = getAllKnownLayoutTags();
+
+        {
+            // Check that all known tags defined in CoreAudio SDK version 10.12.4 are known to JUCE
+            // Include all defined tags even if there are duplicates as Apple will sometimes change
+            // definitions
+            beginTest ("All CA tags handled");
+
+            for (auto tagEntry : knownTags)
+            {
+                auto labels = CoreAudioLayouts::fromCoreAudio (tagEntry.tag);
+
+                expect (! labels.isDiscreteLayout(), String ("Tag \"") + String (tagEntry.name) + "\" is not handled by JUCE");
+            }
+        }
+
+        {
+            beginTest ("Number of speakers");
+
+            for (auto tagEntry : knownTags)
+            {
+                auto labels = CoreAudioLayouts::getSpeakerLayoutForCoreAudioTag (tagEntry.tag);
+
+                expect (labels.size() == (tagEntry.tag & 0xffff), String ("Tag \"") + String (tagEntry.name) + "\" has incorrect channel count");
+            }
+        }
+
+        {
+            beginTest ("No duplicate speaker");
+
+            for (auto tagEntry : knownTags)
+            {
+                auto labels = CoreAudioLayouts::getSpeakerLayoutForCoreAudioTag (tagEntry.tag);
+                labels.sort();
+
+                for (int i = 0; i < (labels.size() - 1); ++i)
+                    expect (labels.getReference (i) != labels.getReference (i + 1),
+                            String ("Tag \"") + String (tagEntry.name) + "\" has the same speaker twice");
+            }
+        }
+
+        {
+            beginTest ("CA speaker list and juce layouts are consistent");
+
+            for (auto tagEntry : knownTags)
+                expect (AudioChannelSet::channelSetWithChannels (CoreAudioLayouts::getSpeakerLayoutForCoreAudioTag (tagEntry.tag))
+                            == CoreAudioLayouts::fromCoreAudio (tagEntry.tag),
+                        String ("Tag \"") + String (tagEntry.name) + "\" is not converted consistantly by JUCE");
+        }
+
+        {
+            beginTest ("AudioChannelSet documentation is correct");
+
+            for (auto tagEntry : knownTags)
+            {
+                if (tagEntry.equivalentChannelSet.isDisabled())
+                    continue;
+
+                expect (CoreAudioLayouts::fromCoreAudio (tagEntry.tag) == tagEntry.equivalentChannelSet,
+                        String ("Documentation for tag \"") + String (tagEntry.name) + "\" is incorrect");
+            }
+        }
+
+        {
+            beginTest ("CA tag reverse conversion");
+
+            for (auto tagEntry : knownTags)
+            {
+                if (tagEntry.equivalentChannelSet.isDisabled())
+                    continue;
+
+                expect (CoreAudioLayouts::toCoreAudio (tagEntry.equivalentChannelSet) == tagEntry.tag,
+                        String ("Incorrect reverse conversion for tag \"") + String (tagEntry.name) + "\"");
+            }
+        }
+    }
+
+private:
+    struct CoreAudioChannelLayoutTag
+    {
+        AudioChannelLayoutTag tag;
+        const char* name;
+        AudioChannelSet equivalentChannelSet; /* referred to this in the AudioChannelSet documentation */
+    };
+
+    //==============================================================================
+    const Array<CoreAudioChannelLayoutTag>& getAllKnownLayoutTags() const
+    {
+        static CoreAudioChannelLayoutTag tags[] = {
+            DEFINE_CHANNEL_LAYOUT_TAG_ENTRY (kAudioChannelLayoutTag_Mono,   AudioChannelSet::mono()),
+            DEFINE_CHANNEL_LAYOUT_TAG_ENTRY (kAudioChannelLayoutTag_Stereo, AudioChannelSet::stereo()),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_StereoHeadphones),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_MatrixStereo),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_MidSide),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_XY),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_Binaural),
+            DEFINE_CHANNEL_LAYOUT_TAG_ENTRY (kAudioChannelLayoutTag_Ambisonic_B_Format, AudioChannelSet::ambisonic()),
+            DEFINE_CHANNEL_LAYOUT_TAG_ENTRY (kAudioChannelLayoutTag_Quadraphonic, AudioChannelSet::quadraphonic()),
+            DEFINE_CHANNEL_LAYOUT_TAG_ENTRY (kAudioChannelLayoutTag_Pentagonal, AudioChannelSet::pentagonal()),
+            DEFINE_CHANNEL_LAYOUT_TAG_ENTRY (kAudioChannelLayoutTag_Hexagonal, AudioChannelSet::hexagonal()),
+            DEFINE_CHANNEL_LAYOUT_TAG_ENTRY (kAudioChannelLayoutTag_Octagonal, AudioChannelSet::octagonal()),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_Cube),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_MPEG_1_0),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_MPEG_2_0),
+            DEFINE_CHANNEL_LAYOUT_TAG_ENTRY (kAudioChannelLayoutTag_MPEG_3_0_A, AudioChannelSet::createLCR()),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_MPEG_3_0_B),
+            DEFINE_CHANNEL_LAYOUT_TAG_ENTRY (kAudioChannelLayoutTag_MPEG_4_0_A, AudioChannelSet::createLCRS()),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_MPEG_4_0_B),
+            DEFINE_CHANNEL_LAYOUT_TAG_ENTRY (kAudioChannelLayoutTag_MPEG_5_0_A, AudioChannelSet::create5point0()),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_MPEG_5_0_B),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_MPEG_5_0_C),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_MPEG_5_0_D),
+            DEFINE_CHANNEL_LAYOUT_TAG_ENTRY (kAudioChannelLayoutTag_MPEG_5_1_A, AudioChannelSet::create5point1()),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_MPEG_5_1_B),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_MPEG_5_1_C),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_MPEG_5_1_D),
+            DEFINE_CHANNEL_LAYOUT_TAG_ENTRY (kAudioChannelLayoutTag_MPEG_6_1_A, AudioChannelSet::create6point1()),
+            DEFINE_CHANNEL_LAYOUT_TAG_ENTRY (kAudioChannelLayoutTag_MPEG_7_1_A, AudioChannelSet::create7point1SDDS()),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_MPEG_7_1_B),
+            DEFINE_CHANNEL_LAYOUT_TAG_ENTRY (kAudioChannelLayoutTag_MPEG_7_1_C, AudioChannelSet::create7point1()),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_Emagic_Default_7_1),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_SMPTE_DTV),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_ITU_1_0),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_ITU_2_0),
+            DEFINE_CHANNEL_LAYOUT_TAG_ENTRY (kAudioChannelLayoutTag_ITU_2_1, AudioChannelSet::createLRS()),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_ITU_2_2),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_ITU_3_0),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_ITU_3_1),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_ITU_3_2),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_ITU_3_2_1),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_ITU_3_4_1),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DVD_0),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DVD_1),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DVD_2),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DVD_3),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DVD_4),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DVD_5),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DVD_6),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DVD_7),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DVD_8),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DVD_9),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DVD_10),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DVD_11),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DVD_12),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DVD_13),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DVD_14),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DVD_15),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DVD_16),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DVD_17),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DVD_18),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DVD_19),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DVD_20),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AudioUnit_4),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AudioUnit_5),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AudioUnit_6),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AudioUnit_8),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AudioUnit_5_0),
+            DEFINE_CHANNEL_LAYOUT_TAG_ENTRY (kAudioChannelLayoutTag_AudioUnit_6_0, AudioChannelSet::create6point0()),
+            DEFINE_CHANNEL_LAYOUT_TAG_ENTRY (kAudioChannelLayoutTag_AudioUnit_7_0, AudioChannelSet::create7point0()),
+            DEFINE_CHANNEL_LAYOUT_TAG_ENTRY (kAudioChannelLayoutTag_AudioUnit_7_0_Front, AudioChannelSet::create7point0SDDS()),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AudioUnit_5_1),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AudioUnit_6_1),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AudioUnit_7_1),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AudioUnit_7_1_Front),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AAC_3_0),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AAC_Quadraphonic),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AAC_4_0),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AAC_5_0),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AAC_5_1),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AAC_6_0),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AAC_6_1),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AAC_7_0),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AAC_7_1),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AAC_7_1_B),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AAC_7_1_C),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AAC_Octagonal),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_TMH_10_2_std),
+            // DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_TMH_10_2_full), no indicatoin on how to handle this tag
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AC3_1_0_1),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AC3_3_0),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AC3_3_1),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AC3_3_0_1),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AC3_2_1_1),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_AC3_3_1_1),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_EAC_6_0_A),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_EAC_7_0_A),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_EAC3_6_1_A),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_EAC3_6_1_B),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_EAC3_6_1_C),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_EAC3_7_1_A),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_EAC3_7_1_B),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_EAC3_7_1_C),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_EAC3_7_1_D),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_EAC3_7_1_E),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_EAC3_7_1_F),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_EAC3_7_1_G),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_EAC3_7_1_H),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DTS_3_1),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DTS_4_1),
+            DEFINE_CHANNEL_LAYOUT_TAG_ENTRY (kAudioChannelLayoutTag_DTS_6_0_A, AudioChannelSet::create6point0Music()),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DTS_6_0_B),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DTS_6_0_C),
+            DEFINE_CHANNEL_LAYOUT_TAG_ENTRY (kAudioChannelLayoutTag_DTS_6_1_A, AudioChannelSet::create6point1Music()),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DTS_6_1_B),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DTS_6_1_C),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DTS_7_0),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DTS_7_1),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DTS_8_0_A),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DTS_8_0_B),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DTS_8_1_A),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DTS_8_1_B),
+            DEFINE_CHANNEL_LAYOUT_DFL_ENTRY (kAudioChannelLayoutTag_DTS_6_1_D)
+        };
+        static Array<CoreAudioChannelLayoutTag> knownTags (tags, sizeof (tags) / sizeof (CoreAudioChannelLayoutTag));
+
+        return knownTags;
+    }
+};
+
+static CoreAudioLayoutsUnitTest coreAudioLayoutsUnitTest;
+
+#endif
+
+} // namespace juce
 
 #endif

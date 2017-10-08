@@ -2,31 +2,26 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
+namespace juce
+{
 
 namespace TimeHelpers
 {
@@ -108,7 +103,7 @@ namespace TimeHelpers
 
        #ifdef JUCE_MSVC
         if (tm->tm_year < -1900 || tm->tm_year > 8099)
-            return String();   // Visual Studio's library can only handle 0 -> 9999 AD
+            return {};   // Visual Studio's library can only handle 0 -> 9999 AD
         #endif
 
         for (size_t bufferSize = 256; ; bufferSize += 256)
@@ -491,15 +486,15 @@ Time Time::fromISO8601 (StringRef iso) noexcept
 
     const int year = parseFixedSizeIntAndSkip (t, 4, '-');
     if (year < 0)
-        return Time();
+        return {};
 
     const int month = parseFixedSizeIntAndSkip (t, 2, '-');
     if (month < 0)
-        return Time();
+        return {};
 
     const int day = parseFixedSizeIntAndSkip (t, 2, 0);
     if (day < 0)
-        return Time();
+        return {};
 
     int hours = 0, minutes = 0, milliseconds = 0;
 
@@ -508,13 +503,25 @@ Time Time::fromISO8601 (StringRef iso) noexcept
         ++t;
         hours = parseFixedSizeIntAndSkip (t, 2, ':');
         if (hours < 0)
-            return Time();
+            return {};
 
         minutes = parseFixedSizeIntAndSkip (t, 2, ':');
         if (minutes < 0)
-            return Time();
+            return {};
 
-        milliseconds = (int) (1000.0 * CharacterFunctions::readDoubleValue (t));
+        auto seconds = parseFixedSizeIntAndSkip (t, 2, 0);
+        if (seconds < 0)
+             return {};
+
+        if (*t == '.')
+        {
+            ++t;
+            milliseconds = parseFixedSizeIntAndSkip (t, 3, 0);
+            if (milliseconds < 0)
+                return {};
+        }
+
+        milliseconds += 1000 * seconds;
     }
 
     const juce_wchar nextChar = t.getAndAdvance();
@@ -523,18 +530,18 @@ Time Time::fromISO8601 (StringRef iso) noexcept
     {
         const int offsetHours = parseFixedSizeIntAndSkip (t, 2, ':');
         if (offsetHours < 0)
-            return Time();
+            return {};
 
         const int offsetMinutes = parseFixedSizeIntAndSkip (t, 2, 0);
         if (offsetMinutes < 0)
-            return Time();
+            return {};
 
         const int offsetMs = (offsetHours * 60 + offsetMinutes) * 60 * 1000;
         milliseconds += nextChar == '-' ? offsetMs : -offsetMs; // NB: this seems backwards but is correct!
     }
     else if (nextChar != 0 && nextChar != 'Z')
     {
-        return Time();
+        return {};
     }
 
     return Time (year, month - 1, day, hours, minutes, 0, milliseconds, false);
@@ -624,7 +631,7 @@ Time Time::getCompilationDate()
 class TimeTests  : public UnitTest
 {
 public:
-    TimeTests() : UnitTest ("Time") {}
+    TimeTests() : UnitTest ("Time", "Time") {}
 
     void runTest() override
     {
@@ -675,3 +682,5 @@ public:
 static TimeTests timeTests;
 
 #endif
+
+} // namespace juce

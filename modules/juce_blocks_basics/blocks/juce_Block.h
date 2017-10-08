@@ -2,32 +2,26 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
+namespace juce
+{
 
 /**
     Represents an individual BLOCKS device.
@@ -50,6 +44,7 @@ public:
         liveBlock,
         loopBlock,
         developerControlBlock,
+        touchBlock,
         seaboardBlock // on-screen seaboard view
     };
 
@@ -65,6 +60,12 @@ public:
 
     /** The Block's serial number. */
     const juce::String serialNumber;
+
+    /** The Block's version number */
+    juce::String versionNumber;
+
+    /** The Block's name */
+    juce::String name;
 
     using UID = uint64;
 
@@ -185,6 +186,217 @@ public:
     virtual juce::Array<ConnectionPort> getPorts() const = 0;
 
     //==============================================================================
+    /** A program that can be loaded onto a block. */
+    struct Program
+    {
+        /** Creates a Program for the corresponding LEDGrid. */
+        Program (Block&);
+
+        /** Destructor. */
+        virtual ~Program();
+
+        /** Returns the LittleFoot program to execute on the BLOCKS device. */
+        virtual juce::String getLittleFootProgram() = 0;
+
+        Block& block;
+    };
+
+    /** Sets the Program to run on this block.
+
+        The supplied Program's lifetime will be managed by this class, so do not
+        use the Program in other places in your code.
+    */
+    virtual juce::Result setProgram (Program*) = 0;
+
+    /** Returns a pointer to the currently loaded program. */
+    virtual Program* getProgram() const = 0;
+
+    //==============================================================================
+    /** A message that can be sent to the currently loaded program. */
+    struct ProgramEventMessage
+    {
+        int32 values[3];
+    };
+
+    /** Sends a message to the currently loaded program.
+
+        To receive the message the program must provide a littlefoot function called
+        handleMessage with the following form:
+        @code
+        void handleMessage (int param1, int param2, int param3)
+        {
+            // Do something with the two integer parameters that the app has sent...
+        }
+        @endcode
+    */
+    virtual void sendProgramEvent (const ProgramEventMessage&) = 0;
+
+    /** Interface for objects listening to custom program events. */
+    struct ProgramEventListener
+    {
+        virtual ~ProgramEventListener() {}
+
+        /** Called whenever a message from a block is received. */
+        virtual void handleProgramEvent (Block& source, const ProgramEventMessage&) = 0;
+    };
+
+    /** Adds a new listener for custom program events from the block. */
+    virtual void addProgramEventListener (ProgramEventListener*);
+
+    /** Removes a listener for custom program events from the block. */
+    virtual void removeProgramEventListener (ProgramEventListener*);
+
+    //==============================================================================
+    /** Returns the size of the data block that setDataByte and other functions can write to. */
+    virtual uint32 getMemorySize() = 0;
+
+    /** Sets a single byte on the littlefoot heap. */
+    virtual void setDataByte (size_t offset, uint8 value) = 0;
+
+    /** Sets multiple bytes on the littlefoot heap. */
+    virtual void setDataBytes (size_t offset, const void* data, size_t num) = 0;
+
+    /** Sets multiple bits on the littlefoot heap. */
+    virtual void setDataBits (uint32 startBit, uint32 numBits, uint32 value) = 0;
+
+    /** Gets a byte from the littlefoot heap. */
+    virtual uint8 getDataByte (size_t offset) = 0;
+
+    /** Sets the current program as the block's default state. */
+    virtual void saveProgramAsDefault() = 0;
+
+    //==============================================================================
+    /** Metadata for a given config item */
+    struct ConfigMetaData
+    {
+        static constexpr int32 numOptionNames = 8;
+
+        ConfigMetaData() {}
+
+        // Constructor to work around VS2015 bugs...
+        ConfigMetaData (uint32 itemIndex,
+                        int32 itemValue,
+                        juce::Range<int32> rangeToUse,
+                        bool active,
+                        const char* itemName,
+                        uint32 itemType,
+                        const char* options[ConfigMetaData::numOptionNames],
+                        const char* groupName)
+          : item (itemIndex),
+            value (itemValue),
+            range (rangeToUse),
+            isActive (active),
+            name (itemName),
+            type (itemType),
+            group (groupName)
+        {
+            for (int i = 0; i < numOptionNames; ++i)
+                optionNames[i] = options[i];
+        }
+
+        ConfigMetaData (const ConfigMetaData& other)
+        {
+            *this = other;
+        }
+
+        const ConfigMetaData& operator= (const ConfigMetaData& other)
+        {
+            if (this != &other)
+            {
+                item     = other.item;
+                value    = other.value;
+                range    = other.range;
+                isActive = other.isActive;
+                name     = other.name;
+                type     = other.type;
+                group    = other.group;
+
+                for (int i = 0; i < numOptionNames; ++i)
+                    optionNames[i] = other.optionNames[i];
+            }
+            return *this;
+        }
+
+        bool operator== (const ConfigMetaData& other) const
+        {
+            for (int32 optionIndex = 0; optionIndex < numOptionNames; ++optionIndex)
+                if (optionNames[optionIndex] != other.optionNames[optionIndex])
+                    return false;
+
+            return item     == other.item
+                && value    == other.value
+                && range    == other.range
+                && isActive == other.isActive
+                && name     == other.name
+                && group    == other.group;
+        }
+
+        bool operator != (const ConfigMetaData& other) const
+        {
+            return ! (*this == other);
+        }
+
+        uint32 item = 0;
+        int32 value = 0;
+        juce::Range<int32> range;
+        bool isActive = false;
+        juce::String name;
+        uint32 type = 0;
+        juce::String optionNames[numOptionNames] = {};
+        juce::String group;
+    };
+
+    /** Returns the maximum number of config items available */
+    virtual uint32 getMaxConfigIndex() = 0;
+
+    /** Determine if this is a valid config item index */
+    virtual bool isValidUserConfigIndex (uint32 item) = 0;
+
+    /** Get local config item value */
+    virtual int32 getLocalConfigValue (uint32 item) = 0;
+
+    /** Set local config item value */
+    virtual void setLocalConfigValue (uint32 item, int32 value) = 0;
+
+    /** Set local config item range */
+    virtual void setLocalConfigRange (uint32 item, int32 min, int32 max) = 0;
+
+    /** Set if config item is active or not */
+    virtual void setLocalConfigItemActive (uint32 item, bool isActive) = 0;
+
+    /** Determine if config item is active or not */
+    virtual bool isLocalConfigItemActive (uint32 item) = 0;
+
+    /** Get config item metadata */
+    virtual ConfigMetaData getLocalConfigMetaData (uint32 item) = 0;
+
+    /** Request sync of factory config with block */
+    virtual void requestFactoryConfigSync() = 0;
+
+    /** Reset all items active status */
+    virtual void resetConfigListActiveStatus() = 0;
+
+    /** Perform factory reset on Block */
+    virtual void factoryReset() = 0;
+
+    /** Reset this Block */
+    virtual void blockReset() = 0;
+
+    /** Set Block name */
+    virtual bool setName (const juce::String& name) = 0;
+
+    //==============================================================================
+    /** Allows the user to provide a function that will receive log messages from the block. */
+    virtual void setLogger (std::function<void(const String&)> loggingCallback) = 0;
+
+    /** Sends a firmware update packet to a block, and waits for a reply. Returns an error code. */
+    virtual bool sendFirmwareUpdatePacket (const uint8* data, uint8 size,
+                                           std::function<void (uint8, uint32)> packetAckCallback) = 0;
+
+    /** Provides a callback that will be called when a config changes. */
+    virtual void setConfigChangedCallback (std::function<void(Block&, const ConfigMetaData&, uint32)>) = 0;
+
+    //==============================================================================
     /** Interface for objects listening to input data port. */
     struct DataInputPortListener
     {
@@ -194,10 +406,10 @@ public:
         virtual void handleIncomingDataPortMessage (Block& source, const void* messageData, size_t messageSize) = 0;
     };
 
-    /** Adds a new listener of data input port. */
+    /** Adds a new listener for the data input port. */
     virtual void addDataInputPortListener (DataInputPortListener*);
 
-    /** Removes a listener of data input port. */
+    /** Removes a listener for the data input port. */
     virtual void removeDataInputPortListener (DataInputPortListener*);
 
     /** Sends a message to the block. */
@@ -212,10 +424,14 @@ public:
 protected:
     //==============================================================================
     Block (const juce::String& serialNumberToUse);
+    Block (const juce::String& serial, const juce::String& version, const juce::String& name);
 
     juce::ListenerList<DataInputPortListener> dataInputPortListeners;
+    juce::ListenerList<ProgramEventListener> programEventListeners;
 
 private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Block)
 };
+
+} // namespace juce

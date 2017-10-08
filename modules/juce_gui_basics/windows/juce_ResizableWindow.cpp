@@ -2,60 +2,48 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
+namespace juce
+{
+
 ResizableWindow::ResizableWindow (const String& name, bool shouldAddToDesktop)
-    : TopLevelWindow (name, shouldAddToDesktop),
-      ownsContentComponent (false),
-      resizeToFitContent (false),
-      fullscreen (false),
-      canDrag (true),
-      dragStarted (false),
-      constrainer (nullptr)
-     #if JUCE_DEBUG
-      , hasBeenResized (false)
-     #endif
+    : TopLevelWindow (name, shouldAddToDesktop)
 {
     initialise (shouldAddToDesktop);
 }
 
 ResizableWindow::ResizableWindow (const String& name, Colour bkgnd, bool shouldAddToDesktop)
-    : TopLevelWindow (name, shouldAddToDesktop),
-      ownsContentComponent (false),
-      resizeToFitContent (false),
-      fullscreen (false),
-      canDrag (true),
-      dragStarted (false),
-      constrainer (nullptr)
-     #if JUCE_DEBUG
-      , hasBeenResized (false)
-     #endif
+    : TopLevelWindow (name, shouldAddToDesktop)
 {
     setBackgroundColour (bkgnd);
-
     initialise (shouldAddToDesktop);
 }
 
 ResizableWindow::~ResizableWindow()
 {
+    splashScreen.deleteAndZero();
+
     // Don't delete or remove the resizer components yourself! They're managed by the
     // ResizableWindow, and you should leave them alone! You may have deleted them
     // accidentally by careless use of deleteAllChildren()..?
@@ -73,6 +61,25 @@ ResizableWindow::~ResizableWindow()
 
 void ResizableWindow::initialise (const bool shouldAddToDesktop)
 {
+    /*
+      ==========================================================================
+       In accordance with the terms of the JUCE 5 End-Use License Agreement, the
+       JUCE Code in SECTION A cannot be removed, changed or otherwise rendered
+       ineffective unless you have a JUCE Indie or Pro license, or are using
+       JUCE under the GPL v3 license.
+
+       End User License Agreement: www.juce.com/juce-5-licence
+      ==========================================================================
+    */
+
+    // BEGIN SECTION A
+
+   #if ! JucePlugin_Build_Standalone
+    splashScreen = new JUCESplashScreen (*this);
+   #endif
+
+    // END SECTION A
+
     defaultConstrainer.setMinimumOnscreenAmounts (0x10000, 16, 24, 16);
 
     lastNonFullScreenPos.setBounds (50, 50, 256, 256);
@@ -160,7 +167,7 @@ void ResizableWindow::setContentComponentSize (int width, int height)
 {
     jassert (width > 0 && height > 0); // not a great idea to give it a zero size..
 
-    const BorderSize<int> border (getContentComponentBorder());
+    auto border = getContentComponentBorder();
 
     setSize (width + border.getLeftAndRight(),
              height + border.getTopAndBottom());
@@ -169,7 +176,7 @@ void ResizableWindow::setContentComponentSize (int width, int height)
 BorderSize<int> ResizableWindow::getBorderThickness()
 {
     if (isUsingNativeTitleBar() || isKioskMode())
-        return BorderSize<int>();
+        return {};
 
     return BorderSize<int> ((resizableBorder != nullptr && ! isFullScreen()) ? 4 : 1);
 }
@@ -187,7 +194,6 @@ void ResizableWindow::moved()
 void ResizableWindow::visibilityChanged()
 {
     TopLevelWindow::visibilityChanged();
-
     updateLastPosIfShowing();
 }
 
@@ -237,7 +243,7 @@ void ResizableWindow::childBoundsChanged (Component* child)
         jassert (child->getWidth() > 0);
         jassert (child->getHeight() > 0);
 
-        const BorderSize<int> borders (getContentComponentBorder());
+        auto borders = getContentComponentBorder();
 
         setSize (child->getWidth() + borders.getLeftAndRight(),
                  child->getHeight() + borders.getTopAndBottom());
@@ -248,9 +254,9 @@ void ResizableWindow::childBoundsChanged (Component* child)
 //==============================================================================
 void ResizableWindow::activeWindowStatusChanged()
 {
-    const BorderSize<int> border (getContentComponentBorder());
+    auto border = getContentComponentBorder();
+    auto area = getLocalBounds();
 
-    Rectangle<int> area (getLocalBounds());
     repaint (area.removeFromTop (border.getTop()));
     repaint (area.removeFromLeft (border.getLeft()));
     repaint (area.removeFromRight (border.getRight()));
@@ -300,10 +306,10 @@ bool ResizableWindow::isResizable() const noexcept
         || resizableBorder != nullptr;
 }
 
-void ResizableWindow::setResizeLimits (const int newMinimumWidth,
-                                       const int newMinimumHeight,
-                                       const int newMaximumWidth,
-                                       const int newMaximumHeight) noexcept
+void ResizableWindow::setResizeLimits (int newMinimumWidth,
+                                       int newMinimumHeight,
+                                       int newMaximumWidth,
+                                       int newMaximumHeight) noexcept
 {
     // if you've set up a custom constrainer then these settings won't have any effect..
     jassert (constrainer == &defaultConstrainer || constrainer == nullptr);
@@ -328,8 +334,8 @@ void ResizableWindow::setConstrainer (ComponentBoundsConstrainer* newConstrainer
     {
         constrainer = newConstrainer;
 
-        const bool useBottomRightCornerResizer = resizableCorner != nullptr;
-        const bool shouldBeResizable = useBottomRightCornerResizer || resizableBorder != nullptr;
+        bool useBottomRightCornerResizer = resizableCorner != nullptr;
+        bool shouldBeResizable = useBottomRightCornerResizer || resizableBorder != nullptr;
 
         resizableCorner = nullptr;
         resizableBorder = nullptr;
@@ -350,7 +356,7 @@ void ResizableWindow::setBoundsConstrained (const Rectangle<int>& newBounds)
 //==============================================================================
 void ResizableWindow::paint (Graphics& g)
 {
-    LookAndFeel& lf = getLookAndFeel();
+    auto& lf = getLookAndFeel();
 
     lf.fillResizableWindowBackground (g, getWidth(), getHeight(),
                                       getBorderThickness(), *this);
@@ -393,13 +399,12 @@ Colour ResizableWindow::getBackgroundColour() const noexcept
 
 void ResizableWindow::setBackgroundColour (Colour newColour)
 {
-    Colour backgroundColour (newColour);
+    auto backgroundColour = newColour;
 
     if (! Desktop::canUseSemiTransparentWindows())
         backgroundColour = newColour.withAlpha (1.0f);
 
     setColour (backgroundColourId, backgroundColour);
-
     setOpaque (backgroundColour.isOpaque());
     repaint();
 }
@@ -409,7 +414,7 @@ bool ResizableWindow::isFullScreen() const
 {
     if (isOnDesktop())
     {
-        ComponentPeer* const peer = getPeer();
+        auto* peer = getPeer();
         return peer != nullptr && peer->isFullScreen();
     }
 
@@ -425,10 +430,10 @@ void ResizableWindow::setFullScreen (const bool shouldBeFullScreen)
 
         if (isOnDesktop())
         {
-            if (ComponentPeer* const peer = getPeer())
+            if (auto* peer = getPeer())
             {
                 // keep a copy of this intact in case the real one gets messed-up while we're un-maximising
-                const Rectangle<int> lastPos (lastNonFullScreenPos);
+                auto lastPos = lastNonFullScreenPos;
 
                 peer->setFullScreen (shouldBeFullScreen);
 
@@ -454,7 +459,7 @@ void ResizableWindow::setFullScreen (const bool shouldBeFullScreen)
 
 bool ResizableWindow::isMinimised() const
 {
-    if (ComponentPeer* const peer = getPeer())
+    if (auto* peer = getPeer())
         return peer->isMinimised();
 
     return false;
@@ -464,7 +469,7 @@ void ResizableWindow::setMinimised (const bool shouldMinimise)
 {
     if (shouldMinimise != isMinimised())
     {
-        if (ComponentPeer* const peer = getPeer())
+        if (auto* peer = getPeer())
         {
             updateLastPosIfShowing();
             peer->setMinimised (shouldMinimise);
@@ -479,7 +484,7 @@ void ResizableWindow::setMinimised (const bool shouldMinimise)
 bool ResizableWindow::isKioskMode() const
 {
     if (isOnDesktop())
-        if (ComponentPeer* peer = getPeer())
+        if (auto* peer = getPeer())
             return peer->isKioskMode();
 
     return Desktop::getInstance().getKioskModeComponent() == this;
@@ -503,7 +508,7 @@ void ResizableWindow::updateLastPosIfNotFullScreen()
 void ResizableWindow::updatePeerConstrainer()
 {
     if (isOnDesktop())
-        if (ComponentPeer* const peer = getPeer())
+        if (auto* peer = getPeer())
             peer->setConstrainer (constrainer);
 }
 
@@ -541,19 +546,20 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
     if (newPos.isEmpty())
         return false;
 
-    ComponentPeer* const peer = isOnDesktop() ? getPeer() : nullptr;
+    auto* peer = isOnDesktop() ? getPeer() : nullptr;
+
     if (peer != nullptr)
         peer->getFrameSize().addTo (newPos);
 
     {
-        Desktop& desktop = Desktop::getInstance();
-        RectangleList<int> allMonitors (desktop.getDisplays().getRectangleList (true));
+        auto& desktop = Desktop::getInstance();
+        auto allMonitors = desktop.getDisplays().getRectangleList (true);
         allMonitors.clipTo (newPos);
-        const Rectangle<int> onScreenArea (allMonitors.getBounds());
+        auto onScreenArea = allMonitors.getBounds();
 
         if (onScreenArea.getWidth() * onScreenArea.getHeight() < 32 * 32)
         {
-            const Rectangle<int> screen (desktop.getDisplays().getDisplayContaining (newPos.getCentre()).userArea);
+            auto screen = desktop.getDisplays().getDisplayContaining (newPos.getCentre()).userArea;
 
             newPos.setSize (jmin (newPos.getWidth(),  screen.getWidth()),
                             jmin (newPos.getHeight(), screen.getHeight()));
@@ -639,3 +645,5 @@ void ResizableWindow::addAndMakeVisible (Component* const child, int zOrder)
     Component::addAndMakeVisible (child, zOrder);
 }
 #endif
+
+} // namespace juce

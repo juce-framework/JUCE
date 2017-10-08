@@ -2,27 +2,30 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 struct PluginBusUtilities;
 
@@ -93,6 +96,15 @@ public:
     //==============================================================================
     /** Returns the name of this processor. */
     virtual const String getName() const = 0;
+
+    /** Returns a list of alternative names to use for this processor.
+
+        Some hosts truncate the name of your AudioProcessor when there isn't enough
+        space in the GUI to show the full name. Overriding this method, allows the host
+        to choose an alternative name (such as an abbreviation) to better fit the
+        available space.
+    */
+    virtual StringArray getAlternateDisplayNames() const;
 
     //==============================================================================
     /** Called before playback starts, to let the filter prepare itself.
@@ -1009,13 +1021,22 @@ public:
     virtual String getParameterText (int parameterIndex, int maximumStringLength);
 
     /** Returns the number of discrete steps that this parameter can represent.
+
         The default return value if you don't implement this method is
         AudioProcessor::getDefaultNumParameterSteps().
+
         If your parameter is boolean, then you may want to make this return 2.
+
+        If you want the host to display stepped automation values, rather than a
+        continuous interpolation between successive values, you should ensure that
+        isParameterDiscrete returns true.
+
         The value that is returned may or may not be used, depending on the host.
 
         NOTE! This method will eventually be deprecated! It's recommended that you use
         AudioProcessorParameter::getNumSteps() instead.
+
+        @see isParameterDiscrete
     */
     virtual int getParameterNumSteps (int parameterIndex);
 
@@ -1023,9 +1044,25 @@ public:
 
         NOTE! This method will eventually be deprecated! It's recommended that you use
         AudioProcessorParameter::getNumSteps() instead.
+
         @see getParameterNumSteps
     */
     static int getDefaultNumParameterSteps() noexcept;
+
+    /** Returns true if the parameter should take discrete, rather than continuous
+        values.
+
+        If the parameter is boolean, this should return true (with getParameterNumSteps
+        returning 2).
+
+        The value that is returned may or may not be used, depending on the host.
+
+        NOTE! This method will eventually be deprecated! It's recommended that you use
+        AudioProcessorParameter::isDiscrete() instead.
+
+        @see getParameterNumSteps
+    */
+    virtual bool isParameterDiscrete (int parameterIndex) const;
 
     /** Returns the default value for the parameter.
         By default, this just returns 0.
@@ -1107,8 +1144,8 @@ public:
         By default, this returns the "generic" category.
 
         NOTE! This method will eventually be deprecated! It's recommended that you use
-        AudioProcessorParameter::isMetaParameter() instead.
-     */
+        AudioProcessorParameter::getCategory() instead.
+    */
     virtual AudioProcessorParameter::Category getParameterCategory (int parameterIndex) const;
 
     /** Sends a signal to the host to tell it that the user is about to start changing this
@@ -1299,6 +1336,32 @@ public:
     */
     WrapperType wrapperType;
 
+    /** A struct containing information about the DAW track inside which your
+        AudioProcessor is loaded. */
+    struct TrackProperties
+    {
+        String name;    // The name of the track - this will be empty if the track name is not known
+        Colour colour;  // The colour of the track - this will be transparentBlack if the colour is not known
+
+        // other properties may be added in the future
+    };
+
+    /** Informs the AudioProcessor that track properties such as the track's name or
+        colour has been changed.
+
+        If you are hosting this AudioProcessor then use this method to inform the
+        AudioProcessor about which track the AudioProcessor is loaded on. This method
+        may only be called on the message thread.
+
+        If you are implemeting an AudioProcessor then you can override this callback
+        to do something useful with the track properties such as changing the colour
+        of your AudioProcessor's editor. It's entirely up to the host when and how
+        often this callback will be called.
+
+        The default implementation of this callback will do nothing.
+    */
+    virtual void updateTrackProperties (const TrackProperties& properties);
+
     //==============================================================================
    #ifndef DOXYGEN
     /** Deprecated: use getTotalNumInputChannels instead. */
@@ -1309,8 +1372,8 @@ public:
         These functions are deprecated: use the methods provided in the AudioChannelSet
         class.
      */
-    JUCE_DEPRECATED_WITH_BODY (const String getInputSpeakerArrangement()  const noexcept, { return cachedInputSpeakerArrString; });
-    JUCE_DEPRECATED_WITH_BODY (const String getOutputSpeakerArrangement() const noexcept, { return cachedOutputSpeakerArrString; });
+    JUCE_DEPRECATED_WITH_BODY (const String getInputSpeakerArrangement()  const noexcept, { return cachedInputSpeakerArrString; })
+    JUCE_DEPRECATED_WITH_BODY (const String getOutputSpeakerArrangement() const noexcept, { return cachedOutputSpeakerArrString; })
 
     /** Returns the name of one of the processor's input channels.
 
@@ -1558,7 +1621,9 @@ private:
     void processBypassed (AudioBuffer<floatType>&, MidiBuffer&);
 
     // This method is no longer used - you can delete it from your AudioProcessor classes.
-    JUCE_DEPRECATED_WITH_BODY (virtual bool silenceInProducesSilenceOut() const, { return false; });
+    JUCE_DEPRECATED_WITH_BODY (virtual bool silenceInProducesSilenceOut() const, { return false; })
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessor)
 };
+
+} // namespace juce

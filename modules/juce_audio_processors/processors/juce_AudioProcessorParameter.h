@@ -2,28 +2,30 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /** An abstract base class for parameter objects that can be added to an
@@ -104,15 +106,31 @@ public:
     */
     virtual String getLabel() const = 0;
 
-    /** Returns the number of discrete interval steps that this parameter's range
-        should be quantised into.
+    /** Returns the number of steps that this parameter's range should be quantised into.
 
         If you want a continuous range of values, don't override this method, and allow
         the default implementation to return AudioProcessor::getDefaultNumParameterSteps().
+
         If your parameter is boolean, then you may want to make this return 2.
-        The value that is returned may or may not be used, depending on the host.
+
+        The value that is returned may or may not be used, depending on the host. If you
+        want the host to display stepped automation values, rather than a continuous
+        interpolation between successive values, you should override isDiscrete to return true.
+
+        @see isDiscrete
     */
     virtual int getNumSteps() const;
+
+    /** Returns whether the parameter uses discrete values, based on the result of
+        getNumSteps, or allows the host to select values continuously.
+
+        This information may or may not be used, depending on the host. If you
+        want the host to display stepped automation values, rather than a continuous
+        interpolation between successive values, override this method to return true.
+
+        @see getNumSteps
+    */
+    virtual bool isDiscrete() const;
 
     /** Returns a textual version of the supplied parameter value.
         The default implementation just returns the floating point value
@@ -150,9 +168,10 @@ public:
         outputGain       = (1 << 16) | 1,
 
         /** The following categories tell the host that this parameter is a meter level value
-         and therefore read-only. Most hosts will display these type of parameters as
-         a meter in the generic view of your plug-in. Pro-Tools will also show the meter
-         in the mixer view. */
+            and therefore read-only. Most hosts will display these type of parameters as
+            a meter in the generic view of your plug-in. Pro-Tools will also show the meter
+            in the mixer view.
+        */
         inputMeter                          = (2 << 16) | 0,
         outputMeter                         = (2 << 16) | 1,
         compressorLimiterGainReductionMeter = (2 << 16) | 2,
@@ -174,3 +193,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorParameter)
 };
+
+} // namespace juce

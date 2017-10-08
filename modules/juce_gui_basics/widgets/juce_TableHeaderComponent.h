@@ -2,28 +2,30 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -365,6 +367,24 @@ public:
     virtual void reactToMenuItem (int menuReturnId, int columnIdClicked);
 
     //==============================================================================
+    /** A set of colour IDs to use to change the colour of various aspects of the TableHeaderComponent.
+
+        @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
+    */
+    enum ColourIds
+    {
+        textColourId                   = 0x1003800, /**< The colour for the text in the header. */
+        backgroundColourId             = 0x1003810, /**< The colour of the table header background.
+                                                         It's up to the LookAndFeel how this is used. */
+        outlineColourId                = 0x1003820, /**< The colour of the table header's outline. */
+        highlightColourId              = 0x1003830, /**< The colour of the table header background when
+                                                         the mouse is over or down above the the table
+                                                         header. It's up to the LookAndFeel to use a
+                                                         variant of this colour to destiuish between
+                                                         the down and hover state. */
+    };
+
+    //==============================================================================
     /** This abstract base class is implemented by LookAndFeel classes. */
     struct JUCE_API  LookAndFeelMethods
     {
@@ -372,7 +392,8 @@ public:
 
         virtual void drawTableHeaderBackground (Graphics&, TableHeaderComponent&) = 0;
 
-        virtual void drawTableHeaderColumn (Graphics&, const String& columnName, int columnId,
+        virtual void drawTableHeaderColumn (Graphics&, TableHeaderComponent&,
+                                            const String& columnName, int columnId,
                                             int width, int height,
                                             bool isMouseOver, bool isMouseDown, int columnFlags) = 0;
     };
@@ -380,8 +401,6 @@ public:
     //==============================================================================
     /** @internal */
     void paint (Graphics&) override;
-    /** @internal */
-    void resized() override;
     /** @internal */
     void mouseMove (const MouseEvent&) override;
     /** @internal */
@@ -415,9 +434,10 @@ private:
     ScopedPointer<Component> dragOverlayComp;
     class DragOverlayComp;
 
-    bool columnsChanged, columnsResized, sortChanged, menuActive, stretchToFit;
-    int columnIdBeingResized, columnIdBeingDragged, initialColumnWidth;
-    int columnIdUnderMouse, draggingColumnOffset, draggingColumnOriginalIndex, lastDeliberateWidth;
+    bool columnsChanged = false, columnsResized = false, sortChanged = false;
+    bool menuActive = true, stretchToFit = false;
+    int columnIdBeingResized = 0, columnIdBeingDragged = 0, initialColumnWidth = 0;
+    int columnIdUnderMouse = 0, draggingColumnOffset = 0, draggingColumnOriginalIndex = 0, lastDeliberateWidth = 0;
 
     ColumnInfo* getInfoForId (int columnId) const;
     int visibleIndexToTotalIndex (int visibleIndex) const;
@@ -435,3 +455,5 @@ private:
 
 /** This typedef is just for compatibility with old code - newer code should use the TableHeaderComponent::Listener class directly. */
 typedef TableHeaderComponent::Listener TableHeaderListener;
+
+} // namespace juce

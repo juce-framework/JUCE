@@ -2,436 +2,476 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#pragma once
-
-
-//==============================================================================
-/**
-    Simple class to hold a primitive value and perform atomic operations on it.
-
-    The type used must be a 32 or 64 bit primitive, like an int, pointer, etc.
-    There are methods to perform most of the basic atomic operations.
-*/
-template <typename Type>
-class Atomic
+namespace juce
 {
-public:
-    /** Creates a new value, initialised to zero. */
-    inline Atomic() noexcept
-        : value (0)
-    {
-    }
 
-    /** Creates a new value, with a given initial value. */
-    inline explicit Atomic (const Type initialValue) noexcept
-        : value (initialValue)
-    {
-    }
+#ifndef DOXYGEN
+ namespace AtomicHelpers
+ {
+     template <typename T> struct DiffTypeHelper     { typedef T Type; };
+     template <typename T> struct DiffTypeHelper<T*> { typedef std::ptrdiff_t Type; };
+ }
+#endif
 
-    /** Copies another value (atomically). */
-    inline Atomic (const Atomic& other) noexcept
-        : value (other.get())
-    {
-    }
+#if JUCE_ATOMIC_AVAILABLE
+ //==============================================================================
+ /**
+     A simple wrapper around std::atomic.
+ */
+ template <typename Type>
+ struct Atomic
+ {
+     typedef typename AtomicHelpers::DiffTypeHelper<Type>::Type DiffType;
 
-    /** Destructor. */
-    inline ~Atomic() noexcept
-    {
-        static_assert (sizeof (Type) == 4 || sizeof (Type) == 8,
-                       "Atomic can only be used for types which are 32 or 64 bits in size");
-    }
+     /** Creates a new value, initialised to zero. */
+     Atomic() noexcept  : value (0) {}
 
-    /** Atomically reads and returns the current value. */
-    Type get() const noexcept;
+     /** Creates a new value, with a given initial value. */
+     Atomic (Type initialValue) noexcept  : value (initialValue) {}
 
-    /** Copies another value onto this one (atomically). */
-    inline Atomic& operator= (const Atomic& other) noexcept         { exchange (other.get()); return *this; }
+     /** Copies another value (atomically). */
+     Atomic (const Atomic& other) noexcept  : value (other.get()) {}
 
-    /** Copies another value onto this one (atomically). */
-    inline Atomic& operator= (const Type newValue) noexcept         { exchange (newValue); return *this; }
+     /** Destructor. */
+     ~Atomic() noexcept
+     {
+        #if __cpp_lib_atomic_is_always_lock_free
+         static_assert (std::atomic<Type>::is_always_lock_free,
+                        "This class can only be used for lock-free types");
+        #endif
+     }
 
-    /** Atomically sets the current value. */
-    void set (Type newValue) noexcept                               { exchange (newValue); }
+     /** Atomically reads and returns the current value. */
+     Type get() const noexcept               { return value.load(); }
 
-    /** Atomically sets the current value, returning the value that was replaced. */
-    Type exchange (Type value) noexcept;
+     /** Atomically sets the current value. */
+     void set (Type newValue) noexcept       { value = newValue; }
 
-    /** Atomically adds a number to this value, returning the new value. */
-    Type operator+= (Type amountToAdd) noexcept;
+     /** Atomically sets the current value, returning the value that was replaced. */
+     Type exchange (Type newValue) noexcept  { return value.exchange (newValue); }
 
-    /** Atomically subtracts a number from this value, returning the new value. */
-    Type operator-= (Type amountToSubtract) noexcept;
+     /** Atomically compares this value with a target value, and if it is equal, sets
+         this to be equal to a new value.
 
-    /** Atomically increments this value, returning the new value. */
-    Type operator++() noexcept;
+         This operation is the atomic equivalent of doing this:
+         @code
+         bool compareAndSetBool (Type newValue, Type valueToCompare)
+         {
+             if (get() == valueToCompare)
+             {
+                 set (newValue);
+                 return true;
+             }
 
-    /** Atomically decrements this value, returning the new value. */
-    Type operator--() noexcept;
+             return false;
+         }
+         @endcode
 
-    /** Atomically compares this value with a target value, and if it is equal, sets
-        this to be equal to a new value.
+         Internally, this method calls std::atomic::compare_exchange_strong with
+         memory_order_seq_cst (the strictest std::memory_order).
 
-        This operation is the atomic equivalent of doing this:
-        @code
-        bool compareAndSetBool (Type newValue, Type valueToCompare)
-        {
-            if (get() == valueToCompare)
-            {
-                set (newValue);
-                return true;
-            }
+         @returns true if the comparison was true and the value was replaced; false if
+                  the comparison failed and the value was left unchanged.
+         @see compareAndSetValue
+     */
+     bool compareAndSetBool (Type newValue, Type valueToCompare) noexcept
+     {
+         return value.compare_exchange_strong (valueToCompare, newValue);
+     }
 
-            return false;
-        }
-        @endcode
+     /** Copies another value into this one (atomically). */
+     Atomic<Type>& operator= (const Atomic& other) noexcept
+     {
+         value = other.value.load();
+         return *this;
+     }
 
-        @returns true if the comparison was true and the value was replaced; false if
-                 the comparison failed and the value was left unchanged.
-        @see compareAndSetValue
-    */
-    bool compareAndSetBool (Type newValue, Type valueToCompare) noexcept;
+     /** Copies another value into this one (atomically). */
+     Atomic<Type>& operator= (Type newValue) noexcept
+     {
+         value = newValue;
+         return *this;
+     }
 
-    /** Atomically compares this value with a target value, and if it is equal, sets
-        this to be equal to a new value.
+     /** Atomically adds a number to this value, returning the new value. */
+     Type operator+= (DiffType amountToAdd) noexcept { return value += amountToAdd; }
 
-        This operation is the atomic equivalent of doing this:
-        @code
-        Type compareAndSetValue (Type newValue, Type valueToCompare)
-        {
-            Type oldValue = get();
-            if (oldValue == valueToCompare)
-                set (newValue);
+     /** Atomically subtracts a number from this value, returning the new value. */
+     Type operator-= (DiffType amountToSubtract) noexcept { return value -= amountToSubtract; }
 
-            return oldValue;
-        }
-        @endcode
+     /** Atomically increments this value, returning the new value. */
+     Type operator++() noexcept { return ++value; }
 
-        @returns the old value before it was changed.
-        @see compareAndSetBool
-    */
-    Type compareAndSetValue (Type newValue, Type valueToCompare) noexcept;
+     /** Atomically decrements this value, returning the new value. */
+     Type operator--() noexcept { return --value; }
 
-    /** Implements a memory read/write barrier. */
-    static void memoryBarrier() noexcept;
+     /** Implements a memory read/write barrier.
 
-    //==============================================================================
-   #if JUCE_64BIT
-    JUCE_ALIGN (8)
-   #else
-    JUCE_ALIGN (4)
-   #endif
+         Internally this calls std::atomic_thread_fence with
+         memory_order_seq_cst (the strictest std::memory_order).
+      */
+     void memoryBarrier() noexcept          { atomic_thread_fence (std::memory_order_seq_cst); }
 
-    /** The raw value that this class operates on.
-        This is exposed publicly in case you need to manipulate it directly
-        for performance reasons.
-    */
-    volatile Type value;
+     /** The std::atomic object that this class operates on. */
+     std::atomic<Type> value;
 
-private:
-    template <typename Dest, typename Source>
-    static inline Dest castTo (Source value) noexcept         { union { Dest d; Source s; } u; u.s = value; return u.d; }
-
-    static inline Type castFrom32Bit (int32 value) noexcept   { return castTo <Type, int32> (value); }
-    static inline Type castFrom64Bit (int64 value) noexcept   { return castTo <Type, int64> (value); }
-    static inline int32 castTo32Bit (Type value) noexcept     { return castTo <int32, Type> (value); }
-    static inline int64 castTo64Bit (Type value) noexcept     { return castTo <int64, Type> (value); }
-
-    Type operator++ (int); // better to just use pre-increment with atomics..
-    Type operator-- (int);
-
-    /** This templated negate function will negate pointers as well as integers */
-    template <typename ValueType>
-    inline ValueType negateValue (ValueType n) noexcept
-    {
-        return sizeof (ValueType) == 1 ? (ValueType) -(signed char) n
-            : (sizeof (ValueType) == 2 ? (ValueType) -(short) n
-            : (sizeof (ValueType) == 4 ? (ValueType) -(int) n
-            : ((ValueType) -(int64) n)));
-    }
-
-    /** This templated negate function will negate pointers as well as integers */
-    template <typename PointerType>
-    inline PointerType* negateValue (PointerType* n) noexcept
-    {
-        return reinterpret_cast<PointerType*> (-reinterpret_cast<pointer_sized_int> (n));
-    }
-};
-
-
-//==============================================================================
-/*
-    The following code is in the header so that the atomics can be inlined where possible...
-*/
-#if JUCE_MAC && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2))
-  #define JUCE_ATOMICS_MAC_LEGACY 1      // Older OSX builds using gcc4.1 or earlier
-
-//==============================================================================
-#elif JUCE_GCC || JUCE_CLANG
-  #define JUCE_ATOMICS_GCC 1        // GCC with intrinsics
-
-  #if JUCE_IOS || JUCE_ANDROID // (64-bit ops will compile but not link on these mobile OSes)
-    #define JUCE_64BIT_ATOMICS_UNAVAILABLE 1
-  #endif
-
-//==============================================================================
-#else
-  #define JUCE_ATOMICS_WINDOWS 1    // Windows with intrinsics
-
-  #ifndef __INTEL_COMPILER
-   #pragma intrinsic (_InterlockedExchange, _InterlockedIncrement, _InterlockedDecrement, _InterlockedCompareExchange, \
-                      _InterlockedCompareExchange64, _InterlockedExchangeAdd, _ReadWriteBarrier)
-  #endif
-  #define juce_InterlockedExchange(a, b)              _InterlockedExchange(a, b)
-  #define juce_InterlockedIncrement(a)                _InterlockedIncrement(a)
-  #define juce_InterlockedDecrement(a)                _InterlockedDecrement(a)
-  #define juce_InterlockedExchangeAdd(a, b)           _InterlockedExchangeAdd(a, b)
-  #define juce_InterlockedCompareExchange(a, b, c)    _InterlockedCompareExchange(a, b, c)
-  #define juce_InterlockedCompareExchange64(a, b, c)  _InterlockedCompareExchange64(a, b, c)
-  #define juce_MemoryBarrier _ReadWriteBarrier
-
-  #if JUCE_64BIT
-    #ifndef __INTEL_COMPILER
-     #pragma intrinsic (_InterlockedExchangeAdd64, _InterlockedExchange64, _InterlockedIncrement64, _InterlockedDecrement64)
+     //==============================================================================
+    #ifndef DOXYGEN
+     // This method has been deprecated as there is no equivalent method in std::atomic.
+     JUCE_DEPRECATED (Type compareAndSetValue (Type, Type) noexcept);
     #endif
-    #define juce_InterlockedExchangeAdd64(a, b)     _InterlockedExchangeAdd64(a, b)
-    #define juce_InterlockedExchange64(a, b)        _InterlockedExchange64(a, b)
-    #define juce_InterlockedIncrement64(a)          _InterlockedIncrement64(a)
-    #define juce_InterlockedDecrement64(a)          _InterlockedDecrement64(a)
-  #else
-    // None of these atomics are available in a 32-bit Windows build!!
-    template <typename Type> static Type juce_InterlockedExchangeAdd64 (volatile Type* a, Type b) noexcept  { jassertfalse; Type old = *a; *a += b; return old; }
-    template <typename Type> static Type juce_InterlockedExchange64 (volatile Type* a, Type b) noexcept     { jassertfalse; Type old = *a; *a = b; return old; }
-    template <typename Type> static Type juce_InterlockedIncrement64 (volatile Type* a) noexcept            { jassertfalse; return ++*a; }
-    template <typename Type> static Type juce_InterlockedDecrement64 (volatile Type* a) noexcept            { jassertfalse; return --*a; }
+ };
+
+#else
+
+ #ifndef DOXYGEN
+  template <typename Type> class AtomicBase;
+ #endif
+
+ //==============================================================================
+ /**
+     Simple class to hold a primitive value and perform atomic operations on it.
+
+     The type used must be a 32 or 64 bit primitive, like an int, pointer, etc.
+     There are methods to perform most of the basic atomic operations.
+ */
+ template <typename Type>
+ class Atomic : public AtomicBase<Type>
+ {
+ public:
+     /** Resulting type when subtracting the underlying Type. */
+     typedef typename AtomicBase<Type>::DiffType DiffType;
+
+     /** Creates a new value, initialised to zero. */
+     inline Atomic() noexcept {}
+
+     /** Creates a new value, with a given initial value. */
+     inline explicit Atomic (const Type initialValue) noexcept  : AtomicBase<Type> (initialValue) {}
+
+     /** Copies another value (atomically). */
+     inline Atomic (const Atomic& other) noexcept   : AtomicBase<Type> (other) {}
+
+     /** Destructor. */
+     inline ~Atomic() noexcept
+     {
+         static_assert (sizeof (Type) == 4 || sizeof (Type) == 8,
+                        "Atomic can only be used for types which are 32 or 64 bits in size");
+     }
+
+     /** Atomically reads and returns the current value. */
+     inline Type get() const noexcept   { return AtomicBase<Type>::get(); }
+
+     /** Copies another value into this one (atomically). */
+     inline Atomic& operator= (const Atomic& other) noexcept         { AtomicBase<Type>::operator= (other); return *this; }
+
+     /** Copies another value into this one (atomically). */
+     inline Atomic& operator= (const Type newValue) noexcept         { AtomicBase<Type>::operator= (newValue); return *this; }
+
+     /** Atomically sets the current value. */
+     inline void set (Type newValue) noexcept                        { exchange (newValue); }
+
+     /** Atomically sets the current value, returning the value that was replaced. */
+     inline Type exchange (Type v) noexcept                          { return AtomicBase<Type>::exchange (v); }
+
+     /** Atomically adds a number to this value, returning the new value. */
+     Type operator+= (DiffType amountToAdd) noexcept;
+
+     /** Atomically subtracts a number from this value, returning the new value. */
+     Type operator-= (DiffType amountToSubtract) noexcept;
+
+     /** Atomically increments this value, returning the new value. */
+     Type operator++() noexcept;
+
+     /** Atomically decrements this value, returning the new value. */
+     Type operator--() noexcept;
+
+     /** Atomically compares this value with a target value, and if it is equal, sets
+         this to be equal to a new value.
+
+         This operation is the atomic equivalent of doing this:
+         @code
+         bool compareAndSetBool (Type newValue, Type valueToCompare)
+         {
+             if (get() == valueToCompare)
+             {
+                 set (newValue);
+                 return true;
+             }
+
+             return false;
+         }
+         @endcode
+
+         @returns true if the comparison was true and the value was replaced; false if
+                  the comparison failed and the value was left unchanged.
+         @see compareAndSetValue
+     */
+     inline bool compareAndSetBool (Type newValue, Type valueToCompare) noexcept  { return AtomicBase<Type>::compareAndSetBool (newValue, valueToCompare); }
+
+     /** Atomically compares this value with a target value, and if it is equal, sets
+         this to be equal to a new value.
+
+         This operation is the atomic equivalent of doing this:
+         @code
+         Type compareAndSetValue (Type newValue, Type valueToCompare)
+         {
+             Type oldValue = get();
+             if (oldValue == valueToCompare)
+                 set (newValue);
+
+             return oldValue;
+         }
+         @endcode
+
+         @returns the old value before it was changed.
+         @see compareAndSetBool
+     */
+     inline Type compareAndSetValue (Type newValue, Type valueToCompare) noexcept  { return AtomicBase<Type>::compareAndSetValue (newValue, valueToCompare); }
+
+     /** Implements a memory read/write barrier. */
+     static inline void memoryBarrier() noexcept { AtomicBase<Type>::memoryBarrier (); }
+ };
+
+ #ifndef DOXYGEN
+
+  //==============================================================================
+  // Internal implementation follows
+  //==============================================================================
+  template <typename Type>
+  class AtomicBase
+  {
+  public:
+      typedef typename AtomicHelpers::DiffTypeHelper<Type>::Type DiffType;
+
+      inline AtomicBase() noexcept : value (0) {}
+      inline explicit AtomicBase (const Type v) noexcept : value (v) {}
+      inline AtomicBase (const AtomicBase& other) noexcept : value (other.get()) {}
+      Type get() const noexcept;
+      inline AtomicBase& operator= (const AtomicBase<Type>& other) noexcept { exchange (other.get()); return *this; }
+      inline AtomicBase& operator= (const Type newValue) noexcept           { exchange (newValue);    return *this; }
+      void set (Type newValue) noexcept                                     { exchange (newValue); }
+      Type exchange (Type) noexcept;
+      bool compareAndSetBool (Type, Type) noexcept;
+      Type compareAndSetValue (Type, Type) noexcept;
+      static void memoryBarrier() noexcept;
+
+      //==============================================================================
+      #if JUCE_64BIT
+       JUCE_ALIGN (8)
+      #else
+       JUCE_ALIGN (4)
+      #endif
+
+      /** The raw value that this class operates on.
+          This is exposed publicly in case you need to manipulate it directly
+          for performance reasons.
+      */
+      volatile Type value;
+
+  protected:
+      template <typename Dest, typename Source>
+      static inline Dest castTo (Source value) noexcept         { union { Dest d; Source s; } u; u.s = value; return u.d; }
+
+      static inline Type castFrom32Bit (int32 value) noexcept   { return castTo <Type, int32> (value); }
+      static inline Type castFrom64Bit (int64 value) noexcept   { return castTo <Type, int64> (value); }
+      static inline int32 castTo32Bit (Type value) noexcept     { return castTo <int32, Type> (value); }
+      static inline int64 castTo64Bit (Type value) noexcept     { return castTo <int64, Type> (value); }
+
+      Type operator++ (int); // better to just use pre-increment with atomics..
+      Type operator-- (int);
+
+      /** This templated negate function will negate pointers as well as integers */
+      template <typename ValueType>
+      inline ValueType negateValue (ValueType n) noexcept
+      {
+          return sizeof (ValueType) == 1 ? (ValueType) -(signed char) n
+              : (sizeof (ValueType) == 2 ? (ValueType) -(short) n
+              : (sizeof (ValueType) == 4 ? (ValueType) -(int) n
+              : ((ValueType) -(int64) n)));
+      }
+
+      /** This templated negate function will negate pointers as well as integers */
+      template <typename PointerType>
+      inline PointerType* negateValue (PointerType* n) noexcept
+      {
+          return reinterpret_cast<PointerType*> (-reinterpret_cast<pointer_sized_int> (n));
+      }
+  };
+
+  //==============================================================================
+  // Specialisation for void* which does not include the pointer arithmetic
+  template <>
+  class Atomic<void*> : public AtomicBase<void*>
+  {
+  public:
+      inline Atomic() noexcept {}
+      inline explicit Atomic (void* const initialValue) noexcept  : AtomicBase<void*> (initialValue) {}
+      inline Atomic (const Atomic<void*>& other) noexcept   : AtomicBase<void*> (other) {}
+      inline void* get() const noexcept   { return AtomicBase<void*>::get(); }
+      inline Atomic& operator= (const Atomic& other) noexcept         { AtomicBase<void*>::operator= (other); return *this; }
+      inline Atomic& operator= (void* const newValue) noexcept        { AtomicBase<void*>::operator= (newValue); return *this; }
+      inline void set (void* newValue) noexcept                       { exchange (newValue); }
+      inline void* exchange (void* v) noexcept                        { return AtomicBase<void*>::exchange (v); }
+      inline bool compareAndSetBool (void* newValue, void* valueToCompare) noexcept  { return AtomicBase<void*>::compareAndSetBool (newValue, valueToCompare); }
+      inline void* compareAndSetValue (void* newValue, void* valueToCompare) noexcept  { return AtomicBase<void*>::compareAndSetValue (newValue, valueToCompare); }
+      static inline void memoryBarrier() noexcept { AtomicBase<void*>::memoryBarrier(); }
+  };
+
+  //==============================================================================
+  /*
+      The following code is in the header so that the atomics can be inlined where possible...
+  */
+  #if JUCE_MAC && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2))
+   #define JUCE_ATOMICS_MAC_LEGACY 1      // Older OSX builds using gcc4.1 or earlier
+  #elif JUCE_GCC || JUCE_CLANG
+   #define JUCE_ATOMICS_GCC 1        // GCC with intrinsics
+   #if JUCE_IOS || JUCE_ANDROID      // (64-bit ops will compile but not link on these mobile OSes)
     #define JUCE_64BIT_ATOMICS_UNAVAILABLE 1
+   #endif
   #endif
 
-  template <typename Type, std::size_t sizeOfType>
-  struct WindowsInterlockedHelpersBase
-  {};
-
   template <typename Type>
-  struct WindowsInterlockedHelpersBase<Type, 4>
+  struct AtomicIncrementDecrement
   {
-      static inline Type exchange (volatile Type* value, Type other) noexcept
+      static inline Type inc (AtomicBase<Type>& a) noexcept
       {
-          return castFrom (juce_InterlockedExchange (reinterpret_cast<volatile long*> (value), castTo (other)));
+        #if JUCE_ATOMICS_MAC_LEGACY
+         return sizeof (Type) == 4 ? (Type) OSAtomicIncrement32Barrier ((volatile int32_t*) &a.value)
+                                   : (Type) OSAtomicIncrement64Barrier ((volatile int64_t*) &a.value);
+        #elif JUCE_ATOMICS_GCC
+         return sizeof (Type) == 4 ? (Type) __sync_add_and_fetch (& (a.value), (Type) 1)
+                                   : (Type) __sync_add_and_fetch ((int64_t*) & (a.value), 1);
+        #endif
       }
 
-      static inline Type add (volatile Type* value, Type other) noexcept
+      static inline Type dec (AtomicBase<Type>& a) noexcept
       {
-          return castFrom (juce_InterlockedExchangeAdd (reinterpret_cast<volatile long*> (value), castTo (other)) + castTo (other));
+        #if JUCE_ATOMICS_MAC_LEGACY
+         return sizeof (Type) == 4 ? (Type) OSAtomicDecrement32Barrier ((volatile int32_t*) &a.value)
+                                   : (Type) OSAtomicDecrement64Barrier ((volatile int64_t*) &a.value);
+        #elif JUCE_ATOMICS_GCC
+         return sizeof (Type) == 4 ? (Type) __sync_add_and_fetch (& (a.value), (Type) -1)
+                                   : (Type) __sync_add_and_fetch ((int64_t*) & (a.value), -1);
+        #endif
       }
-
-      static inline Type inc (volatile Type* value) noexcept
-      {
-          return castFrom (juce_InterlockedIncrement (reinterpret_cast<volatile long*> (value)));
-      }
-
-      static inline Type dec (volatile Type* value) noexcept
-      {
-          return castFrom (juce_InterlockedDecrement (reinterpret_cast<volatile long*> (value)));
-      }
-
-      static inline Type cmp (volatile Type* value, Type other, Type comparand) noexcept
-      {
-          return castFrom (juce_InterlockedCompareExchange (reinterpret_cast<volatile long*> (value), castTo (other), castTo (comparand)));
-      }
-
-      static inline Type castFrom (long value) { union { long in; Type out; } u; u.in = value; return u.out; }
-      static inline long castTo   (Type value) { union { Type in; long out; } u; u.in = value; return u.out; }
   };
 
   template <typename Type>
-  struct WindowsInterlockedHelpersBase<Type, 8>
+  struct AtomicIncrementDecrement<Type*>
   {
-      static inline Type exchange (volatile Type* value, Type other) noexcept
-      {
-          return castFrom (juce_InterlockedExchange64 (reinterpret_cast<volatile __int64*> (value), castTo (other)));
-      }
-
-      static inline Type add (volatile Type* value, Type other) noexcept
-      {
-          return castFrom (juce_InterlockedExchangeAdd64 (reinterpret_cast<volatile __int64*> (value), castTo (other)) + castTo (other));
-      }
-
-      static inline Type inc (volatile Type* value) noexcept
-      {
-          return castFrom (juce_InterlockedIncrement64 (reinterpret_cast<volatile __int64*> (value)));
-      }
-
-      static inline Type dec (volatile Type* value) noexcept
-      {
-          return castFrom (juce_InterlockedDecrement64 (reinterpret_cast<volatile __int64*> (value)));
-      }
-
-      static inline Type cmp (volatile Type* value, Type other, Type comparand) noexcept
-      {
-          return castFrom (juce_InterlockedCompareExchange64 (reinterpret_cast<volatile __int64*> (value), castTo (other), castTo (comparand)));
-      }
-
-      static inline Type castFrom (__int64 value) { union { __int64 in; Type out; } u; u.in = value; return u.out; }
-      static inline __int64 castTo   (Type value) { union { Type in; __int64 out; } u; u.in = value; return u.out; }
+      static inline Type* inc (Atomic<Type*>& a) noexcept { return a.operator+= (1); }
+      static inline Type* dec (Atomic<Type*>& a) noexcept { return a.operator-= (1); }
   };
 
+  //==============================================================================
   template <typename Type>
-  struct WindowsInterlockedHelpers : WindowsInterlockedHelpersBase<Type, sizeof (Type)> {};
+  inline Type AtomicBase<Type>::get() const noexcept
+  {
+    #if JUCE_ATOMICS_MAC_LEGACY
+     return sizeof (Type) == 4 ? castFrom32Bit ((int32) OSAtomicAdd32Barrier ((int32_t) 0, (volatile int32_t*) &value))
+                               : castFrom64Bit ((int64) OSAtomicAdd64Barrier ((int64_t) 0, (volatile int64_t*) &value));
+    #elif JUCE_ATOMICS_GCC
+     return sizeof (Type) == 4 ? castFrom32Bit ((int32) __sync_add_and_fetch ((volatile int32*) &value, 0))
+                               : castFrom64Bit ((int64) __sync_add_and_fetch ((volatile int64*) &value, 0));
+    #endif
+  }
+
+  template <typename Type>
+  inline Type AtomicBase<Type>::exchange (const Type newValue) noexcept
+  {
+     #if JUCE_ATOMICS_MAC_LEGACY || JUCE_ATOMICS_GCC
+      Type currentVal = value;
+      while (! compareAndSetBool (newValue, currentVal)) { currentVal = value; }
+      return currentVal;
+     #endif
+  }
+
+  template <typename Type>
+  inline Type Atomic<Type>::operator+= (const DiffType amountToAdd) noexcept
+  {
+      Type amount = (Type() + amountToAdd);
+
+     #if JUCE_ATOMICS_MAC_LEGACY
+      return sizeof (Type) == 4 ? (Type) OSAtomicAdd32Barrier ((int32_t) castTo32Bit (amount), (volatile int32_t*) &AtomicBase<Type>::value)
+                                : (Type) OSAtomicAdd64Barrier ((int64_t) amount, (volatile int64_t*) &AtomicBase<Type>::value);
+     #elif JUCE_ATOMICS_GCC
+      return (Type) __sync_add_and_fetch (& (AtomicBase<Type>::value), amount);
+     #endif
+  }
+
+  template <typename Type>
+  inline Type Atomic<Type>::operator-= (const DiffType amountToSubtract) noexcept
+  {
+      return operator+= (AtomicBase<Type>::negateValue (amountToSubtract));
+  }
+
+  template <typename Type>
+  inline Type Atomic<Type>::operator++() noexcept   { return AtomicIncrementDecrement<Type>::inc (*this); }
+
+  template <typename Type>
+  inline Type Atomic<Type>::operator--() noexcept   { return AtomicIncrementDecrement<Type>::dec (*this); }
+
+  template <typename Type>
+  inline bool AtomicBase<Type>::compareAndSetBool (const Type newValue, const Type valueToCompare) noexcept
+  {
+     #if JUCE_ATOMICS_MAC_LEGACY
+      return sizeof (Type) == 4 ? OSAtomicCompareAndSwap32Barrier ((int32_t) castTo32Bit (valueToCompare), (int32_t) castTo32Bit (newValue), (volatile int32_t*) &value)
+                                : OSAtomicCompareAndSwap64Barrier ((int64_t) castTo64Bit (valueToCompare), (int64_t) castTo64Bit (newValue), (volatile int64_t*) &value);
+     #elif JUCE_ATOMICS_GCC
+      return sizeof (Type) == 4 ? __sync_bool_compare_and_swap ((volatile int32*) &value, castTo32Bit (valueToCompare), castTo32Bit (newValue))
+                                : __sync_bool_compare_and_swap ((volatile int64*) &value, castTo64Bit (valueToCompare), castTo64Bit (newValue));
+     #endif
+  }
+
+  template <typename Type>
+  inline Type AtomicBase<Type>::compareAndSetValue (const Type newValue, const Type valueToCompare) noexcept
+  {
+     #if JUCE_ATOMICS_MAC_LEGACY
+      for (;;) // Annoying workaround for only having a bool CAS operation..
+      {
+          if (compareAndSetBool (newValue, valueToCompare))
+              return valueToCompare;
+
+          const Type result = value;
+          if (result != valueToCompare)
+              return result;
+      }
+     #elif JUCE_ATOMICS_GCC
+      return sizeof (Type) == 4 ? castFrom32Bit ((int32) __sync_val_compare_and_swap ((volatile int32*) &value, castTo32Bit (valueToCompare), castTo32Bit (newValue)))
+                                : castFrom64Bit ((int64) __sync_val_compare_and_swap ((volatile int64*) &value, castTo64Bit (valueToCompare), castTo64Bit (newValue)));
+     #endif
+  }
+
+  template <typename Type>
+  inline void AtomicBase<Type>::memoryBarrier() noexcept
+  {
+    #if JUCE_ATOMICS_MAC_LEGACY
+      OSMemoryBarrier();
+    #elif JUCE_ATOMICS_GCC
+      __sync_synchronize();
+    #endif
+  }
+
+ #endif
+
 #endif
 
-
-#if JUCE_MSVC
-  #pragma warning (push)
-  #pragma warning (disable: 4311)  // (truncation warning)
-#endif
-
-//==============================================================================
-template <typename Type>
-inline Type Atomic<Type>::get() const noexcept
-{
-  #if JUCE_ATOMICS_MAC_LEGACY
-    return sizeof (Type) == 4 ? castFrom32Bit ((int32) OSAtomicAdd32Barrier ((int32_t) 0, (volatile int32_t*) &value))
-                              : castFrom64Bit ((int64) OSAtomicAdd64Barrier ((int64_t) 0, (volatile int64_t*) &value));
-  #elif JUCE_ATOMICS_WINDOWS
-    return WindowsInterlockedHelpers<Type>::add (const_cast<volatile Type*> (&value), (Type) 0);
-  #elif JUCE_ATOMICS_GCC
-    return sizeof (Type) == 4 ? castFrom32Bit ((int32) __sync_add_and_fetch ((volatile int32*) &value, 0))
-                              : castFrom64Bit ((int64) __sync_add_and_fetch ((volatile int64*) &value, 0));
-  #endif
-}
-
-template <typename Type>
-inline Type Atomic<Type>::exchange (const Type newValue) noexcept
-{
-  #if JUCE_ATOMICS_MAC_LEGACY || JUCE_ATOMICS_GCC
-    Type currentVal = value;
-    while (! compareAndSetBool (newValue, currentVal)) { currentVal = value; }
-    return currentVal;
-  #elif JUCE_ATOMICS_WINDOWS
-    return WindowsInterlockedHelpers<Type>::exchange (&value, newValue);
-  #endif
-}
-
-template <typename Type>
-inline Type Atomic<Type>::operator+= (const Type amountToAdd) noexcept
-{
-  #if JUCE_ATOMICS_MAC_LEGACY
-    return sizeof (Type) == 4 ? (Type) OSAtomicAdd32Barrier ((int32_t) castTo32Bit (amountToAdd), (volatile int32_t*) &value)
-                              : (Type) OSAtomicAdd64Barrier ((int64_t) amountToAdd, (volatile int64_t*) &value);
-  #elif JUCE_ATOMICS_WINDOWS
-    return WindowsInterlockedHelpers<Type>::add (&value, amountToAdd);
-  #elif JUCE_ATOMICS_GCC
-    return (Type) __sync_add_and_fetch (&value, amountToAdd);
-  #endif
-}
-
-template <typename Type>
-inline Type Atomic<Type>::operator-= (const Type amountToSubtract) noexcept
-{
-    return operator+= (negateValue (amountToSubtract));
-}
-
-template <typename Type>
-inline Type Atomic<Type>::operator++() noexcept
-{
-  #if JUCE_ATOMICS_MAC_LEGACY
-    return sizeof (Type) == 4 ? (Type) OSAtomicIncrement32Barrier ((volatile int32_t*) &value)
-                              : (Type) OSAtomicIncrement64Barrier ((volatile int64_t*) &value);
-  #elif JUCE_ATOMICS_WINDOWS
-    return WindowsInterlockedHelpers<Type>::inc (&value);
-  #elif JUCE_ATOMICS_GCC
-    return sizeof (Type) == 4 ? (Type) __sync_add_and_fetch (&value, (Type) 1)
-                              : (Type) __sync_add_and_fetch ((int64_t*) &value, 1);
-  #endif
-}
-
-template <typename Type>
-inline Type Atomic<Type>::operator--() noexcept
-{
-  #if JUCE_ATOMICS_MAC_LEGACY
-    return sizeof (Type) == 4 ? (Type) OSAtomicDecrement32Barrier ((volatile int32_t*) &value)
-                              : (Type) OSAtomicDecrement64Barrier ((volatile int64_t*) &value);
-  #elif JUCE_ATOMICS_WINDOWS
-    return WindowsInterlockedHelpers<Type>::dec (&value);
-  #elif JUCE_ATOMICS_GCC
-    return sizeof (Type) == 4 ? (Type) __sync_add_and_fetch (&value, (Type) -1)
-                              : (Type) __sync_add_and_fetch ((int64_t*) &value, -1);
-  #endif
-}
-
-template <typename Type>
-inline bool Atomic<Type>::compareAndSetBool (const Type newValue, const Type valueToCompare) noexcept
-{
-  #if JUCE_ATOMICS_MAC_LEGACY
-    return sizeof (Type) == 4 ? OSAtomicCompareAndSwap32Barrier ((int32_t) castTo32Bit (valueToCompare), (int32_t) castTo32Bit (newValue), (volatile int32_t*) &value)
-                              : OSAtomicCompareAndSwap64Barrier ((int64_t) castTo64Bit (valueToCompare), (int64_t) castTo64Bit (newValue), (volatile int64_t*) &value);
-  #elif JUCE_ATOMICS_WINDOWS
-    return compareAndSetValue (newValue, valueToCompare) == valueToCompare;
-  #elif JUCE_ATOMICS_GCC
-    return sizeof (Type) == 4 ? __sync_bool_compare_and_swap ((volatile int32*) &value, castTo32Bit (valueToCompare), castTo32Bit (newValue))
-                              : __sync_bool_compare_and_swap ((volatile int64*) &value, castTo64Bit (valueToCompare), castTo64Bit (newValue));
-  #endif
-}
-
-template <typename Type>
-inline Type Atomic<Type>::compareAndSetValue (const Type newValue, const Type valueToCompare) noexcept
-{
-  #if JUCE_ATOMICS_MAC_LEGACY
-    for (;;) // Annoying workaround for only having a bool CAS operation..
-    {
-        if (compareAndSetBool (newValue, valueToCompare))
-            return valueToCompare;
-
-        const Type result = value;
-        if (result != valueToCompare)
-            return result;
-    }
-
-  #elif JUCE_ATOMICS_WINDOWS
-    return WindowsInterlockedHelpers<Type>::cmp (&value, newValue, valueToCompare);
-  #elif JUCE_ATOMICS_GCC
-    return sizeof (Type) == 4 ? castFrom32Bit ((int32) __sync_val_compare_and_swap ((volatile int32*) &value, castTo32Bit (valueToCompare), castTo32Bit (newValue)))
-                              : castFrom64Bit ((int64) __sync_val_compare_and_swap ((volatile int64*) &value, castTo64Bit (valueToCompare), castTo64Bit (newValue)));
-  #endif
-}
-
-template <typename Type>
-inline void Atomic<Type>::memoryBarrier() noexcept
-{
-  #if JUCE_ATOMICS_MAC_LEGACY
-    OSMemoryBarrier();
-  #elif JUCE_ATOMICS_GCC
-    __sync_synchronize();
-  #elif JUCE_ATOMICS_WINDOWS
-    juce_MemoryBarrier();
-  #endif
-}
-
-#if JUCE_MSVC
-  #pragma warning (pop)
-#endif
+} // namespace juce

@@ -2,53 +2,54 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-class ImageCache::Pimpl     : private Timer,
-                              private DeletedAtShutdown
+namespace juce
 {
-public:
-    Pimpl()  : cacheTimeout (5000)
-    {
-    }
 
-    ~Pimpl()
-    {
-        clearSingletonInstance();
-    }
+struct ImageCache::Pimpl     : private Timer,
+                               private DeletedAtShutdown
+{
+    Pimpl() {}
+    ~Pimpl() { clearSingletonInstance(); }
 
-    Image getFromHashCode (const int64 hashCode)
+    juce_DeclareSingleton_SingleThreaded_Minimal (ImageCache::Pimpl)
+
+    Image getFromHashCode (const int64 hashCode) noexcept
     {
         const ScopedLock sl (lock);
 
-        for (int i = images.size(); --i >= 0;)
+        for (auto& item : images)
         {
-            const Item* const item = images.getUnchecked(i);
-
-            if (item->hashCode == hashCode)
-                return item->image;
+            if (item.hashCode == hashCode)
+            {
+                item.lastUseTime = Time::getApproximateMillisecondCounter();
+                return item.image;
+            }
         }
 
-        return Image();
-    }
+        return {};
+     }
 
     void addImageToCache (const Image& image, const int64 hashCode)
     {
@@ -57,38 +58,33 @@ public:
             if (! isTimerRunning())
                 startTimer (2000);
 
-            Item* const item = new Item();
-            item->hashCode = hashCode;
-            item->image = image;
-            item->lastUseTime = Time::getApproximateMillisecondCounter();
-
             const ScopedLock sl (lock);
-            images.add (item);
+            images.add ({ image, hashCode, Time::getApproximateMillisecondCounter() });
         }
     }
 
     void timerCallback() override
     {
-        const uint32 now = Time::getApproximateMillisecondCounter();
+        auto now = Time::getApproximateMillisecondCounter();
 
         const ScopedLock sl (lock);
 
         for (int i = images.size(); --i >= 0;)
         {
-            Item* const item = images.getUnchecked(i);
+            auto& item = images.getReference(i);
 
-            if (item->image.getReferenceCount() <= 1)
+            if (item.image.getReferenceCount() <= 1)
             {
-                if (now > item->lastUseTime + cacheTimeout || now < item->lastUseTime - 1000)
+                if (now > item.lastUseTime + cacheTimeout || now < item.lastUseTime - 1000)
                     images.remove (i);
             }
             else
             {
-                item->lastUseTime = now; // multiply-referenced, so this image is still in use.
+                item.lastUseTime = now; // multiply-referenced, so this image is still in use.
             }
         }
 
-        if (images.size() == 0)
+        if (images.isEmpty())
             stopTimer();
     }
 
@@ -97,7 +93,7 @@ public:
         const ScopedLock sl (lock);
 
         for (int i = images.size(); --i >= 0;)
-            if (images.getUnchecked(i)->image.getReferenceCount() <= 1)
+            if (images.getReference(i).image.getReferenceCount() <= 1)
                 images.remove (i);
     }
 
@@ -108,13 +104,9 @@ public:
         uint32 lastUseTime;
     };
 
-    unsigned int cacheTimeout;
-
-    juce_DeclareSingleton_SingleThreaded_Minimal (ImageCache::Pimpl)
-
-private:
-    OwnedArray<Item> images;
+    Array<Item> images;
     CriticalSection lock;
+    unsigned int cacheTimeout = 5000;
 
     JUCE_DECLARE_NON_COPYABLE (Pimpl)
 };
@@ -128,7 +120,7 @@ Image ImageCache::getFromHashCode (const int64 hashCode)
     if (Pimpl::getInstanceWithoutCreating() != nullptr)
         return Pimpl::getInstanceWithoutCreating()->getFromHashCode (hashCode);
 
-    return Image();
+    return {};
 }
 
 void ImageCache::addImageToCache (const Image& image, const int64 hashCode)
@@ -138,8 +130,8 @@ void ImageCache::addImageToCache (const Image& image, const int64 hashCode)
 
 Image ImageCache::getFromFile (const File& file)
 {
-    const int64 hashCode = file.hashCode64();
-    Image image (getFromHashCode (hashCode));
+    auto hashCode = file.hashCode64();
+    auto image = getFromHashCode (hashCode);
 
     if (image.isNull())
     {
@@ -152,8 +144,8 @@ Image ImageCache::getFromFile (const File& file)
 
 Image ImageCache::getFromMemory (const void* imageData, const int dataSize)
 {
-    const int64 hashCode = (int64) (pointer_sized_int) imageData;
-    Image image (getFromHashCode (hashCode));
+    auto hashCode = (int64) (pointer_sized_int) imageData;
+    auto image = getFromHashCode (hashCode);
 
     if (image.isNull())
     {
@@ -174,3 +166,5 @@ void ImageCache::releaseUnusedImages()
 {
     Pimpl::getInstance()->releaseUnusedImages();
 }
+
+} // namespace juce

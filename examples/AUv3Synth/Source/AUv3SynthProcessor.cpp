@@ -1,10 +1,29 @@
 /*
   ==============================================================================
 
-    Copyright (c) 2015 - ROLI Ltd.
+   This file is part of the JUCE library.
+   Copyright (c) 2017 - ROLI Ltd.
+
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
+
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
+
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
+
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "AUv3SynthEditor.h"
 
@@ -30,7 +49,7 @@ public:
     //==============================================================================
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override
     {
-        return (layouts.getMainInputChannels() == 2);
+        return (layouts.getMainOutputChannels() == 2);
     }
 
     void prepareToPlay (double sampleRate, int estimatedMaxSizeOfBuffer) override
@@ -77,19 +96,16 @@ public:
     const String getName() const override                                       { return "AUv3 Synth"; }
     int getNumPrograms() override                                               { return 4; }
     int getCurrentProgram() override                                            { return currentProgram; }
-    void setCurrentProgram (int index) override                             { currentProgram = index; }
+    void setCurrentProgram (int index) override                                 { currentProgram = index; }
+
     const String getProgramName (int index) override
     {
         switch (index)
         {
-            case 0:
-                return "Piano";
-            case 1:
-                return "Singing";
-            case 2:
-                return "Pinched Balloon";
-            case 3:
-                return "Gazeebo";
+            case 0:  return "Piano";
+            case 1:  return "Singing";
+            case 2:  return "Pinched Balloon";
+            case 3:  return "Gazeebo";
         }
 
         return "<Unknown>";

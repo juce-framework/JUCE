@@ -2,25 +2,30 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
+namespace juce
+{
 
 namespace
 {
@@ -36,7 +41,7 @@ namespace
               && (int) h >= 0 && (int) h <= maxVal);
        #endif
 
-        return Rectangle<Type> (x, y, w, h);
+        return { x, y, w, h };
     }
 }
 
@@ -47,15 +52,13 @@ LowLevelGraphicsContext::~LowLevelGraphicsContext() {}
 //==============================================================================
 Graphics::Graphics (const Image& imageToDrawOnto)
     : context (*imageToDrawOnto.createLowLevelContext()),
-      contextToDelete (&context),
-      saveStatePending (false)
+      contextToDelete (&context)
 {
     jassert (imageToDrawOnto.isValid()); // Can't draw into a null image!
 }
 
 Graphics::Graphics (LowLevelGraphicsContext& internalContext) noexcept
-    : context (internalContext),
-      saveStatePending (false)
+    : context (internalContext)
 {
 }
 
@@ -83,7 +86,7 @@ bool Graphics::reduceClipRegion (Rectangle<int> area)
     return context.clipToRectangle (area);
 }
 
-bool Graphics::reduceClipRegion (const int x, const int y, const int w, const int h)
+bool Graphics::reduceClipRegion (int x, int y, int w, int h)
 {
     return reduceClipRegion (coordsToRectangle (x, y, w, h));
 }
@@ -155,7 +158,7 @@ void Graphics::setOrigin (Point<int> newOrigin)
 
 void Graphics::setOrigin (int x, int y)
 {
-    setOrigin (Point<int> (x, y));
+    setOrigin ({ x, y });
 }
 
 void Graphics::addTransform (const AffineTransform& transform)
@@ -237,23 +240,20 @@ void Graphics::drawSingleLineText (const String& text, const int startX, const i
         // Don't pass any vertical placement flags to this method - they'll be ignored.
         jassert (justification.getOnlyVerticalFlags() == 0);
 
-        const int flags = justification.getOnlyHorizontalFlags();
+        auto flags = justification.getOnlyHorizontalFlags();
 
-        if (flags == Justification::right)
-        {
-            if (startX < context.getClipBounds().getX())
-                return;
-        }
-        else if (flags == Justification::left)
-            if (startX > context.getClipBounds().getRight())
-                return;
+        if (flags == Justification::right && startX < context.getClipBounds().getX())
+            return;
+
+        if (flags == Justification::left && startX > context.getClipBounds().getRight())
+            return;
 
         GlyphArrangement arr;
         arr.addLineOfText (context.getFont(), text, (float) startX, (float) baselineY);
 
         if (flags != Justification::left)
         {
-            float w = arr.getBoundingBox (0, -1, true).getWidth();
+            auto w = arr.getBoundingBox (0, -1, true).getWidth();
 
             if ((flags & (Justification::horizontallyCentred | Justification::horizontallyJustified)) != 0)
                 w /= 2.0f;
@@ -365,13 +365,8 @@ void Graphics::fillRectList (const RectangleList<float>& rectangles) const
 
 void Graphics::fillRectList (const RectangleList<int>& rects) const
 {
-    for (const Rectangle<int>* r = rects.begin(), * const e = rects.end(); r != e; ++r)
-        context.fillRect (*r, false);
-}
-
-void Graphics::setPixel (int x, int y) const
-{
-    context.fillRect (coordsToRectangle (x, y, 1, 1), false);
+    for (auto& r : rects)
+        context.fillRect (r, false);
 }
 
 void Graphics::fillAll() const
@@ -383,7 +378,7 @@ void Graphics::fillAll (Colour colourToUse) const
 {
     if (! colourToUse.isTransparent())
     {
-        const Rectangle<int> clip (context.getClipBounds());
+        auto clip = context.getClipBounds();
 
         context.saveState();
         context.setFill (colourToUse);
@@ -505,7 +500,7 @@ void Graphics::drawRoundedRectangle (Rectangle<float> r, float cornerSize, float
     strokePath (p, PathStrokeType (lineThickness));
 }
 
-void Graphics::drawArrow (const Line<float>& line, float lineThickness, float arrowheadWidth, float arrowheadLength) const
+void Graphics::drawArrow (Line<float> line, float lineThickness, float arrowheadWidth, float arrowheadLength) const
 {
     Path p;
     p.addArrow (line, lineThickness, arrowheadWidth, arrowheadLength);
@@ -529,7 +524,7 @@ void Graphics::fillCheckerBoard (Rectangle<int> area,
         }
         else
         {
-            const Rectangle<int> clipped (context.getClipBounds().getIntersection (area));
+            auto clipped = context.getClipBounds().getIntersection (area);
 
             if (! clipped.isEmpty())
             {
@@ -571,7 +566,7 @@ void Graphics::drawHorizontalLine (const int y, float left, float right) const
         context.fillRect (Rectangle<float> (left, (float) y, right - left, 1.0f));
 }
 
-void Graphics::drawLine (const Line<float>& line) const
+void Graphics::drawLine (Line<float> line) const
 {
     context.drawLine (line);
 }
@@ -586,15 +581,15 @@ void Graphics::drawLine (float x1, float y1, float x2, float y2, float lineThick
     drawLine (Line<float> (x1, y1, x2, y2), lineThickness);
 }
 
-void Graphics::drawLine (const Line<float>& line, const float lineThickness) const
+void Graphics::drawLine (Line<float> line, const float lineThickness) const
 {
     Path p;
     p.addLineSegment (line, lineThickness);
     fillPath (p);
 }
 
-void Graphics::drawDashedLine (const Line<float>& line, const float* const dashLengths,
-                               const int numDashLengths, const float lineThickness, int n) const
+void Graphics::drawDashedLine (Line<float> line, const float* dashLengths,
+                               int numDashLengths, float lineThickness, int n) const
 {
     jassert (n >= 0 && n < numDashLengths); // your start index must be valid!
 
@@ -700,3 +695,5 @@ Graphics::ScopedSaveState::~ScopedSaveState()
 {
     context.restoreState();
 }
+
+} // namespace juce

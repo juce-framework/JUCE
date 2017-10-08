@@ -1,9 +1,99 @@
 
-﻿== Major JUCE features and updates ==
+== Major JUCE features and updates ==
 
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 5.1.2
+  - Fixed multiple plugin-resizing bugs
+  - Added support for AUv3 MIDI and screen size negotiation
+  - Added support for Xcode 9 and iOS 11
+  - Added an In-App Purchases module
+  - Added backwards compatible constexpr support
+  - Standalone plug-in improvements
+  - Better .jucer file change monitoring in the Projucer
+  - Increased the speed of AU parameter lookup
+  - Improved the Android thread management when dealing with web requests
+  - Better denormal support
+  - Plug-in parameters can be explicitly marked as continuous or discrete
+  - Multiple documentation updates
+
+Version 5.1.1
+  - Fixed Windows live build engine on Visual Studio 2017
+  - Fixed a compiler error in juce_MathFunctions.h in Visual Studio 2013
+  - Fixed a potential crash when using the ProcessorDuplicator
+  - Fixed a compiler-error in Filter::IIR
+  - Fixed an issue where the WavFileFormatWriter could not create files with discrete channels
+  - Fixed an issue where a window which is beneath a hidden window would not receive any clicks on Linux
+  - Altered the format of BREAKING-CHANGES.txt to display better on GitHub
+  - Projucer: Fixed an issue in exporter tilde expansion
+  - Fixed compiler errors when building the DSP module with a static version of FFTW
+  - Fixed an audio glitch when bypassing the convolution engine
+  - Fixed an issue where a JUCE VST2 would not correctly report that it supports resizing of it’s plugin editor
+  - Various documentation tweaks and fixes
+
+Version 5.1.0
+  - Release of the JUCE DSP module
+  - Multichannel audio readers and writers
+  - Plugin editor Hi-DPI scaling support
+  - Major improvements to Projucer module search paths
+  - Added Projucer support for iOS app groups
+  - Added support for AVFoundation and deprecated the use of Quicktime
+  - Added a new real-time audio thread priority for Android
+  - Various Projucer UI fixes
+  - Various documentation fixes
+  - Various minor improvements and bug fixes
+
+Version 5.0.2
+  - Improved project save speed in the Projucer
+  - Added option to save individual exporters in the Projucer
+  - Added the ability to create custom colour schemes for the Projucer’s code editor
+  - Minor fixes to JUCE’s SVG parser
+  - Various bug fixes in the way JUCE handles Hi-DPI monitors
+  - Improved code browsing in Visual Studio Exports
+  - Improved the handling of audio device buffer size changes on iOS
+  - Fixed bug in the Win32 FileChooser dialog when selecting a nonexistent root drive
+  - Fixed a Projucer crash when saving projects with no targets
+  - Fixed a bug where Projucer generated Makefiles would not trigger a recompilation when header files had changed
+  - The standalone plugin target is now compatible with effect plug-ins
+  - Fixed an issue where it was not possible to use the live build engine on plugin projects
+  - Improved the way the Projucer’s live-build engine searches for platform headers on Windows
+  - Fixed an issue where the Projucer would complain about not having internet even if the user had a license
+  - Fixed a use-after-free in the AUv3 wrapper
+  - Fixed an issue where the channel layout would not be reported correctly in the AUv3 wrapper
+  - Fixed a potential memory overrun issue when hosting VST2 plugins with more than eight channels
+  - Fixed a problem with the Mac main menu bar showing menus in the wrong position
+  - Various Projucer UI fixes
+  - Various documentation fixes
+  - Various minor improvements and bug fixes
+
+Version 5.0.1
+  - Fixed Windows live build engine on Visual Studio 2017
+  - Fixed memory-leak in Projucer live build engine
+  - Fixed an issue where you could not paste your redeem serial number with Cmd+V on macOS
+  - Fixed an issue where the Projucer would crash on linux due to missing symbols in WebKit
+  - Minor Projucer UI improvements
+  - Various minor improvements and bug fixes
+
+Version 5.0.0
+  - New licensing model
+  - Projucer UI/UX overhaul
+  - New look and feel (version 4)
+  - New standalone plug-in format
+  - Added support for Visual Studio 2017
+  - Added support for VST3 SDK 3.6.7
+  - Added support for Apple Inter-App Audio on iOS
+  - Various Android stability and performance improvements
+  - Added support for non-experimental gradle plug-in versions >= 2.2 and Android Studio 2.3
+  - Added support for closed-source third-party modules
+  - Added support for Windows 10 Bluetooth LE MIDI devices
+  - Modernised JUCE codebase to use C++11/14 features
+  - Added support for Linux embedded platforms
+  - Added support for WebBrowserComponent on Linux
+  - Added support for IPv6
+  - Various minor improvements and bug fixes
+  - Various documentation improvements
+ 
 Version 4.3.1
   - Added support for iOS download tasks
   - Added support for AAX plug-in meters

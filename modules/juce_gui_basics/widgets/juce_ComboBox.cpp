@@ -2,25 +2,30 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
+namespace juce
+{
 
 ComboBox::ComboBox (const String& name)
     : Component (name),
@@ -200,15 +205,15 @@ int ComboBox::getNumItems() const noexcept
 
 String ComboBox::getItemText (const int index) const
 {
-    if (const PopupMenu::Item* const item = getItemForIndex (index))
+    if (auto* item = getItemForIndex (index))
         return item->text;
 
-    return String();
+    return {};
 }
 
 int ComboBox::getItemId (const int index) const noexcept
 {
-    if (const PopupMenu::Item* const item = getItemForIndex (index))
+    if (auto* item = getItemForIndex (index))
         return item->itemID;
 
     return 0;
@@ -223,7 +228,7 @@ int ComboBox::indexOfItemId (const int itemId) const noexcept
 
         while (iterator.next())
         {
-            PopupMenu::Item &item = iterator.getItem();
+            auto& item = iterator.getItem();
 
             if (item.itemID == itemId)
                 return n;
@@ -382,7 +387,7 @@ void ComboBox::paint (Graphics& g)
          && ! label->isBeingEdited())
     {
         g.setColour (findColour (textColourId).withMultipliedAlpha (0.5f));
-        g.setFont (label->getFont());
+        g.setFont (label->getLookAndFeel().getLabelFont (*label));
         g.drawFittedText (textWhenNothingSelected, label->getBounds().reduced (2, 1),
                           label->getJustificationType(),
                           jmax (1, (int) (label->getHeight() / label->getFont().getHeight())));
@@ -503,7 +508,14 @@ void ComboBox::showPopupIfNotActive()
     if (! menuActive)
     {
         menuActive = true;
-        showPopup();
+
+        SafePointer<ComboBox> safePointer (this);
+
+        // as this method was triggered by a mouse event, the same mouse event may have
+        // exited the modal state of other popups currently on the screen. By calling
+        // showPopup asynchronously, we are giving the other popups a chance to properly
+        // close themselves
+        MessageManager::callAsync([safePointer] () mutable { if (safePointer != nullptr) safePointer->showPopup(); });
     }
 }
 
@@ -599,13 +611,12 @@ void ComboBox::mouseUp (const MouseEvent& e2)
 
 void ComboBox::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
 {
-    if (! menuActive && scrollWheelEnabled && e.eventComponent == this && wheel.deltaY != 0)
+    if (! menuActive && scrollWheelEnabled && e.eventComponent == this && wheel.deltaY != 0.0f)
     {
-        const int oldPos = (int) mouseWheelAccumulator;
+        auto oldPos = (int) mouseWheelAccumulator;
         mouseWheelAccumulator += wheel.deltaY * 5.0f;
-        const int delta = oldPos - (int) mouseWheelAccumulator;
 
-        if (delta != 0)
+        if (auto delta = oldPos - (int) mouseWheelAccumulator)
             nudgeSelectedItem (delta);
     }
     else
@@ -626,7 +637,7 @@ void ComboBox::removeListener (ComboBoxListener* listener)    { listeners.remove
 void ComboBox::handleAsyncUpdate()
 {
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, &ComboBoxListener::comboBoxChanged, this);  // (can't use ComboBox::Listener due to idiotic VC2005 bug)
+    listeners.callChecked (checker, &ComboBox::Listener::comboBoxChanged, this);
 }
 
 void ComboBox::sendChange (const NotificationType notification)
@@ -643,3 +654,5 @@ void ComboBox::clear (const bool dontSendChange)                                
 void ComboBox::setSelectedItemIndex (const int index, const bool dontSendChange) { setSelectedItemIndex (index, dontSendChange ? dontSendNotification : sendNotification); }
 void ComboBox::setSelectedId (const int newItemId, const bool dontSendChange)    { setSelectedId (newItemId, dontSendChange ? dontSendNotification : sendNotification); }
 void ComboBox::setText (const String& newText, const bool dontSendChange)        { setText (newText, dontSendChange ? dontSendNotification : sendNotification); }
+
+} // namespace juce

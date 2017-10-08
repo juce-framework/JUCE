@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -54,8 +56,8 @@ public:
     //==============================================================================
     File getProjectFolder() const                       { return getFile().getParentDirectory(); }
     ValueTree getProjectRoot() const                    { return projectRoot; }
-    String getTitle() const;
-    Value getProjectNameValue()                         { return getMainGroup().getNameValue(); }
+    String getTitle() const                             { return projectRoot [Ids::name]; }
+    Value getProjectNameValue()                         { return getProjectValue (Ids::name); }
     String getProjectFilenameRoot()                     { return File::createLegalFileName (getDocumentTitle()); }
     String getProjectUID() const                        { return projectRoot [Ids::ID]; }
 
@@ -91,17 +93,27 @@ public:
     String getDefaultAAXIdentifier()                    { return getDefaultBundleIdentifier(); }
 
     Value getCompanyName()                              { return getProjectValue (Ids::companyName); }
+    Value getCompanyCopyright()                         { return getProjectValue (Ids::companyCopyright); }
     Value getCompanyWebsite()                           { return getProjectValue (Ids::companyWebsite); }
     Value getCompanyEmail()                             { return getProjectValue (Ids::companyEmail); }
+
+    Value shouldDisplaySplashScreen()                   { return getProjectValue (Ids::displaySplashScreen); }
+    Value shouldReportAppUsage()                        { return getProjectValue (Ids::reportAppUsage); }
+    Value splashScreenColour()                          { return getProjectValue (Ids::splashScreenColour); }
+
+    Value getCppStandardValue()                         { return getProjectValue (Ids::cppLanguageStandard); }
 
     //==============================================================================
     Value getProjectValue (const Identifier& name)       { return projectRoot.getPropertyAsValue (name, getUndoManagerFor (projectRoot)); }
     var   getProjectVar   (const Identifier& name) const { return projectRoot.getProperty        (name); }
 
-    Value getProjectPreprocessorDefs()                  { return getProjectValue (Ids::defines); }
+    Value getProjectHeaderSearchPaths()                  { return getProjectValue (Ids::headerPath); }
+    String getHeaderSearchPaths() const                  { return projectRoot [Ids::headerPath]; }
+
+    Value getProjectPreprocessorDefs()                   { return getProjectValue (Ids::defines); }
     StringPairArray getPreprocessorDefs() const;
 
-    Value getProjectUserNotes()                         { return getProjectValue (Ids::userNotes); }
+    Value getProjectUserNotes()                          { return getProjectValue (Ids::userNotes); }
 
     //==============================================================================
     File getGeneratedCodeFolder() const                         { return getFile().getSiblingFile ("JuceLibraryCode"); }
@@ -255,7 +267,7 @@ public:
 
         UndoManager* getUndoManager() const              { return project.getUndoManagerFor (state); }
 
-        Icon getIcon() const;
+        Icon getIcon (bool isOpen = false) const;
         bool isIconCrossedOut() const;
 
         Project& project;
@@ -307,7 +319,7 @@ public:
     static const char* const configFlagDisabled;
 
     Value getConfigFlag (const String& name);
-    bool isConfigFlagEnabled (const String& name) const;
+    bool isConfigFlagEnabled (const String& name, bool defaultIsEnabled = false) const;
 
     //==============================================================================
     EnabledModuleList& getModules();
@@ -335,10 +347,18 @@ public:
     bool hasProjectBeenModified();
     void updateModificationTime() { modificationTime = getFile().getLastModificationTime(); }
 
+    //==============================================================================
+    String getUniqueTargetFolderSuffixForExporter (const String& exporterName, const String& baseTargetFolder);
+
+    //==============================================================================
+    bool shouldWaitAfterSaving = false;
+    String specifiedExporterToSave = {};
+
 private:
     //==============================================================================
     void setMissingAudioPluginDefaultValues();
     void createAudioPluginPropertyEditors (PropertyListBuilder& props);
+    bool setCppVersionFromOldExporterSettings();
 
     //==============================================================================
     friend class Item;

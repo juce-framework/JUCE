@@ -2,38 +2,41 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-extern bool isIOSAppActive;
-
-struct AppInactivityCallback // NB: careful, this declaration is duplicated in other modules
+namespace juce
 {
-    virtual ~AppInactivityCallback() {}
-    virtual void appBecomingInactive() = 0;
-};
+    extern bool isIOSAppActive;
 
-// This is an internal list of callbacks (but currently used between modules)
-Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
+    struct AppInactivityCallback // NB: careful, this declaration is duplicated in other modules
+    {
+        virtual ~AppInactivityCallback() {}
+        virtual void appBecomingInactive() = 0;
+    };
 
-} // (juce namespace)
+    // This is an internal list of callbacks (but currently used between modules)
+    Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
+}
 
 @interface JuceAppStartupDelegate : NSObject <UIApplicationDelegate>
 {
@@ -97,15 +100,7 @@ Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
             }
         }];
 
-        MessageManager::callAsync ([self,application,app] ()
-                                   {
-                                       app->suspended();
-                                       if (appSuspendTask != UIBackgroundTaskInvalid)
-                                       {
-                                           [application endBackgroundTask:appSuspendTask];
-                                           appSuspendTask = UIBackgroundTaskInvalid;
-                                       }
-                                   });
+        MessageManager::callAsync ([self,application,app] ()  { app->suspended(); });
        #else
         ignoreUnused (application);
         app->suspended();
@@ -360,14 +355,28 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
     return 0;
 }
 
+int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (AlertWindow::AlertIconType /*iconType*/,
+                                                  const String& title, const String& message,
+                                                  Component* /*associatedComponent*/,
+                                                  ModalComponentManager::Callback* callback)
+{
+    ScopedPointer<iOSMessageBox> mb (new iOSMessageBox (title, message, @"No", @"Yes", nil, callback, callback != nullptr));
+
+    if (callback == nullptr)
+        return mb->getResult();
+
+    mb.release();
+    return 0;
+}
+
 //==============================================================================
-bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray&, bool)
+bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray&, bool, Component*)
 {
     jassertfalse;    // no such thing on iOS!
     return false;
 }
 
-bool DragAndDropContainer::performExternalDragDropOfText (const String&)
+bool DragAndDropContainer::performExternalDragDropOfText (const String&, Component*)
 {
     jassertfalse;    // no such thing on iOS!
     return false;
@@ -415,7 +424,12 @@ String SystemClipboard::getTextFromClipboard()
 //==============================================================================
 bool MouseInputSource::SourceList::addSource()
 {
-    addSource (sources.size(), false);
+    addSource (sources.size(), MouseInputSource::InputSourceType::touch);
+    return true;
+}
+
+bool MouseInputSource::SourceList::canUseTouch()
+{
     return true;
 }
 
@@ -465,3 +479,5 @@ void Desktop::Displays::findDisplays (float masterScale)
         displays.add (d);
     }
 }
+
+} // namespace juce

@@ -20,6 +20,33 @@
 
 // [END_USER_CODE_SECTION]
 
+/*
+  ==============================================================================
+
+   In accordance with the terms of the JUCE 5 End-Use License Agreement, the
+   JUCE Code in SECTION A cannot be removed, changed or otherwise rendered
+   ineffective unless you have a JUCE Indie or Pro license, or are using JUCE
+   under the GPL v3 license.
+
+   End User License Agreement: www.juce.com/juce-5-licence
+  ==============================================================================
+*/
+
+// BEGIN SECTION A
+
+#ifndef JUCE_DISPLAY_SPLASH_SCREEN
+ #define JUCE_DISPLAY_SPLASH_SCREEN 0
+#endif
+
+#ifndef JUCE_REPORT_APP_USAGE
+ #define JUCE_REPORT_APP_USAGE 0
+#endif
+
+
+// END SECTION A
+
+#define JUCE_USE_DARK_SPLASH_SCREEN 1
+
 //==============================================================================
 #define JUCE_MODULE_AVAILABLE_juce_audio_basics             1
 #define JUCE_MODULE_AVAILABLE_juce_audio_devices            1
@@ -36,6 +63,185 @@
 #define JUCE_MODULE_AVAILABLE_juce_opengl                   1
 #define JUCE_MODULE_AVAILABLE_juce_video                    1
 
+#define JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED 1
+
+//==============================================================================
+// juce_audio_devices flags:
+
+#ifndef    JUCE_ASIO
+ //#define JUCE_ASIO 1
+#endif
+
+#ifndef    JUCE_WASAPI
+ //#define JUCE_WASAPI 1
+#endif
+
+#ifndef    JUCE_WASAPI_EXCLUSIVE
+ //#define JUCE_WASAPI_EXCLUSIVE 1
+#endif
+
+#ifndef    JUCE_DIRECTSOUND
+ //#define JUCE_DIRECTSOUND 1
+#endif
+
+#ifndef    JUCE_ALSA
+ //#define JUCE_ALSA 1
+#endif
+
+#ifndef    JUCE_JACK
+ //#define JUCE_JACK 1
+#endif
+
+#ifndef    JUCE_USE_ANDROID_OPENSLES
+ //#define JUCE_USE_ANDROID_OPENSLES 1
+#endif
+
+#ifndef    JUCE_USE_WINRT_MIDI
+ //#define JUCE_USE_WINRT_MIDI 1
+#endif
+
+//==============================================================================
+// juce_audio_formats flags:
+
+#ifndef    JUCE_USE_FLAC
+ //#define JUCE_USE_FLAC 1
+#endif
+
+#ifndef    JUCE_USE_OGGVORBIS
+ //#define JUCE_USE_OGGVORBIS 1
+#endif
+
+#ifndef    JUCE_USE_MP3AUDIOFORMAT
+ //#define JUCE_USE_MP3AUDIOFORMAT 1
+#endif
+
+#ifndef    JUCE_USE_LAME_AUDIO_FORMAT
+ //#define JUCE_USE_LAME_AUDIO_FORMAT 1
+#endif
+
+#ifndef    JUCE_USE_WINDOWS_MEDIA_FORMAT
+ //#define JUCE_USE_WINDOWS_MEDIA_FORMAT 1
+#endif
+
+//==============================================================================
+// juce_audio_plugin_client flags:
+
+#ifndef    JUCE_FORCE_USE_LEGACY_PARAM_IDS
+ //#define JUCE_FORCE_USE_LEGACY_PARAM_IDS 1
+#endif
+
+#ifndef    JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
+ //#define JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE 1
+#endif
+
+#ifndef    JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS
+ //#define JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS 1
+#endif
+
+//==============================================================================
+// juce_audio_processors flags:
+
+#ifndef    JUCE_PLUGINHOST_VST
+ //#define JUCE_PLUGINHOST_VST 1
+#endif
+
+#ifndef    JUCE_PLUGINHOST_VST3
+ //#define JUCE_PLUGINHOST_VST3 1
+#endif
+
+#ifndef    JUCE_PLUGINHOST_AU
+ //#define JUCE_PLUGINHOST_AU 1
+#endif
+
+//==============================================================================
+// juce_core flags:
+
+#ifndef    JUCE_FORCE_DEBUG
+ //#define JUCE_FORCE_DEBUG 1
+#endif
+
+#ifndef    JUCE_LOG_ASSERTIONS
+ //#define JUCE_LOG_ASSERTIONS 1
+#endif
+
+#ifndef    JUCE_CHECK_MEMORY_LEAKS
+ //#define JUCE_CHECK_MEMORY_LEAKS 1
+#endif
+
+#ifndef    JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
+ //#define JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES 1
+#endif
+
+#ifndef    JUCE_INCLUDE_ZLIB_CODE
+ //#define JUCE_INCLUDE_ZLIB_CODE 1
+#endif
+
+#ifndef    JUCE_USE_CURL
+ //#define JUCE_USE_CURL 1
+#endif
+
+#ifndef    JUCE_CATCH_UNHANDLED_EXCEPTIONS
+ //#define JUCE_CATCH_UNHANDLED_EXCEPTIONS 1
+#endif
+
+#ifndef    JUCE_ALLOW_STATIC_NULL_VARIABLES
+ //#define JUCE_ALLOW_STATIC_NULL_VARIABLES 1
+#endif
+
+//==============================================================================
+// juce_events flags:
+
+#ifndef    JUCE_EXECUTE_APP_SUSPEND_ON_IOS_BACKGROUND_TASK
+ //#define JUCE_EXECUTE_APP_SUSPEND_ON_IOS_BACKGROUND_TASK 1
+#endif
+
+//==============================================================================
+// juce_graphics flags:
+
+#ifndef    JUCE_USE_COREIMAGE_LOADER
+ //#define JUCE_USE_COREIMAGE_LOADER 1
+#endif
+
+#ifndef    JUCE_USE_DIRECTWRITE
+ //#define JUCE_USE_DIRECTWRITE 1
+#endif
+
+//==============================================================================
+// juce_gui_basics flags:
+
+#ifndef    JUCE_ENABLE_REPAINT_DEBUGGING
+ //#define JUCE_ENABLE_REPAINT_DEBUGGING 1
+#endif
+
+#ifndef    JUCE_USE_XSHM
+ //#define JUCE_USE_XSHM 1
+#endif
+
+#ifndef    JUCE_USE_XRENDER
+ //#define JUCE_USE_XRENDER 1
+#endif
+
+#ifndef    JUCE_USE_XCURSOR
+ //#define JUCE_USE_XCURSOR 1
+#endif
+
+//==============================================================================
+// juce_gui_extra flags:
+
+#ifndef    JUCE_WEB_BROWSER
+ //#define JUCE_WEB_BROWSER 1
+#endif
+
+#ifndef    JUCE_ENABLE_LIVE_CONSTANT_EDITOR
+ //#define JUCE_ENABLE_LIVE_CONSTANT_EDITOR 1
+#endif
+
+//==============================================================================
+// juce_video flags:
+
+#ifndef    JUCE_USE_CAMERA
+ //#define JUCE_USE_CAMERA 1
+#endif
 //==============================================================================
 #ifndef    JUCE_STANDALONE_APPLICATION
  #if defined(JucePlugin_Name) && defined(JucePlugin_Build_Standalone)
@@ -43,194 +249,6 @@
  #else
   #define  JUCE_STANDALONE_APPLICATION 0
  #endif
-#endif
-
-#define JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED 1
-
-//==============================================================================
-// juce_audio_devices flags:
-
-#ifndef    JUCE_ASIO
- //#define JUCE_ASIO
-#endif
-
-#ifndef    JUCE_WASAPI
- //#define JUCE_WASAPI
-#endif
-
-#ifndef    JUCE_WASAPI_EXCLUSIVE
- //#define JUCE_WASAPI_EXCLUSIVE
-#endif
-
-#ifndef    JUCE_DIRECTSOUND
- //#define JUCE_DIRECTSOUND
-#endif
-
-#ifndef    JUCE_ALSA
- //#define JUCE_ALSA
-#endif
-
-#ifndef    JUCE_JACK
- //#define JUCE_JACK
-#endif
-
-#ifndef    JUCE_USE_ANDROID_OPENSLES
- //#define JUCE_USE_ANDROID_OPENSLES
-#endif
-
-#ifndef    JUCE_USE_WINRT_MIDI
- //#define JUCE_USE_WINRT_MIDI
-#endif
-
-//==============================================================================
-// juce_audio_formats flags:
-
-#ifndef    JUCE_USE_FLAC
- //#define JUCE_USE_FLAC
-#endif
-
-#ifndef    JUCE_USE_OGGVORBIS
- //#define JUCE_USE_OGGVORBIS
-#endif
-
-#ifndef    JUCE_USE_MP3AUDIOFORMAT
- //#define JUCE_USE_MP3AUDIOFORMAT
-#endif
-
-#ifndef    JUCE_USE_LAME_AUDIO_FORMAT
- //#define JUCE_USE_LAME_AUDIO_FORMAT
-#endif
-
-#ifndef    JUCE_USE_WINDOWS_MEDIA_FORMAT
- //#define JUCE_USE_WINDOWS_MEDIA_FORMAT
-#endif
-
-//==============================================================================
-// juce_audio_plugin_client flags:
-
-#ifndef    JUCE_FORCE_USE_LEGACY_PARAM_IDS
- //#define JUCE_FORCE_USE_LEGACY_PARAM_IDS
-#endif
-
-#ifndef    JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS
- //#define JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS
-#endif
-
-//==============================================================================
-// juce_audio_processors flags:
-
-#ifndef    JUCE_PLUGINHOST_VST
- //#define JUCE_PLUGINHOST_VST
-#endif
-
-#ifndef    JUCE_PLUGINHOST_VST3
- //#define JUCE_PLUGINHOST_VST3
-#endif
-
-#ifndef    JUCE_PLUGINHOST_AU
- //#define JUCE_PLUGINHOST_AU
-#endif
-
-//==============================================================================
-// juce_core flags:
-
-#ifndef    JUCE_FORCE_DEBUG
- //#define JUCE_FORCE_DEBUG
-#endif
-
-#ifndef    JUCE_LOG_ASSERTIONS
- //#define JUCE_LOG_ASSERTIONS
-#endif
-
-#ifndef    JUCE_CHECK_MEMORY_LEAKS
- //#define JUCE_CHECK_MEMORY_LEAKS
-#endif
-
-#ifndef    JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
- //#define JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
-#endif
-
-#ifndef    JUCE_INCLUDE_ZLIB_CODE
- //#define JUCE_INCLUDE_ZLIB_CODE
-#endif
-
-#ifndef    JUCE_USE_CURL
- //#define JUCE_USE_CURL
-#endif
-
-#ifndef    JUCE_CATCH_UNHANDLED_EXCEPTIONS
- //#define JUCE_CATCH_UNHANDLED_EXCEPTIONS
-#endif
-
-#ifndef    JUCE_ALLOW_STATIC_NULL_VARIABLES
- //#define JUCE_ALLOW_STATIC_NULL_VARIABLES
-#endif
-
-//==============================================================================
-// juce_events flags:
-
-#ifndef    JUCE_EXECUTE_APP_SUSPEND_ON_IOS_BACKGROUND_TASK
- //#define JUCE_EXECUTE_APP_SUSPEND_ON_IOS_BACKGROUND_TASK
-#endif
-
-//==============================================================================
-// juce_graphics flags:
-
-#ifndef    JUCE_USE_COREIMAGE_LOADER
- //#define JUCE_USE_COREIMAGE_LOADER
-#endif
-
-#ifndef    JUCE_USE_DIRECTWRITE
- //#define JUCE_USE_DIRECTWRITE
-#endif
-
-//==============================================================================
-// juce_gui_basics flags:
-
-#ifndef    JUCE_ENABLE_REPAINT_DEBUGGING
- //#define JUCE_ENABLE_REPAINT_DEBUGGING
-#endif
-
-#ifndef    JUCE_USE_XSHM
- //#define JUCE_USE_XSHM
-#endif
-
-#ifndef    JUCE_USE_XRENDER
- //#define JUCE_USE_XRENDER
-#endif
-
-#ifndef    JUCE_USE_XCURSOR
- //#define JUCE_USE_XCURSOR
-#endif
-
-//==============================================================================
-// juce_gui_extra flags:
-
-#ifndef    JUCE_WEB_BROWSER
- //#define JUCE_WEB_BROWSER
-#endif
-
-#ifndef    JUCE_ENABLE_LIVE_CONSTANT_EDITOR
- //#define JUCE_ENABLE_LIVE_CONSTANT_EDITOR
-#endif
-
-//==============================================================================
-// juce_video flags:
-
-#ifndef    JUCE_DIRECTSHOW
- //#define JUCE_DIRECTSHOW
-#endif
-
-#ifndef    JUCE_MEDIAFOUNDATION
- //#define JUCE_MEDIAFOUNDATION
-#endif
-
-#ifndef    JUCE_QUICKTIME
- #define   JUCE_QUICKTIME 0
-#endif
-
-#ifndef    JUCE_USE_CAMERA
- //#define JUCE_USE_CAMERA
 #endif
 
 //==============================================================================
@@ -254,8 +272,8 @@
 #ifndef  JucePlugin_Build_AAX
  #define JucePlugin_Build_AAX              1
 #endif
-#ifndef  JucePlugin_Build_STANDALONE
- #define JucePlugin_Build_STANDALONE       0
+#ifndef  JucePlugin_Build_Standalone
+ #define JucePlugin_Build_Standalone       0
 #endif
 #ifndef  JucePlugin_Enable_IAA
  #define JucePlugin_Enable_IAA             0
@@ -327,7 +345,7 @@
  #define JucePlugin_AUManufacturerCode     JucePlugin_ManufacturerCode
 #endif
 #ifndef  JucePlugin_CFBundleIdentifier
- #define JucePlugin_CFBundleIdentifier     com.ROLI.Surround
+ #define JucePlugin_CFBundleIdentifier     com.roli.Surround
 #endif
 #ifndef  JucePlugin_RTASCategory
  #define JucePlugin_RTASCategory           ePlugInCategory_None
@@ -345,7 +363,7 @@
  #define JucePlugin_RTASDisableMultiMono   0
 #endif
 #ifndef  JucePlugin_AAXIdentifier
- #define JucePlugin_AAXIdentifier          com.ROLI.Surround
+ #define JucePlugin_AAXIdentifier          com.roli.Surround
 #endif
 #ifndef  JucePlugin_AAXManufacturerCode
  #define JucePlugin_AAXManufacturerCode    JucePlugin_ManufacturerCode

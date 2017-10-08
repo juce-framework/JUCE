@@ -2,31 +2,26 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
+namespace juce
+{
 
 #if JUCE_COREAUDIO_LOGGING_ENABLED
  #define JUCE_COREAUDIOLOG(a) { String camsg ("CoreAudio: "); camsg << a; Logger::writeToLog (camsg); }
@@ -236,7 +231,7 @@ public:
 
                 for (int i = 0; i < numStreams; ++i)
                 {
-                    const ::AudioBuffer& b = bufList->mBuffers[i];
+                    auto& b = bufList->mBuffers[i];
 
                     for (unsigned int j = 0; j < b.mNumberChannels; ++j)
                     {
@@ -586,6 +581,8 @@ public:
 
         stop (false);
 
+        updateDetailsFromDevice();
+
         activeInputChans = inputChannels;
         activeInputChans.setRange (inChanNames.size(),
                                    activeInputChans.getHighestBit() + 1 - inChanNames.size(),
@@ -741,7 +738,7 @@ public:
                 }
             }
 
-            callback->audioDeviceIOCallback (const_cast<const float**> (tempInputBuffers.getData()),
+            callback->audioDeviceIOCallback (const_cast<const float**> (tempInputBuffers.get()),
                                              numInputChans,
                                              tempOutputBuffers,
                                              numOutputChans,
@@ -799,6 +796,7 @@ public:
     int inputLatency  = 0;
     int outputLatency = 0;
     int bitDepth = 32;
+    int xruns = 0;
     BigInteger activeInputChans, activeOutputChans;
     StringArray inChanNames, outChanNames;
     Array<double> sampleRates;
@@ -840,6 +838,9 @@ private:
 
         switch (pa->mSelector)
         {
+            case kAudioDeviceProcessorOverload:
+                intern->xruns++;
+                break;
             case kAudioDevicePropertyBufferSize:
             case kAudioDevicePropertyBufferFrameSize:
             case kAudioDevicePropertyNominalSampleRate:
@@ -965,6 +966,7 @@ public:
     double getCurrentSampleRate() override              { return internal->getSampleRate(); }
     int getCurrentBitDepth() override                   { return internal->bitDepth; }
     int getCurrentBufferSizeSamples() override          { return internal->getBufferSize(); }
+    int getXRunCount() const noexcept override          { return internal->xruns; }
 
     int getDefaultBufferSize() override
     {
@@ -985,6 +987,7 @@ public:
     {
         isOpen_ = true;
 
+        internal->xruns = 0;
         if (bufferSizeSamples <= 0)
             bufferSizeSamples = getDefaultBufferSize();
 
@@ -1284,7 +1287,7 @@ public:
         fifos.clear();
         startThread (9);
 
-        return String();
+        return {};
     }
 
     void close() override
@@ -1374,21 +1377,7 @@ public:
         }
     }
 
-    void stop() override
-    {
-        AudioIODeviceCallback* lastCallback = nullptr;
-
-        {
-            const ScopedLock sl (callbackLock);
-            std::swap (callback, lastCallback);
-        }
-
-        for (int i = 0; i < devices.size(); ++i)
-            devices.getUnchecked(i)->device->stop();
-
-        if (lastCallback != nullptr)
-            lastCallback->audioDeviceStopped();
-    }
+    void stop() override    { shutdown ({}); }
 
     String getLastError() override
     {
@@ -1461,6 +1450,27 @@ private:
 
                 reset();
             }
+        }
+    }
+
+    void shutdown (const String& error)
+    {
+        AudioIODeviceCallback* lastCallback = nullptr;
+
+        {
+            const ScopedLock sl (callbackLock);
+            std::swap (callback, lastCallback);
+        }
+
+        for (int i = 0; i < devices.size(); ++i)
+            devices.getUnchecked(i)->device->stop();
+
+        if (lastCallback != nullptr)
+        {
+            if (error.isNotEmpty())
+                lastCallback->audioDeviceError (error);
+            else
+                lastCallback->audioDeviceStopped();
         }
     }
 
@@ -1592,21 +1602,8 @@ private:
             callback->audioDeviceAboutToStart (device);
     }
 
-    void handleAudioDeviceStopped()
-    {
-        const ScopedLock sl (callbackLock);
-
-        if (callback != nullptr)
-            callback->audioDeviceStopped();
-    }
-
-    void handleAudioDeviceError (const String& errorMessage)
-    {
-        const ScopedLock sl (callbackLock);
-
-        if (callback != nullptr)
-            callback->audioDeviceError (errorMessage);
-    }
+    void handleAudioDeviceStopped()                            { shutdown ({}); }
+    void handleAudioDeviceError (const String& errorMessage)   { shutdown (errorMessage.isNotEmpty() ? errorMessage : String ("unknown")); }
 
     //==============================================================================
     struct DeviceWrapper  : private AudioIODeviceCallback
@@ -2051,7 +2048,7 @@ private:
 
     static OSStatus hardwareListenerProc (AudioDeviceID, UInt32, const AudioObjectPropertyAddress*, void* clientData)
     {
-        static_cast<CoreAudioIODeviceType*> (clientData)->audioDeviceListChanged();
+        static_cast<CoreAudioIODeviceType*> (clientData)->triggerAsyncAudioDeviceListChange();
         return noErr;
     }
 
@@ -2072,3 +2069,5 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_CoreAudio()
 }
 
 #undef JUCE_COREAUDIOLOG
+
+} // namespace juce

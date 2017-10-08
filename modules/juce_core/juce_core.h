@@ -2,28 +2,20 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -40,7 +32,7 @@
 
   ID:               juce_core
   vendor:           juce
-  version:          4.3.1
+  version:          5.1.2
   name:             JUCE core classes
   description:      The essential set of basic JUCE classes, as required by all the other JUCE modules. Includes text, container, memory, threading and i/o functionality.
   website:          http://www.juce.com/juce
@@ -183,20 +175,19 @@
 
 namespace juce
 {
+    class StringRef;
+    class MemoryBlock;
+    class File;
+    class InputStream;
+    class OutputStream;
+    class DynamicObject;
+    class FileInputStream;
+    class FileOutputStream;
+    class XmlElement;
 
-class StringRef;
-class MemoryBlock;
-class File;
-class InputStream;
-class OutputStream;
-class DynamicObject;
-class FileInputStream;
-class FileOutputStream;
-class XmlElement;
-class JSONFormatter;
-
-extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger() noexcept;
-extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noexcept;
+    extern JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger() noexcept;
+    extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noexcept;
+}
 
 #include "memory/juce_Memory.h"
 #include "maths/juce_MathsFunctions.h"
@@ -287,7 +278,6 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
 #include "misc/juce_RuntimePermissions.h"
 #include "misc/juce_Uuid.h"
 #include "misc/juce_WindowsRegistry.h"
-#include "system/juce_SystemStats.h"
 #include "threads/juce_ChildProcess.h"
 #include "threads/juce_DynamicLibrary.h"
 #include "threads/juce_HighResolutionTimer.h"
@@ -308,6 +298,7 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
 #include "network/juce_Socket.h"
 #include "network/juce_URL.h"
 #include "network/juce_WebInputStream.h"
+#include "system/juce_SystemStats.h"
 #include "time/juce_PerformanceCounter.h"
 #include "unit_tests/juce_UnitTest.h"
 #include "xml/juce_XmlDocument.h"
@@ -327,11 +318,13 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
 #endif
 
 #if JUCE_CORE_INCLUDE_JNI_HELPERS && JUCE_ANDROID
+ #include <jni.h>
  #include "native/juce_android_JNIHelpers.h"
 #endif
 
-
 #ifndef DOXYGEN
+namespace juce
+{
  /*
     As the very long class names here try to explain, the purpose of this code is to cause
     a linker error if not all of your compile units are consistent in the options that they
@@ -349,9 +342,8 @@ extern JUCE_API void JUCE_CALLTYPE logAssertion (const char* file, int line) noe
   { this_will_fail_to_link_if_some_of_your_compile_units_are_built_in_release_mode() noexcept; };
   static this_will_fail_to_link_if_some_of_your_compile_units_are_built_in_release_mode compileUnitMismatchSentinel;
  #endif
-#endif
-
 }
+#endif
 
 #if JUCE_MSVC
  #pragma warning (pop)

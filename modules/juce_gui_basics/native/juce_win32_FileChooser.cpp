@@ -2,25 +2,30 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
+namespace juce
+{
 
 namespace FileChooserHelpers
 {
@@ -159,14 +164,17 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
     if (extraInfoComponent == nullptr)
         parentWindow.enterModalState();
 
-    if (currentFileOrDirectory.isDirectory())
+    auto parentDirectory = currentFileOrDirectory.getParentDirectory();
+
+    // Handle nonexistent root directories in the same way as existing ones
+    if (currentFileOrDirectory.isDirectory() || currentFileOrDirectory.isRoot())
     {
         info.initialPath = currentFileOrDirectory.getFullPathName();
     }
     else
     {
         currentFileOrDirectory.getFileName().copyToUTF16 (files, charsAvailableForResult * sizeof (WCHAR));
-        info.initialPath = currentFileOrDirectory.getParentDirectory().getFullPathName();
+        info.initialPath = parentDirectory.getFullPathName();
     }
 
     if (selectsDirectory)
@@ -197,7 +205,7 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
 
         if (info.returnedString.isNotEmpty())
         {
-            results.add (File (String (files)).getSiblingFile (info.returnedString));
+            results.add (File (String (files.get())).getSiblingFile (info.returnedString));
             return;
         }
     }
@@ -216,7 +224,7 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
             flags |= OFN_ENABLEHOOK;
 
             info.customComponent = new CustomComponentHolder (extraInfoComponent);
-            info.customComponent->enterModalState();
+            info.customComponent->enterModalState (false);
         }
 
         const size_t filterSpaceNumChars = 2048;
@@ -282,12 +290,14 @@ void FileChooser::showPlatformDialog (Array<File>& results, const String& title_
 
         while (*filename != 0)
         {
-            results.add (File (String (files)).getChildFile (String (filename)));
+            results.add (File (String (files.get())).getChildFile (String (filename)));
             filename += wcslen (filename) + 1;
         }
     }
     else if (files[0] != 0)
     {
-        results.add (File (String (files)));
+        results.add (File (String (files.get())));
     }
 }
+
+} // namespace juce

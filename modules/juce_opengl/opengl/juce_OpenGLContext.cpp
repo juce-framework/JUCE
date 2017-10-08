@@ -2,25 +2,30 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
+namespace juce
+{
 
 #if JUCE_IOS
 struct AppInactivityCallback // NB: this is a duplicate of an internal declaration in juce_core
@@ -69,18 +74,7 @@ public:
     CachedImage (OpenGLContext& c, Component& comp,
                  const OpenGLPixelFormat& pixFormat, void* contextToShare)
         : ThreadPoolJob ("OpenGL Rendering"),
-          context (c), component (comp),
-          scale (1.0),
-         #if JUCE_OPENGL3
-          vertexArrayObject (0),
-         #endif
-         #if JUCE_OPENGL_ES
-          shadersAvailable (true),
-         #else
-          shadersAvailable (false),
-         #endif
-          hasInitialised (false),
-          needsUpdate (1), lastMMLockReleaseTime (0)
+          context (c), component (comp)
     {
         nativeContext = new NativeContext (component, pixFormat, contextToShare,
                                            c.useMultisampling, c.versionRequired);
@@ -175,8 +169,8 @@ public:
     //==============================================================================
     bool ensureFrameBufferSize()
     {
-        const int fbW = cachedImageFrameBuffer.getWidth();
-        const int fbH = cachedImageFrameBuffer.getHeight();
+        auto fbW = cachedImageFrameBuffer.getWidth();
+        auto fbH = cachedImageFrameBuffer.getHeight();
 
         if (fbW != viewportArea.getWidth() || fbH != viewportArea.getHeight() || ! cachedImageFrameBuffer.isValid())
         {
@@ -195,13 +189,13 @@ public:
         glClearColor (0, 0, 0, 0);
         glEnable (GL_SCISSOR_TEST);
 
-        const GLuint previousFrameBufferTarget = OpenGLFrameBuffer::getCurrentFrameBufferTarget();
+        auto previousFrameBufferTarget = OpenGLFrameBuffer::getCurrentFrameBufferTarget();
         cachedImageFrameBuffer.makeCurrentRenderingTarget();
-        const int imageH = cachedImageFrameBuffer.getHeight();
+        auto imageH = cachedImageFrameBuffer.getHeight();
 
-        for (const Rectangle<int>* i = list.begin(), * const e = list.end(); i != e; ++i)
+        for (auto& r : list)
         {
-            glScissor (i->getX(), imageH - i->getBottom(), i->getWidth(), i->getHeight());
+            glScissor (r.getX(), imageH - r.getBottom(), r.getWidth(), r.getHeight());
             glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         }
 
@@ -275,16 +269,16 @@ public:
 
     void updateViewportSize (bool canTriggerUpdate)
     {
-        if (ComponentPeer* peer = component.getPeer())
+        if (auto* peer = component.getPeer())
         {
             lastScreenBounds = component.getTopLevelComponent()->getScreenBounds();
 
-            const double newScale = Desktop::getInstance().getDisplays()
-                                        .getDisplayContaining (lastScreenBounds.getCentre()).scale;
+            auto newScale = Desktop::getInstance().getDisplays()
+                              .getDisplayContaining (lastScreenBounds.getCentre()).scale;
 
-            Rectangle<int> newArea (peer->getComponent().getLocalArea (&component, component.getLocalBounds())
-                                                        .withZeroOrigin()
-                                     * newScale);
+            auto newArea = peer->getComponent().getLocalArea (&component, component.getLocalBounds())
+                                               .withZeroOrigin()
+                             * newScale;
 
             if (scale != newScale || viewportArea != newArea)
             {
@@ -307,7 +301,7 @@ public:
 
     void checkViewportBounds()
     {
-        const Rectangle<int> screenBounds (component.getTopLevelComponent()->getScreenBounds());
+        auto screenBounds = component.getTopLevelComponent()->getScreenBounds();
 
         if (lastScreenBounds != screenBounds)
             updateViewportSize (true);
@@ -519,7 +513,7 @@ public:
     }
 
     //==============================================================================
-    struct MessageLockWorker : MessageManagerLock::BailOutChecker
+    struct MessageLockWorker  : public MessageManagerLock::BailOutChecker
     {
         MessageLockWorker (CachedImage& cachedImageRequestingLock)
             : owner (cachedImageRequestingLock)
@@ -529,11 +523,11 @@ public:
         bool shouldAbortAcquiringLock() override   { return owner.doWorkWhileWaitingForLock (false); }
 
         CachedImage& owner;
-        JUCE_DECLARE_NON_COPYABLE(MessageLockWorker)
+        JUCE_DECLARE_NON_COPYABLE (MessageLockWorker)
     };
 
     //==============================================================================
-    struct BlockingWorker : OpenGLContext::AsyncWorker
+    struct BlockingWorker  : public OpenGLContext::AsyncWorker
     {
         BlockingWorker (OpenGLContext::AsyncWorker::Ptr && workerToUse)
             : originalWorker (static_cast<OpenGLContext::AsyncWorker::Ptr&&> (workerToUse))
@@ -547,7 +541,7 @@ public:
             finishedSignal.signal();
         }
 
-        void block() { finishedSignal.wait (); }
+        void block() noexcept  { finishedSignal.wait(); }
 
         OpenGLContext::AsyncWorker::Ptr originalWorker;
         WaitableEvent finishedSignal;
@@ -594,7 +588,9 @@ public:
                 blocker->block();
         }
         else
+        {
             jassertfalse; // you called execute AFTER you detached your openglcontext
+        }
     }
 
     //==============================================================================
@@ -605,13 +601,14 @@ public:
 
     //==============================================================================
     // used to push no work on to the gl thread to easily block
-    struct DoNothingWorker : OpenGLContext::AsyncWorker
+    struct DoNothingWorker  : public OpenGLContext::AsyncWorker
     {
         DoNothingWorker() {}
         void operator() (OpenGLContext&) override {}
     };
 
     //==============================================================================
+    friend class NativeContext;
     ScopedPointer<NativeContext> nativeContext;
 
     OpenGLContext& context;
@@ -620,18 +617,23 @@ public:
     OpenGLFrameBuffer cachedImageFrameBuffer;
     RectangleList<int> validArea;
     Rectangle<int> viewportArea, lastScreenBounds;
-    double scale;
+    double scale = 1.0;
    #if JUCE_OPENGL3
-    GLuint vertexArrayObject;
+    GLuint vertexArrayObject = 0;
    #endif
 
     StringArray associatedObjectNames;
     ReferenceCountedArray<ReferenceCountedObject> associatedObjects;
 
     WaitableEvent canPaintNowFlag, finishedPaintingFlag, repaintEvent;
-    bool shadersAvailable, hasInitialised;
-    Atomic<int> needsUpdate, destroying;
-    uint32 lastMMLockReleaseTime;
+   #if JUCE_OPENGL_ES
+    bool shadersAvailable = true;
+   #else
+    bool shadersAvailable = false;
+   #endif
+    bool hasInitialised = false;
+    Atomic<int> needsUpdate { 1 }, destroying;
+    uint32 lastMMLockReleaseTime = 0;
 
     ScopedPointer<ThreadPool> renderThread;
     ReferenceCountedArray<OpenGLContext::AsyncWorker, CriticalSection> workQueue;
@@ -662,24 +664,15 @@ public:
 
     void detach()
     {
-        stopTimer();
-
-        Component& comp = *getComponent();
-
-       #if JUCE_MAC
-        [[(NSView*) comp.getWindowHandle() window] disableScreenUpdatesUntilFlush];
-       #endif
-
-        if (CachedImage* const oldCachedImage = CachedImage::get (comp))
-            oldCachedImage->stop(); // (must stop this before detaching it from the component)
-
+        auto& comp = *getComponent();
+        stop();
         comp.setCachedComponentImage (nullptr);
         context.nativeContext = nullptr;
     }
 
     void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/) override
     {
-        Component& comp = *getComponent();
+        auto& comp = *getComponent();
 
         if (isAttached (comp) != canBeAttached (comp))
             componentVisibilityChanged();
@@ -687,10 +680,10 @@ public:
         if (comp.getWidth() > 0 && comp.getHeight() > 0
              && context.nativeContext != nullptr)
         {
-            if (CachedImage* const c = CachedImage::get (comp))
+            if (auto* c = CachedImage::get (comp))
                 c->handleResize();
 
-            if (ComponentPeer* peer = comp.getTopLevelComponent()->getPeer())
+            if (auto* peer = comp.getTopLevelComponent()->getPeer())
                 context.nativeContext->updateWindowPosition (peer->getAreaCoveredBy (comp));
         }
     }
@@ -703,7 +696,7 @@ public:
 
     void componentVisibilityChanged() override
     {
-        Component& comp = *getComponent();
+        auto& comp = *getComponent();
 
         if (canBeAttached (comp))
         {
@@ -730,12 +723,22 @@ public:
     }
    #endif
 
+    void update()
+    {
+        auto& comp = *getComponent();
+
+        if (canBeAttached (comp))
+            start();
+        else
+            stop();
+    }
+
 private:
     OpenGLContext& context;
 
-    static bool canBeAttached (const Component& comp) noexcept
+    bool canBeAttached (const Component& comp) noexcept
     {
-        return comp.getWidth() > 0 && comp.getHeight() > 0 && isShowingOrMinimised (comp);
+        return (! context.overrideCanAttach) && comp.getWidth() > 0 && comp.getHeight() > 0 && isShowingOrMinimised (comp);
     }
 
     static bool isShowingOrMinimised (const Component& c)
@@ -743,7 +746,7 @@ private:
         if (! c.isVisible())
             return false;
 
-        if (Component* p = c.getParentComponent())
+        if (auto* p = c.getParentComponent())
             return isShowingOrMinimised (*p);
 
         return c.getPeer() != nullptr;
@@ -756,33 +759,51 @@ private:
 
     void attach()
     {
-        Component& comp = *getComponent();
-        CachedImage* const newCachedImage = new CachedImage (context, comp,
-                                                             context.openGLPixelFormat,
-                                                             context.contextToShareWith);
+        auto& comp = *getComponent();
+        auto* newCachedImage = new CachedImage (context, comp,
+                                                context.openGLPixelFormat,
+                                                context.contextToShareWith);
         comp.setCachedComponentImage (newCachedImage);
-        newCachedImage->start(); // (must wait until this is attached before starting its thread)
-        newCachedImage->updateViewportSize (true);
 
-        startTimer (400);
+        start();
+    }
+
+    void stop()
+    {
+        stopTimer();
+
+        auto& comp = *getComponent();
+
+       #if JUCE_MAC
+        [[(NSView*) comp.getWindowHandle() window] disableScreenUpdatesUntilFlush];
+       #endif
+
+        if (auto* oldCachedImage = CachedImage::get (comp))
+            oldCachedImage->stop(); // (must stop this before detaching it from the component)
+    }
+
+    void start()
+    {
+        auto& comp = *getComponent();
+
+        if (auto* cachedImage = CachedImage::get (comp))
+        {
+            cachedImage->start(); // (must wait until this is attached before starting its thread)
+            cachedImage->updateViewportSize (true);
+
+            startTimer (400);
+        }
     }
 
     void timerCallback() override
     {
-        if (CachedImage* const cachedImage = CachedImage::get (*getComponent()))
+        if (auto* cachedImage = CachedImage::get (*getComponent()))
             cachedImage->checkViewportBounds();
     }
 };
 
 //==============================================================================
 OpenGLContext::OpenGLContext()
-    : nativeContext (nullptr), renderer (nullptr),
-      currentRenderScale (1.0), contextToShareWith (nullptr),
-      versionRequired (OpenGLContext::defaultGLVersion),
-      imageCacheMaxSize (8 * 1024 * 1024),
-      renderComponents (true),
-      useMultisampling (false),
-      continuousRepaint (false)
 {
 }
 
@@ -860,7 +881,7 @@ void OpenGLContext::attachTo (Component& component)
 
 void OpenGLContext::detach()
 {
-    if (Attachment* a = attachment)
+    if (auto* a = attachment.get())
     {
         a->detach(); // must detach before nulling our pointer
         attachment = nullptr;
@@ -881,7 +902,7 @@ Component* OpenGLContext::getTargetComponent() const noexcept
 
 OpenGLContext* OpenGLContext::getContextAttachedTo (Component& c) noexcept
 {
-    if (CachedImage* const ci = CachedImage::get (c))
+    if (auto* ci = CachedImage::get (c))
         return &(ci->context);
 
     return nullptr;
@@ -896,7 +917,7 @@ OpenGLContext* OpenGLContext::getCurrentContext()
 
 bool OpenGLContext::makeActive() const noexcept
 {
-    OpenGLContext*& current = currentThreadActiveContext.get();
+    auto& current = currentThreadActiveContext.get();
 
     if (nativeContext != nullptr && nativeContext->makeActive())
     {
@@ -921,7 +942,7 @@ void OpenGLContext::deactivateCurrentContext()
 
 void OpenGLContext::triggerRepaint()
 {
-    if (CachedImage* const cachedImage = getCachedImage())
+    if (auto* cachedImage = getCachedImage())
         cachedImage->triggerRepaint();
 }
 
@@ -953,7 +974,7 @@ void* OpenGLContext::getRawContext() const noexcept
 
 OpenGLContext::CachedImage* OpenGLContext::getCachedImage() const noexcept
 {
-    if (Component* const comp = getTargetComponent())
+    if (auto* comp = getTargetComponent())
         return CachedImage::get (*comp);
 
     return nullptr;
@@ -961,7 +982,7 @@ OpenGLContext::CachedImage* OpenGLContext::getCachedImage() const noexcept
 
 bool OpenGLContext::areShadersAvailable() const
 {
-    CachedImage* const c = getCachedImage();
+    auto* c = getCachedImage();
     return c != nullptr && c->shadersAvailable;
 }
 
@@ -969,7 +990,7 @@ ReferenceCountedObject* OpenGLContext::getAssociatedObject (const char* name) co
 {
     jassert (name != nullptr);
 
-    CachedImage* const c = getCachedImage();
+    auto* c = getCachedImage();
 
     // This method must only be called from an openGL rendering callback.
     jassert (c != nullptr && nativeContext != nullptr);
@@ -983,7 +1004,7 @@ void OpenGLContext::setAssociatedObject (const char* name, ReferenceCountedObjec
 {
     jassert (name != nullptr);
 
-    if (CachedImage* const c = getCachedImage())
+    if (auto* c = getCachedImage())
     {
         // This method must only be called from an openGL rendering callback.
         jassert (nativeContext != nullptr);
@@ -1016,10 +1037,21 @@ size_t OpenGLContext::getImageCacheSize() const noexcept            { return ima
 
 void OpenGLContext::execute (OpenGLContext::AsyncWorker::Ptr workerToUse, bool shouldBlock)
 {
-    if (CachedImage* const c = getCachedImage())
+    if (auto* c = getCachedImage())
         c->execute (static_cast<OpenGLContext::AsyncWorker::Ptr&&> (workerToUse), shouldBlock);
     else
         jassertfalse; // You must have attached the context to a component
+}
+
+void OpenGLContext::overrideCanBeAttached (bool newCanAttach)
+{
+    if (overrideCanAttach != newCanAttach)
+    {
+        overrideCanAttach = newCanAttach;
+
+        if (auto* a = attachment.get())
+            a->update();
+    }
 }
 
 //==============================================================================
@@ -1140,13 +1172,13 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
             Params params;
         };
 
-        const GLshort left   = (GLshort) targetClipArea.getX();
-        const GLshort top    = (GLshort) targetClipArea.getY();
-        const GLshort right  = (GLshort) targetClipArea.getRight();
-        const GLshort bottom = (GLshort) targetClipArea.getBottom();
+        auto left   = (GLshort) targetClipArea.getX();
+        auto top    = (GLshort) targetClipArea.getY();
+        auto right  = (GLshort) targetClipArea.getRight();
+        auto bottom = (GLshort) targetClipArea.getBottom();
         const GLshort vertices[] = { left, bottom, right, bottom, left, top, right, top };
 
-        const OverlayShaderProgram& program = OverlayShaderProgram::select (*this);
+        auto& program = OverlayShaderProgram::select (*this);
         program.params.set ((float) contextWidth, (float) contextHeight, anchorPosAndTextureSize.toFloat(), flippedVertically);
 
         GLuint vertexBuffer = 0;
@@ -1154,7 +1186,7 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
         extensions.glBindBuffer (GL_ARRAY_BUFFER, vertexBuffer);
         extensions.glBufferData (GL_ARRAY_BUFFER, sizeof (vertices), vertices, GL_STATIC_DRAW);
 
-        const GLuint index = (GLuint) program.params.positionAttribute.attributeID;
+        auto index = (GLuint) program.params.positionAttribute.attributeID;
         extensions.glVertexAttribPointer (index, 2, GL_SHORT, GL_FALSE, 4, 0);
         extensions.glEnableVertexAttribArray (index);
         JUCE_CHECK_OPENGL_ERROR
@@ -1182,12 +1214,16 @@ void OpenGLContext::NativeContext::surfaceCreated (jobject holder)
 {
     ignoreUnused (holder);
 
-    if (juceContext != nullptr)
+    if (auto* cachedImage = CachedImage::get (component))
     {
-        if (OpenGLContext::CachedImage* cachedImage = juceContext->getCachedImage())
-            cachedImage->resume();
-
-        juceContext->triggerRepaint();
+        if (auto* pool = cachedImage->renderThread.get())
+        {
+            if (! pool->contains (cachedImage))
+            {
+                cachedImage->resume();
+                cachedImage->context.triggerRepaint();
+            }
+        }
     }
 }
 
@@ -1197,8 +1233,14 @@ void OpenGLContext::NativeContext::surfaceDestroyed (jobject holder)
 
     // unlike the name suggests this will be called just before the
     // surface is destroyed. We need to pause the render thread.
-    if (juceContext != nullptr)
-        if (OpenGLContext::CachedImage* cachedImage = juceContext->getCachedImage())
-            cachedImage->pause();
+    if (auto* cachedImage = CachedImage::get (component))
+    {
+        cachedImage->pause();
+
+        if (auto* threadPool = cachedImage->renderThread.get())
+            threadPool->waitForJobToFinish (cachedImage, -1);
+    }
 }
 #endif
+
+} // namespace juce

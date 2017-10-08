@@ -24,6 +24,8 @@ xcuserdata
 contents.xcworkspacedata
 .DS_Store
 .svn
+.deps
+.dirstamp
 profile
 **/MacOSX/build
 **/iOS/build
@@ -41,6 +43,10 @@ profile
 **/VisualStudio2013/x64
 **/VisualStudio2015/Win32
 **/VisualStudio2015/x64
+**/VisualStudio2017/Win32
+**/VisualStudio2017/x64
+**/Builds/x64
+**/.vs
 **/CodeBlocks/bin
 **/CodeBlocks/obj
 **/CodeBlocks/*.depend

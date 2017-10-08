@@ -2,29 +2,31 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#if JUCE_COMPILER_SUPPORTS_LAMBDAS
+namespace juce
+{
 
-//==============================================================================
 struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParameterWithID,
                                                    private ValueTree::Listener
 {
@@ -32,11 +34,17 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
                const String& parameterID, const String& paramName, const String& labelText,
                NormalisableRange<float> r, float defaultVal,
                std::function<String (float)> valueToText,
-               std::function<float (const String&)> textToValue)
+               std::function<float (const String&)> textToValue,
+               bool meta,
+               bool automatable,
+               bool discrete)
         : AudioProcessorParameterWithID (parameterID, paramName, labelText),
           owner (s), valueToTextFunction (valueToText), textToValueFunction (textToValue),
           range (r), value (defaultVal), defaultValue (defaultVal),
-          listenersNeedCalling (true)
+          listenersNeedCalling (true),
+          isMetaParam (meta),
+          isAutomatableParam (automatable),
+          isDiscreteParam (discrete)
     {
         state.addListener (this);
         needsUpdate.set (1);
@@ -144,6 +152,10 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
         return nullptr;
     }
 
+    bool isMetaParameter() const override      { return isMetaParam; }
+    bool isAutomatable() const override        { return isAutomatableParam; }
+    bool isDiscrete() const override           { return isDiscreteParam; }
+
     AudioProcessorValueTreeState& owner;
     ValueTree state;
     ListenerList<AudioProcessorValueTreeState::Listener> listeners;
@@ -153,6 +165,7 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
     float value, defaultValue;
     Atomic<int> needsUpdate;
     bool listenersNeedCalling;
+    const bool isMetaParam, isAutomatableParam, isDiscreteParam;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Parameter)
 };
@@ -175,7 +188,10 @@ AudioProcessorValueTreeState::~AudioProcessorValueTreeState() {}
 AudioProcessorParameterWithID* AudioProcessorValueTreeState::createAndAddParameter (const String& paramID, const String& paramName,
                                                                                     const String& labelText, NormalisableRange<float> r,
                                                                                     float defaultVal, std::function<String (float)> valueToTextFunction,
-                                                                                    std::function<float (const String&)> textToValueFunction)
+                                                                                    std::function<float (const String&)> textToValueFunction,
+                                                                                    bool isMetaParameter,
+                                                                                    bool isAutomatableParameter,
+                                                                                    bool isDiscreteParameter)
 {
     // All parameters must be created before giving this manager a ValueTree state!
     jassert (! state.isValid());
@@ -184,7 +200,9 @@ AudioProcessorParameterWithID* AudioProcessorValueTreeState::createAndAddParamet
    #endif
 
     Parameter* p = new Parameter (*this, paramID, paramName, labelText, r,
-                                  defaultVal, valueToTextFunction, textToValueFunction);
+                                  defaultVal, valueToTextFunction, textToValueFunction,
+                                  isMetaParameter, isAutomatableParameter,
+                                  isDiscreteParameter);
     processor.addParameter (p);
     return p;
 }
@@ -555,4 +573,4 @@ AudioProcessorValueTreeState::ButtonAttachment::ButtonAttachment (AudioProcessor
 
 AudioProcessorValueTreeState::ButtonAttachment::~ButtonAttachment() {}
 
-#endif
+} // namespace juce

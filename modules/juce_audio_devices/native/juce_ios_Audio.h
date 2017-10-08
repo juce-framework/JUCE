@@ -2,35 +2,28 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
-class iOSAudioIODeviceType;
+struct iOSAudioIODeviceType;
 
 class iOSAudioIODevice : public AudioIODevice
 {
@@ -44,64 +37,57 @@ public:
 
     Array<double> getAvailableSampleRates() override;
     Array<int> getAvailableBufferSizes() override;
+
     bool setAudioPreprocessingEnabled (bool) override;
 
     //==============================================================================
-    bool isPlaying() override                             { return isRunning && callback != nullptr; }
-    bool isOpen() override                                { return isRunning; }
-    String getLastError() override                        { return lastError; };
+    bool isPlaying() override;
+    bool isOpen() override;
+    String getLastError() override;
 
     //==============================================================================
-    StringArray getOutputChannelNames() override          { return { "Left", "Right" }; }
-    StringArray getInputChannelNames() override           { return audioInputIsAvailable ? getOutputChannelNames() : StringArray(); }
-    int getDefaultBufferSize() override                   { return defaultBufferSize; }
-    int getCurrentBufferSizeSamples() override            { return actualBufferSize; }
-    double getCurrentSampleRate() override                { return sampleRate; }
-    int getCurrentBitDepth() override                     { return 16; }
-    BigInteger getActiveOutputChannels() const override   { return activeOutputChans; }
-    BigInteger getActiveInputChannels() const override    { return activeInputChans; }
+    StringArray getOutputChannelNames() override;
+    StringArray getInputChannelNames() override;
+
+    int getDefaultBufferSize() override;
+    int getCurrentBufferSizeSamples() override;
+
+    double getCurrentSampleRate() override;
+
+    int getCurrentBitDepth() override;
+
+    BigInteger getActiveOutputChannels() const override;
+    BigInteger getActiveInputChannels() const override;
+
     int getOutputLatencyInSamples() override;
     int getInputLatencyInSamples() override;
 
-    //==============================================================================
-    void handleStatusChange (bool enabled, const char* reason);
-    void handleRouteChange (const char* reason);
+    int getXRunCount() const noexcept override;
 
     //==============================================================================
-    virtual void setMidiMessageCollector (MidiMessageCollector* collector)     { messageCollector = collector; }
-    virtual AudioPlayHead* getAudioPlayHead() const;
+    void setMidiMessageCollector (MidiMessageCollector*);
+    AudioPlayHead* getAudioPlayHead() const;
 
     //==============================================================================
-    virtual bool isInterAppAudioConnected() const                              { return interAppAudioConnected; }
-   #if JUCE_MODULE_AVAILABLE_juce_gui_basics
-    virtual Image getIcon (int size);
+    bool isInterAppAudioConnected() const;
+   #if JUCE_MODULE_AVAILABLE_juce_graphics
+    Image getIcon (int size);
    #endif
-    virtual void switchApplication();
+    void switchApplication();
+
 private:
     //==============================================================================
-    void updateSampleRateAndAudioInput();
+    iOSAudioIODevice (const String&);
 
     //==============================================================================
-    friend class iOSAudioIODeviceType;
-    iOSAudioIODevice (const String& deviceName);
+    friend struct iOSAudioIODeviceType;
+    friend struct AudioSessionHolder;
 
-    //==============================================================================
-    const int defaultBufferSize;
-    double sampleRate;
-    int numInputChannels, numOutputChannels;
-    int preferredBufferSize, actualBufferSize;
-    bool isRunning;
-    String lastError;
-
-    bool audioInputIsAvailable, interAppAudioConnected;
-    BigInteger activeOutputChans, activeInputChans;
-
-    AudioIODeviceCallback* callback;
-    MidiMessageCollector* messageCollector;
-
-    class Pimpl;
-    friend class Pimpl;
+    struct Pimpl;
+    friend struct Pimpl;
     ScopedPointer<Pimpl> pimpl;
 
     JUCE_DECLARE_NON_COPYABLE (iOSAudioIODevice)
 };
+
+} // namespace juce

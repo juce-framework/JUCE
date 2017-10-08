@@ -2,34 +2,26 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -127,6 +119,14 @@ public:
         @see exists, existsAsFile
     */
     bool isDirectory() const;
+
+    /** Checks whether the path of this file represents the root of a file system,
+        irrespective of its existance.
+
+        This will return true for "C:", "D:", etc on Windows and "/" on other
+        platforms.
+    */
+    bool isRoot() const;
 
     /** Returns the size of the file in bytes.
 
@@ -877,10 +877,21 @@ public:
        #endif
 
         /** The directory in which applications normally get installed.
-            So on windows, this would be something like "c:\program files", on the
+            So on windows, this would be something like "C:\Program Files", on the
             Mac "/Applications", or "/usr" on linux.
         */
-        globalApplicationsDirectory
+        globalApplicationsDirectory,
+
+       #if JUCE_WINDOWS
+        /** On a Windows machine, returns the directory in which 32 bit applications
+            normally get installed. On a 64 bit machine this would be something like
+            "C:\Program Files (x86)", whereas for 32 bit machines this would match
+            globalApplicationsDirectory and be something like "C:\Program Files".
+
+            @see globalApplicationsDirectory
+        */
+        globalApplicationsDirectoryX86
+       #endif
     };
 
     /** Finds the location of a special type of file or directory, such as a home folder or
@@ -1032,3 +1043,5 @@ private:
     bool setFileReadOnlyInternal (bool) const;
     bool setFileExecutableInternal (bool) const;
 };
+
+} // namespace juce

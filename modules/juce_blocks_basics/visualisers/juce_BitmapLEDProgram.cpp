@@ -2,34 +2,28 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
+namespace juce
+{
 
-BitmapLEDProgram::BitmapLEDProgram (LEDGrid& lg)  : Program (lg) {}
+BitmapLEDProgram::BitmapLEDProgram (Block& b)  : Program (b) {}
 
 /*
     The heap format for this program is just an array of 15x15 5:6:5 colours,
@@ -38,27 +32,31 @@ BitmapLEDProgram::BitmapLEDProgram (LEDGrid& lg)  : Program (lg) {}
 
 void BitmapLEDProgram::setLED (uint32 x, uint32 y, LEDColour colour)
 {
-    auto w = (uint32) ledGrid.getNumColumns();
-    auto h = (uint32) ledGrid.getNumRows();
-
-    if (x < w && y < h)
+    if (auto ledGrid = block.getLEDGrid())
     {
-        auto bit = (x + y * w) * 16;
+        auto w = (uint32) ledGrid->getNumColumns();
+        auto h = (uint32) ledGrid->getNumRows();
 
-        ledGrid.setDataBits (bit,      5, colour.getRed()   >> 3);
-        ledGrid.setDataBits (bit + 5,  6, colour.getGreen() >> 2);
-        ledGrid.setDataBits (bit + 11, 5, colour.getBlue()  >> 3);
+        if (x < w && y < h)
+        {
+            auto bit = (x + y * w) * 16;
+
+            block.setDataBits (bit,      5, colour.getRed()   >> 3);
+            block.setDataBits (bit + 5,  6, colour.getGreen() >> 2);
+            block.setDataBits (bit + 11, 5, colour.getBlue()  >> 3);
+        }
     }
-}
-
-uint32 BitmapLEDProgram::getHeapSize()
-{
-    return 15 * 15 * 16;
+    else
+    {
+        jassertfalse;
+    }
 }
 
 juce::String BitmapLEDProgram::getLittleFootProgram()
 {
-    auto program = R"littlefoot(
+    String program (R"littlefoot(
+
+    #heapsize: 15 * 15 * 2
 
     void repaint()
     {
@@ -68,17 +66,22 @@ juce::String BitmapLEDProgram::getLittleFootProgram()
             {
                 int bit = (x + y * NUM_COLUMNS) * 16;
 
-                setLED (x, y, makeARGB (255,
-                                        getHeapBits (bit,      5) << 3,
-                                        getHeapBits (bit + 5,  6) << 2,
-                                        getHeapBits (bit + 11, 5) << 3));
+                fillPixel (makeARGB (255,
+                                     getHeapBits (bit,      5) << 3,
+                                     getHeapBits (bit + 5,  6) << 2,
+                                     getHeapBits (bit + 11, 5) << 3), x, y);
             }
         }
     }
 
-    )littlefoot";
+    )littlefoot");
 
-    return juce::String (program)
-             .replace ("NUM_COLUMNS", juce::String (ledGrid.getNumColumns()))
-             .replace ("NUM_ROWS",    juce::String (ledGrid.getNumRows()));
+    if (auto ledGrid = block.getLEDGrid())
+        return program.replace ("NUM_COLUMNS", juce::String (ledGrid->getNumColumns()))
+                      .replace ("NUM_ROWS",    juce::String (ledGrid->getNumRows()));
+
+    jassertfalse;
+    return {};
 }
+
+} // namespace juce

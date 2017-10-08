@@ -2,25 +2,30 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
+namespace juce
+{
 
 static const char* const aiffFormatName = "AIFF file";
 
@@ -614,7 +619,8 @@ public:
             case 16:    ReadHelper<AudioData::Int32, AudioData::Int16, Endianness>::read (destSamples, startOffsetInDestBuffer, numDestChannels, sourceData, numChannels, numSamples); break;
             case 24:    ReadHelper<AudioData::Int32, AudioData::Int24, Endianness>::read (destSamples, startOffsetInDestBuffer, numDestChannels, sourceData, numChannels, numSamples); break;
             case 32:    if (usesFloatingPointData) ReadHelper<AudioData::Float32, AudioData::Float32, Endianness>::read (destSamples, startOffsetInDestBuffer, numDestChannels, sourceData, numChannels, numSamples);
-                        else                       ReadHelper<AudioData::Int32,   AudioData::Int32,   Endianness>::read (destSamples, startOffsetInDestBuffer, numDestChannels, sourceData, numChannels, numSamples); break;
+                        else                       ReadHelper<AudioData::Int32,   AudioData::Int32,   Endianness>::read (destSamples, startOffsetInDestBuffer, numDestChannels, sourceData, numChannels, numSamples);
+                        break;
             default:    jassertfalse; break;
         }
     }
@@ -634,10 +640,7 @@ public:
     AiffAudioFormatWriter (OutputStream* out, double rate,
                            unsigned int numChans, unsigned int bits,
                            const StringPairArray& metadataValues)
-        : AudioFormatWriter (out, aiffFormatName, rate, numChans, bits),
-          lengthInSamples (0),
-          bytesWritten (0),
-          writeFailed (false)
+        : AudioFormatWriter (out, aiffFormatName, rate, numChans, bits)
     {
         using namespace AiffFileHelpers;
 
@@ -704,9 +707,9 @@ public:
 
 private:
     MemoryBlock tempBlock, markChunk, comtChunk, instChunk;
-    uint64 lengthInSamples, bytesWritten;
-    int64 headerPosition;
-    bool writeFailed;
+    uint64 lengthInSamples = 0, bytesWritten = 0;
+    int64 headerPosition = 0;
+    bool writeFailed = false;
 
     void writeHeader()
     {
@@ -867,7 +870,8 @@ public:
                 case 16:    ReadHelper<AudioData::Float32, AudioData::Int16, AudioData::LittleEndian>::read (dest, 0, 1, source, 1, num); break;
                 case 24:    ReadHelper<AudioData::Float32, AudioData::Int24, AudioData::LittleEndian>::read (dest, 0, 1, source, 1, num); break;
                 case 32:    if (usesFloatingPointData) ReadHelper<AudioData::Float32, AudioData::Float32, AudioData::LittleEndian>::read (dest, 0, 1, source, 1, num);
-                            else                       ReadHelper<AudioData::Float32, AudioData::Int32,   AudioData::LittleEndian>::read (dest, 0, 1, source, 1, num); break;
+                            else                       ReadHelper<AudioData::Float32, AudioData::Int32,   AudioData::LittleEndian>::read (dest, 0, 1, source, 1, num);
+                            break;
                 default:    jassertfalse; break;
             }
         }
@@ -879,7 +883,8 @@ public:
                 case 16:    ReadHelper<AudioData::Float32, AudioData::Int16, AudioData::BigEndian>::read (dest, 0, 1, source, 1, num); break;
                 case 24:    ReadHelper<AudioData::Float32, AudioData::Int24, AudioData::BigEndian>::read (dest, 0, 1, source, 1, num); break;
                 case 32:    if (usesFloatingPointData) ReadHelper<AudioData::Float32, AudioData::Float32, AudioData::BigEndian>::read (dest, 0, 1, source, 1, num);
-                            else                       ReadHelper<AudioData::Float32, AudioData::Int32,   AudioData::BigEndian>::read (dest, 0, 1, source, 1, num); break;
+                            else                       ReadHelper<AudioData::Float32, AudioData::Int32,   AudioData::BigEndian>::read (dest, 0, 1, source, 1, num);
+                            break;
                 default:    jassertfalse; break;
             }
         }
@@ -905,7 +910,8 @@ public:
             case 16:    scanMinAndMax<AudioData::Int16> (startSampleInFile, numSamples, results, numChannelsToRead); break;
             case 24:    scanMinAndMax<AudioData::Int24> (startSampleInFile, numSamples, results, numChannelsToRead); break;
             case 32:    if (usesFloatingPointData) scanMinAndMax<AudioData::Float32> (startSampleInFile, numSamples, results, numChannelsToRead);
-                        else                       scanMinAndMax<AudioData::Int32>   (startSampleInFile, numSamples, results, numChannelsToRead); break;
+                        else                       scanMinAndMax<AudioData::Int32>   (startSampleInFile, numSamples, results, numChannelsToRead);
+                        break;
             default:    jassertfalse; break;
         }
     }
@@ -960,7 +966,7 @@ bool AiffAudioFormat::canHandleFile (const File& f)
     if (AudioFormat::canHandleFile (f))
         return true;
 
-    const OSType type = f.getMacOSType();
+    auto type = f.getMacOSType();
 
     // (NB: written as hex to avoid four-char-constant warnings)
     return type == 0x41494646 /* AIFF */ || type == 0x41494643 /* AIFC */
@@ -968,7 +974,7 @@ bool AiffAudioFormat::canHandleFile (const File& f)
 }
 #endif
 
-AudioFormatReader* AiffAudioFormat::createReaderFor (InputStream* sourceStream, const bool deleteStreamIfOpeningFails)
+AudioFormatReader* AiffAudioFormat::createReaderFor (InputStream* sourceStream, bool deleteStreamIfOpeningFails)
 {
     ScopedPointer<AiffAudioFormatReader> w (new AiffAudioFormatReader (sourceStream));
 
@@ -1007,7 +1013,10 @@ AudioFormatWriter* AiffAudioFormat::createWriterFor (OutputStream* out,
                                                      int /*qualityOptionIndex*/)
 {
     if (out != nullptr && getPossibleBitDepths().contains (bitsPerSample))
-        return new AiffAudioFormatWriter (out, sampleRate, numberOfChannels, (unsigned int) bitsPerSample, metadataValues);
+        return new AiffAudioFormatWriter (out, sampleRate, numberOfChannels,
+                                          (unsigned int) bitsPerSample, metadataValues);
 
     return nullptr;
 }
+
+} // namespace juce

@@ -2,35 +2,40 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace PropertyFileConstants
 {
-    static const int magicNumber            = (int) ByteOrder::littleEndianInt ("PROP");
-    static const int magicNumberCompressed  = (int) ByteOrder::littleEndianInt ("CPRP");
+    JUCE_CONSTEXPR static const int magicNumber            = (int) ByteOrder::littleEndianInt ('P', 'R', 'O', 'P');
+    JUCE_CONSTEXPR static const int magicNumberCompressed  = (int) ByteOrder::littleEndianInt ('C', 'P', 'R', 'P');
 
-    static const char* const fileTag        = "PROPERTIES";
-    static const char* const valueTag       = "VALUE";
-    static const char* const nameAttribute  = "name";
-    static const char* const valueAttribute = "val";
+    JUCE_CONSTEXPR static const char* const fileTag        = "PROPERTIES";
+    JUCE_CONSTEXPR static const char* const valueTag       = "VALUE";
+    JUCE_CONSTEXPR static const char* const nameAttribute  = "name";
+    JUCE_CONSTEXPR static const char* const valueAttribute = "val";
 }
 
 //==============================================================================
@@ -92,7 +97,7 @@ File PropertiesFile::Options::getDefaultFile() const
                                                          : File::userApplicationDataDirectory));
 
     if (dir == File())
-        return File();
+        return {};
 
     dir = dir.getChildFile (folderName.isNotEmpty() ? folderName
                                                     : applicationName);
@@ -354,3 +359,5 @@ void PropertiesFile::propertyChanged()
     else if (options.millisecondsBeforeSaving == 0)
         saveIfNeeded();
 }
+
+} // namespace juce

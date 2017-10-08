@@ -1,18 +1,35 @@
 /*
   ==============================================================================
 
-    JUCE demo code - use at your own risk!
+   This file is part of the JUCE library.
+   Copyright (c) 2017 - ROLI Ltd.
+
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
+
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
+
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
+
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
-
 
 class SpectrogramComponent   : public AudioAppComponent,
                                private Timer
 {
 public:
     SpectrogramComponent()
-        : forwardFFT (fftOrder, false),
+        : forwardFFT (fftOrder),
           spectrogramImage (Image::RGB, 512, 512, true),
           fifoIndex (0),
           nextFFTBlockReady (false)
@@ -107,7 +124,7 @@ public:
         {
             const float skewedProportionY = 1.0f - std::exp (std::log (y / (float) imageHeight) * 0.2f);
             const int fftDataIndex = jlimit (0, fftSize / 2, (int) (skewedProportionY * fftSize / 2));
-            const float level = jmap (fftData[fftDataIndex], 0.0f, maxLevel.getEnd(), 0.0f, 1.0f);
+            const float level = jmap (fftData[fftDataIndex], 0.0f, jmax (maxLevel.getEnd(), 1e-5f), 0.0f, 1.0f);
 
             spectrogramImage.setPixelAt (rightHandEdge, y, Colour::fromHSV (level, 1.0f, level, 1.0f));
         }
@@ -120,7 +137,7 @@ public:
     };
 
 private:
-    FFT forwardFFT;
+    dsp::FFT forwardFFT;
     Image spectrogramImage;
 
     float fifo [fftSize];

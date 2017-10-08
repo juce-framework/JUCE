@@ -2,35 +2,29 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-class JSONParser
+namespace juce
 {
-public:
+
+struct JSONParser
+{
     static Result parseObjectOrArray (String::CharPointerType t, var& result)
     {
         t = t.findEndOfWhitespace();
@@ -51,7 +45,7 @@ public:
 
         for (;;)
         {
-            juce_wchar c = t.getAndAdvance();
+            auto c = t.getAndAdvance();
 
             if (c == quoteChar)
                 break;
@@ -80,7 +74,8 @@ public:
 
                         for (int i = 4; --i >= 0;)
                         {
-                            const int digitValue = CharacterFunctions::getHexDigitValue (t.getAndAdvance());
+                            auto digitValue = CharacterFunctions::getHexDigitValue (t.getAndAdvance());
+
                             if (digitValue < 0)
                                 return createFail ("Syntax error in unicode escape sequence");
 
@@ -105,7 +100,7 @@ public:
     static Result parseAny (String::CharPointerType& t, var& result)
     {
         t = t.findEndOfWhitespace();
-        String::CharPointerType t2 (t);
+        auto t2 = t;
 
         switch (t2.getAndAdvance())
         {
@@ -173,16 +168,16 @@ private:
 
     static Result parseNumber (String::CharPointerType& t, var& result, const bool isNegative)
     {
-        String::CharPointerType oldT (t);
+        auto oldT = t;
 
         int64 intValue = t.getAndAdvance() - '0';
         jassert (intValue >= 0 && intValue < 10);
 
         for (;;)
         {
-            String::CharPointerType previousChar (t);
-            const juce_wchar c = t.getAndAdvance();
-            const int digit = ((int) c) - '0';
+            auto previousChar = t;
+            auto c = t.getAndAdvance();
+            auto digit = ((int) c) - '0';
 
             if (isPositiveAndBelow (digit, 10))
             {
@@ -193,7 +188,7 @@ private:
             if (c == 'e' || c == 'E' || c == '.')
             {
                 t = oldT;
-                const double asDouble = CharacterFunctions::readDoubleValue (t);
+                auto asDouble = CharacterFunctions::readDoubleValue (t);
                 result = isNegative ? -asDouble : asDouble;
                 return Result::ok();
             }
@@ -208,7 +203,7 @@ private:
             return createFail ("Syntax error in number", &oldT);
         }
 
-        const int64 correctedValue = isNegative ? -intValue : intValue;
+        auto correctedValue = isNegative ? -intValue : intValue;
 
         if ((intValue >> 31) != 0)
             result = correctedValue;
@@ -220,16 +215,16 @@ private:
 
     static Result parseObject (String::CharPointerType& t, var& result)
     {
-        DynamicObject* const resultObject = new DynamicObject();
+        auto resultObject = new DynamicObject();
         result = resultObject;
-        NamedValueSet& resultProperties = resultObject->getProperties();
+        auto& resultProperties = resultObject->getProperties();
 
         for (;;)
         {
             t = t.findEndOfWhitespace();
 
-            String::CharPointerType oldT (t);
-            const juce_wchar c = t.getAndAdvance();
+            auto oldT = t;
+            auto c = t.getAndAdvance();
 
             if (c == '}')
                 break;
@@ -240,7 +235,7 @@ private:
             if (c == '"')
             {
                 var propertyNameVar;
-                Result r (parseString ('"', t, propertyNameVar));
+                auto r = parseString ('"', t, propertyNameVar);
 
                 if (r.failed())
                     return r;
@@ -252,14 +247,15 @@ private:
                     t = t.findEndOfWhitespace();
                     oldT = t;
 
-                    const juce_wchar c2 = t.getAndAdvance();
+                    auto c2 = t.getAndAdvance();
+
                     if (c2 != ':')
                         return createFail ("Expected ':', but found", &oldT);
 
                     resultProperties.set (propertyName, var());
                     var* propertyValue = resultProperties.getVarPointer (propertyName);
 
-                    Result r2 (parseAny (t, *propertyValue));
+                    auto r2 = parseAny (t, *propertyValue);
 
                     if (r2.failed())
                         return r2;
@@ -267,7 +263,7 @@ private:
                     t = t.findEndOfWhitespace();
                     oldT = t;
 
-                    const juce_wchar nextChar = t.getAndAdvance();
+                    auto nextChar = t.getAndAdvance();
 
                     if (nextChar == ',')
                         continue;
@@ -286,14 +282,14 @@ private:
     static Result parseArray (String::CharPointerType& t, var& result)
     {
         result = var (Array<var>());
-        Array<var>* const destArray = result.getArray();
+        auto* destArray = result.getArray();
 
         for (;;)
         {
             t = t.findEndOfWhitespace();
 
-            String::CharPointerType oldT (t);
-            const juce_wchar c = t.getAndAdvance();
+            auto oldT = t;
+            auto c = t.getAndAdvance();
 
             if (c == ']')
                 break;
@@ -303,7 +299,7 @@ private:
 
             t = oldT;
             destArray->add (var());
-            Result r (parseAny (t, destArray->getReference (destArray->size() - 1)));
+            auto r = parseAny (t, destArray->getReference (destArray->size() - 1));
 
             if (r.failed())
                 return r;
@@ -311,7 +307,7 @@ private:
             t = t.findEndOfWhitespace();
             oldT = t;
 
-            const juce_wchar nextChar = t.getAndAdvance();
+            auto nextChar = t.getAndAdvance();
 
             if (nextChar == ',')
                 continue;
@@ -327,11 +323,10 @@ private:
 };
 
 //==============================================================================
-class JSONFormatter
+struct JSONFormatter
 {
-public:
     static void write (OutputStream& out, const var& v,
-                       const int indentLevel, const bool allOnOneLine)
+                       int indentLevel, bool allOnOneLine, int maximumDecimalPlaces)
     {
         if (v.isString())
         {
@@ -351,14 +346,18 @@ public:
         {
             out << (static_cast<bool> (v) ? "true" : "false");
         }
+        else if (v.isDouble())
+        {
+            out << String (static_cast<double> (v), maximumDecimalPlaces);
+        }
         else if (v.isArray())
         {
-            writeArray (out, *v.getArray(), indentLevel, allOnOneLine);
+            writeArray (out, *v.getArray(), indentLevel, allOnOneLine, maximumDecimalPlaces);
         }
         else if (v.isObject())
         {
-            if (DynamicObject* object = v.getDynamicObject())
-                object->writeAsJSON (out, indentLevel, allOnOneLine);
+            if (auto* object = v.getDynamicObject())
+                object->writeAsJSON (out, indentLevel, allOnOneLine, maximumDecimalPlaces);
             else
                 jassertfalse; // Only DynamicObjects can be converted to JSON!
         }
@@ -380,7 +379,7 @@ public:
     {
         for (;;)
         {
-            const juce_wchar c (t.getAndAdvance());
+            auto c = t.getAndAdvance();
 
             switch (c)
             {
@@ -428,11 +427,11 @@ public:
     }
 
     static void writeArray (OutputStream& out, const Array<var>& array,
-                            const int indentLevel, const bool allOnOneLine)
+                            int indentLevel, bool allOnOneLine, int maximumDecimalPlaces)
     {
         out << '[';
 
-        if (array.size() > 0)
+        if (! array.isEmpty())
         {
             if (! allOnOneLine)
                 out << newLine;
@@ -442,7 +441,7 @@ public:
                 if (! allOnOneLine)
                     writeSpaces (out, indentLevel + indentSize);
 
-                write (out, array.getReference(i), indentLevel + indentSize, allOnOneLine);
+                write (out, array.getReference(i), indentLevel + indentSize, allOnOneLine, maximumDecimalPlaces);
 
                 if (i < array.size() - 1)
                 {
@@ -501,16 +500,16 @@ Result JSON::parse (const String& text, var& result)
     return JSONParser::parseObjectOrArray (text.getCharPointer(), result);
 }
 
-String JSON::toString (const var& data, const bool allOnOneLine)
+String JSON::toString (const var& data, const bool allOnOneLine, int maximumDecimalPlaces)
 {
     MemoryOutputStream mo (1024);
-    JSONFormatter::write (mo, data, 0, allOnOneLine);
+    JSONFormatter::write (mo, data, 0, allOnOneLine, maximumDecimalPlaces);
     return mo.toUTF8();
 }
 
-void JSON::writeToStream (OutputStream& output, const var& data, const bool allOnOneLine)
+void JSON::writeToStream (OutputStream& output, const var& data, const bool allOnOneLine, int maximumDecimalPlaces)
 {
-    JSONFormatter::write (output, data, 0, allOnOneLine);
+    JSONFormatter::write (output, data, 0, allOnOneLine, maximumDecimalPlaces);
 }
 
 String JSON::escapeString (StringRef s)
@@ -522,7 +521,7 @@ String JSON::escapeString (StringRef s)
 
 Result JSON::parseQuotedString (String::CharPointerType& t, var& result)
 {
-    const juce_wchar quote = t.getAndAdvance();
+    auto quote = t.getAndAdvance();
 
     if (quote == '"' || quote == '\'')
         return JSONParser::parseString (quote, t, result);
@@ -537,7 +536,7 @@ Result JSON::parseQuotedString (String::CharPointerType& t, var& result)
 class JSONTests  : public UnitTest
 {
 public:
-    JSONTests() : UnitTest ("JSON") {}
+    JSONTests() : UnitTest ("JSON", "JSON") {}
 
     static String createRandomWideCharString (Random& r)
     {
@@ -573,24 +572,18 @@ public:
         return CharPointer_ASCII (buffer);
     }
 
-    // (creates a random double that can be easily stringified, to avoid
-    // false failures when decimal places are rounded or truncated slightly)
+    // Creates a random double that can be easily stringified, to avoid
+    // false failures when decimal places are rounded or truncated slightly
     static var createRandomDouble (Random& r)
     {
-        for (;;)
-        {
-            var v (String (r.nextDouble() * 1000.0, 20).getDoubleValue());
-
-            if (v.toString() == String (static_cast<double> (v), 20))
-                return v;
-        }
+        return var ((r.nextDouble() * 1000.0) + 0.1);
     }
 
     static var createRandomVar (Random& r, int depth)
     {
         switch (r.nextInt (depth > 3 ? 6 : 8))
         {
-            case 0:     return var();
+            case 0:     return {};
             case 1:     return r.nextInt();
             case 2:     return r.nextInt64();
             case 3:     return r.nextBool();
@@ -618,7 +611,7 @@ public:
             }
 
             default:
-                return var();
+                return {};
         }
     }
 
@@ -656,3 +649,5 @@ public:
 static JSONTests JSONUnitTests;
 
 #endif
+
+} // namespace juce

@@ -2,25 +2,30 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
+namespace juce
+{
 
 const Colour Colours::transparentBlack (0);
 const Colour Colours::transparentWhite (0x00ffffff);
@@ -72,6 +77,7 @@ const Colour Colours::floralwhite (0xfffffaf0);
 const Colour Colours::forestgreen (0xff228b22);
 const Colour Colours::fuchsia (0xffff00ff);
 const Colour Colours::gainsboro (0xffdcdcdc);
+const Colour Colours::ghostwhite (0xfff8f8ff);
 const Colour Colours::gold (0xffffd700);
 const Colour Colours::goldenrod (0xffdaa520);
 const Colour Colours::grey (0xff808080);
@@ -85,6 +91,7 @@ const Colour Colours::ivory (0xfffffff0);
 const Colour Colours::khaki (0xfff0e68c);
 const Colour Colours::lavender (0xffe6e6fa);
 const Colour Colours::lavenderblush (0xfffff0f5);
+const Colour Colours::lawngreen (0xff7cfc00);
 const Colour Colours::lemonchiffon (0xfffffacd);
 const Colour Colours::lightblue (0xffadd8e6);
 const Colour Colours::lightcoral (0xfff08080);
@@ -116,6 +123,7 @@ const Colour Colours::mediumvioletred (0xffc71585);
 const Colour Colours::midnightblue (0xff191970);
 const Colour Colours::mintcream (0xfff5fffa);
 const Colour Colours::mistyrose (0xffffe4e1);
+const Colour Colours::moccasin (0xffffe4b5);
 const Colour Colours::navajowhite (0xffffdead);
 const Colour Colours::navy (0xff000080);
 const Colour Colours::oldlace (0xfffdf5e6);
@@ -135,6 +143,7 @@ const Colour Colours::pink (0xffffc0cb);
 const Colour Colours::plum (0xffdda0dd);
 const Colour Colours::powderblue (0xffb0e0e6);
 const Colour Colours::purple (0xff800080);
+const Colour Colours::rebeccapurple (0xff663399);
 const Colour Colours::red (0xffff0000);
 const Colour Colours::rosybrown (0xffbc8f8f);
 const Colour Colours::royalblue (0xff4169e1);
@@ -223,6 +232,7 @@ Colour Colours::findColourForName (const String& colourName,
         0xd086fd06, 0xff228b22, /* forestgreen */
         0xe106b6d7, 0xffff00ff, /* fuchsia */
         0x7880d61e, 0xffdcdcdc, /* gainsboro */
+        0x2018a2fa, 0xfff8f8ff, /* ghostwhite */
         0x00308060, 0xffffd700, /* gold */
         0xb3b3bc1e, 0xffdaa520, /* goldenrod */
         0xbab8a537, 0xffadff2f, /* greenyellow */
@@ -234,6 +244,7 @@ Colour Colours::findColourForName (const String& colourName,
         0x06149302, 0xfff0e68c, /* khaki */
         0xad5a05c7, 0xffe6e6fa, /* lavender */
         0x7c4d5b99, 0xfffff0f5, /* lavenderblush */
+        0x41cc4377, 0xff7cfc00, /* lawngreen */
         0x195756f0, 0xfffffacd, /* lemonchiffon */
         0x28e4ea70, 0xffadd8e6, /* lightblue */
         0xf3c7ccdb, 0xfff08080, /* lightcoral */
@@ -265,6 +276,7 @@ Colour Colours::findColourForName (const String& colourName,
         0x168eb32a, 0xff191970, /* midnightblue */
         0x4306b960, 0xfff5fffa, /* mintcream */
         0x4cbc0e6b, 0xffffe4e1, /* mistyrose */
+        0xd9447d59, 0xffffe4b5, /* moccasin */
         0xe97218a6, 0xffffdead, /* navajowhite */
         0x00337bb6, 0xff000080, /* navy */
         0xadd2d33e, 0xfffdf5e6, /* oldlace */
@@ -284,6 +296,7 @@ Colour Colours::findColourForName (const String& colourName,
         0x00348d94, 0xffdda0dd, /* plum */
         0xd036be93, 0xffb0e0e6, /* powderblue */
         0xc5c507bc, 0xff800080, /* purple */
+        0xf381f607, 0xff663399, /* rebeccapurple */
         0xa89d65b3, 0xffbc8f8f, /* rosybrown */
         0xbd9413e1, 0xff4169e1, /* royalblue */
         0xf456044f, 0xff8b4513, /* saddlebrown */
@@ -318,3 +331,5 @@ Colour Colours::findColourForName (const String& colourName,
 
     return defaultColour;
 }
+
+} // namespace juce

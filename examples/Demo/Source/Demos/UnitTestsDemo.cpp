@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -61,16 +63,21 @@ struct UnitTestClasses
                               private Timer
     {
     public:
-        TestRunnerThread (UnitTestsDemo& utd)
+        TestRunnerThread (UnitTestsDemo& utd, const String& ctg)
             : Thread ("Unit Tests"),
-              owner (utd)
+              owner (utd),
+              category (ctg)
         {
         }
 
         void run() override
         {
             CustomTestRunner runner (*this);
-            runner.runAllTests();
+
+            if (category == "All Tests")
+                runner.runAllTests();
+            else
+                runner.runTestsInCategory (category);
 
             startTimer (50); // when finished, start the timer which will
                              // wait for the thread to end, then tell our component.
@@ -92,6 +99,7 @@ struct UnitTestClasses
 
     private:
         UnitTestsDemo& owner;
+        const String category;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TestRunnerThread)
     };
@@ -108,13 +116,22 @@ struct UnitTestClasses
             setOpaque (true);
 
             addAndMakeVisible (startTestButton);
+            startTestButton.addListener (this);
+
             addAndMakeVisible (testResultsBox);
             testResultsBox.setMultiLine (true);
             testResultsBox.setFont (Font (Font::getDefaultMonospacedFontName(), 12.0f, Font::plain));
 
-            startTestButton.addListener (this);
+            addAndMakeVisible (categoriesBox);
+            categoriesBox.addItem ("All Tests", 1);
 
-            logMessage ("This panel runs all the built-in JUCE unit-tests.\n");
+            auto categories = UnitTest::getAllCategories();
+            categories.sort (true);
+
+            categoriesBox.addItemList (categories, 2);
+            categoriesBox.setSelectedId (1);
+
+            logMessage ("This panel runs the built-in JUCE unit-tests from the selected category.\n");
             logMessage ("To add your own unit-tests, see the JUCE_UNIT_TESTS macro.");
         }
 
@@ -126,31 +143,35 @@ struct UnitTestClasses
         //==============================================================================
         void paint (Graphics& g) override
         {
-            g.fillAll (Colours::grey);
+            g.fillAll (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
+                                               Colours::grey));
         }
 
         void resized() override
         {
-            Rectangle<int> r (getLocalBounds().reduced (6));
+            auto bounds = getLocalBounds().reduced (6);
 
-            startTestButton.setBounds (r.removeFromTop (25).removeFromLeft (200));
-            testResultsBox.setBounds (r.withTrimmedTop (5));
+            auto topSlice = bounds.removeFromTop (25);
+            startTestButton.setBounds (topSlice.removeFromLeft (200));
+            topSlice.removeFromLeft (10);
+            categoriesBox.setBounds (topSlice.removeFromLeft (250));
+
+            bounds.removeFromTop (5);
+            testResultsBox.setBounds (bounds);
         }
 
         void buttonClicked (Button* buttonThatWasClicked) override
         {
             if (buttonThatWasClicked == &startTestButton)
-            {
-                startTest();
-            }
+                startTest (categoriesBox.getText());
         }
 
-        void startTest()
+        void startTest (const String& category)
         {
             testResultsBox.clear();
             startTestButton.setEnabled (false);
 
-            currentTestThread = new TestRunnerThread (*this);
+            currentTestThread = new TestRunnerThread (*this, category);
             currentTestThread->startThread();
         }
 
@@ -181,7 +202,13 @@ struct UnitTestClasses
         ScopedPointer<TestRunnerThread> currentTestThread;
 
         TextButton startTestButton;
+        ComboBox categoriesBox;
         TextEditor testResultsBox;
+
+        void lookAndFeelChanged() override
+        {
+            testResultsBox.applyFontToAllText (testResultsBox.getFont());
+        }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UnitTestsDemo)
     };

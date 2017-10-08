@@ -2,28 +2,33 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-CallOutBox::CallOutBox (Component& c, const Rectangle<int>& area, Component* const parent)
-    : arrowSize (16.0f), content (c), dismissalMouseClicksAreAlwaysConsumed (false)
+namespace juce
+{
+
+CallOutBox::CallOutBox (Component& c, Rectangle<int> area, Component* const parent)
+    : content (c)
 {
     addAndMakeVisible (content);
 
@@ -79,7 +84,7 @@ public:
     JUCE_DECLARE_NON_COPYABLE (CallOutBoxCallback)
 };
 
-CallOutBox& CallOutBox::launchAsynchronously (Component* content, const Rectangle<int>& area, Component* parent)
+CallOutBox& CallOutBox::launchAsynchronously (Component* content, Rectangle<int> area, Component* parent)
 {
     jassert (content != nullptr); // must be a valid content component!
 
@@ -105,7 +110,7 @@ void CallOutBox::paint (Graphics& g)
 
 void CallOutBox::resized()
 {
-    const int borderSpace = getBorderSize();
+    auto borderSpace = getBorderSize();
     content.setTopLeftPosition (borderSpace, borderSpace);
     refreshPath();
 }
@@ -138,7 +143,8 @@ void CallOutBox::inputAttemptWhenModal()
         // as Windows still sends touch events before the CallOutBox had a chance
         // to really open.
 
-        RelativeTime elapsed = Time::getCurrentTime() - creationTime;
+        auto elapsed = Time::getCurrentTime() - creationTime;
+
         if (elapsed.inMilliseconds() > 200)
             dismiss();
     }
@@ -188,29 +194,29 @@ void CallOutBox::updatePosition (const Rectangle<int>& newAreaToPointTo, const R
     targetArea = newAreaToPointTo;
     availableArea = newAreaToFitIn;
 
-    const int borderSpace = getBorderSize();
+    auto borderSpace = getBorderSize();
 
     Rectangle<int> newBounds (content.getWidth()  + borderSpace * 2,
                               content.getHeight() + borderSpace * 2);
 
-    const int hw = newBounds.getWidth() / 2;
-    const int hh = newBounds.getHeight() / 2;
-    const float hwReduced = (float) (hw - borderSpace * 2);
-    const float hhReduced = (float) (hh - borderSpace * 2);
-    const float arrowIndent = borderSpace - arrowSize;
+    auto hw = newBounds.getWidth() / 2;
+    auto hh = newBounds.getHeight() / 2;
+    auto hwReduced = (float) (hw - borderSpace * 2);
+    auto hhReduced = (float) (hh - borderSpace * 2);
+    auto arrowIndent = borderSpace - arrowSize;
 
-    Point<float> targets[4] = { Point<float> ((float) targetArea.getCentreX(), (float) targetArea.getBottom()),
-                                Point<float> ((float) targetArea.getRight(),   (float) targetArea.getCentreY()),
-                                Point<float> ((float) targetArea.getX(),       (float) targetArea.getCentreY()),
-                                Point<float> ((float) targetArea.getCentreX(), (float) targetArea.getY()) };
+    Point<float> targets[4] = { { (float) targetArea.getCentreX(), (float) targetArea.getBottom() },
+                                { (float) targetArea.getRight(),   (float) targetArea.getCentreY() },
+                                { (float) targetArea.getX(),       (float) targetArea.getCentreY() },
+                                { (float) targetArea.getCentreX(), (float) targetArea.getY() } };
 
-    Line<float> lines[4] = { Line<float> (targets[0].translated (-hwReduced, hh - arrowIndent),    targets[0].translated (hwReduced, hh - arrowIndent)),
-                             Line<float> (targets[1].translated (hw - arrowIndent, -hhReduced),    targets[1].translated (hw - arrowIndent, hhReduced)),
-                             Line<float> (targets[2].translated (-(hw - arrowIndent), -hhReduced), targets[2].translated (-(hw - arrowIndent), hhReduced)),
-                             Line<float> (targets[3].translated (-hwReduced, -(hh - arrowIndent)), targets[3].translated (hwReduced, -(hh - arrowIndent))) };
+    Line<float> lines[4] = { { targets[0].translated (-hwReduced, hh - arrowIndent),    targets[0].translated (hwReduced, hh - arrowIndent) },
+                             { targets[1].translated (hw - arrowIndent, -hhReduced),    targets[1].translated (hw - arrowIndent, hhReduced) },
+                             { targets[2].translated (-(hw - arrowIndent), -hhReduced), targets[2].translated (-(hw - arrowIndent), hhReduced) },
+                             { targets[3].translated (-hwReduced, -(hh - arrowIndent)), targets[3].translated (hwReduced, -(hh - arrowIndent)) } };
 
-    const Rectangle<float> centrePointArea (newAreaToFitIn.reduced (hw, hh).toFloat());
-    const Point<float> targetCentre (targetArea.getCentre().toFloat());
+    auto centrePointArea = newAreaToFitIn.reduced (hw, hh).toFloat();
+    auto targetCentre = targetArea.getCentre().toFloat();
 
     float nearest = 1.0e9f;
 
@@ -219,8 +225,8 @@ void CallOutBox::updatePosition (const Rectangle<int>& newAreaToPointTo, const R
         Line<float> constrainedLine (centrePointArea.getConstrainedPoint (lines[i].getStart()),
                                      centrePointArea.getConstrainedPoint (lines[i].getEnd()));
 
-        const Point<float> centre (constrainedLine.findNearestPointTo (targetCentre));
-        float distanceFromCentre = centre.getDistanceFrom (targets[i]);
+        auto centre = constrainedLine.findNearestPointTo (targetCentre);
+        auto distanceFromCentre = centre.getDistanceFrom (targets[i]);
 
         if (! centrePointArea.intersects (lines[i]))
             distanceFromCentre += 1000.0f;
@@ -228,8 +234,8 @@ void CallOutBox::updatePosition (const Rectangle<int>& newAreaToPointTo, const R
         if (distanceFromCentre < nearest)
         {
             nearest = distanceFromCentre;
-
             targetPoint = targets[i];
+
             newBounds.setPosition ((int) (centre.x - hw),
                                    (int) (centre.y - hh));
         }
@@ -241,7 +247,7 @@ void CallOutBox::updatePosition (const Rectangle<int>& newAreaToPointTo, const R
 void CallOutBox::refreshPath()
 {
     repaint();
-    background = Image();
+    background = {};
     outline.clear();
 
     const float gap = 4.5f;
@@ -257,3 +263,5 @@ void CallOutBox::timerCallback()
     toFront (true);
     stopTimer();
 }
+
+} // namespace juce

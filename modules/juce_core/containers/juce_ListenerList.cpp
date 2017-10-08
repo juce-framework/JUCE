@@ -2,38 +2,36 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
+namespace juce
+{
 
 #if JUCE_UNIT_TESTS
 
 struct ListenerBase
 {
     ListenerBase (int& counter) : c (counter) {}
-    virtual ~ListenerBase () {}
+    virtual ~ListenerBase() {}
+
+    // Required to supress VS2013 compiler warnings
+    ListenerBase& operator= (const ListenerBase&) = delete;
 
     virtual void f () = 0;
     virtual void f (void*) = 0;
@@ -50,6 +48,9 @@ struct Listener1 : public ListenerBase
 {
     Listener1 (int& counter) : ListenerBase (counter) {}
 
+    // Required to supress VS2013 compiler warnings
+    Listener1& operator= (const Listener1&) = delete;
+
     void f () override                                         { c += 1; }
     void f (void*) override                                    { c += 2; }
     void f (void*, void*) override                             { c += 3; }
@@ -63,6 +64,9 @@ struct Listener2 : public ListenerBase
 {
     Listener2 (int& counter) : ListenerBase (counter) {}
 
+    // Required to supress VS2013 compiler warnings
+    Listener1& operator= (const Listener1&) = delete;
+
     void f () override                                         { c -= 2; }
     void f (void*) override                                    { c -= 4; }
     void f (void*, void*) override                             { c -= 6; }
@@ -75,7 +79,7 @@ struct Listener2 : public ListenerBase
 class ListenerListTests : public UnitTest
 {
 public:
-    ListenerListTests() : UnitTest ("ListenerList") {}
+    ListenerListTests() : UnitTest ("ListenerList", "Containers") {}
 
     template <typename... Args>
     void callHelper (std::vector<int>& expectedCounterValues)
@@ -109,7 +113,7 @@ public:
     }
 
     template <typename... Args>
-    void callExcludingHelper (ListenerBase& listenerToExclude,
+    void callExcludingHelper (ListenerBase* listenerToExclude,
                               std::vector<int>& expectedCounterValues)
     {
         counter = 0;
@@ -124,7 +128,7 @@ public:
     }
 
     template<typename T, typename... Args>
-    void callExcludingHelper (ListenerBase& listenerToExclude,
+    void callExcludingHelper (ListenerBase* listenerToExclude,
                               std::vector<int>& expectedCounterValues, T first, Args... args)
     {
         const int expected = expectedCounterValues[sizeof... (args) + 1];
@@ -143,6 +147,8 @@ public:
 
     void runTest() override
     {
+        counter = 0;
+
         beginTest ("Call single listener");
         listeners.add (&listener1);
         std::vector<int> expectedCounterValues;
@@ -164,7 +170,10 @@ public:
         for (int i = 1; i < 8; ++i)
             expectedCounterValues.push_back (i);
 
-        callExcludingHelper (listener2, expectedCounterValues, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+        callExcludingHelper (&listener2, expectedCounterValues, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+
+        listeners.remove (&listener1);
+        listeners.remove (&listener2);
     }
 
     int counter = 0;
@@ -176,3 +185,5 @@ public:
 static ListenerListTests listenerListTests;
 
 #endif
+
+} // namespace juce

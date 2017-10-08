@@ -2,31 +2,26 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
+namespace juce
+{
 
 StringArray::StringArray() noexcept
 {
@@ -38,7 +33,7 @@ StringArray::StringArray (const StringArray& other)
 }
 
 StringArray::StringArray (StringArray&& other) noexcept
-    : strings (static_cast<Array <String>&&> (other.strings))
+    : strings (static_cast<Array<String>&&> (other.strings))
 {
 }
 
@@ -179,8 +174,8 @@ void StringArray::addArray (const StringArray& otherArray, int startIndex, int n
 
 void StringArray::mergeArray (const StringArray& otherArray, const bool ignoreCase)
 {
-    for (int i = 0; i < otherArray.size(); ++i)
-        addIfNotAlreadyThere (otherArray[i], ignoreCase);
+    for (auto& s : otherArray)
+        addIfNotAlreadyThere (s, ignoreCase);
 }
 
 void StringArray::set (const int index, const String& newString)
@@ -198,7 +193,7 @@ int StringArray::indexOf (StringRef stringToLookFor, const bool ignoreCase, int 
     if (i < 0)
         i = 0;
 
-    const int numElements = size();
+    auto numElements = size();
 
     if (ignoreCase)
     {
@@ -222,7 +217,7 @@ void StringArray::move (const int currentIndex, const int newIndex) noexcept
 }
 
 //==============================================================================
-void StringArray::remove (const int index)
+void StringArray::remove (int index)
 {
     strings.remove (index);
 }
@@ -267,11 +262,8 @@ void StringArray::removeEmptyStrings (const bool removeWhitespaceStrings)
 
 void StringArray::trim()
 {
-    for (int i = size(); --i >= 0;)
-    {
-        String& s = strings.getReference(i);
+    for (auto& s : strings)
         s = s.trim();
-    }
 }
 
 //==============================================================================
@@ -313,20 +305,20 @@ void StringArray::sortNatural()
 //==============================================================================
 String StringArray::joinIntoString (StringRef separator, int start, int numberToJoin) const
 {
-    const int last = (numberToJoin < 0) ? size()
-                                        : jmin (size(), start + numberToJoin);
+    auto last = (numberToJoin < 0) ? size()
+                                   : jmin (size(), start + numberToJoin);
 
     if (start < 0)
         start = 0;
 
     if (start >= last)
-        return String();
+        return {};
 
     if (start == last - 1)
         return strings.getReference (start);
 
-    const size_t separatorBytes = separator.text.sizeInBytes() - sizeof (String::CharPointerType::CharType);
-    size_t bytesNeeded = separatorBytes * (size_t) (last - start - 1);
+    auto separatorBytes = separator.text.sizeInBytes() - sizeof (String::CharPointerType::CharType);
+    auto bytesNeeded = separatorBytes * (size_t) (last - start - 1);
 
     for (int i = start; i < last; ++i)
         bytesNeeded += strings.getReference(i).getCharPointer().sizeInBytes() - sizeof (String::CharPointerType::CharType);
@@ -334,11 +326,11 @@ String StringArray::joinIntoString (StringRef separator, int start, int numberTo
     String result;
     result.preallocateBytes (bytesNeeded);
 
-    String::CharPointerType dest (result.getCharPointer());
+    auto dest = result.getCharPointer();
 
     while (start < last)
     {
-        const String& s = strings.getReference (start);
+        auto& s = strings.getReference (start);
 
         if (! s.isEmpty())
             dest.writeAll (s.getCharPointer());
@@ -363,11 +355,11 @@ int StringArray::addTokens (StringRef text, StringRef breakCharacters, StringRef
 
     if (text.isNotEmpty())
     {
-        for (String::CharPointerType t (text.text);;)
+        for (auto t = text.text;;)
         {
-            String::CharPointerType tokenEnd (CharacterFunctions::findEndOfToken (t,
-                                                                                  breakCharacters.text,
-                                                                                  quoteCharacters.text));
+            auto tokenEnd = CharacterFunctions::findEndOfToken (t,
+                                                                breakCharacters.text,
+                                                                quoteCharacters.text);
             strings.add (String (t, tokenEnd));
             ++num;
 
@@ -384,14 +376,14 @@ int StringArray::addTokens (StringRef text, StringRef breakCharacters, StringRef
 int StringArray::addLines (StringRef sourceText)
 {
     int numLines = 0;
-    String::CharPointerType text (sourceText.text);
+    auto text = sourceText.text;
     bool finished = text.isEmpty();
 
     while (! finished)
     {
-        for (String::CharPointerType startOfLine (text);;)
+        for (auto startOfLine = text;;)
         {
-            const String::CharPointerType endOfLine (text);
+            auto endOfLine = text;
 
             switch (text.getAndAdvance())
             {
@@ -438,7 +430,7 @@ void StringArray::removeDuplicates (const bool ignoreCase)
 {
     for (int i = 0; i < size() - 1; ++i)
     {
-        const String s (strings.getReference(i));
+        auto s = strings.getReference(i);
 
         for (int nextIndex = i + 1;;)
         {
@@ -457,24 +449,20 @@ void StringArray::appendNumbersToDuplicates (const bool ignoreCase,
                                              CharPointer_UTF8 preNumberString,
                                              CharPointer_UTF8 postNumberString)
 {
-    CharPointer_UTF8 defaultPre (" ("), defaultPost (")");
-
     if (preNumberString.getAddress() == nullptr)
-        preNumberString = defaultPre;
+        preNumberString = CharPointer_UTF8 (" (");
 
     if (postNumberString.getAddress() == nullptr)
-        postNumberString = defaultPost;
+        postNumberString = CharPointer_UTF8 (")");
 
     for (int i = 0; i < size() - 1; ++i)
     {
-        String& s = strings.getReference(i);
-
-        int nextIndex = indexOf (s, ignoreCase, i + 1);
+        auto& s = strings.getReference(i);
+        auto nextIndex = indexOf (s, ignoreCase, i + 1);
 
         if (nextIndex >= 0)
         {
-            const String original (s);
-
+            auto original = s;
             int number = 0;
 
             if (appendNumberToFirstInstance)
@@ -500,3 +488,5 @@ void StringArray::minimiseStorageOverheads()
 {
     strings.minimiseStorageOverheads();
 }
+
+} // namespace juce

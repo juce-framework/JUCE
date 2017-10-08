@@ -1,3 +1,29 @@
+/*
+  ==============================================================================
+
+   This file is part of the JUCE library.
+   Copyright (c) 2017 - ROLI Ltd.
+
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
+
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
+
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
+
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
+
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
+
+  ==============================================================================
+*/
+
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
@@ -24,13 +50,13 @@ struct SynthGrid
     {
         gridFillArray.clear();
 
-        for (int i = 0; i < numRows; ++i)
+        for (auto i = 0; i < numRows; ++i)
         {
-            for (int j = 0; j < numColumns; ++j)
+            for (auto j = 0; j < numColumns; ++j)
             {
                 DrumPadGridProgram::GridFill fill;
 
-                int padNum = (i * 5) + j;
+                auto padNum = (i * 5) + j;
 
                 fill.colour =  notes.contains (padNum) ? baseGridColour
                                                        : tonics.contains (padNum) ? Colours::white
@@ -43,8 +69,8 @@ struct SynthGrid
 
     int getNoteNumberForPad (int x, int y) const
     {
-        int xIndex = x / 3;
-        int yIndex = y / 3;
+        auto xIndex = x / 3;
+        auto yIndex = y / 3;
 
         return 60 + ((4 - yIndex) * 5) + xIndex;
     }
@@ -100,7 +126,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::lightgrey);
+        g.setColour (getLookAndFeel().findColour (Label::textColourId));
         g.drawText ("Connect a Lightpad Block to play.",
                     getLocalBounds(), Justification::centred, false);
     }
@@ -145,7 +171,7 @@ public:
                     scaleX = static_cast<float> (grid->getNumColumns() - 1) / activeBlock->getWidth();
                     scaleY = static_cast<float> (grid->getNumRows() - 1)    / activeBlock->getHeight();
 
-                    setLEDProgram (grid);
+                    setLEDProgram (*activeBlock);
                 }
 
                 break;
@@ -159,55 +185,61 @@ private:
     {
         if (currentMode == waveformSelectionMode && touch.isTouchStart && allowTouch)
         {
-            // Change the displayed waveshape to the next one
-            ++waveshapeMode;
+            if (auto* waveshapeProgram = getWaveshapeProgram())
+            {
+                // Change the displayed waveshape to the next one
+                ++waveshapeMode;
 
-            if (waveshapeMode > 3)
-                waveshapeMode = 0;
+                if (waveshapeMode > 3)
+                    waveshapeMode = 0;
 
-            waveshapeProgram->setWaveshapeType (static_cast<uint8> (waveshapeMode));
+                waveshapeProgram->setWaveshapeType (static_cast<uint8> (waveshapeMode));
 
-            allowTouch = false;
-            startTimer (250);
+                allowTouch = false;
+                startTimer (250);
+            }
         }
         else if (currentMode == playMode)
         {
-            // Translate X and Y touch events to LED indexes
-            int xLed = roundToInt (touch.startX * scaleX);
-            int yLed = roundToInt (touch.startY * scaleY);
-
-            // Limit the number of touches per second
-            constexpr int maxNumTouchMessagesPerSecond = 100;
-            auto now = Time::getCurrentTime();
-            clearOldTouchTimes (now);
-
-            int midiChannel = waveshapeMode + 1;
-
-            // Send the touch event to the DrumPadGridProgram and Audio class
-            if (touch.isTouchStart)
+            if (auto* gridProgram = getGridProgram())
             {
-                gridProgram->startTouch (touch.startX, touch.startY);
-                audio.noteOn (midiChannel, layout.getNoteNumberForPad (xLed, yLed), touch.z);
-            }
-            else if (touch.isTouchEnd)
-            {
-                gridProgram->endTouch (touch.startX, touch.startY);
-                audio.noteOff (midiChannel, layout.getNoteNumberForPad (xLed, yLed), 1.0);
-            }
-            else
-            {
-                if (touchMessageTimesInLastSecond.size() > maxNumTouchMessagesPerSecond / 3)
-                    return;
+                // Translate X and Y touch events to LED indexes
+                auto xLed = roundToInt (touch.startX * scaleX);
+                auto yLed = roundToInt (touch.startY * scaleY);
 
-                gridProgram->sendTouch (touch.x, touch.y, touch.z,
-                                        layout.touchColour);
+                // Limit the number of touches per second
+                constexpr auto maxNumTouchMessagesPerSecond = 100;
+                auto now = Time::getCurrentTime();
+                clearOldTouchTimes (now);
 
-                // Send pitch change and pressure values to the Audio class
-                audio.pitchChange (midiChannel, (touch.x - touch.startX) / activeBlock->getWidth());
-                audio.pressureChange (midiChannel, touch.z);
+                auto midiChannel = waveshapeMode + 1;
+
+                // Send the touch event to the DrumPadGridProgram and Audio class
+                if (touch.isTouchStart)
+                {
+                    gridProgram->startTouch (touch.startX, touch.startY);
+                    audio.noteOn (midiChannel, layout.getNoteNumberForPad (xLed, yLed), touch.z);
+                }
+                else if (touch.isTouchEnd)
+                {
+                    gridProgram->endTouch (touch.startX, touch.startY);
+                    audio.noteOff (midiChannel, layout.getNoteNumberForPad (xLed, yLed), 1.0);
+                }
+                else
+                {
+                    if (touchMessageTimesInLastSecond.size() > maxNumTouchMessagesPerSecond / 3)
+                        return;
+
+                    gridProgram->sendTouch (touch.x, touch.y, touch.z,
+                                            layout.touchColour);
+
+                    // Send pitch change and pressure values to the Audio class
+                    audio.pitchChange (midiChannel, (touch.x - touch.startX) / activeBlock->getWidth());
+                    audio.pressureChange (midiChannel, touch.z);
+                }
+
+                touchMessageTimesInLastSecond.add (now);
             }
-
-            touchMessageTimesInLastSecond.add (now);
         }
     }
 
@@ -227,7 +259,7 @@ private:
             currentMode = waveformSelectionMode;
 
         // Set the LEDGrid program to the new mode
-        setLEDProgram (activeBlock->getLEDGrid());
+        setLEDProgram (*activeBlock);
     }
 
    #if JUCE_IOS
@@ -241,7 +273,7 @@ private:
     /** Clears the old touch times */
     void clearOldTouchTimes (const Time now)
     {
-        for (int i = touchMessageTimesInLastSecond.size(); --i >= 0;)
+        for (auto i = touchMessageTimesInLastSecond.size(); --i >= 0;)
             if (touchMessageTimesInLastSecond.getReference(i) < now - juce::RelativeTime::seconds (0.33))
                 touchMessageTimesInLastSecond.remove (i);
     }
@@ -259,38 +291,58 @@ private:
     }
 
     /** Sets the LEDGrid Program for the selected mode */
-    void setLEDProgram (LEDGrid* grid)
+    void setLEDProgram (Block& block)
     {
         if (currentMode == waveformSelectionMode)
         {
-            // Create a new WaveshapeProgram for the LEDGrid
-            waveshapeProgram = new WaveshapeProgram (*grid);
-
             // Set the LEDGrid program
-            grid->setProgram (waveshapeProgram);
+            block.setProgram (new WaveshapeProgram (block));
 
             // Initialise the program
-            waveshapeProgram->setWaveshapeType (static_cast<uint8> (waveshapeMode));
-            waveshapeProgram->generateWaveshapes();
+            if (auto* waveshapeProgram = getWaveshapeProgram())
+            {
+                waveshapeProgram->setWaveshapeType (static_cast<uint8> (waveshapeMode));
+                waveshapeProgram->generateWaveshapes();
+            }
         }
         else if (currentMode == playMode)
         {
-            // Create a new DrumPadGridProgram for the LEDGrid
-            gridProgram = new DrumPadGridProgram (*grid);
-
             // Set the LEDGrid program
-            grid->setProgram (gridProgram);
+            auto error = block.setProgram (new DrumPadGridProgram (block));
+
+            if (error.failed())
+            {
+                DBG (error.getErrorMessage());
+                jassertfalse;
+            }
 
             // Setup the grid layout
-            gridProgram->setGridFills (layout.numColumns,
-                                       layout.numRows,
-                                       layout.gridFillArray);
+            if (auto* gridProgram = getGridProgram())
+                gridProgram->setGridFills (layout.numColumns, layout.numRows, layout.gridFillArray);
         }
     }
 
     /** Stops touch events from triggering multiple waveshape mode changes */
     void timerCallback() override { allowTouch = true; }
 
+    //==============================================================================
+    DrumPadGridProgram* getGridProgram()
+    {
+        if (activeBlock != nullptr)
+            return dynamic_cast<DrumPadGridProgram*> (activeBlock->getProgram());
+
+        return nullptr;
+    }
+
+    WaveshapeProgram* getWaveshapeProgram()
+    {
+        if (activeBlock != nullptr)
+            return dynamic_cast<WaveshapeProgram*> (activeBlock->getProgram());
+
+        return nullptr;
+    }
+
+    //==============================================================================
     enum BlocksSynthMode
     {
         waveformSelectionMode = 0,
@@ -301,9 +353,6 @@ private:
 
     //==============================================================================
     Audio audio;
-
-    DrumPadGridProgram* gridProgram      = nullptr;
-    WaveshapeProgram*   waveshapeProgram = nullptr;
 
     SynthGrid layout { 5, 5 };
     PhysicalTopologySource topologySource;

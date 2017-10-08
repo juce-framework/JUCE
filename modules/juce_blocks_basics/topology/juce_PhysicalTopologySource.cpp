@@ -2,31 +2,26 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
+namespace juce
+{
 
 #define JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED \
     jassert (juce::MessageManager::getInstance()->currentThreadHasLockedMessageManager());
@@ -134,6 +129,21 @@ struct PhysicalTopologySource::Internal
 
             if (midiInput != nullptr)
                 midiInput->stop();
+
+            if (interprocessLock != nullptr)
+                interprocessLock->exit();
+        }
+
+        bool lockAgainstOtherProcesses (const String& midiInName, const String& midiOutName)
+        {
+            interprocessLock.reset (new juce::InterProcessLock ("blocks_sdk_"
+                                                                  + File::createLegalFileName (midiInName)
+                                                                  + "_" + File::createLegalFileName (midiOutName)));
+            if (interprocessLock->enter (500))
+                return true;
+
+            interprocessLock = nullptr;
+            return false;
         }
 
         struct Listener
@@ -189,6 +199,7 @@ struct PhysicalTopologySource::Internal
 
     private:
         juce::ListenerList<Listener> listeners;
+        std::unique_ptr<juce::InterProcessLock> interprocessLock;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MIDIDeviceConnection)
     };
@@ -215,13 +226,16 @@ struct PhysicalTopologySource::Internal
             {
                 std::unique_ptr<MIDIDeviceConnection> dev (new MIDIDeviceConnection());
 
-                dev->midiInput.reset (juce::MidiInput::openDevice (pair.inputIndex, dev.get()));
-                dev->midiOutput.reset (juce::MidiOutput::openDevice (pair.outputIndex));
-
-                if (dev->midiInput != nullptr)
+                if (dev->lockAgainstOtherProcesses (pair.inputName, pair.outputName))
                 {
-                    dev->midiInput->start();
-                    return dev.release();
+                    dev->midiInput.reset (juce::MidiInput::openDevice (pair.inputIndex, dev.get()));
+                    dev->midiOutput.reset (juce::MidiOutput::openDevice (pair.outputIndex));
+
+                    if (dev->midiInput != nullptr)
+                    {
+                        dev->midiInput->start();
+                        return dev.release();
+                    }
                 }
             }
 
@@ -298,6 +312,8 @@ struct PhysicalTopologySource::Internal
         Block::UID uid;
         BlocksProtocol::TopologyIndex index;
         BlocksProtocol::BlockSerialNumber serial;
+        BlocksProtocol::VersionNumber version;
+        BlocksProtocol::BlockName name;
         bool isMaster;
     };
 
@@ -313,9 +329,14 @@ struct PhysicalTopologySource::Internal
 
         for (auto& device : devices)
         {
+            BlocksProtocol::VersionNumber version;
+            BlocksProtocol::BlockName name;
+
             result.add ({ getBlockUIDFromSerialNumber (device.serialNumber),
                           device.index,
                           device.serialNumber,
+                          version,
+                          name,
                           isFirst });
 
             isFirst = false;
@@ -340,6 +361,43 @@ struct PhysicalTopologySource::Internal
                 return true;
 
         return false;
+    }
+
+    static bool versionNumberAddedToBlock (const juce::Array<DeviceInfo>& devices, Block::UID uid, juce::String version) noexcept
+    {
+        for (auto&& d : devices)
+        {
+            String deviceVersion (reinterpret_cast<const char*> (d.version.version),
+                                  jmin (static_cast<size_t> (d.version.length), sizeof (d.version.version)));
+
+            if (d.uid == uid && deviceVersion != version)
+                return true;
+        }
+
+        return false;
+    }
+
+    static bool nameAddedToBlock (const juce::Array<DeviceInfo>& devices, Block::UID uid) noexcept
+    {
+        for (auto&& d : devices)
+            if (d.uid == uid && d.name.length)
+                return true;
+
+        return false;
+    }
+
+    static void setVersionNumberForBlock (const juce::Array<DeviceInfo>& devices, Block& block) noexcept
+    {
+        for (auto&& d : devices)
+            if (d.uid == block.uid)
+                block.versionNumber = juce::String ((const char*) d.version.version, d.version.length);
+    }
+
+    static void setNameForBlock (const juce::Array<DeviceInfo>& devices, Block& block) noexcept
+    {
+        for (auto&& d : devices)
+            if (d.uid == block.uid)
+                block.name = juce::String ((const char*) d.name.name, d.name.length);
     }
 
     //==============================================================================
@@ -457,6 +515,12 @@ struct PhysicalTopologySource::Internal
             incomingTopologyConnections.ensureStorageAllocated (numConnections);
         }
 
+        void extendTopology (int numDevices, int numConnections)
+        {
+            incomingTopologyDevices.ensureStorageAllocated (incomingTopologyDevices.size() + numDevices);
+            incomingTopologyConnections.ensureStorageAllocated (incomingTopologyConnections.size() + numConnections);
+        }
+
         void handleTopologyDevice (BlocksProtocol::DeviceStatus status)
         {
             incomingTopologyDevices.add (status);
@@ -479,11 +543,47 @@ struct PhysicalTopologySource::Internal
             blockPings.clear();
         }
 
+        void handleVersion (BlocksProtocol::DeviceVersion version)
+        {
+            for (auto i = 0; i < currentDeviceInfo.size(); ++i)
+            {
+                if (currentDeviceInfo[i].index == version.index && version.version.length > 1)
+                {
+                    if (memcmp (currentDeviceInfo.getReference (i).version.version, version.version.version, sizeof (version.version)))
+                    {
+                        currentDeviceInfo.getReference(i).version = version.version;
+                        detector.handleTopologyChange();
+                    }
+                }
+            }
+        }
+
+        void handleName (BlocksProtocol::DeviceName name)
+        {
+            for (auto i = 0; i < currentDeviceInfo.size(); ++i)
+            {
+                if (currentDeviceInfo[i].index == name.index && name.name.length > 1)
+                {
+                    if (memcmp (currentDeviceInfo.getReference (i).name.name, name.name.name, sizeof (name.name)))
+                    {
+                        currentDeviceInfo.getReference (i).name = name.name;
+                        detector.handleTopologyChange();
+                    }
+                }
+            }
+        }
+
         void handleControlButtonUpDown (BlocksProtocol::TopologyIndex deviceIndex, uint32 timestamp,
                                         BlocksProtocol::ControlButtonID buttonID, bool isDown)
         {
             if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
                 detector.handleButtonChange (deviceID, deviceTimestampToHost (timestamp), buttonID.get(), isDown);
+        }
+
+        void handleCustomMessage (BlocksProtocol::TopologyIndex deviceIndex, uint32 timestamp, const int32* data)
+        {
+            if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
+                detector.handleCustomMessage (deviceID, deviceTimestampToHost (timestamp), data);
         }
 
         void handleTouchChange (BlocksProtocol::TopologyIndex deviceIndex,
@@ -530,6 +630,36 @@ struct PhysicalTopologySource::Internal
         {
             if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
                 detector.handleSharedDataACK (deviceID, counter);
+        }
+
+        void handleFirmwareUpdateACK (BlocksProtocol::TopologyIndex deviceIndex, BlocksProtocol::FirmwareUpdateACKCode resultCode, BlocksProtocol::FirmwareUpdateACKDetail resultDetail)
+        {
+            if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
+                detector.handleFirmwareUpdateACK (deviceID, (uint8) resultCode.get(), (uint32) resultDetail.get());
+        }
+
+        void handleConfigUpdateMessage (BlocksProtocol::TopologyIndex deviceIndex, int32 item, int32 value, int32 min, int32 max)
+        {
+            if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
+                detector.handleConfigUpdateMessage (deviceID, item, value, min, max);
+        }
+
+        void handleConfigSetMessage (BlocksProtocol::TopologyIndex deviceIndex, int32 item, int32 value)
+        {
+            if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
+                detector.handleConfigSetMessage (deviceID, item, value);
+        }
+
+        void handleConfigFactorySyncEndMessage (BlocksProtocol::TopologyIndex deviceIndex)
+        {
+            if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
+                detector.handleConfigFactorySyncEndMessage (deviceID);
+        }
+
+        void handleLogMessage (BlocksProtocol::TopologyIndex deviceIndex, const String& message)
+        {
+            if (auto deviceID = getDeviceIDFromMessageIndex (deviceIndex))
+                detector.handleLogMessage (deviceID, message);
         }
 
         //==============================================================================
@@ -799,12 +929,20 @@ struct PhysicalTopologySource::Internal
 
                         currentTopology.blocks.remove (i);
                     }
+                    else
+                    {
+                        if (versionNumberAddedToBlock (newDeviceInfo, block->uid, block->versionNumber))
+                            setVersionNumberForBlock (newDeviceInfo, *block);
+
+                        if (nameAddedToBlock (newDeviceInfo, block->uid))
+                            setNameForBlock (newDeviceInfo, *block);
+                    }
                 }
 
                 for (auto& info : newDeviceInfo)
                     if (info.serial.isValid())
                         if (! containsBlockWithUID (currentTopology.blocks, getBlockUIDFromSerialNumber (info.serial)))
-                            currentTopology.blocks.add (new BlockImplementation (info.serial, *this, info.isMaster));
+                            currentTopology.blocks.add (new BlockImplementation (info.serial, *this, info.version, info.name, info.isMaster));
 
                 currentTopology.connections.swapWith (newDeviceConnections);
             }
@@ -825,6 +963,66 @@ struct PhysicalTopologySource::Internal
                 if (b->uid == deviceID)
                     if (auto bi = BlockImplementation::getFrom (*b))
                         bi->handleSharedDataACK (packetCounter);
+        }
+
+        void handleFirmwareUpdateACK (Block::UID deviceID, uint8 resultCode, uint32 resultDetail)
+        {
+            for (auto&& b : currentTopology.blocks)
+                if (b->uid == deviceID)
+                    if (auto bi = BlockImplementation::getFrom (*b))
+                        bi->handleFirmwareUpdateACK (resultCode, resultDetail);
+        }
+
+        void handleConfigUpdateMessage (Block::UID deviceID, int32 item, int32 value, int32 min, int32 max)
+        {
+            for (auto&& b : currentTopology.blocks)
+                if (b->uid == deviceID)
+                    if (auto bi = BlockImplementation::getFrom (*b))
+                        bi->handleConfigUpdateMessage (item, value, min, max);
+        }
+
+        void notifyBlockOfConfigChange (BlockImplementation& bi, uint32 item)
+        {
+            if (auto configChangedCallback = bi.configChangedCallback)
+            {
+                if (item >= bi.getMaxConfigIndex())
+                    configChangedCallback (bi, {}, item);
+                else
+                    configChangedCallback (bi, bi.getLocalConfigMetaData (item), item);
+            }
+        }
+
+        void handleConfigSetMessage (Block::UID deviceID, int32 item, int32 value)
+        {
+            for (auto&& b : currentTopology.blocks)
+            {
+                if (b->uid == deviceID)
+                {
+                    if (auto bi = BlockImplementation::getFrom (*b))
+                    {
+                        bi->handleConfigSetMessage (item, value);
+                        notifyBlockOfConfigChange (*bi, uint32 (item));
+                    }
+                }
+            }
+        }
+
+        void handleConfigFactorySyncEndMessage (Block::UID deviceID)
+        {
+            for (auto&& b : currentTopology.blocks)
+                if (b->uid == deviceID)
+                    if (auto bi = BlockImplementation::getFrom (*b))
+                        notifyBlockOfConfigChange (*bi, bi->getMaxConfigIndex());
+        }
+
+        void handleLogMessage (Block::UID deviceID, const String& message) const
+        {
+            JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
+
+            for (auto&& b : currentTopology.blocks)
+                if (b->uid == deviceID)
+                    if (auto bi = BlockImplementation::getFrom (*b))
+                        bi->handleLogMessage (message);
         }
 
         void handleButtonChange (Block::UID deviceID, Block::Timestamp timestamp, uint32 buttonIndex, bool isDown) const
@@ -872,12 +1070,20 @@ struct PhysicalTopologySource::Internal
                 surface->cancelAllActiveTouches();
         }
 
+        void handleCustomMessage (Block::UID deviceID, Block::Timestamp timestamp, const int32* data)
+        {
+            for (auto&& b : currentTopology.blocks)
+                if (b->uid == deviceID)
+                    if (auto bi = BlockImplementation::getFrom (*b))
+                        bi->handleCustomMessage (timestamp, data);
+        }
+
         //==============================================================================
         int getIndexFromDeviceID (Block::UID deviceID) const noexcept
         {
-            for (auto c : connectedDeviceGroups)
+            for (auto* c : connectedDeviceGroups)
             {
-                const int index = c->getIndexFromDeviceID (deviceID);
+                auto index = c->getIndexFromDeviceID (deviceID);
 
                 if (index >= 0)
                     return index;
@@ -889,7 +1095,7 @@ struct PhysicalTopologySource::Internal
         template <typename PacketBuilder>
         bool sendMessageToDevice (Block::UID deviceID, const PacketBuilder& builder) const
         {
-            for (auto c : connectedDeviceGroups)
+            for (auto* c : connectedDeviceGroups)
                 if (c->getIndexFromDeviceID (deviceID) >= 0)
                     return c->sendMessageToDevice (builder);
 
@@ -898,7 +1104,7 @@ struct PhysicalTopologySource::Internal
 
         static Detector* getFrom (Block& b) noexcept
         {
-            if (auto bi = BlockImplementation::getFrom (b))
+            if (auto* bi = BlockImplementation::getFrom (b))
                 return &(bi->detector);
 
             jassertfalse;
@@ -992,11 +1198,17 @@ struct PhysicalTopologySource::Internal
 
     //==============================================================================
     struct BlockImplementation  : public Block,
-                                  private MIDIDeviceConnection::Listener
+                                  private MIDIDeviceConnection::Listener,
+                                  private Timer
     {
-        BlockImplementation (const BlocksProtocol::BlockSerialNumber& serial, Detector& detectorToUse, bool master)
-            : Block (juce::String ((const char*) serial.serial, sizeof (serial.serial))), modelData (serial),
-              remoteHeap (modelData.programAndHeapSize), detector (detectorToUse), isMaster (master)
+        BlockImplementation (const BlocksProtocol::BlockSerialNumber& serial, Detector& detectorToUse, BlocksProtocol::VersionNumber version, BlocksProtocol::BlockName name, bool master)
+            : Block (juce::String ((const char*) serial.serial, sizeof (serial.serial)),
+                     juce::String ((const char*) version.version, version.length),
+                     juce::String ((const char*) name.name, name.length)),
+              modelData (serial),
+              remoteHeap (modelData.programAndHeapSize),
+              detector (detectorToUse),
+              isMaster (master)
         {
             sendCommandMessage (BlocksProtocol::beginAPIMode);
 
@@ -1004,27 +1216,33 @@ struct PhysicalTopologySource::Internal
                 touchSurface.reset (new TouchSurfaceImplementation (*this));
 
             int i = 0;
-            for (auto b : modelData.buttons)
+            for (auto&& b : modelData.buttons)
                 controlButtons.add (new ControlButtonImplementation (*this, i++, b));
 
             if (modelData.lightGridWidth > 0 && modelData.lightGridHeight > 0)
                 ledGrid.reset (new LEDGridImplementation (*this));
 
-            for (auto s : modelData.statusLEDs)
+            for (auto&& s : modelData.statusLEDs)
                 statusLights.add (new StatusLightImplementation (*this, s));
 
             if (modelData.numLEDRowLEDs > 0)
                 ledRow.reset (new LEDRowImplementation (*this));
 
             listenerToMidiConnection = dynamic_cast<MIDIDeviceConnection*> (detector.getDeviceConnectionFor (*this));
+
             if (listenerToMidiConnection != nullptr)
                 listenerToMidiConnection->addListener (this);
+
+            config.setDeviceComms (listenerToMidiConnection);
         }
 
         ~BlockImplementation()
         {
             if (listenerToMidiConnection != nullptr)
+            {
+                config.setDeviceComms (nullptr);
                 listenerToMidiConnection->removeListener (this);
+            }
         }
 
         void invalidate()
@@ -1108,6 +1326,16 @@ struct PhysicalTopologySource::Internal
             return sendMessageToDevice (p);
         }
 
+        void handleCustomMessage (Block::Timestamp, const int32* data)
+        {
+            ProgramEventMessage m;
+
+            for (uint32 i = 0; i < BlocksProtocol::numProgramMessageInts; ++i)
+                m.values[i] = data[i];
+
+            programEventListeners.call (&Block::ProgramEventListener::handleProgramEvent, *this, m);
+        }
+
         static BlockImplementation* getFrom (Block& b) noexcept
         {
             if (auto bi = dynamic_cast<BlockImplementation*> (&b))
@@ -1123,46 +1351,94 @@ struct PhysicalTopologySource::Internal
 
             return type == Block::Type::liveBlock
                 || type == Block::Type::loopBlock
+                || type == Block::Type::touchBlock
                 || type == Block::Type::developerControlBlock;
         }
 
         //==============================================================================
-        void clearProgramAndData()
+        std::function<void(const String&)> logger;
+
+        void setLogger (std::function<void(const String&)> newLogger) override
         {
-            programSize = 0;
-            remoteHeap.clear();
+            logger = newLogger;
         }
 
-        void setProgram (const void* compiledCode, size_t codeSize)
+        void handleLogMessage (const String& message) const
         {
-            clearProgramAndData();
-            setDataBytes (0, compiledCode, codeSize);
-            programSize = (uint32) codeSize;
+            if (logger != nullptr)
+                logger (message);
         }
 
-        void setDataByte (size_t offset, uint8 value)
+        //==============================================================================
+        juce::Result setProgram (Program* newProgram) override
         {
-            remoteHeap.setByte (programSize + offset, value);
+            if (newProgram == nullptr || program.get() != newProgram)
+            {
+                {
+                    std::unique_ptr<Program> p (newProgram);
+
+                    if (program != nullptr
+                         && newProgram != nullptr
+                         && program->getLittleFootProgram() == newProgram->getLittleFootProgram())
+                        return juce::Result::ok();
+
+                    stopTimer();
+                    std::swap (program, p);
+                }
+
+                stopTimer();
+                programSize = 0;
+
+                if (program != nullptr)
+                {
+                    littlefoot::Compiler compiler;
+                    compiler.addNativeFunctions (PhysicalTopologySource::getStandardLittleFootFunctions());
+
+                    auto err = compiler.compile (program->getLittleFootProgram(), 512);
+
+                    if (err.failed())
+                        return err;
+
+                    DBG ("Compiled littlefoot program, space needed: "
+                            << (int) compiler.getCompiledProgram().getTotalSpaceNeeded() << " bytes");
+
+                    if (compiler.getCompiledProgram().getTotalSpaceNeeded() > getMemorySize())
+                        return Result::fail ("Program too large!");
+
+                    auto size = (size_t) compiler.compiledObjectCode.size();
+                    programSize = (uint32) size;
+
+                    remoteHeap.resetDataRangeToUnknown (0, remoteHeap.blockSize);
+                    remoteHeap.clear();
+                    remoteHeap.sendChanges (*this, true);
+
+                    remoteHeap.resetDataRangeToUnknown (0, (uint32) size);
+                    remoteHeap.setBytes (0, compiler.compiledObjectCode.begin(), size);
+                    remoteHeap.sendChanges (*this, true);
+
+                    this->resetConfigListActiveStatus();
+
+                    if (auto changeCallback = this->configChangedCallback)
+                        changeCallback (*this, {}, this->getMaxConfigIndex());
+                }
+                else
+                {
+                    remoteHeap.clear();
+                }
+            }
+            else
+            {
+                jassertfalse;
+            }
+
+            return juce::Result::ok();
         }
 
-        void setDataBytes (size_t offset, const void* newData, size_t num)
-        {
-            remoteHeap.setBytes (programSize + offset, static_cast<const uint8*> (newData), num);
-        }
+        Program* getProgram() const override                                        { return program.get(); }
 
-        void setDataBits (uint32 startBit, uint32 numBits, uint32 value)
+        void sendProgramEvent (const ProgramEventMessage& message) override
         {
-            remoteHeap.setBits (programSize * 8 + startBit, numBits, value);
-        }
-
-        uint8 getDataByte (size_t offset)
-        {
-            return remoteHeap.getByte (programSize + offset);
-        }
-
-        void sendProgramEvent (const LEDGrid::ProgramEventMessage& message)
-        {
-            static_assert (sizeof (LEDGrid::ProgramEventMessage::values) == 4 * BlocksProtocol::numProgramMessageInts,
+            static_assert (sizeof (ProgramEventMessage::values) == 4 * BlocksProtocol::numProgramMessageInts,
                            "Need to keep the internal and external messages structures the same");
 
             if (remoteHeap.isProgramLoaded())
@@ -1187,15 +1463,102 @@ struct PhysicalTopologySource::Internal
             }
         }
 
-        void saveProgramAsDefault()
+        void timerCallback() override
         {
-            sendCommandMessage (BlocksProtocol::saveProgramAsDefault);
+            if (remoteHeap.isFullySynced() && remoteHeap.isProgramLoaded())
+            {
+                stopTimer();
+                sendCommandMessage (BlocksProtocol::saveProgramAsDefault);
+            }
+            else
+            {
+                startTimer (100);
+            }
+        }
+
+        void saveProgramAsDefault() override
+        {
+            startTimer (10);
+        }
+
+        uint32 getMemorySize() override
+        {
+            return modelData.programAndHeapSize;
+        }
+
+        void setDataByte (size_t offset, uint8 value) override
+        {
+            remoteHeap.setByte (programSize + offset, value);
+        }
+
+        void setDataBytes (size_t offset, const void* newData, size_t num) override
+        {
+            remoteHeap.setBytes (programSize + offset, static_cast<const uint8*> (newData), num);
+        }
+
+        void setDataBits (uint32 startBit, uint32 numBits, uint32 value) override
+        {
+            remoteHeap.setBits (programSize * 8 + startBit, numBits, value);
+        }
+
+        uint8 getDataByte (size_t offset) override
+        {
+            return remoteHeap.getByte (programSize + offset);
         }
 
         void handleSharedDataACK (uint32 packetCounter) noexcept
         {
             pingFromDevice();
             remoteHeap.handleACKFromDevice (*this, packetCounter);
+        }
+
+        bool sendFirmwareUpdatePacket (const uint8* data, uint8 size, std::function<void (uint8, uint32)> callback) override
+        {
+            firmwarePacketAckCallback = {};
+
+            auto index = getDeviceIndex();
+
+            if (index >= 0)
+            {
+                BlocksProtocol::HostPacketBuilder<256> p;
+                p.writePacketSysexHeaderBytes ((BlocksProtocol::TopologyIndex) index);
+
+                if (p.addFirmwareUpdatePacket (data, size))
+                {
+                    p.writePacketSysexFooter();
+
+                    if (sendMessageToDevice (p))
+                    {
+                        firmwarePacketAckCallback = callback;
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                jassertfalse;
+            }
+
+            return false;
+        }
+
+        void handleFirmwareUpdateACK (uint8 resultCode, uint32 resultDetail)
+        {
+            if (firmwarePacketAckCallback != nullptr)
+            {
+                firmwarePacketAckCallback (resultCode, resultDetail);
+                firmwarePacketAckCallback = {};
+            }
+        }
+
+        void handleConfigUpdateMessage (int32 item, int32 value, int32 min, int32 max)
+        {
+            config.handleConfigUpdateMessage (item, value, min, max);
+        }
+
+        void handleConfigSetMessage(int32 item, int32 value)
+        {
+            config.handleConfigSetMessage (item, value);
         }
 
         void pingFromDevice()
@@ -1232,10 +1595,136 @@ struct PhysicalTopologySource::Internal
                 if (auto renderer = ledGrid->getRenderer())
                     renderer->renderLEDGrid (*ledGrid);
 
-            remoteHeap.sendChanges (*this);
+            remoteHeap.sendChanges (*this, false);
 
             if (lastMessageSendTime < juce::Time::getCurrentTime() - juce::RelativeTime::milliseconds (pingIntervalMs))
                 sendCommandMessage (BlocksProtocol::ping);
+        }
+
+        //==============================================================================
+        int32 getLocalConfigValue (uint32 item) override
+        {
+            initialiseDeviceIndexAndConnection();
+            return config.getItemValue ((BlocksProtocol::ConfigItemId) item);
+        }
+
+        void setLocalConfigValue (uint32 item, int32 value) override
+        {
+            initialiseDeviceIndexAndConnection();
+            config.setItemValue ((BlocksProtocol::ConfigItemId) item, value);
+        }
+
+        void setLocalConfigRange (uint32 item, int32 min, int32 max) override
+        {
+            initialiseDeviceIndexAndConnection();
+            config.setItemMin ((BlocksProtocol::ConfigItemId) item, min);
+            config.setItemMax ((BlocksProtocol::ConfigItemId) item, max);
+        }
+
+        void setLocalConfigItemActive (uint32 item, bool isActive) override
+        {
+            initialiseDeviceIndexAndConnection();
+            config.setItemActive ((BlocksProtocol::ConfigItemId) item, isActive);
+        }
+
+        bool isLocalConfigItemActive (uint32 item) override
+        {
+            initialiseDeviceIndexAndConnection();
+            return config.getItemActive ((BlocksProtocol::ConfigItemId) item);
+        }
+
+        uint32 getMaxConfigIndex () override
+        {
+            return uint32 (BlocksProtocol::maxConfigIndex);
+        }
+
+        bool isValidUserConfigIndex (uint32 item) override
+        {
+            return item >= (uint32) BlocksProtocol::ConfigItemId::user0
+                && item < (uint32) (BlocksProtocol::ConfigItemId::user0 + numberOfUserConfigs);
+        }
+
+        ConfigMetaData getLocalConfigMetaData (uint32 item) override
+        {
+            initialiseDeviceIndexAndConnection();
+            return config.getMetaData ((BlocksProtocol::ConfigItemId) item);
+        }
+
+        void requestFactoryConfigSync() override
+        {
+            initialiseDeviceIndexAndConnection();
+            config.requestFactoryConfigSync();
+        }
+
+        void resetConfigListActiveStatus() override
+        {
+            config.resetConfigListActiveStatus();
+        }
+
+        void setConfigChangedCallback (std::function<void(Block&, const ConfigMetaData&, uint32)> configChanged) override
+        {
+            configChangedCallback = configChanged;
+        }
+
+        void factoryReset() override
+        {
+            auto index = getDeviceIndex();
+
+            if (index >= 0)
+            {
+                BlocksProtocol::HostPacketBuilder<32> p;
+                p.writePacketSysexHeaderBytes ((BlocksProtocol::TopologyIndex) index);
+                p.addFactoryReset();
+                p.writePacketSysexFooter();
+                sendMessageToDevice (p);
+            }
+            else
+            {
+                jassertfalse;
+            }
+        }
+
+        void blockReset() override
+        {
+            auto index = getDeviceIndex();
+
+            if (index >= 0)
+            {
+                BlocksProtocol::HostPacketBuilder<32> p;
+                p.writePacketSysexHeaderBytes ((BlocksProtocol::TopologyIndex) index);
+                p.addBlockReset();
+                p.writePacketSysexFooter();
+                sendMessageToDevice (p);
+            }
+            else
+            {
+                jassertfalse;
+            }
+        }
+
+        bool setName (const juce::String& newName) override
+        {
+            auto index = getDeviceIndex();
+
+            if (index >= 0)
+            {
+                BlocksProtocol::HostPacketBuilder<128> p;
+                p.writePacketSysexHeaderBytes ((BlocksProtocol::TopologyIndex) index);
+
+                if (p.addSetBlockName (newName))
+                {
+                    p.writePacketSysexFooter();
+
+                    if (sendMessageToDevice (p))
+                        return true;
+                }
+            }
+            else
+            {
+                jassertfalse;
+            }
+
+            return false;
         }
 
         //==============================================================================
@@ -1260,15 +1749,27 @@ struct PhysicalTopologySource::Internal
         using RemoteHeapType = littlefoot::LittleFootRemoteHeap<BlockImplementation>;
         RemoteHeapType remoteHeap;
 
-        uint32 programSize = 0;
-
         Detector& detector;
         juce::Time lastMessageSendTime, lastMessageReceiveTime;
 
+        BlockConfigManager config;
+        std::function<void(Block&, const ConfigMetaData&, uint32)> configChangedCallback;
+
     private:
+        std::unique_ptr<Program> program;
+        uint32 programSize = 0;
+
+        std::function<void(uint8, uint32)> firmwarePacketAckCallback;
+
         uint32 resetMessagesSent = 0;
         bool isStillConnected = true;
         bool isMaster = false;
+
+        void initialiseDeviceIndexAndConnection()
+        {
+            config.setDeviceIndex ((TopologyIndex) getDeviceIndex());
+            config.setDeviceComms (listenerToMidiConnection);
+        }
 
         const juce::MidiInput* getMidiInput() const
         {
@@ -1310,120 +1811,144 @@ struct PhysicalTopologySource::Internal
             juce::ignoreUnused (c);
             listenerToMidiConnection->removeListener (this);
             listenerToMidiConnection = nullptr;
+            config.setDeviceComms (nullptr);
         }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BlockImplementation)
     };
 
     //==============================================================================
-    struct LEDRowImplementation  : public LEDRow
+    struct LEDRowImplementation  : public LEDRow,
+                                   private Timer
     {
-        LEDRowImplementation (BlockImplementation& b) : LEDRow (b), blockImpl (b)
+        LEDRowImplementation (BlockImplementation& b) : LEDRow (b)
         {
-            loadProgramOntoBlock();
+            startTimer (300);
         }
 
-        /*  Data format:
-
-            0:  10 x 5-6-5 bits for button LED RGBs
-            20: 15 x 5-6-5 bits for LED row colours
-            50:  1 x 5-6-5 bits for LED row overlay colour
-        */
-        static constexpr uint32 totalDataSize = 256;
-
-        //==============================================================================
         void setButtonColour (uint32 index, LEDColour colour)
         {
             if (index < 10)
-                write565Colour (16 * index, colour);
+            {
+                colours[index] = colour;
+                flush();
+            }
         }
 
         int getNumLEDs() const override
         {
-            return blockImpl.modelData.numLEDRowLEDs;
+            return static_cast<const BlockImplementation&> (block).modelData.numLEDRowLEDs;
         }
 
         void setLEDColour (int index, LEDColour colour) override
         {
             if ((uint32) index < 15u)
-                write565Colour (20 * 8 + 16 * (uint32) index, colour);
+            {
+                colours[10 + index] = colour;
+                flush();
+            }
         }
 
         void setOverlayColour (LEDColour colour) override
         {
-            write565Colour (50 * 8, colour);
+            colours[25] = colour;
+            flush();
         }
 
         void resetOverlayColour() override
         {
-            write565Colour (50 * 8, {});
+            setOverlayColour ({});
         }
 
     private:
+        LEDColour colours[26];
+
+        void timerCallback() override
+        {
+            stopTimer();
+            loadProgramOntoBlock();
+            flush();
+        }
+
         void loadProgramOntoBlock()
         {
-            littlefoot::Compiler compiler;
-            compiler.addNativeFunctions (PhysicalTopologySource::getStandardLittleFootFunctions());
-
-            auto err = compiler.compile (getLittleFootProgram(), totalDataSize);
-
-            if (err.failed())
+            if (block.getProgram() == nullptr)
             {
-                DBG (err.getErrorMessage());
-                jassertfalse;
-                return;
-            }
+                auto err = block.setProgram (new DefaultLEDGridProgram (block));
 
-            blockImpl.setProgram (compiler.compiledObjectCode.begin(), (size_t) compiler.compiledObjectCode.size());
+                if (err.failed())
+                {
+                    DBG (err.getErrorMessage());
+                    jassertfalse;
+                }
+            }
+        }
+
+        void flush()
+        {
+            if (block.getProgram() != nullptr)
+                for (uint32 i = 0; i < (uint32) numElementsInArray (colours); ++i)
+                    write565Colour (16 * i, colours[i]);
         }
 
         void write565Colour (uint32 bitIndex, LEDColour colour)
         {
-            blockImpl.setDataBits (bitIndex,      5, colour.getRed()   >> 3);
-            blockImpl.setDataBits (bitIndex + 5,  6, colour.getGreen() >> 2);
-            blockImpl.setDataBits (bitIndex + 11, 5, colour.getBlue()  >> 3);
+            block.setDataBits (bitIndex,      5, colour.getRed()   >> 3);
+            block.setDataBits (bitIndex + 5,  6, colour.getGreen() >> 2);
+            block.setDataBits (bitIndex + 11, 5, colour.getBlue()  >> 3);
         }
 
-        static const char* getLittleFootProgram() noexcept
+        struct DefaultLEDGridProgram  : public Block::Program
         {
-            return R"littlefoot(
+            DefaultLEDGridProgram (Block& b) : Block::Program (b) {}
 
-            int getColour (int bitIndex)
+            juce::String getLittleFootProgram() override
             {
-                return makeARGB (255,
-                                 getHeapBits (bitIndex,      5) << 3,
-                                 getHeapBits (bitIndex + 5,  6) << 2,
-                                 getHeapBits (bitIndex + 11, 5) << 3);
+                /*  Data format:
+
+                    0:  10 x 5-6-5 bits for button LED RGBs
+                    20: 15 x 5-6-5 bits for LED row colours
+                    50:  1 x 5-6-5 bits for LED row overlay colour
+                */
+                return R"littlefoot(
+
+                #heapsize: 128
+
+                int getColour (int bitIndex)
+                {
+                    return makeARGB (255,
+                                     getHeapBits (bitIndex,      5) << 3,
+                                     getHeapBits (bitIndex + 5,  6) << 2,
+                                     getHeapBits (bitIndex + 11, 5) << 3);
+                }
+
+                int getButtonColour (int index)
+                {
+                    return getColour (16 * index);
+                }
+
+                int getLEDColour (int index)
+                {
+                    if (getHeapInt (50))
+                        return getColour (50 * 8);
+
+                    return getColour (20 * 8 + 16 * index);
+                }
+
+                void repaint()
+                {
+                    for (int x = 0; x < 15; ++x)
+                        fillPixel (getLEDColour (x), x, 0);
+
+                    for (int i = 0; i < 10; ++i)
+                        fillPixel (getButtonColour (i), i, 1);
+                }
+
+                void handleMessage (int p1, int p2) {}
+
+                )littlefoot";
             }
-
-            int getButtonColour (int index)
-            {
-                return getColour (16 * index);
-            }
-
-            int getLEDColour (int index)
-            {
-                if (getHeapInt (50))
-                    return getColour (50 * 8);
-
-                return getColour (20 * 8 + 16 * index);
-            }
-
-            void repaint()
-            {
-                for (int x = 0; x < 15; ++x)
-                    setLED (x, 0, getLEDColour (x));
-
-                for (int i = 0; i < 10; ++i)
-                    setLED (i, 1, getButtonColour (i));
-            }
-
-            void handleMessage (int p1, int p2) {}
-
-            )littlefoot";
-        }
-
-        BlockImplementation& blockImpl;
+        };
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LEDRowImplementation)
     };
@@ -1638,50 +2163,7 @@ struct PhysicalTopologySource::Internal
         int getNumColumns() const override      { return blockImpl.modelData.lightGridWidth; }
         int getNumRows() const override         { return blockImpl.modelData.lightGridHeight; }
 
-        juce::Result setProgram (Program* newProgram) override
-        {
-            if (program.get() != newProgram)
-            {
-                program.reset (newProgram);
-
-                if (program != nullptr)
-                {
-                    littlefoot::Compiler compiler;
-                    compiler.addNativeFunctions (PhysicalTopologySource::getStandardLittleFootFunctions());
-
-                    auto err = compiler.compile (newProgram->getLittleFootProgram(), newProgram->getHeapSize());
-
-                    if (err.failed())
-                        return err;
-
-                    DBG ("Compiled littlefoot program, size = " << (int) compiler.compiledObjectCode.size() << " bytes");
-
-                    blockImpl.setProgram (compiler.compiledObjectCode.begin(), (size_t) compiler.compiledObjectCode.size());
-                }
-                else
-                {
-                    blockImpl.clearProgramAndData();
-                }
-            }
-            else
-            {
-                jassertfalse;
-            }
-
-            return juce::Result::ok();
-        }
-
-        Program* getProgram() const override                                        { return program.get(); }
-
-        void sendProgramEvent (const ProgramEventMessage& m) override               { blockImpl.sendProgramEvent (m); }
-        void saveProgramAsDefault() override                                        { blockImpl.saveProgramAsDefault(); }
-        void setDataByte (size_t offset, uint8 value) override                      { blockImpl.setDataByte (offset, value); }
-        void setDataBytes (size_t offset, const void* data, size_t num) override    { blockImpl.setDataBytes (offset, data, num); }
-        void setDataBits (uint32 startBit, uint32 numBits, uint32 value) override   { blockImpl.setDataBits (startBit, numBits, value); }
-        uint8 getDataByte (size_t offset) override                                  { return blockImpl.getDataByte (offset); }
-
         BlockImplementation& blockImpl;
-        std::unique_ptr<Program> program;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LEDGridImplementation)
     };
@@ -1874,3 +2356,5 @@ bool BlockDeviceConnection::operator!= (const BlockDeviceConnection& other) cons
 {
     return ! operator== (other);
 }
+
+} // namespace juce

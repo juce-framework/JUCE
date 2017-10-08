@@ -2,31 +2,26 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
+
+namespace juce
+{
 
 struct FallbackDownloadTask  : public URL::DownloadTask,
                                public Thread
@@ -69,18 +64,21 @@ struct FallbackDownloadTask  : public URL::DownloadTask,
             const int max = jmin ((int) bufferSize, contentLength < 0 ? std::numeric_limits<int>::max()
                                                                       : static_cast<int> (contentLength - downloaded));
 
-            const int actual = stream->read (buffer.getData(), max);
+            const int actual = stream->read (buffer.get(), max);
 
-            if (threadShouldExit() || stream->isError())
+            if (actual < 0 || threadShouldExit() || stream->isError())
                 break;
 
-            if (! fileStream->write (buffer.getData(), static_cast<size_t> (actual)))
+            if (! fileStream->write (buffer.get(), static_cast<size_t> (actual)))
             {
                 error = true;
                 break;
             }
 
             downloaded += actual;
+
+            if (downloaded == contentLength)
+                break;
         }
 
         fileStream->flush();
@@ -114,14 +112,15 @@ URL::DownloadTask::Listener::~Listener() {}
 URL::DownloadTask* URL::DownloadTask::createFallbackDownloader (const URL& urlToUse,
                                                                 const File& targetFileToUse,
                                                                 const String& extraHeadersToUse,
-                                                                Listener* listenerToUse)
+                                                                Listener* listenerToUse,
+                                                                bool usePostRequest)
 {
     const size_t bufferSize = 0x8000;
     targetFileToUse.deleteFile();
 
     if (ScopedPointer<FileOutputStream> outputStream = targetFileToUse.createOutputStream (bufferSize))
     {
-        ScopedPointer<WebInputStream> stream = new WebInputStream (urlToUse, false);
+        ScopedPointer<WebInputStream> stream = new WebInputStream (urlToUse, usePostRequest);
         stream->withExtraHeaders (extraHeadersToUse);
 
         if (stream->connect (nullptr))
@@ -131,7 +130,7 @@ URL::DownloadTask* URL::DownloadTask::createFallbackDownloader (const URL& urlTo
     return nullptr;
 }
 
-URL::DownloadTask::DownloadTask() : contentLength (-1), downloaded (0), finished (false), error (false), httpCode (-1) {}
+URL::DownloadTask::DownloadTask() {}
 URL::DownloadTask::~DownloadTask() {}
 
 //==============================================================================
@@ -150,18 +149,15 @@ URL::URL (const String& u)  : url (u)
             const int nextAmp   = url.indexOfChar (i + 1, '&');
             const int equalsPos = url.indexOfChar (i + 1, '=');
 
-            if (equalsPos > i + 1)
+            if (nextAmp < 0)
             {
-                if (nextAmp < 0)
-                {
-                    addParameter (removeEscapeChars (url.substring (i + 1, equalsPos)),
-                                  removeEscapeChars (url.substring (equalsPos + 1)));
-                }
-                else if (nextAmp > 0 && equalsPos < nextAmp)
-                {
-                    addParameter (removeEscapeChars (url.substring (i + 1, equalsPos)),
-                                  removeEscapeChars (url.substring (equalsPos + 1, nextAmp)));
-                }
+                addParameter (removeEscapeChars (equalsPos < 0 ? url.substring (i + 1) : url.substring (i + 1, equalsPos)),
+                              equalsPos < 0 ? String() : removeEscapeChars (url.substring (equalsPos + 1)));
+            }
+            else if (nextAmp > 0 && equalsPos < nextAmp)
+            {
+                addParameter (removeEscapeChars (equalsPos < 0 ? url.substring (i + 1, nextAmp) : url.substring (i + 1, equalsPos)),
+                              equalsPos < 0 ? String() : removeEscapeChars (url.substring (equalsPos + 1, nextAmp)));
             }
 
             i = nextAmp;
@@ -229,9 +225,12 @@ namespace URLHelpers
             if (i > 0)
                 p << '&';
 
-            p << URL::addEscapeChars (url.getParameterNames()[i], true)
-              << '='
-              << URL::addEscapeChars (url.getParameterValues()[i], true);
+            auto val = url.getParameterValues()[i];
+
+            p << URL::addEscapeChars (url.getParameterNames()[i], true);
+
+            if (val.isNotEmpty())
+                p << '=' << URL::addEscapeChars (val, true);
         }
 
         return p;
@@ -251,6 +250,7 @@ namespace URLHelpers
     static int findStartOfNetLocation (const String& url)
     {
         int start = findEndOfScheme (url);
+
         while (url[start] == '/')
             ++start;
 
@@ -306,8 +306,8 @@ String URL::getDomain() const
     const int end2 = url.indexOfChar (start, ':');
 
     const int end = (end1 < 0 && end2 < 0) ? std::numeric_limits<int>::max()
-                            : ((end1 < 0 || end2 < 0) ? jmax (end1, end2)
-                               : jmin (end1, end2));
+                                           : ((end1 < 0 || end2 < 0) ? jmax (end1, end2)
+                                                                     : jmin (end1, end2));
     return url.substring (start, end);
 }
 
@@ -326,7 +326,7 @@ String URL::getScheme() const
 
 int URL::getPort() const
 {
-    const int colonPos = url.indexOfChar (URLHelpers::findStartOfNetLocation (url), ':');
+    auto colonPos = url.indexOfChar (URLHelpers::findStartOfNetLocation (url), ':');
 
     return colonPos > 0 ? url.substring (colonPos + 1).getIntValue() : 0;
 }
@@ -367,7 +367,7 @@ void URL::createHeadersAndPostData (String& headers, MemoryBlock& postDataToWrit
         // (this doesn't currently support mixing custom post-data with uploads..)
         jassert (postData.getSize() == 0);
 
-        const String boundary (String::toHexString (Random::getSystemRandom().nextInt64()));
+        auto boundary = String::toHexString (Random::getSystemRandom().nextInt64());
 
         headers << "Content-Type: multipart/form-data; boundary=" << boundary << "\r\n";
 
@@ -380,22 +380,20 @@ void URL::createHeadersAndPostData (String& headers, MemoryBlock& postDataToWrit
                  << "\r\n--" << boundary;
         }
 
-        for (int i = 0; i < filesToUpload.size(); ++i)
+        for (auto* f : filesToUpload)
         {
-            const Upload& f = *filesToUpload.getObjectPointerUnchecked(i);
+            data << "\r\nContent-Disposition: form-data; name=\"" << f->parameterName
+                 << "\"; filename=\"" << f->filename << "\"\r\n";
 
-            data << "\r\nContent-Disposition: form-data; name=\"" << f.parameterName
-                 << "\"; filename=\"" << f.filename << "\"\r\n";
-
-            if (f.mimeType.isNotEmpty())
-                data << "Content-Type: " << f.mimeType << "\r\n";
+            if (f->mimeType.isNotEmpty())
+                data << "Content-Type: " << f->mimeType << "\r\n";
 
             data << "Content-Transfer-Encoding: binary\r\n\r\n";
 
-            if (f.data != nullptr)
-                data << *f.data;
+            if (f->data != nullptr)
+                data << *f->data;
             else
-                data << f.file;
+                data << f->file;
 
             data << "\r\n--" << boundary;
         }
@@ -420,8 +418,8 @@ bool URL::isProbablyAWebsiteURL (const String& possibleURL)
 {
     static const char* validProtocols[] = { "http:", "ftp:", "https:" };
 
-    for (int i = 0; i < numElementsInArray (validProtocols); ++i)
-        if (possibleURL.startsWithIgnoreCase (validProtocols[i]))
+    for (auto* protocol : validProtocols)
+        if (possibleURL.startsWithIgnoreCase (protocol))
             return true;
 
     if (possibleURL.containsChar ('@')
@@ -436,7 +434,7 @@ bool URL::isProbablyAWebsiteURL (const String& possibleURL)
 
 bool URL::isProbablyAnEmailAddress (const String& possibleEmailAddress)
 {
-    const int atSign = possibleEmailAddress.indexOfChar ('@');
+    auto atSign = possibleEmailAddress.indexOfChar ('@');
 
     return atSign > 0
         && possibleEmailAddress.lastIndexOfChar ('.') > (atSign + 1)
@@ -507,8 +505,7 @@ WebInputStream* URL::createInputStream (const bool usePostCommand,
 }
 
 //==============================================================================
-bool URL::readEntireBinaryStream (MemoryBlock& destData,
-                                  const bool usePostCommand) const
+bool URL::readEntireBinaryStream (MemoryBlock& destData, bool usePostCommand) const
 {
     const ScopedPointer<InputStream> in (createInputStream (usePostCommand));
 
@@ -521,17 +518,17 @@ bool URL::readEntireBinaryStream (MemoryBlock& destData,
     return false;
 }
 
-String URL::readEntireTextStream (const bool usePostCommand) const
+String URL::readEntireTextStream (bool usePostCommand) const
 {
     const ScopedPointer<InputStream> in (createInputStream (usePostCommand));
 
     if (in != nullptr)
         return in->readEntireStreamAsString();
 
-    return String();
+    return {};
 }
 
-XmlElement* URL::readEntireXmlStream (const bool usePostCommand) const
+XmlElement* URL::readEntireXmlStream (bool usePostCommand) const
 {
     return XmlDocument::parse (readEntireTextStream (usePostCommand));
 }
@@ -604,7 +601,7 @@ URL URL::withDataToUpload (const String& parameterName, const String& filename,
 //==============================================================================
 String URL::removeEscapeChars (const String& s)
 {
-    String result (s.replaceCharacter ('+', ' '));
+    auto result = s.replaceCharacter ('+', ' ');
 
     if (! result.containsChar ('%'))
         return result;
@@ -631,9 +628,9 @@ String URL::removeEscapeChars (const String& s)
     return String::fromUTF8 (utf8.getRawDataPointer(), utf8.size());
 }
 
-String URL::addEscapeChars (const String& s, const bool isParameter, bool roundBracketsAreLegal)
+String URL::addEscapeChars (const String& s, bool isParameter, bool roundBracketsAreLegal)
 {
-    String legalChars (isParameter ? "_-.*!'"
+    String legalChars (isParameter ? "_-.~"
                                    : ",$_-.*!'");
 
     if (roundBracketsAreLegal)
@@ -643,7 +640,7 @@ String URL::addEscapeChars (const String& s, const bool isParameter, bool roundB
 
     for (int i = 0; i < utf8.size(); ++i)
     {
-        const char c = utf8.getUnchecked(i);
+        auto c = utf8.getUnchecked(i);
 
         if (! (CharacterFunctions::isLetterOrDigit (c)
                  || legalChars.containsChar ((juce_wchar) c)))
@@ -660,10 +657,12 @@ String URL::addEscapeChars (const String& s, const bool isParameter, bool roundB
 //==============================================================================
 bool URL::launchInDefaultBrowser() const
 {
-    String u (toString (true));
+    auto u = toString (true);
 
     if (u.containsChar ('@') && ! u.containsChar (':'))
         u = "mailto:" + u;
 
-    return Process::openDocument (u, String());
+    return Process::openDocument (u, {});
 }
+
+} // namespace juce

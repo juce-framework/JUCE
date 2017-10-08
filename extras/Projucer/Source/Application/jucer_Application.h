@@ -2,22 +2,24 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -27,14 +29,16 @@
 #include "jucer_MainWindow.h"
 #include "../Project/jucer_Module.h"
 #include "jucer_AutoUpdater.h"
-#include "../Code Editor/jucer_SourceCodeEditor.h"
-#include "../Utility/jucer_ProjucerLookAndFeel.h"
+#include "../CodeEditor/jucer_SourceCodeEditor.h"
+#include "../Utility/UI/jucer_ProjucerLookAndFeel.h"
+#include "../Licenses/jucer_LicenseController.h"
+
 struct ChildProcessCache;
 
 //==============================================================================
 class ProjucerApplication   : public JUCEApplication,
-                              private Timer,
-                              private AsyncUpdater
+                              private AsyncUpdater,
+                              private LicenseController::StateChangedCallback
 {
 public:
     ProjucerApplication();
@@ -88,19 +92,32 @@ public:
     bool closeAllDocuments (bool askUserToSave);
     bool closeAllMainWindows();
 
-    PropertiesFile::Options getPropertyFileOptionsFor (const String& filename);
+    PropertiesFile::Options getPropertyFileOptionsFor (const String& filename, bool isProjectSettings);
 
     //==============================================================================
     void showUTF8ToolWindow();
     void showSVGPathDataToolWindow();
 
-    void addLiveBuildConfigItem (Project&, TreeViewItem&);
+    void showAboutWindow();
+    void showApplicationUsageDataAgreementPopup();
+    void dismissApplicationUsageDataAgreementPopup();
 
-    void showLoginForm();
-    void hideLoginForm();
+    void showPathsWindow();
+    void showEditorColourSchemeWindow();
 
     void updateAllBuildTabs();
     LatestVersionChecker* createVersionChecker() const;
+
+    //==============================================================================
+    void licenseStateChanged (const LicenseState&) override;
+    void doLogout();
+
+    bool isPaidOrGPL() const              { return licenseController == nullptr || licenseController->getState().isPaidOrGPL(); }
+
+    //==============================================================================
+    void selectEditorColourSchemeWithName (const String& schemeName);
+    static bool isEditorColourSchemeADefaultScheme (const StringArray& schemes, int editorColourSchemeIndex);
+    static int getEditorColourSchemeForGUIColourScheme (const StringArray& schemes, int guiColourSchemeIndex);
 
     //==============================================================================
     ProjucerLookAndFeel lookAndFeel;
@@ -115,17 +132,20 @@ public:
     OpenDocumentManager openDocumentManager;
     ScopedPointer<ApplicationCommandManager> commandManager;
 
-    ScopedPointer<Component> appearanceEditorWindow, globalPreferencesWindow, utf8Window, svgPathWindow;
+    ScopedPointer<Component> utf8Window, svgPathWindow, aboutWindow, applicationUsageDataWindow,
+                             pathsWindow, editorColourSchemeWindow;
+
     ScopedPointer<FileLogger> logger;
 
     bool isRunningCommandLine;
     ScopedPointer<ChildProcessCache> childProcessCache;
+    ScopedPointer<LicenseController> licenseController;
 
 private:
     void* server = nullptr;
 
-    Component* loginForm = nullptr;
     ScopedPointer<LatestVersionChecker> versionChecker;
+    TooltipWindow tooltipWindow;
 
     void loginOrLogout();
 
@@ -134,8 +154,17 @@ private:
     String getEULAChecksumProperty() const;
     void setCurrentEULAAccepted (bool hasBeenAccepted) const;
 
-    void showLoginFormAsyncIfNotTriedRecently();
-    void timerCallback() override;
     void handleAsyncUpdate() override;
     void initCommandManager();
+
+    //==============================================================================
+    void setColourScheme (int index, bool saveSetting);
+
+    void setEditorColourScheme (int index, bool saveSetting);
+    void updateEditorColourSchemeIfNeeded();
+
+    int selectedColourSchemeIndex = 0;
+
+    int selectedEditorColourSchemeIndex = 0;
+    int numEditorColourSchemes = 0;
 };

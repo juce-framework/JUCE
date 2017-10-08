@@ -2,28 +2,30 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2015 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
+   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
+   27th April 2017).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-5-licence
+   Privacy Policy: www.juce.com/juce-5-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -127,7 +129,7 @@ public:
     /** Changes the type of slider interface being used.
 
         @param newStyle         the type of interface
-        @see setRotaryParameters, setVelocityBasedMode,
+        @see setRotaryParameters, setVelocityBasedMode
     */
     void setSliderStyle (SliderStyle newStyle);
 
@@ -140,19 +142,22 @@ public:
     struct RotaryParameters
     {
         /** The angle (in radians, clockwise from the top) at which
-            the slider's minimum value is represented. */
+            the slider's minimum value is represented.
+        */
         float startAngleRadians;
 
         /** The angle (in radians, clockwise from the top) at which
             the slider's maximum value is represented. This must be
-            greater than startAngleRadians. */
+            greater than startAngleRadians.
+        */
         float endAngleRadians;
 
         /** Determines what happens when a circular drag action rotates beyond
             the minimum or maximum angle. If true, the value will stop changing
             until the mouse moves back the way it came; if false, the value
             will snap back to the value nearest to the mouse. Note that this has
-            no effect if the drag mode is vertical or horizontal.*/
+            no effect if the drag mode is vertical or horizontal.
+        */
         bool stopAtEnd;
     };
 
@@ -611,7 +616,7 @@ public:
     bool getSliderSnapsToMousePosition() const noexcept;
 
     /** If enabled, this gives the slider a pop-up bubble which appears while the
-        slider is being dragged.
+        slider is being dragged or hovered-over.
 
         This can be handy if your slider doesn't have a text-box, so that users can
         see the value just when they're changing it.
@@ -622,7 +627,9 @@ public:
         transparent window, so if you're using an OS that can't do transparent windows
         you'll have to add it to a parent component instead).
     */
-    void setPopupDisplayEnabled (bool isEnabled, Component* parentComponentToUse);
+    void setPopupDisplayEnabled (bool shouldShowOnMouseDrag,
+                                 bool shouldShowOnMouseHover,
+                                 Component* parentComponentToUse);
 
     /** If a popup display is enabled and is currently visible, this returns the component
         that is being shown, or nullptr if none is currently in use.
@@ -899,6 +906,12 @@ public:
     void focusOfChildComponentChanged (FocusChangeType) override;
     /** @internal */
     void colourChanged() override;
+    /** @internal */
+    void mouseMove (const MouseEvent&) override;
+    /** @internal */
+    void mouseExit (const MouseEvent&) override;
+    /** @internal */
+    void mouseEnter (const MouseEvent&) override;
 
 private:
     //==============================================================================
@@ -929,3 +942,5 @@ private:
 
 /** This typedef is just for compatibility with old code - newer code should use the Slider::Listener class directly. */
 typedef Slider::Listener SliderListener;
+
+} // namespace juce

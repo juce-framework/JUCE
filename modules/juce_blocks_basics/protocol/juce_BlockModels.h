@@ -2,32 +2,28 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2016 - ROLI Ltd.
+   Copyright (c) 2017 - ROLI Ltd.
 
-   Permission is granted to use this software under the terms of the ISC license
-   http://www.isc.org/downloads/software-support-policy/isc-license/
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Permission to use, copy, modify, and/or distribute this software for any
-   purpose with or without fee is hereby granted, provided that the above
-   copyright notice and this permission notice appear in all copies.
+   The code included in this file is provided under the terms of the ISC license
+   http://www.isc.org/downloads/software-support-policy/isc-license. Permission
+   To use, copy, modify, and/or distribute this software for any purpose with or
+   without fee is hereby granted provided that the above copyright notice and
+   this permission notice appear in all copies.
 
-   THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH REGARD
-   TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT,
-   OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-   USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-   TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
-   OF THIS SOFTWARE.
-
-   -----------------------------------------------------------------------------
-
-   To release a closed-source product which uses other parts of JUCE not
-   licensed under the ISC terms, commercial licenses are available: visit
-   www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
 
+namespace juce
+{
+namespace BlocksProtocol
+{
 
 // This file isn't part of the public API, it's where we encode the knowledge base
 // of all the different types of block we know about..
@@ -40,6 +36,8 @@ struct BlockDataSheet
         if (serialNumber.isLiveBlock())     initialiseForControlBlockLive();
         if (serialNumber.isLoopBlock())     initialiseForControlBlockLoop();
         if (serialNumber.isDevCtrlBlock())  initialiseForControlBlockDeveloper();
+        if (serialNumber.isTouchBlock())    initialiseForControlBlockTouch();
+        if (serialNumber.isSeaboardBlock()) initialiseForSeaboardBlock();
     }
 
     Block::ConnectionPort convertPortIndexToConnectorPort (BlocksProtocol::ConnectorPort port) const noexcept
@@ -147,6 +145,21 @@ private:
                                 ControlButton::ButtonFunction::up);
     }
 
+    void initialiseForControlBlockTouch()
+    {
+        initialiseControlBlock ("Touch BLOCK", Block::Type::touchBlock,
+                                ControlButton::ButtonFunction::velocitySensitivity,
+                                ControlButton::ButtonFunction::glideSensitivity,
+                                ControlButton::ButtonFunction::slideSensitivity,
+                                ControlButton::ButtonFunction::pressSensitivity,
+                                ControlButton::ButtonFunction::liftSensitivity,
+                                ControlButton::ButtonFunction::fixedVelocity,
+                                ControlButton::ButtonFunction::glideLock,
+                                ControlButton::ButtonFunction::pianoMode,
+                                ControlButton::ButtonFunction::down,
+                                ControlButton::ButtonFunction::up);
+    }
+
     void initialiseControlBlock (const char* name, Block::Type type,
                                  ControlButton::ButtonFunction b1, ControlButton::ButtonFunction b2,
                                  ControlButton::ButtonFunction b3, ControlButton::ButtonFunction b4,
@@ -185,6 +198,29 @@ private:
                     b10, x5, y2);
 
         numLEDRowLEDs = 15;
+    }
+
+    void initialiseForSeaboardBlock()
+    {
+        apiType = Block::Type::seaboardBlock;
+
+        description = "Seaboard BLOCK (6x3)";
+
+        widthUnits  = 6;
+        heightUnits = 3;
+
+        lightGridWidth = 0;
+        lightGridHeight = 0;
+        numKeywaves = 24;
+
+        addPortsSW (Block::ConnectionPort::DeviceEdge::west,  1);
+        addPortsNE (Block::ConnectionPort::DeviceEdge::north, 2);
+        addPortsNE (Block::ConnectionPort::DeviceEdge::east,  1);
+
+        hasTouchSurface = true;
+        programAndHeapSize = BlocksProtocol::padBlockProgramAndHeapSize;
+
+        addModeButton();
     }
 
     //==============================================================================
@@ -266,8 +302,20 @@ static const char* getButtonNameForFunction (ControlButton::ButtonFunction fn) n
         case BF::button5:       return "5";
         case BF::button6:       return "6";
         case BF::button7:       return "7";
+
+        case BF::velocitySensitivity:   return "Velocity Sensitivity";
+        case BF::glideSensitivity:      return "Glide Sensitivity";
+        case BF::slideSensitivity:      return "Slide Sensitivity";
+        case BF::pressSensitivity:      return "Press Sensitivity";
+        case BF::liftSensitivity:       return "Lift Sensitivity";
+        case BF::fixedVelocity: return "Fixed Velocity";
+        case BF::glideLock:     return "Glide Lock";
+        case BF::pianoMode:     return "Piano Mode";
     }
 
     jassertfalse;
     return nullptr;
 }
+
+} // namespace BlocksProtocol
+} // namespace juce
