@@ -110,6 +110,10 @@ public:
 
     Value getCppStandardValue()                         { return getProjectValue (Ids::cppLanguageStandard); }
 
+    Value getUsePrecompiledHeaders()                    { return getProjectValue (Ids::usePrecompiledHeaders); }
+    Value getPrecompiledHeaderFileName()                { return getProjectValue (Ids::precompiledHeaderFileName); }
+    Value getPrecompiledHeaderExcludedWildcard()        { return getProjectValue (Ids::precompiledHeaderExcludedWildcard); }
+
     //==============================================================================
     Value getProjectValue (const Identifier& name)       { return projectRoot.getPropertyAsValue (name, getUndoManagerFor (projectRoot)); }
     var   getProjectVar   (const Identifier& name) const { return projectRoot.getProperty        (name); }

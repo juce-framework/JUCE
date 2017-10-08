@@ -279,9 +279,23 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
                    "Additional libraries to link (one per line). You should not add any platform specific decoration to these names. "
                    "This string can contain references to preprocessor definitions in the form ${NAME_OF_VALUE}, which will be replaced with their values.");
 
-        if (! isVisualStudio())
-            props.add (new BooleanPropertyComponent (getShouldUseGNUExtensionsValue(), "GNU Compiler Extensions", "Enabled"),
-                       "Enabling this will use the GNU C++ language standard variant for compilation.");
+    props.add (new BooleanPropertyComponent(getUsePrecompiledHeaders(), "Use Precompiled Headers", "Use Precompiled Headers"),
+        "Enable this to generate precompiled headers with the project.  Make sure to set the precompiled header "
+        "file name as well.");
+ 
+    props.add (new TextPropertyComponent(getPrecompiledHeaderFileName(), "Precompiled Header File Name", 1024, false),
+        "The name of the .hpp or .h precompiled header file to be used.  Enter the name of a header file already in your project. "
+        "On Windows platforms, you should create a corresponding .cpp file with the same base name of this header file, and add it "
+        "to this project.  That .cpp "
+        "file should contain exactly one line, and that is: #include \"your_precompiled_header_file_name\" .");
+
+    props.add (new TextPropertyComponent(getPrecompiledHeaderExcludedWildcard(), "Precompiled Header Exclusions", 1024, false),
+        "The wildcard for the filenames to be excluded from using a precompiled header. "
+        "Typically for a juce modules, so use it like \"include_juce_*\" .");
+
+    if (!isVisualStudio())
+        props.add (new BooleanPropertyComponent (getShouldUseGNUExtensionsValue(), "GNU Compiler Extensions", "Enabled"),
+                   "Enabling this will use the GNU C++ language standard variant for compilation.");
 
         createIconProperties (props);
     }

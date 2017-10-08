@@ -130,6 +130,12 @@ void Project::setMissingDefaultValues()
     if (! projectRoot.hasProperty (Ids::version))
         getVersionValue() = "1.0.0";
 
+    if (! projectRoot.hasProperty (Ids::usePrecompiledHeaders))
+        getUsePrecompiledHeaders() = false;
+    if (!projectRoot.hasProperty(Ids::precompiledHeaderFileName))
+        getPrecompiledHeaderFileName() = "";
+    if (!projectRoot.hasProperty(Ids::precompiledHeaderExcludedWildcard))
+        getPrecompiledHeaderExcludedWildcard() = "include_juce_*";
     updateOldStyleConfigList();
     moveOldPropertyFromProjectToAllExporters (Ids::bigIcon);
     moveOldPropertyFromProjectToAllExporters (Ids::smallIcon);

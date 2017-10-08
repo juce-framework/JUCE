@@ -153,6 +153,13 @@ public:
     Value getExternalLibraries()                { return getSetting (Ids::externalLibraries); }
     String getExternalLibrariesString() const   { return getSearchPathsFromString (getSettingString (Ids::externalLibraries)).joinIntoString (";"); }
 
+    Value getUsePrecompiledHeaders()            { return getSetting (Ids::usePrecompiledHeaders); }
+    bool getUsePrecompiledHeadersBool() const   { return (getSettingString (Ids::usePrecompiledHeaders) == "1"); }
+    Value getPrecompiledHeaderFileName()        { return getSetting (Ids::precompiledHeaderFileName); }
+    Value getPrecompiledHeaderExcludedWildcard() { return getSetting(Ids::precompiledHeaderExcludedWildcard); }
+    String getPrecompiledHeaderFileNameString() const  { return (getSettingString (Ids::precompiledHeaderFileName)); }
+    String getPrecompiledHeaderExcludedWildcardString() const  { return (getSettingString(Ids::precompiledHeaderExcludedWildcard)); }
+
     Value getUserNotes()                        { return getSetting (Ids::userNotes); }
 
     Value getVST3PathValue() const              { return vst3Path; }

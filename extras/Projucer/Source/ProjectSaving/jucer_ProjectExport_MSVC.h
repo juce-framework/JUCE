@@ -577,7 +577,16 @@ public:
                     cl->createNewChildElement ("RuntimeLibrary")->addTextElement (runtimeDLL ? (isDebug ? "MultiThreadedDebugDLL" : "MultiThreadedDLL")
                                                                                   : (isDebug ? "MultiThreadedDebug"    : "MultiThreaded"));
                     cl->createNewChildElement ("RuntimeTypeInfo")->addTextElement ("true");
-                    cl->createNewChildElement ("PrecompiledHeader");
+
+                    XmlElement* precompiledHeaders = new XmlElement("PrecompiledHeader");
+                    if (getOwner().getUsePrecompiledHeadersBool())
+                    {
+                        precompiledHeaders->addTextElement("Use");
+                        cl->createNewChildElement("PrecompiledHeaderFile")->addTextElement(getOwner().getPrecompiledHeaderFileNameString());
+                        cl->createNewChildElement("ForcedIncludeFiles")->addTextElement(getOwner().getPrecompiledHeaderFileNameString());
+                    }
+                    cl->addChildElement(precompiledHeaders);
+
                     cl->createNewChildElement ("AssemblerListingLocation")->addTextElement ("$(IntDir)\\");
                     cl->createNewChildElement ("ObjectFileName")->addTextElement ("$(IntDir)\\");
                     cl->createNewChildElement ("ProgramDataBaseFileName")->addTextElement ("$(IntDir)\\");
@@ -790,12 +799,23 @@ public:
                     {
                         auto* e = cpps.createNewChildElement ("ClCompile");
                         e->setAttribute ("Include", path.toWindowsStyle());
-
+                        
                         if (shouldUseStdCall (path))
                             e->createNewChildElement ("CallingConvention")->addTextElement ("StdCall");
 
                         if (! projectItem.shouldBeCompiled())
-                            e->createNewChildElement ("ExcludedFromBuild")->addTextElement ("true");
+                             e->createNewChildElement ("ExcludedFromBuild")->addTextElement ("true");
+
+                        if (getOwner().getUsePrecompiledHeadersBool())
+                        {
+                            String pchFileName = getOwner().getPrecompiledHeaderFileNameString();
+                            String excludeWildcard = getOwner().getPrecompiledHeaderExcludedWildcardString();
+                            String precompiledHeaderBaseName = pchFileName.substring(0, pchFileName.lastIndexOfChar('.'));
+                            if (precompiledHeaderBaseName == path.getFileNameWithoutExtension())
+                                e->createNewChildElement("PrecompiledHeader")->addTextElement("Create");
+                            else if (path.getFileNameWithoutExtension().matchesWildcard(excludeWildcard, true))
+                                e->createNewChildElement("PrecompiledHeader")->addTextElement("NotUsing");
+                        }
                     }
                 }
                 else if (path.hasFileExtension (headerFileExtensions))
