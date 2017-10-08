@@ -583,7 +583,6 @@ public:
                     {
                         precompiledHeaders->addTextElement("Use");
                         cl->createNewChildElement("PrecompiledHeaderFile")->addTextElement(getOwner().getPrecompiledHeaderFileNameString());
-                        cl->createNewChildElement("ForcedIncludeFiles")->addTextElement(getOwner().getPrecompiledHeaderFileNameString());
                     }
                     cl->addChildElement(precompiledHeaders);
 
