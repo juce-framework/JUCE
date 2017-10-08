@@ -808,12 +808,19 @@ public:
                         if (getOwner().getUsePrecompiledHeadersBool())
                         {
                             String pchFileName = getOwner().getPrecompiledHeaderFileNameString();
-                            String excludeWildcard = getOwner().getPrecompiledHeaderExcludedWildcardString();
                             String precompiledHeaderBaseName = pchFileName.substring(0, pchFileName.lastIndexOfChar('.'));
-                            if (precompiledHeaderBaseName == path.getFileNameWithoutExtension())
+                            if (precompiledHeaderBaseName == path.getFileNameWithoutExtension()) {
                                 e->createNewChildElement("PrecompiledHeader")->addTextElement("Create");
-                            else if (path.getFileNameWithoutExtension().matchesWildcard(excludeWildcard, true))
-                                e->createNewChildElement("PrecompiledHeader")->addTextElement("NotUsing");
+                            } else {
+                                StringArray wildcards;
+                                wildcards.addTokens(getOwner().getPrecompiledHeaderExcludedWildcardString(), "|;,", "\"");
+                                for (String wildcard : wildcards) {
+                                    if (path.getFileNameWithoutExtension().matchesWildcard(wildcard, true)) {
+                                        e->createNewChildElement("PrecompiledHeader")->addTextElement("NotUsing");
+                                        break;
+                                    }
+                                }
+                            }
                         }
                     }
                 }

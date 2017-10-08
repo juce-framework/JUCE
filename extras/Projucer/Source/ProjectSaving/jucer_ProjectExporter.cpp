@@ -289,9 +289,9 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
         "to this project.  That .cpp "
         "file should contain exactly one line, and that is: #include \"your_precompiled_header_file_name\" .");
 
-    props.add (new TextPropertyComponent(getPrecompiledHeaderExcludedWildcard(), "Precompiled Header Exclusions", 1024, false),
-        "The wildcard for the filenames to be excluded from using a precompiled header. "
-        "Typically for a juce modules, so use it like \"include_juce_*\" .");
+    props.add(new TextPropertyComponent(getPrecompiledHeaderExcludedWildcard(), "Precompiled Header Exclusions", 1024, false),
+        "The wildcard list for the filenames to be excluded from using a precompiled header, separated by comma or semicolon. "
+        "Typically used for JUCE modules and binary data, e.g. \"BinaryData*;include_juce_*\" .");
 
     if (!isVisualStudio())
         props.add (new BooleanPropertyComponent (getShouldUseGNUExtensionsValue(), "GNU Compiler Extensions", "Enabled"),
