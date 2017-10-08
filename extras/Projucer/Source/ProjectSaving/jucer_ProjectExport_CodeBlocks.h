@@ -306,6 +306,25 @@ private:
     };
 
     //==============================================================================
+
+    StringArray getPackages() const
+    {
+        StringArray result (linuxPackages);
+
+        static String guiExtrasModule ("juce_gui_extra");
+
+        if (project.getModules().isModuleEnabled (guiExtrasModule)
+            && project.isConfigFlagEnabled ("JUCE_WEB_BROWSER", true))
+        {
+            result.add ("webkit2gtk-4.0");
+            result.add ("gtk+-x11-3.0");
+        }
+
+        result.removeDuplicates (false);
+
+        return result;
+    }
+
     void addVersion (XmlElement& xml) const
     {
         XmlElement* fileVersion = xml.createNewChildElement ("FileVersion");
@@ -324,7 +343,7 @@ private:
     {
         StringPairArray defines;
 
-        if (isCodeBlocks() && isWindows())
+        if (isWindows())
         {
             defines.set ("__MINGW__", "1");
             defines.set ("__MINGW_EXTENSION", String());
@@ -399,10 +418,12 @@ private:
             if (target.isDynamicLibrary() || getProject().getProjectType().isAudioPlugin())
                 flags.add ("-fPIC");
 
-            if (linuxPackages.size() > 0)
+            const auto packages = getPackages();
+
+            if (packages.size() > 0)
             {
                 auto pkgconfigFlags = String ("`pkg-config --cflags");
-                for (auto p : linuxPackages)
+                for (auto p : packages)
                     pkgconfigFlags << " " << p;
 
                 pkgconfigFlags << "`";
@@ -432,13 +453,15 @@ private:
         if (getProject().getProjectType().isAudioPlugin() && target.type != ProjectType::Target::SharedCodeTarget)
             flags.add ("-l" + config.getTargetBinaryNameString());
 
-        if (config.exporter.isLinux() && linuxPackages.size() > 0)
+        const auto packages = getPackages();
+
+        if (config.exporter.isLinux() && packages.size() > 0)
         {
             if (target.isDynamicLibrary())
                 flags.add ("-shared");
 
             auto pkgconfigLibs = String ("`pkg-config --libs");
-            for (auto p : linuxPackages)
+            for (auto p : packages)
                 pkgconfigLibs << " " << p;
 
             pkgconfigLibs << "`";
@@ -456,8 +479,14 @@ private:
         paths.addArray (extraSearchPaths);
         paths.addArray (config.getHeaderSearchPaths());
 
-        if (! (isCodeBlocks() && isWindows()))
+        if (! isWindows())
+        {
             paths.add ("/usr/include/freetype2");
+
+            // Replace ~ character with $(HOME) environment variable
+            for (auto& path : paths)
+                path = path.replace ("~", "$(HOME)");
+        }
 
         return getCleanedStringArray (paths);
     }
