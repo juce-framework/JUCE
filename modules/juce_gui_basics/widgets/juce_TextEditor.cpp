@@ -2400,12 +2400,12 @@ int TextEditor::indexAtPosition (const float x, const float y)
     {
         for (Iterator i (*this); i.next();)
         {
-            if (i.lineY + i.lineHeight > y)
+            if (y < i.lineY + i.lineHeight)
             {
-                if (i.lineY > y)
+                if (y < i.lineY)
                     return jmax (0, i.indexInText - 1);
 
-                if (i.atomX >= x)
+                if (x <= i.atomX || i.atom->isNewLine())
                     return i.indexInText;
 
                 if (x < i.atomRight)
