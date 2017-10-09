@@ -22,10 +22,6 @@
   ==============================================================================
 */
 
-// Avoid asserts  
-// ToDo: Handle errors
-#define JUCE_DONT_ASSERT_ON_GLSL_COMPILE_ERROR 1
-
 OpenGLShaderProgram::OpenGLShaderProgram (const OpenGLContext& c) noexcept
     : context (c), programID (0)
 {
