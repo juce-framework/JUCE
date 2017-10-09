@@ -2378,25 +2378,6 @@ public:
                 numStr << std::numeric_limits<int16>::min();
                 expect (numStr == "-32768");
             }
-            // uint16
-            {
-                String numStr (std::numeric_limits<uint16>::max());
-                expect (numStr == "65535");
-            }
-            {
-                String numStr (std::numeric_limits<uint16>::min());
-                expect (numStr == "0");
-            }
-            {
-                String numStr;
-                numStr << std::numeric_limits<uint16>::max();
-                expect (numStr == "65535");
-            }
-            {
-                String numStr;
-                numStr << std::numeric_limits<uint16>::min();
-                expect (numStr == "0");
-            }
             // int32
             {
                 String numStr (std::numeric_limits<int32>::max());
