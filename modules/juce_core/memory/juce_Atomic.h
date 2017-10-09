@@ -154,7 +154,7 @@ namespace juce
      There are methods to perform most of the basic atomic operations.
  */
  template <typename Type>
- class Atomic : public AtomicBase<Type>  final
+ class Atomic  final  : public AtomicBase<Type>
  {
  public:
      /** Resulting type when subtracting the underlying Type. */
