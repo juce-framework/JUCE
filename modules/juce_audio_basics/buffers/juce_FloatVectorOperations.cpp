@@ -846,7 +846,7 @@ void FloatVectorOperations::abs (float* dest, const float* src, int num) noexcep
    #else
     FloatVectorHelpers::signMask32 signMask;
     signMask.i = 0x7fffffffUL;
-    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = fabsf (src[i]), Mode::bit_and (s, mask),
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = std::abs (src[i]), Mode::bit_and (s, mask),
                                   JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
                                   const Mode::ParallelType mask = Mode::load1 (signMask.f);)
 
@@ -862,7 +862,7 @@ void FloatVectorOperations::abs (double* dest, const double* src, int num) noexc
     FloatVectorHelpers::signMask64 signMask;
     signMask.i = 0x7fffffffffffffffULL;
 
-    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = fabs (src[i]), Mode::bit_and (s, mask),
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = std::abs (src[i]), Mode::bit_and (s, mask),
                                   JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
                                   const Mode::ParallelType mask = Mode::load1 (signMask.d);)
 

@@ -299,7 +299,7 @@ struct FlockDemo  : public BackgroundLogo
             {
                 const float regionSize = high - low;
                 const float adjustedProportion = (proportion - low) / regionSize;
-                const float F = (0.5f - cos (adjustedProportion * float_Pi * 2.0f) * 0.5f + 0.5f) * strength;
+                const float F = (0.5f - std::cos (adjustedProportion * float_Pi * 2.0f) * 0.5f + 0.5f) * strength;
 
                 b1.accelerate (getVectorWithLength (b2.velocity, F));
                 b2.accelerate (getVectorWithLength (b1.velocity, F));
@@ -308,7 +308,7 @@ struct FlockDemo  : public BackgroundLogo
             {
                 const float regionSize = 1.0f - high;
                 const float adjustedProportion = (proportion - high) / regionSize;
-                const float F = (0.5f - cos (adjustedProportion * float_Pi * 2.0f) * 0.5f + 0.5f) * strength;
+                const float F = (0.5f - std::cos (adjustedProportion * float_Pi * 2.0f) * 0.5f + 0.5f) * strength;
                 delta = getVectorWithLength (delta, F);
 
                 b1.accelerate (-delta);

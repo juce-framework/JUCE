@@ -67,13 +67,13 @@ namespace SIMDRegister_test_internal
     template <typename type>
     static type safeAbs (type a)
     {
-        return static_cast<type> (fabs ((double) a));
+        return static_cast<type> (std::abs (static_cast<double> (a)));
     }
 
     template <typename type>
     static type safeAbs (std::complex<type> a)
     {
-        return abs (a);
+        return std::abs (a);
     }
 
     template <typename type>
