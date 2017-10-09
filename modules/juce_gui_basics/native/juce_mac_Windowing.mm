@@ -164,7 +164,7 @@ static NSRect getDragRect (NSView* view, NSEvent* event)
                     fromView: nil];
 }
 
-NSView* getNSViewForDragEvent (Component* sourceComp)
+static NSView* getNSViewForDragEvent (Component* sourceComp)
 {
     if (sourceComp == nullptr)
         if (auto* draggingSource = Desktop::getInstance().getDraggingMouseSource(0))
@@ -558,6 +558,7 @@ static Image createNSWindowSnapshot (NSWindow* nsWindow)
     }
 }
 
+Image createSnapshotOfNativeWindow (void*);
 Image createSnapshotOfNativeWindow (void* nativeWindowHandle)
 {
     if (id windowOrView = (id) nativeWindowHandle)

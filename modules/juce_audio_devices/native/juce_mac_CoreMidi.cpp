@@ -69,7 +69,7 @@ namespace CoreMidiHelpers
         return result;
     }
 
-    void enableSimulatorMidiSession()
+    static void enableSimulatorMidiSession()
     {
        #if TARGET_OS_SIMULATOR
         static bool hasEnabledNetworkSession = false;

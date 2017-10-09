@@ -232,7 +232,7 @@ namespace WavFileHelpers
     } JUCE_PACKED;
 
     //==============================================================================
-    AudioChannelSet canonicalWavChannelSet (int numChannels)
+    inline AudioChannelSet canonicalWavChannelSet (int numChannels)
     {
         if (numChannels == 1)  return AudioChannelSet::mono();
         if (numChannels == 2)  return AudioChannelSet::stereo();

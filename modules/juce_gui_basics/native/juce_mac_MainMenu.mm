@@ -787,8 +787,8 @@ void juce_initialiseMacMainMenu()
 }
 
 // (used from other modules that need to create an NSMenu)
-NSMenu* createNSMenu (const PopupMenu& menu, const String& name,
-                      int topLevelMenuId, int topLevelIndex, bool addDelegate)
+NSMenu* createNSMenu (const PopupMenu&, const String&, int, int, bool);
+NSMenu* createNSMenu (const PopupMenu& menu, const String& name, int topLevelMenuId, int topLevelIndex, bool addDelegate)
 {
     juce_initialiseMacMainMenu();
 
