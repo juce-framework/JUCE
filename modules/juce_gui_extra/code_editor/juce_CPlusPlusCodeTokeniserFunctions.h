@@ -75,7 +75,7 @@ struct CppTokeniserFunctions
               "@private", "@protected", "@property", "@synthesize", "__fastcall", "__stdcall",
               "atomic_cancel", "atomic_commit", "atomic_noexcept", "char16_t", "char32_t",
               "co_await", "co_return", "co_yield", "const_cast", "constexpr", "continue",
-              "decltype", "dynamic_cast", "explicit", "namespace", "noexcept", "operator",
+              "decltype", "dynamic_cast", "explicit", "namespace", "noexcept", "operator", "override",
               "protected", "register", "reinterpret_cast", "requires", "static_assert",
               "static_cast", "synchronized", "template", "thread_local", "typename", "unsigned",
               "volatile", nullptr };
