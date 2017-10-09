@@ -29,7 +29,7 @@ namespace juce
     various methods to operate on the data.
     @see CharPointer_UTF16, CharPointer_UTF32
 */
-class CharPointer_UTF8
+class CharPointer_UTF8  final
 {
 public:
     typedef char CharType;

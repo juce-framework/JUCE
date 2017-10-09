@@ -31,7 +31,7 @@ namespace juce
 
     @see InterprocessConnection
 */
-class JUCE_API  NamedPipe
+class JUCE_API  NamedPipe  final
 {
 public:
     //==============================================================================

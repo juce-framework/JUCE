@@ -44,7 +44,7 @@ typedef void* (MessageCallbackFunction) (void* userData);
 
     @see Message, CallbackMessage, MessageManagerLock, JUCEApplication, JUCEApplicationBase
 */
-class JUCE_API  MessageManager
+class JUCE_API  MessageManager  final
 {
 public:
     //==============================================================================

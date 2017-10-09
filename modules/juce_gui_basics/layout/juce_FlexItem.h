@@ -32,7 +32,7 @@ namespace juce
 
     @see FlexBox
 */
-class JUCE_API  FlexItem
+class JUCE_API  FlexItem  final
 {
 public:
     //==============================================================================
@@ -111,7 +111,7 @@ public:
     float maxHeight = (float) notAssigned;  /**< The item's maximum height */
 
     /** Represents a margin. */
-    struct Margin
+    struct Margin  final
     {
         Margin() noexcept;              /**< Creates a margin of size zero. */
         Margin (float size) noexcept;   /**< Creates a margin with this size on all sides. */

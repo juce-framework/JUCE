@@ -37,7 +37,7 @@ namespace juce
      A simple wrapper around std::atomic.
  */
  template <typename Type>
- struct Atomic
+ struct Atomic  final
  {
      typedef typename AtomicHelpers::DiffTypeHelper<Type>::Type DiffType;
 
@@ -154,7 +154,7 @@ namespace juce
      There are methods to perform most of the basic atomic operations.
  */
  template <typename Type>
- class Atomic : public AtomicBase<Type>
+ class Atomic : public AtomicBase<Type>  final
  {
  public:
      /** Resulting type when subtracting the underlying Type. */

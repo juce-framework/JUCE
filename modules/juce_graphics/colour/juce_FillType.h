@@ -36,7 +36,7 @@ namespace juce
 
     @see Graphics::setFillType, DrawablePath::setFill
 */
-class JUCE_API  FillType
+class JUCE_API  FillType  final
 {
 public:
     //==============================================================================

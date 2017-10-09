@@ -37,7 +37,7 @@ namespace juce
 
     @see GlyphArrangement, Font
 */
-class JUCE_API  PositionedGlyph
+class JUCE_API  PositionedGlyph  final
 {
 public:
     //==============================================================================
@@ -120,7 +120,7 @@ private:
 
     @see Font, PositionedGlyph
 */
-class JUCE_API  GlyphArrangement
+class JUCE_API  GlyphArrangement  final
 {
 public:
     //==============================================================================

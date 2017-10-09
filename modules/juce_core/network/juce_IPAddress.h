@@ -27,7 +27,7 @@ namespace juce
 /**
     Represents an IP address.
 */
-class JUCE_API  IPAddress
+class JUCE_API  IPAddress  final
 {
 public:
     //==============================================================================

@@ -32,7 +32,7 @@ namespace juce
 
     @see DatagramSocket, InterprocessConnection, InterprocessConnectionServer
 */
-class JUCE_API  StreamingSocket
+class JUCE_API  StreamingSocket  final
 {
 public:
     //==============================================================================
@@ -194,7 +194,7 @@ private:
 
     @see StreamingSocket, InterprocessConnection, InterprocessConnectionServer
 */
-class JUCE_API  DatagramSocket
+class JUCE_API  DatagramSocket  final
 {
 public:
     //==============================================================================

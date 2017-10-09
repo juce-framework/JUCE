@@ -46,7 +46,7 @@ namespace juce
     multiple threads, then you'll need to use your own synchronisation around any code
     that accesses it.
 */
-class JUCE_API  Value
+class JUCE_API  Value  final
 {
 public:
     //==============================================================================

@@ -37,7 +37,7 @@ namespace juce
 
     @see FlexItem
 */
-class JUCE_API  FlexBox
+class JUCE_API  FlexBox  final
 {
 public:
     /** Possible values for the flexDirection property. */

@@ -56,7 +56,7 @@ namespace juce
 
     @see String
 */
-class JUCE_API  StringRef
+class JUCE_API  StringRef  final
 {
 public:
     /** Creates a StringRef from a raw string literal.

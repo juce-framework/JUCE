@@ -38,7 +38,7 @@ namespace juce
 
     @see Path, Point, Line
 */
-class JUCE_API  AffineTransform
+class JUCE_API  AffineTransform  final
 {
 public:
     //==============================================================================

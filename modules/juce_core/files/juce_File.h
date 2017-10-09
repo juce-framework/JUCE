@@ -35,7 +35,7 @@ namespace juce
 
     @see FileInputStream, FileOutputStream
 */
-class JUCE_API  File
+class JUCE_API  File  final
 {
 public:
     //==============================================================================

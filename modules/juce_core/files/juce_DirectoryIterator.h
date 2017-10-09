@@ -36,7 +36,7 @@ namespace juce
 
     It also provides an estimate of its progress, using a (highly inaccurate!) algorithm.
 */
-class JUCE_API  DirectoryIterator
+class JUCE_API  DirectoryIterator  final
 {
 public:
     //==============================================================================

@@ -60,7 +60,7 @@ namespace juce
 
     @see PathFlatteningIterator, PathStrokeType, Graphics
 */
-class JUCE_API  Path
+class JUCE_API  Path  final
 {
 public:
     //==============================================================================
