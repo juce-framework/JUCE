@@ -27,9 +27,9 @@
 namespace juce
 {
 
-ImageConvolutionKernel::ImageConvolutionKernel (const int size_)
-    : values ((size_t) (size_ * size_)),
-      size (size_)
+ImageConvolutionKernel::ImageConvolutionKernel (int sizeToUse)
+    : values ((size_t) (sizeToUse * sizeToUse)),
+      size (sizeToUse)
 {
     clear();
 }
@@ -92,10 +92,10 @@ void ImageConvolutionKernel::createGaussianBlur (const float radius)
     {
         for (int x = size; --x >= 0;)
         {
-            const int cx = x - centre;
-            const int cy = y - centre;
+            auto cx = x - centre;
+            auto cy = y - centre;
 
-            values [x + y * size] = (float) exp (radiusFactor * (cx * cx + cy * cy));
+            values [x + y * size] = (float) std::exp (radiusFactor * (cx * cx + cy * cy));
         }
     }
 
@@ -122,13 +122,13 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
         }
     }
 
-    const Rectangle<int> area (destinationArea.getIntersection (destImage.getBounds()));
+    auto area = destinationArea.getIntersection (destImage.getBounds());
 
     if (area.isEmpty())
         return;
 
-    const int right = area.getRight();
-    const int bottom = area.getBottom();
+    auto right = area.getRight();
+    auto bottom = area.getBottom();
 
     const Image::BitmapData destData (destImage, area.getX(), area.getY(), area.getWidth(), area.getHeight(),
                                       Image::BitmapData::writeOnly);

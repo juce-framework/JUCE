@@ -478,7 +478,7 @@ namespace NumberToStringConverters
         {
             auto* end = buffer + numChars;
             auto* t = end;
-            auto v = (int64) (pow (10.0, numDecPlaces) * std::abs (n) + 0.5);
+            auto v = (int64) (std::pow (10.0, numDecPlaces) * std::abs (n) + 0.5);
             *--t = (char) 0;
 
             while (numDecPlaces >= 0 || v > 0)

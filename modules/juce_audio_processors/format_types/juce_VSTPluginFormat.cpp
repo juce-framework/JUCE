@@ -2417,7 +2417,7 @@ private:
                 || ((w == 0 && rw > 0) || (h == 0 && rh > 0)))
             {
                 // very dodgy logic to decide which size is right.
-                if (abs (rw - w) > 350 || abs (rh - h) > 350)
+                if (std::abs (rw - w) > 350 || std::abs (rh - h) > 350)
                 {
                     SetWindowPos (pluginHWND, 0,
                                   0, 0, rw, rh,

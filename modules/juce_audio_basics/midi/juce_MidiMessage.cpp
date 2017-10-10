@@ -999,7 +999,7 @@ String MidiMessage::getMidiNoteName (int note, bool useSharps, bool includeOctav
 
 double MidiMessage::getMidiNoteInHertz (const int noteNumber, const double frequencyOfA) noexcept
 {
-    return frequencyOfA * pow (2.0, (noteNumber - 69) / 12.0);
+    return frequencyOfA * std::pow (2.0, (noteNumber - 69) / 12.0);
 }
 
 bool MidiMessage::isMidiNoteBlack (int noteNumber) noexcept

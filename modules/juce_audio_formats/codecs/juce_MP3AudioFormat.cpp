@@ -672,7 +672,7 @@ private:
 
             float* table = muls[k];
             for (int j = 3, i = 0; i < 63; ++i, --j)
-                *table++ = (float) (multipliers[k] * pow (2.0, j / 3.0));
+                *table++ = (float) (multipliers[k] * std::pow (2.0, j / 3.0));
             *table++ = 0;
         }
     }
@@ -681,10 +681,10 @@ private:
     {
         int i, j;
         for (i = -256; i < 118 + 4; ++i)
-            powToGains[i + 256] = (float) pow (2.0, -0.25 * (i + 210));
+            powToGains[i + 256] = (float) std::pow (2.0, -0.25 * (i + 210));
 
         for (i = 0; i < 8207; ++i)
-            nToThe4Over3[i] = (float) pow ((double) i, 4.0 / 3.0);
+            nToThe4Over3[i] = (float) std::pow ((double) i, 4.0 / 3.0);
 
         for (i = 0; i < 8; ++i)
         {
@@ -737,12 +737,12 @@ private:
 
                 if (i > 0)
                 {
-                    const double base = pow (2.0, -0.25 * (j + 1));
+                    const double base = std::pow (2.0, -0.25 * (j + 1));
 
                     if (i & 1)
-                        p1 = pow (base, (i + 1) * 0.5);
+                        p1 = std::pow (base, (i + 1) * 0.5);
                     else
-                        p2 = pow (base, i * 0.5);
+                        p2 = std::pow (base, i * 0.5);
                 }
 
                 pow1_1[j][i] = (float) p1;

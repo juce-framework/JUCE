@@ -582,8 +582,8 @@ void CodeEditorComponent::moveCaretTo (const CodeDocument::Position& newPos, con
     {
         if (dragType == notDragging)
         {
-            if (abs (caretPos.getPosition() - selectionStart.getPosition())
-                  < abs (caretPos.getPosition() - selectionEnd.getPosition()))
+            if (std::abs (caretPos.getPosition() - selectionStart.getPosition())
+                  < std::abs (caretPos.getPosition() - selectionEnd.getPosition()))
                 dragType = draggingSelectionStart;
             else
                 dragType = draggingSelectionEnd;
@@ -595,7 +595,7 @@ void CodeEditorComponent::moveCaretTo (const CodeDocument::Position& newPos, con
 
             if (selectionEnd.getPosition() < selectionStart.getPosition())
             {
-                const CodeDocument::Position temp (selectionStart);
+                auto temp = selectionStart;
                 selectionStart = selectionEnd;
                 selectionEnd = temp;
 
@@ -608,7 +608,7 @@ void CodeEditorComponent::moveCaretTo (const CodeDocument::Position& newPos, con
 
             if (selectionEnd.getPosition() < selectionStart.getPosition())
             {
-                const CodeDocument::Position temp (selectionStart);
+                auto temp = selectionStart;
                 selectionStart = selectionEnd;
                 selectionEnd = temp;
 
