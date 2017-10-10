@@ -113,7 +113,7 @@ private:
         struct Type
         {
             const char* name;
-            uint32 colour;
+            juce::uint32 colour;
         };
 
         const Type types[] =
@@ -144,7 +144,7 @@ private:
         struct Type
         {
             const char* name;
-            uint32 colour;
+            juce::uint32 colour;
         };
 
         const Type types[] =
