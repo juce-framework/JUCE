@@ -927,12 +927,12 @@ public:
     /** The system-specific file separator character.
         On Windows, this will be '\', on Mac/Linux, it'll be '/'
     */
-    static const juce_wchar separator;
+    static juce_wchar getSeparatorChar();
 
     /** The system-specific file separator character, as a string.
         On Windows, this will be '\', on Mac/Linux, it'll be '/'
     */
-    static const String separatorString;
+    static StringRef getSeparatorString();
 
     //==============================================================================
     /** Returns a version of a filename with any illegal characters removed.
@@ -1026,6 +1026,12 @@ public:
 
         bool foldersFirst;
     };
+
+   #ifndef DOXYGEN
+    // Deprecated: use File::getSeparatorChar() and File::getSeparatorString() instead!
+    JUCE_DEPRECATED (static const juce_wchar separator);
+    JUCE_DEPRECATED (static const StringRef separatorString);
+   #endif
 
 private:
     //==============================================================================

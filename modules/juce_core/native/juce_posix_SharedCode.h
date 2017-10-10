@@ -188,7 +188,11 @@ static MaxNumFileHandlesInitialiser maxNumFileHandlesInitialiser;
 
 //==============================================================================
 const juce_wchar File::separator = '/';
-const String File::separatorString ("/");
+const StringRef File::separatorString ("/");
+
+juce_wchar File::getSeparatorChar()    { return '/'; }
+StringRef File::getSeparatorString()   { return "/"; }
+
 
 //==============================================================================
 File File::getCurrentWorkingDirectory()
@@ -351,7 +355,7 @@ bool File::hasWriteAccess() const
         return (hasEffectiveRootFilePermissions()
              || access (fullPath.toUTF8(), W_OK) == 0);
 
-    if ((! isDirectory()) && fullPath.containsChar (separator))
+    if ((! isDirectory()) && fullPath.containsChar (getSeparatorChar()))
         return getParentDirectory().hasWriteAccess();
 
     return false;
@@ -360,6 +364,7 @@ bool File::hasWriteAccess() const
 static bool setFileModeFlags (const String& fullPath, mode_t flags, bool shouldSet) noexcept
 {
     juce_statStruct info;
+
     if (! juce_stat (fullPath, info))
         return false;
 
@@ -1124,7 +1129,7 @@ public:
         // Looks like you're trying to launch a non-existent exe or a folder (perhaps on OSX
         // you're trying to launch the .app folder rather than the actual binary inside it?)
         jassert (File::getCurrentWorkingDirectory().getChildFile (exe).existsAsFile()
-                  || ! exe.containsChar (File::separator));
+                  || ! exe.containsChar (File::getSeparatorChar()));
 
         int pipeHandles[2] = { 0 };
 

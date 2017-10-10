@@ -502,14 +502,14 @@ String Project::getRelativePathForFile (const File& file) const
     String p1 (relativePathBase.getFullPathName());
     String p2 (file.getFullPathName());
 
-    while (p1.startsWithChar (File::separator))
+    while (p1.startsWithChar (File::getSeparatorChar()))
         p1 = p1.substring (1);
 
-    while (p2.startsWithChar (File::separator))
+    while (p2.startsWithChar (File::getSeparatorChar()))
         p2 = p2.substring (1);
 
-    if (p1.upToFirstOccurrenceOf (File::separatorString, true, false)
-          .equalsIgnoreCase (p2.upToFirstOccurrenceOf (File::separatorString, true, false)))
+    if (p1.upToFirstOccurrenceOf (File::getSeparatorString(), true, false)
+          .equalsIgnoreCase (p2.upToFirstOccurrenceOf (File::getSeparatorString(), true, false)))
     {
         filename = FileHelpers::getRelativePathFrom (file, relativePathBase);
     }

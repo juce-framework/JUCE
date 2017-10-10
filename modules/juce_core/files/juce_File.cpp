@@ -79,7 +79,7 @@ static String removeEllipsis (const String& path)
    #endif
     {
         StringArray toks;
-        toks.addTokens (path, File::separatorString, {});
+        toks.addTokens (path, File::getSeparatorString(), {});
         bool anythingChanged = false;
 
         for (int i = 1; i < toks.size(); ++i)
@@ -100,7 +100,7 @@ static String removeEllipsis (const String& path)
         }
 
         if (anythingChanged)
-            return toks.joinIntoString (File::separatorString);
+            return toks.joinIntoString (File::getSeparatorString());
     }
 
     return path;
@@ -161,7 +161,7 @@ String File::parseAbsolutePath (const String& p)
 
     if (path.startsWithChar ('~'))
     {
-        if (path[1] == separator || path[1] == 0)
+        if (path[1] == getSeparatorChar() || path[1] == 0)
         {
             // expand a name of the form "~/abc"
             path = File::getSpecialLocation (File::userHomeDirectory).getFullPathName()
@@ -176,7 +176,7 @@ String File::parseAbsolutePath (const String& p)
                 path = addTrailingSeparator (pw->pw_dir) + path.fromFirstOccurrenceOf ("/", false, false);
         }
     }
-    else if (! path.startsWithChar (separator))
+    else if (! path.startsWithChar (getSeparatorChar()))
     {
        #if JUCE_DEBUG || JUCE_LOG_ASSERTIONS
         if (! (path.startsWith ("./") || path.startsWith ("../")))
@@ -200,7 +200,7 @@ String File::parseAbsolutePath (const String& p)
     }
 #endif
 
-    while (path.endsWithChar (separator) && path != separatorString) // careful not to turn a single "/" into an empty string.
+    while (path.endsWithChar (getSeparatorChar()) && path != getSeparatorString()) // careful not to turn a single "/" into an empty string.
         path = path.dropLastCharacters (1);
 
     return path;
@@ -208,8 +208,8 @@ String File::parseAbsolutePath (const String& p)
 
 String File::addTrailingSeparator (const String& path)
 {
-    return path.endsWithChar (separator) ? path
-                                         : path + separator;
+    return path.endsWithChar (getSeparatorChar()) ? path
+                                                  : path + getSeparatorChar();
 }
 
 //==============================================================================
@@ -344,13 +344,13 @@ bool File::copyDirectoryTo (const File& newDirectory) const
 //==============================================================================
 String File::getPathUpToLastSlash() const
 {
-    auto lastSlash = fullPath.lastIndexOfChar (separator);
+    auto lastSlash = fullPath.lastIndexOfChar (getSeparatorChar());
 
     if (lastSlash > 0)
         return fullPath.substring (0, lastSlash);
 
     if (lastSlash == 0)
-        return separatorString;
+        return getSeparatorString();
 
     return fullPath;
 }
@@ -363,12 +363,12 @@ File File::getParentDirectory() const
 //==============================================================================
 String File::getFileName() const
 {
-    return fullPath.substring (fullPath.lastIndexOfChar (separator) + 1);
+    return fullPath.substring (fullPath.lastIndexOfChar (getSeparatorChar()) + 1);
 }
 
 String File::getFileNameWithoutExtension() const
 {
-    auto lastSlash = fullPath.lastIndexOfChar (separator) + 1;
+    auto lastSlash = fullPath.lastIndexOfChar (getSeparatorChar()) + 1;
     auto lastDot   = fullPath.lastIndexOfChar ('.');
 
     if (lastDot > lastSlash)
@@ -401,7 +401,7 @@ bool File::isAbsolutePath (StringRef path)
 {
     auto firstChar = *(path.text);
 
-    return firstChar == separator
+    return firstChar == getSeparatorChar()
            #if JUCE_WINDOWS
             || (firstChar != 0 && path.text[1] == ':');
            #else
@@ -422,6 +422,7 @@ File File::getChildFile (StringRef relativePath) const
    #endif
 
     auto path = fullPath;
+    auto separatorChar = getSeparatorChar();
 
     while (*r == '.')
     {
@@ -432,14 +433,14 @@ File File::getChildFile (StringRef relativePath) const
         {
             auto thirdChar = *++r;
 
-            if (thirdChar == separator || thirdChar == 0)
+            if (thirdChar == separatorChar || thirdChar == 0)
             {
-                auto lastSlash = path.lastIndexOfChar (separator);
+                auto lastSlash = path.lastIndexOfChar (separatorChar);
 
                 if (lastSlash >= 0)
                     path = path.substring (0, lastSlash);
 
-                while (*r == separator) // ignore duplicate slashes
+                while (*r == separatorChar) // ignore duplicate slashes
                     ++r;
             }
             else
@@ -448,9 +449,9 @@ File File::getChildFile (StringRef relativePath) const
                 break;
             }
         }
-        else if (secondChar == separator || secondChar == 0)  // remove "./"
+        else if (secondChar == separatorChar || secondChar == 0)  // remove "./"
         {
-            while (*r == separator) // ignore duplicate slashes
+            while (*r == separatorChar) // ignore duplicate slashes
                 ++r;
         }
         else
@@ -520,7 +521,7 @@ Result File::createDirectory() const
     auto r = parentDir.createDirectory();
 
     if (r.wasOk())
-        r = createDirectoryInternal (fullPath.trimCharactersAtEnd (separatorString));
+        r = createDirectoryInternal (fullPath.trimCharactersAtEnd (getSeparatorString()));
 
     return r;
 }
@@ -663,7 +664,7 @@ String File::getFileExtension() const
 {
     auto indexOfDot = fullPath.lastIndexOfChar ('.');
 
-    if (indexOfDot > fullPath.lastIndexOfChar (separator))
+    if (indexOfDot > fullPath.lastIndexOfChar (getSeparatorChar()))
         return fullPath.substring (indexOfDot);
 
     return {};
@@ -672,7 +673,7 @@ String File::getFileExtension() const
 bool File::hasFileExtension (StringRef possibleSuffix) const
 {
     if (possibleSuffix.isEmpty())
-        return fullPath.lastIndexOfChar ('.') <= fullPath.lastIndexOfChar (separator);
+        return fullPath.lastIndexOfChar ('.') <= fullPath.lastIndexOfChar (getSeparatorChar());
 
     auto semicolon = possibleSuffix.text.indexOf ((juce_wchar) ';');
 
@@ -869,7 +870,7 @@ static int countNumberOfSeparators (String::CharPointerType s)
         if (c == 0)
             break;
 
-        if (c == File::separator)
+        if (c == File::getSeparatorChar())
             ++num;
     }
 
@@ -883,7 +884,7 @@ String File::getRelativePathFrom (const File& dir) const
 
     auto thisPath = fullPath;
 
-    while (thisPath.endsWithChar (separator))
+    while (thisPath.endsWithChar (getSeparatorChar()))
         thisPath = thisPath.dropLastCharacters (1);
 
     auto dirPath = addTrailingSeparator (dir.existsAsFile() ? dir.getParentDirectory().getFullPathName()
@@ -912,7 +913,7 @@ String File::getRelativePathFrom (const File& dir) const
 
             ++i;
 
-            if (c1 == separator)
+            if (c1 == getSeparatorChar())
             {
                 thisPathAfterCommon = thisPathIter;
                 dirPathAfterCommon  = dirPathIter;
@@ -922,7 +923,7 @@ String File::getRelativePathFrom (const File& dir) const
     }
 
     // if the only common bit is the root, then just return the full path..
-    if (commonBitLength == 0 || (commonBitLength == 1 && thisPath[1] == separator))
+    if (commonBitLength == 0 || (commonBitLength == 1 && thisPath[1] == getSeparatorChar()))
         return fullPath;
 
     auto numUpDirectoriesNeeded = countNumberOfSeparators (dirPathAfterCommon);
@@ -1110,8 +1111,8 @@ public:
         expectEquals (tempFile.loadFileAsString(), String ("0123456789"));
         expect (! demoFolder.containsSubDirectories());
 
-        expectEquals (tempFile.getRelativePathFrom (demoFolder.getParentDirectory()), demoFolder.getFileName() + File::separatorString + tempFile.getFileName());
-        expectEquals (demoFolder.getParentDirectory().getRelativePathFrom (tempFile), ".." + File::separatorString + ".." + File::separatorString + demoFolder.getParentDirectory().getFileName());
+        expectEquals (tempFile.getRelativePathFrom (demoFolder.getParentDirectory()), demoFolder.getFileName() + File::getSeparatorString() + tempFile.getFileName());
+        expectEquals (demoFolder.getParentDirectory().getRelativePathFrom (tempFile), ".." + File::getSeparatorString() + ".." + File::getSeparatorString() + demoFolder.getParentDirectory().getFileName());
 
         expect (demoFolder.getNumberOfChildFiles (File::findFiles) == 1);
         expect (demoFolder.getNumberOfChildFiles (File::findFilesAndDirectories) == 1);

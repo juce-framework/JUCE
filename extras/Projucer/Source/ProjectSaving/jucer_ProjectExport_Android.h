@@ -887,11 +887,11 @@ private:
             auto package = getActivityClassPackage();
             auto targetFolder = getTargetFolder();
 
-            auto inAppBillingPath = String ("com.android.vending.billing").replaceCharacter ('.', File::separator);
+            auto inAppBillingPath = String ("com.android.vending.billing").replaceCharacter ('.', File::getSeparatorChar());
             auto javaSourceFolder = coreModule->getFolder().getChildFile ("native").getChildFile ("java");
             auto javaInAppBillingTarget = targetFolder.getChildFile ("app/src/main/java").getChildFile (inAppBillingPath);
             auto javaActivityTarget = targetFolder.getChildFile ("app/src/main/java")
-                                                  .getChildFile (package.replaceCharacter ('.', File::separator));
+                                                  .getChildFile (package.replaceCharacter ('.', File::getSeparatorChar()));
 
             copyActivityJavaFiles (javaSourceFolder, javaActivityTarget, package);
             copyAdditionalJavaFiles (javaSourceFolder, javaInAppBillingTarget);
