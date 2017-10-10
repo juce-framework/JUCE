@@ -55,10 +55,14 @@ JUCE_API void JUCE_CALLTYPE Process::makeForegroundProcess()
 
 JUCE_API void JUCE_CALLTYPE Process::hide()
 {
-   #if JUCE_MAC
     if (! SystemStats::isRunningInAppExtensionSandbox())
+    {
+       #if JUCE_MAC
         [NSApp hide: nil];
-   #endif
+       #elif JUCE_IOS
+        [[UIApplication sharedApplication] performSelector: @selector(suspend)];
+       #endif
+    }
 }
 
 JUCE_API void JUCE_CALLTYPE Process::raisePrivilege()

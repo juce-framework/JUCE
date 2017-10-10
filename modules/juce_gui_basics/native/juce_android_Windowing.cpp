@@ -29,6 +29,14 @@ extern juce::JUCEApplicationBase* juce_CreateApplication(); // (from START_JUCE_
 namespace juce
 {
 
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (constructor,   "<init>",           "()V") \
+ METHOD (setAction,     "setAction",        "(Ljava/lang/String;)Landroid/content/Intent;") \
+ METHOD (addCategory,   "addCategory",       "(Ljava/lang/String;)Landroid/content/Intent;") \
+
+DECLARE_JNI_CLASS (Intent, "android/content/Intent");
+#undef JNI_CLASS_MEMBERS
+
 //==============================================================================
 #if JUCE_IN_APP_PURCHASES && JUCE_MODULE_AVAILABLE_juce_product_unlocking
  extern void juce_inAppPurchaseCompleted (void*);
@@ -793,11 +801,24 @@ ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
     return AndroidComponentPeer::currentModifiers;
 }
 
+JUCE_API void JUCE_CALLTYPE Process::hide()
+{
+    if (android.activity.callBooleanMethod (JuceAppActivity.moveTaskToBack, true) == 0)
+    {
+        auto* env = getEnv();
+
+        GlobalRef intent (env->NewObject (Intent, Intent.constructor));
+        env->CallObjectMethod (intent, Intent.setAction,   javaString ("android.intent.action.MAIN")  .get());
+        env->CallObjectMethod (intent, Intent.addCategory, javaString ("android.intent.category.HOME").get());
+
+        android.activity.callVoidMethod (JuceAppActivity.startActivity, intent.get());
+    }
+}
+
 //==============================================================================
 // TODO
 JUCE_API bool JUCE_CALLTYPE Process::isForegroundProcess() { return true; }
 JUCE_API void JUCE_CALLTYPE Process::makeForegroundProcess() {}
-JUCE_API void JUCE_CALLTYPE Process::hide() {}
 
 //==============================================================================
 void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType /*iconType*/,

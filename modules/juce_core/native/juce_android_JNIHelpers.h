@@ -318,6 +318,8 @@ extern AndroidSystem android;
  METHOD (unbindService,           "unbindService",        "(Landroid/content/ServiceConnection;)V") \
  METHOD (startIntentSenderForResult, "startIntentSenderForResult", "(Landroid/content/IntentSender;ILandroid/content/Intent;III)V") \
  METHOD (getPackageName,          "getPackageName",       "()Ljava/lang/String;") \
+ METHOD (moveTaskToBack,          "moveTaskToBack",       "(Z)Z") \
+ METHOD (startActivity,           "startActivity",        "(Landroid/content/Intent;)V") \
 
 DECLARE_JNI_CLASS (JuceAppActivity, JUCE_ANDROID_ACTIVITY_CLASSPATH);
 #undef JNI_CLASS_MEMBERS
