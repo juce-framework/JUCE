@@ -683,18 +683,14 @@ private:
 
         out << getPhonyTargetLine() << newLine << newLine;
 
-        StringArray packages;
-        packages.addTokens (getExtraPkgConfigString(), " ", "\"'");
-        packages.removeEmptyStrings();
+        auto packages = getPackages();
 
-        const bool useLinuxPackages = (linuxPackages.size() > 0 || packages.size() > 0);
-
-        writeTargetLines (out, useLinuxPackages);
+        writeTargetLines (out, ! packages.isEmpty());
 
         for (auto target : targets)
             target->addFiles (out);
 
-        if (useLinuxPackages)
+        if (! packages.isEmpty())
         {
             out << "check-pkg-config:" << newLine
                 << "\t@command -v pkg-config >/dev/null 2>&1 || "
@@ -702,11 +698,8 @@ private:
                 "exit 1; }" << newLine
                 << "\t@pkg-config --print-errors";
 
-            for (int i = 0; i < linuxPackages.size(); ++i)
-                out << " " << linuxPackages[i];
-
-            for (int i = 0; i < packages.size(); ++i)
-                out << " " << packages[i];
+            for (auto& pkg : packages)
+                out << " " << pkg;
 
             out << newLine << newLine;
         }
