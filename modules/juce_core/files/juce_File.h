@@ -35,7 +35,7 @@ namespace juce
 
     @see FileInputStream, FileOutputStream
 */
-class JUCE_API  File  final
+class JUCE_API  File final
 {
 public:
     //==============================================================================
@@ -1027,7 +1027,7 @@ public:
         bool foldersFirst;
     };
 
-   #ifndef DOXYGEN
+   #if (! defined(DOXYGEN)) && (! defined (JUCE_GCC))
     // Deprecated: use File::getSeparatorChar() and File::getSeparatorString() instead!
     JUCE_DEPRECATED (static const juce_wchar separator);
     JUCE_DEPRECATED (static const StringRef separatorString);
