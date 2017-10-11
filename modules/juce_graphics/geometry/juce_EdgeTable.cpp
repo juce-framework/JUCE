@@ -32,8 +32,12 @@ const int juce_edgeTableDefaultEdgesPerLine = 32;
 //==============================================================================
 EdgeTable::EdgeTable (Rectangle<int> area, const Path& path, const AffineTransform& transform)
    : bounds (area),
-     maxEdgesPerLine (juce_edgeTableDefaultEdgesPerLine),
-     lineStrideElements (juce_edgeTableDefaultEdgesPerLine * 2 + 1)
+     // this is a very vague heuristic to make a rough guess at a good table size
+     // for a given path, such that it's big enough to mostly avoid remapping, but also
+     // not so big that it's wasteful for simple paths.
+     maxEdgesPerLine (jmax (juce_edgeTableDefaultEdgesPerLine / 2,
+                            4 * (int) std::sqrt (path.numElements))),
+     lineStrideElements (maxEdgesPerLine * 2 + 1)
 {
     allocate();
     int* t = table;
@@ -404,7 +408,7 @@ void EdgeTable::remapTableForNumEdges (const int newNumEdgesPerLine)
 
 inline void EdgeTable::remapWithExtraSpace (int numPoints)
 {
-    remapTableForNumEdges (numPoints + jmax (juce_edgeTableDefaultEdgesPerLine, numPoints / 2));
+    remapTableForNumEdges (numPoints * 2);
     jassert (numPoints < maxEdgesPerLine);
 }
 
