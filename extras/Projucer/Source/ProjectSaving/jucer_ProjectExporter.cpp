@@ -715,6 +715,7 @@ void ProjectExporter::createDefaultConfigs()
         config->getNameValue() = debugConfig ? "Debug" : "Release";
         config->isDebugValue() = debugConfig;
         config->getOptimisationLevel() = config->getDefaultOptimisationLevel();
+        config->getLinkTimeOptimisationEnabledValue() = ! debugConfig;
         config->getTargetBinaryName() = project.getProjectFilenameRoot();
     }
 }
@@ -889,6 +890,9 @@ void ProjectExporter::BuildConfiguration::createPropertyEditors (PropertyListBui
     props.add (new TextPropertyComponent (getBuildConfigPreprocessorDefs(), "Preprocessor definitions", 32768, true),
                "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace, commas, or "
                "new-lines to separate the items - to include a space or comma in a definition, precede it with a backslash.");
+
+    props.add (new BooleanPropertyComponent (getLinkTimeOptimisationEnabledValue(), "Link-Time Optimisation", "Enabled"),
+               "Enable this to perform link-time code optimisation. This is recommended for release builds.");
 
     createConfigProperties (props);
 

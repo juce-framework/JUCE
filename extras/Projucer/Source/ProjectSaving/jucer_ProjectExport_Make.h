@@ -601,6 +601,7 @@ private:
             out << " -g -ggdb";
 
         out << " -O" << config.getGCCOptimisationFlag()
+            << (config.isLinkTimeOptimisationEnabled() ? " -flto" : "")
             << (" "  + replacePreprocessorTokens (config, getExtraCompilerFlagsString())).trimEnd()
             << " $(CFLAGS)" << newLine;
 

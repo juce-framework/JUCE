@@ -160,6 +160,9 @@ public:
 
             setValueIfVoid (shouldGenerateManifestValue(), true);
             setValueIfVoid (getArchitectureType(), get64BitArchName());
+
+            if (! isDebug())
+                updateOldLTOSetting();
         }
 
         Value getWarningLevelValue()                { return getValue (Ids::winWarningLevel); }
@@ -181,9 +184,6 @@ public:
 
         Value shouldLinkIncrementalValue()          { return getValue (Ids::enableIncrementalLinking); }
         bool shouldLinkIncremental() const          { return config [Ids::enableIncrementalLinking]; }
-
-        Value getWholeProgramOptValue()             { return getValue (Ids::wholeProgramOptimisation); }
-        bool shouldDisableWholeProgramOpt() const   { return static_cast<int> (config [Ids::wholeProgramOptimisation]) > 0; }
 
         Value getUsingRuntimeLibDLL()               { return getValue (Ids::useRuntimeLibDLL); }
         bool isUsingRuntimeLibDLL() const           { return config [Ids::useRuntimeLibDLL]; }
@@ -264,15 +264,6 @@ public:
             }
 
             {
-                static const char* wpoNames[] = { "Enable link-time code generation when possible",
-                                                  "Always disable link-time code generation", nullptr };
-                const var wpoValues[] = { var(), var (1) };
-
-                props.add (new ChoicePropertyComponent (getWholeProgramOptValue(), "Whole Program Optimisation",
-                                                        StringArray (wpoNames), Array<var> (wpoValues, numElementsInArray (wpoValues))));
-            }
-
-            {
                 props.add (new BooleanPropertyComponent (shouldLinkIncrementalValue(), "Incremental Linking", "Enable"),
                            "Enable to avoid linking from scratch for every new build. "
                            "Disable to ensure that your final release build does not contain padding or thunks.");
@@ -303,6 +294,11 @@ public:
                 result += "d";
 
             return result;
+        }
+
+        void updateOldLTOSetting()
+        {
+            getLinkTimeOptimisationEnabledValue() = (static_cast<int> (config ["wholeProgramOptimisation"]) == 0);
         }
     };
 
@@ -371,7 +367,7 @@ public:
                 if (charSet.isNotEmpty())
                     e->createNewChildElement ("CharacterSet")->addTextElement (charSet);
 
-                if (! (config.isDebug() || config.shouldDisableWholeProgramOpt()))
+                if (config.isLinkTimeOptimisationEnabled())
                     e->createNewChildElement ("WholeProgramOptimization")->addTextElement ("true");
 
                 if (config.shouldLinkIncremental())

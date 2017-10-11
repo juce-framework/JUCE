@@ -261,6 +261,9 @@ public:
         int getOptimisationLevelInt() const                 { return config [Ids::optimisation]; }
         String getGCCOptimisationFlag() const;
 
+        Value getLinkTimeOptimisationEnabledValue()         { return getValue (Ids::linkTimeOptimisation); }
+        bool isLinkTimeOptimisationEnabled() const          { return config [Ids::linkTimeOptimisation]; }
+
         Value getBuildConfigPreprocessorDefs()              { return getValue (Ids::defines); }
         String getBuildConfigPreprocessorDefsString() const { return config [Ids::defines]; }
         StringPairArray getAllPreprocessorDefs() const;    // includes inherited definitions

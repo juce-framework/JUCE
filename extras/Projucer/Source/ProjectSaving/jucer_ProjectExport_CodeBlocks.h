@@ -380,6 +380,9 @@ private:
 
         flags.add ("-O" + config.getGCCOptimisationFlag());
 
+        if (config.isLinkTimeOptimisationEnabled())
+            flags.add ("-flto");
+
         {
             auto cppStandard = config.project.getCppStandardValue().toString();
 

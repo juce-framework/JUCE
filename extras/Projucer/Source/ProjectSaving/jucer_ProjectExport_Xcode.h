@@ -399,7 +399,6 @@ protected:
               cppStandardLibrary           (config, Ids::cppLibType,                   nullptr),
               codeSignIdentity             (config, Ids::codeSigningIdentity,          nullptr, iOS ? "iPhone Developer" : "Mac Developer"),
               fastMathEnabled              (config, Ids::fastMath,                     nullptr),
-              linkTimeOptimisationEnabled  (config, Ids::linkTimeOptimisation,         nullptr),
               stripLocalSymbolsEnabled     (config, Ids::stripLocalSymbols,            nullptr),
               vstBinaryLocation            (config, Ids::xcodeVstBinaryLocation,       nullptr, "$(HOME)/Library/Audio/Plug-Ins/VST/"),
               vst3BinaryLocation           (config, Ids::xcodeVst3BinaryLocation,      nullptr, "$(HOME)/Library/Audio/Plug-Ins/VST3/"),
@@ -414,7 +413,7 @@ protected:
 
         CachedValue<String> osxSDKVersion, osxDeploymentTarget, iosDeploymentTarget, osxArchitecture,
                             customXcodeFlags, plistPreprocessorDefinitions, cppStandardLibrary, codeSignIdentity;
-        CachedValue<bool>   fastMathEnabled, linkTimeOptimisationEnabled, stripLocalSymbolsEnabled;
+        CachedValue<bool>   fastMathEnabled, stripLocalSymbolsEnabled;
         CachedValue<String> vstBinaryLocation, vst3BinaryLocation, auBinaryLocation, rtasBinaryLocation, aaxBinaryLocation;
 
         //==========================================================================
@@ -488,9 +487,6 @@ protected:
 
             props.add (new BooleanPropertyComponent (fastMathEnabled.getPropertyAsValue(), "Relax IEEE compliance", "Enabled"),
                        "Enable this to use FAST_MATH non-IEEE mode. (Warning: this can have unexpected results!)");
-
-            props.add (new BooleanPropertyComponent (linkTimeOptimisationEnabled.getPropertyAsValue(), "Link-Time Optimisation", "Enabled"),
-                       "Enable this to perform link-time code generation. This is recommended for release builds.");
 
             props.add (new BooleanPropertyComponent (stripLocalSymbolsEnabled.getPropertyAsValue(), "Strip local symbols", "Enabled"),
                        "Enable this to strip any locally defined symbols resulting in a smaller binary size. Enabling this "
@@ -910,7 +906,7 @@ public:
                     s.add ("INFOPLIST_PREPROCESSOR_DEFINITIONS = " + indentParenthesisedList (defsList));
             }
 
-            if (config.linkTimeOptimisationEnabled.get())
+            if (config.isLinkTimeOptimisationEnabled())
                 s.add ("LLVM_LTO = YES");
 
             if (config.fastMathEnabled.get())

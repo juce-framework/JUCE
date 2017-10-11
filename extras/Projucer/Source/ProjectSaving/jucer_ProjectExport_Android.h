@@ -360,6 +360,11 @@ protected:
         {
             return "${ANDROID_ABI}";
         }
+
+        String getLinkerFlagsString() const
+        {
+            return String ("\"-DCMAKE_EXE_LINKER_FLAGS_") + (isDebug() ? "DEBUG" : "RELEASE") + "=-flto\"";
+        }
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
@@ -595,7 +600,9 @@ private:
                                            << ", \"-DCMAKE_CXX_FLAGS_" << (cfg.isDebug() ? "DEBUG" : "RELEASE")
                                            << "=-O" << cfg.getGCCOptimisationFlag() << "\""
                                            << ", \"-DCMAKE_C_FLAGS_"   << (cfg.isDebug() ? "DEBUG" : "RELEASE")
-                                           << "=-O" << cfg.getGCCOptimisationFlag() << "\"" << newLine;
+                                           << "=-O" << cfg.getGCCOptimisationFlag() << "\""
+                                           << (cfg.isLinkTimeOptimisationEnabled() ? ", " + cfg.getLinkerFlagsString() : "")
+                                           << newLine;
             mo << "                }"                   << newLine;
             mo << "            }"                       << newLine;
             mo << "       }"                            << newLine;
