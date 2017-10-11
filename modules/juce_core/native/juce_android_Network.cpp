@@ -260,7 +260,7 @@ static void findIPAddresses (int sock, Array<IPAddress>& result)
     do
     {
         bufferSize *= 2;
-        buffer.calloc ((size_t) bufferSize);
+        buffer.calloc (bufferSize);
 
         cfg.ifc_len = bufferSize;
         cfg.ifc_buf = buffer;

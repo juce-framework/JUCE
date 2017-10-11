@@ -440,7 +440,7 @@ public:
 
         HeapBlock<int*> channels;
         HeapBlock<int> temp;
-        const int bitsToShift = 32 - (int) bitsPerSample;
+        auto bitsToShift = 32 - (int) bitsPerSample;
 
         if (bitsToShift > 0)
         {
@@ -484,9 +484,9 @@ public:
     void writeMetaData (const FlacNamespace::FLAC__StreamMetadata* metadata)
     {
         using namespace FlacNamespace;
-        const FLAC__StreamMetadata_StreamInfo& info = metadata->data.stream_info;
+        auto& info = metadata->data.stream_info;
 
-        unsigned char buffer [FLAC__STREAM_METADATA_STREAMINFO_LENGTH];
+        unsigned char buffer[FLAC__STREAM_METADATA_STREAMINFO_LENGTH];
         const unsigned int channelsMinus1 = info.channels - 1;
         const unsigned int bitsMinus1 = info.bits_per_sample - 1;
 

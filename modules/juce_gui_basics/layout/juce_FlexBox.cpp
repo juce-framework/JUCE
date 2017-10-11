@@ -37,8 +37,8 @@ struct FlexBoxLayoutCalculation
                           || fb.flexDirection == FlexBox::Direction::rowReverse),
          containerLineLength (isRowDirection ? parentWidth : parentHeight)
     {
-        lineItems.calloc ((size_t) (numItems * numItems));
-        lineInfo.calloc ((size_t) numItems);
+        lineItems.calloc (numItems * numItems);
+        lineInfo.calloc (numItems);
     }
 
     struct ItemWithState

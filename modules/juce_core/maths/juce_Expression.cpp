@@ -245,10 +245,12 @@ struct Expression::Helpers
         {
             checkRecursionDepth (recursionDepth);
             double result = 0;
-            const int numParams = parameters.size();
+            auto numParams = parameters.size();
+
             if (numParams > 0)
             {
-                HeapBlock<double> params ((size_t) numParams);
+                HeapBlock<double> params (numParams);
+
                 for (int i = 0; i < numParams; ++i)
                     params[i] = parameters.getReference(i).term->resolve (scope, recursionDepth + 1)->toDouble();
 

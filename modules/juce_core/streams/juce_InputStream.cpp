@@ -177,7 +177,7 @@ String InputStream::readString()
 String InputStream::readNextLine()
 {
     MemoryBlock buffer (256);
-    char* data = static_cast<char*> (buffer.getData());
+    auto* data = static_cast<char*> (buffer.getData());
     size_t i = 0;
 
     while ((data[i] = readByte()) != 0)
@@ -223,8 +223,8 @@ void InputStream::skipNextBytes (int64 numBytesToSkip)
 {
     if (numBytesToSkip > 0)
     {
-        const int skipBufferSize = (int) jmin (numBytesToSkip, (int64) 16384);
-        HeapBlock<char> temp ((size_t) skipBufferSize);
+        auto skipBufferSize = (int) jmin (numBytesToSkip, (int64) 16384);
+        HeapBlock<char> temp (skipBufferSize);
 
         while (numBytesToSkip > 0 && ! isExhausted())
             numBytesToSkip -= read (temp, (int) jmin (numBytesToSkip, (int64) skipBufferSize));
