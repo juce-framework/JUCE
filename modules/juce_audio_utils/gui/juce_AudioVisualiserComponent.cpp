@@ -76,7 +76,7 @@ struct AudioVisualiserComponent::ChannelInfo
     }
 
     AudioVisualiserComponent& owner;
-    Array<Range<float> > levels;
+    Array<Range<float>> levels;
     Range<float> value;
     int nextSample, subSample;
 

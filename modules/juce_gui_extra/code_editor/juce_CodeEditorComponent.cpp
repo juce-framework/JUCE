@@ -398,7 +398,7 @@ bool CodeEditorComponent::isTextInputActive() const
     return true;
 }
 
-void CodeEditorComponent::setTemporaryUnderlining (const Array<Range<int> >&)
+void CodeEditorComponent::setTemporaryUnderlining (const Array<Range<int>>&)
 {
     jassertfalse; // TODO Windows IME not yet supported for this comp..
 }

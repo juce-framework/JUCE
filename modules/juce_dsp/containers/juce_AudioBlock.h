@@ -504,7 +504,7 @@ public:
     // This class can only be used with floating point types
     static_assert (std::is_same<SampleType, float>::value                || std::is_same<SampleType, double>::value
                   #if JUCE_USE_SIMD
-                   || std::is_same<SampleType, SIMDRegister<float> >::value || std::is_same<SampleType, SIMDRegister<double> >::value
+                   || std::is_same<SampleType, SIMDRegister<float>>::value || std::is_same<SampleType, SIMDRegister<double>>::value
                   #endif
                    , "AudioBlock only supports single or double precision floating point types");
 

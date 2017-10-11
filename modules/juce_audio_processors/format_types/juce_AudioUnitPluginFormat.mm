@@ -430,18 +430,18 @@ public:
         for (int dir = 0; dir < 2; ++dir)
         {
             const bool isInput = (dir == 0);
-            const Array<AudioChannelSet>& requestedLayouts         = (isInput ? layouts.inputBuses  : layouts.outputBuses);
-            const Array<AudioChannelSet>& oppositeRequestedLayouts = (isInput ? layouts.outputBuses : layouts.inputBuses);
-            const Array<Array<AudioChannelSet> >& supported = (isInput ? supportedInLayouts : supportedOutLayouts);
+            auto& requestedLayouts         = (isInput ? layouts.inputBuses  : layouts.outputBuses);
+            auto& oppositeRequestedLayouts = (isInput ? layouts.outputBuses : layouts.inputBuses);
+            auto& supported                = (isInput ? supportedInLayouts : supportedOutLayouts);
             const int n = getBusCount (isInput);
 
             for (int busIdx = 0; busIdx < n; ++busIdx)
             {
-                const AudioChannelSet& requested  = requestedLayouts.getReference (busIdx);
+                auto& requested = requestedLayouts.getReference (busIdx);
                 const int oppositeBusIdx = jmin (getBusCount (! isInput) - 1, busIdx);
                 const bool hasOppositeBus = (oppositeBusIdx >= 0);
-                const AudioChannelSet oppositeRequested = (hasOppositeBus ? oppositeRequestedLayouts.getReference (oppositeBusIdx) : AudioChannelSet());
-                const Array<AudioChannelSet>& possible = supported.getReference (busIdx);
+                auto oppositeRequested = (hasOppositeBus ? oppositeRequestedLayouts.getReference (oppositeBusIdx) : AudioChannelSet());
+                auto& possible = supported.getReference (busIdx);
 
                 if (requested.isDisabled())
                     return false;
@@ -452,9 +452,9 @@ public:
                 int i;
                 for (i = 0; i < numChannelInfos; ++i)
                 {
-                    const AUChannelInfo& info = channelInfos[i];
-                    const SInt16& thisChannels = (isInput ? info.inChannels  : info.outChannels);
-                    const SInt16& opChannels   = (isInput ? info.outChannels : info.inChannels);
+                    auto& info = channelInfos[i];
+                    auto& thisChannels = (isInput ? info.inChannels  : info.outChannels);
+                    auto& opChannels   = (isInput ? info.outChannels : info.inChannels);
 
                     // this bus
                     if      (thisChannels == 0) continue;
@@ -472,11 +472,13 @@ public:
                     {
                         int numOppositeBuses = getBusCount (! isInput);
                         int j;
+
                         for (j = 0; j < numOppositeBuses; ++j)
                             if (requested.size() != oppositeRequestedLayouts.getReference (j).size())
                                 break;
 
-                        if (j < numOppositeBuses) continue;
+                        if (j < numOppositeBuses)
+                            continue;
                     }
 
                     break;
@@ -1254,7 +1256,7 @@ private:
     OwnedArray<AUBuffer> outputBufferList;
     AudioTimeStamp timeStamp;
     AudioSampleBuffer* currentBuffer;
-    Array<Array<AudioChannelSet> > supportedInLayouts, supportedOutLayouts;
+    Array<Array<AudioChannelSet>> supportedInLayouts, supportedOutLayouts;
 
     int numChannelInfos;
     HeapBlock<AUChannelInfo> channelInfos;

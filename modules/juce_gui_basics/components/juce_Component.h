@@ -2270,7 +2270,7 @@ private:
     friend class MouseListenerList;
     friend struct ContainerDeletePolicy<MouseListenerList>;
     ScopedPointer<MouseListenerList> mouseListeners;
-    ScopedPointer<Array<KeyListener*> > keyListeners;
+    ScopedPointer<Array<KeyListener*>> keyListeners;
     ListenerList<ComponentListener> componentListeners;
     NamedValueSet properties;
 

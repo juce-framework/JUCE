@@ -755,8 +755,8 @@ public:
         }
 
         //==============================================================================
-        ScopedPointer<OpenSLQueueRunnerPlayer<T> > player;
-        ScopedPointer<OpenSLQueueRunnerRecorder<T> > recorder;
+        ScopedPointer<OpenSLQueueRunnerPlayer<T>> player;
+        ScopedPointer<OpenSLQueueRunnerRecorder<T>> recorder;
         Atomic<int> guard;
         jmethodID getUnderrunCount = 0;
     };

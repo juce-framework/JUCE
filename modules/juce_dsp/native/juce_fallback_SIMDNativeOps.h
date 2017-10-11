@@ -40,11 +40,11 @@ namespace SIMDInternal
     template <> struct MaskTypeFor <int16_t>                { typedef uint16_t  type; };
     template <> struct MaskTypeFor <int32_t>                { typedef uint32_t  type; };
     template <> struct MaskTypeFor <int64_t>                { typedef uint64_t  type; };
-    template <> struct MaskTypeFor <std::complex<float> >   { typedef uint32_t  type; };
-    template <> struct MaskTypeFor <std::complex<double> >  { typedef uint64_t  type; };
+    template <> struct MaskTypeFor <std::complex<float>>    { typedef uint32_t  type; };
+    template <> struct MaskTypeFor <std::complex<double>>   { typedef uint64_t  type; };
 
     template <typename Primitive> struct PrimitiveType                           { typedef Primitive type; };
-    template <typename Primitive> struct PrimitiveType<std::complex<Primitive> > { typedef Primitive type; };
+    template <typename Primitive> struct PrimitiveType<std::complex<Primitive>>  { typedef Primitive type; };
 
     template <int n>    struct Log2Helper    { enum { value = Log2Helper<n/2>::value + 1 }; };
     template <>         struct Log2Helper<1> { enum { value = 0 }; };

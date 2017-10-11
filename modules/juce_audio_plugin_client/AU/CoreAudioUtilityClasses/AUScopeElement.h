@@ -264,7 +264,7 @@ protected:
 	inline ParameterMapEvent&	GetParamEvent(AudioUnitParameterID paramID);
 
 private:
-	typedef std::map<AudioUnitParameterID, ParameterMapEvent, std::less<AudioUnitParameterID> > ParameterMap;
+	typedef std::map<AudioUnitParameterID, ParameterMapEvent, std::less<AudioUnitParameterID>> ParameterMap;
 
 /*! @var mAudioUnit */
 	AUBase *						mAudioUnit;

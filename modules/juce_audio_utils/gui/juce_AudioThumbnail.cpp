@@ -126,7 +126,7 @@ public:
         }
     }
 
-    void getLevels (int64 startSample, int numSamples, Array<Range<float> >& levels)
+    void getLevels (int64 startSample, int numSamples, Array<Range<float>>& levels)
     {
         const ScopedLock sl (readerLock);
 
@@ -144,7 +144,7 @@ public:
         if (reader != nullptr)
         {
             if (levels.size() < (int) reader->numChannels)
-                levels.insertMultiple (0, Range<float>(), (int) reader->numChannels - levels.size());
+                levels.insertMultiple (0, {}, (int) reader->numChannels - levels.size());
 
             reader->readMaxLevels (startSample, numSamples, levels.getRawDataPointer(), (int) reader->numChannels);
 
