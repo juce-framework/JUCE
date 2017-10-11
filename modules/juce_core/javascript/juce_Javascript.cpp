@@ -1719,13 +1719,10 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         static var Math_cos       (Args a) { return std::cos   (getDouble (a, 0)); }
         static var Math_acos      (Args a) { return std::acos  (getDouble (a, 0)); }
         static var Math_sinh      (Args a) { return std::sinh  (getDouble (a, 0)); }
-        static var Math_asinh     (Args a) { return std::asinh (getDouble (a, 0)); }
         static var Math_cosh      (Args a) { return std::cosh  (getDouble (a, 0)); }
-        static var Math_acosh     (Args a) { return std::acosh (getDouble (a, 0)); }
         static var Math_tan       (Args a) { return std::tan   (getDouble (a, 0)); }
         static var Math_tanh      (Args a) { return std::tanh  (getDouble (a, 0)); }
         static var Math_atan      (Args a) { return std::atan  (getDouble (a, 0)); }
-        static var Math_atanh     (Args a) { return std::atanh (getDouble (a, 0)); }
         static var Math_log       (Args a) { return std::log   (getDouble (a, 0)); }
         static var Math_log10     (Args a) { return std::log10 (getDouble (a, 0)); }
         static var Math_exp       (Args a) { return std::exp   (getDouble (a, 0)); }
@@ -1734,6 +1731,12 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         static var Math_sqrt      (Args a) { return std::sqrt  (getDouble (a, 0)); }
         static var Math_ceil      (Args a) { return std::ceil  (getDouble (a, 0)); }
         static var Math_floor     (Args a) { return std::floor (getDouble (a, 0)); }
+
+        // We can't use the std namespace equivalents of these functions without breaking
+        // compatibility with older versions of OS X.
+        static var Math_asinh     (Args a) { return asinh (getDouble (a, 0)); }
+        static var Math_acosh     (Args a) { return acosh (getDouble (a, 0)); }
+        static var Math_atanh     (Args a) { return atanh (getDouble (a, 0)); }
 
         static Identifier getClassName()   { static const Identifier i ("Math"); return i; }
         template <typename Type> static Type sign (Type n) noexcept  { return n > 0 ? (Type) 1 : (n < 0 ? (Type) -1 : 0); }
