@@ -120,9 +120,9 @@ String File::parseAbsolutePath (const String& p)
     // Windows..
     auto path = removeEllipsis (p.replaceCharacter ('/', '\\'));
 
-    if (path.startsWithChar (separator))
+    if (path.startsWithChar (getSeparatorChar()))
     {
-        if (path[1] != separator)
+        if (path[1] != getSeparatorChar())
         {
             /*  When you supply a raw string to the File object constructor, it must be an absolute path.
                 If you're trying to parse a string that may be either a relative path or an absolute path,
