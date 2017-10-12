@@ -27,14 +27,8 @@
 namespace juce
 {
 
-AudioFormatReader::AudioFormatReader (InputStream* const in, const String& name)
-    : sampleRate (0),
-      bitsPerSample (0),
-      lengthInSamples (0),
-      numChannels (0),
-      usesFloatingPointData (false),
-      input (in),
-      formatName (name)
+AudioFormatReader::AudioFormatReader (InputStream* in, const String& name)
+    : input (in), formatName (name)
 {
 }
 
