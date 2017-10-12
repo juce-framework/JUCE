@@ -47,7 +47,8 @@ MidiMessageSequence& MidiMessageSequence::operator= (const MidiMessageSequence& 
 
 MidiMessageSequence::MidiMessageSequence (MidiMessageSequence&& other) noexcept
     : list (static_cast<OwnedArray<MidiEventHolder>&&> (other.list))
-{}
+{
+}
 
 MidiMessageSequence& MidiMessageSequence::operator= (MidiMessageSequence&& other) noexcept
 {

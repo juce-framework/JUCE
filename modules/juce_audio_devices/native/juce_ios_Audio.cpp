@@ -1101,7 +1101,8 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
 iOSAudioIODevice::iOSAudioIODevice (const String& deviceName)
     : AudioIODevice (deviceName, iOSAudioDeviceName),
       pimpl (new Pimpl (*this))
-{}
+{
+}
 
 //==============================================================================
 String iOSAudioIODevice::open (const BigInteger& inChans, const BigInteger& outChans,

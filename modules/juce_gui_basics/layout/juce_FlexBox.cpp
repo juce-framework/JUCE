@@ -764,7 +764,8 @@ FlexBox::FlexBox (JustifyContent jc) noexcept  : justifyContent (jc) {}
 
 FlexBox::FlexBox (Direction d, Wrap w, AlignContent ac, AlignItems ai, JustifyContent jc) noexcept
     : flexDirection (d), flexWrap (w), alignContent (ac), alignItems (ai), justifyContent (jc)
-{}
+{
+}
 
 void FlexBox::performLayout (Rectangle<float> targetArea)
 {

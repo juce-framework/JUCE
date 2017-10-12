@@ -60,17 +60,13 @@ GridItem::Property::Property (Span spanToUse) noexcept
 
 
 //==============================================================================
-GridItem::Margin::Margin() noexcept : left(), right(), top(), bottom()
-{}
+GridItem::Margin::Margin() noexcept : left(), right(), top(), bottom() {}
 
-GridItem::Margin::Margin (int v) noexcept : GridItem::Margin::Margin (static_cast<float> (v))
-{}
+GridItem::Margin::Margin (int v) noexcept : GridItem::Margin::Margin (static_cast<float> (v)) {}
 
-GridItem::Margin::Margin (float v) noexcept : left (v), right (v), top (v), bottom (v)
-{}
+GridItem::Margin::Margin (float v) noexcept : left (v), right (v), top (v), bottom (v) {}
 
-GridItem::Margin::Margin (float t, float r, float b, float l) noexcept : left (l), right (r), top (t), bottom (b)
-{}
+GridItem::Margin::Margin (float t, float r, float b, float l) noexcept : left (l), right (r), top (t), bottom (b) {}
 
 //==============================================================================
 GridItem::GridItem() noexcept {}

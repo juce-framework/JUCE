@@ -1092,7 +1092,8 @@ void TextEditor::updateCaretPosition()
 
 TextEditor::LengthAndCharacterRestriction::LengthAndCharacterRestriction (int maxLen, const String& chars)
     : allowedCharacters (chars), maxLength (maxLen)
-{}
+{
+}
 
 String TextEditor::LengthAndCharacterRestriction::filterNewText (TextEditor& ed, const String& newInput)
 {
