@@ -428,13 +428,13 @@ private:
 
     PopupMenu currentMenu;
     Value currentId;
-    int lastCurrentId;
-    bool isButtonDown, menuActive, scrollWheelEnabled;
-    float mouseWheelAccumulator;
+    int lastCurrentId = 0;
+    bool isButtonDown = false, menuActive = false, scrollWheelEnabled = false;
+    float mouseWheelAccumulator = 0;
     ListenerList<Listener> listeners;
     ScopedPointer<Label> label;
     String textWhenNothingSelected, noChoicesMessage;
-    EditableState labelEditableState;
+    EditableState labelEditableState = editableUnknown;
 
     PopupMenu::Item* getItemForId (int) const noexcept;
     PopupMenu::Item* getItemForIndex (int) const noexcept;

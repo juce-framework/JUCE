@@ -91,7 +91,7 @@ public:
     enum class AlignSelf  { autoAlign, flexStart, flexEnd, center, stretch };
 
     /** This is the aligh-self property of the item.
-        This determines the alignment of the item along the corss-axis (perpendicular to the direction
+        This determines the alignment of the item along the cross-axis (perpendicular to the direction
         of flow).
     */
     AlignSelf alignSelf = AlignSelf::stretch;
