@@ -74,16 +74,6 @@ DECLARE_JNI_CLASS (Integer, "java/lang/Integer");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
-    METHOD (constructor,         "<init>",         "()V") \
-    METHOD (constructWithString, "<init>",         "(Ljava/lang/String;)V") \
-    METHOD (setPackage,          "setPackage",     "(Ljava/lang/String;)Landroid/content/Intent;") \
-    METHOD (getIntExtra,         "getIntExtra",    "(Ljava/lang/String;I)I") \
-    METHOD (getStringExtra,      "getStringExtra", "(Ljava/lang/String;)Ljava/lang/String;")
-
-DECLARE_JNI_CLASS (Intent, "android/content/Intent");
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
     METHOD (hasNext, "hasNext", "()Z") \
     METHOD (next,    "next",    "()Ljava/lang/Object;")
 

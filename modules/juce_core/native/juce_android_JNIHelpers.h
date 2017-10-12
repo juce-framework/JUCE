@@ -398,6 +398,19 @@ DECLARE_JNI_CLASS (JavaClass, "java/lang/Class");
 DECLARE_JNI_CLASS (JavaObject, "java/lang/Object");
 #undef JNI_CLASS_MEMBERS
 
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  METHOD (constructor,         "<init>",         "()V") \
+  METHOD (constructWithString, "<init>",         "(Ljava/lang/String;)V") \
+  METHOD (setPackage,          "setPackage",     "(Ljava/lang/String;)Landroid/content/Intent;") \
+  METHOD (getIntExtra,         "getIntExtra",    "(Ljava/lang/String;I)I") \
+  METHOD (getStringExtra,      "getStringExtra", "(Ljava/lang/String;)Ljava/lang/String;") \
+  METHOD (addCategory,         "addCategory",    "(Ljava/lang/String;)Landroid/content/Intent;") \
+  METHOD (setType,             "setType",        "(Ljava/lang/String;)Landroid/content/Intent;") \
+  METHOD (getData,             "getData",        "()Landroid/net/Uri;") \
+  METHOD (setAction,           "setAction",      "(Ljava/lang/String;)Landroid/content/Intent;") \
+
+DECLARE_JNI_CLASS (Intent, "android/content/Intent");
+#undef JNI_CLASS_MEMBERS
 
 //==============================================================================
 class AndroidInterfaceImplementer;

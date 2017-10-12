@@ -29,14 +29,6 @@ extern juce::JUCEApplicationBase* juce_CreateApplication(); // (from START_JUCE_
 namespace juce
 {
 
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
- METHOD (constructor,   "<init>",           "()V") \
- METHOD (setAction,     "setAction",        "(Ljava/lang/String;)Landroid/content/Intent;") \
- METHOD (addCategory,   "addCategory",       "(Ljava/lang/String;)Landroid/content/Intent;") \
-
-DECLARE_JNI_CLASS (Intent, "android/content/Intent");
-#undef JNI_CLASS_MEMBERS
-
 //==============================================================================
 #if JUCE_IN_APP_PURCHASES && JUCE_MODULE_AVAILABLE_juce_product_unlocking
  extern void juce_inAppPurchaseCompleted (void*);
