@@ -317,6 +317,8 @@ public class JuceAppActivity   extends Activity
 
     public final void deleteView (ComponentPeerView view)
     {
+        view.host = 0;
+
         ViewGroup group = (ViewGroup) (view.getParent());
 
         if (group != null)
@@ -590,6 +592,9 @@ public class JuceAppActivity   extends Activity
         @Override
         public boolean onTouchEvent (MotionEvent event)
         {
+            if (host == 0)
+                return false;
+
             int action = event.getAction();
             long time = event.getEventTime();
 
