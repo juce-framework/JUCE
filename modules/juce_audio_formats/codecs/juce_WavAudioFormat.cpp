@@ -1677,6 +1677,8 @@ bool WavAudioFormat::isChannelLayoutSupported (const AudioChannelSet& channelSet
 AudioFormatReader* WavAudioFormat::createReaderFor (InputStream* sourceStream,
                                                     const bool deleteStreamIfOpeningFails)
 {
+    const auto originalPos = sourceStream->getPosition();
+
     ScopedPointer<WavAudioFormatReader> r (new WavAudioFormatReader (sourceStream));
 
     if (r->sampleRate > 0 && r->numChannels > 0 && r->bytesPerFrame > 0)
@@ -1685,6 +1687,8 @@ AudioFormatReader* WavAudioFormat::createReaderFor (InputStream* sourceStream,
    #if JUCE_USE_OGGVORBIS
     if (r->isSubformatOggVorbis)
     {
+        sourceStream->setPosition (originalPos);
+
         r->input = nullptr; //N.B.: Let the OggVorbisAudioFormat handle the stream
         return OggVorbisAudioFormat().createReaderFor (sourceStream, deleteStreamIfOpeningFails);
     }
