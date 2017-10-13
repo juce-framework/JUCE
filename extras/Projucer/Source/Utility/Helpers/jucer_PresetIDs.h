@@ -124,6 +124,7 @@ namespace Ids
     DECLARE_ID (windowsCodeBlocksArchitecture);
     DECLARE_ID (toolset);
     DECLARE_ID (windowsTargetPlatformVersion);
+    DECLARE_ID (debugInformationFormat);
     DECLARE_ID (IPPLibrary);
     DECLARE_ID (msvcModuleDefinitionFile);
     DECLARE_ID (bigIcon);

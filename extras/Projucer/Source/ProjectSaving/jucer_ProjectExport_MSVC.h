@@ -160,6 +160,7 @@ public:
 
             setValueIfVoid (shouldGenerateManifestValue(), true);
             setValueIfVoid (getArchitectureType(), get64BitArchName());
+            setValueIfVoid (getDebugInformationFormatValue(), isDebug() ? "ProgramDatabase" : "None");
 
             if (! isDebug())
                 updateOldLTOSetting();
@@ -203,6 +204,9 @@ public:
         String get64BitArchName() const             { return "x64"; }
         String get32BitArchName() const             { return "Win32"; }
 
+        Value getDebugInformationFormatValue()            { return getValue (Ids::debugInformationFormat); }
+        String getDebugInformationFormatString() const    { return config [Ids::debugInformationFormat]; }
+
         String createMSVCConfigName() const
         {
             return getName() + "|" + (config [Ids::winArchitecture] == get64BitArchName() ? "x64" : "Win32");
@@ -226,6 +230,21 @@ public:
             props.add (new ChoicePropertyComponent (getArchitectureType(), "Architecture",
                                                     StringArray (archTypes, numElementsInArray (archTypes)),
                                                     Array<var>  (archTypes, numElementsInArray (archTypes))));
+
+
+            {
+                static const char* debugInfoOptions[] = { "None", "C7 Compatible (/Z7)", "Program Database (/Zi)", "Program Database for Edit And Continue (/ZI)", nullptr };
+                static const char* debugInfoValues[] = { "None", "OldStyle", "ProgramDatabase", "EditAndContinue", nullptr };
+
+                props.add (new ChoicePropertyComponentWithEnablement (getDebugInformationFormatValue(),
+                                                                      isDebug() ? isDebugValue() : shouldGenerateDebugSymbolsValue(),
+                                                                      "Debug Information Format",
+                                                                      StringArray (debugInfoOptions),
+                                                                      Array<var> (debugInfoValues)),
+                           "The type of debugging information created for your program for this configuration."
+                           " This will only be used in a debug configuration with no optimisation or a release configuration"
+                           " with forced generation of debug symbols.");
+            }
 
             props.add (new BooleanPropertyComponent (getFastMathValue(), "Relax IEEE compliance", "Enabled"),
                        "Enable this to use FAST_MATH non-IEEE mode. (Warning: this can have unexpected results!)");
@@ -477,13 +496,11 @@ public:
 
                     cl->createNewChildElement ("Optimization")->addTextElement (getOptimisationLevelString (config.getOptimisationLevelInt()));
 
-                    if (isDebug && config.getOptimisationLevelInt() <= optimisationOff)
+                    if ((isDebug || config.shouldGenerateDebugSymbols())
+                        && config.getOptimisationLevelInt() <= optimisationOff)
                     {
-                        isUsingEditAndContinue = ! config.is64Bit();
-
                         cl->createNewChildElement ("DebugInformationFormat")
-                          ->addTextElement (isUsingEditAndContinue ? "EditAndContinue"
-                                                                   : "ProgramDatabase");
+                            ->addTextElement (config.getDebugInformationFormatString());
                     }
 
                     StringArray includePaths (getOwner().getHeaderSearchPaths (config));
