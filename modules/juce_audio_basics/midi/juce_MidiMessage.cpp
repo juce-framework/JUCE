@@ -93,7 +93,7 @@ int MidiMessage::getMessageLengthFromFirstByte (const uint8 firstByte) noexcept
         1, 2, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
     };
 
-    return messageLengths [firstByte & 0x7f];
+    return messageLengths[firstByte & 0x7f];
 }
 
 //==============================================================================
@@ -342,6 +342,11 @@ String MidiMessage::getDescription() const
     }
 
     return String::toHexString (getRawData(), getRawDataSize());
+}
+
+MidiMessage MidiMessage::withTimeStamp (double newTimestamp) const
+{
+    return { *this, newTimestamp };
 }
 
 int MidiMessage::getChannel() const noexcept
@@ -964,7 +969,7 @@ bool MidiMessage::isMidiMachineControlGoto (int& hours, int& minutes, int& secon
         hours = data[7] % 24;   // (that some machines send out hours > 24)
         minutes = data[8];
         seconds = data[9];
-        frames = data[10];
+        frames  = data[10];
 
         return true;
     }
@@ -985,8 +990,8 @@ String MidiMessage::getMidiNoteName (int note, bool useSharps, bool includeOctav
 
     if (isPositiveAndBelow (note, 128))
     {
-        String s (useSharps ? sharpNoteNames [note % 12]
-                            : flatNoteNames  [note % 12]);
+        String s (useSharps ? sharpNoteNames[note % 12]
+                            : flatNoteNames [note % 12]);
 
         if (includeOctaveNumber)
             s << (note / 12 + (octaveNumForMiddleC - 5));
@@ -1079,7 +1084,7 @@ const char* MidiMessage::getRhythmInstrumentName (const int n)
         NEEDS_TRANS("Open Cuica"),          NEEDS_TRANS("Mute Triangle"),   NEEDS_TRANS("Open Triangle")
     };
 
-    return (n >= 35 && n <= 81) ? names [n - 35] : nullptr;
+    return (n >= 35 && n <= 81) ? names[n - 35] : nullptr;
 }
 
 const char* MidiMessage::getControllerName (const int n)
