@@ -1090,7 +1090,7 @@ void JUCE_CALLTYPE FloatVectorOperations::disableDenormalisedNumberSupport() noe
    #if JUCE_USE_SSE_INTRINSICS
     intptr_t mask = 0x8040;
    #else /*JUCE_USE_ARM_NEON*/
-    intptr_t mask = (1 << 24 /* FZ */) | (1 << 23 /* RMODE_1 */) | (1 << 22 /* RMODE_0 */);
+    intptr_t mask = (1 << 24 /* FZ */);
    #endif
 
     setFpStatusRegister (getFpStatusRegister() | mask);
@@ -1107,7 +1107,7 @@ ScopedNoDenormals::ScopedNoDenormals() noexcept
    #if JUCE_USE_SSE_INTRINSICS
     intptr_t mask = 0x8040;
    #else /*JUCE_USE_ARM_NEON*/
-    intptr_t mask = (1 << 24 /* FZ */) | (1 << 23 /* RMODE_1 */) | (1 << 22 /* RMODE_0 */);
+    intptr_t mask = (1 << 24 /* FZ */);
    #endif
 
     fpsr = FloatVectorOperations::getFpStatusRegister();
