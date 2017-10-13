@@ -1339,11 +1339,16 @@ void TextEditor::scrollEditorToPositionCaret (const int desiredCaretX,
 
 Rectangle<int> TextEditor::getCaretRectangle()
 {
+    return getCaretRectangleFloat().getSmallestIntegerContainer();
+}
+
+Rectangle<float> TextEditor::getCaretRectangleFloat() const
+{
     Point<float> anchor;
     auto cursorHeight = currentFont.getHeight(); // (in case the text is empty and the call below doesn't set this value)
     getCharPosition (caretPosition, anchor, cursorHeight);
 
-    return { roundToInt (anchor.x), roundToInt (anchor.y), 2, roundToInt (cursorHeight) };
+    return { anchor.x, anchor.y, 2.0f, cursorHeight };
 }
 
 //==============================================================================
@@ -1837,7 +1842,7 @@ bool TextEditor::moveCaretUp (bool selecting)
     if (! isMultiLine())
         return moveCaretToStartOfLine (selecting);
 
-    auto caretPos = getCaretRectangle().toFloat();
+    auto caretPos = getCaretRectangleFloat();
     return moveCaretWithTransaction (indexAtPosition (caretPos.getX(), caretPos.getY() - 1.0f), selecting);
 }
 
@@ -1846,7 +1851,7 @@ bool TextEditor::moveCaretDown (bool selecting)
     if (! isMultiLine())
         return moveCaretToEndOfLine (selecting);
 
-    auto caretPos = getCaretRectangle().toFloat();
+    auto caretPos = getCaretRectangleFloat();
     return moveCaretWithTransaction (indexAtPosition (caretPos.getX(), caretPos.getBottom() + 1.0f), selecting);
 }
 
@@ -1855,7 +1860,7 @@ bool TextEditor::pageUp (bool selecting)
     if (! isMultiLine())
         return moveCaretToStartOfLine (selecting);
 
-    auto caretPos = getCaretRectangle().toFloat();
+    auto caretPos = getCaretRectangleFloat();
     return moveCaretWithTransaction (indexAtPosition (caretPos.getX(), caretPos.getY() - viewport->getViewHeight()), selecting);
 }
 
@@ -1864,7 +1869,7 @@ bool TextEditor::pageDown (bool selecting)
     if (! isMultiLine())
         return moveCaretToEndOfLine (selecting);
 
-    auto caretPos = getCaretRectangle().toFloat();
+    auto caretPos = getCaretRectangleFloat();
     return moveCaretWithTransaction (indexAtPosition (caretPos.getX(), caretPos.getBottom() + viewport->getViewHeight()), selecting);
 }
 
@@ -1892,7 +1897,7 @@ bool TextEditor::moveCaretToTop (bool selecting)
 
 bool TextEditor::moveCaretToStartOfLine (bool selecting)
 {
-    auto caretPos = getCaretRectangle().toFloat();
+    auto caretPos = getCaretRectangleFloat();
     return moveCaretWithTransaction (indexAtPosition (0.0f, caretPos.getY()), selecting);
 }
 
@@ -1903,7 +1908,7 @@ bool TextEditor::moveCaretToEnd (bool selecting)
 
 bool TextEditor::moveCaretToEndOfLine (bool selecting)
 {
-    auto caretPos = getCaretRectangle().toFloat();
+    auto caretPos = getCaretRectangleFloat();
     return moveCaretWithTransaction (indexAtPosition ((float) textHolder->getWidth(), caretPos.getY()), selecting);
 }
 

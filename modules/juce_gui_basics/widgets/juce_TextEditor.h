@@ -749,6 +749,7 @@ private:
     void reinsert (int insertIndex, const OwnedArray<UniformTextSection>&);
     void remove (Range<int>, UndoManager*, int caretPositionToMoveTo);
     void getCharPosition (int index, Point<float>&, float& lineHeight) const;
+    Rectangle<float> getCaretRectangleFloat() const;
     void updateCaretPosition();
     void updateValueFromText();
     void textWasChangedByValue();
