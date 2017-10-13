@@ -554,6 +554,7 @@ public:
 
         Assuming that this file is a directory, this method will search it
         for either files or subdirectories whose names match a filename pattern.
+        Note that the order in which files are returned is completely undefined!
 
         @param results                  an array to which File objects will be added for the
                                         files that the search comes up with
