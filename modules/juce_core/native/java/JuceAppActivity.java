@@ -548,7 +548,6 @@ public class JuceAppActivity   extends Activity
             setFocusable (true);
             setFocusableInTouchMode (true);
             setOnFocusChangeListener (this);
-            requestFocus();
 
             // swap red and blue colours to match internal opengl texture format
             ColorMatrix colorMatrix = new ColorMatrix();
