@@ -1034,6 +1034,17 @@ public:
                                 bytesPerFrame = 0;
                         }
                     }
+                    else if (format == 0x674F /*WAVE_FORMAT_OGG_VORBIS_MODE_1*/
+                          || format == 0x6750 /*WAVE_FORMAT_OGG_VORBIS_MODE_2*/
+                          || format == 0x6751 /*WAVE_FORMAT_OGG_VORBIS_MODE_3*/
+                          || format == 0x676F /*WAVE_FORMAT_OGG_VORBIS_MODE_1_PLUS*/
+                          || format == 0x6770 /*WAVE_FORMAT_OGG_VORBIS_MODE_2_PLUS*/
+                          || format == 0x6771 /*WAVE_FORMAT_OGG_VORBIS_MODE_3_PLUS*/)
+                    {
+                        sampleRate = 0.0; //N.B.: Forces a failure case in WavAudioFormat::createReaderFor
+                        isSubformatOggVorbis = true;
+                        break;
+                    }
                     else if (format != 1)
                     {
                         bytesPerFrame = 0;
@@ -1267,6 +1278,7 @@ public:
     int64 dataChunkStart = 0, dataLength = 0;
     int bytesPerFrame = 0;
     bool isRF64 = false;
+    bool isSubformatOggVorbis = false;
     AudioChannelSet channelLayout;
 
 private:
@@ -1665,10 +1677,22 @@ bool WavAudioFormat::isChannelLayoutSupported (const AudioChannelSet& channelSet
 AudioFormatReader* WavAudioFormat::createReaderFor (InputStream* sourceStream,
                                                     const bool deleteStreamIfOpeningFails)
 {
+    const auto originalPos = sourceStream->getPosition();
+
     ScopedPointer<WavAudioFormatReader> r (new WavAudioFormatReader (sourceStream));
 
     if (r->sampleRate > 0 && r->numChannels > 0 && r->bytesPerFrame > 0)
         return r.release();
+
+   #if JUCE_USE_OGGVORBIS
+    if (r->isSubformatOggVorbis)
+    {
+        sourceStream->setPosition (originalPos);
+
+        r->input = nullptr; //N.B.: Let the OggVorbisAudioFormat handle the stream
+        return OggVorbisAudioFormat().createReaderFor (sourceStream, deleteStreamIfOpeningFails);
+    }
+   #endif
 
     if (! deleteStreamIfOpeningFails)
         r->input = nullptr;
