@@ -37,7 +37,7 @@ class JUCE_API  URL
 public:
     //==============================================================================
     /** Creates an empty URL. */
-    URL();
+    URL() noexcept;
 
     /** Creates a URL from a string.
         This will parse any embedded parameters after a '?' character and store them
@@ -46,14 +46,13 @@ public:
     */
     URL (const String& url);
 
-    /** Creates a copy of another URL. */
-    URL (const URL&);
+    URL (const URL&) = default;
+    URL (URL&&) = default;
+    URL& operator= (const URL&) = default;
+    URL& operator= (URL&&) = default;
 
     /** Destructor. */
     ~URL();
-
-    /** Copies this URL from another one. */
-    URL& operator= (const URL&);
 
     /** Compares two URLs.
         All aspects of the URLs must be identical for them to match, including any parameters,

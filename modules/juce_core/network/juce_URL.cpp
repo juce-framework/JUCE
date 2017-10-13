@@ -134,7 +134,7 @@ URL::DownloadTask::DownloadTask() {}
 URL::DownloadTask::~DownloadTask() {}
 
 //==============================================================================
-URL::URL()
+URL::URL() noexcept
 {
 }
 
@@ -173,26 +173,6 @@ URL::URL (const String& u, int)  : url (u) {}
 URL URL::createWithoutParsing (const String& u)
 {
     return URL (u, 0);
-}
-
-URL::URL (const URL& other)
-    : url (other.url),
-      postData (other.postData),
-      parameterNames (other.parameterNames),
-      parameterValues (other.parameterValues),
-      filesToUpload (other.filesToUpload)
-{
-}
-
-URL& URL::operator= (const URL& other)
-{
-    url = other.url;
-    postData = other.postData;
-    parameterNames = other.parameterNames;
-    parameterValues = other.parameterValues;
-    filesToUpload = other.filesToUpload;
-
-    return *this;
 }
 
 bool URL::operator== (const URL& other) const
@@ -301,19 +281,19 @@ bool URL::isWellFormed() const
 
 String URL::getDomain() const
 {
-    const int start = URLHelpers::findStartOfNetLocation (url);
-    const int end1 = url.indexOfChar (start, '/');
-    const int end2 = url.indexOfChar (start, ':');
+    auto start = URLHelpers::findStartOfNetLocation (url);
+    auto end1 = url.indexOfChar (start, '/');
+    auto end2 = url.indexOfChar (start, ':');
 
-    const int end = (end1 < 0 && end2 < 0) ? std::numeric_limits<int>::max()
-                                           : ((end1 < 0 || end2 < 0) ? jmax (end1, end2)
-                                                                     : jmin (end1, end2));
+    auto end = (end1 < 0 && end2 < 0) ? std::numeric_limits<int>::max()
+                                      : ((end1 < 0 || end2 < 0) ? jmax (end1, end2)
+                                                                : jmin (end1, end2));
     return url.substring (start, end);
 }
 
 String URL::getSubPath() const
 {
-    const int startOfPath = URLHelpers::findStartOfPath (url);
+    auto startOfPath = URLHelpers::findStartOfPath (url);
 
     return startOfPath <= 0 ? String()
         : url.substring (startOfPath);
