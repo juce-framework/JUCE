@@ -42,7 +42,9 @@ public:
 
         if (touchIndex < 0)
         {
-            touchIndex = jmax (0, currentTouches.indexOf ({}));
+            auto emptyTouchIndex = currentTouches.indexOf ({});
+            touchIndex = (emptyTouchIndex >= 0 ? emptyTouchIndex : currentTouches.size());
+
             currentTouches.set (touchIndex, info);
         }
 
