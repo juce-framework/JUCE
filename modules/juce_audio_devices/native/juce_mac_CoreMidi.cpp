@@ -186,6 +186,37 @@ namespace CoreMidiHelpers
         return result;
     }
 
+    static void setUniqueIdForMidiPort (MIDIObjectRef device, const String& portName, bool isInput)
+    {
+        String portUniqueId;
+       #if defined (JucePlugin_CFBundleIdentifier)
+        portUniqueId = JUCE_STRINGIFY (JucePlugin_CFBundleIdentifier);
+       #else
+        File appBundle (File::getSpecialLocation (File::currentApplicationFile));
+        CFURLRef bundleURL = CFURLCreateWithFileSystemPath (kCFAllocatorDefault, appBundle.getFullPathName().toCFString(), kCFURLPOSIXPathStyle, true);
+        if (bundleURL != nullptr)
+        {
+            CFBundleRef bundleRef = CFBundleCreate (kCFAllocatorDefault, bundleURL);
+            CFRelease (bundleURL);
+
+            if (bundleRef != nullptr)
+            {
+                if (auto bundleId = CFBundleGetIdentifier (bundleRef))
+                    portUniqueId = String::fromCFString (bundleId);
+
+                CFRelease (bundleRef);
+            }
+        }
+       #endif
+
+        if (portUniqueId.isNotEmpty())
+        {
+            portUniqueId += (String ("." + portName + String (isInput ? ".input" : ".output")));
+
+            CHECK_ERROR (MIDIObjectSetStringProperty (device, kMIDIPropertyUniqueID, portUniqueId.toCFString()));
+        }
+    }
+
     static StringArray findDevices (const bool forInput)
     {
         // It seems that OSX can be a bit picky about the thread that's first used to
@@ -380,6 +411,8 @@ MidiOutput* MidiOutput::createNewDevice (const String& deviceName)
 
     if (client != 0 && CHECK_ERROR (MIDISourceCreate (client, name.cfString, &endPoint)))
     {
+        CoreMidiHelpers::setUniqueIdForMidiPort (endPoint, deviceName, false);
+
         MidiOutput* mo = new MidiOutput (deviceName);
         mo->internal = new CoreMidiHelpers::MidiPortAndEndpoint (0, endPoint);
         return mo;
@@ -522,6 +555,8 @@ MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallba
 
         if (CHECK_ERROR (MIDIDestinationCreate (client, name.cfString, midiInputProc, mpc, &endPoint)))
         {
+            CoreMidiHelpers::setUniqueIdForMidiPort (endPoint, deviceName, true);
+
             mpc->portAndEndpoint = new MidiPortAndEndpoint (0, endPoint);
 
             mi = new MidiInput (deviceName);
