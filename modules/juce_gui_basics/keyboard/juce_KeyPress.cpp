@@ -226,9 +226,17 @@ KeyPress KeyPress::createFromDescription (const String& desc)
     {
         // see if it's a function key..
         if (! desc.containsChar ('#')) // avoid mistaking hex-codes like "#f1"
-            for (int i = 1; i <= 12; ++i)
+        {
+            for (int i = 1; i <= 35; ++i)
+            {
                 if (desc.containsWholeWordIgnoreCase ("f" + String (i)))
-                    key = F1Key + i - 1;
+                {
+                    if (i <= 16)        key = F1Key + i - 1;
+                    else if (i <= 24)   key = F17Key + i - 17;
+                    else if (i <= 35)   key = F25Key + i - 25;
+                }
+            }
+        }
 
         if (key == 0)
         {
