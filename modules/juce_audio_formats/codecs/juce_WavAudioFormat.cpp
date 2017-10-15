@@ -42,7 +42,7 @@ StringPairArray WavAudioFormat::createBWAVMetadata (const String& description,
                                                     const String& originator,
                                                     const String& originatorRef,
                                                     Time date,
-                                                    const int64 timeReferenceSamples,
+                                                    int64 timeReferenceSamples,
                                                     const String& codingHistory)
 {
     StringPairArray m;
@@ -200,7 +200,7 @@ namespace WavFileHelpers
             MemoryBlock data (roundUpSize (sizeof (BWAVChunk) + values[WavAudioFormat::bwavCodingHistory].getNumBytesAsUTF8()));
             data.fillWith (0);
 
-            BWAVChunk* b = (BWAVChunk*) data.getData();
+            auto* b = (BWAVChunk*) data.getData();
 
             // Allow these calls to overwrite an extra byte at the end, which is fine as long
             // as they get called in the right order..
@@ -683,14 +683,14 @@ namespace WavFileHelpers
                     if (infoLength <= 0)
                         return;
 
-                    for (int i = 0; i < numElementsInArray (types); ++i)
+                    for (auto& type : types)
                     {
-                        if (isMatchingTypeIgnoringCase (infoType, types[i]))
+                        if (isMatchingTypeIgnoringCase (infoType, type))
                         {
                             MemoryBlock mb;
                             input.readIntoMemoryBlock (mb, (ssize_t) infoLength);
-                            values.set (types[i], String::createStringFromData ((const char*) mb.getData(),
-                                                                                (int) mb.getSize()));
+                            values.set (type, String::createStringFromData ((const char*) mb.getData(),
+                                                                            (int) mb.getSize()));
                             break;
                         }
                     }
@@ -724,8 +724,8 @@ namespace WavFileHelpers
             out.writeInt (chunkName ("INFO"));
             bool anyParamsDefined = false;
 
-            for (int i = 0; i < numElementsInArray (types); ++i)
-                if (writeValue (values, out, types[i]))
+            for (auto& type : types)
+                if (writeValue (values, out, type))
                     anyParamsDefined = true;
 
             return anyParamsDefined ? out.getMemoryBlock() : MemoryBlock();
@@ -1096,7 +1096,7 @@ public:
                 }
                 else if (chunkType == chunkName ("LIST"))
                 {
-                    const int subChunkType = input->readInt();
+                    auto subChunkType = input->readInt();
 
                     if (subChunkType == chunkName ("info") || subChunkType == chunkName ("INFO"))
                     {
@@ -1106,9 +1106,9 @@ public:
                     {
                         while (input->getPosition() < chunkEnd)
                         {
-                            const int adtlChunkType = input->readInt();
-                            const uint32 adtlLength = (uint32) input->readInt();
-                            const int64 adtlChunkEnd = input->getPosition() + (adtlLength + (adtlLength & 1));
+                            auto adtlChunkType = input->readInt();
+                            auto adtlLength = (uint32) input->readInt();
+                            auto adtlChunkEnd = input->getPosition() + (adtlLength + (adtlLength & 1));
 
                             if (adtlChunkType == chunkName ("labl") || adtlChunkType == chunkName ("note"))
                             {
@@ -1119,8 +1119,8 @@ public:
                                 else if (adtlChunkType == chunkName ("note"))
                                     prefix << "CueNote" << cueNoteIndex++;
 
-                                const uint32 identifier = (uint32) input->readInt();
-                                const int stringLength = (int) adtlLength - 4;
+                                auto identifier = (uint32) input->readInt();
+                                auto stringLength = (int) adtlLength - 4;
 
                                 MemoryBlock textBlock;
                                 input->readIntoMemoryBlock (textBlock, stringLength);
@@ -1130,15 +1130,15 @@ public:
                             }
                             else if (adtlChunkType == chunkName ("ltxt"))
                             {
-                                const String prefix ("CueRegion" + String (cueRegionIndex++));
-                                const uint32 identifier     = (uint32) input->readInt();
-                                const uint32 sampleLength   = (uint32) input->readInt();
-                                const uint32 purpose        = (uint32) input->readInt();
-                                const uint16 country        = (uint16) input->readInt();
-                                const uint16 language       = (uint16) input->readInt();
-                                const uint16 dialect        = (uint16) input->readInt();
-                                const uint16 codePage       = (uint16) input->readInt();
-                                const uint32 stringLength   = adtlLength - 20;
+                                auto prefix = "CueRegion" + String (cueRegionIndex++);
+                                auto identifier     = (uint32) input->readInt();
+                                auto sampleLength   = (uint32) input->readInt();
+                                auto purpose        = (uint32) input->readInt();
+                                auto country        = (uint16) input->readInt();
+                                auto language       = (uint16) input->readInt();
+                                auto dialect        = (uint16) input->readInt();
+                                auto codePage       = (uint16) input->readInt();
+                                auto stringLength   = adtlLength - 20;
 
                                 MemoryBlock textBlock;
                                 input->readIntoMemoryBlock (textBlock, (int) stringLength);
@@ -1199,8 +1199,8 @@ public:
             const int tempBufSize = 480 * 3 * 4; // (keep this a multiple of 3)
             char tempBuffer[tempBufSize];
 
-            const int numThisTime = jmin (tempBufSize / bytesPerFrame, numSamples);
-            const int bytesRead = input->read (tempBuffer, numThisTime * bytesPerFrame);
+            auto numThisTime = jmin (tempBufSize / bytesPerFrame, numSamples);
+            auto bytesRead = input->read (tempBuffer, numThisTime * bytesPerFrame);
 
             if (bytesRead < numThisTime * bytesPerFrame)
             {
@@ -1332,7 +1332,7 @@ public:
         if (writeFailed)
             return false;
 
-        const size_t bytes = numChannels * (size_t) numSamples * bitsPerSample / 8;
+        auto bytes = numChannels * (size_t) numSamples * bitsPerSample / 8;
         tempBlock.ensureSize (bytes, false);
 
         switch (bitsPerSample)
