@@ -966,7 +966,7 @@ public:
                     showPopupDisplay();
 
                 if (popupDisplay != nullptr)
-                    popupDisplay->startTimer (2000);
+                    popupDisplay->startTimer (popupHoverTimeout);
             }
         }
     }
@@ -1259,6 +1259,8 @@ public:
     bool scrollWheelEnabled = true;
     bool snapsToMousePos = true;
 
+    int popupHoverTimeout = 2000;
+
     ScopedPointer<Label> valueBox;
     ScopedPointer<Button> incButton, decButton;
 
@@ -1446,11 +1448,12 @@ void Slider::setChangeNotificationOnlyOnRelease (bool onlyNotifyOnRelease)
 bool Slider::getSliderSnapsToMousePosition() const noexcept                 { return pimpl->snapsToMousePos; }
 void Slider::setSliderSnapsToMousePosition (const bool shouldSnapToMouse)   { pimpl->snapsToMousePos = shouldSnapToMouse; }
 
-void Slider::setPopupDisplayEnabled (bool showOnDrag, bool showOnHover, Component* parent)
+void Slider::setPopupDisplayEnabled (bool showOnDrag, bool showOnHover, Component* parent, int hoverTimeout)
 {
     pimpl->showPopupOnDrag = showOnDrag;
     pimpl->showPopupOnHover = showOnHover;
     pimpl->parentForPopupDisplay = parent;
+    pimpl->popupHoverTimeout = hoverTimeout;
 }
 
 Component* Slider::getCurrentPopupDisplay() const noexcept      { return pimpl->popupDisplay.get(); }
