@@ -965,7 +965,7 @@ public:
                 if (popupDisplay == nullptr)
                     showPopupDisplay();
 
-                if (popupDisplay != nullptr)
+                if (popupDisplay != nullptr && popupHoverTimeout != -1)
                     popupDisplay->startTimer (popupHoverTimeout);
             }
         }
