@@ -65,8 +65,11 @@ public:
 
         if (iOS)
         {
-            if (getScreenOrientationValue().toString().isEmpty())
-                getScreenOrientationValue() = "portraitlandscape";
+            if (getiPhoneScreenOrientationValue().toString().isEmpty())
+                getiPhoneScreenOrientationValue() = "portraitlandscape";
+
+            if (getiPadScreenOrientationValue().toString().isEmpty())
+                getiPadScreenOrientationValue() = getiPhoneScreenOrientationString();
 
             if (getDeviceFamilyValue().toString().isEmpty())
                 getDeviceFamilyValue() = "1,2";
@@ -106,8 +109,11 @@ public:
     Value getDeviceFamilyValue()                     { return getSetting (Ids::iosDeviceFamily); }
     String getDeviceFamilyString() const             { return settings   [Ids::iosDeviceFamily]; }
 
-    Value  getScreenOrientationValue()               { return getSetting (Ids::iosScreenOrientation); }
-    String getScreenOrientationString() const        { return settings   [Ids::iosScreenOrientation]; }
+    Value  getiPhoneScreenOrientationValue()               { return getSetting (Ids::iPhoneScreenOrientation); }
+    String getiPhoneScreenOrientationString() const        { return settings   [Ids::iPhoneScreenOrientation]; }
+
+    Value  getiPadScreenOrientationValue()               { return getSetting (Ids::iPadScreenOrientation); }
+    String getiPadScreenOrientationString() const        { return settings   [Ids::iPadScreenOrientation]; }
 
     Value getCustomResourceFoldersValue()            { return getSetting (Ids::customXcodeResourceFolders); }
     String getCustomResourceFoldersString() const    { return getSettingString (Ids::customXcodeResourceFolders).replaceCharacters ("\r\n", "::"); }
@@ -203,11 +209,14 @@ public:
             props.add (new ChoicePropertyComponent (getDeviceFamilyValue(), "Device Family", StringArray (deviceFamilies), Array<var> (deviceFamilyValues)),
                        "The device family to target.");
 
-            static const char* orientations[] = { "Portrait and Landscape", "Portrait", "Landscape", nullptr };
+            static const char* iOSOrientations[] = { "Portrait and Landscape", "Portrait", "Landscape", nullptr };
             static const char* orientationValues[] = { "portraitlandscape", "portrait", "landscape", nullptr };
 
-            props.add (new ChoicePropertyComponent (getScreenOrientationValue(), "Screen orientation", StringArray (orientations), Array<var> (orientationValues)),
-                       "The screen orientations that this app should support.");
+            props.add (new ChoicePropertyComponent (getiPhoneScreenOrientationValue(), "iPhone Screen orientation", StringArray (iOSOrientations), Array<var> (orientationValues)),
+                       "The screen orientations that this app should support on iPhones.");
+
+            props.add (new ChoicePropertyComponent (getiPadScreenOrientationValue(),   "iPad Screen orientation",   StringArray (iOSOrientations), Array<var> (orientationValues)),
+                       "The screen orientations that this app should support on iPad.");
 
             props.add (new BooleanPropertyComponent (getSetting ("UIFileSharingEnabled"), "File Sharing Enabled", "Enabled"),
                        "Enable this to expose your app's files to iTunes.");
@@ -1255,13 +1264,19 @@ public:
         //==============================================================================
         void addIosScreenOrientations (XmlElement* dict) const
         {
-            String screenOrientation = owner.getScreenOrientationString();
-            StringArray iOSOrientations;
+            String screenOrientations[2] = { owner.getiPhoneScreenOrientationString(), owner.getiPadScreenOrientationString() };
+            String plistSuffix[2]        = { "", "~ipad" };
+            auto orientationsAreTheSame  = ( screenOrientations[0] == screenOrientations[1] );
 
-            if (screenOrientation.contains ("portrait"))   { iOSOrientations.add ("UIInterfaceOrientationPortrait"); }
-            if (screenOrientation.contains ("landscape"))  { iOSOrientations.add ("UIInterfaceOrientationLandscapeLeft");  iOSOrientations.add ("UIInterfaceOrientationLandscapeRight"); }
+            for (int i = 0; i < (orientationsAreTheSame ? 1 : 2); ++i)
+            {
+                StringArray iOSOrientations;
 
-            addArrayToPlist (dict, "UISupportedInterfaceOrientations", iOSOrientations);
+                if (screenOrientations[i].contains ("portrait"))   { iOSOrientations.add ("UIInterfaceOrientationPortrait"); }
+                if (screenOrientations[i].contains ("landscape"))  { iOSOrientations.add ("UIInterfaceOrientationLandscapeLeft");  iOSOrientations.add ("UIInterfaceOrientationLandscapeRight"); }
+
+                addArrayToPlist (dict, String ("UISupportedInterfaceOrientations") + plistSuffix[i], iOSOrientations);
+            }
 
         }
 
