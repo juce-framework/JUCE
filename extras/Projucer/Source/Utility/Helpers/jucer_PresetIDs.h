@@ -195,6 +195,8 @@ namespace Ids
     DECLARE_ID (androidScreenOrientation);
     DECLARE_ID (androidExtraAssetsFolder);
     DECLARE_ID (iosDeviceFamily);
+    const Identifier iPhoneScreenOrientation ("iosScreenOrientation"); // old name is confusing
+    DECLARE_ID (iPadScreenOrientation);
     DECLARE_ID (iosScreenOrientation);
     DECLARE_ID (iosInAppPurchases);
     DECLARE_ID (iosBackgroundAudio);
