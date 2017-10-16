@@ -84,7 +84,7 @@ public:
     ReferenceCountedArray (const ReferenceCountedArray<OtherObjectClass, OtherCriticalSection>& other) noexcept
     {
         const typename ReferenceCountedArray<OtherObjectClass, OtherCriticalSection>::ScopedLockType lock (other.getLock());
-        numUsed = other.numUsed;
+        numUsed = other.size();
         data.setAllocatedSize (numUsed);
         memcpy (data.elements, other.getRawDataPointer(), (size_t) numUsed * sizeof (ObjectClass*));
 
