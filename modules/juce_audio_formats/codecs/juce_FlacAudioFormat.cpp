@@ -545,17 +545,13 @@ FlacAudioFormat::~FlacAudioFormat() {}
 
 Array<int> FlacAudioFormat::getPossibleSampleRates()
 {
-    const int rates[] = { 8000, 11025, 12000, 16000, 22050, 32000, 44100, 48000,
-                          88200, 96000, 176400, 192000, 352800, 384000 };
-
-    return Array<int> (rates, numElementsInArray (rates));
+    return { 8000, 11025, 12000, 16000, 22050, 32000, 44100, 48000,
+             88200, 96000, 176400, 192000, 352800, 384000 };
 }
 
 Array<int> FlacAudioFormat::getPossibleBitDepths()
 {
-    const int depths[] = { 16, 24 };
-
-    return Array<int> (depths, numElementsInArray (depths));
+    return { 16, 24 };
 }
 
 bool FlacAudioFormat::canDoStereo()     { return true; }
@@ -595,8 +591,7 @@ AudioFormatWriter* FlacAudioFormat::createWriterFor (OutputStream* out,
 
 StringArray FlacAudioFormat::getQualityOptions()
 {
-    static const char* options[] = { "0 (Fastest)", "1", "2", "3", "4", "5 (Default)","6", "7", "8 (Highest quality)", 0 };
-    return StringArray (options);
+    return { "0 (Fastest)", "1", "2", "3", "4", "5 (Default)","6", "7", "8 (Highest quality)" };
 }
 
 #endif

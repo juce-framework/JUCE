@@ -433,17 +433,13 @@ OggVorbisAudioFormat::~OggVorbisAudioFormat()
 
 Array<int> OggVorbisAudioFormat::getPossibleSampleRates()
 {
-    const int rates[] = { 8000, 11025, 12000, 16000, 22050, 32000,
-                          44100, 48000, 88200, 96000, 176400, 192000 };
-
-    return Array<int> (rates, numElementsInArray (rates));
+    return { 8000, 11025, 12000, 16000, 22050, 32000,
+             44100, 48000, 88200, 96000, 176400, 192000 };
 }
 
 Array<int> OggVorbisAudioFormat::getPossibleBitDepths()
 {
-    const int depths[] = { 32 };
-
-    return Array<int> (depths, numElementsInArray (depths));
+    return Array<int> (32);
 }
 
 bool OggVorbisAudioFormat::canDoStereo()    { return true; }
@@ -482,9 +478,8 @@ AudioFormatWriter* OggVorbisAudioFormat::createWriterFor (OutputStream* out,
 
 StringArray OggVorbisAudioFormat::getQualityOptions()
 {
-    static const char* options[] = { "64 kbps", "80 kbps", "96 kbps", "112 kbps", "128 kbps", "160 kbps",
-                                     "192 kbps", "224 kbps", "256 kbps", "320 kbps", "500 kbps", 0 };
-    return StringArray (options);
+    return { "64 kbps", "80 kbps", "96 kbps", "112 kbps", "128 kbps", "160 kbps",
+             "192 kbps", "224 kbps", "256 kbps", "320 kbps", "500 kbps" };
 }
 
 int OggVorbisAudioFormat::estimateOggFileQuality (const File& source)

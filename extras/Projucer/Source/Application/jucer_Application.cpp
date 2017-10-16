@@ -340,8 +340,7 @@ MenuBarModel* ProjucerApplication::getMenuModel()
 
 StringArray ProjucerApplication::getMenuNames()
 {
-    const char* const names[] = { "File", "Edit", "View", "Build", "Window", "GUI Editor", "Tools", nullptr };
-    return StringArray (names);
+    return { "File", "Edit", "View", "Build", "Window", "GUI Editor", "Tools" };
 }
 
 void ProjucerApplication::createMenu (PopupMenu& menu, const String& menuName)
