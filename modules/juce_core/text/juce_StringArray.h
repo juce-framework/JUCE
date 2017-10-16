@@ -45,6 +45,10 @@ public:
     /** Creates an array containing a single string. */
     explicit StringArray (const String& firstValue);
 
+    /** Creates an array containing a list of strings. */
+    template <typename... OtherElements>
+    StringArray (StringRef firstValue, OtherElements... otherValues) : strings (firstValue, otherValues...) {}
+
     /** Creates an array from a raw array of strings.
         @param strings          an array of strings to add
         @param numberOfStrings  how many items there are in the array
@@ -77,10 +81,6 @@ public:
         @param numberOfStrings  how many items there are in the array
     */
     StringArray (const wchar_t* const* strings, int numberOfStrings);
-
-   #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
-    StringArray (const std::initializer_list<const char*>& strings);
-   #endif
 
     /** Destructor. */
     ~StringArray();
