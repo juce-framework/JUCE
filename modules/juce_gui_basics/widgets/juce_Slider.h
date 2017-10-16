@@ -404,18 +404,29 @@ public:
                    double newMaximum,
                    double newInterval = 0);
 
+    /** Sets the limits that the slider's value can take.
+
+        @param newRange     the range to allow
+        @param newInterval  the steps in which the value is allowed to increase - if this
+                            is not zero, the value will always be (newMinimum + (newInterval * an integer)).
+    */
+    void setRange (Range<double> newRange, double newInterval);
+
+    /** Returns the slider's range. */
+    Range<double> getRange() const noexcept;
+
     /** Returns the current maximum value.
-        @see setRange
+        @see setRange, getRange
     */
     double getMaximum() const noexcept;
 
     /** Returns the current minimum value.
-        @see setRange
+        @see setRange, getRange
     */
     double getMinimum() const noexcept;
 
     /** Returns the current step-size for values.
-        @see setRange
+        @see setRange, getRange
     */
     double getInterval() const noexcept;
 
