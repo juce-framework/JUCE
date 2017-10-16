@@ -69,17 +69,15 @@ public:
     /** Creates a copy of another polynomial. */
     Polynomial& operator= (Polynomial&&) = default;
 
-   #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS || defined(DOXYGEN)
     /** Creates a new polynomial with coefficients by a C++11 initializer list.
         This function can be used in the following way:
         Polynomial<float> p ({0.5f, -0.3f, 0.2f});
     */
-    template <typename TypeToCreateFrom>
-    Polynomial (const std::initializer_list<TypeToCreateFrom>& items)  : coeffs (items)
+    template <typename... Values>
+    Polynomial (Values... items)  : coeffs (items...)
     {
         jassert (! coeffs.isEmpty());
     }
-   #endif
 
     //==============================================================================
     /** Returns a single coefficient of the receiver for reading */
