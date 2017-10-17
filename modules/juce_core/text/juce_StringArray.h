@@ -43,7 +43,7 @@ public:
     StringArray (StringArray&&) noexcept;
 
     /** Creates an array containing a single string. */
-    explicit StringArray (const String& firstValue);
+    StringArray (const String& firstValue);
 
     /** Creates an array containing a list of strings. */
     template <typename... OtherElements>
