@@ -96,7 +96,7 @@ public:
             writeBinaryDataFiles();
             writeAppHeader (modules);
             writeModuleCppWrappers (modules);
-            writeProjects (modules, specifiedExporterToSave);
+            writeProjects (modules, specifiedExporterToSave, ! showProgressBox);
             writeAppConfigFile (modules, appConfigUserContent); // (this is repeated in case the projects added anything to it)
 
             if (generatedCodeFolder.exists())
@@ -659,7 +659,7 @@ private:
 
     void writePluginCharacteristicsFile();
 
-    void writeProjects (const OwnedArray<LibraryModule>& modules, const String& specifiedExporterToSave)
+    void writeProjects (const OwnedArray<LibraryModule>& modules, const String& specifiedExporterToSave, bool isCommandLineApp)
     {
         ThreadPool threadPool;
 
@@ -694,7 +694,10 @@ private:
                     generatedFilesGroup.sortAlphabetically (true, true);
                     exporter->getAllGroups().add (generatedFilesGroup);
 
-                    threadPool.addJob (new ExporterJob (*this, exporter.exporter.release(), modules), true);
+                    if (isCommandLineApp)
+                        saveExporter (exporter.exporter, modules);
+                    else
+                        threadPool.addJob (new ExporterJob (*this, exporter.exporter.release(), modules), true);
                 }
                 else
                 {
@@ -707,8 +710,22 @@ private:
             addError (saveError.message);
         }
 
-        while (threadPool.getNumJobs() > 0)
-            Thread::sleep (10);
+        if (! isCommandLineApp)
+            while (threadPool.getNumJobs() > 0)
+                Thread::sleep (10);
+    }
+
+    void saveExporter (ProjectExporter* exporter, const OwnedArray<LibraryModule>& modules)
+    {
+        try
+        {
+            exporter->create (modules);
+            std::cout << "Finished saving: " << exporter->getName() << std::endl;
+        }
+        catch (ProjectExporter::SaveError& error)
+        {
+            addError (error.message);
+        }
     }
 
     class ExporterJob   : public ThreadPoolJob
@@ -723,16 +740,7 @@ private:
 
         JobStatus runJob() override
         {
-            try
-            {
-                exporter->create (modules);
-                std::cout << "Finished saving: " << exporter->getName() << std::endl;
-            }
-            catch (ProjectExporter::SaveError& error)
-            {
-                owner.addError (error.message);
-            }
-
+            owner.saveExporter (exporter, modules);
             return jobHasFinished;
         }
 
