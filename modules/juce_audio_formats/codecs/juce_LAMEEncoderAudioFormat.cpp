@@ -173,7 +173,7 @@ Array<int> LAMEEncoderAudioFormat::getPossibleSampleRates()
 
 Array<int> LAMEEncoderAudioFormat::getPossibleBitDepths()
 {
-    return Array<int> (16);
+    return { 16 };
 }
 
 bool LAMEEncoderAudioFormat::canDoStereo()      { return true; }

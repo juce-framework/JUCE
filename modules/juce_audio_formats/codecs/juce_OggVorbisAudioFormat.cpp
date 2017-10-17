@@ -439,7 +439,7 @@ Array<int> OggVorbisAudioFormat::getPossibleSampleRates()
 
 Array<int> OggVorbisAudioFormat::getPossibleBitDepths()
 {
-    return Array<int> (32);
+    return { 32 };
 }
 
 bool OggVorbisAudioFormat::canDoStereo()    { return true; }

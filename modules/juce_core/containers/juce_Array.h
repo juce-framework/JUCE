@@ -106,13 +106,13 @@ public:
     }
 
     /** Initalises an Array of size 1 containing a single element. */
-    explicit Array (const ElementType& singleElementToAdd)
+    Array (const ElementType& singleElementToAdd)
     {
         add (singleElementToAdd);
     }
 
     /** Initalises an Array of size 1 containing a single element. */
-    explicit Array (ElementType&& singleElementToAdd)
+    Array (ElementType&& singleElementToAdd)
     {
         add (static_cast<ElementType&&> (singleElementToAdd));
     }
@@ -121,7 +121,7 @@ public:
     template <typename... OtherElements>
     Array (const ElementType& firstNewElement, OtherElements... otherElements)
     {
-        data.ensureAllocatedSize (1 + (int) sizeof... (otherElements));
+        data.setAllocatedSize (1 + (int) sizeof... (otherElements));
         addAssumingCapacityIsReady (firstNewElement, otherElements...);
     }
 
@@ -129,7 +129,7 @@ public:
     template <typename... OtherElements>
     Array (ElementType&& firstNewElement, OtherElements... otherElements)
     {
-        data.ensureAllocatedSize (1 + (int) sizeof... (otherElements));
+        data.setAllocatedSize (1 + (int) sizeof... (otherElements));
         addAssumingCapacityIsReady (static_cast<ElementType&&> (firstNewElement), otherElements...);
     }
 
