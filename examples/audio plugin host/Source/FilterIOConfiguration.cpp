@@ -304,9 +304,9 @@ private:
     {
         if (combo == &layouts)
         {
-            if (auto* processor = owner.getAudioProcessor())
+            if (auto* audioProcessor = owner.getAudioProcessor())
             {
-                if (auto* bus = processor->getBus (isInput, currentBus))
+                if (auto* bus = audioProcessor->getBus (isInput, currentBus))
                 {
                     auto selectedNumChannels = layouts.getSelectedId();
 
@@ -332,9 +332,9 @@ private:
     {
         if (btn == &enabledToggle && enabledToggle.isEnabled())
         {
-            if (auto* processor = owner.getAudioProcessor())
+            if (auto* audioProcessor = owner.getAudioProcessor())
             {
-                if (auto* bus = processor->getBus (isInput, currentBus))
+                if (auto* bus = audioProcessor->getBus (isInput, currentBus))
                 {
                     if (bus->isEnabled() != enabledToggle.getToggleState())
                     {
@@ -368,11 +368,11 @@ private:
     //==============================================================================
     void addColumn() override
     {
-        if (auto* processor = owner.getAudioProcessor())
+        if (auto* audioProcessor = owner.getAudioProcessor())
         {
-            if (processor->canAddBus (isInput))
+            if (audioProcessor->canAddBus (isInput))
             {
-                if (processor->addBus (isInput))
+                if (audioProcessor->addBus (isInput))
                 {
                     updateBusButtons();
                     updateBusLayout();
@@ -391,13 +391,13 @@ private:
 
     void removeColumn() override
     {
-        if (auto* processor = owner.getAudioProcessor())
+        if (auto* audioProcessor = owner.getAudioProcessor())
         {
-            if (processor->getBusCount (isInput) > 1 && processor->canRemoveBus (isInput))
+            if (audioProcessor->getBusCount (isInput) > 1 && audioProcessor->canRemoveBus (isInput))
             {
-                if (processor->removeBus (isInput))
+                if (audioProcessor->removeBus (isInput))
                 {
-                    currentBus = jmin (processor->getBusCount (isInput) - 1, currentBus);
+                    currentBus = jmin (audioProcessor->getBusCount (isInput) - 1, currentBus);
 
                     updateBusButtons();
                     updateBusLayout();
