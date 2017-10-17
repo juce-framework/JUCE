@@ -180,7 +180,6 @@ String InputStream::readNextLine()
     for (;;)
     {
         auto c = readByte();
-        buffer.writeByte (c);
 
         if (c == 0 || c == '\n')
             break;
@@ -194,6 +193,8 @@ String InputStream::readNextLine()
 
             break;
         }
+
+        buffer.writeByte (c);
     }
 
     return buffer.toUTF8();
