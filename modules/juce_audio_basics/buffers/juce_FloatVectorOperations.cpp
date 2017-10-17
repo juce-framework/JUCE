@@ -1084,7 +1084,7 @@ void JUCE_CALLTYPE FloatVectorOperations::enableFlushToZeroMode (bool shouldEnab
   #endif
 }
 
-void JUCE_CALLTYPE FloatVectorOperations::disableDenormalisedNumberSupport() noexcept
+void JUCE_CALLTYPE FloatVectorOperations::disableDenormalisedNumberSupport (bool shouldDisable) noexcept
 {
   #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || defined (__arm64__) || defined (__aarch64__))
    #if JUCE_USE_SSE_INTRINSICS
@@ -1093,11 +1093,28 @@ void JUCE_CALLTYPE FloatVectorOperations::disableDenormalisedNumberSupport() noe
     intptr_t mask = (1 << 24 /* FZ */);
    #endif
 
-    setFpStatusRegister (getFpStatusRegister() | mask);
+    setFpStatusRegister ((getFpStatusRegister() & (~mask)) | (shouldDisable ? mask : 0));
   #else
+    ignoreUnused (shouldDisable);
+
    #if ! (defined (JUCE_INTEL) || defined (JUCE_ARM))
     jassertfalse; // No support for disable denormals mode on your platform
    #endif
+  #endif
+}
+
+bool JUCE_CALLTYPE FloatVectorOperations::areDenormalsDisabled() noexcept
+{
+  #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || defined (__arm64__) || defined (__aarch64__))
+   #if JUCE_USE_SSE_INTRINSICS
+    intptr_t mask = 0x8040;
+   #else /*JUCE_USE_ARM_NEON*/
+    intptr_t mask = (1 << 24 /* FZ */);
+   #endif
+
+    return ((getFpStatusRegister() & mask) == mask);
+  #else
+    return false;
   #endif
 }
 
