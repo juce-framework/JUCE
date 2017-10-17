@@ -104,6 +104,9 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\NoiseGate.bsc</OutputFile>
     </Bscmake>
+    <Lib>
+      <AdditionalDependencies>NoiseGate.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
     <PreBuildEvent>
       <Command>if not exist &quot;$(OutDir)\NoiseGate.aaxplugin&quot; mkdir &quot;$(OutDir)\NoiseGate.aaxplugin&quot;
 if not exist &quot;$(OutDir)\NoiseGate.aaxplugin\Contents&quot; mkdir &quot;$(OutDir)\NoiseGate.aaxplugin\Contents&quot;
@@ -157,6 +160,9 @@ call &quot;C:\\SDKs\\AAX\\Utilities\\CreatePackage.bat&quot; &quot;$(OutDir)\Noi
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\NoiseGate.bsc</OutputFile>
     </Bscmake>
+    <Lib>
+      <AdditionalDependencies>NoiseGate.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
     <PreBuildEvent>
       <Command>if not exist &quot;$(OutDir)\NoiseGate.aaxplugin&quot; mkdir &quot;$(OutDir)\NoiseGate.aaxplugin&quot;
 if not exist &quot;$(OutDir)\NoiseGate.aaxplugin\Contents&quot; mkdir &quot;$(OutDir)\NoiseGate.aaxplugin\Contents&quot;

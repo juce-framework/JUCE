@@ -104,6 +104,9 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\JuceDemoPlugin.bsc</OutputFile>
     </Bscmake>
+    <Lib>
+      <AdditionalDependencies>JuceDemoPlugin.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>
@@ -147,6 +150,9 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\JuceDemoPlugin.bsc</OutputFile>
     </Bscmake>
+    <Lib>
+      <AdditionalDependencies>JuceDemoPlugin.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_plugin_client_VST2.cpp"/>

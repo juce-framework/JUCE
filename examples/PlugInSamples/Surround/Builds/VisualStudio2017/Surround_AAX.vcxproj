@@ -104,6 +104,9 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\Surround.bsc</OutputFile>
     </Bscmake>
+    <Lib>
+      <AdditionalDependencies>Surround.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
     <PreBuildEvent>
       <Command>if not exist &quot;$(OutDir)\Surround.aaxplugin&quot; mkdir &quot;$(OutDir)\Surround.aaxplugin&quot;
 if not exist &quot;$(OutDir)\Surround.aaxplugin\Contents&quot; mkdir &quot;$(OutDir)\Surround.aaxplugin\Contents&quot;
@@ -157,6 +160,9 @@ call &quot;C:\\SDKs\\AAX\\Utilities\\CreatePackage.bat&quot; &quot;$(OutDir)\Sur
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\Surround.bsc</OutputFile>
     </Bscmake>
+    <Lib>
+      <AdditionalDependencies>Surround.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
     <PreBuildEvent>
       <Command>if not exist &quot;$(OutDir)\Surround.aaxplugin&quot; mkdir &quot;$(OutDir)\Surround.aaxplugin&quot;
 if not exist &quot;$(OutDir)\Surround.aaxplugin\Contents&quot; mkdir &quot;$(OutDir)\Surround.aaxplugin\Contents&quot;

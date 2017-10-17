@@ -104,6 +104,9 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\MultiOutSynth.bsc</OutputFile>
     </Bscmake>
+    <Lib>
+      <AdditionalDependencies>MultiOutSynth.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
     <PreBuildEvent>
       <Command>if not exist &quot;$(OutDir)\MultiOutSynth.aaxplugin&quot; mkdir &quot;$(OutDir)\MultiOutSynth.aaxplugin&quot;
 if not exist &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents&quot; mkdir &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents&quot;
@@ -157,6 +160,9 @@ call &quot;C:\\SDKs\\AAX\\Utilities\\CreatePackage.bat&quot; &quot;$(OutDir)\Mul
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\MultiOutSynth.bsc</OutputFile>
     </Bscmake>
+    <Lib>
+      <AdditionalDependencies>MultiOutSynth.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
     <PreBuildEvent>
       <Command>if not exist &quot;$(OutDir)\MultiOutSynth.aaxplugin&quot; mkdir &quot;$(OutDir)\MultiOutSynth.aaxplugin&quot;
 if not exist &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents&quot; mkdir &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents&quot;

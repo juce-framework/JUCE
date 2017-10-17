@@ -400,6 +400,8 @@ public class JUCENetworkGraphicsDemo   extends Activity
 
     public final void deleteView (ComponentPeerView view)
     {
+        view.host = 0;
+
         ViewGroup group = (ViewGroup) (view.getParent());
 
         if (group != null)
@@ -629,7 +631,6 @@ public class JUCENetworkGraphicsDemo   extends Activity
             setFocusable (true);
             setFocusableInTouchMode (true);
             setOnFocusChangeListener (this);
-            requestFocus();
 
             // swap red and blue colours to match internal opengl texture format
             ColorMatrix colorMatrix = new ColorMatrix();
@@ -649,6 +650,9 @@ public class JUCENetworkGraphicsDemo   extends Activity
         @Override
         public void onDraw (Canvas canvas)
         {
+            if (host == 0)
+                return;
+
             handlePaint (host, canvas, paint);
         }
 
@@ -670,6 +674,9 @@ public class JUCENetworkGraphicsDemo   extends Activity
         @Override
         public boolean onTouchEvent (MotionEvent event)
         {
+            if (host == 0)
+                return false;
+
             int action = event.getAction();
             long time = event.getEventTime();
 
@@ -740,6 +747,9 @@ public class JUCENetworkGraphicsDemo   extends Activity
         @Override
         public boolean onKeyDown (int keyCode, KeyEvent event)
         {
+            if (host == 0)
+                return false;
+
             switch (keyCode)
             {
                 case KeyEvent.KEYCODE_VOLUME_UP:
@@ -762,6 +772,9 @@ public class JUCENetworkGraphicsDemo   extends Activity
         @Override
         public boolean onKeyUp (int keyCode, KeyEvent event)
         {
+            if (host == 0)
+                return false;
+
             handleKeyUp (host, keyCode, event.getUnicodeChar());
             return true;
         }
@@ -769,6 +782,9 @@ public class JUCENetworkGraphicsDemo   extends Activity
         @Override
         public boolean onKeyMultiple (int keyCode, int count, KeyEvent event)
         {
+            if (host == 0)
+                return false;
+
             if (keyCode != KeyEvent.KEYCODE_UNKNOWN || event.getAction() != KeyEvent.ACTION_MULTIPLE)
                 return super.onKeyMultiple (keyCode, count, event);
 
@@ -801,6 +817,9 @@ public class JUCENetworkGraphicsDemo   extends Activity
         @Override
         protected void onSizeChanged (int w, int h, int oldw, int oldh)
         {
+            if (host == 0)
+                return;
+
             super.onSizeChanged (w, h, oldw, oldh);
             viewSizeChanged (host);
         }
@@ -817,6 +836,9 @@ public class JUCENetworkGraphicsDemo   extends Activity
         @Override
         public void onFocusChange (View v, boolean hasFocus)
         {
+            if (host == 0)
+                return;
+
             if (v == this)
                 focusChanged (host, hasFocus);
         }

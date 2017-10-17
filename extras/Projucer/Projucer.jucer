@@ -34,10 +34,12 @@
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="1" optimisation="1" targetName="Projucer" headerPath=""
-                       libraryPath="" defines="" useRuntimeLibDLL="1" wholeProgramOptimisation="1"/>
+                       libraryPath="" defines="" useRuntimeLibDLL="1" wholeProgramOptimisation="1"
+                       debugInformationFormat="ProgramDatabase"/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="0" optimisation="3" targetName="Projucer" headerPath=""
-                       libraryPath="" useRuntimeLibDLL="0"/>
+                       libraryPath="" useRuntimeLibDLL="0" debugInformationFormat="None"
+                       linkTimeOptimisation="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -54,10 +56,11 @@
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="1" optimisation="1" targetName="Projucer" headerPath=""
-                       libraryPath="" useRuntimeLibDLL="1"/>
+                       libraryPath="" useRuntimeLibDLL="1" debugInformationFormat="ProgramDatabase"/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="0" optimisation="3" targetName="Projucer" headerPath=""
-                       libraryPath="" useRuntimeLibDLL="0"/>
+                       libraryPath="" useRuntimeLibDLL="0" debugInformationFormat="None"
+                       linkTimeOptimisation="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -72,9 +75,10 @@
     <VS2017 targetFolder="Builds/VisualStudio2017" bigIcon="rv1F4h" windowsTargetPlatformVersion="10.0.15063.0">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="Projucer"/>
+                       isDebug="1" optimisation="1" targetName="Projucer" debugInformationFormat="ProgramDatabase"/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="Projucer"/>
+                       isDebug="0" optimisation="3" targetName="Projucer" debugInformationFormat="None"
+                       linkTimeOptimisation="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
