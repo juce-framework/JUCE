@@ -927,7 +927,7 @@ void Project::Item::setID (const String& newID)   { state.setProperty (Ids::ID, 
 
 Drawable* Project::Item::loadAsImageFile() const
 {
-    const MessageManagerLock mml;
+    const MessageManagerLock mml (ThreadPoolJob::getCurrentThreadPoolJob());
     return isValid() ? Drawable::createFromImageFile (getFile())
                      : nullptr;
 }
