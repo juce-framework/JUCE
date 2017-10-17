@@ -227,11 +227,20 @@ public:
             props.add (new BooleanPropertyComponent (getMicrophonePermissionValue(), "Microphone access", "Enabled"),
                        "Enable this to allow your app to use the microphone. "
                        "The user of your app will be prompted to grant microphone access permissions.");
+        }
+        else if (projectType.isGUIApplication())
+        {
+            props.add (new TextPropertyComponent (getSetting ("documentExtensions"), "Document file extensions", 128, false),
+                       "A comma-separated list of file extensions for documents that your app can open. "
+                       "Using a leading '.' is optional, and the extensions are not case-sensitive.");
+        }
 
-            props.add (new BooleanPropertyComponent (getInAppPurchasesValue(), "In-App purchases capability", "Enabled"),
-                       "Enable this to grant your app the capability for in-app purchases. "
-                       "This option requires that you specify a valid Development Team ID.");
+        props.add (new BooleanPropertyComponent (getInAppPurchasesValue(), "In-App purchases capability", "Enabled"),
+                   "Enable this to grant your app the capability for in-app purchases. "
+                   "This option requires that you specify a valid Development Team ID.");
 
+        if (iOS)
+        {
             props.add (new BooleanPropertyComponent (getBackgroundAudioValue(), "Audio background capability", "Enabled"),
                        "Enable this to grant your app the capability to access audio when in background mode.");
 
@@ -243,12 +252,6 @@ public:
 
             props.add (new BooleanPropertyComponent (getAppGroupsEnabledValue(), "App groups capability", "Enabled"),
                        "Enable this to grant your app the capability to share resources between apps using the same app group ID.");
-        }
-        else if (projectType.isGUIApplication())
-        {
-            props.add (new TextPropertyComponent (getSetting ("documentExtensions"), "Document file extensions", 128, false),
-                       "A comma-separated list of file extensions for documents that your app can open. "
-                       "Using a leading '.' is optional, and the extensions are not case-sensitive.");
         }
 
         props.add (new TextPropertyComponent (getPListToMergeValue(), "Custom PList", 8192, true),
@@ -783,7 +786,7 @@ public:
                 attributes << "DevelopmentTeam = " << developmentTeamID << "; ";
 
             auto appGroupsEnabled      = (owner.iOS && owner.isAppGroupsEnabled() ? 1 : 0);
-            auto inAppPurchasesEnabled = (owner.iOS && owner.isInAppPurchasesEnabled()) ? 1 : 0;
+            auto inAppPurchasesEnabled = owner.isInAppPurchasesEnabled() ? 1 : 0;
             auto interAppAudioEnabled  = (owner.iOS
                                           && type == Target::StandalonePlugIn
                                           && owner.getProject().shouldEnableIAA()) ? 1 : 0;
@@ -1059,7 +1062,7 @@ public:
                 s.add ("SEPARATE_STRIP = YES");
             }
 
-            if (owner.iOS && owner.isInAppPurchasesEnabled())
+            if (owner.isInAppPurchasesEnabled())
                 defines.set ("JUCE_IN_APP_PURCHASES", "1");
 
             defines = mergePreprocessorDefs (defines, owner.getAllPreprocessorDefs (config, type));
@@ -2146,7 +2149,7 @@ private:
     {
         if (! projectType.isStaticLibrary())
         {
-            if (iOS && isInAppPurchasesEnabled())
+            if (isInAppPurchasesEnabled())
                 xcodeFrameworks.addIfNotAlreadyThere ("StoreKit");
 
             xcodeFrameworks.addTokens (getExtraFrameworksString(), ",;", "\"'");

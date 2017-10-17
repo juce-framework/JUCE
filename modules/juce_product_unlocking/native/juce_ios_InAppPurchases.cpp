@@ -100,9 +100,15 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         DownloadImpl (SKDownload* downloadToUse)  : download (downloadToUse) {}
 
         String getProductId()      const override  { return nsStringToJuce (download.contentIdentifier); }
-        int64 getContentLength()   const override  { return download.contentLength; }
         String getContentVersion() const override  { return nsStringToJuce (download.contentVersion); }
+
+      #if JUCE_IOS
+        int64 getContentLength()   const override  { return download.contentLength; }
         Status getStatus()         const override  { return SKDownloadStateToDownloadStatus (download.downloadState); }
+      #else
+        int64 getContentLength()   const override  { return [download.contentLength longLongValue]; }
+        Status getStatus()         const override  { return SKDownloadStateToDownloadStatus (download.state); }
+      #endif
 
         SKDownload* download;
     };
@@ -146,9 +152,14 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         {
             for (SKDownload* d in transaction.downloads)
             {
-                if (d.downloadState != SKDownloadStateFinished
-                     && d.downloadState != SKDownloadStateFailed
-                     && d.downloadState != SKDownloadStateCancelled)
+              #if JUCE_IOS
+                SKDownloadState state = d.downloadState;
+              #else
+                SKDownloadState state = d.state;
+              #endif
+                if (state != SKDownloadStateFinished
+                     && state != SKDownloadStateFailed
+                     && state != SKDownloadStateCancelled)
                 {
                     return false;
                 }
@@ -308,7 +319,11 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         {
             if (auto* pendingDownload = getPendingDownloadFor (download))
             {
+              #if JUCE_IOS
                 switch (download.downloadState)
+              #else
+                switch (download.state)
+              #endif
                 {
                     case SKDownloadStateWaiting: break;
                     case SKDownloadStatePaused:  owner.listeners.call (&Listener::productDownloadPaused, *pendingDownload); break;
@@ -467,7 +482,13 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
     {
         if (auto* pdt = getPendingDownloadsTransactionSKDownloadFor (download))
         {
-            auto contentURL = download.downloadState == SKDownloadStateFinished
+          #if JUCE_IOS
+            SKDownloadState state = download.downloadState;
+          #else
+            SKDownloadState state = download.state;
+          #endif
+
+            auto contentURL = state == SKDownloadStateFinished
                                 ? URL (nsStringToJuce (download.contentURL.absoluteString))
                                 : URL();
 
