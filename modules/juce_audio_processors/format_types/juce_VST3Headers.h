@@ -46,6 +46,9 @@
  #pragma clang diagnostic ignored "-Wdelete-non-virtual-dtor"
  #pragma clang diagnostic ignored "-Wdeprecated-declarations"
  #pragma clang diagnostic ignored "-Wextra-semi"
+ #if __has_warning("-Wcomma")
+  #pragma clang diagnostic ignored "-Wcomma"
+ #endif
 #endif
 
 #undef DEVELOPMENT
