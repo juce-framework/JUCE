@@ -615,7 +615,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         auto identifier   = nsStringToJuce (skProduct.productIdentifier);
         auto title        = nsStringToJuce (skProduct.localizedTitle);
         auto description  = nsStringToJuce (skProduct.localizedDescription);
-        auto priceLocale  = nsStringToJuce (skProduct.priceLocale.languageCode);
+        auto priceLocale  = nsStringToJuce ([skProduct.priceLocale objectForKey: NSLocaleLanguageCode]);
         auto price        = nsStringToJuce ([numberFormatter stringFromNumber: skProduct.price]);
 
         [numberFormatter release];
