@@ -419,7 +419,7 @@ private:
     ScopedPointer<AlertWindow> alertWindow;
 };
 
-StringArray InAppPurchaseApplication::MainContentComponent::PhraseModel::phrases {{"I love JUCE!", "The five dimensions of touch", "Make it fast!"}};
+StringArray InAppPurchaseApplication::MainContentComponent::PhraseModel::phrases {"I love JUCE!", "The five dimensions of touch", "Make it fast!"};
 
 //==============================================================================
 // This macro generates the main() routine that launches the app.
