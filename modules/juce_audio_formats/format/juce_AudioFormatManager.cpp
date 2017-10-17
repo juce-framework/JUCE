@@ -39,8 +39,10 @@ void AudioFormatManager::registerFormat (AudioFormat* newFormat, bool makeThisTh
     {
        #if JUCE_DEBUG
         for (auto* af : knownFormats)
+        {
             if (af->getFormatName() == newFormat->getFormatName())
                 jassertfalse; // trying to add the same format twice!
+        }
        #endif
 
         if (makeThisTheDefaultFormat)
