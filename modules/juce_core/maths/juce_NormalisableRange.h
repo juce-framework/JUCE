@@ -41,9 +41,9 @@ public:
     NormalisableRange() noexcept = default;
 
     NormalisableRange (const NormalisableRange&) = default;
-    NormalisableRange (NormalisableRange&&) noexcept = default;
+    NormalisableRange (NormalisableRange&&) = default;
     NormalisableRange& operator= (const NormalisableRange&) = default;
-    NormalisableRange& operator= (NormalisableRange&&) noexcept = default;
+    NormalisableRange& operator= (NormalisableRange&&) = default;
 
     /** Creates a NormalisableRange with a given range, interval and skew factor. */
     NormalisableRange (ValueType rangeStart,
