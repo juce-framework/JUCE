@@ -133,6 +133,14 @@ public:
         addAssumingCapacityIsReady (static_cast<ElementType&&> (firstNewElement), otherElements...);
     }
 
+   #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
+    template <typename TypeToCreateFrom>
+    Array (const std::initializer_list<TypeToCreateFrom>& items)
+    {
+        addArray (items);
+    }
+   #endif
+
     /** Destructor. */
     ~Array()
     {

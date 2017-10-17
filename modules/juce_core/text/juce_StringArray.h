@@ -49,6 +49,10 @@ public:
     template <typename... OtherElements>
     StringArray (StringRef firstValue, OtherElements... otherValues) : strings (firstValue, otherValues...) {}
 
+   #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
+    StringArray (const std::initializer_list<const char*>& strings);
+   #endif
+
     /** Creates an array from a raw array of strings.
         @param strings          an array of strings to add
         @param numberOfStrings  how many items there are in the array
