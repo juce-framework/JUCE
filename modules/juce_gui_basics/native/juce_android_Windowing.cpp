@@ -137,6 +137,7 @@ public:
     AndroidComponentPeer (Component& comp, const int windowStyleFlags)
         : ComponentPeer (comp, windowStyleFlags),
           fullScreen (false),
+          navBarsHidden (false),
           sizeAllocated (0),
           scale ((float) Desktop::getInstance().getDisplays().getMainDisplay().scale)
     {
@@ -289,9 +290,9 @@ public:
         return false;
     }
 
-    bool shouldNavBarsBeHidden() const
+    bool shouldNavBarsBeHidden (bool shouldBeFullScreen) const
     {
-        if (fullScreen)
+        if (shouldBeFullScreen)
             if (Component* kiosk = Desktop::getInstance().getKioskModeComponent())
                 if (kiosk->getPeer() == this)
                     return true;
@@ -299,7 +300,7 @@ public:
         return false;
     }
 
-    void setNavBarsHidden (bool hidden) const
+    void setNavBarsHidden (bool hidden)
     {
         enum
         {
@@ -316,18 +317,24 @@ public:
         view.callVoidMethod (ComponentPeerView.setSystemUiVisibility,
                              hidden ? (jint) (SYSTEM_UI_FLAG_HIDE_NAVIGATION | SYSTEM_UI_FLAG_FULLSCREEN | SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
                                     : (jint) (SYSTEM_UI_FLAG_VISIBLE));
+
+        navBarsHidden = hidden;
     }
 
     void setFullScreen (bool shouldBeFullScreen) override
     {
         // updating the nav bar visibility is a bit odd on Android - need to wait for
-        if (shouldNavBarsBeHidden())
+        if (shouldNavBarsBeHidden (shouldBeFullScreen))
         {
-            if (! isTimerRunning())
+            if (! navBarsHidden && ! isTimerRunning())
+            {
                 startTimer (500);
+            }
         }
         else
+        {
             setNavBarsHidden (false);
+        }
 
         Rectangle<int> r (shouldBeFullScreen ? Desktop::getInstance().getDisplays().getMainDisplay().userArea
                                              : lastNonFullscreenBounds);
@@ -349,7 +356,7 @@ public:
 
     void timerCallback() override
     {
-        setNavBarsHidden (shouldNavBarsBeHidden());
+        setNavBarsHidden (shouldNavBarsBeHidden (fullScreen));
         setFullScreen (fullScreen);
         stopTimer();
     }
@@ -608,6 +615,7 @@ private:
     GlobalRef view;
     GlobalRef buffer;
     bool fullScreen;
+    bool navBarsHidden;
     int sizeAllocated;
     float scale;
     static AndroidComponentPeer* frontWindow;
