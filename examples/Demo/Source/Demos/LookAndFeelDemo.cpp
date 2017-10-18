@@ -36,17 +36,18 @@
  */
 struct CustomLookAndFeel    : public LookAndFeel_V4
 {
-    void drawRoundThumb (Graphics& g, const float x, const float y,
-                         const float diameter, const Colour& colour, float outlineThickness)
+    void drawRoundThumb (Graphics& g, float x, float y, float diameter, Colour colour, float outlineThickness)
     {
         const Rectangle<float> a (x, y, diameter, diameter);
-        const float halfThickness = outlineThickness * 0.5f;
+        auto halfThickness = outlineThickness * 0.5f;
 
         Path p;
-        p.addEllipse (x + halfThickness, y + halfThickness, diameter - outlineThickness, diameter - outlineThickness);
+        p.addEllipse (x + halfThickness,
+                      y + halfThickness,
+                      diameter - outlineThickness,
+                      diameter - outlineThickness);
 
-        const DropShadow ds (Colours::black, 1, Point<int> (0, 0));
-        ds.drawForPath (g, p);
+        DropShadow (Colours::black, 1, {}).drawForPath (g, p);
 
         g.setColour (colour);
         g.fillPath (p);
@@ -58,25 +59,25 @@ struct CustomLookAndFeel    : public LookAndFeel_V4
     void drawButtonBackground (Graphics& g, Button& button, const Colour& backgroundColour,
                                bool isMouseOverButton, bool isButtonDown) override
     {
-        Colour baseColour (backgroundColour.withMultipliedSaturation (button.hasKeyboardFocus (true) ? 1.3f : 0.9f)
-                           .withMultipliedAlpha (button.isEnabled() ? 0.9f : 0.5f));
+        auto baseColour = backgroundColour.withMultipliedSaturation (button.hasKeyboardFocus (true) ? 1.3f : 0.9f)
+                                          .withMultipliedAlpha (button.isEnabled() ? 0.9f : 0.5f);
 
         if (isButtonDown || isMouseOverButton)
             baseColour = baseColour.contrasting (isButtonDown ? 0.2f : 0.1f);
 
-        const bool flatOnLeft   = button.isConnectedOnLeft();
-        const bool flatOnRight  = button.isConnectedOnRight();
-        const bool flatOnTop    = button.isConnectedOnTop();
-        const bool flatOnBottom = button.isConnectedOnBottom();
+        bool flatOnLeft   = button.isConnectedOnLeft();
+        bool flatOnRight  = button.isConnectedOnRight();
+        bool flatOnTop    = button.isConnectedOnTop();
+        bool flatOnBottom = button.isConnectedOnBottom();
 
-        const float width  = button.getWidth() - 1.0f;
-        const float height = button.getHeight() - 1.0f;
+        auto width  = button.getWidth() - 1.0f;
+        auto height = button.getHeight() - 1.0f;
 
         if (width > 0 && height > 0)
         {
-            const float cornerSize = jmin (15.0f, jmin (width, height) * 0.45f);
-            const float lineThickness = cornerSize * 0.1f;
-            const float halfThickness = lineThickness * 0.5f;
+            auto cornerSize = jmin (15.0f, jmin (width, height) * 0.45f);
+            auto lineThickness = cornerSize * 0.1f;
+            auto halfThickness = lineThickness * 0.5f;
 
             Path outline;
             outline.addRoundedRectangle (0.5f + halfThickness, 0.5f + halfThickness, width - lineThickness, height - lineThickness,
@@ -86,8 +87,8 @@ struct CustomLookAndFeel    : public LookAndFeel_V4
                                          ! (flatOnLeft  || flatOnBottom),
                                          ! (flatOnRight || flatOnBottom));
 
-            const Colour outlineColour (button.findColour (button.getToggleState() ? TextButton::textColourOnId
-                                                                                   : TextButton::textColourOffId));
+            auto outlineColour = button.findColour (button.getToggleState() ? TextButton::textColourOnId
+                                                                            : TextButton::textColourOffId);
 
             g.setColour (baseColour);
             g.fillPath (outline);
@@ -110,8 +111,10 @@ struct CustomLookAndFeel    : public LookAndFeel_V4
         const float boxSize = w * 0.7f;
 
         bool isDownOrDragging = component.isEnabled() && (component.isMouseOverOrDragging() || component.isMouseButtonDown());
-        const Colour colour (component.findColour (TextButton::buttonColourId).withMultipliedSaturation ((component.hasKeyboardFocus (false) || isDownOrDragging) ? 1.3f : 0.9f)
-                             .withMultipliedAlpha (component.isEnabled() ? 1.0f : 0.7f));
+
+        auto colour = component.findColour (TextButton::buttonColourId)
+                           .withMultipliedSaturation ((component.hasKeyboardFocus (false) || isDownOrDragging) ? 1.3f : 0.9f)
+                           .withMultipliedAlpha (component.isEnabled() ? 1.0f : 0.7f);
 
         drawRoundThumb (g, x, y + (h - boxSize) * 0.5f, boxSize, colour,
                         isEnabled ? ((isButtonDown || isMouseOverButton) ? 1.1f : 0.5f) : 0.3f);
@@ -132,11 +135,13 @@ struct CustomLookAndFeel    : public LookAndFeel_V4
                                 float sliderPos, float minSliderPos, float maxSliderPos,
                                 const Slider::SliderStyle style, Slider& slider) override
     {
-        const float sliderRadius = (float) (getSliderThumbRadius (slider) - 2);
+        auto sliderRadius = (float) (getSliderThumbRadius (slider) - 2);
 
         bool isDownOrDragging = slider.isEnabled() && (slider.isMouseOverOrDragging() || slider.isMouseButtonDown());
-        Colour knobColour (slider.findColour (Slider::thumbColourId).withMultipliedSaturation ((slider.hasKeyboardFocus (false) || isDownOrDragging) ? 1.3f : 0.9f)
-                           .withMultipliedAlpha (slider.isEnabled() ? 1.0f : 0.7f));
+
+        auto knobColour = slider.findColour (Slider::thumbColourId)
+                            .withMultipliedSaturation ((slider.hasKeyboardFocus (false) || isDownOrDragging) ? 1.3f : 0.9f)
+                            .withMultipliedAlpha (slider.isEnabled() ? 1.0f : 0.7f);
 
         if (style == Slider::LinearHorizontal || style == Slider::LinearVertical)
         {
@@ -153,7 +158,7 @@ struct CustomLookAndFeel    : public LookAndFeel_V4
                 ky = y + height * 0.5f;
             }
 
-            const float outlineThickness = slider.isEnabled() ? 0.8f : 0.3f;
+            auto outlineThickness = slider.isEnabled() ? 0.8f : 0.3f;
 
             drawRoundThumb (g,
                             kx - sliderRadius,
@@ -176,24 +181,21 @@ struct CustomLookAndFeel    : public LookAndFeel_V4
 
         if (style == Slider::LinearBar || style == Slider::LinearBarVertical)
         {
-            const float fx = (float) x, fy = (float) y, fw = (float) width, fh = (float) height;
-
             Path p;
 
             if (style == Slider::LinearBarVertical)
-                p.addRectangle (fx, sliderPos, fw, 1.0f + fh - sliderPos);
+                p.addRectangle ((float) x, sliderPos, (float) width, 1.0f + height - sliderPos);
             else
-                p.addRectangle (fx, fy, sliderPos - fx, fh);
+                p.addRectangle ((float) x, (float) y, sliderPos - x, (float) height);
 
-
-            Colour baseColour (slider.findColour (Slider::rotarySliderFillColourId)
-                               .withMultipliedSaturation (slider.isEnabled() ? 1.0f : 0.5f)
-                               .withMultipliedAlpha (0.8f));
+            auto baseColour = slider.findColour (Slider::rotarySliderFillColourId)
+                                  .withMultipliedSaturation (slider.isEnabled() ? 1.0f : 0.5f)
+                                  .withMultipliedAlpha (0.8f);
 
             g.setColour (baseColour);
             g.fillPath (p);
 
-            const float lineThickness = jmin (15.0f, jmin (width, height) * 0.45f) * 0.1f;
+            auto lineThickness = jmin (15.0f, jmin (width, height) * 0.45f) * 0.1f;
             g.drawRect (slider.getLocalBounds().toFloat(), lineThickness);
         }
         else
@@ -209,23 +211,23 @@ struct CustomLookAndFeel    : public LookAndFeel_V4
                                      float /*maxSliderPos*/,
                                      const Slider::SliderStyle /*style*/, Slider& slider) override
     {
-        const float sliderRadius = getSliderThumbRadius (slider) - 5.0f;
+        auto sliderRadius = getSliderThumbRadius (slider) - 5.0f;
         Path on, off;
 
         if (slider.isHorizontal())
         {
-            const float iy = y + height * 0.5f - sliderRadius * 0.5f;
+            auto iy = y + height * 0.5f - sliderRadius * 0.5f;
             Rectangle<float> r (x - sliderRadius * 0.5f, iy, width + sliderRadius, sliderRadius);
-            const float onW = r.getWidth() * ((float) slider.valueToProportionOfLength (slider.getValue()));
+            auto onW = r.getWidth() * ((float) slider.valueToProportionOfLength (slider.getValue()));
 
             on.addRectangle (r.removeFromLeft (onW));
             off.addRectangle (r);
         }
         else
         {
-            const float ix = x + width * 0.5f - sliderRadius * 0.5f;
+            auto ix = x + width * 0.5f - sliderRadius * 0.5f;
             Rectangle<float> r (ix, y - sliderRadius * 0.5f, sliderRadius, height + sliderRadius);
-            const float onH = r.getHeight() * ((float) slider.valueToProportionOfLength (slider.getValue()));
+            auto onH = r.getHeight() * ((float) slider.valueToProportionOfLength (slider.getValue()));
 
             on.addRectangle (r.removeFromBottom (onH));
             off.addRectangle (r);
@@ -241,14 +243,14 @@ struct CustomLookAndFeel    : public LookAndFeel_V4
     void drawRotarySlider (Graphics& g, int x, int y, int width, int height, float sliderPos,
                            float rotaryStartAngle, float rotaryEndAngle, Slider& slider) override
     {
-        const float radius = jmin (width / 2, height / 2) - 2.0f;
-        const float centreX = x + width * 0.5f;
-        const float centreY = y + height * 0.5f;
-        const float rx = centreX - radius;
-        const float ry = centreY - radius;
-        const float rw = radius * 2.0f;
-        const float angle = rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
-        const bool isMouseOver = slider.isMouseOverOrDragging() && slider.isEnabled();
+        auto radius = jmin (width / 2, height / 2) - 2.0f;
+        auto centreX = x + width * 0.5f;
+        auto centreY = y + height * 0.5f;
+        auto rx = centreX - radius;
+        auto ry = centreY - radius;
+        auto rw = radius * 2.0f;
+        auto angle = rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
+        bool isMouseOver = slider.isMouseOverOrDragging() && slider.isEnabled();
 
         if (slider.isEnabled())
             g.setColour (slider.findColour (Slider::rotarySliderFillColourId).withAlpha (isMouseOver ? 1.0f : 0.7f));
@@ -262,7 +264,7 @@ struct CustomLookAndFeel    : public LookAndFeel_V4
         }
 
         {
-            const float lineThickness = jmin (15.0f, jmin (width, height) * 0.45f) * 0.1f;
+            auto lineThickness = jmin (15.0f, jmin (width, height) * 0.45f) * 0.1f;
             Path outlineArc;
             outlineArc.addPieSegment (rx, ry, rw, rw, rotaryStartAngle, rotaryEndAngle, 0.0);
             g.strokePath (outlineArc, PathStrokeType (lineThickness));
@@ -279,14 +281,14 @@ struct SquareLookAndFeel    : public CustomLookAndFeel
     void drawButtonBackground (Graphics& g, Button& button, const Colour& backgroundColour,
                                bool isMouseOverButton, bool isButtonDown) override
     {
-        Colour baseColour (backgroundColour.withMultipliedSaturation (button.hasKeyboardFocus (true) ? 1.3f : 0.9f)
-                           .withMultipliedAlpha (button.isEnabled() ? 0.9f : 0.5f));
+        auto baseColour = backgroundColour.withMultipliedSaturation (button.hasKeyboardFocus (true) ? 1.3f : 0.9f)
+                                          .withMultipliedAlpha (button.isEnabled() ? 0.9f : 0.5f);
 
         if (isButtonDown || isMouseOverButton)
             baseColour = baseColour.contrasting (isButtonDown ? 0.2f : 0.1f);
 
-        const float width  = button.getWidth() - 1.0f;
-        const float height = button.getHeight() - 1.0f;
+        auto width  = button.getWidth() - 1.0f;
+        auto height = button.getHeight() - 1.0f;
 
         if (width > 0 && height > 0)
         {
@@ -305,11 +307,14 @@ struct SquareLookAndFeel    : public CustomLookAndFeel
                       bool /*isMouseOverButton*/,
                       bool /*isButtonDown*/) override
     {
-        const float boxSize = w * 0.7f;
+        auto boxSize = w * 0.7f;
 
         bool isDownOrDragging = component.isEnabled() && (component.isMouseOverOrDragging() || component.isMouseButtonDown());
-        const Colour colour (component.findColour (TextButton::buttonOnColourId).withMultipliedSaturation ((component.hasKeyboardFocus (false) || isDownOrDragging) ? 1.3f : 0.9f)
-                             .withMultipliedAlpha (component.isEnabled() ? 1.0f : 0.7f));
+
+        auto colour = component.findColour (TextButton::buttonOnColourId)
+                         .withMultipliedSaturation ((component.hasKeyboardFocus (false) || isDownOrDragging) ? 1.3f : 0.9f)
+                         .withMultipliedAlpha (component.isEnabled() ? 1.0f : 0.7f);
+
         g.setColour (colour);
 
         Rectangle<float> r (x, y + (h - boxSize) * 0.5f, boxSize, boxSize);
@@ -317,12 +322,14 @@ struct SquareLookAndFeel    : public CustomLookAndFeel
 
         if (ticked)
         {
-            const Path tick (LookAndFeel_V4::getTickShape (6.0f));
+            auto tickPath = LookAndFeel_V4::getTickShape (6.0f);
             g.setColour (isEnabled ? findColour (TextButton::buttonColourId) : Colours::grey);
 
-            const AffineTransform trans (RectanglePlacement (RectanglePlacement::centred)
-                                         .getTransformToFit (tick.getBounds(), r.reduced (r.getHeight() * 0.05f)));
-            g.fillPath (tick, trans);
+            auto transform = RectanglePlacement (RectanglePlacement::centred)
+                               .getTransformToFit (tickPath.getBounds(),
+                                                   r.reduced (r.getHeight() * 0.05f));
+
+            g.fillPath (tickPath, transform);
         }
     }
 
@@ -330,11 +337,14 @@ struct SquareLookAndFeel    : public CustomLookAndFeel
                                 float sliderPos, float minSliderPos, float maxSliderPos,
                                 const Slider::SliderStyle style, Slider& slider) override
     {
-        const float sliderRadius = (float) getSliderThumbRadius (slider);
+        auto sliderRadius = (float) getSliderThumbRadius (slider);
 
         bool isDownOrDragging = slider.isEnabled() && (slider.isMouseOverOrDragging() || slider.isMouseButtonDown());
-        Colour knobColour (slider.findColour (Slider::rotarySliderFillColourId).withMultipliedSaturation ((slider.hasKeyboardFocus (false) || isDownOrDragging) ? 1.3f : 0.9f)
-                           .withMultipliedAlpha (slider.isEnabled() ? 1.0f : 0.7f));
+
+        auto knobColour = slider.findColour (Slider::rotarySliderFillColourId)
+                            .withMultipliedSaturation ((slider.hasKeyboardFocus (false) || isDownOrDragging) ? 1.3f : 0.9f)
+                            .withMultipliedAlpha (slider.isEnabled() ? 1.0f : 0.7f);
+
         g.setColour (knobColour);
 
         if (style == Slider::LinearHorizontal || style == Slider::LinearVertical)
@@ -364,24 +374,28 @@ struct SquareLookAndFeel    : public CustomLookAndFeel
     void drawRotarySlider (Graphics& g, int x, int y, int width, int height, float sliderPos,
                            float rotaryStartAngle, float rotaryEndAngle, Slider& slider) override
     {
-        const float diameter = jmin (width, height) - 4.0f;
-        const float radius = (diameter / 2.0f) * std::cos (float_Pi / 4.0f);
-        const float centreX = x + width * 0.5f;
-        const float centreY = y + height * 0.5f;
-        const float rx = centreX - radius;
-        const float ry = centreY - radius;
-        const float rw = radius * 2.0f;
-        const float angle = rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
-        const bool isMouseOver = slider.isMouseOverOrDragging() && slider.isEnabled();
+        auto diameter = jmin (width, height) - 4.0f;
+        auto radius = (diameter / 2.0f) * std::cos (float_Pi / 4.0f);
+        auto centreX = x + width * 0.5f;
+        auto centreY = y + height * 0.5f;
+        auto rx = centreX - radius;
+        auto ry = centreY - radius;
+        auto rw = radius * 2.0f;
+        auto angle = rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
+        bool isMouseOver = slider.isMouseOverOrDragging() && slider.isEnabled();
 
-        const Colour baseColour (slider.isEnabled() ? slider.findColour (Slider::rotarySliderFillColourId).withAlpha (isMouseOver ? 0.8f : 1.0f)
-                                                    : Colour (0x80808080));
+        auto baseColour = slider.isEnabled() ? slider.findColour (Slider::rotarySliderFillColourId).withAlpha (isMouseOver ? 0.8f : 1.0f)
+                                             : Colour (0x80808080);
 
         Rectangle<float> r (rx, ry, rw, rw);
-        AffineTransform t (AffineTransform::rotation (angle, r.getCentreX(), r.getCentreY()));
+        auto transform = AffineTransform::rotation (angle, r.getCentreX(), r.getCentreY());
 
-        float x1 = r.getTopLeft().getX(), y1 = r.getTopLeft().getY(), x2 = r.getBottomLeft().getX(), y2 = r.getBottomLeft().getY();
-        t.transformPoints (x1, y1, x2, y2);
+        auto x1 = r.getTopLeft().getX();
+        auto y1 = r.getTopLeft().getY();
+        auto x2 = r.getBottomLeft().getX();
+        auto y2 = r.getBottomLeft().getY();
+
+        transform.transformPoints (x1, y1, x2, y2);
 
         g.setGradientFill (ColourGradient (baseColour, x1, y1,
                                            baseColour.darker (0.1f), x2, y2,
@@ -389,11 +403,11 @@ struct SquareLookAndFeel    : public CustomLookAndFeel
 
         Path knob;
         knob.addRectangle (r);
-        g.fillPath (knob, t);
+        g.fillPath (knob, transform);
 
         Path needle;
-        Rectangle<float> r2 (r * 0.1f);
-        needle.addRectangle (r2.withPosition (Point<float> (r.getCentreX() - (r2.getWidth() / 2.0f), r.getY())));
+        auto r2 = r * 0.1f;
+        needle.addRectangle (r2.withPosition ({ r.getCentreX() - (r2.getWidth() / 2.0f), r.getY() }));
 
         g.setColour (slider.findColour (Slider::rotarySliderOutlineColourId));
         g.fillPath (needle, AffineTransform::rotation (angle, r.getCentreX(), r.getCentreY()));
@@ -442,7 +456,7 @@ struct LookAndFeelDemoComponent  : public Component
 
         for (int i = 0; i < 3; ++i)
         {
-            TextButton* b = radioButtons.add (new TextButton());
+            auto* b = radioButtons.add (new TextButton());
             addAndMakeVisible (b);
             b->setRadioGroupId (42);
             b->setClickingTogglesState (true);
@@ -462,8 +476,8 @@ struct LookAndFeelDemoComponent  : public Component
 
     void resized() override
     {
-        Rectangle<int> area (getLocalBounds().reduced (10));
-        Rectangle<int> row (area.removeFromTop (100));
+        auto area = getLocalBounds().reduced (10);
+        auto row = area.removeFromTop (100);
 
         rotarySlider.setBounds (row.removeFromLeft (100).reduced (5));
         verticalSlider.setBounds (row.removeFromLeft (100).reduced (5));
@@ -473,15 +487,15 @@ struct LookAndFeelDemoComponent  : public Component
         row = area.removeFromTop (100);
         button1.setBounds (row.removeFromLeft (100).reduced (5));
 
-        Rectangle<int> row2 (row.removeFromTop (row.getHeight() / 2).reduced (0, 10));
+        auto row2 = row.removeFromTop (row.getHeight() / 2).reduced (0, 10);
         button2.setBounds (row2.removeFromLeft (100).reduced (5, 0));
         button3.setBounds (row2.removeFromLeft (100).reduced (5, 0));
         button4.setBounds (row2.removeFromLeft (100).reduced (5, 0));
 
         row2 = (row.removeFromTop (row2.getHeight() + 20).reduced (5, 10));
 
-        for (int i = 0; i < radioButtons.size(); ++i)
-            radioButtons.getUnchecked (i)->setBounds (row2.removeFromLeft (100));
+        for (auto* b : radioButtons)
+            b->setBounds (row2.removeFromLeft (100));
     }
 
     Slider rotarySlider, verticalSlider, barSlider, incDecSlider;
@@ -516,11 +530,11 @@ public:
         addLookAndFeel (new LookAndFeel_V4 (LookAndFeel_V4::getGreyColourScheme()), "LookAndFeel_V4 (Grey)");
         addLookAndFeel (new LookAndFeel_V4 (LookAndFeel_V4::getLightColourScheme()), "LookAndFeel_V4 (Light)");
 
-        CustomLookAndFeel* claf = new CustomLookAndFeel();
+        auto claf = new CustomLookAndFeel();
         addLookAndFeel (claf, "Custom Look And Feel");
         setupCustomLookAndFeelColours (*claf);
 
-        SquareLookAndFeel* slaf = new SquareLookAndFeel();
+        auto slaf = new SquareLookAndFeel();
         addLookAndFeel (slaf, "Square Look And Feel");
         setupSquareLookAndFeelColours (*slaf);
 
@@ -540,10 +554,9 @@ public:
 
     void resized() override
     {
-        Rectangle<int> r (getLocalBounds().reduced (10));
+        auto r = getLocalBounds().reduced (10);
 
         demoComp.setBounds (r);
-
         descriptionLabel.setBounds (r.removeFromTop (200));
         lafBox.setBounds (r.removeFromTop (22).removeFromLeft (250));
         randomButton.setBounds (lafBox.getBounds().withX (lafBox.getRight() + 20).withWidth (140));
@@ -580,7 +593,8 @@ private:
 
     void setupSquareLookAndFeelColours (LookAndFeel& laf)
     {
-        const Colour baseColour (Colours::red);
+        auto baseColour = Colours::red;
+
         laf.setColour (Slider::thumbColourId, Colour::greyLevel (0.95f));
         laf.setColour (Slider::textBoxOutlineColourId, Colours::transparentWhite);
         laf.setColour (Slider::rotarySliderFillColourId, baseColour);
