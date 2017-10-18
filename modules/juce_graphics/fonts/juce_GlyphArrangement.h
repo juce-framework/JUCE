@@ -42,15 +42,18 @@ class JUCE_API  PositionedGlyph  final
 public:
     //==============================================================================
     PositionedGlyph() noexcept;
-    ~PositionedGlyph();
 
     PositionedGlyph (const Font& font, juce_wchar character, int glyphNumber,
                      float anchorX, float baselineY, float width, bool isWhitespace);
 
     PositionedGlyph (const PositionedGlyph&) = default;
-    PositionedGlyph (PositionedGlyph&&) noexcept = default;
     PositionedGlyph& operator= (const PositionedGlyph&) = default;
-    PositionedGlyph& operator= (PositionedGlyph&&) noexcept = default;
+
+    // VS2013 can't default move constructors and assignmants
+    PositionedGlyph (PositionedGlyph&&) noexcept;
+    PositionedGlyph& operator= (PositionedGlyph&&) noexcept;
+
+    ~PositionedGlyph();
 
     /** Returns the character the glyph represents. */
     juce_wchar getCharacter() const noexcept    { return character; }
@@ -124,9 +127,11 @@ public:
     GlyphArrangement();
 
     GlyphArrangement (const GlyphArrangement&) = default;
-    GlyphArrangement (GlyphArrangement&&) = default;
     GlyphArrangement& operator= (const GlyphArrangement&) = default;
-    GlyphArrangement& operator= (GlyphArrangement&&) = default;
+
+    // VS2013 can't default move constructors and assignmants
+    GlyphArrangement (GlyphArrangement&&);
+    GlyphArrangement& operator= (GlyphArrangement&&);
 
     /** Destructor. */
     ~GlyphArrangement();

@@ -74,7 +74,15 @@ public:
     }
 
     UniformTextSection (const UniformTextSection&) = default;
-    UniformTextSection (UniformTextSection&&) = default;
+
+    // VS2013 can't default move constructors
+    UniformTextSection (UniformTextSection&& other)
+        : font (static_cast<Font&&> (other.font)),
+          colour (other.colour),
+          atoms (static_cast<Array<TextAtom>&&> (other.atoms))
+    {
+    }
+
     UniformTextSection& operator= (const UniformTextSection&) = delete;
 
     void append (UniformTextSection& other, const juce_wchar passwordChar)

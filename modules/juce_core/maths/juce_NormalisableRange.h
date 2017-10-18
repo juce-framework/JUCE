@@ -38,12 +38,34 @@ class NormalisableRange
 {
 public:
     /** Creates a continuous range that performs a dummy mapping. */
-    NormalisableRange() noexcept = default;
+    NormalisableRange() noexcept {}
 
     NormalisableRange (const NormalisableRange&) = default;
-    NormalisableRange (NormalisableRange&&) = default;
     NormalisableRange& operator= (const NormalisableRange&) = default;
-    NormalisableRange& operator= (NormalisableRange&&) = default;
+
+    // VS2013 can't default move constructors
+    NormalisableRange (NormalisableRange&& other)
+        : start (other.start), end (other.end),
+          interval (other.interval), skew (other.skew),
+          symmetricSkew (other.symmetricSkew),
+          convertFrom0To1Function  (static_cast<ConverstionFunction&&> (other.convertFrom0To1Function)),
+          convertTo0To1Function    (static_cast<ConverstionFunction&&> (other.convertTo0To1Function)),
+          snapToLegalValueFunction (static_cast<ConverstionFunction&&> (other.snapToLegalValueFunction))
+    {
+    }
+
+    // VS2013 can't default move assignments
+    NormalisableRange& operator= (NormalisableRange&& other)
+    {
+        start = other.start;
+        end = other.end;
+        interval = other.interval;
+        skew = other.skew;
+        symmetricSkew = other.symmetricSkew;
+        convertFrom0To1Function  = static_cast<ConverstionFunction&&> (other.convertFrom0To1Function);
+        convertTo0To1Function    = static_cast<ConverstionFunction&&> (other.convertTo0To1Function);
+        snapToLegalValueFunction = static_cast<ConverstionFunction&&> (other.snapToLegalValueFunction);
+    }
 
     /** Creates a NormalisableRange with a given range, interval and skew factor. */
     NormalisableRange (ValueType rangeStart,
@@ -235,9 +257,10 @@ private:
         jassert (skew > ValueType());
     }
 
-    std::function<ValueType (ValueType, ValueType, ValueType)> convertFrom0To1Function  = {},
-                                                               convertTo0To1Function    = {},
-                                                               snapToLegalValueFunction = {};
+    typedef std::function<ValueType(ValueType, ValueType, ValueType)> ConverstionFunction;
+    ConverstionFunction convertFrom0To1Function  = {},
+                        convertTo0To1Function    = {},
+                        snapToLegalValueFunction = {};
 };
 
 } // namespace juce

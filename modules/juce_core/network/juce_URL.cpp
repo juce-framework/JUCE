@@ -134,9 +134,7 @@ URL::DownloadTask::DownloadTask() {}
 URL::DownloadTask::~DownloadTask() {}
 
 //==============================================================================
-URL::URL() noexcept
-{
-}
+URL::URL() noexcept {}
 
 URL::URL (const String& u)  : url (u)
 {
@@ -170,6 +168,28 @@ URL::URL (const String& u)  : url (u)
 
 URL::URL (const String& u, int)  : url (u) {}
 
+URL::URL (URL&& other)
+    : url             (static_cast<String&&> (other.url)),
+      postData        (static_cast<MemoryBlock&&> (other.postData)),
+      parameterNames  (static_cast<StringArray&&> (other.parameterNames)),
+      parameterValues (static_cast<StringArray&&> (other.parameterValues)),
+      filesToUpload   (static_cast<ReferenceCountedArray<Upload>&&> (other.filesToUpload))
+{
+}
+
+URL& URL::operator= (URL&& other)
+{
+    url             = static_cast<String&&> (other.url);
+    postData        = static_cast<MemoryBlock&&> (other.postData);
+    parameterNames  = static_cast<StringArray&&> (other.parameterNames);
+    parameterValues = static_cast<StringArray&&> (other.parameterValues);
+    filesToUpload   = static_cast<ReferenceCountedArray<Upload>&&> (other.filesToUpload);
+
+    return *this;
+}
+
+URL::~URL() {}
+
 URL URL::createWithoutParsing (const String& u)
 {
     return URL (u, 0);
@@ -187,10 +207,6 @@ bool URL::operator== (const URL& other) const
 bool URL::operator!= (const URL& other) const
 {
     return ! operator== (other);
-}
-
-URL::~URL()
-{
 }
 
 namespace URLHelpers

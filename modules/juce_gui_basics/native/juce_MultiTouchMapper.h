@@ -82,12 +82,22 @@ private:
     struct TouchInfo
     {
         TouchInfo() noexcept  : touchId (0), owner (nullptr) {}
-        TouchInfo (IDType idToUse, ComponentPeer* peer) noexcept : touchId (idToUse), owner (peer) {}
-        TouchInfo (const TouchInfo&) noexcept = default;
-        TouchInfo (TouchInfo&&) noexcept      = default;
+        TouchInfo (IDType idToUse, ComponentPeer* peer) noexcept  : touchId (idToUse), owner (peer) {}
 
-        TouchInfo& operator= (const TouchInfo&) noexcept = default;
-        TouchInfo& operator= (TouchInfo&&) noexcept      = default;
+        TouchInfo (const TouchInfo&) = default;
+        TouchInfo& operator= (const TouchInfo&) = default;
+
+        // VS2013 can't default move constructors
+        TouchInfo (TouchInfo&& other) noexcept  : touchId (other.touchId), owner (other.owner) {}
+
+        // VS2013 can't default move assignments
+        TouchInfo& operator= (TouchInfo&& other) noexcept
+        {
+            touchId = other.touchId;
+            owner = other.owner;
+
+            return *this;
+        }
 
         IDType touchId;
         ComponentPeer* owner;

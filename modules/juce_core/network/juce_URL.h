@@ -47,9 +47,11 @@ public:
     URL (const String& url);
 
     URL (const URL&) = default;
-    URL (URL&&) = default;
     URL& operator= (const URL&) = default;
-    URL& operator= (URL&&) = default;
+
+    // VS2013 can't default move constructors and assignments
+    URL (URL&&);
+    URL& operator= (URL&&);
 
     /** Destructor. */
     ~URL();

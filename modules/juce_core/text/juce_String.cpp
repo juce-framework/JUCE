@@ -1359,8 +1359,6 @@ struct StringCreationHelper
         dest.write (c);
     }
 
-    String&& get() noexcept     { return static_cast<String&&> (result); }
-
     String result;
     String::CharPointerType source { nullptr }, dest { nullptr };
     size_t allocatedBytes, bytesWritten = 0;
@@ -1386,7 +1384,7 @@ String String::replaceCharacter (const juce_wchar charToReplace, const juce_wcha
             break;
     }
 
-    return builder.get();
+    return static_cast<String&&> (builder.result);
 }
 
 String String::replaceCharacters (StringRef charactersToReplace, StringRef charactersToInsertInstead) const
@@ -1411,7 +1409,7 @@ String String::replaceCharacters (StringRef charactersToReplace, StringRef chara
             break;
     }
 
-    return builder.get();
+    return static_cast<String&&> (builder.result);
 }
 
 //==============================================================================
@@ -1493,7 +1491,7 @@ String String::toUpperCase() const
         ++(builder.source);
     }
 
-    return builder.get();
+    return static_cast<String&&> (builder.result);
 }
 
 String String::toLowerCase() const
@@ -1511,7 +1509,7 @@ String String::toLowerCase() const
         ++(builder.source);
     }
 
-    return builder.get();
+    return static_cast<String&&> (builder.result);
 }
 
 //==============================================================================
@@ -1776,7 +1774,7 @@ String String::retainCharacters (StringRef charactersToRetain) const
     }
 
     builder.write (0);
-    return builder.get();
+    return static_cast<String&&> (builder.result);
 }
 
 String String::removeCharacters (StringRef charactersToRemove) const
@@ -1797,7 +1795,7 @@ String String::removeCharacters (StringRef charactersToRemove) const
             break;
     }
 
-    return builder.get();
+    return static_cast<String&&> (builder.result);
 }
 
 String String::initialSectionContainingOnly (StringRef permittedCharacters) const
@@ -2013,7 +2011,7 @@ String String::createStringFromData (const void* const unknownData, int size)
         }
 
         builder.write (0);
-        return builder.get();
+        return static_cast<String&&> (builder.result);
     }
 
     auto* start = (const char*) data;
