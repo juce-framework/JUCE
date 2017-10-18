@@ -413,6 +413,8 @@ private:
             mo << "SET( CMAKE_SHARED_LINKER_FLAGS  \"${CMAKE_EXE_LINKER_FLAGS} ${JUCE_LDFLAGS}\")" << newLine << newLine;
         }
 
+        mo << "enable_language(ASM)" << newLine << newLine;
+
         StringArray userLibraries = StringArray::fromTokens(getExternalLibrariesString(), ";", "");
         userLibraries.addArray (androidLibs);
 
