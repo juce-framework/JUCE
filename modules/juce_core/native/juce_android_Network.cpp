@@ -121,7 +121,8 @@ public:
             const ScopedLock lock (createStreamLock);
 
             if (! hasBeenCancelled)
-                stream = GlobalRef (env->CallStaticObjectMethod (JuceAppActivity,
+            {
+                jobject objstream = env->CallStaticObjectMethod (JuceAppActivity,
                                                                  JuceAppActivity.createHTTPStream,
                                                                  javaString (address).get(),
                                                                  (jboolean) isPost,
@@ -131,7 +132,10 @@ public:
                                                                  statusCodeArray,
                                                                  responseHeaderBuffer.get(),
                                                                  (jint) numRedirectsToFollow,
-                                                                 javaString (httpRequest).get()));
+                                                                 javaString (httpRequest).get());
+                stream = GlobalRef(objstream);
+                if (objstream != 0) env->DeleteLocalRef(objstream);
+            }
         }
 
         if (stream != 0 && ! stream.callBooleanMethod (HTTPStream.connect))
