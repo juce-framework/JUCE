@@ -2261,7 +2261,7 @@ private:
     ScopedPointer<Positioner> positioner;
     ScopedPointer<AffineTransform> affineTransform;
     Array<Component*> childComponentList;
-    LookAndFeel* lookAndFeel = nullptr;
+    WeakReference<LookAndFeel> lookAndFeel;
     MouseCursor cursor;
     ImageEffectFilter* effect = nullptr;
     ScopedPointer<CachedComponentImage> cachedImage;
