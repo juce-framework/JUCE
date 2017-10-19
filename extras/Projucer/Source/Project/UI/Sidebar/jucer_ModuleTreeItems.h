@@ -166,6 +166,9 @@ private:
 
             for (Project::ExporterIterator exporter (project); exporter.next();)
             {
+                if (exporter->isCLion())
+                    continue;
+
                 auto key = modules.isJuceModule (moduleID) ? Ids::defaultJuceModulePath
                                                            : Ids::defaultUserModulePath;
 

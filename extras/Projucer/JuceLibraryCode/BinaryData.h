@@ -26,6 +26,9 @@ namespace BinaryData
     extern const char*   export_android_svg;
     const int            export_android_svgSize = 3586;
 
+    extern const char*   export_clion_svg;
+    const int            export_clion_svgSize = 2244;
+
     extern const char*   export_codeBlocks_svg;
     const int            export_codeBlocks_svgSize = 1726;
 
@@ -159,7 +162,7 @@ namespace BinaryData
     extern const char* namedResourceList[];
 
     // Number of elements in the namedResourceList array.
-    const int namedResourceListSize = 49;
+    const int namedResourceListSize = 50;
 
     // If you provide the name of one of the binary resource variables above, this function will
     // return the corresponding data and its size (or a null pointer if the name isn't found).

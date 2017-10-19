@@ -1244,6 +1244,7 @@ public:
     bool isCodeBlocks() const override           { return false; }
     bool isMakefile() const override             { return false; }
     bool isAndroidStudio() const override        { return false; }
+    bool isCLion() const override                { return false; }
 
     bool isAndroid() const override              { return false; }
     bool isWindows() const override              { return true; }

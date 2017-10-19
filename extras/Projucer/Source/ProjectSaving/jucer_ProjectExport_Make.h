@@ -36,7 +36,7 @@ protected:
     {
     public:
         MakeBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
-        : BuildConfiguration (p, settings, e)
+            : BuildConfiguration (p, settings, e)
         {
         }
 
@@ -89,46 +89,75 @@ public:
             : ProjectType::Target (targetType), owner (exporter)
         {}
 
-        StringArray getTargetSettings (const BuildConfiguration& config) const
+        StringArray getCompilerFlags() const
+        {
+            StringArray result;
+
+            if (getTargetFileType() == sharedLibraryOrDLL || getTargetFileType() == pluginBundle)
+            {
+                result.add ("-fPIC");
+                result.add ("-fvisibility=hidden");
+            }
+
+            return result;
+        }
+
+        StringArray getLinkerFlags() const
+        {
+            StringArray result;
+
+            if (getTargetFileType() == sharedLibraryOrDLL || getTargetFileType() == pluginBundle)
+            {
+                result.add ("-shared");
+
+                if (getTargetFileType() == pluginBundle)
+                    result.add ("-Wl,--no-undefined");
+            }
+
+            return result;
+        }
+
+        StringPairArray getDefines (const BuildConfiguration& config) const
+        {
+            StringPairArray result;
+            auto commonOptionKeys = owner.getAllPreprocessorDefs (config, ProjectType::Target::unspecified).getAllKeys();
+            auto targetSpecific = owner.getAllPreprocessorDefs (config, type);
+
+            for (auto& key : targetSpecific.getAllKeys())
+                if (! commonOptionKeys.contains (key))
+                    result.set (key, targetSpecific[key]);
+
+            return result;
+        }
+
+        StringArray getTargetSettings (const MakeBuildConfiguration& config) const
         {
             if (type == AggregateTarget)
                 // the aggregate target should not specify any settings at all!
                 // it just defines dependencies on the other targets.
                 return {};
 
-            StringPairArray commonOptions  = owner.getAllPreprocessorDefs (config, ProjectType::Target::unspecified);
-            StringPairArray targetSpecific = owner.getAllPreprocessorDefs (config, type);
+            StringArray defines;
+            auto defs = getDefines (config);
 
-            StringArray defs;
-
-            // remove any defines that have already been added by the configuration
-            const int n = targetSpecific.size();
-            for (int i = 0 ; i < n; ++i)
-            {
-                const String& key = targetSpecific.getAllKeys()[i];
-
-                if (! commonOptions.getAllKeys().contains (key))
-                    defs.add (String ("-D") + key + String ("=") + targetSpecific.getAllValues()[i]);
-            }
+            for (auto& key : defs.getAllKeys())
+                defines.add ("-D" + key + "=" + defs[key]);
 
             StringArray s;
 
             const String cppflagsVarName = String ("JUCE_CPPFLAGS_") + getTargetVarName();
 
-            s.add (cppflagsVarName + String (" := ") + defs.joinIntoString (" "));
+            s.add (cppflagsVarName + String (" := ") + defines.joinIntoString (" "));
 
-            if (getTargetFileType() == sharedLibraryOrDLL || getTargetFileType() == pluginBundle)
-            {
-                s.add (String ("JUCE_CFLAGS_") + getTargetVarName() + String (" := -fPIC -fvisibility=hidden"));
+            auto cflags = getCompilerFlags();
 
-                const String ldflagsVarName = String ("JUCE_LDFLAGS_") + getTargetVarName();
-                String targetLinkOptions = ldflagsVarName  + String (" := -shared");
+            if (! cflags.isEmpty())
+                s.add (String ("JUCE_CFLAGS_") + getTargetVarName() + " := " + cflags.joinIntoString (" "));
 
-                if (getTargetFileType() == pluginBundle)
-                    targetLinkOptions += " -Wl,--no-undefined";
+            auto ldflags = getLinkerFlags();
 
-                s.add (targetLinkOptions);
-            }
+            if (! ldflags.isEmpty())
+                s.add (String ("JUCE_LDFLAGS_") + getTargetVarName() + " := " + ldflags.joinIntoString (" "));
 
             String targetName (owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString()));
 
@@ -287,26 +316,6 @@ public:
         return nullptr;
     }
 
-    StringArray getPackages() const
-    {
-        StringArray packages;
-        packages.addTokens (getExtraPkgConfigString(), " ", "\"'");
-        packages.removeEmptyStrings();
-
-        packages.addArray (linuxPackages);
-
-        if (isWebBrowserComponentEnabled())
-        {
-            packages.add ("webkit2gtk-4.0");
-            packages.add ("gtk+-x11-3.0");
-        }
-
-        packages.removeDuplicates (false);
-
-        return packages;
-    }
-
-
     //==============================================================================
     MakefileProjectExporter (Project& p, const ValueTree& t)   : ProjectExporter (p, t)
     {
@@ -328,6 +337,7 @@ public:
     bool isCodeBlocks() const override                  { return false; }
     bool isMakefile() const override                    { return true; }
     bool isAndroidStudio() const override               { return false; }
+    bool isCLion() const override                       { return false; }
 
     bool isAndroid() const override                     { return false; }
     bool isWindows() const override                     { return false; }
@@ -412,6 +422,171 @@ public:
     }
 
 private:
+    StringPairArray getDefines (const BuildConfiguration& config) const
+    {
+        StringPairArray result;
+
+        result.set ("LINUX", "1");
+
+        if (config.isDebug())
+        {
+            result.set ("DEBUG", "1");
+            result.set ("_DEBUG", "1");
+        }
+        else
+        {
+            result.set ("NDEBUG", "1");
+        }
+
+        result = mergePreprocessorDefs (result, getAllPreprocessorDefs (config, ProjectType::Target::unspecified));
+
+        return result;
+    }
+
+    StringArray getPackages() const
+    {
+        StringArray packages;
+        packages.addTokens (getExtraPkgConfigString(), " ", "\"'");
+        packages.removeEmptyStrings();
+
+        packages.addArray (linuxPackages);
+
+        if (isWebBrowserComponentEnabled())
+        {
+            packages.add ("webkit2gtk-4.0");
+            packages.add ("gtk+-x11-3.0");
+        }
+
+        packages.removeDuplicates (false);
+
+        return packages;
+    }
+
+    String getPreprocessorPkgConfigFlags() const
+    {
+        auto packages = getPackages();
+
+        if (packages.size() > 0)
+            return "$(shell pkg-config --cflags " + packages.joinIntoString (" ") + ")";
+
+        return {};
+    }
+
+    String getLinkerPkgConfigFlags() const
+    {
+        auto packages = getPackages();
+
+        if (packages.size() > 0)
+            return "$(shell pkg-config --libs " + packages.joinIntoString (" ") + ")";
+
+        return {};
+    }
+
+    StringArray getCPreprocessorFlags (const BuildConfiguration&) const
+    {
+        StringArray result;
+
+        if (linuxLibs.contains("pthread"))
+            result.add ("-pthread");
+
+        return result;
+    }
+
+    StringArray getCFlags (const BuildConfiguration& config) const
+    {
+        StringArray result;
+
+        if (anyTargetIsSharedLibrary())
+            result.add ("-fPIC");
+
+        if (config.isDebug())
+        {
+            result.add ("-g");
+            result.add ("-ggdb");
+        }
+
+        result.add ("-O" + config.getGCCOptimisationFlag());
+
+        if (config.isLinkTimeOptimisationEnabled())
+            result.add ("-flto");
+
+        auto extra = replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim();
+
+        if (extra.isNotEmpty())
+            result.add (extra);
+
+        return result;
+    }
+
+    StringArray getCXXFlags() const
+    {
+        StringArray result;
+
+        auto cppStandard = project.getCppStandardValue().toString();
+
+        if (cppStandard == "latest")
+            cppStandard = "1z";
+
+        cppStandard = "-std=" + String (shouldUseGNUExtensions() ? "gnu++" : "c++") + cppStandard;
+
+        result.add (cppStandard);
+
+        return result;
+    }
+
+    StringArray getHeaderSearchPaths (const BuildConfiguration& config) const
+    {
+        StringArray searchPaths (extraSearchPaths);
+        searchPaths.addArray (config.getHeaderSearchPaths());
+        searchPaths = getCleanedStringArray (searchPaths);
+
+        StringArray result;
+
+        for (auto& path : searchPaths)
+            result.add (FileHelpers::unixStylePath (replacePreprocessorTokens (config, path)));
+
+        return result;
+    }
+
+    StringArray getLibraryNames (const BuildConfiguration& config) const
+    {
+        StringArray result (linuxLibs);
+
+        StringArray libraries;
+        libraries.addTokens (getExternalLibrariesString(), ";", "\"'");
+        libraries.removeEmptyStrings();
+
+        if (libraries.size() != 0)
+            result.add (replacePreprocessorTokens (config, libraries.joinIntoString (" ")).trim());
+
+        return result;
+    }
+
+    StringArray getLibrarySearchPaths (const BuildConfiguration& config) const
+    {
+        auto result = getSearchPathsFromString (config.getLibrarySearchPathString());
+
+        for (auto path : moduleLibSearchPaths)
+            result.add (path + "/" + config.getModuleLibraryArchName());
+
+        return result;
+    }
+
+    StringArray getLinkerFlags (const BuildConfiguration& config) const
+    {
+        StringArray result (makefileExtraLinkerFlags);
+
+        if (! config.isDebug())
+            result.add ("-fvisibility=hidden");
+
+        auto extraFlags = getExtraLinkerFlagsString().trim();
+
+        if (extraFlags.isNotEmpty())
+            result.add (replacePreprocessorTokens (config, extraFlags));
+
+        return result;
+    }
+
     bool isWebBrowserComponentEnabled() const
     {
         static String guiExtrasModule ("juce_gui_extra");
@@ -421,54 +596,39 @@ private:
     }
 
     //==============================================================================
-    void writeDefineFlags (OutputStream& out, const BuildConfiguration& config) const
+    void writeDefineFlags (OutputStream& out, const MakeBuildConfiguration& config) const
     {
-        StringPairArray defines;
-        defines.set ("LINUX", "1");
+        out << createGCCPreprocessorFlags (mergePreprocessorDefs (getDefines (config), getAllPreprocessorDefs (config, ProjectType::Target::unspecified)));
+    }
 
-        if (config.isDebug())
-        {
-            defines.set ("DEBUG", "1");
-            defines.set ("_DEBUG", "1");
-        }
-        else
-        {
-            defines.set ("NDEBUG", "1");
-        }
+    void writePkgConfigFlags (OutputStream& out) const
+    {
+        auto flags = getPreprocessorPkgConfigFlags();
 
-        out << createGCCPreprocessorFlags (mergePreprocessorDefs (defines, getAllPreprocessorDefs (config, ProjectType::Target::unspecified)));
+        if (flags.isNotEmpty())
+            out << " " << flags;
+    }
+
+    void writeCPreprocessorFlags (OutputStream& out, const BuildConfiguration& config) const
+    {
+        auto flags = getCPreprocessorFlags (config);
+
+        if (! flags.isEmpty())
+            out << " " << flags.joinIntoString (" ");
     }
 
     void writeHeaderPathFlags (OutputStream& out, const BuildConfiguration& config) const
     {
-        StringArray searchPaths (extraSearchPaths);
-        searchPaths.addArray (config.getHeaderSearchPaths());
-
-        auto packages = getPackages();
-        if (packages.size() > 0)
-        {
-            out << " $(shell pkg-config --cflags";
-
-            for (int i = 0; i < packages.size(); ++i)
-                out << " " << packages[i];
-
-            out << ")";
-        }
-
-        if (linuxLibs.contains("pthread"))
-            out << " -pthread";
-
-        searchPaths = getCleanedStringArray (searchPaths);
-
-        // Replace ~ character with $(HOME) environment variable
-        for (int i = 0; i < searchPaths.size(); ++i)
-            out << " -I" << escapeSpaces (FileHelpers::unixStylePath (replacePreprocessorTokens (config, searchPaths[i]))).replace ("~", "$(HOME)");
+        for (auto& path : getHeaderSearchPaths (config))
+            out << " -I" << escapeSpaces (path).replace ("~", "$(HOME)");
     }
 
-    void writeCppFlags (OutputStream& out, const BuildConfiguration& config) const
+    void writeCppFlags (OutputStream& out, const MakeBuildConfiguration& config) const
     {
         out << "  JUCE_CPPFLAGS := $(DEPFLAGS)";
         writeDefineFlags (out, config);
+        writePkgConfigFlags (out);
+        writeCPreprocessorFlags (out, config);
         writeHeaderPathFlags (out, config);
         out << " $(CPPFLAGS)" << newLine;
     }
@@ -477,41 +637,23 @@ private:
     {
         out << "  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR)";
 
-        {
-            StringArray flags (makefileExtraLinkerFlags);
+        for (auto path : getLibrarySearchPaths (config))
+            out << " -L" << escapeSpaces (path).replace ("~", "$(HOME)");
 
-            if (! config.isDebug())
-                flags.add ("-fvisibility=hidden");
+        auto pkgConfigFlags = getLinkerPkgConfigFlags();
 
-            if (flags.size() > 0)
-                out << " " << getCleanedStringArray (flags).joinIntoString (" ");
-        }
+        if (pkgConfigFlags.isNotEmpty())
+            out << " " << getLinkerPkgConfigFlags();
 
-        out << config.getGCCLibraryPathFlags();
+        auto linkerFlags = getLinkerFlags (config).joinIntoString (" ");
 
-        auto packages = getPackages();
-        if (packages.size() > 0 )
-        {
-            out << " $(shell pkg-config --libs";
+        if (linkerFlags.isNotEmpty())
+            out << " " << linkerFlags;
 
-            for (int i = 0; i < packages.size(); ++i)
-                out << " " << packages[i];
+        for (auto& libName : getLibraryNames (config))
+            out << " -l" << libName;
 
-            out << ")";
-        }
-
-        for (int i = 0; i < linuxLibs.size(); ++i)
-            out << " -l" << linuxLibs[i];
-
-        StringArray libraries;
-        libraries.addTokens (getExternalLibrariesString(), ";", "\"'");
-        libraries.removeEmptyStrings();
-
-        if (libraries.size() != 0)
-            out << " -l" << replacePreprocessorTokens (config, libraries.joinIntoString (" -l")).trim();
-
-        out << " " << replacePreprocessorTokens (config, getExtraLinkerFlagsString()).trim()
-            << " $(LDFLAGS)" << newLine;
+        out << " $(LDFLAGS)" << newLine;
     }
 
     void writeTargetLines (OutputStream& out, const bool useLinuxPackages) const
@@ -520,7 +662,7 @@ private:
 
         for (int i = 0; i < n; ++i)
         {
-            if (MakefileTarget* target = targets.getUnchecked (i))
+            if (auto* target = targets.getUnchecked (i))
             {
                 if (target->type == ProjectType::Target::AggregateTarget)
                 {
@@ -531,7 +673,7 @@ private:
                     {
                         if (i == j) continue;
 
-                        if (MakefileTarget* dependency = targets.getUnchecked (j))
+                        if (auto* dependency = targets.getUnchecked (j))
                         {
                             if (dependency->type != ProjectType::Target::SharedCodeTarget)
                             {
@@ -557,7 +699,7 @@ private:
         }
     }
 
-    void writeConfig (OutputStream& out, const BuildConfiguration& config) const
+    void writeConfig (OutputStream& out, const MakeBuildConfiguration& config) const
     {
         const String buildDirName ("build");
         const String intermediatesDirName (buildDirName + "/intermediate/" + config.getName());
@@ -594,28 +736,21 @@ private:
 
         out << "  JUCE_CFLAGS += $(JUCE_CPPFLAGS) $(TARGET_ARCH)";
 
-        if (anyTargetIsSharedLibrary())
-            out << " -fPIC";
+        auto cflags = getCFlags (config).joinIntoString (" ");
 
-        if (config.isDebug())
-            out << " -g -ggdb";
+        if (cflags.isNotEmpty())
+            out << " " << cflags;
 
-        out << " -O" << config.getGCCOptimisationFlag()
-            << (config.isLinkTimeOptimisationEnabled() ? " -flto" : "")
-            << (" "  + replacePreprocessorTokens (config, getExtraCompilerFlagsString())).trimEnd()
-            << " $(CFLAGS)" << newLine;
+        out << " $(CFLAGS)" << newLine;
 
-        {
-            auto cppStandard = config.project.getCppStandardValue().toString();
+        out << "  JUCE_CXXFLAGS += $(JUCE_CFLAGS)";
 
-            if (cppStandard == "latest")
-                cppStandard = "1z";
+        auto cxxflags = getCXXFlags().joinIntoString (" ");
 
-            cppStandard = "-std=" + String (shouldUseGNUExtensions() ? "gnu++" : "c++") + cppStandard;
+        if (cxxflags.isNotEmpty())
+            out << " " << cxxflags;
 
-            out << "  JUCE_CXXFLAGS += $(CXXFLAGS) $(JUCE_CFLAGS) "
-                << cppStandard << " $(CXXFLAGS)" << newLine;
-        }
+        out << " $(CXXFLAGS)" << newLine;
 
         writeLinkerFlags (out, config);
 
@@ -632,7 +767,7 @@ private:
 
         for (int i = 0; i < n; ++i)
         {
-            if (MakefileTarget* target = targets.getUnchecked (i))
+            if (auto* target = targets.getUnchecked (i))
             {
                 if (target->type == ProjectType::Target::AggregateTarget)
                     continue;
@@ -677,7 +812,7 @@ private:
             << newLine;
 
         for (ConstConfigIterator config (*this); config.next();)
-            writeConfig (out, *config);
+            writeConfig (out, dynamic_cast<const MakeBuildConfiguration&> (*config));
 
         for (auto target : targets)
             target->writeObjects (out);
@@ -749,6 +884,8 @@ private:
 
         return phonyTargetLine.toString();
     }
+
+    friend class CLionProjectExporter;
 
     OwnedArray<MakefileTarget> targets;
 

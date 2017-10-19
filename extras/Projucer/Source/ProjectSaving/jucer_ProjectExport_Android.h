@@ -37,6 +37,7 @@ public:
     bool isCodeBlocks() const override           { return false; }
     bool isMakefile() const override             { return false; }
     bool isAndroidStudio() const override        { return true;  }
+    bool isCLion() const override                { return false; }
 
     bool isAndroid() const override              { return true; }
     bool isWindows() const override              { return false; }

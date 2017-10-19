@@ -165,6 +165,8 @@
               file="Source/BinaryData/Icons/background_logo.svg"/>
         <FILE id="csCUBK" name="export_android.svg" compile="0" resource="1"
               file="Source/BinaryData/Icons/export_android.svg"/>
+        <FILE id="ILM268" name="export_clion.svg" compile="0" resource="1"
+              file="Source/BinaryData/Icons/export_clion.svg"/>
         <FILE id="aEHhYA" name="export_codeBlocks.svg" compile="0" resource="1"
               file="Source/BinaryData/Icons/export_codeBlocks.svg"/>
         <FILE id="gT2nPs" name="export_linux.svg" compile="0" resource="1"
@@ -551,6 +553,8 @@
     <GROUP id="{00CEE998-91CD-5001-DE85-4F4895E99A32}" name="ProjectSaving">
       <FILE id="JBLk8Y" name="jucer_ProjectExport_Android.h" compile="0"
             resource="0" file="Source/ProjectSaving/jucer_ProjectExport_Android.h"/>
+      <FILE id="l1SmNV" name="jucer_ProjectExport_CLion.h" compile="0" resource="0"
+            file="Source/ProjectSaving/jucer_ProjectExport_CLion.h"/>
       <FILE id="Kxo6ef" name="jucer_ProjectExport_CodeBlocks.h" compile="0"
             resource="0" file="Source/ProjectSaving/jucer_ProjectExport_CodeBlocks.h"/>
       <FILE id="wLX3RL" name="jucer_ProjectExport_Make.h" compile="0" resource="0"

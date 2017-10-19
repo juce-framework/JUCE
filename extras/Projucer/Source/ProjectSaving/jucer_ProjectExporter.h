@@ -88,6 +88,7 @@ public:
     virtual bool isCodeBlocks() const    = 0;
     virtual bool isMakefile() const      = 0;
     virtual bool isAndroidStudio() const = 0;
+    virtual bool isCLion() const         = 0;
 
     // operating system targeted by exporter
     virtual bool isAndroid() const = 0;
@@ -95,6 +96,8 @@ public:
     virtual bool isLinux() const   = 0;
     virtual bool isOSX() const     = 0;
     virtual bool isiOS() const     = 0;
+
+    virtual String getDescription()   { return {}; }
 
     //==============================================================================
     // cross-platform audio plug-ins supported by exporter
@@ -242,7 +245,6 @@ public:
         virtual var getDefaultOptimisationLevel() const = 0;
         virtual String getModuleLibraryArchName() const = 0;
 
-
         //==============================================================================
         Value getNameValue()                                { return getValue (Ids::name); }
         String getName() const                              { return config [Ids::name]; }
@@ -341,7 +343,7 @@ public:
     BuildConfiguration::Ptr getConfiguration (int index) const;
 
     ValueTree getConfigurations() const;
-    void createDefaultConfigs();
+    virtual void createDefaultConfigs();
     void createDefaultModulePaths();
 
     //==============================================================================

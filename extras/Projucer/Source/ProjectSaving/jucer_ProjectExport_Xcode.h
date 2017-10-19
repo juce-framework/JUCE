@@ -148,6 +148,7 @@ public:
     bool isCodeBlocks() const override               { return false; }
     bool isMakefile() const override                 { return false; }
     bool isAndroidStudio() const override            { return false; }
+    bool isCLion() const override                    { return false; }
 
     bool isAndroid() const override                  { return false; }
     bool isWindows() const override                  { return false; }
@@ -350,7 +351,7 @@ public:
     {
         callForAllSupportedTargets ([this] (ProjectType::Target::Type targetType)
                                     {
-                                        if (XcodeTarget* target = new XcodeTarget (targetType, *this))
+                                        if (auto* target = new XcodeTarget (targetType, *this))
                                         {
                                             if (targetType == ProjectType::Target::AggregateTarget)
                                                 targets.insert (0, target);
@@ -668,6 +669,7 @@ public:
 
                 case SharedCodeTarget:
                     xcodeFileType = "archive.ar";
+                    xcodeBundleExtension = ".a";
                     xcodeProductType = "com.apple.product-type.library.static";
                     xcodeCopyToProductInstallPathAfterBuild = false;
                     break;
@@ -707,8 +709,44 @@ public:
         Array<RelativePath> xcodeExtraLibrariesDebug, xcodeExtraLibrariesRelease;
 
         StringArray frameworkIDs, buildPhaseIDs, configIDs, sourceIDs, rezFileIDs;
+        StringArray frameworkNames;
         String dependencyID, mainBuildProductID;
         File infoPlistFile;
+
+        struct SourceFileInfo
+        {
+            RelativePath path;
+            bool shouldBeCompiled = false;
+        };
+
+        Array<SourceFileInfo> getSourceFilesInfo (const Project::Item& projectItem) const
+        {
+            Array<SourceFileInfo> result;
+
+            const Type targetType = (owner.getProject().getProjectType().isAudioPlugin() ? type : SharedCodeTarget);
+
+            if (projectItem.isGroup())
+            {
+                for (int i = 0; i < projectItem.getNumChildren(); ++i)
+                    result.addArray (getSourceFilesInfo (projectItem.getChild (i)));
+            }
+            else if (projectItem.shouldBeAddedToTargetProject()
+                     && owner.getProject().getTargetTypeFromFilePath (projectItem.getFile(), true) == targetType)
+            {
+                SourceFileInfo info;
+
+                info.path = RelativePath (projectItem.getFile(), owner.getTargetFolder(), RelativePath::buildTargetFolder);
+
+                jassert (info.path.getRoot() == RelativePath::buildTargetFolder);
+
+                if (targetType == SharedCodeTarget || projectItem.shouldBeCompiled())
+                    info.shouldBeCompiled = projectItem.shouldBeCompiled();
+
+                result.add (info);
+            }
+
+            return result;
+        }
 
         //==============================================================================
         void addMainBuildProduct() const
@@ -850,26 +888,10 @@ public:
             return false;
         }
 
-        //==============================================================================
-        StringArray getTargetSettings (const XcodeBuildConfiguration& config) const
+        String getBundleIdentifier() const
         {
-            StringArray s;
-
-            if (type == AggregateTarget && ! owner.isiOS())
-            {
-                // the aggregate target needs to have the deployment target set for
-                // pre-/post-build scripts
-
-                String sdkRoot;
-                s.add ("MACOSX_DEPLOYMENT_TARGET = " + getOSXDeploymentTarget (config, &sdkRoot));
-
-                if (sdkRoot.isNotEmpty())
-                    s.add ("SDKROOT = " + sdkRoot);
-
-                return s;
-            }
-
             String bundleIdentifier = owner.project.getBundleIdentifier().toString();
+
             if (xcodeBundleIDSubPath.isNotEmpty())
             {
                 StringArray bundleIdSegments = StringArray::fromTokens (bundleIdentifier, ".", StringRef());
@@ -878,27 +900,49 @@ public:
                 bundleIdentifier += String (".") + bundleIdSegments[bundleIdSegments.size() - 1] + xcodeBundleIDSubPath;
             }
 
-            s.add ("PRODUCT_BUNDLE_IDENTIFIER = " + bundleIdentifier);
+            return bundleIdentifier;
+        }
+
+        //==============================================================================
+        StringPairArray getTargetSettings (const XcodeBuildConfiguration& config) const
+        {
+            StringPairArray s;
+
+            if (type == AggregateTarget && ! owner.isiOS())
+            {
+                // the aggregate target needs to have the deployment target set for
+                // pre-/post-build scripts
+
+                String sdkRoot;
+                s.set ("MACOSX_DEPLOYMENT_TARGET", getOSXDeploymentTarget (config, &sdkRoot));
+
+                if (sdkRoot.isNotEmpty())
+                    s.set ("SDKROOT", sdkRoot);
+
+                return s;
+            }
+
+            s.set ("PRODUCT_BUNDLE_IDENTIFIER", getBundleIdentifier());
 
             const String arch ((! owner.isiOS() && type == Target::AudioUnitv3PlugIn) ? osxArch_64Bit : config.osxArchitecture.get());
-            if (arch == osxArch_Native)                s.add ("ARCHS = \"$(NATIVE_ARCH_ACTUAL)\"");
-            else if (arch == osxArch_32BitUniversal)   s.add ("ARCHS = \"$(ARCHS_STANDARD_32_BIT)\"");
-            else if (arch == osxArch_64BitUniversal)   s.add ("ARCHS = \"$(ARCHS_STANDARD_32_64_BIT)\"");
-            else if (arch == osxArch_64Bit)            s.add ("ARCHS = \"$(ARCHS_STANDARD_64_BIT)\"");
+            if (arch == osxArch_Native)                s.set ("ARCHS", "\"$(NATIVE_ARCH_ACTUAL)\"");
+            else if (arch == osxArch_32BitUniversal)   s.set ("ARCHS", "\"$(ARCHS_STANDARD_32_BIT)\"");
+            else if (arch == osxArch_64BitUniversal)   s.set ("ARCHS", "\"$(ARCHS_STANDARD_32_64_BIT)\"");
+            else if (arch == osxArch_64Bit)            s.set ("ARCHS", "\"$(ARCHS_STANDARD_64_BIT)\"");
 
-            s.add ("HEADER_SEARCH_PATHS = " + getHeaderSearchPaths (config));
-            s.add ("USE_HEADERMAP = " + String (static_cast<bool> (config.exporter.settings.getProperty ("useHeaderMap")) ? "YES" : "NO"));
+            s.set ("HEADER_SEARCH_PATHS", String ("(") + getHeaderSearchPaths (config).joinIntoString (", ") + ", \"$(inherited)\")");
+            s.set ("USE_HEADERMAP", String (static_cast<bool> (config.exporter.settings.getProperty ("useHeaderMap")) ? "YES" : "NO"));
 
-            s.add ("GCC_OPTIMIZATION_LEVEL = " + config.getGCCOptimisationFlag());
+            s.set ("GCC_OPTIMIZATION_LEVEL", config.getGCCOptimisationFlag());
 
             if (shouldCreatePList())
             {
-                s.add ("INFOPLIST_FILE = " + infoPlistFile.getFileName());
+                s.set ("INFOPLIST_FILE", infoPlistFile.getFileName());
 
                 if (owner.getPListPrefixHeaderString().isNotEmpty())
-                    s.add ("INFOPLIST_PREFIX_HEADER = " + owner.getPListPrefixHeaderString());
+                    s.set ("INFOPLIST_PREFIX_HEADER", owner.getPListPrefixHeaderString());
 
-                s.add ("INFOPLIST_PREPROCESS = " + (owner.isPListPreprocessEnabled() ? String ("YES") : String ("NO")));
+                s.set ("INFOPLIST_PREPROCESS", (owner.isPListPreprocessEnabled() ? String ("YES") : String ("NO")));
 
                 auto plistDefs = parsePreprocessorDefs (config.plistPreprocessorDefinitions.get());
                 StringArray defsList;
@@ -915,41 +959,42 @@ public:
                 }
 
                 if (defsList.size() > 0)
-                    s.add ("INFOPLIST_PREPROCESSOR_DEFINITIONS = " + indentParenthesisedList (defsList));
+                    s.set ("INFOPLIST_PREPROCESSOR_DEFINITIONS", indentParenthesisedList (defsList));
             }
 
             if (config.isLinkTimeOptimisationEnabled())
-                s.add ("LLVM_LTO = YES");
+                s.set ("LLVM_LTO", "YES");
 
             if (config.fastMathEnabled.get())
-                s.add ("GCC_FAST_MATH = YES");
+                s.set ("GCC_FAST_MATH", "YES");
 
             const String extraFlags (owner.replacePreprocessorTokens (config, owner.getExtraCompilerFlagsString()).trim());
+
             if (extraFlags.isNotEmpty())
-                s.add ("OTHER_CPLUSPLUSFLAGS = \"" + extraFlags + "\"");
+                s.set ("OTHER_CPLUSPLUSFLAGS", extraFlags.quoted());
 
             String installPath = getInstallPathForConfiguration (config);
 
             if (installPath.isNotEmpty())
             {
-                s.add ("INSTALL_PATH = \"" + installPath + "\"");
+                s.set ("INSTALL_PATH", installPath.quoted());
 
                 if (xcodeCopyToProductInstallPathAfterBuild)
                 {
-                    s.add ("DEPLOYMENT_LOCATION = YES");
-                    s.add ("DSTROOT = /");
+                    s.set ("DEPLOYMENT_LOCATION", "YES");
+                    s.set ("DSTROOT", "/");
                 }
             }
 
             if (getTargetFileType() == pluginBundle)
             {
-                s.add ("LIBRARY_STYLE = Bundle");
-                s.add ("WRAPPER_EXTENSION = " + xcodeBundleExtension.substring (1));
-                s.add ("GENERATE_PKGINFO_FILE = YES");
+                s.set ("LIBRARY_STYLE", "Bundle");
+                s.set ("WRAPPER_EXTENSION", xcodeBundleExtension.substring (1));
+                s.set ("GENERATE_PKGINFO_FILE", "YES");
             }
 
             if (xcodeOtherRezFlags.isNotEmpty())
-                s.add ("OTHER_REZFLAGS = \"" + xcodeOtherRezFlags + "\"");
+                s.set ("OTHER_REZFLAGS", "\"" + xcodeOtherRezFlags + "\"");
 
             String configurationBuildDir = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
 
@@ -964,41 +1009,41 @@ public:
                                                                 .toUnixStyle());
             }
 
-            s.add ("CONFIGURATION_BUILD_DIR = " + addQuotesIfRequired (configurationBuildDir));
+            s.set ("CONFIGURATION_BUILD_DIR", addQuotesIfRequired (configurationBuildDir));
 
             String gccVersion ("com.apple.compilers.llvm.clang.1_0");
 
             if (owner.iOS)
             {
-                s.add ("ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon");
-                s.add ("ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage");
+                s.set ("ASSETCATALOG_COMPILER_APPICON_NAME", "AppIcon");
+                s.set ("ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME", "LaunchImage");
             }
             else
             {
                 String sdkRoot;
-                s.add ("MACOSX_DEPLOYMENT_TARGET = " + getOSXDeploymentTarget (config, &sdkRoot));
+                s.set ("MACOSX_DEPLOYMENT_TARGET", getOSXDeploymentTarget (config, &sdkRoot));
 
                 if (sdkRoot.isNotEmpty())
-                    s.add ("SDKROOT = " + sdkRoot);
+                    s.set ("SDKROOT", sdkRoot);
 
-                s.add ("MACOSX_DEPLOYMENT_TARGET_ppc = 10.4");
-                s.add ("SDKROOT_ppc = macosx10.5");
+                s.set ("MACOSX_DEPLOYMENT_TARGET_ppc", "10.4");
+                s.set ("SDKROOT_ppc", "macosx10.5");
 
                 if (xcodeExcludedFiles64Bit.isNotEmpty())
                 {
-                    s.add ("EXCLUDED_SOURCE_FILE_NAMES = \"$(EXCLUDED_SOURCE_FILE_NAMES_$(CURRENT_ARCH))\"");
-                    s.add ("EXCLUDED_SOURCE_FILE_NAMES_x86_64 = " + xcodeExcludedFiles64Bit);
+                    s.set ("EXCLUDED_SOURCE_FILE_NAMES", "\"$(EXCLUDED_SOURCE_FILE_NAMES_$(CURRENT_ARCH))\"");
+                    s.set ("EXCLUDED_SOURCE_FILE_NAMES_x86_64", xcodeExcludedFiles64Bit);
                 }
             }
 
-            s.add ("GCC_VERSION = " + gccVersion);
-            s.add ("CLANG_LINK_OBJC_RUNTIME = NO");
+            s.set ("GCC_VERSION", gccVersion);
+            s.set ("CLANG_LINK_OBJC_RUNTIME", "NO");
 
             if (! config.codeSignIdentity.isUsingDefault())
-                s.add ("CODE_SIGN_IDENTITY = " + config.codeSignIdentity.get().quoted());
+                s.set ("CODE_SIGN_IDENTITY", config.codeSignIdentity.get().quoted());
 
             if (shouldAddEntitlements())
-                s.add (String ("CODE_SIGN_ENTITLEMENTS = \"") + owner.getEntitlementsFileName() + String ("\""));
+                s.set ("CODE_SIGN_ENTITLEMENTS", owner.getEntitlementsFileName().quoted());
 
             {
                 auto cppStandard = owner.project.getCppStandardValue().toString();
@@ -1006,33 +1051,33 @@ public:
                 if (cppStandard == "latest")
                     cppStandard = "1z";
 
-                s.add ("CLANG_CXX_LANGUAGE_STANDARD = " + (String (owner.shouldUseGNUExtensions() ? "gnu++"
-                                                                                                  : "c++") + cppStandard).quoted());
+                s.set ("CLANG_CXX_LANGUAGE_STANDARD", (String (owner.shouldUseGNUExtensions() ? "gnu++"
+                                                                                              : "c++") + cppStandard).quoted());
             }
 
             if (config.cppStandardLibrary.get().isNotEmpty())
-                s.add ("CLANG_CXX_LIBRARY = " + config.cppStandardLibrary.get().quoted());
+                s.set ("CLANG_CXX_LIBRARY", config.cppStandardLibrary.get().quoted());
 
-            s.add ("COMBINE_HIDPI_IMAGES = YES");
+            s.set ("COMBINE_HIDPI_IMAGES", "YES");
 
             {
                 StringArray linkerFlags, librarySearchPaths;
                 getLinkerSettings (config, linkerFlags, librarySearchPaths);
 
                 if (linkerFlags.size() > 0)
-                    s.add ("OTHER_LDFLAGS = \"" + linkerFlags.joinIntoString (" ") + "\"");
+                    s.set ("OTHER_LDFLAGS", linkerFlags.joinIntoString (" ").quoted());
 
                 librarySearchPaths.addArray (config.getLibrarySearchPaths());
                 librarySearchPaths = getCleanedStringArray (librarySearchPaths);
 
                 if (librarySearchPaths.size() > 0)
                 {
-                    String libPaths ("LIBRARY_SEARCH_PATHS = (\"$(inherited)\"");
+                    String libPaths ("(\"$(inherited)\"");
 
                     for (auto& p : librarySearchPaths)
                         libPaths += ", \"\\\"" + p + "\\\"\"";
 
-                    s.add (libPaths + ")");
+                    s.set ("LIBRARY_SEARCH_PATHS", libPaths + ")");
                 }
             }
 
@@ -1042,24 +1087,24 @@ public:
             {
                 defines.set ("_DEBUG", "1");
                 defines.set ("DEBUG", "1");
-                s.add ("COPY_PHASE_STRIP = NO");
-                s.add ("GCC_DYNAMIC_NO_PIC = NO");
+                s.set ("COPY_PHASE_STRIP", "NO");
+                s.set ("GCC_DYNAMIC_NO_PIC", "NO");
             }
             else
             {
                 defines.set ("_NDEBUG", "1");
                 defines.set ("NDEBUG", "1");
-                s.add ("GCC_GENERATE_DEBUGGING_SYMBOLS = NO");
-                s.add ("GCC_SYMBOLS_PRIVATE_EXTERN = YES");
-                s.add ("DEAD_CODE_STRIPPING = YES");
+                s.set ("GCC_GENERATE_DEBUGGING_SYMBOLS", "NO");
+                s.set ("GCC_SYMBOLS_PRIVATE_EXTERN", "YES");
+                s.set ("DEAD_CODE_STRIPPING", "YES");
             }
 
             if (type != Target::SharedCodeTarget && type != Target::StaticLibrary && type != Target::DynamicLibrary
                   && config.stripLocalSymbolsEnabled.get())
             {
-                s.add ("STRIPFLAGS = \"-x\"");
-                s.add ("DEPLOYMENT_POSTPROCESSING = YES");
-                s.add ("SEPARATE_STRIP = YES");
+                s.set ("STRIPFLAGS", "\"-x\"");
+                s.set ("DEPLOYMENT_POSTPROCESSING", "YES");
+                s.set ("SEPARATE_STRIP", "YES");
             }
 
             if (owner.isInAppPurchasesEnabled())
@@ -1079,11 +1124,19 @@ public:
                 defsList.add ("\"" + def + "\"");
             }
 
-            s.add ("GCC_PREPROCESSOR_DEFINITIONS = " + indentParenthesisedList (defsList));
+            s.set ("GCC_PREPROCESSOR_DEFINITIONS", indentParenthesisedList (defsList));
 
-            s.addTokens (config.customXcodeFlags.get(), ",", "\"'");
+            StringArray customFlags;
+            customFlags.addTokens (config.customXcodeFlags.get(), ",", "\"'");
+            customFlags.removeEmptyStrings();
 
-            return getCleanedStringArray (s);
+            for (auto flag : customFlags)
+            {
+                s.set (flag.upToFirstOccurrenceOf ("=", false, false).trim(),
+                       flag.fromFirstOccurrenceOf ("=", false, false).trim().quoted());
+            }
+
+            return s;
         }
 
         String getInstallPathForConfiguration (const XcodeBuildConfiguration& config) const
@@ -1173,7 +1226,7 @@ public:
             if (! owner.iOS) // (NB: on iOS this causes error ITMS-90032 during publishing)
                 addPlistDictionaryKey (dict, "CFBundleIconFile", owner.iconFile.exists() ? owner.iconFile.getFileName() : String());
 
-            addPlistDictionaryKey (dict, "CFBundleIdentifier",          "$(PRODUCT_BUNDLE_IDENTIFIER)");
+            addPlistDictionaryKey (dict, "CFBundleIdentifier",          getBundleIdentifier());
             addPlistDictionaryKey (dict, "CFBundleName",                owner.projectName);
 
             // needed by NSExtension on iOS
@@ -1327,7 +1380,7 @@ public:
         }
 
         //==============================================================================
-        String getHeaderSearchPaths (const BuildConfiguration& config) const
+        StringArray getHeaderSearchPaths (const BuildConfiguration& config) const
         {
             StringArray paths (owner.extraSearchPaths);
             paths.addArray (config.getHeaderSearchPaths());
@@ -1341,8 +1394,6 @@ public:
                                 .toUnixStyle());
             }
 
-            paths.add ("$(inherited)");
-
             paths = getCleanedStringArray (paths);
 
             for (auto& s : paths)
@@ -1355,7 +1406,7 @@ public:
                     s = "\"" + s + "\"";
             }
 
-            return "(" + paths.joinIntoString (", ") + ")";
+            return paths;
         }
 
     private:
@@ -1561,6 +1612,8 @@ public:
 
 private:
     //==============================================================================
+    friend class CLionProjectExporter;
+
     bool xcodeCanUseDwarf;
     OwnedArray<XcodeTarget> targets;
 
@@ -1685,11 +1738,16 @@ private:
 
     void addBuildConfigurations() const
     {
-        // add build configurations
         for (ConstConfigIterator config (*this); config.next();)
         {
-            const XcodeBuildConfiguration& xcodeConfig = dynamic_cast<const XcodeBuildConfiguration&> (*config);
-            addProjectConfig (config->getName(), getProjectSettings (xcodeConfig));
+            const auto& xcodeConfig = dynamic_cast<const XcodeBuildConfiguration&> (*config);
+            StringArray settingsLines;
+            const auto configSettings = getProjectSettings (xcodeConfig);
+
+            for (auto& key : configSettings.getAllKeys())
+                settingsLines.add (key + " = " + configSettings[key]);
+
+            addProjectConfig (config->getName(), settingsLines);
         }
     }
 
@@ -1736,7 +1794,14 @@ private:
             for (ConstConfigIterator config (*this); config.next();)
             {
                 const XcodeBuildConfiguration& xcodeConfig = dynamic_cast<const XcodeBuildConfiguration&> (*config);
-                target->addTargetConfig (config->getName(), target->getTargetSettings (xcodeConfig));
+
+                const auto configSettings = target->getTargetSettings (xcodeConfig);
+                StringArray settingsLines;
+
+                for (auto& key : configSettings.getAllKeys())
+                    settingsLines.add (key + " = " + configSettings.getValue (key, "\"\""));
+
+                target->addTargetConfig (config->getName(), settingsLines);
             }
 
             addConfigList (*target, targetConfigs, createID (String ("__configList") + target->getName()));
@@ -2065,83 +2130,85 @@ private:
         return sanitisePath (searchPath);
     }
 
-    StringArray getProjectSettings (const XcodeBuildConfiguration& config) const
+    StringPairArray getProjectSettings (const XcodeBuildConfiguration& config) const
     {
-        StringArray s;
-        s.add ("ALWAYS_SEARCH_USER_PATHS = NO");
-        s.add ("ENABLE_STRICT_OBJC_MSGSEND = YES");
-        s.add ("GCC_C_LANGUAGE_STANDARD = c11");
-        s.add ("GCC_NO_COMMON_BLOCKS = YES");
-        s.add ("GCC_MODEL_TUNING = G5");
-        s.add ("GCC_WARN_ABOUT_RETURN_TYPE = YES");
-        s.add ("GCC_WARN_CHECK_SWITCH_STATEMENTS = YES");
-        s.add ("GCC_WARN_UNUSED_VARIABLE = YES");
-        s.add ("GCC_WARN_MISSING_PARENTHESES = YES");
-        s.add ("GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES");
-        s.add ("GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES");
-        s.add ("GCC_WARN_64_TO_32_BIT_CONVERSION = YES");
-        s.add ("GCC_WARN_UNDECLARED_SELECTOR = YES");
-        s.add ("GCC_WARN_UNINITIALIZED_AUTOS = YES");
-        s.add ("GCC_WARN_UNUSED_FUNCTION = YES");
-        s.add ("CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES");
-        s.add ("CLANG_WARN_BOOL_CONVERSION = YES");
-        s.add ("CLANG_WARN_COMMA = YES");
-        s.add ("CLANG_WARN_CONSTANT_CONVERSION = YES");
-        s.add ("CLANG_WARN_EMPTY_BODY = YES");
-        s.add ("CLANG_WARN_ENUM_CONVERSION = YES");
-        s.add ("CLANG_WARN_INFINITE_RECURSION = YES");
-        s.add ("CLANG_WARN_INT_CONVERSION = YES");
-        s.add ("CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES");
-        s.add ("CLANG_WARN_OBJC_LITERAL_CONVERSION = YES");
-        s.add ("CLANG_WARN_RANGE_LOOP_ANALYSIS = YES");
-        s.add ("CLANG_WARN_STRICT_PROTOTYPES = YES");
-        s.add ("CLANG_WARN_SUSPICIOUS_MOVE = YES");
-        s.add ("CLANG_WARN_UNREACHABLE_CODE = YES");
-        s.add ("CLANG_WARN__DUPLICATE_METHOD_MATCH = YES");
-        s.add ("WARNING_CFLAGS = -Wreorder");
+        StringPairArray s;
+
+        s.set ("ALWAYS_SEARCH_USER_PATHS", "NO");
+        s.set ("ENABLE_STRICT_OBJC_MSGSEND", "YES");
+        s.set ("GCC_C_LANGUAGE_STANDARD", "c11");
+        s.set ("GCC_NO_COMMON_BLOCKS", "YES");
+        s.set ("GCC_MODEL_TUNING", "G5");
+        s.set ("GCC_WARN_ABOUT_RETURN_TYPE", "YES");
+        s.set ("GCC_WARN_CHECK_SWITCH_STATEMENTS", "YES");
+        s.set ("GCC_WARN_UNUSED_VARIABLE", "YES");
+        s.set ("GCC_WARN_MISSING_PARENTHESES", "YES");
+        s.set ("GCC_WARN_NON_VIRTUAL_DESTRUCTOR", "YES");
+        s.set ("GCC_WARN_TYPECHECK_CALLS_TO_PRINTF", "YES");
+        s.set ("GCC_WARN_64_TO_32_BIT_CONVERSION", "YES");
+        s.set ("GCC_WARN_UNDECLARED_SELECTOR", "YES");
+        s.set ("GCC_WARN_UNINITIALIZED_AUTOS", "YES");
+        s.set ("GCC_WARN_UNUSED_FUNCTION", "YES");
+        s.set ("CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING", "YES");
+        s.set ("CLANG_WARN_BOOL_CONVERSION", "YES");
+        s.set ("CLANG_WARN_COMMA", "YES");
+        s.set ("CLANG_WARN_CONSTANT_CONVERSION", "YES");
+        s.set ("CLANG_WARN_EMPTY_BODY", "YES");
+        s.set ("CLANG_WARN_ENUM_CONVERSION", "YES");
+        s.set ("CLANG_WARN_INFINITE_RECURSION", "YES");
+        s.set ("CLANG_WARN_INT_CONVERSION", "YES");
+        s.set ("CLANG_WARN_NON_LITERAL_NULL_CONVERSION", "YES");
+        s.set ("CLANG_WARN_OBJC_LITERAL_CONVERSION", "YES");
+        s.set ("CLANG_WARN_RANGE_LOOP_ANALYSIS", "YES");
+        s.set ("CLANG_WARN_STRICT_PROTOTYPES", "YES");
+        s.set ("CLANG_WARN_SUSPICIOUS_MOVE", "YES");
+        s.set ("CLANG_WARN_UNREACHABLE_CODE", "YES");
+        s.set ("CLANG_WARN__DUPLICATE_METHOD_MATCH", "YES");
+        s.set ("WARNING_CFLAGS", "-Wreorder");
 
         if (projectType.isStaticLibrary())
         {
-            s.add ("GCC_INLINES_ARE_PRIVATE_EXTERN = NO");
-            s.add ("GCC_SYMBOLS_PRIVATE_EXTERN = NO");
+            s.set ("GCC_INLINES_ARE_PRIVATE_EXTERN", "NO");
+            s.set ("GCC_SYMBOLS_PRIVATE_EXTERN", "NO");
         }
         else
         {
-            s.add ("GCC_INLINES_ARE_PRIVATE_EXTERN = YES");
+            s.set ("GCC_INLINES_ARE_PRIVATE_EXTERN", "YES");
         }
 
         if (config.isDebug())
         {
-            s.add ("ENABLE_TESTABILITY = YES");
+            s.set ("ENABLE_TESTABILITY", "YES");
 
             if (config.osxArchitecture.get() == osxArch_Default || config.osxArchitecture.get().isEmpty())
-                s.add ("ONLY_ACTIVE_ARCH = YES");
+                s.set ("ONLY_ACTIVE_ARCH", "YES");
         }
 
         if (iOS)
         {
-            s.add ("\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\" = " + config.codeSignIdentity.get().quoted());
-            s.add ("SDKROOT = iphoneos");
-            s.add (String ("TARGETED_DEVICE_FAMILY = \"") + getDeviceFamilyString() + String ("\""));
+            s.set ("\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\"", config.codeSignIdentity.get().quoted());
+            s.set ("SDKROOT", "iphoneos");
+            s.set ("TARGETED_DEVICE_FAMILY", getDeviceFamilyString().quoted());
 
             const String iosVersion (config.iosDeploymentTarget.get());
             if (iosVersion.isNotEmpty() && iosVersion != osxVersionDefault)
-                s.add ("IPHONEOS_DEPLOYMENT_TARGET = " + iosVersion);
+                s.set ("IPHONEOS_DEPLOYMENT_TARGET", iosVersion);
             else
-                s.add ("IPHONEOS_DEPLOYMENT_TARGET = 9.3");
+                s.set ("IPHONEOS_DEPLOYMENT_TARGET", "9.3");
         }
         else
         {
             if (! config.codeSignIdentity.isUsingDefault() || getIosDevelopmentTeamIDString().isNotEmpty())
-                s.add ("\"CODE_SIGN_IDENTITY\" = " + config.codeSignIdentity.get().quoted());
+                s.set ("CODE_SIGN_IDENTITY", config.codeSignIdentity.get().quoted());
         }
 
-        s.add ("ZERO_LINK = NO");
+        s.set ("ZERO_LINK", "NO");
 
         if (xcodeCanUseDwarf)
-            s.add ("DEBUG_INFORMATION_FORMAT = \"dwarf\"");
+            s.set ("DEBUG_INFORMATION_FORMAT", "\"dwarf\"");
 
-        s.add ("PRODUCT_NAME = \"" + replacePreprocessorTokens (config, config.getTargetBinaryNameString()) + "\"");
+        s.set ("PRODUCT_NAME", replacePreprocessorTokens (config, config.getTargetBinaryNameString()).quoted());
+
         return s;
     }
 
@@ -2173,8 +2240,13 @@ private:
 
                 // find all the targets that are referring to this object
                 for (auto& target : targets)
+                {
                     if (xcodeFrameworks.contains (framework) || target->xcodeFrameworks.contains (framework))
+                    {
                         target->frameworkIDs.add (frameworkID);
+                        target->frameworkNames.add (framework);
+                    }
+                }
             }
         }
     }
@@ -2260,8 +2332,10 @@ private:
 
         if (addToSourceBuildPhase)
         {
-            if (xcodeTarget != nullptr) xcodeTarget->sourceIDs.add (fileID);
-            else sourceIDs.add (fileID);
+            if (xcodeTarget != nullptr)
+                xcodeTarget->sourceIDs.add (fileID);
+            else
+                sourceIDs.add (fileID);
         }
 
         ValueTree* v = new ValueTree (fileID);

@@ -109,6 +109,7 @@ public:
     bool isCodeBlocks() const override               { return true; }
     bool isMakefile() const override                 { return false; }
     bool isAndroidStudio() const override            { return false; }
+    bool isCLion() const override                    { return false; }
 
     bool isAndroid() const override                  { return false; }
     bool isWindows() const override                  { return os == windowsTarget; }
@@ -183,7 +184,7 @@ public:
     void initialiseDependencyPathValues() override
     {
         DependencyPathOS pathOS = isLinux() ? TargetOS::linux
-        : TargetOS::windows;
+                                            : TargetOS::windows;
 
         vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder), Ids::vst3Path, pathOS)));
 
@@ -212,6 +213,7 @@ private:
                                                      : Ids::linuxCodeBlocksArchitecture;
             return getValue (archID);
         }
+
         var getArchitectureTypeVar() const
         {
             const auto archID = exporter.isWindows() ? Ids::windowsCodeBlocksArchitecture
@@ -259,8 +261,9 @@ private:
     class CodeBlocksTarget : public ProjectType::Target
     {
     public:
-        CodeBlocksTarget (CodeBlocksProjectExporter&, ProjectType::Target::Type typeToUse)
-            : ProjectType::Target (typeToUse)
+        CodeBlocksTarget (const CodeBlocksProjectExporter& e, ProjectType::Target::Type typeToUse)
+            : ProjectType::Target (typeToUse),
+              exporter (e)
         {}
 
         String getTargetNameForConfiguration (const BuildConfiguration& config) const
@@ -275,24 +278,39 @@ private:
         {
             auto fileType = getTargetFileType();
 
-            switch (fileType)
+            if (exporter.isWindows())
             {
-                case executable:            return {};
-                case staticLibrary:         return ".a";
-                case sharedLibraryOrDLL:    return ".so";
+                switch (fileType)
+                {
+                    case executable:            return ".exe";
+                    case staticLibrary:         return ".lib";
+                    case sharedLibraryOrDLL:
+                    case pluginBundle:          return ".dll";
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                switch (fileType)
+                {
+                    case executable:            return {};
+                    case staticLibrary:         return ".a";
+                    case sharedLibraryOrDLL:    return ".so";
 
-                case pluginBundle:
-                    switch (type)
-                    {
-                        case VST3PlugIn:    return ".vst3";
-                        case VSTPlugIn:     return ".so";
-                        default:            break;
-                    }
+                    case pluginBundle:
+                        switch (type)
+                        {
+                            case VST3PlugIn:    return ".vst3";
+                            case VSTPlugIn:     return ".so";
+                            default:            break;
+                        }
 
-                    return ".so";
+                        return ".so";
 
-                default:
-                    break;
+                    default:
+                        break;
+                }
             }
 
             return {};
@@ -303,6 +321,8 @@ private:
             return (type == DynamicLibrary || type == VST3PlugIn
                      || type == VSTPlugIn || type == AAXPlugIn);
         }
+
+        const CodeBlocksProjectExporter& exporter;
     };
 
     //==============================================================================
@@ -402,20 +422,6 @@ private:
         flags.addTokens (replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim(),
                          " \n", "\"'");
 
-        {
-            const StringArray defines (getDefines (config, target));
-
-            for (int i = 0; i < defines.size(); ++i)
-            {
-                String def (defines[i]);
-
-                if (! def.containsChar ('='))
-                    def << '=';
-
-                flags.add ("-D" + def);
-            }
-        }
-
         if (config.exporter.isLinux())
         {
             if (target.isDynamicLibrary() || getProject().getProjectType().isAudioPlugin())
@@ -452,9 +458,6 @@ private:
 
         flags.addTokens (replacePreprocessorTokens (config, getExtraLinkerFlagsString()).trim(),
                          " \n", "\"'");
-
-        if (getProject().getProjectType().isAudioPlugin() && target.type != ProjectType::Target::SharedCodeTarget)
-            flags.add ("-l" + config.getTargetBinaryNameString());
 
         const auto packages = getPackages();
 
@@ -538,9 +541,12 @@ private:
     {
         const String outputPath = getOutputPathForTarget (getTargetWithType (ProjectType::Target::SharedCodeTarget), config);
         RelativePath path (outputPath, RelativePath::buildTargetFolder);
+        auto filename = path.getFileName();
 
-        const String autoPrefixedFilename = "lib" + path.getFileName();
-        return path.getParentDirectory().getChildFile (autoPrefixedFilename).toUnixStyle();
+        if (isLinux())
+            filename = "lib" + filename;
+
+        return path.getParentDirectory().getChildFile (filename).toUnixStyle();
     }
 
     void createBuildTarget (XmlElement& xml, CodeBlocksTarget& target, const BuildConfiguration& config) const
@@ -552,10 +558,18 @@ private:
 
             output->setAttribute ("output", getOutputPathForTarget (target, config));
 
-            const bool keepPrefix = (target.type == ProjectType::Target::VSTPlugIn || target.type == ProjectType::Target::VST3PlugIn
-                                  || target.type == ProjectType::Target::AAXPlugIn || target.type == ProjectType::Target::RTASPlugIn);
+            if (isLinux())
+            {
+                const bool keepPrefix = (target.type == ProjectType::Target::VSTPlugIn || target.type == ProjectType::Target::VST3PlugIn
+                                      || target.type == ProjectType::Target::AAXPlugIn || target.type == ProjectType::Target::RTASPlugIn);
 
-            output->setAttribute ("prefix_auto", keepPrefix ? 0 : 1);
+                output->setAttribute ("prefix_auto", keepPrefix ? 0 : 1);
+            }
+            else
+            {
+                output->setAttribute ("prefix_auto", 0);
+            }
+
             output->setAttribute ("extension_auto", 0);
         }
 
@@ -572,9 +586,19 @@ private:
             XmlElement* const compiler = xml.createNewChildElement ("Compiler");
 
             {
-                const StringArray compilerFlags (getCompilerFlags (config, target));
+                StringArray flags;
 
-                for (auto flag : compilerFlags)
+                for (auto& def : getDefines (config, target))
+                {
+                    if (! def.containsChar ('='))
+                            def << '=';
+
+                    flags.add ("-D" + def);
+                }
+
+                flags.addArray (getCompilerFlags (config, target));
+
+                for (auto flag : flags)
                     setAddOption (*compiler, "option", flag);
             }
 
@@ -589,7 +613,11 @@ private:
         {
             XmlElement* const linker = xml.createNewChildElement ("Linker");
 
+            if (getProject().getProjectType().isAudioPlugin() && target.type != ProjectType::Target::SharedCodeTarget)
+                setAddOption (*linker, "option", getSharedCodePath (config));
+
             const StringArray linkerFlags (getLinkerFlags (config, target));
+
             for (auto flag : linkerFlags)
                 setAddOption (*linker, "option", flag);
 
@@ -604,9 +632,7 @@ private:
                 librarySearchPaths.add (RelativePath (getSharedCodePath (config), RelativePath::buildTargetFolder).getParentDirectory().toUnixStyle());
 
             for (auto path : librarySearchPaths)
-            {
                 setAddOption (*linker, "directory", replacePreprocessorDefs (getAllPreprocessorDefs(), path));
-            }
         }
     }
 
@@ -615,11 +641,9 @@ private:
         XmlElement* const build = xml.createNewChildElement ("Build");
 
         for (ConstConfigIterator config (*this); config.next();)
-        {
             for (auto target : targets)
                 if (target->type != ProjectType::Target::AggregateTarget)
                     createBuildTarget (*build->createNewChildElement ("Target"), *target, *config);
-        }
     }
 
     void addVirtualTargets (XmlElement& xml) const
@@ -647,32 +671,42 @@ private:
         }
     }
 
+    StringArray getProjectCompilerOptions() const
+    {
+        return { "-Wall", "-Wno-strict-aliasing", "-Wno-strict-overflow" };
+    }
+
     void addProjectCompilerOptions (XmlElement& xml) const
     {
         XmlElement* const compiler = xml.createNewChildElement ("Compiler");
-        setAddOption (*compiler, "option", "-Wall");
-        setAddOption (*compiler, "option", "-Wno-strict-aliasing");
-        setAddOption (*compiler, "option", "-Wno-strict-overflow");
+
+        for (auto& option : getProjectCompilerOptions())
+            setAddOption (*compiler, "option", option);
+    }
+
+    StringArray getProjectLinkerLibs() const
+    {
+        StringArray result;
+
+        if (isWindows())
+            result.addArray ({ "gdi32", "user32", "kernel32", "comctl32" });
+
+        result.addTokens (getExternalLibrariesString(), ";\n", "\"'");
+
+        result = getCleanedStringArray (result);
+
+        for (auto& option : result)
+            option = replacePreprocessorDefs (getAllPreprocessorDefs(), option);
+
+        return result;
     }
 
     void addProjectLinkerOptions (XmlElement& xml) const
     {
         XmlElement* const linker = xml.createNewChildElement ("Linker");
 
-        StringArray libs;
-
-        if (isWindows())
-        {
-            static const char* defaultLibs[] = { "gdi32", "user32", "kernel32", "comctl32" };
-            libs = StringArray (defaultLibs, numElementsInArray (defaultLibs));
-        }
-
-        libs.addTokens (getExternalLibrariesString(), ";\n", "\"'");
-
-        libs = getCleanedStringArray (libs);
-
-        for (int i = 0; i < libs.size(); ++i)
-            setAddOption (*linker, "library", replacePreprocessorDefs (getAllPreprocessorDefs(), libs[i]));
+        for (auto& lib : getProjectLinkerLibs())
+            setAddOption (*linker, "library", lib);
     }
 
     CodeBlocksTarget& getTargetWithType (ProjectType::Target::Type type) const
@@ -775,6 +809,8 @@ private:
     CodeBlocksOS os;
 
     OwnedArray<CodeBlocksTarget> targets;
+
+    friend class CLionProjectExporter;
 
     JUCE_DECLARE_NON_COPYABLE (CodeBlocksProjectExporter)
 };

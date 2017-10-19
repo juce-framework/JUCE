@@ -659,68 +659,16 @@ private:
 
     void writePluginCharacteristicsFile();
 
-    void writeProjects (const OwnedArray<LibraryModule>& modules, const String& specifiedExporterToSave, bool isCommandLineApp)
-    {
-        ThreadPool threadPool;
-
-        // keep a copy of the basic generated files group, as each exporter may modify it.
-        const ValueTree originalGeneratedGroup (generatedFilesGroup.state.createCopy());
-
-        try
-        {
-            for (Project::ExporterIterator exporter (project); exporter.next();)
-            {
-                if (specifiedExporterToSave.isNotEmpty() && exporter->getName() != specifiedExporterToSave)
-                    continue;
-
-                exporter->initialiseDependencyPathValues();
-
-                if (exporter->getTargetFolder().createDirectory())
-                {
-                    exporter->copyMainGroupFromProject();
-                    exporter->settings = exporter->settings.createCopy();
-
-                    exporter->addToExtraSearchPaths (RelativePath ("JuceLibraryCode", RelativePath::projectFolder));
-
-                    generatedFilesGroup.state = originalGeneratedGroup.createCopy();
-                    exporter->addSettingsForProjectType (project.getProjectType());
-
-                    for (auto& module: modules)
-                        module->addSettingsForModuleToExporter (*exporter, *this);
-
-                    if (project.getProjectType().isAudioPlugin())
-                        writePluginCharacteristicsFile();
-
-                    generatedFilesGroup.sortAlphabetically (true, true);
-                    exporter->getAllGroups().add (generatedFilesGroup);
-
-                    if (isCommandLineApp)
-                        saveExporter (exporter.exporter, modules);
-                    else
-                        threadPool.addJob (new ExporterJob (*this, exporter.exporter.release(), modules), true);
-                }
-                else
-                {
-                    addError ("Can't create folder: " + exporter->getTargetFolder().getFullPathName());
-                }
-            }
-        }
-        catch (ProjectExporter::SaveError& saveError)
-        {
-            addError (saveError.message);
-        }
-
-        if (! isCommandLineApp)
-            while (threadPool.getNumJobs() > 0)
-                Thread::sleep (10);
-    }
+    void writeProjects (const OwnedArray<LibraryModule>&, const String&, bool);
 
     void saveExporter (ProjectExporter* exporter, const OwnedArray<LibraryModule>& modules)
     {
         try
         {
             exporter->create (modules);
-            std::cout << "Finished saving: " << exporter->getName() << std::endl;
+
+            if (! exporter->isCLion())
+                std::cout << "Finished saving: " << exporter->getName() << std::endl;
         }
         catch (ProjectExporter::SaveError& error)
         {

@@ -81,7 +81,7 @@ public:
     Path user, closedFolder, exporter, fileExplorer, file,
          buildTab, modules, openFolder, play, settings, singleModule,
          buildNow, continuousBuildStart, continuousBuildStop, edit, plus,
-         android, codeBlocks, linux, xcode, visualStudio;
+         android, codeBlocks, linux, xcode, visualStudio, clion;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Icons)

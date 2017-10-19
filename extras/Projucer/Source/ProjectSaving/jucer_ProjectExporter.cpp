@@ -34,6 +34,8 @@
 #include "jucer_ProjectExport_Android.h"
 #include "jucer_ProjectExport_CodeBlocks.h"
 
+#include "jucer_ProjectExport_CLion.h"
+
 //==============================================================================
 static void addType (Array<ProjectExporter::ExporterTypeInfo>& list,
                      const char* name, const void* iconData, int iconDataSize)
@@ -55,6 +57,7 @@ Array<ProjectExporter::ExporterTypeInfo> ProjectExporter::getExporterTypes()
     addType (types, AndroidProjectExporter::getName(),           BinaryData::export_android_svg,        BinaryData::export_android_svgSize);
     addType (types, CodeBlocksProjectExporter::getNameWindows(), BinaryData::export_codeBlocks_svg,     BinaryData::export_codeBlocks_svgSize);
     addType (types, CodeBlocksProjectExporter::getNameLinux(),   BinaryData::export_codeBlocks_svg,     BinaryData::export_codeBlocks_svgSize);
+    addType (types, CLionProjectExporter::getName(),             BinaryData::export_clion_svg,          BinaryData::export_clion_svgSize);
 
     return types;
 }
@@ -74,7 +77,7 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int
         case 6:     exp = new AndroidProjectExporter       (project, ValueTree (AndroidProjectExporter       ::getValueTreeTypeName())); break;
         case 7:     exp = new CodeBlocksProjectExporter    (project, ValueTree (CodeBlocksProjectExporter    ::getValueTreeTypeName (CodeBlocksProjectExporter::windowsTarget)), CodeBlocksProjectExporter::windowsTarget); break;
         case 8:     exp = new CodeBlocksProjectExporter    (project, ValueTree (CodeBlocksProjectExporter    ::getValueTreeTypeName (CodeBlocksProjectExporter::linuxTarget)),   CodeBlocksProjectExporter::linuxTarget); break;
-        default:    jassertfalse; return 0;
+        case 9:     exp = new CLionProjectExporter         (project, ValueTree (CLionProjectExporter         ::getValueTreeTypeName())); break;
     }
 
     exp->createDefaultConfigs();
@@ -122,6 +125,9 @@ String ProjectExporter::getValueTreeNameForExporter (const String& exporterName)
     if (exporterName == CodeBlocksProjectExporter::getNameWindows())
         return CodeBlocksProjectExporter::getValueTreeTypeName (CodeBlocksProjectExporter::CodeBlocksOS::windowsTarget);
 
+    if (exporterName == CLionProjectExporter::getName())
+        return CLionProjectExporter::getValueTreeTypeName();
+
     return {};
 }
 
@@ -138,6 +144,7 @@ StringArray ProjectExporter::getAllDefaultBuildsFolders()
     folders.add (getDefaultBuildsRootFolder() + "CodeBlocksWindows");
     folders.add (getDefaultBuildsRootFolder() + "CodeBlocksLinux");
     folders.add (getDefaultBuildsRootFolder() + "Android");
+    folders.add (getDefaultBuildsRootFolder() + "CLion");
 
     return folders;
 }
@@ -169,6 +176,7 @@ ProjectExporter* ProjectExporter::createExporter (Project& project, const ValueT
     if (exp == nullptr)    exp = MakefileProjectExporter      ::createForSettings (project, settings);
     if (exp == nullptr)    exp = AndroidProjectExporter       ::createForSettings (project, settings);
     if (exp == nullptr)    exp = CodeBlocksProjectExporter    ::createForSettings (project, settings);
+    if (exp == nullptr)    exp = CLionProjectExporter         ::createForSettings (project, settings);
 
     jassert (exp != nullptr);
     return exp;
@@ -247,33 +255,36 @@ bool ProjectExporter::shouldFileBeCompiledByDefault (const RelativePath& file) c
 //==============================================================================
 void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
 {
-    props.add (new TextPropertyComponent (getTargetLocationValue(), "Target Project Folder", 2048, false),
-               "The location of the folder in which the " + name + " project will be created. "
-               "This path can be absolute, but it's much more sensible to make it relative to the jucer project directory.");
+    if (! isCLion())
+    {
+        props.add (new TextPropertyComponent (getTargetLocationValue(), "Target Project Folder", 2048, false),
+                   "The location of the folder in which the " + name + " project will be created. "
+                   "This path can be absolute, but it's much more sensible to make it relative to the jucer project directory.");
 
-    createDependencyPathProperties (props);
+        createDependencyPathProperties (props);
 
-    props.add (new TextPropertyComponent (getExporterPreprocessorDefs(), "Extra Preprocessor Definitions", 32768, true),
-               "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace, commas, "
-               "or new-lines to separate the items - to include a space or comma in a definition, precede it with a backslash.");
+        props.add (new TextPropertyComponent (getExporterPreprocessorDefs(), "Extra Preprocessor Definitions", 32768, true),
+                   "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace, commas, "
+                   "or new-lines to separate the items - to include a space or comma in a definition, precede it with a backslash.");
 
-    props.add (new TextPropertyComponent (getExtraCompilerFlags(), "Extra compiler flags", 8192, true),
-               "Extra command-line flags to be passed to the compiler. This string can contain references to preprocessor definitions in the "
-               "form ${NAME_OF_DEFINITION}, which will be replaced with their values.");
+        props.add (new TextPropertyComponent (getExtraCompilerFlags(), "Extra compiler flags", 8192, true),
+                   "Extra command-line flags to be passed to the compiler. This string can contain references to preprocessor definitions in the "
+                   "form ${NAME_OF_DEFINITION}, which will be replaced with their values.");
 
-    props.add (new TextPropertyComponent (getExtraLinkerFlags(), "Extra linker flags", 8192, true),
-               "Extra command-line flags to be passed to the linker. You might want to use this for adding additional libraries. "
-               "This string can contain references to preprocessor definitions in the form ${NAME_OF_VALUE}, which will be replaced with their values.");
+        props.add (new TextPropertyComponent (getExtraLinkerFlags(), "Extra linker flags", 8192, true),
+                   "Extra command-line flags to be passed to the linker. You might want to use this for adding additional libraries. "
+                   "This string can contain references to preprocessor definitions in the form ${NAME_OF_VALUE}, which will be replaced with their values.");
 
-    props.add (new TextPropertyComponent (getExternalLibraries(), "External libraries to link", 8192, true),
-               "Additional libraries to link (one per line). You should not add any platform specific decoration to these names. "
-               "This string can contain references to preprocessor definitions in the form ${NAME_OF_VALUE}, which will be replaced with their values.");
+        props.add (new TextPropertyComponent (getExternalLibraries(), "External libraries to link", 8192, true),
+                   "Additional libraries to link (one per line). You should not add any platform specific decoration to these names. "
+                   "This string can contain references to preprocessor definitions in the form ${NAME_OF_VALUE}, which will be replaced with their values.");
 
-    if (! isVisualStudio())
-        props.add (new BooleanPropertyComponent (getShouldUseGNUExtensionsValue(), "GNU Compiler Extensions", "Enabled"),
-                   "Enabling this will use the GNU C++ language standard variant for compilation.");
+        if (! isVisualStudio())
+            props.add (new BooleanPropertyComponent (getShouldUseGNUExtensionsValue(), "GNU Compiler Extensions", "Enabled"),
+                       "Enabling this will use the GNU C++ language standard variant for compilation.");
 
-    createIconProperties (props);
+        createIconProperties (props);
+    }
 
     createExporterProperties (props);
 
@@ -940,20 +951,6 @@ StringArray ProjectExporter::BuildConfiguration::getLibrarySearchPaths() const
 
     for (auto path : exporter.moduleLibSearchPaths)
         s.add (path + separator + getModuleLibraryArchName());
-
-    return s;
-}
-
-String ProjectExporter::BuildConfiguration::getGCCLibraryPathFlags() const
-{
-    String s;
-    const auto libraryPaths = getSearchPathsFromString (getLibrarySearchPathString());
-
-    for (auto path : libraryPaths)
-        s << " -L" << escapeSpaces (path).replace ("~", "$(HOME)");
-
-    for (auto path : exporter.moduleLibSearchPaths)
-        s << " -L" << escapeSpaces (path).replace ("~", "$(HOME)") << "/" << getModuleLibraryArchName();
 
     return s;
 }
