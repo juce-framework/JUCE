@@ -118,7 +118,7 @@ public:
     void cleanAll();
     void handleMissingSystemHeaders();
     bool isBuildTabEnabled() const;
-    void setBuildEnabled (bool);
+    void setBuildEnabled (bool enabled, bool displayError = false);
     bool isBuildEnabled() const;
     bool areWarningsEnabled() const;
 

@@ -264,7 +264,11 @@ private:
     void* server;
    #endif
 
-    void timerCallback()    { owner.handleCrash (String()); }
+    void timerCallback()
+    {
+        stopTimer();
+        owner.handleCrash (String());
+    }
 };
 
 //==============================================================================

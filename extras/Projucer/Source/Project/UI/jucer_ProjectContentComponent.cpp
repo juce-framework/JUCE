@@ -1129,16 +1129,19 @@ void ProjectContentComponent::killChildProcess()
     }
 }
 
-void ProjectContentComponent::setBuildEnabled (bool b)
+void ProjectContentComponent::setBuildEnabled (bool isEnabled, bool displayError)
 {
-    if (project != nullptr && b != isBuildEnabled())
+    if (project != nullptr && isEnabled != isBuildEnabled())
     {
-        LiveBuildProjectSettings::setBuildDisabled (*project, ! b);
+        if (! displayError)
+            lastCrashMessage = {};
+
+        LiveBuildProjectSettings::setBuildDisabled (*project, ! isEnabled);
         killChildProcess();
         refreshTabsIfBuildStatusChanged();
 
         if (auto* h = dynamic_cast<HeaderComponent*> (header.get()))
-            h->updateBuildButtons (b, isContinuousRebuildEnabled());
+            h->updateBuildButtons (isEnabled, isContinuousRebuildEnabled());
     }
 }
 
@@ -1159,7 +1162,7 @@ void ProjectContentComponent::handleCrash (const String& message)
 
     if (project != nullptr)
     {
-        setBuildEnabled (false);
+        setBuildEnabled (false, true);
         showBuildTab();
     }
 }
@@ -1316,7 +1319,7 @@ void ProjectContentComponent::handleMissingSystemHeaders()
     const String alertWindowMessage = "Missing system headers\nPlease do sudo apt-get install ...";
    #endif
 
-    setBuildEnabled (false);
+    setBuildEnabled (false, true);
 
     deleteProjectTabs();
     createProjectTabs();
