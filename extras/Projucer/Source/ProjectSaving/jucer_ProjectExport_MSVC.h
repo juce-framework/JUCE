@@ -1049,8 +1049,8 @@ public:
                 return projectIcon.rebased (getOwner().getTargetFolder(),
                                             getOwner().getProject().getProjectFolder(),
                                             RelativePath::projectFolder);
-            else
-                return aaxSDK.getChildFile ("Utilities").getChildFile ("PlugIn.ico");
+
+            return aaxSDK.getChildFile ("Utilities").getChildFile ("PlugIn.ico");
         }
 
         String getExtraPostBuildSteps (const MSVCBuildConfiguration& config) const
@@ -1094,15 +1094,13 @@ public:
             {
                 String script;
 
-                const bool is64Bit = (config.config [Ids::winArchitecture] == "x64");
-                const String bundleDir      = getOwner().getOutDirFile (config, config.getOutputFilename (".aaxplugin", false));
+                bool is64Bit = (config.config [Ids::winArchitecture] == "x64");
+                auto bundleDir      = getOwner().getOutDirFile (config, config.getOutputFilename (".aaxplugin", false));
+                auto bundleContents = bundleDir + "\\Contents";
+                auto macOSDir       = bundleContents + String ("\\") + (is64Bit ? "x64" : "Win32");
 
-                const String bundleContents = bundleDir + "\\Contents";
-                const String macOSDir       = bundleContents + String ("\\") + (is64Bit ? "x64" : "Win32");
-
-                StringArray folders = {bundleDir.toRawUTF8(), bundleContents.toRawUTF8(), macOSDir.toRawUTF8()};
-                for (int i = 0; i < folders.size(); ++i)
-                    script += String ("if not exist \"") + folders[i] + String ("\" mkdir \"") + folders[i] + String ("\"\r\n");
+                for (auto& folder : StringArray { bundleDir, bundleContents, macOSDir })
+                    script += String ("if not exist \"") + folder + String ("\" mkdir \"") + folder + String ("\"\r\n");
 
                 return script;
             }
@@ -1112,22 +1110,18 @@ public:
 
         String getPostBuildSteps (const MSVCBuildConfiguration& config) const
         {
-            String postBuild            = config.getPostbuildCommandString();
-            const String extraPostBuild = getExtraPostBuildSteps (config);
+            auto postBuild = config.getPostbuildCommandString();
+            auto extraPostBuild = getExtraPostBuildSteps (config);
 
-            postBuild += String (postBuild.isNotEmpty() && extraPostBuild.isNotEmpty() ? "\r\n" : "") + extraPostBuild;
-
-            return postBuild;
+            return postBuild + String (postBuild.isNotEmpty() && extraPostBuild.isNotEmpty() ? "\r\n" : "") + extraPostBuild;
         }
 
         String getPreBuildSteps (const MSVCBuildConfiguration& config) const
         {
-            String preBuild            = config.getPrebuildCommandString();
-            const String extraPreBuild = getExtraPreBuildSteps (config);
+            auto preBuild = config.getPrebuildCommandString();
+            auto extraPreBuild = getExtraPreBuildSteps (config);
 
-            preBuild += String (preBuild.isNotEmpty() && extraPreBuild.isNotEmpty() ? "\r\n" : "") + extraPreBuild;
-
-            return preBuild;
+            return preBuild + String (preBuild.isNotEmpty() && extraPreBuild.isNotEmpty() ? "\r\n" : "") + extraPreBuild;
         }
 
         void addExtraPreprocessorDefines (StringPairArray& defines) const
@@ -1136,7 +1130,7 @@ public:
             {
             case AAXPlugIn:
                 {
-                    const RelativePath aaxLibsFolder = RelativePath (getOwner().getAAXPathValue().toString(), RelativePath::projectFolder).getChildFile ("Libs");
+                    auto aaxLibsFolder = RelativePath (getOwner().getAAXPathValue().toString(), RelativePath::projectFolder).getChildFile ("Libs");
                     defines.set ("JucePlugin_AAXLibs_path", createRebasedPath (aaxLibsFolder));
                 }
                 break;
@@ -1165,6 +1159,7 @@ public:
             if (type == RTASPlugIn)
             {
                 const RelativePath rtasFolder (getOwner().getRTASPathValue().toString(), RelativePath::projectFolder);
+
                 static const char* p[] = { "AlturaPorts/TDMPlugins/PluginLibrary/EffectClasses",
                                            "AlturaPorts/TDMPlugins/PluginLibrary/ProcessClasses",
                                            "AlturaPorts/TDMPlugins/PluginLibrary/ProcessClasses/Interfaces",
@@ -1192,8 +1187,8 @@ public:
                                            "AvidCode/AVX2sdk/AVX/avx2/avx2sdk/inc",
                                            "xplat/AVX/avx2/avx2sdk/inc" };
 
-                for (int i = 0; i < numElementsInArray (p); ++i)
-                    searchPaths.add (createRebasedPath (rtasFolder.getChildFile (p[i])));
+                for (auto* path : p)
+                    searchPaths.add (createRebasedPath (rtasFolder.getChildFile (path)));
             }
 
             return searchPaths;
