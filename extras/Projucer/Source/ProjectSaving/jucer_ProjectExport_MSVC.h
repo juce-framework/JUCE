@@ -350,10 +350,12 @@ public:
 
         void initialisePluginCachedValues()
         {
+            vstBinaryLocation.referTo  (config, Ids::vstBinaryLocation,  nullptr, ((is64Bit() ? "%ProgramW6432%"
+                                                                                              : "%programfiles(x86)%") + String ("\\Steinberg\\Vstplugins")));
+
             auto prefix = is64Bit() ? "%CommonProgramW6432%"
                                     : "%CommonProgramFiles(x86)%";
 
-            vstBinaryLocation.referTo  (config, Ids::vstBinaryLocation,  nullptr, prefix + String ("\\Steinberg\\VST2"));
             vst3BinaryLocation.referTo (config, Ids::vst3BinaryLocation, nullptr, prefix + String ("\\VST3"));
             rtasBinaryLocation.referTo (config, Ids::rtasBinaryLocation, nullptr, prefix + String ("\\Digidesign\\DAE\\Plug-Ins"));
             aaxBinaryLocation.referTo  (config, Ids::aaxBinaryLocation,  nullptr, prefix + String ("\\Avid\\Audio\\Plug-Ins"));
