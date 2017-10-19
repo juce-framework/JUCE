@@ -65,6 +65,8 @@ public:
         convertFrom0To1Function  = static_cast<ConverstionFunction&&> (other.convertFrom0To1Function);
         convertTo0To1Function    = static_cast<ConverstionFunction&&> (other.convertTo0To1Function);
         snapToLegalValueFunction = static_cast<ConverstionFunction&&> (other.snapToLegalValueFunction);
+
+        return *this;
     }
 
     /** Creates a NormalisableRange with a given range, interval and skew factor. */
