@@ -790,16 +790,13 @@ void FlexBox::performLayout (Rectangle<float> targetArea)
         {
             item.currentBounds += targetArea.getPosition();
 
-            if (auto comp = item.associatedComponent)
-            {
-                auto position = item.currentBounds.getPosition().roundToInt();
-                comp->setBounds (position.getX(),
-                                 position.getY(),
-                                 roundToInt (item.currentBounds.getRight())  - position.getX(),
-                                 roundToInt (item.currentBounds.getBottom()) - position.getY());
-            }
+            if (auto* comp = item.associatedComponent)
+                comp->setBounds (Rectangle<int>::leftTopRightBottom ((int) item.currentBounds.getX(),
+                                                                     (int) item.currentBounds.getY(),
+                                                                     (int) item.currentBounds.getRight(),
+                                                                     (int) item.currentBounds.getBottom()));
 
-            if (auto box = item.associatedFlexBox)
+            if (auto* box = item.associatedFlexBox)
                 box->performLayout (item.currentBounds);
         }
     }
