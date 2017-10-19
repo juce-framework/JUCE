@@ -164,6 +164,8 @@ public:
 
             if (! isDebug())
                 updateOldLTOSetting();
+
+            initialisePluginCachedValues();
         }
 
         Value getWarningLevelValue()                { return getValue (Ids::winWarningLevel); }
@@ -226,6 +228,8 @@ public:
 
         void createConfigProperties (PropertyListBuilder& props) override
         {
+            addVisualStudioPluginInstallPathProperties (props);
+
             const String archTypes[] = { get32BitArchName(), get64BitArchName() };
             props.add (new ChoicePropertyComponent (getArchitectureType(), "Architecture",
                                                     StringArray (archTypes, numElementsInArray (archTypes)),
@@ -315,9 +319,44 @@ public:
             return result;
         }
 
+        //==============================================================================
+        CachedValue<String> vstBinaryLocation, vst3BinaryLocation, rtasBinaryLocation, aaxBinaryLocation;
+
+    private:
+        //==============================================================================
         void updateOldLTOSetting()
         {
             getLinkTimeOptimisationEnabledValue() = (static_cast<int> (config ["wholeProgramOptimisation"]) == 0);
+        }
+
+        void addVisualStudioPluginInstallPathProperties (PropertyListBuilder& props)
+        {
+            if (project.shouldBuildVST())
+                props.add (new TextWithDefaultPropertyComponent<String> (vstBinaryLocation, "VST Binary location", 1024),
+                           "The folder in which the compiled VST binary should be placed.");
+
+            if (project.shouldBuildVST3())
+                props.add (new TextWithDefaultPropertyComponent<String> (vst3BinaryLocation, "VST3 Binary location", 1024),
+                           "The folder in which the compiled VST3 binary should be placed.");
+
+            if (project.shouldBuildRTAS())
+                props.add (new TextWithDefaultPropertyComponent<String> (rtasBinaryLocation, "RTAS Binary location", 1024),
+                           "The folder in which the compiled RTAS binary should be placed.");
+
+            if (project.shouldBuildAAX())
+                props.add (new TextWithDefaultPropertyComponent<String> (aaxBinaryLocation, "AAX Binary location", 1024),
+                           "The folder in which the compiled AAX binary should be placed.");
+        }
+
+        void initialisePluginCachedValues()
+        {
+            auto prefix = is64Bit() ? "%CommonProgramW6432%"
+                                    : "%CommonProgramFiles(x86)%";
+
+            vstBinaryLocation.referTo  (config, Ids::vstBinaryLocation,  nullptr, prefix + String ("\\Steinberg\\VST2"));
+            vst3BinaryLocation.referTo (config, Ids::vst3BinaryLocation, nullptr, prefix + String ("\\VST3"));
+            rtasBinaryLocation.referTo (config, Ids::rtasBinaryLocation, nullptr, prefix + String ("\\Digidesign\\DAE\\Plug-Ins"));
+            aaxBinaryLocation.referTo  (config, Ids::aaxBinaryLocation,  nullptr, prefix + String ("\\Avid\\Audio\\Plug-Ins"));
         }
     };
 
@@ -1021,14 +1060,27 @@ public:
                 const RelativePath bundleScript  = aaxSDK.getChildFile ("Utilities").getChildFile ("CreatePackage.bat");
                 const RelativePath iconFilePath  = getAAXIconFile();
 
-                const bool is64Bit = (config.config [Ids::winArchitecture] == "x64");
-                const String bundleDir      = getOwner().getOutDirFile (config, config.getOutputFilename (".aaxplugin", true));
-                const String bundleContents = bundleDir + "\\Contents";
-                const String macOSDir       = bundleContents + String ("\\") + (is64Bit ? "x64" : "Win32");
-                const String executable     = macOSDir + String ("\\") + config.getOutputFilename (".aaxplugin", true);
+                auto is64Bit = (config.config [Ids::winArchitecture] == "x64");
 
-                return String ("copy /Y \"") + getOutputFilePath (config) + String ("\" \"") + executable + String ("\"\r\ncall ") +
-                    createRebasedPath (bundleScript) + String (" \"") + macOSDir + String ("\" ") + createRebasedPath (iconFilePath);
+                auto outputFilename = config.getOutputFilename (".aaxplugin", true);
+                auto bundleDir      = getOwner().getOutDirFile (config, outputFilename);
+                auto bundleContents = bundleDir + "\\Contents";
+                auto macOSDir       = bundleContents + String ("\\") + (is64Bit ? "x64" : "Win32");
+                auto executable     = macOSDir + String ("\\") + outputFilename;
+
+                auto pkgScript = String ("copy /Y ") + getOutputFilePath (config).quoted() + String (" ") + executable.quoted() + String ("\r\ncall ")
+                                     + createRebasedPath (bundleScript) + String (" ") + macOSDir.quoted() + String (" ") + createRebasedPath (iconFilePath);
+
+                return pkgScript + "\r\n" + String ("xcopy ") + bundleDir.quoted() + " "
+                           + String (config.aaxBinaryLocation.get() + "\\" + outputFilename + "\\").quoted() + " /E /Y";
+            }
+            else
+            {
+                auto copyScript = String ("copy /Y \"$(OutDir)$(TargetFileName)\"") + String (" \"$COPYDIR$\\$(TargetFileName)\"");
+
+                if (type == VSTPlugIn)     return copyScript.replace ("$COPYDIR$", config.vstBinaryLocation.get());
+                if (type == VST3PlugIn)    return copyScript.replace ("$COPYDIR$", config.vst3BinaryLocation.get());
+                if (type == RTASPlugIn)    return copyScript.replace ("$COPYDIR$", config.rtasBinaryLocation.get());
             }
 
             return {};

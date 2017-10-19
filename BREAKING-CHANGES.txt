@@ -6,6 +6,27 @@ develop
 
 Change
 ------
+Visual Studio plugin targets now have a post-build script that copies the plugin binary to the default folder
+for its type or to a specified folder, which can be set in the build configuration. 
+
+Possible Issues
+---------------
+It may cause some issues if you already have a post-build script set up to do this, 
+if the default folders do not exist, or you do not have write permissions to these folders.
+
+Workaround
+----------
+Change the copy destination folder in the VS exporter build configuration to one that exists and you have rights
+to copy to, or create the default ones.
+
+Rationale
+---------
+This brings the behaviour of the VS exporter in line with the Xcode exporter and makes it easier
+to build and use plugins as they will automatically be copied to the default folder for the plugin type.
+
+
+Change
+------
 Viewport now enables "scroll on drag" mode by default on Android and iOS.
 
 Possible Issues

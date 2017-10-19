@@ -28,6 +28,7 @@
 
 #include "../Project/jucer_Project.h"
 #include "../Utility/UI/PropertyComponents/jucer_DependencyPathPropertyComponent.h"
+#include "../Utility/UI/PropertyComponents/jucer_TextWithDefaultPropertyComponent.h"
 
 class ProjectSaver;
 
