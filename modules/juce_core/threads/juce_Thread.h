@@ -173,6 +173,27 @@ public:
     bool waitForThreadToExit (int timeOutMilliseconds) const;
 
     //==============================================================================
+    class Listener
+    {
+    public:
+        virtual ~Listener() {}
+
+        /** Called if Thread::signalThreadShouldExit was called.
+            @see Thread::threadShouldExit, Thread::addListener, Thread::removeListener
+        */
+        virtual void exitSignalSent() = 0;
+    };
+
+    /** Add a listener to this thread which will receive a callback when
+        signalThreadShouldExit was called on this thread.
+        @see signalThreadShouldExit, removeListener
+    */
+    void addListener (Listener*);
+
+    /** Removes a listener added with addListener. */
+    void removeListener (Listener*);
+
+    //==============================================================================
     /** Special realtime audio thread priority
 
         This priority will create a high-priority thread which is best suited
@@ -313,6 +334,7 @@ private:
     uint32 affinityMask = 0;
     bool deleteOnThreadEnd = false;
     bool volatile shouldExit = false;
+    ListenerList<Listener, Array<Listener*, CriticalSection>> listeners;
 
    #if JUCE_ANDROID
     bool isAndroidRealtimeThread = false;

@@ -361,12 +361,12 @@ struct OSCReceiver::Pimpl   : private Thread,
     }
 
     //==============================================================================
-    void addListener (Listener<MessageLoopCallback>* listenerToAdd)
+    void addListener (OSCReceiver::Listener<MessageLoopCallback>* listenerToAdd)
     {
         listeners.add (listenerToAdd);
     }
 
-    void addListener (Listener<RealtimeCallback>* listenerToAdd)
+    void addListener (OSCReceiver::Listener<RealtimeCallback>* listenerToAdd)
     {
         realtimeListeners.add (listenerToAdd);
     }
@@ -383,12 +383,12 @@ struct OSCReceiver::Pimpl   : private Thread,
         addListenerWithAddress (listenerToAdd, addressToMatch, realtimeListenersWithAddress);
     }
 
-    void removeListener (Listener<MessageLoopCallback>* listenerToRemove)
+    void removeListener (OSCReceiver::Listener<MessageLoopCallback>* listenerToRemove)
     {
         listeners.remove (listenerToRemove);
     }
 
-    void removeListener (Listener<RealtimeCallback>* listenerToRemove)
+    void removeListener (OSCReceiver::Listener<RealtimeCallback>* listenerToRemove)
     {
         realtimeListeners.remove (listenerToRemove);
     }
@@ -585,7 +585,7 @@ bool OSCReceiver::disconnect()
     return pimpl->disconnect();
 }
 
-void OSCReceiver::addListener (Listener<MessageLoopCallback>* listenerToAdd)
+void OSCReceiver::addListener (OSCReceiver::Listener<MessageLoopCallback>* listenerToAdd)
 {
     pimpl->addListener (listenerToAdd);
 }
