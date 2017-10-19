@@ -1,6 +1,29 @@
 JUCE breaking changes
 =====================
 
+develop
+=============
+
+Change
+------
+Viewport now enables "scroll on drag" mode by default on Android and iOS.
+
+Possible Issues
+---------------
+Any code relying on "scroll on drag" mode being turned off by default, should disable
+it manually.
+
+Workaround
+----------
+None.
+
+Rationale
+---------
+It is expected on mobile devices to be able to scroll a list by just a drag,
+rather than using a dedicated scrollbar. The scrollbar is still available though if
+needed.
+
+
 Version 5.1.2
 =============
 
