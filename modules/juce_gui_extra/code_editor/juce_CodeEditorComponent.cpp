@@ -195,8 +195,9 @@ private:
     {
         jassert (index <= line.length());
 
-        String::CharPointerType t (line.getCharPointer());
+        auto t = line.getCharPointer();
         int col = 0;
+
         for (int i = 0; i < index; ++i)
         {
             if (t.getAndAdvance() != '\t')
@@ -208,8 +209,7 @@ private:
         return col;
     }
 
-    static void addToken (Array<SyntaxToken>& dest, const String& text,
-                          const int length, const int type)
+    static void addToken (Array<SyntaxToken>& dest, const String& text, int length, int type)
     {
         if (length > 1000)
         {

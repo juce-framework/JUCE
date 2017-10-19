@@ -1265,10 +1265,10 @@ private:
 
         if (len > 2)
         {
-            const float dpi = 96.0f;
+            auto dpi = 96.0f;
 
-            const juce_wchar n1 = s [len - 2];
-            const juce_wchar n2 = s [len - 1];
+            auto n1 = s[len - 2];
+            auto n2 = s[len - 1];
 
             if (n1 == 'i' && n2 == 'n')         n *= dpi;
             else if (n1 == 'm' && n2 == 'm')    n *= dpi / 25.4f;
@@ -1400,7 +1400,7 @@ private:
     }
 
     //==============================================================================
-    static bool isIdentifierChar (const juce_wchar c)
+    static bool isIdentifierChar (juce_wchar c)
     {
         return CharacterFunctions::isLetter (c) || c == '-';
     }
@@ -1446,7 +1446,7 @@ private:
 
     static bool parseNextNumber (String::CharPointerType& text, String& value, const bool allowUnits)
     {
-        String::CharPointerType s (text);
+        auto s = text;
 
         while (s.isWhitespace() || *s == ',')
             ++s;

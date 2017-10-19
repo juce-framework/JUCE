@@ -28,7 +28,6 @@ namespace juce
 {
 
 KeyPress::KeyPress() noexcept
-    : keyCode (0), textCharacter (0)
 {
 }
 
@@ -37,14 +36,12 @@ KeyPress::KeyPress (int code, ModifierKeys m, juce_wchar textChar) noexcept
 {
 }
 
-KeyPress::KeyPress (const int code) noexcept
-    : keyCode (code), textCharacter (0)
+KeyPress::KeyPress (const int code) noexcept  : keyCode (code)
 {
 }
 
 KeyPress::KeyPress (const KeyPress& other) noexcept
-    : keyCode (other.keyCode), mods (other.mods),
-      textCharacter (other.textCharacter)
+    : keyCode (other.keyCode), mods (other.mods), textCharacter (other.textCharacter)
 {
 }
 
@@ -53,7 +50,6 @@ KeyPress& KeyPress::operator= (const KeyPress& other) noexcept
     keyCode = other.keyCode;
     mods = other.mods;
     textCharacter = other.textCharacter;
-
     return *this;
 }
 
@@ -75,15 +71,8 @@ bool KeyPress::operator== (const KeyPress& other) const noexcept
                            == CharacterFunctions::toLowerCase ((juce_wchar) other.keyCode)));
 }
 
-bool KeyPress::operator!= (const KeyPress& other) const noexcept
-{
-    return ! operator== (other);
-}
-
-bool KeyPress::operator!= (int otherKeyCode) const noexcept
-{
-    return ! operator== (otherKeyCode);
-}
+bool KeyPress::operator!= (const KeyPress& other) const noexcept    { return ! operator== (other); }
+bool KeyPress::operator!= (int otherKeyCode) const noexcept         { return ! operator== (otherKeyCode); }
 
 bool KeyPress::isCurrentlyDown() const
 {
@@ -149,7 +138,7 @@ namespace KeyPressHelpers
     {
         if (desc.containsIgnoreCase (numberPadPrefix()))
         {
-            const juce_wchar lastChar = desc.trimEnd().getLastCharacter();
+            auto lastChar = desc.trimEnd().getLastCharacter();
 
             switch (lastChar)
             {
@@ -241,9 +230,9 @@ KeyPress KeyPress::createFromDescription (const String& desc)
         if (key == 0)
         {
             // give up and use the hex code..
-            const int hexCode = desc.fromFirstOccurrenceOf ("#", false, false)
-                                    .retainCharacters ("0123456789abcdefABCDEF")
-                                    .getHexValue32();
+            auto hexCode = desc.fromFirstOccurrenceOf ("#", false, false)
+                               .retainCharacters ("0123456789abcdefABCDEF")
+                               .getHexValue32();
 
             if (hexCode > 0)
                 key = hexCode;
@@ -302,7 +291,7 @@ String KeyPress::getTextDescription() const
 String KeyPress::getTextDescriptionWithIcons() const
 {
    #if JUCE_MAC
-    String s (getTextDescription());
+    auto s = getTextDescription();
 
     for (int i = 0; i < numElementsInArray (KeyPressHelpers::osxSymbols); ++i)
         s = s.replace (KeyPressHelpers::osxSymbols[i].text,

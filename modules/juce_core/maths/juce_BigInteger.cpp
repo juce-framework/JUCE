@@ -52,9 +52,7 @@ int findHighestSetBit (uint32 n) noexcept
 
 //==============================================================================
 BigInteger::BigInteger()
-    : allocatedSize (numPreallocatedInts),
-      highestBit (-1),
-      negative (false)
+    : allocatedSize (numPreallocatedInts)
 {
     for (int i = 0; i < numPreallocatedInts; ++i)
         preallocated[i] = 0;
@@ -75,8 +73,7 @@ BigInteger::BigInteger (const int32 value)
 
 BigInteger::BigInteger (const uint32 value)
     : allocatedSize (numPreallocatedInts),
-      highestBit (31),
-      negative (false)
+      highestBit (31)
 {
     preallocated[0] = value;
 
@@ -153,7 +150,7 @@ BigInteger& BigInteger::operator= (const BigInteger& other)
     if (this != &other)
     {
         highestBit = other.getHighestBit();
-        const size_t newAllocatedSize = (size_t) jmax ((size_t) numPreallocatedInts, sizeNeededToHold (highestBit));
+        auto newAllocatedSize = (size_t) jmax ((size_t) numPreallocatedInts, sizeNeededToHold (highestBit));
 
         if (newAllocatedSize <= numPreallocatedInts)
             heapAllocation.free();
@@ -181,7 +178,7 @@ uint32* BigInteger::ensureSize (const size_t numVals)
 {
     if (numVals > allocatedSize)
     {
-        size_t oldSize = allocatedSize;
+        auto oldSize = allocatedSize;
         allocatedSize = ((numVals + 2) * 3) / 2;
 
         if (heapAllocation == nullptr)
@@ -193,7 +190,7 @@ uint32* BigInteger::ensureSize (const size_t numVals)
         {
             heapAllocation.realloc (allocatedSize);
 
-            for (uint32* values = getValues(); oldSize < allocatedSize; ++oldSize)
+            for (auto* values = getValues(); oldSize < allocatedSize; ++oldSize)
                 values[oldSize] = 0;
         }
     }
@@ -210,14 +207,14 @@ bool BigInteger::operator[] (const int bit) const noexcept
 
 int BigInteger::toInteger() const noexcept
 {
-    const int n = (int) (getValues()[0] & 0x7fffffff);
+    auto n = (int) (getValues()[0] & 0x7fffffff);
     return negative ? -n : n;
 }
 
 int64 BigInteger::toInt64() const noexcept
 {
-    const uint32* values = getValues();
-    const int64 n = (((int64) (values[1] & 0x7fffffff)) << 32) | values[0];
+    auto* values = getValues();
+    auto n = (((int64) (values[1] & 0x7fffffff)) << 32) | values[0];
     return negative ? -n : n;
 }
 
@@ -225,7 +222,7 @@ BigInteger BigInteger::getBitRange (int startBit, int numBits) const
 {
     BigInteger r;
     numBits = jmin (numBits, getHighestBit() + 1 - startBit);
-    uint32* const destValues = r.ensureSize (sizeNeededToHold (numBits));
+    auto* destValues = r.ensureSize (sizeNeededToHold (numBits));
     r.highestBit = numBits;
 
     for (int i = 0; numBits > 0;)
@@ -252,12 +249,12 @@ uint32 BigInteger::getBitRangeAsInt (const int startBit, int numBits) const noex
     if (numBits <= 0)
         return 0;
 
-    const size_t pos = bitToIndex (startBit);
-    const int offset = startBit & 31;
-    const int endSpace = 32 - numBits;
-    const uint32* values = getValues();
+    auto pos = bitToIndex (startBit);
+    auto offset = startBit & 31;
+    auto endSpace = 32 - numBits;
+    auto* values = getValues();
 
-    uint32 n = ((uint32) values [pos]) >> offset;
+    auto n = ((uint32) values [pos]) >> offset;
 
     if (offset > endSpace)
         n |= ((uint32) values [pos + 1]) << (32 - offset);
@@ -372,7 +369,7 @@ void BigInteger::negate() noexcept
 int BigInteger::countNumberOfSetBits() const noexcept
 {
     int total = 0;
-    const uint32* values = getValues();
+    auto* values = getValues();
 
     for (int i = (int) sizeNeededToHold (highestBit); --i >= 0;)
         total += countNumberOfBits (values[i]);
@@ -382,7 +379,7 @@ int BigInteger::countNumberOfSetBits() const noexcept
 
 int BigInteger::getHighestBit() const noexcept
 {
-    const uint32* values = getValues();
+    auto* values = getValues();
 
     for (int i = (int) bitToIndex (highestBit); i >= 0; --i)
         if (uint32 n = values[i])
@@ -393,7 +390,7 @@ int BigInteger::getHighestBit() const noexcept
 
 int BigInteger::findNextSetBit (int i) const noexcept
 {
-    const uint32* values = getValues();
+    auto* values = getValues();
 
     for (; i <= highestBit; ++i)
         if ((values [bitToIndex (i)] & bitToMask (i)) != 0)
@@ -404,7 +401,7 @@ int BigInteger::findNextSetBit (int i) const noexcept
 
 int BigInteger::findNextClearBit (int i) const noexcept
 {
-    const uint32* values = getValues();
+    auto* values = getValues();
 
     for (; i <= highestBit; ++i)
         if ((values [bitToIndex (i)] & bitToMask (i)) == 0)
@@ -426,7 +423,7 @@ BigInteger& BigInteger::operator+= (const BigInteger& other)
     {
         if (compareAbsolute (other) < 0)
         {
-            BigInteger temp (*this);
+            auto temp = *this;
             temp.negate();
             *this = other;
             *this -= temp;
@@ -442,9 +439,9 @@ BigInteger& BigInteger::operator+= (const BigInteger& other)
     {
         highestBit = jmax (highestBit, other.highestBit) + 1;
 
-        const size_t numInts = sizeNeededToHold (highestBit);
-        uint32* const values = ensureSize (numInts);
-        const uint32* const otherValues = other.getValues();
+        auto numInts = sizeNeededToHold (highestBit);
+        auto* values = ensureSize (numInts);
+        auto* otherValues = other.getValues();
         int64 remainder = 0;
 
         for (size_t i = 0; i < numInts; ++i)
@@ -486,18 +483,18 @@ BigInteger& BigInteger::operator-= (const BigInteger& other)
 
     if (compareAbsolute (other) < 0)
     {
-        BigInteger temp (other);
+        auto temp = other;
         swapWith (temp);
         *this -= temp;
         negate();
         return *this;
     }
 
-    const size_t numInts = sizeNeededToHold (getHighestBit());
-    const size_t maxOtherInts = sizeNeededToHold (other.getHighestBit());
+    auto numInts = sizeNeededToHold (getHighestBit());
+    auto maxOtherInts = sizeNeededToHold (other.getHighestBit());
     jassert (numInts >= maxOtherInts);
-    uint32* const values = getValues();
-    const uint32* const otherValues = other.getValues();
+    auto* values = getValues();
+    auto* otherValues = other.getValues();
     int64 amountToSubtract = 0;
 
     for (size_t i = 0; i < numInts; ++i)
@@ -527,24 +524,24 @@ BigInteger& BigInteger::operator*= (const BigInteger& other)
     if (this == &other)
         return operator*= (BigInteger (other));
 
-    int n = getHighestBit();
-    int t = other.getHighestBit();
+    auto n = getHighestBit();
+    auto t = other.getHighestBit();
 
-    const bool wasNegative = isNegative();
+    auto wasNegative = isNegative();
     setNegative (false);
 
     BigInteger total;
     total.highestBit = n + t + 1;
-    uint32* const totalValues = total.ensureSize (sizeNeededToHold (total.highestBit) + 1);
+    auto* totalValues = total.ensureSize (sizeNeededToHold (total.highestBit) + 1);
 
     n >>= 5;
     t >>= 5;
 
-    BigInteger m (other);
+    auto m = other;
     m.setNegative (false);
 
-    const uint32* const mValues = m.getValues();
-    const uint32* const values = getValues();
+    auto* mValues = m.getValues();
+    auto* values = getValues();
 
     for (int i = 0; i <= t; ++i)
     {
@@ -552,7 +549,7 @@ BigInteger& BigInteger::operator*= (const BigInteger& other)
 
         for (int j = 0; j <= n; ++j)
         {
-            uint64 uv = (uint64) totalValues[i + j] + (uint64) values[j] * (uint64) mValues[i] + (uint64) c;
+            auto uv = (uint64) totalValues[i + j] + (uint64) values[j] * (uint64) mValues[i] + (uint64) c;
             totalValues[i + j] = (uint32) uv;
             c = uv >> 32;
         }
@@ -574,8 +571,8 @@ void BigInteger::divideBy (const BigInteger& divisor, BigInteger& remainder)
 
     jassert (this != &remainder); // (can't handle passing itself in to get the remainder)
 
-    const int divHB = divisor.getHighestBit();
-    const int ourHB = getHighestBit();
+    auto divHB = divisor.getHighestBit();
+    auto ourHB = getHighestBit();
 
     if (divHB < 0 || ourHB < 0)
     {
@@ -585,7 +582,7 @@ void BigInteger::divideBy (const BigInteger& divisor, BigInteger& remainder)
     }
     else
     {
-        const bool wasNegative = isNegative();
+        auto wasNegative = isNegative();
 
         swapWith (remainder);
         remainder.setNegative (false);
@@ -594,7 +591,7 @@ void BigInteger::divideBy (const BigInteger& divisor, BigInteger& remainder)
         BigInteger temp (divisor);
         temp.setNegative (false);
 
-        int leftShift = ourHB - divHB;
+        auto leftShift = ourHB - divHB;
         temp <<= leftShift;
 
         while (leftShift >= 0)
@@ -631,10 +628,10 @@ BigInteger& BigInteger::operator|= (const BigInteger& other)
 
     if (other.highestBit >= 0)
     {
-        uint32* const values = ensureSize (sizeNeededToHold (other.highestBit));
-        const uint32* const otherValues = other.getValues();
+        auto* values = ensureSize (sizeNeededToHold (other.highestBit));
+        auto* otherValues = other.getValues();
 
-        int n = (int) bitToIndex (other.highestBit) + 1;
+        auto n = (int) bitToIndex (other.highestBit) + 1;
 
         while (--n >= 0)
             values[n] |= otherValues[n];
@@ -656,10 +653,10 @@ BigInteger& BigInteger::operator&= (const BigInteger& other)
     // this operation doesn't take into account negative values..
     jassert (isNegative() == other.isNegative());
 
-    uint32* const values = getValues();
-    const uint32* const otherValues = other.getValues();
+    auto* values = getValues();
+    auto* otherValues = other.getValues();
 
-    int n = (int) allocatedSize;
+    auto n = (int) allocatedSize;
 
     while (n > (int) other.allocatedSize)
         values[--n] = 0;
@@ -687,10 +684,10 @@ BigInteger& BigInteger::operator^= (const BigInteger& other)
 
     if (other.highestBit >= 0)
     {
-        uint32* const values = ensureSize (sizeNeededToHold (other.highestBit));
-        const uint32* const otherValues = other.getValues();
+        auto* values = ensureSize (sizeNeededToHold (other.highestBit));
+        auto* otherValues = other.getValues();
 
-        int n = (int) bitToIndex (other.highestBit) + 1;
+        auto n = (int) bitToIndex (other.highestBit) + 1;
 
         while (--n >= 0)
             values[n] ^= otherValues[n];
@@ -714,31 +711,31 @@ BigInteger& BigInteger::operator%= (const BigInteger& divisor)
 
 BigInteger& BigInteger::operator++()      { return operator+= (1); }
 BigInteger& BigInteger::operator--()      { return operator-= (1); }
-BigInteger  BigInteger::operator++ (int)  { const BigInteger old (*this); operator+= (1); return old; }
-BigInteger  BigInteger::operator-- (int)  { const BigInteger old (*this); operator-= (1); return old; }
+BigInteger  BigInteger::operator++ (int)  { const auto old (*this); operator+= (1); return old; }
+BigInteger  BigInteger::operator-- (int)  { const auto old (*this); operator-= (1); return old; }
 
-BigInteger  BigInteger::operator-() const                            { BigInteger b (*this); b.negate(); return b; }
-BigInteger  BigInteger::operator+   (const BigInteger& other) const  { BigInteger b (*this); return b += other; }
-BigInteger  BigInteger::operator-   (const BigInteger& other) const  { BigInteger b (*this); return b -= other; }
-BigInteger  BigInteger::operator*   (const BigInteger& other) const  { BigInteger b (*this); return b *= other; }
-BigInteger  BigInteger::operator/   (const BigInteger& other) const  { BigInteger b (*this); return b /= other; }
-BigInteger  BigInteger::operator|   (const BigInteger& other) const  { BigInteger b (*this); return b |= other; }
-BigInteger  BigInteger::operator&   (const BigInteger& other) const  { BigInteger b (*this); return b &= other; }
-BigInteger  BigInteger::operator^   (const BigInteger& other) const  { BigInteger b (*this); return b ^= other; }
-BigInteger  BigInteger::operator%   (const BigInteger& other) const  { BigInteger b (*this); return b %= other; }
-BigInteger  BigInteger::operator<<  (const int numBits) const        { BigInteger b (*this); return b <<= numBits; }
-BigInteger  BigInteger::operator>>  (const int numBits) const        { BigInteger b (*this); return b >>= numBits; }
+BigInteger  BigInteger::operator-() const                            { auto b (*this); b.negate(); return b; }
+BigInteger  BigInteger::operator+   (const BigInteger& other) const  { auto b (*this); return b += other; }
+BigInteger  BigInteger::operator-   (const BigInteger& other) const  { auto b (*this); return b -= other; }
+BigInteger  BigInteger::operator*   (const BigInteger& other) const  { auto b (*this); return b *= other; }
+BigInteger  BigInteger::operator/   (const BigInteger& other) const  { auto b (*this); return b /= other; }
+BigInteger  BigInteger::operator|   (const BigInteger& other) const  { auto b (*this); return b |= other; }
+BigInteger  BigInteger::operator&   (const BigInteger& other) const  { auto b (*this); return b &= other; }
+BigInteger  BigInteger::operator^   (const BigInteger& other) const  { auto b (*this); return b ^= other; }
+BigInteger  BigInteger::operator%   (const BigInteger& other) const  { auto b (*this); return b %= other; }
+BigInteger  BigInteger::operator<<  (const int numBits) const        { auto b (*this); return b <<= numBits; }
+BigInteger  BigInteger::operator>>  (const int numBits) const        { auto b (*this); return b >>= numBits; }
 BigInteger& BigInteger::operator<<= (const int numBits)              { shiftBits (numBits, 0);  return *this; }
 BigInteger& BigInteger::operator>>= (const int numBits)              { shiftBits (-numBits, 0); return *this; }
 
 //==============================================================================
 int BigInteger::compare (const BigInteger& other) const noexcept
 {
-    const bool isNeg = isNegative();
+    auto isNeg = isNegative();
 
     if (isNeg == other.isNegative())
     {
-        const int absComp = compareAbsolute (other);
+        auto absComp = compareAbsolute (other);
         return isNeg ? -absComp : absComp;
     }
 
@@ -747,14 +744,14 @@ int BigInteger::compare (const BigInteger& other) const noexcept
 
 int BigInteger::compareAbsolute (const BigInteger& other) const noexcept
 {
-    const int h1 = getHighestBit();
-    const int h2 = other.getHighestBit();
+    auto h1 = getHighestBit();
+    auto h2 = other.getHighestBit();
 
     if (h1 > h2) return 1;
     if (h1 < h2) return -1;
 
-    const uint32* const values = getValues();
-    const uint32* const otherValues = other.getValues();
+    auto* values = getValues();
+    auto* otherValues = other.getValues();
 
     for (int i = (int) bitToIndex (h1); i >= 0; --i)
         if (values[i] != otherValues[i])
@@ -783,10 +780,9 @@ void BigInteger::shiftLeft (int bits, const int startBit)
     }
     else
     {
-        uint32* const values = ensureSize (sizeNeededToHold (highestBit + bits));
-
-        const size_t wordsToMove = bitToIndex (bits);
-        size_t numOriginalInts = bitToIndex (highestBit);
+        auto* values = ensureSize (sizeNeededToHold (highestBit + bits));
+        auto wordsToMove = bitToIndex (bits);
+        auto numOriginalInts = bitToIndex (highestBit);
         highestBit += bits;
 
         if (wordsToMove > 0)
@@ -802,7 +798,7 @@ void BigInteger::shiftLeft (int bits, const int startBit)
 
         if (bits != 0)
         {
-            const int invBits = 32 - bits;
+            auto invBits = 32 - bits;
 
             for (size_t i = bitToIndex (highestBit); i > wordsToMove; --i)
                 values[i] = (values[i] << bits) | (values[i - 1] >> invBits);
@@ -831,18 +827,17 @@ void BigInteger::shiftRight (int bits, const int startBit)
         }
         else
         {
-            const size_t wordsToMove = bitToIndex (bits);
-            size_t top = 1 + bitToIndex (highestBit) - wordsToMove;
+            auto wordsToMove = bitToIndex (bits);
+            auto top = 1 + bitToIndex (highestBit) - wordsToMove;
             highestBit -= bits;
-            uint32* const values = getValues();
+            auto* values = getValues();
 
             if (wordsToMove > 0)
             {
-                size_t i;
-                for (i = 0; i < top; ++i)
+                for (size_t i = 0; i < top; ++i)
                     values[i] = values[i + wordsToMove];
 
-                for (i = 0; i < wordsToMove; ++i)
+                for (size_t i = 0; i < wordsToMove; ++i)
                     values[top + i] = 0;
 
                 bits &= 31;
@@ -850,7 +845,7 @@ void BigInteger::shiftRight (int bits, const int startBit)
 
             if (bits != 0)
             {
-                const int invBits = 32 - bits;
+                auto invBits = 32 - bits;
                 --top;
 
                 for (size_t i = 0; i < top; ++i)
@@ -891,7 +886,7 @@ static BigInteger simpleGCD (BigInteger* m, BigInteger* n)
 
 BigInteger BigInteger::findGreatestCommonDivisor (BigInteger n) const
 {
-    BigInteger m (*this);
+    auto m = *this;
 
     while (! n.isZero())
     {
@@ -911,14 +906,13 @@ BigInteger BigInteger::findGreatestCommonDivisor (BigInteger n) const
 void BigInteger::exponentModulo (const BigInteger& exponent, const BigInteger& modulus)
 {
     *this %= modulus;
-    BigInteger exp (exponent);
+    auto exp = exponent;
     exp %= modulus;
 
     if (modulus.getHighestBit() <= 32 || modulus % 2 == 0)
     {
-        BigInteger a (*this);
-
-        const int n = exp.getHighestBit();
+        auto a = *this;
+        auto n = exp.getHighestBit();
 
         for (int i = n; --i >= 0;)
         {
@@ -933,7 +927,7 @@ void BigInteger::exponentModulo (const BigInteger& exponent, const BigInteger& m
     }
     else
     {
-        const int Rfactor = modulus.getHighestBit() + 1;
+        auto Rfactor = modulus.getHighestBit() + 1;
         BigInteger R (1);
         R.shiftLeft (Rfactor, 0);
 
@@ -957,9 +951,9 @@ void BigInteger::exponentModulo (const BigInteger& exponent, const BigInteger& m
         }
         else
         {
-            BigInteger am (((*this) * R) % modulus);
-            BigInteger xm (am);
-            BigInteger um (R % modulus);
+            auto am  = (*this * R) % modulus;
+            auto xm = am;
+            auto um = R % modulus;
 
             for (int i = exp.getHighestBit(); --i >= 0;)
             {
@@ -979,8 +973,7 @@ void BigInteger::montgomeryMultiplication (const BigInteger& other, const BigInt
                                            const BigInteger& modulusp, const int k)
 {
     *this *= other;
-
-    BigInteger t (*this);
+    auto t = *this;
 
     setRange (k, highestBit - k + 1, false);
     *this *= modulusp;
@@ -1000,7 +993,6 @@ void BigInteger::extendedEuclidean (const BigInteger& a, const BigInteger& b,
                                     BigInteger& x, BigInteger& y)
 {
     BigInteger p(a), q(b), gcd(1);
-
     Array<BigInteger> tempValues;
 
     while (! q.isZero())
@@ -1016,7 +1008,7 @@ void BigInteger::extendedEuclidean (const BigInteger& a, const BigInteger& b,
 
     for (int i = 1; i < tempValues.size(); ++i)
     {
-        const BigInteger& v = tempValues.getReference (tempValues.size() - i - 1);
+        auto& v = tempValues.getReference (tempValues.size() - i - 1);
 
         if ((i & 1) != 0)
             x += y * v;
@@ -1054,8 +1046,8 @@ void BigInteger::inverseModulo (const BigInteger& modulus)
         return;
     }
 
-    BigInteger a1 (modulus), a2 (*this);
-    BigInteger b1 (modulus), b2 (1);
+    BigInteger a1 (modulus), a2 (*this),
+               b1 (modulus), b2 (1);
 
     while (! a2.isOne())
     {
@@ -1064,7 +1056,7 @@ void BigInteger::inverseModulo (const BigInteger& modulus)
 
         temp1 = a2;
         temp1 *= multiplier;
-        BigInteger temp2 (a1);
+        auto temp2 = a1;
         temp2 -= temp1;
         a1 = a2;
         a2 = temp2;
@@ -1093,17 +1085,16 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const BigInteger& 
 String BigInteger::toString (const int base, const int minimumNumCharacters) const
 {
     String s;
-    BigInteger v (*this);
+    auto v = *this;
 
     if (base == 2 || base == 8 || base == 16)
     {
-        const int bits = (base == 2) ? 1 : (base == 8 ? 3 : 4);
+        auto bits = (base == 2) ? 1 : (base == 8 ? 3 : 4);
         static const char hexDigits[] = "0123456789abcdef";
 
         for (;;)
         {
-            const uint32 remainder = v.getBitRangeAsInt (0, bits);
-
+            auto remainder = v.getBitRangeAsInt (0, bits);
             v >>= bits;
 
             if (remainder == 0 && v.isZero())
@@ -1141,18 +1132,18 @@ String BigInteger::toString (const int base, const int minimumNumCharacters) con
 void BigInteger::parseString (StringRef text, const int base)
 {
     clear();
-    String::CharPointerType t (text.text.findEndOfWhitespace());
+    auto t = text.text.findEndOfWhitespace();
 
     setNegative (*t == (juce_wchar) '-');
 
     if (base == 2 || base == 8 || base == 16)
     {
-        const int bits = (base == 2) ? 1 : (base == 8 ? 3 : 4);
+        auto bits = (base == 2) ? 1 : (base == 8 ? 3 : 4);
 
         for (;;)
         {
-            const juce_wchar c = t.getAndAdvance();
-            const int digit = CharacterFunctions::getHexDigitValue (c);
+            auto c = t.getAndAdvance();
+            auto digit = CharacterFunctions::getHexDigitValue (c);
 
             if (((uint32) digit) < (uint32) base)
             {
@@ -1171,7 +1162,7 @@ void BigInteger::parseString (StringRef text, const int base)
 
         for (;;)
         {
-            const juce_wchar c = t.getAndAdvance();
+            auto c = t.getAndAdvance();
 
             if (c >= '0' && c <= '9')
             {
@@ -1188,9 +1179,9 @@ void BigInteger::parseString (StringRef text, const int base)
 
 MemoryBlock BigInteger::toMemoryBlock() const
 {
-    const int numBytes = (getHighestBit() + 8) >> 3;
+    auto numBytes = (getHighestBit() + 8) >> 3;
     MemoryBlock mb ((size_t) numBytes);
-    const uint32* const values = getValues();
+    auto* values = getValues();
 
     for (int i = 0; i < numBytes; ++i)
         mb[i] = (char) ((values[i / 4] >> ((i & 3) * 8)) & 0xff);
@@ -1200,9 +1191,9 @@ MemoryBlock BigInteger::toMemoryBlock() const
 
 void BigInteger::loadFromMemoryBlock (const MemoryBlock& data)
 {
-    const size_t numBytes = data.getSize();
-    const size_t numInts = 1 + (numBytes / sizeof (uint32));
-    uint32* const values = ensureSize (numInts);
+    auto numBytes = data.getSize();
+    auto numInts = 1 + (numBytes / sizeof (uint32));
+    auto* values = ensureSize (numInts);
 
     for (int i = 0; i < (int) numInts - 1; ++i)
         values[i] = (uint32) ByteOrder::littleEndianInt (addBytesToPointer (data.getData(), sizeof (uint32) * (size_t) i));

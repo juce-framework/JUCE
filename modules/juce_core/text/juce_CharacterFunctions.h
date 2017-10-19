@@ -450,7 +450,7 @@ public:
     template <typename DestCharPointerType, typename SrcCharPointerType>
     static void copyAll (DestCharPointerType& dest, SrcCharPointerType src) noexcept
     {
-        while (juce_wchar c = src.getAndAdvance())
+        while (auto c = src.getAndAdvance())
             dest.write (c);
 
         dest.writeNull();

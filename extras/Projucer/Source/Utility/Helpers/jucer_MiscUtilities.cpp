@@ -81,7 +81,7 @@ void setValueIfVoid (Value value, const var& defaultValue)
 StringPairArray parsePreprocessorDefs (const String& text)
 {
     StringPairArray result;
-    String::CharPointerType s (text.getCharPointer());
+    auto s = text.getCharPointer();
 
     while (! s.isEmpty())
     {
@@ -136,8 +136,9 @@ String createGCCPreprocessorFlags (const StringPairArray& defs)
 
     for (int i = 0; i < defs.size(); ++i)
     {
-        String def (defs.getAllKeys()[i]);
-        const String value (defs.getAllValues()[i]);
+        auto def = defs.getAllKeys()[i];
+        auto value = defs.getAllValues()[i];
+
         if (value.isNotEmpty())
             def << "=" << value;
 
