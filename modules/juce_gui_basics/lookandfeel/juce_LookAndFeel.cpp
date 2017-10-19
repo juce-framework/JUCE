@@ -50,6 +50,16 @@ LookAndFeel::LookAndFeel()
 
 LookAndFeel::~LookAndFeel()
 {
+    /* This assertion is triggered if you try to delete a LookAndFeel object while it's
+         - still being used as the default LookAndFeel; or
+         - is set as a Component's current lookandfeel; or
+         - pointed to by a WeakReference somewhere else in the code
+
+       Deleting a LookAndFeel is unlikely to cause a crash since most things will use a
+       safe WeakReference to it, but it could cause some unexpected graphical behaviour,
+       so it's advisable to clear up any references before destroying them!
+    */
+    jassert (masterReference.getNumActiveWeakReferences() == 0);
 }
 
 //==============================================================================
