@@ -196,8 +196,6 @@ AudioProcessorParameterWithID* AudioProcessorValueTreeState::createAndAddParamet
     // All parameters must be created before giving this manager a ValueTree state!
     jassert (! state.isValid());
 
-    const MessageManagerLock mmLock;
-
     Parameter* p = new Parameter (*this, paramID, paramName, labelText, r,
                                   defaultVal, valueToTextFunction, textToValueFunction,
                                   isMetaParameter, isAutomatableParameter,
