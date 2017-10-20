@@ -80,8 +80,6 @@ public:
     }
 
     //==============================================================================
-    bool canLaunchProject() override                          { return false; }
-    bool launchProject() override                             { return false; }
     bool usesMMFiles() const override                         { return false; }
     bool canCopeWithDuplicateFiles() override                 { return false; }
     bool supportsUserDefinedConfigurations() const override   { return false; }
@@ -103,6 +101,28 @@ public:
 
     void addPlatformSpecificSettingsForProjectType (const ProjectType&) override {}
     void initialiseDependencyPathValues() override {}
+
+    //==============================================================================
+    bool canLaunchProject() override
+    {
+       #if JUCE_MAC
+        static Identifier exporterName ("XCODE_MAC");
+       #elif JUCE_WINDOWS
+        static Identifier exporterName ("CODEBLOCKS_WINDOWS");
+       #else
+        static Identifier exporterName;
+       #endif
+
+        if (getProject().getExporters().getChildWithName (exporterName).isValid())
+            return getCLionExecutable().existsAsFile();
+
+        return false;
+    }
+
+    bool launchProject() override
+    {
+        return getCLionExecutable().startAsProcess (getTargetFolder().getFullPathName());
+    }
 
     String getDescription() override
     {
@@ -202,6 +222,22 @@ public:
     }
 
 private:
+    //==============================================================================
+    static File getCLionExecutable()
+    {
+       #if JUCE_MAC
+        return { "/Applications/CLion.app/Contents/MacOS/clion" };
+       #elif JUCE_WINDOWS
+        auto regValue = WindowsRegistry::getValue ("HKEY_LOCAL_MACHINE\\SOFTWARE\\Classes\\Applications\\clion64.exe\\shell\\open\\command\\", {}, {});
+        auto openCmd = StringArray::fromTokens (regValue, true);
+
+        if (! openCmd.isEmpty())
+            return { openCmd[0].unquoted() };
+       #endif
+
+        return {};
+    }
+
     //==============================================================================
     Identifier getExporterEnabledId (const ProjectExporter& exporter) const
     {
