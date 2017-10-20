@@ -418,6 +418,7 @@ protected:
               rtasBinaryLocation           (config, Ids::rtasBinaryLocation,           nullptr, "/Library/Application Support/Digidesign/Plug-Ins/"),
               aaxBinaryLocation            (config, Ids::aaxBinaryLocation,            nullptr, "/Library/Application Support/Avid/Audio/Plug-Ins/")
         {
+            updateOldPluginBinaryLocations();
         }
 
         //==========================================================================
@@ -533,6 +534,15 @@ protected:
             if (project.shouldBuildAAX())
                 props.add (new TextWithDefaultPropertyComponent<String> (aaxBinaryLocation, "AAX Binary location", 1024),
                            "The folder in which the compiled AAX binary should be placed.");
+        }
+
+        void updateOldPluginBinaryLocations()
+        {
+            if (! config ["xcodeVstBinaryLocation"].isVoid())        vstBinaryLocation  = config ["xcodeVstBinaryLocation"];
+            if (! config ["xcodeVst3BinaryLocation"].isVoid())       vst3BinaryLocation = config ["xcodeVst3BinaryLocation"];
+            if (! config ["xcodeAudioUnitBinaryLocation"].isVoid())  auBinaryLocation   = config ["xcodeAudioUnitBinaryLocation"];
+            if (! config ["xcodeRtasBinaryLocation"].isVoid())       rtasBinaryLocation = config ["xcodeRtasBinaryLocation"];
+            if (! config ["xcodeAaxBinaryLocation"].isVoid())        aaxBinaryLocation  = config ["xcodeAaxBinaryLocation"];
         }
     };
 
