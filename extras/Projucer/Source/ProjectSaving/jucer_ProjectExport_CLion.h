@@ -754,16 +754,19 @@ private:
 
                 out << ")" << newLine << newLine;
 
-                String linkerFlags;
+                StringArray linkerFlags;
 
                 if (targetAttributeKeys.contains ("OTHER_LDFLAGS"))
                 {
                     // CMake adds its own SHARED_CODE library linking flags
-                    linkerFlags = targetAttributes["OTHER_LDFLAGS"]
-                                      .unquoted()
-                                      .replace ("-bundle", {})
-                                      .replace ("-l" + binaryName, {})
-                                      .trim();
+                    auto flagsWithReplacedSpaces = targetAttributes["OTHER_LDFLAGS"].unquoted().replace ("\\\\ ", "^^%%^^");
+                    linkerFlags.addTokens (flagsWithReplacedSpaces, true);
+                    linkerFlags.removeString ("-bundle");
+                    linkerFlags.removeString ("-l" + binaryName.replace (" ", "^^%%^^"));
+
+                    for (auto& flag : linkerFlags)
+                        flag = flag.replace ("^^%%^^", " ");
+
                     targetAttributeKeys.removeString ("OTHER_LDFLAGS");
                 }
 
@@ -886,10 +889,10 @@ private:
                     out << "    SHARED_CODE" << newLine;
 
                 for (auto& path : libSearchPaths)
-                    out << "    -L" << path.quoted() << newLine;
+                    out << "    \"-L" << path << "\"" << newLine;
 
-                if (linkerFlags.isNotEmpty())
-                    out << "    " << linkerFlags << newLine;
+                for (auto& flag : linkerFlags)
+                    out << "    " << flag.quoted() << newLine;
 
                 for (auto& framework : target->frameworkNames)
                         out << "    \"-framework " << framework << "\"" << newLine;
