@@ -260,6 +260,11 @@ public:
         setEnabled (value.getValue());
     }
 
+    ~TextPropertyComponentWithEnablement()
+    {
+        value.removeListener (this);
+    }
+
 private:
     Value value;
 
@@ -285,6 +290,11 @@ public:
     {
         value.addListener (this);
         setEnabled (value.getValue());
+    }
+
+    ~ChoicePropertyComponentWithEnablement()
+    {
+        value.removeListener (this);
     }
 
 private:

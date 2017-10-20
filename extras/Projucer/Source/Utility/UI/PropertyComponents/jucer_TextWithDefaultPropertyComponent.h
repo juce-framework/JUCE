@@ -169,3 +169,34 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextWithDefaultPropertyComponent)
 };
+
+
+//==============================================================================
+class TextWithDefaultPropertyComponentWithEnablement : public TextWithDefaultPropertyComponent<String>,
+                                                       private Value::Listener
+{
+public:
+    TextWithDefaultPropertyComponentWithEnablement (CachedValue<String>& valueToControl,
+                                                    const Value& valueToListenTo,
+                                                    const String& propertyName,
+                                                    int maxNumChars)
+        : TextWithDefaultPropertyComponent<String> (valueToControl, propertyName, maxNumChars),
+          value (valueToListenTo)
+    {
+        value.addListener (this);
+        setEnabled (value.getValue());
+    }
+
+    ~TextWithDefaultPropertyComponentWithEnablement()
+    {
+        value.removeListener (this);
+    }
+
+private:
+    Value value;
+
+    void valueChanged (Value& v) override
+    {
+        setEnabled (v.getValue());
+    }
+};

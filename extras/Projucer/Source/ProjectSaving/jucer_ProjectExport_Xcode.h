@@ -412,12 +412,14 @@ protected:
               codeSignIdentity             (config, Ids::codeSigningIdentity,          nullptr, iOS ? "iPhone Developer" : "Mac Developer"),
               fastMathEnabled              (config, Ids::fastMath,                     nullptr),
               stripLocalSymbolsEnabled     (config, Ids::stripLocalSymbols,            nullptr),
+              pluginBinaryCopyStepEnabled  (config, Ids::enablePluginBinaryCopyStep,   nullptr),
               vstBinaryLocation            (config, Ids::vstBinaryLocation,            nullptr, "$(HOME)/Library/Audio/Plug-Ins/VST/"),
               vst3BinaryLocation           (config, Ids::vst3BinaryLocation,           nullptr, "$(HOME)/Library/Audio/Plug-Ins/VST3/"),
               auBinaryLocation             (config, Ids::auBinaryLocation,             nullptr, "$(HOME)/Library/Audio/Plug-Ins/Components/"),
               rtasBinaryLocation           (config, Ids::rtasBinaryLocation,           nullptr, "/Library/Application Support/Digidesign/Plug-Ins/"),
               aaxBinaryLocation            (config, Ids::aaxBinaryLocation,            nullptr, "/Library/Application Support/Avid/Audio/Plug-Ins/")
         {
+            setValueIfVoid (pluginBinaryCopyStepEnabled.getPropertyAsValue(), true);
             updateOldPluginBinaryLocations();
         }
 
@@ -426,7 +428,7 @@ protected:
 
         CachedValue<String> osxSDKVersion, osxDeploymentTarget, iosDeploymentTarget, osxArchitecture,
                             customXcodeFlags, plistPreprocessorDefinitions, cppStandardLibrary, codeSignIdentity;
-        CachedValue<bool>   fastMathEnabled, stripLocalSymbolsEnabled;
+        CachedValue<bool>   fastMathEnabled, stripLocalSymbolsEnabled, pluginBinaryCopyStepEnabled;
         CachedValue<String> vstBinaryLocation, vst3BinaryLocation, auBinaryLocation, rtasBinaryLocation, aaxBinaryLocation;
 
         //==========================================================================
@@ -515,24 +517,37 @@ protected:
         //==========================================================================
         void addXcodePluginInstallPathProperties (PropertyListBuilder& props)
         {
+            auto isBuildingAnyPlugins = (project.shouldBuildVST() || project.shouldBuildVST3() || project.shouldBuildAU()
+                                         || project.shouldBuildRTAS() || project.shouldBuildAAX());
+
+            if (isBuildingAnyPlugins)
+                props.add (new BooleanPropertyComponent (pluginBinaryCopyStepEnabled.getPropertyAsValue(),
+                                                         "Enable Plugin Copy Step", "Enabled"),
+                           "Enable this to copy plugin binaries to the specified folder after building.");
+
             if (project.shouldBuildVST())
-                props.add (new TextWithDefaultPropertyComponent<String> (vstBinaryLocation, "VST Binary location", 1024),
+                props.add (new TextWithDefaultPropertyComponentWithEnablement (vstBinaryLocation, pluginBinaryCopyStepEnabled.getPropertyAsValue(),
+                                                                               "VST Binary Location", 1024),
                            "The folder in which the compiled VST binary should be placed.");
 
             if (project.shouldBuildVST3())
-                props.add (new TextWithDefaultPropertyComponent<String> (vst3BinaryLocation, "VST3 Binary location", 1024),
+                props.add (new TextWithDefaultPropertyComponentWithEnablement (vst3BinaryLocation, pluginBinaryCopyStepEnabled.getPropertyAsValue(),
+                                                                         "VST3 Binary Location", 1024),
                            "The folder in which the compiled VST3 binary should be placed.");
 
             if (project.shouldBuildAU())
-                props.add (new TextWithDefaultPropertyComponent<String> (auBinaryLocation, "AU Binary location", 1024),
+                props.add (new TextWithDefaultPropertyComponentWithEnablement (auBinaryLocation, pluginBinaryCopyStepEnabled.getPropertyAsValue(),
+                                                                         "AU Binary Location", 1024),
                            "The folder in which the compiled AU binary should be placed.");
 
             if (project.shouldBuildRTAS())
-                props.add (new TextWithDefaultPropertyComponent<String> (rtasBinaryLocation, "RTAS Binary location", 1024),
+                props.add (new TextWithDefaultPropertyComponentWithEnablement (rtasBinaryLocation, pluginBinaryCopyStepEnabled.getPropertyAsValue(),
+                                                                         "RTAS Binary Location", 1024),
                            "The folder in which the compiled RTAS binary should be placed.");
 
             if (project.shouldBuildAAX())
-                props.add (new TextWithDefaultPropertyComponent<String> (aaxBinaryLocation, "AAX Binary location", 1024),
+                props.add (new TextWithDefaultPropertyComponentWithEnablement (aaxBinaryLocation, pluginBinaryCopyStepEnabled.getPropertyAsValue(),
+                                                                         "AAX Binary Location", 1024),
                            "The folder in which the compiled AAX binary should be placed.");
         }
 
@@ -1154,11 +1169,11 @@ public:
             {
                 case GUIApp:            return "$(HOME)/Applications";
                 case ConsoleApp:        return "/usr/bin";
-                case VSTPlugIn:         return config.vstBinaryLocation.get();
-                case VST3PlugIn:        return config.vst3BinaryLocation.get();
-                case AudioUnitPlugIn:   return config.auBinaryLocation.get();
-                case RTASPlugIn:        return config.rtasBinaryLocation.get();
-                case AAXPlugIn:         return config.aaxBinaryLocation.get();
+                case VSTPlugIn:         return config.pluginBinaryCopyStepEnabled.get() ? config.vstBinaryLocation.get() : String();
+                case VST3PlugIn:        return config.pluginBinaryCopyStepEnabled.get() ? config.vst3BinaryLocation.get() : String();
+                case AudioUnitPlugIn:   return config.pluginBinaryCopyStepEnabled.get() ? config.auBinaryLocation.get() : String();
+                case RTASPlugIn:        return config.pluginBinaryCopyStepEnabled.get() ? config.rtasBinaryLocation.get() : String();
+                case AAXPlugIn:         return config.pluginBinaryCopyStepEnabled.get() ? config.aaxBinaryLocation.get() : String();
                 case SharedCodeTarget:  return owner.isiOS() ? "@executable_path/Frameworks" : "@executable_path/../Frameworks";
                 default:                return {};
             }

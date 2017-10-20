@@ -161,6 +161,7 @@ public:
             setValueIfVoid (shouldGenerateManifestValue(), true);
             setValueIfVoid (getArchitectureType(), get64BitArchName());
             setValueIfVoid (getDebugInformationFormatValue(), isDebug() ? "ProgramDatabase" : "None");
+            setValueIfVoid (getPluginBinaryCopyStepEnabledValue(), false);
 
             if (! isDebug())
                 updateOldLTOSetting();
@@ -168,46 +169,50 @@ public:
             initialisePluginCachedValues();
         }
 
-        Value getWarningLevelValue()                { return getValue (Ids::winWarningLevel); }
-        int getWarningLevel() const                 { return config [Ids::winWarningLevel]; }
+        Value getWarningLevelValue()                      { return getValue (Ids::winWarningLevel); }
+        int getWarningLevel() const                       { return config [Ids::winWarningLevel]; }
 
-        Value getWarningsTreatedAsErrors()          { return getValue (Ids::warningsAreErrors); }
-        bool areWarningsTreatedAsErrors() const     { return config [Ids::warningsAreErrors]; }
+        Value getWarningsTreatedAsErrors()                { return getValue (Ids::warningsAreErrors); }
+        bool areWarningsTreatedAsErrors() const           { return config [Ids::warningsAreErrors]; }
 
-        Value getPrebuildCommand()                  { return getValue (Ids::prebuildCommand); }
-        String getPrebuildCommandString() const     { return config [Ids::prebuildCommand]; }
-        Value getPostbuildCommand()                 { return getValue (Ids::postbuildCommand); }
-        String getPostbuildCommandString() const    { return config [Ids::postbuildCommand]; }
+        Value getPrebuildCommand()                        { return getValue (Ids::prebuildCommand); }
+        String getPrebuildCommandString() const           { return config [Ids::prebuildCommand]; }
 
-        Value shouldGenerateDebugSymbolsValue()     { return getValue (Ids::alwaysGenerateDebugSymbols); }
-        bool shouldGenerateDebugSymbols() const     { return config [Ids::alwaysGenerateDebugSymbols]; }
+        Value getPostbuildCommand()                       { return getValue (Ids::postbuildCommand); }
+        String getPostbuildCommandString() const          { return config [Ids::postbuildCommand]; }
 
-        Value shouldGenerateManifestValue()         { return getValue (Ids::generateManifest); }
-        bool shouldGenerateManifest() const         { return config [Ids::generateManifest]; }
+        Value shouldGenerateDebugSymbolsValue()           { return getValue (Ids::alwaysGenerateDebugSymbols); }
+        bool shouldGenerateDebugSymbols() const           { return config [Ids::alwaysGenerateDebugSymbols]; }
 
-        Value shouldLinkIncrementalValue()          { return getValue (Ids::enableIncrementalLinking); }
-        bool shouldLinkIncremental() const          { return config [Ids::enableIncrementalLinking]; }
+        Value shouldGenerateManifestValue()               { return getValue (Ids::generateManifest); }
+        bool shouldGenerateManifest() const               { return config [Ids::generateManifest]; }
 
-        Value getUsingRuntimeLibDLL()               { return getValue (Ids::useRuntimeLibDLL); }
-        bool isUsingRuntimeLibDLL() const           { return config [Ids::useRuntimeLibDLL]; }
+        Value shouldLinkIncrementalValue()                { return getValue (Ids::enableIncrementalLinking); }
+        bool shouldLinkIncremental() const                { return config [Ids::enableIncrementalLinking]; }
 
-        String getIntermediatesPath() const         { return config [Ids::intermediatesPath].toString(); }
-        Value getIntermediatesPathValue()           { return getValue (Ids::intermediatesPath); }
+        Value getUsingRuntimeLibDLL()                     { return getValue (Ids::useRuntimeLibDLL); }
+        bool isUsingRuntimeLibDLL() const                 { return config [Ids::useRuntimeLibDLL]; }
 
-        String getCharacterSet() const              { return config [Ids::characterSet].toString(); }
-        Value getCharacterSetValue()                { return getValue (Ids::characterSet); }
+        Value getIntermediatesPathValue()                 { return getValue (Ids::intermediatesPath); }
+        String getIntermediatesPath() const               { return config [Ids::intermediatesPath].toString(); }
 
-        Value getArchitectureType()                 { return getValue (Ids::winArchitecture); }
-        bool is64Bit() const                        { return config [Ids::winArchitecture].toString() == get64BitArchName(); }
+        Value getCharacterSetValue()                      { return getValue (Ids::characterSet); }
+        String getCharacterSet() const                    { return config [Ids::characterSet].toString(); }
 
-        Value getFastMathValue()                    { return getValue (Ids::fastMath); }
-        bool isFastMathEnabled() const              { return config [Ids::fastMath]; }
+        Value getArchitectureType()                       { return getValue (Ids::winArchitecture); }
+        bool is64Bit() const                              { return config [Ids::winArchitecture].toString() == get64BitArchName(); }
 
-        String get64BitArchName() const             { return "x64"; }
-        String get32BitArchName() const             { return "Win32"; }
+        Value getFastMathValue()                          { return getValue (Ids::fastMath); }
+        bool isFastMathEnabled() const                    { return config [Ids::fastMath]; }
+
+        String get64BitArchName() const                   { return "x64"; }
+        String get32BitArchName() const                   { return "Win32"; }
 
         Value getDebugInformationFormatValue()            { return getValue (Ids::debugInformationFormat); }
         String getDebugInformationFormatString() const    { return config [Ids::debugInformationFormat]; }
+
+        Value getPluginBinaryCopyStepEnabledValue()       { return getValue (Ids::enablePluginBinaryCopyStep); }
+        bool isPluginBinaryCopyStepEnabled() const        { return config [Ids::enablePluginBinaryCopyStep]; }
 
         String createMSVCConfigName() const
         {
@@ -331,20 +336,31 @@ public:
 
         void addVisualStudioPluginInstallPathProperties (PropertyListBuilder& props)
         {
+            auto isBuildingAnyPlugins = (project.shouldBuildVST() || project.shouldBuildVST3()
+                                            || project.shouldBuildRTAS() || project.shouldBuildAAX());
+
+            if (isBuildingAnyPlugins)
+                props.add (new BooleanPropertyComponent (getPluginBinaryCopyStepEnabledValue(), "Enable Plugin Copy Step", "Enabled"),
+                           "Enable this to copy plugin binaries to a specified folder after building.");
+
             if (project.shouldBuildVST())
-                props.add (new TextWithDefaultPropertyComponent<String> (vstBinaryLocation, "VST Binary location", 1024),
+                props.add (new TextWithDefaultPropertyComponentWithEnablement (vstBinaryLocation, getPluginBinaryCopyStepEnabledValue(),
+                                                                               "VST Binary Location", 1024),
                            "The folder in which the compiled VST binary should be placed.");
 
             if (project.shouldBuildVST3())
-                props.add (new TextWithDefaultPropertyComponent<String> (vst3BinaryLocation, "VST3 Binary location", 1024),
+                props.add (new TextWithDefaultPropertyComponentWithEnablement (vst3BinaryLocation, getPluginBinaryCopyStepEnabledValue(),
+                                                                              "VST3 Binary Location", 1024),
                            "The folder in which the compiled VST3 binary should be placed.");
 
             if (project.shouldBuildRTAS())
-                props.add (new TextWithDefaultPropertyComponent<String> (rtasBinaryLocation, "RTAS Binary location", 1024),
+                props.add (new TextWithDefaultPropertyComponentWithEnablement (rtasBinaryLocation, getPluginBinaryCopyStepEnabledValue(),
+                                                                              "RTAS Binary Location", 1024),
                            "The folder in which the compiled RTAS binary should be placed.");
 
             if (project.shouldBuildAAX())
-                props.add (new TextWithDefaultPropertyComponent<String> (aaxBinaryLocation, "AAX Binary location", 1024),
+                props.add (new TextWithDefaultPropertyComponentWithEnablement (aaxBinaryLocation, getPluginBinaryCopyStepEnabledValue(),
+                                                                               "AAX Binary Location", 1024),
                            "The folder in which the compiled AAX binary should be placed.");
         }
 
@@ -1073,10 +1089,13 @@ public:
                 auto pkgScript = String ("copy /Y ") + getOutputFilePath (config).quoted() + String (" ") + executable.quoted() + String ("\r\ncall ")
                                      + createRebasedPath (bundleScript) + String (" ") + macOSDir.quoted() + String (" ") + createRebasedPath (iconFilePath);
 
-                return pkgScript + "\r\n" + String ("xcopy ") + bundleDir.quoted() + " "
-                           + String (config.aaxBinaryLocation.get() + "\\" + outputFilename + "\\").quoted() + " /E /Y";
+                if (config.isPluginBinaryCopyStepEnabled())
+                    return pkgScript + "\r\n" + String ("xcopy ") + bundleDir.quoted() + " "
+                               + String (config.aaxBinaryLocation.get() + "\\" + outputFilename + "\\").quoted() + " /E /Y";
+
+                return pkgScript;
             }
-            else
+            else if (config.isPluginBinaryCopyStepEnabled())
             {
                 auto copyScript = String ("copy /Y \"$(OutDir)$(TargetFileName)\"") + String (" \"$COPYDIR$\\$(TargetFileName)\"");
 
