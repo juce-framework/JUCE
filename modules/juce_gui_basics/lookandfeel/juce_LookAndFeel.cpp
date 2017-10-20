@@ -60,7 +60,8 @@ LookAndFeel::~LookAndFeel()
        so it's advisable to clear up any references before destroying them!
     */
     jassert (masterReference.getNumActiveWeakReferences() == 0
-              || masterReference.getNumActiveWeakReferences() == 1 && this == &getDefaultLookAndFeel());
+              || (masterReference.getNumActiveWeakReferences() == 1
+                   && this == &getDefaultLookAndFeel()));
 }
 
 //==============================================================================
