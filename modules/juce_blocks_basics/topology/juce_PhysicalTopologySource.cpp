@@ -2011,7 +2011,7 @@ struct PhysicalTopologySource::Internal
         void timerCallback() override
         {
             // Find touches that seem to have become stuck, and fake a touch-end for them..
-            static const uint32 touchTimeOutMs = 40;
+            static const uint32 touchTimeOutMs = 500;
 
             for (auto& t : touches)
             {
