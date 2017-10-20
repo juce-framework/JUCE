@@ -743,12 +743,18 @@ struct VSTPluginInstance     : public AudioPluginInstance,
     //==============================================================================
     void prepareToPlay (double rate, int samplesPerBlockExpected) override
     {
+        auto numInputBuses  = getBusCount (true);
+        auto numOutputBuses = getBusCount (false);
+
         setRateAndBufferSizeDetails (rate, samplesPerBlockExpected);
 
-        SpeakerMappings::VstSpeakerConfigurationHolder inArr  (getChannelLayoutOfBus (true,  0));
-        SpeakerMappings::VstSpeakerConfigurationHolder outArr (getChannelLayoutOfBus (false, 0));
+        if (numInputBuses <= 1 && numOutputBuses <= 1)
+        {
+            SpeakerMappings::VstSpeakerConfigurationHolder inArr  (getChannelLayoutOfBus (true,  0));
+            SpeakerMappings::VstSpeakerConfigurationHolder outArr (getChannelLayoutOfBus (false, 0));
 
-        dispatch (plugInOpcodeSetSpeakerConfiguration, 0, (pointer_sized_int) &inArr.get(), (void*) &outArr.get(), 0.0f);
+            dispatch (plugInOpcodeSetSpeakerConfiguration, 0, (pointer_sized_int) &inArr.get(), (void*) &outArr.get(), 0.0f);
+        }
 
         vstHostTime.tempoBPM = 120.0;
         vstHostTime.timeSignatureNumerator = 4;
