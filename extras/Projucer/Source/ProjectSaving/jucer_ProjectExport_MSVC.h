@@ -1929,7 +1929,7 @@ public:
     String getSolutionComment() const override                       { return "# Visual Studio 2017"; }
     String getToolsVersion() const override                          { return "15.0"; }
     String getDefaultToolset() const override                        { return "v141"; }
-    String getDefaultWindowsTargetPlatformVersion() const override   { return "10.0.15063.0"; }
+    String getDefaultWindowsTargetPlatformVersion() const override   { return "10.0.16299.0"; }
 
     static MSVCProjectExporterVC2017* createForSettings (Project& project, const ValueTree& settings)
     {
