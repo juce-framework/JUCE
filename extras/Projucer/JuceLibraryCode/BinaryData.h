@@ -153,7 +153,7 @@ namespace BinaryData
     const int            offlinepage_htmlSize = 1155;
 
     extern const char*   projucer_EULA_txt;
-    const int            projucer_EULA_txtSize = 14394;
+    const int            projucer_EULA_txtSize = 14361;
 
     extern const char*   RecentFilesMenuTemplate_nib;
     const int            RecentFilesMenuTemplate_nibSize = 2842;

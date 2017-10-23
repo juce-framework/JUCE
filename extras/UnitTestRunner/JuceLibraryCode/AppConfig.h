@@ -48,6 +48,7 @@
 #define JUCE_USE_DARK_SPLASH_SCREEN 1
 
 //==============================================================================
+#define JUCE_MODULE_AVAILABLE_juce_analytics              1
 #define JUCE_MODULE_AVAILABLE_juce_audio_basics           1
 #define JUCE_MODULE_AVAILABLE_juce_audio_devices          1
 #define JUCE_MODULE_AVAILABLE_juce_audio_formats          1
