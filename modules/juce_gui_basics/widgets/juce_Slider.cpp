@@ -980,6 +980,11 @@ public:
         {
             popupDisplay = new PopupDisplayComponent (owner);
 
+            if (parentForPopupDisplay != nullptr)
+                parentForPopupDisplay->addChildComponent (popupDisplay);
+            else
+                popupDisplay->addToDesktop (ComponentPeer::windowIsTemporary);
+
             if (style == SliderStyle::TwoValueHorizontal
                 || style == SliderStyle::TwoValueVertical)
             {
@@ -990,11 +995,6 @@ public:
             {
                 updatePopupDisplay (getValue());
             }
-
-            if (parentForPopupDisplay != nullptr)
-                parentForPopupDisplay->addChildComponent (popupDisplay);
-            else
-                popupDisplay->addToDesktop (ComponentPeer::windowIsTemporary);
 
             popupDisplay->setVisible (true);
         }
