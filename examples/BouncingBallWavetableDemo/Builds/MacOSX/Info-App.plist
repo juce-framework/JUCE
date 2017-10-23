@@ -8,7 +8,7 @@
     <key>CFBundleIconFile</key>
     <string></string>
     <key>CFBundleIdentifier</key>
-    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <string>com.juce.BouncingBallWavetableDemo</string>
     <key>CFBundleName</key>
     <string>BouncingBallWavetableDemo</string>
     <key>CFBundleDisplayName</key>

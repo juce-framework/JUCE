@@ -14,10 +14,10 @@
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Projucer"
                        osxSDK="default" osxCompatibility="10.9 SDK" osxArchitecture="default"
-                       headerPath="" libraryPath="" cppLibType="libc++"/>
+                       headerPath="" libraryPath="" cppLibType="libc++" enablePluginBinaryCopyStep="1"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Projucer"
                        osxSDK="default" osxCompatibility="10.7 SDK" osxArchitecture="default"
-                       headerPath="" libraryPath="" cppLibType="libc++"/>
+                       headerPath="" libraryPath="" cppLibType="libc++" enablePluginBinaryCopyStep="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -35,11 +35,11 @@
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="1" optimisation="1" targetName="Projucer" headerPath=""
                        libraryPath="" defines="" useRuntimeLibDLL="1" wholeProgramOptimisation="1"
-                       debugInformationFormat="ProgramDatabase"/>
+                       debugInformationFormat="ProgramDatabase" enablePluginBinaryCopyStep="0"/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="0" optimisation="3" targetName="Projucer" headerPath=""
                        libraryPath="" useRuntimeLibDLL="0" debugInformationFormat="None"
-                       linkTimeOptimisation="1"/>
+                       linkTimeOptimisation="1" enablePluginBinaryCopyStep="0"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -56,11 +56,12 @@
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="1" optimisation="1" targetName="Projucer" headerPath=""
-                       libraryPath="" useRuntimeLibDLL="1" debugInformationFormat="ProgramDatabase"/>
+                       libraryPath="" useRuntimeLibDLL="1" debugInformationFormat="ProgramDatabase"
+                       enablePluginBinaryCopyStep="0"/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="0" optimisation="3" targetName="Projucer" headerPath=""
                        libraryPath="" useRuntimeLibDLL="0" debugInformationFormat="None"
-                       linkTimeOptimisation="1"/>
+                       linkTimeOptimisation="1" enablePluginBinaryCopyStep="0"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -75,10 +76,11 @@
     <VS2017 targetFolder="Builds/VisualStudio2017" bigIcon="rv1F4h" windowsTargetPlatformVersion="10.0.15063.0">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="Projucer" debugInformationFormat="ProgramDatabase"/>
+                       isDebug="1" optimisation="1" targetName="Projucer" debugInformationFormat="ProgramDatabase"
+                       enablePluginBinaryCopyStep="0"/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="0" optimisation="3" targetName="Projucer" debugInformationFormat="None"
-                       linkTimeOptimisation="1"/>
+                       linkTimeOptimisation="1" enablePluginBinaryCopyStep="0"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>

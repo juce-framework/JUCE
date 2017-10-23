@@ -3,7 +3,8 @@
 <JUCERPROJECT id="SS6MsF" name="PushNotificationsDemo" displaySplashScreen="0"
               reportAppUsage="0" splashScreenColour="Dark" projectType="guiapp"
               version="1.0.0" bundleIdentifier="com.juce.pushnotificationsdemo"
-              includeBinaryInAppConfig="1" cppLanguageStandard="11" jucerVersion="5.1.2">
+              includeBinaryInAppConfig="1" cppLanguageStandard="11" jucerVersion="5.1.2"
+              companyCopyright="">
   <MAINGROUP id="VaJRhp" name="PushNotificationsDemo">
     <GROUP id="{712B2C90-FAC6-CCF3-F8F9-ED82411AF5ED}" name="BinaryResources">
       <GROUP id="{DBF05B65-21C4-E232-D005-149CC3FD4CD6}" name="images">
@@ -55,7 +56,8 @@
   <EXPORTFORMATS>
     <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="portraitlandscape"
                   iosPushNotifications="1" extraCompilerFlags="-pedantic -Werror -Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion&#10;-F../../../../3rd_party/FacebookSDKs-iOS-4&#10;-F../../../../3rd_party/Firebase_ios_sdk/Analytics&#10;-F../../../../3rd_party/Firebase_ios_sdk/Messaging"
-                  customXcodeResourceFolders="./BinaryResources/sounds">
+                  customXcodeResourceFolders="./BinaryResources/sounds" iPadScreenOrientation="portraitlandscape"
+                  iosDeviceFamily="1,2">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="PushNotificationsDemo"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="PushNotificationsDemo"/>
