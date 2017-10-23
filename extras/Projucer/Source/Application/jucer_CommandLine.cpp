@@ -92,7 +92,7 @@ namespace
     {
         Array<File> files;
 
-        for (DirectoryIterator di (folder, true, "*.cpp;*.cxx;*.cc;*.c;*.h;*.hpp;*.hxx;*.hpp;*.mm;*.m", File::findFiles); di.next();)
+        for (DirectoryIterator di (folder, true, "*.cpp;*.cxx;*.cc;*.c;*.h;*.hpp;*.hxx;*.hpp;*.mm;*.m;*.java;", File::findFiles); di.next();)
             if (! di.getFile().isSymbolicLink())
                 files.add (di.getFile());
 

@@ -1068,20 +1068,10 @@ private:
 
             for (const auto& file : files)
             {
-                auto javaSourceLines = StringArray::fromLines (file.loadFileAsString());
-
-                {
-                    MemoryOutputStream newFile;
-
-                    for (const auto& line : javaSourceLines)
-                        newFile << line.replace ("package com.juce;", "package " + package + ";") << newLine;
-
-                    javaSourceLines = StringArray::fromLines (newFile.toString());
-                }
-
+                auto newContent = file.loadFileAsString()
+                                      .replace ("package com.juce;", "package " + package + ";");
                 auto targetFile = targetFolder.getChildFile (file.getFileName());
-
-                overwriteFileIfDifferentOrThrow (targetFile, javaSourceLines.joinIntoString (newLine));
+                overwriteFileIfDifferentOrThrow (targetFile, newContent);
             }
         }
     }
@@ -1338,7 +1328,6 @@ private:
     StringArray getProjectCxxCompilerFlags() const
     {
         StringArray cxxFlags (getAndroidCxxCompilerFlags());
-
         cxxFlags.addArray (getEscapedFlags (StringArray::fromTokens (getExtraCompilerFlagsString(), true)));
         return cxxFlags;
     }

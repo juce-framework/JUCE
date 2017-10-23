@@ -59,8 +59,10 @@
                   customXcodeResourceFolders="./BinaryResources/sounds" iPadScreenOrientation="portraitlandscape"
                   iosDeviceFamily="1,2">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="PushNotificationsDemo"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="PushNotificationsDemo"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="PushNotificationsDemo"
+                       enablePluginBinaryCopyStep="1"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="PushNotificationsDemo"
+                       enablePluginBinaryCopyStep="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../Repos/roli-software/JUCE/modules"/>
@@ -104,8 +106,10 @@
     </ANDROIDSTUDIO>
     <XCODE_MAC targetFolder="Builds/MacOSX">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="PushNotificationsDemo"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="PushNotificationsDemo"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="PushNotificationsDemo"
+                       enablePluginBinaryCopyStep="1"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="PushNotificationsDemo"
+                       enablePluginBinaryCopyStep="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_opengl" path="../Repos/roli-software/JUCE/modules"/>
@@ -125,9 +129,11 @@
     <VS2015 targetFolder="Builds/VisualStudio2015">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="PushNotificationsDemo"/>
+                       isDebug="1" optimisation="1" targetName="PushNotificationsDemo"
+                       debugInformationFormat="ProgramDatabase" enablePluginBinaryCopyStep="0"/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="PushNotificationsDemo"/>
+                       isDebug="0" optimisation="3" targetName="PushNotificationsDemo"
+                       linkTimeOptimisation="1" debugInformationFormat="None" enablePluginBinaryCopyStep="0"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_opengl" path="../Repos/roli-software/JUCE/modules"/>
