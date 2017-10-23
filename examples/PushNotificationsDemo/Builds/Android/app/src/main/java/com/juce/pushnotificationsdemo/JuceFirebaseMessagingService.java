@@ -33,4 +33,3 @@ public final class JuceFirebaseMessagingService extends FirebaseMessagingService
         firebaseRemoteMessageSendError (messageId, e.toString());
     }
 }
-

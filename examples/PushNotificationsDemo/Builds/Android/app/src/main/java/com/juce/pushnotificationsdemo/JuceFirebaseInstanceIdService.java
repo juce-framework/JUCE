@@ -14,4 +14,3 @@ public final class JuceFirebaseInstanceIdService extends FirebaseInstanceIdServi
         firebaseInstanceIdTokenRefreshed (token);
     }
 }
-
