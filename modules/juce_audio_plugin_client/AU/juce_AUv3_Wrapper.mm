@@ -692,7 +692,19 @@ public:
     //==============================================================================
     AUInternalRenderBlock getInternalRenderBlock() override   { return internalRenderBlock;  }
     bool getRenderingOffline() override                       { return getAudioProcessor().isNonRealtime(); }
-    void setRenderingOffline (bool offline) override          { getAudioProcessor().setNonRealtime (offline); }
+    void setRenderingOffline (bool offline) override
+    {
+        auto& processor = getAudioProcessor();
+        auto isCurrentlyNonRealtime = processor.isNonRealtime();
+
+        if (isCurrentlyNonRealtime != offline)
+        {
+            ScopedLock callbackLock (processor.getCallbackLock());
+
+            processor.setNonRealtime (offline);
+            processor.prepareToPlay (processor.getSampleRate(), processor.getBlockSize());
+        }
+    }
 
     //==============================================================================
     NSString* getContextName() const    override              { return juceStringToNS (contextName); }
