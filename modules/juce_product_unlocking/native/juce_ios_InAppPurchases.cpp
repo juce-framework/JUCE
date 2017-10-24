@@ -588,12 +588,14 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
                             {
                                 if (auto productId = getAs<NSString> (purchaseData[nsStringLiteral ("product_id")]))
                                 {
-                                    if (auto purchaseTime = getAs<NSNumber> (purchaseData[nsStringLiteral ("purchase_date_ms")]))
+                                    auto purchaseTime = getPurchaseDateMs (purchaseData[nsStringLiteral ("purchase_date_ms")]);
+
+                                    if (purchaseTime > 0)
                                     {
                                         purchases.add ({ { nsStringToJuce (transactionId),
                                                            nsStringToJuce (productId),
                                                            nsStringToJuce (bundleId),
-                                                           Time ([purchaseTime integerValue]).toString (true, true, true, true),
+                                                           Time (purchaseTime).toString (true, true, true, true),
                                                            {} }, {} });
                                     }
                                     else
@@ -623,6 +625,26 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
     {
         MessageManager::callAsync ([this]() { owner.listeners.call (&Listener::purchasesListRestored,
                                                                     {}, false, NEEDS_TRANS ("Receipt fetch failed")); });
+    }
+
+    static int64 getPurchaseDateMs (id date)
+    {
+        if (auto dateAsNumber = getAs<NSNumber> (date))
+        {
+            return [dateAsNumber longLongValue];
+        }
+        else if (auto dateAsString = getAs<NSString> (date))
+        {
+            auto* formatter = [[NSNumberFormatter alloc] init];
+            [formatter setNumberStyle: NSNumberFormatterDecimalStyle];
+            dateAsNumber = [formatter numberFromString: dateAsString];
+            [formatter release];
+            return [dateAsNumber longLongValue];
+        }
+        else
+        {
+            return -1;
+        }
     }
 
     //==============================================================================
