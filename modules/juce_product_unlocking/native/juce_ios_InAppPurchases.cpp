@@ -663,10 +663,8 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
             [formatter release];
             return [dateAsNumber longLongValue];
         }
-        else
-        {
-            return -1;
-        }
+
+        return -1;
     }
 
     //==============================================================================
