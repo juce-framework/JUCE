@@ -44,6 +44,7 @@ struct SKDelegateAndPaymentObserver
 
     virtual void didReceiveResponse (SKProductsRequest*, SKProductsResponse*) = 0;
     virtual void requestDidFinish (SKRequest*) = 0;
+    virtual void requestDidFailWithError (SKRequest*, NSError*) = 0;
     virtual void updatedTransactions (SKPaymentQueue*, NSArray<SKPaymentTransaction*>*) = 0;
     virtual void restoreCompletedTransactionsFailedWithError (SKPaymentQueue*, NSError*) = 0;
     virtual void restoreCompletedTransactionsFinished (SKPaymentQueue*) = 0;
@@ -62,6 +63,7 @@ private:
 
             addMethod (@selector (productsRequest:didReceiveResponse:),                       didReceiveResponse,                          "v@:@@");
             addMethod (@selector (requestDidFinish:),                                         requestDidFinish,                            "v@:@");
+            addMethod (@selector (request:didFailWithError:),                                 requestDidFailWithError,                     "v@:@@");
             addMethod (@selector (paymentQueue:updatedTransactions:),                         updatedTransactions,                         "v@:@@");
             addMethod (@selector (paymentQueue:restoreCompletedTransactionsFailedWithError:), restoreCompletedTransactionsFailedWithError, "v@:@@");
             addMethod (@selector (paymentQueueRestoreCompletedTransactionsFinished:),         restoreCompletedTransactionsFinished,        "v@:@");
@@ -77,6 +79,7 @@ private:
         //==============================================================================
         static void didReceiveResponse (id self, SEL, SKProductsRequest* request, SKProductsResponse* response)      { getThis (self).didReceiveResponse (request, response); }
         static void requestDidFinish (id self, SEL, SKRequest* request)                                              { getThis (self).requestDidFinish (request); }
+        static void requestDidFailWithError (id self, SEL, SKRequest* request, NSError* err)                         { getThis (self).requestDidFailWithError (request, err); }
         static void updatedTransactions (id self, SEL, SKPaymentQueue* queue, NSArray<SKPaymentTransaction*>* trans) { getThis (self).updatedTransactions (queue, trans); }
         static void restoreCompletedTransactionsFailedWithError (id self, SEL, SKPaymentQueue* q, NSError* err)      { getThis (self).restoreCompletedTransactionsFailedWithError (q, err); }
         static void restoreCompletedTransactionsFinished (id self, SEL, SKPaymentQueue* queue)                       { getThis (self).restoreCompletedTransactionsFinished (queue); }
@@ -279,6 +282,25 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
                 if (pendingRequest.request == receiptRefreshRequest)
                 {
                     processReceiptRefreshResponseWithSubscriptionsSharedSecret (pendingRequest.subscriptionsSharedSecret);
+                    pendingReceiptRefreshRequests.remove (i);
+                    return;
+                }
+            }
+        }
+    }
+
+    void requestDidFailWithError (SKRequest* request, NSError* error) override
+    {
+        if (auto receiptRefreshRequest = getAs<SKReceiptRefreshRequest> (request))
+        {
+            for (auto i = 0; i < pendingReceiptRefreshRequests.size(); ++i)
+            {
+                auto& pendingRequest = *pendingReceiptRefreshRequests[i];
+
+                if (pendingRequest.request == receiptRefreshRequest)
+                {
+                    auto errorDetails = error != nil ? (", " + nsStringToJuce ([error localizedDescription])) : String ("");
+                    owner.listeners.call (&Listener::purchasesListRestored, {}, false, NEEDS_TRANS ("Receipt fetch failed") + errorDetails);
                     pendingReceiptRefreshRequests.remove (i);
                     return;
                 }
