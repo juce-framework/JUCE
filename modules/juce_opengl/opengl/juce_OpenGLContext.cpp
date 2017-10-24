@@ -836,6 +836,11 @@ void OpenGLContext::setPixelFormat (const OpenGLPixelFormat& preferredPixelForma
     openGLPixelFormat = preferredPixelFormat;
 }
 
+void OpenGLContext::setTextureMagnificationFilter (OpenGLContext::TextureMagnificationFilter magFilterMode) noexcept
+{
+    texMagFilter = magFilterMode;
+}
+
 void OpenGLContext::setNativeSharedContext (void* nativeContextToShareWith) noexcept
 {
     // This method must not be called when the context has already been attached!
