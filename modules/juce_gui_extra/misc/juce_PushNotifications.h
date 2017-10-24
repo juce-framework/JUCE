@@ -140,7 +140,7 @@ public:
         /**@{*/
 
         String category;                /**< Required: determines set of actions that will appear (as per setup done
-                                             in initializeWithSettings()). */
+                                             in requestPermissionsWithSettings()). */
         double triggerIntervalSec = 0.; /**< Optional: specifies number of seconds before the notification should trigger. */
         bool   repeat = false;          /**< Optional: allows the notification to continuously retrigger after
                                              triggerIntervalSec seconds. Available from iOS 10. */
@@ -389,7 +389,7 @@ public:
         Array<Category> categories;   /**< list of categories the app wants to support */
     };
 
-    /** Initializes push notifications on current device with the settings provided.
+    /** Initialises push notifications on current device with the settings provided.
         Call this on your application startup and on iOS the first time the application starts,
         a user will be presented with a permission request dialog to give push notifications permission.
         Once a user responds, Listener::notificationSettingsReceived() will be called so that
