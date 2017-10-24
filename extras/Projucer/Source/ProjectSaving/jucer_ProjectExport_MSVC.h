@@ -160,7 +160,7 @@ public:
 
             setValueIfVoid (shouldGenerateManifestValue(), true);
             setValueIfVoid (getArchitectureType(), get64BitArchName());
-            setValueIfVoid (getDebugInformationFormatValue(), isDebug() ? "ProgramDatabase" : "None");
+            setValueIfVoid (getDebugInformationFormatValue(), "ProgramDatabase");
             setValueIfVoid (getPluginBinaryCopyStepEnabledValue(), false);
 
             if (! isDebug())
