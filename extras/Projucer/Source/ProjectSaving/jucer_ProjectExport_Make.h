@@ -556,8 +556,8 @@ private:
         libraries.addTokens (getExternalLibrariesString(), ";", "\"'");
         libraries.removeEmptyStrings();
 
-        if (libraries.size() != 0)
-            result.add (replacePreprocessorTokens (config, libraries.joinIntoString (" ")).trim());
+        for (auto& lib : libraries)
+            result.add (replacePreprocessorTokens (config, lib).trim());
 
         return result;
     }
