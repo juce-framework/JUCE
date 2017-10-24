@@ -3147,6 +3147,7 @@ AudioFormatWriter* MP3AudioFormat::createWriterFor (OutputStream*, double /*samp
                                                     unsigned int /*numberOfChannels*/, int /*bitsPerSample*/,
                                                     const StringPairArray& /*metadataValues*/, int /*qualityOptionIndex*/)
 {
+    jassertfalse; // not yet implemented!
     return nullptr;
 }
 
