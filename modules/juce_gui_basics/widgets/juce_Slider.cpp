@@ -841,7 +841,9 @@ public:
                 if (showPopupOnDrag || showPopupOnHover)
                 {
                     showPopupDisplay();
-                    popupDisplay->stopTimer();
+
+                    if (popupDisplay != nullptr)
+                        popupDisplay->stopTimer();
                 }
 
                 currentDrag = new DragInProgress (*this);
@@ -951,7 +953,12 @@ public:
         auto isTwoValue   = (style == TwoValueHorizontal   || style == TwoValueVertical);
         auto isThreeValue = (style == ThreeValueHorizontal || style == ThreeValueVertical);
 
-        if (showPopupOnHover
+        // this is a workaround for a bug where the popup display being dismissed triggers
+        // a mouse move causing it to never be hidden
+        auto shouldShowPopup = showPopupOnHover
+                                && (Time::getMillisecondCounterHiRes() - lastPopupDismissal) > 250;
+
+        if (shouldShowPopup
              && ! isTwoValue
              && ! isThreeValue)
         {
@@ -1254,6 +1261,7 @@ public:
     bool snapsToMousePos = true;
 
     int popupHoverTimeout = 2000;
+    double lastPopupDismissal = 0.0;
 
     ScopedPointer<Label> valueBox;
     ScopedPointer<Button> incButton, decButton;
@@ -1269,6 +1277,11 @@ public:
             setAlwaysOnTop (true);
             setAllowedPlacement (owner.getLookAndFeel().getSliderPopupPlacement (s));
             setLookAndFeel (&s.getLookAndFeel());
+        }
+
+        ~PopupDisplayComponent()
+        {
+            owner.pimpl->lastPopupDismissal = Time::getMillisecondCounterHiRes();
         }
 
         void paintContent (Graphics& g, int w, int h) override
@@ -1293,6 +1306,7 @@ public:
 
         void timerCallback() override
         {
+            stopTimer();
             owner.pimpl->popupDisplay = nullptr;
         }
 
