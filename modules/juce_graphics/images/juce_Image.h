@@ -53,7 +53,7 @@ class ImagePixelData;
 
     @see Graphics, ImageFileFormat, ImageCache, ImageConvolutionKernel
 */
-class JUCE_API  Image
+class JUCE_API  Image  final
 {
 public:
     //==============================================================================
@@ -313,7 +313,7 @@ public:
         The actual format of the pixel data depends on the image's format - see Image::getFormat(),
         and the PixelRGB, PixelARGB and PixelAlpha classes for more info.
     */
-    class JUCE_API  BitmapData
+    class JUCE_API  BitmapData  final
     {
     public:
         enum ReadWriteMode

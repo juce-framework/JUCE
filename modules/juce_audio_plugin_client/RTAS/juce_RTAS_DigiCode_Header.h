@@ -24,9 +24,6 @@
   ==============================================================================
 */
 
-namespace juce
-{
-
 #if JucePlugin_Build_RTAS
 #ifdef _MSC_VER
 
@@ -68,5 +65,3 @@ namespace juce
 
 #endif
 #endif
-
-} // namespace juce

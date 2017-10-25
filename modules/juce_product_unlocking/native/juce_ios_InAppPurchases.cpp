@@ -44,6 +44,7 @@ struct SKDelegateAndPaymentObserver
 
     virtual void didReceiveResponse (SKProductsRequest*, SKProductsResponse*) = 0;
     virtual void requestDidFinish (SKRequest*) = 0;
+    virtual void requestDidFailWithError (SKRequest*, NSError*) = 0;
     virtual void updatedTransactions (SKPaymentQueue*, NSArray<SKPaymentTransaction*>*) = 0;
     virtual void restoreCompletedTransactionsFailedWithError (SKPaymentQueue*, NSError*) = 0;
     virtual void restoreCompletedTransactionsFinished (SKPaymentQueue*) = 0;
@@ -62,6 +63,7 @@ private:
 
             addMethod (@selector (productsRequest:didReceiveResponse:),                       didReceiveResponse,                          "v@:@@");
             addMethod (@selector (requestDidFinish:),                                         requestDidFinish,                            "v@:@");
+            addMethod (@selector (request:didFailWithError:),                                 requestDidFailWithError,                     "v@:@@");
             addMethod (@selector (paymentQueue:updatedTransactions:),                         updatedTransactions,                         "v@:@@");
             addMethod (@selector (paymentQueue:restoreCompletedTransactionsFailedWithError:), restoreCompletedTransactionsFailedWithError, "v@:@@");
             addMethod (@selector (paymentQueueRestoreCompletedTransactionsFinished:),         restoreCompletedTransactionsFinished,        "v@:@");
@@ -77,6 +79,7 @@ private:
         //==============================================================================
         static void didReceiveResponse (id self, SEL, SKProductsRequest* request, SKProductsResponse* response)      { getThis (self).didReceiveResponse (request, response); }
         static void requestDidFinish (id self, SEL, SKRequest* request)                                              { getThis (self).requestDidFinish (request); }
+        static void requestDidFailWithError (id self, SEL, SKRequest* request, NSError* err)                         { getThis (self).requestDidFailWithError (request, err); }
         static void updatedTransactions (id self, SEL, SKPaymentQueue* queue, NSArray<SKPaymentTransaction*>* trans) { getThis (self).updatedTransactions (queue, trans); }
         static void restoreCompletedTransactionsFailedWithError (id self, SEL, SKPaymentQueue* q, NSError* err)      { getThis (self).restoreCompletedTransactionsFailedWithError (q, err); }
         static void restoreCompletedTransactionsFinished (id self, SEL, SKPaymentQueue* queue)                       { getThis (self).restoreCompletedTransactionsFinished (queue); }
@@ -100,9 +103,15 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         DownloadImpl (SKDownload* downloadToUse)  : download (downloadToUse) {}
 
         String getProductId()      const override  { return nsStringToJuce (download.contentIdentifier); }
-        int64 getContentLength()   const override  { return download.contentLength; }
         String getContentVersion() const override  { return nsStringToJuce (download.contentVersion); }
+
+      #if JUCE_IOS
+        int64 getContentLength()   const override  { return download.contentLength; }
         Status getStatus()         const override  { return SKDownloadStateToDownloadStatus (download.downloadState); }
+      #else
+        int64 getContentLength()   const override  { return [download.contentLength longLongValue]; }
+        Status getStatus()         const override  { return SKDownloadStateToDownloadStatus (download.state); }
+      #endif
 
         SKDownload* download;
     };
@@ -146,9 +155,14 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         {
             for (SKDownload* d in transaction.downloads)
             {
-                if (d.downloadState != SKDownloadStateFinished
-                     && d.downloadState != SKDownloadStateFailed
-                     && d.downloadState != SKDownloadStateCancelled)
+              #if JUCE_IOS
+                SKDownloadState state = d.downloadState;
+              #else
+                SKDownloadState state = d.state;
+              #endif
+                if (state != SKDownloadStateFinished
+                     && state != SKDownloadStateFailed
+                     && state != SKDownloadStateCancelled)
                 {
                     return false;
                 }
@@ -275,6 +289,25 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         }
     }
 
+    void requestDidFailWithError (SKRequest* request, NSError* error) override
+    {
+        if (auto receiptRefreshRequest = getAs<SKReceiptRefreshRequest> (request))
+        {
+            for (auto i = 0; i < pendingReceiptRefreshRequests.size(); ++i)
+            {
+                auto& pendingRequest = *pendingReceiptRefreshRequests[i];
+
+                if (pendingRequest.request == receiptRefreshRequest)
+                {
+                    auto errorDetails = error != nil ? (", " + nsStringToJuce ([error localizedDescription])) : String ("");
+                    owner.listeners.call (&Listener::purchasesListRestored, {}, false, NEEDS_TRANS ("Receipt fetch failed") + errorDetails);
+                    pendingReceiptRefreshRequests.remove (i);
+                    return;
+                }
+            }
+        }
+    }
+
     void updatedTransactions (SKPaymentQueue*, NSArray<SKPaymentTransaction*>* transactions) override
     {
         for (SKPaymentTransaction* transaction in transactions)
@@ -308,7 +341,11 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         {
             if (auto* pendingDownload = getPendingDownloadFor (download))
             {
+              #if JUCE_IOS
                 switch (download.downloadState)
+              #else
+                switch (download.state)
+              #endif
                 {
                     case SKDownloadStateWaiting: break;
                     case SKDownloadStatePaused:  owner.listeners.call (&Listener::productDownloadPaused, *pendingDownload); break;
@@ -467,7 +504,13 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
     {
         if (auto* pdt = getPendingDownloadsTransactionSKDownloadFor (download))
         {
-            auto contentURL = download.downloadState == SKDownloadStateFinished
+          #if JUCE_IOS
+            SKDownloadState state = download.downloadState;
+          #else
+            SKDownloadState state = download.state;
+          #endif
+
+            auto contentURL = state == SKDownloadStateFinished
                                 ? URL (nsStringToJuce (download.contentURL.absoluteString))
                                 : URL();
 
@@ -567,12 +610,14 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
                             {
                                 if (auto productId = getAs<NSString> (purchaseData[nsStringLiteral ("product_id")]))
                                 {
-                                    if (auto purchaseTime = getAs<NSNumber> (purchaseData[nsStringLiteral ("purchase_date_ms")]))
+                                    auto purchaseTime = getPurchaseDateMs (purchaseData[nsStringLiteral ("purchase_date_ms")]);
+
+                                    if (purchaseTime > 0)
                                     {
                                         purchases.add ({ { nsStringToJuce (transactionId),
                                                            nsStringToJuce (productId),
                                                            nsStringToJuce (bundleId),
-                                                           Time ([purchaseTime integerValue]).toString (true, true, true, true),
+                                                           Time (purchaseTime).toString (true, true, true, true),
                                                            {} }, {} });
                                     }
                                     else
@@ -604,6 +649,24 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
                                                                     {}, false, NEEDS_TRANS ("Receipt fetch failed")); });
     }
 
+    static int64 getPurchaseDateMs (id date)
+    {
+        if (auto dateAsNumber = getAs<NSNumber> (date))
+        {
+            return [dateAsNumber longLongValue];
+        }
+        else if (auto dateAsString = getAs<NSString> (date))
+        {
+            auto* formatter = [[NSNumberFormatter alloc] init];
+            [formatter setNumberStyle: NSNumberFormatterDecimalStyle];
+            dateAsNumber = [formatter numberFromString: dateAsString];
+            [formatter release];
+            return [dateAsNumber longLongValue];
+        }
+
+        return -1;
+    }
+
     //==============================================================================
     static Product SKProductToIAPProduct (SKProduct* skProduct)
     {
@@ -615,7 +678,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         auto identifier   = nsStringToJuce (skProduct.productIdentifier);
         auto title        = nsStringToJuce (skProduct.localizedTitle);
         auto description  = nsStringToJuce (skProduct.localizedDescription);
-        auto priceLocale  = nsStringToJuce (skProduct.priceLocale.languageCode);
+        auto priceLocale  = nsStringToJuce ([skProduct.priceLocale objectForKey: NSLocaleLanguageCode]);
         auto price        = nsStringToJuce ([numberFormatter stringFromNumber: skProduct.price]);
 
         [numberFormatter release];

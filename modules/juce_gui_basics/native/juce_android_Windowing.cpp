@@ -30,6 +30,16 @@ namespace juce
 {
 
 //==============================================================================
+#if JUCE_PUSH_NOTIFICATIONS && JUCE_MODULE_AVAILABLE_juce_gui_extra
+ // Returns true if the intent was handled.
+ extern bool juce_handleNotificationIntent (void*);
+ extern void juce_firebaseDeviceNotificationsTokenRefreshed (void*);
+ extern void juce_firebaseRemoteNotificationReceived (void*);
+ extern void juce_firebaseRemoteMessagesDeleted();
+ extern void juce_firebaseRemoteMessageSent(void*);
+ extern void juce_firebaseRemoteMessageSendError (void*, void*);
+#endif
+
 #if JUCE_IN_APP_PURCHASES && JUCE_MODULE_AVAILABLE_juce_product_unlocking
  extern void juce_inAppPurchaseCompleted (void*);
 #endif
@@ -98,6 +108,75 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, appActivityResult, void, (JN
    #endif
 }
 
+JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, appNewIntent, void, (JNIEnv* env, jobject, jobject intentData))
+{
+    setEnv (env);
+
+  #if JUCE_PUSH_NOTIFICATIONS && JUCE_MODULE_AVAILABLE_juce_gui_extra
+    if (juce_handleNotificationIntent ((void *)intentData))
+        return;
+
+    // Add other functions processing intents here as needed.
+  #else
+    ignoreUnused (intentData);
+  #endif
+}
+
+#if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
+JUCE_JNI_CALLBACK (JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME, firebaseInstanceIdTokenRefreshed, void, (JNIEnv* env, jobject /*activity*/, jstring token))
+{
+    setEnv (env);
+
+  #if JUCE_MODULE_AVAILABLE_juce_gui_extra
+    juce_firebaseDeviceNotificationsTokenRefreshed (token);
+  #else
+    ignoreUnused (token);
+  #endif
+}
+
+JUCE_JNI_CALLBACK (JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME, firebaseRemoteMessageReceived, void, (JNIEnv* env, jobject /*activity*/, jobject remoteMessage))
+{
+    setEnv (env);
+
+  #if JUCE_MODULE_AVAILABLE_juce_gui_extra
+    juce_firebaseRemoteNotificationReceived (remoteMessage);
+  #else
+    ignoreUnused (remoteMessage);
+  #endif
+}
+
+JUCE_JNI_CALLBACK (JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME, firebaseRemoteMessagesDeleted, void, (JNIEnv* env, jobject /*activity*/))
+{
+    setEnv (env);
+
+  #if JUCE_MODULE_AVAILABLE_juce_gui_extra
+    juce_firebaseRemoteMessagesDeleted();
+  #endif
+}
+
+JUCE_JNI_CALLBACK (JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME, firebaseRemoteMessageSent, void, (JNIEnv* env, jobject /*activity*/, jstring messageId))
+{
+    setEnv (env);
+
+  #if JUCE_MODULE_AVAILABLE_juce_gui_extra
+    juce_firebaseRemoteMessageSent (messageId);
+  #else
+    ignoreUnused (messageId);
+  #endif
+}
+
+JUCE_JNI_CALLBACK (JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME, firebaseRemoteMessageSendError, void, (JNIEnv* env, jobject /*activity*/, jstring messageId, jstring error))
+{
+    setEnv (env);
+
+  #if JUCE_MODULE_AVAILABLE_juce_gui_extra
+    juce_firebaseRemoteMessageSendError (messageId, error);
+  #else
+    ignoreUnused (messageId, error);
+  #endif
+}
+#endif
+
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (drawBitmap,       "drawBitmap",    "([IIIFFIIZLandroid/graphics/Paint;)V") \
@@ -137,6 +216,7 @@ public:
     AndroidComponentPeer (Component& comp, const int windowStyleFlags)
         : ComponentPeer (comp, windowStyleFlags),
           fullScreen (false),
+          navBarsHidden (false),
           sizeAllocated (0),
           scale ((float) Desktop::getInstance().getDisplays().getMainDisplay().scale)
     {
@@ -289,9 +369,9 @@ public:
         return false;
     }
 
-    bool shouldNavBarsBeHidden() const
+    bool shouldNavBarsBeHidden (bool shouldBeFullScreen) const
     {
-        if (fullScreen)
+        if (shouldBeFullScreen)
             if (Component* kiosk = Desktop::getInstance().getKioskModeComponent())
                 if (kiosk->getPeer() == this)
                     return true;
@@ -299,7 +379,7 @@ public:
         return false;
     }
 
-    void setNavBarsHidden (bool hidden) const
+    void setNavBarsHidden (bool hidden)
     {
         enum
         {
@@ -316,18 +396,24 @@ public:
         view.callVoidMethod (ComponentPeerView.setSystemUiVisibility,
                              hidden ? (jint) (SYSTEM_UI_FLAG_HIDE_NAVIGATION | SYSTEM_UI_FLAG_FULLSCREEN | SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
                                     : (jint) (SYSTEM_UI_FLAG_VISIBLE));
+
+        navBarsHidden = hidden;
     }
 
     void setFullScreen (bool shouldBeFullScreen) override
     {
         // updating the nav bar visibility is a bit odd on Android - need to wait for
-        if (shouldNavBarsBeHidden())
+        if (shouldNavBarsBeHidden (shouldBeFullScreen))
         {
-            if (! isTimerRunning())
+            if (! navBarsHidden && ! isTimerRunning())
+            {
                 startTimer (500);
+            }
         }
         else
+        {
             setNavBarsHidden (false);
+        }
 
         Rectangle<int> r (shouldBeFullScreen ? Desktop::getInstance().getDisplays().getMainDisplay().userArea
                                              : lastNonFullscreenBounds);
@@ -349,7 +435,7 @@ public:
 
     void timerCallback() override
     {
-        setNavBarsHidden (shouldNavBarsBeHidden());
+        setNavBarsHidden (shouldNavBarsBeHidden (fullScreen));
         setFullScreen (fullScreen);
         stopTimer();
     }
@@ -608,6 +694,7 @@ private:
     GlobalRef view;
     GlobalRef buffer;
     bool fullScreen;
+    bool navBarsHidden;
     int sizeAllocated;
     float scale;
     static AndroidComponentPeer* frontWindow;
@@ -793,11 +880,24 @@ ModifierKeys ModifierKeys::getCurrentModifiersRealtime() noexcept
     return AndroidComponentPeer::currentModifiers;
 }
 
+JUCE_API void JUCE_CALLTYPE Process::hide()
+{
+    if (android.activity.callBooleanMethod (JuceAppActivity.moveTaskToBack, true) == 0)
+    {
+        auto* env = getEnv();
+
+        GlobalRef intent (env->NewObject (Intent, Intent.constructor));
+        env->CallObjectMethod (intent, Intent.setAction,   javaString ("android.intent.action.MAIN")  .get());
+        env->CallObjectMethod (intent, Intent.addCategory, javaString ("android.intent.category.HOME").get());
+
+        android.activity.callVoidMethod (JuceAppActivity.startActivity, intent.get());
+    }
+}
+
 //==============================================================================
 // TODO
 JUCE_API bool JUCE_CALLTYPE Process::isForegroundProcess() { return true; }
 JUCE_API void JUCE_CALLTYPE Process::makeForegroundProcess() {}
-JUCE_API void JUCE_CALLTYPE Process::hide() {}
 
 //==============================================================================
 void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType /*iconType*/,

@@ -189,6 +189,12 @@ public:
                 sharedPointer->clearPointer();
         }
 
+        /** Returns the number of WeakReferences that are out there pointing to this object. */
+        int getNumActiveWeakReferences() const noexcept
+        {
+            return sharedPointer == nullptr ? 0 : (sharedPointer->getReferenceCount() - 1);
+        }
+
     private:
         SharedRef sharedPointer;
 

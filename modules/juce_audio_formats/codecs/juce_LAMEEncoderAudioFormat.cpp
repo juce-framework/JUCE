@@ -38,12 +38,11 @@ public:
             int bitsPerSample, const StringPairArray& metadata)
         : AudioFormatWriter (destStream, formatName, sampleRate,
                              numberOfChannels, (unsigned int) bitsPerSample),
-          vbrLevel (vbr), cbrBitrate (cbr),
-          tempWav (".wav")
+          vbrLevel (vbr), cbrBitrate (cbr)
     {
         WavAudioFormat wavFormat;
 
-        if (FileOutputStream* out = tempWav.getFile().createOutputStream())
+        if (auto* out = tempWav.getFile().createOutputStream())
         {
             writer = wavFormat.createWriterFor (out, sampleRate, numChannels,
                                                 bitsPerSample, metadata, 0);
@@ -77,7 +76,7 @@ public:
 
     void addMetadataArg (const StringPairArray& metadata, const char* key, const char* lameFlag)
     {
-        const String value (metadata.getValue (key, String()));
+        auto value = metadata.getValue (key, {});
 
         if (value.isNotEmpty())
         {
@@ -104,7 +103,7 @@ public:
 
 private:
     int vbrLevel, cbrBitrate;
-    TemporaryFile tempWav;
+    TemporaryFile tempWav { ".wav" };
     ScopedPointer<AudioFormatWriter> writer;
     StringArray args;
 
@@ -114,7 +113,7 @@ private:
 
         if (cp.start (processArgs))
         {
-            const String childOutput (cp.readAllProcessOutput());
+            auto childOutput = cp.readAllProcessOutput();
             DBG (childOutput); ignoreUnused (childOutput);
 
             cp.waitForProcessToFinish (10000);
@@ -169,14 +168,12 @@ bool LAMEEncoderAudioFormat::canHandleFile (const File&)
 
 Array<int> LAMEEncoderAudioFormat::getPossibleSampleRates()
 {
-    const int rates[] = { 32000, 44100, 48000, 0 };
-    return Array<int> (rates);
+    return { 32000, 44100, 48000 };
 }
 
 Array<int> LAMEEncoderAudioFormat::getPossibleBitDepths()
 {
-    const int depths[] = { 16, 0 };
-    return Array<int> (depths);
+    return { 16 };
 }
 
 bool LAMEEncoderAudioFormat::canDoStereo()      { return true; }

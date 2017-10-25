@@ -78,7 +78,7 @@ int AudioCDReader::getLastIndex() const
 
 Array<int> AudioCDReader::findIndexesInTrack (const int)
 {
-    return Array<int>();
+    return {};
 }
 
 } // namespace juce

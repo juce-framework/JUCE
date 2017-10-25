@@ -38,9 +38,8 @@ struct TranslationHelpers
 
     static void scanFileForTranslations (StringArray& strings, const File& file)
     {
-        const String content (file.loadFileAsString());
-
-        String::CharPointerType p (content.getCharPointer());
+        auto content = file.loadFileAsString();
+        auto p = content.getCharPointer();
 
         for (;;)
         {
@@ -69,11 +68,11 @@ struct TranslationHelpers
 
         if (p.getAndAdvance() == '"')
         {
-            String::CharPointerType start (p);
+            auto start = p;
 
             for (;;)
             {
-                juce_wchar c = *p;
+                auto c = *p;
 
                 if (c == '"')
                 {
@@ -101,7 +100,7 @@ struct TranslationHelpers
 
     static juce_wchar readEscapedChar (String::CharPointerType& p)
     {
-        juce_wchar c = *p;
+        auto c = *p;
 
         switch (c)
         {

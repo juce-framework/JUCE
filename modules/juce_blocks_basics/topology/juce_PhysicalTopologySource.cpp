@@ -505,8 +505,7 @@ struct PhysicalTopologySource::Internal
         }
 
         //==============================================================================
-        // The following methods will be called by the DeviceToHostPacketDecoder:
-
+        // The following methods will be called by the HostPacketDecoder:
         void beginTopology (int numDevices, int numConnections)
         {
             incomingTopologyDevices.clearQuick();
@@ -815,12 +814,13 @@ struct PhysicalTopologySource::Internal
 
             for (auto& packet : packets)
             {
-                lastGlobalPingTime = juce::Time::getCurrentTime();
                 auto data = static_cast<const uint8*> (packet.getData());
 
                 BlocksProtocol::HostPacketDecoder<ConnectedDeviceGroup>
                     ::processNextPacket (*this, *data, data + 1, (int) packet.getSize() - 1);
             }
+
+            lastGlobalPingTime = juce::Time::getCurrentTime();
         }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConnectedDeviceGroup)
@@ -833,11 +833,13 @@ struct PhysicalTopologySource::Internal
     {
         Detector()  : defaultDetector (new MIDIDeviceDetector()), deviceDetector (*defaultDetector)
         {
+            topologyBroadcastThrottle.detector = this;
             startTimer (10);
         }
 
         Detector (DeviceDetector& dd)  : deviceDetector (dd)
         {
+            topologyBroadcastThrottle.detector = this;
             startTimer (10);
         }
 
@@ -947,12 +949,7 @@ struct PhysicalTopologySource::Internal
                 currentTopology.connections.swapWith (newDeviceConnections);
             }
 
-            for (auto d : activeTopologySources)
-                d->listeners.call (&TopologySource::Listener::topologyChanged);
-
-           #if DUMP_TOPOLOGY
-            dumpTopology (currentTopology);
-           #endif
+            topologyBroadcastThrottle.scheduleTopologyChangeCallback();
         }
 
         void handleSharedDataACK (Block::UID deviceID, uint32 packetCounter) const
@@ -1192,6 +1189,39 @@ struct PhysicalTopologySource::Internal
         }
 
         juce::OwnedArray<ConnectedDeviceGroup> connectedDeviceGroups;
+
+        //==============================================================================
+        /** Flurries of topology messages sometimes arrive due to loose connections.
+            Avoid informing listeners until they've stabilised.
+        */
+        struct TopologyBroadcastThrottle  : private juce::Timer
+        {
+            TopologyBroadcastThrottle() = default;
+
+            void scheduleTopologyChangeCallback()   { startTimer (750); }
+
+            void timerCallback() override
+            {
+                if (detector->currentTopology != lastTopology)
+                {
+                    lastTopology = detector->currentTopology;
+
+                    for (auto* d : detector->activeTopologySources)
+                        d->listeners.call (&TopologySource::Listener::topologyChanged);
+
+                   #if DUMP_TOPOLOGY
+                    dumpTopology (lastTopology);
+                   #endif
+                }
+
+                stopTimer();
+            }
+
+            Detector* detector = nullptr;
+            BlockTopology lastTopology;
+        };
+
+        TopologyBroadcastThrottle topologyBroadcastThrottle;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Detector)
     };
@@ -2011,7 +2041,7 @@ struct PhysicalTopologySource::Internal
         void timerCallback() override
         {
             // Find touches that seem to have become stuck, and fake a touch-end for them..
-            static const uint32 touchTimeOutMs = 40;
+            static const uint32 touchTimeOutMs = 500;
 
             for (auto& t : touches)
             {

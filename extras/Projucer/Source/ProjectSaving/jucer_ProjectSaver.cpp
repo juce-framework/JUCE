@@ -27,6 +27,8 @@
 #include "../Application/jucer_Headers.h"
 #include "jucer_ProjectSaver.h"
 
+#include "jucer_ProjectExport_CLion.h"
+
 //==============================================================================
 namespace
 {
@@ -146,4 +148,80 @@ void ProjectSaver::writePluginCharacteristicsFile()
     }
 
     setExtraAppConfigFileContent (mem.toString());
+}
+
+void ProjectSaver::writeProjects (const OwnedArray<LibraryModule>& modules, const String& specifiedExporterToSave, bool isCommandLineApp)
+{
+    ThreadPool threadPool;
+
+    // keep a copy of the basic generated files group, as each exporter may modify it.
+    const ValueTree originalGeneratedGroup (generatedFilesGroup.state.createCopy());
+
+    CLionProjectExporter* clionExporter = nullptr;
+    OwnedArray<ProjectExporter> exporters;
+
+    try
+    {
+        for (Project::ExporterIterator exp (project); exp.next();)
+        {
+            if (specifiedExporterToSave.isNotEmpty() && exp->getName() != specifiedExporterToSave)
+                continue;
+
+            auto* exporter = exporters.add (exp.exporter.release());
+
+            exporter->initialiseDependencyPathValues();
+
+            if (exporter->getTargetFolder().createDirectory())
+            {
+                if (exporter->isCLion())
+                {
+                    clionExporter = dynamic_cast<CLionProjectExporter*> (exporter);
+                }
+                else
+                {
+                    exporter->copyMainGroupFromProject();
+                    exporter->settings = exporter->settings.createCopy();
+
+                    exporter->addToExtraSearchPaths (RelativePath ("JuceLibraryCode", RelativePath::projectFolder));
+
+                    generatedFilesGroup.state = originalGeneratedGroup.createCopy();
+                    exporter->addSettingsForProjectType (project.getProjectType());
+
+                    for (auto& module: modules)
+                        module->addSettingsForModuleToExporter (*exporter, *this);
+
+                    if (project.getProjectType().isAudioPlugin())
+                        writePluginCharacteristicsFile();
+
+                    generatedFilesGroup.sortAlphabetically (true, true);
+                    exporter->getAllGroups().add (generatedFilesGroup);
+                }
+
+                if (isCommandLineApp)
+                    saveExporter (exporter, modules);
+                else
+                    threadPool.addJob (new ExporterJob (*this, exporter, modules), true);
+            }
+            else
+            {
+                addError ("Can't create folder: " + exporter->getTargetFolder().getFullPathName());
+            }
+        }
+    }
+    catch (ProjectExporter::SaveError& saveError)
+    {
+        addError (saveError.message);
+    }
+
+    if (! isCommandLineApp)
+        while (threadPool.getNumJobs() > 0)
+            Thread::sleep (10);
+
+    if (clionExporter != nullptr)
+    {
+        for (auto* exporter : exporters)
+            clionExporter->writeCMakeListsExporterSection (exporter);
+
+        std::cout << "Finished saving: " << clionExporter->getName() << std::endl;
+    }
 }

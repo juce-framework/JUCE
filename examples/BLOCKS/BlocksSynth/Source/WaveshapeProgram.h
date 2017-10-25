@@ -56,7 +56,7 @@ public:
         for (auto x = 0; x < 30; ++x)
         {
             // Scale and offset the sin output to the Lightpad display
-            auto sineOutput = sin (currentPhase);
+            auto sineOutput = std::sin (currentPhase);
             sineWaveY[x] = static_cast<uint8> (roundToInt ((sineOutput * 6.5) + 7.0));
 
             // Square wave output, set flags for when vertical line should be drawn

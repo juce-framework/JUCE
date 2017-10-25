@@ -59,7 +59,7 @@ static uint32 splashDisplayTime = 0;
 static bool appUsageReported = false;
 
 
-Rectangle<float> getLogoArea (Rectangle<float> parentRect)
+static Rectangle<float> getLogoArea (Rectangle<float> parentRect)
 {
     return parentRect.reduced (6.0f)
                      .removeFromRight  ((float) splashScreenLogoWidth)

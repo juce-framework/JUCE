@@ -123,8 +123,8 @@ void LiveBuildProjectSettings::getLiveSettings (Project& project, PropertyListBu
     props.add (new TextPropertyComponent (getExtraDLLsValue (project), "Extra dynamic libraries", 2048, true),
                "Extra dynamic libs that the running code may require. Use new-lines or commas to separate the items");
 
-    static const char* targetPlatformNames[] = { "(default)", "8.1", "10.0.10240.0", "10.0.10586.0", "10.0.14393.0", "10.0.15063.0", nullptr };
-    const var targetPlatforms[]              = { var(),       "8.1", "10.0.10240.0", "10.0.10586.0", "10.0.14393.0", "10.0.15063.0" };
+    static const char* targetPlatformNames[] = { "(default)", "8.1", "10.0.10240.0", "10.0.10586.0", "10.0.14393.0", "10.0.16299.0", nullptr };
+    const var targetPlatforms[]              = { var(),       "8.1", "10.0.10240.0", "10.0.10586.0", "10.0.14393.0", "10.0.16299.0" };
 
     props.add (new ChoicePropertyComponent (getWindowsTargetPlatformVersionValue (project), "Windows Target Platform",
                                             StringArray (targetPlatformNames), Array<var> (targetPlatforms, numElementsInArray (targetPlatforms))),
@@ -264,7 +264,11 @@ private:
     void* server;
    #endif
 
-    void timerCallback()    { owner.handleCrash (String()); }
+    void timerCallback()
+    {
+        stopTimer();
+        owner.handleCrash (String());
+    }
 };
 
 //==============================================================================

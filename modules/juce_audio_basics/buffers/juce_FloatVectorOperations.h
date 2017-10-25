@@ -210,16 +210,19 @@ public:
     /** Finds the maximum value in the given array. */
     static double JUCE_CALLTYPE findMaximum (const double* src, int numValues) noexcept;
 
-    /** On Intel CPUs, this method enables or disables the SSE flush-to-zero mode.
-        Effectively, this is a wrapper around a call to _MM_SET_FLUSH_ZERO_MODE
-    */
+    /** This method enables or disables the SSE/NEON flush-to-zero mode. */
     static void JUCE_CALLTYPE enableFlushToZeroMode (bool shouldEnable) noexcept;
 
     /** On Intel CPUs, this method enables the SSE flush-to-zero and denormalised-are-zero modes.
-        This effectively sets the DAZ and FZ bits of the MXCSR register. It's a convenient thing to
-        call before audio processing code where you really want to avoid denormalisation performance hits.
+        This effectively sets the DAZ and FZ bits of the MXCSR register. On arm CPUs this will
+        enable flush to zero mode.
+        It's a convenient thing to call before audio processing code where you really want to
+        avoid denormalisation performance hits.
     */
-    static void JUCE_CALLTYPE disableDenormalisedNumberSupport() noexcept;
+    static void JUCE_CALLTYPE disableDenormalisedNumberSupport (bool shouldDisable = true) noexcept;
+
+    /** This method returns true if denormals are currently disabled. */
+    static bool JUCE_CALLTYPE areDenormalsDisabled() noexcept;
 
 private:
     friend ScopedNoDenormals;

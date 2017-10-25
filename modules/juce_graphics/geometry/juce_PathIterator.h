@@ -37,7 +37,7 @@ namespace juce
 
     @see Path
 */
-class JUCE_API  PathFlatteningIterator
+class JUCE_API  PathFlatteningIterator  final
 {
 public:
     //==============================================================================

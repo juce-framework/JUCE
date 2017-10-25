@@ -88,15 +88,15 @@ using namespace juce;
 // TODO: use SFINAE to automatically generate this for all NSObjects
 template <> struct ContainerDeletePolicy<AUAudioUnitBusArray>                   { static void destroy (NSObject* o) { [o release]; } };
 template <> struct ContainerDeletePolicy<AUParameterTree>                       { static void destroy (NSObject* o) { [o release]; } };
-template <> struct ContainerDeletePolicy<NSMutableArray<AUParameterNode *> >    { static void destroy (NSObject* o) { [o release]; } };
+template <> struct ContainerDeletePolicy<NSMutableArray<AUParameterNode*>>      { static void destroy (NSObject* o) { [o release]; } };
 template <> struct ContainerDeletePolicy<AUParameter>                           { static void destroy (NSObject* o) { [o release]; } };
-template <> struct ContainerDeletePolicy<NSMutableArray<AUAudioUnitBus*> >      { static void destroy (NSObject* o) { [o release]; } };
+template <> struct ContainerDeletePolicy<NSMutableArray<AUAudioUnitBus*>>       { static void destroy (NSObject* o) { [o release]; } };
 template <> struct ContainerDeletePolicy<AUAudioUnitBus>                        { static void destroy (NSObject* o) { [o release]; } };
 template <> struct ContainerDeletePolicy<AVAudioFormat>                         { static void destroy (NSObject* o) { [o release]; } };
 template <> struct ContainerDeletePolicy<AVAudioPCMBuffer>                      { static void destroy (NSObject* o) { [o release]; } };
-template <> struct ContainerDeletePolicy<NSMutableArray<NSNumber*> >            { static void destroy (NSObject* o) { [o release]; } };
+template <> struct ContainerDeletePolicy<NSMutableArray<NSNumber*>>             { static void destroy (NSObject* o) { [o release]; } };
 template <> struct ContainerDeletePolicy<NSNumber>                              { static void destroy (NSObject* o) { [o release]; } };
-template <> struct ContainerDeletePolicy<NSMutableArray<AUAudioUnitPreset*> >   { static void destroy (NSObject* o) { [o release]; } };
+template <> struct ContainerDeletePolicy<NSMutableArray<AUAudioUnitPreset*>>    { static void destroy (NSObject* o) { [o release]; } };
 template <> struct ContainerDeletePolicy<AUAudioUnitPreset>                     { static void destroy (NSObject* o) { [o release]; } };
 
 //==============================================================================
@@ -692,7 +692,19 @@ public:
     //==============================================================================
     AUInternalRenderBlock getInternalRenderBlock() override   { return internalRenderBlock;  }
     bool getRenderingOffline() override                       { return getAudioProcessor().isNonRealtime(); }
-    void setRenderingOffline (bool offline) override          { getAudioProcessor().setNonRealtime (offline); }
+    void setRenderingOffline (bool offline) override
+    {
+        auto& processor = getAudioProcessor();
+        auto isCurrentlyNonRealtime = processor.isNonRealtime();
+
+        if (isCurrentlyNonRealtime != offline)
+        {
+            ScopedLock callbackLock (processor.getCallbackLock());
+
+            processor.setNonRealtime (offline);
+            processor.prepareToPlay (processor.getSampleRate(), processor.getBlockSize());
+        }
+    }
 
     //==============================================================================
     NSString* getContextName() const    override              { return juceStringToNS (contextName); }
@@ -1050,7 +1062,7 @@ private:
     //==============================================================================
     void addAudioUnitBusses (bool isInput)
     {
-        ScopedPointer<NSMutableArray<AUAudioUnitBus*> > array = [[NSMutableArray<AUAudioUnitBus*> alloc] init];
+        ScopedPointer<NSMutableArray<AUAudioUnitBus*>> array = [[NSMutableArray<AUAudioUnitBus*> alloc] init];
         AudioProcessor& processor = getAudioProcessor();
         const int n = AudioUnitHelpers::getBusCount (&processor, isInput);
 
@@ -1076,7 +1088,7 @@ private:
 
     void addParameters()
     {
-        ScopedPointer<NSMutableArray<AUParameterNode*> > params = [[NSMutableArray<AUParameterNode*> alloc] init];
+        ScopedPointer<NSMutableArray<AUParameterNode*>> params = [[NSMutableArray<AUParameterNode*> alloc] init];
 
         paramObserver = CreateObjCBlock (this, &JuceAudioUnitv3::valueChangedFromHost);
         paramProvider = CreateObjCBlock (this, &JuceAudioUnitv3::getValue);
@@ -1451,7 +1463,7 @@ private:
     ScopedPointer<NSMutableArray<NSNumber*>> overviewParams;
     ScopedPointer<NSMutableArray<NSNumber*>> channelCapabilities;
 
-    ScopedPointer<NSMutableArray<AUAudioUnitPreset*> > factoryPresets;
+    ScopedPointer<NSMutableArray<AUAudioUnitPreset*>> factoryPresets;
 
     ObjCBlock<AUInternalRenderBlock> internalRenderBlock;
 

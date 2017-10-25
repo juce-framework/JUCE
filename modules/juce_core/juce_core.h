@@ -171,6 +171,10 @@
  #include "native/juce_BasicNativeHeaders.h"
 #endif
 
+#if JUCE_WINDOWS
+ #undef small
+#endif
+
 #include "system/juce_StandardHeader.h"
 
 namespace juce

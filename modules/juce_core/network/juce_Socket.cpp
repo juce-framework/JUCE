@@ -74,18 +74,18 @@ namespace SocketHelpers
     }
 
     template <typename Type>
-    static bool setOption (const SocketHandle handle, int mode, int property, Type value) noexcept
+    static bool setOption (SocketHandle handle, int mode, int property, Type value) noexcept
     {
         return setsockopt (handle, mode, property, reinterpret_cast<const char*> (&value), sizeof (value)) == 0;
     }
 
     template <typename Type>
-    static bool setOption (const SocketHandle handle, int property, Type value) noexcept
+    static bool setOption (SocketHandle handle, int property, Type value) noexcept
     {
         return setOption (handle, SOL_SOCKET, property, value);
     }
 
-    static bool resetSocketOptions (const SocketHandle handle, const bool isDatagram, const bool allowBroadcast) noexcept
+    static bool resetSocketOptions (SocketHandle handle, bool isDatagram, bool allowBroadcast) noexcept
     {
         return handle > 0
                 && setOption (handle, SO_RCVBUF, (int) 65536)
@@ -95,7 +95,7 @@ namespace SocketHelpers
     }
 
     static void closeSocket (volatile int& handle, CriticalSection& readLock,
-                             const bool isListener, int portNumber, bool& connected) noexcept
+                             bool isListener, int portNumber, bool& connected) noexcept
     {
         const SocketHandle h = handle;
         handle = -1;
@@ -107,7 +107,7 @@ namespace SocketHelpers
             closesocket (h);
 
         // make sure any read process finishes before we delete the socket
-        CriticalSection::ScopedLockType lock(readLock);
+        CriticalSection::ScopedLockType lock (readLock);
         connected = false;
        #else
         if (connected)
@@ -145,7 +145,7 @@ namespace SocketHelpers
        #endif
     }
 
-    static bool bindSocket (const SocketHandle handle, int port, const String& address) noexcept
+    static bool bindSocket (SocketHandle handle, int port, const String& address) noexcept
     {
         if (handle <= 0 || ! isValidPortNumber (port))
             return false;
@@ -161,7 +161,7 @@ namespace SocketHelpers
         return ::bind (handle, (struct sockaddr*) &addr, sizeof (addr)) >= 0;
     }
 
-    static int getBoundPort (const SocketHandle handle) noexcept
+    static int getBoundPort (SocketHandle handle) noexcept
     {
         if (handle > 0)
         {
@@ -175,7 +175,7 @@ namespace SocketHelpers
         return -1;
     }
 
-    static String getConnectedAddress (const SocketHandle handle) noexcept
+    static String getConnectedAddress (SocketHandle handle) noexcept
     {
         struct sockaddr_in addr;
         socklen_t len = sizeof (addr);
@@ -186,10 +186,10 @@ namespace SocketHelpers
         return String ("0.0.0.0");
     }
 
-    static int readSocket (const SocketHandle handle,
+    static int readSocket (SocketHandle handle,
                            void* const destBuffer, const int maxBytesToRead,
                            bool volatile& connected,
-                           const bool blockUntilSpecifiedAmountHasArrived,
+                           bool blockUntilSpecifiedAmountHasArrived,
                            CriticalSection& readLock,
                            String* senderIP = nullptr,
                            int* senderPort = nullptr) noexcept
@@ -199,8 +199,8 @@ namespace SocketHelpers
         while (bytesRead < maxBytesToRead)
         {
             long bytesThisTime = -1;
-            char* const buffer = static_cast<char*> (destBuffer) + bytesRead;
-            const juce_recvsend_size_t numToRead = (juce_recvsend_size_t) (maxBytesToRead - bytesRead);
+            auto buffer = static_cast<char*> (destBuffer) + bytesRead;
+            auto numToRead = (juce_recvsend_size_t) (maxBytesToRead - bytesRead);
 
             {
                 // avoid race-condition
@@ -308,7 +308,7 @@ namespace SocketHelpers
         return FD_ISSET (h, forReading ? &rset : &wset) ? 1 : 0;
     }
 
-    static bool setSocketBlockingState (const SocketHandle handle, const bool shouldBlock) noexcept
+    static bool setSocketBlockingState (SocketHandle handle, const bool shouldBlock) noexcept
     {
        #if JUCE_WINDOWS
         u_long nonBlocking = shouldBlock ? 0 : (u_long) 1;
@@ -338,7 +338,8 @@ namespace SocketHelpers
         hints.ai_flags = AI_NUMERICSERV;
 
         struct addrinfo* info = nullptr;
-        if (getaddrinfo (hostName.toUTF8(), String (portNumber).toUTF8(), &hints, &info) == 0)
+
+        if (getaddrinfo (hostName.toRawUTF8(), String (portNumber).toRawUTF8(), &hints, &info) == 0)
             return info;
 
         return nullptr;
@@ -352,16 +353,16 @@ namespace SocketHelpers
     {
         bool success = false;
 
-        if (struct addrinfo* info = getAddressInfo (false, hostName, portNumber))
+        if (auto* info = getAddressInfo (false, hostName, portNumber))
         {
-            for (struct addrinfo* i = info; i != nullptr; i = i->ai_next)
+            for (auto* i = info; i != nullptr; i = i->ai_next)
             {
-                const SocketHandle newHandle = socket (i->ai_family, i->ai_socktype, 0);
+                auto newHandle = socket (i->ai_family, i->ai_socktype, 0);
 
                 if (newHandle != invalidSocket)
                 {
                     setSocketBlockingState (newHandle, false);
-                    const int result = ::connect (newHandle, i->ai_addr, (socklen_t) i->ai_addrlen);
+                    auto result = ::connect (newHandle, i->ai_addr, (socklen_t) i->ai_addrlen);
                     success = (result >= 0);
 
                     if (! success)
@@ -373,6 +374,7 @@ namespace SocketHelpers
                        #endif
                         {
                             const volatile int cvHandle = (int) newHandle;
+
                             if (waitForReadiness (cvHandle, readLock, false, timeOutMillisecs) == 1)
                                 success = true;
                         }
@@ -430,10 +432,6 @@ namespace SocketHelpers
 
 //==============================================================================
 StreamingSocket::StreamingSocket()
-    : portNumber (0),
-      handle (-1),
-      connected (false),
-      isListener (false)
 {
     SocketHelpers::initSockets();
 }
@@ -442,8 +440,7 @@ StreamingSocket::StreamingSocket (const String& host, int portNum, int h)
     : hostName (host),
       portNumber (portNum),
       handle (h),
-      connected (true),
-      isListener (false)
+      connected (true)
 {
     jassert (SocketHelpers::isValidPortNumber (portNum));
 
@@ -581,7 +578,7 @@ StreamingSocket* StreamingSocket::waitForNextConnection() const
     {
         struct sockaddr_storage address;
         juce_socklen_t len = sizeof (address);
-        const int newSocket = (int) accept (handle, (struct sockaddr*) &address, &len);
+        auto newSocket = (int) accept (handle, (struct sockaddr*) &address, &len);
 
         if (newSocket >= 0 && connected)
             return new StreamingSocket (inet_ntoa (((struct sockaddr_in*) &address)->sin_addr),
@@ -600,22 +597,17 @@ bool StreamingSocket::isLocal() const noexcept
     IPAddress::findAllAddresses (localAddresses);
     IPAddress currentIP (SocketHelpers::getConnectedAddress (handle));
 
-    const int n = localAddresses.size();
-    for (int i = 0; i < n; ++i)
-        if (localAddresses.getReference (i) == currentIP)
+    for (auto& a : localAddresses)
+        if (a == currentIP)
             return true;
 
-    return (hostName == "127.0.0.1");
+    return hostName == "127.0.0.1";
 }
 
 
 //==============================================================================
 //==============================================================================
-DatagramSocket::DatagramSocket (const bool canBroadcast)
-    : handle (-1),
-      isBound (false),
-      lastServerPort (-1),
-      lastServerAddress (nullptr)
+DatagramSocket::DatagramSocket (bool canBroadcast)
 {
     SocketHelpers::initSockets();
 
@@ -641,7 +633,7 @@ void DatagramSocket::shutdown()
     if (handle < 0)
         return;
 
-    int copyOfHandle = handle;
+    auto copyOfHandle = handle;
     handle = -1;
     bool connected = false;
     SocketHelpers::closeSocket (copyOfHandle, readLock, false, 0, connected);
@@ -668,10 +660,7 @@ bool DatagramSocket::bindToPort (const int port, const String& addr)
 
 int DatagramSocket::getBoundPort() const noexcept
 {
-    if (handle < 0)
-        return -1;
-
-    return isBound ? SocketHelpers::getBoundPort (handle) : -1;
+    return (handle >= 0 && isBound) ? SocketHelpers::getBoundPort (handle) : -1;
 }
 
 //==============================================================================

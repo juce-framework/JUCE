@@ -418,7 +418,7 @@ public:
 
     /** Finds the row component for a given row in the list.
 
-        The component returned will have been created using createRowComponent().
+        The component returned will have been created using ListBoxModel::refreshComponentForRow().
 
         If the component for this row is off-screen or if the row is out-of-range,
         this will return nullptr.

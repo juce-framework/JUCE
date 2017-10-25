@@ -44,7 +44,7 @@ typedef void* (MessageCallbackFunction) (void* userData);
 
     @see Message, CallbackMessage, MessageManagerLock, JUCEApplication, JUCEApplicationBase
 */
-class JUCE_API  MessageManager
+class JUCE_API  MessageManager  final
 {
 public:
     //==============================================================================
@@ -186,6 +186,120 @@ public:
     };
 
     //==============================================================================
+    /** A lock you can use to lock the message manager. You can use this class with
+        the RAII-based ScopedLock classes.
+    */
+    class Lock
+    {
+    public:
+        /**
+            Creates a new critical section to exclusively access methods which can
+            only be called when the message manager is locked.
+
+            Unlike CrititcalSection, multiple instances of this lock class provide
+            exclusive access to a single resource - the MessageManager.
+        */
+        Lock();
+
+        /** Destructor. */
+        ~Lock();
+
+        /** Acquires the message manager lock.
+
+            If the caller thread already has exclusive access to the MessageManager, this method
+            will return immediately.
+            If another thread is currently using the MessageManager, this will wait until that
+            thread releases the lock to the MessageManager.
+
+            This call will only exit if the lock was accquired by this thread. Calling abort while
+            a thread is waiting for enter to finish, will have no effect.
+
+            @see exit, abort
+         */
+         void enter() const noexcept;
+
+         /** Attempts to lock the meesage manager and exits if abort is called.
+
+            This method behaves identically to enter, except that it will abort waiting for
+            the lock if the abort method is called.
+
+            Unlike other JUCE critical sections, this method **will** block waiting for the lock.
+
+            To ensure predictable behaviour, you should re-check your abort condition if tryEnter
+            returns false.
+
+            This method can be used if you want to do some work while waiting for the
+            MessageManagerLock:
+
+            void doWorkWhileWaitingForMessageManagerLock()
+            {
+                MessageManager::Lock::ScopedTryLockType mmLock (messageManagerLock);
+
+                while (! mmLock.isLocked())
+                {
+                     while (workQueue.size() > 0)
+                     {
+                          auto work = workQueue.pop();
+                          doSomeWork (work);
+                     }
+
+                     // this will block until we either have the lock or there is work
+                     mmLock.retryLock();
+                }
+
+                // we have the mmlock
+                // do some message manager stuff like resizing and painting components
+            }
+
+            // called from another thread
+            void addWorkToDo (Work work)
+            {
+                 queue.push (work);
+                 messageManagerLock.abort();
+            }
+
+            @returns false if waiting for a lock was aborted, true if the lock was accquired.
+            @see enter, abort, ScopedTryLock
+        */
+        bool tryEnter() const noexcept;
+
+        /** Releases the message manager lock.
+            @see enter, ScopedLock
+        */
+        void exit() const noexcept;
+
+        /** Unblocks a thread which is waiting in tryEnter
+            Call this method if you want to unblock a thread which is waiting for the
+            MessageManager lock in tryEnter.
+            This method does not have any effetc on a thread waiting for a lock in enter.
+            @see tryEnter
+        */
+        void abort() const noexcept;
+
+        //==============================================================================
+        /** Provides the type of scoped lock to use with a CriticalSection. */
+        typedef GenericScopedLock<Lock>       ScopedLockType;
+
+        /** Provides the type of scoped unlocker to use with a CriticalSection. */
+        typedef GenericScopedUnlock<Lock>     ScopedUnlockType;
+
+        /** Provides the type of scoped try-locker to use with a CriticalSection. */
+        typedef GenericScopedTryLock<Lock>    ScopedTryLockType;
+
+    private:
+        struct BlockingMessage;
+        friend class ReferenceCountedObjectPtr<BlockingMessage>;
+
+        bool tryAcquire (bool) const noexcept;
+        void messageCallback() const;
+
+        //==============================================================================
+        mutable ReferenceCountedObjectPtr<BlockingMessage> blockingMessage;
+        WaitableEvent lockedEvent;
+        mutable Atomic<int> abortWait, lockGained;
+    };
+
+    //==============================================================================
    #ifndef DOXYGEN
     // Internal methods - do not use!
     void deliverBroadcastMessage (const String&);
@@ -206,8 +320,7 @@ private:
     ScopedPointer<ActionBroadcaster> broadcaster;
     bool quitMessagePosted = false, quitMessageReceived = false;
     Thread::ThreadID messageThreadId;
-    Thread::ThreadID volatile threadWithLock = {};
-    CriticalSection lockingLock;
+    Atomic<Thread::ThreadID> threadWithLock;
 
     static bool postMessageToSystemQueue (MessageBase*);
     static void* exitModalLoopCallback (void*);
@@ -264,7 +377,7 @@ private:
 
     @see MessageManager, MessageManager::currentThreadHasLockedMessageManager
 */
-class JUCE_API MessageManagerLock
+class JUCE_API MessageManagerLock      : private Thread::Listener
 {
 public:
     //==============================================================================
@@ -320,23 +433,6 @@ public:
     MessageManagerLock (ThreadPoolJob* jobToCheckForExitSignal);
 
     //==============================================================================
-    struct BailOutChecker
-    {
-        virtual ~BailOutChecker() {}
-
-        /** Return true if acquiring the lock should be aborted. */
-        virtual bool shouldAbortAcquiringLock() = 0;
-    };
-
-    /** This is an abstraction of the other constructors. You can pass this constructor
-        a functor which is periodically checked if attempting the lock should be aborted.
-
-        See the MessageManagerLock (Thread*) constructor for details on how this works.
-     */
-     MessageManagerLock (BailOutChecker&);
-
-
-    //==============================================================================
     /** Releases the current thread's lock on the message manager.
 
         Make sure this object is created and deleted by the same thread,
@@ -351,29 +447,13 @@ public:
     bool lockWasGained() const noexcept                     { return locked; }
 
 private:
-    class BlockingMessage;
-    friend class ReferenceCountedObjectPtr<BlockingMessage>;
-    ReferenceCountedObjectPtr<BlockingMessage> blockingMessage;
-
-    struct ThreadChecker : BailOutChecker
-    {
-        ThreadChecker (Thread* const, ThreadPoolJob* const);
-
-        // Required to supress VS2013 compiler warnings
-        ThreadChecker& operator= (const ThreadChecker&) = delete;
-
-        bool shouldAbortAcquiringLock() override;
-
-        Thread* const threadToCheck;
-        ThreadPoolJob* const job;
-    };
-
     //==============================================================================
-    ThreadChecker checker;
+    MessageManager::Lock mmLock;
     bool locked;
 
     //==============================================================================
-    bool attemptLock (BailOutChecker*);
+    bool attemptLock (Thread*, ThreadPoolJob*);
+    void exitSignalSent() override;
 
     JUCE_DECLARE_NON_COPYABLE (MessageManagerLock)
 };

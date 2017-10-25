@@ -29,7 +29,7 @@ namespace juce
 
     You can create a Random object and use it to generate a sequence of random numbers.
 */
-class JUCE_API  Random
+class JUCE_API  Random  final
 {
 public:
     //==============================================================================

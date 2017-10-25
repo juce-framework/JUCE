@@ -610,6 +610,7 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, const int windowStyle
 
 UIViewComponentPeer::~UIViewComponentPeer()
 {
+    currentTouches.deleteAllTouchesForPeer (this);
     Desktop::getInstance().removeFocusChangeListener (this);
 
     view->owner = nullptr;
@@ -841,7 +842,7 @@ void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, cons
         juce_lastMousePos = pos + getBounds (true).getPosition().toFloat();
 
         const int64 time = getMouseTime (event);
-        const int touchIndex = currentTouches.getIndexOfTouch (touch);
+        const int touchIndex = currentTouches.getIndexOfTouch (this, touch);
 
         ModifierKeys modsToSend (currentModifiers);
 

@@ -33,7 +33,7 @@ namespace juce
 
     @see NamedValueSet, ValueTree
 */
-class JUCE_API  Identifier
+class JUCE_API  Identifier  final
 {
 public:
     /** Creates a null identifier. */

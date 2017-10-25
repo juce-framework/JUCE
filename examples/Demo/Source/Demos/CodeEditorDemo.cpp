@@ -54,6 +54,8 @@ public:
         // Create a file chooser control to load files into it..
         addAndMakeVisible (fileChooser);
         fileChooser.addListener (this);
+
+        lookAndFeelChanged();
     }
 
     ~CodeEditorDemo()
@@ -90,6 +92,82 @@ private:
     void filenameComponentChanged (FilenameComponent*) override
     {
         editor->loadContent (fileChooser.getCurrentFile().loadFileAsString());
+    }
+
+    void lookAndFeelChanged() override
+    {
+        if (auto* v4 = dynamic_cast<LookAndFeel_V4*> (&LookAndFeel::getDefaultLookAndFeel()))
+        {
+            auto useLight = v4->getCurrentColourScheme() == LookAndFeel_V4::getLightColourScheme();
+            editor->setColourScheme (useLight ? getLightCodeEditorColourScheme()
+                                              : getDarkCodeEditorColourScheme());
+        }
+        else
+        {
+            editor->setColourScheme (cppTokeniser.getDefaultColourScheme());
+        }
+    }
+
+    CodeEditorComponent::ColourScheme getDarkCodeEditorColourScheme()
+    {
+        struct Type
+        {
+            const char* name;
+            juce::uint32 colour;
+        };
+
+        const Type types[] =
+        {
+            { "Error",              0xffe60000 },
+            { "Comment",            0xff72d20c },
+            { "Keyword",            0xffee6f6f },
+            { "Operator",           0xffc4eb19 },
+            { "Identifier",         0xffcfcfcf },
+            { "Integer",            0xff42c8c4 },
+            { "Float",              0xff885500 },
+            { "String",             0xffbc45dd },
+            { "Bracket",            0xff058202 },
+            { "Punctuation",        0xffcfbeff },
+            { "Preprocessor Text",  0xfff8f631 }
+        };
+
+        CodeEditorComponent::ColourScheme cs;
+
+        for (auto& t : types)
+            cs.set (t.name, Colour (t.colour));
+
+        return cs;
+    }
+
+    CodeEditorComponent::ColourScheme getLightCodeEditorColourScheme()
+    {
+        struct Type
+        {
+            const char* name;
+            juce::uint32 colour;
+        };
+
+        const Type types[] =
+        {
+            { "Error",              0xffcc0000 },
+            { "Comment",            0xff00aa00 },
+            { "Keyword",            0xff0000cc },
+            { "Operator",           0xff225500 },
+            { "Identifier",         0xff000000 },
+            { "Integer",            0xff880000 },
+            { "Float",              0xff885500 },
+            { "String",             0xff990099 },
+            { "Bracket",            0xff000055 },
+            { "Punctuation",        0xff004400 },
+            { "Preprocessor Text",  0xff660000 }
+        };
+
+        CodeEditorComponent::ColourScheme cs;
+
+        for (auto& t : types)
+            cs.set (t.name, Colour (t.colour));
+
+        return cs;
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CodeEditorDemo)

@@ -82,6 +82,15 @@ void HyperlinkButton::changeWidthToFitText()
     setSize (getFontToUse().getStringWidth (getButtonText()) + 6, getHeight());
 }
 
+void HyperlinkButton::setJustificationType (Justification newJustification)
+{
+    if (justification != newJustification)
+    {
+        justification = newJustification;
+        repaint();
+    }
+}
+
 void HyperlinkButton::colourChanged()
 {
     repaint();

@@ -72,7 +72,7 @@ struct NewProjectWizard
 
     virtual StringArray getDefaultModules()
     {
-        static const char* mods[] =
+        return
         {
             "juce_core",
             "juce_events",
@@ -86,11 +86,8 @@ struct NewProjectWizard
             "juce_audio_basics",
             "juce_audio_devices",
             "juce_audio_formats",
-            "juce_audio_processors",
-            nullptr
+            "juce_audio_processors"
         };
-
-        return StringArray (mods);
     }
 
     String appTitle;

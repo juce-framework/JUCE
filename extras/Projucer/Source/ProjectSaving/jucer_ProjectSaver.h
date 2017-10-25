@@ -96,7 +96,7 @@ public:
             writeBinaryDataFiles();
             writeAppHeader (modules);
             writeModuleCppWrappers (modules);
-            writeProjects (modules, specifiedExporterToSave);
+            writeProjects (modules, specifiedExporterToSave, ! showProgressBox);
             writeAppConfigFile (modules, appConfigUserContent); // (this is repeated in case the projects added anything to it)
 
             if (generatedCodeFolder.exists())
@@ -659,56 +659,21 @@ private:
 
     void writePluginCharacteristicsFile();
 
-    void writeProjects (const OwnedArray<LibraryModule>& modules, const String& specifiedExporterToSave)
+    void writeProjects (const OwnedArray<LibraryModule>&, const String&, bool);
+
+    void saveExporter (ProjectExporter* exporter, const OwnedArray<LibraryModule>& modules)
     {
-        ThreadPool threadPool;
-
-        // keep a copy of the basic generated files group, as each exporter may modify it.
-        const ValueTree originalGeneratedGroup (generatedFilesGroup.state.createCopy());
-
         try
         {
-            for (Project::ExporterIterator exporter (project); exporter.next();)
-            {
-                if (specifiedExporterToSave.isNotEmpty() && exporter->getName() != specifiedExporterToSave)
-                    continue;
+            exporter->create (modules);
 
-                exporter->initialiseDependencyPathValues();
-
-                if (exporter->getTargetFolder().createDirectory())
-                {
-                    exporter->copyMainGroupFromProject();
-                    exporter->settings = exporter->settings.createCopy();
-
-                    exporter->addToExtraSearchPaths (RelativePath ("JuceLibraryCode", RelativePath::projectFolder));
-
-                    generatedFilesGroup.state = originalGeneratedGroup.createCopy();
-                    exporter->addSettingsForProjectType (project.getProjectType());
-
-                    for (auto& module: modules)
-                        module->addSettingsForModuleToExporter (*exporter, *this);
-
-                    if (project.getProjectType().isAudioPlugin())
-                        writePluginCharacteristicsFile();
-
-                    generatedFilesGroup.sortAlphabetically (true, true);
-                    exporter->getAllGroups().add (generatedFilesGroup);
-
-                    threadPool.addJob (new ExporterJob (*this, exporter.exporter.release(), modules), true);
-                }
-                else
-                {
-                    addError ("Can't create folder: " + exporter->getTargetFolder().getFullPathName());
-                }
-            }
+            if (! exporter->isCLion())
+                std::cout << "Finished saving: " << exporter->getName() << std::endl;
         }
-        catch (ProjectExporter::SaveError& saveError)
+        catch (ProjectExporter::SaveError& error)
         {
-            addError (saveError.message);
+            addError (error.message);
         }
-
-        while (threadPool.getNumJobs() > 0)
-            Thread::sleep (10);
     }
 
     class ExporterJob   : public ThreadPoolJob
@@ -723,16 +688,7 @@ private:
 
         JobStatus runJob() override
         {
-            try
-            {
-                exporter->create (modules);
-                std::cout << "Finished saving: " << exporter->getName() << std::endl;
-            }
-            catch (ProjectExporter::SaveError& error)
-            {
-                owner.addError (error.message);
-            }
-
+            owner.saveExporter (exporter, modules);
             return jobHasFinished;
         }
 

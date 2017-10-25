@@ -1651,6 +1651,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_PreferencesPanel.cpp">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_PushNotifications.cpp">
+      <Filter>Juce Modules\juce_gui_extra\misc</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_RecentlyOpenedFilesList.cpp">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClCompile>
@@ -1660,7 +1663,13 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_SystemTrayIconComponent.cpp">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\native\juce_android_PushNotifications.cpp">
+      <Filter>Juce Modules\juce_gui_extra\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\native\juce_android_WebBrowserComponent.cpp">
+      <Filter>Juce Modules\juce_gui_extra\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\native\juce_ios_PushNotifications.cpp">
       <Filter>Juce Modules\juce_gui_extra\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\native\juce_ios_UIViewComponent.mm">
@@ -2116,6 +2125,9 @@
       <Filter>Projucer\Project</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_Android.h">
+      <Filter>Projucer\ProjectSaving</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_CLion.h">
       <Filter>Projucer\ProjectSaving</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_CodeBlocks.h">
@@ -3390,6 +3402,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_PreferencesPanel.h">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_PushNotifications.h">
+      <Filter>Juce Modules\juce_gui_extra\misc</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_RecentlyOpenedFilesList.h">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClInclude>
@@ -3435,6 +3450,9 @@
       <Filter>Projucer\BinaryData\Icons</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\Icons\export_android.svg">
+      <Filter>Projucer\BinaryData\Icons</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\Icons\export_clion.svg">
       <Filter>Projucer\BinaryData\Icons</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\Icons\export_codeBlocks.svg">
@@ -3508,6 +3526,9 @@
     </None>
     <None Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\libpng_readme.txt">
       <Filter>Juce Modules\juce_graphics\image_formats\pnglib</Filter>
+    </None>
+    <None Include=".\icon.ico">
+      <Filter>Juce Library Code</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

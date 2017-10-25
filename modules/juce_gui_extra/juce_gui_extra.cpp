@@ -35,9 +35,14 @@
 
 #define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
 #define JUCE_CORE_INCLUDE_COM_SMART_PTR 1
+#define JUCE_CORE_INCLUDE_JNI_HELPERS 1
 #define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
 #define JUCE_EVENTS_INCLUDE_WIN32_MESSAGE_WINDOW 1
 #define JUCE_GRAPHICS_INCLUDE_COREGRAPHICS_HELPERS 1
+
+#ifndef JUCE_PUSH_NOTIFICATIONS
+ #define JUCE_PUSH_NOTIFICATIONS 0
+#endif
 
 #include "juce_gui_extra.h"
 
@@ -50,7 +55,21 @@
  #import <IOKit/hid/IOHIDKeys.h>
  #import <IOKit/pwr_mgt/IOPMLib.h>
 
+//==============================================================================
 #elif JUCE_IOS
+ #if JUCE_PUSH_NOTIFICATIONS
+  #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+   #import <UserNotifications/UserNotifications.h>
+  #endif
+
+  #include "native/juce_ios_PushNotifications.cpp"
+ #endif
+
+//==============================================================================
+#elif JUCE_ANDROID
+ #if JUCE_PUSH_NOTIFICATIONS
+  #include "native/juce_android_PushNotifications.cpp"
+ #endif
 
 //==============================================================================
 #elif JUCE_WINDOWS
@@ -93,6 +112,7 @@
 #include "misc/juce_ColourSelector.cpp"
 #include "misc/juce_KeyMappingEditorComponent.cpp"
 #include "misc/juce_PreferencesPanel.cpp"
+#include "misc/juce_PushNotifications.cpp"
 #include "misc/juce_RecentlyOpenedFilesList.cpp"
 #include "misc/juce_SplashScreen.cpp"
 #include "misc/juce_SystemTrayIconComponent.cpp"

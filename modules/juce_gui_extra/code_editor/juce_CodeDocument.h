@@ -357,8 +357,8 @@ public:
     {
     public:
         Iterator (const CodeDocument& document) noexcept;
-        Iterator (const Iterator&) noexcept = default;
-        Iterator& operator= (const Iterator&) noexcept = default;
+        Iterator (const Iterator&) = default;
+        Iterator& operator= (const Iterator&) = default;
         ~Iterator() noexcept;
 
         /** Reads the next character and returns it.

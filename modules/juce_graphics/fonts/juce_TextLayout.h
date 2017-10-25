@@ -36,7 +36,7 @@ namespace juce
 
     @see AttributedString
 */
-class JUCE_API  TextLayout
+class JUCE_API  TextLayout  final
 {
 public:
     /** Creates an empty layout.

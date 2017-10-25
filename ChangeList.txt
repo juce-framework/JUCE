@@ -93,7 +93,7 @@ Version 5.0.0
   - Added support for IPv6
   - Various minor improvements and bug fixes
   - Various documentation improvements
- 
+
 Version 4.3.1
   - Added support for iOS download tasks
   - Added support for AAX plug-in meters

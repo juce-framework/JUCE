@@ -326,7 +326,7 @@ struct FontPlaceholderNames
            regular { "<Regular>" };
 };
 
-const FontPlaceholderNames& getFontPlaceholderNames()
+static const FontPlaceholderNames& getFontPlaceholderNames()
 {
     static FontPlaceholderNames names;
     return names;

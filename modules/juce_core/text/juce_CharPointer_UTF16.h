@@ -29,7 +29,7 @@ namespace juce
     various methods to operate on the data.
     @see CharPointer_UTF8, CharPointer_UTF32
 */
-class CharPointer_UTF16
+class CharPointer_UTF16  final
 {
 public:
    #if JUCE_NATIVE_WCHAR_IS_UTF16

@@ -37,6 +37,7 @@ public:
     bool isCodeBlocks() const override           { return false; }
     bool isMakefile() const override             { return false; }
     bool isAndroidStudio() const override        { return true;  }
+    bool isCLion() const override                { return false; }
 
     bool isAndroid() const override              { return true; }
     bool isWindows() const override              { return false; }
@@ -106,8 +107,11 @@ public:
 
     CachedValue<bool>   androidInternetNeeded, androidMicNeeded, androidBluetoothNeeded,
                         androidExternalReadPermission, androidExternalWritePermission,
-                        androidInAppBillingPermission;
+                        androidInAppBillingPermission, androidVibratePermission;
     CachedValue<String> androidOtherPermissions;
+
+    CachedValue<bool>   androidEnableRemoteNotifications;
+    CachedValue<String> androidRemoteNotificationsConfigFile;
 
     CachedValue<String> androidKeyStore, androidKeyStorePass, androidKeyAlias, androidKeyAliasPass;
 
@@ -134,7 +138,10 @@ public:
           androidExternalReadPermission  (settings, Ids::androidExternalReadNeeded, nullptr, true),
           androidExternalWritePermission (settings, Ids::androidExternalWriteNeeded, nullptr, true),
           androidInAppBillingPermission (settings, Ids::androidInAppBilling, nullptr, false),
+          androidVibratePermission (settings, Ids::androidVibratePermissionNeeded, nullptr, false),
           androidOtherPermissions (settings, Ids::androidOtherPermissions, nullptr),
+          androidEnableRemoteNotifications (settings, Ids::androidEnableRemoteNotifications, nullptr, false),
+          androidRemoteNotificationsConfigFile (settings, Ids::androidRemoteNotificationsConfigFile, nullptr, ""),
           androidKeyStore (settings, Ids::androidKeyStore, nullptr, "${user.home}/.android/debug.keystore"),
           androidKeyStorePass (settings, Ids::androidKeyStorePass, nullptr, "android"),
           androidKeyAlias (settings, Ids::androidKeyAlias, nullptr, "androiddebugkey"),
@@ -326,6 +333,9 @@ protected:
         Value getAdditionalXmlResourcesValue()    { return getValue (Ids::androidAdditionalXmlValueResources); }
         String getAdditionalXmlResources() const  { return config [Ids::androidAdditionalXmlValueResources]; }
 
+        Value getAdditionalRawResourcesValue()    { return getValue (Ids::androidAdditionalRawValueResources); }
+        String getAdditionalRawResources() const  { return config [Ids::androidAdditionalRawValueResources]; }
+
         Value getCustomStringsXmlValue()        { return getValue (Ids::androidCustomStringXmlElements); }
         String getCustomStringsXml() const      { return config [Ids::androidCustomStringXmlElements]; }
 
@@ -342,8 +352,14 @@ protected:
                        "Paths to additional \"value resource\" files in XML format that should be included in the app (one per line). "
                        "If you have additional XML resources that should be treated as value resources, add them here.");
 
-            props.add (new TextPropertyComponent (getCustomStringsXmlValue(), "Custom string.xml elements", 8192, true),
-                       "You can specify custom XML elements that will be added to string.xml as children of <resources> element.");
+            props.add (new TextPropertyComponent (getAdditionalRawResourcesValue(), "Extra Android Raw Resources", 2048, true),
+                       "Paths to additional \"raw resource\" files that should be included in the app (one per line). "
+                       "Resource file names must contain only lowercase a-z, 0-9 or underscore.");
+
+            props.add (new TextPropertyComponent (getCustomStringsXmlValue(), "Custom string resources", 8192, true),
+                       "Custom XML resources that will be added to string.xml as children of <resources> element. "
+                       "Example: \n<string name=\"value\">text</string>\n"
+                       "<string name2=\"value2\">text2</string>\n");
         }
 
         String getProductFlavourNameIdentifier() const
@@ -359,6 +375,11 @@ protected:
         String getModuleLibraryArchName() const override
         {
             return "${ANDROID_ABI}";
+        }
+
+        String getLinkerFlagsString() const
+        {
+            return String ("\"-DCMAKE_EXE_LINKER_FLAGS_") + (isDebug() ? "DEBUG" : "RELEASE") + "=-flto\"";
         }
     };
 
@@ -407,6 +428,8 @@ private:
             mo << "SET( JUCE_LDFLAGS \"" << cfgExtraLinkerFlags.replace ("\"", "\\\"") << "\")" << newLine;
             mo << "SET( CMAKE_SHARED_LINKER_FLAGS  \"${CMAKE_EXE_LINKER_FLAGS} ${JUCE_LDFLAGS}\")" << newLine << newLine;
         }
+
+        mo << "enable_language(ASM)" << newLine << newLine;
 
         StringArray userLibraries = StringArray::fromTokens(getExternalLibrariesString(), ";", "");
         userLibraries.addArray (androidLibs);
@@ -525,12 +548,24 @@ private:
         mo << "   }"                                                                                   << newLine;
         mo << "   dependencies {"                                                                      << newLine;
         mo << "       classpath 'com.android.tools.build:gradle:" << androidPluginVersion.get() << "'" << newLine;
+
+        if (androidEnableRemoteNotifications.get())
+            mo << "       classpath 'com.google.gms:google-services:3.1.0'" << newLine;
+
         mo << "   }"                                                                                   << newLine;
         mo << "}"                                                                                      << newLine;
         mo << ""                                                                                       << newLine;
         mo << "allprojects {"                                                                          << newLine;
         mo << "   repositories {"                                                                      << newLine;
         mo << "       jcenter()"                                                                       << newLine;
+
+        if (androidEnableRemoteNotifications.get())
+        {
+            mo << "       maven {"                                                                     << newLine;
+            mo << "           url \"https://maven.google.com\""                                        << newLine;
+            mo << "       }"                                                                           << newLine;
+        }
+
         mo << "   }"                                                                                   << newLine;
         mo << "}"                                                                                      << newLine;
 
@@ -560,6 +595,7 @@ private:
 
         mo << getAndroidRepositories()                                            << newLine;
         mo << getAndroidDependencies()                                            << newLine;
+        mo << getApplyPlugins()                                                   << newLine;
 
         mo << "}"                                                                 << newLine << newLine;
 
@@ -595,7 +631,9 @@ private:
                                            << ", \"-DCMAKE_CXX_FLAGS_" << (cfg.isDebug() ? "DEBUG" : "RELEASE")
                                            << "=-O" << cfg.getGCCOptimisationFlag() << "\""
                                            << ", \"-DCMAKE_C_FLAGS_"   << (cfg.isDebug() ? "DEBUG" : "RELEASE")
-                                           << "=-O" << cfg.getGCCOptimisationFlag() << "\"" << newLine;
+                                           << "=-O" << cfg.getGCCOptimisationFlag() << "\""
+                                           << (cfg.isLinkTimeOptimisationEnabled() ? ", " + cfg.getLinkerFlagsString() : "")
+                                           << newLine;
             mo << "                }"                   << newLine;
             mo << "            }"                       << newLine;
             mo << "       }"                            << newLine;
@@ -738,12 +776,28 @@ private:
         juce::StringArray  dependencies;
         dependencies.addLines (androidDependencies.get());
 
-        mo << "dependencies {"                << newLine;
+        mo << "dependencies {" << newLine;
+
+        if (androidEnableRemoteNotifications.get())
+        {
+            mo << "    'com.google.firebase:firebase-core:11.4.0'" << newLine;
+            mo << "    compile 'com.google.firebase:firebase-messaging:11.4.0'" << newLine;
+        }
 
         for (const auto& d : dependencies)
             mo << "    " << d << newLine;
 
-        mo << "}"                             << newLine;
+        mo << "}" << newLine;
+
+        return mo.toString();
+    }
+
+    String getApplyPlugins() const
+    {
+        MemoryOutputStream mo;
+
+        if (androidEnableRemoteNotifications.get())
+            mo << "apply plugin: 'com.google.gms.google-services'" << newLine;
 
         return mo.toString();
     }
@@ -828,11 +882,23 @@ private:
         props.add (new BooleanPropertyComponent (androidInAppBillingPermission.getPropertyAsValue(), "In-App Billing", "Specify In-App Billing permission in the manifest"),
                    "If enabled, this will set the com.android.vending.BILLING flag in the manifest.");
 
+        props.add (new BooleanPropertyComponent (androidVibratePermission.getPropertyAsValue(), "Vibrate", "Specify permissions to vibrate"),
+                   "If enabled, this will set the android.permission.VIBRATE flag in the manifest.");
+
         props.add (new TextPropertyComponent (androidOtherPermissions.getPropertyAsValue(), "Custom permissions", 2048, false),
                    "A space-separated list of other permission flags that should be added to the manifest.");
 
-        props.add (new TextPropertyComponent (androidManifestCustomXmlElements.getPropertyAsValue(), "Custom manifest xml elements", 8192, true),
-                   "You can specify custom XML elements that will be added to AndroidManifest.xml as children of <application> element.");
+        props.add (new BooleanPropertyComponent (androidEnableRemoteNotifications.getPropertyAsValue(), "Remote Notifications", "Enabled"),
+                   "Enable to be able to send remote notifications to devices running your app (min API level 14). Provide Remote Notifications Config File, "
+                   "configure your app in Firebase Console and ensure you have the latest Google Repository in Android Studio's SDK Manager.");
+
+        props.add (new TextPropertyComponent (androidRemoteNotificationsConfigFile.getPropertyAsValue(), "Remote Notifications Config File", 2048, false),
+                   "Path to google-services.json file. This will be the file provided by Firebase when creating a new app in Firebase console.");
+
+        props.add (new TextPropertyComponent (androidManifestCustomXmlElements.getPropertyAsValue(), "Custom manifest XML content", 8192, true),
+                   "You can specify custom AndroidManifest.xml content overriding the default one generated by Projucer. "
+                   "Projucer will automatically create any missing and required XML elements and attributes "
+                   "and merge them into your custom content.");
     }
 
     //==============================================================================
@@ -887,13 +953,14 @@ private:
             auto package = getActivityClassPackage();
             auto targetFolder = getTargetFolder();
 
-            auto inAppBillingPath = String ("com.android.vending.billing").replaceCharacter ('.', File::separator);
+            auto inAppBillingPath = String ("com.android.vending.billing").replaceCharacter ('.', File::getSeparatorChar());
             auto javaSourceFolder = coreModule->getFolder().getChildFile ("native").getChildFile ("java");
             auto javaInAppBillingTarget = targetFolder.getChildFile ("app/src/main/java").getChildFile (inAppBillingPath);
-            auto javaActivityTarget = targetFolder.getChildFile ("app/src/main/java")
-                                                  .getChildFile (package.replaceCharacter ('.', File::separator));
+            auto javaTarget = targetFolder.getChildFile ("app/src/main/java")
+                                          .getChildFile (package.replaceCharacter ('.', File::getSeparatorChar()));
 
-            copyActivityJavaFiles (javaSourceFolder, javaActivityTarget, package);
+            copyActivityJavaFiles (javaSourceFolder, javaTarget, package);
+            copyServicesJavaFiles (javaSourceFolder, javaTarget, package);
             copyAdditionalJavaFiles (javaSourceFolder, javaInAppBillingTarget);
         }
     }
@@ -982,21 +1049,59 @@ private:
             inAppBillingJavaSrcFile.copyFileTo (inAppBillingJavaDestFile);
     }
 
+    void copyServicesJavaFiles (const File& javaSourceFolder, const File& targetFolder, const String& package) const
+    {
+        if (androidEnableRemoteNotifications.get())
+        {
+            String instanceIdFileName = "JuceFirebaseInstanceIdService.java";
+            String messagingFileName  = "JuceFirebaseMessagingService.java";
+
+            File instanceIdFile (javaSourceFolder.getChildFile (instanceIdFileName));
+            File messagingFile  (javaSourceFolder.getChildFile (messagingFileName));
+
+            jassert (instanceIdFile.existsAsFile());
+            jassert (messagingFile .existsAsFile());
+
+            Array<File> files;
+            files.add (instanceIdFile);
+            files.add (messagingFile);
+
+            for (const auto& file : files)
+            {
+                auto newContent = file.loadFileAsString()
+                                      .replace ("package com.juce;", "package " + package + ";");
+                auto targetFile = targetFolder.getChildFile (file.getFileName());
+                overwriteFileIfDifferentOrThrow (targetFile, newContent);
+            }
+        }
+    }
+
     void copyExtraResourceFiles() const
     {
         for (ConstConfigIterator config (*this); config.next();)
         {
             const auto& cfg = dynamic_cast<const AndroidBuildConfiguration&> (*config);
-            const juce::String path = cfg.isDebug() ? "app/src/debug/res/values" : "app/src/release/res/values";
+            const String xmlValuesPath = cfg.isDebug() ? "app/src/debug/res/values" : "app/src/release/res/values";
+            const String rawPath = cfg.isDebug() ? "app/src/debug/res/raw" : "app/src/release/res/raw";
 
-            copyExtraResourceFiles (cfg.getAdditionalXmlResources(), path);
+            copyExtraResourceFiles (cfg.getAdditionalXmlResources(), xmlValuesPath);
+            copyExtraResourceFiles (cfg.getAdditionalRawResources(), rawPath);
+        }
+
+        if (androidEnableRemoteNotifications.get())
+        {
+            File file (getProject().getFile().getChildFile (androidRemoteNotificationsConfigFile.get()));
+            // Settings file must be present for remote notifications to work and it must be called google-services.json.
+            jassert (file.existsAsFile() && file.getFileName() == "google-services.json");
+
+            copyExtraResourceFiles (androidRemoteNotificationsConfigFile.get(), "app");
         }
     }
 
-    void copyExtraResourceFiles (const juce::String& xmlResources, const juce::String& dstRelativePath) const
+    void copyExtraResourceFiles (const String& resources, const String& dstRelativePath) const
     {
-        juce::StringArray resourcePaths;
-        resourcePaths.addTokens (xmlResources, true);
+        StringArray resourcePaths;
+        resourcePaths.addTokens (resources, true);
 
         const File parentFolder (getTargetFolder().getChildFile (dstRelativePath));
 
@@ -1004,7 +1109,7 @@ private:
 
         for (const auto& path : resourcePaths)
         {
-            juce::File file (getProject().getFile().getChildFile(path));
+            File file (getProject().getFile().getChildFile (path));
 
             jassert (file.existsAsFile());
 
@@ -1064,21 +1169,19 @@ private:
     {
         for (ConstConfigIterator config (*this); config.next();)
         {
-            XmlElement strings ("resources");
-            XmlElement* resourceName = strings.createNewChildElement ("string");
-
-            resourceName->setAttribute ("name", "app_name");
-            resourceName->addTextElement (projectName);
-
             const auto& cfg = dynamic_cast<const AndroidBuildConfiguration&> (*config);
 
-            for (XmlElement* e = XmlDocument::parse (cfg.getCustomStringsXml()); e != nullptr; e = e->getNextElement())
-                strings.addChildElement (e);
+            String customStringsXmlContent = "<resources>\n";
+            customStringsXmlContent << "<string name=\"app_name\">" << projectName << "</string>\n";
+            customStringsXmlContent << cfg.getCustomStringsXml();
+            customStringsXmlContent << "\n</resources>";
+
+            ScopedPointer<XmlElement> strings = XmlDocument::parse (customStringsXmlContent);
 
             const juce::String dir     = cfg.isDebug() ? "debug" : "release";
             const juce::String subPath = "app/src/" + dir + "/res/values/string.xml";
 
-            writeXmlOrThrow (strings, folder.getChildFile (subPath), "utf-8", 100, true);
+            writeXmlOrThrow (*strings, folder.getChildFile (subPath), "utf-8", 100, true);
         }
     }
 
@@ -1225,7 +1328,6 @@ private:
     StringArray getProjectCxxCompilerFlags() const
     {
         StringArray cxxFlags (getAndroidCxxCompilerFlags());
-
         cxxFlags.addArray (getEscapedFlags (StringArray::fromTokens (getExtraCompilerFlagsString(), true)));
         return cxxFlags;
     }
@@ -1239,9 +1341,18 @@ private:
         defines.set ("JUCE_ANDROID_API_VERSION", androidMinimumSDK.get());
         defines.set ("JUCE_ANDROID_ACTIVITY_CLASSNAME", getJNIActivityClassName().replaceCharacter ('/', '_'));
         defines.set ("JUCE_ANDROID_ACTIVITY_CLASSPATH", "\"" + getJNIActivityClassName() + "\"");
+        defines.set ("JUCE_PUSH_NOTIFICATIONS", "1");
 
         if (androidInAppBillingPermission.get())
             defines.set ("JUCE_IN_APP_PURCHASES", "1");
+
+        if (androidEnableRemoteNotifications.get())
+        {
+            auto instanceIdClassName = getActivityClassPackage() + ".JuceFirebaseInstanceIdService";
+            auto messagingClassName  = getActivityClassPackage() + ".JuceFirebaseMessagingService";
+            defines.set ("JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME", instanceIdClassName.replaceCharacter ('.', '_'));
+            defines.set ("JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME", messagingClassName.replaceCharacter ('.', '_'));
+        }
 
         if (supportsGLv3())
             defines.set ("JUCE_ANDROID_GL_ES_VERSION_3_0", "1");
@@ -1356,28 +1467,39 @@ private:
     //==============================================================================
     XmlElement* createManifestXML() const
     {
-        XmlElement* manifest = new XmlElement ("manifest");
+        XmlElement* manifest = XmlDocument::parse (androidManifestCustomXmlElements.get());
 
-        manifest->setAttribute ("xmlns:android", "http://schemas.android.com/apk/res/android");
-        manifest->setAttribute ("android:versionCode", androidVersionCode.get());
-        manifest->setAttribute ("android:versionName",  project.getVersionString());
-        manifest->setAttribute ("package", getActivityClassPackage());
+        if (manifest == nullptr)
+            manifest = new XmlElement ("manifest");
+
+        setAttributeIfNotPresent (*manifest, "xmlns:android", "http://schemas.android.com/apk/res/android");
+        setAttributeIfNotPresent (*manifest, "android:versionCode", androidVersionCode.get());
+        setAttributeIfNotPresent (*manifest, "android:versionName",  project.getVersionString());
+        setAttributeIfNotPresent (*manifest, "package", getActivityClassPackage());
 
         if (! isLibrary())
         {
-            XmlElement* screens = manifest->createNewChildElement ("supports-screens");
-            screens->setAttribute ("android:smallScreens", "true");
-            screens->setAttribute ("android:normalScreens", "true");
-            screens->setAttribute ("android:largeScreens", "true");
-            screens->setAttribute ("android:anyDensity", "true");
+            if (manifest->getChildByName ("supports-screens") == nullptr)
+            {
+                XmlElement* screens = manifest->createNewChildElement ("supports-screens");
+                screens->setAttribute ("android:smallScreens", "true");
+                screens->setAttribute ("android:normalScreens", "true");
+                screens->setAttribute ("android:largeScreens", "true");
+                screens->setAttribute ("android:anyDensity", "true");
+            }
         }
 
-        XmlElement* sdk = manifest->createNewChildElement ("uses-sdk");
-        sdk->setAttribute ("android:minSdkVersion", androidMinimumSDK.get());
-        sdk->setAttribute ("android:targetSdkVersion", androidMinimumSDK.get());
+        auto* sdk = getOrCreateChildWithName (*manifest, "uses-sdk");
+        setAttributeIfNotPresent (*sdk, "android:minSdkVersion", androidMinimumSDK.get());
+        setAttributeIfNotPresent (*sdk, "android:targetSdkVersion", androidMinimumSDK.get());
 
         {
-            const StringArray permissions (getPermissionsRequired());
+            StringArray permissions (getPermissionsRequired());
+
+            forEachXmlChildElementWithTagName (*manifest, child, "uses-permission")
+            {
+                permissions.removeString (child->getStringAttribute ("android:name"), false);
+            }
 
             for (int i = permissions.size(); --i >= 0;)
                 manifest->createNewChildElement ("uses-permission")->setAttribute ("android:name", permissions[i]);
@@ -1385,19 +1507,33 @@ private:
 
         if (project.getModules().isModuleEnabled ("juce_opengl"))
         {
-            XmlElement* feature = manifest->createNewChildElement ("uses-feature");
-            feature->setAttribute ("android:glEsVersion", (androidMinimumSDK.get().getIntValue() >= 18 ? "0x00030000" : "0x00020000"));
-            feature->setAttribute ("android:required", "true");
+            XmlElement* glVersion = nullptr;
+
+            forEachXmlChildElementWithTagName (*manifest, child, "uses-feature")
+            {
+                if (child->getStringAttribute ("android:glEsVersion").isNotEmpty())
+                {
+                    glVersion = child;
+                    break;
+                }
+            }
+
+            if (glVersion == nullptr)
+                glVersion = manifest->createNewChildElement ("uses-feature");
+
+            setAttributeIfNotPresent (*glVersion, "android:glEsVersion", (androidMinimumSDK.get().getIntValue() >= 18 ? "0x00030000" : "0x00020000"));
+            setAttributeIfNotPresent (*glVersion, "android:required", "true");
         }
 
         if (! isLibrary())
         {
-            XmlElement* app = manifest->createNewChildElement ("application");
-            app->setAttribute ("android:label", "@string/app_name");
+            auto* app = getOrCreateChildWithName (*manifest, "application");
+            setAttributeIfNotPresent (*app, "android:label", "@string/app_name");
 
             if (androidTheme.get().isNotEmpty())
-                app->setAttribute ("android:theme", androidTheme.get());
+                setAttributeIfNotPresent (*app, "android:theme", androidTheme.get());
 
+            if (! app->hasAttribute ("android:icon"))
             {
                 ScopedPointer<Drawable> bigIcon (getBigIcon()), smallIcon (getSmallIcon());
 
@@ -1407,27 +1543,82 @@ private:
 
             if (androidMinimumSDK.get().getIntValue() >= 11)
                 app->setAttribute ("android:hardwareAccelerated", "false"); // (using the 2D acceleration slows down openGL)
+            else
+                app->removeAttribute ("android:hardwareAccelerated");
 
-            XmlElement* act = app->createNewChildElement ("activity");
-            act->setAttribute ("android:name", getActivitySubClassName());
-            act->setAttribute ("android:label", "@string/app_name");
+            auto* act = getOrCreateChildWithName (*app, "activity");
 
-            String configChanges ("keyboardHidden|orientation");
-            if (androidMinimumSDK.get().getIntValue() >= 13)
-                configChanges += "|screenSize";
+            setAttributeIfNotPresent (*act, "android:name", getActivitySubClassName());
+            setAttributeIfNotPresent (*act, "android:label", "@string/app_name");
 
-            act->setAttribute ("android:configChanges", configChanges);
-            act->setAttribute ("android:screenOrientation", androidScreenOrientation.get());
+            if (! act->hasAttribute ("android:configChanges"))
+            {
+                String configChanges ("keyboardHidden|orientation");
+                if (androidMinimumSDK.get().getIntValue() >= 13)
+                    configChanges += "|screenSize";
 
-            XmlElement* intent = act->createNewChildElement ("intent-filter");
-            intent->createNewChildElement ("action")->setAttribute ("android:name", "android.intent.action.MAIN");
-            intent->createNewChildElement ("category")->setAttribute ("android:name", "android.intent.category.LAUNCHER");
+                act->setAttribute ("android:configChanges", configChanges);
+            }
+            else
+            {
+                auto configChanges = act->getStringAttribute ("android:configChanges");
 
-            for (XmlElement* e = XmlDocument::parse (androidManifestCustomXmlElements.get()); e != nullptr; e = e->getNextElement())
-                app->addChildElement (e);
+                if (androidMinimumSDK.get().getIntValue() < 13 && configChanges.contains ("screenSize"))
+                {
+                    configChanges = configChanges.replace ("|screenSize", "")
+                                                 .replace ("screenSize|", "")
+                                                 .replace ("screenSize", "");
+
+                    act->setAttribute ("android:configChanges", configChanges);
+                }
+            }
+
+            setAttributeIfNotPresent (*act, "android:screenOrientation", androidScreenOrientation.get());
+            setAttributeIfNotPresent (*act, "android:launchMode", "singleTask");
+
+            auto* intent = getOrCreateChildWithName (*act, "intent-filter");
+
+            auto* action = getOrCreateChildWithName (*intent, "action");
+            setAttributeIfNotPresent (*action, "android:name", "android.intent.action.MAIN");
+
+            auto* category = getOrCreateChildWithName (*intent, "category");
+            setAttributeIfNotPresent (*category, "android:name", "android.intent.category.LAUNCHER");
+
+            if (androidEnableRemoteNotifications.get())
+            {
+                auto* service = app->createNewChildElement ("service");
+                service->setAttribute ("android:name", ".JuceFirebaseMessagingService");
+                auto* intentFilter = service->createNewChildElement ("intent-filter");
+                intentFilter->createNewChildElement ("action")->setAttribute ("android:name", "com.google.firebase.MESSAGING_EVENT");
+
+                service = app->createNewChildElement ("service");
+                service->setAttribute ("android:name", ".JuceFirebaseInstanceIdService");
+                intentFilter = service->createNewChildElement ("intent-filter");
+                intentFilter->createNewChildElement ("action")->setAttribute ("android:name", "com.google.firebase.INSTANCE_ID_EVENT");
+
+                auto* metaData = app->createNewChildElement ("meta-data");
+                metaData->setAttribute ("android:name", "firebase_analytics_collection_deactivated");
+                metaData->setAttribute ("android:value", "true");
+            }
         }
 
         return manifest;
+    }
+
+    static XmlElement* getOrCreateChildWithName (XmlElement& element, const String& name)
+    {
+        auto* child = element.getChildByName (name);
+
+        if (child == nullptr)
+            child = element.createNewChildElement (name);
+
+        return child;
+    }
+
+    static void setAttributeIfNotPresent (XmlElement& element, const Identifier& attribute, const String& value)
+    {
+        if (! element.hasAttribute (attribute.toString()))
+            element.setAttribute (attribute, value);
     }
 
     StringArray getPermissionsRequired() const
@@ -1456,6 +1647,9 @@ private:
 
         if (androidInAppBillingPermission.get())
             s.add ("com.android.vending.BILLING");
+
+        if (androidVibratePermission.get())
+            s.add ("android.permission.VIBRATE");
 
         return getCleanedStringArray (s);
     }

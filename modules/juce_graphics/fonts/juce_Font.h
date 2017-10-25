@@ -37,7 +37,7 @@ namespace juce
 
     @see Typeface
 */
-class JUCE_API  Font
+class JUCE_API  Font  final
 {
 public:
     //==============================================================================

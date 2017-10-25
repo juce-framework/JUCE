@@ -65,7 +65,9 @@ void OpenGLTexture::create (const int w, const int h, const void* pixels, GLenum
         glGenTextures (1, &textureID);
         glBindTexture (GL_TEXTURE_2D, textureID);
         glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        auto glMagFilter = (ownerContext->texMagFilter == OpenGLContext::linear ? GL_LINEAR : GL_NEAREST);
+        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, glMagFilter);
         glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         JUCE_CHECK_OPENGL_ERROR
@@ -107,12 +109,12 @@ struct Flipper
     static void flip (HeapBlock<PixelARGB>& dataCopy, const uint8* srcData, const int lineStride,
                       const int w, const int h)
     {
-        dataCopy.malloc ((size_t) (w * h));
+        dataCopy.malloc (w * h);
 
         for (int y = 0; y < h; ++y)
         {
-            const PixelType* src = (const PixelType*) srcData;
-            PixelARGB* const dst = (PixelARGB*) (dataCopy + w * (h - 1 - y));
+            auto* src = (const PixelType*) srcData;
+            auto* dst = (PixelARGB*) (dataCopy + w * (h - 1 - y));
 
             for (int x = 0; x < w; ++x)
                 dst[x].set (src[x]);

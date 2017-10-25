@@ -47,9 +47,32 @@ StringPairArray& StringPairArray::operator= (const StringPairArray& other)
 
 bool StringPairArray::operator== (const StringPairArray& other) const
 {
-    for (int i = keys.size(); --i >= 0;)
-        if (other [keys[i]] != values[i])
-            return false;
+    auto num = size();
+
+    if (num != other.size())
+        return false;
+
+    for (int i = 0; i < num; ++i)
+    {
+        if (keys[i] == other.keys[i]) // optimise for the case where the keys are in the same order
+        {
+            if (values[i] != other.values[i])
+                return false;
+        }
+        else
+        {
+            // if we encounter keys that are in a different order, search remaining items by brute force..
+            for (int j = i; j < num; ++j)
+            {
+                auto otherIndex = other.keys.indexOf (keys[j], other.ignoreCase);
+
+                if (otherIndex < 0 || values[j] != other.values[otherIndex])
+                    return false;
+            }
+
+            return true;
+        }
+    }
 
     return true;
 }
@@ -61,12 +84,12 @@ bool StringPairArray::operator!= (const StringPairArray& other) const
 
 const String& StringPairArray::operator[] (StringRef key) const
 {
-    return values [keys.indexOf (key, ignoreCase)];
+    return values[keys.indexOf (key, ignoreCase)];
 }
 
 String StringPairArray::getValue (StringRef key, const String& defaultReturnValue) const
 {
-    const int i = keys.indexOf (key, ignoreCase);
+    auto i = keys.indexOf (key, ignoreCase);
 
     if (i >= 0)
         return values[i];
@@ -81,7 +104,7 @@ bool StringPairArray::containsKey (StringRef key) const noexcept
 
 void StringPairArray::set (const String& key, const String& value)
 {
-    const int i = keys.indexOf (key, ignoreCase);
+    auto i = keys.indexOf (key, ignoreCase);
 
     if (i >= 0)
     {
@@ -111,13 +134,13 @@ void StringPairArray::remove (StringRef key)
     remove (keys.indexOf (key, ignoreCase));
 }
 
-void StringPairArray::remove (const int index)
+void StringPairArray::remove (int index)
 {
     keys.remove (index);
     values.remove (index);
 }
 
-void StringPairArray::setIgnoresCase (const bool shouldIgnoreCase)
+void StringPairArray::setIgnoresCase (bool shouldIgnoreCase)
 {
     ignoreCase = shouldIgnoreCase;
 }
@@ -129,6 +152,7 @@ String StringPairArray::getDescription() const
     for (int i = 0; i < keys.size(); ++i)
     {
         s << keys[i] << " = " << values[i];
+
         if (i < keys.size())
             s << ", ";
     }

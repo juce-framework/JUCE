@@ -610,10 +610,24 @@ public:
                 }
 
                 case kAudioUnitProperty_OfflineRender:
+                {
+                    auto shouldBeRealtime = (*reinterpret_cast<const UInt32*> (inData) != 0);
+
                     if (juceFilter != nullptr)
-                        juceFilter->setNonRealtime ((*(UInt32*) inData) != 0);
+                    {
+                        auto isCurrentlyRealtime = juceFilter->isNonRealtime();
+
+                        if (isCurrentlyRealtime != shouldBeRealtime)
+                        {
+                            const ScopedLock sl (juceFilter->getCallbackLock());
+
+                            juceFilter->setNonRealtime (shouldBeRealtime);
+                            juceFilter->prepareToPlay (getSampleRate(), (int) GetMaxFramesPerSlice());
+                        }
+                    }
 
                     return noErr;
+                }
 
                 default: break;
             }
@@ -1635,7 +1649,7 @@ private:
 
     //==============================================================================
     Array<AUChannelInfo> channelInfo;
-    Array<Array<AudioChannelLayoutTag> > supportedInputLayouts, supportedOutputLayouts;
+    Array<Array<AudioChannelLayoutTag>> supportedInputLayouts, supportedOutputLayouts;
     Array<AudioChannelLayoutTag> currentInputLayout, currentOutputLayout;
 
     //==============================================================================
@@ -2034,10 +2048,10 @@ private:
 
     void addSupportedLayoutTagsForDirection (bool isInput)
     {
-        Array<Array<AudioChannelLayoutTag> >& layouts = isInput ? supportedInputLayouts : supportedOutputLayouts;
+        auto& layouts = isInput ? supportedInputLayouts : supportedOutputLayouts;
         layouts.clear();
+        auto numBuses = AudioUnitHelpers::getBusCount (juceFilter, isInput);
 
-        const int numBuses = AudioUnitHelpers::getBusCount (juceFilter, isInput);
         for (int busNr = 0; busNr < numBuses; ++busNr)
         {
             Array<AudioChannelLayoutTag> busLayouts;

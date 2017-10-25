@@ -636,6 +636,8 @@ public:
     //==============================================================================
     void closeButtonPressed() override
     {
+        pluginHolder->savePluginState();
+
         JUCEApplicationBase::quit();
     }
 
@@ -830,7 +832,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandaloneFilterWindow)
 };
 
-StandalonePluginHolder* StandalonePluginHolder::getInstance()
+inline StandalonePluginHolder* StandalonePluginHolder::getInstance()
 {
    #if JucePlugin_Enable_IAA || JucePlugin_Build_Standalone
     if (PluginHostType::getPluginLoadedAs() == AudioProcessor::wrapperType_Standalone)

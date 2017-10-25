@@ -290,7 +290,7 @@ public:
             if (config != nullptr && javaProxy != nullptr)
             {
                 javaProxy.clear();
-                (*config)->ReleaseJavaProxy (config, SL_ANDROID_JAVA_PROXY_ROUTING);
+                (*config)->ReleaseJavaProxy (config, /*SL_ANDROID_JAVA_PROXY_ROUTING*/1);
             }
         }
 
@@ -310,7 +310,7 @@ public:
                 if (config != nullptr)
                 {
                     jobject audioRoutingJni;
-                    auto status = (*config)->AcquireJavaProxy (config, SL_ANDROID_JAVA_PROXY_ROUTING,
+                    auto status = (*config)->AcquireJavaProxy (config, /*SL_ANDROID_JAVA_PROXY_ROUTING*/1,
                                                                &audioRoutingJni);
 
                     if (status == SL_RESULT_SUCCESS && audioRoutingJni != 0)
@@ -755,8 +755,8 @@ public:
         }
 
         //==============================================================================
-        ScopedPointer<OpenSLQueueRunnerPlayer<T> > player;
-        ScopedPointer<OpenSLQueueRunnerRecorder<T> > recorder;
+        ScopedPointer<OpenSLQueueRunnerPlayer<T>> player;
+        ScopedPointer<OpenSLQueueRunnerRecorder<T>> recorder;
         Atomic<int> guard;
         jmethodID getUnderrunCount = 0;
     };

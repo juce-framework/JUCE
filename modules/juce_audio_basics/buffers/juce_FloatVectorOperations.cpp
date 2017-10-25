@@ -846,7 +846,7 @@ void FloatVectorOperations::abs (float* dest, const float* src, int num) noexcep
    #else
     FloatVectorHelpers::signMask32 signMask;
     signMask.i = 0x7fffffffUL;
-    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = fabsf (src[i]), Mode::bit_and (s, mask),
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = std::abs (src[i]), Mode::bit_and (s, mask),
                                   JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
                                   const Mode::ParallelType mask = Mode::load1 (signMask.f);)
 
@@ -862,7 +862,7 @@ void FloatVectorOperations::abs (double* dest, const double* src, int num) noexc
     FloatVectorHelpers::signMask64 signMask;
     signMask.i = 0x7fffffffffffffffULL;
 
-    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = fabs (src[i]), Mode::bit_and (s, mask),
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = std::abs (src[i]), Mode::bit_and (s, mask),
                                   JUCE_LOAD_SRC, JUCE_INCREMENT_SRC_DEST,
                                   const Mode::ParallelType mask = Mode::load1 (signMask.d);)
 
@@ -1084,20 +1084,37 @@ void JUCE_CALLTYPE FloatVectorOperations::enableFlushToZeroMode (bool shouldEnab
   #endif
 }
 
-void JUCE_CALLTYPE FloatVectorOperations::disableDenormalisedNumberSupport() noexcept
+void JUCE_CALLTYPE FloatVectorOperations::disableDenormalisedNumberSupport (bool shouldDisable) noexcept
 {
   #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || defined (__arm64__) || defined (__aarch64__))
    #if JUCE_USE_SSE_INTRINSICS
     intptr_t mask = 0x8040;
    #else /*JUCE_USE_ARM_NEON*/
-    intptr_t mask = (1 << 24 /* FZ */) | (1 << 23 /* RMODE_1 */) | (1 << 22 /* RMODE_0 */);
+    intptr_t mask = (1 << 24 /* FZ */);
    #endif
 
-    setFpStatusRegister (getFpStatusRegister() | mask);
+    setFpStatusRegister ((getFpStatusRegister() & (~mask)) | (shouldDisable ? mask : 0));
   #else
+    ignoreUnused (shouldDisable);
+
    #if ! (defined (JUCE_INTEL) || defined (JUCE_ARM))
     jassertfalse; // No support for disable denormals mode on your platform
    #endif
+  #endif
+}
+
+bool JUCE_CALLTYPE FloatVectorOperations::areDenormalsDisabled() noexcept
+{
+  #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || defined (__arm64__) || defined (__aarch64__))
+   #if JUCE_USE_SSE_INTRINSICS
+    intptr_t mask = 0x8040;
+   #else /*JUCE_USE_ARM_NEON*/
+    intptr_t mask = (1 << 24 /* FZ */);
+   #endif
+
+    return ((getFpStatusRegister() & mask) == mask);
+  #else
+    return false;
   #endif
 }
 
@@ -1107,7 +1124,7 @@ ScopedNoDenormals::ScopedNoDenormals() noexcept
    #if JUCE_USE_SSE_INTRINSICS
     intptr_t mask = 0x8040;
    #else /*JUCE_USE_ARM_NEON*/
-    intptr_t mask = (1 << 24 /* FZ */) | (1 << 23 /* RMODE_1 */) | (1 << 22 /* RMODE_0 */);
+    intptr_t mask = (1 << 24 /* FZ */);
    #endif
 
     fpsr = FloatVectorOperations::getFpStatusRegister();
@@ -1139,8 +1156,8 @@ public:
             const int range = random.nextBool() ? 500 : 10;
             const int num = random.nextInt (range) + 1;
 
-            HeapBlock<ValueType> buffer1 ((size_t) num + 16), buffer2 ((size_t) num + 16);
-            HeapBlock<int> buffer3 ((size_t) num + 16);
+            HeapBlock<ValueType> buffer1 (num + 16), buffer2 (num + 16);
+            HeapBlock<int> buffer3 (num + 16);
 
            #if JUCE_ARM
             ValueType* const data1 = buffer1;

@@ -4,20 +4,20 @@
               jucerVersion="5.1.2" version="5.1.2" bundleIdentifier="com.juce.theprojucer"
               defines="" includeBinaryInAppConfig="1" splashScreenColour="Dark"
               displaySplashScreen="0" reportAppUsage="0" companyName="ROLI Ltd."
-              cppLanguageStandard="11">
+              cppLanguageStandard="11" companyCopyright="ROLI Ltd.">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
-               documentExtensions=".jucer" objCExtraSuffix="zkVtji" bigIcon="OCyr5F"
+               documentExtensions=".jucer" objCExtraSuffix="zkVtji" bigIcon="rv1F4h"
                smallIcon="" extraLinkerFlags="" extraCompilerFlags="-Wall -Wshadow -Wstrict-aliasing -Wconversion -Wsign-compare -Woverloaded-virtual -Wextra-semi"
                customPList="&lt;plist&gt;&#10;&lt;dict&gt;&#10;&#9;&lt;key&gt;NSAppTransportSecurity&lt;/key&gt;&#10;&#9;&lt;dict&gt;&#10;&#9;&#9;&lt;key&gt;NSAllowsArbitraryLoads&lt;/key&gt;&#10;&#9;&#9;&lt;true/&gt;&#10;&#9;&#9;&lt;key&gt;NSExceptionDomains&lt;/key&gt;&#10;&#9;&#9;&lt;dict&gt;&#10;&#9;&#9;&#9;&lt;key&gt;amazonaws.com&lt;/key&gt;&#10;&#9;&#9;&#9;&lt;dict&gt;&#10;&#9;&#9;&#9;&#9;&lt;key&gt;NSExceptionAllowsInsecureHTTPLoads&lt;/key&gt;&#10;&#9;&#9;&#9;&#9;&lt;true/&gt;&#10;&#9;&#9;&#9;&#9;&lt;key&gt;NSIncludesSubdomains&lt;/key&gt;&#10;&#9;&#9;&#9;&#9;&lt;true/&gt;&#10;&#9;&#9;&#9;&lt;/dict&gt;&#10;&#9;&#9;&lt;/dict&gt;&#10;&#9;&lt;/dict&gt;&#10;&lt;/dict&gt;&#10;&lt;/plist&gt;"
                extraFrameworks="AudioUnit; Accelerate; AVFoundation; CoreAudio; CoreAudioKit; CoreMIDI; DiscRecording; QuartzCore; AudioToolbox; OpenGL; QTKit; QuickTime">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Projucer"
                        osxSDK="default" osxCompatibility="10.9 SDK" osxArchitecture="default"
-                       headerPath="" libraryPath="" cppLibType="libc++"/>
+                       headerPath="" libraryPath="" cppLibType="libc++" enablePluginBinaryCopyStep="1"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Projucer"
                        osxSDK="default" osxCompatibility="10.7 SDK" osxArchitecture="default"
-                       headerPath="" libraryPath="" cppLibType="libc++"/>
+                       headerPath="" libraryPath="" cppLibType="libc++" enablePluginBinaryCopyStep="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -30,14 +30,16 @@
       </MODULEPATHS>
     </XCODE_MAC>
     <VS2013 targetFolder="Builds/VisualStudio2013" externalLibraries="" extraLinkerFlags=""
-            bigIcon="OCyr5F" toolset="v120" vstFolder="">
+            bigIcon="rv1F4h" toolset="v120" vstFolder="" windowsTargetPlatformVersion="8.1">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="1" optimisation="1" targetName="Projucer" headerPath=""
-                       libraryPath="" defines="" useRuntimeLibDLL="1" wholeProgramOptimisation="1"/>
+                       libraryPath="" defines="" useRuntimeLibDLL="1" wholeProgramOptimisation="1"
+                       debugInformationFormat="ProgramDatabase" enablePluginBinaryCopyStep="0"/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="0" optimisation="3" targetName="Projucer" headerPath=""
-                       libraryPath="" useRuntimeLibDLL="0"/>
+                       libraryPath="" useRuntimeLibDLL="0" debugInformationFormat="None"
+                       linkTimeOptimisation="1" enablePluginBinaryCopyStep="0"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -49,15 +51,17 @@
         <MODULEPATH id="juce_core" path="../../modules"/>
       </MODULEPATHS>
     </VS2013>
-    <VS2015 targetFolder="Builds/VisualStudio2015" externalLibraries="" bigIcon="OCyr5F"
-            toolset="v140" vstFolder="">
+    <VS2015 targetFolder="Builds/VisualStudio2015" externalLibraries="" bigIcon="rv1F4h"
+            toolset="v140" vstFolder="" windowsTargetPlatformVersion="8.1">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="1" optimisation="1" targetName="Projucer" headerPath=""
-                       libraryPath="" useRuntimeLibDLL="1"/>
+                       libraryPath="" useRuntimeLibDLL="1" debugInformationFormat="ProgramDatabase"
+                       enablePluginBinaryCopyStep="0"/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="0" optimisation="3" targetName="Projucer" headerPath=""
-                       libraryPath="" useRuntimeLibDLL="0"/>
+                       libraryPath="" useRuntimeLibDLL="0" debugInformationFormat="None"
+                       linkTimeOptimisation="1" enablePluginBinaryCopyStep="0"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -69,12 +73,14 @@
         <MODULEPATH id="juce_core" path="../../modules"/>
       </MODULEPATHS>
     </VS2015>
-    <VS2017 targetFolder="Builds/VisualStudio2017" bigIcon="OCyr5F">
+    <VS2017 targetFolder="Builds/VisualStudio2017" bigIcon="rv1F4h" windowsTargetPlatformVersion="10.0.15063.0">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="Projucer"/>
+                       isDebug="1" optimisation="1" targetName="Projucer" debugInformationFormat="ProgramDatabase"
+                       enablePluginBinaryCopyStep="0"/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="Projucer"/>
+                       isDebug="0" optimisation="3" targetName="Projucer" debugInformationFormat="None"
+                       linkTimeOptimisation="1" enablePluginBinaryCopyStep="0"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -87,7 +93,7 @@
       </MODULEPATHS>
     </VS2017>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile" extraCompilerFlags="" extraLinkerFlags=""
-                bigIcon="OCyr5F" smallIcon="" vstFolder="">
+                bigIcon="rv1F4h" smallIcon="" vstFolder="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" libraryPath="" isDebug="1" optimisation="1" targetName="Projucer"
                        headerPath=""/>
@@ -161,6 +167,8 @@
               file="Source/BinaryData/Icons/background_logo.svg"/>
         <FILE id="csCUBK" name="export_android.svg" compile="0" resource="1"
               file="Source/BinaryData/Icons/export_android.svg"/>
+        <FILE id="ILM268" name="export_clion.svg" compile="0" resource="1"
+              file="Source/BinaryData/Icons/export_clion.svg"/>
         <FILE id="aEHhYA" name="export_codeBlocks.svg" compile="0" resource="1"
               file="Source/BinaryData/Icons/export_codeBlocks.svg"/>
         <FILE id="gT2nPs" name="export_linux.svg" compile="0" resource="1"
@@ -547,6 +555,8 @@
     <GROUP id="{00CEE998-91CD-5001-DE85-4F4895E99A32}" name="ProjectSaving">
       <FILE id="JBLk8Y" name="jucer_ProjectExport_Android.h" compile="0"
             resource="0" file="Source/ProjectSaving/jucer_ProjectExport_Android.h"/>
+      <FILE id="l1SmNV" name="jucer_ProjectExport_CLion.h" compile="0" resource="0"
+            file="Source/ProjectSaving/jucer_ProjectExport_CLion.h"/>
       <FILE id="Kxo6ef" name="jucer_ProjectExport_CodeBlocks.h" compile="0"
             resource="0" file="Source/ProjectSaving/jucer_ProjectExport_CodeBlocks.h"/>
       <FILE id="wLX3RL" name="jucer_ProjectExport_Make.h" compile="0" resource="0"

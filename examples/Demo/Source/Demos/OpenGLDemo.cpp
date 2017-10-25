@@ -593,7 +593,8 @@ struct OpenGLDemoClasses
         it implements the OpenGLRenderer callback so that it can do real GL work.
     */
     class OpenGLDemo  : public Component,
-                        private OpenGLRenderer
+                        private OpenGLRenderer,
+                        private AsyncUpdater
     {
     public:
         OpenGLDemo()
@@ -757,6 +758,11 @@ struct OpenGLDemoClasses
         BouncingNumber bouncingNumber;
 
     private:
+        void handleAsyncUpdate() override
+        {
+            controlsOverlay->statusLabel.setText (statusText, dontSendNotification);
+        }
+
         void drawBackground2DStuff (float desktopScale)
         {
             // Create an OpenGLGraphicsContext that will draw into this GL window..
@@ -806,7 +812,7 @@ struct OpenGLDemoClasses
         OpenGLTexture texture;
         DemoTexture* textureToUse, *lastTexture;
 
-        String newVertexShader, newFragmentShader;
+        String newVertexShader, newFragmentShader, statusText;
 
         struct BackgroundStar
         {
@@ -821,7 +827,6 @@ struct OpenGLDemoClasses
             if (newVertexShader.isNotEmpty() || newFragmentShader.isNotEmpty())
             {
                 ScopedPointer<OpenGLShaderProgram> newShader (new OpenGLShaderProgram (openGLContext));
-                String statusText;
 
                 if (newShader->addVertexShader (OpenGLHelpers::translateVertexShaderToV3 (newVertexShader))
                       && newShader->addFragmentShader (OpenGLHelpers::translateFragmentShaderToV3 (newFragmentShader))
@@ -845,8 +850,7 @@ struct OpenGLDemoClasses
                     statusText = newShader->getLastError();
                 }
 
-                controlsOverlay->statusLabel.setText (statusText, dontSendNotification);
-
+                triggerAsyncUpdate();
 
                 newVertexShader = String();
                 newFragmentShader = String();

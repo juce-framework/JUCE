@@ -126,13 +126,9 @@ public:
 };
 
 //==============================================================================
-CodeDocument::Iterator::Iterator (const CodeDocument& doc) noexcept : document (&doc)
-{
-}
+CodeDocument::Iterator::Iterator (const CodeDocument& doc) noexcept : document (&doc) {}
 
-CodeDocument::Iterator::~Iterator() noexcept
-{
-}
+CodeDocument::Iterator::~Iterator() noexcept {}
 
 juce_wchar CodeDocument::Iterator::nextChar() noexcept
 {

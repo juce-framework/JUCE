@@ -190,11 +190,11 @@ public:
 
     void allocateTempBuffers()
     {
-        const int tempBufSize = bufferSize + 4;
-        audioBuffer.calloc ((size_t) ((numInputChans + numOutputChans) * tempBufSize));
+        auto tempBufSize = bufferSize + 4;
+        audioBuffer.calloc ((numInputChans + numOutputChans) * tempBufSize);
 
-        tempInputBuffers.calloc  ((size_t) numInputChans + 2);
-        tempOutputBuffers.calloc ((size_t) numOutputChans + 2);
+        tempInputBuffers.calloc  (numInputChans + 2);
+        tempOutputBuffers.calloc (numOutputChans + 2);
 
         int count = 0;
         for (int i = 0; i < numInputChans;  ++i)  tempInputBuffers[i]  = audioBuffer + count++ * tempBufSize;

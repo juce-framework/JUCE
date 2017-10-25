@@ -33,7 +33,7 @@ namespace juce
 
     @see Graphics::setGradientFill
 */
-class JUCE_API  ColourGradient
+class JUCE_API  ColourGradient  final
 {
 public:
     //==============================================================================

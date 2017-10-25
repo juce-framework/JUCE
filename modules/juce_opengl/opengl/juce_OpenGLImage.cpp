@@ -103,8 +103,8 @@ private:
 
         static void verticalRowFlip (PixelARGB* const data, const int w, const int h)
         {
-            HeapBlock<PixelARGB> tempRow ((size_t) w);
-            const size_t rowSize = sizeof (PixelARGB) * (size_t) w;
+            HeapBlock<PixelARGB> tempRow (w);
+            auto rowSize = sizeof (PixelARGB) * (size_t) w;
 
             for (int y = 0; y < h / 2; ++y)
             {
@@ -125,8 +125,8 @@ private:
 
         void write (const PixelARGB* const data) const noexcept
         {
-            HeapBlock<PixelARGB> invertedCopy ((size_t) (area.getWidth() * area.getHeight()));
-            const size_t rowSize = sizeof (PixelARGB) * (size_t) area.getWidth();
+            HeapBlock<PixelARGB> invertedCopy (area.getWidth() * area.getHeight());
+            auto rowSize = sizeof (PixelARGB) * (size_t) area.getWidth();
 
             for (int y = 0; y < area.getHeight(); ++y)
                 memcpy (invertedCopy + area.getWidth() * y,

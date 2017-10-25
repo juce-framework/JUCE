@@ -8,13 +8,15 @@ SET(BINARY_NAME "juce_jni")
 add_library("cpufeatures" STATIC "${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c")
 set_source_files_properties("${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c" PROPERTIES COMPILE_FLAGS "-Wno-sign-conversion -Wno-gnu-statement-expression")
 
-add_definitions("-DJUCE_ANDROID=1" "-DJUCE_ANDROID_API_VERSION=10" "-DJUCE_ANDROID_ACTIVITY_CLASSNAME=com_juce_networkgraphicsdemo_JUCENetworkGraphicsDemo" "-DJUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/juce/networkgraphicsdemo/JUCENetworkGraphicsDemo\"" "-DJUCER_ANDROIDSTUDIO_7F0E4A25=1" "-DJUCE_APP_VERSION=1.0.0" "-DJUCE_APP_VERSION_HEX=0x10000")
+add_definitions("-DJUCE_ANDROID=1" "-DJUCE_ANDROID_API_VERSION=10" "-DJUCE_ANDROID_ACTIVITY_CLASSNAME=com_juce_networkgraphicsdemo_JUCENetworkGraphicsDemo" "-DJUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/juce/networkgraphicsdemo/JUCENetworkGraphicsDemo\"" "-DJUCE_PUSH_NOTIFICATIONS=1" "-DJUCER_ANDROIDSTUDIO_7F0E4A25=1" "-DJUCE_APP_VERSION=1.0.0" "-DJUCE_APP_VERSION_HEX=0x10000")
 
 include_directories( AFTER
     "../../../JuceLibraryCode"
     "../../../../../modules"
     "${ANDROID_NDK}/sources/android/cpufeatures"
 )
+
+enable_language(ASM)
 
 IF(JUCE_BUILD_CONFIGFURATION MATCHES "DEBUG")
     add_definitions("-DJUCE_DEBUG=0" "-DDEBUG=1" "-D_DEBUG=1")
@@ -1151,6 +1153,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_extra/misc/juce_LiveConstantEditor.h"
     "../../../../../modules/juce_gui_extra/misc/juce_PreferencesPanel.cpp"
     "../../../../../modules/juce_gui_extra/misc/juce_PreferencesPanel.h"
+    "../../../../../modules/juce_gui_extra/misc/juce_PushNotifications.cpp"
+    "../../../../../modules/juce_gui_extra/misc/juce_PushNotifications.h"
     "../../../../../modules/juce_gui_extra/misc/juce_RecentlyOpenedFilesList.cpp"
     "../../../../../modules/juce_gui_extra/misc/juce_RecentlyOpenedFilesList.h"
     "../../../../../modules/juce_gui_extra/misc/juce_SplashScreen.cpp"
@@ -1158,7 +1162,9 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_extra/misc/juce_SystemTrayIconComponent.cpp"
     "../../../../../modules/juce_gui_extra/misc/juce_SystemTrayIconComponent.h"
     "../../../../../modules/juce_gui_extra/misc/juce_WebBrowserComponent.h"
+    "../../../../../modules/juce_gui_extra/native/juce_android_PushNotifications.cpp"
     "../../../../../modules/juce_gui_extra/native/juce_android_WebBrowserComponent.cpp"
+    "../../../../../modules/juce_gui_extra/native/juce_ios_PushNotifications.cpp"
     "../../../../../modules/juce_gui_extra/native/juce_ios_UIViewComponent.mm"
     "../../../../../modules/juce_gui_extra/native/juce_linux_X11_SystemTrayIcon.cpp"
     "../../../../../modules/juce_gui_extra/native/juce_linux_X11_WebBrowserComponent.cpp"
@@ -2367,6 +2373,8 @@ set_source_files_properties("../../../../../modules/juce_gui_extra/misc/juce_Liv
 set_source_files_properties("../../../../../modules/juce_gui_extra/misc/juce_LiveConstantEditor.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/misc/juce_PreferencesPanel.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/misc/juce_PreferencesPanel.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_extra/misc/juce_PushNotifications.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_extra/misc/juce_PushNotifications.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/misc/juce_RecentlyOpenedFilesList.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/misc/juce_RecentlyOpenedFilesList.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/misc/juce_SplashScreen.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2374,7 +2382,9 @@ set_source_files_properties("../../../../../modules/juce_gui_extra/misc/juce_Spl
 set_source_files_properties("../../../../../modules/juce_gui_extra/misc/juce_SystemTrayIconComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/misc/juce_SystemTrayIconComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/misc/juce_WebBrowserComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_android_PushNotifications.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_android_WebBrowserComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_ios_PushNotifications.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_ios_UIViewComponent.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_linux_X11_SystemTrayIcon.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_linux_X11_WebBrowserComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)

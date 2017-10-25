@@ -88,7 +88,7 @@ public:
 
                 for (;;)
                 {
-                    HeapBlock<char> buffer ((size_t) bufferSizeBytes);
+                    HeapBlock<char> buffer (bufferSizeBytes);
 
                     if (HttpQueryInfo (request, HTTP_QUERY_RAW_HEADERS_CRLF, buffer.getData(), &bufferSizeBytes, 0))
                     {
@@ -216,8 +216,8 @@ public:
                 return false;
 
             int64 numBytesToSkip = wantedPos - position;
-            const int skipBufferSize = (int) jmin (numBytesToSkip, (int64) 16384);
-            HeapBlock<char> temp ((size_t) skipBufferSize);
+            auto skipBufferSize = (int) jmin (numBytesToSkip, (int64) 16384);
+            HeapBlock<char> temp (skipBufferSize);
 
             while (numBytesToSkip > 0 && ! isExhausted())
                 numBytesToSkip -= read (temp, (int) jmin (numBytesToSkip, (int64) skipBufferSize));
@@ -645,7 +645,7 @@ bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& targetEmailA
     message.lpRecips = &recip;
 
     HeapBlock<MapiFileDesc> files;
-    files.calloc ((size_t) filesToAttach.size());
+    files.calloc (filesToAttach.size());
 
     message.nFileCount = (ULONG) filesToAttach.size();
     message.lpFiles = files;

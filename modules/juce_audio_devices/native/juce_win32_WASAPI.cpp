@@ -442,6 +442,7 @@ public:
              && tryInitialisingWithBufferSize (bufferSizeSamples))
         {
             sampleRateHasChanged = false;
+            shouldClose = false;
 
             channelMaps.clear();
             for (int i = 0; i <= channels.getHighestBit(); ++i)
@@ -887,7 +888,7 @@ public:
     void updateFormatWithType (DestType*)
     {
         typedef AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const> NativeType;
-        converter = new AudioData::ConverterInstance<NativeType, AudioData::Pointer<DestType, AudioData::LittleEndian, AudioData::Interleaved, AudioData::NonConst> > (1, actualNumChannels);
+        converter = new AudioData::ConverterInstance<NativeType, AudioData::Pointer<DestType, AudioData::LittleEndian, AudioData::Interleaved, AudioData::NonConst>> (1, actualNumChannels);
     }
 
     void updateFormat (bool isFloat) override

@@ -565,14 +565,14 @@ void LibraryModule::findAndAddCompiledUnits (ProjectExporter& exporter,
 
 static void addFileWithGroups (Project::Item& group, const RelativePath& file, const String& path)
 {
-    const int slash = path.indexOfChar (File::separator);
+    auto slash = path.indexOfChar (File::getSeparatorChar());
 
     if (slash >= 0)
     {
-        const String topLevelGroup (path.substring (0, slash));
-        const String remainingPath (path.substring (slash + 1));
+        auto topLevelGroup = path.substring (0, slash);
+        auto remainingPath = path.substring (slash + 1);
 
-        Project::Item newGroup (group.getOrCreateSubGroup (topLevelGroup));
+        auto newGroup = group.getOrCreateSubGroup (topLevelGroup);
         addFileWithGroups (newGroup, file, remainingPath);
     }
     else

@@ -144,9 +144,7 @@ struct ChildProcessCache
 
     void removeOrphans()
     {
-        for (int i = processes.size(); --i >= 0;)
-            if (processes.getObjectPointerUnchecked (i)->getReferenceCount() <= 1)
-                processes.remove (i);
+        processes.clear();
     }
 
 private:

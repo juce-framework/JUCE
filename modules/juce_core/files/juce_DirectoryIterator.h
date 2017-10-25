@@ -34,9 +34,14 @@ namespace juce
     class than File::findChildFiles() because it allows you to stop at any time, rather
     than having to wait for the entire scan to finish before getting the results.
 
+    Please note that the order in which files are returned is completely undefined!
+    They'll arrive in whatever order the underlying OS calls provide them, which will
+    depend on the filesystem and other factors. If you need a sorted list, you'll need
+    to manually sort them using your preferred comparator after collecting the list.
+
     It also provides an estimate of its progress, using a (highly inaccurate!) algorithm.
 */
-class JUCE_API  DirectoryIterator
+class JUCE_API  DirectoryIterator  final
 {
 public:
     //==============================================================================

@@ -103,12 +103,13 @@ namespace Ids
     DECLARE_ID (codeSigningIdentity);
     DECLARE_ID (fastMath);
     DECLARE_ID (linkTimeOptimisation);
+    DECLARE_ID (vstBinaryLocation);
+    DECLARE_ID (vst3BinaryLocation);
+    DECLARE_ID (auBinaryLocation);
+    DECLARE_ID (rtasBinaryLocation);
+    DECLARE_ID (aaxBinaryLocation);
+    DECLARE_ID (enablePluginBinaryCopyStep);
     DECLARE_ID (stripLocalSymbols);
-    DECLARE_ID (xcodeVstBinaryLocation);
-    DECLARE_ID (xcodeVst3BinaryLocation);
-    DECLARE_ID (xcodeAudioUnitBinaryLocation);
-    DECLARE_ID (xcodeRtasBinaryLocation);
-    DECLARE_ID (xcodeAaxBinaryLocation);
     DECLARE_ID (osxSDK);
     DECLARE_ID (osxCompatibility);
     DECLARE_ID (osxArchitecture);
@@ -124,6 +125,7 @@ namespace Ids
     DECLARE_ID (windowsCodeBlocksArchitecture);
     DECLARE_ID (toolset);
     DECLARE_ID (windowsTargetPlatformVersion);
+    DECLARE_ID (debugInformationFormat);
     DECLARE_ID (IPPLibrary);
     DECLARE_ID (msvcModuleDefinitionFile);
     DECLARE_ID (bigIcon);
@@ -133,7 +135,6 @@ namespace Ids
     DECLARE_ID (postbuildCommand);
     DECLARE_ID (generateManifest);
     DECLARE_ID (useRuntimeLibDLL);
-    DECLARE_ID (wholeProgramOptimisation);
     DECLARE_ID (enableIncrementalLinking);
     DECLARE_ID (buildVST);
     DECLARE_ID (bundleIdentifier);
@@ -170,6 +171,7 @@ namespace Ids
     DECLARE_ID (androidRepositories);
     DECLARE_ID (androidDependencies);
     DECLARE_ID (androidAdditionalXmlValueResources);
+    DECLARE_ID (androidAdditionalRawValueResources);
     DECLARE_ID (androidActivityClass);
     DECLARE_ID (androidActivitySubClassName);
     DECLARE_ID (androidVersionCode);
@@ -183,6 +185,9 @@ namespace Ids
     DECLARE_ID (androidExternalReadNeeded);
     DECLARE_ID (androidExternalWriteNeeded);
     DECLARE_ID (androidInAppBilling);
+    DECLARE_ID (androidVibratePermissionNeeded);
+    DECLARE_ID (androidEnableRemoteNotifications);
+    DECLARE_ID (androidRemoteNotificationsConfigFile);
     DECLARE_ID (androidMinimumSDK);
     DECLARE_ID (androidOtherPermissions);
     DECLARE_ID (androidKeyStore);
@@ -195,6 +200,8 @@ namespace Ids
     DECLARE_ID (androidScreenOrientation);
     DECLARE_ID (androidExtraAssetsFolder);
     DECLARE_ID (iosDeviceFamily);
+    const Identifier iPhoneScreenOrientation ("iosScreenOrientation"); // old name is confusing
+    DECLARE_ID (iPadScreenOrientation);
     DECLARE_ID (iosScreenOrientation);
     DECLARE_ID (iosInAppPurchases);
     DECLARE_ID (iosBackgroundAudio);
@@ -210,6 +217,9 @@ namespace Ids
     DECLARE_ID (gradleToolchain);
     DECLARE_ID (gradleToolchainVersion);
     DECLARE_ID (linuxExtraPkgConfig);
+    DECLARE_ID (clionMakefileEnabled);
+    DECLARE_ID (clionXcodeEnabled);
+    DECLARE_ID (clionCodeBlocksEnabled);
     DECLARE_ID (font);
     DECLARE_ID (colour);
     DECLARE_ID (userNotes);

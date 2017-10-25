@@ -323,8 +323,8 @@ private:
     HeapBlock<uint32> heapAllocation;
     uint32 preallocated[numPreallocatedInts];
     size_t allocatedSize;
-    int highestBit;
-    bool negative;
+    int highestBit = -1;
+    bool negative = false;
 
     uint32* getValues() const noexcept;
     uint32* ensureSize (size_t);

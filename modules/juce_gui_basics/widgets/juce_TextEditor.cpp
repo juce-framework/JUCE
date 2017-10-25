@@ -74,7 +74,15 @@ public:
     }
 
     UniformTextSection (const UniformTextSection&) = default;
-    UniformTextSection (UniformTextSection&&) = default;
+
+    // VS2013 can't default move constructors
+    UniformTextSection (UniformTextSection&& other)
+        : font (static_cast<Font&&> (other.font)),
+          colour (other.colour),
+          atoms (static_cast<Array<TextAtom>&&> (other.atoms))
+    {
+    }
+
     UniformTextSection& operator= (const UniformTextSection&) = delete;
 
     void append (UniformTextSection& other, const juce_wchar passwordChar)
@@ -1092,7 +1100,8 @@ void TextEditor::updateCaretPosition()
 
 TextEditor::LengthAndCharacterRestriction::LengthAndCharacterRestriction (int maxLen, const String& chars)
     : allowedCharacters (chars), maxLength (maxLen)
-{}
+{
+}
 
 String TextEditor::LengthAndCharacterRestriction::filterNewText (TextEditor& ed, const String& newInput)
 {
@@ -1338,11 +1347,16 @@ void TextEditor::scrollEditorToPositionCaret (const int desiredCaretX,
 
 Rectangle<int> TextEditor::getCaretRectangle()
 {
+    return getCaretRectangleFloat().getSmallestIntegerContainer();
+}
+
+Rectangle<float> TextEditor::getCaretRectangleFloat() const
+{
     Point<float> anchor;
     auto cursorHeight = currentFont.getHeight(); // (in case the text is empty and the call below doesn't set this value)
     getCharPosition (caretPosition, anchor, cursorHeight);
 
-    return { roundToInt (anchor.x), roundToInt (anchor.y), 2, roundToInt (cursorHeight) };
+    return { anchor.x, anchor.y, 2.0f, cursorHeight };
 }
 
 //==============================================================================
@@ -1836,7 +1850,7 @@ bool TextEditor::moveCaretUp (bool selecting)
     if (! isMultiLine())
         return moveCaretToStartOfLine (selecting);
 
-    auto caretPos = getCaretRectangle().toFloat();
+    auto caretPos = getCaretRectangleFloat();
     return moveCaretWithTransaction (indexAtPosition (caretPos.getX(), caretPos.getY() - 1.0f), selecting);
 }
 
@@ -1845,7 +1859,7 @@ bool TextEditor::moveCaretDown (bool selecting)
     if (! isMultiLine())
         return moveCaretToEndOfLine (selecting);
 
-    auto caretPos = getCaretRectangle().toFloat();
+    auto caretPos = getCaretRectangleFloat();
     return moveCaretWithTransaction (indexAtPosition (caretPos.getX(), caretPos.getBottom() + 1.0f), selecting);
 }
 
@@ -1854,7 +1868,7 @@ bool TextEditor::pageUp (bool selecting)
     if (! isMultiLine())
         return moveCaretToStartOfLine (selecting);
 
-    auto caretPos = getCaretRectangle().toFloat();
+    auto caretPos = getCaretRectangleFloat();
     return moveCaretWithTransaction (indexAtPosition (caretPos.getX(), caretPos.getY() - viewport->getViewHeight()), selecting);
 }
 
@@ -1863,7 +1877,7 @@ bool TextEditor::pageDown (bool selecting)
     if (! isMultiLine())
         return moveCaretToEndOfLine (selecting);
 
-    auto caretPos = getCaretRectangle().toFloat();
+    auto caretPos = getCaretRectangleFloat();
     return moveCaretWithTransaction (indexAtPosition (caretPos.getX(), caretPos.getBottom() + viewport->getViewHeight()), selecting);
 }
 
@@ -1891,7 +1905,7 @@ bool TextEditor::moveCaretToTop (bool selecting)
 
 bool TextEditor::moveCaretToStartOfLine (bool selecting)
 {
-    auto caretPos = getCaretRectangle().toFloat();
+    auto caretPos = getCaretRectangleFloat();
     return moveCaretWithTransaction (indexAtPosition (0.0f, caretPos.getY()), selecting);
 }
 
@@ -1902,7 +1916,7 @@ bool TextEditor::moveCaretToEnd (bool selecting)
 
 bool TextEditor::moveCaretToEndOfLine (bool selecting)
 {
-    auto caretPos = getCaretRectangle().toFloat();
+    auto caretPos = getCaretRectangleFloat();
     return moveCaretWithTransaction (indexAtPosition ((float) textHolder->getWidth(), caretPos.getY()), selecting);
 }
 
@@ -2106,7 +2120,7 @@ void TextEditor::handleCommandMessage (const int commandId)
     }
 }
 
-void TextEditor::setTemporaryUnderlining (const Array<Range<int> >& newUnderlinedSections)
+void TextEditor::setTemporaryUnderlining (const Array<Range<int>>& newUnderlinedSections)
 {
     underlinedSections = newUnderlinedSections;
     repaint();
@@ -2400,12 +2414,12 @@ int TextEditor::indexAtPosition (const float x, const float y)
     {
         for (Iterator i (*this); i.next();)
         {
-            if (i.lineY + i.lineHeight > y)
+            if (y < i.lineY + i.lineHeight)
             {
-                if (i.lineY > y)
+                if (y < i.lineY)
                     return jmax (0, i.indexInText - 1);
 
-                if (i.atomX >= x)
+                if (x <= i.atomX || i.atom->isNewLine())
                     return i.indexInText;
 
                 if (x < i.atomRight)

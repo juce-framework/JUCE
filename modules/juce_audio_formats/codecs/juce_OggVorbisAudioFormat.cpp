@@ -111,12 +111,8 @@ const char* const OggVorbisAudioFormat::id3trackNumber = "id3trackNumber";
 class OggReader : public AudioFormatReader
 {
 public:
-    OggReader (InputStream* const inp)
-        : AudioFormatReader (inp, oggFormatName),
-          reservoirStart (0),
-          samplesInReservoir (0)
+    OggReader (InputStream* inp)  : AudioFormatReader (inp, oggFormatName)
     {
-        using namespace OggVorbisNamespace;
         sampleRate = 0;
         usesFloatingPointData = true;
 
@@ -125,13 +121,13 @@ public:
         callbacks.close_func = &oggCloseCallback;
         callbacks.tell_func  = &oggTellCallback;
 
-        const int err = ov_open_callbacks (input, &ovFile, 0, 0, callbacks);
+        auto err = ov_open_callbacks (input, &ovFile, 0, 0, callbacks);
 
         if (err == 0)
         {
-            vorbis_info* info = ov_info (&ovFile, -1);
+            auto* info = ov_info (&ovFile, -1);
 
-            vorbis_comment* const comment = ov_comment (&ovFile, -1);
+            auto* comment = ov_comment (&ovFile, -1);
             addMetadataItem (comment, "ENCODER",     OggVorbisAudioFormat::encoderName);
             addMetadataItem (comment, "TITLE",       OggVorbisAudioFormat::id3title);
             addMetadataItem (comment, "ARTIST",      OggVorbisAudioFormat::id3artist);
@@ -152,12 +148,12 @@ public:
 
     ~OggReader()
     {
-        OggVorbisNamespace::ov_clear (&ovFile);
+        ov_clear (&ovFile);
     }
 
     void addMetadataItem (OggVorbisNamespace::vorbis_comment* comment, const char* name, const char* metadataName)
     {
-        if (const char* value = vorbis_comment_query (comment, name, 0))
+        if (auto* value = vorbis_comment_query (comment, name, 0))
             metadataValues.set (metadataName, value);
     }
 
@@ -167,13 +163,13 @@ public:
     {
         while (numSamples > 0)
         {
-            const int numAvailable = (int) (reservoirStart + samplesInReservoir - startSampleInFile);
+            auto numAvailable = (int) (reservoirStart + samplesInReservoir - startSampleInFile);
 
             if (startSampleInFile >= reservoirStart && numAvailable > 0)
             {
                 // got a few samples overlapping, so use them before seeking..
 
-                const int numToUse = jmin (numSamples, numAvailable);
+                auto numToUse = jmin (numSamples, numAvailable);
 
                 for (int i = jmin (numDestChannels, reservoir.getNumChannels()); --i >= 0;)
                     if (destSamples[i] != nullptr)
@@ -193,22 +189,21 @@ public:
                 || startSampleInFile + numSamples > reservoirStart + samplesInReservoir)
             {
                 // buffer miss, so refill the reservoir
-                int bitStream = 0;
-
                 reservoirStart = jmax (0, (int) startSampleInFile);
                 samplesInReservoir = reservoir.getNumSamples();
 
-                if (reservoirStart != (int) OggVorbisNamespace::ov_pcm_tell (&ovFile))
-                    OggVorbisNamespace::ov_pcm_seek (&ovFile, reservoirStart);
+                if (reservoirStart != (int) ov_pcm_tell (&ovFile))
+                    ov_pcm_seek (&ovFile, reservoirStart);
 
+                int bitStream = 0;
                 int offset = 0;
                 int numToRead = samplesInReservoir;
 
                 while (numToRead > 0)
                 {
                     float** dataIn = nullptr;
+                    auto samps = ov_read_float (&ovFile, &dataIn, numToRead, &bitStream);
 
-                    const long samps = OggVorbisNamespace::ov_read_float (&ovFile, &dataIn, numToRead, &bitStream);
                     if (samps <= 0)
                         break;
 
@@ -244,7 +239,7 @@ public:
 
     static int oggSeekCallback (void* datasource, OggVorbisNamespace::ogg_int64_t offset, int whence)
     {
-        InputStream* const in = static_cast<InputStream*> (datasource);
+        auto* in = static_cast<InputStream*> (datasource);
 
         if (whence == SEEK_CUR)
             offset += in->getPosition();
@@ -269,7 +264,7 @@ private:
     OggVorbisNamespace::OggVorbis_File ovFile;
     OggVorbisNamespace::ov_callbacks callbacks;
     AudioSampleBuffer reservoir;
-    int reservoirStart, samplesInReservoir;
+    int reservoirStart = 0, samplesInReservoir = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OggReader)
 };
@@ -278,20 +273,14 @@ private:
 class OggWriter  : public AudioFormatWriter
 {
 public:
-    OggWriter (OutputStream* const out,
-               const double sampleRate_,
-               const unsigned int numChannels_,
-               const unsigned int bitsPerSample_,
-               const int qualityIndex,
-               const StringPairArray& metadata)
-        : AudioFormatWriter (out, oggFormatName, sampleRate_, numChannels_, bitsPerSample_),
-          ok (false)
+    OggWriter (OutputStream* out, double rate,
+               unsigned int numChans, unsigned int bitsPerSamp,
+               int qualityIndex, const StringPairArray& metadata)
+        : AudioFormatWriter (out, oggFormatName, rate, numChans, bitsPerSamp)
     {
-        using namespace OggVorbisNamespace;
-
         vorbis_info_init (&vi);
 
-        if (vorbis_encode_init_vbr (&vi, (int) numChannels_, (int) sampleRate_,
+        if (vorbis_encode_init_vbr (&vi, (int) numChans, (int) rate,
                                     jlimit (0.0f, 1.0f, qualityIndex * 0.1f)) == 0)
         {
             vorbis_comment_init (&vc);
@@ -310,10 +299,7 @@ public:
 
             ogg_stream_init (&os, Random::getSystemRandom().nextInt());
 
-            ogg_packet header;
-            ogg_packet header_comm;
-            ogg_packet header_code;
-
+            OggVorbisNamespace::ogg_packet header, header_comm, header_code;
             vorbis_analysis_headerout (&vd, &vc, &header, &header_comm, &header_code);
 
             ogg_stream_packetin (&os, &header);
@@ -335,7 +321,6 @@ public:
 
     ~OggWriter()
     {
-        using namespace OggVorbisNamespace;
         if (ok)
         {
             // write a zero-length packet to show ogg that we're finished..
@@ -362,8 +347,6 @@ public:
     {
         if (ok)
         {
-            using namespace OggVorbisNamespace;
-
             if (numSamples > 0)
             {
                 const double gain = 1.0 / 0x80000000u;
@@ -371,13 +354,13 @@ public:
 
                 for (int i = (int) numChannels; --i >= 0;)
                 {
-                    float* const dst = vorbisBuffer[i];
-                    const int* const src = samplesToWrite [i];
-
-                    if (src != nullptr && dst != nullptr)
+                    if (auto* dst = vorbisBuffer[i])
                     {
-                        for (int j = 0; j < numSamples; ++j)
-                            dst[j] = (float) (src[j] * gain);
+                        if (const int* src = samplesToWrite [i])
+                        {
+                            for (int j = 0; j < numSamples; ++j)
+                                dst[j] = (float) (src[j] * gain);
+                        }
                     }
                 }
             }
@@ -390,8 +373,6 @@ public:
 
     void writeSamples (int numSamples)
     {
-        using namespace OggVorbisNamespace;
-
         vorbis_analysis_wrote (&vd, numSamples);
 
         while (vorbis_analysis_blockout (&vd, &vb) == 1)
@@ -418,7 +399,7 @@ public:
         }
     }
 
-    bool ok;
+    bool ok = false;
 
 private:
     OggVorbisNamespace::ogg_stream_state os;
@@ -431,7 +412,7 @@ private:
 
     void addMetadata (const StringPairArray& metadata, const char* name, const char* vorbisName)
     {
-        const String s (metadata [name]);
+        auto s = metadata [name];
 
         if (s.isNotEmpty())
             vorbis_comment_add_tag (&vc, vorbisName, const_cast<char*> (s.toRawUTF8()));
@@ -452,24 +433,20 @@ OggVorbisAudioFormat::~OggVorbisAudioFormat()
 
 Array<int> OggVorbisAudioFormat::getPossibleSampleRates()
 {
-    const int rates[] = { 8000, 11025, 12000, 16000, 22050, 32000,
-                          44100, 48000, 88200, 96000, 176400, 192000 };
-
-    return Array<int> (rates, numElementsInArray (rates));
+    return { 8000, 11025, 12000, 16000, 22050, 32000,
+             44100, 48000, 88200, 96000, 176400, 192000 };
 }
 
 Array<int> OggVorbisAudioFormat::getPossibleBitDepths()
 {
-    const int depths[] = { 32 };
-
-    return Array<int> (depths, numElementsInArray (depths));
+    return { 32 };
 }
 
 bool OggVorbisAudioFormat::canDoStereo()    { return true; }
 bool OggVorbisAudioFormat::canDoMono()      { return true; }
 bool OggVorbisAudioFormat::isCompressed()   { return true; }
 
-AudioFormatReader* OggVorbisAudioFormat::createReaderFor (InputStream* in, const bool deleteStreamIfOpeningFails)
+AudioFormatReader* OggVorbisAudioFormat::createReaderFor (InputStream* in, bool deleteStreamIfOpeningFails)
 {
     ScopedPointer<OggReader> r (new OggReader (in));
 
@@ -501,29 +478,26 @@ AudioFormatWriter* OggVorbisAudioFormat::createWriterFor (OutputStream* out,
 
 StringArray OggVorbisAudioFormat::getQualityOptions()
 {
-    static const char* options[] = { "64 kbps", "80 kbps", "96 kbps", "112 kbps", "128 kbps", "160 kbps",
-                                     "192 kbps", "224 kbps", "256 kbps", "320 kbps", "500 kbps", 0 };
-    return StringArray (options);
+    return { "64 kbps", "80 kbps", "96 kbps", "112 kbps", "128 kbps", "160 kbps",
+             "192 kbps", "224 kbps", "256 kbps", "320 kbps", "500 kbps" };
 }
 
 int OggVorbisAudioFormat::estimateOggFileQuality (const File& source)
 {
-    if (FileInputStream* const in = source.createInputStream())
+    if (auto* in = source.createInputStream())
     {
-        ScopedPointer<AudioFormatReader> r (createReaderFor (in, true));
-
-        if (r != nullptr)
+        if (ScopedPointer<AudioFormatReader> r = createReaderFor (in, true))
         {
-            const double lengthSecs = r->lengthInSamples / r->sampleRate;
-            const int approxBitsPerSecond = (int) (source.getSize() * 8 / lengthSecs);
+            auto lengthSecs = r->lengthInSamples / r->sampleRate;
+            auto approxBitsPerSecond = (int) (source.getSize() * 8 / lengthSecs);
 
-            const StringArray qualities (getQualityOptions());
+            auto qualities = getQualityOptions();
             int bestIndex = 0;
             int bestDiff = 10000;
 
             for (int i = qualities.size(); --i >= 0;)
             {
-                const int diff = std::abs (qualities[i].getIntValue() - approxBitsPerSecond);
+                auto diff = std::abs (qualities[i].getIntValue() - approxBitsPerSecond);
 
                 if (diff < bestDiff)
                 {

@@ -72,7 +72,7 @@ public:
                 float sample = buffer.getReadPointer (ch)[j];
                 alpha = (0.8f * alpha) + (0.2f * sample);
 
-                if (fabsf (alpha) >= 0.1f)
+                if (std::abs (alpha) >= 0.1f)
                     channelTime = static_cast<int> (getSampleRate() / 2.0);
             }
 

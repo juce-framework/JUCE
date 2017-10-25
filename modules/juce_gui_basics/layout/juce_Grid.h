@@ -35,12 +35,12 @@ namespace juce
 
     @see GridItem
 */
-class JUCE_API  Grid
+class JUCE_API  Grid  final
 {
 public:
     //==============================================================================
     /** A size in pixels */
-    struct Px
+    struct Px  final
     {
         explicit Px (float p) : pixels (static_cast<long double>(p)) { /*sta (p >= 0.0f);*/ }
         explicit Px (int p)   : pixels (static_cast<long double>(p)) { /*sta (p >= 0.0f);*/ }
@@ -51,7 +51,7 @@ public:
     };
 
     /** A fractional ratio integer */
-    struct Fr
+    struct Fr  final
     {
         explicit Fr (int f) : fraction (static_cast<unsigned long long> (f)) {}
         explicit constexpr Fr (unsigned long long p) : fraction (p) {}
@@ -61,7 +61,7 @@ public:
 
     //==============================================================================
     /** */
-    struct TrackInfo
+    struct TrackInfo  final
     {
         /** Creates a track with auto dimension. */
         TrackInfo() noexcept;

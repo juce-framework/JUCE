@@ -112,7 +112,8 @@ public:
                 if (! renderThread->contains (this))
                     resume();
 
-                execute (new DoNothingWorker(), true, true);
+                while (workQueue.size() != 0)
+                    Thread::sleep (20);
             }
 
             pause();
@@ -125,6 +126,9 @@ public:
     //==============================================================================
     void pause()
     {
+        signalJobShouldExit();
+        messageManagerLock.abort();
+
         if (renderThread != nullptr)
         {
             repaintEvent.signal();
@@ -206,20 +210,24 @@ public:
 
     bool renderFrame()
     {
-        ScopedPointer<MessageManagerLock> mmLock;
-
+        MessageManager::Lock::ScopedTryLockType mmLock (messageManagerLock, false);
         const bool isUpdating = needsUpdate.compareAndSetBool (0, 1);
 
         if (context.renderComponents && isUpdating)
         {
-            MessageLockWorker worker (*this);
-
             // This avoids hogging the message thread when doing intensive rendering.
             if (lastMMLockReleaseTime + 1 >= Time::getMillisecondCounter())
                 Thread::sleep (2);
 
-            mmLock = new MessageManagerLock (worker);  // need to acquire this before locking the context.
-            if (! mmLock->lockWasGained())
+            while (! shouldExit())
+            {
+                doWorkWhileWaitingForLock (false);
+
+                if (mmLock.retryLock ())
+                    break;
+            }
+
+            if (shouldExit())
                 return false;
 
             updateViewportSize (false);
@@ -253,7 +261,7 @@ public:
                 if (! hasInitialised)
                     return false;
 
-                mmLock = nullptr;
+                messageManagerLock.exit();
                 lastMMLockReleaseTime = Time::getMillisecondCounter();
             }
 
@@ -418,12 +426,15 @@ public:
     JobStatus runJob() override
     {
         {
-            MessageLockWorker worker (*this);
-
             // Allow the message thread to finish setting-up the context before using it..
-            MessageManagerLock mml (worker);
-            if (! mml.lockWasGained())
-                return ThreadPoolJob::jobHasFinished;
+            MessageManager::Lock::ScopedTryLockType mmLock (messageManagerLock, false);
+
+            do
+            {
+                if (shouldExit())
+                    return ThreadPoolJob::jobHasFinished;
+
+            } while (! mmLock.retryLock ());
         }
 
         initialiseOnThread();
@@ -513,20 +524,6 @@ public:
     }
 
     //==============================================================================
-    struct MessageLockWorker  : public MessageManagerLock::BailOutChecker
-    {
-        MessageLockWorker (CachedImage& cachedImageRequestingLock)
-            : owner (cachedImageRequestingLock)
-        {
-        }
-
-        bool shouldAbortAcquiringLock() override   { return owner.doWorkWhileWaitingForLock (false); }
-
-        CachedImage& owner;
-        JUCE_DECLARE_NON_COPYABLE (MessageLockWorker)
-    };
-
-    //==============================================================================
     struct BlockingWorker  : public OpenGLContext::AsyncWorker
     {
         BlockingWorker (OpenGLContext::AsyncWorker::Ptr && workerToUse)
@@ -582,6 +579,7 @@ public:
             OpenGLContext::AsyncWorker::Ptr worker = (blocker != nullptr ? blocker : static_cast<OpenGLContext::AsyncWorker::Ptr&&> (workerToUse));
             workQueue.add (worker);
 
+            messageManagerLock.abort();
             context.triggerRepaint();
 
             if (blocker != nullptr)
@@ -598,14 +596,6 @@ public:
     {
         return dynamic_cast<CachedImage*> (c.getCachedComponentImage());
     }
-
-    //==============================================================================
-    // used to push no work on to the gl thread to easily block
-    struct DoNothingWorker  : public OpenGLContext::AsyncWorker
-    {
-        DoNothingWorker() {}
-        void operator() (OpenGLContext&) override {}
-    };
 
     //==============================================================================
     friend class NativeContext;
@@ -637,6 +627,7 @@ public:
 
     ScopedPointer<ThreadPool> renderThread;
     ReferenceCountedArray<OpenGLContext::AsyncWorker, CriticalSection> workQueue;
+    MessageManager::Lock messageManagerLock;
 
    #if JUCE_IOS
     iOSBackgroundProcessCheck backgroundProcessCheck;
@@ -843,6 +834,11 @@ void OpenGLContext::setPixelFormat (const OpenGLPixelFormat& preferredPixelForma
     jassert (nativeContext == nullptr);
 
     openGLPixelFormat = preferredPixelFormat;
+}
+
+void OpenGLContext::setTextureMagnificationFilter (OpenGLContext::TextureMagnificationFilter magFilterMode) noexcept
+{
+    texMagFilter = magFilterMode;
 }
 
 void OpenGLContext::setNativeSharedContext (void* nativeContextToShareWith) noexcept

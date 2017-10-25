@@ -23,19 +23,10 @@
 namespace juce
 {
 
-XmlDocument::XmlDocument (const String& documentText)
-    : originalText (documentText)
-{
-}
+XmlDocument::XmlDocument (const String& text)  : originalText (text) {}
+XmlDocument::XmlDocument (const File& file)  : inputSource (new FileInputSource (file)) {}
 
-XmlDocument::XmlDocument (const File& file)
-    : inputSource (new FileInputSource (file))
-{
-}
-
-XmlDocument::~XmlDocument()
-{
-}
+XmlDocument::~XmlDocument() {}
 
 XmlElement* XmlDocument::parse (const File& file)
 {
@@ -89,7 +80,7 @@ namespace XmlIdentifierChars
         DBG (s);
     }*/
 
-    static String::CharPointerType findEndOfToken (String::CharPointerType p)
+    static String::CharPointerType findEndOfToken (String::CharPointerType p) noexcept
     {
         while (isIdentifierChar (*p))
             ++p;
@@ -102,9 +93,7 @@ XmlElement* XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentEle
 {
     if (originalText.isEmpty() && inputSource != nullptr)
     {
-        ScopedPointer<InputStream> in (inputSource->createInputStream());
-
-        if (in != nullptr)
+        if (ScopedPointer<InputStream> in = inputSource->createInputStream())
         {
             MemoryOutputStream data;
             data.writeFromInputStream (*in, onlyReadOuterDocumentElement ? 8192 : -1);
@@ -113,7 +102,7 @@ XmlElement* XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentEle
             if (data.getDataSize() > 2)
             {
                 data.writeByte (0);
-                const char* text = static_cast<const char*> (data.getData());
+                auto* text = static_cast<const char*> (data.getData());
 
                 if (CharPointer_UTF16::isByteOrderMarkBigEndian (text)
                       || CharPointer_UTF16::isByteOrderMarkLittleEndian (text))
@@ -152,19 +141,15 @@ void XmlDocument::setLastError (const String& desc, const bool carryOn)
 String XmlDocument::getFileContents (const String& filename) const
 {
     if (inputSource != nullptr)
-    {
-        const ScopedPointer<InputStream> in (inputSource->createInputStreamFor (filename.trim().unquoted()));
-
-        if (in != nullptr)
+        if (ScopedPointer<InputStream> in = inputSource->createInputStreamFor (filename.trim().unquoted()))
             return in->readEntireStreamAsString();
-    }
 
     return {};
 }
 
 juce_wchar XmlDocument::readNextChar() noexcept
 {
-    const juce_wchar c = input.getAndAdvance();
+    auto c = input.getAndAdvance();
 
     if (c == 0)
     {
@@ -198,7 +183,6 @@ XmlElement* XmlDocument::parseDocumentElement (String::CharPointerType textToPar
     else
     {
         lastError.clear();
-
         ScopedPointer<XmlElement> result (readNextElement (! onlyReadOuterDocumentElement));
 
         if (! errorOccurred)
@@ -214,17 +198,18 @@ bool XmlDocument::parseHeader()
 
     if (CharacterFunctions::compareUpTo (input, CharPointer_ASCII ("<?xml"), 5) == 0)
     {
-        const String::CharPointerType headerEnd (CharacterFunctions::find (input, CharPointer_ASCII ("?>")));
+        auto headerEnd = CharacterFunctions::find (input, CharPointer_ASCII ("?>"));
 
         if (headerEnd.isEmpty())
             return false;
 
        #if JUCE_DEBUG
-        const String encoding (String (input, headerEnd)
-                                 .fromFirstOccurrenceOf ("encoding", false, true)
-                                 .fromFirstOccurrenceOf ("=", false, false)
-                                 .fromFirstOccurrenceOf ("\"", false, false)
-                                 .upToFirstOccurrenceOf ("\"", false, false).trim());
+        auto encoding = String (input, headerEnd)
+                          .fromFirstOccurrenceOf ("encoding", false, true)
+                          .fromFirstOccurrenceOf ("=", false, false)
+                          .fromFirstOccurrenceOf ("\"", false, false)
+                          .upToFirstOccurrenceOf ("\"", false, false)
+                          .trim();
 
         /* If you load an XML document with a non-UTF encoding type, it may have been
            loaded wrongly.. Since all the files are read via the normal juce file streams,
@@ -248,11 +233,11 @@ bool XmlDocument::parseDTD()
     if (CharacterFunctions::compareUpTo (input, CharPointer_ASCII ("<!DOCTYPE"), 9) == 0)
     {
         input += 9;
-        const String::CharPointerType dtdStart (input);
+        auto dtdStart = input;
 
         for (int n = 1; n > 0;)
         {
-            const juce_wchar c = readNextChar();
+            auto c = readNextChar();
 
             if (outOfData)
                 return false;
@@ -288,7 +273,7 @@ void XmlDocument::skipNextWhiteSpace()
                  && input[3] == '-')
             {
                 input += 4;
-                const int closeComment = input.indexOf (CharPointer_ASCII ("-->"));
+                auto closeComment = input.indexOf (CharPointer_ASCII ("-->"));
 
                 if (closeComment < 0)
                 {
@@ -303,7 +288,7 @@ void XmlDocument::skipNextWhiteSpace()
             if (input[1] == '?')
             {
                 input += 2;
-                const int closeBracket = input.indexOf (CharPointer_ASCII ("?>"));
+                auto closeBracket = input.indexOf (CharPointer_ASCII ("?>"));
 
                 if (closeBracket < 0)
                 {
@@ -322,11 +307,11 @@ void XmlDocument::skipNextWhiteSpace()
 
 void XmlDocument::readQuotedString (String& result)
 {
-    const juce_wchar quote = readNextChar();
+    auto quote = readNextChar();
 
     while (! outOfData)
     {
-        const juce_wchar c = readNextChar();
+        auto c = readNextChar();
 
         if (c == quote)
             break;
@@ -339,11 +324,11 @@ void XmlDocument::readQuotedString (String& result)
         }
         else
         {
-            const String::CharPointerType start (input);
+            auto start = input;
 
             for (;;)
             {
-                const juce_wchar character = *input;
+                auto character = *input;
 
                 if (character == quote)
                 {
@@ -351,12 +336,14 @@ void XmlDocument::readQuotedString (String& result)
                     ++input;
                     return;
                 }
-                else if (character == '&')
+
+                if (character == '&')
                 {
                     result.appendCharPointer (start, input);
                     break;
                 }
-                else if (character == 0)
+
+                if (character == 0)
                 {
                     setLastError ("unmatched quotes", false);
                     outOfData = true;
@@ -372,15 +359,15 @@ void XmlDocument::readQuotedString (String& result)
 XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements)
 {
     XmlElement* node = nullptr;
-
     skipNextWhiteSpace();
+
     if (outOfData)
         return nullptr;
 
     if (*input == '<')
     {
         ++input;
-        String::CharPointerType endOfToken (XmlIdentifierChars::findEndOfToken (input));
+        auto endOfToken = XmlIdentifierChars::findEndOfToken (input);
 
         if (endOfToken == input)
         {
@@ -403,8 +390,7 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements)
         for (;;)
         {
             skipNextWhiteSpace();
-
-            const juce_wchar c = *input;
+            auto c = *input;
 
             // empty tag..
             if (c == '/' && input[1] == '>')
@@ -427,26 +413,22 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements)
             // get an attribute..
             if (XmlIdentifierChars::isIdentifierChar (c))
             {
-                String::CharPointerType attNameEnd (XmlIdentifierChars::findEndOfToken (input));
+                auto attNameEnd = XmlIdentifierChars::findEndOfToken (input);
 
                 if (attNameEnd != input)
                 {
-                    const String::CharPointerType attNameStart (input);
+                    auto attNameStart = input;
                     input = attNameEnd;
-
                     skipNextWhiteSpace();
 
                     if (readNextChar() == '=')
                     {
                         skipNextWhiteSpace();
-
-                        const juce_wchar nextChar = *input;
+                        auto nextChar = *input;
 
                         if (nextChar == '"' || nextChar == '\'')
                         {
-                            XmlElement::XmlAttributeNode* const newAtt
-                                = new XmlElement::XmlAttributeNode (attNameStart, attNameEnd);
-
+                            auto* newAtt = new XmlElement::XmlAttributeNode (attNameStart, attNameEnd);
                             readQuotedString (newAtt->value);
                             attributeAppender.append (newAtt);
                             continue;
@@ -479,7 +461,7 @@ void XmlDocument::readChildElements (XmlElement& parent)
 
     for (;;)
     {
-        const String::CharPointerType preWhitespaceInput (input);
+        auto preWhitespaceInput = input;
         skipNextWhiteSpace();
 
         if (outOfData)
@@ -490,12 +472,12 @@ void XmlDocument::readChildElements (XmlElement& parent)
 
         if (*input == '<')
         {
-            const juce_wchar c1 = input[1];
+            auto c1 = input[1];
 
             if (c1 == '/')
             {
                 // our close tag..
-                const int closeTag = input.indexOf ((juce_wchar) '>');
+                auto closeTag = input.indexOf ((juce_wchar) '>');
 
                 if (closeTag >= 0)
                     input += closeTag + 1;
@@ -506,11 +488,11 @@ void XmlDocument::readChildElements (XmlElement& parent)
             if (c1 == '!' && CharacterFunctions::compareUpTo (input + 2, CharPointer_ASCII ("[CDATA["), 7) == 0)
             {
                 input += 9;
-                const String::CharPointerType inputStart (input);
+                auto inputStart = input;
 
                 for (;;)
                 {
-                    const juce_wchar c0 = *input;
+                    auto c0 = *input;
 
                     if (c0 == 0)
                     {
@@ -518,9 +500,8 @@ void XmlDocument::readChildElements (XmlElement& parent)
                         outOfData = true;
                         break;
                     }
-                    else if (c0 == ']'
-                              && input[1] == ']'
-                              && input[2] == '>')
+
+                    if (c0 == ']' && input[1] == ']' && input[2] == '>')
                     {
                         childAppender.append (XmlElement::createTextElement (String (inputStart, input)));
                         input += 3;
@@ -533,7 +514,7 @@ void XmlDocument::readChildElements (XmlElement& parent)
             else
             {
                 // this is some other element, so parse and add it..
-                if (XmlElement* const n = readNextElement (true))
+                if (auto* n = readNextElement (true))
                     childAppender.append (n);
                 else
                     break;
@@ -547,14 +528,14 @@ void XmlDocument::readChildElements (XmlElement& parent)
 
             for (;;)
             {
-                const juce_wchar c = *input;
+                auto c = *input;
 
                 if (c == '<')
                 {
                     if (input[1] == '!' && input[2] == '-' && input[3] == '-')
                     {
                         input += 4;
-                        const int closeComment = input.indexOf (CharPointer_ASCII ("-->"));
+                        auto closeComment = input.indexOf (CharPointer_ASCII ("-->"));
 
                         if (closeComment < 0)
                         {
@@ -584,13 +565,13 @@ void XmlDocument::readChildElements (XmlElement& parent)
 
                     if (entity.startsWithChar ('<') && entity [1] != 0)
                     {
-                        const String::CharPointerType oldInput (input);
-                        const bool oldOutOfData = outOfData;
+                        auto oldInput = input;
+                        auto oldOutOfData = outOfData;
 
                         input = entity.getCharPointer();
                         outOfData = false;
 
-                        while (XmlElement* n = readNextElement (true))
+                        while (auto* n = readNextElement (true))
                             childAppender.append (n);
 
                         input = oldInput;
@@ -606,7 +587,7 @@ void XmlDocument::readChildElements (XmlElement& parent)
                 {
                     for (;; ++input)
                     {
-                        juce_wchar nextChar = *input;
+                        auto nextChar = *input;
 
                         if (nextChar == '\r')
                         {
@@ -680,7 +661,7 @@ void XmlDocument::readEntity (String& result)
 
             while (input[0] != ';')
             {
-                const int hexValue = CharacterFunctions::getHexDigitValue (input[0]);
+                auto hexValue = CharacterFunctions::getHexDigitValue (input[0]);
 
                 if (hexValue < 0 || ++numChars > 8)
                 {
@@ -723,8 +704,8 @@ void XmlDocument::readEntity (String& result)
     }
     else
     {
-        const String::CharPointerType entityNameStart (input);
-        const int closingSemiColon = input.indexOf ((juce_wchar) ';');
+        auto entityNameStart = input;
+        auto closingSemiColon = input.indexOf ((juce_wchar) ';');
 
         if (closingSemiColon < 0)
         {
@@ -734,7 +715,6 @@ void XmlDocument::readEntity (String& result)
         else
         {
             input += closingSemiColon + 1;
-
             result += expandExternalEntity (String (entityNameStart, (size_t) closingSemiColon));
         }
     }
@@ -750,7 +730,7 @@ String XmlDocument::expandEntity (const String& ent)
 
     if (ent[0] == '#')
     {
-        const juce_wchar char1 = ent[1];
+        auto char1 = ent[1];
 
         if (char1 == 'x' || char1 == 'X')
             return String::charToString (static_cast<juce_wchar> (ent.substring (2).getHexValue32()));
@@ -774,10 +754,10 @@ String XmlDocument::expandExternalEntity (const String& entity)
             dtdText = dtdText.trimCharactersAtEnd (">");
             tokenisedDTD.addTokens (dtdText, true);
 
-            if (tokenisedDTD [tokenisedDTD.size() - 2].equalsIgnoreCase ("system")
-                 && tokenisedDTD [tokenisedDTD.size() - 1].isQuotedString())
+            if (tokenisedDTD[tokenisedDTD.size() - 2].equalsIgnoreCase ("system")
+                 && tokenisedDTD[tokenisedDTD.size() - 1].isQuotedString())
             {
-                const String fn (tokenisedDTD [tokenisedDTD.size() - 1]);
+                auto fn = tokenisedDTD[tokenisedDTD.size() - 1];
 
                 tokenisedDTD.clear();
                 tokenisedDTD.addTokens (getFileContents (fn), true);
@@ -785,11 +765,11 @@ String XmlDocument::expandExternalEntity (const String& entity)
             else
             {
                 tokenisedDTD.clear();
-                const int openBracket = dtdText.indexOfChar ('[');
+                auto openBracket = dtdText.indexOfChar ('[');
 
                 if (openBracket > 0)
                 {
-                    const int closeBracket = dtdText.lastIndexOfChar (']');
+                    auto closeBracket = dtdText.lastIndexOfChar (']');
 
                     if (closeBracket > openBracket)
                         tokenisedDTD.addTokens (dtdText.substring (openBracket + 1,
@@ -802,7 +782,7 @@ String XmlDocument::expandExternalEntity (const String& entity)
                 if (tokenisedDTD[i].startsWithChar ('%')
                      && tokenisedDTD[i].endsWithChar (';'))
                 {
-                    const String parsed (getParameterEntity (tokenisedDTD[i].substring (1, tokenisedDTD[i].length() - 1)));
+                    auto parsed = getParameterEntity (tokenisedDTD[i].substring (1, tokenisedDTD[i].length() - 1));
                     StringArray newToks;
                     newToks.addTokens (parsed, true);
 
@@ -823,14 +803,14 @@ String XmlDocument::expandExternalEntity (const String& entity)
         {
             if (tokenisedDTD[i - 1].equalsIgnoreCase ("<!entity"))
             {
-                String ent (tokenisedDTD [i + 1].trimCharactersAtEnd (">").trim().unquoted());
+                auto ent = tokenisedDTD [i + 1].trimCharactersAtEnd (">").trim().unquoted();
 
                 // check for sub-entities..
-                int ampersand = ent.indexOfChar ('&');
+                auto ampersand = ent.indexOfChar ('&');
 
                 while (ampersand >= 0)
                 {
-                    const int semiColon = ent.indexOf (i + 1, ";");
+                    auto semiColon = ent.indexOf (i + 1, ";");
 
                     if (semiColon < 0)
                     {
@@ -838,7 +818,7 @@ String XmlDocument::expandExternalEntity (const String& entity)
                         break;
                     }
 
-                    const String resolved (expandEntity (ent.substring (i + 1, semiColon)));
+                    auto resolved = expandEntity (ent.substring (i + 1, semiColon));
 
                     ent = ent.substring (0, ampersand)
                            + resolved
@@ -853,7 +833,6 @@ String XmlDocument::expandExternalEntity (const String& entity)
     }
 
     setLastError ("unknown entity", true);
-
     return entity;
 }
 
@@ -865,7 +844,7 @@ String XmlDocument::getParameterEntity (const String& entity)
              && tokenisedDTD [i - 1] == "%"
              && tokenisedDTD [i - 2].equalsIgnoreCase ("<!entity"))
         {
-            const String ent (tokenisedDTD [i + 1].trimCharactersAtEnd (">"));
+            auto ent = tokenisedDTD [i + 1].trimCharactersAtEnd (">");
 
             if (ent.equalsIgnoreCase ("system"))
                 return getFileContents (tokenisedDTD [i + 2].trimCharactersAtEnd (">"));

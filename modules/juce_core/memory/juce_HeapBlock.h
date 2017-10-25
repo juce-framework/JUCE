@@ -90,7 +90,7 @@ public:
         After creation, you can resize the array using the malloc(), calloc(),
         or realloc() methods.
     */
-    HeapBlock() noexcept  : data (nullptr)
+    HeapBlock() noexcept
     {
     }
 
@@ -102,8 +102,9 @@ public:
         If you want an array of zero values, you can use the calloc() method or the
         other constructor that takes an InitialisationState parameter.
     */
-    explicit HeapBlock (const size_t numElements)
-        : data (static_cast<ElementType*> (std::malloc (numElements * sizeof (ElementType))))
+    template <typename SizeType>
+    explicit HeapBlock (SizeType numElements)
+        : data (static_cast<ElementType*> (std::malloc (static_cast<size_t> (numElements) * sizeof (ElementType))))
     {
         throwOnAllocationFailure();
     }
@@ -113,10 +114,11 @@ public:
         The initialiseToZero parameter determines whether the new memory should be cleared,
         or left uninitialised.
     */
-    HeapBlock (const size_t numElements, const bool initialiseToZero)
+    template <typename SizeType>
+    HeapBlock (SizeType numElements, bool initialiseToZero)
         : data (static_cast<ElementType*> (initialiseToZero
-                                               ? std::calloc (numElements, sizeof (ElementType))
-                                               : std::malloc (numElements * sizeof (ElementType))))
+                                               ? std::calloc (static_cast<size_t> (numElements), sizeof (ElementType))
+                                               : std::malloc (static_cast<size_t> (numElements) * sizeof (ElementType))))
     {
         throwOnAllocationFailure();
     }
@@ -148,62 +150,61 @@ public:
         This may be a null pointer if the data hasn't yet been allocated, or if it has been
         freed by calling the free() method.
     */
-    inline operator ElementType*() const noexcept                           { return data; }
-
-
-    /** Returns a raw pointer to the allocated data.
-        This may be a null pointer if the data hasn't yet been allocated, or if it has been
-        freed by calling the free() method.
-    */
-    inline ElementType* get() const noexcept                                { return data; }
+    inline operator ElementType*() const noexcept                            { return data; }
 
     /** Returns a raw pointer to the allocated data.
         This may be a null pointer if the data hasn't yet been allocated, or if it has been
         freed by calling the free() method.
     */
-    inline ElementType* getData() const noexcept                            { return data; }
+    inline ElementType* get() const noexcept                                 { return data; }
+
+    /** Returns a raw pointer to the allocated data.
+        This may be a null pointer if the data hasn't yet been allocated, or if it has been
+        freed by calling the free() method.
+    */
+    inline ElementType* getData() const noexcept                             { return data; }
 
     /** Returns a void pointer to the allocated data.
         This may be a null pointer if the data hasn't yet been allocated, or if it has been
         freed by calling the free() method.
     */
-    inline operator void*() const noexcept                                  { return static_cast<void*> (data); }
+    inline operator void*() const noexcept                                   { return static_cast<void*> (data); }
 
     /** Returns a void pointer to the allocated data.
         This may be a null pointer if the data hasn't yet been allocated, or if it has been
         freed by calling the free() method.
     */
-    inline operator const void*() const noexcept                            { return static_cast<const void*> (data); }
+    inline operator const void*() const noexcept                             { return static_cast<const void*> (data); }
 
     /** Lets you use indirect calls to the first element in the array.
         Obviously this will cause problems if the array hasn't been initialised, because it'll
         be referencing a null pointer.
     */
-    inline ElementType* operator->() const  noexcept                        { return data; }
+    inline ElementType* operator->() const  noexcept                         { return data; }
 
     /** Returns a reference to one of the data elements.
         Obviously there's no bounds-checking here, as this object is just a dumb pointer and
         has no idea of the size it currently has allocated.
     */
     template <typename IndexType>
-    inline ElementType& operator[] (IndexType index) const noexcept         { return data [index]; }
+    ElementType& operator[] (IndexType index) const noexcept                 { return data [index]; }
 
     /** Returns a pointer to a data element at an offset from the start of the array.
         This is the same as doing pointer arithmetic on the raw pointer itself.
     */
     template <typename IndexType>
-    inline ElementType* operator+ (IndexType index) const noexcept          { return data + index; }
+    ElementType* operator+ (IndexType index) const noexcept                  { return data + index; }
 
     //==============================================================================
     /** Compares the pointer with another pointer.
         This can be handy for checking whether this is a null pointer.
     */
-    inline bool operator== (const ElementType* const otherPointer) const noexcept   { return otherPointer == data; }
+    inline bool operator== (const ElementType* otherPointer) const noexcept  { return otherPointer == data; }
 
     /** Compares the pointer with another pointer.
         This can be handy for checking whether this is a null pointer.
     */
-    inline bool operator!= (const ElementType* const otherPointer) const noexcept   { return otherPointer != data; }
+    inline bool operator!= (const ElementType* otherPointer) const noexcept  { return otherPointer != data; }
 
     //==============================================================================
     /** Allocates a specified amount of memory.
@@ -218,20 +219,22 @@ public:
         The data that is allocated will be freed when this object is deleted, or when you
         call free() or any of the allocation methods.
     */
-    void malloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
+    template <typename SizeType>
+    void malloc (SizeType newNumElements, size_t elementSize = sizeof (ElementType))
     {
         std::free (data);
-        data = static_cast<ElementType*> (std::malloc (newNumElements * elementSize));
+        data = static_cast<ElementType*> (std::malloc (static_cast<size_t> (newNumElements) * elementSize));
         throwOnAllocationFailure();
     }
 
     /** Allocates a specified amount of memory and clears it.
         This does the same job as the malloc() method, but clears the memory that it allocates.
     */
-    void calloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
+    template <typename SizeType>
+    void calloc (SizeType newNumElements, const size_t elementSize = sizeof (ElementType))
     {
         std::free (data);
-        data = static_cast<ElementType*> (std::calloc (newNumElements, elementSize));
+        data = static_cast<ElementType*> (std::calloc (static_cast<size_t> (newNumElements), elementSize));
         throwOnAllocationFailure();
     }
 
@@ -239,12 +242,13 @@ public:
         This does the same job as either malloc() or calloc(), depending on the
         initialiseToZero parameter.
     */
-    void allocate (const size_t newNumElements, bool initialiseToZero)
+    template <typename SizeType>
+    void allocate (SizeType newNumElements, bool initialiseToZero)
     {
         std::free (data);
         data = static_cast<ElementType*> (initialiseToZero
-                                             ? std::calloc (newNumElements, sizeof (ElementType))
-                                             : std::malloc (newNumElements * sizeof (ElementType)));
+                                             ? std::calloc (static_cast<size_t> (newNumElements), sizeof (ElementType))
+                                             : std::malloc (static_cast<size_t> (newNumElements) * sizeof (ElementType)));
         throwOnAllocationFailure();
     }
 
@@ -253,10 +257,11 @@ public:
         The semantics of this method are the same as malloc() and calloc(), but it
         uses realloc() to keep as much of the existing data as possible.
     */
-    void realloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
+    template <typename SizeType>
+    void realloc (SizeType newNumElements, size_t elementSize = sizeof (ElementType))
     {
-        data = static_cast<ElementType*> (data == nullptr ? std::malloc (newNumElements * elementSize)
-                                                          : std::realloc (data, newNumElements * elementSize));
+        data = static_cast<ElementType*> (data == nullptr ? std::malloc (static_cast<size_t> (newNumElements) * elementSize)
+                                                          : std::realloc (data, static_cast<size_t> (newNumElements) * elementSize));
         throwOnAllocationFailure();
     }
 
@@ -282,9 +287,10 @@ public:
         Since the block has no way of knowing its own size, you must make sure that the number of
         elements you specify doesn't exceed the allocated size.
     */
-    void clear (size_t numElements) noexcept
+    template <typename SizeType>
+    void clear (SizeType numElements) noexcept
     {
-        zeromem (data, sizeof (ElementType) * numElements);
+        zeromem (data, sizeof (ElementType) * static_cast<size_t> (numElements));
     }
 
     /** This typedef can be used to get the type of the heapblock's elements. */
@@ -292,7 +298,7 @@ public:
 
 private:
     //==============================================================================
-    ElementType* data;
+    ElementType* data = nullptr;
 
     void throwOnAllocationFailure() const
     {

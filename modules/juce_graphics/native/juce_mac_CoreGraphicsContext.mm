@@ -247,7 +247,7 @@ bool CoreGraphicsContext::clipToRectangleListWithoutTest (const RectangleList<in
         return false;
     }
 
-    const size_t numRects = (size_t) clipRegion.getNumRectangles();
+    auto numRects = (size_t) clipRegion.getNumRectangles();
     HeapBlock<CGRect> rects (numRects);
 
     int i = 0;
@@ -558,7 +558,7 @@ void CoreGraphicsContext::drawLine (const Line<float>& line)
 
 void CoreGraphicsContext::fillRectList (const RectangleList<float>& list)
 {
-    HeapBlock<CGRect> rects ((size_t) list.getNumRectangles());
+    HeapBlock<CGRect> rects (list.getNumRectangles());
 
     size_t num = 0;
 

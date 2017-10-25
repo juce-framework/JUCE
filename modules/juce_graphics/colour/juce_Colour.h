@@ -33,7 +33,7 @@ namespace juce
 
     The colour is stored internally as unsigned 8-bit red, green, blue and alpha values.
 */
-class JUCE_API  Colour
+class JUCE_API  Colour  final
 {
 public:
     //==============================================================================

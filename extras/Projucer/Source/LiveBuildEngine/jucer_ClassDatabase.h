@@ -476,7 +476,7 @@ struct ClassDatabase
 
         void add (const Class& c, const String::CharPointerType& localName)
         {
-            const String::CharPointerType nextDoubleColon (CharacterFunctions::find (localName, CharPointer_ASCII ("::")));
+            auto nextDoubleColon = CharacterFunctions::find (localName, CharPointer_ASCII ("::"));
 
             if (nextDoubleColon.isEmpty())
                 merge (c);

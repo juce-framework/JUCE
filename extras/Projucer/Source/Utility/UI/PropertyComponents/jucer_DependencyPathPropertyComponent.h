@@ -260,6 +260,43 @@ public:
         setEnabled (value.getValue());
     }
 
+    ~TextPropertyComponentWithEnablement()
+    {
+        value.removeListener (this);
+    }
+
+private:
+    Value value;
+
+    void valueChanged (Value& v) override
+    {
+        setEnabled (v.getValue());
+    }
+};
+
+//==============================================================================
+class ChoicePropertyComponentWithEnablement    : public ChoicePropertyComponent,
+                                                 private Value::Listener
+{
+public:
+    ChoicePropertyComponentWithEnablement (const Value& valueToControl,
+                                           const Value& valueToListenTo,
+                                           const String& propertyName,
+                                           const StringArray& choices,
+                                           const Array<var>& correspondingValues)
+        : ChoicePropertyComponent (valueToControl, propertyName,
+                                   choices, correspondingValues),
+          value (valueToListenTo)
+    {
+        value.addListener (this);
+        setEnabled (value.getValue());
+    }
+
+    ~ChoicePropertyComponentWithEnablement()
+    {
+        value.removeListener (this);
+    }
+
 private:
     Value value;
 

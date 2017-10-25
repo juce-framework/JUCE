@@ -235,10 +235,16 @@ private:
 class PropertyGroupComponent  : public Component
 {
 public:
-    PropertyGroupComponent (String name, Icon icon)
-    : header (name, icon)
+    PropertyGroupComponent (String name, Icon icon, String desc = {})
+        : header (name, icon),
+          description (desc)
     {
         addAndMakeVisible (header);
+
+        description.setFont (Font (16.0f));
+        description.setColour (getLookAndFeel().findColour (defaultTextColourId));
+        description.setLineSpacing (5.0f);
+        description.setJustification (Justification::centredLeft);
     }
 
     void setProperties (const PropertyListBuilder& newProps)
@@ -264,9 +270,14 @@ public:
 
     int updateSize (int x, int y, int width)
     {
-        header.setBounds (0, 0, width, 40);
+        header.setBounds (0, 0, width, headerSize);
+        auto height = header.getBottom() + 10;
 
-        auto height = header.getHeight() + 5;
+        descriptionLayout.createLayout (description, (float) (width - 40));
+        const auto descriptionHeight = (int) descriptionLayout.getHeight();
+
+        if (descriptionHeight > 0)
+            height += (int) descriptionLayout.getHeight() + 25;
 
         for (auto i = 0; i < properties.size(); ++i)
         {
@@ -303,6 +314,12 @@ public:
     {
         g.setColour (findColour (secondaryBackgroundColourId));
         g.fillRect (getLocalBounds());
+
+        auto textArea = getLocalBounds().toFloat()
+                                        .withTop ((float) headerSize)
+                                        .reduced (20.0f, 10.0f)
+                                        .withHeight (descriptionLayout.getHeight());
+        descriptionLayout.draw (g, textArea);
     }
 
     int getHeightMultiplier (PropertyComponent* pp)
@@ -330,9 +347,13 @@ public:
     }
 
     OwnedArray<PropertyComponent> properties;
-    OwnedArray<InfoButton> infoButtons;
-    ContentViewHeader header;
 
 private:
+    OwnedArray<InfoButton> infoButtons;
+    ContentViewHeader header;
+    AttributedString description;
+    TextLayout descriptionLayout;
+    const int headerSize = 40;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertyGroupComponent)
 };

@@ -442,9 +442,9 @@ private:
             typedef AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const> SourceType;
 
             if (isLittleEndian)
-                return new AudioData::ConverterInstance <SourceType, AudioData::Pointer <SampleType, AudioData::LittleEndian, InterleavedType, AudioData::NonConst> > (1, numInterleavedChannels);
+                return new AudioData::ConverterInstance <SourceType, AudioData::Pointer <SampleType, AudioData::LittleEndian, InterleavedType, AudioData::NonConst>> (1, numInterleavedChannels);
 
-            return new AudioData::ConverterInstance <SourceType, AudioData::Pointer <SampleType, AudioData::BigEndian, InterleavedType, AudioData::NonConst> > (1, numInterleavedChannels);
+            return new AudioData::ConverterInstance <SourceType, AudioData::Pointer <SampleType, AudioData::BigEndian, InterleavedType, AudioData::NonConst>> (1, numInterleavedChannels);
         }
     };
 

@@ -195,9 +195,6 @@ AudioProcessorParameterWithID* AudioProcessorValueTreeState::createAndAddParamet
 {
     // All parameters must be created before giving this manager a ValueTree state!
     jassert (! state.isValid());
-   #if ! JUCE_LINUX
-    jassert (MessageManager::getInstance()->isThisTheMessageThread());
-   #endif
 
     Parameter* p = new Parameter (*this, paramID, paramName, labelText, r,
                                   defaultVal, valueToTextFunction, textToValueFunction,
