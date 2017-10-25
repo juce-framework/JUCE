@@ -249,15 +249,15 @@ public:
             props.add (new BooleanPropertyComponent (getBackgroundBleValue(), "Bluetooth MIDI background capability", "Enabled"),
                        "Enable this to grant your app the capability to connect to Bluetooth LE devices when in background mode.");
 
-            props.add (new BooleanPropertyComponent (getPushNotificationsValue(), "Push Notifications capability", "Enabled"),
-                       "Enable this to grant your app the capability to receive push notifications.");
-
             props.add (new BooleanPropertyComponent (getAppGroupsEnabledValue(), "App groups capability", "Enabled"),
                        "Enable this to grant your app the capability to share resources between apps using the same app group ID.");
 
             props.add (new BooleanPropertyComponent (getiCloudPermissionsEnabled(), "iCloud Permissions", "Enabled"),
                        "Enable this to grant your app the capability to use native file load/save browser windows on iOS.");
         }
+
+        props.add (new BooleanPropertyComponent (getPushNotificationsValue(), "Push Notifications capability", "Enabled"),
+                   "Enable this to grant your app the capability to receive push notifications.");
 
         props.add (new TextPropertyComponent (getPListToMergeValue(), "Custom PList", 8192, true),
                    "You can paste the contents of an XML PList file in here, and the settings that it contains will override any "
@@ -860,7 +860,7 @@ public:
                                           && type == Target::StandalonePlugIn
                                           && owner.getProject().shouldEnableIAA()) ? 1 : 0;
 
-            auto pushNotificationsEnabled = (owner.iOS && owner.isPushNotificationsEnabled()) ? 1 : 0;
+            auto pushNotificationsEnabled = owner.isPushNotificationsEnabled() ? 1 : 0;
             auto sandboxEnabled = (type == Target::AudioUnitv3PlugIn ? 1 : 0);
 
             attributes << "SystemCapabilities = {";
@@ -1146,7 +1146,7 @@ public:
             if (owner.isInAppPurchasesEnabled())
                 defines.set ("JUCE_IN_APP_PURCHASES", "1");
 
-            if (owner.iOS && owner.isPushNotificationsEnabled())
+            if (owner.isPushNotificationsEnabled())
                 defines.set ("JUCE_PUSH_NOTIFICATIONS", "1");
 
             defines = mergePreprocessorDefs (defines, owner.getAllPreprocessorDefs (config, type));
@@ -2552,8 +2552,10 @@ private:
         }
         else
         {
-            if (isiOS() && isPushNotificationsEnabled())
-                entitlements.set ("aps-environment", "<string>development</string>");
+            if (isPushNotificationsEnabled())
+                entitlements.set (isiOS() ? "aps-environment"
+                                          : "com.apple.developer.aps-environment",
+                                  "<string>development</string>");
         }
 
         if (isAppGroupsEnabled())
