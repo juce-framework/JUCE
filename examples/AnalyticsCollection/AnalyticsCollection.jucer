@@ -4,7 +4,7 @@
               reportAppUsage="0" splashScreenColour="Dark" projectType="guiapp"
               version="1.0.0" bundleIdentifier="com.yourcompany.AnalyticsCollection"
               includeBinaryInAppConfig="1" cppLanguageStandard="11" companyCopyright=""
-              jucerVersion="5.1.2">
+              jucerVersion="5.2.0">
   <MAINGROUP id="aOi9Tf" name="AnalyticsCollection">
     <GROUP id="{527B2E17-B1B1-B919-CBEA-231058E23D74}" name="Source">
       <FILE id="qTLkDX" name="GoogleAnalyticsDestination.h" compile="0" resource="0"
