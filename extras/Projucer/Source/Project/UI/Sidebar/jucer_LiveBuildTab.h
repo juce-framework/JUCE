@@ -124,9 +124,9 @@ public:
     {
         auto bounds = getLocalBounds();
 
-        auto bottomSlice = bounds.removeFromBottom (25);
-        bottomSlice.removeFromRight (5);
-        settingsButton->setBounds (bottomSlice.removeFromRight (25).reduced (2));
+        settingsButton->setBounds (bounds.removeFromBottom (25)
+                                         .removeFromRight  (25)
+                                         .reduced (3));
 
         if (errorMessageLabel != nullptr)
         {
