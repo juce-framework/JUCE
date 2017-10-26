@@ -135,7 +135,9 @@ namespace juce
 
      //==============================================================================
     #ifndef DOXYGEN
-     // This method has been deprecated as there is no equivalent method in std::atomic.
+     /* This method has been deprecated as there is no equivalent method in
+        std::atomic. Use compareAndSetBool instead.
+     */
      JUCE_DEPRECATED (Type compareAndSetValue (Type, Type) noexcept);
     #endif
  };
