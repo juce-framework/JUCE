@@ -35,10 +35,8 @@ namespace juce
     function that the other plugin wrappers use, and will run it through the
     computer's audio/MIDI devices using AudioDeviceManager and AudioProcessorPlayer.
 */
-class StandalonePluginHolder    : private AudioIODeviceCallback
-                               #if JUCE_IOS || JUCE_ANDROID
-                                , Timer
-                               #endif
+class StandalonePluginHolder    : private AudioIODeviceCallback,
+                                  private Timer
 {
 public:
     //==============================================================================
@@ -63,11 +61,18 @@ public:
                             bool takeOwnershipOfSettings = true,
                             const String& preferredDefaultDeviceName = String(),
                             const AudioDeviceManager::AudioDeviceSetup* preferredSetupOptions = nullptr,
-                            const Array<PluginInOuts>& channels = Array<PluginInOuts>())
+                            const Array<PluginInOuts>& channels = Array<PluginInOuts>(),
+                           #if JUCE_ANDROID || JUCE_IOS
+                            bool shouldAutoOpenMidiDevices = true
+                           #else
+                            bool shouldAutoOpenMidiDevices = false
+                           #endif
+                            )
 
         : settings (settingsToUse, takeOwnershipOfSettings),
           channelConfiguration (channels),
-          shouldMuteInput (! isInterAppAudioConnected())
+          shouldMuteInput (! isInterAppAudioConnected()),
+          autoOpenMidiDevices (shouldAutoOpenMidiDevices)
     {
         createPlugin();
 
@@ -91,16 +96,13 @@ public:
         reloadPluginState();
         startPlaying();
 
-       #if JUCE_IOS || JUCE_ANDROID
-        startTimer (500);
-       #endif
+       if (autoOpenMidiDevices)
+           startTimer (500);
     }
 
     virtual ~StandalonePluginHolder()
     {
-       #if JUCE_IOS || JUCE_ANDROID
         stopTimer();
-       #endif
 
         deletePlugin();
         shutDownAudioDevices();
@@ -383,12 +385,10 @@ public:
     bool processorHasPotentialFeedbackLoop = true;
     Value shouldMuteInput;
     AudioSampleBuffer emptyBuffer;
+    bool autoOpenMidiDevices;
 
     ScopedPointer<AudioDeviceManager::AudioDeviceSetup> options;
-
-   #if JUCE_IOS || JUCE_ANDROID
     StringArray lastMidiDevices;
-   #endif
 
 private:
     //==============================================================================
@@ -513,7 +513,6 @@ private:
         deviceManager.removeAudioCallback (this);
     }
 
-   #if JUCE_IOS || JUCE_ANDROID
     void timerCallback() override
     {
         auto newMidiDevices = MidiInput::getDevices();
@@ -529,7 +528,6 @@ private:
                     deviceManager.setMidiInputEnabled (newDevice, true);
         }
     }
-   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandalonePluginHolder)
 };
@@ -561,7 +559,13 @@ public:
                             bool takeOwnershipOfSettings,
                             const String& preferredDefaultDeviceName = String(),
                             const AudioDeviceManager::AudioDeviceSetup* preferredSetupOptions = nullptr,
-                            const Array<PluginInOuts>& constrainToConfiguration = Array<PluginInOuts> ())
+                            const Array<PluginInOuts>& constrainToConfiguration = Array<PluginInOuts> (),
+                           #if JUCE_ANDROID || JUCE_IOS
+                            bool autoOpenMidiDevices = true
+                           #else
+                            bool autoOpenMidiDevices = false
+                           #endif
+                            )
         : DocumentWindow (title, backgroundColour, DocumentWindow::minimiseButton | DocumentWindow::closeButton),
           optionsButton ("Options")
     {
@@ -573,7 +577,7 @@ public:
 
         pluginHolder = new StandalonePluginHolder (settingsToUse, takeOwnershipOfSettings,
                                                    preferredDefaultDeviceName, preferredSetupOptions,
-                                                   constrainToConfiguration);
+                                                   constrainToConfiguration, autoOpenMidiDevices);
 
        #if JUCE_IOS || JUCE_ANDROID
         setFullScreen (true);
