@@ -3,7 +3,7 @@
 <JUCERPROJECT id="SS6MsF" name="PushNotificationsDemo" displaySplashScreen="0"
               reportAppUsage="0" splashScreenColour="Dark" projectType="guiapp"
               version="1.0.0" bundleIdentifier="com.juce.pushnotificationsdemo"
-              includeBinaryInAppConfig="1" cppLanguageStandard="11" jucerVersion="5.1.2"
+              includeBinaryInAppConfig="1" cppLanguageStandard="11" jucerVersion="5.2.0"
               companyCopyright="">
   <MAINGROUP id="VaJRhp" name="PushNotificationsDemo">
     <GROUP id="{712B2C90-FAC6-CCF3-F8F9-ED82411AF5ED}" name="BinaryResources">
@@ -65,18 +65,18 @@
                        enablePluginBinaryCopyStep="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_core" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_events" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_graphics" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_data_structures" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_gui_basics" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_gui_extra" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_cryptography" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_opengl" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_audio_basics" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_audio_devices" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_audio_formats" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_audio_processors" path="../Repos/roli-software/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_opengl" path="../../modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_IPHONE>
     <ANDROIDSTUDIO targetFolder="Builds/Android" androidSDKPath="" androidNDKPath=""
@@ -90,18 +90,18 @@
                        targetName="PushNotificationsDemo" androidAdditionalRawValueResources="../BinaryResources/sounds/demonstrative.mp3&#10;../BinaryResources/sounds/isntit.mp3&#10;../BinaryResources/sounds/jinglebellssms.mp3&#10;../BinaryResources/sounds/served.mp3&#10;../BinaryResources/sounds/solemn.mp3&#10;../BinaryResources/images/ic_stat_name.png&#10;../BinaryResources/images/ic_stat_name2.png&#10;../BinaryResources/images/ic_stat_name3.png&#10;../BinaryResources/images/ic_stat_name4.png&#10;../BinaryResources/images/ic_stat_name5.png&#10;../BinaryResources/images/ic_stat_name6.png&#10;../BinaryResources/images/ic_stat_name7.png&#10;../BinaryResources/images/ic_stat_name8.png&#10;../BinaryResources/images/ic_stat_name9.png&#10;../BinaryResources/images/ic_stat_name10.png"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_core" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_events" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_graphics" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_data_structures" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_gui_basics" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_gui_extra" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_cryptography" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_opengl" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_audio_basics" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_audio_devices" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_audio_formats" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_audio_processors" path="../Repos/roli-software/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_opengl" path="../../modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../modules"/>
       </MODULEPATHS>
     </ANDROIDSTUDIO>
     <XCODE_MAC targetFolder="Builds/MacOSX">
@@ -112,18 +112,18 @@
                        enablePluginBinaryCopyStep="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_opengl" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_gui_extra" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_gui_basics" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_graphics" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_events" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_data_structures" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_cryptography" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_core" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_audio_processors" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_audio_formats" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_audio_devices" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_audio_basics" path="../Repos/roli-software/JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
     <VS2015 targetFolder="Builds/VisualStudio2015">
@@ -136,34 +136,34 @@
                        linkTimeOptimisation="1" debugInformationFormat="None" enablePluginBinaryCopyStep="0"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_opengl" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_gui_extra" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_gui_basics" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_graphics" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_events" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_data_structures" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_cryptography" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_core" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_audio_processors" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_audio_formats" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_audio_devices" path="../Repos/roli-software/JUCE/modules"/>
-        <MODULEPATH id="juce_audio_basics" path="../Repos/roli-software/JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../modules"/>
       </MODULEPATHS>
     </VS2015>
   </EXPORTFORMATS>
   <MODULES>
-    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
-    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
-    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
-    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
-    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
-    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
-    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
-    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
-    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
-    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
-    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
-    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
   </MODULES>
   <JUCEOPTIONS/>
 </JUCERPROJECT>

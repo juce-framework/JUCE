@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="cgcxPd" name="SimpleFFTExample" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.roli.SimpleFFTExample" includeBinaryInAppConfig="1"
-              jucerVersion="5.1.2" displaySplashScreen="0" reportAppUsage="0"
+              jucerVersion="5.2.0" displaySplashScreen="0" reportAppUsage="0"
               splashScreenColour="Dark" companyName="ROLI Ltd." cppLanguageStandard="14"
               companyCopyright="ROLI Ltd.">
   <MAINGROUP id="rZCHr8" name="SimpleFFTExample">

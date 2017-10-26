@@ -401,6 +401,9 @@ private:
             out << "if (" << buildTypeCondition << ")" << newLine
                 << newLine;
 
+            out << "execute_process (COMMAND uname -m OUTPUT_VARIABLE JUCE_ARCH_LABEL OUTPUT_STRIP_TRAILING_WHITESPACE)" << newLine
+                << newLine;
+
             out << "include_directories (" << newLine;
 
             for (auto& path : exporter.getHeaderSearchPaths (config))
@@ -570,6 +573,16 @@ private:
                     out << "    SHARED_CODE" << newLine
                         << "    -L." << newLine;
 
+                for (auto& path : exporter.getLinkerSearchPaths (config, *target))
+                {
+                    out << "    \"-L";
+
+                    if (! File::isAbsolutePath (path))
+                        out << "${CMAKE_CURRENT_SOURCE_DIR}/";
+
+                    out << path << "\"" << newLine;
+                }
+
                 for (auto& flag : exporter.getLinkerFlags (config, *target))
                     out << "    " << flag << newLine;
 
@@ -656,6 +669,9 @@ private:
             out << "if (" << buildTypeCondition << ")" << newLine
                 << newLine;
 
+            out << "execute_process (COMMAND uname -m OUTPUT_VARIABLE JUCE_ARCH_LABEL OUTPUT_STRIP_TRAILING_WHITESPACE)" << newLine
+                << newLine;
+
             const auto configSettings = exporter.getProjectSettings (config);
             auto configSettingsKeys = configSettings.getAllKeys();
 
@@ -675,18 +691,6 @@ private:
 
                 auto targetAttributes = target->getTargetSettings (config);
                 auto targetAttributeKeys = targetAttributes.getAllKeys();
-
-                StringArray libSearchPaths;
-
-                if (targetAttributeKeys.contains ("LIBRARY_SEARCH_PATHS"))
-                {
-                    auto paths = targetAttributes["LIBRARY_SEARCH_PATHS"].trim().substring (1).dropLastCharacters (1);
-                    paths = paths.replace ("\"$(inherited)\"", {});
-                    paths = paths.replace ("$(HOME)", "$ENV{HOME}");
-                    libSearchPaths.addTokens (paths, ",\"\t\\", {});
-                    libSearchPaths.removeEmptyStrings();
-                    targetAttributeKeys.removeString ("LIBRARY_SEARCH_PATHS");
-                }
 
                 StringArray headerSearchPaths;
 
@@ -725,18 +729,28 @@ private:
 
                 StringArray cppFlags;
 
+                String archLabel ("${JUCE_ARCH_LABEL}");
+
                 // Fat binaries are not supported.
                 if (targetAttributeKeys.contains ("ARCHS"))
                 {
                     auto value = targetAttributes["ARCHS"].unquoted();
 
                     if  (value.contains ("NATIVE_ARCH_ACTUAL"))
+                    {
                         cppFlags.add ("-march=native");
+                    }
                     else if (value.contains ("ARCHS_STANDARD_32_BIT"))
+                    {
+                        archLabel = "i386";
                         cppFlags.add ("-arch x86");
+                    }
                     else if (value.contains ("ARCHS_STANDARD_32_64_BIT")
                           || value.contains ("ARCHS_STANDARD_64_BIT"))
-                         cppFlags.add ("-arch x86_64");
+                    {
+                        archLabel = "x86_64";
+                        cppFlags.add ("-arch x86_64");
+                    }
 
                     targetAttributeKeys.removeString ("ARCHS");
                 }
@@ -789,6 +803,27 @@ private:
                     out << "    " << flag << newLine;
 
                 out << ")" << newLine << newLine;
+
+                StringArray libSearchPaths;
+
+                if (targetAttributeKeys.contains ("LIBRARY_SEARCH_PATHS"))
+                {
+                    auto paths = targetAttributes["LIBRARY_SEARCH_PATHS"].trim().substring (1).dropLastCharacters (1);
+                    paths = paths.replace ("\"$(inherited)\"", {});
+                    paths = paths.replace ("$(HOME)", "$ENV{HOME}");
+                    libSearchPaths.addTokens (paths, ",\"\t\\", {});
+                    libSearchPaths.removeEmptyStrings();
+
+                    for (auto& libPath : libSearchPaths)
+                    {
+                        libPath = libPath.replace ("${CURRENT_ARCH}", archLabel);
+
+                        if (! File::isAbsolutePath (libPath))
+                            libPath = "${CMAKE_CURRENT_SOURCE_DIR}/" + libPath;
+                    }
+
+                    targetAttributeKeys.removeString ("LIBRARY_SEARCH_PATHS");
+                }
 
                 StringArray linkerFlags;
 

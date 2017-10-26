@@ -1,7 +1,7 @@
 JUCE breaking changes
 =====================
 
-develop
+Version 5.2.0
 =============
 
 Change

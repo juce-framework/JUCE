@@ -238,14 +238,14 @@ private:
         String getModuleLibraryArchName() const override
         {
             const String archFlag = getArchitectureTypeVar();
-
             const auto prefix = String ("-march=");
+
             if (archFlag.startsWith (prefix))
-                return String ("/") + archFlag.substring (prefix.length());
+                return archFlag.substring (prefix.length());
             else if (archFlag == "-m64")
-                return "/x86_64";
+                return "x86_64";
             else if (archFlag == "-m32")
-                return "/i386";
+                return "i386";
 
             jassertfalse;
             return {};
@@ -456,8 +456,7 @@ private:
         if (! config.isDebug())
             flags.add ("-s");
 
-        flags.addTokens (replacePreprocessorTokens (config, getExtraLinkerFlagsString()).trim(),
-                         " \n", "\"'");
+        flags.addTokens (replacePreprocessorTokens (config, getExtraLinkerFlagsString()).trim(), " \n", "\"'");
 
         const auto packages = getPackages();
 
@@ -475,6 +474,16 @@ private:
         }
 
         return getCleanedStringArray (flags);
+    }
+
+    StringArray getLinkerSearchPaths (const BuildConfiguration& config, CodeBlocksTarget& target) const
+    {
+        StringArray librarySearchPaths (config.getLibrarySearchPaths());
+
+        if (getProject().getProjectType().isAudioPlugin() && target.type != ProjectType::Target::SharedCodeTarget)
+            librarySearchPaths.add (RelativePath (getSharedCodePath (config), RelativePath::buildTargetFolder).getParentDirectory().toUnixStyle());
+
+        return librarySearchPaths;
     }
 
     StringArray getIncludePaths (const BuildConfiguration& config) const
@@ -616,9 +625,7 @@ private:
             if (getProject().getProjectType().isAudioPlugin() && target.type != ProjectType::Target::SharedCodeTarget)
                 setAddOption (*linker, "option", getSharedCodePath (config));
 
-            const StringArray linkerFlags (getLinkerFlags (config, target));
-
-            for (auto flag : linkerFlags)
+            for (auto& flag : getLinkerFlags (config, target))
                 setAddOption (*linker, "option", flag);
 
             const StringArray& libs = isWindows() ? mingwLibs : linuxLibs;
@@ -626,12 +633,7 @@ private:
             for (auto lib : libs)
                 setAddOption (*linker, "library", lib);
 
-            StringArray librarySearchPaths (config.getLibrarySearchPaths());
-
-            if (getProject().getProjectType().isAudioPlugin() && target.type != ProjectType::Target::SharedCodeTarget)
-                librarySearchPaths.add (RelativePath (getSharedCodePath (config), RelativePath::buildTargetFolder).getParentDirectory().toUnixStyle());
-
-            for (auto path : librarySearchPaths)
+            for (auto& path : getLinkerSearchPaths (config, target))
                 setAddOption (*linker, "directory", replacePreprocessorDefs (getAllPreprocessorDefs(), path));
         }
     }

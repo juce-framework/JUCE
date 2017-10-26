@@ -93,10 +93,10 @@ void ComboBox::addItem (const String& newItemText, int newItemId)
         currentMenu.addItem (newItemId, newItemText, true, false);
 }
 
-void ComboBox::addItemList (const StringArray& itemsToAdd, int firstItemIdOffset)
+void ComboBox::addItemList (const StringArray& itemsToAdd, int firstItemID)
 {
-    for (int i = 0; i < itemsToAdd.size(); ++i)
-        currentMenu.addItem (i + firstItemIdOffset, itemsToAdd[i]);
+    for (auto& i : itemsToAdd)
+        currentMenu.addItem (firstItemID++, i);
 }
 
 void ComboBox::addSeparator()
@@ -529,14 +529,13 @@ static void comboBoxPopupMenuFinishedCallback (int result, ComboBox* combo)
 
 void ComboBox::showPopup()
 {
-    PopupMenu noChoicesMenu;
-    const bool hasItems = (currentMenu.getNumItems() > 0);
+    auto menu = currentMenu;
 
-    if (hasItems)
+    if (menu.getNumItems() > 0)
     {
         auto selectedId = getSelectedId();
 
-        for (PopupMenu::MenuItemIterator iterator (currentMenu, true); iterator.next();)
+        for (PopupMenu::MenuItemIterator iterator (menu, true); iterator.next();)
         {
             auto& item = iterator.getItem();
 
@@ -546,17 +545,16 @@ void ComboBox::showPopup()
     }
     else
     {
-        noChoicesMenu.addItem (1, noChoicesMessage, false, false);
+        menu.addItem (1, noChoicesMessage, false, false);
     }
 
-    auto& menuToShow = (hasItems ? currentMenu : noChoicesMenu);
-    menuToShow.setLookAndFeel (&getLookAndFeel());
-    menuToShow.showMenuAsync (PopupMenu::Options().withTargetComponent (this)
-                                                  .withItemThatMustBeVisible (getSelectedId())
-                                                  .withMinimumWidth (getWidth())
-                                                  .withMaximumNumColumns (1)
-                                                  .withStandardItemHeight (label->getHeight()),
-                              ModalCallbackFunction::forComponent (comboBoxPopupMenuFinishedCallback, this));
+    menu.setLookAndFeel (&getLookAndFeel());
+    menu.showMenuAsync (PopupMenu::Options().withTargetComponent (this)
+                                            .withItemThatMustBeVisible (getSelectedId())
+                                            .withMinimumWidth (getWidth())
+                                            .withMaximumNumColumns (1)
+                                            .withStandardItemHeight (label->getHeight()),
+                        ModalCallbackFunction::forComponent (comboBoxPopupMenuFinishedCallback, this));
 }
 
 //==============================================================================
@@ -599,11 +597,19 @@ void ComboBox::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& whe
 {
     if (! menuActive && scrollWheelEnabled && e.eventComponent == this && wheel.deltaY != 0.0f)
     {
-        auto oldPos = (int) mouseWheelAccumulator;
         mouseWheelAccumulator += wheel.deltaY * 5.0f;
 
-        if (auto delta = oldPos - (int) mouseWheelAccumulator)
-            nudgeSelectedItem (delta);
+        while (mouseWheelAccumulator > 1.0f)
+        {
+            mouseWheelAccumulator -= 1.0f;
+            nudgeSelectedItem (-1);
+        }
+
+        while (mouseWheelAccumulator < -1.0f)
+        {
+            mouseWheelAccumulator += 1.0f;
+            nudgeSelectedItem (1);
+        }
     }
     else
     {
