@@ -93,8 +93,8 @@ public:
         }
 
         if (fileToOpen.existsAsFile())
-            if (GraphDocumentComponent* graph = mainWindow->getGraphEditor())
-                if (FilterGraph* ioGraph = graph->graph.get())
+            if (auto* graph = mainWindow->graphHolder.get())
+                if (auto* ioGraph = graph->graph.get())
                     ioGraph->loadFrom (fileToOpen, true);
     }
 

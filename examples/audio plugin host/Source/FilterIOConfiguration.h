@@ -26,38 +26,35 @@
 
 #pragma once
 
-#include "FilterGraph.h"
+class MainHostWindow;
+class GraphDocumentComponent;
 
-class FilterIOConfigurationWindow       : public  AudioProcessorEditor
+
+//==============================================================================
+class FilterIOConfigurationWindow   : public  AudioProcessorEditor
 {
 public:
-    class InputOutputConfig;
-
-    //==============================================================================
-    FilterIOConfigurationWindow (AudioProcessor* const p);
+    FilterIOConfigurationWindow (AudioProcessor&);
     ~FilterIOConfigurationWindow();
 
     //==============================================================================
     void paint (Graphics& g) override;
     void resized() override;
 
-    //==============================================================================
-    InputOutputConfig* getConfig (bool isInput) noexcept { return isInput ? inConfig : outConfig; }
-    void update();
 private:
-
-    //==============================================================================
-    MainHostWindow* getMainWindow() const;
-    GraphDocumentComponent* getGraphEditor() const;
-    AudioProcessorGraph* getGraph() const;
-    int32 getNodeId() const;
-
-    //==============================================================================
-    friend class InputOutputConfig;
+    class InputOutputConfig;
 
     AudioProcessor::BusesLayout currentLayout;
     Label title;
     ScopedPointer<InputOutputConfig> inConfig, outConfig;
+
+    InputOutputConfig* getConfig (bool isInput) noexcept    { return isInput ? inConfig : outConfig; }
+    void update();
+
+    MainHostWindow* getMainWindow() const;
+    GraphDocumentComponent* getGraphEditor() const;
+    AudioProcessorGraph* getGraph() const;
+    AudioProcessorGraph::NodeID getNodeID() const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilterIOConfigurationWindow)
 };

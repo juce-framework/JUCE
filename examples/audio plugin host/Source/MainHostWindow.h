@@ -48,8 +48,6 @@ ApplicationCommandManager& getCommandManager();
 ApplicationProperties& getAppProperties();
 
 //==============================================================================
-/**
-*/
 class MainHostWindow    : public DocumentWindow,
                           public MenuBarModel,
                           public ApplicationCommandTarget,
@@ -62,24 +60,24 @@ public:
     ~MainHostWindow();
 
     //==============================================================================
-    void closeButtonPressed();
-    void changeListenerCallback (ChangeBroadcaster*);
+    void closeButtonPressed() override;
+    void changeListenerCallback (ChangeBroadcaster*) override;
 
-    bool isInterestedInFileDrag (const StringArray& files);
-    void fileDragEnter (const StringArray& files, int, int);
-    void fileDragMove (const StringArray& files, int, int);
-    void fileDragExit (const StringArray& files);
-    void filesDropped (const StringArray& files, int, int);
+    bool isInterestedInFileDrag (const StringArray& files) override;
+    void fileDragEnter (const StringArray& files, int, int) override;
+    void fileDragMove (const StringArray& files, int, int) override;
+    void fileDragExit (const StringArray& files) override;
+    void filesDropped (const StringArray& files, int, int) override;
 
-    void menuBarActivated (bool isActive);
+    void menuBarActivated (bool isActive) override;
 
-    StringArray getMenuBarNames();
-    PopupMenu getMenuForIndex (int topLevelMenuIndex, const String& menuName);
-    void menuItemSelected (int menuItemID, int topLevelMenuIndex);
-    ApplicationCommandTarget* getNextCommandTarget();
-    void getAllCommands (Array<CommandID>& commands);
-    void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result);
-    bool perform (const InvocationInfo& info);
+    StringArray getMenuBarNames() override;
+    PopupMenu getMenuForIndex (int topLevelMenuIndex, const String& menuName) override;
+    void menuItemSelected (int menuItemID, int topLevelMenuIndex) override;
+    ApplicationCommandTarget* getNextCommandTarget() override;
+    void getAllCommands (Array<CommandID>&) override;
+    void getCommandInfo (CommandID, ApplicationCommandInfo&) override;
+    bool perform (const InvocationInfo&) override;
 
     void tryToQuitApplication();
 
@@ -88,10 +86,10 @@ public:
     void addPluginsToMenu (PopupMenu&) const;
     const PluginDescription* getChosenType (int menuID) const;
 
-    GraphDocumentComponent* getGraphEditor() const;
-
     bool isDoublePrecisionProcessing();
     void updatePrecisionMenuItem (ApplicationCommandInfo& info);
+
+    ScopedPointer<GraphDocumentComponent> graphHolder;
 
 private:
     //==============================================================================

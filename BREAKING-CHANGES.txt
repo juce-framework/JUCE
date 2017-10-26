@@ -1,6 +1,32 @@
 JUCE breaking changes
 =====================
 
+
+Develop
+=======
+
+Change
+------
+AudioProcessorGraph interface has changed in a number of ways - Node objects
+are now reference counted, there are different accessor methods to iterate them,
+and misc other small improvements to the API
+
+Possible Issues
+---------------
+The changes won't cause any silent errors in user code, but will require some
+manual refactoring
+
+Workaround
+----------
+Just find equivalent new methods to replace existing code.
+
+Rationale
+---------
+The graph class was extremely old and creaky, and these changes is the start of
+an improvement process that should eventually result in it being broken down
+into fundamental graph building block classes for use in other contexts.
+
+
 Version 5.2.0
 =============
 

@@ -2169,6 +2169,9 @@
     <ClInclude Include="..\..\Source\MainHostWindow.h">
       <Filter>Plugin Host</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\PluginWindow.h">
+      <Filter>Plugin Host</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.h">
       <Filter>Juce Modules\juce_audio_basics\audio_play_head</Filter>
     </ClInclude>
