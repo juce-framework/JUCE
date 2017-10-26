@@ -457,7 +457,7 @@ void MainWindowList::openDocument (OpenDocumentManager::Document* doc, bool grab
     getFrontmostWindow()->getProjectContentComponent()->showDocument (doc, grabFocus);
 }
 
-bool MainWindowList::openFile (const File& file)
+bool MainWindowList::openFile (const File& file, bool openInBackground)
 {
     for (int i = windows.size(); --i >= 0;)
     {
@@ -472,11 +472,16 @@ bool MainWindowList::openFile (const File& file)
 
     if (file.hasFileExtension (Project::projectFileExtension))
     {
+        auto previousFrontWindow = getFrontmostWindow();
+
         MainWindow* const w = getOrCreateEmptyWindow();
         bool ok = w->openFile (file);
 
         w->makeVisible();
         avoidSuperimposedWindows (w);
+
+        if (openInBackground && (previousFrontWindow != nullptr))
+            previousFrontWindow->toFront (true);
 
         return ok;
     }
@@ -581,7 +586,7 @@ void MainWindowList::reopenLastProjects()
     Array<File> projects (getAppSettings().getLastProjects());
 
     for (int i = 0; i < projects.size(); ++ i)
-        openFile (projects.getReference(i));
+        openFile (projects.getReference(i), true);
 }
 
 void MainWindowList::sendLookAndFeelChange()

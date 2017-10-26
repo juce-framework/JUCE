@@ -98,7 +98,7 @@ public:
 
     void createWindowIfNoneAreOpen();
     void openDocument (OpenDocumentManager::Document*, bool grabFocus);
-    bool openFile (const File& file);
+    bool openFile (const File& file, bool openInBackground = false);
 
     MainWindow* createNewMainWindow();
     MainWindow* getFrontmostWindow (bool createIfNotFound = true);
