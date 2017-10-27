@@ -126,8 +126,8 @@ struct ItemComponent  : public Component
 
     void resized() override
     {
-        if (Component* const child = getChildComponent (0))
-            child->setBounds (getLocalBounds().reduced (2, 0));
+        if (auto* child = getChildComponent (0))
+            child->setBounds (getLocalBounds().reduced (getLookAndFeel().getPopupMenuBorderSize(), 0));
     }
 
     void setHighlighted (bool shouldBeHighlighted)
@@ -551,7 +551,7 @@ public:
 
     bool treeContains (const MenuWindow* const window) const noexcept
     {
-        const MenuWindow* mw = this;
+        auto* mw = this;
 
         while (mw->parent != nullptr)
             mw = mw->parent;
@@ -617,7 +617,7 @@ public:
         if (parentComponent != nullptr)
             target = parentComponent->getLocalArea (nullptr, target).getIntersection (parentArea);
 
-        const int maxMenuHeight = parentArea.getHeight() - 24;
+        auto maxMenuHeight = parentArea.getHeight() - 24;
 
         int x, y, widthToUse, heightToUse;
         layoutMenuItems (parentArea.getWidth() - 24, maxMenuHeight, widthToUse, heightToUse);
@@ -656,8 +656,8 @@ public:
                 }
             }
 
-            const int biggestSpace = jmax (parentArea.getRight() - target.getRight(),
-                                           target.getX() - parentArea.getX()) - 32;
+            auto biggestSpace = jmax (parentArea.getRight() - target.getRight(),
+                                      target.getX() - parentArea.getX()) - 32;
 
             if (biggestSpace < widthToUse)
             {
@@ -696,13 +696,12 @@ public:
     {
         numColumns = options.getMinimumNumColumns();
         contentHeight = 0;
-        int totalW;
 
         auto maximumNumColumns = options.getMaximumNumColumns() > 0 ? options.getMaximumNumColumns() : 7;
 
         for (;;)
         {
-            totalW = workOutBestSize (maxMenuW);
+            auto totalW = workOutBestSize (maxMenuW);
 
             if (totalW > maxMenuW)
             {
@@ -737,8 +736,8 @@ public:
         {
             int colW = options.getStandardItemHeight(), colH = 0;
 
-            const int numChildren = jmin (items.size() - childNum,
-                                          (items.size() + numColumns - 1) / numColumns);
+            auto numChildren = jmin (items.size() - childNum,
+                                     (items.size() + numColumns - 1) / numColumns);
 
             for (int i = numChildren; --i >= 0;)
             {
@@ -791,8 +790,7 @@ public:
                                               currentY);
 
                         auto parentArea = getParentArea (windowPos.getPosition());
-
-                        int deltaY = wantedY - currentY;
+                        auto deltaY = wantedY - currentY;
 
                         windowPos.setSize (jmin (windowPos.getWidth(), parentArea.getWidth()),
                                            jmin (windowPos.getHeight(), parentArea.getHeight()));
@@ -825,7 +823,7 @@ public:
         }
         else if (childYOffset > 0)
         {
-            const int spaceAtBottom = r.getHeight() - (contentHeight - childYOffset);
+            auto spaceAtBottom = r.getHeight() - (contentHeight - childYOffset);
 
             if (spaceAtBottom > 0)
                 r.setSize (r.getWidth(), r.getHeight() - spaceAtBottom);
@@ -835,7 +833,7 @@ public:
         updateYPositions();
     }
 
-    void alterChildYPos (const int delta)
+    void alterChildYPos (int delta)
     {
         if (canScroll())
         {
@@ -865,12 +863,11 @@ public:
 
         for (int col = 0; col < numColumns; ++col)
         {
-            const int numChildren = jmin (items.size() - childNum,
-                                          (items.size() + numColumns - 1) / numColumns);
+            auto numChildren = jmin (items.size() - childNum,
+                                     (items.size() + numColumns - 1) / numColumns);
 
-            const int colW = columnWidths [col];
-
-            int y = getLookAndFeel().getPopupMenuBorderSize() - (childYOffset + (getY() - windowPos.getY()));
+            auto colW = columnWidths[col];
+            auto y = getLookAndFeel().getPopupMenuBorderSize() - (childYOffset + (getY() - windowPos.getY()));
 
             for (int i = 0; i < numChildren; ++i)
             {
@@ -886,7 +883,7 @@ public:
         return x;
     }
 
-    void setCurrentlyHighlightedChild (ItemComponent* const child)
+    void setCurrentlyHighlightedChild (ItemComponent* child)
     {
         if (currentChild != nullptr)
             currentChild->setHighlighted (false);
@@ -902,7 +899,7 @@ public:
 
     bool isSubMenuVisible() const noexcept          { return activeSubMenu != nullptr && activeSubMenu->isVisible(); }
 
-    bool showSubMenuFor (ItemComponent* const childComp)
+    bool showSubMenuFor (ItemComponent* childComp)
     {
         activeSubMenu = nullptr;
 
@@ -935,11 +932,11 @@ public:
         }
     }
 
-    void selectNextItem (const int delta)
+    void selectNextItem (int delta)
     {
         disableTimerUntilMouseMoves();
 
-        int start = jmax (0, items.indexOf (currentChild));
+        auto start = jmax (0, items.indexOf (currentChild));
 
         for (int i = items.size(); --i >= 0;)
         {
@@ -1135,6 +1132,7 @@ private:
             if (! isMovingTowardsMenu)
             {
                 auto* c = window.getComponentAt (localMousePos);
+
                 if (c == &window)
                     c = nullptr;
 
