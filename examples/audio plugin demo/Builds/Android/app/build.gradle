@@ -26,7 +26,7 @@ android {
             cmake {
                 arguments "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-23", "-DANDROID_STL=c++_static", "-DANDROID_CPP_FEATURES=exceptions rtti", "-DANDROID_ARM_MODE=arm", "-DANDROID_ARM_NEON=TRUE"
                 cFlags "-fsigned-char"
-                cppFlags "-fsigned-char", "-std=c++11"
+                cppFlags "-fsigned-char", "-std=c++14"
             }
         }
     }

@@ -23,6 +23,8 @@ ifndef CONFIG
   CONFIG=Debug
 endif
 
+JUCE_ARCH_LABEL := $(shell uname -m)
+
 ifeq ($(CONFIG),Debug)
   JUCE_BINDIR := build
   JUCE_LIBDIR := build
