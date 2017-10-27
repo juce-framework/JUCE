@@ -57,9 +57,10 @@ struct ConvolutionEngine
         AudioBuffer<float>* buffer;
 
         double sampleRate = 0;
-        bool wantsStereo;
-        bool wantsTrimming;
-        size_t impulseResponseSize;
+        bool wantsStereo = true;
+        bool wantsTrimming = true;
+        bool wantsNormalization = true;
+        size_t impulseResponseSize = 0;
         size_t maximumBufferSize = 0;
     };
 
@@ -85,7 +86,7 @@ struct ConvolutionEngine
         FFTSize = blockSize > 128 ? 2 * blockSize
                                   : 4 * blockSize;
 
-        numSegments = ((size_t) info.buffer->getNumSamples()) / (FFTSize - blockSize) + 1;
+        numSegments = ((size_t) info.buffer->getNumSamples()) / (FFTSize - blockSize) + 1u;
 
         numInputSegments = (blockSize > 128 ? numSegments : 3 * numSegments);
 
@@ -341,6 +342,7 @@ public:
         changeImpulseResponseSize,
         changeStereo,
         changeTrimming,
+        changeNormalization,
         numChangeRequestTypes
     };
 
@@ -599,9 +601,20 @@ public:
                     bool newWantsTrimming = requestParameters[n];
 
                     if (currentInfo.wantsTrimming != newWantsTrimming)
-                        changeLevel = jmax(1, changeLevel);
+                        changeLevel = jmax (1, changeLevel);
 
                     currentInfo.wantsTrimming = newWantsTrimming;
+                }
+                break;
+
+                case ChangeRequest::changeNormalization:
+                {
+                    bool newWantsNormalization = requestParameters[n];
+
+                    if (currentInfo.wantsNormalization != newWantsNormalization)
+                        changeLevel = jmax (1, changeLevel);
+
+                    currentInfo.wantsNormalization = newWantsNormalization;
                 }
                 break;
 
@@ -767,15 +780,19 @@ private:
         if (isThreadRunning() && threadShouldExit())
             return;
 
-        if (currentInfo.wantsStereo)
+        if (currentInfo.wantsNormalization)
         {
-            normalizeImpulseResponse (currentInfo.buffer->getWritePointer(0), currentInfo.buffer->getNumSamples(), 1.0);
-            normalizeImpulseResponse (currentInfo.buffer->getWritePointer(1), currentInfo.buffer->getNumSamples(), 1.0);
+            if (currentInfo.wantsStereo)
+            {
+                normalizeImpulseResponse (currentInfo.buffer->getWritePointer(0), currentInfo.buffer->getNumSamples(), 1.0);
+                normalizeImpulseResponse (currentInfo.buffer->getWritePointer(1), currentInfo.buffer->getNumSamples(), 1.0);
+            }
+            else
+            {
+                normalizeImpulseResponse (currentInfo.buffer->getWritePointer (0), currentInfo.buffer->getNumSamples(), 1.0);
+            }
         }
-        else
-        {
-            normalizeImpulseResponse (currentInfo.buffer->getWritePointer (0), currentInfo.buffer->getNumSamples(), 1.0);
-        }
+
     }
 
     /** Converts the data from an audio file into a stereo audio buffer of floats, and
@@ -996,7 +1013,9 @@ Convolution::~Convolution()
 {
 }
 
-void Convolution::loadImpulseResponse (const void* sourceData, size_t sourceDataSize, bool wantsStereo, bool wantsTrimming, size_t size)
+void Convolution::loadImpulseResponse (const void* sourceData, size_t sourceDataSize,
+                                       bool wantsStereo, bool wantsTrimming, size_t size,
+                                       bool wantsNormalization)
 {
     if (sourceData == nullptr)
         return;
@@ -1004,7 +1023,8 @@ void Convolution::loadImpulseResponse (const void* sourceData, size_t sourceData
     Pimpl::ChangeRequest types[] = { Pimpl::ChangeRequest::changeSource,
                                      Pimpl::ChangeRequest::changeImpulseResponseSize,
                                      Pimpl::ChangeRequest::changeStereo,
-                                     Pimpl::ChangeRequest::changeTrimming };
+                                     Pimpl::ChangeRequest::changeTrimming,
+                                     Pimpl::ChangeRequest::changeNormalization };
 
     Array<juce::var> sourceParameter;
 
@@ -1014,12 +1034,14 @@ void Convolution::loadImpulseResponse (const void* sourceData, size_t sourceData
     juce::var parameters[] = { juce::var (sourceParameter),
                                juce::var (static_cast<int64> (size)),
                                juce::var (wantsStereo),
-                               juce::var (wantsTrimming) };
+                               juce::var (wantsTrimming),
+                               juce::var (wantsNormalization) };
 
-    pimpl->addToFifo (types, parameters, 3);
+    pimpl->addToFifo (types, parameters, 5);
 }
 
-void Convolution::loadImpulseResponse (const File& fileImpulseResponse, bool wantsStereo, bool wantsTrimming, size_t size)
+void Convolution::loadImpulseResponse (const File& fileImpulseResponse, bool wantsStereo,
+                                       bool wantsTrimming, size_t size, bool wantsNormalization)
 {
     if (! fileImpulseResponse.existsAsFile())
         return;
@@ -1027,7 +1049,8 @@ void Convolution::loadImpulseResponse (const File& fileImpulseResponse, bool wan
     Pimpl::ChangeRequest types[] = { Pimpl::ChangeRequest::changeSource,
                                      Pimpl::ChangeRequest::changeImpulseResponseSize,
                                      Pimpl::ChangeRequest::changeStereo,
-                                     Pimpl::ChangeRequest::changeTrimming };
+                                     Pimpl::ChangeRequest::changeTrimming,
+                                     Pimpl::ChangeRequest::changeNormalization };
 
     Array<juce::var> sourceParameter;
 
@@ -1037,13 +1060,14 @@ void Convolution::loadImpulseResponse (const File& fileImpulseResponse, bool wan
     juce::var parameters[] = { juce::var (sourceParameter),
                                juce::var (static_cast<int64> (size)),
                                juce::var (wantsStereo),
-                               juce::var (wantsTrimming) };
+                               juce::var (wantsTrimming),
+                               juce::var (wantsNormalization) };
 
-    pimpl->addToFifo (types, parameters, 3);
+    pimpl->addToFifo (types, parameters, 5);
 }
 
 void Convolution::copyAndLoadImpulseResponseFromBuffer (const AudioBuffer<float>& buffer,
-                                                        double bufferSampleRate, bool wantsStereo, bool wantsTrimming, size_t size)
+                                                        double bufferSampleRate, bool wantsStereo, bool wantsTrimming, bool wantsNormalization, size_t size)
 {
     jassert (bufferSampleRate > 0);
 
@@ -1055,7 +1079,8 @@ void Convolution::copyAndLoadImpulseResponseFromBuffer (const AudioBuffer<float>
     Pimpl::ChangeRequest types[] = { Pimpl::ChangeRequest::changeSource,
                                      Pimpl::ChangeRequest::changeImpulseResponseSize,
                                      Pimpl::ChangeRequest::changeStereo,
-                                     Pimpl::ChangeRequest::changeTrimming };
+                                     Pimpl::ChangeRequest::changeTrimming,
+                                     Pimpl::ChangeRequest::changeNormalization };
 
     Array<juce::var> sourceParameter;
     sourceParameter.add (juce::var ((int) ConvolutionEngine::ProcessingInformation::SourceType::sourceAudioBuffer));
@@ -1064,9 +1089,10 @@ void Convolution::copyAndLoadImpulseResponseFromBuffer (const AudioBuffer<float>
     juce::var parameters[] = { juce::var (sourceParameter),
                                juce::var (static_cast<int64> (size)),
                                juce::var (wantsStereo),
-                               juce::var (wantsTrimming) };
+                               juce::var (wantsTrimming),
+                               juce::var (wantsNormalization) };
 
-    pimpl->addToFifo (types, parameters, 3);
+    pimpl->addToFifo (types, parameters, 5);
 }
 
 void Convolution::prepare (const ProcessSpec& spec)
@@ -1091,6 +1117,8 @@ void Convolution::prepare (const ProcessSpec& spec)
     dryBuffer = AudioBlock<float> (dryBufferStorage,
                                    jmin (spec.numChannels, 2u),
                                    spec.maximumBlockSize);
+
+    isActive = true;
 }
 
 void Convolution::reset() noexcept
@@ -1101,6 +1129,9 @@ void Convolution::reset() noexcept
 
 void Convolution::processSamples (const AudioBlock<float>& input, AudioBlock<float>& output, bool isBypassed) noexcept
 {
+    if (! isActive)
+        return;
+
     jassert (input.getNumChannels() == output.getNumChannels());
     jassert (isPositiveAndBelow (input.getNumChannels(), static_cast<size_t> (3))); // only mono and stereo is supported
 
