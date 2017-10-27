@@ -84,12 +84,9 @@ public:
 
     void addWindowsTargetPlatformProperties (PropertyListBuilder& props)
     {
-        if (getWindowsTargetPlatformVersionValue() == Value())
-            getWindowsTargetPlatformVersionValue() = getDefaultWindowsTargetPlatformVersion();
-
         auto isWindows10SDK = getVisualStudioVersion() > 14;
 
-        props.add (new TextPropertyComponent (getWindowsTargetPlatformVersionValue(), "Windows Target Platform", 20, false),
+        props.add (new TextWithDefaultPropertyComponent<String> (windowsTargetPlatformVersion, "Windows Target Platform", 20),
                    String ("Specifies the version of the Windows SDK that will be used when building this project. ")
                    + (isWindows10SDK ? "You can see which SDKs you have installed on your machine by going to \"Program Files (x86)\\Windows Kits\\10\\Lib\". " : "")
                    + "The default value for this exporter is " + getDefaultWindowsTargetPlatformVersion());
@@ -103,11 +100,8 @@ public:
 
     void addWindowsTargetPlatformVersionToPropertyGroup (XmlElement& p) const
     {
-        const String& targetVersion = getWindowsTargetPlatformVersion();
-
-        if (targetVersion.isNotEmpty())
-            forEachXmlChildElementWithTagName (p, e, "PropertyGroup")
-            e->createNewChildElement ("WindowsTargetPlatformVersion")->addTextElement (getWindowsTargetPlatformVersion());
+        forEachXmlChildElementWithTagName (p, e, "PropertyGroup")
+        e->createNewChildElement ("WindowsTargetPlatformVersion")->addTextElement (getWindowsTargetPlatformVersion());
     }
 
     void addIPPSettingToPropertyGroup (XmlElement& p) const
@@ -149,6 +143,12 @@ public:
         rtasPath.referTo (Value (new DependencyPathValueSource (getSetting (Ids::rtasFolder),
                                                                 Ids::rtasPath,
                                                                 TargetOS::windows)));
+    }
+
+    void initialiseWindowsTargetPlatformVersion()
+    {
+        windowsTargetPlatformVersion.referTo (settings, Ids::windowsTargetPlatformVersion,
+                                              nullptr, getDefaultWindowsTargetPlatformVersion());
     }
 
     //==============================================================================
@@ -1443,6 +1443,7 @@ protected:
     //==============================================================================
     mutable File rcFile, iconFile;
     OwnedArray<MSVCTargetBase> targets;
+    CachedValue<String> windowsTargetPlatformVersion;
 
     File getProjectFile (const String& extension, const String& target) const
     {
@@ -1839,6 +1840,7 @@ public:
         : MSVCProjectExporterBase (p, t, "VisualStudio2013")
     {
         name = getName();
+        initialiseWindowsTargetPlatformVersion();
     }
 
     static const char* getName()                                     { return "Visual Studio 2013"; }
@@ -1882,6 +1884,7 @@ public:
         : MSVCProjectExporterBase (p, t, "VisualStudio2015")
     {
         name = getName();
+        initialiseWindowsTargetPlatformVersion();
     }
 
     static const char* getName()                                     { return "Visual Studio 2015"; }
@@ -1924,6 +1927,7 @@ public:
         : MSVCProjectExporterBase (p, t, "VisualStudio2017")
     {
         name = getName();
+        initialiseWindowsTargetPlatformVersion();
     }
 
     static const char* getName()                                     { return "Visual Studio 2017"; }
