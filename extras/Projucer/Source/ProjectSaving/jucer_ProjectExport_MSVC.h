@@ -87,9 +87,12 @@ public:
         if (getWindowsTargetPlatformVersionValue() == Value())
             getWindowsTargetPlatformVersionValue() = getDefaultWindowsTargetPlatformVersion();
 
+        auto isWindows10SDK = getVisualStudioVersion() > 14;
+
         props.add (new TextPropertyComponent (getWindowsTargetPlatformVersionValue(), "Windows Target Platform", 20, false),
-                   "Specifies the version of the Windows SDK that will be used when building this project. "
-                   "The default value for this exporter is " + getDefaultWindowsTargetPlatformVersion());
+                   String ("Specifies the version of the Windows SDK that will be used when building this project. ")
+                   + (isWindows10SDK ? "You can see which SDKs you have installed on your machine by going to \"Program Files (x86)\\Windows Kits\\10\\Lib\". " : "")
+                   + "The default value for this exporter is " + getDefaultWindowsTargetPlatformVersion());
     }
 
     void addPlatformToolsetToPropertyGroup (XmlElement& p) const
