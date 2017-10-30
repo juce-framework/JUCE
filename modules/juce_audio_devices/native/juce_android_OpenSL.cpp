@@ -166,9 +166,9 @@ struct BufferHelpers<int16>
         dataFormat.representation = 0;
     }
 
-    static void prepareCallbackBuffer (AudioSampleBuffer&, int16*) {}
+    static void prepareCallbackBuffer (AudioBuffer<float>&, int16*) {}
 
-    static void convertFromOpenSL (const int16* srcInterleaved, AudioSampleBuffer& audioBuffer)
+    static void convertFromOpenSL (const int16* srcInterleaved, AudioBuffer<float>& audioBuffer)
     {
         for (int i = 0; i < audioBuffer.getNumChannels(); ++i)
         {
@@ -181,7 +181,7 @@ struct BufferHelpers<int16>
         }
     }
 
-    static void convertToOpenSL (const AudioSampleBuffer& audioBuffer, int16* dstInterleaved)
+    static void convertToOpenSL (const AudioBuffer<float>& audioBuffer, int16* dstInterleaved)
     {
         for (int i = 0; i < audioBuffer.getNumChannels(); ++i)
         {
@@ -215,13 +215,13 @@ struct BufferHelpers<float>
         dataFormat.representation = SL_ANDROID_PCM_REPRESENTATION_FLOAT;
     }
 
-    static void prepareCallbackBuffer (AudioSampleBuffer& audioBuffer, float* native)
+    static void prepareCallbackBuffer (AudioBuffer<float>& audioBuffer, float* native)
     {
         if (audioBuffer.getNumChannels() == 1)
             audioBuffer.setDataToReferTo (&native, 1, audioBuffer.getNumSamples());
     }
 
-    static void convertFromOpenSL (const float* srcInterleaved, AudioSampleBuffer& audioBuffer)
+    static void convertFromOpenSL (const float* srcInterleaved, AudioBuffer<float>& audioBuffer)
     {
         if (audioBuffer.getNumChannels() == 1)
         {
@@ -240,7 +240,7 @@ struct BufferHelpers<float>
         }
     }
 
-    static void convertToOpenSL (const AudioSampleBuffer& audioBuffer, float* dstInterleaved)
+    static void convertToOpenSL (const AudioBuffer<float>& audioBuffer, float* dstInterleaved)
     {
         if (audioBuffer.getNumChannels() == 1)
         {
@@ -374,7 +374,7 @@ public:
         int numChannels;
 
         HeapBlock<T> nativeBuffer;
-        AudioSampleBuffer scratchBuffer, sampleBuffer;
+        AudioBuffer<float> scratchBuffer, sampleBuffer;
 
         Atomic<int> nextBlock, numBlocksOut;
     };

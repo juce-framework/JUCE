@@ -42,9 +42,7 @@ struct SineWaveSound : public SynthesiserSound
 /** Our demo synth voice just plays a sine wave.. */
 struct SineWaveVoice  : public SynthesiserVoice
 {
-    SineWaveVoice()   : currentAngle (0), angleDelta (0), level (0), tailOff (0)
-    {
-    }
+    SineWaveVoice() {}
 
     bool canPlaySound (SynthesiserSound* sound) override
     {
@@ -94,7 +92,7 @@ struct SineWaveVoice  : public SynthesiserVoice
         // not interested in controllers in this case.
     }
 
-    void renderNextBlock (AudioSampleBuffer& outputBuffer, int startSample, int numSamples) override
+    void renderNextBlock (AudioBuffer<float>& outputBuffer, int startSample, int numSamples) override
     {
         if (angleDelta != 0.0)
         {
@@ -102,7 +100,7 @@ struct SineWaveVoice  : public SynthesiserVoice
             {
                 while (--numSamples >= 0)
                 {
-                    const float currentSample = (float) (std::sin (currentAngle) * level * tailOff);
+                    auto currentSample = (float) (std::sin (currentAngle) * level * tailOff);
 
                     for (int i = outputBuffer.getNumChannels(); --i >= 0;)
                         outputBuffer.addSample (i, startSample, currentSample);
@@ -125,7 +123,7 @@ struct SineWaveVoice  : public SynthesiserVoice
             {
                 while (--numSamples >= 0)
                 {
-                    const float currentSample = (float) (std::sin (currentAngle) * level);
+                    auto currentSample = (float) (std::sin (currentAngle) * level);
 
                     for (int i = outputBuffer.getNumChannels(); --i >= 0;)
                         outputBuffer.addSample (i, startSample, currentSample);
@@ -138,7 +136,7 @@ struct SineWaveVoice  : public SynthesiserVoice
     }
 
 private:
-    double currentAngle, angleDelta, level, tailOff;
+    double currentAngle = 0, angleDelta = 0, level = 0, tailOff = 0;
 };
 
 //==============================================================================

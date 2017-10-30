@@ -60,7 +60,7 @@ public:
 
     void releaseResources() override { reset(); }
 
-    void processBlock (AudioSampleBuffer& buffer, MidiBuffer&) override
+    void processBlock (AudioBuffer<float>& buffer, MidiBuffer&) override
     {
         for (int ch = 0; ch < buffer.getNumChannels(); ++ch)
         {
@@ -79,8 +79,8 @@ public:
             channelTime = jmax (0, channelTime - buffer.getNumSamples());
         }
 
-        const int fillSamples = jmin (static_cast<int> (std::ceil (getSampleRate())) - sampleOffset,
-                                      buffer.getNumSamples());
+        auto fillSamples = jmin (static_cast<int> (std::ceil (getSampleRate())) - sampleOffset,
+                                 buffer.getNumSamples());
 
         if (isPositiveAndBelow (channelClicked, buffer.getNumChannels()))
         {
@@ -126,7 +126,7 @@ public:
 
     //==============================================================================
     void getStateInformation (MemoryBlock&) override {}
-    void setStateInformation (const void* , int) override {}
+    void setStateInformation (const void*, int) override {}
 
     void channelButtonClicked (int channelIndex) override
     {
@@ -141,8 +141,8 @@ public:
 
     void handleAsyncUpdate() override
     {
-        if (AudioProcessorEditor* editor = getActiveEditor())
-            if (SurroundEditor* surroundEditor = dynamic_cast<SurroundEditor*> (editor))
+        if (auto* editor = getActiveEditor())
+            if (auto* surroundEditor = dynamic_cast<SurroundEditor*> (editor))
                 surroundEditor->updateGUI();
     }
 
@@ -151,6 +151,7 @@ private:
     Array<float> alphaCoeffs;
     int channelClicked;
     int sampleOffset;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SurroundProcessor)
 };

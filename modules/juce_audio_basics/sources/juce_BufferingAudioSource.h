@@ -100,7 +100,7 @@ private:
     OptionalScopedPointer<PositionableAudioSource> source;
     TimeSliceThread& backgroundThread;
     int numberOfSamplesToBuffer, numberOfChannels;
-    AudioSampleBuffer buffer;
+    AudioBuffer<float> buffer;
     CriticalSection bufferStartPosLock;
     WaitableEvent bufferReadyEvent;
     int64 volatile bufferValidStart, bufferValidEnd, nextPlayPos;

@@ -693,7 +693,7 @@ int64 AudioThumbnail::getHashCode() const
     return source == nullptr ? 0 : source->hashCode;
 }
 
-void AudioThumbnail::addBlock (const int64 startSample, const AudioSampleBuffer& incoming,
+void AudioThumbnail::addBlock (int64 startSample, const AudioBuffer<float>& incoming,
                                int startOffsetInBuffer, int numSamples)
 {
     jassert (startSample >= 0

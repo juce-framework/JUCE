@@ -33,9 +33,9 @@ public:
     //==============================================================================
     //==============================================================================
     NoiseGate()
-        : AudioProcessor (BusesProperties().withInput  ("Input",     AudioChannelSet::stereo())
-                                             .withOutput ("Output",    AudioChannelSet::stereo())
-                                             .withInput  ("Sidechain", AudioChannelSet::stereo()))
+        : AudioProcessor (BusesProperties().withInput  ("Input",      AudioChannelSet::stereo())
+                                            .withOutput ("Output",    AudioChannelSet::stereo())
+                                            .withInput  ("Sidechain", AudioChannelSet::stereo()))
     {
         addParameter (threshold = new AudioParameterFloat ("threshold", "Threshold", 0.0f, 1.0f, 0.5f));
         addParameter (alpha  = new AudioParameterFloat ("alpha",  "Alpha",   0.0f, 1.0f, 0.8f));
@@ -47,18 +47,18 @@ public:
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override
     {
         // the sidechain can take any layout, the main bus needs to be the same on the input and output
-        return (layouts.getMainInputChannelSet() == layouts.getMainOutputChannelSet() &&
-                (! layouts.getMainInputChannelSet().isDisabled()));
+        return layouts.getMainInputChannelSet() == layouts.getMainOutputChannelSet()
+                 && ! layouts.getMainInputChannelSet().isDisabled();
     }
 
     //==============================================================================
     void prepareToPlay (double /*sampleRate*/, int /*maxBlockSize*/) override { lowPassCoeff = 0.0f; sampleCountDown = 0; }
     void releaseResources() override                                          {}
 
-    void processBlock (AudioSampleBuffer& buffer, MidiBuffer&) override
+    void processBlock (AudioBuffer<float>& buffer, MidiBuffer&) override
     {
-        AudioSampleBuffer mainInputOutput = getBusBuffer(buffer, true, 0);
-        AudioSampleBuffer sideChainInput  = getBusBuffer(buffer, true, 1);
+        auto mainInputOutput = getBusBuffer (buffer, true, 0);
+        auto sideChainInput  = getBusBuffer (buffer, true, 1);
 
         float alphaCopy = *alpha;
         float thresholdCopy = *threshold;
@@ -66,6 +66,7 @@ public:
         for (int j = 0; j < buffer.getNumSamples(); ++j)
         {
             float mixedSamples = 0.0f;
+
             for (int i = 0; i < sideChainInput.getNumChannels(); ++i)
                 mixedSamples += sideChainInput.getReadPointer (i) [j];
 

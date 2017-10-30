@@ -44,7 +44,7 @@ SamplerSound::SamplerSound (const String& soundName,
         length = jmin ((int) source.lengthInSamples,
                        (int) (maxSampleLengthSeconds * sourceSampleRate));
 
-        data = new AudioSampleBuffer (jmin (2, (int) source.numChannels), length + 4);
+        data = new AudioBuffer<float> (jmin (2, (int) source.numChannels), length + 4);
 
         source.read (data, 0, length + 4, 0, true, true);
 
@@ -129,7 +129,7 @@ void SamplerVoice::pitchWheelMoved (int /*newValue*/) {}
 void SamplerVoice::controllerMoved (int /*controllerNumber*/, int /*newValue*/) {}
 
 //==============================================================================
-void SamplerVoice::renderNextBlock (AudioSampleBuffer& outputBuffer, int startSample, int numSamples)
+void SamplerVoice::renderNextBlock (AudioBuffer<float>& outputBuffer, int startSample, int numSamples)
 {
     if (auto* playingSound = static_cast<SamplerSound*> (getCurrentlyPlayingSound().get()))
     {

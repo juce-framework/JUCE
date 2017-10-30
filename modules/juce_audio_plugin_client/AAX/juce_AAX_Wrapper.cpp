@@ -1237,7 +1237,7 @@ namespace AAXClasses
         void process (float* const* channels, const int numChans, const int bufferSize,
                       const bool bypass, AAX_IMIDINode* midiNodeIn, AAX_IMIDINode* midiNodesOut)
         {
-            AudioSampleBuffer buffer (channels, numChans, bufferSize);
+            AudioBuffer<float> buffer (channels, numChans, bufferSize);
 
             midiBuffer.clear();
 

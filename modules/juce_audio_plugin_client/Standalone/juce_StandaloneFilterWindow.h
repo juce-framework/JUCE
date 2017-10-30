@@ -384,7 +384,7 @@ public:
     // avoid feedback loop by default
     bool processorHasPotentialFeedbackLoop = true;
     Value shouldMuteInput;
-    AudioSampleBuffer emptyBuffer;
+    AudioBuffer<float> emptyBuffer;
     bool autoOpenMidiDevices;
 
     ScopedPointer<AudioDeviceManager::AudioDeviceSetup> options;

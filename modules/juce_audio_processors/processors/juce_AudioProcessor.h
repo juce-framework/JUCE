@@ -441,7 +441,7 @@ public:
 
         //==============================================================================
         /** Returns the position of a bus's channels within the processBlock buffer.
-            This can be called in processBlock to figure out which channel of the master AudioSampleBuffer
+            This can be called in processBlock to figure out which channel of the master AudioBuffer
             maps onto a specific bus's channel.
         */
         int getChannelIndexInProcessBlockBuffer (int channelIndex) const noexcept;
@@ -449,7 +449,7 @@ public:
 
         /** Returns an AudioBuffer containing a set of channel pointers for a specific bus.
             This can be called in processBlock to get a buffer containing a sub-group of the master
-            AudioSampleBuffer which contains all the plugin channels.
+            AudioBuffer which contains all the plugin channels.
         */
         template <typename FloatType>
         AudioBuffer<FloatType> getBusBuffer (AudioBuffer<FloatType>& processBlockBuffer) const
@@ -605,7 +605,7 @@ public:
 
     //==============================================================================
     /** Returns the position of a bus's channels within the processBlock buffer.
-        This can be called in processBlock to figure out which channel of the master AudioSampleBuffer
+        This can be called in processBlock to figure out which channel of the master AudioBuffer
         maps onto a specific bus's channel.
      */
     int getChannelIndexInProcessBlockBuffer (bool isInput, int busIndex, int channelIndex) const noexcept;
@@ -620,7 +620,7 @@ public:
 
     /** Returns an AudioBuffer containing a set of channel pointers for a specific bus.
         This can be called in processBlock to get a buffer containing a sub-group of the master
-        AudioSampleBuffer which contains all the plugin channels.
+        AudioBuffer which contains all the plugin channels.
      */
     template <typename FloatType>
     AudioBuffer<FloatType> getBusBuffer (AudioBuffer<FloatType>& processBlockBuffer, bool isInput, int busIndex) const

@@ -47,7 +47,7 @@ namespace SampleTypeHelpers // Internal classes needed for handling sample type 
     This class doesn't own any of the data which it points to, it's simply a view
     into data that is owned elsewhere. You can construct one from some raw data
     that you've allocated yourself, or give it a HeapBlock to use, or give it
-    an AudioSampleBuffer which it can refer to, but in all cases the user is
+    an AudioBuffer which it can refer to, but in all cases the user is
     responsible for making sure that the data doesn't get deleted while there's
     still an AudioBlock using it.
 */

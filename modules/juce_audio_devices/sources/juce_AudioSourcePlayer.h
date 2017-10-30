@@ -96,14 +96,14 @@ public:
 private:
     //==============================================================================
     CriticalSection readLock;
-    AudioSource* source;
-    double sampleRate;
-    int bufferSize;
-    float* channels [128];
-    float* outputChans [128];
-    const float* inputChans [128];
-    AudioSampleBuffer tempBuffer;
-    float lastGain, gain;
+    AudioSource* source = nullptr;
+    double sampleRate = 0;
+    int bufferSize = 0;
+    float* channels[128];
+    float* outputChans[128];
+    const float* inputChans[128];
+    AudioBuffer<float> tempBuffer;
+    float lastGain = 1.0f, gain = 1.0f;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioSourcePlayer)
 };
