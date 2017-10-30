@@ -365,6 +365,7 @@ public:
                 props.add (new TextWithDefaultPropertyComponentWithEnablement (aaxBinaryLocation, getPluginBinaryCopyStepEnabledValue(),
                                                                                "AAX Binary Location", 1024),
                            "The folder in which the compiled AAX binary should be placed.");
+
         }
 
         void initialisePluginCachedValues()

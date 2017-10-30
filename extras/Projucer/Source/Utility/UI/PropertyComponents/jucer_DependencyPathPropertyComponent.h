@@ -251,27 +251,14 @@ class TextPropertyComponentWithEnablement    : public TextPropertyComponent,
                                                private Value::Listener
 {
 public:
-    TextPropertyComponentWithEnablement (const Value& valueToControl, const Value& valueToListenTo,
-                                         const String& propertyName, int maxNumChars, bool isMultiLine)
-        : TextPropertyComponent (valueToControl, propertyName, maxNumChars, isMultiLine),
-          value (valueToListenTo)
-    {
-        value.addListener (this);
-        setEnabled (value.getValue());
-    }
+    TextPropertyComponentWithEnablement (const Value&, const Value&, const String&, int, bool);
 
-    ~TextPropertyComponentWithEnablement()
-    {
-        value.removeListener (this);
-    }
+    ~TextPropertyComponentWithEnablement();
 
 private:
     Value value;
 
-    void valueChanged (Value& v) override
-    {
-        setEnabled (v.getValue());
-    }
+    void valueChanged (Value& v) override;
 };
 
 //==============================================================================
@@ -279,29 +266,13 @@ class ChoicePropertyComponentWithEnablement    : public ChoicePropertyComponent,
                                                  private Value::Listener
 {
 public:
-    ChoicePropertyComponentWithEnablement (const Value& valueToControl,
-                                           const Value& valueToListenTo,
-                                           const String& propertyName,
-                                           const StringArray& choices,
-                                           const Array<var>& correspondingValues)
-        : ChoicePropertyComponent (valueToControl, propertyName,
-                                   choices, correspondingValues),
-          value (valueToListenTo)
-    {
-        value.addListener (this);
-        setEnabled (value.getValue());
-    }
+    ChoicePropertyComponentWithEnablement (const Value&, const Value&, const String&,
+                                           const StringArray&, const Array<var>&);
 
-    ~ChoicePropertyComponentWithEnablement()
-    {
-        value.removeListener (this);
-    }
+    ~ChoicePropertyComponentWithEnablement();
 
 private:
     Value value;
 
-    void valueChanged (Value& v) override
-    {
-        setEnabled (v.getValue());
-    }
+    void valueChanged (Value& v) override;
 };
