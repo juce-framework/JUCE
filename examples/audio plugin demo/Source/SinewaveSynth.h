@@ -94,7 +94,7 @@ public:
         // not implemented for the purposes of this demo!
     }
 
-    void renderNextBlock (AudioSampleBuffer& outputBuffer, int startSample, int numSamples) override
+    void renderNextBlock (AudioBuffer<float>& outputBuffer, int startSample, int numSamples) override
     {
         if (angleDelta != 0.0)
         {

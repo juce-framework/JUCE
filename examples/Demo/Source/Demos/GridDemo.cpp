@@ -27,7 +27,7 @@
 #include "../JuceDemoHeader.h"
 
 // these classes are C++11-only
-#if JUCE_HAS_CONSTEXPR
+#if JUCE_HAS_CONSTEXPR && JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
 
 struct GridDemo   : public Component
 {

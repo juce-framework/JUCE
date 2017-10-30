@@ -63,12 +63,14 @@ void ResizableWindow::initialise (const bool shouldAddToDesktop)
 {
     /*
       ==========================================================================
+
        In accordance with the terms of the JUCE 5 End-Use License Agreement, the
        JUCE Code in SECTION A cannot be removed, changed or otherwise rendered
        ineffective unless you have a JUCE Indie or Pro license, or are using
        JUCE under the GPL v3 license.
 
        End User License Agreement: www.juce.com/juce-5-licence
+
       ==========================================================================
     */
 

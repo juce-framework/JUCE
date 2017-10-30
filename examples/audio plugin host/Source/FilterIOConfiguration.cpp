@@ -32,11 +32,10 @@
 
 
 //==============================================================================
-class NumberedBoxes   : public TableListBox,
+struct NumberedBoxes  : public TableListBox,
                         private TableListBoxModel,
                         private Button::Listener
 {
-public:
     struct Listener
     {
         virtual ~Listener() {}
@@ -98,6 +97,10 @@ public:
     }
 
 private:
+    //==============================================================================
+    Listener& listener;
+    bool canAddColumn, canRemoveColumn;
+
     //==============================================================================
     int getNumRows() override                                             { return 1; }
     void paintCell (Graphics&, int, int, int, int, bool) override         {}
@@ -164,9 +167,7 @@ private:
             listener.columnSelected (text.getIntValue());
     }
 
-    //==============================================================================
-    Listener& listener;
-    bool canAddColumn, canRemoveColumn;
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NumberedBoxes)
 };
 
 //==============================================================================
@@ -179,12 +180,8 @@ public:
     InputOutputConfig (FilterIOConfigurationWindow& parent, bool direction)
         : owner (parent),
           ioTitle ("ioLabel", direction ? "Input Configuration" : "Output Configuration"),
-          nameLabel ("nameLabel", "Bus Name:"),
-          layoutLabel ("layoutLabel", "Channel Layout:"),
-          enabledToggle ("Enabled"),
           ioBuses (*this, false, false),
-          isInput (direction),
-          currentBus (0)
+          isInput (direction)
     {
         ioTitle.setFont (ioTitle.getFont().withStyle (Font::bold));
         nameLabel.setFont (nameLabel.getFont().withStyle (Font::bold));
@@ -223,7 +220,6 @@ public:
 
         {
             auto label = r.removeFromTop (24);
-
             nameLabel.setBounds (label.removeFromLeft (100));
             enabledToggle.setBounds (label.removeFromRight (80));
             name.setBounds (label);
@@ -231,7 +227,6 @@ public:
 
         {
             auto label = r.removeFromTop (24);
-
             layoutLabel.setBounds (label.removeFromLeft (100));
             layouts.setBounds (label);
         }
@@ -304,9 +299,9 @@ private:
     {
         if (combo == &layouts)
         {
-            if (auto* audioProcessor = owner.getAudioProcessor())
+            if (auto* p = owner.getAudioProcessor())
             {
-                if (auto* bus = audioProcessor->getBus (isInput, currentBus))
+                if (auto* bus = p->getBus (isInput, currentBus))
                 {
                     auto selectedNumChannels = layouts.getSelectedId();
 
@@ -332,24 +327,20 @@ private:
     {
         if (btn == &enabledToggle && enabledToggle.isEnabled())
         {
-            if (auto* audioProcessor = owner.getAudioProcessor())
+            if (auto* p = owner.getAudioProcessor())
             {
-                if (auto* bus = audioProcessor->getBus (isInput, currentBus))
+                if (auto* bus = p->getBus (isInput, currentBus))
                 {
                     if (bus->isEnabled() != enabledToggle.getToggleState())
                     {
-                        bool success;
-
-                        if (enabledToggle.getToggleState())
-                            success = bus->enable();
-                        else
-                            success = bus->setCurrentLayout (AudioChannelSet::disabled());
+                        bool success = enabledToggle.getToggleState() ? bus->enable()
+                                                                      : bus->setCurrentLayout (AudioChannelSet::disabled());
 
                         if (success)
                         {
                             updateBusLayout();
 
-                            if (InputOutputConfig* config = owner.getConfig (! isInput))
+                            if (auto* config = owner.getConfig (! isInput))
                                 config->updateBusLayout();
 
                             owner.update();
@@ -368,11 +359,11 @@ private:
     //==============================================================================
     void addColumn() override
     {
-        if (auto* audioProcessor = owner.getAudioProcessor())
+        if (auto* p = owner.getAudioProcessor())
         {
-            if (audioProcessor->canAddBus (isInput))
+            if (p->canAddBus (isInput))
             {
-                if (audioProcessor->addBus (isInput))
+                if (p->addBus (isInput))
                 {
                     updateBusButtons();
                     updateBusLayout();
@@ -382,22 +373,22 @@ private:
                         config->updateBusButtons();
                         config->updateBusLayout();
                     }
-
-                    owner.update();
                 }
+
+                owner.update();
             }
         }
     }
 
     void removeColumn() override
     {
-        if (auto* audioProcessor = owner.getAudioProcessor())
+        if (auto* p = owner.getAudioProcessor())
         {
-            if (audioProcessor->getBusCount (isInput) > 1 && audioProcessor->canRemoveBus (isInput))
+            if (p->getBusCount (isInput) > 1 && p->canRemoveBus (isInput))
             {
-                if (audioProcessor->removeBus (isInput))
+                if (p->removeBus (isInput))
                 {
-                    currentBus = jmin (audioProcessor->getBusCount (isInput) - 1, currentBus);
+                    currentBus = jmin (p->getBusCount (isInput) - 1, currentBus);
 
                     updateBusButtons();
                     updateBusLayout();
@@ -428,40 +419,41 @@ private:
 
     //==============================================================================
     FilterIOConfigurationWindow& owner;
-    Label ioTitle, nameLabel, name, layoutLabel;
-    ToggleButton enabledToggle;
+    Label ioTitle, name;
+    Label nameLabel { "nameLabel", "Bus Name:" };
+    Label layoutLabel { "layoutLabel", "Channel Layout:" };
+    ToggleButton enabledToggle { "Enabled" };
     ComboBox layouts;
     NumberedBoxes ioBuses;
     bool isInput;
-    int currentBus;
+    int currentBus = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InputOutputConfig)
 };
 
 
-FilterIOConfigurationWindow::FilterIOConfigurationWindow (AudioProcessor* const p)
-    : AudioProcessorEditor (p),
-      title ("title", p->getName())
+FilterIOConfigurationWindow::FilterIOConfigurationWindow (AudioProcessor& p)
+   : AudioProcessorEditor (&p),
+     title ("title", p.getName())
 {
-    jassert (p != nullptr);
     setOpaque (true);
 
     title.setFont (title.getFont().withStyle (Font::bold));
     addAndMakeVisible (title);
 
     {
-        ScopedLock renderLock (p->getCallbackLock());
-        p->suspendProcessing (true);
-        p->releaseResources();
+        ScopedLock renderLock (p.getCallbackLock());
+        p.suspendProcessing (true);
+        p.releaseResources();
     }
 
-    if (p->getBusCount (true)  > 0 || p->canAddBus (true))
+    if (p.getBusCount (true)  > 0 || p.canAddBus (true))
         addAndMakeVisible (inConfig = new InputOutputConfig (*this, true));
 
-    if (p->getBusCount (false) > 0 || p->canAddBus (false))
+    if (p.getBusCount (false) > 0 || p.canAddBus (false))
         addAndMakeVisible (outConfig = new InputOutputConfig (*this, false));
 
-    currentLayout = p->getBusesLayout();
+    currentLayout = p.getBusesLayout();
     setSize (400, (inConfig != nullptr && outConfig != nullptr ? 160 : 0) + 200);
 }
 
@@ -506,38 +498,33 @@ void FilterIOConfigurationWindow::resized()
 
 void FilterIOConfigurationWindow::update()
 {
-    auto nodeId = getNodeId();
+    auto nodeID = getNodeID();
 
     if (auto* graph = getGraph())
-        if (nodeId != -1)
-            graph->disconnectNode (static_cast<uint32> (nodeId));
+        if (nodeID != 0)
+            graph->disconnectNode (nodeID);
 
     if (auto* graphEditor = getGraphEditor())
-        if (auto* panel = graphEditor->graphPanel)
+        if (auto* panel = graphEditor->graphPanel.get())
             panel->updateComponents();
 }
 
-int32 FilterIOConfigurationWindow::getNodeId() const
+AudioProcessorGraph::NodeID FilterIOConfigurationWindow::getNodeID() const
 {
     if (auto* graph = getGraph())
-    {
-        const int n = graph->getNumNodes();
+        for (auto* node : graph->getNodes())
+            if (node->getProcessor() == getAudioProcessor())
+                return node->nodeID;
 
-        for (int i = 0; i < n; ++i)
-            if (auto* node = graph->getNode (i))
-                if (node->getProcessor() == getAudioProcessor())
-                    return static_cast<int32> (node->nodeId);
-    }
-
-    return -1;
+    return 0;
 }
 
 MainHostWindow* FilterIOConfigurationWindow::getMainWindow() const
 {
-    Component* comp;
+    auto& desktop = Desktop::getInstance();
 
-    for (int idx = 0; (comp = Desktop::getInstance().getComponent(idx)) != nullptr; ++idx)
-        if (auto* mainWindow = dynamic_cast<MainHostWindow*> (comp))
+    for (int i = desktop.getNumComponents(); --i >= 0;)
+        if (auto* mainWindow = dynamic_cast<MainHostWindow*> (desktop.getComponent(i)))
             return mainWindow;
 
     return nullptr;
@@ -546,8 +533,7 @@ MainHostWindow* FilterIOConfigurationWindow::getMainWindow() const
 GraphDocumentComponent* FilterIOConfigurationWindow::getGraphEditor() const
 {
     if (auto* mainWindow = getMainWindow())
-        if (auto* graphEditor = mainWindow->getGraphEditor())
-            return graphEditor;
+        return mainWindow->graphHolder.get();
 
     return nullptr;
 }
@@ -555,8 +541,8 @@ GraphDocumentComponent* FilterIOConfigurationWindow::getGraphEditor() const
 AudioProcessorGraph* FilterIOConfigurationWindow::getGraph() const
 {
     if (auto* graphEditor = getGraphEditor())
-        if (auto* graph = graphEditor->graph.get())
-            return &graph->getGraph();
+        if (auto* panel = graphEditor->graph.get())
+            return &panel->graph;
 
     return nullptr;
 }

@@ -75,7 +75,7 @@ private:
     //==============================================================================
     OptionalScopedPointer<AudioSource> input;
     double ratio, lastRatio;
-    AudioSampleBuffer buffer;
+    AudioBuffer<float> buffer;
     int bufferPos, sampsInBuffer;
     double subSampleOffset;
     double coefficients[6];

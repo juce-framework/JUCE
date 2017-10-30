@@ -970,7 +970,7 @@ double AudioDeviceManager::LevelMeter::getCurrentLevel() const noexcept
 void AudioDeviceManager::playTestSound()
 {
     { // cunningly nested to swap, unlock and delete in that order.
-        ScopedPointer<AudioSampleBuffer> oldSound;
+        ScopedPointer<AudioBuffer<float>> oldSound;
 
         {
             const ScopedLock sl (audioCallbackLock);
@@ -990,7 +990,7 @@ void AudioDeviceManager::playTestSound()
 
         const double phasePerSample = double_Pi * 2.0 / (sampleRate / frequency);
 
-        AudioSampleBuffer* const newSound = new AudioSampleBuffer (1, soundLength);
+        auto* newSound = new AudioBuffer<float> (1, soundLength);
 
         for (int i = 0; i < soundLength; ++i)
             newSound->setSample (0, i, amplitude * (float) std::sin (i * phasePerSample));

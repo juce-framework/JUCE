@@ -310,7 +310,7 @@ public:
     }
 
     //==============================================================================
-    bool writeToOutputDevice (AudioSampleBuffer& outputChannelBuffer, const int numSamples)
+    bool writeToOutputDevice (AudioBuffer<float>& outputChannelBuffer, const int numSamples)
     {
         jassert (numChannelsRunning <= outputChannelBuffer.getNumChannels());
         float* const* const data = outputChannelBuffer.getArrayOfWritePointers();
@@ -348,7 +348,7 @@ public:
         return true;
     }
 
-    bool readFromInputDevice (AudioSampleBuffer& inputChannelBuffer, const int numSamples)
+    bool readFromInputDevice (AudioBuffer<float>& inputChannelBuffer, const int numSamples)
     {
         jassert (numChannelsRunning <= inputChannelBuffer.getNumChannels());
         float* const* const data = inputChannelBuffer.getArrayOfWritePointers();
@@ -801,7 +801,7 @@ private:
 
     CriticalSection callbackLock;
 
-    AudioSampleBuffer inputChannelBuffer, outputChannelBuffer;
+    AudioBuffer<float> inputChannelBuffer, outputChannelBuffer;
     Array<const float*> inputChannelDataForCallback;
     Array<float*> outputChannelDataForCallback;
 

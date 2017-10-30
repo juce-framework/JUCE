@@ -124,8 +124,8 @@ public:
         {
             activeWriter->write (inputChannelData, numSamples);
 
-            // Create an AudioSampleBuffer to wrap our incoming data, note that this does no allocations or copies, it simply references our input data
-            const AudioSampleBuffer buffer (const_cast<float**> (inputChannelData), thumbnail.getNumChannels(), numSamples);
+            // Create an AudioBuffer to wrap our incoming data, note that this does no allocations or copies, it simply references our input data
+            AudioBuffer<float> buffer (const_cast<float**> (inputChannelData), thumbnail.getNumChannels(), numSamples);
             thumbnail.addBlock (nextSampleNum, buffer, 0, numSamples);
             nextSampleNum += numSamples;
         }

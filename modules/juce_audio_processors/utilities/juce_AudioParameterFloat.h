@@ -69,6 +69,11 @@ public:
     /** Provides access to the parameter's range. */
     NormalisableRange<float> range;
 
+protected:
+    /** Override this method if you are interested in receiving callbacks
+        when the parameter value changes.
+    */
+    virtual void valueChanged (float newValue);
 
 private:
     //==============================================================================

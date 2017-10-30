@@ -74,7 +74,7 @@ public:
         The number of channels provided here is expected to match the number of channels
         that this AudioVisualiserComponent has been told to use.
     */
-    void pushBuffer (const AudioSampleBuffer& bufferToPush);
+    void pushBuffer (const AudioBuffer<float>& bufferToPush);
 
     /** Pushes a buffer of channels data.
         The number of channels provided here is expected to match the number of channels

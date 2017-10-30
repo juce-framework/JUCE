@@ -172,7 +172,7 @@ public:
     }
 
 private:
-    AudioSampleBuffer testSound, recordedSound;
+    AudioBuffer<float> testSound, recordedSound;
     Array<int> spikePositions;
     int playingSampleNum, recordedSampleNum;
     CriticalSection lock;
@@ -211,7 +211,7 @@ private:
     }
 
     // Searches a buffer for a set of spikes that matches those in the test sound
-    int findOffsetOfSpikes (const AudioSampleBuffer& buffer) const
+    int findOffsetOfSpikes (const AudioBuffer<float>& buffer) const
     {
         const float minSpikeLevel = 5.0f;
         const double smooth = 0.975;

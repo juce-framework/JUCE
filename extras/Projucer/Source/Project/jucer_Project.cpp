@@ -146,7 +146,7 @@ void Project::setMissingDefaultValues()
         shouldIncludeBinaryInAppConfig() = true;
 
     if (! projectRoot.hasProperty (Ids::cppLanguageStandard) && ! setCppVersionFromOldExporterSettings())
-        getCppStandardValue() = "11";
+        getCppStandardValue() = "14";
 
     if (getCompanyCopyright().toString().isEmpty())
         getCompanyCopyright() = getCompanyName().toString();

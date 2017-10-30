@@ -537,10 +537,8 @@ struct VST3BufferExchange
     static inline void assignRawPointer (Steinberg::Vst::AudioBusBuffers& vstBuffers, float** raw)  { vstBuffers.channelBuffers32 = raw; }
     static inline void assignRawPointer (Steinberg::Vst::AudioBusBuffers& vstBuffers, double** raw) { vstBuffers.channelBuffers64 = raw; }
 
-    /** Assigns a series of AudioSampleBuffer's channels to an AudioBusBuffers'
-
-        @warning For speed, does not check the channel count and offsets
-                 according to the AudioSampleBuffer
+    /** Assigns a series of AudioBuffer's channels to an AudioBusBuffers'
+        @warning For speed, does not check the channel count and offsets according to the AudioBuffer
     */
     static void associateBufferTo (Steinberg::Vst::AudioBusBuffers& vstBuffers,
                                    Bus& bus,

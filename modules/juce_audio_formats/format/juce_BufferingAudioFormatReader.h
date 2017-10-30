@@ -78,7 +78,7 @@ private:
         BufferedBlock (AudioFormatReader& reader, int64 pos, int numSamples);
 
         Range<int64> range;
-        AudioSampleBuffer buffer;
+        AudioBuffer<float> buffer;
     };
 
     CriticalSection lock;

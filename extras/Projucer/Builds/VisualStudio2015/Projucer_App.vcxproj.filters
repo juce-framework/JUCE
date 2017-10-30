@@ -373,6 +373,12 @@
     <ClCompile Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElement.cpp">
       <Filter>Projucer\ComponentEditor\PaintElements</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementGroup.cpp">
+      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementImage.cpp">
+      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementPath.cpp">
       <Filter>Projucer\ComponentEditor\PaintElements</Filter>
     </ClCompile>
@@ -464,6 +470,9 @@
       <Filter>Projucer\Utility\Helpers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Utility\UI\PropertyComponents\jucer_DependencyPathPropertyComponent.cpp">
+      <Filter>Projucer\Utility\UI\PropertyComponents</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Utility\UI\PropertyComponents\jucer_TextWithDefaultPropertyComponentWithEnablement.cpp">
       <Filter>Projucer\Utility\UI\PropertyComponents</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Utility\UI\jucer_Icons.cpp">
@@ -2191,6 +2200,9 @@
       <Filter>Projucer\Utility\UI\PropertyComponents</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_TextWithDefaultPropertyComponent.h">
+      <Filter>Projucer\Utility\UI\PropertyComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_TextWithDefaultPropertyComponentWithEnablement.h">
       <Filter>Projucer\Utility\UI\PropertyComponents</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\UI\jucer_IconButton.h">

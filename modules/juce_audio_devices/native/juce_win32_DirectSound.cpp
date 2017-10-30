@@ -892,7 +892,7 @@ private:
     int bufferSizeSamples = 0;
     double sampleRate = 0;
     BigInteger enabledInputs, enabledOutputs;
-    AudioSampleBuffer inputBuffers, outputBuffers;
+    AudioBuffer<float> inputBuffers, outputBuffers;
 
     AudioIODeviceCallback* callback = nullptr;
     CriticalSection startStopLock;

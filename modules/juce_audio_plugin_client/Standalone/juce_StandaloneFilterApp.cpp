@@ -87,6 +87,11 @@ public:
                                            false, {}, nullptr
                                           #ifdef JucePlugin_PreferredChannelConfigurations
                                            , juce::Array<StandalonePluginHolder::PluginInOuts> (channels, juce::numElementsInArray (channels))
+                                          #else
+                                           , {}
+                                          #endif
+                                          #if JUCE_DONT_AUTO_OPEN_MIDI_DEVICES_ON_MOBILE
+                                           , false
                                           #endif
                                            );
     }
@@ -129,7 +134,11 @@ protected:
     ScopedPointer<StandaloneFilterWindow> mainWindow;
 };
 
+} // namespace juce
+
 #if JucePlugin_Build_Standalone && JUCE_IOS
+
+using namespace juce;
 
 bool JUCE_CALLTYPE juce_isInterAppAudioConnected()
 {
@@ -155,7 +164,5 @@ Image JUCE_CALLTYPE juce_getIAAHostIcon (int size)
 }
 #endif
 #endif
-
-} // namespace juce
 
 #endif

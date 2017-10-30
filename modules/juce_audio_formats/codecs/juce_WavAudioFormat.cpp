@@ -1838,7 +1838,7 @@ struct WaveAudioFormatTests : public UnitTest
                                                                              32, metadataValues, 0));
             expect (writer != nullptr);
 
-            AudioSampleBuffer buffer (numTestAudioBufferChannels, numTestAudioBufferSamples);
+            AudioBuffer<float> buffer (numTestAudioBufferChannels, numTestAudioBufferSamples);
             buffer.clear();
 
             beginTest ("Writing audio data to the basic wave writer");

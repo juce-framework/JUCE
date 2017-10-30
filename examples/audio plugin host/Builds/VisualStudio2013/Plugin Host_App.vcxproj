@@ -1779,6 +1779,7 @@
     <ClInclude Include="..\..\Source\GraphEditorPanel.h"/>
     <ClInclude Include="..\..\Source\InternalFilters.h"/>
     <ClInclude Include="..\..\Source\MainHostWindow.h"/>
+    <ClInclude Include="..\..\Source\PluginWindow.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioChannelSet.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioDataConverters.h"/>

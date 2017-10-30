@@ -96,7 +96,7 @@ public:
     //==============================================================================
     /** Writes a set of samples to the audio stream.
 
-        Note that if you're trying to write the contents of an AudioSampleBuffer, you
+        Note that if you're trying to write the contents of an AudioBuffer, you
         can use writeFromAudioSampleBuffer().
 
         @param samplesToWrite   an array of arrays containing the sample data for
@@ -154,8 +154,8 @@ public:
                                int samplesPerBlock = 2048);
 
 
-    /** Writes some samples from an AudioSampleBuffer. */
-    bool writeFromAudioSampleBuffer (const AudioSampleBuffer& source,
+    /** Writes some samples from an AudioBuffer. */
+    bool writeFromAudioSampleBuffer (const AudioBuffer<float>& source,
                                      int startSample, int numSamples);
 
     /** Writes some samples from a set of float data channels. */
@@ -217,7 +217,7 @@ public:
             virtual ~IncomingDataReceiver() {}
 
             virtual void reset (int numChannels, double sampleRate, int64 totalSamplesInSource) = 0;
-            virtual void addBlock (int64 sampleNumberInSource, const AudioSampleBuffer& newData,
+            virtual void addBlock (int64 sampleNumberInSource, const AudioBuffer<float>& newData,
                                    int startOffsetInBuffer, int numSamples) = 0;
         };
 
