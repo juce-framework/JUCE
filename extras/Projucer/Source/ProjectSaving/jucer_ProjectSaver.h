@@ -407,6 +407,7 @@ private:
             << "   under the GPL v3 license." << newLine
             << newLine
             << "   End User License Agreement: www.juce.com/juce-5-licence" << newLine
+            << newLine
             << "  ==============================================================================" << newLine
             << "*/" << newLine
             << newLine
