@@ -396,35 +396,29 @@ void WebBrowserComponent::focusGained (FocusChangeType)
 
 void WebBrowserComponent::clearCookies()
 {
-    HeapBlock<::INTERNET_CACHE_ENTRY_INFO> entry;
-    ::DWORD entrySize = sizeof (::INTERNET_CACHE_ENTRY_INFO);
-
-   #if JUCE_MINGW
-    const auto searchPattern = "cookie:";
-   #else
-    const auto searchPattern = TEXT ("cookie:");
-   #endif
-    ::HANDLE urlCacheHandle = ::FindFirstUrlCacheEntry (searchPattern, entry.getData(), &entrySize);
+    HeapBlock<::INTERNET_CACHE_ENTRY_INFOA> entry;
+    ::DWORD entrySize = sizeof (::INTERNET_CACHE_ENTRY_INFOA);
+    ::HANDLE urlCacheHandle = ::FindFirstUrlCacheEntryA ("cookie:", entry.getData(), &entrySize);
 
     if (urlCacheHandle == nullptr && GetLastError() == ERROR_INSUFFICIENT_BUFFER)
     {
         entry.realloc (1, entrySize);
-        urlCacheHandle = ::FindFirstUrlCacheEntry (searchPattern, entry.getData(), &entrySize);
+        urlCacheHandle = ::FindFirstUrlCacheEntryA ("cookie:", entry.getData(), &entrySize);
     }
 
     if (urlCacheHandle != nullptr)
     {
         for (;;)
         {
-            ::DeleteUrlCacheEntry (entry.getData()->lpszSourceUrlName);
+            ::DeleteUrlCacheEntryA (entry.getData()->lpszSourceUrlName);
 
-            if (::FindNextUrlCacheEntry (urlCacheHandle, entry.getData(), &entrySize) == 0)
+            if (::FindNextUrlCacheEntryA (urlCacheHandle, entry.getData(), &entrySize) == 0)
             {
                 if (GetLastError() == ERROR_INSUFFICIENT_BUFFER)
                 {
                     entry.realloc (1, entrySize);
 
-                    if (::FindNextUrlCacheEntry (urlCacheHandle, entry.getData(), &entrySize) != 0)
+                    if (::FindNextUrlCacheEntryA (urlCacheHandle, entry.getData(), &entrySize) != 0)
                         continue;
                 }
 
