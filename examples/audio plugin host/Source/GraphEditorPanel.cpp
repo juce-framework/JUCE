@@ -600,8 +600,14 @@ GraphEditorPanel::ConnectorComponent* GraphEditorPanel::getComponentForConnectio
 GraphEditorPanel::PinComponent* GraphEditorPanel::findPinAt (Point<float> pos) const
 {
     for (auto* fc : nodes)
-        if (auto* pin = dynamic_cast<PinComponent*> (fc->getComponentAt (pos.toInt() - fc->getPosition())))
+    {
+        // NB: A Visual Studio optimiser error means we have to put this Component* in a local
+        // variable before trying to cast it, or it gets mysteriously optimised away..
+        auto* comp = fc->getComponentAt (pos.toInt() - fc->getPosition());
+
+        if (auto* pin = dynamic_cast<PinComponent*> (comp))
             return pin;
+    }
 
     return nullptr;
 }
