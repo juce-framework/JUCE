@@ -447,6 +447,15 @@ bool ProjectContentComponent::setEditorComponent (Component* editor,
     return false;
 }
 
+Component* ProjectContentComponent::getEditorComponentContent() const
+{
+    if (contentView != nullptr)
+        if (auto* vp = dynamic_cast<ContentViewport*> (contentView.get()))
+            return vp->viewport.getViewedComponent();
+
+    return nullptr;
+}
+
 void ProjectContentComponent::closeDocument()
 {
     if (currentDocument != nullptr)
