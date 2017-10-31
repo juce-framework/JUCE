@@ -198,8 +198,11 @@ private:
     ObjectType* object = nullptr;
 
     const ScopedPointer* getAddress() const noexcept  { return this; } // Used internally to avoid the & operator
+
+   #if ! JUCE_MSVC  // (MSVC can't deal with multiple copy constructors)
     ScopedPointer (const ScopedPointer&) = delete;
     ScopedPointer& operator= (const ScopedPointer&) = delete;
+   #endif
 };
 
 //==============================================================================
