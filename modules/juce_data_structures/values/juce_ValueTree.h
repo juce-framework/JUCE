@@ -209,8 +209,10 @@ public:
         The Value object will maintain a reference to this tree, and will use the undo manager when
         it needs to change the value. Attaching a Value::Listener to the value object will provide
         callbacks whenever the property changes.
+        If shouldUpdateSynchronously is true the Value::Listener will be updated synchronously
+        @see ValueSource::sendChangeMessage(bool)
     */
-    Value getPropertyAsValue (const Identifier& name, UndoManager* undoManager);
+    Value getPropertyAsValue (const Identifier& name, UndoManager* undoManager, bool shouldUpdateSynchronously = false);
 
     /** Overwrites all the properties in this tree with the properties of the source tree.
         Any properties that already exist will be updated; and new ones will be added, and

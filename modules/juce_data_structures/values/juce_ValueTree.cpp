@@ -783,8 +783,8 @@ class ValueTreePropertyValueSource  : public Value::ValueSource,
                                       private ValueTree::Listener
 {
 public:
-    ValueTreePropertyValueSource (const ValueTree& vt, const Identifier& prop, UndoManager* um)
-        : tree (vt), property (prop), undoManager (um)
+    ValueTreePropertyValueSource (const ValueTree& vt, const Identifier& prop, UndoManager* um, bool sync)
+        : tree (vt), property (prop), undoManager (um), shouldUpdateSynchronously(sync)
     {
         tree.addListener (this);
     }
@@ -801,11 +801,12 @@ private:
     ValueTree tree;
     const Identifier property;
     UndoManager* const undoManager;
+    bool shouldUpdateSynchronously;
 
     void valueTreePropertyChanged (ValueTree& changedTree, const Identifier& changedProperty) override
     {
         if (tree == changedTree && property == changedProperty)
-            sendChangeMessage (false);
+            sendChangeMessage (shouldUpdateSynchronously);
     }
 
     void valueTreeChildAdded (ValueTree&, ValueTree&) override {}
@@ -816,9 +817,9 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueTreePropertyValueSource)
 };
 
-Value ValueTree::getPropertyAsValue (const Identifier& name, UndoManager* const undoManager)
+Value ValueTree::getPropertyAsValue (const Identifier& name, UndoManager* const undoManager, bool shouldUpdateSynchronously)
 {
-    return Value (new ValueTreePropertyValueSource (*this, name, undoManager));
+    return Value (new ValueTreePropertyValueSource (*this, name, undoManager, shouldUpdateSynchronously));
 }
 
 //==============================================================================
