@@ -162,8 +162,6 @@ void ProjucerApplication::handleAsyncUpdate()
     MenuBarModel::setMacMainMenu (menuModel, &extraAppleMenuItems); //, "Open Recent");
    #endif
 
-    versionChecker = new LatestVersionChecker();
-
     showLoginFormAsyncIfNotTriedRecently();
 }
 
