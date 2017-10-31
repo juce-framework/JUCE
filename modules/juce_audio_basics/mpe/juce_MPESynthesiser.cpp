@@ -25,6 +25,9 @@ namespace juce
 
 MPESynthesiser::MPESynthesiser()
 {
+    MPEZoneLayout zoneLayout;
+    zoneLayout.addZone (MPEZone (1, 15));
+    setZoneLayout (zoneLayout);
 }
 
 MPESynthesiser::MPESynthesiser (MPEInstrument* mpeInstrument)  : MPESynthesiserBase (mpeInstrument)
