@@ -324,6 +324,11 @@ public:
         setVisible (true);
     }
 
+    ~EditorWindow()
+    {
+        setLookAndFeel (nullptr);
+    }
+
     void closeButtonPressed() override
     {
         setVisible (false);
