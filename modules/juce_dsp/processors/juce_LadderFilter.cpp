@@ -31,8 +31,7 @@ namespace dsp
 
 //==============================================================================
 template <typename Type>
-LadderFilter<Type>::LadderFilter()
-    : state (2)
+LadderFilter<Type>::LadderFilter()  : state (2)
 {
     setSampleRate (Type (1000));    // intentionally setting unrealistic default
                                     // sample rate to catch missing initialisation bugs
@@ -47,11 +46,11 @@ void LadderFilter<Type>::setMode (Mode newValue) noexcept
 {
     switch (newValue)
     {
-        case Mode::LPF12:   A = { Type (0), Type (0),  Type (1), Type (0),  Type (0) }; comp = Type (0.5);  break;
-        case Mode::HPF12:   A = { Type (1), Type (-2), Type (1), Type (0),  Type (0) }; comp = Type (0);    break;
-        case Mode::LPF24:   A = { Type (0), Type (0),  Type (0), Type (0),  Type (1) }; comp = Type (0.5);  break;
-        case Mode::HPF24:   A = { Type (1), Type (-4), Type (6), Type (-4), Type (1) }; comp = Type (0);    break;
-        default:            jassertfalse;                                                                   break;
+        case Mode::LPF12:   A = {{ Type (0), Type (0),  Type (1), Type (0),  Type (0) }}; comp = Type (0.5);  break;
+        case Mode::HPF12:   A = {{ Type (1), Type (-2), Type (1), Type (0),  Type (0) }}; comp = Type (0);    break;
+        case Mode::LPF24:   A = {{ Type (0), Type (0),  Type (0), Type (0),  Type (1) }}; comp = Type (0.5);  break;
+        case Mode::HPF24:   A = {{ Type (1), Type (-4), Type (6), Type (-4), Type (1) }}; comp = Type (0);    break;
+        default:            jassertfalse;                                                                     break;
     }
 
     static constexpr auto outputGain = Type (1.2);
