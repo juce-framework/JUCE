@@ -41,27 +41,40 @@ public:
     */
     using NumericType = typename SampleTypeHelpers::ElementType<SampleType>::Type;
 
+    /** Creates an uninitialised oscillator. Call initialise before first use. */
+    Oscillator()
+    {}
+
     /** Creates an oscillator with a periodic input function (-pi..pi).
 
         If lookup table is not zero, then the function will be approximated
         with a lookup table.
     */
     Oscillator (const std::function<NumericType (NumericType)>& function, size_t lookupTableNumPoints = 0)
-        : generator (function), frequency (440.0f)
+    {
+        initialise (function, lookupTableNumPoints);
+    }
+
+    /** Initialises the oscillator with a waveform. */
+    void initialise (const std::function<NumericType (NumericType)>& function, size_t lookupTableNumPoints = 0)
     {
         if (lookupTableNumPoints != 0)
         {
-            auto table = new LookupTableTransform<NumericType> (generator, static_cast <NumericType> (-1.0 * double_Pi),
-                                                                static_cast<NumericType> (double_Pi), lookupTableNumPoints);
+            auto* table = new LookupTableTransform<NumericType> (function, static_cast <NumericType> (-1.0 * double_Pi),
+                                                                 static_cast<NumericType> (double_Pi), lookupTableNumPoints);
 
             lookupTable = table;
             generator = [table] (NumericType x) { return (*table) (x); };
+        }
+        else
+        {
+            generator = function;
         }
     }
 
     //==============================================================================
     /** Sets the frequency of the oscillator. */
-    void setFrequency (NumericType newGain) noexcept             { frequency.setValue (newGain); }
+    void setFrequency (NumericType newGain, bool force = false) noexcept    { frequency.setValue (newGain, force); }
 
     /** Returns the current frequency of the oscillator. */
     NumericType getFrequency() const noexcept                    { return frequency.getTargetValue(); }

@@ -106,6 +106,8 @@ public:
         return existing.release();
     }
 
+    String getGroupPath() const    { return item.getFile().getFullPathName(); }
+
     //==============================================================================
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override    { itemChanged(); }
     void valueTreeChildAdded (ValueTree&, ValueTree&) override                { itemChanged(); }

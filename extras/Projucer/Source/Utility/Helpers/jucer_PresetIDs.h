@@ -123,6 +123,7 @@ namespace Ids
     DECLARE_ID (linuxArchitecture);
     DECLARE_ID (linuxCodeBlocksArchitecture);
     DECLARE_ID (windowsCodeBlocksArchitecture);
+    DECLARE_ID (codeBlocksWindowsTarget);
     DECLARE_ID (toolset);
     DECLARE_ID (windowsTargetPlatformVersion);
     DECLARE_ID (debugInformationFormat);

@@ -728,12 +728,12 @@ public:
             if (otherFilesGroup->getFirstChildElement() != nullptr)
                 projectXml.addChildElement (otherFilesGroup.release());
 
-                if (getOwner().hasResourceFile())
-                {
-                    XmlElement* rcGroup = projectXml.createNewChildElement ("ItemGroup");
-                    XmlElement* e = rcGroup->createNewChildElement ("ResourceCompile");
-                    e->setAttribute ("Include", prependDot (getOwner().rcFile.getFileName()));
-                }
+            if (getOwner().hasResourceFile())
+            {
+                XmlElement* rcGroup = projectXml.createNewChildElement ("ItemGroup");
+                XmlElement* e = rcGroup->createNewChildElement ("ResourceCompile");
+                e->setAttribute ("Include", prependDot (getOwner().rcFile.getFileName()));
+            }
 
             {
                 XmlElement* e = projectXml.createNewChildElement ("Import");
@@ -919,13 +919,13 @@ public:
             if (otherFilesGroup->getFirstChildElement() != nullptr)
                 filterXml.addChildElement (otherFilesGroup.release());
 
-                if (getOwner().hasResourceFile())
-                {
-                    XmlElement* rcGroup = filterXml.createNewChildElement ("ItemGroup");
-                    XmlElement* e = rcGroup->createNewChildElement ("ResourceCompile");
-                    e->setAttribute ("Include", prependDot (getOwner().rcFile.getFileName()));
-                    e->createNewChildElement ("Filter")->addTextElement (ProjectSaver::getJuceCodeGroupName());
-                }
+            if (getOwner().hasResourceFile())
+            {
+                XmlElement* rcGroup = filterXml.createNewChildElement ("ItemGroup");
+                XmlElement* e = rcGroup->createNewChildElement ("ResourceCompile");
+                e->setAttribute ("Include", prependDot (getOwner().rcFile.getFileName()));
+                e->createNewChildElement ("Filter")->addTextElement (ProjectSaver::getJuceCodeGroupName());
+            }
         }
 
         const MSVCProjectExporterBase& getOwner() const { return owner; }

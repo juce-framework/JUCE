@@ -149,7 +149,6 @@ private:
         };
 
         //==============================================================================
-        //==============================================================================
     public:
         LicenseWebviewContent (LicenseWebview& parentWindowToUse, ModalComponentManager::Callback* callbackToUse)
             : parentWindow (parentWindowToUse), modalCallback (callbackToUse), webview (*this)
@@ -196,6 +195,7 @@ private:
                 HashMap<String, String> params;
 
                 auto n = url.getParameterNames().size();
+
                 for (int i = 0; i < n; ++i)
                     params.set (url.getParameterNames()[i], url.getParameterValues()[i]);
 
