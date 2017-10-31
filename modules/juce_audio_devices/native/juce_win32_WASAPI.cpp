@@ -1339,10 +1339,11 @@ private:
     bool isOpen_, isStarted;
     int currentBufferSizeSamples;
     double currentSampleRate;
-    bool sampleRateChangedByOutput, deviceBecameInactive;
 
     AudioIODeviceCallback* callback;
     CriticalSection startStopLock;
+
+    bool sampleRateChangedByOutput, deviceBecameInactive;
 
     BigInteger lastKnownInputChannels, lastKnownOutputChannels;
 
