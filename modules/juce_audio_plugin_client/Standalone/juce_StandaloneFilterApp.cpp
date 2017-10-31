@@ -126,7 +126,9 @@ public:
             });
         }
         else
+        {
             quit();
+        }
     }
 
 protected:
