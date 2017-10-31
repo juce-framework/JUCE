@@ -32,7 +32,6 @@ JUCE_DECLARE_UUID_GETTER (IConnectionPointContainer, "B196B284-BAB4-101A-B69C-00
 JUCE_DECLARE_UUID_GETTER (IWebBrowser2,              "D30C1661-CDAF-11D0-8A3E-00C04FC9E26E")
 
 #if JUCE_MINGW
- #define DISPID_NAVIGATEERROR 271
  class WebBrowser;
 #endif
 
@@ -178,7 +177,7 @@ private:
                 return S_OK;
             }
 
-            if (dispIdMember == DISPID_NAVIGATEERROR)
+            if (dispIdMember == 271 /*DISPID_NAVIGATEERROR*/)
             {
                 int statusCode = pDispParams->rgvarg[1].pvarVal->intVal;
                 *pDispParams->rgvarg[0].pboolVal = VARIANT_FALSE;

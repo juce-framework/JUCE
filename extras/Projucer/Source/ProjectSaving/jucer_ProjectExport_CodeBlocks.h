@@ -137,8 +137,15 @@ public:
         return false;
     }
 
-    void createExporterProperties (PropertyListBuilder&) override
+    void createExporterProperties (PropertyListBuilder& props) override
     {
+        if (isWindows())
+        {
+            StringArray toolsetNames = { "(default)", "Windows NT 4.0", "Windows 2000", "Windows XP", "Windows Server 2003", "Windows Vista", "Windows Server 2008", "Windows 7", "Windows 8", "Windows 8.1", "Windows 10" };
+            Array<var> toolsets      = { var(),       "0x0400",         "0x0500",       "0x0501",     "0x0502",              "0x0600",         "0x0600",             "0x0601",    "0x0602",    "0x0603",      "0x0A00" };
+            props.add (new ChoicePropertyComponent (getTargetPlatformValue(), "Target platform", toolsetNames, toolsets),
+                       "This sets the preprocessor macro WINVER to an appropriate value for the corresponding platform.");
+        }
     }
 
     //==============================================================================
@@ -196,6 +203,9 @@ public:
     }
 
 private:
+    Value getTargetPlatformValue()                { return getSetting (Ids::codeBlocksWindowsTarget); }
+    String getTargetPlatform() const              { return settings [Ids::codeBlocksWindowsTarget].toString(); }
+
     //==============================================================================
     class CodeBlocksBuildConfiguration  : public BuildConfiguration
     {
@@ -366,7 +376,12 @@ private:
         if (isWindows())
         {
             defines.set ("__MINGW__", "1");
-            defines.set ("__MINGW_EXTENSION", String());
+            defines.set ("__MINGW_EXTENSION", {});
+
+            auto targetPlatform = getTargetPlatform();
+
+            if (targetPlatform.isNotEmpty())
+                defines.set ("WINVER", targetPlatform);
         }
         else
         {
@@ -386,8 +401,18 @@ private:
         defines = mergePreprocessorDefs (defines, getAllPreprocessorDefs (config, target.type));
 
         StringArray defs;
+        const auto keys = defines.getAllKeys();
+        const auto values = defines.getAllValues();
+
         for (int i = 0; i < defines.size(); ++i)
-            defs.add (defines.getAllKeys()[i] + "=" + defines.getAllValues()[i]);
+        {
+            auto result = keys[i];
+
+            if (values[i].isNotEmpty())
+                result += "=" + values[i];
+
+            defs.add (result);
+        }
 
         return getCleanedStringArray (defs);
     }
