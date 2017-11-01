@@ -60,8 +60,9 @@ public:
 
     //==============================================================================
     /** Set a new target value.
-        @param newValue New target value
-        @force if true, the value will be set immediately, bypassing the ramp
+
+        @param newValue     The new target value
+        @param force        If true, the value will be set immediately, bypassing the ramp
     */
     void setValue (FloatType newValue, bool force = false) noexcept
     {
