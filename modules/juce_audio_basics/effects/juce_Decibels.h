@@ -37,10 +37,10 @@ public:
         decibel value lower than minusInfinityDb will return a gain of 0.
     */
     template <typename Type>
-    static Type decibelsToGain (const Type decibels,
-                                const Type minusInfinityDb = (Type) defaultMinusInfinitydB)
+    static Type decibelsToGain (Type decibels,
+                                Type minusInfinityDb = Type (defaultMinusInfinitydB))
     {
-        return decibels > minusInfinityDb ? std::pow ((Type) 10.0, decibels * (Type) 0.05)
+        return decibels > minusInfinityDb ? std::pow (Type (10.0), decibels * Type (0.05))
                                           : Type();
     }
 
@@ -51,10 +51,10 @@ public:
         provided as minusInfinityDb.
     */
     template <typename Type>
-    static Type gainToDecibels (const Type gain,
-                                const Type minusInfinityDb = (Type) defaultMinusInfinitydB)
+    static Type gainToDecibels (Type gain,
+                                Type minusInfinityDb = Type (defaultMinusInfinitydB))
     {
-        return gain > Type() ? jmax (minusInfinityDb, (Type) std::log10 (gain) * (Type) 20.0)
+        return gain > Type() ? jmax (minusInfinityDb, static_cast<Type> (std::log10 (gain)) * Type (20.0))
                              : minusInfinityDb;
     }
 
@@ -67,42 +67,44 @@ public:
         the return value will be "-INF".
     */
     template <typename Type>
-    static String toString (const Type decibels,
-                            const int decimalPlaces = 2,
-                            const Type minusInfinityDb = (Type) defaultMinusInfinitydB,
+    static String toString (Type decibels,
+                            int decimalPlaces = 2,
+                            Type minusInfinityDb = Type (defaultMinusInfinitydB),
                             bool shouldIncludeSuffix = true,
                             StringRef customMinusInfinityString = {})
     {
         String s;
+        s.preallocateBytes (20);
 
         if (decibels <= minusInfinityDb)
         {
-            s = customMinusInfinityString.isEmpty() ? "-INF"
-                                                    : customMinusInfinityString;
+            if (customMinusInfinityString.isEmpty())
+                s << "-INF";
+            else
+                s << customMinusInfinityString;
         }
         else
         {
             if (decibels >= Type())
                 s << '+';
 
-            s += String (decibels, decimalPlaces);
+            if (decimalPlaces <= 0)
+                s << roundToInt (decibels);
+            else
+                s << String (decibels, decimalPlaces);
         }
 
         if (shouldIncludeSuffix)
-            s += " dB";
+            s << " dB";
 
         return s;
     }
 
 private:
     //==============================================================================
-    enum
-    {
-        defaultMinusInfinitydB = -100
-    };
+    enum { defaultMinusInfinitydB = -100 };
 
-    Decibels(); // This class can't be instantiated, it's just a holder for static methods..
-    JUCE_DECLARE_NON_COPYABLE (Decibels)
+    Decibels() = delete; // This class can't be instantiated, it's just a holder for static methods..
 };
 
 } // namespace juce
