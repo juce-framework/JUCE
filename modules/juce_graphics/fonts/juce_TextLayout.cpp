@@ -214,7 +214,7 @@ void TextLayout::addLine (Line* line)
 
 void TextLayout::draw (Graphics& g, Rectangle<float> area) const
 {
-    auto origin = justification.appliedToRectangle ({ width, getHeight() }, area).getPosition();
+    auto origin = justification.appliedToRectangle (Rectangle<float> (width, getHeight()), area).getPosition();
 
     auto& context   = g.getInternalContext();
     auto clip       = context.getClipBounds();
