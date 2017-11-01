@@ -59,32 +59,40 @@ public:
     }
 
     //==============================================================================
-    /** Converts a decibel reading to a string, with the 'dB' suffix.
-        If the decibel value is lower than minusInfinityDb, the return value will
-        be "-INF dB".
+    /** Converts a decibel reading to a string.
+
+        By default the returned string will have the 'dB' suffix added, but this can be removed by
+        setting the shouldIncludeSuffix argument to false. If a customMinusInfinityString argument
+        is provided this will be returned if the value is lower than minusInfinityDb, otherwise
+        the return value will be "-INF".
     */
     template <typename Type>
     static String toString (const Type decibels,
                             const int decimalPlaces = 2,
-                            const Type minusInfinityDb = (Type) defaultMinusInfinitydB)
+                            const Type minusInfinityDb = (Type) defaultMinusInfinitydB,
+                            bool shouldIncludeSuffix = true,
+                            StringRef customMinusInfinityString = {})
     {
         String s;
 
         if (decibels <= minusInfinityDb)
         {
-            s = "-INF dB";
+            s = customMinusInfinityString.isEmpty() ? "-INF"
+                                                    : customMinusInfinityString;
         }
         else
         {
             if (decibels >= Type())
                 s << '+';
 
-            s << String (decibels, decimalPlaces) << " dB";
+            s += String (decibels, decimalPlaces);
         }
+
+        if (shouldIncludeSuffix)
+            s += " dB";
 
         return s;
     }
-
 
 private:
     //==============================================================================
