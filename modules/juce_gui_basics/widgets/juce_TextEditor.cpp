@@ -898,7 +898,7 @@ TextEditor::~TextEditor()
     textValue.removeListener (textHolder);
     textValue.referTo (Value());
 
-    viewport = nullptr;
+    viewport.reset();
     textHolder = nullptr;
 }
 
@@ -1051,7 +1051,7 @@ void TextEditor::applyColourToAllText (const Colour& newColour, bool changeCurre
 
 void TextEditor::lookAndFeelChanged()
 {
-    caret = nullptr;
+    caret.reset();
     recreateCaret();
     repaint();
 }
@@ -1088,7 +1088,7 @@ void TextEditor::recreateCaret()
     }
     else
     {
-        caret = nullptr;
+        caret.reset();
     }
 }
 

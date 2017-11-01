@@ -87,7 +87,7 @@ void DirectoryContentsList::stopSearching()
 {
     shouldStop = true;
     thread.removeTimeSliceClient (this);
-    fileFindHandle = nullptr;
+    fileFindHandle.reset();
 }
 
 void DirectoryContentsList::clear()
@@ -210,7 +210,7 @@ bool DirectoryContentsList::checkNextFile (bool& hasChanged)
             return true;
         }
 
-        fileFindHandle = nullptr;
+        fileFindHandle.reset();
     }
 
     return false;

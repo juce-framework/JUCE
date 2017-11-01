@@ -201,10 +201,10 @@ public:
 
     ~ConcertinaTreeComponent()
     {
-        treeToDisplay = nullptr;
-        addButton = nullptr;
-        findPanel = nullptr;
-        settingsButton = nullptr;
+        treeToDisplay.reset();
+        addButton.reset();
+        findPanel.reset();
+        settingsButton.reset();
     }
 
     void resized() override

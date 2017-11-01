@@ -94,7 +94,7 @@ void TestComponent::setFilename (const String& newName)
     {
         recursiveFiles.add (newFile.getFullPathName());
 
-        loadedDocument = nullptr;
+        loadedDocument.reset();
 
         filename = newName;
         lastModificationTime = findFile().getLastModificationTime();

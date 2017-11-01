@@ -50,7 +50,7 @@ public:
     bool canOpenFile (const File& file) const;
     bool openFile (const File& file);
     void setProject (Project* newProject);
-    Project* getProject() const                 { return currentProject; }
+    Project* getProject() const                 { return currentProject.get(); }
 
     void makeVisible();
     void restoreWindowPosition();

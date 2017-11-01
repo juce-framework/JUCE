@@ -385,8 +385,8 @@ ListBox::ListBox (const String& name, ListBoxModel* const m)
 
 ListBox::~ListBox()
 {
-    headerComponent = nullptr;
-    viewport = nullptr;
+    headerComponent.reset();
+    viewport.reset();
 }
 
 void ListBox::setModel (ListBoxModel* const newModel)
@@ -412,7 +412,7 @@ void ListBox::setMouseMoveSelectsRows (bool b)
     }
     else
     {
-        mouseMoveSelector = nullptr;
+        mouseMoveSelector.reset();
     }
 }
 

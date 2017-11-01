@@ -74,9 +74,9 @@ DocumentWindow::~DocumentWindow()
     jassert (titleBarButtons[2] == nullptr || getIndexOfChildComponent (titleBarButtons[2]) >= 0);
 
     for (auto& b : titleBarButtons)
-        b = nullptr;
+        b.reset();
 
-    menuBar = nullptr;
+    menuBar.reset();
 }
 
 //==============================================================================
@@ -125,7 +125,7 @@ void DocumentWindow::setMenuBar (MenuBarModel* newMenuBarModel, const int newMen
 {
     if (menuBarModel != newMenuBarModel)
     {
-        menuBar = nullptr;
+        menuBar.reset();
 
         menuBarModel = newMenuBarModel;
         menuBarHeight = newMenuBarHeight > 0 ? newMenuBarHeight
@@ -288,7 +288,7 @@ int DocumentWindow::getDesktopWindowStyleFlags() const
 void DocumentWindow::lookAndFeelChanged()
 {
     for (auto& b : titleBarButtons)
-        b = nullptr;
+        b.reset();
 
     if (! isUsingNativeTitleBar())
     {

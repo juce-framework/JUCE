@@ -407,7 +407,7 @@ Result Project::loadDocument (const File& file)
         return Result::fail ("The document contains errors and couldn't be parsed!");
 
     registerRecentFile (file);
-    enabledModulesList = nullptr;
+    enabledModulesList.reset();
     projectRoot = newTree;
 
     removeDefunctExporters();

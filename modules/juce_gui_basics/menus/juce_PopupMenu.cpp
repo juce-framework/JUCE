@@ -271,7 +271,7 @@ public:
     {
         getActiveWindows().removeFirstMatchingValue (this);
         Desktop::getInstance().removeGlobalMouseListener (this);
-        activeSubMenu = nullptr;
+        activeSubMenu.reset();
         items.clear();
     }
 
@@ -313,7 +313,7 @@ public:
         {
             WeakReference<Component> deletionChecker (this);
 
-            activeSubMenu = nullptr;
+            activeSubMenu.reset();
             currentChild = nullptr;
 
             if (item != nullptr
@@ -901,7 +901,7 @@ public:
 
     bool showSubMenuFor (ItemComponent* childComp)
     {
-        activeSubMenu = nullptr;
+        activeSubMenu.reset();
 
         if (childComp != nullptr
              && hasActiveSubMenu (childComp->item))
@@ -1612,7 +1612,7 @@ struct PopupMenuCompletionCallback  : public ModalComponentManager::Callback
         }
 
         // (this would be the place to fade out the component, if that's what's required)
-        component = nullptr;
+        component.reset();
 
         if (! PopupMenuSettings::menuWasHiddenBecauseOfAppChange)
         {

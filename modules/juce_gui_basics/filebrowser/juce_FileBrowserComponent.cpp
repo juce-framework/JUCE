@@ -121,8 +121,8 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
 
 FileBrowserComponent::~FileBrowserComponent()
 {
-    fileListComponent = nullptr;
-    fileList = nullptr;
+    fileListComponent.reset();
+    fileList.reset();
     thread.stopThread (10000);
 }
 

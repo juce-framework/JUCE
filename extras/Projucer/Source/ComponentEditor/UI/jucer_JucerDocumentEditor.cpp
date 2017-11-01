@@ -598,8 +598,7 @@ void JucerDocumentEditor::saveLastSelectedTab() const
 {
     if (document != nullptr)
     {
-        auto* project = document->getCppDocument().getProject();
-        if (project != nullptr)
+        if (auto* project = document->getCppDocument().getProject())
         {
             auto& projectProps = project->getStoredProperties();
 
@@ -617,7 +616,7 @@ void JucerDocumentEditor::saveLastSelectedTab() const
 
             child->setAttribute ("tab", tabbedComponent.getCurrentTabIndex());
 
-            projectProps.setValue ("GUIComponentsLastTab", root);
+            projectProps.setValue ("GUIComponentsLastTab", root.get());
         }
     }
 }
@@ -626,10 +625,10 @@ void JucerDocumentEditor::restoreLastSelectedTab()
 {
     if (document != nullptr)
     {
-        auto* project = document->getCppDocument().getProject();
-        if (project != nullptr)
+        if (auto* project = document->getCppDocument().getProject())
         {
             ScopedPointer<XmlElement> root (project->getStoredProperties().getXmlValue ("GUIComponentsLastTab"));
+
             if (root != nullptr)
             {
                 auto* child = root->getChildByName (document->getCppFile().getFileName());

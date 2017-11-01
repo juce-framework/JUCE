@@ -40,7 +40,7 @@ ComboBox::~ComboBox()
 {
     currentId.removeListener (this);
     hidePopup();
-    label = nullptr;
+    label.reset();
 }
 
 //==============================================================================

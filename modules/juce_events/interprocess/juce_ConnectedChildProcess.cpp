@@ -128,7 +128,7 @@ ChildProcessMaster::~ChildProcessMaster()
     {
         sendMessageToSlave (MemoryBlock (killMessage, specialMessageSize));
         connection->disconnect();
-        connection = nullptr;
+        connection.reset();
     }
 }
 
@@ -145,10 +145,10 @@ bool ChildProcessMaster::sendMessageToSlave (const MemoryBlock& mb)
 
 bool ChildProcessMaster::launchSlaveProcess (const File& executable, const String& commandLineUniqueID, int timeoutMs, int streamFlags)
 {
-    connection = nullptr;
+    connection.reset();
     jassert (childProcess.kill());
 
-    const String pipeName ("p" + String::toHexString (Random().nextInt64()));
+    auto pipeName = "p" + String::toHexString (Random().nextInt64());
 
     StringArray args;
     args.add (executable.getFullPathName());
@@ -164,7 +164,7 @@ bool ChildProcessMaster::launchSlaveProcess (const File& executable, const Strin
             return true;
         }
 
-        connection = nullptr;
+        connection.reset();
     }
 
     return false;
@@ -257,7 +257,7 @@ bool ChildProcessSlave::initialiseFromCommandLine (const String& commandLine,
             connection = new Connection (*this, pipeName, timeoutMs <= 0 ? defaultTimeoutMs : timeoutMs);
 
             if (! connection->isConnected())
-                connection = nullptr;
+                connection.reset();
         }
     }
 

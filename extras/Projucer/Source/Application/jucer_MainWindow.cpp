@@ -90,7 +90,7 @@ MainWindow::~MainWindow()
     getGlobalProperties().setValue ("lastMainWindowPos", getWindowStateAsString());
 
     clearContentComponent();
-    currentProject = nullptr;
+    currentProject.reset();
 }
 
 void MainWindow::createProjectContentCompIfNeeded()
@@ -155,7 +155,7 @@ bool MainWindow::closeProject (Project* project)
 
 bool MainWindow::closeCurrentProject()
 {
-    return currentProject == nullptr || closeProject (currentProject);
+    return currentProject == nullptr || closeProject (currentProject.get());
 }
 
 void MainWindow::setProject (Project* newProject)
@@ -200,17 +200,17 @@ bool MainWindow::openFile (const File& file)
     {
         ScopedPointer<Project> newDoc (new Project (file));
 
-        Result result (newDoc->loadFrom (file, true));
+        auto result = newDoc->loadFrom (file, true);
 
         if (result.wasOk() && closeCurrentProject())
         {
-            setProject (newDoc);
+            setProject (newDoc.get());
             newDoc.release()->setChangedFlag (false);
 
             jassert (getProjectContentComponent() != nullptr);
             getProjectContentComponent()->reloadLastOpenDocuments();
 
-            if (Project* p = getProject())
+            if (auto* p = getProject())
                 p->updateDeprecatedProjectSettingsInteractively();
 
             return true;

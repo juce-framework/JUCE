@@ -61,7 +61,7 @@ public:
         if (useProxyComponent)
             proxy = new ProxyComponent (*component);
         else
-            proxy = nullptr;
+            proxy.reset();
 
         component->setVisible (! useProxyComponent);
     }

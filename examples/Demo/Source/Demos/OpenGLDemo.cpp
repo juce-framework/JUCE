@@ -642,10 +642,10 @@ struct OpenGLDemoClasses
 
         void freeAllContextObjects()
         {
-            shape = nullptr;
-            shader = nullptr;
-            attributes = nullptr;
-            uniforms = nullptr;
+            shape.reset();
+            shader.reset();
+            attributes.reset();
+            uniforms.reset();
             texture.release();
         }
 
@@ -832,9 +832,9 @@ struct OpenGLDemoClasses
                       && newShader->addFragmentShader (OpenGLHelpers::translateFragmentShaderToV3 (newFragmentShader))
                       && newShader->link())
                 {
-                    shape = nullptr;
-                    attributes = nullptr;
-                    uniforms = nullptr;
+                    shape.reset();
+                    attributes.reset();
+                    uniforms.reset();
 
                     shader = newShader;
                     shader->use();

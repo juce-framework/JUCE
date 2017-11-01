@@ -84,7 +84,7 @@ private:
 
         propertyFiles.getUnchecked (0)->setValue (isProjectDefaults ? "PROJECT_DEFAULT_SETTINGS"
                                                                     : "FALLBACK_PATHS",
-                                                  data);
+                                                  data.get());
     }
 
     void updateGlobalPreferences();

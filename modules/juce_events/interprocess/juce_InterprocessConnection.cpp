@@ -45,7 +45,7 @@ InterprocessConnection::~InterprocessConnection()
     callbackConnectionState = false;
     disconnect();
     masterReference.clear();
-    thread = nullptr;
+    thread.reset();
 }
 
 //==============================================================================
@@ -65,7 +65,7 @@ bool InterprocessConnection::connectToSocket (const String& hostName,
         return true;
     }
 
-    socket = nullptr;
+    socket.reset();
     return false;
 }
 
@@ -121,8 +121,8 @@ void InterprocessConnection::disconnect()
 void InterprocessConnection::deletePipeAndSocket()
 {
     const ScopedLock sl (pipeAndSocketLock);
-    socket = nullptr;
-    pipe = nullptr;
+    socket.reset();
+    pipe.reset();
 }
 
 bool InterprocessConnection::isConnected() const

@@ -27,7 +27,7 @@
 #include "Main.h"
 
 DSPSamplesApplication::DSPSamplesApplication()
-    : TimeSliceThread ("Audio File Reader Thread"), demoIndex (-1)
+    : TimeSliceThread ("Audio File Reader Thread")
 {
     loopState.addListener (this);
 }
@@ -50,7 +50,7 @@ void DSPSamplesApplication::shutdown()
     stop();
     audioDeviceManager.removeAudioCallback (&audioSourcePlayer);
     waitForThreadToExit (10000);
-    mainWindow = nullptr;
+    mainWindow.reset();
 }
 
 //==============================================================================
@@ -68,8 +68,8 @@ bool DSPSamplesApplication::loadFile (const File& fileToPlay)
 
     audioSourcePlayer.setSource (nullptr);
     mainWindow->setTransportSource (nullptr);
-    transportSource = nullptr;
-    readerSource = nullptr;
+    transportSource.reset();
+    readerSource.reset();
 
     reader = formatManager.createReaderFor (fileToPlay);
 
@@ -125,7 +125,7 @@ void DSPSamplesApplication::init()
     }
 
     audioSourcePlayer.setSource (nullptr);
-    currentDemo = nullptr;
+    currentDemo.reset();
 
     if (currentDemo == nullptr)
         if (auto demo = Demo::getList()[demoIndex])

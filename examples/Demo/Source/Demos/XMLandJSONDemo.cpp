@@ -296,14 +296,14 @@ private:
     {
         // clear the current tree
         resultsTree.setRootItem (nullptr);
-        rootItem = nullptr;
+        rootItem.reset();
 
         // try and parse the editor's contents
         switch (typeBox.getSelectedItemIndex())
         {
             case xml:           rootItem = rebuildXml();        break;
             case json:          rootItem = rebuildJson();       break;
-            default:            rootItem = nullptr;             break;
+            default:            rootItem.reset();               break;
         }
 
         // if we have a valid TreeViewItem hide any old error messages and set our TreeView to use it
@@ -318,7 +318,7 @@ private:
     /** Parses the editors contects as XML. */
     TreeViewItem* rebuildXml()
     {
-        parsedXml = nullptr;
+        parsedXml.reset();
 
         XmlDocument doc (codeDocument.getAllContent());
         parsedXml = doc.getDocumentElement();

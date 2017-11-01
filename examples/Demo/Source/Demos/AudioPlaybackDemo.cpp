@@ -361,11 +361,9 @@ private:
         // unload the previous file source and delete it..
         transportSource.stop();
         transportSource.setSource (nullptr);
-        currentAudioFileSource = nullptr;
+        currentAudioFileSource.reset();
 
-        AudioFormatReader* reader = formatManager.createReaderFor (audioFile);
-
-        if (reader != nullptr)
+        if (auto* reader = formatManager.createReaderFor (audioFile))
         {
             currentAudioFileSource = new AudioFormatReaderSource (reader, true);
 

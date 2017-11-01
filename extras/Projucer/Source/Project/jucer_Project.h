@@ -297,7 +297,7 @@ public:
         bool next();
 
         ProjectExporter& operator*() const       { return *exporter; }
-        ProjectExporter* operator->() const      { return exporter; }
+        ProjectExporter* operator->() const      { return exporter.get(); }
 
         ScopedPointer<ProjectExporter> exporter;
         int index;

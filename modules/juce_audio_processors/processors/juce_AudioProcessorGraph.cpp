@@ -1177,8 +1177,8 @@ void AudioProcessorGraph::buildRenderingSequence()
     {
         {
             const ScopedLock sl (getCallbackLock());
-            renderSequenceFloat = nullptr;
-            renderSequenceDouble = nullptr;
+            renderSequenceFloat.reset();
+            renderSequenceDouble.reset();
         }
 
         for (auto* node : nodes)

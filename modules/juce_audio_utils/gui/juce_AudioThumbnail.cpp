@@ -120,7 +120,7 @@ public:
             sampleRate = reader->sampleRate;
 
             if (lengthInSamples <= 0 || isFullyLoaded())
-                reader = nullptr;
+                reader.reset();
             else
                 owner.cache.getTimeSliceThread().addTimeSliceClient (this);
         }
@@ -155,7 +155,7 @@ public:
     void releaseResources()
     {
         const ScopedLock sl (readerLock);
-        reader = nullptr;
+        reader.reset();
     }
 
     int useTimeSlice() override
@@ -557,7 +557,7 @@ AudioThumbnail::~AudioThumbnail()
 
 void AudioThumbnail::clear()
 {
-    source = nullptr;
+    source.reset();
     const ScopedLock sl (lock);
     clearChannelData();
 }

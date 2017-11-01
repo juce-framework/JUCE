@@ -51,7 +51,7 @@ public:
     void shutdown() override
     {
         // Do your application's shutdown code here..
-        mainWindow = nullptr;
+        mainWindow.reset();
     }
 
     //==============================================================================

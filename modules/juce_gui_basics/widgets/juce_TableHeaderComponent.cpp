@@ -55,7 +55,7 @@ TableHeaderComponent::TableHeaderComponent()
 
 TableHeaderComponent::~TableHeaderComponent()
 {
-    dragOverlayComp = nullptr;
+    dragOverlayComp.reset();
 }
 
 //==============================================================================
@@ -564,7 +564,7 @@ void TableHeaderComponent::mouseDrag (const MouseEvent& e)
          && e.mouseWasDraggedSinceMouseDown()
          && ! e.mods.isPopupMenu())
     {
-        dragOverlayComp = nullptr;
+        dragOverlayComp.reset();
 
         columnIdBeingResized = getResizeDraggerAt (e.getMouseDownX());
 
@@ -744,7 +744,7 @@ void TableHeaderComponent::mouseUp (const MouseEvent& e)
     if (columnIdUnderMouse != 0 && ! (e.mouseWasDraggedSinceMouseDown() || e.mods.isPopupMenu()))
         columnClicked (columnIdUnderMouse, e.mods);
 
-    dragOverlayComp = nullptr;
+    dragOverlayComp.reset();
 }
 
 MouseCursor TableHeaderComponent::getMouseCursor()

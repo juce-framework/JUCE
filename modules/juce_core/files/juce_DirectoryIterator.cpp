@@ -79,7 +79,7 @@ bool DirectoryIterator::next (bool* const isDirResult, bool* const isHiddenResul
             if (subIterator->next (isDirResult, isHiddenResult, fileSize, modTime, creationTime, isReadOnly))
                 return true;
 
-            subIterator = nullptr;
+            subIterator.reset();
         }
 
         String filename;

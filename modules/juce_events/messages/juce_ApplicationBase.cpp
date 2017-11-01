@@ -304,7 +304,7 @@ bool JUCEApplicationBase::initialiseApp()
 
    #if JUCE_HANDLE_MULTIPLE_INSTANCES
     if (multipleInstanceHandler != nullptr)
-        MessageManager::getInstance()->registerBroadcastListener (multipleInstanceHandler);
+        MessageManager::getInstance()->registerBroadcastListener (multipleInstanceHandler.get());
    #endif
 
     return true;
@@ -316,7 +316,7 @@ int JUCEApplicationBase::shutdownApp()
 
    #if JUCE_HANDLE_MULTIPLE_INSTANCES
     if (multipleInstanceHandler != nullptr)
-        MessageManager::getInstance()->deregisterBroadcastListener (multipleInstanceHandler);
+        MessageManager::getInstance()->deregisterBroadcastListener (multipleInstanceHandler.get());
    #endif
 
     JUCE_TRY
@@ -326,7 +326,7 @@ int JUCEApplicationBase::shutdownApp()
     }
     JUCE_CATCH_EXCEPTION
 
-    multipleInstanceHandler = nullptr;
+    multipleInstanceHandler.reset();
     return getApplicationReturnValue();
 }
 

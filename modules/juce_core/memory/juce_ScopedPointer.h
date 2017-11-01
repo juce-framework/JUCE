@@ -170,6 +170,12 @@ public:
         }
     }
 
+    /** Sets this pointer to a new object, deleting the old object that it was previously pointing to if there was one. */
+    void reset (ScopedPointer& newObject)
+    {
+        reset (newObject.release());
+    }
+
     /** Detaches and returns the current object from this ScopedPointer without deleting it.
         This will return the current object, and set the ScopedPointer to a null pointer.
     */
@@ -191,7 +197,7 @@ public:
     /** If the pointer is non-null, this will attempt to return a new copy of the object that is pointed to.
         If the pointer is null, this will safely return a nullptr.
     */
-    inline ObjectType* createCopy() const                                            { return createCopyIfNotNull (object); }
+    inline ObjectType* createCopy() const                                           { return createCopyIfNotNull (object); }
 
 private:
     //==============================================================================
@@ -206,22 +212,74 @@ private:
 };
 
 //==============================================================================
-/** Compares a ScopedPointer with another pointer.
-    This can be handy for checking whether this is a null pointer.
-*/
-template <class ObjectType>
-bool operator== (const ScopedPointer<ObjectType>& pointer1, ObjectType* pointer2) noexcept
+/** Compares a ScopedPointer with another pointer. */
+template <typename ObjectType1, typename ObjectType2>
+bool operator== (ObjectType1* pointer1, const ScopedPointer<ObjectType2>& pointer2) noexcept
 {
-    return static_cast<ObjectType*> (pointer1) == pointer2;
+    return pointer1 == pointer2.get();
 }
 
-/** Compares a ScopedPointer with another pointer.
-    This can be handy for checking whether this is a null pointer.
-*/
-template <class ObjectType>
-bool operator!= (const ScopedPointer<ObjectType>& pointer1, ObjectType* pointer2) noexcept
+/** Compares a ScopedPointer with another pointer. */
+template <typename ObjectType1, typename ObjectType2>
+bool operator!= (ObjectType1* pointer1, const ScopedPointer<ObjectType2>& pointer2) noexcept
 {
-    return static_cast<ObjectType*> (pointer1) != pointer2;
+    return pointer1 != pointer2.get();
+}
+
+/** Compares a ScopedPointer with another pointer. */
+template <typename ObjectType1, typename ObjectType2>
+bool operator== (const ScopedPointer<ObjectType1>& pointer1, ObjectType2* pointer2) noexcept
+{
+    return pointer1.get() == pointer2;
+}
+
+/** Compares a ScopedPointer with another pointer. */
+template <typename ObjectType1, typename ObjectType2>
+bool operator!= (const ScopedPointer<ObjectType1>& pointer1, ObjectType2* pointer2) noexcept
+{
+    return pointer1.get() != pointer2;
+}
+
+/** Compares a ScopedPointer with another pointer. */
+template <typename ObjectType1, typename ObjectType2>
+bool operator== (const ScopedPointer<ObjectType1>& pointer1, const ScopedPointer<ObjectType2>& pointer2) noexcept
+{
+    return pointer1.get() == pointer2.get();
+}
+
+/** Compares a ScopedPointer with another pointer. */
+template <typename ObjectType1, typename ObjectType2>
+bool operator!= (const ScopedPointer<ObjectType1>& pointer1, const ScopedPointer<ObjectType2>& pointer2) noexcept
+{
+    return pointer1.get() != pointer2.get();
+}
+
+/** Compares a ScopedPointer with a nullptr. */
+template <class ObjectType>
+bool operator== (decltype (nullptr), const ScopedPointer<ObjectType>& pointer) noexcept
+{
+    return pointer.get() == nullptr;
+}
+
+/** Compares a ScopedPointer with a nullptr. */
+template <class ObjectType>
+bool operator!= (decltype (nullptr), const ScopedPointer<ObjectType>& pointer) noexcept
+{
+    return pointer.get() != nullptr;
+}
+
+/** Compares a ScopedPointer with a nullptr. */
+template <class ObjectType>
+bool operator== (const ScopedPointer<ObjectType>& pointer, decltype (nullptr)) noexcept
+{
+    return pointer.get() == nullptr;
+}
+
+/** Compares a ScopedPointer with a nullptr. */
+template <class ObjectType>
+bool operator!= (const ScopedPointer<ObjectType>& pointer, decltype (nullptr)) noexcept
+{
+    return pointer.get() != nullptr;
 }
 
 //==============================================================================

@@ -195,31 +195,31 @@ void ProjucerApplication::shutdown()
         Logger::writeToLog ("Server shutdown cleanly");
     }
 
-    versionChecker = nullptr;
-    utf8Window = nullptr;
-    svgPathWindow = nullptr;
-    aboutWindow = nullptr;
-    pathsWindow = nullptr;
-    editorColourSchemeWindow = nullptr;
+    versionChecker.reset();
+    utf8Window.reset();
+    svgPathWindow.reset();
+    aboutWindow.reset();
+    pathsWindow.reset();
+    editorColourSchemeWindow.reset();
 
     if (licenseController != nullptr)
     {
         licenseController->removeLicenseStatusChangedCallback (this);
-        licenseController = nullptr;
+        licenseController.reset();
     }
 
     mainWindowList.forceCloseAllWindows();
     openDocumentManager.clear();
 
-    childProcessCache = nullptr;
+    childProcessCache.reset();
 
    #if JUCE_MAC
     MenuBarModel::setMacMainMenu (nullptr);
    #endif
 
-    menuModel = nullptr;
-    commandManager = nullptr;
-    settings = nullptr;
+    menuModel.reset();
+    commandManager.reset();
+    settings.reset();
 
     LookAndFeel::setDefaultLookAndFeel (nullptr);
 
@@ -739,7 +739,7 @@ void ProjucerApplication::showApplicationUsageDataAgreementPopup()
 void ProjucerApplication::dismissApplicationUsageDataAgreementPopup()
 {
     if (applicationUsageDataWindow != nullptr)
-        applicationUsageDataWindow = nullptr;
+        applicationUsageDataWindow.reset();
 }
 
 void ProjucerApplication::showPathsWindow()
@@ -804,7 +804,7 @@ void ProjucerApplication::deleteLogger()
         }
     }
 
-    logger = nullptr;
+    logger.reset();
 }
 
 PropertiesFile::Options ProjucerApplication::getPropertyFileOptionsFor (const String& filename, bool isProjectSettings)

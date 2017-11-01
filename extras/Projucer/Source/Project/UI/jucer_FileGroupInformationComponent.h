@@ -98,7 +98,7 @@ public:
             if (existingComponentToUpdate == nullptr
                  || dynamic_cast<FileOptionComponent*> (existing.get())->item != child)
             {
-                existing = nullptr;
+                existing.reset();
                 existing = new FileOptionComponent (child, dynamic_cast<ListBoxHeader*> (list.getHeaderComponent()));
             }
         }
