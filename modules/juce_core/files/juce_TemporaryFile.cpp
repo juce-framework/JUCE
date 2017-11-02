@@ -24,7 +24,7 @@ namespace juce
 {
 
 static File createTempFile (const File& parentDirectory, String name,
-                            const String& suffix, const int optionFlags)
+                            const String& suffix, int optionFlags)
 {
     if ((optionFlags & TemporaryFile::useHiddenFile) != 0)
         name = "." + name;

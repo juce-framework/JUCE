@@ -26,23 +26,22 @@ namespace juce
 static void parseWildcard (const String& pattern, StringArray& result)
 {
     result.addTokens (pattern.toLowerCase(), ";,", "\"'");
-
     result.trim();
     result.removeEmptyStrings();
 
     // special case for *.*, because people use it to mean "any file", but it
     // would actually ignore files with no extension.
-    for (int i = result.size(); --i >= 0;)
-        if (result[i] == "*.*")
-            result.set (i, "*");
+    for (auto& r : result)
+        if (r == "*.*")
+            r = "*";
 }
 
 static bool matchWildcard (const File& file, const StringArray& wildcards)
 {
-    const String filename (file.getFileName());
+    auto filename = file.getFileName();
 
-    for (int i = wildcards.size(); --i >= 0;)
-        if (filename.matchesWildcard (wildcards[i], true))
+    for (auto& w : wildcards)
+        if (filename.matchesWildcard (w, true))
             return true;
 
     return false;
