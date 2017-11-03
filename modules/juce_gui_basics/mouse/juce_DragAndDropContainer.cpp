@@ -45,7 +45,9 @@ public:
         : sourceDetails (desc, sourceComponent, Point<int>()),
           image (im), owner (ddc),
           mouseDragSource (draggingSource->getComponentUnderMouse()),
-          imageOffset (offset), originalMouseIndex (draggingSource->getIndex())
+          imageOffset (offset),
+          originalInputSourceIndex (draggingSource->getIndex()),
+          originalInputSourceType (draggingSource->getType())
     {
         updateSize();
 
@@ -68,7 +70,7 @@ public:
         {
             mouseDragSource->removeMouseListener (this);
 
-            if (DragAndDropTarget* const current = getCurrentlyOver())
+            if (auto* current = getCurrentlyOver())
                 if (current->isInterestedInDragSource (sourceDetails))
                     current->itemDragExit (sourceDetails);
         }
@@ -87,14 +89,14 @@ public:
 
     void mouseUp (const MouseEvent& e) override
     {
-        if (e.originalComponent != this && e.source.getIndex() == originalMouseIndex)
+        if (e.originalComponent != this && isOriginalInputSource (e.source))
         {
             if (mouseDragSource != nullptr)
                 mouseDragSource->removeMouseListener (this);
 
             // (note: use a local copy of this in case the callback runs
             // a modal loop and deletes this object before the method completes)
-            DragAndDropTarget::SourceDetails details (sourceDetails);
+            auto details = sourceDetails;
             DragAndDropTarget* finalTarget = nullptr;
 
             auto wasVisible = isVisible();
@@ -105,7 +107,7 @@ public:
             if (wasVisible) // fade the component and remove it - it'll be deleted later by the timer callback
                 dismissWithAnimation (finalTarget == nullptr);
 
-            if (Component* parent = getParentComponent())
+            if (auto* parent = getParentComponent())
                 parent->removeChildComponent (this);
 
             if (finalTarget != nullptr)
@@ -120,7 +122,7 @@ public:
 
     void mouseDrag (const MouseEvent& e) override
     {
-        if (e.originalComponent != this && e.source.getIndex() == originalMouseIndex)
+        if (e.originalComponent != this && isOriginalInputSource (e.source))
             updateLocation (true, e.getScreenPosition());
     }
 
@@ -180,14 +182,15 @@ public:
         }
         else
         {
-            if (auto* ms = Desktop::getInstance().getMouseSource (originalMouseIndex))
+            for (auto& s : Desktop::getInstance().getMouseSources())
             {
-                if (! ms->isDragging())
+                if (isOriginalInputSource (s) && ! s.isDragging())
                 {
                     if (mouseDragSource != nullptr)
                         mouseDragSource->removeMouseListener (this);
 
                     deleteSelf();
+                    break;
                 }
             }
         }
@@ -222,7 +225,8 @@ private:
     const Point<int> imageOffset;
     bool hasCheckedForExternalDrag = false;
     Time lastTimeOverTarget;
-    int originalMouseIndex;
+    int originalInputSourceIndex;
+    MouseInputSource::InputSourceType originalInputSourceType;
 
     void updateSize()
     {
@@ -361,6 +365,12 @@ private:
         {
             animator.fadeOut (this, 120);
         }
+    }
+
+    bool isOriginalInputSource (const MouseInputSource& sourceToCheck)
+    {
+        return (sourceToCheck.getType() == originalInputSourceType
+                && sourceToCheck.getIndex() == originalInputSourceIndex);
     }
 
     JUCE_DECLARE_NON_COPYABLE (DragImageComponent)
