@@ -12,10 +12,10 @@
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
                        osxSDK="default" osxCompatibility="10.10 SDK" osxArchitecture="default"
-                       defines=""/>
+                       defines="" enablePluginBinaryCopyStep="1"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="JuceDemo"
                        osxSDK="default" osxCompatibility="10.6 SDK" osxArchitecture="default"
-                       defines=""/>
+                       defines="" enablePluginBinaryCopyStep="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_video" path="../../modules"/>
@@ -43,10 +43,10 @@
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
                        osxSDK="default" osxCompatibility="default" osxArchitecture="default"
-                       defines="" iosCompatibility="default"/>
+                       defines="" iosCompatibility="default" enablePluginBinaryCopyStep="1"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="JuceDemo"
                        osxSDK="default" osxCompatibility="default" osxArchitecture="default"
-                       defines="" iosCompatibility="default"/>
+                       defines="" iosCompatibility="default" enablePluginBinaryCopyStep="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_video" path="../../modules"/>
@@ -69,9 +69,11 @@
     <VS2013 targetFolder="Builds/VisualStudio2013" bigIcon="BvyE0d" extraCompilerFlags="/FC">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="1" optimisation="1" targetName="JuceDemo"/>
+                       isDebug="1" optimisation="1" targetName="JuceDemo" debugInformationFormat="ProgramDatabase"
+                       enablePluginBinaryCopyStep="0"/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="0" optimisation="3" targetName="JuceDemo"/>
+                       isDebug="0" optimisation="3" targetName="JuceDemo" debugInformationFormat="ProgramDatabase"
+                       enablePluginBinaryCopyStep="0" linkTimeOptimisation="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_video" path="../../modules"/>
@@ -94,9 +96,11 @@
     <VS2015 targetFolder="Builds/VisualStudio2015" bigIcon="BvyE0d" extraCompilerFlags="/FC">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="JuceDemo"/>
+                       isDebug="1" optimisation="1" targetName="JuceDemo" debugInformationFormat="ProgramDatabase"
+                       enablePluginBinaryCopyStep="0"/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="JuceDemo"/>
+                       isDebug="0" optimisation="3" targetName="JuceDemo" debugInformationFormat="ProgramDatabase"
+                       enablePluginBinaryCopyStep="0" linkTimeOptimisation="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_video" path="../../modules"/>
@@ -120,9 +124,11 @@
             extraCompilerFlags="/FC">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="JuceDemo"/>
+                       isDebug="1" optimisation="1" targetName="JuceDemo" debugInformationFormat="ProgramDatabase"
+                       enablePluginBinaryCopyStep="0"/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="JuceDemo"/>
+                       isDebug="0" optimisation="3" targetName="JuceDemo" debugInformationFormat="ProgramDatabase"
+                       enablePluginBinaryCopyStep="0" linkTimeOptimisation="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_video" path="../../modules"/>
@@ -144,7 +150,7 @@
     </VS2017>
     <ANDROIDSTUDIO androidActivityClass="com.yourcompany.jucedemo.JuceDemo" androidInternetNeeded="1"
                    androidCpp11="1" targetFolder="Builds/Android" androidSDKPath=""
-                   androidNDKPath="" androidBluetoothNeeded="0" bigIcon="BvyE0d"
+                   androidNDKPath="" androidBluetoothNeeded="1" bigIcon="BvyE0d"
                    androidScreenOrientation="unspecified" androidMicNeeded="1" gradleToolchain="clang"
                    gradleToolchainVersion="3.6" androidTheme="@android:style/Theme.NoTitleBar"
                    microphonePermissionNeeded="1" extraCompilerFlags="-pedantic -Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion -Wextra-semi">
