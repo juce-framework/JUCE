@@ -34,16 +34,20 @@ class GlobalSearchPathsWindowComponent    : public Component,
 public:
     GlobalSearchPathsWindowComponent()
         : modulesLabel ("modulesLabel", "Modules"),
-          sdksLabel ("sdksLabel", "SDKs")
+          sdksLabel ("sdksLabel", "SDKs"),
+          cLionLabel ("cLionLabel", "CLion")
     {
         addAndMakeVisible (modulesLabel);
         addAndMakeVisible (sdksLabel);
+        addAndMakeVisible (cLionLabel);
 
         modulesLabel.setFont (Font (18.0f, Font::FontStyleFlags::bold));
-        sdksLabel.setFont (Font (18.0f, Font::FontStyleFlags::bold));
+        sdksLabel   .setFont (Font (18.0f, Font::FontStyleFlags::bold));
+        cLionLabel  .setFont (Font (18.0f, Font::FontStyleFlags::bold));
 
         modulesLabel.setJustificationType (Justification::centredLeft);
-        sdksLabel.setJustificationType (Justification::centredLeft);
+        sdksLabel   .setJustificationType (Justification::centredLeft);
+        cLionLabel  .setJustificationType (Justification::centredLeft);
 
         addAndMakeVisible (info);
         info.setInfoToDisplay ("Use this dropdown to set the global paths for different OSes. "
@@ -85,10 +89,13 @@ public:
         modulesLabel.setBounds (b.removeFromTop (20));
         b.removeFromTop (20);
 
-        auto i = 0;
-        for (auto propertyComponent : pathPropertyComponents)
+        auto thisOS = TargetOS::getThisOS();
+        auto selectedOS = getSelectedOS();
+        const int numComps = pathPropertyComponents.size();
+
+        for (int i = 0; i < numComps; ++i)
         {
-            propertyComponent->setBounds (b.removeFromTop (propertyComponent->getPreferredHeight()));
+            pathPropertyComponents[i]->setBounds (b.removeFromTop (pathPropertyComponents[i]->getPreferredHeight()));
             b.removeFromTop (5);
 
             if (i == 1)
@@ -98,12 +105,17 @@ public:
                 b.removeFromTop (20);
             }
 
-            ++i;
+            if (selectedOS == thisOS && i == numComps - 2)
+            {
+                b.removeFromTop (15);
+                cLionLabel.setBounds (b.removeFromTop (20));
+                b.removeFromTop (20);
+            }
         }
     }
 
 private:
-    Label modulesLabel, sdksLabel;
+    Label modulesLabel, sdksLabel, cLionLabel;
     OwnedArray<PropertyComponent> pathPropertyComponents;
     ComboBox osSelector;
     InfoButton info;
@@ -113,11 +125,8 @@ private:
         updateFilePathPropertyComponents();
     }
 
-    void updateFilePathPropertyComponents()
+    TargetOS::OS getSelectedOS() const
     {
-        pathPropertyComponents.clear();
-
-        auto thisOS = TargetOS::getThisOS();
         auto selectedOS = TargetOS::unknown;
 
         switch (osSelector.getSelectedId())
@@ -127,6 +136,16 @@ private:
             case 3: selectedOS = TargetOS::linux;   break;
             default:                                break;
         }
+
+        return selectedOS;
+    }
+
+    void updateFilePathPropertyComponents()
+    {
+        pathPropertyComponents.clear();
+
+        const auto thisOS = TargetOS::getThisOS();
+        const auto selectedOS = getSelectedOS();
 
         auto& settings = getAppSettings();
 
@@ -160,6 +179,16 @@ private:
                                                                                           "Android SDK", true)));
             addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::androidNDKPath),
                                                                                           "Android NDK", true)));
+
+           #if JUCE_MAC
+            String exeLabel ("app");
+           #elif JUCE_WINDOWS
+            String exeLabel ("executable");
+           #else
+            String exeLabel ("startup script");
+           #endif
+            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::clionExePath),
+                                                                                          "CLion " + exeLabel, false)));
         }
         else
         {

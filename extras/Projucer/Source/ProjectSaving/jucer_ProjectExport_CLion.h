@@ -109,6 +109,8 @@ public:
         static Identifier exporterName ("XCODE_MAC");
        #elif JUCE_WINDOWS
         static Identifier exporterName ("CODEBLOCKS_WINDOWS");
+       #elif JUCE_LINUX
+        static Identifier exporterName ("LINUX_MAKE");
        #else
         static Identifier exporterName;
        #endif
@@ -121,7 +123,7 @@ public:
 
     bool launchProject() override
     {
-        return getCLionExecutable().startAsProcess (getTargetFolder().getFullPathName());
+        return getCLionExecutable().startAsProcess (getTargetFolder().getFullPathName().quoted());
     }
 
     String getDescription() override
@@ -148,7 +150,7 @@ public:
                     << newLine
                     << "Not all features of all the exporters are currently supported. Notable omissions are AUv3 "
                     << "plug-ins, embedding resources and fat binaries on MacOS, and adding application icons. On "
-                    << "Windows CLion requires a GCC-based compiler like MinGW.";
+                    << "Windows the CLion exporter requires a GCC-based compiler like MinGW.";
 
         return description;
     }
@@ -225,17 +227,17 @@ private:
     //==============================================================================
     static File getCLionExecutable()
     {
-       #if JUCE_MAC
-        return { "/Applications/CLion.app/Contents/MacOS/clion" };
-       #elif JUCE_WINDOWS
-        auto regValue = WindowsRegistry::getValue ("HKEY_LOCAL_MACHINE\\SOFTWARE\\Classes\\Applications\\clion64.exe\\shell\\open\\command\\", {}, {});
-        auto openCmd = StringArray::fromTokens (regValue, true);
+        File clionExe (getAppSettings()
+                       .getStoredPath (Ids::clionExePath)
+                       .toString()
+                       .replace ("${user.home}", File::getSpecialLocation (File::userHomeDirectory).getFullPathName()));
 
-        if (! openCmd.isEmpty())
-            return { openCmd[0].unquoted() };
+       #if JUCE_MAC
+        if (clionExe.getFileName().endsWith (".app"))
+            clionExe = clionExe.getChildFile ("Contents/MacOS/clion");
        #endif
 
-        return {};
+        return clionExe;
     }
 
     //==============================================================================
