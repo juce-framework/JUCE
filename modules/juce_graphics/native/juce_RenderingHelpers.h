@@ -1640,8 +1640,8 @@ struct ClipRegions
         virtual Ptr clipToRectangleList (const RectangleList<int>&) = 0;
         virtual Ptr excludeClipRectangle (Rectangle<int>) = 0;
         virtual Ptr clipToPath (const Path&, const AffineTransform&) = 0;
-        virtual Ptr clipToEdgeTable (const EdgeTable& et) = 0;
-        virtual Ptr clipToImageAlpha (const Image&, const AffineTransform&, const Graphics::ResamplingQuality) = 0;
+        virtual Ptr clipToEdgeTable (const EdgeTable&) = 0;
+        virtual Ptr clipToImageAlpha (const Image&, const AffineTransform&, Graphics::ResamplingQuality) = 0;
         virtual void translate (Point<int> delta) = 0;
 
         virtual bool clipRegionIntersects (Rectangle<int>) const = 0;
