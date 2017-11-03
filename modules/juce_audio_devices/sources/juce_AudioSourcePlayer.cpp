@@ -24,11 +24,6 @@ namespace juce
 {
 
 AudioSourcePlayer::AudioSourcePlayer()
-    : source (nullptr),
-      sampleRate (0),
-      bufferSize (0),
-      lastGain (1.0f),
-      gain (1.0f)
 {
 }
 
@@ -41,7 +36,7 @@ void AudioSourcePlayer::setSource (AudioSource* newSource)
 {
     if (source != newSource)
     {
-        AudioSource* const oldSource = source;
+        auto* oldSource = source;
 
         if (newSource != nullptr && bufferSize > 0 && sampleRate > 0)
             newSource->prepareToPlay (bufferSize, sampleRate);
@@ -137,7 +132,7 @@ void AudioSourcePlayer::audioDeviceIOCallback (const float** inputChannelData,
             }
         }
 
-        AudioSampleBuffer buffer (channels, numActiveChans, numSamples);
+        AudioBuffer<float> buffer (channels, numActiveChans, numSamples);
 
         AudioSourceChannelInfo info (&buffer, 0, numSamples);
         source->getNextAudioBlock (info);

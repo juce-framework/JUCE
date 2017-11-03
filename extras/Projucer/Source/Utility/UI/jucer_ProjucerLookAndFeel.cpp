@@ -34,6 +34,8 @@ ProjucerLookAndFeel::ProjucerLookAndFeel()
     setupColours();
 }
 
+ProjucerLookAndFeel::~ProjucerLookAndFeel() {}
+
 void ProjucerLookAndFeel::drawTabButton (TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
     const auto area = button.getActiveArea();

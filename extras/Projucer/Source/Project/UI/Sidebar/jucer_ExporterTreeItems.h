@@ -69,12 +69,12 @@ public:
 
     Icon getIcon() const override
     {
-        return getIconForExporter (exporter).withColour (getContentColour (true));
+        return getIconForExporter (exporter.get()).withColour (getContentColour (true));
     }
 
     void showDocument() override
     {
-        showSettingsPage (new SettingsComp (exporter));
+        showSettingsPage (new SettingsComp (exporter.get()));
     }
 
     void deleteItem() override
@@ -142,7 +142,7 @@ public:
 
     void itemDropped (const DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex) override
     {
-        const int oldIndex = indexOfConfig (dragSourceDetails.description.toString().fromLastOccurrenceOf ("||", false, false));
+        auto oldIndex = indexOfConfig (dragSourceDetails.description.toString().fromLastOccurrenceOf ("||", false, false));
 
         if (oldIndex >= 0)
             configListTree.moveChild (oldIndex, insertIndex, project.getUndoManagerFor (configListTree));

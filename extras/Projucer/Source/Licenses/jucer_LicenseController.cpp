@@ -114,7 +114,7 @@ LicenseController::LicenseController()
 LicenseController::~LicenseController()
 {
    #if !JUCER_ENABLE_GPL_MODE
-    thread = nullptr;
+    thread.reset();
     closeWebview (-1);
    #endif
 }
@@ -155,7 +155,7 @@ void LicenseController::logout()
     jassert (MessageManager::getInstance()->isThisTheMessageThread());
 
    #if ! JUCER_ENABLE_GPL_MODE
-    thread = nullptr;
+    thread.reset();
     updateState ({});
 
    #if ! JUCE_LINUX
@@ -171,7 +171,7 @@ void LicenseController::chooseNewLicense()
     jassert (MessageManager::getInstance()->isThisTheMessageThread());
 
    #if ! JUCER_ENABLE_GPL_MODE
-    thread = nullptr;
+    thread.reset();
     thread = new LicenseThread (*this, true);
    #endif
 }

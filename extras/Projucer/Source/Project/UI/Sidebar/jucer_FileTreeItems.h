@@ -56,41 +56,52 @@ public:
 
     void deleteItem() override                          { item.removeItemFromProject(); }
 
-    virtual void deleteAllSelectedItems() override
+    void deleteAllSelectedItems() override
     {
-        TreeView* tree = getOwnerView();
-        const int numSelected = tree->getNumSelectedItems();
-        OwnedArray<File> filesToTrash;
-        OwnedArray<Project::Item> itemsToRemove;
+        auto* tree = getOwnerView();
+        Array<File> filesToTrash;
+        Array<Project::Item> itemsToRemove;
 
-        for (int i = 0; i < numSelected; ++i)
+        for (auto i = 0; i < tree->getNumSelectedItems(); ++i)
         {
             if (auto* p = dynamic_cast<FileTreeItemBase*> (tree->getSelectedItem (i)))
             {
-                itemsToRemove.add (new Project::Item (p->item));
+                itemsToRemove.add (p->item);
 
-                if (p->getFile().existsAsFile())
-                    filesToTrash.add (new File (p->getFile()));
+                if (p->item.isGroup())
+                {
+                    for (auto j = 0; j < p->item.getNumChildren(); ++j)
+                    {
+                        auto associatedFile = p->item.getChild (j).getFile();
+
+                        if (associatedFile.existsAsFile())
+                            filesToTrash.addIfNotAlreadyThere (associatedFile);
+                    }
+                }
+                else if (p->getFile().existsAsFile())
+                {
+                    filesToTrash.addIfNotAlreadyThere (p->getFile());
+                }
             }
         }
 
         if (filesToTrash.size() > 0)
         {
             String fileList;
-            const int maxFilesToList = 10;
-            for (int i = jmin (maxFilesToList, filesToTrash.size()); --i >= 0;)
-                fileList << filesToTrash.getUnchecked(i)->getFullPathName() << "\n";
+            auto maxFilesToList = 10;
+            for (auto i = jmin (maxFilesToList, filesToTrash.size()); --i >= 0;)
+                fileList << filesToTrash.getUnchecked(i).getFullPathName() << "\n";
 
             if (filesToTrash.size() > maxFilesToList)
                 fileList << "\n...plus " << (filesToTrash.size() - maxFilesToList) << " more files...";
 
-            int r = AlertWindow::showYesNoCancelBox (AlertWindow::NoIcon, "Delete Project Items",
-                                                     "As well as removing the selected item(s) from the project, do you also want to move their files to the trash:\n\n"
-                                                       + fileList,
-                                                     "Just remove references",
-                                                     "Also move files to Trash",
-                                                     "Cancel",
-                                                     tree->getTopLevelComponent());
+            auto r = AlertWindow::showYesNoCancelBox (AlertWindow::NoIcon, "Delete Project Items",
+                                                      "As well as removing the selected item(s) from the project, do you also want to move their files to the trash:\n\n"
+                                                           + fileList,
+                                                      "Just remove references",
+                                                      "Also move files to Trash",
+                                                      "Cancel",
+                                                      tree->getTopLevelComponent());
 
             if (r == 0)
                 return;
@@ -105,7 +116,7 @@ public:
 
             for (int i = filesToTrash.size(); --i >= 0;)
             {
-                const File f (*filesToTrash.getUnchecked(i));
+                auto f = filesToTrash.getUnchecked(i);
 
                 om.closeFile (f, false);
 
@@ -115,10 +126,17 @@ public:
                 }
             }
 
-            for (int i = itemsToRemove.size(); --i >= 0;)
+            for (auto i = itemsToRemove.size(); --i >= 0;)
             {
-                if (auto* itemToRemove = treeRootItem->findTreeViewItem (*itemsToRemove.getUnchecked(i)))
+                if (auto itemToRemove = treeRootItem->findTreeViewItem (itemsToRemove.getUnchecked (i)))
                 {
+                    if (auto* pcc = getProjectContentComponent())
+                    {
+                        if (auto* fileInfoComp = dynamic_cast<FileGroupInformationComponent*> (pcc->getEditorComponentContent()))
+                            if (fileInfoComp->getGroupPath() == itemToRemove->getFile().getFullPathName())
+                                pcc->hideEditor();
+                    }
+
                     om.closeFile (itemToRemove->getFile(), false);
                     itemToRemove->deleteItem();
                 }

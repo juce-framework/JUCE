@@ -198,7 +198,7 @@ public:
 
         @see KeyPressMappingSet
     */
-    KeyPressMappingSet* getKeyMappings() const noexcept                         { return keyMappings; }
+    KeyPressMappingSet* getKeyMappings() const noexcept         { return keyMappings.get(); }
 
 
     //==============================================================================
@@ -304,7 +304,7 @@ private:
     OwnedArray<ApplicationCommandInfo> commands;
     ListenerList<ApplicationCommandManagerListener> listeners;
     ScopedPointer<KeyPressMappingSet> keyMappings;
-    ApplicationCommandTarget* firstTarget;
+    ApplicationCommandTarget* firstTarget = nullptr;
 
     void sendListenerInvokeCallback (const ApplicationCommandTarget::InvocationInfo&);
     void handleAsyncUpdate() override;

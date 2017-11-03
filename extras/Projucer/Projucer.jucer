@@ -30,7 +30,7 @@
       </MODULEPATHS>
     </XCODE_MAC>
     <VS2013 targetFolder="Builds/VisualStudio2013" externalLibraries="" extraLinkerFlags=""
-            bigIcon="rv1F4h" toolset="v120" vstFolder="" windowsTargetPlatformVersion="8.1">
+            bigIcon="rv1F4h" toolset="v120" vstFolder="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="1" optimisation="1" targetName="Projucer" headerPath=""
@@ -52,7 +52,7 @@
       </MODULEPATHS>
     </VS2013>
     <VS2015 targetFolder="Builds/VisualStudio2015" externalLibraries="" bigIcon="rv1F4h"
-            toolset="v140" vstFolder="" windowsTargetPlatformVersion="8.1">
+            toolset="v140" vstFolder="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="1" optimisation="1" targetName="Projucer" headerPath=""
@@ -73,7 +73,7 @@
         <MODULEPATH id="juce_core" path="../../modules"/>
       </MODULEPATHS>
     </VS2015>
-    <VS2017 targetFolder="Builds/VisualStudio2017" bigIcon="rv1F4h" windowsTargetPlatformVersion="10.0.15063.0">
+    <VS2017 targetFolder="Builds/VisualStudio2017" bigIcon="rv1F4h">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="1" optimisation="1" targetName="Projucer" debugInformationFormat="ProgramDatabase"
@@ -344,8 +344,12 @@
               file="Source/ComponentEditor/PaintElements/jucer_PaintElement.h"/>
         <FILE id="XIdWSH" name="jucer_PaintElementEllipse.h" compile="0" resource="0"
               file="Source/ComponentEditor/PaintElements/jucer_PaintElementEllipse.h"/>
+        <FILE id="wfQP9E" name="jucer_PaintElementGroup.cpp" compile="1" resource="0"
+              file="Source/ComponentEditor/PaintElements/jucer_PaintElementGroup.cpp"/>
         <FILE id="BvqsF8" name="jucer_PaintElementGroup.h" compile="0" resource="0"
               file="Source/ComponentEditor/PaintElements/jucer_PaintElementGroup.h"/>
+        <FILE id="IwLSAV" name="jucer_PaintElementImage.cpp" compile="1" resource="0"
+              file="Source/ComponentEditor/PaintElements/jucer_PaintElementImage.cpp"/>
         <FILE id="wYJFrA" name="jucer_PaintElementImage.h" compile="0" resource="0"
               file="Source/ComponentEditor/PaintElements/jucer_PaintElementImage.h"/>
         <FILE id="fVo9WQ" name="jucer_PaintElementPath.cpp" compile="1" resource="0"
@@ -624,6 +628,10 @@
                 resource="0" file="Source/Utility/UI/PropertyComponents/jucer_FilePathPropertyComponent.h"/>
           <FILE id="gptc0E" name="jucer_TextWithDefaultPropertyComponent.h" compile="0"
                 resource="0" file="Source/Utility/UI/PropertyComponents/jucer_TextWithDefaultPropertyComponent.h"/>
+          <FILE id="szzNXP" name="jucer_TextWithDefaultPropertyComponentWithEnablement.cpp"
+                compile="1" resource="0" file="Source/Utility/UI/PropertyComponents/jucer_TextWithDefaultPropertyComponentWithEnablement.cpp"/>
+          <FILE id="JTFOwY" name="jucer_TextWithDefaultPropertyComponentWithEnablement.h"
+                compile="0" resource="0" file="Source/Utility/UI/PropertyComponents/jucer_TextWithDefaultPropertyComponentWithEnablement.h"/>
         </GROUP>
         <FILE id="VQCK4C" name="jucer_IconButton.h" compile="0" resource="0"
               file="Source/Utility/UI/jucer_IconButton.h"/>

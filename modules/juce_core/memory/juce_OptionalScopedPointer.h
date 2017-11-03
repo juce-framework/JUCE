@@ -98,7 +98,7 @@ public:
 
     //==============================================================================
     /** Returns the object that this pointer is managing. */
-    inline operator ObjectType*() const noexcept                    { return object; }
+    inline operator ObjectType*() const noexcept                    { return object.get(); }
 
     /** Returns the object that this pointer is managing. */
     inline ObjectType* get() const noexcept                         { return object; }
@@ -107,7 +107,7 @@ public:
     inline ObjectType& operator*() const noexcept                   { return *object; }
 
     /** Lets you access methods and properties of the object that this pointer is holding. */
-    inline ObjectType* operator->() const noexcept                  { return object; }
+    inline ObjectType* operator->() const noexcept                  { return object.get(); }
 
     //==============================================================================
     /** Removes the current object from this OptionalScopedPointer without deleting it.

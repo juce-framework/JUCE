@@ -1585,7 +1585,7 @@ public:
 
             state->flush();
             state->target = *finishedLayerState.previousTarget;
-            finishedLayerState.previousTarget = nullptr;
+            finishedLayerState.previousTarget.reset();
 
             state->target.makeActive();
             const Rectangle<int> clipBounds (clip->getClipBounds());

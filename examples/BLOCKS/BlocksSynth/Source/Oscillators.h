@@ -75,7 +75,7 @@ public:
         amplitude.setValue (newChannelPressureValue / 127.0);
     }
 
-    void renderNextBlock (AudioSampleBuffer& outputBuffer, int startSample, int numSamples) override
+    void renderNextBlock (AudioBuffer<float>& outputBuffer, int startSample, int numSamples) override
     {
         while (--numSamples >= 0)
         {

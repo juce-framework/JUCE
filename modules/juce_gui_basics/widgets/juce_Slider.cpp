@@ -49,7 +49,7 @@ public:
         currentValue.removeListener (this);
         valueMin.removeListener (this);
         valueMax.removeListener (this);
-        popupDisplay = nullptr;
+        popupDisplay.reset();
     }
 
     //==============================================================================
@@ -550,7 +550,7 @@ public:
             auto previousTextBoxContent = (valueBox != nullptr ? valueBox->getText()
                                                                : owner.getTextFromValue (currentValue.getValue()));
 
-            valueBox = nullptr;
+            valueBox.reset();
             owner.addAndMakeVisible (valueBox = lf.createSliderTextBox (owner));
 
             valueBox->setWantsKeyboardFocus (false);
@@ -567,7 +567,7 @@ public:
         }
         else
         {
-            valueBox = nullptr;
+            valueBox.reset();
         }
 
         if (style == IncDecButtons)
@@ -595,8 +595,8 @@ public:
         }
         else
         {
-            incButton = nullptr;
-            decButton = nullptr;
+            incButton.reset();
+            decButton.reset();
         }
 
         owner.setComponentEffect (lf.getSliderEffect (owner));
@@ -804,8 +804,8 @@ public:
         incDecDragged = false;
         useDragEvents = false;
         mouseDragStartPos = mousePosWhenLastDragged = e.position;
-        currentDrag = nullptr;
-        popupDisplay = nullptr;
+        currentDrag.reset();
+        popupDisplay.reset();
 
         if (owner.isEnabled())
         {
@@ -931,8 +931,8 @@ public:
             if (sendChangeOnlyOnRelease && valueOnMouseDown != static_cast<double> (currentValue.getValue()))
                 triggerChangeMessage (sendNotificationAsync);
 
-            currentDrag = nullptr;
-            popupDisplay = nullptr;
+            currentDrag.reset();
+            popupDisplay.reset();
 
             if (style == IncDecButtons)
             {
@@ -945,7 +945,7 @@ public:
             popupDisplay->startTimer (200);
         }
 
-        currentDrag = nullptr;
+        currentDrag.reset();
     }
 
     void mouseMove()
@@ -975,7 +975,7 @@ public:
 
     void mouseExit()
     {
-        popupDisplay = nullptr;
+        popupDisplay.reset();
     }
 
     void showPopupDisplay()
@@ -1307,7 +1307,7 @@ public:
         void timerCallback() override
         {
             stopTimer();
-            owner.pimpl->popupDisplay = nullptr;
+            owner.pimpl->popupDisplay.reset();
         }
 
     private:

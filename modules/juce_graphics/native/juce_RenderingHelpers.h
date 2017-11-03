@@ -297,10 +297,10 @@ public:
         snapToIntegerCoordinate = typeface->isHinted();
         glyph = glyphNumber;
 
-        const float fontHeight = font.getHeight();
-        edgeTable = typeface->getEdgeTableForGlyph (glyphNumber,
-                                                    AffineTransform::scale (fontHeight * font.getHorizontalScale(),
-                                                                            fontHeight), fontHeight);
+        auto fontHeight = font.getHeight();
+        edgeTable.reset (typeface->getEdgeTableForGlyph (glyphNumber,
+                                                         AffineTransform::scale (fontHeight * font.getHorizontalScale(),
+                                                                                 fontHeight), fontHeight));
     }
 
     Font font;

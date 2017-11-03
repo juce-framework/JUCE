@@ -32,7 +32,7 @@ MessageManager::MessageManager() noexcept
 
 MessageManager::~MessageManager() noexcept
 {
-    broadcaster = nullptr;
+    broadcaster.reset();
 
     doPlatformSpecificShutdown();
 

@@ -134,7 +134,7 @@ public:
 
     void clearCurrentDemo()
     {
-        currentDemo = nullptr;
+        currentDemo.reset();
     }
 
     void resized() override
@@ -202,7 +202,7 @@ public:
     {
         if (auto* selectedDemoType = JuceDemoTypeBase::getDemoTypeList() [lastRowSelected])
         {
-            currentDemo = nullptr;
+            currentDemo.reset();
             addAndMakeVisible (currentDemo = selectedDemoType->createComponent());
             currentDemo->setName (selectedDemoType->name);
             resized();
@@ -618,9 +618,9 @@ MainAppWindow::~MainAppWindow()
 {
     contentComponent->clearCurrentDemo();
     clearContentComponent();
-    contentComponent = nullptr;
-    applicationCommandManager = nullptr;
-    sharedAudioDeviceManager = nullptr;
+    contentComponent.reset();
+    applicationCommandManager.reset();
+    sharedAudioDeviceManager.reset();
 
    #if JUCE_OPENGL
     openGLContext.detach();

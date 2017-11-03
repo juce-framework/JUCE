@@ -28,7 +28,6 @@ namespace juce
 {
 
 ApplicationCommandManager::ApplicationCommandManager()
-    : firstTarget (nullptr)
 {
     keyMappings = new KeyPressMappingSet (*this);
     Desktop::getInstance().addFocusChangeListener (this);
@@ -37,7 +36,7 @@ ApplicationCommandManager::ApplicationCommandManager()
 ApplicationCommandManager::~ApplicationCommandManager()
 {
     Desktop::getInstance().removeFocusChangeListener (this);
-    keyMappings = nullptr;
+    keyMappings.reset();
 }
 
 //==============================================================================

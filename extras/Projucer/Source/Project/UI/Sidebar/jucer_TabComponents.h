@@ -201,10 +201,10 @@ public:
 
     ~ConcertinaTreeComponent()
     {
-        treeToDisplay = nullptr;
-        addButton = nullptr;
-        findPanel = nullptr;
-        settingsButton = nullptr;
+        treeToDisplay.reset();
+        addButton.reset();
+        findPanel.reset();
+        settingsButton.reset();
     }
 
     void resized() override
@@ -214,7 +214,7 @@ public:
         if (addButton != nullptr || settingsButton != nullptr || findPanel != nullptr)
         {
             auto bottomSlice = bounds.removeFromBottom (25);
-            bottomSlice.removeFromRight (5);
+            bottomSlice.removeFromRight (3);
 
             if (addButton != nullptr)
                 addButton->setBounds (bottomSlice.removeFromRight (25).reduced (2));

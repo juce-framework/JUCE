@@ -141,7 +141,7 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChann
         }
     }
 
-    AudioSampleBuffer buffer (channels, totalNumChans, numSamples);
+    AudioBuffer<float> buffer (channels, totalNumChans, numSamples);
 
     {
         const ScopedLock sl (lock);

@@ -162,7 +162,7 @@ public:
 
     ~ServerIPC()
     {
-        zombieKiller = nullptr;
+        zombieKiller.reset();
 
         if (dll.isLoaded())
             dll.projucer_deleteBuilder (liveCodeBuilder);

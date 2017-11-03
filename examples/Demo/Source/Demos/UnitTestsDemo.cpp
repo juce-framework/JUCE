@@ -180,7 +180,7 @@ struct UnitTestClasses
             if (currentTestThread != nullptr)
             {
                 currentTestThread->stopThread (15000);
-                currentTestThread = nullptr;
+                currentTestThread.reset();
             }
         }
 

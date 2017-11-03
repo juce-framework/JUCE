@@ -99,11 +99,11 @@ ProjectContentComponent::~ProjectContentComponent()
 
     ProjucerApplication::getApp().openDocumentManager.removeListener (this);
 
-    logo = nullptr;
-    header = nullptr;
+    logo.reset();
+    header.reset();
     setProject (nullptr);
-    contentView = nullptr;
-    fileNameLabel = nullptr;
+    contentView.reset();
+    fileNameLabel.reset();
     removeChildComponent (&bubbleMessage);
     jassert (getNumChildComponents() <= 1);
 }
@@ -178,8 +178,8 @@ void ProjectContentComponent::setProject (Project* newProject)
         if (project != nullptr)
             project->removeChangeListener (this);
 
-        contentView = nullptr;
-        resizerBar = nullptr;
+        contentView.reset();
+        resizerBar.reset();
 
         deleteProjectTabs();
         project = newProject;
@@ -391,7 +391,7 @@ bool ProjectContentComponent::showDocument (OpenDocumentManager::Document* doc, 
 void ProjectContentComponent::hideEditor()
 {
     currentDocument = nullptr;
-    contentView = nullptr;
+    contentView.reset();
 
     if (fileNameLabel != nullptr)
         fileNameLabel->setVisible (false);
@@ -416,7 +416,7 @@ bool ProjectContentComponent::setEditorComponent (Component* editor,
 {
     if (editor != nullptr)
     {
-        contentView = nullptr;
+        contentView.reset();
 
         if (doc == nullptr)
         {
@@ -445,6 +445,15 @@ bool ProjectContentComponent::setEditorComponent (Component* editor,
     }
 
     return false;
+}
+
+Component* ProjectContentComponent::getEditorComponentContent() const
+{
+    if (contentView != nullptr)
+        if (auto* vp = dynamic_cast<ContentViewport*> (contentView.get()))
+            return vp->viewport.getViewedComponent();
+
+    return nullptr;
 }
 
 void ProjectContentComponent::closeDocument()

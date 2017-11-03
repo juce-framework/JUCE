@@ -30,15 +30,7 @@ namespace juce
 Label::Label (const String& name, const String& labelText)
     : Component (name),
       textValue (labelText),
-      lastTextValue (labelText),
-      font (15.0f),
-      justification (Justification::centredLeft),
-      border (1, 5, 1, 5),
-      minimumHorizontalScale (0.0f),
-      keyboardType (TextEditor::textKeyboard),
-      editSingleClick (false),
-      editDoubleClick (false),
-      lossOfFocusDiscardsChanges (false)
+      lastTextValue (labelText)
 {
     setColour (TextEditor::textColourId, Colours::black);
     setColour (TextEditor::backgroundColourId, Colours::transparentBlack);
@@ -54,12 +46,11 @@ Label::~Label()
     if (ownerComponent != nullptr)
         ownerComponent->removeComponentListener (this);
 
-    editor = nullptr;
+    editor.reset();
 }
 
 //==============================================================================
-void Label::setText (const String& newText,
-                     const NotificationType notification)
+void Label::setText (const String& newText, NotificationType notification)
 {
     hideEditor (true);
 
@@ -107,13 +98,13 @@ Font Label::getFont() const noexcept
     return font;
 }
 
-void Label::setEditable (const bool editOnSingleClick,
-                         const bool editOnDoubleClick,
-                         const bool lossOfFocusDiscardsChanges_)
+void Label::setEditable (bool editOnSingleClick,
+                         bool editOnDoubleClick,
+                         bool lossOfFocusDiscards)
 {
     editSingleClick = editOnSingleClick;
     editDoubleClick = editOnDoubleClick;
-    lossOfFocusDiscardsChanges = lossOfFocusDiscardsChanges_;
+    lossOfFocusDiscardsChanges = lossOfFocusDiscards;
 
     setWantsKeyboardFocus (editOnSingleClick || editOnDoubleClick);
     setFocusContainer (editOnSingleClick || editOnDoubleClick);
@@ -184,7 +175,7 @@ void Label::componentMovedOrResized (Component& component, bool /*wasMoved*/, bo
 
 void Label::componentParentHierarchyChanged (Component& component)
 {
-    if (Component* parent = component.getParentComponent())
+    if (auto* parent = component.getParentComponent())
         parent->addChildComponent (this);
 }
 
@@ -263,14 +254,13 @@ void Label::hideEditor (const bool discardCurrentEditorContents)
     if (editor != nullptr)
     {
         WeakReference<Component> deletionChecker (this);
-
         ScopedPointer<TextEditor> outgoingEditor (editor);
 
         editorAboutToBeHidden (outgoingEditor);
 
         const bool changed = (! discardCurrentEditorContents)
                                && updateFromTextEditorContents (*outgoingEditor);
-        outgoingEditor = nullptr;
+        outgoingEditor.reset();
         repaint();
 
         if (changed)
@@ -308,7 +298,7 @@ static void copyColourIfSpecified (Label& l, TextEditor& ed, int colourID, int t
 
 TextEditor* Label::createEditorComponent()
 {
-    TextEditor* const ed = new TextEditor (getName());
+    auto* ed = new TextEditor (getName());
     ed->applyFontToAllText (getLookAndFeel().getLabelFont (*this));
     copyAllExplicitColoursTo (*ed);
 

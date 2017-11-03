@@ -803,6 +803,7 @@ void LookAndFeel_V4::drawPopupMenuItem (Graphics& g, const Rectangle<int>& area,
         if (icon != nullptr)
         {
             icon->drawWithin (g, iconArea, RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, 1.0f);
+            r.removeFromLeft (roundToInt (maxFontHeight * 0.5f));
         }
         else if (isTicked)
         {

@@ -69,7 +69,7 @@ public:
 
     ~OpenGL2DShaderDemo()
     {
-        shader = nullptr;
+        shader.reset();
     }
 
     void paint (Graphics& g) override
@@ -78,7 +78,7 @@ public:
 
         if (shader == nullptr || shader->getFragmentShaderCode() != fragmentCode)
         {
-            shader = nullptr;
+            shader.reset();
 
             if (fragmentCode.isNotEmpty())
             {
@@ -89,7 +89,7 @@ public:
                 if (result.failed())
                 {
                     statusLabel.setText (result.getErrorMessage(), dontSendNotification);
-                    shader = nullptr;
+                    shader.reset();
                 }
             }
         }

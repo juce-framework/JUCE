@@ -44,7 +44,7 @@ public:
         ignoreUnused (isShownInsideWebview);
        #endif
 
-        auto standardFont = Font (12.0f);
+        auto standardFont = Font (16.0f);
 
         addAndMakeVisible (loggedInUsernameLabel = new Label ("Username Label"));
 
@@ -72,7 +72,7 @@ public:
             switchLicenseButton->addListener (this);
         }
 
-        if (LicenseController* controller = ProjucerApplication::getApp().licenseController)
+        if (auto* controller = ProjucerApplication::getApp().licenseController.get())
             licenseStateChanged (controller->getState());
        #endif
     }
@@ -84,12 +84,12 @@ public:
 
     void resized() override
     {
-        auto bounds = getLocalBounds().reduced (10, 20);
+        auto bounds = getLocalBounds().reduced (10);
 
        #if JUCER_ENABLE_GPL_MODE
         loggedInUsernameLabel->setBounds (bounds);
        #else
-        loggedInUsernameLabel->setBounds (bounds.removeFromTop (25));
+        loggedInUsernameLabel->setBounds (bounds.removeFromTop (hasLicenseType ? 25 : 75));
 
         if (hasLicenseType)
         {
@@ -98,7 +98,7 @@ public:
         }
 
         bounds.removeFromBottom (5);
-        auto buttonArea = bounds.removeFromBottom (30);
+        auto buttonArea = bounds.removeFromBottom (40);
 
         if (! isInsideWebview)
             switchLicenseButton->setBounds (buttonArea.removeFromRight (buttonArea.getWidth() / 2).reduced (2));
@@ -120,7 +120,7 @@ private:
         else if (b == switchLicenseButton)
         {
             dismissCalloutBox();
-            if (LicenseController* controller = ProjucerApplication::getApp().licenseController)
+            if (auto* controller = ProjucerApplication::getApp().licenseController.get())
                 controller->chooseNewLicense();
         }
     }

@@ -59,10 +59,11 @@ AudioParameterFloat::AudioParameterFloat (String pid, String nm, float minValue,
 AudioParameterFloat::~AudioParameterFloat() {}
 
 float AudioParameterFloat::getValue() const                              { return range.convertTo0to1 (value); }
-void AudioParameterFloat::setValue (float newValue)                      { value = range.convertFrom0to1 (newValue); }
+void AudioParameterFloat::setValue (float newValue)                      { value = range.convertFrom0to1 (newValue); valueChanged (get()); }
 float AudioParameterFloat::getDefaultValue() const                       { return range.convertTo0to1 (defaultValue); }
 int AudioParameterFloat::getNumSteps() const                             { return AudioProcessorParameterWithID::getNumSteps(); }
 float AudioParameterFloat::getValueForText (const String& text) const    { return range.convertTo0to1 (text.getFloatValue()); }
+void AudioParameterFloat::valueChanged (float)                           {}
 
 String AudioParameterFloat::getText (float v, int length) const
 {
@@ -97,11 +98,12 @@ float AudioParameterInt::convertTo0to1 (int v) const noexcept            { retur
 int AudioParameterInt::convertFrom0to1 (float v) const noexcept          { return limitRange (roundToInt ((v * (float) rangeOfValues) + minValue)); }
 
 float AudioParameterInt::getValue() const                                { return convertTo0to1 (roundToInt (value)); }
-void AudioParameterInt::setValue (float newValue)                        { value = (float) convertFrom0to1 (newValue); }
+void AudioParameterInt::setValue (float newValue)                        { value = (float) convertFrom0to1 (newValue); valueChanged (get()); }
 float AudioParameterInt::getDefaultValue() const                         { return defaultValue; }
 int AudioParameterInt::getNumSteps() const                               { return rangeOfValues + 1; }
 float AudioParameterInt::getValueForText (const String& text) const      { return convertTo0to1 (text.getIntValue()); }
 String AudioParameterInt::getText (float v, int /*length*/) const        { return String (convertFrom0to1 (v)); }
+void AudioParameterInt::valueChanged (int)                               {}
 
 AudioParameterInt& AudioParameterInt::operator= (int newValue)
 {
@@ -124,12 +126,13 @@ AudioParameterBool::AudioParameterBool (const String& idToUse, const String& nam
 AudioParameterBool::~AudioParameterBool() {}
 
 float AudioParameterBool::getValue() const                               { return value; }
-void AudioParameterBool::setValue (float newValue)                       { value = newValue; }
+void AudioParameterBool::setValue (float newValue)                       { value = newValue; valueChanged (get()); }
 float AudioParameterBool::getDefaultValue() const                        { return defaultValue; }
 int AudioParameterBool::getNumSteps() const                              { return 2; }
 bool AudioParameterBool::isDiscrete() const                              { return true; }
 float AudioParameterBool::getValueForText (const String& text) const     { return text.getIntValue() != 0 ? 1.0f : 0.0f; }
 String AudioParameterBool::getText (float v, int /*length*/) const       { return String ((int) (v > 0.5f ? 1 : 0)); }
+void AudioParameterBool::valueChanged (bool)                             {}
 
 AudioParameterBool& AudioParameterBool::operator= (bool newValue)
 {
@@ -158,12 +161,13 @@ float AudioParameterChoice::convertTo0to1 (int v) const noexcept         { retur
 int AudioParameterChoice::convertFrom0to1 (float v) const noexcept       { return limitRange (roundToInt (v * (float) maxIndex)); }
 
 float AudioParameterChoice::getValue() const                             { return convertTo0to1 (roundToInt (value)); }
-void AudioParameterChoice::setValue (float newValue)                     { value = (float) convertFrom0to1 (newValue); }
+void AudioParameterChoice::setValue (float newValue)                     { value = (float) convertFrom0to1 (newValue); valueChanged (getIndex()); }
 float AudioParameterChoice::getDefaultValue() const                      { return defaultValue; }
 int AudioParameterChoice::getNumSteps() const                            { return choices.size(); }
 bool AudioParameterChoice::isDiscrete() const                            { return true; }
 float AudioParameterChoice::getValueForText (const String& text) const   { return convertTo0to1 (choices.indexOf (text)); }
 String AudioParameterChoice::getText (float v, int /*length*/) const     { return choices [convertFrom0to1 (v)]; }
+void AudioParameterChoice::valueChanged (int)                            {}
 
 AudioParameterChoice& AudioParameterChoice::operator= (int newValue)
 {

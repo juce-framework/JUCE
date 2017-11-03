@@ -113,14 +113,14 @@ PaintRoutine* ButtonDocument::getPaintRoutine (const int index) const
         if (paintStatesEnabled [i])
         {
             if (index == n)
-                return paintRoutines [i];
-            else
-                ++n;
+                return paintRoutines[i].get();
+
+            ++n;
         }
     }
 
     jassertfalse;
-    return 0;
+    return {};
 }
 
 void ButtonDocument::setStatePaintRoutineEnabled (const int index, bool b)

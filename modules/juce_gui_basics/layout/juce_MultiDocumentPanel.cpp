@@ -282,7 +282,7 @@ bool MultiDocumentPanel::closeDocument (Component* component,
                 delete component;
 
             if (tabComponent != nullptr && tabComponent->getNumTabs() <= numDocsBeforeTabsUsed)
-                tabComponent = nullptr;
+                tabComponent.reset();
 
             components.removeFirstMatchingValue (component);
 
@@ -387,7 +387,7 @@ void MultiDocumentPanel::setLayoutMode (const LayoutMode newLayoutMode)
 
         if (mode == FloatingWindows)
         {
-            tabComponent = nullptr;
+            tabComponent.reset();
         }
         else
         {

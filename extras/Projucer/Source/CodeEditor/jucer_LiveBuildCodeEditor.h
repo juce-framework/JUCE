@@ -345,7 +345,7 @@ private:
                    || underMouse->findParentComponentOfClass<ControlsComponent>() != nullptr))
             return;
 
-        overlay = nullptr;
+        overlay.reset();
 
         if (hasKeyboardFocus (true) && underMouse != nullptr
               && (underMouse == this || underMouse->isParentOf (this)))
@@ -372,7 +372,7 @@ private:
     void hideOverlay()
     {
         stopTimer();
-        overlay = nullptr;
+        overlay.reset();
     }
 
     void focusLost (FocusChangeType) override

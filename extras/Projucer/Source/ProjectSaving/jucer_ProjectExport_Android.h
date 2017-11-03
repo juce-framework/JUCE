@@ -146,10 +146,10 @@ public:
           androidKeyStorePass (settings, Ids::androidKeyStorePass, nullptr, "android"),
           androidKeyAlias (settings, Ids::androidKeyAlias, nullptr, "androiddebugkey"),
           androidKeyAliasPass (settings, Ids::androidKeyAliasPass, nullptr, "android"),
-          gradleVersion (settings, Ids::gradleVersion, nullptr, "3.3"),
-          androidPluginVersion (settings, Ids::androidPluginVersion, nullptr, "2.3.3"),
+          gradleVersion (settings, Ids::gradleVersion, nullptr, "4.1"),
+          androidPluginVersion (settings, Ids::androidPluginVersion, nullptr, "3.0.0"),
           gradleToolchain (settings, Ids::gradleToolchain, nullptr, "clang"),
-          buildToolsVersion (settings, Ids::buildToolsVersion, nullptr, "26.0.0"),
+          buildToolsVersion (settings, Ids::buildToolsVersion, nullptr, "27.0.0"),
           AndroidExecutable (findAndroidExecutable())
     {
         name = getName();
@@ -545,6 +545,7 @@ private:
         mo << "buildscript {"                                                                          << newLine;
         mo << "   repositories {"                                                                      << newLine;
         mo << "       jcenter()"                                                                       << newLine;
+        mo << "       google()"                                                                        << newLine;
         mo << "   }"                                                                                   << newLine;
         mo << "   dependencies {"                                                                      << newLine;
         mo << "       classpath 'com.android.tools.build:gradle:" << androidPluginVersion.get() << "'" << newLine;
@@ -606,6 +607,7 @@ private:
     {
         MemoryOutputStream mo;
 
+        mo << "    flavorDimensions \"default\"" << newLine;
         mo << "    productFlavors {" << newLine;
 
         for (ConstConfigIterator config (*this); config.next();)
@@ -635,7 +637,8 @@ private:
                                            << (cfg.isLinkTimeOptimisationEnabled() ? ", " + cfg.getLinkerFlagsString() : "")
                                            << newLine;
             mo << "                }"                   << newLine;
-            mo << "            }"                       << newLine;
+            mo << "            }"                       << newLine << newLine;
+            mo << "            dimension \"default\""   << newLine;
             mo << "       }"                            << newLine;
         }
 

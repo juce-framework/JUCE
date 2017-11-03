@@ -189,7 +189,7 @@ public:
                 button->setNewKey (button->currentKeyEntryWindow->lastPress, false);
             }
 
-            button->currentKeyEntryWindow = nullptr;
+            button->currentKeyEntryWindow.reset();
         }
     }
 
@@ -405,14 +405,14 @@ KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet& mappin
     if (showResetToDefaultButton)
     {
         addAndMakeVisible (resetButton);
-        resetButton.addListener (treeItem);
+        resetButton.addListener (treeItem.get());
     }
 
     addAndMakeVisible (tree);
     tree.setColour (TreeView::backgroundColourId, findColour (backgroundColourId));
     tree.setRootItemVisible (false);
     tree.setDefaultOpenness (true);
-    tree.setRootItem (treeItem);
+    tree.setRootItem (treeItem.get());
     tree.setIndentSize (12);
 }
 

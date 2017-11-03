@@ -293,12 +293,12 @@ public:
         if (isRunningApp && server != nullptr)
             server->killServerWithoutMercy();
 
-        server = nullptr;
+        server.reset();
     }
 
     void restartServer()
     {
-        server = nullptr;
+        server.reset();
         server = new ClientIPC (owner);
         sendRebuild();
     }
@@ -578,7 +578,7 @@ CompileEngineChildProcess::~CompileEngineChildProcess()
 {
     ProjucerApplication::getApp().openDocumentManager.removeListener (this);
 
-    process = nullptr;
+    process.reset();
     lastComponentList.clear();
 }
 
@@ -588,7 +588,7 @@ void CompileEngineChildProcess::createProcess()
     process = new ChildProcess (*this, project);
 
     if (! process->openedOk)
-        process = nullptr;
+        process.reset();
 
     updateAllEditors();
 }
@@ -662,7 +662,7 @@ bool CompileEngineChildProcess::canKillApp() const
 
 void CompileEngineChildProcess::killApp()
 {
-    runningAppProcess = nullptr;
+    runningAppProcess.reset();
 }
 
 void CompileEngineChildProcess::handleAppLaunched()
@@ -675,7 +675,7 @@ void CompileEngineChildProcess::handleAppLaunched()
 void CompileEngineChildProcess::handleAppQuit()
 {
     DBG ("handleAppQuit");
-    runningAppProcess = nullptr;
+    runningAppProcess.reset();
 }
 
 //==============================================================================

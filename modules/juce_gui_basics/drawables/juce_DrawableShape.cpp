@@ -103,7 +103,7 @@ void DrawableShape::setFillInternal (RelativeFillType& fill, const RelativeFillT
     if (fill != newFill)
     {
         fill = newFill;
-        pos = nullptr;
+        pos.reset();
 
         if (fill.isDynamic())
         {

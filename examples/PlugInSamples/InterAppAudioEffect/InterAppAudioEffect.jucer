@@ -11,7 +11,7 @@
               pluginRTASCategory="" aaxIdentifier="com.yourcompany.InterAppAudioEffect"
               pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.2.0"
               companyName="ROLI Ltd." buildStandalone="1" displaySplashScreen="0"
-              reportAppUsage="0" splashScreenColour="Dark" cppLanguageStandard="11"
+              reportAppUsage="0" splashScreenColour="Dark" cppLanguageStandard="14"
               companyCopyright="ROLI Ltd.">
   <MAINGROUP id="BhTVmm" name="InterAppAudioEffect">
     <GROUP id="{79B2188B-B073-DD2F-F997-AFE1A88B5908}" name="Source">

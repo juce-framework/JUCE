@@ -519,7 +519,7 @@ private:
     TextButton cancelButton { TRANS("Cancel") };
     ModulesFolderPathBox modulesPathBox;
 
-    NewProjectWizardClasses::NewProjectWizard* createWizard()
+    ScopedPointer<NewProjectWizardClasses::NewProjectWizard> createWizard()
     {
         return createWizardType (projectType.getSelectedItemIndex());
     }

@@ -51,6 +51,7 @@
 
 #include "processors/juce_FIRFilter.cpp"
 #include "processors/juce_IIRFilter.cpp"
+#include "processors/juce_LadderFilter.cpp"
 #include "processors/juce_Oversampling.cpp"
 #include "maths/juce_SpecialFunctions.cpp"
 #include "maths/juce_Matrix.cpp"

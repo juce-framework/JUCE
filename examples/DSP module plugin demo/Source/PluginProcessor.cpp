@@ -164,7 +164,7 @@ void DspModulePluginDemoAudioProcessor::process (dsp::ProcessContextReplacing<fl
     outputVolume.process (context);
 }
 
-void DspModulePluginDemoAudioProcessor::processBlock (AudioSampleBuffer& inoutBuffer, MidiBuffer&)
+void DspModulePluginDemoAudioProcessor::processBlock (AudioBuffer<float>& inoutBuffer, MidiBuffer&)
 {
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();

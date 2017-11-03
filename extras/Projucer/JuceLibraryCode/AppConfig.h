@@ -17,18 +17,17 @@
 // [BEGIN_USER_CODE_SECTION]
 
 /*
- ==============================================================================
- In accordance with the terms of the JUCE 5 End-Use License Agreement, the
- JUCE Code in SECTION A cannot be removed, changed or otherwise rendered
- ineffective unless you have a JUCE Indie or Pro license, or are using JUCE
- under the GPL v3 license.
+  ==============================================================================
 
- End User License Agreement: www.juce.com/juce-5-licence
+   In accordance with the terms of the JUCE 5 End-Use License Agreement, the
+   JUCE Code in SECTION A cannot be removed, changed or otherwise rendered
+   ineffective unless you have a JUCE Indie or Pro license, or are using JUCE
+   under the GPL v3 license.
 
- If you are using a GPL v3 license then you can set JUCER_ENABLE_GPL_MODE to
- 1 to use the Projucer without online license validation.
- ==============================================================================
- */
+   End User License Agreement: www.juce.com/juce-5-licence
+
+  ==============================================================================
+*/
 
 // BEGIN SECTION A
 
@@ -47,6 +46,7 @@
    under the GPL v3 license.
 
    End User License Agreement: www.juce.com/juce-5-licence
+
   ==============================================================================
 */
 
@@ -59,7 +59,6 @@
 #ifndef JUCE_REPORT_APP_USAGE
  #define JUCE_REPORT_APP_USAGE 0
 #endif
-
 
 // END SECTION A
 

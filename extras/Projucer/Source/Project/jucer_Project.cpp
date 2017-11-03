@@ -146,7 +146,7 @@ void Project::setMissingDefaultValues()
         shouldIncludeBinaryInAppConfig() = true;
 
     if (! projectRoot.hasProperty (Ids::cppLanguageStandard) && ! setCppVersionFromOldExporterSettings())
-        getCppStandardValue() = "11";
+        getCppStandardValue() = "14";
 
     if (getCompanyCopyright().toString().isEmpty())
         getCompanyCopyright() = getCompanyName().toString();
@@ -407,7 +407,7 @@ Result Project::loadDocument (const File& file)
         return Result::fail ("The document contains errors and couldn't be parsed!");
 
     registerRecentFile (file);
-    enabledModulesList = nullptr;
+    enabledModulesList.reset();
     projectRoot = newTree;
 
     removeDefunctExporters();

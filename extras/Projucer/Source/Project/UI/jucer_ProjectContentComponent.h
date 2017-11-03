@@ -66,7 +66,8 @@ public:
 
     void hideEditor();
     bool setEditorComponent (Component* editor, OpenDocumentManager::Document* doc);
-    Component* getEditorComponent() const    { return contentView; }
+    Component* getEditorComponentContent() const;
+    Component* getEditorComponent() const    { return contentView.get(); }
     Component& getSidebarComponent()         { return sidebarTabs; }
 
     bool goToPreviousFile();

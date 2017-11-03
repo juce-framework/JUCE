@@ -3,7 +3,7 @@
 <JUCERPROJECT id="SS6MsF" name="PushNotificationsDemo" displaySplashScreen="0"
               reportAppUsage="0" splashScreenColour="Dark" projectType="guiapp"
               version="1.0.0" bundleIdentifier="com.juce.pushnotificationsdemo"
-              includeBinaryInAppConfig="1" cppLanguageStandard="11" jucerVersion="5.2.0"
+              includeBinaryInAppConfig="1" cppLanguageStandard="14" jucerVersion="5.2.0"
               companyCopyright="">
   <MAINGROUP id="VaJRhp" name="PushNotificationsDemo">
     <GROUP id="{712B2C90-FAC6-CCF3-F8F9-ED82411AF5ED}" name="BinaryResources">

@@ -183,7 +183,7 @@ private:
     //==============================================================================
     void setMidiOutput (int index)
     {
-        currentMidiOutput = nullptr;
+        currentMidiOutput.reset();
 
         if (MidiOutput::getDevices() [index].isNotEmpty())
         {

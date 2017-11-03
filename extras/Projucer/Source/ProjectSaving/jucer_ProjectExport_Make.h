@@ -71,7 +71,7 @@ protected:
             if (archFlag == "-m32")
                 return "i386";
 
-            return "$(shell uname -m)";
+            return "${JUCE_ARCH_LABEL}";
         }
     };
 
@@ -809,6 +809,9 @@ private:
         out << "ifndef CONFIG" << newLine
             << "  CONFIG=" << escapeSpaces (getConfiguration(0)->getName()) << newLine
             << "endif" << newLine
+            << newLine;
+
+        out << "JUCE_ARCH_LABEL := $(shell uname -m)" << newLine
             << newLine;
 
         for (ConstConfigIterator config (*this); config.next();)

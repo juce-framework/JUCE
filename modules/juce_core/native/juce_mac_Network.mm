@@ -941,7 +941,7 @@ public:
 
     ~Pimpl()
     {
-        connection = nullptr;
+        connection.reset();
     }
 
     bool connect (WebInputStream::Listener* webInputListener, int numRetries = 0)
@@ -963,12 +963,12 @@ public:
            #if ! (JUCE_IOS || (defined (__MAC_OS_X_VERSION_MIN_REQUIRED) && defined (__MAC_10_10) && __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_10))
             if (numRetries == 0 && connection->nsUrlErrorCode == NSURLErrorNetworkConnectionLost)
             {
-                connection = nullptr;
+                connection.reset();
                 return connect (webInputListener, ++numRetries);
             }
            #endif
 
-            connection = nullptr;
+            connection.reset();
             return false;
         }
 

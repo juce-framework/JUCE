@@ -143,7 +143,7 @@ void DrawablePath::setPath (const RelativePointPath& newRelativePath)
     }
     else
     {
-        relativePath = nullptr;
+        relativePath.reset();
         applyRelativePath (newRelativePath, nullptr);
     }
 }

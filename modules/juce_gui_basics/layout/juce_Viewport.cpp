@@ -99,8 +99,8 @@ void Viewport::setViewedComponent (Component* const newViewedComponent, const bo
 
 void Viewport::recreateScrollbars()
 {
-    verticalScrollBar = nullptr;
-    horizontalScrollBar = nullptr;
+    verticalScrollBar.reset();
+    horizontalScrollBar.reset();
 
     addChildComponent (verticalScrollBar   = createScrollBarComponent (true));
     addChildComponent (horizontalScrollBar = createScrollBarComponent (false));
@@ -298,7 +298,7 @@ void Viewport::setScrollOnDragEnabled (bool shouldScrollOnDrag)
         if (shouldScrollOnDrag)
             dragToScrollListener = new DragToScrollListener (*this);
         else
-            dragToScrollListener = nullptr;
+            dragToScrollListener.reset();
     }
 }
 

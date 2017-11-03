@@ -534,7 +534,7 @@ private:
             uncompressedSize += bytesRead;
         }
 
-        stream = nullptr;
+        stream.reset();
         return true;
     }
 

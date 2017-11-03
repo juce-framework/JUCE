@@ -154,7 +154,7 @@ void PaintRoutineEditor::visibilityChanged()
 void PaintRoutineEditor::refreshAllElements()
 {
     for (int i = getNumChildComponents(); --i >= 0;)
-        if (PaintElement* const e = dynamic_cast<PaintElement*> (getChildComponent (i)))
+        if (auto* e = dynamic_cast<PaintElement*> (getChildComponent (i)))
             if (! graphics.containsElement (e))
                 removeChildComponent (e);
 
@@ -162,7 +162,7 @@ void PaintRoutineEditor::refreshAllElements()
 
     for (int i = graphics.getNumElements(); --i >= 0;)
     {
-        PaintElement* const e = graphics.getElement (i);
+        auto* e = graphics.getElement (i);
 
         addAndMakeVisible (e);
 
@@ -268,7 +268,7 @@ void PaintRoutineEditor::filesDropped (const StringArray& filenames, int x, int 
 
         if (d != nullptr)
         {
-            d = nullptr;
+            d.reset();
 
             document.beginTransaction();
 

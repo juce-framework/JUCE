@@ -149,7 +149,7 @@ TopLevelWindow::TopLevelWindow (const String& name, const bool shouldAddToDeskto
 
 TopLevelWindow::~TopLevelWindow()
 {
-    shadower = nullptr;
+    shadower.reset();
     TopLevelWindowManager::getInstance()->removeWindow (this);
 }
 
@@ -212,7 +212,7 @@ void TopLevelWindow::setDropShadowEnabled (const bool useShadow)
 
     if (isOnDesktop())
     {
-        shadower = nullptr;
+        shadower.reset();
         Component::addToDesktop (getDesktopWindowStyleFlags());
     }
     else
@@ -229,7 +229,7 @@ void TopLevelWindow::setDropShadowEnabled (const bool useShadow)
         }
         else
         {
-            shadower = nullptr;
+            shadower.reset();
         }
     }
 }
@@ -256,7 +256,7 @@ void TopLevelWindow::recreateDesktopWindow()
 
 void TopLevelWindow::addToDesktop()
 {
-    shadower = nullptr;
+    shadower.reset();
     Component::addToDesktop (getDesktopWindowStyleFlags());
     setDropShadowEnabled (isDropShadowEnabled()); // force an update to clear away any fake shadows if necessary.
 }

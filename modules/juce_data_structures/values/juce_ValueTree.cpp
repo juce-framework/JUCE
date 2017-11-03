@@ -32,20 +32,20 @@ class ValueTree::SharedObject  : public ReferenceCountedObject
 public:
     typedef ReferenceCountedObjectPtr<SharedObject> Ptr;
 
-    explicit SharedObject (const Identifier& t) noexcept  : type (t)
-    {
-    }
+    explicit SharedObject (const Identifier& t) noexcept  : type (t) {}
 
     SharedObject (const SharedObject& other)
         : ReferenceCountedObject(), type (other.type), properties (other.properties)
     {
-        for (int i = 0; i < other.children.size(); ++i)
+        for (auto* c : other.children)
         {
-            auto child = new SharedObject (*other.children.getObjectPointerUnchecked(i));
+            auto child = new SharedObject (*c);
             child->parent = this;
             children.add (child);
         }
     }
+
+    SharedObject& operator= (const SharedObject&) = delete;
 
     ~SharedObject()
     {
@@ -98,7 +98,6 @@ public:
     void sendPropertyChangeMessage (const Identifier& property, ValueTree::Listener* listenerToExclude = nullptr)
     {
         ValueTree tree (this);
-
         callListenersForAllParents ([&] (ListenerList<Listener>& list) { list.callExcluding (listenerToExclude, &ValueTree::Listener::valueTreePropertyChanged, tree, property); });
     }
 
@@ -144,11 +143,13 @@ public:
             if (auto* existingValue = properties.getVarPointer (name))
             {
                 if (*existingValue != newValue)
-                    undoManager->perform (new SetPropertyAction (this, name, newValue, *existingValue, false, false, listenerToExclude));
+                    undoManager->perform (new SetPropertyAction (this, name, newValue, *existingValue,
+                                                                 false, false, listenerToExclude));
             }
             else
             {
-                undoManager->perform (new SetPropertyAction (this, name, newValue, {}, true, false, listenerToExclude));
+                undoManager->perform (new SetPropertyAction (this, name, newValue, {},
+                                                             true, false, listenerToExclude));
             }
         }
     }
@@ -402,7 +403,7 @@ public:
         }
         else
         {
-            output.writeString (String());
+            output.writeString ({});
             output.writeCompressedInt (0);
             output.writeCompressedInt (0);
         }
@@ -451,7 +452,7 @@ public:
         {
             if (! (isAddingNewProperty || isDeletingProperty))
             {
-                if (SetPropertyAction* const next = dynamic_cast<SetPropertyAction*> (nextAction))
+                if (auto* next = dynamic_cast<SetPropertyAction*> (nextAction))
                     if (next->target == target && next->name == name
                           && ! (next->isAddingNewProperty || next->isDeletingProperty))
                         return new SetPropertyAction (target, name, next->newValue, oldValue, false, false);
@@ -571,8 +572,6 @@ public:
     SortedSet<ValueTree*> valueTreesWithListeners;
     SharedObject* parent = nullptr;
 
-private:
-    SharedObject& operator= (const SharedObject&);
     JUCE_LEAK_DETECTOR (SharedObject)
 };
 
@@ -779,12 +778,11 @@ int ValueTree::getReferenceCount() const noexcept
 }
 
 //==============================================================================
-class ValueTreePropertyValueSource  : public Value::ValueSource,
-                                      private ValueTree::Listener
+struct ValueTreePropertyValueSource  : public Value::ValueSource,
+                                       private ValueTree::Listener
 {
-public:
-    ValueTreePropertyValueSource (const ValueTree& vt, const Identifier& prop, UndoManager* um)
-        : tree (vt), property (prop), undoManager (um)
+    ValueTreePropertyValueSource (const ValueTree& vt, const Identifier& prop, UndoManager* um, bool sync)
+        : tree (vt), property (prop), undoManager (um), updateSynchronously (sync)
     {
         tree.addListener (this);
     }
@@ -801,11 +799,12 @@ private:
     ValueTree tree;
     const Identifier property;
     UndoManager* const undoManager;
+    const bool updateSynchronously;
 
     void valueTreePropertyChanged (ValueTree& changedTree, const Identifier& changedProperty) override
     {
         if (tree == changedTree && property == changedProperty)
-            sendChangeMessage (false);
+            sendChangeMessage (updateSynchronously);
     }
 
     void valueTreeChildAdded (ValueTree&, ValueTree&) override {}
@@ -816,9 +815,9 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueTreePropertyValueSource)
 };
 
-Value ValueTree::getPropertyAsValue (const Identifier& name, UndoManager* const undoManager)
+Value ValueTree::getPropertyAsValue (const Identifier& name, UndoManager* const undoManager, bool updateSynchronously)
 {
-    return Value (new ValueTreePropertyValueSource (*this, name, undoManager));
+    return Value (new ValueTreePropertyValueSource (*this, name, undoManager, updateSynchronously));
 }
 
 //==============================================================================

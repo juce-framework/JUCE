@@ -90,7 +90,7 @@ MainWindow::~MainWindow()
     getGlobalProperties().setValue ("lastMainWindowPos", getWindowStateAsString());
 
     clearContentComponent();
-    currentProject = nullptr;
+    currentProject.reset();
 }
 
 void MainWindow::createProjectContentCompIfNeeded()
@@ -155,7 +155,7 @@ bool MainWindow::closeProject (Project* project)
 
 bool MainWindow::closeCurrentProject()
 {
-    return currentProject == nullptr || closeProject (currentProject);
+    return currentProject == nullptr || closeProject (currentProject.get());
 }
 
 void MainWindow::setProject (Project* newProject)
@@ -200,17 +200,17 @@ bool MainWindow::openFile (const File& file)
     {
         ScopedPointer<Project> newDoc (new Project (file));
 
-        Result result (newDoc->loadFrom (file, true));
+        auto result = newDoc->loadFrom (file, true);
 
         if (result.wasOk() && closeCurrentProject())
         {
-            setProject (newDoc);
+            setProject (newDoc.get());
             newDoc.release()->setChangedFlag (false);
 
             jassert (getProjectContentComponent() != nullptr);
             getProjectContentComponent()->reloadLastOpenDocuments();
 
-            if (Project* p = getProject())
+            if (auto* p = getProject())
                 p->updateDeprecatedProjectSettingsInteractively();
 
             return true;
@@ -457,7 +457,7 @@ void MainWindowList::openDocument (OpenDocumentManager::Document* doc, bool grab
     getFrontmostWindow()->getProjectContentComponent()->showDocument (doc, grabFocus);
 }
 
-bool MainWindowList::openFile (const File& file)
+bool MainWindowList::openFile (const File& file, bool openInBackground)
 {
     for (int i = windows.size(); --i >= 0;)
     {
@@ -472,11 +472,16 @@ bool MainWindowList::openFile (const File& file)
 
     if (file.hasFileExtension (Project::projectFileExtension))
     {
+        auto previousFrontWindow = getFrontmostWindow();
+
         MainWindow* const w = getOrCreateEmptyWindow();
         bool ok = w->openFile (file);
 
         w->makeVisible();
         avoidSuperimposedWindows (w);
+
+        if (openInBackground && (previousFrontWindow != nullptr))
+            previousFrontWindow->toFront (true);
 
         return ok;
     }
@@ -581,7 +586,7 @@ void MainWindowList::reopenLastProjects()
     Array<File> projects (getAppSettings().getLastProjects());
 
     for (int i = 0; i < projects.size(); ++ i)
-        openFile (projects.getReference(i));
+        openFile (projects.getReference(i), true);
 }
 
 void MainWindowList::sendLookAndFeelChange()

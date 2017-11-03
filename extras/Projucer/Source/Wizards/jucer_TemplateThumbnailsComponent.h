@@ -144,7 +144,7 @@ public:
 
         for (int i = 0; i < numWizardButtons; ++i)
         {
-            ScopedPointer<NewProjectWizard> wizard (createWizardType (i));
+            auto wizard = createWizardType (i);
 
             TemplateOptionButton* b = new TemplateOptionButton (wizard->getName(),
                                                                 TemplateOptionButton::ImageFitted,

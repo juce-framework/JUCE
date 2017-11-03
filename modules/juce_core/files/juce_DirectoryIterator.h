@@ -140,11 +140,11 @@ private:
     StringArray wildCards;
     NativeIterator fileFinder;
     String wildCard, path;
-    int index;
-    mutable int totalNumFiles;
+    int index = -1;
+    mutable int totalNumFiles = -1;
     const int whatToLookFor;
     const bool isRecursive;
-    bool hasBeenAdvanced;
+    bool hasBeenAdvanced = false;
     ScopedPointer<DirectoryIterator> subIterator;
     File currentFile;
 

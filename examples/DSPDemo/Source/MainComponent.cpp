@@ -239,8 +239,7 @@ void MainContentComponent::initParameters()
 {
     auto& parameters = DSPSamplesApplication::getApp().getCurrentDemoParameters();
 
-    if (parametersComponent != nullptr)
-        parametersComponent = nullptr;
+    parametersComponent.reset();
 
     if (parameters.size() > 0)
         addAndMakeVisible (parametersComponent = new DemoParametersComponent (parameters));

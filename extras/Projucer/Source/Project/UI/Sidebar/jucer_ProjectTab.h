@@ -161,7 +161,7 @@ public:
 
     void resized() override
     {
-        concertinaPanel.setBounds (getLocalBounds());
+        concertinaPanel.setBounds (getLocalBounds().withTrimmedBottom (3));
     }
 
     TreePanelBase* getTreeWithSelectedItems()

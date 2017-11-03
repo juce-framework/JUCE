@@ -136,7 +136,7 @@ namespace
 
             if (! project->loadFrom (projectFile, true))
             {
-                project = nullptr;
+                project.reset();
                 throw CommandLineError ("Failed to load the project file: " + projectFile.getFullPathName());
             }
         }
@@ -148,7 +148,7 @@ namespace
                 Result error (justSaveResources ? project->saveResourcesOnly (project->getFile())
                                                 : project->saveProject (project->getFile(), true));
 
-                project = nullptr;
+                project.reset();
 
                 if (error.failed())
                     throw CommandLineError ("Error when saving: " + error.getErrorMessage());
@@ -302,7 +302,7 @@ namespace
         ScopedPointer<FileOutputStream> out (temp.getFile().createOutputStream());
 
         bool ok = out != nullptr && zip.writeToStream (*out, nullptr);
-        out = nullptr;
+        out.reset();
         ok = ok && temp.overwriteTargetFileWithTemporary();
 
         if (! ok)

@@ -36,6 +36,7 @@ namespace juce
    under the GPL v3 license.
 
    End User License Agreement: www.juce.com/juce-5-licence
+
   ==============================================================================
 */
 
@@ -141,7 +142,7 @@ void ReportingThreadContainer::sendReport (String address, String& userAgent, St
 
 void ReportingThreadContainer::changeListenerCallback (ChangeBroadcaster*)
 {
-    reportingThread = nullptr;
+    reportingThread.reset();
 }
 
 //==============================================================================

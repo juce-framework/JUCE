@@ -41,7 +41,7 @@ public:
         bool showPurchaseButton = false;
 
        #if ! JUCER_ENABLE_GPL_MODE
-        if (LicenseController* controller = ProjucerApplication::getApp().licenseController)
+        if (auto* controller = ProjucerApplication::getApp().licenseController.get())
             showPurchaseButton = (controller->getState().type != LicenseState::Type::indie
                                && controller->getState().type != LicenseState::Type::pro);
        #endif
@@ -130,19 +130,17 @@ private:
     Rectangle<float> huckleberryLogoBounds;
     Rectangle<float> juceLogoBounds;
 
-    ScopedPointer<Drawable> juceLogo
-        = Drawable::createFromImageData (BinaryData::juce_icon_png,
-                                         BinaryData::juce_icon_pngSize);
+    ScopedPointer<Drawable> juceLogo { Drawable::createFromImageData (BinaryData::juce_icon_png,
+                                                                      BinaryData::juce_icon_pngSize) };
 
-    ScopedPointer<Drawable> huckleberryLogo
-        = Drawable::createFromImageData (BinaryData::huckleberry_icon_svg,
-                                         BinaryData::huckleberry_icon_svgSize);
+    ScopedPointer<Drawable> huckleberryLogo { Drawable::createFromImageData (BinaryData::huckleberry_icon_svg,
+                                                                             BinaryData::huckleberry_icon_svgSize) };
 
     void buttonClicked (Button* b) override
     {
-        if (b == licenseButton)
+        if (b == licenseButton.get())
         {
-            if (LicenseController* controller = ProjucerApplication::getApp().licenseController)
+            if (auto* controller = ProjucerApplication::getApp().licenseController.get())
                 controller->chooseNewLicense();
         }
     }

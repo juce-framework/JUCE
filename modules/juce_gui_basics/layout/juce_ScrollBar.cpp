@@ -57,20 +57,7 @@ private:
 
 
 //==============================================================================
-ScrollBar::ScrollBar (const bool shouldBeVertical)
-    : totalRange (0.0, 1.0),
-      visibleRange (0.0, 0.1),
-      singleStepSize (0.1),
-      thumbAreaStart (0),
-      thumbAreaSize (0),
-      thumbStart (0),
-      thumbSize (0),
-      initialDelayInMillisecs (100),
-      repeatDelayInMillisecs (50),
-      minimumDelayInMillisecs (10),
-      vertical (shouldBeVertical),
-      isDraggingThumb (false),
-      autohides (true)
+ScrollBar::ScrollBar (bool shouldBeVertical)  : vertical (shouldBeVertical)
 {
     setRepaintsOnMouseActivity (true);
     setFocusContainer (true);
@@ -78,8 +65,8 @@ ScrollBar::ScrollBar (const bool shouldBeVertical)
 
 ScrollBar::~ScrollBar()
 {
-    upButton = nullptr;
-    downButton = nullptr;
+    upButton.reset();
+    downButton.reset();
 }
 
 //==============================================================================
@@ -302,8 +289,8 @@ void ScrollBar::resized()
     }
     else
     {
-        upButton = nullptr;
-        downButton = nullptr;
+        upButton.reset();
+        downButton.reset();
     }
 
     if (length < 32 + lf.getMinimumScrollbarThumbSize (*this))

@@ -853,7 +853,7 @@ void Component::setBufferedToImage (const bool shouldBeBuffered)
     }
     else
     {
-        cachedImage = nullptr;
+        cachedImage.reset();
     }
 }
 
@@ -1334,7 +1334,7 @@ void Component::setTransform (const AffineTransform& newTransform)
         if (affineTransform != nullptr)
         {
             repaint();
-            affineTransform = nullptr;
+            affineTransform.reset();
             repaint();
 
             sendMovedResizedMessages (false, false);
@@ -2812,7 +2812,7 @@ void Component::grabFocusInternal (const FocusChangeType cause, const bool canTr
                 if (traverser != nullptr)
                 {
                     auto* defaultComp = traverser->getDefaultComponent (this);
-                    traverser = nullptr;
+                    traverser.reset();
 
                     if (defaultComp != nullptr)
                     {
@@ -2859,7 +2859,7 @@ void Component::moveKeyboardFocusToSibling (const bool moveToNext)
         {
             auto* nextComp = moveToNext ? traverser->getNextComponent (this)
                                         : traverser->getPreviousComponent (this);
-            traverser = nullptr;
+            traverser.reset();
 
             if (nextComp != nullptr)
             {

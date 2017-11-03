@@ -90,13 +90,14 @@ public:
 
     void releaseResources() override {}
 
-    void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiBuffer) override
+    void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiBuffer) override
     {
-        const int busCount = getBusCount (false);
+        auto busCount = getBusCount (false);
+
         for (int busNr = 0; busNr < busCount; ++busNr)
         {
             MidiBuffer midiChannelBuffer = filterMidiMessagesForChannel (midiBuffer, busNr + 1);
-            AudioSampleBuffer audioBusBuffer = getBusBuffer (buffer, false, busNr);
+            auto audioBusBuffer = getBusBuffer (buffer, false, busNr);
 
             synth [busNr]->renderNextBlock (audioBusBuffer, midiChannelBuffer, 0, audioBusBuffer.getNumSamples());
         }

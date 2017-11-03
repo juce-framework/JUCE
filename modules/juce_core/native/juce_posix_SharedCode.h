@@ -880,7 +880,7 @@ bool InterProcessLock::enter (const int timeOutMillisecs)
         pimpl = new Pimpl (name, timeOutMillisecs);
 
         if (pimpl->handle == 0)
-            pimpl = nullptr;
+            pimpl.reset();
     }
     else
     {
@@ -898,7 +898,7 @@ void InterProcessLock::exit()
     jassert (pimpl != nullptr);
 
     if (pimpl != nullptr && --(pimpl->refCount) == 0)
-        pimpl = nullptr;
+        pimpl.reset();
 }
 
 //==============================================================================
@@ -1260,7 +1260,7 @@ bool ChildProcess::start (const StringArray& args, int streamFlags)
     activeProcess = new ActiveProcess (args, streamFlags);
 
     if (activeProcess->childPID == 0)
-        activeProcess = nullptr;
+        activeProcess.reset();
 
     return activeProcess != nullptr;
 }
