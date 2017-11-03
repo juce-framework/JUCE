@@ -131,23 +131,6 @@ namespace MidiFileHelpers
         return correctedTime + (time - lastTime) * secsPerTick;
     }
 
-    // a comparator that puts all the note-offs before note-ons that have the same time
-    struct Sorter
-    {
-        static int compareElements (const MidiMessageSequence::MidiEventHolder* const first,
-                                    const MidiMessageSequence::MidiEventHolder* const second) noexcept
-        {
-            const double diff = (first->message.getTimeStamp() - second->message.getTimeStamp());
-
-            if (diff > 0) return 1;
-            if (diff < 0) return -1;
-            if (first->message.isNoteOff() && second->message.isNoteOn())   return -1;
-            if (first->message.isNoteOn()  && second->message.isNoteOff())  return 1;
-
-            return 0;
-        }
-    };
-
     template <typename MethodType>
     static void findAllMatchingEvents (const OwnedArray<MidiMessageSequence>& tracks,
                                        MidiMessageSequence& results,
@@ -335,9 +318,19 @@ void MidiFile::readNextTrack (const uint8* data, int size)
             lastStatusByte = firstByte;
     }
 
-    // use a sort that puts all the note-offs before note-ons that have the same time
-    MidiFileHelpers::Sorter sorter;
-    result.list.sort (sorter, true);
+    // sort so that we put all the note-offs before note-ons that have the same time
+    std::stable_sort (result.list.begin(), result.list.end(),
+                      [] (const MidiMessageSequence::MidiEventHolder* a,
+                          const MidiMessageSequence::MidiEventHolder* b)
+    {
+        auto t1 = a->message.getTimeStamp();
+        auto t2 = b->message.getTimeStamp();
+
+        if (t1 < t2)  return true;
+        if (t2 < t1)  return false;
+
+        return a->message.isNoteOff() && b->message.isNoteOn();
+    });
 
     addTrack (result);
     tracks.getLast()->updateMatchedPairs();

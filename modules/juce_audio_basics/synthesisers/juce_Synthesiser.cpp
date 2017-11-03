@@ -489,14 +489,6 @@ SynthesiserVoice* Synthesiser::findFreeVoice (SynthesiserSound* soundToPlay,
     return nullptr;
 }
 
-struct VoiceAgeSorter
-{
-    static int compareElements (SynthesiserVoice* v1, SynthesiserVoice* v2) noexcept
-    {
-        return v1->wasStartedBefore (*v2) ? -1 : (v2->wasStartedBefore (*v1) ? 1 : 0);
-    }
-};
-
 SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay,
                                                  int /*midiChannel*/, int midiNoteNumber) const
 {
@@ -521,8 +513,9 @@ SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay,
         {
             jassert (voice->isVoiceActive()); // We wouldn't be here otherwise
 
-            VoiceAgeSorter sorter;
-            usableVoices.addSorted (sorter, voice);
+            usableVoices.add (voice);
+            std::sort (usableVoices.begin(), usableVoices.end(),
+                       [] (const SynthesiserVoice* a, const SynthesiserVoice* b) { return a->wasStartedBefore (*b); });
 
             if (! voice->isPlayingButReleased()) // Don't protect released notes
             {

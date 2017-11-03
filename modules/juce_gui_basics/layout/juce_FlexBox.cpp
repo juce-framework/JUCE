@@ -111,7 +111,8 @@ struct FlexBoxLayoutCalculation
         for (auto& item : owner.items)
             itemStates.add (item);
 
-        itemStates.sort (*this, true);
+        std::stable_sort (itemStates.begin(), itemStates.end(),
+                          [] (const ItemWithState& i1, const ItemWithState& i2)  { return i1.item->order < i2.item->order; });
 
         for (auto& item : itemStates)
         {
@@ -529,11 +530,6 @@ struct FlexBoxLayoutCalculation
 
         reverseLocations();
         reverseWrap();
-    }
-
-    static int compareElements (const ItemWithState& i1, const ItemWithState& i2) noexcept
-    {
-        return i1.item->order < i2.item->order ? -1 : (i2.item->order < i1.item->order ? 1 : 0);
     }
 
 private:

@@ -41,8 +41,9 @@ struct FFT::Engine
 {
     Engine (int priorityToUse) : enginePriority (priorityToUse)
     {
-        EnginePriorityComparator comparator;
-        getEngines().addSorted (comparator, this);
+        auto& list = getEngines();
+        list.add (this);
+        std::sort (list.begin(), list.end(), [] (Engine* a, Engine* b) { return b->enginePriority < a->enginePriority; });
     }
 
     virtual ~Engine() {}
@@ -61,15 +62,6 @@ struct FFT::Engine
     }
 
 private:
-    struct EnginePriorityComparator
-    {
-        static int compareElements (Engine* first, Engine* second) noexcept
-        {
-            // sort in reverse order
-            return DefaultElementComparator<int>::compareElements (second->enginePriority, first->enginePriority);
-        }
-    };
-
     static Array<Engine*>& getEngines()
     {
         static Array<Engine*> engines;

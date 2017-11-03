@@ -363,15 +363,14 @@ Path DrawableText::getOutlineAsPath() const
 
     Path pathOfAllGlyphs;
 
-    for (int i = 0; i < arr.getNumGlyphs(); ++i)
+    for (auto& glyph : arr)
     {
         Path gylphPath;
-        arr.getGlyph (i).createPath (gylphPath);
+        glyph.createPath (gylphPath);
         pathOfAllGlyphs.addPath (gylphPath);
     }
 
-    pathOfAllGlyphs.applyTransform (getTextTransform (w, h)
-                                      .followedBy (getTransform()));
+    pathOfAllGlyphs.applyTransform (getTextTransform (w, h).followedBy (getTransform()));
 
     return pathOfAllGlyphs;
 }

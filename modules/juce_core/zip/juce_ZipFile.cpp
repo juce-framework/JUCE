@@ -36,14 +36,6 @@ struct ZipFile::ZipEntryHolder
         entry.filename          = String::fromUTF8 (buffer + 46, fileNameLen);
     }
 
-    struct FileNameComparator
-    {
-        static int compareElements (const ZipEntryHolder* e1, const ZipEntryHolder* e2) noexcept
-        {
-            return e1->entry.filename.compare (e2->entry.filename);
-        }
-    };
-
     static Time parseFileTime (uint32 time, uint32 date) noexcept
     {
         int year      = 1980 + (date >> 9);
@@ -321,8 +313,8 @@ InputStream* ZipFile::createStreamForEntry (const ZipEntry& entry)
 
 void ZipFile::sortEntriesByFilename()
 {
-    ZipEntryHolder::FileNameComparator sorter;
-    entries.sort (sorter);
+    std::sort (entries.begin(), entries.end(),
+               [] (const ZipEntryHolder* e1, const ZipEntryHolder* e2) { return e1->entry.filename < e2->entry.filename; });
 }
 
 //==============================================================================

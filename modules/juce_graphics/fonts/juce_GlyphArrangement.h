@@ -148,6 +148,9 @@ public:
     */
     PositionedGlyph& getGlyph (int index) const noexcept;
 
+    const PositionedGlyph* begin() const                        { return glyphs.begin(); }
+    const PositionedGlyph* end() const                          { return glyphs.end(); }
+
     //==============================================================================
     /** Clears all text from the arrangement and resets it. */
     void clear();

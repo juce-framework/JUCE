@@ -142,18 +142,12 @@ const ModuleDescription* ModuleList::getModuleWithID (const String& moduleID) co
     return nullptr;
 }
 
-struct ModuleSorter
-{
-    static int compareElements (const ModuleDescription* m1, const ModuleDescription* m2)
-    {
-        return m1->getID().compareIgnoreCase (m2->getID());
-    }
-};
-
 void ModuleList::sort()
 {
-    ModuleSorter sorter;
-    modules.sort (sorter);
+    std::sort (modules.begin(), modules.end(), [] (const ModuleDescription* m1, const ModuleDescription* m2)
+    {
+        return m1->getID().compareIgnoreCase (m2->getID()) < 0;
+    });
 }
 
 StringArray ModuleList::getIDs() const

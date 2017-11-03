@@ -1303,45 +1303,23 @@ private:
     }
 
     //==============================================================================
-    struct SortByCoordinate
-    {
-        bool sortByYCoordinate;
-
-        SortByCoordinate (bool byYCoordinate)  : sortByYCoordinate (byYCoordinate)
-        {
-        }
-
-        int compareElements (const ExtendedInfo* a, const ExtendedInfo* b)
-        {
-            int coordinateA, coordinateB;
-
-            if (sortByYCoordinate)
-            {
-                coordinateA = a->totalBounds.getY();
-                coordinateB = b->totalBounds.getY();
-            }
-            else
-            {
-                coordinateA = a->totalBounds.getX();
-                coordinateB = b->totalBounds.getX();
-            }
-
-            return coordinateA - coordinateB;
-        }
-    };
-
-    //==============================================================================
     void updateScaledDisplayCoordinate (bool updateYCoordinates)
     {
         if (infos.size() < 2)
             return;
 
         Array<ExtendedInfo*> copy;
+
+        for (auto& i : infos)
+            copy.add (&i);
+
+        std::sort (copy.begin(), copy.end(), [updateYCoordinates] (const ExtendedInfo* a, const ExtendedInfo* b)
         {
-            SortByCoordinate sorter (updateYCoordinates);
-            for (int i = 0; i < infos.size(); ++i)
-                copy.addSorted (sorter, &infos.getReference (i));
-        }
+            if (updateYCoordinates)
+                return a->totalBounds.getY() < b->totalBounds.getY();
+
+            return a->totalBounds.getX() < b->totalBounds.getX();
+        });
 
         for (int i = 1; i < copy.size(); ++i)
         {
@@ -1351,13 +1329,14 @@ private:
             for (int j = i - 1; j >= 0; --j)
             {
                 auto& other = *copy[j];
-                int prevCoordinate = updateYCoordinates ? other.totalBounds.getBottom() : other.totalBounds.getRight();
-                int curCoordinate = updateYCoordinates ? current.totalBounds.getY() : current.totalBounds.getX();
+                auto prevCoordinate = updateYCoordinates ? other.totalBounds.getBottom() : other.totalBounds.getRight();
+                auto curCoordinate  = updateYCoordinates ? current.totalBounds.getY() : current.totalBounds.getX();
+
                 if (prevCoordinate == curCoordinate)
                 {
                     // both displays are aligned! As "other" comes before "current" in the array, it must already
                     // have a valid topLeftScaled which we can use
-                    Point<int> topLeftScaled = other.topLeftScaled;
+                    auto topLeftScaled = other.topLeftScaled;
                     topLeftScaled += Point<int> (other.totalBounds.getWidth(), other.totalBounds.getHeight()) / other.scale;
 
                     if (updateYCoordinates)
