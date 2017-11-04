@@ -393,6 +393,15 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
                                           const Point<int>* imageOffsetFromMouse,
                                           const MouseInputSource* inputSourceCausingDrag)
 {
+    if (isAlreadyDragging (sourceComponent))
+        return;
+
+    if (inputSourceCausingDrag == nullptr || ! inputSourceCausingDrag->isDragging())
+    {
+        jassertfalse;   // You must call startDragging() from within a mouseDown or mouseDrag callback!
+        return;
+    }
+
     auto* draggingSource = getMouseInputSourceForDrag (sourceComponent, inputSourceCausingDrag);
     auto lastMouseDown = draggingSource->getLastMouseDownPosition().roundToInt();
     Point<int> imageOffset;
@@ -569,6 +578,17 @@ const MouseInputSource* DragAndDropContainer::getMouseInputSourceForDrag (Compon
     jassert (inputSourceCausingDrag != nullptr && inputSourceCausingDrag->isDragging());
 
     return inputSourceCausingDrag;
+}
+
+bool DragAndDropContainer::isAlreadyDragging (Component* component) const noexcept
+{
+    for (auto* dragImageComp : dragImageComponents)
+    {
+        if (dragImageComp->sourceDetails.sourceComponent == component)
+            return true;
+    }
+
+    return false;
 }
 
 //==============================================================================
