@@ -1003,8 +1003,53 @@ private:
         else
         {
             juceMidiCode = javaSourceFolder.getChildFile ("AndroidMidiFallback.java")
-                               .loadFileAsString()
-                               .replace ("JuceAppActivity", className);
+                                           .loadFileAsString()
+                                           .replace ("JuceAppActivity", className);
+        }
+
+        String juceWebViewImports, juceWebViewCodeNative, juceWebViewCode;
+
+        if (androidMinimumSDK.get().getIntValue() >= 23)
+            juceWebViewImports << "import android.webkit.WebResourceError;" << newLine;
+
+        if (androidMinimumSDK.get().getIntValue() >= 21)
+            juceWebViewImports << "import android.webkit.WebResourceRequest;" << newLine;
+
+        if (androidMinimumSDK.get().getIntValue() >= 11)
+            juceWebViewImports << "import android.webkit.WebResourceResponse;" << newLine;
+
+        auto javaWebViewFile = javaSourceFolder.getChildFile ("AndroidWebView.java");
+        auto juceWebViewCodeAll = javaWebViewFile.loadFileAsString();
+
+        if (androidMinimumSDK.get().getIntValue() <= 10)
+        {
+            juceWebViewCode << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewApi1_10", false, false)
+                                                 .upToFirstOccurrenceOf ("WebViewApi1_10$$", false, false);
+        }
+        else
+        {
+            if (androidMinimumSDK.get().getIntValue() >= 23)
+            {
+                juceWebViewCodeNative << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewNativeApi23", false, false)
+                                                           .upToFirstOccurrenceOf ("WebViewNativeApi23$$", false, false);
+
+                juceWebViewCode << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewApi23", false, false)
+                                                     .upToFirstOccurrenceOf ("WebViewApi23$$", false, false);
+            }
+
+            if (androidMinimumSDK.get().getIntValue() >= 21)
+            {
+                juceWebViewCodeNative << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewNativeApi21", false, false)
+                                                           .upToFirstOccurrenceOf ("WebViewNativeApi21$$", false, false);
+
+                juceWebViewCode << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewApi21", false, false)
+                                                     .upToFirstOccurrenceOf ("WebViewApi21$$", false, false);
+            }
+            else
+            {
+                juceWebViewCode << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewApi11_20", false, false)
+                                                     .upToFirstOccurrenceOf ("WebViewApi11_20$$", false, false);
+            }
         }
 
         auto javaSourceFile = javaSourceFolder.getChildFile ("JuceAppActivity.java");
@@ -1021,6 +1066,12 @@ private:
                     newFile << juceMidiCode;
                 else if (line.contains ("$$JuceAndroidRuntimePermissionsCode$$"))
                     newFile << juceRuntimePermissionsCode;
+                else if (line.contains ("$$JuceAndroidWebViewImports$$"))
+                    newFile << juceWebViewImports;
+                else if (line.contains ("$$JuceAndroidWebViewNativeCode$$"))
+                    newFile << juceWebViewCodeNative;
+                else if (line.contains ("$$JuceAndroidWebViewCode$$"))
+                    newFile << juceWebViewCode;
                 else
                     newFile << line.replace ("JuceAppActivity", className)
                                    .replace ("package com.juce;", "package " + package + ";") << newLine;

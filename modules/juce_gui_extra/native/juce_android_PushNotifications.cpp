@@ -74,29 +74,10 @@ DECLARE_JNI_CLASS (Bundle, "android/os/Bundle");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
-  METHOD (toString, "toString", "()Ljava/lang/String;")
-
-DECLARE_JNI_CLASS (CharSequence, "java/lang/CharSequence");
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   METHOD (hasNext, "hasNext", "()Z") \
   METHOD (next,    "next",    "()Ljava/lang/Object;")
 
 DECLARE_JNI_CLASS (Iterator, "java/util/Iterator");
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
-  METHOD (get,    "get",    "(Ljava/lang/Object;)Ljava/lang/Object;") \
-  METHOD (keySet, "keySet", "()Ljava/util/Set;")
-
-DECLARE_JNI_CLASS (JavaMap, "java/util/Map");
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
-  METHOD (concat, "concat", "(Ljava/lang/String;)Ljava/lang/String;")
-
-DECLARE_JNI_CLASS (JavaString, "java/lang/String");
 #undef JNI_CLASS_MEMBERS
 
 #if __ANDROID_API__ >= 26
@@ -529,7 +510,7 @@ struct PushNotifications::Pimpl
             if (remoteInputResult.get() != 0)
             {
                 auto charSequence      = LocalRef<jobject> (env->CallObjectMethod (remoteInputResult, Bundle.getCharSequence, resultKeyString.get()));
-                auto responseString    = LocalRef<jstring> ((jstring) env->CallObjectMethod (charSequence, CharSequence.toString));
+                auto responseString    = LocalRef<jstring> ((jstring) env->CallObjectMethod (charSequence, JavaCharSequence.toString));
 
                 owner.listeners.call (&PushNotifications::Listener::handleNotificationAction,
                                       true,

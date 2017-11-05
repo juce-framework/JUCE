@@ -421,6 +421,58 @@ DECLARE_JNI_CLASS (JavaObject, "java/lang/Object");
 DECLARE_JNI_CLASS (Intent, "android/content/Intent");
 #undef JNI_CLASS_MEMBERS
 
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (layout,              "layout",              "(IIII)V") \
+ METHOD (getLeft,             "getLeft",             "()I") \
+ METHOD (getTop,              "getTop",              "()I") \
+ METHOD (getWidth,            "getWidth",            "()I") \
+ METHOD (getHeight,           "getHeight",           "()I") \
+ METHOD (getLocationOnScreen, "getLocationOnScreen", "([I)V") \
+ METHOD (getParent,           "getParent",           "()Landroid/view/ViewParent;") \
+ METHOD (bringToFront,        "bringToFront",        "()V") \
+ METHOD (requestFocus,        "requestFocus",        "()Z") \
+ METHOD (hasFocus,            "hasFocus",            "()Z") \
+ METHOD (invalidate,          "invalidate",          "(IIII)V") \
+ METHOD (setVisibility,       "setVisibility",       "(I)V")
+
+DECLARE_JNI_CLASS (AndroidView, "android/view/View");
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (addView,    "addView",    "(Landroid/view/View;)V") \
+ METHOD (removeView, "removeView", "(Landroid/view/View;)V")
+
+DECLARE_JNI_CLASS (AndroidViewGroup, "android/view/ViewGroup")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  METHOD (toString, "toString", "()Ljava/lang/String;")
+
+DECLARE_JNI_CLASS (JavaCharSequence, "java/lang/CharSequence");
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  METHOD (get,    "get",    "(Ljava/lang/Object;)Ljava/lang/Object;") \
+  METHOD (keySet, "keySet", "()Ljava/util/Set;") \
+  METHOD (put,    "put",    "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;")
+
+DECLARE_JNI_CLASS (JavaMap, "java/util/Map");
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  METHOD (constructor,             "<init>", "()V") \
+  METHOD (constructorWithCapacity, "<init>", "(I)V")
+
+DECLARE_JNI_CLASS (JavaHashMap, "java/util/HashMap");
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  METHOD (concat,   "concat",   "(Ljava/lang/String;)Ljava/lang/String;") \
+  METHOD (getBytes, "getBytes", "()[B")
+
+DECLARE_JNI_CLASS (JavaString, "java/lang/String");
+#undef JNI_CLASS_MEMBERS
+
 //==============================================================================
 class AndroidInterfaceImplementer;
 

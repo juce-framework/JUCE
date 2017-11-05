@@ -187,22 +187,12 @@ DECLARE_JNI_CLASS (CanvasMinimal, "android/graphics/Canvas");
 
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
- METHOD (setViewName,   "setViewName",      "(Ljava/lang/String;)V") \
- METHOD (layout,        "layout",           "(IIII)V") \
- METHOD (getLeft,       "getLeft",          "()I") \
- METHOD (getTop,        "getTop",           "()I") \
- METHOD (getWidth,      "getWidth",         "()I") \
- METHOD (getHeight,     "getHeight",        "()I") \
- METHOD (getLocationOnScreen, "getLocationOnScreen", "([I)V") \
- METHOD (bringToFront,  "bringToFront",     "()V") \
- METHOD (requestFocus,  "requestFocus",     "()Z") \
- METHOD (setVisible,    "setVisible",       "(Z)V") \
- METHOD (isVisible,     "isVisible",        "()Z") \
- METHOD (hasFocus,      "hasFocus",         "()Z") \
- METHOD (invalidate,    "invalidate",       "(IIII)V") \
- METHOD (containsPoint, "containsPoint",    "(II)Z") \
- METHOD (showKeyboard,  "showKeyboard",     "(Ljava/lang/String;)V") \
- METHOD (setSystemUiVisibility, "setSystemUiVisibilityCompat", "(I)V") \
+ METHOD (setViewName,                 "setViewName",                 "(Ljava/lang/String;)V") \
+ METHOD (setVisible,                  "setVisible",                  "(Z)V") \
+ METHOD (isVisible,                   "isVisible",                   "()Z") \
+ METHOD (containsPoint,               "containsPoint",               "(II)Z") \
+ METHOD (showKeyboard,                "showKeyboard",                "(Ljava/lang/String;)V") \
+ METHOD (setSystemUiVisibilityCompat, "setSystemUiVisibilityCompat", "(I)V") \
 
 DECLARE_JNI_CLASS (ComponentPeerView, JUCE_ANDROID_ACTIVITY_CLASSPATH "$ComponentPeerView");
 #undef JNI_CLASS_MEMBERS
@@ -302,7 +292,7 @@ public:
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
             fullScreen = isNowFullScreen;
-            view.callVoidMethod (ComponentPeerView.layout,
+            view.callVoidMethod (AndroidView.layout,
                                  r.getX(), r.getY(), r.getRight(), r.getBottom());
         }
         else
@@ -314,7 +304,7 @@ public:
 
                 void messageCallback() override
                 {
-                    view.callVoidMethod (ComponentPeerView.layout,
+                    view.callVoidMethod (AndroidView.layout,
                                          bounds.getX(), bounds.getY(), bounds.getRight(), bounds.getBottom());
                 }
 
@@ -329,10 +319,10 @@ public:
 
     Rectangle<int> getBounds() const override
     {
-        return (Rectangle<float> (view.callIntMethod (ComponentPeerView.getLeft),
-                                  view.callIntMethod (ComponentPeerView.getTop),
-                                  view.callIntMethod (ComponentPeerView.getWidth),
-                                  view.callIntMethod (ComponentPeerView.getHeight)) / scale).toNearestInt();
+        return (Rectangle<float> (view.callIntMethod (AndroidView.getLeft),
+                                  view.callIntMethod (AndroidView.getTop),
+                                  view.callIntMethod (AndroidView.getWidth),
+                                  view.callIntMethod (AndroidView.getHeight)) / scale).toNearestInt();
     }
 
     void handleScreenSizeChange() override
@@ -345,8 +335,8 @@ public:
 
     Point<float> getScreenPosition() const
     {
-        return Point<float> (view.callIntMethod (ComponentPeerView.getLeft),
-                             view.callIntMethod (ComponentPeerView.getTop)) / scale;
+        return Point<float> (view.callIntMethod (AndroidView.getLeft),
+                             view.callIntMethod (AndroidView.getTop)) / scale;
     }
 
     Point<float> localToGlobal (Point<float> relativePosition) override
@@ -393,7 +383,7 @@ public:
             SYSTEM_UI_FLAG_IMMERSIVE_STICKY         = 4096
         };
 
-        view.callVoidMethod (ComponentPeerView.setSystemUiVisibility,
+        view.callVoidMethod (ComponentPeerView.setSystemUiVisibilityCompat,
                              hidden ? (jint) (SYSTEM_UI_FLAG_HIDE_NAVIGATION | SYSTEM_UI_FLAG_FULLSCREEN | SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
                                     : (jint) (SYSTEM_UI_FLAG_VISIBLE));
 
@@ -471,7 +461,7 @@ public:
         // Avoid calling bringToFront excessively: it's very slow
         if (frontWindow != this)
         {
-            view.callVoidMethod (ComponentPeerView.bringToFront);
+            view.callVoidMethod (AndroidView.bringToFront);
 
             frontWindow = this;
         }
@@ -547,7 +537,7 @@ public:
     bool isFocused() const override
     {
         if (view != nullptr)
-            return view.callBooleanMethod (ComponentPeerView.hasFocus);
+            return view.callBooleanMethod (AndroidView.hasFocus);
 
         return false;
     }
@@ -555,7 +545,7 @@ public:
     void grabFocus() override
     {
         if (view != nullptr)
-            view.callBooleanMethod (ComponentPeerView.requestFocus);
+            view.callBooleanMethod (AndroidView.requestFocus);
     }
 
     void handleFocusChangeCallback (bool hasFocus)
@@ -645,7 +635,7 @@ public:
 
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
-            view.callVoidMethod (ComponentPeerView.invalidate, area.getX(), area.getY(), area.getRight(), area.getBottom());
+            view.callVoidMethod (AndroidView.invalidate, area.getX(), area.getY(), area.getRight(), area.getBottom());
         }
         else
         {
@@ -656,7 +646,7 @@ public:
 
                 void messageCallback() override
                 {
-                    view.callVoidMethod (ComponentPeerView.invalidate, area.getX(), area.getY(),
+                    view.callVoidMethod (AndroidView.invalidate, area.getX(), area.getY(),
                                          area.getRight(), area.getBottom());
                 }
 

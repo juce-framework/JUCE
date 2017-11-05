@@ -358,8 +358,7 @@ private:
 
 //==============================================================================
 WebBrowserComponent::WebBrowserComponent (const bool unloadWhenHidden)
-    : browser (nullptr),
-      blankPageShown (false),
+    : blankPageShown (false),
       unloadPageWhenBrowserIsHidden (unloadWhenHidden)
 {
     setOpaque (true);
@@ -369,7 +368,6 @@ WebBrowserComponent::WebBrowserComponent (const bool unloadWhenHidden)
 
 WebBrowserComponent::~WebBrowserComponent()
 {
-    deleteAndZero (browser);
 }
 
 //==============================================================================
