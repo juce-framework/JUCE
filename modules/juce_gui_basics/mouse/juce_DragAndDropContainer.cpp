@@ -396,13 +396,14 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
     if (isAlreadyDragging (sourceComponent))
         return;
 
-    if (inputSourceCausingDrag == nullptr || ! inputSourceCausingDrag->isDragging())
+    auto* draggingSource = getMouseInputSourceForDrag (sourceComponent, inputSourceCausingDrag);
+
+    if (draggingSource == nullptr || ! draggingSource->isDragging())
     {
         jassertfalse;   // You must call startDragging() from within a mouseDown or mouseDrag callback!
         return;
     }
 
-    auto* draggingSource = getMouseInputSourceForDrag (sourceComponent, inputSourceCausingDrag);
     auto lastMouseDown = draggingSource->getLastMouseDownPosition().roundToInt();
     Point<int> imageOffset;
 
