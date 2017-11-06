@@ -1967,10 +1967,10 @@
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h"/>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Source\BinaryData\Gradle\gradle-wrapper.jar"/>
-    <None Include="..\..\Source\BinaryData\Gradle\gradlew"/>
-    <None Include="..\..\Source\BinaryData\Gradle\gradlew.bat"/>
-    <None Include="..\..\Source\BinaryData\Gradle\LICENSE"/>
+    <None Include="..\..\Source\BinaryData\gradle\gradle-wrapper.jar"/>
+    <None Include="..\..\Source\BinaryData\gradle\gradlew"/>
+    <None Include="..\..\Source\BinaryData\gradle\gradlew.bat"/>
+    <None Include="..\..\Source\BinaryData\gradle\LICENSE"/>
     <None Include="..\..\Source\BinaryData\Icons\background_logo.svg"/>
     <None Include="..\..\Source\BinaryData\Icons\export_android.svg"/>
     <None Include="..\..\Source\BinaryData\Icons\export_clion.svg"/>

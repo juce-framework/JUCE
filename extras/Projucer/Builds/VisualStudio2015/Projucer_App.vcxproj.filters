@@ -8,8 +8,8 @@
     <Filter Include="Projucer\Application">
       <UniqueIdentifier>{4F8BCD36-CE20-D951-FB82-2CCEDD0C5898}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Projucer\BinaryData\Gradle">
-      <UniqueIdentifier>{CCBE7B90-B600-DF59-8641-D4FD8FA0C88B}</UniqueIdentifier>
+    <Filter Include="Projucer\BinaryData\gradle">
+      <UniqueIdentifier>{661FA330-2192-FAA3-E7B2-FAF8EBB783C6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Projucer\BinaryData\Icons">
       <UniqueIdentifier>{3A77FAA0-7E92-6D59-9C5F-BAAA2BF82833}</UniqueIdentifier>
@@ -3446,17 +3446,17 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Source\BinaryData\Gradle\gradle-wrapper.jar">
-      <Filter>Projucer\BinaryData\Gradle</Filter>
+    <None Include="..\..\Source\BinaryData\gradle\gradle-wrapper.jar">
+      <Filter>Projucer\BinaryData\gradle</Filter>
     </None>
-    <None Include="..\..\Source\BinaryData\Gradle\gradlew">
-      <Filter>Projucer\BinaryData\Gradle</Filter>
+    <None Include="..\..\Source\BinaryData\gradle\gradlew">
+      <Filter>Projucer\BinaryData\gradle</Filter>
     </None>
-    <None Include="..\..\Source\BinaryData\Gradle\gradlew.bat">
-      <Filter>Projucer\BinaryData\Gradle</Filter>
+    <None Include="..\..\Source\BinaryData\gradle\gradlew.bat">
+      <Filter>Projucer\BinaryData\gradle</Filter>
     </None>
-    <None Include="..\..\Source\BinaryData\Gradle\LICENSE">
-      <Filter>Projucer\BinaryData\Gradle</Filter>
+    <None Include="..\..\Source\BinaryData\gradle\LICENSE">
+      <Filter>Projucer\BinaryData\gradle</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\Icons\background_logo.svg">
       <Filter>Projucer\BinaryData\Icons</Filter>
