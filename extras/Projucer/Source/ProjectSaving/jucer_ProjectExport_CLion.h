@@ -1037,7 +1037,7 @@ private:
                     if (target->getTargetFileType() == ProjectType::Target::TargetFileType::pluginBundle
                         && targetAttributeKeys.contains("INSTALL_PATH"))
                     {
-                        const auto installPath = targetAttributes["INSTALL_PATH"].unquoted();
+                        const auto installPath = targetAttributes["INSTALL_PATH"].unquoted().replace ("$(HOME)", "$ENV{HOME}");
                         const auto productFilename = binaryName + (targetAttributeKeys.contains ("WRAPPER_EXTENSION") ? "." + targetAttributes["WRAPPER_EXTENSION"] : String());
                         auto productPath = (installPath + productFilename).quoted();
                         out << "add_custom_command (TARGET " << targetVarName << " POST_BUILD" << newLine
