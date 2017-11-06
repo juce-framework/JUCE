@@ -2852,7 +2852,9 @@ private:
     {
         String attributes;
 
-        attributes << "{ LastUpgradeCheck = 0830; ";
+        attributes << "{ LastUpgradeCheck = 0830; "
+                   << "ORGANIZATIONNAME = " << getProject().getCompanyNameString().quoted()
+                   <<"; ";
 
         if (projectType.isGUIApplication() || projectType.isAudioPlugin())
         {
