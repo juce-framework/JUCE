@@ -202,8 +202,15 @@ MPESynthesiserVoice* MPESynthesiser::findVoiceToSteal (MPENote noteToStealVoiceF
         jassert (voice->isActive()); // We wouldn't be here otherwise
 
         usableVoices.add (voice);
-        std::sort (usableVoices.begin(), usableVoices.end(),
-                   [] (const MPESynthesiserVoice* a, const MPESynthesiserVoice* b) { return a->wasStartedBefore (*b); });
+
+        // NB: Using a functor rather than a lambda here due to scare-stories about
+        // compilers generating code containing heap allocations..
+        struct Sorter
+        {
+            bool operator() (const MPESynthesiserVoice* a, const MPESynthesiserVoice* b) const noexcept { return a->wasStartedBefore (*b); }
+        };
+
+        std::sort (usableVoices.begin(), usableVoices.end(), Sorter());
 
         if (! voice->isPlayingButReleased()) // Don't protect released notes
         {
