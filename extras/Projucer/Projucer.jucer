@@ -13,10 +13,10 @@
                extraFrameworks="AudioUnit; Accelerate; AVFoundation; CoreAudio; CoreAudioKit; CoreMIDI; DiscRecording; QuartzCore; AudioToolbox; OpenGL; QTKit; QuickTime">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Projucer"
-                       osxSDK="default" osxCompatibility="10.9 SDK" osxArchitecture="default"
+                       osxSDK="default" osxCompatibility="10.11 SDK" osxArchitecture="default"
                        headerPath="" libraryPath="" cppLibType="libc++" enablePluginBinaryCopyStep="1"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Projucer"
-                       osxSDK="default" osxCompatibility="10.7 SDK" osxArchitecture="default"
+                       osxSDK="default" osxCompatibility="10.11 SDK" osxArchitecture="default"
                        headerPath="" libraryPath="" cppLibType="libc++" enablePluginBinaryCopyStep="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
