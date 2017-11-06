@@ -691,6 +691,72 @@ namespace
     }
 
     //==============================================================================
+    static bool isThisOS (const String& os)
+    {
+        auto targetOS = TargetOS::unknown;
+
+        if      (os == "osx")        targetOS = TargetOS::osx;
+        else if (os == "windows")    targetOS = TargetOS::windows;
+        else if (os == "linux")      targetOS = TargetOS::linux;
+
+        if (targetOS == TargetOS::unknown)
+            throw CommandLineError ("You need to specify a valid OS! Use osx, windows or linux");
+
+        return targetOS == TargetOS::getThisOS();
+    }
+
+    static bool isValidPathIdentifier (const String& id, const String& os)
+    {
+        return id == "vst3Path" || (id == "aaxPath" && os != "linux") || (id == "rtasPath" && os != "linux")
+            || id == "androidSDKPath" || id == "androidNDKPath" || id == "defaultJuceModulePath" || id == "defaultUserModulePath";
+    }
+
+    static void setGlobalPath (const StringArray& args)
+    {
+        checkArgumentCount (args, 3);
+
+        if (! isValidPathIdentifier (args[2], args[1]))
+            throw CommandLineError ("Identifier " + args[2] + " is not valid for the OS " + args[1]);
+
+        auto userAppData = File::getSpecialLocation (File::userApplicationDataDirectory);
+
+       #if JUCE_MAC
+        userAppData = userAppData.getChildFile ("Application Support");
+       #endif
+
+        auto settingsFile = userAppData.getChildFile ("Projucer").getChildFile ("Projucer.settings");
+
+        if (! settingsFile.existsAsFile())
+            throw CommandLineError ("Expected settings file at " + settingsFile.getFullPathName() + " not found!");
+
+        ScopedPointer<XmlElement> xml (XmlDocument::parse (settingsFile));
+        auto settingsTree = ValueTree::fromXml (*xml);
+
+        if (! settingsTree.isValid())
+            throw CommandLineError ("Settings file not valid!");
+
+        ValueTree childToSet;
+        if (isThisOS (args[1]))
+        {
+            childToSet = settingsTree.getChildWithProperty (Ids::name, "PROJECT_DEFAULT_SETTINGS")
+                                     .getChildWithName ("PROJECT_DEFAULT_SETTINGS");
+        }
+        else
+        {
+            childToSet = settingsTree.getChildWithProperty (Ids::name, "FALLBACK_PATHS")
+                                     .getChildWithName ("FALLBACK_PATHS")
+                                     .getChildWithName (args[1] + String ("Fallback"));
+        }
+
+        if (! childToSet.isValid())
+            throw CommandLineError ("Failed to set the requested setting!");
+
+        childToSet.setProperty (args[2], args[3], nullptr);
+
+        settingsFile.replaceWithText (settingsTree.toXmlString());
+    }
+
+    //==============================================================================
     static void showHelp()
     {
         hideDockIcon();
@@ -751,6 +817,10 @@ namespace
                   << std::endl
                   << " " << appName << " --trans-finish pre_translated_file post_translated_file optional_existing_translation_file" << std::endl
                   << "    Creates a completed translations mapping file, that can be used to initialise a LocalisedStrings object. This allows you to localise the strings in your project" << std::endl
+                  << std::endl
+                  << " " << appName << " --set-global-search-path os identifier_to_set new_path" << std::endl
+                  << "    Sets the global search path for a specified os and identifier. The os should be either osx, windows or linux and the identifiers can be any of the following: "
+                  << "defaultJuceModulePath, defaultUserModulePath, vst3path, aaxPath (not valid on linux), rtasPath (not valid on linux), androidSDKPath or androidNDKPath." << std::endl
                   << std::endl;
     }
 }
@@ -766,25 +836,26 @@ int performCommandLine (const String& commandLine)
 
     try
     {
-        if (matchArgument (command, "help"))                     { showHelp(); return 0; }
-        if (matchArgument (command, "h"))                        { showHelp(); return 0; }
-        if (matchArgument (command, "resave"))                   { resaveProject (args, false); return 0; }
-        if (matchArgument (command, "resave-resources"))         { resaveProject (args, true); return 0; }
-        if (matchArgument (command, "get-version"))              { getVersion (args); return 0; }
-        if (matchArgument (command, "set-version"))              { setVersion (args); return 0; }
-        if (matchArgument (command, "bump-version"))             { bumpVersion (args); return 0; }
-        if (matchArgument (command, "git-tag-version"))          { gitTag (args); return 0; }
-        if (matchArgument (command, "buildmodule"))              { buildModules (args, false); return 0; }
-        if (matchArgument (command, "buildallmodules"))          { buildModules (args, true); return 0; }
-        if (matchArgument (command, "status"))                   { showStatus (args); return 0; }
-        if (matchArgument (command, "trim-whitespace"))          { cleanWhitespace (args, false); return 0; }
-        if (matchArgument (command, "remove-tabs"))              { cleanWhitespace (args, true); return 0; }
-        if (matchArgument (command, "tidy-divider-comments"))    { tidyDividerComments (args); return 0; }
-        if (matchArgument (command, "fix-broken-include-paths")) { fixRelativeIncludePaths (args); return 0; }
-        if (matchArgument (command, "obfuscated-string-code"))   { generateObfuscatedStringCode (args); return 0; }
-        if (matchArgument (command, "encode-binary"))            { encodeBinary (args); return 0; }
+        if (matchArgument (command, "help"))                     { showHelp();                            return 0; }
+        if (matchArgument (command, "h"))                        { showHelp();                            return 0; }
+        if (matchArgument (command, "resave"))                   { resaveProject (args, false);           return 0; }
+        if (matchArgument (command, "resave-resources"))         { resaveProject (args, true);            return 0; }
+        if (matchArgument (command, "get-version"))              { getVersion (args);                     return 0; }
+        if (matchArgument (command, "set-version"))              { setVersion (args);                     return 0; }
+        if (matchArgument (command, "bump-version"))             { bumpVersion (args);                    return 0; }
+        if (matchArgument (command, "git-tag-version"))          { gitTag (args);                         return 0; }
+        if (matchArgument (command, "buildmodule"))              { buildModules (args, false);            return 0; }
+        if (matchArgument (command, "buildallmodules"))          { buildModules (args, true);             return 0; }
+        if (matchArgument (command, "status"))                   { showStatus (args);                     return 0; }
+        if (matchArgument (command, "trim-whitespace"))          { cleanWhitespace (args, false);         return 0; }
+        if (matchArgument (command, "remove-tabs"))              { cleanWhitespace (args, true);          return 0; }
+        if (matchArgument (command, "tidy-divider-comments"))    { tidyDividerComments (args);            return 0; }
+        if (matchArgument (command, "fix-broken-include-paths")) { fixRelativeIncludePaths (args);        return 0; }
+        if (matchArgument (command, "obfuscated-string-code"))   { generateObfuscatedStringCode (args);   return 0; }
+        if (matchArgument (command, "encode-binary"))            { encodeBinary (args);                   return 0; }
         if (matchArgument (command, "trans"))                    { scanFoldersForTranslationFiles (args); return 0; }
-        if (matchArgument (command, "trans-finish"))             { createFinishedTranslationFile (args); return 0; }
+        if (matchArgument (command, "trans-finish"))             { createFinishedTranslationFile (args);  return 0; }
+        if (matchArgument (command, "set-global-search-path"))   { setGlobalPath (args);                  return 0; }
     }
     catch (const CommandLineError& error)
     {
