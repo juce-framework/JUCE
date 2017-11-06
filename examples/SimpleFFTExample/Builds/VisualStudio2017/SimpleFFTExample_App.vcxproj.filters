@@ -1189,6 +1189,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_dsp\processors\juce_IIRFilter.cpp">
       <Filter>Juce Modules\juce_dsp\processors</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\processors\juce_LadderFilter.cpp">
+      <Filter>Juce Modules\juce_dsp\processors</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_dsp\processors\juce_Oversampling.cpp">
       <Filter>Juce Modules\juce_dsp\processors</Filter>
     </ClCompile>
@@ -3165,6 +3168,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_IIRFilter_Impl.h">
       <Filter>Juce Modules\juce_dsp\processors</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_LadderFilter.h">
+      <Filter>Juce Modules\juce_dsp\processors</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_Oscillator.h">
       <Filter>Juce Modules\juce_dsp\processors</Filter>
     </ClInclude>
@@ -3181,6 +3187,9 @@
       <Filter>Juce Modules\juce_dsp\processors</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_ProcessorWrapper.h">
+      <Filter>Juce Modules\juce_dsp\processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_Reverb.h">
       <Filter>Juce Modules\juce_dsp\processors</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_StateVariableFilter.h">
