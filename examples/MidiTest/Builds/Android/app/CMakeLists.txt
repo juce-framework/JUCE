@@ -1119,6 +1119,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_extra/documents/juce_FileBasedDocument.cpp"
     "../../../../../modules/juce_gui_extra/documents/juce_FileBasedDocument.h"
     "../../../../../modules/juce_gui_extra/embedding/juce_ActiveXControlComponent.h"
+    "../../../../../modules/juce_gui_extra/embedding/juce_AndroidViewComponent.h"
     "../../../../../modules/juce_gui_extra/embedding/juce_NSViewComponent.h"
     "../../../../../modules/juce_gui_extra/embedding/juce_UIViewComponent.h"
     "../../../../../modules/juce_gui_extra/embedding/juce_XEmbedComponent.h"
@@ -1146,6 +1147,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_extra/misc/juce_WebBrowserComponent.h"
     "../../../../../modules/juce_gui_extra/native/juce_android_PushNotifications.cpp"
     "../../../../../modules/juce_gui_extra/native/juce_android_WebBrowserComponent.cpp"
+    "../../../../../modules/juce_gui_extra/native/juce_AndroidViewComponent.cpp"
     "../../../../../modules/juce_gui_extra/native/juce_ios_PushNotifications.cpp"
     "../../../../../modules/juce_gui_extra/native/juce_ios_UIViewComponent.mm"
     "../../../../../modules/juce_gui_extra/native/juce_linux_X11_SystemTrayIcon.cpp"
@@ -2264,6 +2266,7 @@ set_source_files_properties("../../../../../modules/juce_gui_extra/code_editor/j
 set_source_files_properties("../../../../../modules/juce_gui_extra/documents/juce_FileBasedDocument.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/documents/juce_FileBasedDocument.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/embedding/juce_ActiveXControlComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_extra/embedding/juce_AndroidViewComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/embedding/juce_NSViewComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/embedding/juce_UIViewComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/embedding/juce_XEmbedComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2291,6 +2294,7 @@ set_source_files_properties("../../../../../modules/juce_gui_extra/misc/juce_Sys
 set_source_files_properties("../../../../../modules/juce_gui_extra/misc/juce_WebBrowserComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_android_PushNotifications.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_android_WebBrowserComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_AndroidViewComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_ios_PushNotifications.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_ios_UIViewComponent.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_linux_X11_SystemTrayIcon.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)

@@ -384,7 +384,7 @@
 					BFF2EB37A2D5F01B426D07EA,
 					1C07E2DC3F7DE233F9641F84,
 					B50D9D46D6C2BE3393758F4F, ); buildRules = ( ); dependencies = (  ); name = "InAppPurchase - App"; productName = InAppPurchase; productReference = 2F3D7DB7AC87E3233938D392; productType = "com.apple.product-type.application"; };
-		66C8FC6F4B36193FCAB3E896 = {isa = PBXProject; buildConfigurationList = A70E95856B781E1B86D0B31E; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { A76C77BF453794B916526154 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 1; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 45141DDCB203B1BF5610629C; projectDirPath = ""; projectRoot = ""; targets = (A76C77BF453794B916526154); };
+		66C8FC6F4B36193FCAB3E896 = {isa = PBXProject; buildConfigurationList = A70E95856B781E1B86D0B31E; attributes = { LastUpgradeCheck = 0830; ORGANIZATIONNAME = "ROLI Ltd."; TargetAttributes = { A76C77BF453794B916526154 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 1; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 45141DDCB203B1BF5610629C; projectDirPath = ""; projectRoot = ""; targets = (A76C77BF453794B916526154); };
 	};
 	rootObject = 66C8FC6F4B36193FCAB3E896;
 }

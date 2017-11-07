@@ -359,7 +359,7 @@
 					E7F21000BAE43EE2C27B118F,
 					627CF54E723F7183D553D95D,
 					66A35D349B59508A0E2A8BCF, ); buildRules = ( ); dependencies = (  ); name = "PushNotificationsDemo - App"; productName = PushNotificationsDemo; productReference = 49780B4714C19DCE9EC9012D; productType = "com.apple.product-type.application"; };
-		84BAB813E5482CE31314F6CD = {isa = PBXProject; buildConfigurationList = 681FA1A1638927EA96D44D7E; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { 5DA4352D4ADD33CF21895F9F = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 38775C0754A977E01F939DE6; projectDirPath = ""; projectRoot = ""; targets = (5DA4352D4ADD33CF21895F9F); };
+		84BAB813E5482CE31314F6CD = {isa = PBXProject; buildConfigurationList = 681FA1A1638927EA96D44D7E; attributes = { LastUpgradeCheck = 0830; ORGANIZATIONNAME = ""; TargetAttributes = { 5DA4352D4ADD33CF21895F9F = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 38775C0754A977E01F939DE6; projectDirPath = ""; projectRoot = ""; targets = (5DA4352D4ADD33CF21895F9F); };
 	};
 	rootObject = 84BAB813E5482CE31314F6CD;
 }
