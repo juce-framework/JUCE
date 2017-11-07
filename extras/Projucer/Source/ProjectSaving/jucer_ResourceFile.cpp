@@ -239,8 +239,9 @@ Result ResourceFile::writeCpp (MemoryOutputStream& cpp, const File& headerFile, 
             << "{" << newLine;
 
         for (int j = 0; j < files.size(); ++j)
-            cpp << "    " << variableNames[j].quoted() << (j < files.size() - 1 ? "," : "") << newLine;
+            cpp << "    " << variableNames[j].quoted() << (j < files.size() ? "," : "") << newLine;
 
+		cpp << "    " << "nullptr" << newLine;
         cpp << "};" << newLine;
     }
 
