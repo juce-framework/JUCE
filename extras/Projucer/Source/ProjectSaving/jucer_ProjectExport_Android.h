@@ -1576,7 +1576,19 @@ private:
                 }
             }
 
-            setAttributeIfNotPresent (*act, "android:screenOrientation", androidScreenOrientation.get());
+            if (androidScreenOrientation.get() == "landscape")
+            {
+                String landscapeString = androidMinimumSDK.get().getIntValue() < 9
+                                       ? "landscape"
+                                       : (androidMinimumSDK.get().getIntValue() < 18 ? "sensorLandscape" : "userLandscape");
+
+                setAttributeIfNotPresent (*act, "android:screenOrientation", landscapeString);
+            }
+            else
+            {
+                setAttributeIfNotPresent (*act, "android:screenOrientation", androidScreenOrientation.get());
+            }
+
             setAttributeIfNotPresent (*act, "android:launchMode", "singleTask");
 
             auto* intent = getOrCreateChildWithName (*act, "intent-filter");
