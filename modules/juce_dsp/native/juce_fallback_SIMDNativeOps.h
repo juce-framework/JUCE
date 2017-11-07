@@ -200,6 +200,25 @@ struct SIMDFallbackOps
         return retval;
     }
 
+    static forcedinline vSIMDType load (const ScalarType* a) noexcept
+    {
+        vSIMDType retval;
+        auto* dst = reinterpret_cast<ScalarType*> (&retval);
+
+        for (size_t i = 0; i < n; ++i)
+            dst [i] = a[i];
+
+        return retval;
+    }
+
+    static forcedinline void store (vSIMDType value, ScalarType* dest) noexcept
+    {
+        const auto* src = reinterpret_cast<const ScalarType*> (&value);
+
+        for (size_t i = 0; i < n; ++i)
+            dest[i] = src[i];
+    }
+
     template <unsigned int shuffle_idx>
     static forcedinline vSIMDType shuffle (vSIMDType a) noexcept
     {
