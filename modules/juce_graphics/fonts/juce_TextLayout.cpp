@@ -218,8 +218,8 @@ void TextLayout::draw (Graphics& g, Rectangle<float> area) const
 
     auto& context   = g.getInternalContext();
     auto clip       = context.getClipBounds();
-    auto clipTop    = (float) clip.getY();
-    auto clipBottom = (float) clip.getBottom();
+    auto clipTop    = clip.getY()      - origin.y;
+    auto clipBottom = clip.getBottom() - origin.y;
 
     for (auto* line : lines)
     {
