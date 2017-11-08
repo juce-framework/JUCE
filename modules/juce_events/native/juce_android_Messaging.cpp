@@ -43,7 +43,7 @@ namespace Android
         jobject invoke (jobject proxy, jobject method, jobjectArray args) override
         {
             auto* env = getEnv();
-            auto methodName = juce::juceString ((jstring) env->CallObjectMethod (method, Method.getName));
+            auto methodName = juce::juceString ((jstring) env->CallObjectMethod (method, JavaMethod.getName));
 
             if (methodName == "run")
             {

@@ -44,7 +44,7 @@ private:
     {
         auto* env = getEnv();
 
-        auto methodName = juceString ((jstring) env->CallObjectMethod (method, Method.getName));
+        auto methodName = juceString ((jstring) env->CallObjectMethod (method, JavaMethod.getName));
 
         if (methodName == "onMediaScannerConnected")
         {

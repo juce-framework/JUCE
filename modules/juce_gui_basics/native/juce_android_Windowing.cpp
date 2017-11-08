@@ -587,10 +587,10 @@ public:
     void handlePaintCallback (JNIEnv* env, jobject canvas, jobject paint)
     {
         jobject rect = env->CallObjectMethod (canvas, CanvasMinimal.getClipBounds);
-        const int left   = env->GetIntField (rect, RectClass.left);
-        const int top    = env->GetIntField (rect, RectClass.top);
-        const int right  = env->GetIntField (rect, RectClass.right);
-        const int bottom = env->GetIntField (rect, RectClass.bottom);
+        const int left   = env->GetIntField (rect, AndroidRectClass.left);
+        const int top    = env->GetIntField (rect, AndroidRectClass.top);
+        const int right  = env->GetIntField (rect, AndroidRectClass.right);
+        const int bottom = env->GetIntField (rect, AndroidRectClass.bottom);
         env->DeleteLocalRef (rect);
 
         const Rectangle<int> clip (left, top, right - left, bottom - top);
@@ -876,9 +876,9 @@ JUCE_API void JUCE_CALLTYPE Process::hide()
     {
         auto* env = getEnv();
 
-        GlobalRef intent (env->NewObject (Intent, Intent.constructor));
-        env->CallObjectMethod (intent, Intent.setAction,   javaString ("android.intent.action.MAIN")  .get());
-        env->CallObjectMethod (intent, Intent.addCategory, javaString ("android.intent.category.HOME").get());
+        GlobalRef intent (env->NewObject (AndroidIntent, AndroidIntent.constructor));
+        env->CallObjectMethod (intent, AndroidIntent.setAction,   javaString ("android.intent.action.MAIN")  .get());
+        env->CallObjectMethod (intent, AndroidIntent.addCategory, javaString ("android.intent.category.HOME").get());
 
         android.activity.callVoidMethod (JuceAppActivity.startActivity, intent.get());
     }
