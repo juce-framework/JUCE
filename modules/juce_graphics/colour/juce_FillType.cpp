@@ -42,6 +42,11 @@ FillType::FillType (const ColourGradient& g)
 {
 }
 
+FillType::FillType (ColourGradient&& g)
+    : colour (0xff000000), gradient (new ColourGradient (static_cast<ColourGradient&&> (g)))
+{
+}
+
 FillType::FillType (const Image& im, const AffineTransform& t) noexcept
     : colour (0xff000000), image (im), transform (t)
 {

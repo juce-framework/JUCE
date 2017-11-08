@@ -36,6 +36,18 @@ namespace juce
 class JUCE_API  ColourGradient  final
 {
 public:
+    /** Creates an uninitialised gradient.
+
+        If you use this constructor instead of the other one, be sure to set all the
+        object's public member variables before using it!
+    */
+    ColourGradient() noexcept;
+
+    ColourGradient (const ColourGradient&);
+    ColourGradient (ColourGradient&&) noexcept;
+    ColourGradient& operator= (const ColourGradient&);
+    ColourGradient& operator= (ColourGradient&&) noexcept;
+
     //==============================================================================
     /** Creates a gradient object.
 
@@ -79,12 +91,13 @@ public:
                     Colour colour2, Point<float> point2,
                     bool isRadial);
 
-    /** Creates an uninitialised gradient.
+    /** Creates a vertical linear gradient between two Y coordinates */
+    static ColourGradient vertical (Colour colour1, float y1,
+                                    Colour colour2, float y2);
 
-        If you use this constructor instead of the other one, be sure to set all the
-        object's public member variables before using it!
-    */
-    ColourGradient() noexcept;
+    /** Creates a horizontal linear gradient between two X coordinates */
+    static ColourGradient horizontal (Colour colour1, float x1,
+                                      Colour colour2, float x2);
 
     /** Destructor */
     ~ColourGradient();
@@ -182,13 +195,10 @@ private:
     struct ColourPoint
     {
         ColourPoint() noexcept {}
+        ColourPoint (double pos, Colour col) noexcept : position (pos), colour (col) {}
 
-        ColourPoint (const double pos, Colour col) noexcept
-            : position (pos), colour (col)
-        {}
-
-        bool operator== (const ColourPoint&) const noexcept;
-        bool operator!= (const ColourPoint&) const noexcept;
+        bool operator== (ColourPoint) const noexcept;
+        bool operator!= (ColourPoint) const noexcept;
 
         double position;
         Colour colour;

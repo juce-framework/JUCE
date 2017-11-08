@@ -1273,8 +1273,7 @@ void LookAndFeel_V2::drawLinearSliderBackground (Graphics& g, int x, int y, int 
         const float iy = y + height * 0.5f - sliderRadius * 0.5f;
         const float ih = sliderRadius;
 
-        g.setGradientFill (ColourGradient (gradCol1, 0.0f, iy,
-                                           gradCol2, 0.0f, iy + ih, false));
+        g.setGradientFill (ColourGradient::vertical (gradCol1, iy, gradCol2, iy + ih));
 
         indent.addRoundedRectangle (x - sliderRadius * 0.5f, iy,
                                     width + sliderRadius, ih,
@@ -1285,8 +1284,7 @@ void LookAndFeel_V2::drawLinearSliderBackground (Graphics& g, int x, int y, int 
         const float ix = x + width * 0.5f - sliderRadius * 0.5f;
         const float iw = sliderRadius;
 
-        g.setGradientFill (ColourGradient (gradCol1, ix, 0.0f,
-                                           gradCol2, ix + iw, 0.0f, false));
+        g.setGradientFill (ColourGradient::horizontal (gradCol1, ix, gradCol2, ix + iw));
 
         indent.addRoundedRectangle (ix, y - sliderRadius * 0.5f,
                                     iw, height + sliderRadius,
@@ -1765,10 +1763,8 @@ void LookAndFeel_V2::drawDocumentWindowTitleBar (DocumentWindow& window, Graphic
 
     const bool isActive = window.isActiveWindow();
 
-    g.setGradientFill (ColourGradient (window.getBackgroundColour(),
-                                       0.0f, 0.0f,
-                                       window.getBackgroundColour().contrasting (isActive ? 0.15f : 0.05f),
-                                       0.0f, (float) h, false));
+    g.setGradientFill (ColourGradient::vertical (window.getBackgroundColour(), 0,
+                                                 window.getBackgroundColour().contrasting (isActive ? 0.15f : 0.05f), (float) h));
     g.fillAll();
 
     Font font (h * 0.65f, Font::bold);

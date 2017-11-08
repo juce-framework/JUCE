@@ -872,7 +872,7 @@ void LookAndFeel_V4::drawMenuBarBackground (Graphics& g, int width, int height,
     g.fillRect  (r.removeFromTop (1));
     g.fillRect  (r.removeFromBottom (1));
 
-    g.setGradientFill (ColourGradient (colour, 0, 0, colour.darker (0.2f), 0, (float) height, false));
+    g.setGradientFill (ColourGradient::vertical (colour, 0, colour.darker (0.2f), (float) height));
     g.fillRect (r);
 }
 
@@ -1132,8 +1132,8 @@ void LookAndFeel_V4::drawConcertinaPanelHeader (Graphics& g, const Rectangle<int
 
     const auto bkg = Colours::grey;
 
-    g.setGradientFill (ColourGradient (Colours::white.withAlpha (isMouseOver ? 0.4f : 0.2f), 0, (float) area.getY(),
-                                       Colours::darkgrey.withAlpha (0.1f), 0, (float) area.getBottom(), false));
+    g.setGradientFill (ColourGradient::vertical (Colours::white.withAlpha (isMouseOver ? 0.4f : 0.2f), (float) area.getY(),
+                                                 Colours::darkgrey.withAlpha (0.1f), (float) area.getBottom()));
     g.fillPath (p);
 }
 

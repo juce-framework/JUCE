@@ -53,6 +53,11 @@ public:
     */
     FillType (const ColourGradient& gradient);
 
+    /** Creates a gradient fill type.
+        @see setGradient
+    */
+    FillType (ColourGradient&& gradient);
+
     /** Creates a tiled image fill type. The transform allows you to set the scaling, offset
         and rotation of the pattern.
         @see setTiledImage
