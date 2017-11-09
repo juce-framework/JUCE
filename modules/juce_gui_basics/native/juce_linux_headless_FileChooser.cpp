@@ -27,17 +27,16 @@
 namespace juce
 {
 
-#if JUCE_WINDOWS || (JUCE_LINUX && ! JUCE_HEADLESS_PLUGIN_CLIENT) || JUCE_MAC
-
-SystemTrayIconComponent::SystemTrayIconComponent()
+bool FileChooser::isPlatformDialogAvailable()
 {
-    addToDesktop (0);
+    return false;
 }
 
-SystemTrayIconComponent::~SystemTrayIconComponent()
-{
-}
-
-#endif
+void FileChooser::showPlatformDialog (Array<File>& /* results */,
+                                      const String& /* title */, const File& /* file */, const String& /* filters */,
+                                      bool /* isDirectory */, bool /* selectsFiles */,
+                                      bool /* isSave */, bool /* warnAboutOverwritingExistingFiles */,
+                                      bool /*treatFilePackagesAsDirs*/,
+                                      bool /* selectMultipleFiles */, FilePreviewComponent*) {}
 
 } // namespace juce

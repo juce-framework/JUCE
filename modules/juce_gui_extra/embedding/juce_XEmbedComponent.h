@@ -32,7 +32,7 @@ bool juce_handleXEmbedEvent (ComponentPeer*, void*);
 /** @internal */
 unsigned long juce_getCurrentFocusWindow (ComponentPeer*);
 
-#if JUCE_LINUX || DOXYGEN
+#if (JUCE_LINUX && ! JUCE_HEADLESS_PLUGIN_CLIENT) || DOXYGEN
 
 //==============================================================================
 /**
