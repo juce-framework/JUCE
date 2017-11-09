@@ -77,8 +77,8 @@ ColourGradient::ColourGradient (Colour colour1, Point<float> p1,
       point2 (p2),
       isRadial (radial)
 {
-    colours.add ({ 0.0, colour1 });
-    colours.add ({ 1.0, colour2 });
+    colours.add (ColourPoint { 0.0, colour1 },
+                 ColourPoint { 1.0, colour2 });
 }
 
 ColourGradient::~ColourGradient() {}
@@ -118,7 +118,7 @@ int ColourGradient::addColour (const double proportionAlongGradient, Colour colo
 
     if (proportionAlongGradient <= 0)
     {
-        colours.set (0, ColourPoint (0.0, colour));
+        colours.set (0, { 0.0, colour });
         return 0;
     }
 
@@ -129,7 +129,7 @@ int ColourGradient::addColour (const double proportionAlongGradient, Colour colo
         if (colours.getReference(i).position > pos)
             break;
 
-    colours.insert (i, ColourPoint (pos, colour));
+    colours.insert (i, { pos, colour });
     return i;
 }
 
