@@ -324,6 +324,7 @@ extern AndroidSystem android;
  METHOD (startIntentSenderForResult, "startIntentSenderForResult", "(Landroid/content/IntentSender;ILandroid/content/Intent;III)V") \
  METHOD (moveTaskToBack,          "moveTaskToBack",       "(Z)Z") \
  METHOD (startActivity,           "startActivity",        "(Landroid/content/Intent;)V") \
+ METHOD (getContentResolver,      "getContentResolver",   "()Landroid/content/ContentResolver;") \
 
 DECLARE_JNI_CLASS (JuceAppActivity, JUCE_ANDROID_ACTIVITY_CLASSPATH);
 #undef JNI_CLASS_MEMBERS
@@ -561,6 +562,13 @@ DECLARE_JNI_CLASS (JavaSet, "java/util/Set");
   METHOD (getBytes, "getBytes", "()[B")
 
 DECLARE_JNI_CLASS (JavaString, "java/lang/String");
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ STATICMETHOD (parse, "parse", "(Ljava/lang/String;)Landroid/net/Uri;") \
+ METHOD       (getAuthority, "getAuthority", "()Ljava/lang/String;") \
+
+DECLARE_JNI_CLASS (Uri, "android/net/Uri");
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================

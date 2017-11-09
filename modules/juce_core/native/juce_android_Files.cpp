@@ -32,6 +32,328 @@ namespace juce
 DECLARE_JNI_CLASS (MediaScannerConnection, "android/media/MediaScannerConnection");
 #undef JNI_CLASS_MEMBERS
 
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (query,           "query",           "(Landroid/net/Uri;[Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor;") \
+ METHOD (openInputStream, "openInputStream", "(Landroid/net/Uri;)Ljava/io/InputStream;") \
+
+DECLARE_JNI_CLASS (ContentResolver, "android/content/ContentResolver");
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (moveToFirst,     "moveToFirst",     "()Z") \
+ METHOD (getColumnIndex,  "getColumnIndex",  "(Ljava/lang/String;)I") \
+ METHOD (getString,       "getString",       "(I)Ljava/lang/String;") \
+ METHOD (close,           "close",           "()V") \
+
+DECLARE_JNI_CLASS (AndroidCursor, "android/database/Cursor");
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ STATICMETHOD (getExternalStorageDirectory, "getExternalStorageDirectory", "()Ljava/io/File;") \
+ STATICMETHOD (getExternalStoragePublicDirectory, "getExternalStoragePublicDirectory", "(Ljava/lang/String;)Ljava/io/File;") \
+
+DECLARE_JNI_CLASS (AndroidEnvironment, "android/os/Environment");
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (getAbsolutePath, "getAbsolutePath", "()Ljava/lang/String;") \
+
+DECLARE_JNI_CLASS (AndroidFile, "java/io/File");
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ STATICMETHOD (withAppendedId, "withAppendedId", "(Landroid/net/Uri;J)Landroid/net/Uri;") \
+
+DECLARE_JNI_CLASS (ContentUris, "android/content/ContentUris");
+#undef JNI_CLASS_MEMBERS
+
+//==============================================================================
+struct AndroidContentUriResolver
+{
+public:
+    static LocalRef<jobject> getInputStreamForContentUri (const URL& url)
+    {
+        // only use this method for content URIs
+        jassert (url.getScheme() == "content");
+        auto* env = getEnv();
+
+        LocalRef<jobject> contentResolver (android.activity.callObjectMethod (JuceAppActivity.getContentResolver));
+
+        if (contentResolver)
+            return LocalRef<jobject> ((env->CallObjectMethod (contentResolver.get(), ContentResolver.openInputStream, urlToUri (url).get())));
+
+        return LocalRef<jobject>();
+    }
+
+    static File getLocalFileFromContentUri (const URL& url)
+    {
+        // only use this method for content URIs
+        jassert (url.getScheme() == "content");
+
+        auto authority  = url.getDomain();
+        auto documentId = URL::removeEscapeChars (url.getSubPath().fromFirstOccurrenceOf ("/", false, false));
+        auto tokens = StringArray::fromTokens (documentId, ":", "");
+
+        if (authority == "com.android.externalstorage.documents")
+        {
+            auto storageId  = tokens[0];
+            auto subpath    = tokens[1];
+
+            auto storagePath = getStorageDevicePath (storageId);
+
+            if (storagePath != File())
+                return storagePath.getChildFile (subpath);
+        }
+        else if (authority == "com.android.providers.downloads.documents")
+        {
+            auto type       = tokens[0];
+            auto downloadId = tokens[1];
+
+            if (type.equalsIgnoreCase ("raw"))
+            {
+                return File (downloadId);
+            }
+            else if (type.equalsIgnoreCase ("downloads"))
+            {
+                auto subDownloadPath = url.getSubPath().fromFirstOccurrenceOf ("tree/downloads", false, false);
+                return File (getWellKnownFolder ("Download").getFullPathName() + "/" + subDownloadPath);
+            }
+            else
+            {
+                return getLocalFileFromContentUri (URL ("content://downloads/public_downloads/" + documentId));
+            }
+        }
+        else if (authority == "com.android.providers.media.documents" && documentId.isNotEmpty())
+        {
+            auto type    = tokens[0];
+            auto mediaId = tokens[1];
+
+            if (type == "image")
+                type = "images";
+
+            return getCursorDataColumn (URL (String ("content://media/external/") + type + "/media"),
+                                        "_id=?", StringArray {mediaId});
+        }
+
+        return getCursorDataColumn (url);
+    }
+private:
+    //==============================================================================
+    static String getCursorDataColumn (const URL& url, const String& selection = {},
+                                       const StringArray& selectionArgs = {})
+    {
+        auto uri = urlToUri (url);
+        auto* env = getEnv();
+        LocalRef<jobject> contentResolver (android.activity.callObjectMethod (JuceAppActivity.getContentResolver));
+
+        if (contentResolver)
+        {
+            LocalRef<jstring> columnName (javaString ("_data"));
+            LocalRef<jobjectArray> projection (env->NewObjectArray (1, JavaString, columnName.get()));
+
+            LocalRef<jobjectArray> args;
+
+            if (selection.isNotEmpty())
+            {
+                args = LocalRef<jobjectArray> (env->NewObjectArray (selectionArgs.size(), JavaString, javaString("").get()));
+
+                for (int i = 0; i < selectionArgs.size(); ++i)
+                    env->SetObjectArrayElement (args.get(), i, javaString (selectionArgs[i]).get());
+            }
+
+            LocalRef<jstring> jSelection (selection.isNotEmpty() ? javaString (selection) : LocalRef<jstring>());
+            LocalRef<jobject> cursor (env->CallObjectMethod (contentResolver.get(), ContentResolver.query,
+                                                             uri.get(), projection.get(), jSelection.get(),
+                                                             args.get(), nullptr));
+
+            if (cursor)
+            {
+                if (env->CallBooleanMethod (cursor.get(), AndroidCursor.moveToFirst) != 0)
+                {
+                    auto columnIndex = env->CallIntMethod (cursor.get(), AndroidCursor.getColumnIndex, columnName.get());
+
+                    if (columnIndex >= 0)
+                    {
+                        LocalRef<jstring> value ((jstring) env->CallObjectMethod (cursor.get(), AndroidCursor.getString, columnIndex));
+
+                        if (value)
+                            return juceString (value.get());
+                    }
+                }
+
+                env->CallVoidMethod (cursor.get(), AndroidCursor.close);
+            }
+        }
+
+        return {};
+    }
+
+    //==============================================================================
+    static File getWellKnownFolder (const String& folderId)
+    {
+        auto* env = getEnv();
+        LocalRef<jobject> downloadFolder (env->CallStaticObjectMethod (AndroidEnvironment,
+                                                                       AndroidEnvironment.getExternalStoragePublicDirectory,
+                                                                       javaString (folderId).get()));
+
+        return (downloadFolder ? juceFile (downloadFolder) : File());
+    }
+
+    //==============================================================================
+    static File getStorageDevicePath (const String& storageId)
+    {
+        // check for the primary alias
+        if (storageId == "primary")
+            return getPrimaryStorageDirectory();
+
+        auto storageDevices = getSecondaryStorageDirectories();
+
+        for (auto storageDevice : storageDevices)
+            if (getStorageIdForMountPoint (storageDevice) == storageId)
+                return storageDevice;
+
+        return {};
+    }
+
+    static File getPrimaryStorageDirectory()
+    {
+        auto* env = getEnv();
+        return juceFile (LocalRef<jobject> (env->CallStaticObjectMethod (AndroidEnvironment, AndroidEnvironment.getExternalStorageDirectory)));
+    }
+
+    static Array<File> getSecondaryStorageDirectories()
+    {
+        Array<File> results;
+
+        if (getSDKVersion() >= 19)
+        {
+            auto* env = getEnv();
+            static jmethodID m = (env->GetMethodID (JuceAppActivity, "getExternalFilesDirs",
+                                                    "(Ljava/lang/String;)[Ljava/io/File;"));
+            if (m == 0)
+                return {};
+
+            auto paths = convertFileArray (LocalRef<jobject> (android.activity.callObjectMethod (m, nullptr)));
+
+            for (auto path : paths)
+                results.add (getMountPointForFile (path));
+        }
+        else
+        {
+            // on older SDKs other external storages are located "next" to the primary
+            // storage mount point
+            auto mountFolder = getMountPointForFile (getPrimaryStorageDirectory())
+                                    .getParentDirectory();
+
+            // don't include every folder. Only folders which are actually mountpoints
+            juce_statStruct info;
+            if (! juce_stat (mountFolder.getFullPathName(), info))
+                return {};
+
+            auto rootFsDevice = info.st_dev;
+            DirectoryIterator iter (mountFolder, false, "*", File::findDirectories);
+
+            while (iter.next())
+            {
+                auto candidate = iter.getFile();
+
+                if (juce_stat (candidate.getFullPathName(), info)
+                      && info.st_dev != rootFsDevice)
+                    results.add (candidate);
+            }
+
+        }
+
+        return results;
+    }
+
+    //==============================================================================
+    static String getStorageIdForMountPoint (const File& mountpoint)
+    {
+        // currently this seems to work fine, but something
+        // more intelligent may be needed in the future
+        return mountpoint.getFileName();
+    }
+
+    static File getMountPointForFile (const File& file)
+    {
+        juce_statStruct info;
+
+        if (juce_stat (file.getFullPathName(), info))
+        {
+            auto dev  = info.st_dev;
+            File mountPoint = file;
+
+            for (;;)
+            {
+                auto parent = mountPoint.getParentDirectory();
+
+                if (parent == mountPoint)
+                    break;
+
+                juce_stat (parent.getFullPathName(), info);
+
+                if (info.st_dev != dev)
+                    break;
+
+                mountPoint = parent;
+            }
+
+            return mountPoint;
+        }
+
+        return {};
+    }
+
+    //==============================================================================
+    static Array<File> convertFileArray (LocalRef<jobject> obj)
+    {
+        auto* env = getEnv();
+        int n = (int) env->GetArrayLength ((jobjectArray) obj.get());
+        Array<File> files;
+
+        for (int i = 0; i < n; ++i)
+            files.add (juceFile (LocalRef<jobject> (env->GetObjectArrayElement ((jobjectArray) obj.get(),
+                                                                                 (jsize) i))));
+
+        return files;
+    }
+
+    static File juceFile (LocalRef<jobject> obj)
+    {
+        auto* env = getEnv();
+
+        if (env->IsInstanceOf (obj.get(), AndroidFile) != 0)
+            return File (safeString (LocalRef<jobject> (env->CallObjectMethod (obj.get(),
+                                                            AndroidFile.getAbsolutePath))));
+
+        return {};
+    }
+
+    //==============================================================================
+    static int getSDKVersion()
+    {
+        static int sdkVersion
+            = getEnv()->CallStaticIntMethod (JuceAppActivity,
+                                             JuceAppActivity.getAndroidSDKVersion);
+
+        return sdkVersion;
+    }
+
+    static LocalRef<jobject> urlToUri (const URL& url)
+    {
+        return LocalRef<jobject> (getEnv()->CallStaticObjectMethod (Uri, Uri.parse, javaString (url.toString (true)).get()));
+    }
+
+    static String safeString (LocalRef<jobject> str)
+    {
+        if (str)
+            return juceString ((jstring) str.get());
+
+        return {};
+    }
+};
+
 //==============================================================================
 class MediaScannerConnectionClient : public AndroidInterfaceImplementer
 {
