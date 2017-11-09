@@ -83,7 +83,7 @@
  #endif
 
 //==============================================================================
-#elif JUCE_LINUX
+#elif JUCE_LINUX && ! JUCE_HEADLESS_PLUGIN_CLIENT
  #include <X11/Xlib.h>
  #include <X11/Xatom.h>
  #include <X11/Xutil.h>
@@ -154,8 +154,8 @@
  #include "native/juce_win32_SystemTrayIcon.cpp"
 
 //==============================================================================
-#elif JUCE_LINUX
-  #include "native/juce_linux_XEmbedComponent.cpp"
+#elif JUCE_LINUX && ! JUCE_HEADLESS_PLUGIN_CLIENT
+ #include "native/juce_linux_XEmbedComponent.cpp"
  #if JUCE_WEB_BROWSER
   #include "native/juce_linux_X11_WebBrowserComponent.cpp"
  #endif

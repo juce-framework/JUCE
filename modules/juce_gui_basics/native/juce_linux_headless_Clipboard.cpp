@@ -27,17 +27,13 @@
 namespace juce
 {
 
-#if JUCE_WINDOWS || (JUCE_LINUX && ! JUCE_HEADLESS_PLUGIN_CLIENT) || JUCE_MAC
+//==============================================================================
+void SystemClipboard::copyTextToClipboard (const String& /* clipText */) {}
 
-SystemTrayIconComponent::SystemTrayIconComponent()
+String SystemClipboard::getTextFromClipboard()
 {
-    addToDesktop (0);
+    String content;
+    return content;
 }
-
-SystemTrayIconComponent::~SystemTrayIconComponent()
-{
-}
-
-#endif
 
 } // namespace juce
