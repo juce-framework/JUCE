@@ -64,6 +64,8 @@ void SidePanel::setContent (Component* newContent, bool deleteComponentWhenNoLon
             contentComponent.setNonOwned (newContent);
 
         addAndMakeVisible (contentComponent);
+
+        resized();
     }
 }
 
