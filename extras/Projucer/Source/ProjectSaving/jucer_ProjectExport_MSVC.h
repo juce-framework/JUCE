@@ -254,7 +254,7 @@ public:
                                                                       StringArray (debugInfoOptions),
                                                                       Array<var> (debugInfoValues)),
                            "The type of debugging information created for your program for this configuration."
-                           " This will only be used in a debug configuration with no optimisation or a release configuration"
+                           " This will always be used in a debug configuration and will be used in a release configuration"
                            " with forced generation of debug symbols.");
             }
 
@@ -557,8 +557,7 @@ public:
 
                     cl->createNewChildElement ("Optimization")->addTextElement (getOptimisationLevelString (config.getOptimisationLevelInt()));
 
-                    if ((isDebug || config.shouldGenerateDebugSymbols())
-                        && config.getOptimisationLevelInt() <= optimisationOff)
+                    if (isDebug || config.shouldGenerateDebugSymbols())
                     {
                         cl->createNewChildElement ("DebugInformationFormat")
                             ->addTextElement (config.getDebugInformationFormatString());
