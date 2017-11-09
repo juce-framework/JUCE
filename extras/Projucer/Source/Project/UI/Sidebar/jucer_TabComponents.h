@@ -69,7 +69,7 @@ public:
 
     void mouseUp (const MouseEvent& e) override
     {
-        if (arrowPath.getBounds().expanded (3).contains (e.getPosition().toFloat()))
+        if (! e.mouseWasDraggedSinceMouseDown())
             sendChangeMessage();
     }
 
