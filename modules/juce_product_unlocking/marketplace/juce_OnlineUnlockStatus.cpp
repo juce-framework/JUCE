@@ -327,6 +327,10 @@ StringArray OnlineUnlockStatus::getLocalMachineIDs()
     return MachineIDUtilities::getLocalMachineIDs();
 }
 
+void OnlineUnlockStatus::userCancelled()
+{
+}
+
 void OnlineUnlockStatus::setUserEmail (const String& usernameOrEmail)
 {
     status.setProperty (userNameProp, usernameOrEmail, nullptr);

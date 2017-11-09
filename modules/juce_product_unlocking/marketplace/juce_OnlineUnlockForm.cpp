@@ -129,6 +129,8 @@ struct OnlineUnlockForm::OverlayComp  : public Component,
     {
         if (button == cancelButton)
         {
+            form.status.userCancelled();
+
             spinner.setVisible (false);
             stopTimer();
 
