@@ -285,7 +285,7 @@ public:
         if (iOS)
             props.add (new TextPropertyComponentWithEnablement (getAppGroupIdValue(), getAppGroupsEnabledValue(), "App Group ID", 256, false),
                        "The App Group ID to be used for allowing multiple apps to access a shared resource folder. Multiple IDs can be "
-                       "added seperated by a semicolon.");
+                       "added separated by a semicolon.");
 
         props.add (new BooleanPropertyComponent (getSetting ("keepCustomXcodeSchemes"), "Keep custom Xcode schemes", "Enabled"),
                    "Enable this to keep any Xcode schemes you have created for debugging or running, e.g. to launch a plug-in in"

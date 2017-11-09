@@ -131,7 +131,7 @@ public:
         String description;
 
         description << "The " << getName() << " exporter produces a single CMakeLists.txt file with "
-                    << "multiple platform dependant sections, where the configuration for each section "
+                    << "multiple platform dependent sections, where the configuration for each section "
                     << "is inherited from other exporters added to this project." << newLine
                     << newLine
                     << "The exporters which provide the CLion configuration for the corresponding platform are:" << newLine

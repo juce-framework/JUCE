@@ -861,7 +861,7 @@ private:
                    "The number of the minimum version of the Android SDK that the app requires");
 
         props.add (new TextPropertyComponent (androidExtraAssetsFolder.getPropertyAsValue(), "Extra Android Assets", 256, false),
-                   "A path to a folder (relative to the project folder) which conatins extra android assets.");
+                   "A path to a folder (relative to the project folder) which contains extra android assets.");
     }
 
     //==============================================================================
