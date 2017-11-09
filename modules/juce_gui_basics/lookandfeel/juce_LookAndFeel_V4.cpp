@@ -1439,6 +1439,13 @@ void LookAndFeel_V4::initialiseColours()
         FileSearchPathListComponent::backgroundColourId,        currentColourScheme.getUIColour (ColourScheme::UIColour::menuBackground).getARGB(),
 
         FileChooserDialogBox::titleTextColourId,                currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
+
+        SidePanel::backgroundColour,                            currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).getARGB(),
+        SidePanel::titleTextColour,                             currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
+        SidePanel::shadowBaseColour,                            currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).darker().getARGB(),
+        SidePanel::dismissButtonNormalColour,                   currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).getARGB(),
+        SidePanel::dismissButtonOverColour,                     currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).darker().getARGB(),
+        SidePanel::dismissButtonDownColour,                     currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).brighter().getARGB(),
     };
 
     for (int i = 0; i < numElementsInArray (coloursToUse); i += 2)

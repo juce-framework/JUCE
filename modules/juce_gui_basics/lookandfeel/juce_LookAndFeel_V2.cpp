@@ -212,6 +212,13 @@ LookAndFeel_V2::LookAndFeel_V2()
         FileSearchPathListComponent::backgroundColourId,        0xffffffff,
 
         FileChooserDialogBox::titleTextColourId,                0xff000000,
+
+        SidePanel::backgroundColour,                            0xffffffff,
+        SidePanel::titleTextColour,                             0xff000000,
+        SidePanel::shadowBaseColour,                            0xff000000,
+        SidePanel::dismissButtonNormalColour,                   textButtonColour,
+        SidePanel::dismissButtonOverColour,                     textButtonColour,
+        SidePanel::dismissButtonDownColour,                     0xff4444ff,
     };
 
     for (int i = 0; i < numElementsInArray (standardColours); i += 2)
@@ -2774,6 +2781,37 @@ void LookAndFeel_V2::drawKeymapChangeButton (Graphics& g, int width, int height,
         g.setColour (textColour.withAlpha (0.4f));
         g.drawRect (0, 0, width, height);
     }
+}
+//==============================================================================
+Font LookAndFeel_V2::getSidePanelTitleFont (SidePanel&)
+{
+    return Font (18.0f);
+}
+
+Justification LookAndFeel_V2::getSidePanelTitleJustification (SidePanel& panel)
+{
+    return panel.isPanelOnLeft() ? Justification::centredRight
+                                  : Justification::centredLeft;
+}
+
+Path LookAndFeel_V2::getSidePanelDismissButtonShape (SidePanel& panel)
+{
+    Path p;
+
+    if (panel.isPanelOnLeft())
+    {
+        p.startNewSubPath (10, 0);
+        p.lineTo (0, 5);
+        p.lineTo (10, 10);
+    }
+    else
+    {
+        p.startNewSubPath (0, 10);
+        p.lineTo (10, 5);
+        p.lineTo (0, 0);
+    }
+
+    return p;
 }
 
 //==============================================================================

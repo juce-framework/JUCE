@@ -202,6 +202,7 @@ namespace juce
 #include "layout/juce_ResizableCornerComponent.cpp"
 #include "layout/juce_ResizableEdgeComponent.cpp"
 #include "layout/juce_ScrollBar.cpp"
+#include "layout/juce_SidePanel.cpp"
 #include "layout/juce_StretchableLayoutManager.cpp"
 #include "layout/juce_StretchableLayoutResizerBar.cpp"
 #include "layout/juce_StretchableObjectResizer.cpp"
