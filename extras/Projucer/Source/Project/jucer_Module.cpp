@@ -906,6 +906,7 @@ bool EnabledModuleList::isJuceModule (const String& moduleID)
 {
     static StringArray juceModuleIds =
     {
+        "juce_analytics",
         "juce_audio_basics",
         "juce_audio_devices",
         "juce_audio_formats",
