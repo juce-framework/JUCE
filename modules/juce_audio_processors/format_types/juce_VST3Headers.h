@@ -95,12 +95,14 @@
  #include <base/source/fobject.cpp>
  #include <base/source/fstreamer.cpp>
  #include <base/source/fstring.cpp>
- #include <base/source/flock.cpp>
  #include <base/source/updatehandler.cpp>
+ #include <base/thread/source/flock.cpp>
+ #include <base/thread/source/fcondition.cpp>
  #include <pluginterfaces/base/conststringtable.cpp>
  #include <pluginterfaces/base/funknown.cpp>
  #include <pluginterfaces/base/ipluginbase.h>
  #include <pluginterfaces/base/ustring.cpp>
+ #include <pluginterfaces/base/coreiids.cpp>
  #include <pluginterfaces/gui/iplugview.h>
  #include <pluginterfaces/gui/iplugviewcontentscalesupport.h>
  #include <pluginterfaces/vst/ivstmidicontrollers.h>
@@ -122,7 +124,6 @@ namespace Steinberg
     DEF_CLASS_IID (IPluginBase)
     DEF_CLASS_IID (IPlugView)
     DEF_CLASS_IID (IPlugFrame)
-    DEF_CLASS_IID (IBStream)
     DEF_CLASS_IID (IPluginFactory)
     DEF_CLASS_IID (IPluginFactory2)
     DEF_CLASS_IID (IPluginFactory3)

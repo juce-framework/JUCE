@@ -2597,7 +2597,7 @@ struct JucePluginFactory  : public IPluginFactory3
     {
         *obj = nullptr;
 
-        FUID sourceFuid = sourceIid;
+        FUID sourceFuid = FUID::fromTUID(sourceIid); // TODO: not sure about this one
 
         if (cid == nullptr || sourceIid == nullptr || ! sourceFuid.isValid())
         {
