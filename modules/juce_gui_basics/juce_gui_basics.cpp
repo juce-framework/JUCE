@@ -215,6 +215,7 @@ namespace juce
 #include "lookandfeel/juce_LookAndFeel_V3.cpp"
 #include "lookandfeel/juce_LookAndFeel_V4.cpp"
 #include "menus/juce_MenuBarComponent.cpp"
+#include "menus/juce_BurgerMenuComponent.cpp"
 #include "menus/juce_MenuBarModel.cpp"
 #include "menus/juce_PopupMenu.cpp"
 #include "positioning/juce_MarkerList.cpp"

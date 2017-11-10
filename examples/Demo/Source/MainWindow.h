@@ -48,6 +48,8 @@ public:
     // (returns a shared AudioDeviceManager object that all the demos can use)
     static AudioDeviceManager& getSharedAudioDeviceManager();
 
+    static SidePanel& getSharedSidePanel();
+
     StringArray getRenderingEngines() const;
     int getActiveRenderingEngine() const;
     void setRenderingEngine (int index);

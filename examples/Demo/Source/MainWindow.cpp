@@ -124,6 +124,8 @@ public:
             demoList.getViewport()->setScrollOnDragEnabled (true);
 
         addAndMakeVisible (demoList);
+        addAndMakeVisible (sidePanel);
+        sidePanel.setAlwaysOnTop (true);
     }
 
     ~ContentComponent()
@@ -246,9 +248,15 @@ public:
         return currentDemo != nullptr && currentDemo->getName().contains ("OpenGL 2D");
     }
 
+    SidePanel& getSharedSidePanel()
+    {
+        return sidePanel;
+    }
+
 private:
     ListBox demoList;
     ScopedPointer<Component> currentDemo;
+    SidePanel sidePanel {"Menu", 300, false};
 
     LookAndFeel_V1 lookAndFeelV1;
     LookAndFeel_V2 lookAndFeelV2;
@@ -743,6 +751,11 @@ int MainAppWindow::getActiveRenderingEngine() const
         return peer->getCurrentRenderingEngine();
 
     return 0;
+}
+
+SidePanel& MainAppWindow::getSharedSidePanel()
+{
+    return getMainAppWindow()->contentComponent->getSharedSidePanel();
 }
 
 Path MainAppWindow::getJUCELogoPath()

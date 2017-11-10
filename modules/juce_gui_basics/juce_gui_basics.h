@@ -248,6 +248,7 @@ namespace juce
 #include "widgets/juce_ToolbarItemComponent.h"
 #include "widgets/juce_ToolbarItemFactory.h"
 #include "widgets/juce_ToolbarItemPalette.h"
+#include "menus/juce_BurgerMenuComponent.h"
 #include "buttons/juce_ToolbarButton.h"
 #include "misc/juce_DropShadower.h"
 #include "misc/juce_JUCESplashScreen.h"

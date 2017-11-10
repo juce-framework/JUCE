@@ -1276,12 +1276,87 @@ private:
 };
 
 //==============================================================================
+struct BurgerMenuHeader  : public Component,
+                           private Button::Listener
+{
+    BurgerMenuHeader()
+    {
+        static const unsigned char burgerMenuPathData[]
+            = { 110,109,0,0,128,64,0,0,32,65,108,0,0,224,65,0,0,32,65,98,254,212,232,65,0,0,32,65,0,0,240,65,252,
+                169,17,65,0,0,240,65,0,0,0,65,98,0,0,240,65,8,172,220,64,254,212,232,65,0,0,192,64,0,0,224,65,0,0,
+                192,64,108,0,0,128,64,0,0,192,64,98,16,88,57,64,0,0,192,64,0,0,0,64,8,172,220,64,0,0,0,64,0,0,0,65,
+                98,0,0,0,64,252,169,17,65,16,88,57,64,0,0,32,65,0,0,128,64,0,0,32,65,99,109,0,0,224,65,0,0,96,65,108,
+                0,0,128,64,0,0,96,65,98,16,88,57,64,0,0,96,65,0,0,0,64,4,86,110,65,0,0,0,64,0,0,128,65,98,0,0,0,64,
+                254,212,136,65,16,88,57,64,0,0,144,65,0,0,128,64,0,0,144,65,108,0,0,224,65,0,0,144,65,98,254,212,232,
+                65,0,0,144,65,0,0,240,65,254,212,136,65,0,0,240,65,0,0,128,65,98,0,0,240,65,4,86,110,65,254,212,232,
+                65,0,0,96,65,0,0,224,65,0,0,96,65,99,109,0,0,224,65,0,0,176,65,108,0,0,128,64,0,0,176,65,98,16,88,57,
+                64,0,0,176,65,0,0,0,64,2,43,183,65,0,0,0,64,0,0,192,65,98,0,0,0,64,254,212,200,65,16,88,57,64,0,0,208,
+                65,0,0,128,64,0,0,208,65,108,0,0,224,65,0,0,208,65,98,254,212,232,65,0,0,208,65,0,0,240,65,254,212,
+                200,65,0,0,240,65,0,0,192,65,98,0,0,240,65,2,43,183,65,254,212,232,65,0,0,176,65,0,0,224,65,0,0,176,
+                65,99,101,0,0 };
+
+        Path p;
+        p.loadPathFromData (burgerMenuPathData, sizeof (burgerMenuPathData));
+        burgerButton.setShape (p, true, true, false);
+
+        burgerButton.addListener (this);
+        addAndMakeVisible (burgerButton);
+    }
+
+    ~BurgerMenuHeader()
+    {
+        MainAppWindow::getSharedSidePanel().showOrHide (false);
+    }
+
+private:
+    void paint (Graphics& g) override
+    {
+        auto titleBarBackgroundColour = getLookAndFeel().findColour (ResizableWindow::backgroundColourId)
+                                                        .darker();
+
+        g.setColour (titleBarBackgroundColour);
+        g.fillRect (getLocalBounds());
+    }
+
+    void resized() override
+    {
+        auto r = getLocalBounds();
+
+        burgerButton.setBounds (r.removeFromRight (40).withSizeKeepingCentre (20, 20));
+
+        titleLabel.setFont (Font (getHeight() * 0.5f, Font::plain));
+        titleLabel.setBounds (r);
+    }
+
+    void buttonClicked (Button*) override
+    {
+        auto& panel = MainAppWindow::getSharedSidePanel();
+
+        panel.showOrHide (! panel.isPanelShowing());
+    }
+
+    Label titleLabel { "titleLabel", "JUCE Demo" };
+    ShapeButton burgerButton { "burgerButton", Colours::lightgrey, Colours::lightgrey, Colours::white };
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BurgerMenuHeader)
+};
+
+//==============================================================================
 class MenusDemo : public Component,
                   public MenuBarModel,
                   public ChangeBroadcaster,
                   private Button::Listener
 {
 public:
+    //==============================================================================
+    enum MenuBarPosition
+    {
+        window,
+        globalMenuBar,
+        burger
+    };
+
+    //==============================================================================
     MenusDemo()
     {
         addAndMakeVisible (menuBar = new MenuBarComponent (this));
@@ -1290,12 +1365,15 @@ public:
         popupButton.setTriggeredOnMouseDown (true);
         popupButton.addListener (this);
         addAndMakeVisible (popupButton);
+        addChildComponent (menuHeader);
 
         setApplicationCommandManagerToWatch (&MainAppWindow::getApplicationCommandManager());
     }
 
     ~MenusDemo()
     {
+        MainAppWindow::getSharedSidePanel().setContent (nullptr, false);
+
        #if JUCE_MAC
         MenuBarModel::setMacMainMenu (nullptr);
        #endif
@@ -1307,7 +1385,13 @@ public:
     void resized() override
     {
         Rectangle<int> area (getLocalBounds());
-        menuBar->setBounds (area.removeFromTop (LookAndFeel::getDefaultLookAndFeel().getDefaultMenuBarHeight()));
+
+        {
+            auto menuBarArea = area.removeFromTop (40);
+
+            menuBar->setBounds (menuBarArea.withHeight (LookAndFeel::getDefaultLookAndFeel().getDefaultMenuBarHeight()));
+            menuHeader.setBounds (menuBarArea);
+        }
 
         area.removeFromTop (20);
         area = area.removeFromTop (33);
@@ -1317,7 +1401,7 @@ public:
     //==============================================================================
     StringArray getMenuBarNames() override
     {
-        return { "Demo", "Look-and-feel", "Tabs", "Misc" };
+        return { "Demo", "Look-and-feel", "Menus", "Tabs", "Misc" };
     }
 
     PopupMenu getMenuForIndex (int menuIndex, const String& /*menuName*/) override
@@ -1350,10 +1434,6 @@ public:
             menu.addSeparator();
             menu.addCommandItem (commandManager, MainAppWindow::useNativeTitleBar);
 
-           #if JUCE_MAC
-            menu.addItem (6000, "Use Native Menu Bar");
-           #endif
-
            #if ! JUCE_LINUX
             menu.addCommandItem (commandManager, MainAppWindow::goToKioskMode);
            #endif
@@ -1373,6 +1453,14 @@ public:
         }
         else if (menuIndex == 2)
         {
+            menu.addItem (6000, "Inside Window",   true, menuBarPosition == window);
+           #if JUCE_MAC
+            menu.addItem (6001, "Global Menu Bar", true, menuBarPosition == globalMenuBar);
+           #endif
+            menu.addItem (6002, "Burger Menu",     true, menuBarPosition == burger);
+        }
+        else if (menuIndex == 3)
+        {
             if (TabbedComponent* tabs = findParentComponentOfClass<TabbedComponent>())
             {
                 menu.addItem (3000, "Tabs at Top",    true, tabs->getOrientation() == TabbedButtonBar::TabsAtTop);
@@ -1381,7 +1469,7 @@ public:
                 menu.addItem (3003, "Tabs on Right",  true, tabs->getOrientation() == TabbedButtonBar::TabsAtRight);
             }
         }
-        else if (menuIndex == 3)
+        else if (menuIndex == 4)
         {
             return getDummyPopupMenu();
         }
@@ -1394,20 +1482,28 @@ public:
         // most of our menu items are invoked automatically as commands, but we can handle the
         // other special cases here..
 
-        if (menuItemID == 6000)
+        if (menuItemID >= 6000 && menuItemID < 7000)
         {
-           #if JUCE_MAC
-            if (MenuBarModel::getMacMainMenu() != nullptr)
+            auto newPosition = static_cast<MenuBarPosition> (menuItemID - 6000);
+
+            if (newPosition != menuBarPosition)
             {
-                MenuBarModel::setMacMainMenu (nullptr);
-                menuBar->setModel (this);
+                menuBarPosition = newPosition;
+
+                if (menuBarPosition != burger)
+                    MainAppWindow::getSharedSidePanel().showOrHide (false);
+
+               #if JUCE_MAC
+                MenuBarModel::setMacMainMenu (menuBarPosition == globalMenuBar ? this : nullptr);
+               #endif
+                menuBar->setModel     (menuBarPosition == window ? this : nullptr);
+                menuBar->setVisible   (menuBarPosition == window);
+                burgerMenu.setModel   (menuBarPosition == burger ? this : nullptr);
+                menuHeader.setVisible (menuBarPosition == burger);
+
+                MainAppWindow::getSharedSidePanel().setContent (menuBarPosition == burger ? &burgerMenu : nullptr, false);
+                menuItemsChanged();
             }
-            else
-            {
-                menuBar->setModel (nullptr);
-                MenuBarModel::setMacMainMenu (this);
-            }
-           #endif
         }
         else if (menuItemID >= 3000 && menuItemID <= 3003)
         {
@@ -1431,6 +1527,9 @@ public:
 private:
     TextButton popupButton;
     ScopedPointer<MenuBarComponent> menuBar;
+    BurgerMenuComponent burgerMenu;
+    BurgerMenuHeader menuHeader;
+    MenuBarPosition menuBarPosition = window;
 
     PopupMenu getDummyPopupMenu()
     {
@@ -1443,21 +1542,24 @@ private:
         m.addCustomItem (5, new CustomMenuComponent());
         m.addSeparator();
 
-        for (int i = 0; i < 8; ++i)
+        if (menuBarPosition != burger)
         {
-            PopupMenu subMenu;
-
-            for (int s = 0; s < 8; ++s)
+            for (int i = 0; i < 8; ++i)
             {
-                PopupMenu subSubMenu;
+                PopupMenu subMenu;
 
-                for (int item = 0; item < 8; ++item)
-                    subSubMenu.addItem (1000 + (i * s * item), "Item " + String (item + 1));
+                for (int s = 0; s < 8; ++s)
+                {
+                    PopupMenu subSubMenu;
 
-                subMenu.addSubMenu ("Sub-sub menu " + String (s + 1), subSubMenu);
+                    for (int item = 0; item < 8; ++item)
+                        subSubMenu.addItem (1000 + (i * s * item), "Item " + String (item + 1));
+
+                    subMenu.addSubMenu ("Sub-sub menu " + String (s + 1), subSubMenu);
+                }
+
+                m.addSubMenu ("Sub menu " + String (i + 1), subMenu);
             }
-
-            m.addSubMenu ("Sub menu " + String (i + 1), subMenu);
         }
 
         return m;
@@ -1508,9 +1610,11 @@ private:
         void timerCallback() override
         {
             Random random;
-            blobPosition.setBounds ((float) random.nextInt (getWidth()),
-                                    (float) random.nextInt (getHeight()),
-                                    40.0f, 30.0f);
+
+            if (! getBounds().isEmpty())
+                blobPosition.setBounds ((float) random.nextInt (getWidth()),
+                                        (float) random.nextInt (getHeight()),
+                                        40.0f, 30.0f);
             repaint();
         }
 

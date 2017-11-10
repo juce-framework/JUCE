@@ -54,6 +54,11 @@ public:
         mainWindow.reset();
     }
 
+    void backButtonPressed() override
+    {
+        MainAppWindow::getSharedSidePanel().showOrHide (false);
+    }
+
     //==============================================================================
     void systemRequestedQuit() override
     {
