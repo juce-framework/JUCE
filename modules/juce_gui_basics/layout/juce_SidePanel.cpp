@@ -133,7 +133,14 @@ void SidePanel::mouseDrag (const MouseEvent& e)
 {
     if (shouldResize)
     {
-        auto currentMouseDragX = static_cast<int> (e.position.x);
+        Point<int> convertedPoint;
+
+        if (getParentComponent() == nullptr)
+            convertedPoint = e.eventComponent->localPointToGlobal (e.getPosition());
+        else
+            convertedPoint = getParentComponent()->getLocalPoint (e.eventComponent, e.getPosition());
+
+        auto currentMouseDragX = convertedPoint.x;
 
         if (isOnLeft)
         {
