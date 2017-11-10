@@ -2791,25 +2791,18 @@ Font LookAndFeel_V2::getSidePanelTitleFont (SidePanel&)
 Justification LookAndFeel_V2::getSidePanelTitleJustification (SidePanel& panel)
 {
     return panel.isPanelOnLeft() ? Justification::centredRight
-                                  : Justification::centredLeft;
+                                 : Justification::centredLeft;
 }
 
 Path LookAndFeel_V2::getSidePanelDismissButtonShape (SidePanel& panel)
 {
     Path p;
+    const float size = 10.0f;
 
     if (panel.isPanelOnLeft())
-    {
-        p.startNewSubPath (10, 0);
-        p.lineTo (0, 5);
-        p.lineTo (10, 10);
-    }
+        p.addTriangle (size, 0.0f, 0.0f, size * 0.5f, size, size);
     else
-    {
-        p.startNewSubPath (0, 10);
-        p.lineTo (10, 5);
-        p.lineTo (0, 0);
-    }
+        p.addTriangle (0.0f, 0.0f, size, size * 0.5f, 0.0f, size);
 
     return p;
 }
