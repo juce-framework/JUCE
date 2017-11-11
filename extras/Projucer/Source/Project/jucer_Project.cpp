@@ -1502,7 +1502,7 @@ void Project::addNewExporter (const String& exporterName)
                                        + getUniqueTargetFolderSuffixForExporter (exp->getName(), exp->getTargetLocationString());
 
     auto exportersTree = getExporters();
-    exportersTree.addChild (exp->settings, -1, getUndoManagerFor (exportersTree));
+    exportersTree.appendChild (exp->settings, getUndoManagerFor (exportersTree));
 }
 
 void Project::createExporterForCurrentPlatform()

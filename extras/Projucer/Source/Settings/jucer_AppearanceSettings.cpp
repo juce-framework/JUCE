@@ -208,7 +208,7 @@ Value AppearanceSettings::getColourValue (const String& colourName)
     {
         c = ValueTree ("COLOUR");
         c.setProperty (Ids::name, colourName, nullptr);
-        settings.addChild (c, -1, nullptr);
+        settings.appendChild (c, nullptr);
     }
 
     return c.getPropertyAsValue (Ids::colour, nullptr);

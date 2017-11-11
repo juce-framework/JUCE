@@ -253,7 +253,7 @@ ValueTree AudioProcessorValueTreeState::getOrCreateChildValueTree (const String&
     {
         v = ValueTree (valueType);
         v.setProperty (idPropertyID, paramID, undoManager);
-        state.addChild (v, -1, undoManager);
+        state.appendChild (v, undoManager);
     }
 
     return v;

@@ -428,7 +428,7 @@ struct ClassDatabase
             classDeclaration.writeToValueTree (v, Ids::classDecl);
 
             for (const MemberInfo& m : members)
-                v.addChild (m.toValueTree(), -1, nullptr);
+                v.appendChild (m.toValueTree(), nullptr);
 
             return v;
         }
@@ -637,8 +637,8 @@ struct ClassDatabase
 
             v.setProperty (Ids::name, name, nullptr);
 
-            for (const auto& c : components)    v.addChild (c.toValueTree(), -1, nullptr);
-            for (const auto& n : namespaces)    v.addChild (n.toValueTree(), -1, nullptr);
+            for (const auto& c : components)    v.appendChild (c.toValueTree(), nullptr);
+            for (const auto& n : namespaces)    v.appendChild (n.toValueTree(), nullptr);
 
             return v;
         }

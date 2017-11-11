@@ -310,7 +310,7 @@ ValueTree DrawableComposite::createValueTree (ComponentBuilder::ImageProvider* i
         auto* d = dynamic_cast<const Drawable*> (c);
         jassert (d != nullptr); // You can't save a mix of Drawables and normal components!
 
-        childList.addChild (d->createValueTree (imageProvider), -1, nullptr);
+        childList.appendChild (d->createValueTree (imageProvider), nullptr);
     }
 
     v.getMarkerListCreating (true, nullptr).readFrom (markersX, nullptr);

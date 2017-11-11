@@ -617,7 +617,7 @@ void LibraryModule::addBrowseableCode (ProjectExporter& exporter, const Array<Fi
     sourceGroup.sortAlphabetically (true, true);
     sourceGroup.addFileAtIndex (moduleHeader, -1, false);
 
-    exporter.getModulesGroup().state.addChild (sourceGroup.state.createCopy(), -1, nullptr);
+    exporter.getModulesGroup().state.appendChild (sourceGroup.state.createCopy(), nullptr);
 }
 
 
@@ -754,7 +754,7 @@ void EnabledModuleList::addModule (const File& moduleFolder, bool copyLocally, b
             ValueTree module (Ids::MODULE);
             module.setProperty (Ids::ID, moduleID, nullptr);
 
-            state.addChild (module, -1, getUndoManager());
+            state.appendChild (module, getUndoManager());
             sortAlphabetically();
 
             shouldShowAllModuleFilesInProject (moduleID) = true;

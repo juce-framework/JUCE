@@ -186,7 +186,7 @@ void DrawablePath::ValueTreeWrapper::readFrom (const RelativePointPath& p, UndoM
     pathTree.removeAllChildren (undoManager);
 
     for (int i = 0; i < p.elements.size(); ++i)
-        pathTree.addChild (p.elements.getUnchecked(i)->createTree(), -1, undoManager);
+        pathTree.appendChild (p.elements.getUnchecked(i)->createTree(), undoManager);
 }
 
 void DrawablePath::ValueTreeWrapper::writeTo (RelativePointPath& p) const
