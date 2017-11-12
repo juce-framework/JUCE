@@ -227,7 +227,7 @@ public:
 
         if (context.renderComponents && isUpdating)
         {
-            MessageLockWorker worker (*this);
+            MessageLockWorker worker (*this, 100);
 
             // This avoids hogging the message thread when doing intensive rendering.
             if (lastMMLockReleaseTime + 1 >= Time::getMillisecondCounter())
@@ -549,14 +549,24 @@ public:
     //==============================================================================
     struct MessageLockWorker : MessageManagerLock::BailOutChecker
     {
-        MessageLockWorker (CachedImage& cachedImageRequestingLock)
+        MessageLockWorker (CachedImage& cachedImageRequestingLock, int attempts = -1)
             : owner (cachedImageRequestingLock)
+            , numAttempts (attempts)
         {
         }
 
-        bool shouldAbortAcquiringLock() override   { return owner.doWorkWhileWaitingForLock (false); }
+        bool shouldAbortAcquiringLock() override
+        {
+            if (owner.doWorkWhileWaitingForLock (false))
+                return true;
+            if (numAttempts == -1)
+                return false;
+            --numAttempts;
+            return numAttempts == 0;
+        }
 
         CachedImage& owner;
+        int numAttempts;
         JUCE_DECLARE_NON_COPYABLE(MessageLockWorker)
     };
 
