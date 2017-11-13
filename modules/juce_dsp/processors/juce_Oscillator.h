@@ -61,7 +61,7 @@ public:
 
     //==============================================================================
     /** Sets the frequency of the oscillator. */
-    void setFrequency (NumericType newGain) noexcept             { frequency.setValue (newGain); }
+    void setFrequency (NumericType newFrequency) noexcept             { frequency.setValue (newFrequency); }
 
     /** Returns the current frequency of the oscillator. */
     NumericType getFrequency() const noexcept                    { return frequency.getTargetValue(); }
