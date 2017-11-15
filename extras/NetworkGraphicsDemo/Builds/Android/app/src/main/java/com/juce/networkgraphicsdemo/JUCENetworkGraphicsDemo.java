@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*
   ==============================================================================
 
@@ -328,7 +329,7 @@ public class JUCENetworkGraphicsDemo   extends Activity
         setContentView (viewHolder);
     }
 
-    private void callAppLauncher()
+    protected void callAppLauncher()
     {
         launchApp (getApplicationInfo().publicSourceDir,
                    getApplicationInfo().dataDir);
