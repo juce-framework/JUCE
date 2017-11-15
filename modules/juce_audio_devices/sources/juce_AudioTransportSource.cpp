@@ -206,6 +206,40 @@ bool AudioTransportSource::isLooping() const
     return positionableSource != nullptr && positionableSource->isLooping();
 }
 
+void AudioTransportSource::getLoopRange (int64 & loopStart, int64 & loopLength) const
+{
+    const ScopedLock sl (callbackLock);
+    if (positionableSource != nullptr) {
+        const double ratio = (sampleRate > 0 && sourceSampleRate > 0) ? sampleRate / sourceSampleRate : 1.0;
+
+        positionableSource->getLoopRange(loopStart, loopLength);
+        loopStart = (int64) (loopStart * ratio);
+        loopLength = (int64) (loopLength * ratio);
+    }
+    else {
+        loopStart = 0;
+        loopLength = 0;
+    }
+}
+
+void AudioTransportSource::setLoopRange (int64 loopStart, int64 loopLength)
+{
+    if (positionableSource != nullptr)
+    {
+        if (sampleRate > 0 && sourceSampleRate > 0) {
+            loopStart = (int64) (loopStart * sourceSampleRate / sampleRate);
+            loopLength = (int64) (loopLength * sourceSampleRate / sampleRate);
+        }
+        
+        positionableSource->setLoopRange(loopStart, loopLength);
+        
+        if (resamplerSource != nullptr)
+            resamplerSource->flushBuffers();
+        
+    }
+}
+
+
 void AudioTransportSource::setGain (const float newGain) noexcept
 {
     gain = newGain;

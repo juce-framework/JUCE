@@ -157,6 +157,13 @@ public:
     /** Implements the PositionableAudioSource method. */
     bool isLooping() const override;
 
+    /** Implements the PositionableAudioSource method. */
+    void setLoopRange (int64 loopStart, int64 loopLength) override;
+
+    /** Implements the PositionableAudioSource method. */
+    void getLoopRange (int64 & loopStart, int64 & loopLength) const override;
+
+    
 private:
     //==============================================================================
     PositionableAudioSource* source = nullptr;

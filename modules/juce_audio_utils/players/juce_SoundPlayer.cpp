@@ -91,7 +91,8 @@ class AudioBufferSource  : public PositionableAudioSource
 public:
     AudioBufferSource (AudioBuffer<float>* audioBuffer, bool ownBuffer, bool playOnAllChannels)
         : buffer (audioBuffer, ownBuffer),
-          playAcrossAllChannels (playOnAllChannels)
+          playAcrossAllChannels (playOnAllChannels),
+          loopLen(buffer->getNumSamples())
     {}
 
     //==============================================================================
@@ -111,6 +112,14 @@ public:
     bool isLooping() const override                 { return looping; }
     void setLooping (bool shouldLoop) override      { looping = shouldLoop; }
 
+    void setLoopRange (int64 loopStart, int64 loopLength) override {
+        loopStartPos = jmax(0, jmin(static_cast<int>(loopStart), static_cast<int>(buffer->getNumSamples()) - 1));
+        loopLen =  jmax(1, jmin(static_cast<int>(buffer->getNumSamples()) - loopStartPos, static_cast<int>(loopLength)));
+    }
+    void getLoopRange(int64 & loopStart, int64 & loopLength) const override {
+        loopStart = loopStartPos; loopLength = loopLen;
+    }
+        
     //==============================================================================
     void prepareToPlay (int, double) override {}
     void releaseResources() override {}
@@ -120,26 +129,46 @@ public:
         bufferToFill.clearActiveBufferRegion();
 
         const int bufferSize = buffer->getNumSamples();
-        const int samplesNeeded = bufferToFill.numSamples;
-        const int samplesToCopy = jmin (bufferSize - position, samplesNeeded);
+        int samplesNeeded = bufferToFill.numSamples;
 
-        if (samplesToCopy > 0)
-        {
-            int maxInChannels = buffer->getNumChannels();
-            int maxOutChannels = bufferToFill.buffer->getNumChannels();
+        while (samplesNeeded > 0) {
 
-            if (! playAcrossAllChannels)
-                maxOutChannels = jmin (maxOutChannels, maxInChannels);
+            const int samplesToCopy = jmin (looping ? (loopStartPos + loopLen) - position :  bufferSize - position, samplesNeeded);
 
-            for (int i = 0; i < maxOutChannels; ++i)
-                bufferToFill.buffer->copyFrom (i, bufferToFill.startSample, *buffer,
-                                               i % maxInChannels, position, samplesToCopy);
+            if (samplesToCopy > 0)
+            {
+                int maxInChannels = buffer->getNumChannels();
+                int maxOutChannels = bufferToFill.buffer->getNumChannels();
+                
+                if (! playAcrossAllChannels) {
+                    maxOutChannels = jmin (maxOutChannels, maxInChannels);
+                }
+                
+                for (int i = 0; i < maxOutChannels; ++i) {
+                    bufferToFill.buffer->copyFrom (i, bufferToFill.startSample, *buffer,
+                                                   i % maxInChannels, position, samplesToCopy);
+                }
+
+                position += samplesToCopy;
+                samplesNeeded -= samplesToCopy;
+            }
+            else {
+                position += samplesNeeded;
+                samplesNeeded = 0;
+            }
+
+            if (looping) {
+                int posdelta = position - (loopStartPos + loopLen);
+                if (posdelta >= 0) {
+                    position = loopStartPos + posdelta;
+                }
+            }
+            else {
+                position += samplesNeeded - samplesToCopy;
+                samplesNeeded = 0; // force to be done
+            }
         }
 
-        position += samplesNeeded;
-
-        if (looping)
-            position %= bufferSize;
     }
 
 private:
@@ -147,7 +176,7 @@ private:
     OptionalScopedPointer<AudioBuffer<float>> buffer;
     int position = 0;
     bool looping = false, playAcrossAllChannels;
-
+    int loopStartPos = 0, loopLen;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioBufferSource)
 };
 
