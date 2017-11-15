@@ -183,6 +183,14 @@ public:
     */
     virtual void resumed() = 0;
 
+    /** This method is called when the application (generally on android) is started
+    */
+    virtual void started() {};
+
+    /** This method is called when the application (generally on android) is stopped
+    */
+    virtual void stopped() {};
+    
     /** If any unhandled exceptions make it through to the message dispatch loop, this
         callback will be triggered, in case you want to log them or do some other
         type of error-handling.
