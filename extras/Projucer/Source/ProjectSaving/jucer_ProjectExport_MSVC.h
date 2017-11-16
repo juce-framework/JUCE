@@ -167,7 +167,10 @@ public:
             setValueIfVoid (getPluginBinaryCopyStepEnabledValue(), false);
 
             if (! isDebug())
+            {
                 updateOldLTOSetting();
+                setValueIfVoid (getLinkTimeOptimisationEnabledValue(), true);
+            }
 
             initialisePluginCachedValues();
         }
@@ -334,7 +337,8 @@ public:
         //==============================================================================
         void updateOldLTOSetting()
         {
-            getLinkTimeOptimisationEnabledValue() = (static_cast<int> (config ["wholeProgramOptimisation"]) == 0);
+            if (config.getPropertyAsValue ("wholeProgramOptimisation", nullptr) != Value())
+                getLinkTimeOptimisationEnabledValue() = (static_cast<int> (config ["wholeProgramOptimisation"]) == 0);
         }
 
         void addVisualStudioPluginInstallPathProperties (PropertyListBuilder& props)
@@ -441,14 +445,13 @@ public:
                 e->setAttribute ("Label", "Configuration");
                 e->createNewChildElement ("ConfigurationType")->addTextElement (getProjectType());
                 e->createNewChildElement ("UseOfMfc")->addTextElement ("false");
+                e->createNewChildElement ("WholeProgramOptimization")->addTextElement (config.isLinkTimeOptimisationEnabled() ? "true"
+                                                                                                                              : "false");
 
                 const String charSet (config.getCharacterSet());
 
                 if (charSet.isNotEmpty())
                     e->createNewChildElement ("CharacterSet")->addTextElement (charSet);
-
-                if (config.isLinkTimeOptimisationEnabled())
-                    e->createNewChildElement ("WholeProgramOptimization")->addTextElement ("true");
 
                 if (config.shouldLinkIncremental())
                     e->createNewChildElement ("LinkIncremental")->addTextElement ("true");
