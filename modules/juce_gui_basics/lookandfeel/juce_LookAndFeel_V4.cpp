@@ -806,7 +806,8 @@ void LookAndFeel_V4::drawPopupMenuItem (Graphics& g, const Rectangle<int>& area,
         if (icon != nullptr)
         {
             icon->drawWithin (g, iconArea, RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, 1.0f);
-            r.removeFromLeft (roundToInt (maxFontHeight * 0.5f));
+            // r.removeFromLeft (roundToInt (maxFontHeight * 0.5f));
+            r.removeFromLeft (2);
         }
         else if (isTicked)
         {
@@ -931,12 +932,25 @@ Font LookAndFeel_V4::getComboBoxFont (ComboBox& box)
     return { jmin (16.0f, box.getHeight() * 0.85f) };
 }
 
-void LookAndFeel_V4::positionComboBoxText (ComboBox& box, Label& label)
+void LookAndFeel_V4::positionComboBoxText (ComboBox& box, Label& label, Drawable* image)
 {
-    label.setBounds (1, 1,
-                     box.getWidth() - 30,
+    int imagewidth = image != nullptr ? box.getHeight() / 1.3f : 0;
+
+    label.setBounds (1 + imagewidth, 1,
+                     box.getWidth() - 30 - imagewidth,
                      box.getHeight() - 2);
 
+    if (image != nullptr) {
+        // if the label is too narrow, we set its width to 0 to hide it completely and show the image only centered
+        if (label.getWidth() < imagewidth * 2) {
+            label.setSize(0, label.getHeight());
+            image->setTransformToFit (Rectangle<float>(1 + (box.getWidth()-30)/2 - imagewidth/2, 1, imagewidth, box.getHeight() - 2), RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize);
+        }
+        else {
+            image->setTransformToFit (Rectangle<float>(3, 1, imagewidth - 6, box.getHeight() - 2), RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize);
+        }
+    }
+    
     label.setFont (getComboBoxFont (box));
 }
 

@@ -1192,11 +1192,17 @@ Label* LookAndFeel_V2::createComboBoxTextBox (ComboBox&)
     return new Label (String(), String());
 }
 
-void LookAndFeel_V2::positionComboBoxText (ComboBox& box, Label& label)
+void LookAndFeel_V2::positionComboBoxText (ComboBox& box, Label& label, Drawable* image)
 {
-    label.setBounds (1, 1,
-                     box.getWidth() + 3 - box.getHeight(),
+    int imagewidth = image != nullptr ? 20 : 0;
+
+    label.setBounds (1 + imagewidth, 1,
+                     box.getWidth() + 3 - box.getHeight() - imagewidth,
                      box.getHeight() - 2);
+
+    if (image != nullptr) {
+        image->setTransformToFit (Rectangle<float>(1, 1, imagewidth, box.getHeight() - 2), RectanglePlacement::centred);
+    }
 
     label.setFont (getComboBoxFont (box));
 }

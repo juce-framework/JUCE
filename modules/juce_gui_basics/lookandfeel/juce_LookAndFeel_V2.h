@@ -196,7 +196,7 @@ public:
                        ComboBox&) override;
     Font getComboBoxFont (ComboBox&) override;
     Label* createComboBoxTextBox (ComboBox&) override;
-    void positionComboBoxText (ComboBox&, Label&) override;
+    void positionComboBoxText (ComboBox&, Label&, Drawable*) override;
     PopupMenu::Options getOptionsForComboBoxPopupMenu (ComboBox&, Label&) override;
     void drawComboBoxTextWhenNothingSelected (Graphics&, ComboBox&, Label&) override;
 
