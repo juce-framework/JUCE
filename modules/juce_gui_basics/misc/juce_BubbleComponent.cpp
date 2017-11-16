@@ -145,7 +145,16 @@ void BubbleComponent::setPosition (Rectangle<int> rectangleToPointTo,
         }
     }
 
-    setBounds (targetX - arrowTip.x, targetY - arrowTip.y, totalW, totalH);
+    Rectangle<int> computedBounds(targetX - arrowTip.x, targetY - arrowTip.y, totalW, totalH);
+
+    // make sure it is within available bounds
+    if (!availableSpace.contains(computedBounds)) {
+        Rectangle<int> newBounds = computedBounds.constrainedWithin(availableSpace);
+        arrowTip = arrowTip.translated(computedBounds.getX() - newBounds.getX(), computedBounds.getY() - newBounds.getY());
+        computedBounds = newBounds;
+    }
+
+    setBounds (computedBounds);
 }
 
 } // namespace juce
