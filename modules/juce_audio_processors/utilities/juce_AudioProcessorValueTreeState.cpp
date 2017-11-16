@@ -37,8 +37,9 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
                std::function<float (const String&)> textToValue,
                bool meta,
                bool automatable,
-               bool discrete)
-        : AudioProcessorParameterWithID (parameterID, paramName, labelText),
+               bool discrete,
+               AudioProcessorParameter::Category category)
+        : AudioProcessorParameterWithID (parameterID, paramName, labelText, category),
           owner (s), valueToTextFunction (valueToText), textToValueFunction (textToValue),
           range (r), value (defaultVal), defaultValue (defaultVal),
           listenersNeedCalling (true),
@@ -191,7 +192,8 @@ AudioProcessorParameterWithID* AudioProcessorValueTreeState::createAndAddParamet
                                                                                     std::function<float (const String&)> textToValueFunction,
                                                                                     bool isMetaParameter,
                                                                                     bool isAutomatableParameter,
-                                                                                    bool isDiscreteParameter)
+                                                                                    bool isDiscreteParameter,
+                                                                                    AudioProcessorParameter::Category category)
 {
     // All parameters must be created before giving this manager a ValueTree state!
     jassert (! state.isValid());
@@ -199,7 +201,7 @@ AudioProcessorParameterWithID* AudioProcessorValueTreeState::createAndAddParamet
     Parameter* p = new Parameter (*this, paramID, paramName, labelText, r,
                                   defaultVal, valueToTextFunction, textToValueFunction,
                                   isMetaParameter, isAutomatableParameter,
-                                  isDiscreteParameter);
+                                  isDiscreteParameter, category);
     processor.addParameter (p);
     return p;
 }
