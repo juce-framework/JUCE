@@ -1,0 +1,60 @@
+diff a/modules/juce_gui_basics/widgets/juce_ListBox.cpp b/modules/juce_gui_basics/widgets/juce_ListBox.cpp	(rejected hunks)
+@@ -63,12 +63,15 @@ public:
+ 
+     void mouseDown (const MouseEvent& e) override
+     {
++        DBG("Listbox row mousedown");
+         isDragging = false;
+         selectRowOnMouseUp = false;
+ 
++        owner.stopInertialScroll();
++        
+         if (isEnabled())
+         {
+-            if (owner.selectOnMouseDown && ! selected)
++            if (! selected && owner.selectOnMouseDown && !owner.getTouchScrollEnabled())
+             {
+                 owner.selectRowsBasedOnModifierKeys (row, e.mods, false);
+ 
+@@ -84,7 +87,16 @@ public:
+ 
+     void mouseUp (const MouseEvent& e) override
+     {
+-        if (isEnabled() && selectRowOnMouseUp && ! isDragging)
++        bool wasTouchScrolling = false;
++        if (owner.isTouchScrollActive()) {
++            wasTouchScrolling = true;
++            if (owner.getTouchScrollInertia() > 0.0f) {
++                owner.startInertialScroll();
++            }
++            owner.touchScrollDone();
++        }
++        
++        if (isEnabled() && !wasTouchScrolling && selectRowOnMouseUp && !isDragging)
+         {
+             owner.selectRowsBasedOnModifierKeys (row, e.mods, true);
+ 
+@@ -102,9 +114,10 @@ public:
+ 
+     void mouseDrag (const MouseEvent& e) override
+     {
++	bool touchdrag = owner.touchScrollDrag(e);
+         if (ListBoxModel* m = owner.getModel())
+         {
+-            if (isEnabled() && e.mouseWasDraggedSinceMouseDown() && ! isDragging)
++            if (!touchdrag && isEnabled() && e.mouseWasDraggedSinceMouseDown() && ! isDragging)
+             {
+                 SparseSet<int> rowsToDrag;
+ 
+@@ -367,6 +380,11 @@ private:
+ //==============================================================================
+ ListBox::ListBox (const String& name, ListBoxModel* const m)
+     : Component (name),
++      touchScrollEnabled(false),
++      touchScrolling(false),
++      scrollRate(0.0f),
++      touchScrollInertia(0.25f),
++      touchScrollScale(1.0f),
+       model (m),
+       totalItems (0),
+       rowHeight (22),

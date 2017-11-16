@@ -225,6 +225,7 @@ public:
         the ctrl/shift keys are held down.
     */
     void setMultipleSelectionEnabled (bool shouldBeEnabled) noexcept;
+    bool getMultipleSelectionEnabled () const noexcept { return multipleSelection; }
 
     /** If enabled, this makes the listbox flip the selection status of
         each row that the user clicks, without affecting other selected rows.
@@ -234,12 +235,21 @@ public:
         down CMD or CTRL when clicking.
     */
     void setClickingTogglesRowSelection (bool flipRowSelection) noexcept;
+    bool getClickingTogglesRowSelection () const noexcept { return alwaysFlipSelection; }
 
     /** Sets whether a row should be selected when the mouse is pressed or released.
         By default this is true, but you may want to turn it off.
     */
     void setRowSelectedOnMouseDown (bool isSelectedOnMouseDown) noexcept;
+    bool getRowSelectedOnMouseDown () const noexcept { return selectOnMouseDown; }
 
+    /** Sets whether a row should be selected when the mouse is pressed or released.
+     By default this is true, but you may want to turn it off.
+     */
+    void setRowClickedOnMouseDown (bool clicksOnMouseDown) noexcept;
+    bool getRowClickedOnMouseDown () const noexcept { return clickOnMouseDown; }
+
+    
     /** Makes the list react to mouse moves by selecting the row that the mouse if over.
 
         This function is here primarily for the ComboBox class to use, but might be
@@ -587,7 +597,7 @@ private:
     int totalItems = 0, rowHeight = 22, minimumRowWidth = 0;
     int outlineThickness = 0;
     int lastRowSelected = -1;
-    bool multipleSelection = false, alwaysFlipSelection = false, hasDoneInitialUpdate = false, selectOnMouseDown = true;
+    bool multipleSelection = false, alwaysFlipSelection = false, hasDoneInitialUpdate = false, selectOnMouseDown = true, clickOnMouseDown = true;
 
     void selectRowInternal (int rowNumber, bool dontScrollToShowThisRow,
                             bool deselectOthersFirst, bool isMouseClick);
