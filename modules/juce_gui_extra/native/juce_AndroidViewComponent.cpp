@@ -106,8 +106,11 @@ private:
         {
             jobject peerView = (jobject) currentPeer->getNativeHandle();
 
+            auto* env = getEnv();
+            auto parentView = env->CallObjectMethod (peerView, AndroidView.getParent);
+
             // Assuming a parent is always of ViewGroup type
-            getEnv()->CallVoidMethod (peerView, AndroidViewGroup.addView, view.get());
+            env->CallVoidMethod (parentView, AndroidViewGroup.addView, view.get());
 
             componentMovedOrResized (false, false);
         }

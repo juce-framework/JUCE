@@ -568,6 +568,8 @@ public class JuceAppActivity   extends Activity
 
             colorMatrix.set (colorTransform);
             paint.setColorFilter (new ColorMatrixColorFilter (colorMatrix));
+
+            setLayerType (View.LAYER_TYPE_NONE, null);
         }
 
         //==============================================================================

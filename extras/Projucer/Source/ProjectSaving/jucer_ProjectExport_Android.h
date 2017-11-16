@@ -1606,9 +1606,14 @@ private:
             }
 
             if (androidMinimumSDK.get().getIntValue() >= 11)
-                app->setAttribute ("android:hardwareAccelerated", "false"); // (using the 2D acceleration slows down openGL)
+            {
+                if (! app->hasAttribute ("android:hardwareAccelerated"))
+                    app->setAttribute ("android:hardwareAccelerated", "false"); // (using the 2D acceleration slows down openGL)
+            }
             else
+            {
                 app->removeAttribute ("android:hardwareAccelerated");
+            }
 
             auto* act = getOrCreateChildWithName (*app, "activity");
 
@@ -1651,6 +1656,19 @@ private:
             }
 
             setAttributeIfNotPresent (*act, "android:launchMode", "singleTask");
+
+            // Using the 2D acceleration slows down OpenGL. We *do* enable it here for the activity though, and we disable it
+            // in each ComponentPeerView instead. This way any embedded native views, which are not children of ComponentPeerView,
+            // can still use hardware acceleration if needed (e.g. web view).
+            if (androidMinimumSDK.get().getIntValue() >= 11)
+            {
+                if (! act->hasAttribute ("android:hardwareAccelerated"))
+                    act->setAttribute ("android:hardwareAccelerated", "true"); // (using the 2D acceleration slows down openGL)
+            }
+            else
+            {
+                act->removeAttribute ("android:hardwareAccelerated");
+            }
 
             auto* intent = getOrCreateChildWithName (*act, "intent-filter");
 
