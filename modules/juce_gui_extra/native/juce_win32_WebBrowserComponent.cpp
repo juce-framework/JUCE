@@ -246,6 +246,7 @@ WebBrowserComponent::WebBrowserComponent (const bool unloadPageWhenBrowserIsHidd
       unloadPageWhenBrowserIsHidden (unloadPageWhenBrowserIsHidden_)
 {
     setOpaque (true);
+    addAndMakeVisible (browser);
 }
 
 WebBrowserComponent::~WebBrowserComponent()
