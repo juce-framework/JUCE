@@ -60,7 +60,9 @@ public:
     enum ExtraComponentPlacement
     {
         beforeText,
-        afterText
+        afterText,
+        aboveText,
+        belowText
     };
 
     /** Sets an extra component that will be shown in the tab.

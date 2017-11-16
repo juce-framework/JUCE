@@ -112,10 +112,18 @@ void TabBarButton::calcAreas (Rectangle<int>& extraComp, Rectangle<int>& textAre
         }
         else
         {
-            if (extraComp.getCentreX() > textArea.getCentreX())
-                textArea.setRight (jmin (textArea.getRight(), extraComp.getX()));
-            else
-                textArea.setLeft (jmax (textArea.getX(), extraComp.getRight()));
+            if (extraCompPlacement == afterText || extraCompPlacement == beforeText) {
+                if (extraComp.getCentreX() > textArea.getCentreX())
+                    textArea.setRight (jmin (textArea.getRight(), extraComp.getX()));
+                else
+                    textArea.setLeft (jmax (textArea.getX(), extraComp.getRight()));
+            }
+            else {
+                if (extraComp.getCentreY() > textArea.getCentreY())
+                    textArea.setBottom (jmin (textArea.getBottom(), extraComp.getY()));
+                else
+                    textArea.setTop (jmax (textArea.getY(), extraComp.getBottom()));
+            }
         }
     }
 }
@@ -143,7 +151,7 @@ Rectangle<int> TabBarButton::getActiveArea() const
 
 void TabBarButton::setExtraComponent (Component* comp, ExtraComponentPlacement placement)
 {
-    jassert (extraCompPlacement == beforeText || extraCompPlacement == afterText);
+    jassert (extraCompPlacement == beforeText || extraCompPlacement == afterText || extraCompPlacement == belowText || extraCompPlacement == aboveText);
     extraCompPlacement = placement;
     extraComponent.reset (comp);
     addAndMakeVisible (extraComponent.get());
