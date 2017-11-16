@@ -443,6 +443,9 @@ public:
     */
     double getInterval() const noexcept;
 
+    void setIncDecModeInterval(double ival);
+    double getIncDecModeInterval() const noexcept;
+    
     //==============================================================================
     /** For a slider with two or three thumbs, this returns the lower of its values.
 
