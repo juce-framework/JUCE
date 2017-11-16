@@ -707,7 +707,7 @@ File EnabledModuleList::getModuleFolder (const String& moduleID)
         if (isJuceModule (moduleID))
             return getModuleFolderFromPathIfItExists (getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString(), moduleID, project);
 
-        return findUserModuleFolder (moduleID, getAppSettings().getStoredPath (Ids::defaultUserModulePath).toString());
+        return findUserModuleFolder (getAppSettings().getStoredPath (Ids::defaultUserModulePath).toString(), moduleID);
     }
 
     auto paths = getAllPossibleModulePathsFromExporters (project);
