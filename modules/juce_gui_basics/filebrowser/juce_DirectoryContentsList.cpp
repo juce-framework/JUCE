@@ -229,6 +229,7 @@ bool DirectoryContentsList::checkNextFile (bool& hasChanged)
     return false;
 }
 
+
 bool DirectoryContentsList::addFile (const File& file, const bool isDir,
                                      const int64 fileSize,
                                      Time modTime, Time creationTime,
@@ -257,10 +258,10 @@ bool DirectoryContentsList::addFile (const File& file, const bool isDir,
 
         std::sort (files.begin(), files.end(), [] (const FileInfo* a, const FileInfo* b)
         {
-           #if JUCE_WINDOWS
+//           #if JUCE_WINDOWS
             if (a->isDirectory != b->isDirectory)
                 return a->isDirectory;
-           #endif
+//           #endif
 
             return a->filename.compareNatural (b->filename) < 0;
         });

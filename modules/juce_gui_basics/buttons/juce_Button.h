@@ -501,6 +501,7 @@ private:
     bool isKeyDown = false;
     bool triggerOnMouseDown = false;
     bool generateTooltip = false;
+    bool isInDraggableViewport = false ,isDraggingToScroll = false;
 
     void repeatTimerCallback();
     bool keyStateChangedCallback();
@@ -518,7 +519,8 @@ private:
     void setToggleState (bool shouldBeOn, NotificationType click, NotificationType state);
 
     bool isMouseOrTouchOver (const MouseEvent& e);
-
+    bool isInDragToScrollViewport() const noexcept;
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Button)
 };
 
