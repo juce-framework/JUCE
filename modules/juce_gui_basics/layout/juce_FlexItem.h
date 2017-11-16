@@ -51,7 +51,9 @@ public:
     /** Creates an item with a given target component. */
     FlexItem (Component& componentToControl) noexcept;
 
-    /** Creates an item that represents an embedded FlexBox. */
+    /** Creates an item that represents an embedded FlexBox. This class will not
+        create a copy of the supplied flex box. You need to ensure that the
+        life-time of flexBoxToControl is longer than the FlexItem. */
     FlexItem (FlexBox& flexBoxToControl) noexcept;
 
     //==============================================================================
