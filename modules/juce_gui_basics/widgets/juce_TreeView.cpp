@@ -36,11 +36,20 @@ public:
     {
     }
 
+    bool isInDragToScrollViewport() const noexcept
+    {
+        if (auto* vp = owner.getViewport())
+            return vp->isScrollOnDragEnabled() && (vp->canScrollVertically() || vp->canScrollHorizontally());
+
+        return false;
+    }
+
     void mouseDown (const MouseEvent& e) override
     {
         updateButtonUnderMouse (e);
 
         isDragging = false;
+        isDraggingToScroll = false;
         needSelectionOnMouseUp = false;
         Rectangle<int> pos;
 
@@ -60,14 +69,14 @@ public:
                 else
                 {
                     // mouse-down inside the body of the item..
-                    if (! owner.isMultiSelectEnabled())
+                    if (! owner.isMultiSelectEnabled() && !isInDragToScrollViewport())
                         item->setSelected (true, true);
-                    else if (item->isSelected())
-                        needSelectionOnMouseUp = ! e.mods.isPopupMenu();
+                    else if (item->isSelected() || isInDragToScrollViewport())
+                        needSelectionOnMouseUp = (! e.mods.isPopupMenu()) || isInDragToScrollViewport();
                     else
                         selectBasedOnModifiers (item, e.mods);
 
-                    if (e.x >= pos.getX())
+                    if (e.x >= pos.getX() && ! isInDragToScrollViewport())
                         item->itemClicked (e.withNewPosition (e.position - pos.getPosition().toFloat()));
                 }
             }
@@ -78,12 +87,16 @@ public:
     {
         updateButtonUnderMouse (e);
 
-        if (needSelectionOnMouseUp && e.mouseWasClicked() && isEnabled())
+        if (needSelectionOnMouseUp && e.mouseWasClicked() && isEnabled() && ! (isDragging || isDraggingToScroll))
         {
             Rectangle<int> pos;
 
             if (auto* item = findItemAt (e.y, pos))
                 selectBasedOnModifiers (item, e.mods);
+
+                if (e.x >= pos.getX() && isInDragToScrollViewport())
+                    item->itemClicked (e.withNewPosition (e.position - pos.getPosition().toFloat()));
+            }
         }
     }
 
@@ -136,6 +149,10 @@ public:
                 }
             }
         }
+
+        if (! isDraggingToScroll)
+            if (auto* vp = owner.getViewport())
+                isDraggingToScroll = vp->isCurrentlyScrollingOnDrag();
     }
 
     void mouseMove (const MouseEvent& e) override    { updateButtonUnderMouse (e); }
@@ -282,6 +299,7 @@ private:
     OwnedArray<RowItem> items;
     TreeViewItem* buttonUnderMouse = nullptr;
     bool isDragging = false, needSelectionOnMouseUp = false;
+    bool isDraggingToScroll = false;
 
     void selectBasedOnModifiers (TreeViewItem* const item, const ModifierKeys modifiers)
     {
