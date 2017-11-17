@@ -223,7 +223,7 @@ struct Viewport::DragToScrollListener   : private MouseListener,
                                                                 (int) offsetY.getPosition()));
     }
 
-    void mouseDown (const MouseEvent& e) override
+    void mouseDown (const MouseEvent&) override
     {
         offsetX.setPosition (offsetX.getPosition());
         offsetY.setPosition (offsetY.getPosition());
@@ -255,7 +255,7 @@ struct Viewport::DragToScrollListener   : private MouseListener,
         }
     }
 
-    void mouseUp (const MouseEvent& e) override
+    void mouseUp (const MouseEvent&) override
     {
         if (--numTouches <= 0)
         {
