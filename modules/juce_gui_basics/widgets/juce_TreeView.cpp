@@ -90,10 +90,10 @@ public:
         if (needSelectionOnMouseUp && e.mouseWasClicked() && isEnabled() && ! (isDragging || isDraggingToScroll))
         {
             Rectangle<int> pos;
-
-            if (auto* item = findItemAt (e.y, pos))
+            
+            if (auto* item = findItemAt (e.y, pos)) {
                 selectBasedOnModifiers (item, e.mods);
-
+                
                 if (e.x >= pos.getX() && isInDragToScrollViewport())
                     item->itemClicked (e.withNewPosition (e.position - pos.getPosition().toFloat()));
             }
