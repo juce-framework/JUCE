@@ -934,7 +934,7 @@ Font LookAndFeel_V4::getComboBoxFont (ComboBox& box)
 
 void LookAndFeel_V4::positionComboBoxText (ComboBox& box, Label& label, Drawable* image)
 {
-    int imagewidth = image != nullptr ? box.getHeight() / 1.3f : 0;
+    int imagewidth = image != nullptr ? (int) (box.getHeight() / 1.3f) : 0;
 
     label.setBounds (1 + imagewidth, 1,
                      box.getWidth() - 30 - imagewidth,
