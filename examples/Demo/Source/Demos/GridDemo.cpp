@@ -34,7 +34,6 @@
      GridDemo()
      {
          addGridItemPanel (Colours::aquamarine, "0");
-         addGridItemPanel (Colours::aquamarine, "0");
          addGridItemPanel (Colours::red,        "1");
          addGridItemPanel (Colours::blue,       "2");
          addGridItemPanel (Colours::green,      "3");
