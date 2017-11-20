@@ -2195,8 +2195,8 @@ struct VST3PluginInstance : public AudioPluginInstance
                  && getBusInfo (false, true, busIdx).channelCount == 2;
     }
 
-    bool acceptsMidi() const override    { return getBusInfo (true,  false).channelCount > 0; }
-    bool producesMidi() const override   { return getBusInfo (false, false).channelCount > 0; }
+    bool acceptsMidi() const override    { return getNumSingleDirectionBusesFor (holder->component, true,  false) > 0; }
+    bool producesMidi() const override   { return getNumSingleDirectionBusesFor (holder->component, false, false) > 0; }
 
     //==============================================================================
     /** May return a negative value as a means of informing us that the plugin has "infinite tail," or 0 for "no tail." */
