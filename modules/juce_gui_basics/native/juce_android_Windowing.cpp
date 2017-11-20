@@ -44,6 +44,10 @@ namespace juce
  extern void juce_inAppPurchaseCompleted (void*);
 #endif
 
+#if ! JUCE_DISABLE_NATIVE_FILECHOOSERS
+ extern void juce_fileChooserCompleted (int, void*);
+#endif
+
 //==============================================================================
 JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, launchApp, void, (JNIEnv* env, jobject activity,
                                                                       jstring appFile, jstring appDataDir))
@@ -96,16 +100,20 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, quitApp, void, (JNIEnv* env,
     android.shutdown (env);
 }
 
-JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, appActivityResult, void, (JNIEnv* env, jobject, jint requestCode, jint /*resultCode*/, jobject intentData))
+JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, appActivityResult, void, (JNIEnv* env, jobject, jint requestCode, jint resultCode, jobject intentData))
 {
     setEnv (env);
 
    #if JUCE_IN_APP_PURCHASES && JUCE_MODULE_AVAILABLE_juce_product_unlocking
     if (requestCode == 1001)
         juce_inAppPurchaseCompleted (intentData);
-   #else
-    ignoreUnused (intentData, requestCode);
    #endif
+
+   #if ! JUCE_DISABLE_NATIVE_FILECHOOSERS
+    if (requestCode == /*READ_REQUEST_CODE*/42)
+        juce_fileChooserCompleted (resultCode, intentData);
+   #endif
+    ignoreUnused (intentData, requestCode);
 }
 
 JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, appNewIntent, void, (JNIEnv* env, jobject, jobject intentData))

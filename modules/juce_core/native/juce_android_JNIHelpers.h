@@ -324,6 +324,7 @@ extern AndroidSystem android;
  METHOD (startIntentSenderForResult, "startIntentSenderForResult", "(Landroid/content/IntentSender;ILandroid/content/Intent;III)V") \
  METHOD (moveTaskToBack,          "moveTaskToBack",       "(Z)Z") \
  METHOD (startActivity,           "startActivity",        "(Landroid/content/Intent;)V") \
+ METHOD (startActivityForResult,  "startActivityForResult", "(Landroid/content/Intent;I)V") \
  METHOD (getContentResolver,      "getContentResolver",   "()Landroid/content/ContentResolver;") \
 
 DECLARE_JNI_CLASS (JuceAppActivity, JUCE_ANDROID_ACTIVITY_CLASSPATH);
@@ -355,6 +356,9 @@ DECLARE_JNI_CLASS (AndroidBitmapConfig, "android/graphics/Bitmap$Config");
   METHOD (getIntExtra,                    "getIntExtra",    "(Ljava/lang/String;I)I") \
   METHOD (getStringExtra,                 "getStringExtra", "(Ljava/lang/String;)Ljava/lang/String;") \
   METHOD (putExtras,                      "putExtras",      "(Landroid/os/Bundle;)Landroid/content/Intent;") \
+  METHOD (putExtraString,                 "putExtra",       "(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;") \
+  METHOD (putExtraStrings,                "putExtra",       "(Ljava/lang/String;[Ljava/lang/String;)Landroid/content/Intent;") \
+  METHOD (putExtraParcelable,             "putExtra",       "(Ljava/lang/String;Landroid/os/Parcelable;)Landroid/content/Intent;") \
   METHOD (setAction,                      "setAction",      "(Ljava/lang/String;)Landroid/content/Intent;") \
   METHOD (setPackage,                     "setPackage",     "(Ljava/lang/String;)Landroid/content/Intent;") \
   METHOD (setType,                        "setType",        "(Ljava/lang/String;)Landroid/content/Intent;") \

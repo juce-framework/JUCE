@@ -289,10 +289,12 @@ namespace juce
  #if JUCE_IOS
   #include "native/juce_ios_UIViewComponentPeer.mm"
   #include "native/juce_ios_Windowing.mm"
+  #include "native/juce_ios_FileChooser.mm"
  #else
   #include "native/juce_mac_NSViewComponentPeer.mm"
   #include "native/juce_mac_Windowing.mm"
   #include "native/juce_mac_MainMenu.mm"
+  #include "native/juce_mac_FileChooser.mm"
  #endif
 
  #if JUCE_CLANG
@@ -300,7 +302,6 @@ namespace juce
  #endif
 
  #include "native/juce_mac_MouseCursor.mm"
- #include "native/juce_mac_FileChooser.mm"
 
 #elif JUCE_WINDOWS
  #include "native/juce_win32_Windowing.cpp"
@@ -315,6 +316,7 @@ namespace juce
 
 #elif JUCE_ANDROID
  #include "native/juce_android_Windowing.cpp"
+ #include "native/juce_common_MimeTypes.cpp"
  #include "native/juce_android_FileChooser.cpp"
 
 #endif

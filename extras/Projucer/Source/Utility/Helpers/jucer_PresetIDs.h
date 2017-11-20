@@ -209,6 +209,7 @@ namespace Ids
     DECLARE_ID (iosBackgroundBle);
     DECLARE_ID (iosPushNotifications);
     DECLARE_ID (iosAppGroups);
+    DECLARE_ID (iCloudPermissions);
     DECLARE_ID (iosDevelopmentTeamID);
     DECLARE_ID (iosAppGroupsId);
     DECLARE_ID (iosAppExtensionDuplicateResourcesFolder);

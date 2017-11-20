@@ -43,7 +43,7 @@
 
   dependencies:     juce_events juce_graphics juce_data_structures
   OSXFrameworks:    Cocoa Carbon QuartzCore
-  iOSFrameworks:    UIKit
+  iOSFrameworks:    UIKit MobileCoreServices
   linuxPackages:    x11 xinerama xext
 
  END_JUCE_MODULE_DECLARATION

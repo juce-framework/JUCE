@@ -132,6 +132,8 @@ public:
     bool   isPushNotificationsEnabled() const        { return settings   [Ids::iosPushNotifications]; }
     Value  getAppGroupsEnabledValue()                { return getSetting (Ids::iosAppGroups); }
     bool   isAppGroupsEnabled() const                { return settings   [Ids::iosAppGroups]; }
+    Value  getiCloudPermissionsEnabled()             { return getSetting (Ids::iCloudPermissions); }
+    bool   isiCloudPermissionsEnabled() const        { return settings   [Ids::iCloudPermissions]; }
 
     Value  getIosDevelopmentTeamIDValue()            { return getSetting (Ids::iosDevelopmentTeamID); }
     String getIosDevelopmentTeamIDString() const     { return settings   [Ids::iosDevelopmentTeamID]; }
@@ -252,6 +254,9 @@ public:
 
             props.add (new BooleanPropertyComponent (getAppGroupsEnabledValue(), "App groups capability", "Enabled"),
                        "Enable this to grant your app the capability to share resources between apps using the same app group ID.");
+
+            props.add (new BooleanPropertyComponent (getiCloudPermissionsEnabled(), "iCloud Permissions", "Enabled"),
+                       "Enable this to grant your app the capability to use native file load/save browser windows on iOS.");
         }
 
         props.add (new TextPropertyComponent (getPListToMergeValue(), "Custom PList", 8192, true),
@@ -845,7 +850,10 @@ public:
 
             auto developmentTeamID = owner.getIosDevelopmentTeamIDString();
             if (developmentTeamID.isNotEmpty())
+            {
                 attributes << "DevelopmentTeam = " << developmentTeamID << "; ";
+                attributes << "ProvisioningStyle = Automatic; ";
+            }
 
             auto appGroupsEnabled      = (owner.iOS && owner.isAppGroupsEnabled() ? 1 : 0);
             auto inAppPurchasesEnabled = owner.isInAppPurchasesEnabled() ? 1 : 0;
@@ -862,6 +870,10 @@ public:
             attributes << "com.apple.InterAppAudio = { enabled = " << interAppAudioEnabled << "; }; ";
             attributes << "com.apple.Push = { enabled = " << pushNotificationsEnabled << "; }; ";
             attributes << "com.apple.Sandbox = { enabled = " << sandboxEnabled << "; }; ";
+
+            if (owner.iOS && owner.isiCloudPermissionsEnabled())
+                attributes << "com.apple.iCloud = { enabled = 1; }; ";
+
             attributes << "}; };";
 
             return attributes;
@@ -901,7 +913,7 @@ public:
         //==============================================================================
         bool shouldAddEntitlements() const
         {
-            if (owner.isPushNotificationsEnabled() || owner.isAppGroupsEnabled())
+            if (owner.isPushNotificationsEnabled() || owner.isAppGroupsEnabled() || (owner.isiOS() && owner.isiCloudPermissionsEnabled()))
                 return true;
 
             if (owner.project.getProjectType().isAudioPlugin()
@@ -1063,8 +1075,15 @@ public:
             s.set ("GCC_VERSION", gccVersion);
             s.set ("CLANG_LINK_OBJC_RUNTIME", "NO");
 
-            if (! config.codeSignIdentity.isUsingDefault())
-                s.set ("CODE_SIGN_IDENTITY", config.codeSignIdentity.get().quoted());
+            if (isUsingCodeSigning (config))
+            {
+                s.set (owner.iOS ? "\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\"" : "CODE_SIGN_IDENTITY",
+                       getCodeSignIdentity (config).quoted());
+                s.set ("PROVISIONING_PROFILE_SPECIFIER", "\"\"");
+            }
+
+            if (owner.getIosDevelopmentTeamIDString().isNotEmpty())
+                s.set ("DEVELOPMENT_TEAM", owner.getIosDevelopmentTeamIDString());
 
             if (shouldAddEntitlements())
                 s.set ("CODE_SIGN_ENTITLEMENTS", owner.getEntitlementsFileName().quoted());
@@ -1626,6 +1645,20 @@ public:
             }
 
             return deploymentTarget;
+        }
+
+        String getCodeSignIdentity (const XcodeBuildConfiguration& config) const
+        {
+            if (config.codeSignIdentity.isUsingDefault())
+                return owner.iOS ? "iPhone Developer" : "Mac Developer";
+
+            return config.codeSignIdentity.get();
+        }
+
+        bool isUsingCodeSigning (const XcodeBuildConfiguration& config) const
+        {
+            return (! config.codeSignIdentity.isUsingDefault())
+                     || owner.getIosDevelopmentTeamIDString().isNotEmpty();
         }
 
         //==============================================================================
@@ -2542,6 +2575,24 @@ private:
             groups += "\n\t</array>";
 
             entitlements.set ("com.apple.security.application-groups", groups);
+        }
+
+        if (isiOS() && isiCloudPermissionsEnabled())
+        {
+            entitlements.set ("com.apple.developer.icloud-container-identifiers",
+                              "<array>\n"
+                              "        <string>iCloud.$(CFBundleIdentifier)</string>\n"
+                              "    </array>");
+
+            entitlements.set ("com.apple.developer.icloud-services",
+                              "<array>\n"
+                              "        <string>CloudDocuments</string>\n"
+                              "    </array>");
+
+            entitlements.set ("com.apple.developer.ubiquity-container-identifiers",
+                              "<array>\n"
+                              "        <string>iCloud.$(CFBundleIdentifier)</string>\n"
+                              "    </array>");
         }
 
         return entitlements;
