@@ -39,7 +39,7 @@ class OSXMessageBox  : private AsyncUpdater
 {
 public:
     OSXMessageBox (AlertWindow::AlertIconType type, const String& t, const String& m,
-                   const char* b1, const char* b2, const char* b3,
+                   const String& b1, const String& b2, const String& b3,
                    ModalComponentManager::Callback* c, const bool runAsync)
         : iconType (type), title (t), message (m), callback (c),
           button1 (b1), button2 (b2), button3 (b3)
@@ -75,9 +75,7 @@ private:
     AlertWindow::AlertIconType iconType;
     String title, message;
     ScopedPointer<ModalComponentManager::Callback> callback;
-    const char* button1;
-    const char* button2;
-    const char* button3;
+    String button1, button2, button3;
 
     void handleAsyncUpdate() override
     {
@@ -105,9 +103,9 @@ private:
         return [alert runModal];
     }
 
-    static void addButton (NSAlert* alert, const char* button)
+    static void addButton (NSAlert* alert, const String& button)
     {
-        if (button != nullptr)
+        if (button.isNotEmpty())
             [alert addButtonWithTitle: juceStringToNS (TRANS (button))];
     }
 };
