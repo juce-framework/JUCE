@@ -62,7 +62,7 @@ public:
         LinearHorizontal,               /**< A traditional horizontal slider. */
         LinearVertical,                 /**< A traditional vertical slider. */
         LinearBar,                      /**< A horizontal bar slider with the text label drawn on top of it. */
-        LinearBarVertical,
+        LinearBarVertical,              /**< A vertical bar slider with the text label drawn on top of it. */
         Rotary,                         /**< A rotary control that you move by dragging the mouse in a circular motion, like a knob.
                                              @see setRotaryParameters */
         RotaryHorizontalDrag,           /**< A rotary control that you move by dragging the mouse left-to-right.
@@ -81,7 +81,7 @@ public:
         ThreeValueHorizontal,           /**< A horizontal slider that has three thumbs instead of one, so it can show a minimum and maximum
                                              value, with the current value being somewhere between them.
                                              @see setMinValue, setMaxValue */
-        ThreeValueVertical,             /**< A vertical slider that has three thumbs instead of one, so it can show a minimum and maximum
+        ThreeValueVertical              /**< A vertical slider that has three thumbs instead of one, so it can show a minimum and maximum
                                              value, with the current value being somewhere between them.
                                              @see setMinValue, setMaxValue */
     };
