@@ -343,7 +343,7 @@
 				INFOPLIST_FILE = Info-App.plist;
 				INFOPLIST_PREPROCESS = NO;
 				INSTALL_PATH = "$(HOME)/Applications";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow -Wstrict-aliasing -Wconversion -Wsign-compare -Woverloaded-virtual -Wextra-semi";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.JuceDemo;
@@ -377,7 +377,7 @@
 				INFOPLIST_FILE = Info-App.plist;
 				INFOPLIST_PREPROCESS = NO;
 				INSTALL_PATH = "$(HOME)/Applications";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow -Wstrict-aliasing -Wconversion -Wsign-compare -Woverloaded-virtual -Wextra-semi";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.JuceDemo;
