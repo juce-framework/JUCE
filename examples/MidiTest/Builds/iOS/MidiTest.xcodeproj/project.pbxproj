@@ -17,6 +17,7 @@
 		B5839C1ADE6343A97E377F9E = {isa = PBXBuildFile; fileRef = 61275921D3E9ECE1690FD578; };
 		820F8C7344562E54C962352F = {isa = PBXBuildFile; fileRef = B37B0559AA71B6CD7CEC8213; };
 		2276632F4A0CAA61F25AFCB2 = {isa = PBXBuildFile; fileRef = 342786564B1F67373B78584A; };
+		CC428BCC000261D59E8CF764 = {isa = PBXBuildFile; fileRef = 05FCB4FEB0CD32058E6E8235; };
 		3D7C47402EAF5E8BE1C72E65 = {isa = PBXBuildFile; fileRef = 566D5E15DB1A5D46DDC9B861; };
 		029CD2478E773EB13C1D4D87 = {isa = PBXBuildFile; fileRef = 913C67AB487B1455B97E8A3E; };
 		B4EA7A34D4DFF81EF9616B34 = {isa = PBXBuildFile; fileRef = 9FBD6E11D5668E77AF50973E; };
@@ -33,6 +34,7 @@
 		1B1338721F6CAD1E410C63E2 = {isa = PBXBuildFile; fileRef = A6EDD0A39ED1D013EDF5B76E; };
 		F7EECBD89D15CF5026B8285F = {isa = PBXBuildFile; fileRef = 441261DDD3EA2AA4BAF2546E; };
 		79882682F9443C44D182CEF6 = {isa = PBXBuildFile; fileRef = BE8A547CB1569A46575E86BB; };
+		05FCB4FEB0CD32058E6E8235 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		0D3696A03DE495018144E0BA = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_audio_processors"; path = "../../../../modules/juce_audio_processors"; sourceTree = "SOURCE_ROOT"; };
 		161DFA24CD5C89477A9C9971 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_data_structures.mm"; path = "../../JuceLibraryCode/include_juce_data_structures.mm"; sourceTree = "SOURCE_ROOT"; };
 		1C1A2B6085A7DB073BBDDB81 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_data_structures"; path = "../../../../modules/juce_data_structures"; sourceTree = "SOURCE_ROOT"; };
@@ -121,6 +123,7 @@
 					61275921D3E9ECE1690FD578,
 					B37B0559AA71B6CD7CEC8213,
 					342786564B1F67373B78584A,
+					05FCB4FEB0CD32058E6E8235,
 					566D5E15DB1A5D46DDC9B861,
 					913C67AB487B1455B97E8A3E, ); name = Frameworks; sourceTree = "<group>"; };
 		396BE724B1AC489682B74278 = {isa = PBXGroup; children = (
@@ -309,6 +312,7 @@
 					B5839C1ADE6343A97E377F9E,
 					820F8C7344562E54C962352F,
 					2276632F4A0CAA61F25AFCB2,
+					CC428BCC000261D59E8CF764,
 					3D7C47402EAF5E8BE1C72E65,
 					029CD2478E773EB13C1D4D87, ); runOnlyForDeploymentPostprocessing = 0; };
 		68C4BE0E455A27D9A0CEB672 = {isa = PBXNativeTarget; buildConfigurationList = 9EEC5DC9E6376BF734D6A626; buildPhases = (

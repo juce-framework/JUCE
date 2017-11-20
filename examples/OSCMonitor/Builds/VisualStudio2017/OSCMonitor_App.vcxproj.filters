@@ -1651,6 +1651,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ScrollBar.cpp">
       <Filter>Juce Modules\juce_gui_basics\layout</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_SidePanel.cpp">
+      <Filter>Juce Modules\juce_gui_basics\layout</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\layout\juce_StretchableLayoutManager.cpp">
       <Filter>Juce Modules\juce_gui_basics\layout</Filter>
     </ClCompile>
@@ -1683,6 +1686,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V4.cpp">
       <Filter>Juce Modules\juce_gui_basics\lookandfeel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\menus\juce_BurgerMenuComponent.cpp">
+      <Filter>Juce Modules\juce_gui_basics\menus</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\menus\juce_MenuBarComponent.cpp">
       <Filter>Juce Modules\juce_gui_basics\menus</Filter>
@@ -1727,6 +1733,12 @@
       <Filter>Juce Modules\juce_gui_basics\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_android_Windowing.cpp">
+      <Filter>Juce Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_common_MimeTypes.cpp">
+      <Filter>Juce Modules\juce_gui_basics\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_ios_FileChooser.mm">
       <Filter>Juce Modules\juce_gui_basics\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_ios_UIViewComponentPeer.mm">
@@ -3516,6 +3528,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_ScrollBar.h">
       <Filter>Juce Modules\juce_gui_basics\layout</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_SidePanel.h">
+      <Filter>Juce Modules\juce_gui_basics\layout</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\layout\juce_StretchableLayoutManager.h">
       <Filter>Juce Modules\juce_gui_basics\layout</Filter>
     </ClInclude>
@@ -3548,6 +3563,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\lookandfeel\juce_LookAndFeel_V4.h">
       <Filter>Juce Modules\juce_gui_basics\lookandfeel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\menus\juce_BurgerMenuComponent.h">
+      <Filter>Juce Modules\juce_gui_basics\menus</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\menus\juce_MenuBarComponent.h">
       <Filter>Juce Modules\juce_gui_basics\menus</Filter>

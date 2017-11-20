@@ -16,6 +16,7 @@
 		91FB13E966DF491DAB11AE54 = {isa = PBXBuildFile; fileRef = E377874A0AFBAC8A5CB14A77; };
 		17C39AB2D68A6CFC6CC4FC07 = {isa = PBXBuildFile; fileRef = 7EB61485172E45EC8DFCD854; };
 		9B4FE18278DEB63FE7E74459 = {isa = PBXBuildFile; fileRef = 39BD432972C38905D1EC8B77; };
+		27FBA59ECA42A30388780208 = {isa = PBXBuildFile; fileRef = C1F5CD4B2D08BFB4046BCC08; };
 		B3195C7B4D98EDB57273FBEC = {isa = PBXBuildFile; fileRef = D5E16BAF4E665E238BE1C57B; };
 		10C3B856F0D4727BB7387C6A = {isa = PBXBuildFile; fileRef = DD592EABB0FDAB7BA403EDCE; };
 		A89178313735BBE021C9B6F8 = {isa = PBXBuildFile; fileRef = F9DD5C729F10092A9450C104; };
@@ -90,6 +91,7 @@
 		B4BAF22F832D6087073F6A94 = {isa = PBXFileReference; lastKnownFileType = file.caf; name = demonstrative.caf; path = ../../BinaryResources/sounds/demonstrative.caf; sourceTree = "SOURCE_ROOT"; };
 		B8D5B4A343EE9B1F17F6C6E8 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		C16665B24212C85C41C28AFB = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_gui_extra"; path = "../../../../modules/juce_gui_extra"; sourceTree = "SOURCE_ROOT"; };
+		C1F5CD4B2D08BFB4046BCC08 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		C7D481DB8CAD9B796584D884 = {isa = PBXFileReference; lastKnownFileType = image.png; name = "ic_stat_name.png"; path = "../../BinaryResources/images/ic_stat_name.png"; sourceTree = "SOURCE_ROOT"; };
 		C99B706BE72C70269D5E215B = {isa = PBXFileReference; lastKnownFileType = image.png; name = "ic_stat_name4.png"; path = "../../BinaryResources/images/ic_stat_name4.png"; sourceTree = "SOURCE_ROOT"; };
 		CD620A300FB068C981C81F09 = {isa = PBXFileReference; lastKnownFileType = image.png; name = "ic_stat_name7.png"; path = "../../BinaryResources/images/ic_stat_name7.png"; sourceTree = "SOURCE_ROOT"; };
@@ -182,6 +184,7 @@
 					E377874A0AFBAC8A5CB14A77,
 					7EB61485172E45EC8DFCD854,
 					39BD432972C38905D1EC8B77,
+					C1F5CD4B2D08BFB4046BCC08,
 					D5E16BAF4E665E238BE1C57B,
 					DD592EABB0FDAB7BA403EDCE,
 					F9DD5C729F10092A9450C104,
@@ -381,6 +384,7 @@
 					91FB13E966DF491DAB11AE54,
 					17C39AB2D68A6CFC6CC4FC07,
 					9B4FE18278DEB63FE7E74459,
+					27FBA59ECA42A30388780208,
 					B3195C7B4D98EDB57273FBEC,
 					10C3B856F0D4727BB7387C6A,
 					A89178313735BBE021C9B6F8,
