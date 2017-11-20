@@ -1909,13 +1909,13 @@ static const unsigned char temp_binary_data_7[] =
 "    {\r\n"
 "        // No Approximation\r\n"
 "        {[] (float x) { return std::sin (x); }},                   // sine\r\n"
-"        {[] (float x) { return x / float_Pi; }},                   // saw\r\n"
+"        {[] (float x) { return x / MathConstants<float>::pi; }},   // saw\r\n"
 "        {[] (float x) { return x < 0.0f ? -1.0f : 1.0f; }},        // square\r\n"
 "\r\n"
 "        // Approximated by a wave-table\r\n"
-"        {[] (float x) { return std::sin (x); }, 100},             // sine\r\n"
-"        {[] (float x) { return x / float_Pi; }, 100},             // saw\r\n"
-"        {[] (float x) { return x < 0.0f ? -1.0f : 1.0f; }, 100}   // square\r\n"
+"        {[] (float x) { return std::sin (x); }, 100},                 // sine\r\n"
+"        {[] (float x) { return x / MathConstants<float>::pi; }, 100}, // saw\r\n"
+"        {[] (float x) { return x < 0.0f ? -1.0f : 1.0f; }, 100}       // square\r\n"
 "    };\r\n"
 "\r\n"
 "    int currentOscillatorIdx = 0;\r\n"
@@ -2329,7 +2329,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x14aa0aae:  numBytes = 2674; return FIRFilterDemo_cpp;
         case 0xab621a06:  numBytes = 1809; return GainDemo_cpp;
         case 0x06a7a4b1:  numBytes = 2819; return IIRFilterDemo_cpp;
-        case 0x6fc33e27:  numBytes = 3974; return OscillatorDemo_cpp;
+        case 0x6fc33e27:  numBytes = 3986; return OscillatorDemo_cpp;
         case 0xdfdc547d:  numBytes = 3039; return OverdriveDemo_cpp;
         case 0x3f21e597:  numBytes = 4849; return SIMDRegisterDemo_cpp;
         case 0x54e9f84c:  numBytes = 2718; return StateVariableFilterDemo_cpp;

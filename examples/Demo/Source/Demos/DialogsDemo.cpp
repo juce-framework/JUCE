@@ -106,6 +106,9 @@ public:
         loadWithPreviewChooser,
         directoryChooser,
         saveChooser,
+        shareText,
+        shareFile,
+        shareImage,
         numDialogs
     };
 
@@ -130,7 +133,10 @@ public:
             "'Load' File Browser",
             "'Load' File Browser With Image Preview",
             "'Choose Directory' File Browser",
-            "'Save' File Browser"
+            "'Save' File Browser",
+            "Share Text",
+            "Share Files",
+            "Share Images"
         };
 
         // warn in case we add any windows
@@ -379,6 +385,68 @@ private:
                                                                        "You picked: " + name);
                                  });
             }
+        }
+        else if (type == shareText)
+        {
+            ContentSharer::getInstance()->shareText ("I love JUCE!",
+                                                     [] (bool success, const String& error)
+                {
+                    String resultString = success ? "success" : ("failure\n (error: " + error + ")");
+
+                    AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
+                                                      "Sharing Text Result",
+                                                      "Sharing text finished\nwith " + resultString);
+                });
+        }
+        else if (type == shareFile)
+        {
+            File fileToSave = File::createTempFile ("DialogsDemoSharingTest");
+
+            if (fileToSave.createDirectory().wasOk())
+            {
+                fileToSave = fileToSave.getChildFile ("SharingDemoFile.txt");
+                fileToSave.replaceWithText ("Make it fast!");
+
+                Array<URL> urls;
+                urls.add (URL (fileToSave));
+
+                ContentSharer::getInstance()->shareFiles (urls,
+                    [] (bool success, const String& error)
+                    {
+                        String resultString = success ? "success" : ("failure\n (error: " + error + ")");
+
+                        AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
+                                                          "Sharing Files Result",
+                                                          "Sharing files finished\nwith " + resultString);
+                    });
+
+            }
+        }
+        else if (type == shareImage)
+        {
+            Image myImage = ImageCache::getFromMemory (BinaryData::juce_icon_png,
+                                                       BinaryData::juce_icon_pngSize);
+
+            Image myImage2 (Image::RGB, 500, 500, true);
+            Graphics g (myImage2);
+            g.setColour (Colours::green);
+            ColourGradient gradient (Colours::yellow, 170, 170, Colours::cyan, 170, 20, true);
+            g.setGradientFill (gradient);
+            g.fillEllipse (20, 20, 300, 300);
+
+            Array<Image> images;
+            images.add (myImage);
+            images.add (myImage2);
+
+            ContentSharer::getInstance()->shareImages (images,
+                [] (bool success, const String& error)
+                {
+                    String resultString = success ? "success" : ("failure\n (error: " + error + ")");
+
+                    AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
+                                                      "Sharing Images Result",
+                                                      "Sharing images finished\nwith " + resultString);
+                });
         }
     }
 

@@ -57,23 +57,11 @@ DECLARE_JNI_CLASS (AndroidEnvironment, "android/os/Environment");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
- METHOD (getAbsolutePath, "getAbsolutePath", "()Ljava/lang/String;") \
-
-DECLARE_JNI_CLASS (AndroidFile, "java/io/File");
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (close, "close", "()V") \
  METHOD (flush, "flush", "()V") \
  METHOD (write, "write", "([BII)V")
 
 DECLARE_JNI_CLASS (AndroidOutputStream, "java/io/OutputStream");
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
- STATICMETHOD (withAppendedId, "withAppendedId", "(Landroid/net/Uri;J)Landroid/net/Uri;") \
-
-DECLARE_JNI_CLASS (ContentUris, "android/content/ContentUris");
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
@@ -167,7 +155,7 @@ private:
 
             if (selection.isNotEmpty())
             {
-                args = LocalRef<jobjectArray> (env->NewObjectArray (selectionArgs.size(), JavaString, javaString("").get()));
+                args = LocalRef<jobjectArray> (env->NewObjectArray (selectionArgs.size(), JavaString, javaString ("").get()));
 
                 for (int i = 0; i < selectionArgs.size(); ++i)
                     env->SetObjectArrayElement (args.get(), i, javaString (selectionArgs[i]).get());
@@ -335,9 +323,9 @@ private:
     {
         auto* env = getEnv();
 
-        if (env->IsInstanceOf (obj.get(), AndroidFile) != 0)
-            return File (safeString (LocalRef<jobject> (env->CallObjectMethod (obj.get(),
-                                                            AndroidFile.getAbsolutePath))));
+        if (env->IsInstanceOf (obj.get(), JavaFile) != 0)
+            return File (juceString (LocalRef<jstring> ((jstring) env->CallObjectMethod (obj.get(),
+                                                        JavaFile.getAbsolutePath))));
 
         return {};
     }
@@ -354,15 +342,8 @@ private:
 
     static LocalRef<jobject> urlToUri (const URL& url)
     {
-        return LocalRef<jobject> (getEnv()->CallStaticObjectMethod (Uri, Uri.parse, javaString (url.toString (true)).get()));
-    }
-
-    static String safeString (LocalRef<jobject> str)
-    {
-        if (str)
-            return juceString ((jstring) str.get());
-
-        return {};
+        return LocalRef<jobject> (getEnv()->CallStaticObjectMethod (AndroidUri, AndroidUri.parse,
+                                                                    javaString (url.toString (true)).get()));
     }
 };
 
@@ -576,7 +557,7 @@ void FileOutputStream::flushInternal()
             status = getResultForErrno();
 
         // This stuff tells the OS to asynchronously update the metadata
-        // that the OS has cached aboud the file - this metadata is used
+        // that the OS has cached about the file - this metadata is used
         // when the device is acting as a USB drive, and unless it's explicitly
         // refreshed, it'll get out of step with the real file.
         new SingleMediaScanner (file.getFullPathName());

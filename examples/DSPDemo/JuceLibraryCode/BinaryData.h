@@ -30,7 +30,7 @@ namespace BinaryData
     const int            IIRFilterDemo_cppSize = 2819;
 
     extern const char*   OscillatorDemo_cpp;
-    const int            OscillatorDemo_cppSize = 3974;
+    const int            OscillatorDemo_cppSize = 3986;
 
     extern const char*   OverdriveDemo_cpp;
     const int            OverdriveDemo_cppSize = 3039;

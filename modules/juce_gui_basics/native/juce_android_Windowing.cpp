@@ -48,6 +48,8 @@ namespace juce
  extern void juce_fileChooserCompleted (int, void*);
 #endif
 
+extern void juce_contentSharingCompleted (int);
+
 //==============================================================================
 JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, launchApp, void, (JNIEnv* env, jobject activity,
                                                                       jstring appFile, jstring appDataDir))
@@ -113,6 +115,10 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, appActivityResult, void, (JN
     if (requestCode == /*READ_REQUEST_CODE*/42)
         juce_fileChooserCompleted (resultCode, intentData);
    #endif
+
+    if (requestCode == 1003)
+        juce_contentSharingCompleted (resultCode);
+
     ignoreUnused (intentData, requestCode);
 }
 

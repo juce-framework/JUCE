@@ -279,6 +279,7 @@ namespace juce
 #include "filebrowser/juce_FileSearchPathListComponent.h"
 #include "filebrowser/juce_FileTreeComponent.h"
 #include "filebrowser/juce_ImagePreviewComponent.h"
+#include "filebrowser/juce_ContentSharer.h"
 #include "properties/juce_PropertyComponent.h"
 #include "properties/juce_BooleanPropertyComponent.h"
 #include "properties/juce_ButtonPropertyComponent.h"

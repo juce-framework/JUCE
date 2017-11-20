@@ -58,6 +58,8 @@
   #import <UserNotifications/UserNotifications.h>
  #endif
 
+ #import <UIKit/UIActivityViewController.h>
+
 //==============================================================================
 #elif JUCE_WINDOWS
  #include <windowsx.h>
@@ -191,6 +193,7 @@ namespace juce
 #include "filebrowser/juce_FileSearchPathListComponent.cpp"
 #include "filebrowser/juce_FileTreeComponent.cpp"
 #include "filebrowser/juce_ImagePreviewComponent.cpp"
+#include "filebrowser/juce_ContentSharer.cpp"
 #include "layout/juce_ComponentAnimator.cpp"
 #include "layout/juce_ComponentBoundsConstrainer.cpp"
 #include "layout/juce_ComponentBuilder.cpp"
@@ -290,6 +293,7 @@ namespace juce
   #include "native/juce_ios_UIViewComponentPeer.mm"
   #include "native/juce_ios_Windowing.mm"
   #include "native/juce_ios_FileChooser.mm"
+  #include "native/juce_ios_ContentSharer.cpp"
  #else
   #include "native/juce_mac_NSViewComponentPeer.mm"
   #include "native/juce_mac_Windowing.mm"
@@ -318,5 +322,6 @@ namespace juce
  #include "native/juce_android_Windowing.cpp"
  #include "native/juce_common_MimeTypes.cpp"
  #include "native/juce_android_FileChooser.cpp"
+ #include "native/juce_android_ContentSharer.cpp"
 
 #endif
