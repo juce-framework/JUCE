@@ -182,8 +182,9 @@ LookAndFeel_V2::LookAndFeel_V2()
         TableHeaderComponent::outlineColourId,      0x33000000,
         TableHeaderComponent::highlightColourId,    0x8899aadd,
 
-        DirectoryContentsDisplayComponent::highlightColourId,   textHighlightColour,
-        DirectoryContentsDisplayComponent::textColourId,        0xff000000,
+        DirectoryContentsDisplayComponent::highlightColourId,              textHighlightColour,
+        DirectoryContentsDisplayComponent::textColourId,                   0xff000000,
+        DirectoryContentsDisplayComponent::highlightedTextColourId,        0xff000000,
 
         0x1000440, /*LassoComponent::lassoFillColourId*/        0x66dddddd,
         0x1000441, /*LassoComponent::lassoOutlineColourId*/     0x99111111,
@@ -2554,8 +2555,13 @@ void LookAndFeel_V2::drawFileBrowserRow (Graphics& g, int width, int height,
                            RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, 1.0f);
     }
 
-    g.setColour (fileListComp != nullptr ? fileListComp->findColour (DirectoryContentsDisplayComponent::textColourId)
-                                         : findColour (DirectoryContentsDisplayComponent::textColourId));
+    if (isItemSelected)
+        g.setColour (fileListComp != nullptr ? fileListComp->findColour (DirectoryContentsDisplayComponent::highlightedTextColourId)
+                                             : findColour (DirectoryContentsDisplayComponent::highlightedTextColourId));
+    else
+        g.setColour (fileListComp != nullptr ? fileListComp->findColour (DirectoryContentsDisplayComponent::textColourId)
+                                             : findColour (DirectoryContentsDisplayComponent::textColourId));
+
     g.setFont (height * 0.7f);
 
     if (width > 450 && ! isDirectory)

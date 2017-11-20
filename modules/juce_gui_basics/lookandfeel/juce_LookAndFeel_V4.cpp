@@ -742,11 +742,6 @@ void LookAndFeel_V4::drawFileBrowserRow (Graphics& g, int width, int height,
                                          bool isDirectory, bool isItemSelected,
                                          int itemIndex, DirectoryContentsDisplayComponent& dcc)
 {
-    if (auto fileListComp = dynamic_cast<Component*> (&dcc))
-        fileListComp->setColour (DirectoryContentsDisplayComponent::textColourId,
-                                 currentColourScheme.getUIColour (isItemSelected ? ColourScheme::UIColour::highlightedText
-                                                                                 : ColourScheme::UIColour::menuText));
-
     LookAndFeel_V2::drawFileBrowserRow (g, width, height, file, filename, icon,
                                         fileSizeDescription, fileTimeDescription,
                                         isDirectory, isItemSelected, itemIndex, dcc);
@@ -1409,8 +1404,9 @@ void LookAndFeel_V4::initialiseColours()
         BubbleComponent::backgroundColourId,        currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).getARGB(),
         BubbleComponent::outlineColourId,           currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
 
-        DirectoryContentsDisplayComponent::highlightColourId,   currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedFill).getARGB(),
-        DirectoryContentsDisplayComponent::textColourId,        currentColourScheme.getUIColour (ColourScheme::UIColour::menuText).getARGB(),
+        DirectoryContentsDisplayComponent::highlightColourId,          currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedFill).getARGB(),
+        DirectoryContentsDisplayComponent::textColourId,               currentColourScheme.getUIColour (ColourScheme::UIColour::menuText).getARGB(),
+        DirectoryContentsDisplayComponent::highlightedTextColourId,    currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedText).getARGB(),
 
         0x1000440, /*LassoComponent::lassoFillColourId*/        currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).getARGB(),
         0x1000441, /*LassoComponent::lassoOutlineColourId*/     currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
