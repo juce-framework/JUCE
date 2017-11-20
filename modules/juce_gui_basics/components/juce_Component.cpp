@@ -2926,6 +2926,9 @@ void Component::setEnabled (const bool shouldBeEnabled)
         // so no need to send a change message
         if (parentComponent == nullptr || parentComponent->isEnabled())
             sendEnablementChangeMessage();
+
+        BailOutChecker checker (this);
+        componentListeners.callChecked (checker, &ComponentListener::componentEnablementChanged, *this);
     }
 }
 
