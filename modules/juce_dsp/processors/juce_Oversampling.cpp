@@ -282,7 +282,7 @@ public:
                                     SampleType normalizedTransitionWidthUp,
                                     SampleType stopbandAttenuationdBUp,
                                     SampleType normalizedTransitionWidthDown,
-                                    SampleType stopbandAttenuationdBDown) : OversamplingEngine<SampleType> (2, numChannels)
+                                    SampleType stopbandAttenuationdBDown) : OversamplingEngine<SampleType> (numChannels, 2)
     {
         auto structureUp = dsp::FilterDesign<SampleType>::designIIRLowpassHalfBandPolyphaseAllpassMethod (normalizedTransitionWidthUp, stopbandAttenuationdBUp);
         dsp::IIR::Coefficients<SampleType> coeffsUp = getCoefficients (structureUp);
