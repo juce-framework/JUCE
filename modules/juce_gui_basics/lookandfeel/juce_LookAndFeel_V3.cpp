@@ -35,6 +35,7 @@ LookAndFeel_V3::LookAndFeel_V3()
     setColour (TextButton::buttonColourId, textButtonColour);
     setColour (TextButton::buttonOnColourId, Colour (0xff888888));
     setColour (ComboBox::buttonColourId, textButtonColour);
+    setColour (ComboBox::focusedOutlineColourId, textButtonColour);
     setColour (TextEditor::outlineColourId, Colours::transparentBlack);
     setColour (TabbedButtonBar::tabOutlineColourId, Colour (0x66000000));
     setColour (TabbedComponent::outlineColourId, Colour (0x66000000));
@@ -357,11 +358,9 @@ void LookAndFeel_V3::drawComboBox (Graphics& g, int width, int height, const boo
 {
     g.fillAll (box.findColour (ComboBox::backgroundColourId));
 
-    const Colour buttonColour (box.findColour (ComboBox::buttonColourId));
-
     if (box.isEnabled() && box.hasKeyboardFocus (false))
     {
-        g.setColour (buttonColour);
+        g.setColour (box.findColour (ComboBox::focusedOutlineColourId));
         g.drawRect (0, 0, width, height, 2);
     }
     else

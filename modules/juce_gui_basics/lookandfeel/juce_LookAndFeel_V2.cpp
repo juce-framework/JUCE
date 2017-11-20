@@ -112,6 +112,7 @@ LookAndFeel_V2::LookAndFeel_V2()
         ComboBox::textColourId,                     0xff000000,
         ComboBox::backgroundColourId,               0xffffffff,
         ComboBox::arrowColourId,                    0x99000000,
+        ComboBox::focusedOutlineColourId,           0xffbbbbff,
 
         PropertyComponent::backgroundColourId,      0x66ffffff,
         PropertyComponent::labelTextColourId,       0xff000000,
@@ -1167,7 +1168,7 @@ void LookAndFeel_V2::drawComboBox (Graphics& g, int width, int height, const boo
 
     if (box.isEnabled() && box.hasKeyboardFocus (false))
     {
-        g.setColour (box.findColour (ComboBox::buttonColourId));
+        g.setColour (box.findColour (ComboBox::focusedOutlineColourId));
         g.drawRect (0, 0, width, height, 2);
     }
     else
