@@ -716,17 +716,12 @@ void LookAndFeel_V4::layoutFileBrowserComponent (FileBrowserComponent& browserCo
     auto bottomSlice = b.removeFromBottom (sectionHeight);
 
     currentPathBox->setBounds (topSlice.removeFromLeft (topSlice.getWidth() - buttonWidth));
-    currentPathBox->setColour (ComboBox::backgroundColourId,    currentColourScheme.getUIColour (ColourScheme::UIColour::menuBackground));
-    currentPathBox->setColour (ComboBox::textColourId,          currentColourScheme.getUIColour (ColourScheme::UIColour::menuText));
-    currentPathBox->setColour (ComboBox::arrowColourId,         currentColourScheme.getUIColour (ColourScheme::UIColour::menuText));
 
     topSlice.removeFromLeft (6);
     goUpButton->setBounds (topSlice);
 
     bottomSlice.removeFromLeft (20);
     filenameBox->setBounds (bottomSlice);
-    filenameBox->setColour (TextEditor::backgroundColourId,  currentColourScheme.getUIColour (ColourScheme::UIColour::menuBackground));
-    filenameBox->setColour (TextEditor::textColourId,        currentColourScheme.getUIColour (ColourScheme::UIColour::menuText));
 
     if (previewComp != nullptr)
         previewComp->setBounds (b.removeFromRight (b.getWidth() / 3));
@@ -1443,6 +1438,12 @@ void LookAndFeel_V4::initialiseColours()
         SidePanel::dismissButtonNormalColour,                   currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).getARGB(),
         SidePanel::dismissButtonOverColour,                     currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).darker().getARGB(),
         SidePanel::dismissButtonDownColour,                     currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).brighter().getARGB(),
+
+        FileBrowserComponent::currentPathBoxBackgroundColourId,    currentColourScheme.getUIColour (ColourScheme::UIColour::menuBackground).getARGB(),
+        FileBrowserComponent::currentPathBoxTextColourId,          currentColourScheme.getUIColour (ColourScheme::UIColour::menuText).getARGB(),
+        FileBrowserComponent::currentPathBoxArrowColourId,         currentColourScheme.getUIColour (ColourScheme::UIColour::menuText).getARGB(),
+        FileBrowserComponent::filenameBoxBackgroundColourId,       currentColourScheme.getUIColour (ColourScheme::UIColour::menuBackground).getARGB(),
+        FileBrowserComponent::filenameBoxTextColourId,             currentColourScheme.getUIColour (ColourScheme::UIColour::menuText).getARGB(),
     };
 
     for (int i = 0; i < numElementsInArray (coloursToUse); i += 2)

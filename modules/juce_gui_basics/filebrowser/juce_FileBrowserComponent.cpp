@@ -112,6 +112,8 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
     if (previewComp != nullptr)
         addAndMakeVisible (previewComp);
 
+    lookAndFeelChanged();
+
     setRoot (currentRoot);
 
     thread.startThread (4);
@@ -340,6 +342,17 @@ void FileBrowserComponent::resized()
     getLookAndFeel()
         .layoutFileBrowserComponent (*this, fileListComponent, previewComp,
                                      &currentPathBox, &filenameBox, goUpButton);
+}
+
+//==============================================================================
+void FileBrowserComponent::lookAndFeelChanged()
+{
+    currentPathBox.setColour (ComboBox::backgroundColourId,    findColour (currentPathBoxBackgroundColourId));
+    currentPathBox.setColour (ComboBox::textColourId,          findColour (currentPathBoxTextColourId));
+    currentPathBox.setColour (ComboBox::arrowColourId,         findColour (currentPathBoxArrowColourId));
+
+    filenameBox.setColour (TextEditor::backgroundColourId,     findColour (filenameBoxBackgroundColourId));
+    filenameBox.setColour (TextEditor::textColourId,           findColour (filenameBoxTextColourId));
 }
 
 //==============================================================================

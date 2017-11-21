@@ -221,6 +221,12 @@ LookAndFeel_V2::LookAndFeel_V2()
         SidePanel::dismissButtonNormalColour,                   textButtonColour,
         SidePanel::dismissButtonOverColour,                     textButtonColour,
         SidePanel::dismissButtonDownColour,                     0xff4444ff,
+
+        FileBrowserComponent::currentPathBoxBackgroundColourId,    0xffffffff,
+        FileBrowserComponent::currentPathBoxTextColourId,          0xff000000,
+        FileBrowserComponent::currentPathBoxArrowColourId,         0x99000000,
+        FileBrowserComponent::filenameBoxBackgroundColourId,       0xffffffff,
+        FileBrowserComponent::filenameBoxTextColourId,             0xff000000,
     };
 
     for (int i = 0; i < numElementsInArray (standardColours); i += 2)
