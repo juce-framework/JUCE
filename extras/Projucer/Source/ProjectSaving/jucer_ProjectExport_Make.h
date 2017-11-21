@@ -585,6 +585,9 @@ private:
         if (! config.isDebug())
             result.add ("-fvisibility=hidden");
 
+        if (config.isLinkTimeOptimisationEnabled())
+            result.add ("-flto");
+
         auto extraFlags = getExtraLinkerFlagsString().trim();
 
         if (extraFlags.isNotEmpty())

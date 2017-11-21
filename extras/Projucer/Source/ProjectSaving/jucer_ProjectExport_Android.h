@@ -376,11 +376,6 @@ protected:
         {
             return "${ANDROID_ABI}";
         }
-
-        String getLinkerFlagsString() const
-        {
-            return String ("\"-DCMAKE_EXE_LINKER_FLAGS_") + (isDebug() ? "DEBUG" : "RELEASE") + "=-flto\"";
-        }
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
@@ -474,6 +469,22 @@ private:
                     }
 
                     mo << newLine;
+                }
+
+                if (cfg.isLinkTimeOptimisationEnabled())
+                {
+                    // There's no MIPS support for LTO
+                    String mipsCondition ("NOT (ANDROID_ABI STREQUAL \"mips\" OR ANDROID_ABI STREQUAL \"mips64\")");
+                    mo << "    if(" << mipsCondition << ")" << newLine;
+                    StringArray cmakeVariables ("CMAKE_C_FLAGS", "CMAKE_CXX_FLAGS", "CMAKE_EXE_LINKER_FLAGS");
+
+                    for (auto& variable : cmakeVariables)
+                    {
+                        auto configVariable = variable + "_" + cfg.getProductFlavourCMakeIdentifier();
+                        mo << "        SET(" << configVariable << " \"${" << configVariable << "} -flto\")" << newLine;
+                    }
+
+                    mo << "    ENDIF(" << mipsCondition << ")" << newLine;
                 }
 
                 first = false;
@@ -633,9 +644,8 @@ private:
                                            << ", \"-DCMAKE_CXX_FLAGS_" << (cfg.isDebug() ? "DEBUG" : "RELEASE")
                                            << "=-O" << cfg.getGCCOptimisationFlag() << "\""
                                            << ", \"-DCMAKE_C_FLAGS_"   << (cfg.isDebug() ? "DEBUG" : "RELEASE")
-                                           << "=-O" << cfg.getGCCOptimisationFlag() << "\""
-                                           << (cfg.isLinkTimeOptimisationEnabled() ? ", " + cfg.getLinkerFlagsString() : "")
-                                           << newLine;
+                                           << "=-O" << cfg.getGCCOptimisationFlag() << "\"" << newLine;
+
             mo << "                }"                   << newLine;
             mo << "            }"                       << newLine << newLine;
             mo << "            dimension \"default\""   << newLine;

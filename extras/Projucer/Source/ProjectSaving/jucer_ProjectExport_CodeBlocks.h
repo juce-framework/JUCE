@@ -481,6 +481,9 @@ private:
         if (! config.isDebug())
             flags.add ("-s");
 
+        if (config.isLinkTimeOptimisationEnabled())
+            flags.add ("-flto");
+
         flags.addTokens (replacePreprocessorTokens (config, getExtraLinkerFlagsString()).trim(), " \n", "\"'");
 
         const auto packages = getPackages();
