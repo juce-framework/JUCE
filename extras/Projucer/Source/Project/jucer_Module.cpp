@@ -669,12 +669,12 @@ File EnabledModuleList::getModuleFolderFromPathIfItExists (const String& path, c
 
         if (moduleFolder.exists())
         {
-            if (ModuleDescription (moduleFolder).isValid())
+            if (ModuleDescription (moduleFolder).getID() == moduleID)
                 return moduleFolder;
 
             auto f = moduleFolder.getChildFile (moduleID);
 
-            if (ModuleDescription (f).isValid())
+            if (ModuleDescription (f).getID() == moduleID)
                 return f;
         }
     }
