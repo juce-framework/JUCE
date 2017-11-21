@@ -2596,7 +2596,15 @@ struct JucePluginFactory  : public IPluginFactory3
     {
         *obj = nullptr;
 
-        FUID sourceFuid = sourceIid;
+        TUID tuid;
+        memcpy (tuid, sourceIid, sizeof (TUID));
+
+       #if VST_VERSION >= 0x030608
+        auto sourceFuid = FUID::fromTUID (tuid);
+       #else
+        FUID sourceFuid;
+        sourceFuid = tuid;
+       #endif
 
         if (cid == nullptr || sourceIid == nullptr || ! sourceFuid.isValid())
         {
