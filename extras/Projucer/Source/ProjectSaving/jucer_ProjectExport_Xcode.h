@@ -731,11 +731,10 @@ public:
 
         String xcodePackageType, xcodeBundleSignature, xcodeBundleExtension;
         String xcodeProductType, xcodeFileType;
-        String xcodeOtherRezFlags, xcodeExcludedFiles64Bit, xcodeBundleIDSubPath;
+        String xcodeOtherRezFlags, xcodeBundleIDSubPath;
         bool xcodeCopyToProductInstallPathAfterBuild;
         StringArray xcodeFrameworks, xcodeLibs;
         Array<XmlElement> xcodeExtraPListEntries;
-        Array<RelativePath> xcodeExtraLibrariesDebug, xcodeExtraLibrariesRelease;
 
         StringArray frameworkIDs, buildPhaseIDs, configIDs, sourceIDs, rezFileIDs;
         StringArray frameworkNames;
@@ -1064,12 +1063,6 @@ public:
 
                 s.set ("MACOSX_DEPLOYMENT_TARGET_ppc", "10.4");
                 s.set ("SDKROOT_ppc", "macosx10.5");
-
-                if (xcodeExcludedFiles64Bit.isNotEmpty())
-                {
-                    s.set ("EXCLUDED_SOURCE_FILE_NAMES", "\"$(EXCLUDED_SOURCE_FILE_NAMES_$(CURRENT_ARCH))\"");
-                    s.set ("EXCLUDED_SOURCE_FILE_NAMES_x86_64", xcodeExcludedFiles64Bit);
-                }
             }
 
             s.set ("GCC_VERSION", gccVersion);
@@ -1207,8 +1200,7 @@ public:
             if (getTargetFileType() == pluginBundle)
                 flags.add (owner.isiOS() ? "-bitcode_bundle" : "-bundle");
 
-            Array<RelativePath> extraLibs (config.isDebug() ? xcodeExtraLibrariesDebug
-                                                            : xcodeExtraLibrariesRelease);
+            Array<RelativePath> extraLibs;
 
             addExtraLibsForTargetType (config, extraLibs);
 
