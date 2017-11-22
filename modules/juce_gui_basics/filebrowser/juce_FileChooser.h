@@ -66,7 +66,8 @@ public:
         @param initialFileOrDirectory         the file or directory that should be selected
                                               when the dialog box opens. If this parameter is
                                               set to File(), a sensible default directory will
-                                              be used instead.
+                                              be used instead. This parameter is ignored for native
+                                              iOS file choosers.
         @param filePatternsAllowed            a set of file patterns to specify which files
                                               can be selected - each pattern should be
                                               separated by a comma or semi-colon, e.g. "*" or
@@ -122,12 +123,22 @@ public:
         @param warnAboutOverwritingExistingFiles     if true, the dialog box will ask
                     the user if they're sure they want to overwrite a file that already
                     exists
+        @param fileWhichShouldBeSaved     if this parameter is specified, then, if the the user
+                    selects a valid location to save the file, fileWhichShouldBeSaved will
+                    automaitcally be moved to the location selected by the user when the user
+                    clicks 'ok'. If you do not specify this parameter, then it is your
+                    responsibility to save your file at the location that is returned from this
+                    file chooser. Typically, when using this parameter, you already write the
+                    file you wish to save to a temporary location and then supply the path to
+                    this file to this parameter. This parameter is required on iOS when using
+                    native file save dialogs but can be used on all other platforms.
         @returns    true if the user chose a file and pressed 'ok', in which case, use
                     the getResult() method to find out what the file was. Returns false
                     if they cancelled instead.
         @see browseForFileToOpen, browseForDirectory
     */
-    bool browseForFileToSave (bool warnAboutOverwritingExistingFiles);
+    bool browseForFileToSave (bool warnAboutOverwritingExistingFiles,
+                              const File& fileWhichShouldBeSaved = File());
 
     /** Shows a dialog box to choose a directory.
 
@@ -152,12 +163,24 @@ public:
     /** Runs a dialog box for the given set of option flags.
         The flag values used are those in FileBrowserComponent::FileChooserFlags.
 
+        @param fileWhichShouldBeSaved     if this parameter is specified and saveMode is
+                    specified, then, if the the user selects a valid location to save the file,
+                    fileWhichShouldBeSaved will automaitcally be moved to the location selected
+                    by the user when the user clicks 'ok'. If you do not specify this parameter,
+                    then it is your responsibility to save your file at the location that is
+                    returned from this file chooser. Typically, when using this parameter,
+                    you already write the file you wish to save to a temporary location and
+                    then supply the path to this file to this parameter. This parameter is
+                    required on iOS when using native file save dialogs but can be used on all
+                    other platforms.
+
         @returns    true if the user chose a directory and pressed 'ok', in which case, use
                     the getResult() method to find out what they chose. Returns false
                     if they cancelled instead.
         @see FileBrowserComponent::FileChooserFlags
     */
-    bool showDialog (int flags, FilePreviewComponent* previewComponent);
+    bool showDialog (int flags, FilePreviewComponent* previewComponent,
+                     const File& fileWhichShouldBeSaved = File());
 
     /** Use this method to launch the file browser window asynchronously.
 
@@ -173,10 +196,22 @@ public:
 
         You must ensure that the lifetime of the callback object is longer than
         the lifetime of the file-chooser.
+
+        @param fileWhichShouldBeSaved     if this parameter is specified and saveMode is
+                    specified, then, if the the user selects a valid location to save the file,
+                    fileWhichShouldBeSaved will automaitcally be moved to the location selected
+                    by the user when the user clicks 'ok'. If you do not specify this parameter,
+                    then it is your responsibility to save your file at the location that is
+                    returned from this file chooser. Typically, when using this parameter,
+                    you already write the file you wish to save to a temporary location and
+                    then supply the path to this file to this parameter. This parameter is
+                    required on iOS when using native file save dialogs but can be used on all
+                    other platforms.
     */
     void launchAsync (int flags,
                       std::function<void (const FileChooser&)>,
-                      FilePreviewComponent* previewComponent = nullptr);
+                      FilePreviewComponent* previewComponent = nullptr,
+                      const File& fileWhichShouldBeSaved = File());
 
     //==============================================================================
     /** Returns the last file that was chosen by one of the browseFor methods.
@@ -253,14 +288,14 @@ public:
 private:
     //==============================================================================
     String title, filters;
-    const File startingFile;
+    File startingFile, fileToSave;
     Array<URL> results;
     const bool useNativeDialogBox;
     const bool treatFilePackagesAsDirs;
     std::function<void (const FileChooser&)> asyncCallback;
 
     //==============================================================================
-    void finished (const Array<URL>&);
+    void finished (const Array<URL>&, bool);
 
     //==============================================================================
     struct Pimpl

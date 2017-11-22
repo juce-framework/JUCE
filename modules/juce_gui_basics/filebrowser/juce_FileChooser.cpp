@@ -73,7 +73,7 @@ private:
                 result.add (URL (browserComponent.getSelectedFile (i)));
         }
 
-        owner.finished (result);
+        owner.finished (result, true);
     }
 
     //==============================================================================
@@ -137,12 +137,13 @@ bool FileChooser::browseForMultipleFilesOrDirectories (FilePreviewComponent* pre
                        previewComp);
 }
 
-bool FileChooser::browseForFileToSave (const bool warnAboutOverwrite)
+bool FileChooser::browseForFileToSave (const bool warnAboutOverwrite,
+                                       const File& fileWhichShouldBeSaved)
 {
     return showDialog (FileBrowserComponent::saveMode
                         | FileBrowserComponent::canSelectFiles
                         | (warnAboutOverwrite ? FileBrowserComponent::warnAboutOverwriting : 0),
-                       nullptr);
+                       nullptr, fileWhichShouldBeSaved);
 }
 
 bool FileChooser::browseForDirectory()
@@ -152,8 +153,11 @@ bool FileChooser::browseForDirectory()
                        nullptr);
 }
 
-bool FileChooser::showDialog (const int flags, FilePreviewComponent* const previewComp)
+bool FileChooser::showDialog (const int flags, FilePreviewComponent* const previewComp,
+                              const File& fileWhichShouldBeSaved)
 {
+    fileToSave = (flags & FileBrowserComponent::saveMode) != 0 ? fileWhichShouldBeSaved : File();
+
     FocusRestorer focusRestorer;
 
     pimpl = createPimpl (flags, previewComp);
@@ -167,13 +171,16 @@ bool FileChooser::showDialog (const int flags, FilePreviewComponent* const previ
 #endif
 
 void FileChooser::launchAsync (int flags, std::function<void (const FileChooser&)> callback,
-                               FilePreviewComponent* previewComp)
+                               FilePreviewComponent* previewComp,
+                               const File& fileWhichShouldBeSaved)
 {
     // You must specify a callback when using launchAsync
     jassert (callback);
 
     // you cannot run two file chooser dialog boxes at the same time
     jassert (asyncCallback == nullptr);
+
+    fileToSave = (flags & FileBrowserComponent::saveMode) != 0 ? fileWhichShouldBeSaved : File();
 
     asyncCallback = static_cast<std::function<void (const FileChooser&)>&&> (callback);
 
@@ -249,12 +256,22 @@ URL FileChooser::getURLResult() const
     return results.getFirst();
 }
 
-void FileChooser::finished (const Array<URL>& asyncResults)
+void FileChooser::finished (const Array<URL>& asyncResults, bool shouldMove)
 {
      std::function<void (const FileChooser&)> callback;
      std::swap (callback, asyncCallback);
 
      results = asyncResults;
+
+     if (shouldMove && fileToSave.existsAsFile() && results.size() > 0)
+     {
+         // The user either selected multiple files or wants to save the file to a URL
+         // Both are not supported
+         jassert (results.size() == 1 && results.getReference (0).isLocalFile());
+
+         if (! fileToSave.moveFileTo (results.getReference (0).getLocalFile()))
+             results.clear();
+     }
 
      pimpl = nullptr;
 

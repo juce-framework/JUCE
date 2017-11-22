@@ -45,25 +45,14 @@ public:
 
         if ((flags & FileBrowserComponent::saveMode) != 0)
         {
-            auto currentFileOrDirectory = owner.startingFile;
+            // You must specify the fileWhichShouldBeSaved parameter when using
+            // the native save dialog on iOS!
+            jassert (owner.fileToSave.existsAsFile());
 
-            if (! currentFileOrDirectory.existsAsFile())
-            {
-                auto filename = (currentFileOrDirectory.isDirectory() ? "Untitled" : currentFileOrDirectory.getFileName());
-
-                auto tmpDirectory = File::createTempFile ("iosDummyFiles");
-
-                if (tmpDirectory.createDirectory().wasOk())
-                {
-                    currentFileOrDirectory = tmpDirectory.getChildFile (filename);
-                    currentFileOrDirectory.replaceWithText ("");
-                }
-            }
-
-            auto url = [[NSURL alloc] initFileURLWithPath:juceStringToNS (currentFileOrDirectory.getFullPathName())];
+            auto url = [[NSURL alloc] initFileURLWithPath:juceStringToNS (owner.fileToSave.getFullPathName())];
 
             controller = [[UIDocumentPickerViewController alloc] initWithURL:url
-                                                                      inMode:UIDocumentPickerModeMoveToService];
+                                                                      inMode:UIDocumentPickerModeExportToService];
             [url release];
         }
         else
@@ -158,7 +147,7 @@ private:
         Array<URL> chooserResults;
         chooserResults.add (URL (nsStringToJuce ([url absoluteString])));
 
-        owner.finished (chooserResults);
+        owner.finished (chooserResults, false);
         exitModalState (1);
     }
 
@@ -166,7 +155,7 @@ private:
     {
         Array<URL> chooserResults;
 
-        owner.finished (chooserResults);
+        owner.finished (chooserResults, false);
         exitModalState (0);
     }
 

@@ -213,7 +213,7 @@ private:
             }
         }
 
-        owner.finished (chooserResults);
+        owner.finished (chooserResults, true);
     }
 
     bool shouldShowFilename (const String& filenameToTest)

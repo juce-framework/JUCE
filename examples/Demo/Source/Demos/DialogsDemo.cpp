@@ -317,8 +317,16 @@ private:
             }
             else if (type == saveChooser)
             {
+                File fileToSave = File::createTempFile ("saveChooserDemo");
+
+                if (fileToSave.createDirectory().wasOk())
+                {
+                    fileToSave = fileToSave.getChildFile ("JUCE.png");
+                    fileToSave.replaceWithData (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize);
+                }
+
                 fc = new FileChooser ("Choose a file to save...",
-                                      File::getCurrentWorkingDirectory(),
+                                      File::getCurrentWorkingDirectory().getChildFile (fileToSave.getFileName()),
                                       "*",
                                       useNativeVersion);
 
@@ -333,7 +341,7 @@ private:
                                      AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
                                                                        "File Chooser...",
                                                                        "You picked: " + name);
-                                 });
+                                 }, nullptr, fileToSave);
             }
             else if (type == directoryChooser)
             {

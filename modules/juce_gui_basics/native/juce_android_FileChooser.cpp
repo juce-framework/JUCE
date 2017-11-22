@@ -168,7 +168,7 @@ public:
             }
         }
 
-        owner.finished (chosenURLs);
+        owner.finished (chosenURLs, true);
     }
 
     static Native* currentFileChooser;
