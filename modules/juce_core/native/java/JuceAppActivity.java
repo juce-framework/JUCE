@@ -569,7 +569,26 @@ public class JuceAppActivity   extends Activity
             colorMatrix.set (colorTransform);
             paint.setColorFilter (new ColorMatrixColorFilter (colorMatrix));
 
-            setLayerType (View.LAYER_TYPE_NONE, null);
+            java.lang.reflect.Method method = null;
+
+            try
+            {
+                method = getClass().getMethod ("setLayerType", int.class, Paint.class);
+            }
+            catch (SecurityException e)     {}
+            catch (NoSuchMethodException e) {}
+
+            if (method != null)
+            {
+                try
+                {
+                    int layerTypeNone = 0;
+                    method.invoke (this, layerTypeNone, null);
+                }
+                catch (java.lang.IllegalArgumentException e) {}
+                catch (java.lang.IllegalAccessException e) {}
+                catch (java.lang.reflect.InvocationTargetException e) {}
+            }
         }
 
         //==============================================================================
