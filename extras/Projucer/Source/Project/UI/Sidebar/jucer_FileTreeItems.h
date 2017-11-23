@@ -130,7 +130,7 @@ public:
             {
                 if (auto itemToRemove = treeRootItem->findTreeViewItem (itemsToRemove.getUnchecked (i)))
                 {
-                    if (auto* pcc = getProjectContentComponent())
+                    if (auto* pcc = treeRootItem->getProjectContentComponent())
                     {
                         if (auto* fileInfoComp = dynamic_cast<FileGroupInformationComponent*> (pcc->getEditorComponentContent()))
                             if (fileInfoComp->getGroupPath() == itemToRemove->getFile().getFullPathName())

@@ -2529,15 +2529,6 @@ struct JucePluginFactory  : public IPluginFactory3
         return true;
     }
 
-    bool isClassRegistered (const FUID& cid) const
-    {
-        for (int i = 0; i < classes.size(); ++i)
-            if (classes.getUnchecked (i)->infoW.cid == cid)
-                return true;
-
-        return false;
-    }
-
     //==============================================================================
     JUCE_DECLARE_VST3_COM_REF_METHODS
 

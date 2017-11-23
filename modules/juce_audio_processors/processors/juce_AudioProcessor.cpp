@@ -1365,6 +1365,9 @@ int32 AudioProcessor::getAAXPluginIDForMainBusConfig (const AudioChannelSet& mai
         else if (set == AudioChannelSet::create7point1SDDS())    aaxFormatIndex = 13;
         else if (set == AudioChannelSet::create7point0point2())  aaxFormatIndex = 14;
         else if (set == AudioChannelSet::create7point1point2())  aaxFormatIndex = 15;
+        else if (set == AudioChannelSet::ambisonic (1))          aaxFormatIndex = 16;
+        else if (set == AudioChannelSet::ambisonic (2))          aaxFormatIndex = 17;
+        else if (set == AudioChannelSet::ambisonic (3))          aaxFormatIndex = 18;
         else
         {
             // AAX does not support this format and the wrapper should not have
