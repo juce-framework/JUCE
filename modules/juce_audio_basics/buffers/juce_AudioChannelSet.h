@@ -240,7 +240,7 @@ public:
     static AudioChannelSet JUCE_CALLTYPE octagonal();
 
     //==============================================================================
-    /** Creates a set for ambisonic surround setups (ambisonicW, ambisonicX, ambisonicY, ambisonicZ).
+    /** Creates a set for ACN, SN3D normalised ambisonic surround setups with a given order.
 
         Is equivalent to: kAmbiXXXOrderACN (VST), AAX_eStemFormat_Ambi_XXX_ACN (AAX), kAudioChannelLayoutTag_HOA_ACN_SN3D (CoreAudio)
     */
