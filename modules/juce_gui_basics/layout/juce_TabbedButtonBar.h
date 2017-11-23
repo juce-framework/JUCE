@@ -72,7 +72,7 @@ public:
                             ExtraComponentPlacement extraComponentPlacement);
 
     /** Returns the custom component, if there is one. */
-    Component* getExtraComponent() const noexcept                           { return extraComponent; }
+    Component* getExtraComponent() const noexcept                           { return extraComponent.get(); }
 
     /** Returns the placement of the custom component, if there is one. */
     ExtraComponentPlacement getExtraComponentPlacement() const noexcept     { return extraCompPlacement; }

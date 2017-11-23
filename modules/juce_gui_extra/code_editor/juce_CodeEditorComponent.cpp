@@ -405,7 +405,7 @@ void CodeEditorComponent::setTemporaryUnderlining (const Array<Range<int>>&)
 
 Rectangle<int> CodeEditorComponent::getCaretRectangle()
 {
-    return getLocalArea (caret, caret->getLocalBounds());
+    return getLocalArea (caret.get(), caret->getLocalBounds());
 }
 
 void CodeEditorComponent::setLineNumbersShown (const bool shouldBeShown)
@@ -413,7 +413,7 @@ void CodeEditorComponent::setLineNumbersShown (const bool shouldBeShown)
     if (showLineNumbers != shouldBeShown)
     {
         showLineNumbers = shouldBeShown;
-        gutter = nullptr;
+        gutter.reset();
 
         if (shouldBeShown)
             addAndMakeVisible (gutter = new GutterComponent());
@@ -429,9 +429,9 @@ void CodeEditorComponent::setReadOnly (bool b) noexcept
         readOnly = b;
 
         if (b)
-            removeChildComponent (caret);
+            removeChildComponent (caret.get());
         else
-            addAndMakeVisible (caret);
+            addAndMakeVisible (caret.get());
     }
 }
 

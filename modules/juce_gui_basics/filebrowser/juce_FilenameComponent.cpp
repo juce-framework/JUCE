@@ -88,7 +88,7 @@ void FilenameComponent::setBrowseButtonText (const String& newBrowseButtonText)
 
 void FilenameComponent::lookAndFeelChanged()
 {
-    browseButton = nullptr;
+    browseButton.reset();
 
     addAndMakeVisible (browseButton = getLookAndFeel().createFilenameComponentBrowseButton (browseButtonText));
     browseButton->setConnectedEdges (Button::ConnectedOnLeft);

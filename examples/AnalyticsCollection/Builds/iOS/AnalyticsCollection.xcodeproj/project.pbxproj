@@ -11,6 +11,7 @@
 		A808E8D738B9BD079492797F = {isa = PBXBuildFile; fileRef = D87EBFBF8CF2D8160F22405B; };
 		921F2D865DD5EBF5AA00DF38 = {isa = PBXBuildFile; fileRef = 644905C665C9F08A8700FE0D; };
 		107547912F5D18FB3DD33009 = {isa = PBXBuildFile; fileRef = 192797C933B56812538409D4; };
+		668A4D391D55A27F8E57375D = {isa = PBXBuildFile; fileRef = 345ADA913F1D4EB89E5DC12F; };
 		38EE4929FFB8B83FB37B6E73 = {isa = PBXBuildFile; fileRef = FBCE051A0BA6C9FA3E64B47B; };
 		F6BB4E84E37BD38B6CA3025E = {isa = PBXBuildFile; fileRef = E206CE5D6771CAAA3C56F465; };
 		02E32ED5F96146B51FE4669C = {isa = PBXBuildFile; fileRef = BC02966C48A4F51E9A187E4A; };
@@ -25,6 +26,7 @@
 		192797C933B56812538409D4 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1AA9DA887BE127DCED5228BB = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_events"; path = "../../../../modules/juce_events"; sourceTree = "SOURCE_ROOT"; };
 		33B9806EFA95DA05ACD9344E = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "include_juce_analytics.cpp"; path = "../../JuceLibraryCode/include_juce_analytics.cpp"; sourceTree = "SOURCE_ROOT"; };
+		345ADA913F1D4EB89E5DC12F = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		5219A3D3BECB8C7135C90377 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_gui_basics"; path = "../../../../modules/juce_gui_basics"; sourceTree = "SOURCE_ROOT"; };
 		5DC0FF6BC4AE24FABC41F20E = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_core.mm"; path = "../../JuceLibraryCode/include_juce_core.mm"; sourceTree = "SOURCE_ROOT"; };
 		61FADB63565026F559F43F3B = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_graphics.mm"; path = "../../JuceLibraryCode/include_juce_graphics.mm"; sourceTree = "SOURCE_ROOT"; };
@@ -77,6 +79,7 @@
 					D87EBFBF8CF2D8160F22405B,
 					644905C665C9F08A8700FE0D,
 					192797C933B56812538409D4,
+					345ADA913F1D4EB89E5DC12F,
 					FBCE051A0BA6C9FA3E64B47B,
 					E206CE5D6771CAAA3C56F465, ); name = Frameworks; sourceTree = "<group>"; };
 		40E8A594A7EAFA1EF5707952 = {isa = PBXGroup; children = (
@@ -253,13 +256,14 @@
 					A808E8D738B9BD079492797F,
 					921F2D865DD5EBF5AA00DF38,
 					107547912F5D18FB3DD33009,
+					668A4D391D55A27F8E57375D,
 					38EE4929FFB8B83FB37B6E73,
 					F6BB4E84E37BD38B6CA3025E, ); runOnlyForDeploymentPostprocessing = 0; };
 		3195ADB3A101AAE977C998D2 = {isa = PBXNativeTarget; buildConfigurationList = 850BB95DDE68E87344778037; buildPhases = (
 					9DE971716CBA79E89467EFD0,
 					A01C1A7AFBB72E638096E0BA,
 					32F46511CABBD859FD1D427D, ); buildRules = ( ); dependencies = (  ); name = "AnalyticsCollection - App"; productName = AnalyticsCollection; productReference = 707149C59A1AF9752E428B97; productType = "com.apple.product-type.application"; };
-		8C6201B9CB81795542E3302D = {isa = PBXProject; buildConfigurationList = 65535D1056F6B2C9C545923E; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { 3195ADB3A101AAE977C998D2 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 5CB45B3816ED17D0620DDEBF; projectDirPath = ""; projectRoot = ""; targets = (3195ADB3A101AAE977C998D2); };
+		8C6201B9CB81795542E3302D = {isa = PBXProject; buildConfigurationList = 65535D1056F6B2C9C545923E; attributes = { LastUpgradeCheck = 0830; ORGANIZATIONNAME = ""; TargetAttributes = { 3195ADB3A101AAE977C998D2 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 5CB45B3816ED17D0620DDEBF; projectDirPath = ""; projectRoot = ""; targets = (3195ADB3A101AAE977C998D2); };
 	};
 	rootObject = 8C6201B9CB81795542E3302D;
 }

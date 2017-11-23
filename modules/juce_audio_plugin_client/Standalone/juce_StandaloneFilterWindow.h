@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+#if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+extern juce::AudioProcessor* JUCE_API JUCE_CALLTYPE createPluginFilterOfType (juce::AudioProcessor::WrapperType type);
+#endif
+
 namespace juce
 {
 

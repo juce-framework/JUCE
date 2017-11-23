@@ -202,7 +202,7 @@ public:
         Currently, this priority is identical to priority 9, except when building
         for Android with OpenSL support.
 
-        In this case, JUCE will ask OpenSL to consturct a super high priority thread
+        In this case, JUCE will ask OpenSL to construct a super high priority thread
         specifically for realtime audio processing.
 
         Note that this priority can only be set **before** the thread has

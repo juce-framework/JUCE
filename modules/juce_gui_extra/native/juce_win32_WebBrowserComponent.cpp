@@ -241,17 +241,16 @@ private:
 
 //==============================================================================
 WebBrowserComponent::WebBrowserComponent (const bool unloadPageWhenBrowserIsHidden_)
-    : browser (nullptr),
+    : browser (new Pimpl()),
       blankPageShown (false),
       unloadPageWhenBrowserIsHidden (unloadPageWhenBrowserIsHidden_)
 {
     setOpaque (true);
-    addAndMakeVisible (browser = new Pimpl());
+    addAndMakeVisible (browser);
 }
 
 WebBrowserComponent::~WebBrowserComponent()
 {
-    delete browser;
 }
 
 //==============================================================================

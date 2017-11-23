@@ -50,8 +50,8 @@ ResizableWindow::~ResizableWindow()
     jassert (resizableCorner == nullptr || getIndexOfChildComponent (resizableCorner) >= 0);
     jassert (resizableBorder == nullptr || getIndexOfChildComponent (resizableBorder) >= 0);
 
-    resizableCorner = nullptr;
-    resizableBorder = nullptr;
+    resizableCorner.reset();
+    resizableBorder.reset();
     clearContentComponent();
 
     // have you been adding your own components directly to this window..? tut tut tut.
@@ -115,8 +115,8 @@ void ResizableWindow::clearContentComponent()
 }
 
 void ResizableWindow::setContent (Component* newContentComponent,
-                                  const bool takeOwnership,
-                                  const bool resizeToFitWhenContentChangesSize)
+                                  bool takeOwnership,
+                                  bool resizeToFitWhenContentChangesSize)
 {
     if (newContentComponent != contentComponent)
     {
@@ -273,7 +273,7 @@ void ResizableWindow::setResizable (const bool shouldBeResizable,
     {
         if (useBottomRightCornerResizer)
         {
-            resizableBorder = nullptr;
+            resizableBorder.reset();
 
             if (resizableCorner == nullptr)
             {
@@ -283,7 +283,7 @@ void ResizableWindow::setResizable (const bool shouldBeResizable,
         }
         else
         {
-            resizableCorner = nullptr;
+            resizableCorner.reset();
 
             if (resizableBorder == nullptr)
                 Component::addChildComponent (resizableBorder = new ResizableBorderComponent (this, constrainer));
@@ -291,8 +291,8 @@ void ResizableWindow::setResizable (const bool shouldBeResizable,
     }
     else
     {
-        resizableCorner = nullptr;
-        resizableBorder = nullptr;
+        resizableCorner.reset();
+        resizableBorder.reset();
     }
 
     if (isUsingNativeTitleBar())
@@ -339,8 +339,8 @@ void ResizableWindow::setConstrainer (ComponentBoundsConstrainer* newConstrainer
         bool useBottomRightCornerResizer = resizableCorner != nullptr;
         bool shouldBeResizable = useBottomRightCornerResizer || resizableBorder != nullptr;
 
-        resizableCorner = nullptr;
-        resizableBorder = nullptr;
+        resizableCorner.reset();
+        resizableBorder.reset();
 
         setResizable (shouldBeResizable, useBottomRightCornerResizer);
         updatePeerConstrainer();

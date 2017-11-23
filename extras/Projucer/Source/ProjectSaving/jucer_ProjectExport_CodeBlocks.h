@@ -481,21 +481,32 @@ private:
         if (! config.isDebug())
             flags.add ("-s");
 
+        if (config.isLinkTimeOptimisationEnabled())
+            flags.add ("-flto");
+
         flags.addTokens (replacePreprocessorTokens (config, getExtraLinkerFlagsString()).trim(), " \n", "\"'");
 
         const auto packages = getPackages();
 
-        if (config.exporter.isLinux() && packages.size() > 0)
+        if (config.exporter.isLinux())
         {
             if (target.isDynamicLibrary())
                 flags.add ("-shared");
 
-            auto pkgconfigLibs = String ("`pkg-config --libs");
-            for (auto p : packages)
-                pkgconfigLibs << " " << p;
+            if (target.type == ProjectType::Target::StandalonePlugIn
+             || target.type == ProjectType::Target::GUIApp)
+                flags.add ("-no-pie");
 
-            pkgconfigLibs << "`";
-            flags.add (pkgconfigLibs);
+            if (packages.size() > 0)
+            {
+                String pkgconfigLibs ("`pkg-config --libs");
+
+                for (auto p : packages)
+                    pkgconfigLibs << " " << p;
+
+                pkgconfigLibs << "`";
+                flags.add (pkgconfigLibs);
+            }
         }
 
         return getCleanedStringArray (flags);

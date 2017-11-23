@@ -30,10 +30,12 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.http.SslError;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.Handler;
+import android.os.Message;
 import android.os.ParcelUuid;
 import android.os.Environment;
 import android.view.*;
@@ -47,6 +49,10 @@ import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
+import android.webkit.SslErrorHandler;
+import android.webkit.WebChromeClient;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import java.lang.Runnable;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.*;
@@ -644,6 +650,27 @@ public class JuceDemo   extends Activity
 
             colorMatrix.set (colorTransform);
             paint.setColorFilter (new ColorMatrixColorFilter (colorMatrix));
+
+            java.lang.reflect.Method method = null;
+
+            try
+            {
+                method = getClass().getMethod ("setLayerType", int.class, Paint.class);
+            }
+            catch (SecurityException e)     {}
+            catch (NoSuchMethodException e) {}
+
+            if (method != null)
+            {
+                try
+                {
+                    int layerTypeNone = 0;
+                    method.invoke (this, layerTypeNone, null);
+                }
+                catch (java.lang.IllegalArgumentException e) {}
+                catch (java.lang.IllegalAccessException e) {}
+                catch (java.lang.reflect.InvocationTargetException e) {}
+            }
         }
 
         //==============================================================================
@@ -1419,6 +1446,83 @@ public class JuceDemo   extends Activity
         startActivity (new Intent (Intent.ACTION_VIEW, Uri.parse (url)));
     }
 
+    private native boolean webViewPageLoadStarted (long host, WebView view, String url);
+    private native void webViewPageLoadFinished (long host, WebView view, String url);
+    private native void webViewReceivedSslError (long host, WebView view, SslErrorHandler handler, SslError error);
+    private native void webViewCloseWindowRequest (long host, WebView view);
+    private native void webViewCreateWindowRequest (long host, WebView view);
+
+    //==============================================================================
+    public class JuceWebViewClient   extends WebViewClient
+    {
+        public JuceWebViewClient (long hostToUse)
+        {
+            host = hostToUse;
+        }
+
+        public void hostDeleted()
+        {
+            synchronized (hostLock)
+            {
+                host = 0;
+            }
+        }
+
+        @Override
+        public void onPageFinished (WebView view, String url)
+        {
+            if (host == 0)
+                return;
+
+            webViewPageLoadFinished (host, view, url);
+        }
+
+        @Override
+        public void onReceivedSslError (WebView view, SslErrorHandler handler, SslError error)
+        {
+            if (host == 0)
+                return;
+
+            webViewReceivedSslError (host, view, handler, error);
+        }
+
+        @Override
+        public void onPageStarted (WebView view, String url, Bitmap favicon)
+        {
+            if (host != 0)
+                webViewPageLoadStarted (host, view, url);
+        }
+
+        private long host;
+        private final Object hostLock = new Object();
+    }
+
+    public class JuceWebChromeClient    extends WebChromeClient
+    {
+        public JuceWebChromeClient (long hostToUse)
+        {
+            host = hostToUse;
+        }
+
+        @Override
+        public void onCloseWindow (WebView window)
+        {
+            webViewCloseWindowRequest (host, window);
+        }
+
+        @Override
+        public boolean onCreateWindow (WebView view, boolean isDialog,
+                                       boolean isUserGesture, Message resultMsg)
+        {
+            webViewCreateWindowRequest (host, view);
+            return false;
+        }
+
+        private long host;
+        private final Object hostLock = new Object();
+    }
+
+    //==============================================================================
     public static final String getLocaleValue (boolean isRegion)
     {
         java.util.Locale locale = java.util.Locale.getDefault();

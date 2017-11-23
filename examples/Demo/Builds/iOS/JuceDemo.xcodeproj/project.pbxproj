@@ -19,6 +19,7 @@
 		4E306BFA283851066E0DA96E = {isa = PBXBuildFile; fileRef = EACCBFA17F4D07ECE058EEBB; };
 		78A2A3F0D3D555397E3C3CF7 = {isa = PBXBuildFile; fileRef = FBCD860CD7113A3136B127C8; };
 		21C66018A589DB4DCCA7B48B = {isa = PBXBuildFile; fileRef = 8E87696FD85E6134968D4341; };
+		71747FAECF002254F52B1126 = {isa = PBXBuildFile; fileRef = 793B01BBF93056657ADDBF96; };
 		98416DF4B2FD4D550364EBE8 = {isa = PBXBuildFile; fileRef = 5B1433D89E82F55DA4D004B1; };
 		9855E6AE1E9125FC6C3673D4 = {isa = PBXBuildFile; fileRef = 033BE48C56ED09055876AFB9; };
 		1562996CAD648AAC922C763F = {isa = PBXBuildFile; fileRef = C68A1D6B6EAA0B70553FF6D3; };
@@ -128,6 +129,7 @@
 		6F094BA35EB6387B8CA854D3 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_gui_extra.mm"; path = "../../JuceLibraryCode/include_juce_gui_extra.mm"; sourceTree = "SOURCE_ROOT"; };
 		703C1FBF6632A8078BBE05AC = {isa = PBXFileReference; lastKnownFileType = file.wav; name = cello.wav; path = ../../Resources/cello.wav; sourceTree = "SOURCE_ROOT"; };
 		77179735C0CB2D89D9C61466 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_module_info"; path = "../../Resources/juce_module_info"; sourceTree = "SOURCE_ROOT"; };
+		793B01BBF93056657ADDBF96 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		7AEEF2EE40D3B8AE687C6618 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FlexBoxDemo.cpp; path = ../../Source/Demos/FlexBoxDemo.cpp; sourceTree = "SOURCE_ROOT"; };
 		7D639D6C81A57F107F3FA3D6 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_gui_basics.mm"; path = "../../JuceLibraryCode/include_juce_gui_basics.mm"; sourceTree = "SOURCE_ROOT"; };
 		7DBF83B26277D13CB3FC1479 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ImagesDemo.cpp; path = ../../Source/Demos/ImagesDemo.cpp; sourceTree = "SOURCE_ROOT"; };
@@ -307,6 +309,7 @@
 					EACCBFA17F4D07ECE058EEBB,
 					FBCD860CD7113A3136B127C8,
 					8E87696FD85E6134968D4341,
+					793B01BBF93056657ADDBF96,
 					5B1433D89E82F55DA4D004B1,
 					033BE48C56ED09055876AFB9,
 					C68A1D6B6EAA0B70553FF6D3, ); name = Frameworks; sourceTree = "<group>"; };
@@ -548,6 +551,7 @@
 					4E306BFA283851066E0DA96E,
 					78A2A3F0D3D555397E3C3CF7,
 					21C66018A589DB4DCCA7B48B,
+					71747FAECF002254F52B1126,
 					98416DF4B2FD4D550364EBE8,
 					9855E6AE1E9125FC6C3673D4,
 					1562996CAD648AAC922C763F, ); runOnlyForDeploymentPostprocessing = 0; };
@@ -555,7 +559,7 @@
 					8A0460E8E406AB26F4BA09A8,
 					DB71CE9A0FCC9F1D4DB88011,
 					8B042CD6831F0E9BD5C0815E, ); buildRules = ( ); dependencies = (  ); name = "JuceDemo - App"; productName = JuceDemo; productReference = 90B1185950EF7670F87EAA3F; productType = "com.apple.product-type.application"; };
-		A97F75347E57A9C1AF731F1D = {isa = PBXProject; buildConfigurationList = E3E8152B5B6326971AA2F802; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { 00C030852F071EE5DCA3C532 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 605D88E415A9989447F78548; projectDirPath = ""; projectRoot = ""; targets = (00C030852F071EE5DCA3C532); };
+		A97F75347E57A9C1AF731F1D = {isa = PBXProject; buildConfigurationList = E3E8152B5B6326971AA2F802; attributes = { LastUpgradeCheck = 0830; ORGANIZATIONNAME = "ROLI Ltd."; TargetAttributes = { 00C030852F071EE5DCA3C532 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 605D88E415A9989447F78548; projectDirPath = ""; projectRoot = ""; targets = (00C030852F071EE5DCA3C532); };
 	};
 	rootObject = A97F75347E57A9C1AF731F1D;
 }

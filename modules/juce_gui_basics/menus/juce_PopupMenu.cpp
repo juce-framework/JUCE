@@ -44,7 +44,7 @@ class MenuWindow;
 
 static bool canBeTriggered (const PopupMenu::Item& item) noexcept        { return item.isEnabled && item.itemID != 0 && ! item.isSectionHeader; }
 static bool hasActiveSubMenu (const PopupMenu::Item& item) noexcept      { return item.isEnabled && item.subMenu != nullptr && item.subMenu->items.size() > 0; }
-static const Colour* getColour (const PopupMenu::Item& item) noexcept    { return item.colour != Colour (0x00000000) ? &item.colour : nullptr; }
+static const Colour* getColour (const PopupMenu::Item& item) noexcept    { return item.colour != Colour() ? &item.colour : nullptr; }
 static bool hasSubMenu (const PopupMenu::Item& item) noexcept            { return item.subMenu != nullptr && (item.itemID == 0 || item.subMenu->getNumItems() > 0); }
 
 //==============================================================================
@@ -271,7 +271,7 @@ public:
     {
         getActiveWindows().removeFirstMatchingValue (this);
         Desktop::getInstance().removeGlobalMouseListener (this);
-        activeSubMenu = nullptr;
+        activeSubMenu.reset();
         items.clear();
     }
 
@@ -313,7 +313,7 @@ public:
         {
             WeakReference<Component> deletionChecker (this);
 
-            activeSubMenu = nullptr;
+            activeSubMenu.reset();
             currentChild = nullptr;
 
             if (item != nullptr
@@ -901,7 +901,7 @@ public:
 
     bool showSubMenuFor (ItemComponent* childComp)
     {
-        activeSubMenu = nullptr;
+        activeSubMenu.reset();
 
         if (childComp != nullptr
              && hasActiveSubMenu (childComp->item))
@@ -1612,7 +1612,7 @@ struct PopupMenuCompletionCallback  : public ModalComponentManager::Callback
         }
 
         // (this would be the place to fade out the component, if that's what's required)
-        component = nullptr;
+        component.reset();
 
         if (! PopupMenuSettings::menuWasHiddenBecauseOfAppChange)
         {

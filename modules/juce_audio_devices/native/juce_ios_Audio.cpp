@@ -1195,6 +1195,10 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                         result.add (nsStringToJuce (desc.channelName));
                 }
 
+                // A fallback for the iOS simulator and older iOS versions
+                if (result.isEmpty())
+                    return { "Left", "Right" };
+
                 return result;
             }
 
@@ -1202,8 +1206,9 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                                                                BigInteger requiredChannels)
             {
                 requiredChannels.setRange (numHardwareChannelsAvailable,
-                                           requiredChannels.getHighestBit(),
+                                           requiredChannels.getHighestBit() + 1,
                                            false);
+
                 return requiredChannels;
             }
 

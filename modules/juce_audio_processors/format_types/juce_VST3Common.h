@@ -62,6 +62,11 @@ static bool doUIDsMatch (const Steinberg::TUID a, const Steinberg::TUID b) noexc
     }
 
 //==============================================================================
+#if VST_VERSION < 0x030608
+ #define kAmbi1stOrderACN kBFormat
+#endif
+
+//==============================================================================
 inline juce::String toString (const Steinberg::char8* string) noexcept      { return juce::String (string); }
 inline juce::String toString (const Steinberg::char16* string) noexcept     { return juce::String (juce::CharPointer_UTF16 ((juce::CharPointer_UTF16::CharType*) string)); }
 
@@ -265,7 +270,7 @@ static inline Steinberg::Vst::SpeakerArrangement getVst3SpeakerArrangement (cons
     else if (channels == AudioChannelSet::create7point0SDDS())   return k70Cine;
     else if (channels == AudioChannelSet::create7point1())       return k71CineSideFill;
     else if (channels == AudioChannelSet::create7point1SDDS())   return k71Cine;
-    else if (channels == AudioChannelSet::ambisonic())           return kBFormat;
+    else if (channels == AudioChannelSet::ambisonic())           return kAmbi1stOrderACN;
     else if (channels == AudioChannelSet::quadraphonic())        return k40Music;
     else if (channels == AudioChannelSet::create7point0point2()) return k71_2 & ~(Steinberg::Vst::kSpeakerLfe);
     else if (channels == AudioChannelSet::create7point1point2()) return k71_2;
@@ -300,7 +305,7 @@ static inline AudioChannelSet getChannelSetForSpeakerArrangement (Steinberg::Vst
     else if (arr == k70Cine)                                  return AudioChannelSet::create7point0SDDS();
     else if (arr == k71CineSideFill)                          return AudioChannelSet::create7point1();
     else if (arr == k71Cine)                                  return AudioChannelSet::create7point1SDDS();
-    else if (arr == kBFormat)                                 return AudioChannelSet::ambisonic();
+    else if (arr == kAmbi1stOrderACN)                         return AudioChannelSet::ambisonic();
     else if (arr == k40Music)                                 return AudioChannelSet::quadraphonic();
     else if (arr == k71_2)                                    return AudioChannelSet::create7point1point2();
     else if (arr == (k71_2 & ~(Steinberg::Vst::kSpeakerLfe))) return AudioChannelSet::create7point0point2();

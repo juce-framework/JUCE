@@ -31,7 +31,7 @@ namespace dsp
 
 struct FFTUnitTest  : public UnitTest
 {
-    FFTUnitTest()  : UnitTest("FFT") {}
+    FFTUnitTest()  : UnitTest ("FFT", "DSP") {}
 
     static void fillRandom (Random& random, Complex<float>* buffer, size_t n)
     {

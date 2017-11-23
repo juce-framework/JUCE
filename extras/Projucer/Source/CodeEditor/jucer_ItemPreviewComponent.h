@@ -81,7 +81,7 @@ private:
     {
         facts.clear();
         facts.add (file.getFullPathName());
-        drawable = nullptr;
+        drawable.reset();
 
         {
             ScopedPointer<InputStream> input (file.createInputStream());
@@ -94,7 +94,7 @@ private:
                 if (ImageFileFormat* format = ImageFileFormat::findImageFormatForStream (*input))
                     formatName = " " + format->getFormatName();
 
-                input = nullptr;
+                input.reset();
 
                 Image image (ImageCache::getFromFile (file));
 

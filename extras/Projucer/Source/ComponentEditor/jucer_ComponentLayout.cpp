@@ -420,7 +420,7 @@ Component* ComponentLayout::addNewComponent (ComponentTypeHandler* const type, i
         c->getProperties().set ("id", nextCompUID++);
 
         ScopedPointer<XmlElement> xml (type->createXmlFor (c, this));
-        c = nullptr;
+        c.reset();
         c = addComponentFromXml (*xml, true);
 
         String memberName (CodeHelpers::makeValidIdentifier (type->getClassName (c), true, true, false));

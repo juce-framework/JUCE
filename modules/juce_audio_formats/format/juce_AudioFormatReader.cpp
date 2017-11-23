@@ -389,7 +389,7 @@ bool MemoryMappedAudioFormatReader::mapSectionOfFile (Range<int64> samplesToMap)
 {
     if (map == nullptr || samplesToMap != mappedSection)
     {
-        map = nullptr;
+        map.reset();
 
         const Range<int64> fileRange (sampleToFilePos (samplesToMap.getStart()),
                                       sampleToFilePos (samplesToMap.getEnd()));
@@ -397,7 +397,7 @@ bool MemoryMappedAudioFormatReader::mapSectionOfFile (Range<int64> samplesToMap)
         map = new MemoryMappedFile (file, fileRange, MemoryMappedFile::readOnly);
 
         if (map->getData() == nullptr)
-            map = nullptr;
+            map.reset();
         else
             mappedSection = Range<int64> (jmax ((int64) 0, filePosToSample (map->getRange().getStart() + (bytesPerFrame - 1))),
                                           jmin (lengthInSamples, filePosToSample (map->getRange().getEnd())));

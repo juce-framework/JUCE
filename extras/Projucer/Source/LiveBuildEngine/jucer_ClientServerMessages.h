@@ -132,7 +132,7 @@ namespace MessageTypes
             v.setProperty (Ids::start, change.range.getStart(), nullptr);
             v.setProperty (Ids::end, change.range.getEnd(), nullptr);
             v.setProperty (Ids::text, change.text, nullptr);
-            changesMessage.addChild (v, -1, nullptr);
+            changesMessage.appendChild (v, nullptr);
         }
 
         send (target, changesMessage);

@@ -55,6 +55,9 @@ public:
         initialise (function, lookupTableNumPoints);
     }
 
+    /** Returns true if the Oscillator has been initialised. */
+    bool isInitialised() const noexcept     { return static_cast<bool> (generator); }
+
     /** Initialises the oscillator with a waveform. */
     void initialise (const std::function<NumericType (NumericType)>& function, size_t lookupTableNumPoints = 0)
     {
@@ -74,7 +77,7 @@ public:
 
     //==============================================================================
     /** Sets the frequency of the oscillator. */
-    void setFrequency (NumericType newGain, bool force = false) noexcept    { frequency.setValue (newGain, force); }
+    void setFrequency (NumericType newFrequency, bool force = false) noexcept    { frequency.setValue (newFrequency, force); }
 
     /** Returns the current frequency of the oscillator. */
     NumericType getFrequency() const noexcept                    { return frequency.getTargetValue(); }
@@ -102,6 +105,7 @@ public:
     /** Returns the result of processing a single sample. */
     SampleType JUCE_VECTOR_CALLTYPE processSample (SampleType) noexcept
     {
+        jassert (isInitialised());
         auto increment = static_cast<NumericType> (2.0 * double_Pi) * frequency.getNextValue() / sampleRate;
         auto value = generator (pos - static_cast<NumericType> (double_Pi));
         pos = std::fmod (pos + increment, static_cast<NumericType> (2.0 * double_Pi));
@@ -113,6 +117,7 @@ public:
     template <typename ProcessContext>
     void process (const ProcessContext& context) noexcept
     {
+        jassert (isInitialised());
         auto&& outBlock = context.getOutputBlock();
 
         // this is an output-only processory

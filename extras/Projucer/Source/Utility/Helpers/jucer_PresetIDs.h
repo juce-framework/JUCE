@@ -209,6 +209,7 @@ namespace Ids
     DECLARE_ID (iosBackgroundBle);
     DECLARE_ID (iosPushNotifications);
     DECLARE_ID (iosAppGroups);
+    DECLARE_ID (iCloudPermissions);
     DECLARE_ID (iosDevelopmentTeamID);
     DECLARE_ID (iosAppGroupsId);
     DECLARE_ID (iosAppExtensionDuplicateResourcesFolder);
@@ -221,6 +222,7 @@ namespace Ids
     DECLARE_ID (clionMakefileEnabled);
     DECLARE_ID (clionXcodeEnabled);
     DECLARE_ID (clionCodeBlocksEnabled);
+    DECLARE_ID (clionExePath);
     DECLARE_ID (font);
     DECLARE_ID (colour);
     DECLARE_ID (userNotes);

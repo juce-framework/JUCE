@@ -113,7 +113,7 @@ void AudioProcessorEditor::setResizable (const bool shouldBeResizable, const boo
         }
         else
         {
-            resizableCorner = nullptr;
+            resizableCorner.reset();
         }
     }
 }

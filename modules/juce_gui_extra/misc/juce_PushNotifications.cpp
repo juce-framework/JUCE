@@ -28,7 +28,7 @@ namespace juce
 {
 
 //==============================================================================
-#if ! JUCE_ANDROID && ! JUCE_IOS
+#if ! JUCE_ANDROID && ! JUCE_IOS && ! JUCE_MAC
 bool PushNotifications::Notification::isValid() const noexcept { return true; }
 #endif
 
@@ -49,7 +49,7 @@ void PushNotifications::removeListener (Listener* l)   { listeners.remove (l); }
 
 void PushNotifications::requestPermissionsWithSettings (const PushNotifications::Settings& settings)
 {
-  #if JUCE_PUSH_NOTIFICATIONS && JUCE_IOS
+  #if JUCE_PUSH_NOTIFICATIONS && (JUCE_IOS || JUCE_MAC)
     pimpl->requestPermissionsWithSettings (settings);
   #else
     ignoreUnused (settings);
@@ -59,7 +59,7 @@ void PushNotifications::requestPermissionsWithSettings (const PushNotifications:
 
 void PushNotifications::requestSettingsUsed()
 {
-  #if JUCE_PUSH_NOTIFICATIONS && JUCE_IOS
+  #if JUCE_PUSH_NOTIFICATIONS && (JUCE_IOS || JUCE_MAC)
     pimpl->requestSettingsUsed();
   #else
     listeners.call (&PushNotifications::Listener::notificationSettingsReceived, {});

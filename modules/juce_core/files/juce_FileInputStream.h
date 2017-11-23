@@ -75,9 +75,9 @@ public:
 private:
     //==============================================================================
     const File file;
-    void* fileHandle;
-    int64 currentPosition;
-    Result status;
+    void* fileHandle = nullptr;
+    int64 currentPosition = 0;
+    Result status { Result::ok() };
 
     void openHandle();
     size_t readInternal (void*, size_t);

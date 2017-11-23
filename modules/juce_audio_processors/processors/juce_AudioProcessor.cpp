@@ -395,8 +395,14 @@ void AudioProcessor::setPlayConfigDetails (const int newNumIns,
     if (getTotalNumInputChannels()  != newNumIns)
         success &= setChannelLayoutOfBus (true,  0, AudioChannelSet::canonicalChannelSet (newNumIns));
 
+    // failed to find a compatible input configuration
+    jassert (success);
+
     if (getTotalNumOutputChannels() != newNumOuts)
         success &= setChannelLayoutOfBus (false, 0, AudioChannelSet::canonicalChannelSet (newNumOuts));
+
+    // failed to find a compatible output configuration
+    jassert (success);
 
     // if the user is using this method then they do not want any side-buses or aux outputs
     success &= disableNonMainBuses();

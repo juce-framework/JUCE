@@ -95,7 +95,7 @@ namespace SIMDRegister_test_internal
 class SIMDRegisterUnitTests   : public UnitTest
 {
 public:
-    SIMDRegisterUnitTests()  : UnitTest ("SIMDRegister UnitTests") {}
+    SIMDRegisterUnitTests()  : UnitTest ("SIMDRegister UnitTests", "DSP") {}
 
     //==============================================================================
     // Some helper classes
@@ -113,7 +113,10 @@ public:
     template <typename type>
     static bool vecEqualToArray (const SIMDRegister<type>& vec, const type* array)
     {
-        const type* ptr = reinterpret_cast<const type*> (&vec);
+        HeapBlock<type> vecElementsStorage (SIMDRegister<type>::SIMDNumElements * 2);
+        auto* ptr = SIMDRegister<type>::getNextSIMDAlignedPtr (vecElementsStorage.getData());
+        vec.copyToRawArray (ptr);
+
         for (size_t i = 0; i < SIMDRegister<type>::SIMDNumElements; ++i)
         {
             double delta = SIMDRegister_test_internal::difference (ptr[i], array[i]);
@@ -130,8 +133,15 @@ public:
     template <typename type>
     static void copy (SIMDRegister<type>& vec, const type* ptr)
     {
-        for (size_t i = 0; i < SIMDRegister<type>::SIMDNumElements; ++i)
-            vec[i] = ptr[i];
+        if (SIMDRegister<type>::isSIMDAligned (ptr))
+        {
+            vec = SIMDRegister<type>::fromRawArray (ptr);
+        }
+        else
+        {
+            for (size_t i = 0; i < SIMDRegister<type>::SIMDNumElements; ++i)
+                vec[i] = ptr[i];
+        }
     }
 
     //==============================================================================

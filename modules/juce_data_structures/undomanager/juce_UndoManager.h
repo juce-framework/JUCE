@@ -232,8 +232,8 @@ private:
     friend struct ContainerDeletePolicy<ActionSet>;
     OwnedArray<ActionSet> transactions, stashedFutureTransactions;
     String newTransactionName;
-    int totalUnitsStored, maxNumUnitsToKeep, minimumTransactionsToKeep, nextIndex;
-    bool newTransaction, reentrancyCheck;
+    int totalUnitsStored = 0, maxNumUnitsToKeep = 0, minimumTransactionsToKeep = 0, nextIndex = 0;
+    bool newTransaction = true, reentrancyCheck = false;
     ActionSet* getCurrentSet() const noexcept;
     ActionSet* getNextSet() const noexcept;
     void moveFutureTransactionsToStash();

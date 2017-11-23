@@ -564,7 +564,7 @@ bool JucerDocument::flushChangesToDocuments (Project* project)
             cpp->getCodeDocument().replaceAllContent (cppTemplate);
     }
 
-    userDocChangeTimer = nullptr;
+    userDocChangeTimer.reset();
     return true;
 }
 
@@ -771,7 +771,7 @@ public:
                         jucerDoc->setClassName (newFile.getFileNameWithoutExtension());
 
                         jucerDoc->flushChangesToDocuments (&project);
-                        jucerDoc = nullptr;
+                        jucerDoc.reset();
 
                         cpp->save();
                         header->save();

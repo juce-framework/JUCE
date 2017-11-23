@@ -142,18 +142,12 @@ const ModuleDescription* ModuleList::getModuleWithID (const String& moduleID) co
     return nullptr;
 }
 
-struct ModuleSorter
-{
-    static int compareElements (const ModuleDescription* m1, const ModuleDescription* m2)
-    {
-        return m1->getID().compareIgnoreCase (m2->getID());
-    }
-};
-
 void ModuleList::sort()
 {
-    ModuleSorter sorter;
-    modules.sort (sorter);
+    std::sort (modules.begin(), modules.end(), [] (const ModuleDescription* m1, const ModuleDescription* m2)
+    {
+        return m1->getID().compareIgnoreCase (m2->getID()) < 0;
+    });
 }
 
 StringArray ModuleList::getIDs() const
@@ -623,7 +617,7 @@ void LibraryModule::addBrowseableCode (ProjectExporter& exporter, const Array<Fi
     sourceGroup.sortAlphabetically (true, true);
     sourceGroup.addFileAtIndex (moduleHeader, -1, false);
 
-    exporter.getModulesGroup().state.addChild (sourceGroup.state.createCopy(), -1, nullptr);
+    exporter.getModulesGroup().state.appendChild (sourceGroup.state.createCopy(), nullptr);
 }
 
 
@@ -675,12 +669,12 @@ File EnabledModuleList::getModuleFolderFromPathIfItExists (const String& path, c
 
         if (moduleFolder.exists())
         {
-            if (ModuleDescription (moduleFolder).isValid())
+            if (ModuleDescription (moduleFolder).getID() == moduleID)
                 return moduleFolder;
 
             auto f = moduleFolder.getChildFile (moduleID);
 
-            if (ModuleDescription (f).isValid())
+            if (ModuleDescription (f).getID() == moduleID)
                 return f;
         }
     }
@@ -713,7 +707,7 @@ File EnabledModuleList::getModuleFolder (const String& moduleID)
         if (isJuceModule (moduleID))
             return getModuleFolderFromPathIfItExists (getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString(), moduleID, project);
 
-        return findUserModuleFolder (moduleID, getAppSettings().getStoredPath (Ids::defaultUserModulePath).toString());
+        return findUserModuleFolder (getAppSettings().getStoredPath (Ids::defaultUserModulePath).toString(), moduleID);
     }
 
     auto paths = getAllPossibleModulePathsFromExporters (project);
@@ -760,7 +754,7 @@ void EnabledModuleList::addModule (const File& moduleFolder, bool copyLocally, b
             ValueTree module (Ids::MODULE);
             module.setProperty (Ids::ID, moduleID, nullptr);
 
-            state.addChild (module, -1, getUndoManager());
+            state.appendChild (module, getUndoManager());
             sortAlphabetically();
 
             shouldShowAllModuleFilesInProject (moduleID) = true;
@@ -912,6 +906,7 @@ bool EnabledModuleList::isJuceModule (const String& moduleID)
 {
     static StringArray juceModuleIds =
     {
+        "juce_analytics",
         "juce_audio_basics",
         "juce_audio_devices",
         "juce_audio_formats",

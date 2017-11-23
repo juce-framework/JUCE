@@ -496,7 +496,7 @@ Value ProjectExporter::getPathForModuleValue (const String& moduleID)
     {
         m = ValueTree (Ids::MODULEPATH);
         m.setProperty (Ids::ID, moduleID, um);
-        paths.addChild (m, -1, um);
+        paths.appendChild (m, um);
     }
 
     return m.getPropertyAsValue (Ids::path, um);
@@ -703,7 +703,7 @@ void ProjectExporter::addNewConfiguration (const BuildConfiguration* configToCop
 
     newConfig.setProperty (Ids::name, configName, 0);
 
-    configs.addChild (newConfig, -1, project.getUndoManagerFor (configs));
+    configs.appendChild (newConfig, project.getUndoManagerFor (configs));
 }
 
 void ProjectExporter::BuildConfiguration::removeFromExporter()

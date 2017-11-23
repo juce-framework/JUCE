@@ -69,7 +69,7 @@ public:
 
     void mouseUp (const MouseEvent& e) override
     {
-        if (arrowPath.getBounds().expanded (3).contains (e.getPosition().toFloat()))
+        if (! e.mouseWasDraggedSinceMouseDown())
             sendChangeMessage();
     }
 
@@ -201,10 +201,10 @@ public:
 
     ~ConcertinaTreeComponent()
     {
-        treeToDisplay = nullptr;
-        addButton = nullptr;
-        findPanel = nullptr;
-        settingsButton = nullptr;
+        treeToDisplay.reset();
+        addButton.reset();
+        findPanel.reset();
+        settingsButton.reset();
     }
 
     void resized() override

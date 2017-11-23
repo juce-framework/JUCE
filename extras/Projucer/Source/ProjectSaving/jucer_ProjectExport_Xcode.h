@@ -132,6 +132,8 @@ public:
     bool   isPushNotificationsEnabled() const        { return settings   [Ids::iosPushNotifications]; }
     Value  getAppGroupsEnabledValue()                { return getSetting (Ids::iosAppGroups); }
     bool   isAppGroupsEnabled() const                { return settings   [Ids::iosAppGroups]; }
+    Value  getiCloudPermissionsEnabled()             { return getSetting (Ids::iCloudPermissions); }
+    bool   isiCloudPermissionsEnabled() const        { return settings   [Ids::iCloudPermissions]; }
 
     Value  getIosDevelopmentTeamIDValue()            { return getSetting (Ids::iosDevelopmentTeamID); }
     String getIosDevelopmentTeamIDString() const     { return settings   [Ids::iosDevelopmentTeamID]; }
@@ -247,12 +249,15 @@ public:
             props.add (new BooleanPropertyComponent (getBackgroundBleValue(), "Bluetooth MIDI background capability", "Enabled"),
                        "Enable this to grant your app the capability to connect to Bluetooth LE devices when in background mode.");
 
-            props.add (new BooleanPropertyComponent (getPushNotificationsValue(), "Push Notifications capability", "Enabled"),
-                       "Enable this to grant your app the capability to receive push notifications.");
-
             props.add (new BooleanPropertyComponent (getAppGroupsEnabledValue(), "App groups capability", "Enabled"),
                        "Enable this to grant your app the capability to share resources between apps using the same app group ID.");
+
+            props.add (new BooleanPropertyComponent (getiCloudPermissionsEnabled(), "iCloud Permissions", "Enabled"),
+                       "Enable this to grant your app the capability to use native file load/save browser windows on iOS.");
         }
+
+        props.add (new BooleanPropertyComponent (getPushNotificationsValue(), "Push Notifications capability", "Enabled"),
+                   "Enable this to grant your app the capability to receive push notifications.");
 
         props.add (new TextPropertyComponent (getPListToMergeValue(), "Custom PList", 8192, true),
                    "You can paste the contents of an XML PList file in here, and the settings that it contains will override any "
@@ -285,7 +290,7 @@ public:
         if (iOS)
             props.add (new TextPropertyComponentWithEnablement (getAppGroupIdValue(), getAppGroupsEnabledValue(), "App Group ID", 256, false),
                        "The App Group ID to be used for allowing multiple apps to access a shared resource folder. Multiple IDs can be "
-                       "added seperated by a semicolon.");
+                       "added separated by a semicolon.");
 
         props.add (new BooleanPropertyComponent (getSetting ("keepCustomXcodeSchemes"), "Keep custom Xcode schemes", "Enabled"),
                    "Enable this to keep any Xcode schemes you have created for debugging or running, e.g. to launch a plug-in in"
@@ -726,11 +731,10 @@ public:
 
         String xcodePackageType, xcodeBundleSignature, xcodeBundleExtension;
         String xcodeProductType, xcodeFileType;
-        String xcodeOtherRezFlags, xcodeExcludedFiles64Bit, xcodeBundleIDSubPath;
+        String xcodeOtherRezFlags, xcodeBundleIDSubPath;
         bool xcodeCopyToProductInstallPathAfterBuild;
         StringArray xcodeFrameworks, xcodeLibs;
         Array<XmlElement> xcodeExtraPListEntries;
-        Array<RelativePath> xcodeExtraLibrariesDebug, xcodeExtraLibrariesRelease;
 
         StringArray frameworkIDs, buildPhaseIDs, configIDs, sourceIDs, rezFileIDs;
         StringArray frameworkNames;
@@ -845,7 +849,10 @@ public:
 
             auto developmentTeamID = owner.getIosDevelopmentTeamIDString();
             if (developmentTeamID.isNotEmpty())
+            {
                 attributes << "DevelopmentTeam = " << developmentTeamID << "; ";
+                attributes << "ProvisioningStyle = Automatic; ";
+            }
 
             auto appGroupsEnabled      = (owner.iOS && owner.isAppGroupsEnabled() ? 1 : 0);
             auto inAppPurchasesEnabled = owner.isInAppPurchasesEnabled() ? 1 : 0;
@@ -853,7 +860,7 @@ public:
                                           && type == Target::StandalonePlugIn
                                           && owner.getProject().shouldEnableIAA()) ? 1 : 0;
 
-            auto pushNotificationsEnabled = (owner.iOS && owner.isPushNotificationsEnabled()) ? 1 : 0;
+            auto pushNotificationsEnabled = owner.isPushNotificationsEnabled() ? 1 : 0;
             auto sandboxEnabled = (type == Target::AudioUnitv3PlugIn ? 1 : 0);
 
             attributes << "SystemCapabilities = {";
@@ -862,6 +869,10 @@ public:
             attributes << "com.apple.InterAppAudio = { enabled = " << interAppAudioEnabled << "; }; ";
             attributes << "com.apple.Push = { enabled = " << pushNotificationsEnabled << "; }; ";
             attributes << "com.apple.Sandbox = { enabled = " << sandboxEnabled << "; }; ";
+
+            if (owner.iOS && owner.isiCloudPermissionsEnabled())
+                attributes << "com.apple.iCloud = { enabled = 1; }; ";
+
             attributes << "}; };";
 
             return attributes;
@@ -901,7 +912,7 @@ public:
         //==============================================================================
         bool shouldAddEntitlements() const
         {
-            if (owner.isPushNotificationsEnabled() || owner.isAppGroupsEnabled())
+            if (owner.isPushNotificationsEnabled() || owner.isAppGroupsEnabled() || (owner.isiOS() && owner.isiCloudPermissionsEnabled()))
                 return true;
 
             if (owner.project.getProjectType().isAudioPlugin()
@@ -1052,19 +1063,20 @@ public:
 
                 s.set ("MACOSX_DEPLOYMENT_TARGET_ppc", "10.4");
                 s.set ("SDKROOT_ppc", "macosx10.5");
-
-                if (xcodeExcludedFiles64Bit.isNotEmpty())
-                {
-                    s.set ("EXCLUDED_SOURCE_FILE_NAMES", "\"$(EXCLUDED_SOURCE_FILE_NAMES_$(CURRENT_ARCH))\"");
-                    s.set ("EXCLUDED_SOURCE_FILE_NAMES_x86_64", xcodeExcludedFiles64Bit);
-                }
             }
 
             s.set ("GCC_VERSION", gccVersion);
             s.set ("CLANG_LINK_OBJC_RUNTIME", "NO");
 
-            if (! config.codeSignIdentity.isUsingDefault())
-                s.set ("CODE_SIGN_IDENTITY", config.codeSignIdentity.get().quoted());
+            if (isUsingCodeSigning (config))
+            {
+                s.set (owner.iOS ? "\"CODE_SIGN_IDENTITY[sdk=iphoneos*]\"" : "CODE_SIGN_IDENTITY",
+                       getCodeSignIdentity (config).quoted());
+                s.set ("PROVISIONING_PROFILE_SPECIFIER", "\"\"");
+            }
+
+            if (owner.getIosDevelopmentTeamIDString().isNotEmpty())
+                s.set ("DEVELOPMENT_TEAM", owner.getIosDevelopmentTeamIDString());
 
             if (shouldAddEntitlements())
                 s.set ("CODE_SIGN_ENTITLEMENTS", owner.getEntitlementsFileName().quoted());
@@ -1134,7 +1146,7 @@ public:
             if (owner.isInAppPurchasesEnabled())
                 defines.set ("JUCE_IN_APP_PURCHASES", "1");
 
-            if (owner.iOS && owner.isPushNotificationsEnabled())
+            if (owner.isPushNotificationsEnabled())
                 defines.set ("JUCE_PUSH_NOTIFICATIONS", "1");
 
             defines = mergePreprocessorDefs (defines, owner.getAllPreprocessorDefs (config, type));
@@ -1188,8 +1200,7 @@ public:
             if (getTargetFileType() == pluginBundle)
                 flags.add (owner.isiOS() ? "-bitcode_bundle" : "-bundle");
 
-            Array<RelativePath> extraLibs (config.isDebug() ? xcodeExtraLibrariesDebug
-                                                            : xcodeExtraLibrariesRelease);
+            Array<RelativePath> extraLibs;
 
             addExtraLibsForTargetType (config, extraLibs);
 
@@ -1626,6 +1637,20 @@ public:
             }
 
             return deploymentTarget;
+        }
+
+        String getCodeSignIdentity (const XcodeBuildConfiguration& config) const
+        {
+            if (config.codeSignIdentity.isUsingDefault())
+                return owner.iOS ? "iPhone Developer" : "Mac Developer";
+
+            return config.codeSignIdentity.get();
+        }
+
+        bool isUsingCodeSigning (const XcodeBuildConfiguration& config) const
+        {
+            return (! config.codeSignIdentity.isUsingDefault())
+                     || owner.getIosDevelopmentTeamIDString().isNotEmpty();
         }
 
         //==============================================================================
@@ -2527,8 +2552,10 @@ private:
         }
         else
         {
-            if (isiOS() && isPushNotificationsEnabled())
-                entitlements.set ("aps-environment", "<string>development</string>");
+            if (isPushNotificationsEnabled())
+                entitlements.set (isiOS() ? "aps-environment"
+                                          : "com.apple.developer.aps-environment",
+                                  "<string>development</string>");
         }
 
         if (isAppGroupsEnabled())
@@ -2542,6 +2569,24 @@ private:
             groups += "\n\t</array>";
 
             entitlements.set ("com.apple.security.application-groups", groups);
+        }
+
+        if (isiOS() && isiCloudPermissionsEnabled())
+        {
+            entitlements.set ("com.apple.developer.icloud-container-identifiers",
+                              "<array>\n"
+                              "        <string>iCloud.$(CFBundleIdentifier)</string>\n"
+                              "    </array>");
+
+            entitlements.set ("com.apple.developer.icloud-services",
+                              "<array>\n"
+                              "        <string>CloudDocuments</string>\n"
+                              "    </array>");
+
+            entitlements.set ("com.apple.developer.ubiquity-container-identifiers",
+                              "<array>\n"
+                              "        <string>iCloud.$(CFBundleIdentifier)</string>\n"
+                              "    </array>");
         }
 
         return entitlements;
@@ -2852,7 +2897,9 @@ private:
     {
         String attributes;
 
-        attributes << "{ LastUpgradeCheck = 0830; ";
+        attributes << "{ LastUpgradeCheck = 0830; "
+                   << "ORGANIZATIONNAME = " << getProject().getCompanyNameString().quoted()
+                   <<"; ";
 
         if (projectType.isGUIApplication() || projectType.isAudioPlugin())
         {

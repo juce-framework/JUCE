@@ -138,6 +138,28 @@ URL::URL() noexcept {}
 
 URL::URL (const String& u)  : url (u)
 {
+    init();
+}
+
+URL::URL (File localFile)
+{
+    while (! localFile.isRoot())
+    {
+        url = "/" + addEscapeChars (localFile.getFileName(), false) + url;
+        localFile = localFile.getParentDirectory();
+    }
+
+    url = addEscapeChars (localFile.getFileName (), false) + url;
+    if (! url.startsWithChar (L'/'))
+        url = "/" + url;
+
+    url = "file://" + url;
+
+    jassert (isWellFormed());
+}
+
+void URL::init()
+{
     int i = url.indexOfChar ('?');
 
     if (i >= 0)
@@ -320,6 +342,40 @@ String URL::getScheme() const
     return url.substring (0, URLHelpers::findEndOfScheme (url) - 1);
 }
 
+#ifndef JUCE_ANDROID
+bool URL::isLocalFile() const
+{
+    return (getScheme() == "file");
+}
+
+File URL::getLocalFile() const
+{
+    return fileFromFileSchemeURL (*this);
+}
+#endif
+
+File URL::fileFromFileSchemeURL (const URL& fileURL)
+{
+    if (! fileURL.isLocalFile())
+    {
+        jassertfalse;
+        return {};
+    }
+
+    auto path = removeEscapeChars (fileURL.getDomain());
+
+   #ifndef JUCE_WINDOWS
+    path = File::getSeparatorString() + path;
+   #endif
+
+    auto urlElements = StringArray::fromTokens (fileURL.getSubPath(), "/", "");
+
+    for (auto urlElement : urlElements)
+        path += File::getSeparatorString() + removeEscapeChars (urlElement);
+
+    return path;
+}
+
 int URL::getPort() const
 {
     auto colonPos = url.indexOfChar (URLHelpers::findStartOfNetLocation (url), ':');
@@ -438,16 +494,19 @@ bool URL::isProbablyAnEmailAddress (const String& possibleEmailAddress)
 }
 
 //==============================================================================
-WebInputStream* URL::createInputStream (const bool usePostCommand,
-                                        OpenStreamProgressCallback* const progressCallback,
-                                        void* const progressCallbackContext,
-                                        String headers,
-                                        const int timeOutMs,
-                                        StringPairArray* const responseHeaders,
-                                        int* statusCode,
-                                        const int numRedirectsToFollow,
-                                        String httpRequestCmd) const
+InputStream* URL::createInputStream (const bool usePostCommand,
+                                     OpenStreamProgressCallback* const progressCallback,
+                                     void* const progressCallbackContext,
+                                     String headers,
+                                     const int timeOutMs,
+                                     StringPairArray* const responseHeaders,
+                                     int* statusCode,
+                                     const int numRedirectsToFollow,
+                                     String httpRequestCmd) const
 {
+    if (isLocalFile())
+        return getLocalFile().createInputStream();
+
     ScopedPointer<WebInputStream> wi (new WebInputStream (*this, usePostCommand));
 
     struct ProgressCallbackCaller : WebInputStream::Listener
@@ -503,7 +562,8 @@ WebInputStream* URL::createInputStream (const bool usePostCommand,
 //==============================================================================
 bool URL::readEntireBinaryStream (MemoryBlock& destData, bool usePostCommand) const
 {
-    const ScopedPointer<InputStream> in (createInputStream (usePostCommand));
+    const ScopedPointer<InputStream> in (isLocalFile() ? getLocalFile().createInputStream()
+                                                       : static_cast<InputStream*> (createInputStream (usePostCommand)));
 
     if (in != nullptr)
     {
@@ -516,7 +576,8 @@ bool URL::readEntireBinaryStream (MemoryBlock& destData, bool usePostCommand) co
 
 String URL::readEntireTextStream (bool usePostCommand) const
 {
-    const ScopedPointer<InputStream> in (createInputStream (usePostCommand));
+    const ScopedPointer<InputStream> in (isLocalFile() ? getLocalFile().createInputStream()
+                                                       : static_cast<InputStream*> (createInputStream (usePostCommand)));
 
     if (in != nullptr)
         return in->readEntireStreamAsString();

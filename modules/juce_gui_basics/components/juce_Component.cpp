@@ -853,7 +853,7 @@ void Component::setBufferedToImage (const bool shouldBeBuffered)
     }
     else
     {
-        cachedImage = nullptr;
+        cachedImage.reset();
     }
 }
 
@@ -1334,7 +1334,7 @@ void Component::setTransform (const AffineTransform& newTransform)
         if (affineTransform != nullptr)
         {
             repaint();
-            affineTransform = nullptr;
+            affineTransform.reset();
             repaint();
 
             sendMovedResizedMessages (false, false);
@@ -2812,7 +2812,7 @@ void Component::grabFocusInternal (const FocusChangeType cause, const bool canTr
                 if (traverser != nullptr)
                 {
                     auto* defaultComp = traverser->getDefaultComponent (this);
-                    traverser = nullptr;
+                    traverser.reset();
 
                     if (defaultComp != nullptr)
                     {
@@ -2859,7 +2859,7 @@ void Component::moveKeyboardFocusToSibling (const bool moveToNext)
         {
             auto* nextComp = moveToNext ? traverser->getNextComponent (this)
                                         : traverser->getPreviousComponent (this);
-            traverser = nullptr;
+            traverser.reset();
 
             if (nextComp != nullptr)
             {
@@ -2926,6 +2926,9 @@ void Component::setEnabled (const bool shouldBeEnabled)
         // so no need to send a change message
         if (parentComponent == nullptr || parentComponent->isEnabled())
             sendEnablementChangeMessage();
+
+        BailOutChecker checker (this);
+        componentListeners.callChecked (checker, &ComponentListener::componentEnablementChanged, *this);
     }
 }
 
@@ -2960,7 +2963,7 @@ bool Component::isMouseOver (const bool includeChildren) const
         auto* c = ms.getComponentUnderMouse();
 
         if ((c == this || (includeChildren && isParentOf (c)))
-             && c->reallyContains (c->getLocalPoint (nullptr, ms.getScreenPosition()).roundToInt(), false)
+             && c->reallyContains (c->getLocalPoint (nullptr, ms.getScreenPosition().roundToInt()), false)
              && ((! ms.isTouch()) || ms.isDragging()))
             return true;
     }

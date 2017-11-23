@@ -81,15 +81,14 @@ private:
         struct Header : public Component, private LicenseController::StateChangedCallback,
                         private Button::Listener
         {
-            Header ()
-                : avatarButton ("User Settings", &getIcons().user)
+            Header()  : avatarButton ("User Settings", &getIcons().user)
             {
                 setOpaque (true);
                 addChildComponent (avatarButton);
 
                 avatarButton.addListener (this);
 
-                if (LicenseController* licenseController = ProjucerApplication::getApp().licenseController)
+                if (auto* licenseController = ProjucerApplication::getApp().licenseController.get())
                 {
                     licenseController->addLicenseStatusChangedCallback (this);
                     licenseStateChanged (licenseController->getState());
@@ -100,7 +99,7 @@ private:
             {
                 avatarButton.removeListener (this);
 
-                if (LicenseController* licenseController = ProjucerApplication::getApp().licenseController)
+                if (auto* licenseController = ProjucerApplication::getApp().licenseController.get())
                     licenseController->removeLicenseStatusChangedCallback (this);
             }
 
@@ -128,9 +127,9 @@ private:
 
             void buttonClicked (Button*) override
             {
-                if (LicenseController* licenseController = ProjucerApplication::getApp().licenseController)
+                if (auto* licenseController = ProjucerApplication::getApp().licenseController.get())
                 {
-                    const LicenseState::Type type = licenseController->getState().type;
+                    auto type = licenseController->getState().type;
 
                     auto* content = new UserSettingsPopup (true);
                     content->setSize (200, (type == LicenseState::Type::noLicenseChosenYet ? 100 : 150));

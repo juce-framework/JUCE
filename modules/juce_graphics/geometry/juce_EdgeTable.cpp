@@ -679,7 +679,7 @@ void EdgeTable::clipEdgeTableLineToRange (int* dest, const int x1, const int x2)
 
 
 //==============================================================================
-void EdgeTable::clipToRectangle (const Rectangle<int>& r)
+void EdgeTable::clipToRectangle (Rectangle<int> r)
 {
     auto clipped = r.getIntersection (bounds);
 
@@ -718,7 +718,7 @@ void EdgeTable::clipToRectangle (const Rectangle<int>& r)
     }
 }
 
-void EdgeTable::excludeRectangle (const Rectangle<int>& r)
+void EdgeTable::excludeRectangle (Rectangle<int> r)
 {
     auto clipped = r.getIntersection (bounds);
 

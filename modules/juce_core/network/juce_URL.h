@@ -53,6 +53,9 @@ public:
     URL (URL&&);
     URL& operator= (URL&&);
 
+    /** Creates URL referring to a local file on your disk using the file:// scheme. */
+    explicit URL (File);
+
     /** Destructor. */
     ~URL();
 
@@ -93,6 +96,20 @@ public:
         include the colon).
     */
     String getScheme() const;
+
+    /** Returns true if this URL refers to a local file. */
+    bool isLocalFile() const;
+
+    /** Returns the file path of the local file to which this URL refers to.
+        If the URL does not represent a local file URL (i.e. the URL's scheme is not 'file')
+        then this method will assert.
+
+        This method also supports converting Android's content:// URLs to
+        local file paths.
+
+        @see isLocalFile
+    */
+    File getLocalFile() const;
 
     /** Attempts to read a port number from the URL.
         @returns the port number, or 0 if none is explicitly specified.
@@ -266,15 +283,17 @@ public:
     
     /** Attempts to open a stream that can read from this URL.
 
-        This method is a convenience wrapper for creating a new WebInputStream and setting some
-        commonly used options. The returned WebInputStream will have already been connected and
-        reading can start instantly.
-
         Note that this method will block until the first byte of data has been received or an
         error has occurred.
 
         Note that on some platforms (Android, for example) it's not permitted to do any network
         action from the message thread, so you must only call it from a background thread.
+
+        Unless the URL represents a local file, this method returns an instance of a
+        WebInputStream. You can use dynamic_cast to cast the return value to a WebInputStream
+        which allows you more fine-grained control of the transfer process.
+
+        If the URL represents a local file, then this method simply returns a FileInputStream.
 
         @param doPostLikeRequest if true, the parameters added to this class will be transferred
                                  via the HTTP headers which is typical for POST requests. Otherwise
@@ -304,15 +323,15 @@ public:
         @returns    an input stream that the caller must delete, or a null pointer if there was an
                     error trying to open it.
      */
-    WebInputStream* createInputStream (bool doPostLikeRequest,
-                                       OpenStreamProgressCallback* progressCallback = nullptr,
-                                       void* progressCallbackContext = nullptr,
-                                       String extraHeaders = String(),
-                                       int connectionTimeOutMs = 0,
-                                       StringPairArray* responseHeaders = nullptr,
-                                       int* statusCode = nullptr,
-                                       int numRedirectsToFollow = 5,
-                                       String httpRequestCmd = String()) const;
+    InputStream* createInputStream (bool doPostLikeRequest,
+                                    OpenStreamProgressCallback* progressCallback = nullptr,
+                                    void* progressCallbackContext = nullptr,
+                                    String extraHeaders = String(),
+                                    int connectionTimeOutMs = 0,
+                                    StringPairArray* responseHeaders = nullptr,
+                                    int* statusCode = nullptr,
+                                    int numRedirectsToFollow = 5,
+                                    String httpRequestCmd = String()) const;
 
     //==============================================================================
     /** Represents a download task.
@@ -493,6 +512,8 @@ private:
     MemoryBlock postData;
     StringArray parameterNames, parameterValues;
 
+    static File fileFromFileSchemeURL (const URL&);
+
     struct Upload  : public ReferenceCountedObject
     {
         Upload (const String&, const String&, const String&, const File&, MemoryBlock*);
@@ -507,6 +528,7 @@ private:
     ReferenceCountedArray<Upload> filesToUpload;
 
     URL (const String&, int);
+    void init();
     void addParameter (const String&, const String&);
     void createHeadersAndPostData (String&, MemoryBlock&) const;
     URL withUpload (Upload*) const;

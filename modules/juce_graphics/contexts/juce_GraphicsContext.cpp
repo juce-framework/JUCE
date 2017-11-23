@@ -190,7 +190,7 @@ void Graphics::setColour (Colour newColour)
     context.setFill (newColour);
 }
 
-void Graphics::setOpacity (const float newOpacity)
+void Graphics::setOpacity (float newOpacity)
 {
     saveStateIfPending();
     context.setOpacity (newOpacity);
@@ -199,6 +199,11 @@ void Graphics::setOpacity (const float newOpacity)
 void Graphics::setGradientFill (const ColourGradient& gradient)
 {
     setFillType (gradient);
+}
+
+void Graphics::setGradientFill (ColourGradient&& gradient)
+{
+    setFillType (static_cast<ColourGradient&&> (gradient));
 }
 
 void Graphics::setTiledImageFill (const Image& imageToUse, const int anchorX, const int anchorY, const float opacity)

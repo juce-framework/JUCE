@@ -295,7 +295,7 @@ Value StoredSettings::getFallbackPathForOS (const Identifier& key, DependencyPat
         else if (key == Ids::aaxPath)
         {
             if      (os == TargetOS::windows)  v = "C:\\SDKs\\AAX";
-            else if (os == TargetOS::osx)      v = "~/SDKs/AAX" ;
+            else if (os == TargetOS::osx)      v = "~/SDKs/AAX";
             else                               jassertfalse; // no AAX on this OS!
         }
         else if (key == Ids::androidSDKPath)
@@ -305,6 +305,29 @@ Value StoredSettings::getFallbackPathForOS (const Identifier& key, DependencyPat
         else if (key == Ids::androidNDKPath)
         {
             v = "${user.home}/Library/Android/sdk/ndk-bundle";
+        }
+        else if (key == Ids::clionExePath)
+        {
+            if (os == TargetOS::windows)
+            {
+              #if JUCE_WINDOWS
+                auto regValue = WindowsRegistry::getValue ("HKEY_LOCAL_MACHINE\\SOFTWARE\\Classes\\Applications\\clion64.exe\\shell\\open\\command\\", {}, {});
+                auto openCmd = StringArray::fromTokens (regValue, true);
+
+                if (! openCmd.isEmpty())
+                    return Value (openCmd[0].unquoted());
+              #endif
+
+                v = "C:\\Program Files\\JetBrains\\CLion YYYY.MM.DD\\bin\\clion64.exe";
+            }
+            else if (os == TargetOS::osx)
+            {
+                v = "/Applications/CLion.app";
+            }
+            else
+            {
+                v = "${user.home}/clion/bin/clion.sh";
+            }
         }
     }
 
@@ -356,6 +379,16 @@ bool StoredSettings::isGlobalPathValid (const File& relativeTo, const Identifier
     else if (key == Ids::defaultUserModulePath)
     {
         fileToCheckFor = {};
+    }
+    else if (key == Ids::clionExePath)
+    {
+       #if JUCE_MAC
+        fileToCheckFor = path.trim().endsWith (".app") ? "Contents/MacOS/clion" : "../clion";
+       #elif JUCE_WIDOWS
+        fileToCheckFor = "../clion64.exe";
+       #else
+        fileToCheckFor = "../clion.sh";
+       #endif
     }
     else
     {

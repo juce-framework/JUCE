@@ -18,6 +18,7 @@
 		139AEB224F22582CF606327F = {isa = PBXBuildFile; fileRef = 732EEC584A4CE3ED07C5BEFB; };
 		0DE5F0C9D8D826AF3EEBAC04 = {isa = PBXBuildFile; fileRef = 888284627B1FEA22193130AB; };
 		F3F1AF2E0D45882BFE3EDE07 = {isa = PBXBuildFile; fileRef = AF947B0E188B6EA57EB0109B; };
+		1C5A5F5B1B8FD4EAC6E2E3F9 = {isa = PBXBuildFile; fileRef = 3B479141E51C3D8D5A878D8C; };
 		64D079C3CBBBB5BC9D7CC531 = {isa = PBXBuildFile; fileRef = 012CB8E6966875E4AE099E8C; };
 		CA82C00B49701B9ECEB91AE1 = {isa = PBXBuildFile; fileRef = 3B5B55FF08F71060B836F5DB; };
 		3EBD65476039DBFD1A91FB69 = {isa = PBXBuildFile; fileRef = 30B85C7478732E3A6997065D; };
@@ -48,6 +49,7 @@
 		30B85C7478732E3A6997065D = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		366E8D313544E819D73E172C = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_cryptography.mm"; path = "../../JuceLibraryCode/include_juce_cryptography.mm"; sourceTree = "SOURCE_ROOT"; };
 		3A4507CC74253A87B3E246AC = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_audio_basics.mm"; path = "../../JuceLibraryCode/include_juce_audio_basics.mm"; sourceTree = "SOURCE_ROOT"; };
+		3B479141E51C3D8D5A878D8C = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		3B5B55FF08F71060B836F5DB = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		3D594C03A810C7B5A8C94EEA = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_graphics.mm"; path = "../../JuceLibraryCode/include_juce_graphics.mm"; sourceTree = "SOURCE_ROOT"; };
 		3F21F440B8E24F68C9169DAA = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_core"; path = "../../../../modules/juce_core"; sourceTree = "SOURCE_ROOT"; };
@@ -134,6 +136,7 @@
 					732EEC584A4CE3ED07C5BEFB,
 					888284627B1FEA22193130AB,
 					AF947B0E188B6EA57EB0109B,
+					3B479141E51C3D8D5A878D8C,
 					012CB8E6966875E4AE099E8C,
 					3B5B55FF08F71060B836F5DB,
 					30B85C7478732E3A6997065D, ); name = Frameworks; sourceTree = "<group>"; };
@@ -326,6 +329,7 @@
 					139AEB224F22582CF606327F,
 					0DE5F0C9D8D826AF3EEBAC04,
 					F3F1AF2E0D45882BFE3EDE07,
+					1C5A5F5B1B8FD4EAC6E2E3F9,
 					64D079C3CBBBB5BC9D7CC531,
 					CA82C00B49701B9ECEB91AE1,
 					3EBD65476039DBFD1A91FB69, ); runOnlyForDeploymentPostprocessing = 0; };
@@ -333,7 +337,7 @@
 					6DD59723DA58F112C3C6F427,
 					2CCE82C7290D2D226DD34C0B,
 					4516F5A575174EF76FEAD8B3, ); buildRules = ( ); dependencies = (  ); name = "AnimationAppExample - App"; productName = AnimationAppExample; productReference = CBF69B3CBCD089CD7DC8343C; productType = "com.apple.product-type.application"; };
-		AEF97977FF56185DB5E0C493 = {isa = PBXProject; buildConfigurationList = 576D6DACFB71E339D0AD373A; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { 80F5D4DB72CAE33FF7BE0E28 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = E2839CF91E2C633A933666F4; projectDirPath = ""; projectRoot = ""; targets = (80F5D4DB72CAE33FF7BE0E28); };
+		AEF97977FF56185DB5E0C493 = {isa = PBXProject; buildConfigurationList = 576D6DACFB71E339D0AD373A; attributes = { LastUpgradeCheck = 0830; ORGANIZATIONNAME = "ROLI Ltd."; TargetAttributes = { 80F5D4DB72CAE33FF7BE0E28 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = E2839CF91E2C633A933666F4; projectDirPath = ""; projectRoot = ""; targets = (80F5D4DB72CAE33FF7BE0E28); };
 	};
 	rootObject = AEF97977FF56185DB5E0C493;
 }

@@ -109,6 +109,8 @@ public:
         static Identifier exporterName ("XCODE_MAC");
        #elif JUCE_WINDOWS
         static Identifier exporterName ("CODEBLOCKS_WINDOWS");
+       #elif JUCE_LINUX
+        static Identifier exporterName ("LINUX_MAKE");
        #else
         static Identifier exporterName;
        #endif
@@ -121,7 +123,7 @@ public:
 
     bool launchProject() override
     {
-        return getCLionExecutable().startAsProcess (getTargetFolder().getFullPathName());
+        return getCLionExecutable().startAsProcess (getTargetFolder().getFullPathName().quoted());
     }
 
     String getDescription() override
@@ -129,7 +131,7 @@ public:
         String description;
 
         description << "The " << getName() << " exporter produces a single CMakeLists.txt file with "
-                    << "multiple platform dependant sections, where the configuration for each section "
+                    << "multiple platform dependent sections, where the configuration for each section "
                     << "is inherited from other exporters added to this project." << newLine
                     << newLine
                     << "The exporters which provide the CLion configuration for the corresponding platform are:" << newLine
@@ -148,7 +150,7 @@ public:
                     << newLine
                     << "Not all features of all the exporters are currently supported. Notable omissions are AUv3 "
                     << "plug-ins, embedding resources and fat binaries on MacOS, and adding application icons. On "
-                    << "Windows CLion requires a GCC-based compiler like MinGW.";
+                    << "Windows the CLion exporter requires a GCC-based compiler like MinGW.";
 
         return description;
     }
@@ -225,17 +227,17 @@ private:
     //==============================================================================
     static File getCLionExecutable()
     {
-       #if JUCE_MAC
-        return { "/Applications/CLion.app/Contents/MacOS/clion" };
-       #elif JUCE_WINDOWS
-        auto regValue = WindowsRegistry::getValue ("HKEY_LOCAL_MACHINE\\SOFTWARE\\Classes\\Applications\\clion64.exe\\shell\\open\\command\\", {}, {});
-        auto openCmd = StringArray::fromTokens (regValue, true);
+        File clionExe (getAppSettings()
+                       .getStoredPath (Ids::clionExePath)
+                       .toString()
+                       .replace ("${user.home}", File::getSpecialLocation (File::userHomeDirectory).getFullPathName()));
 
-        if (! openCmd.isEmpty())
-            return { openCmd[0].unquoted() };
+       #if JUCE_MAC
+        if (clionExe.getFileName().endsWith (".app"))
+            clionExe = clionExe.getChildFile ("Contents/MacOS/clion");
        #endif
 
-        return {};
+        return clionExe;
     }
 
     //==============================================================================
@@ -262,6 +264,17 @@ private:
         auto enabledID = getExporterEnabledId (exporter);
         getSetting (enabledID) = isExporterEnabled (exporter);
         return getSetting (enabledID);
+    }
+
+    //==============================================================================
+    static bool isWindowsAbsolutePath (const String& path)
+    {
+        return path.length() > 1 && path[1] == ':';
+    }
+
+    static bool isUnixAbsolutePath (const String& path)
+    {
+        return path.isNotEmpty() && (path[0] == '/' || path[0] == '~' || path.startsWith ("$ENV{HOME}"));
     }
 
     //==============================================================================
@@ -302,9 +315,8 @@ private:
     {
         for (auto* target : exporter.targets)
         {
-            if (target->getTargetFileType() == ProjectType::Target::TargetFileType::macOSAppex
-                || target->type == ProjectType::Target::Type::AggregateTarget
-                || target->type == ProjectType::Target::Type::AudioUnitv3PlugIn)
+            if (target->type == ProjectType::Target::Type::AggregateTarget
+             || target->type == ProjectType::Target::Type::AudioUnitv3PlugIn)
                 continue;
 
             String functionName;
@@ -314,6 +326,11 @@ private:
             {
                 case ProjectType::Target::TargetFileType::executable:
                     functionName = "add_executable";
+
+                    if (exporter.isCodeBlocks() && exporter.isWindows()
+                            && target->type != ProjectType::Target::Type::ConsoleApp)
+                        properties.add ("WIN32");
+
                     break;
                 case ProjectType::Target::TargetFileType::staticLibrary:
                 case ProjectType::Target::TargetFileType::sharedLibraryOrDLL:
@@ -359,7 +376,7 @@ private:
     //==============================================================================
     void writeCMakeListsMakefileSection (OutputStream& out, MakefileProjectExporter& exporter) const
     {
-        out << "project (" << getProject().getTitle() << " C CXX)" << newLine
+        out << "project (" << getProject().getTitle().quoted() << " C CXX)" << newLine
             << newLine;
 
         out << "find_package (PkgConfig REQUIRED)" << newLine;
@@ -426,7 +443,7 @@ private:
                     out << "    " << path.quoted() << newLine;
 
                 out << ")" << newLine
-                << newLine;
+                    << newLine;
             }
 
             for (auto* target : exporter.targets)
@@ -437,8 +454,19 @@ private:
                 const auto targetVarName = getTargetVarName (*target);
 
                 out << "set_target_properties (" << targetVarName << " PROPERTIES" << newLine
-                    << "    OUTPUT_NAME "  <<  config.getTargetBinaryNameString().quoted() << newLine
-                    << ")" << newLine << newLine;
+                    << "    OUTPUT_NAME "  <<  config.getTargetBinaryNameString().quoted() << newLine;
+
+                auto cxxStandard = project.getCppStandardValue().toString();
+
+                if (cxxStandard == "latest")
+                    cxxStandard = "1z";
+
+                out << "    CXX_STANDARD " << cxxStandard << newLine;
+
+                if (! shouldUseGNUExtensions())
+                    out << "    CXX_EXTENSIONS OFF" << newLine;
+
+                out << ")" << newLine << newLine;
 
                 auto defines = exporter.getDefines (config);
                 defines.addArray (target->getDefines (config));
@@ -493,9 +521,15 @@ private:
             cFlags.add (exporter.getArchFlags (config));
             cFlags.addArray (exporter.getCPreprocessorFlags (config));
             cFlags.addArray (exporter.getCFlags (config));
+            out << addToCMakeVariable ("CMAKE_C_FLAGS", cFlags.joinIntoString (" ")) << newLine;
 
-            out << addToCMakeVariable ("CMAKE_C_FLAGS", cFlags.joinIntoString (" ")) << newLine
-                << addToCMakeVariable ("CMAKE_CXX_FLAGS", "${CMAKE_C_FLAGS} " + exporter.getCXXFlags().joinIntoString (" ")) << newLine
+            String cxxFlags;
+
+            for (auto& flag : exporter.getCXXFlags())
+                if (! flag.startsWith ("-std="))
+                    cxxFlags += " " + flag;
+
+            out << addToCMakeVariable ("CMAKE_CXX_FLAGS", "${CMAKE_C_FLAGS} " + cxxFlags) << newLine
                 << newLine;
 
             out << "endif (" << buildTypeCondition << ")" << newLine
@@ -506,7 +540,7 @@ private:
     //==============================================================================
     void writeCMakeListsCodeBlocksSection (OutputStream& out, CodeBlocksProjectExporter& exporter) const
     {
-        out << "project (" << getProject().getTitle() << " C CXX)" << newLine
+        out << "project (" << getProject().getTitle().quoted() << " C CXX)" << newLine
             << newLine;
 
         writeCMakeTargets (out, exporter);
@@ -537,7 +571,7 @@ private:
             out << "include_directories (" << newLine;
 
             for (auto& path : exporter.getIncludePaths (config))
-                out << "    " << path.quoted() << newLine;
+                out << "    " << path.replace ("\\", "/").quoted() << newLine;
 
             out << ")" << newLine << newLine;
 
@@ -549,8 +583,19 @@ private:
                 const auto targetVarName = getTargetVarName (*target);
 
                 out << "set_target_properties (" << targetVarName << " PROPERTIES" << newLine
-                    << "    OUTPUT_NAME "  <<  config.getTargetBinaryNameString().quoted() << newLine
-                    << ")" << newLine << newLine;
+                    << "    OUTPUT_NAME "  <<  config.getTargetBinaryNameString().quoted() << newLine;
+
+                auto cxxStandard = project.getCppStandardValue().toString();
+
+                if (cxxStandard == "latest")
+                    cxxStandard = "1z";
+
+                out << "    CXX_STANDARD " << cxxStandard << newLine;
+
+                if (! shouldUseGNUExtensions())
+                    out << "    CXX_EXTENSIONS OFF" << newLine;
+
+                out << ")" << newLine << newLine;
 
                 out << "target_compile_definitions (" << targetVarName << " PRIVATE" << newLine;
 
@@ -562,7 +607,8 @@ private:
                 out << "target_compile_options (" << targetVarName << " PRIVATE" << newLine;
 
                 for (auto& option : exporter.getCompilerFlags (config, *target))
-                    out << "    " << option.quoted() << newLine;
+                    if (! option.startsWith ("-std="))
+                        out << "    " << option.quoted() << newLine;
 
                 out << ")" << newLine << newLine;
 
@@ -575,12 +621,12 @@ private:
 
                 for (auto& path : exporter.getLinkerSearchPaths (config, *target))
                 {
-                    out << "    \"-L";
+                    out << "    \"-L\\\"";
 
-                    if (! File::isAbsolutePath (path))
+                    if (! isWindowsAbsolutePath (path))
                         out << "${CMAKE_CURRENT_SOURCE_DIR}/";
 
-                    out << path << "\"" << newLine;
+                    out << path.replace ("\\", "/") << "\\\"\"" << newLine;
                 }
 
                 for (auto& flag : exporter.getLinkerFlags (config, *target))
@@ -633,7 +679,7 @@ private:
             }
         }
 
-        out << "project (" << getProject().getTitle() << " C CXX)" << newLine << newLine;
+        out << "project (" << getProject().getTitle().quoted() << " C CXX)" << newLine << newLine;
 
         writeCMakeTargets (out, exporter);
 
@@ -697,8 +743,9 @@ private:
                 if (targetAttributeKeys.contains ("HEADER_SEARCH_PATHS"))
                 {
                     auto paths = targetAttributes["HEADER_SEARCH_PATHS"].trim().substring (1).dropLastCharacters (1);
-                    paths = paths.replace ("\"$(inherited)\"", {});
-                    paths = paths.replace ("$(HOME)", "$ENV{HOME}");
+                    paths = paths.replace ("\"$(inherited)\"", {})
+                                 .replace ("$(HOME)", "$ENV{HOME}")
+                                 .replace ("~", "$ENV{HOME}");
                     headerSearchPaths.addTokens (paths, ",\"\t\\", {});
                     headerSearchPaths.removeEmptyStrings();
                     targetAttributeKeys.removeString ("HEADER_SEARCH_PATHS");
@@ -785,11 +832,8 @@ private:
                     targetAttributeKeys.removeString ("GCC_FAST_MATH");
                 }
 
-                if (targetAttributeKeys.contains ("CLANG_CXX_LANGUAGE_STANDARD"))
-                {
-                    cppFlags.add ("-std=" + targetAttributes["CLANG_CXX_LANGUAGE_STANDARD"].unquoted());
-                    targetAttributeKeys.removeString ("CLANG_CXX_LANGUAGE_STANDARD");
-                }
+                // We'll take this setting from the project
+                targetAttributeKeys.removeString ("CLANG_CXX_LANGUAGE_STANDARD");
 
                 if (targetAttributeKeys.contains ("CLANG_CXX_LIBRARY"))
                 {
@@ -818,7 +862,7 @@ private:
                     {
                         libPath = libPath.replace ("${CURRENT_ARCH}", archLabel);
 
-                        if (! File::isAbsolutePath (libPath))
+                        if (! isUnixAbsolutePath (libPath))
                             libPath = "${CMAKE_CURRENT_SOURCE_DIR}/" + libPath;
                     }
 
@@ -872,7 +916,14 @@ private:
                                 << "        " << rezFlags.unquoted().removeCharacters ("\\") << newLine;
 
                             for (auto& path : headerSearchPaths)
-                                out << "        -I \"${PROJECT_SOURCE_DIR}/" << path.unquoted() << "\"" << newLine;
+                            {
+                                out << "        -I \"";
+
+                                if (! isUnixAbsolutePath (path))
+                                    out << "${PROJECT_SOURCE_DIR}/";
+
+                                out << path << "\"" << newLine;
+                            }
 
                             out << "        ${" << resSourcesVar << "}" << newLine
                                 << "        -o ${" << resOutputVar << "}" << newLine
@@ -930,6 +981,16 @@ private:
                 out << "set_target_properties (" << targetVarName << " PROPERTIES" << newLine
                     << "    OUTPUT_NAME "  << binaryName.quoted() << newLine;
 
+                auto cxxStandard = project.getCppStandardValue().toString();
+
+                if (cxxStandard == "latest")
+                    cxxStandard = "1z";
+
+                out << "    CXX_STANDARD " << cxxStandard << newLine;
+
+                if (! shouldUseGNUExtensions())
+                    out << "    CXX_EXTENSIONS OFF" << newLine;
+
                 for (auto& key : targetAttributeKeys)
                     out << "    XCODE_ATTRIBUTE_" << key << " " << targetAttributes[key] << newLine;
 
@@ -960,7 +1021,7 @@ private:
                     out << "    SHARED_CODE" << newLine;
 
                 for (auto& path : libSearchPaths)
-                    out << "    \"-L" << path << "\"" << newLine;
+                    out << "    \"-L\\\"" << path << "\\\"\"" << newLine;
 
                 for (auto& flag : linkerFlags)
                     out << "    " << flag.quoted() << newLine;
@@ -976,7 +1037,7 @@ private:
                     if (target->getTargetFileType() == ProjectType::Target::TargetFileType::pluginBundle
                         && targetAttributeKeys.contains("INSTALL_PATH"))
                     {
-                        const auto installPath = targetAttributes["INSTALL_PATH"].unquoted();
+                        const auto installPath = targetAttributes["INSTALL_PATH"].unquoted().replace ("$(HOME)", "$ENV{HOME}");
                         const auto productFilename = binaryName + (targetAttributeKeys.contains ("WRAPPER_EXTENSION") ? "." + targetAttributes["WRAPPER_EXTENSION"] : String());
                         auto productPath = (installPath + productFilename).quoted();
                         out << "add_custom_command (TARGET " << targetVarName << " POST_BUILD" << newLine

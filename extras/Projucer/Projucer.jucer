@@ -13,10 +13,10 @@
                extraFrameworks="AudioUnit; Accelerate; AVFoundation; CoreAudio; CoreAudioKit; CoreMIDI; DiscRecording; QuartzCore; AudioToolbox; OpenGL; QTKit; QuickTime">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Projucer"
-                       osxSDK="default" osxCompatibility="10.9 SDK" osxArchitecture="default"
+                       osxSDK="default" osxCompatibility="10.11 SDK" osxArchitecture="default"
                        headerPath="" libraryPath="" cppLibType="libc++" enablePluginBinaryCopyStep="1"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="Projucer"
-                       osxSDK="default" osxCompatibility="10.7 SDK" osxArchitecture="default"
+                       osxSDK="default" osxCompatibility="10.11 SDK" osxArchitecture="default"
                        headerPath="" libraryPath="" cppLibType="libc++" enablePluginBinaryCopyStep="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
@@ -155,12 +155,12 @@
             file="Source/Application/jucer_MainWindow.h"/>
     </GROUP>
     <GROUP id="{8853BD6C-8307-BCF8-65BE-6A2F57093B40}" name="BinaryData">
-      <GROUP id="{01CF24A8-7630-2107-3C44-2D021E8339CC}" name="Gradle">
-        <FILE id="DtmKLq" name="gradle-wrapper.jar" compile="0" resource="1"
-              file="Source/BinaryData/Gradle/gradle-wrapper.jar"/>
-        <FILE id="h7CWqI" name="gradlew" compile="0" resource="1" file="Source/BinaryData/Gradle/gradlew"/>
-        <FILE id="zLjIme" name="gradlew.bat" compile="0" resource="1" file="Source/BinaryData/Gradle/gradlew.bat"/>
-        <FILE id="c58ZPm" name="LICENSE" compile="0" resource="1" file="Source/BinaryData/Gradle/LICENSE"/>
+      <GROUP id="{1A183456-21D3-225D-99E4-93B1A8E8C43A}" name="gradle">
+        <FILE id="iKvP2G" name="gradle-wrapper.jar" compile="0" resource="1"
+              file="Source/BinaryData/gradle/gradle-wrapper.jar"/>
+        <FILE id="Ap8FMN" name="gradlew" compile="0" resource="1" file="Source/BinaryData/gradle/gradlew"/>
+        <FILE id="dv12Xk" name="gradlew.bat" compile="0" resource="1" file="Source/BinaryData/gradle/gradlew.bat"/>
+        <FILE id="Df6IUU" name="LICENSE" compile="0" resource="1" file="Source/BinaryData/gradle/LICENSE"/>
       </GROUP>
       <GROUP id="{C49A0B44-304A-389D-AAB0-06169AD6ABAD}" name="Icons">
         <FILE id="kyKYL7" name="background_logo.svg" compile="0" resource="1"

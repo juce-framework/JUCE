@@ -142,7 +142,7 @@ void ReportingThreadContainer::sendReport (String address, String& userAgent, St
 
 void ReportingThreadContainer::changeListenerCallback (ChangeBroadcaster*)
 {
-    reportingThread = nullptr;
+    reportingThread.reset();
 }
 
 //==============================================================================

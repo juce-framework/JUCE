@@ -378,7 +378,7 @@ private:
                     || jucerComp->getOwnerDocument() == nullptr
                     || jucerComp->getFilename() != jucerComponentFile)
                 {
-                    jucerComp = nullptr;
+                    jucerComp.reset();
 
                     jucerComp = new TestComponent (ComponentTypeHandler::findParentDocument (this), 0, false);
                     jucerComp->setFilename (jucerComponentFile);
@@ -389,7 +389,7 @@ private:
             }
             else
             {
-                jucerComp = nullptr;
+                jucerComp.reset();
             }
 
             resized();

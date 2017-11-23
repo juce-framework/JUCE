@@ -318,8 +318,7 @@ namespace CoreMidiHelpers
     class MidiPortAndCallback
     {
     public:
-        MidiPortAndCallback (MidiInputCallback& cb)
-            : input (nullptr), active (false), callback (cb), concatenator (2048)
+        MidiPortAndCallback (MidiInputCallback& cb)  : callback (cb)
         {
         }
 
@@ -332,18 +331,19 @@ namespace CoreMidiHelpers
                 activeCallbacks.removeFirstMatchingValue (this);
             }
 
-            if (portAndEndpoint != 0 && portAndEndpoint->port != 0)
+            if (portAndEndpoint != nullptr && portAndEndpoint->port != 0)
                 CHECK_ERROR (MIDIPortDisconnectSource (portAndEndpoint->port, portAndEndpoint->endPoint));
         }
 
         void handlePackets (const MIDIPacketList* const pktlist)
         {
-            const double time = Time::getMillisecondCounterHiRes() * 0.001;
+            auto time = Time::getMillisecondCounterHiRes() * 0.001;
 
             const ScopedLock sl (callbackLock);
+
             if (activeCallbacks.contains (this) && active)
             {
-                const MIDIPacket* packet = &pktlist->packet[0];
+                auto* packet = &pktlist->packet[0];
 
                 for (unsigned int i = 0; i < pktlist->numPackets; ++i)
                 {
@@ -355,13 +355,13 @@ namespace CoreMidiHelpers
             }
         }
 
-        MidiInput* input;
+        MidiInput* input = nullptr;
         ScopedPointer<MidiPortAndEndpoint> portAndEndpoint;
-        volatile bool active;
+        volatile bool active = false;
 
     private:
         MidiInputCallback& callback;
-        MidiDataConcatenator concatenator;
+        MidiDataConcatenator concatenator { 2048 };
     };
 
     static void midiInputProc (const MIDIPacketList* pktlist, void* readProcRefCon, void* /*srcConnRefCon*/)

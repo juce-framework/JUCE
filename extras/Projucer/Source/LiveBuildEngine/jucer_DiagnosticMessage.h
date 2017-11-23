@@ -157,7 +157,7 @@ struct DiagnosticList
             lastMessage = m;
         }
 
-        list.addChild (m.toValueTree(), -1, nullptr);
+        list.appendChild (m.toValueTree(), nullptr);
     }
 
     void add (const DiagnosticList& l)
@@ -165,7 +165,7 @@ struct DiagnosticList
         jassert (l.list != list);
 
         for (int i = 0; i < l.list.getNumChildren(); ++i)
-            list.addChild (l.list.getChild(i).createCopy(), -1, nullptr);
+            list.appendChild (l.list.getChild(i).createCopy(), nullptr);
     }
 
     void remove (DiagnosticMessage m)

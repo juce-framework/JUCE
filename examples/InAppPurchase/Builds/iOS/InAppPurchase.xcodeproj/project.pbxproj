@@ -17,6 +17,7 @@
 		8F09175E78801A7BEC436C82 = {isa = PBXBuildFile; fileRef = DAABDCED79C1DA90F45253B8; };
 		891B29DB06A03394D5F677EC = {isa = PBXBuildFile; fileRef = 3197EC86271A508C5D5A2E4C; };
 		B69028E545FA545A8A621A10 = {isa = PBXBuildFile; fileRef = 588E7A1211ECCDA4BED7A8E9; };
+		3B029809362858599BFC76CA = {isa = PBXBuildFile; fileRef = A9FF0BD47F557AEF80D64843; };
 		4D2CCC2E460D480A66F0DF4B = {isa = PBXBuildFile; fileRef = 8359553FC47651559C507253; };
 		B78CB6417449BA02D4DA2068 = {isa = PBXBuildFile; fileRef = 8957C2F43247B9144CF301F1; };
 		0F590D6038AA475993311AE5 = {isa = PBXBuildFile; fileRef = E72CE518332596C4088E985B; };
@@ -96,6 +97,7 @@
 		A7A4F41C64D34868A5B7A66C = {isa = PBXFileReference; lastKnownFileType = image.png; name = Lukasz.png; path = ../../BinaryData/Lukasz.png; sourceTree = "SOURCE_ROOT"; };
 		A7B1E98E73BC27CCDAF8F48C = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_audio_formats.mm"; path = "../../JuceLibraryCode/include_juce_audio_formats.mm"; sourceTree = "SOURCE_ROOT"; };
 		A93B7E8919F407B0602C83BD = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_audio_devices.mm"; path = "../../JuceLibraryCode/include_juce_audio_devices.mm"; sourceTree = "SOURCE_ROOT"; };
+		A9FF0BD47F557AEF80D64843 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		B112609CE6C6DF5DA8DFB65B = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_audio_formats"; path = "../../../../modules/juce_audio_formats"; sourceTree = "SOURCE_ROOT"; };
 		B66E23275DDD9CB2882ABD01 = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Info-App.plist"; path = "Info-App.plist"; sourceTree = "SOURCE_ROOT"; };
 		BB9B6A4E376A5CD956B89BFA = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
@@ -197,6 +199,7 @@
 					DAABDCED79C1DA90F45253B8,
 					3197EC86271A508C5D5A2E4C,
 					588E7A1211ECCDA4BED7A8E9,
+					A9FF0BD47F557AEF80D64843,
 					8359553FC47651559C507253,
 					8957C2F43247B9144CF301F1,
 					E72CE518332596C4088E985B,
@@ -395,6 +398,7 @@
 					8F09175E78801A7BEC436C82,
 					891B29DB06A03394D5F677EC,
 					B69028E545FA545A8A621A10,
+					3B029809362858599BFC76CA,
 					4D2CCC2E460D480A66F0DF4B,
 					B78CB6417449BA02D4DA2068,
 					0F590D6038AA475993311AE5,
@@ -403,7 +407,7 @@
 					BFF2EB37A2D5F01B426D07EA,
 					1C07E2DC3F7DE233F9641F84,
 					B50D9D46D6C2BE3393758F4F, ); buildRules = ( ); dependencies = (  ); name = "InAppPurchase - App"; productName = InAppPurchase; productReference = 2F3D7DB7AC87E3233938D392; productType = "com.apple.product-type.application"; };
-		66C8FC6F4B36193FCAB3E896 = {isa = PBXProject; buildConfigurationList = A70E95856B781E1B86D0B31E; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { A76C77BF453794B916526154 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 1; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 45141DDCB203B1BF5610629C; projectDirPath = ""; projectRoot = ""; targets = (A76C77BF453794B916526154); };
+		66C8FC6F4B36193FCAB3E896 = {isa = PBXProject; buildConfigurationList = A70E95856B781E1B86D0B31E; attributes = { LastUpgradeCheck = 0830; ORGANIZATIONNAME = "ROLI Ltd."; TargetAttributes = { A76C77BF453794B916526154 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 1; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 45141DDCB203B1BF5610629C; projectDirPath = ""; projectRoot = ""; targets = (A76C77BF453794B916526154); };
 	};
 	rootObject = 66C8FC6F4B36193FCAB3E896;
 }

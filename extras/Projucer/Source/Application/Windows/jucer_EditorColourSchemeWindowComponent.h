@@ -39,7 +39,7 @@ public:
         else
             content = new AppearanceEditor::EditorPanel();
 
-        changeContent (content);
+        changeContent (content.get());
     }
 
     void paint (Graphics& g) override

@@ -474,7 +474,7 @@ void GenericCodeEditorComponent::showFindPanel()
 
 void GenericCodeEditorComponent::hideFindPanel()
 {
-    findPanel = nullptr;
+    findPanel.reset();
 }
 
 void GenericCodeEditorComponent::findSelection()

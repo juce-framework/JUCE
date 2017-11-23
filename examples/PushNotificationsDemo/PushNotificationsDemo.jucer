@@ -31,19 +31,25 @@
       </GROUP>
       <GROUP id="{D7B3F6B4-2E9A-E281-831A-2B67D6D4C4A0}" name="sounds">
         <FILE id="il8LpK" name="demonstrative.caf" compile="0" resource="1"
-              file="BinaryResources/sounds/demonstrative.caf"/>
+              file="BinaryResources/sounds/demonstrative.caf" xcodeResource="0"/>
         <FILE id="aUWCPt" name="demonstrative.mp3" compile="0" resource="1"
-              file="BinaryResources/sounds/demonstrative.mp3"/>
-        <FILE id="PWlDpi" name="isntit.caf" compile="0" resource="1" file="BinaryResources/sounds/isntit.caf"/>
-        <FILE id="nbNoVQ" name="isntit.mp3" compile="0" resource="1" file="BinaryResources/sounds/isntit.mp3"/>
+              file="BinaryResources/sounds/demonstrative.mp3" xcodeResource="1"/>
+        <FILE id="PWlDpi" name="isntit.caf" compile="0" resource="1" file="BinaryResources/sounds/isntit.caf"
+              xcodeResource="0"/>
+        <FILE id="nbNoVQ" name="isntit.mp3" compile="0" resource="1" file="BinaryResources/sounds/isntit.mp3"
+              xcodeResource="1"/>
         <FILE id="AheEYO" name="jinglebellssms.caf" compile="0" resource="1"
-              file="BinaryResources/sounds/jinglebellssms.caf"/>
+              file="BinaryResources/sounds/jinglebellssms.caf" xcodeResource="0"/>
         <FILE id="WeQemY" name="jinglebellssms.mp3" compile="0" resource="1"
-              file="BinaryResources/sounds/jinglebellssms.mp3"/>
-        <FILE id="TmLrYM" name="served.caf" compile="0" resource="1" file="BinaryResources/sounds/served.caf"/>
-        <FILE id="Ad45fH" name="served.mp3" compile="0" resource="1" file="BinaryResources/sounds/served.mp3"/>
-        <FILE id="qH4XUR" name="solemn.caf" compile="0" resource="1" file="BinaryResources/sounds/solemn.caf"/>
-        <FILE id="cwrEXS" name="solemn.mp3" compile="0" resource="1" file="BinaryResources/sounds/solemn.mp3"/>
+              file="BinaryResources/sounds/jinglebellssms.mp3" xcodeResource="1"/>
+        <FILE id="TmLrYM" name="served.caf" compile="0" resource="1" file="BinaryResources/sounds/served.caf"
+              xcodeResource="0"/>
+        <FILE id="Ad45fH" name="served.mp3" compile="0" resource="1" file="BinaryResources/sounds/served.mp3"
+              xcodeResource="1"/>
+        <FILE id="qH4XUR" name="solemn.caf" compile="0" resource="1" file="BinaryResources/sounds/solemn.caf"
+              xcodeResource="0"/>
+        <FILE id="cwrEXS" name="solemn.mp3" compile="0" resource="1" file="BinaryResources/sounds/solemn.mp3"
+              xcodeResource="1"/>
       </GROUP>
     </GROUP>
     <GROUP id="{1AF8C966-743E-3F06-189C-AADD83767CB4}" name="Source">
@@ -104,7 +110,7 @@
         <MODULEPATH id="juce_audio_processors" path="../../modules"/>
       </MODULEPATHS>
     </ANDROIDSTUDIO>
-    <XCODE_MAC targetFolder="Builds/MacOSX">
+    <XCODE_MAC targetFolder="Builds/MacOSX" iosPushNotifications="1" customXcodeResourceFolders="./BinaryResources/images">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="PushNotificationsDemo"
                        enablePluginBinaryCopyStep="1"/>

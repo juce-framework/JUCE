@@ -96,6 +96,7 @@ private:
     //==============================================================================
     void updateState (const LicenseState&);
 
+    static LicenseState licenseStateFromOldSettings (XmlElement*);
     static LicenseState licenseStateFromSettings (PropertiesFile&);
     static void licenseStateToSettings (const LicenseState&, PropertiesFile&);
 

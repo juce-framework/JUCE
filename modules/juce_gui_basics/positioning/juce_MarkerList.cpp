@@ -236,7 +236,7 @@ void MarkerList::ValueTreeWrapper::setMarker (const MarkerList::Marker& m, UndoM
         marker = ValueTree (markerTag);
         marker.setProperty (nameProperty, m.name, nullptr);
         marker.setProperty (posProperty, m.position.toString(), nullptr);
-        state.addChild (marker, -1, undoManager);
+        state.appendChild (marker, undoManager);
     }
 }
 

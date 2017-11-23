@@ -247,103 +247,6 @@ static void toProcessContext (Vst::ProcessContext& context, AudioPlayHead* playH
 }
 
 //==============================================================================
-/** Get a list of speaker arrangements as per their speaker names
-
-    (e.g.: 2 regular channels, aliased as 'kStringStereoS', is "L R")
-*/
-static StringArray getSpeakerArrangements()
-{
-    using namespace Vst::SpeakerArr;
-
-    const Vst::CString arrangements[] =
-    {
-        kStringMonoS,       kStringStereoS,         kStringStereoRS,    kStringStereoCS,
-        kStringStereoSS,    kStringStereoCLfeS,     kString30CineS,     kString30MusicS,
-        kString31CineS,     kString31MusicS,        kString40CineS,     kString40MusicS,
-        kString41CineS,     kString41MusicS,        kString50S,         kString51S,
-        kString60CineS,     kString60MusicS,        kString61CineS,     kString61MusicS,
-        kString70CineS,     kString70MusicS,        kString71CineS,     kString71MusicS,
-        kString80CineS,     kString80MusicS,        kString81CineS,     kString81MusicS,
-        kString80CubeS,             kStringBFormat1stOrderS,    kString71CineTopCenterS,
-        kString71CineCenterHighS,   kString71CineFrontHighS,    kString71CineSideHighS,
-        kString71CineFullRearS,     kString90S,                 kString91S,
-        kString100S,        kString101S,            kString110S,        kString111S,
-        kString130S,        kString131S,            kString102S,        kString122S,
-        nullptr
-    };
-
-    return StringArray (arrangements);
-}
-
-/** Get a list of speaker arrangements as per their named configurations
-
-    (e.g.: 2 regular channels, aliased as 'kStringStereoS', is "L R")
-*/
-static StringArray getNamedSpeakerArrangements()
-{
-    using namespace Vst::SpeakerArr;
-
-    const Vst::CString arrangements[] =
-    {
-        kStringEmpty,       kStringMono,            kStringStereo,              kStringStereoR,
-        kStringStereoC,     kStringStereoSide,      kStringStereoCLfe,          kString30Cine,
-        kString30Music,     kString31Cine,          kString31Music,             kString40Cine,
-        kString40Music,     kString41Cine,          kString41Music,             kString50,
-        kString51,          kString60Cine,          kString60Music,             kString61Cine,
-        kString61Music,     kString70Cine,          kString70Music,             kString71Cine,
-        kString71Music,     kString71CineTopCenter, kString71CineCenterHigh,
-        kString71CineFrontHigh,         kString71CineSideHigh,          kString71CineFullRear,
-        kString80Cine,      kString80Music,         kString80Cube,              kString81Cine,
-        kString81Music,     kString102,             kString122,                 kString90,
-        kString91,          kString100,             kString101,                 kString110,
-        kString111,         kString130,             kString131,
-        nullptr
-    };
-
-    return StringArray (arrangements);
-}
-
-static Vst::SpeakerArrangement getSpeakerArrangementFrom (const String& string)
-{
-    return Vst::SpeakerArr::getSpeakerArrangementFromString (string.toUTF8());
-}
-
-//==============================================================================
-static StringArray getPluginEffectCategories()
-{
-    using namespace Vst::PlugType;
-
-    const Vst::CString categories[] =
-    {
-        kFxAnalyzer,            kFxDelay,       kFxDistortion,      kFxDynamics,
-        kFxEQ,                  kFxFilter,      kFx,                kFxInstrument,
-        kFxInstrumentExternal,  kFxSpatial,     kFxGenerator,       kFxMastering,
-        kFxModulation,          kFxPitchShift,  kFxRestoration,     kFxReverb,
-        kFxSurround,            kFxTools,       kSpatial,           kSpatialFx,
-        nullptr
-    };
-
-    return StringArray (categories);
-}
-
-static StringArray getPluginInstrumentCategories()
-{
-    using namespace Vst::PlugType;
-
-    const Vst::CString categories[] =
-    {
-        kInstrumentSynthSampler,    kInstrumentDrum,
-        kInstrumentSampler,         kInstrumentSynth,
-        kInstrumentExternal,        kFxInstrument,
-        kFxInstrumentExternal,      kFxSpatial,
-        kFxGenerator,
-        nullptr
-    };
-
-    return StringArray (categories);
-}
-
-//==============================================================================
 struct VST3PluginInstance;
 
 struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
@@ -2195,8 +2098,8 @@ struct VST3PluginInstance : public AudioPluginInstance
                  && getBusInfo (false, true, busIdx).channelCount == 2;
     }
 
-    bool acceptsMidi() const override    { return getBusInfo (true,  false).channelCount > 0; }
-    bool producesMidi() const override   { return getBusInfo (false, false).channelCount > 0; }
+    bool acceptsMidi() const override    { return getNumSingleDirectionBusesFor (holder->component, true,  false) > 0; }
+    bool producesMidi() const override   { return getNumSingleDirectionBusesFor (holder->component, false, false) > 0; }
 
     //==============================================================================
     /** May return a negative value as a means of informing us that the plugin has "infinite tail," or 0 for "no tail." */

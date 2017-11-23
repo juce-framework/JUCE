@@ -716,17 +716,12 @@ void LookAndFeel_V4::layoutFileBrowserComponent (FileBrowserComponent& browserCo
     auto bottomSlice = b.removeFromBottom (sectionHeight);
 
     currentPathBox->setBounds (topSlice.removeFromLeft (topSlice.getWidth() - buttonWidth));
-    currentPathBox->setColour (ComboBox::backgroundColourId,    currentColourScheme.getUIColour (ColourScheme::UIColour::menuBackground));
-    currentPathBox->setColour (ComboBox::textColourId,          currentColourScheme.getUIColour (ColourScheme::UIColour::menuText));
-    currentPathBox->setColour (ComboBox::arrowColourId,         currentColourScheme.getUIColour (ColourScheme::UIColour::menuText));
 
     topSlice.removeFromLeft (6);
     goUpButton->setBounds (topSlice);
 
     bottomSlice.removeFromLeft (20);
     filenameBox->setBounds (bottomSlice);
-    filenameBox->setColour (TextEditor::backgroundColourId,  currentColourScheme.getUIColour (ColourScheme::UIColour::menuBackground));
-    filenameBox->setColour (TextEditor::textColourId,        currentColourScheme.getUIColour (ColourScheme::UIColour::menuText));
 
     if (previewComp != nullptr)
         previewComp->setBounds (b.removeFromRight (b.getWidth() / 3));
@@ -742,11 +737,6 @@ void LookAndFeel_V4::drawFileBrowserRow (Graphics& g, int width, int height,
                                          bool isDirectory, bool isItemSelected,
                                          int itemIndex, DirectoryContentsDisplayComponent& dcc)
 {
-    if (auto fileListComp = dynamic_cast<Component*> (&dcc))
-        fileListComp->setColour (DirectoryContentsDisplayComponent::textColourId,
-                                 currentColourScheme.getUIColour (isItemSelected ? ColourScheme::UIColour::highlightedText
-                                                                                 : ColourScheme::UIColour::menuText));
-
     LookAndFeel_V2::drawFileBrowserRow (g, width, height, file, filename, icon,
                                         fileSizeDescription, fileTimeDescription,
                                         isDirectory, isItemSelected, itemIndex, dcc);
@@ -872,7 +862,7 @@ void LookAndFeel_V4::drawMenuBarBackground (Graphics& g, int width, int height,
     g.fillRect  (r.removeFromTop (1));
     g.fillRect  (r.removeFromBottom (1));
 
-    g.setGradientFill (ColourGradient (colour, 0, 0, colour.darker (0.2f), 0, (float) height, false));
+    g.setGradientFill (ColourGradient::vertical (colour, 0, colour.darker (0.2f), (float) height));
     g.fillRect (r);
 }
 
@@ -1132,8 +1122,8 @@ void LookAndFeel_V4::drawConcertinaPanelHeader (Graphics& g, const Rectangle<int
 
     const auto bkg = Colours::grey;
 
-    g.setGradientFill (ColourGradient (Colours::white.withAlpha (isMouseOver ? 0.4f : 0.2f), 0, (float) area.getY(),
-                                       Colours::darkgrey.withAlpha (0.1f), 0, (float) area.getBottom(), false));
+    g.setGradientFill (ColourGradient::vertical (Colours::white.withAlpha (isMouseOver ? 0.4f : 0.2f), (float) area.getY(),
+                                                 Colours::darkgrey.withAlpha (0.1f), (float) area.getBottom()));
     g.fillPath (p);
 }
 
@@ -1343,6 +1333,7 @@ void LookAndFeel_V4::initialiseColours()
         ComboBox::textColourId,                     currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
         ComboBox::backgroundColourId,               currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).getARGB(),
         ComboBox::arrowColourId,                    currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
+        ComboBox::focusedOutlineColourId,           currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
 
         PropertyComponent::backgroundColourId,      currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).getARGB(),
         PropertyComponent::labelTextColourId,       currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
@@ -1408,8 +1399,9 @@ void LookAndFeel_V4::initialiseColours()
         BubbleComponent::backgroundColourId,        currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).getARGB(),
         BubbleComponent::outlineColourId,           currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
 
-        DirectoryContentsDisplayComponent::highlightColourId,   currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedFill).getARGB(),
-        DirectoryContentsDisplayComponent::textColourId,        currentColourScheme.getUIColour (ColourScheme::UIColour::menuText).getARGB(),
+        DirectoryContentsDisplayComponent::highlightColourId,          currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedFill).getARGB(),
+        DirectoryContentsDisplayComponent::textColourId,               currentColourScheme.getUIColour (ColourScheme::UIColour::menuText).getARGB(),
+        DirectoryContentsDisplayComponent::highlightedTextColourId,    currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedText).getARGB(),
 
         0x1000440, /*LassoComponent::lassoFillColourId*/        currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).getARGB(),
         0x1000441, /*LassoComponent::lassoOutlineColourId*/     currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
@@ -1439,6 +1431,19 @@ void LookAndFeel_V4::initialiseColours()
         FileSearchPathListComponent::backgroundColourId,        currentColourScheme.getUIColour (ColourScheme::UIColour::menuBackground).getARGB(),
 
         FileChooserDialogBox::titleTextColourId,                currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
+
+        SidePanel::backgroundColour,                            currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).getARGB(),
+        SidePanel::titleTextColour,                             currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
+        SidePanel::shadowBaseColour,                            currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).darker().getARGB(),
+        SidePanel::dismissButtonNormalColour,                   currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).getARGB(),
+        SidePanel::dismissButtonOverColour,                     currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).darker().getARGB(),
+        SidePanel::dismissButtonDownColour,                     currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).brighter().getARGB(),
+
+        FileBrowserComponent::currentPathBoxBackgroundColourId,    currentColourScheme.getUIColour (ColourScheme::UIColour::menuBackground).getARGB(),
+        FileBrowserComponent::currentPathBoxTextColourId,          currentColourScheme.getUIColour (ColourScheme::UIColour::menuText).getARGB(),
+        FileBrowserComponent::currentPathBoxArrowColourId,         currentColourScheme.getUIColour (ColourScheme::UIColour::menuText).getARGB(),
+        FileBrowserComponent::filenameBoxBackgroundColourId,       currentColourScheme.getUIColour (ColourScheme::UIColour::menuBackground).getARGB(),
+        FileBrowserComponent::filenameBoxTextColourId,             currentColourScheme.getUIColour (ColourScheme::UIColour::menuText).getARGB(),
     };
 
     for (int i = 0; i < numElementsInArray (coloursToUse); i += 2)

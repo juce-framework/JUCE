@@ -16,12 +16,18 @@
 		91FB13E966DF491DAB11AE54 = {isa = PBXBuildFile; fileRef = E377874A0AFBAC8A5CB14A77; };
 		17C39AB2D68A6CFC6CC4FC07 = {isa = PBXBuildFile; fileRef = 7EB61485172E45EC8DFCD854; };
 		9B4FE18278DEB63FE7E74459 = {isa = PBXBuildFile; fileRef = 39BD432972C38905D1EC8B77; };
+		27FBA59ECA42A30388780208 = {isa = PBXBuildFile; fileRef = C1F5CD4B2D08BFB4046BCC08; };
 		B3195C7B4D98EDB57273FBEC = {isa = PBXBuildFile; fileRef = D5E16BAF4E665E238BE1C57B; };
 		10C3B856F0D4727BB7387C6A = {isa = PBXBuildFile; fileRef = DD592EABB0FDAB7BA403EDCE; };
 		A89178313735BBE021C9B6F8 = {isa = PBXBuildFile; fileRef = F9DD5C729F10092A9450C104; };
 		752E84DCB954F914A628623C = {isa = PBXBuildFile; fileRef = 5B4F02F6A13734698AEEAA76; };
 		D3441839BBEBA8A35A952CCC = {isa = PBXBuildFile; fileRef = D712F707778B4CF73AB3CE87; };
 		349777A5158B577C8C15020B = {isa = PBXBuildFile; fileRef = 3553B4591C36FB40546D6B0A; };
+		3E92B5298F56C01DBC0327ED = {isa = PBXBuildFile; fileRef = 579C20B8F73AF4168863FEE3; };
+		BAEBA83CFBE8E4DB30DC7BD1 = {isa = PBXBuildFile; fileRef = B41416ED658D3176A48CA7A4; };
+		02F44CDE9B0D52704F809AE0 = {isa = PBXBuildFile; fileRef = 1234504682C839042EC61D74; };
+		99B0FF98E03A80C9403D68AE = {isa = PBXBuildFile; fileRef = 9F5A0EB28E3146AB04C4C1B8; };
+		E4BCCDC8ECE533F3FBDB7718 = {isa = PBXBuildFile; fileRef = 84CFB624424D9C970DC45AB0; };
 		E817D42312FA199D7906FBA7 = {isa = PBXBuildFile; fileRef = 97EBB6E78389113E73BE2E48; };
 		C16F77E9A844E3F54E58C7CE = {isa = PBXBuildFile; fileRef = 8A45EABA916468AEC4217F96; };
 		789C7E0D1F98CA772665224B = {isa = PBXBuildFile; fileRef = D5203E6BEF873044EDF49889; };
@@ -90,6 +96,7 @@
 		B4BAF22F832D6087073F6A94 = {isa = PBXFileReference; lastKnownFileType = file.caf; name = demonstrative.caf; path = ../../BinaryResources/sounds/demonstrative.caf; sourceTree = "SOURCE_ROOT"; };
 		B8D5B4A343EE9B1F17F6C6E8 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		C16665B24212C85C41C28AFB = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_gui_extra"; path = "../../../../modules/juce_gui_extra"; sourceTree = "SOURCE_ROOT"; };
+		C1F5CD4B2D08BFB4046BCC08 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		C7D481DB8CAD9B796584D884 = {isa = PBXFileReference; lastKnownFileType = image.png; name = "ic_stat_name.png"; path = "../../BinaryResources/images/ic_stat_name.png"; sourceTree = "SOURCE_ROOT"; };
 		C99B706BE72C70269D5E215B = {isa = PBXFileReference; lastKnownFileType = image.png; name = "ic_stat_name4.png"; path = "../../BinaryResources/images/ic_stat_name4.png"; sourceTree = "SOURCE_ROOT"; };
 		CD620A300FB068C981C81F09 = {isa = PBXFileReference; lastKnownFileType = image.png; name = "ic_stat_name7.png"; path = "../../BinaryResources/images/ic_stat_name7.png"; sourceTree = "SOURCE_ROOT"; };
@@ -171,7 +178,12 @@
 		AE9D258BED2C621F5A456B04 = {isa = PBXGroup; children = (
 					D712F707778B4CF73AB3CE87,
 					7BF1E114F639F9BE68770228,
-					3553B4591C36FB40546D6B0A, ); name = Resources; sourceTree = "<group>"; };
+					3553B4591C36FB40546D6B0A,
+					579C20B8F73AF4168863FEE3,
+					B41416ED658D3176A48CA7A4,
+					1234504682C839042EC61D74,
+					9F5A0EB28E3146AB04C4C1B8,
+					84CFB624424D9C970DC45AB0, ); name = Resources; sourceTree = "<group>"; };
 		7A18BE464CE6E95227F3A4E4 = {isa = PBXGroup; children = (
 					A0C9BB332EF3D0DAA0E68C08,
 					830CAE3F1BF4FBE401B6236A,
@@ -182,6 +194,7 @@
 					E377874A0AFBAC8A5CB14A77,
 					7EB61485172E45EC8DFCD854,
 					39BD432972C38905D1EC8B77,
+					C1F5CD4B2D08BFB4046BCC08,
 					D5E16BAF4E665E238BE1C57B,
 					DD592EABB0FDAB7BA403EDCE,
 					F9DD5C729F10092A9450C104,
@@ -354,7 +367,12 @@
 					702B53B812A6A8E7D8FF96D0, ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
 		E7F21000BAE43EE2C27B118F = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (
 					D3441839BBEBA8A35A952CCC,
-					349777A5158B577C8C15020B, ); runOnlyForDeploymentPostprocessing = 0; };
+					349777A5158B577C8C15020B,
+					3E92B5298F56C01DBC0327ED,
+					BAEBA83CFBE8E4DB30DC7BD1,
+					02F44CDE9B0D52704F809AE0,
+					99B0FF98E03A80C9403D68AE,
+					E4BCCDC8ECE533F3FBDB7718, ); runOnlyForDeploymentPostprocessing = 0; };
 		627CF54E723F7183D553D95D = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (
 					E817D42312FA199D7906FBA7,
 					C16F77E9A844E3F54E58C7CE,
@@ -381,6 +399,7 @@
 					91FB13E966DF491DAB11AE54,
 					17C39AB2D68A6CFC6CC4FC07,
 					9B4FE18278DEB63FE7E74459,
+					27FBA59ECA42A30388780208,
 					B3195C7B4D98EDB57273FBEC,
 					10C3B856F0D4727BB7387C6A,
 					A89178313735BBE021C9B6F8,
@@ -389,7 +408,7 @@
 					E7F21000BAE43EE2C27B118F,
 					627CF54E723F7183D553D95D,
 					66A35D349B59508A0E2A8BCF, ); buildRules = ( ); dependencies = (  ); name = "PushNotificationsDemo - App"; productName = PushNotificationsDemo; productReference = 49780B4714C19DCE9EC9012D; productType = "com.apple.product-type.application"; };
-		84BAB813E5482CE31314F6CD = {isa = PBXProject; buildConfigurationList = 681FA1A1638927EA96D44D7E; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { 5DA4352D4ADD33CF21895F9F = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 1; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 38775C0754A977E01F939DE6; projectDirPath = ""; projectRoot = ""; targets = (5DA4352D4ADD33CF21895F9F); };
+		84BAB813E5482CE31314F6CD = {isa = PBXProject; buildConfigurationList = 681FA1A1638927EA96D44D7E; attributes = { LastUpgradeCheck = 0830; ORGANIZATIONNAME = ""; TargetAttributes = { 5DA4352D4ADD33CF21895F9F = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 1; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 38775C0754A977E01F939DE6; projectDirPath = ""; projectRoot = ""; targets = (5DA4352D4ADD33CF21895F9F); };
 	};
 	rootObject = 84BAB813E5482CE31314F6CD;
 }

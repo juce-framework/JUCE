@@ -4125,7 +4125,7 @@ void* MouseCursor::createStandardMouseCursor (const MouseCursor::StandardCursorT
                       16,0,0,2,52,148,47,0,200,185,16,130,90,12,74,139,107,84,123,39,132,117,151,116,132,146,248,60,209,138,
                       98,22,203,114,34,236,37,52,77,217,247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59 };
 
-                dragHandCursor = CustomMouseCursorInfo (ImageFileFormat::loadFrom (dragHandData, sizeof (dragHandData)), 8, 7).create();
+                dragHandCursor = CustomMouseCursorInfo (ImageFileFormat::loadFrom (dragHandData, sizeof (dragHandData)), { 8, 7 }).create();
             }
 
             return dragHandCursor;
@@ -4143,7 +4143,7 @@ void* MouseCursor::createStandardMouseCursor (const MouseCursor::StandardCursorT
                   252,114,147,74,83,5,50,68,147,208,217,16,71,149,252,124,5,0,59,0,0 };
                 const int copyCursorSize = 119;
 
-                copyCursor = CustomMouseCursorInfo (ImageFileFormat::loadFrom (copyCursorData, copyCursorSize), 1, 3).create();
+                copyCursor = CustomMouseCursorInfo (ImageFileFormat::loadFrom (copyCursorData, copyCursorSize), { 1, 3 }).create();
             }
 
             return copyCursor;

@@ -553,7 +553,7 @@ void PaintRoutine::dropImageAt (const File& f, int x, int y)
     if (d != nullptr)
     {
         auto bounds = d->getDrawableBounds();
-        d = nullptr;
+        d.reset();
 
         auto* newElement = addNewElement (ObjectTypes::createNewImageElement (this), -1, true);
 

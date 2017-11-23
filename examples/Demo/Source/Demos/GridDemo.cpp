@@ -34,7 +34,6 @@
      GridDemo()
      {
          addGridItemPanel (Colours::aquamarine, "0");
-         addGridItemPanel (Colours::aquamarine, "0");
          addGridItemPanel (Colours::red,        "1");
          addGridItemPanel (Colours::blue,       "2");
          addGridItemPanel (Colours::green,      "3");
@@ -87,7 +86,10 @@
                                  GridItem (items[5]),
                                  GridItem (items[6]),
                                  GridItem (items[7]),
-                                 GridItem (items[8])
+                                 GridItem (items[8]),
+                                 GridItem (items[9]),
+                                 GridItem (items[10]),
+                                 GridItem (items[11])
                                });
 
           grid.performLayout (getLocalBounds());

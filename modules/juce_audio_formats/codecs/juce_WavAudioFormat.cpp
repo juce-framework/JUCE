@@ -1749,8 +1749,8 @@ namespace WavFileHelpers
                     outStream.release();
 
                     bool ok = writer->writeFromAudioReader (*reader, 0, -1);
-                    writer = nullptr;
-                    reader = nullptr;
+                    writer.reset();
+                    reader.reset();
 
                     return ok && tempFile.overwriteTargetFileWithTemporary();
                 }
@@ -1769,7 +1769,7 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
     {
         auto bwavPos  = reader->bwavChunkStart;
         auto bwavSize = reader->bwavSize;
-        reader = nullptr;
+        reader.reset();
 
         if (bwavSize > 0)
         {

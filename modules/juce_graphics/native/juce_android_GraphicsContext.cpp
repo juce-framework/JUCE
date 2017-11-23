@@ -38,12 +38,12 @@ namespace GraphicsHelpers
         if (quality > Graphics::lowResamplingQuality)
             constructorFlags |= 2; /*FILTER_BITMAP_FLAG*/
 
-        return getEnv()->NewObject (Paint, Paint.constructor, constructorFlags);
+        return getEnv()->NewObject (AndroidPaint, AndroidPaint.constructor, constructorFlags);
     }
 
     const jobject createMatrix (JNIEnv* env, const AffineTransform& t)
     {
-        jobject m = env->NewObject (Matrix, Matrix.constructor);
+        jobject m = env->NewObject (AndroidMatrix, AndroidMatrix.constructor);
 
         jfloat values[9] = { t.mat00, t.mat01, t.mat02,
                              t.mat10, t.mat11, t.mat12,
@@ -52,7 +52,7 @@ namespace GraphicsHelpers
         jfloatArray javaArray = env->NewFloatArray (9);
         env->SetFloatArrayRegion (javaArray, 0, 9, values);
 
-        env->CallVoidMethod (m, Matrix.setValues, javaArray);
+        env->CallVoidMethod (m, AndroidMatrix.setValues, javaArray);
         env->DeleteLocalRef (javaArray);
 
         return m;

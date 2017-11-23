@@ -95,14 +95,15 @@ public:
         use, because it will be referencing its data.
     */
     AudioBlock (HeapBlock<char>& heapBlockToUseForAllocation,
-                size_t numberOfChannels, size_t numberOfSamples) noexcept
+                size_t numberOfChannels, size_t numberOfSamples,
+                size_t alignmentInBytes = defaultAlignment) noexcept
         : numChannels (static_cast<ChannelCountType> (numberOfChannels)),
           numSamples (numberOfSamples)
     {
         auto roundedUpNumSamples = (numberOfSamples + elementMask) & ~elementMask;
         auto channelSize = sizeof (SampleType) * roundedUpNumSamples;
         auto channelListBytes = sizeof (SampleType*) * numberOfChannels;
-        auto extraBytes = sizeof (SampleType) - 1;
+        auto extraBytes = alignmentInBytes - 1;
 
         heapBlockToUseForAllocation.malloc (channelListBytes + extraBytes + channelSize * numberOfChannels);
 
@@ -110,7 +111,7 @@ public:
         channels = chanArray;
 
         auto* data = reinterpret_cast<SampleType*> (addBytesToPointer (chanArray, channelListBytes));
-        data = snapPointerToAlignment (data, sizeof (SampleType));
+        data = snapPointerToAlignment (data, alignmentInBytes);
 
         for (ChannelCountType i = 0; i < numChannels; ++i)
         {
@@ -536,9 +537,15 @@ private:
     using ChannelCountType = unsigned int;
 
     //==============================================================================
-    static constexpr size_t sizeFactor  = sizeof (SampleType) / sizeof (NumericType);
-    static constexpr size_t elementMask = sizeFactor - 1;
-    static constexpr size_t byteMask    = (sizeFactor * sizeof (NumericType)) - 1;
+    static constexpr size_t sizeFactor    = sizeof (SampleType) / sizeof (NumericType);
+    static constexpr size_t elementMask   = sizeFactor - 1;
+    static constexpr size_t byteMask      = (sizeFactor * sizeof (NumericType)) - 1;
+
+   #if JUCE_USE_SIMD
+    static constexpr size_t defaultAlignment = sizeof (SIMDRegister<NumericType>);
+   #else
+    static constexpr size_t defaultAlignment = sizeof (NumericType);
+   #endif
 
     SampleType* const* channels;
     ChannelCountType numChannels = 0;

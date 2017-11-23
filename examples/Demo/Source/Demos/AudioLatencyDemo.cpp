@@ -328,8 +328,8 @@ public:
     {
         MainAppWindow::getSharedAudioDeviceManager().removeAudioCallback (liveAudioScroller);
         startTestButton.removeListener (this);
-        latencyTester = nullptr;
-        liveAudioScroller = nullptr;
+        latencyTester.reset();
+        liveAudioScroller.reset();
     }
 
     void startTest()

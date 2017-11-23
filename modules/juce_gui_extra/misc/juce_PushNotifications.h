@@ -35,10 +35,11 @@ namespace juce
     listener as soon as possible, because your application can be launched from
     a push notification too.
 
-    To send a local notification create an instance of @class Notification, fill the
-    necessary fields and call PushNotifications::sendLocalNotification(). When receiving
-    local or remote notifications, inspect the Notification's fields for notification details.
-    Bear in mind that some fields will not be available when receiving a remote notification.
+    To send a local notification create an instance of Notification, fill the necessary
+    fields and call PushNotifications::sendLocalNotification(). When receiving local or
+    remote notifications, inspect the Notification's fields for notification details.
+    Bear in mind that some fields will not be available when receiving a remote
+    notification.
 */
 class JUCE_API PushNotifications
 {
@@ -122,6 +123,14 @@ public:
         int badgeNumber = 0; /**< Optional: on platforms that support it, can set a number this notification represents. */
         URL soundToPlay;     /**< Optional: empty when the notification should be silent. When the name is set to
                                   "default_os_sound", then a default sound will be used.
+
+                                  For a custom sound on OSX, set the URL to the name of a sound file (preferably without
+                                  an extension) and place the sound file directly in bundle's "Resources" directory (you
+                                  can use "Xcode Resource" tickbox in Projucer to achieve that), i.e. it cannot be in a
+                                  subdirectory of "Resources" like "Resources/sound". Alternatively, if a sound file
+                                  cannot be found in bundle's "Resources" directory, the OS may look for the sound in the
+                                  following paths: "~/Library/Sounds", "/Library/Sounds", "/Network/Library/Sounds",
+                                  "/System/Library/Sounds".
 
                                   For a custom sound on iOS, set the URL to a relative path within your bundle, including
                                   file extension. For instance, if your bundle contains "sounds" folder with "my_sound.caf"
@@ -311,7 +320,11 @@ public:
 
     //==========================================================================
     /** Describes settings we want to use for current device. Note that at the
-        moment this is only used on iOS.
+        moment this is only used on iOS and partially on OSX.
+
+        On OSX only allow* flags are used and they control remote notifications only.
+        To control sound, alert and badge settings for local notifications on OSX,
+        use Notifications settings in System Preferences.
 
         To setup push notifications for current device, provide permissions required,
         as well as register categories of notifications you want to support. Each
@@ -403,16 +416,20 @@ public:
 
         You can also call requestSettingsUsed() to explicitly ask for current settings.
     */
-    void requestPermissionsWithSettings (const Settings& s);
+    void requestPermissionsWithSettings (const Settings& settings);
 
     /** Sends an asynchronous request to retrieve current settings that are currently in use.
         These can be exactly the same as used in requestPermissionsWithSettings(), but depending
         on user's subsequent changes in OS settings, the actual current settings may be
         different (e.g. user might have later decided to disable sounds).
 
-        Note that settings are currently only used on iOS. When calling on other platforms, Settings
-        with no categories and all allow* flags set to true will be received in
-        Listener::notificationSettingsReceived().
+        Note that settings are currently only used on iOS and partially on OSX.
+
+        On OSX, only allow* flags are used and they refer to remote notifications only. For
+        local notifications, refer to System Preferences.
+
+        When calling this function on other platforms, Settings with no categories and all allow*
+        flags set to true will be received in Listener::notificationSettingsReceived().
     */
     void requestSettingsUsed();
 
@@ -467,7 +484,7 @@ public:
         used in the app. These have to be setup before notifications can be sent on Android API
         level 26 or higher.
     */
-    void setupChannels (const Array<ChannelGroup>&, const Array<Channel>&);
+    void setupChannels (const Array<ChannelGroup>& groups, const Array<Channel>& channels);
 
     //==========================================================================
     /** iOS only: sends an asynchronous request to retrieve a list of notifications that were
@@ -485,7 +502,7 @@ public:
 
     //==========================================================================
     /** Checks whether notifications are enabled for given application.
-        On iOS this will always return true, use requestSettingsUsed() instead.
+        On iOS and OSX this will always return true, use requestSettingsUsed() instead.
     */
     bool areNotificationsEnabled() const;
 
@@ -494,7 +511,7 @@ public:
         if the same identifier is used as in a notification that was already sent
         and not yet responded by a user.
     */
-    void sendLocalNotification (const Notification& n);
+    void sendLocalNotification (const Notification& notification);
 
     /** Sends a request for a list of notifications delivered. Such notifications are visible in the
         notification area on the device and they are still waiting for user action/response.
@@ -577,15 +594,15 @@ public:
             requestPermissionsWithSettings().
 
             Note that settings are currently only used on iOS. When called on other platforms, Settings
-            with no categories and all allow* flags set to true will be received in
+            with no categories and all allow flags set to true will be received in
             Listener::notificationSettingsReceived().
         */
-        virtual void notificationSettingsReceived (const Settings&) {}
+        virtual void notificationSettingsReceived (const Settings& settings) { ignoreUnused (settings); }
 
         /** Called when the list of pending notifications, requested by calling
             getPendingLocalNotifications() is returned. iOS 10 or above only.
         */
-        virtual void pendingLocalNotificationsListReceived (const Array<Notification>&) {}
+        virtual void pendingLocalNotificationsListReceived (const Array<Notification>& notifications) { ignoreUnused (notifications); }
 
         /** This can be called in multiple different situations, depending on the OS and the situation.
 
@@ -601,7 +618,7 @@ public:
 
             Note you can receive this callback on startup, if the application was launched from a notification.
         */
-        virtual void handleNotification (bool /*isLocalNotification*/, const Notification& /*n*/) {}
+        virtual void handleNotification (bool isLocalNotification, const Notification& notification) { ignoreUnused (isLocalNotification); ignoreUnused (notification); }
 
         /** This can be called when a user performs some action on the notification such as
             pressing on an action button or responding with a text input.
@@ -610,19 +627,28 @@ public:
 
             Note you can receive this callback on startup, if the application was launched from a notification's action.
 
-            @param optionalResponse Text response a user inputs for notifications with a text input.
-                                    Empty for notifications without a text input option.
+            @param isLocalNotification If the notification is local
+            @param notification        The notification
+            @param actionIdentifier    A String identifiing the action
+            @param optionalResponse    Text response a user inputs for notifications with a text input.
+                                       Empty for notifications without a text input option.
 
         */
-        virtual void handleNotificationAction (bool /*isLocalNotification*/,
-                                               const Notification& /*n*/,
-                                               const String& /*actionIdentifier*/,
-                                               const String& /*optionalResponse*/) {}
+        virtual void handleNotificationAction (bool isLocalNotification,
+                                               const Notification& notification,
+                                               const String& actionIdentifier,
+                                               const String& optionalResponse)
+        {
+            ignoreUnused (isLocalNotification);
+            ignoreUnused (notification);
+            ignoreUnused (actionIdentifier);
+            ignoreUnused (optionalResponse);
+        }
 
         /** For iOS10 and Android, this can be also called when a user dismissed the notification before
             responding to it.
         */
-        virtual void localNotificationDismissedByUser (const Notification& /*n*/) {}
+        virtual void localNotificationDismissedByUser (const Notification& notification) { ignoreUnused (notification); }
 
         /** Called after getDeliveredNotifications() request is fulfilled. Returns notifications
             that are visible in the notification area on the device and that are still waiting
@@ -631,12 +657,12 @@ public:
             On iOS, iOS version 10 or higher is required. On Android, API level 18 or higher is required.
             For unsupported platforms, an empty array will be returned.
          */
-        virtual void deliveredNotificationsListReceived (const Array<Notification>&) {}
+        virtual void deliveredNotificationsListReceived (const Array<Notification>& notifications) { ignoreUnused (notifications); }
 
         /** Called whenever a token gets refreshed. You should monitor any token updates, because
             only the last token that is assigned to device is valid and can be used.
         */
-        virtual void deviceTokenRefreshed (const String& /*token*/) {}
+        virtual void deviceTokenRefreshed (const String& token) { ignoreUnused (token); }
 
         /** Called when Firebase Cloud Messaging server deletes pending messages. This can happen when
             1) too many messages were sent to the server (hint: use collapsible messages).
@@ -649,13 +675,13 @@ public:
             sent successfully.
             Bear in mind that in may take several minutes or more to receive this callback.
         */
-        virtual void upstreamMessageSent (const String& /*messageId*/) {}
+        virtual void upstreamMessageSent (const String& messageId) { ignoreUnused (messageId); }
 
         /** Called when there was an error sending an upstream message with
             PushNotifications::sendUpstreamMessage().
             Bear in mind that in may take several minutes or more to receive this callback.
         */
-        virtual void upstreamMessageSendingError (const String& /*messageId*/, const String& /*error*/) {}
+        virtual void upstreamMessageSendingError (const String& messageId, const String& error) {  ignoreUnused (messageId); ignoreUnused (error); }
     };
 
     void addListener (Listener* l);
@@ -668,7 +694,7 @@ private:
     ListenerList<PushNotifications::Listener> listeners;
 
    #if JUCE_ANDROID
-    friend bool juce_handleNotificationIntent (void* intent);
+    friend bool juce_handleNotificationIntent (void*);
     friend void juce_firebaseDeviceNotificationsTokenRefreshed (void*);
     friend void juce_firebaseRemoteNotificationReceived (void*);
     friend void juce_firebaseRemoteMessagesDeleted();

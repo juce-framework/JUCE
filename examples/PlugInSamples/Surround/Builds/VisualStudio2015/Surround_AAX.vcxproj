@@ -23,6 +23,7 @@
                  Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
     <PlatformToolset>v140_xp</PlatformToolset>
     <PlatformToolset>v140_xp</PlatformToolset>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>

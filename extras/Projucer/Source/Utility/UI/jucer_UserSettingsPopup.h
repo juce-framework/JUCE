@@ -72,7 +72,7 @@ public:
             switchLicenseButton->addListener (this);
         }
 
-        if (LicenseController* controller = ProjucerApplication::getApp().licenseController)
+        if (auto* controller = ProjucerApplication::getApp().licenseController.get())
             licenseStateChanged (controller->getState());
        #endif
     }
@@ -120,7 +120,7 @@ private:
         else if (b == switchLicenseButton)
         {
             dismissCalloutBox();
-            if (LicenseController* controller = ProjucerApplication::getApp().licenseController)
+            if (auto* controller = ProjucerApplication::getApp().licenseController.get())
                 controller->chooseNewLicense();
         }
     }

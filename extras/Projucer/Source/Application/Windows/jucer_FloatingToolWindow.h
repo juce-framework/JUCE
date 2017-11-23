@@ -68,7 +68,7 @@ struct FloatingToolWindow  : public DialogWindow
 
     void closeButtonPressed() override
     {
-        owner = nullptr;
+        owner.reset();
     }
 
     bool escapeKeyPressed() override

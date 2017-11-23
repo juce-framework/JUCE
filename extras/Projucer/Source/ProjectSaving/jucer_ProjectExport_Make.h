@@ -113,6 +113,10 @@ public:
                 if (getTargetFileType() == pluginBundle)
                     result.add ("-Wl,--no-undefined");
             }
+            else if (type == GUIApp || type == StandalonePlugIn)
+            {
+                result.add ("-no-pie");
+            }
 
             return result;
         }
@@ -289,7 +293,8 @@ public:
 
                 out << "$(JUCE_LDFLAGS) ";
 
-                if (getTargetFileType() == sharedLibraryOrDLL || getTargetFileType() == pluginBundle)
+                if (getTargetFileType() == sharedLibraryOrDLL || getTargetFileType() == pluginBundle
+                        || type == GUIApp || type == StandalonePlugIn)
                     out << "$(JUCE_LDFLAGS_" << getTargetVarName() << ") ";
 
                 out << "$(RESOURCES) $(TARGET_ARCH)" << newLine;
@@ -374,11 +379,12 @@ public:
     //==============================================================================
     bool anyTargetIsSharedLibrary() const
     {
-        const int n = targets.size();
-        for (int i = 0; i < n; ++i)
+        for (auto* target : targets)
         {
-            const ProjectType::Target::TargetFileType fileType = targets.getUnchecked (i)->getTargetFileType();
-            if (fileType == ProjectType::Target::sharedLibraryOrDLL || fileType == ProjectType::Target::pluginBundle)
+            const ProjectType::Target::TargetFileType fileType = target->getTargetFileType();
+
+            if (fileType == ProjectType::Target::sharedLibraryOrDLL
+             || fileType == ProjectType::Target::pluginBundle)
                 return true;
         }
 
@@ -578,6 +584,9 @@ private:
 
         if (! config.isDebug())
             result.add ("-fvisibility=hidden");
+
+        if (config.isLinkTimeOptimisationEnabled())
+            result.add ("-flto");
 
         auto extraFlags = getExtraLinkerFlagsString().trim();
 

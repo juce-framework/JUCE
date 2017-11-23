@@ -76,27 +76,7 @@ private:
 };
 
 //==============================================================================
-Button::Button (const String& name)
-  : Component (name),
-    text (name),
-    buttonPressTime (0),
-    lastRepeatTime (0),
-    commandManagerToUse (nullptr),
-    autoRepeatDelay (-1),
-    autoRepeatSpeed (0),
-    autoRepeatMinimumDelay (-1),
-    radioGroupId (0),
-    connectedEdgeFlags (0),
-    commandID(),
-    buttonState (buttonNormal),
-    lastStatePainted (buttonNormal),
-    lastToggleState (false),
-    clickTogglesState (false),
-    needsToRelease (false),
-    needsRepainting (false),
-    isKeyDown (false),
-    triggerOnMouseDown (false),
-    generateTooltip (false)
+Button::Button (const String& name)  : Component (name), text (name)
 {
     callbackHelper = new CallbackHelper (*this);
 
@@ -112,7 +92,7 @@ Button::~Button()
         commandManagerToUse->removeListener (callbackHelper);
 
     isOn.removeListener (callbackHelper);
-    callbackHelper = nullptr;
+    callbackHelper.reset();
 }
 
 //==============================================================================

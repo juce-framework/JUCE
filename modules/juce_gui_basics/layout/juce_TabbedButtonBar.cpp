@@ -214,7 +214,7 @@ TabbedButtonBar::TabbedButtonBar (Orientation orientationToUse)
 TabbedButtonBar::~TabbedButtonBar()
 {
     tabs.clear();
-    extraTabsButton = nullptr;
+    extraTabsButton.reset();
 }
 
 //==============================================================================
@@ -243,7 +243,7 @@ void TabbedButtonBar::setMinimumTabScaleFactor (double newMinimumScale)
 void TabbedButtonBar::clearTabs()
 {
     tabs.clear();
-    extraTabsButton = nullptr;
+    extraTabsButton.reset();
     setCurrentTabIndex (-1);
 }
 
@@ -390,7 +390,7 @@ Rectangle<int> TabbedButtonBar::getTargetBounds (TabBarButton* button) const
 
 void TabbedButtonBar::lookAndFeelChanged()
 {
-    extraTabsButton = nullptr;
+    extraTabsButton.reset();
     resized();
 }
 
@@ -481,7 +481,7 @@ void TabbedButtonBar::updateTabPositions (bool animate)
     }
     else
     {
-        extraTabsButton = nullptr;
+        extraTabsButton.reset();
     }
 
     int pos = 0;
