@@ -144,6 +144,19 @@ namespace AAXClasses
         AudioChannelSet::ChannelType speakerOrder[10];
     };
 
+    static AAX_EStemFormat stemFormatForAmbisonicOrder (int order)
+    {
+        switch (order)
+        {
+            case 1:   return AAX_eStemFormat_Ambi_1_ACN;
+            case 2:   return AAX_eStemFormat_Ambi_2_ACN;
+            case 3:   return AAX_eStemFormat_Ambi_3_ACN;
+            default:  break;
+        }
+
+        return AAX_eStemFormat_INT32_MAX;
+    }
+
     static AAXChannelStreamOrder aaxChannelOrder[] =
     {
         { AAX_eStemFormat_Mono,     { AudioChannelSet::centre, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown } },
@@ -180,7 +193,10 @@ namespace AAXClasses
         AAX_eStemFormat_7_0_DTS,
         AAX_eStemFormat_7_1_DTS,
         AAX_eStemFormat_7_0_2,
-        AAX_eStemFormat_7_1_2
+        AAX_eStemFormat_7_1_2,
+        AAX_eStemFormat_Ambi_1_ACN,
+        AAX_eStemFormat_Ambi_2_ACN,
+        AAX_eStemFormat_Ambi_3_ACN
     };
 
     static AAX_EStemFormat getFormatForAudioChannelSet (const AudioChannelSet& set, bool ignoreLayout) noexcept
@@ -188,7 +204,9 @@ namespace AAXClasses
         // if the plug-in ignores layout, it is ok to convert between formats only by their numchannnels
         if (ignoreLayout)
         {
-            switch (set.size())
+            auto numChannels = set.size();
+
+            switch (numChannels)
             {
                 case 0:   return AAX_eStemFormat_None;
                 case 1:   return AAX_eStemFormat_Mono;
@@ -201,8 +219,17 @@ namespace AAXClasses
                 case 8:   return AAX_eStemFormat_7_1_DTS;
                 case 9:   return AAX_eStemFormat_7_0_2;
                 case 10:  return AAX_eStemFormat_7_1_2;
-                default:  return AAX_eStemFormat_INT32_MAX;
+                default:  break;
             }
+
+            // check for ambisonics support
+            auto sqrtMinusOne   = std::sqrt (static_cast<float> (numChannels)) - 1.0f;
+            auto ambisonicOrder = jmax (0, static_cast<int> (std::floor (sqrtMinusOne)));
+
+            if (static_cast<float> (ambisonicOrder) == sqrtMinusOne)
+                return stemFormatForAmbisonicOrder (ambisonicOrder);
+
+            return AAX_eStemFormat_INT32_MAX;
         }
 
         if (set == AudioChannelSet::disabled())             return AAX_eStemFormat_None;
@@ -222,6 +249,10 @@ namespace AAXClasses
         if (set == AudioChannelSet::create7point0point2())  return AAX_eStemFormat_7_0_2;
         if (set == AudioChannelSet::create7point1point2())  return AAX_eStemFormat_7_1_2;
 
+        auto order = set.getAmbisonicOrder();
+        if (order >= 0)
+            return stemFormatForAmbisonicOrder (order);
+
         return AAX_eStemFormat_INT32_MAX;
     }
 
@@ -231,23 +262,26 @@ namespace AAXClasses
         {
             switch (format)
             {
-                case AAX_eStemFormat_None:      return AudioChannelSet::disabled();
-                case AAX_eStemFormat_Mono:      return AudioChannelSet::mono();
-                case AAX_eStemFormat_Stereo:    return AudioChannelSet::stereo();
-                case AAX_eStemFormat_LCR:       return AudioChannelSet::createLCR();
-                case AAX_eStemFormat_LCRS:      return AudioChannelSet::createLCRS();
-                case AAX_eStemFormat_Quad:      return AudioChannelSet::quadraphonic();
-                case AAX_eStemFormat_5_0:       return AudioChannelSet::create5point0();
-                case AAX_eStemFormat_5_1:       return AudioChannelSet::create5point1();
-                case AAX_eStemFormat_6_0:       return AudioChannelSet::create6point0();
-                case AAX_eStemFormat_6_1:       return AudioChannelSet::create6point1();
-                case AAX_eStemFormat_7_0_SDDS:  return AudioChannelSet::create7point0SDDS();
-                case AAX_eStemFormat_7_0_DTS:   return AudioChannelSet::create7point0();
-                case AAX_eStemFormat_7_1_SDDS:  return AudioChannelSet::create7point1SDDS();
-                case AAX_eStemFormat_7_1_DTS:   return AudioChannelSet::create7point1();
-                case AAX_eStemFormat_7_0_2:     return AudioChannelSet::create7point0point2();
-                case AAX_eStemFormat_7_1_2:     return AudioChannelSet::create7point1point2();
-                default:                        return AudioChannelSet::disabled();
+                case AAX_eStemFormat_None:       return AudioChannelSet::disabled();
+                case AAX_eStemFormat_Mono:       return AudioChannelSet::mono();
+                case AAX_eStemFormat_Stereo:     return AudioChannelSet::stereo();
+                case AAX_eStemFormat_LCR:        return AudioChannelSet::createLCR();
+                case AAX_eStemFormat_LCRS:       return AudioChannelSet::createLCRS();
+                case AAX_eStemFormat_Quad:       return AudioChannelSet::quadraphonic();
+                case AAX_eStemFormat_5_0:        return AudioChannelSet::create5point0();
+                case AAX_eStemFormat_5_1:        return AudioChannelSet::create5point1();
+                case AAX_eStemFormat_6_0:        return AudioChannelSet::create6point0();
+                case AAX_eStemFormat_6_1:        return AudioChannelSet::create6point1();
+                case AAX_eStemFormat_7_0_SDDS:   return AudioChannelSet::create7point0SDDS();
+                case AAX_eStemFormat_7_0_DTS:    return AudioChannelSet::create7point0();
+                case AAX_eStemFormat_7_1_SDDS:   return AudioChannelSet::create7point1SDDS();
+                case AAX_eStemFormat_7_1_DTS:    return AudioChannelSet::create7point1();
+                case AAX_eStemFormat_7_0_2:      return AudioChannelSet::create7point0point2();
+                case AAX_eStemFormat_7_1_2:      return AudioChannelSet::create7point1point2();
+                case AAX_eStemFormat_Ambi_1_ACN: return AudioChannelSet::ambisonic (1);
+                case AAX_eStemFormat_Ambi_2_ACN: return AudioChannelSet::ambisonic (2);
+                case AAX_eStemFormat_Ambi_3_ACN: return AudioChannelSet::ambisonic (3);
+                default:                         return AudioChannelSet::disabled();
             }
         }
 
@@ -283,8 +317,12 @@ namespace AAXClasses
 
     static int juceChannelIndexToAax (int juceIndex, const AudioChannelSet& channelSet)
     {
+        auto isAmbisonic = (channelSet.getAmbisonicOrder() >= 0);
         auto currentLayout = getFormatForAudioChannelSet (channelSet, false);
         int layoutIndex;
+
+        if (isAmbisonic && currentLayout != AAX_eStemFormat_INT32_MAX)
+            return juceIndex;
 
         for (layoutIndex = 0; aaxChannelOrder[layoutIndex].aaxStemFormat != currentLayout; ++layoutIndex)
             if (aaxChannelOrder[layoutIndex].aaxStemFormat == 0) return juceIndex;
@@ -1914,6 +1952,12 @@ namespace AAXClasses
             if (featureInfo->SupportLevel (supportLevel) == AAX_SUCCESS && supportLevel == AAX_eSupportLevel_ByProperty)
             {
                 ScopedPointer<const AAX_IPropertyMap> props (featureInfo->AcquireProperties());
+
+                // Due to a bug in ProTools 12.8, ProTools thinks that AAX_eStemFormat_Ambi_1_ACN is not supported
+                // To workaround this bug, check if ProTools supports AAX_eStemFormat_Ambi_2_ACN, and, if yes,
+                // we can safely assume that it will also support AAX_eStemFormat_Ambi_1_ACN
+                if (stemFormat == AAX_eStemFormat_Ambi_1_ACN)
+                    stemFormat = AAX_eStemFormat_Ambi_2_ACN;
 
                 if (props != nullptr && props->GetProperty ((AAX_EProperty) stemFormat, (AAX_CPropertyValue*) &supportLevel) != 0)
                     return (supportLevel == AAX_eSupportLevel_Supported);
