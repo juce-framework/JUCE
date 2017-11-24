@@ -1171,6 +1171,15 @@ struct StateHelpers
         {
             JUCE_CHECK_OPENGL_ERROR
 
+           #if JUCE_ANDROID || JUCE_IOS
+            int numQuads = maxNumQuads;
+           #else
+            GLint maxIndices = 0;
+            glGetIntegerv (GL_MAX_ELEMENTS_INDICES, &maxIndices);
+            auto numQuads = jmin ((int) maxNumQuads, (int) maxIndices / 6);
+            maxVertices = numQuads * 4 - 4;
+           #endif
+
             for (int i = 0, v = 0; i < numQuads * 6; i += 6, v += 4)
             {
                 indexData[i] = (GLushort) v;
@@ -1212,7 +1221,7 @@ struct StateHelpers
 
             numVertices += 4;
 
-            if (numVertices > numQuads * 4 - 4)
+            if (numVertices > maxVertices)
                 draw();
         }
 
@@ -1264,13 +1273,19 @@ struct StateHelpers
             GLuint colour;
         };
 
-        enum { numQuads = 256 };
+        enum { maxNumQuads = 256 };
 
         GLuint buffers[2];
-        VertexInfo vertexData[numQuads * 4];
-        GLushort indexData[numQuads * 6];
+        VertexInfo vertexData[maxNumQuads * 4];
+        GLushort indexData[maxNumQuads * 6];
         const OpenGLContext& context;
         int numVertices = 0;
+
+       #if JUCE_ANDROID || JUCE_IOS
+        enum { maxVertices = maxNumQuads * 4 - 4 };
+       #else
+        int maxVertices = 0;
+       #endif
 
         void draw() noexcept
         {
