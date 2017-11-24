@@ -129,6 +129,8 @@ public:
     void getCommandInfo (CommandID, ApplicationCommandInfo&) override;
     bool perform (const InvocationInfo&) override;
 
+    bool isSaveCommand (const CommandID id);
+
     void paint (Graphics&) override;
     void resized() override;
     void childBoundsChanged (Component*) override;

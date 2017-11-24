@@ -358,6 +358,7 @@ public:
     String getUniqueTargetFolderSuffixForExporter (const String& exporterName, const String& baseTargetFolder);
 
     //==============================================================================
+    bool isCurrentlySaving() const noexcept     { return isSaving; }
     bool shouldWaitAfterSaving = false;
     String specifiedExporterToSave = {};
 
