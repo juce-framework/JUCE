@@ -28,6 +28,12 @@ namespace juce
 struct CoreAudioLayouts
 {
     //==============================================================================
+    enum
+    {
+        coreAudioHOASN3DLayoutTag = (190U<<16) | 0 // kAudioChannelLayoutTag_HOA_ACN_SN3D
+    };
+
+    //==============================================================================
     /** Convert CoreAudio's native AudioChannelLayout to JUCE's AudioChannelSet.
 
         Note that this method cannot preserve the order of channels.
@@ -53,7 +59,7 @@ struct CoreAudioLayouts
     static AudioChannelLayoutTag toCoreAudio (const AudioChannelSet& set)
     {
         if (set.getAmbisonicOrder() >= 0)
-            return kAudioChannelLayoutTag_HOA_ACN_SN3D | static_cast<unsigned> (set.size());
+            return coreAudioHOASN3DLayoutTag | static_cast<unsigned> (set.size());
 
         for (auto* tbl = SpeakerLayoutTable::get(); tbl->tag != 0; ++tbl)
         {
@@ -128,7 +134,7 @@ struct CoreAudioLayouts
         }
 
         auto numChannels = tag & 0xffff;
-        if (tag >= kAudioChannelLayoutTag_HOA_ACN_SN3D && tag <= (kAudioChannelLayoutTag_HOA_ACN_SN3D | 0xffff))
+        if (tag >= coreAudioHOASN3DLayoutTag && tag <= (coreAudioHOASN3DLayoutTag | 0xffff))
         {
             auto sqrtMinusOne   = std::sqrt (static_cast<float> (numChannels)) - 1.0f;
             auto ambisonicOrder = jmax (0, static_cast<int> (std::floor (sqrtMinusOne)));
@@ -159,7 +165,7 @@ private:
             tags.addIfNotAlreadyThere (tbl->tag);
 
         for (unsigned order = 0; order <= 5; ++order)
-            tags.addIfNotAlreadyThere (kAudioChannelLayoutTag_HOA_ACN_SN3D | ((order + 1) * (order + 1)));
+            tags.addIfNotAlreadyThere (coreAudioHOASN3DLayoutTag | ((order + 1) * (order + 1)));
 
         return tags;
     }
