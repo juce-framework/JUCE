@@ -608,12 +608,12 @@ public:
     // some ambisonic tags which are not explicitely defined
     enum
     {
-        kAudioChannelLayoutTag_HOA_ACN_SN3D_0Order = kAudioChannelLayoutTag_HOA_ACN_SN3D | 1,
-        kAudioChannelLayoutTag_HOA_ACN_SN3D_1Order = kAudioChannelLayoutTag_HOA_ACN_SN3D | 4,
-        kAudioChannelLayoutTag_HOA_ACN_SN3D_2Order = kAudioChannelLayoutTag_HOA_ACN_SN3D | 9,
-        kAudioChannelLayoutTag_HOA_ACN_SN3D_3Order = kAudioChannelLayoutTag_HOA_ACN_SN3D | 16,
-        kAudioChannelLayoutTag_HOA_ACN_SN3D_4Order = kAudioChannelLayoutTag_HOA_ACN_SN3D | 25,
-        kAudioChannelLayoutTag_HOA_ACN_SN3D_5Order = kAudioChannelLayoutTag_HOA_ACN_SN3D | 36
+        kAudioChannelLayoutTag_HOA_ACN_SN3D_0Order = (190U<<16) | 1,
+        kAudioChannelLayoutTag_HOA_ACN_SN3D_1Order = (190U<<16) | 4,
+        kAudioChannelLayoutTag_HOA_ACN_SN3D_2Order = (190U<<16) | 9,
+        kAudioChannelLayoutTag_HOA_ACN_SN3D_3Order = (190U<<16) | 16,
+        kAudioChannelLayoutTag_HOA_ACN_SN3D_4Order = (190U<<16) | 25,
+        kAudioChannelLayoutTag_HOA_ACN_SN3D_5Order = (190U<<16) | 36
     };
 
     void runTest() override

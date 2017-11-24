@@ -991,7 +991,7 @@ public:
         ev.mArgument.mParameter.mScope       = kAudioUnitScope_Global;
         ev.mArgument.mParameter.mElement     = 0;
 
-        AUEventListenerNotify (nullptr, nullptr, &ev);
+        AUEventListenerNotify (eventListenerRef, nullptr, &ev);
        #else
         ignoreUnused (index);
        #endif

@@ -288,7 +288,7 @@ public:
 
             {
                 static const char* runtimeNames[] = { "(Default)", "Use static runtime", "Use DLL runtime", nullptr };
-                const var runtimeValues[] = { var(), var (false), var (true) };
+                const var runtimeValues[] = { var (true), var (false), var (true) };
 
                 props.add (new ChoicePropertyComponent (getUsingRuntimeLibDLL(), "Runtime Library",
                                                         StringArray (runtimeNames), Array<var> (runtimeValues, numElementsInArray (runtimeValues))),

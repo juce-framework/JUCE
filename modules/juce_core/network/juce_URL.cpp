@@ -362,7 +362,7 @@ File URL::fileFromFileSchemeURL (const URL& fileURL)
         return {};
     }
 
-    auto path = removeEscapeChars (fileURL.getDomain());
+    auto path = removeEscapeChars (fileURL.getDomain()).replace ("+", "%2B");
 
    #ifndef JUCE_WINDOWS
     path = File::getSeparatorString() + path;
@@ -371,7 +371,7 @@ File URL::fileFromFileSchemeURL (const URL& fileURL)
     auto urlElements = StringArray::fromTokens (fileURL.getSubPath(), "/", "");
 
     for (auto urlElement : urlElements)
-        path += File::getSeparatorString() + removeEscapeChars (urlElement);
+        path += File::getSeparatorString() + removeEscapeChars (urlElement.replace ("+", "%2B"));
 
     return path;
 }
