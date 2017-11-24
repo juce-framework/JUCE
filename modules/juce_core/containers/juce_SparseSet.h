@@ -261,12 +261,12 @@ public:
     }
 
     //==============================================================================
-    bool operator== (const SparseSet<Type>& other) noexcept
+    bool operator== (const SparseSet<Type>& other) const noexcept
     {
         return values == other.values;
     }
 
-    bool operator!= (const SparseSet<Type>& other) noexcept
+    bool operator!= (const SparseSet<Type>& other) const noexcept
     {
         return values != other.values;
     }
