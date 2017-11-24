@@ -263,14 +263,21 @@ void FileChooser::finished (const Array<URL>& asyncResults, bool shouldMove)
 
      results = asyncResults;
 
-     if (shouldMove && fileToSave.existsAsFile() && results.size() > 0)
+     if (shouldMove && fileToSave.existsAsFile())
      {
-         // The user either selected multiple files or wants to save the file to a URL
-         // Both are not supported
-         jassert (results.size() == 1 && results.getReference (0).isLocalFile());
+         if (results.size() > 0)
+         {
+             // The user either selected multiple files or wants to save the file to a URL
+             // Both are not supported
+             jassert (results.size() == 1 && results.getReference (0).isLocalFile());
 
-         if (! fileToSave.moveFileTo (results.getReference (0).getLocalFile()))
-             results.clear();
+             if (! fileToSave.moveFileTo (results.getReference (0).getLocalFile()))
+                 results.clear();
+         }
+         else
+         {
+             fileToSave.deleteFile();
+         }
      }
 
      pimpl = nullptr;
