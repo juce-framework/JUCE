@@ -168,8 +168,6 @@ void ProjucerApplication::handleAsyncUpdate()
     // submenu's title here avoids the defect in JuceMainMenuHandler::addMenuItem
     MenuBarModel::setMacMainMenu (menuModel, &extraAppleMenuItems); //, "Open Recent");
    #endif
-
-    versionChecker = new LatestVersionChecker();
 }
 
 void ProjucerApplication::initialiseWindows (const String& commandLine)

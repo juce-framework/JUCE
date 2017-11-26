@@ -45,6 +45,13 @@
  #define verify_noerr(errorCode)  __Verify_noErr(errorCode)
 #endif
 
+#ifndef verify
+ #define verify __Verify
+#endif
+#ifndef verify_noerr
+ #define verify_noerr __Verify_noErr
+#endif
+
 #include "AU/CoreAudioUtilityClasses/AUBase.cpp"
 #include "AU/CoreAudioUtilityClasses/AUBuffer.cpp"
 #include "AU/CoreAudioUtilityClasses/AUCarbonViewBase.cpp"
