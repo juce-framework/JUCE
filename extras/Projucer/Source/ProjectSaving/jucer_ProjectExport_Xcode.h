@@ -1166,9 +1166,9 @@ public:
 
             s.set ("GCC_PREPROCESSOR_DEFINITIONS", indentParenthesisedList (defsList));
             if (type == Target::RTASPlugIn && ! config.isDebug())
-                s.add("VALID_ARCHS=\"i386\"");
+                s.set ("VALID_ARCHS", "\"i386\"");
             if (type == Target::AudioUnitv3PlugIn && ! owner.isiOS() && ! config.isDebug())
-                s.add("VALID_ARCHS=\"x86_64\"");
+                s.set ("VALID_ARCHS", "\"x86_64\"");
 
             StringArray customFlags;
             customFlags.addTokens (config.customXcodeFlags.get(), ",", "\"'");
