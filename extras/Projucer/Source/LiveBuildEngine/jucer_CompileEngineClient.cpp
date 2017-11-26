@@ -874,15 +874,6 @@ void CompileEngineChildProcess::handleClassListChanged (const ValueTree& newList
 
 void CompileEngineChildProcess::handleBuildFailed()
 {
-    auto* mcm = ModalComponentManager::getInstance();
-    auto* pcc = findProjectContentComponent();
-
-    if (mcm->getNumModalComponents() > 0 || pcc == nullptr || pcc->getCurrentTabIndex() == 1)
-        return;
-
-    if (errorList.getNumErrors() > 0)
-        ProjucerApplication::getCommandManager().invokeDirectly (CommandIDs::showBuildTab, true);
-
     ProjucerApplication::getCommandManager().commandStatusChanged();
 }
 
