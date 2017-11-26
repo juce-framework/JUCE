@@ -115,6 +115,20 @@ struct SIMDRegister
         __mm128 for single-precision floating point on SSE architectures). */
     inline static SIMDRegister JUCE_VECTOR_CALLTYPE fromNative (vSIMDType a) noexcept       { return {a}; }
 
+    /** Creates a new SIMDRegister from the first SIMDNumElements of a scalar array. */
+    inline static SIMDRegister JUCE_VECTOR_CALLTYPE fromRawArray (const ElementType* a) noexcept
+    {
+        jassert (isSIMDAligned (a));
+        return {CmplxOps::load (a)};
+    }
+
+    /** Copies the elements of the SIMDRegister to a scalar array in memory. */
+    inline void JUCE_VECTOR_CALLTYPE copyToRawArray (ElementType* a) const noexcept
+    {
+        jassert (isSIMDAligned (a));
+        CmplxOps::store (value, a);
+    }
+
     //==============================================================================
     /** Returns the idx-th element of the receiver. Note that this does not check if idx
         is larger than the native register size. */
@@ -269,7 +283,7 @@ struct SIMDRegister
 
     //==============================================================================
     /** Checks if the given pointer is suffeciently aligned for using SIMD operations. */
-    static inline bool isSIMDAligned (ElementType* ptr) noexcept
+    static inline bool isSIMDAligned (const ElementType* ptr) noexcept
     {
         uintptr_t bitmask = SIMDRegisterSize - 1;
         return (reinterpret_cast<uintptr_t> (ptr) & bitmask) == 0;
@@ -284,6 +298,13 @@ struct SIMDRegister
     {
         return snapPointerToAlignment (ptr, SIMDRegisterSize);
     }
+
+   #ifndef DOXYGEN
+    static inline const ElementType* getNextSIMDAlignedPtr (const ElementType* ptr) noexcept
+    {
+        return snapPointerToAlignment (ptr, SIMDRegisterSize);
+    }
+   #endif
 
 private:
     static inline vMaskType JUCE_VECTOR_CALLTYPE toMaskType (vSIMDType a) noexcept
@@ -333,6 +354,16 @@ struct CmplxSIMDOps
 {
     typedef typename SIMDNativeOps<Scalar>::vSIMDType vSIMDType;
 
+    static inline vSIMDType JUCE_VECTOR_CALLTYPE load (const Scalar* a) noexcept
+    {
+        return SIMDNativeOps<Scalar>::load (a);
+    }
+
+    static inline void JUCE_VECTOR_CALLTYPE store (vSIMDType value, Scalar* dest) noexcept
+    {
+        SIMDNativeOps<Scalar>::store (value, dest);
+    }
+
     static inline vSIMDType JUCE_VECTOR_CALLTYPE expand (Scalar s) noexcept
     {
         return SIMDNativeOps<Scalar>::expand (s);
@@ -359,6 +390,16 @@ template <typename Scalar>
 struct CmplxSIMDOps<std::complex<Scalar>>
 {
     typedef typename SIMDNativeOps<Scalar>::vSIMDType vSIMDType;
+
+    static inline vSIMDType JUCE_VECTOR_CALLTYPE load (const std::complex<Scalar>* a) noexcept
+    {
+        return SIMDNativeOps<Scalar>::load (reinterpret_cast<const Scalar*> (a));
+    }
+
+    static inline void JUCE_VECTOR_CALLTYPE store (vSIMDType value, std::complex<Scalar>* dest) noexcept
+    {
+        SIMDNativeOps<Scalar>::store (value, reinterpret_cast<Scalar*> (dest));
+    }
 
     static inline vSIMDType JUCE_VECTOR_CALLTYPE expand (std::complex<Scalar> s) noexcept
     {

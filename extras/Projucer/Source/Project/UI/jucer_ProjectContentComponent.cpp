@@ -99,11 +99,11 @@ ProjectContentComponent::~ProjectContentComponent()
 
     ProjucerApplication::getApp().openDocumentManager.removeListener (this);
 
-    logo = nullptr;
-    header = nullptr;
+    logo.reset();
+    header.reset();
     setProject (nullptr);
-    contentView = nullptr;
-    fileNameLabel = nullptr;
+    contentView.reset();
+    fileNameLabel.reset();
     removeChildComponent (&bubbleMessage);
     jassert (getNumChildComponents() <= 1);
 }
@@ -178,8 +178,8 @@ void ProjectContentComponent::setProject (Project* newProject)
         if (project != nullptr)
             project->removeChangeListener (this);
 
-        contentView = nullptr;
-        resizerBar = nullptr;
+        contentView.reset();
+        resizerBar.reset();
 
         deleteProjectTabs();
         project = newProject;
@@ -391,7 +391,7 @@ bool ProjectContentComponent::showDocument (OpenDocumentManager::Document* doc, 
 void ProjectContentComponent::hideEditor()
 {
     currentDocument = nullptr;
-    contentView = nullptr;
+    contentView.reset();
 
     if (fileNameLabel != nullptr)
         fileNameLabel->setVisible (false);
@@ -416,7 +416,7 @@ bool ProjectContentComponent::setEditorComponent (Component* editor,
 {
     if (editor != nullptr)
     {
-        contentView = nullptr;
+        contentView.reset();
 
         if (doc == nullptr)
         {
@@ -445,6 +445,15 @@ bool ProjectContentComponent::setEditorComponent (Component* editor,
     }
 
     return false;
+}
+
+Component* ProjectContentComponent::getEditorComponentContent() const
+{
+    if (contentView != nullptr)
+        if (auto* vp = dynamic_cast<ContentViewport*> (contentView.get()))
+            return vp->viewport.getViewedComponent();
+
+    return nullptr;
 }
 
 void ProjectContentComponent::closeDocument()
@@ -801,7 +810,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Save Project",
                         "Saves the current project",
                         CommandCategories::general, 0);
-        result.setActive (project != nullptr);
+        result.setActive (project != nullptr && ! project->isCurrentlySaving());
         break;
 
     case CommandIDs::closeProject:
@@ -815,7 +824,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Save" + documentName,
                         "Saves the current document",
                         CommandCategories::general, 0);
-        result.setActive (currentDocument != nullptr || project != nullptr);
+        result.setActive (currentDocument != nullptr || (project != nullptr && ! project->isCurrentlySaving()));
         result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier, 0));
         break;
 
@@ -926,7 +935,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Save Project and Open in IDE...",
                         "Saves the project and launches it in an external IDE",
                         CommandCategories::general, 0);
-        result.setActive (ProjectExporter::canProjectBeLaunched (project));
+        result.setActive (ProjectExporter::canProjectBeLaunched (project) && ! project->isCurrentlySaving());
         result.defaultKeypresses.add (KeyPress ('l', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
         break;
 
@@ -1040,6 +1049,10 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
 
 bool ProjectContentComponent::perform (const InvocationInfo& info)
 {
+    // don't allow the project to be saved again if it's currently saving
+    if (isSaveCommand (info.commandID) && (project != nullptr && project->isCurrentlySaving()))
+        return false;
+
     switch (info.commandID)
     {
         case CommandIDs::saveProject:
@@ -1110,6 +1123,11 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
     }
 
     return true;
+}
+
+bool ProjectContentComponent::isSaveCommand (const CommandID id)
+{
+    return (id == CommandIDs::saveProject || id == CommandIDs::saveDocument || id == CommandIDs::saveAndOpenInIDE);
 }
 
 void ProjectContentComponent::getSelectedProjectItemsBeingDragged (const DragAndDropTarget::SourceDetails& dragSourceDetails,

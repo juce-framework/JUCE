@@ -787,9 +787,9 @@ public:
         for (int i = 0; i < getBusCount (false); ++i)  AudioUnitReset (audioUnit, kAudioUnitScope_Output, static_cast<UInt32> (i));
     }
 
-    void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages) override
+    void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
     {
-        const int numSamples = buffer.getNumSamples();
+        auto numSamples = buffer.getNumSamples();
 
         if (prepared)
         {
@@ -816,6 +816,7 @@ public:
             {
                 int chIdx = 0;
                 numOutputBuses = getBusCount (false);
+
                 for (int i = 0; i < numOutputBuses; ++i)
                 {
                     if (AUBuffer* buf = outputBufferList[i])
@@ -990,7 +991,7 @@ public:
         ev.mArgument.mParameter.mScope       = kAudioUnitScope_Global;
         ev.mArgument.mParameter.mElement     = 0;
 
-        AUEventListenerNotify (nullptr, nullptr, &ev);
+        AUEventListenerNotify (eventListenerRef, nullptr, &ev);
        #else
         ignoreUnused (index);
        #endif
@@ -1298,7 +1299,7 @@ private:
 
     OwnedArray<AUBuffer> outputBufferList;
     AudioTimeStamp timeStamp;
-    AudioSampleBuffer* currentBuffer;
+    AudioBuffer<float>* currentBuffer;
     Array<Array<AudioChannelSet>> supportedInLayouts, supportedOutLayouts;
 
     int numChannelInfos;
@@ -1464,10 +1465,9 @@ private:
         {
             // if this ever happens, might need to add extra handling
             jassert (inNumberFrames == (UInt32) currentBuffer->getNumSamples());
-            AudioSampleBuffer buffer =
-                (static_cast<int> (inBusNumber) < getBusCount (true)
-                    ? getBusBuffer (*currentBuffer, true, static_cast<int> (inBusNumber))
-                    : AudioSampleBuffer());
+            auto buffer = static_cast<int> (inBusNumber) < getBusCount (true)
+                             ? getBusBuffer (*currentBuffer, true, static_cast<int> (inBusNumber))
+                             : AudioBuffer<float>();
 
             for (int i = 0; i < static_cast<int> (ioData->mNumberBuffers); ++i)
             {

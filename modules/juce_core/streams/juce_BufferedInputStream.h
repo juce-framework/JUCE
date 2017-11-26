@@ -80,7 +80,7 @@ private:
     int bufferSize;
     int64 position, lastReadPos = 0, bufferStart, bufferOverlap = 128;
     HeapBlock<char> buffer;
-    void ensureBuffered();
+    bool ensureBuffered();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BufferedInputStream)
 };

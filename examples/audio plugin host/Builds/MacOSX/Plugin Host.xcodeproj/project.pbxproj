@@ -70,6 +70,7 @@
 		6692043E22BB181F01767845 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MainHostWindow.h; path = ../../Source/MainHostWindow.h; sourceTree = "SOURCE_ROOT"; };
 		683CEE986A2467C850FE99E6 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_core.mm"; path = "../../JuceLibraryCode/include_juce_core.mm"; sourceTree = "SOURCE_ROOT"; };
 		6A71B2BCAC4239072BC2BD7E = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_audio_basics"; path = "../../../../modules/juce_audio_basics"; sourceTree = "SOURCE_ROOT"; };
+		714C53257417E615916687E5 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PluginWindow.h; path = ../../Source/PluginWindow.h; sourceTree = "SOURCE_ROOT"; };
 		7DA35787B5F6F7440D667CC8 = {isa = PBXFileReference; lastKnownFileType = file.nib; name = RecentFilesMenuTemplate.nib; path = RecentFilesMenuTemplate.nib; sourceTree = "SOURCE_ROOT"; };
 		81C1A7770E082F56FE5A90A7 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_opengl"; path = "../../../../modules/juce_opengl"; sourceTree = "SOURCE_ROOT"; };
 		82800DBA287EF4BAB13B42FB = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_graphics.mm"; path = "../../JuceLibraryCode/include_juce_graphics.mm"; sourceTree = "SOURCE_ROOT"; };
@@ -115,7 +116,8 @@
 					362BB539489999164C3A3D5B,
 					EE1BEF4055936CD0C543687C,
 					1EC0F33A3BABE58138317375,
-					6692043E22BB181F01767845, ); name = "Plugin Host"; sourceTree = "<group>"; };
+					6692043E22BB181F01767845,
+					714C53257417E615916687E5, ); name = "Plugin Host"; sourceTree = "<group>"; };
 		9D8FE1F65CAD416AA606C47A = {isa = PBXGroup; children = (
 					6A71B2BCAC4239072BC2BD7E,
 					5313EB852E41EE58B199B9A2,
@@ -178,7 +180,7 @@
 					D1C4804CD275CB57A5C89A2D,
 					D85C0D11EE4F6C73B9EB5BCD, ); name = Source; sourceTree = "<group>"; };
 		C8B793AC1BEFBE7A99BE8352 = {isa = XCBuildConfiguration; buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -210,7 +212,7 @@
 				SDKROOT_ppc = macosx10.5;
 				USE_HEADERMAP = NO; }; name = Debug; };
 		49453CC5AD9F08D2738464AC = {isa = XCBuildConfiguration; buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -367,7 +369,7 @@
 					2429BB4D705CC57F49418CFB,
 					E8E94B3C187DA578BFCBDA98,
 					C515A1FE1A53D3968C22FAEF, ); buildRules = ( ); dependencies = (  ); name = "Plugin Host - App"; productName = "Plugin Host"; productReference = 8D8BBC353637DA442C5575DA; productType = "com.apple.product-type.application"; };
-		ADE6E539DB98A302483A82D0 = {isa = PBXProject; buildConfigurationList = 493C2C5E457692E5149C5525; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { DE12B7643D374BFF7E4FEB1C = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 65BEFC705A89E5C8A9E35C97; projectDirPath = ""; projectRoot = ""; targets = (DE12B7643D374BFF7E4FEB1C); };
+		ADE6E539DB98A302483A82D0 = {isa = PBXProject; buildConfigurationList = 493C2C5E457692E5149C5525; attributes = { LastUpgradeCheck = 0830; ORGANIZATIONNAME = "ROLI Ltd."; TargetAttributes = { DE12B7643D374BFF7E4FEB1C = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 65BEFC705A89E5C8A9E35C97; projectDirPath = ""; projectRoot = ""; targets = (DE12B7643D374BFF7E4FEB1C); };
 	};
 	rootObject = ADE6E539DB98A302483A82D0;
 }

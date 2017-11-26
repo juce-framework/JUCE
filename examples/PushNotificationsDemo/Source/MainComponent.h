@@ -88,230 +88,61 @@ private:
     void upstreamMessageSendingError (const String& messageId, const String& error) override;
 
     static Array<PushNotifications::Channel> getAndroidChannels();
-  #elif JUCE_IOS
-    static PushNotifications::Settings getIosSettings();
+  #elif JUCE_IOS || JUCE_MAC
+    static PushNotifications::Settings getNotificationSettings();
   #endif
 
-    struct RequiredParamsView   : public Component
+    struct RowComponent : public Component
     {
-        RequiredParamsView()
+        RowComponent (Label& l, Component& c, int u = 1)
+            : label (l),
+              editor (c),
+              rowUnits (u)
         {
-            addAndMakeVisible (identifierLabel);
-            addAndMakeVisible (identifierEditor);
-            addAndMakeVisible (titleLabel);
-            addAndMakeVisible (titleEditor);
-            addAndMakeVisible (bodyLabel);
-            addAndMakeVisible (bodyEditor);
-          #if JUCE_IOS
-            addAndMakeVisible (categoryLabel);
-            addAndMakeVisible (categoryComboBox);
-
-            categories.add ("okCategory");
-            categories.add ("okCancelCategory");
-            categories.add ("textCategory");
-
-            for (const auto& c : categories)
-                categoryComboBox.addItem (c, categoryComboBox.getNumItems() + 1);
-            categoryComboBox.setSelectedItemIndex (0);
-
-          #elif JUCE_ANDROID
-           #if __ANDROID_API__ >= 26
-            addAndMakeVisible (channelIdLabel);
-            addAndMakeVisible (channelIdComboBox);
-
-            for (int i = 1; i <= 3; ++i)
-                channelIdComboBox.addItem (String (i), i);
-            channelIdComboBox.setSelectedItemIndex (0);
-
-           #endif
-            addAndMakeVisible (iconLabel);
-            addAndMakeVisible (iconComboBox);
-
-            for (int i = 0; i < 5; ++i)
-                iconComboBox.addItem ("icon" + String (i + 1), i + 1);
-            iconComboBox.setSelectedItemIndex (0);
-          #endif
-
-            // For now, to be able to dismiss mobile keyboard.
-            setWantsKeyboardFocus (true);
+            addAndMakeVisible (label);
+            addAndMakeVisible (editor);
         }
 
         void resized() override
         {
-            const int labelColumnWidth = getWidth() / 3;
-          #if JUCE_ANDROID && __ANDROID_API__ >= 26
-            const int rowHeight = getHeight() / 8;
-          #else
-            const int rowHeight = getHeight() / 7;
-          #endif
-
-            auto layoutRow = [labelColumnWidth] (Rectangle<int> rowBounds, Component& label, Component& editor)
-            {
-                label .setBounds (rowBounds.removeFromLeft (labelColumnWidth));
-                editor.setBounds (rowBounds);
-            };
-
             auto bounds = getLocalBounds();
-
-            layoutRow (bounds.removeFromTop (rowHeight), identifierLabel, identifierEditor);
-            layoutRow (bounds.removeFromTop (rowHeight), titleLabel, titleEditor);
-            layoutRow (bounds.removeFromTop (4 * rowHeight), bodyLabel, bodyEditor);
-          #if JUCE_IOS
-            layoutRow (bounds.removeFromTop (rowHeight), categoryLabel, categoryComboBox);
-          #elif JUCE_ANDROID
-           #if __ANDROID_API__ >= 26
-            layoutRow (bounds.removeFromTop (rowHeight), channelIdLabel, channelIdComboBox);
-           #endif
-            layoutRow (bounds.removeFromTop (rowHeight), iconLabel, iconComboBox);
-          #endif
+            label .setBounds (bounds.removeFromLeft (getWidth() / 3));
+            editor.setBounds (bounds);
         }
-        Label      identifierLabel { "identifierLabel", "Identifier" };
-        TextEditor identifierEditor;
-        Label      titleLabel { "titleLabel", "Title" };
-        TextEditor titleEditor;
-        Label      bodyLabel { "bodyLabel", "Body" };
-        TextEditor bodyEditor;
-      #if JUCE_IOS
-        StringArray  categories;
-        Label        categoryLabel { "categoryLabel", "Category" };
-        ComboBox     categoryComboBox;
-      #elif JUCE_ANDROID
-        Label    channelIdLabel { "channelIdLabel", "Channel ID" };
-        ComboBox channelIdComboBox;
-        Label    iconLabel { "iconLabel", "Icon" };
-        ComboBox iconComboBox;
-      #endif
+
+        Label& label;
+        Component& editor;
+        int rowUnits;
     };
 
-    struct OptionalParamsOneView   : public Component
+    struct ParamControls
     {
-        OptionalParamsOneView()
-        {
-            addAndMakeVisible (subtitleLabel);
-            addAndMakeVisible (subtitleEditor);
-            addAndMakeVisible (badgeNumberLabel);
-            addAndMakeVisible (badgeNumberComboBox);
-            addAndMakeVisible (soundToPlayLabel);
-            addAndMakeVisible (soundToPlayComboBox);
-            addAndMakeVisible (propertiesLabel);
-            addAndMakeVisible (propertiesEditor);
-          #if JUCE_IOS
-            addAndMakeVisible (fireInLabel);
-            addAndMakeVisible (fireInComboBox);
-            addAndMakeVisible (repeatLabel);
-            addAndMakeVisible (repeatButton);
+        Label       identifierLabel { "identifierLabel", "Identifier" };
+        TextEditor  identifierEditor;
+        Label       titleLabel { "titleLabel", "Title" };
+        TextEditor  titleEditor;
+        Label       bodyLabel { "bodyLabel", "Body" };
+        TextEditor  bodyEditor;
 
-            fireInComboBox.addItem ("Now", 1);
+        Label       categoryLabel { "categoryLabel", "Category" };
+        ComboBox    categoryComboBox;
+        Label       channelIdLabel { "channelIdLabel", "Channel ID" };
+        ComboBox    channelIdComboBox;
+        Label       iconLabel { "iconLabel", "Icon" };
+        ComboBox    iconComboBox;
 
-            for (int i = 1; i < 11; ++i)
-                fireInComboBox.addItem (String (10 * i) + "seconds", i + 1);
-            fireInComboBox.setSelectedItemIndex (0);
-
-          #elif JUCE_ANDROID
-            addAndMakeVisible (largeIconLabel);
-            addAndMakeVisible (largeIconComboBox);
-            addAndMakeVisible (badgeIconLabel);
-            addAndMakeVisible (badgeIconComboBox);
-            addAndMakeVisible (tickerTextLabel);
-            addAndMakeVisible (tickerTextEditor);
-            addAndMakeVisible (autoCancelLabel);
-            addAndMakeVisible (autoCancelButton);
-            addAndMakeVisible (alertOnlyOnceLabel);
-            addAndMakeVisible (alertOnlyOnceButton);
-            addAndMakeVisible (actionsLabel);
-            addAndMakeVisible (actionsComboBox);
-
-            largeIconComboBox.addItem ("none", 1);
-
-            for (int i = 1; i < 5; ++i)
-                largeIconComboBox.addItem ("icon" + String (i), i + 1);
-            largeIconComboBox.setSelectedItemIndex (0);
-
-            badgeIconComboBox.addItem ("none", 1);
-            badgeIconComboBox.addItem ("small", 2);
-            badgeIconComboBox.addItem ("large", 3);
-            badgeIconComboBox.setSelectedItemIndex (2);
-
-            actionsComboBox.addItem ("none", 1);
-            actionsComboBox.addItem ("ok-cancel", 2);
-            actionsComboBox.addItem ("ok-cancel-icons", 3);
-            actionsComboBox.addItem ("text-input", 4);
-            actionsComboBox.addItem ("text-input-limited_responses", 5);
-            actionsComboBox.setSelectedItemIndex (0);
-          #endif
-
-            for (int i = 0; i < 7; ++i)
-                badgeNumberComboBox.addItem (String (i), i + 1);
-            badgeNumberComboBox.setSelectedItemIndex (0);
-
-          #if JUCE_IOS
-            String prefix = "sounds/";
-            String extension = ".caf";
-          #else
-            String prefix;
-            String extension;
-          #endif
-
-            soundToPlayComboBox.addItem ("none", 1);
-            soundToPlayComboBox.addItem ("default_os_sound", 2);
-            soundToPlayComboBox.addItem (prefix + "demonstrative" + extension, 3);
-            soundToPlayComboBox.addItem (prefix + "isntit" + extension, 4);
-            soundToPlayComboBox.addItem (prefix + "jinglebellssms" + extension, 5);
-            soundToPlayComboBox.addItem (prefix + "served" + extension, 6);
-            soundToPlayComboBox.addItem (prefix + "solemn" + extension, 7);
-            soundToPlayComboBox.setSelectedItemIndex (1);
-
-            // For now, to be able to dismiss mobile keyboard.
-            setWantsKeyboardFocus (true);
-        }
-
-        void resized() override
-        {
-            const int labelColumnWidth = getWidth() / 3;
-          #if JUCE_ANDROID
-            const int rowHeight = getHeight() / 12;
-          #else
-            const int rowHeight = getHeight() / 8;
-          #endif
-
-            auto layoutRow = [labelColumnWidth] (Rectangle<int> rowBounds, Component& label, Component& editor)
-            {
-                label .setBounds (rowBounds.removeFromLeft (labelColumnWidth));
-                editor.setBounds (rowBounds);
-            };
-
-            auto bounds = getLocalBounds();
-
-            layoutRow (bounds.removeFromTop (rowHeight), subtitleLabel, subtitleEditor);
-            layoutRow (bounds.removeFromTop (rowHeight), badgeNumberLabel, badgeNumberComboBox);
-            layoutRow (bounds.removeFromTop (rowHeight), soundToPlayLabel, soundToPlayComboBox);
-            layoutRow (bounds.removeFromTop (3 * rowHeight), propertiesLabel, propertiesEditor);
-          #if JUCE_IOS
-            layoutRow (bounds.removeFromTop (rowHeight), fireInLabel, fireInComboBox);
-            layoutRow (bounds.removeFromTop (rowHeight), repeatLabel, repeatButton);
-          #elif JUCE_ANDROID
-            layoutRow (bounds.removeFromTop (rowHeight), largeIconLabel, largeIconComboBox);
-            layoutRow (bounds.removeFromTop (rowHeight), badgeIconLabel, badgeIconComboBox);
-            layoutRow (bounds.removeFromTop (rowHeight), tickerTextLabel, tickerTextEditor);
-            layoutRow (bounds.removeFromTop (rowHeight), autoCancelLabel, autoCancelButton);
-            layoutRow (bounds.removeFromTop (rowHeight), alertOnlyOnceLabel, alertOnlyOnceButton);
-            layoutRow (bounds.removeFromTop (rowHeight), actionsLabel, actionsComboBox);
-          #endif
-        }
-        Label      subtitleLabel { "subtitleLabel", "Subtitle" };
-        TextEditor subtitleEditor;
-        Label      badgeNumberLabel { "badgeNumberLabel", "BadgeNumber" };
-        ComboBox   badgeNumberComboBox;
-        Label      soundToPlayLabel { "soundToPlayLabel", "SoundToPlay" };
-        ComboBox   soundToPlayComboBox;
-        Label      propertiesLabel { "propertiesLabel", "Properties" };
-        TextEditor propertiesEditor;
-      #if JUCE_IOS
+        Label        subtitleLabel { "subtitleLabel", "Subtitle" };
+        TextEditor   subtitleEditor;
+        Label        badgeNumberLabel { "badgeNumberLabel", "BadgeNumber" };
+        ComboBox     badgeNumberComboBox;
+        Label        soundToPlayLabel { "soundToPlayLabel", "SoundToPlay" };
+        ComboBox     soundToPlayComboBox;
+        Label        propertiesLabel { "propertiesLabel", "Properties" };
+        TextEditor   propertiesEditor;
         Label        fireInLabel { "fireInLabel", "Fire in" };
         ComboBox     fireInComboBox;
         Label        repeatLabel { "repeatLabel", "Repeat" };
         ToggleButton repeatButton;
-      #elif JUCE_ANDROID
         Label        largeIconLabel { "largeIconLabel", "Large Icon" };
         ComboBox     largeIconComboBox;
         Label        badgeIconLabel { "badgeIconLabel", "Badge Icon" };
@@ -324,106 +155,6 @@ private:
         ToggleButton alertOnlyOnceButton;
         Label        actionsLabel { "actionsLabel", "Actions" };
         ComboBox     actionsComboBox;
-      #endif
-    };
-
-    struct OptionalParamsTwoView   : public Component
-    {
-        OptionalParamsTwoView()
-        {
-            addAndMakeVisible (progressMaxLabel);
-            addAndMakeVisible (progressMaxComboBox);
-            addAndMakeVisible (progressCurrentLabel);
-            addAndMakeVisible (progressCurrentComboBox);
-            addAndMakeVisible (progressIndeterminateLabel);
-            addAndMakeVisible (progressIndeterminateButton);
-            addAndMakeVisible (categoryLabel);
-            addAndMakeVisible (categoryComboBox);
-            addAndMakeVisible (priorityLabel);
-            addAndMakeVisible (priorityComboBox);
-            addAndMakeVisible (personLabel);
-            addAndMakeVisible (personEditor);
-            addAndMakeVisible (lockScreenVisibilityLabel);
-            addAndMakeVisible (lockScreenVisibilityComboBox);
-            addAndMakeVisible (groupIdLabel);
-            addAndMakeVisible (groupIdEditor);
-            addAndMakeVisible (sortKeyLabel);
-            addAndMakeVisible (sortKeyEditor);
-            addAndMakeVisible (groupSummaryLabel);
-            addAndMakeVisible (groupSummaryButton);
-            addAndMakeVisible (groupAlertBehaviourLabel);
-            addAndMakeVisible (groupAlertBehaviourComboBox);
-
-            for (int i = 0; i < 11; ++i)
-            {
-                progressMaxComboBox    .addItem (String (i * 10) + "%", i + 1);
-                progressCurrentComboBox.addItem (String (i * 10) + "%", i + 1);
-            }
-
-            progressMaxComboBox    .setSelectedItemIndex (0);
-            progressCurrentComboBox.setSelectedItemIndex (0);
-
-            categoryComboBox.addItem ("unspecified",     1);
-            categoryComboBox.addItem ("alarm",           2);
-            categoryComboBox.addItem ("call",            3);
-            categoryComboBox.addItem ("email",           4);
-            categoryComboBox.addItem ("error",           5);
-            categoryComboBox.addItem ("event",           6);
-            categoryComboBox.addItem ("message",         7);
-            categoryComboBox.addItem ("progress",        8);
-            categoryComboBox.addItem ("promo",           9);
-            categoryComboBox.addItem ("recommendation", 10);
-            categoryComboBox.addItem ("reminder",       11);
-            categoryComboBox.addItem ("service",        12);
-            categoryComboBox.addItem ("social",         13);
-            categoryComboBox.addItem ("status",         14);
-            categoryComboBox.addItem ("system",         15);
-            categoryComboBox.addItem ("transport",      16);
-            categoryComboBox.setSelectedItemIndex (0);
-
-            for (int i = -2; i < 3; ++i)
-                priorityComboBox.addItem (String (i), i + 3);
-            priorityComboBox.setSelectedItemIndex (2);
-
-            lockScreenVisibilityComboBox.addItem ("don't show", 1);
-            lockScreenVisibilityComboBox.addItem ("show partially", 2);
-            lockScreenVisibilityComboBox.addItem ("show completely", 3);
-            lockScreenVisibilityComboBox.setSelectedItemIndex (1);
-
-            groupAlertBehaviourComboBox.addItem ("alert all", 1);
-            groupAlertBehaviourComboBox.addItem ("alert summary", 2);
-            groupAlertBehaviourComboBox.addItem ("alert children", 3);
-            groupAlertBehaviourComboBox.setSelectedItemIndex (0);
-
-            // For now, to be able to dismiss mobile keyboard.
-            setWantsKeyboardFocus (true);
-        }
-
-        void resized() override
-        {
-            const int labelColumnWidth = getWidth() / 3;
-            const int rowHeight = getHeight() / 11;
-
-            auto layoutRow = [labelColumnWidth] (Rectangle<int> rowBounds, Component& label, Component& editor)
-            {
-                label .setBounds (rowBounds.removeFromLeft (labelColumnWidth));
-                editor.setBounds (rowBounds);
-            };
-
-            auto bounds = getLocalBounds();
-
-            layoutRow (bounds.removeFromTop (rowHeight), progressMaxLabel, progressMaxComboBox);
-            layoutRow (bounds.removeFromTop (rowHeight), progressCurrentLabel, progressCurrentComboBox);
-            layoutRow (bounds.removeFromTop (rowHeight), progressIndeterminateLabel, progressIndeterminateButton);
-            layoutRow (bounds.removeFromTop (rowHeight), categoryLabel, categoryComboBox);
-            layoutRow (bounds.removeFromTop (rowHeight), priorityLabel, priorityComboBox);
-            layoutRow (bounds.removeFromTop (rowHeight), personLabel, personEditor);
-            layoutRow (bounds.removeFromTop (rowHeight), lockScreenVisibilityLabel, lockScreenVisibilityComboBox);
-            layoutRow (bounds.removeFromTop (rowHeight), groupIdLabel, groupIdEditor);
-            layoutRow (bounds.removeFromTop (rowHeight), sortKeyLabel, sortKeyEditor);
-            layoutRow (bounds.removeFromTop (rowHeight), groupSummaryLabel, groupSummaryButton);
-            layoutRow (bounds.removeFromTop (rowHeight), groupAlertBehaviourLabel, groupAlertBehaviourComboBox);
-        }
 
         Label        progressMaxLabel { "progressMaxLabel", "ProgressMax" };
         ComboBox     progressMaxComboBox;
@@ -431,8 +162,8 @@ private:
         ComboBox     progressCurrentComboBox;
         Label        progressIndeterminateLabel { "progressIndeterminateLabel", "ProgressIndeterminate" };
         ToggleButton progressIndeterminateButton;
-        Label        categoryLabel { "categoryLabel", "Category" };
-        ComboBox     categoryComboBox;
+        Label        notifCategoryLabel { "notifCategoryLabel", "Category" };
+        ComboBox     notifCategoryComboBox;
         Label        priorityLabel { "priorityLabel", "Priority" };
         ComboBox     priorityComboBox;
         Label        personLabel { "personLabel", "Person" };
@@ -447,84 +178,6 @@ private:
         ToggleButton groupSummaryButton;
         Label        groupAlertBehaviourLabel { "groupAlertBehaviourLabel", "GroupAlertBehaviour" };
         ComboBox     groupAlertBehaviourComboBox;
-    };
-
-    struct OptionalParamsThreeView   : public Component
-    {
-        OptionalParamsThreeView()
-        {
-            addAndMakeVisible (accentColourLabel);
-            addAndMakeVisible (accentColourButton);
-            addAndMakeVisible (ledColourLabel);
-            addAndMakeVisible (ledColourButton);
-            addAndMakeVisible (ledMsToBeOnLabel);
-            addAndMakeVisible (ledMsToBeOnComboBox);
-            addAndMakeVisible (ledMsToBeOffLabel);
-            addAndMakeVisible (ledMsToBeOffComboBox);
-            addAndMakeVisible (vibratorMsToBeOnLabel);
-            addAndMakeVisible (vibratorMsToBeOnComboBox);
-            addAndMakeVisible (vibratorMsToBeOffLabel);
-            addAndMakeVisible (vibratorMsToBeOffComboBox);
-            addAndMakeVisible (localOnlyLabel);
-            addAndMakeVisible (localOnlyButton);
-            addAndMakeVisible (ongoingLabel);
-            addAndMakeVisible (ongoingButton);
-            addAndMakeVisible (timestampVisibilityLabel);
-            addAndMakeVisible (timestampVisibilityComboBox);
-            addAndMakeVisible (timeoutAfterLabel);
-            addAndMakeVisible (timeoutAfterComboBox);
-
-            timeoutAfterComboBox.addItem ("No timeout", 1);
-
-            for (int i = 0; i < 10; ++i)
-            {
-                ledMsToBeOnComboBox      .addItem (String (i * 200) + "ms", i + 1);
-                ledMsToBeOffComboBox     .addItem (String (i * 200) + "ms", i + 1);
-                vibratorMsToBeOnComboBox .addItem (String (i * 500) + "ms", i + 1);
-                vibratorMsToBeOffComboBox.addItem (String (i * 500) + "ms", i + 1);
-                timeoutAfterComboBox.addItem (String (5000 + 1000 * i) + "ms", i + 2);
-            }
-
-            ledMsToBeOnComboBox      .setSelectedItemIndex (5);
-            ledMsToBeOffComboBox     .setSelectedItemIndex (5);
-            vibratorMsToBeOnComboBox .setSelectedItemIndex (0);
-            vibratorMsToBeOffComboBox.setSelectedItemIndex (0);
-            timeoutAfterComboBox.setSelectedItemIndex (0);
-
-            timestampVisibilityComboBox.addItem ("off", 1);
-            timestampVisibilityComboBox.addItem ("on", 2);
-            timestampVisibilityComboBox.addItem ("chronometer", 3);
-            timestampVisibilityComboBox.addItem ("count down", 4);
-            timestampVisibilityComboBox.setSelectedItemIndex (1);
-
-            // For now, to be able to dismiss mobile keyboard.
-            setWantsKeyboardFocus (true);
-        }
-
-        void resized() override
-        {
-            const int labelColumnWidth = getWidth() / 3;
-            const int rowHeight = getHeight() / 10;
-
-            auto layoutRow = [labelColumnWidth] (Rectangle<int> rowBounds, Component& label, Component& editor)
-            {
-                label .setBounds (rowBounds.removeFromLeft (labelColumnWidth));
-                editor.setBounds (rowBounds);
-            };
-
-            auto bounds = getLocalBounds();
-
-            layoutRow (bounds.removeFromTop (rowHeight), accentColourLabel, accentColourButton);
-            layoutRow (bounds.removeFromTop (rowHeight), ledColourLabel, ledColourButton);
-            layoutRow (bounds.removeFromTop (rowHeight), ledMsToBeOnLabel, ledMsToBeOnComboBox);
-            layoutRow (bounds.removeFromTop (rowHeight), ledMsToBeOffLabel, ledMsToBeOffComboBox);
-            layoutRow (bounds.removeFromTop (rowHeight), vibratorMsToBeOnLabel, vibratorMsToBeOnComboBox);
-            layoutRow (bounds.removeFromTop (rowHeight), vibratorMsToBeOffLabel, vibratorMsToBeOffComboBox);
-            layoutRow (bounds.removeFromTop (rowHeight), localOnlyLabel, localOnlyButton);
-            layoutRow (bounds.removeFromTop (rowHeight), ongoingLabel, ongoingButton);
-            layoutRow (bounds.removeFromTop (rowHeight), timestampVisibilityLabel, timestampVisibilityComboBox);
-            layoutRow (bounds.removeFromTop (rowHeight), timeoutAfterLabel, timeoutAfterComboBox);
-        }
 
         Label        accentColourLabel { "accentColourLabel", "AccentColour" };
         TextButton   accentColourButton;
@@ -551,6 +204,45 @@ private:
         ColourSelector* ledColourSelector = nullptr;
     };
 
+    void setupControls();
+    void distributeControls();
+
+    struct ParamsView   : public Component
+    {
+        ParamsView()
+        {
+            // For now, to be able to dismiss mobile keyboard.
+            setWantsKeyboardFocus (true);
+        }
+
+        void addRowComponent (RowComponent *rc)
+        {
+            rowComponents.add (rc);
+            addAndMakeVisible (rc);
+        }
+
+        void resized() override
+        {
+            int totalRowUnits = 0;
+
+            for (const auto &rc : rowComponents)
+                totalRowUnits += rc->rowUnits;
+
+            const int rowHeight = getHeight() / totalRowUnits;
+
+            auto bounds = getLocalBounds();
+
+            for (auto &rc : rowComponents)
+                rc->setBounds (bounds.removeFromTop (rc->rowUnits * rowHeight));
+
+            auto* last = rowComponents[rowComponents.size() - 1];
+            last->setBounds (last->getBounds().withHeight (getHeight() - last->getY()));
+        }
+
+    private:
+        OwnedArray<RowComponent> rowComponents;
+    };
+
     struct AuxActionsView   : public Component
     {
         AuxActionsView()
@@ -559,7 +251,7 @@ private:
             addAndMakeVisible (removeDeliveredNotifWithIdButton);
             addAndMakeVisible (deliveredNotifIdentifier);
             addAndMakeVisible (removeAllDeliveredNotifsButton);
-          #if JUCE_IOS
+          #if JUCE_IOS || JUCE_MAC
             addAndMakeVisible (getPendingNotificationsButton);
             addAndMakeVisible (removePendingNotifWithIdButton);
             addAndMakeVisible (pendingNotifIdentifier);
@@ -586,7 +278,7 @@ private:
 
             removeAllDeliveredNotifsButton  .setBounds (bounds.removeFromTop (rowHeight));
 
-          #if JUCE_IOS
+          #if JUCE_IOS || JUCE_MAC
             getPendingNotificationsButton .setBounds (bounds.removeFromTop (rowHeight));
 
             rowBounds = bounds.removeFromTop (rowHeight);
@@ -601,12 +293,10 @@ private:
         TextButton removeDeliveredNotifWithIdButton { "Remove Delivered Notif With ID:" };
         TextEditor deliveredNotifIdentifier;
         TextButton removeAllDeliveredNotifsButton { "Remove All Delivered Notifs" };
-      #if JUCE_IOS
         TextButton getPendingNotificationsButton { "Get Pending Notifications" };
         TextButton removePendingNotifWithIdButton { "Remove Pending Notif With ID:" };
         TextEditor pendingNotifIdentifier;
         TextButton removeAllPendingNotifsButton { "Remove All Pending Notifs" };
-      #endif
     };
 
     struct RemoteView   : public Component
@@ -641,17 +331,52 @@ private:
         TextButton unsubscribeFromSportsButton { "UnsubscribeFromSports" };
     };
 
-    Label                   headerLabel { "headerLabel", "Push Notifications Demo" };
-    RequiredParamsView      requiredParamsView;
-    OptionalParamsOneView   optionalParamsOneView;
-    OptionalParamsTwoView   optionalParamsTwoView;
-    OptionalParamsThreeView optionalParamsThreeView;
-    AuxActionsView          auxActionsView;
-    TabbedComponent         localNotificationsTabs { TabbedButtonBar::TabsAtTop };
-    RemoteView              remoteView;
-    TabbedComponent         mainTabs { TabbedButtonBar::TabsAtTop };
-    TextButton              sendButton { "Send!" };
-    Label                   notAvailableYetLabel { "notAvailableYetLabel", "Push Notifications feature is not available on this platform yet!" };
+    struct DemoTabbedComponent  : public TabbedComponent
+    {
+        explicit DemoTabbedComponent (TabbedButtonBar::Orientation orientation)
+            : TabbedComponent (orientation)
+        {
+        }
+
+        void currentTabChanged (int, const String& newCurrentTabName) override
+        {
+            if (! showedRemoteInstructions && newCurrentTabName == "Remote")
+            {
+                MainContentComponent::showRemoteInstructions();
+
+                showedRemoteInstructions = true;
+            }
+
+        }
+
+    private:
+        bool showedRemoteInstructions = false;
+    };
+
+    static void showRemoteInstructions()
+    {
+      #if JUCE_IOS || JUCE_MAC
+        NativeMessageBox::showMessageBoxAsync (AlertWindow::InfoIcon,
+                                               "Remote Notifications instructions",
+                                               "In order to be able to test remote notifications "
+                                               "ensure that the app is signed and that you register "
+                                               "the bundle ID for remote notifications in "
+                                               "Apple Developer Center.");
+      #endif
+    }
+
+    Label headerLabel { "headerLabel", "Push Notifications Demo" };
+    ParamControls paramControls;
+    ParamsView paramsOneView;
+    ParamsView paramsTwoView;
+    ParamsView paramsThreeView;
+    ParamsView paramsFourView;
+    AuxActionsView auxActionsView;
+    TabbedComponent localNotificationsTabs { TabbedButtonBar::TabsAtTop };
+    RemoteView remoteView;
+    DemoTabbedComponent mainTabs { TabbedButtonBar::TabsAtTop };
+    TextButton sendButton { "Send!" };
+    Label notAvailableYetLabel { "notAvailableYetLabel", "Push Notifications feature is not available on this platform yet!" };
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)

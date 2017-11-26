@@ -1056,7 +1056,7 @@ private:
         AudioBufferList* bufferList = nullptr;
         int maxFrames, numberOfChannels;
         bool isInterleaved;
-        AudioSampleBuffer scratchBuffer;
+        AudioBuffer<float> scratchBuffer;
     };
 
     //==============================================================================
@@ -1360,7 +1360,7 @@ private:
         return noErr;
     }
 
-    void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiBuffer) noexcept
+    void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiBuffer) noexcept
     {
         auto& processor = getAudioProcessor();
         const ScopedLock sl (processor.getCallbackLock());

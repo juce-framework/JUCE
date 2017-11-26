@@ -98,13 +98,15 @@ public:
             if (existingComponentToUpdate == nullptr
                  || dynamic_cast<FileOptionComponent*> (existing.get())->item != child)
             {
-                existing = nullptr;
+                existing.reset();
                 existing = new FileOptionComponent (child, dynamic_cast<ListBoxHeader*> (list.getHeaderComponent()));
             }
         }
 
         return existing.release();
     }
+
+    String getGroupPath() const    { return item.getFile().getFullPathName(); }
 
     //==============================================================================
     void valueTreePropertyChanged (ValueTree&, const Identifier&) override    { itemChanged(); }

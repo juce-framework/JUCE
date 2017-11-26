@@ -459,8 +459,8 @@ public:
             }
             else
             {
-                outputChanLabel = nullptr;
-                outputChanList = nullptr;
+                outputChanLabel.reset();
+                outputChanList.reset();
             }
 
             if (setup.maxNumInputChannels > 0
@@ -480,8 +480,8 @@ public:
             }
             else
             {
-                inputChanLabel = nullptr;
-                inputChanList = nullptr;
+                inputChanLabel.reset();
+                inputChanList.reset();
             }
 
             updateSampleRateComboBox (currentDevice);
@@ -491,15 +491,15 @@ public:
         {
             jassert (setup.manager->getCurrentAudioDevice() == nullptr); // not the correct device type!
 
-            inputChanLabel = nullptr;
-            outputChanLabel = nullptr;
-            sampleRateLabel = nullptr;
-            bufferSizeLabel = nullptr;
+            inputChanLabel.reset();
+            outputChanLabel.reset();
+            sampleRateLabel.reset();
+            bufferSizeLabel.reset();
 
-            inputChanList = nullptr;
-            outputChanList = nullptr;
-            sampleRateDropDown = nullptr;
-            bufferSizeDropDown = nullptr;
+            inputChanList.reset();
+            outputChanList.reset();
+            sampleRateDropDown.reset();
+            bufferSizeDropDown.reset();
 
             if (outputDeviceDropDown != nullptr)
                 outputDeviceDropDown->setSelectedId (-1, dontSendNotification);
@@ -574,8 +574,8 @@ private:
 
     void updateControlPanelButton()
     {
-        AudioIODevice* const currentDevice = setup.manager->getCurrentAudioDevice();
-        showUIButton = nullptr;
+        auto* currentDevice = setup.manager->getCurrentAudioDevice();
+        showUIButton.reset();
 
         if (currentDevice != nullptr && currentDevice->hasControlPanel())
         {
@@ -606,7 +606,7 @@ private:
             }
         }
 
-        resetDeviceButton = nullptr;
+        resetDeviceButton.reset();
     }
 
     void updateOutputsComboBox()
@@ -1033,9 +1033,9 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
     }
     else
     {
-        midiInputsList = nullptr;
-        midiInputsLabel = nullptr;
-        bluetoothButton = nullptr;
+        midiInputsList.reset();
+        midiInputsLabel.reset();
+        bluetoothButton.reset();
     }
 
     if (showMidiOutputSelector)
@@ -1048,8 +1048,8 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
     }
     else
     {
-        midiOutputSelector = nullptr;
-        midiOutputLabel = nullptr;
+        midiOutputSelector.reset();
+        midiOutputLabel.reset();
     }
 
     deviceManager.addChangeListener (this);
@@ -1123,7 +1123,7 @@ void AudioDeviceSelectorComponent::comboBoxChanged (ComboBox* comboBoxThatHasCha
     {
         if (AudioIODeviceType* const type = deviceManager.getAvailableDeviceTypes() [deviceTypeDropDown->getSelectedId() - 1])
         {
-            audioDeviceSettingsComp = nullptr;
+            audioDeviceSettingsComp.reset();
             deviceManager.setCurrentAudioDeviceType (type->getTypeName(), true);
             updateAllControls(); // needed in case the type hasn't actually changed
         }
@@ -1153,11 +1153,10 @@ void AudioDeviceSelectorComponent::updateAllControls()
          || audioDeviceSettingsCompType != deviceManager.getCurrentAudioDeviceType())
     {
         audioDeviceSettingsCompType = deviceManager.getCurrentAudioDeviceType();
-        audioDeviceSettingsComp = nullptr;
+        audioDeviceSettingsComp.reset();
 
-        if (AudioIODeviceType* const type
-                = deviceManager.getAvailableDeviceTypes() [deviceTypeDropDown == nullptr
-                                                            ? 0 : deviceTypeDropDown->getSelectedId() - 1])
+        if (auto* type = deviceManager.getAvailableDeviceTypes() [deviceTypeDropDown == nullptr
+                                                                   ? 0 : deviceTypeDropDown->getSelectedId() - 1])
         {
             AudioDeviceSetupDetails details;
             details.manager = &deviceManager;
@@ -1167,7 +1166,7 @@ void AudioDeviceSelectorComponent::updateAllControls()
             details.maxNumOutputChannels = maxOutputChannels;
             details.useStereoPairs = showChannelsAsStereoPairs;
 
-            AudioDeviceSettingsPanel* sp = new AudioDeviceSettingsPanel (*type, details, hideAdvancedOptionsWithButton);
+            auto* sp = new AudioDeviceSettingsPanel (*type, details, hideAdvancedOptionsWithButton);
             audioDeviceSettingsComp = sp;
             addAndMakeVisible (sp);
             sp->updateAllControls();
@@ -1185,7 +1184,7 @@ void AudioDeviceSelectorComponent::updateAllControls()
     {
         midiOutputSelector->clear();
 
-        const StringArray midiOuts (MidiOutput::getDevices());
+        auto midiOuts = MidiOutput::getDevices();
 
         midiOutputSelector->addItem (getNoDeviceString(), -1);
         midiOutputSelector->addSeparator();

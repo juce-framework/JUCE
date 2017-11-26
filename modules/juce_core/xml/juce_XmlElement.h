@@ -44,7 +44,7 @@ namespace juce
 */
 #define forEachXmlChildElement(parentXmlElement, childElementVariableName) \
 \
-    for (juce::XmlElement* childElementVariableName = (parentXmlElement).getFirstChildElement(); \
+    for (auto* childElementVariableName = (parentXmlElement).getFirstChildElement(); \
          childElementVariableName != nullptr; \
          childElementVariableName = childElementVariableName->getNextElement())
 
@@ -73,7 +73,7 @@ namespace juce
 */
 #define forEachXmlChildElementWithTagName(parentXmlElement, childElementVariableName, requiredTagName) \
 \
-    for (juce::XmlElement* childElementVariableName = (parentXmlElement).getChildByName (requiredTagName); \
+    for (auto* childElementVariableName = (parentXmlElement).getChildByName (requiredTagName); \
          childElementVariableName != nullptr; \
          childElementVariableName = childElementVariableName->getNextElementWithTagName (requiredTagName))
 

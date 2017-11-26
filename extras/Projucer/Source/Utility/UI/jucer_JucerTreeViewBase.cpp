@@ -54,10 +54,10 @@ void TreePanelBase::saveOpenness()
 {
     if (project != nullptr)
     {
-        const ScopedPointer<XmlElement> opennessState (tree.getOpennessState (true));
+        ScopedPointer<XmlElement> opennessState (tree.getOpennessState (true));
 
         if (opennessState != nullptr)
-            project->getStoredProperties().setValue (opennessStateKey, opennessState);
+            project->getStoredProperties().setValue (opennessStateKey, opennessState.get());
         else
             project->getStoredProperties().removeValue (opennessStateKey);
     }
@@ -269,5 +269,5 @@ void JucerTreeViewBase::itemDoubleClicked (const MouseEvent&)
 
 void JucerTreeViewBase::cancelDelayedSelectionTimer()
 {
-    delayedSelectionTimer = nullptr;
+    delayedSelectionTimer.reset();
 }

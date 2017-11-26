@@ -28,10 +28,6 @@
 
 #include "FilterGraph.h"
 
-struct FilterComponent;
-struct ConnectorComponent;
-struct PinComponent;
-
 
 //==============================================================================
 /**
@@ -44,30 +40,36 @@ public:
     GraphEditorPanel (FilterGraph& graph);
     ~GraphEditorPanel();
 
-    void paint (Graphics& g);
-    void mouseDown (const MouseEvent& e);
-
     void createNewPlugin (const PluginDescription&, Point<int> position);
 
-    FilterComponent* getComponentForFilter (uint32 filterID) const;
-    ConnectorComponent* getComponentForConnection (const AudioProcessorGraph::Connection& conn) const;
-    PinComponent* findPinAt (Point<float>) const;
-
-    void resized();
-    void changeListenerCallback (ChangeBroadcaster*);
+    void paint (Graphics&) override;
+    void mouseDown (const MouseEvent&) override;
+    void resized() override;
+    void changeListenerCallback (ChangeBroadcaster*) override;
     void updateComponents();
 
     //==============================================================================
-    void beginConnectorDrag (uint32 sourceFilterID, int sourceFilterChannel,
-                             uint32 destFilterID, int destFilterChannel,
-                             const MouseEvent& e);
-    void dragConnector (const MouseEvent& e);
-    void endDraggingConnector (const MouseEvent& e);
+    void beginConnectorDrag (AudioProcessorGraph::NodeAndChannel source,
+                             AudioProcessorGraph::NodeAndChannel dest,
+                             const MouseEvent&);
+    void dragConnector (const MouseEvent&);
+    void endDraggingConnector (const MouseEvent&);
 
     //==============================================================================
-private:
     FilterGraph& graph;
+
+private:
+    struct FilterComponent;
+    struct ConnectorComponent;
+    struct PinComponent;
+
+    OwnedArray<FilterComponent> nodes;
+    OwnedArray<ConnectorComponent> connectors;
     ScopedPointer<ConnectorComponent> draggingConnector;
+
+    FilterComponent* getComponentForFilter (AudioProcessorGraph::NodeID) const;
+    ConnectorComponent* getComponentForConnection (const AudioProcessorGraph::Connection&) const;
+    PinComponent* findPinAt (Point<float>) const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GraphEditorPanel)
 };
@@ -82,7 +84,6 @@ private:
 class GraphDocumentComponent  : public Component
 {
 public:
-    //==============================================================================
     GraphDocumentComponent (AudioPluginFormatManager& formatManager,
                             AudioDeviceManager& deviceManager);
     ~GraphDocumentComponent();
@@ -90,18 +91,17 @@ public:
     //==============================================================================
     void createNewPlugin (const PluginDescription&, Point<int> position);
     void setDoublePrecision (bool doublePrecision);
+    bool closeAnyOpenPluginWindows();
 
     //==============================================================================
     ScopedPointer<FilterGraph> graph;
 
-    //==============================================================================
     void resized();
-
-    //==============================================================================
     void unfocusKeyboardComponent();
-
-    //==============================================================================
     void releaseGraph();
+
+    ScopedPointer<GraphEditorPanel> graphPanel;
+    ScopedPointer<MidiKeyboardComponent> keyboardComp;
 
 private:
     //==============================================================================
@@ -109,63 +109,8 @@ private:
     AudioProcessorPlayer graphPlayer;
     MidiKeyboardState keyState;
 
-public:
-    GraphEditorPanel* graphPanel;
-
-private:
-    Component* keyboardComp;
-    Component* statusBar;
+    struct TooltipBar;
+    ScopedPointer<TooltipBar> statusBar;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GraphDocumentComponent)
 };
-
-//==============================================================================
-/** A desktop window containing a plugin's UI. */
-class PluginWindow  : public DocumentWindow
-{
-public:
-    enum WindowFormatType
-    {
-        Normal = 0,
-        Generic,
-        Programs,
-        Parameters,
-        AudioIO,
-        NumTypes
-    };
-
-    PluginWindow (AudioProcessorEditor*, AudioProcessorGraph::Node*, WindowFormatType);
-    ~PluginWindow();
-
-    static PluginWindow* getWindowFor (AudioProcessorGraph::Node*, WindowFormatType);
-
-    static void closeCurrentlyOpenWindowsFor (const uint32 nodeId);
-    static void closeAllCurrentlyOpenWindows();
-
-    void moved() override;
-    void closeButtonPressed() override;
-
-private:
-    AudioProcessorGraph::Node* owner;
-    WindowFormatType type;
-
-    float getDesktopScaleFactor() const override     { return 1.0f; }
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginWindow)
-};
-
-inline String toString (PluginWindow::WindowFormatType type)
-{
-    switch (type)
-    {
-        case PluginWindow::Normal:     return "Normal";
-        case PluginWindow::Generic:    return "Generic";
-        case PluginWindow::Programs:   return "Programs";
-        case PluginWindow::Parameters: return "Parameters";
-        default:                       return String();
-    }
-}
-
-inline String getLastXProp (PluginWindow::WindowFormatType type)    { return "uiLastX_" + toString (type); }
-inline String getLastYProp (PluginWindow::WindowFormatType type)    { return "uiLastY_" + toString (type); }
-inline String getOpenProp  (PluginWindow::WindowFormatType type)    { return "uiopen_"  + toString (type); }

@@ -715,11 +715,6 @@ WebBrowserComponent::WebBrowserComponent (const bool unloadPageWhenBrowserIsHidd
 
 WebBrowserComponent::~WebBrowserComponent()
 {
-    if (browser != nullptr)
-    {
-        delete browser;
-        browser = nullptr;
-    }
 }
 
 //==============================================================================

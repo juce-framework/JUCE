@@ -69,7 +69,7 @@ public:
         {
             addAndMakeVisible (shareApplicationUsageDataToggle = new ToggleButton());
 
-            LicenseController* controller = ProjucerApplication::getApp().licenseController;
+            auto* controller = ProjucerApplication::getApp().licenseController.get();
 
             if (controller != nullptr && controller->getState().applicationUsageDataState == LicenseState::ApplicationUsageData::disabled)
                 shareApplicationUsageDataToggle->setToggleState (false, dontSendNotification);
@@ -90,7 +90,7 @@ public:
 
     ~ApplicationUsageDataWindowComponent()
     {
-        if (LicenseController* controller = ProjucerApplication::getApp().licenseController)
+        if (auto* controller = ProjucerApplication::getApp().licenseController.get())
         {
             auto newApplicationUsageDataState = LicenseState::ApplicationUsageData::enabled;
 
@@ -160,7 +160,7 @@ private:
         }
         else if (b == upgradeLicenseButton)
         {
-            if (LicenseController* controller = ProjucerApplication::getApp().licenseController)
+            if (auto* controller = ProjucerApplication::getApp().licenseController.get())
                 controller->chooseNewLicense();
         }
     }

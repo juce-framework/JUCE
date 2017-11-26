@@ -124,6 +124,14 @@ public:
         URL soundToPlay;     /**< Optional: empty when the notification should be silent. When the name is set to
                                   "default_os_sound", then a default sound will be used.
 
+                                  For a custom sound on OSX, set the URL to the name of a sound file (preferably without
+                                  an extension) and place the sound file directly in bundle's "Resources" directory (you
+                                  can use "Xcode Resource" tickbox in Projucer to achieve that), i.e. it cannot be in a
+                                  subdirectory of "Resources" like "Resources/sound". Alternatively, if a sound file
+                                  cannot be found in bundle's "Resources" directory, the OS may look for the sound in the
+                                  following paths: "~/Library/Sounds", "/Library/Sounds", "/Network/Library/Sounds",
+                                  "/System/Library/Sounds".
+
                                   For a custom sound on iOS, set the URL to a relative path within your bundle, including
                                   file extension. For instance, if your bundle contains "sounds" folder with "my_sound.caf"
                                   file, then the URL should be "sounds/my_sound.caf".
@@ -312,7 +320,11 @@ public:
 
     //==========================================================================
     /** Describes settings we want to use for current device. Note that at the
-        moment this is only used on iOS.
+        moment this is only used on iOS and partially on OSX.
+
+        On OSX only allow* flags are used and they control remote notifications only.
+        To control sound, alert and badge settings for local notifications on OSX,
+        use Notifications settings in System Preferences.
 
         To setup push notifications for current device, provide permissions required,
         as well as register categories of notifications you want to support. Each
@@ -411,9 +423,13 @@ public:
         on user's subsequent changes in OS settings, the actual current settings may be
         different (e.g. user might have later decided to disable sounds).
 
-        Note that settings are currently only used on iOS. When calling on other platforms, Settings
-        with no categories and all allow* flags set to true will be received in
-        Listener::notificationSettingsReceived().
+        Note that settings are currently only used on iOS and partially on OSX.
+
+        On OSX, only allow* flags are used and they refer to remote notifications only. For
+        local notifications, refer to System Preferences.
+
+        When calling this function on other platforms, Settings with no categories and all allow*
+        flags set to true will be received in Listener::notificationSettingsReceived().
     */
     void requestSettingsUsed();
 
@@ -486,7 +502,7 @@ public:
 
     //==========================================================================
     /** Checks whether notifications are enabled for given application.
-        On iOS this will always return true, use requestSettingsUsed() instead.
+        On iOS and OSX this will always return true, use requestSettingsUsed() instead.
     */
     bool areNotificationsEnabled() const;
 

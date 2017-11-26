@@ -79,7 +79,7 @@ public:
     /** Returns the audio sample data.
         This could return nullptr if there was a problem loading the data.
     */
-    AudioSampleBuffer* getAudioData() const noexcept        { return data; }
+    AudioBuffer<float>* getAudioData() const noexcept       { return data; }
 
 
     //==============================================================================
@@ -92,7 +92,7 @@ private:
     friend class SamplerVoice;
 
     String name;
-    ScopedPointer<AudioSampleBuffer> data;
+    ScopedPointer<AudioBuffer<float>> data;
     double sourceSampleRate;
     BigInteger midiNotes;
     int length = 0, attackSamples = 0, releaseSamples = 0;
@@ -130,7 +130,7 @@ public:
     void pitchWheelMoved (int newValue) override;
     void controllerMoved (int controllerNumber, int newValue) override;
 
-    void renderNextBlock (AudioSampleBuffer&, int startSample, int numSamples) override;
+    void renderNextBlock (AudioBuffer<float>&, int startSample, int numSamples) override;
 
 
 private:

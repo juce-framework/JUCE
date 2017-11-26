@@ -129,7 +129,7 @@ private:
     Array<int> remappedInputs, remappedOutputs;
     int requiredNumberOfChannels;
 
-    AudioSampleBuffer buffer;
+    AudioBuffer<float> buffer;
     AudioSourceChannelInfo remappedInfo;
     CriticalSection lock;
 

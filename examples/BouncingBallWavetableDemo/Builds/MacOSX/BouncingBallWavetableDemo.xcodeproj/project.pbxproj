@@ -144,7 +144,7 @@
 					A7B7C70BA17B026FA6BF5D08,
 					00666C9999AC748D4960F748, ); name = Source; sourceTree = "<group>"; };
 		45F779E239E967C4CAC99B65 = {isa = XCBuildConfiguration; buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -175,7 +175,7 @@
 				SDKROOT_ppc = macosx10.5;
 				USE_HEADERMAP = NO; }; name = Debug; };
 		8FB0B373098873C168E05C35 = {isa = XCBuildConfiguration; buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -323,7 +323,7 @@
 					9DB3F429F51E36C0D0BA23BE,
 					61103B6693CEFBD075D35197,
 					7F8CC4D24837DC0A20E4755D, ); buildRules = ( ); dependencies = (  ); name = "BouncingBallWavetableDemo - App"; productName = BouncingBallWavetableDemo; productReference = 4AAB1224C8A731A6994D74CE; productType = "com.apple.product-type.application"; };
-		974612E740A911D4EF4009DB = {isa = PBXProject; buildConfigurationList = 188D4D6EAB63E875595F6B81; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { 17E038E1F4CB0730CD868712 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 3F698ABD99D14CCA53BFAF17; projectDirPath = ""; projectRoot = ""; targets = (17E038E1F4CB0730CD868712); };
+		974612E740A911D4EF4009DB = {isa = PBXProject; buildConfigurationList = 188D4D6EAB63E875595F6B81; attributes = { LastUpgradeCheck = 0830; ORGANIZATIONNAME = "ROLI Ltd."; TargetAttributes = { 17E038E1F4CB0730CD868712 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 3F698ABD99D14CCA53BFAF17; projectDirPath = ""; projectRoot = ""; targets = (17E038E1F4CB0730CD868712); };
 	};
 	rootObject = 974612E740A911D4EF4009DB;
 }

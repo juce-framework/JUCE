@@ -34,84 +34,6 @@ template <> struct ContainerDeletePolicy<NSObject<UIApplicationDelegate, UNUserN
 namespace PushNotificationsDelegateDetails
 {
     //==============================================================================
-    NSArray* varArrayToNSArray (const var& varToParse);
-
-    NSDictionary* varObjectToNSDictionary (const var& varToParse)
-    {
-        NSMutableDictionary* dictionary = [NSMutableDictionary dictionary];
-
-        if (varToParse.isObject())
-        {
-            auto* dynamicObject = varToParse.getDynamicObject();
-
-            auto& properties = dynamicObject->getProperties();
-
-            for (int i = 0; i < properties.size(); ++i)
-            {
-                NSString* keyString = juceStringToNS (properties.getName (i).toString());
-
-                const var& valueVar = properties.getValueAt (i);
-
-                if (valueVar.isObject())
-                {
-                    NSDictionary* valueDictionary = varObjectToNSDictionary (valueVar);
-
-                    [dictionary setObject: valueDictionary forKey: keyString];
-                }
-                else if (valueVar.isArray())
-                {
-                    NSArray* valueArray = varArrayToNSArray (valueVar);
-
-                    [dictionary setObject: valueArray forKey: keyString];
-                }
-                else
-                {
-                    NSString* valueString = juceStringToNS (valueVar.toString());
-
-                    [dictionary setObject: valueString forKey: keyString];
-                }
-            }
-        }
-
-        return dictionary;
-    }
-
-    NSArray* varArrayToNSArray (const var& varToParse)
-    {
-        jassert (varToParse.isArray());
-
-        if (! varToParse.isArray())
-            return nil;
-
-        const auto* varArray = varToParse.getArray();
-
-        NSMutableArray* array = [NSMutableArray arrayWithCapacity: (NSUInteger) varArray->size()];
-
-        for (const auto& aVar : *varArray)
-        {
-            if (aVar.isObject())
-            {
-                NSDictionary* valueDictionary = varObjectToNSDictionary (aVar);
-
-                [array addObject: valueDictionary];
-            }
-            else if (aVar.isArray())
-            {
-                NSArray* valueArray = varArrayToNSArray (aVar);
-
-                [array addObject: valueArray];
-            }
-            else
-            {
-                NSString* valueString = juceStringToNS (aVar.toString());
-
-                [array addObject: valueString];
-            }
-        }
-
-        return array;
-    }
-
     using Action   = PushNotifications::Settings::Action;
     using Category = PushNotifications::Settings::Category;
 
@@ -210,7 +132,7 @@ namespace PushNotificationsDelegateDetails
 
         auto triggerTime = Time::getCurrentTime() + RelativeTime (n.triggerIntervalSec);
         notification.fireDate   = [NSDate dateWithTimeIntervalSince1970: triggerTime.toMilliseconds() / 1000.];
-        notification.userInfo   = PushNotificationsDelegateDetails::varObjectToNSDictionary (n.properties);
+        notification.userInfo   = varObjectToNSDictionary (n.properties);
 
         auto soundToPlayString = n.soundToPlay.toString (true);
 
@@ -242,7 +164,7 @@ namespace PushNotificationsDelegateDetails
         else if (soundToPlayString.isNotEmpty())
             content.sound = [UNNotificationSound soundNamed: juceStringToNS (soundToPlayString)];
 
-        NSMutableDictionary* propsDict = (NSMutableDictionary*) PushNotificationsDelegateDetails::varObjectToNSDictionary (n.properties);
+        NSMutableDictionary* propsDict = (NSMutableDictionary*) varObjectToNSDictionary (n.properties);
         [propsDict setObject: juceStringToNS (soundToPlayString) forKey: nsStringLiteral ("com.juce.soundName")];
         content.userInfo = propsDict;
 
@@ -267,54 +189,6 @@ namespace PushNotificationsDelegateDetails
         return request;
     }
   #endif
-
-    var nsArrayToVar (NSArray* array);
-
-    var nsDictionaryToVar (NSDictionary* dictionary)
-    {
-        DynamicObject::Ptr dynamicObject = new DynamicObject();
-
-        for (NSString* key in dictionary)
-        {
-            const auto keyString = nsStringToJuce (key);
-
-            id value = dictionary[key];
-
-            if ([value isKindOfClass: [NSString class]])
-                dynamicObject->setProperty (keyString, nsStringToJuce ((NSString*) value));
-            else if ([value isKindOfClass: [NSNumber class]])
-                dynamicObject->setProperty (keyString, nsStringToJuce ([(NSNumber*) value stringValue]));
-            else if ([value isKindOfClass: [NSDictionary class]])
-                dynamicObject->setProperty (keyString, nsDictionaryToVar ((NSDictionary*) value));
-            else if ([value isKindOfClass: [NSArray class]])
-                dynamicObject->setProperty (keyString, nsArrayToVar ((NSArray*) value));
-            else
-                jassertfalse; // Unsupported yet, add here!
-        }
-
-        return var (dynamicObject);
-    }
-
-    var nsArrayToVar (NSArray* array)
-    {
-        Array<var> resultArray;
-
-        for (id value in array)
-        {
-            if ([value isKindOfClass: [NSString class]])
-                resultArray.add (var (nsStringToJuce ((NSString*) value)));
-            else if ([value isKindOfClass: [NSNumber class]])
-                resultArray.add (var (nsStringToJuce ([(NSNumber*) value stringValue])));
-            else if ([value isKindOfClass: [NSDictionary class]])
-                resultArray.add (nsDictionaryToVar ((NSDictionary*) value));
-            else if ([value isKindOfClass: [NSArray class]])
-                resultArray.add (nsArrayToVar ((NSArray*) value));
-            else
-                jassertfalse; // Unsupported yet, add here!
-        }
-
-        return var (resultArray);
-    }
 
     String getUserResponseFromNSDictionary (NSDictionary* dictionary)
     {
@@ -397,7 +271,7 @@ namespace PushNotificationsDelegateDetails
         n.category   = nsStringToJuce (r.content.categoryIdentifier);
         n.badgeNumber = r.content.badge.intValue;
 
-        auto userInfoVar = PushNotificationsDelegateDetails::nsDictionaryToVar (r.content.userInfo);
+        auto userInfoVar = nsDictionaryToVar (r.content.userInfo);
 
         if (auto* object = userInfoVar.getDynamicObject())
         {
@@ -755,8 +629,6 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
        #endif
 
         [[UIApplication sharedApplication] registerForRemoteNotifications];
-
-        initialised = true;
     }
 
     void requestSettingsUsed()
@@ -979,6 +851,8 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
                                           stringByReplacingOccurrencesOfString: nsStringLiteral (" ") withString: nsStringLiteral ("")];
 
         deviceToken = nsStringToJuce (deviceTokenString);
+
+        initialised = true;
 
         owner.listeners.call (&PushNotifications::Listener::deviceTokenRefreshed, deviceToken);
     }

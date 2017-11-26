@@ -46,11 +46,9 @@ struct ProjectTreeItemBase  : public JucerTreeViewBase,
     void closeSettingsPage()
     {
         if (auto* pcc = getProjectContentComponent())
-        {
-            if (auto* content = dynamic_cast<Viewport*> (pcc->getEditorComponent()->getChildComponent (0)))
-                if (content->getViewedComponent()->getComponentID() == getUniqueName())
+            if (auto* content = pcc->getEditorComponentContent())
+                if (content->getComponentID() == getUniqueName())
                     pcc->hideEditor();
-        }
     }
 
     void deleteAllSelectedItems() override

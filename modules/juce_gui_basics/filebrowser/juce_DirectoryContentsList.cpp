@@ -87,7 +87,7 @@ void DirectoryContentsList::stopSearching()
 {
     shouldStop = true;
     thread.removeTimeSliceClient (this);
-    fileFindHandle = nullptr;
+    fileFindHandle.reset();
 }
 
 void DirectoryContentsList::clear()
@@ -210,25 +210,11 @@ bool DirectoryContentsList::checkNextFile (bool& hasChanged)
             return true;
         }
 
-        fileFindHandle = nullptr;
+        fileFindHandle.reset();
     }
 
     return false;
 }
-
-struct FileInfoComparator
-{
-    static int compareElements (const DirectoryContentsList::FileInfo* const first,
-                                const DirectoryContentsList::FileInfo* const second)
-    {
-       #if JUCE_WINDOWS
-        if (first->isDirectory != second->isDirectory)
-            return first->isDirectory ? -1 : 1;
-       #endif
-
-        return first->filename.compareNatural (second->filename);
-    }
-};
 
 bool DirectoryContentsList::addFile (const File& file, const bool isDir,
                                      const int64 fileSize,
@@ -254,8 +240,18 @@ bool DirectoryContentsList::addFile (const File& file, const bool isDir,
             if (files.getUnchecked(i)->filename == info->filename)
                 return false;
 
-        FileInfoComparator comp;
-        files.addSorted (comp, info.release());
+        files.add (info.release());
+
+        std::sort (files.begin(), files.end(), [] (const FileInfo* a, const FileInfo* b)
+        {
+           #if JUCE_WINDOWS
+            if (a->isDirectory != b->isDirectory)
+                return a->isDirectory;
+           #endif
+
+            return a->filename.compareNatural (b->filename) < 0;
+        });
+
         return true;
     }
 

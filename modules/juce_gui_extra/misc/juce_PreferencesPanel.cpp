@@ -121,7 +121,7 @@ void PreferencesPanel::setCurrentPage (const String& pageName)
     {
         currentPageName = pageName;
 
-        currentPage = nullptr;
+        currentPage.reset();
         currentPage = createComponentForPage (pageName);
 
         if (currentPage != nullptr)

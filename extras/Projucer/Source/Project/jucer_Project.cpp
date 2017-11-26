@@ -146,7 +146,7 @@ void Project::setMissingDefaultValues()
         shouldIncludeBinaryInAppConfig() = true;
 
     if (! projectRoot.hasProperty (Ids::cppLanguageStandard) && ! setCppVersionFromOldExporterSettings())
-        getCppStandardValue() = "11";
+        getCppStandardValue() = "14";
 
     if (getCompanyCopyright().toString().isEmpty())
         getCompanyCopyright() = getCompanyName().toString();
@@ -407,7 +407,7 @@ Result Project::loadDocument (const File& file)
         return Result::fail ("The document contains errors and couldn't be parsed!");
 
     registerRecentFile (file);
-    enabledModulesList = nullptr;
+    enabledModulesList.reset();
     projectRoot = newTree;
 
     removeDefunctExporters();
@@ -931,6 +931,10 @@ void Project::Item::setID (const String& newID)   { state.setProperty (Ids::ID, 
 Drawable* Project::Item::loadAsImageFile() const
 {
     const MessageManagerLock mml (ThreadPoolJob::getCurrentThreadPoolJob());
+
+    if (! mml.lockWasGained())
+        return nullptr;
+
     return isValid() ? Drawable::createFromImageFile (getFile())
                      : nullptr;
 }
@@ -1505,7 +1509,7 @@ void Project::addNewExporter (const String& exporterName)
                                        + getUniqueTargetFolderSuffixForExporter (exp->getName(), exp->getTargetLocationString());
 
     auto exportersTree = getExporters();
-    exportersTree.addChild (exp->settings, -1, getUndoManagerFor (exportersTree));
+    exportersTree.appendChild (exp->settings, getUndoManagerFor (exportersTree));
 }
 
 void Project::createExporterForCurrentPlatform()

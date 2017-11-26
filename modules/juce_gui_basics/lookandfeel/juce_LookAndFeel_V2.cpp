@@ -112,6 +112,7 @@ LookAndFeel_V2::LookAndFeel_V2()
         ComboBox::textColourId,                     0xff000000,
         ComboBox::backgroundColourId,               0xffffffff,
         ComboBox::arrowColourId,                    0x99000000,
+        ComboBox::focusedOutlineColourId,           0xffbbbbff,
 
         PropertyComponent::backgroundColourId,      0x66ffffff,
         PropertyComponent::labelTextColourId,       0xff000000,
@@ -181,8 +182,9 @@ LookAndFeel_V2::LookAndFeel_V2()
         TableHeaderComponent::outlineColourId,      0x33000000,
         TableHeaderComponent::highlightColourId,    0x8899aadd,
 
-        DirectoryContentsDisplayComponent::highlightColourId,   textHighlightColour,
-        DirectoryContentsDisplayComponent::textColourId,        0xff000000,
+        DirectoryContentsDisplayComponent::highlightColourId,              textHighlightColour,
+        DirectoryContentsDisplayComponent::textColourId,                   0xff000000,
+        DirectoryContentsDisplayComponent::highlightedTextColourId,        0xff000000,
 
         0x1000440, /*LassoComponent::lassoFillColourId*/        0x66dddddd,
         0x1000441, /*LassoComponent::lassoOutlineColourId*/     0x99111111,
@@ -212,6 +214,19 @@ LookAndFeel_V2::LookAndFeel_V2()
         FileSearchPathListComponent::backgroundColourId,        0xffffffff,
 
         FileChooserDialogBox::titleTextColourId,                0xff000000,
+
+        SidePanel::backgroundColour,                            0xffffffff,
+        SidePanel::titleTextColour,                             0xff000000,
+        SidePanel::shadowBaseColour,                            0xff000000,
+        SidePanel::dismissButtonNormalColour,                   textButtonColour,
+        SidePanel::dismissButtonOverColour,                     textButtonColour,
+        SidePanel::dismissButtonDownColour,                     0xff4444ff,
+
+        FileBrowserComponent::currentPathBoxBackgroundColourId,    0xffffffff,
+        FileBrowserComponent::currentPathBoxTextColourId,          0xff000000,
+        FileBrowserComponent::currentPathBoxArrowColourId,         0x99000000,
+        FileBrowserComponent::filenameBoxBackgroundColourId,       0xffffffff,
+        FileBrowserComponent::filenameBoxTextColourId,             0xff000000,
     };
 
     for (int i = 0; i < numElementsInArray (standardColours); i += 2)
@@ -1160,7 +1175,7 @@ void LookAndFeel_V2::drawComboBox (Graphics& g, int width, int height, const boo
 
     if (box.isEnabled() && box.hasKeyboardFocus (false))
     {
-        g.setColour (box.findColour (ComboBox::buttonColourId));
+        g.setColour (box.findColour (ComboBox::focusedOutlineColourId));
         g.drawRect (0, 0, width, height, 2);
     }
     else
@@ -1273,8 +1288,7 @@ void LookAndFeel_V2::drawLinearSliderBackground (Graphics& g, int x, int y, int 
         const float iy = y + height * 0.5f - sliderRadius * 0.5f;
         const float ih = sliderRadius;
 
-        g.setGradientFill (ColourGradient (gradCol1, 0.0f, iy,
-                                           gradCol2, 0.0f, iy + ih, false));
+        g.setGradientFill (ColourGradient::vertical (gradCol1, iy, gradCol2, iy + ih));
 
         indent.addRoundedRectangle (x - sliderRadius * 0.5f, iy,
                                     width + sliderRadius, ih,
@@ -1285,8 +1299,7 @@ void LookAndFeel_V2::drawLinearSliderBackground (Graphics& g, int x, int y, int 
         const float ix = x + width * 0.5f - sliderRadius * 0.5f;
         const float iw = sliderRadius;
 
-        g.setGradientFill (ColourGradient (gradCol1, ix, 0.0f,
-                                           gradCol2, ix + iw, 0.0f, false));
+        g.setGradientFill (ColourGradient::horizontal (gradCol1, ix, gradCol2, ix + iw));
 
         indent.addRoundedRectangle (ix, y - sliderRadius * 0.5f,
                                     iw, height + sliderRadius,
@@ -1765,10 +1778,8 @@ void LookAndFeel_V2::drawDocumentWindowTitleBar (DocumentWindow& window, Graphic
 
     const bool isActive = window.isActiveWindow();
 
-    g.setGradientFill (ColourGradient (window.getBackgroundColour(),
-                                       0.0f, 0.0f,
-                                       window.getBackgroundColour().contrasting (isActive ? 0.15f : 0.05f),
-                                       0.0f, (float) h, false));
+    g.setGradientFill (ColourGradient::vertical (window.getBackgroundColour(), 0,
+                                                 window.getBackgroundColour().contrasting (isActive ? 0.15f : 0.05f), (float) h));
     g.fillAll();
 
     Font font (h * 0.65f, Font::bold);
@@ -2550,8 +2561,13 @@ void LookAndFeel_V2::drawFileBrowserRow (Graphics& g, int width, int height,
                            RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, 1.0f);
     }
 
-    g.setColour (fileListComp != nullptr ? fileListComp->findColour (DirectoryContentsDisplayComponent::textColourId)
-                                         : findColour (DirectoryContentsDisplayComponent::textColourId));
+    if (isItemSelected)
+        g.setColour (fileListComp != nullptr ? fileListComp->findColour (DirectoryContentsDisplayComponent::highlightedTextColourId)
+                                             : findColour (DirectoryContentsDisplayComponent::highlightedTextColourId));
+    else
+        g.setColour (fileListComp != nullptr ? fileListComp->findColour (DirectoryContentsDisplayComponent::textColourId)
+                                             : findColour (DirectoryContentsDisplayComponent::textColourId));
+
     g.setFont (height * 0.7f);
 
     if (width > 450 && ! isDirectory)
@@ -2778,6 +2794,30 @@ void LookAndFeel_V2::drawKeymapChangeButton (Graphics& g, int width, int height,
         g.setColour (textColour.withAlpha (0.4f));
         g.drawRect (0, 0, width, height);
     }
+}
+//==============================================================================
+Font LookAndFeel_V2::getSidePanelTitleFont (SidePanel&)
+{
+    return Font (18.0f);
+}
+
+Justification LookAndFeel_V2::getSidePanelTitleJustification (SidePanel& panel)
+{
+    return panel.isPanelOnLeft() ? Justification::centredRight
+                                 : Justification::centredLeft;
+}
+
+Path LookAndFeel_V2::getSidePanelDismissButtonShape (SidePanel& panel)
+{
+    Path p;
+    const float size = 10.0f;
+
+    if (panel.isPanelOnLeft())
+        p.addTriangle (size, 0.0f, 0.0f, size * 0.5f, size, size);
+    else
+        p.addTriangle (0.0f, 0.0f, size, size * 0.5f, 0.0f, size);
+
+    return p;
 }
 
 //==============================================================================

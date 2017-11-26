@@ -114,7 +114,7 @@ LicenseController::LicenseController()
 LicenseController::~LicenseController()
 {
    #if !JUCER_ENABLE_GPL_MODE
-    thread = nullptr;
+    thread.reset();
     closeWebview (-1);
    #endif
 }
@@ -155,7 +155,7 @@ void LicenseController::logout()
     jassert (MessageManager::getInstance()->isThisTheMessageThread());
 
    #if ! JUCER_ENABLE_GPL_MODE
-    thread = nullptr;
+    thread.reset();
     updateState ({});
 
    #if ! JUCE_LINUX
@@ -171,7 +171,7 @@ void LicenseController::chooseNewLicense()
     jassert (MessageManager::getInstance()->isThisTheMessageThread());
 
    #if ! JUCER_ENABLE_GPL_MODE
-    thread = nullptr;
+    thread.reset();
     thread = new LicenseThread (*this, true);
    #endif
 }
@@ -261,21 +261,47 @@ void LicenseController::updateState (const LicenseState& newState)
     listeners.call (&StateChangedCallback::licenseStateChanged, getState());
 }
 
+LicenseState LicenseController::licenseStateFromOldSettings (XmlElement* licenseXml)
+{
+    LicenseState result;
+    result.type                        = getLicenseTypeFromValue    (licenseXml->getChildElementAllSubText ("type", {}));
+    result.applicationUsageDataState   = getApplicationUsageDataTypeFromValue (licenseXml->getChildElementAllSubText ("applicationUsageData", {}));
+    result.username                    = licenseXml->getChildElementAllSubText ("username", {});
+    result.email                       = licenseXml->getChildElementAllSubText ("email", {});
+    result.authToken                   = licenseXml->getChildElementAllSubText ("authToken", {});
+
+    MemoryOutputStream imageData;
+    Base64::convertFromBase64 (imageData, licenseXml->getChildElementAllSubText ("avatar", {}));
+    result.avatar = ImageFileFormat::loadFrom (imageData.getData(), imageData.getDataSize());
+
+    return result;
+}
+
 LicenseState LicenseController::licenseStateFromSettings (PropertiesFile& props)
 {
     ScopedPointer<XmlElement> licenseXml = props.getXmlValue ("license");
 
     if (licenseXml != nullptr)
     {
+        // this is here for backwards compatibility with old-style settings files using XML text elements
+        if (licenseXml->getChildElementAllSubText ("type", {}) != String())
+        {
+            auto stateFromOldSettings = licenseStateFromOldSettings (licenseXml);
+
+            licenseStateToSettings (stateFromOldSettings, props);
+
+            return stateFromOldSettings;
+        }
+
         LicenseState result;
-        result.type                        = getLicenseTypeFromValue    (licenseXml->getChildElementAllSubText ("type", {}));
-        result.applicationUsageDataState   = getApplicationUsageDataTypeFromValue (licenseXml->getChildElementAllSubText ("applicationUsageData", {}));
-        result.username                    = licenseXml->getChildElementAllSubText ("username", {});
-        result.email                       = licenseXml->getChildElementAllSubText ("email", {});
-        result.authToken                   = licenseXml->getChildElementAllSubText ("authToken", {});
+        result.type                        = getLicenseTypeFromValue    (licenseXml->getStringAttribute ("type", {}));
+        result.applicationUsageDataState   = getApplicationUsageDataTypeFromValue (licenseXml->getStringAttribute ("applicationUsageData", {}));
+        result.username                    = licenseXml->getStringAttribute ("username", {});
+        result.email                       = licenseXml->getStringAttribute ("email", {});
+        result.authToken                   = licenseXml->getStringAttribute ("authToken", {});
 
         MemoryOutputStream imageData;
-        Base64::convertFromBase64 (imageData, licenseXml->getChildElementAllSubText ("avatar", {}));
+        Base64::convertFromBase64 (imageData, licenseXml->getStringAttribute ("avatar", {}));
         result.avatar = ImageFileFormat::loadFrom (imageData.getData(), imageData.getDataSize());
 
         return result;
@@ -293,19 +319,16 @@ void LicenseController::licenseStateToSettings (const LicenseState& state, Prope
         XmlElement licenseXml ("license");
 
         if (auto* typeString = getLicenseStateValue (state.type))
-            licenseXml.createNewChildElement ("type")->addTextElement (typeString);
+            licenseXml.setAttribute ("type", typeString);
 
-        licenseXml.createNewChildElement ("applicationUsageData")->addTextElement (getApplicationUsageDataStateValue (state.applicationUsageDataState));
-
-        licenseXml.createNewChildElement ("username")->addTextElement (state.username);
-        licenseXml.createNewChildElement ("email")   ->addTextElement (state.email);
-
-        // TODO: encrypt authToken
-        licenseXml.createNewChildElement ("authToken")->addTextElement (state.authToken);
+        licenseXml.setAttribute ("applicationUsageData", getApplicationUsageDataStateValue (state.applicationUsageDataState));
+        licenseXml.setAttribute ("username", state.username);
+        licenseXml.setAttribute ("email", state.email);
+        licenseXml.setAttribute ("authToken", state.authToken);
 
         MemoryOutputStream imageData;
         if (state.avatar.isValid() && PNGImageFormat().writeImageToStream (state.avatar, imageData))
-            licenseXml.createNewChildElement ("avatar")->addTextElement (Base64::toBase64 (imageData.getData(), imageData.getDataSize()));
+            licenseXml.setAttribute ("avatar", Base64::toBase64 (imageData.getData(), imageData.getDataSize()));
 
         props.setValue ("license", &licenseXml);
     }

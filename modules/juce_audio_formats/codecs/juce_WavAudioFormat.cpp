@@ -1749,8 +1749,8 @@ namespace WavFileHelpers
                     outStream.release();
 
                     bool ok = writer->writeFromAudioReader (*reader, 0, -1);
-                    writer = nullptr;
-                    reader = nullptr;
+                    writer.reset();
+                    reader.reset();
 
                     return ok && tempFile.overwriteTargetFileWithTemporary();
                 }
@@ -1769,7 +1769,7 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
     {
         auto bwavPos  = reader->bwavChunkStart;
         auto bwavSize = reader->bwavSize;
-        reader = nullptr;
+        reader.reset();
 
         if (bwavSize > 0)
         {
@@ -1838,7 +1838,7 @@ struct WaveAudioFormatTests : public UnitTest
                                                                              32, metadataValues, 0));
             expect (writer != nullptr);
 
-            AudioSampleBuffer buffer (numTestAudioBufferChannels, numTestAudioBufferSamples);
+            AudioBuffer<float> buffer (numTestAudioBufferChannels, numTestAudioBufferSamples);
             buffer.clear();
 
             beginTest ("Writing audio data to the basic wave writer");

@@ -2062,6 +2062,9 @@ private:
 
         void emitCast (CodeGenerator& cg, Type destType, int stackDepth) const
         {
+            if (arguments.size() != 1)
+                location.throwError (getTypeName (destType) + " cast operation requires a single argument");
+
             auto* arg = arguments.getReference (0);
             const auto sourceType = arg->getType (cg);
             arg->emit (cg, sourceType, stackDepth);

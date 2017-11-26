@@ -407,6 +407,7 @@ private:
             << "   under the GPL v3 license." << newLine
             << newLine
             << "   End User License Agreement: www.juce.com/juce-5-licence" << newLine
+            << newLine
             << "  ==============================================================================" << newLine
             << "*/" << newLine
             << newLine
@@ -418,7 +419,7 @@ private:
 
             << "#ifndef JUCE_REPORT_APP_USAGE" << newLine
             << " #define JUCE_REPORT_APP_USAGE "        << (project.shouldReportAppUsage().getValue()      ? "1" : "0") << newLine
-            << "#endif" << newLine << newLine
+            << "#endif" << newLine
             << newLine
             << "// END SECTION A" << newLine
             << newLine

@@ -118,9 +118,6 @@
 
  #if _MSC_VER >= 1900
   #define JUCE_COMPILER_SUPPORTS_NOEXCEPT 1
- #endif
-
- #if _MSC_VER >= 1910
   #define JUCE_HAS_CONSTEXPR 1
  #endif
 

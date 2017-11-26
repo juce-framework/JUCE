@@ -17,6 +17,7 @@
 		5CC0AE888A8B9CF85C8C1077 = {isa = PBXBuildFile; fileRef = 42747FC2DD3F362950112EFA; };
 		BDD9B6E13096A4F929CDF0C7 = {isa = PBXBuildFile; fileRef = 0A72A10DC2BCD29B4A801D40; };
 		03889D80A76102BB72F53888 = {isa = PBXBuildFile; fileRef = AB8E624C28BB20096959B5C9; };
+		7A8C478ABEB46D60F8107715 = {isa = PBXBuildFile; fileRef = 3D6AAFA0213E4E76476201A4; };
 		268110CDBB2C5560CE1935AB = {isa = PBXBuildFile; fileRef = 0FD9AE627E98FA0C1EC3C163; };
 		DEE7F200E0ABCA5F551B8BC8 = {isa = PBXBuildFile; fileRef = 67663D2E66C7F1C1B6BD6392; };
 		AE46B38D70B347166EEA3112 = {isa = PBXBuildFile; fileRef = ACC89760CF09AB1EB06AD52B; };
@@ -48,6 +49,7 @@
 		24F4FDACFEC863133A98A229 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_audio_basics"; path = "../../../../../modules/juce_audio_basics"; sourceTree = "SOURCE_ROOT"; };
 		2564C21CB1B8F0ECFA6D18C4 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_gui_basics"; path = "../../../../../modules/juce_gui_basics"; sourceTree = "SOURCE_ROOT"; };
 		3C199976207F5D3971652212 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_events"; path = "../../../../../modules/juce_events"; sourceTree = "SOURCE_ROOT"; };
+		3D6AAFA0213E4E76476201A4 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		4014BF84F7684FC6C36A1575 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_blocks_basics"; path = "../../../../../modules/juce_blocks_basics"; sourceTree = "SOURCE_ROOT"; };
 		42747FC2DD3F362950112EFA = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = System/Library/Frameworks/CoreMIDI.framework; sourceTree = SDKROOT; };
 		47248ADCFEF454A66744B755 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_graphics"; path = "../../../../../modules/juce_graphics"; sourceTree = "SOURCE_ROOT"; };
@@ -138,6 +140,7 @@
 					42747FC2DD3F362950112EFA,
 					0A72A10DC2BCD29B4A801D40,
 					AB8E624C28BB20096959B5C9,
+					3D6AAFA0213E4E76476201A4,
 					0FD9AE627E98FA0C1EC3C163,
 					67663D2E66C7F1C1B6BD6392,
 					ACC89760CF09AB1EB06AD52B, ); name = Frameworks; sourceTree = "<group>"; };
@@ -153,7 +156,7 @@
 		BD1F40E3A4433BD30678025E = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -183,7 +186,7 @@
 		1EABC8E25D5063C5DE0DA4E2 = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -328,6 +331,7 @@
 					5CC0AE888A8B9CF85C8C1077,
 					BDD9B6E13096A4F929CDF0C7,
 					03889D80A76102BB72F53888,
+					7A8C478ABEB46D60F8107715,
 					268110CDBB2C5560CE1935AB,
 					DEE7F200E0ABCA5F551B8BC8,
 					AE46B38D70B347166EEA3112, ); runOnlyForDeploymentPostprocessing = 0; };
@@ -335,7 +339,7 @@
 					B62995CCD71EBA82C2BC1692,
 					C8A1585A07BDCD77C240ECAA,
 					1EFBDD8D783B94E754626B32, ); buildRules = ( ); dependencies = (  ); name = "BlocksSynth - App"; productName = BlocksSynth; productReference = D778C2ED7EA9D5EDCFBA1507; productType = "com.apple.product-type.application"; };
-		C28D173095C609C48901860E = {isa = PBXProject; buildConfigurationList = F2BDE5D743A9870C169E5CC8; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { 0B9ADB15A71FB90DD6919895 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 0F4E2B72B683E9B48DF13DDB; projectDirPath = ""; projectRoot = ""; targets = (0B9ADB15A71FB90DD6919895); };
+		C28D173095C609C48901860E = {isa = PBXProject; buildConfigurationList = F2BDE5D743A9870C169E5CC8; attributes = { LastUpgradeCheck = 0830; ORGANIZATIONNAME = ""; TargetAttributes = { 0B9ADB15A71FB90DD6919895 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 0F4E2B72B683E9B48DF13DDB; projectDirPath = ""; projectRoot = ""; targets = (0B9ADB15A71FB90DD6919895); };
 	};
 	rootObject = C28D173095C609C48901860E;
 }

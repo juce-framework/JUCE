@@ -1160,7 +1160,6 @@ public:
         TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IAudioProcessor)
         TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IUnitInfo)
         TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IConnectionPoint)
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::ChannelContext::IInfoListener)
         TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, FUnknown, Vst::IComponent)
 
         if (doUIDsMatch (targetIID, JuceAudioProcessor::iid))
@@ -2530,15 +2529,6 @@ struct JucePluginFactory  : public IPluginFactory3
         return true;
     }
 
-    bool isClassRegistered (const FUID& cid) const
-    {
-        for (int i = 0; i < classes.size(); ++i)
-            if (classes.getUnchecked (i)->infoW.cid == cid)
-                return true;
-
-        return false;
-    }
-
     //==============================================================================
     JUCE_DECLARE_VST3_COM_REF_METHODS
 
@@ -2597,7 +2587,15 @@ struct JucePluginFactory  : public IPluginFactory3
     {
         *obj = nullptr;
 
-        FUID sourceFuid = sourceIid;
+        TUID tuid;
+        memcpy (tuid, sourceIid, sizeof (TUID));
+
+       #if VST_VERSION >= 0x030608
+        auto sourceFuid = FUID::fromTUID (tuid);
+       #else
+        FUID sourceFuid;
+        sourceFuid = tuid;
+       #endif
 
         if (cid == nullptr || sourceIid == nullptr || ! sourceFuid.isValid())
         {

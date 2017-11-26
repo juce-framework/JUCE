@@ -55,7 +55,8 @@ public:
     */
     OnlineUnlockForm (OnlineUnlockStatus&,
                       const String& userInstructions,
-                      bool hasCancelButton = true);
+                      bool hasCancelButton = true,
+                      bool overlayHasCancelButton = false);
 
     /** Destructor. */
     ~OnlineUnlockForm();
@@ -80,6 +81,8 @@ public:
 private:
     OnlineUnlockStatus& status;
     ScopedPointer<BubbleMessageComponent> bubble;
+
+    bool showOverlayCancelButton;
 
     struct OverlayComp;
     friend struct OverlayComp;

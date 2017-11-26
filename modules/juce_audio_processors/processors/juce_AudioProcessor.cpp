@@ -395,8 +395,14 @@ void AudioProcessor::setPlayConfigDetails (const int newNumIns,
     if (getTotalNumInputChannels()  != newNumIns)
         success &= setChannelLayoutOfBus (true,  0, AudioChannelSet::canonicalChannelSet (newNumIns));
 
+    // failed to find a compatible input configuration
+    jassert (success);
+
     if (getTotalNumOutputChannels() != newNumOuts)
         success &= setChannelLayoutOfBus (false, 0, AudioChannelSet::canonicalChannelSet (newNumOuts));
+
+    // failed to find a compatible output configuration
+    jassert (success);
 
     // if the user is using this method then they do not want any side-buses or aux outputs
     success &= disableNonMainBuses();
@@ -1365,6 +1371,9 @@ int32 AudioProcessor::getAAXPluginIDForMainBusConfig (const AudioChannelSet& mai
         else if (set == AudioChannelSet::create7point1SDDS())    aaxFormatIndex = 13;
         else if (set == AudioChannelSet::create7point0point2())  aaxFormatIndex = 14;
         else if (set == AudioChannelSet::create7point1point2())  aaxFormatIndex = 15;
+        else if (set == AudioChannelSet::ambisonic (1))          aaxFormatIndex = 16;
+        else if (set == AudioChannelSet::ambisonic (2))          aaxFormatIndex = 17;
+        else if (set == AudioChannelSet::ambisonic (3))          aaxFormatIndex = 18;
         else
         {
             // AAX does not support this format and the wrapper should not have

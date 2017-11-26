@@ -1103,7 +1103,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         Expression* parseInPlaceOpExpression (ExpPtr& lhs)
         {
             ExpPtr rhs (parseExpression());
-            Expression* bareLHS = lhs; // careful - bare pointer is deliberately alised
+            Expression* bareLHS = lhs.get(); // careful - bare pointer is deliberately alised
             return new SelfAssignment (location, bareLHS, new OpType (location, lhs, rhs));
         }
 

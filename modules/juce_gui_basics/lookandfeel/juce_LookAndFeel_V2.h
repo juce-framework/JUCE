@@ -324,6 +324,11 @@ public:
     void drawKeymapChangeButton (Graphics&, int width, int height, Button&, const String& keyDescription) override;
 
     //==============================================================================
+    Font getSidePanelTitleFont (SidePanel&) override;
+    Justification getSidePanelTitleJustification (SidePanel&) override;
+    Path getSidePanelDismissButtonShape (SidePanel&) override;
+
+    //==============================================================================
     /** Draws a 3D raised (or indented) bevel using two colours.
 
         The bevel is drawn inside the given rectangle, and greater bevel thicknesses

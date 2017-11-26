@@ -41,27 +41,43 @@ public:
     */
     using NumericType = typename SampleTypeHelpers::ElementType<SampleType>::Type;
 
+    /** Creates an uninitialised oscillator. Call initialise before first use. */
+    Oscillator()
+    {}
+
     /** Creates an oscillator with a periodic input function (-pi..pi).
 
         If lookup table is not zero, then the function will be approximated
         with a lookup table.
     */
     Oscillator (const std::function<NumericType (NumericType)>& function, size_t lookupTableNumPoints = 0)
-        : generator (function), frequency (440.0f)
+    {
+        initialise (function, lookupTableNumPoints);
+    }
+
+    /** Returns true if the Oscillator has been initialised. */
+    bool isInitialised() const noexcept     { return static_cast<bool> (generator); }
+
+    /** Initialises the oscillator with a waveform. */
+    void initialise (const std::function<NumericType (NumericType)>& function, size_t lookupTableNumPoints = 0)
     {
         if (lookupTableNumPoints != 0)
         {
-            auto table = new LookupTableTransform<NumericType> (generator, static_cast <NumericType> (-1.0 * double_Pi),
-                                                                static_cast<NumericType> (double_Pi), lookupTableNumPoints);
+            auto* table = new LookupTableTransform<NumericType> (function, static_cast <NumericType> (-1.0 * double_Pi),
+                                                                 static_cast<NumericType> (double_Pi), lookupTableNumPoints);
 
             lookupTable = table;
             generator = [table] (NumericType x) { return (*table) (x); };
+        }
+        else
+        {
+            generator = function;
         }
     }
 
     //==============================================================================
     /** Sets the frequency of the oscillator. */
-    void setFrequency (NumericType newGain) noexcept             { frequency.setValue (newGain); }
+    void setFrequency (NumericType newFrequency, bool force = false) noexcept    { frequency.setValue (newFrequency, force); }
 
     /** Returns the current frequency of the oscillator. */
     NumericType getFrequency() const noexcept                    { return frequency.getTargetValue(); }
@@ -89,6 +105,7 @@ public:
     /** Returns the result of processing a single sample. */
     SampleType JUCE_VECTOR_CALLTYPE processSample (SampleType) noexcept
     {
+        jassert (isInitialised());
         auto increment = static_cast<NumericType> (2.0 * double_Pi) * frequency.getNextValue() / sampleRate;
         auto value = generator (pos - static_cast<NumericType> (double_Pi));
         pos = std::fmod (pos + increment, static_cast<NumericType> (2.0 * double_Pi));
@@ -100,6 +117,7 @@ public:
     template <typename ProcessContext>
     void process (const ProcessContext& context) noexcept
     {
+        jassert (isInitialised());
         auto&& outBlock = context.getOutputBlock();
 
         // this is an output-only processory

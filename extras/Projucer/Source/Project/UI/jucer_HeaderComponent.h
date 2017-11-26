@@ -172,15 +172,16 @@ public:
     void showUserSettings()
     {
        #if JUCER_ENABLE_GPL_MODE
-        const int settingsPopupHeight = 75;
+        auto settingsPopupHeight = 40;
+        auto settingsPopupWidth = 200;
        #else
-        const int settingsPopupHeight = 150;
+        auto settingsPopupHeight = 150;
+        auto settingsPopupWidth = 250;
        #endif
 
         auto* content = new UserSettingsPopup (false);
 
-
-        content->setSize (200, settingsPopupHeight);
+        content->setSize (settingsPopupWidth, settingsPopupHeight);
 
         userSettingsWindow = &CallOutBox::launchAsynchronously (content, userSettingsButton->getScreenBounds(), nullptr);
     }

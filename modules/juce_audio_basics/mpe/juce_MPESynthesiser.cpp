@@ -25,6 +25,9 @@ namespace juce
 
 MPESynthesiser::MPESynthesiser()
 {
+    MPEZoneLayout zoneLayout;
+    zoneLayout.addZone (MPEZone (1, 15));
+    setZoneLayout (zoneLayout);
 }
 
 MPESynthesiser::MPESynthesiser (MPEInstrument* mpeInstrument)  : MPESynthesiserBase (mpeInstrument)
@@ -176,14 +179,6 @@ MPESynthesiserVoice* MPESynthesiser::findFreeVoice (MPENote noteToFindVoiceFor, 
     return nullptr;
 }
 
-struct MPEVoiceAgeSorter
-{
-    static int compareElements (MPESynthesiserVoice* v1, MPESynthesiserVoice* v2) noexcept
-    {
-        return v1->wasStartedBefore (*v2) ? -1 : (v2->wasStartedBefore (*v1) ? 1 : 0);
-    }
-};
-
 MPESynthesiserVoice* MPESynthesiser::findVoiceToSteal (MPENote noteToStealVoiceFor) const
 {
     // This voice-stealing algorithm applies the following heuristics:
@@ -202,17 +197,24 @@ MPESynthesiserVoice* MPESynthesiser::findVoiceToSteal (MPENote noteToStealVoiceF
     Array<MPESynthesiserVoice*> usableVoices;
     usableVoices.ensureStorageAllocated (voices.size());
 
-    for (int i = 0; i < voices.size(); ++i)
+    for (auto* voice : voices)
     {
-        MPESynthesiserVoice* const voice = voices.getUnchecked (i);
         jassert (voice->isActive()); // We wouldn't be here otherwise
 
-        MPEVoiceAgeSorter sorter;
-        usableVoices.addSorted (sorter, voice);
+        usableVoices.add (voice);
+
+        // NB: Using a functor rather than a lambda here due to scare-stories about
+        // compilers generating code containing heap allocations..
+        struct Sorter
+        {
+            bool operator() (const MPESynthesiserVoice* a, const MPESynthesiserVoice* b) const noexcept { return a->wasStartedBefore (*b); }
+        };
+
+        std::sort (usableVoices.begin(), usableVoices.end(), Sorter());
 
         if (! voice->isPlayingButReleased()) // Don't protect released notes
         {
-            const int noteNumber = voice->getCurrentlyPlayingNote().initialNote;
+            auto noteNumber = voice->getCurrentlyPlayingNote().initialNote;
 
             if (low == nullptr || noteNumber < low->getCurrentlyPlayingNote().initialNote)
                 low = voice;
@@ -226,49 +228,29 @@ MPESynthesiserVoice* MPESynthesiser::findVoiceToSteal (MPENote noteToStealVoiceF
     if (top == low)
         top = nullptr;
 
-    const int numUsableVoices = usableVoices.size();
-
     // If we want to re-use the voice to trigger a new note,
     // then The oldest note that's playing the same note number is ideal.
     if (noteToStealVoiceFor.isValid())
-    {
-        for (int i = 0; i < numUsableVoices; ++i)
-        {
-            MPESynthesiserVoice* const voice = usableVoices.getUnchecked (i);
-
+        for (auto* voice : usableVoices)
             if (voice->getCurrentlyPlayingNote().initialNote == noteToStealVoiceFor.initialNote)
                 return voice;
-        }
-    }
 
     // Oldest voice that has been released (no finger on it and not held by sustain pedal)
-    for (int i = 0; i < numUsableVoices; ++i)
-    {
-        MPESynthesiserVoice* const voice = usableVoices.getUnchecked (i);
-
+    for (auto* voice : usableVoices)
         if (voice != low && voice != top && voice->isPlayingButReleased())
             return voice;
-    }
 
     // Oldest voice that doesn't have a finger on it:
-    for (int i = 0; i < numUsableVoices; ++i)
-    {
-        MPESynthesiserVoice* const voice = usableVoices.getUnchecked (i);
-
+    for (auto* voice : usableVoices)
         if (voice != low && voice != top
              && voice->getCurrentlyPlayingNote().keyState != MPENote::keyDown
              && voice->getCurrentlyPlayingNote().keyState != MPENote::keyDownAndSustained)
             return voice;
-    }
 
     // Oldest voice that isn't protected
-    for (int i = 0; i < numUsableVoices; ++i)
-    {
-        MPESynthesiserVoice* const voice = usableVoices.getUnchecked (i);
-
+    for (auto* voice : usableVoices)
         if (voice != low && voice != top)
             return voice;
-    }
 
     // We've only got "protected" voices now: lowest note takes priority
     jassert (low != nullptr);

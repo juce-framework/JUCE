@@ -27,6 +27,67 @@
 namespace juce
 {
 
+//==============================================================================
+class FileChooser::NonNative    : public FileChooser::Pimpl
+{
+public:
+    NonNative (FileChooser& fileChooser, int flags, FilePreviewComponent* preview)
+        : owner (fileChooser),
+          selectsDirectories ((flags & FileBrowserComponent::canSelectDirectories)   != 0),
+          selectsFiles       ((flags & FileBrowserComponent::canSelectFiles)         != 0),
+          warnAboutOverwrite ((flags & FileBrowserComponent::warnAboutOverwriting)   != 0),
+
+          filter (selectsFiles ? owner.filters : String(), selectsDirectories ? "*" : String(), {}),
+          browserComponent (flags, owner.startingFile, &filter, preview),
+          dialogBox (owner.title, {}, browserComponent, warnAboutOverwrite, browserComponent.findColour (AlertWindow::backgroundColourId))
+    {}
+
+    ~NonNative()
+    {
+        dialogBox.exitModalState (0);
+    }
+
+    void launch() override
+    {
+        dialogBox.centreWithDefaultSize (nullptr);
+        dialogBox.enterModalState (true, ModalCallbackFunction::create ([this] (int r) { modalStateFinished (r); }), true);
+    }
+
+    void runModally() override
+    {
+       #if JUCE_MODAL_LOOPS_PERMITTED
+        modalStateFinished (dialogBox.show() ? 1 : 0);
+       #else
+        jassertfalse;
+       #endif
+    }
+
+private:
+    void modalStateFinished (int returnValue)
+    {
+        Array<URL> result;
+
+        if (returnValue != 0)
+        {
+            for (int i = 0; i < browserComponent.getNumSelectedFiles(); ++i)
+                result.add (URL (browserComponent.getSelectedFile (i)));
+        }
+
+        owner.finished (result, true);
+    }
+
+    //==============================================================================
+    FileChooser& owner;
+    bool selectsDirectories, selectsFiles, warnAboutOverwrite;
+
+    WildcardFileFilter filter;
+    FileBrowserComponent browserComponent;
+    FileChooserDialogBox dialogBox;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NonNative)
+};
+
+//==============================================================================
 FileChooser::FileChooser (const String& chooserBoxTitle,
                           const File& currentFileOrDirectory,
                           const String& fileFilters,
@@ -38,11 +99,18 @@ FileChooser::FileChooser (const String& chooserBoxTitle,
       useNativeDialogBox (useNativeBox && isPlatformDialogAvailable()),
       treatFilePackagesAsDirs (treatFilePackagesAsDirectories)
 {
+   #ifndef JUCE_MAC
+    ignoreUnused (treatFilePackagesAsDirs);
+   #endif
+
     if (! fileFilters.containsNonWhitespaceChars())
         filters = "*";
 }
 
-FileChooser::~FileChooser() {}
+FileChooser::~FileChooser()
+{
+    asyncCallback = nullptr;
+}
 
 #if JUCE_MODAL_LOOPS_PERMITTED
 bool FileChooser::browseForFileToOpen (FilePreviewComponent* previewComp)
@@ -69,12 +137,13 @@ bool FileChooser::browseForMultipleFilesOrDirectories (FilePreviewComponent* pre
                        previewComp);
 }
 
-bool FileChooser::browseForFileToSave (const bool warnAboutOverwrite)
+bool FileChooser::browseForFileToSave (const bool warnAboutOverwrite,
+                                       const File& fileWhichShouldBeSaved)
 {
     return showDialog (FileBrowserComponent::saveMode
                         | FileBrowserComponent::canSelectFiles
                         | (warnAboutOverwrite ? FileBrowserComponent::warnAboutOverwriting : 0),
-                       nullptr);
+                       nullptr, fileWhichShouldBeSaved);
 }
 
 bool FileChooser::browseForDirectory()
@@ -84,70 +153,137 @@ bool FileChooser::browseForDirectory()
                        nullptr);
 }
 
-bool FileChooser::showDialog (const int flags, FilePreviewComponent* const previewComp)
+bool FileChooser::showDialog (const int flags, FilePreviewComponent* const previewComp,
+                              const File& fileWhichShouldBeSaved)
 {
+    fileToSave = (flags & FileBrowserComponent::saveMode) != 0 ? fileWhichShouldBeSaved : File();
+
     FocusRestorer focusRestorer;
 
+    pimpl = createPimpl (flags, previewComp);
+    pimpl->runModally();
+
+    // ensure that the finished function was invoked
+    jassert (pimpl == nullptr);
+
+    return (results.size() > 0);
+}
+#endif
+
+void FileChooser::launchAsync (int flags, std::function<void (const FileChooser&)> callback,
+                               FilePreviewComponent* previewComp,
+                               const File& fileWhichShouldBeSaved)
+{
+    // You must specify a callback when using launchAsync
+    jassert (callback);
+
+    // you cannot run two file chooser dialog boxes at the same time
+    jassert (asyncCallback == nullptr);
+
+    fileToSave = (flags & FileBrowserComponent::saveMode) != 0 ? fileWhichShouldBeSaved : File();
+
+    asyncCallback = static_cast<std::function<void (const FileChooser&)>&&> (callback);
+
+    pimpl = createPimpl (flags, previewComp);
+    pimpl->launch();
+}
+
+
+FileChooser::Pimpl* FileChooser::createPimpl (int flags, FilePreviewComponent* previewComp)
+{
     results.clear();
 
     // the preview component needs to be the right size before you pass it in here..
     jassert (previewComp == nullptr || (previewComp->getWidth() > 10
                                          && previewComp->getHeight() > 10));
 
-    const bool selectsDirectories = (flags & FileBrowserComponent::canSelectDirectories) != 0;
-    const bool selectsFiles       = (flags & FileBrowserComponent::canSelectFiles) != 0;
-    const bool isSave             = (flags & FileBrowserComponent::saveMode) != 0;
-    const bool warnAboutOverwrite = (flags & FileBrowserComponent::warnAboutOverwriting) != 0;
-    const bool selectMultiple     = (flags & FileBrowserComponent::canSelectMultipleItems) != 0;
+    if (pimpl != nullptr)
+    {
+        // you cannot run two file chooser dialog boxes at the same time
+        jassertfalse;
 
+        pimpl = nullptr;
+    }
     // You've set the flags for both saveMode and openMode!
-    jassert (! (isSave && (flags & FileBrowserComponent::openMode) != 0));
+    jassert (! (((flags & FileBrowserComponent::saveMode) != 0)
+                && ((flags & FileBrowserComponent::openMode) != 0)));
 
    #if JUCE_WINDOWS
+    const bool selectsFiles       = (flags & FileBrowserComponent::canSelectFiles) != 0;
+    const bool selectsDirectories = (flags & FileBrowserComponent::canSelectDirectories) != 0;
+
     if (useNativeDialogBox && ! (selectsFiles && selectsDirectories))
-   #elif JUCE_MAC || JUCE_LINUX
-    if (useNativeDialogBox)
    #else
-    if (false)
+    if (useNativeDialogBox)
    #endif
     {
-        showPlatformDialog (results, title, startingFile, filters,
-                            selectsDirectories, selectsFiles, isSave,
-                            warnAboutOverwrite, selectMultiple, treatFilePackagesAsDirs,
-                            previewComp);
+        return showPlatformDialog (*this, flags, previewComp);
     }
     else
     {
-        ignoreUnused (selectMultiple);
-
-        WildcardFileFilter wildcard (selectsFiles ? filters : String(),
-                                     selectsDirectories ? "*" : String(),
-                                     String());
-
-        FileBrowserComponent browserComponent (flags, startingFile, &wildcard, previewComp);
-
-        FileChooserDialogBox box (title, String(),
-                                  browserComponent, warnAboutOverwrite,
-                                  browserComponent.findColour (AlertWindow::backgroundColourId));
-
-        if (box.show())
-        {
-            for (int i = 0; i < browserComponent.getNumSelectedFiles(); ++i)
-                results.add (browserComponent.getSelectedFile (i));
-        }
+        return new NonNative (*this, flags, previewComp);
     }
-
-    return results.size() > 0;
 }
-#endif
+
+Array<File> FileChooser::getResults() const noexcept
+{
+    Array<File> files;
+
+    for (auto url : getURLResults())
+        if (url.isLocalFile())
+            files.add (url.getLocalFile());
+
+    return files;
+}
 
 File FileChooser::getResult() const
+{
+    auto fileResults = getResults();
+
+    // if you've used a multiple-file select, you should use the getResults() method
+    // to retrieve all the files that were chosen.
+    jassert (fileResults.size() <= 1);
+
+    return fileResults.getFirst();
+}
+
+URL FileChooser::getURLResult() const
 {
     // if you've used a multiple-file select, you should use the getResults() method
     // to retrieve all the files that were chosen.
     jassert (results.size() <= 1);
 
     return results.getFirst();
+}
+
+void FileChooser::finished (const Array<URL>& asyncResults, bool shouldMove)
+{
+     std::function<void (const FileChooser&)> callback;
+     std::swap (callback, asyncCallback);
+
+     results = asyncResults;
+
+     if (shouldMove && fileToSave.existsAsFile())
+     {
+         if (results.size() > 0)
+         {
+             // The user either selected multiple files or wants to save the file to a URL
+             // Both are not supported
+             jassert (results.size() == 1 && results.getReference (0).isLocalFile());
+
+             if (! fileToSave.moveFileTo (results.getReference (0).getLocalFile()))
+                 results.clear();
+         }
+         else
+         {
+             fileToSave.deleteFile();
+         }
+     }
+
+     pimpl = nullptr;
+
+     if (callback)
+         callback (*this);
 }
 
 //==============================================================================

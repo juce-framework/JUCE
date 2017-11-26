@@ -331,7 +331,7 @@ bool PropertiesFile::saveAsBinary()
             out->writeString (values[i]);
         }
 
-        out = nullptr;
+        out.reset();
 
         if (tempFile.overwriteTargetFileWithTemporary())
         {

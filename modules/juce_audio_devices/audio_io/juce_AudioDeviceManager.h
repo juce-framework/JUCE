@@ -458,7 +458,7 @@ private:
     BigInteger inputChannels, outputChannels;
     ScopedPointer<XmlElement> lastExplicitSettings;
     mutable bool listNeedsScanning;
-    AudioSampleBuffer tempBuffer;
+    AudioBuffer<float> tempBuffer;
 
     struct MidiCallbackInfo
     {
@@ -474,7 +474,7 @@ private:
     ScopedPointer<MidiOutput> defaultMidiOutput;
     CriticalSection audioCallbackLock, midiCallbackLock;
 
-    ScopedPointer<AudioSampleBuffer> testSound;
+    ScopedPointer<AudioBuffer<float>> testSound;
     int testSoundPosition;
 
     double cpuUsageMs, timeToCpuScale, msPerBlock;

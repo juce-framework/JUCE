@@ -96,7 +96,7 @@ TabbedComponent::TabbedComponent (const TabbedButtonBar::Orientation orientation
 TabbedComponent::~TabbedComponent()
 {
     clearTabs();
-    tabs = nullptr;
+    tabs.reset();
 }
 
 //==============================================================================

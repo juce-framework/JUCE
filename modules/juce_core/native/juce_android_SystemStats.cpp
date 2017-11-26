@@ -159,7 +159,7 @@ LocalRef<jobject> CreateJavaInterface (AndroidInterfaceImplementer* implementer,
 jobject AndroidInterfaceImplementer::invoke (jobject /*proxy*/, jobject method, jobjectArray args)
 {
     auto* env = getEnv();
-    return env->CallObjectMethod (method, Method.invoke, javaSubClass.get(), args);
+    return env->CallObjectMethod (method, JavaMethod.invoke, javaSubClass.get(), args);
 }
 
 jobject juce_invokeImplementer (JNIEnv* env, jlong thisPtr, jobject proxy, jobject method, jobjectArray args)

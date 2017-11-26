@@ -1085,6 +1085,7 @@ public:
         PropertyChanged (kAudioUnitProperty_Latency,       kAudioUnitScope_Global, 0);
         PropertyChanged (kAudioUnitProperty_ParameterList, kAudioUnitScope_Global, 0);
         PropertyChanged (kAudioUnitProperty_ParameterInfo, kAudioUnitScope_Global, 0);
+        PropertyChanged (kAudioUnitProperty_ClassInfo,     kAudioUnitScope_Global, 0);
 
         refreshCurrentPreset();
 
@@ -1167,8 +1168,6 @@ public:
             return kAudioUnitErr_FormatNotSupported;
 
         err = MusicDeviceBase::ChangeStreamFormat (scope, element, old, format);
-
-        DBG (set.getDescription());
 
         if (err == noErr)
             currentTag = CoreAudioLayouts::toCoreAudio (set);
@@ -1691,7 +1690,7 @@ private:
         }
     }
 
-    void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiBuffer) noexcept
+    void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiBuffer) noexcept
     {
         const ScopedLock sl (juceFilter->getCallbackLock());
 

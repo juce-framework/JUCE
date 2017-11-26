@@ -23,7 +23,12 @@
 namespace juce
 {
 
-AudioChannelSet::AudioChannelSet (uint32 c) : channels (c) {}
+
+
+AudioChannelSet::AudioChannelSet (uint32 c) : channels (static_cast<int64> (c))
+{
+}
+
 AudioChannelSet::AudioChannelSet (const Array<ChannelType>& c)
 {
     for (auto channel : c)
@@ -106,14 +111,17 @@ String AudioChannelSet::getAbbreviatedChannelTypeName (AudioChannelSet::ChannelT
         case LFE2:                return "Lfe2";
         case leftSurroundSide:    return "Lss";
         case rightSurroundSide:   return "Rss";
-        case ambisonicW:          return "W";
-        case ambisonicX:          return "X";
-        case ambisonicY:          return "Y";
-        case ambisonicZ:          return "Z";
+        case ambisonicACN0:       return "ACN0";
+        case ambisonicACN1:       return "ACN1";
+        case ambisonicACN2:       return "ACN2";
+        case ambisonicACN3:       return "ACN3";
         case topSideLeft:         return "Tsl";
         case topSideRight:        return "Tsr";
         default:                  break;
     }
+
+    if (type >= ambisonicACN4 && type <= ambisonicACN35)
+        return "ACN" + String (type - ambisonicACN4 + 4);
 
     return {};
 }
@@ -215,7 +223,26 @@ String AudioChannelSet::getDescription() const
     if (*this == pentagonal())         return "Pentagonal";
     if (*this == hexagonal())          return "Hexagonal";
     if (*this == octagonal())          return "Octagonal";
-    if (*this == ambisonic())          return "Ambisonic";
+
+    // ambisonics
+    {
+        auto order = getAmbisonicOrder();
+
+        if (order >= 0)
+        {
+            String suffix;
+
+            switch (order)
+            {
+                case 1:  suffix = "st"; break;
+                case 2:  suffix = "nd"; break;
+                case 3:  suffix = "rd"; break;
+                default: suffix = "th"; break;
+            }
+
+            return String (order) + suffix + " Order Ambisonics";
+        }
+    }
 
     return "Unknown";
 }
@@ -223,7 +250,7 @@ String AudioChannelSet::getDescription() const
 bool AudioChannelSet::isDiscreteLayout() const noexcept
 {
     for (auto& speaker : getChannelTypes())
-        if (speaker <= topSideRight)
+        if (speaker <= ambisonicACN35)
             return false;
 
     return true;
@@ -299,7 +326,6 @@ AudioChannelSet AudioChannelSet::create7point0()       { return AudioChannelSet 
 AudioChannelSet AudioChannelSet::create7point0SDDS()   { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << leftSurround) | (1u << rightSurround) | (1u << leftCentre) | (1u << rightCentre)); }
 AudioChannelSet AudioChannelSet::create7point1()       { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << LFE) | (1u << leftSurroundSide) | (1u << rightSurroundSide) | (1u << leftSurroundRear) | (1u << rightSurroundRear)); }
 AudioChannelSet AudioChannelSet::create7point1SDDS()   { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << LFE) | (1u << leftSurround) | (1u << rightSurround) | (1u << leftCentre) | (1u << rightCentre)); }
-AudioChannelSet AudioChannelSet::ambisonic()           { return AudioChannelSet ((1u << ambisonicW) | (1u << ambisonicX) | (1u << ambisonicY) | (1u << ambisonicZ)); }
 AudioChannelSet AudioChannelSet::quadraphonic()        { return AudioChannelSet ((1u << left) | (1u << right) | (1u << leftSurround) | (1u << rightSurround)); }
 AudioChannelSet AudioChannelSet::pentagonal()          { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << leftSurroundRear) | (1u << rightSurroundRear)); }
 AudioChannelSet AudioChannelSet::hexagonal()           { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << centreSurround) | (1u << leftSurroundRear) | (1u << rightSurroundRear)); }
@@ -307,6 +333,30 @@ AudioChannelSet AudioChannelSet::octagonal()           { return AudioChannelSet 
 AudioChannelSet AudioChannelSet::create7point0point2() { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << leftSurroundSide) | (1u << rightSurroundSide) | (1u << leftSurroundRear) | (1u << rightSurroundRear) | (1u << topSideLeft) | (1u << topSideRight)); }
 AudioChannelSet AudioChannelSet::create7point1point2() { return AudioChannelSet ((1u << left) | (1u << right) | (1u << centre) | (1u << LFE) | (1u << leftSurroundSide) | (1u << rightSurroundSide) | (1u << leftSurroundRear) | (1u << rightSurroundRear) | (1u << topSideLeft) | (1u << topSideRight)); }
 
+AudioChannelSet AudioChannelSet::ambisonic (int order)
+{
+    jassert (isPositiveAndBelow (order, 6));
+
+    if (order == 0)
+        return AudioChannelSet ((uint32) (1 << ambisonicACN0));
+
+    AudioChannelSet set ((1u << ambisonicACN0) | (1u << ambisonicACN1) | (1u << ambisonicACN2) | (1u << ambisonicACN3));
+
+    auto numAmbisonicChannels = (order + 1) * (order + 1);
+    set.channels.setRange (ambisonicACN4, numAmbisonicChannels - 4, true);
+
+    return set;
+}
+
+int AudioChannelSet::getAmbisonicOrder() const
+{
+    auto ambisonicOrder = getAmbisonicOrderForNumChannels (size());
+
+    if (ambisonicOrder >= 0)
+        return (*this == ambisonic (ambisonicOrder) ? ambisonicOrder : -1);
+
+    return -1;
+}
 
 AudioChannelSet AudioChannelSet::discreteChannels (int numChannels)
 {
@@ -368,7 +418,6 @@ Array<AudioChannelSet> AudioChannelSet::channelSetsWithNumberOfChannels (int num
         {
             retval.add (AudioChannelSet::quadraphonic());
             retval.add (AudioChannelSet::createLCRS());
-            retval.add (AudioChannelSet::ambisonic());
         }
         else if (numChannels == 5)
         {
@@ -395,6 +444,10 @@ Array<AudioChannelSet> AudioChannelSet::channelSetsWithNumberOfChannels (int num
             retval.add (AudioChannelSet::create7point1SDDS());
             retval.add (AudioChannelSet::octagonal());
         }
+
+        auto order = getAmbisonicOrderForNumChannels (numChannels);
+        if (order >= 0)
+            retval.add (AudioChannelSet::ambisonic (order));
     }
 
     return retval;
@@ -427,5 +480,107 @@ int32 AudioChannelSet::getWaveChannelMask() const noexcept
 
     return (channels.toInteger() >> 1);
 }
+
+//==============================================================================
+int JUCE_CALLTYPE AudioChannelSet::getAmbisonicOrderForNumChannels (int numChannels)
+{
+    auto sqrtMinusOne   = std::sqrt (static_cast<float> (numChannels)) - 1.0f;
+    auto ambisonicOrder = jmax (0, static_cast<int> (std::floor (sqrtMinusOne)));
+
+    if (ambisonicOrder > 5)
+        return -1;
+
+    return (static_cast<float> (ambisonicOrder) == sqrtMinusOne ? ambisonicOrder : -1);
+}
+
+//==============================================================================
+#if JUCE_UNIT_TESTS
+class AudioChannelSetUnitTest  : public UnitTest
+{
+public:
+    AudioChannelSetUnitTest() : UnitTest ("AudioChannelSetUnitTest", "Audio") {}
+
+    void runTest() override
+    {
+        auto max = AudioChannelSet::maxChannelsOfNamedLayout;
+
+        beginTest ("maxChannelsOfNamedLayout is non-discrete");
+        expect (AudioChannelSet::channelSetsWithNumberOfChannels (max).size() >= 2);
+
+        beginTest ("channelSetsWithNumberOfChannels returns correct speaker count");
+        {
+            for (auto ch = 1; ch <= max; ++ch)
+            {
+                auto channelSets = AudioChannelSet::channelSetsWithNumberOfChannels (ch);
+
+                for (auto set : channelSets)
+                    expect (set.size() == ch);
+            }
+        }
+
+        beginTest ("Ambisonics");
+        {
+            uint64 mask = 0;
+
+            mask |= (1ull << AudioChannelSet::ambisonicACN0);
+            checkAmbisonic (mask, 0, "0th Order Ambisonics");
+
+            mask |= (1ull << AudioChannelSet::ambisonicACN1) | (1ull << AudioChannelSet::ambisonicACN2) | (1ull << AudioChannelSet::ambisonicACN3);
+            checkAmbisonic (mask, 1, "1st Order Ambisonics");
+
+            mask |= (1ull << AudioChannelSet::ambisonicACN4) | (1ull << AudioChannelSet::ambisonicACN5) | (1ull << AudioChannelSet::ambisonicACN6)
+                  | (1ull << AudioChannelSet::ambisonicACN7) | (1ull << AudioChannelSet::ambisonicACN8);
+            checkAmbisonic (mask, 2, "2nd Order Ambisonics");
+
+            mask |= (1ull << AudioChannelSet::ambisonicACN9)  | (1ull << AudioChannelSet::ambisonicACN10) | (1ull << AudioChannelSet::ambisonicACN11)
+                  | (1ull << AudioChannelSet::ambisonicACN12) | (1ull << AudioChannelSet::ambisonicACN13) | (1ull << AudioChannelSet::ambisonicACN14)
+                  | (1ull << AudioChannelSet::ambisonicACN15);
+            checkAmbisonic (mask, 3, "3rd Order Ambisonics");
+
+            mask |= (1ull << AudioChannelSet::ambisonicACN16) | (1ull << AudioChannelSet::ambisonicACN17) | (1ull << AudioChannelSet::ambisonicACN18)
+                  | (1ull << AudioChannelSet::ambisonicACN19) | (1ull << AudioChannelSet::ambisonicACN20) | (1ull << AudioChannelSet::ambisonicACN21)
+                  | (1ull << AudioChannelSet::ambisonicACN22) | (1ull << AudioChannelSet::ambisonicACN23) | (1ull << AudioChannelSet::ambisonicACN24);
+            checkAmbisonic (mask, 4, "4th Order Ambisonics");
+
+            mask |= (1ull << AudioChannelSet::ambisonicACN25) | (1ull << AudioChannelSet::ambisonicACN26) | (1ull << AudioChannelSet::ambisonicACN27)
+                  | (1ull << AudioChannelSet::ambisonicACN28) | (1ull << AudioChannelSet::ambisonicACN29) | (1ull << AudioChannelSet::ambisonicACN30)
+                  | (1ull << AudioChannelSet::ambisonicACN31) | (1ull << AudioChannelSet::ambisonicACN32) | (1ull << AudioChannelSet::ambisonicACN33)
+                  | (1ull << AudioChannelSet::ambisonicACN34) | (1ull << AudioChannelSet::ambisonicACN35);
+            checkAmbisonic (mask, 5, "5th Order Ambisonics");
+        }
+    }
+
+private:
+    void checkAmbisonic (uint64 mask, int order, const char* layoutName)
+    {
+        auto expected = AudioChannelSet::ambisonic (order);
+        auto numChannels = expected.size();
+
+        expect (numChannels == BigInteger ((int64) mask).countNumberOfSetBits());
+        expect (channelSetFromMask (mask) == expected);
+
+        expect (order == expected.getAmbisonicOrder());
+        expect (expected.getDescription() == layoutName);
+
+        auto layouts = AudioChannelSet::channelSetsWithNumberOfChannels (numChannels);
+        expect (layouts.contains (expected));
+
+        for (auto layout : layouts)
+            expect (layout.getAmbisonicOrder() == (layout == expected ? order : -1));
+    }
+
+    static AudioChannelSet channelSetFromMask (uint64 mask)
+    {
+        Array<AudioChannelSet::ChannelType> channels;
+        for (int bit = 0; bit <= 62; ++bit)
+            if ((mask & (1ull << bit)) != 0)
+                channels.add (static_cast<AudioChannelSet::ChannelType> (bit));
+
+        return AudioChannelSet::channelSetWithChannels (channels);
+    }
+};
+
+static AudioChannelSetUnitTest audioChannelSetUnitTest;
+#endif
 
 } // namespace juce

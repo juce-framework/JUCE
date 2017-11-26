@@ -93,9 +93,16 @@ public:
     String getDefaultAAXIdentifier()                    { return getDefaultBundleIdentifier(); }
 
     Value getCompanyName()                              { return getProjectValue (Ids::companyName); }
+    String getCompanyNameString() const                 { return getProjectVar (Ids::companyName); }
+
     Value getCompanyCopyright()                         { return getProjectValue (Ids::companyCopyright); }
+    String getCompanyCopyrightString() const            { return getProjectVar (Ids::companyCopyright); }
+
     Value getCompanyWebsite()                           { return getProjectValue (Ids::companyWebsite); }
+    String getCompanyWebsiteString() const              { return getProjectVar (Ids::companyWebsite); }
+
     Value getCompanyEmail()                             { return getProjectValue (Ids::companyEmail); }
+    String getCompanyEmailString() const                { return getProjectVar (Ids::companyEmail); }
 
     Value shouldDisplaySplashScreen()                   { return getProjectValue (Ids::displaySplashScreen); }
     Value shouldReportAppUsage()                        { return getProjectValue (Ids::reportAppUsage); }
@@ -298,7 +305,7 @@ public:
         bool next();
 
         ProjectExporter& operator*() const       { return *exporter; }
-        ProjectExporter* operator->() const      { return exporter; }
+        ProjectExporter* operator->() const      { return exporter.get(); }
 
         ScopedPointer<ProjectExporter> exporter;
         int index;
@@ -352,6 +359,7 @@ public:
     String getUniqueTargetFolderSuffixForExporter (const String& exporterName, const String& baseTargetFolder);
 
     //==============================================================================
+    bool isCurrentlySaving() const noexcept     { return isSaving; }
     bool shouldWaitAfterSaving = false;
     String specifiedExporterToSave = {};
 

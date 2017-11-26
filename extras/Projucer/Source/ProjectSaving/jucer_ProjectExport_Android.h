@@ -146,10 +146,10 @@ public:
           androidKeyStorePass (settings, Ids::androidKeyStorePass, nullptr, "android"),
           androidKeyAlias (settings, Ids::androidKeyAlias, nullptr, "androiddebugkey"),
           androidKeyAliasPass (settings, Ids::androidKeyAliasPass, nullptr, "android"),
-          gradleVersion (settings, Ids::gradleVersion, nullptr, "3.3"),
-          androidPluginVersion (settings, Ids::androidPluginVersion, nullptr, "2.3.3"),
+          gradleVersion (settings, Ids::gradleVersion, nullptr, "4.1"),
+          androidPluginVersion (settings, Ids::androidPluginVersion, nullptr, "3.0.0"),
           gradleToolchain (settings, Ids::gradleToolchain, nullptr, "clang"),
-          buildToolsVersion (settings, Ids::buildToolsVersion, nullptr, "26.0.0"),
+          buildToolsVersion (settings, Ids::buildToolsVersion, nullptr, "27.0.0"),
           AndroidExecutable (findAndroidExecutable())
     {
         name = getName();
@@ -376,11 +376,6 @@ protected:
         {
             return "${ANDROID_ABI}";
         }
-
-        String getLinkerFlagsString() const
-        {
-            return String ("\"-DCMAKE_EXE_LINKER_FLAGS_") + (isDebug() ? "DEBUG" : "RELEASE") + "=-flto\"";
-        }
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
@@ -450,7 +445,7 @@ private:
                        && cfgHeaderPaths.size() == 0 && cfgLibraryPaths.size() == 0)
                     continue;
 
-                mo << (first ? "IF" : "ELSEIF") << "(JUCE_BUILD_CONFIGFURATION MATCHES \"" << cfg.getProductFlavourCMakeIdentifier() <<"\")" << newLine;
+                mo << (first ? "IF" : "ELSEIF") << "(JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg.getProductFlavourCMakeIdentifier() <<"\")" << newLine;
 
                 if (isLibrary())
                     mo << "    SET(BINARY_NAME \"" << getNativeModuleBinaryName (cfg) << "\")" << newLine;
@@ -476,6 +471,22 @@ private:
                     mo << newLine;
                 }
 
+                if (cfg.isLinkTimeOptimisationEnabled())
+                {
+                    // There's no MIPS support for LTO
+                    String mipsCondition ("NOT (ANDROID_ABI STREQUAL \"mips\" OR ANDROID_ABI STREQUAL \"mips64\")");
+                    mo << "    if(" << mipsCondition << ")" << newLine;
+                    StringArray cmakeVariables ("CMAKE_C_FLAGS", "CMAKE_CXX_FLAGS", "CMAKE_EXE_LINKER_FLAGS");
+
+                    for (auto& variable : cmakeVariables)
+                    {
+                        auto configVariable = variable + "_" + cfg.getProductFlavourCMakeIdentifier();
+                        mo << "        SET(" << configVariable << " \"${" << configVariable << "} -flto\")" << newLine;
+                    }
+
+                    mo << "    ENDIF(" << mipsCondition << ")" << newLine;
+                }
+
                 first = false;
             }
 
@@ -487,9 +498,9 @@ private:
                 {
                     if (const auto* cfg = dynamic_cast<const AndroidBuildConfiguration*> (config.get()))
                     {
-                        mo << "ELSE(JUCE_BUILD_CONFIGFURATION MATCHES \"" << cfg->getProductFlavourCMakeIdentifier() <<"\")" << newLine;
+                        mo << "ELSE(JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg->getProductFlavourCMakeIdentifier() <<"\")" << newLine;
                         mo << "    MESSAGE( FATAL_ERROR \"No matching build-configuration found.\" )" << newLine;
-                        mo << "ENDIF(JUCE_BUILD_CONFIGFURATION MATCHES \"" << cfg->getProductFlavourCMakeIdentifier() <<"\")" << newLine << newLine;
+                        mo << "ENDIF(JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg->getProductFlavourCMakeIdentifier() <<"\")" << newLine << newLine;
                     }
                 }
             }
@@ -545,6 +556,7 @@ private:
         mo << "buildscript {"                                                                          << newLine;
         mo << "   repositories {"                                                                      << newLine;
         mo << "       jcenter()"                                                                       << newLine;
+        mo << "       google()"                                                                        << newLine;
         mo << "   }"                                                                                   << newLine;
         mo << "   dependencies {"                                                                      << newLine;
         mo << "       classpath 'com.android.tools.build:gradle:" << androidPluginVersion.get() << "'" << newLine;
@@ -606,6 +618,7 @@ private:
     {
         MemoryOutputStream mo;
 
+        mo << "    flavorDimensions \"default\"" << newLine;
         mo << "    productFlavors {" << newLine;
 
         for (ConstConfigIterator config (*this); config.next();)
@@ -627,15 +640,15 @@ private:
             if (getProject().getProjectType().isStaticLibrary())
                 mo << "                    targets \"" << getNativeModuleBinaryName (cfg) << "\"" << newLine;
 
-            mo << "                    arguments \"-DJUCE_BUILD_CONFIGFURATION=" << cfg.getProductFlavourCMakeIdentifier() << "\""
+            mo << "                    arguments \"-DJUCE_BUILD_CONFIGURATION=" << cfg.getProductFlavourCMakeIdentifier() << "\""
                                            << ", \"-DCMAKE_CXX_FLAGS_" << (cfg.isDebug() ? "DEBUG" : "RELEASE")
                                            << "=-O" << cfg.getGCCOptimisationFlag() << "\""
                                            << ", \"-DCMAKE_C_FLAGS_"   << (cfg.isDebug() ? "DEBUG" : "RELEASE")
-                                           << "=-O" << cfg.getGCCOptimisationFlag() << "\""
-                                           << (cfg.isLinkTimeOptimisationEnabled() ? ", " + cfg.getLinkerFlagsString() : "")
-                                           << newLine;
+                                           << "=-O" << cfg.getGCCOptimisationFlag() << "\"" << newLine;
+
             mo << "                }"                   << newLine;
-            mo << "            }"                       << newLine;
+            mo << "            }"                       << newLine << newLine;
+            mo << "            dimension \"default\""   << newLine;
             mo << "       }"                            << newLine;
         }
 
@@ -858,7 +871,7 @@ private:
                    "The number of the minimum version of the Android SDK that the app requires");
 
         props.add (new TextPropertyComponent (androidExtraAssetsFolder.getPropertyAsValue(), "Extra Android Assets", 256, false),
-                   "A path to a folder (relative to the project folder) which conatins extra android assets.");
+                   "A path to a folder (relative to the project folder) which contains extra android assets.");
     }
 
     //==============================================================================
@@ -1000,8 +1013,53 @@ private:
         else
         {
             juceMidiCode = javaSourceFolder.getChildFile ("AndroidMidiFallback.java")
-                               .loadFileAsString()
-                               .replace ("JuceAppActivity", className);
+                                           .loadFileAsString()
+                                           .replace ("JuceAppActivity", className);
+        }
+
+        String juceWebViewImports, juceWebViewCodeNative, juceWebViewCode;
+
+        if (androidMinimumSDK.get().getIntValue() >= 23)
+            juceWebViewImports << "import android.webkit.WebResourceError;" << newLine;
+
+        if (androidMinimumSDK.get().getIntValue() >= 21)
+            juceWebViewImports << "import android.webkit.WebResourceRequest;" << newLine;
+
+        if (androidMinimumSDK.get().getIntValue() >= 11)
+            juceWebViewImports << "import android.webkit.WebResourceResponse;" << newLine;
+
+        auto javaWebViewFile = javaSourceFolder.getChildFile ("AndroidWebView.java");
+        auto juceWebViewCodeAll = javaWebViewFile.loadFileAsString();
+
+        if (androidMinimumSDK.get().getIntValue() <= 10)
+        {
+            juceWebViewCode << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewApi1_10", false, false)
+                                                 .upToFirstOccurrenceOf ("WebViewApi1_10$$", false, false);
+        }
+        else
+        {
+            if (androidMinimumSDK.get().getIntValue() >= 23)
+            {
+                juceWebViewCodeNative << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewNativeApi23", false, false)
+                                                           .upToFirstOccurrenceOf ("WebViewNativeApi23$$", false, false);
+
+                juceWebViewCode << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewApi23", false, false)
+                                                     .upToFirstOccurrenceOf ("WebViewApi23$$", false, false);
+            }
+
+            if (androidMinimumSDK.get().getIntValue() >= 21)
+            {
+                juceWebViewCodeNative << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewNativeApi21", false, false)
+                                                           .upToFirstOccurrenceOf ("WebViewNativeApi21$$", false, false);
+
+                juceWebViewCode << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewApi21", false, false)
+                                                     .upToFirstOccurrenceOf ("WebViewApi21$$", false, false);
+            }
+            else
+            {
+                juceWebViewCode << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewApi11_20", false, false)
+                                                     .upToFirstOccurrenceOf ("WebViewApi11_20$$", false, false);
+            }
         }
 
         auto javaSourceFile = javaSourceFolder.getChildFile ("JuceAppActivity.java");
@@ -1018,6 +1076,12 @@ private:
                     newFile << juceMidiCode;
                 else if (line.contains ("$$JuceAndroidRuntimePermissionsCode$$"))
                     newFile << juceRuntimePermissionsCode;
+                else if (line.contains ("$$JuceAndroidWebViewImports$$"))
+                    newFile << juceWebViewImports;
+                else if (line.contains ("$$JuceAndroidWebViewNativeCode$$"))
+                    newFile << juceWebViewCodeNative;
+                else if (line.contains ("$$JuceAndroidWebViewCode$$"))
+                    newFile << juceWebViewCode;
                 else
                     newFile << line.replace ("JuceAppActivity", className)
                                    .replace ("package com.juce;", "package " + package + ";") << newLine;
@@ -1542,9 +1606,14 @@ private:
             }
 
             if (androidMinimumSDK.get().getIntValue() >= 11)
-                app->setAttribute ("android:hardwareAccelerated", "false"); // (using the 2D acceleration slows down openGL)
+            {
+                if (! app->hasAttribute ("android:hardwareAccelerated"))
+                    app->setAttribute ("android:hardwareAccelerated", "false"); // (using the 2D acceleration slows down openGL)
+            }
             else
+            {
                 app->removeAttribute ("android:hardwareAccelerated");
+            }
 
             auto* act = getOrCreateChildWithName (*app, "activity");
 
@@ -1573,8 +1642,33 @@ private:
                 }
             }
 
-            setAttributeIfNotPresent (*act, "android:screenOrientation", androidScreenOrientation.get());
+            if (androidScreenOrientation.get() == "landscape")
+            {
+                String landscapeString = androidMinimumSDK.get().getIntValue() < 9
+                                       ? "landscape"
+                                       : (androidMinimumSDK.get().getIntValue() < 18 ? "sensorLandscape" : "userLandscape");
+
+                setAttributeIfNotPresent (*act, "android:screenOrientation", landscapeString);
+            }
+            else
+            {
+                setAttributeIfNotPresent (*act, "android:screenOrientation", androidScreenOrientation.get());
+            }
+
             setAttributeIfNotPresent (*act, "android:launchMode", "singleTask");
+
+            // Using the 2D acceleration slows down OpenGL. We *do* enable it here for the activity though, and we disable it
+            // in each ComponentPeerView instead. This way any embedded native views, which are not children of ComponentPeerView,
+            // can still use hardware acceleration if needed (e.g. web view).
+            if (androidMinimumSDK.get().getIntValue() >= 11)
+            {
+                if (! act->hasAttribute ("android:hardwareAccelerated"))
+                    act->setAttribute ("android:hardwareAccelerated", "true"); // (using the 2D acceleration slows down openGL)
+            }
+            else
+            {
+                act->removeAttribute ("android:hardwareAccelerated");
+            }
 
             auto* intent = getOrCreateChildWithName (*act, "intent-filter");
 

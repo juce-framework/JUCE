@@ -235,12 +235,12 @@ public:
     static ValueTree createRootValueTree()
     {
         ValueTree vt = createTree ("This demo displays a ValueTree as a treeview.");
-        vt.addChild (createTree ("You can drag around the nodes to rearrange them"), -1, nullptr);
-        vt.addChild (createTree ("..and press 'delete' to delete them"), -1, nullptr);
-        vt.addChild (createTree ("Then, you can use the undo/redo buttons to undo these changes"), -1, nullptr);
+        vt.appendChild (createTree ("You can drag around the nodes to rearrange them"), nullptr);
+        vt.appendChild (createTree ("..and press 'delete' to delete them"), nullptr);
+        vt.appendChild (createTree ("Then, you can use the undo/redo buttons to undo these changes"), nullptr);
 
         int n = 1;
-        vt.addChild (createRandomTree (n, 0), -1, nullptr);
+        vt.appendChild (createRandomTree (n, 0), nullptr);
 
         return vt;
     }
@@ -251,7 +251,7 @@ public:
 
         if (depth < 3)
             for (int i = 1 + Random::getSystemRandom().nextInt (7); --i >= 0;)
-                t.addChild (createRandomTree (counter, depth + 1), -1, nullptr);
+                t.appendChild (createRandomTree (counter, depth + 1), nullptr);
 
         return t;
     }

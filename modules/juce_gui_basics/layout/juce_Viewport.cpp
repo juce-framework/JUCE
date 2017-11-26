@@ -99,8 +99,8 @@ void Viewport::setViewedComponent (Component* const newViewedComponent, const bo
 
 void Viewport::recreateScrollbars()
 {
-    verticalScrollBar = nullptr;
-    horizontalScrollBar = nullptr;
+    verticalScrollBar.reset();
+    horizontalScrollBar.reset();
 
     addChildComponent (verticalScrollBar   = createScrollBarComponent (true));
     addChildComponent (horizontalScrollBar = createScrollBarComponent (false));
@@ -223,11 +223,8 @@ struct Viewport::DragToScrollListener   : private MouseListener,
                                                                 (int) offsetY.getPosition()));
     }
 
-    void mouseDown (const MouseEvent& e) override
+    void mouseDown (const MouseEvent&) override
     {
-        if (doesMouseEventComponentBlockViewportDrag (e.eventComponent))
-            isViewportDragBlocked = true;
-
         offsetX.setPosition (offsetX.getPosition());
         offsetY.setPosition (offsetY.getPosition());
         ++numTouches;
@@ -235,7 +232,7 @@ struct Viewport::DragToScrollListener   : private MouseListener,
 
     void mouseDrag (const MouseEvent& e) override
     {
-        if (numTouches == 1 && ! isViewportDragBlocked)
+        if (numTouches == 1 && ! doesMouseEventComponentBlockViewportDrag (e.eventComponent))
         {
             auto totalOffset = e.getOffsetFromDragStart().toFloat();
 
@@ -258,11 +255,8 @@ struct Viewport::DragToScrollListener   : private MouseListener,
         }
     }
 
-    void mouseUp (const MouseEvent& e) override
+    void mouseUp (const MouseEvent&) override
     {
-        if (doesMouseEventComponentBlockViewportDrag (e.eventComponent))
-            isViewportDragBlocked = false;
-
         if (--numTouches <= 0)
         {
             offsetX.endDrag();
@@ -286,7 +280,6 @@ struct Viewport::DragToScrollListener   : private MouseListener,
     Point<int> originalViewPos;
     int numTouches = 0;
     bool isDragging = false;
-    bool isViewportDragBlocked = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DragToScrollListener)
 };
@@ -298,7 +291,7 @@ void Viewport::setScrollOnDragEnabled (bool shouldScrollOnDrag)
         if (shouldScrollOnDrag)
             dragToScrollListener = new DragToScrollListener (*this);
         else
-            dragToScrollListener = nullptr;
+            dragToScrollListener.reset();
     }
 }
 

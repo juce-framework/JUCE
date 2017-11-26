@@ -82,7 +82,7 @@ public:
         if (nativeContext->createdOk())
             context.nativeContext = nativeContext;
         else
-            nativeContext = nullptr;
+            nativeContext.reset();
     }
 
     ~CachedImage()
@@ -117,7 +117,7 @@ public:
             }
 
             pause();
-            renderThread = nullptr;
+            renderThread.reset();
         }
 
         hasInitialised = false;
@@ -912,7 +912,7 @@ void OpenGLContext::detach()
     if (auto* a = attachment.get())
     {
         a->detach(); // must detach before nulling our pointer
-        attachment = nullptr;
+        attachment.reset();
     }
 
     nativeContext = nullptr;

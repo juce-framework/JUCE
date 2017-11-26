@@ -292,9 +292,8 @@ struct SquareLookAndFeel    : public CustomLookAndFeel
 
         if (width > 0 && height > 0)
         {
-            g.setGradientFill (ColourGradient (baseColour, 0.0f, 0.0f,
-                                               baseColour.darker (0.1f), 0.0f, height,
-                                               false));
+            g.setGradientFill (ColourGradient::vertical (baseColour, 0.0f,
+                                                         baseColour.darker (0.1f), height));
 
             g.fillRect (button.getLocalBounds());
         }

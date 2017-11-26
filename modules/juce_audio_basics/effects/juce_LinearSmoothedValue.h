@@ -60,10 +60,19 @@ public:
 
     //==============================================================================
     /** Set a new target value.
-        @param newValue New target value
+
+        @param newValue     The new target value
+        @param force        If true, the value will be set immediately, bypassing the ramp
     */
-    void setValue (FloatType newValue) noexcept
+    void setValue (FloatType newValue, bool force = false) noexcept
     {
+        if (force)
+        {
+            target = currentValue = newValue;
+            countdown = 0;
+            return;
+        }
+
         if (target != newValue)
         {
             target = newValue;

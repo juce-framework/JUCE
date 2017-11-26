@@ -242,7 +242,7 @@ void SystemTrayIconComponent::setIconImage (const Image& newImage)
     }
     else
     {
-        pimpl = nullptr;
+        pimpl.reset();
     }
 }
 

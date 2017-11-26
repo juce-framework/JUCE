@@ -191,7 +191,7 @@ void NamedPipe::close()
         ignoreUnused (done);
 
         ScopedWriteLock sl (lock);
-        pimpl = nullptr;
+        pimpl.reset();
     }
 }
 
@@ -211,7 +211,7 @@ bool NamedPipe::openInternal (const String& pipeName, const bool createPipe, boo
 
     if (createPipe && ! pimpl->createFifos (mustNotExist))
     {
-        pimpl = nullptr;
+        pimpl.reset();
         return false;
     }
 

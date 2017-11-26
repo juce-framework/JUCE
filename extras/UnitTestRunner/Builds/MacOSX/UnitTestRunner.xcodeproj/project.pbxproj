@@ -357,7 +357,7 @@
 					DD4C62A6EA1FD3497B42CDB0,
 					E8585DDC9F9A0EE2FB82FA52,
 					136E27FD16209F9868093A6C, ); buildRules = ( ); dependencies = (  ); name = "UnitTestRunner - ConsoleApp"; productName = UnitTestRunner; productReference = 080EAB9CF5AB2BD6B2BBB173; productType = "com.apple.product-type.tool"; };
-		E1E93F2B4B2D17E011395520 = {isa = PBXProject; buildConfigurationList = 18FC121B1014F7999CD135D3; attributes = { LastUpgradeCheck = 0830; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 99F3717D3FEAFDCA3C22E868; projectDirPath = ""; projectRoot = ""; targets = (B0D62ED1051EE9DFD49F6321); };
+		E1E93F2B4B2D17E011395520 = {isa = PBXProject; buildConfigurationList = 18FC121B1014F7999CD135D3; attributes = { LastUpgradeCheck = 0830; ORGANIZATIONNAME = "ROLI Ltd."; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 99F3717D3FEAFDCA3C22E868; projectDirPath = ""; projectRoot = ""; targets = (B0D62ED1051EE9DFD49F6321); };
 	};
 	rootObject = E1E93F2B4B2D17E011395520;
 }

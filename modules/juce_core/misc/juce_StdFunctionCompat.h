@@ -154,7 +154,7 @@ namespace std
         FunctorHolderBase<Result, Arguments...>* getFunctorStorage (int size)
         {
             return reinterpret_cast<FunctorHolderBase<Result, Arguments...>*>
-                       (size > functorHolderStackSize ? new char [size]
+                       (size > functorHolderStackSize ? new char [static_cast<unsigned long> (size)]
                                                       : &(stackFunctorStorage[0]));
         }
 

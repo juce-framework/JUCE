@@ -41,7 +41,7 @@ VideoComponent::VideoComponent()  : pimpl (new Pimpl())
 
 VideoComponent::~VideoComponent()
 {
-    pimpl = nullptr;
+    pimpl.reset();
 }
 
 Result VideoComponent::load (const File& file)

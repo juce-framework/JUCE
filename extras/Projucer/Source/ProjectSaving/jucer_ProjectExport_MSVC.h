@@ -84,12 +84,12 @@ public:
 
     void addWindowsTargetPlatformProperties (PropertyListBuilder& props)
     {
-        if (getWindowsTargetPlatformVersionValue() == Value())
-            getWindowsTargetPlatformVersionValue() = getDefaultWindowsTargetPlatformVersion();
+        auto isWindows10SDK = getVisualStudioVersion() > 14;
 
-        props.add (new TextPropertyComponent (getWindowsTargetPlatformVersionValue(), "Windows Target Platform", 20, false),
-                   "Specifies the version of the Windows SDK that will be used when building this project. "
-                   "The default value for this exporter is " + getDefaultWindowsTargetPlatformVersion());
+        props.add (new TextWithDefaultPropertyComponent<String> (windowsTargetPlatformVersion, "Windows Target Platform", 20),
+                   String ("Specifies the version of the Windows SDK that will be used when building this project. ")
+                   + (isWindows10SDK ? "You can see which SDKs you have installed on your machine by going to \"Program Files (x86)\\Windows Kits\\10\\Lib\". " : "")
+                   + "The default value for this exporter is " + getDefaultWindowsTargetPlatformVersion());
     }
 
     void addPlatformToolsetToPropertyGroup (XmlElement& p) const
@@ -100,11 +100,8 @@ public:
 
     void addWindowsTargetPlatformVersionToPropertyGroup (XmlElement& p) const
     {
-        const String& targetVersion = getWindowsTargetPlatformVersion();
-
-        if (targetVersion.isNotEmpty())
-            forEachXmlChildElementWithTagName (p, e, "PropertyGroup")
-            e->createNewChildElement ("WindowsTargetPlatformVersion")->addTextElement (getWindowsTargetPlatformVersion());
+        forEachXmlChildElementWithTagName (p, e, "PropertyGroup")
+        e->createNewChildElement ("WindowsTargetPlatformVersion")->addTextElement (getWindowsTargetPlatformVersion());
     }
 
     void addIPPSettingToPropertyGroup (XmlElement& p) const
@@ -148,6 +145,12 @@ public:
                                                                 TargetOS::windows)));
     }
 
+    void initialiseWindowsTargetPlatformVersion()
+    {
+        windowsTargetPlatformVersion.referTo (settings, Ids::windowsTargetPlatformVersion,
+                                              nullptr, getDefaultWindowsTargetPlatformVersion());
+    }
+
     //==============================================================================
     class MSVCBuildConfiguration  : public BuildConfiguration
     {
@@ -164,7 +167,10 @@ public:
             setValueIfVoid (getPluginBinaryCopyStepEnabledValue(), false);
 
             if (! isDebug())
+            {
                 updateOldLTOSetting();
+                setValueIfVoid (getLinkTimeOptimisationEnabledValue(), true);
+            }
 
             initialisePluginCachedValues();
         }
@@ -251,7 +257,7 @@ public:
                                                                       StringArray (debugInfoOptions),
                                                                       Array<var> (debugInfoValues)),
                            "The type of debugging information created for your program for this configuration."
-                           " This will only be used in a debug configuration with no optimisation or a release configuration"
+                           " This will always be used in a debug configuration and will be used in a release configuration"
                            " with forced generation of debug symbols.");
             }
 
@@ -282,7 +288,7 @@ public:
 
             {
                 static const char* runtimeNames[] = { "(Default)", "Use static runtime", "Use DLL runtime", nullptr };
-                const var runtimeValues[] = { var(), var (false), var (true) };
+                const var runtimeValues[] = { var (true), var (false), var (true) };
 
                 props.add (new ChoicePropertyComponent (getUsingRuntimeLibDLL(), "Runtime Library",
                                                         StringArray (runtimeNames), Array<var> (runtimeValues, numElementsInArray (runtimeValues))),
@@ -331,7 +337,8 @@ public:
         //==============================================================================
         void updateOldLTOSetting()
         {
-            getLinkTimeOptimisationEnabledValue() = (static_cast<int> (config ["wholeProgramOptimisation"]) == 0);
+            if (config.getPropertyAsValue ("wholeProgramOptimisation", nullptr) != Value())
+                getLinkTimeOptimisationEnabledValue() = (static_cast<int> (config ["wholeProgramOptimisation"]) == 0);
         }
 
         void addVisualStudioPluginInstallPathProperties (PropertyListBuilder& props)
@@ -362,6 +369,7 @@ public:
                 props.add (new TextWithDefaultPropertyComponentWithEnablement (aaxBinaryLocation, getPluginBinaryCopyStepEnabledValue(),
                                                                                "AAX Binary Location", 1024),
                            "The folder in which the compiled AAX binary should be placed.");
+
         }
 
         void initialisePluginCachedValues()
@@ -437,14 +445,13 @@ public:
                 e->setAttribute ("Label", "Configuration");
                 e->createNewChildElement ("ConfigurationType")->addTextElement (getProjectType());
                 e->createNewChildElement ("UseOfMfc")->addTextElement ("false");
+                e->createNewChildElement ("WholeProgramOptimization")->addTextElement (config.isLinkTimeOptimisationEnabled() ? "true"
+                                                                                                                              : "false");
 
                 const String charSet (config.getCharacterSet());
 
                 if (charSet.isNotEmpty())
                     e->createNewChildElement ("CharacterSet")->addTextElement (charSet);
-
-                if (config.isLinkTimeOptimisationEnabled())
-                    e->createNewChildElement ("WholeProgramOptimization")->addTextElement ("true");
 
                 if (config.shouldLinkIncremental())
                     e->createNewChildElement ("LinkIncremental")->addTextElement ("true");
@@ -553,8 +560,7 @@ public:
 
                     cl->createNewChildElement ("Optimization")->addTextElement (getOptimisationLevelString (config.getOptimisationLevelInt()));
 
-                    if ((isDebug || config.shouldGenerateDebugSymbols())
-                        && config.getOptimisationLevelInt() <= optimisationOff)
+                    if (isDebug || config.shouldGenerateDebugSymbols())
                     {
                         cl->createNewChildElement ("DebugInformationFormat")
                             ->addTextElement (config.getDebugInformationFormatString());
@@ -724,12 +730,12 @@ public:
             if (otherFilesGroup->getFirstChildElement() != nullptr)
                 projectXml.addChildElement (otherFilesGroup.release());
 
-                if (getOwner().hasResourceFile())
-                {
-                    XmlElement* rcGroup = projectXml.createNewChildElement ("ItemGroup");
-                    XmlElement* e = rcGroup->createNewChildElement ("ResourceCompile");
-                    e->setAttribute ("Include", prependDot (getOwner().rcFile.getFileName()));
-                }
+            if (getOwner().hasResourceFile())
+            {
+                XmlElement* rcGroup = projectXml.createNewChildElement ("ItemGroup");
+                XmlElement* e = rcGroup->createNewChildElement ("ResourceCompile");
+                e->setAttribute ("Include", prependDot (getOwner().rcFile.getFileName()));
+            }
 
             {
                 XmlElement* e = projectXml.createNewChildElement ("Import");
@@ -915,13 +921,13 @@ public:
             if (otherFilesGroup->getFirstChildElement() != nullptr)
                 filterXml.addChildElement (otherFilesGroup.release());
 
-                if (getOwner().hasResourceFile())
-                {
-                    XmlElement* rcGroup = filterXml.createNewChildElement ("ItemGroup");
-                    XmlElement* e = rcGroup->createNewChildElement ("ResourceCompile");
-                    e->setAttribute ("Include", prependDot (getOwner().rcFile.getFileName()));
-                    e->createNewChildElement ("Filter")->addTextElement (ProjectSaver::getJuceCodeGroupName());
-                }
+            if (getOwner().hasResourceFile())
+            {
+                XmlElement* rcGroup = filterXml.createNewChildElement ("ItemGroup");
+                XmlElement* e = rcGroup->createNewChildElement ("ResourceCompile");
+                e->setAttribute ("Include", prependDot (getOwner().rcFile.getFileName()));
+                e->createNewChildElement ("Filter")->addTextElement (ProjectSaver::getJuceCodeGroupName());
+            }
         }
 
         const MSVCProjectExporterBase& getOwner() const { return owner; }
@@ -1440,6 +1446,7 @@ protected:
     //==============================================================================
     mutable File rcFile, iconFile;
     OwnedArray<MSVCTargetBase> targets;
+    CachedValue<String> windowsTargetPlatformVersion;
 
     File getProjectFile (const String& extension, const String& target) const
     {
@@ -1836,6 +1843,7 @@ public:
         : MSVCProjectExporterBase (p, t, "VisualStudio2013")
     {
         name = getName();
+        initialiseWindowsTargetPlatformVersion();
     }
 
     static const char* getName()                                     { return "Visual Studio 2013"; }
@@ -1879,6 +1887,7 @@ public:
         : MSVCProjectExporterBase (p, t, "VisualStudio2015")
     {
         name = getName();
+        initialiseWindowsTargetPlatformVersion();
     }
 
     static const char* getName()                                     { return "Visual Studio 2015"; }
@@ -1921,6 +1930,7 @@ public:
         : MSVCProjectExporterBase (p, t, "VisualStudio2017")
     {
         name = getName();
+        initialiseWindowsTargetPlatformVersion();
     }
 
     static const char* getName()                                     { return "Visual Studio 2017"; }

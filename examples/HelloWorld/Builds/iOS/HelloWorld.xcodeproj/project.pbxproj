@@ -11,6 +11,7 @@
 		3755AEDF75D3AF5C7E02DF23 = {isa = PBXBuildFile; fileRef = 3847D554E299F92BBE0BD3D0; };
 		02F0D49EDD6A3E82D98302F3 = {isa = PBXBuildFile; fileRef = FE9531D38CA4C273B6FB87A7; };
 		9C737750FC4663FBFDF8C048 = {isa = PBXBuildFile; fileRef = FB6FA17C00AB569935B5CFF8; };
+		7D2B80AC757C9F099278ADF2 = {isa = PBXBuildFile; fileRef = 301C285EFA2B832C2D75A3C7; };
 		EAA5A5EECF04D2B7FCF768FC = {isa = PBXBuildFile; fileRef = EF932865774E86525CE7FC55; };
 		ACB6DFC6389AFB78A7EF0A61 = {isa = PBXBuildFile; fileRef = 07D50D8347ED27B84F822D6C; };
 		7AA2F50DAEF3BA88A7C9C97E = {isa = PBXBuildFile; fileRef = B700739654886DC8E7C1293B; };
@@ -28,6 +29,7 @@
 		2163B479EFFA5511F6D19B85 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_core.mm"; path = "../../JuceLibraryCode/include_juce_core.mm"; sourceTree = "SOURCE_ROOT"; };
 		238A6B51668F857519FE3DC1 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_gui_extra.mm"; path = "../../JuceLibraryCode/include_juce_gui_extra.mm"; sourceTree = "SOURCE_ROOT"; };
 		2A4AAAFAE241939610C1FBED = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_events.mm"; path = "../../JuceLibraryCode/include_juce_events.mm"; sourceTree = "SOURCE_ROOT"; };
+		301C285EFA2B832C2D75A3C7 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		33F007A080A781EC0FEE6B98 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_graphics"; path = "../../../../modules/juce_graphics"; sourceTree = "SOURCE_ROOT"; };
 		3847D554E299F92BBE0BD3D0 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
 		512CFEFF47A2FA52C7A016A0 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_data_structures.mm"; path = "../../JuceLibraryCode/include_juce_data_structures.mm"; sourceTree = "SOURCE_ROOT"; };
@@ -78,6 +80,7 @@
 					3847D554E299F92BBE0BD3D0,
 					FE9531D38CA4C273B6FB87A7,
 					FB6FA17C00AB569935B5CFF8,
+					301C285EFA2B832C2D75A3C7,
 					EF932865774E86525CE7FC55,
 					07D50D8347ED27B84F822D6C, ); name = Frameworks; sourceTree = "<group>"; };
 		1C83313FCFBC3FAFA8CDB087 = {isa = PBXGroup; children = (
@@ -92,7 +95,7 @@
 		88AB96D6C191F6480F1CC05F = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -122,7 +125,7 @@
 		0B5D6160680C2FCAC89A9A1D = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -255,13 +258,14 @@
 					3755AEDF75D3AF5C7E02DF23,
 					02F0D49EDD6A3E82D98302F3,
 					9C737750FC4663FBFDF8C048,
+					7D2B80AC757C9F099278ADF2,
 					EAA5A5EECF04D2B7FCF768FC,
 					ACB6DFC6389AFB78A7EF0A61, ); runOnlyForDeploymentPostprocessing = 0; };
 		192D34128EA37F28BC1CBB22 = {isa = PBXNativeTarget; buildConfigurationList = EFBE1A73760DB4B465A16F0B; buildPhases = (
 					026F69AE2DD97CA7C9006986,
 					C39352E04613E968B30D0584,
 					CD0E71EFDCF3177FCE405E9D, ); buildRules = ( ); dependencies = (  ); name = "HelloWorld - App"; productName = HelloWorld; productReference = 630E0739D24A3C9E99CD4592; productType = "com.apple.product-type.application"; };
-		E34D5B980741D93050D0BB6B = {isa = PBXProject; buildConfigurationList = D5495970AC0AFC78DD0ADE12; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { 192D34128EA37F28BC1CBB22 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = CB9C4DF3F11D65C6BF6B80AD; projectDirPath = ""; projectRoot = ""; targets = (192D34128EA37F28BC1CBB22); };
+		E34D5B980741D93050D0BB6B = {isa = PBXProject; buildConfigurationList = D5495970AC0AFC78DD0ADE12; attributes = { LastUpgradeCheck = 0830; ORGANIZATIONNAME = "ROLI Ltd."; TargetAttributes = { 192D34128EA37F28BC1CBB22 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = CB9C4DF3F11D65C6BF6B80AD; projectDirPath = ""; projectRoot = ""; targets = (192D34128EA37F28BC1CBB22); };
 	};
 	rootObject = E34D5B980741D93050D0BB6B;
 }

@@ -1,6 +1,70 @@
 JUCE breaking changes
 =====================
 
+
+Develop
+=======
+
+Change
+------
+On Windows, release builds will now link to the dynamic C++ runtime by default
+
+Possible Issues
+---------------
+If you are creating a new .jucer project, then your plug-in will now link to the dynamic
+C++ runtime by default, which means that you MUST ensure that the C++ runtime libraries
+exist on your customer's computers.
+
+Workaround
+----------
+If you are only targeting Windows 10, then the C++ runtime is now part of the system core
+components and will always exist on the computers of your customers (just like kernel332.dll,
+for example). If you are targeting Windows versions between Vista and Windows 10, then you
+should build your plug-in with the latest updated version of VS2015 or later, which ensures
+that it's linked to the universal runtime. Universal runtime is part of the system's core
+libraries on Windows 10 and on Windows versions Vista to 8.1, it will be available on your
+customer's computers via Windows Update. Unfortunately, if your customer has just installed
+Windows 8.1 to Vista on a fresh computer, then there is a chance that the update mechanism
+for the universal runtime hasn't triggered yet and your plug-in may still fail. Your installer
+should prompt the user to install all the Windows updates in this case or you can deploy the
+universal runtime as a redistributable with your installer. If you are targeting earlier
+versions of Windows then you should always include the runtime as a redistributable with your
+plug-in's installer. Alternatively, you can change the runtime linking to static (however,
+see 'Rationale' section).
+
+Rationale
+---------
+In a recent update to Windows 10, Microsoft has limited the number of fiber local storage
+(FLS) slots per process. Effectively, this limits how many plug-ins with static runtime
+linkage can be loaded into a DAW. In the worst case, this limits the total number of plug-ins
+to a maximum of 64 plug-ins. There is no workaround for DAW vendors and the only solution is
+to push plug-in vendors to use the dynamic runtime. To help with this, JUCE has decided to make
+dynamic runtime linkage the default in JUCE.
+
+
+
+Change
+------
+AudioProcessorGraph interface has changed in a number of ways - Node objects
+are now reference counted, there are different accessor methods to iterate them,
+and misc other small improvements to the API
+
+Possible Issues
+---------------
+The changes won't cause any silent errors in user code, but will require some
+manual refactoring
+
+Workaround
+----------
+Just find equivalent new methods to replace existing code.
+
+Rationale
+---------
+The graph class was extremely old and creaky, and these changes is the start of
+an improvement process that should eventually result in it being broken down
+into fundamental graph building block classes for use in other contexts.
+
+
 Version 5.2.0
 =============
 

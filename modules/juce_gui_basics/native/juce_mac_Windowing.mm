@@ -370,7 +370,7 @@ public:
         }
         else
         {
-            assertion = nullptr;
+            assertion.reset();
         }
     }
 
@@ -415,7 +415,7 @@ static ScopedPointer<ScreenSaverDefeater> screenSaverDefeater;
 void Desktop::setScreenSaverEnabled (const bool isEnabled)
 {
     if (isEnabled)
-        screenSaverDefeater = nullptr;
+        screenSaverDefeater.reset();
     else if (screenSaverDefeater == nullptr)
         screenSaverDefeater = new ScreenSaverDefeater();
 }

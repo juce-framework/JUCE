@@ -46,7 +46,7 @@ bool InterprocessConnectionServer::beginWaitingForSocket (const int portNumber, 
         return true;
     }
 
-    socket = nullptr;
+    socket.reset();
     return false;
 }
 
@@ -58,7 +58,7 @@ void InterprocessConnectionServer::stop()
         socket->close();
 
     stopThread (4000);
-    socket = nullptr;
+    socket.reset();
 }
 
 int InterprocessConnectionServer::getBoundPort() const noexcept

@@ -566,11 +566,16 @@ juce::String DrumPadGridProgram::getLittleFootProgramPost25() const
     int dimDelay;
     int slideAnimationProgress;
     int lastVisiblePads;
+    bool gammaCorrected;
 
     void initialise()
     {
         for (int i = 0; i < 32; ++i)
             setLocalConfigActiveState (i, true, true);
+
+        // Enable gamma correction if supported on hardware
+        setLocalConfig (33, 1);
+        gammaCorrected = getLocalConfig (33) > 0;
     }
 
     int getGridColour (int index, int colourMapOffset)
@@ -738,7 +743,7 @@ juce::String DrumPadGridProgram::getLittleFootProgramPost25() const
         }
         else
         {
-            dimFactor = 180;
+            dimFactor = gammaCorrected ? 100 : 180;
             dimDelay = 12;
         }
     }

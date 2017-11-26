@@ -18,13 +18,13 @@ include_directories( AFTER
 
 enable_language(ASM)
 
-IF(JUCE_BUILD_CONFIGFURATION MATCHES "DEBUG")
+IF(JUCE_BUILD_CONFIGURATION MATCHES "DEBUG")
     add_definitions("-DDEBUG=1" "-D_DEBUG=1")
-ELSEIF(JUCE_BUILD_CONFIGFURATION MATCHES "RELEASE")
+ELSEIF(JUCE_BUILD_CONFIGURATION MATCHES "RELEASE")
     add_definitions("-DNDEBUG=1")
-ELSE(JUCE_BUILD_CONFIGFURATION MATCHES "DEBUG")
+ELSE(JUCE_BUILD_CONFIGURATION MATCHES "DEBUG")
     MESSAGE( FATAL_ERROR "No matching build-configuration found." )
-ENDIF(JUCE_BUILD_CONFIGFURATION MATCHES "DEBUG")
+ENDIF(JUCE_BUILD_CONFIGURATION MATCHES "DEBUG")
 
 add_library( ${BINARY_NAME}
 
@@ -994,6 +994,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_basics/layout/juce_ResizableEdgeComponent.h"
     "../../../../../modules/juce_gui_basics/layout/juce_ScrollBar.cpp"
     "../../../../../modules/juce_gui_basics/layout/juce_ScrollBar.h"
+    "../../../../../modules/juce_gui_basics/layout/juce_SidePanel.cpp"
+    "../../../../../modules/juce_gui_basics/layout/juce_SidePanel.h"
     "../../../../../modules/juce_gui_basics/layout/juce_StretchableLayoutManager.cpp"
     "../../../../../modules/juce_gui_basics/layout/juce_StretchableLayoutManager.h"
     "../../../../../modules/juce_gui_basics/layout/juce_StretchableLayoutResizerBar.cpp"
@@ -1016,6 +1018,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V3.h"
     "../../../../../modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V4.cpp"
     "../../../../../modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V4.h"
+    "../../../../../modules/juce_gui_basics/menus/juce_BurgerMenuComponent.cpp"
+    "../../../../../modules/juce_gui_basics/menus/juce_BurgerMenuComponent.h"
     "../../../../../modules/juce_gui_basics/menus/juce_MenuBarComponent.cpp"
     "../../../../../modules/juce_gui_basics/menus/juce_MenuBarComponent.h"
     "../../../../../modules/juce_gui_basics/menus/juce_MenuBarModel.cpp"
@@ -1050,6 +1054,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_basics/mouse/juce_TooltipClient.h"
     "../../../../../modules/juce_gui_basics/native/juce_android_FileChooser.cpp"
     "../../../../../modules/juce_gui_basics/native/juce_android_Windowing.cpp"
+    "../../../../../modules/juce_gui_basics/native/juce_common_MimeTypes.cpp"
+    "../../../../../modules/juce_gui_basics/native/juce_ios_FileChooser.mm"
     "../../../../../modules/juce_gui_basics/native/juce_ios_UIViewComponentPeer.mm"
     "../../../../../modules/juce_gui_basics/native/juce_ios_Windowing.mm"
     "../../../../../modules/juce_gui_basics/native/juce_linux_FileChooser.cpp"
@@ -1158,6 +1164,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_extra/documents/juce_FileBasedDocument.cpp"
     "../../../../../modules/juce_gui_extra/documents/juce_FileBasedDocument.h"
     "../../../../../modules/juce_gui_extra/embedding/juce_ActiveXControlComponent.h"
+    "../../../../../modules/juce_gui_extra/embedding/juce_AndroidViewComponent.h"
     "../../../../../modules/juce_gui_extra/embedding/juce_NSViewComponent.h"
     "../../../../../modules/juce_gui_extra/embedding/juce_UIViewComponent.h"
     "../../../../../modules/juce_gui_extra/embedding/juce_XEmbedComponent.h"
@@ -1185,6 +1192,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_extra/misc/juce_WebBrowserComponent.h"
     "../../../../../modules/juce_gui_extra/native/juce_android_PushNotifications.cpp"
     "../../../../../modules/juce_gui_extra/native/juce_android_WebBrowserComponent.cpp"
+    "../../../../../modules/juce_gui_extra/native/juce_AndroidViewComponent.cpp"
     "../../../../../modules/juce_gui_extra/native/juce_ios_PushNotifications.cpp"
     "../../../../../modules/juce_gui_extra/native/juce_ios_UIViewComponent.mm"
     "../../../../../modules/juce_gui_extra/native/juce_linux_X11_SystemTrayIcon.cpp"
@@ -1193,6 +1201,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_extra/native/juce_mac_AppleRemote.mm"
     "../../../../../modules/juce_gui_extra/native/juce_mac_CarbonViewWrapperComponent.h"
     "../../../../../modules/juce_gui_extra/native/juce_mac_NSViewComponent.mm"
+    "../../../../../modules/juce_gui_extra/native/juce_mac_PushNotifications.cpp"
     "../../../../../modules/juce_gui_extra/native/juce_mac_SystemTrayIcon.cpp"
     "../../../../../modules/juce_gui_extra/native/juce_mac_WebBrowserComponent.mm"
     "../../../../../modules/juce_gui_extra/native/juce_win32_ActiveXComponent.cpp"
@@ -2231,6 +2240,8 @@ set_source_files_properties("../../../../../modules/juce_gui_basics/layout/juce_
 set_source_files_properties("../../../../../modules/juce_gui_basics/layout/juce_ResizableEdgeComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/layout/juce_ScrollBar.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/layout/juce_ScrollBar.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/layout/juce_SidePanel.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/layout/juce_SidePanel.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/layout/juce_StretchableLayoutManager.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/layout/juce_StretchableLayoutManager.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/layout/juce_StretchableLayoutResizerBar.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2253,6 +2264,8 @@ set_source_files_properties("../../../../../modules/juce_gui_basics/lookandfeel/
 set_source_files_properties("../../../../../modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V3.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V4.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/lookandfeel/juce_LookAndFeel_V4.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/menus/juce_BurgerMenuComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/menus/juce_BurgerMenuComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/menus/juce_MenuBarComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/menus/juce_MenuBarComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/menus/juce_MenuBarModel.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2287,6 +2300,8 @@ set_source_files_properties("../../../../../modules/juce_gui_basics/mouse/juce_T
 set_source_files_properties("../../../../../modules/juce_gui_basics/mouse/juce_TooltipClient.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_android_FileChooser.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_android_Windowing.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_common_MimeTypes.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_ios_FileChooser.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_ios_UIViewComponentPeer.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_ios_Windowing.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_linux_FileChooser.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2395,6 +2410,7 @@ set_source_files_properties("../../../../../modules/juce_gui_extra/code_editor/j
 set_source_files_properties("../../../../../modules/juce_gui_extra/documents/juce_FileBasedDocument.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/documents/juce_FileBasedDocument.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/embedding/juce_ActiveXControlComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_extra/embedding/juce_AndroidViewComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/embedding/juce_NSViewComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/embedding/juce_UIViewComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/embedding/juce_XEmbedComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2422,6 +2438,7 @@ set_source_files_properties("../../../../../modules/juce_gui_extra/misc/juce_Sys
 set_source_files_properties("../../../../../modules/juce_gui_extra/misc/juce_WebBrowserComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_android_PushNotifications.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_android_WebBrowserComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_AndroidViewComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_ios_PushNotifications.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_ios_UIViewComponent.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_linux_X11_SystemTrayIcon.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2430,6 +2447,7 @@ set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_l
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_mac_AppleRemote.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_mac_CarbonViewWrapperComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_mac_NSViewComponent.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_mac_PushNotifications.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_mac_SystemTrayIcon.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_mac_WebBrowserComponent.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_win32_ActiveXComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)

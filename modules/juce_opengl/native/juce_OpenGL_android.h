@@ -35,13 +35,6 @@ namespace juce
 DECLARE_JNI_CLASS (NativeSurfaceView, JUCE_ANDROID_ACTIVITY_CLASSPATH "$NativeSurfaceView")
 #undef JNI_CLASS_MEMBERS
 
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
- METHOD (addView,        "addView",        "(Landroid/view/View;)V") \
- METHOD (removeView,     "removeView",        "(Landroid/view/View;)V") \
-
-DECLARE_JNI_CLASS (AndroidViewGroup, "android/view/ViewGroup")
-#undef JNI_CLASS_MEMBERS
-
 //==============================================================================
 class OpenGLContext::NativeContext
 {

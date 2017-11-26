@@ -166,7 +166,7 @@ private:
     //==============================================================================
     class SharedCursorHandle;
     friend class SharedCursorHandle;
-    SharedCursorHandle* cursorHandle;
+    SharedCursorHandle* cursorHandle = nullptr;
 
     friend class MouseInputSourceInternal;
     void showInWindow (ComponentPeer* window) const;

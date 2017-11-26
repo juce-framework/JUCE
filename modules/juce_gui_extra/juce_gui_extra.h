@@ -83,6 +83,7 @@
 #include "code_editor/juce_XMLCodeTokeniser.h"
 #include "code_editor/juce_LuaCodeTokeniser.h"
 #include "embedding/juce_ActiveXControlComponent.h"
+#include "embedding/juce_AndroidViewComponent.h"
 #include "embedding/juce_NSViewComponent.h"
 #include "embedding/juce_UIViewComponent.h"
 #include "embedding/juce_XEmbedComponent.h"

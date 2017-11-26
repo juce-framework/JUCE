@@ -184,15 +184,15 @@ public:
 
     void initialise (JNIEnv* const env)
     {
-        rect = GlobalRef (env->NewObject (RectClass, RectClass.constructor, 0, 0, 0, 0));
+        rect = GlobalRef (env->NewObject (AndroidRectClass, AndroidRectClass.constructor, 0, 0, 0, 0));
 
         paint = GlobalRef (GraphicsHelpers::createPaint (Graphics::highResamplingQuality));
-        const LocalRef<jobject> ignored (paint.callObjectMethod (Paint.setTypeface, typeface.get()));
+        const LocalRef<jobject> ignored (paint.callObjectMethod (AndroidPaint.setTypeface, typeface.get()));
 
-        paint.callVoidMethod (Paint.setTextSize, referenceFontSize);
+        paint.callVoidMethod (AndroidPaint.setTextSize, referenceFontSize);
 
-        const float fullAscent = std::abs (paint.callFloatMethod (Paint.ascent));
-        const float fullDescent = paint.callFloatMethod (Paint.descent);
+        const float fullAscent = std::abs (paint.callFloatMethod (AndroidPaint.ascent));
+        const float fullDescent = paint.callFloatMethod (AndroidPaint.descent);
         const float totalHeight = fullAscent + fullDescent;
 
         ascent  = fullAscent / totalHeight;
@@ -210,7 +210,7 @@ public:
         const int numChars = text.length();
         jfloatArray widths = env->NewFloatArray (numChars);
 
-        const int numDone = paint.callIntMethod (Paint.getTextWidths, javaString (text).get(), widths);
+        const int numDone = paint.callIntMethod (AndroidPaint.getTextWidths, javaString (text).get(), widths);
 
         HeapBlock<jfloat> localWidths (static_cast<size_t> (numDone));
         env->GetFloatArrayRegion (widths, 0, numDone, localWidths);
@@ -229,7 +229,7 @@ public:
         const int numChars = text.length();
         jfloatArray widths = env->NewFloatArray (numChars);
 
-        const int numDone = paint.callIntMethod (Paint.getTextWidths, javaString (text).get(), widths);
+        const int numDone = paint.callIntMethod (AndroidPaint.getTextWidths, javaString (text).get(), widths);
 
         HeapBlock<jfloat> localWidths (static_cast<size_t> (numDone));
         env->GetFloatArrayRegion (widths, 0, numDone, localWidths);
@@ -306,10 +306,10 @@ public:
 
         env->DeleteLocalRef (matrix);
 
-        const int left   = env->GetIntField (rect.get(), RectClass.left);
-        const int top    = env->GetIntField (rect.get(), RectClass.top);
-        const int right  = env->GetIntField (rect.get(), RectClass.right);
-        const int bottom = env->GetIntField (rect.get(), RectClass.bottom);
+        const int left   = env->GetIntField (rect.get(), AndroidRectClass.left);
+        const int top    = env->GetIntField (rect.get(), AndroidRectClass.top);
+        const int right  = env->GetIntField (rect.get(), AndroidRectClass.right);
+        const int bottom = env->GetIntField (rect.get(), AndroidRectClass.bottom);
 
         const Rectangle<int> bounds (left, top, right - left, bottom - top);
 

@@ -64,7 +64,7 @@ public:
     void audioDeviceIOCallback (const float **/*inputChannelData*/, int /*numInputChannels*/,
                                 float **outputChannelData, int numOutputChannels, int numSamples) override
     {
-        AudioSampleBuffer sampleBuffer = AudioSampleBuffer (outputChannelData, numOutputChannels, numSamples);
+        AudioBuffer<float> sampleBuffer (outputChannelData, numOutputChannels, numSamples);
         sampleBuffer.clear();
 
         synthesiser.renderNextBlock (sampleBuffer, MidiBuffer(), 0, numSamples);

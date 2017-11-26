@@ -100,7 +100,8 @@ class JUCE_API  LookAndFeel   : public ScrollBar::LookAndFeelMethods,
                                 public StretchableLayoutResizerBar::LookAndFeelMethods,
                                 public ExtraLookAndFeelBaseClasses::KeyMappingEditorComponentMethods,
                                 public ExtraLookAndFeelBaseClasses::AudioDeviceSelectorComponentMethods,
-                                public ExtraLookAndFeelBaseClasses::LassoComponentMethods
+                                public ExtraLookAndFeelBaseClasses::LassoComponentMethods,
+                                public SidePanel::LookAndFeelMethods
 {
 public:
     //==============================================================================

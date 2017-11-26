@@ -3,7 +3,7 @@
 <JUCERPROJECT id="Z3D0EG" name="AnalyticsCollection" displaySplashScreen="0"
               reportAppUsage="0" splashScreenColour="Dark" projectType="guiapp"
               version="1.0.0" bundleIdentifier="com.yourcompany.AnalyticsCollection"
-              includeBinaryInAppConfig="1" cppLanguageStandard="11" companyCopyright=""
+              includeBinaryInAppConfig="1" cppLanguageStandard="14" companyCopyright=""
               jucerVersion="5.2.0">
   <MAINGROUP id="aOi9Tf" name="AnalyticsCollection">
     <GROUP id="{527B2E17-B1B1-B919-CBEA-231058E23D74}" name="Source">

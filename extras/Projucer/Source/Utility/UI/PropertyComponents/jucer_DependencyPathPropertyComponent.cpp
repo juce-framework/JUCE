@@ -284,3 +284,47 @@ Colour DependencyFilePathPropertyComponent::getTextColourToDisplay() const
     return isValidPath ? findColour (widgetTextColourId).withMultipliedAlpha (alpha)
                        : Colours::red.withMultipliedAlpha (alpha);
 }
+
+//==============================================================================
+TextPropertyComponentWithEnablement::TextPropertyComponentWithEnablement (const Value& valueToControl, const Value& valueToListenTo,
+                                                                         const String& propertyName, int maxNumChars, bool isMultiLine)
+    : TextPropertyComponent (valueToControl, propertyName, maxNumChars, isMultiLine),
+      value (valueToListenTo)
+{
+    value.addListener (this);
+    setEnabled (value.getValue());
+}
+
+TextPropertyComponentWithEnablement::~TextPropertyComponentWithEnablement()
+{
+    value.removeListener (this);
+}
+
+void TextPropertyComponentWithEnablement::valueChanged (Value& v)
+{
+    setEnabled (v.getValue());
+}
+
+//==============================================================================
+ChoicePropertyComponentWithEnablement::ChoicePropertyComponentWithEnablement (const Value& valueToControl,
+                                                                              const Value& valueToListenTo,
+                                                                              const String& propertyName,
+                                                                              const StringArray& choices,
+                                                                              const Array<var>& correspondingValues)
+    : ChoicePropertyComponent (valueToControl, propertyName,
+                               choices, correspondingValues),
+      value (valueToListenTo)
+{
+    value.addListener (this);
+    setEnabled (value.getValue());
+}
+
+ChoicePropertyComponentWithEnablement::~ChoicePropertyComponentWithEnablement()
+{
+    value.removeListener (this);
+}
+
+void ChoicePropertyComponentWithEnablement::valueChanged (Value& v)
+{
+    setEnabled (v.getValue());
+}

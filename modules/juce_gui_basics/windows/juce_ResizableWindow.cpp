@@ -50,8 +50,8 @@ ResizableWindow::~ResizableWindow()
     jassert (resizableCorner == nullptr || getIndexOfChildComponent (resizableCorner) >= 0);
     jassert (resizableBorder == nullptr || getIndexOfChildComponent (resizableBorder) >= 0);
 
-    resizableCorner = nullptr;
-    resizableBorder = nullptr;
+    resizableCorner.reset();
+    resizableBorder.reset();
     clearContentComponent();
 
     // have you been adding your own components directly to this window..? tut tut tut.
@@ -63,12 +63,14 @@ void ResizableWindow::initialise (const bool shouldAddToDesktop)
 {
     /*
       ==========================================================================
+
        In accordance with the terms of the JUCE 5 End-Use License Agreement, the
        JUCE Code in SECTION A cannot be removed, changed or otherwise rendered
        ineffective unless you have a JUCE Indie or Pro license, or are using
        JUCE under the GPL v3 license.
 
        End User License Agreement: www.juce.com/juce-5-licence
+
       ==========================================================================
     */
 
@@ -113,8 +115,8 @@ void ResizableWindow::clearContentComponent()
 }
 
 void ResizableWindow::setContent (Component* newContentComponent,
-                                  const bool takeOwnership,
-                                  const bool resizeToFitWhenContentChangesSize)
+                                  bool takeOwnership,
+                                  bool resizeToFitWhenContentChangesSize)
 {
     if (newContentComponent != contentComponent)
     {
@@ -271,7 +273,7 @@ void ResizableWindow::setResizable (const bool shouldBeResizable,
     {
         if (useBottomRightCornerResizer)
         {
-            resizableBorder = nullptr;
+            resizableBorder.reset();
 
             if (resizableCorner == nullptr)
             {
@@ -281,7 +283,7 @@ void ResizableWindow::setResizable (const bool shouldBeResizable,
         }
         else
         {
-            resizableCorner = nullptr;
+            resizableCorner.reset();
 
             if (resizableBorder == nullptr)
                 Component::addChildComponent (resizableBorder = new ResizableBorderComponent (this, constrainer));
@@ -289,8 +291,8 @@ void ResizableWindow::setResizable (const bool shouldBeResizable,
     }
     else
     {
-        resizableCorner = nullptr;
-        resizableBorder = nullptr;
+        resizableCorner.reset();
+        resizableBorder.reset();
     }
 
     if (isUsingNativeTitleBar())
@@ -337,8 +339,8 @@ void ResizableWindow::setConstrainer (ComponentBoundsConstrainer* newConstrainer
         bool useBottomRightCornerResizer = resizableCorner != nullptr;
         bool shouldBeResizable = useBottomRightCornerResizer || resizableBorder != nullptr;
 
-        resizableCorner = nullptr;
-        resizableBorder = nullptr;
+        resizableCorner.reset();
+        resizableBorder.reset();
 
         setResizable (shouldBeResizable, useBottomRightCornerResizer);
         updatePeerConstrainer();

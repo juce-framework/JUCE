@@ -85,7 +85,9 @@ public:
         The next time the getNextAudioBlock() method is called, this
         is the time from which it'll read data.
 
-        @see getPosition
+        @param newPosition    the new playback position in seconds
+
+        @see getCurrentPosition
     */
     void setPosition (double newPosition);
 

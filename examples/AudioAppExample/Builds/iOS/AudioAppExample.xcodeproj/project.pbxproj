@@ -19,6 +19,7 @@
 		26E4E22AC7196AC405E218B9 = {isa = PBXBuildFile; fileRef = 7C86E886C3FCB671004E1CA2; };
 		DE32F1DDED355F817FCA16C4 = {isa = PBXBuildFile; fileRef = F5B5D441C4AB1D01509ACC8D; };
 		62AE0FBB5B9184FF94092D43 = {isa = PBXBuildFile; fileRef = D7867DB9C17425E3F05EB860; };
+		32CE2DFAE1AE943FF698B234 = {isa = PBXBuildFile; fileRef = E93741E8D80335499F5EA33F; };
 		C3F12DC7CA8C22C1853A7F08 = {isa = PBXBuildFile; fileRef = 712FD99244BEDA356A73A60D; };
 		291730DFE49E6AE97D4C8CEC = {isa = PBXBuildFile; fileRef = B06A9120276E8875161CFC7D; };
 		D3AC61A0594DE1592920426F = {isa = PBXBuildFile; fileRef = 1D29F6A21F927F10EB8C5EEF; };
@@ -84,6 +85,7 @@
 		D96EF22A7C2912FDB2F9BBFD = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_opengl"; path = "../../../../modules/juce_opengl"; sourceTree = "SOURCE_ROOT"; };
 		E0DDAD7A205F6DD0B0501DE3 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_graphics"; path = "../../../../modules/juce_graphics"; sourceTree = "SOURCE_ROOT"; };
 		E87E13099757D39753D4F951 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_core"; path = "../../../../modules/juce_core"; sourceTree = "SOURCE_ROOT"; };
+		E93741E8D80335499F5EA33F = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		E9E3BEA778FE14AE7BA9032F = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		ED96DF5BB1BAA94746049FE4 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_gui_basics.mm"; path = "../../JuceLibraryCode/include_juce_gui_basics.mm"; sourceTree = "SOURCE_ROOT"; };
 		F5B5D441C4AB1D01509ACC8D = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
@@ -142,6 +144,7 @@
 					7C86E886C3FCB671004E1CA2,
 					F5B5D441C4AB1D01509ACC8D,
 					D7867DB9C17425E3F05EB860,
+					E93741E8D80335499F5EA33F,
 					712FD99244BEDA356A73A60D,
 					B06A9120276E8875161CFC7D,
 					1D29F6A21F927F10EB8C5EEF, ); name = Frameworks; sourceTree = "<group>"; };
@@ -157,7 +160,7 @@
 		B0ADA4CCDD12487AAA4D29E3 = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -187,7 +190,7 @@
 		F8E0347F1E2A6CDA40CBAFC1 = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -336,6 +339,7 @@
 					26E4E22AC7196AC405E218B9,
 					DE32F1DDED355F817FCA16C4,
 					62AE0FBB5B9184FF94092D43,
+					32CE2DFAE1AE943FF698B234,
 					C3F12DC7CA8C22C1853A7F08,
 					291730DFE49E6AE97D4C8CEC,
 					D3AC61A0594DE1592920426F, ); runOnlyForDeploymentPostprocessing = 0; };
@@ -343,7 +347,7 @@
 					3602833D915A2AC7C25F537F,
 					BC3ECD5BCB6580E951083B7E,
 					C9974DDFB456D5307D4C29F3, ); buildRules = ( ); dependencies = (  ); name = "AudioAppExample - App"; productName = AudioAppExample; productReference = 9C71E9533EDADF610F789D88; productType = "com.apple.product-type.application"; };
-		0E00FEF4A999DE35888889AE = {isa = PBXProject; buildConfigurationList = 074FE87A26471418B3AC0921; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { D010D5837C01EB7574A48649 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 41A4B977F5588A439A066455; projectDirPath = ""; projectRoot = ""; targets = (D010D5837C01EB7574A48649); };
+		0E00FEF4A999DE35888889AE = {isa = PBXProject; buildConfigurationList = 074FE87A26471418B3AC0921; attributes = { LastUpgradeCheck = 0830; ORGANIZATIONNAME = "ROLI Ltd."; TargetAttributes = { D010D5837C01EB7574A48649 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 41A4B977F5588A439A066455; projectDirPath = ""; projectRoot = ""; targets = (D010D5837C01EB7574A48649); };
 	};
 	rootObject = 0E00FEF4A999DE35888889AE;
 }
