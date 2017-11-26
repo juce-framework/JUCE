@@ -46,6 +46,10 @@
  #pragma warning (disable : 4127 4512)
 #endif
 
+#include <AAX_Version.h>
+
+static_assert (AAX_SDK_CURRENT_REVISION >= AAX_SDK_2p3p0_REVISION, "JUCE requires AAX SDK version 2.3.0 or higher");
+
 #include <AAX_Exports.cpp>
 #include <AAX_ICollection.h>
 #include <AAX_IComponentDescriptor.h>
@@ -63,6 +67,9 @@
 #include <AAX_IMIDINode.h>
 #include <AAX_UtilsNative.h>
 #include <AAX_Enums.h>
+#include <AAX_IDescriptionHost.h>
+#include <AAX_IFeatureInfo.h>
+#include <AAX_UIDs.h>
 
 #ifdef _MSC_VER
  #pragma warning (pop)
@@ -100,7 +107,11 @@
 
 using namespace juce;
 
-const int32_t juceChunkType = 'juce';
+#ifndef JucePlugin_AAX_Chunk_Identifier
+ #define JucePlugin_AAX_Chunk_Identifier     'juce'
+#endif
+
+const int32_t juceChunkType = JucePlugin_AAX_Chunk_Identifier;
 const int maxAAXChannels = 8;
 
 //==============================================================================
@@ -130,25 +141,27 @@ namespace AAXClasses
     struct AAXChannelStreamOrder
     {
         AAX_EStemFormat aaxStemFormat;
-        AudioChannelSet::ChannelType speakerOrder[8];
+        AudioChannelSet::ChannelType speakerOrder[10];
     };
 
     static AAXChannelStreamOrder aaxChannelOrder[] =
     {
-        {AAX_eStemFormat_Mono,     {AudioChannelSet::centre, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
-        {AAX_eStemFormat_Stereo,   {AudioChannelSet::left, AudioChannelSet::right, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
-        {AAX_eStemFormat_LCR,      {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
-        {AAX_eStemFormat_LCRS,     {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::centreSurround, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
-        {AAX_eStemFormat_Quad,     {AudioChannelSet::left, AudioChannelSet::right,  AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
-        {AAX_eStemFormat_5_0,      {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
-        {AAX_eStemFormat_5_1,      {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::LFE, AudioChannelSet::unknown, AudioChannelSet::unknown}},
-        {AAX_eStemFormat_6_0,      {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::centreSurround, AudioChannelSet::rightSurround, AudioChannelSet::unknown, AudioChannelSet::unknown}},
-        {AAX_eStemFormat_6_1,      {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::centreSurround, AudioChannelSet::rightSurround, AudioChannelSet::LFE, AudioChannelSet::unknown}},
-        {AAX_eStemFormat_7_0_SDDS, {AudioChannelSet::left, AudioChannelSet::leftCentre, AudioChannelSet::centre, AudioChannelSet::rightCentre, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::unknown}},
-        {AAX_eStemFormat_7_0_DTS,  {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurroundSide, AudioChannelSet::rightSurroundSide, AudioChannelSet::leftSurroundRear, AudioChannelSet::rightSurroundRear, AudioChannelSet::unknown}},
-        {AAX_eStemFormat_7_1_SDDS, {AudioChannelSet::left, AudioChannelSet::leftCentre, AudioChannelSet::centre, AudioChannelSet::rightCentre, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::LFE}},
-        {AAX_eStemFormat_7_1_DTS,  {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurroundSide, AudioChannelSet::rightSurroundSide, AudioChannelSet::leftSurroundRear, AudioChannelSet::rightSurroundRear, AudioChannelSet::LFE}},
-        {AAX_eStemFormat_None,     {AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
+        {AAX_eStemFormat_Mono,     {AudioChannelSet::centre, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
+        {AAX_eStemFormat_Stereo,   {AudioChannelSet::left, AudioChannelSet::right, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
+        {AAX_eStemFormat_LCR,      {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
+        {AAX_eStemFormat_LCRS,     {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::centreSurround, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
+        {AAX_eStemFormat_Quad,     {AudioChannelSet::left, AudioChannelSet::right,  AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
+        {AAX_eStemFormat_5_0,      {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
+        {AAX_eStemFormat_5_1,      {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::LFE, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
+        {AAX_eStemFormat_6_0,      {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::centreSurround, AudioChannelSet::rightSurround, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
+        {AAX_eStemFormat_6_1,      {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::centreSurround, AudioChannelSet::rightSurround, AudioChannelSet::LFE, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
+        {AAX_eStemFormat_7_0_SDDS, {AudioChannelSet::left, AudioChannelSet::leftCentre, AudioChannelSet::centre, AudioChannelSet::rightCentre, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
+        {AAX_eStemFormat_7_0_DTS,  {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurroundSide, AudioChannelSet::rightSurroundSide, AudioChannelSet::leftSurroundRear, AudioChannelSet::rightSurroundRear, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
+        {AAX_eStemFormat_7_1_SDDS, {AudioChannelSet::left, AudioChannelSet::leftCentre, AudioChannelSet::centre, AudioChannelSet::rightCentre, AudioChannelSet::right, AudioChannelSet::leftSurround, AudioChannelSet::rightSurround, AudioChannelSet::LFE, AudioChannelSet::unknown, AudioChannelSet::unknown}},
+        {AAX_eStemFormat_7_1_DTS,  {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurroundSide, AudioChannelSet::rightSurroundSide, AudioChannelSet::leftSurroundRear, AudioChannelSet::rightSurroundRear, AudioChannelSet::LFE, AudioChannelSet::unknown, AudioChannelSet::unknown}},
+        {AAX_eStemFormat_7_0_2,    {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurroundSide, AudioChannelSet::rightSurroundSide, AudioChannelSet::leftSurroundRear, AudioChannelSet::rightSurroundRear, AudioChannelSet::topSideLeft, AudioChannelSet::topSideRight, AudioChannelSet::unknown}},
+        {AAX_eStemFormat_7_1_2,    {AudioChannelSet::left, AudioChannelSet::centre, AudioChannelSet::right, AudioChannelSet::leftSurroundSide, AudioChannelSet::rightSurroundSide, AudioChannelSet::leftSurroundRear, AudioChannelSet::rightSurroundRear, AudioChannelSet::LFE, AudioChannelSet::topSideLeft, AudioChannelSet::topSideRight}},
+        {AAX_eStemFormat_None,     {AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown, AudioChannelSet::unknown}},
     };
 
     static AAX_EStemFormat aaxFormats[] =
@@ -165,7 +178,9 @@ namespace AAXClasses
         AAX_eStemFormat_7_0_SDDS,
         AAX_eStemFormat_7_1_SDDS,
         AAX_eStemFormat_7_0_DTS,
-        AAX_eStemFormat_7_1_DTS
+        AAX_eStemFormat_7_1_DTS,
+        AAX_eStemFormat_7_0_2,
+        AAX_eStemFormat_7_1_2
     };
 
     static AAX_EStemFormat getFormatForAudioChannelSet (const AudioChannelSet& set, bool ignoreLayout) noexcept
@@ -175,15 +190,17 @@ namespace AAXClasses
         {
             switch (set.size())
             {
-                case 0: return AAX_eStemFormat_None;
-                case 1: return AAX_eStemFormat_Mono;
-                case 2: return AAX_eStemFormat_Stereo;
-                case 3: return AAX_eStemFormat_LCR;
-                case 4: return AAX_eStemFormat_Quad;
-                case 5: return AAX_eStemFormat_5_0;
-                case 6: return AAX_eStemFormat_5_1;
-                case 7: return AAX_eStemFormat_7_0_DTS;
-                case 8: return AAX_eStemFormat_7_1_DTS;
+                case 0:  return AAX_eStemFormat_None;
+                case 1:  return AAX_eStemFormat_Mono;
+                case 2:  return AAX_eStemFormat_Stereo;
+                case 3:  return AAX_eStemFormat_LCR;
+                case 4:  return AAX_eStemFormat_Quad;
+                case 5:  return AAX_eStemFormat_5_0;
+                case 6:  return AAX_eStemFormat_5_1;
+                case 7:  return AAX_eStemFormat_7_0_DTS;
+                case 8:  return AAX_eStemFormat_7_1_DTS;
+                case 9:  return AAX_eStemFormat_7_0_2;
+                case 10: return AAX_eStemFormat_7_1_2;
                 default:
                     break;
             }
@@ -191,20 +208,22 @@ namespace AAXClasses
             return AAX_eStemFormat_INT32_MAX;
         }
 
-        if (set == AudioChannelSet::disabled())           return AAX_eStemFormat_None;
-        if (set == AudioChannelSet::mono())               return AAX_eStemFormat_Mono;
-        if (set == AudioChannelSet::stereo())             return AAX_eStemFormat_Stereo;
-        if (set == AudioChannelSet::createLCR())          return AAX_eStemFormat_LCR;
-        if (set == AudioChannelSet::createLCRS())         return AAX_eStemFormat_LCRS;
-        if (set == AudioChannelSet::quadraphonic())       return AAX_eStemFormat_Quad;
-        if (set == AudioChannelSet::create5point0())      return AAX_eStemFormat_5_0;
-        if (set == AudioChannelSet::create5point1())      return AAX_eStemFormat_5_1;
-        if (set == AudioChannelSet::create6point0())      return AAX_eStemFormat_6_0;
-        if (set == AudioChannelSet::create6point1())      return AAX_eStemFormat_6_1;
-        if (set == AudioChannelSet::create7point0())      return AAX_eStemFormat_7_0_DTS;
-        if (set == AudioChannelSet::create7point1())      return AAX_eStemFormat_7_1_DTS;
-        if (set == AudioChannelSet::create7point0SDDS())  return AAX_eStemFormat_7_0_SDDS;
-        if (set == AudioChannelSet::create7point1SDDS())  return AAX_eStemFormat_7_1_SDDS;
+        if (set == AudioChannelSet::disabled())             return AAX_eStemFormat_None;
+        if (set == AudioChannelSet::mono())                 return AAX_eStemFormat_Mono;
+        if (set == AudioChannelSet::stereo())               return AAX_eStemFormat_Stereo;
+        if (set == AudioChannelSet::createLCR())            return AAX_eStemFormat_LCR;
+        if (set == AudioChannelSet::createLCRS())           return AAX_eStemFormat_LCRS;
+        if (set == AudioChannelSet::quadraphonic())         return AAX_eStemFormat_Quad;
+        if (set == AudioChannelSet::create5point0())        return AAX_eStemFormat_5_0;
+        if (set == AudioChannelSet::create5point1())        return AAX_eStemFormat_5_1;
+        if (set == AudioChannelSet::create6point0())        return AAX_eStemFormat_6_0;
+        if (set == AudioChannelSet::create6point1())        return AAX_eStemFormat_6_1;
+        if (set == AudioChannelSet::create7point0())        return AAX_eStemFormat_7_0_DTS;
+        if (set == AudioChannelSet::create7point1())        return AAX_eStemFormat_7_1_DTS;
+        if (set == AudioChannelSet::create7point0SDDS())    return AAX_eStemFormat_7_0_SDDS;
+        if (set == AudioChannelSet::create7point1SDDS())    return AAX_eStemFormat_7_1_SDDS;
+        if (set == AudioChannelSet::create7point0point2())  return AAX_eStemFormat_7_0_2;
+        if (set == AudioChannelSet::create7point1point2())  return AAX_eStemFormat_7_1_2;
 
         return AAX_eStemFormat_INT32_MAX;
     }
@@ -229,6 +248,8 @@ namespace AAXClasses
                 case AAX_eStemFormat_7_0_DTS:  return AudioChannelSet::create7point0();
                 case AAX_eStemFormat_7_1_SDDS: return AudioChannelSet::create7point1SDDS();
                 case AAX_eStemFormat_7_1_DTS:  return AudioChannelSet::create7point1();
+                case AAX_eStemFormat_7_0_2:    return AudioChannelSet::create7point0point2();
+                case AAX_eStemFormat_7_1_2:    return AudioChannelSet::create7point1point2();
                 default:
                     break;
             }
@@ -263,8 +284,9 @@ namespace AAXClasses
 
         const AAXChannelStreamOrder& channelOrder = aaxChannelOrder[layoutIndex];
         const AudioChannelSet::ChannelType channelType = channelSet.getTypeOfChannel (static_cast<int> (juceIndex));
+        auto numSpeakers = numElementsInArray (channelOrder.speakerOrder);
 
-        for (int i = 0; i < 8 && channelOrder.speakerOrder[i] != 0; ++i)
+        for (int i = 0; i < numSpeakers && channelOrder.speakerOrder[i] != 0; ++i)
             if (channelOrder.speakerOrder[i] == channelType)
                 return i;
 
@@ -1889,7 +1911,25 @@ namespace AAXClasses
         check (desc.AddProcessProc_Native (algorithmProcessCallback, properties));
     }
 
-    static void getPlugInDescription (AAX_IEffectDescriptor& descriptor)
+    static bool hostSupportsStemFormat (AAX_EStemFormat stemFormat, const AAX_IFeatureInfo* featureInfo)
+    {
+        if (featureInfo != nullptr)
+        {
+            AAX_ESupportLevel supportLevel;
+
+            if (featureInfo->SupportLevel (supportLevel) == AAX_SUCCESS && supportLevel == AAX_eSupportLevel_ByProperty)
+            {
+                ScopedPointer<const AAX_IPropertyMap> props (featureInfo->AcquireProperties());
+
+                if (props != nullptr && props->GetProperty ((AAX_EProperty) stemFormat, (AAX_CPropertyValue*) &supportLevel) != 0)
+                    return (supportLevel == AAX_eSupportLevel_Supported);
+            }
+        }
+
+        return (AAX_STEM_FORMAT_INDEX (stemFormat) <= 12);
+    }
+
+    static void getPlugInDescription (AAX_IEffectDescriptor& descriptor, const AAX_IFeatureInfo* featureInfo)
     {
         PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_AAX;
         ScopedPointer<AudioProcessor> plugin = createPluginFilterOfType (AudioProcessor::wrapperType_AAX);
@@ -1945,14 +1985,17 @@ namespace AAXClasses
                 AAX_EStemFormat aaxOutFormat = numOuts > 0 ? aaxFormats[outIdx] : AAX_eStemFormat_None;
                 AudioChannelSet outLayout = channelSetFromStemFormat (aaxOutFormat, false);
 
-                AudioProcessor::BusesLayout fullLayout;
-                if (! JuceAAX_Processor::fullBusesLayoutFromMainLayout (*plugin, inLayout, outLayout, fullLayout))
-                    continue;
-
-                if (AAX_IComponentDescriptor* const desc = descriptor.NewComponentDescriptor())
+                if (hostSupportsStemFormat (aaxInFormat, featureInfo) && hostSupportsStemFormat (aaxOutFormat, featureInfo))
                 {
-                    createDescriptor (*desc, fullLayout, *plugin, pluginIds, numMeters);
-                    check (descriptor.AddComponent (desc));
+                    AudioProcessor::BusesLayout fullLayout;
+                    if (! JuceAAX_Processor::fullBusesLayoutFromMainLayout (*plugin, inLayout, outLayout, fullLayout))
+                        continue;
+
+                    if (AAX_IComponentDescriptor* const desc = descriptor.NewComponentDescriptor())
+                    {
+                        createDescriptor (*desc, fullLayout, *plugin, pluginIds, numMeters);
+                        check (descriptor.AddComponent (desc));
+                    }
                 }
             }
         }
@@ -1969,14 +2012,21 @@ void AAX_CALLBACK AAXClasses::algorithmProcessCallback (JUCEAlgorithmContext* co
 }
 
 //==============================================================================
+
+//==============================================================================
 AAX_Result JUCE_CDECL GetEffectDescriptions (AAX_ICollection*);
 AAX_Result JUCE_CDECL GetEffectDescriptions (AAX_ICollection* collection)
 {
     ScopedJuceInitialiser_GUI libraryInitialiser;
 
+    ScopedPointer<const AAX_IFeatureInfo> stemFormatFeatureInfo;
+
+    if (const auto* hostDescription = collection->DescriptionHost())
+        stemFormatFeatureInfo = hostDescription->AcquireFeatureProperties (AAXATTR_ClientFeature_StemFormat);
+
     if (AAX_IEffectDescriptor* const descriptor = collection->NewDescriptor())
     {
-        AAXClasses::getPlugInDescription (*descriptor);
+        AAXClasses::getPlugInDescription (*descriptor, stemFormatFeatureInfo);
         collection->AddEffect (JUCE_STRINGIFY (JucePlugin_AAXIdentifier), descriptor);
 
         collection->SetManufacturerName (JucePlugin_Manufacturer);

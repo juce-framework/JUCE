@@ -3,8 +3,8 @@
 <JUCERPROJECT id="bSx0Ct" name="InAppPurchase" displaySplashScreen="0" reportAppUsage="1"
               splashScreenColour="Dark" projectType="guiapp" version="0.0.2"
               bundleIdentifier="com.roli.juceInAppPurchaseSample" includeBinaryInAppConfig="1"
-              cppLanguageStandard="11" jucerVersion="5.1.2" companyName="ROLI Ltd."
-              companyWebsite="www.juce.com" companyEmail="info@juce.com">
+              cppLanguageStandard="11" jucerVersion="5.2.0" companyName="ROLI Ltd."
+              companyWebsite="www.juce.com" companyEmail="info@juce.com" companyCopyright="ROLI Ltd.">
   <MAINGROUP id="y4sxBT" name="InAppPurchase">
     <GROUP id="{D5BB0A26-3258-B6DA-ED7A-A306325E64AE}" name="BinaryData">
       <FILE id="V6ODJ9" name="Ed.png" compile="0" resource="1" file="BinaryData/Ed.png"/>
@@ -42,7 +42,8 @@
   <EXPORTFORMATS>
     <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="portraitlandscape"
                   enableGNUExtensions="0" extraDefs="" iosInAppPurchases="1" extraCompilerFlags="-pedantic -Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion -Wextra-semi"
-                  bigIcon="OqeN3h" smallIcon="OqeN3h">
+                  bigIcon="OqeN3h" smallIcon="OqeN3h" iPadScreenOrientation="portraitlandscape"
+                  iosDeviceFamily="1,2">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="InAppPurchase"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="InAppPurchase"/>
@@ -94,6 +95,30 @@
         <MODULEPATH id="juce_audio_utils" path="../../modules"/>
       </MODULEPATHS>
     </ANDROIDSTUDIO>
+    <XCODE_MAC targetFolder="Builds/MacOSX" iosInAppPurchases="1">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" linkTimeOptimisation="0"
+                       targetName="InAppPurchase"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" linkTimeOptimisation="1"
+                       targetName="InAppPurchase"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_product_unlocking" path="../../modules"/>
+        <MODULEPATH id="juce_opengl" path="../../modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../modules"/>
+      </MODULEPATHS>
+    </XCODE_MAC>
   </EXPORTFORMATS>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>

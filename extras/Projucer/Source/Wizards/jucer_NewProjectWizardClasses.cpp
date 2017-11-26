@@ -24,13 +24,9 @@
   ==============================================================================
 */
 
-#include "../jucer_Headers.h"
-#include "jucer_NewProjectWizardClasses.h"
-#include "../Project/jucer_ProjectType.h"
-#include "../Project/jucer_Module.h"
-#include "../Project Saving/jucer_ProjectExporter.h"
-#include "../Application/jucer_MainWindow.h"
-#include "../Utility/jucer_SlidingPanelComponent.h"
+#include "../Application/jucer_Headers.h"
+#include "../ProjectSaving/jucer_ProjectExporter.h"
+#include "../Utility/UI/jucer_SlidingPanelComponent.h"
 
 struct NewProjectWizardClasses
 {

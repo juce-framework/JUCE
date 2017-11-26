@@ -195,8 +195,9 @@ private:
     {
         jassert (index <= line.length());
 
-        String::CharPointerType t (line.getCharPointer());
+        auto t = line.getCharPointer();
         int col = 0;
+
         for (int i = 0; i < index; ++i)
         {
             if (t.getAndAdvance() != '\t')
@@ -208,8 +209,7 @@ private:
         return col;
     }
 
-    static void addToken (Array<SyntaxToken>& dest, const String& text,
-                          const int length, const int type)
+    static void addToken (Array<SyntaxToken>& dest, const String& text, int length, int type)
     {
         if (length > 1000)
         {
@@ -398,7 +398,7 @@ bool CodeEditorComponent::isTextInputActive() const
     return true;
 }
 
-void CodeEditorComponent::setTemporaryUnderlining (const Array<Range<int> >&)
+void CodeEditorComponent::setTemporaryUnderlining (const Array<Range<int>>&)
 {
     jassertfalse; // TODO Windows IME not yet supported for this comp..
 }
@@ -582,8 +582,8 @@ void CodeEditorComponent::moveCaretTo (const CodeDocument::Position& newPos, con
     {
         if (dragType == notDragging)
         {
-            if (abs (caretPos.getPosition() - selectionStart.getPosition())
-                  < abs (caretPos.getPosition() - selectionEnd.getPosition()))
+            if (std::abs (caretPos.getPosition() - selectionStart.getPosition())
+                  < std::abs (caretPos.getPosition() - selectionEnd.getPosition()))
                 dragType = draggingSelectionStart;
             else
                 dragType = draggingSelectionEnd;
@@ -595,7 +595,7 @@ void CodeEditorComponent::moveCaretTo (const CodeDocument::Position& newPos, con
 
             if (selectionEnd.getPosition() < selectionStart.getPosition())
             {
-                const CodeDocument::Position temp (selectionStart);
+                auto temp = selectionStart;
                 selectionStart = selectionEnd;
                 selectionEnd = temp;
 
@@ -608,7 +608,7 @@ void CodeEditorComponent::moveCaretTo (const CodeDocument::Position& newPos, con
 
             if (selectionEnd.getPosition() < selectionStart.getPosition())
             {
-                const CodeDocument::Position temp (selectionStart);
+                auto temp = selectionStart;
                 selectionStart = selectionEnd;
                 selectionEnd = temp;
 

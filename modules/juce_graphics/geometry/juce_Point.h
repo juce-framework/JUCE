@@ -51,40 +51,40 @@ public:
 
     //==============================================================================
     /** Copies this point from another one. */
-    Point& operator= (const Point& other) noexcept                       { x = other.x; y = other.y; return *this; }
+    Point& operator= (const Point& other) noexcept                          { x = other.x; y = other.y; return *this; }
 
-    JUCE_CONSTEXPR inline bool operator== (Point other) const noexcept   { return x == other.x && y == other.y; }
-    JUCE_CONSTEXPR inline bool operator!= (Point other) const noexcept   { return x != other.x || y != other.y; }
+    JUCE_CONSTEXPR inline bool operator== (Point other) const noexcept      { return x == other.x && y == other.y; }
+    JUCE_CONSTEXPR inline bool operator!= (Point other) const noexcept      { return x != other.x || y != other.y; }
 
     /** Returns true if the point is (0, 0). */
-    JUCE_CONSTEXPR bool isOrigin() const noexcept                        { return x == ValueType() && y == ValueType(); }
+    JUCE_CONSTEXPR bool isOrigin() const noexcept                           { return x == ValueType() && y == ValueType(); }
 
     /** Returns true if the coordinates are finite values. */
-    JUCE_CONSTEXPR inline bool isFinite() const noexcept                 { return juce_isfinite(x) && juce_isfinite(y); }
+    JUCE_CONSTEXPR inline bool isFinite() const noexcept                    { return juce_isfinite(x) && juce_isfinite(y); }
 
     /** Returns the point's x coordinate. */
-    JUCE_CONSTEXPR inline ValueType getX() const noexcept                { return x; }
+    JUCE_CONSTEXPR inline ValueType getX() const noexcept                   { return x; }
 
     /** Returns the point's y coordinate. */
-    JUCE_CONSTEXPR inline ValueType getY() const noexcept                { return y; }
+    JUCE_CONSTEXPR inline ValueType getY() const noexcept                   { return y; }
 
     /** Sets the point's x coordinate. */
-    inline void setX (ValueType newX) noexcept                           { x = newX; }
+    inline void setX (ValueType newX) noexcept                              { x = newX; }
 
     /** Sets the point's y coordinate. */
-    inline void setY (ValueType newY) noexcept                           { y = newY; }
+    inline void setY (ValueType newY) noexcept                              { y = newY; }
 
     /** Returns a point which has the same Y position as this one, but a new X. */
-    JUCE_CONSTEXPR Point withX (ValueType newX) const noexcept           { return Point (newX, y); }
+    JUCE_CONSTEXPR Point withX (ValueType newX) const noexcept              { return Point (newX, y); }
 
     /** Returns a point which has the same X position as this one, but a new Y. */
-    JUCE_CONSTEXPR Point withY (ValueType newY) const noexcept           { return Point (x, newY); }
+    JUCE_CONSTEXPR Point withY (ValueType newY) const noexcept              { return Point (x, newY); }
 
     /** Changes the point's x and y coordinates. */
-    void setXY (ValueType newX, ValueType newY) noexcept                 { x = newX; y = newY; }
+    void setXY (ValueType newX, ValueType newY) noexcept                    { x = newX; y = newY; }
 
     /** Adds a pair of coordinates to this value. */
-    void addXY (ValueType xToAdd, ValueType yToAdd) noexcept             { x += xToAdd; y += yToAdd; }
+    void addXY (ValueType xToAdd, ValueType yToAdd) noexcept                { x += xToAdd; y += yToAdd; }
 
     //==============================================================================
     /** Returns a point with a given offset from this one. */
@@ -143,16 +143,16 @@ public:
 
     //==============================================================================
     /** Returns the straight-line distance between this point and the origin. */
-    ValueType getDistanceFromOrigin() const noexcept                { return juce_hypot (x, y); }
+    ValueType getDistanceFromOrigin() const noexcept                               { return juce_hypot (x, y); }
 
     /** Returns the straight-line distance between this point and another one. */
-    ValueType getDistanceFrom (Point other) const noexcept          { return juce_hypot (x - other.x, y - other.y); }
+    ValueType getDistanceFrom (Point other) const noexcept                         { return juce_hypot (x - other.x, y - other.y); }
 
     /** Returns the square of the straight-line distance between this point and the origin. */
-    ValueType getDistanceSquaredFromOrigin() const noexcept         { return x * x + y * y; }
+    JUCE_CONSTEXPR ValueType getDistanceSquaredFromOrigin() const noexcept         { return x * x + y * y; }
 
     /** Returns the square of the straight-line distance between this point and another one. */
-    ValueType getDistanceSquaredFrom (Point other) const noexcept   { return (*this - other).getDistanceSquaredFromOrigin(); }
+    JUCE_CONSTEXPR ValueType getDistanceSquaredFrom (Point other) const noexcept   { return (*this - other).getDistanceSquaredFromOrigin(); }
 
     /** Returns the angle from this point to another one.
 
@@ -198,7 +198,7 @@ public:
     }
 
     /** Returns the dot-product of two points (x1 * x2 + y1 * y2). */
-    FloatType getDotProduct (Point other) const noexcept          { return x * other.x + y * other.y; }
+    JUCE_CONSTEXPR FloatType getDotProduct (Point other) const noexcept          { return x * other.x + y * other.y; }
 
     //==============================================================================
     /** Uses a transform to change the point's coordinates.
@@ -217,16 +217,16 @@ public:
 
     //==============================================================================
     /** Casts this point to a Point<int> object. */
-    Point<int> toInt() const noexcept                             { return Point<int> (static_cast<int> (x), static_cast<int> (y)); }
+    JUCE_CONSTEXPR Point<int> toInt() const noexcept              { return Point<int> (static_cast<int> (x), static_cast<int> (y)); }
 
     /** Casts this point to a Point<float> object. */
-    Point<float> toFloat() const noexcept                         { return Point<float> (static_cast<float> (x), static_cast<float> (y)); }
+    JUCE_CONSTEXPR Point<float> toFloat() const noexcept          { return Point<float> (static_cast<float> (x), static_cast<float> (y)); }
 
     /** Casts this point to a Point<double> object. */
-    Point<double> toDouble() const noexcept                       { return Point<double> (static_cast<double> (x), static_cast<double> (y)); }
+    JUCE_CONSTEXPR Point<double> toDouble() const noexcept        { return Point<double> (static_cast<double> (x), static_cast<double> (y)); }
 
     /** Casts this point to a Point<int> object using roundToInt() to convert the values. */
-    Point<int> roundToInt() const noexcept                        { return Point<int> (juce::roundToInt (x), juce::roundToInt (y)); }
+    JUCE_CONSTEXPR Point<int> roundToInt() const noexcept         { return Point<int> (juce::roundToInt (x), juce::roundToInt (y)); }
 
     /** Returns the point as a string in the form "x, y". */
     String toString() const                                       { return String (x) + ", " + String (y); }

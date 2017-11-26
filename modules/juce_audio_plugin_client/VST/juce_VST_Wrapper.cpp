@@ -295,9 +295,9 @@ public:
         vstEffect.plugInIdentifier = JucePlugin_VSTUniqueID;
 
        #ifdef JucePlugin_VSTChunkStructureVersion
-        vstEffect.plugInVersion = convertHexVersionToDecimal (JucePlugin_VSTChunkStructureVersion);
+        vstEffect.plugInVersion = JucePlugin_VSTChunkStructureVersion;
        #else
-        vstEffect.plugInVersion = convertHexVersionToDecimal (JucePlugin_VersionCode);
+        vstEffect.plugInVersion = JucePlugin_VersionCode;
        #endif
 
         vstEffect.processAudioInplaceFunction = processReplacingCB;
@@ -1483,10 +1483,27 @@ private:
        #if JUCE_VST_RETURN_HEX_VERSION_NUMBER_DIRECTLY
         return (int32) hexVersion;
        #else
-        return (int32) (((hexVersion >> 24) & 0xff) * 1000
-                         + ((hexVersion >> 16) & 0xff) * 100
-                         + ((hexVersion >> 8)  & 0xff) * 10
-                         + (hexVersion & 0xff));
+        // Currently, only Cubase displays the version number to the user
+        // We are hoping here that when other DAWs start to display the version
+        // number, that they do so according to yfede's encoding table in the link
+        // below. If not, then this code will need an if (isSteinberg()) in the
+        // future.
+        int major = (hexVersion >> 16) & 0xff;
+        int minor = (hexVersion >> 8) & 0xff;
+        int bugfix = hexVersion & 0xff;
+
+        // for details, see: https://forum.juce.com/t/issues-with-version-integer-reported-by-vst2/23867
+
+        // Encoding B
+        if (major < 1)
+            return major * 1000 + minor * 100 + bugfix * 10;
+
+        // Encoding E
+        if (major > 100)
+            return major * 10000000 + minor * 100000 + bugfix * 1000;
+
+        // Encoding D
+        return static_cast<int32> (hexVersion);
        #endif
     }
 

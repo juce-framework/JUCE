@@ -27,23 +27,21 @@
 namespace juce
 {
 
-AudioFormatManager::AudioFormatManager()  : defaultFormatIndex (0) {}
+AudioFormatManager::AudioFormatManager() {}
 AudioFormatManager::~AudioFormatManager() {}
 
 //==============================================================================
-void AudioFormatManager::registerFormat (AudioFormat* newFormat, const bool makeThisTheDefaultFormat)
+void AudioFormatManager::registerFormat (AudioFormat* newFormat, bool makeThisTheDefaultFormat)
 {
     jassert (newFormat != nullptr);
 
     if (newFormat != nullptr)
     {
        #if JUCE_DEBUG
-        for (int i = getNumKnownFormats(); --i >= 0;)
+        for (auto* af : knownFormats)
         {
-            if (getKnownFormat (i)->getFormatName() == newFormat->getFormatName())
-            {
+            if (af->getFormatName() == newFormat->getFormatName())
                 jassertfalse; // trying to add the same format twice!
-            }
         }
        #endif
 
@@ -86,29 +84,18 @@ void AudioFormatManager::clearFormats()
     defaultFormatIndex = 0;
 }
 
-int AudioFormatManager::getNumKnownFormats() const
-{
-    return knownFormats.size();
-}
-
-AudioFormat* AudioFormatManager::getKnownFormat (const int index) const
-{
-    return knownFormats [index];
-}
-
-AudioFormat* AudioFormatManager::getDefaultFormat() const
-{
-    return getKnownFormat (defaultFormatIndex);
-}
+int AudioFormatManager::getNumKnownFormats() const                  { return knownFormats.size(); }
+AudioFormat* AudioFormatManager::getKnownFormat (int index) const   { return knownFormats[index]; }
+AudioFormat* AudioFormatManager::getDefaultFormat() const           { return getKnownFormat (defaultFormatIndex); }
 
 AudioFormat* AudioFormatManager::findFormatForFileExtension (const String& fileExtension) const
 {
     if (! fileExtension.startsWithChar ('.'))
         return findFormatForFileExtension ("." + fileExtension);
 
-    for (int i = 0; i < getNumKnownFormats(); ++i)
-        if (getKnownFormat(i)->getFileExtensions().contains (fileExtension, true))
-            return getKnownFormat(i);
+    for (auto* af : knownFormats)
+        if (af->getFileExtensions().contains (fileExtension, true))
+            return af;
 
     return nullptr;
 }
@@ -117,14 +104,14 @@ String AudioFormatManager::getWildcardForAllFormats() const
 {
     StringArray extensions;
 
-    for (int i = 0; i < getNumKnownFormats(); ++i)
-        extensions.addArray (getKnownFormat(i)->getFileExtensions());
+    for (auto* af : knownFormats)
+        extensions.addArray (af->getFileExtensions());
 
     extensions.trim();
     extensions.removeEmptyStrings();
 
-    for (int i = 0; i < extensions.size(); ++i)
-        extensions.set (i, (extensions[i].startsWithChar ('.') ? "*" : "*.") + extensions[i]);
+    for (auto& e : extensions)
+        e = (e.startsWithChar ('.') ? "*" : "*.") + e;
 
     extensions.removeDuplicates (true);
     return extensions.joinIntoString (";");
@@ -137,15 +124,11 @@ AudioFormatReader* AudioFormatManager::createReaderFor (const File& file)
     // use them to open a file!
     jassert (getNumKnownFormats() > 0);
 
-    for (int i = 0; i < getNumKnownFormats(); ++i)
-    {
-        AudioFormat* const af = getKnownFormat(i);
-
+    for (auto* af : knownFormats)
         if (af->canHandleFile (file))
-            if (InputStream* const in = file.createInputStream())
-                if (AudioFormatReader* const r = af->createReaderFor (in, true))
+            if (auto* in = file.createInputStream())
+                if (auto* r = af->createReaderFor (in, true))
                     return r;
-    }
 
     return nullptr;
 }
@@ -156,15 +139,14 @@ AudioFormatReader* AudioFormatManager::createReaderFor (InputStream* audioFileSt
     // use them to open a file!
     jassert (getNumKnownFormats() > 0);
 
-    ScopedPointer<InputStream> in (audioFileStream);
-
-    if (in != nullptr)
+    if (audioFileStream != nullptr)
     {
-        const int64 originalStreamPos = in->getPosition();
+        ScopedPointer<InputStream> in (audioFileStream);
+        auto originalStreamPos = in->getPosition();
 
-        for (int i = 0; i < getNumKnownFormats(); ++i)
+        for (auto* af : knownFormats)
         {
-            if (AudioFormatReader* const r = getKnownFormat(i)->createReaderFor (in, false))
+            if (auto* r = af->createReaderFor (in, false))
             {
                 in.release();
                 return r;

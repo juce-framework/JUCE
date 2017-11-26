@@ -298,9 +298,8 @@ private:
     }
 
     //==============================================================================
-    const String name;
-    const String category;
-    UnitTestRunner* runner;
+    const String name, category;
+    UnitTestRunner* runner = nullptr;
 
     JUCE_DECLARE_NON_COPYABLE (UnitTest)
 };
@@ -418,10 +417,10 @@ private:
     //==============================================================================
     friend class UnitTest;
 
-    UnitTest* currentTest;
+    UnitTest* currentTest = nullptr;
     String currentSubCategory;
-    OwnedArray <TestResult, CriticalSection> results;
-    bool assertOnFailure, logPasses;
+    OwnedArray<TestResult, CriticalSection> results;
+    bool assertOnFailure = true, logPasses = false;
     Random randomForTest;
 
     void beginNewTest (UnitTest* test, const String& subCategory);

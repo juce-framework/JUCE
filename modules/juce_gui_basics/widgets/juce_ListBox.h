@@ -379,11 +379,11 @@ public:
     /** Scrolls if necessary to make sure that a particular row is visible. */
     void scrollToEnsureRowIsOnscreen (int row);
 
-    /** Returns a pointer to the vertical scrollbar. */
-    ScrollBar* getVerticalScrollBar() const noexcept;
+    /** Returns a reference to the vertical scrollbar. */
+    ScrollBar& getVerticalScrollBar() const noexcept;
 
-    /** Returns a pointer to the horizontal scrollbar. */
-    ScrollBar* getHorizontalScrollBar() const noexcept;
+    /** Returns a reference to the horizontal scrollbar. */
+    ScrollBar& getHorizontalScrollBar() const noexcept;
 
     /** Finds the row index that contains a given x,y position.
         The position is relative to the ListBox's top-left.
@@ -418,7 +418,7 @@ public:
 
     /** Finds the row component for a given row in the list.
 
-        The component returned will have been created using createRowComponent().
+        The component returned will have been created using ListBoxModel::refreshComponentForRow().
 
         If the component for this row is off-screen or if the row is out-of-range,
         this will return nullptr.

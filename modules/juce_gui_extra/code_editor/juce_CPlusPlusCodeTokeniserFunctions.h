@@ -47,34 +47,38 @@ struct CppTokeniserFunctions
     static bool isReservedKeyword (String::CharPointerType token, const int tokenLength) noexcept
     {
         static const char* const keywords2Char[] =
-            { "if", "do", "or", nullptr };
+            { "do", "if", "or", nullptr };
 
         static const char* const keywords3Char[] =
-            { "for", "int", "new", "try", "xor", "and", "asm", "not", nullptr };
+            { "and", "asm", "for", "int", "new", "not", "try", "xor", nullptr };
 
         static const char* const keywords4Char[] =
-            { "bool", "void", "this", "true", "long", "else", "char",
-              "enum", "case", "goto", "auto", nullptr };
+            { "auto", "bool", "case", "char", "else", "enum", "goto",
+              "long", "this", "true", "void", nullptr };
 
         static const char* const keywords5Char[] =
-            { "float", "const", "while", "break", "false", "catch", "class", "bitor",
-              "compl", "or_eq", "short", "throw", "union", "using", "final", nullptr };
+            { "bitor", "break", "catch", "class", "compl", "const", "false", "final",
+              "float", "or_eq", "short", "throw", "union", "using", "while", nullptr };
 
         static const char* const keywords6Char[] =
-            { "return", "and_eq", "bitand", "delete", "double", "export", "extern",
-              "friend", "inline", "not_eq", "public", "signed", "sizeof", "static",
-              "struct", "switch", "typeid", "xor_eq", nullptr };
+            { "and_eq", "bitand", "delete", "double", "export", "extern", "friend",
+              "import", "inline", "module", "not_eq", "public", "return", "signed",
+              "sizeof", "static", "struct", "switch", "typeid", "xor_eq", nullptr };
 
         static const char* const keywords7Char[] =
-            { "nullptr", "alignas", "alignof", "default", "mutable", "private",
-              "typedef", "virtual", "wchar_t", "__cdecl", "_Pragma", "uint8_t", nullptr };
+            { "__cdecl", "_Pragma", "alignas", "alignof", "concept", "default",
+              "mutable", "nullptr", "private", "typedef", "uint8_t", "virtual",
+              "wchar_t", nullptr };
 
         static const char* const keywordsOther[] =
-            { "char16_t", "char32_t", "const_cast", "constexpr", "continue", "decltype", "dynamic_cast",
-              "explicit", "namespace", "noexcept", "operator", "protected", "register", "reinterpret_cast",
-              "static_assert", "static_cast", "template", "thread_local", "typename", "unsigned", "volatile",
-              "@class", "@dynamic", "@end", "@implementation", "@interface", "@public", "@private",
-              "@protected", "@property", "@synthesize", "__fastcall", "__stdcall", nullptr };
+            { "@class", "@dynamic", "@end", "@implementation", "@interface", "@public",
+              "@private", "@protected", "@property", "@synthesize", "__fastcall", "__stdcall",
+              "atomic_cancel", "atomic_commit", "atomic_noexcept", "char16_t", "char32_t",
+              "co_await", "co_return", "co_yield", "const_cast", "constexpr", "continue",
+              "decltype", "dynamic_cast", "explicit", "namespace", "noexcept", "operator", "override",
+              "protected", "register", "reinterpret_cast", "requires", "static_assert",
+              "static_cast", "synchronized", "template", "thread_local", "typename", "unsigned",
+              "volatile", nullptr };
 
         const char* const* k;
 
@@ -106,12 +110,12 @@ struct CppTokeniserFunctions
     static int parseIdentifier (Iterator& source) noexcept
     {
         int tokenLength = 0;
-        String::CharPointerType::CharType possibleIdentifier [100];
+        String::CharPointerType::CharType possibleIdentifier[100];
         String::CharPointerType possible (possibleIdentifier);
 
         while (isIdentifierBody (source.peekNextChar()))
         {
-            const juce_wchar c = source.nextChar();
+            auto c = source.nextChar();
 
             if (tokenLength < 20)
                 possible.write (c);
@@ -133,7 +137,8 @@ struct CppTokeniserFunctions
     template <typename Iterator>
     static bool skipNumberSuffix (Iterator& source)
     {
-        const juce_wchar c = source.peekNextChar();
+        auto c = source.peekNextChar();
+
         if (c == 'l' || c == 'L' || c == 'u' || c == 'U')
             source.skip();
 
@@ -159,11 +164,13 @@ struct CppTokeniserFunctions
         if (source.nextChar() != '0')
             return false;
 
-        juce_wchar c = source.nextChar();
+        auto c = source.nextChar();
+
         if (c != 'x' && c != 'X')
             return false;
 
         int numDigits = 0;
+
         while (isHexDigit (source.peekNextChar()))
         {
             ++numDigits;
@@ -253,18 +260,19 @@ struct CppTokeniserFunctions
         if (numDigits == 0)
             return false;
 
-        juce_wchar c = source.peekNextChar();
-        const bool hasExponent = (c == 'e' || c == 'E');
+        auto c = source.peekNextChar();
+        bool hasExponent = (c == 'e' || c == 'E');
 
         if (hasExponent)
         {
             source.skip();
-
             c = source.peekNextChar();
+
             if (c == '+' || c == '-')
                 source.skip();
 
             int numExpDigits = 0;
+
             while (isDecimalDigit (source.peekNextChar()))
             {
                 source.skip();
@@ -276,6 +284,7 @@ struct CppTokeniserFunctions
         }
 
         c = source.peekNextChar();
+
         if (c == 'f' || c == 'F')
             source.skip();
         else if (! (hasExponent || hasPoint))
@@ -307,11 +316,11 @@ struct CppTokeniserFunctions
     template <typename Iterator>
     static void skipQuotedString (Iterator& source) noexcept
     {
-        const juce_wchar quote = source.nextChar();
+        auto quote = source.nextChar();
 
         for (;;)
         {
-            const juce_wchar c = source.nextChar();
+            auto c = source.nextChar();
 
             if (c == quote || c == 0)
                 break;
@@ -328,7 +337,7 @@ struct CppTokeniserFunctions
 
         for (;;)
         {
-            const juce_wchar c = source.nextChar();
+            auto c = source.nextChar();
 
             if (c == 0 || (c == '/' && lastWasStar))
                 break;
@@ -344,7 +353,7 @@ struct CppTokeniserFunctions
 
         for (;;)
         {
-            const juce_wchar c = source.peekNextChar();
+            auto c = source.peekNextChar();
 
             if (c == '"')
             {
@@ -356,7 +365,7 @@ struct CppTokeniserFunctions
             {
                 Iterator next (source);
                 next.skip();
-                const juce_wchar c2 = next.peekNextChar();
+                auto c2 = next.peekNextChar();
 
                 if (c2 == '/' || c2 == '*')
                     return;
@@ -390,7 +399,7 @@ struct CppTokeniserFunctions
     template <typename Iterator>
     static void skipIfNextCharMatches (Iterator& source, const juce_wchar c1, const juce_wchar c2) noexcept
     {
-        const juce_wchar c = source.peekNextChar();
+        auto c = source.peekNextChar();
 
         if (c == c1 || c == c2)
             source.skip();
@@ -400,8 +409,7 @@ struct CppTokeniserFunctions
     static int readNextToken (Iterator& source)
     {
         source.skipWhitespace();
-
-        const juce_wchar firstChar = source.peekNextChar();
+        auto firstChar = source.peekNextChar();
 
         switch (firstChar)
         {
@@ -412,7 +420,7 @@ struct CppTokeniserFunctions
         case '5':   case '6':   case '7':   case '8':   case '9':
         case '.':
         {
-            int result = parseNumber (source);
+            auto result = parseNumber (source);
 
             if (result == CPlusPlusCodeTokeniser::tokenType_error)
             {
@@ -450,7 +458,7 @@ struct CppTokeniserFunctions
         case '-':
         {
             source.skip();
-            int result = parseNumber (source);
+            auto result = parseNumber (source);
 
             if (result == CPlusPlusCodeTokeniser::tokenType_error)
             {
@@ -470,7 +478,7 @@ struct CppTokeniserFunctions
         case '/':
         {
             source.skip();
-            juce_wchar nextChar = source.peekNextChar();
+            auto nextChar = source.peekNextChar();
 
             if (nextChar == '/')
             {
@@ -523,8 +531,8 @@ struct CppTokeniserFunctions
     */
     struct StringIterator
     {
-        StringIterator (const String& s) noexcept            : t (s.getCharPointer()), numChars (0) {}
-        StringIterator (String::CharPointerType s) noexcept  : t (s), numChars (0) {}
+        StringIterator (const String& s) noexcept            : t (s.getCharPointer()) {}
+        StringIterator (String::CharPointerType s) noexcept  : t (s) {}
 
         juce_wchar nextChar() noexcept      { if (isEOF()) return 0; ++numChars; return t.getAndAdvance(); }
         juce_wchar peekNextChar()noexcept   { return *t; }
@@ -534,7 +542,7 @@ struct CppTokeniserFunctions
         bool isEOF() const noexcept         { return t.isEmpty(); }
 
         String::CharPointerType t;
-        int numChars;
+        int numChars = 0;
     };
 
     //==============================================================================
@@ -558,7 +566,7 @@ struct CppTokeniserFunctions
 
         for (int i = 0; i < numBytesToRead || numBytesToRead < 0; ++i)
         {
-            const unsigned char c = (unsigned char) utf8[i];
+            auto c = (unsigned char) utf8[i];
             bool startNewLine = false;
 
             switch (c)

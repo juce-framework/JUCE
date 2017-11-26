@@ -176,7 +176,7 @@ private:
 
         if (CharacterFunctions::compareUpTo (CharPointer_ASCII (token), t, len) == 0)
         {
-            String::CharPointerType end = t + len;
+            auto end = t + len;
 
             if (end.isEmpty() || end.isWhitespace())
             {
@@ -279,7 +279,7 @@ private:
 
         for (int lineNum = 0; lineNum < lines.size(); ++lineNum)
         {
-            String::CharPointerType l = lines[lineNum].getCharPointer().findEndOfWhitespace();
+            auto l = lines[lineNum].getCharPointer().findEndOfWhitespace();
 
             if (matchToken (l, "v"))    { mesh.vertices.add (parseVertex (l));            continue; }
             if (matchToken (l, "vn"))   { mesh.normals.add (parseVertex (l));             continue; }
@@ -341,7 +341,7 @@ private:
 
         for (int i = 0; i < lines.size(); ++i)
         {
-            String::CharPointerType l (lines[i].getCharPointer().findEndOfWhitespace());
+            auto l = lines[i].getCharPointer().findEndOfWhitespace();
 
             if (matchToken (l, "newmtl"))   { materials.add (material); material.name = String (l).trim(); continue; }
 

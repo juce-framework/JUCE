@@ -126,6 +126,12 @@ public:
         addAndMakeVisible (demoList);
     }
 
+    ~ContentComponent()
+    {
+        // before deleting our lookandfeel object, make sure it's no longer in use
+        LookAndFeel::setDefaultLookAndFeel (nullptr);
+    }
+
     void clearCurrentDemo()
     {
         currentDemo = nullptr;

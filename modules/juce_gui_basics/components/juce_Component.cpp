@@ -1447,7 +1447,7 @@ Component* Component::getComponentAt (Point<int> position)
     return nullptr;
 }
 
-Component* Component::getComponentAt (const int x, const int y)
+Component* Component::getComponentAt (int x, int y)
 {
     return getComponentAt ({ x, y });
 }
@@ -1623,7 +1623,7 @@ Component* Component::findChildWithID (StringRef targetID) const noexcept
 
 Component* Component::getTopLevelComponent() const noexcept
 {
-    const Component* comp = this;
+    auto* comp = this;
 
     while (comp->parentComponent != nullptr)
         comp = comp->parentComponent;
@@ -1842,9 +1842,9 @@ float Component::getAlpha() const noexcept
     return (255 - componentTransparency) / 255.0f;
 }
 
-void Component::setAlpha (const float newAlpha)
+void Component::setAlpha (float newAlpha)
 {
-    const uint8 newIntAlpha = (uint8) (255 - jlimit (0, 255, roundToInt (newAlpha * 255.0)));
+    auto newIntAlpha = (uint8) (255 - jlimit (0, 255, roundToInt (newAlpha * 255.0)));
 
     if (componentTransparency != newIntAlpha)
     {
@@ -1872,7 +1872,7 @@ void Component::repaint()
     internalRepaintUnchecked (getLocalBounds(), true);
 }
 
-void Component::repaint (const int x, const int y, const int w, const int h)
+void Component::repaint (int x, int y, int w, int h)
 {
     internalRepaint ({ x, y, w, h });
 }
@@ -1896,8 +1896,12 @@ void Component::internalRepaint (Rectangle<int> area)
         internalRepaintUnchecked (area, false);
 }
 
-void Component::internalRepaintUnchecked (Rectangle<int> area, const bool isEntireComponent)
+void Component::internalRepaintUnchecked (Rectangle<int> area, bool isEntireComponent)
 {
+    // if component methods are being called from threads other than the message
+    // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
+    ASSERT_MESSAGE_MANAGER_IS_LOCKED
+
     if (flags.visibleFlag)
     {
         if (cachedImage != nullptr)
@@ -1907,10 +1911,6 @@ void Component::internalRepaintUnchecked (Rectangle<int> area, const bool isEnti
 
         if (flags.hasHeavyweightPeerFlag)
         {
-            // if component methods are being called from threads other than the message
-            // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-            ASSERT_MESSAGE_MANAGER_IS_LOCKED
-
             if (auto* peer = getPeer())
             {
                 // Tweak the scaling so that the component's integer size exactly aligns with the peer's scaled size

@@ -241,7 +241,14 @@ static void* currentModuleHandle = nullptr;
 void* JUCE_CALLTYPE Process::getCurrentModuleInstanceHandle() noexcept
 {
     if (currentModuleHandle == nullptr)
-        currentModuleHandle = GetModuleHandleA (nullptr);
+    {
+        auto status = GetModuleHandleEx (GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                                         (LPCTSTR) &currentModuleHandle,
+                                         (HMODULE*) &currentModuleHandle);
+
+        if (status == 0 || currentModuleHandle == nullptr)
+            currentModuleHandle = GetModuleHandleA (nullptr);
+    }
 
     return currentModuleHandle;
 }

@@ -93,7 +93,7 @@ int MidiMessage::getMessageLengthFromFirstByte (const uint8 firstByte) noexcept
         1, 2, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
     };
 
-    return messageLengths [firstByte & 0x7f];
+    return messageLengths[firstByte & 0x7f];
 }
 
 //==============================================================================
@@ -344,6 +344,11 @@ String MidiMessage::getDescription() const
     return String::toHexString (getRawData(), getRawDataSize());
 }
 
+MidiMessage MidiMessage::withTimeStamp (double newTimestamp) const
+{
+    return { *this, newTimestamp };
+}
+
 int MidiMessage::getChannel() const noexcept
 {
     auto data = getRawData();
@@ -452,8 +457,8 @@ MidiMessage MidiMessage::aftertouchChange (const int channel,
                                            const int aftertouchValue) noexcept
 {
     jassert (channel > 0 && channel <= 16); // valid channels are numbered 1 to 16
-    jassert (isPositiveAndBelow (noteNum, (int) 128));
-    jassert (isPositiveAndBelow (aftertouchValue, (int) 128));
+    jassert (isPositiveAndBelow (noteNum, 128));
+    jassert (isPositiveAndBelow (aftertouchValue, 128));
 
     return MidiMessage (MidiHelpers::initialByte (0xa0, channel),
                         noteNum & 0x7f,
@@ -474,7 +479,7 @@ int MidiMessage::getChannelPressureValue() const noexcept
 MidiMessage MidiMessage::channelPressureChange (const int channel, const int pressure) noexcept
 {
     jassert (channel > 0 && channel <= 16); // valid channels are numbered 1 to 16
-    jassert (isPositiveAndBelow (pressure, (int) 128));
+    jassert (isPositiveAndBelow (pressure, 128));
 
     return MidiMessage (MidiHelpers::initialByte (0xd0, channel), pressure & 0x7f);
 }
@@ -522,7 +527,7 @@ int MidiMessage::getPitchWheelValue() const noexcept
 MidiMessage MidiMessage::pitchWheel (const int channel, const int position) noexcept
 {
     jassert (channel > 0 && channel <= 16); // valid channels are numbered 1 to 16
-    jassert (isPositiveAndBelow (position, (int) 0x4000));
+    jassert (isPositiveAndBelow (position, 0x4000));
 
     return MidiMessage (MidiHelpers::initialByte (0xe0, channel),
                         position & 127, (position >> 7) & 127);
@@ -563,7 +568,7 @@ MidiMessage MidiMessage::controllerEvent (const int channel, const int controlle
 MidiMessage MidiMessage::noteOn (const int channel, const int noteNumber, const uint8 velocity) noexcept
 {
     jassert (channel > 0 && channel <= 16);
-    jassert (isPositiveAndBelow (noteNumber, (int) 128));
+    jassert (isPositiveAndBelow (noteNumber, 128));
 
     return MidiMessage (MidiHelpers::initialByte (0x90, channel),
                         noteNumber & 127, MidiHelpers::validVelocity (velocity));
@@ -577,7 +582,7 @@ MidiMessage MidiMessage::noteOn (const int channel, const int noteNumber, const 
 MidiMessage MidiMessage::noteOff (const int channel, const int noteNumber, uint8 velocity) noexcept
 {
     jassert (channel > 0 && channel <= 16);
-    jassert (isPositiveAndBelow (noteNumber, (int) 128));
+    jassert (isPositiveAndBelow (noteNumber, 128));
 
     return MidiMessage (MidiHelpers::initialByte (0x80, channel),
                         noteNumber & 127, MidiHelpers::validVelocity (velocity));
@@ -591,7 +596,7 @@ MidiMessage MidiMessage::noteOff (const int channel, const int noteNumber, float
 MidiMessage MidiMessage::noteOff (const int channel, const int noteNumber) noexcept
 {
     jassert (channel > 0 && channel <= 16);
-    jassert (isPositiveAndBelow (noteNumber, (int) 128));
+    jassert (isPositiveAndBelow (noteNumber, 128));
 
     return MidiMessage (MidiHelpers::initialByte (0x80, channel), noteNumber & 127, 0);
 }
@@ -638,7 +643,7 @@ bool MidiMessage::isSysEx() const noexcept
 
 MidiMessage MidiMessage::createSysExMessage (const void* sysexData, const int dataSize)
 {
-    HeapBlock<uint8> m ((size_t) dataSize + 2);
+    HeapBlock<uint8> m (dataSize + 2);
 
     m[0] = 0xf0;
     memcpy (m + 1, sysexData, (size_t) dataSize);
@@ -964,7 +969,7 @@ bool MidiMessage::isMidiMachineControlGoto (int& hours, int& minutes, int& secon
         hours = data[7] % 24;   // (that some machines send out hours > 24)
         minutes = data[8];
         seconds = data[9];
-        frames = data[10];
+        frames  = data[10];
 
         return true;
     }
@@ -983,10 +988,10 @@ String MidiMessage::getMidiNoteName (int note, bool useSharps, bool includeOctav
     static const char* const sharpNoteNames[] = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
     static const char* const flatNoteNames[]  = { "C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B" };
 
-    if (isPositiveAndBelow (note, (int) 128))
+    if (isPositiveAndBelow (note, 128))
     {
-        String s (useSharps ? sharpNoteNames [note % 12]
-                            : flatNoteNames  [note % 12]);
+        String s (useSharps ? sharpNoteNames[note % 12]
+                            : flatNoteNames [note % 12]);
 
         if (includeOctaveNumber)
             s << (note / 12 + (octaveNumForMiddleC - 5));
@@ -999,7 +1004,7 @@ String MidiMessage::getMidiNoteName (int note, bool useSharps, bool includeOctav
 
 double MidiMessage::getMidiNoteInHertz (const int noteNumber, const double frequencyOfA) noexcept
 {
-    return frequencyOfA * pow (2.0, (noteNumber - 69) / 12.0);
+    return frequencyOfA * std::pow (2.0, (noteNumber - 69) / 12.0);
 }
 
 bool MidiMessage::isMidiNoteBlack (int noteNumber) noexcept
@@ -1079,7 +1084,7 @@ const char* MidiMessage::getRhythmInstrumentName (const int n)
         NEEDS_TRANS("Open Cuica"),          NEEDS_TRANS("Mute Triangle"),   NEEDS_TRANS("Open Triangle")
     };
 
-    return (n >= 35 && n <= 81) ? names [n - 35] : nullptr;
+    return (n >= 35 && n <= 81) ? names[n - 35] : nullptr;
 }
 
 const char* MidiMessage::getControllerName (const int n)

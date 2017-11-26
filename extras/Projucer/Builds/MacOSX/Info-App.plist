@@ -23,7 +23,7 @@
     <key>CFBundleIconFile</key>
     <string>Icon.icns</string>
     <key>CFBundleIdentifier</key>
-    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <string>com.juce.theprojucer</string>
     <key>CFBundleName</key>
     <string>Projucer</string>
     <key>CFBundleDisplayName</key>
@@ -33,9 +33,9 @@
     <key>CFBundleSignature</key>
     <string>????</string>
     <key>CFBundleShortVersionString</key>
-    <string>5.1.2</string>
+    <string>5.2.0</string>
     <key>CFBundleVersion</key>
-    <string>5.1.2</string>
+    <string>5.2.0</string>
     <key>NSHumanReadableCopyright</key>
     <string>ROLI Ltd.</string>
     <key>NSHighResolutionCapable</key>

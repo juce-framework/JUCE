@@ -20,6 +20,66 @@ namespace BinaryData
     extern const char*   LICENSE;
     const int            LICENSESize = 11325;
 
+    extern const char*   background_logo_svg;
+    const int            background_logo_svgSize = 3117;
+
+    extern const char*   export_android_svg;
+    const int            export_android_svgSize = 3586;
+
+    extern const char*   export_clion_svg;
+    const int            export_clion_svgSize = 2244;
+
+    extern const char*   export_codeBlocks_svg;
+    const int            export_codeBlocks_svgSize = 1726;
+
+    extern const char*   export_linux_svg;
+    const int            export_linux_svgSize = 28184;
+
+    extern const char*   export_visualStudio_svg;
+    const int            export_visualStudio_svgSize = 1706;
+
+    extern const char*   export_xcode_svg;
+    const int            export_xcode_svgSize = 12295;
+
+    extern const char*   huckleberry_icon_svg;
+    const int            huckleberry_icon_svgSize = 3375;
+
+    extern const char*   jucelogowithtext_svg;
+    const int            jucelogowithtext_svgSize = 5312;
+
+    extern const char*   juce_icon_png;
+    const int            juce_icon_pngSize = 45854;
+
+    extern const char*   wizard_AnimatedApp_svg;
+    const int            wizard_AnimatedApp_svgSize = 5978;
+
+    extern const char*   wizard_AudioApp_svg;
+    const int            wizard_AudioApp_svgSize = 17791;
+
+    extern const char*   wizard_AudioPlugin_svg;
+    const int            wizard_AudioPlugin_svgSize = 21296;
+
+    extern const char*   wizard_ConsoleApp_svg;
+    const int            wizard_ConsoleApp_svgSize = 3249;
+
+    extern const char*   wizard_DLL_svg;
+    const int            wizard_DLL_svgSize = 7503;
+
+    extern const char*   wizard_GUI_svg;
+    const int            wizard_GUI_svgSize = 6528;
+
+    extern const char*   wizard_Highlight_svg;
+    const int            wizard_Highlight_svgSize = 1798;
+
+    extern const char*   wizard_Openfile_svg;
+    const int            wizard_Openfile_svgSize = 1859;
+
+    extern const char*   wizard_OpenGL_svg;
+    const int            wizard_OpenGL_svgSize = 4551;
+
+    extern const char*   wizard_StaticLibrary_svg;
+    const int            wizard_StaticLibrary_svgSize = 7488;
+
     extern const char*   jucer_AnimatedComponentTemplate_cpp;
     const int            jucer_AnimatedComponentTemplate_cppSize = 1887;
 
@@ -83,89 +143,26 @@ namespace BinaryData
     extern const char*   jucer_OpenGLComponentTemplate_cpp;
     const int            jucer_OpenGLComponentTemplate_cppSize = 1716;
 
-    extern const char*   background_logo_svg;
-    const int            background_logo_svgSize = 3117;
-
-    extern const char*   background_tile_png;
-    const int            background_tile_pngSize = 151;
-
     extern const char*   colourscheme_dark_xml;
     const int            colourscheme_dark_xmlSize = 1050;
 
     extern const char*   colourscheme_light_xml;
     const int            colourscheme_light_xmlSize = 1050;
 
-    extern const char*   export_android_svg;
-    const int            export_android_svgSize = 3586;
-
-    extern const char*   export_codeBlocks_svg;
-    const int            export_codeBlocks_svgSize = 1726;
-
-    extern const char*   export_linux_svg;
-    const int            export_linux_svgSize = 28184;
-
-    extern const char*   export_visualStudio_svg;
-    const int            export_visualStudio_svgSize = 1706;
-
-    extern const char*   export_xcode_svg;
-    const int            export_xcode_svgSize = 12295;
-
-    extern const char*   huckleberry_icon_svg;
-    const int            huckleberry_icon_svgSize = 3375;
-
-    extern const char*   jucelogowithtext_svg;
-    const int            jucelogowithtext_svgSize = 5312;
-
-    extern const char*   juce_icon_png;
-    const int            juce_icon_pngSize = 45854;
-
     extern const char*   offlinepage_html;
     const int            offlinepage_htmlSize = 1155;
 
     extern const char*   projucer_EULA_txt;
-    const int            projucer_EULA_txtSize = 14394;
-
-    extern const char*   projucer_login_bg_svg;
-    const int            projucer_login_bg_svgSize = 5046;
+    const int            projucer_EULA_txtSize = 14361;
 
     extern const char*   RecentFilesMenuTemplate_nib;
     const int            RecentFilesMenuTemplate_nibSize = 2842;
-
-    extern const char*   wizard_AnimatedApp_svg;
-    const int            wizard_AnimatedApp_svgSize = 5978;
-
-    extern const char*   wizard_AudioApp_svg;
-    const int            wizard_AudioApp_svgSize = 17791;
-
-    extern const char*   wizard_AudioPlugin_svg;
-    const int            wizard_AudioPlugin_svgSize = 21296;
-
-    extern const char*   wizard_ConsoleApp_svg;
-    const int            wizard_ConsoleApp_svgSize = 3249;
-
-    extern const char*   wizard_DLL_svg;
-    const int            wizard_DLL_svgSize = 7503;
-
-    extern const char*   wizard_GUI_svg;
-    const int            wizard_GUI_svgSize = 6528;
-
-    extern const char*   wizard_Highlight_svg;
-    const int            wizard_Highlight_svgSize = 1798;
-
-    extern const char*   wizard_Openfile_svg;
-    const int            wizard_Openfile_svgSize = 1859;
-
-    extern const char*   wizard_OpenGL_svg;
-    const int            wizard_OpenGL_svgSize = 4551;
-
-    extern const char*   wizard_StaticLibrary_svg;
-    const int            wizard_StaticLibrary_svgSize = 7488;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];
 
     // Number of elements in the namedResourceList array.
-    const int namedResourceListSize = 51;
+    const int namedResourceListSize = 50;
 
     // If you provide the name of one of the binary resource variables above, this function will
     // return the corresponding data and its size (or a null pointer if the name isn't found).

@@ -2,8 +2,9 @@
 
 <JUCERPROJECT id="LrATE6" name="AnimationAppExample" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.roli.AnimationAppExample" includeBinaryInAppConfig="1"
-              jucerVersion="5.1.2" displaySplashScreen="0" reportAppUsage="0"
-              splashScreenColour="Dark" companyName="ROLI Ltd." cppLanguageStandard="11">
+              jucerVersion="5.2.0" displaySplashScreen="0" reportAppUsage="0"
+              splashScreenColour="Dark" companyName="ROLI Ltd." cppLanguageStandard="11"
+              companyCopyright="ROLI Ltd.">
   <MAINGROUP id="F3keCY" name="AnimationAppExample">
     <GROUP id="{5E4132EA-C4A0-CBDE-BEDA-FD6772DA79D5}" name="Source">
       <FILE id="n1FmZc" name="MainComponent.cpp" compile="1" resource="0"
@@ -35,7 +36,8 @@
         <MODULEPATH id="juce_audio_processors" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="portraitlandscape">
+    <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="portraitlandscape"
+                  iPadScreenOrientation="portraitlandscape" iosDeviceFamily="1,2">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" iosCompatibility="default" isDebug="1" optimisation="1"
                        targetName="AnimationAppExample"/>

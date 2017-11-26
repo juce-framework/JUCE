@@ -1092,7 +1092,7 @@ private:
         }
         else
         {
-            allocatedData.malloc ((size_t) numChannels + 1, sizeof (Type*));
+            allocatedData.malloc (numChannels + 1, sizeof (Type*));
             channels = reinterpret_cast<Type**> (allocatedData.get());
         }
 

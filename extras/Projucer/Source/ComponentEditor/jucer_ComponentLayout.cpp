@@ -24,12 +24,11 @@
   ==============================================================================
 */
 
-#include "../jucer_Headers.h"
+#include "../Application/jucer_Headers.h"
 #include "jucer_JucerDocument.h"
 #include "jucer_ObjectTypes.h"
-#include "ui/jucer_JucerDocumentEditor.h"
-#include "components/jucer_ComponentUndoableAction.h"
-
+#include "UI/jucer_JucerDocumentEditor.h"
+#include "Components/jucer_ComponentUndoableAction.h"
 
 //==============================================================================
 ComponentLayout::ComponentLayout()

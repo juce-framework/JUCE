@@ -578,7 +578,7 @@ public:
                 const int pixStride = 2;
                 const int stride = ((w * pixStride + 3) & ~3);
 
-                imageData16Bit.malloc ((size_t) (stride * h));
+                imageData16Bit.malloc (stride * h);
                 xImage->data = imageData16Bit;
                 xImage->bitmap_pad = 16;
                 xImage->depth = pixStride * 8;
@@ -1946,7 +1946,7 @@ public:
     void setIcon (const Image& newIcon) override
     {
         const int dataSize = newIcon.getWidth() * newIcon.getHeight() + 2;
-        HeapBlock<unsigned long> data ((size_t) dataSize);
+        HeapBlock<unsigned long> data (dataSize);
 
         int index = 0;
         data[index++] = (unsigned long) newIcon.getWidth();

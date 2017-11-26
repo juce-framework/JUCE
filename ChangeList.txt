@@ -4,6 +4,27 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 5.2.0
+  - Added a CMake exporter to the Projucer
+  - JUCE analytics module 
+  - Added support for push notifications on iOS and Android
+  - Added in-app purchase support for macOS
+  - Added a plugin binary copy step to the Visual Studio exporter
+  - Added an option to set the debug information format in the Visual Studio exporter
+  - Added a link-time optimisation option to all exporters
+  - Added support for adding asm files to Android projects
+  - Improved the reliability of the Projucer's live-build engine
+  - Added support for AUv2 Midi Effect plug-in hosting
+  - Added support for Atmos 7.0.2 and 7.1.2 Surround formats
+  - Added support for the OGG sub-format inside a WAV file
+  - Added support for querying the audio hardware on how many overruns/underruns occurred
+  - Implement Process::hide on mobile platforms
+  - Added support for multi-touch drag and drop
+  - Improved the performance of 3D rendering when multiple OpenGL contexts are used at the same time
+  - Tweaked the rate at which EdgeTable grows its internal storage, to improve performance 
+    rendering large and complex paths
+
+
 Version 5.1.2
   - Fixed multiple plugin-resizing bugs
   - Added support for AUv3 MIDI and screen size negotiation
@@ -93,7 +114,7 @@ Version 5.0.0
   - Added support for IPv6
   - Various minor improvements and bug fixes
   - Various documentation improvements
- 
+
 Version 4.3.1
   - Added support for iOS download tasks
   - Added support for AAX plug-in meters

@@ -96,13 +96,13 @@ public:
 
 private:
     //==============================================================================
-    void* address;
+    void* address = nullptr;
     Range<int64> range;
 
    #if JUCE_WINDOWS
-    void* fileHandle;
+    void* fileHandle = nullptr;
    #else
-    int fileHandle;
+    int fileHandle = 0;
    #endif
 
     void openInternal (const File&, AccessMode, bool);

@@ -26,6 +26,8 @@
 
 #pragma once
 
+
+//==============================================================================
 inline String quotedString (const String& s, bool wrapInTransMacro)
 {
     const int embeddedIndex = s.indexOfIgnoreCase ("%%");

@@ -52,11 +52,15 @@ public:
 
         @param  exitCallback A callback which will be called when the modal
                 bluetooth dialog is closed.
+        @param  btWindowBounds The bounds of the bluetooth window that will
+                be opened. The dialog itself is opened by the OS so cannot
+                be customised by JUCE.
         @return true if the dialogue was opened, false on error.
 
         @see ModalComponentManager::Callback
     */
-    static bool open (ModalComponentManager::Callback* exitCallback = nullptr);
+    static bool open (ModalComponentManager::Callback* exitCallback = nullptr,
+                      Rectangle<int>* btWindowBounds = nullptr);
 
     /** Checks if a Bluetooth MIDI pairing dialogue is available on this
         platform.

@@ -1350,22 +1350,28 @@ public:
 
     //==============================================================================
    #if JUCE_VST3_CAN_REPLACE_VST2
-    void loadVST2VstWBlock (const char* data, int size)
+    bool loadVST2VstWBlock (const char* data, int size)
     {
-        auto headerLen = static_cast<int> (htonl (*(juce::int32*) (data + 4)));
-        auto bank = (const vst2FxBank*) (data + (8 + headerLen));
-        auto version = static_cast<int> (htonl (bank->version1)); ignoreUnused (version);
-
         jassert ('VstW' == htonl (*(juce::int32*) data));
         jassert (1 == htonl (*(juce::int32*) (data + 8))); // version should be 1 according to Steinberg's docs
+
+        auto headerLen = (int) htonl (*(juce::int32*) (data + 4)) + 8;
+        return loadVST2CcnKBlock (data + headerLen, size - headerLen);
+    }
+
+    bool loadVST2CcnKBlock (const char* data, int size)
+    {
+        auto bank = (const vst2FxBank*) data;
+
         jassert ('CcnK' == htonl (bank->magic1));
         jassert ('FBCh' == htonl (bank->magic2));
-        jassert (version == 1 || version == 2);
+        jassert (htonl (bank->version1) == 1 || htonl (bank->version1) == 2);
         jassert (JucePlugin_VSTUniqueID == htonl (bank->fxID));
 
         setStateInformation (bank->chunk,
                              jmin ((int) (size - (bank->chunk - data)),
                                    (int) htonl (bank->chunkSize)));
+        return true;
     }
 
     bool loadVST3PresetFile (const char* data, int size)
@@ -1411,11 +1417,13 @@ public:
         if (size < 4)
             return false;
 
-        if (htonl (*(juce::int32*) data) == 'VstW')
-        {
-            loadVST2VstWBlock (data, size);
-            return true;
-        }
+        auto header = htonl (*(juce::int32*) data);
+
+        if (header == 'VstW')
+            return loadVST2VstWBlock (data, size);
+
+        if (header == 'CcnK')
+            return loadVST2CcnKBlock (data, size);
 
         if (memcmp (data, "VST3", 4) == 0)
         {
@@ -2030,6 +2038,9 @@ public:
 
         midiBuffer.clear();
 
+        if (data.inputParameterChanges != nullptr)
+            processParameterChanges (*data.inputParameterChanges);
+
        #if JucePlugin_WantsMidiInput
         if (data.inputEvents != nullptr)
             MidiEventList::toMidiBuffer (midiBuffer, *data.inputEvents);
@@ -2228,9 +2239,6 @@ private:
             const ScopedLock sl (pluginInstance->getCallbackLock());
 
             pluginInstance->setNonRealtime (data.processMode == Vst::kOffline);
-
-            if (data.inputParameterChanges != nullptr)
-                processParameterChanges (*data.inputParameterChanges);
 
            #if JUCE_DEBUG && ! JucePlugin_ProducesMidiOutput
             const int numMidiEventsComingIn = midiBuffer.getNumEvents();

@@ -743,12 +743,18 @@ struct VSTPluginInstance     : public AudioPluginInstance,
     //==============================================================================
     void prepareToPlay (double rate, int samplesPerBlockExpected) override
     {
+        auto numInputBuses  = getBusCount (true);
+        auto numOutputBuses = getBusCount (false);
+
         setRateAndBufferSizeDetails (rate, samplesPerBlockExpected);
 
-        SpeakerMappings::VstSpeakerConfigurationHolder inArr  (getChannelLayoutOfBus (true,  0));
-        SpeakerMappings::VstSpeakerConfigurationHolder outArr (getChannelLayoutOfBus (false, 0));
+        if (numInputBuses <= 1 && numOutputBuses <= 1)
+        {
+            SpeakerMappings::VstSpeakerConfigurationHolder inArr  (getChannelLayoutOfBus (true,  0));
+            SpeakerMappings::VstSpeakerConfigurationHolder outArr (getChannelLayoutOfBus (false, 0));
 
-        dispatch (plugInOpcodeSetSpeakerConfiguration, 0, (pointer_sized_int) &inArr.get(), (void*) &outArr.get(), 0.0f);
+            dispatch (plugInOpcodeSetSpeakerConfiguration, 0, (pointer_sized_int) &inArr.get(), (void*) &outArr.get(), 0.0f);
+        }
 
         vstHostTime.tempoBPM = 120.0;
         vstHostTime.timeSignatureNumerator = 4;
@@ -943,7 +949,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
 
     float getParameter (int index) override
     {
-        if (vstEffect != nullptr && isPositiveAndBelow (index, (int) vstEffect->numParameters))
+        if (vstEffect != nullptr && isPositiveAndBelow (index, vstEffect->numParameters))
         {
             const ScopedLock sl (lock);
             return vstEffect->getParameterValueFunction (vstEffect, index);
@@ -954,7 +960,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
 
     void setParameter (int index, float newValue) override
     {
-        if (vstEffect != nullptr && isPositiveAndBelow (index, (int) vstEffect->numParameters))
+        if (vstEffect != nullptr && isPositiveAndBelow (index, vstEffect->numParameters))
         {
             const ScopedLock sl (lock);
 
@@ -1971,32 +1977,44 @@ private:
 
         if (v != 0)
         {
-            int versionBits[32];
-            int n = 0;
+            // See yfede's post for the rational on this encoding
+            // https://forum.juce.com/t/issues-with-version-integer-reported-by-vst2/23867/6
 
-            for (auto vv = v; vv != 0; vv /= 10)
-                versionBits [n++] = vv % 10;
+            unsigned int major = 0, minor = 0, bugfix = 0, build = 0;
 
-            if (n > 4) // if the number ends up silly, it's probably encoded as hex instead of decimal..
+            if (v < 10)            // Encoding A
             {
-                n = 0;
-
-                for (auto vv = v; vv != 0; vv >>= 8)
-                    versionBits [n++] = vv & 255;
+                major = v;
+            }
+            else if (v < 10000)    // Encoding B
+            {
+                major  = (v / 1000);
+                minor  = (v % 1000) / 100;
+                bugfix = (v % 100)  / 10;
+                build  = (v % 10);
+            }
+            else if (v < 0x10000)  // Encoding C
+            {
+                major  = (v / 10000);
+                minor  = (v % 10000) / 1000;
+                bugfix = (v % 1000)  / 100;
+                build  = (v % 100)   / 10;
+            }
+            else if (v < 0x650000) // Encoding D
+            {
+                major  = (v >> 16) & 0xff;
+                minor  = (v >> 8)  & 0xff;
+                bugfix = (v >> 0)  & 0xff;
+            }
+            else                  // Encoding E
+            {
+                major  = (v / 10000000);
+                minor  = (v % 10000000) / 100000;
+                bugfix = (v % 100000)   / 1000;
+                build  = (v % 1000);
             }
 
-            while (n > 1 && versionBits [n - 1] == 0)
-                --n;
-
-            s << 'V';
-
-            while (n > 0)
-            {
-                s << versionBits [--n];
-
-                if (n > 0)
-                    s << '.';
-            }
+            s << (int) major << '.' << (int) minor << '.' << (int) bugfix << '.' << (int) build;
         }
 
         return s;
@@ -2405,7 +2423,7 @@ private:
                 || ((w == 0 && rw > 0) || (h == 0 && rh > 0)))
             {
                 // very dodgy logic to decide which size is right.
-                if (abs (rw - w) > 350 || abs (rh - h) > 350)
+                if (std::abs (rw - w) > 350 || std::abs (rh - h) > 350)
                 {
                     SetWindowPos (pluginHWND, 0,
                                   0, 0, rw, rh,

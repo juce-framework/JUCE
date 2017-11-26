@@ -593,9 +593,9 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
     }
 
     //==============================================================================
-    struct DelegateClass  : public ObjCClass<NSObject<NSURLSessionDelegate> >
+    struct DelegateClass  : public ObjCClass<NSObject<NSURLSessionDelegate>>
     {
-        DelegateClass()  : ObjCClass<NSObject<NSURLSessionDelegate> > ("JUCE_URLDelegate_")
+        DelegateClass()  : ObjCClass<NSObject<NSURLSessionDelegate>> ("JUCE_URLDelegate_")
         {
             addIvar<BackgroundDownloadTask*> ("state");
 
@@ -1055,9 +1055,9 @@ public:
             if (wantedPos < position)
                 return false;
 
-            int64 numBytesToSkip = wantedPos - position;
-            const int skipBufferSize = (int) jmin (numBytesToSkip, (int64) 16384);
-            HeapBlock<char> temp ((size_t) skipBufferSize);
+            auto numBytesToSkip = wantedPos - position;
+            auto skipBufferSize = (int) jmin (numBytesToSkip, (int64) 16384);
+            HeapBlock<char> temp (skipBufferSize);
 
             while (numBytesToSkip > 0 && ! isExhausted())
                 numBytesToSkip -= read (temp, (int) jmin (numBytesToSkip, (int64) skipBufferSize));

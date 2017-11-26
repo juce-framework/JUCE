@@ -636,6 +636,8 @@ public:
     //==============================================================================
     void closeButtonPressed() override
     {
+        pluginHolder->savePluginState();
+
         JUCEApplicationBase::quit();
     }
 
@@ -788,9 +790,13 @@ private:
             shouldShowNotification = newInputMutedValue;
             notification.setVisible (shouldShowNotification);
 
+           #if JUCE_IOS || JUCE_ANDROID
+            resized();
+           #else
             setSize (editor->getWidth(),
                      editor->getHeight()
                      + (shouldShowNotification ? NotificationArea::height : 0));
+           #endif
         }
 
         void valueChanged (Value& value) override     { inputMutedChanged (value.getValue()); }
@@ -826,7 +832,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandaloneFilterWindow)
 };
 
-StandalonePluginHolder* StandalonePluginHolder::getInstance()
+inline StandalonePluginHolder* StandalonePluginHolder::getInstance()
 {
    #if JucePlugin_Enable_IAA || JucePlugin_Build_Standalone
     if (PluginHostType::getPluginLoadedAs() == AudioProcessor::wrapperType_Standalone)

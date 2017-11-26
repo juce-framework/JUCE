@@ -617,6 +617,7 @@ private:
 };
 
 //==============================================================================
+Image createSnapshotOfNativeWindow (void*);
 Image createSnapshotOfNativeWindow (void* nativeWindowHandle)
 {
     auto hwnd = (HWND) nativeWindowHandle;
@@ -963,6 +964,7 @@ public:
     ~HWNDComponentPeer()
     {
         shadower = nullptr;
+        currentTouches.deleteAllTouchesForPeer (this);
 
         // do this before the next bit to avoid messages arriving for this window
         // before it's destroyed
@@ -1179,8 +1181,8 @@ public:
     {
         auto r = getWindowRect (hwnd);
 
-        if (! (isPositiveAndBelow (localPos.x, (int) (r.right - r.left))
-                && isPositiveAndBelow (localPos.y, (int) (r.bottom - r.top))))
+        if (! (isPositiveAndBelow (localPos.x, r.right - r.left)
+                && isPositiveAndBelow (localPos.y, r.bottom - r.top)))
             return false;
 
         POINT p = { localPos.x + r.left + windowBorder.getLeft(),
@@ -2358,7 +2360,7 @@ private:
     {
         auto isCancel = false;
 
-        const auto touchIndex = currentTouches.getIndexOfTouch (touch.dwID);
+        const auto touchIndex = currentTouches.getIndexOfTouch (this, touch.dwID);
         const auto time = getMouseEventTime();
         const auto pos = globalToLocal ({ touch.x / 100.0f, touch.y / 100.0f });
         const auto pressure = touchPressure;
@@ -2652,8 +2654,7 @@ private:
     {
         updateKeyModifiers();
 
-        juce_wchar textChar = (juce_wchar) key;
-
+        auto textChar = (juce_wchar) key;
         const int virtualScanCode = (flags >> 16) & 0xff;
 
         if (key >= '0' && key <= '9')
@@ -3385,7 +3386,7 @@ private:
                     compositionRange.setLength (0);
 
                     target->setHighlightedRegion (Range<int>::emptyRange (compositionRange.getEnd()));
-                    target->setTemporaryUnderlining (Array<Range<int> >());
+                    target->setTemporaryUnderlining ({});
                 }
 
                 if (auto hImc = ImmGetContext (hWnd))
@@ -3413,7 +3414,7 @@ private:
                                                  Range<int>::emptyRange (-1));
 
                         reset();
-                        target->setTemporaryUnderlining (Array<Range<int> >());
+                        target->setTemporaryUnderlining ({});
                     }
                     else if ((lParam & GCS_COMPSTR) != 0) // (composition is still in-progress)
                     {
@@ -3491,7 +3492,7 @@ private:
                 if (attributeSizeBytes > 0)
                 {
                     // Get attributes (8 bit flag per character):
-                    HeapBlock<char> attributes ((size_t) attributeSizeBytes);
+                    HeapBlock<char> attributes (attributeSizeBytes);
                     ImmGetCompositionString (hImc, GCS_COMPATTR, attributes, (DWORD) attributeSizeBytes);
 
                     selectionStart = 0;

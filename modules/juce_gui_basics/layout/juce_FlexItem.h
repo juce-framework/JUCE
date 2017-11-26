@@ -32,7 +32,7 @@ namespace juce
 
     @see FlexBox
 */
-class JUCE_API  FlexItem
+class JUCE_API  FlexItem  final
 {
 public:
     //==============================================================================
@@ -91,7 +91,7 @@ public:
     enum class AlignSelf  { autoAlign, flexStart, flexEnd, center, stretch };
 
     /** This is the aligh-self property of the item.
-        This determines the alignment of the item along the corss-axis (perpendicular to the direction
+        This determines the alignment of the item along the cross-axis (perpendicular to the direction
         of flow).
     */
     AlignSelf alignSelf = AlignSelf::stretch;
@@ -111,7 +111,7 @@ public:
     float maxHeight = (float) notAssigned;  /**< The item's maximum height */
 
     /** Represents a margin. */
-    struct Margin
+    struct Margin  final
     {
         Margin() noexcept;              /**< Creates a margin of size zero. */
         Margin (float size) noexcept;   /**< Creates a margin with this size on all sides. */

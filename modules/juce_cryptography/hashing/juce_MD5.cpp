@@ -229,11 +229,11 @@ MD5::MD5 (CharPointer_UTF8 utf8) noexcept
 MD5 MD5::fromUTF32 (StringRef text)
 {
     MD5Generator generator;
-    String::CharPointerType t (text.text);
+    auto t = text.text;
 
     while (! t.isEmpty())
     {
-        uint32 unicodeChar = ByteOrder::swapIfBigEndian ((uint32) t.getAndAdvance());
+        auto unicodeChar = ByteOrder::swapIfBigEndian ((uint32) t.getAndAdvance());
         generator.processBlock (&unicodeChar, sizeof (unicodeChar));
     }
 
@@ -276,7 +276,7 @@ void MD5::processStream (InputStream& input, int64 numBytesToRead)
     while (numBytesToRead > 0)
     {
         uint8 tempBuffer [512];
-        const int bytesRead = input.read (tempBuffer, (int) jmin (numBytesToRead, (int64) sizeof (tempBuffer)));
+        auto bytesRead = input.read (tempBuffer, (int) jmin (numBytesToRead, (int64) sizeof (tempBuffer)));
 
         if (bytesRead <= 0)
             break;

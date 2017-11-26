@@ -69,6 +69,17 @@ void ThreadPoolJob::setJobName (const String& newName)
 void ThreadPoolJob::signalJobShouldExit()
 {
     shouldStop = true;
+    listeners.call (&Thread::Listener::exitSignalSent);
+}
+
+void ThreadPoolJob::addListener (Thread::Listener* listener)
+{
+    listeners.add (listener);
+}
+
+void ThreadPoolJob::removeListener (Thread::Listener* listener)
+{
+    listeners.remove (listener);
 }
 
 ThreadPoolJob* ThreadPoolJob::getCurrentThreadPoolJob()

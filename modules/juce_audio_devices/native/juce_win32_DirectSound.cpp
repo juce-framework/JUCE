@@ -266,6 +266,10 @@ public:
         pDirectSound = nullptr;
         pOutputBuffer = nullptr;
         writeOffset = 0;
+        xruns = 0;
+
+        firstPlayTime = true;
+        lastPlayTime = 0;
 
         String error;
         HRESULT hr = E_NOINTERFACE;
@@ -276,6 +280,7 @@ public:
         if (SUCCEEDED (hr))
         {
             bytesPerBuffer = (bufferSizeSamples * (bitDepth >> 2)) & ~15;
+            ticksPerBuffer = bytesPerBuffer * Time::getHighResolutionTicksPerSecond() / (sampleRate * (bitDepth >> 2));
             totalBytesPerBuffer = (blocksPerOverallBuffer * bytesPerBuffer) & ~15;
             const int numChannels = 2;
 
@@ -397,6 +402,18 @@ public:
             return true;
         }
 
+        auto currentPlayTime = Time::getHighResolutionTicks();
+        if (! firstPlayTime)
+        {
+            auto expectedBuffers = (currentPlayTime - lastPlayTime) / ticksPerBuffer;
+
+            playCursor += static_cast<DWORD> (expectedBuffers * bytesPerBuffer);
+        }
+        else
+            firstPlayTime = false;
+
+        lastPlayTime = currentPlayTime;
+
         int playWriteGap = (int) (writeCursor - playCursor);
         if (playWriteGap < 0)
             playWriteGap += totalBytesPerBuffer;
@@ -409,6 +426,9 @@ public:
         {
             writeOffset = writeCursor;
             bytesEmpty = totalBytesPerBuffer - playWriteGap;
+
+            // buffer underflow
+            xruns++;
         }
 
         if (bytesEmpty >= bytesPerBuffer)
@@ -480,7 +500,7 @@ public:
         }
     }
 
-    int bitDepth;
+    int bitDepth, xruns;
     bool doneFlag;
 
 private:
@@ -495,6 +515,9 @@ private:
     DWORD writeOffset;
     int totalBytesPerBuffer, bytesPerBuffer;
     unsigned int lastPlayCursor;
+
+    bool firstPlayTime;
+    int64 lastPlayTime, ticksPerBuffer;
 
     static inline int convertInputValues (const float l, const float r) noexcept
     {
@@ -511,9 +534,8 @@ struct DSoundInternalInChannel
 public:
     DSoundInternalInChannel (const String& name_, const GUID& guid_, int rate,
                              int bufferSize, float* left, float* right)
-        : bitDepth (16), name (name_), guid (guid_), sampleRate (rate),
-          bufferSizeSamples (bufferSize), leftBuffer (left), rightBuffer (right),
-          pDirectSound (nullptr), pDirectSoundCapture (nullptr), pInputBuffer (nullptr)
+        : name (name_), guid (guid_), sampleRate (rate),
+          bufferSizeSamples (bufferSize), leftBuffer (left), rightBuffer (right)
     {
     }
 
@@ -624,6 +646,7 @@ public:
             return true;
 
         int bytesFilled = (int) (readPos - readOffset);
+
         if (bytesFilled < 0)
             bytesFilled += totalBytesPerBuffer;
 
@@ -692,7 +715,7 @@ public:
 
     unsigned int readOffset;
     int bytesPerBuffer, totalBytesPerBuffer;
-    int bitDepth;
+    int bitDepth = 16;
     bool doneFlag;
 
 private:
@@ -702,9 +725,9 @@ private:
     float* leftBuffer;
     float* rightBuffer;
 
-    IDirectSound* pDirectSound;
-    IDirectSoundCapture* pDirectSoundCapture;
-    IDirectSoundCaptureBuffer* pInputBuffer;
+    IDirectSound* pDirectSound = nullptr;
+    IDirectSoundCapture* pDirectSoundCapture = nullptr;
+    IDirectSoundCaptureBuffer* pInputBuffer = nullptr;
 
     JUCE_DECLARE_NON_COPYABLE (DSoundInternalInChannel)
 };
@@ -720,12 +743,7 @@ public:
         : AudioIODevice (deviceName, "DirectSound"),
           Thread ("Juce DSound"),
           outputDeviceIndex (outputDeviceIndex_),
-          inputDeviceIndex (inputDeviceIndex_),
-          isOpen_ (false),
-          isStarted (false),
-          bufferSizeSamples (0),
-          sampleRate (0.0),
-          callback (nullptr)
+          inputDeviceIndex (inputDeviceIndex_)
     {
         if (outputDeviceIndex_ >= 0)
         {
@@ -778,8 +796,7 @@ public:
 
     Array<double> getAvailableSampleRates() override
     {
-        static const double rates[] = { 44100.0, 48000.0, 88200.0, 96000.0 };
-        return Array<double> (rates, numElementsInArray (rates));
+        return { 44100.0, 48000.0, 88200.0, 96000.0 };
     }
 
     Array<int> getAvailableBufferSizes() override
@@ -839,7 +856,7 @@ public:
     {
         if (isStarted)
         {
-            AudioIODeviceCallback* const callbackLocal = callback;
+            auto* callbackLocal = callback;
 
             {
                 const ScopedLock sl (startStopLock);
@@ -854,25 +871,30 @@ public:
     bool isPlaying() override            { return isStarted && isOpen_ && isThreadRunning(); }
     String getLastError() override       { return lastError; }
 
+    int getXRunCount() const noexcept override
+    {
+        return outChans[0] != nullptr ? outChans[0]->xruns : -1;
+    }
+
     //==============================================================================
     StringArray inChannels, outChannels;
     int outputDeviceIndex, inputDeviceIndex;
 
 private:
-    bool isOpen_;
-    bool isStarted;
+    bool isOpen_ = false;
+    bool isStarted = false;
     String lastError;
 
     OwnedArray<DSoundInternalInChannel> inChans;
     OwnedArray<DSoundInternalOutChannel> outChans;
     WaitableEvent startEvent;
 
-    int bufferSizeSamples;
-    double sampleRate;
+    int bufferSizeSamples = 0;
+    double sampleRate = 0;
     BigInteger enabledInputs, enabledOutputs;
     AudioSampleBuffer inputBuffers, outputBuffers;
 
-    AudioIODeviceCallback* callback;
+    AudioIODeviceCallback* callback = nullptr;
     CriticalSection startStopLock;
 
     String openDevice (const BigInteger& inputChannels,
@@ -1190,8 +1212,7 @@ class DSoundAudioIODeviceType  : public AudioIODeviceType,
 public:
     DSoundAudioIODeviceType()
         : AudioIODeviceType ("DirectSound"),
-          DeviceChangeDetector (L"DirectSound"),
-          hasScanned (false)
+          DeviceChangeDetector (L"DirectSound")
     {
         initialiseDSoundFunctions();
     }
@@ -1247,7 +1268,7 @@ public:
 
 private:
     DSoundDeviceList deviceList;
-    bool hasScanned;
+    bool hasScanned = false;
 
     void systemDeviceChanged() override
     {

@@ -91,7 +91,7 @@ public:
                 {
                     jassert (parentContentsList != nullptr);
 
-                    DirectoryContentsList* const l = new DirectoryContentsList (parentContentsList->getFilter(), thread);
+                    auto l = new DirectoryContentsList (parentContentsList->getFilter(), thread);
 
                     l->setDirectory (file,
                                      parentContentsList->isFindingDirectories(),
@@ -299,7 +299,7 @@ void FileTreeComponent::deselectAllFiles()
 
 void FileTreeComponent::scrollToTop()
 {
-    getViewport()->getVerticalScrollBar()->setCurrentRangeStart (0);
+    getViewport()->getVerticalScrollBar().setCurrentRangeStart (0);
 }
 
 void FileTreeComponent::setDragAndDropDescription (const String& description)

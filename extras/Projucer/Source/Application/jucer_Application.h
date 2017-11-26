@@ -29,8 +29,8 @@
 #include "jucer_MainWindow.h"
 #include "../Project/jucer_Module.h"
 #include "jucer_AutoUpdater.h"
-#include "../Code Editor/jucer_SourceCodeEditor.h"
-#include "../Utility/jucer_ProjucerLookAndFeel.h"
+#include "../CodeEditor/jucer_SourceCodeEditor.h"
+#include "../Utility/UI/jucer_ProjucerLookAndFeel.h"
 #include "../Licenses/jucer_LicenseController.h"
 
 struct ChildProcessCache;

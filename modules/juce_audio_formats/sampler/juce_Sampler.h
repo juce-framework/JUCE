@@ -95,8 +95,8 @@ private:
     ScopedPointer<AudioSampleBuffer> data;
     double sourceSampleRate;
     BigInteger midiNotes;
-    int length, attackSamples, releaseSamples;
-    int midiRootNote;
+    int length = 0, attackSamples = 0, releaseSamples = 0;
+    int midiRootNote = 0;
 
     JUCE_LEAK_DETECTOR (SamplerSound)
 };
@@ -135,10 +135,10 @@ public:
 
 private:
     //==============================================================================
-    double pitchRatio;
-    double sourceSamplePosition;
-    float lgain, rgain, attackReleaseLevel, attackDelta, releaseDelta;
-    bool isInAttack, isInRelease;
+    double pitchRatio = 0;
+    double sourceSamplePosition = 0;
+    float lgain = 0, rgain = 0, attackReleaseLevel = 0, attackDelta = 0, releaseDelta = 0;
+    bool isInAttack = false, isInRelease = false;
 
     JUCE_LEAK_DETECTOR (SamplerVoice)
 };

@@ -2,9 +2,9 @@
 
 <JUCERPROJECT id="AKfc5m" name="AudioPerformanceTest" projectType="guiapp"
               version="1.0.0" bundleIdentifier="com.juce.AudioPerformanceTest"
-              includeBinaryInAppConfig="1" jucerVersion="5.1.2" displaySplashScreen="0"
+              includeBinaryInAppConfig="1" jucerVersion="5.2.0" displaySplashScreen="0"
               reportAppUsage="0" splashScreenColour="Dark" companyName="ROLI Ltd."
-              cppLanguageStandard="11">
+              cppLanguageStandard="11" companyCopyright="ROLI Ltd.">
   <MAINGROUP id="b1eVTe" name="AudioPerformanceTest">
     <GROUP id="{AB66118C-9D88-1C3A-D95C-42892D828E4B}" name="Source">
       <FILE id="SqGU9p" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
@@ -33,7 +33,8 @@
         <MODULEPATH id="juce_audio_utils" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <XCODE_IPHONE targetFolder="Builds/iOS" extraCompilerFlags="" iosScreenOrientation="portraitlandscape">
+    <XCODE_IPHONE targetFolder="Builds/iOS" extraCompilerFlags="" iosScreenOrientation="portraitlandscape"
+                  iPadScreenOrientation="portraitlandscape" iosDeviceFamily="1,2">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" iosCompatibility="default" isDebug="1" optimisation="1"
                        targetName="AudioPerformanceTest"/>

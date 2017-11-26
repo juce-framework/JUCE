@@ -53,6 +53,11 @@
   #import <Carbon/Carbon.h> // still needed for SetSystemUIMode()
  #endif
 
+#elif JUCE_IOS
+ #if JUCE_PUSH_NOTIFICATIONS && defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+  #import <UserNotifications/UserNotifications.h>
+ #endif
+
 //==============================================================================
 #elif JUCE_WINDOWS
  #include <windowsx.h>

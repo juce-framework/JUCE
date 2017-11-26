@@ -212,9 +212,9 @@ void findMinAndMax (const Type* values, int numValues, Type& lowest, Type& highe
     @see jmin, jmax, jmap
 */
 template <typename Type>
-Type jlimit (const Type lowerLimit,
-             const Type upperLimit,
-             const Type valueToConstrain) noexcept
+Type jlimit (Type lowerLimit,
+             Type upperLimit,
+             Type valueToConstrain) noexcept
 {
     jassert (lowerLimit <= upperLimit); // if these are in the wrong order, results are unpredictable..
 
@@ -228,15 +228,15 @@ Type jlimit (const Type lowerLimit,
     @code valueToTest >= 0 && valueToTest < upperLimit
     @endcode
 */
-template <typename Type>
-bool isPositiveAndBelow (Type valueToTest, Type upperLimit) noexcept
+template <typename Type1, typename Type2>
+bool isPositiveAndBelow (Type1 valueToTest, Type2 upperLimit) noexcept
 {
-    jassert (Type() <= upperLimit); // makes no sense to call this if the upper limit is itself below zero..
-    return Type() <= valueToTest && valueToTest < upperLimit;
+    jassert (Type1() <= static_cast<Type1> (upperLimit)); // makes no sense to call this if the upper limit is itself below zero..
+    return Type1() <= valueToTest && valueToTest < static_cast<Type1> (upperLimit);
 }
 
-template <>
-inline bool isPositiveAndBelow (const int valueToTest, const int upperLimit) noexcept
+template <typename Type>
+bool isPositiveAndBelow (int valueToTest, Type upperLimit) noexcept
 {
     jassert (upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero..
     return static_cast<unsigned int> (valueToTest) < static_cast<unsigned int> (upperLimit);
@@ -247,28 +247,21 @@ inline bool isPositiveAndBelow (const int valueToTest, const int upperLimit) noe
     @code valueToTest >= 0 && valueToTest <= upperLimit
     @endcode
 */
-template <typename Type>
-bool isPositiveAndNotGreaterThan (Type valueToTest, Type upperLimit) noexcept
+template <typename Type1, typename Type2>
+bool isPositiveAndNotGreaterThan (Type1 valueToTest, Type2 upperLimit) noexcept
 {
-    jassert (Type() <= upperLimit); // makes no sense to call this if the upper limit is itself below zero..
-    return Type() <= valueToTest && valueToTest <= upperLimit;
+    jassert (Type1() <= static_cast<Type1> (upperLimit)); // makes no sense to call this if the upper limit is itself below zero..
+    return Type1() <= valueToTest && valueToTest <= static_cast<Type1> (upperLimit);
 }
 
-template <>
-inline bool isPositiveAndNotGreaterThan (const int valueToTest, const int upperLimit) noexcept
+template <typename Type>
+bool isPositiveAndNotGreaterThan (int valueToTest, Type upperLimit) noexcept
 {
     jassert (upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero..
     return static_cast<unsigned int> (valueToTest) <= static_cast<unsigned int> (upperLimit);
 }
 
 //==============================================================================
-/** Handy function to swap two values. */
-template <typename Type>
-void swapVariables (Type& variable1, Type& variable2)
-{
-    std::swap (variable1, variable2);
-}
-
 /** Handy function for avoiding unused variables warning. */
 template <typename Type1>
 void ignoreUnused (const Type1&) noexcept {}

@@ -2261,7 +2261,7 @@ private:
     ScopedPointer<Positioner> positioner;
     ScopedPointer<AffineTransform> affineTransform;
     Array<Component*> childComponentList;
-    LookAndFeel* lookAndFeel = nullptr;
+    WeakReference<LookAndFeel> lookAndFeel;
     MouseCursor cursor;
     ImageEffectFilter* effect = nullptr;
     ScopedPointer<CachedComponentImage> cachedImage;
@@ -2270,7 +2270,7 @@ private:
     friend class MouseListenerList;
     friend struct ContainerDeletePolicy<MouseListenerList>;
     ScopedPointer<MouseListenerList> mouseListeners;
-    ScopedPointer<Array<KeyListener*> > keyListeners;
+    ScopedPointer<Array<KeyListener*>> keyListeners;
     ListenerList<ComponentListener> componentListeners;
     NamedValueSet properties;
 

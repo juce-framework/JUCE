@@ -27,14 +27,8 @@
 namespace juce
 {
 
-AudioFormatReader::AudioFormatReader (InputStream* const in, const String& name)
-    : sampleRate (0),
-      bitsPerSample (0),
-      lengthInSamples (0),
-      numChannels (0),
-      usesFloatingPointData (false),
-      input (in),
-      formatName (name)
+AudioFormatReader::AudioFormatReader (InputStream* in, const String& name)
+    : input (in), formatName (name)
 {
 }
 
@@ -168,7 +162,7 @@ void AudioFormatReader::read (AudioSampleBuffer* buffer,
         }
         else
         {
-            HeapBlock<int*> chans ((size_t) numTargetChannels + 1);
+            HeapBlock<int*> chans (numTargetChannels + 1);
             readChannels (*this, chans, buffer, startSample, numSamples, readerStartSample, numTargetChannels);
         }
 
@@ -274,14 +268,14 @@ int64 AudioFormatReader::searchForLevel (int64 startSample,
 
     jassert (magnitudeRangeMaximum > magnitudeRangeMinimum);
 
-    const double doubleMin = jlimit (0.0, (double) std::numeric_limits<int>::max(), magnitudeRangeMinimum * std::numeric_limits<int>::max());
-    const double doubleMax = jlimit (doubleMin, (double) std::numeric_limits<int>::max(), magnitudeRangeMaximum * std::numeric_limits<int>::max());
-    const int intMagnitudeRangeMinimum = roundToInt (doubleMin);
-    const int intMagnitudeRangeMaximum = roundToInt (doubleMax);
+    auto doubleMin = jlimit (0.0, (double) std::numeric_limits<int>::max(), magnitudeRangeMinimum * std::numeric_limits<int>::max());
+    auto doubleMax = jlimit (doubleMin, (double) std::numeric_limits<int>::max(), magnitudeRangeMaximum * std::numeric_limits<int>::max());
+    auto intMagnitudeRangeMinimum = roundToInt (doubleMin);
+    auto intMagnitudeRangeMaximum = roundToInt (doubleMax);
 
     while (numSamplesToSearch != 0)
     {
-        const int numThisTime = (int) jmin (abs64 (numSamplesToSearch), (int64) bufferSize);
+        auto numThisTime = (int) jmin (abs64 (numSamplesToSearch), (int64) bufferSize);
         int64 bufferStart = startSample;
 
         if (numSamplesToSearch < 0)
@@ -291,15 +285,15 @@ int64 AudioFormatReader::searchForLevel (int64 startSample,
             break;
 
         read (tempBuffer, 2, bufferStart, numThisTime, false);
+        auto num = numThisTime;
 
-        int num = numThisTime;
         while (--num >= 0)
         {
             if (numSamplesToSearch < 0)
                 --startSample;
 
             bool matches = false;
-            const int index = (int) (startSample - bufferStart);
+            auto index = (int) (startSample - bufferStart);
 
             if (usesFloatingPointData)
             {
@@ -320,7 +314,7 @@ int64 AudioFormatReader::searchForLevel (int64 startSample,
             }
             else
             {
-                const int sample1 = abs (tempBuffer[0] [index]);
+                const int sample1 = std::abs (tempBuffer[0] [index]);
 
                 if (sample1 >= intMagnitudeRangeMinimum
                      && sample1 <= intMagnitudeRangeMaximum)
@@ -329,7 +323,7 @@ int64 AudioFormatReader::searchForLevel (int64 startSample,
                 }
                 else if (numChannels > 1)
                 {
-                    const int sample2 = abs (tempBuffer[1][index]);
+                    const int sample2 = std::abs (tempBuffer[1][index]);
 
                     matches = (sample2 >= intMagnitudeRangeMinimum
                                  && sample2 <= intMagnitudeRangeMaximum);

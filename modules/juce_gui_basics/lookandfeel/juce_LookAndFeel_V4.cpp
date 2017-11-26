@@ -200,6 +200,8 @@ void LookAndFeel_V4::positionDocumentWindowButtons (DocumentWindow&,
                                                     Button* closeButton,
                                                     bool positionTitleBarButtonsOnLeft)
 {
+    titleBarH = jmin (titleBarH, titleBarH - titleBarY);
+
     const int buttonW = (int) (titleBarH * 1.2);
 
     int x = positionTitleBarButtonsOnLeft ? titleBarX
@@ -1305,7 +1307,7 @@ void LookAndFeel_V4::initialiseColours()
 
         TextEditor::backgroundColourId,             currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).getARGB(),
         TextEditor::textColourId,                   currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
-        TextEditor::highlightColourId,              currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedFill).getARGB(),
+        TextEditor::highlightColourId,              currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).withAlpha (0.4f).getARGB(),
         TextEditor::highlightedTextColourId,        currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedText).getARGB(),
         TextEditor::outlineColourId,                currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
         TextEditor::focusedOutlineColourId,         currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
@@ -1362,7 +1364,7 @@ void LookAndFeel_V4::initialiseColours()
         Slider::rotarySliderOutlineColourId,        currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).getARGB(),
         Slider::textBoxTextColourId,                currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
         Slider::textBoxBackgroundColourId,          currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).withAlpha (0.0f).getARGB(),
-        Slider::textBoxHighlightColourId,           currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedFill).getARGB(),
+        Slider::textBoxHighlightColourId,           currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).withAlpha (0.4f).getARGB(),
         Slider::textBoxOutlineColourId,             currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
 
         ResizableWindow::backgroundColourId,        currentColourScheme.getUIColour (ColourScheme::UIColour::windowBackground).getARGB(),
@@ -1422,7 +1424,7 @@ void LookAndFeel_V4::initialiseColours()
         0x1005008, /*MidiKeyboardComponent::shadowColourId*/                  0x4c000000,
 
         0x1004500, /*CodeEditorComponent::backgroundColourId*/                currentColourScheme.getUIColour (ColourScheme::UIColour::widgetBackground).getARGB(),
-        0x1004502, /*CodeEditorComponent::highlightColourId*/                 currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedFill).getARGB(),
+        0x1004502, /*CodeEditorComponent::highlightColourId*/                 currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).withAlpha (0.4f).getARGB(),
         0x1004503, /*CodeEditorComponent::defaultTextColourId*/               currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
         0x1004504, /*CodeEditorComponent::lineNumberBackgroundId*/            currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedFill).withAlpha (0.5f).getARGB(),
         0x1004505, /*CodeEditorComponent::lineNumberTextId*/                  currentColourScheme.getUIColour (ColourScheme::UIColour::defaultFill).getARGB(),

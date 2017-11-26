@@ -25,7 +25,8 @@ namespace juce
 
 WebInputStream::WebInputStream (const URL& url, const bool usePost)
     : pimpl (new Pimpl (*this, url, usePost)), hasCalledConnect (false)
-{}
+{
+}
 
 WebInputStream::~WebInputStream()
 {

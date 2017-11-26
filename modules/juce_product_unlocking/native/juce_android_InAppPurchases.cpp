@@ -74,16 +74,6 @@ DECLARE_JNI_CLASS (Integer, "java/lang/Integer");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
-    METHOD (constructor,         "<init>",         "()V") \
-    METHOD (constructWithString, "<init>",         "(Ljava/lang/String;)V") \
-    METHOD (setPackage,          "setPackage",     "(Ljava/lang/String;)Landroid/content/Intent;") \
-    METHOD (getIntExtra,         "getIntExtra",    "(Ljava/lang/String;I)I") \
-    METHOD (getStringExtra,      "getStringExtra", "(Ljava/lang/String;)Ljava/lang/String;")
-
-DECLARE_JNI_CLASS (Intent, "android/content/Intent");
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
     METHOD (hasNext, "hasNext", "()Z") \
     METHOD (next,    "next",    "()Ljava/lang/Object;")
 
@@ -203,14 +193,19 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
             android.activity.callVoidMethod (JuceAppActivity.startIntentSenderForResult, intentSender.get(), requestCode,
                                              fillInIntent.get(), flagsMask.get(), flagsValues.get(), extraFlags.get());
         }
+        else if (responseCode == 7)
+        {
+            // Item already bought.
+            notifyAboutPurchaseResult ({ {}, productIdentifier, juceString (getPackageName()), {}, {} }, true, statusCodeToUserString (responseCode));
+        }
     }
 
     void restoreProductsBoughtList (bool, const juce::String&)
     {
-        auto callback = [this](const Array<InAppPurchases::Listener::PurchaseInfo>& purchases)
+        auto callback = [this](const GetProductsBoughtJob::Result& r)
         {
             const ScopedLock lock (getProductsBoughtJobResultsLock);
-            getProductsBoughtJobResults.insert (0, purchases);
+            getProductsBoughtJobResults.insert (0, r);
             triggerAsyncUpdate();
         };
 
@@ -546,7 +541,14 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
     //==============================================================================
     struct GetProductsBoughtJob  : public ThreadPoolJob
     {
-        using Callback = std::function<void(const Array<InAppPurchases::Listener::PurchaseInfo>&)>;
+        struct Result
+        {
+            bool success = false;
+            Array<InAppPurchases::Listener::PurchaseInfo> purchases;
+            String statusDescription;
+        };
+
+        using Callback = std::function<void(const Result&)>;
 
         GetProductsBoughtJob (Pimpl& parent,
                               const LocalRef<jstring>& packageNameToUse,
@@ -574,12 +576,12 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
                     purchases.add ({ purchase, {} });
 
                 if (callback)
-                    callback (purchases);
+                    callback ({true, purchases, "Success"});
             }
             else
             {
                 if (callback)
-                    callback ({});
+                    callback ({false, {}, "In-App purchases unavailable"});
             }
 
             return jobHasFinished;
@@ -661,8 +663,8 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
     public:
         struct Result
         {
+            bool success = false;
             String productIdentifier;
-            bool success;
             String statusDescription;
         };
 
@@ -692,7 +694,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
                 if (token.isEmpty())
                 {
                     if (callback)
-                        callback ({ productIdentifier, false, NEEDS_TRANS ("Item not owned") });
+                        callback ({ false, productIdentifier, NEEDS_TRANS ("Item not owned") });
 
                     return jobHasFinished;
                 }
@@ -701,12 +703,12 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
                                                                        (jstring)packageName.get(), javaString (token).get());
 
                 if (callback)
-                    callback ({ productIdentifier, responseCode == 0, statusCodeToUserString (responseCode) });
+                    callback ({ responseCode == 0, productIdentifier, statusCodeToUserString (responseCode) });
             }
             else
             {
                 if (callback)
-                    callback ({{}, false, "In-App purchases unavailable"});
+                    callback ({false, {}, "In-App purchases unavailable"});
             }
 
             return jobHasFinished;
@@ -790,7 +792,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
             {
                 const auto& result = getProductsBoughtJobResults.getReference (i);
 
-                owner.listeners.call (&Listener::purchasesListRestored, result, true, NEEDS_TRANS ("Success"));
+                owner.listeners.call (&Listener::purchasesListRestored, result.purchases, result.success, result.statusDescription);
                 getProductsBoughtJobResults.remove (i);
             }
         }
@@ -923,7 +925,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
                     consumePurchaseJobResultsLock;
 
     Array<Array<InAppPurchases::Product>> getProductsInformationJobResults;
-    Array<Array<InAppPurchases::Listener::PurchaseInfo>> getProductsBoughtJobResults;
+    Array<GetProductsBoughtJob::Result> getProductsBoughtJobResults;
     Array<ConsumePurchaseJob::Result> consumePurchaseJobResults;
 };
 

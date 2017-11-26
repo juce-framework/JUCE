@@ -49,14 +49,8 @@ private:
 };
 
 //==============================================================================
-ApplicationCommandTarget::ApplicationCommandTarget()
-{
-}
-
-ApplicationCommandTarget::~ApplicationCommandTarget()
-{
-    masterReference.clear();
-}
+ApplicationCommandTarget::ApplicationCommandTarget() {}
+ApplicationCommandTarget::~ApplicationCommandTarget() {}
 
 //==============================================================================
 bool ApplicationCommandTarget::tryToInvoke (const InvocationInfo& info, const bool async)

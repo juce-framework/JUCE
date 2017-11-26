@@ -475,8 +475,10 @@ public:
     */
     void setScrollToShowCursor (bool shouldScrollToShowCaret);
 
-    /** Sets the line spacing of the TextEditor.
+    /** Modifies the horizontal justification of the text within the editor window. */
+    void setJustification (Justification newJustification);
 
+    /** Sets the line spacing of the TextEditor.
         The default (and minimum) value is 1.0 and values > 1.0 will increase the line spacing as a
         multiple of the line height e.g. for double-spacing call this method with an argument of 2.0.
     */
@@ -651,15 +653,13 @@ public:
     /** @internal */
     void enablementChanged() override;
     /** @internal */
-    void colourChanged() override;
-    /** @internal */
     void lookAndFeelChanged() override;
     /** @internal */
     void parentHierarchyChanged() override;
     /** @internal */
     bool isTextInputActive() const override;
     /** @internal */
-    void setTemporaryUnderlining (const Array<Range<int> >&) override;
+    void setTemporaryUnderlining (const Array<Range<int>>&) override;
     /** @internal */
     VirtualKeyboardType getKeyboardType() override    { return keyboardType; }
 
@@ -682,17 +682,17 @@ protected:
 
 private:
     //==============================================================================
-    class Iterator;
     JUCE_PUBLIC_IN_DLL_BUILD (class UniformTextSection)
-    class TextHolderComponent;
-    class InsertAction;
-    class RemoveAction;
-    friend class InsertAction;
-    friend class RemoveAction;
+    struct Iterator;
+    struct TextHolderComponent;
+    struct TextEditorViewport;
+    struct InsertAction;
+    struct RemoveAction;
 
     ScopedPointer<Viewport> viewport;
     TextHolderComponent* textHolder;
     BorderSize<int> borderSize { 1, 1, 1, 3 };
+    Justification justification { Justification::left };
 
     bool readOnly = false;
     bool caretVisible = true;
@@ -723,18 +723,20 @@ private:
     juce_wchar passwordCharacter;
     OptionalScopedPointer<InputFilter> inputFilter;
     Value textValue;
-    VirtualKeyboardType keyboardType;
+    VirtualKeyboardType keyboardType = TextInputTarget::textKeyboard;
     float lineSpacing = 1.0f;
 
-    enum
+    enum DragType
     {
         notDragging,
         draggingSelectionStart,
         draggingSelectionEnd
-    } dragType;
+    };
+
+    DragType dragType = notDragging;
 
     ListenerList<Listener> listeners;
-    Array<Range<int> > underlinedSections;
+    Array<Range<int>> underlinedSections;
 
     void moveCaret (int newCaretPos);
     void moveCaretTo (int newPosition, bool isSelecting);
@@ -743,10 +745,11 @@ private:
     void coalesceSimilarSections();
     void splitSection (int sectionIndex, int charToSplitAt);
     void clearInternal (UndoManager*);
-    void insert (const String&, int insertIndex, const Font&, const Colour, UndoManager*, int newCaretPos);
+    void insert (const String&, int insertIndex, const Font&, Colour, UndoManager*, int newCaretPos);
     void reinsert (int insertIndex, const OwnedArray<UniformTextSection>&);
-    void remove (Range<int> range, UndoManager*, int caretPositionToMoveTo);
-    void getCharPosition (int index, float& x, float& y, float& lineHeight) const;
+    void remove (Range<int>, UndoManager*, int caretPositionToMoveTo);
+    void getCharPosition (int index, Point<float>&, float& lineHeight) const;
+    Rectangle<float> getCaretRectangleFloat() const;
     void updateCaretPosition();
     void updateValueFromText();
     void textWasChangedByValue();
@@ -754,11 +757,10 @@ private:
     int findWordBreakAfter (int position) const;
     int findWordBreakBefore (int position) const;
     bool moveCaretWithTransaction (int newPos, bool selecting);
-    friend class TextHolderComponent;
-    friend class TextEditorViewport;
     void drawContent (Graphics&);
     void updateTextHolderSize();
     float getWordWrapWidth() const;
+    float getJustificationWidth() const;
     void timerCallbackInt();
     void repaintText (Range<int>);
     void scrollByLines (int deltaLines);

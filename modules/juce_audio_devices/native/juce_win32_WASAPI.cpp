@@ -128,7 +128,12 @@ enum EDataFlow
 
 enum
 {
-    DEVICE_STATE_ACTIVE = 1,
+    DEVICE_STATE_ACTIVE = 1
+};
+
+enum
+{
+    AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY = 1,
     AUDCLNT_BUFFERFLAGS_SILENT = 2
 };
 
@@ -437,6 +442,7 @@ public:
              && tryInitialisingWithBufferSize (bufferSizeSamples))
         {
             sampleRateHasChanged = false;
+            shouldClose = false;
 
             channelMaps.clear();
             for (int i = 0; i <= channels.getHighestBit(); ++i)
@@ -742,6 +748,7 @@ public:
         reservoirMask = nextPowerOfTwo (reservoirSize) - 1;
         reservoir.setSize ((reservoirMask + 1) * bytesPerFrame, true);
         reservoirReadPos = reservoirWritePos = 0;
+        xruns = 0;
 
         if (! check (client->Start()))
             return false;
@@ -774,6 +781,9 @@ public:
 
         while (check (captureClient->GetBuffer (&inputData, &numSamplesAvailable, &flags, nullptr, nullptr)) && numSamplesAvailable > 0)
         {
+            if ((flags & AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) != 0)
+                xruns++;
+
             int samplesLeft = (int) numSamplesAvailable;
 
             while (samplesLeft > 0)
@@ -838,7 +848,7 @@ public:
 
     ComSmartPtr<IAudioCaptureClient> captureClient;
     MemoryBlock reservoir;
-    int reservoirSize, reservoirMask;
+    int reservoirSize, reservoirMask, xruns;
     volatile int reservoirReadPos, reservoirWritePos;
 
     ScopedPointer<AudioData::Converter> converter;
@@ -878,7 +888,7 @@ public:
     void updateFormatWithType (DestType*)
     {
         typedef AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const> NativeType;
-        converter = new AudioData::ConverterInstance<NativeType, AudioData::Pointer<DestType, AudioData::LittleEndian, AudioData::Interleaved, AudioData::NonConst> > (1, actualNumChannels);
+        converter = new AudioData::ConverterInstance<NativeType, AudioData::Pointer<DestType, AudioData::LittleEndian, AudioData::Interleaved, AudioData::NonConst>> (1, actualNumChannels);
     }
 
     void updateFormat (bool isFloat) override
@@ -1075,7 +1085,7 @@ public:
     BigInteger getActiveOutputChannels() const override     { return outputDevice != nullptr ? outputDevice->channels : BigInteger(); }
     BigInteger getActiveInputChannels() const override      { return inputDevice  != nullptr ? inputDevice->channels  : BigInteger(); }
     String getLastError() override                          { return lastError; }
-
+    int getXRunCount () const noexcept override             { return inputDevice != nullptr ? inputDevice->xruns : -1; }
 
     String open (const BigInteger& inputChannels, const BigInteger& outputChannels,
                  double sampleRate, int bufferSizeSamples) override

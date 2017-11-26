@@ -26,10 +26,8 @@
 
 #pragma once
 
-
-#include "components/jucer_ComponentTypeHandler.h"
+#include "Components/jucer_ComponentTypeHandler.h"
 class JucerDocument;
-
 
 //==============================================================================
 /**

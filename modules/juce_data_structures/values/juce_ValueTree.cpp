@@ -835,7 +835,8 @@ ValueTree ValueTree::getChild (int index) const
 
 ValueTree::Iterator::Iterator (const ValueTree& v, bool isEnd) noexcept
    : internal (v.object != nullptr ? (isEnd ? v.object->children.end() : v.object->children.begin()) : nullptr)
-{}
+{
+}
 
 ValueTree::Iterator& ValueTree::Iterator::operator++() noexcept
 {

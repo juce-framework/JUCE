@@ -2,8 +2,8 @@
 
 <JUCERPROJECT id="X7eXs7" name="BlocksMonitor" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.yourcompany.BlocksInfo" includeBinaryInAppConfig="1"
-              jucerVersion="5.1.2" displaySplashScreen="0" reportAppUsage="0"
-              splashScreenColour="Dark" cppLanguageStandard="11">
+              jucerVersion="5.2.0" displaySplashScreen="0" reportAppUsage="0"
+              splashScreenColour="Dark" cppLanguageStandard="11" companyCopyright="">
   <MAINGROUP id="msZ9DB" name="BlocksMonitor">
     <GROUP id="{2C318C74-6596-8102-3CA6-602595447F25}" name="Source">
       <FILE id="Tw2mMp" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
@@ -34,7 +34,8 @@
         <MODULEPATH id="juce_audio_processors" path="../../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="portraitlandscape">
+    <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="portraitlandscape"
+                  iPadScreenOrientation="portraitlandscape" iosDeviceFamily="1,2">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="BlocksMonitor"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="BlocksMonitor"/>

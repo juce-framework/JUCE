@@ -64,15 +64,13 @@ public:
 
 private:
     //==============================================================================
-    friend class WeakReference<ActionBroadcaster>;
-    WeakReference<ActionBroadcaster>::Master masterReference;
-
     class ActionMessage;
     friend class ActionMessage;
 
     SortedSet<ActionListener*> actionListeners;
     CriticalSection actionListenerLock;
 
+    JUCE_DECLARE_WEAK_REFERENCEABLE (ActionBroadcaster)
     JUCE_DECLARE_NON_COPYABLE (ActionBroadcaster)
 };
 

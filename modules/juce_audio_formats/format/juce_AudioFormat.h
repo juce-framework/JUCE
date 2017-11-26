@@ -47,18 +47,15 @@ public:
     */
     const String& getFormatName() const;
 
+    //==============================================================================
     /** Returns all the file extensions that might apply to a file of this format.
-
         The first item will be the one that's preferred when creating a new file.
-
         So for a wav file this might just return ".wav"; for an AIFF file it might
         return two items, ".aif" and ".aiff"
     */
-    const StringArray& getFileExtensions() const;
+    virtual StringArray getFileExtensions() const;
 
-    //==============================================================================
     /** Returns true if this the given file can be read by this format.
-
         Subclasses shouldn't do too much work here, just check the extension or
         file type. The base class implementation just checks the file's extension
         against one of the ones that was registered in the constructor.

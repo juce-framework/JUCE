@@ -61,7 +61,7 @@ void FileListComponent::deselectAllFiles()
 
 void FileListComponent::scrollToTop()
 {
-    getVerticalScrollBar()->setCurrentRangeStart (0);
+    getVerticalScrollBar().setCurrentRangeStart (0);
 }
 
 void FileListComponent::setSelectedFile (const File& f)

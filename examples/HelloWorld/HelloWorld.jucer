@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="tTAKTK1s" name="HelloWorld" projectType="guiapp" juceFolder="../../../juce"
-              jucerVersion="5.1.2" version="1.0.0" bundleIdentifier="com.roli.jucehelloworld"
+              jucerVersion="5.2.0" version="1.0.0" bundleIdentifier="com.roli.jucehelloworld"
               companyName="ROLI Ltd." includeBinaryInAppConfig="1" displaySplashScreen="0"
-              reportAppUsage="0" splashScreenColour="Dark" cppLanguageStandard="11">
+              reportAppUsage="0" splashScreenColour="Dark" cppLanguageStandard="11"
+              companyCopyright="ROLI Ltd.">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                objCExtraSuffix="JtTAKTK1s">
@@ -23,7 +24,8 @@
       </MODULEPATHS>
     </XCODE_MAC>
     <XCODE_IPHONE targetFolder="Builds/iOS" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
-                  objCExtraSuffix="JtTAKTK1s" iosScreenOrientation="portraitlandscape">
+                  objCExtraSuffix="JtTAKTK1s" iosScreenOrientation="portraitlandscape"
+                  iPadScreenOrientation="portraitlandscape" iosDeviceFamily="1,2">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="HelloWorld"
                        osxSDK="1" osxCompatibility="1" osxArchitecture="default" iosCompatibility="default"/>

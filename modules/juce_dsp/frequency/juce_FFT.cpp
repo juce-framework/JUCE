@@ -805,7 +805,8 @@ FFT::EngineImpl<IntelFFT> fftwEngine;
 FFT::FFT (int order)
     : engine (FFT::Engine::createBestEngineForPlatform (order)),
       size (1 << order)
-{}
+{
+}
 
 FFT::~FFT() {}
 

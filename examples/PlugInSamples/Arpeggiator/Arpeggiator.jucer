@@ -9,10 +9,10 @@
               pluginIsMidiEffectPlugin="1" pluginSilenceInIsSilenceOut="0"
               pluginEditorRequiresKeys="0" pluginAUExportPrefix="ArpeggiatorAU"
               pluginRTASCategory="" aaxIdentifier="com.roli.Arpeggiator" pluginAAXCategory="AAX_EPlugInCategory_Effect"
-              jucerVersion="5.1.2" companyName="ROLI Ltd." companyWebsite="www.juce.com"
+              jucerVersion="5.2.0" companyName="ROLI Ltd." companyWebsite="www.juce.com"
               companyEmail="info@juce.com" buildAUv3="0" buildStandalone="0"
               enableIAA="0" displaySplashScreen="0" reportAppUsage="0" splashScreenColour="Dark"
-              cppLanguageStandard="11">
+              cppLanguageStandard="11" companyCopyright="ROLI Ltd.">
   <MAINGROUP id="l0H2am" name="Arpeggiator">
     <GROUP id="{E91162B3-479D-3630-4B5F-0E76EE995FB8}" name="Source">
       <FILE id="hfXSa1" name="Arpeggiator.cpp" compile="1" resource="0" file="Source/Arpeggiator.cpp"/>

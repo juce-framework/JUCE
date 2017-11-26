@@ -71,7 +71,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <AdditionalIncludeDirectories>C:\SDKs\VST_SDK\VST3_SDK;..\..\JuceLibraryCode;..\..\..\..\..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;JUCER_VS2015_78A5022=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=1;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -96,7 +96,6 @@
       <ProgramDatabaseFile>$(IntDir)\GainPlugIn.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
-      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalDependencies>GainPlugIn.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
@@ -104,6 +103,9 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\GainPlugIn.bsc</OutputFile>
     </Bscmake>
+    <Lib>
+      <AdditionalDependencies>GainPlugIn.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -148,6 +150,9 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\GainPlugIn.bsc</OutputFile>
     </Bscmake>
+    <Lib>
+      <AdditionalDependencies>GainPlugIn.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_plugin_client_VST3.cpp"/>

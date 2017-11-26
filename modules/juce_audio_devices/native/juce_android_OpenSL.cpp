@@ -23,12 +23,6 @@
 namespace juce
 {
 
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
-STATICFIELD (SDK_INT, "SDK_INT", "I") \
-
-DECLARE_JNI_CLASS (AndroidBuildVersion, "android/os/Build$VERSION");
-#undef JNI_CLASS_MEMBERS
-
 //==============================================================================
 #ifndef SL_ANDROID_DATAFORMAT_PCM_EX
  #define SL_ANDROID_DATAFORMAT_PCM_EX                   ((SLuint32) 0x00000004)
@@ -291,11 +285,38 @@ public:
               nextBlock (0), numBlocksOut (0)
         {}
 
+        ~OpenSLQueueRunner()
+        {
+            if (config != nullptr && javaProxy != nullptr)
+            {
+                javaProxy.clear();
+                (*config)->ReleaseJavaProxy (config, /*SL_ANDROID_JAVA_PROXY_ROUTING*/1);
+            }
+        }
+
         bool init()
         {
             runner = crtp().createPlayerOrRecorder();
             if (runner == nullptr)
                 return false;
+
+            const bool supportsJavaProxy = (getEnv()->GetStaticIntField (AndroidBuildVersion, AndroidBuildVersion.SDK_INT) >= 24);
+
+            if (supportsJavaProxy)
+            {
+                // may return nullptr on some platforms - that's ok
+                config = SlRef<SLAndroidConfigurationItf_>::cast (runner);
+
+                if (config != nullptr)
+                {
+                    jobject audioRoutingJni;
+                    auto status = (*config)->AcquireJavaProxy (config, /*SL_ANDROID_JAVA_PROXY_ROUTING*/1,
+                                                               &audioRoutingJni);
+
+                    if (status == SL_RESULT_SUCCESS && audioRoutingJni != 0)
+                        javaProxy = GlobalRef (audioRoutingJni);
+                }
+            }
 
             queue = SlRef<SLAndroidSimpleBufferQueueItf_>::cast (runner);
             if (queue == nullptr)
@@ -347,6 +368,8 @@ public:
 
         SlRef<RunnerObjectType> runner;
         SlRef<SLAndroidSimpleBufferQueueItf_> queue;
+        SlRef<SLAndroidConfigurationItf_> config;
+        GlobalRef javaProxy;
 
         int numChannels;
 
@@ -379,12 +402,12 @@ public:
             SLDataSource source = {&queueLocator, &dataFormat};
             SLDataSink   sink   = {&outputMix,    nullptr};
 
-            SLInterfaceID queueInterfaces[] = { &IntfIID<SLAndroidSimpleBufferQueueItf_>::iid };
-            SLboolean trueFlag = SL_BOOLEAN_TRUE;
+            SLInterfaceID queueInterfaces[] = { &IntfIID<SLAndroidSimpleBufferQueueItf_>::iid, &IntfIID<SLAndroidConfigurationItf_>::iid };
+            SLboolean interfaceRequired[] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_FALSE};
 
             SLObjectItf obj = nullptr;
 
-            SLresult status = (*Base::owner.engine)->CreateAudioPlayer (Base::owner.engine, &obj, &source, &sink, 1, queueInterfaces, &trueFlag);
+            SLresult status = (*Base::owner.engine)->CreateAudioPlayer (Base::owner.engine, &obj, &source, &sink, 2, queueInterfaces, interfaceRequired);
             if (status != SL_RESULT_SUCCESS || obj == nullptr || (*obj)->Realize (obj, 0) != SL_RESULT_SUCCESS)
             {
                 if (obj != nullptr)
@@ -437,15 +460,12 @@ public:
 
             SlRef<SLRecordItf_> recorder = SlRef<SLRecordItf_>::cast (SlObjectRef (obj));
 
-            // may return nullptr on some platforms - that's ok
-            config = SlRef<SLAndroidConfigurationItf_>::cast (recorder);
-
             return recorder;
         }
 
         bool setAudioPreprocessingEnabled (bool shouldEnable)
         {
-            if (config != nullptr)
+            if (Base::config != nullptr)
             {
                 const bool supportsUnprocessed = (getEnv()->GetStaticIntField (AndroidBuildVersion, AndroidBuildVersion.SDK_INT) >= 25);
                 const SLuint32 recordingPresetValue
@@ -453,8 +473,8 @@ public:
                                     : (supportsUnprocessed ? SL_ANDROID_RECORDING_PRESET_UNPROCESSED
                                                            : SL_ANDROID_RECORDING_PRESET_VOICE_RECOGNITION));
 
-                SLresult status = (*config)->SetConfiguration (config, SL_ANDROID_KEY_RECORDING_PRESET,
-                                                               &recordingPresetValue, sizeof (recordingPresetValue));
+                SLresult status = (*Base::config)->SetConfiguration (Base::config, SL_ANDROID_KEY_RECORDING_PRESET,
+                                                                     &recordingPresetValue, sizeof (recordingPresetValue));
 
                 return (status == SL_RESULT_SUCCESS);
             }
@@ -463,8 +483,6 @@ public:
         }
 
         void setState (bool running)    { (*Base::runner)->SetRecordState (Base::runner, running ? SL_RECORDSTATE_RECORDING : SL_RECORDSTATE_STOPPED); }
-
-        SlRef<SLAndroidConfigurationItf_> config;
     };
 
     //==============================================================================
@@ -521,6 +539,7 @@ public:
         virtual void stop()              { running = false; }
         virtual bool setAudioPreprocessingEnabled (bool shouldEnable) = 0;
         virtual bool supportsFloatingPoint() const noexcept = 0;
+        virtual int getXRunCount() const noexcept = 0;
 
         void setCallback (AudioIODeviceCallback* callbackToUse)
         {
@@ -616,6 +635,9 @@ public:
                         player = nullptr;
                         return;
                     }
+
+                    const bool supportsUnderrunCount = (getEnv()->GetStaticIntField (AndroidBuildVersion, AndroidBuildVersion.SDK_INT) >= 24);
+                    getUnderrunCount = supportsUnderrunCount ? getEnv()->GetMethodID (AudioTrack, "getUnderrunCount", "()I") : 0;
                 }
             }
         }
@@ -678,6 +700,14 @@ public:
             return true;
         }
 
+        int getXRunCount() const noexcept override
+        {
+            if (player != nullptr && player->javaProxy != nullptr && getUnderrunCount != 0)
+                return getEnv()->CallIntMethod (player->javaProxy, getUnderrunCount);
+
+            return -1;
+        }
+
         bool supportsFloatingPoint() const noexcept override          { return (BufferHelpers<T>::isFloatingPoint != 0); }
 
         void doSomeWorkOnAudioThread()
@@ -725,9 +755,10 @@ public:
         }
 
         //==============================================================================
-        ScopedPointer<OpenSLQueueRunnerPlayer<T> > player;
-        ScopedPointer<OpenSLQueueRunnerRecorder<T> > recorder;
+        ScopedPointer<OpenSLQueueRunnerPlayer<T>> player;
+        ScopedPointer<OpenSLQueueRunnerRecorder<T>> recorder;
         Atomic<int> guard;
+        jmethodID getUnderrunCount = 0;
     };
 
     //==============================================================================
@@ -892,6 +923,7 @@ public:
     BigInteger getActiveInputChannels() const override  { return activeInputChans; }
     String getLastError() override                      { return lastError; }
     bool isPlaying() override                           { return callback != nullptr; }
+    int getXRunCount() const noexcept override          { return (session != nullptr ? session->getXRunCount() : -1); }
 
     int getDefaultBufferSize() override
     {

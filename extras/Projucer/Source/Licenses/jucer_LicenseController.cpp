@@ -23,15 +23,15 @@
 
   ==============================================================================
 */
-#include "../jucer_Headers.h"
+#include "../Application/jucer_Headers.h"
 #include "../Application/jucer_Application.h"
-#include "../Project Saving/jucer_ProjectExporter.h"
-#include "../Project/jucer_HeaderComponent.h"
+#include "../ProjectSaving/jucer_ProjectExporter.h"
+#include "../Project/UI/jucer_HeaderComponent.h"
 #include "jucer_LicenseController.h"
 
 #if ! JUCER_ENABLE_GPL_MODE
-#include "jucer_LicenseWebview.h"
-#include "jucer_LicenseThread.h"
+ #include "jucer_LicenseWebview.h"
+ #include "jucer_LicenseThread.h"
 #endif
 
 //==============================================================================

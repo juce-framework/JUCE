@@ -8,7 +8,7 @@
     <key>CFBundleIconFile</key>
     <string></string>
     <key>CFBundleIdentifier</key>
-    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <string>com.juce.AudioPerformanceTest</string>
     <key>CFBundleName</key>
     <string>AudioPerformanceTest</string>
     <key>CFBundleDisplayName</key>

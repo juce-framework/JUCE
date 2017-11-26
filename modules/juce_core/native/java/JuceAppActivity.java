@@ -229,6 +229,7 @@ public class JuceAppActivity   extends Activity
                    getApplicationInfo().dataDir);
     }
 
+    //==============================================================================
     private void hideActionBar()
     {
         // get "getActionBar" method
@@ -300,6 +301,7 @@ public class JuceAppActivity   extends Activity
     private native void resumeApp();
     private native void setScreenSize (int screenWidth, int screenHeight, int dpi);
     private native void appActivityResult (int requestCode, int resultCode, Intent data);
+    private native void appNewIntent (Intent intent);
 
     //==============================================================================
     private ViewHolder viewHolder;
@@ -317,6 +319,8 @@ public class JuceAppActivity   extends Activity
 
     public final void deleteView (ComponentPeerView view)
     {
+        view.host = 0;
+
         ViewGroup group = (ViewGroup) (view.getParent());
 
         if (group != null)
@@ -546,7 +550,6 @@ public class JuceAppActivity   extends Activity
             setFocusable (true);
             setFocusableInTouchMode (true);
             setOnFocusChangeListener (this);
-            requestFocus();
 
             // swap red and blue colours to match internal opengl texture format
             ColorMatrix colorMatrix = new ColorMatrix();
@@ -566,6 +569,9 @@ public class JuceAppActivity   extends Activity
         @Override
         public void onDraw (Canvas canvas)
         {
+            if (host == 0)
+                return;
+
             handlePaint (host, canvas, paint);
         }
 
@@ -587,6 +593,9 @@ public class JuceAppActivity   extends Activity
         @Override
         public boolean onTouchEvent (MotionEvent event)
         {
+            if (host == 0)
+                return false;
+
             int action = event.getAction();
             long time = event.getEventTime();
 
@@ -657,6 +666,9 @@ public class JuceAppActivity   extends Activity
         @Override
         public boolean onKeyDown (int keyCode, KeyEvent event)
         {
+            if (host == 0)
+                return false;
+
             switch (keyCode)
             {
                 case KeyEvent.KEYCODE_VOLUME_UP:
@@ -679,6 +691,9 @@ public class JuceAppActivity   extends Activity
         @Override
         public boolean onKeyUp (int keyCode, KeyEvent event)
         {
+            if (host == 0)
+                return false;
+
             handleKeyUp (host, keyCode, event.getUnicodeChar());
             return true;
         }
@@ -686,6 +701,9 @@ public class JuceAppActivity   extends Activity
         @Override
         public boolean onKeyMultiple (int keyCode, int count, KeyEvent event)
         {
+            if (host == 0)
+                return false;
+
             if (keyCode != KeyEvent.KEYCODE_UNKNOWN || event.getAction() != KeyEvent.ACTION_MULTIPLE)
                 return super.onKeyMultiple (keyCode, count, event);
 
@@ -718,6 +736,9 @@ public class JuceAppActivity   extends Activity
         @Override
         protected void onSizeChanged (int w, int h, int oldw, int oldh)
         {
+            if (host == 0)
+                return;
+
             super.onSizeChanged (w, h, oldw, oldh);
             viewSizeChanged (host);
         }
@@ -734,6 +755,9 @@ public class JuceAppActivity   extends Activity
         @Override
         public void onFocusChange (View v, boolean hasFocus)
         {
+            if (host == 0)
+                return;
+
             if (v == this)
                 focusChanged (host, hasFocus);
         }
@@ -1343,6 +1367,15 @@ public class JuceAppActivity   extends Activity
     protected void onActivityResult (int requestCode, int resultCode, Intent data)
     {
         appActivityResult (requestCode, resultCode, data);
+    }
+
+    @Override
+    protected void onNewIntent (Intent intent)
+    {
+        super.onNewIntent(intent);
+        setIntent(intent);
+
+        appNewIntent (intent);
     }
 
     //==============================================================================

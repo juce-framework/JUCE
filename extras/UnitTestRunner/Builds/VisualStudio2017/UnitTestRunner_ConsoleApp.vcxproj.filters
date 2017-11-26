@@ -8,6 +8,15 @@
     <Filter Include="UnitTestRunner">
       <UniqueIdentifier>{D8F766C2-4389-8396-EB11-0E281B84E2C8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Juce Modules\juce_analytics\analytics">
+      <UniqueIdentifier>{B0E83D1C-737D-813B-5FF0-A01675F61A5F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juce Modules\juce_analytics\destinations">
+      <UniqueIdentifier>{9DAB8837-5D73-5B25-AEF9-11F592DD3FE4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Juce Modules\juce_analytics">
+      <UniqueIdentifier>{19561ADD-E564-E896-A9C2-CC550102A713}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Juce Modules\juce_audio_basics\audio_play_head">
       <UniqueIdentifier>{52045BA8-DF89-5074-688D-A0977F25B09C}</UniqueIdentifier>
     </Filter>
@@ -432,6 +441,18 @@
   <ItemGroup>
     <ClCompile Include="..\..\Source\Main.cpp">
       <Filter>UnitTestRunner\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_analytics\analytics\juce_Analytics.cpp">
+      <Filter>Juce Modules\juce_analytics\analytics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_analytics\analytics\juce_ButtonTracker.cpp">
+      <Filter>Juce Modules\juce_analytics\analytics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_analytics\destinations\juce_ThreadedAnalyticsDestination.cpp">
+      <Filter>Juce Modules\juce_analytics\destinations</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_analytics\juce_analytics.cpp">
+      <Filter>Juce Modules\juce_analytics</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioChannelSet.cpp">
       <Filter>Juce Modules\juce_audio_basics\buffers</Filter>
@@ -2125,6 +2146,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_PreferencesPanel.cpp">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_PushNotifications.cpp">
+      <Filter>Juce Modules\juce_gui_extra\misc</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_RecentlyOpenedFilesList.cpp">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClCompile>
@@ -2134,7 +2158,13 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_SystemTrayIconComponent.cpp">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\native\juce_android_PushNotifications.cpp">
+      <Filter>Juce Modules\juce_gui_extra\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\native\juce_android_WebBrowserComponent.cpp">
+      <Filter>Juce Modules\juce_gui_extra\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\native\juce_ios_PushNotifications.cpp">
       <Filter>Juce Modules\juce_gui_extra\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\native\juce_ios_UIViewComponent.mm">
@@ -2272,6 +2302,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_video\juce_video.mm">
       <Filter>Juce Modules\juce_video</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_analytics.cpp">
+      <Filter>Juce Library Code</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_basics.cpp">
       <Filter>Juce Library Code</Filter>
     </ClCompile>
@@ -2328,6 +2361,21 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\modules\juce_analytics\analytics\juce_Analytics.h">
+      <Filter>Juce Modules\juce_analytics\analytics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_analytics\analytics\juce_ButtonTracker.h">
+      <Filter>Juce Modules\juce_analytics\analytics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_analytics\destinations\juce_AnalyticsDestination.h">
+      <Filter>Juce Modules\juce_analytics\destinations</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_analytics\destinations\juce_ThreadedAnalyticsDestination.h">
+      <Filter>Juce Modules\juce_analytics\destinations</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_analytics\juce_analytics.h">
+      <Filter>Juce Modules\juce_analytics</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.h">
       <Filter>Juce Modules\juce_audio_basics\audio_play_head</Filter>
     </ClInclude>
@@ -4201,6 +4249,9 @@
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_PreferencesPanel.h">
+      <Filter>Juce Modules\juce_gui_extra\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_PushNotifications.h">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_RecentlyOpenedFilesList.h">

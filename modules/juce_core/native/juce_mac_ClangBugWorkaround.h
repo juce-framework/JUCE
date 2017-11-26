@@ -28,7 +28,7 @@
  #undef CF_OPTIONS
  #define CF_OPTIONS(_type, _name) _type _name; enum
 
- // This is a workaround for the XCode 9 version of NSUUID.h causing some errors
+ // This is a workaround for the Xcode 9 version of NSUUID.h causing some errors
  // in the live-build engine.
  #define _Nullable
  #define _Nonnull

@@ -179,9 +179,9 @@ public:
         String getLineText() const;
 
     private:
-        CodeDocument* owner;
-        int characterPos, line, indexInLine;
-        bool positionMaintained;
+        CodeDocument* owner = nullptr;
+        int characterPos = 0, line = 0, indexInLine = 0;
+        bool positionMaintained = false;
     };
 
     //==============================================================================
@@ -357,8 +357,8 @@ public:
     {
     public:
         Iterator (const CodeDocument& document) noexcept;
-        Iterator (const Iterator&) noexcept;
-        Iterator& operator= (const Iterator&) noexcept;
+        Iterator (const Iterator&) = default;
+        Iterator& operator= (const Iterator&) = default;
         ~Iterator() noexcept;
 
         /** Reads the next character and returns it.
@@ -389,24 +389,24 @@ public:
 
     private:
         const CodeDocument* document;
-        mutable String::CharPointerType charPointer;
-        int line, position;
+        mutable String::CharPointerType charPointer { nullptr };
+        int line = 0, position = 0;
     };
 
 private:
     //==============================================================================
-    friend class CodeDocumentInsertAction;
-    friend class CodeDocumentDeleteAction;
+    struct InsertAction;
+    struct DeleteAction;
     friend class Iterator;
     friend class Position;
 
-    OwnedArray <CodeDocumentLine> lines;
-    Array <Position*> positionsToMaintain;
+    OwnedArray<CodeDocumentLine> lines;
+    Array<Position*> positionsToMaintain;
     UndoManager undoManager;
-    int currentActionIndex, indexOfSavedState;
-    int maximumLineLength;
-    ListenerList <Listener> listeners;
-    String newLineChars;
+    int currentActionIndex = 0, indexOfSavedState = -1;
+    int maximumLineLength = -1;
+    ListenerList<Listener> listeners;
+    String newLineChars { "\r\n" };
 
     void insert (const String& text, int insertPos, bool undoable);
     void remove (int startPos, int endPos, bool undoable);

@@ -87,7 +87,7 @@ public:
         String dialogTitle;
 
         /** The background colour for the window. */
-        Colour dialogBackgroundColour;
+        Colour dialogBackgroundColour = Colours::lightgrey;
 
         /** The content component to show in the window. This must not be null!
             Using an OptionalScopedPointer to hold this pointer lets you indicate whether
@@ -100,16 +100,16 @@ public:
             dialog box in front of. See the DocumentWindow::centreAroundComponent() method for
             more info about this parameter.
         */
-        Component* componentToCentreAround;
+        Component* componentToCentreAround = nullptr;
 
         /** If true, then the escape key will trigger the dialog's close button. */
-        bool escapeKeyTriggersCloseButton;
+        bool escapeKeyTriggersCloseButton = true;
         /** If true, the dialog will use a native title bar. See TopLevelWindow::setUsingNativeTitleBar() */
-        bool useNativeTitleBar;
+        bool useNativeTitleBar = true;
         /** If true, the window will be resizable. See ResizableWindow::setResizable() */
-        bool resizable;
+        bool resizable = true;
         /** Indicates whether to use a border or corner resizer component. See ResizableWindow::setResizable() */
-        bool useBottomRightCornerResizer;
+        bool useBottomRightCornerResizer = false;
 
         /** Launches a new modal dialog window.
             This will create a dialog based on the settings in this structure,
@@ -144,6 +144,8 @@ public:
         */
         int runModal();
        #endif
+
+        JUCE_DECLARE_NON_COPYABLE (LaunchOptions)
     };
 
     //==============================================================================

@@ -59,6 +59,8 @@ namespace juce
         friend class WeakReference<MyObject>;
     };
 
+    OR: just use the handy JUCE_DECLARE_WEAK_REFERENCEABLE macro to do all this for you.
+
     // Here's an example of using a pointer..
 
     MyObject* n = new MyObject();
@@ -187,6 +189,12 @@ public:
                 sharedPointer->clearPointer();
         }
 
+        /** Returns the number of WeakReferences that are out there pointing to this object. */
+        int getNumActiveWeakReferences() const noexcept
+        {
+            return sharedPointer == nullptr ? 0 : (sharedPointer->getReferenceCount() - 1);
+        }
+
     private:
         SharedRef sharedPointer;
 
@@ -201,5 +209,32 @@ private:
         return (o != nullptr) ? o->masterReference.getSharedPointer (o) : nullptr;
     }
 };
+
+
+//==============================================================================
+/**
+     Macro to easily allow a class to be made weak-referenceable.
+     This can be inserted in a class definition to add the requisite weak-ref boilerplate to that class.
+     e.g.
+
+     @code
+     class MyObject
+     {
+     public:
+         MyObject();
+         ~MyObject();
+
+     private:
+         JUCE_DECLARE_WEAK_REFERENCEABLE (MyObject)
+     };
+     @endcode
+
+     @see WeakReference, WeakReference::Master
+*/
+#define JUCE_DECLARE_WEAK_REFERENCEABLE(Class) \
+    struct WeakRefMaster  : public WeakReference<Class>::Master { ~WeakRefMaster() { this->clear(); } }; \
+    WeakRefMaster masterReference; \
+    friend class WeakReference<Class>; \
+
 
 } // namespace juce

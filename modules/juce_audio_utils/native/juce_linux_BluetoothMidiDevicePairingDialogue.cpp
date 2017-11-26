@@ -27,7 +27,8 @@
 namespace juce
 {
 
-bool BluetoothMidiDevicePairingDialogue::open (ModalComponentManager::Callback* exitCallback)
+bool BluetoothMidiDevicePairingDialogue::open (ModalComponentManager::Callback* exitCallback,
+                                               Rectangle<int>*)
 {
     ScopedPointer<ModalComponentManager::Callback> cb (exitCallback);
     // not implemented on Linux yet!

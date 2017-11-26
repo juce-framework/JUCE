@@ -165,7 +165,7 @@ static int findInsertIndexInSortedArray (ElementComparator& comparator,
     This will work for primitive types and objects that implement operator<().
 
     Example: @code
-    Array <int> myArray;
+    Array<int> myArray;
     DefaultElementComparator<int> sorter;
     myArray.sort (sorter);
     @endcode

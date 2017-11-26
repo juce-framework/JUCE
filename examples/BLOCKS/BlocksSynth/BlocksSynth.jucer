@@ -2,8 +2,8 @@
 
 <JUCERPROJECT id="XsTycT" name="BlocksSynth" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.yourcompany.BlocksSynth" includeBinaryInAppConfig="1"
-              jucerVersion="5.1.2" displaySplashScreen="0" reportAppUsage="0"
-              splashScreenColour="Dark" cppLanguageStandard="11">
+              jucerVersion="5.2.0" displaySplashScreen="0" reportAppUsage="0"
+              splashScreenColour="Dark" cppLanguageStandard="11" companyCopyright="">
   <MAINGROUP id="onTNql" name="BlocksSynth">
     <GROUP id="{0CEBC63B-4C52-E77F-CD6E-A2E65F0C9B2B}" name="Source">
       <GROUP id="{06BF67F9-0F56-6AD3-00A9-443125750AAE}" name="Audio">
@@ -38,7 +38,8 @@
         <MODULEPATH id="juce_audio_utils" path="../../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="portraitlandscape">
+    <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="portraitlandscape"
+                  iPadScreenOrientation="portraitlandscape" iosDeviceFamily="1,2">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="BlocksSynth"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="BlocksSynth"/>

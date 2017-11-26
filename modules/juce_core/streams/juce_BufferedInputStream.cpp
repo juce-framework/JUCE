@@ -44,7 +44,7 @@ BufferedInputStream::BufferedInputStream (InputStream* sourceStream, int size, b
      position (sourceStream->getPosition()),
      bufferStart (position)
 {
-    buffer.malloc ((size_t) bufferSize);
+    buffer.malloc (bufferSize);
 }
 
 BufferedInputStream::BufferedInputStream (InputStream& sourceStream, int size)

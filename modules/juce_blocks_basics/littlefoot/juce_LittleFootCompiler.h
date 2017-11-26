@@ -193,8 +193,8 @@ private:
     private:
         String::CharPointerType p;
 
-        static bool isIdentifierStart (const juce_wchar c) noexcept   { return CharacterFunctions::isLetter (c)        || c == '_'; }
-        static bool isIdentifierBody  (const juce_wchar c) noexcept   { return CharacterFunctions::isLetterOrDigit (c) || c == '_'; }
+        static bool isIdentifierStart (juce_wchar c) noexcept   { return CharacterFunctions::isLetter (c)        || c == '_'; }
+        static bool isIdentifierBody  (juce_wchar c) noexcept   { return CharacterFunctions::isLetterOrDigit (c) || c == '_'; }
 
         TokenType matchNextToken()
         {
@@ -245,7 +245,7 @@ private:
 
                 if (*p == '/')
                 {
-                    const juce_wchar c2 = p[1];
+                    auto c2 = p[1];
 
                     if (c2 == '/')  { p = CharacterFunctions::find (p, (juce_wchar) '\n'); continue; }
 

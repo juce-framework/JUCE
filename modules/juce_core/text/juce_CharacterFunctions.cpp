@@ -241,12 +241,13 @@ public:
             STRING_DOUBLE_PAIR_COMBOS (2087.3087e+00006),
             STRING_DOUBLE_PAIR_COMBOS (6.0872e-00006),
 
-            // Too many sig figs
+            // Too many sig figs. The parsing routine on MinGW gets the last
+            // significant figure wrong.
             STRING_DOUBLE_PAIR_COMBOS (1.23456789012345678901234567890),
             STRING_DOUBLE_PAIR_COMBOS (1.23456789012345678901234567890e-111)
 
+            // Limits. DBL_MAX may not exist on Linux.
            #if ! JUCE_LINUX
-            // Limits
           , STRING_DOUBLE_PAIR (DBL_MAX),
             STRING_DOUBLE_PAIR (-DBL_MAX),
             STRING_DOUBLE_PAIR (DBL_MIN)

@@ -57,7 +57,7 @@ public:
 
         if (isPositiveAndBelow (row, oscLogList.size()))
         {
-            g.setColour (Colours::black);
+            g.setColour (Colours::white);
 
             g.drawText (oscLogList[row],
                         Rectangle<int> (width, height).reduced (4, 0),

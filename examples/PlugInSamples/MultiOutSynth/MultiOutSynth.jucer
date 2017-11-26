@@ -9,10 +9,10 @@
               pluginSilenceInIsSilenceOut="0" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="MultiOutSynthAU" pluginRTASCategory=""
               aaxIdentifier="com.roli.MultiOutSynth" pluginAAXCategory="AAX_ePlugInCategory_SWGenerators"
-              jucerVersion="5.1.2" companyName="ROLI Ltd." companyWebsite="www.roli.com"
+              jucerVersion="5.2.0" companyName="ROLI Ltd." companyWebsite="www.roli.com"
               companyEmail="info@juce.com" pluginIsMidiEffectPlugin="0" buildAUv3="0"
               buildStandalone="0" enableIAA="0" displaySplashScreen="0" reportAppUsage="0"
-              splashScreenColour="Dark" cppLanguageStandard="11">
+              splashScreenColour="Dark" cppLanguageStandard="11" companyCopyright="ROLI Ltd.">
   <MAINGROUP id="uGSDhi" name="MultiOutSynth">
     <GROUP id="{78464AFF-72EB-5BDD-4FD3-6C8C6CF5DFA3}" name="Source">
       <GROUP id="{A6DFE970-77F1-27E9-9B49-A42BC96FECDB}" name="BinaryData">

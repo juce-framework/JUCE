@@ -25,7 +25,7 @@ namespace juce
 
 int64 InputStream::getNumBytesRemaining()
 {
-    int64 len = getTotalLength();
+    auto len = getTotalLength();
 
     if (len >= 0)
         len -= getPosition();
@@ -87,23 +87,26 @@ int InputStream::readIntBigEndian()
 
 int InputStream::readCompressedInt()
 {
-    const uint8 sizeByte = (uint8) readByte();
+    auto sizeByte = (uint8) readByte();
+
     if (sizeByte == 0)
         return 0;
 
     const int numBytes = (sizeByte & 0x7f);
+
     if (numBytes > 4)
     {
-        jassertfalse;    // trying to read corrupt data - this method must only be used
+        jassertfalse;  // trying to read corrupt data - this method must only be used
                        // to read data that was written by OutputStream::writeCompressedInt()
         return 0;
     }
 
-    char bytes[4] = { 0, 0, 0, 0 };
+    char bytes[4] = {};
+
     if (read (bytes, numBytes) != numBytes)
         return 0;
 
-    const int num = (int) ByteOrder::littleEndianInt (bytes);
+    auto num = (int) ByteOrder::littleEndianInt (bytes);
     return (sizeByte >> 7) ? -num : num;
 }
 
@@ -158,36 +161,32 @@ double InputStream::readDoubleBigEndian()
 
 String InputStream::readString()
 {
-    MemoryBlock buffer (256);
-    char* data = static_cast<char*> (buffer.getData());
-    size_t i = 0;
+    MemoryOutputStream buffer;
 
-    while ((data[i] = readByte()) != 0)
+    for (;;)
     {
-        if (++i >= buffer.getSize())
-        {
-            buffer.setSize (buffer.getSize() + 512);
-            data = static_cast<char*> (buffer.getData());
-        }
-    }
+        auto c = readByte();
+        buffer.writeByte (c);
 
-    return String::fromUTF8 (data, (int) i);
+        if (c == 0)
+            return buffer.toUTF8();
+    }
 }
 
 String InputStream::readNextLine()
 {
-    MemoryBlock buffer (256);
-    char* data = static_cast<char*> (buffer.getData());
-    size_t i = 0;
+    MemoryOutputStream buffer;
 
-    while ((data[i] = readByte()) != 0)
+    for (;;)
     {
-        if (data[i] == '\n')
+        auto c = readByte();
+
+        if (c == 0 || c == '\n')
             break;
 
-        if (data[i] == '\r')
+        if (c == '\r')
         {
-            const int64 lastPos = getPosition();
+            auto lastPos = getPosition();
 
             if (readByte() != '\n')
                 setPosition (lastPos);
@@ -195,14 +194,10 @@ String InputStream::readNextLine()
             break;
         }
 
-        if (++i >= buffer.getSize())
-        {
-            buffer.setSize (buffer.getSize() + 512);
-            data = static_cast<char*> (buffer.getData());
-        }
+        buffer.writeByte (c);
     }
 
-    return String::fromUTF8 (data, (int) i);
+    return buffer.toUTF8();
 }
 
 size_t InputStream::readIntoMemoryBlock (MemoryBlock& block, ssize_t numBytes)
@@ -223,8 +218,8 @@ void InputStream::skipNextBytes (int64 numBytesToSkip)
 {
     if (numBytesToSkip > 0)
     {
-        const int skipBufferSize = (int) jmin (numBytesToSkip, (int64) 16384);
-        HeapBlock<char> temp ((size_t) skipBufferSize);
+        auto skipBufferSize = (int) jmin (numBytesToSkip, (int64) 16384);
+        HeapBlock<char> temp (skipBufferSize);
 
         while (numBytesToSkip > 0 && ! isExhausted())
             numBytesToSkip -= read (temp, (int) jmin (numBytesToSkip, (int64) skipBufferSize));

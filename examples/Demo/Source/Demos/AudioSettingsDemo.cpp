@@ -118,7 +118,7 @@ private:
         diagnosticsBox.applyFontToAllText (diagnosticsBox.getFont());
     }
 
-    static String getListOfActiveBits (const BitArray& b)
+    static String getListOfActiveBits (const BigInteger& b)
     {
         StringArray bits;
 

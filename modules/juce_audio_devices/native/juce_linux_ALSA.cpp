@@ -333,8 +333,14 @@ public:
             numDone = snd_pcm_writen (handle, (void**) data, (snd_pcm_uframes_t) numSamples);
         }
 
-        if (numDone < 0 && JUCE_ALSA_FAILED (snd_pcm_recover (handle, (int) numDone, 1 /* silent */)))
-            return false;
+        if (numDone < 0)
+        {
+            if (numDone == -(EPIPE))
+                underrunCount++;
+
+            if (JUCE_ALSA_FAILED (snd_pcm_recover (handle, (int) numDone, 1 /* silent */)))
+                return false;
+        }
 
         if (numDone < numSamples)
             JUCE_ALSA_LOG ("Did not write all samples: numDone: " << numDone << ", numSamples: " << numSamples);
@@ -354,8 +360,15 @@ public:
 
             snd_pcm_sframes_t num = snd_pcm_readi (handle, scratch.getData(), (snd_pcm_uframes_t) numSamples);
 
-            if (num < 0 && JUCE_ALSA_FAILED (snd_pcm_recover (handle, (int) num, 1 /* silent */)))
-                return false;
+            if (num < 0)
+            {
+                if (num == -(EPIPE))
+                    overrunCount++;
+
+                if (JUCE_ALSA_FAILED (snd_pcm_recover (handle, (int) num, 1 /* silent */)))
+                    return false;
+            }
+
 
             if (num < numSamples)
                 JUCE_ALSA_LOG ("Did not read all samples: num: " << num << ", numSamples: " << numSamples);
@@ -367,8 +380,14 @@ public:
         {
             snd_pcm_sframes_t num = snd_pcm_readn (handle, (void**) data, (snd_pcm_uframes_t) numSamples);
 
-            if (num < 0 && JUCE_ALSA_FAILED (snd_pcm_recover (handle, (int) num, 1 /* silent */)))
-                return false;
+            if (num < 0)
+            {
+                if (num == -(EPIPE))
+                    overrunCount++;
+
+                if (JUCE_ALSA_FAILED (snd_pcm_recover (handle, (int) num, 1 /* silent */)))
+                    return false;
+            }
 
             if (num < numSamples)
                 JUCE_ALSA_LOG ("Did not read all samples: num: " << num << ", numSamples: " << numSamples);
@@ -384,6 +403,7 @@ public:
     snd_pcm_t* handle;
     String error;
     int bitDepth, numChannelsRunning, latency;
+    int underrunCount = 0, overrunCount = 0;
 
 private:
     //==============================================================================
@@ -422,9 +442,9 @@ private:
             typedef AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const> SourceType;
 
             if (isLittleEndian)
-                return new AudioData::ConverterInstance <SourceType, AudioData::Pointer <SampleType, AudioData::LittleEndian, InterleavedType, AudioData::NonConst> > (1, numInterleavedChannels);
+                return new AudioData::ConverterInstance <SourceType, AudioData::Pointer <SampleType, AudioData::LittleEndian, InterleavedType, AudioData::NonConst>> (1, numInterleavedChannels);
 
-            return new AudioData::ConverterInstance <SourceType, AudioData::Pointer <SampleType, AudioData::BigEndian, InterleavedType, AudioData::NonConst> > (1, numInterleavedChannels);
+            return new AudioData::ConverterInstance <SourceType, AudioData::Pointer <SampleType, AudioData::BigEndian, InterleavedType, AudioData::NonConst>> (1, numInterleavedChannels);
         }
     };
 
@@ -749,6 +769,19 @@ public:
         return 16;
     }
 
+    int getXRunCount() const noexcept
+    {
+        int result = 0;
+
+        if (outputDevice != nullptr)
+            result += outputDevice->underrunCount;
+
+        if (inputDevice != nullptr)
+            result += inputDevice->overrunCount;
+
+        return result;
+    }
+
     //==============================================================================
     String error;
     double sampleRate;
@@ -907,6 +940,8 @@ public:
 
     int getOutputLatencyInSamples() override         { return internal.outputLatency; }
     int getInputLatencyInSamples() override          { return internal.inputLatency; }
+
+    int getXRunCount() const noexcept override       { return internal.getXRunCount(); }
 
     void start (AudioIODeviceCallback* callback) override
     {

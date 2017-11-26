@@ -24,14 +24,12 @@
   ==============================================================================
 */
 
-#include "../jucer_Headers.h"
+#include "../Application/jucer_Headers.h"
 #include "jucer_Module.h"
-#include "jucer_ProjectType.h"
-#include "../Project Saving/jucer_ProjectExporter.h"
-#include "../Project Saving/jucer_ProjectSaver.h"
-#include "../Project Saving/jucer_ProjectExport_XCode.h"
+#include "../ProjectSaving/jucer_ProjectSaver.h"
+#include "../ProjectSaving/jucer_ProjectExport_Xcode.h"
 
-
+//==============================================================================
 static String trimCommentCharsFromStartOfLine (const String& line)
 {
     return line.trimStart().trimCharactersAtStart ("*/").trimStart();
@@ -396,7 +394,7 @@ void LibraryModule::addSettingsForModuleToExporter (ProjectExporter& exporter, P
 
     if (exporter.isXcode())
     {
-        auto& xcodeExporter = dynamic_cast<XCodeProjectExporter&> (exporter);
+        auto& xcodeExporter = dynamic_cast<XcodeProjectExporter&> (exporter);
 
         if (project.isAUPluginHost())
             xcodeExporter.xcodeFrameworks.addTokens (xcodeExporter.isOSX() ? "AudioUnit CoreAudioKit" : "CoreAudioKit", false);
@@ -567,14 +565,14 @@ void LibraryModule::findAndAddCompiledUnits (ProjectExporter& exporter,
 
 static void addFileWithGroups (Project::Item& group, const RelativePath& file, const String& path)
 {
-    const int slash = path.indexOfChar (File::separator);
+    auto slash = path.indexOfChar (File::getSeparatorChar());
 
     if (slash >= 0)
     {
-        const String topLevelGroup (path.substring (0, slash));
-        const String remainingPath (path.substring (slash + 1));
+        auto topLevelGroup = path.substring (0, slash);
+        auto remainingPath = path.substring (slash + 1);
 
-        Project::Item newGroup (group.getOrCreateSubGroup (topLevelGroup));
+        auto newGroup = group.getOrCreateSubGroup (topLevelGroup);
         addFileWithGroups (newGroup, file, remainingPath);
     }
     else

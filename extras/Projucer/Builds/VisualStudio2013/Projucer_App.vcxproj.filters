@@ -2,56 +2,83 @@
 
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="Projucer\Application\Windows">
+      <UniqueIdentifier>{DC7E18A5-E854-3D99-627F-AAA88246B712}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Projucer\Application">
       <UniqueIdentifier>{4F8BCD36-CE20-D951-FB82-2CCEDD0C5898}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Projucer\Licenses">
-      <UniqueIdentifier>{E5D23B90-895E-EB0B-AC18-C7EBB25546AE}</UniqueIdentifier>
+    <Filter Include="Projucer\BinaryData\Gradle">
+      <UniqueIdentifier>{CCBE7B90-B600-DF59-8641-D4FD8FA0C88B}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Projucer\LiveBuildEngine">
-      <UniqueIdentifier>{0A3B9446-F50B-3D4E-230F-7ED493541A07}</UniqueIdentifier>
+    <Filter Include="Projucer\BinaryData\Icons">
+      <UniqueIdentifier>{3A77FAA0-7E92-6D59-9C5F-BAAA2BF82833}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Projucer\Code Editor">
-      <UniqueIdentifier>{5405FC41-BFE2-A51C-0AE7-96B19E9AFBCF}</UniqueIdentifier>
+    <Filter Include="Projucer\BinaryData\Templates">
+      <UniqueIdentifier>{D8DD148A-AB2B-B485-520B-8924DA606099}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Projucer\ComponentEditor\components">
-      <UniqueIdentifier>{0560E4F4-F24D-870A-444C-9BC16D918768}</UniqueIdentifier>
+    <Filter Include="Projucer\BinaryData">
+      <UniqueIdentifier>{FE290DF2-C600-4159-D484-7F48DB498EBE}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Projucer\ComponentEditor\documents">
-      <UniqueIdentifier>{D2D3D7D7-2F4C-85E4-1C43-9D4F9E558BF4}</UniqueIdentifier>
+    <Filter Include="Projucer\CodeEditor">
+      <UniqueIdentifier>{DE3E40F0-B495-2AC0-52AF-AA073FFE8E4C}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Projucer\ComponentEditor\paintelements">
-      <UniqueIdentifier>{AA9D8157-1521-DB4F-B8EB-B7EF407D9FAD}</UniqueIdentifier>
+    <Filter Include="Projucer\ComponentEditor\Components">
+      <UniqueIdentifier>{A61A4546-CC78-CCFD-CC99-D5CD03650B08}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Projucer\ComponentEditor\properties">
-      <UniqueIdentifier>{5208559E-5151-522B-610E-4A7D10D0709F}</UniqueIdentifier>
+    <Filter Include="Projucer\ComponentEditor\Documents">
+      <UniqueIdentifier>{485EE240-BE7D-E5FD-07C2-760B7401D5F3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Projucer\ComponentEditor\ui">
-      <UniqueIdentifier>{ACB81B1C-458D-6018-E92B-663C616374C1}</UniqueIdentifier>
+    <Filter Include="Projucer\ComponentEditor\PaintElements">
+      <UniqueIdentifier>{35957741-E3A5-47F8-86DC-FDE691866C74}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Projucer\ComponentEditor\Properties">
+      <UniqueIdentifier>{16DF510D-120E-D924-C478-E1E82643ED83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Projucer\ComponentEditor\UI">
+      <UniqueIdentifier>{3207865A-047C-278E-870A-BC204B74ECB3}</UniqueIdentifier>
     </Filter>
     <Filter Include="Projucer\ComponentEditor">
       <UniqueIdentifier>{5F21E507-E5E8-0A74-F1AE-874BB67C26CC}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Projucer\Licenses">
+      <UniqueIdentifier>{E5D23B90-895E-EB0B-AC18-C7EBB25546AE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Projucer\LiveBuildEngine\UI">
+      <UniqueIdentifier>{E880260F-D9FB-64B6-244B-6F06B70FE9EE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Projucer\LiveBuildEngine">
+      <UniqueIdentifier>{0A3B9446-F50B-3D4E-230F-7ED493541A07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Projucer\Project\UI\Sidebar">
+      <UniqueIdentifier>{A0A94AE6-B447-151A-D0DA-FAE9B5410EBF}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Projucer\Project\UI">
+      <UniqueIdentifier>{D2E33EF7-EDDC-06BA-9343-EF957E30A158}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Projucer\Project">
       <UniqueIdentifier>{BBF7BD20-FB7D-59E5-D1DD-3E6F1455CA02}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Projucer\Project Saving">
-      <UniqueIdentifier>{9F94CAA6-D93A-E34C-3744-8DB22A7D65DD}</UniqueIdentifier>
+    <Filter Include="Projucer\ProjectSaving">
+      <UniqueIdentifier>{C4676327-23FA-ED8F-1881-BC5E53840936}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Projucer\Settings">
+      <UniqueIdentifier>{FAD9788E-4FE6-172B-0E32-913C0C8FC2FB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Projucer\Utility\Helpers">
+      <UniqueIdentifier>{A353D068-8C43-A573-8460-59B6BA167F83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Projucer\Utility\UI\PropertyComponents">
+      <UniqueIdentifier>{ACCBC32A-58D5-1EC6-FC4D-B3B32CB6588E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Projucer\Utility\UI">
+      <UniqueIdentifier>{A90A32B8-1A07-8900-6E90-EC981F56EC9D}</UniqueIdentifier>
     </Filter>
     <Filter Include="Projucer\Utility">
       <UniqueIdentifier>{F77CA057-8DE4-E076-7EB6-D2646794864B}</UniqueIdentifier>
     </Filter>
     <Filter Include="Projucer\Wizards">
       <UniqueIdentifier>{4BBA3556-B2A1-3008-8BE1-F82DE6666552}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Projucer\BinaryData\gradle">
-      <UniqueIdentifier>{661FA330-2192-FAA3-E7B2-FAF8EBB783C6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Projucer\BinaryData\templates">
-      <UniqueIdentifier>{DD0D745A-044A-A337-0DBA-0816C2E7C767}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Projucer\BinaryData">
-      <UniqueIdentifier>{FE290DF2-C600-4159-D484-7F48DB498EBE}</UniqueIdentifier>
     </Filter>
     <Filter Include="Projucer">
       <UniqueIdentifier>{7DBEF27C-2AFE-DA02-1DBF-E80FAAC99EA7}</UniqueIdentifier>
@@ -268,9 +295,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Source\Application\jucer_AppearanceSettings.cpp">
-      <Filter>Projucer\Application</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Application\jucer_Application.cpp">
       <Filter>Projucer\Application</Filter>
     </ClCompile>
@@ -280,74 +304,101 @@
     <ClCompile Include="..\..\Source\Application\jucer_CommandLine.cpp">
       <Filter>Projucer\Application</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Application\jucer_DocumentEditorComponent.cpp">
-      <Filter>Projucer\Application</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Application\jucer_DownloadCompileEngineThread.cpp">
-      <Filter>Projucer\Application</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Application\jucer_Main.cpp">
       <Filter>Projucer\Application</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Application\jucer_MainWindow.cpp">
       <Filter>Projucer\Application</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Application\jucer_OpenDocumentManager.cpp">
-      <Filter>Projucer\Application</Filter>
+    <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_AnimatedComponentTemplate.cpp">
+      <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Licenses\jucer_LicenseController.cpp">
-      <Filter>Projucer\Licenses</Filter>
+    <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_AudioComponentTemplate.cpp">
+      <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\LiveBuildEngine\projucer_CompileEngineClient.cpp">
-      <Filter>Projucer\LiveBuildEngine</Filter>
+    <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_AudioPluginEditorTemplate.cpp">
+      <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\LiveBuildEngine\projucer_CompileEngineServer.cpp">
-      <Filter>Projucer\LiveBuildEngine</Filter>
+    <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_AudioPluginFilterTemplate.cpp">
+      <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Code Editor\jucer_SourceCodeEditor.cpp">
-      <Filter>Projucer\Code Editor</Filter>
+    <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_ComponentTemplate.cpp">
+      <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\components\jucer_ComponentTypeHandler.cpp">
-      <Filter>Projucer\ComponentEditor\components</Filter>
+    <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_ContentCompTemplate.cpp">
+      <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\documents\jucer_ButtonDocument.cpp">
-      <Filter>Projucer\ComponentEditor\documents</Filter>
+    <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_MainConsoleAppTemplate.cpp">
+      <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\documents\jucer_ComponentDocument.cpp">
-      <Filter>Projucer\ComponentEditor\documents</Filter>
+    <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_MainTemplate_NoWindow.cpp">
+      <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\paintelements\jucer_ColouredElement.cpp">
-      <Filter>Projucer\ComponentEditor\paintelements</Filter>
+    <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_MainTemplate_SimpleWindow.cpp">
+      <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\paintelements\jucer_PaintElement.cpp">
-      <Filter>Projucer\ComponentEditor\paintelements</Filter>
+    <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_MainTemplate_Window.cpp">
+      <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementPath.cpp">
-      <Filter>Projucer\ComponentEditor\paintelements</Filter>
+    <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_NewComponentTemplate.cpp">
+      <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\ui\jucer_ComponentLayoutEditor.cpp">
-      <Filter>Projucer\ComponentEditor\ui</Filter>
+    <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_NewCppFileTemplate.cpp">
+      <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\ui\jucer_ComponentOverlayComponent.cpp">
-      <Filter>Projucer\ComponentEditor\ui</Filter>
+    <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_OpenGLComponentTemplate.cpp">
+      <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\ui\jucer_EditingPanelBase.cpp">
-      <Filter>Projucer\ComponentEditor\ui</Filter>
+    <ClCompile Include="..\..\Source\CodeEditor\jucer_DocumentEditorComponent.cpp">
+      <Filter>Projucer\CodeEditor</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\ui\jucer_JucerDocumentEditor.cpp">
-      <Filter>Projucer\ComponentEditor\ui</Filter>
+    <ClCompile Include="..\..\Source\CodeEditor\jucer_OpenDocumentManager.cpp">
+      <Filter>Projucer\CodeEditor</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\ui\jucer_PaintRoutineEditor.cpp">
-      <Filter>Projucer\ComponentEditor\ui</Filter>
+    <ClCompile Include="..\..\Source\CodeEditor\jucer_SourceCodeEditor.cpp">
+      <Filter>Projucer\CodeEditor</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\ui\jucer_PaintRoutinePanel.cpp">
-      <Filter>Projucer\ComponentEditor\ui</Filter>
+    <ClCompile Include="..\..\Source\ComponentEditor\Components\jucer_ComponentTypeHandler.cpp">
+      <Filter>Projucer\ComponentEditor\Components</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\ui\jucer_ResourceEditorPanel.cpp">
-      <Filter>Projucer\ComponentEditor\ui</Filter>
+    <ClCompile Include="..\..\Source\ComponentEditor\Documents\jucer_ButtonDocument.cpp">
+      <Filter>Projucer\ComponentEditor\Documents</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ComponentEditor\ui\jucer_TestComponent.cpp">
-      <Filter>Projucer\ComponentEditor\ui</Filter>
+    <ClCompile Include="..\..\Source\ComponentEditor\Documents\jucer_ComponentDocument.cpp">
+      <Filter>Projucer\ComponentEditor\Documents</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\PaintElements\jucer_ColouredElement.cpp">
+      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElement.cpp">
+      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementPath.cpp">
+      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\UI\jucer_ComponentLayoutEditor.cpp">
+      <Filter>Projucer\ComponentEditor\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\UI\jucer_ComponentOverlayComponent.cpp">
+      <Filter>Projucer\ComponentEditor\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\UI\jucer_EditingPanelBase.cpp">
+      <Filter>Projucer\ComponentEditor\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\UI\jucer_JucerDocumentEditor.cpp">
+      <Filter>Projucer\ComponentEditor\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\UI\jucer_PaintRoutineEditor.cpp">
+      <Filter>Projucer\ComponentEditor\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\UI\jucer_PaintRoutinePanel.cpp">
+      <Filter>Projucer\ComponentEditor\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\UI\jucer_ResourceEditorPanel.cpp">
+      <Filter>Projucer\ComponentEditor\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\ComponentEditor\UI\jucer_TestComponent.cpp">
+      <Filter>Projucer\ComponentEditor\UI</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\ComponentEditor\jucer_BinaryResources.cpp">
       <Filter>Projucer\ComponentEditor</Filter>
@@ -367,8 +418,20 @@
     <ClCompile Include="..\..\Source\ComponentEditor\jucer_PaintRoutine.cpp">
       <Filter>Projucer\ComponentEditor</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Project\jucer_DependencyPathPropertyComponent.cpp">
-      <Filter>Projucer\Project</Filter>
+    <ClCompile Include="..\..\Source\Licenses\jucer_LicenseController.cpp">
+      <Filter>Projucer\Licenses</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\LiveBuildEngine\jucer_CompileEngineClient.cpp">
+      <Filter>Projucer\LiveBuildEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\LiveBuildEngine\jucer_CompileEngineServer.cpp">
+      <Filter>Projucer\LiveBuildEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\LiveBuildEngine\jucer_DownloadCompileEngineThread.cpp">
+      <Filter>Projucer\LiveBuildEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Project\UI\jucer_ProjectContentComponent.cpp">
+      <Filter>Projucer\Project\UI</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Project\jucer_Module.cpp">
       <Filter>Projucer\Project</Filter>
@@ -376,86 +439,50 @@
     <ClCompile Include="..\..\Source\Project\jucer_Project.cpp">
       <Filter>Projucer\Project</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Project\jucer_ProjectContentComponent.cpp">
-      <Filter>Projucer\Project</Filter>
+    <ClCompile Include="..\..\Source\ProjectSaving\jucer_ProjectExporter.cpp">
+      <Filter>Projucer\ProjectSaving</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Project Saving\jucer_ProjectExporter.cpp">
-      <Filter>Projucer\Project Saving</Filter>
+    <ClCompile Include="..\..\Source\ProjectSaving\jucer_ProjectSaver.cpp">
+      <Filter>Projucer\ProjectSaving</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Project Saving\jucer_ProjectSaver.cpp">
-      <Filter>Projucer\Project Saving</Filter>
+    <ClCompile Include="..\..\Source\ProjectSaving\jucer_ResourceFile.cpp">
+      <Filter>Projucer\ProjectSaving</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Project Saving\jucer_ResourceFile.cpp">
-      <Filter>Projucer\Project Saving</Filter>
+    <ClCompile Include="..\..\Source\Settings\jucer_AppearanceSettings.cpp">
+      <Filter>Projucer\Settings</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Utility\jucer_CodeHelpers.cpp">
-      <Filter>Projucer\Utility</Filter>
+    <ClCompile Include="..\..\Source\Settings\jucer_StoredSettings.cpp">
+      <Filter>Projucer\Settings</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Utility\jucer_FileHelpers.cpp">
-      <Filter>Projucer\Utility</Filter>
+    <ClCompile Include="..\..\Source\Utility\Helpers\jucer_CodeHelpers.cpp">
+      <Filter>Projucer\Utility\Helpers</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Utility\jucer_Icons.cpp">
-      <Filter>Projucer\Utility</Filter>
+    <ClCompile Include="..\..\Source\Utility\Helpers\jucer_FileHelpers.cpp">
+      <Filter>Projucer\Utility\Helpers</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Utility\jucer_JucerTreeViewBase.cpp">
-      <Filter>Projucer\Utility</Filter>
+    <ClCompile Include="..\..\Source\Utility\Helpers\jucer_MiscUtilities.cpp">
+      <Filter>Projucer\Utility\Helpers</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Utility\jucer_MiscUtilities.cpp">
-      <Filter>Projucer\Utility</Filter>
+    <ClCompile Include="..\..\Source\Utility\UI\PropertyComponents\jucer_DependencyPathPropertyComponent.cpp">
+      <Filter>Projucer\Utility\UI\PropertyComponents</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Utility\jucer_ProjucerLookAndFeel.cpp">
-      <Filter>Projucer\Utility</Filter>
+    <ClCompile Include="..\..\Source\Utility\UI\jucer_Icons.cpp">
+      <Filter>Projucer\Utility\UI</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Utility\jucer_SlidingPanelComponent.cpp">
-      <Filter>Projucer\Utility</Filter>
+    <ClCompile Include="..\..\Source\Utility\UI\jucer_JucerTreeViewBase.cpp">
+      <Filter>Projucer\Utility\UI</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Utility\jucer_StoredSettings.cpp">
-      <Filter>Projucer\Utility</Filter>
+    <ClCompile Include="..\..\Source\Utility\UI\jucer_ProjucerLookAndFeel.cpp">
+      <Filter>Projucer\Utility\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Utility\UI\jucer_SlidingPanelComponent.cpp">
+      <Filter>Projucer\Utility\UI</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Wizards\jucer_NewFileWizard.cpp">
       <Filter>Projucer\Wizards</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Wizards\jucer_NewProjectWizardClasses.cpp">
       <Filter>Projucer\Wizards</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\jucer_AnimatedComponentTemplate.cpp">
-      <Filter>Projucer\BinaryData\templates</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\jucer_AudioComponentTemplate.cpp">
-      <Filter>Projucer\BinaryData\templates</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\jucer_AudioPluginEditorTemplate.cpp">
-      <Filter>Projucer\BinaryData\templates</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\jucer_AudioPluginFilterTemplate.cpp">
-      <Filter>Projucer\BinaryData\templates</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\jucer_ComponentTemplate.cpp">
-      <Filter>Projucer\BinaryData\templates</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\jucer_ContentCompTemplate.cpp">
-      <Filter>Projucer\BinaryData\templates</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\jucer_MainConsoleAppTemplate.cpp">
-      <Filter>Projucer\BinaryData\templates</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\jucer_MainTemplate_NoWindow.cpp">
-      <Filter>Projucer\BinaryData\templates</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\jucer_MainTemplate_SimpleWindow.cpp">
-      <Filter>Projucer\BinaryData\templates</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\jucer_MainTemplate_Window.cpp">
-      <Filter>Projucer\BinaryData\templates</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\jucer_NewComponentTemplate.cpp">
-      <Filter>Projucer\BinaryData\templates</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\jucer_NewCppFileTemplate.cpp">
-      <Filter>Projucer\BinaryData\templates</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\jucer_OpenGLComponentTemplate.cpp">
-      <Filter>Projucer\BinaryData\templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_AbstractFifo.cpp">
       <Filter>Juce Modules\juce_core\containers</Filter>
@@ -1624,6 +1651,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_PreferencesPanel.cpp">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_PushNotifications.cpp">
+      <Filter>Juce Modules\juce_gui_extra\misc</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_RecentlyOpenedFilesList.cpp">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClCompile>
@@ -1633,7 +1663,13 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_SystemTrayIconComponent.cpp">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\native\juce_android_PushNotifications.cpp">
+      <Filter>Juce Modules\juce_gui_extra\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\native\juce_android_WebBrowserComponent.cpp">
+      <Filter>Juce Modules\juce_gui_extra\native</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\native\juce_ios_PushNotifications.cpp">
       <Filter>Juce Modules\juce_gui_extra\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\native\juce_ios_UIViewComponent.mm">
@@ -1701,8 +1737,29 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Source\Application\jucer_AppearanceSettings.h">
-      <Filter>Projucer\Application</Filter>
+    <ClInclude Include="..\..\Source\Application\Windows\jucer_AboutWindowComponent.h">
+      <Filter>Projucer\Application\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Application\Windows\jucer_ApplicationUsageDataWindowComponent.h">
+      <Filter>Projucer\Application\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Application\Windows\jucer_EditorColourSchemeWindowComponent.h">
+      <Filter>Projucer\Application\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Application\Windows\jucer_FloatingToolWindow.h">
+      <Filter>Projucer\Application\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Application\Windows\jucer_GlobalSearchPathsWindowComponent.h">
+      <Filter>Projucer\Application\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Application\Windows\jucer_SVGPathDataWindowComponent.h">
+      <Filter>Projucer\Application\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Application\Windows\jucer_TranslationToolWindowComponent.h">
+      <Filter>Projucer\Application\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Application\Windows\jucer_UTF8WindowComponent.h">
+      <Filter>Projucer\Application\Windows</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Application\jucer_Application.h">
       <Filter>Projucer\Application</Filter>
@@ -1719,260 +1776,221 @@
     <ClInclude Include="..\..\Source\Application\jucer_CommonHeaders.h">
       <Filter>Projucer\Application</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Application\jucer_DocumentEditorComponent.h">
-      <Filter>Projucer\Application</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Application\jucer_DownloadCompileEngineThread.h">
-      <Filter>Projucer\Application</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Application\jucer_FilePreviewComponent.h">
-      <Filter>Projucer\Application</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\jucer_Headers.h">
+    <ClInclude Include="..\..\Source\Application\jucer_Headers.h">
       <Filter>Projucer\Application</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Application\jucer_MainWindow.h">
       <Filter>Projucer\Application</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Application\jucer_OpenDocumentManager.h">
-      <Filter>Projucer\Application</Filter>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AudioPluginEditorTemplate.h">
+      <Filter>Projucer\BinaryData\Templates</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Licenses\jucer_LicenseController.h">
-      <Filter>Projucer\Licenses</Filter>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AudioPluginFilterTemplate.h">
+      <Filter>Projucer\BinaryData\Templates</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Licenses\jucer_LicenseThread.h">
-      <Filter>Projucer\Licenses</Filter>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_ComponentTemplate.h">
+      <Filter>Projucer\BinaryData\Templates</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Licenses\jucer_LicenseWebview.h">
-      <Filter>Projucer\Licenses</Filter>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_ContentCompTemplate.h">
+      <Filter>Projucer\BinaryData\Templates</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\projucer_ActivityList.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_InlineComponentTemplate.h">
+      <Filter>Projucer\BinaryData\Templates</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\projucer_ActivityListComponent.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_NewComponentTemplate.h">
+      <Filter>Projucer\BinaryData\Templates</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\projucer_BuildTabStatusComp.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_NewCppFileTemplate.h">
+      <Filter>Projucer\BinaryData\Templates</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\projucer_ClassDatabase.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_NewInlineComponentTemplate.h">
+      <Filter>Projucer\BinaryData\Templates</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\projucer_ClientServerMessages.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
+    <ClInclude Include="..\..\Source\CodeEditor\jucer_DocumentEditorComponent.h">
+      <Filter>Projucer\CodeEditor</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\projucer_CompileEngineClient.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
+    <ClInclude Include="..\..\Source\CodeEditor\jucer_ItemPreviewComponent.h">
+      <Filter>Projucer\CodeEditor</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\projucer_CompileEngineDLL.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
+    <ClInclude Include="..\..\Source\CodeEditor\jucer_LiveBuildCodeEditor.h">
+      <Filter>Projucer\CodeEditor</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\projucer_CompileEngineServer.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
+    <ClInclude Include="..\..\Source\CodeEditor\jucer_OpenDocumentManager.h">
+      <Filter>Projucer\CodeEditor</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\projucer_ComponentListComp.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
+    <ClInclude Include="..\..\Source\CodeEditor\jucer_SourceCodeEditor.h">
+      <Filter>Projucer\CodeEditor</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\projucer_CppHelpers.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_ButtonHandler.h">
+      <Filter>Projucer\ComponentEditor\Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\projucer_DiagnosticMessage.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_ComboBoxHandler.h">
+      <Filter>Projucer\ComponentEditor\Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\projucer_ErrorList.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_ComponentNameProperty.h">
+      <Filter>Projucer\ComponentEditor\Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\projucer_ErrorListComponent.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_ComponentTypeHandler.h">
+      <Filter>Projucer\ComponentEditor\Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\projucer_LiveCodeBuilderDLL.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_ComponentUndoableAction.h">
+      <Filter>Projucer\ComponentEditor\Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\projucer_MessageIDs.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_GenericComponentHandler.h">
+      <Filter>Projucer\ComponentEditor\Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\projucer_ProjectBuildInfo.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_GroupComponentHandler.h">
+      <Filter>Projucer\ComponentEditor\Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\projucer_SourceCodeRange.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_HyperlinkButtonHandler.h">
+      <Filter>Projucer\ComponentEditor\Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Code Editor\jucer_LiveBuildCodeEditor.h">
-      <Filter>Projucer\Code Editor</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_ImageButtonHandler.h">
+      <Filter>Projucer\ComponentEditor\Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Code Editor\jucer_SourceCodeEditor.h">
-      <Filter>Projucer\Code Editor</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_JucerComponentHandler.h">
+      <Filter>Projucer\ComponentEditor\Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_ButtonHandler.h">
-      <Filter>Projucer\ComponentEditor\components</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_LabelHandler.h">
+      <Filter>Projucer\ComponentEditor\Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_ComboBoxHandler.h">
-      <Filter>Projucer\ComponentEditor\components</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_SliderHandler.h">
+      <Filter>Projucer\ComponentEditor\Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_ComponentNameProperty.h">
-      <Filter>Projucer\ComponentEditor\components</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_TabbedComponentHandler.h">
+      <Filter>Projucer\ComponentEditor\Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_ComponentTypeHandler.h">
-      <Filter>Projucer\ComponentEditor\components</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_TextButtonHandler.h">
+      <Filter>Projucer\ComponentEditor\Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_ComponentUndoableAction.h">
-      <Filter>Projucer\ComponentEditor\components</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_TextEditorHandler.h">
+      <Filter>Projucer\ComponentEditor\Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_GenericComponentHandler.h">
-      <Filter>Projucer\ComponentEditor\components</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_ToggleButtonHandler.h">
+      <Filter>Projucer\ComponentEditor\Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_GroupComponentHandler.h">
-      <Filter>Projucer\ComponentEditor\components</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_TreeViewHandler.h">
+      <Filter>Projucer\ComponentEditor\Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_HyperlinkButtonHandler.h">
-      <Filter>Projucer\ComponentEditor\components</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Components\jucer_ViewportHandler.h">
+      <Filter>Projucer\ComponentEditor\Components</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_ImageButtonHandler.h">
-      <Filter>Projucer\ComponentEditor\components</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Documents\jucer_ButtonDocument.h">
+      <Filter>Projucer\ComponentEditor\Documents</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_JucerComponentHandler.h">
-      <Filter>Projucer\ComponentEditor\components</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Documents\jucer_ComponentDocument.h">
+      <Filter>Projucer\ComponentEditor\Documents</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_LabelHandler.h">
-      <Filter>Projucer\ComponentEditor\components</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_ColouredElement.h">
+      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_SliderHandler.h">
-      <Filter>Projucer\ComponentEditor\components</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_ElementSiblingComponent.h">
+      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_TabbedComponentHandler.h">
-      <Filter>Projucer\ComponentEditor\components</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_FillType.h">
+      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_TextButtonHandler.h">
-      <Filter>Projucer\ComponentEditor\components</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_GradientPointComponent.h">
+      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_TextEditorHandler.h">
-      <Filter>Projucer\ComponentEditor\components</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_ImageResourceProperty.h">
+      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_ToggleButtonHandler.h">
-      <Filter>Projucer\ComponentEditor\components</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElement.h">
+      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_TreeViewHandler.h">
-      <Filter>Projucer\ComponentEditor\components</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementEllipse.h">
+      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\components\jucer_ViewportHandler.h">
-      <Filter>Projucer\ComponentEditor\components</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementGroup.h">
+      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\documents\jucer_ButtonDocument.h">
-      <Filter>Projucer\ComponentEditor\documents</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementImage.h">
+      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\documents\jucer_ComponentDocument.h">
-      <Filter>Projucer\ComponentEditor\documents</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementPath.h">
+      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_ColouredElement.h">
-      <Filter>Projucer\ComponentEditor\paintelements</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementRectangle.h">
+      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_ElementSiblingComponent.h">
-      <Filter>Projucer\ComponentEditor\paintelements</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementRoundedRectangle.h">
+      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_FillType.h">
-      <Filter>Projucer\ComponentEditor\paintelements</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementText.h">
+      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_GradientPointComponent.h">
-      <Filter>Projucer\ComponentEditor\paintelements</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PaintElementUndoableAction.h">
+      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_ImageResourceProperty.h">
-      <Filter>Projucer\ComponentEditor\paintelements</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_PointComponent.h">
+      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_PaintElement.h">
-      <Filter>Projucer\ComponentEditor\paintelements</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\PaintElements\jucer_StrokeType.h">
+      <Filter>Projucer\ComponentEditor\PaintElements</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementEllipse.h">
-      <Filter>Projucer\ComponentEditor\paintelements</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_ColourPropertyComponent.h">
+      <Filter>Projucer\ComponentEditor\Properties</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementGroup.h">
-      <Filter>Projucer\ComponentEditor\paintelements</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_ComponentBooleanProperty.h">
+      <Filter>Projucer\ComponentEditor\Properties</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementImage.h">
-      <Filter>Projucer\ComponentEditor\paintelements</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_ComponentChoiceProperty.h">
+      <Filter>Projucer\ComponentEditor\Properties</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementPath.h">
-      <Filter>Projucer\ComponentEditor\paintelements</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_ComponentColourProperty.h">
+      <Filter>Projucer\ComponentEditor\Properties</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementRectangle.h">
-      <Filter>Projucer\ComponentEditor\paintelements</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_ComponentTextProperty.h">
+      <Filter>Projucer\ComponentEditor\Properties</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementRoundedRectangle.h">
-      <Filter>Projucer\ComponentEditor\paintelements</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_FilePropertyComponent.h">
+      <Filter>Projucer\ComponentEditor\Properties</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementText.h">
-      <Filter>Projucer\ComponentEditor\paintelements</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_FontPropertyComponent.h">
+      <Filter>Projucer\ComponentEditor\Properties</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_PaintElementUndoableAction.h">
-      <Filter>Projucer\ComponentEditor\paintelements</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_JustificationProperty.h">
+      <Filter>Projucer\ComponentEditor\Properties</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_PointComponent.h">
-      <Filter>Projucer\ComponentEditor\paintelements</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\Properties\jucer_PositionPropertyBase.h">
+      <Filter>Projucer\ComponentEditor\Properties</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\paintelements\jucer_StrokeType.h">
-      <Filter>Projucer\ComponentEditor\paintelements</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_ComponentLayoutEditor.h">
+      <Filter>Projucer\ComponentEditor\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\properties\jucer_ColourPropertyComponent.h">
-      <Filter>Projucer\ComponentEditor\properties</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_ComponentLayoutPanel.h">
+      <Filter>Projucer\ComponentEditor\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\properties\jucer_ComponentBooleanProperty.h">
-      <Filter>Projucer\ComponentEditor\properties</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_ComponentOverlayComponent.h">
+      <Filter>Projucer\ComponentEditor\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\properties\jucer_ComponentChoiceProperty.h">
-      <Filter>Projucer\ComponentEditor\properties</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_EditingPanelBase.h">
+      <Filter>Projucer\ComponentEditor\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\properties\jucer_ComponentColourProperty.h">
-      <Filter>Projucer\ComponentEditor\properties</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_JucerCommandIDs.h">
+      <Filter>Projucer\ComponentEditor\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\properties\jucer_ComponentTextProperty.h">
-      <Filter>Projucer\ComponentEditor\properties</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_JucerDocumentEditor.h">
+      <Filter>Projucer\ComponentEditor\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\properties\jucer_FilePropertyComponent.h">
-      <Filter>Projucer\ComponentEditor\properties</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_PaintRoutineEditor.h">
+      <Filter>Projucer\ComponentEditor\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\properties\jucer_FontPropertyComponent.h">
-      <Filter>Projucer\ComponentEditor\properties</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_PaintRoutinePanel.h">
+      <Filter>Projucer\ComponentEditor\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\properties\jucer_JustificationProperty.h">
-      <Filter>Projucer\ComponentEditor\properties</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_RelativePositionedRectangle.h">
+      <Filter>Projucer\ComponentEditor\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\properties\jucer_PositionPropertyBase.h">
-      <Filter>Projucer\ComponentEditor\properties</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_ResourceEditorPanel.h">
+      <Filter>Projucer\ComponentEditor\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\ui\jucer_ComponentLayoutEditor.h">
-      <Filter>Projucer\ComponentEditor\ui</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_SnapGridPainter.h">
+      <Filter>Projucer\ComponentEditor\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\ui\jucer_ComponentLayoutPanel.h">
-      <Filter>Projucer\ComponentEditor\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\ui\jucer_ComponentOverlayComponent.h">
-      <Filter>Projucer\ComponentEditor\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\ui\jucer_EditingPanelBase.h">
-      <Filter>Projucer\ComponentEditor\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\ui\jucer_JucerCommandIDs.h">
-      <Filter>Projucer\ComponentEditor\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\ui\jucer_JucerDocumentEditor.h">
-      <Filter>Projucer\ComponentEditor\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\ui\jucer_PaintRoutineEditor.h">
-      <Filter>Projucer\ComponentEditor\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\ui\jucer_PaintRoutinePanel.h">
-      <Filter>Projucer\ComponentEditor\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\ui\jucer_RelativePositionedRectangle.h">
-      <Filter>Projucer\ComponentEditor\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\ui\jucer_ResourceEditorPanel.h">
-      <Filter>Projucer\ComponentEditor\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\ui\jucer_SnapGridPainter.h">
-      <Filter>Projucer\ComponentEditor\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ComponentEditor\ui\jucer_TestComponent.h">
-      <Filter>Projucer\ComponentEditor\ui</Filter>
+    <ClInclude Include="..\..\Source\ComponentEditor\UI\jucer_TestComponent.h">
+      <Filter>Projucer\ComponentEditor\UI</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\ComponentEditor\jucer_BinaryResources.h">
       <Filter>Projucer\ComponentEditor</Filter>
@@ -1995,149 +2013,203 @@
     <ClInclude Include="..\..\Source\ComponentEditor\jucer_UtilityFunctions.h">
       <Filter>Projucer\ComponentEditor</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ConfigTree_Base.h">
-      <Filter>Projucer\Project</Filter>
+    <ClInclude Include="..\..\Source\Licenses\jucer_LicenseController.h">
+      <Filter>Projucer\Licenses</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ConfigTree_Exporter.h">
-      <Filter>Projucer\Project</Filter>
+    <ClInclude Include="..\..\Source\Licenses\jucer_LicenseThread.h">
+      <Filter>Projucer\Licenses</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ConfigTree_Modules.h">
-      <Filter>Projucer\Project</Filter>
+    <ClInclude Include="..\..\Source\Licenses\jucer_LicenseWebview.h">
+      <Filter>Projucer\Licenses</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_DependencyPathPropertyComponent.h">
-      <Filter>Projucer\Project</Filter>
+    <ClInclude Include="..\..\Source\LiveBuildEngine\UI\jucer_ActivityListComponent.h">
+      <Filter>Projucer\LiveBuildEngine\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_GroupInformationComponent.h">
-      <Filter>Projucer\Project</Filter>
+    <ClInclude Include="..\..\Source\LiveBuildEngine\UI\jucer_BuildTabStatusComponent.h">
+      <Filter>Projucer\LiveBuildEngine\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_HeaderComponent.h">
-      <Filter>Projucer\Project</Filter>
+    <ClInclude Include="..\..\Source\LiveBuildEngine\UI\jucer_ComponentListComponent.h">
+      <Filter>Projucer\LiveBuildEngine\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_LiveBuildTab.h">
-      <Filter>Projucer\Project</Filter>
+    <ClInclude Include="..\..\Source\LiveBuildEngine\UI\jucer_ErrorListComponent.h">
+      <Filter>Projucer\LiveBuildEngine\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_ActivityList.h">
+      <Filter>Projucer\LiveBuildEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_ClassDatabase.h">
+      <Filter>Projucer\LiveBuildEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_ClientServerMessages.h">
+      <Filter>Projucer\LiveBuildEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_CompileEngineClient.h">
+      <Filter>Projucer\LiveBuildEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_CompileEngineDLL.h">
+      <Filter>Projucer\LiveBuildEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_CompileEngineServer.h">
+      <Filter>Projucer\LiveBuildEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_CppHelpers.h">
+      <Filter>Projucer\LiveBuildEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_DiagnosticMessage.h">
+      <Filter>Projucer\LiveBuildEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_DownloadCompileEngineThread.h">
+      <Filter>Projucer\LiveBuildEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_ErrorList.h">
+      <Filter>Projucer\LiveBuildEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_LiveCodeBuilderDLL.h">
+      <Filter>Projucer\LiveBuildEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_MessageIDs.h">
+      <Filter>Projucer\LiveBuildEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_ProjectBuildInfo.h">
+      <Filter>Projucer\LiveBuildEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_SourceCodeRange.h">
+      <Filter>Projucer\LiveBuildEngine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_ExporterTreeItems.h">
+      <Filter>Projucer\Project\UI\Sidebar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_FileTreeItems.h">
+      <Filter>Projucer\Project\UI\Sidebar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_LiveBuildTab.h">
+      <Filter>Projucer\Project\UI\Sidebar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_ModuleTreeItems.h">
+      <Filter>Projucer\Project\UI\Sidebar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_ProjectTab.h">
+      <Filter>Projucer\Project\UI\Sidebar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_ProjectTreeItemBase.h">
+      <Filter>Projucer\Project\UI\Sidebar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_TabComponents.h">
+      <Filter>Projucer\Project\UI\Sidebar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_TreeItemTypes.h">
+      <Filter>Projucer\Project\UI\Sidebar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\UI\jucer_ContentViewComponents.h">
+      <Filter>Projucer\Project\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\UI\jucer_FileGroupInformationComponent.h">
+      <Filter>Projucer\Project\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\UI\jucer_HeaderComponent.h">
+      <Filter>Projucer\Project\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\UI\jucer_ModulesInformationComponent.h">
+      <Filter>Projucer\Project\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\UI\jucer_ProjectContentComponent.h">
+      <Filter>Projucer\Project\UI</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_Module.h">
-      <Filter>Projucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ModulesPanel.h">
       <Filter>Projucer\Project</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_Project.h">
       <Filter>Projucer\Project</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectContentComponent.h">
-      <Filter>Projucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectTab.h">
-      <Filter>Projucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectTree_Base.h">
-      <Filter>Projucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectTree_File.h">
-      <Filter>Projucer\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_ProjectTree_Group.h">
-      <Filter>Projucer\Project</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Project\jucer_ProjectType.h">
       <Filter>Projucer\Project</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project\jucer_TreeItemTypes.h">
-      <Filter>Projucer\Project</Filter>
+    <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_Android.h">
+      <Filter>Projucer\ProjectSaving</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Android.h">
-      <Filter>Projucer\Project Saving</Filter>
+    <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_CLion.h">
+      <Filter>Projucer\ProjectSaving</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_CodeBlocks.h">
-      <Filter>Projucer\Project Saving</Filter>
+    <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_CodeBlocks.h">
+      <Filter>Projucer\ProjectSaving</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_Make.h">
-      <Filter>Projucer\Project Saving</Filter>
+    <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_Make.h">
+      <Filter>Projucer\ProjectSaving</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_MSVC.h">
-      <Filter>Projucer\Project Saving</Filter>
+    <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_MSVC.h">
+      <Filter>Projucer\ProjectSaving</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExport_XCode.h">
-      <Filter>Projucer\Project Saving</Filter>
+    <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_Xcode.h">
+      <Filter>Projucer\ProjectSaving</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectExporter.h">
-      <Filter>Projucer\Project Saving</Filter>
+    <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExporter.h">
+      <Filter>Projucer\ProjectSaving</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project Saving\jucer_ProjectSaver.h">
-      <Filter>Projucer\Project Saving</Filter>
+    <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectSaver.h">
+      <Filter>Projucer\ProjectSaving</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project Saving\jucer_ResourceFile.h">
-      <Filter>Projucer\Project Saving</Filter>
+    <ClInclude Include="..\..\Source\ProjectSaving\jucer_ResourceFile.h">
+      <Filter>Projucer\ProjectSaving</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_AboutWindowComponent.h">
-      <Filter>Projucer\Utility</Filter>
+    <ClInclude Include="..\..\Source\Settings\jucer_AppearanceSettings.h">
+      <Filter>Projucer\Settings</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_ApplicationUsageDataWindowComponent.h">
-      <Filter>Projucer\Utility</Filter>
+    <ClInclude Include="..\..\Source\Settings\jucer_StoredSettings.h">
+      <Filter>Projucer\Settings</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_CodeHelpers.h">
-      <Filter>Projucer\Utility</Filter>
+    <ClInclude Include="..\..\Source\Utility\Helpers\jucer_CodeHelpers.h">
+      <Filter>Projucer\Utility\Helpers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_ColourPropertyComponent.h">
-      <Filter>Projucer\Utility</Filter>
+    <ClInclude Include="..\..\Source\Utility\Helpers\jucer_Colours.h">
+      <Filter>Projucer\Utility\Helpers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_Colours.h">
-      <Filter>Projucer\Utility</Filter>
+    <ClInclude Include="..\..\Source\Utility\Helpers\jucer_FileHelpers.h">
+      <Filter>Projucer\Utility\Helpers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_EditorColourSchemeWindowComponent.h">
-      <Filter>Projucer\Utility</Filter>
+    <ClInclude Include="..\..\Source\Utility\Helpers\jucer_MiscUtilities.h">
+      <Filter>Projucer\Utility\Helpers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_FileHelpers.h">
-      <Filter>Projucer\Utility</Filter>
+    <ClInclude Include="..\..\Source\Utility\Helpers\jucer_PresetIDs.h">
+      <Filter>Projucer\Utility\Helpers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_FilePathPropertyComponent.h">
-      <Filter>Projucer\Utility</Filter>
+    <ClInclude Include="..\..\Source\Utility\Helpers\jucer_RelativePath.h">
+      <Filter>Projucer\Utility\Helpers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_FloatingToolWindow.h">
-      <Filter>Projucer\Utility</Filter>
+    <ClInclude Include="..\..\Source\Utility\Helpers\jucer_TranslationHelpers.h">
+      <Filter>Projucer\Utility\Helpers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_GlobalSearchPathsWindowComponent.h">
-      <Filter>Projucer\Utility</Filter>
+    <ClInclude Include="..\..\Source\Utility\Helpers\jucer_ValueSourceHelpers.h">
+      <Filter>Projucer\Utility\Helpers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_Icons.h">
-      <Filter>Projucer\Utility</Filter>
+    <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_ColourPropertyComponent.h">
+      <Filter>Projucer\Utility\UI\PropertyComponents</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_JucerTreeViewBase.h">
-      <Filter>Projucer\Utility</Filter>
+    <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_DependencyPathPropertyComponent.h">
+      <Filter>Projucer\Utility\UI\PropertyComponents</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_MiscUtilities.h">
-      <Filter>Projucer\Utility</Filter>
+    <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_FilePathPropertyComponent.h">
+      <Filter>Projucer\Utility\UI\PropertyComponents</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_PresetIDs.h">
-      <Filter>Projucer\Utility</Filter>
+    <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_TextWithDefaultPropertyComponent.h">
+      <Filter>Projucer\Utility\UI\PropertyComponents</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_ProjucerLookAndFeel.h">
-      <Filter>Projucer\Utility</Filter>
+    <ClInclude Include="..\..\Source\Utility\UI\jucer_IconButton.h">
+      <Filter>Projucer\Utility\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_RelativePath.h">
-      <Filter>Projucer\Utility</Filter>
+    <ClInclude Include="..\..\Source\Utility\UI\jucer_Icons.h">
+      <Filter>Projucer\Utility\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_SlidingPanelComponent.h">
-      <Filter>Projucer\Utility</Filter>
+    <ClInclude Include="..\..\Source\Utility\UI\jucer_JucerTreeViewBase.h">
+      <Filter>Projucer\Utility\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_StoredSettings.h">
-      <Filter>Projucer\Utility</Filter>
+    <ClInclude Include="..\..\Source\Utility\UI\jucer_ProjucerLookAndFeel.h">
+      <Filter>Projucer\Utility\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_SVGPathDataComponent.h">
-      <Filter>Projucer\Utility</Filter>
+    <ClInclude Include="..\..\Source\Utility\UI\jucer_SlidingPanelComponent.h">
+      <Filter>Projucer\Utility\UI</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_TranslationHelpers.h">
-      <Filter>Projucer\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_TranslationToolComponent.h">
-      <Filter>Projucer\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_UTF8Component.h">
-      <Filter>Projucer\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\jucer_ValueSourceHelpers.h">
-      <Filter>Projucer\Utility</Filter>
+    <ClInclude Include="..\..\Source\Utility\UI\jucer_UserSettingsPopup.h">
+      <Filter>Projucer\Utility\UI</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Wizards\jucer_NewFileWizard.h">
       <Filter>Projucer\Wizards</Filter>
@@ -2183,30 +2255,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Wizards\jucer_TemplateThumbnailsComponent.h">
       <Filter>Projucer\Wizards</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\BinaryData\jucer_AudioPluginEditorTemplate.h">
-      <Filter>Projucer\BinaryData\templates</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\BinaryData\jucer_AudioPluginFilterTemplate.h">
-      <Filter>Projucer\BinaryData\templates</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\BinaryData\jucer_ComponentTemplate.h">
-      <Filter>Projucer\BinaryData\templates</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\BinaryData\jucer_ContentCompTemplate.h">
-      <Filter>Projucer\BinaryData\templates</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\BinaryData\jucer_InlineComponentTemplate.h">
-      <Filter>Projucer\BinaryData\templates</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\BinaryData\jucer_NewComponentTemplate.h">
-      <Filter>Projucer\BinaryData\templates</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\BinaryData\jucer_NewCppFileTemplate.h">
-      <Filter>Projucer\BinaryData\templates</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\BinaryData\jucer_NewInlineComponentTemplate.h">
-      <Filter>Projucer\BinaryData\templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_AbstractFifo.h">
       <Filter>Juce Modules\juce_core\containers</Filter>
@@ -3354,6 +3402,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_PreferencesPanel.h">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_PushNotifications.h">
+      <Filter>Juce Modules\juce_gui_extra\misc</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_RecentlyOpenedFilesList.h">
       <Filter>Juce Modules\juce_gui_extra\misc</Filter>
     </ClInclude>
@@ -3383,52 +3434,82 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Source\BinaryData\gradle\gradle-wrapper.jar">
-      <Filter>Projucer\BinaryData\gradle</Filter>
+    <None Include="..\..\Source\BinaryData\Gradle\gradle-wrapper.jar">
+      <Filter>Projucer\BinaryData\Gradle</Filter>
     </None>
-    <None Include="..\..\Source\BinaryData\gradle\gradlew">
-      <Filter>Projucer\BinaryData\gradle</Filter>
+    <None Include="..\..\Source\BinaryData\Gradle\gradlew">
+      <Filter>Projucer\BinaryData\Gradle</Filter>
     </None>
-    <None Include="..\..\Source\BinaryData\gradle\gradlew.bat">
-      <Filter>Projucer\BinaryData\gradle</Filter>
+    <None Include="..\..\Source\BinaryData\Gradle\gradlew.bat">
+      <Filter>Projucer\BinaryData\Gradle</Filter>
     </None>
-    <None Include="..\..\Source\BinaryData\gradle\LICENSE">
-      <Filter>Projucer\BinaryData\gradle</Filter>
+    <None Include="..\..\Source\BinaryData\Gradle\LICENSE">
+      <Filter>Projucer\BinaryData\Gradle</Filter>
     </None>
-    <None Include="..\..\Source\BinaryData\background_logo.svg">
-      <Filter>Projucer\BinaryData</Filter>
+    <None Include="..\..\Source\BinaryData\Icons\background_logo.svg">
+      <Filter>Projucer\BinaryData\Icons</Filter>
     </None>
-    <None Include="..\..\Source\BinaryData\background_tile.png">
-      <Filter>Projucer\BinaryData</Filter>
+    <None Include="..\..\Source\BinaryData\Icons\export_android.svg">
+      <Filter>Projucer\BinaryData\Icons</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\Icons\export_clion.svg">
+      <Filter>Projucer\BinaryData\Icons</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\Icons\export_codeBlocks.svg">
+      <Filter>Projucer\BinaryData\Icons</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\Icons\export_linux.svg">
+      <Filter>Projucer\BinaryData\Icons</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\Icons\export_visualStudio.svg">
+      <Filter>Projucer\BinaryData\Icons</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\Icons\export_xcode.svg">
+      <Filter>Projucer\BinaryData\Icons</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\Icons\huckleberry_icon.svg">
+      <Filter>Projucer\BinaryData\Icons</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\Icons\juce-logo-with-text.svg">
+      <Filter>Projucer\BinaryData\Icons</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\Icons\juce_icon.png">
+      <Filter>Projucer\BinaryData\Icons</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\Icons\wizard_AnimatedApp.svg">
+      <Filter>Projucer\BinaryData\Icons</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\Icons\wizard_AudioApp.svg">
+      <Filter>Projucer\BinaryData\Icons</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\Icons\wizard_AudioPlugin.svg">
+      <Filter>Projucer\BinaryData\Icons</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\Icons\wizard_ConsoleApp.svg">
+      <Filter>Projucer\BinaryData\Icons</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\Icons\wizard_DLL.svg">
+      <Filter>Projucer\BinaryData\Icons</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\Icons\wizard_GUI.svg">
+      <Filter>Projucer\BinaryData\Icons</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\Icons\wizard_Highlight.svg">
+      <Filter>Projucer\BinaryData\Icons</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\Icons\wizard_Openfile.svg">
+      <Filter>Projucer\BinaryData\Icons</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\Icons\wizard_OpenGL.svg">
+      <Filter>Projucer\BinaryData\Icons</Filter>
+    </None>
+    <None Include="..\..\Source\BinaryData\Icons\wizard_StaticLibrary.svg">
+      <Filter>Projucer\BinaryData\Icons</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\colourscheme_dark.xml">
       <Filter>Projucer\BinaryData</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\colourscheme_light.xml">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\export_android.svg">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\export_codeBlocks.svg">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\export_linux.svg">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\export_visualStudio.svg">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\export_xcode.svg">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\huckleberry_icon.svg">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\juce-logo-with-text.svg">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\juce_icon.png">
       <Filter>Projucer\BinaryData</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\offlinepage.html">
@@ -3437,40 +3518,7 @@
     <None Include="..\..\Source\BinaryData\projucer_EULA.txt">
       <Filter>Projucer\BinaryData</Filter>
     </None>
-    <None Include="..\..\Source\BinaryData\projucer_login_bg.svg">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
     <None Include="..\..\Source\BinaryData\RecentFilesMenuTemplate.nib">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\wizard_AnimatedApp.svg">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\wizard_AudioApp.svg">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\wizard_AudioPlugin.svg">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\wizard_ConsoleApp.svg">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\wizard_DLL.svg">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\wizard_GUI.svg">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\wizard_Highlight.svg">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\wizard_Openfile.svg">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\wizard_OpenGL.svg">
-      <Filter>Projucer\BinaryData</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\wizard_StaticLibrary.svg">
       <Filter>Projucer\BinaryData</Filter>
     </None>
     <None Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\changes to libjpeg for JUCE.txt">

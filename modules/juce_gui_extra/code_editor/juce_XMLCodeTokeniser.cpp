@@ -53,8 +53,8 @@ CodeEditorComponent::ColourScheme XmlTokeniser::getDefaultColourScheme()
 
     CodeEditorComponent::ColourScheme cs;
 
-    for (unsigned int i = 0; i < sizeof (types) / sizeof (types[0]); ++i)  // (NB: numElementsInArray doesn't work here in GCC4.2)
-        cs.set (types[i].name, Colour (types[i].colour));
+    for (auto& t : types)
+        cs.set (t.name, Colour (t.colour));
 
     return cs;
 }
@@ -66,7 +66,7 @@ static void skipToEndOfXmlDTD (Iterator& source) noexcept
 
     for (;;)
     {
-        const juce_wchar c = source.nextChar();
+        auto c = source.nextChar();
 
         if (c == 0 || (c == '>' && lastWasQuestionMark))
             break;
@@ -78,11 +78,11 @@ static void skipToEndOfXmlDTD (Iterator& source) noexcept
 template <typename Iterator>
 static void skipToEndOfXmlComment (Iterator& source) noexcept
 {
-    juce_wchar last[2] = { 0 };
+    juce_wchar last[2] = {};
 
     for (;;)
     {
-        const juce_wchar c = source.nextChar();
+        auto c = source.nextChar();
 
         if (c == 0 || (c == '>' && last[0] == '-' && last[1] == '-'))
             break;
@@ -95,7 +95,7 @@ static void skipToEndOfXmlComment (Iterator& source) noexcept
 int XmlTokeniser::readNextToken (CodeDocument::Iterator& source)
 {
     source.skipWhitespace();
-    const juce_wchar firstChar = source.peekNextChar();
+    auto firstChar = source.peekNextChar();
 
     switch (firstChar)
     {
@@ -110,7 +110,7 @@ int XmlTokeniser::readNextToken (CodeDocument::Iterator& source)
         {
             source.skip();
             source.skipWhitespace();
-            const juce_wchar nextChar = source.peekNextChar();
+            auto nextChar = source.peekNextChar();
 
             if (nextChar == '?')
             {

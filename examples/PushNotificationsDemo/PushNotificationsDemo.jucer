@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="SS6MsF" name="PushNotificationsDemo" displaySplashScreen="0"
+              reportAppUsage="0" splashScreenColour="Dark" projectType="guiapp"
+              version="1.0.0" bundleIdentifier="com.juce.pushnotificationsdemo"
+              includeBinaryInAppConfig="1" cppLanguageStandard="11" jucerVersion="5.2.0"
+              companyCopyright="">
+  <MAINGROUP id="VaJRhp" name="PushNotificationsDemo">
+    <GROUP id="{712B2C90-FAC6-CCF3-F8F9-ED82411AF5ED}" name="BinaryResources">
+      <GROUP id="{DBF05B65-21C4-E232-D005-149CC3FD4CD6}" name="images">
+        <FILE id="vPFlgX" name="ic_stat_name.png" compile="0" resource="1"
+              file="BinaryResources/images/ic_stat_name.png"/>
+        <FILE id="cFrr9F" name="ic_stat_name2.png" compile="0" resource="1"
+              file="BinaryResources/images/ic_stat_name2.png"/>
+        <FILE id="d6aZX5" name="ic_stat_name3.png" compile="0" resource="1"
+              file="BinaryResources/images/ic_stat_name3.png"/>
+        <FILE id="nkb99Z" name="ic_stat_name4.png" compile="0" resource="1"
+              file="BinaryResources/images/ic_stat_name4.png"/>
+        <FILE id="y7x7U0" name="ic_stat_name5.png" compile="0" resource="1"
+              file="BinaryResources/images/ic_stat_name5.png"/>
+        <FILE id="IVufcJ" name="ic_stat_name6.png" compile="0" resource="1"
+              file="BinaryResources/images/ic_stat_name6.png"/>
+        <FILE id="yYDjas" name="ic_stat_name7.png" compile="0" resource="1"
+              file="BinaryResources/images/ic_stat_name7.png"/>
+        <FILE id="uB2QTS" name="ic_stat_name8.png" compile="0" resource="1"
+              file="BinaryResources/images/ic_stat_name8.png"/>
+        <FILE id="Jgbx8i" name="ic_stat_name9.png" compile="0" resource="1"
+              file="BinaryResources/images/ic_stat_name9.png"/>
+        <FILE id="Q2zkvf" name="ic_stat_name10.png" compile="0" resource="1"
+              file="BinaryResources/images/ic_stat_name10.png"/>
+      </GROUP>
+      <GROUP id="{D7B3F6B4-2E9A-E281-831A-2B67D6D4C4A0}" name="sounds">
+        <FILE id="il8LpK" name="demonstrative.caf" compile="0" resource="1"
+              file="BinaryResources/sounds/demonstrative.caf"/>
+        <FILE id="aUWCPt" name="demonstrative.mp3" compile="0" resource="1"
+              file="BinaryResources/sounds/demonstrative.mp3"/>
+        <FILE id="PWlDpi" name="isntit.caf" compile="0" resource="1" file="BinaryResources/sounds/isntit.caf"/>
+        <FILE id="nbNoVQ" name="isntit.mp3" compile="0" resource="1" file="BinaryResources/sounds/isntit.mp3"/>
+        <FILE id="AheEYO" name="jinglebellssms.caf" compile="0" resource="1"
+              file="BinaryResources/sounds/jinglebellssms.caf"/>
+        <FILE id="WeQemY" name="jinglebellssms.mp3" compile="0" resource="1"
+              file="BinaryResources/sounds/jinglebellssms.mp3"/>
+        <FILE id="TmLrYM" name="served.caf" compile="0" resource="1" file="BinaryResources/sounds/served.caf"/>
+        <FILE id="Ad45fH" name="served.mp3" compile="0" resource="1" file="BinaryResources/sounds/served.mp3"/>
+        <FILE id="qH4XUR" name="solemn.caf" compile="0" resource="1" file="BinaryResources/sounds/solemn.caf"/>
+        <FILE id="cwrEXS" name="solemn.mp3" compile="0" resource="1" file="BinaryResources/sounds/solemn.mp3"/>
+      </GROUP>
+    </GROUP>
+    <GROUP id="{1AF8C966-743E-3F06-189C-AADD83767CB4}" name="Source">
+      <FILE id="f0GZqm" name="MainComponent.cpp" compile="1" resource="0"
+            file="Source/MainComponent.cpp"/>
+      <FILE id="p0ifBx" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
+      <FILE id="nD1eGt" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
+    </GROUP>
+  </MAINGROUP>
+  <EXPORTFORMATS>
+    <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="portraitlandscape"
+                  iosPushNotifications="1" extraCompilerFlags="-pedantic -Werror -Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion&#10;-F../../../../3rd_party/FacebookSDKs-iOS-4&#10;-F../../../../3rd_party/Firebase_ios_sdk/Analytics&#10;-F../../../../3rd_party/Firebase_ios_sdk/Messaging"
+                  customXcodeResourceFolders="./BinaryResources/sounds" iPadScreenOrientation="portraitlandscape"
+                  iosDeviceFamily="1,2">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="PushNotificationsDemo"
+                       enablePluginBinaryCopyStep="1"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="PushNotificationsDemo"
+                       enablePluginBinaryCopyStep="1"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_opengl" path="../../modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../modules"/>
+      </MODULEPATHS>
+    </XCODE_IPHONE>
+    <ANDROIDSTUDIO targetFolder="Builds/Android" androidSDKPath="" androidNDKPath=""
+                   androidEnableRemoteNotifications="1" androidRemoteNotificationsConfigFile="../google-services.json"
+                   extraCompilerFlags="-pedantic -Werror -Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion&#10;-F../../../../3rd_party/FacebookSDKs-iOS-4&#10;-F../../../../3rd_party/Firebase_ios_sdk/Analytics&#10;-F../../../../3rd_party/Firebase_ios_sdk/Messaging"
+                   androidVibratePermissionNeeded="1" androidMinimumSDK="26">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" androidArchitectures="armeabi x86" isDebug="1" optimisation="1"
+                       targetName="PushNotificationsDemo" androidAdditionalRawValueResources="../BinaryResources/sounds/demonstrative.mp3&#10;../BinaryResources/sounds/isntit.mp3&#10;../BinaryResources/sounds/jinglebellssms.mp3&#10;../BinaryResources/sounds/served.mp3&#10;../BinaryResources/sounds/solemn.mp3&#10;../BinaryResources/images/ic_stat_name.png&#10;../BinaryResources/images/ic_stat_name2.png&#10;../BinaryResources/images/ic_stat_name3.png&#10;../BinaryResources/images/ic_stat_name4.png&#10;../BinaryResources/images/ic_stat_name5.png&#10;../BinaryResources/images/ic_stat_name6.png&#10;../BinaryResources/images/ic_stat_name7.png&#10;../BinaryResources/images/ic_stat_name8.png&#10;../BinaryResources/images/ic_stat_name9.png&#10;../BinaryResources/images/ic_stat_name10.png"/>
+        <CONFIGURATION name="Release" androidArchitectures="" isDebug="0" optimisation="3"
+                       targetName="PushNotificationsDemo" androidAdditionalRawValueResources="../BinaryResources/sounds/demonstrative.mp3&#10;../BinaryResources/sounds/isntit.mp3&#10;../BinaryResources/sounds/jinglebellssms.mp3&#10;../BinaryResources/sounds/served.mp3&#10;../BinaryResources/sounds/solemn.mp3&#10;../BinaryResources/images/ic_stat_name.png&#10;../BinaryResources/images/ic_stat_name2.png&#10;../BinaryResources/images/ic_stat_name3.png&#10;../BinaryResources/images/ic_stat_name4.png&#10;../BinaryResources/images/ic_stat_name5.png&#10;../BinaryResources/images/ic_stat_name6.png&#10;../BinaryResources/images/ic_stat_name7.png&#10;../BinaryResources/images/ic_stat_name8.png&#10;../BinaryResources/images/ic_stat_name9.png&#10;../BinaryResources/images/ic_stat_name10.png"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_opengl" path="../../modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../modules"/>
+      </MODULEPATHS>
+    </ANDROIDSTUDIO>
+    <XCODE_MAC targetFolder="Builds/MacOSX">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="PushNotificationsDemo"
+                       enablePluginBinaryCopyStep="1"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="PushNotificationsDemo"
+                       enablePluginBinaryCopyStep="1"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_opengl" path="../../modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../modules"/>
+      </MODULEPATHS>
+    </XCODE_MAC>
+    <VS2015 targetFolder="Builds/VisualStudio2015">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
+                       isDebug="1" optimisation="1" targetName="PushNotificationsDemo"
+                       debugInformationFormat="ProgramDatabase" enablePluginBinaryCopyStep="0"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
+                       isDebug="0" optimisation="3" targetName="PushNotificationsDemo"
+                       linkTimeOptimisation="1" debugInformationFormat="None" enablePluginBinaryCopyStep="0"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_opengl" path="../../modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
+        <MODULEPATH id="juce_graphics" path="../../modules"/>
+        <MODULEPATH id="juce_events" path="../../modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../modules"/>
+        <MODULEPATH id="juce_core" path="../../modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../modules"/>
+      </MODULEPATHS>
+    </VS2015>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+  </MODULES>
+  <JUCEOPTIONS/>
+</JUCERPROJECT>

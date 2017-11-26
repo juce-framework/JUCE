@@ -263,9 +263,9 @@ public:
 
 private:
     //==============================================================================
-    int keyCode;
+    int keyCode = 0;
     ModifierKeys mods;
-    juce_wchar textCharacter;
+    juce_wchar textCharacter = 0;
 
     JUCE_LEAK_DETECTOR (KeyPress)
 };

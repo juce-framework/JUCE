@@ -107,6 +107,13 @@ String SystemStats::getCpuModel()
 
 static int findNumberOfPhysicalCores() noexcept
 {
+   #if JUCE_MINGW
+    // Not implemented in MinGW
+    jassertfalse;
+
+    return 1;
+   #else
+
     int numPhysicalCores = 0;
     DWORD bufferSize = 0;
     GetLogicalProcessorInformation (nullptr, &bufferSize);
@@ -122,6 +129,7 @@ static int findNumberOfPhysicalCores() noexcept
     }
 
     return numPhysicalCores;
+   #endif // JUCE_MINGW
 }
 
 //==============================================================================

@@ -184,12 +184,14 @@ public:
     bool isInAppPurchasesSupported() const;
 
     /** Asynchronously requests information for products with given ids. Upon completion, for each enquired product
-        there is going to be a corresponding @class Product object.
+        there is going to be a corresponding Product object.
         If there is no information available for the given product identifier, it will be ignored.
      */
     void getProductsInformation (const StringArray& productIdentifiers);
 
     /** Asynchronously requests to buy a product with given id.
+
+        @param productIdentifier               The product identifier.
 
         @param isSubscription                  (Android only) defines if a product a user wants to buy is a subscription or a one-time purchase.
                                                On iOS, type of the product is derived implicitly.
@@ -265,7 +267,7 @@ private:
     friend void juce_inAppPurchaseCompleted (void*);
    #endif
 
-   #if JUCE_ANDROID || JUCE_IOS
+   #if JUCE_ANDROID || JUCE_IOS || JUCE_MAC
     struct Pimpl;
     friend struct Pimpl;
 

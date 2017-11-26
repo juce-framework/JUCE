@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="sBBIzr" name="JuceDemo" projectType="guiapp" version="3.0.0"
-              bundleIdentifier="com.roli.JuceDemo" jucerVersion="5.1.2" defines="JUCE_UNIT_TESTS=1"
+              bundleIdentifier="com.roli.JuceDemo" jucerVersion="5.2.0" defines="JUCE_UNIT_TESTS=1"
               includeBinaryInAppConfig="1" displaySplashScreen="0" reportAppUsage="0"
-              splashScreenColour="Dark" companyName="ROLI Ltd." cppLanguageStandard="11">
+              splashScreenColour="Dark" companyName="ROLI Ltd." cppLanguageStandard="11"
+              companyCopyright="ROLI Ltd.">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                objCExtraSuffix="hZh0GG" bigIcon="BvyE0d" extraCompilerFlags="-Wall -Wshadow -Wstrict-aliasing -Wconversion -Wsign-compare -Woverloaded-virtual -Wextra-semi"
@@ -37,7 +38,8 @@
     <XCODE_IPHONE targetFolder="Builds/iOS" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                   objCExtraSuffix="Lpywnl" bigIcon="BvyE0d" iosScreenOrientation="portraitlandscape"
                   customPList="&lt;plist&gt;&#10;&lt;dict&gt;&#10;&#9;&lt;key&gt;NSAppTransportSecurity&lt;/key&gt;&#10;&#9;&lt;dict&gt;&#10;&#9;&#9;&lt;key&gt;NSAllowsArbitraryLoads&lt;/key&gt;&#10;&#9;&#9;&lt;true/&gt;&#10;&#9;&lt;/dict&gt;&#10;&lt;/dict&gt;&#10;&lt;/plist&gt;"
-                  microphonePermissionNeeded="1" extraCompilerFlags="-pedantic -Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion -Wextra-semi">
+                  microphonePermissionNeeded="1" extraCompilerFlags="-pedantic -Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion -Wextra-semi"
+                  iPadScreenOrientation="portraitlandscape" iosDeviceFamily="1,2">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
                        osxSDK="default" osxCompatibility="default" osxArchitecture="default"

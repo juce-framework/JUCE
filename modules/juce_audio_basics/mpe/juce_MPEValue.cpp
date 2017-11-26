@@ -161,8 +161,8 @@ private:
     //==============================================================================
     void expectFloatWithinRelativeError (float actualValue, float expectedValue, float maxRelativeError)
     {
-        const float maxAbsoluteError = jmax (1.0f, std::fabs (expectedValue)) * maxRelativeError;
-        expect (std::fabs (expectedValue - actualValue) < maxAbsoluteError);
+        const float maxAbsoluteError = jmax (1.0f, std::abs (expectedValue)) * maxRelativeError;
+        expect (std::abs (expectedValue - actualValue) < maxAbsoluteError);
     }
 };
 

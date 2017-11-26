@@ -26,9 +26,7 @@
 
 #pragma once
 
-#include "../jucer_Headers.h"
 #include "../Project/jucer_Project.h"
-
 
 //==============================================================================
 class NewFileWizard

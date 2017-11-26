@@ -137,7 +137,7 @@ void DspModulePluginDemoAudioProcessor::process (dsp::ProcessContextReplacing<fl
     // The fast tanh can be used instead of std::tanh to reduce the CPU load
     auto waveshaperIndex = waveshaperParam->getIndex();
 
-    if (isPositiveAndBelow (waveshaperIndex, (int) numWaveShapers) )
+    if (isPositiveAndBelow (waveshaperIndex, numWaveShapers) )
     {
         waveShapers[waveshaperIndex].process (waveshaperContext);
 

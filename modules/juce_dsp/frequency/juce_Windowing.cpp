@@ -69,7 +69,7 @@ void WindowingFunction<FloatType>::fillWindowingTables (FloatType* samples, size
             auto halfSlots = static_cast<FloatType> (0.5) * static_cast<FloatType> (size - 1);
 
             for (size_t i = 0; i < size; ++i)
-                samples[i] = static_cast<FloatType> (1.0) - std::fabs ((static_cast<FloatType> (i) - halfSlots) / halfSlots);
+                samples[i] = static_cast<FloatType> (1.0) - std::abs ((static_cast<FloatType> (i) - halfSlots) / halfSlots);
         }
         break;
 

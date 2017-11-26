@@ -81,9 +81,9 @@ public:
 private:
     //==============================================================================
     WeakReference<Component> component;
-    uint32 lastPeerID;
-    Array <Component*> registeredParentComps;
-    bool reentrant, wasShowing;
+    uint32 lastPeerID = 0;
+    Array<Component*> registeredParentComps;
+    bool reentrant = false, wasShowing;
     Rectangle<int> lastBounds;
 
     void unregister();

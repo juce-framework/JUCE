@@ -9,7 +9,9 @@ Please include:
   6) the plugin format (VST2, VST3, AU, AAX, RTAS) - if applicable
   7) which DAW you observed the bug in - if applicable
 
-Make sure you have pulled the latest commits from the JUCE repo and re-compiled
-the Projucer before you submit your bug. If it's a major bug, which must be
-hot-fixed immediately, then we will also accept bug reports for tagged release
-versions.
+Make sure you have pulled the latest commits from the `develop` branch of the
+JUCE repo and have re-compiled the Projucer before you submit your bug. Often
+we have already fixed the issue but it hasn't yet been released on the `master`
+branch. If it's a major bug, which must be hot-fixed immediately, then we will
+also accept bug reports for tagged release versions.
+

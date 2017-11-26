@@ -9,9 +9,10 @@
               pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
               pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="InterAppAudioEffectAU"
               pluginRTASCategory="" aaxIdentifier="com.yourcompany.InterAppAudioEffect"
-              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.1.2"
+              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.2.0"
               companyName="ROLI Ltd." buildStandalone="1" displaySplashScreen="0"
-              reportAppUsage="0" splashScreenColour="Dark" cppLanguageStandard="11">
+              reportAppUsage="0" splashScreenColour="Dark" cppLanguageStandard="11"
+              companyCopyright="ROLI Ltd.">
   <MAINGROUP id="BhTVmm" name="InterAppAudioEffect">
     <GROUP id="{79B2188B-B073-DD2F-F997-AFE1A88B5908}" name="Source">
       <FILE id="s4nZon" name="IAAEffectProcessor.h" compile="0" resource="0"
@@ -25,7 +26,8 @@
   </MAINGROUP>
   <EXPORTFORMATS>
     <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="portraitlandscape"
-                  microphonePermissionNeeded="1" iosBackgroundAudio="1" extraCompilerFlags="-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion">
+                  microphonePermissionNeeded="1" iosBackgroundAudio="1" extraCompilerFlags="-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion"
+                  iPadScreenOrientation="portraitlandscape" iosDeviceFamily="1,2">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="InterAppAudioEffect"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="InterAppAudioEffect"/>

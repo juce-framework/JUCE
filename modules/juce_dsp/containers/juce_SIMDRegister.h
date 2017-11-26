@@ -356,7 +356,7 @@ struct CmplxSIMDOps
 
 // The pure complex version
 template <typename Scalar>
-struct CmplxSIMDOps<std::complex<Scalar> >
+struct CmplxSIMDOps<std::complex<Scalar>>
 {
     typedef typename SIMDNativeOps<Scalar>::vSIMDType vSIMDType;
 
@@ -379,7 +379,7 @@ struct CmplxSIMDOps<std::complex<Scalar> >
     static inline std::complex<Scalar> JUCE_VECTOR_CALLTYPE sum (vSIMDType a)  noexcept
     {
         vSIMDType result = SIMDNativeOps<Scalar>::oddevensum (a);
-        const Scalar* ptr = reinterpret_cast<const Scalar*> (&result);
+        auto* ptr = reinterpret_cast<const Scalar*> (&result);
         return std::complex<Scalar> (ptr[0], ptr[1]);
     }
 

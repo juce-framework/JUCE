@@ -96,7 +96,7 @@ public:
     /** Returns an Array of 2 integers with the number of rows and columns in the
         matrix.
     */
-    Array<size_t> getSize() const noexcept             { return {{ rows, columns }}; }
+    Array<size_t> getSize() const noexcept             { return { rows, columns }; }
 
     /** Fills the contents of the matrix with zeroes. */
     void clear() noexcept                              { zeromem (data.begin(), sizeof (ElementType) * (size_t) data.size()); }

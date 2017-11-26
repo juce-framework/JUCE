@@ -16,7 +16,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{33FE4627-BBEA-82E1-5512-8C1F218CF560}</ProjectGuid>
     <PlatformToolset>v141</PlatformToolset>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"
@@ -25,7 +25,7 @@
     <UseOfMfc>false</UseOfMfc>
     <PlatformToolset>v141</PlatformToolset>
     <PlatformToolset>v141</PlatformToolset>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'"
                  Label="Configuration">
@@ -34,7 +34,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <PlatformToolset>v141</PlatformToolset>
     <PlatformToolset>v141</PlatformToolset>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props"/>
   <ImportGroup Label="ExtensionSettings"/>
@@ -45,7 +45,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros">
     <PlatformToolset>v141</PlatformToolset>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
@@ -59,7 +59,7 @@
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">MultiOutSynth</TargetName>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
     <PlatformToolset>v141</PlatformToolset>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>
@@ -101,6 +101,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\MultiOutSynth.bsc</OutputFile>
     </Bscmake>
+    <Lib/>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>
@@ -143,6 +144,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\MultiOutSynth.bsc</OutputFile>
     </Bscmake>
+    <Lib/>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\MultiOutSynth.cpp"/>
@@ -1691,6 +1693,9 @@
     <ClCompile Include="..\..\..\..\..\modules\juce_gui_extra\misc\juce_PreferencesPanel.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\..\modules\juce_gui_extra\misc\juce_PushNotifications.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\..\modules\juce_gui_extra\misc\juce_RecentlyOpenedFilesList.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1700,7 +1705,13 @@
     <ClCompile Include="..\..\..\..\..\modules\juce_gui_extra\misc\juce_SystemTrayIconComponent.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\..\modules\juce_gui_extra\native\juce_android_PushNotifications.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\..\modules\juce_gui_extra\native\juce_android_WebBrowserComponent.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\..\modules\juce_gui_extra\native\juce_ios_PushNotifications.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\..\modules\juce_gui_extra\native\juce_linux_X11_SystemTrayIcon.cpp">
@@ -2389,6 +2400,7 @@
     <ClInclude Include="..\..\..\..\..\modules\juce_gui_extra\misc\juce_KeyMappingEditorComponent.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_gui_extra\misc\juce_LiveConstantEditor.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_gui_extra\misc\juce_PreferencesPanel.h"/>
+    <ClInclude Include="..\..\..\..\..\modules\juce_gui_extra\misc\juce_PushNotifications.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_gui_extra\misc\juce_RecentlyOpenedFilesList.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_gui_extra\misc\juce_SplashScreen.h"/>
     <ClInclude Include="..\..\..\..\..\modules\juce_gui_extra\misc\juce_SystemTrayIconComponent.h"/>

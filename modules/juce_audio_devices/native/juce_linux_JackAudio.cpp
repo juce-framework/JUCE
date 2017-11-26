@@ -69,6 +69,7 @@ JUCE_DECL_JACK_FUNCTION (void*, jack_set_port_connect_callback, (jack_client_t* 
 JUCE_DECL_JACK_FUNCTION (jack_port_t* , jack_port_by_id, (jack_client_t* client, jack_port_id_t port_id), (client, port_id));
 JUCE_DECL_JACK_FUNCTION (int, jack_port_connected, (const jack_port_t* port), (port));
 JUCE_DECL_JACK_FUNCTION (int, jack_port_connected_to, (const jack_port_t* port, const char* port_name), (port, port_name));
+JUCE_DECL_JACK_FUNCTION (int, jack_set_xrun_callback, (jack_client_t* client, JackXRunCallback xrun_callback, void* arg), (client, xrun_callback, arg));
 
 #if JUCE_DEBUG
  #define JACK_LOGGING_ENABLED 1
@@ -258,9 +259,11 @@ public:
         lastError.clear();
         close();
 
+        xruns = 0;
         juce::jack_set_process_callback (client, processCallback, this);
         juce::jack_set_port_connect_callback (client, portConnectCallback, this);
         juce::jack_on_shutdown (client, shutdownCallback, this);
+        juce::jack_set_xrun_callback (client, xrunCallback, this);
         juce::jack_activate (client);
         deviceIsOpen = true;
 
@@ -302,6 +305,8 @@ public:
         if (client != nullptr)
         {
             juce::jack_deactivate (client);
+
+            juce::jack_set_xrun_callback (client, xrunCallback, nullptr);
             juce::jack_set_process_callback (client, processCallback, nullptr);
             juce::jack_set_port_connect_callback (client, portConnectCallback, nullptr);
             juce::jack_on_shutdown (client, shutdownCallback, nullptr);
@@ -338,6 +343,7 @@ public:
     bool isPlaying() override                        { return callback != nullptr; }
     int getCurrentBitDepth() override                { return 32; }
     String getLastError() override                   { return lastError; }
+    int getXRunCount() const noexcept override       { return xruns; }
 
     BigInteger getActiveOutputChannels() const override  { return activeOutputChannels; }
     BigInteger getActiveInputChannels()  const override  { return activeInputChannels;  }
@@ -404,6 +410,14 @@ private:
     {
         if (callbackArgument != nullptr)
             ((JackAudioIODevice*) callbackArgument)->process (nframes);
+
+        return 0;
+    }
+
+    static int xrunCallback (void* callbackArgument)
+    {
+        if (callbackArgument != nullptr)
+            ((JackAudioIODevice*) callbackArgument)->xruns++;
 
         return 0;
     }
@@ -477,6 +491,8 @@ private:
     int totalNumberOfOutputChannels;
     Array<void*> inputPorts, outputPorts;
     BigInteger activeInputChannels, activeOutputChannels;
+
+    int xruns;
 };
 
 

@@ -391,7 +391,9 @@ private:
 class BluetoothMidiSelectorOverlay  : public Component
 {
 public:
-    BluetoothMidiSelectorOverlay (ModalComponentManager::Callback* exitCallbackToUse)
+    BluetoothMidiSelectorOverlay (ModalComponentManager::Callback* exitCallbackToUse,
+                                  const Rectangle<int>& boundsToUse)
+        : bounds (boundsToUse)
     {
         ScopedPointer<ModalComponentManager::Callback> exitCallback (exitCallbackToUse);
 
@@ -400,8 +402,14 @@ public:
         setAlwaysOnTop (true);
         setVisible (true);
         addToDesktop (ComponentPeer::windowHasDropShadow);
-        setBounds (0, 0, getParentWidth(), getParentHeight());
+
+        if (bounds.isEmpty())
+            setBounds (0, 0, getParentWidth(), getParentHeight());
+        else
+            setBounds (bounds);
+
         toFront (true);
+        setOpaque (! bounds.isEmpty());
 
         addAndMakeVisible (bluetoothDevicesList);
         enterModalState (true, exitCallback.release(), true);
@@ -414,7 +422,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::black.withAlpha (0.6f));
+        g.fillAll (bounds.isEmpty() ? Colours::black.withAlpha (0.6f) : Colours::black);
 
         g.setColour (Colour (0xffdfdfdf));
         Rectangle<int> overlayBounds = getOverlayBounds();
@@ -441,19 +449,30 @@ public:
     void parentSizeChanged() override               { update(); }
 
 private:
+    Rectangle<int> bounds;
+
     void update()
     {
-        setBounds (0, 0, getParentWidth(), getParentHeight());
+        if (bounds.isEmpty())
+            setBounds (0, 0, getParentWidth(), getParentHeight());
+        else
+            setBounds (bounds);
+
         bluetoothDevicesList.setBounds (getOverlayBounds().withTrimmedTop (40));
     }
 
     Rectangle<int> getOverlayBounds() const noexcept
     {
-        const int pw = getParentWidth();
-        const int ph = getParentHeight();
+        if (bounds.isEmpty())
+        {
+            const int pw = getParentWidth();
+            const int ph = getParentHeight();
 
-        return Rectangle<int> (pw, ph).withSizeKeepingCentre (jmin (400, pw - 14),
-                                                              jmin (300, ph - 40));
+            return Rectangle<int> (pw, ph).withSizeKeepingCentre (jmin (400, pw - 14),
+                                                                  jmin (300, ph - 40));
+        }
+
+        return bounds.withZeroOrigin();
     }
 
     AndroidBluetoothMidiDevicesListBox bluetoothDevicesList;
@@ -462,9 +481,11 @@ private:
 };
 
 //==============================================================================
-bool BluetoothMidiDevicePairingDialogue::open (ModalComponentManager::Callback* exitCallbackPtr)
+bool BluetoothMidiDevicePairingDialogue::open (ModalComponentManager::Callback* exitCallbackPtr,
+                                               Rectangle<int>* btBounds)
 {
     ScopedPointer<ModalComponentManager::Callback> exitCallback (exitCallbackPtr);
+    auto boundsToUse = (btBounds != nullptr ? *btBounds : Rectangle<int> {});
 
     if (! RuntimePermissions::isGranted (RuntimePermissions::bluetoothMidi))
     {
@@ -475,7 +496,7 @@ bool BluetoothMidiDevicePairingDialogue::open (ModalComponentManager::Callback* 
         return false;
     }
 
-    new BluetoothMidiSelectorOverlay (exitCallback.release());
+    new BluetoothMidiSelectorOverlay (exitCallback.release(), boundsToUse);
     return true;
 }
 

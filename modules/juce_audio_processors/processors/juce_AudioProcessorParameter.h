@@ -51,10 +51,11 @@ public:
     */
     virtual float getValue() const = 0;
 
-    /** The host will call this method to change the value of one of the filter's parameters.
+    /** The host will call this method to change the value of a parameter.
 
         The host may call this at any time, including during the audio processing
-        callback, so the filter has to process this very fast and avoid blocking.
+        callback, so your implementation has to process this very efficiently and
+        avoid any kind of locking.
 
         If you want to set the value of a parameter internally, e.g. from your
         editor component, then don't call this directly - instead, use the
@@ -66,7 +67,7 @@ public:
     */
     virtual void setValue (float newValue) = 0;
 
-    /** Your filter can call this when it needs to change one of its parameters.
+    /** A processor should call this when it needs to change one of its parameters.
 
         This could happen when the editor or some other internal operation changes
         a parameter. This method will call the setValue() method to change the
@@ -188,8 +189,8 @@ public:
 
 private:
     friend class AudioProcessor;
-    AudioProcessor* processor;
-    int parameterIndex;
+    AudioProcessor* processor = nullptr;
+    int parameterIndex = -1;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorParameter)
 };

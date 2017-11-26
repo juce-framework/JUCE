@@ -104,6 +104,9 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\Surround.bsc</OutputFile>
     </Bscmake>
+    <Lib>
+      <AdditionalDependencies>Surround.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>
@@ -147,6 +150,9 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\Surround.bsc</OutputFile>
     </Bscmake>
+    <Lib>
+      <AdditionalDependencies>Surround.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_plugin_client_VST3.cpp"/>

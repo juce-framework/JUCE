@@ -61,7 +61,7 @@ namespace juce
 #endif
 
 //==============================================================================
-/** GNU libstdc++ does not have std::make_unsigned */
+// GNU libstdc++ does not have std::make_unsigned
 namespace internal
 {
     template <typename Type> struct make_unsigned               { typedef Type type; };
@@ -140,20 +140,29 @@ public:
     template <typename CharPointerType>
     static double readDoubleValue (CharPointerType& text) noexcept
     {
-        const int maxSignificantDigits = 17 + 1; // An additional digit for rounding
-        const int bufferSize = maxSignificantDigits + 7 + 1; // -.E-XXX and a trailing null-terminator
+       #if JUCE_MINGW
+        bool isNegative = false;
+       #else
+        JUCE_CONSTEXPR const int maxSignificantDigits = 17 + 1; // An additional digit for rounding
+        JUCE_CONSTEXPR const int bufferSize = maxSignificantDigits + 7 + 1; // -.E-XXX and a trailing null-terminator
         char buffer[bufferSize] = {};
         char* currentCharacter = &(buffer[0]);
-        int numSigFigs = 0;
-        bool decimalPointFound = false;
+       #endif
 
         text = text.findEndOfWhitespace();
         auto c = *text;
 
         switch (c)
         {
-            case '-':   *currentCharacter++ = '-'; // Fall-through..
-            case '+':   c = *++text;
+            case '-':
+               #if JUCE_MINGW
+                isNegative = true;
+               #else
+                *currentCharacter++ = '-';
+               #endif
+                // Fall-through..
+            case '+':
+                c = *++text;
         }
 
         switch (c)
@@ -171,11 +180,121 @@ public:
                 break;
         }
 
+       #if JUCE_MINGW
+        // MinGW does not have access to the locale functions required for strtold, so we parse the doubles
+        // ourselves. There are some edge cases where the least significant digit will be wrong!
+        double result[3] = { 0 }, accumulator[2] = { 0 };
+        int exponentAdjustment[2] = { 0 }, exponentAccumulator[2] = { -1, -1 };
+        int exponent = 0, decPointIndex = 0, digit = 0;
+        int lastDigit = 0, numSignificantDigits = 0;
+        bool digitsFound = false;
+        JUCE_CONSTEXPR const int maxSignificantDigits = 17 + 1;
+
         for (;;)
         {
             if (text.isDigit())
             {
-                int digit = (int) text.getAndAdvance() - '0';
+                lastDigit = digit;
+                digit = (int) text.getAndAdvance() - '0';
+                digitsFound = true;
+
+                if (decPointIndex != 0)
+                    exponentAdjustment[1]++;
+
+                if (numSignificantDigits == 0 && digit == 0)
+                    continue;
+
+                if (++numSignificantDigits > maxSignificantDigits)
+                {
+                    if (digit > 5)
+                        ++accumulator [decPointIndex];
+                    else if (digit == 5 && (lastDigit & 1) != 0)
+                        ++accumulator [decPointIndex];
+
+                    if (decPointIndex > 0)
+                        exponentAdjustment[1]--;
+                    else
+                        exponentAdjustment[0]++;
+
+                    while (text.isDigit())
+                    {
+                        ++text;
+                        if (decPointIndex == 0)
+                            exponentAdjustment[0]++;
+                    }
+                }
+                else
+                {
+                    const auto maxAccumulatorValue = (double) ((std::numeric_limits<unsigned int>::max() - 9) / 10);
+                    if (accumulator [decPointIndex] > maxAccumulatorValue)
+                    {
+                        result [decPointIndex] = mulexp10 (result [decPointIndex], exponentAccumulator [decPointIndex])
+                                                 + accumulator [decPointIndex];
+                        accumulator [decPointIndex] = 0;
+                        exponentAccumulator [decPointIndex] = 0;
+                    }
+
+                    accumulator [decPointIndex] = accumulator[decPointIndex] * 10 + digit;
+                    exponentAccumulator [decPointIndex]++;
+                }
+            }
+            else if (decPointIndex == 0 && *text == '.')
+            {
+                ++text;
+                decPointIndex = 1;
+
+                if (numSignificantDigits > maxSignificantDigits)
+                {
+                    while (text.isDigit())
+                        ++text;
+                    break;
+                }
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        result[0] = mulexp10 (result[0], exponentAccumulator[0]) + accumulator[0];
+
+        if (decPointIndex != 0)
+            result[1] = mulexp10 (result[1], exponentAccumulator[1]) + accumulator[1];
+
+        c = *text;
+        if ((c == 'e' || c == 'E') && digitsFound)
+        {
+            auto negativeExponent = false;
+
+            switch (*++text)
+            {
+                case '-':   negativeExponent = true; // fall-through..
+                case '+':   ++text;
+            }
+
+            while (text.isDigit())
+                exponent = (exponent * 10) + ((int) text.getAndAdvance() - '0');
+
+            if (negativeExponent)
+                exponent = -exponent;
+        }
+
+        auto r = mulexp10 (result[0], exponent + exponentAdjustment[0]);
+        if (decPointIndex != 0)
+            r += mulexp10 (result[1], exponent - exponentAdjustment[1]);
+
+        return isNegative ? -r : r;
+
+       #else   // ! JUCE_MINGW
+
+        int numSigFigs = 0;
+        bool decimalPointFound = false;
+
+        for (;;)
+        {
+            if (text.isDigit())
+            {
+                auto digit = (int) text.getAndAdvance() - '0';
 
                 if (numSigFigs >= maxSignificantDigits
                      || ((numSigFigs == 0 && (! decimalPointFound)) && digit == 0))
@@ -231,17 +350,19 @@ public:
                 *currentCharacter++ = '0';
         }
 
-      #if JUCE_WINDOWS
+       #if JUCE_WINDOWS
         static _locale_t locale = _create_locale (LC_ALL, "C");
         return _strtod_l (&buffer[0], nullptr, locale);
-      #else
-        static locale_t locale = newlocale (LC_ALL_MASK, "C", nullptr);
-       #if JUCE_ANDROID
-        return (double) strtold_l (&buffer[0], nullptr, locale);
        #else
+        static locale_t locale = newlocale (LC_ALL_MASK, "C", nullptr);
+        #if JUCE_ANDROID
+        return (double) strtold_l (&buffer[0], nullptr, locale);
+        #else
         return strtod_l (&buffer[0], nullptr, locale);
+        #endif
        #endif
-      #endif
+
+       #endif   // JUCE_MINGW
     }
 
     /** Parses a character string, to read a floating-point value. */
@@ -329,7 +450,7 @@ public:
     template <typename DestCharPointerType, typename SrcCharPointerType>
     static void copyAll (DestCharPointerType& dest, SrcCharPointerType src) noexcept
     {
-        while (juce_wchar c = src.getAndAdvance())
+        while (auto c = src.getAndAdvance())
             dest.write (c);
 
         dest.writeNull();

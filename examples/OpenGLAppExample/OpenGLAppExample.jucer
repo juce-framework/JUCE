@@ -2,8 +2,9 @@
 
 <JUCERPROJECT id="c3KrlE" name="OpenGLAppExample" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.roli.OpenGLAppExample" includeBinaryInAppConfig="1"
-              jucerVersion="5.1.2" displaySplashScreen="0" reportAppUsage="0"
-              splashScreenColour="Dark" companyName="ROLI Ltd." cppLanguageStandard="11">
+              jucerVersion="5.2.0" displaySplashScreen="0" reportAppUsage="0"
+              splashScreenColour="Dark" companyName="ROLI Ltd." cppLanguageStandard="11"
+              companyCopyright="ROLI Ltd.">
   <MAINGROUP id="amjEXL" name="OpenGLAppExample">
     <GROUP id="{28FE2D12-A88D-07E2-72CF-CD04014CF225}" name="Source">
       <GROUP id="{666960E2-D311-806A-1FE7-A27057939840}" name="Resources">
@@ -40,7 +41,8 @@
         <MODULEPATH id="juce_audio_processors" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="portraitlandscape">
+    <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="portraitlandscape"
+                  iPadScreenOrientation="portraitlandscape" iosDeviceFamily="1,2">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" iosCompatibility="default" isDebug="1" optimisation="1"
                        targetName="OpenGLAppExample"/>

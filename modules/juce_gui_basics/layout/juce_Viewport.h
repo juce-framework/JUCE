@@ -231,12 +231,15 @@ public:
     /** Returns a pointer to the scrollbar component being used.
         Handy if you need to customise the bar somehow.
     */
-    ScrollBar* getVerticalScrollBar() noexcept                  { return &verticalScrollBar; }
+    ScrollBar& getVerticalScrollBar() noexcept                  { return *verticalScrollBar; }
 
     /** Returns a pointer to the scrollbar component being used.
         Handy if you need to customise the bar somehow.
     */
-    ScrollBar* getHorizontalScrollBar() noexcept                { return &horizontalScrollBar; }
+    ScrollBar& getHorizontalScrollBar() noexcept                { return *horizontalScrollBar; }
+
+    /** Re-instantiates the scrollbars, which is only really useful if you've overridden createScrollBarComponent(). */
+    void recreateScrollbars();
 
     /** True if there's any off-screen content that could be scrolled vertically,
         or false if everything is currently visible.
@@ -277,9 +280,16 @@ public:
     /** @internal */
     static bool respondsToKey (const KeyPress&);
 
+protected:
+    //==============================================================================
+    /** Creates the Scrollbar components that will be added to the Viewport.
+        Subclasses can override this if they need to customise the scrollbars in some way.
+    */
+    virtual ScrollBar* createScrollBarComponent (bool isVertical);
+
 private:
     //==============================================================================
-    ScrollBar verticalScrollBar { true }, horizontalScrollBar { false };
+    ScopedPointer<ScrollBar> verticalScrollBar, horizontalScrollBar;
     Component contentHolder;
     WeakReference<Component> contentComp;
     Rectangle<int> lastVisibleArea;

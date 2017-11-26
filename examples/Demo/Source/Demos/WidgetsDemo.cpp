@@ -1058,7 +1058,7 @@ private:
                 return columnXml->getStringAttribute ("name");
         }
 
-        return String();
+        return {};
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TableDemoComponent)
@@ -1317,9 +1317,7 @@ public:
     //==============================================================================
     StringArray getMenuBarNames() override
     {
-        const char* const names[] = { "Demo", "Look-and-feel", "Tabs", "Misc", nullptr };
-
-        return StringArray (names);
+        return { "Demo", "Look-and-feel", "Tabs", "Misc" };
     }
 
     PopupMenu getMenuForIndex (int menuIndex, const String& /*menuName*/) override

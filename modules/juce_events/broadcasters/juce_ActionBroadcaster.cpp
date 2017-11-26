@@ -59,8 +59,6 @@ ActionBroadcaster::~ActionBroadcaster()
 {
     // all event-based objects must be deleted BEFORE juce is shut down!
     jassert (MessageManager::getInstanceWithoutCreating() != nullptr);
-
-    masterReference.clear();
 }
 
 void ActionBroadcaster::addActionListener (ActionListener* const listener)

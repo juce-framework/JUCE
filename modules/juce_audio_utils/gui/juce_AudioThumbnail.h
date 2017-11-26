@@ -210,10 +210,10 @@ private:
     ScopedPointer<CachedWindow> window;
     OwnedArray<ThumbData> channels;
 
-    int32 samplesPerThumbSample;
-    int64 totalSamples, numSamplesFinished;
-    int32 numChannels;
-    double sampleRate;
+    int32 samplesPerThumbSample = 0;
+    int64 totalSamples = 0, numSamplesFinished = 0;
+    int32 numChannels = 0;
+    double sampleRate = 0;
     CriticalSection lock;
 
     void clearChannelData();

@@ -316,8 +316,8 @@ private:
 
             if (snd_midi_event_new (maxEventSize, &midiParser) >= 0)
             {
-                const int numPfds = snd_seq_poll_descriptors_count (seqHandle, POLLIN);
-                HeapBlock<pollfd> pfd ((size_t) numPfds);
+                auto numPfds = snd_seq_poll_descriptors_count (seqHandle, POLLIN);
+                HeapBlock<pollfd> pfd (numPfds);
                 snd_seq_poll_descriptors (seqHandle, pfd, (unsigned int) numPfds, POLLIN);
 
                 HeapBlock<uint8> buffer (maxEventSize);

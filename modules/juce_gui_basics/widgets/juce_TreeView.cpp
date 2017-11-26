@@ -124,7 +124,7 @@ public:
                             dragImage.multiplyAllAlphas (0.6f);
 
                             auto imageOffset = pos.getPosition() - e.getPosition();
-                            dragContainer->startDragging (dragDescription, &owner, dragImage, true, &imageOffset);
+                            dragContainer->startDragging (dragDescription, &owner, dragImage, true, &imageOffset, &e.source);
                         }
                         else
                         {

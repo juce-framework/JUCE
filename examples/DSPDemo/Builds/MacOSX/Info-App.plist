@@ -8,7 +8,7 @@
     <key>CFBundleIconFile</key>
     <string></string>
     <key>CFBundleIdentifier</key>
-    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <string>com.roli.DSPDemo</string>
     <key>CFBundleName</key>
     <string>DSPDemo</string>
     <key>CFBundleDisplayName</key>

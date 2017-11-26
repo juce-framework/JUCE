@@ -129,7 +129,11 @@ protected:
     ScopedPointer<StandaloneFilterWindow> mainWindow;
 };
 
+} // namespace juce
+
 #if JucePlugin_Build_Standalone && JUCE_IOS
+
+using namespace juce;
 
 bool JUCE_CALLTYPE juce_isInterAppAudioConnected()
 {
@@ -155,7 +159,5 @@ Image JUCE_CALLTYPE juce_getIAAHostIcon (int size)
 }
 #endif
 #endif
-
-} // namespace juce
 
 #endif

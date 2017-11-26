@@ -67,13 +67,13 @@ namespace SIMDRegister_test_internal
     template <typename type>
     static type safeAbs (type a)
     {
-        return static_cast<type> (fabs ((double) a));
+        return static_cast<type> (std::abs (static_cast<double> (a)));
     }
 
     template <typename type>
     static type safeAbs (std::complex<type> a)
     {
-        return abs (a);
+        return std::abs (a);
     }
 
     template <typename type>
@@ -295,7 +295,7 @@ public:
                 for (size_t i = 0; i < SIMDRegister<type>::SIMDNumElements; ++i)
                     Operation::template inplace<type, type> (array_a[i], array_b[i]);
 
-                Operation::template inplace<SIMDRegister<type>, SIMDRegister<type> > (a, b);
+                Operation::template inplace<SIMDRegister<type>, SIMDRegister<type>> (a, b);
 
                 u.expect (vecEqualToArray (a, array_a));
                 u.expect (vecEqualToArray (b, array_b));
@@ -325,7 +325,7 @@ public:
                 for (size_t i = 0; i < SIMDRegister<type>::SIMDNumElements; ++i)
                     array_c[i] = Operation::template outofplace<type, type> (array_a[i], array_b[i]);
 
-                c = Operation::template outofplace<SIMDRegister<type>, SIMDRegister<type> > (a, b);
+                c = Operation::template outofplace<SIMDRegister<type>, SIMDRegister<type>> (a, b);
 
                 u.expect (vecEqualToArray (a, array_a));
                 u.expect (vecEqualToArray (b, array_b));
@@ -625,7 +625,7 @@ public:
         TheTest::template run<uint32_t>(*this, random);
         TheTest::template run<int64_t> (*this, random);
         TheTest::template run<uint64_t>(*this, random);
-        TheTest::template run<std::complex<float> >   (*this, random);
+        TheTest::template run<std::complex<float>>   (*this, random);
         TheTest::template run<std::complex<double>>  (*this, random);
     }
 
@@ -654,13 +654,13 @@ public:
 
         runTestForAllTypes<AccessTest> ("AccessTest");
 
-        runTestForAllTypes<OperatorTests<Addition> > ("AdditionOperators");
-        runTestForAllTypes<OperatorTests<Subtraction> > ("SubtractionOperators");
-        runTestForAllTypes<OperatorTests<Multiplication> > ("MultiplicationOperators");
+        runTestForAllTypes<OperatorTests<Addition>> ("AdditionOperators");
+        runTestForAllTypes<OperatorTests<Subtraction>> ("SubtractionOperators");
+        runTestForAllTypes<OperatorTests<Multiplication>> ("MultiplicationOperators");
 
-        runTestForAllTypes<BitOperatorTests<BitAND> > ("BitANDOperators");
-        runTestForAllTypes<BitOperatorTests<BitOR> > ("BitOROperators");
-        runTestForAllTypes<BitOperatorTests<BitXOR> > ("BitXOROperators");
+        runTestForAllTypes<BitOperatorTests<BitAND>> ("BitANDOperators");
+        runTestForAllTypes<BitOperatorTests<BitOR>>  ("BitOROperators");
+        runTestForAllTypes<BitOperatorTests<BitXOR>> ("BitXOROperators");
 
         runTestNonComplex<CheckComparisonOps> ("CheckComparisons");
         runTestNonComplex<CheckMinMax> ("CheckMinMax");

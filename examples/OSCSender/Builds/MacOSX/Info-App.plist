@@ -8,7 +8,7 @@
     <key>CFBundleIconFile</key>
     <string></string>
     <key>CFBundleIdentifier</key>
-    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <string>com.roli.OSCSender</string>
     <key>CFBundleName</key>
     <string>OSCSender</string>
     <key>CFBundleDisplayName</key>

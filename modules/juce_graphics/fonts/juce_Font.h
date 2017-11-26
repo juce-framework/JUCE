@@ -37,7 +37,7 @@ namespace juce
 
     @see Typeface
 */
-class JUCE_API  Font
+class JUCE_API  Font  final
 {
 public:
     //==============================================================================
@@ -392,7 +392,7 @@ public:
         An extra x offset is added at the end of the run, to indicate where the right hand
         edge of the last character is.
     */
-    void getGlyphPositions (const String& text, Array <int>& glyphs, Array <float>& xOffsets) const;
+    void getGlyphPositions (const String& text, Array<int>& glyphs, Array<float>& xOffsets) const;
 
     //==============================================================================
     /** Returns the typeface used by this font.

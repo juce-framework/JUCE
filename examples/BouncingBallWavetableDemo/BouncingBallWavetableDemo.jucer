@@ -2,9 +2,9 @@
 
 <JUCERPROJECT id="fyUrFS" name="BouncingBallWavetableDemo" projectType="guiapp"
               version="1.0.0" bundleIdentifier="com.juce.BouncingBallWavetableDemo"
-              includeBinaryInAppConfig="1" jucerVersion="5.1.2" displaySplashScreen="0"
+              includeBinaryInAppConfig="1" jucerVersion="5.2.0" displaySplashScreen="0"
               reportAppUsage="0" splashScreenColour="Dark" companyName="ROLI Ltd."
-              cppLanguageStandard="11">
+              cppLanguageStandard="11" companyCopyright="ROLI Ltd.">
   <MAINGROUP id="MgjqDB" name="BouncingBallWavetableDemo">
     <GROUP id="{D35F88A0-C242-1CAA-21A9-6D01F78F4128}" name="Source">
       <FILE id="M5GUDX" name="MainComponent.cpp" compile="1" resource="0"

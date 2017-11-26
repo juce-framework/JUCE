@@ -9,9 +9,9 @@
               pluginIsMidiEffectPlugin="0" pluginSilenceInIsSilenceOut="0"
               pluginEditorRequiresKeys="0" pluginAUExportPrefix="SurroundAU"
               pluginRTASCategory="" aaxIdentifier="com.roli.Surround" pluginAAXCategory="AAX_ePlugInCategory_Dynamics"
-              jucerVersion="5.1.2" buildAUv3="0" buildStandalone="0" enableIAA="0"
+              jucerVersion="5.2.0" buildAUv3="0" buildStandalone="0" enableIAA="0"
               displaySplashScreen="0" reportAppUsage="0" splashScreenColour="Dark"
-              companyName="ROLI Ltd." cppLanguageStandard="11">
+              companyName="ROLI Ltd." cppLanguageStandard="11" companyCopyright="ROLI Ltd.">
   <MAINGROUP id="dEAH7t" name="Surround">
     <GROUP id="{1CB41212-BD0E-AC71-15E8-C40AD59BD2EE}" name="Source">
       <FILE id="sLk2ic" name="SurroundProcessor.cpp" compile="1" resource="0"

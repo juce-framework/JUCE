@@ -64,7 +64,7 @@ public:
 
 private:
     //==============================================================================
-    int minValue, maxValue;
+    const int minValue, maxValue, rangeOfValues;
     float value, defaultValue;
 
     float getValue() const override;

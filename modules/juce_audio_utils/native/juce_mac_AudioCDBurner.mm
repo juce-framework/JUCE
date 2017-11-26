@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 const int kilobytesPerSecond1x = 176;
 
 struct AudioTrackProducerClass  : public ObjCClass <NSObject>
@@ -32,7 +35,13 @@ struct AudioTrackProducerClass  : public ObjCClass <NSObject>
     {
         addIvar<AudioSourceHolder*> ("source");
 
+       #pragma clang diagnostic push
+       #pragma clang diagnostic ignored "-Wundeclared-selector"
         addMethod (@selector (initWithAudioSourceHolder:),     initWithAudioSourceHolder,     "@@:^v");
+        addMethod (@selector (verifyDataForTrack:intoBuffer:length:atAddress:blockSize:ioFlags:),
+                   produceDataForTrack,           "I@:@^cIQI^I");
+       #pragma clang diagnostic pop
+
         addMethod (@selector (cleanupTrackAfterBurn:),         cleanupTrackAfterBurn,         "v@:@");
         addMethod (@selector (cleanupTrackAfterVerification:), cleanupTrackAfterVerification, "c@:@");
         addMethod (@selector (estimateLengthOfTrack:),         estimateLengthOfTrack,         "Q@:@");
@@ -41,8 +50,6 @@ struct AudioTrackProducerClass  : public ObjCClass <NSObject>
         addMethod (@selector (produceDataForTrack:intoBuffer:length:atAddress:blockSize:ioFlags:),
                                                                produceDataForTrack,           "I@:@^cIQI^I");
         addMethod (@selector (producePreGapForTrack:intoBuffer:length:atAddress:blockSize:ioFlags:),
-                                                               produceDataForTrack,           "I@:@^cIQI^I");
-        addMethod (@selector (verifyDataForTrack:intoBuffer:length:atAddress:blockSize:ioFlags:),
                                                                produceDataForTrack,           "I@:@^cIQI^I");
 
         registerClass();
@@ -182,8 +189,11 @@ struct OpenDiskDevice
 
             static AudioTrackProducerClass cls;
 
+           #pragma clang diagnostic push
+           #pragma clang diagnostic ignored "-Wundeclared-selector"
             NSObject* producer = [cls.createInstance()  performSelector: @selector (initWithAudioSourceHolder:)
                                                              withObject: (id) new AudioTrackProducerClass::AudioSourceHolder (source, numFrames)];
+           #pragma clang diagnostic pop
             DRTrack* track = [[DRTrack alloc] initWithProducer: producer];
 
             {
@@ -454,4 +464,6 @@ String AudioCDBurner::burn (AudioCDBurner::BurnProgressListener* listener,
         return pimpl->device->burn (listener, ejectDiscAfterwards, performFakeBurnForTesting, writeSpeed);
 
     return "Couldn't open or write to the CD device";
+}
+
 }

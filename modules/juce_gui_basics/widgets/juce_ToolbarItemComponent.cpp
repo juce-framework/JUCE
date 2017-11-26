@@ -75,7 +75,7 @@ public:
 
             if (DragAndDropContainer* const dnd = DragAndDropContainer::findParentDragContainerFor (this))
             {
-                dnd->startDragging (Toolbar::toolbarDragDescriptor, getParentComponent(), Image(), true);
+                dnd->startDragging (Toolbar::toolbarDragDescriptor, getParentComponent(), Image(), true, nullptr, &e.source);
 
                 if (ToolbarItemComponent* const tc = getToolbarItemComponent())
                 {

@@ -479,8 +479,8 @@ private:
     OwnedArray<Component> textBlocks;
     Array<Component*> allComps;
     StringArray textboxNames, comboBoxNames;
-    Component* associatedComponent;
-    bool escapeKeyCancels;
+    Component* const associatedComponent;
+    bool escapeKeyCancels = true;
 
     void updateLayout (bool onlyIncreaseSize);
 

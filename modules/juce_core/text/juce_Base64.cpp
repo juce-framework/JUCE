@@ -26,24 +26,24 @@ namespace juce
 bool Base64::convertToBase64 (OutputStream& base64Result, const void* sourceData, size_t sourceDataSize)
 {
     static const char lookup[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    const uint8* source = static_cast<const uint8*> (sourceData);
+    auto* source = static_cast<const uint8*> (sourceData);
 
     while (sourceDataSize > 0)
     {
         char frame[4];
-        const uint8 byte0 = *source++;
+        auto byte0 = *source++;
         frame[0] = lookup [(byte0 & 0xfcu) >> 2];
         uint32 bits = (byte0 & 0x03u) << 4;
 
         if (sourceDataSize > 1)
         {
-            const uint8 byte1 = *source++;
+            auto byte1 = *source++;
             frame[1] = lookup[bits | ((byte1 & 0xf0u) >> 4)];
             bits = (byte1 & 0x0fu) << 2;
 
             if (sourceDataSize > 2)
             {
-                const uint8 byte2 = *source++;
+                auto byte2 = *source++;
                 frame[2] = lookup[bits | ((byte2 & 0xc0u) >> 6)];
                 frame[3] = lookup[byte2 & 0x3fu];
                 sourceDataSize -= 3;
@@ -72,13 +72,13 @@ bool Base64::convertToBase64 (OutputStream& base64Result, const void* sourceData
 
 bool Base64::convertFromBase64 (OutputStream& binaryOutput, StringRef base64TextInput)
 {
-    for (String::CharPointerType s = base64TextInput.text; ! s.isEmpty();)
+    for (auto s = base64TextInput.text; ! s.isEmpty();)
     {
         uint8 data[4];
 
         for (int i = 0; i < 4; ++i)
         {
-            uint32 c = (uint32) s.getAndAdvance();
+            auto c = (uint32) s.getAndAdvance();
 
             if (c >= 'A' && c <= 'Z')         c -= 'A';
             else if (c >= 'a' && c <= 'z')    c -= 'a' - 26;
@@ -143,15 +143,15 @@ public:
     {
         beginTest ("Base64");
 
-        Random r = getRandom();
+        auto r = getRandom();
 
         for (int i = 1000; --i >= 0;)
         {
-            const MemoryBlock original (createRandomData (r));
-            String asBase64 (Base64::toBase64 (original.getData(), original.getSize()));
+            auto original = createRandomData (r);
+            auto asBase64 = Base64::toBase64 (original.getData(), original.getSize());
             MemoryOutputStream out;
             expect (Base64::convertFromBase64 (out, asBase64));
-            MemoryBlock result = out.getMemoryBlock();
+            auto result = out.getMemoryBlock();
             expect (result == original);
         }
     }

@@ -101,6 +101,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\HelloWorld.bsc</OutputFile>
     </Bscmake>
+    <Lib/>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>
@@ -143,6 +144,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>$(IntDir)\HelloWorld.bsc</OutputFile>
     </Bscmake>
+    <Lib/>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\Main.cpp"/>
@@ -1227,6 +1229,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_PreferencesPanel.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_PushNotifications.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_RecentlyOpenedFilesList.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1236,7 +1241,13 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\misc\juce_SystemTrayIconComponent.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\native\juce_android_PushNotifications.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\native\juce_android_WebBrowserComponent.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_extra\native\juce_ios_PushNotifications.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\native\juce_linux_X11_SystemTrayIcon.cpp">
@@ -1647,6 +1658,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_KeyMappingEditorComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_LiveConstantEditor.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_PreferencesPanel.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_PushNotifications.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_RecentlyOpenedFilesList.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_SplashScreen.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_SystemTrayIconComponent.h"/>

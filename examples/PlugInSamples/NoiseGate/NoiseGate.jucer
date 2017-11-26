@@ -8,10 +8,10 @@
               pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
               pluginSilenceInIsSilenceOut="0" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="NoiseGateAU" pluginRTASCategory="" aaxIdentifier="com.roli.NoiseGate"
-              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.1.2"
+              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.2.0"
               pluginIsMidiEffectPlugin="0" buildAUv3="0" buildStandalone="0"
               enableIAA="0" displaySplashScreen="0" reportAppUsage="0" splashScreenColour="Dark"
-              companyName="ROLI Ltd." cppLanguageStandard="11">
+              companyName="ROLI Ltd." cppLanguageStandard="11" companyCopyright="ROLI Ltd.">
   <MAINGROUP id="FVYuyg" name="NoiseGate">
     <GROUP id="{6EB662B0-ED81-2504-8B90-DCBFA5675DFC}" name="Source">
       <FILE id="iyPpdA" name="NoiseGate.cpp" compile="1" resource="0" file="Source/NoiseGate.cpp"/>

@@ -386,7 +386,7 @@ struct VBRTagData
         const int sampleRateIndex = (data[2] >> 2) & 3;
         const int mode = (data[3] >> 6) & 3;
 
-        static const int bitRates[3][16] =
+        static const short bitRates[3][16] =
         {
             { 0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160, -1 }, // MPEG2
             { 0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, -1 }, // MPEG1
@@ -451,7 +451,7 @@ struct VBRTagData
     unsigned int flags, frames, bytes;
 
 private:
-    static bool isVbrTag (const uint8* const d) noexcept
+    static bool isVbrTag (const uint8* d) noexcept
     {
         return (d[0] == 'X' && d[1] == 'i' && d[2] == 'n' && d[3] == 'g')
             || (d[0] == 'I' && d[1] == 'n' && d[2] == 'f' && d[3] == 'o');
@@ -477,17 +477,17 @@ struct MP3Frame
         };
 
         static const AllocationTable* const tables[] = { allocTable0, allocTable1, allocTable2, allocTable3, allocTable4 };
-        static const int limits[] = { 27, 30, 8, 12, 30 };
+        static const int8 limits[] = { 27, 30, 8, 12, 30 };
 
         const int index = lsf ? 4 : translate[sampleRateIndex][2 - numChannels][bitrateIndex];
-        layer2SubBandLimit = limits [index];
-        allocationTable = tables [index];
+        layer2SubBandLimit = limits[index];
+        allocationTable = tables[index];
     }
 
     int getFrequency() const noexcept
     {
         const int frequencies[] = { 44100, 48000, 32000, 22050, 24000, 16000, 11025, 12000, 8000 };
-        return frequencies [sampleRateIndex];
+        return frequencies[sampleRateIndex];
     }
 
     void decodeHeader (const uint32 header)
@@ -509,7 +509,7 @@ struct MP3Frame
         //emphasis          = header & 3;
         numChannels         = (mode == 3) ? 1 : 2;
 
-        static const int frameSizes [2][3][16] =
+        static const int frameSizes[2][3][16] =
         {
             { { 0, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448 },
               { 0, 32, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384 },
@@ -563,9 +563,9 @@ struct Constants
     {
         switch (d1)
         {
-            case 3:   return &group3tab [3 * jmin (index, 3u * 3u * 3u)];
-            case 5:   return &group5tab [3 * jmin (index, 5u * 5u * 5u)];
-            case 9:   return &group9tab [3 * jmin (index, 9u * 9u * 9u)];
+            case 3:   return &group3tab[3 * jmin (index, 3u * 3u * 3u)];
+            case 5:   return &group5tab[3 * jmin (index, 5u * 5u * 5u)];
+            case 9:   return &group9tab[3 * jmin (index, 9u * 9u * 9u)];
             default:  break;
         }
 
@@ -595,9 +595,9 @@ private:
     int mapbuf1[9][156];
     int mapbuf2[9][44];
     float cos64[16], cos32[8], cos16[4], cos8[2], cos4[1];
-    uint8 group3tab [32 * 3];
-    uint8 group5tab [128 * 3];
-    uint8 group9tab [1024 * 3];
+    uint8 group3tab[32 * 3];
+    uint8 group5tab[128 * 3];
+    uint8 group9tab[1024 * 3];
 
     void initDecodeTables()
     {
@@ -672,7 +672,7 @@ private:
 
             float* table = muls[k];
             for (int j = 3, i = 0; i < 63; ++i, --j)
-                *table++ = (float) (multipliers[k] * pow (2.0, j / 3.0));
+                *table++ = (float) (multipliers[k] * std::pow (2.0, j / 3.0));
             *table++ = 0;
         }
     }
@@ -681,10 +681,10 @@ private:
     {
         int i, j;
         for (i = -256; i < 118 + 4; ++i)
-            powToGains[i + 256] = (float) pow (2.0, -0.25 * (i + 210));
+            powToGains[i + 256] = (float) std::pow (2.0, -0.25 * (i + 210));
 
         for (i = 0; i < 8207; ++i)
-            nToThe4Over3[i] = (float) pow ((double) i, 4.0 / 3.0);
+            nToThe4Over3[i] = (float) std::pow ((double) i, 4.0 / 3.0);
 
         for (i = 0; i < 8; ++i)
         {
@@ -737,12 +737,12 @@ private:
 
                 if (i > 0)
                 {
-                    const double base = pow (2.0, -0.25 * (j + 1));
+                    const double base = std::pow (2.0, -0.25 * (j + 1));
 
                     if (i & 1)
-                        p1 = pow (base, (i + 1) * 0.5);
+                        p1 = std::pow (base, (i + 1) * 0.5);
                     else
-                        p2 = pow (base, i * 0.5);
+                        p2 = std::pow (base, i * 0.5);
                 }
 
                 pow1_1[j][i] = (float) p1;
@@ -885,9 +885,9 @@ struct Layer3SideInfo
 
             for (; sb != 0; --sb, xr1 += 10)
             {
-                const float* cs = constants.antiAliasingCs;
-                const float* ca = constants.antiAliasingCa;
-                float* xr2 = xr1;
+                auto* cs = constants.antiAliasingCs;
+                auto* ca = constants.antiAliasingCa;
+                auto* xr2 = xr1;
 
                 for (int ss = 7; ss >= 0; --ss)
                 {
@@ -898,16 +898,17 @@ struct Layer3SideInfo
             }
         }
 
-        void doIStereo (float xrBuffer[2][32][18], const int* const scaleFactors,
-                        const int sampleRate, const bool msStereo, const int lsf) const noexcept
+        void doIStereo (float xrBuffer[2][32][18], const int* scaleFactors,
+                        int sampleRate, bool msStereo, int lsf) const noexcept
         {
             float (*xr) [32 * 18] = (float (*) [32 * 18]) xrBuffer;
-            const BandInfoStruct& bi = bandInfo[sampleRate];
+            auto& bi = bandInfo[sampleRate];
             const float* tabl1, *tabl2;
 
             if (lsf != 0)
             {
-                const int p = scaleFactorCompression & 1;
+                auto p = scaleFactorCompression & 1;
+
                 if (msStereo)
                 {
                     tabl1 = constants.pow1_2[p];
@@ -944,13 +945,14 @@ struct Layer3SideInfo
 
                     for (; sfb < 12; ++sfb)
                     {
-                        const int p = scaleFactors[sfb * 3 + lwin - mixedBlockFlag];
+                        auto p = scaleFactors[sfb * 3 + lwin - mixedBlockFlag];
+
                         if (p != 7)
                         {
-                            const float t1 = tabl1[p];
-                            const float t2 = tabl2[p];
+                            auto t1 = tabl1[p];
+                            auto t2 = tabl2[p];
                             int sb = bi.shortDiff[sfb];
-                            uint32 index = (uint32) sb + lwin;
+                            auto index = (uint32) sb + lwin;
 
                             for (; sb > 0; --sb, index += 3)
                             {
@@ -961,14 +963,14 @@ struct Layer3SideInfo
                         }
                     }
 
-                    const int p = scaleFactors[11 * 3 + lwin - mixedBlockFlag];
+                    auto p = scaleFactors[11 * 3 + lwin - mixedBlockFlag];
 
                     if (p != 7)
                     {
-                        const float t1 = tabl1[p];
-                        const float t2 = tabl2[p];
+                        auto t1 = tabl1[p];
+                        auto t2 = tabl2[p];
                         int sb = bi.shortDiff[12];
-                        uint32 index = (uint32) sb + lwin;
+                        auto index = (uint32) sb + lwin;
 
                         for (; sb > 0; --sb, index += 3)
                         {
@@ -986,12 +988,12 @@ struct Layer3SideInfo
                     for (uint32 sfb = maxBandl; sfb < 8; ++sfb)
                     {
                         int sb = bi.longDiff[sfb];
-                        const int p = scaleFactors[sfb];
+                        auto p = scaleFactors[sfb];
 
                         if (p != 7)
                         {
-                            const float t1 = tabl1[p];
-                            const float t2 = tabl2[p];
+                            auto t1 = tabl1[p];
+                            auto t2 = tabl2[p];
 
                             for (; sb > 0; --sb, ++index)
                             {
@@ -1012,12 +1014,12 @@ struct Layer3SideInfo
                 for (uint32 sfb = maxBandl; sfb < 21; ++sfb)
                 {
                     int sb = bi.longDiff[sfb];
-                    const int p = scaleFactors[sfb];
+                    auto p = scaleFactors[sfb];
 
                     if (p != 7)
                     {
-                        const float t1 = tabl1[p];
-                        const float t2 = tabl2[p];
+                        auto t1 = tabl1[p];
+                        auto t2 = tabl2[p];
 
                         for (; sb > 0; --sb, ++index)
                         {
@@ -1030,10 +1032,11 @@ struct Layer3SideInfo
                         index += sb;
                 }
 
-                const int p = scaleFactors[20];
+                auto p = scaleFactors[20];
+
                 if (p != 7)
                 {
-                    const float t1 = tabl1[p], t2 = tabl2[p];
+                    auto t1 = tabl1[p], t2 = tabl2[p];
 
                     for (int sb = bi.longDiff[21]; sb > 0; --sb, ++index)
                     {
@@ -1065,37 +1068,31 @@ struct Layer3SideInfo
 //==============================================================================
 namespace DCT
 {
-    enum { SBLIMIT = 32 };
+    enum { subBandLimit = 32 };
     static const float cos6_1  = 0.866025388f;
     static const float cos6_2  = 0.5f;
     static const float cos9[]  = { 1.0f, 0.98480773f, 0.939692616f, 0.866025388f, 0.766044438f, 0.642787635f, 0.5f, 0.342020154f, 0.173648179f };
     static const float cos36[] = { 0.501909912f, 0.517638087f, 0.551688969f, 0.610387266f, 0.707106769f, 0.871723413f, 1.18310082f, 1.93185163f, 5.73685646f };
     static const float cos12[] = { 0.517638087f, 0.707106769f, 1.93185163f };
 
-    inline void dct36_0 (const int v, float* const ts, float* const out1, float* const out2,
-                         const float* const wintab, float sum0, const float sum1) noexcept
+    inline void dct36_0 (int v, float* ts, float* out1, float* out2, const float* wintab, float sum0, float sum1) noexcept
     {
-        const float tmp = sum0 + sum1;
+        auto tmp = sum0 + sum1;
         out2[9 + v] = tmp * wintab[27 + v];
         out2[8 - v] = tmp * wintab[26 - v];
         sum0 -= sum1;
-        ts[SBLIMIT * (8 - v)] = out1[8 - v] + sum0 * wintab[8 - v];
-        ts[SBLIMIT * (9 + v)] = out1[9 + v] + sum0 * wintab[9 + v];
+        ts[subBandLimit * (8 - v)] = out1[8 - v] + sum0 * wintab[8 - v];
+        ts[subBandLimit * (9 + v)] = out1[9 + v] + sum0 * wintab[9 + v];
     }
 
-    inline void dct36_1 (const int v, float* const ts, float* const out1, float* const out2, const float* const wintab,
-                         const float tmp1a, const float tmp1b, const float tmp2a, const float tmp2b) noexcept
+    inline void dct36_12 (int v1, int v2, float* ts, float* out1, float* out2, const float* wintab,
+                          float tmp1a, float tmp1b, float tmp2a, float tmp2b) noexcept
     {
-        dct36_0 (v, ts, out1, out2, wintab, tmp1a + tmp2a, (tmp1b + tmp2b) * cos36[v]);
+        dct36_0 (v1, ts, out1, out2, wintab, tmp1a + tmp2a, (tmp1b + tmp2b) * cos36[v1]);
+        dct36_0 (v2, ts, out1, out2, wintab, tmp2a - tmp1a, (tmp2b - tmp1b) * cos36[v2]);
     }
 
-    inline void dct36_2 (const int v, float* const ts, float* const out1, float* const out2, const float* const wintab,
-                         const float tmp1a, const float tmp1b, const float tmp2a, const float tmp2b) noexcept
-    {
-        dct36_0 (v, ts, out1, out2, wintab, tmp2a - tmp1a, (tmp2b - tmp1b) * cos36[v]);
-    }
-
-    static void dct36 (float* const in, float* const out1, float* const out2, const float* const wintab, float* const ts) noexcept
+    static void dct36 (float* in, float* out1, float* out2, const float* wintab, float* ts) noexcept
     {
         in[17] += in[16]; in[16] += in[15]; in[15] += in[14]; in[14] += in[13]; in[13] += in[12];
         in[12] += in[11]; in[11] += in[10]; in[10] += in[9];  in[9]  += in[8];  in[8]  += in[7];
@@ -1103,63 +1100,51 @@ namespace DCT
         in[2]  += in[1];  in[1]  += in[0];  in[17] += in[15]; in[15] += in[13]; in[13] += in[11];
         in[11] += in[9];  in[9]  += in[7];  in[7]  += in[5];  in[5]  += in[3];  in[3]  += in[1];
 
-        const float ta33 = in[6]  * cos9[3];
-        const float ta66 = in[12] * cos9[6];
-        const float tb33 = in[7]  * cos9[3];
-        const float tb66 = in[13] * cos9[6];
+        auto ta33 = in[6]  * cos9[3];
+        auto ta66 = in[12] * cos9[6];
+        auto tb33 = in[7]  * cos9[3];
+        auto tb66 = in[13] * cos9[6];
 
-        {
-            const float tmp1a = in[2] * cos9[1] + ta33 + in[10] * cos9[5] + in[14] * cos9[7];
-            const float tmp1b = in[3] * cos9[1] + tb33 + in[11] * cos9[5] + in[15] * cos9[7];
-            const float tmp2a = in[0] + in[4] * cos9[2] + in[8] * cos9[4] + ta66 + in[16] * cos9[8];
-            const float tmp2b = in[1] + in[5] * cos9[2] + in[9] * cos9[4] + tb66 + in[17] * cos9[8];
-            dct36_1 (0, ts, out1, out2, wintab, tmp1a, tmp1b, tmp2a, tmp2b);
-            dct36_2 (8, ts, out1, out2, wintab, tmp1a, tmp1b, tmp2a, tmp2b);
-        }
+        dct36_12 (0, 8, ts, out1, out2, wintab,
+                  in[2] * cos9[1] + ta33 + in[10] * cos9[5] + in[14] * cos9[7],
+                  in[3] * cos9[1] + tb33 + in[11] * cos9[5] + in[15] * cos9[7],
+                  in[0] + in[4] * cos9[2] + in[8] * cos9[4] + ta66 + in[16] * cos9[8],
+                  in[1] + in[5] * cos9[2] + in[9] * cos9[4] + tb66 + in[17] * cos9[8]);
 
-        {
-            const float tmp1a = (in[2] - in[10] - in[14]) * cos9[3];
-            const float tmp1b = (in[3] - in[11] - in[15]) * cos9[3];
-            const float tmp2a = (in[4] - in[8] - in[16]) * cos9[6] - in[12] + in[0];
-            const float tmp2b = (in[5] - in[9] - in[17]) * cos9[6] - in[13] + in[1];
-            dct36_1 (1, ts, out1, out2, wintab, tmp1a, tmp1b, tmp2a, tmp2b);
-            dct36_2 (7, ts, out1, out2, wintab, tmp1a, tmp1b, tmp2a, tmp2b);
-        }
+        dct36_12 (1, 7, ts, out1, out2, wintab,
+                  (in[2] - in[10] - in[14]) * cos9[3],
+                  (in[3] - in[11] - in[15]) * cos9[3],
+                  (in[4] - in[8] - in[16]) * cos9[6] - in[12] + in[0],
+                  (in[5] - in[9] - in[17]) * cos9[6] - in[13] + in[1]);
 
-        {
-            const float tmp1a = in[2] * cos9[5] - ta33 - in[10] * cos9[7] + in[14] * cos9[1];
-            const float tmp1b = in[3] * cos9[5] - tb33 - in[11] * cos9[7] + in[15] * cos9[1];
-            const float tmp2a = in[0] - in[4] * cos9[8] - in[8] * cos9[2] + ta66 + in[16] * cos9[4];
-            const float tmp2b = in[1] - in[5] * cos9[8] - in[9] * cos9[2] + tb66 + in[17] * cos9[4];
-            dct36_1 (2, ts, out1, out2, wintab, tmp1a, tmp1b, tmp2a, tmp2b);
-            dct36_2 (6, ts, out1, out2, wintab, tmp1a, tmp1b, tmp2a, tmp2b);
-        }
+        dct36_12 (2, 6, ts, out1, out2, wintab,
+                  in[2] * cos9[5] - ta33 - in[10] * cos9[7] + in[14] * cos9[1],
+                  in[3] * cos9[5] - tb33 - in[11] * cos9[7] + in[15] * cos9[1],
+                  in[0] - in[4] * cos9[8] - in[8] * cos9[2] + ta66 + in[16] * cos9[4],
+                  in[1] - in[5] * cos9[8] - in[9] * cos9[2] + tb66 + in[17] * cos9[4]);
 
-        {
-            const float tmp1a = in[2] * cos9[7] - ta33 + in[10] * cos9[1] - in[14] * cos9[5];
-            const float tmp1b = in[3] * cos9[7] - tb33 + in[11] * cos9[1] - in[15] * cos9[5];
-            const float tmp2a = in[0] - in[4] * cos9[4] + in[8] * cos9[8] + ta66 - in[16] * cos9[2];
-            const float tmp2b = in[1] - in[5] * cos9[4] + in[9] * cos9[8] + tb66 - in[17] * cos9[2];
-            dct36_1 (3, ts, out1, out2, wintab, tmp1a, tmp1b, tmp2a, tmp2b);
-            dct36_2 (5, ts, out1, out2, wintab, tmp1a, tmp1b, tmp2a, tmp2b);
-        }
+        dct36_12 (3, 5, ts, out1, out2, wintab,
+                  in[2] * cos9[7] - ta33 + in[10] * cos9[1] - in[14] * cos9[5],
+                  in[3] * cos9[7] - tb33 + in[11] * cos9[1] - in[15] * cos9[5],
+                  in[0] - in[4] * cos9[4] + in[8] * cos9[8] + ta66 - in[16] * cos9[2],
+                  in[1] - in[5] * cos9[4] + in[9] * cos9[8] + tb66 - in[17] * cos9[2]);
 
-        const float sum0 =  in[0] - in[4] + in[8] - in[12] + in[16];
-        const float sum1 = (in[1] - in[5] + in[9] - in[13] + in[17]) * cos36[4];
-        dct36_0 (4, ts, out1, out2, wintab, sum0, sum1);
+        dct36_0 (4, ts, out1, out2, wintab,
+                 in[0] - in[4] + in[8] - in[12] + in[16],
+                 (in[1] - in[5] + in[9] - in[13] + in[17]) * cos36[4]);
     }
 
     struct DCT12Inputs
     {
         float in0, in1, in2, in3, in4, in5;
 
-        inline DCT12Inputs (const float* const in) noexcept
+        inline DCT12Inputs (const float* in) noexcept
         {
-            in5 = in[5*3] + (in4 = in[4*3]);
-            in4 += (in3 = in[3*3]);
-            in3 += (in2 = in[2*3]);
-            in2 += (in1 = in[1*3]);
-            in1 += (in0 = in[0*3]);
+            in5 = in[5 * 3] + (in4 = in[4 * 3]);
+            in4 += (in3 = in[3 * 3]);
+            in3 += (in2 = in[2 * 3]);
+            in2 += (in1 = in[1 * 3]);
+            in1 += (in0 = in[0 * 3]);
             in5 += in3; in3 += in1;
             in2 *= cos6_1;
             in3 *= cos6_1;
@@ -1177,53 +1162,53 @@ namespace DCT
         }
     };
 
-    static void dct12 (const float* in, float* const out1, float* const out2, const float* wi, float* ts) noexcept
+    static void dct12 (const float* in, float* out1, float* out2, const float* wi, float* ts) noexcept
     {
         {
             ts[0] = out1[0];
-            ts[SBLIMIT * 1] = out1[1];
-            ts[SBLIMIT * 2] = out1[2];
-            ts[SBLIMIT * 3] = out1[3];
-            ts[SBLIMIT * 4] = out1[4];
-            ts[SBLIMIT * 5] = out1[5];
+            ts[subBandLimit * 1] = out1[1];
+            ts[subBandLimit * 2] = out1[2];
+            ts[subBandLimit * 3] = out1[3];
+            ts[subBandLimit * 4] = out1[4];
+            ts[subBandLimit * 5] = out1[5];
 
             DCT12Inputs inputs (in);
 
             {
-                float tmp1 = (inputs.in0 - inputs.in4);
-                const float tmp2 = (inputs.in1 - inputs.in5) * cos12[1];
-                const float tmp0 = tmp1 + tmp2;
+                auto tmp1 = (inputs.in0 - inputs.in4);
+                auto tmp2 = (inputs.in1 - inputs.in5) * cos12[1];
+                auto tmp0 = tmp1 + tmp2;
                 tmp1 -= tmp2;
 
-                ts[16 * SBLIMIT] = out1[16] + tmp0 * wi[10];
-                ts[13 * SBLIMIT] = out1[13] + tmp0 * wi[7];
-                ts[7  * SBLIMIT] = out1[7]  + tmp1 * wi[1];
-                ts[10 * SBLIMIT] = out1[10] + tmp1 * wi[4];
+                ts[16 * subBandLimit] = out1[16] + tmp0 * wi[10];
+                ts[13 * subBandLimit] = out1[13] + tmp0 * wi[7];
+                ts[7  * subBandLimit] = out1[7]  + tmp1 * wi[1];
+                ts[10 * subBandLimit] = out1[10] + tmp1 * wi[4];
             }
 
             inputs.process();
 
-            ts[17 * SBLIMIT] = out1[17] + inputs.in2 * wi[11];
-            ts[12 * SBLIMIT] = out1[12] + inputs.in2 * wi[6];
-            ts[14 * SBLIMIT] = out1[14] + inputs.in3 * wi[8];
-            ts[15 * SBLIMIT] = out1[15] + inputs.in3 * wi[9];
+            ts[17 * subBandLimit] = out1[17] + inputs.in2 * wi[11];
+            ts[12 * subBandLimit] = out1[12] + inputs.in2 * wi[6];
+            ts[14 * subBandLimit] = out1[14] + inputs.in3 * wi[8];
+            ts[15 * subBandLimit] = out1[15] + inputs.in3 * wi[9];
 
-            ts[6  * SBLIMIT] = out1[6]  + inputs.in0 * wi[0];
-            ts[11 * SBLIMIT] = out1[11] + inputs.in0 * wi[5];
-            ts[8  * SBLIMIT] = out1[8]  + inputs.in4 * wi[2];
-            ts[9  * SBLIMIT] = out1[9]  + inputs.in4 * wi[3];
+            ts[6  * subBandLimit] = out1[6]  + inputs.in0 * wi[0];
+            ts[11 * subBandLimit] = out1[11] + inputs.in0 * wi[5];
+            ts[8  * subBandLimit] = out1[8]  + inputs.in4 * wi[2];
+            ts[9  * subBandLimit] = out1[9]  + inputs.in4 * wi[3];
         }
 
         {
             DCT12Inputs inputs (++in);
-            float tmp1 = (inputs.in0 - inputs.in4);
-            const float tmp2 = (inputs.in1 - inputs.in5) * cos12[1];
-            const float tmp0 = tmp1 + tmp2;
+            auto tmp1 = (inputs.in0 - inputs.in4);
+            auto tmp2 = (inputs.in1 - inputs.in5) * cos12[1];
+            auto tmp0 = tmp1 + tmp2;
             tmp1 -= tmp2;
             out2[4] = tmp0 * wi[10];
             out2[1] = tmp0 * wi[7];
-            ts[13 * SBLIMIT] += tmp1 * wi[1];
-            ts[16 * SBLIMIT] += tmp1 * wi[4];
+            ts[13 * subBandLimit] += tmp1 * wi[1];
+            ts[16 * subBandLimit] += tmp1 * wi[4];
 
             inputs.process();
 
@@ -1231,19 +1216,19 @@ namespace DCT
             out2[0] = inputs.in2 * wi[6];
             out2[2] = inputs.in3 * wi[8];
             out2[3] = inputs.in3 * wi[9];
-            ts[12 * SBLIMIT] += inputs.in0 * wi[0];
-            ts[17 * SBLIMIT] += inputs.in0 * wi[5];
-            ts[14 * SBLIMIT] += inputs.in4 * wi[2];
-            ts[15 * SBLIMIT] += inputs.in4 * wi[5 - 2];
+            ts[12 * subBandLimit] += inputs.in0 * wi[0];
+            ts[17 * subBandLimit] += inputs.in0 * wi[5];
+            ts[14 * subBandLimit] += inputs.in4 * wi[2];
+            ts[15 * subBandLimit] += inputs.in4 * wi[5 - 2];
         }
 
         {
             DCT12Inputs inputs (++in);
             out2[12] = out2[13] = out2[14] = out2[15] = out2[16] = out2[17] = 0;
 
-            float tmp1 = (inputs.in0 - inputs.in4);
-            const float tmp2 = (inputs.in1 - inputs.in5) * cos12[1];
-            const float tmp0 = tmp1 + tmp2;
+            auto tmp1 = (inputs.in0 - inputs.in4);
+            auto tmp2 = (inputs.in1 - inputs.in5) * cos12[1];
+            auto tmp0 = tmp1 + tmp2;
             tmp1 -= tmp2;
 
             out2[10] = tmp0 * wi[10];
@@ -1264,10 +1249,12 @@ namespace DCT
         }
     }
 
-    static void dct64 (float* const out0, float* const out1, float* const b1, float* const b2, const float* const samples) noexcept
+    static void dct64 (float* out0, float* out1, const float* samples) noexcept
     {
+        float b1[32], b2[32];
+
         {
-            const float* const costab = constants.cosTables[0];
+            auto* costab = constants.cosTables[0];
             b1[0x00] = samples[0x00] + samples[0x1F];   b1[0x1F] = (samples[0x00] - samples[0x1F]) * costab[0x0];
             b1[0x01] = samples[0x01] + samples[0x1E];   b1[0x1E] = (samples[0x01] - samples[0x1E]) * costab[0x1];
             b1[0x02] = samples[0x02] + samples[0x1D];   b1[0x1D] = (samples[0x02] - samples[0x1D]) * costab[0x2];
@@ -1287,7 +1274,7 @@ namespace DCT
         }
 
         {
-            const float* const costab = constants.cosTables[1];
+            auto* costab = constants.cosTables[1];
             b2[0x00] = b1[0x00] + b1[0x0F];   b2[0x0F] = (b1[0x00] - b1[0x0F]) * costab[0];
             b2[0x01] = b1[0x01] + b1[0x0E];   b2[0x0E] = (b1[0x01] - b1[0x0E]) * costab[1];
             b2[0x02] = b1[0x02] + b1[0x0D];   b2[0x0D] = (b1[0x02] - b1[0x0D]) * costab[2];
@@ -1307,7 +1294,7 @@ namespace DCT
         }
 
         {
-            const float* const costab = constants.cosTables[2];
+            auto* costab = constants.cosTables[2];
             b1[0x00] = b2[0x00] + b2[0x07];   b1[0x07] = (b2[0x00] - b2[0x07]) * costab[0];
             b1[0x01] = b2[0x01] + b2[0x06];   b1[0x06] = (b2[0x01] - b2[0x06]) * costab[1];
             b1[0x02] = b2[0x02] + b2[0x05];   b1[0x05] = (b2[0x02] - b2[0x05]) * costab[2];
@@ -1327,8 +1314,8 @@ namespace DCT
         }
 
         {
-            const float cos0 = constants.cosTables[3][0];
-            const float cos1 = constants.cosTables[3][1];
+            auto cos0 = constants.cosTables[3][0];
+            auto cos1 = constants.cosTables[3][1];
             b2[0x00] = b1[0x00] + b1[0x03];   b2[0x03] = (b1[0x00] - b1[0x03]) * cos0;
             b2[0x01] = b1[0x01] + b1[0x02];   b2[0x02] = (b1[0x01] - b1[0x02]) * cos1;
             b2[0x04] = b1[0x04] + b1[0x07];   b2[0x07] = (b1[0x07] - b1[0x04]) * cos0;
@@ -1348,7 +1335,7 @@ namespace DCT
         }
 
         {
-            const float cos0 = constants.cosTables[4][0];
+            auto cos0 = constants.cosTables[4][0];
             b1[0x00] = b2[0x00] + b2[0x01];   b1[0x01] = (b2[0x00] - b2[0x01]) * cos0;
             b1[0x02] = b2[0x02] + b2[0x03];   b1[0x03] = (b2[0x03] - b2[0x02]) * cos0;  b1[0x02] += b1[0x03];
             b1[0x04] = b2[0x04] + b2[0x05];   b1[0x05] = (b2[0x04] - b2[0x05]) * cos0;
@@ -1389,29 +1376,21 @@ namespace DCT
         b1[0x1B] += b1[0x1F];  out1[0x10 * 9]  = b1[0x13] + b1[0x1B];   out1[0x10 * 11] = b1[0x1B] + b1[0x17];
         out1[0x10 * 13] = b1[0x17] + b1[0x1F];  out1[0x10 * 15] = b1[0x1F];
     }
-
-    static void dct64 (float* const a, float* const b, const float* const c) noexcept
-    {
-        float temp[64];
-        dct64 (a, b, temp, temp + 32, c);
-    }
 }
 
 //==============================================================================
 struct MP3Stream
 {
-    MP3Stream (InputStream& source)
-        : stream (source, 8192),
-          numFrames (0), currentFrameIndex (0), vbrHeaderFound (false)
+    MP3Stream (InputStream& source)  : stream (source, 8192)
     {
         reset();
     }
 
-    int decodeNextBlock (float* const out0, float* const out1, int& done)
+    int decodeNextBlock (float* out0, float* out1, int& done)
     {
         if (! headerParsed)
         {
-            int nextFrameOffset = scanForNextFrameHeader (false);
+            auto nextFrameOffset = scanForNextFrameHeader (false);
 
             if (lastFrameSize == -1 || needToSyncBitStream)
             {
@@ -1427,10 +1406,9 @@ struct MP3Stream
 
             if (nextFrameOffset > 0)
             {
-                int size;
                 wasFreeFormat = false;
                 needToSyncBitStream = true;
-                size = (int) (bufferPointer - (bufferSpace[bufferSpaceIndex] + 512));
+                auto size = (int) (bufferPointer - (bufferSpace[bufferSpaceIndex] + 512));
 
                 if (size > 2880)
                 {
@@ -1438,7 +1416,7 @@ struct MP3Stream
                     bufferPointer = bufferSpace[bufferSpaceIndex] + 512;
                 }
 
-                const int toSkip = (size + nextFrameOffset) - 2880;
+                auto toSkip = (size + nextFrameOffset) - 2880;
 
                 if (toSkip > 0)
                 {
@@ -1477,7 +1455,7 @@ struct MP3Stream
                 if (frame.crc16FollowsHeader)
                     getBits (16);
 
-                const int bits = jmax (0, decodeLayer3SideInfo());
+                auto bits = jmax (0, decodeLayer3SideInfo());
                 dataSize = (bits + 7) / 8;
 
                 if (! isFreeFormat)
@@ -1525,7 +1503,7 @@ struct MP3Stream
             }
             else
             {
-                const int nextFrameOffset = scanForNextFrameHeader (true);
+                auto nextFrameOffset = scanForNextFrameHeader (true);
 
                 wasFreeFormat = isFreeFormat;
 
@@ -1547,7 +1525,7 @@ struct MP3Stream
 
         if (bytes > 0)
         {
-            const int toSkip = bytes - 512;
+            auto toSkip = bytes - 512;
 
             if (toSkip > 0)
             {
@@ -1574,7 +1552,7 @@ struct MP3Stream
         while (frameIndex >= frameStreamPositions.size() * storedStartPosInterval)
         {
             int dummy = 0;
-            const int result = decodeNextBlock (nullptr, nullptr, dummy);
+            auto result = decodeNextBlock (nullptr, nullptr, dummy);
 
             if (result < 0)
                 return false;
@@ -1594,8 +1572,8 @@ struct MP3Stream
     MP3Frame frame;
     VBRTagData vbrTagData;
     BufferedInputStream stream;
-    int numFrames, currentFrameIndex;
-    bool vbrHeaderFound;
+    int numFrames = 0, currentFrameIndex = 0;
+    bool vbrHeaderFound = false;
 
 private:
     bool headerParsed, sideParsed, dataParsed, needToSyncBitStream;
@@ -1645,9 +1623,9 @@ private:
         uint8 scaleFactor[32][2][3];
     };
 
-    static bool isValidHeader (const uint32 header, const int oldLayer) noexcept
+    static bool isValidHeader (uint32 header, int oldLayer) noexcept
     {
-        const int newLayer = 4 - ((header >> 17) & 3);
+        int newLayer = 4 - ((header >> 17) & 3);
 
         return (header & 0xffe00000) == 0xffe00000
                 && newLayer != 4
@@ -1662,7 +1640,7 @@ private:
         if (lastFrameSize < 0 && backstep > 0)
             return false;
 
-        const uint8* oldBuffer = bufferSpace[1 - bufferSpaceIndex] + 512;
+        auto* oldBuffer = bufferSpace[1 - bufferSpaceIndex] + 512;
         bufferPointer -= backstep;
 
         if (backstep != 0)
@@ -1672,7 +1650,7 @@ private:
         return true;
     }
 
-    uint32 getBits (const int numBits) noexcept
+    uint32 getBits (int numBits) noexcept
     {
         if (numBits <= 0 || bufferPointer == nullptr)
             return 0;
@@ -1687,14 +1665,14 @@ private:
 
     uint32 getOneBit() noexcept
     {
-        const uint8 result = (uint8) (*bufferPointer << bitIndex);
+        auto result = (uint8) (*bufferPointer << bitIndex);
         ++bitIndex;
         bufferPointer += (bitIndex >> 3);
         bitIndex &= 7;
         return result >> 7;
     }
 
-    uint32 getBitsUnchecked (const int numBits) noexcept
+    uint32 getBitsUnchecked (int numBits) noexcept
     {
         const uint32 result = ((((bufferPointer[0] << 8) | bufferPointer[1]) << bitIndex) & 0xffff) >> (16 - numBits);
         bitIndex += numBits;
@@ -1703,12 +1681,12 @@ private:
         return result;
     }
 
-    inline uint8  getBitsUint8  (const int numBits) noexcept  { return (uint8)  getBitsUnchecked (numBits); }
-    inline uint16 getBitsUint16 (const int numBits) noexcept  { return (uint16) getBitsUnchecked (numBits); }
+    inline uint8  getBitsUint8  (int numBits) noexcept  { return (uint8)  getBitsUnchecked (numBits); }
+    inline uint16 getBitsUint16 (int numBits) noexcept  { return (uint16) getBitsUnchecked (numBits); }
 
-    int scanForNextFrameHeader (const bool checkTypeAgainstLastFrame) noexcept
+    int scanForNextFrameHeader (bool checkTypeAgainstLastFrame) noexcept
     {
-        const int64 oldPos = stream.getPosition();
+        auto oldPos = stream.getPosition();
         int offset = -3;
         uint32 header = 0;
 
@@ -1755,7 +1733,7 @@ private:
 
     void readVBRHeader()
     {
-        int64 oldPos = stream.getPosition();
+        auto oldPos = stream.getPosition();
         uint8 xing[194];
         stream.read (xing, sizeof (xing));
 
@@ -1770,12 +1748,12 @@ private:
         stream.setPosition (oldPos);
     }
 
-    void decodeLayer1Frame (float* const pcm0, float* const pcm1, int& samplesDone) noexcept
+    void decodeLayer1Frame (float* pcm0, float* pcm1, int& samplesDone) noexcept
     {
         float fraction[2][32];
         SideInfoLayer1 si;
         layer1Step1 (si);
-        const int single = (frame.numChannels == 1 || frame.single == 3) ? 0 : frame.single;
+        auto single = (frame.numChannels == 1 || frame.single == 3) ? 0 : frame.single;
 
         if (single >= 0)
         {
@@ -1795,19 +1773,20 @@ private:
         }
     }
 
-    void decodeLayer2Frame (float* const pcm0, float* const pcm1, int& samplesDone)
+    void decodeLayer2Frame (float* pcm0, float* pcm1, int& samplesDone)
     {
         float fraction[2][4][32];
         frame.selectLayer2Table();
         SideInfoLayer2 si;
         layer2Step1 (si);
-        const int single = (frame.numChannels == 1 || frame.single == 3) ? 0 : frame.single;
+        auto single = (frame.numChannels == 1 || frame.single == 3) ? 0 : frame.single;
 
         if (single >= 0)
         {
             for (int i = 0; i < 12; ++i)
             {
                 layer2Step2 (si, i >> 2, fraction);
+
                 for (int j = 0; j < 3; ++j)
                     synthesise (fraction[single][j], 0, pcm0, samplesDone);
             }
@@ -1817,13 +1796,14 @@ private:
             for (int i = 0; i < 12; ++i)
             {
                 layer2Step2 (si, i >> 2, fraction);
+
                 for (int j = 0; j < 3; ++j)
                     synthesiseStereo (fraction[0][j], fraction[1][j], pcm0, pcm1, samplesDone);
             }
         }
     }
 
-    void decodeLayer3Frame (float* const pcm0, float* const pcm1, int& samplesDone) noexcept
+    void decodeLayer3Frame (float* pcm0, float* pcm1, int& samplesDone) noexcept
     {
         if (! rollBackBufferPointer ((int) sideinfo.mainDataStart))
             return;
@@ -1838,9 +1818,9 @@ private:
         for (int gr = 0; gr < granules; ++gr)
         {
             {
-                Layer3SideInfo::Info& granule = sideinfo.ch[0].gr[gr];
-                const int part2bits = frame.lsf ? getLayer3ScaleFactors2 (scaleFactors[0], granule, 0)
-                                                : getLayer3ScaleFactors1 (scaleFactors[0], granule);
+                auto& granule = sideinfo.ch[0].gr[gr];
+                auto part2bits = frame.lsf ? getLayer3ScaleFactors2 (scaleFactors[0], granule, 0)
+                                           : getLayer3ScaleFactors1 (scaleFactors[0], granule);
 
                 if (layer3DequantizeSample (hybridIn[0], scaleFactors[0], granule, frame.sampleRateIndex, part2bits))
                     return;
@@ -1848,9 +1828,9 @@ private:
 
             if (frame.numChannels == 2)
             {
-                Layer3SideInfo::Info& granule = sideinfo.ch[1].gr[gr];
-                const int part2bits = frame.lsf ? getLayer3ScaleFactors2 (scaleFactors[1], granule, iStereo)
-                                                : getLayer3ScaleFactors1 (scaleFactors[1], granule);
+                auto& granule = sideinfo.ch[1].gr[gr];
+                auto part2bits = frame.lsf ? getLayer3ScaleFactors2 (scaleFactors[1], granule, iStereo)
+                                           : getLayer3ScaleFactors1 (scaleFactors[1], granule);
 
                 if (layer3DequantizeSample (hybridIn[1], scaleFactors[1], granule, frame.sampleRateIndex, part2bits))
                     return;
@@ -1859,10 +1839,10 @@ private:
                 {
                     for (int i = 0; i < 32 * 18; ++i)
                     {
-                        const float tmp0 = ((const float*) hybridIn[0]) [i];
-                        const float tmp1 = ((const float*) hybridIn[1]) [i];
-                        ((float*) hybridIn[1]) [i] = tmp0 - tmp1;
-                        ((float*) hybridIn[0]) [i] = tmp0 + tmp1;
+                        auto tmp0 = ((const float*) hybridIn[0])[i];
+                        auto tmp1 = ((const float*) hybridIn[1])[i];
+                        ((float*) hybridIn[1])[i] = tmp0 - tmp1;
+                        ((float*) hybridIn[0])[i] = tmp0 + tmp1;
                     }
                 }
 
@@ -1881,8 +1861,9 @@ private:
                 {
                     case 3:
                     {
-                        float* in0 = (float*) hybridIn[0];
-                        const float* in1 = (const float*) hybridIn[1];
+                        auto* in0 = (float*) hybridIn[0];
+                        auto* in1 = (const float*) hybridIn[1];
+
                         for (int i = 0; i < (int) (18 * granule.maxb); ++i, ++in0)
                             *in0 = (*in0 + *in1++);
                     }
@@ -1890,8 +1871,9 @@ private:
 
                     case 1:
                     {
-                        float* in0 = (float*) hybridIn[0];
-                        const float* in1 = (const float*) hybridIn[1];
+                        auto* in0 = (float*) hybridIn[0];
+                        auto* in1 = (const float*) hybridIn[1];
+
                         for (int i = 0; i < (int) (18 * granule.maxb); ++i)
                             *in0++ = *in1++;
                     }
@@ -1901,7 +1883,7 @@ private:
 
             for (int ch = 0; ch < numChans; ++ch)
             {
-                const Layer3SideInfo::Info& granule = sideinfo.ch[ch].gr[gr];
+                auto& granule = sideinfo.ch[ch].gr[gr];
                 granule.doAntialias (hybridIn[ch]);
                 layer3Hybrid (hybridIn[ch], hybridOut[ch], ch, granule);
             }
@@ -2017,14 +1999,14 @@ private:
         zerostruct (si);
         const int sblimit = frame.layer2SubBandLimit;
         const int jsbound = (frame.mode == 1) ? (frame.modeExt << 2) + 4 : frame.layer2SubBandLimit;
-        const AllocationTable* allocTable = frame.allocationTable;
+        auto* allocTable = frame.allocationTable;
         uint8 scfsi[32][2];
 
         if (frame.numChannels == 2)
         {
             for (int i = 0; i < jsbound; ++i)
             {
-                const int16 step = allocTable->bits;
+                auto step = allocTable->bits;
                 allocTable += (static_cast<intptr_t> (1) << step);
                 si.allocation[i][0] = getBitsUint8 (step);
                 si.allocation[i][1] = getBitsUint8 (step);
@@ -2032,8 +2014,8 @@ private:
 
             for (int i = jsbound; i < sblimit; ++i)
             {
-                const int16 step = allocTable->bits;
-                const uint8 b0 = getBitsUint8 (step);
+                auto step = allocTable->bits;
+                auto b0 = getBitsUint8 (step);
                 allocTable += (static_cast<intptr_t> (1) << step);
                 si.allocation[i][0] = b0;
                 si.allocation[i][1] = b0;
@@ -2098,22 +2080,21 @@ private:
 
     void layer2Step2 (SideInfoLayer2& si, const int gr, float fraction[2][4][32]) noexcept
     {
-        const AllocationTable* allocTable = frame.allocationTable;
+        auto* allocTable = frame.allocationTable;
         const int jsbound = (frame.mode == 1) ? (frame.modeExt << 2) + 4 : frame.layer2SubBandLimit;
 
         for (int i = 0; i < jsbound; ++i)
         {
-            const int16 step = allocTable->bits;
+            auto step = allocTable->bits;
 
             for (int ch = 0; ch < frame.numChannels; ++ch)
             {
-                const uint8 ba = si.allocation[i][ch];
-                if (ba != 0)
+                if (auto ba = si.allocation[i][ch])
                 {
-                    const uint8 x1 = jmin ((uint8) 63, si.scaleFactor[i][ch][gr]);
-                    const AllocationTable* const alloc2 = allocTable + ba;
-                    const int16 k = jmin ((int16) 16, alloc2->bits);
-                    const int16 d1 = alloc2->d;
+                    auto x1 = jmin ((uint8) 63, si.scaleFactor[i][ch][gr]);
+                    auto* alloc2 = allocTable + ba;
+                    auto k = jmin ((int16) 16, alloc2->bits);
+                    auto d1 = alloc2->d;
 
                     if (d1 < 0)
                     {
@@ -2124,7 +2105,7 @@ private:
                     }
                     else
                     {
-                        const uint8* const tab = constants.getGroupTable (d1, getBits (k));
+                        auto* tab = constants.getGroupTable (d1, getBits (k));
                         fraction[ch][0][i] = (float) constants.muls[tab[0]][x1];
                         fraction[ch][1][i] = (float) constants.muls[tab[1]][x1];
                         fraction[ch][2][i] = (float) constants.muls[tab[2]][x1];
@@ -2141,25 +2122,25 @@ private:
 
         for (int i = jsbound; i < frame.layer2SubBandLimit; ++i)
         {
-            const int16 step = allocTable->bits;
-            const uint8 ba = si.allocation[i][0];
+            auto step = allocTable->bits;
+            auto ba = si.allocation[i][0];
 
             if (ba != 0)
             {
-                const AllocationTable* const alloc2 = allocTable + ba;
+                auto* alloc2 = allocTable + ba;
                 int16 k = alloc2->bits;
                 int16 d1 = alloc2->d;
                 k = (k <= 16) ? k : 16;
 
                 if (d1 < 0)
                 {
-                    const int v0 = (int) getBits (k);
-                    const int v1 = (int) getBits (k);
-                    const int v2 = (int) getBits (k);
+                    auto v0 = (int) getBits (k);
+                    auto v1 = (int) getBits (k);
+                    auto v2 = (int) getBits (k);
 
                     for (int ch = 0; ch < frame.numChannels; ++ch)
                     {
-                        const uint8 x1 = jmin ((uint8) 63, si.scaleFactor[i][ch][gr]);
+                        auto x1 = jmin ((uint8) 63, si.scaleFactor[i][ch][gr]);
                         const double cm = constants.muls[k][x1];
                         fraction[ch][0][i] = (float) ((v0 + d1) * cm);
                         fraction[ch][1][i] = (float) ((v1 + d1) * cm);
@@ -2168,14 +2149,14 @@ private:
                 }
                 else
                 {
-                    const uint8* const tab = constants.getGroupTable (d1, getBits (k));
-                    const uint8 k0 = tab[0];
-                    const uint8 k1 = tab[1];
-                    const uint8 k2 = tab[2];
+                    auto* tab = constants.getGroupTable (d1, getBits (k));
+                    auto k0 = tab[0];
+                    auto k1 = tab[1];
+                    auto k2 = tab[2];
 
                     for (int ch = 0; ch < frame.numChannels; ++ch)
                     {
-                        const uint8 x1 = jmin ((uint8) 63, si.scaleFactor[i][ch][gr]);
+                        auto x1 = jmin ((uint8) 63, si.scaleFactor[i][ch][gr]);
                         fraction[ch][0][i] = (float) constants.muls[k0][x1];
                         fraction[ch][1][i] = (float) constants.muls[k1][x1];
                         fraction[ch][2][i] = (float) constants.muls[k2][x1];
@@ -2187,6 +2168,7 @@ private:
                 fraction[0][0][i] = fraction[0][1][i] = fraction[0][2][i] = 0;
                 fraction[1][0][i] = fraction[1][1][i] = fraction[1][2][i] = 0;
             }
+
             allocTable += (static_cast<intptr_t> (1) << step);
         }
 
@@ -2211,7 +2193,7 @@ private:
         {
             for (int ch = 0; ch < stereo; ++ch)
             {
-                Layer3SideInfo::Info& granule = sideinfo.ch[ch].gr[gr];
+                auto& granule = sideinfo.ch[ch].gr[gr];
 
                 granule.part2_3Length = getBits (12);
                 granule.bigValues = jmin (288u, getBitsUnchecked (9));
@@ -2272,7 +2254,7 @@ private:
 
         for (int ch = 0; ch < stereo; ++ch)
         {
-            Layer3SideInfo::Info& granule = sideinfo.ch[ch].gr[0];
+            auto& granule = sideinfo.ch[ch].gr[0];
 
             granule.part2_3Length = getBits (12);
             granule.bigValues = jmin (288u, getBitsUnchecked (9));
@@ -2421,8 +2403,8 @@ private:
             { { 6, 9, 9, 9 }, { 6, 9, 12, 6 }, { 15, 18, 0, 0 }, { 6, 15, 12, 0 },  { 6, 12, 9, 6 }, { 6, 18, 9, 0 } }
         };
 
-        uint32 len = iStereo ? constants.iLength2 [granule.scaleFactorCompression >> 1]
-                             : constants.nLength2 [granule.scaleFactorCompression];
+        uint32 len = iStereo ? constants.iLength2[granule.scaleFactorCompression >> 1]
+                             : constants.nLength2[granule.scaleFactorCompression];
 
         granule.preflag = (len >> 15) & 1;
 
@@ -2435,9 +2417,9 @@ private:
         }
 
         const uint8* const data = scaleTable[n][(len >> 12) & 7];
-        int i, numBits = 0;
+        int numBits = 0;
 
-        for (i = 0; i < 4; ++i)
+        for (int i = 0; i < 4; ++i)
         {
             int num = len & 7;
             len >>= 3;
@@ -2457,7 +2439,8 @@ private:
         }
 
         n = (n << 1) + 1;
-        for (i = 0; i < n; ++i)
+
+        for (int i = 0; i < n; ++i)
             *scf++ = 0;
 
         return numBits;
@@ -2466,14 +2449,14 @@ private:
     bool layer3DequantizeSample (float xr[32][18], int* scf, Layer3SideInfo::Info& granule, int sampleRate, int part2bits) noexcept
     {
         const uint32 shift = 1 + granule.scaleFactorScale;
-        float* xrpnt = (float*) xr;
-        int part2remain = (int) granule.part2_3Length - part2bits;
+        auto* xrpnt = (float*) xr;
+        auto part2remain = (int) granule.part2_3Length - part2bits;
 
         zeromem (xrpnt, sizeof (float) * (size_t) (&xr[32][0] - xrpnt));
 
-        const int bv = (int) granule.bigValues;
-        const int region1 = (int) granule.region1Start;
-        const int region2 = (int) granule.region2Start;
+        auto bv = (int) granule.bigValues;
+        auto region1 = (int) granule.region1Start;
+        auto region2 = (int) granule.region2Start;
         int l3 = ((576 >> 1) - bv) >> 1;
         int l[3];
 
@@ -2514,19 +2497,19 @@ private:
             {
                 max[3] = -1;
                 max[0] = max[1] = max[2] = 2;
-                map = constants.map [sampleRate][0];
-                mapEnd = constants.mapEnd [sampleRate][0];
+                map    = constants.map   [sampleRate][0];
+                mapEnd = constants.mapEnd[sampleRate][0];
             }
             else
             {
                 max[0] = max[1] = max[2] = max[3] = -1;
-                map = constants.map [sampleRate][1];
-                mapEnd = constants.mapEnd [sampleRate][1];
+                map    = constants.map   [sampleRate][1];
+                mapEnd = constants.mapEnd[sampleRate][1];
             }
 
             for (int i = 0; i < 2; ++i)
             {
-                const BitsToTableMap* h = huffmanTables1 + granule.tableSelect[i];
+                auto* h = huffmanTables1 + granule.tableSelect[i];
 
                 for (int lp = l[i]; lp != 0; --lp, --mc)
                 {
@@ -2550,7 +2533,7 @@ private:
                         }
                     }
 
-                    const int16* val = h->table;
+                    auto* val = h->table;
 
                     while ((y = *val++) < 0)
                     {
@@ -2603,8 +2586,8 @@ private:
 
             for (; l3 && (part2remain > 0); --l3)
             {
-                const BitsToTableMap* h = huffmanTables2 + granule.count1TableSelect;
-                const int16* val = h->table;
+                auto* h = huffmanTables2 + granule.count1TableSelect;
+                auto* val = h->table;
                 int16 a;
 
                 while ((a = *val++) < 0)
@@ -2616,6 +2599,7 @@ private:
                     }
 
                     --part2remain;
+
                     if (getOneBit())
                         val -= a;
                 }
@@ -2649,6 +2633,7 @@ private:
                     if ((a & (8 >> i)))
                     {
                         max[lwin] = cb;
+
                         if (part2remain == 0)
                             break;
 
@@ -2691,25 +2676,25 @@ private:
             static const int pretab1[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 3, 3, 3, 2, 0 };
             static const int pretab2[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-            const int* pretab = (const int*) (granule.preflag ? pretab1 : pretab2);
+            auto* pretab = (const int*) (granule.preflag ? pretab1 : pretab2);
             int max = -1, cb = 0, mc = 0;
-            int* map = constants.map [sampleRate][2];
+            auto* map = constants.map[sampleRate][2];
             float v = 0;
 
             for (int i = 0; i < 3; ++i)
             {
-                const BitsToTableMap* h = huffmanTables1 + granule.tableSelect[i];
+                auto* h = huffmanTables1 + granule.tableSelect[i];
 
                 for (int lp = l[i]; lp != 0; --lp, --mc)
                 {
                     if (mc == 0)
                     {
                         mc = *map++;
-                        v = granule.pow2gain [((*scf++) + (*pretab++)) << shift];
+                        v = granule.pow2gain[((*scf++) + (*pretab++)) << shift];
                         cb = *map++;
                     }
 
-                    const int16* val = h->table;
+                    auto* val = h->table;
                     int y;
 
                     while ((y = *val++) < 0)
@@ -2757,8 +2742,8 @@ private:
 
             for (; l3 && part2remain > 0; --l3)
             {
-                const BitsToTableMap* h = huffmanTables2 + granule.count1TableSelect;
-                const int16* values = h->table;
+                auto* h = huffmanTables2 + granule.count1TableSelect;
+                auto* values = h->table;
                 int16 a;
 
                 while ((a = *values++) < 0)
@@ -2770,6 +2755,7 @@ private:
                     }
 
                     --part2remain;
+
                     if (getOneBit())
                         values -= a;
                 }
@@ -2782,7 +2768,7 @@ private:
                         {
                             mc = *map++;
                             cb = *map++;
-                            v = granule.pow2gain [((*scf++) + (*pretab++)) << shift];
+                            v = granule.pow2gain[((*scf++) + (*pretab++)) << shift];
                         }
                         --mc;
                     }
@@ -2824,7 +2810,7 @@ private:
 
     void layer3Hybrid (float fsIn[32][18], float tsOut[18][32], int ch, const Layer3SideInfo::Info& granule) noexcept
     {
-        float* ts = (float*) tsOut;
+        auto* ts = (float*) tsOut;
         float* rawout1, *rawout2;
         int sb = 0;
 
@@ -2846,7 +2832,8 @@ private:
             ts += 2;
         }
 
-        const uint32 bt = granule.blockType;
+        auto bt = granule.blockType;
+
         if (bt == 2)
         {
             for (; sb < (int) granule.maxb; sb += 2, ts += 2, rawout1 += 36, rawout2 += 36)
@@ -2876,18 +2863,18 @@ private:
 
     void synthesiseStereo (const float* bandPtr0, const float* bandPtr1, float* out0, float* out1, int& samplesDone) noexcept
     {
-        int dummy = samplesDone;
+        auto dummy = samplesDone;
         synthesise (bandPtr0, 0, out0, dummy);
         synthesise (bandPtr1, 1, out1, samplesDone);
     }
 
-    void synthesise (const float* bandPtr, const int channel, float* out, int& samplesDone)
+    void synthesise (const float* bandPtr, int channel, float* out, int& samplesDone)
     {
         out += samplesDone;
         const int bo = channel == 0 ? ((synthBo - 1) & 15) : synthBo;
         float (*buf)[0x110] = synthBuffers[channel];
         float* b0;
-        int j, bo1 = bo;
+        auto bo1 = bo;
 
         if (bo & 1)
         {
@@ -2904,9 +2891,9 @@ private:
         synthBo = bo;
         const float* window = constants.decodeWin + 16 - bo1;
 
-        for (j = 16; j != 0; --j, b0 += 16, window += 32)
+        for (int j = 16; j != 0; --j, b0 += 16, window += 32)
         {
-            float sum = window[0] * b0[0];  sum -= window[1] * b0[1];
+            auto sum = window[0] * b0[0];  sum -= window[1] * b0[1];
             sum += window[2]  * b0[2];   sum -= window[3]  * b0[3];
             sum += window[4]  * b0[4];   sum -= window[5]  * b0[5];
             sum += window[6]  * b0[6];   sum -= window[7]  * b0[7];
@@ -2918,7 +2905,7 @@ private:
         }
 
         {
-            float sum = window[0] * b0[0];   sum += window[2] * b0[2];
+            auto sum = window[0] * b0[0];   sum += window[2] * b0[2];
             sum += window[4]  * b0[4];   sum += window[6]  * b0[6];
             sum += window[8]  * b0[8];   sum += window[10] * b0[10];
             sum += window[12] * b0[12];  sum += window[14] * b0[14];
@@ -2927,9 +2914,9 @@ private:
             window += bo1 << 1;
         }
 
-        for (j = 15; j != 0; --j, b0 -= 16, window -= 32)
+        for (int j = 15; j != 0; --j, b0 -= 16, window -= 32)
         {
-            float sum = -window[-1] * b0[0];  sum -= window[-2] * b0[1];
+            auto sum = -window[-1] * b0[0];  sum -= window[-2] * b0[1];
             sum -= window[-3]  * b0[2];   sum -= window[-4]  * b0[3];
             sum -= window[-5]  * b0[4];   sum -= window[-6]  * b0[5];
             sum -= window[-7]  * b0[6];   sum -= window[-8]  * b0[7];
@@ -3044,7 +3031,7 @@ private:
     MP3Stream stream;
     int64 currentPosition;
     enum { decodedDataSize = 1152 };
-    float decoded0 [decodedDataSize], decoded1 [decodedDataSize];
+    float decoded0[decodedDataSize], decoded1[decodedDataSize];
     int decodedStart, decodedEnd;
 
     void createEmptyDecodedData() noexcept
@@ -3160,6 +3147,7 @@ AudioFormatWriter* MP3AudioFormat::createWriterFor (OutputStream*, double /*samp
                                                     unsigned int /*numberOfChannels*/, int /*bitsPerSample*/,
                                                     const StringPairArray& /*metadataValues*/, int /*qualityOptionIndex*/)
 {
+    jassertfalse; // not yet implemented!
     return nullptr;
 }
 

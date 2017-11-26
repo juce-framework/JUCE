@@ -24,7 +24,7 @@
   ==============================================================================
 */
 
-#include "../jucer_Headers.h"
+#include "../Application/jucer_Headers.h"
 #include "jucer_Application.h"
 #include "jucer_AutoUpdater.h"
 

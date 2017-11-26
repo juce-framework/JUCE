@@ -2140,8 +2140,8 @@ private:
 
     void expectDoubleWithinRelativeError (double actual, double expected, double maxRelativeError)
     {
-        const double maxAbsoluteError = jmax (1.0, std::fabs (expected)) * maxRelativeError;
-        expect (std::fabs (expected - actual) < maxAbsoluteError);
+        const double maxAbsoluteError = jmax (1.0, std::abs (expected)) * maxRelativeError;
+        expect (std::abs (expected - actual) < maxAbsoluteError);
     }
 
     //==============================================================================

@@ -27,6 +27,8 @@
 namespace juce
 {
 
+class OpenGLTexture;
+
 //==============================================================================
 /**
     Creates an OpenGL context, which can be attached to a component.
@@ -97,6 +99,20 @@ public:
     */
     void setPixelFormat (const OpenGLPixelFormat& preferredPixelFormat) noexcept;
 
+    /** Texture magnification filters, used by setTextureMagnificationFilter(). */
+    enum TextureMagnificationFilter
+    {
+        nearest,
+        linear
+    };
+
+    /** Sets the texture magnification filter. By default the texture magnification
+        filter is linear. However, for faster rendering you may want to use the
+        'nearest' magnification filter. This option will not affect any textures
+        created before this function was called. */
+    void setTextureMagnificationFilter (TextureMagnificationFilter magFilterMode) noexcept;
+
+     //==============================================================================
     /** Provides a context with which you'd like this context's resources to be shared.
         The object passed-in here is a platform-dependent native context object, and
         must not be deleted while this context may still be using it! To turn off sharing,
@@ -298,32 +314,35 @@ public:
    #endif
 
 private:
+    friend class OpenGLTexture;
+
     class CachedImage;
     class Attachment;
-    NativeContext* nativeContext;
-    OpenGLRenderer* renderer;
-    double currentRenderScale;
+    NativeContext* nativeContext = nullptr;
+    OpenGLRenderer* renderer = nullptr;
+    double currentRenderScale = 1.0;
     ScopedPointer<Attachment> attachment;
     OpenGLPixelFormat openGLPixelFormat;
-    void* contextToShareWith;
-    OpenGLVersion versionRequired;
-    size_t imageCacheMaxSize;
-    bool renderComponents, useMultisampling, continuousRepaint, overrideCanAttach;
+    void* contextToShareWith = nullptr;
+    OpenGLVersion versionRequired = defaultGLVersion;
+    size_t imageCacheMaxSize = 8 * 1024 * 1024;
+    bool renderComponents = true, useMultisampling = false, continuousRepaint = false, overrideCanAttach = false;
+    TextureMagnificationFilter texMagFilter = linear;
 
     //==============================================================================
-    struct AsyncWorker : ReferenceCountedObject
+    struct AsyncWorker  : public ReferenceCountedObject
     {
         typedef ReferenceCountedObjectPtr<AsyncWorker> Ptr;
         virtual void operator() (OpenGLContext&) = 0;
         virtual ~AsyncWorker() {}
     };
 
-    template <typename T>
-    struct AsyncWorkerFunctor : AsyncWorker
+    template <typename FunctionType>
+    struct AsyncWorkerFunctor  : public AsyncWorker
     {
-        AsyncWorkerFunctor (T functorToUse) : functor (functorToUse) {}
+        AsyncWorkerFunctor (FunctionType functorToUse) : functor (functorToUse) {}
         void operator() (OpenGLContext& callerContext) override     { functor (callerContext); }
-        T functor;
+        FunctionType functor;
 
         JUCE_DECLARE_NON_COPYABLE (AsyncWorkerFunctor)
     };
@@ -341,8 +360,8 @@ private:
 
 //==============================================================================
 #ifndef DOXYGEN
-template <typename T>
-void OpenGLContext::executeOnGLThread (T&& f, bool shouldBlock) { execute (new AsyncWorkerFunctor<T> (f), shouldBlock); }
+template <typename FunctionType>
+void OpenGLContext::executeOnGLThread (FunctionType&& f, bool shouldBlock) { execute (new AsyncWorkerFunctor<FunctionType> (f), shouldBlock); }
 #endif
 
 } // namespace juce

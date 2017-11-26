@@ -122,8 +122,8 @@ Range<float> TextLayout::Line::getLineBoundsX() const noexcept
 
 Range<float> TextLayout::Line::getLineBoundsY() const noexcept
 {
-    return Range<float> (lineOrigin.y - ascent,
-                         lineOrigin.y + descent);
+    return { lineOrigin.y - ascent,
+             lineOrigin.y + descent };
 }
 
 Rectangle<float> TextLayout::Line::getLineBounds() const noexcept
@@ -223,7 +223,8 @@ void TextLayout::draw (Graphics& g, Rectangle<float> area) const
                                                     : runExtent.getUnionWith (glyphRange);
                 }
 
-                const float lineThickness = run->font.getDescent() * 0.3f;
+                auto lineThickness = run->font.getDescent() * 0.3f;
+
                 context.fillRect ({ runExtent.getStart() + lineOrigin.x, lineOrigin.y + lineThickness * 2.0f,
                                     runExtent.getLength(), lineThickness });
             }
@@ -256,8 +257,8 @@ void TextLayout::createLayoutWithBalancedLineLengths (const AttributedString& te
 
 void TextLayout::createLayoutWithBalancedLineLengths (const AttributedString& text, float maxWidth, float maxHeight)
 {
-    const float minimumWidth = maxWidth / 2.0f;
-    float bestWidth = maxWidth;
+    auto minimumWidth = maxWidth / 2.0f;
+    auto bestWidth = maxWidth;
     float bestLineProportion = 0.0f;
 
     while (maxWidth > minimumWidth)
@@ -267,12 +268,13 @@ void TextLayout::createLayoutWithBalancedLineLengths (const AttributedString& te
         if (getNumLines() < 2)
             return;
 
-        const float line1 = lines.getUnchecked (lines.size() - 1)->getLineBoundsX().getLength();
-        const float line2 = lines.getUnchecked (lines.size() - 2)->getLineBoundsX().getLength();
-        const float shortestLine = jmin (line1, line2);
-        const float prop = (shortestLine > 0) ? jmax (line1, line2) / shortestLine : 1.0f;
+        auto line1 = lines.getUnchecked (lines.size() - 1)->getLineBoundsX().getLength();
+        auto line2 = lines.getUnchecked (lines.size() - 2)->getLineBoundsX().getLength();
+        auto shortest = jmin (line1, line2);
+        auto longest  = jmax (line1, line2);
+        auto prop = shortest > 0 ? longest / shortest : 1.0f;
 
-        if (prop > 0.9f)
+        if (prop > 0.9f && prop < 1.1f)
             return;
 
         if (prop > bestLineProportion)
@@ -308,8 +310,7 @@ namespace TextLayoutHelpers
         float lineHeight;
         const bool isWhitespace, isNewLine;
 
-    private:
-        Token& operator= (const Token&);
+        Token& operator= (const Token&) = delete;
     };
 
     struct TokenList
@@ -346,7 +347,7 @@ namespace TextLayoutHelpers
                 if (newGlyphs.size() > 0)
                 {
                     currentRun->glyphs.ensureStorageAllocated (currentRun->glyphs.size() + newGlyphs.size());
-                    const Point<float> tokenOrigin (t.area.getPosition().translated (0, t.font.getAscent()));
+                    auto tokenOrigin = t.area.getPosition().translated (0, t.font.getAscent());
 
                     if (needToSetLineOrigin)
                     {
@@ -354,11 +355,11 @@ namespace TextLayoutHelpers
                         currentLine->lineOrigin = tokenOrigin;
                     }
 
-                    const Point<float> glyphOffset (tokenOrigin - currentLine->lineOrigin);
+                    auto glyphOffset = tokenOrigin - currentLine->lineOrigin;
 
                     for (int j = 0; j < newGlyphs.size(); ++j)
                     {
-                        const float x = xOffsets.getUnchecked (j);
+                        auto x = xOffsets.getUnchecked (j);
                         currentRun->glyphs.add (TextLayout::Glyph (newGlyphs.getUnchecked(j),
                                                                    glyphOffset.translated (x, 0),
                                                                    xOffsets.getUnchecked (j + 1) - x));
@@ -370,7 +371,7 @@ namespace TextLayoutHelpers
                 if (t.isWhitespace || t.isNewLine)
                     ++charPosition;
 
-                if (auto* nextToken = tokens [i + 1])
+                if (auto* nextToken = tokens[i + 1])
                 {
                     if (t.font != nextToken->font || t.colour != nextToken->colour)
                     {
@@ -408,12 +409,12 @@ namespace TextLayoutHelpers
 
             if ((text.getJustification().getFlags() & (Justification::right | Justification::horizontallyCentred)) != 0)
             {
-                const float totalW = layout.getWidth();
-                const bool isCentred = (text.getJustification().getFlags() & Justification::horizontallyCentred) != 0;
+                auto totalW = layout.getWidth();
+                bool isCentred = (text.getJustification().getFlags() & Justification::horizontallyCentred) != 0;
 
                 for (int i = 0; i < layout.getNumLines(); ++i)
                 {
-                    float dx = totalW - layout.getLine(i).getLineBoundsX().getLength();
+                    auto dx = totalW - layout.getLine(i).getLineBoundsX().getLength();
 
                     if (isCentred)
                         dx /= 2.0f;
@@ -451,11 +452,12 @@ namespace TextLayoutHelpers
 
             for (;;)
             {
-                const juce_wchar c = t.getAndAdvance();
+                auto c = t.getAndAdvance();
+
                 if (c == 0)
                     break;
 
-                const int charType = getCharacterType (c);
+                auto charType = getCharacterType (c);
 
                 if (charType == 0 || charType != lastCharType)
                 {
@@ -529,7 +531,7 @@ namespace TextLayoutHelpers
 
         void addTextRuns (const AttributedString& text)
         {
-            const int numAttributes = text.getNumAttributes();
+            auto numAttributes = text.getNumAttributes();
             tokens.ensureStorageAllocated (jmax (64, numAttributes));
 
             for (int i = 0; i < numAttributes; ++i)

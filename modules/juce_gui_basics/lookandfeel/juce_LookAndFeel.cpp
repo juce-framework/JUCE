@@ -37,7 +37,6 @@ extern GetTypefaceForFont juce_getTypefaceForFont;
 
 //==============================================================================
 LookAndFeel::LookAndFeel()
-    : useNativeAlertWindows (false)
 {
     /* if this fails it means you're trying to create a LookAndFeel object before
        the static Colours have been initialised. That ain't gonna work. It probably
@@ -51,14 +50,25 @@ LookAndFeel::LookAndFeel()
 
 LookAndFeel::~LookAndFeel()
 {
-    masterReference.clear();
+    /* This assertion is triggered if you try to delete a LookAndFeel object while it's
+         - still being used as the default LookAndFeel; or
+         - is set as a Component's current lookandfeel; or
+         - pointed to by a WeakReference somewhere else in the code
+
+       Deleting a LookAndFeel is unlikely to cause a crash since most things will use a
+       safe WeakReference to it, but it could cause some unexpected graphical behaviour,
+       so it's advisable to clear up any references before destroying them!
+    */
+    jassert (masterReference.getNumActiveWeakReferences() == 0
+              || (masterReference.getNumActiveWeakReferences() == 1
+                   && this == &getDefaultLookAndFeel()));
 }
 
 //==============================================================================
 Colour LookAndFeel::findColour (int colourID) const noexcept
 {
     const ColourSetting c = { colourID, Colour() };
-    const int index = colours.indexOf (c);
+    auto index = colours.indexOf (c);
 
     if (index >= 0)
         return colours.getReference (index).colour;
@@ -70,7 +80,7 @@ Colour LookAndFeel::findColour (int colourID) const noexcept
 void LookAndFeel::setColour (int colourID, Colour newColour) noexcept
 {
     const ColourSetting c = { colourID, newColour };
-    const int index = colours.indexOf (c);
+    auto index = colours.indexOf (c);
 
     if (index >= 0)
         colours.getReference (index).colour = newColour;
@@ -120,16 +130,16 @@ void LookAndFeel::setDefaultSansSerifTypefaceName (const String& newName)
 //==============================================================================
 MouseCursor LookAndFeel::getMouseCursorFor (Component& component)
 {
-    MouseCursor m (component.getMouseCursor());
+    auto cursor = component.getMouseCursor();
 
-    Component* parent = component.getParentComponent();
-    while (parent != nullptr && m == MouseCursor::ParentCursor)
+    for (auto* parent = component.getParentComponent();
+         parent != nullptr && cursor == MouseCursor::ParentCursor;
+         parent = parent->getParentComponent())
     {
-        m = parent->getMouseCursor();
-        parent = parent->getParentComponent();
+        cursor = parent->getMouseCursor();
     }
 
-    return m;
+    return cursor;
 }
 
 LowLevelGraphicsContext* LookAndFeel::createGraphicsContext (const Image& imageToRenderOn, const Point<int>& origin,

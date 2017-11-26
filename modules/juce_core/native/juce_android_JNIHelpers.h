@@ -138,7 +138,7 @@ public:
 
     LocalRef& operator= (const LocalRef& other)
     {
-        jobject newObj = retain (other.obj);
+        JavaType newObj = retain (other.obj);
         clear();
         obj = newObj;
         return *this;
@@ -168,6 +168,9 @@ namespace
 {
     inline String juceString (JNIEnv* env, jstring s)
     {
+        if (s == 0)
+            return {};
+
         const char* const utf8 = env->GetStringUTFChars (s, nullptr);
         CharPointer_UTF8 utf8CP (utf8);
         const String result (utf8CP);
@@ -313,11 +316,14 @@ extern AndroidSystem android;
  METHOD (isPermissionGranted,     "isPermissionGranted",  "(I)Z" ) \
  METHOD (isPermissionDeclaredInManifest, "isPermissionDeclaredInManifest", "(I)Z" ) \
  METHOD (getSystemService,        "getSystemService",     "(Ljava/lang/String;)Ljava/lang/Object;") \
+ METHOD (getPackageName,          "getPackageName",       "()Ljava/lang/String;") \
+ METHOD (getResources,            "getResources",         "()Landroid/content/res/Resources;") \
  STATICMETHOD (createInvocationHandler,  "createInvocationHandler", "(J)Ljava/lang/reflect/InvocationHandler;") \
  METHOD (bindService,             "bindService",          "(Landroid/content/Intent;Landroid/content/ServiceConnection;I)Z") \
  METHOD (unbindService,           "unbindService",        "(Landroid/content/ServiceConnection;)V") \
  METHOD (startIntentSenderForResult, "startIntentSenderForResult", "(Landroid/content/IntentSender;ILandroid/content/Intent;III)V") \
- METHOD (getPackageName,          "getPackageName",       "()Ljava/lang/String;") \
+ METHOD (moveTaskToBack,          "moveTaskToBack",       "(Z)Z") \
+ METHOD (startActivity,           "startActivity",        "(Landroid/content/Intent;)V") \
 
 DECLARE_JNI_CLASS (JuceAppActivity, JUCE_ANDROID_ACTIVITY_CLASSPATH);
 #undef JNI_CLASS_MEMBERS
@@ -396,6 +402,24 @@ DECLARE_JNI_CLASS (JavaClass, "java/lang/Class");
 DECLARE_JNI_CLASS (JavaObject, "java/lang/Object");
 #undef JNI_CLASS_MEMBERS
 
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  METHOD (addCategory,                    "addCategory",    "(Ljava/lang/String;)Landroid/content/Intent;") \
+  METHOD (constructor,                    "<init>",         "()V") \
+  METHOD (constructorWithContextAndClass, "<init>",         "(Landroid/content/Context;Ljava/lang/Class;)V") \
+  METHOD (constructWithString,            "<init>",         "(Ljava/lang/String;)V") \
+  METHOD (getAction,                      "getAction",      "()Ljava/lang/String;") \
+  METHOD (getCategories,                  "getCategories",  "()Ljava/util/Set;") \
+  METHOD (getData,                        "getData",        "()Landroid/net/Uri;") \
+  METHOD (getExtras,                      "getExtras",      "()Landroid/os/Bundle;") \
+  METHOD (getIntExtra,                    "getIntExtra",    "(Ljava/lang/String;I)I") \
+  METHOD (getStringExtra,                 "getStringExtra", "(Ljava/lang/String;)Ljava/lang/String;") \
+  METHOD (putExtras,                      "putExtras",      "(Landroid/os/Bundle;)Landroid/content/Intent;") \
+  METHOD (setAction,                      "setAction",      "(Ljava/lang/String;)Landroid/content/Intent;") \
+  METHOD (setPackage,                     "setPackage",     "(Ljava/lang/String;)Landroid/content/Intent;") \
+  METHOD (setType,                        "setType",        "(Ljava/lang/String;)Landroid/content/Intent;") \
+
+DECLARE_JNI_CLASS (Intent, "android/content/Intent");
+#undef JNI_CLASS_MEMBERS
 
 //==============================================================================
 class AndroidInterfaceImplementer;

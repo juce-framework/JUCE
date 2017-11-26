@@ -1,0 +1,92 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 26
+    buildToolsVersion "26.0.0"
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+        }
+    }
+    signingConfigs {
+        juceSigning {
+            storeFile     file("${System.properties['user.home']}${File.separator}.android${File.separator}debug.keystore")
+            storePassword "android"
+            keyAlias      "androiddebugkey"
+            keyPassword   "android"
+            storeType     "jks"
+        }
+    }
+
+    defaultConfig {
+        applicationId "com.juce.pushnotificationsdemo"
+        minSdkVersion    26
+        targetSdkVersion 26
+        externalNativeBuild {
+            cmake {
+                arguments "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-26", "-DANDROID_STL=c++_static", "-DANDROID_CPP_FEATURES=exceptions rtti", "-DANDROID_ARM_MODE=arm", "-DANDROID_ARM_NEON=TRUE"
+                cFlags "-fsigned-char", "-pedantic", "-Werror", "-Wall", "-Wshadow", "-Wno-missing-field-initializers", "-Wshadow", "-Wshorten-64-to-32", "-Wstrict-aliasing", "-Wuninitialized", "-Wunused-parameter", "-Wconversion", "-Wsign-compare", "-Wint-conversion", "-Woverloaded-virtual", "-Wreorder", "-Wconstant-conversion", "-Wsign-conversion", "-F../../../../3rd_party/FacebookSDKs-iOS-4", "-F../../../../3rd_party/Firebase_ios_sdk/Analytics", "-F../../../../3rd_party/Firebase_ios_sdk/Messaging"
+                cppFlags "-fsigned-char", "-std=c++11", "-pedantic", "-Werror", "-Wall", "-Wshadow", "-Wno-missing-field-initializers", "-Wshadow", "-Wshorten-64-to-32", "-Wstrict-aliasing", "-Wuninitialized", "-Wunused-parameter", "-Wconversion", "-Wsign-compare", "-Wint-conversion", "-Woverloaded-virtual", "-Wreorder", "-Wconstant-conversion", "-Wsign-conversion", "-F../../../../3rd_party/FacebookSDKs-iOS-4", "-F../../../../3rd_party/Firebase_ios_sdk/Analytics", "-F../../../../3rd_party/Firebase_ios_sdk/Messaging"
+            }
+        }
+    }
+
+    buildTypes {
+         debug {
+             initWith debug
+             debuggable    true
+             jniDebuggable true
+             signingConfig signingConfigs.juceSigning
+         }
+         release {
+             initWith release
+             debuggable    false
+             jniDebuggable false
+             signingConfig signingConfigs.juceSigning
+         }
+    }
+
+    productFlavors {
+        debug_ {
+            ndk {
+                abiFilters "armeabi", "x86"
+            }
+            externalNativeBuild {
+                cmake {
+                    arguments "-DJUCE_BUILD_CONFIGFURATION=DEBUG", "-DCMAKE_CXX_FLAGS_DEBUG=-O0", "-DCMAKE_C_FLAGS_DEBUG=-O0"
+                }
+            }
+       }
+        release_ {
+            externalNativeBuild {
+                cmake {
+                    arguments "-DJUCE_BUILD_CONFIGFURATION=RELEASE", "-DCMAKE_CXX_FLAGS_RELEASE=-O3", "-DCMAKE_C_FLAGS_RELEASE=-O3"
+                }
+            }
+       }
+    }
+
+    variantFilter { variant ->
+        def names = variant.flavors*.name
+        if (names.contains ("debug_")
+              && variant.buildType.name != "debug") {
+            setIgnore(true)
+        }
+        if (names.contains ("release_")
+              && variant.buildType.name != "release") {
+            setIgnore(true)
+        }
+    }
+
+repositories {
+}
+
+dependencies {
+    'com.google.firebase:firebase-core:11.4.0'
+    compile 'com.google.firebase:firebase-messaging:11.4.0'
+}
+
+apply plugin: 'com.google.gms.google-services'
+
+}
+

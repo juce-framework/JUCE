@@ -88,7 +88,7 @@ public:
 
                 for (;;)
                 {
-                    HeapBlock<char> buffer ((size_t) bufferSizeBytes);
+                    HeapBlock<char> buffer (bufferSizeBytes);
 
                     if (HttpQueryInfo (request, HTTP_QUERY_RAW_HEADERS_CRLF, buffer.getData(), &bufferSizeBytes, 0))
                     {
@@ -216,8 +216,8 @@ public:
                 return false;
 
             int64 numBytesToSkip = wantedPos - position;
-            const int skipBufferSize = (int) jmin (numBytesToSkip, (int64) 16384);
-            HeapBlock<char> temp ((size_t) skipBufferSize);
+            auto skipBufferSize = (int) jmin (numBytesToSkip, (int64) 16384);
+            HeapBlock<char> temp (skipBufferSize);
 
             while (numBytesToSkip > 0 && ! isExhausted())
                 numBytesToSkip -= read (temp, (int) jmin (numBytesToSkip, (int64) skipBufferSize));
@@ -503,6 +503,17 @@ namespace MACAddressHelpers
             }
         }
     }
+
+    static void split (const sockaddr_in6* sa_in6, int off, uint8* split)
+    {
+       #if JUCE_MINGW
+        split[0] = sa_in6->sin6_addr._S6_un._S6_u8[off + 1];
+        split[1] = sa_in6->sin6_addr._S6_un._S6_u8[off];
+       #else
+        split[0] = sa_in6->sin6_addr.u.Byte[off + 1];
+        split[1] = sa_in6->sin6_addr.u.Byte[off];
+       #endif
+    }
 }
 
 void MACAddress::findAllAddresses (Array<MACAddress>& result)
@@ -541,9 +552,7 @@ void IPAddress::findAllAddresses (Array<IPAddress>& result, bool includeIPv6)
 
                     for (int i = 0; i < 8; ++i)
                     {
-                        temp.split[0] = sa_in6->sin6_addr.u.Byte[i * 2 + 1];
-                        temp.split[1] = sa_in6->sin6_addr.u.Byte[i * 2];
-
+                        MACAddressHelpers::split (sa_in6, i * 2, temp.split);
                         arr[i] = temp.combined;
                     }
 
@@ -570,9 +579,7 @@ void IPAddress::findAllAddresses (Array<IPAddress>& result, bool includeIPv6)
 
                     for (int i = 0; i < 8; ++i)
                     {
-                        temp.split[0] = sa_in6->sin6_addr.u.Byte[i * 2 + 1];
-                        temp.split[1] = sa_in6->sin6_addr.u.Byte[i * 2];
-
+                        MACAddressHelpers::split (sa_in6, i * 2, temp.split);
                         arr[i] = temp.combined;
                     }
 
@@ -599,9 +606,7 @@ void IPAddress::findAllAddresses (Array<IPAddress>& result, bool includeIPv6)
 
                     for (int i = 0; i < 8; ++i)
                     {
-                        temp.split[0] = sa_in6->sin6_addr.u.Byte[i * 2 + 1];
-                        temp.split[1] = sa_in6->sin6_addr.u.Byte[i * 2];
-
+                        MACAddressHelpers::split (sa_in6, i * 2, temp.split);
                         arr[i] = temp.combined;
                     }
 
@@ -640,7 +645,7 @@ bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& targetEmailA
     message.lpRecips = &recip;
 
     HeapBlock<MapiFileDesc> files;
-    files.calloc ((size_t) filesToAttach.size());
+    files.calloc (filesToAttach.size());
 
     message.nFileCount = (ULONG) filesToAttach.size();
     message.lpFiles = files;

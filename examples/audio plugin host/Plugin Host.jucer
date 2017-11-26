@@ -2,9 +2,9 @@
 
 <JUCERPROJECT id="NTe0XB0ij" name="Plugin Host" projectType="guiapp" version="1.0.0"
               juceFolder="../../../juce" vstFolderMac="~/SDKs/vstsdk2.4" vstFolderPC="c:\SDKs\vstsdk2.4"
-              bundleIdentifier="com.roli.pluginhost" jucerVersion="5.1.2" companyName="ROLI Ltd."
+              bundleIdentifier="com.roli.pluginhost" jucerVersion="5.2.0" companyName="ROLI Ltd."
               includeBinaryInAppConfig="1" displaySplashScreen="0" reportAppUsage="0"
-              splashScreenColour="Dark" cppLanguageStandard="11">
+              splashScreenColour="Dark" cppLanguageStandard="11" companyCopyright="ROLI Ltd.">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="" rtasFolder="~/SDKs/PT_80_SDK"
                objCExtraSuffix="M73TRi" vst3Folder="" extraCompilerFlags="-Wall -Wshadow -Wstrict-aliasing -Wconversion -Wsign-compare -Woverloaded-virtual -Wextra-semi">

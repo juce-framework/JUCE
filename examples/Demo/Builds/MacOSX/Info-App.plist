@@ -13,7 +13,7 @@
     <key>CFBundleIconFile</key>
     <string>Icon.icns</string>
     <key>CFBundleIdentifier</key>
-    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <string>com.roli.JuceDemo</string>
     <key>CFBundleName</key>
     <string>JuceDemo</string>
     <key>CFBundleDisplayName</key>

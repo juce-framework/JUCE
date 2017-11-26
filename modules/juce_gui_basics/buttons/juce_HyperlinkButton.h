@@ -91,6 +91,15 @@ public:
     */
     void changeWidthToFitText();
 
+    //==============================================================================
+    /** Sets the style of justification to be used for positioning the text.
+        (The default is Justification::centred)
+    */
+    void setJustificationType (Justification justification);
+
+    /** Returns the type of justification, as set in setJustificationType(). */
+    Justification getJustificationType() const noexcept         { return justification; }
+
 protected:
     //==============================================================================
     /** @internal */

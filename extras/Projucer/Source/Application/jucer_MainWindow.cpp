@@ -24,13 +24,11 @@
   ==============================================================================
 */
 
-#include "../jucer_Headers.h"
+#include "../Application/jucer_Headers.h"
 #include "jucer_Application.h"
 #include "jucer_MainWindow.h"
-#include "jucer_OpenDocumentManager.h"
-#include "../Code Editor/jucer_SourceCodeEditor.h"
 #include "../Wizards/jucer_NewProjectWizardClasses.h"
-#include "../Utility/jucer_JucerTreeViewBase.h"
+#include "../Utility/UI/jucer_JucerTreeViewBase.h"
 
 
 //==============================================================================

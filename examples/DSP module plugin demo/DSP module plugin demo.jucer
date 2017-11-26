@@ -11,8 +11,8 @@
               pluginProducesMidiOut="0" pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="DSPmoduleplugindemoAU" pluginRTASCategory=""
               aaxIdentifier="com.yourcompany.DSPmoduleplugindemo" pluginAAXCategory="AAX_ePlugInCategory_Dynamics"
-              jucerVersion="5.1.2" companyName="ROLI Ltd." companyWebsite="www.juce.com"
-              companyEmail="info@juce.com" cppLanguageStandard="14">
+              jucerVersion="5.2.0" companyName="ROLI Ltd." companyWebsite="www.juce.com"
+              companyEmail="info@juce.com" cppLanguageStandard="14" companyCopyright="ROLI Ltd.">
   <MAINGROUP id="EukfoT" name="DSPModulePluginDemo">
     <GROUP id="{03DB4847-1567-1194-A0D2-ECC6C6C5042C}" name="Resources">
       <FILE id="EWBl4v" name="Impulse1.wav" compile="0" resource="1" file="Resources/Impulse1.wav"/>

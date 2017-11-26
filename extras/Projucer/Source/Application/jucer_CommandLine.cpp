@@ -24,10 +24,9 @@
   ==============================================================================
 */
 
-#include "../jucer_Headers.h"
-#include "../Project/jucer_Project.h"
+#include "jucer_Headers.h"
 #include "../Project/jucer_Module.h"
-#include "../Utility/jucer_TranslationHelpers.h"
+#include "../Utility/Helpers/jucer_TranslationHelpers.h"
 
 #include "jucer_CommandLine.h"
 
@@ -93,7 +92,7 @@ namespace
     {
         Array<File> files;
 
-        for (DirectoryIterator di (folder, true, "*.cpp;*.cxx;*.cc;*.c;*.h;*.hpp;*.hxx;*.hpp;*.mm;*.m", File::findFiles); di.next();)
+        for (DirectoryIterator di (folder, true, "*.cpp;*.cxx;*.cc;*.c;*.h;*.hpp;*.hxx;*.hpp;*.mm;*.m;*.java;", File::findFiles); di.next();)
             if (! di.getFile().isSymbolicLink())
                 files.add (di.getFile());
 

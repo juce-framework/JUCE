@@ -2,9 +2,9 @@
 
 <JUCERPROJECT id="gWI5Ir" name="JUCE Network Graphics Demo" projectType="guiapp"
               version="1.0.0" bundleIdentifier="com.juce.NetworkGraphicsDemo"
-              includeBinaryInAppConfig="1" jucerVersion="5.1.2" displaySplashScreen="0"
+              includeBinaryInAppConfig="1" jucerVersion="5.2.0" displaySplashScreen="0"
               reportAppUsage="0" splashScreenColour="Dark" companyName="ROLI Ltd."
-              cppLanguageStandard="11">
+              cppLanguageStandard="11" companyCopyright="ROLI Ltd.">
   <MAINGROUP id="OT9rJ2" name="JUCE Network Graphics Demo">
     <GROUP id="{48D54E6E-37F4-B20A-E038-C63E4EDFD4D9}" name="Source">
       <FILE id="BfclEZ" name="Demos.h" compile="0" resource="0" file="Source/Demos.h"/>
@@ -90,7 +90,8 @@
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
       </MODULEPATHS>
     </VS2017>
-    <XCODE_IPHONE targetFolder="Builds/iOS" bigIcon="Ww6bQw" iosScreenOrientation="portraitlandscape">
+    <XCODE_IPHONE targetFolder="Builds/iOS" bigIcon="Ww6bQw" iosScreenOrientation="portraitlandscape"
+                  iPadScreenOrientation="portraitlandscape" iosDeviceFamily="1,2">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" iosCompatibility="default" isDebug="1" optimisation="1"
                        targetName="JUCE Network Graphics Demo"/>

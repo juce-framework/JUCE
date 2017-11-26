@@ -149,7 +149,7 @@ namespace CoreTextTypeLayout
         {
             if (advances == nullptr)
             {
-                local.malloc ((size_t) numGlyphs);
+                local.malloc (numGlyphs);
                 CTRunGetAdvances (run, CFRangeMake (0, 0), local);
                 advances = local;
             }

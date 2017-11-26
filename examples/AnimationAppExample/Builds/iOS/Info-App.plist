@@ -10,7 +10,7 @@
     <key>CFBundleExecutable</key>
     <string>${EXECUTABLE_NAME}</string>
     <key>CFBundleIdentifier</key>
-    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <string>com.roli.AnimationAppExample</string>
     <key>CFBundleName</key>
     <string>AnimationAppExample</string>
     <key>CFBundleDisplayName</key>

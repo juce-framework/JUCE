@@ -71,40 +71,71 @@ public:
         findParentDragContainerFor() is a handy method to call to find the
         drag container to use for a component.
 
-        @param sourceDescription    a string or value to use as the description of the thing being dragged -
-                                    this will be passed to the objects that might be dropped-onto so they can
-                                    decide whether they want to handle it
-        @param sourceComponent      the component that is being dragged
-        @param dragImage            the image to drag around underneath the mouse. If this is a null image,
-                                    a snapshot of the sourceComponent will be used instead.
+        @param sourceDescription                 a string or value to use as the description of the thing being dragged -
+                                                 this will be passed to the objects that might be dropped-onto so they can
+                                                 decide whether they want to handle it
+        @param sourceComponent                   the component that is being dragged
+        @param dragImage                         the image to drag around underneath the mouse. If this is a null image,
+                                                 a snapshot of the sourceComponent will be used instead.
         @param allowDraggingToOtherJuceWindows   if true, the dragged component will appear as a desktop
-                                    window, and can be dragged to DragAndDropTargets that are the
-                                    children of components other than this one.
-        @param imageOffsetFromMouse if an image has been passed-in, this specifies the offset
-                                    at which the image should be drawn from the mouse. If it isn't
-                                    specified, then the image will be centred around the mouse. If
-                                    an image hasn't been passed-in, this will be ignored.
+                                                 window, and can be dragged to DragAndDropTargets that are the
+                                                 children of components other than this one.
+        @param imageOffsetFromMouse              if an image has been passed-in, this specifies the offset
+                                                 at which the image should be drawn from the mouse. If it isn't
+                                                 specified, then the image will be centred around the mouse. If
+                                                 an image hasn't been passed-in, this will be ignored.
+        @param inputSourceCausingDrag            the mouse input source which started the drag. When calling
+                                                 from within a mouseDown or mouseDrag event, you can pass
+                                                 MouseEvent::source to this method. If this param is nullptr then JUCE
+                                                 will use the mouse input source which is currently dragging. If there
+                                                 are several dragging mouse input sources (which can often occur on mobile)
+                                                 then JUCE will use the mouseInputSource which is closest to the sourceComponent.
     */
     void startDragging (const var& sourceDescription,
                         Component* sourceComponent,
                         Image dragImage = Image(),
                         bool allowDraggingToOtherJuceWindows = false,
-                        const Point<int>* imageOffsetFromMouse = nullptr);
+                        const Point<int>* imageOffsetFromMouse = nullptr,
+                        const MouseInputSource* inputSourceCausingDrag = nullptr);
 
     /** Returns true if something is currently being dragged. */
     bool isDragAndDropActive() const;
+
+    /** Returns the number of things currently being dragged. */
+    int getNumCurrentDrags() const;
 
     /** Returns the description of the thing that's currently being dragged.
 
         If nothing's being dragged, this will return a null var, otherwise it'll return
         the var that was passed into startDragging().
 
-        @see startDragging
+        If you are using drag and drop in a multi-touch environment then you should use the
+        getDragDescriptionForIndex() method instead which takes a touch index parameter.
+
+        @see startDragging, getDragDescriptionForIndex
     */
     var getCurrentDragDescription() const;
 
-    /** If a drag is in progress, this allows the image being shown to be dynamically updated. */
+    /** Same as the getCurrentDragDescription() method but takes a touch index parameter.
+
+        @see getCurrentDragDescription
+    */
+    var getDragDescriptionForIndex (int index) const;
+
+    /** If a drag is in progress, this allows the image being shown to be dynamically updated.
+
+        If you are using drag and drop in a multi-touch environment then you should use the
+        setDragImageForIndex() method instead which takes a touch index parameter.
+
+        @see setDragImageForIndex
+    */
     void setCurrentDragImage (const Image& newImage);
+
+    /** Same as the setCurrentDragImage() method but takes a touch index parameter.
+
+        @see setCurrentDragImage
+     */
+    void setDragImageForIndex (int index, const Image& newImage);
 
     /** Utility to find the DragAndDropContainer for a given Component.
 
@@ -199,7 +230,9 @@ private:
     class DragImageComponent;
     friend class DragImageComponent;
     friend struct ContainerDeletePolicy<DragImageComponent>;
-    ScopedPointer<DragImageComponent> dragImageComponent;
+    OwnedArray<DragImageComponent> dragImageComponents;
+
+    const MouseInputSource* getMouseInputSourceForDrag (Component* sourceComponent, const MouseInputSource* inputSourceCausingDrag);
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
     // This is just here to cause a compile error in old code that hasn't been changed to use the new

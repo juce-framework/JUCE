@@ -2,9 +2,9 @@
 
 <JUCERPROJECT id="oNvA5C" name="ComponentTutorialExample" projectType="guiapp"
               version="1.0.0" bundleIdentifier="com.roli.ComponentTutorialExample"
-              includeBinaryInAppConfig="1" jucerVersion="5.1.2" displaySplashScreen="0"
+              includeBinaryInAppConfig="1" jucerVersion="5.2.0" displaySplashScreen="0"
               reportAppUsage="0" splashScreenColour="Dark" companyName="ROLI Ltd."
-              cppLanguageStandard="11">
+              cppLanguageStandard="11" companyCopyright="ROLI Ltd.">
   <MAINGROUP id="WydTVz" name="ComponentTutorialExample">
     <GROUP id="{F2C8112A-EE4B-7AF1-A0A9-16152D1EF1A7}" name="Source">
       <FILE id="t4ngZQ" name="ToggleLightGridComponent.h" compile="0" resource="0"

@@ -2,8 +2,9 @@
 
 <JUCERPROJECT id="IilE7R" name="MPETest" projectType="guiapp" version="1.0.0"
               bundleIdentifier="com.roli.MPETest" includeBinaryInAppConfig="1"
-              jucerVersion="5.1.2" displaySplashScreen="0" reportAppUsage="0"
-              splashScreenColour="Dark" companyName="ROLI Ltd." cppLanguageStandard="11">
+              jucerVersion="5.2.0" displaySplashScreen="0" reportAppUsage="0"
+              splashScreenColour="Dark" companyName="ROLI Ltd." cppLanguageStandard="11"
+              companyCopyright="ROLI Ltd.">
   <MAINGROUP id="VCQQcn" name="MPETest">
     <GROUP id="{D43238F0-992F-BC5A-F1AA-31BBBD3D17B0}" name="Source">
       <FILE id="uRxR7V" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>

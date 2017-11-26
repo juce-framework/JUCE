@@ -63,7 +63,7 @@ void DialogWindow::resized()
 
     if (escapeKeyTriggersCloseButton)
     {
-        if (Button* const close = getCloseButton())
+        if (auto* close = getCloseButton())
         {
             const KeyPress esc (KeyPress::escapeKey, 0, 0);
 
@@ -102,15 +102,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE (DefaultDialogWindow)
 };
 
-DialogWindow::LaunchOptions::LaunchOptions() noexcept
-    : dialogBackgroundColour (Colours::lightgrey),
-      componentToCentreAround (nullptr),
-      escapeKeyTriggersCloseButton (true),
-      useNativeTitleBar (true),
-      resizable (true),
-      useBottomRightCornerResizer (false)
-{
-}
+DialogWindow::LaunchOptions::LaunchOptions() noexcept {}
 
 DialogWindow* DialogWindow::LaunchOptions::create()
 {
@@ -121,7 +113,7 @@ DialogWindow* DialogWindow::LaunchOptions::create()
 
 DialogWindow* DialogWindow::LaunchOptions::launchAsync()
 {
-    DialogWindow* const d = create();
+    auto* d = create();
     d->enterModalState (true, nullptr, true);
     return d;
 }

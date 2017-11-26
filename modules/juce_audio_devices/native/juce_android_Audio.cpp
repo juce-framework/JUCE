@@ -51,6 +51,13 @@ DECLARE_JNI_CLASS (AudioRecord, "android/media/AudioRecord");
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ STATICFIELD (SDK_INT, "SDK_INT", "I") \
+
+ DECLARE_JNI_CLASS (AndroidBuildVersion, "android/os/Build$VERSION");
+#undef JNI_CLASS_MEMBERS
+
+//==============================================================================
 enum
 {
     CHANNEL_OUT_STEREO  = 12,
@@ -195,6 +202,9 @@ public:
                                                       STREAM_MUSIC, sampleRate, CHANNEL_OUT_STEREO, ENCODING_PCM_16BIT,
                                                       (jint) (minBufferSizeOut * numDeviceOutputChannels * static_cast<int> (sizeof (int16))), MODE_STREAM));
 
+            const bool supportsUnderrunCount = (getEnv()->GetStaticIntField (AndroidBuildVersion, AndroidBuildVersion.SDK_INT) >= 24);
+            getUnderrunCount = supportsUnderrunCount ? env->GetMethodID (AudioTrack, "getUnderrunCount", "()I") : 0;
+
             int outputDeviceState = env->CallIntMethod (outputDevice, AudioTrack.getState);
             if (outputDeviceState > 0)
             {
@@ -280,6 +290,14 @@ public:
     BigInteger getActiveInputChannels() const override   { return activeInputChans; }
     String getLastError() override                       { return lastError; }
     bool isPlaying() override                            { return isRunning && callback != 0; }
+
+    int getXRunCount() const noexcept override
+    {
+        if (outputDevice != nullptr && getUnderrunCount != 0)
+            return getEnv()->CallIntMethod (outputDevice, getUnderrunCount);
+
+        return -1;
+    }
 
     void start (AudioIODeviceCallback* newCallback) override
     {
@@ -406,6 +424,7 @@ private:
     BigInteger activeOutputChans, activeInputChans;
     GlobalRef outputDevice, inputDevice;
     AudioSampleBuffer inputChannelBuffer, outputChannelBuffer;
+    jmethodID getUnderrunCount = 0;
 
     void closeDevices()
     {

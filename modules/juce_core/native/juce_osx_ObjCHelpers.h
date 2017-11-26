@@ -202,6 +202,77 @@ private:
     JUCE_DECLARE_NON_COPYABLE (ObjCClass)
 };
 
+//==============================================================================
+#ifndef DOXYGEN
+template <class JuceClass>
+struct ObjCLifetimeManagedClass : public ObjCClass<NSObject>
+{
+    ObjCLifetimeManagedClass()
+        : ObjCClass<NSObject> ("ObjCLifetimeManagedClass_")
+    {
+        addIvar<JuceClass*> ("cppObject");
+
+       #pragma clang diagnostic push
+       #pragma clang diagnostic ignored "-Wundeclared-selector"
+        addMethod (@selector (initWithJuceObject:), initWithJuceObject, "@@:@");
+       #pragma clang diagnostic pop
+
+        addMethod (@selector (dealloc),             dealloc,            "v@:");
+
+
+        registerClass();
+    }
+
+    static id initWithJuceObject (id _self, SEL, JuceClass* obj)
+    {
+        NSObject* self = _self;
+
+        objc_super s = { self, [NSObject class] };
+        self = ObjCMsgSendSuper<NSObject*> (&s, @selector(init));
+
+        object_setInstanceVariable (self, "cppObject", obj);
+        return self;
+    }
+
+    static void dealloc (id _self, SEL)
+    {
+        if (auto* obj = getIvar<JuceClass*> (_self, "cppObject"))
+        {
+            delete obj;
+            object_setInstanceVariable (_self, "cppObject", nullptr);
+        }
+
+        objc_super s = { _self, [NSObject class] };
+        ObjCMsgSendSuper<void> (&s, @selector(dealloc));
+    }
+
+
+    static ObjCLifetimeManagedClass objCLifetimeManagedClass;
+};
+
+template <typename Class>
+ObjCLifetimeManagedClass<Class> ObjCLifetimeManagedClass<Class>::objCLifetimeManagedClass;
+#endif
+
+// this will return an NSObject which takes ownership of the JUCE instance passed-in
+// This is useful to tie the life-time of a juce instance to the life-time of an NSObject
+template <typename Class>
+NSObject* createNSObjectFromJuceClass (Class* obj)
+{
+   #pragma clang diagnostic push
+   #pragma clang diagnostic ignored "-Wobjc-method-access"
+    return [ObjCLifetimeManagedClass<Class>::objCLifetimeManagedClass.createInstance() initWithJuceObject:obj];
+   #pragma clang diagnostic pop
+}
+
+// Get the JUCE class instance that was tied to the life-time of an NSObject with the
+// function above
+template <typename Class>
+Class* getJuceClassFromNSObject (NSObject* obj)
+{
+    return obj != nullptr ? ObjCLifetimeManagedClass<Class>:: template getIvar<Class*> (obj, "cppObject") : nullptr;
+}
+
 #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
 
 template <typename ReturnT, class Class, typename... Params>

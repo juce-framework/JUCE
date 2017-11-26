@@ -187,7 +187,7 @@ void AudioProcessorPlayer::audioDeviceAboutToStart (AudioIODevice* const device)
     numOutputChans = numChansOut;
 
     messageCollector.reset (sampleRate);
-    channels.calloc ((size_t) jmax (numChansIn, numChansOut) + 2);
+    channels.calloc (jmax (numChansIn, numChansOut) + 2);
 
     if (processor != nullptr)
     {

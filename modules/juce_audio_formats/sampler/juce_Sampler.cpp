@@ -30,23 +30,16 @@ namespace juce
 SamplerSound::SamplerSound (const String& soundName,
                             AudioFormatReader& source,
                             const BigInteger& notes,
-                            const int midiNoteForNormalPitch,
-                            const double attackTimeSecs,
-                            const double releaseTimeSecs,
-                            const double maxSampleLengthSeconds)
+                            int midiNoteForNormalPitch,
+                            double attackTimeSecs,
+                            double releaseTimeSecs,
+                            double maxSampleLengthSeconds)
     : name (soundName),
+      sourceSampleRate (source.sampleRate),
       midiNotes (notes),
       midiRootNote (midiNoteForNormalPitch)
 {
-    sourceSampleRate = source.sampleRate;
-
-    if (sourceSampleRate <= 0 || source.lengthInSamples <= 0)
-    {
-        length = 0;
-        attackSamples = 0;
-        releaseSamples = 0;
-    }
-    else
+    if (sourceSampleRate > 0 && source.lengthInSamples > 0)
     {
         length = jmin ((int) source.lengthInSamples,
                        (int) (maxSampleLengthSeconds * sourceSampleRate));
@@ -55,7 +48,7 @@ SamplerSound::SamplerSound (const String& soundName,
 
         source.read (data, 0, length + 4, 0, true, true);
 
-        attackSamples = roundToInt (attackTimeSecs * sourceSampleRate);
+        attackSamples  = roundToInt (attackTimeSecs  * sourceSampleRate);
         releaseSamples = roundToInt (releaseTimeSecs * sourceSampleRate);
     }
 }
@@ -66,7 +59,7 @@ SamplerSound::~SamplerSound()
 
 bool SamplerSound::appliesToNote (int midiNoteNumber)
 {
-    return midiNotes [midiNoteNumber];
+    return midiNotes[midiNoteNumber];
 }
 
 bool SamplerSound::appliesToChannel (int /*midiChannel*/)
@@ -75,32 +68,19 @@ bool SamplerSound::appliesToChannel (int /*midiChannel*/)
 }
 
 //==============================================================================
-SamplerVoice::SamplerVoice()
-    : pitchRatio (0.0),
-      sourceSamplePosition (0.0),
-      lgain (0.0f), rgain (0.0f),
-      attackReleaseLevel (0), attackDelta (0), releaseDelta (0),
-      isInAttack (false), isInRelease (false)
-{
-}
-
-SamplerVoice::~SamplerVoice()
-{
-}
+SamplerVoice::SamplerVoice() {}
+SamplerVoice::~SamplerVoice() {}
 
 bool SamplerVoice::canPlaySound (SynthesiserSound* sound)
 {
     return dynamic_cast<const SamplerSound*> (sound) != nullptr;
 }
 
-void SamplerVoice::startNote (const int midiNoteNumber,
-                              const float velocity,
-                              SynthesiserSound* s,
-                              const int /*currentPitchWheelPosition*/)
+void SamplerVoice::startNote (int midiNoteNumber, float velocity, SynthesiserSound* s, int /*currentPitchWheelPosition*/)
 {
-    if (const SamplerSound* const sound = dynamic_cast<const SamplerSound*> (s))
+    if (auto* sound = dynamic_cast<const SamplerSound*> (s))
     {
-        pitchRatio = pow (2.0, (midiNoteNumber - sound->midiRootNote) / 12.0)
+        pitchRatio = std::pow (2.0, (midiNoteNumber - sound->midiRootNote) / 12.0)
                         * sound->sourceSampleRate / getSampleRate();
 
         sourceSamplePosition = 0.0;
@@ -145,36 +125,30 @@ void SamplerVoice::stopNote (float /*velocity*/, bool allowTailOff)
     }
 }
 
-void SamplerVoice::pitchWheelMoved (const int /*newValue*/)
-{
-}
-
-void SamplerVoice::controllerMoved (const int /*controllerNumber*/,
-                                    const int /*newValue*/)
-{
-}
+void SamplerVoice::pitchWheelMoved (int /*newValue*/) {}
+void SamplerVoice::controllerMoved (int /*controllerNumber*/, int /*newValue*/) {}
 
 //==============================================================================
 void SamplerVoice::renderNextBlock (AudioSampleBuffer& outputBuffer, int startSample, int numSamples)
 {
-    if (const SamplerSound* const playingSound = static_cast<SamplerSound*> (getCurrentlyPlayingSound().get()))
+    if (auto* playingSound = static_cast<SamplerSound*> (getCurrentlyPlayingSound().get()))
     {
-        const float* const inL = playingSound->data->getReadPointer (0);
-        const float* const inR = playingSound->data->getNumChannels() > 1
-                                    ? playingSound->data->getReadPointer (1) : nullptr;
+        auto& data = *playingSound->data;
+        const float* const inL = data.getReadPointer (0);
+        const float* const inR = data.getNumChannels() > 1 ? data.getReadPointer (1) : nullptr;
 
         float* outL = outputBuffer.getWritePointer (0, startSample);
         float* outR = outputBuffer.getNumChannels() > 1 ? outputBuffer.getWritePointer (1, startSample) : nullptr;
 
         while (--numSamples >= 0)
         {
-            const int pos = (int) sourceSamplePosition;
-            const float alpha = (float) (sourceSamplePosition - pos);
-            const float invAlpha = 1.0f - alpha;
+            auto pos = (int) sourceSamplePosition;
+            auto alpha = (float) (sourceSamplePosition - pos);
+            auto invAlpha = 1.0f - alpha;
 
             // just using a very simple linear interpolation here..
-            float l = (inL [pos] * invAlpha + inL [pos + 1] * alpha);
-            float r = (inR != nullptr) ? (inR [pos] * invAlpha + inR [pos + 1] * alpha)
+            float l = (inL[pos] * invAlpha + inL[pos + 1] * alpha);
+            float r = (inR != nullptr) ? (inR[pos] * invAlpha + inR[pos + 1] * alpha)
                                        : l;
 
             l *= lgain;

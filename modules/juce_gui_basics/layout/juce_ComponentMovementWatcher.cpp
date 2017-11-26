@@ -29,14 +29,11 @@ namespace juce
 
 ComponentMovementWatcher::ComponentMovementWatcher (Component* const comp)
     : component (comp),
-      lastPeerID (0),
-      reentrant (false),
       wasShowing (comp->isShowing())
 {
     jassert (component != nullptr); // can't use this with a null pointer..
 
     component->addComponentListener (this);
-
     registerWithParentComps();
 }
 
@@ -55,8 +52,8 @@ void ComponentMovementWatcher::componentParentHierarchyChanged (Component&)
     {
         const ScopedValueSetter<bool> setter (reentrant, true);
 
-        ComponentPeer* const peer = component->getPeer();
-        const uint32 peerID = peer != nullptr ? peer->getUniqueID() : 0;
+        auto* peer = component->getPeer();
+        auto peerID = peer != nullptr ? peer->getUniqueID() : 0;
 
         if (peerID != lastPeerID)
         {
@@ -85,7 +82,7 @@ void ComponentMovementWatcher::componentMovedOrResized (Component&, bool wasMove
         if (wasMoved)
         {
             Point<int> newPos;
-            Component* const top = component->getTopLevelComponent();
+            auto* top = component->getTopLevelComponent();
 
             if (top != component)
                 newPos = top->getLocalPoint (component, Point<int>());
@@ -128,7 +125,7 @@ void ComponentMovementWatcher::componentVisibilityChanged (Component&)
 
 void ComponentMovementWatcher::registerWithParentComps()
 {
-    for (Component* p = component->getParentComponent(); p != nullptr; p = p->getParentComponent())
+    for (auto* p = component->getParentComponent(); p != nullptr; p = p->getParentComponent())
     {
         p->addComponentListener (this);
         registeredParentComps.add (p);
@@ -137,8 +134,8 @@ void ComponentMovementWatcher::registerWithParentComps()
 
 void ComponentMovementWatcher::unregister()
 {
-    for (int i = registeredParentComps.size(); --i >= 0;)
-        registeredParentComps.getUnchecked(i)->removeComponentListener (this);
+    for (auto* c : registeredParentComps)
+        c->removeComponentListener (this);
 
     registeredParentComps.clear();
 }

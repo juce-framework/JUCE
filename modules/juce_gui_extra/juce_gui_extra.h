@@ -35,7 +35,7 @@
 
   ID:               juce_gui_extra
   vendor:           juce
-  version:          5.1.2
+  version:          5.2.0
   name:             JUCE extended GUI classes
   description:      Miscellaneous GUI classes for specialised tasks.
   website:          http://www.juce.com/juce
@@ -91,6 +91,7 @@
 #include "misc/juce_ColourSelector.h"
 #include "misc/juce_KeyMappingEditorComponent.h"
 #include "misc/juce_PreferencesPanel.h"
+#include "misc/juce_PushNotifications.h"
 #include "misc/juce_RecentlyOpenedFilesList.h"
 #include "misc/juce_SplashScreen.h"
 #include "misc/juce_SystemTrayIconComponent.h"

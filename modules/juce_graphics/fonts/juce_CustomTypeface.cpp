@@ -30,7 +30,7 @@ namespace juce
 class CustomTypeface::GlyphInfo
 {
 public:
-    GlyphInfo (const juce_wchar c, const Path& p, const float w) noexcept
+    GlyphInfo (juce_wchar c, const Path& p, float w) noexcept
         : character (c), path (p), width (w)
     {
     }
@@ -41,21 +41,17 @@ public:
         float kerningAmount;
     };
 
-    void addKerningPair (const juce_wchar subsequentCharacter,
-                         const float extraKerningAmount) noexcept
+    void addKerningPair (juce_wchar subsequentCharacter, float extraKerningAmount) noexcept
     {
-        KerningPair kp;
-        kp.character2 = subsequentCharacter;
-        kp.kerningAmount = extraKerningAmount;
-        kerningPairs.add (kp);
+        kerningPairs.add ({ subsequentCharacter, extraKerningAmount });
     }
 
-    float getHorizontalSpacing (const juce_wchar subsequentCharacter) const noexcept
+    float getHorizontalSpacing (juce_wchar subsequentCharacter) const noexcept
     {
         if (subsequentCharacter != 0)
-            for (int i = kerningPairs.size(); --i >= 0;)
-                if (kerningPairs.getReference(i).character2 == subsequentCharacter)
-                    return width + kerningPairs.getReference(i).kerningAmount;
+            for (auto& kp : kerningPairs)
+                if (kp.character2 == subsequentCharacter)
+                    return width + kp.kerningAmount;
 
         return width;
     }
@@ -63,7 +59,7 @@ public:
     const juce_wchar character;
     const Path path;
     float width;
-    Array <KerningPair> kerningPairs;
+    Array<KerningPair> kerningPairs;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GlyphInfo)
@@ -74,11 +70,11 @@ namespace CustomTypefaceHelpers
 {
     static juce_wchar readChar (InputStream& in)
     {
-        uint32 n = (uint32) (uint16) in.readShort();
+        auto n = (uint32) (uint16) in.readShort();
 
         if (n >= 0xd800 && n <= 0xdfff)
         {
-            const uint32 nextWord = (uint32) (uint16) in.readShort();
+            auto nextWord = (uint32) (uint16) in.readShort();
             jassert (nextWord >= 0xdc00); // illegal unicode character!
 
             n = 0x10000 + (((n - 0xd800) << 10) | (nextWord - 0xdc00));
@@ -126,24 +122,24 @@ CustomTypeface::CustomTypeface (InputStream& serialisedTypefaceStream)
     ascent = in.readFloat();
     defaultCharacter = CustomTypefaceHelpers::readChar (in);
 
-    int numChars = in.readInt();
+    auto numChars = in.readInt();
 
     for (int i = 0; i < numChars; ++i)
     {
-        const juce_wchar c = CustomTypefaceHelpers::readChar (in);
-        const float width = in.readFloat();
+        auto c = CustomTypefaceHelpers::readChar (in);
+        auto width = in.readFloat();
 
         Path p;
         p.loadPathFromStream (in);
         addGlyph (c, p, width);
     }
 
-    const int numKerningPairs = in.readInt();
+    auto numKerningPairs = in.readInt();
 
     for (int i = 0; i < numKerningPairs; ++i)
     {
-        const juce_wchar char1 = CustomTypefaceHelpers::readChar (in);
-        const juce_wchar char2 = CustomTypefaceHelpers::readChar (in);
+        auto char1 = CustomTypefaceHelpers::readChar (in);
+        auto char2 = CustomTypefaceHelpers::readChar (in);
 
         addKerningPair (char1, char2, in.readFloat());
     }
@@ -163,8 +159,8 @@ void CustomTypeface::clear()
     glyphs.clear();
 }
 
-void CustomTypeface::setCharacteristics (const String& newName, const float newAscent, const bool isBold,
-                                         const bool isItalic, const juce_wchar newDefaultCharacter) noexcept
+void CustomTypeface::setCharacteristics (const String& newName, float newAscent, bool isBold,
+                                         bool isItalic, juce_wchar newDefaultCharacter) noexcept
 {
     name = newName;
     defaultCharacter = newDefaultCharacter;
@@ -172,8 +168,8 @@ void CustomTypeface::setCharacteristics (const String& newName, const float newA
     style = FontStyleHelpers::getStyleName (isBold, isItalic);
 }
 
-void CustomTypeface::setCharacteristics (const String& newName, const String& newStyle, const float newAscent,
-                                         const juce_wchar newDefaultCharacter) noexcept
+void CustomTypeface::setCharacteristics (const String& newName, const String& newStyle,
+                                         float newAscent, juce_wchar newDefaultCharacter) noexcept
 {
     name = newName;
     style = newStyle;
@@ -181,18 +177,18 @@ void CustomTypeface::setCharacteristics (const String& newName, const String& ne
     ascent = newAscent;
 }
 
-void CustomTypeface::addGlyph (const juce_wchar character, const Path& path, const float width) noexcept
+void CustomTypeface::addGlyph (juce_wchar character, const Path& path, float width) noexcept
 {
     // Check that you're not trying to add the same character twice..
     jassert (findGlyph (character, false) == nullptr);
 
-    if (isPositiveAndBelow ((int) character, (int) numElementsInArray (lookupTable)))
+    if (isPositiveAndBelow ((int) character, numElementsInArray (lookupTable)))
         lookupTable [character] = (short) glyphs.size();
 
     glyphs.add (new GlyphInfo (character, path, width));
 }
 
-void CustomTypeface::addKerningPair (const juce_wchar char1, const juce_wchar char2, const float extraAmount) noexcept
+void CustomTypeface::addKerningPair (juce_wchar char1, juce_wchar char2, float extraAmount) noexcept
 {
     if (extraAmount != 0.0f)
     {
@@ -203,17 +199,14 @@ void CustomTypeface::addKerningPair (const juce_wchar char1, const juce_wchar ch
     }
 }
 
-CustomTypeface::GlyphInfo* CustomTypeface::findGlyph (const juce_wchar character, const bool loadIfNeeded) noexcept
+CustomTypeface::GlyphInfo* CustomTypeface::findGlyph (juce_wchar character, bool loadIfNeeded) noexcept
 {
-    if (isPositiveAndBelow ((int) character, (int) numElementsInArray (lookupTable)) && lookupTable [character] > 0)
+    if (isPositiveAndBelow ((int) character, numElementsInArray (lookupTable)) && lookupTable [character] > 0)
         return glyphs [(int) lookupTable [(int) character]];
 
-    for (int i = 0; i < glyphs.size(); ++i)
-    {
-        GlyphInfo* const g = glyphs.getUnchecked(i);
+    for (auto* g : glyphs)
         if (g->character == character)
             return g;
-    }
 
     if (loadIfNeeded && loadGlyphIfPossible (character))
         return findGlyph (character, false);
@@ -221,7 +214,7 @@ CustomTypeface::GlyphInfo* CustomTypeface::findGlyph (const juce_wchar character
     return nullptr;
 }
 
-bool CustomTypeface::loadGlyphIfPossible (const juce_wchar /*characterNeeded*/)
+bool CustomTypeface::loadGlyphIfPossible (juce_wchar)
 {
     return false;
 }
@@ -232,17 +225,17 @@ void CustomTypeface::addGlyphsFromOtherTypeface (Typeface& typefaceToCopy, juce_
 
     for (int i = 0; i < numCharacters; ++i)
     {
-        const juce_wchar c = (juce_wchar) (characterStartIndex + static_cast<juce_wchar> (i));
+        auto c = (juce_wchar) (characterStartIndex + static_cast<juce_wchar> (i));
 
-        Array <int> glyphIndexes;
-        Array <float> offsets;
+        Array<int> glyphIndexes;
+        Array<float> offsets;
         typefaceToCopy.getGlyphPositions (String::charToString (c), glyphIndexes, offsets);
 
         const int glyphIndex = glyphIndexes.getFirst();
 
         if (glyphIndex >= 0 && glyphIndexes.size() > 0)
         {
-            const float glyphWidth = offsets[1];
+            auto glyphWidth = offsets[1];
 
             Path p;
             typefaceToCopy.getOutlineForGlyph (glyphIndex, p);
@@ -251,7 +244,7 @@ void CustomTypeface::addGlyphsFromOtherTypeface (Typeface& typefaceToCopy, juce_
 
             for (int j = glyphs.size() - 1; --j >= 0;)
             {
-                const juce_wchar char2 = glyphs.getUnchecked (j)->character;
+                auto char2 = glyphs.getUnchecked (j)->character;
                 glyphIndexes.clearQuick();
                 offsets.clearQuick();
                 typefaceToCopy.getGlyphPositions (String::charToString (c) + String::charToString (char2), glyphIndexes, offsets);
@@ -276,9 +269,8 @@ bool CustomTypeface::writeToStream (OutputStream& outputStream)
 
     int numKerningPairs = 0;
 
-    for (int i = 0; i < glyphs.size(); ++i)
+    for (auto* g : glyphs)
     {
-        const GlyphInfo* const g = glyphs.getUnchecked (i);
         CustomTypefaceHelpers::writeChar (out, g->character);
         out.writeFloat (g->width);
         g->path.writePathToStream (out);
@@ -288,13 +280,10 @@ bool CustomTypeface::writeToStream (OutputStream& outputStream)
 
     out.writeInt (numKerningPairs);
 
-    for (int i = 0; i < glyphs.size(); ++i)
+    for (auto* g : glyphs)
     {
-        const GlyphInfo* const g = glyphs.getUnchecked (i);
-
-        for (int j = 0; j < g->kerningPairs.size(); ++j)
+        for (auto& p : g->kerningPairs)
         {
-            const GlyphInfo::KerningPair& p = g->kerningPairs.getReference (j);
             CustomTypefaceHelpers::writeChar (out, g->character);
             CustomTypefaceHelpers::writeChar (out, p.character2);
             out.writeFloat (p.kerningAmount);
@@ -313,51 +302,50 @@ float CustomTypeface::getStringWidth (const String& text)
 {
     float x = 0;
 
-    for (String::CharPointerType t (text.getCharPointer()); ! t.isEmpty();)
+    for (auto t = text.getCharPointer(); ! t.isEmpty();)
     {
-        const juce_wchar c = t.getAndAdvance();
+        auto c = t.getAndAdvance();
 
-        if (const GlyphInfo* const glyph = findGlyph (c, true))
+        if (auto* glyph = findGlyph (c, true))
         {
             x += glyph->getHorizontalSpacing (*t);
         }
         else
         {
-            const Typeface::Ptr fallbackTypeface (Typeface::getFallbackTypeface());
-
-            if (fallbackTypeface != nullptr && fallbackTypeface != this)
-                x += fallbackTypeface->getStringWidth (String::charToString (c));
+            if (auto fallbackTypeface = Typeface::getFallbackTypeface())
+                if (fallbackTypeface != this)
+                    x += fallbackTypeface->getStringWidth (String::charToString (c));
         }
     }
 
     return x;
 }
 
-void CustomTypeface::getGlyphPositions (const String& text, Array <int>& resultGlyphs, Array<float>& xOffsets)
+void CustomTypeface::getGlyphPositions (const String& text, Array<int>& resultGlyphs, Array<float>& xOffsets)
 {
     xOffsets.add (0);
     float x = 0;
 
-    for (String::CharPointerType t (text.getCharPointer()); ! t.isEmpty();)
+    for (auto t = text.getCharPointer(); ! t.isEmpty();)
     {
         float width = 0.0f;
         int glyphChar = 0;
 
-        const juce_wchar c = t.getAndAdvance();
+        auto c = t.getAndAdvance();
 
-        if (const GlyphInfo* const glyph = findGlyph (c, true))
+        if (auto* glyph = findGlyph (c, true))
         {
             width = glyph->getHorizontalSpacing (*t);
             glyphChar = (int) glyph->character;
         }
         else
         {
-            const Typeface::Ptr fallbackTypeface (getFallbackTypeface());
+            auto fallbackTypeface = getFallbackTypeface();
 
             if (fallbackTypeface != nullptr && fallbackTypeface != this)
             {
-                Array <int> subGlyphs;
-                Array <float> subOffsets;
+                Array<int> subGlyphs;
+                Array<float> subOffsets;
                 fallbackTypeface->getGlyphPositions (String::charToString (c), subGlyphs, subOffsets);
 
                 if (subGlyphs.size() > 0)
@@ -376,23 +364,22 @@ void CustomTypeface::getGlyphPositions (const String& text, Array <int>& resultG
 
 bool CustomTypeface::getOutlineForGlyph (int glyphNumber, Path& path)
 {
-    if (const GlyphInfo* const glyph = findGlyph ((juce_wchar) glyphNumber, true))
+    if (auto* glyph = findGlyph ((juce_wchar) glyphNumber, true))
     {
         path = glyph->path;
         return true;
     }
 
-    const Typeface::Ptr fallbackTypeface (getFallbackTypeface());
-
-    if (fallbackTypeface != nullptr && fallbackTypeface != this)
-        return fallbackTypeface->getOutlineForGlyph (glyphNumber, path);
+    if (auto fallbackTypeface = getFallbackTypeface())
+        if (fallbackTypeface != this)
+            return fallbackTypeface->getOutlineForGlyph (glyphNumber, path);
 
     return false;
 }
 
 EdgeTable* CustomTypeface::getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform, float fontHeight)
 {
-    if (const GlyphInfo* const glyph = findGlyph ((juce_wchar) glyphNumber, true))
+    if (auto* glyph = findGlyph ((juce_wchar) glyphNumber, true))
     {
         if (! glyph->path.isEmpty())
             return new EdgeTable (glyph->path.getBoundsTransformed (transform)
@@ -401,10 +388,9 @@ EdgeTable* CustomTypeface::getEdgeTableForGlyph (int glyphNumber, const AffineTr
     }
     else
     {
-        const Typeface::Ptr fallbackTypeface (getFallbackTypeface());
-
-        if (fallbackTypeface != nullptr && fallbackTypeface != this)
-            return fallbackTypeface->getEdgeTableForGlyph (glyphNumber, transform, fontHeight);
+        if (auto fallbackTypeface = getFallbackTypeface())
+            if (fallbackTypeface != this)
+                return fallbackTypeface->getEdgeTableForGlyph (glyphNumber, transform, fontHeight);
     }
 
     return nullptr;
