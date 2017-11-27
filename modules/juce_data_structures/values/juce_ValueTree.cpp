@@ -1125,23 +1125,30 @@ public:
     void runTest() override
     {
         beginTest ("ValueTree");
-        Random r = getRandom();
+        auto r = getRandom();
 
         for (int i = 10; --i >= 0;)
         {
             MemoryOutputStream mo;
-            ValueTree v1 (createRandomTree (nullptr, 0, r));
+            auto v1 = createRandomTree (nullptr, 0, r);
             v1.writeToStream (mo);
 
             MemoryInputStream mi (mo.getData(), mo.getDataSize(), false);
-            ValueTree v2 = ValueTree::readFromStream (mi);
+            auto v2 = ValueTree::readFromStream (mi);
             expect (v1.isEquivalentTo (v2));
+
+            MemoryOutputStream zipped;
+            {
+                GZIPCompressorOutputStream zippedOut (zipped);
+                v1.writeToStream (zippedOut);
+            }
+            expect (v1.isEquivalentTo (ValueTree::readFromGZIPData (zipped.getData(), zipped.getDataSize())));
 
             ScopedPointer<XmlElement> xml1 (v1.createXml());
             ScopedPointer<XmlElement> xml2 (v2.createCopy().createXml());
             expect (xml1->isEquivalentTo (xml2, false));
 
-            ValueTree v4 = v2.createCopy();
+            auto v4 = v2.createCopy();
             expect (v1.isEquivalentTo (v4));
         }
     }
