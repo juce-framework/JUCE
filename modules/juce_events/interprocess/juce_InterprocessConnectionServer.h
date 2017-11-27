@@ -48,7 +48,7 @@ public:
     //==============================================================================
     /** Starts an internal thread which listens on the given port number.
 
-        While this is running, in another process tries to connect with the
+        While this is running, if another process tries to connect with the
         InterprocessConnection::connectToSocket() method, this object will call
         createConnectionObject() to create a connection to that client.
 
