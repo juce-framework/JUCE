@@ -2490,6 +2490,11 @@ Rectangle<int> LookAndFeel_V2::getPropertyComponentContentPosition (PropertyComp
     return Rectangle<int> (textW, 1, component.getWidth() - textW - 1, component.getHeight() - 3);
 }
 
+int LookAndFeel_V2::getPropertyPanelSectionHeaderHeight (const String& sectionTitle)
+{
+    return sectionTitle.isEmpty() ? 0 : 22;
+}
+
 //==============================================================================
 void LookAndFeel_V2::drawCallOutBoxBackground (CallOutBox& box, Graphics& g,
                                                const Path& path, Image& cachedImage)
