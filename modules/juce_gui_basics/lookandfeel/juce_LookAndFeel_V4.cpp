@@ -997,7 +997,7 @@ void LookAndFeel_V4::drawLinearSlider (Graphics& g, int x, int y, int width, int
         if (! isTwoVal)
         {
             g.setColour (slider.findColour (Slider::thumbColourId));
-            g.fillEllipse (Rectangle<float> (thumbWidth, thumbWidth).withCentre (isThreeVal ? thumbPoint : maxPoint));
+            g.fillEllipse (Rectangle<float> (static_cast<float> (thumbWidth), static_cast<float> (thumbWidth)).withCentre (isThreeVal ? thumbPoint : maxPoint));
         }
 
         if (isTwoVal || isThreeVal)
