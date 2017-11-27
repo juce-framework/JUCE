@@ -91,33 +91,33 @@ typedef unsigned int                uint32;
 
 /** Returns the larger of two values. */
 template <typename Type>
-Type jmax (const Type a, const Type b)                                               { return (a < b) ? b : a; }
+JUCE_CONSTEXPR Type jmax (Type a, Type b)                                   { return a < b ? b : a; }
 
 /** Returns the larger of three values. */
 template <typename Type>
-Type jmax (const Type a, const Type b, const Type c)                                 { return (a < b) ? ((b < c) ? c : b) : ((a < c) ? c : a); }
+JUCE_CONSTEXPR Type jmax (Type a, Type b, Type c)                           { return a < b ? (b < c ? c : b) : (a < c ? c : a); }
 
 /** Returns the larger of four values. */
 template <typename Type>
-Type jmax (const Type a, const Type b, const Type c, const Type d)                   { return jmax (a, jmax (b, c, d)); }
+JUCE_CONSTEXPR Type jmax (Type a, Type b, Type c, Type d)                   { return jmax (a, jmax (b, c, d)); }
 
 /** Returns the smaller of two values. */
 template <typename Type>
-Type jmin (const Type a, const Type b)                                               { return (b < a) ? b : a; }
+JUCE_CONSTEXPR Type jmin (Type a, Type b)                                   { return b < a ? b : a; }
 
 /** Returns the smaller of three values. */
 template <typename Type>
-Type jmin (const Type a, const Type b, const Type c)                                 { return (b < a) ? ((c < b) ? c : b) : ((c < a) ? c : a); }
+JUCE_CONSTEXPR Type jmin (Type a, Type b, Type c)                           { return b < a ? (c < b ? c : b) : (c < a ? c : a); }
 
 /** Returns the smaller of four values. */
 template <typename Type>
-Type jmin (const Type a, const Type b, const Type c, const Type d)                   { return jmin (a, jmin (b, c, d)); }
+JUCE_CONSTEXPR Type jmin (Type a, Type b, Type c, Type d)                   { return jmin (a, jmin (b, c, d)); }
 
 /** Remaps a normalised value (between 0 and 1) to a target range.
     This effectively returns (targetRangeMin + value0To1 * (targetRangeMax - targetRangeMin)).
 */
 template <typename Type>
-Type jmap (Type value0To1, Type targetRangeMin, Type targetRangeMax)
+JUCE_CONSTEXPR Type jmap (Type value0To1, Type targetRangeMin, Type targetRangeMax)
 {
     return targetRangeMin + value0To1 * (targetRangeMax - targetRangeMin);
 }
@@ -135,14 +135,16 @@ template <typename Type>
 Type findMinimum (const Type* data, int numValues)
 {
     if (numValues <= 0)
-        return Type();
+        return {};
 
-    Type result (*data++);
+    auto result = *data++;
 
     while (--numValues > 0) // (> 0 rather than >= 0 because we've already taken the first sample)
     {
-        const Type& v = *data++;
-        if (v < result)  result = v;
+        auto v = *data++;
+
+        if (v < result)
+            result = v;
     }
 
     return result;
@@ -153,14 +155,16 @@ template <typename Type>
 Type findMaximum (const Type* values, int numValues)
 {
     if (numValues <= 0)
-        return Type();
+        return {};
 
-    Type result (*values++);
+    auto result = *values++;
 
     while (--numValues > 0) // (> 0 rather than >= 0 because we've already taken the first sample)
     {
-        const Type& v = *values++;
-        if (result < v)  result = v;
+        auto v = *values++;
+
+        if (result < v)
+            result = v;
     }
 
     return result;
@@ -172,17 +176,17 @@ void findMinAndMax (const Type* values, int numValues, Type& lowest, Type& highe
 {
     if (numValues <= 0)
     {
-        lowest = Type();
-        highest = Type();
+        lowest = {};
+        highest = {};
     }
     else
     {
-        Type mn (*values++);
-        Type mx (mn);
+        auto mn = *values++;
+        auto mx = mn;
 
         while (--numValues > 0) // (> 0 rather than >= 0 because we've already taken the first sample)
         {
-            const Type& v = *values++;
+            auto v = *values++;
 
             if (mx < v)  mx = v;
             if (v < mn)  mn = v;
@@ -218,9 +222,9 @@ Type jlimit (Type lowerLimit,
 {
     jassert (lowerLimit <= upperLimit); // if these are in the wrong order, results are unpredictable..
 
-    return (valueToConstrain < lowerLimit) ? lowerLimit
-                                           : ((upperLimit < valueToConstrain) ? upperLimit
-                                                                              : valueToConstrain);
+    return valueToConstrain < lowerLimit ? lowerLimit
+                                         : (upperLimit < valueToConstrain ? upperLimit
+                                                                          : valueToConstrain);
 }
 
 /** Returns true if a value is at least zero, and also below a specified upper limit.
@@ -263,17 +267,8 @@ bool isPositiveAndNotGreaterThan (int valueToTest, Type upperLimit) noexcept
 
 //==============================================================================
 /** Handy function for avoiding unused variables warning. */
-template <typename Type1>
-void ignoreUnused (const Type1&) noexcept {}
-
-template <typename Type1, typename Type2>
-void ignoreUnused (const Type1&, const Type2&) noexcept {}
-
-template <typename Type1, typename Type2, typename Type3>
-void ignoreUnused (const Type1&, const Type2&, const Type3&) noexcept {}
-
-template <typename Type1, typename Type2, typename Type3, typename Type4>
-void ignoreUnused (const Type1&, const Type2&, const Type3&, const Type4&) noexcept {}
+template <typename... Types>
+void ignoreUnused (Types&&...) noexcept {}
 
 /** Handy function for getting the number of elements in a simple const C array.
     E.g.
@@ -284,9 +279,9 @@ void ignoreUnused (const Type1&, const Type2&, const Type3&, const Type4&) noexc
     @endcode
 */
 template <typename Type, int N>
-int numElementsInArray (Type (&array)[N])
+JUCE_CONSTEXPR int numElementsInArray (Type (&array)[N])
 {
-    ignoreUnused (array);
+    (void) array;
     (void) sizeof (0[array]); // This line should cause an error if you pass an object with a user-defined subscript operator
     return N;
 }
@@ -362,16 +357,16 @@ const float   float_Pi   = MathConstants<float>::pi;
 
 
 /** Converts an angle in degrees to radians. */
-inline float degreesToRadians (float degrees) noexcept     { return degrees * (float_Pi / 180.0f); }
+inline JUCE_CONSTEXPR float degreesToRadians (float degrees) noexcept     { return degrees * (float_Pi / 180.0f); }
 
 /** Converts an angle in degrees to radians. */
-inline double degreesToRadians (double degrees) noexcept   { return degrees * (double_Pi / 180.0); }
+inline JUCE_CONSTEXPR double degreesToRadians (double degrees) noexcept   { return degrees * (double_Pi / 180.0); }
 
 /** Converts an angle in radians to degrees. */
-inline float radiansToDegrees (float radians) noexcept     { return radians * (180.0f / float_Pi); }
+inline JUCE_CONSTEXPR float radiansToDegrees (float radians) noexcept     { return radians * (180.0f / float_Pi); }
 
 /** Converts an angle in radians to degrees. */
-inline double radiansToDegrees (double radians) noexcept   { return radians * (180.0 / double_Pi); }
+inline JUCE_CONSTEXPR double radiansToDegrees (double radians) noexcept   { return radians * (180.0 / double_Pi); }
 
 
 //==============================================================================
@@ -515,13 +510,13 @@ unsigned int truncatePositiveToUnsignedInt (FloatType value) noexcept
 //==============================================================================
 /** Returns true if the specified integer is a power-of-two. */
 template <typename IntegerType>
-bool isPowerOfTwo (IntegerType value)
+JUCE_CONSTEXPR bool isPowerOfTwo (IntegerType value)
 {
    return (value & (value - 1)) == 0;
 }
 
 /** Returns the smallest power-of-two which is equal to or greater than the given integer. */
-inline int nextPowerOfTwo (int n) noexcept
+inline JUCE_CONSTEXPR int nextPowerOfTwo (int n) noexcept
 {
     --n;
     n |= (n >> 1);
@@ -539,7 +534,7 @@ inline int nextPowerOfTwo (int n) noexcept
 int findHighestSetBit (uint32 n) noexcept;
 
 /** Returns the number of bits in a 32-bit integer. */
-inline int countNumberOfBits (uint32 n) noexcept
+inline JUCE_CONSTEXPR int countNumberOfBits (uint32 n) noexcept
 {
     n -= ((n >> 1) & 0x55555555);
     n =  (((n >> 2) & 0x33333333) + (n & 0x33333333));
@@ -550,7 +545,7 @@ inline int countNumberOfBits (uint32 n) noexcept
 }
 
 /** Returns the number of bits in a 64-bit integer. */
-inline int countNumberOfBits (uint64 n) noexcept
+inline JUCE_CONSTEXPR int countNumberOfBits (uint64 n) noexcept
 {
     return countNumberOfBits ((uint32) n) + countNumberOfBits ((uint32) (n >> 32));
 }
@@ -568,7 +563,7 @@ IntegerType negativeAwareModulo (IntegerType dividend, const IntegerType divisor
 
 /** Returns the square of its argument. */
 template <typename NumericType>
-NumericType square (NumericType n) noexcept
+inline JUCE_CONSTEXPR NumericType square (NumericType n) noexcept
 {
     return n * n;
 }
