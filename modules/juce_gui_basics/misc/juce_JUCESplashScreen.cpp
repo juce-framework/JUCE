@@ -348,7 +348,10 @@ void JUCESplashScreen::parentHierarchyChanged()
 
 bool JUCESplashScreen::hitTest (int x, int y)
 {
-    return getLogoArea (getLocalBounds().toFloat()).contains ((float) x, (float) y);
+    if (! hasStartedFading)
+        return getLogoArea (getLocalBounds().toFloat()).contains ((float) x, (float) y);
+
+    return false;
 }
 
 void JUCESplashScreen::mouseUp (const MouseEvent&)
