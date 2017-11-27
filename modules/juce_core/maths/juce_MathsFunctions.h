@@ -279,7 +279,7 @@ void ignoreUnused (Types&&...) noexcept {}
     @endcode
 */
 template <typename Type, int N>
-JUCE_CONSTEXPR int numElementsInArray (Type (&array)[N])
+int numElementsInArray (Type (&array)[N])
 {
     (void) array;
     (void) sizeof (0[array]); // This line should cause an error if you pass an object with a user-defined subscript operator
@@ -327,6 +327,21 @@ inline int64 abs64 (const int64 n) noexcept
 
 //==============================================================================
 
+#if JUCE_HAS_CONSTEXPR
+
+/** Commonly used mathematical constants */
+template <typename FloatType>
+struct MathConstants
+{
+    /** A predefined value for Pi */
+    static constexpr FloatType pi = static_cast<FloatType> (3.141592653589793238L);
+
+    /** A predfined value for Euler's number */
+    static constexpr FloatType euler = static_cast<FloatType> (2.71828182845904523536L);
+};
+
+#else
+
 /** Commonly used mathematical constants */
 template <typename FloatType>
 struct MathConstants
@@ -344,16 +359,18 @@ const FloatType MathConstants<FloatType>::pi = static_cast<FloatType> (3.1415926
 template <typename FloatType>
 const FloatType MathConstants<FloatType>::euler = static_cast<FloatType> (2.71828182845904523536L);
 
+#endif
+
 
 /** A predefined value for Pi, at double-precision.
     @see float_Pi
 */
-const double  double_Pi  = MathConstants<double>::pi;
+const JUCE_CONSTEXPR double  double_Pi  = MathConstants<double>::pi;
 
 /** A predefined value for Pi, at single-precision.
     @see double_Pi
 */
-const float   float_Pi   = MathConstants<float>::pi;
+const JUCE_CONSTEXPR float   float_Pi   = MathConstants<float>::pi;
 
 
 /** Converts an angle in degrees to radians. */
@@ -516,7 +533,7 @@ JUCE_CONSTEXPR bool isPowerOfTwo (IntegerType value)
 }
 
 /** Returns the smallest power-of-two which is equal to or greater than the given integer. */
-inline JUCE_CONSTEXPR int nextPowerOfTwo (int n) noexcept
+inline int nextPowerOfTwo (int n) noexcept
 {
     --n;
     n |= (n >> 1);
@@ -534,7 +551,7 @@ inline JUCE_CONSTEXPR int nextPowerOfTwo (int n) noexcept
 int findHighestSetBit (uint32 n) noexcept;
 
 /** Returns the number of bits in a 32-bit integer. */
-inline JUCE_CONSTEXPR int countNumberOfBits (uint32 n) noexcept
+inline int countNumberOfBits (uint32 n) noexcept
 {
     n -= ((n >> 1) & 0x55555555);
     n =  (((n >> 2) & 0x33333333) + (n & 0x33333333));
@@ -545,7 +562,7 @@ inline JUCE_CONSTEXPR int countNumberOfBits (uint32 n) noexcept
 }
 
 /** Returns the number of bits in a 64-bit integer. */
-inline JUCE_CONSTEXPR int countNumberOfBits (uint64 n) noexcept
+inline int countNumberOfBits (uint64 n) noexcept
 {
     return countNumberOfBits ((uint32) n) + countNumberOfBits ((uint32) (n >> 32));
 }
