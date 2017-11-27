@@ -447,7 +447,7 @@ struct ZipFile::Builder::Item
 
         if (compressionLevel > 0)
         {
-            GZIPCompressorOutputStream compressor (&compressedData, compressionLevel, false,
+            GZIPCompressorOutputStream compressor (compressedData, compressionLevel,
                                                    GZIPCompressorOutputStream::windowBitsRaw);
             if (! writeSource (compressor))
                 return false;
