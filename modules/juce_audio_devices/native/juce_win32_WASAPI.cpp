@@ -987,7 +987,7 @@ public:
                          const String& inputDeviceID,
                          const bool exclusiveMode)
         : AudioIODevice (deviceName, typeName),
-          Thread ("Juce WASAPI"),
+          Thread ("JUCE WASAPI"),
           outputDeviceId (outputDeviceID),
           inputDeviceId (inputDeviceID),
           useExclusiveMode (exclusiveMode),

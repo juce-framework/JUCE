@@ -35,7 +35,7 @@ namespace juce
     a platform-specific subclass that can be used.
 
     The CustomTypeface subclass allow you to build your own typeface, and to
-    load and save it in the Juce typeface format.
+    load and save it in the JUCE typeface format.
 
     Normally you should never need to deal directly with Typeface objects - the Font
     class does everything you typically need for rendering text.
@@ -95,7 +95,7 @@ public:
     */
     virtual float getDescent() const = 0;
 
-    /** Returns the value by which you should multiply a juce font-height value to
+    /** Returns the value by which you should multiply a JUCE font-height value to
         convert it to the equivalent point-size.
     */
     virtual float getHeightToPointsFactor() const = 0;

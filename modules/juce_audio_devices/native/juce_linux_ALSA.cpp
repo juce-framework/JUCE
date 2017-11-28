@@ -487,7 +487,7 @@ class ALSAThread  : public Thread
 {
 public:
     ALSAThread (const String& inputDeviceID, const String& outputDeviceID)
-        : Thread ("Juce ALSA"),
+        : Thread ("JUCE ALSA"),
           sampleRate (0),
           bufferSize (0),
           outputLatency (0),

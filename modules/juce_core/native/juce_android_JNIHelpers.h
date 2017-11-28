@@ -121,7 +121,7 @@ template <typename JavaType>
 class LocalRef
 {
 public:
-    explicit inline LocalRef () noexcept                : obj (0) {}
+    explicit inline LocalRef() noexcept                 : obj (0) {}
     explicit inline LocalRef (JavaType o) noexcept      : obj (o) {}
     inline LocalRef (const LocalRef& other) noexcept    : obj (retain (other.obj)) {}
     inline LocalRef (LocalRef&& other) noexcept         : obj (0) { std::swap (obj, other.obj); }

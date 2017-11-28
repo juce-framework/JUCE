@@ -118,7 +118,7 @@ class DemoThread    : public BouncingBallComp,
 {
 public:
     DemoThread()
-        : Thread ("Juce Demo Thread")
+        : Thread ("JUCE Demo Thread")
     {
         interval = Random::getSystemRandom().nextInt (50) + 6;
 

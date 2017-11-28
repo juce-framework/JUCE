@@ -321,9 +321,7 @@ namespace
 struct OSCReceiver::Pimpl   : private Thread,
                               private MessageListener
 {
-    Pimpl()
-      : Thread ("Juce OSC server"),
-        formatErrorHandler (nullptr)
+    Pimpl()  : Thread ("JUCE OSC server")
     {
     }
 
@@ -571,7 +569,7 @@ private:
 
     ScopedPointer<DatagramSocket> socket;
     int portNumber = 0;
-    OSCReceiver::FormatErrorHandler formatErrorHandler;
+    OSCReceiver::FormatErrorHandler formatErrorHandler { nullptr };
     enum { oscBufferSize = 4098 };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)

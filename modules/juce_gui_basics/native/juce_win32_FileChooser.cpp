@@ -278,7 +278,7 @@ private:
         threadHasReference.signal();
 
         Array<URL> r = openDialog (true);
-        MessageManager::callAsync ([safeThis, r] ()
+        MessageManager::callAsync ([safeThis, r]()
         {
             safeThis->results = r;
 
@@ -377,7 +377,7 @@ private:
                 }
                 else
                 {
-                    MessageManager::callAsync ([custom, cr, componentWidth, hdlg] () mutable
+                    MessageManager::callAsync ([custom, cr, componentWidth, hdlg]() mutable
                     {
                         if (custom != nullptr)
                         {
@@ -418,7 +418,7 @@ private:
                     Component::SafePointer<FilePreviewComponent> safeComp (comp);
 
                     File selectedFile (path);
-                    MessageManager::callAsync ([safeComp, selectedFile] () mutable
+                    MessageManager::callAsync ([safeComp, selectedFile]() mutable
                                                {
                                                     safeComp->selectedFileChanged (selectedFile);
                                                });

@@ -1663,7 +1663,7 @@ struct PhysicalTopologySource::Internal
             return config.getItemActive ((BlocksProtocol::ConfigItemId) item);
         }
 
-        uint32 getMaxConfigIndex () override
+        uint32 getMaxConfigIndex() override
         {
             return uint32 (BlocksProtocol::maxConfigIndex);
         }

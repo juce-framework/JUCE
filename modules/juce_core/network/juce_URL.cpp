@@ -149,7 +149,8 @@ URL::URL (File localFile)
         localFile = localFile.getParentDirectory();
     }
 
-    url = addEscapeChars (localFile.getFileName (), false) + url;
+    url = addEscapeChars (localFile.getFileName(), false) + url;
+
     if (! url.startsWithChar (L'/'))
         url = "/" + url;
 
@@ -160,7 +161,7 @@ URL::URL (File localFile)
 
 void URL::init()
 {
-    int i = url.indexOfChar ('?');
+    auto i = url.indexOfChar ('?');
 
     if (i >= 0)
     {

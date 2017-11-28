@@ -303,7 +303,7 @@ private:
     {
     public:
         MidiInputThread (AlsaClient& c)
-            : Thread ("Juce MIDI Input"), client (c), concatenator (2048)
+            : Thread ("JUCE MIDI Input"), client (c), concatenator (2048)
         {
             jassert (client.get() != nullptr);
         }

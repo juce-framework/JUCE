@@ -897,7 +897,7 @@ private:
 
                     for (auto& item : exporter.getAllGroups())
                     {
-                        if (item.getName() == "Juce Library Code")
+                        if (item.getName() == ProjectSaver::getJuceCodeGroupName())
                         {
                             String resSourcesVar (targetVarName + "_REZ_SOURCES");
                             String resOutputVar (targetVarName + "_REZ_OUTPUT");

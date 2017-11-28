@@ -134,7 +134,7 @@ namespace juce
             }
         }];
 
-        MessageManager::callAsync ([self,application,app] ()  { app->suspended(); });
+        MessageManager::callAsync ([self,application,app]()  { app->suspended(); });
        #else
         ignoreUnused (application);
         app->suspended();

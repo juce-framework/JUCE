@@ -223,7 +223,7 @@ public:
             {
                 doWorkWhileWaitingForLock (false);
 
-                if (mmLock.retryLock ())
+                if (mmLock.retryLock())
                     break;
             }
 
@@ -434,7 +434,7 @@ public:
                 if (shouldExit())
                     return ThreadPoolJob::jobHasFinished;
 
-            } while (! mmLock.retryLock ());
+            } while (! mmLock.retryLock());
         }
 
         initialiseOnThread();

@@ -173,7 +173,7 @@ public:
     static const char* getGeneratedGroupID() noexcept               { return "__jucelibfiles"; }
     Project::Item& getGeneratedCodeGroup()                          { return generatedFilesGroup; }
 
-    static String getJuceCodeGroupName()                            { return "Juce Library Code"; }
+    static String getJuceCodeGroupName()                            { return "JUCE Library Code"; }
 
     File getGeneratedCodeFolder() const                             { return generatedCodeFolder; }
 

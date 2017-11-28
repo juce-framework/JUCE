@@ -160,8 +160,7 @@ namespace
 
 struct SharedMessageThread  : public Thread
 {
-    SharedMessageThread ()
-        : Thread ("VstMessageThread")
+    SharedMessageThread()  : Thread ("VstMessageThread")
     {
         startThread (7);
 

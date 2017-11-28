@@ -26,11 +26,11 @@
 		9DC13797237D190C48A242C9 = {isa = PBXGroup; children = (
 					AF0451FEC95312712E8145CD, ); name = BinaryBuilder; sourceTree = "<group>"; };
 		5D4B80BC67BBCEDCC3B6BAB8 = {isa = PBXGroup; children = (
-					8702176D2368B6F785546D2B, ); name = "Juce Modules"; sourceTree = "<group>"; };
+					8702176D2368B6F785546D2B, ); name = "JUCE Modules"; sourceTree = "<group>"; };
 		8905BD956C24F83087634C3A = {isa = PBXGroup; children = (
 					7E86227B01E504302C234A04,
 					D186E2D509765FAE0758F17D,
-					D6C3594C8BEC94040AF108FE, ); name = "Juce Library Code"; sourceTree = "<group>"; };
+					D6C3594C8BEC94040AF108FE, ); name = "JUCE Library Code"; sourceTree = "<group>"; };
 		87ECE820BF4D73DD50D614CB = {isa = PBXGroup; children = (
 					1A71A586C0F50B6B328D877B, ); name = Resources; sourceTree = "<group>"; };
 		E28F51A0038F01E08E22F853 = {isa = PBXGroup; children = (

@@ -73,7 +73,7 @@ class ScopedXLock
 {
 public:
     /** Creating a ScopedXLock object locks the X display.
-        This uses XLockDisplay() to grab the display that Juce is using.
+        This uses XLockDisplay() to grab the display that JUCE is using.
     */
     ScopedXLock (XDisplay);
 

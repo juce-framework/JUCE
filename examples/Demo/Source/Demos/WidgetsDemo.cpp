@@ -1160,7 +1160,7 @@ private:
 
         //==============================================================================
         // These methods implement the DragAndDropTarget interface, and allow our component
-        // to accept drag-and-drop of objects from other Juce components..
+        // to accept drag-and-drop of objects from other JUCE components..
 
         bool isInterestedInDragSource (const SourceDetails& /*dragSourceDetails*/) override
         {

@@ -249,7 +249,7 @@ namespace juce
      inline Type compareAndSetValue (Type newValue, Type valueToCompare) noexcept  { return AtomicBase<Type>::compareAndSetValue (newValue, valueToCompare); }
 
      /** Implements a memory read/write barrier. */
-     static inline void memoryBarrier() noexcept { AtomicBase<Type>::memoryBarrier (); }
+     static inline void memoryBarrier() noexcept   { AtomicBase<Type>::memoryBarrier(); }
  };
 
  #ifndef DOXYGEN

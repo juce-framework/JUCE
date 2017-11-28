@@ -272,7 +272,7 @@ private:
     void startRecording()
     {
         const File file (File::getSpecialLocation (File::userDocumentsDirectory)
-                            .getNonexistentChildFile ("Juce Demo Audio Recording", ".wav"));
+                            .getNonexistentChildFile ("JUCE Demo Audio Recording", ".wav"));
         recorder.startRecording (file);
 
         recordButton.setButtonText ("Stop");

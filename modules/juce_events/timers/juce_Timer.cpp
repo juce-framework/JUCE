@@ -30,7 +30,7 @@ class Timer::TimerThread  : private Thread,
 public:
     typedef CriticalSection LockType; // (mysteriously, using a SpinLock here causes problems on some XP machines..)
 
-    TimerThread()  : Thread ("Juce Timer")
+    TimerThread()  : Thread ("JUCE Timer")
     {
         triggerAsyncUpdate();
     }
