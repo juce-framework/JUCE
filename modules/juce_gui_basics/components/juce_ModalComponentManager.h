@@ -137,8 +137,7 @@ protected:
 
 private:
     //==============================================================================
-    class ModalItem;
-    class ReturnValueRetriever;
+    struct ModalItem;
 
     friend class Component;
     friend struct ContainerDeletePolicy<ModalItem>;
