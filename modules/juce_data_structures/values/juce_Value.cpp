@@ -230,7 +230,7 @@ void Value::callListeners()
     if (listeners.size() > 0)
     {
         Value v (*this); // (create a copy in case this gets deleted by a callback)
-        listeners.call (&ValueListener::valueChanged, v);
+        listeners.call ([&] (ValueListener& l) { l.valueChanged (v); });
     }
 }
 

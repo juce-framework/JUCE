@@ -644,7 +644,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
             for (UIUserNotificationCategory *c in s.categories)
                 settings.categories.add (PushNotificationsDelegateDetails::uiUserNotificationCategoryToCategory (c));
 
-            owner.listeners.call (&PushNotifications::Listener::notificationSettingsReceived, settings);
+            owner.listeners.call ([&] (Listener& l) { l.notificationSettingsReceived (settings); });
         }
        #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
         else
@@ -663,7 +663,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
                       for (UNNotificationCategory* c in categories)
                           settings.categories.add (PushNotificationsDelegateDetails::unNotificationCategoryToCategory (c));
 
-                      owner.listeners.call (&PushNotifications::Listener::notificationSettingsReceived, settings);
+                      owner.listeners.call ([&] (Listener& l) { l.notificationSettingsReceived (settings); });
                   }
                  ];
 
@@ -707,7 +707,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
         {
             // Not supported on this platform
             jassertfalse;
-            owner.listeners.call (&Listener::deliveredNotificationsListReceived, {});
+            owner.listeners.call ([] (Listener& l) { l.deliveredNotificationsListReceived ({}); });
         }
        #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
         else
@@ -720,7 +720,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
                 for (UNNotification* n in notifications)
                     notifs.add (PushNotificationsDelegateDetails::unNotificationToJuceNotification (n));
 
-                owner.listeners.call (&Listener::deliveredNotificationsListReceived, notifs);
+                owner.listeners.call ([&] (Listener& l) { l.deliveredNotificationsListReceived (notifs); });
              }];
         }
        #endif
@@ -775,7 +775,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
             for (UILocalNotification* n in [UIApplication sharedApplication].scheduledLocalNotifications)
                 notifs.add (PushNotificationsDelegateDetails::uiLocalNotificationToJuceNotification (n));
 
-            owner.listeners.call (&PushNotifications::Listener::pendingLocalNotificationsListReceived, notifs);
+            owner.listeners.call ([&] (Listener& l) { l.pendingLocalNotificationsListReceived (notifs); });
         }
        #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
         else
@@ -789,7 +789,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
                  for (UNNotificationRequest* r : requests)
                      notifs.add (PushNotificationsDelegateDetails::unNotificationRequestToJuceNotification (r));
 
-                 owner.listeners.call (&PushNotifications::Listener::pendingLocalNotificationsListReceived, notifs);
+                 owner.listeners.call ([&] (Listener& l) { l.pendingLocalNotificationsListReceived (notifs); });
              }
             ];
         }
@@ -854,7 +854,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
 
         initialised = true;
 
-        owner.listeners.call (&PushNotifications::Listener::deviceTokenRefreshed, deviceToken);
+        owner.listeners.call ([&] (Listener& l) { l.deviceTokenRefreshed (deviceToken); });
     }
 
     void failedToRegisterForRemoteNotifications (NSError* error) override
@@ -868,16 +868,13 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
     {
         auto n = PushNotificationsDelegateDetails::nsDictionaryToJuceNotification (userInfo);
 
-        owner.listeners.call (&PushNotifications::Listener::handleNotification, false, n);
+        owner.listeners.call ([&] (Listener& l) { l.handleNotification (false, n); });
     }
 
     void didReceiveRemoteNotificationFetchCompletionHandler (NSDictionary* userInfo,
                                                              void (^completionHandler)(UIBackgroundFetchResult result)) override
     {
-        auto n = PushNotificationsDelegateDetails::nsDictionaryToJuceNotification (userInfo);
-
-        owner.listeners.call (&PushNotifications::Listener::handleNotification, false, n);
-
+        didReceiveRemoteNotification (userInfo);
         completionHandler (UIBackgroundFetchResultNewData);
     }
 
@@ -890,7 +887,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
         auto actionString = nsStringToJuce (actionIdentifier);
         auto response = PushNotificationsDelegateDetails::getUserResponseFromNSDictionary (responseInfo);
 
-        owner.listeners.call (&PushNotifications::Listener::handleNotificationAction, false, n, actionString, response);
+        owner.listeners.call ([&] (Listener& l) { l.handleNotificationAction (false, n, actionString, response); });
 
         completionHandler();
     }
@@ -899,7 +896,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
     {
         auto n = PushNotificationsDelegateDetails::uiLocalNotificationToJuceNotification (notification);
 
-        owner.listeners.call (&PushNotifications::Listener::handleNotification, true, n);
+        owner.listeners.call ([&] (Listener& l) { l.handleNotification (true, n); });
     }
 
     void handleActionForLocalNotificationCompletionHandler (NSString* actionIdentifier,
@@ -921,7 +918,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
         auto actionString = nsStringToJuce (actionIdentifier);
         auto response = PushNotificationsDelegateDetails::getUserResponseFromNSDictionary (responseInfo);
 
-        owner.listeners.call (&PushNotifications::Listener::handleNotificationAction, true, n, actionString, response);
+        owner.listeners.call ([&] (Listener& l) { l.handleNotificationAction (true, n, actionString, response); });
 
         completionHandler();
     }
@@ -961,8 +958,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
             responseString = nsStringToJuce (textResponse.userText);
         }
 
-        owner.listeners.call (&PushNotifications::Listener::handleNotificationAction, ! remote, n, actionString, responseString);
-
+        owner.listeners.call ([&] (Listener& l) { l.handleNotificationAction (! remote, n, actionString, responseString); });
         completionHandler();
     }
   #endif

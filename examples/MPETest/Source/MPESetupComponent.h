@@ -173,7 +173,7 @@ private:
                                         masterPitchbendRange.getText().getIntValue());
 
             zoneLayout.addZone (newZone);
-            listeners.call (&MPESetupComponent::Listener::zoneAdded, newZone);
+            listeners.call ([&] (Listener& l) { l.zoneAdded (newZone); });
         }
         else
         {
@@ -185,7 +185,7 @@ private:
     void clearAllZonesButtonClicked()
     {
         zoneLayout.clearAllZones();
-        listeners.call (&MPESetupComponent::Listener::allZonesCleared);
+        listeners.call ([] (Listener& l) { l.allZonesCleared(); });
     }
 
     //==============================================================================
@@ -206,10 +206,9 @@ private:
 
         if (areLegacyModeParametersValid())
         {
-            listeners.call (&MPESetupComponent::Listener::legacyModeChanged,
-                            legacyModeEnabledToggle.getToggleState(),
-                            legacyPitchbendRange.getText().getIntValue(),
-                            getLegacyModeChannelRange());
+            listeners.call ([&] (Listener& l) { l.legacyModeChanged (legacyModeEnabledToggle.getToggleState(),
+                                                                     legacyPitchbendRange.getText().getIntValue(),
+                                                                     getLegacyModeChannelRange()); });
         }
         else
         {
@@ -220,8 +219,8 @@ private:
     //==============================================================================
     void voiceStealingEnabledToggleClicked()
     {
-        listeners.call (&MPESetupComponent::Listener::voiceStealingEnabledChanged,
-                        voiceStealingEnabledToggle.getToggleState());
+        bool newState = voiceStealingEnabledToggle.getToggleState();
+        listeners.call ([=] (Listener& l) { l.voiceStealingEnabledChanged (newState); });
     }
 
     //==============================================================================
@@ -231,7 +230,7 @@ private:
         {
             numberOfVoicesChanged();
         }
-        else if (legacyModeEnabledToggle.getToggleState() == true)
+        else if (legacyModeEnabledToggle.getToggleState())
         {
             if (comboBoxThatHasChanged == &legacyPitchbendRange)
                 legacyModePitchbendRangeChanged();
@@ -243,17 +242,16 @@ private:
     //==============================================================================
     void numberOfVoicesChanged()
     {
-        listeners.call (&MPESetupComponent::Listener::numberOfVoicesChanged,
-                        numberOfVoices.getText().getIntValue());
+        listeners.call ([this] (Listener& l) { l.numberOfVoicesChanged (numberOfVoices.getText().getIntValue()); });
     }
 
     void legacyModePitchbendRangeChanged()
     {
         jassert (legacyModeEnabledToggle.getToggleState() == true);
 
-        listeners.call (&MPESetupComponent::Listener::legacyModeChanged, true,
-                        legacyPitchbendRange.getText().getIntValue(),
-                        getLegacyModeChannelRange());
+        listeners.call ([this] (Listener& l) { l.legacyModeChanged (true,
+                                                                    legacyPitchbendRange.getText().getIntValue(),
+                                                                    getLegacyModeChannelRange()); });
     }
 
     void legacyModeChannelRangeChanged()
@@ -262,9 +260,9 @@ private:
 
         if (areLegacyModeParametersValid())
         {
-            listeners.call (&MPESetupComponent::Listener::legacyModeChanged, true,
-                            legacyPitchbendRange.getText().getIntValue(),
-                            getLegacyModeChannelRange());
+            listeners.call ([this] (Listener& l) { l.legacyModeChanged (true,
+                                                                        legacyPitchbendRange.getText().getIntValue(),
+                                                                        getLegacyModeChannelRange()); });
         }
         else
         {

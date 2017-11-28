@@ -2098,20 +2098,20 @@ void TextEditor::handleCommandMessage (const int commandId)
     switch (commandId)
     {
     case TextEditorDefs::textChangeMessageId:
-        listeners.callChecked (checker, &Listener::textEditorTextChanged, (TextEditor&) *this);
+        listeners.callChecked (checker, [this] (Listener& l) { l.textEditorTextChanged (*this); });
         break;
 
     case TextEditorDefs::returnKeyMessageId:
-        listeners.callChecked (checker, &Listener::textEditorReturnKeyPressed, (TextEditor&) *this);
+        listeners.callChecked (checker, [this] (Listener& l) { l.textEditorReturnKeyPressed (*this); });
         break;
 
     case TextEditorDefs::escapeKeyMessageId:
-        listeners.callChecked (checker, &Listener::textEditorEscapeKeyPressed, (TextEditor&) *this);
+        listeners.callChecked (checker, [this] (Listener& l) { l.textEditorEscapeKeyPressed (*this); });
         break;
 
     case TextEditorDefs::focusLossMessageId:
         updateValueFromText();
-        listeners.callChecked (checker, &Listener::textEditorFocusLost, (TextEditor&) *this);
+        listeners.callChecked (checker, [this] (Listener& l) { l.textEditorFocusLost (*this); });
         break;
 
     default:

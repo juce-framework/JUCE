@@ -352,9 +352,6 @@ public:
     /** Returns the button's current over/down/up state. */
     ButtonState getState() const noexcept               { return buttonState; }
 
-    // This method's parameters have changed - see the new version.
-    JUCE_DEPRECATED (void setToggleState (bool, bool));
-
     //==============================================================================
     /** This abstract base class is implemented by LookAndFeel classes to provide
         button-drawing functionality.
@@ -389,6 +386,9 @@ public:
         virtual int changeTextButtonWidthToFitText (TextButton&, int) { return 0; }
        #endif
     };
+
+    // This method's parameters have changed - see the new version.
+    JUCE_DEPRECATED (void setToggleState (bool, bool));
 
 protected:
     //==============================================================================

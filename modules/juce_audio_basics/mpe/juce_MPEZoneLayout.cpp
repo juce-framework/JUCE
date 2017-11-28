@@ -35,8 +35,13 @@ MPEZoneLayout::MPEZoneLayout (const MPEZoneLayout& other)
 MPEZoneLayout& MPEZoneLayout::operator= (const MPEZoneLayout& other)
 {
     zones = other.zones;
-    listeners.call (&MPEZoneLayout::Listener::zoneLayoutChanged, *this);
+    sendLayoutChangeMessage();
     return *this;
+}
+
+void MPEZoneLayout::sendLayoutChangeMessage()
+{
+    listeners.call ([this] (Listener& l) { l.zoneLayoutChanged (*this); });
 }
 
 //==============================================================================
@@ -46,7 +51,7 @@ bool MPEZoneLayout::addZone (MPEZone newZone)
 
     for (int i = zones.size(); --i >= 0;)
     {
-        MPEZone& zone = zones.getReference (i);
+        auto& zone = zones.getReference (i);
 
         if (zone.overlapsWith (newZone))
         {
@@ -59,7 +64,7 @@ bool MPEZoneLayout::addZone (MPEZone newZone)
     }
 
     zones.add (newZone);
-    listeners.call (&MPEZoneLayout::Listener::zoneLayoutChanged, *this);
+    sendLayoutChangeMessage();
     return noOtherZonesModified;
 }
 
@@ -80,7 +85,7 @@ MPEZone* MPEZoneLayout::getZoneByIndex (int index) const noexcept
 void MPEZoneLayout::clearAllZones()
 {
     zones.clear();
-    listeners.call (&MPEZoneLayout::Listener::zoneLayoutChanged, *this);
+    sendLayoutChangeMessage();
 }
 
 //==============================================================================
@@ -119,22 +124,22 @@ void MPEZoneLayout::processZoneLayoutRpnMessage (MidiRPNMessage rpn)
 //==============================================================================
 void MPEZoneLayout::processPitchbendRangeRpnMessage (MidiRPNMessage rpn)
 {
-    if (MPEZone* zone = getZoneByFirstNoteChannel (rpn.channel))
+    if (auto* zone = getZoneByFirstNoteChannel (rpn.channel))
     {
         if (zone->getPerNotePitchbendRange() != rpn.value)
         {
             zone->setPerNotePitchbendRange (rpn.value);
-            listeners.call (&MPEZoneLayout::Listener::zoneLayoutChanged, *this);
+            sendLayoutChangeMessage();
             return;
         }
     }
 
-    if (MPEZone* zone = getZoneByMasterChannel (rpn.channel))
+    if (auto* zone = getZoneByMasterChannel (rpn.channel))
     {
         if (zone->getMasterPitchbendRange() != rpn.value)
         {
             zone->setMasterPitchbendRange (rpn.value);
-            listeners.call (&MPEZoneLayout::Listener::zoneLayoutChanged, *this);
+            sendLayoutChangeMessage();
             return;
         }
     }
@@ -154,7 +159,7 @@ void MPEZoneLayout::processNextMidiBuffer (const MidiBuffer& buffer)
 //==============================================================================
 MPEZone* MPEZoneLayout::getZoneByChannel (int channel) const noexcept
 {
-    for (MPEZone* zone = zones.begin(); zone != zones.end(); ++zone)
+    for (auto* zone = zones.begin(); zone != zones.end(); ++zone)
         if (zone->isUsingChannel (channel))
             return zone;
 
@@ -163,7 +168,7 @@ MPEZone* MPEZoneLayout::getZoneByChannel (int channel) const noexcept
 
 MPEZone* MPEZoneLayout::getZoneByMasterChannel (int channel) const noexcept
 {
-    for (MPEZone* zone = zones.begin(); zone != zones.end(); ++zone)
+    for (auto* zone = zones.begin(); zone != zones.end(); ++zone)
         if (zone->getMasterChannel() == channel)
             return zone;
 
@@ -172,7 +177,7 @@ MPEZone* MPEZoneLayout::getZoneByMasterChannel (int channel) const noexcept
 
 MPEZone* MPEZoneLayout::getZoneByFirstNoteChannel (int channel) const noexcept
 {
-    for (MPEZone* zone = zones.begin(); zone != zones.end(); ++zone)
+    for (auto* zone = zones.begin(); zone != zones.end(); ++zone)
         if (zone->getFirstNoteChannel() == channel)
             return zone;
 
@@ -181,7 +186,7 @@ MPEZone* MPEZoneLayout::getZoneByFirstNoteChannel (int channel) const noexcept
 
 MPEZone* MPEZoneLayout::getZoneByNoteChannel (int channel) const noexcept
 {
-    for (MPEZone* zone = zones.begin(); zone != zones.end(); ++zone)
+    for (auto* zone = zones.begin(); zone != zones.end(); ++zone)
         if (zone->isUsingChannelAsNoteChannel (channel))
             return zone;
 

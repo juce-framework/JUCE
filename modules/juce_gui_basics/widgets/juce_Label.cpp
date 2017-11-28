@@ -154,7 +154,7 @@ void Label::attachToComponent (Component* owner, const bool onLeft)
 
 void Label::componentMovedOrResized (Component& component, bool /*wasMoved*/, bool /*wasResized*/)
 {
-    const Font f (getLookAndFeel().getLabelFont (*this));
+    auto f = getLookAndFeel().getLabelFont (*this);
 
     if (leftOfOwnerComp)
     {
@@ -191,16 +191,16 @@ void Label::textWasChanged() {}
 void Label::editorShown (TextEditor* textEditor)
 {
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, &LabelListener::editorShown, this, *textEditor);
+    listeners.callChecked (checker, [this, textEditor] (LabelListener& l) { l.editorShown (this, *textEditor); });
 }
 
 void Label::editorAboutToBeHidden (TextEditor* textEditor)
 {
-    if (ComponentPeer* const peer = getPeer())
+    if (auto* peer = getPeer())
         peer->dismissPendingTextInput();
 
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, &LabelListener::editorHidden, this, *textEditor);
+    listeners.callChecked (checker, [this, textEditor] (LabelListener& l) { l.editorHidden (this, *textEditor); });
 }
 
 void Label::showEditor()
@@ -230,7 +230,7 @@ void Label::showEditor()
 
 bool Label::updateFromTextEditorContents (TextEditor& ed)
 {
-    const String newText (ed.getText());
+    auto newText = ed.getText();
 
     if (textValue.toString() != newText)
     {
@@ -409,7 +409,7 @@ void Label::removeListener (LabelListener* const listener)
 void Label::callChangeListeners()
 {
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, &Label::Listener::labelTextChanged, this);
+    listeners.callChecked (checker, [this] (Listener& l) { l.labelTextChanged (this); });
 }
 
 //==============================================================================

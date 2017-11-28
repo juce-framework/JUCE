@@ -131,10 +131,9 @@ void IAAEffectProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer&)
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         buffer.applyGainRamp (channel, 0, numSamples, previousGain, gain);
+        auto newLevel = buffer.getMagnitude (channel, 0, numSamples);
 
-        meterListeners.call (&IAAEffectProcessor::MeterListener::handleNewMeterValue,
-                             channel,
-                             buffer.getMagnitude (channel, 0, numSamples));
+        meterListeners.call ([=] (MeterListener& l) { l.handleNewMeterValue (channel, newLevel); });
     }
 
     previousGain = gain;

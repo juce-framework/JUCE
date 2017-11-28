@@ -379,7 +379,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
         if (isEarlierThanLion)
         {
             // no settings available
-            owner.listeners.call (&PushNotifications::Listener::notificationSettingsReceived, {});
+            owner.listeners.call ([] (Listener& l) { l.notificationSettingsReceived ({}); });
             return;
         }
 
@@ -391,7 +391,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
             settings.allowAlert = [NSApplication sharedApplication].enabledRemoteNotificationTypes & NSRemoteNotificationTypeAlert;
         }
 
-        owner.listeners.call (&PushNotifications::Listener::notificationSettingsReceived, settings);
+        owner.listeners.call ([&] (Listener& l) { l.notificationSettingsReceived (settings); });
     }
 
     bool areNotificationsEnabled() const { return true; }
@@ -410,7 +410,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
         for (NSUserNotification* n in [NSUserNotificationCenter defaultUserNotificationCenter].deliveredNotifications)
             notifs.add (PushNotificationsDelegateDetailsOsx::nsUserNotificationToJuceNotification (n, isEarlierThanMavericks, isEarlierThanYosemite));
 
-        owner.listeners.call (&Listener::deliveredNotificationsListReceived, notifs);
+        owner.listeners.call ([&] (Listener& l) { l.deliveredNotificationsListReceived (notifs); });
     }
 
     void removeAllDeliveredNotifications()
@@ -440,7 +440,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
         for (NSUserNotification* n in [NSUserNotificationCenter defaultUserNotificationCenter].scheduledNotifications)
             notifs.add (PushNotificationsDelegateDetailsOsx::nsUserNotificationToJuceNotification (n, isEarlierThanMavericks, isEarlierThanYosemite));
 
-        owner.listeners.call (&PushNotifications::Listener::pendingLocalNotificationsListReceived, notifs);
+        owner.listeners.call ([&] (Listener& l) { l.pendingLocalNotificationsListReceived (notifs); });
     }
 
     void removePendingLocalNotification (const String& identifier)
@@ -480,47 +480,45 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
 
         initialised = true;
 
-        owner.listeners.call (&PushNotifications::Listener::deviceTokenRefreshed, deviceToken);
+        owner.listeners.call ([&] (Listener& l) { l.deviceTokenRefreshed (deviceToken); });
     }
 
     void failedToRegisterForRemoteNotifications (NSError* error) override
     {
         ignoreUnused (error);
-
         deviceToken.clear();
     }
 
     void didReceiveRemoteNotification (NSDictionary* userInfo) override
     {
         auto n = PushNotificationsDelegateDetailsOsx::nsDictionaryToJuceNotification (userInfo);
-
-        owner.listeners.call (&PushNotifications::Listener::handleNotification, true, n);
+        owner.listeners.call ([&] (Listener& l) { l.handleNotification (true, n); });
     }
 
-    void didDeliverNotification    (NSUserNotification* notification) override
+    void didDeliverNotification (NSUserNotification* notification) override
     {
         ignoreUnused (notification);
     }
 
-    void didActivateNotification   (NSUserNotification* notification) override
+    void didActivateNotification (NSUserNotification* notification) override
     {
         auto n = PushNotificationsDelegateDetailsOsx::nsUserNotificationToJuceNotification (notification, isEarlierThanMavericks, isEarlierThanYosemite);
 
         if (notification.activationType == NSUserNotificationActivationTypeContentsClicked)
         {
-            owner.listeners.call (&PushNotifications::Listener::handleNotification, notification.remote, n);
+            owner.listeners.call ([&] (Listener& l) { l.handleNotification (notification.remote, n); });
         }
         else
         {
             auto actionIdentifier = (! isEarlierThanYosemite && notification.additionalActivationAction != nil)
-                    ? nsStringToJuce (notification.additionalActivationAction.identifier)
-                    : nsStringToJuce (notification.actionButtonTitle);
+                                        ? nsStringToJuce (notification.additionalActivationAction.identifier)
+                                        : nsStringToJuce (notification.actionButtonTitle);
 
             auto reply = notification.activationType == NSUserNotificationActivationTypeReplied
-                ? nsStringToJuce ([notification.response string])
-                : String();
+                            ? nsStringToJuce ([notification.response string])
+                            : String();
 
-            owner.listeners.call (&PushNotifications::Listener::handleNotificationAction, notification.remote, n, actionIdentifier, reply);
+            owner.listeners.call ([&] (Listener& l) { l.handleNotificationAction (notification.remote, n, actionIdentifier, reply); });
         }
     }
 

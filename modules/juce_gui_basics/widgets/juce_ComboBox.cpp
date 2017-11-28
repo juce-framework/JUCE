@@ -629,7 +629,7 @@ void ComboBox::removeListener (ComboBoxListener* listener)    { listeners.remove
 void ComboBox::handleAsyncUpdate()
 {
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, &ComboBox::Listener::comboBoxChanged, this);
+    listeners.callChecked (checker, [this] (Listener& l) { l.comboBoxChanged (this); });
 }
 
 void ComboBox::sendChange (const NotificationType notification)

@@ -518,9 +518,15 @@ private:
         typedef OSCReceiver::Listener<OSCReceiver::MessageLoopCallback> Listener;
 
         if (content.isMessage())
-            listeners.call (&Listener::oscMessageReceived, content.getMessage());
+        {
+            auto&& message = content.getMessage();
+            listeners.call ([&] (Listener& l) { l.oscMessageReceived (message); });
+        }
         else if (content.isBundle())
-            listeners.call (&Listener::oscBundleReceived, content.getBundle());
+        {
+            auto&& bundle = content.getBundle();
+            listeners.call ([&] (Listener& l) { l.oscBundleReceived (bundle); });
+        }
     }
 
     void callRealtimeListeners (const OSCBundle::Element& content)
@@ -528,9 +534,15 @@ private:
         typedef OSCReceiver::Listener<OSCReceiver::RealtimeCallback> Listener;
 
         if (content.isMessage())
-            realtimeListeners.call (&Listener::oscMessageReceived, content.getMessage());
+        {
+            auto&& message = content.getMessage();
+            realtimeListeners.call ([&] (Listener& l) { l.oscMessageReceived (message); });
+        }
         else if (content.isBundle())
-            realtimeListeners.call (&Listener::oscBundleReceived, content.getBundle());
+        {
+            auto&& bundle = content.getBundle();
+            realtimeListeners.call ([&] (Listener& l) { l.oscBundleReceived (bundle); });
+        }
     }
 
     //==============================================================================

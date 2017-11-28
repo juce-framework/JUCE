@@ -760,9 +760,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_HashMap_test.cpp">
       <Filter>Juce Modules\juce_core\containers</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_ListenerList.cpp">
-      <Filter>Juce Modules\juce_core\containers</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_NamedValueSet.cpp">
       <Filter>Juce Modules\juce_core\containers</Filter>
     </ClCompile>

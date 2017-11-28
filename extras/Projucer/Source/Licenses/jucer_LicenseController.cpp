@@ -141,7 +141,8 @@ void LicenseController::startWebviewIfNeeded()
     if (guiNotInitialisedYet)
     {
         guiNotInitialisedYet = false;
-        listeners.call (&StateChangedCallback::licenseStateChanged, getState());
+        auto stateParam = getState();
+        listeners.call ([&] (StateChangedCallback& l) { l.licenseStateChanged (stateParam); });
     }
 
    #if ! JUCER_ENABLE_GPL_MODE
@@ -258,7 +259,8 @@ void LicenseController::updateState (const LicenseState& newState)
 
     state = newState;
     licenseStateToSettings (state, props);
-    listeners.call (&StateChangedCallback::licenseStateChanged, getState());
+    auto stateParam = getState();
+    listeners.call ([&] (StateChangedCallback& l) { l.licenseStateChanged (stateParam); });
 }
 
 LicenseState LicenseController::licenseStateFromOldSettings (XmlElement* licenseXml)

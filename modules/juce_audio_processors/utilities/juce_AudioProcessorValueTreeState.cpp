@@ -88,7 +88,7 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
         {
             value = newValue;
 
-            listeners.call (&AudioProcessorValueTreeState::Listener::parameterChanged, paramID, value);
+            listeners.call ([=] (AudioProcessorValueTreeState::Listener& l) { l.parameterChanged (paramID, value); });
             listenersNeedCalling = false;
 
             needsUpdate.set (1);

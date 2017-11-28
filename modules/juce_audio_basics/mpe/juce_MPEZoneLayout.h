@@ -156,6 +156,7 @@ private:
     void processRpnMessage (MidiRPNMessage);
     void processZoneLayoutRpnMessage (MidiRPNMessage);
     void processPitchbendRangeRpnMessage (MidiRPNMessage);
+    void sendLayoutChangeMessage();
 };
 
 } // namespace juce

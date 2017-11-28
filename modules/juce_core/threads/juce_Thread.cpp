@@ -167,7 +167,7 @@ Thread* JUCE_CALLTYPE Thread::getCurrentThread()
 void Thread::signalThreadShouldExit()
 {
     shouldExit = true;
-    listeners.call (&Listener::exitSignalSent);
+    listeners.call ([] (Listener& l) { l.exitSignalSent(); });
 }
 
 bool Thread::currentThreadShouldExit()
@@ -183,7 +183,7 @@ bool Thread::waitForThreadToExit (const int timeOutMilliseconds) const
     // Doh! So how exactly do you expect this thread to wait for itself to stop??
     jassert (getThreadId() != getCurrentThreadId() || getCurrentThreadId() == 0);
 
-    const uint32 timeoutEnd = Time::getMillisecondCounter() + (uint32) timeOutMilliseconds;
+    auto timeoutEnd = Time::getMillisecondCounter() + (uint32) timeOutMilliseconds;
 
     while (isThreadRunning())
     {

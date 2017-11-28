@@ -38,7 +38,7 @@ void AudioIODeviceType::removeListener (Listener* l)   { listeners.remove (l); }
 
 void AudioIODeviceType::callDeviceChangeListeners()
 {
-    listeners.call (&AudioIODeviceType::Listener::audioDeviceListChanged);
+    listeners.call ([] (Listener& l) { l.audioDeviceListChanged(); });
 }
 
 //==============================================================================
