@@ -529,7 +529,17 @@ private:
     ReferenceCountedArray<Upload> filesToUpload;
 
   #if JUCE_IOS
-    void* bookmark;
+    struct Bookmark : public ReferenceCountedObject
+    {
+        using Ptr = ReferenceCountedObjectPtr<Bookmark>;
+
+        Bookmark (void*);
+        ~Bookmark();
+
+        void* data;
+    };
+
+    Bookmark::Ptr bookmark;
 
     friend void setURLBookmark (URL&, void*);
     friend void* getURLBookmark (URL&);

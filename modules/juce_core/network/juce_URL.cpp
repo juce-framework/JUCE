@@ -198,7 +198,7 @@ URL::URL (URL&& other)
       parameterValues (static_cast<StringArray&&> (other.parameterValues)),
       filesToUpload   (static_cast<ReferenceCountedArray<Upload>&&> (other.filesToUpload))
    #if JUCE_IOS
-    , bookmark        (other.bookmark)
+    , bookmark        (static_cast<Bookmark::Ptr&&> (other.bookmark))
    #endif
 {
 }
@@ -210,8 +210,8 @@ URL& URL::operator= (URL&& other)
     parameterNames  = static_cast<StringArray&&> (other.parameterNames);
     parameterValues = static_cast<StringArray&&> (other.parameterValues);
     filesToUpload   = static_cast<ReferenceCountedArray<Upload>&&> (other.filesToUpload);
-  #if JUCE_IOS
-    bookmark        = other.bookmark;
+   #if JUCE_IOS
+    bookmark        = static_cast<Bookmark::Ptr&&> (other.bookmark);
    #endif
 
     return *this;
@@ -501,14 +501,27 @@ bool URL::isProbablyAnEmailAddress (const String& possibleEmailAddress)
 }
 
 #if JUCE_IOS
+URL::Bookmark::Bookmark (void* bookmarkToUse)
+    : data (bookmarkToUse)
+{
+}
+
+URL::Bookmark::~Bookmark()
+{
+    [(NSData*) data release];
+}
+
 void setURLBookmark (URL& u, void* bookmark)
 {
-    u.bookmark = bookmark;
+    u.bookmark = new URL::Bookmark (bookmark);
 }
 
 void* getURLBookmark (URL& u)
 {
-    return u.bookmark;
+    if (u.bookmark.get() == nullptr)
+        return nullptr;
+
+    return u.bookmark.get()->data;
 }
 
 template <typename Stream> struct iOSFileStreamWrapperFlush    { static void flush (Stream*) {} };

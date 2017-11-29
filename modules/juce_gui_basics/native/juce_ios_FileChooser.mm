@@ -217,6 +217,8 @@ private:
                                                   relativeToURL: nil
                                                           error: &error];
 
+                [bookmark retain];
+
                 [url stopAccessingSecurityScopedResource];
 
                 URL juceUrl (nsStringToJuce ([url absoluteString]));
