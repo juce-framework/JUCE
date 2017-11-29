@@ -194,21 +194,19 @@ Range<float> MidiKeyboardComponent::getKeyPosition (int midiNoteNumber, float ta
 {
     jassert (midiNoteNumber >= 0 && midiNoteNumber < 128);
 
-    static const float blackNoteWidth = 0.7f;
-
-    static const float notePos[] = { 0.0f, 1 - blackNoteWidth * 0.6f,
-                                     1.0f, 2 - blackNoteWidth * 0.4f,
+    static const float notePos[] = { 0.0f, 1 - blackNoteWidthRatio * 0.6f,
+                                     1.0f, 2 - blackNoteWidthRatio * 0.4f,
                                      2.0f,
-                                     3.0f, 4 - blackNoteWidth * 0.7f,
-                                     4.0f, 5 - blackNoteWidth * 0.5f,
-                                     5.0f, 6 - blackNoteWidth * 0.3f,
+                                     3.0f, 4 - blackNoteWidthRatio * 0.7f,
+                                     4.0f, 5 - blackNoteWidthRatio * 0.5f,
+                                     5.0f, 6 - blackNoteWidthRatio * 0.3f,
                                      6.0f };
 
     auto octave = midiNoteNumber / 12;
     auto note   = midiNoteNumber % 12;
 
     auto start = octave * 7.0f * targetKeyWidth + notePos[note] * targetKeyWidth;
-    auto width = MidiMessage::isMidiNoteBlack (note) ? blackNoteWidth * targetKeyWidth : targetKeyWidth;
+    auto width = MidiMessage::isMidiNoteBlack (note) ? blackNoteWidthRatio * targetKeyWidth : targetKeyWidth;
 
     return { start, start + width };
 }
@@ -566,6 +564,17 @@ float MidiKeyboardComponent::getBlackNoteLength() const noexcept
 {
     auto whiteNoteLength = orientation == horizontalKeyboard ? getHeight() : getWidth();
     return whiteNoteLength * blackNoteLengthRatio;
+}
+
+void MidiKeyboardComponent::setBlackNoteWidthProportion (float ratio) noexcept
+{
+    jassert (ratio >= 0.0f && ratio <= 1.0f);
+
+    if (blackNoteWidthRatio != ratio)
+    {
+        blackNoteWidthRatio = ratio;
+        resized();
+    }
 }
 
 void MidiKeyboardComponent::resized()

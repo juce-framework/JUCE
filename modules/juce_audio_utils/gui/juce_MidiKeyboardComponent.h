@@ -177,6 +177,17 @@ public:
     */
     float getBlackNoteLength() const noexcept;
 
+    /** Sets the width of the black notes as a proportion of the white note width. */
+    void setBlackNoteWidthProportion (float ratio) noexcept;
+
+    /** Returns the width of the black notes as a proportion of the white note width. */
+    float getBlackNoteWidthProportion() const noexcept             { return blackNoteWidthRatio; }
+
+    /** Returns the absolute width of the black notes.
+        This will be their vertical or horizontal width, depending on the keyboard's orientation.
+    */
+    float getBlackNoteWidth() const noexcept                       { return keyWidth * blackNoteWidthRatio; }
+
     /** If set to true, then scroll buttons will appear at either end of the keyboard
         if there are too many notes to fit them all in the component at once.
     */
@@ -380,6 +391,7 @@ private:
 
     MidiKeyboardState& state;
     float blackNoteLengthRatio = 0.7f;
+    float blackNoteWidthRatio = 0.7f;
     float xOffset = 0;
     float keyWidth = 16.0f;
     Orientation orientation;
