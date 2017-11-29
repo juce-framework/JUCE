@@ -327,6 +327,13 @@ public:
                                     int numRedirectsToFollow = 5,
                                     String httpRequestCmd = String()) const;
 
+    /** Attempts to open an output stream to a URL for writing
+
+        This method can only be used for certain scheme types such as local files
+        and content:// URIs on Android.
+    */
+    OutputStream* createOutputStream() const;
+
     //==============================================================================
     /** Represents a download task.
         Returned by downloadToFile to allow querying and controling the download task.
@@ -520,6 +527,13 @@ private:
 
     friend struct ContainerDeletePolicy<Upload>;
     ReferenceCountedArray<Upload> filesToUpload;
+
+  #if JUCE_IOS
+    void* bookmark;
+
+    friend void setURLBookmark (URL&, void*);
+    friend void* getURLBookmark (URL&);
+  #endif
 
     URL (const String&, int);
     void init();

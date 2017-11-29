@@ -33,8 +33,9 @@ DECLARE_JNI_CLASS (MediaScannerConnection, "android/media/MediaScannerConnection
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
- METHOD (query,           "query",           "(Landroid/net/Uri;[Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor;") \
- METHOD (openInputStream, "openInputStream", "(Landroid/net/Uri;)Ljava/io/InputStream;") \
+ METHOD (query,            "query",            "(Landroid/net/Uri;[Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor;") \
+ METHOD (openInputStream,  "openInputStream",  "(Landroid/net/Uri;)Ljava/io/InputStream;") \
+ METHOD (openOutputStream, "openOutputStream", "(Landroid/net/Uri;)Ljava/io/OutputStream;")
 
 DECLARE_JNI_CLASS (ContentResolver, "android/content/ContentResolver");
 #undef JNI_CLASS_MEMBERS
@@ -62,6 +63,14 @@ DECLARE_JNI_CLASS (AndroidFile, "java/io/File");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+ METHOD (close, "close", "()V") \
+ METHOD (flush, "flush", "()V") \
+ METHOD (write, "write", "([BII)V")
+
+DECLARE_JNI_CLASS (AndroidOutputStream, "java/io/OutputStream");
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  STATICMETHOD (withAppendedId, "withAppendedId", "(Landroid/net/Uri;J)Landroid/net/Uri;") \
 
 DECLARE_JNI_CLASS (ContentUris, "android/content/ContentUris");
@@ -71,7 +80,7 @@ DECLARE_JNI_CLASS (ContentUris, "android/content/ContentUris");
 struct AndroidContentUriResolver
 {
 public:
-    static LocalRef<jobject> getInputStreamForContentUri (const URL& url)
+    static LocalRef<jobject> getStreamForContentUri (const URL& url, bool inputStream)
     {
         // only use this method for content URIs
         jassert (url.getScheme() == "content");
@@ -80,7 +89,10 @@ public:
         LocalRef<jobject> contentResolver (android.activity.callObjectMethod (JuceAppActivity.getContentResolver));
 
         if (contentResolver)
-            return LocalRef<jobject> ((env->CallObjectMethod (contentResolver.get(), ContentResolver.openInputStream, urlToUri (url).get())));
+            return LocalRef<jobject> ((env->CallObjectMethod (contentResolver.get(),
+                                                              inputStream ? ContentResolver.openInputStream
+                                                                          : ContentResolver.openOutputStream,
+                                                              urlToUri (url).get())));
 
         return LocalRef<jobject>();
     }
@@ -353,6 +365,62 @@ private:
         return {};
     }
 };
+
+//==============================================================================
+struct AndroidContentUriOutputStream :  public OutputStream
+{
+    AndroidContentUriOutputStream (LocalRef<jobject>&& outputStream)
+        : stream (outputStream)
+    {
+    }
+
+    ~AndroidContentUriOutputStream()
+    {
+        stream.callVoidMethod (AndroidOutputStream.close);
+    }
+
+    void flush() override
+    {
+        stream.callVoidMethod (AndroidOutputStream.flush);
+    }
+
+    bool setPosition (int64 newPos) override
+    {
+        return (newPos == pos);
+    }
+
+    int64 getPosition() override
+    {
+        return pos;
+    }
+
+    bool write (const void* dataToWrite, size_t numberOfBytes) override
+    {
+        if (numberOfBytes == 0)
+            return true;
+
+        JNIEnv* env = getEnv();
+
+        jbyteArray javaArray = env->NewByteArray ((jsize) numberOfBytes);
+        env->SetByteArrayRegion (javaArray, 0, (jsize) numberOfBytes, (const jbyte*) dataToWrite);
+
+        stream.callVoidMethod (AndroidOutputStream.write, javaArray, 0, (jint) numberOfBytes);
+        env->DeleteLocalRef (javaArray);
+
+        pos += static_cast<int64> (numberOfBytes);
+        return true;
+    }
+
+    GlobalRef stream;
+    int64 pos = 0;
+};
+
+OutputStream* juce_CreateContentURIOutputStream (const URL& url)
+{
+    auto stream = AndroidContentUriResolver::getStreamForContentUri (url, false);
+
+    return (stream.get() != 0 ? new AndroidContentUriOutputStream (static_cast<LocalRef<jobject>&&> (stream)) : nullptr);
+}
 
 //==============================================================================
 class MediaScannerConnectionClient : public AndroidInterfaceImplementer

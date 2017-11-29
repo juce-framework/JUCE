@@ -28,8 +28,8 @@ namespace juce
 {
 
 //==============================================================================
-template <> struct ContainerDeletePolicy<UIDocumentPickerViewController>                   { static void destroy (NSObject* o) { [o release]; } };
-template <> struct ContainerDeletePolicy<NSObject<UIDocumentPickerDelegate>>               { static void destroy (NSObject* o) { [o release]; } };
+template <> struct ContainerDeletePolicy<UIDocumentPickerViewController>     { static void destroy (NSObject* o) { [o release]; } };
+template <> struct ContainerDeletePolicy<NSObject<UIDocumentPickerDelegate>> { static void destroy (NSObject* o) { [o release]; } };
 
 class FileChooser::Native    : private Component, public FileChooser::Pimpl
 {
@@ -37,32 +37,54 @@ public:
     Native (FileChooser& fileChooser, int flags)
         : owner (fileChooser)
     {
+        String firstFileExtension;
+
         static FileChooserDelegateClass cls;
         delegate = [cls.createInstance() init];
         FileChooserDelegateClass::setOwner (delegate, this);
 
-        auto utTypeArray = createNSArrayFromStringArray (getUTTypesForWildcards (owner.filters));
+        auto utTypeArray = createNSArrayFromStringArray (getUTTypesForWildcards (owner.filters, firstFileExtension));
 
         if ((flags & FileBrowserComponent::saveMode) != 0)
         {
-            // You must specify the fileWhichShouldBeSaved parameter when using
-            // the native save dialog on iOS!
-            jassert (owner.fileToSave.existsAsFile());
+            auto currentFileOrDirectory = owner.startingFile;
 
-            auto url = [[NSURL alloc] initFileURLWithPath:juceStringToNS (owner.fileToSave.getFullPathName())];
+            UIDocumentPickerMode pickerMode = currentFileOrDirectory.existsAsFile()
+                                            ? UIDocumentPickerModeExportToService
+                                            : UIDocumentPickerModeMoveToService;
 
-            controller = [[UIDocumentPickerViewController alloc] initWithURL:url
-                                                                      inMode:UIDocumentPickerModeExportToService];
+            if (! currentFileOrDirectory.existsAsFile())
+            {
+                auto filename = getFilename (currentFileOrDirectory, firstFileExtension);
+                auto tmpDirectory = File::createTempFile ("JUCE-filepath");
+
+                if (tmpDirectory.createDirectory().wasOk())
+                {
+                    currentFileOrDirectory = tmpDirectory.getChildFile (filename);
+                    currentFileOrDirectory.replaceWithText ("");
+                }
+                else
+                {
+                    // Temporary directory creation failed! You need to specify a
+                    // path you have write access to. Saving will not work for
+                    // current path.
+                    jassertfalse;
+                }
+            }
+
+            auto url = [[NSURL alloc] initFileURLWithPath: juceStringToNS (currentFileOrDirectory.getFullPathName())];
+            controller = [[UIDocumentPickerViewController alloc] initWithURL: url
+                                                                      inMode: pickerMode];
             [url release];
         }
         else
         {
-            controller = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:utTypeArray
-                                                                                inMode:UIDocumentPickerModeOpen];
+            controller = [[UIDocumentPickerViewController alloc] initWithDocumentTypes: utTypeArray
+                                                                                inMode: UIDocumentPickerModeOpen];
         }
 
-        [controller setDelegate:delegate];
-        [controller setModalTransitionStyle:UIModalTransitionStyleCrossDissolve];
+        [controller setDelegate: delegate];
+        [controller setModalTransitionStyle: UIModalTransitionStyleCrossDissolve];
 
         setOpaque (false);
 
@@ -101,7 +123,7 @@ private:
             peer = newPeer;
 
             if (auto* parentController = peer->controller)
-                [parentController showViewController:controller sender:parentController];
+                [parentController showViewController: controller sender: parentController];
 
             if (peer->view.window != nil)
                 peer->view.window.autoresizesSubviews = YES;
@@ -109,10 +131,12 @@ private:
     }
 
     //==============================================================================
-    static StringArray getUTTypesForWildcards (const String& filterWildcards)
+    static StringArray getUTTypesForWildcards (const String& filterWildcards, String& firstExtension)
     {
         auto filters = StringArray::fromTokens (filterWildcards, ";", "");
         StringArray result;
+
+        firstExtension = {};
 
         if (! filters.contains ("*") && filters.size() > 0)
         {
@@ -123,6 +147,9 @@ private:
 
                 auto fileExtension = filter.fromLastOccurrenceOf (".", false, false);
                 auto fileExtensionCF = fileExtension.toCFString();
+
+                if (firstExtension.isEmpty())
+                    firstExtension = fileExtension;
 
                 auto tag = UTTypeCreatePreferredIdentifierForTag (kUTTagClassFilenameExtension, fileExtensionCF, nullptr);
 
@@ -141,21 +168,87 @@ private:
         return result;
     }
 
+    static String getFilename (const File& path, const String& fallbackExtension)
+    {
+        auto filename  = path.getFileNameWithoutExtension();
+        auto extension = path.getFileExtension().substring (1);
+
+        if (filename.isEmpty())
+            filename = "Untitled";
+
+        if (extension.isEmpty())
+            extension = fallbackExtension;
+
+        if (extension.isNotEmpty())
+            filename += String (".") + extension;
+
+        return filename;
+    }
+
     //==============================================================================
     void didPickDocumentAtURL (NSURL* url)
     {
-        Array<URL> chooserResults;
-        chooserResults.add (URL (nsStringToJuce ([url absoluteString])));
+        bool isWriting = controller.get().documentPickerMode == UIDocumentPickerModeExportToService
+                       | controller.get().documentPickerMode == UIDocumentPickerModeMoveToService;
 
-        owner.finished (chooserResults, false);
-        exitModalState (1);
+        NSUInteger accessOptions = isWriting ? 0 : NSFileCoordinatorReadingWithoutChanges;
+
+        auto* fileAccessIntent = isWriting
+                               ? [NSFileAccessIntent writingIntentWithURL: url options: accessOptions]
+                               : [NSFileAccessIntent readingIntentWithURL: url options: accessOptions];
+
+        NSArray<NSFileAccessIntent*>* intents = @[fileAccessIntent];
+
+        auto* fileCoordinator = [[NSFileCoordinator alloc] initWithFilePresenter: nil];
+
+        [fileCoordinator coordinateAccessWithIntents: intents queue: [NSOperationQueue mainQueue] byAccessor: ^(NSError* err)
+        {
+            Array<URL> chooserResults;
+
+            if (err == nil)
+            {
+                [url startAccessingSecurityScopedResource];
+
+                NSError* error = nil;
+
+                NSData* bookmark = [url bookmarkDataWithOptions: 0
+                                 includingResourceValuesForKeys: nil
+                                                  relativeToURL: nil
+                                                          error: &error];
+
+                [url stopAccessingSecurityScopedResource];
+
+                URL juceUrl (nsStringToJuce ([url absoluteString]));
+
+                if (error == nil)
+                {
+                    setURLBookmark (juceUrl, (void*) bookmark);
+                }
+                else
+                {
+                    auto* desc = [error localizedDescription];
+                    ignoreUnused (desc);
+                    jassertfalse;
+                }
+
+                chooserResults.add (juceUrl);
+            }
+            else
+            {
+                auto* desc = [err localizedDescription];
+                ignoreUnused (desc);
+                jassertfalse;
+            }
+
+            owner.finished (chooserResults);
+        }];
     }
 
     void pickerWasCancelled()
     {
         Array<URL> chooserResults;
 
-        owner.finished (chooserResults, false);
+        owner.finished (chooserResults);
         exitModalState (0);
     }
 
@@ -174,7 +267,7 @@ private:
             registerClass();
         }
 
-        static void setOwner (id self, Native* owner)   { object_setInstanceVariable         (self, "owner", owner); }
+        static void setOwner (id self, Native* owner)   { object_setInstanceVariable (self, "owner", owner); }
         static Native* getOwner (id self)               { return getIvar<Native*> (self, "owner"); }
 
         //==============================================================================

@@ -535,7 +535,7 @@ public:
                         [safeThis] (int)
                         {
                             if (safeThis != nullptr)
-                                safeThis->owner.finished (safeThis->nativeFileChooser->results, true);
+                                safeThis->owner.finished (safeThis->nativeFileChooser->results);
                         }));
 
         nativeFileChooser->open (true);
@@ -548,7 +548,7 @@ public:
         exitModalState (nativeFileChooser->results.size() > 0 ? 1 : 0);
         nativeFileChooser->cancel();
 
-        owner.finished (nativeFileChooser->results, true);
+        owner.finished (nativeFileChooser->results);
     }
 
 private:

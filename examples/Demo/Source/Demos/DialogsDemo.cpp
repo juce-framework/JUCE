@@ -331,17 +331,34 @@ private:
                                       useNativeVersion);
 
                 fc->launchAsync (FileBrowserComponent::saveMode | FileBrowserComponent::canSelectFiles,
-                                 [] (const FileChooser& chooser)
+                                 [fileToSave] (const FileChooser& chooser)
                                  {
                                      auto result = chooser.getURLResult();
                                      auto name = result.isEmpty() ? String()
                                                                   : (result.isLocalFile() ? result.getLocalFile().getFullPathName()
                                                                                           : result.toString (true));
 
+                                     // Android and iOS file choosers will create placeholder files for chosen
+                                     // paths, so we may as well write into those files.
+                                   #if JUCE_ANDROID || JUCE_IOS
+                                     if (! result.isEmpty())
+                                     {
+                                         ScopedPointer<InputStream> wi (fileToSave.createInputStream());
+                                         ScopedPointer<OutputStream> wo (result.createOutputStream());
+
+                                         if (wi != nullptr && wo != nullptr)
+                                         {
+                                             auto numWritten = wo->writeFromInputStream (*wi, -1);
+                                             jassert (numWritten > 0);
+                                             ignoreUnused (numWritten);
+                                         }
+                                     }
+                                   #endif
+
                                      AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
                                                                        "File Chooser...",
                                                                        "You picked: " + name);
-                                 }, nullptr, fileToSave);
+                                 });
             }
             else if (type == directoryChooser)
             {

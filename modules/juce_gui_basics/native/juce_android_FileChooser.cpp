@@ -109,7 +109,7 @@ public:
                         {
                             env->SetObjectArrayElement (jMimeTypes.get(), i, javaString (mimeTypes[i]).get());
 
-                            if (mimeGroup != mimeTypes[0].upToFirstOccurrenceOf ("/", false, false))
+                            if (mimeGroup != mimeTypes[i].upToFirstOccurrenceOf ("/", false, false))
                                 allMimeTypesHaveSameGroup = false;
                         }
 
@@ -168,7 +168,7 @@ public:
             }
         }
 
-        owner.finished (chosenURLs, true);
+        owner.finished (chosenURLs);
     }
 
     static Native* currentFileChooser;
