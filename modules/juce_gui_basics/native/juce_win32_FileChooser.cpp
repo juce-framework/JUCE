@@ -533,21 +533,12 @@ public:
     {
         SafePointer<Native> safeThis (this);
 
-<<<<<<< Updated upstream
-        enterModalState (true, ModalCallbackFunction::create(
-                        [safeThis] (int)
-                        {
-                            if (safeThis != nullptr)
-                                safeThis->owner.finished (safeThis->nativeFileChooser->results);
-                        }));
-=======
         enterModalState (true, ModalCallbackFunction::create (
                          [safeThis] (int)
                          {
                              if (safeThis != nullptr)
-                                 safeThis->owner.finished (safeThis->nativeFileChooser->results, true);
+                                 safeThis->owner.finished (safeThis->nativeFileChooser->results);
                          }));
->>>>>>> Stashed changes
 
         nativeFileChooser->open (true);
     }
