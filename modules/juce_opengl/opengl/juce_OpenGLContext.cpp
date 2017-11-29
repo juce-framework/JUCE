@@ -143,7 +143,10 @@ public:
     }
 
     //==============================================================================
-    void paint (Graphics&) override {}
+    void paint (Graphics&) override
+    {
+        updateViewportSize (false);
+    }
 
     bool invalidateAll() override
     {
@@ -229,8 +232,6 @@ public:
 
             if (shouldExit())
                 return false;
-
-            updateViewportSize (false);
         }
 
         if (! context.makeActive())
