@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -28,7 +29,7 @@
     various methods to operate on the data.
     @see CharPointer_UTF16, CharPointer_UTF32
 */
-class CharPointer_UTF8
+class CharPointer_UTF8  final
 {
 public:
     typedef char CharType;
@@ -470,7 +471,7 @@ public:
     /** Parses this string as a 64-bit integer. */
     int64 getIntValue64() const noexcept
     {
-       #if JUCE_WINDOWS
+       #if JUCE_WINDOWS && ! JUCE_MINGW
         return _atoi64 (data);
        #else
         return atoll (data);
@@ -560,3 +561,5 @@ public:
 private:
     CharType* data;
 };
+
+} // namespace juce

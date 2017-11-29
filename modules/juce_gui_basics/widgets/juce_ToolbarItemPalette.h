@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -64,7 +64,7 @@ private:
     ToolbarItemFactory& factory;
     Toolbar& toolbar;
     Viewport viewport;
-    OwnedArray <ToolbarItemComponent> items;
+    OwnedArray<ToolbarItemComponent> items;
 
     friend class Toolbar;
     void replaceComponent (ToolbarItemComponent&);
@@ -72,3 +72,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToolbarItemPalette)
 };
+
+} // namespace juce

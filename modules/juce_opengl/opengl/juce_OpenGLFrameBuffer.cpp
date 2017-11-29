@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class OpenGLFrameBuffer::Pimpl
 {
 public:
@@ -177,11 +180,11 @@ bool OpenGLFrameBuffer::initialise (OpenGLContext& context, int width, int heigh
 {
     jassert (context.isActive()); // The context must be active when creating a framebuffer!
 
-    pimpl = nullptr;
+    pimpl.reset();
     pimpl = new Pimpl (context, width, height, false, false);
 
     if (! pimpl->createdOk())
-        pimpl = nullptr;
+        pimpl.reset();
 
     return pimpl != nullptr;
 }
@@ -203,7 +206,7 @@ bool OpenGLFrameBuffer::initialise (OpenGLFrameBuffer& other)
 
     if (p == nullptr)
     {
-        pimpl = nullptr;
+        pimpl.reset();
         return true;
     }
 
@@ -231,8 +234,8 @@ bool OpenGLFrameBuffer::initialise (OpenGLFrameBuffer& other)
 
 void OpenGLFrameBuffer::release()
 {
-    pimpl = nullptr;
-    savedState = nullptr;
+    pimpl.reset();
+    savedState.reset();
 }
 
 void OpenGLFrameBuffer::saveAndRelease()
@@ -240,7 +243,7 @@ void OpenGLFrameBuffer::saveAndRelease()
     if (pimpl != nullptr)
     {
         savedState = new SavedState (*this, pimpl->width, pimpl->height);
-        pimpl = nullptr;
+        pimpl.reset();
     }
 }
 
@@ -347,3 +350,5 @@ bool OpenGLFrameBuffer::writePixels (const PixelARGB* data, const Rectangle<int>
     JUCE_CHECK_OPENGL_ERROR
     return true;
 }
+
+} // namespace juce

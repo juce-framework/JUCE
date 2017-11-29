@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace RelativeRectangleHelpers
 {
     inline void skipComma (String::CharPointerType& s)
@@ -262,3 +265,5 @@ void RelativeRectangle::applyToComponent (Component& component) const
         component.setBounds (resolve (nullptr).getSmallestIntegerContainer());
     }
 }
+
+} // namespace juce

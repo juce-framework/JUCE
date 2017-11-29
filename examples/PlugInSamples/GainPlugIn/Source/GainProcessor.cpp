@@ -48,7 +48,7 @@ public:
     void prepareToPlay (double, int) override {}
     void releaseResources() override {}
 
-    void processBlock (AudioSampleBuffer& buffer, MidiBuffer&) override
+    void processBlock (AudioBuffer<float>& buffer, MidiBuffer&) override
     {
         buffer.applyGain (*gain);
     }

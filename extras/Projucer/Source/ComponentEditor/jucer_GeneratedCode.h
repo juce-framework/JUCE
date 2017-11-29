@@ -29,7 +29,6 @@
 #include "../Project/jucer_Project.h"
 class JucerDocument;
 
-
 //==============================================================================
 /**
     A class for collecting the various snippets of c++ that will be assembled into

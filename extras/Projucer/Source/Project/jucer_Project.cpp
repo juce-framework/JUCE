@@ -24,11 +24,9 @@
   ==============================================================================
 */
 
-#include "../jucer_Headers.h"
+#include "../Application/jucer_Headers.h"
 #include "jucer_Project.h"
-#include "../Project Saving/jucer_ProjectExporter.h"
-#include "../Project Saving/jucer_ProjectSaver.h"
-#include "../Application/jucer_OpenDocumentManager.h"
+#include "../ProjectSaving/jucer_ProjectSaver.h"
 #include "../Application/jucer_Application.h"
 
 namespace
@@ -148,7 +146,10 @@ void Project::setMissingDefaultValues()
         shouldIncludeBinaryInAppConfig() = true;
 
     if (! projectRoot.hasProperty (Ids::cppLanguageStandard) && ! setCppVersionFromOldExporterSettings())
-        getCppStandardValue() = "11";
+        getCppStandardValue() = "14";
+
+    if (getCompanyCopyright().toString().isEmpty())
+        getCompanyCopyright() = getCompanyName().toString();
 
     ProjucerApplication::getApp().updateNewlyOpenedProject (*this);
 }
@@ -406,7 +407,7 @@ Result Project::loadDocument (const File& file)
         return Result::fail ("The document contains errors and couldn't be parsed!");
 
     registerRecentFile (file);
-    enabledModulesList = nullptr;
+    enabledModulesList.reset();
     projectRoot = newTree;
 
     removeDefunctExporters();
@@ -501,14 +502,14 @@ String Project::getRelativePathForFile (const File& file) const
     String p1 (relativePathBase.getFullPathName());
     String p2 (file.getFullPathName());
 
-    while (p1.startsWithChar (File::separator))
+    while (p1.startsWithChar (File::getSeparatorChar()))
         p1 = p1.substring (1);
 
-    while (p2.startsWithChar (File::separator))
+    while (p2.startsWithChar (File::getSeparatorChar()))
         p2 = p2.substring (1);
 
-    if (p1.upToFirstOccurrenceOf (File::separatorString, true, false)
-          .equalsIgnoreCase (p2.upToFirstOccurrenceOf (File::separatorString, true, false)))
+    if (p1.upToFirstOccurrenceOf (File::getSeparatorString(), true, false)
+          .equalsIgnoreCase (p2.upToFirstOccurrenceOf (File::getSeparatorString(), true, false)))
     {
         filename = FileHelpers::getRelativePathFrom (file, relativePathBase);
     }
@@ -631,6 +632,9 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
     props.add (new TextPropertyComponent (getCompanyName(), "Company Name", 256, false),
                "Your company name, which will be added to the properties of the binary where possible");
 
+    props.add (new TextPropertyComponent (getCompanyCopyright(), "Company Copyright", 256, false),
+               "Your company copyright, which will be added to the properties of the binary where possible");
+
     props.add (new TextPropertyComponent (getCompanyWebsite(), "Company Website", 256, false),
                "Your company website, which will be added to the properties of the binary where possible");
 
@@ -750,6 +754,8 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
     props.add (new TextPropertyComponent (getProjectPreprocessorDefs(), "Preprocessor definitions", 32768, true),
                "Global preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace, commas, or "
                "new-lines to separate the items - to include a space or comma in a definition, precede it with a backslash.");
+
+    props.addSearchPathProperty (getProjectHeaderSearchPaths(), "Header search paths", "Global header search paths.");
 
     props.add (new TextPropertyComponent (getProjectUserNotes(), "Notes", 32768, true),
                "Extra comments: This field is not used for code or project generation, it's just a space where you can express your thoughts.");
@@ -921,6 +927,11 @@ void Project::Item::setID (const String& newID)   { state.setProperty (Ids::ID, 
 
 Drawable* Project::Item::loadAsImageFile() const
 {
+    const MessageManagerLock mml (ThreadPoolJob::getCurrentThreadPoolJob());
+
+    if (! mml.lockWasGained())
+        return nullptr;
+
     return isValid() ? Drawable::createFromImageFile (getFile())
                      : nullptr;
 }
@@ -1495,7 +1506,7 @@ void Project::addNewExporter (const String& exporterName)
                                        + getUniqueTargetFolderSuffixForExporter (exp->getName(), exp->getTargetLocationString());
 
     auto exportersTree = getExporters();
-    exportersTree.addChild (exp->settings, -1, getUndoManagerFor (exportersTree));
+    exportersTree.appendChild (exp->settings, getUndoManagerFor (exportersTree));
 }
 
 void Project::createExporterForCurrentPlatform()

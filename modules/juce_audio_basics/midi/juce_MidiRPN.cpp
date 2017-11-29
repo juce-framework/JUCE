@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 MidiRPNDetector::MidiRPNDetector() noexcept
 {
 }
@@ -369,3 +372,5 @@ private:
 static MidiRPNGeneratorTests MidiRPNGeneratorUnitTests;
 
 #endif // JUCE_UNIT_TESTS
+
+} // namespace juce

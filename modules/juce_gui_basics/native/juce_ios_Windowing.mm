@@ -24,20 +24,25 @@
   ==============================================================================
 */
 
-extern bool isIOSAppActive;
-
-struct AppInactivityCallback // NB: careful, this declaration is duplicated in other modules
+namespace juce
 {
-    virtual ~AppInactivityCallback() {}
-    virtual void appBecomingInactive() = 0;
-};
+    extern bool isIOSAppActive;
 
-// This is an internal list of callbacks (but currently used between modules)
-Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
+    struct AppInactivityCallback // NB: careful, this declaration is duplicated in other modules
+    {
+        virtual ~AppInactivityCallback() {}
+        virtual void appBecomingInactive() = 0;
+    };
 
-} // (juce namespace)
+    // This is an internal list of callbacks (but currently used between modules)
+    Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
+}
 
+#if JUCE_PUSH_NOTIFICATIONS && defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+@interface JuceAppStartupDelegate : NSObject <UIApplicationDelegate, UNUserNotificationCenterDelegate>
+#else
 @interface JuceAppStartupDelegate : NSObject <UIApplicationDelegate>
+#endif
 {
     UIBackgroundTaskIdentifier appSuspendTask;
 }
@@ -50,16 +55,46 @@ Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
 - (void) applicationWillEnterForeground: (UIApplication*) application;
 - (void) applicationDidBecomeActive: (UIApplication*) application;
 - (void) applicationWillResignActive: (UIApplication*) application;
-- (void) application: (UIApplication*) application handleEventsForBackgroundURLSession: (NSString*)identifier
-   completionHandler: (void (^)(void))completionHandler;
+- (void) application: (UIApplication*) application handleEventsForBackgroundURLSession: (NSString*) identifier
+   completionHandler: (void (^)(void)) completionHandler;
+#if JUCE_PUSH_NOTIFICATIONS
+- (void) application: (UIApplication*) application didRegisterUserNotificationSettings: (UIUserNotificationSettings*) notificationSettings;
+- (void) application: (UIApplication*) application didRegisterForRemoteNotificationsWithDeviceToken: (NSData*) deviceToken;
+- (void) application: (UIApplication*) application didFailToRegisterForRemoteNotificationsWithError: (NSError*) error;
+- (void) application: (UIApplication*) application didReceiveRemoteNotification: (NSDictionary*) userInfo;
+- (void) application: (UIApplication*) application didReceiveRemoteNotification: (NSDictionary*) userInfo
+  fetchCompletionHandler: (void (^)(UIBackgroundFetchResult result)) completionHandler;
+- (void) application: (UIApplication*) application handleActionWithIdentifier: (NSString*) identifier
+  forRemoteNotification: (NSDictionary*) userInfo withResponseInfo: (NSDictionary*) responseInfo
+   completionHandler: (void(^)()) completionHandler;
+- (void) application: (UIApplication*) application didReceiveLocalNotification: (UILocalNotification*) notification;
+- (void) application: (UIApplication*) application handleActionWithIdentifier: (NSString*) identifier
+  forLocalNotification: (UILocalNotification*) notification completionHandler: (void(^)()) completionHandler;
+- (void) application: (UIApplication*) application handleActionWithIdentifier: (NSString*) identifier
+  forLocalNotification: (UILocalNotification*) notification withResponseInfo: (NSDictionary*) responseInfo
+   completionHandler: (void(^)()) completionHandler;
+#if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+- (void) userNotificationCenter: (UNUserNotificationCenter*) center willPresentNotification: (UNNotification*) notification
+          withCompletionHandler: (void (^)(UNNotificationPresentationOptions options)) completionHandler;
+- (void) userNotificationCenter: (UNUserNotificationCenter*) center didReceiveNotificationResponse: (UNNotificationResponse*) response
+          withCompletionHandler: (void(^)())completionHandler;
+#endif
+#endif
+
 @end
 
 @implementation JuceAppStartupDelegate
+
+    NSObject* _pushNotificationsDelegate;
 
 - (id)init
 {
     self = [super init];
     appSuspendTask = UIBackgroundTaskInvalid;
+
+  #if JUCE_PUSH_NOTIFICATIONS && defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+    [UNUserNotificationCenter currentNotificationCenter].delegate = self;
+  #endif
 
     return self;
 }
@@ -99,7 +134,7 @@ Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
             }
         }];
 
-        MessageManager::callAsync ([self,application,app] ()  { app->suspended(); });
+        MessageManager::callAsync ([self,application,app]()  { app->suspended(); });
        #else
         ignoreUnused (application);
         app->suspended();
@@ -117,7 +152,8 @@ Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
 
 - (void) applicationDidBecomeActive: (UIApplication*) application
 {
-    ignoreUnused (application);
+    application.applicationIconBadgeNumber = 0;
+
     isIOSAppActive = true;
 }
 
@@ -137,6 +173,232 @@ Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
     URL::DownloadTask::juce_iosURLSessionNotify (nsStringToJuce (identifier));
     completionHandler();
 }
+
+- (void) setPushNotificationsDelegateToUse: (NSObject*) delegate
+{
+    _pushNotificationsDelegate = delegate;
+}
+
+#if JUCE_PUSH_NOTIFICATIONS
+- (void) application: (UIApplication*) application didRegisterUserNotificationSettings: (UIUserNotificationSettings*) notificationSettings
+{
+    ignoreUnused (application);
+
+    SEL selector = NSSelectorFromString (@"application:didRegisterUserNotificationSettings:");
+
+    if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
+    {
+        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [_pushNotificationsDelegate methodSignatureForSelector: selector]];
+        [invocation setSelector: selector];
+        [invocation setTarget: _pushNotificationsDelegate];
+        [invocation setArgument: &application          atIndex:2];
+        [invocation setArgument: &notificationSettings atIndex:3];
+
+        [invocation invoke];
+    }
+}
+
+- (void) application: (UIApplication*) application didRegisterForRemoteNotificationsWithDeviceToken: (NSData*) deviceToken
+{
+    ignoreUnused (application);
+
+    SEL selector = NSSelectorFromString (@"application:didRegisterForRemoteNotificationsWithDeviceToken:");
+
+    if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
+    {
+        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [_pushNotificationsDelegate methodSignatureForSelector: selector]];
+        [invocation setSelector: selector];
+        [invocation setTarget: _pushNotificationsDelegate];
+        [invocation setArgument: &application atIndex:2];
+        [invocation setArgument: &deviceToken atIndex:3];
+
+        [invocation invoke];
+    }
+}
+
+- (void) application: (UIApplication*) application didFailToRegisterForRemoteNotificationsWithError: (NSError*) error
+{
+    ignoreUnused (application);
+
+    SEL selector = NSSelectorFromString (@"application:didFailToRegisterForRemoteNotificationsWithError:");
+
+    if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
+    {
+        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [_pushNotificationsDelegate methodSignatureForSelector: selector]];
+        [invocation setSelector: selector];
+        [invocation setTarget: _pushNotificationsDelegate];
+        [invocation setArgument: &application atIndex:2];
+        [invocation setArgument: &error       atIndex:3];
+
+        [invocation invoke];
+    }
+}
+
+- (void) application: (UIApplication*) application didReceiveRemoteNotification: (NSDictionary*) userInfo
+{
+    ignoreUnused (application);
+
+    SEL selector = NSSelectorFromString (@"application:didReceiveRemoteNotification:");
+
+    if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
+    {
+        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [_pushNotificationsDelegate methodSignatureForSelector: selector]];
+        [invocation setSelector: selector];
+        [invocation setTarget: _pushNotificationsDelegate];
+        [invocation setArgument: &application atIndex:2];
+        [invocation setArgument: &userInfo    atIndex:3];
+
+        [invocation invoke];
+    }
+}
+
+- (void) application: (UIApplication*) application didReceiveRemoteNotification: (NSDictionary*) userInfo
+  fetchCompletionHandler: (void (^)(UIBackgroundFetchResult result)) completionHandler
+{
+    ignoreUnused (application);
+
+    SEL selector = NSSelectorFromString (@"application:didReceiveRemoteNotification:fetchCompletionHandler:");
+
+    if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
+    {
+        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [_pushNotificationsDelegate methodSignatureForSelector: selector]];
+        [invocation setSelector: selector];
+        [invocation setTarget: _pushNotificationsDelegate];
+        [invocation setArgument: &application       atIndex:2];
+        [invocation setArgument: &userInfo          atIndex:3];
+        [invocation setArgument: &completionHandler atIndex:4];
+
+        [invocation invoke];
+    }
+}
+
+- (void) application: (UIApplication*) application handleActionWithIdentifier: (NSString*) identifier
+  forRemoteNotification: (NSDictionary*) userInfo withResponseInfo: (NSDictionary*) responseInfo
+  completionHandler: (void(^)()) completionHandler
+{
+    ignoreUnused (application);
+
+    SEL selector = NSSelectorFromString (@"application:handleActionWithIdentifier:forRemoteNotification:withResponseInfo:completionHandler:");
+
+    if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
+    {
+        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [_pushNotificationsDelegate methodSignatureForSelector: selector]];
+        [invocation setSelector: selector];
+        [invocation setTarget: _pushNotificationsDelegate];
+        [invocation setArgument: &application       atIndex:2];
+        [invocation setArgument: &identifier        atIndex:3];
+        [invocation setArgument: &userInfo          atIndex:4];
+        [invocation setArgument: &responseInfo      atIndex:5];
+        [invocation setArgument: &completionHandler atIndex:6];
+
+        [invocation invoke];
+    }
+}
+
+- (void) application: (UIApplication*) application didReceiveLocalNotification: (UILocalNotification*) notification
+{
+    ignoreUnused (application);
+
+    SEL selector = NSSelectorFromString (@"application:didReceiveLocalNotification:");
+
+    if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
+    {
+        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [_pushNotificationsDelegate methodSignatureForSelector: selector]];
+        [invocation setSelector: selector];
+        [invocation setTarget: _pushNotificationsDelegate];
+        [invocation setArgument: &application  atIndex:2];
+        [invocation setArgument: &notification atIndex:3];
+
+        [invocation invoke];
+    }
+}
+
+- (void) application: (UIApplication*) application handleActionWithIdentifier: (NSString*) identifier
+  forLocalNotification: (UILocalNotification*) notification completionHandler: (void(^)()) completionHandler
+{
+    ignoreUnused (application);
+
+    SEL selector = NSSelectorFromString (@"application:handleActionWithIdentifier:forLocalNotification:completionHandler:");
+
+    if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
+    {
+        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [_pushNotificationsDelegate methodSignatureForSelector: selector]];
+        [invocation setSelector: selector];
+        [invocation setTarget: _pushNotificationsDelegate];
+        [invocation setArgument: &application       atIndex:2];
+        [invocation setArgument: &identifier        atIndex:3];
+        [invocation setArgument: &notification      atIndex:4];
+        [invocation setArgument: &completionHandler atIndex:5];
+
+        [invocation invoke];
+    }
+}
+
+- (void) application: (UIApplication*) application handleActionWithIdentifier: (NSString*) identifier
+  forLocalNotification: (UILocalNotification*) notification withResponseInfo: (NSDictionary*) responseInfo
+  completionHandler: (void(^)()) completionHandler
+{
+    ignoreUnused (application);
+
+    SEL selector = NSSelectorFromString (@"application:handleActionWithIdentifier:forLocalNotification:withResponseInfo:completionHandler:");
+
+    if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
+    {
+        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [_pushNotificationsDelegate methodSignatureForSelector: selector]];
+        [invocation setSelector: selector];
+        [invocation setTarget: _pushNotificationsDelegate];
+        [invocation setArgument: &application       atIndex:2];
+        [invocation setArgument: &identifier        atIndex:3];
+        [invocation setArgument: &notification      atIndex:4];
+        [invocation setArgument: &responseInfo      atIndex:5];
+        [invocation setArgument: &completionHandler atIndex:6];
+
+        [invocation invoke];
+    }
+}
+
+#if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+- (void) userNotificationCenter: (UNUserNotificationCenter*) center willPresentNotification: (UNNotification*) notification
+         withCompletionHandler: (void (^)(UNNotificationPresentationOptions options)) completionHandler
+{
+    ignoreUnused (center);
+
+    SEL selector = NSSelectorFromString (@"userNotificationCenter:willPresentNotification:withCompletionHandler:");
+
+    if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
+    {
+        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [_pushNotificationsDelegate methodSignatureForSelector: selector]];
+        [invocation setSelector: selector];
+        [invocation setTarget: _pushNotificationsDelegate];
+        [invocation setArgument: &center            atIndex:2];
+        [invocation setArgument: &notification      atIndex:3];
+        [invocation setArgument: &completionHandler atIndex:4];
+
+        [invocation invoke];
+    }
+}
+
+- (void) userNotificationCenter: (UNUserNotificationCenter*) center didReceiveNotificationResponse: (UNNotificationResponse*) response
+         withCompletionHandler: (void(^)()) completionHandler
+{
+    ignoreUnused (center);
+
+    SEL selector = NSSelectorFromString (@"userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:");
+
+    if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
+    {
+        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [_pushNotificationsDelegate methodSignatureForSelector: selector]];
+        [invocation setSelector: selector];
+        [invocation setTarget: _pushNotificationsDelegate];
+        [invocation setArgument: &center            atIndex:2];
+        [invocation setArgument: &response          atIndex:3];
+        [invocation setArgument: &completionHandler atIndex:4];
+
+        [invocation invoke];
+    }
+}
+#endif
+#endif
 
 @end
 
@@ -478,3 +740,5 @@ void Desktop::Displays::findDisplays (float masterScale)
         displays.add (d);
     }
 }
+
+} // namespace juce

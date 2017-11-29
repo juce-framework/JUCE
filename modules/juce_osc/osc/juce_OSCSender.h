@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -153,3 +153,5 @@ private:
      return sendToIPAddress (targetIPAddress, targetPortNumber, OSCMessage (address, std::forward<Args> (args)...));
  }
 #endif // JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
+
+} // namespace juce

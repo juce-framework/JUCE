@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 /** @internal This macro contains a list of GL extension functions that need to be dynamically loaded on Windows/Linux.
     @see OpenGLExtensionFunctions
@@ -154,3 +154,5 @@ struct OpenGLExtensionFunctions
 
     #undef JUCE_DECLARE_GL_FUNCTION
 };
+
+} // namespace juce

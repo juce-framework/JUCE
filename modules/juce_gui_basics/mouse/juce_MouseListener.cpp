@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 void MouseListener::mouseEnter (const MouseEvent&) {}
 void MouseListener::mouseExit (const MouseEvent&)  {}
 void MouseListener::mouseDown (const MouseEvent&)  {}
@@ -32,3 +35,5 @@ void MouseListener::mouseDrag (const MouseEvent&)  {}
 void MouseListener::mouseMove (const MouseEvent&)  {}
 void MouseListener::mouseDoubleClick (const MouseEvent&) {}
 void MouseListener::mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) {}
+
+} // namespace juce

@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct CatmullRomAlgorithm
 {
     static forcedinline float valueAtOffset (const float* const inputs, const float offset) noexcept
@@ -78,4 +81,7 @@ int CatmullRomInterpolator::processAddingUnchecked (double actualRatio, const fl
 {
     return interpolateAddingUnchecked<CatmullRomAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut, gain);
 }
+
+
+} // namespace juce
 

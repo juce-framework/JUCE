@@ -24,7 +24,9 @@
   ==============================================================================
 */
 
-//==============================================================================
+namespace juce
+{
+
 bool juce_handleXEmbedEvent (ComponentPeer*, void*);
 Window juce_getCurrentFocusWindow (ComponentPeer*);
 
@@ -521,7 +523,7 @@ private:
                     if (allowResize)
                         configureNotify();
                     else
-                        MessageManager::callAsync([this] () {componentMovedOrResized (owner, true, true);});
+                        MessageManager::callAsync ([this]() {componentMovedOrResized (owner, true, true);});
 
                     return true;
             }
@@ -672,10 +674,12 @@ unsigned long XEmbedComponent::getHostWindowID()                   { return pimp
 //==============================================================================
 bool juce_handleXEmbedEvent (ComponentPeer* p, void* e)
 {
-    return ::XEmbedComponent::Pimpl::dispatchX11Event (p, reinterpret_cast<const XEvent*> (e));
+    return XEmbedComponent::Pimpl::dispatchX11Event (p, reinterpret_cast<const XEvent*> (e));
 }
 
 unsigned long juce_getCurrentFocusWindow (ComponentPeer* peer)
 {
-    return (unsigned long) ::XEmbedComponent::Pimpl::getCurrentFocusWindow (peer);
+    return (unsigned long) XEmbedComponent::Pimpl::getCurrentFocusWindow (peer);
 }
+
+} // namespace juce

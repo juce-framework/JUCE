@@ -24,11 +24,7 @@
   ==============================================================================
 */
 
-#pragma once
-
 #include "../juce_audio_plugin_client.h"
-
-using namespace juce;
 
 namespace juce
 {
@@ -47,4 +43,4 @@ namespace juce
     }
 }
 
-extern AudioProcessor* JUCE_API JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor::WrapperType);
+extern juce::AudioProcessor* JUCE_API JUCE_CALLTYPE createPluginFilterOfType (juce::AudioProcessor::WrapperType);

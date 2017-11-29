@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 #ifndef DOXYGEN
  namespace AtomicHelpers
@@ -36,7 +37,7 @@
      A simple wrapper around std::atomic.
  */
  template <typename Type>
- struct Atomic
+ struct Atomic  final
  {
      typedef typename AtomicHelpers::DiffTypeHelper<Type>::Type DiffType;
 
@@ -44,7 +45,7 @@
      Atomic() noexcept  : value (0) {}
 
      /** Creates a new value, with a given initial value. */
-     Atomic (const Type initialValue) noexcept  : value (initialValue) {}
+     Atomic (Type initialValue) noexcept  : value (initialValue) {}
 
      /** Copies another value (atomically). */
      Atomic (const Atomic& other) noexcept  : value (other.get()) {}
@@ -53,7 +54,7 @@
      ~Atomic() noexcept
      {
         #if __cpp_lib_atomic_is_always_lock_free
-         static_assert (std::atomic<Type>::is_always_lock_free(),
+         static_assert (std::atomic<Type>::is_always_lock_free,
                         "This class can only be used for lock-free types");
         #endif
      }
@@ -104,7 +105,7 @@
      }
 
      /** Copies another value into this one (atomically). */
-     Atomic<Type>& operator= (const Type newValue) noexcept
+     Atomic<Type>& operator= (Type newValue) noexcept
      {
          value = newValue;
          return *this;
@@ -127,14 +128,16 @@
          Internally this calls std::atomic_thread_fence with
          memory_order_seq_cst (the strictest std::memory_order).
       */
-     void memoryBarrier() noexcept { atomic_thread_fence (std::memory_order_seq_cst); }
+     void memoryBarrier() noexcept          { atomic_thread_fence (std::memory_order_seq_cst); }
 
      /** The std::atomic object that this class operates on. */
      std::atomic<Type> value;
 
      //==============================================================================
     #ifndef DOXYGEN
-     // This method has been deprecated as there is no equivalent method in std::atomic.
+     /* This method has been deprecated as there is no equivalent method in
+        std::atomic. Use compareAndSetBool instead.
+     */
      JUCE_DEPRECATED (Type compareAndSetValue (Type, Type) noexcept);
     #endif
  };
@@ -153,7 +156,7 @@
      There are methods to perform most of the basic atomic operations.
  */
  template <typename Type>
- class Atomic : public AtomicBase<Type>
+ class Atomic  final  : public AtomicBase<Type>
  {
  public:
      /** Resulting type when subtracting the underlying Type. */
@@ -246,7 +249,7 @@
      inline Type compareAndSetValue (Type newValue, Type valueToCompare) noexcept  { return AtomicBase<Type>::compareAndSetValue (newValue, valueToCompare); }
 
      /** Implements a memory read/write barrier. */
-     static inline void memoryBarrier() noexcept { AtomicBase<Type>::memoryBarrier (); }
+     static inline void memoryBarrier() noexcept   { AtomicBase<Type>::memoryBarrier(); }
  };
 
  #ifndef DOXYGEN
@@ -472,3 +475,5 @@
  #endif
 
 #endif
+
+} // namespace juce

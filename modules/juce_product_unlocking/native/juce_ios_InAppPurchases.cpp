@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 template <> struct ContainerDeletePolicy<SKProductsRequest>                                                { static void destroy (NSObject* o) { [o release]; } };
 template <> struct ContainerDeletePolicy<SKReceiptRefreshRequest>                                          { static void destroy (NSObject* o) { [o release]; } };
 template <> struct ContainerDeletePolicy<NSObject<SKProductsRequestDelegate,SKPaymentTransactionObserver>> { static void destroy (NSObject* o) { [o release]; } };
@@ -41,6 +44,7 @@ struct SKDelegateAndPaymentObserver
 
     virtual void didReceiveResponse (SKProductsRequest*, SKProductsResponse*) = 0;
     virtual void requestDidFinish (SKRequest*) = 0;
+    virtual void requestDidFailWithError (SKRequest*, NSError*) = 0;
     virtual void updatedTransactions (SKPaymentQueue*, NSArray<SKPaymentTransaction*>*) = 0;
     virtual void restoreCompletedTransactionsFailedWithError (SKPaymentQueue*, NSError*) = 0;
     virtual void restoreCompletedTransactionsFinished (SKPaymentQueue*) = 0;
@@ -59,6 +63,7 @@ private:
 
             addMethod (@selector (productsRequest:didReceiveResponse:),                       didReceiveResponse,                          "v@:@@");
             addMethod (@selector (requestDidFinish:),                                         requestDidFinish,                            "v@:@");
+            addMethod (@selector (request:didFailWithError:),                                 requestDidFailWithError,                     "v@:@@");
             addMethod (@selector (paymentQueue:updatedTransactions:),                         updatedTransactions,                         "v@:@@");
             addMethod (@selector (paymentQueue:restoreCompletedTransactionsFailedWithError:), restoreCompletedTransactionsFailedWithError, "v@:@@");
             addMethod (@selector (paymentQueueRestoreCompletedTransactionsFinished:),         restoreCompletedTransactionsFinished,        "v@:@");
@@ -74,6 +79,7 @@ private:
         //==============================================================================
         static void didReceiveResponse (id self, SEL, SKProductsRequest* request, SKProductsResponse* response)      { getThis (self).didReceiveResponse (request, response); }
         static void requestDidFinish (id self, SEL, SKRequest* request)                                              { getThis (self).requestDidFinish (request); }
+        static void requestDidFailWithError (id self, SEL, SKRequest* request, NSError* err)                         { getThis (self).requestDidFailWithError (request, err); }
         static void updatedTransactions (id self, SEL, SKPaymentQueue* queue, NSArray<SKPaymentTransaction*>* trans) { getThis (self).updatedTransactions (queue, trans); }
         static void restoreCompletedTransactionsFailedWithError (id self, SEL, SKPaymentQueue* q, NSError* err)      { getThis (self).restoreCompletedTransactionsFailedWithError (q, err); }
         static void restoreCompletedTransactionsFinished (id self, SEL, SKPaymentQueue* queue)                       { getThis (self).restoreCompletedTransactionsFinished (queue); }
@@ -97,9 +103,15 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         DownloadImpl (SKDownload* downloadToUse)  : download (downloadToUse) {}
 
         String getProductId()      const override  { return nsStringToJuce (download.contentIdentifier); }
-        int64 getContentLength()   const override  { return download.contentLength; }
         String getContentVersion() const override  { return nsStringToJuce (download.contentVersion); }
+
+      #if JUCE_IOS
+        int64 getContentLength()   const override  { return download.contentLength; }
         Status getStatus()         const override  { return SKDownloadStateToDownloadStatus (download.downloadState); }
+      #else
+        int64 getContentLength()   const override  { return [download.contentLength longLongValue]; }
+        Status getStatus()         const override  { return SKDownloadStateToDownloadStatus (download.state); }
+      #endif
 
         SKDownload* download;
     };
@@ -143,9 +155,14 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         {
             for (SKDownload* d in transaction.downloads)
             {
-                if (d.downloadState != SKDownloadStateFinished
-                     && d.downloadState != SKDownloadStateFailed
-                     && d.downloadState != SKDownloadStateCancelled)
+              #if JUCE_IOS
+                SKDownloadState state = d.downloadState;
+              #else
+                SKDownloadState state = d.state;
+              #endif
+                if (state != SKDownloadStateFinished
+                     && state != SKDownloadStateFailed
+                     && state != SKDownloadStateCancelled)
                 {
                     return false;
                 }
@@ -179,7 +196,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
     {
         if (! [SKPaymentQueue canMakePayments])
         {
-            owner.listeners.call (&Listener::productPurchaseFinished, {}, false, NEEDS_TRANS ("Payments not allowed"));
+            owner.listeners.call ([&] (Listener& l) { l.productPurchaseFinished ({}, false, NEEDS_TRANS ("Payments not allowed")); });
             return;
         }
 
@@ -272,6 +289,25 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         }
     }
 
+    void requestDidFailWithError (SKRequest* request, NSError* error) override
+    {
+        if (auto receiptRefreshRequest = getAs<SKReceiptRefreshRequest> (request))
+        {
+            for (auto i = 0; i < pendingReceiptRefreshRequests.size(); ++i)
+            {
+                auto& pendingRequest = *pendingReceiptRefreshRequests[i];
+
+                if (pendingRequest.request == receiptRefreshRequest)
+                {
+                    auto errorDetails = error != nil ? (", " + nsStringToJuce ([error localizedDescription])) : String();
+                    owner.listeners.call ([&] (Listener& l) { l.purchasesListRestored ({}, false, NEEDS_TRANS ("Receipt fetch failed") + errorDetails); });
+                    pendingReceiptRefreshRequests.remove (i);
+                    return;
+                }
+            }
+        }
+    }
+
     void updatedTransactions (SKPaymentQueue*, NSArray<SKPaymentTransaction*>* transactions) override
     {
         for (SKPaymentTransaction* transaction in transactions)
@@ -290,12 +326,12 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
 
     void restoreCompletedTransactionsFailedWithError (SKPaymentQueue*, NSError* error) override
     {
-        owner.listeners.call (&Listener::purchasesListRestored, {}, false, nsStringToJuce (error.localizedDescription));
+        owner.listeners.call ([&] (Listener& l) { l.purchasesListRestored ({}, false, nsStringToJuce (error.localizedDescription)); });
     }
 
     void restoreCompletedTransactionsFinished (SKPaymentQueue*) override
     {
-        owner.listeners.call (&Listener::purchasesListRestored, restoredPurchases, true, NEEDS_TRANS ("Success"));
+        owner.listeners.call ([this] (Listener& l) { l.purchasesListRestored (restoredPurchases, true, NEEDS_TRANS ("Success")); });
         restoredPurchases.clear();
     }
 
@@ -305,12 +341,17 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         {
             if (auto* pendingDownload = getPendingDownloadFor (download))
             {
+              #if JUCE_IOS
                 switch (download.downloadState)
+              #else
+                switch (download.state)
+              #endif
                 {
                     case SKDownloadStateWaiting: break;
-                    case SKDownloadStatePaused:  owner.listeners.call (&Listener::productDownloadPaused, *pendingDownload); break;
-                    case SKDownloadStateActive:  owner.listeners.call (&Listener::productDownloadProgressUpdate, *pendingDownload,
-                                                                       download.progress, RelativeTime (download.timeRemaining)); break;
+                    case SKDownloadStatePaused:  owner.listeners.call ([&] (Listener& l) { l.productDownloadPaused (*pendingDownload); }); break;
+                    case SKDownloadStateActive:  owner.listeners.call ([&] (Listener& l) { l.productDownloadProgressUpdate (*pendingDownload,
+                                                                                                                            download.progress,
+                                                                                                                            RelativeTime (download.timeRemaining)); }); break;
                     case SKDownloadStateFinished:
                     case SKDownloadStateFailed:
                     case SKDownloadStateCancelled: processDownloadFinish (pendingDownload, download); break;
@@ -329,7 +370,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         for (SKProduct* skProduct in products)
             productsToReturn.add (SKProductToIAPProduct (skProduct));
 
-        owner.listeners.call (&Listener::productsInfoReturned, productsToReturn);
+        owner.listeners.call ([&] (Listener& l) { l.productsInfoReturned (productsToReturn); });
     }
 
     void startPurchase (NSArray<SKProduct*>* products)
@@ -345,8 +386,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         }
         else
         {
-            owner.listeners.call (&Listener::productPurchaseFinished, {}, false,
-                                  NEEDS_TRANS ("Your app is not setup for payments"));
+            owner.listeners.call ([] (Listener& l) { l.productPurchaseFinished ({}, false, NEEDS_TRANS ("Your app is not setup for payments")); });
         }
     }
 
@@ -424,8 +464,8 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         if (transaction.transactionState == SKPaymentTransactionStateRestored)
             restoredPurchases.add ({ purchase, downloads });
         else
-            owner.listeners.call (&Listener::productPurchaseFinished, { purchase, downloads }, success,
-                                  SKPaymentTransactionStateToString (transaction.transactionState));
+            owner.listeners.call ([&] (Listener& l) { l.productPurchaseFinished ({ purchase, downloads }, success,
+                                                                                 SKPaymentTransactionStateToString (transaction.transactionState)); });
     }
 
     PendingDownloadsTransaction* getPendingDownloadsTransactionForSKTransaction (SKPaymentTransaction* transaction)
@@ -464,11 +504,17 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
     {
         if (auto* pdt = getPendingDownloadsTransactionSKDownloadFor (download))
         {
-            auto contentURL = download.downloadState == SKDownloadStateFinished
+          #if JUCE_IOS
+            SKDownloadState state = download.downloadState;
+          #else
+            SKDownloadState state = download.state;
+          #endif
+
+            auto contentURL = state == SKDownloadStateFinished
                                 ? URL (nsStringToJuce (download.contentURL.absoluteString))
                                 : URL();
 
-            owner.listeners.call (&Listener::productDownloadFinished, *pendingDownload, contentURL);
+            owner.listeners.call ([&] (Listener& l) { l.productDownloadFinished (*pendingDownload, contentURL); });
 
             if (pdt->canBeMarkedAsFinished())
             {
@@ -488,7 +534,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         if (auto* receiptData = [NSData dataWithContentsOfURL: receiptURL])
             fetchReceiptDetailsFromAppStore (receiptData, secret);
         else
-            owner.listeners.call (&Listener::purchasesListRestored, {}, false, NEEDS_TRANS ("Receipt fetch failed"));
+            owner.listeners.call ([&] (Listener& l) { l.purchasesListRestored ({}, false, NEEDS_TRANS ("Receipt fetch failed")); });
     }
 
     void fetchReceiptDetailsFromAppStore (NSData* receiptData, const String& secret)
@@ -505,7 +551,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
                                                               error: &error];
         if (requestData == nil)
         {
-            owner.listeners.call (&Listener::purchasesListRestored, {}, false, NEEDS_TRANS ("Receipt fetch failed"));
+            sendReceiptFetchFail();
             return;
         }
 
@@ -526,7 +572,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
                                                         {
                                                             if (connectionError != nil)
                                                             {
-                                                                owner.listeners.call (&Listener::purchasesListRestored, {}, false, NEEDS_TRANS ("Receipt fetch failed"));
+                                                                sendReceiptFetchFail();
                                                             }
                                                             else
                                                             {
@@ -535,7 +581,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
                                                                 if (NSDictionary* receiptDetails = [NSJSONSerialization JSONObjectWithData: data options: 0 error: &err])
                                                                     processReceiptDetails (receiptDetails);
                                                                 else
-                                                                    owner.listeners.call (&Listener::purchasesListRestored, {}, false, NEEDS_TRANS ("Receipt fetch failed"));
+                                                                    sendReceiptFetchFail();
                                                             }
                                                         }];
 
@@ -564,41 +610,64 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
                             {
                                 if (auto productId = getAs<NSString> (purchaseData[nsStringLiteral ("product_id")]))
                                 {
-                                    if (auto purchaseTime = getAs<NSNumber> (purchaseData[nsStringLiteral ("purchase_date_ms")]))
+                                    auto purchaseTime = getPurchaseDateMs (purchaseData[nsStringLiteral ("purchase_date_ms")]);
+
+                                    if (purchaseTime > 0)
                                     {
                                         purchases.add ({ { nsStringToJuce (transactionId),
                                                            nsStringToJuce (productId),
                                                            nsStringToJuce (bundleId),
-                                                           Time ([purchaseTime integerValue]).toString (true, true, true, true),
+                                                           Time (purchaseTime).toString (true, true, true, true),
                                                            {} }, {} });
                                     }
                                     else
                                     {
-                                        return sendReceiptFetchFail();
+                                        return sendReceiptFetchFailAsync();
                                     }
                                 }
                             }
                         }
                         else
                         {
-                            return sendReceiptFetchFail();
+                            return sendReceiptFetchFailAsync();
                         }
                     }
 
-                    MessageManager::callAsync ([this, purchases]() { owner.listeners.call (&Listener::purchasesListRestored,
-                                                                                           purchases, true, NEEDS_TRANS ("Success")); });
+                    MessageManager::callAsync ([this, purchases]() { owner.listeners.call ([&] (Listener& l) { l.purchasesListRestored (purchases, true, NEEDS_TRANS ("Success")); }); });
                     return;
                 }
             }
         }
 
-        sendReceiptFetchFail();
+        sendReceiptFetchFailAsync();
     }
 
     void sendReceiptFetchFail()
     {
-        MessageManager::callAsync ([this]() { owner.listeners.call (&Listener::purchasesListRestored,
-                                                                    {}, false, NEEDS_TRANS ("Receipt fetch failed")); });
+        owner.listeners.call ([] (Listener& l) { l.purchasesListRestored ({}, false, NEEDS_TRANS ("Receipt fetch failed")); });
+    }
+
+    void sendReceiptFetchFailAsync()
+    {
+        MessageManager::callAsync ([this]() { sendReceiptFetchFail(); });
+    }
+
+    static int64 getPurchaseDateMs (id date)
+    {
+        if (auto dateAsNumber = getAs<NSNumber> (date))
+        {
+            return [dateAsNumber longLongValue];
+        }
+        else if (auto dateAsString = getAs<NSString> (date))
+        {
+            auto* formatter = [[NSNumberFormatter alloc] init];
+            [formatter setNumberStyle: NSNumberFormatterDecimalStyle];
+            dateAsNumber = [formatter numberFromString: dateAsString];
+            [formatter release];
+            return [dateAsNumber longLongValue];
+        }
+
+        return -1;
     }
 
     //==============================================================================
@@ -612,7 +681,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
         auto identifier   = nsStringToJuce (skProduct.productIdentifier);
         auto title        = nsStringToJuce (skProduct.localizedTitle);
         auto description  = nsStringToJuce (skProduct.localizedDescription);
-        auto priceLocale  = nsStringToJuce (skProduct.priceLocale.languageCode);
+        auto priceLocale  = nsStringToJuce ([skProduct.priceLocale objectForKey: NSLocaleLanguageCode]);
         auto price        = nsStringToJuce ([numberFormatter stringFromNumber: skProduct.price]);
 
         [numberFormatter release];
@@ -677,3 +746,5 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
     OwnedArray<PendingDownloadsTransaction> pendingDownloadsTransactions;
     Array<Listener::PurchaseInfo> restoredPurchases;
 };
+
+} // namespace juce

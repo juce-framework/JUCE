@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -224,8 +224,14 @@ public:
     /** Returns true if the sustain pedal is currently active for this voice. */
     bool isSustainPedalDown() const noexcept                    { return sustainPedalDown; }
 
+    /** Modifies the sustain pedal flag. */
+    void setSustainPedalDown (bool isNowDown) noexcept          { sustainPedalDown = isNowDown; }
+
     /** Returns true if the sostenuto pedal is currently active for this voice. */
     bool isSostenutoPedalDown() const noexcept                  { return sostenutoPedalDown; }
+
+    /** Modifies the sostenuto pedal flag. */
+    void setSostenutoPedalDown (bool isNowDown) noexcept        { sostenutoPedalDown = isNowDown; }
 
     /** Returns true if a voice is sounding in its release phase **/
     bool isPlayingButReleased() const noexcept
@@ -514,15 +520,15 @@ public:
         with timestamps outside the specified region will be ignored.
     */
     inline void renderNextBlock (AudioBuffer<float>& outputAudio,
-                          const MidiBuffer& inputMidi,
-                          int startSample,
-                          int numSamples)
+                                 const MidiBuffer& inputMidi,
+                                 int startSample,
+                                 int numSamples)
         { processNextBlock (outputAudio, inputMidi, startSample, numSamples); }
 
     inline void renderNextBlock (AudioBuffer<double>& outputAudio,
-                          const MidiBuffer& inputMidi,
-                          int startSample,
-                          int numSamples)
+                                 const MidiBuffer& inputMidi,
+                                 int startSample,
+                                 int numSamples)
         { processNextBlock (outputAudio, inputMidi, startSample, numSamples); }
 
     /** Returns the current target sample rate at which rendering is being done.
@@ -639,3 +645,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Synthesiser)
 };
+
+} // namespace juce

@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_ALSA
 
 // You can define these strings in your app if you want to override the default names:
@@ -300,7 +303,7 @@ private:
     {
     public:
         MidiInputThread (AlsaClient& c)
-            : Thread ("Juce MIDI Input"), client (c), concatenator (2048)
+            : Thread ("JUCE MIDI Input"), client (c), concatenator (2048)
         {
             jassert (client.get() != nullptr);
         }
@@ -313,8 +316,8 @@ private:
 
             if (snd_midi_event_new (maxEventSize, &midiParser) >= 0)
             {
-                const int numPfds = snd_seq_poll_descriptors_count (seqHandle, POLLIN);
-                HeapBlock<pollfd> pfd ((size_t) numPfds);
+                auto numPfds = snd_seq_poll_descriptors_count (seqHandle, POLLIN);
+                HeapBlock<pollfd> pfd (numPfds);
                 snd_seq_poll_descriptors (seqHandle, pfd, (unsigned int) numPfds, POLLIN);
 
                 HeapBlock<uint8> buffer (maxEventSize);
@@ -610,3 +613,5 @@ MidiInput* MidiInput::openDevice (int, MidiInputCallback*)                  { re
 MidiInput* MidiInput::createNewDevice (const String&, MidiInputCallback*)   { return nullptr; }
 
 #endif
+
+} // namespace juce

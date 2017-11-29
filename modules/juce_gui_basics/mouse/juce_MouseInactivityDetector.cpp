@@ -24,8 +24,10 @@
   ==============================================================================
 */
 
-MouseInactivityDetector::MouseInactivityDetector (Component& c)
-    : targetComp (c), delayMs (1500), toleranceDistance (15), isActive (true)
+namespace juce
+{
+
+MouseInactivityDetector::MouseInactivityDetector (Component& c)  : targetComp (c)
 {
     targetComp.addMouseListener (this, true);
 }
@@ -48,7 +50,7 @@ void MouseInactivityDetector::timerCallback()
 
 void MouseInactivityDetector::wakeUp (const MouseEvent& e, bool alwaysWake)
 {
-    const Point<int> newPos (e.getEventRelativeTo (&targetComp).getPosition());
+    auto newPos = e.getEventRelativeTo (&targetComp).getPosition();
 
     if ((! isActive) && (alwaysWake || e.source.isTouch() || newPos.getDistanceFrom (lastMousePos) > toleranceDistance))
         setActive (true);
@@ -66,7 +68,11 @@ void MouseInactivityDetector::setActive (bool b)
     {
         isActive = b;
 
-        listenerList.call (b ? &Listener::mouseBecameActive
-                             : &Listener::mouseBecameInactive);
+        if (isActive)
+            listenerList.call ([] (Listener& l) { l.mouseBecameActive(); });
+        else
+            listenerList.call ([] (Listener& l) { l.mouseBecameInactive(); });
     }
 }
+
+} // namespace juce

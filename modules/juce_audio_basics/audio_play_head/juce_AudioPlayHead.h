@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -71,20 +71,20 @@ public:
         /** Time signature denominator, e.g. the 4 of a 3/4 time sig */
         int timeSigDenominator;
 
-        /** The current play position, in samples from the start of the edit. */
+        /** The current play position, in samples from the start of the timeline. */
         int64 timeInSamples;
-        /** The current play position, in seconds from the start of the edit. */
+        /** The current play position, in seconds from the start of the timeline. */
         double timeInSeconds;
 
-        /** For timecode, the position of the start of the edit, in seconds from 00:00:00:00. */
+        /** For timecode, the position of the start of the timeline, in seconds from 00:00:00:00. */
         double editOriginTime;
 
-        /** The current play position, in pulses-per-quarter-note. */
+        /** The current play position, in units of quarter-notes. */
         double ppqPosition;
 
-        /** The position of the start of the last bar, in pulses-per-quarter-note.
+        /** The position of the start of the last bar, in units of quarter-notes.
 
-            This is the time from the start of the edit to the start of the current
+            This is the time from the start of the timeline to the start of the current
             bar, in ppq units.
 
             Note - this value may be unavailable on some hosts, e.g. Pro-Tools. If
@@ -104,13 +104,13 @@ public:
         */
         bool isRecording;
 
-        /** The current cycle start position in pulses-per-quarter-note.
+        /** The current cycle start position in units of quarter-notes.
             Note that not all hosts or plugin formats may provide this value.
             @see isLooping
         */
         double ppqLoopStart;
 
-        /** The current cycle end position in pulses-per-quarter-note.
+        /** The current cycle end position in units of quarter-notes.
             Note that not all hosts or plugin formats may provide this value.
             @see isLooping
         */
@@ -151,3 +151,5 @@ public:
     /** Rewinds the audio. */
     virtual void transportRewind()                             {}
 };
+
+} // namespace juce

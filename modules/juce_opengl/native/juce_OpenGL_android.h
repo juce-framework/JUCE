@@ -24,20 +24,15 @@
   ==============================================================================
 */
 
-//==============================================================================
+namespace juce
+{
+
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (getParent, "getParent", "()Landroid/view/ViewParent;") \
  METHOD (layout, "layout", "(IIII)V" ) \
  METHOD (getNativeSurface,     "getNativeSurface",        "()Landroid/view/Surface;") \
 
 DECLARE_JNI_CLASS (NativeSurfaceView, JUCE_ANDROID_ACTIVITY_CLASSPATH "$NativeSurfaceView")
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
- METHOD (addView,        "addView",        "(Landroid/view/View;)V") \
- METHOD (removeView,     "removeView",        "(Landroid/view/View;)V") \
-
-DECLARE_JNI_CLASS (AndroidViewGroup, "android/view/ViewGroup")
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
@@ -306,3 +301,5 @@ bool OpenGLHelpers::isContextActive()
 {
     return eglGetCurrentContext() != EGL_NO_CONTEXT;
 }
+
+} // namespace juce

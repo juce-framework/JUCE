@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 AudioIODeviceType::AudioIODeviceType (const String& name)
     : typeName (name)
 {
@@ -35,7 +38,7 @@ void AudioIODeviceType::removeListener (Listener* l)   { listeners.remove (l); }
 
 void AudioIODeviceType::callDeviceChangeListeners()
 {
-    listeners.call (&AudioIODeviceType::Listener::audioDeviceListChanged);
+    listeners.call ([] (Listener& l) { l.audioDeviceListChanged(); });
 }
 
 //==============================================================================
@@ -74,3 +77,5 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_Android()         
 #if ! (JUCE_ANDROID && JUCE_USE_ANDROID_OPENSLES)
 AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_OpenSLES()        { return nullptr; }
 #endif
+
+} // namespace juce

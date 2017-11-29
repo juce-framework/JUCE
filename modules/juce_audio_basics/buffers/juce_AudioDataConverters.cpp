@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 void AudioDataConverters::convertFloatToInt16LE (const float* source, void* dest, int numSamples, const int destBytesPerSample)
 {
     const double maxVal = (double) 0x7fff;
@@ -512,12 +515,12 @@ public:
 
             // convert data from the source to dest format..
             ScopedPointer<AudioData::Converter> conv (new AudioData::ConverterInstance <AudioData::Pointer<F1, E1, AudioData::NonInterleaved, AudioData::Const>,
-                                                                                        AudioData::Pointer<F2, E2, AudioData::NonInterleaved, AudioData::NonConst> >());
+                                                                                        AudioData::Pointer<F2, E2, AudioData::NonInterleaved, AudioData::NonConst>>());
             conv->convertSamples (inPlace ? reversed : converted, original, numSamples);
 
             // ..and back again..
             conv = new AudioData::ConverterInstance <AudioData::Pointer<F2, E2, AudioData::NonInterleaved, AudioData::Const>,
-                                                     AudioData::Pointer<F1, E1, AudioData::NonInterleaved, AudioData::NonConst> >();
+                                                     AudioData::Pointer<F1, E1, AudioData::NonInterleaved, AudioData::NonConst>>();
             if (! inPlace)
                 zeromem (reversed, sizeof (reversed));
 
@@ -596,3 +599,5 @@ public:
 static AudioConversionTests audioConversionUnitTests;
 
 #endif
+
+} // namespace juce

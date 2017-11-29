@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 MPEValue::MPEValue() noexcept  : normalisedValue (8192)
 {
 }
@@ -158,11 +161,13 @@ private:
     //==============================================================================
     void expectFloatWithinRelativeError (float actualValue, float expectedValue, float maxRelativeError)
     {
-        const float maxAbsoluteError = jmax (1.0f, std::fabs (expectedValue)) * maxRelativeError;
-        expect (std::fabs (expectedValue - actualValue) < maxAbsoluteError);
+        const float maxAbsoluteError = jmax (1.0f, std::abs (expectedValue)) * maxRelativeError;
+        expect (std::abs (expectedValue - actualValue) < maxAbsoluteError);
     }
 };
 
 static MPEValueTests MPEValueUnitTests;
 
 #endif // JUCE_UNIT_TESTS
+
+} // namespace juce

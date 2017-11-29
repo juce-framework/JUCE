@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 // tests that some coordinates aren't NaNs
 #define JUCE_CHECK_COORDS_ARE_VALID(x, y) \
     jassert (x == x && y == y);
@@ -1631,3 +1634,5 @@ bool Path::Iterator::next() noexcept
 }
 
 #undef JUCE_CHECK_COORDS_ARE_VALID
+
+} // namespace juce

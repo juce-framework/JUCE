@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 /**
     Applies waveshaping to audio samples as single samples or AudioBlocks.
@@ -63,3 +67,6 @@ struct WaveShaper
 //==============================================================================
 template <typename Functor>
 static WaveShaper<typename std::result_of<Functor>, Functor> CreateWaveShaper (Functor functionToUse)   { return {functionToUse}; }
+
+} // namespace dsp
+} // namespace juce

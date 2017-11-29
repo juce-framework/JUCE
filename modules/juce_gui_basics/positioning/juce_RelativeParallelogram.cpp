@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 RelativeParallelogram::RelativeParallelogram()
 {
 }
@@ -134,3 +137,5 @@ Rectangle<float> RelativeParallelogram::getBoundingBox (const Point<float>* cons
     const Point<float> points[] = { p[0], p[1], p[2], p[1] + (p[2] - p[0]) };
     return Rectangle<float>::findAreaContainingPoints (points, 4);
 }
+
+} // namespace juce

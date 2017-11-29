@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -87,9 +87,11 @@ private:
     Array<AudioSource*> inputs;
     BigInteger inputsToDelete;
     CriticalSection lock;
-    AudioSampleBuffer tempBuffer;
+    AudioBuffer<float> tempBuffer;
     double currentSampleRate;
     int bufferSizeExpected;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MixerAudioSource)
 };
+
+} // namespace juce

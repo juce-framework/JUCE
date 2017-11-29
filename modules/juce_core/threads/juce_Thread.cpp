@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 Thread::Thread (const String& name, size_t stackSize)
    : threadName (name), threadStackSize (stackSize)
 {
@@ -164,6 +167,7 @@ Thread* JUCE_CALLTYPE Thread::getCurrentThread()
 void Thread::signalThreadShouldExit()
 {
     shouldExit = true;
+    listeners.call ([] (Listener& l) { l.exitSignalSent(); });
 }
 
 bool Thread::currentThreadShouldExit()
@@ -179,7 +183,7 @@ bool Thread::waitForThreadToExit (const int timeOutMilliseconds) const
     // Doh! So how exactly do you expect this thread to wait for itself to stop??
     jassert (getThreadId() != getCurrentThreadId() || getCurrentThreadId() == 0);
 
-    const uint32 timeoutEnd = Time::getMillisecondCounter() + (uint32) timeOutMilliseconds;
+    auto timeoutEnd = Time::getMillisecondCounter() + (uint32) timeOutMilliseconds;
 
     while (isThreadRunning())
     {
@@ -224,6 +228,16 @@ bool Thread::stopThread (const int timeOutMilliseconds)
     }
 
     return true;
+}
+
+void Thread::addListener (Listener* listener)
+{
+    listeners.add (listener);
+}
+
+void Thread::removeListener (Listener* listener)
+{
+    listeners.remove (listener);
 }
 
 //==============================================================================
@@ -447,7 +461,8 @@ public:
 static AtomicTests atomicUnitTests;
 
 //==============================================================================
-class ThreadLocalValueUnitTest : public UnitTest, private Thread
+class ThreadLocalValueUnitTest  : public UnitTest,
+                                  private Thread
 {
 public:
     ThreadLocalValueUnitTest()
@@ -503,3 +518,5 @@ private:
 ThreadLocalValueUnitTest threadLocalValueUnitTest;
 
 #endif
+
+} // namespace juce

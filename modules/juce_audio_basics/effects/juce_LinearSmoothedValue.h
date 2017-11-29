@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -60,10 +60,19 @@ public:
 
     //==============================================================================
     /** Set a new target value.
-        @param newValue New target value
+
+        @param newValue     The new target value
+        @param force        If true, the value will be set immediately, bypassing the ramp
     */
-    void setValue (FloatType newValue) noexcept
+    void setValue (FloatType newValue, bool force = false) noexcept
     {
+        if (force)
+        {
+            target = currentValue = newValue;
+            countdown = 0;
+            return;
+        }
+
         if (target != newValue)
         {
             target = newValue;
@@ -182,3 +191,5 @@ private:
     FloatType currentValue = 0, target = 0, step = 0;
     int countdown = 0, stepsToTarget = 0;
 };
+
+} // namespace juce

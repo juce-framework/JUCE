@@ -8,7 +8,7 @@
     <key>CFBundleIconFile</key>
     <string></string>
     <key>CFBundleIdentifier</key>
-    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <string>com.roli.MultiOutSynth</string>
     <key>CFBundleName</key>
     <string>MultiOutSynth</string>
     <key>CFBundleDisplayName</key>

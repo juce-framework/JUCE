@@ -24,6 +24,11 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
+
 /**
     General matrix and vectors class, meant for classic math manipulation such as
     additions, multiplications, and linear systems of equations solving.
@@ -91,7 +96,7 @@ public:
     /** Returns an Array of 2 integers with the number of rows and columns in the
         matrix.
     */
-    Array<size_t> getSize() const noexcept             { return {{ rows, columns }}; }
+    Array<size_t> getSize() const noexcept             { return { rows, columns }; }
 
     /** Fills the contents of the matrix with zeroes. */
     void clear() noexcept                              { zeromem (data.begin(), sizeof (ElementType) * (size_t) data.size()); }
@@ -243,3 +248,6 @@ private:
     //==============================================================================
     JUCE_LEAK_DETECTOR (Matrix)
 };
+
+} // namespace dsp
+} // namespace juce

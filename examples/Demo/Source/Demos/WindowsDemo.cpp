@@ -249,7 +249,7 @@ private:
     // Because in this demo the windows delete themselves, we'll use the
     // Component::SafePointer class to point to them, which automatically becomes
     // null when the component that it points to is deleted.
-    Array< Component::SafePointer<Component> > windows;
+    Array<Component::SafePointer<Component>> windows;
     TextButton showWindowsButton, closeWindowsButton;
     SafePointer<DialogWindow> dialogWindow;
 

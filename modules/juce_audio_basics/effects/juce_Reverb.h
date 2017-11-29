@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -229,7 +229,7 @@ private:
             if (size != bufferSize)
             {
                 bufferIndex = 0;
-                buffer.malloc ((size_t) size);
+                buffer.malloc (size);
                 bufferSize = size;
             }
 
@@ -274,7 +274,7 @@ private:
             if (size != bufferSize)
             {
                 bufferIndex = 0;
-                buffer.malloc ((size_t) size);
+                buffer.malloc (size);
                 bufferSize = size;
             }
 
@@ -316,3 +316,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Reverb)
 };
+
+} // namespace juce

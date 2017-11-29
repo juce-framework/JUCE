@@ -20,12 +20,8 @@
   ==============================================================================
 */
 
-//==============================================================================
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
-STATICFIELD (SDK_INT, "SDK_INT", "I") \
-
-DECLARE_JNI_CLASS (AndroidBuildVersion, "android/os/Build$VERSION");
-#undef JNI_CLASS_MEMBERS
+namespace juce
+{
 
 //==============================================================================
 #ifndef SL_ANDROID_DATAFORMAT_PCM_EX
@@ -170,9 +166,9 @@ struct BufferHelpers<int16>
         dataFormat.representation = 0;
     }
 
-    static void prepareCallbackBuffer (AudioSampleBuffer&, int16*) {}
+    static void prepareCallbackBuffer (AudioBuffer<float>&, int16*) {}
 
-    static void convertFromOpenSL (const int16* srcInterleaved, AudioSampleBuffer& audioBuffer)
+    static void convertFromOpenSL (const int16* srcInterleaved, AudioBuffer<float>& audioBuffer)
     {
         for (int i = 0; i < audioBuffer.getNumChannels(); ++i)
         {
@@ -185,7 +181,7 @@ struct BufferHelpers<int16>
         }
     }
 
-    static void convertToOpenSL (const AudioSampleBuffer& audioBuffer, int16* dstInterleaved)
+    static void convertToOpenSL (const AudioBuffer<float>& audioBuffer, int16* dstInterleaved)
     {
         for (int i = 0; i < audioBuffer.getNumChannels(); ++i)
         {
@@ -219,13 +215,13 @@ struct BufferHelpers<float>
         dataFormat.representation = SL_ANDROID_PCM_REPRESENTATION_FLOAT;
     }
 
-    static void prepareCallbackBuffer (AudioSampleBuffer& audioBuffer, float* native)
+    static void prepareCallbackBuffer (AudioBuffer<float>& audioBuffer, float* native)
     {
         if (audioBuffer.getNumChannels() == 1)
             audioBuffer.setDataToReferTo (&native, 1, audioBuffer.getNumSamples());
     }
 
-    static void convertFromOpenSL (const float* srcInterleaved, AudioSampleBuffer& audioBuffer)
+    static void convertFromOpenSL (const float* srcInterleaved, AudioBuffer<float>& audioBuffer)
     {
         if (audioBuffer.getNumChannels() == 1)
         {
@@ -244,7 +240,7 @@ struct BufferHelpers<float>
         }
     }
 
-    static void convertToOpenSL (const AudioSampleBuffer& audioBuffer, float* dstInterleaved)
+    static void convertToOpenSL (const AudioBuffer<float>& audioBuffer, float* dstInterleaved)
     {
         if (audioBuffer.getNumChannels() == 1)
         {
@@ -289,11 +285,38 @@ public:
               nextBlock (0), numBlocksOut (0)
         {}
 
+        ~OpenSLQueueRunner()
+        {
+            if (config != nullptr && javaProxy != nullptr)
+            {
+                javaProxy.clear();
+                (*config)->ReleaseJavaProxy (config, /*SL_ANDROID_JAVA_PROXY_ROUTING*/1);
+            }
+        }
+
         bool init()
         {
             runner = crtp().createPlayerOrRecorder();
             if (runner == nullptr)
                 return false;
+
+            const bool supportsJavaProxy = (getEnv()->GetStaticIntField (AndroidBuildVersion, AndroidBuildVersion.SDK_INT) >= 24);
+
+            if (supportsJavaProxy)
+            {
+                // may return nullptr on some platforms - that's ok
+                config = SlRef<SLAndroidConfigurationItf_>::cast (runner);
+
+                if (config != nullptr)
+                {
+                    jobject audioRoutingJni;
+                    auto status = (*config)->AcquireJavaProxy (config, /*SL_ANDROID_JAVA_PROXY_ROUTING*/1,
+                                                               &audioRoutingJni);
+
+                    if (status == SL_RESULT_SUCCESS && audioRoutingJni != 0)
+                        javaProxy = GlobalRef (audioRoutingJni);
+                }
+            }
 
             queue = SlRef<SLAndroidSimpleBufferQueueItf_>::cast (runner);
             if (queue == nullptr)
@@ -308,7 +331,7 @@ public:
             nextBlock.set (0);
             numBlocksOut.set (0);
 
-            zeromem (nativeBuffer.getData(), static_cast<size_t> (owner.bufferSize * numChannels * owner.numBuffers) * sizeof (T));
+            zeromem (nativeBuffer.get(), static_cast<size_t> (owner.bufferSize * numChannels * owner.numBuffers) * sizeof (T));
             scratchBuffer.clear();
             (*queue)->Clear (queue);
         }
@@ -321,7 +344,7 @@ public:
 
         bool isBufferAvailable() const         { return (numBlocksOut.get() < owner.numBuffers); }
         T* getNextBuffer()                     { nextBlock.set((nextBlock.get() + 1) % owner.numBuffers); return getCurrentBuffer(); }
-        T* getCurrentBuffer()                  { return nativeBuffer.getData() + (static_cast<size_t> (nextBlock.get()) * getBufferSizeInSamples()); }
+        T* getCurrentBuffer()                  { return nativeBuffer.get() + (static_cast<size_t> (nextBlock.get()) * getBufferSizeInSamples()); }
         size_t getBufferSizeInSamples() const  { return static_cast<size_t> (owner.bufferSize * numChannels); }
 
         void finished (SLAndroidSimpleBufferQueueItf)
@@ -345,11 +368,13 @@ public:
 
         SlRef<RunnerObjectType> runner;
         SlRef<SLAndroidSimpleBufferQueueItf_> queue;
+        SlRef<SLAndroidConfigurationItf_> config;
+        GlobalRef javaProxy;
 
         int numChannels;
 
         HeapBlock<T> nativeBuffer;
-        AudioSampleBuffer scratchBuffer, sampleBuffer;
+        AudioBuffer<float> scratchBuffer, sampleBuffer;
 
         Atomic<int> nextBlock, numBlocksOut;
     };
@@ -377,12 +402,12 @@ public:
             SLDataSource source = {&queueLocator, &dataFormat};
             SLDataSink   sink   = {&outputMix,    nullptr};
 
-            SLInterfaceID queueInterfaces[] = { &IntfIID<SLAndroidSimpleBufferQueueItf_>::iid };
-            SLboolean trueFlag = SL_BOOLEAN_TRUE;
+            SLInterfaceID queueInterfaces[] = { &IntfIID<SLAndroidSimpleBufferQueueItf_>::iid, &IntfIID<SLAndroidConfigurationItf_>::iid };
+            SLboolean interfaceRequired[] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_FALSE};
 
             SLObjectItf obj = nullptr;
 
-            SLresult status = (*Base::owner.engine)->CreateAudioPlayer (Base::owner.engine, &obj, &source, &sink, 1, queueInterfaces, &trueFlag);
+            SLresult status = (*Base::owner.engine)->CreateAudioPlayer (Base::owner.engine, &obj, &source, &sink, 2, queueInterfaces, interfaceRequired);
             if (status != SL_RESULT_SUCCESS || obj == nullptr || (*obj)->Realize (obj, 0) != SL_RESULT_SUCCESS)
             {
                 if (obj != nullptr)
@@ -435,15 +460,12 @@ public:
 
             SlRef<SLRecordItf_> recorder = SlRef<SLRecordItf_>::cast (SlObjectRef (obj));
 
-            // may return nullptr on some platforms - that's ok
-            config = SlRef<SLAndroidConfigurationItf_>::cast (recorder);
-
             return recorder;
         }
 
         bool setAudioPreprocessingEnabled (bool shouldEnable)
         {
-            if (config != nullptr)
+            if (Base::config != nullptr)
             {
                 const bool supportsUnprocessed = (getEnv()->GetStaticIntField (AndroidBuildVersion, AndroidBuildVersion.SDK_INT) >= 25);
                 const SLuint32 recordingPresetValue
@@ -451,8 +473,8 @@ public:
                                     : (supportsUnprocessed ? SL_ANDROID_RECORDING_PRESET_UNPROCESSED
                                                            : SL_ANDROID_RECORDING_PRESET_VOICE_RECOGNITION));
 
-                SLresult status = (*config)->SetConfiguration (config, SL_ANDROID_KEY_RECORDING_PRESET,
-                                                               &recordingPresetValue, sizeof (recordingPresetValue));
+                SLresult status = (*Base::config)->SetConfiguration (Base::config, SL_ANDROID_KEY_RECORDING_PRESET,
+                                                                     &recordingPresetValue, sizeof (recordingPresetValue));
 
                 return (status == SL_RESULT_SUCCESS);
             }
@@ -461,8 +483,6 @@ public:
         }
 
         void setState (bool running)    { (*Base::runner)->SetRecordState (Base::runner, running ? SL_RECORDSTATE_RECORDING : SL_RECORDSTATE_STOPPED); }
-
-        SlRef<SLAndroidConfigurationItf_> config;
     };
 
     //==============================================================================
@@ -519,6 +539,7 @@ public:
         virtual void stop()              { running = false; }
         virtual bool setAudioPreprocessingEnabled (bool shouldEnable) = 0;
         virtual bool supportsFloatingPoint() const noexcept = 0;
+        virtual int getXRunCount() const noexcept = 0;
 
         void setCallback (AudioIODeviceCallback* callbackToUse)
         {
@@ -614,6 +635,9 @@ public:
                         player = nullptr;
                         return;
                     }
+
+                    const bool supportsUnderrunCount = (getEnv()->GetStaticIntField (AndroidBuildVersion, AndroidBuildVersion.SDK_INT) >= 24);
+                    getUnderrunCount = supportsUnderrunCount ? getEnv()->GetMethodID (AudioTrack, "getUnderrunCount", "()I") : 0;
                 }
             }
         }
@@ -676,6 +700,14 @@ public:
             return true;
         }
 
+        int getXRunCount() const noexcept override
+        {
+            if (player != nullptr && player->javaProxy != nullptr && getUnderrunCount != 0)
+                return getEnv()->CallIntMethod (player->javaProxy, getUnderrunCount);
+
+            return -1;
+        }
+
         bool supportsFloatingPoint() const noexcept override          { return (BufferHelpers<T>::isFloatingPoint != 0); }
 
         void doSomeWorkOnAudioThread()
@@ -723,9 +755,10 @@ public:
         }
 
         //==============================================================================
-        ScopedPointer<OpenSLQueueRunnerPlayer<T> > player;
-        ScopedPointer<OpenSLQueueRunnerRecorder<T> > recorder;
+        ScopedPointer<OpenSLQueueRunnerPlayer<T>> player;
+        ScopedPointer<OpenSLQueueRunnerRecorder<T>> recorder;
         Atomic<int> guard;
+        jmethodID getUnderrunCount = 0;
     };
 
     //==============================================================================
@@ -890,6 +923,7 @@ public:
     BigInteger getActiveInputChannels() const override  { return activeInputChans; }
     String getLastError() override                      { return lastError; }
     bool isPlaying() override                           { return callback != nullptr; }
+    int getXRunCount() const noexcept override          { return (session != nullptr ? session->getXRunCount() : -1); }
 
     int getDefaultBufferSize() override
     {
@@ -1203,11 +1237,11 @@ public:
 
     pthread_t startThread (void* (*entry) (void*), void* userPtr)
     {
-        memset (buffer.getData(), 0, static_cast<size_t> (sizeof (int16) * static_cast<size_t> (bufferSize * numBuffers)));
+        memset (buffer.get(), 0, static_cast<size_t> (sizeof (int16) * static_cast<size_t> (bufferSize * numBuffers)));
 
         for (int i = 0; i < numBuffers; ++i)
         {
-            int16* dst = buffer.getData() + (bufferSize * i);
+            int16* dst = buffer.get() + (bufferSize * i);
             (*queue)->Enqueue (queue, dst, static_cast<SLuint32> (static_cast<size_t> (bufferSize) * sizeof (int16)));
         }
 
@@ -1283,3 +1317,5 @@ pthread_t juce_createRealtimeAudioThread (void* (*entry) (void*), void* userPtr)
 
     return threadID;
 }
+
+} // namespace juce

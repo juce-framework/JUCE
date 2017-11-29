@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -107,7 +107,7 @@ public:
         Pass false to disable the screensaver, and true to re-enable it. (Note that this
         won't enable a screensaver unless the user has actually set one up).
 
-        The disablement will only happen while the Juce application is the foreground
+        The disablement will only happen while the JUCE application is the foreground
         process - if another task is running in front of it, then the screensaver will
         be unaffected.
 
@@ -196,7 +196,7 @@ public:
         This will drill down into top-level windows to find the child component at
         the given position.
 
-        Returns nullptr if the coordinates are inside a non-Juce window.
+        Returns nullptr if the coordinates are inside a non-JUCE window.
     */
     Component* findComponentAt (Point<int> screenPosition) const;
 
@@ -260,7 +260,7 @@ public:
 
     /** Returns the number of mouse-sources that are currently being dragged.
         In a traditional single-mouse system, this will be 0 or 1, depending on whether a
-        juce component has the button down on it. In a multi-touch system, this could
+        JUCE component has the button down on it. In a multi-touch system, this could
         be any number from 0 to the number of simultaneous touches that can be detected.
     */
     int getNumDraggingMouseSources() const noexcept;
@@ -470,3 +470,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Desktop)
 };
+
+} // namespace juce

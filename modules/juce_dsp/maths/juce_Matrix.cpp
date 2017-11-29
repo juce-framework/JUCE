@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 template <typename ElementType>
 Matrix<ElementType> Matrix<ElementType>::identity (size_t size)
@@ -309,3 +313,6 @@ String Matrix<ElementType>::toString() const
 
 template class Matrix<float>;
 template class Matrix<double>;
+
+} // namespace dsp
+} // namespace juce

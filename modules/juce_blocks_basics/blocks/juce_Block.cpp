@@ -20,6 +20,8 @@
   ==============================================================================
 */
 
+namespace juce
+{
 
 static Block::UID getBlockUIDFromSerialNumber (const uint8* serial) noexcept
 {
@@ -104,3 +106,5 @@ LEDRow::~LEDRow() {}
 //==============================================================================
 StatusLight::StatusLight (Block& b) : block (b) {}
 StatusLight::~StatusLight() {}
+
+} // namespace juce

@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -103,3 +103,5 @@ public:
     // The actual rectangle coords...
     RelativeCoordinate left, right, top, bottom;
 };
+
+} // namespace juce

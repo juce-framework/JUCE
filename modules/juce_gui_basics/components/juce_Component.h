@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -1036,6 +1036,11 @@ public:
     */
     void setPaintingIsUnclipped (bool shouldPaintWithoutClipping) noexcept;
 
+    /** Returns true if this component doesn't require its graphics context to be clipped
+        when it is being painted.
+    */
+    bool isPaintingUnclipped() const noexcept;
+
     //==============================================================================
     /** Adds an effect filter to alter the component's appearance.
 
@@ -1418,7 +1423,7 @@ public:
         If you want to cause a component to redraw itself, this is done asynchronously -
         calling the repaint() method marks a region of the component as "dirty", and the
         paint() method will automatically be called sometime later, by the message thread,
-        to paint any bits that need refreshing. In Juce (and almost all modern UI frameworks),
+        to paint any bits that need refreshing. In JUCE (and almost all modern UI frameworks),
         you never redraw something synchronously.
 
         You should never need to call this method directly - to take a snapshot of the
@@ -2222,7 +2227,7 @@ public:
     /** Returns the object that was set by setCachedComponentImage().
         @see setCachedComponentImage
     */
-    CachedComponentImage* getCachedComponentImage() const noexcept      { return cachedImage; }
+    CachedComponentImage* getCachedComponentImage() const noexcept      { return cachedImage.get(); }
 
     /** Sets a flag to indicate whether mouse drag events on this Component should be ignored when it is inside a
         Viewport with drag-to-scroll functionality enabled. This is useful for Components such as sliders that
@@ -2261,7 +2266,7 @@ private:
     ScopedPointer<Positioner> positioner;
     ScopedPointer<AffineTransform> affineTransform;
     Array<Component*> childComponentList;
-    LookAndFeel* lookAndFeel = nullptr;
+    WeakReference<LookAndFeel> lookAndFeel;
     MouseCursor cursor;
     ImageEffectFilter* effect = nullptr;
     ScopedPointer<CachedComponentImage> cachedImage;
@@ -2270,7 +2275,7 @@ private:
     friend class MouseListenerList;
     friend struct ContainerDeletePolicy<MouseListenerList>;
     ScopedPointer<MouseListenerList> mouseListeners;
-    ScopedPointer<Array<KeyListener*> > keyListeners;
+    ScopedPointer<Array<KeyListener*>> keyListeners;
     ListenerList<ComponentListener> componentListeners;
     NamedValueSet properties;
 
@@ -2372,3 +2377,5 @@ protected:
     virtual ComponentPeer* createNewPeer (int styleFlags, void* nativeWindowToAttachTo);
    #endif
 };
+
+} // namespace juce

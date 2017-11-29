@@ -95,7 +95,7 @@ public:
         // Now we can delete the writer object. It's done in this order because the deletion could
         // take a little time while remaining data gets flushed to disk, so it's best to avoid blocking
         // the audio callback while this happens.
-        threadedWriter = nullptr;
+        threadedWriter.reset();
     }
 
     bool isRecording() const
@@ -124,8 +124,8 @@ public:
         {
             activeWriter->write (inputChannelData, numSamples);
 
-            // Create an AudioSampleBuffer to wrap our incoming data, note that this does no allocations or copies, it simply references our input data
-            const AudioSampleBuffer buffer (const_cast<float**> (inputChannelData), thumbnail.getNumChannels(), numSamples);
+            // Create an AudioBuffer to wrap our incoming data, note that this does no allocations or copies, it simply references our input data
+            AudioBuffer<float> buffer (const_cast<float**> (inputChannelData), thumbnail.getNumChannels(), numSamples);
             thumbnail.addBlock (nextSampleNum, buffer, 0, numSamples);
             nextSampleNum += numSamples;
         }
@@ -272,7 +272,7 @@ private:
     void startRecording()
     {
         const File file (File::getSpecialLocation (File::userDocumentsDirectory)
-                            .getNonexistentChildFile ("Juce Demo Audio Recording", ".wav"));
+                            .getNonexistentChildFile ("JUCE Demo Audio Recording", ".wav"));
         recorder.startRecording (file);
 
         recordButton.setButtonText ("Stop");

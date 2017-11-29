@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class ApplicationCommandTarget::CommandMessage  : public MessageManager::MessageBase
 {
 public:
@@ -46,14 +49,8 @@ private:
 };
 
 //==============================================================================
-ApplicationCommandTarget::ApplicationCommandTarget()
-{
-}
-
-ApplicationCommandTarget::~ApplicationCommandTarget()
-{
-    masterReference.clear();
-}
+ApplicationCommandTarget::ApplicationCommandTarget() {}
+ApplicationCommandTarget::~ApplicationCommandTarget() {}
 
 //==============================================================================
 bool ApplicationCommandTarget::tryToInvoke (const InvocationInfo& info, const bool async)
@@ -186,3 +183,5 @@ ApplicationCommandTarget::InvocationInfo::InvocationInfo (const CommandID comman
       millisecsSinceKeyPressed (0)
 {
 }
+
+} // namespace juce

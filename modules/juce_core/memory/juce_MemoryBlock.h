@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -252,7 +252,9 @@ private:
     //==============================================================================
     typedef HeapBlock<char, true> HeapBlockType;
     HeapBlockType data;
-    size_t size;
+    size_t size = 0;
 
     JUCE_LEAK_DETECTOR (MemoryBlock)
 };
+
+} // namespace juce

@@ -26,11 +26,11 @@
 		9DC13797237D190C48A242C9 = {isa = PBXGroup; children = (
 					AF0451FEC95312712E8145CD, ); name = BinaryBuilder; sourceTree = "<group>"; };
 		5D4B80BC67BBCEDCC3B6BAB8 = {isa = PBXGroup; children = (
-					8702176D2368B6F785546D2B, ); name = "Juce Modules"; sourceTree = "<group>"; };
+					8702176D2368B6F785546D2B, ); name = "JUCE Modules"; sourceTree = "<group>"; };
 		8905BD956C24F83087634C3A = {isa = PBXGroup; children = (
 					7E86227B01E504302C234A04,
 					D186E2D509765FAE0758F17D,
-					D6C3594C8BEC94040AF108FE, ); name = "Juce Library Code"; sourceTree = "<group>"; };
+					D6C3594C8BEC94040AF108FE, ); name = "JUCE Library Code"; sourceTree = "<group>"; };
 		87ECE820BF4D73DD50D614CB = {isa = PBXGroup; children = (
 					1A71A586C0F50B6B328D877B, ); name = Resources; sourceTree = "<group>"; };
 		E28F51A0038F01E08E22F853 = {isa = PBXGroup; children = (
@@ -46,7 +46,7 @@
 					E28F51A0038F01E08E22F853,
 					70A875922C34E55D4F48A196, ); name = Source; sourceTree = "<group>"; };
 		00F18709927DE6070FBA7BD0 = {isa = XCBuildConfiguration; buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -75,7 +75,7 @@
 				SDKROOT_ppc = macosx10.5;
 				USE_HEADERMAP = NO; }; name = Debug; };
 		8A190EF24B99F557190320DA = {isa = XCBuildConfiguration; buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -197,7 +197,7 @@
 					4F5C64675AD3AC67829798FF,
 					A69CF4AD8F7015A8D3228FDE,
 					2722C90F3B5DAD661891FDF4, ); buildRules = ( ); dependencies = (  ); name = "BinaryBuilder - ConsoleApp"; productName = BinaryBuilder; productReference = 799073185F72F5FAD05253C3; productType = "com.apple.product-type.tool"; };
-		36B6F402BC83F21646259DEF = {isa = PBXProject; buildConfigurationList = E4C85B0464A93027D035AA1F; attributes = { LastUpgradeCheck = 0830; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = C18D022743CF5BD14D6A6A9E; projectDirPath = ""; projectRoot = ""; targets = (80B70DE094998C267F152DD5); };
+		36B6F402BC83F21646259DEF = {isa = PBXProject; buildConfigurationList = E4C85B0464A93027D035AA1F; attributes = { LastUpgradeCheck = 0830; ORGANIZATIONNAME = "ROLI Ltd."; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = C18D022743CF5BD14D6A6A9E; projectDirPath = ""; projectRoot = ""; targets = (80B70DE094998C267F152DD5); };
 	};
 	rootObject = 36B6F402BC83F21646259DEF;
 }

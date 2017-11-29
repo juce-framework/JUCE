@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -227,7 +227,7 @@
     version of a singleton, where you're using it in very straightforward
     circumstances and don't need the extra checking.
 
-    Juce use the normal juce_ImplementSingleton_SingleThreaded as the counterpart
+    Just use the normal juce_ImplementSingleton_SingleThreaded as the counterpart
     to this declaration, as you would with juce_DeclareSingleton_SingleThreaded.
 
     See the documentation for juce_DeclareSingleton for more information about
@@ -279,3 +279,5 @@
 #define juce_ImplementSingleton_SingleThreaded(classname) \
 \
     classname* classname::_singletonInstance = nullptr;
+
+} // namespace juce

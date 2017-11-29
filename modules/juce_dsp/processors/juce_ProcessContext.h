@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 /**
     This structure is passed into a DSP algorithm's prepare() method, and contains
@@ -47,7 +51,7 @@ struct ProcessSpec
     which is typically shared among several procoessors. This is useful to for
     multi-mono filters which share the same state among several mono processors.
 */
-struct ProcessorState : ReferenceCountedObject
+struct ProcessorState  : public ReferenceCountedObject
 {
     /** The ProcessorState structure is ref-counted, so this is a handy type that can be used
         as a pointer to one.
@@ -153,3 +157,6 @@ private:
     const AudioBlockType& inputBlock;
     AudioBlockType& outputBlock;
 };
+
+} // namespace dsp
+} // namespace juce

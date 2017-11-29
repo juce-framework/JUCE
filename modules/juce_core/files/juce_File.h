@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -35,7 +35,7 @@
 
     @see FileInputStream, FileOutputStream
 */
-class JUCE_API  File
+class JUCE_API  File final
 {
 public:
     //==============================================================================
@@ -275,6 +275,9 @@ public:
     /** Returns the directory that contains this file or directory.
 
         e.g. for "/moose/fish/foo.txt" this will return "/moose/fish".
+
+        If you are already at the root directory ("/" or "C:") then this method will
+        return the root directory.
     */
     File getParentDirectory() const;
 
@@ -554,6 +557,7 @@ public:
 
         Assuming that this file is a directory, this method will search it
         for either files or subdirectories whose names match a filename pattern.
+        Note that the order in which files are returned is completely undefined!
 
         @param results                  an array to which File objects will be added for the
                                         files that the search comes up with
@@ -927,12 +931,12 @@ public:
     /** The system-specific file separator character.
         On Windows, this will be '\', on Mac/Linux, it'll be '/'
     */
-    static const juce_wchar separator;
+    static juce_wchar getSeparatorChar();
 
     /** The system-specific file separator character, as a string.
         On Windows, this will be '\', on Mac/Linux, it'll be '/'
     */
-    static const String separatorString;
+    static StringRef getSeparatorString();
 
     //==============================================================================
     /** Returns a version of a filename with any illegal characters removed.
@@ -1027,6 +1031,12 @@ public:
         bool foldersFirst;
     };
 
+   #if (! defined(DOXYGEN)) && (! defined (JUCE_GCC))
+    // Deprecated: use File::getSeparatorChar() and File::getSeparatorString() instead!
+    JUCE_DEPRECATED (static const juce_wchar separator);
+    JUCE_DEPRECATED (static const StringRef separatorString);
+   #endif
+
 private:
     //==============================================================================
     String fullPath;
@@ -1043,3 +1053,5 @@ private:
     bool setFileReadOnlyInternal (bool) const;
     bool setFileExecutableInternal (bool) const;
 };
+
+} // namespace juce

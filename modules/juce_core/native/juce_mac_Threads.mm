@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 /*
     Note that a lot of methods that you'd expect to find in this file actually
     live in juce_posix_SharedCode.h!
@@ -52,10 +55,14 @@ JUCE_API void JUCE_CALLTYPE Process::makeForegroundProcess()
 
 JUCE_API void JUCE_CALLTYPE Process::hide()
 {
-   #if JUCE_MAC
     if (! SystemStats::isRunningInAppExtensionSandbox())
+    {
+       #if JUCE_MAC
         [NSApp hide: nil];
-   #endif
+       #elif JUCE_IOS
+        [[UIApplication sharedApplication] performSelector: @selector(suspend)];
+       #endif
+    }
 }
 
 JUCE_API void JUCE_CALLTYPE Process::raisePrivilege()
@@ -82,3 +89,5 @@ JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger() noexcept
     sysctl (m, 4, &info, &sz, 0, 0);
     return (info.kp_proc.p_flag & P_TRACED) != 0;
 }
+
+} // namespace juce

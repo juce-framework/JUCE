@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -62,7 +62,7 @@ public:
         LinearHorizontal,               /**< A traditional horizontal slider. */
         LinearVertical,                 /**< A traditional vertical slider. */
         LinearBar,                      /**< A horizontal bar slider with the text label drawn on top of it. */
-        LinearBarVertical,
+        LinearBarVertical,              /**< A vertical bar slider with the text label drawn on top of it. */
         Rotary,                         /**< A rotary control that you move by dragging the mouse in a circular motion, like a knob.
                                              @see setRotaryParameters */
         RotaryHorizontalDrag,           /**< A rotary control that you move by dragging the mouse left-to-right.
@@ -81,7 +81,7 @@ public:
         ThreeValueHorizontal,           /**< A horizontal slider that has three thumbs instead of one, so it can show a minimum and maximum
                                              value, with the current value being somewhere between them.
                                              @see setMinValue, setMaxValue */
-        ThreeValueVertical,             /**< A vertical slider that has three thumbs instead of one, so it can show a minimum and maximum
+        ThreeValueVertical              /**< A vertical slider that has three thumbs instead of one, so it can show a minimum and maximum
                                              value, with the current value being somewhere between them.
                                              @see setMinValue, setMaxValue */
     };
@@ -404,18 +404,29 @@ public:
                    double newMaximum,
                    double newInterval = 0);
 
+    /** Sets the limits that the slider's value can take.
+
+        @param newRange     the range to allow
+        @param newInterval  the steps in which the value is allowed to increase - if this
+                            is not zero, the value will always be (newMinimum + (newInterval * an integer)).
+    */
+    void setRange (Range<double> newRange, double newInterval);
+
+    /** Returns the slider's range. */
+    Range<double> getRange() const noexcept;
+
     /** Returns the current maximum value.
-        @see setRange
+        @see setRange, getRange
     */
     double getMaximum() const noexcept;
 
     /** Returns the current minimum value.
-        @see setRange
+        @see setRange, getRange
     */
     double getMinimum() const noexcept;
 
     /** Returns the current step-size for values.
-        @see setRange
+        @see setRange, getRange
     */
     double getInterval() const noexcept;
 
@@ -626,10 +637,15 @@ public:
         pass nullptr, the pop-up will be placed on the desktop instead (note that it's a
         transparent window, so if you're using an OS that can't do transparent windows
         you'll have to add it to a parent component instead).
+
+        By default the popup display shown when hovering will remain visible for 2 seconds,
+        but it is possible to change this by passing a different hoverTimeout value. A
+        value of -1 will cause the popup to remain until a mouseExit() occurs on the slider.
     */
     void setPopupDisplayEnabled (bool shouldShowOnMouseDrag,
                                  bool shouldShowOnMouseHover,
-                                 Component* parentComponentToUse);
+                                 Component* parentComponentToUse,
+                                 int hoverTimeout = 2000);
 
     /** If a popup display is enabled and is currently visible, this returns the component
         that is being shown, or nullptr if none is currently in use.
@@ -910,6 +926,8 @@ public:
     void mouseMove (const MouseEvent&) override;
     /** @internal */
     void mouseExit (const MouseEvent&) override;
+    /** @internal */
+    void mouseEnter (const MouseEvent&) override;
 
 private:
     //==============================================================================
@@ -940,3 +958,5 @@ private:
 
 /** This typedef is just for compatibility with old code - newer code should use the Slider::Listener class directly. */
 typedef Slider::Listener SliderListener;
+
+} // namespace juce

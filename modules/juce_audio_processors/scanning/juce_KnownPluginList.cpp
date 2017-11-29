@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 KnownPluginList::KnownPluginList()  {}
 KnownPluginList::~KnownPluginList() {}
 
@@ -263,8 +266,7 @@ struct PluginSorter
     PluginSorter (KnownPluginList::SortMethod sortMethod, bool forwards) noexcept
         : method (sortMethod), direction (forwards ? 1 : -1) {}
 
-    int compareElements (const PluginDescription* const first,
-                         const PluginDescription* const second) const
+    bool operator() (const PluginDescription* first, const PluginDescription* second) const
     {
         int diff = 0;
 
@@ -281,7 +283,7 @@ struct PluginSorter
         if (diff == 0)
             diff = first->name.compareNatural (second->name, true);
 
-        return diff * direction;
+        return diff * direction < 0;
     }
 
 private:
@@ -298,10 +300,8 @@ private:
         return 0;
     }
 
-    const KnownPluginList::SortMethod method;
-    const int direction;
-
-    JUCE_DECLARE_NON_COPYABLE (PluginSorter)
+    KnownPluginList::SortMethod method;
+    int direction;
 };
 
 void KnownPluginList::sort (const SortMethod method, bool forwards)
@@ -314,10 +314,7 @@ void KnownPluginList::sort (const SortMethod method, bool forwards)
             ScopedLock lock (typesArrayLock);
 
             oldOrder.addArray (types);
-
-            PluginSorter sorter (method, forwards);
-            types.sort (sorter, true);
-
+            std::stable_sort (types.begin(), types.end(), PluginSorter (method, forwards));
             newOrder.addArray (types);
         }
 
@@ -528,11 +525,10 @@ KnownPluginList::PluginTree* KnownPluginList::createTree (const SortMethod sortM
 
     {
         ScopedLock lock (typesArrayLock);
-        PluginSorter sorter (sortMethod, true);
-
-        for (auto* t : types)
-            sorted.addSorted (sorter, t);
+        sorted.addArray (types);
     }
+
+    std::stable_sort (sorted.begin(), sorted.end(), PluginSorter (sortMethod, true));
 
     auto* tree = new PluginTree();
 
@@ -580,3 +576,5 @@ bool KnownPluginList::CustomScanner::shouldExit() const noexcept
 
     return false;
 }
+
+} // namespace juce

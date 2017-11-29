@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -67,7 +68,10 @@ public:
                             modalStateFinished() when the box is dismissed. The callback object
                             will be owned and deleted by the system, so make sure that it works
                             safely and doesn't keep any references to objects that might be deleted
-                            before it gets called.
+                            before it gets called. You can use the ModalCallbackFunction to easily
+                            pass in a lambda for this parameter.
+
+        @see ModalCallbackFunction
     */
     static void JUCE_CALLTYPE showMessageBoxAsync (AlertWindow::AlertIconType iconType,
                                                     const String& title,
@@ -98,10 +102,13 @@ public:
                             being 1 if the ok button was pressed, or 0 for cancel, The callback object
                             will be owned and deleted by the system, so make sure that it works
                             safely and doesn't keep any references to objects that might be deleted
-                            before it gets called.
+                            before it gets called. You can use the ModalCallbackFunction to easily
+                            pass in a lambda for this parameter.
         @returns true if button 1 was clicked, false if it was button 2. If the callback parameter
                  is not null, the method always returns false, and the user's choice is delivered
                  later by the callback.
+
+        @see ModalCallbackFunction
     */
     static bool JUCE_CALLTYPE showOkCancelBox (AlertWindow::AlertIconType iconType,
                                                const String& title,
@@ -138,13 +145,16 @@ public:
                             being 1 if the "yes" button was pressed, 2 for the "no" button, or 0
                             if it was cancelled, The callback object will be owned and deleted by the
                             system, so make sure that it works safely and doesn't keep any references
-                            to objects that might be deleted before it gets called.
+                            to objects that might be deleted before it gets called. You can use the
+                            ModalCallbackFunction to easily pass in a lambda for this parameter.
 
         @returns If the callback parameter has been set, this returns 0. Otherwise, it returns one
                  of the following values:
                  - 0 if 'cancel' was pressed
                  - 1 if 'yes' was pressed
                  - 2 if 'no' was pressed
+
+        @see ModalCallbackFunction
     */
     static int JUCE_CALLTYPE showYesNoCancelBox (AlertWindow::AlertIconType iconType,
                                                  const String& title,
@@ -181,12 +191,15 @@ public:
                             being 1 if the "yes" button was pressed or 0 for the "no" button was
                             pressed. The callback object will be owned and deleted by the
                             system, so make sure that it works safely and doesn't keep any references
-                            to objects that might be deleted before it gets called.
+                            to objects that might be deleted before it gets called. You can use the
+                            ModalCallbackFunction to easily pass in a lambda for this parameter.
 
         @returns If the callback parameter has been set, this returns 0. Otherwise, it returns one
                  of the following values:
                  - 0 if 'no' was pressed
                  - 1 if 'yes' was pressed
+
+        @see ModalCallbackFunction
     */
     static int JUCE_CALLTYPE showYesNoBox (AlertWindow::AlertIconType iconType,
                                            const String& title,
@@ -203,3 +216,5 @@ private:
     NativeMessageBox() JUCE_DELETED_FUNCTION;
     JUCE_DECLARE_NON_COPYABLE (NativeMessageBox)
 };
+
+} // namespace juce

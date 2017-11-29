@@ -35,9 +35,14 @@
 
 #define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
 #define JUCE_CORE_INCLUDE_COM_SMART_PTR 1
+#define JUCE_CORE_INCLUDE_JNI_HELPERS 1
 #define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
 #define JUCE_EVENTS_INCLUDE_WIN32_MESSAGE_WINDOW 1
 #define JUCE_GRAPHICS_INCLUDE_COREGRAPHICS_HELPERS 1
+
+#ifndef JUCE_PUSH_NOTIFICATIONS
+ #define JUCE_PUSH_NOTIFICATIONS 0
+#endif
 
 #include "juce_gui_extra.h"
 
@@ -50,7 +55,27 @@
  #import <IOKit/hid/IOHIDKeys.h>
  #import <IOKit/pwr_mgt/IOPMLib.h>
 
+ #if JUCE_PUSH_NOTIFICATIONS
+  #import <Foundation/NSUserNotification.h>
+
+  #include "native/juce_mac_PushNotifications.cpp"
+ #endif
+
+//==============================================================================
 #elif JUCE_IOS
+ #if JUCE_PUSH_NOTIFICATIONS
+  #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+   #import <UserNotifications/UserNotifications.h>
+  #endif
+
+  #include "native/juce_ios_PushNotifications.cpp"
+ #endif
+
+//==============================================================================
+#elif JUCE_ANDROID
+ #if JUCE_PUSH_NOTIFICATIONS
+  #include "native/juce_android_PushNotifications.cpp"
+ #endif
 
 //==============================================================================
 #elif JUCE_WINDOWS
@@ -83,9 +108,6 @@
 #endif
 
 //==============================================================================
-namespace juce
-{
-
 #include "documents/juce_FileBasedDocument.cpp"
 #include "code_editor/juce_CodeDocument.cpp"
 #include "code_editor/juce_CodeEditorComponent.cpp"
@@ -96,18 +118,12 @@ namespace juce
 #include "misc/juce_ColourSelector.cpp"
 #include "misc/juce_KeyMappingEditorComponent.cpp"
 #include "misc/juce_PreferencesPanel.cpp"
+#include "misc/juce_PushNotifications.cpp"
 #include "misc/juce_RecentlyOpenedFilesList.cpp"
 #include "misc/juce_SplashScreen.cpp"
 #include "misc/juce_SystemTrayIconComponent.cpp"
 #include "misc/juce_LiveConstantEditor.cpp"
 #include "misc/juce_AnimatedAppComponent.cpp"
-
-}
-
-using namespace juce;
-
-namespace juce
-{
 
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
@@ -153,16 +169,20 @@ namespace juce
 
 //==============================================================================
 #elif JUCE_ANDROID
+ #include "native/juce_AndroidViewComponent.cpp"
+
  #if JUCE_WEB_BROWSER
   #include "native/juce_android_WebBrowserComponent.cpp"
  #endif
 #endif
 
 #if JUCE_WEB_BROWSER
- bool WebBrowserComponent::pageAboutToLoad (const String&)  { return true; }
- void WebBrowserComponent::pageFinishedLoading (const String&) {}
- bool WebBrowserComponent::pageLoadHadNetworkError (const String&) { return true; }
- void WebBrowserComponent::windowCloseRequest() {}
- void WebBrowserComponent::newWindowAttemptingToLoad (const String&) {}
-#endif
+namespace juce
+{
+    bool WebBrowserComponent::pageAboutToLoad (const String&)  { return true; }
+    void WebBrowserComponent::pageFinishedLoading (const String&) {}
+    bool WebBrowserComponent::pageLoadHadNetworkError (const String&) { return true; }
+    void WebBrowserComponent::windowCloseRequest() {}
+    void WebBrowserComponent::newWindowAttemptingToLoad (const String&) {}
 }
+#endif

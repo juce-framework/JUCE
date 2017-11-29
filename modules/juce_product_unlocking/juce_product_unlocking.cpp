@@ -48,22 +48,22 @@
  #import <StoreKit/StoreKit.h>
 #endif
 
-namespace juce
-{
-   #if JUCE_ANDROID
-    #include "native/juce_android_InAppPurchases.cpp"
-   #elif JUCE_IOS
-    #include "native/juce_ios_InAppPurchases.cpp"
-   #endif
+#if JUCE_IN_APP_PURCHASES
+ #if JUCE_ANDROID
+  #include "native/juce_android_InAppPurchases.cpp"
+ #elif JUCE_IOS || JUCE_MAC
+  #include "native/juce_ios_InAppPurchases.cpp"
+ #endif
 
-    #include "in_app_purchases/juce_InAppPurchases.cpp"
-    #include "marketplace/juce_OnlineUnlockStatus.cpp"
+ #include "in_app_purchases/juce_InAppPurchases.cpp"
+#endif
 
-   #if JUCE_MODULE_AVAILABLE_juce_data_structures
-    #include "marketplace/juce_TracktionMarketplaceStatus.cpp"
-   #endif
+#include "marketplace/juce_OnlineUnlockStatus.cpp"
 
-   #if JUCE_MODULE_AVAILABLE_juce_gui_extra
-    #include "marketplace/juce_OnlineUnlockForm.cpp"
-   #endif
-}
+#if JUCE_MODULE_AVAILABLE_juce_data_structures
+ #include "marketplace/juce_TracktionMarketplaceStatus.cpp"
+#endif
+
+#if JUCE_MODULE_AVAILABLE_juce_gui_extra
+ #include "marketplace/juce_OnlineUnlockForm.cpp"
+#endif

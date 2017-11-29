@@ -22,22 +22,23 @@
 
 #include <poll.h>
 
-enum FdType {
+enum FdType
+{
     INTERNAL_QUEUE_FD,
     WINDOW_SYSTEM_FD,
     FD_COUNT,
 };
+
+namespace juce
+{
 
 //==============================================================================
 class InternalMessageQueue
 {
 public:
     InternalMessageQueue()
-        : fdCount (1),
-          loopCount (0),
-          bytesInSocket (0)
     {
-        int ret = ::socketpair (AF_LOCAL, SOCK_STREAM, 0, fd);
+        auto ret = ::socketpair (AF_LOCAL, SOCK_STREAM, 0, fd);
         ignoreUnused (ret); jassert (ret == 0);
 
         auto internalQueueCb = [this] (int _fd)
@@ -115,11 +116,10 @@ public:
         {
             const int i = loopCount++;
             loopCount %= fdCount;
+
             if (readCallback[i] != nullptr && readCallback[i]->active)
-            {
                 if ((*readCallback[i]) (pfds[i].fd))
                     return true;
-            }
         }
 
         return false;
@@ -140,9 +140,9 @@ private:
     int fd[2];
     pollfd pfds[FD_COUNT];
     ScopedPointer<LinuxEventLoop::CallbackFunctionBase> readCallback[FD_COUNT];
-    int fdCount;
-    int loopCount;
-    int bytesInSocket;
+    int fdCount = 1;
+    int loopCount = 0;
+    int bytesInSocket = 0;
 
     int getWriteHandle() const noexcept     { return fd[0]; }
     int getReadHandle() const noexcept      { return fd[1]; }
@@ -196,12 +196,10 @@ namespace LinuxErrorHandling
 void MessageManager::doPlatformSpecificInitialisation()
 {
     if (JUCEApplicationBase::isStandaloneApp())
-    {
         LinuxErrorHandling::installKeyboardBreakHandler();
-    }
 
     // Create the internal message queue
-    InternalMessageQueue* queue = InternalMessageQueue::getInstance();
+    auto* queue = InternalMessageQueue::getInstance();
     ignoreUnused (queue);
 }
 
@@ -212,7 +210,7 @@ void MessageManager::doPlatformSpecificShutdown()
 
 bool MessageManager::postMessageToSystemQueue (MessageManager::MessageBase* const message)
 {
-    if (InternalMessageQueue* queue = InternalMessageQueue::getInstanceWithoutCreating())
+    if (auto* queue = InternalMessageQueue::getInstanceWithoutCreating())
     {
         queue->postMessage (message);
         return true;
@@ -221,9 +219,9 @@ bool MessageManager::postMessageToSystemQueue (MessageManager::MessageBase* cons
     return false;
 }
 
-void MessageManager::broadcastMessage (const String& /* value */)
+void MessageManager::broadcastMessage (const String&)
 {
-    /* TODO */
+    // TODO
 }
 
 // this function expects that it will NEVER be called simultaneously for two concurrent threads
@@ -234,12 +232,12 @@ bool MessageManager::dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMes
         if (LinuxErrorHandling::keyboardBreakOccurred)
             JUCEApplicationBase::getInstance()->quit();
 
-        if (InternalMessageQueue* queue = InternalMessageQueue::getInstanceWithoutCreating())
+        if (auto* queue = InternalMessageQueue::getInstanceWithoutCreating())
         {
             if (queue->dispatchNextEvent())
                 break;
 
-            else if (returnIfNoPendingMessages)
+            if (returnIfNoPendingMessages)
                 return false;
 
             // wait for 2000ms for next events if necessary
@@ -251,16 +249,17 @@ bool MessageManager::dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMes
 }
 
 //==============================================================================
-
-
 void LinuxEventLoop::setWindowSystemFdInternal (int fd, LinuxEventLoop::CallbackFunctionBase* readCallback) noexcept
 {
-    if (InternalMessageQueue* queue = InternalMessageQueue::getInstanceWithoutCreating())
+    if (auto* queue = InternalMessageQueue::getInstanceWithoutCreating())
         queue->setWindowSystemFd (fd, readCallback);
 }
 
 void LinuxEventLoop::removeWindowSystemFd() noexcept
 {
-    if (InternalMessageQueue* queue = InternalMessageQueue::getInstanceWithoutCreating())
+    if (auto* queue = InternalMessageQueue::getInstanceWithoutCreating())
         queue->removeWindowSystemFd();
 }
+
+
+} // namespace juce

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class OpenGLContext::NativeContext
 {
 public:
@@ -255,3 +258,5 @@ void componentPeerAboutToChange (Component& comp, bool shouldSuspend)
     for (auto* child : comp.getChildren())
         componentPeerAboutToChange (*child, shouldSuspend);
 }
+
+} // namespace juce

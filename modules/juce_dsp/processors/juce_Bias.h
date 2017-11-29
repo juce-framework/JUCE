@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 /**
     Adds a DC offset (voltage bias) to the audio samples.
@@ -137,3 +141,6 @@ private:
             bias.reset (sampleRate, rampDurationSeconds);
     }
 };
+
+} // namespace dsp
+} // namespace juce

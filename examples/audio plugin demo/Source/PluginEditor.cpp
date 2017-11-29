@@ -42,13 +42,7 @@ public:
         updateSliderPos();
     }
 
-    void valueChanged() override
-    {
-        if (isMouseButtonDown())
-            param.setValueNotifyingHost ((float) Slider::getValue());
-        else
-            param.setValue ((float) Slider::getValue());
-    }
+    void valueChanged() override        { param.setValueNotifyingHost ((float) Slider::getValue()); }
 
     void timerCallback() override       { updateSliderPos(); }
 
@@ -63,7 +57,7 @@ public:
         const float newValue = param.getValue();
 
         if (newValue != (float) Slider::getValue() && ! isMouseButtonDown())
-            Slider::setValue (newValue);
+            Slider::setValue (newValue, NotificationType::dontSendNotification);
     }
 
     AudioProcessorParameter& param;

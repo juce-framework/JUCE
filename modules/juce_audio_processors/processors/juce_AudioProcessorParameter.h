@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /** An abstract base class for parameter objects that can be added to an
@@ -51,10 +51,11 @@ public:
     */
     virtual float getValue() const = 0;
 
-    /** The host will call this method to change the value of one of the filter's parameters.
+    /** The host will call this method to change the value of a parameter.
 
         The host may call this at any time, including during the audio processing
-        callback, so the filter has to process this very fast and avoid blocking.
+        callback, so your implementation has to process this very efficiently and
+        avoid any kind of locking.
 
         If you want to set the value of a parameter internally, e.g. from your
         editor component, then don't call this directly - instead, use the
@@ -66,7 +67,7 @@ public:
     */
     virtual void setValue (float newValue) = 0;
 
-    /** Your filter can call this when it needs to change one of its parameters.
+    /** A processor should call this when it needs to change one of its parameters.
 
         This could happen when the editor or some other internal operation changes
         a parameter. This method will call the setValue() method to change the
@@ -106,15 +107,31 @@ public:
     */
     virtual String getLabel() const = 0;
 
-    /** Returns the number of discrete interval steps that this parameter's range
-        should be quantised into.
+    /** Returns the number of steps that this parameter's range should be quantised into.
 
         If you want a continuous range of values, don't override this method, and allow
         the default implementation to return AudioProcessor::getDefaultNumParameterSteps().
+
         If your parameter is boolean, then you may want to make this return 2.
-        The value that is returned may or may not be used, depending on the host.
+
+        The value that is returned may or may not be used, depending on the host. If you
+        want the host to display stepped automation values, rather than a continuous
+        interpolation between successive values, you should override isDiscrete to return true.
+
+        @see isDiscrete
     */
     virtual int getNumSteps() const;
+
+    /** Returns whether the parameter uses discrete values, based on the result of
+        getNumSteps, or allows the host to select values continuously.
+
+        This information may or may not be used, depending on the host. If you
+        want the host to display stepped automation values, rather than a continuous
+        interpolation between successive values, override this method to return true.
+
+        @see getNumSteps
+    */
+    virtual bool isDiscrete() const;
 
     /** Returns a textual version of the supplied parameter value.
         The default implementation just returns the floating point value
@@ -172,8 +189,10 @@ public:
 
 private:
     friend class AudioProcessor;
-    AudioProcessor* processor;
-    int parameterIndex;
+    AudioProcessor* processor = nullptr;
+    int parameterIndex = -1;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorParameter)
 };
+
+} // namespace juce

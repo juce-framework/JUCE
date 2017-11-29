@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 RSAKey::RSAKey()
 {
 }
@@ -135,3 +138,5 @@ void RSAKey::createKeyPair (RSAKey& publicKey, RSAKey& privateKey,
     privateKey.part1 = d;
     privateKey.part2 = n;
 }
+
+} // namespace juce

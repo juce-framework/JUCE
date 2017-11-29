@@ -20,22 +20,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 AudioTransportSource::AudioTransportSource()
-    : source (nullptr),
-      resamplerSource (nullptr),
-      bufferingSource (nullptr),
-      positionableSource (nullptr),
-      masterSource (nullptr),
-      gain (1.0f),
-      lastGain (1.0f),
-      playing (false),
-      stopped (true),
-      sampleRate (44100.0),
-      sourceSampleRate (0.0),
-      blockSize (128),
-      readAheadBufferSize (0),
-      isPrepared (false),
-      inputStreamEOF (false)
 {
 }
 
@@ -294,3 +282,5 @@ void AudioTransportSource::getNextAudioBlock (const AudioSourceChannelInfo& info
 
     lastGain = gain;
 }
+
+} // namespace juce

@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -53,7 +53,7 @@ protected:
 public:
     /** Creates a text property component.
 
-        @param valueToControl The Value that is controlled by the TextPropertyCOmponent
+        @param valueToControl The Value that is controlled by the TextPropertyComponent
         @param propertyName   The name of the property
         @param maxNumChars    If not zero, then this specifies the maximum allowable length of
                               the string. If zero, then the string will have no length limit.
@@ -153,3 +153,5 @@ private:
  /** This typedef is just for compatibility with old code and VC6 - newer code should use TextPropertyComponent::Listener instead. */
  typedef TextPropertyComponent::Listener TextPropertyComponentListener;
 #endif
+
+} // namespace juce

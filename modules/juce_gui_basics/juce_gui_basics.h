@@ -35,7 +35,7 @@
 
   ID:               juce_gui_basics
   vendor:           juce
-  version:          5.1.1
+  version:          5.2.0
   name:             JUCE GUI core classes
   description:      Basic user-interface components and related classes.
   website:          http://www.juce.com/juce
@@ -43,7 +43,7 @@
 
   dependencies:     juce_events juce_graphics juce_data_structures
   OSXFrameworks:    Cocoa Carbon QuartzCore
-  iOSFrameworks:    UIKit
+  iOSFrameworks:    UIKit MobileCoreServices
   linuxPackages:    x11 xinerama xext
 
  END_JUCE_MODULE_DECLARATION
@@ -112,55 +112,55 @@
 //==============================================================================
 namespace juce
 {
+    class Component;
+    class LookAndFeel;
+    class MouseInputSource;
+    class MouseInputSourceInternal;
+    class ComponentPeer;
+    class MarkerList;
+    class RelativeRectangle;
+    class MouseEvent;
+    struct MouseWheelDetails;
+    struct PenDetails;
+    class ToggleButton;
+    class TextButton;
+    class AlertWindow;
+    class TextLayout;
+    class ScrollBar;
+    class ComboBox;
+    class Button;
+    class FilenameComponent;
+    class DocumentWindow;
+    class ResizableWindow;
+    class GroupComponent;
+    class MenuBarComponent;
+    class DropShadower;
+    class GlyphArrangement;
+    class PropertyComponent;
+    class TableHeaderComponent;
+    class Toolbar;
+    class ToolbarItemComponent;
+    class PopupMenu;
+    class ProgressBar;
+    class FileBrowserComponent;
+    class DirectoryContentsDisplayComponent;
+    class FilePreviewComponent;
+    class ImageButton;
+    class CallOutBox;
+    class Drawable;
+    class DrawablePath;
+    class DrawableComposite;
+    class CaretComponent;
+    class BubbleComponent;
+    class KeyPressMappingSet;
+    class ApplicationCommandManagerListener;
+    class DrawableButton;
 
-class Component;
-class LookAndFeel;
-class MouseInputSource;
-class MouseInputSourceInternal;
-class ComponentPeer;
-class MarkerList;
-class RelativeRectangle;
-class MouseEvent;
-struct MouseWheelDetails;
-struct PenDetails;
-class ToggleButton;
-class TextButton;
-class AlertWindow;
-class TextLayout;
-class ScrollBar;
-class ComboBox;
-class Button;
-class FilenameComponent;
-class DocumentWindow;
-class ResizableWindow;
-class GroupComponent;
-class MenuBarComponent;
-class DropShadower;
-class GlyphArrangement;
-class PropertyComponent;
-class TableHeaderComponent;
-class Toolbar;
-class ToolbarItemComponent;
-class PopupMenu;
-class ProgressBar;
-class FileBrowserComponent;
-class DirectoryContentsDisplayComponent;
-class FilePreviewComponent;
-class ImageButton;
-class CallOutBox;
-class Drawable;
-class DrawablePath;
-class DrawableComposite;
-class CaretComponent;
-class BubbleComponent;
-class KeyPressMappingSet;
-class ApplicationCommandManagerListener;
-class DrawableButton;
-
-#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
- class FlexBox;
- class Grid;
-#endif
+    #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
+     class FlexBox;
+     class Grid;
+    #endif
+}
 
 #include "mouse/juce_MouseCursor.h"
 #include "mouse/juce_MouseListener.h"
@@ -248,6 +248,7 @@ class DrawableButton;
 #include "widgets/juce_ToolbarItemComponent.h"
 #include "widgets/juce_ToolbarItemFactory.h"
 #include "widgets/juce_ToolbarItemPalette.h"
+#include "menus/juce_BurgerMenuComponent.h"
 #include "buttons/juce_ToolbarButton.h"
 #include "misc/juce_DropShadower.h"
 #include "misc/juce_JUCESplashScreen.h"
@@ -263,6 +264,7 @@ class DrawableButton;
 #include "windows/juce_ThreadWithProgressWindow.h"
 #include "windows/juce_TooltipWindow.h"
 #include "layout/juce_MultiDocumentPanel.h"
+#include "layout/juce_SidePanel.h"
 #include "filebrowser/juce_FileBrowserListener.h"
 #include "filebrowser/juce_DirectoryContentsList.h"
 #include "filebrowser/juce_DirectoryContentsDisplayComponent.h"
@@ -297,16 +299,11 @@ class DrawableButton;
 
 // these classes are C++11-only
 #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
-#include "layout/juce_FlexItem.h"
-#include "layout/juce_FlexBox.h"
-#include "layout/juce_GridItem.h"
-#include "layout/juce_Grid.h"
+ #include "layout/juce_FlexItem.h"
+ #include "layout/juce_FlexBox.h"
 
-constexpr Grid::Px operator"" _px (long double px) { return Grid::Px { px }; }
-constexpr Grid::Px operator"" _px (unsigned long long px) { return Grid::Px { px }; }
-
-constexpr Grid::Fr operator"" _fr (unsigned long long fr) { return Grid::Fr { fr }; }
-
+ #if JUCE_HAS_CONSTEXPR
+  #include "layout/juce_GridItem.h"
+  #include "layout/juce_Grid.h"
+ #endif
 #endif
-
-}

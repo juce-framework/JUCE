@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_MSVC
  #pragma warning (push)
  #pragma warning (disable: 4390 4611 4365 4267)
@@ -542,7 +545,7 @@ bool PNGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
                   PNG_COMPRESSION_TYPE_BASE,
                   PNG_FILTER_TYPE_BASE);
 
-    HeapBlock<uint8> rowData ((size_t) width * 4);
+    HeapBlock<uint8> rowData (width * 4);
 
     png_color_8 sig_bit;
     sig_bit.red   = 8;
@@ -598,3 +601,5 @@ bool PNGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
 
     return true;
 }
+
+} // namespace juce

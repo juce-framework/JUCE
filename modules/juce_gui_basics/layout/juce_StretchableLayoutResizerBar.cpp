@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 StretchableLayoutResizerBar::StretchableLayoutResizerBar (StretchableLayoutManager* layout_,
                                                           const int index,
                                                           const bool vertical)
@@ -73,3 +76,5 @@ void StretchableLayoutResizerBar::hasBeenMoved()
     if (Component* parent = getParentComponent())
         parent->resized();
 }
+
+} // namespace juce

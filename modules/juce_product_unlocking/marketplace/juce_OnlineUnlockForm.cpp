@@ -24,7 +24,11 @@
   ==============================================================================
 */
 
-struct Spinner  : public Component, private Timer
+namespace juce
+{
+
+struct Spinner  : public Component,
+                  private Timer
 {
     Spinner()                       { startTimer (1000 / 50); }
     void timerCallback() override   { repaint(); }
@@ -37,14 +41,22 @@ struct Spinner  : public Component, private Timer
 
 struct OnlineUnlockForm::OverlayComp  : public Component,
                                         private Thread,
-                                        private Timer
+                                        private Timer,
+                                        private Button::Listener
 {
-    OverlayComp (OnlineUnlockForm& f)  : Thread (String()), form (f)
+    OverlayComp (OnlineUnlockForm& f, bool hasCancelButton = false)
+        : Thread (String()), form (f)
     {
         result.succeeded = false;
         email = form.emailBox.getText();
         password = form.passwordBox.getText();
         addAndMakeVisible (spinner);
+
+        if (hasCancelButton)
+        {
+            addAndMakeVisible (cancelButton = new TextButton (TRANS ("Cancel")));
+            cancelButton->addListener (this);
+        }
 
         startThread (4);
     }
@@ -70,6 +82,9 @@ struct OnlineUnlockForm::OverlayComp  : public Component,
     {
         const int spinnerSize = 40;
         spinner.setBounds ((getWidth() - spinnerSize) / 2, proportionOfHeight (0.6f), spinnerSize, spinnerSize);
+
+        if (cancelButton != nullptr)
+            cancelButton->setBounds (getLocalBounds().removeFromBottom (50).reduced (getWidth() / 4, 5));
     }
 
     void run() override
@@ -111,10 +126,25 @@ struct OnlineUnlockForm::OverlayComp  : public Component,
             f.dismiss();
     }
 
+    void buttonClicked (Button* button) override
+    {
+        if (button == cancelButton)
+        {
+            form.status.userCancelled();
+
+            spinner.setVisible (false);
+            stopTimer();
+
+            delete this;
+        }
+    }
+
     OnlineUnlockForm& form;
     Spinner spinner;
     OnlineUnlockStatus::UnlockResult result;
     String email, password;
+
+    ScopedPointer<TextButton> cancelButton;
 
     JUCE_LEAK_DETECTOR (OnlineUnlockForm::OverlayComp)
 };
@@ -130,12 +160,14 @@ static juce_wchar getDefaultPasswordChar() noexcept
 
 OnlineUnlockForm::OnlineUnlockForm (OnlineUnlockStatus& s,
                                     const String& userInstructions,
-                                    bool hasCancelButton)
+                                    bool hasCancelButton,
+                                    bool overlayHasCancelButton)
     : message (String(), userInstructions),
       passwordBox (String(), getDefaultPasswordChar()),
       registerButton (TRANS("Register")),
       cancelButton (TRANS ("Cancel")),
-      status (s)
+      status (s),
+      showOverlayCancelButton (overlayHasCancelButton)
 {
     // Please supply a message to tell your users what to do!
     jassert (userInstructions.isNotEmpty());
@@ -273,7 +305,7 @@ void OnlineUnlockForm::attemptRegistration()
 
         status.setUserEmail (emailBox.getText());
 
-        addAndMakeVisible (unlockingOverlay = new OverlayComp (*this));
+        addAndMakeVisible (unlockingOverlay = new OverlayComp (*this, showOverlayCancelButton));
         resized();
         unlockingOverlay->enterModalState();
     }
@@ -283,3 +315,5 @@ void OnlineUnlockForm::dismiss()
 {
     delete this;
 }
+
+} // namespace juce

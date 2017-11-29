@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 /** These are important openGL values that aren't defined by default
     by the GL headers on various platforms.
 */
@@ -87,6 +90,10 @@ enum MissingOpenGLDefinitions
 
    #ifndef GL_MULTISAMPLE
     GL_MULTISAMPLE                  = 0x809D,
+   #endif
+
+   #ifndef GL_MAX_ELEMENTS_INDICES
+    GL_MAX_ELEMENTS_INDICES         = 0x80E9,
    #endif
 
    #if JUCE_WINDOWS && ! defined (GL_TEXTURE0)
@@ -156,3 +163,5 @@ enum MissingOpenGLDefinitions
  typedef pointer_sized_int GLsizeiptr;
  typedef pointer_sized_int GLintptr;
 #endif
+
+} // namespace juce

@@ -24,15 +24,15 @@
   ==============================================================================
 */
 
-#include "../jucer_Headers.h"
+#include "../Application/jucer_Headers.h"
 #include "jucer_PaintRoutine.h"
 #include "jucer_JucerDocument.h"
 #include "jucer_ObjectTypes.h"
-#include "paintelements/jucer_PaintElementUndoableAction.h"
-#include "paintelements/jucer_PaintElementPath.h"
-#include "paintelements/jucer_PaintElementImage.h"
-#include "paintelements/jucer_PaintElementGroup.h"
-#include "ui/jucer_JucerDocumentEditor.h"
+#include "PaintElements/jucer_PaintElementUndoableAction.h"
+#include "PaintElements/jucer_PaintElementPath.h"
+#include "PaintElements/jucer_PaintElementImage.h"
+#include "PaintElements/jucer_PaintElementGroup.h"
+#include "UI/jucer_JucerDocumentEditor.h"
 #include "../Application/jucer_Application.h"
 
 //==============================================================================
@@ -553,7 +553,7 @@ void PaintRoutine::dropImageAt (const File& f, int x, int y)
     if (d != nullptr)
     {
         auto bounds = d->getDrawableBounds();
-        d = nullptr;
+        d.reset();
 
         auto* newElement = addNewElement (ObjectTypes::createNewImageElement (this), -1, true);
 

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace DragAndDropHelpers
 {
     //==============================================================================
@@ -282,3 +285,5 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& text, Co
 
     return DragAndDropHelpers::performDragDrop (&format, &medium, DROPEFFECT_COPY | DROPEFFECT_MOVE);
 }
+
+} // namespace juce

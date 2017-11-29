@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 BufferingAudioSource::BufferingAudioSource (PositionableAudioSource* s,
                                             TimeSliceThread& thread,
                                             const bool deleteSourceWhenDeleted,
@@ -307,3 +310,5 @@ int BufferingAudioSource::useTimeSlice()
 {
     return readNextBufferChunk() ? 1 : 100;
 }
+
+} // namespace juce

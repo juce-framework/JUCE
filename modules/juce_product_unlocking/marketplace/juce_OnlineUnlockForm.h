@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 /** Acts as a GUI which asks the user for their details, and calls the approriate
     methods on your OnlineUnlockStatus object to attempt to register the app.
 
@@ -52,7 +55,8 @@ public:
     */
     OnlineUnlockForm (OnlineUnlockStatus&,
                       const String& userInstructions,
-                      bool hasCancelButton = true);
+                      bool hasCancelButton = true,
+                      bool overlayHasCancelButton = false);
 
     /** Destructor. */
     ~OnlineUnlockForm();
@@ -78,6 +82,8 @@ private:
     OnlineUnlockStatus& status;
     ScopedPointer<BubbleMessageComponent> bubble;
 
+    bool showOverlayCancelButton;
+
     struct OverlayComp;
     friend struct OverlayComp;
     Component::SafePointer<Component> unlockingOverlay;
@@ -88,3 +94,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OnlineUnlockForm)
 };
+
+} // namespace juce

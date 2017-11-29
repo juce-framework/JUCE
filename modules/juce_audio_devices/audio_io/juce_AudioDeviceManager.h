@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -436,6 +436,15 @@ public:
     */
     CriticalSection& getMidiCallbackLock() noexcept         { return midiCallbackLock; }
 
+    //==============================================================================
+    /** Returns the number of under- or over runs reported.
+
+        This method will use the underlying device's native getXRunCount if it supports
+        it. Otherwise it will estimate the number of under-/overruns by measuring the
+        time it spent in the audio callback.
+    */
+    int getXRunCount() const noexcept;
+
 private:
     //==============================================================================
     OwnedArray<AudioIODeviceType> availableDeviceTypes;
@@ -449,7 +458,7 @@ private:
     BigInteger inputChannels, outputChannels;
     ScopedPointer<XmlElement> lastExplicitSettings;
     mutable bool listNeedsScanning;
-    AudioSampleBuffer tempBuffer;
+    AudioBuffer<float> tempBuffer;
 
     struct MidiCallbackInfo
     {
@@ -465,10 +474,11 @@ private:
     ScopedPointer<MidiOutput> defaultMidiOutput;
     CriticalSection audioCallbackLock, midiCallbackLock;
 
-    ScopedPointer<AudioSampleBuffer> testSound;
+    ScopedPointer<AudioBuffer<float>> testSound;
     int testSoundPosition;
 
-    double cpuUsageMs, timeToCpuScale;
+    double cpuUsageMs, timeToCpuScale, msPerBlock;
+    int xruns;
 
     struct LevelMeter
     {
@@ -518,3 +528,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioDeviceManager)
 };
+
+} // namespace juce

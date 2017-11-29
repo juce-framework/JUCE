@@ -20,14 +20,14 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
     Contains methods for finding out about the current hardware and OS configuration.
 */
-class JUCE_API  SystemStats
+class JUCE_API  SystemStats  final
 {
 public:
     //==============================================================================
@@ -217,3 +217,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (SystemStats)
 };
+
+} // namespace juce

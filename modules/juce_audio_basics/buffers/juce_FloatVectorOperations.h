@@ -20,13 +20,17 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
-#if JUCE_INTEL
- #define JUCE_SNAP_TO_ZERO(n)    if (! (n < -1.0e-8f || n > 1.0e-8f)) n = 0;
-#else
- #define JUCE_SNAP_TO_ZERO(n)    ignoreUnused (n)
+#ifndef JUCE_SNAP_TO_ZERO
+ #if JUCE_INTEL
+  #define JUCE_SNAP_TO_ZERO(n)    if (! (n < -1.0e-8f || n > 1.0e-8f)) n = 0;
+ #else
+  #define JUCE_SNAP_TO_ZERO(n)    ignoreUnused (n)
+ #endif
 #endif
+class ScopedNoDenormals;
 
 //==============================================================================
 /**
@@ -208,14 +212,42 @@ public:
     /** Finds the maximum value in the given array. */
     static double JUCE_CALLTYPE findMaximum (const double* src, int numValues) noexcept;
 
-    /** On Intel CPUs, this method enables or disables the SSE flush-to-zero mode.
-        Effectively, this is a wrapper around a call to _MM_SET_FLUSH_ZERO_MODE
-    */
+    /** This method enables or disables the SSE/NEON flush-to-zero mode. */
     static void JUCE_CALLTYPE enableFlushToZeroMode (bool shouldEnable) noexcept;
 
     /** On Intel CPUs, this method enables the SSE flush-to-zero and denormalised-are-zero modes.
-        This effectively sets the DAZ and FZ bits of the MXCSR register. It's a convenient thing to
-        call before audio processing code where you really want to avoid denormalisation performance hits.
+        This effectively sets the DAZ and FZ bits of the MXCSR register. On arm CPUs this will
+        enable flush to zero mode.
+        It's a convenient thing to call before audio processing code where you really want to
+        avoid denormalisation performance hits.
     */
-    static void JUCE_CALLTYPE disableDenormalisedNumberSupport() noexcept;
+    static void JUCE_CALLTYPE disableDenormalisedNumberSupport (bool shouldDisable = true) noexcept;
+
+    /** This method returns true if denormals are currently disabled. */
+    static bool JUCE_CALLTYPE areDenormalsDisabled() noexcept;
+
+private:
+    friend ScopedNoDenormals;
+
+    static intptr_t JUCE_CALLTYPE getFpStatusRegister() noexcept;
+    static void JUCE_CALLTYPE setFpStatusRegister (intptr_t) noexcept;
 };
+
+//==============================================================================
+/**
+     Helper class providing an RAII-based mechanism for temporarily disabling
+     denormals on your CPU.
+*/
+class ScopedNoDenormals
+{
+public:
+    ScopedNoDenormals() noexcept;
+    ~ScopedNoDenormals() noexcept;
+
+private:
+  #if JUCE_USE_SSE_INTRINSICS || (JUCE_USE_ARM_NEON || defined (__arm64__) || defined (__aarch64__))
+    intptr_t fpsr;
+  #endif
+};
+
+} // namespace juce

@@ -20,6 +20,8 @@
   ==============================================================================
 */
 
+namespace juce
+{
 
 /**
     A simple ARGB colour class for setting LEDs.
@@ -94,3 +96,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LEDGrid)
 };
+
+} // namespace juce

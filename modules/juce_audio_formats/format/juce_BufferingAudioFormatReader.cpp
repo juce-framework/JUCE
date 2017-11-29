@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 BufferingAudioReader::BufferingAudioReader (AudioFormatReader* sourceReader,
                                             TimeSliceThread& timeSliceThread,
                                             int samplesToBuffer)
@@ -173,3 +176,5 @@ bool BufferingAudioReader::readNextBufferChunk()
 
     return true;
 }
+
+} // namespace juce

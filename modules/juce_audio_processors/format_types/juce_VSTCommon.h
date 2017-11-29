@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give easier access to items in the namespace)
@@ -127,7 +128,7 @@ struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give e
     class VstSpeakerConfigurationHolder
     {
     public:
-        VstSpeakerConfigurationHolder ()                                           { clear(); }
+        VstSpeakerConfigurationHolder()                                            { clear(); }
         VstSpeakerConfigurationHolder (const VstSpeakerConfiguration& vstConfig)   { operator= (vstConfig); }
         VstSpeakerConfigurationHolder (const VstSpeakerConfigurationHolder& other) { operator= (other.get()); }
         VstSpeakerConfigurationHolder (VstSpeakerConfigurationHolder&& other) : storage (static_cast<HeapBlock<VstSpeakerConfiguration>&&> (other.storage)) { other.clear(); }
@@ -171,7 +172,7 @@ struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give e
             return *this;
         }
 
-        const VstSpeakerConfiguration& get() const { return *storage.getData(); }
+        const VstSpeakerConfiguration& get() const { return *storage.get(); }
 
     private:
         JUCE_LEAK_DETECTOR (VstSpeakerConfigurationHolder)
@@ -184,7 +185,7 @@ struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give e
                                      + sizeof (VstIndividualSpeakerInfo) * static_cast<size_t> (jmax (8, numChannels) - 8);
 
             storage.malloc (1, arrangementSize);
-            return storage.getData();
+            return storage.get();
         }
 
         void clear()
@@ -293,3 +294,5 @@ struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give e
         return AudioChannelSet::unknown;
     }
 };
+
+} // namespace juce

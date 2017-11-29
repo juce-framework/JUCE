@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace MouseCursorHelpers
 {
     extern NSImage* createNSImage (const Image&, float scaleFactor = 1.f);
@@ -239,7 +242,7 @@ void SystemTrayIconComponent::setIconImage (const Image& newImage)
     }
     else
     {
-        pimpl = nullptr;
+        pimpl.reset();
     }
 }
 
@@ -274,3 +277,5 @@ void SystemTrayIconComponent::showDropdownMenu (const PopupMenu& menu)
     if (pimpl != nullptr)
         pimpl->showMenu (menu);
 }
+
+} // namespace juce

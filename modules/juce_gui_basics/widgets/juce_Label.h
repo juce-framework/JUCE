@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -331,18 +331,18 @@ private:
     //==============================================================================
     Value textValue;
     String lastTextValue;
-    Font font;
-    Justification justification;
+    Font font { 15.0f };
+    Justification justification = Justification::centredLeft;
     ScopedPointer<TextEditor> editor;
     ListenerList<Listener> listeners;
     WeakReference<Component> ownerComponent;
-    BorderSize<int> border;
-    float minimumHorizontalScale;
-    TextInputTarget::VirtualKeyboardType keyboardType;
-    bool editSingleClick;
-    bool editDoubleClick;
-    bool lossOfFocusDiscardsChanges;
-    bool leftOfOwnerComp;
+    BorderSize<int> border { 1, 5, 1, 5 };
+    float minimumHorizontalScale = 0;
+    TextInputTarget::VirtualKeyboardType keyboardType = TextInputTarget::textKeyboard;
+    bool editSingleClick = false;
+    bool editDoubleClick = false;
+    bool lossOfFocusDiscardsChanges = false;
+    bool leftOfOwnerComp = false;
 
     bool updateFromTextEditorContents (TextEditor&);
 
@@ -351,3 +351,5 @@ private:
 
 /** This typedef is just for compatibility with old code - newer code should use the Label::Listener class directly. */
 typedef Label::Listener LabelListener;
+
+} // namespace juce

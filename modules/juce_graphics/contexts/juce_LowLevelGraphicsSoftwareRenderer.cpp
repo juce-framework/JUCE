@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image& image)
     : RenderingHelpers::StackBasedLowLevelGraphicsContext<RenderingHelpers::SoftwareRendererSavedState>
         (new RenderingHelpers::SoftwareRendererSavedState (image, image.getBounds()))
@@ -38,3 +41,5 @@ LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image&
 }
 
 LowLevelGraphicsSoftwareRenderer::~LowLevelGraphicsSoftwareRenderer() {}
+
+} // namespace juce

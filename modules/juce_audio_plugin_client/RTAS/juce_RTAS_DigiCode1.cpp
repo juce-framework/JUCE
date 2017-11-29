@@ -24,10 +24,10 @@
   ==============================================================================
 */
 
+#if JucePlugin_Build_RTAS
+
 #include "../../juce_core/system/juce_TargetPlatform.h"
 #include "../utility/juce_CheckSettingMacros.h"
-
-#if JucePlugin_Build_RTAS
 
 #include "juce_RTAS_DigiCode_Header.h"
 

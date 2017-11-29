@@ -84,7 +84,7 @@ public:
 
     ~ChildProcessDemo()
     {
-        masterProcess = nullptr;
+        masterProcess.reset();
     }
 
     void paint (Graphics& g) override
@@ -134,7 +134,7 @@ public:
     {
         if (masterProcess != nullptr)
         {
-            masterProcess = nullptr;
+            masterProcess.reset();
             logMessage ("Child process killed");
         }
     }

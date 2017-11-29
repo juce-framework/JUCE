@@ -24,8 +24,6 @@
   ==============================================================================
 */
 
-} // (juce namespace)
-
 @interface JuceGLView   : UIView
 {
 }
@@ -309,3 +307,5 @@ bool OpenGLHelpers::isContextActive()
 {
     return [EAGLContext currentContext] != nil;
 }
+
+} // namespace juce

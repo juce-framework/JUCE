@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /** An object that watches for any movement of a component or any of its parent components.
@@ -81,9 +81,9 @@ public:
 private:
     //==============================================================================
     WeakReference<Component> component;
-    uint32 lastPeerID;
-    Array <Component*> registeredParentComps;
-    bool reentrant, wasShowing;
+    uint32 lastPeerID = 0;
+    Array<Component*> registeredParentComps;
+    bool reentrant = false, wasShowing;
     Rectangle<int> lastBounds;
 
     void unregister();
@@ -91,3 +91,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentMovementWatcher)
 };
+
+} // namespace juce

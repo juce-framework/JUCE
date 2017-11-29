@@ -23,7 +23,9 @@
 
   ==============================================================================
 */
+
 #pragma once
+
 
 //==============================================================================
 struct NetWorkerThread   : public Thread,
@@ -172,7 +174,7 @@ struct LicenseThread : NetWorkerThread
             if (statusCode == 200)
             {
                 var result = JSON::parse (shared->readEntireStreamAsString());
-                shared = nullptr;
+                shared.reset();
 
                 auto newState = licenseStateFromJSON (result, stateToUpdate.authToken, stateToUpdate.avatar);
 
@@ -220,7 +222,7 @@ struct LicenseThread : NetWorkerThread
 
                 var json = JSON::parse (shared->withExtraHeaders (accessTokenHeader)
                                           .readEntireStreamAsString());
-                shared = nullptr;
+                shared.reset();
 
                 if (auto* jsonLicenses = json.getArray())
                 {

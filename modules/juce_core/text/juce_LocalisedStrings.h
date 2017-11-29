@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -61,9 +61,9 @@
     printSomething (TRANS("hello"));
     @endcode
 
-    This macro is used in the Juce classes themselves, so your application has a chance to
-    intercept and translate any internal Juce text strings that might be shown. (You can easily
-    get a list of all the messages by searching for the TRANS() macro in the Juce source
+    This macro is used in the JUCE classes themselves, so your application has a chance to
+    intercept and translate any internal JUCE text strings that might be shown. (You can easily
+    get a list of all the messages by searching for the TRANS() macro in the JUCE source
     code).
 */
 class JUCE_API  LocalisedStrings
@@ -235,3 +235,5 @@ JUCE_API String translate (CharPointer_UTF8 stringLiteral);
     @see LocalisedStrings
 */
 JUCE_API String translate (const String& stringLiteral, const String& resultIfNotFound);
+
+} // namespace juce

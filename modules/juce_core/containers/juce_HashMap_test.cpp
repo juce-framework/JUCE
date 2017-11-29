@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct HashMapTest : public UnitTest
 {
     HashMapTest() : UnitTest ("HashMap", "Containers") {}
@@ -269,3 +272,5 @@ template <> String HashMapTest::RandomKeys<String>::generateRandomKey (Random& r
 }
 
 static HashMapTest hashMapTest;
+
+} // namespace juce

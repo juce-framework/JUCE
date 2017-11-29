@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 DrawableComposite::DrawableComposite()
     : bounds (Point<float>(), Point<float> (100.0f, 0.0f), Point<float> (0.0f, 100.0f))
 {
@@ -307,7 +310,7 @@ ValueTree DrawableComposite::createValueTree (ComponentBuilder::ImageProvider* i
         auto* d = dynamic_cast<const Drawable*> (c);
         jassert (d != nullptr); // You can't save a mix of Drawables and normal components!
 
-        childList.addChild (d->createValueTree (imageProvider), -1, nullptr);
+        childList.appendChild (d->createValueTree (imageProvider), nullptr);
     }
 
     v.getMarkerListCreating (true, nullptr).readFrom (markersX, nullptr);
@@ -327,3 +330,5 @@ Path DrawableComposite::getOutlineAsPath() const
     p.applyTransform (getTransform());
     return p;
 }
+
+} // namespace juce

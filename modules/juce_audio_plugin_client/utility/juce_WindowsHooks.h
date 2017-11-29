@@ -28,9 +28,9 @@
 
 namespace juce
 {
-    // This function is in juce_win32_Windowing.cpp
-    extern bool offerKeyMessageToJUCEWindow (MSG&);
-}
+
+// This function is in juce_win32_Windowing.cpp
+extern bool offerKeyMessageToJUCEWindow (MSG&);
 
 namespace
 {
@@ -44,11 +44,11 @@ namespace
             if (numHookUsers++ == 0)
             {
                 mouseWheelHook = SetWindowsHookEx (WH_MOUSE, mouseWheelHookCallback,
-                                                   (HINSTANCE) Process::getCurrentModuleInstanceHandle(),
+                                                   (HINSTANCE) juce::Process::getCurrentModuleInstanceHandle(),
                                                    GetCurrentThreadId());
 
                 keyboardHook = SetWindowsHookEx (WH_GETMESSAGE, keyboardHookCallback,
-                                                 (HINSTANCE) Process::getCurrentModuleInstanceHandle(),
+                                                 (HINSTANCE) juce::Process::getCurrentModuleInstanceHandle(),
                                                  GetCurrentThreadId());
             }
         }
@@ -78,9 +78,9 @@ namespace
                 // using a local copy of this struct to support old mingw libraries
                 struct MOUSEHOOKSTRUCTEX_  : public MOUSEHOOKSTRUCT  { DWORD mouseData; };
 
-                const MOUSEHOOKSTRUCTEX_& hs = *(MOUSEHOOKSTRUCTEX_*) lParam;
+                auto& hs = *(MOUSEHOOKSTRUCTEX_*) lParam;
 
-                if (Component* const comp = Desktop::getInstance().findComponentAt (Point<int> (hs.pt.x, hs.pt.y)))
+                if (auto* comp = Desktop::getInstance().findComponentAt ({ hs.pt.x, hs.pt.y }))
                     if (comp->getWindowHandle() != 0)
                         return PostMessage ((HWND) comp->getWindowHandle(), WM_MOUSEWHEEL,
                                             hs.mouseData & 0xffff0000, (hs.pt.x & 0xffff) | (hs.pt.y << 16));
@@ -105,5 +105,7 @@ namespace
         }
     };
 }
+
+} // juce namespace
 
 #endif

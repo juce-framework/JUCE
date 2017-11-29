@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -194,15 +194,20 @@ public:
     */
     static AudioChannelSet JUCE_CALLTYPE create7point1SDDS();
 
+    /** Creates a set for Dolby Atmos 7.0.2 surround setup (left, right, centre, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, topSideLeft, topSideRight).
+
+        Is equivalent to: n/a (VST), AAX_eStemFormat_7_0_2 (AAX), n/a (CoreAudio)
+    */
+    static AudioChannelSet JUCE_CALLTYPE create7point0point2();
+
+    /** Creates a set for Dolby Atmos 7.1.2 surround setup (left, right, centre, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, LFE, topSideLeft, topSideRight).
+
+        Is equivalent to: k71_2 (VST), AAX_eStemFormat_7_1_2 (AAX), n/a (CoreAudio)
+    */
+    static AudioChannelSet JUCE_CALLTYPE create7point1point2();
+
 
     //==============================================================================
-    /** Creates a set for ambisonic surround setups (ambisonicW, ambisonicX, ambisonicY, ambisonicZ).
-
-        Is equivalent to: kBFormat (VST), n/a (AAX), kAudioChannelLayoutTag_Ambisonic_B_Format (CoreAudio)
-    */
-    static AudioChannelSet JUCE_CALLTYPE ambisonic();
-
-
     /** Creates a set for quadraphonic surround setup (left, right, leftSurround, rightSurround)
 
         Is equivalent to: k40Music (VST), AAX_eStemFormat_Quad (AAX), kAudioChannelLayoutTag_Quadraphonic (CoreAudio)
@@ -235,6 +240,18 @@ public:
     static AudioChannelSet JUCE_CALLTYPE octagonal();
 
     //==============================================================================
+    /** Creates a set for ACN, SN3D normalised ambisonic surround setups with a given order.
+
+        Is equivalent to: kAmbiXXXOrderACN (VST), AAX_eStemFormat_Ambi_XXX_ACN (AAX), kAudioChannelLayoutTag_HOA_ACN_SN3D (CoreAudio)
+    */
+    static AudioChannelSet JUCE_CALLTYPE ambisonic (int order = 1);
+
+    /** Returns the order of the ambisonic layout represented by this AudioChannelSet. If the
+        AudioChannelSet is not an ambisonic layout, then this method will return -1.
+    */
+    int getAmbisonicOrder() const;
+
+    //==============================================================================
     /** Creates a set of untyped discrete channels. */
     static AudioChannelSet JUCE_CALLTYPE discreteChannels (int numChannels);
 
@@ -257,10 +274,12 @@ public:
     {
         unknown             = 0,
 
+        //==============================================================================
         left                = 1,     // L
         right               = 2,     // R
         centre              = 3,     // C (sometimes M for mono)
 
+        //==============================================================================
         LFE                 = 4,
         leftSurround        = 5,     // Ls
         rightSurround       = 6,     // Rs
@@ -283,13 +302,67 @@ public:
         wideLeft            = 22,
         wideRight           = 23,
 
+        //==============================================================================
+        // Used by Dolby Atmos 7.0.2 and 7.1.2
+        topSideLeft         = 28,    // Lts (AAX), Tsl (VST)
+        topSideRight        = 29,    // Rts (AAX), Tsr (VST)
 
-        ambisonicW          = 24,
-        ambisonicX          = 25,
-        ambisonicY          = 26,
-        ambisonicZ          = 27,
+        //==============================================================================
+        // Ambisonic ACN formats - all channels are SN3D normalised
 
+        // zero-th and first-order ambisonic ACN
+        ambisonicACN0       = 24,
+        ambisonicACN1       = 25,
+        ambisonicACN2       = 26,
+        ambisonicACN3       = 27,
 
+        // second-order ambisonic
+        ambisonicACN4       = 30,
+        ambisonicACN5       = 31,
+        ambisonicACN6       = 32,
+        ambisonicACN7       = 33,
+        ambisonicACN8       = 34,
+
+        // third-order ambisonic
+        ambisonicACN9       = 35,
+        ambisonicACN10      = 36,
+        ambisonicACN11      = 37,
+        ambisonicACN12      = 38,
+        ambisonicACN13      = 39,
+        ambisonicACN14      = 40,
+        ambisonicACN15      = 41,
+
+        // fourth-order ambisonic
+        ambisonicACN16      = 42,
+        ambisonicACN17      = 43,
+        ambisonicACN18      = 44,
+        ambisonicACN19      = 45,
+        ambisonicACN20      = 46,
+        ambisonicACN21      = 47,
+        ambisonicACN22      = 48,
+        ambisonicACN23      = 49,
+        ambisonicACN24      = 50,
+
+        // fifth-order ambisonic
+        ambisonicACN25      = 51,
+        ambisonicACN26      = 52,
+        ambisonicACN27      = 53,
+        ambisonicACN28      = 54,
+        ambisonicACN29      = 55,
+        ambisonicACN30      = 56,
+        ambisonicACN31      = 57,
+        ambisonicACN32      = 58,
+        ambisonicACN33      = 59,
+        ambisonicACN34      = 60,
+        ambisonicACN35      = 61,
+
+        //==============================================================================
+        ambisonicW          = ambisonicACN0,
+        ambisonicX          = ambisonicACN3,
+        ambisonicY          = ambisonicACN1,
+        ambisonicZ          = ambisonicACN2,
+
+        //==============================================================================
         discreteChannel0    = 64  /**< Non-typed individual channels are indexed upwards from this value. */
     };
 
@@ -305,7 +378,7 @@ public:
     //==============================================================================
     enum
     {
-        maxChannelsOfNamedLayout = 8
+        maxChannelsOfNamedLayout = 36
     };
 
     /** Adds a channel to the set. */
@@ -387,4 +460,9 @@ private:
     //==============================================================================
     explicit AudioChannelSet (uint32);
     explicit AudioChannelSet (const Array<ChannelType>&);
+
+    //==============================================================================
+    static int JUCE_CALLTYPE getAmbisonicOrderForNumChannels (int);
 };
+
+} // namespace juce

@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 /*
@@ -90,33 +91,33 @@ typedef unsigned int                uint32;
 
 /** Returns the larger of two values. */
 template <typename Type>
-Type jmax (const Type a, const Type b)                                               { return (a < b) ? b : a; }
+JUCE_CONSTEXPR Type jmax (Type a, Type b)                                   { return a < b ? b : a; }
 
 /** Returns the larger of three values. */
 template <typename Type>
-Type jmax (const Type a, const Type b, const Type c)                                 { return (a < b) ? ((b < c) ? c : b) : ((a < c) ? c : a); }
+JUCE_CONSTEXPR Type jmax (Type a, Type b, Type c)                           { return a < b ? (b < c ? c : b) : (a < c ? c : a); }
 
 /** Returns the larger of four values. */
 template <typename Type>
-Type jmax (const Type a, const Type b, const Type c, const Type d)                   { return jmax (a, jmax (b, c, d)); }
+JUCE_CONSTEXPR Type jmax (Type a, Type b, Type c, Type d)                   { return jmax (a, jmax (b, c, d)); }
 
 /** Returns the smaller of two values. */
 template <typename Type>
-Type jmin (const Type a, const Type b)                                               { return (b < a) ? b : a; }
+JUCE_CONSTEXPR Type jmin (Type a, Type b)                                   { return b < a ? b : a; }
 
 /** Returns the smaller of three values. */
 template <typename Type>
-Type jmin (const Type a, const Type b, const Type c)                                 { return (b < a) ? ((c < b) ? c : b) : ((c < a) ? c : a); }
+JUCE_CONSTEXPR Type jmin (Type a, Type b, Type c)                           { return b < a ? (c < b ? c : b) : (c < a ? c : a); }
 
 /** Returns the smaller of four values. */
 template <typename Type>
-Type jmin (const Type a, const Type b, const Type c, const Type d)                   { return jmin (a, jmin (b, c, d)); }
+JUCE_CONSTEXPR Type jmin (Type a, Type b, Type c, Type d)                   { return jmin (a, jmin (b, c, d)); }
 
 /** Remaps a normalised value (between 0 and 1) to a target range.
     This effectively returns (targetRangeMin + value0To1 * (targetRangeMax - targetRangeMin)).
 */
 template <typename Type>
-Type jmap (Type value0To1, Type targetRangeMin, Type targetRangeMax)
+JUCE_CONSTEXPR Type jmap (Type value0To1, Type targetRangeMin, Type targetRangeMax)
 {
     return targetRangeMin + value0To1 * (targetRangeMax - targetRangeMin);
 }
@@ -134,14 +135,16 @@ template <typename Type>
 Type findMinimum (const Type* data, int numValues)
 {
     if (numValues <= 0)
-        return Type();
+        return {};
 
-    Type result (*data++);
+    auto result = *data++;
 
     while (--numValues > 0) // (> 0 rather than >= 0 because we've already taken the first sample)
     {
-        const Type& v = *data++;
-        if (v < result)  result = v;
+        auto v = *data++;
+
+        if (v < result)
+            result = v;
     }
 
     return result;
@@ -152,14 +155,16 @@ template <typename Type>
 Type findMaximum (const Type* values, int numValues)
 {
     if (numValues <= 0)
-        return Type();
+        return {};
 
-    Type result (*values++);
+    auto result = *values++;
 
     while (--numValues > 0) // (> 0 rather than >= 0 because we've already taken the first sample)
     {
-        const Type& v = *values++;
-        if (result < v)  result = v;
+        auto v = *values++;
+
+        if (result < v)
+            result = v;
     }
 
     return result;
@@ -171,17 +176,17 @@ void findMinAndMax (const Type* values, int numValues, Type& lowest, Type& highe
 {
     if (numValues <= 0)
     {
-        lowest = Type();
-        highest = Type();
+        lowest = {};
+        highest = {};
     }
     else
     {
-        Type mn (*values++);
-        Type mx (mn);
+        auto mn = *values++;
+        auto mx = mn;
 
         while (--numValues > 0) // (> 0 rather than >= 0 because we've already taken the first sample)
         {
-            const Type& v = *values++;
+            auto v = *values++;
 
             if (mx < v)  mx = v;
             if (v < mn)  mn = v;
@@ -211,15 +216,15 @@ void findMinAndMax (const Type* values, int numValues, Type& lowest, Type& highe
     @see jmin, jmax, jmap
 */
 template <typename Type>
-Type jlimit (const Type lowerLimit,
-             const Type upperLimit,
-             const Type valueToConstrain) noexcept
+Type jlimit (Type lowerLimit,
+             Type upperLimit,
+             Type valueToConstrain) noexcept
 {
     jassert (lowerLimit <= upperLimit); // if these are in the wrong order, results are unpredictable..
 
-    return (valueToConstrain < lowerLimit) ? lowerLimit
-                                           : ((upperLimit < valueToConstrain) ? upperLimit
-                                                                              : valueToConstrain);
+    return valueToConstrain < lowerLimit ? lowerLimit
+                                         : (upperLimit < valueToConstrain ? upperLimit
+                                                                          : valueToConstrain);
 }
 
 /** Returns true if a value is at least zero, and also below a specified upper limit.
@@ -227,15 +232,15 @@ Type jlimit (const Type lowerLimit,
     @code valueToTest >= 0 && valueToTest < upperLimit
     @endcode
 */
-template <typename Type>
-bool isPositiveAndBelow (Type valueToTest, Type upperLimit) noexcept
+template <typename Type1, typename Type2>
+bool isPositiveAndBelow (Type1 valueToTest, Type2 upperLimit) noexcept
 {
-    jassert (Type() <= upperLimit); // makes no sense to call this if the upper limit is itself below zero..
-    return Type() <= valueToTest && valueToTest < upperLimit;
+    jassert (Type1() <= static_cast<Type1> (upperLimit)); // makes no sense to call this if the upper limit is itself below zero..
+    return Type1() <= valueToTest && valueToTest < static_cast<Type1> (upperLimit);
 }
 
-template <>
-inline bool isPositiveAndBelow (const int valueToTest, const int upperLimit) noexcept
+template <typename Type>
+bool isPositiveAndBelow (int valueToTest, Type upperLimit) noexcept
 {
     jassert (upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero..
     return static_cast<unsigned int> (valueToTest) < static_cast<unsigned int> (upperLimit);
@@ -246,40 +251,24 @@ inline bool isPositiveAndBelow (const int valueToTest, const int upperLimit) noe
     @code valueToTest >= 0 && valueToTest <= upperLimit
     @endcode
 */
-template <typename Type>
-bool isPositiveAndNotGreaterThan (Type valueToTest, Type upperLimit) noexcept
+template <typename Type1, typename Type2>
+bool isPositiveAndNotGreaterThan (Type1 valueToTest, Type2 upperLimit) noexcept
 {
-    jassert (Type() <= upperLimit); // makes no sense to call this if the upper limit is itself below zero..
-    return Type() <= valueToTest && valueToTest <= upperLimit;
+    jassert (Type1() <= static_cast<Type1> (upperLimit)); // makes no sense to call this if the upper limit is itself below zero..
+    return Type1() <= valueToTest && valueToTest <= static_cast<Type1> (upperLimit);
 }
 
-template <>
-inline bool isPositiveAndNotGreaterThan (const int valueToTest, const int upperLimit) noexcept
+template <typename Type>
+bool isPositiveAndNotGreaterThan (int valueToTest, Type upperLimit) noexcept
 {
     jassert (upperLimit >= 0); // makes no sense to call this if the upper limit is itself below zero..
     return static_cast<unsigned int> (valueToTest) <= static_cast<unsigned int> (upperLimit);
 }
 
 //==============================================================================
-/** Handy function to swap two values. */
-template <typename Type>
-void swapVariables (Type& variable1, Type& variable2)
-{
-    std::swap (variable1, variable2);
-}
-
 /** Handy function for avoiding unused variables warning. */
-template <typename Type1>
-void ignoreUnused (const Type1&) noexcept {}
-
-template <typename Type1, typename Type2>
-void ignoreUnused (const Type1&, const Type2&) noexcept {}
-
-template <typename Type1, typename Type2, typename Type3>
-void ignoreUnused (const Type1&, const Type2&, const Type3&) noexcept {}
-
-template <typename Type1, typename Type2, typename Type3, typename Type4>
-void ignoreUnused (const Type1&, const Type2&, const Type3&, const Type4&) noexcept {}
+template <typename... Types>
+void ignoreUnused (Types&&...) noexcept {}
 
 /** Handy function for getting the number of elements in a simple const C array.
     E.g.
@@ -292,7 +281,7 @@ void ignoreUnused (const Type1&, const Type2&, const Type3&, const Type4&) noexc
 template <typename Type, int N>
 int numElementsInArray (Type (&array)[N])
 {
-    ignoreUnused (array);
+    (void) array;
     (void) sizeof (0[array]); // This line should cause an error if you pass an object with a user-defined subscript operator
     return N;
 }
@@ -338,6 +327,21 @@ inline int64 abs64 (const int64 n) noexcept
 
 //==============================================================================
 
+#if JUCE_HAS_CONSTEXPR
+
+/** Commonly used mathematical constants */
+template <typename FloatType>
+struct MathConstants
+{
+    /** A predefined value for Pi */
+    static constexpr FloatType pi = static_cast<FloatType> (3.141592653589793238L);
+
+    /** A predfined value for Euler's number */
+    static constexpr FloatType euler = static_cast<FloatType> (2.71828182845904523536L);
+};
+
+#else
+
 /** Commonly used mathematical constants */
 template <typename FloatType>
 struct MathConstants
@@ -355,29 +359,31 @@ const FloatType MathConstants<FloatType>::pi = static_cast<FloatType> (3.1415926
 template <typename FloatType>
 const FloatType MathConstants<FloatType>::euler = static_cast<FloatType> (2.71828182845904523536L);
 
+#endif
+
 
 /** A predefined value for Pi, at double-precision.
     @see float_Pi
 */
-const double  double_Pi  = MathConstants<double>::pi;
+const JUCE_CONSTEXPR double  double_Pi  = MathConstants<double>::pi;
 
 /** A predefined value for Pi, at single-precision.
     @see double_Pi
 */
-const float   float_Pi   = MathConstants<float>::pi;
+const JUCE_CONSTEXPR float   float_Pi   = MathConstants<float>::pi;
 
 
 /** Converts an angle in degrees to radians. */
-inline float degreesToRadians (float degrees) noexcept     { return degrees * (float_Pi / 180.0f); }
+inline JUCE_CONSTEXPR float degreesToRadians (float degrees) noexcept     { return degrees * (float_Pi / 180.0f); }
 
 /** Converts an angle in degrees to radians. */
-inline double degreesToRadians (double degrees) noexcept   { return degrees * (double_Pi / 180.0); }
+inline JUCE_CONSTEXPR double degreesToRadians (double degrees) noexcept   { return degrees * (double_Pi / 180.0); }
 
 /** Converts an angle in radians to degrees. */
-inline float radiansToDegrees (float radians) noexcept     { return radians * (180.0f / float_Pi); }
+inline JUCE_CONSTEXPR float radiansToDegrees (float radians) noexcept     { return radians * (180.0f / float_Pi); }
 
 /** Converts an angle in radians to degrees. */
-inline double radiansToDegrees (double radians) noexcept   { return radians * (180.0 / double_Pi); }
+inline JUCE_CONSTEXPR double radiansToDegrees (double radians) noexcept   { return radians * (180.0 / double_Pi); }
 
 
 //==============================================================================
@@ -521,7 +527,7 @@ unsigned int truncatePositiveToUnsignedInt (FloatType value) noexcept
 //==============================================================================
 /** Returns true if the specified integer is a power-of-two. */
 template <typename IntegerType>
-bool isPowerOfTwo (IntegerType value)
+JUCE_CONSTEXPR bool isPowerOfTwo (IntegerType value)
 {
    return (value & (value - 1)) == 0;
 }
@@ -574,7 +580,7 @@ IntegerType negativeAwareModulo (IntegerType dividend, const IntegerType divisor
 
 /** Returns the square of its argument. */
 template <typename NumericType>
-NumericType square (NumericType n) noexcept
+inline JUCE_CONSTEXPR NumericType square (NumericType n) noexcept
 {
     return n * n;
 }
@@ -661,5 +667,4 @@ namespace TypeHelpers
     template <>              struct UnsignedTypeWithSize<8>         { typedef uint64 type; };
 }
 
-
-//==============================================================================
+} // namespace juce

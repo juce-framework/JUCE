@@ -32,6 +32,7 @@
 #define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
 #define JUCE_CORE_INCLUDE_COM_SMART_PTR 1
 #define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
+#define JUCE_CORE_INCLUDE_JNI_HELPERS 1
 
 #include "juce_core.h"
 
@@ -60,6 +61,8 @@
 
  #if JUCE_MINGW
   #include <ws2spi.h>
+  #include <cstdio>
+  #include <locale.h>
  #endif
 
 #else
@@ -114,12 +117,8 @@
 #endif
 
 //==============================================================================
-namespace juce
-{
-
 #include "containers/juce_AbstractFifo.cpp"
 #include "containers/juce_NamedValueSet.cpp"
-#include "containers/juce_ListenerList.cpp"
 #include "containers/juce_PropertySet.cpp"
 #include "containers/juce_Variant.cpp"
 #include "files/juce_DirectoryIterator.cpp"
@@ -179,10 +178,6 @@ namespace juce
 #include "files/juce_WildcardFileFilter.cpp"
 
 //==============================================================================
-#if JUCE_ANDROID
-#include "native/juce_android_JNIHelpers.h"
-#endif
-
 #if ! JUCE_WINDOWS
 #include "native/juce_posix_SharedCode.h"
 #include "native/juce_posix_NamedPipe.cpp"
@@ -238,6 +233,8 @@ namespace juce
 #endif
 
 //==============================================================================
+namespace juce
+{
 /*
     As the very long class names here try to explain, the purpose of this code is to cause
     a linker error if not all of your compile units are consistent in the options that they
@@ -253,5 +250,4 @@ namespace juce
  this_will_fail_to_link_if_some_of_your_compile_units_are_built_in_release_mode
     ::this_will_fail_to_link_if_some_of_your_compile_units_are_built_in_release_mode() noexcept {}
 #endif
-
 }

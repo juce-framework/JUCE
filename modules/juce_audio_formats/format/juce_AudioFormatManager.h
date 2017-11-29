@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -63,8 +63,7 @@ public:
     void registerFormat (AudioFormat* newFormat,
                          bool makeThisTheDefaultFormat);
 
-    /** Handy method to make it easy to register the formats that come with Juce.
-
+    /** Handy method to make it easy to register the formats that come with JUCE.
         Currently, this will add WAV and AIFF to the list.
     */
     void registerBasicFormats();
@@ -135,7 +134,9 @@ public:
 private:
     //==============================================================================
     OwnedArray<AudioFormat> knownFormats;
-    int defaultFormatIndex;
+    int defaultFormatIndex = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioFormatManager)
 };
+
+} // namespace juce

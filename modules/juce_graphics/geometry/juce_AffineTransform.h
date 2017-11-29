@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -38,7 +38,7 @@
 
     @see Path, Point, Line
 */
-class JUCE_API  AffineTransform
+class JUCE_API  AffineTransform  final
 {
 public:
     //==============================================================================
@@ -275,3 +275,5 @@ public:
     float mat00, mat01, mat02;
     float mat10, mat11, mat12;
 };
+
+} // namespace juce

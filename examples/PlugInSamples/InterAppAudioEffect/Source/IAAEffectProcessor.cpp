@@ -114,14 +114,14 @@ bool IAAEffectProcessor::isBusesLayoutSupported (const BusesLayout& layouts) con
     return true;
 }
 
-void IAAEffectProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer&)
+void IAAEffectProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer&)
 {
     const float gain = *parameters.getRawParameterValue ("gain");
 
-    const int totalNumInputChannels  = getTotalNumInputChannels();
-    const int totalNumOutputChannels = getTotalNumOutputChannels();
+    auto totalNumInputChannels  = getTotalNumInputChannels();
+    auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    const int numSamples = buffer.getNumSamples();
+    auto numSamples = buffer.getNumSamples();
 
     for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
@@ -131,10 +131,9 @@ void IAAEffectProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer&)
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         buffer.applyGainRamp (channel, 0, numSamples, previousGain, gain);
+        auto newLevel = buffer.getMagnitude (channel, 0, numSamples);
 
-        meterListeners.call (&IAAEffectProcessor::MeterListener::handleNewMeterValue,
-                             channel,
-                             buffer.getMagnitude (channel, 0, numSamples));
+        meterListeners.call ([=] (MeterListener& l) { l.handleNewMeterValue (channel, newLevel); });
     }
 
     previousGain = gain;
@@ -164,6 +163,7 @@ void IAAEffectProcessor::getStateInformation (MemoryBlock& destData)
 void IAAEffectProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     auto xmlState = std::unique_ptr<XmlElement> (getXmlFromBinary (data, sizeInBytes));
+
     if (xmlState.get() != nullptr)
         if (xmlState->hasTagName (parameters.state.getType()))
             parameters.state = ValueTree::fromXml (*xmlState);

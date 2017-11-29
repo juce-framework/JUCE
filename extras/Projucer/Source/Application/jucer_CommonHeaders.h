@@ -26,6 +26,7 @@
 
 #pragma once
 
+
 //==============================================================================
 struct TargetOS
 {
@@ -54,14 +55,14 @@ struct TargetOS
 typedef TargetOS::OS DependencyPathOS;
 
 //==============================================================================
-#include "../Utility/jucer_StoredSettings.h"
-#include "../Utility/jucer_Icons.h"
-#include "../Utility/jucer_MiscUtilities.h"
-#include "../Utility/jucer_CodeHelpers.h"
-#include "../Utility/jucer_FileHelpers.h"
-#include "../Utility/jucer_RelativePath.h"
-#include "../Utility/jucer_ValueSourceHelpers.h"
-#include "../Utility/jucer_PresetIDs.h"
+#include "../Settings/jucer_StoredSettings.h"
+#include "../Utility/UI/jucer_Icons.h"
+#include "../Utility/Helpers/jucer_MiscUtilities.h"
+#include "../Utility/Helpers/jucer_CodeHelpers.h"
+#include "../Utility/Helpers/jucer_FileHelpers.h"
+#include "../Utility/Helpers/jucer_RelativePath.h"
+#include "../Utility/Helpers/jucer_ValueSourceHelpers.h"
+#include "../Utility/Helpers/jucer_PresetIDs.h"
 #include "jucer_CommandIDs.h"
 
 //==============================================================================

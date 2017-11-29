@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 Box2DRenderer::Box2DRenderer() noexcept   : graphics (nullptr)
 {
     SetFlags (e_shapeBit);
@@ -105,3 +108,5 @@ void Box2DRenderer::DrawSegment (const b2Vec2& p1, const b2Vec2& p2, const b2Col
 void Box2DRenderer::DrawTransform (const b2Transform&)
 {
 }
+
+} // namespace juce

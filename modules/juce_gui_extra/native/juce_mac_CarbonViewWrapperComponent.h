@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -341,3 +341,5 @@ void* getCarbonWindow (Component* possibleCarbonComponent)
 
     return nullptr;
 }
+
+} // namespace juce

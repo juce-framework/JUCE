@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -56,7 +56,7 @@ public:
     This makes it easy to add a tooltip to a custom component, by simply adding this
     as a base class and calling setTooltip().
 
-    Many of the Juce widgets already use this as a base class to implement their
+    Many of the JUCE widgets already use this as a base class to implement their
     tooltips.
 
     @see TooltipClient, TooltipWindow
@@ -81,3 +81,5 @@ protected:
 private:
     String tooltipString;
 };
+
+} // namespace juce

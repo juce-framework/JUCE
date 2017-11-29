@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace MidiBufferHelpers
 {
     inline int getEventTime (const void* const d) noexcept
@@ -186,9 +189,7 @@ MidiBuffer::Iterator::Iterator (const MidiBuffer& b) noexcept
 {
 }
 
-MidiBuffer::Iterator::~Iterator() noexcept
-{
-}
+MidiBuffer::Iterator::~Iterator() noexcept{}
 
 void MidiBuffer::Iterator::setNextSamplePosition (const int samplePosition) noexcept
 {
@@ -225,3 +226,5 @@ bool MidiBuffer::Iterator::getNextEvent (MidiMessage& result, int& samplePositio
 
     return true;
 }
+
+} // namespace juce

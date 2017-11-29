@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 #if JUCE_MAC || JUCE_WINDOWS || defined (DOXYGEN)
 
@@ -52,3 +53,5 @@ private:
 };
 
 #endif
+
+} // namespace juce

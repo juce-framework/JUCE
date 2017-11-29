@@ -340,9 +340,7 @@ struct OpenGLDemoClasses
         DemoControlsOverlay (OpenGLDemo& d)
             : demo (d),
               vertexEditorComp (vertexDocument, nullptr),
-              fragmentEditorComp (fragmentDocument, nullptr),
-              tabbedComp (TabbedButtonBar::TabsAtLeft),
-              showBackgroundToggle ("Draw 2D graphics in background")
+              fragmentEditorComp (fragmentDocument, nullptr)
         {
             addAndMakeVisible (statusLabel);
             statusLabel.setJustificationType (Justification::topLeft);
@@ -575,13 +573,13 @@ struct OpenGLDemoClasses
 
         CodeDocument vertexDocument, fragmentDocument;
         CodeEditorComponent vertexEditorComp, fragmentEditorComp;
-        TabbedComponent tabbedComp;
+        TabbedComponent tabbedComp { TabbedButtonBar::TabsAtLeft };
 
         ComboBox presetBox, textureBox;
         Label presetLabel, textureLabel;
 
         Slider speedSlider, sizeSlider;
-        ToggleButton showBackgroundToggle;
+        ToggleButton showBackgroundToggle { "Draw 2D graphics in background" };
 
         OwnedArray<DemoTexture> textures;
 
@@ -593,13 +591,11 @@ struct OpenGLDemoClasses
         it implements the OpenGLRenderer callback so that it can do real GL work.
     */
     class OpenGLDemo  : public Component,
-                        private OpenGLRenderer
+                        private OpenGLRenderer,
+                        private AsyncUpdater
     {
     public:
         OpenGLDemo()
-            : doBackgroundDrawing (false),
-              scale (0.5f), rotationSpeed (0.0f), rotation (0.0f),
-              textureToUse (nullptr), lastTexture (nullptr)
         {
             if (MainAppWindow* mw = MainAppWindow::getMainAppWindow())
                 mw->setRenderingEngine (0);
@@ -641,10 +637,10 @@ struct OpenGLDemoClasses
 
         void freeAllContextObjects()
         {
-            shape = nullptr;
-            shader = nullptr;
-            attributes = nullptr;
-            uniforms = nullptr;
+            shape.reset();
+            shader.reset();
+            attributes.reset();
+            uniforms.reset();
             texture.release();
         }
 
@@ -654,7 +650,7 @@ struct OpenGLDemoClasses
         {
             jassert (OpenGLHelpers::isContextActive());
 
-            const float desktopScale = (float) openGLContext.getRenderingScale();
+            auto desktopScale = (float) openGLContext.getRenderingScale();
 
             OpenGLHelpers::clear (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::windowBackground,
                                                           Colours::lightblue));
@@ -717,17 +713,18 @@ struct OpenGLDemoClasses
 
         Matrix3D<float> getProjectionMatrix() const
         {
-            float w = 1.0f / (scale + 0.1f);
-            float h = w * getLocalBounds().toFloat().getAspectRatio (false);
+            auto w = 1.0f / (scale + 0.1f);
+            auto h = w * getLocalBounds().toFloat().getAspectRatio (false);
+
             return Matrix3D<float>::fromFrustum (-w, w, -h, h, 4.0f, 30.0f);
         }
 
         Matrix3D<float> getViewMatrix() const
         {
-            Matrix3D<float> viewMatrix = draggableOrientation.getRotationMatrix()
-                                            * Vector3D<float> (0.0f, 1.0f, -10.0f);
+            auto viewMatrix = draggableOrientation.getRotationMatrix()
+                                 * Vector3D<float> (0.0f, 1.0f, -10.0f);
 
-            Matrix3D<float> rotationMatrix = viewMatrix.rotated (Vector3D<float> (rotation, rotation, -0.3f));
+            auto rotationMatrix = Matrix3D<float>::rotation ({ rotation, rotation, -0.3f });
 
             return rotationMatrix * viewMatrix;
         }
@@ -752,11 +749,16 @@ struct OpenGLDemoClasses
         }
 
         Draggable3DOrientation draggableOrientation;
-        bool doBackgroundDrawing;
-        float scale, rotationSpeed;
+        bool doBackgroundDrawing = false;
+        float scale = 0.5f, rotationSpeed = 0;
         BouncingNumber bouncingNumber;
 
     private:
+        void handleAsyncUpdate() override
+        {
+            controlsOverlay->statusLabel.setText (statusText, dontSendNotification);
+        }
+
         void drawBackground2DStuff (float desktopScale)
         {
             // Create an OpenGLGraphicsContext that will draw into this GL window..
@@ -796,7 +798,7 @@ struct OpenGLDemoClasses
 
         ScopedPointer<DemoControlsOverlay> controlsOverlay;
 
-        float rotation;
+        float rotation = 0;
 
         ScopedPointer<OpenGLShaderProgram> shader;
         ScopedPointer<Shape> shape;
@@ -804,9 +806,10 @@ struct OpenGLDemoClasses
         ScopedPointer<Uniforms> uniforms;
 
         OpenGLTexture texture;
-        DemoTexture* textureToUse, *lastTexture;
+        DemoTexture* textureToUse = nullptr;
+        DemoTexture* lastTexture = nullptr;
 
-        String newVertexShader, newFragmentShader;
+        String newVertexShader, newFragmentShader, statusText;
 
         struct BackgroundStar
         {
@@ -821,15 +824,14 @@ struct OpenGLDemoClasses
             if (newVertexShader.isNotEmpty() || newFragmentShader.isNotEmpty())
             {
                 ScopedPointer<OpenGLShaderProgram> newShader (new OpenGLShaderProgram (openGLContext));
-                String statusText;
 
                 if (newShader->addVertexShader (OpenGLHelpers::translateVertexShaderToV3 (newVertexShader))
                       && newShader->addFragmentShader (OpenGLHelpers::translateFragmentShaderToV3 (newFragmentShader))
                       && newShader->link())
                 {
-                    shape = nullptr;
-                    attributes = nullptr;
-                    uniforms = nullptr;
+                    shape.reset();
+                    attributes.reset();
+                    uniforms.reset();
 
                     shader = newShader;
                     shader->use();
@@ -845,11 +847,10 @@ struct OpenGLDemoClasses
                     statusText = newShader->getLastError();
                 }
 
-                controlsOverlay->statusLabel.setText (statusText, dontSendNotification);
+                triggerAsyncUpdate();
 
-
-                newVertexShader = String();
-                newFragmentShader = String();
+                newVertexShader = {};
+                newFragmentShader = {};
             }
         }
 

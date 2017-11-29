@@ -31,20 +31,8 @@
 
 #include "juce_audio_basics.h"
 
-#if JUCE_MINGW && ! defined (__SSE2__)
- #define JUCE_USE_SSE_INTRINSICS 0
-#endif
-
 #if JUCE_MINGW && ! defined (alloca)
  #define alloca __builtin_alloca
-#endif
-
-#ifndef JUCE_USE_SSE_INTRINSICS
- #define JUCE_USE_SSE_INTRINSICS 1
-#endif
-
-#if ! JUCE_INTEL
- #undef JUCE_USE_SSE_INTRINSICS
 #endif
 
 #if JUCE_USE_SSE_INTRINSICS
@@ -61,23 +49,9 @@
  #undef JUCE_USE_VDSP_FRAMEWORK
 #endif
 
-#if __ARM_NEON__ && ! (JUCE_USE_VDSP_FRAMEWORK || defined (JUCE_USE_ARM_NEON))
- #define JUCE_USE_ARM_NEON 1
-#endif
-
-#if TARGET_IPHONE_SIMULATOR
- #ifdef JUCE_USE_ARM_NEON
-  #undef JUCE_USE_ARM_NEON
- #endif
- #define JUCE_USE_ARM_NEON 0
-#endif
-
 #if JUCE_USE_ARM_NEON
  #include <arm_neon.h>
 #endif
-
-namespace juce
-{
 
 #include "buffers/juce_AudioDataConverters.cpp"
 #include "buffers/juce_FloatVectorOperations.cpp"
@@ -109,5 +83,3 @@ namespace juce
 #include "sources/juce_ReverbAudioSource.cpp"
 #include "sources/juce_ToneGeneratorAudioSource.cpp"
 #include "synthesisers/juce_Synthesiser.cpp"
-
-}

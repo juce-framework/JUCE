@@ -37,17 +37,17 @@ This will produce the executable `BlockFinder` in the `Debug` directory.
 
 ### Compiling the library
 
-The source code for the BLOCKS SDK library is contained within the `SDK` directory of this repository.  Here you will find header files that you can include in your own projects and the `Build` subdirectory contains an XCode project, a Visual Studio project and a Linux Makefile for compiling the SDK source code into a static library. Use the appropriate choice for your platform, select either the "Debug" or "Release" configuration, and build the project.
+The source code for the BLOCKS SDK library is contained within the `SDK` directory of this repository.  Here you will find header files that you can include in your own projects and the `Build` subdirectory contains an Xcode project, a Visual Studio project and a Linux Makefile for compiling the SDK source code into a static library. Use the appropriate choice for your platform, select either the "Debug" or "Release" configuration, and build the project.
 
 For MacOS this will produce `libBLOCKS-SDK.a` in either the `SDK/Build/MacOS/Debug/` or `SDK/Build/MacOS/Release/` directory, for Linux this will produce `libBLOCKS-SDK.a` in either the `SDK/Build/Linux/Debug/` or `SDK/Build/Linux/Release/` directory, and for Windows this will produce `BLOCKS-SDK.lib` in either the `SDK\Build\Windows\x64\Debug` or `SDK\Build\Windows\x64\Release` folder.
 
 ### Using the SDK header file
 
-To use BLOCKS classes and functions in your application you must include the `BlocksHeader.h` file in your source code. You also need to tell the compiler to look in the `SDK` directory for additional header files, which you can configure inside your XCode or Visual Studio project. If you are using the command line to compile your application then you can see an example of how to do this in `examples/BLOCKS-SDK/BlockFinder/Linux/Makefile` (which is also configured for MacOS, despite being located inside the Linux directory).
+To use BLOCKS classes and functions in your application you must include the `BlocksHeader.h` file in your source code. You also need to tell the compiler to look in the `SDK` directory for additional header files, which you can configure inside your Xcode or Visual Studio project. If you are using the command line to compile your application then you can see an example of how to do this in `examples/BLOCKS-SDK/BlockFinder/Linux/Makefile` (which is also configured for MacOS, despite being located inside the Linux directory).
 
 ### Linking against the SDK library
 
-You must also tell your compiler where to find the SDK static library before your BLOCKS application will compile, and include all of the dependencies for your platform, which are listed in the Dependencies section of this README. Again, this is configured in your XCode or Visual Studio project, but if you are using the command line you can see an example of how to do this in `examples/BLOCKS-SDK/BlockFinder/Linux/Makefile` (which, again, is also configured for MacOS).
+You must also tell your compiler where to find the SDK static library before your BLOCKS application will compile, and include all of the dependencies for your platform, which are listed in the Dependencies section of this README. Again, this is configured in your Xcode or Visual Studio project, but if you are using the command line you can see an example of how to do this in `examples/BLOCKS-SDK/BlockFinder/Linux/Makefile` (which, again, is also configured for MacOS).
 
 ## Dependencies
 

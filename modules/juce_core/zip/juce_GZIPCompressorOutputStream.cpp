@@ -20,14 +20,14 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class GZIPCompressorOutputStream::GZIPCompressorHelper
 {
 public:
-    GZIPCompressorHelper (const int compressionLevel, const int windowBits)
-        : compLevel ((compressionLevel < 0 || compressionLevel > 9) ? -1 : compressionLevel),
-          isFirstDeflate (true),
-          streamIsValid (false),
-          finished (false)
+    GZIPCompressorHelper (int compressionLevel, int windowBits)
+        : compLevel ((compressionLevel < 0 || compressionLevel > 9) ? -1 : compressionLevel)
     {
         using namespace zlibNamespace;
         zerostruct (stream);
@@ -70,7 +70,7 @@ private:
 
     zlibNamespace::z_stream stream;
     const int compLevel;
-    bool isFirstDeflate, streamIsValid, finished;
+    bool isFirstDeflate = true, streamIsValid = false, finished = false;
     zlibNamespace::Bytef buffer[32768];
 
     bool doNextBlock (const uint8*& data, size_t& dataSize, OutputStream& out, const int flushMode)
@@ -84,8 +84,8 @@ private:
             stream.avail_in  = (z_uInt) dataSize;
             stream.avail_out = (z_uInt) sizeof (buffer);
 
-            const int result = isFirstDeflate ? deflateParams (&stream, compLevel, strategy)
-                                              : deflate (&stream, flushMode);
+            auto result = isFirstDeflate ? deflateParams (&stream, compLevel, strategy)
+                                         : deflate (&stream, flushMode);
             isFirstDeflate = false;
 
             switch (result)
@@ -97,7 +97,7 @@ private:
                 {
                     data += dataSize - stream.avail_in;
                     dataSize = stream.avail_in;
-                    const ssize_t bytesDone = (ssize_t) sizeof (buffer) - (ssize_t) stream.avail_out;
+                    auto bytesDone = (ssize_t) sizeof (buffer) - (ssize_t) stream.avail_out;
                     return bytesDone <= 0 || out.write (buffer, (size_t) bytesDone);
                 }
 
@@ -113,12 +113,14 @@ private:
 };
 
 //==============================================================================
-GZIPCompressorOutputStream::GZIPCompressorOutputStream (OutputStream* const out,
-                                                        const int compressionLevel,
-                                                        const bool deleteDestStream,
-                                                        const int windowBits)
-    : destStream (out, deleteDestStream),
-      helper (new GZIPCompressorHelper (compressionLevel, windowBits))
+GZIPCompressorOutputStream::GZIPCompressorOutputStream (OutputStream& s, int compressionLevel, int windowBits)
+   : GZIPCompressorOutputStream (&s, compressionLevel, false, windowBits)
+{
+}
+
+GZIPCompressorOutputStream::GZIPCompressorOutputStream (OutputStream* out, int compressionLevel, bool deleteDestStream, int windowBits)
+   : destStream (out, deleteDestStream),
+     helper (new GZIPCompressorHelper (compressionLevel, windowBits))
 {
     jassert (out != nullptr);
 }
@@ -155,9 +157,8 @@ bool GZIPCompressorOutputStream::setPosition (int64 /*newPosition*/)
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
-class GZIPTests  : public UnitTest
+struct GZIPTests  : public UnitTest
 {
-public:
     GZIPTests()   : UnitTest ("GZIP", "Compression") {}
 
     void runTest() override
@@ -170,7 +171,7 @@ public:
             MemoryOutputStream original, compressed, uncompressed;
 
             {
-                GZIPCompressorOutputStream zipper (&compressed, rng.nextInt (10), false);
+                GZIPCompressorOutputStream zipper (compressed, rng.nextInt (10));
 
                 for (int j = rng.nextInt (100); --j >= 0;)
                 {
@@ -205,3 +206,5 @@ public:
 static GZIPTests gzipTests;
 
 #endif
+
+} // namespace juce

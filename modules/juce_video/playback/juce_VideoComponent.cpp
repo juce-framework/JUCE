@@ -22,6 +22,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_MAC || JUCE_IOS || JUCE_MSVC
 
 #if JUCE_MAC || JUCE_IOS
@@ -38,7 +41,7 @@ VideoComponent::VideoComponent()  : pimpl (new Pimpl())
 
 VideoComponent::~VideoComponent()
 {
-    pimpl = nullptr;
+    pimpl.reset();
 }
 
 Result VideoComponent::load (const File& file)
@@ -116,3 +119,5 @@ void VideoComponent::timerCallback()
 }
 
 #endif
+
+} // namespace juce

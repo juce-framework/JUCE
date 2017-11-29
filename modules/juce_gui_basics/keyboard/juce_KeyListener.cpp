@@ -24,7 +24,12 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 bool KeyListener::keyStateChanged (const bool, Component*)
 {
     return false;
 }
+
+} // namespace juce

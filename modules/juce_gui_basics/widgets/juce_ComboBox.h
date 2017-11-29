@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -347,11 +347,12 @@ public:
     */
     enum ColourIds
     {
-        backgroundColourId  = 0x1000b00,    /**< The background colour to fill the box with. */
-        textColourId        = 0x1000a00,    /**< The colour for the text in the box. */
-        outlineColourId     = 0x1000c00,    /**< The colour for an outline around the box. */
-        buttonColourId      = 0x1000d00,    /**< The base colour for the button (a LookAndFeel class will probably use variations on this). */
-        arrowColourId       = 0x1000e00,    /**< The colour for the arrow shape that pops up the menu */
+        backgroundColourId     = 0x1000b00,   /**< The background colour to fill the box with. */
+        textColourId           = 0x1000a00,   /**< The colour for the text in the box. */
+        outlineColourId        = 0x1000c00,   /**< The colour for an outline around the box. */
+        buttonColourId         = 0x1000d00,   /**< The base colour for the button (a LookAndFeel class will probably use variations on this). */
+        arrowColourId          = 0x1000e00,   /**< The colour for the arrow shape that pops up the menu */
+        focusedOutlineColourId = 0x1000f00    /**< The colour that will be used to draw a box around the edge of the component when it has focus. */
     };
 
     //==============================================================================
@@ -428,13 +429,13 @@ private:
 
     PopupMenu currentMenu;
     Value currentId;
-    int lastCurrentId;
-    bool isButtonDown, menuActive, scrollWheelEnabled;
-    float mouseWheelAccumulator;
+    int lastCurrentId = 0;
+    bool isButtonDown = false, menuActive = false, scrollWheelEnabled = false;
+    float mouseWheelAccumulator = 0;
     ListenerList<Listener> listeners;
     ScopedPointer<Label> label;
     String textWhenNothingSelected, noChoicesMessage;
-    EditableState labelEditableState;
+    EditableState labelEditableState = editableUnknown;
 
     PopupMenu::Item* getItemForId (int) const noexcept;
     PopupMenu::Item* getItemForIndex (int) const noexcept;
@@ -448,3 +449,5 @@ private:
 
 /** This typedef is just for compatibility with old code - newer code should use the ComboBox::Listener class directly. */
 typedef ComboBox::Listener ComboBoxListener;
+
+} // namespace juce

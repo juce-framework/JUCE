@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 FillType::FillType() noexcept
     : colour (0xff000000)
 {
@@ -34,13 +37,18 @@ FillType::FillType (Colour c) noexcept
 {
 }
 
-FillType::FillType (const ColourGradient& gradient_)
-    : colour (0xff000000), gradient (new ColourGradient (gradient_))
+FillType::FillType (const ColourGradient& g)
+    : colour (0xff000000), gradient (new ColourGradient (g))
 {
 }
 
-FillType::FillType (const Image& image_, const AffineTransform& transform_) noexcept
-    : colour (0xff000000), image (image_), transform (transform_)
+FillType::FillType (ColourGradient&& g)
+    : colour (0xff000000), gradient (new ColourGradient (static_cast<ColourGradient&&> (g)))
+{
+}
+
+FillType::FillType (const Image& im, const AffineTransform& t) noexcept
+    : colour (0xff000000), image (im), transform (t)
 {
 }
 
@@ -103,7 +111,7 @@ bool FillType::operator!= (const FillType& other) const
 
 void FillType::setColour (Colour newColour) noexcept
 {
-    gradient = nullptr;
+    gradient.reset();
     image = Image();
     colour = newColour;
 }
@@ -122,11 +130,11 @@ void FillType::setGradient (const ColourGradient& newGradient)
     }
 }
 
-void FillType::setTiledImage (const Image& image_, const AffineTransform& transform_) noexcept
+void FillType::setTiledImage (const Image& newImage, const AffineTransform& newTransform) noexcept
 {
-    gradient = nullptr;
-    image = image_;
-    transform = transform_;
+    gradient.reset();
+    image = newImage;
+    transform = newTransform;
     colour = Colours::black;
 }
 
@@ -146,3 +154,5 @@ FillType FillType::transformed (const AffineTransform& t) const
     f.transform = f.transform.followedBy (t);
     return f;
 }
+
+} // namespace juce

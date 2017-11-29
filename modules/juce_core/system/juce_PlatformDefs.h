@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 /*  This file defines miscellaneous macros for debugging, assertions, etc.
@@ -35,7 +36,7 @@
  #endif
 #endif
 
-/** This macro defines the C calling convention used as the standard for Juce calls. */
+/** This macro defines the C calling convention used as the standard for JUCE calls. */
 #if JUCE_MSVC
  #define JUCE_CALLTYPE   __stdcall
  #define JUCE_CDECL      __cdecl
@@ -81,7 +82,7 @@
 #if JUCE_CLANG && defined (__has_feature) && ! defined (JUCE_ANALYZER_NORETURN)
  #if __has_feature (attribute_analyzer_noreturn)
   inline void __attribute__((analyzer_noreturn)) juce_assert_noreturn() {}
-  #define JUCE_ANALYZER_NORETURN juce_assert_noreturn();
+  #define JUCE_ANALYZER_NORETURN juce::juce_assert_noreturn();
  #endif
 #endif
 
@@ -293,3 +294,5 @@
 #else
  #define JUCE_NO_ASSOCIATIVE_MATH_OPTIMISATIONS
 #endif
+
+} // namespace juce

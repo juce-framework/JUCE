@@ -20,6 +20,8 @@
   ==============================================================================
 */
 
+namespace juce
+{
 
 /**
     Represents a button on a block device.
@@ -132,3 +134,5 @@ protected:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ControlButton)
 };
+
+} // namespace juce

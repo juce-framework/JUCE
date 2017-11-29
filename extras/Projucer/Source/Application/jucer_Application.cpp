@@ -28,6 +28,36 @@ void createGUIEditorMenu (PopupMenu&);
 void handleGUIEditorMenuCommand (int);
 void registerGUIEditorCommands();
 
+
+    void attachCallback (Button& button, std::function<void()> callback)
+    {
+        struct ButtonCallback  : public Button::Listener,
+                                 private ComponentListener
+        {
+            ButtonCallback (Button& b, std::function<void()> f) : target (b), fn (f)
+            {
+                target.addListener (this);
+                target.addComponentListener (this);
+            }
+
+            ~ButtonCallback()
+            {
+                target.removeListener (this);
+            }
+
+            void componentBeingDeleted (Component&) override { delete this; }
+            void buttonClicked (Button*) override  { fn(); }
+
+            Button& target;
+            std::function<void()> fn;
+
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonCallback)
+        };
+
+        new ButtonCallback (button, callback);
+    }
+
+
 //==============================================================================
 struct ProjucerApplication::MainMenuModel  : public MenuBarModel
 {
@@ -195,31 +225,31 @@ void ProjucerApplication::shutdown()
         Logger::writeToLog ("Server shutdown cleanly");
     }
 
-    versionChecker = nullptr;
-    utf8Window = nullptr;
-    svgPathWindow = nullptr;
-    aboutWindow = nullptr;
-    pathsWindow = nullptr;
-    editorColourSchemeWindow = nullptr;
+    versionChecker.reset();
+    utf8Window.reset();
+    svgPathWindow.reset();
+    aboutWindow.reset();
+    pathsWindow.reset();
+    editorColourSchemeWindow.reset();
 
     if (licenseController != nullptr)
     {
         licenseController->removeLicenseStatusChangedCallback (this);
-        licenseController = nullptr;
+        licenseController.reset();
     }
 
     mainWindowList.forceCloseAllWindows();
     openDocumentManager.clear();
 
-    childProcessCache = nullptr;
+    childProcessCache.reset();
 
    #if JUCE_MAC
     MenuBarModel::setMacMainMenu (nullptr);
    #endif
 
-    menuModel = nullptr;
-    commandManager = nullptr;
-    settings = nullptr;
+    menuModel.reset();
+    commandManager.reset();
+    settings.reset();
 
     LookAndFeel::setDefaultLookAndFeel (nullptr);
 
@@ -340,8 +370,7 @@ MenuBarModel* ProjucerApplication::getMenuModel()
 
 StringArray ProjucerApplication::getMenuNames()
 {
-    const char* const names[] = { "File", "Edit", "View", "Build", "Window", "GUI Editor", "Tools", nullptr };
-    return StringArray (names);
+    return { "File", "Edit", "View", "Build", "Window", "GUI Editor", "Tools" };
 }
 
 void ProjucerApplication::createMenu (PopupMenu& menu, const String& menuName)
@@ -740,7 +769,7 @@ void ProjucerApplication::showApplicationUsageDataAgreementPopup()
 void ProjucerApplication::dismissApplicationUsageDataAgreementPopup()
 {
     if (applicationUsageDataWindow != nullptr)
-        applicationUsageDataWindow = nullptr;
+        applicationUsageDataWindow.reset();
 }
 
 void ProjucerApplication::showPathsWindow()
@@ -805,7 +834,7 @@ void ProjucerApplication::deleteLogger()
         }
     }
 
-    logger = nullptr;
+    logger.reset();
 }
 
 PropertiesFile::Options ProjucerApplication::getPropertyFileOptionsFor (const String& filename, bool isProjectSettings)

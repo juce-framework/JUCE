@@ -24,7 +24,9 @@
   ==============================================================================
 */
 
-//==============================================================================
+namespace juce
+{
+
 OSCMessage::OSCMessage (const OSCAddressPattern& ap) noexcept  : addressPattern (ap)
 {
 }
@@ -197,3 +199,5 @@ public:
 static OSCMessageTests OSCMessageUnitTests;
 
 #endif // JUCE_UNIT_TESTS
+
+} // namespace juce

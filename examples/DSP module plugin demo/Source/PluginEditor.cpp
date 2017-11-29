@@ -123,6 +123,10 @@ DspModulePluginDemoAudioProcessorEditor::DspModulePluginDemoAudioProcessorEditor
     cabinetSimButton.addListener (this);
     cabinetSimButton.setButtonText (processor.cabinetSimParam->name);
 
+    addAndMakeVisible (oversamplingButton);
+    oversamplingButton.addListener (this);
+    oversamplingButton.setButtonText (processor.oversamplingParam->name);
+
     //==============================================================================
     setSize (600, 400);
 }
@@ -172,9 +176,13 @@ void DspModulePluginDemoAudioProcessorEditor::resized()
 
     //==============================================================================
     auto buttonSlice = bounds.removeFromTop (30);
-    cabinetSimButton.setSize (200, bounds.getHeight());
+    cabinetSimButton.setSize (200, buttonSlice.getHeight());
     cabinetSimButton.setCentrePosition (buttonSlice.getCentre());
-    bounds.removeFromTop (15);
+    bounds.removeFromTop(5);
+
+    buttonSlice = bounds.removeFromTop (30);
+    oversamplingButton.setSize(200, buttonSlice.getHeight());
+    oversamplingButton.setCentrePosition(buttonSlice.getCentre());
 }
 //==============================================================================
 void DspModulePluginDemoAudioProcessorEditor::comboBoxChanged (ComboBox* box)
@@ -196,5 +204,17 @@ void DspModulePluginDemoAudioProcessorEditor::comboBoxChanged (ComboBox* box)
     else if (box == &cabinetTypeBox)
     {
         processor.cabinetTypeParam->operator= (index);
+    }
+}
+
+void DspModulePluginDemoAudioProcessorEditor::buttonClicked (Button* button)
+{
+    if (button == &cabinetSimButton)
+    {
+        processor.cabinetSimParam->operator= (cabinetSimButton.getToggleState());
+    }
+    else if (button == &oversamplingButton)
+    {
+        processor.oversamplingParam->operator= (oversamplingButton.getToggleState());
     }
 }

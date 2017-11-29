@@ -24,6 +24,11 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
+
 template <typename NumericType>
 class OversamplingEngine;
 
@@ -87,6 +92,9 @@ public:
         in your main processor to compensate the additional latency involved with
         the oversampling, for example with a dry / wet functionality, and to report
         the latency to the DAW.
+
+        Note : the latency might not be integer, so you might need to round its value
+        or to compensate it properly in your processing code.
     */
     SampleType getLatencyInSamples() noexcept;
 
@@ -102,21 +110,21 @@ public:
     /** Resets the processing pipeline, ready to oversample a new stream of data. */
     void reset() noexcept;
 
-    /** Must be called to perform the upsampling, prior to any oversampled processing. */
-    void processSamplesUp (dsp::AudioBlock<SampleType> &block) noexcept;
+    /** Must be called to perform the upsampling, prior to any oversampled processing.
 
-    /** Can be called to access to the oversampled input signal, to perform any non-
-        linear processing which needs the higher sample rate. Don't forget to set
-        the sample rate of that processing to N times the original sample rate.
+        Returns an AudioBlock referencing the oversampled input signal, which must be
+        used to perform the non-linear processing which needs the higher sample rate.
+        Don't forget to set the sample rate of that processing to N times the original
+        sample rate.
     */
-    dsp::AudioBlock<SampleType> getProcessedSamples();
+    dsp::AudioBlock<SampleType> processSamplesUp (const dsp::AudioBlock<SampleType> &inputBlock) noexcept;
 
     /** Must be called to perform the downsampling, after the upsampling and the
         non-linear processing. The output signal is probably delayed by the internal
         latency of the whole oversampling behaviour, so don't forget to take this
         into account.
     */
-    void processSamplesDown (dsp::AudioBlock<SampleType> &block) noexcept;
+    void processSamplesDown (dsp::AudioBlock<SampleType> &outputBlock) noexcept;
 
 private:
     //===============================================================================
@@ -133,3 +141,6 @@ private:
     //===============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Oversampling)
 };
+
+} // namespace dsp
+} // namespace juce

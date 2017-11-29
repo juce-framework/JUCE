@@ -20,9 +20,10 @@
   ==============================================================================
 */
 
-TimeSliceThread::TimeSliceThread (const String& name)
-    : Thread (name),
-      clientBeingCalled (nullptr)
+namespace juce
+{
+
+TimeSliceThread::TimeSliceThread (const String& name)  : Thread (name)
 {
 }
 
@@ -179,3 +180,5 @@ void TimeSliceThread::run()
             wait (timeToWait);
     }
 }
+
+} // namespace juce

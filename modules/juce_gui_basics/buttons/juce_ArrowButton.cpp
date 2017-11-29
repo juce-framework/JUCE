@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ArrowButton::ArrowButton (const String& name, float arrowDirectionInRadians, Colour arrowColour)
    : Button (name), colour (arrowColour)
 {
@@ -45,3 +48,5 @@ void ArrowButton::paintButton (Graphics& g, bool /*isMouseOverButton*/, bool isB
     g.setColour (colour);
     g.fillPath (p);
 }
+
+} // namespace juce

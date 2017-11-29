@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -122,9 +122,11 @@ private:
     //==============================================================================
     PropertiesFile::Options options;
     ScopedPointer<PropertiesFile> userProps, commonProps;
-    int commonSettingsAreReadOnly;
+    int commonSettingsAreReadOnly = 0;
 
     void openFiles();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ApplicationProperties)
 };
+
+} // namespace juce

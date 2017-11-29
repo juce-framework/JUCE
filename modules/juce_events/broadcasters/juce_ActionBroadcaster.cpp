@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class ActionBroadcaster::ActionMessage  : public MessageManager::MessageBase
 {
 public:
@@ -56,8 +59,6 @@ ActionBroadcaster::~ActionBroadcaster()
 {
     // all event-based objects must be deleted BEFORE juce is shut down!
     jassert (MessageManager::getInstanceWithoutCreating() != nullptr);
-
-    masterReference.clear();
 }
 
 void ActionBroadcaster::addActionListener (ActionListener* const listener)
@@ -87,3 +88,5 @@ void ActionBroadcaster::sendActionMessage (const String& message) const
     for (int i = actionListeners.size(); --i >= 0;)
         (new ActionMessage (this, message, actionListeners.getUnchecked(i)))->post();
 }
+
+} // namespace juce

@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -149,7 +149,7 @@ public:
     void setStatusMessage (const String& newStatusMessage);
 
     /** Returns the AlertWindow that is being used. */
-    AlertWindow* getAlertWindow() const noexcept        { return alertWindow; }
+    AlertWindow* getAlertWindow() const noexcept        { return alertWindow.get(); }
 
     //==============================================================================
     /** This method is called (on the message thread) when the operation has finished.
@@ -170,3 +170,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThreadWithProgressWindow)
 };
+
+} // namespace juce

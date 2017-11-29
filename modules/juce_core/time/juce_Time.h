@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -403,3 +403,5 @@ JUCE_API bool operator<= (Time time1, Time time2) noexcept;
 JUCE_API bool operator>  (Time time1, Time time2) noexcept;
 /** Compares two Time objects. */
 JUCE_API bool operator>= (Time time1, Time time2) noexcept;
+
+} // namespace juce

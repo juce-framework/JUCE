@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct AudioVisualiserComponent::ChannelInfo
 {
     ChannelInfo (AudioVisualiserComponent& o, int bufferSize)
@@ -73,7 +76,7 @@ struct AudioVisualiserComponent::ChannelInfo
     }
 
     AudioVisualiserComponent& owner;
-    Array<Range<float> > levels;
+    Array<Range<float>> levels;
     Range<float> value;
     int nextSample, subSample;
 
@@ -126,7 +129,7 @@ void AudioVisualiserComponent::pushBuffer (const float** d, int numChannels, int
         channels.getUnchecked(i)->pushSamples (d[i], num);
 }
 
-void AudioVisualiserComponent::pushBuffer (const AudioSampleBuffer& buffer)
+void AudioVisualiserComponent::pushBuffer (const AudioBuffer<float>& buffer)
 {
     pushBuffer (buffer.getArrayOfReadPointers(),
                 buffer.getNumChannels(),
@@ -220,3 +223,5 @@ void AudioVisualiserComponent::paintChannel (Graphics& g, Rectangle<float> area,
                                                       0.0f, 1.0f,                area.getX(), area.getBottom(),
                                                       (float) numLevels, -1.0f,  area.getRight(), area.getY()));
 }
+
+} // namespace juce

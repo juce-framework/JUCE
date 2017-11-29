@@ -24,15 +24,12 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ComboBox::ComboBox (const String& name)
     : Component (name),
-      lastCurrentId (0),
-      isButtonDown (false),
-      menuActive (false),
-      scrollWheelEnabled (false),
-      mouseWheelAccumulator (0),
-      noChoicesMessage (TRANS("(no choices)")),
-      labelEditableState (editableUnknown)
+      noChoicesMessage (TRANS("(no choices)"))
 {
     setRepaintsOnMouseActivity (true);
     lookAndFeelChanged();
@@ -43,7 +40,7 @@ ComboBox::~ComboBox()
 {
     currentId.removeListener (this);
     hidePopup();
-    label = nullptr;
+    label.reset();
 }
 
 //==============================================================================
@@ -81,7 +78,7 @@ void ComboBox::setTooltip (const String& newTooltip)
 }
 
 //==============================================================================
-void ComboBox::addItem (const String& newItemText, const int newItemId)
+void ComboBox::addItem (const String& newItemText, int newItemId)
 {
     // you can't add empty strings to the list..
     jassert (newItemText.isNotEmpty());
@@ -93,15 +90,13 @@ void ComboBox::addItem (const String& newItemText, const int newItemId)
     jassert (getItemForId (newItemId) == nullptr);
 
     if (newItemText.isNotEmpty() && newItemId != 0)
-    {
         currentMenu.addItem (newItemId, newItemText, true, false);
-    }
 }
 
-void ComboBox::addItemList (const StringArray& itemsToAdd, const int firstItemIdOffset)
+void ComboBox::addItemList (const StringArray& itemsToAdd, int firstItemID)
 {
-    for (int i = 0; i < itemsToAdd.size(); ++i)
-        currentMenu.addItem (i + firstItemIdOffset, itemsToAdd[i]);
+    for (auto& i : itemsToAdd)
+        currentMenu.addItem (firstItemID++, i);
 }
 
 void ComboBox::addSeparator()
@@ -115,26 +110,26 @@ void ComboBox::addSectionHeading (const String& headingName)
     jassert (headingName.isNotEmpty());
 
     if (headingName.isNotEmpty())
-    {
         currentMenu.addSectionHeader (headingName);
-    }
 }
 
-void ComboBox::setItemEnabled (const int itemId, const bool shouldBeEnabled)
+void ComboBox::setItemEnabled (int itemId, bool shouldBeEnabled)
 {
-    if (PopupMenu::Item* item = getItemForId (itemId))
+    if (auto* item = getItemForId (itemId))
         item->isEnabled = shouldBeEnabled;
 }
 
 bool ComboBox::isItemEnabled (int itemId) const noexcept
 {
-    const PopupMenu::Item* item = getItemForId (itemId);
-    return item != nullptr && item->isEnabled;
+    if (auto* item = getItemForId (itemId))
+        return item->isEnabled;
+
+    return false;
 }
 
-void ComboBox::changeItemText (const int itemId, const String& newText)
+void ComboBox::changeItemText (int itemId, const String& newText)
 {
-    if (PopupMenu::Item* item = getItemForId (itemId))
+    if (auto* item = getItemForId (itemId))
         item->text = newText;
     else
         jassertfalse;
@@ -149,15 +144,13 @@ void ComboBox::clear (const NotificationType notification)
 }
 
 //==============================================================================
-PopupMenu::Item* ComboBox::getItemForId (const int itemId) const noexcept
+PopupMenu::Item* ComboBox::getItemForId (int itemId) const noexcept
 {
     if (itemId != 0)
     {
-        PopupMenu::MenuItemIterator iterator (currentMenu, true);
-
-        while (iterator.next())
+        for (PopupMenu::MenuItemIterator iterator (currentMenu, true); iterator.next();)
         {
-            PopupMenu::Item &item = iterator.getItem();
+            auto& item = iterator.getItem();
 
             if (item.itemID == itemId)
                 return &item;
@@ -170,11 +163,10 @@ PopupMenu::Item* ComboBox::getItemForId (const int itemId) const noexcept
 PopupMenu::Item* ComboBox::getItemForIndex (const int index) const noexcept
 {
     int n = 0;
-    PopupMenu::MenuItemIterator iterator (currentMenu, true);
 
-    while (iterator.next())
+    for (PopupMenu::MenuItemIterator iterator (currentMenu, true); iterator.next();)
     {
-        PopupMenu::Item &item = iterator.getItem();
+        auto& item = iterator.getItem();
 
         if (item.itemID != 0)
             if (n++ == index)
@@ -187,11 +179,10 @@ PopupMenu::Item* ComboBox::getItemForIndex (const int index) const noexcept
 int ComboBox::getNumItems() const noexcept
 {
     int n = 0;
-    PopupMenu::MenuItemIterator iterator (currentMenu, true);
 
-    while (iterator.next())
+    for (PopupMenu::MenuItemIterator iterator (currentMenu, true); iterator.next();)
     {
-        PopupMenu::Item &item = iterator.getItem();
+        auto& item = iterator.getItem();
 
         if (item.itemID != 0)
             n++;
@@ -221,9 +212,8 @@ int ComboBox::indexOfItemId (const int itemId) const noexcept
     if (itemId != 0)
     {
         int n = 0;
-        PopupMenu::MenuItemIterator iterator (currentMenu, true);
 
-        while (iterator.next())
+        for (PopupMenu::MenuItemIterator iterator (currentMenu, true); iterator.next();)
         {
             auto& item = iterator.getItem();
 
@@ -241,7 +231,7 @@ int ComboBox::indexOfItemId (const int itemId) const noexcept
 //==============================================================================
 int ComboBox::getSelectedItemIndex() const
 {
-    int index = indexOfItemId (currentId.getValue());
+    auto index = indexOfItemId (currentId.getValue());
 
     if (getText() != getItemText (index))
         index = -1;
@@ -256,15 +246,17 @@ void ComboBox::setSelectedItemIndex (const int index, const NotificationType not
 
 int ComboBox::getSelectedId() const noexcept
 {
-    const PopupMenu::Item* const item = getItemForId (currentId.getValue());
+    if (auto* item = getItemForId (currentId.getValue()))
+        if (getText() == item->text)
+            return item->itemID;
 
-    return (item != nullptr && getText() == item->text) ? item->itemID : 0;
+    return 0;
 }
 
 void ComboBox::setSelectedId (const int newItemId, const NotificationType notification)
 {
-    const PopupMenu::Item* const item = getItemForId (newItemId);
-    const String newItemText (item != nullptr ? item->text : String());
+    auto* item = getItemForId (newItemId);
+    auto newItemText = item != nullptr ? item->text : String();
 
     if (lastCurrentId != newItemId || label->getText() != newItemText)
     {
@@ -280,7 +272,7 @@ void ComboBox::setSelectedId (const int newItemId, const NotificationType notifi
 
 bool ComboBox::selectIfEnabled (const int index)
 {
-    if (const PopupMenu::Item* const item = getItemForIndex (index))
+    if (auto* item = getItemForIndex (index))
     {
         if (item->isEnabled)
         {
@@ -315,11 +307,9 @@ String ComboBox::getText() const
 
 void ComboBox::setText (const String& newText, const NotificationType notification)
 {
-    PopupMenu::MenuItemIterator iterator (currentMenu, true);
-
-    while (iterator.next())
+    for (PopupMenu::MenuItemIterator iterator (currentMenu, true); iterator.next();)
     {
-        PopupMenu::Item &item = iterator.getItem();
+        auto& item = iterator.getItem();
 
         if (item.itemID != 0
             && item.text == newText)
@@ -384,7 +374,7 @@ void ComboBox::paint (Graphics& g)
          && ! label->isBeingEdited())
     {
         g.setColour (findColour (textColourId).withMultipliedAlpha (0.5f));
-        g.setFont (label->getFont());
+        g.setFont (label->getLookAndFeel().getLabelFont (*label));
         g.drawFittedText (textWhenNothingSelected, label->getBounds().reduced (2, 1),
                           label->getJustificationType(),
                           jmax (1, (int) (label->getHeight() / label->getFont().getHeight())));
@@ -512,7 +502,7 @@ void ComboBox::showPopupIfNotActive()
         // exited the modal state of other popups currently on the screen. By calling
         // showPopup asynchronously, we are giving the other popups a chance to properly
         // close themselves
-        MessageManager::callAsync([safePointer] () mutable { if (safePointer != nullptr) safePointer->showPopup(); });
+        MessageManager::callAsync ([safePointer]() mutable { if (safePointer != nullptr) safePointer->showPopup(); });
     }
 }
 
@@ -539,17 +529,15 @@ static void comboBoxPopupMenuFinishedCallback (int result, ComboBox* combo)
 
 void ComboBox::showPopup()
 {
-    PopupMenu noChoicesMenu;
-    const bool hasItems = (currentMenu.getNumItems() > 0);
+    auto menu = currentMenu;
 
-    if (hasItems)
+    if (menu.getNumItems() > 0)
     {
-        PopupMenu::MenuItemIterator iterator (currentMenu, true);
-        const int selectedId = getSelectedId();
+        auto selectedId = getSelectedId();
 
-        while (iterator.next())
+        for (PopupMenu::MenuItemIterator iterator (menu, true); iterator.next();)
         {
-            PopupMenu::Item &item = iterator.getItem();
+            auto& item = iterator.getItem();
 
             if (item.itemID != 0)
                 item.isTicked = (item.itemID == selectedId);
@@ -557,17 +545,16 @@ void ComboBox::showPopup()
     }
     else
     {
-        noChoicesMenu.addItem (1, noChoicesMessage, false, false);
+        menu.addItem (1, noChoicesMessage, false, false);
     }
 
-    PopupMenu& menuToShow = (hasItems ? currentMenu : noChoicesMenu);
-    menuToShow.setLookAndFeel (&getLookAndFeel());
-    menuToShow.showMenuAsync (PopupMenu::Options().withTargetComponent (this)
-                                                  .withItemThatMustBeVisible (getSelectedId())
-                                                  .withMinimumWidth (getWidth())
-                                                  .withMaximumNumColumns (1)
-                                                  .withStandardItemHeight (label->getHeight()),
-                              ModalCallbackFunction::forComponent (comboBoxPopupMenuFinishedCallback, this));
+    menu.setLookAndFeel (&getLookAndFeel());
+    menu.showMenuAsync (PopupMenu::Options().withTargetComponent (this)
+                                            .withItemThatMustBeVisible (getSelectedId())
+                                            .withMinimumWidth (getWidth())
+                                            .withMaximumNumColumns (1)
+                                            .withStandardItemHeight (label->getHeight()),
+                        ModalCallbackFunction::forComponent (comboBoxPopupMenuFinishedCallback, this));
 }
 
 //==============================================================================
@@ -596,7 +583,7 @@ void ComboBox::mouseUp (const MouseEvent& e2)
         isButtonDown = false;
         repaint();
 
-        const MouseEvent e (e2.getEventRelativeTo (this));
+        auto e = e2.getEventRelativeTo (this);
 
         if (reallyContains (e.getPosition(), true)
              && (e2.eventComponent == this || ! label->isEditable()))
@@ -610,11 +597,19 @@ void ComboBox::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& whe
 {
     if (! menuActive && scrollWheelEnabled && e.eventComponent == this && wheel.deltaY != 0.0f)
     {
-        auto oldPos = (int) mouseWheelAccumulator;
         mouseWheelAccumulator += wheel.deltaY * 5.0f;
 
-        if (auto delta = oldPos - (int) mouseWheelAccumulator)
-            nudgeSelectedItem (delta);
+        while (mouseWheelAccumulator > 1.0f)
+        {
+            mouseWheelAccumulator -= 1.0f;
+            nudgeSelectedItem (-1);
+        }
+
+        while (mouseWheelAccumulator < -1.0f)
+        {
+            mouseWheelAccumulator += 1.0f;
+            nudgeSelectedItem (1);
+        }
     }
     else
     {
@@ -634,7 +629,7 @@ void ComboBox::removeListener (ComboBoxListener* listener)    { listeners.remove
 void ComboBox::handleAsyncUpdate()
 {
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, &ComboBox::Listener::comboBoxChanged, this);
+    listeners.callChecked (checker, [this] (Listener& l) { l.comboBoxChanged (this); });
 }
 
 void ComboBox::sendChange (const NotificationType notification)
@@ -651,3 +646,5 @@ void ComboBox::clear (const bool dontSendChange)                                
 void ComboBox::setSelectedItemIndex (const int index, const bool dontSendChange) { setSelectedItemIndex (index, dontSendChange ? dontSendNotification : sendNotification); }
 void ComboBox::setSelectedId (const int newItemId, const bool dontSendChange)    { setSelectedId (newItemId, dontSendChange ? dontSendNotification : sendNotification); }
 void ComboBox::setText (const String& newText, const bool dontSendChange)        { setText (newText, dontSendChange ? dontSendNotification : sendNotification); }
+
+} // namespace juce

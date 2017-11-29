@@ -24,14 +24,12 @@
   ==============================================================================
 */
 
-#include "../jucer_Headers.h"
+#include "../Application/jucer_Headers.h"
 #include "jucer_Module.h"
-#include "jucer_ProjectType.h"
-#include "../Project Saving/jucer_ProjectExporter.h"
-#include "../Project Saving/jucer_ProjectSaver.h"
-#include "../Project Saving/jucer_ProjectExport_XCode.h"
+#include "../ProjectSaving/jucer_ProjectSaver.h"
+#include "../ProjectSaving/jucer_ProjectExport_Xcode.h"
 
-
+//==============================================================================
 static String trimCommentCharsFromStartOfLine (const String& line)
 {
     return line.trimStart().trimCharactersAtStart ("*/").trimStart();
@@ -144,18 +142,12 @@ const ModuleDescription* ModuleList::getModuleWithID (const String& moduleID) co
     return nullptr;
 }
 
-struct ModuleSorter
-{
-    static int compareElements (const ModuleDescription* m1, const ModuleDescription* m2)
-    {
-        return m1->getID().compareIgnoreCase (m2->getID());
-    }
-};
-
 void ModuleList::sort()
 {
-    ModuleSorter sorter;
-    modules.sort (sorter);
+    std::sort (modules.begin(), modules.end(), [] (const ModuleDescription* m1, const ModuleDescription* m2)
+    {
+        return m1->getID().compareIgnoreCase (m2->getID()) < 0;
+    });
 }
 
 StringArray ModuleList::getIDs() const
@@ -368,8 +360,8 @@ void LibraryModule::addSettingsForModuleToExporter (ProjectExporter& exporter, P
         StringArray paths;
         paths.addTokens (extraInternalSearchPaths, true);
 
-        for (int i = 0; i < paths.size(); ++i)
-            exporter.addToExtraSearchPaths (moduleRelativePath.getChildFile (paths.getReference(i)));
+        for (auto& path : paths)
+            exporter.addToExtraSearchPaths (moduleRelativePath.getChildFile (path.unquoted()));
     }
 
     {
@@ -396,7 +388,7 @@ void LibraryModule::addSettingsForModuleToExporter (ProjectExporter& exporter, P
 
     if (exporter.isXcode())
     {
-        auto& xcodeExporter = dynamic_cast<XCodeProjectExporter&> (exporter);
+        auto& xcodeExporter = dynamic_cast<XcodeProjectExporter&> (exporter);
 
         if (project.isAUPluginHost())
             xcodeExporter.xcodeFrameworks.addTokens (xcodeExporter.isOSX() ? "AudioUnit CoreAudioKit" : "CoreAudioKit", false);
@@ -567,14 +559,14 @@ void LibraryModule::findAndAddCompiledUnits (ProjectExporter& exporter,
 
 static void addFileWithGroups (Project::Item& group, const RelativePath& file, const String& path)
 {
-    const int slash = path.indexOfChar (File::separator);
+    auto slash = path.indexOfChar (File::getSeparatorChar());
 
     if (slash >= 0)
     {
-        const String topLevelGroup (path.substring (0, slash));
-        const String remainingPath (path.substring (slash + 1));
+        auto topLevelGroup = path.substring (0, slash);
+        auto remainingPath = path.substring (slash + 1);
 
-        Project::Item newGroup (group.getOrCreateSubGroup (topLevelGroup));
+        auto newGroup = group.getOrCreateSubGroup (topLevelGroup);
         addFileWithGroups (newGroup, file, remainingPath);
     }
     else
@@ -625,7 +617,7 @@ void LibraryModule::addBrowseableCode (ProjectExporter& exporter, const Array<Fi
     sourceGroup.sortAlphabetically (true, true);
     sourceGroup.addFileAtIndex (moduleHeader, -1, false);
 
-    exporter.getModulesGroup().state.addChild (sourceGroup.state.createCopy(), -1, nullptr);
+    exporter.getModulesGroup().state.appendChild (sourceGroup.state.createCopy(), nullptr);
 }
 
 
@@ -677,12 +669,12 @@ File EnabledModuleList::getModuleFolderFromPathIfItExists (const String& path, c
 
         if (moduleFolder.exists())
         {
-            if (ModuleDescription (moduleFolder).isValid())
+            if (ModuleDescription (moduleFolder).getID() == moduleID)
                 return moduleFolder;
 
             auto f = moduleFolder.getChildFile (moduleID);
 
-            if (ModuleDescription (f).isValid())
+            if (ModuleDescription (f).getID() == moduleID)
                 return f;
         }
     }
@@ -715,7 +707,7 @@ File EnabledModuleList::getModuleFolder (const String& moduleID)
         if (isJuceModule (moduleID))
             return getModuleFolderFromPathIfItExists (getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString(), moduleID, project);
 
-        return findUserModuleFolder (moduleID, getAppSettings().getStoredPath (Ids::defaultUserModulePath).toString());
+        return findUserModuleFolder (getAppSettings().getStoredPath (Ids::defaultUserModulePath).toString(), moduleID);
     }
 
     auto paths = getAllPossibleModulePathsFromExporters (project);
@@ -762,7 +754,7 @@ void EnabledModuleList::addModule (const File& moduleFolder, bool copyLocally, b
             ValueTree module (Ids::MODULE);
             module.setProperty (Ids::ID, moduleID, nullptr);
 
-            state.addChild (module, -1, getUndoManager());
+            state.appendChild (module, getUndoManager());
             sortAlphabetically();
 
             shouldShowAllModuleFilesInProject (moduleID) = true;
@@ -914,6 +906,7 @@ bool EnabledModuleList::isJuceModule (const String& moduleID)
 {
     static StringArray juceModuleIds =
     {
+        "juce_analytics",
         "juce_audio_basics",
         "juce_audio_devices",
         "juce_audio_formats",

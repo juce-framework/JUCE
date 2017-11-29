@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -55,13 +56,13 @@
 
     @see String
 */
-class JUCE_API  StringRef
+class JUCE_API  StringRef  final
 {
 public:
     /** Creates a StringRef from a raw string literal.
         The StringRef object does NOT take ownership or copy this data, so you must
         ensure that the data does not change during the lifetime of the StringRef.
-        Note that this pointer not be null!
+        Note that this pointer cannot be null!
     */
     StringRef (const char* stringLiteral) noexcept;
 
@@ -128,3 +129,5 @@ inline String operator+ (String s1, StringRef s2)           { return s1 += Strin
 inline String operator+ (StringRef s1, const String& s2)    { return String (s1.text) + s2; }
 inline String operator+ (const char* s1, StringRef s2)      { return String (s1) + String (s2.text); }
 inline String operator+ (StringRef s1, const char* s2)      { return String (s1.text) + String (s2); }
+
+} // namespace juce

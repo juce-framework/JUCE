@@ -46,7 +46,7 @@ public:
    #endif
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
-    void processBlock (AudioSampleBuffer&, MidiBuffer&) override;
+    void processBlock (AudioBuffer<float>&, MidiBuffer&) override;
     void reset() override;
 
     //==============================================================================
@@ -88,6 +88,7 @@ public:
     AudioParameterChoice* cabinetTypeParam;
 
     AudioParameterBool* cabinetSimParam;
+    AudioParameterBool* oversamplingParam;
 
 private:
     //==============================================================================
@@ -102,6 +103,9 @@ private:
     dsp::WaveShaper<float> clipping;
 
     dsp::Gain<float> inputVolume, outputVolume;
+
+    ScopedPointer<dsp::Oversampling<float>> oversampling;
+    bool audioCurrentlyOversampled = false;
 
     Atomic<int> cabinetType;
     bool cabinetIsBypassed = false;

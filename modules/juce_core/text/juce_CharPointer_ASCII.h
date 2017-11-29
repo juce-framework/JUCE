@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -32,7 +32,7 @@
 
     @see CharPointer_UTF8, CharPointer_UTF16, CharPointer_UTF32
 */
-class CharPointer_ASCII
+class CharPointer_ASCII  final
 {
 public:
     typedef char CharType;
@@ -374,3 +374,5 @@ public:
 private:
     CharType* data;
 };
+
+} // namespace juce

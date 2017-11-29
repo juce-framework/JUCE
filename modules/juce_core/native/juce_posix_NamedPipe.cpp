@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class NamedPipe::Pimpl
 {
 public:
@@ -188,7 +191,7 @@ void NamedPipe::close()
         ignoreUnused (done);
 
         ScopedWriteLock sl (lock);
-        pimpl = nullptr;
+        pimpl.reset();
     }
 }
 
@@ -208,7 +211,7 @@ bool NamedPipe::openInternal (const String& pipeName, const bool createPipe, boo
 
     if (createPipe && ! pimpl->createFifos (mustNotExist))
     {
-        pimpl = nullptr;
+        pimpl.reset();
         return false;
     }
 
@@ -226,3 +229,5 @@ int NamedPipe::write (const void* sourceBuffer, int numBytesToWrite, int timeOut
     ScopedReadLock sl (lock);
     return pimpl != nullptr ? pimpl->write (static_cast<const char*> (sourceBuffer), numBytesToWrite, timeOutMilliseconds) : -1;
 }
+
+} // namespace juce

@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class ThreadPool::ThreadPoolThread  : public Thread
 {
 public:
@@ -66,6 +69,17 @@ void ThreadPoolJob::setJobName (const String& newName)
 void ThreadPoolJob::signalJobShouldExit()
 {
     shouldStop = true;
+    listeners.call ([] (Thread::Listener& l) { l.exitSignalSent(); });
+}
+
+void ThreadPoolJob::addListener (Thread::Listener* listener)
+{
+    listeners.add (listener);
+}
+
+void ThreadPoolJob::removeListener (Thread::Listener* listener)
+{
+    listeners.remove (listener);
 }
 
 ThreadPoolJob* ThreadPoolJob::getCurrentThreadPoolJob()
@@ -419,3 +433,5 @@ void ThreadPool::addToDeleteList (OwnedArray<ThreadPoolJob>& deletionList, Threa
     if (job->shouldBeDeleted)
         deletionList.add (job);
 }
+
+} // namespace juce

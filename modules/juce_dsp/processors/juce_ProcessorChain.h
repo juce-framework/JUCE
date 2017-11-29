@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 #ifndef DOXYGEN
 namespace ProcessorHelpers  // Internal helper classes used in building the ProcessorChain
@@ -112,3 +116,6 @@ namespace ProcessorHelpers  // Internal helper classes used in building the Proc
 */
 template <typename... Processors>
 using ProcessorChain = ProcessorHelpers::Chain<Processors...>;
+
+} // namespace dsp
+} // namespace juce

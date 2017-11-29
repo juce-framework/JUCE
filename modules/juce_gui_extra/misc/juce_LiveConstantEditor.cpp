@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_ENABLE_LIVE_CONSTANT_EDITOR
 
 namespace LiveConstantEditor
@@ -321,6 +324,11 @@ public:
         setVisible (true);
     }
 
+    ~EditorWindow()
+    {
+        setLookAndFeel (nullptr);
+    }
+
     void closeButtonPressed() override
     {
         setVisible (false);
@@ -500,3 +508,5 @@ Component* createBoolSlider    (LivePropertyEditorBase& editor)  { return new Bo
 }
 
 #endif
+
+} // namespace juce

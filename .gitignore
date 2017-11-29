@@ -57,6 +57,8 @@ profile
 **/Builds/Android/app/.externalNativeBuild
 **/Builds/Android/lib/build
 **/Builds/Android/lib/.externalNativeBuild
+**/Builds/CLion/cmake-build-*
+**/Builds/CLion/.idea
 **/doxygen/doc
 **/doxygen/build
 extras/Projucer/JUCECompileEngine.dylib

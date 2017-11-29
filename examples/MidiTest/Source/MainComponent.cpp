@@ -142,7 +142,7 @@ private:
 };
 
 //==============================================================================
-MainContentComponent::MainContentComponent ()
+MainContentComponent::MainContentComponent()
     : midiInputLabel ("Midi Input Label", "MIDI Input:"),
       midiOutputLabel ("Midi Output Label", "MIDI Output:"),
       incomingMidiLabel ("Incoming Midi Label", "Received MIDI messages:"),
@@ -341,7 +341,7 @@ void MainContentComponent::updateDeviceList (bool isInputDeviceList)
 }
 
 //==============================================================================
-void MainContentComponent::timerCallback ()
+void MainContentComponent::timerCallback()
 {
     updateDeviceList (true);
     updateDeviceList (false);

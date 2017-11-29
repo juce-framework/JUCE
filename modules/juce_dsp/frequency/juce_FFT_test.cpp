@@ -24,10 +24,14 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 struct FFTUnitTest  : public UnitTest
 {
-    FFTUnitTest()  : UnitTest("FFT") {}
+    FFTUnitTest()  : UnitTest ("FFT", "DSP") {}
 
     static void fillRandom (Random& random, Complex<float>* buffer, size_t n)
     {
@@ -140,7 +144,7 @@ struct FFTUnitTest  : public UnitTest
                 FFT fft ((int) order);
 
                 HeapBlock<float> inout (n << 1), reference (n << 1);
-                HeapBlock<Complex<float> > frequency (n);
+                HeapBlock<Complex<float>> frequency (n);
 
                 fillRandom (random, inout.getData(), n);
                 zeromem (reference.getData(), sizeof (float) * (n << 1));
@@ -168,7 +172,7 @@ struct FFTUnitTest  : public UnitTest
 
                 FFT fft ((int) order);
 
-                HeapBlock<Complex<float> > input (n), buffer (n), output (n), reference (n);
+                HeapBlock<Complex<float>> input (n), buffer (n), output (n), reference (n);
 
                 fillRandom (random, input.getData(), n);
                 performReferenceFourier (input.getData(), reference.getData(), n, false);
@@ -204,3 +208,6 @@ struct FFTUnitTest  : public UnitTest
 };
 
 static FFTUnitTest fftUnitTest;
+
+} // namespace dsp
+} // namespace juce

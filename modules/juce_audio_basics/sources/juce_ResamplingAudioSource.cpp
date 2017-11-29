@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ResamplingAudioSource::ResamplingAudioSource (AudioSource* const inputSource,
                                               const bool deleteInputWhenDeleted,
                                               const int channels)
@@ -49,14 +52,14 @@ void ResamplingAudioSource::prepareToPlay (int samplesPerBlockExpected, double s
 {
     const SpinLock::ScopedLockType sl (ratioLock);
 
-    const int scaledBlockSize = roundToInt (samplesPerBlockExpected * ratio);
+    auto scaledBlockSize = roundToInt (samplesPerBlockExpected * ratio);
     input->prepareToPlay (scaledBlockSize, sampleRate * ratio);
 
     buffer.setSize (numChannels, scaledBlockSize + 32);
 
-    filterStates.calloc ((size_t) numChannels);
-    srcBuffers.calloc ((size_t) numChannels);
-    destBuffers.calloc ((size_t) numChannels);
+    filterStates.calloc (numChannels);
+    srcBuffers.calloc (numChannels);
+    destBuffers.calloc (numChannels);
     createLowPass (ratio);
 
     flushBuffers();
@@ -259,3 +262,5 @@ void ResamplingAudioSource::applyFilter (float* samples, int num, FilterState& f
         *samples++ = (float) out;
     }
 }
+
+} // namespace juce

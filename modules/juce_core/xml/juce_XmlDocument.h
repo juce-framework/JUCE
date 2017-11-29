@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -55,6 +55,7 @@
     if (xml != nullptr && xml->hasTagName ("foobar"))
     {
         ...etc
+    }
     @endcode
 
     @see XmlElement
@@ -143,12 +144,11 @@ public:
     //==============================================================================
 private:
     String originalText;
-    String::CharPointerType input;
-    bool outOfData, errorOccurred;
-
+    String::CharPointerType input { nullptr };
+    bool outOfData = false, errorOccurred = false;
     String lastError, dtdText;
     StringArray tokenisedDTD;
-    bool needToLoadDTD, ignoreEmptyTextElements;
+    bool needToLoadDTD = false, ignoreEmptyTextElements = true;
     ScopedPointer<InputSource> inputSource;
 
     XmlElement* parseDocumentElement (String::CharPointerType, bool outer);
@@ -169,3 +169,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XmlDocument)
 };
+
+} // namespace juce

@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace
 {
 
@@ -307,7 +310,7 @@ public:
     }
 
     //==============================================================================
-    bool writeToOutputDevice (AudioSampleBuffer& outputChannelBuffer, const int numSamples)
+    bool writeToOutputDevice (AudioBuffer<float>& outputChannelBuffer, const int numSamples)
     {
         jassert (numChannelsRunning <= outputChannelBuffer.getNumChannels());
         float* const* const data = outputChannelBuffer.getArrayOfWritePointers();
@@ -330,8 +333,14 @@ public:
             numDone = snd_pcm_writen (handle, (void**) data, (snd_pcm_uframes_t) numSamples);
         }
 
-        if (numDone < 0 && JUCE_ALSA_FAILED (snd_pcm_recover (handle, (int) numDone, 1 /* silent */)))
-            return false;
+        if (numDone < 0)
+        {
+            if (numDone == -(EPIPE))
+                underrunCount++;
+
+            if (JUCE_ALSA_FAILED (snd_pcm_recover (handle, (int) numDone, 1 /* silent */)))
+                return false;
+        }
 
         if (numDone < numSamples)
             JUCE_ALSA_LOG ("Did not write all samples: numDone: " << numDone << ", numSamples: " << numSamples);
@@ -339,7 +348,7 @@ public:
         return true;
     }
 
-    bool readFromInputDevice (AudioSampleBuffer& inputChannelBuffer, const int numSamples)
+    bool readFromInputDevice (AudioBuffer<float>& inputChannelBuffer, const int numSamples)
     {
         jassert (numChannelsRunning <= inputChannelBuffer.getNumChannels());
         float* const* const data = inputChannelBuffer.getArrayOfWritePointers();
@@ -351,8 +360,15 @@ public:
 
             snd_pcm_sframes_t num = snd_pcm_readi (handle, scratch.getData(), (snd_pcm_uframes_t) numSamples);
 
-            if (num < 0 && JUCE_ALSA_FAILED (snd_pcm_recover (handle, (int) num, 1 /* silent */)))
-                return false;
+            if (num < 0)
+            {
+                if (num == -(EPIPE))
+                    overrunCount++;
+
+                if (JUCE_ALSA_FAILED (snd_pcm_recover (handle, (int) num, 1 /* silent */)))
+                    return false;
+            }
+
 
             if (num < numSamples)
                 JUCE_ALSA_LOG ("Did not read all samples: num: " << num << ", numSamples: " << numSamples);
@@ -364,8 +380,14 @@ public:
         {
             snd_pcm_sframes_t num = snd_pcm_readn (handle, (void**) data, (snd_pcm_uframes_t) numSamples);
 
-            if (num < 0 && JUCE_ALSA_FAILED (snd_pcm_recover (handle, (int) num, 1 /* silent */)))
-                return false;
+            if (num < 0)
+            {
+                if (num == -(EPIPE))
+                    overrunCount++;
+
+                if (JUCE_ALSA_FAILED (snd_pcm_recover (handle, (int) num, 1 /* silent */)))
+                    return false;
+            }
 
             if (num < numSamples)
                 JUCE_ALSA_LOG ("Did not read all samples: num: " << num << ", numSamples: " << numSamples);
@@ -381,6 +403,7 @@ public:
     snd_pcm_t* handle;
     String error;
     int bitDepth, numChannelsRunning, latency;
+    int underrunCount = 0, overrunCount = 0;
 
 private:
     //==============================================================================
@@ -419,9 +442,9 @@ private:
             typedef AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const> SourceType;
 
             if (isLittleEndian)
-                return new AudioData::ConverterInstance <SourceType, AudioData::Pointer <SampleType, AudioData::LittleEndian, InterleavedType, AudioData::NonConst> > (1, numInterleavedChannels);
+                return new AudioData::ConverterInstance <SourceType, AudioData::Pointer <SampleType, AudioData::LittleEndian, InterleavedType, AudioData::NonConst>> (1, numInterleavedChannels);
 
-            return new AudioData::ConverterInstance <SourceType, AudioData::Pointer <SampleType, AudioData::BigEndian, InterleavedType, AudioData::NonConst> > (1, numInterleavedChannels);
+            return new AudioData::ConverterInstance <SourceType, AudioData::Pointer <SampleType, AudioData::BigEndian, InterleavedType, AudioData::NonConst>> (1, numInterleavedChannels);
         }
     };
 
@@ -464,7 +487,7 @@ class ALSAThread  : public Thread
 {
 public:
     ALSAThread (const String& inputDeviceID, const String& outputDeviceID)
-        : Thread ("Juce ALSA"),
+        : Thread ("JUCE ALSA"),
           sampleRate (0),
           bufferSize (0),
           outputLatency (0),
@@ -746,6 +769,19 @@ public:
         return 16;
     }
 
+    int getXRunCount() const noexcept
+    {
+        int result = 0;
+
+        if (outputDevice != nullptr)
+            result += outputDevice->underrunCount;
+
+        if (inputDevice != nullptr)
+            result += inputDevice->overrunCount;
+
+        return result;
+    }
+
     //==============================================================================
     String error;
     double sampleRate;
@@ -765,7 +801,7 @@ private:
 
     CriticalSection callbackLock;
 
-    AudioSampleBuffer inputChannelBuffer, outputChannelBuffer;
+    AudioBuffer<float> inputChannelBuffer, outputChannelBuffer;
     Array<const float*> inputChannelDataForCallback;
     Array<float*> outputChannelDataForCallback;
 
@@ -904,6 +940,8 @@ public:
 
     int getOutputLatencyInSamples() override         { return internal.outputLatency; }
     int getInputLatencyInSamples() override          { return internal.inputLatency; }
+
+    int getXRunCount() const noexcept override       { return internal.getXRunCount(); }
 
     void start (AudioIODeviceCallback* callback) override
     {
@@ -1272,3 +1310,5 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_ALSA()
 {
     return createAudioIODeviceType_ALSA_PCMDevices();
 }
+
+} // namespace juce

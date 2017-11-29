@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -73,7 +73,7 @@ public:
                                     If this is a nullptr, the call-out will be added to the desktop.
     */
     CallOutBox (Component& contentComponent,
-                const Rectangle<int>& areaToPointTo,
+                Rectangle<int> areaToPointTo,
                 Component* parentComponent);
 
     /** Destructor. */
@@ -117,7 +117,7 @@ public:
                                     If this is a nullptr, the call-out will be added to the desktop.
     */
     static CallOutBox& launchAsynchronously (Component* contentComponent,
-                                             const Rectangle<int>& areaToPointTo,
+                                             Rectangle<int> areaToPointTo,
                                              Component* parentComponent);
 
     /** Posts a message which will dismiss the callout box asynchronously.
@@ -167,13 +167,13 @@ public:
 
 private:
     //==============================================================================
-    float arrowSize;
     Component& content;
     Path outline;
     Point<float> targetPoint;
     Rectangle<int> availableArea, targetArea;
     Image background;
-    bool dismissalMouseClicksAreAlwaysConsumed;
+    float arrowSize = 16.0f;
+    bool dismissalMouseClicksAreAlwaysConsumed = false;
 
     Time creationTime;
 
@@ -182,3 +182,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CallOutBox)
 };
+
+} // namespace juce

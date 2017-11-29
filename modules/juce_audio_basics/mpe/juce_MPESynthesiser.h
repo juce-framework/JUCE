@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -297,11 +297,13 @@ protected:
 
     //==============================================================================
     OwnedArray<MPESynthesiserVoice> voices;
+    CriticalSection voicesLock;
 
 private:
     //==============================================================================
-    bool shouldStealVoices;
-    CriticalSection voicesLock;
+    bool shouldStealVoices = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MPESynthesiser)
 };
+
+} // namespace juce

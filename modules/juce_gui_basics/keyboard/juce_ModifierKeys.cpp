@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ModifierKeys::ModifierKeys() noexcept  : flags (0) {}
 ModifierKeys::ModifierKeys (int rawFlags) noexcept  : flags (rawFlags) {}
 ModifierKeys::ModifierKeys (const ModifierKeys& other) noexcept  : flags (other.flags) {}
@@ -51,3 +54,5 @@ int ModifierKeys::getNumMouseButtonsDown() const noexcept
 
     return num;
 }
+
+} // namespace juce

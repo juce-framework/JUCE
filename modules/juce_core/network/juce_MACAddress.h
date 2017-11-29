@@ -20,14 +20,14 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
     Represents a MAC network card adapter address ID.
 */
-class JUCE_API  MACAddress
+class JUCE_API  MACAddress  final
 {
 public:
     //==============================================================================
@@ -79,3 +79,5 @@ public:
 private:
     uint8 address[6];
 };
+
+} // namespace juce

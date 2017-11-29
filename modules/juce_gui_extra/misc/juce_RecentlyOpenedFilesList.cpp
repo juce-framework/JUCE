@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 RecentlyOpenedFilesList::RecentlyOpenedFilesList()
     : maxNumberOfItems (10)
 {
@@ -145,3 +148,5 @@ void RecentlyOpenedFilesList::registerRecentFileNatively (const File& file)
     ignoreUnused (file);
    #endif
 }
+
+} // namespace juce

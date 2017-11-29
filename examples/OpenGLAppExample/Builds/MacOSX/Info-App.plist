@@ -8,7 +8,7 @@
     <key>CFBundleIconFile</key>
     <string></string>
     <key>CFBundleIdentifier</key>
-    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <string>com.roli.OpenGLAppExample</string>
     <key>CFBundleName</key>
     <string>OpenGLAppExample</string>
     <key>CFBundleDisplayName</key>

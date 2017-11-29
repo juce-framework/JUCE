@@ -53,6 +53,11 @@
   #import <Carbon/Carbon.h> // still needed for SetSystemUIMode()
  #endif
 
+#elif JUCE_IOS
+ #if JUCE_PUSH_NOTIFICATIONS && defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+  #import <UserNotifications/UserNotifications.h>
+ #endif
+
 //==============================================================================
 #elif JUCE_WINDOWS
  #include <windowsx.h>
@@ -132,16 +137,16 @@
 #include <set>
 
 //==============================================================================
-namespace juce
-{
-
 #define ASSERT_MESSAGE_MANAGER_IS_LOCKED \
     jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
 #define ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN \
     jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager() || getPeer() == nullptr);
 
-extern bool juce_areThereAnyAlwaysOnTopWindows();
+namespace juce
+{
+    extern bool juce_areThereAnyAlwaysOnTopWindows();
+}
 
 #include "components/juce_Component.cpp"
 #include "components/juce_ComponentListener.cpp"
@@ -197,6 +202,7 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
 #include "layout/juce_ResizableCornerComponent.cpp"
 #include "layout/juce_ResizableEdgeComponent.cpp"
 #include "layout/juce_ScrollBar.cpp"
+#include "layout/juce_SidePanel.cpp"
 #include "layout/juce_StretchableLayoutManager.cpp"
 #include "layout/juce_StretchableLayoutResizerBar.cpp"
 #include "layout/juce_StretchableObjectResizer.cpp"
@@ -209,6 +215,7 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
 #include "lookandfeel/juce_LookAndFeel_V3.cpp"
 #include "lookandfeel/juce_LookAndFeel_V4.cpp"
 #include "menus/juce_MenuBarComponent.cpp"
+#include "menus/juce_BurgerMenuComponent.cpp"
 #include "menus/juce_MenuBarModel.cpp"
 #include "menus/juce_PopupMenu.cpp"
 #include "positioning/juce_MarkerList.cpp"
@@ -259,10 +266,12 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
 // these classes are C++11-only
 #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
  #include "layout/juce_FlexBox.cpp"
- #include "layout/juce_GridItem.cpp"
- #include "layout/juce_Grid.cpp"
- #if JUCE_UNIT_TESTS
-  #include "layout/juce_GridUnitTests.cpp"
+ #if JUCE_HAS_CONSTEXPR
+  #include "layout/juce_GridItem.cpp"
+  #include "layout/juce_Grid.cpp"
+  #if JUCE_UNIT_TESTS
+   #include "layout/juce_GridUnitTests.cpp"
+  #endif
  #endif
 #endif
 
@@ -280,10 +289,12 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
  #if JUCE_IOS
   #include "native/juce_ios_UIViewComponentPeer.mm"
   #include "native/juce_ios_Windowing.mm"
+  #include "native/juce_ios_FileChooser.mm"
  #else
   #include "native/juce_mac_NSViewComponentPeer.mm"
   #include "native/juce_mac_Windowing.mm"
   #include "native/juce_mac_MainMenu.mm"
+  #include "native/juce_mac_FileChooser.mm"
  #endif
 
  #if JUCE_CLANG
@@ -291,7 +302,6 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
  #endif
 
  #include "native/juce_mac_MouseCursor.mm"
- #include "native/juce_mac_FileChooser.mm"
 
 #elif JUCE_WINDOWS
  #include "native/juce_win32_Windowing.cpp"
@@ -306,8 +316,7 @@ extern bool juce_areThereAnyAlwaysOnTopWindows();
 
 #elif JUCE_ANDROID
  #include "native/juce_android_Windowing.cpp"
+ #include "native/juce_common_MimeTypes.cpp"
  #include "native/juce_android_FileChooser.cpp"
 
 #endif
-
-}

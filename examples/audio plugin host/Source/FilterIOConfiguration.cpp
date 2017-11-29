@@ -23,17 +23,19 @@
 
   ==============================================================================
 */
+
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "GraphEditorPanel.h"
 #include "InternalFilters.h"
 #include "MainHostWindow.h"
-
 #include "FilterIOConfiguration.h"
 
+
 //==============================================================================
-class NumberedBoxes : public TableListBox, private TableListBoxModel, private Button::Listener
+struct NumberedBoxes  : public TableListBox,
+                        private TableListBoxModel,
+                        private Button::Listener
 {
-public:
     struct Listener
     {
         virtual ~Listener() {}
@@ -56,21 +58,19 @@ public:
           canAddColumn (canCurrentlyAddColumn),
           canRemoveColumn (canCurrentlyRemoveColumn)
     {
-        TableHeaderComponent& tableHeader = getHeader();
+        auto& tableHeader = getHeader();
 
         for (int i = 0; i < 16; ++i)
             tableHeader.addColumn (String (i + 1), i + 1, 40);
 
         setHeaderHeight (0);
         setRowHeight (40);
-
-        if (ScrollBar* scrollbar = getHorizontalScrollBar())
-            scrollbar->setAutoHide (false);
+        getHorizontalScrollBar().setAutoHide (false);
     }
 
     void setSelected (int columnId)
     {
-        if (TextButton* button = dynamic_cast<TextButton*> (getCellComponent (columnId, 0)))
+        if (auto* button = dynamic_cast<TextButton*> (getCellComponent (columnId, 0)))
             button->setToggleState (true, NotificationType::dontSendNotification);
     }
 
@@ -80,7 +80,7 @@ public:
         {
             canAddColumn = canCurrentlyAdd;
 
-            if (TextButton* button = dynamic_cast<TextButton*> (getCellComponent (plusButtonColumnId, 0)))
+            if (auto* button = dynamic_cast<TextButton*> (getCellComponent (plusButtonColumnId, 0)))
                 button->setEnabled (true);
         }
     }
@@ -91,12 +91,16 @@ public:
         {
             canRemoveColumn = canCurrentlyRemove;
 
-            if (TextButton* button = dynamic_cast<TextButton*> (getCellComponent (minusButtonColumnId, 0)))
+            if (auto* button = dynamic_cast<TextButton*> (getCellComponent (minusButtonColumnId, 0)))
                 button->setEnabled (true);
         }
     }
 
 private:
+    //==============================================================================
+    Listener& listener;
+    bool canAddColumn, canRemoveColumn;
+
     //==============================================================================
     int getNumRows() override                                             { return 1; }
     void paintCell (Graphics&, int, int, int, int, bool) override         {}
@@ -105,9 +109,10 @@ private:
     Component* refreshComponentForCell (int, int columnId, bool,
                                         Component* existingComponentToUpdate) override
     {
-        TextButton* textButton = dynamic_cast<TextButton*> (existingComponentToUpdate);
+        auto* textButton = dynamic_cast<TextButton*> (existingComponentToUpdate);
+
         if (textButton == nullptr)
-            textButton = new TextButton ("");
+            textButton = new TextButton();
 
         textButton->setButtonText (getButtonName (columnId));
         textButton->setConnectedEdges (Button::ConnectedOnLeft | Button::ConnectedOnRight |
@@ -124,7 +129,7 @@ private:
             textButton->setRadioGroupId (1, NotificationType::dontSendNotification);
             textButton->setClickingTogglesState (true);
 
-            Colour busColour = Colours::green.withRotatedHue (static_cast<float> (columnId) / 5.0f);
+            auto busColour = Colours::green.withRotatedHue (static_cast<float> (columnId) / 5.0f);
             textButton->setColour (TextButton::buttonColourId, busColour);
             textButton->setColour (TextButton::buttonOnColourId, busColour.withMultipliedBrightness (2.0f));
         }
@@ -145,41 +150,38 @@ private:
 
     void buttonClicked (Button* btn) override
     {
-        const String& text = btn->getButtonText();
+        auto text = btn->getButtonText();
 
-        if      (text == "+") listener.addColumn();
-        else if (text == "-") listener.removeColumn();
+        if (text == "+") listener.addColumn();
+        if (text == "-") listener.removeColumn();
     }
 
     void buttonStateChanged (Button* btn) override
     {
-        const String& text = btn->getButtonText();
+        auto text = btn->getButtonText();
 
-        if (text == "+" || text == "-") return;
+        if (text == "+" || text == "-")
+            return;
 
         if (btn->getToggleState())
             listener.columnSelected (text.getIntValue());
     }
 
-    //==============================================================================
-    Listener& listener;
-    bool canAddColumn, canRemoveColumn;
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NumberedBoxes)
 };
 
 //==============================================================================
-class FilterIOConfigurationWindow::InputOutputConfig
-     : public Component, private ComboBox::Listener, private Button::Listener, private NumberedBoxes::Listener
+class FilterIOConfigurationWindow::InputOutputConfig  : public Component,
+                                                        private ComboBox::Listener,
+                                                        private Button::Listener,
+                                                        private NumberedBoxes::Listener
 {
 public:
     InputOutputConfig (FilterIOConfigurationWindow& parent, bool direction)
         : owner (parent),
           ioTitle ("ioLabel", direction ? "Input Configuration" : "Output Configuration"),
-          nameLabel ("nameLabel", "Bus Name:"),
-          layoutLabel ("layoutLabel", "Channel Layout:"),
-          enabledToggle ("Enabled"),
           ioBuses (*this, false, false),
-          isInput (direction),
-          currentBus (0)
+          isInput (direction)
     {
         ioTitle.setFont (ioTitle.getFont().withStyle (Font::bold));
         nameLabel.setFont (nameLabel.getFont().withStyle (Font::bold));
@@ -208,7 +210,7 @@ public:
 
     void resized() override
     {
-        Rectangle<int> r = getLocalBounds().reduced (10);
+        auto r = getLocalBounds().reduced (10);
 
         ioTitle.setBounds (r.removeFromTop (14));
         r.reduce (10, 0);
@@ -217,16 +219,14 @@ public:
         ioBuses.setBounds (r.removeFromTop (60));
 
         {
-            Rectangle<int> label = r.removeFromTop (24);
-
+            auto label = r.removeFromTop (24);
             nameLabel.setBounds (label.removeFromLeft (100));
             enabledToggle.setBounds (label.removeFromRight (80));
             name.setBounds (label);
         }
 
         {
-            Rectangle<int> label = r.removeFromTop (24);
-
+            auto label = r.removeFromTop (24);
             layoutLabel.setBounds (label.removeFromLeft (100));
             layouts.setBounds (label);
         }
@@ -235,12 +235,13 @@ public:
 private:
     void updateBusButtons()
     {
-        if (AudioProcessor* filter = owner.getAudioProcessor())
+        if (auto* filter = owner.getAudioProcessor())
         {
-            TableHeaderComponent& header = ioBuses.getHeader();
+            auto& header = ioBuses.getHeader();
             header.removeAllColumns();
 
             const int n = filter->getBusCount (isInput);
+
             for (int i = 0; i < n; ++i)
                 header.addColumn ("", i + 1, 40);
 
@@ -256,14 +257,13 @@ private:
 
     void updateBusLayout()
     {
-        if (AudioProcessor* filter = owner.getAudioProcessor())
+        if (auto* filter = owner.getAudioProcessor())
         {
-            if (AudioProcessor::Bus* bus = filter->getBus (isInput, currentBus))
+            if (auto* bus = filter->getBus (isInput, currentBus))
             {
                 name.setText (bus->getName(), NotificationType::dontSendNotification);
 
                 int i;
-
                 for (i = 1; i < AudioChannelSet::maxChannelsOfNamedLayout; ++i)
                     if ((layouts.indexOfItemId(i) == -1) != bus->supportedLayoutWithChannels (i).isDisabled())
                         break;
@@ -275,7 +275,8 @@ private:
 
                     for (i = 1; i < AudioChannelSet::maxChannelsOfNamedLayout; ++i)
                     {
-                        AudioChannelSet set = bus->supportedLayoutWithChannels (i);
+                        auto set = bus->supportedLayoutWithChannels (i);
+
                         if (! set.isDisabled())
                             layouts.addItem (set.getDescription(), i);
                     }
@@ -298,18 +299,18 @@ private:
     {
         if (combo == &layouts)
         {
-            if (AudioProcessor* filter = owner.getAudioProcessor())
+            if (auto* p = owner.getAudioProcessor())
             {
-                if (AudioProcessor::Bus* bus = filter->getBus (isInput, currentBus))
+                if (auto* bus = p->getBus (isInput, currentBus))
                 {
-                    const int selectedNumChannels = layouts.getSelectedId();
+                    auto selectedNumChannels = layouts.getSelectedId();
 
                     if (selectedNumChannels != bus->getLastEnabledLayout().size())
                     {
-                        if (isPositiveAndBelow (selectedNumChannels, (int) AudioChannelSet::maxChannelsOfNamedLayout)
-                         && bus->setCurrentLayoutWithoutEnabling (bus->supportedLayoutWithChannels (selectedNumChannels)))
+                        if (isPositiveAndBelow (selectedNumChannels, AudioChannelSet::maxChannelsOfNamedLayout)
+                             && bus->setCurrentLayoutWithoutEnabling (bus->supportedLayoutWithChannels (selectedNumChannels)))
                         {
-                            if (InputOutputConfig* config = owner.getConfig (! isInput))
+                            if (auto* config = owner.getConfig (! isInput))
                                 config->updateBusLayout();
 
                             owner.update();
@@ -326,24 +327,20 @@ private:
     {
         if (btn == &enabledToggle && enabledToggle.isEnabled())
         {
-            if (AudioProcessor* filter = owner.getAudioProcessor())
+            if (auto* p = owner.getAudioProcessor())
             {
-                if (AudioProcessor::Bus* bus = filter->getBus (isInput, currentBus))
+                if (auto* bus = p->getBus (isInput, currentBus))
                 {
                     if (bus->isEnabled() != enabledToggle.getToggleState())
                     {
-                        bool success;
-
-                        if (enabledToggle.getToggleState())
-                            success = bus->enable();
-                        else
-                            success = bus->setCurrentLayout (AudioChannelSet::disabled());
+                        bool success = enabledToggle.getToggleState() ? bus->enable()
+                                                                      : bus->setCurrentLayout (AudioChannelSet::disabled());
 
                         if (success)
                         {
                             updateBusLayout();
 
-                            if (InputOutputConfig* config = owner.getConfig (! isInput))
+                            if (auto* config = owner.getConfig (! isInput))
                                 config->updateBusLayout();
 
                             owner.update();
@@ -362,41 +359,41 @@ private:
     //==============================================================================
     void addColumn() override
     {
-        if (AudioProcessor* filter = owner.getAudioProcessor())
+        if (auto* p = owner.getAudioProcessor())
         {
-            if (filter->canAddBus (isInput))
+            if (p->canAddBus (isInput))
             {
-                if (filter->addBus (isInput))
+                if (p->addBus (isInput))
                 {
                     updateBusButtons();
                     updateBusLayout();
 
-                    if (InputOutputConfig* config = owner.getConfig (! isInput))
+                    if (auto* config = owner.getConfig (! isInput))
                     {
                         config->updateBusButtons();
                         config->updateBusLayout();
                     }
-
-                    owner.update();
                 }
+
+                owner.update();
             }
         }
     }
 
     void removeColumn() override
     {
-        if (AudioProcessor* filter = owner.getAudioProcessor())
+        if (auto* p = owner.getAudioProcessor())
         {
-            if (filter->getBusCount (isInput) > 1 && filter->canRemoveBus (isInput))
+            if (p->getBusCount (isInput) > 1 && p->canRemoveBus (isInput))
             {
-                if (filter->removeBus (isInput))
+                if (p->removeBus (isInput))
                 {
-                    currentBus = jmin (filter->getBusCount (isInput) - 1, currentBus);
+                    currentBus = jmin (p->getBusCount (isInput) - 1, currentBus);
 
                     updateBusButtons();
                     updateBusLayout();
 
-                    if (InputOutputConfig* config = owner.getConfig (! isInput))
+                    if (auto* config = owner.getConfig (! isInput))
                     {
                         config->updateBusButtons();
                         config->updateBusLayout();
@@ -411,6 +408,7 @@ private:
     void columnSelected (int columnId) override
     {
         const int newBus = columnId - 1;
+
         if (currentBus != newBus)
         {
             currentBus = newBus;
@@ -421,48 +419,49 @@ private:
 
     //==============================================================================
     FilterIOConfigurationWindow& owner;
-    Label ioTitle, nameLabel, name, layoutLabel;
-    ToggleButton enabledToggle;
+    Label ioTitle, name;
+    Label nameLabel { "nameLabel", "Bus Name:" };
+    Label layoutLabel { "layoutLabel", "Channel Layout:" };
+    ToggleButton enabledToggle { "Enabled" };
     ComboBox layouts;
     NumberedBoxes ioBuses;
     bool isInput;
-    int currentBus;
+    int currentBus = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InputOutputConfig)
 };
 
 
-FilterIOConfigurationWindow::FilterIOConfigurationWindow (AudioProcessor* const p)
-    : AudioProcessorEditor (p),
-      title ("title", p->getName())
+FilterIOConfigurationWindow::FilterIOConfigurationWindow (AudioProcessor& p)
+   : AudioProcessorEditor (&p),
+     title ("title", p.getName())
 {
-    jassert (p != nullptr);
     setOpaque (true);
 
     title.setFont (title.getFont().withStyle (Font::bold));
     addAndMakeVisible (title);
 
     {
-        ScopedLock renderLock (p->getCallbackLock());
-        p->suspendProcessing (true);
-        p->releaseResources();
+        ScopedLock renderLock (p.getCallbackLock());
+        p.suspendProcessing (true);
+        p.releaseResources();
     }
 
-    if (p->getBusCount (true)  > 0 || p->canAddBus (true))
+    if (p.getBusCount (true)  > 0 || p.canAddBus (true))
         addAndMakeVisible (inConfig = new InputOutputConfig (*this, true));
 
-    if (p->getBusCount (false) > 0 || p->canAddBus (false))
+    if (p.getBusCount (false) > 0 || p.canAddBus (false))
         addAndMakeVisible (outConfig = new InputOutputConfig (*this, false));
 
-    currentLayout = p->getBusesLayout();
+    currentLayout = p.getBusesLayout();
     setSize (400, (inConfig != nullptr && outConfig != nullptr ? 160 : 0) + 200);
 }
 
 FilterIOConfigurationWindow::~FilterIOConfigurationWindow()
 {
-    if (AudioProcessorGraph* graph = getGraph())
+    if (auto* graph = getGraph())
     {
-        if (AudioProcessor* p = getAudioProcessor())
+        if (auto* p = getAudioProcessor())
         {
             ScopedLock renderLock (graph->getCallbackLock());
 
@@ -485,7 +484,7 @@ void FilterIOConfigurationWindow::paint (Graphics& g)
 
 void FilterIOConfigurationWindow::resized()
 {
-    Rectangle<int> r = getLocalBounds().reduced (10);
+    auto r = getLocalBounds().reduced (10);
 
     title.setBounds (r.removeFromTop (14));
     r.reduce (10, 0);
@@ -499,38 +498,33 @@ void FilterIOConfigurationWindow::resized()
 
 void FilterIOConfigurationWindow::update()
 {
-    const int32 nodeId = getNodeId();
+    auto nodeID = getNodeID();
 
-    if (AudioProcessorGraph* graph = getGraph())
-        if (nodeId != -1)
-            graph->disconnectNode (static_cast<uint32> (nodeId));
+    if (auto* graph = getGraph())
+        if (nodeID != 0)
+            graph->disconnectNode (nodeID);
 
-    if (GraphDocumentComponent* graphEditor = getGraphEditor())
-        if (GraphEditorPanel* panel = graphEditor->graphPanel)
+    if (auto* graphEditor = getGraphEditor())
+        if (auto* panel = graphEditor->graphPanel.get())
             panel->updateComponents();
 }
 
-int32 FilterIOConfigurationWindow::getNodeId() const
+AudioProcessorGraph::NodeID FilterIOConfigurationWindow::getNodeID() const
 {
-    if (AudioProcessorGraph* graph = getGraph())
-    {
-        const int n = graph->getNumNodes();
+    if (auto* graph = getGraph())
+        for (auto* node : graph->getNodes())
+            if (node->getProcessor() == getAudioProcessor())
+                return node->nodeID;
 
-        for (int i = 0; i < n; ++i)
-            if (AudioProcessorGraph::Node* node = graph->getNode (i))
-                if (node->getProcessor() == getAudioProcessor())
-                    return static_cast<int32> (node->nodeId);
-    }
-
-    return -1;
+    return 0;
 }
 
 MainHostWindow* FilterIOConfigurationWindow::getMainWindow() const
 {
-    Component* comp;
+    auto& desktop = Desktop::getInstance();
 
-    for (int idx = 0; (comp = Desktop::getInstance().getComponent(idx)) != nullptr; ++idx)
-        if (MainHostWindow* mainWindow = dynamic_cast<MainHostWindow*> (comp))
+    for (int i = desktop.getNumComponents(); --i >= 0;)
+        if (auto* mainWindow = dynamic_cast<MainHostWindow*> (desktop.getComponent(i)))
             return mainWindow;
 
     return nullptr;
@@ -538,20 +532,17 @@ MainHostWindow* FilterIOConfigurationWindow::getMainWindow() const
 
 GraphDocumentComponent* FilterIOConfigurationWindow::getGraphEditor() const
 {
-    if (MainHostWindow* mainWindow = getMainWindow())
-    {
-        if (GraphDocumentComponent* graphEditor = mainWindow->getGraphEditor())
-            return graphEditor;
-    }
+    if (auto* mainWindow = getMainWindow())
+        return mainWindow->graphHolder.get();
 
     return nullptr;
 }
 
 AudioProcessorGraph* FilterIOConfigurationWindow::getGraph() const
 {
-    if (GraphDocumentComponent* graphEditor = getGraphEditor())
-        if (FilterGraph* filterGraph = graphEditor->graph)
-            return &filterGraph->getGraph();
+    if (auto* graphEditor = getGraphEditor())
+        if (auto* panel = graphEditor->graph.get())
+            return &panel->graph;
 
     return nullptr;
 }

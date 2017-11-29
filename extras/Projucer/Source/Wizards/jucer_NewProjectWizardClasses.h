@@ -24,4 +24,7 @@
   ==============================================================================
 */
 
+#pragma once
+
+
 Component* createNewProjectWizardComponent();

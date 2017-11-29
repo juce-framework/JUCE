@@ -30,10 +30,12 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.http.SslError;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.Handler;
+import android.os.Message;
 import android.os.ParcelUuid;
 import android.os.Environment;
 import android.view.*;
@@ -47,6 +49,10 @@ import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
+import android.webkit.SslErrorHandler;
+import android.webkit.WebChromeClient;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import java.lang.Runnable;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.*;
@@ -312,6 +318,7 @@ public class InAppPurchase   extends Activity
                    getApplicationInfo().dataDir);
     }
 
+    //==============================================================================
     private void hideActionBar()
     {
         // get "getActionBar" method
@@ -383,6 +390,7 @@ public class InAppPurchase   extends Activity
     private native void resumeApp();
     private native void setScreenSize (int screenWidth, int screenHeight, int dpi);
     private native void appActivityResult (int requestCode, int resultCode, Intent data);
+    private native void appNewIntent (Intent intent);
 
     //==============================================================================
     private ViewHolder viewHolder;
@@ -400,6 +408,8 @@ public class InAppPurchase   extends Activity
 
     public final void deleteView (ComponentPeerView view)
     {
+        view.host = 0;
+
         ViewGroup group = (ViewGroup) (view.getParent());
 
         if (group != null)
@@ -519,11 +529,18 @@ public class InAppPurchase   extends Activity
         builder.setTitle (title)
                .setMessage (message)
                .setCancelable (true)
+               .setOnCancelListener (new DialogInterface.OnCancelListener()
+                    {
+                        public void onCancel (DialogInterface dialog)
+                        {
+                            InAppPurchase.this.alertDismissed (callback, 0);
+                        }
+                    })
                .setPositiveButton ("OK", new DialogInterface.OnClickListener()
                     {
                         public void onClick (DialogInterface dialog, int id)
                         {
-                            dialog.cancel();
+                            dialog.dismiss();
                             InAppPurchase.this.alertDismissed (callback, 0);
                         }
                     });
@@ -538,11 +555,18 @@ public class InAppPurchase   extends Activity
         builder.setTitle (title)
                .setMessage (message)
                .setCancelable (true)
+               .setOnCancelListener (new DialogInterface.OnCancelListener()
+                    {
+                        public void onCancel (DialogInterface dialog)
+                        {
+                            InAppPurchase.this.alertDismissed (callback, 0);
+                        }
+                    })
                .setPositiveButton (okButtonText.isEmpty() ? "OK" : okButtonText, new DialogInterface.OnClickListener()
                     {
                         public void onClick (DialogInterface dialog, int id)
                         {
-                            dialog.cancel();
+                            dialog.dismiss();
                             InAppPurchase.this.alertDismissed (callback, 1);
                         }
                     })
@@ -550,7 +574,7 @@ public class InAppPurchase   extends Activity
                     {
                         public void onClick (DialogInterface dialog, int id)
                         {
-                            dialog.cancel();
+                            dialog.dismiss();
                             InAppPurchase.this.alertDismissed (callback, 0);
                         }
                     });
@@ -564,11 +588,18 @@ public class InAppPurchase   extends Activity
         builder.setTitle (title)
                .setMessage (message)
                .setCancelable (true)
+               .setOnCancelListener (new DialogInterface.OnCancelListener()
+                    {
+                        public void onCancel (DialogInterface dialog)
+                        {
+                            InAppPurchase.this.alertDismissed (callback, 0);
+                        }
+                    })
                .setPositiveButton ("Yes", new DialogInterface.OnClickListener()
                     {
                         public void onClick (DialogInterface dialog, int id)
                         {
-                            dialog.cancel();
+                            dialog.dismiss();
                             InAppPurchase.this.alertDismissed (callback, 1);
                         }
                     })
@@ -576,7 +607,7 @@ public class InAppPurchase   extends Activity
                     {
                         public void onClick (DialogInterface dialog, int id)
                         {
-                            dialog.cancel();
+                            dialog.dismiss();
                             InAppPurchase.this.alertDismissed (callback, 2);
                         }
                     })
@@ -584,7 +615,7 @@ public class InAppPurchase   extends Activity
                     {
                         public void onClick (DialogInterface dialog, int id)
                         {
-                            dialog.cancel();
+                            dialog.dismiss();
                             InAppPurchase.this.alertDismissed (callback, 0);
                         }
                     });
@@ -608,7 +639,6 @@ public class InAppPurchase   extends Activity
             setFocusable (true);
             setFocusableInTouchMode (true);
             setOnFocusChangeListener (this);
-            requestFocus();
 
             // swap red and blue colours to match internal opengl texture format
             ColorMatrix colorMatrix = new ColorMatrix();
@@ -620,6 +650,27 @@ public class InAppPurchase   extends Activity
 
             colorMatrix.set (colorTransform);
             paint.setColorFilter (new ColorMatrixColorFilter (colorMatrix));
+
+            java.lang.reflect.Method method = null;
+
+            try
+            {
+                method = getClass().getMethod ("setLayerType", int.class, Paint.class);
+            }
+            catch (SecurityException e)     {}
+            catch (NoSuchMethodException e) {}
+
+            if (method != null)
+            {
+                try
+                {
+                    int layerTypeNone = 0;
+                    method.invoke (this, layerTypeNone, null);
+                }
+                catch (java.lang.IllegalArgumentException e) {}
+                catch (java.lang.IllegalAccessException e) {}
+                catch (java.lang.reflect.InvocationTargetException e) {}
+            }
         }
 
         //==============================================================================
@@ -628,6 +679,9 @@ public class InAppPurchase   extends Activity
         @Override
         public void onDraw (Canvas canvas)
         {
+            if (host == 0)
+                return;
+
             handlePaint (host, canvas, paint);
         }
 
@@ -649,6 +703,9 @@ public class InAppPurchase   extends Activity
         @Override
         public boolean onTouchEvent (MotionEvent event)
         {
+            if (host == 0)
+                return false;
+
             int action = event.getAction();
             long time = event.getEventTime();
 
@@ -719,6 +776,9 @@ public class InAppPurchase   extends Activity
         @Override
         public boolean onKeyDown (int keyCode, KeyEvent event)
         {
+            if (host == 0)
+                return false;
+
             switch (keyCode)
             {
                 case KeyEvent.KEYCODE_VOLUME_UP:
@@ -741,6 +801,9 @@ public class InAppPurchase   extends Activity
         @Override
         public boolean onKeyUp (int keyCode, KeyEvent event)
         {
+            if (host == 0)
+                return false;
+
             handleKeyUp (host, keyCode, event.getUnicodeChar());
             return true;
         }
@@ -748,6 +811,9 @@ public class InAppPurchase   extends Activity
         @Override
         public boolean onKeyMultiple (int keyCode, int count, KeyEvent event)
         {
+            if (host == 0)
+                return false;
+
             if (keyCode != KeyEvent.KEYCODE_UNKNOWN || event.getAction() != KeyEvent.ACTION_MULTIPLE)
                 return super.onKeyMultiple (keyCode, count, event);
 
@@ -780,6 +846,9 @@ public class InAppPurchase   extends Activity
         @Override
         protected void onSizeChanged (int w, int h, int oldw, int oldh)
         {
+            if (host == 0)
+                return;
+
             super.onSizeChanged (w, h, oldw, oldh);
             viewSizeChanged (host);
         }
@@ -796,6 +865,9 @@ public class InAppPurchase   extends Activity
         @Override
         public void onFocusChange (View v, boolean hasFocus)
         {
+            if (host == 0)
+                return;
+
             if (v == this)
                 focusChanged (host, hasFocus);
         }
@@ -982,13 +1054,75 @@ public class InAppPurchase   extends Activity
     //==============================================================================
     public static class HTTPStream
     {
-        public HTTPStream (HttpURLConnection connection_,
-                           int[] statusCode_,
-                           StringBuffer responseHeaders_)
+        public HTTPStream (String address, boolean isPostToUse, byte[] postDataToUse,
+                           String headersToUse, int timeOutMsToUse,
+                           int[] statusCodeToUse, StringBuffer responseHeadersToUse,
+                           int numRedirectsToFollowToUse, String httpRequestCmdToUse) throws IOException
         {
-            connection = connection_;
-            statusCode = statusCode_;
-            responseHeaders = responseHeaders_;
+            isPost = isPostToUse;
+            postData = postDataToUse;
+            headers = headersToUse;
+            timeOutMs = timeOutMsToUse;
+            statusCode = statusCodeToUse;
+            responseHeaders = responseHeadersToUse;
+            totalLength = -1;
+            numRedirectsToFollow = numRedirectsToFollowToUse;
+            httpRequestCmd = httpRequestCmdToUse;
+
+            connection = createConnection (address, isPost, postData, headers, timeOutMs, httpRequestCmd);
+        }
+
+        private final HttpURLConnection createConnection (String address, boolean isPost, byte[] postData,
+                                                          String headers, int timeOutMs, String httpRequestCmdToUse) throws IOException
+        {
+            HttpURLConnection newConnection = (HttpURLConnection) (new URL(address).openConnection());
+
+            try
+            {
+                newConnection.setInstanceFollowRedirects (false);
+                newConnection.setConnectTimeout (timeOutMs);
+                newConnection.setReadTimeout (timeOutMs);
+
+                // headers - if not empty, this string is appended onto the headers that are used for the request. It must therefore be a valid set of HTML header directives, separated by newlines.
+                // So convert headers string to an array, with an element for each line
+                String headerLines[] = headers.split("\\n");
+
+                // Set request headers
+                for (int i = 0; i < headerLines.length; ++i)
+                {
+                    int pos = headerLines[i].indexOf (":");
+
+                    if (pos > 0 && pos < headerLines[i].length())
+                    {
+                        String field = headerLines[i].substring (0, pos);
+                        String value = headerLines[i].substring (pos + 1);
+
+                        if (value.length() > 0)
+                            newConnection.setRequestProperty (field, value);
+                    }
+                }
+
+                newConnection.setRequestMethod (httpRequestCmd);
+
+                if (isPost)
+                {
+                    newConnection.setDoOutput (true);
+
+                    if (postData != null)
+                    {
+                        OutputStream out = newConnection.getOutputStream();
+                        out.write(postData);
+                        out.flush();
+                    }
+                }
+
+                return newConnection;
+            }
+            catch (Throwable e)
+            {
+                newConnection.disconnect();
+                throw new IOException ("Connection error");
+            }
         }
 
         private final InputStream getCancellableStream (final boolean isInput) throws ExecutionException
@@ -1011,16 +1145,9 @@ public class InAppPurchase   extends Activity
 
             try
             {
-                if (connection.getConnectTimeout() > 0)
-                    return streamFuture.get (connection.getConnectTimeout(), TimeUnit.MILLISECONDS);
-                else
-                    return streamFuture.get();
+                return streamFuture.get();
             }
             catch (InterruptedException e)
-            {
-                return null;
-            }
-            catch (TimeoutException e)
             {
                 return null;
             }
@@ -1031,6 +1158,89 @@ public class InAppPurchase   extends Activity
         }
 
         public final boolean connect()
+        {
+            boolean result = false;
+            int numFollowedRedirects = 0;
+
+            while (true)
+            {
+                result = doConnect();
+
+                if (! result)
+                    return false;
+
+                if (++numFollowedRedirects > numRedirectsToFollow)
+                    break;
+
+                int status = statusCode[0];
+
+                if (status == 301 || status == 302 || status == 303 || status == 307)
+                {
+                    // Assumes only one occurrence of "Location"
+                    int pos1 = responseHeaders.indexOf ("Location:") + 10;
+                    int pos2 = responseHeaders.indexOf ("\n", pos1);
+
+                    if (pos2 > pos1)
+                    {
+                        String currentLocation = connection.getURL().toString();
+                        String newLocation = responseHeaders.substring (pos1, pos2);
+
+                        try
+                        {
+                            // Handle newLocation whether it's absolute or relative
+                            URL baseUrl = new URL (currentLocation);
+                            URL newUrl  = new URL (baseUrl, newLocation);
+                            String transformedNewLocation = newUrl.toString();
+
+                            if (transformedNewLocation != currentLocation)
+                            {
+                                // Clear responseHeaders before next iteration
+                                responseHeaders.delete (0, responseHeaders.length());
+
+                                synchronized (createStreamLock)
+                                {
+                                    if (hasBeenCancelled.get())
+                                        return false;
+
+                                    connection.disconnect();
+
+                                    try
+                                    {
+                                        connection = createConnection (transformedNewLocation, isPost,
+                                                                       postData, headers, timeOutMs,
+                                                                       httpRequestCmd);
+                                    }
+                                    catch (Throwable e)
+                                    {
+                                        return false;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                        catch (Throwable e)
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return result;
+        }
+
+        private final boolean doConnect()
         {
             synchronized (createStreamLock)
             {
@@ -1068,9 +1278,16 @@ public class InAppPurchase   extends Activity
                     {}
 
                     for (java.util.Map.Entry<String, java.util.List<String>> entry : connection.getHeaderFields().entrySet())
+                    {
                         if (entry.getKey() != null && entry.getValue() != null)
-                            responseHeaders.append (entry.getKey() + ": "
-                                                    + android.text.TextUtils.join (",", entry.getValue()) + "\n");
+                        {
+                            responseHeaders.append(entry.getKey() + ": "
+                                                   + android.text.TextUtils.join(",", entry.getValue()) + "\n");
+
+                            if (entry.getKey().compareTo ("Content-Length") == 0)
+                                totalLength = Integer.decode (entry.getValue().get (0));
+                        }
+                    }
 
                     return true;
                 }
@@ -1173,13 +1390,20 @@ public class InAppPurchase   extends Activity
         }
 
         public final long getPosition()                 { return position; }
-        public final long getTotalLength()              { return -1; }
+        public final long getTotalLength()              { return totalLength; }
         public final boolean isExhausted()              { return false; }
         public final boolean setPosition (long newPos)  { return false; }
 
+        private boolean isPost;
+        private byte[] postData;
+        private String headers;
+        private int timeOutMs;
+        String httpRequestCmd;
         private HttpURLConnection connection;
         private int[] statusCode;
         private StringBuffer responseHeaders;
+        private int totalLength;
+        private int numRedirectsToFollow;
         private InputStream inputStream;
         private long position;
         private final ReentrantLock createStreamLock = new ReentrantLock();
@@ -1201,89 +1425,15 @@ public class InAppPurchase   extends Activity
         else if (timeOutMs == 0)
             timeOutMs = 30000;
 
-        // headers - if not empty, this string is appended onto the headers that are used for the request. It must therefore be a valid set of HTML header directives, separated by newlines.
-        // So convert headers string to an array, with an element for each line
-        String headerLines[] = headers.split("\\n");
-
         for (;;)
         {
             try
             {
-                HttpURLConnection connection = (HttpURLConnection) (new URL(address).openConnection());
+                HTTPStream httpStream = new HTTPStream (address, isPost, postData, headers,
+                                                        timeOutMs, statusCode, responseHeaders,
+                                                        numRedirectsToFollow, httpRequestCmd);
 
-                if (connection != null)
-                {
-                    try
-                    {
-                        connection.setInstanceFollowRedirects (false);
-                        connection.setConnectTimeout (timeOutMs);
-                        connection.setReadTimeout (timeOutMs);
-
-                        // Set request headers
-                        for (int i = 0; i < headerLines.length; ++i)
-                        {
-                            int pos = headerLines[i].indexOf (":");
-
-                            if (pos > 0 && pos < headerLines[i].length())
-                            {
-                                String field = headerLines[i].substring (0, pos);
-                                String value = headerLines[i].substring (pos + 1);
-
-                                if (value.length() > 0)
-                                    connection.setRequestProperty (field, value);
-                            }
-                        }
-
-                        connection.setRequestMethod (httpRequestCmd);
-                        if (isPost)
-                        {
-                            connection.setDoOutput (true);
-
-                            if (postData != null)
-                            {
-                                OutputStream out = connection.getOutputStream();
-                                out.write(postData);
-                                out.flush();
-                            }
-                        }
-
-                        HTTPStream httpStream = new HTTPStream (connection, statusCode, responseHeaders);
-
-                        // Process redirect & continue as necessary
-                        int status = statusCode[0];
-
-                        if (--numRedirectsToFollow >= 0
-                             && (status == 301 || status == 302 || status == 303 || status == 307))
-                        {
-                            // Assumes only one occurrence of "Location"
-                            int pos1 = responseHeaders.indexOf ("Location:") + 10;
-                            int pos2 = responseHeaders.indexOf ("\n", pos1);
-
-                            if (pos2 > pos1)
-                            {
-                                String newLocation = responseHeaders.substring(pos1, pos2);
-                                // Handle newLocation whether it's absolute or relative
-                                URL baseUrl = new URL (address);
-                                URL newUrl = new URL (baseUrl, newLocation);
-                                String transformedNewLocation = newUrl.toString();
-
-                                if (transformedNewLocation != address)
-                                {
-                                    address = transformedNewLocation;
-                                    // Clear responseHeaders before next iteration
-                                    responseHeaders.delete (0, responseHeaders.length());
-                                    continue;
-                                }
-                            }
-                        }
-
-                        return httpStream;
-                    }
-                    catch (Throwable e)
-                    {
-                        connection.disconnect();
-                    }
-                }
+                return httpStream;
             }
             catch (Throwable e) {}
 
@@ -1296,6 +1446,83 @@ public class InAppPurchase   extends Activity
         startActivity (new Intent (Intent.ACTION_VIEW, Uri.parse (url)));
     }
 
+    private native boolean webViewPageLoadStarted (long host, WebView view, String url);
+    private native void webViewPageLoadFinished (long host, WebView view, String url);
+    private native void webViewReceivedSslError (long host, WebView view, SslErrorHandler handler, SslError error);
+    private native void webViewCloseWindowRequest (long host, WebView view);
+    private native void webViewCreateWindowRequest (long host, WebView view);
+
+    //==============================================================================
+    public class JuceWebViewClient   extends WebViewClient
+    {
+        public JuceWebViewClient (long hostToUse)
+        {
+            host = hostToUse;
+        }
+
+        public void hostDeleted()
+        {
+            synchronized (hostLock)
+            {
+                host = 0;
+            }
+        }
+
+        @Override
+        public void onPageFinished (WebView view, String url)
+        {
+            if (host == 0)
+                return;
+
+            webViewPageLoadFinished (host, view, url);
+        }
+
+        @Override
+        public void onReceivedSslError (WebView view, SslErrorHandler handler, SslError error)
+        {
+            if (host == 0)
+                return;
+
+            webViewReceivedSslError (host, view, handler, error);
+        }
+
+        @Override
+        public void onPageStarted (WebView view, String url, Bitmap favicon)
+        {
+            if (host != 0)
+                webViewPageLoadStarted (host, view, url);
+        }
+
+        private long host;
+        private final Object hostLock = new Object();
+    }
+
+    public class JuceWebChromeClient    extends WebChromeClient
+    {
+        public JuceWebChromeClient (long hostToUse)
+        {
+            host = hostToUse;
+        }
+
+        @Override
+        public void onCloseWindow (WebView window)
+        {
+            webViewCloseWindowRequest (host, window);
+        }
+
+        @Override
+        public boolean onCreateWindow (WebView view, boolean isDialog,
+                                       boolean isUserGesture, Message resultMsg)
+        {
+            webViewCreateWindowRequest (host, view);
+            return false;
+        }
+
+        private long host;
+        private final Object hostLock = new Object();
+    }
+
+    //==============================================================================
     public static final String getLocaleValue (boolean isRegion)
     {
         java.util.Locale locale = java.util.Locale.getDefault();
@@ -1309,7 +1536,14 @@ public class InAppPurchase   extends Activity
         return Environment.getExternalStoragePublicDirectory (type).getAbsolutePath();
     }
 
-    public static final String getDocumentsFolder()  { return Environment.getDataDirectory().getAbsolutePath(); }
+    public static final String getDocumentsFolder()
+    {
+        if (getAndroidSDKVersion() >= 19)
+            return getFileLocation ("Documents");
+
+        return Environment.getDataDirectory().getAbsolutePath();
+    }
+
     public static final String getPicturesFolder()   { return getFileLocation (Environment.DIRECTORY_PICTURES); }
     public static final String getMusicFolder()      { return getFileLocation (Environment.DIRECTORY_MUSIC); }
     public static final String getMoviesFolder()     { return getFileLocation (Environment.DIRECTORY_MOVIES); }
@@ -1320,6 +1554,15 @@ public class InAppPurchase   extends Activity
     protected void onActivityResult (int requestCode, int resultCode, Intent data)
     {
         appActivityResult (requestCode, resultCode, data);
+    }
+
+    @Override
+    protected void onNewIntent (Intent intent)
+    {
+        super.onNewIntent(intent);
+        setIntent(intent);
+
+        appNewIntent (intent);
     }
 
     //==============================================================================
@@ -1404,7 +1647,7 @@ public class InAppPurchase   extends Activity
         return null;
     }
 
-    public final int getAndroidSDKVersion()
+    public static final int getAndroidSDKVersion()
     {
         return android.os.Build.VERSION.SDK_INT;
     }

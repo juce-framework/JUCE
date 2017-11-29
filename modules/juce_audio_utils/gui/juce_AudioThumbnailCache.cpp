@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class AudioThumbnailCache::ThumbnailCacheEntry
 {
 public:
@@ -191,3 +194,5 @@ bool AudioThumbnailCache::loadNewThumb (AudioThumbnailBase&, int64)
 {
     return false;
 }
+
+} // namespace juce

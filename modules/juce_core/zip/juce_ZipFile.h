@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -218,7 +218,7 @@ public:
 
         //==============================================================================
     private:
-        class Item;
+        struct Item;
         friend struct ContainerDeletePolicy<Item>;
         OwnedArray<Item> items;
 
@@ -227,24 +227,22 @@ public:
 
 private:
     //==============================================================================
-    class ZipInputStream;
-    class ZipEntryHolder;
-    friend class ZipInputStream;
-    friend class ZipEntryHolder;
+    struct ZipInputStream;
+    struct ZipEntryHolder;
 
     OwnedArray<ZipEntryHolder> entries;
     CriticalSection lock;
-    InputStream* inputStream;
+    InputStream* inputStream = nullptr;
     ScopedPointer<InputStream> streamToDelete;
     ScopedPointer<InputSource> inputSource;
 
    #if JUCE_DEBUG
     struct OpenStreamCounter
     {
-        OpenStreamCounter() : numOpenStreams (0) {}
+        OpenStreamCounter() {}
         ~OpenStreamCounter();
 
-        int numOpenStreams;
+        int numOpenStreams = 0;
     };
 
     OpenStreamCounter streamCounter;
@@ -254,3 +252,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ZipFile)
 };
+
+} // namespace juce

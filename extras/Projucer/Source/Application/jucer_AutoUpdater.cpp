@@ -24,7 +24,7 @@
   ==============================================================================
 */
 
-#include "../jucer_Headers.h"
+#include "../Application/jucer_Headers.h"
 #include "jucer_Application.h"
 #include "jucer_AutoUpdater.h"
 
@@ -308,16 +308,16 @@ public:
 
     ~UpdateUserDialog()
     {
-        titleLabel = nullptr;
-        contentLabel = nullptr;
-        okButton = nullptr;
-        cancelButton = nullptr;
-        changeLogLabel = nullptr;
-        changeLog = nullptr;
-        overwriteLabel = nullptr;
-        overwritePath = nullptr;
-        overwriteButton = nullptr;
-        juceIcon = nullptr;
+        titleLabel.reset();
+        contentLabel.reset();
+        okButton.reset();
+        cancelButton.reset();
+        changeLogLabel.reset();
+        changeLog.reset();
+        overwriteLabel.reset();
+        overwritePath.reset();
+        overwriteButton.reset();
+        juceIcon.reset();
     }
 
     void paint (Graphics& g) override

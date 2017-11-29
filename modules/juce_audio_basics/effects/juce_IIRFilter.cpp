@@ -20,7 +20,9 @@
   ==============================================================================
 */
 
-//==============================================================================
+namespace juce
+{
+
 IIRCoefficients::IIRCoefficients() noexcept
 {
     zeromem (coefficients, sizeof (coefficients));
@@ -334,4 +336,4 @@ void IIRFilter::processSamples (float* const samples, const int numSamples) noex
     }
 }
 
-#undef JUCE_SNAP_TO_ZERO
+} // namespace juce

@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 class TimeSliceThread;
 
@@ -134,10 +135,12 @@ public:
     //==============================================================================
 private:
     CriticalSection callbackLock, listLock;
-    Array <TimeSliceClient*> clients;
-    TimeSliceClient* clientBeingCalled;
+    Array<TimeSliceClient*> clients;
+    TimeSliceClient* clientBeingCalled = nullptr;
 
     TimeSliceClient* getNextClient (int index) const;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TimeSliceThread)
 };
+
+} // namespace juce

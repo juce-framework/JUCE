@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 SynthesiserSound::SynthesiserSound() {}
 SynthesiserSound::~SynthesiserSound() {}
 
@@ -305,8 +308,8 @@ void Synthesiser::startVoice (SynthesiserVoice* const voice,
         voice->noteOnTime = ++lastNoteOnCounter;
         voice->currentlyPlayingSound = sound;
         voice->setKeyDown (true);
-        voice->sostenutoPedalDown = false;
-        voice->sustainPedalDown = sustainPedalsDown[midiChannel];
+        voice->setSostenutoPedalDown (false);
+        voice->setSustainPedalDown (sustainPedalsDown[midiChannel]);
 
         voice->startNote (midiNoteNumber, velocity, sound,
                           lastPitchWheelValues [midiChannel - 1]);
@@ -340,11 +343,11 @@ void Synthesiser::noteOff (const int midiChannel,
                 if (sound->appliesToNote (midiNoteNumber)
                      && sound->appliesToChannel (midiChannel))
                 {
-                    jassert (! voice->keyIsDown || voice->sustainPedalDown == sustainPedalsDown [midiChannel]);
+                    jassert (! voice->keyIsDown || voice->isSustainPedalDown() == sustainPedalsDown [midiChannel]);
 
                     voice->setKeyDown (false);
 
-                    if (! (voice->sustainPedalDown || voice->sostenutoPedalDown))
+                    if (! (voice->isSustainPedalDown() || voice->isSostenutoPedalDown()))
                         stopVoice (voice, velocity, allowTailOff);
                 }
             }
@@ -421,7 +424,7 @@ void Synthesiser::handleSustainPedal (int midiChannel, bool isDown)
 
         for (auto* voice : voices)
             if (voice->isPlayingChannel (midiChannel) && voice->isKeyDown())
-                voice->sustainPedalDown = true;
+                voice->setSustainPedalDown (true);
     }
     else
     {
@@ -429,7 +432,7 @@ void Synthesiser::handleSustainPedal (int midiChannel, bool isDown)
         {
             if (voice->isPlayingChannel (midiChannel))
             {
-                voice->sustainPedalDown = false;
+                voice->setSustainPedalDown (false);
 
                 if (! (voice->isKeyDown() || voice->isSostenutoPedalDown()))
                     stopVoice (voice, 1.0f, true);
@@ -450,8 +453,8 @@ void Synthesiser::handleSostenutoPedal (int midiChannel, bool isDown)
         if (voice->isPlayingChannel (midiChannel))
         {
             if (isDown)
-                voice->sostenutoPedalDown = true;
-            else if (voice->sostenutoPedalDown)
+                voice->setSostenutoPedalDown (true);
+            else if (voice->isSostenutoPedalDown())
                 stopVoice (voice, 1.0f, true);
         }
     }
@@ -486,14 +489,6 @@ SynthesiserVoice* Synthesiser::findFreeVoice (SynthesiserSound* soundToPlay,
     return nullptr;
 }
 
-struct VoiceAgeSorter
-{
-    static int compareElements (SynthesiserVoice* v1, SynthesiserVoice* v2) noexcept
-    {
-        return v1->wasStartedBefore (*v2) ? -1 : (v2->wasStartedBefore (*v1) ? 1 : 0);
-    }
-};
-
 SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay,
                                                  int /*midiChannel*/, int midiNoteNumber) const
 {
@@ -518,8 +513,16 @@ SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay,
         {
             jassert (voice->isVoiceActive()); // We wouldn't be here otherwise
 
-            VoiceAgeSorter sorter;
-            usableVoices.addSorted (sorter, voice);
+            usableVoices.add (voice);
+
+            // NB: Using a functor rather than a lambda here due to scare-stories about
+            // compilers generating code containing heap allocations..
+            struct Sorter
+            {
+                bool operator() (const SynthesiserVoice* a, const SynthesiserVoice* b) const noexcept { return a->wasStartedBefore (*b); }
+            };
+
+            std::sort (usableVoices.begin(), usableVoices.end(), Sorter());
 
             if (! voice->isPlayingButReleased()) // Don't protect released notes
             {
@@ -567,3 +570,5 @@ SynthesiserVoice* Synthesiser::findVoiceToSteal (SynthesiserSound* soundToPlay,
 
     return low;
 }
+
+} // namespace juce

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #ifndef JUCE_CORETEXT_AVAILABLE
  #define JUCE_CORETEXT_AVAILABLE 1
 #endif
@@ -146,7 +149,7 @@ namespace CoreTextTypeLayout
         {
             if (advances == nullptr)
             {
-                local.malloc ((size_t) numGlyphs);
+                local.malloc (numGlyphs);
                 CTRunGetAdvances (run, CFRangeMake (0, 0), local);
                 advances = local;
             }
@@ -1245,3 +1248,5 @@ bool TextLayout::createNativeLayout (const AttributedString& text)
     ignoreUnused (text);
     return false;
 }
+
+} // namespace juce

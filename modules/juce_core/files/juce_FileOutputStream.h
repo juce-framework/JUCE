@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -94,10 +94,10 @@ public:
 private:
     //==============================================================================
     File file;
-    void* fileHandle;
-    Result status;
-    int64 currentPosition;
-    size_t bufferSize, bytesInBuffer;
+    void* fileHandle = nullptr;
+    Result status { Result::ok() };
+    int64 currentPosition = 0;
+    size_t bufferSize, bytesInBuffer = 0;
     HeapBlock<char> buffer;
 
     void openHandle();
@@ -109,3 +109,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileOutputStream)
 };
+
+} // namespace juce

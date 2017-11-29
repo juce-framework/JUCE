@@ -63,7 +63,7 @@ struct DemoTaskbarComponent  : public SystemTrayIconComponent,
     DemoTaskbarComponent()
     {
         setIconImage (ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize));
-        setIconTooltip ("Juce Demo App!");
+        setIconTooltip ("JUCE Demo App!");
     }
 
     void mouseDown (const MouseEvent&) override
@@ -89,7 +89,7 @@ struct DemoTaskbarComponent  : public SystemTrayIconComponent,
         stopTimer();
 
         PopupMenu m;
-        m.addItem (1, "Quit the Juce demo");
+        m.addItem (1, "Quit the JUCE demo");
 
         // It's always better to open menus asynchronously when possible.
         m.showMenuAsync (PopupMenu::Options(),
@@ -124,11 +124,19 @@ public:
             demoList.getViewport()->setScrollOnDragEnabled (true);
 
         addAndMakeVisible (demoList);
+        addAndMakeVisible (sidePanel);
+        sidePanel.setAlwaysOnTop (true);
+    }
+
+    ~ContentComponent()
+    {
+        // before deleting our lookandfeel object, make sure it's no longer in use
+        LookAndFeel::setDefaultLookAndFeel (nullptr);
     }
 
     void clearCurrentDemo()
     {
-        currentDemo = nullptr;
+        currentDemo.reset();
     }
 
     void resized() override
@@ -196,7 +204,7 @@ public:
     {
         if (auto* selectedDemoType = JuceDemoTypeBase::getDemoTypeList() [lastRowSelected])
         {
-            currentDemo = nullptr;
+            currentDemo.reset();
             addAndMakeVisible (currentDemo = selectedDemoType->createComponent());
             currentDemo->setName (selectedDemoType->name);
             resized();
@@ -240,9 +248,15 @@ public:
         return currentDemo != nullptr && currentDemo->getName().contains ("OpenGL 2D");
     }
 
+    SidePanel& getSharedSidePanel()
+    {
+        return sidePanel;
+    }
+
 private:
     ListBox demoList;
     ScopedPointer<Component> currentDemo;
+    SidePanel sidePanel {"Menu", 300, false};
 
     LookAndFeel_V1 lookAndFeelV1;
     LookAndFeel_V2 lookAndFeelV2;
@@ -612,9 +626,9 @@ MainAppWindow::~MainAppWindow()
 {
     contentComponent->clearCurrentDemo();
     clearContentComponent();
-    contentComponent = nullptr;
-    applicationCommandManager = nullptr;
-    sharedAudioDeviceManager = nullptr;
+    contentComponent.reset();
+    applicationCommandManager.reset();
+    sharedAudioDeviceManager.reset();
 
    #if JUCE_OPENGL
     openGLContext.detach();
@@ -737,6 +751,11 @@ int MainAppWindow::getActiveRenderingEngine() const
         return peer->getCurrentRenderingEngine();
 
     return 0;
+}
+
+SidePanel& MainAppWindow::getSharedSidePanel()
+{
+    return getMainAppWindow()->contentComponent->getSharedSidePanel();
 }
 
 Path MainAppWindow::getJUCELogoPath()

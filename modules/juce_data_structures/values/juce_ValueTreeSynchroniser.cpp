@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace ValueTreeSynchroniserHelpers
 {
     enum ChangeType
@@ -235,3 +238,5 @@ bool ValueTreeSynchroniser::applyChange (ValueTree& root, const void* data, size
 
     return false;
 }
+
+} // namespace juce

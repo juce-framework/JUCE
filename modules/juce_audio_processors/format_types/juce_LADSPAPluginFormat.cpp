@@ -26,8 +26,6 @@
 
 #if JUCE_PLUGINHOST_LADSPA && JUCE_LINUX
 
-} // (juce namespace)
-
 #include <ladspa.h>
 
 namespace juce
@@ -62,9 +60,9 @@ public:
 
     typedef ReferenceCountedObjectPtr<LADSPAModuleHandle> Ptr;
 
-    static Array <LADSPAModuleHandle*>& getActiveModules()
+    static Array<LADSPAModuleHandle*>& getActiveModules()
     {
-        static Array <LADSPAModuleHandle*> activeModules;
+        static Array<LADSPAModuleHandle*> activeModules;
         return activeModules;
     }
 
@@ -288,9 +286,9 @@ public:
         tempBuffer.setSize (1, 1);
     }
 
-    void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
+    void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
     {
-        const int numSamples = buffer.getNumSamples();
+        auto numSamples = buffer.getNumSamples();
 
         if (initialised && plugin != nullptr && handle != nullptr)
         {
@@ -486,7 +484,7 @@ private:
     String name;
     CriticalSection lock;
     bool initialised;
-    AudioSampleBuffer tempBuffer;
+    AudioBuffer<float> tempBuffer;
     Array<int> inputs, outputs, parameters;
 
     struct ParameterValue
@@ -573,7 +571,7 @@ private:
 LADSPAPluginFormat::LADSPAPluginFormat() {}
 LADSPAPluginFormat::~LADSPAPluginFormat() {}
 
-void LADSPAPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>& results,
+void LADSPAPluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& results,
                                               const String& fileOrIdentifier)
 {
     if (! fileMightContainThisPluginType (fileOrIdentifier))
@@ -714,5 +712,7 @@ FileSearchPath LADSPAPluginFormat::getDefaultLocationsToSearch()
                                                                 "/usr/lib/ladspa;/usr/local/lib/ladspa;~/.ladspa")
                              .replace (":", ";"));
 }
+
+} // namespace juce
 
 #endif

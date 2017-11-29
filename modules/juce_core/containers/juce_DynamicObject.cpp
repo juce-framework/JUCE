@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 DynamicObject::DynamicObject()
 {
 }
@@ -125,3 +128,5 @@ void DynamicObject::writeAsJSON (OutputStream& out, const int indentLevel, const
 
     out << '}';
 }
+
+} // namespace juce

@@ -7,14 +7,12 @@ import argparse
 
 
 def get_curly_brace_scope_end(string, start_pos):
-    """Given a string and the position of an opening curly brace, find the
+    """Given a string and a starting position of an opening brace, find the
        position of the closing brace.
     """
-    if string[start_pos] != "{":
-        raise ValueError("string must have \"{\" at start pos")
+    start_pos += 1
     string_end = len(string)
     bracket_counter = 1
-    start_pos += 1
     while start_pos < string_end:
         if string[start_pos] == "{":
             bracket_counter += 1
@@ -26,49 +24,41 @@ def get_curly_brace_scope_end(string, start_pos):
     return -1
 
 
+def remove_juce_namespaces(source):
+    """Return a string of source code with any juce namespaces removed.
+    """
+    namespace_regex = re.compile(r"\s+namespace\s+juce\s*{")
+
+    match = namespace_regex.search(source)
+    while (match is not None):
+        source = source[:match.start()] + source[match.end():]
+        end = get_curly_brace_scope_end(source, match.start() - 1)
+        if end != -1:
+            source = source[:end] + source[end + 1:]
+            match = namespace_regex.search(source)
+            continue
+        else:
+            raise ValueError("failed to find the end of the "
+                             + match.group(1) + " namespace")
+    return source
+
+
 def add_doxygen_group(path, group_name):
     """Add a Doxygen group to the file at 'path'.
 
-       Namespaces cause all kinds of problems, and we need to ensure that if
-       the classes in a source file are contained within a namespace then we
-       also put the @weakgroup inside the namespace.
+       The addition of juce namespacing code to all of the source files breaks
+       backwards compatibility by changing the doc URLs, so we need to remove
+       the namespaces.
     """
 
     filename = os.path.basename(path)
     if re.match(r"^juce_.*\.(h|dox)", filename):
-        group_definition_start = ("\r\n/** @weakgroup "
-                                  + group_name
-                                  + "\r\n *  @{\r\n */\r\n")
-        group_definition_end = "\r\n/** @}*/\r\n"
-
         with open(path, "r") as f:
             content = f.read()
-
-        # Put the group definitions inside all namespaces.
-        namespace_regex = re.compile(r"\s+namespace\s+\S+\s+{")
-        match = namespace_regex.search(content)
-        while (match is not None):
-            namespace_end = get_curly_brace_scope_end(content, match.end() - 1)
-            if namespace_end == -1:
-                raise ValueError("error finding end of namespace "
-                                 + match.group()
-                                 + " in "
-                                 + path)
-            content = (content[:match.end()]
-                       + group_definition_start
-                       + content[match.end():namespace_end]
-                       + group_definition_end
-                       + content[namespace_end:])
-            search_start = (namespace_end
-                            + len(group_definition_start)
-                            + len(group_definition_end))
-
-            match = namespace_regex.search(content, search_start)
-
         with open(path, "w") as f:
-            f.write(group_definition_start)
-            f.write(content)
-            f.write(group_definition_end)
+            f.write("\r\n/** @weakgroup " + group_name + "\r\n *  @{\r\n */\r\n")
+            f.write(remove_juce_namespaces(content))
+            f.write("\r\n/** @}*/\r\n")
 
 
 ###############################################################################
@@ -170,11 +160,8 @@ if __name__ == "__main__":
         for group_name in module_groups:
             for dirpath, dirnames, filenames in os.walk(module_groups[group_name]):
                 for filename in filenames:
-                    try:
-                        add_doxygen_group(os.path.join(dirpath, filename), group_name)
-                    except:
-                        print("Error preprocessing " + filename)
-                        continue
+                    filepath = os.path.join(dirpath, filename)
+                    add_doxygen_group(filepath, group_name)
 
     # Create an extra header file containing the module hierarchy.
     with open(os.path.join(args.dest_dir, "juce_modules.dox"), "w") as f:

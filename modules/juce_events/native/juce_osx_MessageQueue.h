@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 /* An internal message pump class used in OSX and iOS. */
@@ -100,3 +101,5 @@ private:
         static_cast<MessageQueue*> (info)->runLoopCallback();
     }
 };
+
+} // namespace juce

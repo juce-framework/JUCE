@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 static void appendToFile (const File& f, const String& s)
 {
     if (f.getFullPathName().isNotEmpty())
@@ -124,3 +127,5 @@ PerformanceCounter::Statistics PerformanceCounter::getStatisticsAndReset()
 
     return s;
 }
+
+} // namespace juce

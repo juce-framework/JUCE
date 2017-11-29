@@ -8,7 +8,7 @@
     <key>CFBundleIconFile</key>
     <string></string>
     <key>CFBundleIdentifier</key>
-    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <string>com.yourcompany.BlocksInfo</string>
     <key>CFBundleName</key>
     <string>BlocksMonitor</string>
     <key>CFBundleDisplayName</key>

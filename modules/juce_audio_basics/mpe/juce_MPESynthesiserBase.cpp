@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 MPESynthesiserBase::MPESynthesiserBase()
     : instrument (new MPEInstrument),
       sampleRate (0),
@@ -178,3 +181,5 @@ void MPESynthesiserBase::setMinimumRenderingSubdivisionSize (int numSamples, boo
     minimumSubBlockSize = numSamples;
     subBlockSubdivisionIsStrict = shouldBeStrict;
 }
+
+} // namespace juce

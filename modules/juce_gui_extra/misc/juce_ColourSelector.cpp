@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class ColourSelector::ColourComponentSlider  : public Slider
 {
 public:
@@ -43,7 +46,6 @@ public:
         return (double) text.getHexValue32();
     }
 
-private:
     JUCE_DECLARE_NON_COPYABLE (ColourComponentSlider)
 };
 
@@ -64,7 +66,6 @@ public:
         g.drawEllipse (2.0f, 2.0f, getWidth() - 4.0f, getHeight() - 4.0f, 1.0f);
     }
 
-private:
     JUCE_DECLARE_NON_COPYABLE (ColourSpaceMarker)
 };
 
@@ -570,3 +571,5 @@ void ColourSelector::setSwatchColour (int, const Colour&)
 {
     jassertfalse; // if you've overridden getNumSwatches(), you also need to implement this method
 }
+
+} // namespace juce

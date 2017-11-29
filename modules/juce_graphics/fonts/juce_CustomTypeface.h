@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -132,7 +132,7 @@ public:
     float getDescent() const override;
     float getHeightToPointsFactor() const override;
     float getStringWidth (const String&) override;
-    void getGlyphPositions (const String&, Array <int>& glyphs, Array<float>& xOffsets) override;
+    void getGlyphPositions (const String&, Array<int>& glyphs, Array<float>& xOffsets) override;
     bool getOutlineForGlyph (int glyphNumber, Path&) override;
     EdgeTable* getEdgeTableForGlyph (int glyphNumber, const AffineTransform&, float fontHeight) override;
 
@@ -161,3 +161,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomTypeface)
 };
+
+} // namespace juce

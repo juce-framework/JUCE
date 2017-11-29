@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 HWND juce_messageWindowHandle = 0;  // (this is used by other parts of the codebase)
 
 void* getUser32Function (const char* functionName)
@@ -238,7 +241,14 @@ static void* currentModuleHandle = nullptr;
 void* JUCE_CALLTYPE Process::getCurrentModuleInstanceHandle() noexcept
 {
     if (currentModuleHandle == nullptr)
-        currentModuleHandle = GetModuleHandleA (nullptr);
+    {
+        auto status = GetModuleHandleEx (GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                                         (LPCTSTR) &currentModuleHandle,
+                                         (HMODULE*) &currentModuleHandle);
+
+        if (status == 0 || currentModuleHandle == nullptr)
+            currentModuleHandle = GetModuleHandleA (nullptr);
+    }
 
     return currentModuleHandle;
 }
@@ -529,7 +539,7 @@ bool ChildProcess::start (const StringArray& args, int streamFlags)
 //==============================================================================
 struct HighResolutionTimer::Pimpl
 {
-    Pimpl (HighResolutionTimer& t) noexcept  : owner (t), periodMs (0)
+    Pimpl (HighResolutionTimer& t) noexcept  : owner (t)
     {
     }
 
@@ -563,7 +573,7 @@ struct HighResolutionTimer::Pimpl
     }
 
     HighResolutionTimer& owner;
-    int periodMs;
+    int periodMs = 0;
 
 private:
     unsigned int timerID;
@@ -577,3 +587,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (Pimpl)
 };
+
+} // namespace juce

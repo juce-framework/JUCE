@@ -24,26 +24,14 @@
   ==============================================================================
 */
 
-#ifndef DOXYGEN
-
-template <typename Type>
-struct SnapToZeroHelper
+namespace juce
 {
-    static void snap (Type& x) noexcept
-    {
-        for (size_t i = 0; i < Type::size(); ++i)
-            JUCE_SNAP_TO_ZERO (x[i]);
-    }
-};
+namespace dsp
+{
+namespace IIR
+{
 
-template <> struct SnapToZeroHelper<float>       { static void snap (float& x)       noexcept { JUCE_SNAP_TO_ZERO (x); } };
-template <> struct SnapToZeroHelper<double>      { static void snap (double& x)      noexcept { JUCE_SNAP_TO_ZERO (x); } };
-template <> struct SnapToZeroHelper<long double> { static void snap (long double& x) noexcept { JUCE_SNAP_TO_ZERO (x); } };
-
-#if JUCE_USE_SIMD
-template <typename Type>
-struct SnapToZeroHelper<SIMDRegister<Type>>      { static void snap (SIMDRegister<Type>&) noexcept {} };
-#endif
+#ifndef DOXYGEN
 
 //==============================================================================
 template <typename SampleType>
@@ -120,7 +108,7 @@ void Filter<SampleType>::process (const ProcessContext& context) noexcept
                 lv1 = (in * b1) - (out * a1);
             }
 
-            SnapToZeroHelper<SampleType>::snap (lv1); state[0] = lv1;
+            util::snapToZero (lv1); state[0] = lv1;
         }
         break;
 
@@ -145,8 +133,8 @@ void Filter<SampleType>::process (const ProcessContext& context) noexcept
                 lv2 = (in * b2) - (out * a2);
             }
 
-            SnapToZeroHelper<SampleType>::snap (lv1); state[0] = lv1;
-            SnapToZeroHelper<SampleType>::snap (lv2); state[1] = lv2;
+            util::snapToZero (lv1); state[0] = lv1;
+            util::snapToZero (lv2); state[1] = lv2;
         }
         break;
 
@@ -175,9 +163,9 @@ void Filter<SampleType>::process (const ProcessContext& context) noexcept
                 lv3 = (in * b3) - (out * a3);
             }
 
-            SnapToZeroHelper<SampleType>::snap (lv1); state[0] = lv1;
-            SnapToZeroHelper<SampleType>::snap (lv2); state[1] = lv2;
-            SnapToZeroHelper<SampleType>::snap (lv3); state[2] = lv3;
+            util::snapToZero (lv1); state[0] = lv1;
+            util::snapToZero (lv2); state[1] = lv2;
+            util::snapToZero (lv3); state[2] = lv3;
         }
         break;
 
@@ -220,7 +208,7 @@ template <typename SampleType>
 void Filter<SampleType>::snapToZero() noexcept
 {
     for (size_t i = 0; i < order; ++i)
-        SnapToZeroHelper<SampleType>::snap (state[i]);
+        util::snapToZero (state[i]);
 }
 
 template <typename SampleType>
@@ -233,3 +221,7 @@ void Filter<SampleType>::check()
 }
 
 #endif
+
+} // namespace IIR
+} // namespace dsp
+} // namespace juce

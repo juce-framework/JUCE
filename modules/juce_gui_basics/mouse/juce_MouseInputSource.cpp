@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class MouseInputSourceInternal   : private AsyncUpdater
 {
 public:
@@ -208,7 +211,8 @@ public:
 
             if (auto* current = getComponentUnderMouse())
             {
-                registerMouseDown (screenPos, time, *current, buttonState);
+                registerMouseDown (screenPos, time, *current, buttonState,
+                                   inputType == MouseInputSource::InputSourceType::touch);
                 sendMouseDown (*current, screenPos, time);
             }
         }
@@ -519,23 +523,26 @@ private:
         Time time;
         ModifierKeys buttons;
         uint32 peerID = 0;
+        bool isTouch = false;
 
         bool canBePartOfMultipleClickWith (const RecentMouseDown& other, int maxTimeBetweenMs) const noexcept
         {
             return time - other.time < RelativeTime::milliseconds (maxTimeBetweenMs)
-                    && std::abs (position.x - other.position.x) < 8
-                    && std::abs (position.y - other.position.y) < 8
+                    && std::abs (position.x - other.position.x) < getPositionToleranceForInputType()
+                    && std::abs (position.y - other.position.y) < getPositionToleranceForInputType()
                     && buttons == other.buttons
                     && peerID == other.peerID;
         }
+
+        int getPositionToleranceForInputType() const noexcept    { return isTouch ? 25 : 8;  }
     };
 
     RecentMouseDown mouseDowns[4];
     Time lastTime;
     bool mouseMovedSignificantlySincePressed = false;
 
-    void registerMouseDown (Point<float> screenPos, Time time,
-                            Component& component, const ModifierKeys modifiers) noexcept
+    void registerMouseDown (Point<float> screenPos, Time time, Component& component,
+                            const ModifierKeys modifiers, bool isTouchSource) noexcept
     {
         for (int i = numElementsInArray (mouseDowns); --i > 0;)
             mouseDowns[i] = mouseDowns[i - 1];
@@ -543,6 +550,7 @@ private:
         mouseDowns[0].position = screenPos;
         mouseDowns[0].time = time;
         mouseDowns[0].buttons = modifiers.withOnlyMouseButtons();
+        mouseDowns[0].isTouch = isTouchSource;
 
         if (auto* peer = component.getPeer())
             mouseDowns[0].peerID = peer->getUniqueID();
@@ -637,7 +645,13 @@ struct MouseInputSource::SourceList  : public Timer
 {
     SourceList()
     {
-        addSource (0, MouseInputSource::InputSourceType::mouse);
+       #if JUCE_ANDROID || JUCE_IOS
+        auto mainMouseInputType = MouseInputSource::InputSourceType::touch;
+       #else
+        auto mainMouseInputType = MouseInputSource::InputSourceType::mouse;
+       #endif
+
+        addSource (0, mainMouseInputType);
     }
 
     bool addSource();
@@ -748,3 +762,5 @@ struct MouseInputSource::SourceList  : public Timer
     OwnedArray<MouseInputSourceInternal> sources;
     Array<MouseInputSource> sourceArray;
 };
+
+} // namespace juce

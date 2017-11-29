@@ -20,6 +20,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace BlocksProtocol
+{
 
 /** This value is incremented when the format of the API changes in a way which
     breaks compatibility.
@@ -210,6 +214,7 @@ enum ConfigItemId
     fixedVelocityValue  = 16,
     pianoMode           = 17,
     glideLock           = 18,
+    glideLockEnable     = 19,
     // Live
     mode                = 20,
     volume              = 21,
@@ -417,10 +422,10 @@ static constexpr const char* ledProgramLittleFootFunctions[] =
     "mod/iii",
     "getRandomFloat/f",
     "getRandomInt/ii",
-    "getMillisecondCounter/i",
-    "getFirmwareVersion/i",
     "log/vi",
     "logHex/vi",
+    "getMillisecondCounter/i",
+    "getFirmwareVersion/i",
     "getTimeInCurrentFunctionCall/i",
     "getBatteryLevel/f",
     "isBatteryCharging/b",
@@ -449,22 +454,12 @@ static constexpr const char* ledProgramLittleFootFunctions[] =
     "setClusteringActive/vb",
     "makeARGB/iiiii",
     "blendARGB/iii",
-    "setDepthShadingActive/viiiib",
-    "setBlendType/vi",
     "fillPixel/viii",
     "blendPixel/viii",
-    "drawLine/viiiii",
-    "blendLine/viiiii",
     "fillRect/viiiii",
     "blendRect/viiiii",
     "blendGradientRect/viiiiiiii",
-    "fillQuad/vifffffffff",
-    "blendQuad/viffffffff",
     "blendCircle/vifffb",
-    "drawLine3D/viiiiiii",
-    "blendLine3D/viiiiiii",
-    "fillQuad3D/viffffffffffff",
-    "blendQuad3D/viffffffffffff",
     "addPressurePoint/vifff",
     "drawPressureMap/v",
     "fadePressureMap/v",
@@ -482,6 +477,9 @@ static constexpr const char* ledProgramLittleFootFunctions[] =
     "sendPitchBend/vii",
     "sendPitchBend/viii",
     "sendChannelPressure/vii",
+    "addPitchCorrectionPad/viiffff",
+    "setPitchCorrectionEnabled/vb",
+    "getPitchCorrectionPitchBend/iii",
     "setChannelRange/vbii",
     "assignChannel/ii",
     "deassignChannel/vii",
@@ -501,5 +499,13 @@ static constexpr const char* ledProgramLittleFootFunctions[] =
     "onControlPress/vi",
     "onControlRelease/vi",
     "initControl/viiiiiiiii",
+    "setButtonMode/vii",
+    "setButtonType/viii",
+    "setButtonMinMaxDefault/viiii",
+    "setButtonColours/viii",
+    "setButtonTriState/vii",
     nullptr
 };
+
+} // namespace BlocksProtocol
+} // namespace juce

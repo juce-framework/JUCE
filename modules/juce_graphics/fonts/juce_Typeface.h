@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -35,7 +35,7 @@
     a platform-specific subclass that can be used.
 
     The CustomTypeface subclass allow you to build your own typeface, and to
-    load and save it in the Juce typeface format.
+    load and save it in the JUCE typeface format.
 
     Normally you should never need to deal directly with Typeface objects - the Font
     class does everything you typically need for rendering text.
@@ -95,7 +95,7 @@ public:
     */
     virtual float getDescent() const = 0;
 
-    /** Returns the value by which you should multiply a juce font-height value to
+    /** Returns the value by which you should multiply a JUCE font-height value to
         convert it to the equivalent point-size.
     */
     virtual float getHeightToPointsFactor() const = 0;
@@ -110,7 +110,7 @@ public:
         The distances returned are based on the font having an normalised height of 1.0.
         You should never need to call this directly! Use Font::getGlyphPositions() instead!
     */
-    virtual void getGlyphPositions (const String& text, Array <int>& glyphs, Array<float>& xOffsets) = 0;
+    virtual void getGlyphPositions (const String& text, Array<int>& glyphs, Array<float>& xOffsets) = 0;
 
     /** Returns the outline for a glyph.
         The path returned will be normalised to a font height of 1.0.
@@ -157,3 +157,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Typeface)
 };
+
+} // namespace juce

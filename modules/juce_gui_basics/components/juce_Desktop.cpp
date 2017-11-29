@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 Desktop::Desktop()
     : mouseSources (new MouseInputSource::SourceList()),
       mouseClickCounter (0), mouseWheelCounter (0),
@@ -194,7 +197,7 @@ void Desktop::handleAsyncUpdate()
     // The component may be deleted during this operation, but we'll use a SafePointer rather than a
     // BailOutChecker so that any remaining listeners will still get a callback (with a null pointer).
     WeakReference<Component> currentFocus (Component::getCurrentlyFocusedComponent());
-    focusListeners.call (&FocusChangeListener::globalFocusChanged, currentFocus);
+    focusListeners.call ([&] (FocusChangeListener& l) { l.globalFocusChanged (currentFocus); });
 }
 
 //==============================================================================
@@ -245,8 +248,8 @@ void Desktop::sendMouseMove()
         if (auto* target = findComponentAt (lastFakeMouseMove.roundToInt()))
         {
             Component::BailOutChecker checker (target);
-            const Point<float> pos (target->getLocalPoint (nullptr, lastFakeMouseMove));
-            const Time now (Time::getCurrentTime());
+            auto pos = target->getLocalPoint (nullptr, lastFakeMouseMove);
+            auto now = Time::getCurrentTime();
 
             const MouseEvent me (getMainMouseSource(), pos, ModifierKeys::getCurrentModifiers(), MouseInputSource::invalidPressure,
                                  MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
@@ -254,9 +257,9 @@ void Desktop::sendMouseMove()
                                  target, target, now, pos, now, 0, false);
 
             if (me.mods.isAnyMouseButtonDown())
-                mouseListeners.callChecked (checker, &MouseListener::mouseDrag, me);
+                mouseListeners.callChecked (checker, [&] (MouseListener& l) { l.mouseDrag (me); });
             else
-                mouseListeners.callChecked (checker, &MouseListener::mouseMove, me);
+                mouseListeners.callChecked (checker, [&] (MouseListener& l) { l.mouseMove (me); });
         }
     }
 }
@@ -425,3 +428,5 @@ void Desktop::setGlobalScaleFactor (float newScaleFactor) noexcept
         displays->refresh();
     }
 }
+
+} // namespace juce

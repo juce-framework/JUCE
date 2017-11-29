@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class PluginListComponent::TableModel  : public TableListBoxModel
 {
 public:
@@ -382,7 +385,7 @@ public:
         if (pool != nullptr)
         {
             pool->removeAllJobs (true, 60000);
-            pool = nullptr;
+            pool.reset();
         }
     }
 
@@ -577,7 +580,7 @@ void PluginListComponent::scanFinished (const StringArray& failedFiles)
     for (int i = 0; i < failedFiles.size(); ++i)
         shortNames.add (File::createFileWithoutCheckingPath (failedFiles[i]).getFileName());
 
-    currentScanner = nullptr; // mustn't delete this before using the failed files array
+    currentScanner.reset(); // mustn't delete this before using the failed files array
 
     if (shortNames.size() > 0)
         AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
@@ -586,3 +589,5 @@ void PluginListComponent::scanFinished (const StringArray& failedFiles)
                                             + ":\n\n"
                                             + shortNames.joinIntoString (", "));
 }
+
+} // namespace juce

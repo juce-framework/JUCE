@@ -24,7 +24,9 @@
   ==============================================================================
 */
 
-//==============================================================================
+namespace juce
+{
+
 extern int juce_gtkWebkitMain (int argc, const char* argv[]);
 
 class CommandReceiver
@@ -417,7 +419,8 @@ private:
 };
 
 //==============================================================================
-class WebBrowserComponent::Pimpl : private Thread, private CommandReceiver::Responder
+class WebBrowserComponent::Pimpl  : private Thread,
+                                    private CommandReceiver::Responder
 {
 public:
     Pimpl (WebBrowserComponent& parent)
@@ -713,11 +716,6 @@ WebBrowserComponent::WebBrowserComponent (const bool unloadPageWhenBrowserIsHidd
 
 WebBrowserComponent::~WebBrowserComponent()
 {
-    if (browser != nullptr)
-    {
-        delete browser;
-        browser = nullptr;
-    }
 }
 
 //==============================================================================
@@ -821,3 +819,5 @@ int juce_gtkWebkitMain (int argc, const char* argv[])
                            String (argv[3]).getIntValue());
     return child.entry();
 }
+
+} // namespace juce

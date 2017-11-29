@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 /*
   ==============================================================================
 
@@ -33,6 +36,7 @@
    under the GPL v3 license.
 
    End User License Agreement: www.juce.com/juce-5-licence
+
   ==============================================================================
 */
 
@@ -56,7 +60,7 @@ static uint32 splashDisplayTime = 0;
 static bool appUsageReported = false;
 
 
-Rectangle<float> getLogoArea (Rectangle<float> parentRect)
+static Rectangle<float> getLogoArea (Rectangle<float> parentRect)
 {
     return parentRect.reduced (6.0f)
                      .removeFromRight  ((float) splashScreenLogoWidth)
@@ -138,7 +142,7 @@ void ReportingThreadContainer::sendReport (String address, String& userAgent, St
 
 void ReportingThreadContainer::changeListenerCallback (ChangeBroadcaster*)
 {
-    reportingThread = nullptr;
+    reportingThread.reset();
 }
 
 //==============================================================================
@@ -344,7 +348,10 @@ void JUCESplashScreen::parentHierarchyChanged()
 
 bool JUCESplashScreen::hitTest (int x, int y)
 {
-    return getLogoArea (getLocalBounds().toFloat()).contains ((float) x, (float) y);
+    if (! hasStartedFading)
+        return getLogoArea (getLocalBounds().toFloat()).contains ((float) x, (float) y);
+
+    return false;
 }
 
 void JUCESplashScreen::mouseUp (const MouseEvent&)
@@ -354,3 +361,5 @@ void JUCESplashScreen::mouseUp (const MouseEvent&)
 }
 
 // END SECTION A
+
+} // namespace juce

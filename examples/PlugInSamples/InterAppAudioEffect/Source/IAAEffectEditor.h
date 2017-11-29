@@ -263,7 +263,8 @@ private:
         {
             switchToHostButtonLabel.setVisible (visible);
             switchToHostButton.setVisible (visible);
-            if (visible) {
+            if (visible)
+            {
                 auto icon = hostType.getHostIcon (buttonSize);
                 switchToHostButton.setImages(false, true, true,
                                              icon, 1.0, Colours::transparentBlack,
@@ -289,7 +290,6 @@ private:
 
     ImageButton switchToHostButton;
     Label transportText, switchToHostButtonLabel;
-    Image hostImage;
 
     AudioPlayHead::CurrentPositionInfo lastPosInfo;
 

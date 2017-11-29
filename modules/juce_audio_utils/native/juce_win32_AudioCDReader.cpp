@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace CDReaderHelpers
 {
 
@@ -1176,7 +1179,7 @@ int AudioCDReader::getLastIndex() const
 int AudioCDReader::getIndexAt (int samplePos)
 {
     using namespace CDReaderHelpers;
-    CDDeviceWrapper* const device = static_cast<CDDeviceWrapper*> (handle);
+    auto* device = static_cast<CDDeviceWrapper*> (handle);
 
     const int frameNeeded = samplePos / samplesPerFrame;
 
@@ -1210,7 +1213,7 @@ int AudioCDReader::getIndexAt (int samplePos)
 Array<int> AudioCDReader::findIndexesInTrack (const int trackNumber)
 {
     using namespace CDReaderHelpers;
-    Array <int> indexes;
+    Array<int> indexes;
 
     const int trackStart = getPositionOfTrackStart (trackNumber);
     const int trackEnd = getPositionOfTrackStart (trackNumber + 1);
@@ -1257,7 +1260,7 @@ Array<int> AudioCDReader::findIndexesInTrack (const int trackNumber)
 
     if (needToScan)
     {
-        CDDeviceWrapper* const device = static_cast<CDDeviceWrapper*> (handle);
+        auto* device = static_cast<CDDeviceWrapper*> (handle);
 
         int pos = trackStart;
         int last = -1;
@@ -1309,3 +1312,5 @@ void AudioCDReader::ejectDisk()
     using namespace CDReaderHelpers;
     static_cast<CDDeviceWrapper*> (handle)->deviceHandle.openDrawer (true);
 }
+
+} // namespace juce

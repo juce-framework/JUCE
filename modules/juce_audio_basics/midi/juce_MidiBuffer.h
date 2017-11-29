@@ -20,14 +20,14 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
     Holds a sequence of time-stamped midi events.
 
-    Analogous to the AudioSampleBuffer, this holds a set of midi events with
+    Analogous to the AudioBuffer, this holds a set of midi events with
     integer time-stamps. The buffer is kept sorted in order of the time-stamps.
 
     If you're working with a sequence of midi events that may need to be manipulated
@@ -160,8 +160,8 @@ public:
     /**
         Used to iterate through the events in a MidiBuffer.
 
-        Note that altering the buffer while an iterator is using it isn't a
-        safe operation.
+        Note that altering the buffer while an iterator is using it will produce
+        undefined behaviour.
 
         @see MidiBuffer
     */
@@ -171,6 +171,12 @@ public:
         //==============================================================================
         /** Creates an Iterator for this MidiBuffer. */
         Iterator (const MidiBuffer&) noexcept;
+
+        /** Creates a copy of an iterator. */
+        Iterator (const Iterator&) = default;
+
+        // VS2013 requires this, even if it's unused.
+        Iterator& operator= (const Iterator&) = delete;
 
         /** Destructor. */
         ~Iterator() noexcept;
@@ -214,8 +220,6 @@ public:
         //==============================================================================
         const MidiBuffer& buffer;
         const uint8* data;
-
-        JUCE_DECLARE_NON_COPYABLE (Iterator)
     };
 
     /** The raw data holding this buffer.
@@ -227,3 +231,5 @@ public:
 private:
     JUCE_LEAK_DETECTOR (MidiBuffer)
 };
+
+} // namespace juce

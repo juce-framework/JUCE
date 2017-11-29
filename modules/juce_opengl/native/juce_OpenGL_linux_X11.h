@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 extern XContext windowHandleXContext;
 
 //==============================================================================
@@ -249,3 +252,5 @@ bool OpenGLHelpers::isContextActive()
 
     return false;
 }
+
+} // namespace juce

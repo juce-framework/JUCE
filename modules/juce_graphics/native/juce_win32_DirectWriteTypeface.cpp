@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_USE_DIRECTWRITE
 namespace
 {
@@ -320,3 +323,5 @@ private:
 };
 
 #endif
+
+} // namespace juce

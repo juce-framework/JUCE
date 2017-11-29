@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 extern HWND juce_messageWindowHandle;
 
 typedef bool (*CheckEventBlockedByModalComps) (const MSG&);
@@ -225,3 +228,5 @@ struct MountedVolumeListChangeDetector::Pimpl   : private DeviceChangeDetector
 
 MountedVolumeListChangeDetector::MountedVolumeListChangeDetector()  { pimpl = new Pimpl (*this); }
 MountedVolumeListChangeDetector::~MountedVolumeListChangeDetector() {}
+
+} // namespace juce

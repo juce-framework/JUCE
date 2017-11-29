@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -107,7 +107,7 @@ public:
     /** Adds a block of level data to the thumbnail.
         Call reset() before using this, to tell the thumbnail about the data format.
     */
-    void addBlock (int64 sampleNumberInSource, const AudioSampleBuffer& newData,
+    void addBlock (int64 sampleNumberInSource, const AudioBuffer<float>& newData,
                    int startOffsetInBuffer, int numSamples) override;
 
     //==============================================================================
@@ -210,10 +210,10 @@ private:
     ScopedPointer<CachedWindow> window;
     OwnedArray<ThumbData> channels;
 
-    int32 samplesPerThumbSample;
-    int64 totalSamples, numSamplesFinished;
-    int32 numChannels;
-    double sampleRate;
+    int32 samplesPerThumbSample = 0;
+    int64 totalSamples = 0, numSamplesFinished = 0;
+    int32 numChannels = 0;
+    double sampleRate = 0;
     CriticalSection lock;
 
     void clearChannelData();
@@ -223,3 +223,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioThumbnail)
 };
+
+} // namespace juce

@@ -11,8 +11,8 @@
               pluginProducesMidiOut="0" pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="DSPmoduleplugindemoAU" pluginRTASCategory=""
               aaxIdentifier="com.yourcompany.DSPmoduleplugindemo" pluginAAXCategory="AAX_ePlugInCategory_Dynamics"
-              jucerVersion="5.1.1" companyName="ROLI Ltd." companyWebsite="www.juce.com"
-              companyEmail="info@juce.com" cppLanguageStandard="14">
+              jucerVersion="5.2.0" companyName="ROLI Ltd." companyWebsite="www.juce.com"
+              companyEmail="info@juce.com" cppLanguageStandard="14" companyCopyright="ROLI Ltd.">
   <MAINGROUP id="EukfoT" name="DSPModulePluginDemo">
     <GROUP id="{03DB4847-1567-1194-A0D2-ECC6C6C5042C}" name="Resources">
       <FILE id="EWBl4v" name="Impulse1.wav" compile="0" resource="1" file="Resources/Impulse1.wav"/>
@@ -55,7 +55,7 @@
         <MODULEPATH id="juce_dsp" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <VS2015 targetFolder="Builds/VisualStudio2015" windowsTargetPlatformVersion="8.1">
+    <VS2015 targetFolder="Builds/VisualStudio2015">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="1" optimisation="1" targetName="DSPModulePluginDemo"
@@ -125,5 +125,5 @@
     <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
   </MODULES>
-  <JUCEOPTIONS JUCE_QUICKTIME="disabled"/>
+  <JUCEOPTIONS JUCE_QUICKTIME="disabled" JUCE_DSP_ENABLE_SNAP_TO_ZERO="disabled"/>
 </JUCERPROJECT>

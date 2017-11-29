@@ -20,7 +20,9 @@
   ==============================================================================
 */
 
-//==============================================================================
+namespace juce
+{
+
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  STATICMETHOD (newProxyInstance, "newProxyInstance", "(Ljava/lang/ClassLoader;[Ljava/lang/Class;Ljava/lang/reflect/InvocationHandler;)Ljava/lang/Object;") \
 
@@ -157,7 +159,7 @@ LocalRef<jobject> CreateJavaInterface (AndroidInterfaceImplementer* implementer,
 jobject AndroidInterfaceImplementer::invoke (jobject /*proxy*/, jobject method, jobjectArray args)
 {
     auto* env = getEnv();
-    return env->CallObjectMethod (method, Method.invoke, javaSubClass.get(), args);
+    return env->CallObjectMethod (method, JavaMethod.invoke, javaSubClass.get(), args);
 }
 
 jobject juce_invokeImplementer (JNIEnv* env, jlong thisPtr, jobject proxy, jobject method, jobjectArray args)
@@ -405,7 +407,7 @@ int SystemStats::getMemorySizeInMegabytes()
     struct sysinfo sysi;
 
     if (sysinfo (&sysi) == 0)
-        return (static_cast<int> (sysi.totalram * sysi.mem_unit) / (1024 * 1024));
+        return static_cast<int> ((sysi.totalram * sysi.mem_unit) / (1024 * 1024));
    #endif
 
     return 0;
@@ -514,3 +516,5 @@ bool Time::setSystemTimeToThisTime() const
     jassertfalse;
     return false;
 }
+
+} // namespace juce

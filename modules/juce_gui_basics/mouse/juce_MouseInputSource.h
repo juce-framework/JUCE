@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -47,7 +47,7 @@
 
     @see MouseEvent
 */
-class JUCE_API  MouseInputSource
+class JUCE_API  MouseInputSource  final
 {
 public:
     /** Possible mouse input sources. */
@@ -252,3 +252,5 @@ private:
 
     JUCE_LEAK_DETECTOR (MouseInputSource)
 };
+
+} // namespace juce

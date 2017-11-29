@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 /**
     A subclass of AudioProcessorParameter that provides an easy way to create a
     parameter which maps onto a given NormalisableRange.
@@ -66,6 +69,11 @@ public:
     /** Provides access to the parameter's range. */
     NormalisableRange<float> range;
 
+protected:
+    /** Override this method if you are interested in receiving callbacks
+        when the parameter value changes.
+    */
+    virtual void valueChanged (float newValue);
 
 private:
     //==============================================================================
@@ -80,3 +88,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioParameterFloat)
 };
+
+} // namespace juce

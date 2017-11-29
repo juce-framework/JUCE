@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 Logger::Logger() {}
 
 Logger::~Logger()
@@ -55,3 +58,5 @@ void JUCE_API JUCE_CALLTYPE logAssertion (const char* const filename, const int 
    #endif
 }
 #endif
+
+} // namespace juce

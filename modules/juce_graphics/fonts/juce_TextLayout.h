@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -36,7 +36,7 @@
 
     @see AttributedString
 */
-class JUCE_API  TextLayout
+class JUCE_API  TextLayout  final
 {
 public:
     /** Creates an empty layout.
@@ -119,6 +119,9 @@ public:
         Run (Range<int> stringRange, int numGlyphsToPreallocate);
         ~Run() noexcept;
 
+        /** Returns the X position range which contains all the glyphs in this run. */
+        Range<float> getRunBoundsX() const noexcept;
+
         Font font;              /**< The run's font. */
         Colour colour;          /**< The run's colour. */
         Array<Glyph> glyphs;    /**< The glyphs in this run. */
@@ -171,7 +174,7 @@ public:
     int getNumLines() const noexcept    { return lines.size(); }
 
     /** Returns one of the lines. */
-    Line& getLine (int index) const;
+    Line& getLine (int index) const noexcept;
 
     /** Adds a line to the layout. The layout will take ownership of this line object
         and will delete it when it is no longer needed. */
@@ -191,3 +194,5 @@ private:
 
     JUCE_LEAK_DETECTOR (TextLayout)
 };
+
+} // namespace juce

@@ -24,7 +24,9 @@
   ==============================================================================
 */
 
-//==============================================================================
+namespace juce
+{
+
 struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParameterWithID,
                                                    private ValueTree::Listener
 {
@@ -34,13 +36,16 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
                std::function<String (float)> valueToText,
                std::function<float (const String&)> textToValue,
                bool meta,
-               bool automatable)
-        : AudioProcessorParameterWithID (parameterID, paramName, labelText),
+               bool automatable,
+               bool discrete,
+               AudioProcessorParameter::Category category)
+        : AudioProcessorParameterWithID (parameterID, paramName, labelText, category),
           owner (s), valueToTextFunction (valueToText), textToValueFunction (textToValue),
           range (r), value (defaultVal), defaultValue (defaultVal),
           listenersNeedCalling (true),
           isMetaParam (meta),
-          isAutomatableParam (automatable)
+          isAutomatableParam (automatable),
+          isDiscreteParam (discrete)
     {
         state.addListener (this);
         needsUpdate.set (1);
@@ -83,7 +88,7 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
         {
             value = newValue;
 
-            listeners.call (&AudioProcessorValueTreeState::Listener::parameterChanged, paramID, value);
+            listeners.call ([=] (AudioProcessorValueTreeState::Listener& l) { l.parameterChanged (paramID, value); });
             listenersNeedCalling = false;
 
             needsUpdate.set (1);
@@ -150,6 +155,7 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
 
     bool isMetaParameter() const override      { return isMetaParam; }
     bool isAutomatable() const override        { return isAutomatableParam; }
+    bool isDiscrete() const override           { return isDiscreteParam; }
 
     AudioProcessorValueTreeState& owner;
     ValueTree state;
@@ -160,7 +166,7 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
     float value, defaultValue;
     Atomic<int> needsUpdate;
     bool listenersNeedCalling;
-    const bool isMetaParam, isAutomatableParam;
+    const bool isMetaParam, isAutomatableParam, isDiscreteParam;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Parameter)
 };
@@ -185,17 +191,17 @@ AudioProcessorParameterWithID* AudioProcessorValueTreeState::createAndAddParamet
                                                                                     float defaultVal, std::function<String (float)> valueToTextFunction,
                                                                                     std::function<float (const String&)> textToValueFunction,
                                                                                     bool isMetaParameter,
-                                                                                    bool isAutomatableParameter)
+                                                                                    bool isAutomatableParameter,
+                                                                                    bool isDiscreteParameter,
+                                                                                    AudioProcessorParameter::Category category)
 {
     // All parameters must be created before giving this manager a ValueTree state!
     jassert (! state.isValid());
-   #if ! JUCE_LINUX
-    jassert (MessageManager::getInstance()->isThisTheMessageThread());
-   #endif
 
     Parameter* p = new Parameter (*this, paramID, paramName, labelText, r,
                                   defaultVal, valueToTextFunction, textToValueFunction,
-                                  isMetaParameter, isAutomatableParameter);
+                                  isMetaParameter, isAutomatableParameter,
+                                  isDiscreteParameter, category);
     processor.addParameter (p);
     return p;
 }
@@ -249,7 +255,7 @@ ValueTree AudioProcessorValueTreeState::getOrCreateChildValueTree (const String&
     {
         v = ValueTree (valueType);
         v.setProperty (idPropertyID, paramID, undoManager);
-        state.addChild (v, -1, undoManager);
+        state.appendChild (v, undoManager);
     }
 
     return v;
@@ -565,3 +571,5 @@ AudioProcessorValueTreeState::ButtonAttachment::ButtonAttachment (AudioProcessor
 }
 
 AudioProcessorValueTreeState::ButtonAttachment::~ButtonAttachment() {}
+
+} // namespace juce

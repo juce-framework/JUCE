@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -106,8 +106,8 @@ public:
     /** Sets an icon to show in the title bar, next to the title.
 
         A copy is made internally of the image, so the caller can delete the
-        image after calling this. If 0 is passed-in, any existing icon will be
-        removed.
+        image after calling this. If an empty Image is passed-in, any existing icon
+        will be removed.
     */
     void setIcon (const Image& imageToUse);
 
@@ -276,12 +276,12 @@ public:
 
 private:
     //==============================================================================
-    int titleBarHeight, menuBarHeight, requiredButtons;
-    bool positionTitleBarButtonsOnLeft, drawTitleTextCentred;
+    int titleBarHeight = 26, menuBarHeight = 24, requiredButtons;
+    bool positionTitleBarButtonsOnLeft, drawTitleTextCentred = true;
     ScopedPointer<Button> titleBarButtons [3];
     Image titleBarIcon;
     ScopedPointer<Component> menuBar;
-    MenuBarModel* menuBarModel;
+    MenuBarModel* menuBarModel = nullptr;
 
     class ButtonListenerProxy;
     friend struct ContainerDeletePolicy<ButtonListenerProxy>;
@@ -291,3 +291,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DocumentWindow)
 };
+
+} // namespace juce

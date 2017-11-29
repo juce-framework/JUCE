@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -77,7 +78,7 @@ private:
         BufferedBlock (AudioFormatReader& reader, int64 pos, int numSamples);
 
         Range<int64> range;
-        AudioSampleBuffer buffer;
+        AudioBuffer<float> buffer;
     };
 
     CriticalSection lock;
@@ -89,3 +90,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BufferingAudioReader)
 };
+
+} // namespace juce

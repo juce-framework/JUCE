@@ -206,7 +206,5 @@ inline Array<ProjectType*> ProjectType::getAllTypes()
     static ProjectType_DLL dll;
     static ProjectType_AudioPlugin plugin;
 
-    static ProjectType* allTypes[] = { &guiApp, &consoleApp, &staticLib, &dll, &plugin,  nullptr };
-
-    return  Array<ProjectType*> (allTypes);
+    return { &guiApp, &consoleApp, &staticLib, &dll, &plugin };
 }

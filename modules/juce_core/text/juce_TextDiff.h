@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 /**
     Calculates and applies a sequence of changes to convert one text string into
@@ -68,3 +68,5 @@ public:
     */
     Array<Change> changes;
 };
+
+} // namespace juce

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 extern ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component&, void* parent);
 
 //==============================================================================
@@ -266,3 +269,5 @@ bool OpenGLHelpers::isContextActive()
 {
     return wglGetCurrentContext() != 0;
 }
+
+} // namespace juce

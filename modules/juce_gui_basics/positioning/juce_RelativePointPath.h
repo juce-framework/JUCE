@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -174,7 +174,7 @@ public:
     void addElement (ElementBase* newElement);
 
     //==============================================================================
-    OwnedArray <ElementBase> elements;
+    OwnedArray<ElementBase> elements;
     bool usesNonZeroWinding;
 
 private:
@@ -187,3 +187,5 @@ private:
     RelativePointPath& operator= (const RelativePointPath&);
     JUCE_LEAK_DETECTOR (RelativePointPath)
 };
+
+} // namespace juce

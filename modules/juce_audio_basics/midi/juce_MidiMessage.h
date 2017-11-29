@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -170,6 +170,11 @@ public:
         The units for the timestamp will be application-specific.
     */
     void addToTimeStamp (double delta) noexcept         { timeStamp += delta; }
+
+    /** Return a copy of this message with a new timestamp.
+        The units for the timestamp will be application-specific - see the notes for getTimeStamp().
+    */
+    MidiMessage withTimeStamp (double newTimestamp) const;
 
     //==============================================================================
     /** Returns the midi channel associated with the message.
@@ -936,3 +941,5 @@ private:
     inline uint8* getData() const noexcept        { return isHeapAllocated() ? packedData.allocatedData : (uint8*) packedData.asBytes; }
     uint8* allocateSpace (int);
 };
+
+} // namespace juce

@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 /**
     This class contains a ValueTree which is used to manage an AudioProcessor's entire state.
@@ -77,6 +78,10 @@ public:
         @param textToValueFunction      The inverse of valueToTextFunction
         @param isMetaParameter          Set this value to true if this should be a meta parameter
         @param isAutomatableParameter   Set this value to false if this parameter should not be automatable
+        @param isDiscrete               Set this value to true to make this parameter take discrete values in a host.
+                                        @see AudioProcessorParameter::isDiscrete
+        @param category                 Which category the parameter should use.
+                                        @see AudioProcessorParameter::Category
 
         @returns the parameter object that was created
     */
@@ -88,7 +93,10 @@ public:
                                                           std::function<String (float)> valueToTextFunction,
                                                           std::function<float (const String&)> textToValueFunction,
                                                           bool isMetaParameter = false,
-                                                          bool isAutomatableParameter = true);
+                                                          bool isAutomatableParameter = true,
+                                                          bool isDiscrete = false,
+                                                          AudioProcessorParameter::Category category
+                                                             = AudioProcessorParameter::genericParameter);
 
     /** Returns a parameter by its ID string. */
     AudioProcessorParameterWithID* getParameter (StringRef parameterID) const noexcept;
@@ -230,3 +238,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorValueTreeState)
 };
+
+} // namespace juce

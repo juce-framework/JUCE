@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /** Represents the current executable's process.
@@ -71,7 +71,7 @@ public:
     */
     static void JUCE_CALLTYPE makeForegroundProcess();
 
-    /** Hides the application (on an OS that supports this, e.g. OSX) */
+    /** Hides the application (on an OS that supports this, e.g. OSX, iOS, Android) */
     static void JUCE_CALLTYPE hide();
 
     //==============================================================================
@@ -150,3 +150,5 @@ private:
     Process();
     JUCE_DECLARE_NON_COPYABLE (Process)
 };
+
+} // namespace juce

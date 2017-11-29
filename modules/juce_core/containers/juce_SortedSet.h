@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 #if JUCE_MSVC
  #pragma warning (push)
@@ -55,19 +56,22 @@ class SortedSet
 public:
     //==============================================================================
     /** Creates an empty set. */
-    SortedSet() noexcept = default;
+    // VS2013 doesn't allow defaulted noexcept constructors.
+    SortedSet() noexcept {}
 
     /** Creates a copy of another set. */
     SortedSet (const SortedSet&) = default;
 
     /** Creates a copy of another set. */
-    SortedSet (SortedSet&&) noexcept = default;
+    // VS2013 doesn't allow defaulted noexcept constructors.
+    SortedSet (SortedSet&& other) noexcept : data (static_cast<decltype(data)&&> (other.data)) {}
 
     /** Makes a copy of another set. */
     SortedSet& operator= (const SortedSet&) = default;
 
     /** Makes a copy of another set. */
-    SortedSet& operator= (SortedSet&&) noexcept = default;
+    // VS2013 doesn't allow defaulted noexcept constructors.
+    SortedSet& operator= (SortedSet&& other) noexcept { data = static_cast<decltype(data)&&> (other.data); return *this; }
 
     /** Destructor. */
     ~SortedSet() noexcept {}
@@ -478,3 +482,5 @@ private:
 #if JUCE_MSVC
  #pragma warning (pop)
 #endif
+
+} // namespace juce

@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /*
@@ -317,9 +317,12 @@ public:
     /** Re-sets the pitchbend range in semitones (0-96) to be used for notes when in legacy mode. */
     void setLegacyModePitchbendRange (int pitchbendRange);
 
-private:
+protected:
     //==============================================================================
     CriticalSection lock;
+
+private:
+    //==============================================================================
     Array<MPENote> notes;
     MPEZoneLayout zoneLayout;
     ListenerList<Listener> listeners;
@@ -374,3 +377,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MPEInstrument)
 };
+
+} // namespace juce

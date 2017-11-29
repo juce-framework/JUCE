@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 /**
     Converts a mono processor class into a multi-channel version by duplicating it
@@ -88,3 +92,6 @@ private:
 
     juce::OwnedArray<MonoProcessorType> processors;
 };
+
+} // namespace dsp
+} // namespace juce

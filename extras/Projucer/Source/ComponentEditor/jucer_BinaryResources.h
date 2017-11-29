@@ -28,7 +28,6 @@
 
 class JucerDocument;
 
-
 //==============================================================================
 /**
     Manages a list of binary data objects that a JucerDocument wants to embed in

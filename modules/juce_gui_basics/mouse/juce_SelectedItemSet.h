@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /** Manages a list of selectable items.
@@ -319,3 +319,5 @@ private:
 
     JUCE_LEAK_DETECTOR (SelectedItemSet<SelectableItemType>)
 };
+
+} // namespace juce

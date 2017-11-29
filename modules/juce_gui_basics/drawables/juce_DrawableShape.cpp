@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 DrawableShape::DrawableShape()
     : strokeType (0.0f),
       mainFill (Colours::black),
@@ -100,7 +103,7 @@ void DrawableShape::setFillInternal (RelativeFillType& fill, const RelativeFillT
     if (fill != newFill)
     {
         fill = newFill;
-        pos = nullptr;
+        pos.reset();
 
         if (fill.isDynamic())
         {
@@ -496,3 +499,5 @@ Path DrawableShape::getOutlineAsPath() const
     outline.applyTransform (getTransform());
     return outline;
 }
+
+} // namespace juce

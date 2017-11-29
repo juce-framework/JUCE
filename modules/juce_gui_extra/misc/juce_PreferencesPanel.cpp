@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 PreferencesPanel::PreferencesPanel()
     : buttonSize (70)
 {
@@ -118,7 +121,7 @@ void PreferencesPanel::setCurrentPage (const String& pageName)
     {
         currentPageName = pageName;
 
-        currentPage = nullptr;
+        currentPage.reset();
         currentPage = createComponentForPage (pageName);
 
         if (currentPage != nullptr)
@@ -150,3 +153,5 @@ void PreferencesPanel::buttonClicked (Button*)
         }
     }
 }
+
+} // namespace juce

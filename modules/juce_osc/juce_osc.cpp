@@ -35,8 +35,6 @@
 
 #include "juce_osc.h"
 
-namespace juce
-{
 #include "osc/juce_OSCTypes.cpp"
 #include "osc/juce_OSCTimeTag.cpp"
 #include "osc/juce_OSCArgument.cpp"
@@ -45,4 +43,3 @@ namespace juce
 #include "osc/juce_OSCBundle.cpp"
 #include "osc/juce_OSCReceiver.cpp"
 #include "osc/juce_OSCSender.cpp"
-}

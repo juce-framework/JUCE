@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 /*  This is some quick-and-dirty code to extract the typeface name from a lump of TTF file data.
     It's needed because although win32 will happily load a TTF file from in-memory data, it won't
     tell you the name of the damned font that it just loaded.. and in order to actually use the font,
@@ -644,3 +647,5 @@ void Typeface::scanFolderForFonts (const File&)
 {
     jassertfalse; // not implemented on this platform
 }
+
+} // namespace juce

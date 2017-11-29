@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 Image juce_createIconForFile (const File& file);
 
 
@@ -58,7 +61,7 @@ void FileListComponent::deselectAllFiles()
 
 void FileListComponent::scrollToTop()
 {
-    getVerticalScrollBar()->setCurrentRangeStart (0);
+    getVerticalScrollBar().setCurrentRangeStart (0);
 }
 
 void FileListComponent::setSelectedFile (const File& f)
@@ -255,3 +258,5 @@ void FileListComponent::returnKeyPressed (int currentSelectedRow)
 {
     sendDoubleClickMessage (directoryContentsList.getFile (currentSelectedRow));
 }
+
+} // namespace juce

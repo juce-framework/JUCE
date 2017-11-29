@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -97,7 +97,7 @@ public:
     /** True if drop-shadowing is enabled. */
     bool isDropShadowEnabled() const noexcept               { return useDropShadow; }
 
-    /** Sets whether an OS-native title bar will be used, or a Juce one.
+    /** Sets whether an OS-native title bar will be used, or a JUCE one.
         @see isUsingNativeTitleBar
     */
     void setUsingNativeTitleBar (bool useNativeTitleBar);
@@ -153,10 +153,12 @@ protected:
 private:
     friend class TopLevelWindowManager;
     friend class ResizableWindow;
-    bool useDropShadow, useNativeTitleBar, isCurrentlyActive;
+    bool useDropShadow = true, useNativeTitleBar = false, isCurrentlyActive = false;
     ScopedPointer<DropShadower> shadower;
 
     void setWindowActive (bool);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TopLevelWindow)
 };
+
+} // namespace juce

@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 /** A template specialisation to find corresponding mask type for primitives. */
 namespace SIMDInternal
@@ -36,11 +40,11 @@ namespace SIMDInternal
     template <> struct MaskTypeFor <int16_t>                { typedef uint16_t  type; };
     template <> struct MaskTypeFor <int32_t>                { typedef uint32_t  type; };
     template <> struct MaskTypeFor <int64_t>                { typedef uint64_t  type; };
-    template <> struct MaskTypeFor <std::complex<float> >   { typedef uint32_t  type; };
-    template <> struct MaskTypeFor <std::complex<double> >  { typedef uint64_t  type; };
+    template <> struct MaskTypeFor <std::complex<float>>    { typedef uint32_t  type; };
+    template <> struct MaskTypeFor <std::complex<double>>   { typedef uint64_t  type; };
 
     template <typename Primitive> struct PrimitiveType                           { typedef Primitive type; };
-    template <typename Primitive> struct PrimitiveType<std::complex<Primitive> > { typedef Primitive type; };
+    template <typename Primitive> struct PrimitiveType<std::complex<Primitive>>  { typedef Primitive type; };
 
     template <int n>    struct Log2Helper    { enum { value = Log2Helper<n/2>::value + 1 }; };
     template <>         struct Log2Helper<1> { enum { value = 0 }; };
@@ -196,6 +200,25 @@ struct SIMDFallbackOps
         return retval;
     }
 
+    static forcedinline vSIMDType load (const ScalarType* a) noexcept
+    {
+        vSIMDType retval;
+        auto* dst = reinterpret_cast<ScalarType*> (&retval);
+
+        for (size_t i = 0; i < n; ++i)
+            dst [i] = a[i];
+
+        return retval;
+    }
+
+    static forcedinline void store (vSIMDType value, ScalarType* dest) noexcept
+    {
+        const auto* src = reinterpret_cast<const ScalarType*> (&value);
+
+        for (size_t i = 0; i < n; ++i)
+            dest[i] = src[i];
+    }
+
     template <unsigned int shuffle_idx>
     static forcedinline vSIMDType shuffle (vSIMDType a) noexcept
     {
@@ -211,3 +234,6 @@ struct SIMDFallbackOps
         return retval;
     }
 };
+
+} // namespace dsp
+} // namespace juce

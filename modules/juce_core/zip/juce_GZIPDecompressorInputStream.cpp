@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 #if JUCE_MSVC
  #pragma warning (push)
  #pragma warning (disable: 4309 4305 4365)
@@ -97,12 +100,6 @@ class GZIPDecompressorInputStream::GZIPDecompressHelper
 {
 public:
     GZIPDecompressHelper (Format f)
-        : finished (true),
-          needsDictionary (false),
-          error (true),
-          streamIsValid (false),
-          data (nullptr),
-          dataSize (0)
     {
         using namespace zlibNamespace;
         zerostruct (stream);
@@ -112,9 +109,8 @@ public:
 
     ~GZIPDecompressHelper()
     {
-        using namespace zlibNamespace;
         if (streamIsValid)
-            inflateEnd (&stream);
+            zlibNamespace::inflateEnd (&stream);
     }
 
     bool needsInput() const noexcept        { return dataSize <= 0; }
@@ -128,6 +124,7 @@ public:
     int doNextBlock (uint8* const dest, const unsigned int destSize)
     {
         using namespace zlibNamespace;
+
         if (streamIsValid && data != nullptr && ! finished)
         {
             stream.next_in  = data;
@@ -176,14 +173,14 @@ public:
         return MAX_WBITS;
     }
 
-    bool finished, needsDictionary, error, streamIsValid;
+    bool finished = true, needsDictionary = false, error = true, streamIsValid = false;
 
     enum { gzipDecompBufferSize = 32768 };
 
 private:
     zlibNamespace::z_stream stream;
-    uint8* data;
-    size_t dataSize;
+    uint8* data = nullptr;
+    size_t dataSize = 0;
 
     JUCE_DECLARE_NON_COPYABLE (GZIPDecompressHelper)
 };
@@ -194,10 +191,7 @@ GZIPDecompressorInputStream::GZIPDecompressorInputStream (InputStream* source, b
   : sourceStream (source, deleteSourceWhenDestroyed),
     uncompressedStreamLength (uncompressedLength),
     format (f),
-    isEof (false),
-    activeBufferSize (0),
     originalSourcePos (source->getPosition()),
-    currentPos (0),
     buffer ((size_t) GZIPDecompressHelper::gzipDecompBufferSize),
     helper (new GZIPDecompressHelper (f))
 {
@@ -207,10 +201,7 @@ GZIPDecompressorInputStream::GZIPDecompressorInputStream (InputStream& source)
   : sourceStream (&source, false),
     uncompressedStreamLength (-1),
     format (zlibFormat),
-    isEof (false),
-    activeBufferSize (0),
     originalSourcePos (source.getPosition()),
-    currentPos (0),
     buffer ((size_t) GZIPDecompressHelper::gzipDecompBufferSize),
     helper (new GZIPDecompressHelper (zlibFormat))
 {
@@ -232,11 +223,11 @@ int GZIPDecompressorInputStream::read (void* destBuffer, int howMany)
     if (howMany > 0 && ! isEof)
     {
         int numRead = 0;
-        uint8* d = static_cast<uint8*> (destBuffer);
+        auto d = static_cast<uint8*> (destBuffer);
 
         while (! helper->error)
         {
-            const int n = helper->doNextBlock (d, (unsigned int) howMany);
+            auto n = helper->doNextBlock (d, (unsigned int) howMany);
             currentPos += n;
 
             if (n == 0)
@@ -303,3 +294,5 @@ bool GZIPDecompressorInputStream::setPosition (int64 newPos)
     skipNextBytes (newPos - currentPos);
     return true;
 }
+
+} // namespace juce

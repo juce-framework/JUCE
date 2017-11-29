@@ -24,6 +24,11 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
+
 #ifndef DOXYGEN
 namespace SampleTypeHelpers // Internal classes needed for handling sample type classes
 {
@@ -42,7 +47,7 @@ namespace SampleTypeHelpers // Internal classes needed for handling sample type 
     This class doesn't own any of the data which it points to, it's simply a view
     into data that is owned elsewhere. You can construct one from some raw data
     that you've allocated yourself, or give it a HeapBlock to use, or give it
-    an AudioSampleBuffer which it can refer to, but in all cases the user is
+    an AudioBuffer which it can refer to, but in all cases the user is
     responsible for making sure that the data doesn't get deleted while there's
     still an AudioBlock using it.
 */
@@ -90,14 +95,15 @@ public:
         use, because it will be referencing its data.
     */
     AudioBlock (HeapBlock<char>& heapBlockToUseForAllocation,
-                size_t numberOfChannels, size_t numberOfSamples) noexcept
+                size_t numberOfChannels, size_t numberOfSamples,
+                size_t alignmentInBytes = defaultAlignment) noexcept
         : numChannels (static_cast<ChannelCountType> (numberOfChannels)),
           numSamples (numberOfSamples)
     {
         auto roundedUpNumSamples = (numberOfSamples + elementMask) & ~elementMask;
         auto channelSize = sizeof (SampleType) * roundedUpNumSamples;
         auto channelListBytes = sizeof (SampleType*) * numberOfChannels;
-        auto extraBytes = sizeof (SampleType) - 1;
+        auto extraBytes = alignmentInBytes - 1;
 
         heapBlockToUseForAllocation.malloc (channelListBytes + extraBytes + channelSize * numberOfChannels);
 
@@ -105,7 +111,7 @@ public:
         channels = chanArray;
 
         auto* data = reinterpret_cast<SampleType*> (addBytesToPointer (chanArray, channelListBytes));
-        data = snapPointerToAlignment (data, sizeof (SampleType));
+        data = snapPointerToAlignment (data, alignmentInBytes);
 
         for (ChannelCountType i = 0; i < numChannels; ++i)
         {
@@ -499,7 +505,7 @@ public:
     // This class can only be used with floating point types
     static_assert (std::is_same<SampleType, float>::value                || std::is_same<SampleType, double>::value
                   #if JUCE_USE_SIMD
-                   || std::is_same<SampleType, SIMDRegister<float> >::value || std::is_same<SampleType, SIMDRegister<double> >::value
+                   || std::is_same<SampleType, SIMDRegister<float>>::value || std::is_same<SampleType, SIMDRegister<double>>::value
                   #endif
                    , "AudioBlock only supports single or double precision floating point types");
 
@@ -531,11 +537,20 @@ private:
     using ChannelCountType = unsigned int;
 
     //==============================================================================
-    static constexpr size_t sizeFactor  = sizeof (SampleType) / sizeof (NumericType);
-    static constexpr size_t elementMask = sizeFactor - 1;
-    static constexpr size_t byteMask    = (sizeFactor * sizeof (NumericType)) - 1;
+    static constexpr size_t sizeFactor    = sizeof (SampleType) / sizeof (NumericType);
+    static constexpr size_t elementMask   = sizeFactor - 1;
+    static constexpr size_t byteMask      = (sizeFactor * sizeof (NumericType)) - 1;
+
+   #if JUCE_USE_SIMD
+    static constexpr size_t defaultAlignment = sizeof (SIMDRegister<NumericType>);
+   #else
+    static constexpr size_t defaultAlignment = sizeof (NumericType);
+   #endif
 
     SampleType* const* channels;
     ChannelCountType numChannels = 0;
     size_t startSample = 0, numSamples = 0;
 };
+
+} // namespace dsp
+} // namespace juce

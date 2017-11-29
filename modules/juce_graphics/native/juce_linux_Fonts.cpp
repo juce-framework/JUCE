@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 static XmlElement* findFontsConfFile()
 {
     static const char* pathsToSearch[] = { "/etc/fonts/fonts.conf",
@@ -190,3 +193,5 @@ Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
     f.setTypefaceName (defaultNames.getRealFontName (font.getTypefaceName()));
     return Typeface::createSystemTypefaceFor (f);
 }
+
+} // namespace juce

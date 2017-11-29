@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 #define JUCE_DECLARE_VST3_COM_REF_METHODS \
@@ -59,6 +60,11 @@ static bool doUIDsMatch (const Steinberg::TUID a, const Steinberg::TUID b) noexc
         *obj = (CommonClassType*) static_cast<SourceClassType*> (this); \
         return Steinberg::kResultOk; \
     }
+
+//==============================================================================
+#if VST_VERSION < 0x030608
+ #define kAmbi1stOrderACN kBFormat
+#endif
 
 //==============================================================================
 inline juce::String toString (const Steinberg::char8* string) noexcept      { return juce::String (string); }
@@ -127,6 +133,9 @@ static inline Steinberg::Vst::SpeakerArrangement getArrangementForNumChannels (i
         case 12:    return k111;
         case 13:    return k130;
         case 14:    return k131;
+       #if VST_VERSION >= 0x030608
+        case 16:    return kAmbi3rdOrderACN;
+       #endif
         case 24:    return (Steinberg::Vst::SpeakerArrangement) 1929904127; // k222
         default:    break;
     }
@@ -154,9 +163,9 @@ static inline Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set
         case AudioChannelSet::leftCentre:        return kSpeakerLc;
         case AudioChannelSet::rightCentre:       return kSpeakerRc;
         case AudioChannelSet::centreSurround:    return kSpeakerCs;
-        case AudioChannelSet::leftSurroundSide:  return (1 << 26); /* kSpeakerLcs */
-        case AudioChannelSet::rightSurroundSide: return (1 << 27); /* kSpeakerRcs */
-        case AudioChannelSet::topMiddle:         return (1 << 11); /* kSpeakerTm */
+        case AudioChannelSet::leftSurroundSide:  return (1ull << 26); /* kSpeakerLcs */
+        case AudioChannelSet::rightSurroundSide: return (1ull << 27); /* kSpeakerRcs */
+        case AudioChannelSet::topMiddle:         return (1ull << 11); /* kSpeakerTm */
         case AudioChannelSet::topFrontLeft:      return kSpeakerTfl;
         case AudioChannelSet::topFrontCentre:    return kSpeakerTfc;
         case AudioChannelSet::topFrontRight:     return kSpeakerTfr;
@@ -168,10 +177,24 @@ static inline Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set
         case AudioChannelSet::rightSurroundRear: return kSpeakerSr;
         case AudioChannelSet::wideLeft:          return kSpeakerPl;
         case AudioChannelSet::wideRight:         return kSpeakerPr;
-        case AudioChannelSet::ambisonicW:        return (1 << 20); /* kSpeakerW */
-        case AudioChannelSet::ambisonicX:        return (1 << 21); /* kSpeakerX */
-        case AudioChannelSet::ambisonicY:        return (1 << 22); /* kSpeakerY */
-        case AudioChannelSet::ambisonicZ:        return (1 << 23); /* kSpeakerZ */
+        case AudioChannelSet::ambisonicACN0:     return (1ull << 20); /* kSpeakerACN0 */
+        case AudioChannelSet::ambisonicACN1:     return (1ull << 21); /* kSpeakerACN1 */
+        case AudioChannelSet::ambisonicACN2:     return (1ull << 22); /* kSpeakerACN2 */
+        case AudioChannelSet::ambisonicACN3:     return (1ull << 23); /* kSpeakerACN3 */
+        case AudioChannelSet::ambisonicACN4:     return (1ull << 38); /* kSpeakerACN4 */
+        case AudioChannelSet::ambisonicACN5:     return (1ull << 39); /* kSpeakerACN5 */
+        case AudioChannelSet::ambisonicACN6:     return (1ull << 40); /* kSpeakerACN6 */
+        case AudioChannelSet::ambisonicACN7:     return (1ull << 41); /* kSpeakerACN7 */
+        case AudioChannelSet::ambisonicACN8:     return (1ull << 42); /* kSpeakerACN8 */
+        case AudioChannelSet::ambisonicACN9:     return (1ull << 43); /* kSpeakerACN9 */
+        case AudioChannelSet::ambisonicACN10:    return (1ull << 44); /* kSpeakerACN10 */
+        case AudioChannelSet::ambisonicACN11:    return (1ull << 45); /* kSpeakerACN11 */
+        case AudioChannelSet::ambisonicACN12:    return (1ull << 46); /* kSpeakerACN12 */
+        case AudioChannelSet::ambisonicACN13:    return (1ull << 47); /* kSpeakerACN13 */
+        case AudioChannelSet::ambisonicACN14:    return (1ull << 48); /* kSpeakerACN14 */
+        case AudioChannelSet::ambisonicACN15:    return (1ull << 49); /* kSpeakerACN15 */
+        case AudioChannelSet::topSideLeft:       return (1ull << 24); /* kSpeakerTsl */
+        case AudioChannelSet::topSideRight:      return (1ull << 25); /* kSpeakerTsr */
 
         case AudioChannelSet::discreteChannel0:  return kSpeakerM;
         default:
@@ -181,11 +204,9 @@ static inline Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set
 
     switch (static_cast<int> (type))
     {
-        case (int) AudioChannelSet::discreteChannel0 + 1: return (1 << 24); /* kSpeakerTsl */
-        case (int) AudioChannelSet::discreteChannel0 + 2: return (1 << 25); /* kSpeakerTsr */
-        case (int) AudioChannelSet::discreteChannel0 + 3: return (1 << 28); /* kSpeakerBfl */
-        case (int) AudioChannelSet::discreteChannel0 + 4: return (1 << 29); /* kSpeakerBfc */
-        case (int) AudioChannelSet::discreteChannel0 + 5: return (1 << 30); /* kSpeakerBfr */
+        case (int) AudioChannelSet::discreteChannel0 + 3: return (1ull << 28); /* kSpeakerBfl */
+        case (int) AudioChannelSet::discreteChannel0 + 4: return (1ull << 29); /* kSpeakerBfc */
+        case (int) AudioChannelSet::discreteChannel0 + 5: return (1ull << 30); /* kSpeakerBfr */
         default:
             break;
     }
@@ -211,7 +232,7 @@ static inline AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::Speak
         case kSpeakerCs:    return AudioChannelSet::centreSurround;
         case kSpeakerSl:    return AudioChannelSet::leftSurroundRear;
         case kSpeakerSr:    return AudioChannelSet::rightSurroundRear;
-        case (1 << 11):     return AudioChannelSet::topMiddle;  /* kSpeakerTm */
+        case (1ull << 11):  return AudioChannelSet::topMiddle;  /* kSpeakerTm */
         case kSpeakerTfl:   return AudioChannelSet::topFrontLeft;
         case kSpeakerTfc:   return AudioChannelSet::topFrontCentre;
         case kSpeakerTfr:   return AudioChannelSet::topFrontRight;
@@ -219,18 +240,30 @@ static inline AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::Speak
         case kSpeakerTrc:   return AudioChannelSet::topRearCentre;
         case kSpeakerTrr:   return AudioChannelSet::topRearRight;
         case kSpeakerLfe2:  return AudioChannelSet::LFE2;
-        case (1 << 19):     return ((arr & kSpeakerC) != 0 ? AudioChannelSet::discreteChannel0 : AudioChannelSet::centre);
-        case (1 << 20):     return AudioChannelSet::ambisonicW; /* kSpeakerW */
-        case (1 << 21):     return AudioChannelSet::ambisonicX; /* kSpeakerX */
-        case (1 << 22):     return AudioChannelSet::ambisonicY; /* kSpeakerY */
-        case (1 << 23):     return AudioChannelSet::ambisonicZ; /* kSpeakerZ */
-        case (1 << 24):     return static_cast<AudioChannelSet::ChannelType> ((int)AudioChannelSet::discreteChannel0 + 1); /* kSpeakerTsl */
-        case (1 << 25):     return static_cast<AudioChannelSet::ChannelType> ((int)AudioChannelSet::discreteChannel0 + 2); /* kSpeakerTsr */
-        case (1 << 26):     return AudioChannelSet::leftSurroundSide;  /* kSpeakerLcs */
-        case (1 << 27):     return AudioChannelSet::rightSurroundSide; /* kSpeakerRcs */
-        case (1 << 28):     return static_cast<AudioChannelSet::ChannelType> ((int)AudioChannelSet::discreteChannel0 + 3); /* kSpeakerBfl */
-        case (1 << 29):     return static_cast<AudioChannelSet::ChannelType> ((int)AudioChannelSet::discreteChannel0 + 4); /* kSpeakerBfc */
-        case (1 << 30):     return static_cast<AudioChannelSet::ChannelType> ((int)AudioChannelSet::discreteChannel0 + 5); /* kSpeakerBfr */
+        case (1ull << 19):  return ((arr & kSpeakerC) != 0 ? AudioChannelSet::discreteChannel0 : AudioChannelSet::centre);
+        case (1ull << 20):  return AudioChannelSet::ambisonicACN0;  /* kSpeakerACN0 */
+        case (1ull << 21):  return AudioChannelSet::ambisonicACN1;  /* kSpeakerACN1 */
+        case (1ull << 22):  return AudioChannelSet::ambisonicACN2;  /* kSpeakerACN2 */
+        case (1ull << 23):  return AudioChannelSet::ambisonicACN3;  /* kSpeakerACN3 */
+        case (1ull << 38):  return AudioChannelSet::ambisonicACN4;  /* kSpeakerACN4 */
+        case (1ull << 39):  return AudioChannelSet::ambisonicACN5;  /* kSpeakerACN5 */
+        case (1ull << 40):  return AudioChannelSet::ambisonicACN6;  /* kSpeakerACN6 */
+        case (1ull << 41):  return AudioChannelSet::ambisonicACN7;  /* kSpeakerACN7 */
+        case (1ull << 42):  return AudioChannelSet::ambisonicACN8;  /* kSpeakerACN8 */
+        case (1ull << 43):  return AudioChannelSet::ambisonicACN9;  /* kSpeakerACN9 */
+        case (1ull << 44):  return AudioChannelSet::ambisonicACN10; /* kSpeakerACN10 */
+        case (1ull << 45):  return AudioChannelSet::ambisonicACN11; /* kSpeakerACN11 */
+        case (1ull << 46):  return AudioChannelSet::ambisonicACN12; /* kSpeakerACN12 */
+        case (1ull << 47):  return AudioChannelSet::ambisonicACN13; /* kSpeakerACN13 */
+        case (1ull << 48):  return AudioChannelSet::ambisonicACN14; /* kSpeakerACN14 */
+        case (1ull << 49):  return AudioChannelSet::ambisonicACN15; /* kSpeakerACN15 */
+        case (1ull << 24):  return AudioChannelSet::topSideLeft;  /* kSpeakerTsl */
+        case (1ull << 25):  return AudioChannelSet::topSideRight; /* kSpeakerTsr */
+        case (1ull << 26):  return AudioChannelSet::leftSurroundSide;  /* kSpeakerLcs */
+        case (1ull << 27):  return AudioChannelSet::rightSurroundSide; /* kSpeakerRcs */
+        case (1ull << 28):  return static_cast<AudioChannelSet::ChannelType> ((int)AudioChannelSet::discreteChannel0 + 3); /* kSpeakerBfl */
+        case (1ull << 29):  return static_cast<AudioChannelSet::ChannelType> ((int)AudioChannelSet::discreteChannel0 + 4); /* kSpeakerBfc */
+        case (1ull << 30):  return static_cast<AudioChannelSet::ChannelType> ((int)AudioChannelSet::discreteChannel0 + 5); /* kSpeakerBfr */
         case kSpeakerPl:    return AudioChannelSet::wideLeft;
         case kSpeakerPr:    return AudioChannelSet::wideRight;
         default: break;
@@ -246,24 +279,34 @@ static inline AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::Speak
 
 static inline Steinberg::Vst::SpeakerArrangement getVst3SpeakerArrangement (const AudioChannelSet& channels) noexcept
 {
-    if      (channels == AudioChannelSet::disabled())           return Steinberg::Vst::SpeakerArr::kEmpty;
-    else if (channels == AudioChannelSet::mono())               return Steinberg::Vst::SpeakerArr::kMono;
-    else if (channels == AudioChannelSet::stereo())             return Steinberg::Vst::SpeakerArr::kStereo;
-    else if (channels == AudioChannelSet::createLCR())          return Steinberg::Vst::SpeakerArr::k30Cine;
-    else if (channels == AudioChannelSet::createLRS())          return Steinberg::Vst::SpeakerArr::k30Music;
-    else if (channels == AudioChannelSet::createLCRS())         return Steinberg::Vst::SpeakerArr::k40Cine;
-    else if (channels == AudioChannelSet::create5point0())      return Steinberg::Vst::SpeakerArr::k50;
-    else if (channels == AudioChannelSet::create5point1())      return Steinberg::Vst::SpeakerArr::k51;
-    else if (channels == AudioChannelSet::create6point0())      return Steinberg::Vst::SpeakerArr::k60Cine;
-    else if (channels == AudioChannelSet::create6point1())      return Steinberg::Vst::SpeakerArr::k61Cine;
-    else if (channels == AudioChannelSet::create6point0Music()) return Steinberg::Vst::SpeakerArr::k60Music;
-    else if (channels == AudioChannelSet::create6point1Music()) return Steinberg::Vst::SpeakerArr::k61Music;
-    else if (channels == AudioChannelSet::create7point0())      return Steinberg::Vst::SpeakerArr::k70Music;
-    else if (channels == AudioChannelSet::create7point0SDDS())  return Steinberg::Vst::SpeakerArr::k70Cine;
-    else if (channels == AudioChannelSet::create7point1())      return Steinberg::Vst::SpeakerArr::k71CineSideFill;
-    else if (channels == AudioChannelSet::create7point1SDDS())  return Steinberg::Vst::SpeakerArr::k71Cine;
-    else if (channels == AudioChannelSet::ambisonic())          return Steinberg::Vst::SpeakerArr::kBFormat;
-    else if (channels == AudioChannelSet::quadraphonic())       return Steinberg::Vst::SpeakerArr::k40Music;
+    using namespace Steinberg::Vst::SpeakerArr;
+
+    if      (channels == AudioChannelSet::disabled())            return kEmpty;
+    else if (channels == AudioChannelSet::mono())                return kMono;
+    else if (channels == AudioChannelSet::stereo())              return kStereo;
+    else if (channels == AudioChannelSet::createLCR())           return k30Cine;
+    else if (channels == AudioChannelSet::createLRS())           return k30Music;
+    else if (channels == AudioChannelSet::createLCRS())          return k40Cine;
+    else if (channels == AudioChannelSet::create5point0())       return k50;
+    else if (channels == AudioChannelSet::create5point1())       return k51;
+    else if (channels == AudioChannelSet::create6point0())       return k60Cine;
+    else if (channels == AudioChannelSet::create6point1())       return k61Cine;
+    else if (channels == AudioChannelSet::create6point0Music())  return k60Music;
+    else if (channels == AudioChannelSet::create6point1Music())  return k61Music;
+    else if (channels == AudioChannelSet::create7point0())       return k70Music;
+    else if (channels == AudioChannelSet::create7point0SDDS())   return k70Cine;
+    else if (channels == AudioChannelSet::create7point1())       return k71CineSideFill;
+    else if (channels == AudioChannelSet::create7point1SDDS())   return k71Cine;
+    else if (channels == AudioChannelSet::ambisonic())           return kAmbi1stOrderACN;
+    else if (channels == AudioChannelSet::quadraphonic())        return k40Music;
+    else if (channels == AudioChannelSet::create7point0point2()) return k71_2 & ~(Steinberg::Vst::kSpeakerLfe);
+    else if (channels == AudioChannelSet::create7point1point2()) return k71_2;
+    else if (channels == AudioChannelSet::ambisonic (0))         return (1ull << 20);
+    else if (channels == AudioChannelSet::ambisonic (1))         return (1ull << 20) | (1ull << 21) | (1ull << 22) | (1ull << 23);
+   #if VST_VERSION >= 0x030608
+    else if (channels == AudioChannelSet::ambisonic (2))         return kAmbi2cdOrderACN;
+    else if (channels == AudioChannelSet::ambisonic (3))         return kAmbi3rdOrderACN;
+   #endif
 
     Steinberg::Vst::SpeakerArrangement result = 0;
 
@@ -277,24 +320,34 @@ static inline Steinberg::Vst::SpeakerArrangement getVst3SpeakerArrangement (cons
 
 static inline AudioChannelSet getChannelSetForSpeakerArrangement (Steinberg::Vst::SpeakerArrangement arr) noexcept
 {
-    if      (arr == Steinberg::Vst::SpeakerArr::kEmpty)          return AudioChannelSet::disabled();
-    else if (arr == Steinberg::Vst::SpeakerArr::kMono)           return AudioChannelSet::mono();
-    else if (arr == Steinberg::Vst::SpeakerArr::kStereo)         return AudioChannelSet::stereo();
-    else if (arr == Steinberg::Vst::SpeakerArr::k30Cine)         return AudioChannelSet::createLCR();
-    else if (arr == Steinberg::Vst::SpeakerArr::k30Music)        return AudioChannelSet::createLRS();
-    else if (arr == Steinberg::Vst::SpeakerArr::k40Cine)         return AudioChannelSet::createLCRS();
-    else if (arr == Steinberg::Vst::SpeakerArr::k50)             return AudioChannelSet::create5point0();
-    else if (arr == Steinberg::Vst::SpeakerArr::k51)             return AudioChannelSet::create5point1();
-    else if (arr == Steinberg::Vst::SpeakerArr::k60Cine)         return AudioChannelSet::create6point0();
-    else if (arr == Steinberg::Vst::SpeakerArr::k61Cine)         return AudioChannelSet::create6point1();
-    else if (arr == Steinberg::Vst::SpeakerArr::k60Music)        return AudioChannelSet::create6point0Music();
-    else if (arr == Steinberg::Vst::SpeakerArr::k61Music)        return AudioChannelSet::create6point1Music();
-    else if (arr == Steinberg::Vst::SpeakerArr::k70Music)        return AudioChannelSet::create7point0();
-    else if (arr == Steinberg::Vst::SpeakerArr::k70Cine)         return AudioChannelSet::create7point0SDDS();
-    else if (arr == Steinberg::Vst::SpeakerArr::k71CineSideFill) return AudioChannelSet::create7point1();
-    else if (arr == Steinberg::Vst::SpeakerArr::k71Cine)         return AudioChannelSet::create7point1SDDS();
-    else if (arr == Steinberg::Vst::SpeakerArr::kBFormat)        return AudioChannelSet::ambisonic();
-    else if (arr == Steinberg::Vst::SpeakerArr::k40Music)        return AudioChannelSet::quadraphonic();
+    using namespace Steinberg::Vst::SpeakerArr;
+
+    if      (arr == kEmpty)                                          return AudioChannelSet::disabled();
+    else if (arr == kMono)                                           return AudioChannelSet::mono();
+    else if (arr == kStereo)                                         return AudioChannelSet::stereo();
+    else if (arr == k30Cine)                                         return AudioChannelSet::createLCR();
+    else if (arr == k30Music)                                        return AudioChannelSet::createLRS();
+    else if (arr == k40Cine)                                         return AudioChannelSet::createLCRS();
+    else if (arr == k50)                                             return AudioChannelSet::create5point0();
+    else if (arr == k51)                                             return AudioChannelSet::create5point1();
+    else if (arr == k60Cine)                                         return AudioChannelSet::create6point0();
+    else if (arr == k61Cine)                                         return AudioChannelSet::create6point1();
+    else if (arr == k60Music)                                        return AudioChannelSet::create6point0Music();
+    else if (arr == k61Music)                                        return AudioChannelSet::create6point1Music();
+    else if (arr == k70Music)                                        return AudioChannelSet::create7point0();
+    else if (arr == k70Cine)                                         return AudioChannelSet::create7point0SDDS();
+    else if (arr == k71CineSideFill)                                 return AudioChannelSet::create7point1();
+    else if (arr == k71Cine)                                         return AudioChannelSet::create7point1SDDS();
+    else if (arr == kAmbi1stOrderACN)                                return AudioChannelSet::ambisonic();
+    else if (arr == k40Music)                                        return AudioChannelSet::quadraphonic();
+    else if (arr == k71_2)                                           return AudioChannelSet::create7point1point2();
+    else if (arr == (k71_2 & ~(Steinberg::Vst::kSpeakerLfe)))        return AudioChannelSet::create7point0point2();
+    else if (arr == (1 << 20))                                       return AudioChannelSet::ambisonic (0);
+    else if (arr == ((1 << 20) | (1 << 21) | (1 << 22) | (1 << 23))) return AudioChannelSet::ambisonic (1);
+   #if VST_VERSION >= 0x030608
+    else if (arr == kAmbi2cdOrderACN)                                return AudioChannelSet::ambisonic (2);
+    else if (arr == kAmbi3rdOrderACN)                                return AudioChannelSet::ambisonic (3);
+   #endif
 
     AudioChannelSet result;
 
@@ -528,10 +581,8 @@ struct VST3BufferExchange
     static inline void assignRawPointer (Steinberg::Vst::AudioBusBuffers& vstBuffers, float** raw)  { vstBuffers.channelBuffers32 = raw; }
     static inline void assignRawPointer (Steinberg::Vst::AudioBusBuffers& vstBuffers, double** raw) { vstBuffers.channelBuffers64 = raw; }
 
-    /** Assigns a series of AudioSampleBuffer's channels to an AudioBusBuffers'
-
-        @warning For speed, does not check the channel count and offsets
-                 according to the AudioSampleBuffer
+    /** Assigns a series of AudioBuffer's channels to an AudioBusBuffers'
+        @warning For speed, does not check the channel count and offsets according to the AudioBuffer
     */
     static void associateBufferTo (Steinberg::Vst::AudioBusBuffers& vstBuffers,
                                    Bus& bus,
@@ -620,3 +671,5 @@ template <> struct VST3FloatAndDoubleBusMapCompositeHelper<double>
 {
     static inline VST3BufferExchange<double>::BusMap& get (VST3FloatAndDoubleBusMapComposite& impl) { return impl.doubleVersion; }
 };
+
+} // namespace juce

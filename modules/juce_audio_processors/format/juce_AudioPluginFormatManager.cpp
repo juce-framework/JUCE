@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace PluginFormatManagerHelpers
 {
     struct ErrorCallbackOnMessageThread : public CallbackMessage
@@ -176,3 +179,5 @@ bool AudioPluginFormatManager::doesPluginStillExist (const PluginDescription& de
 
     return false;
 }
+
+} // namespace juce

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 AudioCDReader::AudioCDReader()
     : AudioFormatReader (0, "CD Audio")
 {
@@ -75,5 +78,7 @@ int AudioCDReader::getLastIndex() const
 
 Array<int> AudioCDReader::findIndexesInTrack (const int)
 {
-    return Array<int>();
+    return {};
 }
+
+} // namespace juce

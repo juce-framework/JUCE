@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 ToggleButton::ToggleButton()
     : Button (String())
 {
@@ -54,3 +57,5 @@ void ToggleButton::colourChanged()
 {
     repaint();
 }
+
+} // namespace juce

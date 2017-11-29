@@ -33,10 +33,14 @@
  #error "Incorrect use of JUCE cpp file"
 #endif
 
-#ifdef __clang__
+#if defined (__clang__)
  #pragma clang diagnostic push
  #pragma clang diagnostic ignored "-Wsign-conversion"
  #pragma clang diagnostic ignored "-Wfloat-conversion"
+#elif defined (__GNUC__)
+ #pragma GCC diagnostic push
+ #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+ #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
 
 #include "juce_box2d.h"
@@ -87,11 +91,10 @@
 #include "box2d/Dynamics/Joints/b2WheelJoint.cpp"
 #include "box2d/Rope/b2Rope.cpp"
 
-namespace juce
-{
 #include "utils/juce_Box2DRenderer.cpp"
-}
 
-#if JUCE_CLANG
+#if defined (__clang__)
  #pragma clang diagnostic pop
+#elif defined (__GNUC__)
+ #pragma GCC diagnostic pop
 #endif

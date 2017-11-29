@@ -24,12 +24,11 @@
   ==============================================================================
 */
 
-#include "../jucer_Headers.h"
+#include "../Application/jucer_Headers.h"
 #include "jucer_JucerDocument.h"
 #include "jucer_ObjectTypes.h"
-#include "ui/jucer_JucerDocumentEditor.h"
-#include "components/jucer_ComponentUndoableAction.h"
-
+#include "UI/jucer_JucerDocumentEditor.h"
+#include "Components/jucer_ComponentUndoableAction.h"
 
 //==============================================================================
 ComponentLayout::ComponentLayout()
@@ -421,7 +420,7 @@ Component* ComponentLayout::addNewComponent (ComponentTypeHandler* const type, i
         c->getProperties().set ("id", nextCompUID++);
 
         ScopedPointer<XmlElement> xml (type->createXmlFor (c, this));
-        c = nullptr;
+        c.reset();
         c = addComponentFromXml (*xml, true);
 
         String memberName (CodeHelpers::makeValidIdentifier (type->getClassName (c), true, true, false));

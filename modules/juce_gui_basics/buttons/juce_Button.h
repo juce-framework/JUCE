@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -352,9 +352,6 @@ public:
     /** Returns the button's current over/down/up state. */
     ButtonState getState() const noexcept               { return buttonState; }
 
-    // This method's parameters have changed - see the new version.
-    JUCE_DEPRECATED (void setToggleState (bool, bool));
-
     //==============================================================================
     /** This abstract base class is implemented by LookAndFeel classes to provide
         button-drawing functionality.
@@ -389,6 +386,9 @@ public:
         virtual int changeTextButtonWidthToFitText (TextButton&, int) { return 0; }
        #endif
     };
+
+    // This method's parameters have changed - see the new version.
+    JUCE_DEPRECATED (void setToggleState (bool, bool));
 
 protected:
     //==============================================================================
@@ -479,21 +479,21 @@ private:
     friend class CallbackHelper;
     friend struct ContainerDeletePolicy<CallbackHelper>;
     ScopedPointer<CallbackHelper> callbackHelper;
-    uint32 buttonPressTime, lastRepeatTime;
-    ApplicationCommandManager* commandManagerToUse;
-    int autoRepeatDelay, autoRepeatSpeed, autoRepeatMinimumDelay;
-    int radioGroupId, connectedEdgeFlags;
-    CommandID commandID;
-    ButtonState buttonState, lastStatePainted;
+    uint32 buttonPressTime = 0, lastRepeatTime = 0;
+    ApplicationCommandManager* commandManagerToUse = nullptr;
+    int autoRepeatDelay = -1, autoRepeatSpeed = 0, autoRepeatMinimumDelay = -1;
+    int radioGroupId = 0, connectedEdgeFlags = 0;
+    CommandID commandID = {};
+    ButtonState buttonState = buttonNormal, lastStatePainted = buttonNormal;
 
     Value isOn;
-    bool lastToggleState;
-    bool clickTogglesState;
-    bool needsToRelease;
-    bool needsRepainting;
-    bool isKeyDown;
-    bool triggerOnMouseDown;
-    bool generateTooltip;
+    bool lastToggleState = false;
+    bool clickTogglesState = false;
+    bool needsToRelease = false;
+    bool needsRepainting = false;
+    bool isKeyDown = false;
+    bool triggerOnMouseDown = false;
+    bool generateTooltip = false;
 
     void repeatTimerCallback();
     bool keyStateChangedCallback();
@@ -518,3 +518,5 @@ private:
  /** This typedef is just for compatibility with old code and VC6 - newer code should use Button::Listener instead. */
  typedef Button::Listener ButtonListener;
 #endif
+
+} // namespace juce

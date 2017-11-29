@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 RelativeTime::RelativeTime (const double secs) noexcept           : numSeconds (secs) {}
 RelativeTime::RelativeTime (const RelativeTime& other) noexcept   : numSeconds (other.numSeconds) {}
 RelativeTime::~RelativeTime() noexcept {}
@@ -131,3 +134,5 @@ String RelativeTime::getDescription (const String& returnValueForZeroTime) const
 
     return result.trimEnd();
 }
+
+} // namespace juce

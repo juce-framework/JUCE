@@ -5,12 +5,14 @@
   <dict>
     <key>LSRequiresIPhoneOS</key>
     <true/>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>This app requires microphone input.</string>
     <key>UIViewControllerBasedStatusBarAppearance</key>
     <false/>
     <key>CFBundleExecutable</key>
     <string>${EXECUTABLE_NAME}</string>
     <key>CFBundleIdentifier</key>
-    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <string>com.juce.JuceDemoPlugin</string>
     <key>CFBundleName</key>
     <string>JuceDemoPlugin</string>
     <key>CFBundleDisplayName</key>

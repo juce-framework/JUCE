@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 BooleanPropertyComponent::BooleanPropertyComponent (const String& name,
                                                     const String& buttonTextWhenTrue,
                                                     const String& buttonTextWhenFalse)
@@ -85,3 +88,5 @@ void BooleanPropertyComponent::buttonClicked (Button*)
 {
     setState (! getState());
 }
+
+} // namespace juce

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 StretchableObjectResizer::StretchableObjectResizer() {}
 StretchableObjectResizer::~StretchableObjectResizer() {}
 
@@ -116,3 +119,5 @@ void StretchableObjectResizer::resizeToFit (const double targetSize)
             break;
     }
 }
+
+} // namespace juce

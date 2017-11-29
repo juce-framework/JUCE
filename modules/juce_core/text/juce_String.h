@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -33,7 +33,7 @@
 
     @see StringArray, StringPairArray
 */
-class JUCE_API  String
+class JUCE_API  String  final
 {
 public:
     //==============================================================================
@@ -43,10 +43,10 @@ public:
     String() noexcept;
 
     /** Creates a copy of another string. */
-    String (const String& other) noexcept;
+    String (const String&) noexcept;
 
     /** Move constructor */
-    String (String&& other) noexcept;
+    String (String&&) noexcept;
 
     /** Creates a string from a zero-terminated ascii text string.
 
@@ -93,37 +93,37 @@ public:
 
     //==============================================================================
     /** Creates a string from a UTF-8 character string */
-    String (const CharPointer_UTF8 text);
+    String (CharPointer_UTF8 text);
 
     /** Creates a string from a UTF-8 character string */
-    String (const CharPointer_UTF8 text, size_t maxChars);
+    String (CharPointer_UTF8 text, size_t maxChars);
 
     /** Creates a string from a UTF-8 character string */
-    String (const CharPointer_UTF8 start, const CharPointer_UTF8 end);
+    String (CharPointer_UTF8 start, CharPointer_UTF8 end);
 
     //==============================================================================
     /** Creates a string from a UTF-16 character string */
-    String (const CharPointer_UTF16 text);
+    String (CharPointer_UTF16 text);
 
     /** Creates a string from a UTF-16 character string */
-    String (const CharPointer_UTF16 text, size_t maxChars);
+    String (CharPointer_UTF16 text, size_t maxChars);
 
     /** Creates a string from a UTF-16 character string */
-    String (const CharPointer_UTF16 start, const CharPointer_UTF16 end);
+    String (CharPointer_UTF16 start, CharPointer_UTF16 end);
 
     //==============================================================================
     /** Creates a string from a UTF-32 character string */
-    String (const CharPointer_UTF32 text);
+    String (CharPointer_UTF32 text);
 
     /** Creates a string from a UTF-32 character string */
-    String (const CharPointer_UTF32 text, size_t maxChars);
+    String (CharPointer_UTF32 text, size_t maxChars);
 
     /** Creates a string from a UTF-32 character string */
-    String (const CharPointer_UTF32 start, const CharPointer_UTF32 end);
+    String (CharPointer_UTF32 start, CharPointer_UTF32 end);
 
     //==============================================================================
     /** Creates a string from an ASCII character string */
-    String (const CharPointer_ASCII text);
+    String (CharPointer_ASCII text);
 
     /** Creates a string from a UTF-8 encoded std::string. */
     String (const std::string&);
@@ -230,8 +230,8 @@ public:
         @param startOfTextToAppend  the start of the string to add. This must not be a nullptr
         @param endOfTextToAppend    the end of the string to add. This must not be a nullptr
     */
-    void appendCharPointer (const CharPointerType startOfTextToAppend,
-                            const CharPointerType endOfTextToAppend);
+    void appendCharPointer (CharPointerType startOfTextToAppend,
+                            CharPointerType endOfTextToAppend);
 
     /** Appends a string to the end of this one.
 
@@ -239,8 +239,8 @@ public:
         @param endOfTextToAppend    the end of the string to add. This must not be a nullptr
     */
     template <class CharPointer>
-    void appendCharPointer (const CharPointer startOfTextToAppend,
-                            const CharPointer endOfTextToAppend)
+    void appendCharPointer (CharPointer startOfTextToAppend,
+                            CharPointer endOfTextToAppend)
     {
         jassert (startOfTextToAppend.getAddress() != nullptr && endOfTextToAppend.getAddress() != nullptr);
 
@@ -260,7 +260,7 @@ public:
     }
 
     /** Appends a string to the end of this one. */
-    void appendCharPointer (const CharPointerType textToAppend);
+    void appendCharPointer (CharPointerType textToAppend);
 
     /** Appends a string to the end of this one.
 
@@ -268,7 +268,7 @@ public:
         @param maxCharsToTake   the maximum number of characters to take from the string passed in
     */
     template <class CharPointer>
-    void appendCharPointer (const CharPointer textToAppend, size_t maxCharsToTake)
+    void appendCharPointer (CharPointer textToAppend, size_t maxCharsToTake)
     {
         if (textToAppend.getAddress() != nullptr)
         {
@@ -290,7 +290,7 @@ public:
 
     /** Appends a string to the end of this one. */
     template <class CharPointer>
-    void appendCharPointer (const CharPointer textToAppend)
+    void appendCharPointer (CharPointer textToAppend)
     {
         appendCharPointer (textToAppend, std::numeric_limits<size_t>::max());
     }
@@ -1348,7 +1348,7 @@ JUCE_API String& JUCE_CALLTYPE operator<< (String& string1, double number);
 
 // Automatically creating a String from a bool opens up lots of nasty type conversion edge cases.
 // If you want a String representation of a bool you can cast the bool to an int first.
-JUCE_API String& JUCE_CALLTYPE operator<< (String&, bool) = delete;
+String& JUCE_CALLTYPE operator<< (String&, bool) = delete;
 
 //==============================================================================
 /** Case-sensitive comparison of two strings. */
@@ -1358,11 +1358,11 @@ JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const char* strin
 /** Case-sensitive comparison of two strings. */
 JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const wchar_t* string2) noexcept;
 /** Case-sensitive comparison of two strings. */
-JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const CharPointer_UTF8 string2) noexcept;
+JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, CharPointer_UTF8 string2) noexcept;
 /** Case-sensitive comparison of two strings. */
-JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const CharPointer_UTF16 string2) noexcept;
+JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, CharPointer_UTF16 string2) noexcept;
 /** Case-sensitive comparison of two strings. */
-JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, const CharPointer_UTF32 string2) noexcept;
+JUCE_API bool JUCE_CALLTYPE operator== (const String& string1, CharPointer_UTF32 string2) noexcept;
 
 /** Case-sensitive comparison of two strings. */
 JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const String& string2) noexcept;
@@ -1371,11 +1371,11 @@ JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const char* strin
 /** Case-sensitive comparison of two strings. */
 JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const wchar_t* string2) noexcept;
 /** Case-sensitive comparison of two strings. */
-JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const CharPointer_UTF8 string2) noexcept;
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, CharPointer_UTF8 string2) noexcept;
 /** Case-sensitive comparison of two strings. */
-JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const CharPointer_UTF16 string2) noexcept;
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, CharPointer_UTF16 string2) noexcept;
 /** Case-sensitive comparison of two strings. */
-JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, const CharPointer_UTF32 string2) noexcept;
+JUCE_API bool JUCE_CALLTYPE operator!= (const String& string1, CharPointer_UTF32 string2) noexcept;
 
 /** Case-sensitive comparison of two strings. */
 JUCE_API bool JUCE_CALLTYPE operator>  (const String& string1, const String& string2) noexcept;
@@ -1410,3 +1410,15 @@ JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const Str
 
 /** Writes a string to an OutputStream as UTF8. */
 JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, StringRef stringToWrite);
+
+} // namespace juce
+
+#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS // just used to avoid compiling this under compilers that lack libc++
+namespace std
+{
+    template <> struct hash<juce::String>
+    {
+        size_t operator() (const juce::String& s) const noexcept    { return s.hash(); }
+    };
+}
+#endif

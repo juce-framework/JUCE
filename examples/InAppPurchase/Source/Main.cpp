@@ -144,14 +144,16 @@ public:
         };
 
         //==============================================================================
-        class VoiceModel : public ListBoxModel
+        class VoiceModel  : public ListBoxModel
         {
         public:
             //==============================================================================
-            class VoiceRow : public Component, private Button::Listener, private Timer
+            class VoiceRow  : public Component,
+                              private Button::Listener,
+                              private Timer
             {
             public:
-                VoiceRow ()    : voices (getInstance()->getPurchases().getVoiceNames())
+                VoiceRow() : voices (getInstance()->getPurchases().getVoiceNames())
                 {
                     addAndMakeVisible (nameLabel);
                     addAndMakeVisible (purchaseButton);
@@ -377,10 +379,10 @@ public:
     class MainWindow    : public DocumentWindow
     {
     public:
-        MainWindow ()  : DocumentWindow (ProjectInfo::projectName,
-                                         Desktop::getInstance().getDefaultLookAndFeel()
-                                                               .findColour (ResizableWindow::backgroundColourId),
-                                         DocumentWindow::allButtons)
+        MainWindow()  : DocumentWindow (ProjectInfo::projectName,
+                                        Desktop::getInstance().getDefaultLookAndFeel()
+                                           .findColour (ResizableWindow::backgroundColourId),
+                                        DocumentWindow::allButtons)
         {
             setUsingNativeTitleBar (true);
             setContentOwned (new MainContentComponent(), true);
@@ -419,7 +421,7 @@ private:
     ScopedPointer<AlertWindow> alertWindow;
 };
 
-StringArray InAppPurchaseApplication::MainContentComponent::PhraseModel::phrases {{"I love JUCE!", "The five dimensions of touch", "Make it fast!"}};
+StringArray InAppPurchaseApplication::MainContentComponent::PhraseModel::phrases {"I love JUCE!", "The five dimensions of touch", "Make it fast!"};
 
 //==============================================================================
 // This macro generates the main() routine that launches the app.

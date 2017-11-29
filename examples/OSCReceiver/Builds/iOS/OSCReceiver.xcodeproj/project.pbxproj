@@ -11,6 +11,7 @@
 		9983B484984FC2A0DE716D91 = {isa = PBXBuildFile; fileRef = E020B248E1EF77EF4FCBDCE9; };
 		31096D23A1EA98E43FBA9D95 = {isa = PBXBuildFile; fileRef = 64D307BA4E7C75AB1648DEF6; };
 		B569A926F04E72DCCCADF553 = {isa = PBXBuildFile; fileRef = 1AD3B58EF82A3E2C666DBFE0; };
+		7D98D329535A87602C750BC2 = {isa = PBXBuildFile; fileRef = AAC153C0983A9E53E01AB047; };
 		BEAC0D3BDB4671F8E47E441E = {isa = PBXBuildFile; fileRef = 1071DB173D561A5841FF0F30; };
 		00B4AE20961B6E35789ACE19 = {isa = PBXBuildFile; fileRef = B035AE57473F86C5121B2A3E; };
 		BC9100A3FB5977F0F4EE7D5A = {isa = PBXBuildFile; fileRef = F45092B8BF45760A7C6E162A; };
@@ -38,6 +39,7 @@
 		7788FA84B3179B3D5B1D19CC = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JuceHeader.h; path = ../../JuceLibraryCode/JuceHeader.h; sourceTree = "SOURCE_ROOT"; };
 		84BE36386B22B697AD696CA3 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_graphics.mm"; path = "../../JuceLibraryCode/include_juce_graphics.mm"; sourceTree = "SOURCE_ROOT"; };
 		A4DDA40E13CF05D5FC490CF0 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_cryptography.mm"; path = "../../JuceLibraryCode/include_juce_cryptography.mm"; sourceTree = "SOURCE_ROOT"; };
+		AAC153C0983A9E53E01AB047 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		B035AE57473F86C5121B2A3E = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		B4012AD4A80B8D23CDB2A7A2 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		B703A6B2748D906CAD72890E = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AppConfig.h; path = ../../JuceLibraryCode/AppConfig.h; sourceTree = "SOURCE_ROOT"; };
@@ -65,7 +67,7 @@
 					1EE8BFA51FBE624B5CEF6706,
 					0F36051F52777507C1237AF3,
 					F0F350DB73A4824A3A634B03,
-					D00FB7DDB8580F614A038F5F, ); name = "Juce Modules"; sourceTree = "<group>"; };
+					D00FB7DDB8580F614A038F5F, ); name = "JUCE Modules"; sourceTree = "<group>"; };
 		07DB55D8172357541074D54E = {isa = PBXGroup; children = (
 					B703A6B2748D906CAD72890E,
 					BB9A8EC676483892F301D681,
@@ -76,7 +78,7 @@
 					E43E0639A6E120FC0BAD2287,
 					E70523D9850D380365FF03DD,
 					202BBC03590579D04DA254E7,
-					7788FA84B3179B3D5B1D19CC, ); name = "Juce Library Code"; sourceTree = "<group>"; };
+					7788FA84B3179B3D5B1D19CC, ); name = "JUCE Library Code"; sourceTree = "<group>"; };
 		84DA11D7E421FA7DCB18AFFA = {isa = PBXGroup; children = (
 					DBB4370FE47F2C2AA8193558,
 					F45092B8BF45760A7C6E162A, ); name = Resources; sourceTree = "<group>"; };
@@ -85,6 +87,7 @@
 					E020B248E1EF77EF4FCBDCE9,
 					64D307BA4E7C75AB1648DEF6,
 					1AD3B58EF82A3E2C666DBFE0,
+					AAC153C0983A9E53E01AB047,
 					1071DB173D561A5841FF0F30,
 					B035AE57473F86C5121B2A3E, ); name = Frameworks; sourceTree = "<group>"; };
 		C4C4A8503D11FA400E85EDB5 = {isa = PBXGroup; children = (
@@ -99,7 +102,7 @@
 		35EA263E2229633CFF9BA17A = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -129,7 +132,7 @@
 		7FE2E6B09FEAE455422E1496 = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -263,13 +266,14 @@
 					9983B484984FC2A0DE716D91,
 					31096D23A1EA98E43FBA9D95,
 					B569A926F04E72DCCCADF553,
+					7D98D329535A87602C750BC2,
 					BEAC0D3BDB4671F8E47E441E,
 					00B4AE20961B6E35789ACE19, ); runOnlyForDeploymentPostprocessing = 0; };
 		5E1B6101A5D94EDEE60C306A = {isa = PBXNativeTarget; buildConfigurationList = C8C7ABB6629DDECEDC110752; buildPhases = (
 					2EA5C343F865CED412BD5E20,
 					E95E181406F96A95EF81C474,
 					98DB1513FFCA4DC380991BE7, ); buildRules = ( ); dependencies = (  ); name = "OSCReceiver - App"; productName = OSCReceiver; productReference = 0AB2F0BDAF44CF1FE7BA007A; productType = "com.apple.product-type.application"; };
-		9CDCD4F1CF6D5405D574A953 = {isa = PBXProject; buildConfigurationList = 26D2BBF40A8AF71F3DDC53E0; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { 5E1B6101A5D94EDEE60C306A = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 9C0E80FC020192937C98CFC2; projectDirPath = ""; projectRoot = ""; targets = (5E1B6101A5D94EDEE60C306A); };
+		9CDCD4F1CF6D5405D574A953 = {isa = PBXProject; buildConfigurationList = 26D2BBF40A8AF71F3DDC53E0; attributes = { LastUpgradeCheck = 0830; ORGANIZATIONNAME = "ROLI Ltd."; TargetAttributes = { 5E1B6101A5D94EDEE60C306A = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 9C0E80FC020192937C98CFC2; projectDirPath = ""; projectRoot = ""; targets = (5E1B6101A5D94EDEE60C306A); };
 	};
 	rootObject = 9CDCD4F1CF6D5405D574A953;
 }

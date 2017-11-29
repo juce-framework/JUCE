@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 /** This class is used to hold a few look and feel base classes which are associated
@@ -99,7 +100,8 @@ class JUCE_API  LookAndFeel   : public ScrollBar::LookAndFeelMethods,
                                 public StretchableLayoutResizerBar::LookAndFeelMethods,
                                 public ExtraLookAndFeelBaseClasses::KeyMappingEditorComponentMethods,
                                 public ExtraLookAndFeelBaseClasses::AudioDeviceSelectorComponentMethods,
-                                public ExtraLookAndFeelBaseClasses::LassoComponentMethods
+                                public ExtraLookAndFeelBaseClasses::LassoComponentMethods,
+                                public SidePanel::LookAndFeelMethods
 {
 public:
     //==============================================================================
@@ -211,9 +213,6 @@ public:
 
 private:
     //==============================================================================
-    friend class WeakReference<LookAndFeel>;
-    WeakReference<LookAndFeel>::Master masterReference;
-
     struct ColourSetting
     {
         int colourID;
@@ -225,7 +224,10 @@ private:
 
     SortedSet<ColourSetting> colours;
     String defaultSans, defaultSerif, defaultFixed;
-    bool useNativeAlertWindows;
+    bool useNativeAlertWindows = false;
 
+    JUCE_DECLARE_WEAK_REFERENCEABLE (LookAndFeel)
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LookAndFeel)
 };
+
+} // namespace juce

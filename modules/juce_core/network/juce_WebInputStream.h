@@ -20,7 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -41,7 +42,7 @@ class JUCE_API WebInputStream : public InputStream
 
         @param url      The url that should be retrieved. This parameter may also contain
                         post data and/or parameters.
-        @param usePost  Specifies wheather a GET or a POST command should be used. This
+        @param usePost  Specifies whether a GET or a POST command should be used. This
                         parameter will also influence the way parameters are encoded.
     */
     WebInputStream (const URL& url, const bool usePost);
@@ -208,3 +209,5 @@ class JUCE_API WebInputStream : public InputStream
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebInputStream)
 };
+
+} // namespace juce

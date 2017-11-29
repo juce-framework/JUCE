@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class TextPropertyComponent::LabelComp  : public Label,
                                           public FileDragAndDropTarget
 {
@@ -167,7 +170,7 @@ void TextPropertyComponent::removeListener (TextPropertyComponentListener* const
 void TextPropertyComponent::callListeners()
 {
     Component::BailOutChecker checker (this);
-    listenerList.callChecked (checker, &TextPropertyComponentListener::textPropertyComponentChanged, this);
+    listenerList.callChecked (checker, [this] (Listener& l) { l.textPropertyComponentChanged (this); });
 }
 
 void TextPropertyComponent::colourChanged()
@@ -181,3 +184,5 @@ void TextPropertyComponent::setInterestedInFileDrag (bool isInterested)
     if (textEditor != nullptr)
         textEditor->setInterestedInFileDrag (isInterested);
 }
+
+} // namespace juce

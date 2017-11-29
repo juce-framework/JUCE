@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -402,8 +402,6 @@ public:
     /** @internal */
     void paint (Graphics&) override;
     /** @internal */
-    void resized() override;
-    /** @internal */
     void mouseMove (const MouseEvent&) override;
     /** @internal */
     void mouseEnter (const MouseEvent&) override;
@@ -436,9 +434,10 @@ private:
     ScopedPointer<Component> dragOverlayComp;
     class DragOverlayComp;
 
-    bool columnsChanged, columnsResized, sortChanged, menuActive, stretchToFit;
-    int columnIdBeingResized, columnIdBeingDragged, initialColumnWidth;
-    int columnIdUnderMouse, draggingColumnOffset, draggingColumnOriginalIndex, lastDeliberateWidth;
+    bool columnsChanged = false, columnsResized = false, sortChanged = false;
+    bool menuActive = true, stretchToFit = false;
+    int columnIdBeingResized = 0, columnIdBeingDragged = 0, initialColumnWidth = 0;
+    int columnIdUnderMouse = 0, draggingColumnOffset = 0, draggingColumnOriginalIndex = 0, lastDeliberateWidth = 0;
 
     ColumnInfo* getInfoForId (int columnId) const;
     int visibleIndexToTotalIndex (int visibleIndex) const;
@@ -456,3 +455,5 @@ private:
 
 /** This typedef is just for compatibility with old code - newer code should use the TableHeaderComponent::Listener class directly. */
 typedef TableHeaderComponent::Listener TableHeaderListener;
+
+} // namespace juce

@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class Button::CallbackHelper  : public Timer,
                                 public ApplicationCommandManagerListener,
                                 public Value::Listener,
@@ -73,27 +76,7 @@ private:
 };
 
 //==============================================================================
-Button::Button (const String& name)
-  : Component (name),
-    text (name),
-    buttonPressTime (0),
-    lastRepeatTime (0),
-    commandManagerToUse (nullptr),
-    autoRepeatDelay (-1),
-    autoRepeatSpeed (0),
-    autoRepeatMinimumDelay (-1),
-    radioGroupId (0),
-    connectedEdgeFlags (0),
-    commandID(),
-    buttonState (buttonNormal),
-    lastStatePainted (buttonNormal),
-    lastToggleState (false),
-    clickTogglesState (false),
-    needsToRelease (false),
-    needsRepainting (false),
-    isKeyDown (false),
-    triggerOnMouseDown (false),
-    generateTooltip (false)
+Button::Button (const String& name)  : Component (name), text (name)
 {
     callbackHelper = new CallbackHelper (*this);
 
@@ -109,7 +92,7 @@ Button::~Button()
         commandManagerToUse->removeListener (callbackHelper);
 
     isOn.removeListener (callbackHelper);
-    callbackHelper = nullptr;
+    callbackHelper.reset();
 }
 
 //==============================================================================
@@ -413,7 +396,7 @@ void Button::sendClickMessage (const ModifierKeys& modifiers)
     clicked (modifiers);
 
     if (! checker.shouldBailOut())
-        buttonListeners.callChecked (checker, &Button::Listener::buttonClicked, this);
+        buttonListeners.callChecked (checker, [this] (Listener& l) { l.buttonClicked (this); });
 }
 
 void Button::sendStateMessage()
@@ -423,7 +406,7 @@ void Button::sendStateMessage()
     buttonStateChanged();
 
     if (! checker.shouldBailOut())
-        buttonListeners.callChecked (checker, &Button::Listener::buttonStateChanged, this);
+        buttonListeners.callChecked (checker, [this] (Listener& l) { l.buttonStateChanged (this); });
 }
 
 //==============================================================================
@@ -692,3 +675,5 @@ void Button::repeatTimerCallback()
         callbackHelper->stopTimer();
     }
 }
+
+} // namespace juce

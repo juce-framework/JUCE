@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class AsyncUpdater::AsyncUpdaterMessage  : public CallbackMessage
 {
 public:
@@ -86,3 +89,5 @@ bool AsyncUpdater::isUpdatePending() const noexcept
 {
     return activeMessage->shouldDeliver.value != 0;
 }
+
+} // namespace juce

@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -33,7 +34,7 @@
     @see MouseListener, Component::mouseMove, Component::mouseEnter, Component::mouseExit,
          Component::mouseDown, Component::mouseUp, Component::mouseDrag
 */
-class JUCE_API  MouseEvent
+class JUCE_API  MouseEvent  final
 {
 public:
     //==============================================================================
@@ -377,7 +378,7 @@ private:
 
     @see MouseListener, MouseEvent
 */
-struct MouseWheelDetails
+struct MouseWheelDetails  final
 {
     //==============================================================================
     /** The amount that the wheel has been moved in the X axis.
@@ -417,7 +418,7 @@ struct MouseWheelDetails
 
     @see MouseListener, MouseEvent
 */
-struct PenDetails
+struct PenDetails  final
 {
     /**
         The rotation of the pen device in radians. Indicates the clockwise rotation, or twist,
@@ -437,3 +438,5 @@ struct PenDetails
     */
     float tiltY;
 };
+
+} // namespace juce

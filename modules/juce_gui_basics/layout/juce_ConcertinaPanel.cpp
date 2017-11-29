@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct ConcertinaPanel::PanelSizes
 {
     struct Panel
@@ -451,3 +454,5 @@ void ConcertinaPanel::panelHeaderDoubleClicked (Component* component)
     if (! expandPanelFully (component, true))
         setPanelSize (component, 0, true);
 }
+
+} // namespace juce

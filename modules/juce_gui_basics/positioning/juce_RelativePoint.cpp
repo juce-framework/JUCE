@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 namespace RelativePointHelpers
 {
     inline void skipComma (String::CharPointerType& s)
@@ -95,3 +98,5 @@ bool RelativePoint::isDynamic() const
 {
     return x.isDynamic() || y.isDynamic();
 }
+
+} // namespace juce

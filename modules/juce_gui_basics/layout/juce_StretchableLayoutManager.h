@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -242,8 +242,8 @@ private:
         double minSize, maxSize, preferredSize;
     };
 
-    OwnedArray <ItemLayoutProperties> items;
-    int totalSize;
+    OwnedArray<ItemLayoutProperties> items;
+    int totalSize = 0;
 
     //==============================================================================
     static int sizeToRealSize (double size, int totalSpace);
@@ -256,3 +256,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StretchableLayoutManager)
 };
+
+} // namespace juce

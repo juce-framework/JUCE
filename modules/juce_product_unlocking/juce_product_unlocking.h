@@ -35,7 +35,7 @@
 
   ID:               juce_product_unlocking
   vendor:           juce
-  version:          5.1.1
+  version:          5.2.0
   name:             JUCE Online marketplace support
   description:      Classes for online product authentication
   website:          http://www.juce.com/juce
@@ -77,17 +77,17 @@
  #include <juce_gui_extra/juce_gui_extra.h>
 #endif
 
-namespace juce
-{
-   #include "in_app_purchases/juce_InAppPurchases.h"
+#if JUCE_IN_APP_PURCHASES
+ #include "in_app_purchases/juce_InAppPurchases.h"
+#endif
 
-   #if JUCE_MODULE_AVAILABLE_juce_data_structures
-    #include "marketplace/juce_OnlineUnlockStatus.h"
-    #include "marketplace/juce_TracktionMarketplaceStatus.h"
-   #endif
-    #include "marketplace/juce_KeyFileGeneration.h"
+#if JUCE_MODULE_AVAILABLE_juce_data_structures
+ #include "marketplace/juce_OnlineUnlockStatus.h"
+ #include "marketplace/juce_TracktionMarketplaceStatus.h"
+#endif
 
-   #if JUCE_MODULE_AVAILABLE_juce_gui_extra
-    #include "marketplace/juce_OnlineUnlockForm.h"
-   #endif
-}
+#include "marketplace/juce_KeyFileGeneration.h"
+
+#if JUCE_MODULE_AVAILABLE_juce_gui_extra
+ #include "marketplace/juce_OnlineUnlockForm.h"
+#endif

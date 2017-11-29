@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct DefaultImageFormats
 {
     static ImageFileFormat** get()
@@ -105,3 +108,5 @@ Image ImageFileFormat::loadFrom (const void* rawData, const size_t numBytes)
 
     return Image();
 }
+
+} // namespace juce

@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -231,13 +231,13 @@ public:
 
 private:
     //==============================================================================
-    WeakReference<ApplicationCommandTarget>::Master masterReference;
-    friend class WeakReference<ApplicationCommandTarget>;
-
     class CommandMessage;
     friend class CommandMessage;
 
     bool tryToInvoke (const InvocationInfo&, bool async);
 
+    JUCE_DECLARE_WEAK_REFERENCEABLE (ApplicationCommandTarget)
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ApplicationCommandTarget)
 };
+
+} // namespace juce

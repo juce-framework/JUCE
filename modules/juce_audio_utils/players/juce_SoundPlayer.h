@@ -24,7 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -95,7 +96,7 @@ public:
         multiple outputs so that something is sent to all output channels. If it
         is false, then the buffer will just be played on the first output channels.
      */
-    void play (AudioSampleBuffer* buffer,
+    void play (AudioBuffer<float>* buffer,
                bool deleteWhenFinished = false,
                bool playOnAllOutputChannels = false);
 
@@ -130,3 +131,5 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SoundPlayer)
 };
+
+} // namespace juce

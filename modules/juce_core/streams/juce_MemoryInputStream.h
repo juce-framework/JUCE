@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -71,7 +71,7 @@ public:
 
     //==============================================================================
     int64 getPosition() override;
-    bool setPosition (int64 pos) override;
+    bool setPosition (int64) override;
     int64 getTotalLength() override;
     bool isExhausted() override;
     int read (void* destBuffer, int maxBytesToRead) override;
@@ -79,10 +79,12 @@ public:
 private:
     //==============================================================================
     const void* data;
-    size_t dataSize, position;
+    size_t dataSize, position = 0;
     HeapBlock<char> internalCopy;
 
     void createInternalCopy();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryInputStream)
 };
+
+} // namespace juce

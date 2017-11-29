@@ -29,17 +29,16 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 
 //==============================================================================
-class OSCLogListBox    : public ListBox, private ListBoxModel, private AsyncUpdater
+class OSCLogListBox    : public ListBox,
+                         private ListBoxModel,
+                         private AsyncUpdater
 {
 public:
-
-    //==============================================================================
     OSCLogListBox()
     {
         setModel (this);
     }
 
-    //==============================================================================
     ~OSCLogListBox()
     {
     }
@@ -57,7 +56,7 @@ public:
 
         if (isPositiveAndBelow (row, oscLogList.size()))
         {
-            g.setColour (Colours::black);
+            g.setColour (Colours::white);
 
             g.drawText (oscLogList[row],
                         Rectangle<int> (width, height).reduced (4, 0),
@@ -128,13 +127,12 @@ public:
         else if (arg.isBlob())
         {
             typeAsString = "blob";
-            const MemoryBlock& blob = arg.getBlob();
-            valueAsString = String::fromUTF8( (const char*)blob.getData(), blob.getSize());
+            auto& blob = arg.getBlob();
+            valueAsString = String::fromUTF8 ((const char*) blob.getData(), (int) blob.getSize());
         }
         else
         {
             typeAsString = "(unknown)";
-            valueAsString = "";
         }
 
         oscLogList.add (getIndentationString (level + 1) + "- " + typeAsString.paddedRight(' ', 12) + valueAsString);
@@ -162,13 +160,10 @@ public:
     }
 
 private:
-
-    //==============================================================================
-    String getIndentationString (int level)
+    static String getIndentationString (int level)
     {
         return String().paddedRight (' ', 2 * level);
     }
-
 
     //==============================================================================
     StringArray oscLogList;

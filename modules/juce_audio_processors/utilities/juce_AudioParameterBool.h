@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 /**
     Provides a class of AudioProcessorParameter that can be used as a boolean value.
 
@@ -49,6 +52,11 @@ public:
     /** Changes the parameter's current value to a new boolean. */
     AudioParameterBool& operator= (bool newValue);
 
+protected:
+    /** Override this method if you are interested in receiving callbacks
+        when the parameter value changes.
+    */
+    virtual void valueChanged (bool newValue);
 
 private:
     //==============================================================================
@@ -58,8 +66,11 @@ private:
     void setValue (float newValue) override;
     float getDefaultValue() const override;
     int getNumSteps() const override;
+    bool isDiscrete() const override;
     String getText (float, int) const override;
     float getValueForText (const String&) const override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioParameterBool)
 };
+
+} // namespace juce

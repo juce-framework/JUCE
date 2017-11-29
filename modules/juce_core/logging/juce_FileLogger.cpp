@@ -20,6 +20,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 FileLogger::FileLogger (const File& file,
                         const String& welcomeMessage,
                         const int64 maxInitialFileSizeBytes)
@@ -126,3 +129,5 @@ FileLogger* FileLogger::createDateStampedLogger (const String& logFileSubDirecto
                                                    .getNonexistentSibling(),
                            welcomeMessage, 0);
 }
+
+} // namespace juce

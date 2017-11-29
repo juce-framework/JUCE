@@ -24,9 +24,8 @@
   ==============================================================================
 */
 
-#include "../jucer_Headers.h"
+#include "../Application/jucer_Headers.h"
 #include "jucer_JucerDocument.h"
-
 
 //==============================================================================
 BinaryResources::BinaryResources()
@@ -122,7 +121,7 @@ void BinaryResources::add (const String& name, const String& originalFileName, c
 
     r->originalFilename = originalFileName;
     r->data = data;
-    r->drawable = nullptr;
+    r->drawable.reset();
 
     changed();
 }

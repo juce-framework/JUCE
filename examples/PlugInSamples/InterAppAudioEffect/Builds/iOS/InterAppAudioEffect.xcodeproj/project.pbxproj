@@ -18,6 +18,7 @@
 		EE6B5FC34FB47B41336EA293 = {isa = PBXBuildFile; fileRef = AD9B42ED650058295A747510; };
 		B2E5CB24DBACF25E2CBAC9A1 = {isa = PBXBuildFile; fileRef = F07FA71EC2B5FCA584FAA10B; };
 		6FAEC70FAE3DBC629160F86C = {isa = PBXBuildFile; fileRef = 41CB50701EE5BFDCE1F89BBA; };
+		4157133366BD100EE3FB37C8 = {isa = PBXBuildFile; fileRef = 05E775E1FA42EAFA8168EA3D; };
 		DFF48C0819F2191B154569A9 = {isa = PBXBuildFile; fileRef = B69C94CF64688C5270D8122C; };
 		9BB46E700B9A4617B4CFDC24 = {isa = PBXBuildFile; fileRef = 82F310E23852E0C002F5A2D1; };
 		4EC4A8C3AF328E40626CBAE7 = {isa = PBXBuildFile; fileRef = E5A657DE5A5B1516B3E35FA8; };
@@ -37,6 +38,7 @@
 		CD37018E7036F7820A433F4E = {isa = PBXBuildFile; fileRef = F212383F19D044B5431C0BCE; };
 		FAC41C26E955C024553DC96C = {isa = PBXBuildFile; fileRef = 000ADE2B5EA2B1FB20061D1F; };
 		000ADE2B5EA2B1FB20061D1F = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_gui_extra.mm"; path = "../../JuceLibraryCode/include_juce_gui_extra.mm"; sourceTree = "SOURCE_ROOT"; };
+		05E775E1FA42EAFA8168EA3D = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		0F3042AB2BAEE0EC5457645F = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_audio_devices.mm"; path = "../../JuceLibraryCode/include_juce_audio_devices.mm"; sourceTree = "SOURCE_ROOT"; };
 		1867AF96FAD8E984651D1CEF = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_audio_plugin_client_VST_utils.mm"; path = "../../JuceLibraryCode/include_juce_audio_plugin_client_VST_utils.mm"; sourceTree = "SOURCE_ROOT"; };
 		1D65D94E215884324B2BF431 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_core.mm"; path = "../../JuceLibraryCode/include_juce_core.mm"; sourceTree = "SOURCE_ROOT"; };
@@ -104,7 +106,7 @@
 					78F41A05666E3B38C9FDE9D3,
 					C1507624A4C7CFDCE375CEB6,
 					FEBA6F6C0A62E2749D6ACC88,
-					59469A0541A1B91E7968B8FC, ); name = "Juce Modules"; sourceTree = "<group>"; };
+					59469A0541A1B91E7968B8FC, ); name = "JUCE Modules"; sourceTree = "<group>"; };
 		C560791DA1D2E0CA6690BC9E = {isa = PBXGroup; children = (
 					4D36B733C9B175319B696E33,
 					B8AC3D1A8F4DD074C3C6E742,
@@ -121,7 +123,7 @@
 					53BFB18A8201B9321B6AF3AE,
 					F212383F19D044B5431C0BCE,
 					000ADE2B5EA2B1FB20061D1F,
-					B3D01A391D4DF11709AE5688, ); name = "Juce Library Code"; sourceTree = "<group>"; };
+					B3D01A391D4DF11709AE5688, ); name = "JUCE Library Code"; sourceTree = "<group>"; };
 		E1CFC4C60E9EC5DBE60DB32F = {isa = PBXGroup; children = (
 					7B37ABD2C5B9FF909250C8DE,
 					E5A657DE5A5B1516B3E35FA8, ); name = Resources; sourceTree = "<group>"; };
@@ -136,6 +138,7 @@
 					AD9B42ED650058295A747510,
 					F07FA71EC2B5FCA584FAA10B,
 					41CB50701EE5BFDCE1F89BBA,
+					05E775E1FA42EAFA8168EA3D,
 					B69C94CF64688C5270D8122C,
 					82F310E23852E0C002F5A2D1, ); name = Frameworks; sourceTree = "<group>"; };
 		196E6AA022E8A0902AB15281 = {isa = PBXGroup; children = (
@@ -152,7 +155,7 @@
 		22DBBF091193373BEA063A5B = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -181,7 +184,7 @@
 		54D411166886E8F3BBC0E25F = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -211,7 +214,7 @@
 		8DA1E39A676F877EB549B8CA = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				CODE_SIGN_ENTITLEMENTS = "InterAppAudioEffect.entitlements";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -243,7 +246,7 @@
 		07EA55A19B872E1F49C62539 = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				CODE_SIGN_ENTITLEMENTS = "InterAppAudioEffect.entitlements";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -276,7 +279,7 @@
 		E6FA0B75AC78727D8A3F1888 = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -306,7 +309,7 @@
 		665044AFDC3F0D4E11643857 = {isa = XCBuildConfiguration; buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++11";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
@@ -445,6 +448,7 @@
 					EE6B5FC34FB47B41336EA293,
 					B2E5CB24DBACF25E2CBAC9A1,
 					6FAEC70FAE3DBC629160F86C,
+					4157133366BD100EE3FB37C8,
 					DFF48C0819F2191B154569A9,
 					9BB46E700B9A4617B4CFDC24, ); runOnlyForDeploymentPostprocessing = 0; };
 		51FB6E6A2D0998D38E999826 = {isa = PBXNativeTarget; buildConfigurationList = 10A00DA553BF0C30212421D2; buildPhases = (
@@ -472,7 +476,7 @@
 					FAC41C26E955C024553DC96C, ); runOnlyForDeploymentPostprocessing = 0; };
 		A3401CC1AC6C5B89EFBAEF01 = {isa = PBXNativeTarget; buildConfigurationList = AA6F190D4FECB06C7A7A0658; buildPhases = (
 					177DC2A7A303F23EDDE5183A, ); buildRules = ( ); dependencies = (  ); name = "InterAppAudioEffect - Shared Code"; productName = InterAppAudioEffect; productReference = 873711620EC157BCCFFF80B1; productType = "com.apple.product-type.library.static"; };
-		DF3D0C1B88ADC0274AE6BD73 = {isa = PBXProject; buildConfigurationList = 016ACE6B9EC6F47020502F4F; attributes = { LastUpgradeCheck = 0830; TargetAttributes = { 03BD5476C606A5BA65CD4FDF = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };51FB6E6A2D0998D38E999826 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 1; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };A3401CC1AC6C5B89EFBAEF01 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = EC01685A042C62251C5AF093; projectDirPath = ""; projectRoot = ""; targets = (03BD5476C606A5BA65CD4FDF, 51FB6E6A2D0998D38E999826, A3401CC1AC6C5B89EFBAEF01); };
+		DF3D0C1B88ADC0274AE6BD73 = {isa = PBXProject; buildConfigurationList = 016ACE6B9EC6F47020502F4F; attributes = { LastUpgradeCheck = 0830; ORGANIZATIONNAME = "ROLI Ltd."; TargetAttributes = { 03BD5476C606A5BA65CD4FDF = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };51FB6E6A2D0998D38E999826 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 1; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; };A3401CC1AC6C5B89EFBAEF01 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = EC01685A042C62251C5AF093; projectDirPath = ""; projectRoot = ""; targets = (03BD5476C606A5BA65CD4FDF, 51FB6E6A2D0998D38E999826, A3401CC1AC6C5B89EFBAEF01); };
 	};
 	rootObject = DF3D0C1B88ADC0274AE6BD73;
 }

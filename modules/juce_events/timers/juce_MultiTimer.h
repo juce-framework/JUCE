@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -119,3 +119,5 @@ private:
     Timer* getCallback (int) const noexcept;
     MultiTimer& operator= (const MultiTimer&);
 };
+
+} // namespace juce

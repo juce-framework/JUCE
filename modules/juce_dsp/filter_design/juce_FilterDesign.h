@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 /**
     This class provides a set of functions which generates FIR::Coefficients
@@ -257,3 +261,6 @@ private:
                                                                           FloatType stopbandAttenuationdB);
     FilterDesign() = delete;
 };
+
+} // namespace dsp
+} // namespace juce

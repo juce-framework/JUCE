@@ -27,9 +27,9 @@
 #pragma once
 
 #include "jucer_JucerDocument.h"
-#include "paintelements/jucer_PaintElement.h"
+#include "PaintElements/jucer_PaintElement.h"
 
-
+//==============================================================================
 namespace ObjectTypes
 {
     //==============================================================================

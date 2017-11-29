@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 struct WhirlpoolProcessor
 {
     WhirlpoolProcessor() noexcept   : bufferBits (0), bufferPos (0)
@@ -661,3 +664,5 @@ public:
 static WhirlpoolTests whirlpoolUnitTests;
 
 #endif
+
+} // namespace juce

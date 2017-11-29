@@ -24,10 +24,10 @@
   ==============================================================================
 */
 
+#if JucePlugin_Build_RTAS
+
 #include "../../juce_core/system/juce_TargetPlatform.h"
 #include "../utility/juce_CheckSettingMacros.h"
-
-#if JucePlugin_Build_RTAS
 
 #ifdef _MSC_VER
  // (this is a workaround for a build problem in VC9)
@@ -110,6 +110,11 @@
 #endif
 
 #include "../utility/juce_IncludeModuleHeaders.h"
+
+using namespace juce;
+
+namespace juce
+{
 
 #ifdef _MSC_VER
  #pragma pack (pop)
@@ -594,7 +599,7 @@ public:
                         channels [i] = inputs [i];
                 }
 
-                AudioSampleBuffer chans (channels, totalChans, numSamples);
+                AudioBuffer<float> chans (channels, totalChans, numSamples);
 
                 if (mBypassed)
                     juceFilter->processBlockBypassed (chans, midiEvents);
@@ -1032,6 +1037,8 @@ private:
 };
 
 void initialiseMacRTAS();
+
+} // namespace juce
 
 CProcessGroupInterface* CProcessGroup::CreateProcessGroup()
 {

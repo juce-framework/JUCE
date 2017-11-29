@@ -91,3 +91,30 @@
  #undef JucePlugin_Build_AAX
  #define JucePlugin_Build_AAX 0
 #endif
+
+//==============================================================================
+#if JucePlugin_Build_VST
+
+ #if JucePlugin_VersionCode < 0x010000   // Major < 0
+
+  #if (JucePlugin_VersionCode & 0x00FF00) > (9 * 0x100) // check if Minor number exceeeds 9
+   #warning When version has "major" = 0, VST2 has trouble displaying "minor" exceeding 9
+  #endif
+
+  #if (JucePlugin_VersionCode & 0xFF) > 9   // check if Bugfix number exceeeds 9
+   #warning When version has "major" = 0, VST2 has trouble displaying "bugfix" exceeding 9
+  #endif
+
+ #elif JucePlugin_VersionCode >= 0x650000   // Major >= 101
+
+  #if (JucePlugin_VersionCode & 0x00FF00) > (99 * 0x100) // check if Minor number exceeeds 99
+   #warning When version has "major" > 100, VST2 has trouble displaying "minor" exceeding 99
+  #endif
+
+  #if (JucePlugin_VersionCode & 0xFF) > 99  // check if Bugfix number exceeeds 99
+   #warning When version has "major" > 100, VST2 has trouble displaying "bugfix" exceeding 99
+  #endif
+
+ #endif // JucePlugin_VersionCode
+
+#endif // JucePlugin_Build_VST

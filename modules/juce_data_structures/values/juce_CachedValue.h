@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -308,3 +308,5 @@ inline void CachedValue<Type>::valueTreePropertyChanged (ValueTree& changedTree,
     if (changedProperty == targetProperty && targetTree == changedTree)
         forceUpdateOfCachedValue();
 }
+
+} // namespace juce

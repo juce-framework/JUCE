@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -29,7 +29,7 @@
     uncontended situations.
 
     Note that unlike a CriticalSection, this type of lock is not re-entrant, and may
-    be less efficient when used it a highly contended situation, but it's very small and
+    be less efficient when used in a highly contended situation, but it's very small and
     requires almost no initialisation.
     It's most appropriate for simple situations where you're only going to hold the
     lock for a very brief time.
@@ -79,3 +79,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (SpinLock)
 };
+
+} // namespace juce

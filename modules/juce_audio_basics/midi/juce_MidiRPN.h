@@ -20,8 +20,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /** Represents a MIDI RPN (registered parameter number) or NRPN (non-registered
@@ -144,3 +144,5 @@ public:
                                 bool isNRPN = false,
                                 bool use14BitValue = true);
 };
+
+} // namespace juce

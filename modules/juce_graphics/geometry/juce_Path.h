@@ -24,8 +24,8 @@
   ==============================================================================
 */
 
-#pragma once
-
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -60,7 +60,7 @@
 
     @see PathFlatteningIterator, PathStrokeType, Graphics
 */
-class JUCE_API  Path
+class JUCE_API  Path  final
 {
 public:
     //==============================================================================
@@ -781,9 +781,7 @@ public:
     void loadPathFromData (const void* data, size_t numberOfBytes);
 
     /** Stores the path by writing it out to a stream.
-
         After writing out a path, you can reload it using loadPathFromStream().
-
         @see loadPathFromStream, loadPathFromData
     */
     void writePathToStream (OutputStream& destination) const;
@@ -803,6 +801,8 @@ private:
     //==============================================================================
     friend class PathFlatteningIterator;
     friend class Path::Iterator;
+    friend class EdgeTable;
+
     ArrayAllocationBase<float, DummyCriticalSection> data;
     size_t numElements = 0;
 
@@ -829,3 +829,5 @@ private:
 
     JUCE_LEAK_DETECTOR (Path)
 };
+
+} // namespace juce

@@ -24,6 +24,10 @@
   ==============================================================================
 */
 
+namespace juce
+{
+namespace dsp
+{
 
 struct FFT::Instance
 {
@@ -37,8 +41,9 @@ struct FFT::Engine
 {
     Engine (int priorityToUse) : enginePriority (priorityToUse)
     {
-        EnginePriorityComparator comparator;
-        getEngines().addSorted (comparator, this);
+        auto& list = getEngines();
+        list.add (this);
+        std::sort (list.begin(), list.end(), [] (Engine* a, Engine* b) { return b->enginePriority < a->enginePriority; });
     }
 
     virtual ~Engine() {}
@@ -57,15 +62,6 @@ struct FFT::Engine
     }
 
 private:
-    struct EnginePriorityComparator
-    {
-        static int compareElements (Engine* first, Engine* second) noexcept
-        {
-            // sort in reverse order
-            return DefaultElementComparator<int>::compareElements (second->enginePriority, first->enginePriority);
-        }
-    };
-
     static Array<Engine*>& getEngines()
     {
         static Array<Engine*> engines;
@@ -801,7 +797,8 @@ FFT::EngineImpl<IntelFFT> fftwEngine;
 FFT::FFT (int order)
     : engine (FFT::Engine::createBestEngineForPlatform (order)),
       size (1 << order)
-{}
+{
+}
 
 FFT::~FFT() {}
 
@@ -836,3 +833,6 @@ void FFT::performFrequencyOnlyForwardTransform (float* inputOutputData) const no
 
     zeromem (&inputOutputData[size], sizeof (float) * static_cast<size_t> (size));
 }
+
+} // namespace dsp
+} // namespace juce

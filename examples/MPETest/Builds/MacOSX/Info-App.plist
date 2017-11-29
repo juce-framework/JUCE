@@ -8,7 +8,7 @@
     <key>CFBundleIconFile</key>
     <string></string>
     <key>CFBundleIdentifier</key>
-    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <string>com.roli.MPETest</string>
     <key>CFBundleName</key>
     <string>MPETest</string>
     <key>CFBundleDisplayName</key>

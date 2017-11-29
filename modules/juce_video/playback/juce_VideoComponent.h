@@ -25,6 +25,8 @@
 #ifndef JUCE_VIDEOCOMPONENT_H_INCLUDED
 #define JUCE_VIDEOCOMPONENT_H_INCLUDED
 
+namespace juce
+{
 
 //==============================================================================
 /**
@@ -130,3 +132,5 @@ private:
 
 
 #endif
+
+} // namespace juce

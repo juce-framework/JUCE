@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 class TreeView::ContentComponent  : public Component,
                                     public TooltipClient,
                                     public AsyncUpdater
@@ -121,7 +124,7 @@ public:
                             dragImage.multiplyAllAlphas (0.6f);
 
                             auto imageOffset = pos.getPosition() - e.getPosition();
-                            dragContainer->startDragging (dragDescription, &owner, dragImage, true, &imageOffset);
+                            dragContainer->startDragging (dragDescription, &owner, dragImage, true, &imageOffset, &e.source);
                         }
                         else
                         {
@@ -1015,8 +1018,8 @@ void TreeView::showDragHighlight (const InsertPoint& insertPos) noexcept
 
 void TreeView::hideDragHighlight() noexcept
 {
-    dragInsertPointHighlight = nullptr;
-    dragTargetGroupHighlight = nullptr;
+    dragInsertPointHighlight.reset();
+    dragTargetGroupHighlight.reset();
 }
 
 void TreeView::handleDrag (const StringArray& files, const SourceDetails& dragSourceDetails)
@@ -1082,7 +1085,7 @@ void TreeView::fileDragEnter (const StringArray& files, int x, int y)
 
 void TreeView::fileDragMove (const StringArray& files, int x, int y)
 {
-    handleDrag (files, SourceDetails ({}, this, { x, y }));
+    handleDrag (files, SourceDetails (var(), this, { x, y }));
 }
 
 void TreeView::fileDragExit (const StringArray&)
@@ -1092,7 +1095,7 @@ void TreeView::fileDragExit (const StringArray&)
 
 void TreeView::filesDropped (const StringArray& files, int x, int y)
 {
-    handleDrop (files, SourceDetails ({}, this, { x, y }));
+    handleDrop (files, SourceDetails (var(), this, { x, y }));
 }
 
 bool TreeView::isInterestedInDragSource (const SourceDetails& /*dragSourceDetails*/)
@@ -1905,3 +1908,5 @@ TreeViewItem::OpennessRestorer::~OpennessRestorer()
     if (oldOpenness != nullptr)
         treeViewItem.restoreOpennessState (*oldOpenness);
 }
+
+} // namespace juce

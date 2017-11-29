@@ -24,6 +24,9 @@
   ==============================================================================
 */
 
+namespace juce
+{
+
 AudioFormat::AudioFormat (String name, StringArray extensions)
    : formatName (name), fileExtensions (extensions)
 {
@@ -40,15 +43,15 @@ AudioFormat::~AudioFormat()
 
 bool AudioFormat::canHandleFile (const File& f)
 {
-    for (int i = 0; i < fileExtensions.size(); ++i)
-        if (f.hasFileExtension (fileExtensions[i]))
+    for (auto& e : getFileExtensions())
+        if (f.hasFileExtension (e))
             return true;
 
     return false;
 }
 
 const String& AudioFormat::getFormatName() const                { return formatName; }
-const StringArray& AudioFormat::getFileExtensions() const       { return fileExtensions; }
+StringArray AudioFormat::getFileExtensions() const              { return fileExtensions; }
 bool AudioFormat::isCompressed()                                { return false; }
 StringArray AudioFormat::getQualityOptions()                    { return {}; }
 
@@ -85,3 +88,5 @@ AudioFormatWriter* AudioFormat::createWriterFor (OutputStream* streamToWriteTo,
 
     return nullptr;
 }
+
+} // namespace juce
