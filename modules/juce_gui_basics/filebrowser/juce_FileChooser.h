@@ -70,7 +70,7 @@ public:
 
                                               Note: on iOS when saving a file, a user will not
                                               be able to change a file name, so it may be a good
-                                              idea to include at list a valid file name in
+                                              idea to include at least a valid file name in
                                               initialFileOrDirectory. When no filename is found,
                                               "Untitled" will be used.
 
