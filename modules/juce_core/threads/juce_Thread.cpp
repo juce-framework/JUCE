@@ -461,7 +461,8 @@ public:
 static AtomicTests atomicUnitTests;
 
 //==============================================================================
-class ThreadLocalValueUnitTest : public UnitTest, private Thread
+class ThreadLocalValueUnitTest  : public UnitTest,
+                                  private Thread
 {
 public:
     ThreadLocalValueUnitTest()

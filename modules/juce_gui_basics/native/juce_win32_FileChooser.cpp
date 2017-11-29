@@ -35,7 +35,8 @@ namespace juce
 // not have been created yet when the user deletes JUCE's FileChooser class. If this
 // occurs the Win32NativeFileChooser will still have a reference count of 1 and will
 // simply delete itself immedietely once the HWND will have been created a while later.
-class Win32NativeFileChooser    : public ReferenceCountedObject, private Thread
+class Win32NativeFileChooser  : public ReferenceCountedObject,
+                                private Thread
 {
 public:
     typedef ReferenceCountedObjectPtr<Win32NativeFileChooser> Ptr;
@@ -500,7 +501,8 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Win32NativeFileChooser)
 };
 
-class FileChooser::Native     : public Component, public FileChooser::Pimpl
+class FileChooser::Native     : public Component,
+                                public FileChooser::Pimpl
 {
 public:
 
@@ -509,7 +511,7 @@ public:
           nativeFileChooser (new Win32NativeFileChooser (this, flags, previewComp, fileChooser.startingFile,
                                                          fileChooser.title, fileChooser.filters))
     {
-        const Rectangle<int> mainMon (Desktop::getInstance().getDisplays().getMainDisplay().userArea);
+        auto mainMon = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
 
         setBounds (mainMon.getX() + mainMon.getWidth() / 4,
                    mainMon.getY() + mainMon.getHeight() / 4,
@@ -531,12 +533,21 @@ public:
     {
         SafePointer<Native> safeThis (this);
 
+<<<<<<< Updated upstream
         enterModalState (true, ModalCallbackFunction::create(
                         [safeThis] (int)
                         {
                             if (safeThis != nullptr)
                                 safeThis->owner.finished (safeThis->nativeFileChooser->results);
                         }));
+=======
+        enterModalState (true, ModalCallbackFunction::create (
+                         [safeThis] (int)
+                         {
+                             if (safeThis != nullptr)
+                                 safeThis->owner.finished (safeThis->nativeFileChooser->results, true);
+                         }));
+>>>>>>> Stashed changes
 
         nativeFileChooser->open (true);
     }

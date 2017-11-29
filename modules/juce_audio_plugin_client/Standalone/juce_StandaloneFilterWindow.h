@@ -693,15 +693,15 @@ public:
 
 private:
     //==============================================================================
-    class MainContentComponent : public Component, private Value::Listener,
-                                                           Button::Listener,
-                                                           ComponentListener
+    class MainContentComponent  : public Component,
+                                  private Value::Listener,
+                                  private Button::Listener,
+                                  private ComponentListener
     {
     public:
         MainContentComponent (StandaloneFilterWindow& filterWindow)
             : owner (filterWindow), notification (this),
-              editor (owner.getAudioProcessor()->createEditorIfNeeded()),
-              shouldShowNotification (false)
+              editor (owner.getAudioProcessor()->createEditorIfNeeded())
         {
             Value& inputMutedValue = owner.pluginHolder->getMuteInputValue();
 
@@ -829,7 +829,7 @@ private:
         StandaloneFilterWindow& owner;
         NotificationArea notification;
         ScopedPointer<AudioProcessorEditor> editor;
-        bool shouldShowNotification;
+        bool shouldShowNotification = false;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)
     };

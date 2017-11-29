@@ -419,7 +419,8 @@ private:
 };
 
 //==============================================================================
-class WebBrowserComponent::Pimpl : private Thread, private CommandReceiver::Responder
+class WebBrowserComponent::Pimpl  : private Thread,
+                                    private CommandReceiver::Responder
 {
 public:
     Pimpl (WebBrowserComponent& parent)

@@ -31,7 +31,8 @@ namespace juce
 template <> struct ContainerDeletePolicy<UIDocumentPickerViewController>     { static void destroy (NSObject* o) { [o release]; } };
 template <> struct ContainerDeletePolicy<NSObject<UIDocumentPickerDelegate>> { static void destroy (NSObject* o) { [o release]; } };
 
-class FileChooser::Native    : private Component, public FileChooser::Pimpl
+class FileChooser::Native    : private Component,
+                               public FileChooser::Pimpl
 {
 public:
     Native (FileChooser& fileChooser, int flags)
@@ -50,8 +51,8 @@ public:
             auto currentFileOrDirectory = owner.startingFile;
 
             UIDocumentPickerMode pickerMode = currentFileOrDirectory.existsAsFile()
-                                            ? UIDocumentPickerModeExportToService
-                                            : UIDocumentPickerModeMoveToService;
+                                                ? UIDocumentPickerModeExportToService
+                                                : UIDocumentPickerModeMoveToService;
 
             if (! currentFileOrDirectory.existsAsFile())
             {
