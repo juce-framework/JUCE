@@ -20,9 +20,6 @@
   ==============================================================================
 */
 
-namespace juce
-{
-
 namespace
 {
     static forcedinline void pushInterpolationSample (float* lastInputSamples, const float newValue) noexcept
@@ -419,6 +416,11 @@ int LagrangeInterpolator::process (double actualRatio, const float* in, float* o
     return interpolate<LagrangeAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut, available, wrap);
 }
 
+int LagrangeInterpolator::process (double actualRatio, const float* in, float* out, int numOut) noexcept
+{
+    return interpolateUnchecked<LagrangeAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut);
+}
+
 int LagrangeInterpolator::processUnchecked (double actualRatio, const float* in, float* out, int numOut) noexcept
 {
     return interpolateUnchecked<LagrangeAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut);
@@ -429,9 +431,13 @@ int LagrangeInterpolator::processAdding (double actualRatio, const float* in, fl
     return interpolateAdding<LagrangeAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut, available, wrap, gain);
 }
 
+int LagrangeInterpolator::processAdding (double actualRatio, const float* in, float* out, int numOut, float gain) noexcept
+{
+    return interpolateAddingUnchecked<LagrangeAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut, gain);
+}
+
 int LagrangeInterpolator::processAddingUnchecked (double actualRatio, const float* in, float* out, int numOut, float gain) noexcept
 {
     return interpolateAddingUnchecked<LagrangeAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut, gain);
 }
 
-} // namespace juce

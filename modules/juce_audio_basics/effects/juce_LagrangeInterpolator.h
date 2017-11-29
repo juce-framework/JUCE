@@ -20,9 +20,6 @@
   ==============================================================================
 */
 
-namespace juce
-{
-
 /**
     Interpolator for resampling a stream of floats using 4-point lagrange interpolation.
 
@@ -66,6 +63,24 @@ public:
                  int numOutputSamplesToProduce,
                  int available,
                  int wrapAround) noexcept;
+
+    /** Resamples a stream of samples.
+        @deprecated             This function is deprecated and might be removed in the future.
+                                Either call processUnchecked() or process() providing the bounds
+                                of the input buffer.
+
+        @param speedRatio       the number of input samples to use for each output sample
+        @param inputSamples     the source data to read from. This must contain at
+                                least (speedRatio * numOutputSamplesToProduce) samples.
+        @param outputSamples    the buffer to write the results into
+        @param numOutputSamplesToProduce    the number of output samples that should be created
+
+        @returns the actual number of input samples that were used
+     */
+    int process (double speedRatio,
+                 const float* inputSamples,
+                 float* outputSamples,
+                 int numOutputSamplesToProduce) noexcept;
 
     /** Resamples a stream of samples.
 
@@ -113,6 +128,31 @@ public:
     /** Resamples a stream of samples, adding the results to the output data
         with a gain.
 
+        @deprecated             This function is deprecated and might be removed in the future.
+                                Either call processAddingUnchecked() or processAdding() providing
+                                the bounds of the input buffer.
+
+        @param speedRatio       the number of input samples to use for each output sample
+        @param inputSamples     the source data to read from. This must contain at
+                                least (speedRatio * numOutputSamplesToProduce) samples.
+        @param outputSamples    the buffer to write the results to - the result values will be added
+                                to any pre-existing data in this buffer after being multiplied by
+                                the gain factor
+        @param numOutputSamplesToProduce    the number of output samples that should be created
+        @param gain             a gain factor to multiply the resulting samples by before
+                                adding them to the destination buffer
+
+        @returns the actual number of input samples that were used
+     */
+    int processAdding (double speedRatio,
+                       const float* inputSamples,
+                       float* outputSamples,
+                       int numOutputSamplesToProduce,
+                       float gain) noexcept;
+
+    /** Resamples a stream of samples, adding the results to the output data
+        with a gain.
+
         @param speedRatio       the number of input samples to use for each output sample
         @param inputSamples     the source data to read from. This must contain at
                                 least (speedRatio * numOutputSamplesToProduce) samples.
@@ -138,4 +178,3 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LagrangeInterpolator)
 };
 
-} // namespace juce

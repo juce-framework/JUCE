@@ -20,9 +20,6 @@
   ==============================================================================
 */
 
-namespace juce
-{
-
 struct CatmullRomAlgorithm
 {
     static forcedinline float valueAtOffset (const float* const inputs, const float offset) noexcept
@@ -62,9 +59,19 @@ int CatmullRomInterpolator::processUnchecked (double actualRatio, const float* i
     return interpolateUnchecked<CatmullRomAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut);
 }
 
+int CatmullRomInterpolator::process (double actualRatio, const float* in, float* out, int numOut) noexcept
+{
+    return interpolateUnchecked<CatmullRomAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut);
+}
+
 int CatmullRomInterpolator::processAdding (double actualRatio, const float* in, float* out, int numOut, int available, int wrap, float gain) noexcept
 {
     return interpolateAdding<CatmullRomAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut, available, wrap, gain);
+}
+
+int CatmullRomInterpolator::processAdding (double actualRatio, const float* in, float* out, int numOut, float gain) noexcept
+{
+    return interpolateAddingUnchecked<CatmullRomAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut, gain);
 }
 
 int CatmullRomInterpolator::processAddingUnchecked (double actualRatio, const float* in, float* out, int numOut, float gain) noexcept
@@ -72,4 +79,3 @@ int CatmullRomInterpolator::processAddingUnchecked (double actualRatio, const fl
     return interpolateAddingUnchecked<CatmullRomAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut, gain);
 }
 
-} // namespace juce
