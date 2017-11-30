@@ -118,6 +118,19 @@ struct SIMDFallbackOps
     }
 
     //==============================================================================
+    static forcedinline bool allEqual (vSIMDType a, vSIMDType b) noexcept
+    {
+        auto* aSrc = reinterpret_cast<const ScalarType*> (&a);
+        auto* bSrc = reinterpret_cast<const ScalarType*> (&b);
+
+        for (size_t i = 0; i < n; ++i)
+            if (aSrc[i] != bSrc[i])
+                return false;
+
+        return true;
+    }
+
+    //==============================================================================
     static forcedinline vSIMDType cmplxmul (vSIMDType a, vSIMDType b) noexcept
     {
         vSIMDType retval;
