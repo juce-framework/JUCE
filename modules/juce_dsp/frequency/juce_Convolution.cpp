@@ -283,6 +283,8 @@ struct ConvolutionEngine
 
         FloatVectorOperations::addWithMultiply      (&(output[FFTSizeDiv2]), input, &(impulse[FFTSizeDiv2]), static_cast<int> (FFTSizeDiv2));
         FloatVectorOperations::addWithMultiply      (&(output[FFTSizeDiv2]), &(input[FFTSizeDiv2]), impulse, static_cast<int> (FFTSizeDiv2));
+
+        output[FFTSize] += input[FFTSize] * impulse[FFTSize];
     }
 
     /** Undo the re-organization of samples from the function prepareForConvolution.
