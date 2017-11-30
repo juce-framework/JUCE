@@ -135,7 +135,7 @@ template <typename Type>
 Type findMinimum (const Type* data, int numValues)
 {
     if (numValues <= 0)
-        return {};
+        return Type (0);
 
     auto result = *data++;
 
@@ -155,7 +155,7 @@ template <typename Type>
 Type findMaximum (const Type* values, int numValues)
 {
     if (numValues <= 0)
-        return {};
+        return Type (0);
 
     auto result = *values++;
 
@@ -176,8 +176,8 @@ void findMinAndMax (const Type* values, int numValues, Type& lowest, Type& highe
 {
     if (numValues <= 0)
     {
-        lowest = {};
-        highest = {};
+        lowest = Type (0);
+        highest = Type (0);
     }
     else
     {

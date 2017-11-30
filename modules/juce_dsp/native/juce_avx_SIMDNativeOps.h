@@ -190,6 +190,7 @@ struct SIMDNativeOps<int8_t>
     static forcedinline __m256i JUCE_VECTOR_CALLTYPE equal (__m256i a, __m256i b) noexcept                  { return _mm256_cmpeq_epi8 (a, b); }
     static forcedinline __m256i JUCE_VECTOR_CALLTYPE greaterThan (__m256i a, __m256i b) noexcept            { return _mm256_cmpgt_epi8 (a, b); }
     static forcedinline __m256i JUCE_VECTOR_CALLTYPE greaterThanOrEqual (__m256i a, __m256i b) noexcept     { return bit_or (greaterThan (a, b), equal (a,b)); }
+    static forcedinline bool    JUCE_VECTOR_CALLTYPE allEqual (__m256i a, __m256i b) noexcept               { return _mm256_movemask_epi8 (equal (a, b)) == -1; }
     static forcedinline __m256i JUCE_VECTOR_CALLTYPE multiplyAdd (__m256i a, __m256i b, __m256i c) noexcept { return add (a, mul (b, c)); }
     static forcedinline __m256i JUCE_VECTOR_CALLTYPE notEqual (__m256i a, __m256i b) noexcept               { return bit_not (equal (a, b)); }
 
