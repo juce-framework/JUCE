@@ -1054,6 +1054,9 @@ public:
             reverse (i, startSample, numSamples);
     }
 
+    //==============================================================================
+    /** This allows templated code that takes an AudioBuffer to access its sample type. */
+    typedef Type SampleType;
 
 private:
     //==============================================================================
