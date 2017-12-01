@@ -944,7 +944,7 @@ void Thread::launchThread()
     {
        #if JUCE_ANDROID_REALTIME_THREAD_AVAILABLE
         threadHandle = (void*) juce_createRealtimeAudioThread (threadEntryProc, this);
-        threadId = (ThreadID) threadHandle;
+        threadId = (ThreadID) threadHandle.get();
 
         return;
        #else
@@ -969,7 +969,7 @@ void Thread::launchThread()
     {
         pthread_detach (handle);
         threadHandle = (void*) handle;
-        threadId = (ThreadID) threadHandle;
+        threadId = (ThreadID) threadHandle.get();
     }
 
     if (attrPtr != nullptr)
@@ -984,12 +984,12 @@ void Thread::closeThreadHandle()
 
 void Thread::killThread()
 {
-    if (threadHandle != 0)
+    if (threadHandle.get() != 0)
     {
        #if JUCE_ANDROID
         jassertfalse; // pthread_cancel not available!
        #else
-        pthread_cancel ((pthread_t) threadHandle);
+        pthread_cancel ((pthread_t) threadHandle.get());
        #endif
     }
 }

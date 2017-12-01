@@ -309,7 +309,7 @@ public:
         thread's not actually running.
         @see getCurrentThreadId
     */
-    ThreadID getThreadId() const noexcept                           { return threadId; }
+    ThreadID getThreadId() const noexcept                           { return threadId.get(); }
 
     /** Returns the name of the thread.
         This is the name that gets set in the constructor.
@@ -325,8 +325,8 @@ public:
 private:
     //==============================================================================
     const String threadName;
-    void* volatile threadHandle = nullptr;
-    ThreadID threadId = {};
+    Atomic<void*> threadHandle { nullptr };
+    Atomic<ThreadID> threadId = {};
     CriticalSection startStopLock;
     WaitableEvent startSuspensionEvent, defaultEvent;
     int threadPriority = 5;
