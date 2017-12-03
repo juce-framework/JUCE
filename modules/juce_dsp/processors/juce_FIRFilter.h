@@ -172,7 +172,7 @@ namespace FIR
         static SampleType JUCE_VECTOR_CALLTYPE processSingleSample (SampleType sample, SampleType* buf,
                                                                     const NumericType* fir, size_t m, size_t& p) noexcept
         {
-            SampleType out = {};
+            SampleType out (0);
 
             buf[p] = sample;
 

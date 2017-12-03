@@ -88,7 +88,7 @@ public:
     }
 
     //==============================================================================
-    void initialiseOnRenderThread (OpenGLContext& aContext)
+    bool initialiseOnRenderThread (OpenGLContext& aContext)
     {
         jassert (hasInitialised);
 
@@ -100,9 +100,25 @@ public:
         // get a pointer to the native window
         ANativeWindow* window = nullptr;
         if (jobject jSurface = env->CallObjectMethod (surfaceView.get(), NativeSurfaceView.getNativeSurface))
-            window = ANativeWindow_fromSurface (env, jSurface);
+        {
+            window = ANativeWindow_fromSurface(env, jSurface);
 
-        jassert (window != nullptr);
+            // if we didn't succeed the first time, wait 25ms and try again
+            if (window == nullptr)
+            {
+                Thread::sleep (25);
+                window = ANativeWindow_fromSurface (env, jSurface);
+            }
+        }
+
+        if (window == nullptr)
+        {
+            // failed to get a pointer to the native window after second try so
+            // bail out
+            jassertfalse;
+
+            return false;
+        }
 
         // create the surface
         surface = eglCreateWindowSurface(display, config, window, 0);
@@ -116,6 +132,8 @@ public:
         jassert (context != EGL_NO_CONTEXT);
 
         juceContext = &aContext;
+
+        return true;
     }
 
     void shutdownOnRenderThread()
