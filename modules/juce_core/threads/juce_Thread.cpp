@@ -123,7 +123,7 @@ void Thread::startThread()
 {
     const ScopedLock sl (startStopLock);
 
-    shouldExit = false;
+    shouldExit = 0;
 
     if (threadHandle.get() == nullptr)
     {
@@ -170,7 +170,7 @@ Thread* JUCE_CALLTYPE Thread::getCurrentThread()
 //==============================================================================
 void Thread::signalThreadShouldExit()
 {
-    shouldExit = true;
+    shouldExit = 1;
     listeners.call ([] (Listener& l) { l.exitSignalSent(); });
 }
 

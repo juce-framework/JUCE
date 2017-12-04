@@ -1292,8 +1292,11 @@ public:
         }
 
         fifos.setSize (chanIndex, fifoSize);
+        fifoReadPointers  = fifos.getArrayOfReadPointers();
+        fifoWritePointers = fifos.getArrayOfWritePointers();
         fifos.clear();
         startThread (9);
+        threadInitialised.wait();
 
         return {};
     }
@@ -1401,6 +1404,9 @@ private:
     bool active = false;
     String lastError;
     AudioBuffer<float> fifos;
+    const float** fifoReadPointers = nullptr;
+    float** fifoWritePointers = nullptr;
+    WaitableEvent threadInitialised;
 
     void run() override
     {
@@ -1427,6 +1433,8 @@ private:
         auto blockSizeMs = jmax (1, (int) (1000 * numSamples / currentSampleRate));
 
         jassert (numInputChans + numOutputChans == buffer.getNumChannels());
+
+        threadInitialised.signal();
 
         while (! threadShouldExit())
         {
@@ -1679,7 +1687,7 @@ private:
             {
                 auto index = inputIndex + i;
                 auto dest = destBuffer.getWritePointer (index);
-                auto src = owner.fifos.getReadPointer (index);
+                auto src = owner.fifoReadPointers[index];
 
                 if (size1 > 0)  FloatVectorOperations::copy (dest,         src + start1, size1);
                 if (size2 > 0)  FloatVectorOperations::copy (dest + size1, src + start2, size2);
@@ -1704,7 +1712,7 @@ private:
             for (int i = 0; i < numOutputChans; ++i)
             {
                 auto index = outputIndex + i;
-                auto dest = owner.fifos.getWritePointer (index);
+                auto dest = owner.fifoWritePointers[index];
                 auto src = srcBuffer.getReadPointer (index);
 
                 if (size1 > 0)  FloatVectorOperations::copy (dest + start1, src,         size1);
@@ -1718,8 +1726,6 @@ private:
                                     float** outputChannelData, int numOutputChannels,
                                     int numSamples) override
         {
-            auto& buf = owner.fifos;
-
             if (numInputChannels > 0)
             {
                 int start1, size1, start2, size2;
@@ -1733,19 +1739,22 @@ private:
 
                 for (int i = 0; i < numInputChannels; ++i)
                 {
-                    auto dest = buf.getWritePointer (inputIndex + i);
+                    auto dest = owner.fifoWritePointers[inputIndex + i];
                     auto src = inputChannelData[i];
 
                     if (size1 > 0)  FloatVectorOperations::copy (dest + start1, src,         size1);
                     if (size2 > 0)  FloatVectorOperations::copy (dest + start2, src + size1, size2);
                 }
 
-                inputFifo.finishedWrite (size1 + size2);
+                auto totalSize = size1 + size2;
+                inputFifo.finishedWrite (totalSize);
 
-                if (numSamples > size1 + size2)
+                if (numSamples > totalSize)
                 {
+                    auto samplesRemaining = numSamples - totalSize;
+
                     for (int i = 0; i < numInputChans; ++i)
-                        buf.clear (inputIndex + i, size1 + size2, numSamples - (size1 + size2));
+                        FloatVectorOperations::clear (owner.fifoWritePointers[inputIndex + i] + totalSize, samplesRemaining);
 
                     owner.underrun();
                 }
@@ -1765,18 +1774,21 @@ private:
                 for (int i = 0; i < numOutputChannels; ++i)
                 {
                     auto dest = outputChannelData[i];
-                    auto src = buf.getReadPointer (outputIndex + i);
+                    auto src = owner.fifoReadPointers[outputIndex + i];
 
                     if (size1 > 0)  FloatVectorOperations::copy (dest,         src + start1, size1);
                     if (size2 > 0)  FloatVectorOperations::copy (dest + size1, src + start2, size2);
                 }
 
-                outputFifo.finishedRead (size1 + size2);
+                auto totalSize = size1 + size2;
+                outputFifo.finishedRead (totalSize);
 
-                if (numSamples > size1 + size2)
+                if (numSamples > totalSize)
                 {
+                    auto samplesRemaining = numSamples - totalSize;
+
                     for (int i = 0; i < numOutputChannels; ++i)
-                        FloatVectorOperations::clear (outputChannelData[i] + (size1 + size2), numSamples - (size1 + size2));
+                        FloatVectorOperations::clear (outputChannelData[i] + totalSize, samplesRemaining);
 
                     owner.underrun();
                 }

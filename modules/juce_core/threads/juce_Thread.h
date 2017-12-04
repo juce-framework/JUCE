@@ -153,7 +153,7 @@ public:
 
         @see signalThreadShouldExit, currentThreadShouldExit
     */
-    bool threadShouldExit() const                { return shouldExit; }
+    bool threadShouldExit() const                { return shouldExit.get() != 0; }
 
     /** Checks whether the current thread has been told to stop running.
         On the message thread, this will always return false, otherwise
@@ -333,7 +333,7 @@ private:
     size_t threadStackSize;
     uint32 affinityMask = 0;
     bool deleteOnThreadEnd = false;
-    bool volatile shouldExit = false;
+    Atomic<int32> shouldExit { 0 };
     ListenerList<Listener, Array<Listener*, CriticalSection>> listeners;
 
    #if JUCE_ANDROID
