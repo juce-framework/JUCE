@@ -346,14 +346,14 @@ namespace juce
  {
      static inline Type inc (AtomicBase<Type>& a) noexcept
      {
-        return sizeof (Type) == 4 ? (Type) __sync_add_and_fetch (& (a.value), (Type) 1)
-                                  : (Type) __sync_add_and_fetch ((int64_t*) & (a.value), 1);
+         return sizeof (Type) == 4 ? (Type) __sync_add_and_fetch (& (a.value), (Type) 1)
+                                   : (Type) __sync_add_and_fetch ((int64_t*) & (a.value), 1);
      }
 
      static inline Type dec (AtomicBase<Type>& a) noexcept
      {
-        return sizeof (Type) == 4 ? (Type) __sync_add_and_fetch (& (a.value), (Type) -1)
-                                  : (Type) __sync_add_and_fetch ((int64_t*) & (a.value), -1);
+         return sizeof (Type) == 4 ? (Type) __sync_add_and_fetch (& (a.value), (Type) -1)
+                                   : (Type) __sync_add_and_fetch ((int64_t*) & (a.value), -1);
      }
  };
 
@@ -368,15 +368,15 @@ namespace juce
  template <typename Type>
  inline Type AtomicBase<Type>::get() const noexcept
  {
-    return sizeof (Type) == 4 ? castFrom32Bit ((int32) __sync_add_and_fetch ((volatile int32*) &value, 0))
-                              : castFrom64Bit ((int64) __sync_add_and_fetch ((volatile int64*) &value, 0));
+     return sizeof (Type) == 4 ? castFrom32Bit ((int32) __sync_add_and_fetch ((volatile int32*) &value, 0))
+                               : castFrom64Bit ((int64) __sync_add_and_fetch ((volatile int64*) &value, 0));
  }
 
  template <typename Type>
  inline Type AtomicBase<Type>::exchange (const Type newValue) noexcept
  {
-     Type currentVal = value;
-     while (! compareAndSetBool (newValue, currentVal)) { currentVal = value; }
+     Type currentVal = get();
+     while (! compareAndSetBool (newValue, currentVal)) { currentVal = get(); }
      return currentVal;
  }
 

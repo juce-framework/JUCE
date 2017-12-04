@@ -58,7 +58,7 @@ void AbstractFifo::setTotalSize (int newSize) noexcept
 void AbstractFifo::prepareToWrite (int numToWrite, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) const noexcept
 {
     const int vs = validStart.get();
-    const int ve = validEnd.value;
+    const int ve = validEnd.get();
 
     const int freeSpace = ve >= vs ? (bufferSize - (ve - vs)) : (vs - ve);
     numToWrite = jmin (numToWrite, freeSpace - 1);
@@ -83,7 +83,9 @@ void AbstractFifo::prepareToWrite (int numToWrite, int& startIndex1, int& blockS
 void AbstractFifo::finishedWrite (int numWritten) noexcept
 {
     jassert (numWritten >= 0 && numWritten < bufferSize);
-    int newEnd = validEnd.value + numWritten;
+
+    int newEnd = validEnd.get() + numWritten;
+
     if (newEnd >= bufferSize)
         newEnd -= bufferSize;
 
@@ -92,7 +94,7 @@ void AbstractFifo::finishedWrite (int numWritten) noexcept
 
 void AbstractFifo::prepareToRead (int numWanted, int& startIndex1, int& blockSize1, int& startIndex2, int& blockSize2) const noexcept
 {
-    const int vs = validStart.value;
+    const int vs = validStart.get();
     const int ve = validEnd.get();
 
     const int numReady = ve >= vs ? (ve - vs) : (bufferSize - (vs - ve));
@@ -119,14 +121,14 @@ void AbstractFifo::finishedRead (int numRead) noexcept
 {
     jassert (numRead >= 0 && numRead <= bufferSize);
 
-    int newStart = validStart.value + numRead;
+    int newStart = validStart.get() + numRead;
+
     if (newStart >= bufferSize)
         newStart -= bufferSize;
 
     validStart = newStart;
 }
 
-//==============================================================================
 //==============================================================================
 #if JUCE_UNIT_TESTS
 
