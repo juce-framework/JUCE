@@ -254,7 +254,7 @@ namespace CoreMidiHelpers
 
     static String getGlobalMidiClientName()
     {
-        if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+        if (auto* app = JUCEApplicationBase::getInstance())
             return app->getApplicationName();
 
         return "JUCE";

@@ -79,7 +79,7 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, suspendApp, void, (JNIEnv* e
 {
     setEnv (env);
 
-    if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+    if (auto* app = JUCEApplicationBase::getInstance())
         app->suspended();
 }
 
@@ -87,7 +87,7 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, resumeApp, void, (JNIEnv* en
 {
     setEnv (env);
 
-    if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+    if (auto* app = JUCEApplicationBase::getInstance())
         app->resumed();
 }
 
@@ -537,7 +537,7 @@ public:
 
     void handleBackButtonCallback()
     {
-        if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+        if (auto* app = JUCEApplicationBase::getInstance())
             app->backButtonPressed();
     }
 

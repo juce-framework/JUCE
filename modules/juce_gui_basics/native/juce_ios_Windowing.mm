@@ -123,7 +123,7 @@ namespace juce
 
 - (void) applicationDidEnterBackground: (UIApplication*) application
 {
-    if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+    if (auto* app = JUCEApplicationBase::getInstance())
     {
        #if JUCE_EXECUTE_APP_SUSPEND_ON_BACKGROUND_TASK
         appSuspendTask = [application beginBackgroundTaskWithName:@"JUCE Suspend Task" expirationHandler:^{
@@ -146,7 +146,7 @@ namespace juce
 {
     ignoreUnused (application);
 
-    if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+    if (auto* app = JUCEApplicationBase::getInstance())
         app->resumed();
 }
 

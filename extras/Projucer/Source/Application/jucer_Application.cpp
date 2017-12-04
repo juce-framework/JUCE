@@ -268,7 +268,7 @@ struct AsyncQuitRetrier  : private Timer
         stopTimer();
         delete this;
 
-        if (JUCEApplicationBase* app = JUCEApplicationBase::getInstance())
+        if (auto* app = JUCEApplicationBase::getInstance())
             app->systemRequestedQuit();
     }
 

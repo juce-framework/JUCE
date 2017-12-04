@@ -83,7 +83,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 {
     jassert (isThisTheMessageThread()); // must only be called by the message thread
 
-    const int64 endTime = Time::currentTimeMillis() + millisecondsToRunFor;
+    auto endTime = Time::currentTimeMillis() + millisecondsToRunFor;
 
     while (! quitMessageReceived)
     {
@@ -213,7 +213,7 @@ bool MessageManager::isThisTheMessageThread() const noexcept
 
 void MessageManager::setCurrentThreadAsMessageThread()
 {
-    const Thread::ThreadID thisThread = Thread::getCurrentThreadId();
+    auto thisThread = Thread::getCurrentThreadId();
 
     if (messageThreadId != thisThread)
     {
@@ -227,7 +227,7 @@ void MessageManager::setCurrentThreadAsMessageThread()
 
 bool MessageManager::currentThreadHasLockedMessageManager() const noexcept
 {
-    const Thread::ThreadID thisThread = Thread::getCurrentThreadId();
+    auto thisThread = Thread::getCurrentThreadId();
     return thisThread == messageThreadId || thisThread == threadWithLock.get();
 }
 

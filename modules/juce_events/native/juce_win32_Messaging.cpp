@@ -133,7 +133,7 @@ bool MessageManager::dispatchNextMessageOnSystemQueue (const bool returnIfNoPend
         }
         else if (m.message == WM_QUIT)
         {
-            if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+            if (auto* app = JUCEApplicationBase::getInstance())
                 app->systemRequestedQuit();
         }
         else if (isEventBlockedByModalComps == nullptr || ! isEventBlockedByModalComps (m))
