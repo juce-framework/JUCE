@@ -156,10 +156,12 @@ namespace juce
     class ApplicationCommandManagerListener;
     class DrawableButton;
 
-    #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
-     class FlexBox;
+   #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
+    class FlexBox;
+    #if JUCE_HAS_CONSTEXPR
      class Grid;
     #endif
+   #endif
 }
 
 #include "mouse/juce_MouseCursor.h"
