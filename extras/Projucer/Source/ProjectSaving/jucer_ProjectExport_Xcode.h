@@ -617,6 +617,7 @@ public:
 
                 case StaticLibrary:
                     xcodeFileType = "archive.ar";
+                    xcodeBundleExtension = ".a";
                     xcodeProductType = "com.apple.product-type.library.static";
                     xcodeCopyToProductInstallPathAfterBuild = false;
                     break;
