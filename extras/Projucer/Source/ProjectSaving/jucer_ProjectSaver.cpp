@@ -41,6 +41,7 @@ namespace
         jassert ((configs.size() & 1) == 0);  // looks like a syntax error in the configs?
 
         int maxVal = 0;
+
         for (int i = (isInput ? 0 : 1); i < configs.size(); i += 2)
             maxVal = jmax (maxVal, configs[i].getIntValue());
 
@@ -59,16 +60,16 @@ namespace
 
     inline String valueToCharLiteral (const var& v)
     {
-        String fourCharCode = v.toString().trim().substring (0, 4);
+        auto fourCharCode = v.toString().trim().substring (0, 4);
         uint32 hexRepresentation = 0;
 
         for (int i = 0; i < 4; ++i)
-            hexRepresentation = (hexRepresentation << 8U)
-                             |  (static_cast<unsigned int> (fourCharCode[i]) & 0xffU);
+            hexRepresentation = (hexRepresentation << 8u)
+                             |  (static_cast<unsigned int> (fourCharCode[i]) & 0xffu);
 
-        return String ("0x") + String::toHexString (static_cast<int> (hexRepresentation))
-                             + String (" // ")
-                             + CppTokeniserFunctions::addEscapeChars (fourCharCode).quoted ('\'');
+        return "0x" + String::toHexString (static_cast<int> (hexRepresentation))
+                 + " // "
+                 + CppTokeniserFunctions::addEscapeChars (fourCharCode).quoted ('\'');
     }
 }
 

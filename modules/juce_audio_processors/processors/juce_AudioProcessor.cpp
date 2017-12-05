@@ -293,15 +293,8 @@ void AudioProcessor::getNextBestLayout (const BusesLayout& desiredLayout, BusesL
 
             // try setting all other buses to the identical layout
             BusesLayout allTheSame;
-
-            for (int oDir = 0; oDir < 2; ++oDir)
-            {
-                bool oIsInput = (oDir == 0);
-                auto oBusNum = getBusCount (oIsInput);
-
-                for (int oBusIndex = 0; oBusIndex < oBusNum; ++oBusIndex)
-                    (oIsInput ? allTheSame.inputBuses : allTheSame.outputBuses).add (requested);
-            }
+            allTheSame.inputBuses.insertMultiple (-1, requested, getBusCount (true));
+            allTheSame.outputBuses.insertMultiple (-1, requested, getBusCount (false));
 
             if (checkBusesLayoutSupported (allTheSame))
             {
@@ -327,18 +320,18 @@ void AudioProcessor::getNextBestLayout (const BusesLayout& desiredLayout, BusesL
 }
 
 //==============================================================================
-void AudioProcessor::setPlayHead (AudioPlayHead* const newPlayHead)
+void AudioProcessor::setPlayHead (AudioPlayHead* newPlayHead)
 {
     playHead = newPlayHead;
 }
 
-void AudioProcessor::addListener (AudioProcessorListener* const newListener)
+void AudioProcessor::addListener (AudioProcessorListener* newListener)
 {
     const ScopedLock sl (listenerLock);
     listeners.addIfNotAlreadyThere (newListener);
 }
 
-void AudioProcessor::removeListener (AudioProcessorListener* const listenerToRemove)
+void AudioProcessor::removeListener (AudioProcessorListener* listenerToRemove)
 {
     const ScopedLock sl (listenerLock);
     listeners.removeFirstMatchingValue (listenerToRemove);
@@ -348,7 +341,7 @@ void AudioProcessor::setPlayConfigDetails (int newNumIns, int newNumOuts, double
 {
     bool success = true;
 
-    if (getTotalNumInputChannels()  != newNumIns)
+    if (getTotalNumInputChannels() != newNumIns)
         success &= setChannelLayoutOfBus (true,  0, AudioChannelSet::canonicalChannelSet (newNumIns));
 
     // failed to find a compatible input configuration
@@ -740,10 +733,10 @@ AudioProcessor::BusesProperties AudioProcessor::busesPropertiesFromLayoutArray (
     BusesProperties ioProps;
 
     if (config[0].inChannels > 0)
-        ioProps.addBus (true, String ("Input"), AudioChannelSet::canonicalChannelSet (config[0].inChannels));
+        ioProps.addBus (true, "Input", AudioChannelSet::canonicalChannelSet (config[0].inChannels));
 
     if (config[0].outChannels > 0)
-        ioProps.addBus (false, String ("Output"), AudioChannelSet::canonicalChannelSet (config[0].outChannels));
+        ioProps.addBus (false, "Output", AudioChannelSet::canonicalChannelSet (config[0].outChannels));
 
     return ioProps;
 }

@@ -630,7 +630,7 @@ public:
             {
                 auto labels = CoreAudioLayouts::fromCoreAudio (tagEntry.tag);
 
-                expect (! labels.isDiscreteLayout(), String ("Tag \"") + String (tagEntry.name) + "\" is not handled by JUCE");
+                expect (! labels.isDiscreteLayout(), "Tag \"" + String (tagEntry.name) + "\" is not handled by JUCE");
             }
         }
 
@@ -641,7 +641,7 @@ public:
             {
                 auto labels = CoreAudioLayouts::getSpeakerLayoutForCoreAudioTag (tagEntry.tag);
 
-                expect (labels.size() == (tagEntry.tag & 0xffff), String ("Tag \"") + String (tagEntry.name) + "\" has incorrect channel count");
+                expect (labels.size() == (tagEntry.tag & 0xffff), "Tag \"" + String (tagEntry.name) + "\" has incorrect channel count");
             }
         }
 
@@ -655,7 +655,7 @@ public:
 
                 for (int i = 0; i < (labels.size() - 1); ++i)
                     expect (labels.getReference (i) != labels.getReference (i + 1),
-                            String ("Tag \"") + String (tagEntry.name) + "\" has the same speaker twice");
+                            "Tag \"" + String (tagEntry.name) + "\" has the same speaker twice");
             }
         }
 
@@ -665,7 +665,7 @@ public:
             for (auto tagEntry : knownTags)
                 expect (AudioChannelSet::channelSetWithChannels (CoreAudioLayouts::getSpeakerLayoutForCoreAudioTag (tagEntry.tag))
                             == CoreAudioLayouts::fromCoreAudio (tagEntry.tag),
-                        String ("Tag \"") + String (tagEntry.name) + "\" is not converted consistantly by JUCE");
+                        "Tag \"" + String (tagEntry.name) + "\" is not converted consistantly by JUCE");
         }
 
         {
@@ -677,7 +677,7 @@ public:
                     continue;
 
                 expect (CoreAudioLayouts::fromCoreAudio (tagEntry.tag) == tagEntry.equivalentChannelSet,
-                        String ("Documentation for tag \"") + String (tagEntry.name) + "\" is incorrect");
+                        "Documentation for tag \"" + String (tagEntry.name) + "\" is incorrect");
             }
         }
 
@@ -690,7 +690,7 @@ public:
                     continue;
 
                 expect (CoreAudioLayouts::toCoreAudio (tagEntry.equivalentChannelSet) == tagEntry.tag,
-                        String ("Incorrect reverse conversion for tag \"") + String (tagEntry.name) + "\"");
+                        "Incorrect reverse conversion for tag \"" + String (tagEntry.name) + "\"");
             }
         }
     }

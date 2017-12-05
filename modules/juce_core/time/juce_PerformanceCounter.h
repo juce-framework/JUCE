@@ -131,7 +131,7 @@ private:
             doSomething();
         }
 
-        Logger::writeToLog (String ("doSomething() took ") + String (timeSec) + "seconds");
+        Logger::writeToLog ("doSomething() took " + String (timeSec) + "seconds");
     }
 
     @param resultInSeconds The result of the measurement will be stored in this variable.

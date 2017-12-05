@@ -130,7 +130,7 @@ public:
     //==============================================================================
     bool setOptions()
     {
-        const String address = url.toString (! isPost);
+        auto address = url.toString (! isPost);
 
         curl_version_info_data* data = curl_version_info (CURLVERSION_NOW);
         jassert (data != nullptr);
@@ -144,7 +144,7 @@ public:
         if (! requestHeaders.endsWithChar ('\n'))
             requestHeaders << "\r\n";
 
-        String userAgent = String ("curl/") + data->version;
+        auto userAgent = String ("curl/") + data->version;
 
         if (curl_easy_setopt (curl, CURLOPT_URL, address.toRawUTF8()) == CURLE_OK
             && curl_easy_setopt (curl, CURLOPT_WRITEDATA, this) == CURLE_OK
@@ -166,11 +166,10 @@ public:
 
             // handle special http request commands
             bool hasSpecialRequestCmd = isPost ? (httpRequest != "POST") : (httpRequest != "GET");
+
             if (hasSpecialRequestCmd)
-            {
                 if (curl_easy_setopt (curl, CURLOPT_CUSTOMREQUEST, httpRequest.toRawUTF8()) != CURLE_OK)
                     return false;
-            }
 
             if (curl_easy_setopt (curl, CURLOPT_HEADERDATA, this) != CURLE_OK
                 || curl_easy_setopt (curl, CURLOPT_HEADERFUNCTION, StaticCurlHeader) != CURLE_OK)
@@ -178,7 +177,7 @@ public:
 
             if (timeOutMs > 0)
             {
-                long timeOutSecs = ((long) timeOutMs + 999) / 1000;
+                auto timeOutSecs = ((long) timeOutMs + 999) / 1000;
 
                 if (curl_easy_setopt (curl, CURLOPT_CONNECTTIMEOUT, timeOutSecs) != CURLE_OK
                     || curl_easy_setopt (curl, CURLOPT_LOW_SPEED_LIMIT, 100) != CURLE_OK

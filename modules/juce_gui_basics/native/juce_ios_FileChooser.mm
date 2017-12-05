@@ -181,7 +181,7 @@ private:
             extension = fallbackExtension;
 
         if (extension.isNotEmpty())
-            filename += String (".") + extension;
+            filename += "." + extension;
 
         return filename;
     }

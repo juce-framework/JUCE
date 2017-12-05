@@ -119,13 +119,12 @@ private:
     {
         if ([frame isEqual: [sender mainFrame]] && error != nullptr && [error code] != NSURLErrorCancelled)
         {
-            String errorString (nsStringToJuce ([error localizedDescription]));
-
+            auto errorString = nsStringToJuce ([error localizedDescription]);
             bool proceedToErrorPage = getOwner (self)->pageLoadHadNetworkError (errorString);
 
             // WebKit doesn't have an internal error page, so make a really simple one ourselves
             if (proceedToErrorPage)
-                getOwner(self)->goToURL (String ("data:text/plain;charset=UTF-8,") + errorString);
+                getOwner (self)->goToURL ("data:text/plain;charset=UTF-8," + errorString);
         }
     }
 

@@ -601,14 +601,14 @@ struct FFTWImpl  : public FFT::Instance
 
       #if ! JUCE_DSP_USE_STATIC_FFTW
        #if JUCE_MAC
-        const char* libsuffix = "dylib";
+        auto libName = "libfftw3f.dylib";
        #elif JUCE_WINDOWS
-        const char* libsuffix = "dll";
+        auto libName = "libfftw3f.dll";
        #else
-        const char* libsuffix = "so";
+        auto libName = "libfftw3f.so";
        #endif
 
-        if (lib.open (String ("libfftw3f.") + libsuffix))
+        if (lib.open (libName))
       #endif
         {
             Symbols symbols;

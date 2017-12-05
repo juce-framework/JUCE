@@ -143,7 +143,7 @@ public:
             if (type == "image")
                 type = "images";
 
-            return getCursorDataColumn (URL (String ("content://media/external/") + type + "/media"),
+            return getCursorDataColumn (URL ("content://media/external/" + type + "/media"),
                                         "_id=?", StringArray {mediaId});
         }
 

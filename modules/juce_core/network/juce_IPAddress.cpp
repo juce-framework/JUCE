@@ -162,11 +162,10 @@ String IPAddress::getFormattedAddress (const String& unformattedAddress)
 {
     jassert (unformattedAddress.contains (":") && ! unformattedAddress.contains ("::")); // needs to be an unformatted IPv6 address!
 
-    String portString = unformattedAddress.fromFirstOccurrenceOf ("]", false, true);
-    String addressString = unformattedAddress.dropLastCharacters (portString.length()).removeCharacters ("[]");
+    auto portString    = unformattedAddress.fromFirstOccurrenceOf ("]", false, true);
+    auto addressString = unformattedAddress.dropLastCharacters (portString.length()).removeCharacters ("[]");
 
-    StringArray tokens;
-    tokens.addTokens (addressString, ":", String());
+    auto tokens = StringArray::fromTokens (addressString, ":", {});
 
     int numZeros = 0;
     int numZerosTemp = 0;
@@ -175,7 +174,7 @@ String IPAddress::getFormattedAddress (const String& unformattedAddress)
 
     for (int i = 0; i < tokens.size(); ++i)
     {
-        String t = tokens.getReference (i);
+        const auto& t = tokens.getReference (i);
 
         if (t.getHexValue32() == 0x0000)
         {
@@ -212,21 +211,23 @@ String IPAddress::getFormattedAddress (const String& unformattedAddress)
     if (numZeros > 1)
     {
         if (numZeros == tokens.size())
+        {
             addressString = "::,";
+        }
         else
         {
-            String zeroString = isFirst ? String ("0") + String::repeatedString (":0", numZeros - 1)
-                                        : String::repeatedString (":0", numZeros);
+            auto zeroString = isFirst ? "0" + String::repeatedString (":0", numZeros - 1)
+                                      : String::repeatedString (":0", numZeros);
 
             addressString = addressString.replaceFirstOccurrenceOf (zeroString, ":");
 
             if (isLast)
-                addressString += String (":");
+                addressString << ':';
         }
     }
 
     if (portString.isNotEmpty())
-        addressString = String ("[") + addressString + String ("]") + portString;
+        addressString = "[" + addressString + "]" + portString;
 
     return addressString;
 }
@@ -249,7 +250,7 @@ bool IPAddress::operator!= (const IPAddress& other) const noexcept
 #if (! JUCE_WINDOWS) && (! JUCE_ANDROID)
 static void addAddress (const sockaddr_in* addr_in, Array<IPAddress>& result)
 {
-    in_addr_t addr = addr_in->sin_addr.s_addr;
+    auto addr = addr_in->sin_addr.s_addr;
 
     if (addr != INADDR_NONE)
         result.addIfNotAlreadyThere (IPAddress (ntohl (addr)));
