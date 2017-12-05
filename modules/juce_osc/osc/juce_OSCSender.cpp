@@ -677,7 +677,7 @@ public:
 
         beginTest ("OSC message with multiple arguments");
         {
-            OSCMessage outMessage ("/test/four_args", 42, 0.5f, "foo", "bar");
+            OSCMessage outMessage ("/test/four_args", 42, 0.5f, String ("foo"), String ("bar"));
 
             OSCOutputStream output;
             output.writeMessage (outMessage);
@@ -721,7 +721,7 @@ public:
 
             OSCMessage inMessage = inBundle[0].getMessage();
 
-            expectEquals (inMessage.getAddressPattern().toString(), "/test/one_arg");
+            expectEquals (inMessage.getAddressPattern().toString(), String ("/test/one_arg"));
             expectEquals (inMessage.size(), 1);
             expectEquals (inMessage[0].getInt32(), 42);
         }
@@ -730,7 +730,7 @@ public:
         {
             OSCMessage outMessage1 ("/test/empty");
             OSCMessage outMessage2 ("/test/one_arg", 42);
-            OSCMessage outMessage3 ("/test/four_args", 42, 0.5f, "foo", "bar");
+            OSCMessage outMessage3 ("/test/four_args", 42, 0.5f, String ("foo"), String ("bar"));
 
             OSCBundle outBundle;
             outBundle.addElement (outMessage1);
