@@ -103,16 +103,16 @@ struct SIMDRegister
     vSIMDType value;
 
     /** Default constructor. */
-    inline JUCE_VECTOR_CALLTYPE SIMDRegister() noexcept {}
+    inline SIMDRegister() noexcept {}
 
     /** Constructs an object from the native SIMD type. */
-    inline JUCE_VECTOR_CALLTYPE SIMDRegister (vSIMDType a) noexcept : value (a) {}
+    inline SIMDRegister (vSIMDType a) noexcept : value (a) {}
 
     /** Constructs an object from a scalar type by broadcasting it to all elements. */
-    inline JUCE_VECTOR_CALLTYPE SIMDRegister (Type s) noexcept  { *this = s; }
+    inline SIMDRegister (Type s) noexcept  { *this = s; }
 
     /** Destrutor. */
-    inline JUCE_VECTOR_CALLTYPE ~SIMDRegister() noexcept {}
+    inline ~SIMDRegister() noexcept {}
 
     //==============================================================================
     /** Returns the number of elements in this vector. */
