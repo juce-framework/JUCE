@@ -27,8 +27,6 @@
 namespace juce
 {
 
-struct PluginBusUtilities;
-
 //==============================================================================
 /**
     Base class for audio processing classes or plugins.
@@ -1514,8 +1512,6 @@ protected:
                                          BusProperties& outNewBusProperties);
 
     //==============================================================================
-    friend struct PluginBusUtilities;
-
     /** @internal */
     AudioPlayHead* playHead = nullptr;
 
