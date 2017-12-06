@@ -78,7 +78,7 @@ public:
                 channelData[i] = amplitude * std::sin (phase);
 
                 // increment the phase step for the next sample
-                phase = std::fmod (phase + phaseDelta, float_Pi * 2.0f);
+                phase = std::fmod (phase + phaseDelta, MathConstants<float>::twoPi);
             }
         }
     }
@@ -130,7 +130,7 @@ public:
         frequency = (getHeight() - e.y) * 10.0f;
         amplitude = jmin (0.9f, 0.2f * e.position.x / getWidth());
 
-        phaseDelta = (float) (2.0 * double_Pi * frequency / sampleRate);
+        phaseDelta = (float) (MathConstants<double>::twoPi * frequency / sampleRate);
 
         repaint();
     }

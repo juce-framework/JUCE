@@ -166,7 +166,7 @@ public:
                                        blockComponent->block->getHeight() * blockUnitInPixels);
 
             if (blockComponent->rotation != 0)
-                blockComponent->setTransform (AffineTransform::rotation (blockComponent->rotation * (static_cast<float> (double_Pi) / 180.0f),
+                blockComponent->setTransform (AffineTransform::rotation (degreesToRadians (blockComponent->rotation),
                                                                          static_cast<float> (blockComponent->getX()),
                                                                          static_cast<float> (blockComponent->getY())));
         }

@@ -509,7 +509,7 @@ struct GraphEditorPanel::ConnectorComponent   : public Component,
                            arrowL, 0.0f);
 
         arrow.applyTransform (AffineTransform()
-                                .rotated (float_Pi * 0.5f - (float) atan2 (p2.x - p1.x, p2.y - p1.y))
+                                .rotated (MathConstants<float>::pi * 0.5f - (float) atan2 (p2.x - p1.x, p2.y - p1.y))
                                 .translated ((p1 + p2) * 0.5f));
 
         linePath.addPath (arrow);

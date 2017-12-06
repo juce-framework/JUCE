@@ -149,7 +149,7 @@ public:
         for (int i = 0; i < componentsToAnimate.size(); ++i)
         {
             const int newIndex = (i + 3) % componentsToAnimate.size();
-            const float angle = newIndex * 2.0f * float_Pi / componentsToAnimate.size();
+            const float angle = newIndex * MathConstants<float>::twoPi / componentsToAnimate.size();
             const float radius = getWidth() * 0.35f;
 
             Rectangle<int> r (getWidth()  / 2 + (int) (radius * std::sin (angle)) - 50,
@@ -258,7 +258,7 @@ private:
         for (int i = 0; i < componentsToAnimate.size(); ++i)
         {
             const int newIndex = (i + 3 * cycleCount) % componentsToAnimate.size();
-            const float angle = newIndex * 2.0f * float_Pi / componentsToAnimate.size();
+            const float angle = newIndex * MathConstants<float>::twoPi / componentsToAnimate.size();
             const float radius = getWidth() * 0.35f;
 
             Rectangle<int> r (getWidth()  / 2 + (int) (radius * std::sin (angle)) - 50,

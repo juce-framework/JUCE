@@ -200,8 +200,8 @@ protected:
     //==============================================================================
     SpinLock processLock;
     IIRCoefficients coefficients;
-    float v1, v2;
-    bool active;
+    float v1 = 0, v2 = 0;
+    bool active = false;
 
     IIRFilter& operator= (const IIRFilter&);
     JUCE_LEAK_DETECTOR (IIRFilter)

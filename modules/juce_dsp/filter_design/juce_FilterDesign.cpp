@@ -52,7 +52,7 @@ typename FIR::Coefficients<FloatType>::Ptr
         }
         else
         {
-            auto indice = double_Pi * (static_cast<double> (i) - 0.5 * static_cast<double> (order));
+            auto indice = MathConstants<double>::pi * (static_cast<double> (i) - 0.5 * static_cast<double> (order));
             c[i] = static_cast<FloatType> (std::sin (2.0 * indice * normalizedFrequency) / indice);
         }
     }
@@ -81,8 +81,8 @@ typename FIR::Coefficients<FloatType>::Ptr
     else if (attenuationdB <= 21)
         beta = static_cast<FloatType> (0.5842 * std::pow (-attenuationdB - 21, 0.4) + 0.07886 * (-attenuationdB - 21));
 
-    int order = attenuationdB < -21 ? roundDoubleToInt (ceil ((-attenuationdB - 7.95) / (2.285 * normalizedTransitionWidth * 2.0 * double_Pi)))
-                                    : roundDoubleToInt (ceil (5.79 / (normalizedTransitionWidth * 2.0 * double_Pi)));
+    int order = attenuationdB < -21 ? roundDoubleToInt (ceil ((-attenuationdB - 7.95) / (2.285 * normalizedTransitionWidth * MathConstants<double>::twoPi)))
+                                    : roundDoubleToInt (ceil (5.79 / (normalizedTransitionWidth * MathConstants<double>::twoPi)));
 
     jassert (order >= 0);
 
@@ -114,8 +114,8 @@ typename FIR::Coefficients<FloatType>::Ptr
         }
         else
         {
-            auto indice  = double_Pi * (i - 0.5 * order);
-            auto indice2 = double_Pi * normalizedTransitionWidth * (i - 0.5 * order) / spline;
+            auto indice  = MathConstants<double>::pi * (i - 0.5 * order);
+            auto indice2 = MathConstants<double>::pi * normalizedTransitionWidth * (i - 0.5 * order) / spline;
             c[i] = static_cast<FloatType> (std::sin (2 * indice * normalizedFrequency)
                                             / indice * std::pow (std::sin (indice2) / indice2, spline));
         }
@@ -138,8 +138,8 @@ typename FIR::Coefficients<FloatType>::Ptr
 
     auto normalizedFrequency = static_cast<double> (frequency) / sampleRate;
 
-    auto wp = 2.0 * double_Pi * (static_cast<double> (normalizedFrequency - normalizedTransitionWidth / 2.0));
-    auto ws = 2.0 * double_Pi * (static_cast<double> (normalizedFrequency + normalizedTransitionWidth / 2.0));
+    auto wp = MathConstants<double>::twoPi * (static_cast<double> (normalizedFrequency - normalizedTransitionWidth / 2.0));
+    auto ws = MathConstants<double>::twoPi * (static_cast<double> (normalizedFrequency + normalizedTransitionWidth / 2.0));
 
     auto N = order + 1;
 
@@ -154,10 +154,11 @@ typename FIR::Coefficients<FloatType>::Ptr
         Matrix<double> b (M + 1, 1),
                        q (2 * M + 1, 1);
 
-        auto sinc = [](double x) { return x == 0 ? 1 : std::sin (x * double_Pi) / (double_Pi * x); };
+        auto sinc = [](double x) { return x == 0 ? 1 : std::sin (x * MathConstants<double>::pi)
+                                                         / (MathConstants<double>::pi * x); };
 
-        auto factorp = wp / double_Pi;
-        auto factors = ws / double_Pi;
+        auto factorp = wp / MathConstants<double>::pi;
+        auto factors = ws / MathConstants<double>::pi;
 
         for (size_t i = 0; i <= M; ++i)
             b (i, 0) = factorp * sinc (factorp * i);
@@ -191,10 +192,11 @@ typename FIR::Coefficients<FloatType>::Ptr
         Matrix<double> qp (2 * M, 1);
         Matrix<double> qs (2 * M, 1);
 
-        auto sinc = [](double x) { return x == 0 ? 1 : std::sin (x * double_Pi) / (double_Pi * x); };
+        auto sinc = [](double x) { return x == 0 ? 1 : std::sin (x * MathConstants<double>::pi)
+                                                         / (MathConstants<double>::pi * x); };
 
-        auto factorp = wp / double_Pi;
-        auto factors = ws / double_Pi;
+        auto factorp = wp / MathConstants<double>::pi;
+        auto factors = ws / MathConstants<double>::pi;
 
         for (size_t i = 0; i < M; ++i)
             b (i, 0) = factorp * sinc (factorp * (i + 0.5));
@@ -240,7 +242,7 @@ typename FIR::Coefficients<FloatType>::Ptr
     jassert (normalizedTransitionWidth > 0 && normalizedTransitionWidth <= 0.5);
     jassert (attenuationdB >= -300 && attenuationdB <= -10);
 
-    auto wpT = (0.5 - normalizedTransitionWidth) * double_Pi;
+    auto wpT = (0.5 - normalizedTransitionWidth) * MathConstants<double>::pi;
 
     auto n = roundDoubleToInt (ceil ((attenuationdB - 18.18840664 * wpT + 33.64775300) / (18.54155181 * wpT - 29.13196871)));
     auto kp = (n * wpT - 1.57111377 * n + 0.00665857) / (-1.01927560 * n + 0.37221484);
@@ -277,10 +279,10 @@ typename FIR::Coefficients<FloatType>::Ptr
     }
     else
     {
-        auto w01 = std::sqrt (kp * kp + (1 - kp * kp) * std::pow (std::cos (double_Pi / (2.0 * n + 1.0)), 2.0));
+        auto w01 = std::sqrt (kp * kp + (1 - kp * kp) * std::pow (std::cos (MathConstants<double>::pi / (2.0 * n + 1.0)), 2.0));
         auto om01 = std::acos (-w01);
 
-        NN = -2.0 * result->getMagnitudeForFrequency (om01 / (2 * double_Pi), 1.0);
+        NN = -2.0 * result->getMagnitudeForFrequency (om01 / MathConstants<double>::twoPi, 1.0);
     }
 
     for (int i = 0; i < hh.size(); ++i)
@@ -403,8 +405,8 @@ Array<IIR::Coefficients<FloatType>>
     auto epsp = std::sqrt (1.0 / (Gp * Gp) - 1.0);
     auto epss = std::sqrt (1.0 / (Gs * Gs) - 1.0);
 
-    auto omegap = std::tan (double_Pi * fp);
-    auto omegas = std::tan (double_Pi * fs);
+    auto omegap = std::tan (MathConstants<double>::pi * fp);
+    auto omegas = std::tan (MathConstants<double>::pi * fs);
 
     auto k = omegap / omegas;
     auto k1 = epsp / epss;
@@ -444,35 +446,35 @@ Array<IIR::Coefficients<FloatType>>
         for (int i = 1; i <= L; ++i)
         {
             auto ui = (2 * i - 1.0) / (double) N;
-            pa.add (omegap * std::pow (epsp, -1.0 / (double) N) * j * exp (ui * 0.5 * double_Pi * j));
+            pa.add (omegap * std::pow (epsp, -1.0 / (double) N) * j * exp (ui * 0.5 * MathConstants<double>::pi * j));
         }
     }
     else if (type == 1)
     {
-        auto v0 = std::asinh (1.0 / epsp) / (0.5 * N * double_Pi);
+        auto v0 = std::asinh (1.0 / epsp) / (0.5 * N * MathConstants<double>::pi);
 
         if (r == 1)
-            pa.add (-omegap * std::sinh (v0 * 0.5 * double_Pi));
+            pa.add (-omegap * std::sinh (v0 * 0.5 * MathConstants<double>::pi));
 
         for (int i = 1; i <= L; ++i)
         {
             auto ui = (2 * i - 1.0) / (double) N;
-            pa.add (omegap * j * std::cos ((ui - j * v0) * 0.5 * double_Pi));
+            pa.add (omegap * j * std::cos ((ui - j * v0) * 0.5 * MathConstants<double>::pi));
         }
     }
     else if (type == 2)
     {
-        auto v0 = std::asinh (epss) / (N * 0.5 * double_Pi);
+        auto v0 = std::asinh (epss) / (N * 0.5 * MathConstants<double>::pi);
 
         if (r == 1)
-            pa.add(-1.0 / (k / omegap * std::sinh (v0 * 0.5 * double_Pi)));
+            pa.add(-1.0 / (k / omegap * std::sinh (v0 * 0.5 * MathConstants<double>::pi)));
 
         for (int i = 1; i <= L; ++i)
         {
             auto ui = (2 * i - 1.0) / (double) N;
 
-            pa.add (1.0 / (k / omegap * j * std::cos ((ui - j * v0) * 0.5 * double_Pi)));
-            za.add (1.0 / (k / omegap * j * std::cos (ui * 0.5 * double_Pi)));
+            pa.add (1.0 / (k / omegap * j * std::cos ((ui - j * v0) * 0.5 * MathConstants<double>::pi)));
+            za.add (1.0 / (k / omegap * j * std::cos (ui * 0.5 * MathConstants<double>::pi)));
         }
     }
     else
@@ -543,10 +545,10 @@ typename FilterDesign<FloatType>::IIRPolyphaseAllpassStructure
     jassert (normalizedTransitionWidth > 0 && normalizedTransitionWidth <= 0.5);
     jassert (stopbandAttenuationdB > -300 && stopbandAttenuationdB < -10);
 
-    const double wt = 2 * double_Pi * normalizedTransitionWidth;
+    const double wt = MathConstants<double>::twoPi * normalizedTransitionWidth;
     const double ds = Decibels::decibelsToGain (stopbandAttenuationdB, static_cast<FloatType> (-300.0));
 
-    auto k = std::pow (std::tan ((double_Pi - wt) / 4), 2.0);
+    auto k = std::pow (std::tan ((MathConstants<double>::pi - wt) / 4), 2.0);
     auto kp = std::sqrt (1.0 - k * k);
     auto e = (1 - std::sqrt (kp)) / (1 + std::sqrt (kp)) * 0.5;
     auto q = e + 2 * std::pow (e, 5.0) + 15 * std::pow (e, 9.0) + 150 * std::pow (e, 13.0);
@@ -575,7 +577,7 @@ typename FilterDesign<FloatType>::IIRPolyphaseAllpassStructure
         while (std::abs (delta) > 1e-100)
         {
             delta = std::pow (-1, m) * std::pow (q, m * (m + 1))
-                     * std::sin ((2 * m + 1) * double_Pi * i / (double) n);
+                     * std::sin ((2 * m + 1) * MathConstants<double>::pi * i / (double) n);
             num += delta;
             m++;
         }
@@ -589,7 +591,7 @@ typename FilterDesign<FloatType>::IIRPolyphaseAllpassStructure
         while (std::abs (delta) > 1e-100)
         {
             delta = std::pow (-1, m) * std::pow (q, m * m)
-                     * std::cos (2 * m * double_Pi * i / (double) n);
+                     * std::cos (2 * m * MathConstants<double>::pi * i / (double) n);
             den += delta;
             ++m;
         }

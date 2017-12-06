@@ -63,8 +63,10 @@ public:
     {
         if (lookupTableNumPoints != 0)
         {
-            auto* table = new LookupTableTransform<NumericType> (function, static_cast <NumericType> (-1.0 * double_Pi),
-                                                                 static_cast<NumericType> (double_Pi), lookupTableNumPoints);
+            auto* table = new LookupTableTransform<NumericType> (function,
+                                                                 static_cast<NumericType> (-1.0 * MathConstants<double>::pi),
+                                                                 static_cast<NumericType> (MathConstants<double>::pi),
+                                                                 lookupTableNumPoints);
 
             lookupTable = table;
             generator = [table] (NumericType x) { return (*table) (x); };
@@ -106,9 +108,9 @@ public:
     SampleType JUCE_VECTOR_CALLTYPE processSample (SampleType) noexcept
     {
         jassert (isInitialised());
-        auto increment = static_cast<NumericType> (2.0 * double_Pi) * frequency.getNextValue() / sampleRate;
-        auto value = generator (pos - static_cast<NumericType> (double_Pi));
-        pos = std::fmod (pos + increment, static_cast<NumericType> (2.0 * double_Pi));
+        auto increment = static_cast<NumericType> (MathConstants<double>::twoPi) * frequency.getNextValue() / sampleRate;
+        auto value = generator (pos - static_cast<NumericType> (MathConstants<double>::pi));
+        pos = std::fmod (pos + increment, static_cast<NumericType> (MathConstants<double>::twoPi));
 
         return value;
     }
@@ -126,7 +128,7 @@ public:
 
         auto len           = outBlock.getNumSamples();
         auto numChannels   = outBlock.getNumChannels();
-        auto baseIncrement = static_cast<NumericType> (2.0 * double_Pi) / sampleRate;
+        auto baseIncrement = static_cast<NumericType> (MathConstants<double>::twoPi) / sampleRate;
 
         if (frequency.isSmoothing())
         {
@@ -134,9 +136,10 @@ public:
 
             for (size_t i = 0; i < len; ++i)
             {
-                buffer[i] = pos - static_cast<NumericType> (double_Pi);
+                buffer[i] = pos - static_cast<NumericType> (MathConstants<double>::pi);
 
-                pos = std::fmod (pos + (baseIncrement * frequency.getNextValue()), static_cast<NumericType> (2.0 * double_Pi));
+                pos = std::fmod (pos + (baseIncrement * frequency.getNextValue()),
+                                 static_cast<NumericType> (MathConstants<double>::twoPi));
             }
 
             for (size_t ch = 0; ch < numChannels; ++ch)
@@ -158,12 +161,13 @@ public:
 
                 for (size_t i = 0; i < len; ++i)
                 {
-                    dst[i] = generator (p - static_cast<NumericType> (double_Pi));
-                    p = std::fmod (p + freq, static_cast<NumericType> (2.0 * double_Pi));
+                    dst[i] = generator (p - static_cast<NumericType> (MathConstants<double>::pi));
+                    p = std::fmod (p + freq, static_cast<NumericType> (MathConstants<double>::twoPi));
                 }
             }
 
-            pos = std::fmod (pos + freq * static_cast<NumericType> (len), static_cast<NumericType> (2.0 * double_Pi));
+            pos = std::fmod (pos + freq * static_cast<NumericType> (len),
+                             static_cast<NumericType> (MathConstants<double>::twoPi));
         }
     }
 

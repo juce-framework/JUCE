@@ -631,7 +631,7 @@ void Path::addPieSegment (const float x, const float y,
     startNewSubPath (centre.getPointOnCircumference (radiusX, radiusY, fromRadians));
     addArc (x, y, width, height, fromRadians, toRadians);
 
-    if (std::abs (fromRadians - toRadians) > float_Pi * 1.999f)
+    if (std::abs (fromRadians - toRadians) > MathConstants<float>::pi * 1.999f)
     {
         closeSubPath();
 
@@ -714,7 +714,7 @@ void Path::addPolygon (Point<float> centre, int numberOfSides,
 
     if (numberOfSides > 1)
     {
-        auto angleBetweenPoints = float_Pi * 2.0f / numberOfSides;
+        auto angleBetweenPoints = MathConstants<float>::twoPi / numberOfSides;
 
         for (int i = 0; i < numberOfSides; ++i)
         {
@@ -738,7 +738,7 @@ void Path::addStar (Point<float> centre, int numberOfPoints, float innerRadius,
 
     if (numberOfPoints > 1)
     {
-        auto angleBetweenPoints = float_Pi * 2.0f / numberOfPoints;
+        auto angleBetweenPoints = MathConstants<float>::twoPi / numberOfPoints;
 
         for (int i = 0; i < numberOfPoints; ++i)
         {
@@ -784,7 +784,7 @@ void Path::addBubble (Rectangle<float> bodyArea,
     }
 
     lineTo (bodyArea.getRight() - cornerSizeW, bodyArea.getY());
-    addArc (bodyArea.getRight() - cornerSizeW2, bodyArea.getY(), cornerSizeW2, cornerSizeH2, 0, float_Pi * 0.5f);
+    addArc (bodyArea.getRight() - cornerSizeW2, bodyArea.getY(), cornerSizeW2, cornerSizeH2, 0, MathConstants<float>::pi * 0.5f);
 
     if (Rectangle<float> (bodyArea.getRight(), targetLimit.getY(),
                           maximumArea.getRight() - bodyArea.getRight(), targetLimit.getHeight()).contains (arrowTip))
@@ -795,7 +795,7 @@ void Path::addBubble (Rectangle<float> bodyArea,
     }
 
     lineTo (bodyArea.getRight(), bodyArea.getBottom() - cornerSizeH);
-    addArc (bodyArea.getRight() - cornerSizeW2, bodyArea.getBottom() - cornerSizeH2, cornerSizeW2, cornerSizeH2, float_Pi * 0.5f, float_Pi);
+    addArc (bodyArea.getRight() - cornerSizeW2, bodyArea.getBottom() - cornerSizeH2, cornerSizeW2, cornerSizeH2, MathConstants<float>::pi * 0.5f, MathConstants<float>::pi);
 
     if (Rectangle<float> (targetLimit.getX(), bodyArea.getBottom(),
                           targetLimit.getWidth(), maximumArea.getBottom() - bodyArea.getBottom()).contains (arrowTip))
@@ -806,7 +806,7 @@ void Path::addBubble (Rectangle<float> bodyArea,
     }
 
     lineTo (bodyArea.getX() + cornerSizeW, bodyArea.getBottom());
-    addArc (bodyArea.getX(), bodyArea.getBottom() - cornerSizeH2, cornerSizeW2, cornerSizeH2, float_Pi, float_Pi * 1.5f);
+    addArc (bodyArea.getX(), bodyArea.getBottom() - cornerSizeH2, cornerSizeW2, cornerSizeH2, MathConstants<float>::pi, MathConstants<float>::pi * 1.5f);
 
     if (Rectangle<float> (maximumArea.getX(), targetLimit.getY(),
                           bodyArea.getX() - maximumArea.getX(), targetLimit.getHeight()).contains (arrowTip))
@@ -817,7 +817,7 @@ void Path::addBubble (Rectangle<float> bodyArea,
     }
 
     lineTo (bodyArea.getX(), bodyArea.getY() + cornerSizeH);
-    addArc (bodyArea.getX(), bodyArea.getY(), cornerSizeW2, cornerSizeH2, float_Pi * 1.5f, float_Pi * 2.0f - 0.05f);
+    addArc (bodyArea.getX(), bodyArea.getY(), cornerSizeW2, cornerSizeH2, MathConstants<float>::pi * 1.5f, MathConstants<float>::twoPi - 0.05f);
 
     closeSubPath();
 }

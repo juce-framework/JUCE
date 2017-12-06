@@ -1611,10 +1611,10 @@ private:
         return result;
     }
 
-    static void endpointToCentreParameters (const double x1, const double y1,
-                                            const double x2, const double y2,
-                                            const double angle,
-                                            const bool largeArc, const bool sweep,
+    static void endpointToCentreParameters (double x1, double y1,
+                                            double x2, double y2,
+                                            double angle,
+                                            bool largeArc, bool sweep,
                                             double& rx, double& ry,
                                             double& centreX, double& centreY,
                                             double& startAngle, double& deltaAngle) noexcept
@@ -1669,7 +1669,7 @@ private:
         if (uy < 0)
             startAngle = -startAngle;
 
-        startAngle += double_Pi * 0.5;
+        startAngle += MathConstants<double>::pi * 0.5;
 
         deltaAngle = acos (jlimit (-1.0, 1.0, ((ux * vx) + (uy * vy))
                                                 / (length * juce_hypot (vx, vy))));
@@ -1680,15 +1680,15 @@ private:
         if (sweep)
         {
             if (deltaAngle < 0)
-                deltaAngle += double_Pi * 2.0;
+                deltaAngle += MathConstants<double>::twoPi;
         }
         else
         {
             if (deltaAngle > 0)
-                deltaAngle -= double_Pi * 2.0;
+                deltaAngle -= MathConstants<double>::twoPi;
         }
 
-        deltaAngle = fmod (deltaAngle, double_Pi * 2.0);
+        deltaAngle = fmod (deltaAngle, MathConstants<double>::twoPi);
     }
 
     SVGState& operator= (const SVGState&) JUCE_DELETED_FUNCTION;

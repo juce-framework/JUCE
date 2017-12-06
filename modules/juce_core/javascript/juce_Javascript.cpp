@@ -1700,7 +1700,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             setMethod ("sqr",       Math_sqr);              setMethod ("sqrt",      Math_sqrt);
             setMethod ("ceil",      Math_ceil);             setMethod ("floor",     Math_floor);
 
-            setProperty ("PI", double_Pi);
+            setProperty ("PI", MathConstants<double>::pi);
             setProperty ("E", exp (1.0));
         }
 

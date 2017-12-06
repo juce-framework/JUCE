@@ -39,8 +39,8 @@ public:
         style (sliderStyle),
         textBoxPos (textBoxPosition)
     {
-        rotaryParams.startAngleRadians = float_Pi * 1.2f;
-        rotaryParams.endAngleRadians   = float_Pi * 2.8f;
+        rotaryParams.startAngleRadians = MathConstants<float>::pi * 1.2f;
+        rotaryParams.endAngleRadians   = MathConstants<float>::pi * 2.8f;
         rotaryParams.stopAtEnd = true;
     }
 
@@ -676,16 +676,16 @@ public:
             auto angle = std::atan2 ((double) dx, (double) -dy);
 
             while (angle < 0.0)
-                angle += double_Pi * 2.0;
+                angle += MathConstants<double>::twoPi;
 
             if (rotaryParams.stopAtEnd && e.mouseWasDraggedSinceMouseDown())
             {
-                if (std::abs (angle - lastAngle) > double_Pi)
+                if (std::abs (angle - lastAngle) > MathConstants<double>::pi)
                 {
                     if (angle >= lastAngle)
-                        angle -= double_Pi * 2.0;
+                        angle -= MathConstants<double>::twoPi;
                     else
-                        angle += double_Pi * 2.0;
+                        angle += MathConstants<double>::twoPi;
                 }
 
                 if (angle >= lastAngle)
@@ -696,7 +696,7 @@ public:
             else
             {
                 while (angle < rotaryParams.startAngleRadians)
-                    angle += double_Pi * 2.0;
+                    angle += MathConstants<double>::twoPi;
 
                 if (angle > rotaryParams.endAngleRadians)
                 {
@@ -777,9 +777,9 @@ public:
         if (speed != 0.0)
         {
             speed = 0.2 * velocityModeSensitivity
-                      * (1.0 + std::sin (double_Pi * (1.5 + jmin (0.5, velocityModeOffset
-                                                                    + jmax (0.0, (double) (speed - velocityModeThreshold))
-                                                                        / maxSpeed))));
+                      * (1.0 + std::sin (MathConstants<double>::pi * (1.5 + jmin (0.5, velocityModeOffset
+                                                                                         + jmax (0.0, (double) (speed - velocityModeThreshold))
+                                                                                            / maxSpeed))));
 
             if (mouseDiff < 0)
                 speed = -speed;
@@ -1321,8 +1321,8 @@ public:
     static double smallestAngleBetween (double a1, double a2) noexcept
     {
         return jmin (std::abs (a1 - a2),
-                     std::abs (a1 + double_Pi * 2.0 - a2),
-                     std::abs (a2 + double_Pi * 2.0 - a1));
+                     std::abs (a1 + MathConstants<double>::twoPi - a2),
+                     std::abs (a2 + MathConstants<double>::twoPi - a1));
     }
 };
 
@@ -1370,7 +1370,8 @@ void Slider::setRotaryParameters (RotaryParameters p) noexcept
 {
     // make sure the values are sensible..
     jassert (p.startAngleRadians >= 0 && p.endAngleRadians >= 0);
-    jassert (p.startAngleRadians < float_Pi * 4.0f && p.endAngleRadians < float_Pi * 4.0f);
+    jassert (p.startAngleRadians < MathConstants<float>::pi * 4.0f
+              && p.endAngleRadians < MathConstants<float>::pi * 4.0f);
 
     pimpl->rotaryParams = p;
 }

@@ -986,13 +986,13 @@ void AudioDeviceManager::playTestSound()
 
     if (currentAudioDevice != nullptr)
     {
-        const double sampleRate = currentAudioDevice->getCurrentSampleRate();
-        const int soundLength = (int) sampleRate;
+        auto sampleRate = currentAudioDevice->getCurrentSampleRate();
+        auto soundLength = (int) sampleRate;
 
-        const double frequency = 440.0;
-        const float amplitude = 0.5f;
+        double frequency = 440.0;
+        float amplitude = 0.5f;
 
-        const double phasePerSample = double_Pi * 2.0 / (sampleRate / frequency);
+        auto phasePerSample = MathConstants<double>::twoPi / (sampleRate / frequency);
 
         auto* newSound = new AudioBuffer<float> (1, soundLength);
 

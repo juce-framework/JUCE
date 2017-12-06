@@ -39,7 +39,7 @@ double FIR::Coefficients<NumericType>::Coefficients::getMagnitudeForFrequency (d
     auto order = getFilterOrder();
 
     Complex<double> numerator = 0.0, factor = 1.0;
-    Complex<double> jw = std::exp (-2.0 * double_Pi * frequency * j / theSampleRate);
+    Complex<double> jw = std::exp (-MathConstants<double>::twoPi * frequency * j / theSampleRate);
 
     const auto* coefs = coefficients.begin();
 
@@ -69,7 +69,7 @@ void FIR::Coefficients<NumericType>::Coefficients::getMagnitudeForFrequencyArray
 
         Complex<double> numerator = 0.0;
         Complex<double> factor = 1.0;
-        Complex<double> jw = std::exp (-2.0 * double_Pi * frequencies[i] * j / theSampleRate);
+        Complex<double> jw = std::exp (-MathConstants<double>::twoPi * frequencies[i] * j / theSampleRate);
 
         for (size_t n = 0; n <= order; ++n)
         {
@@ -92,7 +92,7 @@ double FIR::Coefficients<NumericType>::Coefficients::getPhaseForFrequency (doubl
 
     Complex<double> numerator = 0.0;
     Complex<double> factor = 1.0;
-    Complex<double> jw = std::exp (-2.0 * double_Pi * frequency * j / theSampleRate);
+    Complex<double> jw = std::exp (-MathConstants<double>::twoPi * frequency * j / theSampleRate);
 
     const auto* coefs = coefficients.begin();
     auto order = getFilterOrder();
@@ -122,7 +122,7 @@ void FIR::Coefficients<NumericType>::Coefficients::getPhaseForFrequencyArray (do
         jassert (frequencies[i] >= 0.0 && frequencies[i] <= theSampleRate * 0.5);
 
         Complex<double> numerator = 0.0, factor = 1.0;
-        Complex<double> jw = std::exp (-2.0 * double_Pi * frequencies[i] * j / theSampleRate);
+        Complex<double> jw = std::exp (-MathConstants<double>::twoPi * frequencies[i] * j / theSampleRate);
 
         for (size_t n = 0; n <= order; ++n)
         {
