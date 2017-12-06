@@ -536,8 +536,8 @@ void Graphics::fillCheckerBoard (Rectangle<float> area, float checkWidth, float 
                 const int checkNumY = (int) ((clipped.getY() - area.getY()) / checkHeight);
                 const float startX = area.getX() + checkNumX * checkWidth;
                 const float startY = area.getY() + checkNumY * checkHeight;
-                const float right  = clipped.getRight();
-                const float bottom = clipped.getBottom();
+                const float right  = (float) clipped.getRight();
+                const float bottom = (float) clipped.getBottom();
 
                 for (int i = 0; i < 2; ++i)
                 {
