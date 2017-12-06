@@ -155,7 +155,7 @@ void LadderFilter<Type>::setSampleRate (Type newValue) noexcept
     jassert (newValue > Type (0));
     cutoffFreqScaler = Type (-2.0 * juce::MathConstants<double>::pi) / newValue;
 
-    static constexpr Type smootherRampTimeSec (0.05);
+    static constexpr Type smootherRampTimeSec = Type (0.05);
     cutoffTransformSmoother.reset (newValue, smootherRampTimeSec);
     scaledResonanceSmoother.reset (newValue, smootherRampTimeSec);
 

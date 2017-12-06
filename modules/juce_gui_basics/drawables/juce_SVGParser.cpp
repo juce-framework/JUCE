@@ -1669,7 +1669,7 @@ private:
         if (uy < 0)
             startAngle = -startAngle;
 
-        startAngle += MathConstants<double>::pi * 0.5;
+        startAngle += MathConstants<double>::halfPi;
 
         deltaAngle = acos (jlimit (-1.0, 1.0, ((ux * vx) + (uy * vy))
                                                 / (length * juce_hypot (vx, vy))));

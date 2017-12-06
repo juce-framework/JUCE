@@ -461,7 +461,7 @@ Path ProjucerLookAndFeel::getArrowPath (Rectangle<float> arrowZone, const int di
     if (filled)
         path.closeSubPath();
 
-    path.applyTransform (AffineTransform::rotation (direction * (MathConstants<float>::pi / 2.0f),
+    path.applyTransform (AffineTransform::rotation (direction * MathConstants<float>::halfPi,
                                                     arrowZone.getCentreX(), arrowZone.getCentreY()));
 
     return path;

@@ -784,7 +784,7 @@ void Path::addBubble (Rectangle<float> bodyArea,
     }
 
     lineTo (bodyArea.getRight() - cornerSizeW, bodyArea.getY());
-    addArc (bodyArea.getRight() - cornerSizeW2, bodyArea.getY(), cornerSizeW2, cornerSizeH2, 0, MathConstants<float>::pi * 0.5f);
+    addArc (bodyArea.getRight() - cornerSizeW2, bodyArea.getY(), cornerSizeW2, cornerSizeH2, 0, MathConstants<float>::halfPi);
 
     if (Rectangle<float> (bodyArea.getRight(), targetLimit.getY(),
                           maximumArea.getRight() - bodyArea.getRight(), targetLimit.getHeight()).contains (arrowTip))
@@ -795,7 +795,7 @@ void Path::addBubble (Rectangle<float> bodyArea,
     }
 
     lineTo (bodyArea.getRight(), bodyArea.getBottom() - cornerSizeH);
-    addArc (bodyArea.getRight() - cornerSizeW2, bodyArea.getBottom() - cornerSizeH2, cornerSizeW2, cornerSizeH2, MathConstants<float>::pi * 0.5f, MathConstants<float>::pi);
+    addArc (bodyArea.getRight() - cornerSizeW2, bodyArea.getBottom() - cornerSizeH2, cornerSizeW2, cornerSizeH2, MathConstants<float>::halfPi, MathConstants<float>::pi);
 
     if (Rectangle<float> (targetLimit.getX(), bodyArea.getBottom(),
                           targetLimit.getWidth(), maximumArea.getBottom() - bodyArea.getBottom()).contains (arrowTip))

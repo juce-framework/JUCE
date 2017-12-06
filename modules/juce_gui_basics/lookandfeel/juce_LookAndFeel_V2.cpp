@@ -2024,10 +2024,10 @@ void LookAndFeel_V2::drawGroupComponentOutline (Graphics& g, int width, int heig
     p.startNewSubPath (x + textX + textW, y);
     p.lineTo (x + w - cs, y);
 
-    p.addArc (x + w - cs2, y, cs2, cs2, 0, MathConstants<float>::pi * 0.5f);
+    p.addArc (x + w - cs2, y, cs2, cs2, 0, MathConstants<float>::halfPi);
     p.lineTo (x + w, y + h - cs);
 
-    p.addArc (x + w - cs2, y + h - cs2, cs2, cs2, MathConstants<float>::pi * 0.5f, MathConstants<float>::pi);
+    p.addArc (x + w - cs2, y + h - cs2, cs2, cs2, MathConstants<float>::halfPi, MathConstants<float>::pi);
     p.lineTo (x + cs, y + h);
 
     p.addArc (x, y + h - cs2, cs2, cs2, MathConstants<float>::pi, MathConstants<float>::pi * 1.5f);
@@ -2948,7 +2948,7 @@ void LookAndFeel_V2::drawGlassPointer (Graphics& g,
     p.lineTo (x, y + diameter * 0.6f);
     p.closeSubPath();
 
-    p.applyTransform (AffineTransform::rotation (direction * (MathConstants<float>::pi * 0.5f), x + diameter * 0.5f, y + diameter * 0.5f));
+    p.applyTransform (AffineTransform::rotation (direction * MathConstants<float>::halfPi, x + diameter * 0.5f, y + diameter * 0.5f));
 
     {
         ColourGradient cg (Colours::white.overlaidWith (colour.withMultipliedAlpha (0.3f)), 0, y,

@@ -1071,8 +1071,8 @@ void LookAndFeel_V4::drawRotarySlider (Graphics& g, int x, int y, int width, int
     }
 
     auto thumbWidth = lineW * 2.0f;
-    Point<float> thumbPoint (bounds.getCentreX() + arcRadius * std::cos (toAngle - MathConstants<float>::pi * 0.5f),
-                             bounds.getCentreY() + arcRadius * std::sin (toAngle - MathConstants<float>::pi * 0.5f));
+    Point<float> thumbPoint (bounds.getCentreX() + arcRadius * std::cos (toAngle - MathConstants<float>::halfPi),
+                             bounds.getCentreY() + arcRadius * std::sin (toAngle - MathConstants<float>::halfPi));
 
     g.setColour (slider.findColour (Slider::thumbColourId));
     g.fillEllipse (Rectangle<float> (thumbWidth, thumbWidth).withCentre (thumbPoint));
@@ -1089,8 +1089,8 @@ void LookAndFeel_V4::drawPointer (Graphics& g, const float x, const float y, con
     p.lineTo (x, y + diameter * 0.6f);
     p.closeSubPath();
 
-    p.applyTransform (AffineTransform::rotation (direction * (MathConstants<float>::pi * 0.5f), x + diameter * 0.5f, y + diameter * 0.5f));
-
+    p.applyTransform (AffineTransform::rotation (direction * MathConstants<float>::halfPi,
+                                                 x + diameter * 0.5f, y + diameter * 0.5f));
     g.setColour (colour);
     g.fillPath (p);
 }

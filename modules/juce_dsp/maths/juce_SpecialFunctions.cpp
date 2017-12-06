@@ -53,7 +53,7 @@ void SpecialFunctions::ellipticIntegralK (double k, double& K, double& Kp) noexc
 {
     constexpr int M = 4;
 
-    K = MathConstants<double>::pi * 0.5;
+    K = MathConstants<double>::halfPi;
     auto lastK = k;
 
     for (int i = 0; i < M; ++i)
@@ -62,7 +62,7 @@ void SpecialFunctions::ellipticIntegralK (double k, double& K, double& Kp) noexc
         K *= 1 + lastK;
     }
 
-    Kp = MathConstants<double>::pi * 0.5;
+    Kp = MathConstants<double>::halfPi;
     auto last = std::sqrt (1 - k * k);
 
     for (int i = 0; i < M; ++i)
@@ -86,7 +86,8 @@ Complex<double> SpecialFunctions::cde (Complex<double> u, double k) noexcept
         *++kei = next;
     }
 
-    std::complex<double> last = std::cos (0.5 * u * MathConstants<double>::pi);
+    // NB: the spurious cast to double here is a workaround for a very odd link-time failure
+    std::complex<double> last = std::cos (u * (double) MathConstants<double>::halfPi);
 
     for (int i = M - 1; i >= 0; --i)
         last = (1.0 + ke[i + 1]) / (1.0 / last + ke[i + 1] * last);
@@ -108,7 +109,8 @@ Complex<double> SpecialFunctions::sne (Complex<double> u, double k) noexcept
         *++kei = next;
     }
 
-    std::complex<double> last = std::sin (0.5 * u * MathConstants<double>::pi);
+    // NB: the spurious cast to double here is a workaround for a very odd link-time failure
+    std::complex<double> last = std::sin (u * (double) MathConstants<double>::halfPi);
 
     for (int i = M - 1; i >= 0; --i)
         last = (1.0 + ke[i + 1]) / (1.0 / last + ke[i + 1] * last);

@@ -326,7 +326,6 @@ inline int64 abs64 (const int64 n) noexcept
 #endif
 
 //==============================================================================
-
 #if JUCE_HAS_CONSTEXPR
 
 /** Commonly used mathematical constants */
@@ -338,6 +337,9 @@ struct MathConstants
 
     /** A predefined value for 2 * Pi */
     static constexpr FloatType twoPi = static_cast<FloatType> (2 * 3.141592653589793238L);
+
+    /** A predefined value for Pi / 2 */
+    static constexpr FloatType halfPi = static_cast<FloatType> (3.141592653589793238L / 2);
 
     /** A predfined value for Euler's number */
     static constexpr FloatType euler = static_cast<FloatType> (2.71828182845904523536L);
@@ -355,6 +357,9 @@ struct MathConstants
     /** A predefined value for 2 * Pi */
     static const FloatType twoPi;
 
+    /** A predefined value for Pi / 2 */
+    static const FloatType halfPi;
+
     /** A predfined value for Euler's number */
     static const FloatType euler;
 };
@@ -364,6 +369,9 @@ const FloatType MathConstants<FloatType>::pi = static_cast<FloatType> (3.1415926
 
 template <typename FloatType>
 const FloatType MathConstants<FloatType>::twoPi = static_cast<FloatType> (2 * 3.141592653589793238L);
+
+template <typename FloatType>
+const FloatType MathConstants<FloatType>::halfPi = static_cast<FloatType> (3.141592653589793238L / 2);
 
 template <typename FloatType>
 const FloatType MathConstants<FloatType>::euler = static_cast<FloatType> (2.71828182845904523536L);

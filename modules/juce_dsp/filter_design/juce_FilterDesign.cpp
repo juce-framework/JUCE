@@ -407,6 +407,7 @@ Array<IIR::Coefficients<FloatType>>
 
     auto omegap = std::tan (MathConstants<double>::pi * fp);
     auto omegas = std::tan (MathConstants<double>::pi * fs);
+    constexpr auto halfPi = MathConstants<double>::halfPi;
 
     auto k = omegap / omegas;
     auto k1 = epsp / epss;
@@ -446,35 +447,35 @@ Array<IIR::Coefficients<FloatType>>
         for (int i = 1; i <= L; ++i)
         {
             auto ui = (2 * i - 1.0) / (double) N;
-            pa.add (omegap * std::pow (epsp, -1.0 / (double) N) * j * exp (ui * 0.5 * MathConstants<double>::pi * j));
+            pa.add (omegap * std::pow (epsp, -1.0 / (double) N) * j * exp (ui * halfPi * j));
         }
     }
     else if (type == 1)
     {
-        auto v0 = std::asinh (1.0 / epsp) / (0.5 * N * MathConstants<double>::pi);
+        auto v0 = std::asinh (1.0 / epsp) / (N * halfPi);
 
         if (r == 1)
-            pa.add (-omegap * std::sinh (v0 * 0.5 * MathConstants<double>::pi));
+            pa.add (-omegap * std::sinh (v0 * halfPi));
 
         for (int i = 1; i <= L; ++i)
         {
             auto ui = (2 * i - 1.0) / (double) N;
-            pa.add (omegap * j * std::cos ((ui - j * v0) * 0.5 * MathConstants<double>::pi));
+            pa.add (omegap * j * std::cos ((ui - j * v0) * halfPi));
         }
     }
     else if (type == 2)
     {
-        auto v0 = std::asinh (epss) / (N * 0.5 * MathConstants<double>::pi);
+        auto v0 = std::asinh (epss) / (N * halfPi);
 
         if (r == 1)
-            pa.add(-1.0 / (k / omegap * std::sinh (v0 * 0.5 * MathConstants<double>::pi)));
+            pa.add(-1.0 / (k / omegap * std::sinh (v0 * halfPi)));
 
         for (int i = 1; i <= L; ++i)
         {
             auto ui = (2 * i - 1.0) / (double) N;
 
-            pa.add (1.0 / (k / omegap * j * std::cos ((ui - j * v0) * 0.5 * MathConstants<double>::pi)));
-            za.add (1.0 / (k / omegap * j * std::cos (ui * 0.5 * MathConstants<double>::pi)));
+            pa.add (1.0 / (k / omegap * j * std::cos ((ui - j * v0) * halfPi)));
+            za.add (1.0 / (k / omegap * j * std::cos (ui * halfPi)));
         }
     }
     else
@@ -591,7 +592,7 @@ typename FilterDesign<FloatType>::IIRPolyphaseAllpassStructure
         while (std::abs (delta) > 1e-100)
         {
             delta = std::pow (-1, m) * std::pow (q, m * m)
-                     * std::cos (2 * m * MathConstants<double>::pi * i / (double) n);
+                     * std::cos (m * MathConstants<double>::twoPi * i / (double) n);
             den += delta;
             ++m;
         }
