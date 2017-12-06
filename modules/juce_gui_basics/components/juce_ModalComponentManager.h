@@ -74,7 +74,9 @@ public:
     };
 
     //==============================================================================
+   #ifndef DOXYGEN
     juce_DeclareSingleton_SingleThreaded_Minimal (ModalComponentManager)
+   #endif
 
     //==============================================================================
     /** Returns the number of components currently being shown modally.

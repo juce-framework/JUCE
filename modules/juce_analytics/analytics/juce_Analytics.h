@@ -79,8 +79,9 @@ public:
     */
     void setSuspended (bool shouldBeSuspended);
 
-
+   #ifndef DOXYGEN
     juce_DeclareSingleton (Analytics, true)
+   #endif
 
 private:
     //==============================================================================

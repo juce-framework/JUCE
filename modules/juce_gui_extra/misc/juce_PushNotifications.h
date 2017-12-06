@@ -44,7 +44,9 @@ namespace juce
 class JUCE_API PushNotifications
 {
 public:
+   #ifndef DOXYGEN
     juce_DeclareSingleton (PushNotifications, false)
+   #endif
 
     //==========================================================================
     /** Represents a notification that can be sent or received. */
