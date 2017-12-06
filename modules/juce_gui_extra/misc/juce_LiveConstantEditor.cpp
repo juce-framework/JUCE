@@ -410,7 +410,7 @@ struct ColourEditorComp  : public Component,
 
     void paint (Graphics& g) override
     {
-        g.fillCheckerBoard (getLocalBounds(), 6, 6,
+        g.fillCheckerBoard (getLocalBounds().toFloat(), 6.0f, 6.0f,
                             Colour (0xffdddddd).overlaidWith (getColour()),
                             Colour (0xffffffff).overlaidWith (getColour()));
     }

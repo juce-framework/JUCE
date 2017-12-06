@@ -300,8 +300,8 @@ public:
                                float cornerSize) const;
 
     /** Fills a rectangle with a checkerboard pattern, alternating between two colours. */
-    void fillCheckerBoard (Rectangle<int> area,
-                           int checkWidth, int checkHeight,
+    void fillCheckerBoard (Rectangle<float> area,
+                           float checkWidth, float checkHeight,
                            Colour colour1, Colour colour2) const;
 
     /** Draws a rectangular outline, using the current colour or brush.

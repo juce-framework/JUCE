@@ -356,7 +356,7 @@ private:
         void paint (Graphics& g) override
         {
             if (jucerComp == nullptr)
-                g.fillCheckerBoard (getLocalBounds(), 50, 50,
+                g.fillCheckerBoard (getLocalBounds().toFloat(), 50.0f, 50.0f,
                                     Colour::greyLevel (0.9f).withAlpha (0.4f),
                                     Colour::greyLevel (0.8f).withAlpha (0.4f));
         }

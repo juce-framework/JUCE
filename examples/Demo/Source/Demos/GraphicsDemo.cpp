@@ -573,7 +573,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillCheckerBoard (getLocalBounds(), 48, 48,
+        g.fillCheckerBoard (getLocalBounds().toFloat(), 48.0f, 48.0f,
                             Colours::lightgrey, Colours::white);
     }
 
