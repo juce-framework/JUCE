@@ -1257,7 +1257,7 @@ void Component::setBoundsRelative (const float x, const float y,
                roundToInt (h * ph));
 }
 
-void Component::setCentrePosition (Point<int> p)    { setBounds (getBounds().withCentre (p)); }
+void Component::setCentrePosition (Point<int> p)    { setBounds (getBounds().withCentre (p.transformedBy (getTransform().inverted()))); }
 void Component::setCentrePosition (int x, int y)    { setCentrePosition ({x, y}); }
 
 void Component::setCentreRelative (float x, float y)
@@ -1268,7 +1268,8 @@ void Component::setCentreRelative (float x, float y)
 
 void Component::centreWithSize (const int width, const int height)
 {
-    auto parentArea = ComponentHelpers::getParentOrMainMonitorBounds (*this);
+    auto parentArea = ComponentHelpers::getParentOrMainMonitorBounds (*this)
+                                       .transformedBy (getTransform().inverted());
 
     setBounds (parentArea.getCentreX() - width / 2,
                parentArea.getCentreY() - height / 2,
