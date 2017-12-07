@@ -37,6 +37,7 @@ public:
     Pimpl (Slider& s, SliderStyle sliderStyle, TextEntryBoxPosition textBoxPosition)
       : owner (s),
         style (sliderStyle),
+        numThumbs (getNumThumbsFromSliderStyle()),
         textBoxPos (textBoxPosition)
     {
         rotaryParams.startAngleRadians = MathConstants<float>::pi * 1.2f;
@@ -96,6 +97,146 @@ public:
                 || (incDecButtonMode == incDecButtonsDraggable_AutoDirection && incDecButtonsSideBySide);
     }
 
+    //==============================================================================
+
+    struct DragInProgress
+    {
+        DragInProgress (Pimpl& p) : owner (p) { owner.sendDragStart(); }
+        ~DragInProgress() { owner.sendDragEnd(); }
+
+        Pimpl& owner;
+
+        JUCE_DECLARE_NON_COPYABLE(DragInProgress)
+    };
+
+    struct ActiveThumb
+    {
+        ActiveThumb (Pimpl& owner, const MouseInputSource& source,
+            int thumb, double value, Point<float> position)
+            : drag (std::make_unique<DragInProgress>(owner)),
+              type (source.getType()),
+              index (source.getIndex()),
+              thumb (thumb),
+              startValue (value),
+              lastValue (value),
+              startPosition (position),
+              lastPosition (position)
+        {}
+
+        std::unique_ptr<DragInProgress> drag;
+        MouseInputSource::InputSourceType type;
+        int index;
+        int thumb;
+        double startValue;
+        double lastValue;
+        Point<float> startPosition;
+        Point<float> lastPosition;
+    };
+
+    bool noThumbsAvailable() const { return activeThumbs.size() == numThumbs; }
+
+    var getValueFromThumbIndex (int thumb) const
+    {
+        return (thumb == 2 ? valueMax
+              : thumb == 1 ? valueMin
+              :              currentValue).getValue();
+    }
+
+    void setValueFromThumbIndex (int thumb, double value, NotificationType notification, bool nudge = true)
+    {
+        if (thumb == 2) return setMaxValue (value, notification, nudge);
+        if (thumb == 1) return setMinValue (value, notification, nudge);
+                               setValue    (value, notification);
+    }
+
+    std::vector<ActiveThumb>::const_iterator findActiveThumb (int thumb) const
+    {
+        return std::find_if (activeThumbs.cbegin(), activeThumbs.cend(),
+               [=] (const auto& x) { return x.thumb == thumb; }
+        );
+    }
+
+    bool thumbIsAvailable (int thumb) const
+    {
+        return findActiveThumb (thumb) == activeThumbs.cend();
+    }
+
+    std::vector<ActiveThumb>::iterator findActiveThumb (MouseInputSource::InputSourceType type, int index)
+    {
+        return std::find_if (activeThumbs.begin(), activeThumbs.end(),
+               [=] (const auto& x) { return x.type == type && x.index == index; }
+        );
+    }
+
+    std::vector<ActiveThumb>::iterator findActiveThumb (const MouseInputSource& source)
+    {
+        return findActiveThumb (source.getType(), source.getIndex());
+    }
+
+    int getNearestAvailableThumbIndex (const MouseEvent& e) const
+    {
+        // this is only called when there is at least one free thumb
+        if (numThumbs == 1)
+            return 0;
+
+        auto mousePos = isVertical() ? e.position.y : e.position.x;
+
+        auto normalPosDistance = std::abs (getLinearSliderPos (currentValue.getValue()) - mousePos);
+        auto minPosDistance    = std::abs (getLinearSliderPos (valueMin.getValue()) + (isVertical() ? 0.1f : -0.1f) - mousePos);
+        auto maxPosDistance    = std::abs (getLinearSliderPos (valueMax.getValue()) + (isVertical() ? -0.1f : 0.1f) - mousePos);
+
+        if (numThumbs == 2)
+        {
+            auto candidate1 = minPosDistance < maxPosDistance ? 1 : 2;
+            if (thumbIsAvailable (candidate1))
+                return candidate1;
+
+            auto candidate2 = (candidate1 == 1) ? 2 : 1;
+            return candidate2;
+        }
+
+        auto candidate1 = normalPosDistance < minPosDistance && normalPosDistance < maxPosDistance ? 0
+                              : minPosDistance < maxPosDistance ? 1 : 2;
+
+        if (thumbIsAvailable (candidate1))
+            return candidate1;
+
+        auto candidates =
+             candidate1 == 0 ? (minPosDistance    < maxPosDistance ? std::make_pair (1, 2) : std::make_pair (2, 1))
+           : candidate1 == 1 ? (normalPosDistance < maxPosDistance ? std::make_pair (0, 2) : std::make_pair (2, 0))
+           :                    normalPosDistance < minPosDistance ? std::make_pair (0, 1) : std::make_pair (1, 0);
+
+        auto candidate2 = candidates.first;
+        auto candidate3 = candidates.second;
+
+        return thumbIsAvailable (candidate2) ? candidate2 : candidate3;
+    }
+
+    int getThumbFromEvent (const MouseEvent& e) {
+        return getThumbFromTypeAndIndex (e.source.getType(), e.source.getIndex());
+    }
+
+    int getThumbFromSource (const MouseInputSource& source) {
+        return getThumbFromTypeAndIndex (source.getType(), source.getIndex());
+    }
+
+    int getThumbFromMouse()
+    {
+        return getThumbFromTypeAndIndex (MouseInputSource::InputSourceType::mouse, 0);
+    }
+
+    int getThumbFromTypeAndIndex (MouseInputSource::InputSourceType type, int index)
+    {
+        auto slider = findActiveThumb (type, index);
+
+        if (slider == activeThumbs.end())
+            return -1;
+
+        return slider->thumb;
+    }
+
+    //==============================================================================
+
     float getPositionOfValue (double value) const
     {
         if (isHorizontal() || isVertical())
@@ -132,7 +273,7 @@ public:
             }
 
             // keep the current values inside the new range..
-            if (style != TwoValueHorizontal && style != TwoValueVertical)
+            if (numThumbs != 2)
             {
                 setValue (getValue(), dontSendNotification);
             }
@@ -150,7 +291,7 @@ public:
     {
         // for a two-value style slider, you should use the getMinValue() and getMaxValue()
         // methods to get the two values.
-        jassert (style != TwoValueHorizontal && style != TwoValueVertical);
+        jassert (numThumbs != 2);
 
         return currentValue.getValue();
     }
@@ -159,11 +300,11 @@ public:
     {
         // for a two-value style slider, you should use the setMinValue() and setMaxValue()
         // methods to set the two values.
-        jassert (style != TwoValueHorizontal && style != TwoValueVertical);
+        jassert (numThumbs != 2);
 
         newValue = constrainedValue (newValue);
 
-        if (style == ThreeValueHorizontal || style == ThreeValueVertical)
+        if (numThumbs == 3)
         {
             jassert (static_cast<double> (valueMin.getValue()) <= static_cast<double> (valueMax.getValue()));
 
@@ -195,12 +336,11 @@ public:
     void setMinValue (double newValue, NotificationType notification, bool allowNudgingOfOtherValues)
     {
         // The minimum value only applies to sliders that are in two- or three-value mode.
-        jassert (style == TwoValueHorizontal || style == TwoValueVertical
-                  || style == ThreeValueHorizontal || style == ThreeValueVertical);
+        jassert (numThumbs != 1);
 
         newValue = constrainedValue (newValue);
 
-        if (style == TwoValueHorizontal || style == TwoValueVertical)
+        if (numThumbs == 2)
         {
             if (allowNudgingOfOtherValues && newValue > static_cast<double> (valueMax.getValue()))
                 setMaxValue (newValue, notification, false);
@@ -229,12 +369,11 @@ public:
     void setMaxValue (double newValue, NotificationType notification, bool allowNudgingOfOtherValues)
     {
         // The maximum value only applies to sliders that are in two- or three-value mode.
-        jassert (style == TwoValueHorizontal || style == TwoValueVertical
-                  || style == ThreeValueHorizontal || style == ThreeValueVertical);
+        jassert (numThumbs != 1);
 
         newValue = constrainedValue (newValue);
 
-        if (style == TwoValueHorizontal || style == TwoValueVertical)
+        if (numThumbs == 2)
         {
             if (allowNudgingOfOtherValues && newValue < static_cast<double> (valueMin.getValue()))
                 setMinValue (newValue, notification, false);
@@ -263,8 +402,7 @@ public:
     void setMinAndMaxValues (double newMinValue, double newMaxValue, NotificationType notification)
     {
         // The maximum value only applies to sliders that are in two- or three-value mode.
-        jassert (style == TwoValueHorizontal || style == TwoValueVertical
-                  || style == ThreeValueHorizontal || style == ThreeValueVertical);
+        jassert (numThumbs != 1);
 
         if (newMaxValue < newMinValue)
             std::swap (newMaxValue, newMinValue);
@@ -287,8 +425,7 @@ public:
     double getMinValue() const
     {
         // The minimum value only applies to sliders that are in two- or three-value mode.
-        jassert (style == TwoValueHorizontal || style == TwoValueVertical
-                  || style == ThreeValueHorizontal || style == ThreeValueVertical);
+        jassert (numThumbs != 1);
 
         return valueMin.getValue();
     }
@@ -296,8 +433,7 @@ public:
     double getMaxValue() const
     {
         // The maximum value only applies to sliders that are in two- or three-value mode.
-        jassert (style == TwoValueHorizontal || style == TwoValueVertical
-                  || style == ThreeValueHorizontal || style == ThreeValueVertical);
+        jassert (numThumbs != 1);
 
         return valueMax.getValue();
     }
@@ -334,21 +470,10 @@ public:
     void sendDragEnd()
     {
         owner.stoppedDragging();
-        sliderBeingDragged = -1;
 
         Component::BailOutChecker checker (&owner);
         listeners.callChecked (checker, [&] (Slider::Listener& l) { l.sliderDragEnded (&owner); });
     }
-
-    struct DragInProgress
-    {
-        DragInProgress (Pimpl& p)  : owner (p)      { owner.sendDragStart(); }
-        ~DragInProgress()                           { owner.sendDragEnd(); }
-
-        Pimpl& owner;
-
-        JUCE_DECLARE_NON_COPYABLE (DragInProgress)
-    };
 
     void buttonClicked (Button* button) override
     {
@@ -357,15 +482,11 @@ public:
             auto delta = (button == incButton) ? interval : -interval;
             auto newValue = owner.snapValue (getValue() + delta, notDragging);
 
-            if (currentDrag != nullptr)
-            {
-                setValue (newValue, sendNotificationSync);
-            }
-            else
-            {
-                DragInProgress drag (*this);
-                setValue (newValue, sendNotificationSync);
-            }
+            auto thumb = getThumbFromMouse();
+            if (thumb == -1)
+                DragInProgress drag(*this);
+
+            setValue (newValue, sendNotificationSync);
         }
     }
 
@@ -373,7 +494,7 @@ public:
     {
         if (value.refersToSameSourceAs (currentValue))
         {
-            if (style != TwoValueHorizontal && style != TwoValueVertical)
+            if (numThumbs != 2)
                 setValue (currentValue.getValue(), dontSendNotification);
         }
         else if (value.refersToSameSourceAs (valueMin))
@@ -421,16 +542,10 @@ public:
 
     float getLinearSliderPos (double value) const
     {
-        double pos;
-
-        if (maximum <= minimum)
-            pos = 0.5;
-        else if (value < minimum)
-            pos = 0.0;
-        else if (value > maximum)
-            pos = 1.0;
-        else
-            pos = owner.valueToProportionOfLength (value);
+        double pos = (maximum <= minimum) ? 0.5
+                   : (value < minimum) ? 0.0
+                   : (value > maximum) ? 1.0
+                   : owner.valueToProportionOfLength (value);
 
         if (isVertical() || style == IncDecButtons)
             pos = 1.0 - pos;
@@ -444,9 +559,16 @@ public:
         if (style != newStyle)
         {
             style = newStyle;
+            numThumbs = getNumThumbsFromSliderStyle();
             owner.repaint();
             owner.lookAndFeelChanged();
         }
+    }
+
+    int getNumThumbsFromSliderStyle() const noexcept
+    {
+        return style == ThreeValueHorizontal || style == ThreeValueVertical ? 3
+             : style == TwoValueHorizontal   || style == TwoValueVertical ? 2 : 1;
     }
 
     void setVelocityModeParameters (double sensitivity, int threshold,
@@ -639,32 +761,6 @@ public:
         }
     }
 
-    int getThumbIndexAt (const MouseEvent& e)
-    {
-        bool isTwoValue   = (style == TwoValueHorizontal   || style == TwoValueVertical);
-        bool isThreeValue = (style == ThreeValueHorizontal || style == ThreeValueVertical);
-
-        if (isTwoValue || isThreeValue)
-        {
-            auto mousePos = isVertical() ? e.position.y : e.position.x;
-
-            auto normalPosDistance = std::abs (getLinearSliderPos (currentValue.getValue()) - mousePos);
-            auto minPosDistance    = std::abs (getLinearSliderPos (valueMin.getValue()) + (isVertical() ? 0.1f : -0.1f) - mousePos);
-            auto maxPosDistance    = std::abs (getLinearSliderPos (valueMax.getValue()) + (isVertical() ? -0.1f : 0.1f) - mousePos);
-
-            if (isTwoValue)
-                return maxPosDistance <= minPosDistance ? 2 : 1;
-
-            if (normalPosDistance >= minPosDistance && maxPosDistance >= minPosDistance)
-                return 1;
-
-            if (normalPosDistance >= maxPosDistance)
-                return 2;
-        }
-
-        return 0;
-    }
-
     //==============================================================================
     void handleRotaryDrag (const MouseEvent& e)
     {
@@ -708,8 +804,9 @@ public:
                 }
             }
 
+            auto activeThumb = findActiveThumb (e.source);
             auto proportion = (angle - rotaryParams.startAngleRadians) / (rotaryParams.endAngleRadians - rotaryParams.startAngleRadians);
-            valueWhenLastDragged = owner.proportionOfLengthToValue (jlimit (0.0, 1.0, proportion));
+            activeThumb->lastValue = owner.proportionOfLengthToValue (jlimit (0.0, 1.0, proportion));
             lastAngle = angle;
         }
     }
@@ -718,6 +815,8 @@ public:
     {
         auto mousePos = (isHorizontal() || style == RotaryHorizontalDrag) ? e.position.x : e.position.y;
         double newPos = 0;
+        auto activeThumb = findActiveThumb (e.source);
+        auto startPos = activeThumb->startPosition;
 
         if (style == RotaryHorizontalDrag
             || style == RotaryVerticalDrag
@@ -729,10 +828,10 @@ public:
                                 || style == LinearHorizontal
                                 || style == LinearBar
                                 || (style == IncDecButtons && incDecDragDirectionIsHorizontal()))
-                              ? e.position.x - mouseDragStartPos.x
-                              : mouseDragStartPos.y - e.position.y;
+                              ? e.position.x - startPos.x
+                              : startPos.y - e.position.y;
 
-            newPos = owner.valueToProportionOfLength (valueOnMouseDown)
+            newPos = owner.valueToProportionOfLength (activeThumb->startValue)
                        + mouseDiff * (1.0 / pixelsForFullDragExtent);
 
             if (style == IncDecButtons)
@@ -743,10 +842,10 @@ public:
         }
         else if (style == RotaryHorizontalVerticalDrag)
         {
-            auto mouseDiff = (e.position.x - mouseDragStartPos.x)
-                               + (mouseDragStartPos.y - e.position.y);
+            auto mouseDiff = (e.position.x - startPos.x)
+                               + (startPos.y - e.position.y);
 
-            newPos = owner.valueToProportionOfLength (valueOnMouseDown)
+            newPos = owner.valueToProportionOfLength (activeThumb->startValue)
                        + mouseDiff * (1.0 / pixelsForFullDragExtent);
         }
         else
@@ -757,7 +856,7 @@ public:
                 newPos = 1.0 - newPos;
         }
 
-        valueWhenLastDragged = owner.proportionOfLengthToValue (jlimit (0.0, 1.0, newPos));
+        activeThumb->lastValue = owner.proportionOfLengthToValue (jlimit (0.0, 1.0, newPos));
     }
 
     void handleVelocityDrag (const MouseEvent& e)
@@ -766,10 +865,13 @@ public:
             (isHorizontal() ||  style == RotaryHorizontalDrag
                             || (style == IncDecButtons && incDecDragDirectionIsHorizontal()));
 
+        auto activeThumb = findActiveThumb(e.source);
+        auto delta = e.position - activeThumb->lastPosition;
+
         auto mouseDiff = style == RotaryHorizontalVerticalDrag
-                            ? (e.position.x - mousePosWhenLastDragged.x) + (mousePosWhenLastDragged.y - e.position.y)
-                            : (hasHorizontalStyle ? e.position.x - mousePosWhenLastDragged.x
-                                                  : e.position.y - mousePosWhenLastDragged.y);
+                            ? delta.x - delta.y
+                            : (hasHorizontalStyle ? delta.x
+                                                  : delta.y);
 
         auto maxSpeed = jmax (200.0, (double) sliderRegionSize);
         auto speed = jlimit (0.0, maxSpeed, (double) std::abs (mouseDiff));
@@ -788,8 +890,8 @@ public:
                  || (style == IncDecButtons && ! incDecDragDirectionIsHorizontal()))
                 speed = -speed;
 
-            auto currentPos = owner.valueToProportionOfLength (valueWhenLastDragged);
-            valueWhenLastDragged = owner.proportionOfLengthToValue (jlimit (0.0, 1.0, currentPos + speed));
+            auto currentPos = owner.valueToProportionOfLength (activeThumb->lastValue);
+            activeThumb->lastValue = owner.proportionOfLengthToValue (jlimit (0.0, 1.0, currentPos + speed));
 
             e.source.enableUnboundedMouseMovement (true, false);
         }
@@ -797,10 +899,6 @@ public:
 
     void mouseDown (const MouseEvent& e)
     {
-        incDecDragged = false;
-        useDragEvents = false;
-        mouseDragStartPos = mousePosWhenLastDragged = e.position;
-        currentDrag.reset();
         popupDisplay.reset();
 
         if (owner.isEnabled())
@@ -816,12 +914,17 @@ public:
             }
             else if (maximum > minimum)
             {
-                useDragEvents = true;
+                if (noThumbsAvailable())
+                    return;
 
+                incDecDragged = false;
+
+                auto newThumbIndex = getNearestAvailableThumbIndex (e);
+                auto value = static_cast<double> (getValueFromThumbIndex (newThumbIndex));
+                activeThumbs.emplace_back(ActiveThumb(*this, e.source, newThumbIndex, value, e.position));
+        
                 if (valueBox != nullptr)
                     valueBox->hideEditor (true);
-
-                sliderBeingDragged = getThumbIndexAt (e);
 
                 minMaxDiff = static_cast<double> (valueMax.getValue()) - static_cast<double> (valueMin.getValue());
 
@@ -829,20 +932,14 @@ public:
                                 + (rotaryParams.endAngleRadians - rotaryParams.startAngleRadians)
                                      * owner.valueToProportionOfLength (currentValue.getValue());
 
-                valueWhenLastDragged = (sliderBeingDragged == 2 ? valueMax
-                                                                : (sliderBeingDragged == 1 ? valueMin
-                                                                                           : currentValue)).getValue();
-                valueOnMouseDown = valueWhenLastDragged;
-
                 if (showPopupOnDrag || showPopupOnHover)
                 {
-                    showPopupDisplay();
+                    showPopupDisplay (e);
 
                     if (popupDisplay != nullptr)
                         popupDisplay->stopTimer();
                 }
 
-                currentDrag = new DragInProgress (*this);
                 mouseDrag (e);
             }
         }
@@ -850,7 +947,12 @@ public:
 
     void mouseDrag (const MouseEvent& e)
     {
-        if (useDragEvents && maximum > minimum
+        auto activeThumb = findActiveThumb (e.source);
+
+        if (activeThumb == activeThumbs.end())
+            return;
+
+        if (maximum > minimum
              && ! ((style == LinearBar || style == LinearBarVertical)
                     && e.mouseWasClicked() && valueBox != nullptr && valueBox->isEditable()))
         {
@@ -868,7 +970,7 @@ public:
                         return;
 
                     incDecDragged = true;
-                    mouseDragStartPos = e.position;
+                    activeThumb->startPosition = e.position;
                 }
 
                 if (isAbsoluteDragMode (e.mods) || (maximum - minimum) / sliderRegionSize < interval)
@@ -883,16 +985,18 @@ public:
                 }
             }
 
-            valueWhenLastDragged = jlimit (minimum, maximum, valueWhenLastDragged);
+            activeThumb->lastValue = jlimit (minimum, maximum, activeThumb->lastValue);
 
-            if (sliderBeingDragged == 0)
+            auto thumb = activeThumb->thumb;
+
+            if (thumb == 0)
             {
-                setValue (owner.snapValue (valueWhenLastDragged, dragMode),
+                setValue (owner.snapValue (activeThumb->lastValue, dragMode),
                           sendChangeOnlyOnRelease ? dontSendNotification : sendNotificationSync);
             }
-            else if (sliderBeingDragged == 1)
+            else if (thumb == 1)
             {
-                setMinValue (owner.snapValue (valueWhenLastDragged, dragMode),
+                setMinValue (owner.snapValue (activeThumb->lastValue, dragMode),
                              sendChangeOnlyOnRelease ? dontSendNotification : sendNotificationAsync, true);
 
                 if (e.mods.isShiftDown())
@@ -900,9 +1004,9 @@ public:
                 else
                     minMaxDiff = static_cast<double> (valueMax.getValue()) - static_cast<double> (valueMin.getValue());
             }
-            else if (sliderBeingDragged == 2)
+            else if (thumb == 2)
             {
-                setMaxValue (owner.snapValue (valueWhenLastDragged, dragMode),
+                setMaxValue (owner.snapValue (activeThumb->lastValue, dragMode),
                              sendChangeOnlyOnRelease ? dontSendNotification : sendNotificationAsync, true);
 
                 if (e.mods.isShiftDown())
@@ -911,23 +1015,23 @@ public:
                     minMaxDiff = static_cast<double> (valueMax.getValue()) - static_cast<double> (valueMin.getValue());
             }
 
-            mousePosWhenLastDragged = e.position;
+            activeThumb->lastPosition = e.position;
         }
     }
 
-    void mouseUp()
+    void mouseUp (const MouseEvent& e)
     {
+        auto activeThumb = findActiveThumb (e.source);
+
         if (owner.isEnabled()
-             && useDragEvents
              && (maximum > minimum)
              && (style != IncDecButtons || incDecDragged))
         {
             restoreMouseIfHidden();
 
-            if (sendChangeOnlyOnRelease && valueOnMouseDown != static_cast<double> (currentValue.getValue()))
+            if (sendChangeOnlyOnRelease && activeThumb->startValue != static_cast<double> (currentValue.getValue()))
                 triggerChangeMessage (sendNotificationAsync);
 
-            currentDrag.reset();
             popupDisplay.reset();
 
             if (style == IncDecButtons)
@@ -941,27 +1045,27 @@ public:
             popupDisplay->startTimer (200);
         }
 
-        currentDrag.reset();
+        activeThumbs.erase(
+            std::remove_if(activeThumbs.begin(), activeThumbs.end(),
+                [&] (const auto& x) { return x.type == e.source.getType() && x.index == e.source.getIndex(); }
+            ),
+            activeThumbs.end()
+        );
     }
 
-    void mouseMove()
+    void mouseMove (const MouseEvent& e)
     {
-        auto isTwoValue   = (style == TwoValueHorizontal   || style == TwoValueVertical);
-        auto isThreeValue = (style == ThreeValueHorizontal || style == ThreeValueVertical);
-
         // this is a workaround for a bug where the popup display being dismissed triggers
         // a mouse move causing it to never be hidden
         auto shouldShowPopup = showPopupOnHover
                                 && (Time::getMillisecondCounterHiRes() - lastPopupDismissal) > 250;
 
-        if (shouldShowPopup
-             && ! isTwoValue
-             && ! isThreeValue)
+        if (shouldShowPopup && numThumbs == 1)
         {
             if (owner.isMouseOver (true))
             {
                 if (popupDisplay == nullptr)
-                    showPopupDisplay();
+                    showPopupDisplay (e);
 
                 if (popupDisplay != nullptr && popupHoverTimeout != -1)
                     popupDisplay->startTimer (popupHoverTimeout);
@@ -974,7 +1078,7 @@ public:
         popupDisplay.reset();
     }
 
-    void showPopupDisplay()
+    void showPopupDisplay (const MouseEvent& e)
     {
         if (style == IncDecButtons)
             return;
@@ -988,16 +1092,7 @@ public:
             else
                 popupDisplay->addToDesktop (ComponentPeer::windowIsTemporary);
 
-            if (style == SliderStyle::TwoValueHorizontal
-                || style == SliderStyle::TwoValueVertical)
-            {
-                updatePopupDisplay (sliderBeingDragged == 2 ? getMaxValue()
-                                                            : getMinValue());
-            }
-            else
-            {
-                updatePopupDisplay (getValue());
-            }
+            updatePopupDisplay (getValueFromThumbIndex (getThumbFromEvent (e)));
 
             popupDisplay->setVisible (true);
         }
@@ -1039,8 +1134,7 @@ public:
     bool mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
     {
         if (scrollWheelEnabled
-             && style != TwoValueHorizontal
-             && style != TwoValueVertical)
+             && ! noThumbsAvailable())
         {
             // sometimes duplicate wheel events seem to be sent, so since we're going to
             // bump the value by a minimum of the interval, avoid doing this twice..
@@ -1053,7 +1147,8 @@ public:
                     if (valueBox != nullptr)
                         valueBox->hideEditor (false);
 
-                    auto value = static_cast<double> (currentValue.getValue());
+                    auto newThumbIndex = getNearestAvailableThumbIndex (e);
+                    auto value = static_cast<double> (getValueFromThumbIndex (newThumbIndex));
                     auto delta = getMouseWheelDelta (value, (std::abs (wheel.deltaX) > std::abs (wheel.deltaY)
                                                                   ? -wheel.deltaX : wheel.deltaY)
                                                                * (wheel.isReversed ? -1.0f : 1.0f));
@@ -1061,8 +1156,7 @@ public:
                     {
                         auto newValue = value + jmax (interval, std::abs (delta)) * (delta < 0 ? -1.0 : 1.0);
 
-                        DragInProgress drag (*this);
-                        setValue (owner.snapValue (newValue, notDragging), sendNotificationSync);
+                        setValueFromThumbIndex (newThumbIndex, owner.snapValue(newValue, notDragging), sendNotificationSync, true);
                     }
                 }
             }
@@ -1093,16 +1187,19 @@ public:
             {
                 ms.enableUnboundedMouseMovement (false);
 
-                auto pos = sliderBeingDragged == 2 ? getMaxValue()
-                                                   : (sliderBeingDragged == 1 ? getMinValue()
-                                                                              : static_cast<double> (currentValue.getValue()));
+                auto activeThumb = findActiveThumb (ms);
+
+                if (activeThumb == activeThumbs.end())
+                    break;
+
+                auto pos = getValueFromThumbIndex (activeThumb->thumb);
                 Point<float> mousePos;
 
                 if (isRotary())
                 {
                     mousePos = ms.getLastMouseDownPosition();
 
-                    auto delta = (float) (pixelsForFullDragExtent * (owner.valueToProportionOfLength (valueOnMouseDown)
+                    auto delta = (float) (pixelsForFullDragExtent * (owner.valueToProportionOfLength (activeThumb->startValue)
                                                                        - owner.valueToProportionOfLength (pos)));
 
                     if (style == RotaryHorizontalDrag)      mousePos += Point<float> (-delta, 0.0f);
@@ -1110,8 +1207,8 @@ public:
                     else                                    mousePos += Point<float> (delta / -2.0f, delta / 2.0f);
 
                     mousePos = owner.getScreenBounds().reduced (4).toFloat().getConstrainedPoint (mousePos);
-                    mouseDragStartPos = mousePosWhenLastDragged = owner.getLocalPoint (nullptr, mousePos);
-                    valueOnMouseDown = valueWhenLastDragged;
+                    activeThumb->startPosition = activeThumb->lastPosition = owner.getLocalPoint(nullptr, mousePos);
+                    activeThumb->startValue = activeThumb->lastValue;
                 }
                 else
                 {
@@ -1218,23 +1315,22 @@ public:
     //==============================================================================
     Slider& owner;
     SliderStyle style;
+    int numThumbs;
 
     ListenerList<Slider::Listener> listeners;
     Value currentValue, valueMin, valueMax;
     double lastCurrentValue = 0, lastValueMin = 0, lastValueMax = 0;
     double minimum = 0, maximum = 10, interval = 0, doubleClickReturnValue = 0;
-    double valueWhenLastDragged = 0, valueOnMouseDown = 0, skewFactor = 1.0, lastAngle = 0;
+    double skewFactor = 1.0, lastAngle = 0;
     bool symmetricSkew = false;
     double velocityModeSensitivity = 1.0, velocityModeOffset = 0, minMaxDiff = 0;
     int velocityModeThreshold = 1;
     RotaryParameters rotaryParams;
-    Point<float> mouseDragStartPos, mousePosWhenLastDragged;
     int sliderRegionStart = 0, sliderRegionSize = 1;
-    int sliderBeingDragged = -1;
     int pixelsForFullDragExtent = 250;
     Time lastMouseWheelTime;
     Rectangle<int> sliderRect;
-    ScopedPointer<DragInProgress> currentDrag;
+    std::vector<ActiveThumb> activeThumbs;
 
     TextEntryBoxPosition textBoxPos;
     String textSuffix;
@@ -1251,7 +1347,6 @@ public:
     bool showPopupOnDrag = false;
     bool showPopupOnHover = false;
     bool menuEnabled = false;
-    bool useDragEvents = false;
     bool incDecDragged = false;
     bool scrollWheelEnabled = true;
     bool snapsToMousePos = true;
@@ -1593,7 +1688,7 @@ double Slider::snapValue (double attemptedValue, DragMode)
 int Slider::getNumDecimalPlacesToDisplay() const noexcept   { return pimpl->numDecimalPlaces; }
 
 //==============================================================================
-int Slider::getThumbBeingDragged() const noexcept           { return pimpl->sliderBeingDragged; }
+int Slider::getThumbBeingDragged() const noexcept           { return pimpl->getThumbFromMouse(); }
 void Slider::startedDragging() {}
 void Slider::stoppedDragging() {}
 void Slider::valueChanged() {}
@@ -1616,13 +1711,13 @@ void Slider::resized()                  { pimpl->resized (getLookAndFeel()); }
 void Slider::focusOfChildComponentChanged (FocusChangeType)     { repaint(); }
 
 void Slider::mouseDown (const MouseEvent& e)    { pimpl->mouseDown (e); }
-void Slider::mouseUp   (const MouseEvent&)      { pimpl->mouseUp(); }
-void Slider::mouseMove (const MouseEvent&)      { pimpl->mouseMove(); }
+void Slider::mouseUp   (const MouseEvent& e)    { pimpl->mouseUp (e); }
+void Slider::mouseMove (const MouseEvent& e)    { pimpl->mouseMove (e); }
 void Slider::mouseExit (const MouseEvent&)      { pimpl->mouseExit(); }
 
 // If popup display is enabled and set to show on mouse hover, this makes sure
 // it is shown when dragging the mouse over a slider and releasing
-void Slider::mouseEnter (const MouseEvent&)     { pimpl->mouseMove(); }
+void Slider::mouseEnter (const MouseEvent& e)   { pimpl->mouseMove (e); }
 
 void Slider::modifierKeysChanged (const ModifierKeys& modifiers)
 {
