@@ -68,7 +68,7 @@ bool MessageManager::MessageBase::post()
 {
     auto* mm = MessageManager::instance;
 
-    if (mm == nullptr || mm->quitMessagePosted || ! postMessageToSystemQueue (this))
+    if (mm == nullptr || mm->quitMessagePosted.get() != 0 || ! postMessageToSystemQueue (this))
     {
         Ptr deleter (this); // (this will delete messages that were just created with a 0 ref count)
         return false;
@@ -85,7 +85,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 
     auto endTime = Time::currentTimeMillis() + millisecondsToRunFor;
 
-    while (! quitMessageReceived)
+    while (quitMessageReceived.get() == 0)
     {
         JUCE_TRY
         {
@@ -98,7 +98,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
             break;
     }
 
-    return ! quitMessageReceived;
+    return quitMessageReceived.get() == 0;
 }
 #endif
 
@@ -121,7 +121,7 @@ void MessageManager::runDispatchLoop()
 {
     jassert (isThisTheMessageThread()); // must only be called by the message thread
 
-    while (! quitMessageReceived)
+    while (quitMessageReceived.get() == 0)
     {
         JUCE_TRY
         {

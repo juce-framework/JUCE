@@ -80,7 +80,7 @@ public:
 
     /** Returns true if the stopDispatchLoop() method has been called.
     */
-    bool hasStopMessageBeenSent() const noexcept        { return quitMessagePosted; }
+    bool hasStopMessageBeenSent() const noexcept        { return quitMessagePosted.get() != 0; }
 
    #if JUCE_MODAL_LOOPS_PERMITTED || DOXYGEN
     /** Synchronously dispatches messages until a given time has elapsed.
@@ -318,7 +318,7 @@ private:
     friend class MessageManagerLock;
 
     ScopedPointer<ActionBroadcaster> broadcaster;
-    bool quitMessagePosted = false, quitMessageReceived = false;
+    Atomic<int> quitMessagePosted { 0 }, quitMessageReceived { 0 };
     Thread::ThreadID messageThreadId;
     Atomic<Thread::ThreadID> threadWithLock;
 

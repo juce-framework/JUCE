@@ -488,7 +488,7 @@ private:
         double getCurrentLevel() const noexcept;
 
         Atomic<int> enabled;
-        double level;
+        Atomic<float> level;
     };
 
     LevelMeter inputLevelMeter, outputLevelMeter;

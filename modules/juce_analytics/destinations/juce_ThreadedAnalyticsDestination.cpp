@@ -176,7 +176,7 @@ namespace DestinationTestHelpers
                           std::deque<AnalyticsEvent>& unloggedEvents)
             : TestDestination (loggedEvents, unloggedEvents)
         {
-            startAnalyticsThread (100);
+            startAnalyticsThread (20);
         }
 
         virtual ~BasicDestination()
@@ -303,12 +303,14 @@ struct ThreadedAnalyticsDestinationTests   : public UnitTest
 
         beginTest ("Basic");
         {
-            DestinationTestHelpers::BasicDestination destination (loggedEvents, unloggedEvents);
+            {
+                DestinationTestHelpers::BasicDestination destination (loggedEvents, unloggedEvents);
 
-            for (auto& event : testEvents)
-                destination.logEvent (event);
+                for (auto& event : testEvents)
+                    destination.logEvent (event);
 
-            Thread::sleep (400);
+                Thread::sleep (400);
+            }
 
             compareEventQueues (loggedEvents, testEvents);
             expect (unloggedEvents.size() == 0);
