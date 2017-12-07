@@ -77,9 +77,6 @@ MidiKeyboardComponent::MidiKeyboardComponent (MidiKeyboardState& s, Orientation 
     for (char c : "awsedftgyhujkolp;")
         setKeyPressForNote (KeyPress (c, 0, 0), note++);
 
-    mouseOverNotes.insertMultiple (0, -1, 32);
-    mouseDownNotes.insertMultiple (0, -1, 32);
-
     colourChanged();
     setWantsKeyboardFocus (true);
 
@@ -357,7 +354,7 @@ void MidiKeyboardComponent::paint (Graphics& g)
             if (noteNum >= rangeStart && noteNum <= rangeEnd)
                 drawWhiteNote (noteNum, g, getRectangleForKey (noteNum),
                                state.isNoteOnForChannels (midiInChannelMask, noteNum),
-                               mouseOverNotes.contains (noteNum), lineColour, textColour);
+                               containsNoteNumber (mouseOverNotes, noteNum), lineColour, textColour);
         }
     }
 
@@ -415,7 +412,7 @@ void MidiKeyboardComponent::paint (Graphics& g)
             if (noteNum >= rangeStart && noteNum <= rangeEnd)
                 drawBlackNote (noteNum, g, getRectangleForKey (noteNum),
                                state.isNoteOnForChannels (midiInChannelMask, noteNum),
-                               mouseOverNotes.contains (noteNum), blackNoteColour);
+                               containsNoteNumber (mouseOverNotes, noteNum), blackNoteColour);
         }
     }
 }
@@ -673,38 +670,48 @@ void MidiKeyboardComponent::resetAnyKeysInUse()
         keysPressed.clear();
     }
 
-    for (int i = mouseDownNotes.size(); --i >= 0;)
-    {
-        auto noteDown = mouseDownNotes.getUnchecked(i);
-
-        if (noteDown >= 0)
-        {
-            state.noteOff (midiChannel, noteDown, 0.0f);
-            mouseDownNotes.set (i, -1);
-        }
-
-        mouseOverNotes.set (i, -1);
-    }
+    for (const auto& mouseDown : mouseDownNotes)
+        state.noteOff (midiChannel, mouseDown.noteNumber, 0.0f);
+    
+    mouseDownNotes.clear();
+    mouseOverNotes.clear();
 }
 
 void MidiKeyboardComponent::updateNoteUnderMouse (const MouseEvent& e, bool isDown)
 {
-    updateNoteUnderMouse (e.getEventRelativeTo (this).position, isDown, e.source.getIndex());
+    updateNoteUnderMouse (e.getEventRelativeTo (this).position, isDown, e.source);
 }
 
-void MidiKeyboardComponent::updateNoteUnderMouse (Point<float> pos, bool isDown, int fingerNum)
+bool MidiKeyboardComponent::containsNoteNumber (const std::vector<InputIndex>& container, int noteNumber)
 {
-    float mousePositionVelocity = 0.0f;
-    auto newNote = xyToNote (pos, mousePositionVelocity);
-    auto oldNote = mouseOverNotes.getUnchecked (fingerNum);
-    auto oldNoteDown = mouseDownNotes.getUnchecked (fingerNum);
-    auto eventVelocity = useMousePositionForVelocity ? mousePositionVelocity * velocity : 1.0f;
+    return std::find_if (container.cbegin(), container.cend(),
+           [=] (const auto& x) { return x.noteNumber == noteNumber; }) != container.cend();
+}
+
+void MidiKeyboardComponent::updateNoteUnderMouse (Point<float> pos, bool isDown, const MouseInputSource& source)
+{
+    const auto downIndex = std::find_if (mouseDownNotes.cbegin(), mouseDownNotes.cend(), 
+        [&] (const auto& x) { return x.type == source.getType() && x.index == source.getIndex(); });
+    const auto overIndex = std::find_if (mouseOverNotes.begin(), mouseOverNotes.end(),
+        [&] (const auto& x) { return x.type == source.getType() && x.index == source.getIndex(); });
+
+    float mousePositionVelocity;
+    const auto newNote = xyToNote (pos, mousePositionVelocity);
+    const auto oldNote = overIndex == mouseOverNotes.end() ? -1 : overIndex->noteNumber;
+    const auto oldNoteDown = downIndex == mouseDownNotes.cend() ? -1 : downIndex->noteNumber;
+    const auto eventVelocity = jmax (0.0f, useMousePositionForVelocity ? mousePositionVelocity * velocity : 1.0f);
 
     if (oldNote != newNote)
     {
         repaintNote (oldNote);
         repaintNote (newNote);
-        mouseOverNotes.set (fingerNum, newNote);
+
+        if (newNote == -1)
+            mouseOverNotes.erase (overIndex);
+        else if (oldNote == -1)
+            mouseOverNotes.emplace_back (InputIndex (source, newNote));
+        else
+            overIndex->noteNumber = newNote;
     }
 
     if (isDown)
@@ -713,24 +720,24 @@ void MidiKeyboardComponent::updateNoteUnderMouse (Point<float> pos, bool isDown,
         {
             if (oldNoteDown >= 0)
             {
-                mouseDownNotes.set (fingerNum, -1);
+                mouseDownNotes.erase (downIndex);
 
-                if (! mouseDownNotes.contains (oldNoteDown))
+                if (! containsNoteNumber (mouseDownNotes, oldNoteDown))
                     state.noteOff (midiChannel, oldNoteDown, eventVelocity);
             }
 
-            if (newNote >= 0 && ! mouseDownNotes.contains (newNote))
+            if (newNote >= 0 && ! containsNoteNumber (mouseDownNotes, newNote))
             {
                 state.noteOn (midiChannel, newNote, eventVelocity);
-                mouseDownNotes.set (fingerNum, newNote);
+                mouseDownNotes.emplace_back (InputIndex (source, newNote));
             }
         }
     }
     else if (oldNoteDown >= 0)
     {
-        mouseDownNotes.set (fingerNum, -1);
+        mouseDownNotes.erase (downIndex);
 
-        if (! mouseDownNotes.contains (oldNoteDown))
+        if (! containsNoteNumber (mouseDownNotes, oldNoteDown))
             state.noteOff (midiChannel, oldNoteDown, eventVelocity);
     }
 }
@@ -821,7 +828,7 @@ void MidiKeyboardComponent::timerCallback()
     {
         for (auto& ms : Desktop::getInstance().getMouseSources())
             if (ms.getComponentUnderMouse() == this || isParentOf (ms.getComponentUnderMouse()))
-                updateNoteUnderMouse (getLocalPoint (nullptr, ms.getScreenPosition()), ms.isDragging(), ms.getIndex());
+                updateNoteUnderMouse (getLocalPoint (nullptr, ms.getScreenPosition()), ms.isDragging(), ms);
     }
 }
 

@@ -399,7 +399,20 @@ private:
     int midiChannel = 1, midiInChannelMask = 0xffff;
     float velocity = 1.0f;
 
-    Array<int> mouseOverNotes, mouseDownNotes;
+    struct InputIndex
+    {
+        InputIndex (const MouseInputSource& source, const int noteNumber)
+          : type (source.getType()),
+            index (source.getIndex()),
+            noteNumber (noteNumber)
+        {}
+
+        MouseInputSource::InputSourceType type;
+        int index;
+        int noteNumber;
+    };
+
+    std::vector<InputIndex> mouseDownNotes, mouseOverNotes;
     BigInteger keysPressed, keysCurrentlyDrawnDown;
     bool shouldCheckState = false;
 
@@ -412,11 +425,12 @@ private:
     Array<int> keyPressNotes;
     int keyMappingOctave = 6, octaveNumForMiddleC = 3;
 
+    static bool containsNoteNumber (const std::vector<InputIndex>& container, int noteNumber);
     Range<float> getKeyPos (int midiNoteNumber) const;
     int xyToNote (Point<float>, float& mousePositionVelocity);
     int remappedXYToNote (Point<float>, float& mousePositionVelocity) const;
     void resetAnyKeysInUse();
-    void updateNoteUnderMouse (Point<float>, bool isDown, int fingerNum);
+    void updateNoteUnderMouse (Point<float>, bool isDown, const MouseInputSource& source);
     void updateNoteUnderMouse (const MouseEvent&, bool isDown);
     void repaintNote (int midiNoteNumber);
     void setLowestVisibleKeyFloat (float noteNumber);
