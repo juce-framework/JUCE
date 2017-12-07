@@ -53,9 +53,6 @@ struct WaveShaper
     template <typename ProcessContext>
     void process (const ProcessContext& context) const noexcept
     {
-        jassert (context.getInputBlock().getNumChannels() == context.getOutputBlock().getNumChannels());
-        jassert (context.getInputBlock().getNumSamples()  == context.getOutputBlock().getNumSamples());
-
         AudioBlock<FloatType>::process (context.getInputBlock(),
                                         context.getOutputBlock(),
                                         functionToUse);
