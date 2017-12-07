@@ -34,7 +34,57 @@ namespace
         lastInputSamples[0] = newValue;
     }
 
-    static forcedinline void pushInterpolationSamples (float* lastInputSamples, const float* input, int numOut) noexcept
+    static forcedinline void pushInterpolationSamples (float* lastInputSamples, const float* input, int numOut, int available, int wrapAround) noexcept
+    {
+        if (numOut >= 5)
+        {
+            if (available >= 5)
+                for (int i = 0; i < 5; ++i)
+                    lastInputSamples[i] = input[--numOut];
+            else
+            {
+                for (int i = 0; i < available; ++i)
+                    lastInputSamples[i] = input[--numOut];
+                if (wrapAround > 0)
+                {
+                    numOut -= wrapAround;
+                    for (int i = available; i < 5; ++i)
+                        lastInputSamples[i] = input[--numOut];
+                }
+                else
+                {
+                    for (int i = available; i < 5; ++i)
+                        lastInputSamples[i] = 0.0f;
+                }
+            }
+        }
+        else
+        {
+            if (numOut > available) {
+                for (int i = 0; i < available; ++i)
+                    pushInterpolationSample (lastInputSamples, input[i]);
+
+                    if (wrapAround > 0) {
+                        for (int i = 0; i < numOut-available; ++i) {
+                            pushInterpolationSample (lastInputSamples, input[i+available-wrapAround]);
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < numOut-available; ++i) {
+                            pushInterpolationSample (lastInputSamples, 0.0);
+                        }
+                    }
+            }
+            else
+            {
+                for (int i = 0; i < numOut; ++i)
+                    pushInterpolationSample (lastInputSamples, input[i]);
+            }
+        }
+    }
+
+    static forcedinline void pushInterpolationSamplesUnchecked (float* lastInputSamples, const float* input, int numOut) noexcept
     {
         if (numOut >= 5)
         {
@@ -50,14 +100,119 @@ namespace
 
     template <typename InterpolatorType>
     static int interpolate (float* lastInputSamples, double& subSamplePos, double actualRatio,
-                            const float* in, float* out, int numOut) noexcept
+                            const float* in, float* out, int numOut, int available, int wrap) noexcept
+    {
+        if (actualRatio == 1.0)
+        {
+            if (available >= numOut)
+            {
+                memcpy (out, in, (size_t) numOut * sizeof (float));
+                pushInterpolationSamples (lastInputSamples, in, numOut, available, wrap);
+            }
+            else
+            {
+                memcpy (out, in, (size_t) available * sizeof (float));
+                pushInterpolationSamples (lastInputSamples, in, numOut, available, wrap);
+                if (wrap > 0)
+                {
+                    memcpy (out + available, in + available - wrap, (size_t) (numOut - available) * sizeof (float));
+                    pushInterpolationSamples (lastInputSamples, in, numOut, available, wrap);
+                }
+                else
+                {
+                    for (int i=0; i < numOut-available; ++i)
+                        pushInterpolationSample (lastInputSamples, 0.0);
+                }
+            }
+            return numOut;
+        }
+
+        const float* const originalIn = in;
+        double pos = subSamplePos;
+        bool   exceeded = false;
+
+        if (actualRatio < 1.0)
+        {
+            for (int i = numOut; --i >= 0;)
+            {
+                if (pos >= 1.0)
+                {
+                    if (exceeded)
+                    {
+                        pushInterpolationSample (lastInputSamples, 0.0);
+                    }
+                    else
+                    {
+                        pushInterpolationSample (lastInputSamples, *in++);
+                        --available;
+                        if (available < 1)
+                        {
+                            if (wrap > 0) {
+                                in        -= wrap;
+                                available += wrap;
+                            }
+                            else
+                                exceeded = true;
+                                }
+                    }
+
+                    pos -= 1.0;
+                }
+
+                *out++ = InterpolatorType::valueAtOffset (lastInputSamples, (float) pos);
+                pos += actualRatio;
+            }
+        }
+        else
+        {
+            for (int i = numOut; --i >= 0;)
+            {
+                while (pos < actualRatio)
+                {
+                    if (exceeded)
+                    {
+                        pushInterpolationSample (lastInputSamples, 0.0);
+                    }
+                    else
+                    {
+                        pushInterpolationSample (lastInputSamples, *in++);
+                        --available;
+                        if (available < 1)
+                        {
+                            if (wrap > 0)
+                            {
+                                in        -= wrap;
+                                available += wrap;
+                            }
+                            else
+                            {
+                                exceeded = true;
+                            }
+                        }
+                    }
+
+                    pos += 1.0;
+                }
+
+                pos -= actualRatio;
+                *out++ = InterpolatorType::valueAtOffset (lastInputSamples, jmax (0.0f, 1.0f - (float) pos));
+            }
+        }
+
+        subSamplePos = pos;
+        return ((int) (in - originalIn) + wrap) % wrap;
+    }
+
+    template <typename InterpolatorType>
+    static int interpolateUnchecked (float* lastInputSamples, double& subSamplePos, double actualRatio,
+                                     const float* in, float* out, int numOut) noexcept
     {
         auto pos = subSamplePos;
 
         if (actualRatio == 1.0 && pos == 1.0)
         {
             memcpy (out, in, (size_t) numOut * sizeof (float));
-            pushInterpolationSamples (lastInputSamples, in, numOut);
+            pushInterpolationSamplesUnchecked (lastInputSamples, in, numOut);
             return numOut;
         }
 
@@ -81,15 +236,114 @@ namespace
     }
 
     template <typename InterpolatorType>
-    static int interpolateAdding (float* lastInputSamples, double& subSamplePos, double actualRatio,
-                                  const float* in, float* out, int numOut, const float gain) noexcept
+    static int interpolateAdding (float* lastInputSamples, double& subSamplePos, const double actualRatio,
+                                  const float* in, float* out, const int numOut,
+                                  int available, const int wrap, const float gain) noexcept
+    {
+        if (actualRatio == 1.0)
+        {
+            if (available >= numOut)
+            {
+                FloatVectorOperations::addWithMultiply (out, in, gain, numOut);
+                pushInterpolationSamples (lastInputSamples, in, numOut, available, wrap);
+            }
+            else
+            {
+                FloatVectorOperations::addWithMultiply (out, in, gain, available);
+                pushInterpolationSamples (lastInputSamples, in, available, available, wrap);
+                if (wrap > 0)
+                {
+                    FloatVectorOperations::addWithMultiply (out, in - wrap, gain, numOut - available);
+                    pushInterpolationSamples (lastInputSamples, in - wrap, numOut - available, available, wrap);
+                }
+                else
+                {
+                    for (int i=0; i < numOut-available; ++i)
+                        pushInterpolationSample (lastInputSamples, 0.0);
+                }
+            }
+            return numOut;
+        }
+
+        const float* const originalIn = in;
+        double pos = subSamplePos;
+        bool   exceeded = false;
+
+        if (actualRatio < 1.0)
+        {
+            for (int i = numOut; --i >= 0;)
+            {
+                if (pos >= 1.0)
+                {
+                    if (exceeded)
+                    {
+                        pushInterpolationSample (lastInputSamples, 0.0);
+                    }
+                    else
+                    {
+                        pushInterpolationSample (lastInputSamples, *in++);
+                        if (--available < 1)
+                        {
+                            if (wrap > 0) {
+                                in        -= wrap;
+                                available += wrap;
+                            }
+                            else
+                            {
+                                exceeded = true;
+                            }
+                        }
+                    }
+
+                    pos -= 1.0;
+                }
+
+                *out++ += gain * InterpolatorType::valueAtOffset (lastInputSamples, (float) pos);
+                pos += actualRatio;
+            }
+        }
+        else
+        {
+            for (int i = numOut; --i >= 0;)
+            {
+                while (pos < actualRatio)
+                {
+                    pushInterpolationSample (lastInputSamples, *in++);
+                    if (--available < 1)
+                    {
+                        if (wrap > 0)
+                        {
+                            in        -= wrap;
+                            available += wrap;
+                        }
+                        else
+                        {
+                            exceeded = true;
+                        }
+                    }
+
+                    pos += 1.0;
+                }
+
+                pos -= actualRatio;
+                *out++ += gain * InterpolatorType::valueAtOffset (lastInputSamples, jmax (0.0f, 1.0f - (float) pos));
+            }
+        }
+
+        subSamplePos = pos;
+        return ((int) (in - originalIn) + wrap) % wrap;
+    }
+
+    template <typename InterpolatorType>
+    static int interpolateAddingUnchecked (float* lastInputSamples, double& subSamplePos, double actualRatio,
+                                           const float* in, float* out, int numOut, const float gain) noexcept
     {
         auto pos = subSamplePos;
 
         if (actualRatio == 1.0 && pos == 1.0)
         {
             FloatVectorOperations::addWithMultiply (out, in, gain, numOut);
-            pushInterpolationSamples (lastInputSamples, in, numOut);
+            pushInterpolationSamplesUnchecked (lastInputSamples, in, numOut);
             return numOut;
         }
 
@@ -160,14 +414,35 @@ void LagrangeInterpolator::reset() noexcept
         s = 0;
 }
 
+int LagrangeInterpolator::process (double actualRatio, const float* in, float* out, int numOut, int available, int wrap) noexcept
+{
+    return interpolate<LagrangeAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut, available, wrap);
+}
+
 int LagrangeInterpolator::process (double actualRatio, const float* in, float* out, int numOut) noexcept
 {
-    return interpolate<LagrangeAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut);
+    return interpolateUnchecked<LagrangeAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut);
+}
+
+int LagrangeInterpolator::processUnchecked (double actualRatio, const float* in, float* out, int numOut) noexcept
+{
+    return interpolateUnchecked<LagrangeAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut);
+}
+
+int LagrangeInterpolator::processAdding (double actualRatio, const float* in, float* out, int numOut, int available, int wrap, float gain) noexcept
+{
+    return interpolateAdding<LagrangeAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut, available, wrap, gain);
 }
 
 int LagrangeInterpolator::processAdding (double actualRatio, const float* in, float* out, int numOut, float gain) noexcept
 {
-    return interpolateAdding<LagrangeAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut, gain);
+    return interpolateAddingUnchecked<LagrangeAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut, gain);
+}
+
+int LagrangeInterpolator::processAddingUnchecked (double actualRatio, const float* in, float* out, int numOut, float gain) noexcept
+{
+    return interpolateAddingUnchecked<LagrangeAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut, gain);
 }
 
 } // namespace juce
+
