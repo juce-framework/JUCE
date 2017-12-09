@@ -554,6 +554,8 @@ public:
                 }
 
                 bool isUsingEditAndContinue = false;
+                const bool isUsingPch = getOwner().getUsePrecompiledHeadersBool();
+                const RelativePath pchPath(getOwner().getPrecompiledHeaderFileNameString(), getOwner().getTargetFolder(), RelativePath::buildTargetFolder);
 
                 {
                     XmlElement* cl = group->createNewChildElement ("ClCompile");
@@ -579,10 +581,10 @@ public:
                     cl->createNewChildElement ("RuntimeTypeInfo")->addTextElement ("true");
 
                     XmlElement* precompiledHeaders = new XmlElement("PrecompiledHeader");
-                    if (getOwner().getUsePrecompiledHeadersBool())
+                    if (isUsingPch)
                     {
                         precompiledHeaders->addTextElement("Use");
-                        cl->createNewChildElement("PrecompiledHeaderFile")->addTextElement(getOwner().getPrecompiledHeaderFileNameString());
+                        cl->createNewChildElement("PrecompiledHeaderFile")->addTextElement(pchPath.getFileName());
                     }
                     cl->addChildElement(precompiledHeaders);
 
@@ -807,8 +809,8 @@ public:
 
                         if (getOwner().getUsePrecompiledHeadersBool())
                         {
-                            String pchFileName = getOwner().getPrecompiledHeaderFileNameString();
-                            String precompiledHeaderBaseName = pchFileName.substring(0, pchFileName.lastIndexOfChar('.'));
+                            const RelativePath pchPath(getOwner().getPrecompiledHeaderFileNameString(), getOwner().getTargetFolder(), RelativePath::buildTargetFolder);
+                            const String precompiledHeaderBaseName = pchPath.getFileNameWithoutExtension();
                             if (precompiledHeaderBaseName == path.getFileNameWithoutExtension()) {
                                 e->createNewChildElement("PrecompiledHeader")->addTextElement("Create");
                             } else {

@@ -268,6 +268,7 @@ public:
 
             out << getBuildProduct() << " : "
                 << ((useLinuxPackages) ? "check-pkg-config " : "")
+                << (owner.getUsePrecompiledHeadersBool() ? "$(PCH_OUT) " : "")
                 << "$(OBJECTS_" << getTargetVarName() << ") $(RESOURCES)";
 
             if (type != SharedCodeTarget && owner.shouldBuildTargetType (SharedCodeTarget))
@@ -667,6 +668,15 @@ private:
     {
         const int n = targets.size();
 
+        MemoryOutputStream pchLines;
+        if (getUsePrecompiledHeadersBool())
+        {
+            pchLines << "$(PCH_OUT): $(PCH_SRC)" << newLine
+                     << "\t@echo \"Generating precompiled header\"" << newLine
+                     << "\t$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o \"$@\" -c \"$<\"" << newLine
+                     << newLine;
+        }
+
         for (int i = 0; i < n; ++i)
         {
             if (auto* target = targets.getUnchecked (i))
@@ -693,6 +703,7 @@ private:
                     }
 
                     out << "all : " << dependencies.joinIntoString (" ") << newLine << newLine;
+                    out << pchLines.toString();
                     out << subTargetLines.toString() << newLine << newLine;
                 }
                 else
@@ -700,6 +711,7 @@ private:
                     if (! getProject().getProjectType().isAudioPlugin())
                         out << "all : " << target->getBuildProduct() << newLine << newLine;
 
+                    out << pchLines.toString();
                     target->writeTargetLine (out, useLinuxPackages);
                 }
             }
@@ -826,6 +838,15 @@ private:
 
         for (auto target : targets)
             target->writeObjects (out);
+
+        if (getUsePrecompiledHeadersBool())
+        {
+            const String pchFileName = getPrecompiledHeaderFileNameString();
+            const String gchFileName = getPrecompiledHeaderFileNameString() + ".gch";
+            out << "PCH_SRC = " << pchFileName << newLine
+                << "PCH_OUT = " << gchFileName << newLine
+                << newLine;
+        }
 
         out << getPhonyTargetLine() << newLine << newLine;
 
