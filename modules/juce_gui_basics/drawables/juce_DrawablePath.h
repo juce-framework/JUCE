@@ -48,7 +48,7 @@ public:
 
     //==============================================================================
     /** Changes the path that will be drawn.
-        @see setFillColour, setStrokeType
+        @see setFill, setStrokeType
     */
     void setPath (const Path& newPath);
 
