@@ -105,9 +105,14 @@ void TooltipWindow::displayTip (Point<int> screenPos, const String& tip)
         activeTooltipWindows.addIfNotAlreadyThere (this);
 
         for (auto* w : activeTooltipWindows)
+        {
             if (w != this && w->tipShowing == tipShowing)
-                jassertfalse; // Looks like you have more than one TooltipWindow showing the same tip.
-                              // Be careful not to create more than one instance of this class!
+            {
+                // Looks like you have more than one TooltipWindow showing the same tip..
+                // Be careful not to create more than one instance of this class!
+                jassertfalse;
+            }
+        }
        #endif
 
         toFront (false);
