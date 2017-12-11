@@ -96,6 +96,9 @@ public:
     bool askAllWindowsToClose();
     void closeWindow (MainWindow*);
 
+    void goToNextWindow (MainWindow*);
+    void goToPreviousWindow (MainWindow*);
+
     void createWindowIfNoneAreOpen();
     void openDocument (OpenDocumentManager::Document*, bool grabFocus);
     bool openFile (const File& file, bool openInBackground = false);
