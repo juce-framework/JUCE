@@ -2111,6 +2111,18 @@ private:
             {
                 auto image = rescaleImageForIcon (*images.getFirst(), type.size);
 
+                if (image.hasAlphaChannel())
+                {
+                    Image background (Image::RGB, image.getWidth(), image.getHeight(), false);
+                    Graphics g (background);
+                    g.fillAll (Colours::white);
+
+                    g.drawImageWithin (image, 0, 0, image.getWidth(), image.getHeight(),
+                                       RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize);
+
+                    image = background;
+                }
+
                 MemoryOutputStream pngData;
                 PNGImageFormat pngFormat;
                 pngFormat.writeImageToStream (image, pngData);
