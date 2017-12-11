@@ -46,54 +46,54 @@ public:
     /** Represents the host type and also its version for some hosts. */
     enum HostType
     {
-        UnknownHost,                //**< Represents an unknown host. */
-        AbletonLive6,               //**< Represents Ableton Live 6. */
-        AbletonLive7,               //**< Represents Ableton Live 7. */
-        AbletonLive8,               //**< Represents Ableton Live 8. */
-        AbletonLiveGeneric,         //**< Represents Ableton Live. */
-        AdobeAudition,              //**< Represents Adobe Audition. */
-        AdobePremierePro,           //**< Represents Adobe Premiere Pro. */
-        AppleLogic,                 //**< Represents Apple Logic Pro. */
-        Ardour,                     //**< Represents Ardour. */
-        BitwigStudio,               //**< Represents Bitwig Studio. */
-        CakewalkSonar8,             //**< Represents Cakewalk Sonar 8. */
-        CakewalkSonarGeneric,       //**< Represents Cakewalk Sonar. */
-        DaVinciResolve,             //**< Represents DaVinci Resolve. */
-        DigidesignProTools,         //**< Represents Avid Pro Tools. */
-        DigitalPerformer,           //**< Represents Digital Performer. */
-        FinalCut,                   //**< Represents Apple Final Cut Pro. */
-        FruityLoops,                //**< Represents Fruity Loops. */
-        MagixSamplitude,            //**< Represents Magix Samplitude. */
-        MergingPyramix,             //**< Represents Merging Pyramix. */
-        MuseReceptorGeneric,        //**< Represents Muse Receptor. */
-        Reaper,                     //**< Represents Cockos Reaper. */
-        Renoise,                    //**< Represents Renoise. */
-        SADiE,                      //**< Represents SADiE. */
-        SteinbergCubase4,           //**< Represents Steinberg Cubase 4. */
-        SteinbergCubase5,           //**< Represents Steinberg Cubase 5. */
-        SteinbergCubase5Bridged,    //**< Represents Steinberg Cubase 5 Bridged. */
-        SteinbergCubase6,           //**< Represents Steinberg Cubase 6. */
-        SteinbergCubase7,           //**< Represents Steinberg Cubase 7. */
-        SteinbergCubase8,           //**< Represents Steinberg Cubase 8. */
-        SteinbergCubase8_5,         //**< Represents Steinberg Cubase 8.5. */
-        SteinbergCubase9,           //**< Represents Steinberg Cubase 9. */
-        SteinbergCubaseGeneric,     //**< Represents Steinberg Cubase. */
-        SteinbergNuendo3,           //**< Represents Steinberg Nuendo 3. */
-        SteinbergNuendo4,           //**< Represents Steinberg Nuendo 4. */
-        SteinbergNuendo5,           //**< Represents Steinberg Nuendo 5. */
-        SteinbergNuendoGeneric,     //**< Represents Steinberg Nuendo. */
-        SteinbergWavelab5,          //**< Represents Steinberg Wavelab 5. */
-        SteinbergWavelab6,          //**< Represents Steinberg Wavelab 6. */
-        SteinbergWavelab7,          //**< Represents Steinberg Wavelab 7. */
-        SteinbergWavelab8,          //**< Represents Steinberg Wavelab 8. */
-        SteinbergWavelabGeneric,    //**< Represents Steinberg Wavelab. */
-        SteinbergTestHost,          //**< Represents Steinberg's VST3 Test Host. */
-        StudioOne,                  //**< Represents PreSonus Studio One. */
-        Tracktion3,                 //**< Represents Tracktion 3. */
-        TracktionGeneric,           //**< Represents Tracktion. */
-        TracktionWaveform,          //**< Represents Tracktion Waveform. */
-        VBVSTScanner,               //**< Represents VB Audio VST Scanner. */
-        WaveBurner                  //**< Represents Apple WaveBurner. */
+        UnknownHost,                /**< Represents an unknown host. */
+        AbletonLive6,               /**< Represents Ableton Live 6. */
+        AbletonLive7,               /**< Represents Ableton Live 7. */
+        AbletonLive8,               /**< Represents Ableton Live 8. */
+        AbletonLiveGeneric,         /**< Represents Ableton Live. */
+        AdobeAudition,              /**< Represents Adobe Audition. */
+        AdobePremierePro,           /**< Represents Adobe Premiere Pro. */
+        AppleLogic,                 /**< Represents Apple Logic Pro. */
+        Ardour,                     /**< Represents Ardour. */
+        BitwigStudio,               /**< Represents Bitwig Studio. */
+        CakewalkSonar8,             /**< Represents Cakewalk Sonar 8. */
+        CakewalkSonarGeneric,       /**< Represents Cakewalk Sonar. */
+        DaVinciResolve,             /**< Represents DaVinci Resolve. */
+        DigidesignProTools,         /**< Represents Avid Pro Tools. */
+        DigitalPerformer,           /**< Represents Digital Performer. */
+        FinalCut,                   /**< Represents Apple Final Cut Pro. */
+        FruityLoops,                /**< Represents Fruity Loops. */
+        MagixSamplitude,            /**< Represents Magix Samplitude. */
+        MergingPyramix,             /**< Represents Merging Pyramix. */
+        MuseReceptorGeneric,        /**< Represents Muse Receptor. */
+        Reaper,                     /**< Represents Cockos Reaper. */
+        Renoise,                    /**< Represents Renoise. */
+        SADiE,                      /**< Represents SADiE. */
+        SteinbergCubase4,           /**< Represents Steinberg Cubase 4. */
+        SteinbergCubase5,           /**< Represents Steinberg Cubase 5. */
+        SteinbergCubase5Bridged,    /**< Represents Steinberg Cubase 5 Bridged. */
+        SteinbergCubase6,           /**< Represents Steinberg Cubase 6. */
+        SteinbergCubase7,           /**< Represents Steinberg Cubase 7. */
+        SteinbergCubase8,           /**< Represents Steinberg Cubase 8. */
+        SteinbergCubase8_5,         /**< Represents Steinberg Cubase 8.5. */
+        SteinbergCubase9,           /**< Represents Steinberg Cubase 9. */
+        SteinbergCubaseGeneric,     /**< Represents Steinberg Cubase. */
+        SteinbergNuendo3,           /**< Represents Steinberg Nuendo 3. */
+        SteinbergNuendo4,           /**< Represents Steinberg Nuendo 4. */
+        SteinbergNuendo5,           /**< Represents Steinberg Nuendo 5. */
+        SteinbergNuendoGeneric,     /**< Represents Steinberg Nuendo. */
+        SteinbergWavelab5,          /**< Represents Steinberg Wavelab 5. */
+        SteinbergWavelab6,          /**< Represents Steinberg Wavelab 6. */
+        SteinbergWavelab7,          /**< Represents Steinberg Wavelab 7. */
+        SteinbergWavelab8,          /**< Represents Steinberg Wavelab 8. */
+        SteinbergWavelabGeneric,    /**< Represents Steinberg Wavelab. */
+        SteinbergTestHost,          /**< Represents Steinberg's VST3 Test Host. */
+        StudioOne,                  /**< Represents PreSonus Studio One. */
+        Tracktion3,                 /**< Represents Tracktion 3. */
+        TracktionGeneric,           /**< Represents Tracktion. */
+        TracktionWaveform,          /**< Represents Tracktion Waveform. */
+        VBVSTScanner,               /**< Represents VB Audio VST Scanner. */
+        WaveBurner                  /**< Represents Apple WaveBurner. */
     };
 
     HostType type;
