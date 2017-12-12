@@ -50,7 +50,8 @@ public:
         If lookup table is not zero, then the function will be approximated
         with a lookup table.
     */
-    Oscillator (const std::function<NumericType (NumericType)>& function, size_t lookupTableNumPoints = 0)
+    Oscillator (const std::function<NumericType (NumericType)>& function,
+                size_t lookupTableNumPoints = 0)
     {
         initialise (function, lookupTableNumPoints);
     }
@@ -59,13 +60,14 @@ public:
     bool isInitialised() const noexcept     { return static_cast<bool> (generator); }
 
     /** Initialises the oscillator with a waveform. */
-    void initialise (const std::function<NumericType (NumericType)>& function, size_t lookupTableNumPoints = 0)
+    void initialise (const std::function<NumericType (NumericType)>& function,
+                     size_t lookupTableNumPoints = 0)
     {
         if (lookupTableNumPoints != 0)
         {
             auto* table = new LookupTableTransform<NumericType> (function,
-                                                                 static_cast<NumericType> (-1.0 * MathConstants<double>::pi),
-                                                                 static_cast<NumericType> (MathConstants<double>::pi),
+                                                                 -MathConstants<NumericType>::pi,
+                                                                 MathConstants<NumericType>::pi,
                                                                  lookupTableNumPoints);
 
             lookupTable = table;
@@ -97,7 +99,7 @@ public:
     /** Resets the internal state of the oscillator */
     void reset() noexcept
     {
-        pos = 0.0;
+        phase.reset();
 
         if (sampleRate > 0)
             frequency.reset (sampleRate, 0.05);
@@ -108,11 +110,8 @@ public:
     SampleType JUCE_VECTOR_CALLTYPE processSample (SampleType) noexcept
     {
         jassert (isInitialised());
-        auto increment = static_cast<NumericType> (MathConstants<double>::twoPi) * frequency.getNextValue() / sampleRate;
-        auto value = generator (pos - static_cast<NumericType> (MathConstants<double>::pi));
-        pos = std::fmod (pos + increment, static_cast<NumericType> (MathConstants<double>::twoPi));
-
-        return value;
+        auto increment = MathConstants<NumericType>::twoPi * frequency.getNextValue() / sampleRate;
+        return generator (phase.advance (increment) - MathConstants<NumericType>::pi);
     }
 
     /** Processes the input and output buffers supplied in the processing context. */
@@ -128,19 +127,15 @@ public:
 
         auto len           = outBlock.getNumSamples();
         auto numChannels   = outBlock.getNumChannels();
-        auto baseIncrement = static_cast<NumericType> (MathConstants<double>::twoPi) / sampleRate;
+        auto baseIncrement = MathConstants<NumericType>::twoPi / sampleRate;
 
         if (frequency.isSmoothing())
         {
             auto* buffer = rampBuffer.getRawDataPointer();
 
             for (size_t i = 0; i < len; ++i)
-            {
-                buffer[i] = pos - static_cast<NumericType> (MathConstants<double>::pi);
-
-                pos = std::fmod (pos + (baseIncrement * frequency.getNextValue()),
-                                 static_cast<NumericType> (MathConstants<double>::twoPi));
-            }
+                buffer[i] = phase.advance (baseIncrement * frequency.getNextValue())
+                              - MathConstants<NumericType>::pi;
 
             for (size_t ch = 0; ch < numChannels; ++ch)
             {
@@ -153,21 +148,18 @@ public:
         else
         {
             auto freq = baseIncrement * frequency.getNextValue();
+            auto p = phase;
 
             for (size_t ch = 0; ch < numChannels; ++ch)
             {
-                auto p = pos;
+                p = phase;
                 auto* dst = outBlock.getChannelPointer (ch);
 
                 for (size_t i = 0; i < len; ++i)
-                {
-                    dst[i] = generator (p - static_cast<NumericType> (MathConstants<double>::pi));
-                    p = std::fmod (p + freq, static_cast<NumericType> (MathConstants<double>::twoPi));
-                }
+                    dst[i] = generator (p.advance (freq) - MathConstants<NumericType>::pi);
             }
 
-            pos = std::fmod (pos + freq * static_cast<NumericType> (len),
-                             static_cast<NumericType> (MathConstants<double>::twoPi));
+            phase = p;
         }
     }
 
@@ -176,8 +168,9 @@ private:
     std::function<NumericType (NumericType)> generator;
     ScopedPointer<LookupTableTransform<NumericType>> lookupTable;
     Array<NumericType> rampBuffer;
-    LinearSmoothedValue<NumericType> frequency {static_cast<NumericType> (440.0)};
-    NumericType sampleRate = 48000.0, pos = 0.0;
+    LinearSmoothedValue<NumericType> frequency { static_cast<NumericType> (440.0) };
+    NumericType sampleRate = 48000.0;
+    Phase<NumericType> phase;
 };
 
 } // namespace dsp
