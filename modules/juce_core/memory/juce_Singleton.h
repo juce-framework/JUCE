@@ -57,7 +57,9 @@ struct SingletonHolder  : private MutexType // (inherited so we can use the empt
 
             if (instance == nullptr)
             {
-                if (onlyCreateOncePerRun)
+                auto once = onlyCreateOncePerRun; // (local copy avoids VS compiler warning about this being constant)
+
+                if (once)
                 {
                     static bool createdOnceAlready = false;
 
