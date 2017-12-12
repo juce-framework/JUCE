@@ -80,11 +80,12 @@ public:
     void setSuspended (bool shouldBeSuspended);
 
 
-    juce_DeclareSingleton (Analytics, true)
+    juce_DeclareSingleton (Analytics, false)
 
 private:
     //==============================================================================
     Analytics() = default;
+    ~Analytics() { clearSingletonInstance(); }
 
     String userId;
     StringPairArray userProperties;
