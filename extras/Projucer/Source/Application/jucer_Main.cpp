@@ -52,7 +52,7 @@
 #include "../LiveBuildEngine/UI/jucer_ComponentListComponent.h"
 #include "../LiveBuildEngine/jucer_CompileEngineServer.h"
 
-juce_ImplementSingleton (CompileEngineDLL);
+JUCE_IMPLEMENT_SINGLETON (CompileEngineDLL)
 
 struct ProjucerAppClasses
 {

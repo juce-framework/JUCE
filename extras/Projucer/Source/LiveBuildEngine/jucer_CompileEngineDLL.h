@@ -29,7 +29,7 @@
 #include "jucer_LiveCodeBuilderDLL.h"
 
 //==============================================================================
-struct CompileEngineDLL : DeletedAtShutdown
+struct CompileEngineDLL  : private DeletedAtShutdown
 {
     CompileEngineDLL()
     {
@@ -39,6 +39,7 @@ struct CompileEngineDLL : DeletedAtShutdown
     ~CompileEngineDLL()
     {
         shutdown();
+        clearSingletonInstance();
     }
 
     bool tryLoadDll()
@@ -117,7 +118,7 @@ struct CompileEngineDLL : DeletedAtShutdown
         return userAppData.getChildFile ("Projucer").getChildFile (String ("CompileEngine-") + ProjectInfo::versionString);
     }
 
-    juce_DeclareSingleton (CompileEngineDLL, false)
+    JUCE_DECLARE_SINGLETON (CompileEngineDLL, false)
 
 private:
     DynamicLibrary dll;

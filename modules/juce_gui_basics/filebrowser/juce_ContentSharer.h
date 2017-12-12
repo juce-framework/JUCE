@@ -36,7 +36,7 @@ namespace juce
 class JUCE_API ContentSharer
 {
 public:
-    juce_DeclareSingleton (ContentSharer, false)
+    JUCE_DECLARE_SINGLETON (ContentSharer, false)
 
     /** Shares the given files. Each URL should be either a full file path
         or it should point to a resource within the application bundle. For

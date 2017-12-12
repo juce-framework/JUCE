@@ -34,7 +34,7 @@ DECLARE_JNI_CLASS (JNIHandler, "android/os/Handler");
 //==============================================================================
 namespace Android
 {
-    class Runnable : public juce::AndroidInterfaceImplementer
+    class Runnable  : public juce::AndroidInterfaceImplementer
     {
     public:
         virtual void run() = 0;
@@ -58,7 +58,7 @@ namespace Android
 
     struct Handler
     {
-        juce_DeclareSingleton (Handler, false)
+        JUCE_DECLARE_SINGLETON (Handler, false)
 
         Handler() : nativeHandler (getEnv()->NewObject (JNIHandler, JNIHandler.constructor)) {}
 
@@ -70,13 +70,13 @@ namespace Android
         GlobalRef nativeHandler;
     };
 
-    juce_ImplementSingleton (Handler);
+    JUCE_IMPLEMENT_SINGLETON (Handler)
 }
 
 //==============================================================================
 struct AndroidMessageQueue     : private Android::Runnable
 {
-    juce_DeclareSingleton_SingleThreaded (AndroidMessageQueue, true)
+    JUCE_DECLARE_SINGLETON_SINGLETHREADED (AndroidMessageQueue, true)
 
     AndroidMessageQueue()
         : self (CreateJavaInterface (this, "java/lang/Runnable").get())
@@ -118,7 +118,7 @@ private:
     Android::Handler handler;
 };
 
-juce_ImplementSingleton_SingleThreaded (AndroidMessageQueue);
+JUCE_IMPLEMENT_SINGLETON (AndroidMessageQueue)
 
 //==============================================================================
 void MessageManager::doPlatformSpecificInitialisation() { AndroidMessageQueue::getInstance(); }

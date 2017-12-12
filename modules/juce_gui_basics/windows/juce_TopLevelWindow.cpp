@@ -35,7 +35,7 @@ public:
     TopLevelWindowManager()     {}
     ~TopLevelWindowManager()    { clearSingletonInstance(); }
 
-    juce_DeclareSingleton_SingleThreaded_Minimal (TopLevelWindowManager)
+    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (TopLevelWindowManager)
 
     void checkFocusAsync()
     {
@@ -122,7 +122,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE (TopLevelWindowManager)
 };
 
-juce_ImplementSingleton_SingleThreaded (TopLevelWindowManager)
+JUCE_IMPLEMENT_SINGLETON (TopLevelWindowManager)
 
 void juce_checkCurrentlyFocusedTopLevelWindow();
 void juce_checkCurrentlyFocusedTopLevelWindow()

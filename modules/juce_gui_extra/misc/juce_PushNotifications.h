@@ -45,7 +45,7 @@ class JUCE_API PushNotifications
 {
 public:
    #ifndef DOXYGEN
-    juce_DeclareSingleton (PushNotifications, false)
+    JUCE_DECLARE_SINGLETON (PushNotifications, false)
    #endif
 
     //==========================================================================

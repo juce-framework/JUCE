@@ -62,6 +62,6 @@ void Analytics::setSuspended (bool shouldBeSuspended)
     isSuspended = shouldBeSuspended;
 }
 
-juce_ImplementSingleton (Analytics)
+JUCE_IMPLEMENT_SINGLETON (Analytics)
 
 }

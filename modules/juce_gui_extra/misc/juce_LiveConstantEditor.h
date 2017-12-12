@@ -200,7 +200,7 @@ namespace LiveConstantEditor
         ValueList();
         ~ValueList();
 
-        juce_DeclareSingleton (ValueList, false)
+        JUCE_DECLARE_SINGLETON (ValueList, false)
 
         template <typename Type>
         LiveValue<Type>& getValue (const char* file, int line, const Type& initialValue)

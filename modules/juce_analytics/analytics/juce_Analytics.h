@@ -80,7 +80,7 @@ public:
     void setSuspended (bool shouldBeSuspended);
 
    #ifndef DOXYGEN
-    juce_DeclareSingleton (Analytics, false)
+    JUCE_DECLARE_SINGLETON (Analytics, false)
    #endif
 
 private:

@@ -148,7 +148,7 @@ private:
 #endif
 
 //==============================================================================
-juce_ImplementSingleton (ContentSharer)
+JUCE_IMPLEMENT_SINGLETON (ContentSharer)
 
 ContentSharer::ContentSharer() {}
 ContentSharer::~ContentSharer() { clearSingletonInstance(); }

@@ -75,7 +75,7 @@ public:
 
     //==============================================================================
    #ifndef DOXYGEN
-    juce_DeclareSingleton_SingleThreaded_Minimal (ModalComponentManager)
+    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (ModalComponentManager)
    #endif
 
     //==============================================================================

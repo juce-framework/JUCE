@@ -42,7 +42,7 @@ public:
     XDisplay displayRef() noexcept;
     XDisplay displayUnref() noexcept;
 
-    juce_DeclareSingleton (XWindowSystem, false)
+    JUCE_DECLARE_SINGLETON (XWindowSystem, false)
 
 private:
     XDisplay display = {};
