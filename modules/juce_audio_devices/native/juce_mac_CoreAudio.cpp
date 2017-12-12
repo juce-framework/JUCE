@@ -432,8 +432,9 @@ public:
         auto newInNames  = isInputDevice  ? getChannelInfo (true,  newInChans)  : StringArray();
         auto newOutNames = isOutputDevice ? getChannelInfo (false, newOutChans) : StringArray();
 
-        auto newBitDepth = jmax (getBitDepthFromDevice (kAudioDevicePropertyScopeInput),
-                                 getBitDepthFromDevice (kAudioDevicePropertyScopeOutput));
+        auto inputBitDepth  = isInputDevice  ? getBitDepthFromDevice (kAudioDevicePropertyScopeInput)  : 0;
+        auto outputBitDepth = isOutputDevice ? getBitDepthFromDevice (kAudioDevicePropertyScopeOutput) : 0;
+        auto newBitDepth = jmax (inputBitDepth, outputBitDepth);
 
         {
             const ScopedLock sl (callbackLock);
