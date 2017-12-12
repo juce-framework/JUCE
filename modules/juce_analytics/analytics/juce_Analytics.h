@@ -80,12 +80,13 @@ public:
     void setSuspended (bool shouldBeSuspended);
 
    #ifndef DOXYGEN
-    juce_DeclareSingleton (Analytics, true)
+    juce_DeclareSingleton (Analytics, false)
    #endif
 
 private:
     //==============================================================================
     Analytics() = default;
+    ~Analytics()  { clearSingletonInstance(); }
 
     String userId;
     StringPairArray userProperties;
