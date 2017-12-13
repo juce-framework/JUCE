@@ -357,6 +357,7 @@ private:
                                              auto numWritten = wo->writeFromInputStream (*wi, -1);
                                              jassert (numWritten > 0);
                                              ignoreUnused (numWritten);
+                                             wo->flush();
                                          }
                                      }
                                    #endif
