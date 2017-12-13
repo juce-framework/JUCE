@@ -110,7 +110,7 @@ public:
         if (subContentsList != nullptr)
         {
             subContentsList->removeChangeListener (this);
-            subContentsList.clear();
+            subContentsList.reset();
         }
     }
 
