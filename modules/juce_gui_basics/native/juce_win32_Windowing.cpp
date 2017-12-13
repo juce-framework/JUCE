@@ -303,6 +303,9 @@ static void checkForPointerAPI()
                      && getPointerPenInfo      != nullptr);
 }
 
+typedef void (*SettingChangeCallbackFunc) (void);
+extern SettingChangeCallbackFunc settingChangeCallback;
+
 static Rectangle<int> rectangleFromRECT (const RECT& r) noexcept
 {
     return Rectangle<int>::leftTopRightBottom ((int) r.left, (int) r.top, (int) r.right, (int) r.bottom);
@@ -1772,6 +1775,11 @@ private:
             updateBorderSize();
             checkForPointerAPI();
 
+            // This is needed so that our plugin window gets notified of WM_SETTINGCHANGE messages
+            // and can respond to display scale changes
+            if (! JUCEApplication::isStandaloneApp())
+                settingChangeCallback = forceDisplayUpdate;
+
             // Calling this function here is (for some reason) necessary to make Windows
             // correctly enable the menu items that we specify in the wm_initmenu message.
             GetSystemMenu (hwnd, false);
@@ -2918,17 +2926,21 @@ private:
 
     void doSettingChange()
     {
-        auto& desktop = Desktop::getInstance();
-
-        const_cast<Desktop::Displays&> (desktop.getDisplays()).refresh();
+        forceDisplayUpdate();
 
         if (fullScreen && ! isMinimised())
         {
-            auto& display = desktop.getDisplays().getDisplayContaining (component.getScreenBounds().getCentre());
+            auto& display = Desktop::getInstance().getDisplays()
+                           .getDisplayContaining (component.getScreenBounds().getCentre());
 
             setWindowPos (hwnd, display.userArea * display.scale,
                           SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSENDCHANGING);
         }
+    }
+
+    static void forceDisplayUpdate()
+    {
+        const_cast<Desktop::Displays&> (Desktop::getInstance().getDisplays()).refresh();
     }
 
     void handleDPIChange() // happens when a window moves to a screen with a different DPI.
@@ -3595,7 +3607,6 @@ JUCE_API ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component& compo
 
 
 JUCE_IMPLEMENT_SINGLETON (HWNDComponentPeer::WindowClassHolder)
-
 
 //==============================================================================
 void ModifierKeys::updateCurrentModifiers() noexcept

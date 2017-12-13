@@ -28,6 +28,9 @@ extern HWND juce_messageWindowHandle;
 typedef bool (*CheckEventBlockedByModalComps) (const MSG&);
 CheckEventBlockedByModalComps isEventBlockedByModalComps = nullptr;
 
+typedef void (*SettingChangeCallbackFunc) (void);
+SettingChangeCallbackFunc settingChangeCallback = nullptr;
+
 //==============================================================================
 namespace WindowsMessageHelpers
 {
@@ -100,6 +103,11 @@ namespace WindowsMessageHelpers
             {
                 handleBroadcastMessage (reinterpret_cast<const COPYDATASTRUCT*> (lParam));
                 return 0;
+            }
+            else if (message == WM_SETTINGCHANGE)
+            {
+                if (settingChangeCallback != nullptr)
+                    settingChangeCallback();
             }
         }
 
