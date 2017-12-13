@@ -73,6 +73,9 @@ struct ReportingThread;
 struct ReportingThreadContainer  : public ChangeListener,
                                    public DeletedAtShutdown
 {
+    ReportingThreadContainer() {}
+    ~ReportingThreadContainer() { clearSingletonInstance(); }
+
     void sendReport (String, String&, StringPairArray&);
     void changeListenerCallback (ChangeBroadcaster*) override;
 

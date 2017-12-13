@@ -60,6 +60,8 @@ public:
     {
         if (winRTHandle != nullptr)
             ::FreeLibrary (winRTHandle);
+
+        clearSingletonInstance();
     }
 
     String hStringToString (HSTRING hstr)

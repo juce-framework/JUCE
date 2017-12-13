@@ -58,9 +58,10 @@ namespace Android
 
     struct Handler
     {
-        JUCE_DECLARE_SINGLETON (Handler, false)
-
         Handler() : nativeHandler (getEnv()->NewObject (JNIHandler, JNIHandler.constructor)) {}
+        ~Handler() { clearSingletonInstance(); }
+
+        JUCE_DECLARE_SINGLETON (Handler, false)
 
         bool post (jobject runnable)
         {
@@ -86,6 +87,7 @@ struct AndroidMessageQueue     : private Android::Runnable
     ~AndroidMessageQueue()
     {
         jassert (MessageManager::getInstance()->isThisTheMessageThread());
+        clearSingletonInstance();
     }
 
     bool post (MessageManager::MessageBase::Ptr&& message)

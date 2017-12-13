@@ -763,6 +763,11 @@ private:
         tipInvocation.CoCreateInstance (ITipInvocation::getCLSID(), CLSCTX_INPROC_HANDLER | CLSCTX_LOCAL_SERVER);
     }
 
+    ~OnScreenKeyboard()
+    {
+        clearSingletonInstance();
+    }
+
     void timerCallback() override
     {
         stopTimer();
