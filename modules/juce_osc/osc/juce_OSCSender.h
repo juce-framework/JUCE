@@ -60,17 +60,17 @@ public:
     */
     bool connect (const String& targetHostName, int targetPortNumber);
 
-	/** Uses an existing datagram socket for sending OSC packets to the specified target.
+    /** Uses an existing datagram socket for sending OSC packets to the specified target.
 
-	    @param  socket           An existing datagram socket. Make sure this doesn't
+        @param  socket           An existing datagram socket. Make sure this doesn't
                                  get deleted while this class is still using it!
-	    @param  targetHostName   The remote host to which messages will be send.
-	    @param  targetPortNumber The remote UDP port number on which the host will
-	                             receive the messages.
+        @param  targetHostName   The remote host to which messages will be send.
+        @param  targetPortNumber The remote UDP port number on which the host will
+                                 receive the messages.
 
-	    @returns true if the connection was successful; false otherwise.
-	    @see connect, send, disconnect.
-	*/
+        @returns true if the connection was successful; false otherwise.
+        @see connect, send, disconnect.
+    */
     bool connectToSocket (DatagramSocket& socket, const String& targetHostName, int targetPortNumber);
 
     //==============================================================================
