@@ -76,7 +76,7 @@ public:
         g.fillEllipse (20, 20, 300, 200);
         Array<Image> images;
         images.add (myImage);
-        ContentSharer::getInstance()->shareImages (images);
+        ContentSharer::getInstance()->shareImages (images, myCallback);
         @endcode
 
         Upon completion you will receive a callback with a sharing result. Note:

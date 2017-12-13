@@ -613,7 +613,7 @@ private:
 
     void filesPrepared (jobject fileUris, const StringArray& mimeTypes)
     {
-        auto env = getEnv();
+        auto* env = getEnv();
 
         auto intent = LocalRef<jobject> (env->NewObject (AndroidIntent, AndroidIntent.constructor));
         env->CallObjectMethod (intent, AndroidIntent.setAction,
@@ -698,6 +698,9 @@ private:
 
     static StringArray javaStringArrayToJuceStringArray (const LocalRef<jobjectArray>& javaArray)
     {
+        if (javaArray.get() == 0)
+            return {};
+
         auto* env = getEnv();
 
         const int size = env->GetArrayLength (javaArray.get());
@@ -743,6 +746,17 @@ private:
         auto parcelFileDescriptor = LocalRef<jobject> (env->CallStaticObjectMethod (ParcelFileDescriptor,
                                                                                     ParcelFileDescriptor.open,
                                                                                     javaFile.get(), modeReadOnly));
+
+        auto exception = LocalRef<jobject> (env->ExceptionOccurred());
+
+        if (exception != 0)
+        {
+            // Failed to create file descriptor. Have you provided a valid file path/resource name?
+            jassertfalse;
+
+            env->ExceptionClear();
+            return nullptr;
+        }
 
         assetFileDescriptors.add (GlobalRef (LocalRef<jobject> (env->NewObject (AssetFileDescriptor,
                                                                                 AssetFileDescriptor.constructor,
