@@ -132,7 +132,7 @@ bool MainWindow::closeProject (Project* project)
 
     project->getStoredProperties().setValue (getProjectWindowPosName(), getWindowStateAsString());
 
-    if (ProjectContentComponent* const pcc = getProjectContentComponent())
+    if (auto* pcc = getProjectContentComponent())
     {
         pcc->saveTreeViewState();
         pcc->saveOpenDocumentList();
@@ -142,7 +142,7 @@ bool MainWindow::closeProject (Project* project)
     if (! ProjucerApplication::getApp().openDocumentManager.closeAllDocumentsUsingProject (*project, true))
         return false;
 
-    FileBasedDocument::SaveResult r = project->saveIfNeededAndUserAgrees();
+    auto r = project->saveIfNeededAndUserAgrees();
 
     if (r == FileBasedDocument::savedOk)
     {
@@ -226,8 +226,8 @@ bool MainWindow::openFile (const File& file)
 
 bool MainWindow::isInterestedInFileDrag (const StringArray& filenames)
 {
-    for (int i = filenames.size(); --i >= 0;)
-        if (canOpenFile (File (filenames[i])))
+    for (auto& filename : filenames)
+        if (canOpenFile (File (filename)))
             return true;
 
     return false;
@@ -235,9 +235,9 @@ bool MainWindow::isInterestedInFileDrag (const StringArray& filenames)
 
 void MainWindow::filesDropped (const StringArray& filenames, int /*mouseX*/, int /*mouseY*/)
 {
-    for (int i = filenames.size(); --i >= 0;)
+    for (auto& filename : filenames)
     {
-        const File f (filenames[i]);
+        const File f (filename);
 
         if (canOpenFile (f) && openFile (f))
             break;
@@ -247,21 +247,21 @@ void MainWindow::filesDropped (const StringArray& filenames, int /*mouseX*/, int
 bool MainWindow::shouldDropFilesWhenDraggedExternally (const DragAndDropTarget::SourceDetails& sourceDetails,
                                                        StringArray& files, bool& canMoveFiles)
 {
-    if (TreeView* tv = dynamic_cast<TreeView*> (sourceDetails.sourceComponent.get()))
+    if (auto* tv = dynamic_cast<TreeView*> (sourceDetails.sourceComponent.get()))
     {
         Array<JucerTreeViewBase*> selected;
 
         for (int i = tv->getNumSelectedItems(); --i >= 0;)
-            if (JucerTreeViewBase* b = dynamic_cast<JucerTreeViewBase*> (tv->getSelectedItem(i)))
+            if (auto* b = dynamic_cast<JucerTreeViewBase*> (tv->getSelectedItem(i)))
                 selected.add (b);
 
-        if (selected.size() > 0)
+        if (! selected.isEmpty())
         {
             for (int i = selected.size(); --i >= 0;)
             {
-                if (JucerTreeViewBase* jtvb = selected.getUnchecked(i))
+                if (auto* jtvb = selected.getUnchecked(i))
                 {
-                    const File f (jtvb->getDraggableFile());
+                    auto f = jtvb->getDraggableFile();
 
                     if (f.existsAsFile())
                         files.add (f.getFullPathName());
@@ -269,7 +269,7 @@ bool MainWindow::shouldDropFilesWhenDraggedExternally (const DragAndDropTarget::
             }
 
             canMoveFiles = false;
-            return files.size() > 0;
+            return ! files.isEmpty();
         }
     }
 
@@ -341,7 +341,12 @@ ApplicationCommandTarget* MainWindow::getNextCommandTarget()
 
 void MainWindow::getAllCommands (Array <CommandID>& commands)
 {
-    const CommandID ids[] = { CommandIDs::closeWindow };
+    const CommandID ids[] =
+    {
+        CommandIDs::closeWindow,
+        CommandIDs::goToPreviousWindow,
+        CommandIDs::goToNextWindow
+    };
 
     commands.addArray (ids, numElementsInArray (ids));
 }
@@ -355,6 +360,18 @@ void MainWindow::getCommandInfo (const CommandID commandID, ApplicationCommandIn
             result.defaultKeypresses.add (KeyPress ('w', ModifierKeys::commandModifier, 0));
             break;
 
+        case CommandIDs::goToPreviousWindow:
+            result.setInfo ("Previous Window", "Activates the previous window", CommandCategories::general, 0);
+            result.setActive (ProjucerApplication::getApp().mainWindowList.windows.size() > 1);
+            result.defaultKeypresses.add (KeyPress (KeyPress::tabKey, ModifierKeys::shiftModifier | ModifierKeys::ctrlModifier, 0));
+            break;
+
+        case CommandIDs::goToNextWindow:
+            result.setInfo ("Next Window", "Activates the next window", CommandCategories::general, 0);
+            result.setActive (ProjucerApplication::getApp().mainWindowList.windows.size() > 1);
+            result.defaultKeypresses.add (KeyPress (KeyPress::tabKey, ModifierKeys::ctrlModifier, 0));
+            break;
+
         default:
             break;
     }
@@ -366,6 +383,14 @@ bool MainWindow::perform (const InvocationInfo& info)
     {
         case CommandIDs::closeWindow:
             closeButtonPressed();
+            break;
+
+        case CommandIDs::goToPreviousWindow:
+            ProjucerApplication::getApp().mainWindowList.goToSiblingWindow (this, -1);
+            break;
+
+        case CommandIDs::goToNextWindow:
+            ProjucerApplication::getApp().mainWindowList.goToSiblingWindow (this, 1);
             break;
 
         default:
@@ -434,15 +459,24 @@ void MainWindowList::closeWindow (MainWindow* w)
     }
 }
 
+void MainWindowList::goToSiblingWindow (MainWindow* w, int delta)
+{
+    auto index = windows.indexOf (w);
+
+    if (index >= 0)
+        if (auto* next = windows[(index + delta + windows.size()) % windows.size()])
+            next->toFront (true);
+}
+
 void MainWindowList::openDocument (OpenDocumentManager::Document* doc, bool grabFocus)
 {
-    Desktop& desktop = Desktop::getInstance();
+    auto& desktop = Desktop::getInstance();
 
     for (int i = desktop.getNumComponents(); --i >= 0;)
     {
-        if (MainWindow* const mw = dynamic_cast<MainWindow*> (desktop.getComponent(i)))
+        if (auto* mw = dynamic_cast<MainWindow*> (desktop.getComponent(i)))
         {
-            if (ProjectContentComponent* pcc = mw->getProjectContentComponent())
+            if (auto* pcc = mw->getProjectContentComponent())
             {
                 if (pcc->hasFileInRecentList (doc->getFile()))
                 {
@@ -459,10 +493,8 @@ void MainWindowList::openDocument (OpenDocumentManager::Document* doc, bool grab
 
 bool MainWindowList::openFile (const File& file, bool openInBackground)
 {
-    for (int i = windows.size(); --i >= 0;)
+    for (auto* w : windows)
     {
-        MainWindow* const w = windows.getUnchecked(i);
-
         if (w->getProject() != nullptr && w->getProject()->getFile() == file)
         {
             w->toFront (true);
@@ -474,7 +506,7 @@ bool MainWindowList::openFile (const File& file, bool openInBackground)
     {
         auto previousFrontWindow = getFrontmostWindow();
 
-        MainWindow* const w = getOrCreateEmptyWindow();
+        auto* w = getOrCreateEmptyWindow();
         bool ok = w->openFile (file);
 
         w->makeVisible();
@@ -494,7 +526,7 @@ bool MainWindowList::openFile (const File& file, bool openInBackground)
 
 MainWindow* MainWindowList::createNewMainWindow()
 {
-    MainWindow* const w = new MainWindow();
+    auto w = new MainWindow();
     windows.add (w);
     w->restoreWindowPosition();
     avoidSuperimposedWindows (w);
@@ -503,11 +535,11 @@ MainWindow* MainWindowList::createNewMainWindow()
 
 MainWindow* MainWindowList::getFrontmostWindow (bool createIfNotFound)
 {
-    if (windows.size() == 0)
+    if (windows.isEmpty())
     {
         if (createIfNotFound)
         {
-            MainWindow* w = createNewMainWindow();
+            auto* w = createNewMainWindow();
             avoidSuperimposedWindows (w);
             w->makeVisible();
             return w;
@@ -518,7 +550,8 @@ MainWindow* MainWindowList::getFrontmostWindow (bool createIfNotFound)
 
     for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
     {
-        MainWindow* mw = dynamic_cast<MainWindow*> (Desktop::getInstance().getComponent (i));
+        auto* mw = dynamic_cast<MainWindow*> (Desktop::getInstance().getComponent (i));
+
         if (windows.contains (mw))
             return mw;
     }
@@ -533,7 +566,8 @@ MainWindow* MainWindowList::getOrCreateEmptyWindow()
 
     for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
     {
-        MainWindow* mw = dynamic_cast<MainWindow*> (Desktop::getInstance().getComponent (i));
+        auto* mw = dynamic_cast<MainWindow*> (Desktop::getInstance().getComponent (i));
+
         if (windows.contains (mw) && mw->getProject() == nullptr)
             return mw;
     }
@@ -545,10 +579,10 @@ void MainWindowList::avoidSuperimposedWindows (MainWindow* const mw)
 {
     for (int i = windows.size(); --i >= 0;)
     {
-        MainWindow* const other = windows.getUnchecked(i);
+        auto* other = windows.getUnchecked(i);
 
-        const Rectangle<int> b1 (mw->getBounds());
-        const Rectangle<int> b2 (other->getBounds());
+        auto b1 = mw->getBounds();
+        auto b2 = other->getBounds();
 
         if (mw != other
              && std::abs (b1.getX() - b2.getX()) < 3
@@ -569,12 +603,12 @@ void MainWindowList::avoidSuperimposedWindows (MainWindow* const mw)
 void MainWindowList::saveCurrentlyOpenProjectList()
 {
     Array<File> projects;
-    Desktop& desktop = Desktop::getInstance();
+    auto& desktop = Desktop::getInstance();
 
     for (int i = 0; i < desktop.getNumComponents(); ++i)
     {
-        if (MainWindow* const mw = dynamic_cast<MainWindow*> (desktop.getComponent(i)))
-            if (Project* p = mw->getProject())
+        if (auto* mw = dynamic_cast<MainWindow*> (desktop.getComponent(i)))
+            if (auto* p = mw->getProject())
                 projects.add (p->getFile());
     }
 
@@ -583,25 +617,23 @@ void MainWindowList::saveCurrentlyOpenProjectList()
 
 void MainWindowList::reopenLastProjects()
 {
-    Array<File> projects (getAppSettings().getLastProjects());
-
-    for (int i = 0; i < projects.size(); ++ i)
-        openFile (projects.getReference(i), true);
+    for (auto& p : getAppSettings().getLastProjects())
+        openFile (p, true);
 }
 
 void MainWindowList::sendLookAndFeelChange()
 {
-    for (int i = windows.size(); --i >= 0;)
-        windows.getUnchecked(i)->sendLookAndFeelChange();
+    for (auto* w : windows)
+        w->sendLookAndFeelChange();
 }
 
 Project* MainWindowList::getFrontmostProject()
 {
-    Desktop& desktop = Desktop::getInstance();
+    auto& desktop = Desktop::getInstance();
 
     for (int i = desktop.getNumComponents(); --i >= 0;)
-        if (MainWindow* const mw = dynamic_cast<MainWindow*> (desktop.getComponent(i)))
-            if (Project* p = mw->getProject())
+        if (auto* mw = dynamic_cast<MainWindow*> (desktop.getComponent(i)))
+            if (auto* p = mw->getProject())
                 return p;
 
     return nullptr;
