@@ -586,7 +586,6 @@ public:
        #if JUCE_IOS || JUCE_ANDROID
         setFullScreen (true);
         setContentOwned (new MainContentComponent (*this), false);
-        Desktop::getInstance().setKioskModeComponent (this, false);
        #else
         setContentOwned (new MainContentComponent (*this), true);
 
