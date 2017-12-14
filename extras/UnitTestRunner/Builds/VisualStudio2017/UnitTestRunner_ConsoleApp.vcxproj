@@ -2308,6 +2308,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_dsp\maths\juce_FastMathApproximations.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\maths\juce_LookupTable.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\maths\juce_Matrix.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\maths\juce_Phase.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\maths\juce_Polynomial.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\maths\juce_SpecialFunctions.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\native\juce_avx_SIMDNativeOps.h"/>

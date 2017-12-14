@@ -3159,6 +3159,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_dsp\maths\juce_Matrix.h">
       <Filter>JUCE Modules\juce_dsp\maths</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\maths\juce_Phase.h">
+      <Filter>JUCE Modules\juce_dsp\maths</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_dsp\maths\juce_Polynomial.h">
       <Filter>JUCE Modules\juce_dsp\maths</Filter>
     </ClInclude>
