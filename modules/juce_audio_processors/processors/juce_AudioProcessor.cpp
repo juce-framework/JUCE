@@ -52,8 +52,7 @@ AudioProcessor::AudioProcessor (const BusesProperties& ioConfig)
 
 AudioProcessor::~AudioProcessor()
 {
-    // ooh, nasty - the editor should have been deleted before the filter
-    // that it refers to is deleted..
+    // ooh, nasty - the editor should have been deleted before its AudioProcessor.
     jassert (activeEditor == nullptr);
 
    #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
@@ -140,7 +139,7 @@ bool AudioProcessor::setBusesLayoutWithoutEnabling (const BusesLayout& arr)
         if (request.getNumChannels (false, i) == 0)
             request.getChannelSet (false, i) = current.getChannelSet (false, i);
 
-    if (! checkBusesLayoutSupported(request))
+    if (! checkBusesLayoutSupported (request))
         return false;
 
     for (int dir = 0; dir < 2; ++dir)
@@ -367,6 +366,10 @@ void AudioProcessor::setRateAndBufferSizeDetails (double newSampleRate, int newB
 {
     currentSampleRate = newSampleRate;
     blockSize = newBlockSize;
+
+   #ifdef JUCE_DEBUG
+    checkForDupedParamIDs();
+   #endif
 }
 
 //==============================================================================
@@ -420,7 +423,7 @@ void AudioProcessor::setParameterNotifyingHost (int parameterIndex, float newVal
 AudioProcessorListener* AudioProcessor::getListenerLocked (int index) const noexcept
 {
     const ScopedLock sl (listenerLock);
-    return listeners [index];
+    return listeners[index];
 }
 
 void AudioProcessor::sendParamChangeMessageToListeners (int parameterIndex, float newValue)
@@ -444,7 +447,7 @@ void AudioProcessor::beginParameterChangeGesture (int parameterIndex)
        #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
         // This means you've called beginParameterChangeGesture twice in succession without a matching
         // call to endParameterChangeGesture. That might be fine in most hosts, but better to avoid doing it.
-        jassert (! changingParams [parameterIndex]);
+        jassert (! changingParams[parameterIndex]);
         changingParams.setBit (parameterIndex);
        #endif
 
@@ -466,7 +469,7 @@ void AudioProcessor::endParameterChangeGesture (int parameterIndex)
         // This means you've called endParameterChangeGesture without having previously called
         // beginParameterChangeGesture. That might be fine in most hosts, but better to keep the
         // calls matched correctly.
-        jassert (changingParams [parameterIndex]);
+        jassert (changingParams[parameterIndex]);
         changingParams.clearBit (parameterIndex);
        #endif
 
@@ -646,16 +649,33 @@ void AudioProcessor::addParameter (AudioProcessorParameter* p)
     // deprecated getNumParameters() method!
     jassert (getNumParameters() == AudioProcessor::getNumParameters());
 
-    // check that no two parameters have the same id
    #ifdef JUCE_DEBUG
-    auto paramId = getParameterID (p->parameterIndex);
-
-    for (auto q : managedParameters)
-    {
-        jassert (q == nullptr || q == p || paramId != getParameterID (q->parameterIndex));
-    }
+    shouldCheckParamsForDupeIDs = true;
    #endif
 }
+
+#ifdef JUCE_DEBUG
+void AudioProcessor::checkForDupedParamIDs()
+{
+    if (shouldCheckParamsForDupeIDs)
+    {
+        shouldCheckParamsForDupeIDs = false;
+        StringArray ids;
+
+        for (auto p : managedParameters)
+            if (auto* withID = dynamic_cast<AudioProcessorParameterWithID*> (p))
+                ids.add (withID->paramID);
+
+        ids.sort (false);
+
+        for (int i = 1; i < ids.size(); ++i)
+        {
+            // This is triggered if you have two or more parameters with the same ID!
+            jassert (ids[i - 1] != ids[i]);
+        }
+    }
+}
+#endif
 
 void AudioProcessor::suspendProcessing (const bool shouldBeSuspended)
 {

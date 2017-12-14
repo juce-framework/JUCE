@@ -1593,6 +1593,8 @@ private:
 
    #if JUCE_DEBUG
     bool textRecursionCheck = false;
+    bool shouldCheckParamsForDupeIDs = false;
+    void checkForDupedParamIDs();
    #endif
 
     AudioProcessorListener* getListenerLocked (int) const noexcept;
