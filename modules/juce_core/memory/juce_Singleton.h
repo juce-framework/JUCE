@@ -247,14 +247,11 @@ struct SingletonHolder  : private MutexType // (inherited so we can use the empt
     version of a singleton, where you're using it in very straightforward
     circumstances and don't need the extra checking.
 
-    Just use the normal JUCE_IMPLEMENT_SINGLETON_SINGLETHREADED as the counterpart
-    to this declaration, as you would with JUCE_DECLARE_SINGLETON_SINGLETHREADED.
-
     See the documentation for JUCE_DECLARE_SINGLETON for more information about
-    how to use it, the only difference being that you have to use
-    JUCE_IMPLEMENT_SINGLETON_SINGLETHREADED instead of JUCE_IMPLEMENT_SINGLETON.
+    how to use it. Just like JUCE_DECLARE_SINGLETON you need to also have a
+    corresponding JUCE_IMPLEMENT_SINGLETON statement somewhere in your code.
 
-    @see JUCE_IMPLEMENT_SINGLETON_SINGLETHREADED, JUCE_DECLARE_SINGLETON
+    @see JUCE_IMPLEMENT_SINGLETON, JUCE_DECLARE_SINGLETON
 */
 #define JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL(Classname) \
 \
