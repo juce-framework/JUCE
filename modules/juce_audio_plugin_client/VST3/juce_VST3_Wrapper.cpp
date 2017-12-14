@@ -2711,6 +2711,8 @@ private:
  #endif
 #endif
 
+using namespace juce;
+
 //==============================================================================
 // The VST3 plugin entry point.
 JUCE_EXPORTED_FUNCTION IPluginFactory* PLUGIN_API GetPluginFactory()
