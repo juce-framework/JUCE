@@ -359,6 +359,11 @@ File URL::getLocalFile() const
 {
     return fileFromFileSchemeURL (*this);
 }
+
+String URL::getFileName() const
+{
+    return toString (false).fromLastOccurrenceOf ("/", false, true);
+}
 #endif
 
 File URL::fileFromFileSchemeURL (const URL& fileURL)

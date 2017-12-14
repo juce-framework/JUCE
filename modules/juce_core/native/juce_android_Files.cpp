@@ -137,6 +137,28 @@ public:
 
         return getCursorDataColumn (url);
     }
+
+    static String getFileNameFromContentUri (const URL& url)
+    {
+        auto uri = urlToUri (url);
+        auto* env = getEnv();
+        LocalRef<jobject> contentResolver (android.activity.callObjectMethod (JuceAppActivity.getContentResolver));
+
+        if (contentResolver == 0)
+            return {};
+
+        auto filename = getStringUsingDataColumn ("_display_name", env, uri, contentResolver);
+
+        // Fallback to "_data" column
+        if (filename.isEmpty())
+        {
+            auto path = getStringUsingDataColumn ("_data", env, uri, contentResolver);
+            filename = path.fromLastOccurrenceOf ("/", false, true);
+        }
+
+        return filename;
+    }
+
 private:
     //==============================================================================
     static String getCursorDataColumn (const URL& url, const String& selection = {},
@@ -344,6 +366,42 @@ private:
     {
         return LocalRef<jobject> (getEnv()->CallStaticObjectMethod (AndroidUri, AndroidUri.parse,
                                                                     javaString (url.toString (true)).get()));
+    }
+
+    //==============================================================================
+    static String getStringUsingDataColumn (const String& columnNameToUse, JNIEnv* env,
+                                            const LocalRef<jobject>& uri,
+                                            const LocalRef<jobject>& contentResolver)
+    {
+        LocalRef<jstring> columnName (javaString (columnNameToUse));
+        LocalRef<jobjectArray> projection (env->NewObjectArray (1, JavaString, columnName.get()));
+
+        LocalRef<jobject> cursor (env->CallObjectMethod (contentResolver.get(), ContentResolver.query,
+                                                         uri.get(), projection.get(), nullptr,
+                                                         nullptr, nullptr));
+
+        if (cursor == 0)
+            return {};
+
+        String fileName;
+
+        if (env->CallBooleanMethod (cursor.get(), AndroidCursor.moveToFirst) != 0)
+        {
+            auto columnIndex = env->CallIntMethod (cursor.get(), AndroidCursor.getColumnIndex, columnName.get());
+
+            if (columnIndex >= 0)
+            {
+                LocalRef<jstring> value ((jstring) env->CallObjectMethod (cursor.get(), AndroidCursor.getString, columnIndex));
+
+                if (value)
+                    fileName = juceString (value.get());
+
+            }
+        }
+
+        env->CallVoidMethod (cursor.get(), AndroidCursor.close);
+
+        return fileName;
     }
 };
 

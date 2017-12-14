@@ -94,6 +94,14 @@ File URL::getLocalFile() const
     return fileFromFileSchemeURL (*this);
 }
 
+String URL::getFileName() const
+{
+    if (getScheme() == "content")
+        return AndroidContentUriResolver::getFileNameFromContentUri (*this);
+
+    return toString (false).fromLastOccurrenceOf ("/", false, true);
+}
+
 //==============================================================================
 class WebInputStream::Pimpl
 {
