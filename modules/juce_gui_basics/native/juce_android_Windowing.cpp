@@ -547,6 +547,13 @@ public:
             app->backButtonPressed();
     }
 
+    void handleAppResumedCallback()
+    {
+        if (Component* kiosk = Desktop::getInstance().getKioskModeComponent())
+            if (kiosk->getPeer() == this)
+                setNavBarsHidden (navBarsHidden);
+    }
+
     //==============================================================================
     bool isFocused() const override
     {
@@ -780,6 +787,7 @@ JUCE_VIEW_CALLBACK (void, focusChanged,     (JNIEnv* env, jobject /*view*/, jlon
 JUCE_VIEW_CALLBACK (void, handleKeyDown,    (JNIEnv* env, jobject /*view*/, jlong host, jint k, jint kc),                         handleKeyDownCallback ((int) k, (int) kc))
 JUCE_VIEW_CALLBACK (void, handleKeyUp,      (JNIEnv* env, jobject /*view*/, jlong host, jint k, jint kc),                         handleKeyUpCallback ((int) k, (int) kc))
 JUCE_VIEW_CALLBACK (void, handleBackButton, (JNIEnv* env, jobject /*view*/, jlong host),                                          handleBackButtonCallback())
+JUCE_VIEW_CALLBACK (void, handleAppResumed, (JNIEnv* env, jobject /*view*/, jlong host),                                          handleAppResumedCallback())
 
 //==============================================================================
 ComponentPeer* Component::createNewPeer (int styleFlags, void*)
