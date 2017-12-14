@@ -878,6 +878,7 @@ private:
                 intern->deviceDetailsChanged();
                 break;
 
+            case kAudioDevicePropertyDeviceHasChanged:
             case kAudioObjectPropertyOwnedObjects:
                 intern->owner.restart();
                 intern->owner.deviceType.triggerAsyncAudioDeviceListChange();
@@ -935,7 +936,8 @@ private:
 
 
 //==============================================================================
-class CoreAudioIODevice   : public AudioIODevice
+class CoreAudioIODevice   : public AudioIODevice,
+                            private Timer
 {
 public:
     CoreAudioIODevice (CoreAudioIODeviceType& dt,
@@ -1016,6 +1018,11 @@ public:
     {
         isOpen_ = true;
         internal->xruns = 0;
+
+        inputChannelsRequested = inputChannels;
+        outputChannelsRequested = outputChannels;
+        sampleRateRequested = sampleRate;
+        bufferSizeSamplesRequested = bufferSizeSamples;
 
         if (bufferSizeSamples <= 0)
             bufferSizeSamples = getDefaultBufferSize();
@@ -1104,9 +1111,17 @@ public:
         }
         else
         {
-            AudioIODeviceCallback* oldCallback = internal->callback;
-            stop();
-            start (oldCallback);
+            {
+                const ScopedLock sl (closeLock);
+
+                if (isStarted)
+                {
+                    previousCallback = internal->callback;
+                    stop();
+                }
+            }
+
+            startTimer (100);
         }
     }
 
@@ -1127,7 +1142,22 @@ private:
     ScopedPointer<CoreAudioInternal> internal;
     bool isOpen_, isStarted;
     String lastError;
+    AudioIODeviceCallback* previousCallback = nullptr;
     std::function<void()> deviceWrapperRestartCallback = nullptr;
+    BigInteger inputChannelsRequested, outputChannelsRequested;
+    double sampleRateRequested;
+    int bufferSizeSamplesRequested;
+    CriticalSection closeLock;
+
+    void timerCallback() override
+    {
+        stopTimer();
+
+        stop();
+        open (inputChannelsRequested, outputChannelsRequested,
+              sampleRateRequested, bufferSizeSamplesRequested);
+        start (previousCallback);
+    }
 
     static OSStatus hardwareListenerProc (AudioDeviceID /*inDevice*/, UInt32 /*inLine*/, const AudioObjectPropertyAddress* pa, void* inClientData)
     {
@@ -1360,18 +1390,28 @@ public:
             d->close();
     }
 
-    void restart()
+    void restart (AudioIODeviceCallback* cb)
     {
-        auto* oldCallback = callback;
+        const ScopedLock sl (closeLock);
 
         close();
         open (inputChannelsRequested, outputChannelsRequested,
               sampleRateRequested, bufferSizeRequested);
-        start (oldCallback);
+        start (cb);
     }
 
     void restartAsync()
     {
+        {
+            const ScopedLock sl (closeLock);
+
+            if (active)
+            {
+                previousCallback = callback;
+                close();
+            }
+        }
+
         startTimer (100);
     }
 
@@ -1462,6 +1502,7 @@ private:
     CoreAudioIODeviceType& owner;
     CriticalSection callbackLock;
     AudioIODeviceCallback* callback = nullptr;
+    AudioIODeviceCallback* previousCallback = nullptr;
     double currentSampleRate = 0;
     int currentBufferSize = 0;
     bool active = false;
@@ -1470,6 +1511,7 @@ private:
     const float** fifoReadPointers = nullptr;
     float** fifoWritePointers = nullptr;
     WaitableEvent threadInitialised;
+    CriticalSection closeLock;
 
     BigInteger inputChannelsRequested, outputChannelsRequested;
     double sampleRateRequested = 44100;
@@ -1536,7 +1578,8 @@ private:
     void timerCallback() override
     {
         stopTimer();
-        restart();
+
+        restart (previousCallback);
     }
 
     void shutdown (const String& error)
