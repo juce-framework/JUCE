@@ -67,6 +67,8 @@ namespace CommandIDs
         goToNextDoc             = 0x300043,
         goToCounterpart         = 0x300044,
         deleteSelectedItem      = 0x300045,
+        goToPreviousWindow      = 0x300046,
+        goToNextWindow          = 0x300047,
 
         showFindPanel           = 0x300050,
         findSelection           = 0x300051,

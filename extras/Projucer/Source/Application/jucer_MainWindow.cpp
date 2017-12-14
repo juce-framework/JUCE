@@ -341,7 +341,10 @@ ApplicationCommandTarget* MainWindow::getNextCommandTarget()
 
 void MainWindow::getAllCommands (Array <CommandID>& commands)
 {
-    const CommandID ids[] = { CommandIDs::closeWindow };
+    const CommandID ids[] = { CommandIDs::closeWindow,
+        CommandIDs::goToPreviousWindow,
+        CommandIDs::goToNextWindow
+    };
 
     commands.addArray (ids, numElementsInArray (ids));
 }
@@ -353,6 +356,14 @@ void MainWindow::getCommandInfo (const CommandID commandID, ApplicationCommandIn
         case CommandIDs::closeWindow:
             result.setInfo ("Close Window", "Closes the current window", CommandCategories::general, 0);
             result.defaultKeypresses.add (KeyPress ('w', ModifierKeys::commandModifier, 0));
+            break;
+        case CommandIDs::goToPreviousWindow:
+            result.setInfo ("Previous Window", "Activates the previous window", CommandCategories::general, 0);
+            result.defaultKeypresses.add (KeyPress (KeyPress::tabKey, ModifierKeys::shiftModifier | ModifierKeys::ctrlModifier, 0));
+            break;
+        case CommandIDs::goToNextWindow:
+            result.setInfo ("Next Window", "Activates the next window", CommandCategories::general, 0);
+            result.defaultKeypresses.add (KeyPress (KeyPress::tabKey, ModifierKeys::ctrlModifier, 0));
             break;
 
         default:
@@ -366,6 +377,12 @@ bool MainWindow::perform (const InvocationInfo& info)
     {
         case CommandIDs::closeWindow:
             closeButtonPressed();
+            break;
+        case CommandIDs::goToPreviousWindow:
+            ProjucerApplication::getApp().mainWindowList.goToPreviousWindow (this);
+            break;
+        case CommandIDs::goToNextWindow:
+            ProjucerApplication::getApp().mainWindowList.goToNextWindow (this);
             break;
 
         default:
@@ -431,6 +448,25 @@ void MainWindowList::closeWindow (MainWindow* w)
             windows.removeObject (w);
             saveCurrentlyOpenProjectList();
         }
+    }
+}
+
+void MainWindowList::goToNextWindow (MainWindow* w)
+{
+    auto index = windows.indexOf (w);
+    if (isPositiveAndBelow (index, windows.size()))
+    {
+        auto* next = windows.getUnchecked ((index + 1) % windows.size());
+        next->toFront (true);
+    }
+}
+void MainWindowList::goToPreviousWindow (MainWindow* w)
+{
+    auto index = windows.indexOf (w);
+    if (isPositiveAndBelow (index, windows.size()))
+    {
+        auto* prev = ((index == 0) ? windows.getLast() : windows.getUnchecked (index - 1));
+        prev->toFront (true);
     }
 }
 
