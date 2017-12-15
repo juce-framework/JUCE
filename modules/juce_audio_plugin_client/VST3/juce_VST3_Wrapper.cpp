@@ -241,7 +241,12 @@ public:
             if (v != valueNormalized)
             {
                 valueNormalized = v;
-                owner.setParameter (paramIndex, static_cast<float> (v));
+
+                // Only update the AudioProcessor here if we're not playing,
+                // otherwise we get parallel streams of parameter value updates
+                // during playback
+                if (owner.vst3IsPlaying.get() == 0)
+                    owner.setParameter (paramIndex, static_cast<float> (v));
 
                 changed();
                 return true;
@@ -635,7 +640,6 @@ private:
     Array<Vst::ParamID> vstParamIDs;
    #endif
     Vst::ParamID bypassParamID;
-
 
     //==============================================================================
     void setupParameters()
@@ -2031,9 +2035,15 @@ public:
             return kResultFalse;
 
         if (data.processContext != nullptr)
+        {
             processContext = *data.processContext;
+            pluginInstance->vst3IsPlaying = processContext.state & Vst::ProcessContext::kPlaying;
+        }
         else
+        {
             zerostruct (processContext);
+            pluginInstance->vst3IsPlaying = 0;
+        }
 
         midiBuffer.clear();
 
