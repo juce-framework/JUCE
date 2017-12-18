@@ -1549,6 +1549,7 @@ struct JuceNSViewClass   : public ObjCClass<NSView>
         addMethod (@selector (markedRange),                   markedRange,                @encode (NSRange), "@:");
         addMethod (@selector (selectedRange),                 selectedRange,              @encode (NSRange), "@:");
         addMethod (@selector (firstRectForCharacterRange:),   firstRectForCharacterRange, @encode (NSRect), "@:", @encode (NSRange));
+        addMethod (@selector (characterIndexForPoint:),       characterIndexForPoint,     "L@:", @encode (NSPoint));
         addMethod (@selector (validAttributesForMarkedText),  validAttributesForMarkedText, "@@:");
         addMethod (@selector (flagsChanged:),                 flagsChanged,               "v@:@");
 
