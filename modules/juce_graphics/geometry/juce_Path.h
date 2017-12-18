@@ -753,7 +753,7 @@ public:
         //==============================================================================
     private:
         const Path& path;
-        size_t index = 0;
+        const float* index;
 
         JUCE_DECLARE_NON_COPYABLE (Iterator)
     };
@@ -803,8 +803,7 @@ private:
     friend class Path::Iterator;
     friend class EdgeTable;
 
-    ArrayAllocationBase<float, DummyCriticalSection> data;
-    size_t numElements = 0;
+    Array<float> data;
 
     struct PathBounds
     {

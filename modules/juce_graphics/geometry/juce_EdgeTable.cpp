@@ -36,7 +36,7 @@ EdgeTable::EdgeTable (Rectangle<int> area, const Path& path, const AffineTransfo
      // for a given path, such that it's big enough to mostly avoid remapping, but also
      // not so big that it's wasteful for simple paths.
      maxEdgesPerLine (jmax (juce_edgeTableDefaultEdgesPerLine / 2,
-                            4 * (int) std::sqrt (path.numElements))),
+                            4 * (int) std::sqrt (path.data.size()))),
      lineStrideElements (maxEdgesPerLine * 2 + 1)
 {
     allocate();
