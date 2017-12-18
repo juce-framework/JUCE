@@ -510,7 +510,7 @@ Array<IIR::Coefficients<FloatType>>
         g.add ((1.0 - p[i + r]) / (1.0 - z[i]));
     }
 
-    Array<IIR::Coefficients<FloatType>> theCascadedCoefficients;
+    Array<IIR::Coefficients<FloatType>> cascadedCoefficients;
 
     if (r == 1)
     {
@@ -518,7 +518,7 @@ Array<IIR::Coefficients<FloatType>>
         auto b1 = b0;
         auto a1 = static_cast<FloatType> (-std::real (p[0]));
 
-        theCascadedCoefficients.add (IIR::Coefficients<FloatType> (b0, b1, 1.f, a1));
+        cascadedCoefficients.add ({ b0, b1, 1.0f, a1 });
     }
 
     for (int i = 0; i < L; ++i)
@@ -532,10 +532,80 @@ Array<IIR::Coefficients<FloatType>>
         auto a1 = static_cast<FloatType> (std::real (-p[i+r] - std::conj (p[i + r])));
         auto a2 = static_cast<FloatType> (std::real ( p[i+r] * std::conj (p[i + r])));
 
-        theCascadedCoefficients.add (IIR::Coefficients<FloatType> (b0, b1, b2, 1, a1, a2));
+        cascadedCoefficients.add ({ b0, b1, b2, 1, a1, a2 });
     }
 
-    return theCascadedCoefficients;
+    return cascadedCoefficients;
+}
+
+template <typename FloatType>
+Array<IIR::Coefficients<FloatType>>
+    FilterDesign<FloatType>::designIIRLowpassHighOrderButterworthMethod (FloatType frequency,
+                                                                         double sampleRate, int order)
+{
+    jassert (sampleRate > 0);
+    jassert (frequency > 0 && frequency <= sampleRate * 0.5);
+    jassert (order > 0);
+
+    Array<IIR::Coefficients<FloatType>> arrayFilters;
+
+    if (order % 2 == 1)
+    {
+        arrayFilters.add (*IIR::Coefficients<FloatType>::makeFirstOrderLowPass (sampleRate, frequency));
+
+        for (auto i = 0; i < order / 2; ++i)
+        {
+            auto Q = 1.0 / (2.0 * std::cos ((i + 1.0) * MathConstants<double>::pi / order));
+            arrayFilters.add (*IIR::Coefficients<FloatType>::makeLowPass (sampleRate, frequency,
+                                                                          static_cast<FloatType> (Q)));
+        }
+    }
+    else
+    {
+        for (auto i = 0; i < order / 2; ++i)
+        {
+            auto Q = 1.0 / (2.0 * std::cos ((2.0 * i + 1.0) * MathConstants<double>::pi / (order * 2.0)));
+            arrayFilters.add (*IIR::Coefficients<FloatType>::makeLowPass (sampleRate, frequency,
+                                                                          static_cast<FloatType> (Q)));
+        }
+    }
+
+    return arrayFilters;
+}
+
+template <typename FloatType>
+Array<IIR::Coefficients<FloatType>>
+    FilterDesign<FloatType>::designIIRHighpassHighOrderButterworthMethod (FloatType frequency,
+                                                                          double sampleRate, int order)
+{
+    jassert (sampleRate > 0);
+    jassert (frequency > 0 && frequency <= sampleRate * 0.5);
+    jassert (order > 0);
+
+    Array<IIR::Coefficients<FloatType>> arrayFilters;
+
+    if (order % 2 == 1)
+    {
+        arrayFilters.add (*IIR::Coefficients<FloatType>::makeFirstOrderHighPass (sampleRate, frequency));
+
+        for (auto i = 0; i < order / 2; ++i)
+        {
+            auto Q = 1.0 / (2.0 * std::cos ((i + 1.0) * MathConstants<double>::pi / order));
+            arrayFilters.add (*IIR::Coefficients<FloatType>::makeHighPass (sampleRate, frequency,
+                                                                           static_cast<FloatType> (Q)));
+        }
+    }
+    else
+    {
+        for (auto i = 0; i < order / 2; ++i)
+        {
+            auto Q = 1.0 / (2.0 * std::cos ((2.0 * i + 1.0) * MathConstants<double>::pi / (order * 2.0)));
+            arrayFilters.add (*IIR::Coefficients<FloatType>::makeHighPass (sampleRate, frequency,
+                                                                           static_cast<FloatType> (Q)));
+        }
+    }
+
+    return arrayFilters;
 }
 
 template <typename FloatType>
