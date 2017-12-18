@@ -158,7 +158,7 @@ public:
     {
         jassert (channel < numChannels);
         jassert (numSamples > 0);
-        return *(channels + channel) + startSample;
+        return channels[channel] + startSample;
     }
 
     /** Returns a raw pointer into one of the channels in this block. */
@@ -166,7 +166,7 @@ public:
     {
         jassert (channel < numChannels);
         jassert (numSamples > 0);
-        return *(channels + channel) + startSample;
+        return channels[channel] + startSample;
     }
 
     /** Returns an AudioBlock that represents one of the channels in this block. */
@@ -186,6 +186,42 @@ public:
         jassert ((channelStart + numChannelsToUse) <= numChannels);
 
         return AudioBlock (channels + channelStart, numChannelsToUse, startSample, numSamples);
+    }
+
+    /** Returns a sample from the buffer.
+        The channel and index are not checked - they are expected to be in-range. If not,
+        an assertion will be thrown, but in a release build, you're into 'undefined behaviour'
+        territory.
+    */
+    SampleType getSample (int channel, int sampleIndex) const noexcept
+    {
+        jassert (isPositiveAndBelow (channel, numChannels));
+        jassert (isPositiveAndBelow (sampleIndex, numSamples));
+        return channels[channel][startSample + sampleIndex];
+    }
+
+    /** Modifies a sample in the buffer.
+        The channel and index are not checked - they are expected to be in-range. If not,
+        an assertion will be thrown, but in a release build, you're into 'undefined behaviour'
+        territory.
+    */
+    void setSample (int destChannel, int destSample, SampleType newValue) noexcept
+    {
+        jassert (isPositiveAndBelow (destChannel, numChannels));
+        jassert (isPositiveAndBelow (destSample, numSamples));
+        channels[destChannel][startSample + destSample] = newValue;
+    }
+
+    /** Adds a value to a sample in the buffer.
+        The channel and index are not checked - they are expected to be in-range. If not,
+        an assertion will be thrown, but in a release build, you're into 'undefined behaviour'
+        territory.
+    */
+    void addSample (int destChannel, int destSample, SampleType valueToAdd) noexcept
+    {
+        jassert (isPositiveAndBelow (destChannel, numChannels));
+        jassert (isPositiveAndBelow (destSample, numSamples));
+        channels[destChannel][startSample + destSample] += valueToAdd;
     }
 
     //==============================================================================
@@ -400,6 +436,7 @@ public:
 
         for (size_t ch = 0; ch < numChannels; ++ch)
             FloatVectorOperations::multiply (channelPtr (ch), src1.channelPtr (ch), src2.channelPtr (ch), n);
+
         return *this;
     }
 
