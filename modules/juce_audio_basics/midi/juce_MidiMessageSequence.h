@@ -101,10 +101,12 @@ public:
     MidiEventHolder* getEventPointer (int index) const noexcept;
 
     /** Iterator for the list of MidiEventHolders */
-    MidiEventHolder** begin() const noexcept;
+    MidiEventHolder** begin() noexcept;
+    MidiEventHolder*const* begin() const noexcept;
 
     /** Iterator for the list of MidiEventHolders */
-    MidiEventHolder** end() const noexcept;
+    MidiEventHolder** end() noexcept;
+    MidiEventHolder*const* end() const noexcept;
 
     /** Returns the time of the note-up that matches the note-on at this index.
         If the event at this index isn't a note-on, it'll just return 0.

@@ -351,9 +351,9 @@ private:
     MPEDimension pitchbendDimension, pressureDimension, timbreDimension;
 
     void updateDimension (int midiChannel, MPEDimension&, MPEValue);
-    void updateDimensionMaster (MPEZone&, MPEDimension&, MPEValue);
+    void updateDimensionMaster (const MPEZone&, MPEDimension&, MPEValue);
     void updateDimensionForNote (MPENote&, MPEDimension&, MPEValue);
-    void callListenersDimensionChanged (MPENote&, MPEDimension&);
+    void callListenersDimensionChanged (const MPENote&, const MPEDimension&);
     MPEValue getInitialValueForNewNote (int midiChannel, MPEDimension&) const;
 
     void processMidiNoteOnMessage (const MidiMessage&);
@@ -368,11 +368,16 @@ private:
     void handleTimbreLSB (int midiChannel, int value) noexcept;
     void handleSustainOrSostenuto (int midiChannel, bool isDown, bool isSostenuto);
 
-    MPENote* getNotePtr (int midiChannel, int midiNoteNumber) const noexcept;
-    MPENote* getNotePtr (int midiChannel, TrackingMode) const noexcept;
-    MPENote* getLastNotePlayedPtr (int midiChannel) const noexcept;
-    MPENote* getHighestNotePtr (int midiChannel) const noexcept;
-    MPENote* getLowestNotePtr (int midiChannel) const noexcept;
+    const MPENote* getNotePtr (int midiChannel, int midiNoteNumber) const noexcept;
+    MPENote* getNotePtr (int midiChannel, int midiNoteNumber) noexcept;
+    const MPENote* getNotePtr (int midiChannel, TrackingMode) const noexcept;
+    MPENote* getNotePtr (int midiChannel, TrackingMode) noexcept;
+    const MPENote* getLastNotePlayedPtr (int midiChannel) const noexcept;
+    MPENote* getLastNotePlayedPtr (int midiChannel) noexcept;
+    const MPENote* getHighestNotePtr (int midiChannel) const noexcept;
+    MPENote* getHighestNotePtr (int midiChannel) noexcept;
+    const MPENote* getLowestNotePtr (int midiChannel) const noexcept;
+    MPENote* getLowestNotePtr (int midiChannel) noexcept;
     void updateNoteTotalPitchbend (MPENote&);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MPEInstrument)

@@ -1121,7 +1121,7 @@ public:
                                                                        isVertical()   ? pixelPos : (owner.getHeight() / 2.0f)));
                 }
 
-                ms.setScreenPosition (mousePos);
+                const_cast <MouseInputSource&> (ms).setScreenPosition (mousePos);
             }
         }
     }

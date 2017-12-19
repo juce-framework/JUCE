@@ -443,7 +443,7 @@ struct PhysicalTopologySource::Internal
             return -1;
         }
 
-        DeviceInfo* getDeviceInfoFromUID (Block::UID uid) const noexcept
+        const DeviceInfo* getDeviceInfoFromUID (Block::UID uid) const noexcept
         {
             for (auto& d : currentDeviceInfo)
                 if (d.uid == uid)

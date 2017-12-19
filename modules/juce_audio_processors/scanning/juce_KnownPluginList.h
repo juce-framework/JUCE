@@ -61,9 +61,12 @@ public:
     PluginDescription* getType (int index) const noexcept           { return types [index]; }
 
     /** Type iteration. */
-    PluginDescription** begin() const noexcept                      { return types.begin(); }
+    PluginDescription** begin() noexcept                            { return types.begin(); }
+    PluginDescription*const* begin() const noexcept                 { return types.begin(); }
+
     /** Type iteration. */
-    PluginDescription** end() const noexcept                        { return types.end(); }
+    PluginDescription** end() noexcept                              { return types.end(); }
+    PluginDescription*const* end() const noexcept                   { return types.end(); }
 
     /** Looks for a type in the list which comes from this file. */
     PluginDescription* getTypeForFile (const String& fileOrIdentifier) const;

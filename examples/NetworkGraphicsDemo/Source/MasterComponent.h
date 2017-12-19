@@ -369,13 +369,18 @@ private:
             canvas.clients.add ({ c.name, c.centre, c.scaleFactor });
     }
 
-    Client* getClient (const String& name) const
+    const Client* getClient (const String& name) const
     {
         for (auto& c : clients)
             if (c.name == name)
                 return &c;
 
         return nullptr;
+    }
+
+    Client* getClient (const String& name)
+    {
+        return const_cast<Client*> (static_cast<const MasterContentComponent&> (*this).getClient (name));
     }
 
     //==============================================================================

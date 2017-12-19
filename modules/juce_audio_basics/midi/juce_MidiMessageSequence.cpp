@@ -80,8 +80,10 @@ MidiMessageSequence::MidiEventHolder* MidiMessageSequence::getEventPointer (int 
     return list[index];
 }
 
-MidiMessageSequence::MidiEventHolder** MidiMessageSequence::begin() const noexcept     { return list.begin(); }
-MidiMessageSequence::MidiEventHolder** MidiMessageSequence::end() const noexcept       { return list.end(); }
+MidiMessageSequence::MidiEventHolder** MidiMessageSequence::begin() noexcept                { return list.begin(); }
+MidiMessageSequence::MidiEventHolder*const* MidiMessageSequence::begin() const noexcept     { return list.begin(); }
+MidiMessageSequence::MidiEventHolder** MidiMessageSequence::end() noexcept                  { return list.end(); }
+MidiMessageSequence::MidiEventHolder*const* MidiMessageSequence::end() const noexcept       { return list.end(); }
 
 double MidiMessageSequence::getTimeOfMatchingKeyUp (int index) const noexcept
 {
