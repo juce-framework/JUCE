@@ -7,6 +7,8 @@
               jucerVersion="5.2.0">
   <MAINGROUP id="aOi9Tf" name="AnalyticsCollection">
     <GROUP id="{527B2E17-B1B1-B919-CBEA-231058E23D74}" name="Source">
+      <FILE id="kkmpUZ" name="DemoAnalyticsEventTypes.h" compile="0" resource="0"
+            file="Source/DemoAnalyticsEventTypes.h"/>
       <FILE id="qTLkDX" name="GoogleAnalyticsDestination.h" compile="0" resource="0"
             file="Source/GoogleAnalyticsDestination.h"/>
       <FILE id="DHs1bY" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>

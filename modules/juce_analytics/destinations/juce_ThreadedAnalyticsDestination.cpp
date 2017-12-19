@@ -297,7 +297,7 @@ struct ThreadedAnalyticsDestinationTests   : public UnitTest
         std::deque<AnalyticsDestination::AnalyticsEvent> testEvents;
 
         for (int i = 0; i < 7; ++i)
-            testEvents.push_back ({ String (i), Time::getMillisecondCounter(), {}, "TestUser", {} });
+            testEvents.push_back ({ String (i), 0, Time::getMillisecondCounter(), {}, "TestUser", {} });
 
         std::deque<AnalyticsDestination::AnalyticsEvent> loggedEvents, unloggedEvents;
 

@@ -51,7 +51,8 @@ public:
     */
     ButtonTracker (Button& buttonToTrack,
                    const String& triggeredEventName,
-                   const StringPairArray& triggeredEventParameters = {});
+                   const StringPairArray& triggeredEventParameters = {},
+                   int triggeredEventType = 0);
 
     /** Destructor. */
     ~ButtonTracker();
@@ -63,6 +64,7 @@ private:
     Button& button;
     const String eventName;
     const StringPairArray eventParameters;
+    const int eventType;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonTracker)
 };

@@ -44,6 +44,12 @@ struct JUCE_API  AnalyticsDestination
         /** The name of the event. */
         String name;
 
+        /** An optional integer representing the type of the event. You can use
+            this to indicate if the event was a screenview, session start,
+            exception, etc.
+        */
+        int eventType;
+
         /**
             The timestamp of the event.
 

@@ -1362,6 +1362,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\DemoAnalyticsEventTypes.h">
+      <Filter>AnalyticsCollection\Source</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\GoogleAnalyticsDestination.h">
       <Filter>AnalyticsCollection\Source</Filter>
     </ClInclude>

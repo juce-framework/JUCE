@@ -2,6 +2,7 @@
 
 #include "GoogleAnalyticsDestination.h"
 #include "MainComponent.h"
+#include "DemoAnalyticsEventTypes.h"
 
 //==============================================================================
 class AnalyticsCollectionApplication  : public JUCEApplication
@@ -17,8 +18,8 @@ public:
     //==============================================================================
     void initialise (const String&) override
     {
-        // Add an analytics identifier for the user. Make sure you don't collect
-        // identifiable information accidentally if you haven't asked for permission!
+        // Add an analytics identifier for the user. Make sure you don't accidentally
+        // collect identifiable information if you haven't asked for permission!
         Analytics::getInstance()->setUserId ("AnonUser1234");
 
         // Add any other constant user information.
@@ -29,14 +30,18 @@ public:
         // Add any analytics destinations we want to use to the Analytics singleton.
         Analytics::getInstance()->addDestination (new GoogleAnalyticsDestination());
 
-        Analytics::getInstance()->logEvent ("startup", {});
+        // The event type here should probably be DemoAnalyticsEventTypes::sessionStart
+        // in a more advanced app.
+        Analytics::getInstance()->logEvent ("startup", {}, DemoAnalyticsEventTypes::event);
 
         mainWindow = new MainWindow (getApplicationName());
     }
 
     void shutdown() override
     {
-        Analytics::getInstance()->logEvent ("shutdown", {});
+        // The event type here should probably be DemoAnalyticsEventTypes::sessionEnd
+        // in a more advanced app.
+        Analytics::getInstance()->logEvent ("shutdown", {}, DemoAnalyticsEventTypes::event);
 
         // Add your application's shutdown code here..
 

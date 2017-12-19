@@ -30,6 +30,7 @@ add_library( ${BINARY_NAME}
 
     SHARED
 
+    "../../../Source/DemoAnalyticsEventTypes.h"
     "../../../Source/GoogleAnalyticsDestination.h"
     "../../../Source/MainComponent.h"
     "../../../Source/Main.cpp"
@@ -788,6 +789,7 @@ add_library( ${BINARY_NAME}
     "../../../JuceLibraryCode/JuceHeader.h"
 )
 
+set_source_files_properties("../../../Source/DemoAnalyticsEventTypes.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../Source/GoogleAnalyticsDestination.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../Source/MainComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_analytics/analytics/juce_Analytics.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)

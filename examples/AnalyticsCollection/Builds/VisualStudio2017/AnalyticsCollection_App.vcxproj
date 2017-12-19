@@ -1228,6 +1228,7 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_basics.cpp"/>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\DemoAnalyticsEventTypes.h"/>
     <ClInclude Include="..\..\Source\GoogleAnalyticsDestination.h"/>
     <ClInclude Include="..\..\Source\MainComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_analytics\analytics\juce_Analytics.h"/>

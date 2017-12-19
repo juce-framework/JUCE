@@ -28,6 +28,11 @@ void Analytics::addDestination (AnalyticsDestination* destination)
     destinations.add (destination);
 }
 
+OwnedArray<AnalyticsDestination>& Analytics::getDestinations()
+{
+    return destinations;
+}
+
 void Analytics::setUserId (const String& newUserId)
 {
     userId = newUserId;
@@ -39,13 +44,15 @@ void Analytics::setUserProperties (const StringPairArray& properties)
 }
 
 void Analytics::logEvent (const String& eventName,
-                          const StringPairArray& parameters)
+                          const StringPairArray& parameters,
+                          int eventType)
 {
     if (! isSuspended)
     {
         AnalyticsDestination::AnalyticsEvent event
         {
             eventName,
+            eventType,
             Time::getMillisecondCounter(),
             parameters,
             userId,
