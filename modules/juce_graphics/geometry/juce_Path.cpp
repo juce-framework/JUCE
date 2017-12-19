@@ -88,43 +88,19 @@ void Path::PathBounds::reset() noexcept
     pathXMin = pathYMin = pathYMax = pathXMax = 0;
 }
 
-void Path::PathBounds::reset (const float x, const float y) noexcept
+void Path::PathBounds::reset (float x, float y) noexcept
 {
     pathXMin = pathXMax = x;
     pathYMin = pathYMax = y;
 }
 
-void Path::PathBounds::extend (const float x, const float y) noexcept
+void Path::PathBounds::extend (float x, float y) noexcept
 {
-    pathXMin = jmin (pathXMin, x);
-    pathXMax = jmax (pathXMax, x);
-    pathYMin = jmin (pathYMin, y);
-    pathYMax = jmax (pathYMax, y);
-}
+    if (x < pathXMin)      pathXMin = x;
+    else if (x > pathXMax) pathXMax = x;
 
-void Path::PathBounds::extend (const float x1, const float y1, const float x2, const float y2) noexcept
-{
-    if (x1 < x2)
-    {
-        pathXMin = jmin (pathXMin, x1);
-        pathXMax = jmax (pathXMax, x2);
-    }
-    else
-    {
-        pathXMin = jmin (pathXMin, x2);
-        pathXMax = jmax (pathXMax, x1);
-    }
-
-    if (y1 < y2)
-    {
-        pathYMin = jmin (pathYMin, y1);
-        pathYMax = jmax (pathYMax, y2);
-    }
-    else
-    {
-        pathYMin = jmin (pathYMin, y2);
-        pathYMax = jmax (pathYMax, y1);
-    }
+    if (y < pathYMin)      pathYMin = y;
+    else if (y > pathYMax) pathYMax = y;
 }
 
 //==============================================================================
@@ -240,7 +216,7 @@ void Path::preallocateSpace (int numExtraCoordsToMakeSpaceFor)
 
 void Path::startNewSubPath (const float x, const float y)
 {
-    JUCE_CHECK_COORDS_ARE_VALID (x, y);
+    JUCE_CHECK_COORDS_ARE_VALID (x, y)
 
     if (data.isEmpty())
         bounds.reset (x, y);
@@ -257,7 +233,7 @@ void Path::startNewSubPath (Point<float> start)
 
 void Path::lineTo (const float x, const float y)
 {
-    JUCE_CHECK_COORDS_ARE_VALID (x, y);
+    JUCE_CHECK_COORDS_ARE_VALID (x, y)
 
     if (data.isEmpty())
         startNewSubPath (0, 0);
@@ -274,8 +250,8 @@ void Path::lineTo (Point<float> end)
 void Path::quadraticTo (const float x1, const float y1,
                         const float x2, const float y2)
 {
-    JUCE_CHECK_COORDS_ARE_VALID (x1, y1);
-    JUCE_CHECK_COORDS_ARE_VALID (x2, y2);
+    JUCE_CHECK_COORDS_ARE_VALID (x1, y1)
+    JUCE_CHECK_COORDS_ARE_VALID (x2, y2)
 
     if (data.isEmpty())
         startNewSubPath (0, 0);
@@ -294,16 +270,15 @@ void Path::cubicTo (const float x1, const float y1,
                     const float x2, const float y2,
                     const float x3, const float y3)
 {
-    JUCE_CHECK_COORDS_ARE_VALID (x1, y1);
-    JUCE_CHECK_COORDS_ARE_VALID (x2, y2);
-    JUCE_CHECK_COORDS_ARE_VALID (x3, y3);
+    JUCE_CHECK_COORDS_ARE_VALID (x1, y1)
+    JUCE_CHECK_COORDS_ARE_VALID (x2, y2)
+    JUCE_CHECK_COORDS_ARE_VALID (x3, y3)
 
     if (data.isEmpty())
         startNewSubPath (0, 0);
 
     data.add (cubicMarker, x1, y1, x2, y2, x3, y3);
-    bounds.extend (x1, y1, x2, y2);
-    bounds.extend (x3, y3);
+    bounds.extend (x1, y1, x2, y2, x3, y3);
 }
 
 void Path::cubicTo (Point<float> controlPoint1,
@@ -858,6 +833,7 @@ void Path::applyTransform (const AffineTransform& transform) noexcept
         if (isMarker (type, moveMarker))
         {
             transform.transformPoint (d[0], d[1]);
+            JUCE_CHECK_COORDS_ARE_VALID (d[0], d[1])
 
             if (firstPoint)
             {
@@ -874,20 +850,25 @@ void Path::applyTransform (const AffineTransform& transform) noexcept
         else if (isMarker (type, lineMarker))
         {
             transform.transformPoint (d[0], d[1]);
+            JUCE_CHECK_COORDS_ARE_VALID (d[0], d[1])
             bounds.extend (d[0], d[1]);
             d += 2;
         }
         else if (isMarker (type, quadMarker))
         {
             transform.transformPoints (d[0], d[1], d[2], d[3]);
+            JUCE_CHECK_COORDS_ARE_VALID (d[0], d[1])
+            JUCE_CHECK_COORDS_ARE_VALID (d[2], d[3])
             bounds.extend (d[0], d[1], d[2], d[3]);
             d += 4;
         }
         else if (isMarker (type, cubicMarker))
         {
             transform.transformPoints (d[0], d[1], d[2], d[3], d[4], d[5]);
-            bounds.extend (d[0], d[1], d[2], d[3]);
-            bounds.extend (d[4], d[5]);
+            JUCE_CHECK_COORDS_ARE_VALID (d[0], d[1])
+            JUCE_CHECK_COORDS_ARE_VALID (d[2], d[3])
+            JUCE_CHECK_COORDS_ARE_VALID (d[4], d[5])
+            bounds.extend (d[0], d[1], d[2], d[3], d[4], d[5]);
             d += 6;
         }
     }
