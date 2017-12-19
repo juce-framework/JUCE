@@ -37,6 +37,12 @@ static NSMutableArray* createAllowedTypesArray (const StringArray& filters)
 
     for (int i = 0; i < filters.size(); ++i)
     {
+       #if defined (MAC_OS_X_VERSION_10_6) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6)
+        // From OS X 10.6 you can only specify allowed extensions, so any filters containing wildcards
+        // must be of the form "*.extension"
+        jassert (filters[i].indexOf ("*") <= 0);
+       #endif
+
         const String f (filters[i].replace ("*.", ""));
 
         if (f == "*")

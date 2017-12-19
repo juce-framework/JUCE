@@ -87,11 +87,12 @@ public:
                                               file. If you create such a temporary file, you need
                                               to delete it yourself, once it is not needed anymore.
 
-        @param filePatternsAllowed            a set of file patterns to specify which files
-                                              can be selected - each pattern should be
-                                              separated by a comma or semi-colon, e.g. "*" or
-                                              "*.jpg;*.gif". An empty string means that all
-                                              files are allowed
+        @param filePatternsAllowed            a set of file patterns to specify which files can be
+                                              selected - each pattern should be separated by a comma or
+                                              semi-colon, e.g. "*" or "*.jpg;*.gif". The native MacOS
+                                              file browser only supports wildcard that specify
+                                              extensions, so "*.jpg" is OK but "myfilename*" will not
+                                              work. An empty string means that all files are allowed
         @param useOSNativeDialogBox           if true, then a native dialog box will be used
                                               if possible; if false, then a Juce-based
                                               browser dialog box will always be used
