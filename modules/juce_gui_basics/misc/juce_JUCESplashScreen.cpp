@@ -169,7 +169,6 @@ JUCESplashScreen::JUCESplashScreen (Component& parent)
             StringPairArray data;
 
             data.set ("v",   "1");
-            data.set ("aip", "1");
             data.set ("tid", "UA-19759318-3");
             data.set ("cid", deviceIdentifier);
             data.set ("t",   "event");
