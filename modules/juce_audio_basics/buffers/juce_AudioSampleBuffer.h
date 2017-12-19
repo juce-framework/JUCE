@@ -183,7 +183,9 @@ public:
         if (numChannels < (int) numElementsInArray (preallocatedChannelSpace))
         {
             channels = preallocatedChannelSpace;
-            memcpy (preallocatedChannelSpace, other.channels, sizeof (preallocatedChannelSpace));
+
+            for (int i = 0; i < numChannels; ++i)
+                preallocatedChannelSpace[i] = other.channels[i];
         }
         else
         {
@@ -207,7 +209,9 @@ public:
         if (numChannels < (int) numElementsInArray (preallocatedChannelSpace))
         {
             channels = preallocatedChannelSpace;
-            memcpy (preallocatedChannelSpace, other.channels, sizeof (preallocatedChannelSpace));
+
+            for (int i = 0; i < numChannels; ++i)
+                preallocatedChannelSpace[i] = other.channels[i];
         }
         else
         {
