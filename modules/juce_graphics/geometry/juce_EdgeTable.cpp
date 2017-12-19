@@ -48,10 +48,10 @@ EdgeTable::EdgeTable (Rectangle<int> area, const Path& path, const AffineTransfo
         t += lineStrideElements;
     }
 
-    auto leftLimit   = bounds.getX() << 8;
-    auto topLimit    = bounds.getY() << 8;
-    auto rightLimit  = bounds.getRight() << 8;
-    auto heightLimit = bounds.getHeight() << 8;
+    auto leftLimit   = bounds.getX() * 256;
+    auto topLimit    = bounds.getY() * 256;
+    auto rightLimit  = bounds.getRight() * 256;
+    auto heightLimit = bounds.getHeight() * 256;
 
     PathFlatteningIterator iter (path, transform);
 
