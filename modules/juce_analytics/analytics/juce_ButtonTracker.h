@@ -46,6 +46,8 @@ public:
         @param triggeredEventName          the name of the generated event
         @param triggeredEventParameters    the parameters to add to the generated
                                            event
+        @param triggeredEventType          (optional) an integer to indicate the event
+                                           type, which will be set to 0 if not supplied.
 
         @see Analytics, AnalyticsDestination::AnalyticsEvent
     */
