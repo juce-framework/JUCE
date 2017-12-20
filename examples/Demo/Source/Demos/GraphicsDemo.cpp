@@ -110,7 +110,7 @@ public:
         AffineTransform t;
 
         if (controls.animateRotation.getToggleState())
-            t = t.rotated (rotation.getValue() * float_Pi * 2.0f);
+            t = t.rotated (rotation.getValue() * MathConstants<float>::twoPi);
 
         if (controls.animateSize.getToggleState())
             t = t.scaled (0.3f + size.getValue() * 2.0f);
@@ -220,7 +220,7 @@ public:
 
         AffineTransform transform (AffineTransform::translation (clipImage.getWidth() / -2.0f,
                                                                  clipImage.getHeight() / -2.0f)
-                                   .rotated (clipImageAngle.getValue() * float_Pi * 2.0f)
+                                   .rotated (clipImageAngle.getValue() * MathConstants<float>::twoPi)
                                    .scaled (2.0f + clipImageSize.getValue() * 3.0f)
                                    .translated (getWidth() * 0.5f,
                                                 getHeight() * 0.5f));
@@ -573,7 +573,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillCheckerBoard (getLocalBounds(), 48, 48,
+        g.fillCheckerBoard (getLocalBounds().toFloat(), 48.0f, 48.0f,
                             Colours::lightgrey, Colours::white);
     }
 

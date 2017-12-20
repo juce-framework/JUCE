@@ -50,7 +50,7 @@ public:
 
         phase = 0.0;
         const double cyclesPerSample = frequency.getNextValue() / currentSampleRate;
-        phaseDelta = 2.0 * double_Pi * cyclesPerSample;
+        phaseDelta = MathConstants<double>::twoPi * cyclesPerSample;
 
         tailOff = 0.0;
     }
@@ -168,8 +168,8 @@ private:
         const float nextSample = float (amplitude * ((a1 * f1) + (a2 * f2)));
 
         const double cyclesPerSample = frequency.getNextValue() / currentSampleRate;
-        phaseDelta = 2.0 * double_Pi * cyclesPerSample;
-        phase = std::fmod (phase + phaseDelta, 2.0 * double_Pi);
+        phaseDelta = MathConstants<double>::twoPi * cyclesPerSample;
+        phase = std::fmod (phase + phaseDelta, MathConstants<double>::twoPi);
 
         return nextSample;
     }

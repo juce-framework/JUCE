@@ -313,6 +313,7 @@ public:
     void drawPropertyComponentBackground (Graphics&, int width, int height, PropertyComponent&) override;
     void drawPropertyComponentLabel (Graphics&, int width, int height, PropertyComponent&) override;
     Rectangle<int> getPropertyComponentContentPosition (PropertyComponent&) override;
+    int getPropertyPanelSectionHeaderHeight (const String& sectionTitle) override;
 
     //==============================================================================
     void drawCallOutBoxBackground (CallOutBox&, Graphics&, const Path& path, Image& cachedImage) override;

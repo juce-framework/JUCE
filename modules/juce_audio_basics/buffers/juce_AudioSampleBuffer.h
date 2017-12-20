@@ -183,7 +183,9 @@ public:
         if (numChannels < (int) numElementsInArray (preallocatedChannelSpace))
         {
             channels = preallocatedChannelSpace;
-            memcpy (preallocatedChannelSpace, other.channels, sizeof (preallocatedChannelSpace));
+
+            for (int i = 0; i < numChannels; ++i)
+                preallocatedChannelSpace[i] = other.channels[i];
         }
         else
         {
@@ -207,7 +209,9 @@ public:
         if (numChannels < (int) numElementsInArray (preallocatedChannelSpace))
         {
             channels = preallocatedChannelSpace;
-            memcpy (preallocatedChannelSpace, other.channels, sizeof (preallocatedChannelSpace));
+
+            for (int i = 0; i < numChannels; ++i)
+                preallocatedChannelSpace[i] = other.channels[i];
         }
         else
         {
@@ -984,7 +988,7 @@ public:
         jassert (startSample >= 0 && numSamples >= 0 && startSample + numSamples <= size);
 
         if (isClear)
-            return {};
+            return { Type (0), Type (0) };
 
         return FloatVectorOperations::findMinAndMax (channels[channel] + startSample, numSamples);
     }
@@ -996,7 +1000,7 @@ public:
         jassert (startSample >= 0 && numSamples >= 0 && startSample + numSamples <= size);
 
         if (isClear)
-            return {};
+            return Type (0);
 
         auto r = findMinMax (channel, startSample, numSamples);
 
@@ -1006,7 +1010,7 @@ public:
     /** Finds the highest absolute sample value within a region on all channels. */
     Type getMagnitude (int startSample, int numSamples) const noexcept
     {
-        Type mag = {};
+        Type mag (0);
 
         if (! isClear)
             for (int i = 0; i < numChannels; ++i)
@@ -1022,7 +1026,7 @@ public:
         jassert (startSample >= 0 && numSamples >= 0 && startSample + numSamples <= size);
 
         if (numSamples <= 0 || channel < 0 || channel >= numChannels || isClear)
-            return {};
+            return Type (0);
 
         auto* data = channels[channel] + startSample;
         double sum = 0.0;
@@ -1054,6 +1058,9 @@ public:
             reverse (i, startSample, numSamples);
     }
 
+    //==============================================================================
+    /** This allows templated code that takes an AudioBuffer to access its sample type. */
+    typedef Type SampleType;
 
 private:
     //==============================================================================

@@ -29,17 +29,16 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 
 //==============================================================================
-class OSCLogListBox    : public ListBox, private ListBoxModel, private AsyncUpdater
+class OSCLogListBox    : public ListBox,
+                         private ListBoxModel,
+                         private AsyncUpdater
 {
 public:
-
-    //==============================================================================
     OSCLogListBox()
     {
         setModel (this);
     }
 
-    //==============================================================================
     ~OSCLogListBox()
     {
     }
@@ -77,8 +76,8 @@ public:
 
         if (! message.isEmpty())
         {
-            for (OSCArgument* arg = message.begin(); arg != message.end(); ++arg)
-                addOSCMessageArgument (*arg, level + 1);
+            for (auto& arg : message)
+                addOSCMessageArgument (arg, level + 1);
         }
 
         triggerAsyncUpdate();
@@ -93,12 +92,12 @@ public:
                         + "- osc bundle, time tag = "
                         + timeTag.toTime().toString (true, true, true, true));
 
-        for (OSCBundle::Element* element = bundle.begin(); element != bundle.end(); ++element)
+        for (auto& element : bundle)
         {
-            if (element->isMessage())
-                addOSCMessage (element->getMessage(), level + 1);
-            else if (element->isBundle())
-                addOSCBundle (element->getBundle(), level + 1);
+            if (element.isMessage())
+                addOSCMessage (element.getMessage(), level + 1);
+            else if (element.isBundle())
+                addOSCBundle (element.getBundle(), level + 1);
         }
 
         triggerAsyncUpdate();
@@ -161,13 +160,10 @@ public:
     }
 
 private:
-
-    //==============================================================================
-    String getIndentationString (int level)
+    static String getIndentationString (int level)
     {
         return String().paddedRight (' ', 2 * level);
     }
-
 
     //==============================================================================
     StringArray oscLogList;

@@ -57,14 +57,14 @@ public:
     /** Constructs an OSCTimeTag object from a raw binary OSC time tag. */
     OSCTimeTag (uint64 rawTimeTag) noexcept;
 
-    /** Constructs an OSCTimeTag object from a Juce Time object. */
+    /** Constructs an OSCTimeTag object from a juce::Time object. */
     OSCTimeTag (Time time) noexcept;
 
-    /** Returns a Juce Time object representing the same time as the OSCTimeTag.
+    /** Returns a juce::Time object representing the same time as the OSCTimeTag.
 
         If the OSCTimeTag has the special value representing "immediately", the
-        resulting Juce Time object will represent an arbitrary point of time (but
-        guaranteed to be in the past), since Juce Time does not have such a special value.
+        resulting juce::Time object will represent an arbitrary point of time (but
+        guaranteed to be in the past), since juce::Time does not have such a special value.
     */
     Time toTime() const noexcept;
 

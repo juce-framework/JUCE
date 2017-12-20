@@ -241,6 +241,7 @@ namespace juce
 
 #include "maths/juce_SpecialFunctions.h"
 #include "maths/juce_Matrix.h"
+#include "maths/juce_Phase.h"
 #include "maths/juce_Polynomial.h"
 #include "maths/juce_FastMathApproximations.h"
 #include "maths/juce_LookupTable.h"

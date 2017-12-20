@@ -286,11 +286,11 @@ public:
     {
         auto structureUp = dsp::FilterDesign<SampleType>::designIIRLowpassHalfBandPolyphaseAllpassMethod (normalizedTransitionWidthUp, stopbandAttenuationdBUp);
         dsp::IIR::Coefficients<SampleType> coeffsUp = getCoefficients (structureUp);
-        latency = static_cast<SampleType> (-(coeffsUp.getPhaseForFrequency (0.0001, 1.0)) / (0.0001 * 2 * double_Pi));
+        latency = static_cast<SampleType> (-(coeffsUp.getPhaseForFrequency (0.0001, 1.0)) / (0.0001 * MathConstants<double>::twoPi));
 
         auto structureDown = dsp::FilterDesign<SampleType>::designIIRLowpassHalfBandPolyphaseAllpassMethod (normalizedTransitionWidthDown, stopbandAttenuationdBDown);
         dsp::IIR::Coefficients<SampleType> coeffsDown = getCoefficients (structureDown);
-        latency += static_cast<SampleType> (-(coeffsDown.getPhaseForFrequency (0.0001, 1.0)) / (0.0001 * 2 * double_Pi));
+        latency += static_cast<SampleType> (-(coeffsDown.getPhaseForFrequency (0.0001, 1.0)) / (0.0001 * MathConstants<double>::twoPi));
 
         for (auto i = 0; i < structureUp.directPath.size(); i++)
             coefficientsUp.add (structureUp.directPath[i].coefficients[0]);

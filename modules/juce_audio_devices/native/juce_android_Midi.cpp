@@ -144,7 +144,7 @@ JUCE_JNI_CALLBACK (JUCE_JOIN_MACRO (JUCE_ANDROID_ACTIVITY_CLASSNAME, _00024JuceM
 {
     // Java may create a Midi thread which JUCE doesn't know about and this callback may be
     // received on this thread. Java will have already created a JNI Env for this new thread,
-    // which we need to tell Juce about
+    // which we need to tell JUCE about
     setEnv (env);
 
     reinterpret_cast<AndroidMidiInput*> (host)->receive (byteArray, offset, count, timestamp);

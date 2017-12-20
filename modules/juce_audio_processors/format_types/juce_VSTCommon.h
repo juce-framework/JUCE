@@ -128,7 +128,7 @@ struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give e
     class VstSpeakerConfigurationHolder
     {
     public:
-        VstSpeakerConfigurationHolder ()                                           { clear(); }
+        VstSpeakerConfigurationHolder()                                            { clear(); }
         VstSpeakerConfigurationHolder (const VstSpeakerConfiguration& vstConfig)   { operator= (vstConfig); }
         VstSpeakerConfigurationHolder (const VstSpeakerConfigurationHolder& other) { operator= (other.get()); }
         VstSpeakerConfigurationHolder (VstSpeakerConfigurationHolder&& other) : storage (static_cast<HeapBlock<VstSpeakerConfiguration>&&> (other.storage)) { other.clear(); }

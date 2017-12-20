@@ -100,7 +100,7 @@ String OpenGLHelpers::translateVertexShaderToV3 (const String& code)
 
             for (int p = code.indexOf (0, "attribute "); p >= 0; p = code.indexOf (p + 1, "attribute "))
             {
-                output += code.substring (last, p) + String ("layout(location=") + String (--numAttributes) + ") in ";
+                output += code.substring (last, p) + "layout(location=" + String (--numAttributes) + ") in ";
 
                 last = p + 10;
             }

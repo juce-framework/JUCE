@@ -27,7 +27,8 @@
 namespace juce
 {
 
-struct Spinner  : public Component, private Timer
+struct Spinner  : public Component,
+                  private Timer
 {
     Spinner()                       { startTimer (1000 / 50); }
     void timerCallback() override   { repaint(); }

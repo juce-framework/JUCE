@@ -153,7 +153,7 @@ public:
 
         @see signalThreadShouldExit, currentThreadShouldExit
     */
-    bool threadShouldExit() const                { return shouldExit; }
+    bool threadShouldExit() const                { return shouldExit.get() != 0; }
 
     /** Checks whether the current thread has been told to stop running.
         On the message thread, this will always return false, otherwise
@@ -298,7 +298,7 @@ public:
 
     /** Finds the thread object that is currently running.
 
-        Note that the main UI thread (or other non-Juce threads) don't have a Thread
+        Note that the main UI thread (or other non-JUCE threads) don't have a Thread
         object associated with them, so this will return nullptr.
     */
     static Thread* JUCE_CALLTYPE getCurrentThread();
@@ -309,7 +309,7 @@ public:
         thread's not actually running.
         @see getCurrentThreadId
     */
-    ThreadID getThreadId() const noexcept                           { return threadId; }
+    ThreadID getThreadId() const noexcept                           { return threadId.get(); }
 
     /** Returns the name of the thread.
         This is the name that gets set in the constructor.
@@ -325,15 +325,15 @@ public:
 private:
     //==============================================================================
     const String threadName;
-    void* volatile threadHandle = nullptr;
-    ThreadID threadId = {};
+    Atomic<void*> threadHandle { nullptr };
+    Atomic<ThreadID> threadId = {};
     CriticalSection startStopLock;
     WaitableEvent startSuspensionEvent, defaultEvent;
     int threadPriority = 5;
     size_t threadStackSize;
     uint32 affinityMask = 0;
     bool deleteOnThreadEnd = false;
-    bool volatile shouldExit = false;
+    Atomic<int32> shouldExit { 0 };
     ListenerList<Listener, Array<Listener*, CriticalSection>> listeners;
 
    #if JUCE_ANDROID

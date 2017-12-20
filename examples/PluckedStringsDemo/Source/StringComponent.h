@@ -44,8 +44,8 @@ public:
     //==============================================================================
     void stringPlucked (float pluckPositionRelative)
     {
-        amplitude = maxAmplitude * std::sin (pluckPositionRelative * float_Pi);
-        phase = float_Pi;
+        amplitude = maxAmplitude * std::sin (pluckPositionRelative * MathConstants<float>::pi);
+        phase = MathConstants<float>::pi;
     }
 
     //==============================================================================
@@ -57,7 +57,7 @@ public:
 
     Path generateStringPath() const
     {
-        const float y = height / 2.0f;
+        auto y = height / 2.0f;
 
         Path stringPath;
         stringPath.startNewSubPath (0, y);
@@ -87,8 +87,8 @@ public:
 
         phase += phaseStep;
 
-        if (phase > float_Pi)
-            phase -= 2.0f * float_Pi;
+        if (phase >= MathConstants<float>::twoPi)
+            phase -= MathConstants<float>::twoPi;
     }
 
 private:

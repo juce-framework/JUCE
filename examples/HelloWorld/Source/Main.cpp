@@ -68,7 +68,7 @@ public:
 };
 
 //==============================================================================
-/** This is the application object that is started up when Juce starts. It handles
+/** This is the application object that is started up when JUCE starts. It handles
     the initialisation and shutdown of the whole application.
 */
 class JUCEHelloWorldApplication : public JUCEApplication

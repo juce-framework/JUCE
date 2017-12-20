@@ -2,19 +2,19 @@
 
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Juce Library Code">
-      <UniqueIdentifier>{8B4D1BAA-6DB4-CAEC-A0FA-271F354D5C61}</UniqueIdentifier>
+    <Filter Include="JUCE Library Code">
+      <UniqueIdentifier>{7ED5A90E-41AF-A1EF-659B-37CEEAB9BA61}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_plugin_client_VST2.cpp">
-      <Filter>Juce Library Code</Filter>
+      <Filter>JUCE Library Code</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup/>
   <ItemGroup>
     <ResourceCompile Include=".\resources.rc">
-      <Filter>Juce Library Code</Filter>
+      <Filter>JUCE Library Code</Filter>
     </ResourceCompile>
   </ItemGroup>
 </Project>

@@ -377,11 +377,11 @@ struct PushNotifications::Pimpl
             }
         }
 
-        owner.listeners.call (&Listener::deliveredNotificationsListReceived, notifications);
+        owner.listeners.call ([&] (Listener& l) { l.deliveredNotificationsListReceived (notifications); });
       #else
         // Not supported on this platform
         jassertfalse;
-        owner.listeners.call (&Listener::deliveredNotificationsListReceived, {});
+        owner.listeners.call ([] (Listener& l) { l.deliveredNotificationsListReceived ({}); });
       #endif
     }
 
@@ -403,25 +403,21 @@ struct PushNotifications::Pimpl
 
         if (actionString.contains (notificationString))
         {
-            owner.listeners.call (&PushNotifications::Listener::handleNotification, true, notification);
+            owner.listeners.call ([&] (Listener& l) { l.handleNotification (true, notification); });
         }
         else if (actionString.contains (notificationButtonActionString))
         {
-            String prefix = notificationButtonActionString + notification.identifier + ".";
+            auto prefix = notificationButtonActionString + notification.identifier + ".";
 
             auto actionTitle = actionString.fromLastOccurrenceOf (prefix, false, false)     // skip prefix
                                            .fromFirstOccurrenceOf (".", false, false);      // skip action index
 
-            owner.listeners.call (&PushNotifications::Listener::handleNotificationAction,
-                                  true,
-                                  notification,
-                                  actionTitle,
-                                  {});
+            owner.listeners.call ([&] (Listener& l) { l.handleNotificationAction (true, notification, actionTitle, {}); });
         }
       #if __ANDROID_API__ >= 20
         else if (actionString.contains (notificationTextInputActionString))
         {
-            String prefix = notificationTextInputActionString + notification.identifier + ".";
+            auto prefix = notificationTextInputActionString + notification.identifier + ".";
 
             auto actionTitle = actionString.fromLastOccurrenceOf (prefix, false, false)     // skip prefix
                                            .fromFirstOccurrenceOf (".", false, false);      // skip action index
@@ -430,26 +426,16 @@ struct PushNotifications::Pimpl
             auto resultKeyString = javaString (actionTitle + actionIndex);
 
             auto remoteInputResult = LocalRef<jobject> (env->CallStaticObjectMethod (RemoteInput, RemoteInput.getResultsFromIntent, intent.get()));
+            String responseString;
 
             if (remoteInputResult.get() != 0)
             {
                 auto charSequence      = LocalRef<jobject> (env->CallObjectMethod (remoteInputResult, JavaBundle.getCharSequence, resultKeyString.get()));
-                auto responseString    = LocalRef<jstring> ((jstring) env->CallObjectMethod (charSequence, JavaCharSequence.toString));
+                auto responseStringRef = LocalRef<jstring> ((jstring) env->CallObjectMethod (charSequence, JavaCharSequence.toString));
+                responseString = juceString (responseStringRef.get());
+            }
 
-                owner.listeners.call (&PushNotifications::Listener::handleNotificationAction,
-                                      true,
-                                      notification,
-                                      actionTitle,
-                                      juceString (responseString.get()));
-            }
-            else
-            {
-                owner.listeners.call (&PushNotifications::Listener::handleNotificationAction,
-                                      true,
-                                      notification,
-                                      actionTitle,
-                                      {});
-            }
+            owner.listeners.call ([&] (Listener& l) { l.handleNotificationAction (true, notification, actionTitle, responseString); });
         }
       #endif
     }
@@ -459,9 +445,9 @@ struct PushNotifications::Pimpl
         auto* env = getEnv();
 
         auto bundle = LocalRef<jobject> (env->CallObjectMethod (intent, AndroidIntent.getExtras));
+        auto notification = localNotificationBundleToJuceNotification (bundle);
 
-        owner.listeners.call (&PushNotifications::Listener::localNotificationDismissedByUser,
-                              localNotificationBundleToJuceNotification (bundle));
+        owner.listeners.call ([&] (Listener& l) { l.localNotificationDismissedByUser (notification); });
     }
 
     void removeAllDeliveredNotifications()
@@ -507,9 +493,9 @@ struct PushNotifications::Pimpl
     {
       #if defined(JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME)
         MessageManager::callAsync ([this, token]()
-           {
-               owner.listeners.call (&PushNotifications::Listener::deviceTokenRefreshed, token);
-           });
+        {
+            owner.listeners.call ([&] (Listener& l) { l.deviceTokenRefreshed (token); });
+        });
       #else
         ignoreUnused (token);
       #endif
@@ -588,9 +574,9 @@ struct PushNotifications::Pimpl
         auto* env = getEnv();
 
         auto bundle = LocalRef<jobject> (env->CallObjectMethod (intent, AndroidIntent.getExtras));
+        auto notification = remoteNotificationBundleToJuceNotification (bundle);
 
-        owner.listeners.call (&PushNotifications::Listener::handleNotification, false,
-                              remoteNotificationBundleToJuceNotification (bundle));
+        owner.listeners.call ([&] (Listener& l) { l.handleNotification (false, notification); });
       #else
         ignoreUnused (intent);
       #endif
@@ -603,8 +589,8 @@ struct PushNotifications::Pimpl
 
         MessageManager::callAsync ([this, rn]()
         {
-            owner.listeners.call (&PushNotifications::Listener::handleNotification, false,
-                                  firebaseRemoteNotificationToJuceNotification (rn.get()));
+            auto notification = firebaseRemoteNotificationToJuceNotification (rn.get());
+            owner.listeners.call ([&] (Listener& l) { l.handleNotification (false, notification); });
         });
       #else
         ignoreUnused (remoteNotification);
@@ -615,9 +601,9 @@ struct PushNotifications::Pimpl
     {
       #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
         MessageManager::callAsync ([this]()
-           {
-               owner.listeners.call (&PushNotifications::Listener::remoteNotificationsDeleted);
-           });
+        {
+            owner.listeners.call ([] (Listener& l) { l.remoteNotificationsDeleted(); });
+        });
       #endif
     }
 
@@ -627,10 +613,10 @@ struct PushNotifications::Pimpl
         GlobalRef mid (messageId);
 
         MessageManager::callAsync ([this, mid]()
-           {
-               owner.listeners.call (&PushNotifications::Listener::upstreamMessageSent,
-                                     juceString ((jstring) mid.get()));
-           });
+        {
+            auto midString = juceString ((jstring) mid.get());
+            owner.listeners.call ([&] (Listener& l) { l.upstreamMessageSent (midString); });
+        });
       #else
         ignoreUnused (messageId);
       #endif
@@ -643,11 +629,12 @@ struct PushNotifications::Pimpl
         GlobalRef mid (messageId), e (error);
 
         MessageManager::callAsync ([this, mid, e]()
-           {
-               owner.listeners.call (&PushNotifications::Listener::upstreamMessageSendingError,
-                                     juceString ((jstring) mid.get()),
-                                     juceString ((jstring) e.get()));
-           });
+        {
+            auto midString = juceString ((jstring) mid.get());
+            auto eString   = juceString ((jstring) e.get());
+
+            owner.listeners.call ([&] (Listener& l) { l.upstreamMessageSendingError (midString, eString); });
+        });
       #else
         ignoreUnused (messageId, error);
       #endif
@@ -1432,7 +1419,7 @@ struct PushNotifications::Pimpl
             propertiesDynamicObject->setProperty ("titleLocalizationKey",  juceString (titleLocalizationKey.get()));
             propertiesDynamicObject->setProperty ("bodyLocalizationArgs",  jobjectArrayToStringArray (bodyLocalizationArgs));
             propertiesDynamicObject->setProperty ("titleLocalizationArgs", jobjectArrayToStringArray (titleLocalizationArgs));
-            propertiesDynamicObject->setProperty ("link",                  link.get() != 0 ? juceString ((jstring) env->CallObjectMethod (link, Uri.toString)) : String());
+            propertiesDynamicObject->setProperty ("link",                  link.get() != 0 ? juceString ((jstring) env->CallObjectMethod (link, AndroidUri.toString)) : String());
         }
 
         n.properties = var (propertiesDynamicObject);

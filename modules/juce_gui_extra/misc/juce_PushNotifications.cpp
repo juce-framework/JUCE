@@ -33,7 +33,7 @@ bool PushNotifications::Notification::isValid() const noexcept { return true; }
 #endif
 
 //==============================================================================
-juce_ImplementSingleton (PushNotifications)
+JUCE_IMPLEMENT_SINGLETON (PushNotifications)
 
 PushNotifications::PushNotifications()
   #if JUCE_PUSH_NOTIFICATIONS
@@ -53,7 +53,7 @@ void PushNotifications::requestPermissionsWithSettings (const PushNotifications:
     pimpl->requestPermissionsWithSettings (settings);
   #else
     ignoreUnused (settings);
-    listeners.call (&PushNotifications::Listener::notificationSettingsReceived, {});
+    listeners.call ([] (Listener& l) { l.notificationSettingsReceived ({}); });
   #endif
 }
 
@@ -62,7 +62,7 @@ void PushNotifications::requestSettingsUsed()
   #if JUCE_PUSH_NOTIFICATIONS && (JUCE_IOS || JUCE_MAC)
     pimpl->requestSettingsUsed();
   #else
-    listeners.call (&PushNotifications::Listener::notificationSettingsReceived, {});
+    listeners.call ([] (Listener& l) { l.notificationSettingsReceived ({}); });
   #endif
 }
 

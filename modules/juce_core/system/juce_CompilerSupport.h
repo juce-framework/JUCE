@@ -85,7 +85,7 @@
   #define JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL 1
  #endif
 
- #if __has_feature(cxx_relaxed_constexpr)
+ #if __has_feature(cxx_constexpr)
   #define JUCE_HAS_CONSTEXPR 1
  #endif
 

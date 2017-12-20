@@ -163,7 +163,7 @@ public:
 
         @see getFileInfo, getFile
     */
-    int getNumFiles() const noexcept                        { return files.size(); }
+    int getNumFiles() const noexcept;
 
     /** Returns the cached information about one of the files in the list.
 

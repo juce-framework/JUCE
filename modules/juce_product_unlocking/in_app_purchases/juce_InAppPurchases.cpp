@@ -53,7 +53,7 @@ void InAppPurchases::getProductsInformation (const StringArray& productIdentifie
     for (auto productId : productIdentifiers)
         products.add (Product { productId, {}, {}, {}, {}  });
 
-    listeners.call (&Listener::productsInfoReturned, products);
+    listeners.call ([&] (Listener& l) { l.productsInfoReturned (products); });
    #endif
 }
 
@@ -68,7 +68,7 @@ void InAppPurchases::purchaseProduct (const String& productIdentifier,
    #else
     Listener::PurchaseInfo purchaseInfo { Purchase { "", productIdentifier, {}, {}, {} }, {} };
 
-    listeners.call (&Listener::productPurchaseFinished, purchaseInfo, false, "In-app purchases unavailable");
+    listeners.call ([&] (Listener& l) { l.productPurchaseFinished (purchaseInfo, false, "In-app purchases unavailable"); });
     ignoreUnused (isSubscription, upgradeProductIdentifiers, creditForUnusedSubscription);
    #endif
 }
@@ -78,7 +78,7 @@ void InAppPurchases::restoreProductsBoughtList (bool includeDownloadInfo, const 
    #if JUCE_ANDROID || JUCE_IOS || JUCE_MAC
     pimpl->restoreProductsBoughtList (includeDownloadInfo, subscriptionsSharedSecret);
    #else
-    listeners.call (&Listener::purchasesListRestored, Array<Listener::PurchaseInfo>(), false, "In-app purchases unavailable");
+    listeners.call ([] (Listener& l) { l.purchasesListRestored ({}, false, "In-app purchases unavailable"); });
     ignoreUnused (includeDownloadInfo, subscriptionsSharedSecret);
    #endif
 }
@@ -88,7 +88,7 @@ void InAppPurchases::consumePurchase (const String& productIdentifier, const Str
    #if JUCE_ANDROID || JUCE_IOS || JUCE_MAC
     pimpl->consumePurchase (productIdentifier, purchaseToken);
    #else
-    listeners.call (&Listener::productConsumed, productIdentifier, false, "In-app purchases unavailable");
+    listeners.call ([&] (Listener& l) { l.productConsumed (productIdentifier, false, "In-app purchases unavailable"); });
     ignoreUnused (purchaseToken);
    #endif
 }

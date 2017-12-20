@@ -295,7 +295,7 @@ public:
 
         if (settings != nullptr)
         {
-            savedState      = settings->getXmlValue ("audioSetup");
+            savedState = settings->getXmlValue ("audioSetup");
 
            #if ! (JUCE_IOS || JUCE_ANDROID)
             shouldMuteInput.setValue (settings->getBoolValue ("shouldMuteInput", true));
@@ -563,7 +563,7 @@ public:
                             bool takeOwnershipOfSettings,
                             const String& preferredDefaultDeviceName = String(),
                             const AudioDeviceManager::AudioDeviceSetup* preferredSetupOptions = nullptr,
-                            const Array<PluginInOuts>& constrainToConfiguration = Array<PluginInOuts> (),
+                            const Array<PluginInOuts>& constrainToConfiguration = {},
                            #if JUCE_ANDROID || JUCE_IOS
                             bool autoOpenMidiDevices = true
                            #else
@@ -573,11 +573,15 @@ public:
         : DocumentWindow (title, backgroundColour, DocumentWindow::minimiseButton | DocumentWindow::closeButton),
           optionsButton ("Options")
     {
+       #if JUCE_IOS || JUCE_ANDROID
+        setTitleBarHeight (0);
+       #else
         setTitleBarButtonsRequired (DocumentWindow::minimiseButton | DocumentWindow::closeButton, false);
 
         Component::addAndMakeVisible (optionsButton);
         optionsButton.addListener (this);
         optionsButton.setTriggeredOnMouseDown (true);
+       #endif
 
         pluginHolder = new StandalonePluginHolder (settingsToUse, takeOwnershipOfSettings,
                                                    preferredDefaultDeviceName, preferredSetupOptions,
@@ -586,7 +590,6 @@ public:
        #if JUCE_IOS || JUCE_ANDROID
         setFullScreen (true);
         setContentOwned (new MainContentComponent (*this), false);
-        Desktop::getInstance().setKioskModeComponent (this, false);
        #else
         setContentOwned (new MainContentComponent (*this), true);
 
@@ -693,15 +696,15 @@ public:
 
 private:
     //==============================================================================
-    class MainContentComponent : public Component, private Value::Listener,
-                                                           Button::Listener,
-                                                           ComponentListener
+    class MainContentComponent  : public Component,
+                                  private Value::Listener,
+                                  private Button::Listener,
+                                  private ComponentListener
     {
     public:
         MainContentComponent (StandaloneFilterWindow& filterWindow)
             : owner (filterWindow), notification (this),
-              editor (owner.getAudioProcessor()->createEditorIfNeeded()),
-              shouldShowNotification (false)
+              editor (owner.getAudioProcessor()->createEditorIfNeeded())
         {
             Value& inputMutedValue = owner.pluginHolder->getMuteInputValue();
 
@@ -829,7 +832,7 @@ private:
         StandaloneFilterWindow& owner;
         NotificationArea notification;
         ScopedPointer<AudioProcessorEditor> editor;
-        bool shouldShowNotification;
+        bool shouldShowNotification = false;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)
     };

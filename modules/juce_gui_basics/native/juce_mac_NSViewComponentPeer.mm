@@ -371,12 +371,7 @@ public:
 
     bool isKioskMode() const override
     {
-       #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7
-        if (hasNativeTitleBar() && ([window styleMask] & NSWindowStyleMaskFullScreen) != 0)
-            return true;
-       #endif
-
-        return ComponentPeer::isKioskMode();
+        return isWindowInKioskMode || ComponentPeer::isKioskMode();
     }
 
     static bool isWindowAtPoint (NSWindow* w, NSPoint screenPoint)
@@ -441,9 +436,17 @@ public:
     {
         if (hasNativeTitleBar())
         {
+           #if defined (MAC_OS_X_VERSION_10_7) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_7
+            isWindowInKioskMode = (([window styleMask] & NSWindowStyleMaskFullScreen) != 0);
+           #endif
+
             auto screen = getFrameSize().subtractedFrom (component.getParentMonitorArea());
 
             fullScreen = component.getScreenBounds().expanded (2, 2).contains (screen);
+        }
+        else
+        {
+            isWindowInKioskMode = false;
         }
     }
 
@@ -1353,6 +1356,7 @@ public:
     NSWindow* window = nil;
     NSView* view = nil;
     bool isSharedWindow = false, fullScreen = false;
+    bool isWindowInKioskMode = false;
    #if USE_COREGRAPHICS_RENDERING
     bool usingCoreGraphics = true;
    #else
@@ -1545,6 +1549,7 @@ struct JuceNSViewClass   : public ObjCClass<NSView>
         addMethod (@selector (markedRange),                   markedRange,                @encode (NSRange), "@:");
         addMethod (@selector (selectedRange),                 selectedRange,              @encode (NSRange), "@:");
         addMethod (@selector (firstRectForCharacterRange:),   firstRectForCharacterRange, @encode (NSRect), "@:", @encode (NSRange));
+        addMethod (@selector (characterIndexForPoint:),       characterIndexForPoint,     "L@:", @encode (NSPoint));
         addMethod (@selector (validAttributesForMarkedText),  validAttributesForMarkedText, "@@:");
         addMethod (@selector (flagsChanged:),                 flagsChanged,               "v@:@");
 

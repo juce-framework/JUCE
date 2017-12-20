@@ -303,6 +303,9 @@ static void checkForPointerAPI()
                      && getPointerPenInfo      != nullptr);
 }
 
+typedef void (*SettingChangeCallbackFunc) (void);
+extern SettingChangeCallbackFunc settingChangeCallback;
+
 static Rectangle<int> rectangleFromRECT (const RECT& r) noexcept
 {
     return Rectangle<int>::leftTopRightBottom ((int) r.left, (int) r.top, (int) r.right, (int) r.bottom);
@@ -755,12 +758,17 @@ struct OnScreenKeyboard   : public DeletedAtShutdown,
         startTimer (10);
     }
 
-    juce_DeclareSingleton_SingleThreaded (OnScreenKeyboard, true)
+    JUCE_DECLARE_SINGLETON_SINGLETHREADED (OnScreenKeyboard, true)
 
 private:
     OnScreenKeyboard()
     {
         tipInvocation.CoCreateInstance (ITipInvocation::getCLSID(), CLSCTX_INPROC_HANDLER | CLSCTX_LOCAL_SERVER);
+    }
+
+    ~OnScreenKeyboard()
+    {
+        clearSingletonInstance();
     }
 
     void timerCallback() override
@@ -803,7 +811,7 @@ private:
     ComSmartPtr<ITipInvocation> tipInvocation;
 };
 
-juce_ImplementSingleton_SingleThreaded (OnScreenKeyboard)
+JUCE_IMPLEMENT_SINGLETON (OnScreenKeyboard)
 
 //==============================================================================
 struct HSTRING_PRIVATE;
@@ -1606,7 +1614,7 @@ private:
 
         LPCTSTR getWindowClassName() const noexcept     { return (LPCTSTR) (pointer_sized_uint) atom; }
 
-        juce_DeclareSingleton_SingleThreaded_Minimal (WindowClassHolder)
+        JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (WindowClassHolder)
 
     private:
         ATOM atom;
@@ -1766,6 +1774,11 @@ private:
             setMessageFilter();
             updateBorderSize();
             checkForPointerAPI();
+
+            // This is needed so that our plugin window gets notified of WM_SETTINGCHANGE messages
+            // and can respond to display scale changes
+            if (! JUCEApplication::isStandaloneApp())
+                settingChangeCallback = forceDisplayUpdate;
 
             // Calling this function here is (for some reason) necessary to make Windows
             // correctly enable the menu items that we specify in the wm_initmenu message.
@@ -2913,17 +2926,21 @@ private:
 
     void doSettingChange()
     {
-        auto& desktop = Desktop::getInstance();
-
-        const_cast<Desktop::Displays&> (desktop.getDisplays()).refresh();
+        forceDisplayUpdate();
 
         if (fullScreen && ! isMinimised())
         {
-            auto& display = desktop.getDisplays().getDisplayContaining (component.getScreenBounds().getCentre());
+            auto& display = Desktop::getInstance().getDisplays()
+                           .getDisplayContaining (component.getScreenBounds().getCentre());
 
             setWindowPos (hwnd, display.userArea * display.scale,
                           SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSENDCHANGING);
         }
+    }
+
+    static void forceDisplayUpdate()
+    {
+        const_cast<Desktop::Displays&> (Desktop::getInstance().getDisplays()).refresh();
     }
 
     void handleDPIChange() // happens when a window moves to a screen with a different DPI.
@@ -3589,8 +3606,7 @@ JUCE_API ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component& compo
 }
 
 
-juce_ImplementSingleton_SingleThreaded (HWNDComponentPeer::WindowClassHolder)
-
+JUCE_IMPLEMENT_SINGLETON (HWNDComponentPeer::WindowClassHolder)
 
 //==============================================================================
 void ModifierKeys::updateCurrentModifiers() noexcept

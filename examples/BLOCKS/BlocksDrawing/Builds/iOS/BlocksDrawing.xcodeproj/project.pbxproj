@@ -106,7 +106,7 @@
 					96CCFB5E486DE32C81BE8452,
 					664139E2D0EEE0D7BFD16F07,
 					D64413E1CB2F5B149C7A3E71,
-					E259E25C09458A24B1D4E7EA, ); name = "Juce Modules"; sourceTree = "<group>"; };
+					E259E25C09458A24B1D4E7EA, ); name = "JUCE Modules"; sourceTree = "<group>"; };
 		04F9940C78EBE86BC90AC333 = {isa = PBXGroup; children = (
 					4ABD70F1E7F6F48AF857A965,
 					B0CCD8CF994F3F797BB6D208,
@@ -122,7 +122,7 @@
 					865530545B611A3E7BBF1F9A,
 					2AF21CDE4EFD3BBA599DE77E,
 					BF4E837550B8F8BDB6D8D26B,
-					E677E7CBC0109236A71D0E76, ); name = "Juce Library Code"; sourceTree = "<group>"; };
+					E677E7CBC0109236A71D0E76, ); name = "JUCE Library Code"; sourceTree = "<group>"; };
 		BA3276FE3301BF867BBA6FBA = {isa = PBXGroup; children = (
 					574E29C4D824BEE95F94E7D6,
 					4FE119D4AAC2809C3D698315, ); name = Resources; sourceTree = "<group>"; };

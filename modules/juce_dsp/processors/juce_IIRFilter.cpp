@@ -349,7 +349,7 @@ double IIR::Coefficients<NumericType>::getMagnitudeForFrequency (double frequenc
     jassert (frequency >= 0 && frequency <= sampleRate * 0.5);
 
     Complex<double> numerator = 0.0, denominator = 0.0, factor = 1.0;
-    Complex<double> jw = std::exp (-2.0 * double_Pi * frequency * j / sampleRate);
+    Complex<double> jw = std::exp (-MathConstants<double>::twoPi * frequency * j / sampleRate);
 
     for (size_t n = 0; n <= order; ++n)
     {
@@ -384,7 +384,7 @@ void IIR::Coefficients<NumericType>::getMagnitudeForFrequencyArray (const double
         jassert (frequencies[i] >= 0 && frequencies[i] <= sampleRate * 0.5);
 
         Complex<double> numerator = 0.0, denominator = 0.0, factor = 1.0;
-        Complex<double> jw = std::exp (-2.0 * double_Pi * frequencies[i] * j / sampleRate);
+        Complex<double> jw = std::exp (-MathConstants<double>::twoPi * frequencies[i] * j / sampleRate);
 
         for (size_t n = 0; n <= order; ++n)
         {
@@ -415,7 +415,7 @@ double IIR::Coefficients<NumericType>::getPhaseForFrequency (double frequency, d
     jassert (frequency >= 0 && frequency <= sampleRate * 0.5);
 
     Complex<double> numerator = 0.0, denominator = 0.0, factor = 1.0;
-    Complex<double> jw = std::exp (-2.0 * double_Pi * frequency * j / sampleRate);
+    Complex<double> jw = std::exp (-MathConstants<double>::twoPi * frequency * j / sampleRate);
 
     for (size_t n = 0; n <= order; ++n)
     {
@@ -453,7 +453,7 @@ void IIR::Coefficients<NumericType>::getPhaseForFrequencyArray (double* frequenc
         jassert (frequencies[i] >= 0 && frequencies[i] <= sampleRate * 0.5);
 
         Complex<double> numerator = 0.0, denominator = 0.0, factor = 1.0;
-        Complex<double> jw = std::exp (-2.0 * double_Pi * frequencies[i] * j * invSampleRate);
+        Complex<double> jw = std::exp (-MathConstants<double>::twoPi * frequencies[i] * j * invSampleRate);
 
         for (size_t n = 0; n <= order; ++n)
         {

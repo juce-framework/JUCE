@@ -263,7 +263,7 @@ void OnlineUnlockStatus::save()
     MemoryOutputStream mo;
 
     {
-        GZIPCompressorOutputStream gzipStream (&mo, 9);
+        GZIPCompressorOutputStream gzipStream (mo, 9);
         status.writeToStream (gzipStream);
     }
 

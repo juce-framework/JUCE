@@ -52,9 +52,19 @@ void CatmullRomInterpolator::reset() noexcept
         s = 0;
 }
 
+int CatmullRomInterpolator::process (double actualRatio, const float* in, float* out, int numOut, int available, int wrap) noexcept
+{
+    return interpolate<CatmullRomAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut, available, wrap);
+}
+
 int CatmullRomInterpolator::process (double actualRatio, const float* in, float* out, int numOut) noexcept
 {
     return interpolate<CatmullRomAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut);
+}
+
+int CatmullRomInterpolator::processAdding (double actualRatio, const float* in, float* out, int numOut, int available, int wrap, float gain) noexcept
+{
+    return interpolateAdding<CatmullRomAlgorithm> (lastInputSamples, subSamplePos, actualRatio, in, out, numOut, available, wrap, gain);
 }
 
 int CatmullRomInterpolator::processAdding (double actualRatio, const float* in, float* out, int numOut, float gain) noexcept

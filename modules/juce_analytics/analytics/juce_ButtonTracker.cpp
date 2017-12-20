@@ -25,10 +25,12 @@ namespace juce
 
 ButtonTracker::ButtonTracker (Button& buttonToTrack,
                               const String& triggeredEventName,
-                              const StringPairArray& triggeredEventParameters)
+                              const StringPairArray& triggeredEventParameters,
+                              int triggeredEventType)
     : button (buttonToTrack),
       eventName (triggeredEventName),
-      eventParameters (triggeredEventParameters)
+      eventParameters (triggeredEventParameters),
+      eventType (triggeredEventType)
 {
     button.addListener (this);
 }
@@ -47,7 +49,7 @@ void ButtonTracker::buttonClicked (Button* b)
         if (button.getClickingTogglesState())
             params.set ("ButtonState", button.getToggleState() ? "On" : "Off");
 
-        Analytics::getInstance()->logEvent (eventName, params);
+        Analytics::getInstance()->logEvent (eventName, params, eventType);
     }
 }
 

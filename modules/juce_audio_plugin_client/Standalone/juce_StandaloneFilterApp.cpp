@@ -101,7 +101,7 @@ public:
     {
         mainWindow = createWindow();
 
-       #if JUCE_IOS || JUCE_ANDROID
+       #if JUCE_STANDALONE_FILTER_WINDOW_USE_KIOSK_MODE
         Desktop::getInstance().setKioskModeComponent (mainWindow, false);
        #endif
 

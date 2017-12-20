@@ -102,6 +102,18 @@ struct SIMDRegister
 
     vSIMDType value;
 
+    /** Default constructor. */
+    inline SIMDRegister() noexcept {}
+
+    /** Constructs an object from the native SIMD type. */
+    inline SIMDRegister (vSIMDType a) noexcept : value (a) {}
+
+    /** Constructs an object from a scalar type by broadcasting it to all elements. */
+    inline SIMDRegister (Type s) noexcept  { *this = s; }
+
+    /** Destrutor. */
+    inline ~SIMDRegister() noexcept {}
+
     //==============================================================================
     /** Returns the number of elements in this vector. */
     static constexpr size_t size() noexcept    { return SIMDNumElements; }
@@ -220,17 +232,30 @@ struct SIMDRegister
     inline SIMDRegister JUCE_VECTOR_CALLTYPE operator^ (vMaskType v) const noexcept     { return { NativeOps::bit_xor (value, toVecType (v.value)) }; }
 
     /** Returns a vector where each element is the bit-inverted value of the corresponding element in the receiver.*/
-    inline SIMDRegister JUCE_VECTOR_CALLTYPE operator~ () const noexcept                       { return { NativeOps::bit_not (value) }; }
+    inline SIMDRegister JUCE_VECTOR_CALLTYPE operator~() const noexcept                 { return { NativeOps::bit_not (value) }; }
 
     //==============================================================================
     /** Returns a vector where each element is the bit-and'd value of the corresponding element in the receiver and the scalar s.*/
-    inline SIMDRegister JUCE_VECTOR_CALLTYPE operator& (MaskType s) const noexcept             { return { NativeOps::bit_and (value, toVecType (s)) }; }
+    inline SIMDRegister JUCE_VECTOR_CALLTYPE operator& (MaskType s) const noexcept      { return { NativeOps::bit_and (value, toVecType (s)) }; }
 
     /** Returns a vector where each element is the bit-or'd value of the corresponding element in the receiver and the scalar s.*/
-    inline SIMDRegister JUCE_VECTOR_CALLTYPE operator| (MaskType s) const noexcept             { return { NativeOps::bit_or  (value, toVecType (s)) }; }
+    inline SIMDRegister JUCE_VECTOR_CALLTYPE operator| (MaskType s) const noexcept      { return { NativeOps::bit_or  (value, toVecType (s)) }; }
 
     /** Returns a vector where each element is the bit-xor'd value of the corresponding element in the receiver and the scalar s.*/
-    inline SIMDRegister JUCE_VECTOR_CALLTYPE operator^ (MaskType s) const noexcept             { return { NativeOps::bit_xor (value, toVecType (s)) }; }
+    inline SIMDRegister JUCE_VECTOR_CALLTYPE operator^ (MaskType s) const noexcept      { return { NativeOps::bit_xor (value, toVecType (s)) }; }
+
+    //==============================================================================
+    /** Returns true if all elements-wise comparisons return true. */
+    inline bool JUCE_VECTOR_CALLTYPE operator== (SIMDRegister other) const noexcept    { return  NativeOps::allEqual (value, other.value); }
+
+    /** Returns true if any elements-wise comparisons return false. */
+    inline bool JUCE_VECTOR_CALLTYPE operator!= (SIMDRegister other) const noexcept    { return ! (*this == other); }
+
+    /** Returns true if all elements are equal to the scalar. */
+    inline bool JUCE_VECTOR_CALLTYPE operator== (Type s) const noexcept                { return *this == SIMDRegister::expand (s); }
+
+    /** Returns true if any elements are not equal to the scalar. */
+    inline bool JUCE_VECTOR_CALLTYPE operator!= (Type s) const noexcept                { return ! (*this == s); }
 
     //==============================================================================
     /** Returns a SIMDRegister of the corresponding integral type where each element has each bit set

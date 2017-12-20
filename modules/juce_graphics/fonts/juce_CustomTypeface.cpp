@@ -258,7 +258,7 @@ void CustomTypeface::addGlyphsFromOtherTypeface (Typeface& typefaceToCopy, juce_
 
 bool CustomTypeface::writeToStream (OutputStream& outputStream)
 {
-    GZIPCompressorOutputStream out (&outputStream);
+    GZIPCompressorOutputStream out (outputStream);
 
     out.writeString (name);
     out.writeBool (FontStyleHelpers::isBold (style));

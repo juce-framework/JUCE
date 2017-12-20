@@ -36,12 +36,12 @@ ImagePixelData::ImagePixelData (const Image::PixelFormat format, const int w, co
 
 ImagePixelData::~ImagePixelData()
 {
-    listeners.call (&Listener::imageDataBeingDeleted, this);
+    listeners.call ([this] (Listener& l) { l.imageDataBeingDeleted (this); });
 }
 
 void ImagePixelData::sendDataChangeMessage()
 {
-    listeners.call (&Listener::imageDataChanged, this);
+    listeners.call ([this] (Listener& l) { l.imageDataChanged (this); });
 }
 
 int ImagePixelData::getSharedCount() const noexcept

@@ -66,13 +66,33 @@ public:
         @param initialFileOrDirectory         the file or directory that should be selected
                                               when the dialog box opens. If this parameter is
                                               set to File(), a sensible default directory will
-                                              be used instead. This parameter is ignored for native
-                                              iOS file choosers.
-        @param filePatternsAllowed            a set of file patterns to specify which files
-                                              can be selected - each pattern should be
-                                              separated by a comma or semi-colon, e.g. "*" or
-                                              "*.jpg;*.gif". An empty string means that all
-                                              files are allowed
+                                              be used instead.
+
+                                              Note: on iOS when saving a file, a user will not
+                                              be able to change a file name, so it may be a good
+                                              idea to include at least a valid file name in
+                                              initialFileOrDirectory. When no filename is found,
+                                              "Untitled" will be used.
+
+                                              Also, if you pass an already existing file on iOS,
+                                              that file will be automatically copied to the
+                                              destination chosen by user and if it can be previewed,
+                                              its preview will be presented in the dialog too. You
+                                              will still be able to write into this file copy, since
+                                              its URL will be returned by getURLResult(). This can be
+                                              useful when you want to save e.g. an image, so that
+                                              you can pass a (temporary) file with low quality
+                                              preview and after the user picks the destination,
+                                              you can write a high quality image into the copied
+                                              file. If you create such a temporary file, you need
+                                              to delete it yourself, once it is not needed anymore.
+
+        @param filePatternsAllowed            a set of file patterns to specify which files can be
+                                              selected - each pattern should be separated by a comma or
+                                              semi-colon, e.g. "*" or "*.jpg;*.gif". The native MacOS
+                                              file browser only supports wildcard that specify
+                                              extensions, so "*.jpg" is OK but "myfilename*" will not
+                                              work. An empty string means that all files are allowed
         @param useOSNativeDialogBox           if true, then a native dialog box will be used
                                               if possible; if false, then a Juce-based
                                               browser dialog box will always be used
@@ -123,22 +143,12 @@ public:
         @param warnAboutOverwritingExistingFiles     if true, the dialog box will ask
                     the user if they're sure they want to overwrite a file that already
                     exists
-        @param fileWhichShouldBeSaved     if this parameter is specified, then, if the the user
-                    selects a valid location to save the file, fileWhichShouldBeSaved will
-                    automaitcally be moved to the location selected by the user when the user
-                    clicks 'ok'. If you do not specify this parameter, then it is your
-                    responsibility to save your file at the location that is returned from this
-                    file chooser. Typically, when using this parameter, you already write the
-                    file you wish to save to a temporary location and then supply the path to
-                    this file to this parameter. This parameter is required on iOS when using
-                    native file save dialogs but can be used on all other platforms.
         @returns    true if the user chose a file and pressed 'ok', in which case, use
                     the getResult() method to find out what the file was. Returns false
                     if they cancelled instead.
         @see browseForFileToOpen, browseForDirectory
     */
-    bool browseForFileToSave (bool warnAboutOverwritingExistingFiles,
-                              const File& fileWhichShouldBeSaved = File());
+    bool browseForFileToSave (bool warnAboutOverwritingExistingFiles);
 
     /** Shows a dialog box to choose a directory.
 
@@ -163,24 +173,12 @@ public:
     /** Runs a dialog box for the given set of option flags.
         The flag values used are those in FileBrowserComponent::FileChooserFlags.
 
-        @param fileWhichShouldBeSaved     if this parameter is specified and saveMode is
-                    specified, then, if the the user selects a valid location to save the file,
-                    fileWhichShouldBeSaved will automaitcally be moved to the location selected
-                    by the user when the user clicks 'ok'. If you do not specify this parameter,
-                    then it is your responsibility to save your file at the location that is
-                    returned from this file chooser. Typically, when using this parameter,
-                    you already write the file you wish to save to a temporary location and
-                    then supply the path to this file to this parameter. This parameter is
-                    required on iOS when using native file save dialogs but can be used on all
-                    other platforms.
-
         @returns    true if the user chose a directory and pressed 'ok', in which case, use
                     the getResult() method to find out what they chose. Returns false
                     if they cancelled instead.
         @see FileBrowserComponent::FileChooserFlags
     */
-    bool showDialog (int flags, FilePreviewComponent* previewComponent,
-                     const File& fileWhichShouldBeSaved = File());
+    bool showDialog (int flags, FilePreviewComponent* previewComponent);
 
     /** Use this method to launch the file browser window asynchronously.
 
@@ -196,22 +194,10 @@ public:
 
         You must ensure that the lifetime of the callback object is longer than
         the lifetime of the file-chooser.
-
-        @param fileWhichShouldBeSaved     if this parameter is specified and saveMode is
-                    specified, then, if the the user selects a valid location to save the file,
-                    fileWhichShouldBeSaved will automaitcally be moved to the location selected
-                    by the user when the user clicks 'ok'. If you do not specify this parameter,
-                    then it is your responsibility to save your file at the location that is
-                    returned from this file chooser. Typically, when using this parameter,
-                    you already write the file you wish to save to a temporary location and
-                    then supply the path to this file to this parameter. This parameter is
-                    required on iOS when using native file save dialogs but can be used on all
-                    other platforms.
     */
     void launchAsync (int flags,
                       std::function<void (const FileChooser&)>,
-                      FilePreviewComponent* previewComponent = nullptr,
-                      const File& fileWhichShouldBeSaved = File());
+                      FilePreviewComponent* previewComponent = nullptr);
 
     //==============================================================================
     /** Returns the last file that was chosen by one of the browseFor methods.
@@ -252,6 +238,15 @@ public:
         may return a URL to a remote document. If a local file is chosen then you can
         convert this file to a JUCE File class via the URL::getLocalFile method.
 
+        Note: on iOS you must use the returned URL object directly (you are also
+        allowed to copy- or move-construct another URL from the returned URL), rather
+        than just storing the path as a String and then creating a new URL from that
+        String. This is because the returned URL contains internally a security
+        bookmark that is required to access the files pointed by it. Then, once you stop
+        dealing with the file pointed by the URL, you should dispose that URL object,
+        so that the security bookmark can be released by the system (only a limited
+        number of such URLs is allowed).
+
         @see getResult, URL::getLocalFile
     */
     URL getURLResult() const;
@@ -265,6 +260,15 @@ public:
 
         This array may be empty if no files were chosen, or can contain multiple entries
         if multiple files were chosen.
+
+        Note: on iOS you must use the returned URL object directly (you are also
+        allowed to copy- or move-construct another URL from the returned URL), rather
+        than just storing the path as a String and then creating a new URL from that
+        String. This is because the returned URL contains internally a security
+        bookmark that is required to access the files pointed by it. Then, once you stop
+        dealing with the file pointed by the URL, you should dispose that URL object,
+        so that the security bookmark can be released by the system (only a limited
+        number of such URLs is allowed).
 
         @see getResults, URL::getLocalFile
     */
@@ -288,14 +292,14 @@ public:
 private:
     //==============================================================================
     String title, filters;
-    File startingFile, fileToSave;
+    File startingFile;
     Array<URL> results;
     const bool useNativeDialogBox;
     const bool treatFilePackagesAsDirs;
     std::function<void (const FileChooser&)> asyncCallback;
 
     //==============================================================================
-    void finished (const Array<URL>&, bool);
+    void finished (const Array<URL>&);
 
     //==============================================================================
     struct Pimpl
@@ -303,7 +307,7 @@ private:
         virtual ~Pimpl() {}
 
         virtual void launch()     = 0;
-        virtual void runModally()                                            = 0;
+        virtual void runModally() = 0;
     };
 
     ScopedPointer<Pimpl> pimpl;

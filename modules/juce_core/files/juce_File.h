@@ -875,7 +875,7 @@ public:
         /** In a plugin, this will return the path of the host executable. */
         hostApplicationPath,
 
-       #if JUCE_WINDOWS
+       #if JUCE_WINDOWS || DOXYGEN
         /** On a Windows machine, returns the location of the Windows/System32 folder. */
         windowsSystemDirectory,
        #endif
@@ -886,7 +886,7 @@ public:
         */
         globalApplicationsDirectory,
 
-       #if JUCE_WINDOWS
+       #if JUCE_WINDOWS || DOXYGEN
         /** On a Windows machine, returns the directory in which 32 bit applications
             normally get installed. On a 64 bit machine this would be something like
             "C:\Program Files (x86)", whereas for 32 bit machines this would match
@@ -989,7 +989,7 @@ public:
     */
     File getLinkedTarget() const;
 
-   #if JUCE_WINDOWS
+   #if JUCE_WINDOWS || DOXYGEN
     /** Windows ONLY - Creates a win32 .LNK shortcut file that links to this file. */
     bool createShortcut (const String& description, const File& linkFileToCreate) const;
 

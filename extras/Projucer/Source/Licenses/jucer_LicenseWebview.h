@@ -78,8 +78,9 @@ private:
         };
 
         //==============================================================================
-        struct Header : public Component, private LicenseController::StateChangedCallback,
-                        private Button::Listener
+        struct Header  : public Component,
+                         private LicenseController::StateChangedCallback,
+                         private Button::Listener
         {
             Header()  : avatarButton ("User Settings", &getIcons().user)
             {

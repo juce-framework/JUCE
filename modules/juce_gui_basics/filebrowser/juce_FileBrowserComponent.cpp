@@ -37,7 +37,7 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
      previewComp (previewComp_),
      currentPathBox ("path"),
      fileLabel ("f", TRANS ("file:")),
-     thread ("Juce FileBrowser"),
+     thread ("JUCE FileBrowser"),
      wasProcessActive (true)
 {
     // You need to specify one or other of the open/save flags..
@@ -68,7 +68,7 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
 
     if ((flags & useTreeView) != 0)
     {
-        FileTreeComponent* const tree = new FileTreeComponent (*fileList);
+        auto tree = new FileTreeComponent (*fileList);
         fileListComponent = tree;
 
         if ((flags & canSelectMultipleItems) != 0)
@@ -78,7 +78,7 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
     }
     else
     {
-        FileListComponent* const list = new FileListComponent (*fileList);
+        auto list = new FileListComponent (*fileList);
         fileListComponent = list;
         list->setOutlineThickness (1);
 
@@ -147,7 +147,7 @@ bool FileBrowserComponent::isSaveMode() const noexcept
 
 int FileBrowserComponent::getNumSelectedFiles() const noexcept
 {
-    if (chosenFiles.size() == 0 && currentFileIsValid())
+    if (chosenFiles.isEmpty() && currentFileIsValid())
         return 1;
 
     return chosenFiles.size();
@@ -166,7 +166,7 @@ File FileBrowserComponent::getSelectedFile (int index) const noexcept
 
 bool FileBrowserComponent::currentFileIsValid() const
 {
-    const File f (getSelectedFile (0));
+    auto f = getSelectedFile (0);
 
     if (isSaveMode())
         return (flags & canSelectDirectories) != 0 || ! f.isDirectory();
@@ -266,7 +266,7 @@ void FileBrowserComponent::setRoot (const File& newRootDirectory)
     if (callListeners)
     {
         Component::BailOutChecker checker (this);
-        listeners.callChecked (checker, &FileBrowserListener::browserRootChanged, currentRoot);
+        listeners.callChecked (checker, [&] (FileBrowserListener& l) { l.browserRootChanged (currentRoot); });
     }
 }
 
@@ -366,7 +366,7 @@ void FileBrowserComponent::sendListenerChangeMessage()
     // You shouldn't delete the browser when the file gets changed!
     jassert (! checker.shouldBailOut());
 
-    listeners.callChecked (checker, &FileBrowserListener::selectionChanged);
+    listeners.callChecked (checker, [] (FileBrowserListener& l) { l.selectionChanged(); });
 }
 
 void FileBrowserComponent::selectionChanged()
@@ -400,7 +400,7 @@ void FileBrowserComponent::selectionChanged()
 void FileBrowserComponent::fileClicked (const File& f, const MouseEvent& e)
 {
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, &FileBrowserListener::fileClicked, f, e);
+    listeners.callChecked (checker, [&] (FileBrowserListener& l) { l.fileClicked (f, e); });
 }
 
 void FileBrowserComponent::fileDoubleClicked (const File& f)
@@ -415,7 +415,7 @@ void FileBrowserComponent::fileDoubleClicked (const File& f)
     else
     {
         Component::BailOutChecker checker (this);
-        listeners.callChecked (checker, &FileBrowserListener::fileDoubleClicked, f);
+        listeners.callChecked (checker, [&] (FileBrowserListener& l) { l.fileDoubleClicked (f); });
     }
 }
 
@@ -489,11 +489,11 @@ void FileBrowserComponent::buttonClicked (Button*)
 
 void FileBrowserComponent::comboBoxChanged (ComboBox*)
 {
-    const String newText (currentPathBox.getText().trim().unquoted());
+    auto newText = currentPathBox.getText().trim().unquoted();
 
     if (newText.isNotEmpty())
     {
-        const int index = currentPathBox.getSelectedId() - 1;
+        auto index = currentPathBox.getSelectedId() - 1;
 
         StringArray rootNames, rootPaths;
         getRoots (rootNames, rootPaths);

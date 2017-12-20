@@ -72,8 +72,8 @@ public:
         (Don't add or remove any child components directly using the normal
         Component::addChildComponent() methods).
 
-        @param newViewedComponent   the component to add to this SidePanel, or null to remove
-                                    the current component.
+        @param newContentComponent   the component to add to this SidePanel, or null to remove
+                                     the current component.
         @param deleteComponentWhenNoLongerNeeded    if true, the component will be deleted automatically when
                                    the SidePanel is deleted or when a different component is added. If false,
                                    the caller must manage the lifetime of the component

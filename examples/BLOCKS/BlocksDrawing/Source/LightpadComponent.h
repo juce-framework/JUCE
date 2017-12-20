@@ -96,15 +96,9 @@ public:
     void mouseDown (const MouseEvent& e) override
     {
         for (auto x = 0; x < 15; ++x)
-        {
             for (auto y = 0; y < 15; ++y)
-            {
                 if (leds.getUnchecked ((x * 15) + y)->getBounds().contains (e.position.toInt()))
-                {
-                    listeners.call (&Listener::ledClicked, x, y, e.pressure);
-                }
-            }
-        }
+                    listeners.call ([&] (Listener& l) { l.ledClicked (x, y, e.pressure); });
     }
 
     void mouseDrag (const MouseEvent& e) override
@@ -120,9 +114,9 @@ public:
                     if (lastLED == Point<int> (x, y) && t.toMilliseconds() - lastMouseEventTime.toMilliseconds() < 50)
                         return;
 
-                    listeners.call (&Listener::ledClicked, x, y, e.pressure);
+                    listeners.call ([&] (Listener& l) { l.ledClicked (x, y, e.pressure); });
 
-                    lastLED = Point<int> (x, y);
+                    lastLED = { x, y };
                     lastMouseEventTime = t;
                 }
             }

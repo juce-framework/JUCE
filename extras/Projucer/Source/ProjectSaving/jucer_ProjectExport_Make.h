@@ -113,10 +113,6 @@ public:
                 if (getTargetFileType() == pluginBundle)
                     result.add ("-Wl,--no-undefined");
             }
-            else if (type == GUIApp || type == StandalonePlugIn)
-            {
-                result.add ("-no-pie");
-            }
 
             return result;
         }
@@ -149,19 +145,19 @@ public:
 
             StringArray s;
 
-            const String cppflagsVarName = String ("JUCE_CPPFLAGS_") + getTargetVarName();
+            const String cppflagsVarName ("JUCE_CPPFLAGS_" + getTargetVarName());
 
-            s.add (cppflagsVarName + String (" := ") + defines.joinIntoString (" "));
+            s.add (cppflagsVarName + " := " + defines.joinIntoString (" "));
 
             auto cflags = getCompilerFlags();
 
             if (! cflags.isEmpty())
-                s.add (String ("JUCE_CFLAGS_") + getTargetVarName() + " := " + cflags.joinIntoString (" "));
+                s.add ("JUCE_CFLAGS_" + getTargetVarName() + " := " + cflags.joinIntoString (" "));
 
             auto ldflags = getLinkerFlags();
 
             if (! ldflags.isEmpty())
-                s.add (String ("JUCE_LDFLAGS_") + getTargetVarName() + " := " + ldflags.joinIntoString (" "));
+                s.add ("JUCE_LDFLAGS_" + getTargetVarName() + " := " + ldflags.joinIntoString (" "));
 
             String targetName (owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString()));
 
@@ -172,7 +168,7 @@ public:
             else
                 targetName = targetName.upToLastOccurrenceOf (".", false, false) + getTargetFileSuffix();
 
-            s.add (String ("JUCE_TARGET_") + getTargetVarName() + String (" := ") + escapeSpaces (targetName));
+            s.add ("JUCE_TARGET_" + getTargetVarName() + String (" := ") + escapeSpaces (targetName));
 
             return s;
         }
@@ -181,9 +177,11 @@ public:
         {
             switch (type)
             {
-                case VSTPlugIn:             return ".so";
+                case VSTPlugIn:
+                case DynamicLibrary:        return ".so";
                 case VST3PlugIn:            return ".vst3";
-                case SharedCodeTarget:      return ".a";
+                case SharedCodeTarget:
+                case StaticLibrary:         return ".a";
                 default:                    break;
             }
 

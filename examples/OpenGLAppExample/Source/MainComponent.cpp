@@ -71,7 +71,7 @@ public:
     {
         Matrix3D<float> viewMatrix (Vector3D<float> (0.0f, 0.0f, -10.0f));
         Matrix3D<float> rotationMatrix
-            = viewMatrix.rotated (Vector3D<float> (-0.3f, 5.0f * std::sin (getFrameCounter() * 0.01f), 0.0f));
+            = viewMatrix.rotation (Vector3D<float> (-0.3f, 5.0f * std::sin (getFrameCounter() * 0.01f), 0.0f));
 
         return rotationMatrix * viewMatrix;
     }

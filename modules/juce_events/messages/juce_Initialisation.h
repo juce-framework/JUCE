@@ -24,24 +24,24 @@ namespace juce
 {
 
 //==============================================================================
-/** Initialises Juce's GUI classes.
+/** Initialises JUCE's GUI classes.
 
-    If you're embedding Juce into an application that uses its own event-loop rather
+    If you're embedding JUCE into an application that uses its own event-loop rather
     than using the START_JUCE_APPLICATION macro, call this function before making any
-    Juce calls, to make sure things are initialised correctly.
+    JUCE calls, to make sure things are initialised correctly.
 
-    Note that if you're creating a Juce DLL for Windows, you may also need to call the
+    Note that if you're creating a JUCE DLL for Windows, you may also need to call the
     Process::setCurrentModuleInstanceHandle() method.
 
     @see shutdownJuce_GUI()
 */
 JUCE_API void JUCE_CALLTYPE  initialiseJuce_GUI();
 
-/** Clears up any static data being used by Juce's GUI classes.
+/** Clears up any static data being used by JUCE's GUI classes.
 
-    If you're embedding Juce into an application that uses its own event-loop rather
+    If you're embedding JUCE into an application that uses its own event-loop rather
     than using the START_JUCE_APPLICATION macro, call this function in your shutdown
-    code to clean up any juce objects that might be lying around.
+    code to clean up any JUCE objects that might be lying around.
 
     @see initialiseJuce_GUI()
 */
@@ -49,7 +49,7 @@ JUCE_API void JUCE_CALLTYPE  shutdownJuce_GUI();
 
 
 //==============================================================================
-/** A utility object that helps you initialise and shutdown Juce correctly
+/** A utility object that helps you initialise and shutdown JUCE correctly
     using an RAII pattern.
 
     When the first instance of this class is created, it calls initialiseJuce_GUI(),
@@ -155,7 +155,7 @@ public:
        You can instruct JUCE to use a custom iOS app delegate class instaed of JUCE's default
        app delegate. For JUCE to work you must pass all messages to JUCE's internal app delegate.
        Below is an example of minimal forwarding custom delegate. Note that you are at your own
-       risk if you decide to use your own delegate an subtle, hard to debug bugs may occur.
+       risk if you decide to use your own delegate and subtle, hard to debug bugs may occur.
 
        @interface MyCustomDelegate : NSObject <UIApplicationDelegate> { NSObject<UIApplicationDelegate>* juceDelegate; } @end
        @implementation MyCustomDelegate

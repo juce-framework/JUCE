@@ -101,27 +101,32 @@ public:
         is no such zone. Zones are sorted by insertion order (most recently added
         zone last).
     */
-    MPEZone* getZoneByIndex (int index) const noexcept;
+    MPEZone* getZoneByIndex (int index) noexcept;
+    const MPEZone* getZoneByIndex (int index) const noexcept;
 
     /** Returns a pointer to the zone which uses the specified channel (1-16),
         or nullptr if there is no such zone.
     */
-    MPEZone* getZoneByChannel (int midiChannel) const noexcept;
+    MPEZone* getZoneByChannel (int midiChannel) noexcept;
+    const MPEZone* getZoneByChannel (int midiChannel) const noexcept;
 
     /** Returns a pointer to the zone which has the specified channel (1-16)
         as its master channel, or nullptr if there is no such zone.
     */
-    MPEZone* getZoneByMasterChannel (int midiChannel) const noexcept;
+    MPEZone* getZoneByMasterChannel (int midiChannel) noexcept;
+    const MPEZone* getZoneByMasterChannel (int midiChannel) const noexcept;
 
     /** Returns a pointer to the zone which has the specified channel (1-16)
         as its first note channel, or nullptr if there is no such zone.
     */
-    MPEZone* getZoneByFirstNoteChannel (int midiChannel) const noexcept;
+    MPEZone* getZoneByFirstNoteChannel (int midiChannel) noexcept;
+    const MPEZone* getZoneByFirstNoteChannel (int midiChannel) const noexcept;
 
     /** Returns a pointer to the zone which has the specified channel (1-16)
         as one of its note channels, or nullptr if there is no such zone.
     */
-    MPEZone* getZoneByNoteChannel (int midiChannel) const noexcept;
+    MPEZone* getZoneByNoteChannel (int midiChannel) noexcept;
+    const MPEZone* getZoneByNoteChannel (int midiChannel) const noexcept;
 
     //==============================================================================
     /** Listener class. Derive from this class to allow your class to be
@@ -156,6 +161,7 @@ private:
     void processRpnMessage (MidiRPNMessage);
     void processZoneLayoutRpnMessage (MidiRPNMessage);
     void processPitchbendRangeRpnMessage (MidiRPNMessage);
+    void sendLayoutChangeMessage();
 };
 
 } // namespace juce

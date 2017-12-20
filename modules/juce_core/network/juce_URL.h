@@ -111,6 +111,15 @@ public:
     */
     File getLocalFile() const;
 
+    /** Returns the file name. For all but Android's content:// scheme, it will
+        simply return the last segment of the URL.
+        E.g. for "http://www.xyz.com/foo/bar.txt", this will return "bar.txt".
+
+        For Android's content:// scheme, it will attempt to resolve the filename
+        located under the URL.
+    */
+    String getFileName() const;
+
     /** Attempts to read a port number from the URL.
         @returns the port number, or 0 if none is explicitly specified.
     */
@@ -333,6 +342,13 @@ public:
                                     int numRedirectsToFollow = 5,
                                     String httpRequestCmd = String()) const;
 
+    /** Attempts to open an output stream to a URL for writing
+
+        This method can only be used for certain scheme types such as local files
+        and content:// URIs on Android.
+    */
+    OutputStream* createOutputStream() const;
+
     //==============================================================================
     /** Represents a download task.
         Returned by downloadToFile to allow querying and controling the download task.
@@ -526,6 +542,23 @@ private:
 
     friend struct ContainerDeletePolicy<Upload>;
     ReferenceCountedArray<Upload> filesToUpload;
+
+  #if JUCE_IOS
+    struct Bookmark : public ReferenceCountedObject
+    {
+        using Ptr = ReferenceCountedObjectPtr<Bookmark>;
+
+        Bookmark (void*);
+        ~Bookmark();
+
+        void* data;
+    };
+
+    Bookmark::Ptr bookmark;
+
+    friend void setURLBookmark (URL&, void*);
+    friend void* getURLBookmark (URL&);
+  #endif
 
     URL (const String&, int);
     void init();

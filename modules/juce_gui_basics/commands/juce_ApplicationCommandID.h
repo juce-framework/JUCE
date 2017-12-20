@@ -45,7 +45,7 @@ typedef int CommandID;
     here to help different apps to use the same numeric values for them.
 
     Of course you don't have to use these, but some of them are used internally by
-    Juce - e.g. the quit ID is recognised as a command by the JUCEApplication class.
+    JUCE - e.g. the quit ID is recognised as a command by the JUCEApplication class.
 
     @see ApplicationCommandInfo, ApplicationCommandManager,
          ApplicationCommandTarget, KeyPressMappingSet

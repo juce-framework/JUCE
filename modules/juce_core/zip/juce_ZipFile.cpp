@@ -23,17 +23,30 @@
 namespace juce
 {
 
+uint16 readUnalignedLittleEndianShort (const void* buffer)
+{
+    auto data = readUnaligned<uint16> (buffer);
+    return ByteOrder::littleEndianShort (&data);
+}
+
+uint32 readUnalignedLittleEndianInt (const void* buffer)
+{
+    auto data = readUnaligned<uint32> (buffer);
+    return ByteOrder::littleEndianInt (&data);
+}
+
 struct ZipFile::ZipEntryHolder
 {
     ZipEntryHolder (const char* buffer, int fileNameLen)
     {
-        isCompressed            = ByteOrder::littleEndianShort (buffer + 10) != 0;
-        entry.fileTime          = parseFileTime (ByteOrder::littleEndianShort (buffer + 12),
-                                                 ByteOrder::littleEndianShort (buffer + 14));
-        compressedSize          = (int64) ByteOrder::littleEndianInt (buffer + 20);
-        entry.uncompressedSize  = (int64) ByteOrder::littleEndianInt (buffer + 24);
-        streamOffset            = (int64) ByteOrder::littleEndianInt (buffer + 42);
-        entry.filename          = String::fromUTF8 (buffer + 46, fileNameLen);
+        isCompressed           = readUnalignedLittleEndianShort (buffer + 10) != 0;
+        entry.fileTime         = parseFileTime (readUnalignedLittleEndianShort (buffer + 12),
+                                                readUnalignedLittleEndianShort (buffer + 14));
+        compressedSize         = (int64) readUnalignedLittleEndianInt (buffer + 20);
+        entry.uncompressedSize = (int64) readUnalignedLittleEndianInt (buffer + 24);
+        streamOffset           = (int64) readUnalignedLittleEndianInt (buffer + 42);
+
+        entry.filename = String::fromUTF8 (buffer + 46, fileNameLen);
     }
 
     static Time parseFileTime (uint32 time, uint32 date) noexcept
@@ -74,12 +87,12 @@ static int64 findCentralDirectoryFileHeader (InputStream& input, int& numEntries
 
         for (int i = 0; i < 22; ++i)
         {
-            if (ByteOrder::littleEndianInt (buffer + i) == 0x06054b50)
+            if (readUnalignedLittleEndianInt (buffer + i) == 0x06054b50)
             {
                 in.setPosition (pos + i);
                 in.read (buffer, 22);
-                numEntries = ByteOrder::littleEndianShort (buffer + 10);
-                auto offset = (int64) ByteOrder::littleEndianInt (buffer + 16);
+                numEntries = readUnalignedLittleEndianShort (buffer + 10);
+                auto offset = (int64) readUnalignedLittleEndianInt (buffer + 16);
 
                 if (offset >= 4)
                 {
@@ -351,7 +364,7 @@ void ZipFile::init()
                         break;
 
                     auto* buffer = static_cast<const char*> (headerData.getData()) + pos;
-                    auto fileNameLen = ByteOrder::littleEndianShort (buffer + 28);
+                    auto fileNameLen = readUnalignedLittleEndianShort (buffer + 28);
 
                     if (pos + 46 + fileNameLen > size)
                         break;
@@ -359,8 +372,8 @@ void ZipFile::init()
                     entries.add (new ZipEntryHolder (buffer, fileNameLen));
 
                     pos += 46 + fileNameLen
-                            + ByteOrder::littleEndianShort (buffer + 30)
-                            + ByteOrder::littleEndianShort (buffer + 32);
+                            + readUnalignedLittleEndianShort (buffer + 30)
+                            + readUnalignedLittleEndianShort (buffer + 32);
                 }
             }
         }
@@ -447,7 +460,7 @@ struct ZipFile::Builder::Item
 
         if (compressionLevel > 0)
         {
-            GZIPCompressorOutputStream compressor (&compressedData, compressionLevel, false,
+            GZIPCompressorOutputStream compressor (compressedData, compressionLevel,
                                                    GZIPCompressorOutputStream::windowBitsRaw);
             if (! writeSource (compressor))
                 return false;
@@ -599,5 +612,51 @@ bool ZipFile::Builder::writeToStream (OutputStream& target, double* const progre
 
     return true;
 }
+
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+struct ZIPTests   : public UnitTest
+{
+    ZIPTests()   : UnitTest ("ZIP") {}
+
+    void runTest() override
+    {
+        beginTest ("ZIP");
+
+        ZipFile::Builder builder;
+        StringArray entryNames { "first", "second", "third" };
+        HashMap<String, MemoryBlock> blocks;
+
+        for (auto& entryName : entryNames)
+        {
+            auto& block = blocks.getReference (entryName);
+            MemoryOutputStream mo (block, false);
+            mo << entryName;
+            mo.flush();
+            builder.addEntry (new MemoryInputStream (block, false), 9, entryName, Time::getCurrentTime());
+        }
+
+        MemoryBlock data;
+        MemoryOutputStream mo (data, false);
+        builder.writeToStream (mo, nullptr);
+        MemoryInputStream mi (data, false);
+
+        ZipFile zip (mi);
+
+        expectEquals (zip.getNumEntries(), entryNames.size());
+
+        for (auto& entryName : entryNames)
+        {
+            auto* entry = zip.getEntry (entryName);
+            ScopedPointer<InputStream> input (zip.createStreamForEntry (*entry));
+            expectEquals (input->readEntireStreamAsString(), entryName);
+        }
+    }
+};
+
+static ZIPTests zipTests;
+
+#endif
 
 } // namespace juce

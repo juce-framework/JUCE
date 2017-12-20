@@ -374,7 +374,7 @@ struct SquareLookAndFeel    : public CustomLookAndFeel
                            float rotaryStartAngle, float rotaryEndAngle, Slider& slider) override
     {
         auto diameter = jmin (width, height) - 4.0f;
-        auto radius = (diameter / 2.0f) * std::cos (float_Pi / 4.0f);
+        auto radius = (diameter / 2.0f) * std::cos (MathConstants<float>::pi / 4.0f);
         auto centreX = x + width * 0.5f;
         auto centreY = y + height * 0.5f;
         auto rx = centreX - radius;

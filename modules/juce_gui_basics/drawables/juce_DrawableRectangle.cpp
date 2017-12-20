@@ -71,7 +71,7 @@ void DrawableRectangle::rebuildPath()
 {
     if (bounds.isDynamic() || cornerSize.isDynamic())
     {
-        Drawable::Positioner<DrawableRectangle>* const p = new Drawable::Positioner<DrawableRectangle> (*this);
+        auto p = new Drawable::Positioner<DrawableRectangle> (*this);
         setPositioner (p);
         p->apply();
     }
@@ -95,11 +95,11 @@ void DrawableRectangle::recalculateCoordinates (Expression::Scope* scope)
     Point<float> points[3];
     bounds.resolveThreePoints (points, scope);
 
-    const float cornerSizeX = (float) cornerSize.x.resolve (scope);
-    const float cornerSizeY = (float) cornerSize.y.resolve (scope);
+    auto cornerSizeX = (float) cornerSize.x.resolve (scope);
+    auto cornerSizeY = (float) cornerSize.y.resolve (scope);
 
-    const float w = Line<float> (points[0], points[1]).getLength();
-    const float h = Line<float> (points[0], points[2]).getLength();
+    auto w = Line<float> (points[0], points[1]).getLength();
+    auto h = Line<float> (points[0], points[2]).getLength();
 
     Path newPath;
 
@@ -154,7 +154,7 @@ void DrawableRectangle::ValueTreeWrapper::setCornerSize (const RelativePoint& ne
 
 RelativePoint DrawableRectangle::ValueTreeWrapper::getCornerSize() const
 {
-    return RelativePoint (state [cornerSize]);
+    return RelativePoint (state[cornerSize]);
 }
 
 Value DrawableRectangle::ValueTreeWrapper::getCornerSizeValue (UndoManager* undoManager)

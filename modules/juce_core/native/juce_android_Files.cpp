@@ -33,8 +33,9 @@ DECLARE_JNI_CLASS (MediaScannerConnection, "android/media/MediaScannerConnection
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
- METHOD (query,           "query",           "(Landroid/net/Uri;[Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor;") \
- METHOD (openInputStream, "openInputStream", "(Landroid/net/Uri;)Ljava/io/InputStream;") \
+ METHOD (query,            "query",            "(Landroid/net/Uri;[Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor;") \
+ METHOD (openInputStream,  "openInputStream",  "(Landroid/net/Uri;)Ljava/io/InputStream;") \
+ METHOD (openOutputStream, "openOutputStream", "(Landroid/net/Uri;)Ljava/io/OutputStream;")
 
 DECLARE_JNI_CLASS (ContentResolver, "android/content/ContentResolver");
 #undef JNI_CLASS_MEMBERS
@@ -56,22 +57,18 @@ DECLARE_JNI_CLASS (AndroidEnvironment, "android/os/Environment");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
- METHOD (getAbsolutePath, "getAbsolutePath", "()Ljava/lang/String;") \
+ METHOD (close, "close", "()V") \
+ METHOD (flush, "flush", "()V") \
+ METHOD (write, "write", "([BII)V")
 
-DECLARE_JNI_CLASS (AndroidFile, "java/io/File");
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
- STATICMETHOD (withAppendedId, "withAppendedId", "(Landroid/net/Uri;J)Landroid/net/Uri;") \
-
-DECLARE_JNI_CLASS (ContentUris, "android/content/ContentUris");
+DECLARE_JNI_CLASS (AndroidOutputStream, "java/io/OutputStream");
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
 struct AndroidContentUriResolver
 {
 public:
-    static LocalRef<jobject> getInputStreamForContentUri (const URL& url)
+    static LocalRef<jobject> getStreamForContentUri (const URL& url, bool inputStream)
     {
         // only use this method for content URIs
         jassert (url.getScheme() == "content");
@@ -80,7 +77,10 @@ public:
         LocalRef<jobject> contentResolver (android.activity.callObjectMethod (JuceAppActivity.getContentResolver));
 
         if (contentResolver)
-            return LocalRef<jobject> ((env->CallObjectMethod (contentResolver.get(), ContentResolver.openInputStream, urlToUri (url).get())));
+            return LocalRef<jobject> ((env->CallObjectMethod (contentResolver.get(),
+                                                              inputStream ? ContentResolver.openInputStream
+                                                                          : ContentResolver.openOutputStream,
+                                                              urlToUri (url).get())));
 
         return LocalRef<jobject>();
     }
@@ -131,12 +131,34 @@ public:
             if (type == "image")
                 type = "images";
 
-            return getCursorDataColumn (URL (String ("content://media/external/") + type + "/media"),
+            return getCursorDataColumn (URL ("content://media/external/" + type + "/media"),
                                         "_id=?", StringArray {mediaId});
         }
 
         return getCursorDataColumn (url);
     }
+
+    static String getFileNameFromContentUri (const URL& url)
+    {
+        auto uri = urlToUri (url);
+        auto* env = getEnv();
+        LocalRef<jobject> contentResolver (android.activity.callObjectMethod (JuceAppActivity.getContentResolver));
+
+        if (contentResolver == 0)
+            return {};
+
+        auto filename = getStringUsingDataColumn ("_display_name", env, uri, contentResolver);
+
+        // Fallback to "_data" column
+        if (filename.isEmpty())
+        {
+            auto path = getStringUsingDataColumn ("_data", env, uri, contentResolver);
+            filename = path.fromLastOccurrenceOf ("/", false, true);
+        }
+
+        return filename;
+    }
+
 private:
     //==============================================================================
     static String getCursorDataColumn (const URL& url, const String& selection = {},
@@ -155,7 +177,7 @@ private:
 
             if (selection.isNotEmpty())
             {
-                args = LocalRef<jobjectArray> (env->NewObjectArray (selectionArgs.size(), JavaString, javaString("").get()));
+                args = LocalRef<jobjectArray> (env->NewObjectArray (selectionArgs.size(), JavaString, javaString ("").get()));
 
                 for (int i = 0; i < selectionArgs.size(); ++i)
                     env->SetObjectArrayElement (args.get(), i, javaString (selectionArgs[i]).get());
@@ -323,9 +345,9 @@ private:
     {
         auto* env = getEnv();
 
-        if (env->IsInstanceOf (obj.get(), AndroidFile) != 0)
-            return File (safeString (LocalRef<jobject> (env->CallObjectMethod (obj.get(),
-                                                            AndroidFile.getAbsolutePath))));
+        if (env->IsInstanceOf (obj.get(), JavaFile) != 0)
+            return File (juceString (LocalRef<jstring> ((jstring) env->CallObjectMethod (obj.get(),
+                                                        JavaFile.getAbsolutePath))));
 
         return {};
     }
@@ -342,17 +364,102 @@ private:
 
     static LocalRef<jobject> urlToUri (const URL& url)
     {
-        return LocalRef<jobject> (getEnv()->CallStaticObjectMethod (Uri, Uri.parse, javaString (url.toString (true)).get()));
+        return LocalRef<jobject> (getEnv()->CallStaticObjectMethod (AndroidUri, AndroidUri.parse,
+                                                                    javaString (url.toString (true)).get()));
     }
 
-    static String safeString (LocalRef<jobject> str)
+    //==============================================================================
+    static String getStringUsingDataColumn (const String& columnNameToUse, JNIEnv* env,
+                                            const LocalRef<jobject>& uri,
+                                            const LocalRef<jobject>& contentResolver)
     {
-        if (str)
-            return juceString ((jstring) str.get());
+        LocalRef<jstring> columnName (javaString (columnNameToUse));
+        LocalRef<jobjectArray> projection (env->NewObjectArray (1, JavaString, columnName.get()));
 
-        return {};
+        LocalRef<jobject> cursor (env->CallObjectMethod (contentResolver.get(), ContentResolver.query,
+                                                         uri.get(), projection.get(), nullptr,
+                                                         nullptr, nullptr));
+
+        if (cursor == 0)
+            return {};
+
+        String fileName;
+
+        if (env->CallBooleanMethod (cursor.get(), AndroidCursor.moveToFirst) != 0)
+        {
+            auto columnIndex = env->CallIntMethod (cursor.get(), AndroidCursor.getColumnIndex, columnName.get());
+
+            if (columnIndex >= 0)
+            {
+                LocalRef<jstring> value ((jstring) env->CallObjectMethod (cursor.get(), AndroidCursor.getString, columnIndex));
+
+                if (value)
+                    fileName = juceString (value.get());
+
+            }
+        }
+
+        env->CallVoidMethod (cursor.get(), AndroidCursor.close);
+
+        return fileName;
     }
 };
+
+//==============================================================================
+struct AndroidContentUriOutputStream :  public OutputStream
+{
+    AndroidContentUriOutputStream (LocalRef<jobject>&& outputStream)
+        : stream (outputStream)
+    {
+    }
+
+    ~AndroidContentUriOutputStream()
+    {
+        stream.callVoidMethod (AndroidOutputStream.close);
+    }
+
+    void flush() override
+    {
+        stream.callVoidMethod (AndroidOutputStream.flush);
+    }
+
+    bool setPosition (int64 newPos) override
+    {
+        return (newPos == pos);
+    }
+
+    int64 getPosition() override
+    {
+        return pos;
+    }
+
+    bool write (const void* dataToWrite, size_t numberOfBytes) override
+    {
+        if (numberOfBytes == 0)
+            return true;
+
+        JNIEnv* env = getEnv();
+
+        jbyteArray javaArray = env->NewByteArray ((jsize) numberOfBytes);
+        env->SetByteArrayRegion (javaArray, 0, (jsize) numberOfBytes, (const jbyte*) dataToWrite);
+
+        stream.callVoidMethod (AndroidOutputStream.write, javaArray, 0, (jint) numberOfBytes);
+        env->DeleteLocalRef (javaArray);
+
+        pos += static_cast<int64> (numberOfBytes);
+        return true;
+    }
+
+    GlobalRef stream;
+    int64 pos = 0;
+};
+
+OutputStream* juce_CreateContentURIOutputStream (const URL& url)
+{
+    auto stream = AndroidContentUriResolver::getStreamForContentUri (url, false);
+
+    return (stream.get() != 0 ? new AndroidContentUriOutputStream (static_cast<LocalRef<jobject>&&> (stream)) : nullptr);
+}
 
 //==============================================================================
 class MediaScannerConnectionClient : public AndroidInterfaceImplementer
@@ -508,7 +615,7 @@ void FileOutputStream::flushInternal()
             status = getResultForErrno();
 
         // This stuff tells the OS to asynchronously update the metadata
-        // that the OS has cached aboud the file - this metadata is used
+        // that the OS has cached about the file - this metadata is used
         // when the device is acting as a USB drive, and unless it's explicitly
         // refreshed, it'll get out of step with the real file.
         new SingleMediaScanner (file.getFullPathName());

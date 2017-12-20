@@ -142,6 +142,10 @@
  //#define JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS 1
 #endif
 
+#ifndef    JUCE_STANDALONE_FILTER_WINDOW_USE_KIOSK_MODE
+ //#define JUCE_STANDALONE_FILTER_WINDOW_USE_KIOSK_MODE 1
+#endif
+
 //==============================================================================
 // juce_audio_processors flags:
 

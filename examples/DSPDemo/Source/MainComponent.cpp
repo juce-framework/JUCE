@@ -221,7 +221,7 @@ void MainContentComponent::setupDemoColours()
     if (xml != nullptr)
     {
         auto colourSchemeTree = ValueTree::fromXml (*xml);
-        auto& scheme = codeEditor.getColourScheme();
+        CodeEditorComponent::ColourScheme scheme (codeEditor.getColourScheme());
 
         for (auto& type : scheme.types)
         {
@@ -230,6 +230,8 @@ void MainContentComponent::setupDemoColours()
             if (colour.isValid())
                 type.colour = Colour::fromString (colour ["colour"].toString());
         }
+
+        codeEditor.setColourScheme (scheme);
     }
 
     codeEditor.setScrollbarThickness (6);

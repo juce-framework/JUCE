@@ -60,8 +60,7 @@ public:
             p.addRectangle (area);
             DropShadow (Colours::black.withAlpha (0.5f), 6, Point<int> (0, 1)).drawForPath (g, p);
 
-            g.fillCheckerBoard (area.getSmallestIntegerContainer(), 24, 24,
-                                Colour (0xffffffff), Colour (0xffeeeeee));
+            g.fillCheckerBoard (area, 24.0f, 24.0f, Colour (0xffffffff), Colour (0xffeeeeee));
 
             drawable->draw (g, 1.0f, RectanglePlacement (RectanglePlacement::stretchToFit)
                                         .getTransformToFit (contentBounds, area.toFloat()));

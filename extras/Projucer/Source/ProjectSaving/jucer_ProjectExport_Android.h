@@ -113,6 +113,8 @@ public:
     CachedValue<bool>   androidEnableRemoteNotifications;
     CachedValue<String> androidRemoteNotificationsConfigFile;
 
+    CachedValue<bool>   androidEnableContentSharing;
+
     CachedValue<String> androidKeyStore, androidKeyStorePass, androidKeyAlias, androidKeyAliasPass;
 
     CachedValue<String> gradleVersion, androidPluginVersion, gradleToolchain, buildToolsVersion;
@@ -142,6 +144,7 @@ public:
           androidOtherPermissions (settings, Ids::androidOtherPermissions, nullptr),
           androidEnableRemoteNotifications (settings, Ids::androidEnableRemoteNotifications, nullptr, false),
           androidRemoteNotificationsConfigFile (settings, Ids::androidRemoteNotificationsConfigFile, nullptr, ""),
+          androidEnableContentSharing (settings, Ids::androidEnableContentSharing, nullptr, false),
           androidKeyStore (settings, Ids::androidKeyStore, nullptr, "${user.home}/.android/debug.keystore"),
           androidKeyStorePass (settings, Ids::androidKeyStorePass, nullptr, "android"),
           androidKeyAlias (settings, Ids::androidKeyAlias, nullptr, "androiddebugkey"),
@@ -905,6 +908,9 @@ private:
                    "Enable to be able to send remote notifications to devices running your app (min API level 14). Provide Remote Notifications Config File, "
                    "configure your app in Firebase Console and ensure you have the latest Google Repository in Android Studio's SDK Manager.");
 
+        props.add (new BooleanPropertyComponent (androidEnableContentSharing.getPropertyAsValue(), "Content Sharing", "Enabled"),
+                   "If enabled, your app will be able to share content with other apps.");
+
         props.add (new TextPropertyComponent (androidRemoteNotificationsConfigFile.getPropertyAsValue(), "Remote Notifications Config File", 2048, false),
                    "Path to google-services.json file. This will be the file provided by Firebase when creating a new app in Firebase console.");
 
@@ -974,6 +980,7 @@ private:
 
             copyActivityJavaFiles (javaSourceFolder, javaTarget, package);
             copyServicesJavaFiles (javaSourceFolder, javaTarget, package);
+            copyProviderJavaFile  (javaSourceFolder, javaTarget, package);
             copyAdditionalJavaFiles (javaSourceFolder, javaInAppBillingTarget);
         }
     }
@@ -1138,6 +1145,31 @@ private:
                 overwriteFileIfDifferentOrThrow (targetFile, newContent);
             }
         }
+    }
+
+    void copyProviderJavaFile (const File& javaSourceFolder, const File& targetFolder, const String& package) const
+    {
+        File providerFile (javaSourceFolder.getChildFile ("AndroidSharingContentProvider.java"));
+
+        jassert (providerFile.existsAsFile());
+
+        auto targetFile = targetFolder.getChildFile ("SharingContentProvider.java");
+
+        auto fileContent = providerFile.loadFileAsString()
+                                       .replace ("package com.juce;", "package " + package + ";");
+
+        auto commonStart = fileContent.upToFirstOccurrenceOf ("$$ContentProviderApi11", false, false);
+        auto commonEnd   = fileContent.fromFirstOccurrenceOf ("ContentProviderApi11$$", false, false);
+
+        auto middleContent = androidMinimumSDK.get().getIntValue() >= 11
+                                ? fileContent.fromFirstOccurrenceOf ("$$ContentProviderApi11", false, false)
+                                             .upToFirstOccurrenceOf ("ContentProviderApi11$$", false, false)
+                                : String();
+
+        auto newContent = commonStart;
+        newContent << middleContent << commonEnd;
+
+        overwriteFileIfDifferentOrThrow (targetFile, newContent);
     }
 
     void copyExtraResourceFiles() const
@@ -1405,6 +1437,8 @@ private:
         defines.set ("JUCE_ANDROID_API_VERSION", androidMinimumSDK.get());
         defines.set ("JUCE_ANDROID_ACTIVITY_CLASSNAME", getJNIActivityClassName().replaceCharacter ('/', '_'));
         defines.set ("JUCE_ANDROID_ACTIVITY_CLASSPATH", "\"" + getJNIActivityClassName() + "\"");
+        defines.set ("JUCE_ANDROID_SHARING_CONTENT_PROVIDER_CLASSNAME", getSharingContentProviderClassName().replaceCharacter('.', '_'));
+        defines.set ("JUCE_ANDROID_SHARING_CONTENT_PROVIDER_CLASSPATH", "\"" + getSharingContentProviderClassName().replaceCharacter('.', '/') + "\"");
         defines.set ("JUCE_PUSH_NOTIFICATIONS", "1");
 
         if (androidInAppBillingPermission.get())
@@ -1422,6 +1456,11 @@ private:
             defines.set ("JUCE_ANDROID_GL_ES_VERSION_3_0", "1");
 
         return defines;
+    }
+
+    String getSharingContentProviderClassName() const
+    {
+        return getActivityClassPackage() + ".SharingContentProvider";
     }
 
     StringPairArray getProjectPreprocessorDefs() const
@@ -1531,6 +1570,29 @@ private:
     //==============================================================================
     XmlElement* createManifestXML() const
     {
+        XmlElement* manifest = createManifestElement();
+
+        createSupportsScreensElement (*manifest);
+        createUsesSdkElement         (*manifest);
+        createPermissionElements     (*manifest);
+        createOpenGlFeatureElement   (*manifest);
+
+        if (! isLibrary())
+        {
+            auto* app = createApplicationElement (*manifest);
+
+            auto* act = createActivityElement (*app);
+            createIntentElement (*act);
+
+            createServiceElements (*app);
+            createProviderElement (*app);
+        }
+
+        return manifest;
+    }
+
+    XmlElement* createManifestElement() const
+    {
         XmlElement* manifest = XmlDocument::parse (androidManifestCustomXmlElements.get());
 
         if (manifest == nullptr)
@@ -1541,39 +1603,51 @@ private:
         setAttributeIfNotPresent (*manifest, "android:versionName",  project.getVersionString());
         setAttributeIfNotPresent (*manifest, "package", getActivityClassPackage());
 
+        return manifest;
+    }
+
+    void createSupportsScreensElement (XmlElement& manifest) const
+    {
         if (! isLibrary())
         {
-            if (manifest->getChildByName ("supports-screens") == nullptr)
+            if (manifest.getChildByName ("supports-screens") == nullptr)
             {
-                XmlElement* screens = manifest->createNewChildElement ("supports-screens");
+                XmlElement* screens = manifest.createNewChildElement ("supports-screens");
                 screens->setAttribute ("android:smallScreens", "true");
                 screens->setAttribute ("android:normalScreens", "true");
                 screens->setAttribute ("android:largeScreens", "true");
                 screens->setAttribute ("android:anyDensity", "true");
             }
         }
+    }
 
-        auto* sdk = getOrCreateChildWithName (*manifest, "uses-sdk");
+    void createUsesSdkElement (XmlElement& manifest) const
+    {
+        auto* sdk = getOrCreateChildWithName (manifest, "uses-sdk");
         setAttributeIfNotPresent (*sdk, "android:minSdkVersion", androidMinimumSDK.get());
         setAttributeIfNotPresent (*sdk, "android:targetSdkVersion", androidMinimumSDK.get());
+    }
 
+    void createPermissionElements (XmlElement& manifest) const
+    {
+        StringArray permissions (getPermissionsRequired());
+
+        forEachXmlChildElementWithTagName (manifest, child, "uses-permission")
         {
-            StringArray permissions (getPermissionsRequired());
-
-            forEachXmlChildElementWithTagName (*manifest, child, "uses-permission")
-            {
-                permissions.removeString (child->getStringAttribute ("android:name"), false);
-            }
-
-            for (int i = permissions.size(); --i >= 0;)
-                manifest->createNewChildElement ("uses-permission")->setAttribute ("android:name", permissions[i]);
+            permissions.removeString (child->getStringAttribute ("android:name"), false);
         }
 
+        for (int i = permissions.size(); --i >= 0;)
+            manifest.createNewChildElement ("uses-permission")->setAttribute ("android:name", permissions[i]);
+    }
+
+    void createOpenGlFeatureElement (XmlElement& manifest) const
+    {
         if (project.getModules().isModuleEnabled ("juce_opengl"))
         {
             XmlElement* glVersion = nullptr;
 
-            forEachXmlChildElementWithTagName (*manifest, child, "uses-feature")
+            forEachXmlChildElementWithTagName (manifest, child, "uses-feature")
             {
                 if (child->getStringAttribute ("android:glEsVersion").isNotEmpty())
                 {
@@ -1583,120 +1657,143 @@ private:
             }
 
             if (glVersion == nullptr)
-                glVersion = manifest->createNewChildElement ("uses-feature");
+                glVersion = manifest.createNewChildElement ("uses-feature");
 
             setAttributeIfNotPresent (*glVersion, "android:glEsVersion", (androidMinimumSDK.get().getIntValue() >= 18 ? "0x00030000" : "0x00020000"));
             setAttributeIfNotPresent (*glVersion, "android:required", "true");
         }
+    }
 
-        if (! isLibrary())
+    XmlElement* createApplicationElement (XmlElement& manifest) const
+    {
+        auto* app = getOrCreateChildWithName (manifest, "application");
+        setAttributeIfNotPresent (*app, "android:label", "@string/app_name");
+
+        if (androidTheme.get().isNotEmpty())
+            setAttributeIfNotPresent (*app, "android:theme", androidTheme.get());
+
+        if (! app->hasAttribute ("android:icon"))
         {
-            auto* app = getOrCreateChildWithName (*manifest, "application");
-            setAttributeIfNotPresent (*app, "android:label", "@string/app_name");
+            ScopedPointer<Drawable> bigIcon (getBigIcon()), smallIcon (getSmallIcon());
 
-            if (androidTheme.get().isNotEmpty())
-                setAttributeIfNotPresent (*app, "android:theme", androidTheme.get());
+            if (bigIcon != nullptr || smallIcon != nullptr)
+                app->setAttribute ("android:icon", "@drawable/icon");
+        }
 
-            if (! app->hasAttribute ("android:icon"))
+        if (androidMinimumSDK.get().getIntValue() >= 11)
+        {
+            if (! app->hasAttribute ("android:hardwareAccelerated"))
+                app->setAttribute ("android:hardwareAccelerated", "false"); // (using the 2D acceleration slows down openGL)
+        }
+        else
+        {
+            app->removeAttribute ("android:hardwareAccelerated");
+        }
+
+        return app;
+    }
+
+    XmlElement* createActivityElement (XmlElement& application) const
+    {
+        auto* act = getOrCreateChildWithName (application, "activity");
+
+        setAttributeIfNotPresent (*act, "android:name", getActivitySubClassName());
+        setAttributeIfNotPresent (*act, "android:label", "@string/app_name");
+
+        if (! act->hasAttribute ("android:configChanges"))
+        {
+            String configChanges ("keyboardHidden|orientation");
+            if (androidMinimumSDK.get().getIntValue() >= 13)
+                configChanges += "|screenSize";
+
+            act->setAttribute ("android:configChanges", configChanges);
+        }
+        else
+        {
+            auto configChanges = act->getStringAttribute ("android:configChanges");
+
+            if (androidMinimumSDK.get().getIntValue() < 13 && configChanges.contains ("screenSize"))
             {
-                ScopedPointer<Drawable> bigIcon (getBigIcon()), smallIcon (getSmallIcon());
-
-                if (bigIcon != nullptr || smallIcon != nullptr)
-                    app->setAttribute ("android:icon", "@drawable/icon");
-            }
-
-            if (androidMinimumSDK.get().getIntValue() >= 11)
-            {
-                if (! app->hasAttribute ("android:hardwareAccelerated"))
-                    app->setAttribute ("android:hardwareAccelerated", "false"); // (using the 2D acceleration slows down openGL)
-            }
-            else
-            {
-                app->removeAttribute ("android:hardwareAccelerated");
-            }
-
-            auto* act = getOrCreateChildWithName (*app, "activity");
-
-            setAttributeIfNotPresent (*act, "android:name", getActivitySubClassName());
-            setAttributeIfNotPresent (*act, "android:label", "@string/app_name");
-
-            if (! act->hasAttribute ("android:configChanges"))
-            {
-                String configChanges ("keyboardHidden|orientation");
-                if (androidMinimumSDK.get().getIntValue() >= 13)
-                    configChanges += "|screenSize";
+                configChanges = configChanges.replace ("|screenSize", "")
+                                             .replace ("screenSize|", "")
+                                             .replace ("screenSize", "");
 
                 act->setAttribute ("android:configChanges", configChanges);
             }
-            else
-            {
-                auto configChanges = act->getStringAttribute ("android:configChanges");
-
-                if (androidMinimumSDK.get().getIntValue() < 13 && configChanges.contains ("screenSize"))
-                {
-                    configChanges = configChanges.replace ("|screenSize", "")
-                                                 .replace ("screenSize|", "")
-                                                 .replace ("screenSize", "");
-
-                    act->setAttribute ("android:configChanges", configChanges);
-                }
-            }
-
-            if (androidScreenOrientation.get() == "landscape")
-            {
-                String landscapeString = androidMinimumSDK.get().getIntValue() < 9
-                                       ? "landscape"
-                                       : (androidMinimumSDK.get().getIntValue() < 18 ? "sensorLandscape" : "userLandscape");
-
-                setAttributeIfNotPresent (*act, "android:screenOrientation", landscapeString);
-            }
-            else
-            {
-                setAttributeIfNotPresent (*act, "android:screenOrientation", androidScreenOrientation.get());
-            }
-
-            setAttributeIfNotPresent (*act, "android:launchMode", "singleTask");
-
-            // Using the 2D acceleration slows down OpenGL. We *do* enable it here for the activity though, and we disable it
-            // in each ComponentPeerView instead. This way any embedded native views, which are not children of ComponentPeerView,
-            // can still use hardware acceleration if needed (e.g. web view).
-            if (androidMinimumSDK.get().getIntValue() >= 11)
-            {
-                if (! act->hasAttribute ("android:hardwareAccelerated"))
-                    act->setAttribute ("android:hardwareAccelerated", "true"); // (using the 2D acceleration slows down openGL)
-            }
-            else
-            {
-                act->removeAttribute ("android:hardwareAccelerated");
-            }
-
-            auto* intent = getOrCreateChildWithName (*act, "intent-filter");
-
-            auto* action = getOrCreateChildWithName (*intent, "action");
-            setAttributeIfNotPresent (*action, "android:name", "android.intent.action.MAIN");
-
-            auto* category = getOrCreateChildWithName (*intent, "category");
-            setAttributeIfNotPresent (*category, "android:name", "android.intent.category.LAUNCHER");
-
-            if (androidEnableRemoteNotifications.get())
-            {
-                auto* service = app->createNewChildElement ("service");
-                service->setAttribute ("android:name", ".JuceFirebaseMessagingService");
-                auto* intentFilter = service->createNewChildElement ("intent-filter");
-                intentFilter->createNewChildElement ("action")->setAttribute ("android:name", "com.google.firebase.MESSAGING_EVENT");
-
-                service = app->createNewChildElement ("service");
-                service->setAttribute ("android:name", ".JuceFirebaseInstanceIdService");
-                intentFilter = service->createNewChildElement ("intent-filter");
-                intentFilter->createNewChildElement ("action")->setAttribute ("android:name", "com.google.firebase.INSTANCE_ID_EVENT");
-
-                auto* metaData = app->createNewChildElement ("meta-data");
-                metaData->setAttribute ("android:name", "firebase_analytics_collection_deactivated");
-                metaData->setAttribute ("android:value", "true");
-            }
         }
 
-        return manifest;
+        if (androidScreenOrientation.get() == "landscape")
+        {
+            String landscapeString = androidMinimumSDK.get().getIntValue() < 9
+                                   ? "landscape"
+                                   : (androidMinimumSDK.get().getIntValue() < 18 ? "sensorLandscape" : "userLandscape");
+
+            setAttributeIfNotPresent (*act, "android:screenOrientation", landscapeString);
+        }
+        else
+        {
+            setAttributeIfNotPresent (*act, "android:screenOrientation", androidScreenOrientation.get());
+        }
+
+        setAttributeIfNotPresent (*act, "android:launchMode", "singleTask");
+
+        // Using the 2D acceleration slows down OpenGL. We *do* enable it here for the activity though, and we disable it
+        // in each ComponentPeerView instead. This way any embedded native views, which are not children of ComponentPeerView,
+        // can still use hardware acceleration if needed (e.g. web view).
+        if (androidMinimumSDK.get().getIntValue() >= 11)
+        {
+            if (! act->hasAttribute ("android:hardwareAccelerated"))
+                act->setAttribute ("android:hardwareAccelerated", "true"); // (using the 2D acceleration slows down openGL)
+        }
+        else
+        {
+            act->removeAttribute ("android:hardwareAccelerated");
+        }
+
+        return act;
+    }
+
+    void createIntentElement (XmlElement& application) const
+    {
+        auto* intent = getOrCreateChildWithName (application, "intent-filter");
+
+        auto* action = getOrCreateChildWithName (*intent, "action");
+        setAttributeIfNotPresent (*action, "android:name", "android.intent.action.MAIN");
+
+        auto* category = getOrCreateChildWithName (*intent, "category");
+        setAttributeIfNotPresent (*category, "android:name", "android.intent.category.LAUNCHER");
+    }
+
+    void createServiceElements (XmlElement& application) const
+    {
+        if (androidEnableRemoteNotifications.get())
+        {
+            auto* service = application.createNewChildElement ("service");
+            service->setAttribute ("android:name", ".JuceFirebaseMessagingService");
+            auto* intentFilter = service->createNewChildElement ("intent-filter");
+            intentFilter->createNewChildElement ("action")->setAttribute ("android:name", "com.google.firebase.MESSAGING_EVENT");
+
+            service = application.createNewChildElement ("service");
+            service->setAttribute ("android:name", ".JuceFirebaseInstanceIdService");
+            intentFilter = service->createNewChildElement ("intent-filter");
+            intentFilter->createNewChildElement ("action")->setAttribute ("android:name", "com.google.firebase.INSTANCE_ID_EVENT");
+
+            auto* metaData = application.createNewChildElement ("meta-data");
+            metaData->setAttribute ("android:name", "firebase_analytics_collection_deactivated");
+            metaData->setAttribute ("android:value", "true");
+        }
+    }
+
+    void createProviderElement (XmlElement& application) const
+    {
+        if (androidEnableContentSharing.get())
+        {
+            auto* provider = application.createNewChildElement ("provider");
+            provider->setAttribute ("android:name", getSharingContentProviderClassName());
+            provider->setAttribute ("android:authorities", getSharingContentProviderClassName().toLowerCase());
+            provider->setAttribute ("android:grantUriPermissions", "true");
+            provider->setAttribute ("android:exported", "false");
+        }
     }
 
     static XmlElement* getOrCreateChildWithName (XmlElement& element, const String& name)

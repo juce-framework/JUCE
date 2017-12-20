@@ -170,7 +170,7 @@ void TextPropertyComponent::removeListener (TextPropertyComponentListener* const
 void TextPropertyComponent::callListeners()
 {
     Component::BailOutChecker checker (this);
-    listenerList.callChecked (checker, &TextPropertyComponentListener::textPropertyComponentChanged, this);
+    listenerList.callChecked (checker, [this] (Listener& l) { l.textPropertyComponentChanged (this); });
 }
 
 void TextPropertyComponent::colourChanged()

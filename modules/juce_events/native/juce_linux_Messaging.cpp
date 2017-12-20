@@ -132,7 +132,7 @@ public:
     }
 
     //==============================================================================
-    juce_DeclareSingleton_SingleThreaded_Minimal (InternalMessageQueue)
+    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (InternalMessageQueue)
 
 private:
     CriticalSection lock;
@@ -165,7 +165,7 @@ private:
     }
 };
 
-juce_ImplementSingleton_SingleThreaded (InternalMessageQueue)
+JUCE_IMPLEMENT_SINGLETON (InternalMessageQueue)
 
 
 //==============================================================================

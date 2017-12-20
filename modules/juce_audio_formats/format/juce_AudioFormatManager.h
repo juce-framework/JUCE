@@ -63,8 +63,7 @@ public:
     void registerFormat (AudioFormat* newFormat,
                          bool makeThisTheDefaultFormat);
 
-    /** Handy method to make it easy to register the formats that come with Juce.
-
+    /** Handy method to make it easy to register the formats that come with JUCE.
         Currently, this will add WAV and AIFF to the list.
     */
     void registerBasicFormats();
@@ -79,10 +78,10 @@ public:
     AudioFormat* getKnownFormat (int index) const;
 
     /** Iterator access to the list of known formats. */
-    AudioFormat** begin() const noexcept            { return knownFormats.begin(); }
+    AudioFormat** begin() const noexcept                       { return knownFormats.begin(); }
 
     /** Iterator access to the list of known formats. */
-    AudioFormat** end() const noexcept              { return knownFormats.end(); }
+    AudioFormat** end() const noexcept                         { return knownFormats.end(); }
 
     /** Looks for which of the known formats is listed as being for a given file
         extension.

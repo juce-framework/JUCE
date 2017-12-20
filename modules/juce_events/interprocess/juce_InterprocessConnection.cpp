@@ -325,7 +325,7 @@ void InterprocessConnection::runThread()
     {
         if (socket != nullptr)
         {
-            auto ready = socket->waitUntilReady (true, 0);
+            auto ready = socket->waitUntilReady (true, 100);
 
             if (ready < 0)
             {

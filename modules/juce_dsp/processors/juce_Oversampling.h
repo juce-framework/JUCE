@@ -50,7 +50,7 @@ class OversamplingEngine;
     Choose between FIR or IIR filtering depending on your needs in term of
     latency and phase distortion. With FIR filters, the phase is linear but the
     latency is maximum. With IIR filtering, the phase is compromised around the
-    Nyquist frequency but the phase is minimum.
+    Nyquist frequency but the latency is minimum.
 
     @see FilterDesign.
 */

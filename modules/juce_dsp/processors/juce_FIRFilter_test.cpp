@@ -106,7 +106,7 @@ class FIRFilterTest : public UnitTest
 
             buffer[0] = input[i];
 
-            SampleType sum{};
+            SampleType sum (0);
 
             for (size_t j = 0; j < numCoefficients; ++j)
                 sum += buffer[j] * firCoefficients[j];
@@ -162,7 +162,7 @@ class FIRFilterTest : public UnitTest
 
     //==============================================================================
     template <typename TheTest, typename SampleType, typename NumericType>
-    void runTestForType ()
+    void runTestForType()
     {
         Random random (8392829);
 
@@ -195,10 +195,10 @@ class FIRFilterTest : public UnitTest
     {
         beginTest (unitTestName);
 
-        runTestForType<TheTest, float, float> ();
+        runTestForType<TheTest, float, float>();
         runTestForType<TheTest, double, double>();
        #if JUCE_USE_SIMD
-        runTestForType<TheTest, SIMDRegister<float>, float> ();
+        runTestForType<TheTest, SIMDRegister<float>, float>();
         runTestForType<TheTest, SIMDRegister<double>, double>();
        #endif
     }

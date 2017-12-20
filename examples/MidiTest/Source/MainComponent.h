@@ -43,14 +43,14 @@ class MainContentComponent  : public Component,
 {
 public:
     //==============================================================================
-    MainContentComponent ();
+    MainContentComponent();
     ~MainContentComponent();
 
     //==============================================================================
-    void timerCallback () override;
+    void timerCallback() override;
     void handleNoteOn (MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) override;
     void handleNoteOff (MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) override;
-    void handleMessage (const Message& msg) override;
+    void handleMessage (const Message&) override;
 
     void paint (Graphics& g) override;
     void resized() override;

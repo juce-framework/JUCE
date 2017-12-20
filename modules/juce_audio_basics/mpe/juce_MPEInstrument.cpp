@@ -220,28 +220,28 @@ void MPEInstrument::processMidiAllNotesOffMessage (const MidiMessage& message)
     {
         for (int i = notes.size(); --i >= 0;)
         {
-            MPENote& note = notes.getReference (i);
+            auto& note = notes.getReference (i);
 
             if (note.midiChannel == message.getChannel())
             {
                 note.keyState = MPENote::off;
                 note.noteOffVelocity = MPEValue::from7BitInt (64); // some reasonable number
-                listeners.call (&MPEInstrument::Listener::noteReleased, note);
+                listeners.call ([&] (Listener& l) { l.noteReleased (note); });
                 notes.remove (i);
             }
         }
     }
-    else if (MPEZone* zone = zoneLayout.getZoneByMasterChannel (message.getChannel()))
+    else if (auto* zone = zoneLayout.getZoneByMasterChannel (message.getChannel()))
     {
         for (int i = notes.size(); --i >= 0;)
         {
-            MPENote& note = notes.getReference (i);
+            auto& note = notes.getReference (i);
 
             if (zone->isUsingChannelAsNoteChannel (note.midiChannel))
             {
                 note.keyState = MPENote::off;
                 note.noteOffVelocity = MPEValue::from7BitInt (64); // some reasonable number
-                listeners.call (&MPEInstrument::Listener::noteReleased, note);
+                listeners.call ([&] (Listener& l) { l.noteReleased (note); });
                 notes.remove (i);
             }
         }
@@ -294,17 +294,17 @@ void MPEInstrument::noteOn (int midiChannel,
     const ScopedLock sl (lock);
     updateNoteTotalPitchbend (newNote);
 
-    if (MPENote* alreadyPlayingNote = getNotePtr (midiChannel, midiNoteNumber))
+    if (auto* alreadyPlayingNote = getNotePtr (midiChannel, midiNoteNumber))
     {
         // pathological case: second note-on received for same note -> retrigger it
         alreadyPlayingNote->keyState = MPENote::off;
         alreadyPlayingNote->noteOffVelocity = MPEValue::from7BitInt (64); // some reasonable number
-        listeners.call (&MPEInstrument::Listener::noteReleased, *alreadyPlayingNote);
+        listeners.call ([=] (Listener& l) { l.noteReleased (*alreadyPlayingNote); });
         notes.remove (alreadyPlayingNote);
     }
 
     notes.add (newNote);
-    listeners.call (&MPEInstrument::Listener::noteAdded, newNote);
+    listeners.call ([&] (Listener& l) { l.noteAdded (newNote); });
 }
 
 //==============================================================================
@@ -317,7 +317,7 @@ void MPEInstrument::noteOff (int midiChannel,
 
     const ScopedLock sl (lock);
 
-    if (MPENote* note = getNotePtr (midiChannel, midiNoteNumber))
+    if (auto* note = getNotePtr (midiChannel, midiNoteNumber))
     {
         note->keyState = (note->keyState == MPENote::keyDownAndSustained) ? MPENote::sustained : MPENote::off;
         note->noteOffVelocity = midiNoteOffVelocity;
@@ -330,12 +330,12 @@ void MPEInstrument::noteOff (int midiChannel,
 
         if (note->keyState == MPENote::off)
         {
-            listeners.call (&MPEInstrument::Listener::noteReleased, *note);
+            listeners.call ([=] (Listener& l) { l.noteReleased (*note); });
             notes.remove (note);
         }
         else
         {
-            listeners.call (&MPEInstrument::Listener::noteKeyStateChanged, *note);
+            listeners.call ([=] (Listener& l) { l.noteKeyStateChanged (*note); });
         }
     }
 }
@@ -375,7 +375,7 @@ void MPEInstrument::updateDimension (int midiChannel, MPEDimension& dimension, M
     if (notes.isEmpty())
         return;
 
-    if (MPEZone* zone = zoneLayout.getZoneByMasterChannel (midiChannel))
+    if (auto* zone = zoneLayout.getZoneByMasterChannel (midiChannel))
     {
         updateDimensionMaster (*zone, dimension, value);
     }
@@ -385,7 +385,7 @@ void MPEInstrument::updateDimension (int midiChannel, MPEDimension& dimension, M
         {
             for (int i = notes.size(); --i >= 0;)
             {
-                MPENote& note = notes.getReference (i);
+                auto& note = notes.getReference (i);
 
                 if (note.midiChannel == midiChannel)
                     updateDimensionForNote (note, dimension, value);
@@ -393,20 +393,20 @@ void MPEInstrument::updateDimension (int midiChannel, MPEDimension& dimension, M
         }
         else
         {
-            if (MPENote* note = getNotePtr (midiChannel, dimension.trackingMode))
+            if (auto* note = getNotePtr (midiChannel, dimension.trackingMode))
                 updateDimensionForNote (*note, dimension, value);
         }
     }
 }
 
 //==============================================================================
-void MPEInstrument::updateDimensionMaster (MPEZone& zone, MPEDimension& dimension, MPEValue value)
+void MPEInstrument::updateDimensionMaster (const MPEZone& zone, MPEDimension& dimension, MPEValue value)
 {
-    const Range<int> channels (zone.getNoteChannelRange());
+    auto channels = zone.getNoteChannelRange();
 
     for (int i = notes.size(); --i >= 0;)
     {
-        MPENote& note = notes.getReference (i);
+        auto& note = notes.getReference (i);
 
         if (! channels.contains (note.midiChannel))
             continue;
@@ -416,7 +416,7 @@ void MPEInstrument::updateDimensionMaster (MPEZone& zone, MPEDimension& dimensio
             // master pitchbend is a special case: we don't change the note's own pitchbend,
             // instead we have to update its total (master + note) pitchbend.
             updateNoteTotalPitchbend (note);
-            listeners.call (&MPEInstrument::Listener::notePitchbendChanged, note);
+            listeners.call ([&] (Listener& l) { l.notePitchbendChanged (note); });
         }
         else if (dimension.getValue (note) != value)
         {
@@ -441,11 +441,11 @@ void MPEInstrument::updateDimensionForNote (MPENote& note, MPEDimension& dimensi
 }
 
 //==============================================================================
-void MPEInstrument::callListenersDimensionChanged (MPENote& note, MPEDimension& dimension)
+void MPEInstrument::callListenersDimensionChanged (const MPENote& note, const MPEDimension& dimension)
 {
-    if (&dimension == &pressureDimension)  { listeners.call (&MPEInstrument::Listener::notePressureChanged,  note); return; }
-    if (&dimension == &timbreDimension)    { listeners.call (&MPEInstrument::Listener::noteTimbreChanged,    note); return; }
-    if (&dimension == &pitchbendDimension) { listeners.call (&MPEInstrument::Listener::notePitchbendChanged, note); return; }
+    if (&dimension == &pressureDimension)  { listeners.call ([&] (Listener& l) { l.notePressureChanged  (note); }); return; }
+    if (&dimension == &timbreDimension)    { listeners.call ([&] (Listener& l) { l.noteTimbreChanged    (note); }); return; }
+    if (&dimension == &pitchbendDimension) { listeners.call ([&] (Listener& l) { l.notePitchbendChanged (note); }); return; }
 }
 
 //==============================================================================
@@ -457,10 +457,10 @@ void MPEInstrument::updateNoteTotalPitchbend (MPENote& note)
     }
     else
     {
-        if (MPEZone* zone = zoneLayout.getZoneByNoteChannel (note.midiChannel))
+        if (auto* zone = zoneLayout.getZoneByNoteChannel (note.midiChannel))
         {
-            double notePitchbendInSemitones = note.pitchbend.asSignedFloat() * zone->getPerNotePitchbendRange();
-            double masterPitchbendInSemitones = pitchbendDimension.lastValueReceivedOnChannel[zone->getMasterChannel() - 1].asSignedFloat() * zone->getMasterPitchbendRange();
+            auto notePitchbendInSemitones = note.pitchbend.asSignedFloat() * zone->getPerNotePitchbendRange();
+            auto masterPitchbendInSemitones = pitchbendDimension.lastValueReceivedOnChannel[zone->getMasterChannel() - 1].asSignedFloat() * zone->getMasterPitchbendRange();
             note.totalPitchbendInSemitones = notePitchbendInSemitones + masterPitchbendInSemitones;
         }
         else
@@ -490,14 +490,14 @@ void MPEInstrument::handleSustainOrSostenuto (int midiChannel, bool isDown, bool
     // in MPE mode, sustain/sostenuto is per-zone and expected on the master channel;
     // in legacy mode, sustain/sostenuto is per MIDI channel (within the channel range used).
 
-    MPEZone* affectedZone = zoneLayout.getZoneByMasterChannel (midiChannel);
+    auto* affectedZone = zoneLayout.getZoneByMasterChannel (midiChannel);
 
     if (legacyMode.isEnabled ? (! legacyMode.channelRange.contains (midiChannel)) : (affectedZone == nullptr))
         return;
 
     for (int i = notes.size(); --i >= 0;)
     {
-        MPENote& note = notes.getReference (i);
+        auto& note = notes.getReference (i);
 
         if (legacyMode.isEnabled ? (note.midiChannel == midiChannel) : affectedZone->isUsingChannel (note.midiChannel))
         {
@@ -510,12 +510,12 @@ void MPEInstrument::handleSustainOrSostenuto (int midiChannel, bool isDown, bool
 
             if (note.keyState == MPENote::off)
             {
-                listeners.call (&MPEInstrument::Listener::noteReleased, note);
+                listeners.call ([&] (Listener& l) { l.noteReleased (note); });
                 notes.remove (i);
             }
             else
             {
-                listeners.call (&MPEInstrument::Listener::noteKeyStateChanged, note);
+                listeners.call ([&] (Listener& l) { l.noteKeyStateChanged (note); });
             }
         }
     }
@@ -555,7 +555,7 @@ int MPEInstrument::getNumPlayingNotes() const noexcept
 
 MPENote MPEInstrument::getNote (int midiChannel, int midiNoteNumber) const noexcept
 {
-    if (MPENote* note = getNotePtr (midiChannel, midiNoteNumber))
+    if (auto* note = getNotePtr (midiChannel, midiNoteNumber))
         return *note;
 
     return MPENote();
@@ -569,7 +569,7 @@ MPENote MPEInstrument::getNote (int index) const noexcept
 //==============================================================================
 MPENote MPEInstrument::getMostRecentNote (int midiChannel) const noexcept
 {
-    if (MPENote* note = getLastNotePlayedPtr (midiChannel))
+    if (auto* note = getLastNotePlayedPtr (midiChannel))
         return *note;
 
     return MPENote();
@@ -579,7 +579,7 @@ MPENote MPEInstrument::getMostRecentNoteOtherThan (MPENote otherThanThisNote) co
 {
     for (int i = notes.size(); --i >= 0;)
     {
-        const MPENote& note = notes.getReference (i);
+        auto& note = notes.getReference (i);
 
         if (note != otherThanThisNote)
             return note;
@@ -589,11 +589,11 @@ MPENote MPEInstrument::getMostRecentNoteOtherThan (MPENote otherThanThisNote) co
 }
 
 //==============================================================================
-MPENote* MPEInstrument::getNotePtr (int midiChannel, int midiNoteNumber) const noexcept
+const MPENote* MPEInstrument::getNotePtr (int midiChannel, int midiNoteNumber) const noexcept
 {
     for (int i = 0; i < notes.size(); ++i)
     {
-        MPENote& note = notes.getReference (i);
+        auto& note = notes.getReference (i);
 
         if (note.midiChannel == midiChannel && note.initialNote == midiNoteNumber)
             return &note;
@@ -602,8 +602,13 @@ MPENote* MPEInstrument::getNotePtr (int midiChannel, int midiNoteNumber) const n
     return nullptr;
 }
 
+MPENote* MPEInstrument::getNotePtr (int midiChannel, int midiNoteNumber) noexcept
+{
+    return const_cast<MPENote*> (static_cast<const MPEInstrument&> (*this).getNotePtr (midiChannel, midiNoteNumber));
+}
+
 //==============================================================================
-MPENote* MPEInstrument::getNotePtr (int midiChannel, TrackingMode mode) const noexcept
+const MPENote* MPEInstrument::getNotePtr (int midiChannel, TrackingMode mode) const noexcept
 {
     // for the "all notes" tracking mode, this method can never possibly
     // work because it returns 0 or 1 note but there might be more than one!
@@ -616,12 +621,17 @@ MPENote* MPEInstrument::getNotePtr (int midiChannel, TrackingMode mode) const no
     return nullptr;
 }
 
+MPENote* MPEInstrument::getNotePtr (int midiChannel, TrackingMode mode) noexcept
+{
+    return const_cast<MPENote*> (static_cast<const MPEInstrument&> (*this).getNotePtr (midiChannel, mode));
+}
+
 //==============================================================================
-MPENote* MPEInstrument::getLastNotePlayedPtr (int midiChannel) const noexcept
+const MPENote* MPEInstrument::getLastNotePlayedPtr (int midiChannel) const noexcept
 {
     for (int i = notes.size(); --i >= 0;)
     {
-        MPENote& note = notes.getReference (i);
+        auto& note = notes.getReference (i);
 
         if (note.midiChannel == midiChannel
              && (note.keyState == MPENote::keyDown || note.keyState == MPENote::keyDownAndSustained))
@@ -631,15 +641,20 @@ MPENote* MPEInstrument::getLastNotePlayedPtr (int midiChannel) const noexcept
     return nullptr;
 }
 
+MPENote* MPEInstrument::getLastNotePlayedPtr (int midiChannel) noexcept
+{
+    return const_cast<MPENote*> (static_cast<const MPEInstrument&> (*this).getLastNotePlayedPtr (midiChannel));
+}
+
 //==============================================================================
-MPENote* MPEInstrument::getHighestNotePtr (int midiChannel) const noexcept
+const MPENote* MPEInstrument::getHighestNotePtr (int midiChannel) const noexcept
 {
     int initialNoteMax = -1;
-    MPENote* result = nullptr;
+    const MPENote* result = nullptr;
 
     for (int i = notes.size(); --i >= 0;)
     {
-        MPENote& note = notes.getReference (i);
+        const auto& note = notes.getReference (i);
 
         if (note.midiChannel == midiChannel
              && (note.keyState == MPENote::keyDown || note.keyState == MPENote::keyDownAndSustained)
@@ -653,14 +668,19 @@ MPENote* MPEInstrument::getHighestNotePtr (int midiChannel) const noexcept
     return result;
 }
 
-MPENote* MPEInstrument::getLowestNotePtr (int midiChannel) const noexcept
+MPENote* MPEInstrument::getHighestNotePtr (int midiChannel) noexcept
+{
+    return const_cast<MPENote*> (static_cast<const MPEInstrument&> (*this).getHighestNotePtr (midiChannel));
+}
+
+const MPENote* MPEInstrument::getLowestNotePtr (int midiChannel) const noexcept
 {
     int initialNoteMin = 128;
-    MPENote* result = nullptr;
+    const MPENote* result = nullptr;
 
     for (int i = notes.size(); --i >= 0;)
     {
-        MPENote& note = notes.getReference (i);
+        auto& note = notes.getReference (i);
 
         if (note.midiChannel == midiChannel
              && (note.keyState == MPENote::keyDown || note.keyState == MPENote::keyDownAndSustained)
@@ -674,6 +694,11 @@ MPENote* MPEInstrument::getLowestNotePtr (int midiChannel) const noexcept
     return result;
 }
 
+MPENote* MPEInstrument::getLowestNotePtr (int midiChannel) noexcept
+{
+    return const_cast<MPENote*> (static_cast<const MPEInstrument&> (*this).getLowestNotePtr (midiChannel));
+}
+
 //==============================================================================
 void MPEInstrument::releaseAllNotes()
 {
@@ -681,10 +706,10 @@ void MPEInstrument::releaseAllNotes()
 
     for (int i = notes.size(); --i >= 0;)
     {
-        MPENote& note = notes.getReference (i);
+        auto& note = notes.getReference (i);
         note.keyState = MPENote::off;
         note.noteOffVelocity = MPEValue::from7BitInt (64); // some reasonable number
-        listeners.call (&MPEInstrument::Listener::noteReleased, note);
+        listeners.call ([&] (Listener& l) { l.noteReleased (note); });
     }
 
     notes.clear();

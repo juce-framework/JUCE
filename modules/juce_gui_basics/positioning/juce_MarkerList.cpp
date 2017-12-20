@@ -50,7 +50,7 @@ MarkerList& MarkerList::operator= (const MarkerList& other)
 
 MarkerList::~MarkerList()
 {
-    listeners.call (&MarkerList::Listener::markerListBeingDeleted, this);
+    listeners.call ([this] (Listener& l) { l.markerListBeingDeleted (this); });
 }
 
 bool MarkerList::operator== (const MarkerList& other) const noexcept
@@ -148,7 +148,7 @@ void MarkerList::removeMarker (const String& name)
 
 void MarkerList::markersHaveChanged()
 {
-    listeners.call (&MarkerList::Listener::markersChanged, this);
+    listeners.call ([this] (Listener& l) { l.markersChanged (this); });
 }
 
 void MarkerList::Listener::markerListBeingDeleted (MarkerList*)

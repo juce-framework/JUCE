@@ -149,7 +149,8 @@ URL::URL (File localFile)
         localFile = localFile.getParentDirectory();
     }
 
-    url = addEscapeChars (localFile.getFileName (), false) + url;
+    url = addEscapeChars (localFile.getFileName(), false) + url;
+
     if (! url.startsWithChar (L'/'))
         url = "/" + url;
 
@@ -160,7 +161,7 @@ URL::URL (File localFile)
 
 void URL::init()
 {
-    int i = url.indexOfChar ('?');
+    auto i = url.indexOfChar ('?');
 
     if (i >= 0)
     {
@@ -196,6 +197,9 @@ URL::URL (URL&& other)
       parameterNames  (static_cast<StringArray&&> (other.parameterNames)),
       parameterValues (static_cast<StringArray&&> (other.parameterValues)),
       filesToUpload   (static_cast<ReferenceCountedArray<Upload>&&> (other.filesToUpload))
+   #if JUCE_IOS
+    , bookmark        (static_cast<Bookmark::Ptr&&> (other.bookmark))
+   #endif
 {
 }
 
@@ -206,6 +210,9 @@ URL& URL::operator= (URL&& other)
     parameterNames  = static_cast<StringArray&&> (other.parameterNames);
     parameterValues = static_cast<StringArray&&> (other.parameterValues);
     filesToUpload   = static_cast<ReferenceCountedArray<Upload>&&> (other.filesToUpload);
+   #if JUCE_IOS
+    bookmark        = static_cast<Bookmark::Ptr&&> (other.bookmark);
+   #endif
 
     return *this;
 }
@@ -352,6 +359,11 @@ File URL::getLocalFile() const
 {
     return fileFromFileSchemeURL (*this);
 }
+
+String URL::getFileName() const
+{
+    return toString (false).fromLastOccurrenceOf ("/", false, true);
+}
 #endif
 
 File URL::fileFromFileSchemeURL (const URL& fileURL)
@@ -493,6 +505,127 @@ bool URL::isProbablyAnEmailAddress (const String& possibleEmailAddress)
         && ! possibleEmailAddress.endsWithChar ('.');
 }
 
+#if JUCE_IOS
+URL::Bookmark::Bookmark (void* bookmarkToUse)
+    : data (bookmarkToUse)
+{
+}
+
+URL::Bookmark::~Bookmark()
+{
+    [(NSData*) data release];
+}
+
+void setURLBookmark (URL& u, void* bookmark)
+{
+    u.bookmark = new URL::Bookmark (bookmark);
+}
+
+void* getURLBookmark (URL& u)
+{
+    if (u.bookmark.get() == nullptr)
+        return nullptr;
+
+    return u.bookmark.get()->data;
+}
+
+template <typename Stream> struct iOSFileStreamWrapperFlush    { static void flush (Stream*) {} };
+template <> struct iOSFileStreamWrapperFlush<FileOutputStream> { static void flush (OutputStream* o) { o->flush(); } };
+
+template <typename Stream>
+class iOSFileStreamWrapper : public Stream
+{
+public:
+    iOSFileStreamWrapper (URL& urlToUse)
+        : Stream (getLocalFileAccess (urlToUse)),
+          url (urlToUse)
+    {}
+
+    ~iOSFileStreamWrapper()
+    {
+        iOSFileStreamWrapperFlush<Stream>::flush (this);
+
+        if (NSData* bookmark = (NSData*) getURLBookmark (url))
+        {
+            BOOL isBookmarkStale = false;
+            NSError* error = nil;
+
+            auto* nsURL = [NSURL URLByResolvingBookmarkData: bookmark
+                                                    options: 0
+                                              relativeToURL: nil
+                                        bookmarkDataIsStale: &isBookmarkStale
+                                                      error: &error];
+
+            if (error == nil)
+            {
+                if (isBookmarkStale)
+                    updateStaleBookmark (nsURL, url);
+
+                [nsURL stopAccessingSecurityScopedResource];
+            }
+            else
+            {
+                auto* desc = [error localizedDescription];
+                ignoreUnused (desc);
+                jassertfalse;
+            }
+        }
+    }
+
+private:
+    URL url;
+    bool securityAccessSucceeded = false;
+
+    File getLocalFileAccess (URL& urlToUse)
+    {
+        if (NSData* bookmark = (NSData*) getURLBookmark (urlToUse))
+        {
+            BOOL isBookmarkStale = false;
+            NSError* error = nil;
+
+            auto* nsURL = [NSURL URLByResolvingBookmarkData: bookmark
+                                                    options: 0
+                                              relativeToURL: nil
+                                        bookmarkDataIsStale: &isBookmarkStale
+                                                      error: &error];
+
+            if (error == nil)
+            {
+                securityAccessSucceeded = [nsURL startAccessingSecurityScopedResource];
+
+                if (isBookmarkStale)
+                    updateStaleBookmark (nsURL, urlToUse);
+
+                return urlToUse.getLocalFile();
+            }
+            else
+            {
+                auto* desc = [error localizedDescription];
+                ignoreUnused (desc);
+                jassertfalse;
+            }
+        }
+
+        return urlToUse.getLocalFile();
+    }
+
+    void updateStaleBookmark (NSURL* nsURL, URL& juceUrl)
+    {
+        NSError* error = nil;
+
+        NSData* bookmark = [nsURL bookmarkDataWithOptions: NSURLBookmarkCreationSuitableForBookmarkFile
+                           includingResourceValuesForKeys: nil
+                                            relativeToURL: nil
+                                                    error: &error];
+
+        if (error == nil)
+            setURLBookmark (juceUrl, (void*) bookmark);
+        else
+            jassertfalse;
+    }
+};
+#endif
+
 //==============================================================================
 InputStream* URL::createInputStream (const bool usePostCommand,
                                      OpenStreamProgressCallback* const progressCallback,
@@ -505,7 +638,15 @@ InputStream* URL::createInputStream (const bool usePostCommand,
                                      String httpRequestCmd) const
 {
     if (isLocalFile())
+    {
+       #if JUCE_IOS
+        // We may need to refresh the embedded bookmark.
+        return new iOSFileStreamWrapper<FileInputStream> (const_cast<URL&>(*this));
+       #else
         return getLocalFile().createInputStream();
+       #endif
+
+    }
 
     ScopedPointer<WebInputStream> wi (new WebInputStream (*this, usePostCommand));
 
@@ -557,6 +698,29 @@ InputStream* URL::createInputStream (const bool usePostCommand,
         return nullptr;
 
     return wi.release();
+}
+
+#if JUCE_ANDROID
+OutputStream* juce_CreateContentURIOutputStream (const URL&);
+#endif
+
+OutputStream* URL::createOutputStream() const
+{
+    if (isLocalFile())
+    {
+       #if JUCE_IOS
+        // We may need to refresh the embedded bookmark.
+        return new iOSFileStreamWrapper<FileOutputStream> (const_cast<URL&> (*this));
+       #else
+        return new FileOutputStream (getLocalFile());
+       #endif
+    }
+
+   #if JUCE_ANDROID
+    return juce_CreateContentURIOutputStream (*this);
+   #else
+    return nullptr;
+   #endif
 }
 
 //==============================================================================

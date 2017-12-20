@@ -171,14 +171,14 @@ void ScrollBar::removeListener (Listener* const listener)
 
 void ScrollBar::handleAsyncUpdate()
 {
-    double start = visibleRange.getStart(); // (need to use a temp variable for VC7 compatibility)
-    listeners.call (&ScrollBar::Listener::scrollBarMoved, this, start);
+    auto start = visibleRange.getStart(); // (need to use a temp variable for VC7 compatibility)
+    listeners.call ([=] (Listener& l) { l.scrollBarMoved (this, start); });
 }
 
 //==============================================================================
 void ScrollBar::updateThumbPosition()
 {
-    const int minimumScrollBarThumbSize = getLookAndFeel().getMinimumScrollbarThumbSize (*this);
+    auto minimumScrollBarThumbSize = getLookAndFeel().getMinimumScrollbarThumbSize (*this);
 
     int newThumbSize = roundToInt (totalRange.getLength() > 0 ? (visibleRange.getLength() * thumbAreaSize) / totalRange.getLength()
                                                               : thumbAreaSize);

@@ -47,6 +47,14 @@ public:
     */
     void addDestination (AnalyticsDestination* destination);
 
+    /** Returns the array of AnalyticsDestinations managed by this class.
+
+        If you have added any subclasses of ThreadedAnalyticsDestination to
+        this class then you can remove them from this list to force them to
+        flush any pending events.
+    */
+    OwnedArray<AnalyticsDestination>& getDestinations();
+
     /** Sets a user ID that will be added to all AnalyticsEvents sent to
         AnalyticsDestinations.
 
@@ -65,26 +73,30 @@ public:
 
         The AnalyticsEvent will be timestamped, and will have the userId and
         userProperties populated by values previously set by calls to
-        setUserId and setUserProperties. The name and parameters will be
+        setUserId and setUserProperties. The name, parameters and type will be
         populated by the arguments supplied to this function.
 
         @param eventName            the event name
         @param parameters           the event parameters
+        @param eventType            (optional) an integer to indicate the event
+                                    type, which will be set to 0 if not supplied.
     */
-    void logEvent (const String& eventName, const StringPairArray& parameters);
+    void logEvent (const String& eventName, const StringPairArray& parameters, int eventType = 0);
 
-    /** Suspends analytics submission to AnalyticsDestinations.
+    /** Suspends analytics submissions to AnalyticsDestinations.
 
         @param shouldBeSuspended    if event submission should be suspended
     */
     void setSuspended (bool shouldBeSuspended);
 
-
-    juce_DeclareSingleton (Analytics, true)
+   #ifndef DOXYGEN
+    JUCE_DECLARE_SINGLETON (Analytics, false)
+   #endif
 
 private:
     //==============================================================================
     Analytics() = default;
+    ~Analytics()  { clearSingletonInstance(); }
 
     String userId;
     StringPairArray userProperties;

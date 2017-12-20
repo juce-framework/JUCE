@@ -32,7 +32,7 @@ namespace
 {
     const char* const osxVersionDefault         = "default";
     const int oldestSDKVersion  = 5;
-    const int currentSDKVersion = 12;
+    const int currentSDKVersion = 13;
     const int minimumAUv3SDKVersion = 11;
 
     const char* const osxArch_Default           = "default";
@@ -617,6 +617,7 @@ public:
 
                 case StaticLibrary:
                     xcodeFileType = "archive.ar";
+                    xcodeBundleExtension = ".a";
                     xcodeProductType = "com.apple.product-type.library.static";
                     xcodeCopyToProductInstallPathAfterBuild = false;
                     break;
@@ -2109,6 +2110,18 @@ private:
             for (auto& type : getiOSAppIconTypes())
             {
                 auto image = rescaleImageForIcon (*images.getFirst(), type.size);
+
+                if (image.hasAlphaChannel())
+                {
+                    Image background (Image::RGB, image.getWidth(), image.getHeight(), false);
+                    Graphics g (background);
+                    g.fillAll (Colours::white);
+
+                    g.drawImageWithin (image, 0, 0, image.getWidth(), image.getHeight(),
+                                       RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize);
+
+                    image = background;
+                }
 
                 MemoryOutputStream pngData;
                 PNGImageFormat pngFormat;

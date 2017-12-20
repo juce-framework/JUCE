@@ -106,8 +106,8 @@ public:
     }
 
     bool isPressureValid()    const noexcept     { return pressure >= 0.0f && pressure <= 1.0f; }
-    bool isOrientationValid() const noexcept     { return orientation >= 0.0f && orientation <= 2.0f * float_Pi; }
-    bool isRotationValid() const noexcept        { return rotation >= 0.0f && rotation <= 2.0f * float_Pi; }
+    bool isOrientationValid() const noexcept     { return orientation >= 0.0f && orientation <= MathConstants<float>::twoPi; }
+    bool isRotationValid() const noexcept        { return rotation >= 0.0f && rotation <= MathConstants<float>::twoPi; }
     bool isTiltValid (bool isX) const noexcept   { return isX ? (tiltX >= -1.0f && tiltX <= 1.0f) : (tiltY >= -1.0f && tiltY <= 1.0f); }
 
     //==============================================================================

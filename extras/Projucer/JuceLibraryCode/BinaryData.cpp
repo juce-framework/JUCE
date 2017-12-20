@@ -5814,7 +5814,7 @@ static const unsigned char temp_binary_data_29[] =
 "\r\n"
 "    bool acceptsMidi() const override;\r\n"
 "    bool producesMidi() const override;\r\n"
-"    bool isMidiEffect () const override;\r\n"
+"    bool isMidiEffect() const override;\r\n"
 "    double getTailLengthSeconds() const override;\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
@@ -6111,7 +6111,7 @@ static const unsigned char temp_binary_data_35[] =
 "\r\n"
 "    This file was auto-generated!\r\n"
 "\r\n"
-"    It contains the basic startup code for a Juce application.\r\n"
+"    It contains the basic startup code for a JUCE application.\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
@@ -6138,7 +6138,7 @@ static const unsigned char temp_binary_data_36[] =
 "\r\n"
 "    This file was auto-generated!\r\n"
 "\r\n"
-"    It contains the basic startup code for a Juce application.\r\n"
+"    It contains the basic startup code for a JUCE application.\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
@@ -6197,7 +6197,7 @@ static const unsigned char temp_binary_data_37[] =
 "\r\n"
 "    This file was auto-generated!\r\n"
 "\r\n"
-"    It contains the basic startup code for a Juce application.\r\n"
+"    It contains the basic startup code for a JUCE application.\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
@@ -6304,7 +6304,7 @@ static const unsigned char temp_binary_data_38[] =
 "\r\n"
 "    This file was auto-generated!\r\n"
 "\r\n"
-"    It contains the basic startup code for a Juce application.\r\n"
+"    It contains the basic startup code for a JUCE application.\r\n"
 "\r\n"
 "  ==============================================================================\r\n"
 "*/\r\n"
@@ -7015,7 +7015,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x27c5a93a:  numBytes = 1310; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 938; return jucer_AudioPluginEditorTemplate_h;
         case 0x51b49ac5:  numBytes = 5638; return jucer_AudioPluginFilterTemplate_cpp;
-        case 0x488afa0a:  numBytes = 2246; return jucer_AudioPluginFilterTemplate_h;
+        case 0x488afa0a:  numBytes = 2245; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2151; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2064; return jucer_ComponentTemplate_h;
         case 0x0b66646c:  numBytes = 1029; return jucer_ContentCompTemplate_cpp;

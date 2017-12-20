@@ -66,13 +66,13 @@ public:
     }
 
     template <typename Function>
-    void callListeners (Function fn) const
+    void callListeners (ValueTree::Listener* listenerToExclude, Function fn) const
     {
         auto numListeners = valueTreesWithListeners.size();
 
         if (numListeners == 1)
         {
-            fn (valueTreesWithListeners.getUnchecked(0)->listeners);
+            valueTreesWithListeners.getUnchecked(0)->listeners.callExcluding (listenerToExclude, fn);
         }
         else if (numListeners > 0)
         {
@@ -83,40 +83,40 @@ public:
                 auto* v = listenersCopy.getUnchecked(i);
 
                 if (i == 0 || valueTreesWithListeners.contains (v))
-                    fn (v->listeners);
+                    v->listeners.callExcluding (listenerToExclude, fn);
             }
         }
     }
 
     template <typename Function>
-    void callListenersForAllParents (Function fn) const
+    void callListenersForAllParents (ValueTree::Listener* listenerToExclude, Function fn) const
     {
         for (auto* t = this; t != nullptr; t = t->parent)
-            t->callListeners (fn);
+            t->callListeners (listenerToExclude, fn);
     }
 
     void sendPropertyChangeMessage (const Identifier& property, ValueTree::Listener* listenerToExclude = nullptr)
     {
         ValueTree tree (this);
-        callListenersForAllParents ([&] (ListenerList<Listener>& list) { list.callExcluding (listenerToExclude, &ValueTree::Listener::valueTreePropertyChanged, tree, property); });
+        callListenersForAllParents (listenerToExclude, [&] (Listener& l) { l.valueTreePropertyChanged (tree, property); });
     }
 
     void sendChildAddedMessage (ValueTree child)
     {
         ValueTree tree (this);
-        callListenersForAllParents ([&] (ListenerList<Listener>& list) { list.call (&ValueTree::Listener::valueTreeChildAdded, tree, child); });
+        callListenersForAllParents (nullptr, [&] (Listener& l) { l.valueTreeChildAdded (tree, child); });
     }
 
     void sendChildRemovedMessage (ValueTree child, int index)
     {
         ValueTree tree (this);
-        callListenersForAllParents ([=, &tree, &child] (ListenerList<Listener>& list) { list.call (&ValueTree::Listener::valueTreeChildRemoved, tree, child, index); });
+        callListenersForAllParents (nullptr, [=, &tree, &child] (Listener& l) { l.valueTreeChildRemoved (tree, child, index); });
     }
 
     void sendChildOrderChangedMessage (int oldIndex, int newIndex)
     {
         ValueTree tree (this);
-        callListenersForAllParents ([=, &tree] (ListenerList<Listener>& list) { list.call (&ValueTree::Listener::valueTreeChildOrderChanged, tree, oldIndex, newIndex); });
+        callListenersForAllParents (nullptr, [=, &tree] (Listener& l) { l.valueTreeChildOrderChanged (tree, oldIndex, newIndex); });
     }
 
     void sendParentChangeMessage()
@@ -127,7 +127,7 @@ public:
             if (auto* child = children.getObjectPointer (j))
                 child->sendParentChangeMessage();
 
-        callListeners ([&] (ListenerList<Listener>& list) { list.call (&ValueTree::Listener::valueTreeParentChanged, tree); });
+        callListeners (nullptr, [&] (Listener& l) { l.valueTreeParentChanged (tree); });
     }
 
     void setProperty (const Identifier& name, const var& newValue, UndoManager* undoManager,
@@ -615,7 +615,7 @@ ValueTree& ValueTree::operator= (const ValueTree& other)
 
             object = other.object;
 
-            listeners.call (&ValueTree::Listener::valueTreeRedirected, *this);
+            listeners.call ([this] (Listener& l) { l.valueTreeRedirected (*this); });
         }
     }
 
@@ -1125,23 +1125,30 @@ public:
     void runTest() override
     {
         beginTest ("ValueTree");
-        Random r = getRandom();
+        auto r = getRandom();
 
         for (int i = 10; --i >= 0;)
         {
             MemoryOutputStream mo;
-            ValueTree v1 (createRandomTree (nullptr, 0, r));
+            auto v1 = createRandomTree (nullptr, 0, r);
             v1.writeToStream (mo);
 
             MemoryInputStream mi (mo.getData(), mo.getDataSize(), false);
-            ValueTree v2 = ValueTree::readFromStream (mi);
+            auto v2 = ValueTree::readFromStream (mi);
             expect (v1.isEquivalentTo (v2));
+
+            MemoryOutputStream zipped;
+            {
+                GZIPCompressorOutputStream zippedOut (zipped);
+                v1.writeToStream (zippedOut);
+            }
+            expect (v1.isEquivalentTo (ValueTree::readFromGZIPData (zipped.getData(), zipped.getDataSize())));
 
             ScopedPointer<XmlElement> xml1 (v1.createXml());
             ScopedPointer<XmlElement> xml2 (v2.createCopy().createXml());
             expect (xml1->isEquivalentTo (xml2, false));
 
-            ValueTree v4 = v2.createCopy();
+            auto v4 = v2.createCopy();
             expect (v1.isEquivalentTo (v4));
         }
     }

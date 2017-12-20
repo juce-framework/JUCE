@@ -153,9 +153,9 @@ template <typename Type>
 void LadderFilter<Type>::setSampleRate (Type newValue) noexcept
 {
     jassert (newValue > Type (0));
-    cutoffFreqScaler = Type (-2 * juce::double_Pi) / newValue;
+    cutoffFreqScaler = Type (-2.0 * juce::MathConstants<double>::pi) / newValue;
 
-    static constexpr auto smootherRampTimeSec = Type (5e-2);
+    static constexpr Type smootherRampTimeSec = Type (0.05);
     cutoffTransformSmoother.reset (newValue, smootherRampTimeSec);
     scaledResonanceSmoother.reset (newValue, smootherRampTimeSec);
 

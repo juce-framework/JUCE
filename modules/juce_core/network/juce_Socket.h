@@ -315,17 +315,23 @@ public:
     void shutdown();
 
     //==============================================================================
-    /** Join a multicast group
+    /** Join a multicast group.
 
         @returns true if it succeeds.
     */
     bool joinMulticast (const String& multicastIPAddress);
 
-    /** Leave a multicast group
+    /** Leave a multicast group.
 
         @returns true if it succeeds.
     */
     bool leaveMulticast (const String& multicastIPAddress);
+
+    /** Enables or disables multicast loopback.
+
+        @returns true if it succeeds.
+    */
+    bool setMulticastLoopbackEnabled (bool enableLoopback);
 
     //==============================================================================
     /** Allow other applications to re-use the port.

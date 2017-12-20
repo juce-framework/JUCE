@@ -40,7 +40,7 @@ public:
     AllComponentRepainter()  {}
     ~AllComponentRepainter() { clearSingletonInstance(); }
 
-    juce_DeclareSingleton (AllComponentRepainter, false)
+    JUCE_DECLARE_SINGLETON (AllComponentRepainter, false)
 
     void trigger()
     {
@@ -89,8 +89,8 @@ private:
     }
 };
 
-juce_ImplementSingleton (AllComponentRepainter)
-juce_ImplementSingleton (ValueList)
+JUCE_IMPLEMENT_SINGLETON (AllComponentRepainter)
+JUCE_IMPLEMENT_SINGLETON (ValueList)
 
 //==============================================================================
 int64 parseInt (String s)
@@ -410,7 +410,7 @@ struct ColourEditorComp  : public Component,
 
     void paint (Graphics& g) override
     {
-        g.fillCheckerBoard (getLocalBounds(), 6, 6,
+        g.fillCheckerBoard (getLocalBounds().toFloat(), 6.0f, 6.0f,
                             Colour (0xffdddddd).overlaidWith (getColour()),
                             Colour (0xffffffff).overlaidWith (getColour()));
     }

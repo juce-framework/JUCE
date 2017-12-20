@@ -37,6 +37,12 @@ static NSMutableArray* createAllowedTypesArray (const StringArray& filters)
 
     for (int i = 0; i < filters.size(); ++i)
     {
+       #if defined (MAC_OS_X_VERSION_10_6) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6)
+        // From OS X 10.6 you can only specify allowed extensions, so any filters containing wildcards
+        // must be of the form "*.extension"
+        jassert (filters[i].indexOf ("*") <= 0);
+       #endif
+
         const String f (filters[i].replace ("*.", ""));
 
         if (f == "*")
@@ -51,7 +57,8 @@ static NSMutableArray* createAllowedTypesArray (const StringArray& filters)
 //==============================================================================
 template <> struct ContainerDeletePolicy<NSSavePanel>    { static void destroy (NSObject* o) { [o release]; } };
 
-class FileChooser::Native     : public Component, public FileChooser::Pimpl
+class FileChooser::Native     : public Component,
+                                public FileChooser::Pimpl
 {
 public:
     Native (FileChooser& fileChooser, int flags, FilePreviewComponent* previewComponent)
@@ -213,7 +220,7 @@ private:
             }
         }
 
-        owner.finished (chooserResults, true);
+        owner.finished (chooserResults);
     }
 
     bool shouldShowFilename (const String& filenameToTest)

@@ -8,7 +8,7 @@ SET(BINARY_NAME "juce_jni")
 add_library("cpufeatures" STATIC "${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c")
 set_source_files_properties("${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c" PROPERTIES COMPILE_FLAGS "-Wno-sign-conversion -Wno-gnu-statement-expression")
 
-add_definitions("-DJUCE_ANDROID=1" "-DJUCE_ANDROID_API_VERSION=10" "-DJUCE_ANDROID_ACTIVITY_CLASSNAME=com_roli_juceinapppurchasesample_InAppPurchase" "-DJUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/roli/juceinapppurchasesample/InAppPurchase\"" "-DJUCE_PUSH_NOTIFICATIONS=1" "-DJUCE_IN_APP_PURCHASES=1" "-DJUCER_ANDROIDSTUDIO_7F0E4A25=1" "-DJUCE_APP_VERSION=0.0.2" "-DJUCE_APP_VERSION_HEX=0x2")
+add_definitions("-DJUCE_ANDROID=1" "-DJUCE_ANDROID_API_VERSION=10" "-DJUCE_ANDROID_ACTIVITY_CLASSNAME=com_roli_juceinapppurchasesample_InAppPurchase" "-DJUCE_ANDROID_ACTIVITY_CLASSPATH=\"com/roli/juceinapppurchasesample/InAppPurchase\"" "-DJUCE_ANDROID_SHARING_CONTENT_PROVIDER_CLASSNAME=com_roli_juceinapppurchasesample_SharingContentProvider" "-DJUCE_ANDROID_SHARING_CONTENT_PROVIDER_CLASSPATH=\"com/roli/juceinapppurchasesample/SharingContentProvider\"" "-DJUCE_PUSH_NOTIFICATIONS=1" "-DJUCE_IN_APP_PURCHASES=1" "-DJUCER_ANDROIDSTUDIO_7F0E4A25=1" "-DJUCE_APP_VERSION=0.0.2" "-DJUCE_APP_VERSION_HEX=0x2")
 
 include_directories( AFTER
     "../../../JuceLibraryCode"
@@ -411,7 +411,6 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/containers/juce_HashMap.h"
     "../../../../../modules/juce_core/containers/juce_HashMap_test.cpp"
     "../../../../../modules/juce_core/containers/juce_LinkedListPointer.h"
-    "../../../../../modules/juce_core/containers/juce_ListenerList.cpp"
     "../../../../../modules/juce_core/containers/juce_ListenerList.h"
     "../../../../../modules/juce_core/containers/juce_NamedValueSet.cpp"
     "../../../../../modules/juce_core/containers/juce_NamedValueSet.h"
@@ -927,6 +926,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_basics/drawables/juce_DrawableText.cpp"
     "../../../../../modules/juce_gui_basics/drawables/juce_DrawableText.h"
     "../../../../../modules/juce_gui_basics/drawables/juce_SVGParser.cpp"
+    "../../../../../modules/juce_gui_basics/filebrowser/juce_ContentSharer.cpp"
+    "../../../../../modules/juce_gui_basics/filebrowser/juce_ContentSharer.h"
     "../../../../../modules/juce_gui_basics/filebrowser/juce_DirectoryContentsDisplayComponent.cpp"
     "../../../../../modules/juce_gui_basics/filebrowser/juce_DirectoryContentsDisplayComponent.h"
     "../../../../../modules/juce_gui_basics/filebrowser/juce_DirectoryContentsList.cpp"
@@ -1052,9 +1053,11 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_basics/mouse/juce_SelectedItemSet.h"
     "../../../../../modules/juce_gui_basics/mouse/juce_TextDragAndDropTarget.h"
     "../../../../../modules/juce_gui_basics/mouse/juce_TooltipClient.h"
+    "../../../../../modules/juce_gui_basics/native/juce_android_ContentSharer.cpp"
     "../../../../../modules/juce_gui_basics/native/juce_android_FileChooser.cpp"
     "../../../../../modules/juce_gui_basics/native/juce_android_Windowing.cpp"
     "../../../../../modules/juce_gui_basics/native/juce_common_MimeTypes.cpp"
+    "../../../../../modules/juce_gui_basics/native/juce_ios_ContentSharer.cpp"
     "../../../../../modules/juce_gui_basics/native/juce_ios_FileChooser.mm"
     "../../../../../modules/juce_gui_basics/native/juce_ios_UIViewComponentPeer.mm"
     "../../../../../modules/juce_gui_basics/native/juce_ios_Windowing.mm"
@@ -1657,7 +1660,6 @@ set_source_files_properties("../../../../../modules/juce_core/containers/juce_El
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_HashMap.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_HashMap_test.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_LinkedListPointer.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_core/containers/juce_ListenerList.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_ListenerList.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_NamedValueSet.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/containers/juce_NamedValueSet.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2173,6 +2175,8 @@ set_source_files_properties("../../../../../modules/juce_gui_basics/drawables/ju
 set_source_files_properties("../../../../../modules/juce_gui_basics/drawables/juce_DrawableText.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/drawables/juce_DrawableText.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/drawables/juce_SVGParser.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/filebrowser/juce_ContentSharer.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/filebrowser/juce_ContentSharer.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/filebrowser/juce_DirectoryContentsDisplayComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/filebrowser/juce_DirectoryContentsDisplayComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/filebrowser/juce_DirectoryContentsList.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2298,9 +2302,11 @@ set_source_files_properties("../../../../../modules/juce_gui_basics/mouse/juce_M
 set_source_files_properties("../../../../../modules/juce_gui_basics/mouse/juce_SelectedItemSet.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/mouse/juce_TextDragAndDropTarget.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/mouse/juce_TooltipClient.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_android_ContentSharer.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_android_FileChooser.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_android_Windowing.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_common_MimeTypes.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_ios_ContentSharer.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_ios_FileChooser.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_ios_UIViewComponentPeer.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_ios_Windowing.mm" PROPERTIES HEADER_FILE_ONLY TRUE)

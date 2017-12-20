@@ -61,8 +61,8 @@ public:
         {
             g.fillAll (Colours::grey);
 
-            g.fillCheckerBoard (getLocalBounds().reduced (2, 2),
-                                10, 10,
+            g.fillCheckerBoard (getLocalBounds().reduced (2, 2).toFloat(),
+                                10.0f, 10.0f,
                                 Colour (0xffdddddd).overlaidWith (colour),
                                 Colour (0xffffffff).overlaidWith (colour));
 

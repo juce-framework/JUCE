@@ -414,7 +414,8 @@ namespace AAXClasses
     //==============================================================================
     class JuceAAX_Processor;
 
-    class JuceAAX_GUI   : public AAX_CEffectGUI, public ModifierKeyProvider
+    class JuceAAX_GUI   : public AAX_CEffectGUI,
+                          public ModifierKeyProvider
     {
     public:
         JuceAAX_GUI() {}
