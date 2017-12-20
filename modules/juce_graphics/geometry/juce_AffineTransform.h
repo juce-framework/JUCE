@@ -235,6 +235,17 @@ public:
                                              float sourceX2, float sourceY2, float targetX2, float targetY2,
                                              float sourceX3, float sourceY3, float targetX3, float targetY3) noexcept;
 
+    /** Returns the transform that will map three specified points onto three target points. */
+    template <typename PointType>
+    static AffineTransform fromTargetPoints (PointType source1, PointType target1,
+                                             PointType source2, PointType target2,
+                                             PointType source3, PointType target3) noexcept
+    {
+        return fromTargetPoints (source1.x, source1.y, target1.x, target1.y,
+                                 source2.x, source2.y, target2.x, target2.y,
+                                 source3.x, source3.y, target3.x, target3.y);
+    }
+
     //==============================================================================
     /** Returns the result of concatenating another transformation after this one. */
     AffineTransform followedBy (const AffineTransform& other) const noexcept;
