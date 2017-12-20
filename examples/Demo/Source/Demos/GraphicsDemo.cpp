@@ -485,9 +485,7 @@ public:
             if (svgDrawable != nullptr)
             {
                 // to make our icon the right size, we'll set its bounding box to the size and position that we want.
-                svgDrawable->setBoundingBox (RelativeParallelogram (Point<float> (-100, -100),
-                                                                    Point<float> (100, -100),
-                                                                    Point<float> (-100, 100)));
+                svgDrawable->setBoundingBox ({ -100.0f, -100.0f, 200.0f, 200.0f });
             }
         }
     }

@@ -182,7 +182,6 @@ ComponentBuilder::TypeHandler* ComponentBuilder::getHandler (const int index) co
 
 void ComponentBuilder::registerStandardComponentTypes()
 {
-    Drawable::registerDrawableTypeHandlers (*this);
 }
 
 void ComponentBuilder::setImageProvider (ImageProvider* newImageProvider) noexcept
