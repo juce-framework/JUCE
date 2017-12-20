@@ -758,10 +758,13 @@ private:
             return nullptr;
         }
 
+        jlong startOffset = 0;
+        jlong unknownLength = -1;
+
         assetFileDescriptors.add (GlobalRef (LocalRef<jobject> (env->NewObject (AssetFileDescriptor,
                                                                                 AssetFileDescriptor.constructor,
                                                                                 parcelFileDescriptor.get(),
-                                                                                0, 0))));
+                                                                                startOffset, unknownLength))));
 
         return assetFileDescriptors.getReference (assetFileDescriptors.size() - 1).get();
     }
