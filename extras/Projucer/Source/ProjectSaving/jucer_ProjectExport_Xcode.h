@@ -223,6 +223,9 @@ public:
             props.add (new BooleanPropertyComponent (getSetting ("UIFileSharingEnabled"), "File Sharing Enabled", "Enabled"),
                        "Enable this to expose your app's files to iTunes.");
 
+            props.add (new BooleanPropertyComponent (getSetting ("UISupportsDocumentBrowser"), "Support Document Browser", "Enabled"),
+                       "Enable this to allow the user to access your app documents from a native file chooser.");
+
             props.add (new BooleanPropertyComponent (getSetting ("UIStatusBarHidden"), "Status Bar Hidden", "Enabled"),
                        "Enable this to disable the status bar in your app.");
 
@@ -1311,6 +1314,9 @@ public:
 
             if (owner.settings ["UIFileSharingEnabled"] && type != AudioUnitv3PlugIn)
                 addPlistDictionaryKeyBool (dict, "UIFileSharingEnabled", true);
+
+            if (owner.settings ["UISupportsDocumentBrowser"])
+                addPlistDictionaryKeyBool (dict, "UISupportsDocumentBrowser", true);
 
             if (owner.settings ["UIStatusBarHidden"] && type != AudioUnitv3PlugIn)
                 addPlistDictionaryKeyBool (dict, "UIStatusBarHidden", true);
