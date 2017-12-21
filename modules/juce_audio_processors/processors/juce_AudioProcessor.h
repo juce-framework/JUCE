@@ -357,7 +357,7 @@ public:
 
         //==============================================================================
         /** The bus's current layout. This will be AudioChannelSet::disabled() if the current
-            layout is dfisabled.
+            layout is disabled.
             @see AudioChannelSet
         */
         const AudioChannelSet& getCurrentLayout() const noexcept        { return layout; }
