@@ -25,7 +25,20 @@ namespace juce
 
 void Logger::outputDebugString (const String& text)
 {
-    __android_log_print (ANDROID_LOG_INFO, "JUCE", "%s", text.toUTF8().getAddress());
+    char* data = text.toUTF8().getAddress();
+    const size_t length = CharPointer_UTF8::getBytesRequiredFor (text.getCharPointer());
+    const size_t chunkSize = 1023;
+
+    size_t position = 0;
+    size_t numToRead = jmin (chunkSize, length);
+
+    while (numToRead > 0)
+    {
+        __android_log_print (ANDROID_LOG_INFO, "JUCE", "%s", data + position);
+
+        position += numToRead;
+        numToRead = jmin (chunkSize, length - position);
+    }
 }
 
 } // namespace juce
