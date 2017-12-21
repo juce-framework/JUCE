@@ -202,8 +202,8 @@ public:
         {
             if (getProject().getProjectType().isAudioPlugin())
                 props.add (new BooleanPropertyComponent (getDuplicateResourcesFolderForAppExtensionValue(),
-                                                         "Don't add resources folder to app extension", "Enabled"),
-                           "Enable this to prevent the Projucer from creating a resources folder for AUv3 app extensions.");
+                                                         "Add resources folder to app extension", "Enabled"),
+                           "Enable this to create a resources folder for AUv3 app extensions.");
 
             static const char* deviceFamilies[] = { "iPhone", "iPad", "Universal", nullptr};
             static const char* deviceFamilyValues[] = { "1", "2", "1,2" };
