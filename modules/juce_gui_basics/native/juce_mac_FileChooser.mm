@@ -207,17 +207,24 @@ private:
 
         if (panel != nil && result == NSFileHandlingPanelOKButton)
         {
+            auto addURLResult = [&chooserResults] (NSURL* urlToAdd)
+            {
+                auto scheme = nsStringToJuce ([urlToAdd scheme]);
+                auto path = nsStringToJuce ([urlToAdd path]);
+                chooserResults.add (URL (scheme + "://" + path));
+            };
+
             if (isSave)
             {
-                chooserResults.add (URL (nsStringToJuce ([[panel URL] absoluteString])));
+                addURLResult ([panel URL]);
             }
             else
             {
-                NSOpenPanel* openPanel = (NSOpenPanel*) panel;
-                NSArray* urls = [openPanel URLs];
+                auto* openPanel = (NSOpenPanel*) panel;
+                auto* urls = [openPanel URLs];
 
                 for (unsigned int i = 0; i < [urls count]; ++i)
-                    chooserResults.add (URL (nsStringToJuce ([[urls objectAtIndex: i] absoluteString])));
+                    addURLResult ([urls objectAtIndex: i]);
             }
         }
 
