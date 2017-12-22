@@ -2106,14 +2106,6 @@ public:
     virtual void colourChanged();
 
     //==============================================================================
-    /** Components can implement this method to provide a MarkerList.
-        The default implementation of this method returns nullptr, but you can override
-        it to return a pointer to the component's marker list. If xAxis is true, it should
-        return the X marker list; if false, it should return the Y markers.
-    */
-    virtual MarkerList* getMarkers (bool xAxis);
-
-    //==============================================================================
     /** Returns the underlying native window handle for this component.
 
         This is platform-dependent and strictly for power-users only!
