@@ -63,7 +63,7 @@
 #elif defined (JUCE_ANDROID)
   #undef        JUCE_ANDROID
   #define       JUCE_ANDROID 1
-#elif defined (LINUX) || defined (__linux__)
+#elif defined (linux) || defined (__linux__)
   #define     JUCE_LINUX 1
 #elif defined (__APPLE_CPP__) || defined(__APPLE_CC__)
   #include <CoreFoundation/CoreFoundation.h> // (needed to find out what platform we're using)
