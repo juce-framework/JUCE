@@ -234,6 +234,34 @@
  #include <stddef.h>
 
 //==============================================================================
+#elif JUCE_BSD
+ #include <sys/stat.h>
+ #include <sys/ptrace.h>
+ #include <sys/mount.h>
+ #include <sys/wait.h>
+ #include <sys/mman.h>
+ #include <sys/types.h>
+ #include <sys/ioctl.h>
+ #include <sys/socket.h>
+ #include <sys/file.h>
+ #include <sys/time.h>
+ #include <sched.h>
+ #include <pthread.h>
+ #include <errno.h>
+ #include <dirent.h>
+ #include <fnmatch.h>
+ #include <utime.h>
+ #include <pwd.h>
+ #include <fcntl.h>
+ #include <dlfcn.h>
+ #include <netdb.h>
+ #include <arpa/inet.h>
+ #include <netinet/in.h>
+ #include <net/if.h>
+ #include <signal.h>
+ #include <stddef.h>
+
+//==============================================================================
 #elif JUCE_ANDROID
  #include <jni.h>
  #include <pthread.h>
