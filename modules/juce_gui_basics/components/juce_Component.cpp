@@ -255,6 +255,8 @@ struct ScalingHelpers
     static Rectangle<float> subtractPosition (Rectangle<float> p, const Component& c) noexcept  { return p - c.getPosition().toFloat(); }
 };
 
+static const char colourPropertyPrefix[] = "jcclr_";
+
 //==============================================================================
 struct Component::ComponentHelpers
 {
@@ -265,30 +267,26 @@ struct Component::ComponentHelpers
     }
    #endif
 
-    static Identifier getColourPropertyId (int colourId)
+    static Identifier getColourPropertyID (int colourID)
     {
-        char reversedHex[32];
-        char* t = reversedHex;
+        char buffer[32];
+        auto* end = buffer + numElementsInArray (buffer) - 1;
+        auto* t = end;
+        *t = 0;
 
-        for (unsigned int v = (unsigned int) colourId;;)
+        for (auto v = (uint32) colourID;;)
         {
-            *t++ = "0123456789abcdef" [(int) (v & 15)];
+            *--t = "0123456789abcdef" [v & 15];
             v >>= 4;
 
             if (v == 0)
                 break;
         }
 
-        char destBuffer[32];
-        char* dest = destBuffer;
-        memcpy (dest, "jcclr_", 6);
-        dest += 6;
+        for (int i = (int) sizeof (colourPropertyPrefix) - 1; --i >= 0;)
+            *--t = colourPropertyPrefix[i];
 
-        while (t > reversedHex)
-            *dest++ = *--t;
-
-        *dest++ = 0;
-        return destBuffer;
+        return t;
     }
 
     //==============================================================================
@@ -672,6 +670,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
             peer->setVisible (isVisible());
 
             peer = ComponentPeer::getPeerFor (this);
+
             if (peer == nullptr)
                 return;
 
@@ -768,9 +767,8 @@ bool Component::isOpaque() const noexcept
 }
 
 //==============================================================================
-class StandardCachedComponentImage  : public CachedComponentImage
+struct StandardCachedComponentImage  : public CachedComponentImage
 {
-public:
     StandardCachedComponentImage (Component& c) noexcept : owner (c), scale (1.0f) {}
 
     void paint (Graphics& g) override
@@ -938,7 +936,7 @@ void Component::toBehind (Component* other)
 
             if (index >= 0 && childList [index + 1] != other)
             {
-                int otherIndex = childList.indexOf (other);
+                auto otherIndex = childList.indexOf (other);
 
                 if (otherIndex >= 0)
                 {
@@ -1046,46 +1044,23 @@ int Component::getParentHeight() const noexcept
                                       : getParentMonitorArea().getHeight();
 }
 
-int Component::getScreenX() const   { return getScreenPosition().x; }
-int Component::getScreenY() const   { return getScreenPosition().y; }
-
-Point<int> Component::getScreenPosition() const       { return localPointToGlobal (Point<int>()); }
-Rectangle<int> Component::getScreenBounds() const     { return localAreaToGlobal (getLocalBounds()); }
-
 Rectangle<int> Component::getParentMonitorArea() const
 {
     return Desktop::getInstance().getDisplays().getDisplayContaining (getScreenBounds().getCentre()).userArea;
 }
 
-Point<int> Component::getLocalPoint (const Component* source, Point<int> point) const
-{
-    return ComponentHelpers::convertCoordinate (this, source, point);
-}
+int Component::getScreenX() const                       { return getScreenPosition().x; }
+int Component::getScreenY() const                       { return getScreenPosition().y; }
+Point<int>     Component::getScreenPosition() const     { return localPointToGlobal (Point<int>()); }
+Rectangle<int> Component::getScreenBounds() const       { return localAreaToGlobal (getLocalBounds()); }
 
-Point<float> Component::getLocalPoint (const Component* source, Point<float> point) const
-{
-    return ComponentHelpers::convertCoordinate (this, source, point);
-}
+Point<int>     Component::getLocalPoint (const Component* source, Point<int> point) const     { return ComponentHelpers::convertCoordinate (this, source, point); }
+Point<float>   Component::getLocalPoint (const Component* source, Point<float> point) const   { return ComponentHelpers::convertCoordinate (this, source, point); }
+Rectangle<int> Component::getLocalArea  (const Component* source, Rectangle<int> area) const  { return ComponentHelpers::convertCoordinate (this, source, area); }
 
-Rectangle<int> Component::getLocalArea (const Component* source, Rectangle<int> area) const
-{
-    return ComponentHelpers::convertCoordinate (this, source, area);
-}
-
-Point<int> Component::localPointToGlobal (Point<int> point) const
-{
-    return ComponentHelpers::convertCoordinate (nullptr, this, point);
-}
-
-Point<float> Component::localPointToGlobal (Point<float> point) const
-{
-    return ComponentHelpers::convertCoordinate (nullptr, this, point);
-}
-
-Rectangle<int> Component::localAreaToGlobal (Rectangle<int> area) const
-{
-    return ComponentHelpers::convertCoordinate (nullptr, this, area);
-}
+Point<int>     Component::localPointToGlobal (Point<int> point) const     { return ComponentHelpers::convertCoordinate (nullptr, this, point); }
+Point<float>   Component::localPointToGlobal (Point<float> point) const   { return ComponentHelpers::convertCoordinate (nullptr, this, point); }
+Rectangle<int> Component::localAreaToGlobal  (Rectangle<int> area) const  { return ComponentHelpers::convertCoordinate (nullptr, this, area); }
 
 //==============================================================================
 void Component::setBounds (int x, int y, int w, int h)
@@ -1194,44 +1169,16 @@ void Component::sendMovedResizedMessages (bool wasMoved, bool wasResized)
         componentListeners.callChecked (checker, [=] (ComponentListener& l) { l.componentMovedOrResized (*this, wasMoved, wasResized); });
 }
 
-void Component::setSize (int w, int h)
-{
-    setBounds (getX(), getY(), w, h);
-}
+void Component::setSize (int w, int h)                  { setBounds (getX(), getY(), w, h); }
 
-void Component::setTopLeftPosition (int x, int y)
-{
-    setBounds (x, y, getWidth(), getHeight());
-}
+void Component::setTopLeftPosition (int x, int y)       { setTopLeftPosition ({ x, y }); }
+void Component::setTopLeftPosition (Point<int> pos)     { setBounds (pos.x, pos.y, getWidth(), getHeight()); }
 
-void Component::setTopLeftPosition (Point<int> pos)
-{
-    setBounds (pos.x, pos.y, getWidth(), getHeight());
-}
+void Component::setTopRightPosition (int x, int y)      { setTopLeftPosition (x - getWidth(), y); }
+void Component::setBounds (Rectangle<int> r)            { setBounds (r.getX(), r.getY(), r.getWidth(), r.getHeight()); }
 
-void Component::setTopRightPosition (int x, int y)
-{
-    setTopLeftPosition (x - getWidth(), y);
-}
-
-void Component::setBounds (Rectangle<int> r)
-{
-    setBounds (r.getX(), r.getY(), r.getWidth(), r.getHeight());
-}
-
-void Component::setBoundsRelative (float x, float y, float w, float h)
-{
-    auto pw = getParentWidth();
-    auto ph = getParentHeight();
-
-    setBounds (roundToInt (x * pw),
-               roundToInt (y * ph),
-               roundToInt (w * pw),
-               roundToInt (h * ph));
-}
-
-void Component::setCentrePosition (Point<int> p)    { setBounds (getBounds().withCentre (p.transformedBy (getTransform().inverted()))); }
-void Component::setCentrePosition (int x, int y)    { setCentrePosition ({x, y}); }
+void Component::setCentrePosition (Point<int> p)        { setBounds (getBounds().withCentre (p.transformedBy (getTransform().inverted()))); }
+void Component::setCentrePosition (int x, int y)        { setCentrePosition ({ x, y }); }
 
 void Component::setCentreRelative (float x, float y)
 {
@@ -1239,10 +1186,21 @@ void Component::setCentreRelative (float x, float y)
                        roundToInt (getParentHeight() * y));
 }
 
+void Component::setBoundsRelative (Rectangle<float> target)
+{
+    setBounds ((target * Point<float> ((float) getParentWidth(),
+                                       (float) getParentHeight())).toNearestInt());
+}
+
+void Component::setBoundsRelative (float x, float y, float w, float h)
+{
+    setBoundsRelative ({ x, y, w, h });
+}
+
 void Component::centreWithSize (int width, int height)
 {
     auto parentArea = ComponentHelpers::getParentOrMainMonitorBounds (*this)
-                                       .transformedBy (getTransform().inverted());
+                          .transformedBy (getTransform().inverted());
 
     setBounds (parentArea.getCentreX() - width / 2,
                parentArea.getCentreY() - height / 2,
@@ -1254,44 +1212,39 @@ void Component::setBoundsInset (BorderSize<int> borders)
     setBounds (borders.subtractedFrom (ComponentHelpers::getParentOrMainMonitorBounds (*this)));
 }
 
-void Component::setBoundsToFit (int x, int y, int width, int height,
-                                Justification justification, bool onlyReduceInSize)
+void Component::setBoundsToFit (Rectangle<int> targetArea, Justification justification, bool onlyReduceInSize)
 {
-    // it's no good calling this method unless both the component and
-    // target rectangle have a finite size.
-    jassert (getWidth() > 0 && getHeight() > 0 && width > 0 && height > 0);
-
-    if (getWidth() > 0 && getHeight() > 0
-         && width > 0 && height > 0)
+    if (getLocalBounds().isEmpty() || targetArea.isEmpty())
     {
-        int newW, newH;
-
-        if (onlyReduceInSize && getWidth() <= width && getHeight() <= height)
-        {
-            newW = getWidth();
-            newH = getHeight();
-        }
-        else
-        {
-            const double imageRatio = getHeight() / (double) getWidth();
-            const double targetRatio = height / (double) width;
-
-            if (imageRatio <= targetRatio)
-            {
-                newW = width;
-                newH = jmin (height, roundToInt (newW * imageRatio));
-            }
-            else
-            {
-                newH = height;
-                newW = jmin (width, roundToInt (newH / imageRatio));
-            }
-        }
-
-        if (newW > 0 && newH > 0)
-            setBounds (justification.appliedToRectangle (Rectangle<int> (newW, newH),
-                                                         Rectangle<int> (x, y, width, height)));
+        // it's no good calling this method unless both the component and
+        // target rectangle have a finite size.
+        jassertfalse;
+        return;
     }
+
+    auto sourceArea = targetArea.withZeroOrigin();
+
+    if (onlyReduceInSize
+         && getWidth() <= targetArea.getWidth()
+         && getHeight() <= targetArea.getHeight())
+    {
+        sourceArea = getLocalBounds();
+    }
+    else
+    {
+        auto sourceRatio = getHeight() / (double) getWidth();
+        auto targetRatio = targetArea.getHeight() / (double) targetArea.getWidth();
+
+        if (sourceRatio <= targetRatio)
+            sourceArea.setHeight (jmin (targetArea.getHeight(),
+                                        roundToInt (targetArea.getWidth() * sourceRatio)));
+        else
+            sourceArea.setWidth (jmin (targetArea.getWidth(),
+                                       roundToInt (targetArea.getHeight() / sourceRatio)));
+    }
+
+    if (! sourceArea.isEmpty())
+        setBounds (justification.appliedToRectangle (sourceArea, targetArea));
 }
 
 //==============================================================================
@@ -1308,7 +1261,6 @@ void Component::setTransform (const AffineTransform& newTransform)
             repaint();
             affineTransform.reset();
             repaint();
-
             sendMovedResizedMessages (false, false);
         }
     }
@@ -1559,13 +1511,13 @@ Component* Component::removeChildComponent (int index, bool sendParentEvents, bo
 //==============================================================================
 void Component::removeAllChildren()
 {
-    while (childComponentList.size() > 0)
+    while (! childComponentList.isEmpty())
         removeChildComponent (childComponentList.size() - 1);
 }
 
 void Component::deleteAllChildren()
 {
-    while (childComponentList.size() > 0)
+    while (! childComponentList.isEmpty())
         delete (removeChildComponent (childComponentList.size() - 1));
 }
 
@@ -1742,13 +1694,10 @@ void Component::exitModalState (int returnValue)
 
 bool Component::isCurrentlyModal (bool onlyConsiderForemostModalComponent) const noexcept
 {
-    const int n = onlyConsiderForemostModalComponent ? 1 : getNumCurrentlyModalComponents();
+    auto& mcm = *ModalComponentManager::getInstance();
 
-    for (int i = 0; i < n; ++i)
-        if (getCurrentlyModalComponent(i) == this)
-            return true;
-
-    return false;
+    return onlyConsiderForemostModalComponent ? mcm.isFrontModalComponent (this)
+                                              : mcm.isModal (this);
 }
 
 bool Component::isCurrentlyBlockedByAnotherModalComponent() const
@@ -2069,7 +2018,7 @@ Image Component::createComponentSnapshot (Rectangle<int> areaToGrab,
         r = r.getIntersection (getLocalBounds());
 
     if (r.isEmpty())
-        return Image();
+        return {};
 
     auto w = roundToInt (scaleFactor * r.getWidth());
     auto h = roundToInt (scaleFactor * r.getHeight());
@@ -2144,32 +2093,32 @@ void Component::sendLookAndFeelChange()
     }
 }
 
-Colour Component::findColour (int colourId, bool inheritFromParent) const
+Colour Component::findColour (int colourID, bool inheritFromParent) const
 {
-    if (auto* v = properties.getVarPointer (ComponentHelpers::getColourPropertyId (colourId)))
+    if (auto* v = properties.getVarPointer (ComponentHelpers::getColourPropertyID (colourID)))
         return Colour ((uint32) static_cast<int> (*v));
 
     if (inheritFromParent && parentComponent != nullptr
-         && (lookAndFeel == nullptr || ! lookAndFeel->isColourSpecified (colourId)))
-        return parentComponent->findColour (colourId, true);
+         && (lookAndFeel == nullptr || ! lookAndFeel->isColourSpecified (colourID)))
+        return parentComponent->findColour (colourID, true);
 
-    return getLookAndFeel().findColour (colourId);
+    return getLookAndFeel().findColour (colourID);
 }
 
-bool Component::isColourSpecified (int colourId) const
+bool Component::isColourSpecified (int colourID) const
 {
-    return properties.contains (ComponentHelpers::getColourPropertyId (colourId));
+    return properties.contains (ComponentHelpers::getColourPropertyID (colourID));
 }
 
-void Component::removeColour (int colourId)
+void Component::removeColour (int colourID)
 {
-    if (properties.remove (ComponentHelpers::getColourPropertyId (colourId)))
+    if (properties.remove (ComponentHelpers::getColourPropertyID (colourID)))
         colourChanged();
 }
 
-void Component::setColour (int colourId, Colour colour)
+void Component::setColour (int colourID, Colour colour)
 {
-    if (properties.set (ComponentHelpers::getColourPropertyId (colourId), (int) colour.getARGB()))
+    if (properties.set (ComponentHelpers::getColourPropertyID (colourID), (int) colour.getARGB()))
         colourChanged();
 }
 
@@ -2181,7 +2130,7 @@ void Component::copyAllExplicitColoursTo (Component& target) const
     {
         auto name = properties.getName(i);
 
-        if (name.toString().startsWith ("jcclr_"))
+        if (name.toString().startsWith (colourPropertyPrefix))
             if (target.properties.set (name, properties [name]))
                 changed = true;
     }

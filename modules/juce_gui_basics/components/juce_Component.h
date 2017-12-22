@@ -485,6 +485,17 @@ public:
     void setBoundsRelative (float proportionalX, float proportionalY,
                             float proportionalWidth, float proportionalHeight);
 
+    /** Changes the component's position and size in terms of fractions of its parent's size.
+
+        The values are factors of the parent's size, so for example
+        setBoundsRelative ({ 0.2f, 0.2f, 0.5f, 0.5f }) would give it half the
+        width and height of the parent, with its top-left position 20% of
+        the way across and down the parent.
+
+        @see setBounds
+    */
+    void setBoundsRelative (Rectangle<float> proportionalArea);
+
     /** Changes the component's position and size based on the amount of space to leave around it.
 
         This will position the component within its parent, leaving the specified number of
@@ -508,7 +519,7 @@ public:
 
         @see setBounds
     */
-    void setBoundsToFit (int x, int y, int width, int height,
+    void setBoundsToFit (Rectangle<int> targetArea,
                          Justification justification,
                          bool onlyReduceInSize);
 
@@ -2060,7 +2071,7 @@ public:
 
         @see setColour, isColourSpecified, colourChanged, LookAndFeel::findColour, LookAndFeel::setColour
     */
-    Colour findColour (int colourId, bool inheritFromParent = false) const;
+    Colour findColour (int colourID, bool inheritFromParent = false) const;
 
     /** Registers a colour to be used for a particular purpose.
 
@@ -2072,17 +2083,17 @@ public:
 
         @see findColour, isColourSpecified, colourChanged, LookAndFeel::findColour, LookAndFeel::setColour
     */
-    void setColour (int colourId, Colour newColour);
+    void setColour (int colourID, Colour newColour);
 
     /** If a colour has been set with setColour(), this will remove it.
         This allows you to make a colour revert to its default state.
     */
-    void removeColour (int colourId);
+    void removeColour (int colourID);
 
     /** Returns true if the specified colour ID has been explicitly set for this
         component using the setColour() method.
     */
-    bool isColourSpecified (int colourId) const;
+    bool isColourSpecified (int colourID) const;
 
     /** This looks for any colours that have been specified for this component,
         and copies them to the specified target component.

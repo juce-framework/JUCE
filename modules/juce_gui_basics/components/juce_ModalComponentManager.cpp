@@ -172,7 +172,7 @@ Component* ModalComponentManager::getModalComponent (int index) const
     return nullptr;
 }
 
-bool ModalComponentManager::isModal (Component* comp) const
+bool ModalComponentManager::isModal (const Component* comp) const
 {
     for (auto* item : stack)
         if (item->isActive && item->component == comp)
@@ -181,7 +181,7 @@ bool ModalComponentManager::isModal (Component* comp) const
     return false;
 }
 
-bool ModalComponentManager::isFrontModalComponent (Component* comp) const
+bool ModalComponentManager::isFrontModalComponent (const Component* comp) const
 {
     return comp == getModalComponent (0);
 }
