@@ -475,8 +475,8 @@ private:
     String text;
     ListenerList<Listener> buttonListeners;
 
-    class CallbackHelper;
-    friend class CallbackHelper;
+    struct CallbackHelper;
+    friend struct CallbackHelper;
     friend struct ContainerDeletePolicy<CallbackHelper>;
     ScopedPointer<CallbackHelper> callbackHelper;
     uint32 buttonPressTime = 0, lastRepeatTime = 0;
