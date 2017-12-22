@@ -250,28 +250,24 @@ public:
         int minNumInputs  = std::numeric_limits<int>::max(), maxNumInputs  = 0,
             minNumOutputs = std::numeric_limits<int>::max(), maxNumOutputs = 0;
 
+        auto updateMinAndMax = [] (int newValue, int& minValue, int& maxValue)
+        {
+            minValue = jmin (minValue, newValue);
+            maxValue = jmax (maxValue, newValue);
+        };
+
         if (channelConfiguration.size() > 0)
         {
             auto defaultConfig = channelConfiguration.getReference (0);
-            minNumInputs  = jmin (minNumInputs,  (int) defaultConfig.numIns);
-            maxNumInputs  = jmax (maxNumInputs,  (int) defaultConfig.numIns);
-            minNumOutputs = jmin (minNumOutputs, (int) defaultConfig.numOuts);
-            maxNumOutputs = jmax (maxNumOutputs, (int) defaultConfig.numOuts);
+            updateMinAndMax ((int) defaultConfig.numIns,  minNumInputs,  maxNumInputs);
+            updateMinAndMax ((int) defaultConfig.numOuts, minNumOutputs, maxNumOutputs);
         }
 
         if (auto* bus = processor->getBus (true, 0))
-        {
-            auto defaultNumChannels = bus->getDefaultLayout().size();
-            minNumInputs = jmin (minNumInputs, defaultNumChannels);
-            maxNumInputs = jmax (maxNumInputs, defaultNumChannels);
-        }
+            updateMinAndMax (bus->getDefaultLayout().size(), minNumInputs, maxNumInputs);
 
         if (auto* bus = processor->getBus (false, 0))
-        {
-            auto defaultNumChannels = bus->getDefaultLayout().size();
-            minNumOutputs = jmin (minNumOutputs, defaultNumChannels);
-            maxNumOutputs = jmax (maxNumOutputs, defaultNumChannels);
-        }
+            updateMinAndMax (bus->getDefaultLayout().size(), minNumOutputs, maxNumOutputs);
 
         minNumInputs  = jmin (minNumInputs,  maxNumInputs);
         minNumOutputs = jmin (minNumOutputs, maxNumOutputs);
