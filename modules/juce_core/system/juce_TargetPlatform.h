@@ -75,7 +75,7 @@
   #else
     #define     JUCE_MAC 1
   #endif
-#elif defined (__FreeBSD__)
+#elif defined (__FreeBSD__) || (__OpenBSD__)
   #define       JUCE_BSD 1
 #else
   #error "Unknown platform!"
