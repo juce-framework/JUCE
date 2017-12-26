@@ -72,6 +72,11 @@ Justification ComboBox::getJustificationType() const noexcept
     return label->getJustificationType();
 }
 
+void ComboBox::setLabelFont(Font labelFont)
+{
+    label->setFont(labelFont);
+}
+
 void ComboBox::setTooltip (const String& newTooltip)
 {
     SettableTooltipClient::setTooltip (newTooltip);
