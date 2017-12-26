@@ -86,9 +86,6 @@ public:
     */
     Justification getJustificationType() const noexcept;
 
-    /** Sets the font of the combo box label. */
-    void setLabelFont(Font labelFont);
-
     //==============================================================================
     /** Adds an item to be shown in the drop-down list.
 
