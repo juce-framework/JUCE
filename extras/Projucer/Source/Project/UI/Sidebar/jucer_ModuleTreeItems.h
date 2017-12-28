@@ -83,6 +83,12 @@ public:
         return Icon (getIcons().singleModule, iconColour);
     }
 
+    void showAddMenu() override
+    {
+        if (auto* parent = dynamic_cast<EnabledModulesItem*> (getParentItem()))
+            parent->showPopupMenu();
+    }
+
     void showPopupMenu() override
     {
         PopupMenu menu;
