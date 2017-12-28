@@ -28,8 +28,7 @@
 
 
 //==============================================================================
-class ModuleItem   : public ProjectTreeItemBase,
-                     private Value::Listener
+class ModuleItem   : public ProjectTreeItemBase
 {
 public:
     ModuleItem (Project& p, const String& modID)
@@ -37,9 +36,6 @@ public:
     {
         missingDependencies = project.getModules().getExtraDependenciesNeeded (moduleID).size() > 0;
         cppStandardHigherThanProject = project.getModules().doesModuleHaveHigherCppStandardThanProject (moduleID);
-
-        projectCppStandardValue.referTo (project.getCppStandardValue());
-        projectCppStandardValue.addListener (this);
 
         moduleInfo = project.getModules().getModuleInfo (moduleID);
     }
@@ -102,6 +98,31 @@ public:
             deleteItem();
     }
 
+    bool checkCppStandard()
+    {
+        auto oldVal = cppStandardHigherThanProject;
+        cppStandardHigherThanProject = project.getModules().doesModuleHaveHigherCppStandardThanProject (moduleID);
+
+        if (oldVal != cppStandardHigherThanProject)
+            return true;
+
+        return false;
+    }
+
+    void refreshModuleInfoIfCurrentlyShowing (bool juceModulePathChanged)
+    {
+        const bool isJuceModule = EnabledModuleList::isJuceModule (moduleID);
+        const bool shouldRefresh = (juceModulePathChanged && isJuceModule) || (! juceModulePathChanged && ! isJuceModule);
+
+        if (! shouldRefresh)
+            return;
+
+        if (auto* pcc = getProjectContentComponent())
+            if (auto* settingsPanel = dynamic_cast<ModuleSettingsPanel*> (pcc->getEditorComponentContent()))
+                if (settingsPanel->getModuleID() == moduleID)
+                    showDocument();
+    }
+
     Project& project;
     String moduleID;
 
@@ -109,26 +130,6 @@ private:
     ModuleDescription moduleInfo;
     bool missingDependencies = false;
     bool cppStandardHigherThanProject = false;
-    Value projectCppStandardValue;
-
-    //==============================================================================
-    void valueChanged (Value& v) override
-    {
-        if (v == projectCppStandardValue)
-        {
-            auto oldVal = cppStandardHigherThanProject;
-            cppStandardHigherThanProject = project.getModules().doesModuleHaveHigherCppStandardThanProject (moduleID);
-
-            if (oldVal != cppStandardHigherThanProject)
-            {
-                if (auto* parent = dynamic_cast<EnabledModulesItem*> (getParentItem()))
-                {
-                    parent->refreshSubItems();
-                    return;
-                }
-            }
-        }
-    }
 
     //==============================================================================
     class ModuleSettingsPanel  : public Component,
@@ -142,12 +143,6 @@ private:
               modulesTree (tree),
               moduleID (modID)
         {
-            defaultJuceModulePathValue.referTo (getAppSettings().getStoredPath (Ids::defaultJuceModulePath));
-            defaultUserModulePathValue.referTo (getAppSettings().getStoredPath (Ids::defaultUserModulePath));
-
-            defaultJuceModulePathValue.addListener (this);
-            defaultUserModulePathValue.addListener (this);
-
             addAndMakeVisible (group);
             refresh();
         }
@@ -250,9 +245,10 @@ private:
             parentSizeChanged();
         }
 
-        void parentSizeChanged() override  { updateSize (*this, group); }
+        void parentSizeChanged() override      { updateSize (*this, group); }
+        void resized() override                { group.setBounds (getLocalBounds().withTrimmedLeft (12)); }
 
-        void resized() override { group.setBounds (getLocalBounds().withTrimmedLeft (12)); }
+        String getModuleID() const noexcept    { return moduleID; }
 
     private:
         PropertyGroupComponent group;
@@ -492,7 +488,8 @@ private:
 };
 
 //==============================================================================
-class EnabledModulesItem   : public ProjectTreeItemBase
+class EnabledModulesItem   : public ProjectTreeItemBase,
+                             private Value::Listener
 {
 public:
     EnabledModulesItem (Project& p)
@@ -500,6 +497,14 @@ public:
           moduleListTree (p.getModules().state)
     {
         moduleListTree.addListener (this);
+
+        projectCppStandardValue.referTo (project.getCppStandardValue());
+        defaultJuceModulePathValue.referTo (getAppSettings().getStoredPath (Ids::defaultJuceModulePath));
+        defaultUserModulePathValue.referTo (getAppSettings().getStoredPath (Ids::defaultUserModulePath));
+
+        projectCppStandardValue.addListener (this);
+        defaultJuceModulePathValue.addListener (this);
+        defaultUserModulePathValue.addListener (this);
     }
 
     int getItemHeight() const override      { return 22; }
@@ -515,7 +520,7 @@ public:
 
     void showDocument() override
     {
-        if (ProjectContentComponent* pcc = getProjectContentComponent())
+        if (auto* pcc = getProjectContentComponent())
             pcc->setEditorComponent (new ModulesInformationComponent (project), nullptr);
     }
 
@@ -668,6 +673,36 @@ public:
 private:
     Project& project;
     ValueTree moduleListTree;
+    Value projectCppStandardValue, defaultJuceModulePathValue, defaultUserModulePathValue;
+
+    //==============================================================================
+    void valueChanged (Value& v) override
+    {
+        if (v == projectCppStandardValue)
+        {
+            for (int i = 0; i < getNumSubItems(); ++i)
+            {
+                if (auto* moduleItem = dynamic_cast<ModuleItem*> (getSubItem (i)))
+                {
+                    if (moduleItem->checkCppStandard())
+                    {
+                        refreshSubItems();
+                        return;
+                    }
+                }
+            }
+        }
+        else if (v == defaultJuceModulePathValue || v == defaultUserModulePathValue)
+        {
+            const bool juceModulePathChanged = (v == defaultJuceModulePathValue);
+
+            for (int i = 0; i < getNumSubItems(); ++i)
+                if (auto* moduleItem = dynamic_cast<ModuleItem*> (getSubItem (i)))
+                    moduleItem->refreshModuleInfoIfCurrentlyShowing (juceModulePathChanged);
+
+            refreshSubItems();
+        }
+    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnabledModulesItem)
 };
