@@ -182,7 +182,7 @@ public:
 
     /** Selects or deselects the item.
         If shouldNotify == sendNotification, then a callback will be made
-        to itemSelectionChanged()
+        to itemSelectionChanged() if the item's selection has changed.
     */
     void setSelected (bool shouldBeSelected,
                       bool deselectOtherItemsFirst,
