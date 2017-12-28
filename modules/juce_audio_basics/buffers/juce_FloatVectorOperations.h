@@ -194,16 +194,16 @@ public:
     /** Each element of dest is calculated by hard clipping the corresponding src element so that it is in the range specified by the arguments low and high. */
     static void JUCE_CALLTYPE clip (double* dest, const double* src, double low, double high, int num) noexcept;
 
-    /** Finds the miniumum and maximum values in the given array. */
+    /** Finds the minimum and maximum values in the given array. */
     static Range<float> JUCE_CALLTYPE findMinAndMax (const float* src, int numValues) noexcept;
 
-    /** Finds the miniumum and maximum values in the given array. */
+    /** Finds the minimum and maximum values in the given array. */
     static Range<double> JUCE_CALLTYPE findMinAndMax (const double* src, int numValues) noexcept;
 
-    /** Finds the miniumum value in the given array. */
+    /** Finds the minimum value in the given array. */
     static float JUCE_CALLTYPE findMinimum (const float* src, int numValues) noexcept;
 
-    /** Finds the miniumum value in the given array. */
+    /** Finds the minimum value in the given array. */
     static double JUCE_CALLTYPE findMinimum (const double* src, int numValues) noexcept;
 
     /** Finds the maximum value in the given array. */
