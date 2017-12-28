@@ -261,7 +261,7 @@ private:
             if (threadShouldExit())
                 return;
 
-            auto filepath = f.toString (true).fromFirstOccurrenceOf ("file://", false, false);
+            auto filepath = URL::removeEscapeChars (f.toString (true).fromFirstOccurrenceOf ("file://", false, false));
 
             filePaths.add (filepath);
 
