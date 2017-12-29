@@ -57,6 +57,7 @@ namespace juce
 - (void) applicationWillResignActive: (UIApplication*) application;
 - (void) application: (UIApplication*) application handleEventsForBackgroundURLSession: (NSString*) identifier
    completionHandler: (void (^)(void)) completionHandler;
+#if JUCE_PUSH_NOTIFICATIONS
 - (void) application: (UIApplication*) application didRegisterUserNotificationSettings: (UIUserNotificationSettings*) notificationSettings;
 - (void) application: (UIApplication*) application didRegisterForRemoteNotificationsWithDeviceToken: (NSData*) deviceToken;
 - (void) application: (UIApplication*) application didFailToRegisterForRemoteNotificationsWithError: (NSError*) error;
@@ -72,11 +73,12 @@ namespace juce
 - (void) application: (UIApplication*) application handleActionWithIdentifier: (NSString*) identifier
   forLocalNotification: (UILocalNotification*) notification withResponseInfo: (NSDictionary*) responseInfo
    completionHandler: (void(^)()) completionHandler;
-#if JUCE_PUSH_NOTIFICATIONS && defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+#if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
 - (void) userNotificationCenter: (UNUserNotificationCenter*) center willPresentNotification: (UNNotification*) notification
           withCompletionHandler: (void (^)(UNNotificationPresentationOptions options)) completionHandler;
 - (void) userNotificationCenter: (UNUserNotificationCenter*) center didReceiveNotificationResponse: (UNNotificationResponse*) response
           withCompletionHandler: (void(^)())completionHandler;
+#endif
 #endif
 
 @end
@@ -177,6 +179,7 @@ namespace juce
     _pushNotificationsDelegate = delegate;
 }
 
+#if JUCE_PUSH_NOTIFICATIONS
 - (void) application: (UIApplication*) application didRegisterUserNotificationSettings: (UIUserNotificationSettings*) notificationSettings
 {
     ignoreUnused (application);
@@ -354,7 +357,7 @@ namespace juce
     }
 }
 
-#if JUCE_PUSH_NOTIFICATIONS && defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+#if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
 - (void) userNotificationCenter: (UNUserNotificationCenter*) center willPresentNotification: (UNNotification*) notification
          withCompletionHandler: (void (^)(UNNotificationPresentationOptions options)) completionHandler
 {
@@ -394,6 +397,7 @@ namespace juce
         [invocation invoke];
     }
 }
+#endif
 #endif
 
 @end
