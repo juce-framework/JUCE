@@ -447,12 +447,8 @@ int XmlElement::getNumAttributes() const noexcept
 
 static const String& getEmptyStringRef() noexcept
 {
-   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
-    return String::empty;
-   #else
     static String empty;
     return empty;
-   #endif
 }
 
 const String& XmlElement::getAttributeName (const int index) const noexcept

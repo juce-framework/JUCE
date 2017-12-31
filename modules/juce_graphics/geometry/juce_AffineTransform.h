@@ -68,20 +68,12 @@ public:
     /** Compares two transforms. */
     bool operator!= (const AffineTransform& other) const noexcept;
 
-   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
-    /** A ready-to-use identity transform.
-        Note that you should always avoid using a static variable like this, and
-        prefer AffineTransform() or {} if you need a default-constructed instance.
-    */
-    static const AffineTransform identity;
-   #endif
-
     //==============================================================================
     /** Transforms a 2D coordinate using this matrix. */
     template <typename ValueType>
     void transformPoint (ValueType& x, ValueType& y) const noexcept
     {
-        const ValueType oldX = x;
+        auto oldX = x;
         x = static_cast<ValueType> (mat00 * oldX + mat01 * y + mat02);
         y = static_cast<ValueType> (mat10 * oldX + mat11 * y + mat12);
     }
@@ -95,7 +87,7 @@ public:
     void transformPoints (ValueType& x1, ValueType& y1,
                           ValueType& x2, ValueType& y2) const noexcept
     {
-        const ValueType oldX1 = x1, oldX2 = x2;
+        auto oldX1 = x1, oldX2 = x2;
         x1 = static_cast<ValueType> (mat00 * oldX1 + mat01 * y1 + mat02);
         y1 = static_cast<ValueType> (mat10 * oldX1 + mat11 * y1 + mat12);
         x2 = static_cast<ValueType> (mat00 * oldX2 + mat01 * y2 + mat02);
@@ -112,7 +104,7 @@ public:
                           ValueType& x2, ValueType& y2,
                           ValueType& x3, ValueType& y3) const noexcept
     {
-        const ValueType oldX1 = x1, oldX2 = x2, oldX3 = x3;
+        auto oldX1 = x1, oldX2 = x2, oldX3 = x3;
         x1 = static_cast<ValueType> (mat00 * oldX1 + mat01 * y1 + mat02);
         y1 = static_cast<ValueType> (mat10 * oldX1 + mat11 * y1 + mat12);
         x2 = static_cast<ValueType> (mat00 * oldX2 + mat01 * y2 + mat02);
@@ -275,6 +267,13 @@ public:
         direction, so this is only appropriate as a rough guide.
     */
     float getScaleFactor() const noexcept;
+
+   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
+    /** A ready-to-use identity transform - now depracated.
+        @deprecated If you need an identity transform, just use AffineTransform() or {}.
+    */
+    static const AffineTransform identity;
+   #endif
 
     //==============================================================================
     /* The transform matrix is:

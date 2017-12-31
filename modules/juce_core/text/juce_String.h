@@ -138,17 +138,6 @@ public:
     /** Destructor. */
     ~String() noexcept;
 
-    //==============================================================================
-   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
-    /** This is a static empty string object that can be used if you need a reference to one.
-        The value of String::empty is exactly the same as String(), and in almost all cases
-        it's better to avoid String::empty and just use String() or {} instead, so that the compiler
-        only has to reason about locally-constructed objects, rather than taking into account
-        the fact that you're referencing a global shared static memory address.
-    */
-    static const String empty;
-   #endif
-
     /** This is the character encoding type used internally to store the string.
 
         By setting the value of JUCE_STRING_UTF_TYPE to 8, 16, or 32, you can change the
@@ -1246,6 +1235,19 @@ public:
         data as this one.
     */
     int getReferenceCount() const noexcept;
+
+    //==============================================================================
+   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
+    /** This was a static empty string object, but is now deprecated as it's too easy to accidentally
+        use it indirectly during a static constructor, leading to hard-to-find order-of-initialisation
+        problems.
+        @deprecated If you need an empty String object, just use String() or {}.
+        The only time you might miss having String::empty available might be if you need to return an
+        empty string from a function by reference, but if you need to do that, it's easy enough to use
+        a function-local static String object and return that, avoiding any order-of-initialisation issues.
+    */
+    static const String empty;
+   #endif
 
 private:
     //==============================================================================
