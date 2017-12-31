@@ -107,7 +107,7 @@ public:
 
     void resized() override
     {
-        thumb->setBoundsToFit (0, 0, getWidth(), getHeight(), Justification::centred, false);
+        thumb->setBoundsToFit (getLocalBounds(), Justification::centred, false);
     }
 
     void setDescription (String descript) noexcept

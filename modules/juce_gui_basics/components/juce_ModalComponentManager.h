@@ -90,10 +90,10 @@ public:
     Component* getModalComponent (int index) const;
 
     /** Returns true if the specified component is in a modal state. */
-    bool isModal (Component* component) const;
+    bool isModal (const Component* component) const;
 
     /** Returns true if the specified component is currently the topmost modal component. */
-    bool isFrontModalComponent (Component* component) const;
+    bool isFrontModalComponent (const Component* component) const;
 
     /** Adds a new callback that will be called when the specified modal component is dismissed.
 
