@@ -112,7 +112,8 @@ public:
         @param newFile                the new filename to use
         @param addToRecentlyUsedList  if true, the filename will also be added to the
                                       drop-down list of recent files.
-        @param notification           whether to send a notification of the change to listeners
+        @param notification           whether to send a notification of the change to listeners.
+                                      A notification will only be sent if the filename has changed.
     */
     void setCurrentFile (File newFile,
                          bool addToRecentlyUsedList,

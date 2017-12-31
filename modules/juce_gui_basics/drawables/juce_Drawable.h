@@ -33,7 +33,8 @@ namespace juce
 
     @see DrawableComposite, DrawableImage, DrawablePath, DrawableText
 */
-class JUCE_API  Drawable  : public Component
+class JUCE_API  Drawable  : public Component,
+                            public MarkerList::MarkerListHolder
 {
 protected:
     //==============================================================================
@@ -224,6 +225,8 @@ public:
         @see ComponentBuilder::registerTypeHandler()
     */
     static void registerDrawableTypeHandlers (ComponentBuilder& componentBuilder);
+
+    MarkerList* getMarkers (bool) override          { return nullptr; }
 
 protected:
     //==============================================================================

@@ -201,6 +201,48 @@ Result ModuleList::addAllModulesInSubfoldersRecursively (const File& path, int d
     return Result::ok();
 }
 
+static File getModuleFolderFromPathIfItExists (const String& path, const String& moduleID, const Project& project)
+{
+    if (path.isNotEmpty())
+    {
+        auto moduleFolder = project.resolveFilename (path);
+
+        if (moduleFolder.exists())
+        {
+            if (ModuleDescription (moduleFolder).getID() == moduleID)
+                return moduleFolder;
+
+            auto f = moduleFolder.getChildFile (moduleID);
+
+            if (ModuleDescription (f).getID() == moduleID)
+                return f;
+        }
+    }
+
+    return {};
+}
+
+static File getPathToSpecifiedModule (Project& project, StringRef moduleID)
+{
+    auto& modules = project.getModules();
+
+    if (! modules.shouldUseGlobalPath (moduleID))
+    {
+        for (Project::ExporterIterator exporter (project); exporter.next();)
+        {
+            if (! exporter->mayCompileOnCurrentOS())
+                continue;
+
+            auto path = getModuleFolderFromPathIfItExists (exporter->getPathForModuleString (moduleID), moduleID, project);
+
+            if (path != File())
+                return path;
+        }
+    }
+
+    return {};
+}
+
 static Array<File> getAllPossibleModulePathsFromExporters (Project& project)
 {
     StringArray paths;
@@ -661,27 +703,6 @@ Value EnabledModuleList::shouldShowAllModuleFilesInProject (const String& module
                 .getPropertyAsValue (Ids::showAllCode, getUndoManager());
 }
 
-File EnabledModuleList::getModuleFolderFromPathIfItExists (const String& path, const String& moduleID, const Project& project)
-{
-    if (path.isNotEmpty())
-    {
-        auto moduleFolder = project.resolveFilename (path);
-
-        if (moduleFolder.exists())
-        {
-            if (ModuleDescription (moduleFolder).getID() == moduleID)
-                return moduleFolder;
-
-            auto f = moduleFolder.getChildFile (moduleID);
-
-            if (ModuleDescription (f).getID() == moduleID)
-                return f;
-        }
-    }
-
-    return {};
-}
-
 File EnabledModuleList::findUserModuleFolder (const String& possiblePaths, const String& moduleID)
 {
     auto paths = StringArray::fromTokens (possiblePaths, ";", {});
@@ -708,6 +729,13 @@ File EnabledModuleList::getModuleFolder (const String& moduleID)
             return getModuleFolderFromPathIfItExists (getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString(), moduleID, project);
 
         return findUserModuleFolder (getAppSettings().getStoredPath (Ids::defaultUserModulePath).toString(), moduleID);
+    }
+
+    {
+        auto path = getPathToSpecifiedModule (project, moduleID);
+
+        if (path != File())
+            return path;
     }
 
     auto paths = getAllPossibleModulePathsFromExporters (project);

@@ -2140,12 +2140,6 @@ void Component::copyAllExplicitColoursTo (Component& target) const
 }
 
 //==============================================================================
-MarkerList* Component::getMarkers (bool /*xAxis*/)
-{
-    return nullptr;
-}
-
-//==============================================================================
 Component::Positioner::Positioner (Component& c) noexcept
     : component (c)
 {

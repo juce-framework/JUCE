@@ -908,8 +908,6 @@ private:
 
         inChans.clear();
         outChans.clear();
-        inputBuffers.setSize (1, 1);
-        outputBuffers.setSize (1, 1);
     }
 
     void resync()
@@ -1111,7 +1109,7 @@ String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
                             enabledInputs.getHighestBit() + 1 - inChannels.size(),
                             false);
 
-    inputBuffers.setSize (jmax (1, enabledInputs.countNumberOfSetBits()), bufferSizeSamples);
+    inputBuffers.setSize (enabledInputs.countNumberOfSetBits(), bufferSizeSamples);
     inputBuffers.clear();
     int numIns = 0;
 
@@ -1132,7 +1130,7 @@ String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
                              enabledOutputs.getHighestBit() + 1 - outChannels.size(),
                              false);
 
-    outputBuffers.setSize (jmax (1, enabledOutputs.countNumberOfSetBits()), bufferSizeSamples);
+    outputBuffers.setSize (enabledOutputs.countNumberOfSetBits(), bufferSizeSamples);
     outputBuffers.clear();
     int numOuts = 0;
 

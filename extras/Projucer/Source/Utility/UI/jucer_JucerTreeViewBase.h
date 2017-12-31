@@ -208,12 +208,13 @@ public:
     TreeItemComponent (JucerTreeViewBase& i)  : item (i)
     {
         setInterceptsMouseClicks (false, true);
+        item.textX = iconWidth;
     }
 
     void paint (Graphics& g) override
     {
         auto bounds = getLocalBounds().toFloat();
-        auto iconBounds = bounds.removeFromLeft (25).reduced (7, 5);
+        auto iconBounds = bounds.removeFromLeft ((float) iconWidth).reduced (7, 5);
 
         bounds.removeFromRight (buttons.size() * bounds.getHeight());
 
@@ -223,9 +224,7 @@ public:
 
     void resized() override
     {
-        item.textX = getHeight() + 4;
-
-        Rectangle<int> r (getLocalBounds());
+        auto r = getLocalBounds();
 
         for (int i = buttons.size(); --i >= 0;)
             buttons.getUnchecked(i)->setBounds (r.removeFromRight (r.getHeight()));
@@ -239,6 +238,8 @@ public:
 
     JucerTreeViewBase& item;
     OwnedArray<Component> buttons;
+
+    const int iconWidth = 25;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeItemComponent)
 };
