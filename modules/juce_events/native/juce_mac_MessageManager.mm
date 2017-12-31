@@ -202,7 +202,7 @@ private:
         static void broadcastMessageCallback (id /*self*/, SEL, NSNotification* n)
         {
             NSDictionary* dict = (NSDictionary*) [n userInfo];
-            const String messageString (nsStringToJuce ((NSString*) [dict valueForKey: nsStringLiteral ("message")]));
+            auto messageString = nsStringToJuce ((NSString*) [dict valueForKey: nsStringLiteral ("message")]);
             MessageManager::getInstance()->deliverBroadcastMessage (messageString);
         }
 

@@ -550,7 +550,7 @@ void GenericCodeEditorComponent::handleEscapeKey()
 void GenericCodeEditorComponent::editorViewportPositionChanged()
 {
     CodeEditorComponent::editorViewportPositionChanged();
-    listeners.call (&Listener::codeEditorViewportMoved, *this);
+    listeners.call ([this] (Listener& l) { l.codeEditorViewportMoved (*this); });
 }
 
 //==============================================================================

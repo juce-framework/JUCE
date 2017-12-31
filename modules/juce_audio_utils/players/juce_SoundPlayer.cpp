@@ -49,7 +49,8 @@ private:
 //==============================================================================
 // An AudioSourcePlayer which will remove itself from the AudioDeviceManager's
 // callback list once it finishes playing its source
-struct AutoRemovingTransportSource : public AudioTransportSource, private Timer
+struct AutoRemovingTransportSource  : public AudioTransportSource,
+                                      private Timer
 {
     AutoRemovingTransportSource (MixerAudioSource& mixerToUse, AudioTransportSource* ts, bool ownSource,
                                  int samplesPerBlock, double requiredSampleRate)

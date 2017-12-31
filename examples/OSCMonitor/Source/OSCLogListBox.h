@@ -29,17 +29,16 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 
 //==============================================================================
-class OSCLogListBox    : public ListBox, private ListBoxModel, private AsyncUpdater
+class OSCLogListBox    : public ListBox,
+                         private ListBoxModel,
+                         private AsyncUpdater
 {
 public:
-
-    //==============================================================================
     OSCLogListBox()
     {
         setModel (this);
     }
 
-    //==============================================================================
     ~OSCLogListBox()
     {
     }
@@ -161,13 +160,10 @@ public:
     }
 
 private:
-
-    //==============================================================================
-    String getIndentationString (int level)
+    static String getIndentationString (int level)
     {
         return String().paddedRight (' ', 2 * level);
     }
-
 
     //==============================================================================
     StringArray oscLogList;

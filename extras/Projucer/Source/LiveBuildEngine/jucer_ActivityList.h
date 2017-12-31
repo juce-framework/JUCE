@@ -96,7 +96,7 @@ struct ActivityList   : public ChangeBroadcaster
     void sendClassListChangedMessage (const ClassDatabase::ClassList& newList)
     {
         checkThread();
-        listeners.call (&ActivityList::Listener::classListChanged, newList);
+        listeners.call ([&] (Listener& l) { l.classListChanged (newList); });
     }
 
 private:

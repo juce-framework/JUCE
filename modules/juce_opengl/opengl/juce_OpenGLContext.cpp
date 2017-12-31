@@ -152,7 +152,10 @@ public:
    #endif
 
     //==============================================================================
-    void paint (Graphics&) override {}
+    void paint (Graphics&) override
+    {
+        updateViewportSize (false);
+    }
 
     bool invalidateAll() override
     {
@@ -232,14 +235,12 @@ public:
             {
                 doWorkWhileWaitingForLock (false);
 
-                if (mmLock.retryLock ())
+                if (mmLock.retryLock())
                     break;
             }
 
             if (shouldExit())
                 return false;
-
-            updateViewportSize (false);
         }
 
         if (! context.makeActive())
@@ -447,7 +448,7 @@ public:
                 if (shouldExit())
                     return ThreadPoolJob::jobHasFinished;
 
-            } while (! mmLock.retryLock ());
+            } while (! mmLock.retryLock());
         }
 
         initialiseOnThread();

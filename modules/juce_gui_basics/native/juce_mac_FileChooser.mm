@@ -51,7 +51,8 @@ static NSMutableArray* createAllowedTypesArray (const StringArray& filters)
 //==============================================================================
 template <> struct ContainerDeletePolicy<NSSavePanel>    { static void destroy (NSObject* o) { [o release]; } };
 
-class FileChooser::Native     : public Component, public FileChooser::Pimpl
+class FileChooser::Native     : public Component,
+                                public FileChooser::Pimpl
 {
 public:
     Native (FileChooser& fileChooser, int flags, FilePreviewComponent* previewComponent)
@@ -213,7 +214,7 @@ private:
             }
         }
 
-        owner.finished (chooserResults, true);
+        owner.finished (chooserResults);
     }
 
     bool shouldShowFilename (const String& filenameToTest)

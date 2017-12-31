@@ -23,8 +23,7 @@
 namespace juce
 {
 
-InterprocessConnectionServer::InterprocessConnectionServer()
-    : Thread ("Juce IPC server")
+InterprocessConnectionServer::InterprocessConnectionServer() : Thread ("JUCE IPC server")
 {
 }
 
@@ -73,7 +72,7 @@ void InterprocessConnectionServer::run()
         ScopedPointer<StreamingSocket> clientSocket (socket->waitForNextConnection());
 
         if (clientSocket != nullptr)
-            if (InterprocessConnection* newConnection = createConnectionObject())
+            if (auto* newConnection = createConnectionObject())
                 newConnection->initialiseWithSocket (clientSocket.release());
     }
 }

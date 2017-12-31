@@ -36,7 +36,7 @@ class Component::MouseListenerList
 public:
     MouseListenerList() noexcept {}
 
-    void addListener (MouseListener* const newListener, const bool wantsEventsForAllNestedChildComponents)
+    void addListener (MouseListener* newListener, bool wantsEventsForAllNestedChildComponents)
     {
         if (! listeners.contains (newListener))
         {
@@ -52,7 +52,7 @@ public:
         }
     }
 
-    void removeListener (MouseListener* const listenerToRemove)
+    void removeListener (MouseListener* listenerToRemove)
     {
         auto index = listeners.indexOf (listenerToRemove);
 
@@ -150,7 +150,7 @@ private:
 
     struct BailOutChecker2
     {
-        BailOutChecker2 (Component::BailOutChecker& boc, Component* const comp)
+        BailOutChecker2 (Component::BailOutChecker& boc, Component* comp)
             : checker (boc), safePointer (comp)
         {
         }
@@ -470,7 +470,7 @@ Component::~Component()
 {
     static_assert (sizeof (flags) <= sizeof (componentFlags), "componentFlags has too many bits!");
 
-    componentListeners.call (&ComponentListener::componentBeingDeleted, *this);
+    componentListeners.call ([this] (ComponentListener& l) { l.componentBeingDeleted (*this); });
 
     masterReference.clear();
 
@@ -505,7 +505,7 @@ void Component::setName (const String& name)
                 peer->setTitle (name);
 
         BailOutChecker checker (this);
-        componentListeners.callChecked (checker, &ComponentListener::componentNameChanged, *this);
+        componentListeners.callChecked (checker, [this] (ComponentListener& l) { l.componentNameChanged (*this); });
     }
 }
 
@@ -569,7 +569,7 @@ void Component::sendVisibilityChangeMessage()
     visibilityChanged();
 
     if (! checker.shouldBailOut())
-        componentListeners.callChecked (checker, &ComponentListener::componentVisibilityChanged, *this);
+        componentListeners.callChecked (checker, [this] (ComponentListener& l) { l.componentVisibilityChanged (*this); });
 }
 
 bool Component::isShowing() const
@@ -1207,8 +1207,7 @@ void Component::sendMovedResizedMessages (const bool wasMoved, const bool wasRes
         parentComponent->childBoundsChanged (this);
 
     if (! checker.shouldBailOut())
-        componentListeners.callChecked (checker, &ComponentListener::componentMovedOrResized,
-                                        *this, wasMoved, wasResized);
+        componentListeners.callChecked (checker, [=] (ComponentListener& l) { l.componentMovedOrResized (*this, wasMoved, wasResized); });
 }
 
 void Component::setSize (int w, int h)
@@ -1661,7 +1660,7 @@ void Component::internalChildrenChanged()
         childrenChanged();
 
         if (! checker.shouldBailOut())
-            componentListeners.callChecked (checker, &ComponentListener::componentChildrenChanged, *this);
+            componentListeners.callChecked (checker, [this] (ComponentListener& l) { l.componentChildrenChanged (*this); });
     }
 }
 
@@ -1674,7 +1673,7 @@ void Component::internalHierarchyChanged()
     if (checker.shouldBailOut())
         return;
 
-    componentListeners.callChecked (checker, &ComponentListener::componentParentHierarchyChanged, *this);
+    componentListeners.callChecked (checker, [this] (ComponentListener& l) { l.componentParentHierarchyChanged (*this); });
 
     if (checker.shouldBailOut())
         return;
@@ -2387,7 +2386,7 @@ void Component::internalMouseEnter (MouseInputSource source, Point<float> relati
     if (checker.shouldBailOut())
         return;
 
-    Desktop::getInstance().getMouseListeners().callChecked (checker, &MouseListener::mouseEnter, me);
+    Desktop::getInstance().getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseEnter (me); });
 
     MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseEnter, me);
 }
@@ -2416,7 +2415,7 @@ void Component::internalMouseExit (MouseInputSource source, Point<float> relativ
     if (checker.shouldBailOut())
         return;
 
-    Desktop::getInstance().getMouseListeners().callChecked (checker, &MouseListener::mouseExit, me);
+    Desktop::getInstance().getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseExit (me); });
 
     MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseExit, me);
 }
@@ -2444,7 +2443,7 @@ void Component::internalMouseDown (MouseInputSource source, Point<float> relativ
                                  orientation, rotation, tiltX, tiltY, this, this, time, relativePos,
                                  time, source.getNumberOfMultipleClicks(), false);
 
-            desktop.getMouseListeners().callChecked (checker, &MouseListener::mouseDown, me);
+            desktop.getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseDown (me); });
             return;
         }
     }
@@ -2481,7 +2480,7 @@ void Component::internalMouseDown (MouseInputSource source, Point<float> relativ
     if (checker.shouldBailOut())
         return;
 
-    desktop.getMouseListeners().callChecked (checker, &MouseListener::mouseDown, me);
+    desktop.getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseDown (me); });
 
     MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseDown, me);
 }
@@ -2517,7 +2516,7 @@ void Component::internalMouseUp (MouseInputSource source, Point<float> relativeP
         return;
 
     auto& desktop = Desktop::getInstance();
-    desktop.getMouseListeners().callChecked (checker, &MouseListener::mouseUp, me);
+    desktop.getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseUp (me); });
 
     MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseUp, me);
 
@@ -2532,7 +2531,7 @@ void Component::internalMouseUp (MouseInputSource source, Point<float> relativeP
         if (checker.shouldBailOut())
             return;
 
-        desktop.mouseListeners.callChecked (checker, &MouseListener::mouseDoubleClick, me);
+        desktop.mouseListeners.callChecked (checker, [&] (MouseListener& l) { l.mouseDoubleClick (me); });
         MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseDoubleClick, me);
     }
 }
@@ -2555,7 +2554,7 @@ void Component::internalMouseDrag (MouseInputSource source, Point<float> relativ
         if (checker.shouldBailOut())
             return;
 
-        Desktop::getInstance().getMouseListeners().callChecked (checker, &MouseListener::mouseDrag, me);
+        Desktop::getInstance().getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseDrag (me); });
 
         MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseDrag, me);
     }
@@ -2583,7 +2582,7 @@ void Component::internalMouseMove (MouseInputSource source, Point<float> relativ
         if (checker.shouldBailOut())
             return;
 
-        desktop.getMouseListeners().callChecked (checker, &MouseListener::mouseMove, me);
+        desktop.getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseMove (me); });
 
         MouseListenerList::sendMouseEvent (*this, checker, &MouseListener::mouseMove, me);
     }
@@ -2603,7 +2602,7 @@ void Component::internalMouseWheel (MouseInputSource source, Point<float> relati
     if (isCurrentlyBlockedByAnotherModalComponent())
     {
         // allow blocked mouse-events to go to global listeners..
-        desktop.mouseListeners.callChecked (checker, &MouseListener::mouseWheelMove, me, wheel);
+        desktop.mouseListeners.callChecked (checker, [&] (MouseListener& l) { l.mouseWheelMove (me, wheel); });
     }
     else
     {
@@ -2612,7 +2611,7 @@ void Component::internalMouseWheel (MouseInputSource source, Point<float> relati
         if (checker.shouldBailOut())
             return;
 
-        desktop.mouseListeners.callChecked (checker, &MouseListener::mouseWheelMove, me, wheel);
+        desktop.mouseListeners.callChecked (checker, [&] (MouseListener& l) { l.mouseWheelMove (me, wheel); });
 
         if (! checker.shouldBailOut())
             MouseListenerList::sendWheelEvent (*this, checker, me, wheel);
@@ -2662,7 +2661,7 @@ void Component::internalBroughtToFront()
     if (checker.shouldBailOut())
         return;
 
-    componentListeners.callChecked (checker, &ComponentListener::componentBroughtToFront, *this);
+    componentListeners.callChecked (checker, [this] (ComponentListener& l) { l.componentBroughtToFront (*this); });
 
     if (checker.shouldBailOut())
         return;
@@ -2911,7 +2910,7 @@ void JUCE_CALLTYPE Component::unfocusAllComponents()
         c->giveAwayFocus (true);
 }
 
-void Component::giveAwayFocus (const bool sendFocusLossEvent)
+void Component::giveAwayFocus (bool sendFocusLossEvent)
 {
     auto* componentLosingFocus = currentlyFocusedComponent;
     currentlyFocusedComponent = nullptr;
@@ -2941,7 +2940,7 @@ void Component::setEnabled (const bool shouldBeEnabled)
             sendEnablementChangeMessage();
 
         BailOutChecker checker (this);
-        componentListeners.callChecked (checker, &ComponentListener::componentEnablementChanged, *this);
+        componentListeners.callChecked (checker, [this] (ComponentListener& l) { l.componentEnablementChanged (*this); });
     }
 }
 

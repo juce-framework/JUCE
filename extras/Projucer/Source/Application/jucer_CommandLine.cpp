@@ -545,7 +545,7 @@ namespace
     static void generateObfuscatedStringCode (const StringArray& args)
     {
         checkArgumentCount (args, 2);
-        const String originalText (args[1]);
+        const String originalText (args[1].unquoted());
 
         struct Section
         {

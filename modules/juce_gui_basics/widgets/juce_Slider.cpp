@@ -320,8 +320,7 @@ public:
         cancelPendingUpdate();
 
         Component::BailOutChecker checker (&owner);
-        Slider* slider = &owner; // (must use an intermediate variable here to avoid a VS2005 compiler bug)
-        listeners.callChecked (checker, &Slider::Listener::sliderValueChanged, slider);
+        listeners.callChecked (checker, [&] (Slider::Listener& l) { l.sliderValueChanged (&owner); });
     }
 
     void sendDragStart()
@@ -329,19 +328,16 @@ public:
         owner.startedDragging();
 
         Component::BailOutChecker checker (&owner);
-        Slider* slider = &owner; // (must use an intermediate variable here to avoid a VS2005 compiler bug)
-        listeners.callChecked (checker, &Slider::Listener::sliderDragStarted, slider);
+        listeners.callChecked (checker, [&] (Slider::Listener& l) { l.sliderDragStarted (&owner); });
     }
 
     void sendDragEnd()
     {
         owner.stoppedDragging();
-
         sliderBeingDragged = -1;
 
         Component::BailOutChecker checker (&owner);
-        Slider* slider = &owner; // (must use an intermediate variable here to avoid a VS2005 compiler bug)
-        listeners.callChecked (checker, &Slider::Listener::sliderDragEnded, slider);
+        listeners.callChecked (checker, [&] (Slider::Listener& l) { l.sliderDragEnded (&owner); });
     }
 
     struct DragInProgress

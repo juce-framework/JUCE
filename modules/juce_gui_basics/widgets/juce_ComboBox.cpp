@@ -502,7 +502,7 @@ void ComboBox::showPopupIfNotActive()
         // exited the modal state of other popups currently on the screen. By calling
         // showPopup asynchronously, we are giving the other popups a chance to properly
         // close themselves
-        MessageManager::callAsync([safePointer] () mutable { if (safePointer != nullptr) safePointer->showPopup(); });
+        MessageManager::callAsync ([safePointer]() mutable { if (safePointer != nullptr) safePointer->showPopup(); });
     }
 }
 
@@ -629,7 +629,7 @@ void ComboBox::removeListener (ComboBoxListener* listener)    { listeners.remove
 void ComboBox::handleAsyncUpdate()
 {
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, &ComboBox::Listener::comboBoxChanged, this);
+    listeners.callChecked (checker, [this] (Listener& l) { l.comboBoxChanged (this); });
 }
 
 void ComboBox::sendChange (const NotificationType notification)

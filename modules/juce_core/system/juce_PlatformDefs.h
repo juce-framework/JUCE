@@ -36,7 +36,7 @@ namespace juce
  #endif
 #endif
 
-/** This macro defines the C calling convention used as the standard for Juce calls. */
+/** This macro defines the C calling convention used as the standard for JUCE calls. */
 #if JUCE_MSVC
  #define JUCE_CALLTYPE   __stdcall
  #define JUCE_CDECL      __cdecl

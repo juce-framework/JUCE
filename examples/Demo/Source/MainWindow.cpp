@@ -63,7 +63,7 @@ struct DemoTaskbarComponent  : public SystemTrayIconComponent,
     DemoTaskbarComponent()
     {
         setIconImage (ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize));
-        setIconTooltip ("Juce Demo App!");
+        setIconTooltip ("JUCE Demo App!");
     }
 
     void mouseDown (const MouseEvent&) override
@@ -89,7 +89,7 @@ struct DemoTaskbarComponent  : public SystemTrayIconComponent,
         stopTimer();
 
         PopupMenu m;
-        m.addItem (1, "Quit the Juce demo");
+        m.addItem (1, "Quit the JUCE demo");
 
         // It's always better to open menus asynchronously when possible.
         m.showMenuAsync (PopupMenu::Options(),

@@ -458,7 +458,7 @@ Project::Item& ProjectExporter::getModulesGroup()
     if (modulesGroup == nullptr)
     {
         jassert (itemGroups.size() > 0); // must call copyMainGroupFromProject before this.
-        itemGroups.add (Project::Item::createGroup (project, "Juce Modules", "__modulesgroup__", true));
+        itemGroups.add (Project::Item::createGroup (project, "JUCE Modules", "__modulesgroup__", true));
         modulesGroup = &(itemGroups.getReference (itemGroups.size() - 1));
     }
 

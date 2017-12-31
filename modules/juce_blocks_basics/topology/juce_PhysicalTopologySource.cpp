@@ -125,7 +125,7 @@ struct PhysicalTopologySource::Internal
         {
             JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
-            listeners.call (&Listener::connectionBeingDeleted, *this);
+            listeners.call ([this] (Listener& l) { l.connectionBeingDeleted (*this); });
 
             if (midiInput != nullptr)
                 midiInput->stop();
@@ -191,7 +191,7 @@ struct PhysicalTopologySource::Internal
                 if (handleMessageFromDevice != nullptr)
                     handleMessageFromDevice (data + sizeof (BlocksProtocol::roliSysexHeader), (size_t) bodySize);
 
-            listeners.call (&Listener::handleIncomingMidiMessage, message);
+            listeners.call ([&] (Listener& l) { l.handleIncomingMidiMessage (message); });
         }
 
         std::unique_ptr<juce::MidiInput> midiInput;
@@ -1207,7 +1207,7 @@ struct PhysicalTopologySource::Internal
                     lastTopology = detector->currentTopology;
 
                     for (auto* d : detector->activeTopologySources)
-                        d->listeners.call (&TopologySource::Listener::topologyChanged);
+                        d->listeners.call ([] (TopologySource::Listener& l) { l.topologyChanged(); });
 
                    #if DUMP_TOPOLOGY
                     dumpTopology (lastTopology);
@@ -1363,7 +1363,7 @@ struct PhysicalTopologySource::Internal
             for (uint32 i = 0; i < BlocksProtocol::numProgramMessageInts; ++i)
                 m.values[i] = data[i];
 
-            programEventListeners.call (&Block::ProgramEventListener::handleProgramEvent, *this, m);
+            programEventListeners.call ([&] (ProgramEventListener& l) { l.handleProgramEvent (*this, m); });
         }
 
         static BlockImplementation* getFrom (Block& b) noexcept
@@ -1663,7 +1663,7 @@ struct PhysicalTopologySource::Internal
             return config.getItemActive ((BlocksProtocol::ConfigItemId) item);
         }
 
-        uint32 getMaxConfigIndex () override
+        uint32 getMaxConfigIndex() override
         {
             return uint32 (BlocksProtocol::maxConfigIndex);
         }
@@ -1831,8 +1831,8 @@ struct PhysicalTopologySource::Internal
 
         void handleIncomingMidiMessage (const juce::MidiMessage& message) override
         {
-            dataInputPortListeners.call (&Block::DataInputPortListener::handleIncomingDataPortMessage,
-                                         *this, message.getRawData(), (size_t) message.getRawDataSize());
+            dataInputPortListeners.call ([&] (DataInputPortListener& l) { l.handleIncomingDataPortMessage (*this, message.getRawData(),
+                                                                                                           (size_t) message.getRawDataSize()); });
         }
 
         void connectionBeingDeleted (const MIDIDeviceConnection& c) override
@@ -2025,7 +2025,7 @@ struct PhysicalTopologySource::Internal
                 if (t.zVelocity <= 0)  t.zVelocity = t.z;
                 if (t.zVelocity <= 0)  t.zVelocity = 0.9f;
 
-                listeners.call (&TouchSurface::Listener::touchChanged, *this, t);
+                listeners.call ([&] (TouchSurface::Listener& l) { l.touchChanged (*this, t); });
             }
 
             // Normal handling:
@@ -2035,7 +2035,7 @@ struct PhysicalTopologySource::Internal
             if (touchEvent.isTouchStart)
                 status.lastStrikePressure = touchEvent.zVelocity;
 
-            listeners.call (&TouchSurface::Listener::touchChanged, *this, touchEvent);
+            listeners.call ([&] (TouchSurface::Listener& l) { l.touchChanged (*this, touchEvent); });
         }
 
         void timerCallback() override
@@ -2074,7 +2074,7 @@ struct PhysicalTopologySource::Internal
             killTouch.isTouchStart      = false;
             killTouch.isTouchEnd        = true;
 
-            listeners.call (&TouchSurface::Listener::touchChanged, *this, killTouch);
+            listeners.call ([&] (TouchSurface::Listener& l) { l.touchChanged (*this, killTouch); });
 
             status.isActive = false;
         }
@@ -2148,9 +2148,9 @@ struct PhysicalTopologySource::Internal
         void sendButtonChangeToListeners (Block::Timestamp timestamp, bool isDown)
         {
             if (isDown)
-                listeners.call (&ControlButton::Listener::buttonPressed, *this, timestamp);
+                listeners.call ([&] (ControlButton::Listener& l) { l.buttonPressed (*this, timestamp); });
             else
-                listeners.call (&ControlButton::Listener::buttonReleased, *this, timestamp);
+                listeners.call ([&] (ControlButton::Listener& l) { l.buttonReleased (*this, timestamp); });
         }
 
         BlockImplementation& blockImpl;

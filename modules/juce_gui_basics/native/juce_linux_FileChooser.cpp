@@ -122,7 +122,7 @@ private:
         if (! shouldKill)
         {
             child.waitForProcessToFinish (60 * 1000);
-            owner.finished (selection, true);
+            owner.finished (selection);
         }
     }
 

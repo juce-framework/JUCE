@@ -162,7 +162,7 @@ class FIRFilterTest : public UnitTest
 
     //==============================================================================
     template <typename TheTest, typename SampleType, typename NumericType>
-    void runTestForType ()
+    void runTestForType()
     {
         Random random (8392829);
 
@@ -195,10 +195,10 @@ class FIRFilterTest : public UnitTest
     {
         beginTest (unitTestName);
 
-        runTestForType<TheTest, float, float> ();
+        runTestForType<TheTest, float, float>();
         runTestForType<TheTest, double, double>();
        #if JUCE_USE_SIMD
-        runTestForType<TheTest, SIMDRegister<float>, float> ();
+        runTestForType<TheTest, SIMDRegister<float>, float>();
         runTestForType<TheTest, SIMDRegister<double>, double>();
        #endif
     }

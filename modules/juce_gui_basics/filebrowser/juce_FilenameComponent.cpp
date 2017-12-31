@@ -175,7 +175,7 @@ String FilenameComponent::getCurrentFileText() const
 
 File FilenameComponent::getCurrentFile() const
 {
-    File f (File::getCurrentWorkingDirectory().getChildFile (getCurrentFileText()));
+    auto f = File::getCurrentWorkingDirectory().getChildFile (getCurrentFileText());
 
     if (enforcedSuffix.isNotEmpty())
         f = f.withFileExtension (enforcedSuffix);
@@ -244,7 +244,7 @@ void FilenameComponent::setMaxNumberOfRecentFiles (const int newMaximum)
 
 void FilenameComponent::addRecentlyUsedFile (const File& file)
 {
-    StringArray files (getRecentlyUsedFilenames());
+    auto files = getRecentlyUsedFilenames();
 
     if (file.getFullPathName().isNotEmpty())
     {
@@ -269,7 +269,7 @@ void FilenameComponent::removeListener (FilenameComponentListener* const listene
 void FilenameComponent::handleAsyncUpdate()
 {
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, &FilenameComponentListener::filenameComponentChanged, this);
+    listeners.callChecked (checker, [this] (FilenameComponentListener& l) { l.filenameComponentChanged (this); });
 }
 
 } // namespace juce

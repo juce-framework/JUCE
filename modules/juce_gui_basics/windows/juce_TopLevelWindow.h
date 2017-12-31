@@ -97,7 +97,7 @@ public:
     /** True if drop-shadowing is enabled. */
     bool isDropShadowEnabled() const noexcept               { return useDropShadow; }
 
-    /** Sets whether an OS-native title bar will be used, or a Juce one.
+    /** Sets whether an OS-native title bar will be used, or a JUCE one.
         @see isUsingNativeTitleBar
     */
     void setUsingNativeTitleBar (bool useNativeTitleBar);

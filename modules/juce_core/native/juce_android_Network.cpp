@@ -137,7 +137,7 @@ public:
 
         if (isContentURL)
         {
-            auto inputStream = AndroidContentUriResolver::getInputStreamForContentUri (url);
+            auto inputStream = AndroidContentUriResolver::getStreamForContentUri (url, true);
 
             if (inputStream != nullptr)
             {

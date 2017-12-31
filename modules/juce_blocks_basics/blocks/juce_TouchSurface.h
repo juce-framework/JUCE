@@ -112,7 +112,7 @@ public:
     /** Testing feature: this allows you to inject touches onto a touch surface. */
     void callListenersTouchChanged (const TouchSurface::Touch& t)
     {
-        listeners.call (&Listener::touchChanged, *this, t);
+        listeners.call ([this, &t] (Listener& l) { l.touchChanged (*this, t); });
     }
 
     /** Adds a listener to be called when the surface is touched. */

@@ -220,17 +220,17 @@ struct SIMDRegister
     inline SIMDRegister JUCE_VECTOR_CALLTYPE operator^ (vMaskType v) const noexcept     { return { NativeOps::bit_xor (value, toVecType (v.value)) }; }
 
     /** Returns a vector where each element is the bit-inverted value of the corresponding element in the receiver.*/
-    inline SIMDRegister JUCE_VECTOR_CALLTYPE operator~ () const noexcept                       { return { NativeOps::bit_not (value) }; }
+    inline SIMDRegister JUCE_VECTOR_CALLTYPE operator~() const noexcept                 { return { NativeOps::bit_not (value) }; }
 
     //==============================================================================
     /** Returns a vector where each element is the bit-and'd value of the corresponding element in the receiver and the scalar s.*/
-    inline SIMDRegister JUCE_VECTOR_CALLTYPE operator& (MaskType s) const noexcept             { return { NativeOps::bit_and (value, toVecType (s)) }; }
+    inline SIMDRegister JUCE_VECTOR_CALLTYPE operator& (MaskType s) const noexcept      { return { NativeOps::bit_and (value, toVecType (s)) }; }
 
     /** Returns a vector where each element is the bit-or'd value of the corresponding element in the receiver and the scalar s.*/
-    inline SIMDRegister JUCE_VECTOR_CALLTYPE operator| (MaskType s) const noexcept             { return { NativeOps::bit_or  (value, toVecType (s)) }; }
+    inline SIMDRegister JUCE_VECTOR_CALLTYPE operator| (MaskType s) const noexcept      { return { NativeOps::bit_or  (value, toVecType (s)) }; }
 
     /** Returns a vector where each element is the bit-xor'd value of the corresponding element in the receiver and the scalar s.*/
-    inline SIMDRegister JUCE_VECTOR_CALLTYPE operator^ (MaskType s) const noexcept             { return { NativeOps::bit_xor (value, toVecType (s)) }; }
+    inline SIMDRegister JUCE_VECTOR_CALLTYPE operator^ (MaskType s) const noexcept      { return { NativeOps::bit_xor (value, toVecType (s)) }; }
 
     //==============================================================================
     /** Returns a SIMDRegister of the corresponding integral type where each element has each bit set

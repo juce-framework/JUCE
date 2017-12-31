@@ -113,8 +113,8 @@ private:
 };
 
 //==============================================================================
-GZIPCompressorOutputStream::GZIPCompressorOutputStream (OutputStream& destStream, int compressionLevel, int windowBits)
-   : GZIPCompressorOutputStream (&destStream, compressionLevel, false, windowBits)
+GZIPCompressorOutputStream::GZIPCompressorOutputStream (OutputStream& s, int compressionLevel, int windowBits)
+   : GZIPCompressorOutputStream (&s, compressionLevel, false, windowBits)
 {
 }
 

@@ -263,7 +263,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
     //==============================================================================
     void notifyAboutPurchaseResult (const InAppPurchases::Purchase& purchase, bool success, const String& statusDescription)
     {
-        owner.listeners.call (&Listener::productPurchaseFinished, { purchase, {} }, success, statusDescription);
+        owner.listeners.call ([&] (Listener& l) { l.productPurchaseFinished ({ purchase, {} }, success, statusDescription); });
     }
 
     //==============================================================================
@@ -738,7 +738,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
             {
                 const auto& result = getProductsInformationJobResults.getReference (i);
 
-                owner.listeners.call (&Listener::productsInfoReturned, result);
+                owner.listeners.call ([&] (Listener& l) { l.productsInfoReturned (result); });
                 getProductsInformationJobResults.remove (i);
             }
         }
@@ -750,7 +750,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
             {
                 const auto& result = getProductsBoughtJobResults.getReference (i);
 
-                owner.listeners.call (&Listener::purchasesListRestored, result.purchases, result.success, result.statusDescription);
+                owner.listeners.call ([&] (Listener& l) { l.purchasesListRestored (result.purchases, result.success, result.statusDescription); });
                 getProductsBoughtJobResults.remove (i);
             }
         }
@@ -762,8 +762,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
             {
                 const auto& result = consumePurchaseJobResults.getReference (i);
 
-                owner.listeners.call (&Listener::productConsumed, result.productIdentifier,
-                                      result.success, result.statusDescription);
+                owner.listeners.call ([&] (Listener& l) { l.productConsumed (result.productIdentifier, result.success, result.statusDescription); });
                 consumePurchaseJobResults.remove (i);
             }
         }

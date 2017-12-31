@@ -2447,7 +2447,7 @@ public:
                     {
                         if (atts.map_state == IsViewable)
                             XSetInputFocus (display,
-                                            (clientMsg.window == windowH ? getFocusWindow ()
+                                            (clientMsg.window == windowH ? getFocusWindow()
                                                                          : clientMsg.window),
                                             RevertToParent,
                                             (::Time) clientMsg.data.l[1]);

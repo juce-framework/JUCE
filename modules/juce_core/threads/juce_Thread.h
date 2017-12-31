@@ -298,7 +298,7 @@ public:
 
     /** Finds the thread object that is currently running.
 
-        Note that the main UI thread (or other non-Juce threads) don't have a Thread
+        Note that the main UI thread (or other non-JUCE threads) don't have a Thread
         object associated with them, so this will return nullptr.
     */
     static Thread* JUCE_CALLTYPE getCurrentThread();
