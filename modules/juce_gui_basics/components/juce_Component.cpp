@@ -2082,6 +2082,11 @@ void Component::setPaintingIsUnclipped (const bool shouldPaintWithoutClipping) n
     flags.dontClipGraphicsFlag = shouldPaintWithoutClipping;
 }
 
+bool Component::isPaintingUnclipped() const noexcept
+{
+    return flags.dontClipGraphicsFlag;
+}
+
 //==============================================================================
 Image Component::createComponentSnapshot (Rectangle<int> areaToGrab,
                                           bool clipImageToComponentBounds, float scaleFactor)

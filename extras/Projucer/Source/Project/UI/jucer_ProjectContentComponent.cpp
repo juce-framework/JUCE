@@ -554,6 +554,9 @@ void ProjectContentComponent::showCurrentExporterSettings()
 
 void ProjectContentComponent::showExporterSettings (const String& exporterName)
 {
+    if (exporterName.isEmpty())
+        return;
+
     showExportersPanel();
 
     if (auto* exportersPanel = getProjectTab()->getExportersTreePanel())

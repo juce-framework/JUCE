@@ -1036,6 +1036,11 @@ public:
     */
     void setPaintingIsUnclipped (bool shouldPaintWithoutClipping) noexcept;
 
+    /** Returns true if this component doesn't require its graphics context to be clipped
+        when it is being painted.
+    */
+    bool isPaintingUnclipped() const noexcept;
+
     //==============================================================================
     /** Adds an effect filter to alter the component's appearance.
 

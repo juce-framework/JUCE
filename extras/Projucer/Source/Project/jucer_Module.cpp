@@ -360,8 +360,8 @@ void LibraryModule::addSettingsForModuleToExporter (ProjectExporter& exporter, P
         StringArray paths;
         paths.addTokens (extraInternalSearchPaths, true);
 
-        for (int i = 0; i < paths.size(); ++i)
-            exporter.addToExtraSearchPaths (moduleRelativePath.getChildFile (paths.getReference(i)));
+        for (auto& path : paths)
+            exporter.addToExtraSearchPaths (moduleRelativePath.getChildFile (path.unquoted()));
     }
 
     {

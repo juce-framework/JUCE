@@ -493,15 +493,11 @@ private:
             if (target.isDynamicLibrary())
                 flags.add ("-shared");
 
-            if (target.type == ProjectType::Target::StandalonePlugIn
-             || target.type == ProjectType::Target::GUIApp)
-                flags.add ("-no-pie");
-
             if (packages.size() > 0)
             {
                 String pkgconfigLibs ("`pkg-config --libs");
 
-                for (auto p : packages)
+                for (auto& p : packages)
                     pkgconfigLibs << " " << p;
 
                 pkgconfigLibs << "`";

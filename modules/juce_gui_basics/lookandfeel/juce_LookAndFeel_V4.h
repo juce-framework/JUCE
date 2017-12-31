@@ -184,6 +184,8 @@ public:
     void positionComboBoxText (ComboBox&, Label&) override;
 
     //==============================================================================
+    int getSliderThumbRadius (Slider&) override;
+
     void drawLinearSlider (Graphics&, int x, int y, int width, int height,
                            float sliderPos, float minSliderPos, float maxSliderPos,
                            const Slider::SliderStyle, Slider&) override;
