@@ -54,6 +54,14 @@ public:
     */
     bool connect (int portNumber);
 
+    /** Connects to a UDP datagram socket that is already set up,
+        and starts listening to OSC packets arriving on this port.
+        Make sure that the object you give it doesn't get deleted while this
+        object is still using it!
+        @returns true if the connection was successful; false otherwise.
+    */
+    bool connectToSocket (DatagramSocket& socketToUse);
+
     //==============================================================================
     /** Disconnects from the currently used UDP port.
         @returns true if the disconnection was successful; false otherwise.

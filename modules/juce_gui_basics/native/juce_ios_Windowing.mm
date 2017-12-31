@@ -123,7 +123,7 @@ namespace juce
 
 - (void) applicationDidEnterBackground: (UIApplication*) application
 {
-    if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+    if (auto* app = JUCEApplicationBase::getInstance())
     {
        #if JUCE_EXECUTE_APP_SUSPEND_ON_BACKGROUND_TASK
         appSuspendTask = [application beginBackgroundTaskWithName:@"JUCE Suspend Task" expirationHandler:^{
@@ -146,7 +146,7 @@ namespace juce
 {
     ignoreUnused (application);
 
-    if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
+    if (auto* app = JUCEApplicationBase::getInstance())
         app->resumed();
 }
 
@@ -405,10 +405,10 @@ namespace juce
 namespace juce
 {
 
-int juce_iOSMain (int argc, const char* argv[], void* customDelgatePtr);
-int juce_iOSMain (int argc, const char* argv[], void* customDelagetPtr)
+int juce_iOSMain (int argc, const char* argv[], void* customDelegatePtr);
+int juce_iOSMain (int argc, const char* argv[], void* customDelegatePtr)
 {
-    Class delegateClass = (customDelagetPtr != nullptr ? reinterpret_cast<Class> (customDelagetPtr) : [JuceAppStartupDelegate class]);
+    Class delegateClass = (customDelegatePtr != nullptr ? reinterpret_cast<Class> (customDelegatePtr) : [JuceAppStartupDelegate class]);
 
     return UIApplicationMain (argc, const_cast<char**> (argv), nil, NSStringFromClass (delegateClass));
 }

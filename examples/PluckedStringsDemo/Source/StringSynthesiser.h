@@ -64,7 +64,7 @@ public:
         {
             // plucking in the middle gives the largest amplitude;
             // plucking at the very ends will do nothing.
-            amplitude = std::sin (float_Pi * pluckPosition);
+            amplitude = std::sin (MathConstants<float>::pi * pluckPosition);
         }
     }
 

@@ -189,12 +189,12 @@ struct SharedMessageThread  : public Thread
         {}
     }
 
-    juce_DeclareSingleton (SharedMessageThread, false)
+    JUCE_DECLARE_SINGLETON (SharedMessageThread, false)
 
     bool initialised = false;
 };
 
-juce_ImplementSingleton (SharedMessageThread)
+JUCE_IMPLEMENT_SINGLETON (SharedMessageThread)
 
 #endif
 

@@ -177,9 +177,11 @@ public:
         {
             switch (type)
             {
-                case VSTPlugIn:             return ".so";
+                case VSTPlugIn:
+                case DynamicLibrary:        return ".so";
                 case VST3PlugIn:            return ".vst3";
-                case SharedCodeTarget:      return ".a";
+                case SharedCodeTarget:
+                case StaticLibrary:         return ".a";
                 default:                    break;
             }
 

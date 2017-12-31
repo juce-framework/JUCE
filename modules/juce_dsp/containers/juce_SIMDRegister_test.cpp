@@ -370,8 +370,10 @@ public:
                 {
                     type array_a [SIMDRegister<type>::SIMDNumElements];
 
-                    union
+                    union ConversionUnion
                     {
+                        inline ConversionUnion() {}
+                        inline ~ConversionUnion() {}
                         SIMDRegister<type> floatVersion;
                         vMaskType intVersion;
                     } a, b;
@@ -512,6 +514,39 @@ public:
                 u.expect (vecEqualToArray (le,  array_le ));
                 u.expect (vecEqualToArray (gt,  array_gt ));
                 u.expect (vecEqualToArray (ge,  array_ge ));
+
+                do
+                {
+                    SIMDRegister_test_internal::fillRandom (array_a, SIMDRegister<type>::SIMDNumElements, random);
+                    SIMDRegister_test_internal::fillRandom (array_b, SIMDRegister<type>::SIMDNumElements, random);
+                } while (std::equal (array_a, array_a + SIMDRegister<type>::SIMDNumElements, array_b));
+
+                copy (a, array_a);
+                copy (b, array_b);
+                u.expect (a != b);
+                u.expect (b != a);
+                u.expect (! (a == b));
+                u.expect (! (b == a));
+
+                SIMDRegister_test_internal::fillRandom (array_a, SIMDRegister<type>::SIMDNumElements, random);
+                copy (a, array_a);
+                copy (b, array_a);
+
+                u.expect (a == b);
+                u.expect (b == a);
+                u.expect (! (a != b));
+                u.expect (! (b != a));
+
+                auto scalar = a[0];
+                a = SIMDRegister<type>::expand (scalar);
+
+                u.expect (a == scalar);
+                u.expect (! (a != scalar));
+
+                scalar--;
+
+                u.expect (a != scalar);
+                u.expect (! (a == scalar));
             }
         }
     };

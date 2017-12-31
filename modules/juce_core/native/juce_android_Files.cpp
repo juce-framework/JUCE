@@ -57,23 +57,11 @@ DECLARE_JNI_CLASS (AndroidEnvironment, "android/os/Environment");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
- METHOD (getAbsolutePath, "getAbsolutePath", "()Ljava/lang/String;") \
-
-DECLARE_JNI_CLASS (AndroidFile, "java/io/File");
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (close, "close", "()V") \
  METHOD (flush, "flush", "()V") \
  METHOD (write, "write", "([BII)V")
 
 DECLARE_JNI_CLASS (AndroidOutputStream, "java/io/OutputStream");
-#undef JNI_CLASS_MEMBERS
-
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
- STATICMETHOD (withAppendedId, "withAppendedId", "(Landroid/net/Uri;J)Landroid/net/Uri;") \
-
-DECLARE_JNI_CLASS (ContentUris, "android/content/ContentUris");
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
@@ -143,12 +131,34 @@ public:
             if (type == "image")
                 type = "images";
 
-            return getCursorDataColumn (URL (String ("content://media/external/") + type + "/media"),
+            return getCursorDataColumn (URL ("content://media/external/" + type + "/media"),
                                         "_id=?", StringArray {mediaId});
         }
 
         return getCursorDataColumn (url);
     }
+
+    static String getFileNameFromContentUri (const URL& url)
+    {
+        auto uri = urlToUri (url);
+        auto* env = getEnv();
+        LocalRef<jobject> contentResolver (android.activity.callObjectMethod (JuceAppActivity.getContentResolver));
+
+        if (contentResolver == 0)
+            return {};
+
+        auto filename = getStringUsingDataColumn ("_display_name", env, uri, contentResolver);
+
+        // Fallback to "_data" column
+        if (filename.isEmpty())
+        {
+            auto path = getStringUsingDataColumn ("_data", env, uri, contentResolver);
+            filename = path.fromLastOccurrenceOf ("/", false, true);
+        }
+
+        return filename;
+    }
+
 private:
     //==============================================================================
     static String getCursorDataColumn (const URL& url, const String& selection = {},
@@ -167,7 +177,7 @@ private:
 
             if (selection.isNotEmpty())
             {
-                args = LocalRef<jobjectArray> (env->NewObjectArray (selectionArgs.size(), JavaString, javaString("").get()));
+                args = LocalRef<jobjectArray> (env->NewObjectArray (selectionArgs.size(), JavaString, javaString ("").get()));
 
                 for (int i = 0; i < selectionArgs.size(); ++i)
                     env->SetObjectArrayElement (args.get(), i, javaString (selectionArgs[i]).get());
@@ -335,9 +345,9 @@ private:
     {
         auto* env = getEnv();
 
-        if (env->IsInstanceOf (obj.get(), AndroidFile) != 0)
-            return File (safeString (LocalRef<jobject> (env->CallObjectMethod (obj.get(),
-                                                            AndroidFile.getAbsolutePath))));
+        if (env->IsInstanceOf (obj.get(), JavaFile) != 0)
+            return File (juceString (LocalRef<jstring> ((jstring) env->CallObjectMethod (obj.get(),
+                                                        JavaFile.getAbsolutePath))));
 
         return {};
     }
@@ -354,15 +364,44 @@ private:
 
     static LocalRef<jobject> urlToUri (const URL& url)
     {
-        return LocalRef<jobject> (getEnv()->CallStaticObjectMethod (Uri, Uri.parse, javaString (url.toString (true)).get()));
+        return LocalRef<jobject> (getEnv()->CallStaticObjectMethod (AndroidUri, AndroidUri.parse,
+                                                                    javaString (url.toString (true)).get()));
     }
 
-    static String safeString (LocalRef<jobject> str)
+    //==============================================================================
+    static String getStringUsingDataColumn (const String& columnNameToUse, JNIEnv* env,
+                                            const LocalRef<jobject>& uri,
+                                            const LocalRef<jobject>& contentResolver)
     {
-        if (str)
-            return juceString ((jstring) str.get());
+        LocalRef<jstring> columnName (javaString (columnNameToUse));
+        LocalRef<jobjectArray> projection (env->NewObjectArray (1, JavaString, columnName.get()));
 
-        return {};
+        LocalRef<jobject> cursor (env->CallObjectMethod (contentResolver.get(), ContentResolver.query,
+                                                         uri.get(), projection.get(), nullptr,
+                                                         nullptr, nullptr));
+
+        if (cursor == 0)
+            return {};
+
+        String fileName;
+
+        if (env->CallBooleanMethod (cursor.get(), AndroidCursor.moveToFirst) != 0)
+        {
+            auto columnIndex = env->CallIntMethod (cursor.get(), AndroidCursor.getColumnIndex, columnName.get());
+
+            if (columnIndex >= 0)
+            {
+                LocalRef<jstring> value ((jstring) env->CallObjectMethod (cursor.get(), AndroidCursor.getString, columnIndex));
+
+                if (value)
+                    fileName = juceString (value.get());
+
+            }
+        }
+
+        env->CallVoidMethod (cursor.get(), AndroidCursor.close);
+
+        return fileName;
     }
 };
 
@@ -576,7 +615,7 @@ void FileOutputStream::flushInternal()
             status = getResultForErrno();
 
         // This stuff tells the OS to asynchronously update the metadata
-        // that the OS has cached aboud the file - this metadata is used
+        // that the OS has cached about the file - this metadata is used
         // when the device is acting as a USB drive, and unless it's explicitly
         // refreshed, it'll get out of step with the real file.
         new SingleMediaScanner (file.getFullPathName());

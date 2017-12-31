@@ -83,13 +83,13 @@ struct OscillatorDemo
     {
         // No Approximation
         {[] (float x) { return std::sin (x); }},                   // sine
-        {[] (float x) { return x / float_Pi; }},                   // saw
+        {[] (float x) { return x / MathConstants<float>::pi; }},   // saw
         {[] (float x) { return x < 0.0f ? -1.0f : 1.0f; }},        // square
 
         // Approximated by a wave-table
-        {[] (float x) { return std::sin (x); }, 100},             // sine
-        {[] (float x) { return x / float_Pi; }, 100},             // saw
-        {[] (float x) { return x < 0.0f ? -1.0f : 1.0f; }, 100}   // square
+        {[] (float x) { return std::sin (x); }, 100},                 // sine
+        {[] (float x) { return x / MathConstants<float>::pi; }, 100}, // saw
+        {[] (float x) { return x < 0.0f ? -1.0f : 1.0f; }, 100}       // square
     };
 
     int currentOscillatorIdx = 0;

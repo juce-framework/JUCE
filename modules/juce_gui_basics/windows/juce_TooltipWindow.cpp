@@ -67,6 +67,10 @@ void TooltipWindow::updatePosition (const String& tip, Point<int> pos, Rectangle
     setVisible (true);
 }
 
+#if JUCE_DEBUG
+static Array<TooltipWindow*> activeTooltipWindows;
+#endif
+
 void TooltipWindow::displayTip (Point<int> screenPos, const String& tip)
 {
     jassert (tip.isNotEmpty());
@@ -97,6 +101,20 @@ void TooltipWindow::displayTip (Point<int> screenPos, const String& tip)
                             | ComponentPeer::windowIgnoresMouseClicks);
         }
 
+       #if JUCE_DEBUG
+        activeTooltipWindows.addIfNotAlreadyThere (this);
+
+        for (auto* w : activeTooltipWindows)
+        {
+            if (w != this && w->tipShowing == tipShowing)
+            {
+                // Looks like you have more than one TooltipWindow showing the same tip..
+                // Be careful not to create more than one instance of this class!
+                jassertfalse;
+            }
+        }
+       #endif
+
         toFront (false);
     }
 }
@@ -121,6 +139,10 @@ void TooltipWindow::hideTip()
         tipShowing.clear();
         removeFromDesktop();
         setVisible (false);
+
+       #if JUCE_DEBUG
+        activeTooltipWindows.removeAllInstancesOf (this);
+       #endif
     }
 }
 

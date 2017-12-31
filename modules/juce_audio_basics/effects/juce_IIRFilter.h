@@ -200,10 +200,13 @@ protected:
     //==============================================================================
     SpinLock processLock;
     IIRCoefficients coefficients;
-    float v1, v2;
-    bool active;
+    float v1 = 0, v2 = 0;
+    bool active = false;
 
-    IIRFilter& operator= (const IIRFilter&);
+    // The exact meaning of an assignment operator would be ambiguous since the filters are
+    // stateful. If you want to copy the coefficients, then just use setCoefficients().
+    IIRFilter& operator= (const IIRFilter&) = delete;
+
     JUCE_LEAK_DETECTOR (IIRFilter)
 };
 

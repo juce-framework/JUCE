@@ -148,6 +148,7 @@ namespace StateVariableFilter
         void processBlock (const SampleType* input, SampleType* output, size_t n) noexcept
         {
             auto state = *parameters;
+
             for (size_t i = 0 ; i < n; ++i)
                 output[i] = processLoop<type> (input[i], state);
 
@@ -187,7 +188,11 @@ namespace StateVariableFilter
         void setCutOffFrequency (double sampleRate, NumericType frequency,
                                  NumericType resonance = static_cast<NumericType> (1.0 / std::sqrt (2.0))) noexcept
         {
-            g  = static_cast<NumericType> (std::tan (double_Pi * frequency / sampleRate));
+            jassert (sampleRate > 0);
+            jassert (resonance > NumericType (0));
+            jassert (frequency > NumericType (0) && frequency <= NumericType (sampleRate * 0.5));
+
+            g  = static_cast<NumericType> (std::tan (MathConstants<double>::pi * frequency / sampleRate));
             R2 = static_cast<NumericType> (1.0 / resonance);
             h  = static_cast<NumericType> (1.0 / (1.0 + R2 * g + g * g));
         }
@@ -204,7 +209,7 @@ namespace StateVariableFilter
         Parameters& operator= (const Parameters& o) noexcept           { g = o.g; R2 = o.R2; h = o.h; return *this; }
 
         //==============================================================================
-        NumericType g   = static_cast<NumericType> (std::tan (double_Pi * 200.0 / 44100.0));
+        NumericType g   = static_cast<NumericType> (std::tan (MathConstants<double>::pi * 200.0 / 44100.0));
         NumericType R2  = static_cast<NumericType> (std::sqrt (2.0));
         NumericType h   = static_cast<NumericType> (1.0 / (1.0 + R2 * g + g * g));
     };

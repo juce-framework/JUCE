@@ -229,7 +229,7 @@ public:
                 sansSerif.addIfNotAlreadyThere (faces.getUnchecked(i)->family);
     }
 
-    juce_DeclareSingleton_SingleThreaded_Minimal (FTTypefaceList)
+    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (FTTypefaceList)
 
 private:
     FTLibWrapper::Ptr library;
@@ -288,7 +288,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FTTypefaceList)
 };
 
-juce_ImplementSingleton_SingleThreaded (FTTypefaceList)
+JUCE_IMPLEMENT_SINGLETON (FTTypefaceList)
 
 
 //==============================================================================

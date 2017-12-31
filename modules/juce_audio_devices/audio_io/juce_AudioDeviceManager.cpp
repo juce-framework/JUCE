@@ -932,6 +932,8 @@ AudioDeviceManager::LevelMeter::LevelMeter() noexcept : level() {}
 
 void AudioDeviceManager::LevelMeter::updateLevel (const float* const* channelData, int numChannels, int numSamples) noexcept
 {
+    auto localLevel = level.get();
+
     if (enabled.get() != 0 && numChannels > 0)
     {
         for (int j = 0; j < numSamples; ++j)
@@ -943,20 +945,22 @@ void AudioDeviceManager::LevelMeter::updateLevel (const float* const* channelDat
 
             s /= (float) numChannels;
 
-            const double decayFactor = 0.99992;
+            const float decayFactor = 0.99992f;
 
-            if (s > level)
-                level = s;
-            else if (level > 0.001f)
-                level *= decayFactor;
+            if (s > localLevel)
+                localLevel = s;
+            else if (localLevel > 0.001f)
+                localLevel *= decayFactor;
             else
-                level = 0;
+                localLevel = 0;
         }
     }
     else
     {
-        level = 0;
+        localLevel = 0;
     }
+
+    level = localLevel;
 }
 
 void AudioDeviceManager::LevelMeter::setEnabled (bool shouldBeEnabled) noexcept
@@ -968,7 +972,7 @@ void AudioDeviceManager::LevelMeter::setEnabled (bool shouldBeEnabled) noexcept
 double AudioDeviceManager::LevelMeter::getCurrentLevel() const noexcept
 {
     jassert (enabled.get() != 0); // you need to call setEnabled (true) before using this!
-    return level;
+    return level.get();
 }
 
 void AudioDeviceManager::playTestSound()
@@ -986,13 +990,13 @@ void AudioDeviceManager::playTestSound()
 
     if (currentAudioDevice != nullptr)
     {
-        const double sampleRate = currentAudioDevice->getCurrentSampleRate();
-        const int soundLength = (int) sampleRate;
+        auto sampleRate = currentAudioDevice->getCurrentSampleRate();
+        auto soundLength = (int) sampleRate;
 
-        const double frequency = 440.0;
-        const float amplitude = 0.5f;
+        double frequency = 440.0;
+        float amplitude = 0.5f;
 
-        const double phasePerSample = double_Pi * 2.0 / (sampleRate / frequency);
+        auto phasePerSample = MathConstants<double>::twoPi / (sampleRate / frequency);
 
         auto* newSound = new AudioBuffer<float> (1, soundLength);
 

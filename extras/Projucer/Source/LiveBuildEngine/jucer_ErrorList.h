@@ -42,7 +42,7 @@ struct ErrorList    : public ChangeBroadcaster
         }
         else
         {
-            for (DiagnosticMessage& d : messages)
+            for (auto& d : messages)
                 if (d.isError())
                     dest.add (d);
         }

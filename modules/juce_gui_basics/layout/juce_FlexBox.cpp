@@ -31,10 +31,10 @@ struct FlexBoxLayoutCalculation
 {
     using Coord = double;
 
-    FlexBoxLayoutCalculation (const FlexBox& fb, Coord w, Coord h)
+    FlexBoxLayoutCalculation (FlexBox& fb, Coord w, Coord h)
        : owner (fb), parentWidth (w), parentHeight (h), numItems (owner.items.size()),
          isRowDirection (fb.flexDirection == FlexBox::Direction::row
-                          || fb.flexDirection == FlexBox::Direction::rowReverse),
+                      || fb.flexDirection == FlexBox::Direction::rowReverse),
          containerLineLength (isRowDirection ? parentWidth : parentHeight)
     {
         lineItems.calloc (numItems * numItems);
@@ -84,7 +84,7 @@ struct FlexBoxLayoutCalculation
         Coord crossSize, lineY, totalLength;
     };
 
-    const FlexBox& owner;
+    FlexBox& owner;
     const Coord parentWidth, parentHeight;
     const int numItems;
     const bool isRowDirection;

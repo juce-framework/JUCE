@@ -27,8 +27,6 @@
 namespace juce
 {
 
-struct PluginBusUtilities;
-
 //==============================================================================
 /**
     Base class for audio processing classes or plugins.
@@ -52,12 +50,11 @@ protected:
     /** Constructor.
 
         This constructor will create a main input and output bus which are diabled
-        by default. If you need more fine grain control then use the other
-        constructors.
+        by default. If you need more fine-grained control then use the other constructors.
     */
     AudioProcessor();
 
-    /** Constructor for multibus AudioProcessors
+    /** Constructor for multi-bus AudioProcessors
 
         If your AudioProcessor supports multiple buses than use this constructor
         to initialise the bus layouts and bus names of your plug-in.
@@ -65,19 +62,18 @@ protected:
     AudioProcessor (const BusesProperties& ioLayouts);
 
     /** Constructor for AudioProcessors which use layout maps
-
         If your AudioProcessor uses layout maps then use this constructor.
     */
    #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
     AudioProcessor (const std::initializer_list<const short[2]>& channelLayoutList)
+        : AudioProcessor (busesPropertiesFromLayoutArray (layoutListToArray (channelLayoutList)))
     {
-        initialise (busesPropertiesFromLayoutArray (layoutListToArray (channelLayoutList)));
     }
    #else
     template <int numLayouts>
     AudioProcessor (const short (&channelLayoutList) [numLayouts][2])
+        : AudioProcessor (busesPropertiesFromLayoutArray (layoutListToArray (channelLayoutList)))
     {
-        initialise (busesPropertiesFromLayoutArray (layoutListToArray (channelLayoutList)));
     }
    #endif
 
@@ -312,7 +308,7 @@ public:
         /** Get the channel set of a particular bus */
         AudioChannelSet getChannelSet (bool isInput, int busIndex) const noexcept
         {
-            return (isInput ? inputBuses : outputBuses) [busIndex];
+            return (isInput ? inputBuses : outputBuses)[busIndex];
         }
 
         /** Get the input channel layout on the main bus. */
@@ -342,17 +338,17 @@ public:
     {
     public:
         /** Returns true if this bus is an input bus. */
-        bool isInput() const;
+        bool isInput() const noexcept;
 
         /** Returns the index of this bus. */
-        int getBusIndex() const;
+        int getBusIndex() const noexcept;
 
         /** Returns true if the current bus is the main input or output bus. */
-        bool isMain() const                                             { return getBusIndex() == 0; }
+        bool isMain() const noexcept                                    { return getBusIndex() == 0; }
 
         //==============================================================================
         /** The bus's name. */
-        const String &getName() const noexcept                          { return name; }
+        const String& getName() const noexcept                          { return name; }
 
         /** Get the default layout of this bus.
             @see AudioChannelSet
@@ -361,7 +357,7 @@ public:
 
         //==============================================================================
         /** The bus's current layout. This will be AudioChannelSet::disabled() if the current
-            layout is dfisabled.
+            layout is disabled.
             @see AudioChannelSet
         */
         const AudioChannelSet& getCurrentLayout() const noexcept        { return layout; }
@@ -454,16 +450,21 @@ public:
         template <typename FloatType>
         AudioBuffer<FloatType> getBusBuffer (AudioBuffer<FloatType>& processBlockBuffer) const
         {
-            bool isIn;
-            int busIdx;
-            busDirAndIndex (isIn, busIdx);
-            return owner.getBusBuffer (processBlockBuffer, isIn, busIdx);
+            auto di = getDirectionAndIndex();
+            return owner.getBusBuffer (processBlockBuffer, di.isInput, di.index);
         }
 
     private:
         friend class AudioProcessor;
         Bus (AudioProcessor&, const String&, const AudioChannelSet&, bool);
-        void busDirAndIndex (bool&, int&) const noexcept;
+
+        struct BusDirectionAndIndex
+        {
+            bool isInput;
+            int index;
+        };
+
+        BusDirectionAndIndex getDirectionAndIndex() const noexcept;
         void updateChannelCount() noexcept;
 
         AudioProcessor& owner;
@@ -480,14 +481,14 @@ public:
     int getBusCount (bool isInput) const noexcept                   { return (isInput ? inputBuses : outputBuses).size(); }
 
     /** Returns the audio bus with a given index and direction.
-        If busIdx is invalid then this method will return a nullptr.
+        If busIndex is invalid then this method will return a nullptr.
     */
-    Bus* getBus (bool isInput, int busIdx) noexcept                 { return (isInput ? inputBuses : outputBuses)[busIdx]; }
+    Bus* getBus (bool isInput, int busIndex) noexcept               { return (isInput ? inputBuses : outputBuses)[busIndex]; }
 
     /** Returns the audio bus with a given index and direction.
-        If busIdx is invalid then this method will return a nullptr.
+        If busIndex is invalid then this method will return a nullptr.
     */
-    const Bus* getBus (bool isInput, int busIdx) const noexcept     { return const_cast<AudioProcessor*> (this)->getBus (isInput, busIdx); }
+    const Bus* getBus (bool isInput, int busIndex) const noexcept   { return const_cast<AudioProcessor*> (this)->getBus (isInput, busIndex); }
 
     //==============================================================================
     /**  Callback to query if a bus can currently be added.
@@ -583,15 +584,15 @@ public:
         If the index, direction combination is invalid or the layout is not
         supported by the audio processor then this method will return false.
     */
-    bool setChannelLayoutOfBus (bool isInput, int busIdx, const AudioChannelSet& layout);
+    bool setChannelLayoutOfBus (bool isInput, int busIndex, const AudioChannelSet& layout);
 
     /** Provides the number of channels of the bus with a given index and direction.
 
         If the index, direction combination is invalid then this will return zero.
     */
-    inline int getChannelCountOfBus (bool isInput, int busIdx) const noexcept
+    inline int getChannelCountOfBus (bool isInput, int busIndex) const noexcept
     {
-        if (const Bus* bus = getBus (isInput, busIdx))
+        if (auto* bus = getBus (isInput, busIndex))
             return bus->getNumberOfChannels();
 
         return 0;
@@ -616,7 +617,7 @@ public:
         It also provides the bus index. For example, this method would return one
         for a processor with two stereo buses when given the absolute channel index.
     */
-    int getOffsetInBusBufferForAbsoluteChannelIndex (bool isInput, int absoluteChannelIndex, /*out*/ int& busIdx) const noexcept;
+    int getOffsetInBusBufferForAbsoluteChannelIndex (bool isInput, int absoluteChannelIndex, int& busIndex) const noexcept;
 
     /** Returns an AudioBuffer containing a set of channel pointers for a specific bus.
         This can be called in processBlock to get a buffer containing a sub-group of the master
@@ -625,8 +626,8 @@ public:
     template <typename FloatType>
     AudioBuffer<FloatType> getBusBuffer (AudioBuffer<FloatType>& processBlockBuffer, bool isInput, int busIndex) const
     {
-        const int busNumChannels = getChannelCountOfBus (isInput, busIndex);
-        const int channelOffset = getChannelIndexInProcessBlockBuffer (isInput, busIndex, 0);
+        auto busNumChannels = getChannelCountOfBus (isInput, busIndex);
+        auto channelOffset = getChannelIndexInProcessBlockBuffer (isInput, busIndex, 0);
 
         return AudioBuffer<FloatType> (processBlockBuffer.getArrayOfWritePointers() + channelOffset,
                                        busNumChannels, processBlockBuffer.getNumSamples());
@@ -1514,18 +1515,16 @@ protected:
 
         The default implementation will return false if canAddBus/canRemoveBus
         returns false (the default behavior). Otherwise, this method returns
-        "Input #busIdx" for input buses and "Output #busIdx" for output buses
-        where busIdx is the index for newly created buses. The default layout
+        "Input #busIndex" for input buses and "Output #busIndex" for output buses
+        where busIndex is the index for newly created buses. The default layout
         in this case will be the layout of the previous bus of the same direction.
     */
     virtual bool canApplyBusCountChange (bool isInput, bool isAddingBuses,
                                          BusProperties& outNewBusProperties);
 
     //==============================================================================
-    friend struct PluginBusUtilities;
-
     /** @internal */
-    AudioPlayHead* playHead;
+    AudioPlayHead* playHead = nullptr;
 
     /** @internal */
     void sendParamChangeMessageToListeners (int parameterIndex, float newValue);
@@ -1534,12 +1533,12 @@ private:
     //==============================================================================
     struct InOutChannelPair
     {
-        int16 inChannels, outChannels;
+        int16 inChannels = 0, outChannels = 0;
 
-        InOutChannelPair() noexcept                           : inChannels (0), outChannels (0) {}
-        InOutChannelPair (const InOutChannelPair& o) noexcept : inChannels (o.inChannels), outChannels (o.outChannels) {}
-        InOutChannelPair (int16 inCh, int16 outCh) noexcept   : inChannels (inCh), outChannels (outCh) {}
-        InOutChannelPair (const int16 (&config)[2]) noexcept  : inChannels (config[0]), outChannels (config[1]) {}
+        InOutChannelPair() noexcept {}
+        InOutChannelPair (const InOutChannelPair& o) noexcept  : inChannels (o.inChannels), outChannels (o.outChannels) {}
+        InOutChannelPair (int16 inCh, int16 outCh) noexcept    : inChannels (inCh), outChannels (outCh) {}
+        InOutChannelPair (const int16 (&config)[2]) noexcept   : inChannels (config[0]), outChannels (config[1]) {}
 
         InOutChannelPair& operator= (const InOutChannelPair& o) noexcept    { inChannels = o.inChannels; outChannels = o.outChannels; return *this; }
 
@@ -1555,10 +1554,7 @@ private:
         Array<InOutChannelPair> layouts;
 
         for (int i = 0; i < numLayouts; ++i)
-        {
-            InOutChannelPair pair (configuration [i]);
-            layouts.add (pair);
-        }
+            layouts.add (InOutChannelPair (configuration[i]));
 
         return layouts;
     }
@@ -1568,12 +1564,8 @@ private:
     {
         Array<InOutChannelPair> layouts;
 
-        for (std::initializer_list<const short[2]>::const_iterator it = configuration.begin();
-             it != configuration.end(); ++it)
-        {
-            InOutChannelPair pair (*it);
-            layouts.add (pair);
-        }
+        for (auto&& i : configuration)
+            layouts.add (InOutChannelPair (i));
 
         return layouts;
     }
@@ -1586,34 +1578,34 @@ private:
     static bool JUCE_CALLTYPE containsLayout (const BusesLayout&, const Array<InOutChannelPair>&);
 
     //==============================================================================
-    void initialise (const BusesProperties&);
     void createBus (bool isInput, const BusProperties&);
 
     //==============================================================================
     Array<AudioProcessorListener*> listeners;
     Component::SafePointer<AudioProcessorEditor> activeEditor;
-    double currentSampleRate;
-    int blockSize, latencySamples;
-   #if JUCE_DEBUG
-    bool textRecursionCheck;
-   #endif
-    bool suspended, nonRealtime;
-    ProcessingPrecision processingPrecision;
+    double currentSampleRate = 0;
+    int blockSize = 0, latencySamples = 0;
+    bool suspended = false, nonRealtime = false;
+    ProcessingPrecision processingPrecision = singlePrecision;
     CriticalSection callbackLock, listenerLock;
 
     friend class Bus;
     mutable OwnedArray<Bus> inputBuses, outputBuses;
 
-    String cachedInputSpeakerArrString;
-    String cachedOutputSpeakerArrString;
-
-    int cachedTotalIns, cachedTotalOuts;
+    String cachedInputSpeakerArrString, cachedOutputSpeakerArrString;
+    int cachedTotalIns = 0, cachedTotalOuts = 0;
 
     OwnedArray<AudioProcessorParameter> managedParameters;
     AudioProcessorParameter* getParamChecked (int) const noexcept;
 
    #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
     BigInteger changingParams;
+   #endif
+
+   #if JUCE_DEBUG
+    bool textRecursionCheck = false;
+    bool shouldCheckParamsForDupeIDs = false;
+    void checkForDupedParamIDs();
    #endif
 
     AudioProcessorListener* getListenerLocked (int) const noexcept;
@@ -1624,6 +1616,12 @@ private:
 
     template <typename floatType>
     void processBypassed (AudioBuffer<floatType>&, MidiBuffer&);
+
+   #if JucePlugin_Build_VST3
+    friend class JuceVST3EditController;
+    friend class JuceVST3Component;
+    Atomic<int> vst3IsPlaying { 0 };
+   #endif
 
     // This method is no longer used - you can delete it from your AudioProcessor classes.
     JUCE_DEPRECATED_WITH_BODY (virtual bool silenceInProducesSilenceOut() const, { return false; })

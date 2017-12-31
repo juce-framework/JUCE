@@ -90,7 +90,7 @@ public:
     FloatingType operator() (FloatingType x) const noexcept
     {
         // Horner's method
-        FloatingType y = 0;
+        FloatingType y (0);
 
         for (int i = coeffs.size(); --i >= 0;)
             y = (x * y) + coeffs.getUnchecked(i);
@@ -144,7 +144,7 @@ public:
 
         for (int i = 0; i < N; ++i)
         {
-            FloatingType value = {};
+            FloatingType value (0);
 
             for (int j = 0; j < Nmax; ++j)
                 if (j >= 0 && j < N1 && i - j >= 0 && i - j < N2)

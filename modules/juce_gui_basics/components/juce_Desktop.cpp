@@ -179,13 +179,13 @@ int Desktop::getMouseWheelMoveCounter() const noexcept      { return mouseWheelC
 void Desktop::incrementMouseClickCounter() noexcept         { ++mouseClickCounter; }
 void Desktop::incrementMouseWheelCounter() noexcept         { ++mouseWheelCounter; }
 
-const Array<MouseInputSource>& Desktop::getMouseSources() const noexcept        { return mouseSources->sourceArray; }
-int Desktop::getNumMouseSources() const noexcept                                { return mouseSources->sources.size(); }
-int Desktop::getNumDraggingMouseSources() const noexcept                        { return mouseSources->getNumDraggingMouseSources(); }
-MouseInputSource* Desktop::getMouseSource (int index) const noexcept            { return mouseSources->getMouseSource (index); }
-MouseInputSource* Desktop::getDraggingMouseSource (int index) const noexcept    { return mouseSources->getDraggingMouseSource (index); }
-MouseInputSource Desktop::getMainMouseSource() const noexcept                   { return MouseInputSource (mouseSources->sources.getUnchecked(0)); }
-void Desktop::beginDragAutoRepeat (int interval)                                { mouseSources->beginDragAutoRepeat (interval); }
+const Array<MouseInputSource>& Desktop::getMouseSources() const noexcept              { return mouseSources->sourceArray; }
+int Desktop::getNumMouseSources() const noexcept                                      { return mouseSources->sources.size(); }
+int Desktop::getNumDraggingMouseSources() const noexcept                              { return mouseSources->getNumDraggingMouseSources(); }
+MouseInputSource* Desktop::getMouseSource (int index) const noexcept                  { return mouseSources->getMouseSource (index); }
+MouseInputSource* Desktop::getDraggingMouseSource (int index) const noexcept          { return mouseSources->getDraggingMouseSource (index); }
+MouseInputSource Desktop::getMainMouseSource() const noexcept                         { return MouseInputSource (mouseSources->sources.getUnchecked(0)); }
+void Desktop::beginDragAutoRepeat (int interval)                                      { mouseSources->beginDragAutoRepeat (interval); }
 
 //==============================================================================
 void Desktop::addFocusChangeListener    (FocusChangeListener* const listener)   { focusListeners.add (listener); }

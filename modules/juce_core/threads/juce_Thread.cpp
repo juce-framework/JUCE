@@ -86,7 +86,7 @@ void Thread::threadEntryPoint()
 
     if (startSuspensionEvent.wait (10000))
     {
-        jassert (getCurrentThreadId() == threadId);
+        jassert (getCurrentThreadId() == threadId.get());
 
         if (affinityMask != 0)
             setCurrentThreadAffinityMask (affinityMask);
@@ -102,9 +102,13 @@ void Thread::threadEntryPoint()
     }
 
     currentThreadHolder->value.releaseCurrentThreadStorage();
+
+    // Once closeThreadHandle is called this class may be deleted by a different
+    // thread, so we need to store deleteOnThreadEnd in a local variable.
+    auto shouldDeleteThis = deleteOnThreadEnd;
     closeThreadHandle();
 
-    if (deleteOnThreadEnd)
+    if (shouldDeleteThis)
         delete this;
 }
 
@@ -119,12 +123,12 @@ void Thread::startThread()
 {
     const ScopedLock sl (startStopLock);
 
-    shouldExit = false;
+    shouldExit = 0;
 
-    if (threadHandle == nullptr)
+    if (threadHandle.get() == nullptr)
     {
         launchThread();
-        setThreadPriority (threadHandle, threadPriority);
+        setThreadPriority (threadHandle.get(), threadPriority);
         startSuspensionEvent.signal();
     }
 }
@@ -133,7 +137,7 @@ void Thread::startThread (int priority)
 {
     const ScopedLock sl (startStopLock);
 
-    if (threadHandle == nullptr)
+    if (threadHandle.get() == nullptr)
     {
         auto isRealtime = (priority == realtimeAudioPriority);
 
@@ -155,7 +159,7 @@ void Thread::startThread (int priority)
 
 bool Thread::isThreadRunning() const
 {
-    return threadHandle != nullptr;
+    return threadHandle.get() != nullptr;
 }
 
 Thread* JUCE_CALLTYPE Thread::getCurrentThread()
@@ -166,7 +170,7 @@ Thread* JUCE_CALLTYPE Thread::getCurrentThread()
 //==============================================================================
 void Thread::signalThreadShouldExit()
 {
-    shouldExit = true;
+    shouldExit = 1;
     listeners.call ([] (Listener& l) { l.exitSignalSent(); });
 }
 
@@ -263,7 +267,7 @@ bool Thread::setPriority (int newPriority)
     isAndroidRealtimeThread = isRealtime;
    #endif
 
-    if ((! isThreadRunning()) || setThreadPriority (threadHandle, newPriority))
+    if ((! isThreadRunning()) || setThreadPriority (threadHandle.get(), newPriority))
     {
         threadPriority = newPriority;
         return true;

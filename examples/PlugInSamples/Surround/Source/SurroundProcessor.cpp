@@ -88,7 +88,7 @@ public:
             const float freq = (float) (440.0 / getSampleRate());
 
             for (int i = 0; i < fillSamples; ++i)
-                channelBuffer[i] += std::sin (2.0f * float_Pi * freq * static_cast<float> (sampleOffset++));
+                channelBuffer[i] += std::sin (MathConstants<float>::twoPi * freq * static_cast<float> (sampleOffset++));
         }
     }
 

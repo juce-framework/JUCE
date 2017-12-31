@@ -33,7 +33,7 @@ bool PushNotifications::Notification::isValid() const noexcept { return true; }
 #endif
 
 //==============================================================================
-juce_ImplementSingleton (PushNotifications)
+JUCE_IMPLEMENT_SINGLETON (PushNotifications)
 
 PushNotifications::PushNotifications()
   #if JUCE_PUSH_NOTIFICATIONS

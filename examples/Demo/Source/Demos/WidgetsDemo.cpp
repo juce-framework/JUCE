@@ -155,7 +155,7 @@ struct SlidersPage  : public Component
 
         s = createSlider (false);
         s->setSliderStyle (Slider::Rotary);
-        s->setRotaryParameters (float_Pi * 1.2f, float_Pi * 2.8f, false);
+        s->setRotaryParameters (MathConstants<float>::pi * 1.2f, MathConstants<float>::pi * 2.8f, false);
         s->setTextBoxStyle (Slider::TextBoxRight, false, 70, 20);
         horizonalSliderArea.removeFromTop (15);
         s->setBounds (horizonalSliderArea.removeFromTop (70));

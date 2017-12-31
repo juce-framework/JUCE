@@ -530,8 +530,8 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
     {
         auto session = [AVAudioSession sharedInstance];
 
-        NSString* mode = (enable ? AVAudioSessionModeMeasurement
-                                 : AVAudioSessionModeDefault);
+        NSString* mode = (enable ? AVAudioSessionModeDefault
+                                 : AVAudioSessionModeMeasurement);
 
         JUCE_NSERROR_CHECK ([session setMode: mode
                                        error: &error]);

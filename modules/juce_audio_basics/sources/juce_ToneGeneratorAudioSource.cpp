@@ -63,7 +63,7 @@ void ToneGeneratorAudioSource::releaseResources()
 void ToneGeneratorAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& info)
 {
     if (phasePerSample == 0.0)
-        phasePerSample = double_Pi * 2.0 / (sampleRate / frequency);
+        phasePerSample = MathConstants<double>::twoPi / (sampleRate / frequency);
 
     for (int i = 0; i < info.numSamples; ++i)
     {

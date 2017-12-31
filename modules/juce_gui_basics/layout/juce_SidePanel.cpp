@@ -153,7 +153,7 @@ void SidePanel::mouseDrag (const MouseEvent& e)
             setBounds (getBounds().withX (startingBounds.getX() + jmax (amountMoved, 0)));
         }
     }
-    else
+    else if (isShowing)
     {
         auto relativeMouseDownPosition = getLocalPoint (e.eventComponent, e.getMouseDownPosition());
         auto relativeMouseDragPosition = getLocalPoint (e.eventComponent, e.getPosition());

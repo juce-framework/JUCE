@@ -225,12 +225,11 @@ void SoundPlayer::play (PositionableAudioSource* audioSource, bool deleteWhenFin
 
 void SoundPlayer::playTestSound()
 {
-    const int soundLength = (int) sampleRate;
+    auto soundLength = (int) sampleRate;
+    double frequency = 440.0;
+    float amplitude = 0.5f;
 
-    const double frequency = 440.0;
-    const float amplitude = 0.5f;
-
-    const double phasePerSample = double_Pi * 2.0 / (sampleRate / frequency);
+    auto phasePerSample = MathConstants<double>::twoPi / (sampleRate / frequency);
 
     auto* newSound = new AudioBuffer<float> (1, soundLength);
 

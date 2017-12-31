@@ -231,7 +231,7 @@ void MPEInstrument::processMidiAllNotesOffMessage (const MidiMessage& message)
             }
         }
     }
-    else if (MPEZone* zone = zoneLayout.getZoneByMasterChannel (message.getChannel()))
+    else if (auto* zone = zoneLayout.getZoneByMasterChannel (message.getChannel()))
     {
         for (int i = notes.size(); --i >= 0;)
         {
@@ -400,7 +400,7 @@ void MPEInstrument::updateDimension (int midiChannel, MPEDimension& dimension, M
 }
 
 //==============================================================================
-void MPEInstrument::updateDimensionMaster (MPEZone& zone, MPEDimension& dimension, MPEValue value)
+void MPEInstrument::updateDimensionMaster (const MPEZone& zone, MPEDimension& dimension, MPEValue value)
 {
     auto channels = zone.getNoteChannelRange();
 
@@ -441,7 +441,7 @@ void MPEInstrument::updateDimensionForNote (MPENote& note, MPEDimension& dimensi
 }
 
 //==============================================================================
-void MPEInstrument::callListenersDimensionChanged (MPENote& note, MPEDimension& dimension)
+void MPEInstrument::callListenersDimensionChanged (const MPENote& note, const MPEDimension& dimension)
 {
     if (&dimension == &pressureDimension)  { listeners.call ([&] (Listener& l) { l.notePressureChanged  (note); }); return; }
     if (&dimension == &timbreDimension)    { listeners.call ([&] (Listener& l) { l.noteTimbreChanged    (note); }); return; }
@@ -555,7 +555,7 @@ int MPEInstrument::getNumPlayingNotes() const noexcept
 
 MPENote MPEInstrument::getNote (int midiChannel, int midiNoteNumber) const noexcept
 {
-    if (MPENote* note = getNotePtr (midiChannel, midiNoteNumber))
+    if (auto* note = getNotePtr (midiChannel, midiNoteNumber))
         return *note;
 
     return MPENote();
@@ -569,7 +569,7 @@ MPENote MPEInstrument::getNote (int index) const noexcept
 //==============================================================================
 MPENote MPEInstrument::getMostRecentNote (int midiChannel) const noexcept
 {
-    if (MPENote* note = getLastNotePlayedPtr (midiChannel))
+    if (auto* note = getLastNotePlayedPtr (midiChannel))
         return *note;
 
     return MPENote();
@@ -579,7 +579,7 @@ MPENote MPEInstrument::getMostRecentNoteOtherThan (MPENote otherThanThisNote) co
 {
     for (int i = notes.size(); --i >= 0;)
     {
-        const MPENote& note = notes.getReference (i);
+        auto& note = notes.getReference (i);
 
         if (note != otherThanThisNote)
             return note;
@@ -589,11 +589,11 @@ MPENote MPEInstrument::getMostRecentNoteOtherThan (MPENote otherThanThisNote) co
 }
 
 //==============================================================================
-MPENote* MPEInstrument::getNotePtr (int midiChannel, int midiNoteNumber) const noexcept
+const MPENote* MPEInstrument::getNotePtr (int midiChannel, int midiNoteNumber) const noexcept
 {
     for (int i = 0; i < notes.size(); ++i)
     {
-        MPENote& note = notes.getReference (i);
+        auto& note = notes.getReference (i);
 
         if (note.midiChannel == midiChannel && note.initialNote == midiNoteNumber)
             return &note;
@@ -602,8 +602,13 @@ MPENote* MPEInstrument::getNotePtr (int midiChannel, int midiNoteNumber) const n
     return nullptr;
 }
 
+MPENote* MPEInstrument::getNotePtr (int midiChannel, int midiNoteNumber) noexcept
+{
+    return const_cast<MPENote*> (static_cast<const MPEInstrument&> (*this).getNotePtr (midiChannel, midiNoteNumber));
+}
+
 //==============================================================================
-MPENote* MPEInstrument::getNotePtr (int midiChannel, TrackingMode mode) const noexcept
+const MPENote* MPEInstrument::getNotePtr (int midiChannel, TrackingMode mode) const noexcept
 {
     // for the "all notes" tracking mode, this method can never possibly
     // work because it returns 0 or 1 note but there might be more than one!
@@ -616,12 +621,17 @@ MPENote* MPEInstrument::getNotePtr (int midiChannel, TrackingMode mode) const no
     return nullptr;
 }
 
+MPENote* MPEInstrument::getNotePtr (int midiChannel, TrackingMode mode) noexcept
+{
+    return const_cast<MPENote*> (static_cast<const MPEInstrument&> (*this).getNotePtr (midiChannel, mode));
+}
+
 //==============================================================================
-MPENote* MPEInstrument::getLastNotePlayedPtr (int midiChannel) const noexcept
+const MPENote* MPEInstrument::getLastNotePlayedPtr (int midiChannel) const noexcept
 {
     for (int i = notes.size(); --i >= 0;)
     {
-        MPENote& note = notes.getReference (i);
+        auto& note = notes.getReference (i);
 
         if (note.midiChannel == midiChannel
              && (note.keyState == MPENote::keyDown || note.keyState == MPENote::keyDownAndSustained))
@@ -631,15 +641,20 @@ MPENote* MPEInstrument::getLastNotePlayedPtr (int midiChannel) const noexcept
     return nullptr;
 }
 
+MPENote* MPEInstrument::getLastNotePlayedPtr (int midiChannel) noexcept
+{
+    return const_cast<MPENote*> (static_cast<const MPEInstrument&> (*this).getLastNotePlayedPtr (midiChannel));
+}
+
 //==============================================================================
-MPENote* MPEInstrument::getHighestNotePtr (int midiChannel) const noexcept
+const MPENote* MPEInstrument::getHighestNotePtr (int midiChannel) const noexcept
 {
     int initialNoteMax = -1;
-    MPENote* result = nullptr;
+    const MPENote* result = nullptr;
 
     for (int i = notes.size(); --i >= 0;)
     {
-        MPENote& note = notes.getReference (i);
+        const auto& note = notes.getReference (i);
 
         if (note.midiChannel == midiChannel
              && (note.keyState == MPENote::keyDown || note.keyState == MPENote::keyDownAndSustained)
@@ -653,14 +668,19 @@ MPENote* MPEInstrument::getHighestNotePtr (int midiChannel) const noexcept
     return result;
 }
 
-MPENote* MPEInstrument::getLowestNotePtr (int midiChannel) const noexcept
+MPENote* MPEInstrument::getHighestNotePtr (int midiChannel) noexcept
+{
+    return const_cast<MPENote*> (static_cast<const MPEInstrument&> (*this).getHighestNotePtr (midiChannel));
+}
+
+const MPENote* MPEInstrument::getLowestNotePtr (int midiChannel) const noexcept
 {
     int initialNoteMin = 128;
-    MPENote* result = nullptr;
+    const MPENote* result = nullptr;
 
     for (int i = notes.size(); --i >= 0;)
     {
-        MPENote& note = notes.getReference (i);
+        auto& note = notes.getReference (i);
 
         if (note.midiChannel == midiChannel
              && (note.keyState == MPENote::keyDown || note.keyState == MPENote::keyDownAndSustained)
@@ -672,6 +692,11 @@ MPENote* MPEInstrument::getLowestNotePtr (int midiChannel) const noexcept
     }
 
     return result;
+}
+
+MPENote* MPEInstrument::getLowestNotePtr (int midiChannel) noexcept
+{
+    return const_cast<MPENote*> (static_cast<const MPEInstrument&> (*this).getLowestNotePtr (midiChannel));
 }
 
 //==============================================================================

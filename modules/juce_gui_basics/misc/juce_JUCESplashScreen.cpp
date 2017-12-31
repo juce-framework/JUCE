@@ -73,15 +73,18 @@ struct ReportingThread;
 struct ReportingThreadContainer  : public ChangeListener,
                                    public DeletedAtShutdown
 {
+    ReportingThreadContainer() {}
+    ~ReportingThreadContainer() { clearSingletonInstance(); }
+
     void sendReport (String, String&, StringPairArray&);
     void changeListenerCallback (ChangeBroadcaster*) override;
 
     ScopedPointer<ReportingThread> reportingThread;
 
-    juce_DeclareSingleton_SingleThreaded_Minimal (ReportingThreadContainer)
+    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (ReportingThreadContainer)
 };
 
-juce_ImplementSingleton_SingleThreaded (ReportingThreadContainer)
+JUCE_IMPLEMENT_SINGLETON (ReportingThreadContainer)
 
 //==============================================================================
 struct ReportingThread  : public Thread,

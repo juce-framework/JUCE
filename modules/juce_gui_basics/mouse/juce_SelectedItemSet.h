@@ -78,12 +78,12 @@ public:
                 if (! other.isSelected (selectedItems.getReference (i)))
                     itemDeselected (selectedItems.removeAndReturn (i));
 
-            for (SelectableItemType* i = other.selectedItems.begin(), *e = other.selectedItems.end(); i != e; ++i)
+            for (auto& i : other.selectedItems)
             {
-                if (! isSelected (*i))
+                if (! isSelected (i))
                 {
-                    selectedItems.add (*i);
-                    itemSelected (*i);
+                    selectedItems.add (i);
+                    itemSelected (i);
                 }
             }
         }

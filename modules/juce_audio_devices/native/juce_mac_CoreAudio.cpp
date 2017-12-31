@@ -35,7 +35,8 @@ namespace juce
 
  // The AudioHardwareService stuff was deprecated in 10.11 but there's no replacement yet,
  // so we'll have to silence the warnings here and revisit it in a future OS version..
- #if ((defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_12) \
+ #if ((defined (MAC_OS_X_VERSION_10_13) && MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_13) \
+   || (defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_12) \
    || (defined (MAC_OS_X_VERSION_10_11) && MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_11))
   #pragma clang diagnostic ignored "-Wdeprecated-declarations"
  #endif
@@ -167,6 +168,10 @@ public:
         jassert (deviceID != 0);
 
         updateDetailsFromDevice();
+        JUCE_COREAUDIOLOG ("Creating CoreAudioInternal\n"
+                           << (isInputDevice  ? ("    inputDeviceId "  + String (deviceID) + "\n") : "")
+                           << (isOutputDevice ? ("    outputDeviceId " + String (deviceID) + "\n") : "")
+                           << getDeviceDetails().joinIntoString ("\n    "));
 
         AudioObjectPropertyAddress pa;
         pa.mSelector = kAudioObjectPropertySelectorWildcard;
@@ -432,8 +437,9 @@ public:
         auto newInNames  = isInputDevice  ? getChannelInfo (true,  newInChans)  : StringArray();
         auto newOutNames = isOutputDevice ? getChannelInfo (false, newOutChans) : StringArray();
 
-        auto newBitDepth = jmax (getBitDepthFromDevice (kAudioDevicePropertyScopeInput),
-                                 getBitDepthFromDevice (kAudioDevicePropertyScopeOutput));
+        auto inputBitDepth  = isInputDevice  ? getBitDepthFromDevice (kAudioDevicePropertyScopeInput)  : 0;
+        auto outputBitDepth = isOutputDevice ? getBitDepthFromDevice (kAudioDevicePropertyScopeOutput) : 0;
+        auto newBitDepth = jmax (inputBitDepth, outputBitDepth);
 
         {
             const ScopedLock sl (callbackLock);
@@ -460,6 +466,33 @@ public:
         }
 
         return true;
+    }
+
+    StringArray getDeviceDetails()
+    {
+        StringArray result;
+
+        String availableSampleRates ("Available sample rates:");
+
+        for (auto& s : sampleRates)
+            availableSampleRates << " " << s;
+
+        result.add (availableSampleRates);
+        result.add ("Sample rate: " + String (sampleRate));
+        String availableBufferSizes ("Available buffer sizes:");
+
+        for (auto& b : bufferSizes)
+            availableBufferSizes << " " << b;
+
+        result.add (availableBufferSizes);
+        result.add ("Buffer size: " + String (bufferSize));
+        result.add ("Bit depth: " + String (bitDepth));
+        result.add ("Input latency: " + String (inputLatency));
+        result.add ("Output latency: " + String (outputLatency));
+        result.add ("Input channel names: "  +  inChanNames.joinIntoString (" "));
+        result.add ("Output channel names: " + outChanNames.joinIntoString (" "));
+
+        return result;
     }
 
     //==============================================================================
@@ -675,9 +708,7 @@ public:
             callback = nullptr;
         }
 
-        if (started
-             && (deviceID != 0)
-             && ! leaveInterruptRunning)
+        if (started && (deviceID != 0) && ! leaveInterruptRunning)
         {
             OK (AudioDeviceStop (deviceID, audioIOProc));
             OK (AudioDeviceDestroyIOProcID (deviceID, audioProcID));
@@ -771,7 +802,7 @@ public:
     // called by callbacks
     void deviceDetailsChanged()
     {
-        if (callbacksAllowed)
+        if (callbacksAllowed.get() == 1)
             startTimer (100);
     }
 
@@ -811,7 +842,7 @@ private:
     HeapBlock<float> audioBuffer;
     int numInputChans  = 0;
     int numOutputChans = 0;
-    bool callbacksAllowed = true;
+    Atomic<int> callbacksAllowed { 1 };
     const bool isInputDevice, isOutputDevice;
 
     Array<CallbackDetailsForChannel> inputChannelInfo, outputChannelInfo;
@@ -848,8 +879,9 @@ private:
                 intern->deviceDetailsChanged();
                 break;
 
+            case kAudioDevicePropertyDeviceHasChanged:
             case kAudioObjectPropertyOwnedObjects:
-                intern->stop (false);
+                intern->owner.restart();
                 intern->owner.deviceType.triggerAsyncAudioDeviceListChange();
                 break;
 
@@ -905,7 +937,8 @@ private:
 
 
 //==============================================================================
-class CoreAudioIODevice   : public AudioIODevice
+class CoreAudioIODevice   : public AudioIODevice,
+                            private Timer
 {
 public:
     CoreAudioIODevice (CoreAudioIODeviceType& dt,
@@ -920,6 +953,7 @@ public:
           isStarted (false)
     {
         CoreAudioInternal* device = nullptr;
+
         if (outputDeviceId == 0 || outputDeviceId == inputDeviceId)
         {
             jassert (inputDeviceId != 0);
@@ -929,8 +963,8 @@ public:
         {
             device = new CoreAudioInternal (*this, outputDeviceId, false, true);
         }
-        jassert (device != nullptr);
 
+        jassert (device != nullptr);
         internal = device;
 
         AudioObjectPropertyAddress pa;
@@ -984,17 +1018,21 @@ public:
                  double sampleRate, int bufferSizeSamples) override
     {
         isOpen_ = true;
-
         internal->xruns = 0;
+
+        inputChannelsRequested = inputChannels;
+        outputChannelsRequested = outputChannels;
+        sampleRateRequested = sampleRate;
+        bufferSizeSamplesRequested = bufferSizeSamples;
+
         if (bufferSizeSamples <= 0)
             bufferSizeSamples = getDefaultBufferSize();
 
         lastError = internal->reopen (inputChannels, outputChannels, sampleRate, bufferSizeSamples);
-
         JUCE_COREAUDIOLOG ("Opened: " << getName());
-        JUCE_COREAUDIOLOG ("Latencies: " << getInputLatencyInSamples() << ' ' << getOutputLatencyInSamples());
 
         isOpen_ = lastError.isEmpty();
+
         return lastError;
     }
 
@@ -1068,15 +1106,34 @@ public:
 
     void restart()
     {
-        JUCE_COREAUDIOLOG ("Restarting");
-        AudioIODeviceCallback* oldCallback = internal->callback;
-        stop();
-        start (oldCallback);
+        if (deviceWrapperRestartCallback != nullptr)
+        {
+            deviceWrapperRestartCallback();
+        }
+        else
+        {
+            {
+                const ScopedLock sl (closeLock);
+
+                if (isStarted)
+                {
+                    previousCallback = internal->callback;
+                    stop();
+                }
+            }
+
+            startTimer (100);
+        }
     }
 
     bool setCurrentSampleRate (double newSampleRate)
     {
         return internal->setNominalSampleRate (newSampleRate);
+    }
+
+    void setDeviceWrapperRestartCallback (const std::function<void()>& cb)
+    {
+        deviceWrapperRestartCallback = cb;
     }
 
     CoreAudioIODeviceType& deviceType;
@@ -1086,6 +1143,22 @@ private:
     ScopedPointer<CoreAudioInternal> internal;
     bool isOpen_, isStarted;
     String lastError;
+    AudioIODeviceCallback* previousCallback = nullptr;
+    std::function<void()> deviceWrapperRestartCallback = nullptr;
+    BigInteger inputChannelsRequested, outputChannelsRequested;
+    double sampleRateRequested;
+    int bufferSizeSamplesRequested;
+    CriticalSection closeLock;
+
+    void timerCallback() override
+    {
+        stopTimer();
+
+        stop();
+        open (inputChannelsRequested, outputChannelsRequested,
+              sampleRateRequested, bufferSizeSamplesRequested);
+        start (previousCallback);
+    }
 
     static OSStatus hardwareListenerProc (AudioDeviceID /*inDevice*/, UInt32 /*inLine*/, const AudioObjectPropertyAddress* pa, void* inClientData)
     {
@@ -1109,7 +1182,8 @@ private:
 
 //==============================================================================
 class AudioIODeviceCombiner    : public AudioIODevice,
-                                 private Thread
+                                 private Thread,
+                                 private Timer
 {
 public:
     AudioIODeviceCombiner (const String& deviceName, CoreAudioIODeviceType& deviceType)
@@ -1246,6 +1320,11 @@ public:
                  const BigInteger& outputChannels,
                  double sampleRate, int bufferSize) override
     {
+        inputChannelsRequested = inputChannels;
+        outputChannelsRequested = outputChannels;
+        sampleRateRequested = sampleRate;
+        bufferSizeRequested = bufferSize;
+
         close();
         active = true;
 
@@ -1292,8 +1371,11 @@ public:
         }
 
         fifos.setSize (chanIndex, fifoSize);
+        fifoReadPointers  = fifos.getArrayOfReadPointers();
+        fifoWritePointers = fifos.getArrayOfWritePointers();
         fifos.clear();
         startThread (9);
+        threadInitialised.wait();
 
         return {};
     }
@@ -1307,6 +1389,31 @@ public:
 
         for (auto* d : devices)
             d->close();
+    }
+
+    void restart (AudioIODeviceCallback* cb)
+    {
+        const ScopedLock sl (closeLock);
+
+        close();
+        open (inputChannelsRequested, outputChannelsRequested,
+              sampleRateRequested, bufferSizeRequested);
+        start (cb);
+    }
+
+    void restartAsync()
+    {
+        {
+            const ScopedLock sl (closeLock);
+
+            if (active)
+            {
+                previousCallback = callback;
+                close();
+            }
+        }
+
+        startTimer (100);
     }
 
     BigInteger getActiveOutputChannels() const override
@@ -1396,11 +1503,20 @@ private:
     CoreAudioIODeviceType& owner;
     CriticalSection callbackLock;
     AudioIODeviceCallback* callback = nullptr;
+    AudioIODeviceCallback* previousCallback = nullptr;
     double currentSampleRate = 0;
     int currentBufferSize = 0;
     bool active = false;
     String lastError;
     AudioBuffer<float> fifos;
+    const float** fifoReadPointers = nullptr;
+    float** fifoWritePointers = nullptr;
+    WaitableEvent threadInitialised;
+    CriticalSection closeLock;
+
+    BigInteger inputChannelsRequested, outputChannelsRequested;
+    double sampleRateRequested = 44100;
+    int bufferSizeRequested = 512;
 
     void run() override
     {
@@ -1427,6 +1543,8 @@ private:
         auto blockSizeMs = jmax (1, (int) (1000 * numSamples / currentSampleRate));
 
         jassert (numInputChans + numOutputChans == buffer.getNumChannels());
+
+        threadInitialised.signal();
 
         while (! threadShouldExit())
         {
@@ -1456,6 +1574,13 @@ private:
                 reset();
             }
         }
+    }
+
+    void timerCallback() override
+    {
+        stopTimer();
+
+        restart (previousCallback);
     }
 
     void shutdown (const String& error)
@@ -1614,6 +1739,7 @@ private:
             : owner (cd), device (d),
               useInputs (useIns), useOutputs (useOuts)
         {
+            d->setDeviceWrapperRestartCallback ([this]() { owner.restartAsync(); });
         }
 
         ~DeviceWrapper()
@@ -1679,7 +1805,7 @@ private:
             {
                 auto index = inputIndex + i;
                 auto dest = destBuffer.getWritePointer (index);
-                auto src = owner.fifos.getReadPointer (index);
+                auto src = owner.fifoReadPointers[index];
 
                 if (size1 > 0)  FloatVectorOperations::copy (dest,         src + start1, size1);
                 if (size2 > 0)  FloatVectorOperations::copy (dest + size1, src + start2, size2);
@@ -1704,7 +1830,7 @@ private:
             for (int i = 0; i < numOutputChans; ++i)
             {
                 auto index = outputIndex + i;
-                auto dest = owner.fifos.getWritePointer (index);
+                auto dest = owner.fifoWritePointers[index];
                 auto src = srcBuffer.getReadPointer (index);
 
                 if (size1 > 0)  FloatVectorOperations::copy (dest + start1, src,         size1);
@@ -1718,8 +1844,6 @@ private:
                                     float** outputChannelData, int numOutputChannels,
                                     int numSamples) override
         {
-            auto& buf = owner.fifos;
-
             if (numInputChannels > 0)
             {
                 int start1, size1, start2, size2;
@@ -1733,19 +1857,22 @@ private:
 
                 for (int i = 0; i < numInputChannels; ++i)
                 {
-                    auto dest = buf.getWritePointer (inputIndex + i);
+                    auto dest = owner.fifoWritePointers[inputIndex + i];
                     auto src = inputChannelData[i];
 
                     if (size1 > 0)  FloatVectorOperations::copy (dest + start1, src,         size1);
                     if (size2 > 0)  FloatVectorOperations::copy (dest + start2, src + size1, size2);
                 }
 
-                inputFifo.finishedWrite (size1 + size2);
+                auto totalSize = size1 + size2;
+                inputFifo.finishedWrite (totalSize);
 
-                if (numSamples > size1 + size2)
+                if (numSamples > totalSize)
                 {
+                    auto samplesRemaining = numSamples - totalSize;
+
                     for (int i = 0; i < numInputChans; ++i)
-                        buf.clear (inputIndex + i, size1 + size2, numSamples - (size1 + size2));
+                        FloatVectorOperations::clear (owner.fifoWritePointers[inputIndex + i] + totalSize, samplesRemaining);
 
                     owner.underrun();
                 }
@@ -1765,18 +1892,21 @@ private:
                 for (int i = 0; i < numOutputChannels; ++i)
                 {
                     auto dest = outputChannelData[i];
-                    auto src = buf.getReadPointer (outputIndex + i);
+                    auto src = owner.fifoReadPointers[outputIndex + i];
 
                     if (size1 > 0)  FloatVectorOperations::copy (dest,         src + start1, size1);
                     if (size2 > 0)  FloatVectorOperations::copy (dest + size1, src + start2, size2);
                 }
 
-                outputFifo.finishedRead (size1 + size2);
+                auto totalSize = size1 + size2;
+                outputFifo.finishedRead (totalSize);
 
-                if (numSamples > size1 + size2)
+                if (numSamples > totalSize)
                 {
+                    auto samplesRemaining = numSamples - totalSize;
+
                     for (int i = 0; i < numOutputChannels; ++i)
-                        FloatVectorOperations::clear (outputChannelData[i] + (size1 + size2), numSamples - (size1 + size2));
+                        FloatVectorOperations::clear (outputChannelData[i] + totalSize, samplesRemaining);
 
                     owner.underrun();
                 }

@@ -74,12 +74,17 @@ int MPEZoneLayout::getNumZones() const noexcept
     return zones.size();
 }
 
-MPEZone* MPEZoneLayout::getZoneByIndex (int index) const noexcept
+const MPEZone* MPEZoneLayout::getZoneByIndex (int index) const noexcept
 {
     if (zones.size() < index)
         return nullptr;
 
     return &(zones.getReference (index));
+}
+
+MPEZone* MPEZoneLayout::getZoneByIndex (int index) noexcept
+{
+    return const_cast<MPEZone*> (static_cast<const MPEZoneLayout&> (*this).getZoneByIndex (index));
 }
 
 void MPEZoneLayout::clearAllZones()
@@ -157,40 +162,60 @@ void MPEZoneLayout::processNextMidiBuffer (const MidiBuffer& buffer)
 }
 
 //==============================================================================
-MPEZone* MPEZoneLayout::getZoneByChannel (int channel) const noexcept
+const MPEZone* MPEZoneLayout::getZoneByChannel (int channel) const noexcept
 {
-    for (auto* zone = zones.begin(); zone != zones.end(); ++zone)
-        if (zone->isUsingChannel (channel))
-            return zone;
+    for (auto& zone : zones)
+        if (zone.isUsingChannel (channel))
+            return &zone;
 
     return nullptr;
 }
 
-MPEZone* MPEZoneLayout::getZoneByMasterChannel (int channel) const noexcept
+MPEZone* MPEZoneLayout::getZoneByChannel (int channel) noexcept
 {
-    for (auto* zone = zones.begin(); zone != zones.end(); ++zone)
-        if (zone->getMasterChannel() == channel)
-            return zone;
+    return const_cast<MPEZone*> (static_cast<const MPEZoneLayout&> (*this).getZoneByChannel (channel));
+}
+
+const MPEZone* MPEZoneLayout::getZoneByMasterChannel (int channel) const noexcept
+{
+    for (auto& zone : zones)
+        if (zone.getMasterChannel() == channel)
+            return &zone;
 
     return nullptr;
 }
 
-MPEZone* MPEZoneLayout::getZoneByFirstNoteChannel (int channel) const noexcept
+MPEZone* MPEZoneLayout::getZoneByMasterChannel (int channel) noexcept
 {
-    for (auto* zone = zones.begin(); zone != zones.end(); ++zone)
-        if (zone->getFirstNoteChannel() == channel)
-            return zone;
+    return const_cast<MPEZone*> (static_cast<const MPEZoneLayout&> (*this).getZoneByMasterChannel (channel));
+}
+
+const MPEZone* MPEZoneLayout::getZoneByFirstNoteChannel (int channel) const noexcept
+{
+    for (auto& zone : zones)
+        if (zone.getFirstNoteChannel() == channel)
+            return &zone;
 
     return nullptr;
 }
 
-MPEZone* MPEZoneLayout::getZoneByNoteChannel (int channel) const noexcept
+MPEZone* MPEZoneLayout::getZoneByFirstNoteChannel (int channel) noexcept
 {
-    for (auto* zone = zones.begin(); zone != zones.end(); ++zone)
-        if (zone->isUsingChannelAsNoteChannel (channel))
-            return zone;
+    return const_cast<MPEZone*> (static_cast<const MPEZoneLayout&> (*this).getZoneByFirstNoteChannel (channel));
+}
+
+const MPEZone* MPEZoneLayout::getZoneByNoteChannel (int channel) const noexcept
+{
+    for (auto& zone : zones)
+        if (zone.isUsingChannelAsNoteChannel (channel))
+            return &zone;
 
     return nullptr;
+}
+
+MPEZone* MPEZoneLayout::getZoneByNoteChannel (int channel) noexcept
+{
+    return const_cast<MPEZone*> (static_cast<const MPEZoneLayout&> (*this).getZoneByNoteChannel (channel));
 }
 
 //==============================================================================

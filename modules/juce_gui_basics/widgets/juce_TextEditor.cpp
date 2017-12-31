@@ -553,7 +553,7 @@ struct TextEditor::Iterator
 
         Graphics::ScopedSaveState state (g);
         g.reduceClipRegion ({ startX, baselineY, endX - startX, 1 });
-        g.fillCheckerBoard ({ endX, baselineY + 1 }, 3, 1, colour, Colours::transparentBlack);
+        g.fillCheckerBoard ({ (float) endX, baselineY + 1.0f }, 3.0f, 1.0f, colour, Colours::transparentBlack);
     }
 
     void drawSelectedText (Graphics& g, Range<int> selected, Colour selectedTextColour) const

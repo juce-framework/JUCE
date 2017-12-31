@@ -32,18 +32,18 @@ namespace juce
 #endif
 
 //==============================================================================
-PathFlatteningIterator::PathFlatteningIterator (const Path& path_,
-                                                const AffineTransform& transform_,
-                                                const float tolerance)
+PathFlatteningIterator::PathFlatteningIterator (const Path& pathToUse,
+                                                const AffineTransform& t,
+                                                float tolerance)
     : x2 (0),
       y2 (0),
       closesSubPath (false),
       subPathIndex (-1),
-      path (path_),
-      transform (transform_),
-      points (path_.data.elements),
+      path (pathToUse),
+      transform (t),
+      source (path.data.begin()),
       toleranceSquared (tolerance * tolerance),
-      isIdentityTransform (transform_.isIdentity())
+      isIdentityTransform (t.isIdentity())
 {
     stackPos = stackBase;
 }
@@ -55,7 +55,7 @@ PathFlatteningIterator::~PathFlatteningIterator()
 bool PathFlatteningIterator::isLastInSubpath() const noexcept
 {
     return stackPos == stackBase.get()
-             && (index >= path.numElements || isMarker (points[index], Path::moveMarker));
+             && (source == path.data.end() || isMarker (*source, Path::moveMarker));
 }
 
 bool PathFlatteningIterator::next()
@@ -74,30 +74,30 @@ bool PathFlatteningIterator::next()
 
         if (stackPos == stackBase)
         {
-            if (index >= path.numElements)
+            if (source == path.data.end())
                 return false;
 
-            type = points [index++];
+            type = *source++;
 
             if (! isMarker (type, Path::closeSubPathMarker))
             {
-                x2 = points [index++];
-                y2 = points [index++];
+                x2 = *source++;
+                y2 = *source++;
 
                 if (isMarker (type, Path::quadMarker))
                 {
-                    x3 = points [index++];
-                    y3 = points [index++];
+                    x3 = *source++;
+                    y3 = *source++;
 
                     if (! isIdentityTransform)
                         transform.transformPoints (x2, y2, x3, y3);
                 }
                 else if (isMarker (type, Path::cubicMarker))
                 {
-                    x3 = points [index++];
-                    y3 = points [index++];
-                    x4 = points [index++];
-                    y4 = points [index++];
+                    x3 = *source++;
+                    y3 = *source++;
+                    x4 = *source++;
+                    y4 = *source++;
 
                     if (! isIdentityTransform)
                         transform.transformPoints (x2, y2, x3, y3, x4, y4);
@@ -137,9 +137,9 @@ bool PathFlatteningIterator::next()
         {
             ++subPathIndex;
 
-            closesSubPath = (stackPos == stackBase)
-                             && (index < path.numElements)
-                             && (points [index] == Path::closeSubPathMarker)
+            closesSubPath = stackPos == stackBase
+                             && source != path.data.end()
+                             && *source == Path::closeSubPathMarker
                              && x2 == subPathCloseX
                              && y2 == subPathCloseY;
 

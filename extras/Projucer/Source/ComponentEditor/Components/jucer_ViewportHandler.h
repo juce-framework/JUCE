@@ -285,7 +285,7 @@ private:
 
         void paint (Graphics& g) override
         {
-            g.fillCheckerBoard (getLocalBounds(), 50, 50,
+            g.fillCheckerBoard (getLocalBounds().toFloat(), 50.0f, 50.0f,
                                 Colours::lightgrey.withAlpha (0.5f),
                                 Colours::darkgrey.withAlpha (0.5f));
         }

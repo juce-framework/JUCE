@@ -612,7 +612,7 @@ public:
 
     void calculateWindowPos (Rectangle<int> target, const bool alignToRectangle)
     {
-        auto parentArea = getParentArea (target.getCentre());
+        auto parentArea = getParentArea (target.getCentre()) / scaleFactor;
 
         if (parentComponent != nullptr)
             target = parentComponent->getLocalArea (nullptr, target).getIntersection (parentArea);

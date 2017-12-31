@@ -51,7 +51,7 @@ public:
 
         // Set current phase position to 0 and work out the required phase increment for one cycle
         auto currentPhase = 0.0;
-        auto phaseInc = (1.0 / 30.0) * (2.0 * double_Pi);
+        auto phaseInc = (1.0 / 30.0) * MathConstants<double>::twoPi;
 
         for (auto x = 0; x < 30; ++x)
         {
@@ -60,7 +60,7 @@ public:
             sineWaveY[x] = static_cast<uint8> (roundToInt ((sineOutput * 6.5) + 7.0));
 
             // Square wave output, set flags for when vertical line should be drawn
-            if (currentPhase < double_Pi)
+            if (currentPhase < MathConstants<double>::pi)
             {
                 if (x == 0)
                     squareWaveY[x] = 255;

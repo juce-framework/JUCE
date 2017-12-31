@@ -111,7 +111,12 @@ public:
         This method does not check the range and results in undefined behaviour
         in case i < 0 or i >= size().
     */
-    OSCBundle::Element& operator[] (const int i) const noexcept
+    OSCBundle::Element& operator[] (const int i) noexcept
+    {
+        return elements.getReference (i);
+    }
+
+    const OSCBundle::Element& operator[] (const int i) const noexcept
     {
         return elements.getReference (i);
     }

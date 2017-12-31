@@ -189,6 +189,7 @@ namespace Ids
     DECLARE_ID (androidVibratePermissionNeeded);
     DECLARE_ID (androidEnableRemoteNotifications);
     DECLARE_ID (androidRemoteNotificationsConfigFile);
+    DECLARE_ID (androidEnableContentSharing);
     DECLARE_ID (androidMinimumSDK);
     DECLARE_ID (androidOtherPermissions);
     DECLARE_ID (androidKeyStore);

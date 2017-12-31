@@ -455,7 +455,7 @@ struct BlockPacketiser
 
         while (remaining > 0)
         {
-            const int num = jmin (maxBlockSize, remaining);
+            auto num = (int) jmin (maxBlockSize, remaining);
             blocks.add (MemoryBlock (addBytesToPointer (data.getData(), offset), (size_t) num));
             offset += num;
             remaining -= num;

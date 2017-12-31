@@ -541,7 +541,7 @@ void MidiKeyboardComponent::drawUpDownButton (Graphics& g, int w, int h,
 
     Path path;
     path.addTriangle (0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.5f);
-    path.applyTransform (AffineTransform::rotation (float_Pi * 2.0f * angle, 0.5f, 0.5f));
+    path.applyTransform (AffineTransform::rotation (MathConstants<float>::twoPi * angle, 0.5f, 0.5f));
 
     g.setColour (findColour (upDownButtonArrowColourId)
                   .withAlpha (buttonDown ? 1.0f : (mouseOver ? 0.6f : 0.4f)));

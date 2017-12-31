@@ -261,7 +261,7 @@ public:
     {
         const Colour c (owner.getSwatchColour (index));
 
-        g.fillCheckerBoard (getLocalBounds(), 6, 6,
+        g.fillCheckerBoard (getLocalBounds().toFloat(), 6.0f, 6.0f,
                             Colour (0xffdddddd).overlaidWith (c),
                             Colour (0xffffffff).overlaidWith (c));
     }
@@ -430,9 +430,9 @@ void ColourSelector::paint (Graphics& g)
 
     if ((flags & showColourAtTop) != 0)
     {
-        const Colour currentColour (getCurrentColour());
+        auto currentColour = getCurrentColour();
 
-        g.fillCheckerBoard (previewArea, 10, 10,
+        g.fillCheckerBoard (previewArea.toFloat(), 10.0f, 10.0f,
                             Colour (0xffdddddd).overlaidWith (currentColour),
                             Colour (0xffffffff).overlaidWith (currentColour));
 

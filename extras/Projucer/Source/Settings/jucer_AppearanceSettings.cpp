@@ -40,11 +40,11 @@ AppearanceSettings::AppearanceSettings (bool updateAppWhenChanged)
         CPlusPlusCodeTokeniser tokeniser;
         CodeEditorComponent editor (doc, &tokeniser);
 
-        const CodeEditorComponent::ColourScheme cs (editor.getColourScheme());
+        CodeEditorComponent::ColourScheme cs (editor.getColourScheme());
 
         for (int i = cs.types.size(); --i >= 0;)
         {
-            CodeEditorComponent::ColourScheme::TokenType& t = cs.types.getReference(i);
+            auto& t = cs.types.getReference(i);
             getColourValue (t.name) = t.colour.toString();
         }
 

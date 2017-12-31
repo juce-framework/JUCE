@@ -569,7 +569,7 @@ void LookAndFeel_V4::drawCircularProgressBar (Graphics& g, ProgressBar& progress
                             barBounds.getWidth() * 0.5f,
                             barBounds.getHeight() * 0.5f, 0.0f,
                             0.0f,
-                            2.0f * float_Pi,
+                            MathConstants<float>::twoPi,
                             true);
     g.strokePath (arcPath2, PathStrokeType (4.0f));
 
@@ -584,7 +584,7 @@ void LookAndFeel_V4::drawCircularProgressBar (Graphics& g, ProgressBar& progress
                            degreesToRadians (endInDegrees),
                            true);
 
-    arcPath.applyTransform (AffineTransform::rotation (normalisedRotation * float_Pi * 2.25f, barBounds.getCentreX(), barBounds.getCentreY()));
+    arcPath.applyTransform (AffineTransform::rotation (normalisedRotation * MathConstants<float>::pi * 2.25f, barBounds.getCentreX(), barBounds.getCentreY()));
     g.strokePath (arcPath, PathStrokeType (4.0f));
 
     if (progressText.isNotEmpty())
@@ -1071,8 +1071,8 @@ void LookAndFeel_V4::drawRotarySlider (Graphics& g, int x, int y, int width, int
     }
 
     auto thumbWidth = lineW * 2.0f;
-    Point<float> thumbPoint (bounds.getCentreX() + arcRadius * std::cos (toAngle - float_Pi * 0.5f),
-                             bounds.getCentreY() + arcRadius * std::sin (toAngle - float_Pi * 0.5f));
+    Point<float> thumbPoint (bounds.getCentreX() + arcRadius * std::cos (toAngle - MathConstants<float>::halfPi),
+                             bounds.getCentreY() + arcRadius * std::sin (toAngle - MathConstants<float>::halfPi));
 
     g.setColour (slider.findColour (Slider::thumbColourId));
     g.fillEllipse (Rectangle<float> (thumbWidth, thumbWidth).withCentre (thumbPoint));
@@ -1089,8 +1089,8 @@ void LookAndFeel_V4::drawPointer (Graphics& g, const float x, const float y, con
     p.lineTo (x, y + diameter * 0.6f);
     p.closeSubPath();
 
-    p.applyTransform (AffineTransform::rotation (direction * (float_Pi * 0.5f), x + diameter * 0.5f, y + diameter * 0.5f));
-
+    p.applyTransform (AffineTransform::rotation (direction * MathConstants<float>::halfPi,
+                                                 x + diameter * 0.5f, y + diameter * 0.5f));
     g.setColour (colour);
     g.fillPath (p);
 }

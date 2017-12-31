@@ -73,8 +73,13 @@ bool URL::isLocalFile() const
     if (getScheme() == "file")
         return true;
 
-    auto file = AndroidContentUriResolver::getLocalFileFromContentUri (*this);
-    return (file != File());
+    if (getScheme() == "content")
+    {
+        auto file = AndroidContentUriResolver::getLocalFileFromContentUri (*this);
+        return (file != File());
+    }
+
+    return false;
 }
 
 File URL::getLocalFile() const
@@ -92,6 +97,14 @@ File URL::getLocalFile() const
     }
 
     return fileFromFileSchemeURL (*this);
+}
+
+String URL::getFileName() const
+{
+    if (getScheme() == "content")
+        return AndroidContentUriResolver::getFileNameFromContentUri (*this);
+
+    return toString (false).fromLastOccurrenceOf ("/", false, true);
 }
 
 //==============================================================================

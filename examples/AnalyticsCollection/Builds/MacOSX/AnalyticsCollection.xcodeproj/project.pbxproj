@@ -38,12 +38,14 @@
 		91208A06115D573563996967 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JuceHeader.h; path = ../../JuceLibraryCode/JuceHeader.h; sourceTree = "SOURCE_ROOT"; };
 		996BEF5ADCE2EC85EB9F637F = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_data_structures"; path = "../../../../modules/juce_data_structures"; sourceTree = "SOURCE_ROOT"; };
 		A0DDFB3559C431E96EC59392 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_events.mm"; path = "../../JuceLibraryCode/include_juce_events.mm"; sourceTree = "SOURCE_ROOT"; };
+		AAB5010326113C1358279789 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = DemoAnalyticsEventTypes.h; path = ../../Source/DemoAnalyticsEventTypes.h; sourceTree = "SOURCE_ROOT"; };
 		AD2CFF58DA5E1C6EDF9CC399 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_data_structures.mm"; path = "../../JuceLibraryCode/include_juce_data_structures.mm"; sourceTree = "SOURCE_ROOT"; };
 		C858CF44E96D416E4B6B9266 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		D352CDB4CA7E8B21FAA83B8C = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MainComponent.h; path = ../../Source/MainComponent.h; sourceTree = "SOURCE_ROOT"; };
 		F2CF007AA4C90AC7A5AD1604 = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_analytics"; path = "../../../../modules/juce_analytics"; sourceTree = "SOURCE_ROOT"; };
 		FBCE051A0BA6C9FA3E64B47B = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		D269FA28B5D6012AEFE0BF20 = {isa = PBXGroup; children = (
+					AAB5010326113C1358279789,
 					8B927F72BA8726A064560942,
 					D352CDB4CA7E8B21FAA83B8C,
 					6A86C9751E9DCFA62D4562DB, ); name = Source; sourceTree = "<group>"; };

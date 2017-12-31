@@ -168,7 +168,7 @@ namespace AiffFileHelpers
 
             switch (key)
             {
-                case minor:     keyString = "major";        break;
+                case minor:     keyString = "minor";        break;
                 case major:     keyString = "major";        break;
                 case neither:   keyString = "neither";      break;
                 case both:      keyString = "both";         break;

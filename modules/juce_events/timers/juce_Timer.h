@@ -126,8 +126,8 @@ public:
 private:
     class TimerThread;
     friend class TimerThread;
-    int timerCountdownMs = 0, timerPeriodMs = 0;
-    Timer* previousTimer = {}, *nextTimer = {};
+    size_t positionInQueue = (size_t) -1;
+    int timerPeriodMs = 0;
 
     Timer& operator= (const Timer&) = delete;
 };

@@ -53,7 +53,12 @@ bool OSCMessage::isEmpty() const noexcept
     return arguments.isEmpty();
 }
 
-OSCArgument& OSCMessage::operator[] (const int i) const noexcept
+OSCArgument& OSCMessage::operator[] (const int i) noexcept
+{
+    return arguments.getReference (i);
+}
+
+const OSCArgument& OSCMessage::operator[] (const int i) const noexcept
 {
     return arguments.getReference (i);
 }

@@ -1,5 +1,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 
+#include "DemoAnalyticsEventTypes.h"
+
 class GoogleAnalyticsDestination  : public ThreadedAnalyticsDestination
 {
 public:
@@ -47,32 +49,56 @@ public:
     {
         // Send events to Google Analytics.
 
-        String appData ("v=1&tid=" + apiKey + "&t=event&");
-
+        String appData ("v=1&aip=1&tid=" + apiKey);
         StringArray postData;
 
         for (auto& event : events)
         {
             StringPairArray data;
 
-            if (event.name == "startup")
+            switch (event.eventType)
             {
-                data.set ("ec",  "info");
-                data.set ("ea",  "appStarted");
-            }
-            else if (event.name == "shutdown")
-            {
-                data.set ("ec",  "info");
-                data.set ("ea",  "appStopped");
-            }
-            else if (event.name == "button_press")
-            {
-                data.set ("ec",  "button_press");
-                data.set ("ea",  event.parameters["id"]);
-            }
-            else
-            {
-                continue;
+                case (DemoAnalyticsEventTypes::event):
+                {
+                    data.set ("t", "event");
+
+                    if (event.name == "startup")
+                    {
+                        data.set ("ec",  "info");
+                        data.set ("ea",  "appStarted");
+                    }
+                    else if (event.name == "shutdown")
+                    {
+                        data.set ("ec",  "info");
+                        data.set ("ea",  "appStopped");
+                    }
+                    else if (event.name == "button_press")
+                    {
+                        data.set ("ec",  "button_press");
+                        data.set ("ea",  event.parameters["id"]);
+                    }
+                    else if (event.name == "crash")
+                    {
+                        data.set ("ec",  "crash");
+                        data.set ("ea",  "crash");
+                    }
+                    else
+                    {
+                        jassertfalse;
+                        continue;
+                    }
+
+                    break;
+                }
+
+                default:
+                {
+                    // Unknown event type! In this demo app we're just using a
+                    // single event type, but in a real app you probably want to
+                    // handle multiple ones.
+                    jassertfalse;
+                    break;
+                }
             }
 
             data.set ("cid", event.userID);
@@ -82,7 +108,7 @@ public:
             for (auto& key : data.getAllKeys())
                 eventData.add (key + "=" + URL::addEscapeChars (data[key], true));
 
-            postData.add (appData + eventData.joinIntoString ("&"));
+            postData.add (appData + "&" + eventData.joinIntoString ("&"));
         }
 
         auto url = URL ("https://www.google-analytics.com/batch")
@@ -139,6 +165,7 @@ private:
         {
             auto* xmlEvent = new XmlElement ("google_analytics_event");
             xmlEvent->setAttribute ("name", event.name);
+            xmlEvent->setAttribute ("type", event.eventType);
             xmlEvent->setAttribute ("timestamp", (int) event.timestamp);
             xmlEvent->setAttribute ("user_id", event.userID);
 
@@ -194,6 +221,7 @@ private:
 
             restoredEventQueue.push_back ({
                 xmlEvent->getStringAttribute ("name"),
+                xmlEvent->getIntAttribute ("type"),
                 (uint32) xmlEvent->getIntAttribute ("timestamp"),
                 parameters,
                 xmlEvent->getStringAttribute ("user_id"),

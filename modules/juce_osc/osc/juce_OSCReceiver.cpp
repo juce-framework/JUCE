@@ -331,17 +331,26 @@ struct OSCReceiver::Pimpl   : private Thread,
     }
 
     //==============================================================================
-    bool connectToPort (int portNum)
+    bool connectToPort (int portNumber)
     {
         if (! disconnect())
             return false;
 
-        portNumber = portNum;
-        socket = new DatagramSocket (false);
+        socket.setOwned (new DatagramSocket (false));
 
         if (! socket->bindToPort (portNumber))
             return false;
 
+        startThread();
+        return true;
+    }
+
+    bool connectToSocket (DatagramSocket& newSocket)
+    {
+        if (! disconnect())
+            return false;
+
+        socket.setNonOwned (&newSocket);
         startThread();
         return true;
     }
@@ -351,9 +360,12 @@ struct OSCReceiver::Pimpl   : private Thread,
         if (socket != nullptr)
         {
             signalThreadShouldExit();
-            socket->shutdown();
+
+            if (socket.willDeleteObject())
+                socket->shutdown();
+
             waitForThreadToExit (10000);
-            socket = nullptr;
+            socket.reset();
         }
         return true;
     }
@@ -567,8 +579,7 @@ private:
     Array<std::pair<OSCAddress, OSCReceiver::ListenerWithOSCAddress<OSCReceiver::MessageLoopCallback>*>> listenersWithAddress;
     Array<std::pair<OSCAddress, OSCReceiver::ListenerWithOSCAddress<OSCReceiver::RealtimeCallback>*>>    realtimeListenersWithAddress;
 
-    ScopedPointer<DatagramSocket> socket;
-    int portNumber = 0;
+    OptionalScopedPointer<DatagramSocket> socket;
     OSCReceiver::FormatErrorHandler formatErrorHandler { nullptr };
     enum { oscBufferSize = 4098 };
 
@@ -588,6 +599,11 @@ OSCReceiver::~OSCReceiver()
 bool OSCReceiver::connect (int portNumber)
 {
     return pimpl->connectToPort (portNumber);
+}
+
+bool OSCReceiver::connectToSocket (DatagramSocket& socket)
+{
+    return pimpl->connectToSocket (socket);
 }
 
 bool OSCReceiver::disconnect()

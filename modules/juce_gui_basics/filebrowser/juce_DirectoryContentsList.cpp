@@ -120,6 +120,13 @@ void DirectoryContentsList::setFileFilter (const FileFilter* newFileFilter)
 }
 
 //==============================================================================
+int DirectoryContentsList::getNumFiles() const noexcept
+{
+    const ScopedLock sl (fileListLock);
+
+    return files.size();
+}
+
 bool DirectoryContentsList::getFileInfo (const int index, FileInfo& result) const
 {
     const ScopedLock sl (fileListLock);

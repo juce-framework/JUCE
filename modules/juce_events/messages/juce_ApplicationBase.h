@@ -190,10 +190,9 @@ public:
 
     //==============================================================================
     /** Override this method to be informed when the back button is pressed on a device.
-
         This is currently only implemented on Android devices.
      */
-    virtual void backButtonPressed() { }
+    virtual void backButtonPressed() {}
 
     //==============================================================================
     /** Signals that the main message loop should stop and the application should terminate.
@@ -275,8 +274,8 @@ public:
 private:
     //==============================================================================
     static JUCEApplicationBase* appInstance;
-    int appReturnValue;
-    bool stillInitialising;
+    int appReturnValue = 0;
+    bool stillInitialising = true;
 
     struct MultipleInstanceHandler;
     friend struct MultipleInstanceHandler;

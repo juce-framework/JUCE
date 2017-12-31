@@ -234,7 +234,7 @@ private:
             Array<ClassDatabase::Class*> newClasses;
 
             if (childProcess != nullptr)
-                childProcess->getComponentList().globalNamespace.findClassesDeclaredInFile (newClasses, file);
+                const_cast <ClassDatabase::ClassList&> (childProcess->getComponentList()).globalNamespace.findClassesDeclaredInFile (newClasses, file);
 
             for (int i = newClasses.size(); --i >= 0;)
                 if (! newClasses.getUnchecked(i)->getInstantiationFlags().canBeInstantiated())

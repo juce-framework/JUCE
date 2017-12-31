@@ -44,7 +44,8 @@ public:
         const float speed = 5.0f; // give each ball a fixed speed so we can
                                   // see the effects of thread priority on how fast
                                   // they actually go.
-        const float angle = Random::getSystemRandom().nextFloat() * float_Pi * 2.0f;
+
+        auto angle = Random::getSystemRandom().nextFloat() * MathConstants<float>::twoPi;
 
         dx = std::sin (angle) * speed;
         dy = std::cos (angle) * speed;

@@ -93,7 +93,8 @@ public:
         This method does not check the range and results in undefined behaviour
         in case i < 0 or i >= size().
     */
-    OSCArgument& operator[] (const int i) const noexcept;
+    OSCArgument& operator[] (const int i) noexcept;
+    const OSCArgument& operator[] (const int i) const noexcept;
 
     /** Returns a pointer to the first OSCArgument in the OSCMessage object.
         This method is provided for compatibility with standard C++ iteration mechanisms.
@@ -107,7 +108,6 @@ public:
 
     /** Removes all arguments from the OSCMessage. */
     void clear();
-
 
     //==============================================================================
     /** Creates a new OSCArgument of type int32 with a given value

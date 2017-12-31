@@ -148,12 +148,13 @@
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
       </MODULEPATHS>
     </VS2017>
-    <ANDROIDSTUDIO androidActivityClass="com.yourcompany.jucedemo.JuceDemo" androidInternetNeeded="1"
+    <ANDROIDSTUDIO androidActivityClass="com.roli.jucedemo.JuceDemo" androidInternetNeeded="1"
                    androidCpp11="1" targetFolder="Builds/Android" androidSDKPath=""
                    androidNDKPath="" androidBluetoothNeeded="1" bigIcon="BvyE0d"
                    androidScreenOrientation="unspecified" androidMicNeeded="1" gradleToolchain="clang"
                    gradleToolchainVersion="3.6" androidTheme="@android:style/Theme.NoTitleBar"
-                   microphonePermissionNeeded="1" extraCompilerFlags="-pedantic -Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion -Wextra-semi">
+                   microphonePermissionNeeded="1" extraCompilerFlags="-pedantic -Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion -Wextra-semi"
+                   androidEnableContentSharing="1">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi x86" isDebug="1" optimisation="1"
                        targetName="JuceDemo"/>

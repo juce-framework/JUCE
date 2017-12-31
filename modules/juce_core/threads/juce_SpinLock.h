@@ -62,7 +62,7 @@ public:
     /** Releases the lock. */
     inline void exit() const noexcept
     {
-        jassert (lock.value == 1); // Agh! Releasing a lock that isn't currently held!
+        jassert (lock.get() == 1); // Agh! Releasing a lock that isn't currently held!
         lock = 0;
     }
 

@@ -48,23 +48,34 @@ public:
     /** Connects to a datagram socket and prepares the socket for sending OSC
         packets to the specified target.
 
+        Note: the operating system will choose which specific network adapter(s)
+        to bind your socket to, and which local port to use for the sender.
+
         @param  targetHostName   The remote host to which messages will be send.
         @param  targetPortNumber The remote UDP port number on which the host will
                                  receive the messages.
 
         @returns true if the connection was successful; false otherwise.
-
-        Note: the operating system will choose which specific network adapter(s)
-        to bind your socket to, and which local port to use for the sender.
-
         @see send, disconnect.
     */
     bool connect (const String& targetHostName, int targetPortNumber);
 
+    /** Uses an existing datagram socket for sending OSC packets to the specified target.
+
+        @param  socket           An existing datagram socket. Make sure this doesn't
+                                 get deleted while this class is still using it!
+        @param  targetHostName   The remote host to which messages will be send.
+        @param  targetPortNumber The remote UDP port number on which the host will
+                                 receive the messages.
+
+        @returns true if the connection was successful; false otherwise.
+        @see connect, send, disconnect.
+    */
+    bool connectToSocket (DatagramSocket& socket, const String& targetHostName, int targetPortNumber);
+
     //==============================================================================
     /** Disconnects from the currently used UDP port.
         @returns true if the disconnection was successful; false otherwise.
-
         @see connect.
     */
     bool disconnect();

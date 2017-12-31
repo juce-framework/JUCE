@@ -190,7 +190,10 @@ private:
 
     float timeToX (const double time) const
     {
-        return getWidth() * (float) ((time - visibleRange.getStart()) / (visibleRange.getLength()));
+        if (visibleRange.getLength() <= 0)
+            return 0;
+
+        return getWidth() * (float) ((time - visibleRange.getStart()) / visibleRange.getLength());
     }
 
     double xToTime (const float x) const

@@ -443,7 +443,7 @@ struct PhysicalTopologySource::Internal
             return -1;
         }
 
-        DeviceInfo* getDeviceInfoFromUID (Block::UID uid) const noexcept
+        const DeviceInfo* getDeviceInfoFromUID (Block::UID uid) const noexcept
         {
             for (auto& d : currentDeviceInfo)
                 if (d.uid == uid)
@@ -1198,7 +1198,14 @@ struct PhysicalTopologySource::Internal
         {
             TopologyBroadcastThrottle() = default;
 
-            void scheduleTopologyChangeCallback()   { startTimer (750); }
+            void scheduleTopologyChangeCallback()
+            {
+               #ifdef JUCE_BLOCKS_TOPOLOGY_BROADCAST_THROTTLE_TIME
+                startTimer (JUCE_BLOCKS_TOPOLOGY_BROADCAST_THROTTLE_TIME);
+               #else
+                startTimer (750);
+               #endif
+            }
 
             void timerCallback() override
             {

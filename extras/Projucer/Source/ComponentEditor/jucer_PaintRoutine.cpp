@@ -525,8 +525,9 @@ void PaintRoutine::fillWithBackground (Graphics& g, const bool drawOpaqueBackgro
 {
     if ((! backgroundColour.isOpaque()) && drawOpaqueBackground)
     {
-        g.fillCheckerBoard (Rectangle<int> (0, 0, g.getClipBounds().getRight(), g.getClipBounds().getBottom()),
-                            50, 50,
+        g.fillCheckerBoard (Rectangle<float> ((float) g.getClipBounds().getRight(),
+                                              (float) g.getClipBounds().getBottom()),
+                            50.0f, 50.0f,
                             Colour (0xffdddddd).overlaidWith (backgroundColour),
                             Colour (0xffffffff).overlaidWith (backgroundColour));
     }

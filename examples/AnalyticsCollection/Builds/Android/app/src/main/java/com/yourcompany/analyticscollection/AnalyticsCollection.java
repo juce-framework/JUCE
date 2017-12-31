@@ -303,6 +303,10 @@ public class AnalyticsCollection   extends Activity
     {
         super.onResume();
         resumeApp();
+
+        // Ensure that navigation/status bar visibility is correctly restored.
+        for (int i = 0; i < viewHolder.getChildCount(); ++i)
+            ((ComponentPeerView) viewHolder.getChildAt (i)).appResumed();
     }
 
     @Override
@@ -902,6 +906,17 @@ public class AnalyticsCollection   extends Activity
         public boolean containsPoint (int x, int y)
         {
             return true; //xxx needs to check overlapping views
+        }
+
+        //==============================================================================
+        private native void handleAppResumed (long host);
+
+        public void appResumed()
+        {
+            if (host == 0)
+                return;
+
+            handleAppResumed (host);
         }
     }
 

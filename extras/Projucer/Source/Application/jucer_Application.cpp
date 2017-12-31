@@ -266,7 +266,7 @@ struct AsyncQuitRetrier  : private Timer
         stopTimer();
         delete this;
 
-        if (JUCEApplicationBase* app = JUCEApplicationBase::getInstance())
+        if (auto* app = JUCEApplicationBase::getInstance())
             app->systemRequestedQuit();
     }
 
@@ -506,6 +506,8 @@ void ProjucerApplication::createColourSchemeItems (PopupMenu& menu)
 
 void ProjucerApplication::createWindowMenu (PopupMenu& menu)
 {
+    menu.addCommandItem (commandManager, CommandIDs::goToPreviousWindow);
+    menu.addCommandItem (commandManager, CommandIDs::goToNextWindow);
     menu.addCommandItem (commandManager, CommandIDs::closeWindow);
     menu.addSeparator();
 

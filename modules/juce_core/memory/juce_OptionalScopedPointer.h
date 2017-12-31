@@ -79,7 +79,7 @@ public:
     {
         if (object != objectToTransferFrom.object)
         {
-            clear();
+            reset();
             object = objectToTransferFrom.object;
         }
 
@@ -93,7 +93,7 @@ public:
     */
     ~OptionalScopedPointer()
     {
-        clear();
+        reset();
     }
 
     //==============================================================================
@@ -118,11 +118,14 @@ public:
     /** Resets this pointer to null, possibly deleting the object that it holds, if it has
         ownership of it.
     */
-    void clear()
+    void reset()
     {
         if (! shouldDelete)
             object.release();
     }
+
+    /** Does the same thing as reset(). */
+    void clear()                                                    { reset(); }
 
     /** Makes this OptionalScopedPointer point at a new object, specifying whether the
         OptionalScopedPointer will take ownership of the object.
@@ -135,7 +138,7 @@ public:
     {
         if (object != newObject)
         {
-            clear();
+            reset();
             object = newObject;
         }
 

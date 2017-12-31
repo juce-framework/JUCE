@@ -135,7 +135,7 @@ template <typename Type>
 Type findMinimum (const Type* data, int numValues)
 {
     if (numValues <= 0)
-        return {};
+        return Type (0);
 
     auto result = *data++;
 
@@ -155,7 +155,7 @@ template <typename Type>
 Type findMaximum (const Type* values, int numValues)
 {
     if (numValues <= 0)
-        return {};
+        return Type (0);
 
     auto result = *values++;
 
@@ -176,8 +176,8 @@ void findMinAndMax (const Type* values, int numValues, Type& lowest, Type& highe
 {
     if (numValues <= 0)
     {
-        lowest = {};
-        highest = {};
+        lowest = Type (0);
+        highest = Type (0);
     }
     else
     {
@@ -326,7 +326,6 @@ inline int64 abs64 (const int64 n) noexcept
 #endif
 
 //==============================================================================
-
 #if JUCE_HAS_CONSTEXPR
 
 /** Commonly used mathematical constants */
@@ -335,6 +334,12 @@ struct MathConstants
 {
     /** A predefined value for Pi */
     static constexpr FloatType pi = static_cast<FloatType> (3.141592653589793238L);
+
+    /** A predefined value for 2 * Pi */
+    static constexpr FloatType twoPi = static_cast<FloatType> (2 * 3.141592653589793238L);
+
+    /** A predefined value for Pi / 2 */
+    static constexpr FloatType halfPi = static_cast<FloatType> (3.141592653589793238L / 2);
 
     /** A predfined value for Euler's number */
     static constexpr FloatType euler = static_cast<FloatType> (2.71828182845904523536L);
@@ -349,6 +354,12 @@ struct MathConstants
     /** A predefined value for Pi */
     static const FloatType pi;
 
+    /** A predefined value for 2 * Pi */
+    static const FloatType twoPi;
+
+    /** A predefined value for Pi / 2 */
+    static const FloatType halfPi;
+
     /** A predfined value for Euler's number */
     static const FloatType euler;
 };
@@ -357,33 +368,39 @@ template <typename FloatType>
 const FloatType MathConstants<FloatType>::pi = static_cast<FloatType> (3.141592653589793238L);
 
 template <typename FloatType>
+const FloatType MathConstants<FloatType>::twoPi = static_cast<FloatType> (2 * 3.141592653589793238L);
+
+template <typename FloatType>
+const FloatType MathConstants<FloatType>::halfPi = static_cast<FloatType> (3.141592653589793238L / 2);
+
+template <typename FloatType>
 const FloatType MathConstants<FloatType>::euler = static_cast<FloatType> (2.71828182845904523536L);
 
 #endif
 
 
-/** A predefined value for Pi, at double-precision.
-    @see float_Pi
+/** A double-precision constant for pi.
+    @deprecated This is deprecated in favour of MathConstants<double>::pi.
+    The reason is that "double_Pi" was a confusing name, and many people misused it,
+    wrongly thinking it meant 2 * pi !
 */
 const JUCE_CONSTEXPR double  double_Pi  = MathConstants<double>::pi;
 
-/** A predefined value for Pi, at single-precision.
-    @see double_Pi
+/** A single-precision constant for pi.
+    @deprecated This is deprecated in favour of MathConstants<float>::pi.
+    The reason is that "double_Pi" was a confusing name, and many people misused it,
+    wrongly thinking it meant 2 * pi !
 */
 const JUCE_CONSTEXPR float   float_Pi   = MathConstants<float>::pi;
 
 
 /** Converts an angle in degrees to radians. */
-inline JUCE_CONSTEXPR float degreesToRadians (float degrees) noexcept     { return degrees * (float_Pi / 180.0f); }
-
-/** Converts an angle in degrees to radians. */
-inline JUCE_CONSTEXPR double degreesToRadians (double degrees) noexcept   { return degrees * (double_Pi / 180.0); }
+template <typename FloatType>
+JUCE_CONSTEXPR FloatType degreesToRadians (FloatType degrees) noexcept     { return degrees * (MathConstants<FloatType>::pi / FloatType (180)); }
 
 /** Converts an angle in radians to degrees. */
-inline JUCE_CONSTEXPR float radiansToDegrees (float radians) noexcept     { return radians * (180.0f / float_Pi); }
-
-/** Converts an angle in radians to degrees. */
-inline JUCE_CONSTEXPR double radiansToDegrees (double radians) noexcept   { return radians * (180.0 / double_Pi); }
+template <typename FloatType>
+JUCE_CONSTEXPR FloatType radiansToDegrees (FloatType radians) noexcept     { return radians * (FloatType (180) / MathConstants<FloatType>::pi); }
 
 
 //==============================================================================

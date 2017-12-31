@@ -33,7 +33,8 @@ namespace juce
 
     To use this class, set its parameters appropriately (you can search online for
     more help on exactly how the FlexBox protocol works!), then add your sub-items
-    to the items array, and call performLayout().
+    to the items array, and call performLayout() in the resized() function of your
+    Component.
 
     @see FlexItem
 */

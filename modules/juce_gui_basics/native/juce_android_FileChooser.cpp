@@ -41,19 +41,19 @@ public:
             auto saveMode           = ((flags & FileBrowserComponent::saveMode) != 0);
             auto selectsDirectories = ((flags & FileBrowserComponent::canSelectDirectories) != 0);
 
-            // You cannot have try to save a direcrtory
+            // You cannot save a directory
             jassert (! (saveMode && selectsDirectories));
 
             if (sdkVersion < 19)
             {
-                // native save dialogs are only supported in Android versions > 19
+                // native save dialogs are only supported in Android versions >= 19
                 jassert (! saveMode);
                 saveMode = false;
             }
 
             if (sdkVersion < 21)
             {
-                // native directory chooser dialogs are only supported in Android versions > 21
+                // native directory chooser dialogs are only supported in Android versions >= 21
                 jassert (! selectsDirectories);
                 selectsDirectories = false;
             }
@@ -64,7 +64,8 @@ public:
                                                      : "android.intent.action.GET_CONTENT")));
 
 
-            intent = GlobalRef (env->NewObject (AndroidIntent, AndroidIntent.constructWithString, javaString (action).get()));
+            intent = GlobalRef (env->NewObject (AndroidIntent, AndroidIntent.constructWithString,
+                                                javaString (action).get()));
 
             if (owner.startingFile != File())
             {
@@ -75,7 +76,8 @@ public:
 
 
                 URL url (owner.startingFile);
-                LocalRef<jobject> uri (env->CallStaticObjectMethod (Uri, Uri.parse, javaString (url.toString (true)).get()));
+                LocalRef<jobject> uri (env->CallStaticObjectMethod (AndroidUri, AndroidUri.parse,
+                                                                    javaString (url.toString (true)).get()));
 
                 if (uri)
                     env->CallObjectMethod (intent.get(), AndroidIntent.putExtraParcelable,
@@ -86,7 +88,8 @@ public:
 
             if (! selectsDirectories)
             {
-                env->CallObjectMethod (intent.get(), AndroidIntent.addCategory, javaString ("android.intent.category.OPENABLE").get());
+                env->CallObjectMethod (intent.get(), AndroidIntent.addCategory,
+                                       javaString ("android.intent.category.OPENABLE").get());
 
                 auto mimeTypes = convertFiltersToMimeTypes (owner.filters);
 
@@ -103,7 +106,8 @@ public:
                         mimeGroup = mimeTypes[0].upToFirstOccurrenceOf ("/", false, false);
                         auto allMimeTypesHaveSameGroup = true;
 
-                        LocalRef<jobjectArray> jMimeTypes (env->NewObjectArray (mimeTypes.size(), JavaString, javaString("").get()));
+                        LocalRef<jobjectArray> jMimeTypes (env->NewObjectArray (mimeTypes.size(), JavaString,
+                                                                                javaString("").get()));
 
                         for (int i = 0; i < mimeTypes.size(); ++i)
                         {

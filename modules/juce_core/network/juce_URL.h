@@ -111,6 +111,15 @@ public:
     */
     File getLocalFile() const;
 
+    /** Returns the file name. For all but Android's content:// scheme, it will
+        simply return the last segment of the URL.
+        E.g. for "http://www.xyz.com/foo/bar.txt", this will return "bar.txt".
+
+        For Android's content:// scheme, it will attempt to resolve the filename
+        located under the URL.
+    */
+    String getFileName() const;
+
     /** Attempts to read a port number from the URL.
         @returns the port number, or 0 if none is explicitly specified.
     */

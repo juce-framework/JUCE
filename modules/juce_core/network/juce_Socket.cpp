@@ -741,6 +741,14 @@ bool DatagramSocket::leaveMulticast (const String& multicastIPAddress)
     return SocketHelpers::multicast (handle, multicastIPAddress, lastBindAddress, false);
 }
 
+bool DatagramSocket::setMulticastLoopbackEnabled (bool enable)
+{
+    if (! isBound || handle < 0)
+        return false;
+
+    return SocketHelpers::setOption<bool> (handle, IPPROTO_IP, IP_MULTICAST_LOOP, enable);
+}
+
 bool DatagramSocket::setEnablePortReuse (bool enabled)
 {
    #if JUCE_ANDROID
