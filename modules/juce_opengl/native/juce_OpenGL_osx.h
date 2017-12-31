@@ -111,12 +111,12 @@ public:
         }
     }
 
-    void initialiseOnRenderThread (OpenGLContext&) {}
-    void shutdownOnRenderThread()               { deactivateCurrentContext(); }
+    bool initialiseOnRenderThread (OpenGLContext&)    { return true; }
+    void shutdownOnRenderThread()                     { deactivateCurrentContext(); }
 
-    bool createdOk() const noexcept             { return getRawContext() != nullptr; }
-    void* getRawContext() const noexcept        { return static_cast<void*> (renderContext); }
-    GLuint getFrameBufferID() const noexcept    { return 0; }
+    bool createdOk() const noexcept                   { return getRawContext() != nullptr; }
+    void* getRawContext() const noexcept              { return static_cast<void*> (renderContext); }
+    GLuint getFrameBufferID() const noexcept          { return 0; }
 
     bool makeActive() const noexcept
     {

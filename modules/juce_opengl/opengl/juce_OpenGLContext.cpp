@@ -451,7 +451,13 @@ public:
             } while (! mmLock.retryLock());
         }
 
-        initialiseOnThread();
+        if (! initialiseOnThread())
+        {
+            hasInitialised = false;
+
+            return ThreadPoolJob::jobHasFinished;
+        }
+
         hasInitialised = true;
 
         while (! shouldExit())
@@ -485,7 +491,7 @@ public:
         return ThreadPoolJob::jobHasFinished;
     }
 
-    void initialiseOnThread()
+    bool initialiseOnThread()
     {
         // On android, this can get called twice, so drop any previous state..
         associatedObjectNames.clear();
@@ -493,7 +499,9 @@ public:
         cachedImageFrameBuffer.release();
 
         context.makeActive();
-        nativeContext->initialiseOnRenderThread (context);
+
+        if (! nativeContext->initialiseOnRenderThread (context))
+            return false;
 
        #if JUCE_ANDROID
         // On android the context may be created in initialiseOnRenderThread
@@ -529,6 +537,8 @@ public:
         CVDisplayLinkSetOutputCallback (displayLink, &displayLinkCallback, this);
         CVDisplayLinkStart (displayLink);
        #endif
+
+        return true;
     }
 
     void shutdownOnThread()
