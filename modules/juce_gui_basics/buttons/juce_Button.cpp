@@ -391,8 +391,15 @@ void Button::sendClickMessage (const ModifierKeys& modifiers)
 
     clicked (modifiers);
 
-    if (! checker.shouldBailOut())
-        buttonListeners.callChecked (checker, [this] (Listener& l) { l.buttonClicked (this); });
+    if (checker.shouldBailOut())
+        return;
+
+    buttonListeners.callChecked (checker, [this] (Listener& l) { l.buttonClicked (this); });
+
+    if (checker.shouldBailOut())
+        return;
+
+    onClick.invoke (*this);
 }
 
 void Button::sendStateMessage()
@@ -401,8 +408,15 @@ void Button::sendStateMessage()
 
     buttonStateChanged();
 
-    if (! checker.shouldBailOut())
-        buttonListeners.callChecked (checker, [this] (Listener& l) { l.buttonStateChanged (this); });
+    if (checker.shouldBailOut())
+        return;
+
+    buttonListeners.callChecked (checker, [this] (Listener& l) { l.buttonStateChanged (this); });
+
+    if (checker.shouldBailOut())
+        return;
+
+    onStateChange.invoke (*this);
 }
 
 //==============================================================================

@@ -184,6 +184,12 @@ public:
     */
     void removeListener (Listener* listener);
 
+    /** You can assign a lambda to this callback object to have it called when the button is clicked. */
+    EventHandler<Button> onClick;
+
+    /** You can assign a lambda to this callback object to have it called when the button's state changes. */
+    EventHandler<Button> onStateChange;
+
     //==============================================================================
     /** Causes the button to act as if it's been clicked.
 
@@ -394,13 +400,10 @@ protected:
     //==============================================================================
     /** This method is called when the button has been clicked.
 
-        Subclasses can override this to perform whatever they actions they need
-        to do.
-
-        Alternatively, a Button::Listener can be added to the button, and these listeners
-        will be called when the click occurs.
-
-        @see triggerClick
+        Subclasses can override this to perform whatever they actions they need to do.
+        In general, you wouldn't use this method to receive clicks, but should get your callbacks
+        by attaching a std::function to the onClick callback, or adding a Button::Listener.
+        @see triggerClick, onClick
     */
     virtual void clicked();
 
