@@ -76,6 +76,7 @@
 #include "broadcasters/juce_AsyncUpdater.h"
 #include "broadcasters/juce_ChangeListener.h"
 #include "broadcasters/juce_ChangeBroadcaster.h"
+#include "broadcasters/juce_EventHandler.h"
 #include "timers/juce_Timer.h"
 #include "timers/juce_MultiTimer.h"
 #include "interprocess/juce_InterprocessConnection.h"
