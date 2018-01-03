@@ -29,27 +29,26 @@
 // these classes are C++11-only
 #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
 
-struct DemoFlexPanel   : public juce::Component,
-                         private juce::TextEditor::Listener
+struct DemoFlexPanel   : public juce::Component
 {
     DemoFlexPanel (juce::Colour col, FlexItem& item)  : flexItem (item), colour (col)
     {
         int x = 70;
         int y = 3;
 
-        setupTextEditor (flexOrderEditor, { x, y, 20, 18 }, "0");
+        setupTextEditor (flexOrderEditor, { x, y, 20, 18 }, "0", [this]() { flexItem.order = (int) flexOrderEditor.getText().getFloatValue(); });
         addLabel ("order", flexOrderEditor);
         y += 20;
 
-        setupTextEditor (flexGrowEditor, { x, y, 20, 18 }, "0");
+        setupTextEditor (flexGrowEditor, { x, y, 20, 18 }, "0", [this]() { flexItem.flexGrow = flexGrowEditor.getText().getFloatValue(); });
         addLabel ("flex-grow", flexGrowEditor);
         y += 20;
 
-        setupTextEditor (flexShrinkEditor, { x, y, 20, 18 }, "1");
+        setupTextEditor (flexShrinkEditor, { x, y, 20, 18 }, "1", [this]() { flexItem.flexShrink = flexShrinkEditor.getText().getFloatValue(); });
         addLabel ("flex-shrink", flexShrinkEditor);
         y += 20;
 
-        setupTextEditor (flexBasisEditor, { x, y, 33, 18 }, "100");
+        setupTextEditor (flexBasisEditor, { x, y, 33, 18 }, "100", [this]() { flexItem.flexBasis = flexBasisEditor.getText().getFloatValue(); });
         addLabel ("flex-basis", flexBasisEditor);
         y += 20;
 
@@ -67,11 +66,18 @@ struct DemoFlexPanel   : public juce::Component,
         addLabel ("align-self", alignSelfCombo);
     }
 
-    void setupTextEditor (TextEditor& te, Rectangle<int> b, StringRef initialText)
+    void setupTextEditor (TextEditor& te, Rectangle<int> b, StringRef initialText, std::function<void()> updateFn)
     {
         te.setBounds (b);
         te.setText (initialText);
-        te.addListener (this);
+
+        te.onTextChange = [this, updateFn]()
+        {
+            updateFn();
+
+            if (auto parent = getParentComponent())
+                parent->resized();
+        };
 
         addAndMakeVisible (te);
     }
@@ -94,19 +100,6 @@ struct DemoFlexPanel   : public juce::Component,
             case 4:  flexItem.alignSelf = FlexItem::AlignSelf::center;    break;
             case 5:  flexItem.alignSelf = FlexItem::AlignSelf::stretch;   break;
         }
-
-        if (auto parent = getParentComponent())
-            parent->resized();
-    }
-
-    void textEditorTextChanged (TextEditor& textEditor) override
-    {
-        auto textIntValue = textEditor.getText().getFloatValue();
-
-        if (&textEditor == &flexOrderEditor)   flexItem.order      = (int) textIntValue;
-        if (&textEditor == &flexGrowEditor)    flexItem.flexGrow   = textIntValue;
-        if (&textEditor == &flexBasisEditor)   flexItem.flexBasis  = textIntValue;
-        if (&textEditor == &flexShrinkEditor)  flexItem.flexShrink = textIntValue;
 
         if (auto parent = getParentComponent())
             parent->resized();

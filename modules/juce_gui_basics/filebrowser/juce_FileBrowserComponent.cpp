@@ -31,7 +31,7 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
                                             const File& initialFileOrDirectory,
                                             const FileFilter* fileFilter_,
                                             FilePreviewComponent* previewComp_)
-   : FileFilter (String()),
+   : FileFilter ({}),
      fileFilter (fileFilter_),
      flags (flags_),
      previewComp (previewComp_),
@@ -93,7 +93,7 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
     addAndMakeVisible (currentPathBox);
     currentPathBox.setEditableText (true);
     resetRecentPaths();
-    currentPathBox.addListener (this);
+    currentPathBox.onChange = [this]() { updateSelectedPath(); };
 
     addAndMakeVisible (filenameBox);
     filenameBox.setMultiLine (false);
@@ -410,7 +410,7 @@ void FileBrowserComponent::fileDoubleClicked (const File& f)
         setRoot (f);
 
         if ((flags & canSelectDirectories) != 0 && (flags & doNotClearFileNameOnRootChange) == 0)
-            filenameBox.setText (String());
+            filenameBox.setText ({});
     }
     else
     {
@@ -455,7 +455,7 @@ void FileBrowserComponent::textEditorReturnKeyPressed (TextEditor&)
             chosenFiles.clear();
 
             if ((flags & doNotClearFileNameOnRootChange) == 0)
-                filenameBox.setText (String());
+                filenameBox.setText ({});
         }
         else
         {
@@ -482,7 +482,7 @@ void FileBrowserComponent::textEditorFocusLost (TextEditor&)
 }
 
 //==============================================================================
-void FileBrowserComponent::comboBoxChanged (ComboBox*)
+void FileBrowserComponent::updateSelectedPath()
 {
     auto newText = currentPathBox.getText().trim().unquoted();
 
@@ -493,9 +493,9 @@ void FileBrowserComponent::comboBoxChanged (ComboBox*)
         StringArray rootNames, rootPaths;
         getRoots (rootNames, rootPaths);
 
-        if (rootPaths [index].isNotEmpty())
+        if (rootPaths[index].isNotEmpty())
         {
-            setRoot (File (rootPaths [index]));
+            setRoot (File (rootPaths[index]));
         }
         else
         {
@@ -549,8 +549,8 @@ void FileBrowserComponent::getDefaultRoots (StringArray& rootNames, StringArray&
         rootNames.add (name);
     }
 
-    rootPaths.add (String());
-    rootNames.add (String());
+    rootPaths.add ({});
+    rootNames.add ({});
 
     rootPaths.add (File::getSpecialLocation (File::userDocumentsDirectory).getFullPathName());
     rootNames.add (TRANS("Documents"));
@@ -573,8 +573,8 @@ void FileBrowserComponent::getDefaultRoots (StringArray& rootNames, StringArray&
     rootPaths.add (File::getSpecialLocation (File::userDesktopDirectory).getFullPathName());
     rootNames.add (TRANS("Desktop"));
 
-    rootPaths.add (String());
-    rootNames.add (String());
+    rootPaths.add ({});
+    rootNames.add ({});
 
     Array<File> volumes;
     File vol ("/Volumes");

@@ -198,8 +198,7 @@ static String getNoDeviceString()   { return "<< " + TRANS("none") + " >>"; }
 
 //==============================================================================
 class AudioDeviceSettingsPanel : public Component,
-                                 private ChangeListener,
-                                 private ComboBox::Listener
+                                 private ChangeListener
 {
 public:
     AudioDeviceSettingsPanel (AudioIODeviceType& t, AudioDeviceSetupDetails& setupDetails,
@@ -328,17 +327,13 @@ public:
         }
     }
 
-    void comboBoxChanged (ComboBox* comboBoxThatHasChanged) override
+    void updateConfig (bool updateOutputDevice, bool updateInputDevice, bool updateSampleRate, bool updateBufferSize)
     {
-        if (comboBoxThatHasChanged == nullptr)
-            return;
-
         AudioDeviceManager::AudioDeviceSetup config;
         setup.manager->getAudioDeviceSetup (config);
         String error;
 
-        if (comboBoxThatHasChanged == outputDeviceDropDown
-              || comboBoxThatHasChanged == inputDeviceDropDown)
+        if (updateOutputDevice || updateInputDevice)
         {
             if (outputDeviceDropDown != nullptr)
                 config.outputDeviceName = outputDeviceDropDown->getSelectedId() < 0 ? String()
@@ -351,7 +346,7 @@ public:
             if (! type.hasSeparateInputsAndOutputs())
                 config.inputDeviceName = config.outputDeviceName;
 
-            if (comboBoxThatHasChanged == inputDeviceDropDown)
+            if (updateInputDevice)
                 config.useDefaultInputChannels = true;
             else
                 config.useDefaultOutputChannels = true;
@@ -364,7 +359,7 @@ public:
             updateControlPanelButton();
             resized();
         }
-        else if (comboBoxThatHasChanged == sampleRateDropDown)
+        else if (updateSampleRate)
         {
             if (sampleRateDropDown->getSelectedId() > 0)
             {
@@ -372,7 +367,7 @@ public:
                 error = setup.manager->setAudioDeviceSetup (config, true);
             }
         }
-        else if (comboBoxThatHasChanged == bufferSizeDropDown)
+        else if (updateBufferSize)
         {
             if (bufferSizeDropDown->getSelectedId() > 0)
             {
@@ -606,7 +601,8 @@ private:
             if (outputDeviceDropDown == nullptr)
             {
                 outputDeviceDropDown = new ComboBox();
-                outputDeviceDropDown->addListener (this);
+                outputDeviceDropDown->onChange = [this]() { updateConfig (true, false, false, false); };
+
                 addAndMakeVisible (outputDeviceDropDown);
 
                 outputDeviceLabel = new Label ({}, type.hasSeparateInputsAndOutputs() ? TRANS("Output:")
@@ -634,7 +630,7 @@ private:
             if (inputDeviceDropDown == nullptr)
             {
                 inputDeviceDropDown = new ComboBox();
-                inputDeviceDropDown->addListener (this);
+                inputDeviceDropDown->onChange = [this]() { updateConfig (false, true, false, false); };
                 addAndMakeVisible (inputDeviceDropDown);
 
                 inputDeviceLabel = new Label ({}, TRANS("Input:"));
@@ -662,7 +658,7 @@ private:
         else
         {
             sampleRateDropDown->clear();
-            sampleRateDropDown->removeListener (this);
+            sampleRateDropDown->onChange = {};
         }
 
         for (auto rate : currentDevice->getAvailableSampleRates())
@@ -672,7 +668,7 @@ private:
         }
 
         sampleRateDropDown->setSelectedId (roundToInt (currentDevice->getCurrentSampleRate()), dontSendNotification);
-        sampleRateDropDown->addListener (this);
+        sampleRateDropDown->onChange = [this]() { updateConfig (false, false, true, false); };
     }
 
     void updateBufferSizeComboBox (AudioIODevice* currentDevice)
@@ -687,7 +683,7 @@ private:
         else
         {
             bufferSizeDropDown->clear();
-            bufferSizeDropDown->removeListener (this);
+            bufferSizeDropDown->onChange = {};
         }
 
         auto currentRate = currentDevice->getCurrentSampleRate();
@@ -699,7 +695,7 @@ private:
             bufferSizeDropDown->addItem (String (bs) + " samples (" + String (bs * 1000.0 / currentRate, 1) + " ms)", bs);
 
         bufferSizeDropDown->setSelectedId (currentDevice->getCurrentBufferSizeSamples(), dontSendNotification);
-        bufferSizeDropDown->addListener (this);
+        bufferSizeDropDown->onChange = [this]() { updateConfig (false, false, false, true); };
     }
 
 public:

@@ -32,8 +32,7 @@
     flag is used to promt the user to save the note when it is closed.
  */
 class Note    : public Component,
-                public FileBasedDocument,
-                private TextEditor::Listener
+                public FileBasedDocument
 {
 public:
     Note (const String& name, const String& contents)
@@ -50,12 +49,7 @@ public:
         editor.setReturnKeyStartsNewLine (true);
         editor.getTextValue().referTo (textValueObject);
         addAndMakeVisible (editor);
-        editor.addListener (this);
-    }
-
-    ~Note()
-    {
-        editor.removeListener (this);
+        editor.onTextChange = [this]() { changed(); };
     }
 
     void resized() override
@@ -107,21 +101,10 @@ private:
     Value textValueObject;
     TextEditor editor;
 
-    void textEditorTextChanged (TextEditor& ed) override
-    {
-        // let our FileBasedDocument know we've changed
-        if (&ed == &editor)
-            changed();
-    }
-
     void lookAndFeelChanged() override
     {
         editor.applyFontToAllText (editor.getFont());
     }
-
-    void textEditorReturnKeyPressed (TextEditor&) override {}
-    void textEditorEscapeKeyPressed (TextEditor&) override {}
-    void textEditorFocusLost (TextEditor&) override {}
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Note)
 };

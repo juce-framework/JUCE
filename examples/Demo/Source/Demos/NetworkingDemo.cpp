@@ -29,7 +29,6 @@
 
 //==============================================================================
 class NetworkingDemo   : public Component,
-                         private TextEditor::Listener,
                          private Thread
 {
 public:
@@ -41,7 +40,7 @@ public:
 
         addAndMakeVisible (urlBox);
         urlBox.setText ("https://www.google.com");
-        urlBox.addListener (this);
+        urlBox.onReturnKey = [this]() { fetchButton.triggerClick(); };
 
         addAndMakeVisible (fetchButton);
         fetchButton.setButtonText ("Download URL Contents");
@@ -105,11 +104,6 @@ private:
 
     CodeDocument resultsDocument;
     CodeEditorComponent resultsBox;
-
-    void textEditorReturnKeyPressed (TextEditor&) override
-    {
-        fetchButton.triggerClick();
-    }
 
     void lookAndFeelChanged() override
     {
