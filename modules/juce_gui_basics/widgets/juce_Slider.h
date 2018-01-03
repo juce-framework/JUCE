@@ -960,7 +960,5 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Slider)
 };
 
-/** This typedef is just for compatibility with old code - newer code should use the Slider::Listener class directly. */
-typedef Slider::Listener SliderListener;
 
 } // namespace juce

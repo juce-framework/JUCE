@@ -156,9 +156,5 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextPropertyComponent)
 };
 
-#ifndef DOXYGEN
- /** This typedef is just for compatibility with old code and VC6 - newer code should use TextPropertyComponent::Listener instead. */
- typedef TextPropertyComponent::Listener TextPropertyComponentListener;
-#endif
 
 } // namespace juce

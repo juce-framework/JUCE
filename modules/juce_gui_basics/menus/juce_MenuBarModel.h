@@ -187,7 +187,5 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuBarModel)
 };
 
-/** This typedef is just for compatibility with old code - newer code should use the MenuBarModel::Listener class directly. */
-typedef MenuBarModel::Listener MenuBarModelListener;
 
 } // namespace juce

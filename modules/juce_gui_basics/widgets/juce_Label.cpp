@@ -190,7 +190,7 @@ void Label::textWasChanged() {}
 void Label::editorShown (TextEditor* textEditor)
 {
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, [this, textEditor] (LabelListener& l) { l.editorShown (this, *textEditor); });
+    listeners.callChecked (checker, [this, textEditor] (Label::Listener& l) { l.editorShown (this, *textEditor); });
 }
 
 void Label::editorAboutToBeHidden (TextEditor* textEditor)
@@ -199,7 +199,7 @@ void Label::editorAboutToBeHidden (TextEditor* textEditor)
         peer->dismissPendingTextInput();
 
     Component::BailOutChecker checker (this);
-    listeners.callChecked (checker, [this, textEditor] (LabelListener& l) { l.editorHidden (this, *textEditor); });
+    listeners.callChecked (checker, [this, textEditor] (Label::Listener& l) { l.editorHidden (this, *textEditor); });
 }
 
 void Label::showEditor()
@@ -395,15 +395,8 @@ KeyboardFocusTraverser* Label::createFocusTraverser()
 }
 
 //==============================================================================
-void Label::addListener (LabelListener* listener)
-{
-    listeners.add (listener);
-}
-
-void Label::removeListener (LabelListener* listener)
-{
-    listeners.remove (listener);
-}
+void Label::addListener    (Label::Listener* l)     { listeners.add (l); }
+void Label::removeListener (Label::Listener* l)     { listeners.remove (l); }
 
 void Label::callChangeListeners()
 {

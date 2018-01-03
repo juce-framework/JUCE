@@ -447,7 +447,5 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComboBox)
 };
 
-/** This typedef is just for compatibility with old code - newer code should use the ComboBox::Listener class directly. */
-typedef ComboBox::Listener ComboBoxListener;
 
 } // namespace juce

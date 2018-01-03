@@ -32,7 +32,7 @@ class TextPropertyComponent::LabelComp  : public Label,
 {
 public:
     LabelComp (TextPropertyComponent& tpc, int charLimit, bool multiline, bool editable)
-        : Label (String(), String()),
+        : Label ({}, {}),
           owner (tpc),
           maxChars (charLimit),
           isMultiline (multiline)
@@ -159,15 +159,8 @@ void TextPropertyComponent::textWasEdited()
     callListeners();
 }
 
-void TextPropertyComponent::addListener (TextPropertyComponentListener* const listener)
-{
-    listenerList.add (listener);
-}
-
-void TextPropertyComponent::removeListener (TextPropertyComponentListener* const listener)
-{
-    listenerList.remove (listener);
-}
+void TextPropertyComponent::addListener    (TextPropertyComponent::Listener* l)  { listenerList.add (l); }
+void TextPropertyComponent::removeListener (TextPropertyComponent::Listener* l)  { listenerList.remove (l); }
 
 void TextPropertyComponent::callListeners()
 {

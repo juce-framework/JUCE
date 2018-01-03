@@ -427,7 +427,5 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScrollBar)
 };
 
-/** This typedef is just for compatibility with old code - newer code should use the ScrollBar::Listener class directly. */
-typedef ScrollBar::Listener ScrollBarListener;
 
 } // namespace juce

@@ -159,11 +159,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CameraDevice)
 };
 
-#ifndef DOXYGEN
- /** This typedef is just for compatibility with VC6 - newer code should use the CameraDevice::Listener class directly. */
- typedef CameraDevice::Listener CameraImageListener;
-#endif
-
 #endif
 
 } // namespace juce
