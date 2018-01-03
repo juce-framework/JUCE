@@ -329,7 +329,6 @@ struct OpenGLDemoClasses
     */
     class DemoControlsOverlay  : public Component,
                                  private CodeDocument::Listener,
-                                 private ComboBox::Listener,
                                  private Slider::Listener,
                                  private Timer
     {
@@ -378,11 +377,11 @@ struct OpenGLDemoClasses
             textures.add (new DynamicTexture());
 
             addAndMakeVisible (textureBox);
-            textureBox.addListener (this);
+            textureBox.onChange = [this]() { selectTexture (textureBox.getSelectedId()); };
             updateTexturesList();
 
             addAndMakeVisible (presetBox);
-            presetBox.addListener (this);
+            presetBox.onChange = [this]() { selectPreset (presetBox.getSelectedItemIndex()); };
 
             auto presets = getPresets();
             StringArray presetNames;
@@ -537,14 +536,6 @@ struct OpenGLDemoClasses
             stopTimer();
             demo.setShaderProgram (vertexDocument.getAllContent(),
                                    fragmentDocument.getAllContent());
-        }
-
-        void comboBoxChanged (ComboBox* box) override
-        {
-            if (box == &presetBox)
-                selectPreset (presetBox.getSelectedItemIndex());
-            else if (box == &textureBox)
-                selectTexture (textureBox.getSelectedId());
         }
 
         void lookAndFeelChanged() override

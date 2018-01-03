@@ -30,7 +30,6 @@
 
 //==============================================================================
 class CameraDemo  : public Component,
-                    private ComboBox::Listener,
                     private CameraDevice::Listener,
                     private AsyncUpdater
 {
@@ -46,7 +45,7 @@ public:
         addAndMakeVisible (cameraSelectorComboBox);
         updateCameraList();
         cameraSelectorComboBox.setSelectedId (1);
-        cameraSelectorComboBox.addListener (this);
+        cameraSelectorComboBox.onChange = [this] { cameraChanged(); };
 
         addAndMakeVisible (snapshotButton);
         snapshotButton.onClick = [this]() { takeSnapshot(); };
@@ -117,7 +116,7 @@ private:
             cameraSelectorComboBox.addItem (cameras[i], i + 2);
     }
 
-    void comboBoxChanged (ComboBox*) override
+    void cameraChanged()
     {
         // This is called when the user chooses a camera from the drop-down list.
         cameraDevice = nullptr;

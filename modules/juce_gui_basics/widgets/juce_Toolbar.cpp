@@ -573,7 +573,7 @@ void Toolbar::itemDragMove (const SourceDetails& dragSourceDetails)
             updateAllItemPositions (true);
         }
 
-        ComponentAnimator& animator = Desktop::getInstance().getAnimator();
+        auto& animator = Desktop::getInstance().getAnimator();
 
         for (int i = getNumItems(); --i >= 0;)
         {
@@ -700,8 +700,7 @@ public:
 private:
     Toolbar& toolbar;
 
-    class CustomiserPanel  : public Component,
-                             private ComboBox::Listener
+    class CustomiserPanel  : public Component
     {
     public:
         CustomiserPanel (ToolbarItemFactory& tbf, Toolbar& bar, int optionFlags)
@@ -734,7 +733,7 @@ private:
 
                 styleBox.setSelectedId (selectedStyle);
 
-                styleBox.addListener (this);
+                styleBox.onChange = [this]() { updateStyle(); };
             }
 
             if ((optionFlags & Toolbar::showResetToDefaultsButton) != 0)
@@ -749,7 +748,7 @@ private:
             setSize (500, 300);
         }
 
-        void comboBoxChanged (ComboBox*) override
+        void updateStyle()
         {
             switch (styleBox.getSelectedId())
             {

@@ -208,7 +208,6 @@ private:
 
 //==============================================================================
 class StringsDemo   : public Component,
-                      private ComboBox::Listener,
                       private CodeDocument::Listener
 {
 public:
@@ -225,9 +224,16 @@ public:
         setOpaque (true);
 
         addAndMakeVisible (typeBox);
-        typeBox.addListener (this);
         typeBox.addItem ("XML", 1);
         typeBox.addItem ("JSON", 2);
+
+        typeBox.onChange = [this]()
+        {
+            if (typeBox.getSelectedId() == 1)
+                reset (xml);
+            else
+                reset (json);
+        };
 
         comboBoxLabel.setText ("Database Type:", dontSendNotification);
         comboBoxLabel.attachToComponent (&typeBox, true);
@@ -361,17 +367,6 @@ private:
             case xml:   codeDocument.replaceAllContent (BinaryData::treedemo_xml);      break;
             case json:  codeDocument.replaceAllContent (BinaryData::juce_module_info);  break;
             default:    codeDocument.replaceAllContent (String());                      break;
-        }
-    }
-
-    void comboBoxChanged (ComboBox* box) override
-    {
-        if (box == &typeBox)
-        {
-            if (typeBox.getSelectedId() == 1)
-                reset (xml);
-            else
-                reset (json);
         }
     }
 

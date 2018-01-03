@@ -68,7 +68,6 @@ private:
 
 //==============================================================================
 class MidiDemo  : public Component,
-                  private ComboBox::Listener,
                   private MidiInputCallback,
                   private MidiKeyboardStateListener,
                   private AsyncUpdater
@@ -76,7 +75,6 @@ class MidiDemo  : public Component,
 public:
     MidiDemo()
         : deviceManager (MainAppWindow::getSharedAudioDeviceManager()),
-          lastInputIndex (0), isAddingFromMidiInput (false),
           keyboardComponent (keyboardState, MidiKeyboardComponent::horizontalKeyboard),
           midiLogListBoxModel (midiMessageList)
     {
@@ -89,9 +87,10 @@ public:
 
         addAndMakeVisible (midiInputList);
         midiInputList.setTextWhenNoChoicesAvailable ("No MIDI Inputs Enabled");
-        const StringArray midiInputs (MidiInput::getDevices());
+
+        auto midiInputs = MidiInput::getDevices();
         midiInputList.addItemList (midiInputs, 1);
-        midiInputList.addListener (this);
+        midiInputList.onChange = [this]() { setMidiInput (midiInputList.getSelectedItemIndex()); };
 
         // find the first enabled device and use that by default
         for (int i = 0; i < midiInputs.size(); ++i)
@@ -116,7 +115,7 @@ public:
         addAndMakeVisible (midiOutputList);
         midiOutputList.setTextWhenNoChoicesAvailable ("No MIDI Output Enabled");
         midiOutputList.addItemList (MidiOutput::getDevices(), 1);
-        midiOutputList.addListener (this);
+        midiOutputList.onChange = [this]() { setMidiOutput (midiOutputList.getSelectedItemIndex()); };
 
         addAndMakeVisible (keyboardComponent);
         keyboardState.addListener (this);
@@ -129,7 +128,6 @@ public:
     {
         keyboardState.removeListener (this);
         deviceManager.removeMidiInputCallback (MidiInput::getDevices()[midiInputList.getSelectedItemIndex()], this);
-        midiInputList.removeListener (this);
     }
 
     void paint (Graphics& g) override
@@ -139,7 +137,7 @@ public:
 
     void resized() override
     {
-        Rectangle<int> area (getLocalBounds());
+        auto area = getLocalBounds();
         midiInputList.setBounds (area.removeFromTop (36).removeFromRight (getWidth() - 150).reduced (8));
         midiOutputList.setBounds (area.removeFromTop (36).removeFromRight (getWidth() - 150).reduced (8));
         keyboardComponent.setBounds (area.removeFromTop (80).reduced(8));
@@ -150,8 +148,8 @@ private:
     AudioDeviceManager& deviceManager;
     ComboBox midiInputList, midiOutputList;
     Label midiInputListLabel, midiOutputListLabel;
-    int lastInputIndex;
-    bool isAddingFromMidiInput;
+    int lastInputIndex = 0;
+    bool isAddingFromMidiInput = false;
 
     MidiKeyboardState keyboardState;
     MidiKeyboardComponent keyboardComponent;
@@ -165,11 +163,11 @@ private:
     /** Starts listening to a MIDI input device, enabling it if necessary. */
     void setMidiInput (int index)
     {
-        const StringArray list (MidiInput::getDevices());
+        auto list = MidiInput::getDevices();
 
         deviceManager.removeMidiInputCallback (list[lastInputIndex], this);
 
-        const String newInput (list[index]);
+        auto newInput = list[index];
 
         if (! deviceManager.isMidiInputEnabled (newInput))
             deviceManager.setMidiInputEnabled (newInput, true);
@@ -192,12 +190,6 @@ private:
         }
     }
 
-    void comboBoxChanged (ComboBox* box) override
-    {
-        if (box == &midiInputList)    setMidiInput  (midiInputList.getSelectedItemIndex());
-        if (box == &midiOutputList)   setMidiOutput (midiOutputList.getSelectedItemIndex());
-    }
-
     // These methods handle callbacks from the midi device + on-screen keyboard..
     void handleIncomingMidiMessage (MidiInput*, const MidiMessage& message) override
     {
@@ -210,7 +202,7 @@ private:
     {
         if (! isAddingFromMidiInput)
         {
-            MidiMessage m (MidiMessage::noteOn (midiChannel, midiNoteNumber, velocity));
+            auto m = MidiMessage::noteOn (midiChannel, midiNoteNumber, velocity);
             m.setTimeStamp (Time::getMillisecondCounterHiRes() * 0.001);
             postMessageToList (m);
         }
@@ -220,7 +212,7 @@ private:
     {
         if (! isAddingFromMidiInput)
         {
-            MidiMessage m (MidiMessage::noteOff (midiChannel, midiNoteNumber, velocity));
+            auto m = MidiMessage::noteOff (midiChannel, midiNoteNumber, velocity);
             m.setTimeStamp (Time::getMillisecondCounterHiRes() * 0.001);
             postMessageToList (m);
         }

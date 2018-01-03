@@ -64,8 +64,7 @@ public:
 class JUCE_API  FilenameComponent  : public Component,
                                      public SettableTooltipClient,
                                      public FileDragAndDropTarget,
-                                     private AsyncUpdater,
-                                     private ComboBox::Listener
+                                     private AsyncUpdater
 {
 public:
     //==============================================================================
@@ -223,7 +222,6 @@ private:
     ListenerList <FilenameComponentListener> listeners;
     File defaultBrowseFile;
 
-    void comboBoxChanged (ComboBox*) override;
     void showChooser();
     void handleAsyncUpdate() override;
 

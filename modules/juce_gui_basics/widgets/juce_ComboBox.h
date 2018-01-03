@@ -301,6 +301,10 @@ public:
     void removeListener (Listener* listener);
 
     //==============================================================================
+    /** You can assign a lambda to this callback object to have it called when the selected ID is changed. */
+    std::function<void()> onChange;
+
+    //==============================================================================
     /** Sets a message to display when there is no item currently selected.
         @see getTextWhenNothingSelected
     */

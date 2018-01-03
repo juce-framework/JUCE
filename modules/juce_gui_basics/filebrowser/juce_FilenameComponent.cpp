@@ -43,9 +43,9 @@ FilenameComponent::FilenameComponent (const String& name,
 {
     addAndMakeVisible (filenameBox);
     filenameBox.setEditableText (canEditFilename);
-    filenameBox.addListener (this);
     filenameBox.setTextWhenNothingSelected (textWhenNothingSelected);
     filenameBox.setTextWhenNoChoicesAvailable (TRANS ("(no recently selected files)"));
+    filenameBox.onChange = [this]() { setCurrentFile (getCurrentFile(), true); };
 
     setBrowseButtonText ("...");
 
@@ -129,11 +129,6 @@ void FilenameComponent::showChooser()
     ignoreUnused (isSaving);
     jassertfalse; // needs rewriting to deal with non-modal environments
    #endif
-}
-
-void FilenameComponent::comboBoxChanged (ComboBox*)
-{
-    setCurrentFile (getCurrentFile(), true);
 }
 
 bool FilenameComponent::isInterestedInFileDrag (const StringArray&)

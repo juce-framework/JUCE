@@ -950,8 +950,7 @@ private:
     //==============================================================================
     // This is a custom component containing a combo box, which we're going to put inside
     // our table's "rating" column.
-    class RatingColumnCustomComponent    : public Component,
-                                           private ComboBox::Listener
+    class RatingColumnCustomComponent    : public Component
     {
     public:
         RatingColumnCustomComponent (TableDemoComponent& td)  : owner (td)
@@ -966,8 +965,7 @@ private:
             comboBox.addItem ("swingin", 6);
             comboBox.addItem ("wild", 7);
 
-            // when the combo is changed, we'll get a callback.
-            comboBox.addListener (this);
+            comboBox.onChange = [this]() { owner.setRating (row, comboBox.getSelectedId()); };
             comboBox.setWantsKeyboardFocus (false);
         }
 
@@ -982,11 +980,6 @@ private:
             row = newRow;
             columnId = newColumn;
             comboBox.setSelectedId (owner.getRating (row), dontSendNotification);
-        }
-
-        void comboBoxChanged (ComboBox*) override
-        {
-            owner.setRating (row, comboBox.getSelectedId());
         }
 
     private:

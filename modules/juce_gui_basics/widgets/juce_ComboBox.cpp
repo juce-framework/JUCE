@@ -630,6 +630,12 @@ void ComboBox::handleAsyncUpdate()
 {
     Component::BailOutChecker checker (this);
     listeners.callChecked (checker, [this] (Listener& l) { l.comboBoxChanged (this); });
+
+    if (checker.shouldBailOut())
+        return;
+
+    if (onChange != nullptr)
+        onChange();
 }
 
 void ComboBox::sendChange (const NotificationType notification)

@@ -30,8 +30,7 @@
 #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
 
 struct DemoFlexPanel   : public juce::Component,
-                         private juce::TextEditor::Listener,
-                         private juce::ComboBox::Listener
+                         private juce::TextEditor::Listener
 {
     DemoFlexPanel (juce::Colour col, FlexItem& item)  : flexItem (item), colour (col)
     {
@@ -61,7 +60,7 @@ struct DemoFlexPanel   : public juce::Component,
         alignSelfCombo.addItem ("stretch",    5);
 
         alignSelfCombo.setBounds (x, y, 90, 18);
-        alignSelfCombo.addListener (this);
+        alignSelfCombo.onChange = [this] { updateAssignSelf(); };
         alignSelfCombo.setSelectedId (5);
         alignSelfCombo.setColour (ComboBox::outlineColourId, Colours::transparentBlack);
         addAndMakeVisible (alignSelfCombo);
@@ -85,15 +84,16 @@ struct DemoFlexPanel   : public juce::Component,
         addAndMakeVisible (label);
     }
 
-    void comboBoxChanged (ComboBox* cb) override
+    void updateAssignSelf()
     {
-        auto selectedID = cb->getSelectedId();
-
-        if (selectedID == 1)  flexItem.alignSelf = FlexItem::AlignSelf::autoAlign;
-        if (selectedID == 2)  flexItem.alignSelf = FlexItem::AlignSelf::flexStart;
-        if (selectedID == 3)  flexItem.alignSelf = FlexItem::AlignSelf::flexEnd;
-        if (selectedID == 4)  flexItem.alignSelf = FlexItem::AlignSelf::center;
-        if (selectedID == 5)  flexItem.alignSelf = FlexItem::AlignSelf::stretch;
+        switch (alignSelfCombo.getSelectedId())
+        {
+            case 1:  flexItem.alignSelf = FlexItem::AlignSelf::autoAlign; break;
+            case 2:  flexItem.alignSelf = FlexItem::AlignSelf::flexStart; break;
+            case 3:  flexItem.alignSelf = FlexItem::AlignSelf::flexEnd;   break;
+            case 4:  flexItem.alignSelf = FlexItem::AlignSelf::center;    break;
+            case 5:  flexItem.alignSelf = FlexItem::AlignSelf::stretch;   break;
+        }
 
         if (auto parent = getParentComponent())
             parent->resized();

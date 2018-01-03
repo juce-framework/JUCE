@@ -186,10 +186,10 @@ public:
 
     //==============================================================================
     /** You can assign a lambda to this callback object to have it called when the button is clicked. */
-    EventHandler<Button> onClick;
+    std::function<void()> onClick;
 
     /** You can assign a lambda to this callback object to have it called when the button's state changes. */
-    EventHandler<Button> onStateChange;
+    std::function<void()> onStateChange;
 
     //==============================================================================
     /** Causes the button to act as if it's been clicked.

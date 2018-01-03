@@ -38,7 +38,6 @@ namespace juce
 */
 class JUCE_API  AudioDeviceSelectorComponent  : public Component,
                                                 private ChangeListener,
-                                                private ComboBox::Listener,
                                                 private Timer
 {
 public:
@@ -111,7 +110,8 @@ private:
     ScopedPointer<TextButton> bluetoothButton;
 
     void handleBluetoothButton();
-    void comboBoxChanged (ComboBox*) override;
+    void updateDeviceType();
+    void updateMidiOutput();
     void changeListenerCallback (ChangeBroadcaster*) override;
     void updateAllControls();
 

@@ -985,7 +985,7 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
             deviceTypeDropDown->addItem (types.getUnchecked(i)->getTypeName(), i + 1);
 
         addAndMakeVisible (deviceTypeDropDown);
-        deviceTypeDropDown->addListener (this);
+        deviceTypeDropDown->onChange = [this]() { updateDeviceType(); };
 
         deviceTypeDropDownLabel = new Label ({}, TRANS("Audio device type:"));
         deviceTypeDropDownLabel->setJustificationType (Justification::centredRight);
@@ -1019,7 +1019,7 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
     if (showMidiOutputSelector)
     {
         addAndMakeVisible (midiOutputSelector = new ComboBox());
-        midiOutputSelector->addListener (this);
+        midiOutputSelector->onChange = [this]() { updateMidiOutput(); };
 
         midiOutputLabel = new Label ("lm", TRANS("MIDI Output:"));
         midiOutputLabel->attachToComponent (midiOutputSelector, true);
@@ -1095,26 +1095,24 @@ void AudioDeviceSelectorComponent::timerCallback()
     updateAllControls();
 }
 
-void AudioDeviceSelectorComponent::comboBoxChanged (ComboBox* comboBoxThatHasChanged)
+void AudioDeviceSelectorComponent::updateDeviceType()
 {
-    if (comboBoxThatHasChanged == deviceTypeDropDown)
+    if (auto* type = deviceManager.getAvailableDeviceTypes() [deviceTypeDropDown->getSelectedId() - 1])
     {
-        if (auto* type = deviceManager.getAvailableDeviceTypes() [deviceTypeDropDown->getSelectedId() - 1])
-        {
-            audioDeviceSettingsComp.reset();
-            deviceManager.setCurrentAudioDeviceType (type->getTypeName(), true);
-            updateAllControls(); // needed in case the type hasn't actually changed
-        }
+        audioDeviceSettingsComp.reset();
+        deviceManager.setCurrentAudioDeviceType (type->getTypeName(), true);
+        updateAllControls(); // needed in case the type hasn't actually changed
     }
-    else if (comboBoxThatHasChanged == midiOutputSelector)
-    {
-        auto midiDeviceName = midiOutputSelector->getText();
+}
 
-        if (midiDeviceName == getNoDeviceString())
-            midiDeviceName = {};
+void AudioDeviceSelectorComponent::updateMidiOutput()
+{
+    auto midiDeviceName = midiOutputSelector->getText();
 
-        deviceManager.setDefaultMidiOutput (midiDeviceName);
-    }
+    if (midiDeviceName == getNoDeviceString())
+        midiDeviceName = {};
+
+    deviceManager.setDefaultMidiOutput (midiDeviceName);
 }
 
 void AudioDeviceSelectorComponent::changeListenerCallback (ChangeBroadcaster*)
