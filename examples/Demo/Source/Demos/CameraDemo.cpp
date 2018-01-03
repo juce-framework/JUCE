@@ -31,7 +31,6 @@
 //==============================================================================
 class CameraDemo  : public Component,
                     private ComboBox::Listener,
-                    private Button::Listener,
                     private CameraDevice::Listener,
                     private AsyncUpdater
 {
@@ -50,11 +49,11 @@ public:
         cameraSelectorComboBox.addListener (this);
 
         addAndMakeVisible (snapshotButton);
-        snapshotButton.addListener (this);
+        snapshotButton.onClick = [this]() { takeSnapshot(); };
         snapshotButton.setEnabled (false);
 
         addAndMakeVisible (recordMovieButton);
-        recordMovieButton.addListener (this);
+        recordMovieButton.onClick = [this]() { startRecording(); };
         recordMovieButton.setEnabled (false);
 
         addAndMakeVisible (lastSnapshot);
@@ -70,9 +69,9 @@ public:
 
     void resized() override
     {
-        Rectangle<int> r (getLocalBounds().reduced (5));
+        auto r = getLocalBounds().reduced (5);
 
-        Rectangle<int> top (r.removeFromTop (25));
+        auto top = r.removeFromTop (25);
         cameraSelectorComboBox.setBounds (top.removeFromLeft (250));
 
         r.removeFromTop (4);
@@ -85,7 +84,7 @@ public:
         recordMovieButton.setBounds (top.removeFromLeft (recordMovieButton.getWidth()));
 
         r.removeFromTop (4);
-        Rectangle<int> previewArea (r.removeFromTop (r.getHeight() / 2));
+        auto previewArea = r.removeFromTop (r.getHeight() / 2);
 
         if (cameraPreviewComp != nullptr)
             cameraPreviewComp->setBounds (previewArea);
@@ -112,7 +111,7 @@ private:
         cameraSelectorComboBox.addItem ("No camera", 1);
         cameraSelectorComboBox.addSeparator();
 
-        StringArray cameras = CameraDevice::getAvailableDevices();
+        auto cameras = CameraDevice::getAvailableDevices();
 
         for (int i = 0; i < cameras.size(); ++i)
             cameraSelectorComboBox.addItem (cameras[i], i + 2);
@@ -140,40 +139,37 @@ private:
         resized();
     }
 
-    void buttonClicked (Button* b) override
+    void startRecording()
     {
         if (cameraDevice != nullptr)
         {
-            if (b == &recordMovieButton)
+            // The user has clicked the record movie button..
+            if (! recordingMovie)
             {
-                // The user has clicked the record movie button..
-                if (! recordingMovie)
-                {
-                    // Start recording to a file on the user's desktop..
-                    recordingMovie = true;
+                // Start recording to a file on the user's desktop..
+                recordingMovie = true;
 
-                    File file (File::getSpecialLocation (File::userDesktopDirectory)
-                               .getNonexistentChildFile ("JuceCameraDemo",
-                                                         CameraDevice::getFileExtension()));
+                auto file = File::getSpecialLocation (File::userDesktopDirectory)
+                              .getNonexistentChildFile ("JuceCameraDemo", CameraDevice::getFileExtension());
 
-                    cameraDevice->startRecordingToFile (file);
-                    recordMovieButton.setButtonText ("Stop Recording");
-                }
-                else
-                {
-                    // Already recording, so stop...
-                    recordingMovie = false;
-                    cameraDevice->stopRecording();
-                    recordMovieButton.setButtonText ("Start recording (to a file on your desktop)");
-                }
+                cameraDevice->startRecordingToFile (file);
+                recordMovieButton.setButtonText ("Stop Recording");
             }
             else
             {
-                // When the user clicks the snapshot button, we'll attach ourselves to
-                // the camera as a listener, and wait for an image to arrive...
-                cameraDevice->addListener (this);
+                // Already recording, so stop...
+                recordingMovie = false;
+                cameraDevice->stopRecording();
+                recordMovieButton.setButtonText ("Start recording (to a file on your desktop)");
             }
         }
+    }
+
+    void takeSnapshot()
+    {
+        // When the user clicks the snapshot button, we'll attach ourselves to
+        // the camera as a listener, and wait for an image to arrive...
+        cameraDevice->addListener (this);
     }
 
     // This is called by the camera device when a new image arrives

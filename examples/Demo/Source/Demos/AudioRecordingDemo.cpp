@@ -210,8 +210,7 @@ private:
 };
 
 //==============================================================================
-class AudioRecordingDemo  : public Component,
-                            private Button::Listener
+class AudioRecordingDemo  : public Component
 {
 public:
     AudioRecordingDemo()
@@ -231,9 +230,16 @@ public:
 
         addAndMakeVisible (recordButton);
         recordButton.setButtonText ("Record");
-        recordButton.addListener (this);
         recordButton.setColour (TextButton::buttonColourId, Colour (0xffff5c5c));
         recordButton.setColour (TextButton::textColourOnId, Colours::black);
+
+        recordButton.onClick = [this]()
+        {
+            if (recorder.isRecording())
+                stopRecording();
+            else
+                startRecording();
+        };
 
         addAndMakeVisible (recordingThumbnail);
 
@@ -271,8 +277,9 @@ private:
 
     void startRecording()
     {
-        const File file (File::getSpecialLocation (File::userDocumentsDirectory)
-                            .getNonexistentChildFile ("JUCE Demo Audio Recording", ".wav"));
+        auto file = File::getSpecialLocation (File::userDocumentsDirectory)
+                      .getNonexistentChildFile ("JUCE Demo Audio Recording", ".wav");
+
         recorder.startRecording (file);
 
         recordButton.setButtonText ("Stop");
@@ -284,17 +291,6 @@ private:
         recorder.stop();
         recordButton.setButtonText ("Record");
         recordingThumbnail.setDisplayFullThumbnail (true);
-    }
-
-    void buttonClicked (Button* button) override
-    {
-        if (button == &recordButton)
-        {
-            if (recorder.isRecording())
-                stopRecording();
-            else
-                startRecording();
-        }
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioRecordingDemo)

@@ -399,7 +399,7 @@ void Button::sendClickMessage (const ModifierKeys& modifiers)
     if (checker.shouldBailOut())
         return;
 
-    onClick.invoke (*this);
+    onClick.invoke();
 }
 
 void Button::sendStateMessage()
@@ -416,7 +416,7 @@ void Button::sendStateMessage()
     if (checker.shouldBailOut())
         return;
 
-    onStateChange.invoke (*this);
+    onStateChange.invoke();
 }
 
 //==============================================================================

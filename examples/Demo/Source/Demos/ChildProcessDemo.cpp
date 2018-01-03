@@ -54,7 +54,6 @@ static String valueTreeToString (const ValueTree& v)
 
 //==============================================================================
 class ChildProcessDemo   : public Component,
-                           private Button::Listener,
                            private MessageListener
 {
 public:
@@ -64,15 +63,15 @@ public:
 
         addAndMakeVisible (launchButton);
         launchButton.setButtonText ("Launch Child Process");
-        launchButton.addListener (this);
+        launchButton.onClick = [this]() { launchChildProcess(); };
 
         addAndMakeVisible (pingButton);
         pingButton.setButtonText ("Send Ping");
-        pingButton.addListener (this);
+        pingButton.onClick = [this]() { pingChildProcess(); };
 
         addAndMakeVisible (killButton);
         killButton.setButtonText ("Kill Child Process");
-        killButton.addListener (this);
+        killButton.onClick = [this]() { killChildProcess(); };
 
         addAndMakeVisible (testResultsBox);
         testResultsBox.setMultiLine (true);
@@ -183,13 +182,6 @@ public:
 private:
     TextButton launchButton, pingButton, killButton;
     TextEditor testResultsBox;
-
-    void buttonClicked (Button* button) override
-    {
-        if (button == &launchButton)  launchChildProcess();
-        if (button == &pingButton)    pingChildProcess();
-        if (button == &killButton)    killChildProcess();
-    }
 
     struct LogMessage  : public Message
     {

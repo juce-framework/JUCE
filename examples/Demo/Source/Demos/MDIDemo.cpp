@@ -163,8 +163,7 @@ private:
     By default this will look for notes saved to the desktop and load them up.
  */
 class MDIDemo   : public Component,
-                  public FileDragAndDropTarget,
-                  private Button::Listener
+                  public FileDragAndDropTarget
 {
 public:
     MDIDemo()
@@ -173,11 +172,11 @@ public:
 
         showInTabsButton.setButtonText ("Show with tabs");
         showInTabsButton.setToggleState (false, dontSendNotification);
-        showInTabsButton.addListener (this);
+        showInTabsButton.onClick = [this]() { updateLayoutMode(); };
         addAndMakeVisible (showInTabsButton);
 
         addNoteButton.setButtonText ("Create a new note");
-        addNoteButton.addListener (this);
+        addNoteButton.onClick = [this]() { addNote (String ("Note ") + String (multiDocumentPanel.getNumDocuments() + 1), "Hello World!"); };
         addAndMakeVisible (addNoteButton);
 
         addAndMakeVisible (multiDocumentPanel);
@@ -186,12 +185,6 @@ public:
         updateLayoutMode();
         addNote ("Notes Demo", "You can drag-and-drop text files onto this page to open them as notes..");
         addExistingNotes();
-    }
-
-    ~MDIDemo()
-    {
-        addNoteButton.removeListener (this);
-        showInTabsButton.removeListener (this);
     }
 
     void paint (Graphics& g) override
@@ -226,11 +219,9 @@ public:
 
     void createNotesForFiles (const Array<File>& files)
     {
-        for (int i = 0; i < files.size(); ++i)
+        for (auto& file : files)
         {
-            const File file (files[i]);
-
-            String content = file.loadFileAsString();
+            auto content = file.loadFileAsString();
 
             if (content.length() > 20000)
                 content = "Too long!";
@@ -263,14 +254,6 @@ private:
         Array<File> files;
         File::getSpecialLocation (File::userDesktopDirectory).findChildFiles (files, File::findFiles, false, "*.jnote");
         createNotesForFiles (files);
-    }
-
-    void buttonClicked (Button* b) override
-    {
-        if (b == &showInTabsButton)
-            updateLayoutMode();
-        else if (b == &addNoteButton)
-            addNote (String ("Note ") + String (multiDocumentPanel.getNumDocuments() + 1), "Hello World!");
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MDIDemo)

@@ -171,8 +171,7 @@ void TabBarButton::resized()
 }
 
 //==============================================================================
-class TabbedButtonBar::BehindFrontTabComp  : public Component,
-                                             public Button::Listener
+class TabbedButtonBar::BehindFrontTabComp  : public Component
 {
 public:
     BehindFrontTabComp (TabbedButtonBar& tb)  : owner (tb)
@@ -190,12 +189,6 @@ public:
         repaint();
     }
 
-    void buttonClicked (Button*) override
-    {
-        owner.showExtraItemsMenu();
-    }
-
-private:
     TabbedButtonBar& owner;
 
     JUCE_DECLARE_NON_COPYABLE (BehindFrontTabComp)
@@ -441,9 +434,9 @@ void TabbedButtonBar::updateTabPositions (bool animate)
         if (extraTabsButton == nullptr)
         {
             addAndMakeVisible (extraTabsButton = lf.createTabBarExtrasButton());
-            extraTabsButton->addListener (behindFrontTab);
             extraTabsButton->setAlwaysOnTop (true);
             extraTabsButton->setTriggeredOnMouseDown (true);
+            extraTabsButton->onClick = [this]() { showExtraItemsMenu(); };
         }
 
         auto buttonSize = jmin (proportionOfWidth (0.7f), proportionOfHeight (0.7f));

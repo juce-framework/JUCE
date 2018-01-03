@@ -36,8 +36,7 @@ namespace juce
 
     @see PropertyComponent
 */
-class JUCE_API  ButtonPropertyComponent  : public PropertyComponent,
-                                           private Button::Listener
+class JUCE_API  ButtonPropertyComponent  : public PropertyComponent
 {
 public:
     //==============================================================================
@@ -66,8 +65,6 @@ public:
     //==============================================================================
     /** @internal */
     void refresh();
-    /** @internal */
-    void buttonClicked (Button*);
 
 private:
     TextButton button;

@@ -233,7 +233,6 @@ private:
 //==============================================================================
 class AudioPlaybackDemo  : public Component,
                            private FileBrowserListener,
-                           private Button::Listener,
                            private Slider::Listener,
                            private ChangeListener
 {
@@ -254,7 +253,7 @@ public:
 
         addAndMakeVisible (followTransportButton);
         followTransportButton.setButtonText ("Follow Transport");
-        followTransportButton.addListener (this);
+        followTransportButton.onClick = [this]() { updateFollowTransportState(); };
 
         addAndMakeVisible (explanation);
         explanation.setText ("Select an audio file in the treeview above, and this page will display its waveform, and let you play it..", dontSendNotification);
@@ -276,9 +275,9 @@ public:
 
         addAndMakeVisible (startStopButton);
         startStopButton.setButtonText ("Play/Stop");
-        startStopButton.addListener (this);
         startStopButton.setColour (TextButton::buttonColourId, Colour (0xff79ed7f));
         startStopButton.setColour (TextButton::textColourOffId, Colours::black);
+        startStopButton.onClick = [this]() { startOrStop(); };
 
         addAndMakeVisible (fileTreeComp);
 
@@ -305,7 +304,6 @@ public:
         deviceManager.removeAudioCallback (&audioSourcePlayer);
         fileTreeComp.removeListener (this);
         thumbnail->removeChangeListener (this);
-        followTransportButton.removeListener (this);
         zoomSlider.removeListener (this);
     }
 
@@ -378,6 +376,24 @@ private:
         }
     }
 
+    void startOrStop()
+    {
+        if (transportSource.isPlaying())
+        {
+            transportSource.stop();
+        }
+        else
+        {
+            transportSource.setPosition (0);
+            transportSource.start();
+        }
+    }
+
+    void updateFollowTransportState()
+    {
+        thumbnail->setFollowsTransport (followTransportButton.getToggleState());
+    }
+
     void selectionChanged() override
     {
         showFile (fileTreeComp.getSelectedFile());
@@ -391,26 +407,6 @@ private:
     {
         if (sliderThatWasMoved == &zoomSlider)
             thumbnail->setZoomFactor (zoomSlider.getValue());
-    }
-
-    void buttonClicked (Button* buttonThatWasClicked) override
-    {
-        if (buttonThatWasClicked == &startStopButton)
-        {
-            if (transportSource.isPlaying())
-            {
-                transportSource.stop();
-            }
-            else
-            {
-                transportSource.setPosition (0);
-                transportSource.start();
-            }
-        }
-        else if (buttonThatWasClicked == &followTransportButton)
-        {
-            thumbnail->setFollowsTransport (followTransportButton.getToggleState());
-        }
     }
 
     void changeListenerCallback (ChangeBroadcaster* source) override

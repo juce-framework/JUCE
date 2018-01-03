@@ -505,8 +505,7 @@ struct LookAndFeelDemoComponent  : public Component
 
 //==============================================================================
 class LookAndFeelDemo   : public Component,
-                          private ComboBox::Listener,
-                          private Button::Listener
+                          private ComboBox::Listener
 {
 public:
     LookAndFeelDemo()
@@ -542,7 +541,7 @@ public:
 
         addAndMakeVisible (randomButton);
         randomButton.setButtonText ("Assign Randomly");
-        randomButton.addListener (this);
+        randomButton.onClick = [this]() { lafBox.setSelectedItemIndex (Random().nextInt (lafBox.getNumItems())); };
     }
 
     void paint (Graphics& g) override
@@ -617,12 +616,6 @@ private:
     {
         if (comboBoxThatHasChanged == &lafBox)
             setAllLookAndFeels (lookAndFeels[lafBox.getSelectedItemIndex()]);
-    }
-
-    void buttonClicked (Button* b) override
-    {
-        if (b == &randomButton)
-            lafBox.setSelectedItemIndex (Random::getSystemRandom().nextInt (lafBox.getNumItems()));
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LookAndFeelDemo)

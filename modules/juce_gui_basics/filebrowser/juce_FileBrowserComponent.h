@@ -40,7 +40,6 @@ namespace juce
 class JUCE_API  FileBrowserComponent  : public Component,
                                         private FileBrowserListener,
                                         private TextEditor::Listener,
-                                        private Button::Listener,
                                         private ComboBox::Listener,
                                         private FileFilter,
                                         private Timer
@@ -236,8 +235,6 @@ public:
     void resized() override;
     /** @internal */
     void lookAndFeelChanged() override;
-    /** @internal */
-    void buttonClicked (Button*) override;
     /** @internal */
     void comboBoxChanged (ComboBox*) override;
     /** @internal */

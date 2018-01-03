@@ -106,7 +106,7 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
     fileLabel.attachToComponent (&filenameBox, true);
 
     addAndMakeVisible (goUpButton = getLookAndFeel().createFileBrowserGoUpButton());
-    goUpButton->addListener (this);
+    goUpButton->onClick = [this]() { goUp(); };
     goUpButton->setTooltip (TRANS ("Go up to parent directory"));
 
     if (previewComp != nullptr)
@@ -482,11 +482,6 @@ void FileBrowserComponent::textEditorFocusLost (TextEditor&)
 }
 
 //==============================================================================
-void FileBrowserComponent::buttonClicked (Button*)
-{
-    goUp();
-}
-
 void FileBrowserComponent::comboBoxChanged (ComboBox*)
 {
     auto newText = currentPathBox.getText().trim().unquoted();

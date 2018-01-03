@@ -29,17 +29,15 @@ namespace juce
 
 FilenameComponent::FilenameComponent (const String& name,
                                       const File& currentFile,
-                                      const bool canEditFilename,
-                                      const bool isDirectory,
-                                      const bool isForSaving,
+                                      bool canEditFilename,
+                                      bool isDirectory,
+                                      bool isForSaving,
                                       const String& fileBrowserWildcard,
                                       const String& suffix,
                                       const String& textWhenNothingSelected)
     : Component (name),
-      maxRecentFiles (30),
       isDir (isDirectory),
       isSaving (isForSaving),
-      isFileDragOver (false),
       wildcard (fileBrowserWildcard),
       enforcedSuffix (suffix)
 {
@@ -92,9 +90,8 @@ void FilenameComponent::lookAndFeelChanged()
 
     addAndMakeVisible (browseButton = getLookAndFeel().createFilenameComponentBrowseButton (browseButtonText));
     browseButton->setConnectedEdges (Button::ConnectedOnLeft);
+    browseButton->onClick = [this]() { showChooser(); };
     resized();
-
-    browseButton->addListener (this);
 }
 
 void FilenameComponent::setTooltip (const String& newTooltip)
@@ -114,7 +111,7 @@ File FilenameComponent::getLocationToBrowse()
                                       : getCurrentFile();
 }
 
-void FilenameComponent::buttonClicked (Button*)
+void FilenameComponent::showChooser()
 {
    #if JUCE_MODAL_LOOPS_PERMITTED
     FileChooser fc (isDir ? TRANS ("Choose a new directory")

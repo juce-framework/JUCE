@@ -69,8 +69,7 @@ private:
 
 //==============================================================================
 class WebBrowserDemo    : public Component,
-                          private TextEditor::Listener,
-                          private Button::Listener
+                          private TextEditor::Listener
 {
 public:
     WebBrowserDemo()
@@ -90,11 +89,11 @@ public:
 
         // add some buttons..
         addAndMakeVisible (goButton);
-        goButton.addListener (this);
+        goButton.onClick = [this]() { webView->goToURL (addressTextBox.getText()); };
         addAndMakeVisible (backButton);
-        backButton.addListener (this);
+        backButton.onClick = [this]() { webView->goBack(); };
         addAndMakeVisible (forwardButton);
-        forwardButton.addListener (this);
+        forwardButton.onClick = [this]() { webView->goForward(); };
 
         // send the browser to a start page..
         webView->goToURL ("https://www.juce.com");
@@ -128,16 +127,6 @@ private:
     void textEditorReturnKeyPressed (TextEditor&) override
     {
         webView->goToURL (addressTextBox.getText());
-    }
-
-    void buttonClicked (Button* b) override
-    {
-        if (b == &backButton)
-            webView->goBack();
-        else if (b == &forwardButton)
-            webView->goForward();
-        else if (b == &goButton)
-            webView->goToURL (addressTextBox.getText());
     }
 
     void lookAndFeelChanged() override

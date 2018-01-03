@@ -145,8 +145,7 @@ struct DemoFlexPanel   : public juce::Component,
 };
 
 //==============================================================================
-struct FlexBoxDemo   : public juce::Component,
-                       private juce::Button::Listener
+struct FlexBoxDemo   : public juce::Component
 {
     FlexBoxDemo()
     {
@@ -184,11 +183,10 @@ struct FlexBoxDemo   : public juce::Component,
         int leftMargin = 15;
         int topMargin = 45;
 
-        setupToggleButton (flexDirectionRowButton,           "row",            groupID, leftMargin, topMargin + i++ * 22);
-        setupToggleButton (flexDirectionRowReverseButton,    "row-reverse",    groupID, leftMargin, topMargin + i++ * 22);
-        setupToggleButton (flexDirectionColumnButton,        "column",         groupID, leftMargin, topMargin + i++ * 22);
-        setupToggleButton (flexDirectionColumnReverseButton, "column-reverse", groupID, leftMargin, topMargin + i++ * 22);
-        flexDirectionRowButton.setToggleState (true, dontSendNotification);
+        createToggleButton ("row",            groupID, leftMargin, topMargin + i++ * 22, true,  [this]() { flexBox.flexDirection = FlexBox::Direction::row; }).setToggleState (true, dontSendNotification);
+        createToggleButton ("row-reverse",    groupID, leftMargin, topMargin + i++ * 22, false, [this]() { flexBox.flexDirection = FlexBox::Direction::rowReverse; });
+        createToggleButton ("column",         groupID, leftMargin, topMargin + i++ * 22, false, [this]() { flexBox.flexDirection = FlexBox::Direction::column; });
+        createToggleButton ("column-reverse", groupID, leftMargin, topMargin + i++ * 22, false, [this]() { flexBox.flexDirection = FlexBox::Direction::columnReverse; });
 
         auto wrapGroup = addControl (new GroupComponent ("wrap", "flex-wrap"));
         wrapGroup->setBounds (160, 30, 140, 110);
@@ -197,10 +195,9 @@ struct FlexBoxDemo   : public juce::Component,
         ++groupID;
         leftMargin = 165;
 
-        setupToggleButton (flexNoWrapButton,      "nowrap",       groupID, leftMargin, topMargin + i++ * 22);
-        setupToggleButton (flexWrapButton,        "wrap",         groupID, leftMargin, topMargin + i++ * 22);
-        setupToggleButton (flexWrapReverseButton, "wrap-reverse", groupID, leftMargin, topMargin + i++ * 22);
-        flexWrapButton.setToggleState (true, sendNotification);
+        createToggleButton ("nowrap",       groupID, leftMargin, topMargin + i++ * 22, false, [this]() { flexBox.flexWrap = FlexBox::Wrap::noWrap; });
+        createToggleButton ("wrap",         groupID, leftMargin, topMargin + i++ * 22, true,  [this]() { flexBox.flexWrap = FlexBox::Wrap::wrap; });
+        createToggleButton ("wrap-reverse", groupID, leftMargin, topMargin + i++ * 22, false, [this]() { flexBox.flexWrap = FlexBox::Wrap::wrapReverse; });
 
         auto justifyGroup = addControl (new GroupComponent ("justify", "justify-content"));
         justifyGroup->setBounds (10, 150, 140, 140);
@@ -210,12 +207,11 @@ struct FlexBoxDemo   : public juce::Component,
         leftMargin = 15;
         topMargin = 165;
 
-        setupToggleButton (justifyFlexStartButton,    "flex-start",    groupID, leftMargin, topMargin + i++ * 22);
-        setupToggleButton (justifyFlexEndButton,      "flex-end",      groupID, leftMargin, topMargin + i++ * 22);
-        setupToggleButton (justifyCenterButton,       "center",        groupID, leftMargin, topMargin + i++ * 22);
-        setupToggleButton (justifySpaceBetweenButton, "space-between", groupID, leftMargin, topMargin + i++ * 22);
-        setupToggleButton (justifySpaceAroundButton,  "space-around",  groupID, leftMargin, topMargin + i++ * 22);
-        justifyFlexStartButton.setToggleState (true, sendNotification);
+        createToggleButton ("flex-start",    groupID, leftMargin, topMargin + i++ * 22, true,  [this]() { flexBox.justifyContent = FlexBox::JustifyContent::flexStart; });
+        createToggleButton ("flex-end",      groupID, leftMargin, topMargin + i++ * 22, false, [this]() { flexBox.justifyContent = FlexBox::JustifyContent::flexEnd; });
+        createToggleButton ("center",        groupID, leftMargin, topMargin + i++ * 22, false, [this]() { flexBox.justifyContent = FlexBox::JustifyContent::center; });
+        createToggleButton ("space-between", groupID, leftMargin, topMargin + i++ * 22, false, [this]() { flexBox.justifyContent = FlexBox::JustifyContent::spaceBetween; });
+        createToggleButton ("space-around",  groupID, leftMargin, topMargin + i++ * 22, false, [this]() { flexBox.justifyContent = FlexBox::JustifyContent::spaceAround; });
 
         auto alignGroup = addControl (new GroupComponent ("align", "align-items"));
         alignGroup->setBounds (160, 150, 140, 140);
@@ -225,11 +221,10 @@ struct FlexBoxDemo   : public juce::Component,
         leftMargin = 165;
         topMargin = 165;
 
-        setupToggleButton (alignStretchButton,   "stretch",    groupID, leftMargin, topMargin + i++ * 22);
-        setupToggleButton (alignFlexStartButton, "flex-start", groupID, leftMargin, topMargin + i++ * 22);
-        setupToggleButton (alignFlexEndButton,   "flex-end",   groupID, leftMargin, topMargin + i++ * 22);
-        setupToggleButton (alignCenterButton,    "center",     groupID, leftMargin, topMargin + i++ * 22);
-        alignStretchButton.setToggleState (true, sendNotification);
+        createToggleButton ("stretch",    groupID, leftMargin, topMargin + i++ * 22, true,  [this]() { flexBox.alignItems = FlexBox::AlignItems::stretch; });
+        createToggleButton ("flex-start", groupID, leftMargin, topMargin + i++ * 22, false, [this]() { flexBox.alignItems = FlexBox::AlignItems::flexStart; });
+        createToggleButton ("flex-end",   groupID, leftMargin, topMargin + i++ * 22, false, [this]() { flexBox.alignItems = FlexBox::AlignItems::flexEnd; });
+        createToggleButton ("center",     groupID, leftMargin, topMargin + i++ * 22, false, [this]() { flexBox.alignItems = FlexBox::AlignItems::center; });
 
         auto alignContentGroup = addControl (new GroupComponent ("content", "align-content"));
         alignContentGroup->setBounds (10, 300, 140, 160);
@@ -239,13 +234,12 @@ struct FlexBoxDemo   : public juce::Component,
         leftMargin = 15;
         topMargin = 315;
 
-        setupToggleButton (alignContentStretchButton,      "stretch",       groupID, leftMargin, topMargin + i++ * 22);
-        setupToggleButton (alignContentFlexStartButton,    "flex-start",    groupID, leftMargin, topMargin + i++ * 22);
-        setupToggleButton (alignContentFlexEndButton,      "flex-end",      groupID, leftMargin, topMargin + i++ * 22);
-        setupToggleButton (alignContentCenterButton,       "center",        groupID, leftMargin, topMargin + i++ * 22);
-        setupToggleButton (alignContentSpaceBetweenButton, "space-between", groupID, leftMargin, topMargin + i++ * 22);
-        setupToggleButton (alignContentSpaceAroundButton,  "space-around",  groupID, leftMargin, topMargin + i++ * 22);
-        alignContentStretchButton.setToggleState (true, sendNotification);
+        createToggleButton ("stretch",       groupID, leftMargin, topMargin + i++ * 22, true,  [this]() { flexBox.alignContent = FlexBox::AlignContent::stretch; });
+        createToggleButton ("flex-start",    groupID, leftMargin, topMargin + i++ * 22, false, [this]() { flexBox.alignContent = FlexBox::AlignContent::flexStart; });
+        createToggleButton ("flex-end",      groupID, leftMargin, topMargin + i++ * 22, false, [this]() { flexBox.alignContent = FlexBox::AlignContent::flexEnd; });
+        createToggleButton ("center",        groupID, leftMargin, topMargin + i++ * 22, false, [this]() { flexBox.alignContent = FlexBox::AlignContent::center; });
+        createToggleButton ("space-between", groupID, leftMargin, topMargin + i++ * 22, false, [this]() { flexBox.alignContent = FlexBox::AlignContent::spaceBetween; });
+        createToggleButton ("space-around",  groupID, leftMargin, topMargin + i++ * 22, false, [this]() { flexBox.alignContent = FlexBox::AlignContent::spaceAround; });
     }
 
     void setupFlexBoxItems()
@@ -265,21 +259,21 @@ struct FlexBoxDemo   : public juce::Component,
 
         auto& flexItem = flexBox.items.getReference (flexBox.items.size() - 1);
 
-        auto panel = new DemoFlexPanel (colour, flexItem);
-        panels.add (panel);
+        auto panel = panels.add (new DemoFlexPanel (colour, flexItem));
         flexItem.associatedComponent = panel;
         addAndMakeVisible (panel);
     }
 
-    void setupToggleButton (ToggleButton& tb, StringRef text, int groupID, int x, int y)
+    ToggleButton& createToggleButton (StringRef text, int groupID, int x, int y, bool toggleOn, std::function<void()> fn)
     {
-        tb.setButtonText (text);
-        tb.setRadioGroupId (groupID);
-        tb.setToggleState (false, dontSendNotification);
-        tb.addListener (this);
-        tb.setBounds (x, y, 130, 22);
-
+        auto* tb = buttons.add (new ToggleButton());
+        tb->setButtonText (text);
+        tb->setRadioGroupId (groupID);
+        tb->setToggleState (toggleOn, dontSendNotification);
+        tb->onClick = fn;
+        tb->setBounds (x, y, 130, 22);
         addAndMakeVisible (tb);
+        return *tb;
     }
 
     template <typename ComponentType>
@@ -290,69 +284,11 @@ struct FlexBoxDemo   : public juce::Component,
         return newControlComp;
     }
 
-    void buttonClicked (Button* b) override
-    {
-        if (b->getToggleState())
-        {
-            if (b == &flexDirectionRowButton)                   flexBox.flexDirection   = FlexBox::Direction::row;
-            else if (b == &flexDirectionRowReverseButton)       flexBox.flexDirection   = FlexBox::Direction::rowReverse;
-            else if (b == &flexDirectionColumnButton)           flexBox.flexDirection   = FlexBox::Direction::column;
-            else if (b == &flexDirectionColumnReverseButton)    flexBox.flexDirection   = FlexBox::Direction::columnReverse;
-            else if (b == &flexNoWrapButton)                    flexBox.flexWrap        = FlexBox::Wrap::noWrap;
-            else if (b == &flexWrapButton)                      flexBox.flexWrap        = FlexBox::Wrap::wrap;
-            else if (b == &flexWrapReverseButton)               flexBox.flexWrap        = FlexBox::Wrap::wrapReverse;
-            else if (b == &justifyFlexStartButton)              flexBox.justifyContent  = FlexBox::JustifyContent::flexStart;
-            else if (b == &justifyFlexEndButton)                flexBox.justifyContent  = FlexBox::JustifyContent::flexEnd;
-            else if (b == &justifyCenterButton)                 flexBox.justifyContent  = FlexBox::JustifyContent::center;
-            else if (b == &justifySpaceBetweenButton)           flexBox.justifyContent  = FlexBox::JustifyContent::spaceBetween;
-            else if (b == &justifySpaceAroundButton)            flexBox.justifyContent  = FlexBox::JustifyContent::spaceAround;
-            else if (b == &alignStretchButton)                  flexBox.alignItems      = FlexBox::AlignItems::stretch;
-            else if (b == &alignFlexStartButton)                flexBox.alignItems      = FlexBox::AlignItems::flexStart;
-            else if (b == &alignFlexEndButton)                  flexBox.alignItems      = FlexBox::AlignItems::flexEnd;
-            else if (b == &alignCenterButton)                   flexBox.alignItems      = FlexBox::AlignItems::center;
-            else if (b == &alignContentStretchButton)           flexBox.alignContent    = FlexBox::AlignContent::stretch;
-            else if (b == &alignContentFlexStartButton)         flexBox.alignContent    = FlexBox::AlignContent::flexStart;
-            else if (b == &alignContentFlexEndButton)           flexBox.alignContent    = FlexBox::AlignContent::flexEnd;
-            else if (b == &alignContentCenterButton)            flexBox.alignContent    = FlexBox::AlignContent::center;
-            else if (b == &alignContentSpaceBetweenButton)      flexBox.alignContent    = FlexBox::AlignContent::spaceBetween;
-            else if (b == &alignContentSpaceAroundButton)       flexBox.alignContent    = FlexBox::AlignContent::spaceAround;
-            else return;
-
-            resized();
-        }
-    }
-
     FlexBox flexBox;
 
     OwnedArray<DemoFlexPanel> panels;
     OwnedArray<Component> controls;
-
-    ToggleButton flexDirectionRowButton,
-                 flexDirectionRowReverseButton,
-                 flexDirectionColumnButton,
-                 flexDirectionColumnReverseButton,
-
-                 flexNoWrapButton,
-                 flexWrapButton,
-                 flexWrapReverseButton,
-
-                 justifyFlexStartButton,
-                 justifyFlexEndButton,
-                 justifyCenterButton,
-                 justifySpaceBetweenButton,
-                 justifySpaceAroundButton,
-
-                 alignStretchButton,
-                 alignFlexStartButton,
-                 alignFlexEndButton,
-                 alignCenterButton,
-
-                 alignContentStretchButton,
-                 alignContentFlexStartButton,
-                 alignContentFlexEndButton,
-                 alignContentCenterButton,
-                 alignContentSpaceBetweenButton,
-                 alignContentSpaceAroundButton;
+    OwnedArray<ToggleButton> buttons;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FlexBoxDemo)
 };

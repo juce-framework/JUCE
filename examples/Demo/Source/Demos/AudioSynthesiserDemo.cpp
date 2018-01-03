@@ -231,8 +231,7 @@ struct SynthAudioSource  : public AudioSource
 };
 
 //==============================================================================
-class AudioSynthesiserDemo  : public Component,
-                              private Button::Listener
+class AudioSynthesiserDemo  : public Component
 {
 public:
     AudioSynthesiserDemo()
@@ -245,13 +244,13 @@ public:
         addAndMakeVisible (sineButton);
         sineButton.setButtonText ("Use sine wave");
         sineButton.setRadioGroupId (321);
-        sineButton.addListener (this);
         sineButton.setToggleState (true, dontSendNotification);
+        sineButton.onClick = [this]() { synthAudioSource.setUsingSineWaveSound(); };
 
         addAndMakeVisible (sampledButton);
         sampledButton.setButtonText ("Use sampled sound");
         sampledButton.setRadioGroupId (321);
-        sampledButton.addListener (this);
+        sampledButton.onClick = [this]() { synthAudioSource.setUsingSampledSound(); };
 
         addAndMakeVisible (liveAudioDisplayComp);
 
@@ -297,15 +296,6 @@ private:
     ToggleButton sineButton;
     ToggleButton sampledButton;
     LiveScrollingAudioDisplay liveAudioDisplayComp;
-
-    //==============================================================================
-    void buttonClicked (Button* buttonThatWasClicked) override
-    {
-        if (buttonThatWasClicked == &sineButton)
-            synthAudioSource.setUsingSineWaveSound();
-        else if (buttonThatWasClicked == &sampledButton)
-            synthAudioSource.setUsingSampledSound();
-    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioSynthesiserDemo)
 };

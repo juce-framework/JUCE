@@ -57,8 +57,7 @@ struct LiveConstantDemoComponent  : public Component
 };
 
 //==============================================================================
-class LiveConstantEditorDemo   : public Component,
-                                 private Button::Listener
+class LiveConstantEditorDemo   : public Component
 {
 public:
     LiveConstantEditorDemo()
@@ -75,7 +74,7 @@ public:
         addAndMakeVisible (descriptionLabel);
         addAndMakeVisible (startButton);
         addChildComponent (demoComp);
-        startButton.addListener (this);
+        startButton.onClick = [this]() { start(); };
     }
 
     void paint (Graphics& g) override
@@ -95,12 +94,7 @@ public:
         demoComp.setBounds (r.withTrimmedTop (10));
     }
 
-private:
-    Label descriptionLabel;
-    TextButton startButton;
-    LiveConstantDemoComponent demoComp;
-
-    void buttonClicked (Button*) override
+    void start()
     {
         startButton.setVisible (false);
         demoComp.setVisible (true);
@@ -109,6 +103,11 @@ private:
                                   "the effect of your changes would be on the component below...",
                                   dontSendNotification);
     }
+
+private:
+    Label descriptionLabel;
+    TextButton startButton;
+    LiveConstantDemoComponent demoComp;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LiveConstantEditorDemo)
 };

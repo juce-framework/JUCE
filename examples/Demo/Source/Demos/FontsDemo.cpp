@@ -31,7 +31,6 @@
 class FontsDemo  : public Component,
                    private ListBoxModel,
                    private Slider::Listener,
-                   private Button::Listener,
                    private ComboBox::Listener
 {
 public:
@@ -59,8 +58,8 @@ public:
         heightSlider.addListener (this);
         kerningSlider.addListener (this);
         scaleSlider.addListener (this);
-        boldToggle.addListener (this);
-        italicToggle.addListener (this);
+        boldToggle.onClick   = [this]() { refreshPreviewBoxFont(); };
+        italicToggle.onClick = [this]() { refreshPreviewBoxFont(); };
         styleBox.addListener (this);
 
         Font::findFonts (fonts);   // Generate the list of fonts
@@ -155,12 +154,6 @@ public:
         if (sliderThatWasMoved == &heightSlider)            refreshPreviewBoxFont();
         else if (sliderThatWasMoved == &kerningSlider)      refreshPreviewBoxFont();
         else if (sliderThatWasMoved == &scaleSlider)        refreshPreviewBoxFont();
-    }
-
-    void buttonClicked (Button* buttonThatWasClicked) override
-    {
-        if (buttonThatWasClicked == &boldToggle)            refreshPreviewBoxFont();
-        else if (buttonThatWasClicked == &italicToggle)     refreshPreviewBoxFont();
     }
 
     // The following methods implement the ListBoxModel virtual methods:

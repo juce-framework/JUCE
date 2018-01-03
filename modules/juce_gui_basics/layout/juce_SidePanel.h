@@ -39,8 +39,7 @@ namespace juce
  */
 //==============================================================================
 class SidePanel    : public Component,
-                     private ComponentListener,
-                     private Button::Listener
+                     private ComponentListener
 {
 public:
     //==============================================================================
@@ -175,7 +174,6 @@ private:
     //==========================================================================
     void lookAndFeelChanged() override;
     void componentMovedOrResized (Component&, bool wasMoved, bool wasResized) override;
-    void buttonClicked (Button*) override;
 
     Rectangle<int> calculateBoundsInParent (Component&) const;
     void calculateAndRemoveShadowBounds (Rectangle<int>& bounds);

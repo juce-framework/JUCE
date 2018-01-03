@@ -37,23 +37,20 @@ struct EventHandler
     EventHandler() {}
     ~EventHandler() {}
 
-    /** Assigns a void std::function to this callback.
+    /** Assigns a lambda to this callback.
         Note that this will replace any existing function that was previously assigned.
     */
-    void operator= (std::function<void()> callbackToAttach)
+    void operator= (const std::function<void()>& callbackToAttach)
     {
-        callback = [=](OwnerClass&) { callbackToAttach(); };
+        callback = callbackToAttach;
     }
 
-    /** Assigns a std::function to this callback which takes a reference to the
-        source object that's making the callback.
-        In the example of this class being used inside, e.g. a Button, then the
-        callback parameter would be the Button that is doing the calling.
+    /** Assigns a lambda to this callback.
         Note that this will replace any existing function that was previously assigned.
     */
-    void operator= (std::function<void(OwnerClass&)> callbackToAttach)
+    void operator= (std::function<void()>&& callbackToAttach)
     {
-        callback = static_cast<std::function<void(OwnerClass&)>&&> (callbackToAttach);
+        callback = static_cast<std::function<void()>&&> (callbackToAttach);
     }
 
     /** Removes any existing function that was previously assigned to the callback. */
@@ -63,14 +60,14 @@ struct EventHandler
     }
 
     /** @internal */
-    void invoke (OwnerClass& owner)
+    void invoke()
     {
         if (callback != nullptr)
-            callback (owner);
+            callback();
     }
 
 private:
-    std::function<void(OwnerClass&)> callback;
+    std::function<void()> callback;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EventHandler)
 };

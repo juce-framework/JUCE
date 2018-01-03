@@ -27,8 +27,7 @@
 #include "../JuceDemoHeader.h"
 
 
-class RSAComponent  : public Component,
-                      private Button::Listener
+class RSAComponent  : public Component
 {
 public:
     RSAComponent()
@@ -44,7 +43,7 @@ public:
 
         addAndMakeVisible (generateRSAButton);
         generateRSAButton.setButtonText ("Generate RSA");
-        generateRSAButton.addListener (this);
+        generateRSAButton.onClick = [this]() { createRSAKey(); };
 
         addAndMakeVisible (rsaResultBox);
         rsaResultBox.setReadOnly (true);
@@ -53,7 +52,7 @@ public:
 
     void resized() override
     {
-        Rectangle<int> area (getLocalBounds());
+        auto area = getLocalBounds();
         rsaGroup.setBounds (area);
         area.removeFromTop (10);
         area.reduce (5, 5);
@@ -103,12 +102,6 @@ private:
     TextButton generateRSAButton;
     Label bitSizeLabel;
     TextEditor bitSize, rsaResultBox;
-
-    void buttonClicked (Button* buttonThatWasClicked) override
-    {
-        if (buttonThatWasClicked == &generateRSAButton)
-            createRSAKey();
-    }
 
     void lookAndFeelChanged() override
     {

@@ -37,7 +37,7 @@ SidePanel::SidePanel (StringRef title, int width, bool positionOnLeft,
 
     addAndMakeVisible (titleLabel);
 
-    dismissButton.addListener (this);
+    dismissButton.onClick = [this]() { showOrHide (false); };
     addAndMakeVisible (dismissButton);
 
     Desktop::getInstance().addGlobalMouseListener (this);
@@ -200,11 +200,6 @@ void SidePanel::componentMovedOrResized (Component& component, bool wasMoved, bo
 
     if (wasResized && (&component == parent))
         setBounds (calculateBoundsInParent (component));
-}
-
-void SidePanel::buttonClicked (Button*)
-{
-    showOrHide (false);
 }
 
 Rectangle<int> SidePanel::calculateBoundsInParent (Component& parentComp) const
