@@ -63,7 +63,7 @@ LookAndFeel::~LookAndFeel()
        it before you delete it, or call LookAndFeel::setDefaultLookAndFeel (nullptr)
        if you had set it up to be the default one. This assertion can also be avoided by
        declaring your LookAndFeel object before any of the Components that use it as
-       the LookAndFeel will be destroyed before the Components.
+       the Components will be destroyed before the LookAndFeel.
 
        Deleting a LookAndFeel is unlikely to cause a crash since most things will use a
        safe WeakReference to it, but it could cause some unexpected graphical behaviour,
