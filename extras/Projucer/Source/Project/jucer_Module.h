@@ -182,7 +182,6 @@ public:
 private:
     UndoManager* getUndoManager() const     { return project.getUndoManagerFor (state); }
 
-    static File getModuleFolderFromPathIfItExists (const String& path, const String& moduleID, const Project&);
     File findUserModuleFolder (const String& possiblePaths, const String& moduleID);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnabledModuleList)

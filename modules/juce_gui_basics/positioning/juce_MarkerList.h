@@ -147,6 +147,16 @@ public:
     void markersHaveChanged();
 
     //==============================================================================
+    /** A base class for objects that want to provide a MarkerList. */
+    struct MarkerListHolder
+    {
+        virtual ~MarkerListHolder() {}
+
+        /** Objects can implement this method to provide a MarkerList. */
+        virtual MarkerList* getMarkers (bool xAxis) = 0;
+    };
+
+    //==============================================================================
     /** Forms a wrapper around a ValueTree that can be used for storing a MarkerList. */
     class ValueTreeWrapper
     {

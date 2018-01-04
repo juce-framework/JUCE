@@ -196,10 +196,7 @@ public:
 
         newState.parseSubElements (xml, *drawable);
 
-        drawable->setContentArea (RelativeRectangle (RelativeCoordinate (viewboxXY.x),
-                                                     RelativeCoordinate (viewboxXY.x + newState.viewBoxW),
-                                                     RelativeCoordinate (viewboxXY.y),
-                                                     RelativeCoordinate (viewboxXY.y + newState.viewBoxH)));
+        drawable->setContentArea ({ viewboxXY.x, viewboxXY.y, newState.viewBoxW, newState.viewBoxH });
         drawable->resetBoundingBoxToContentArea();
 
         return drawable;

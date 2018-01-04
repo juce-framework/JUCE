@@ -104,9 +104,10 @@ FileChooserDialogBox::FileChooserDialogBox (const String& name,
     setResizable (true, true);
     setResizeLimits (300, 300, 1200, 1000);
 
-    content->okButton.addListener (this);
-    content->cancelButton.addListener (this);
-    content->newFolderButton.addListener (this);
+    content->okButton.onClick        = [this]() { okButtonPressed(); };
+    content->cancelButton.onClick    = [this]() { closeButtonPressed(); };
+    content->newFolderButton.onClick = [this]() { createNewFolder(); };
+
     content->chooserComponent.addListener (this);
 
     FileChooserDialogBox::selectionChanged();
@@ -154,13 +155,6 @@ int FileChooserDialogBox::getDefaultWidth() const
 }
 
 //==============================================================================
-void FileChooserDialogBox::buttonClicked (Button* button)
-{
-    if (button == &(content->okButton))         okButtonPressed();
-    if (button == &(content->cancelButton))     closeButtonPressed();
-    if (button == &(content->newFolderButton))  createNewFolder();
-}
-
 void FileChooserDialogBox::closeButtonPressed()
 {
     setVisible (false);

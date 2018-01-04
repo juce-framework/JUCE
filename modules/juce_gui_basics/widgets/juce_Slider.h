@@ -377,7 +377,8 @@ public:
                                 nearest interval if one has been set
         @param notification     can be one of the NotificationType values, to request
                                 a synchronous or asynchronous call to the valueChanged() method
-                                of any Slider::Listeners that are registered.
+                                of any Slider::Listeners that are registered. A notification will
+                                only be sent if the Slider's value has changed.
     */
     void setValue (double newValue, NotificationType notification = sendNotificationAsync);
 
@@ -460,7 +461,8 @@ public:
                                 interval if one has been set.
         @param notification     can be one of the NotificationType values, to request
                                 a synchronous or asynchronous call to the valueChanged() method
-                                of any Slider::Listeners that are registered.
+                                of any Slider::Listeners that are registered. A notification will
+                                only be sent if this value has changed.
         @param allowNudgingOfOtherValues  if false, this value will be restricted to being below the
                                         max value (in a two-value slider) or the mid value (in a three-value
                                         slider). If true, then if this value goes beyond those values,
@@ -500,7 +502,8 @@ public:
                                 interval if one has been set.
         @param notification     can be one of the NotificationType values, to request
                                 a synchronous or asynchronous call to the valueChanged() method
-                                of any Slider::Listeners that are registered.
+                                of any Slider::Listeners that are registered. A notification will
+                                only be sent if this value has changed.
         @param allowNudgingOfOtherValues  if false, this value will be restricted to being above the
                                         min value (in a two-value slider) or the mid value (in a three-value
                                         slider). If true, then if this value goes beyond those values,
@@ -523,7 +526,8 @@ public:
                                 nearest interval if one has been set.
         @param notification     can be one of the NotificationType values, to request
                                 a synchronous or asynchronous call to the valueChanged() method
-                                of any Slider::Listeners that are registered.
+                                of any Slider::Listeners that are registered. A notification will
+                                only be sent if one or more of the values has changed.
         @see setMaxValue, setMinValue, setValue
     */
     void setMinAndMaxValues (double newMinValue, double newMaxValue,
@@ -956,7 +960,5 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Slider)
 };
 
-/** This typedef is just for compatibility with old code - newer code should use the Slider::Listener class directly. */
-typedef Slider::Listener SliderListener;
 
 } // namespace juce

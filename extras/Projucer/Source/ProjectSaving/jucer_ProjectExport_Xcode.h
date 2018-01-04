@@ -202,8 +202,8 @@ public:
         {
             if (getProject().getProjectType().isAudioPlugin())
                 props.add (new BooleanPropertyComponent (getDuplicateResourcesFolderForAppExtensionValue(),
-                                                         "Don't add resources folder to app extension", "Enabled"),
-                           "Enable this to prevent the Projucer from creating a resources folder for AUv3 app extensions.");
+                                                         "Add resources folder to app extension", "Enabled"),
+                           "Enable this to create a resources folder for AUv3 app extensions.");
 
             static const char* deviceFamilies[] = { "iPhone", "iPad", "Universal", nullptr};
             static const char* deviceFamilyValues[] = { "1", "2", "1,2" };
@@ -222,6 +222,9 @@ public:
 
             props.add (new BooleanPropertyComponent (getSetting ("UIFileSharingEnabled"), "File Sharing Enabled", "Enabled"),
                        "Enable this to expose your app's files to iTunes.");
+
+            props.add (new BooleanPropertyComponent (getSetting ("UISupportsDocumentBrowser"), "Support Document Browser", "Enabled"),
+                       "Enable this to allow the user to access your app documents from a native file chooser.");
 
             props.add (new BooleanPropertyComponent (getSetting ("UIStatusBarHidden"), "Status Bar Hidden", "Enabled"),
                        "Enable this to disable the status bar in your app.");
@@ -1311,6 +1314,9 @@ public:
 
             if (owner.settings ["UIFileSharingEnabled"] && type != AudioUnitv3PlugIn)
                 addPlistDictionaryKeyBool (dict, "UIFileSharingEnabled", true);
+
+            if (owner.settings ["UISupportsDocumentBrowser"])
+                addPlistDictionaryKeyBool (dict, "UISupportsDocumentBrowser", true);
 
             if (owner.settings ["UIStatusBarHidden"] && type != AudioUnitv3PlugIn)
                 addPlistDictionaryKeyBool (dict, "UIStatusBarHidden", true);

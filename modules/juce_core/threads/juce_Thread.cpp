@@ -167,11 +167,21 @@ Thread* JUCE_CALLTYPE Thread::getCurrentThread()
     return getCurrentThreadHolder()->value.get();
 }
 
+Thread::ThreadID Thread::getThreadId() const noexcept
+{
+    return threadId.get();
+}
+
 //==============================================================================
 void Thread::signalThreadShouldExit()
 {
     shouldExit = 1;
     listeners.call ([] (Listener& l) { l.exitSignalSent(); });
+}
+
+bool Thread::threadShouldExit() const
+{
+    return shouldExit.get() != 0;
 }
 
 bool Thread::currentThreadShouldExit()

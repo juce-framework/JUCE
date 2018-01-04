@@ -88,9 +88,9 @@ struct OpenGLDemoClasses
 
         void disable (OpenGLContext& openGLContext)
         {
-            if (position != nullptr)       openGLContext.extensions.glDisableVertexAttribArray (position->attributeID);
-            if (normal != nullptr)         openGLContext.extensions.glDisableVertexAttribArray (normal->attributeID);
-            if (sourceColour != nullptr)   openGLContext.extensions.glDisableVertexAttribArray (sourceColour->attributeID);
+            if (position != nullptr)        openGLContext.extensions.glDisableVertexAttribArray (position->attributeID);
+            if (normal != nullptr)          openGLContext.extensions.glDisableVertexAttribArray (normal->attributeID);
+            if (sourceColour != nullptr)    openGLContext.extensions.glDisableVertexAttribArray (sourceColour->attributeID);
             if (textureCoordIn != nullptr)  openGLContext.extensions.glDisableVertexAttribArray (textureCoordIn->attributeID);
         }
 
@@ -144,20 +144,18 @@ struct OpenGLDemoClasses
         Shape (OpenGLContext& openGLContext)
         {
             if (shapeFile.load (BinaryData::teapot_obj).wasOk())
-                for (int i = 0; i < shapeFile.shapes.size(); ++i)
-                    vertexBuffers.add (new VertexBuffer (openGLContext, *shapeFile.shapes.getUnchecked(i)));
-
+                for (auto* s : shapeFile.shapes)
+                    vertexBuffers.add (new VertexBuffer (openGLContext, *s));
         }
 
         void draw (OpenGLContext& openGLContext, Attributes& attributes)
         {
-            for (int i = 0; i < vertexBuffers.size(); ++i)
+            for (auto* vertexBuffer : vertexBuffers)
             {
-                VertexBuffer& vertexBuffer = *vertexBuffers.getUnchecked (i);
-                vertexBuffer.bind();
+                vertexBuffer->bind();
 
                 attributes.enable (openGLContext);
-                glDrawElements (GL_TRIANGLES, vertexBuffer.numIndices, GL_UNSIGNED_INT, 0);
+                glDrawElements (GL_TRIANGLES, vertexBuffer->numIndices, GL_UNSIGNED_INT, 0);
                 attributes.disable (openGLContext);
             }
         }
@@ -331,9 +329,7 @@ struct OpenGLDemoClasses
     */
     class DemoControlsOverlay  : public Component,
                                  private CodeDocument::Listener,
-                                 private ComboBox::Listener,
                                  private Slider::Listener,
-                                 private Button::Listener,
                                  private Timer
     {
     public:
@@ -364,7 +360,7 @@ struct OpenGLDemoClasses
             speedLabel.attachToComponent (&speedSlider, true);
 
             addAndMakeVisible (showBackgroundToggle);
-            showBackgroundToggle.addListener (this);
+            showBackgroundToggle.onClick = [this]() { demo.doBackgroundDrawing = showBackgroundToggle.getToggleState(); };
 
             addAndMakeVisible (tabbedComp);
             tabbedComp.setTabBarDepth (25);
@@ -381,13 +377,13 @@ struct OpenGLDemoClasses
             textures.add (new DynamicTexture());
 
             addAndMakeVisible (textureBox);
-            textureBox.addListener (this);
+            textureBox.onChange = [this]() { selectTexture (textureBox.getSelectedId()); };
             updateTexturesList();
 
             addAndMakeVisible (presetBox);
-            presetBox.addListener (this);
+            presetBox.onChange = [this]() { selectPreset (presetBox.getSelectedItemIndex()); };
 
-            Array<ShaderPreset> presets (getPresets());
+            auto presets = getPresets();
             StringArray presetNames;
 
             for (int i = 0; i < presets.size(); ++i)
@@ -415,11 +411,11 @@ struct OpenGLDemoClasses
 
         void resized() override
         {
-            Rectangle<int> area (getLocalBounds().reduced (4));
+            auto area = getLocalBounds().reduced (4);
 
-            Rectangle<int> top (area.removeFromTop (75));
+            auto top = area.removeFromTop (75);
 
-            Rectangle<int> sliders (top.removeFromRight (area.getWidth() / 2));
+            auto sliders = top.removeFromRight (area.getWidth() / 2);
             showBackgroundToggle.setBounds (sliders.removeFromBottom (25));
             speedSlider.setBounds (sliders.removeFromBottom (25));
             sizeSlider.setBounds (sliders.removeFromBottom (25));
@@ -427,9 +423,9 @@ struct OpenGLDemoClasses
             top.removeFromRight (70);
             statusLabel.setBounds (top);
 
-            Rectangle<int> shaderArea (area.removeFromBottom (area.getHeight() / 2));
+            auto shaderArea = area.removeFromBottom (area.getHeight() / 2);
 
-            Rectangle<int> presets (shaderArea.removeFromTop (25));
+            auto presets = shaderArea.removeFromTop (25);
             presets.removeFromLeft (100);
             presetBox.setBounds (presets.removeFromLeft (150));
             presets.removeFromLeft (100);
@@ -523,11 +519,6 @@ struct OpenGLDemoClasses
             demo.rotationSpeed = (float) speedSlider.getValue();
         }
 
-        void buttonClicked (Button*) override
-        {
-            demo.doBackgroundDrawing = showBackgroundToggle.getToggleState();
-        }
-
         enum { shaderLinkDelay = 500 };
 
         void codeDocumentTextInserted (const String& /*newText*/, int /*insertIndex*/) override
@@ -545,14 +536,6 @@ struct OpenGLDemoClasses
             stopTimer();
             demo.setShaderProgram (vertexDocument.getAllContent(),
                                    fragmentDocument.getAllContent());
-        }
-
-        void comboBoxChanged (ComboBox* box) override
-        {
-            if (box == &presetBox)
-                selectPreset (presetBox.getSelectedItemIndex());
-            else if (box == &textureBox)
-                selectTexture (textureBox.getSelectedId());
         }
 
         void lookAndFeelChanged() override
@@ -597,7 +580,7 @@ struct OpenGLDemoClasses
     public:
         OpenGLDemo()
         {
-            if (MainAppWindow* mw = MainAppWindow::getMainAppWindow())
+            if (auto* mw = MainAppWindow::getMainAppWindow())
                 mw->setRenderingEngine (0);
 
             setOpaque (true);

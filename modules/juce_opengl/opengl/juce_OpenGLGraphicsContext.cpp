@@ -510,9 +510,9 @@ struct ShaderPrograms  : public ReferenceCountedObject
 
         void setMatrix (Point<float> p1, Point<float> p2, Point<float> p3)
         {
-            auto t = AffineTransform::fromTargetPoints (p1.x, p1.y,  0.0f, 0.0f,
-                                                        p2.x, p2.y,  1.0f, 0.0f,
-                                                        p3.x, p3.y,  0.0f, 1.0f);
+            auto t = AffineTransform::fromTargetPoints (p1, Point<float>(),
+                                                        p2, Point<float> (1.0f, 0.0f),
+                                                        p3, Point<float> (0.0f, 1.0f));
             const GLfloat m[] = { t.mat00, t.mat01, t.mat02, t.mat10, t.mat11, t.mat12 };
             matrix.set (m, 6);
         }

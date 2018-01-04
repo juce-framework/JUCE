@@ -623,13 +623,19 @@ void ComboBox::setScrollWheelEnabled (bool enabled) noexcept
 }
 
 //==============================================================================
-void ComboBox::addListener (ComboBoxListener* listener)       { listeners.add (listener); }
-void ComboBox::removeListener (ComboBoxListener* listener)    { listeners.remove (listener); }
+void ComboBox::addListener    (ComboBox::Listener* l)    { listeners.add (l); }
+void ComboBox::removeListener (ComboBox::Listener* l)    { listeners.remove (l); }
 
 void ComboBox::handleAsyncUpdate()
 {
     Component::BailOutChecker checker (this);
     listeners.callChecked (checker, [this] (Listener& l) { l.comboBoxChanged (this); });
+
+    if (checker.shouldBailOut())
+        return;
+
+    if (onChange != nullptr)
+        onChange();
 }
 
 void ComboBox::sendChange (const NotificationType notification)

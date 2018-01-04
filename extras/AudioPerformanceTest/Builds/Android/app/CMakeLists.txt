@@ -708,6 +708,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_graphics/geometry/juce_EdgeTable.cpp"
     "../../../../../modules/juce_graphics/geometry/juce_EdgeTable.h"
     "../../../../../modules/juce_graphics/geometry/juce_Line.h"
+    "../../../../../modules/juce_graphics/geometry/juce_Parallelogram.h"
     "../../../../../modules/juce_graphics/geometry/juce_Path.cpp"
     "../../../../../modules/juce_graphics/geometry/juce_Path.h"
     "../../../../../modules/juce_graphics/geometry/juce_PathIterator.cpp"
@@ -1865,6 +1866,7 @@ set_source_files_properties("../../../../../modules/juce_graphics/geometry/juce_
 set_source_files_properties("../../../../../modules/juce_graphics/geometry/juce_EdgeTable.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/geometry/juce_EdgeTable.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/geometry/juce_Line.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_graphics/geometry/juce_Parallelogram.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/geometry/juce_Path.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/geometry/juce_Path.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/geometry/juce_PathIterator.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)

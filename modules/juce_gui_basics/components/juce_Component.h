@@ -485,6 +485,17 @@ public:
     void setBoundsRelative (float proportionalX, float proportionalY,
                             float proportionalWidth, float proportionalHeight);
 
+    /** Changes the component's position and size in terms of fractions of its parent's size.
+
+        The values are factors of the parent's size, so for example
+        setBoundsRelative ({ 0.2f, 0.2f, 0.5f, 0.5f }) would give it half the
+        width and height of the parent, with its top-left position 20% of
+        the way across and down the parent.
+
+        @see setBounds
+    */
+    void setBoundsRelative (Rectangle<float> proportionalArea);
+
     /** Changes the component's position and size based on the amount of space to leave around it.
 
         This will position the component within its parent, leaving the specified number of
@@ -508,7 +519,7 @@ public:
 
         @see setBounds
     */
-    void setBoundsToFit (int x, int y, int width, int height,
+    void setBoundsToFit (Rectangle<int> targetArea,
                          Justification justification,
                          bool onlyReduceInSize);
 
@@ -689,6 +700,11 @@ public:
 
         This is the same as calling setVisible (true) on the child and then addChildComponent().
         See addChildComponent() for more details.
+
+        @param child    the new component to add. If the component passed-in is already
+                        the child of another component, it'll first be removed from it current parent.
+        @param zOrder   The index in the child-list at which this component should be inserted.
+                        A value of -1 will insert it in front of the others, 0 is the back.
     */
     void addAndMakeVisible (Component* child, int zOrder = -1);
 
@@ -696,6 +712,11 @@ public:
 
         This is the same as calling setVisible (true) on the child and then addChildComponent().
         See addChildComponent() for more details.
+
+        @param child    the new component to add. If the component passed-in is already
+                        the child of another component, it'll first be removed from it current parent.
+        @param zOrder   The index in the child-list at which this component should be inserted.
+                        A value of -1 will insert it in front of the others, 0 is the back.
     */
     void addAndMakeVisible (Component& child, int zOrder = -1);
 
@@ -1749,6 +1770,10 @@ public:
         for which this method will return true is the one that was originally
         clicked on.
 
+        Also note that on a touch-screen device, this will only return true when a finger
+        is actually down - as soon as all touch is released, isMouseOver will always
+        return false.
+
         If includeChildren is true, then this will also return true if the mouse is over
         any of the component's children (recursively) as well as the component itself.
 
@@ -2046,7 +2071,7 @@ public:
 
         @see setColour, isColourSpecified, colourChanged, LookAndFeel::findColour, LookAndFeel::setColour
     */
-    Colour findColour (int colourId, bool inheritFromParent = false) const;
+    Colour findColour (int colourID, bool inheritFromParent = false) const;
 
     /** Registers a colour to be used for a particular purpose.
 
@@ -2058,17 +2083,17 @@ public:
 
         @see findColour, isColourSpecified, colourChanged, LookAndFeel::findColour, LookAndFeel::setColour
     */
-    void setColour (int colourId, Colour newColour);
+    void setColour (int colourID, Colour newColour);
 
     /** If a colour has been set with setColour(), this will remove it.
         This allows you to make a colour revert to its default state.
     */
-    void removeColour (int colourId);
+    void removeColour (int colourID);
 
     /** Returns true if the specified colour ID has been explicitly set for this
         component using the setColour() method.
     */
-    bool isColourSpecified (int colourId) const;
+    bool isColourSpecified (int colourID) const;
 
     /** This looks for any colours that have been specified for this component,
         and copies them to the specified target component.
@@ -2079,14 +2104,6 @@ public:
         @see setColour, findColour
     */
     virtual void colourChanged();
-
-    //==============================================================================
-    /** Components can implement this method to provide a MarkerList.
-        The default implementation of this method returns nullptr, but you can override
-        it to return a pointer to the component's marker list. If xAxis is true, it should
-        return the X marker list; if false, it should return the Y markers.
-    */
-    virtual MarkerList* getMarkers (bool xAxis);
 
     //==============================================================================
     /** Returns the underlying native window handle for this component.
@@ -2193,8 +2210,7 @@ public:
 
         /** Attempts to set the component's position to the given rectangle.
             Unlike simply calling Component::setBounds(), this may involve the positioner
-            being smart enough to adjust itself to fit the new bounds, e.g. a RelativeRectangle's
-            positioner may try to reverse the expressions used to make them fit these new coordinates.
+            being smart enough to adjust itself to fit the new bounds.
         */
         virtual void applyNewBounds (const Rectangle<int>& newBounds) = 0;
 
@@ -2239,16 +2255,6 @@ public:
         @see setViewportIgnoreDragFlag
     */
     bool getViewportIgnoreDragFlag() const noexcept                     { return flags.viewportIgnoreDragFlag; }
-
-    //==============================================================================
-    // These methods are deprecated - use localPointToGlobal, getLocalPoint, getLocalPoint, etc instead.
-    JUCE_DEPRECATED (Point<int> relativePositionToGlobal (Point<int>) const);
-    JUCE_DEPRECATED (Point<int> globalPositionToRelative (Point<int>) const);
-    JUCE_DEPRECATED (Point<int> relativePositionToOtherComponent (const Component*, Point<int>) const);
-
-    // RelativeCoordinates are eventually going to be deprecated
-    JUCE_DEPRECATED (void setBounds (const RelativeRectangle&));
-    JUCE_DEPRECATED (void setBounds (const String&));
 
 private:
     //==============================================================================
@@ -2344,8 +2350,8 @@ private:
     void sendMovedResizedMessagesIfPending();
     void repaintParent();
     void sendFakeMouseMove() const;
-    void takeKeyboardFocus (const FocusChangeType);
-    void grabFocusInternal (const FocusChangeType, bool canTryParent);
+    void takeKeyboardFocus (FocusChangeType);
+    void grabFocusInternal (FocusChangeType, bool canTryParent);
     static void giveAwayFocus (bool sendFocusLossEvent);
     void sendEnablementChangeMessage();
     void sendVisibilityChangeMessage();

@@ -235,11 +235,13 @@ private:
 
     void showGlobalPathsMenu()
     {
+        const bool areAnyModulesSelected = (list.getNumSelectedRows() > 0);
+
         PopupMenu m;
         m.addItem (1, "Set all modules to use global paths");
         m.addItem (2, "Set all modules to not use global paths");
-        m.addItem (3, "Set selected modules to use global paths");
-        m.addItem (4, "Set selected modules to not use global paths");
+        m.addItem (3, "Set selected modules to use global paths", areAnyModulesSelected);
+        m.addItem (4, "Set selected modules to not use global paths", areAnyModulesSelected);
 
         auto res = m.showAt (&globalPathsButton);
 

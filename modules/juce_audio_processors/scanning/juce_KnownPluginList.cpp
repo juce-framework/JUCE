@@ -272,8 +272,8 @@ struct PluginSorter
 
         switch (method)
         {
-            case KnownPluginList::sortByCategory:           diff = first->category.compareNatural (second->category, true); break;
-            case KnownPluginList::sortByManufacturer:       diff = first->manufacturerName.compareNatural (second->manufacturerName, true); break;
+            case KnownPluginList::sortByCategory:           diff = first->category.compareNatural (second->category, false); break;
+            case KnownPluginList::sortByManufacturer:       diff = first->manufacturerName.compareNatural (second->manufacturerName, false); break;
             case KnownPluginList::sortByFormat:             diff = first->pluginFormatName.compare (second->pluginFormatName); break;
             case KnownPluginList::sortByFileSystemLocation: diff = lastPathPart (first->fileOrIdentifier).compare (lastPathPart (second->fileOrIdentifier)); break;
             case KnownPluginList::sortByInfoUpdateTime:     diff = compare (first->lastInfoUpdateTime, second->lastInfoUpdateTime); break;
@@ -281,7 +281,7 @@ struct PluginSorter
         }
 
         if (diff == 0)
-            diff = first->name.compareNatural (second->name, true);
+            diff = first->name.compareNatural (second->name, false);
 
         return diff * direction < 0;
     }

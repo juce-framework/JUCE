@@ -153,7 +153,7 @@ public:
 
         @see signalThreadShouldExit, currentThreadShouldExit
     */
-    bool threadShouldExit() const                { return shouldExit.get() != 0; }
+    bool threadShouldExit() const;
 
     /** Checks whether the current thread has been told to stop running.
         On the message thread, this will always return false, otherwise
@@ -309,7 +309,7 @@ public:
         thread's not actually running.
         @see getCurrentThreadId
     */
-    ThreadID getThreadId() const noexcept                           { return threadId.get(); }
+    ThreadID getThreadId() const noexcept;
 
     /** Returns the name of the thread.
         This is the name that gets set in the constructor.

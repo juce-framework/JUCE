@@ -247,21 +247,36 @@ public:
     {
         DialogWindow::LaunchOptions o;
 
-        auto totalInChannels  = processor->getMainBusNumInputChannels();
-        auto totalOutChannels = processor->getMainBusNumOutputChannels();
+        int minNumInputs  = std::numeric_limits<int>::max(), maxNumInputs  = 0,
+            minNumOutputs = std::numeric_limits<int>::max(), maxNumOutputs = 0;
+
+        auto updateMinAndMax = [] (int newValue, int& minValue, int& maxValue)
+        {
+            minValue = jmin (minValue, newValue);
+            maxValue = jmax (maxValue, newValue);
+        };
 
         if (channelConfiguration.size() > 0)
         {
             auto defaultConfig = channelConfiguration.getReference (0);
-            totalInChannels  = defaultConfig.numIns;
-            totalOutChannels = defaultConfig.numOuts;
+            updateMinAndMax ((int) defaultConfig.numIns,  minNumInputs,  maxNumInputs);
+            updateMinAndMax ((int) defaultConfig.numOuts, minNumOutputs, maxNumOutputs);
         }
 
+        if (auto* bus = processor->getBus (true, 0))
+            updateMinAndMax (bus->getDefaultLayout().size(), minNumInputs, maxNumInputs);
+
+        if (auto* bus = processor->getBus (false, 0))
+            updateMinAndMax (bus->getDefaultLayout().size(), minNumOutputs, maxNumOutputs);
+
+        minNumInputs  = jmin (minNumInputs,  maxNumInputs);
+        minNumOutputs = jmin (minNumOutputs, maxNumOutputs);
+
         o.content.setOwned (new SettingsComponent (*this, deviceManager,
-                                                          totalInChannels,
-                                                          totalInChannels,
-                                                          totalOutChannels,
-                                                          totalOutChannels));
+                                                          minNumInputs,
+                                                          maxNumInputs,
+                                                          minNumOutputs,
+                                                          maxNumOutputs));
         o.content->setSize (500, 550);
 
         o.dialogTitle                   = TRANS("Audio/MIDI Settings");

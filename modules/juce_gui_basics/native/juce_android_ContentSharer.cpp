@@ -158,7 +158,8 @@ public:
         {
             --numOpenedHandles;
 
-            if (fileWasRead && numOpenedHandles == 0)
+            // numOpenedHandles may get negative if we don't receive open handle event.
+            if (fileWasRead && numOpenedHandles <= 0)
             {
                 MessageManager::callAsync ([this]
                 {
@@ -261,7 +262,7 @@ private:
             if (threadShouldExit())
                 return;
 
-            auto filepath = f.toString (true).fromFirstOccurrenceOf ("file://", false, false);
+            auto filepath = URL::removeEscapeChars (f.toString (true).fromFirstOccurrenceOf ("file://", false, false));
 
             filePaths.add (filepath);
 
@@ -758,10 +759,13 @@ private:
             return nullptr;
         }
 
+        jlong startOffset = 0;
+        jlong unknownLength = -1;
+
         assetFileDescriptors.add (GlobalRef (LocalRef<jobject> (env->NewObject (AssetFileDescriptor,
                                                                                 AssetFileDescriptor.constructor,
                                                                                 parcelFileDescriptor.get(),
-                                                                                0, 0))));
+                                                                                startOffset, unknownLength))));
 
         return assetFileDescriptors.getReference (assetFileDescriptors.size() - 1).get();
     }

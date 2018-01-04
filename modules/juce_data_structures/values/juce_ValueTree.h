@@ -532,18 +532,17 @@ public:
         }
     }
 
-   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
-    /** An invalid ValueTree that can be used if you need to return one as an error condition, etc.
-        This invalid object is equivalent to ValueTree created with its default constructor, but
-        you should always prefer to avoid it and use ValueTree() or {} instead.
-    */
-    static const ValueTree invalid;
-   #endif
-
     /** Returns the total number of references to the shared underlying data structure that this
         ValueTree is using.
     */
     int getReferenceCount() const noexcept;
+
+   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
+    /** An invalid ValueTree that can be used if you need to return one as an error condition, etc.
+        @deprecated If you need an empty ValueTree object, just use ValueTree() or {}.
+    */
+    static const ValueTree invalid;
+   #endif
 
 private:
     //==============================================================================

@@ -504,9 +504,7 @@ struct LookAndFeelDemoComponent  : public Component
 };
 
 //==============================================================================
-class LookAndFeelDemo   : public Component,
-                          private ComboBox::Listener,
-                          private Button::Listener
+class LookAndFeelDemo   : public Component
 {
 public:
     LookAndFeelDemo()
@@ -537,12 +535,12 @@ public:
         addLookAndFeel (slaf, "Square Look And Feel");
         setupSquareLookAndFeelColours (*slaf);
 
-        lafBox.addListener (this);
+        lafBox.onChange = [this]() { setAllLookAndFeels (lookAndFeels[lafBox.getSelectedItemIndex()]); };
         lafBox.setSelectedItemIndex (3);
 
         addAndMakeVisible (randomButton);
         randomButton.setButtonText ("Assign Randomly");
-        randomButton.addListener (this);
+        randomButton.onClick = [this]() { lafBox.setSelectedItemIndex (Random().nextInt (lafBox.getNumItems())); };
     }
 
     void paint (Graphics& g) override
@@ -611,18 +609,6 @@ private:
     {
         for (auto* child : demoComp.getChildren())
             child->setLookAndFeel (laf);
-    }
-
-    void comboBoxChanged (ComboBox* comboBoxThatHasChanged) override
-    {
-        if (comboBoxThatHasChanged == &lafBox)
-            setAllLookAndFeels (lookAndFeels[lafBox.getSelectedItemIndex()]);
-    }
-
-    void buttonClicked (Button* b) override
-    {
-        if (b == &randomButton)
-            lafBox.setSelectedItemIndex (Random::getSystemRandom().nextInt (lafBox.getNumItems()));
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LookAndFeelDemo)

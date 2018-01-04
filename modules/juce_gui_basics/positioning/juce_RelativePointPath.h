@@ -80,7 +80,6 @@ public:
     public:
         ElementBase (ElementType type);
         virtual ~ElementBase() {}
-        virtual ValueTree createTree() const = 0;
         virtual void addToPath (Path& path, Expression::Scope*) const = 0;
         virtual RelativePoint* getControlPoints (int& numPoints) = 0;
         virtual ElementBase* clone() const = 0;
@@ -97,7 +96,6 @@ public:
     {
     public:
         StartSubPath (const RelativePoint& pos);
-        ValueTree createTree() const;
         void addToPath (Path& path, Expression::Scope*) const;
         RelativePoint* getControlPoints (int& numPoints);
         ElementBase* clone() const;
@@ -113,7 +111,6 @@ public:
     {
     public:
         CloseSubPath();
-        ValueTree createTree() const;
         void addToPath (Path& path, Expression::Scope*) const;
         RelativePoint* getControlPoints (int& numPoints);
         ElementBase* clone() const;
@@ -127,7 +124,6 @@ public:
     {
     public:
         LineTo (const RelativePoint& endPoint);
-        ValueTree createTree() const;
         void addToPath (Path& path, Expression::Scope*) const;
         RelativePoint* getControlPoints (int& numPoints);
         ElementBase* clone() const;

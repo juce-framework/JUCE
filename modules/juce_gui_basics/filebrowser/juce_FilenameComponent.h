@@ -64,9 +64,7 @@ public:
 class JUCE_API  FilenameComponent  : public Component,
                                      public SettableTooltipClient,
                                      public FileDragAndDropTarget,
-                                     private AsyncUpdater,
-                                     private Button::Listener,
-                                     private ComboBox::Listener
+                                     private AsyncUpdater
 {
 public:
     //==============================================================================
@@ -112,7 +110,8 @@ public:
         @param newFile                the new filename to use
         @param addToRecentlyUsedList  if true, the filename will also be added to the
                                       drop-down list of recent files.
-        @param notification           whether to send a notification of the change to listeners
+        @param notification           whether to send a notification of the change to listeners.
+                                      A notification will only be sent if the filename has changed.
     */
     void setCurrentFile (File newFile,
                          bool addToRecentlyUsedList,
@@ -217,14 +216,13 @@ private:
     ComboBox filenameBox;
     String lastFilename;
     ScopedPointer<Button> browseButton;
-    int maxRecentFiles;
-    bool isDir, isSaving, isFileDragOver;
+    int maxRecentFiles = 30;
+    bool isDir, isSaving, isFileDragOver = false;
     String wildcard, enforcedSuffix, browseButtonText;
     ListenerList <FilenameComponentListener> listeners;
     File defaultBrowseFile;
 
-    void comboBoxChanged (ComboBox*) override;
-    void buttonClicked (Button*) override;
+    void showChooser();
     void handleAsyncUpdate() override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilenameComponent)

@@ -31,13 +31,13 @@ class TextPropertyComponent::LabelComp  : public Label,
                                           public FileDragAndDropTarget
 {
 public:
-    LabelComp (TextPropertyComponent& tpc, const int charLimit, const bool multiline)
-        : Label (String(), String()),
+    LabelComp (TextPropertyComponent& tpc, int charLimit, bool multiline, bool editable)
+        : Label ({}, {}),
           owner (tpc),
           maxChars (charLimit),
           isMultiline (multiline)
     {
-        setEditable (true, true, false);
+        setEditable (editable, editable);
 
         updateColours();
     }
@@ -55,7 +55,7 @@ public:
 
     TextEditor* createEditorComponent() override
     {
-        TextEditor* const ed = Label::createEditorComponent();
+        auto* ed = Label::createEditorComponent();
         ed->setInputRestrictions (maxChars);
 
         if (isMultiline)
@@ -94,20 +94,22 @@ private:
 
 //==============================================================================
 TextPropertyComponent::TextPropertyComponent (const String& name,
-                                              const int maxNumChars,
-                                              const bool isMultiLine)
+                                              int maxNumChars,
+                                              bool isMultiLine,
+                                              bool isEditable)
     : PropertyComponent (name)
 {
-    createEditor (maxNumChars, isMultiLine);
+    createEditor (maxNumChars, isMultiLine, isEditable);
 }
 
 TextPropertyComponent::TextPropertyComponent (const Value& valueToControl,
                                               const String& name,
-                                              const int maxNumChars,
-                                              const bool isMultiLine)
+                                              int maxNumChars,
+                                              bool isMultiLine,
+                                              bool isEditable)
     : PropertyComponent (name)
 {
-    createEditor (maxNumChars, isMultiLine);
+    createEditor (maxNumChars, isMultiLine, isEditable);
 
     textEditor->getTextValue().referTo (valueToControl);
 }
@@ -131,9 +133,9 @@ Value& TextPropertyComponent::getValue() const
     return textEditor->getTextValue();
 }
 
-void TextPropertyComponent::createEditor (const int maxNumChars, const bool isMultiLine)
+void TextPropertyComponent::createEditor (int maxNumChars, bool isMultiLine, bool isEditable)
 {
-    addAndMakeVisible (textEditor = new LabelComp (*this, maxNumChars, isMultiLine));
+    addAndMakeVisible (textEditor = new LabelComp (*this, maxNumChars, isMultiLine, isEditable));
 
     if (isMultiLine)
     {
@@ -149,7 +151,7 @@ void TextPropertyComponent::refresh()
 
 void TextPropertyComponent::textWasEdited()
 {
-    const String newText (textEditor->getText());
+    auto newText = textEditor->getText();
 
     if (getText() != newText)
         setText (newText);
@@ -157,15 +159,8 @@ void TextPropertyComponent::textWasEdited()
     callListeners();
 }
 
-void TextPropertyComponent::addListener (TextPropertyComponentListener* const listener)
-{
-    listenerList.add (listener);
-}
-
-void TextPropertyComponent::removeListener (TextPropertyComponentListener* const listener)
-{
-    listenerList.remove (listener);
-}
+void TextPropertyComponent::addListener    (TextPropertyComponent::Listener* l)  { listenerList.add (l); }
+void TextPropertyComponent::removeListener (TextPropertyComponent::Listener* l)  { listenerList.remove (l); }
 
 void TextPropertyComponent::callListeners()
 {
@@ -183,6 +178,12 @@ void TextPropertyComponent::setInterestedInFileDrag (bool isInterested)
 {
     if (textEditor != nullptr)
         textEditor->setInterestedInFileDrag (isInterested);
+}
+
+void TextPropertyComponent::setEditable (bool isEditable)
+{
+    if (textEditor != nullptr)
+        textEditor->setEditable (isEditable, isEditable);
 }
 
 } // namespace juce

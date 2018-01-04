@@ -159,7 +159,7 @@ PluginListComponent::PluginListComponent (AudioPluginFormatManager& manager, Kno
     addAndMakeVisible (table);
 
     addAndMakeVisible (optionsButton);
-    optionsButton.addListener (this);
+    optionsButton.onClick = [this]() { showOptionsMenu(); };
     optionsButton.setTriggeredOnMouseDown (true);
 
     setSize (400, 600);
@@ -290,28 +290,25 @@ void PluginListComponent::optionsMenuCallback (int result)
     }
 }
 
-void PluginListComponent::buttonClicked (Button* button)
+void PluginListComponent::showOptionsMenu()
 {
-    if (button == &optionsButton)
+    PopupMenu menu;
+    menu.addItem (1, TRANS("Clear list"));
+    menu.addItem (2, TRANS("Remove selected plug-in from list"), table.getNumSelectedRows() > 0);
+    menu.addItem (3, TRANS("Show folder containing selected plug-in"), canShowSelectedFolder());
+    menu.addItem (4, TRANS("Remove any plug-ins whose files no longer exist"));
+    menu.addSeparator();
+
+    for (int i = 0; i < formatManager.getNumFormats(); ++i)
     {
-        PopupMenu menu;
-        menu.addItem (1, TRANS("Clear list"));
-        menu.addItem (2, TRANS("Remove selected plug-in from list"), table.getNumSelectedRows() > 0);
-        menu.addItem (3, TRANS("Show folder containing selected plug-in"), canShowSelectedFolder());
-        menu.addItem (4, TRANS("Remove any plug-ins whose files no longer exist"));
-        menu.addSeparator();
+        auto* format = formatManager.getFormat (i);
 
-        for (int i = 0; i < formatManager.getNumFormats(); ++i)
-        {
-            AudioPluginFormat* const format = formatManager.getFormat (i);
-
-            if (format->canScanForPlugins())
-                menu.addItem (10 + i, "Scan for new or updated " + format->getName() + " plug-ins");
-        }
-
-        menu.showMenuAsync (PopupMenu::Options().withTargetComponent (&optionsButton),
-                            ModalCallbackFunction::forComponent (optionsMenuStaticCallback, this));
+        if (format->canScanForPlugins())
+            menu.addItem (10 + i, "Scan for new or updated " + format->getName() + " plug-ins");
     }
+
+    menu.showMenuAsync (PopupMenu::Options().withTargetComponent (&optionsButton),
+                        ModalCallbackFunction::forComponent (optionsMenuStaticCallback, this));
 }
 
 bool PluginListComponent::isInterestedInFileDrag (const StringArray& /*files*/)

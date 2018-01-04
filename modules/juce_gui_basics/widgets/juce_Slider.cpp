@@ -29,7 +29,6 @@ namespace juce
 
 class Slider::Pimpl   : public AsyncUpdater, // this needs to be public otherwise it will cause an
                                              // error when JUCE_DLL_BUILD=1
-                        private Button::Listener,
                         private Label::Listener,
                         private Value::Listener
 {
@@ -350,11 +349,10 @@ public:
         JUCE_DECLARE_NON_COPYABLE (DragInProgress)
     };
 
-    void buttonClicked (Button* button) override
+    void incrementOrDecrement (double delta)
     {
         if (style == IncDecButtons)
         {
-            auto delta = (button == incButton) ? interval : -interval;
             auto newValue = owner.snapValue (getValue() + delta, notDragging);
 
             if (currentDrag != nullptr)
@@ -569,10 +567,10 @@ public:
         if (style == IncDecButtons)
         {
             owner.addAndMakeVisible (incButton = lf.createSliderButton (owner, true));
-            incButton->addListener (this);
+            incButton->onClick = [this]() { incrementOrDecrement (interval); };
 
             owner.addAndMakeVisible (decButton = lf.createSliderButton (owner, false));
-            decButton->addListener (this);
+            decButton->onClick = [this]() { incrementOrDecrement (-interval); };
 
             if (incDecButtonMode != incDecButtonsNotDraggable)
             {

@@ -187,8 +187,7 @@ private:
 };
 
 //==============================================================================
-class WindowsDemo   : public Component,
-                      private Button::Listener
+class WindowsDemo   : public Component
 {
 public:
     enum Windows
@@ -205,11 +204,11 @@ public:
 
         showWindowsButton.setButtonText ("Show Windows");
         addAndMakeVisible (showWindowsButton);
-        showWindowsButton.addListener (this);
+        showWindowsButton.onClick = [this]() { showAllWindows(); };
 
         closeWindowsButton.setButtonText ("Close Windows");
         addAndMakeVisible (closeWindowsButton);
-        closeWindowsButton.addListener (this);
+        closeWindowsButton.onClick = [this]() { closeAllWindows(); };
     }
 
     ~WindowsDemo()
@@ -224,9 +223,6 @@ public:
         }
 
         closeAllWindows();
-
-        closeWindowsButton.removeListener (this);
-        showWindowsButton.removeListener (this);
     }
 
     void paint (Graphics& g) override
@@ -339,14 +335,6 @@ private:
         balls->setBounds (result);
 
         balls->setVisible (true);
-    }
-
-    void buttonClicked (Button* button) override
-    {
-        if (button == &showWindowsButton)
-            showAllWindows();
-        else if (button == &closeWindowsButton)
-            closeAllWindows();
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowsDemo)

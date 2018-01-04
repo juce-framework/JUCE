@@ -143,7 +143,7 @@ public:
     /** Scalar multiplication */
     inline Matrix& operator*= (ElementType scalar) noexcept
     {
-        std::for_each (begin(), end(), [scalar] (ElementType& x) { x*= scalar; });
+        std::for_each (begin(), end(), [scalar] (ElementType& x) { x *= scalar; });
         return *this;
     }
 

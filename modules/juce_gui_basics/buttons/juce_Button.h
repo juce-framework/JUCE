@@ -185,6 +185,13 @@ public:
     void removeListener (Listener* listener);
 
     //==============================================================================
+    /** You can assign a lambda to this callback object to have it called when the button is clicked. */
+    std::function<void()> onClick;
+
+    /** You can assign a lambda to this callback object to have it called when the button's state changes. */
+    std::function<void()> onStateChange;
+
+    //==============================================================================
     /** Causes the button to act as if it's been clicked.
 
         This will asynchronously make the button draw itself going down and up, and
@@ -394,13 +401,10 @@ protected:
     //==============================================================================
     /** This method is called when the button has been clicked.
 
-        Subclasses can override this to perform whatever they actions they need
-        to do.
-
-        Alternatively, a Button::Listener can be added to the button, and these listeners
-        will be called when the click occurs.
-
-        @see triggerClick
+        Subclasses can override this to perform whatever they actions they need to do.
+        In general, you wouldn't use this method to receive clicks, but should get your callbacks
+        by attaching a std::function to the onClick callback, or adding a Button::Listener.
+        @see triggerClick, onClick
     */
     virtual void clicked();
 
@@ -475,8 +479,8 @@ private:
     String text;
     ListenerList<Listener> buttonListeners;
 
-    class CallbackHelper;
-    friend class CallbackHelper;
+    struct CallbackHelper;
+    friend struct CallbackHelper;
     friend struct ContainerDeletePolicy<CallbackHelper>;
     ScopedPointer<CallbackHelper> callbackHelper;
     uint32 buttonPressTime = 0, lastRepeatTime = 0;
@@ -514,9 +518,5 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Button)
 };
 
-#ifndef DOXYGEN
- /** This typedef is just for compatibility with old code and VC6 - newer code should use Button::Listener instead. */
- typedef Button::Listener ButtonListener;
-#endif
 
 } // namespace juce

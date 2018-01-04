@@ -106,17 +106,15 @@ struct UnitTestClasses
 
 
     //==============================================================================
-    class UnitTestsDemo  : public Component,
-                           public Button::Listener
+    class UnitTestsDemo  : public Component
     {
     public:
         UnitTestsDemo()
-            : startTestButton ("Run Unit Tests...")
         {
             setOpaque (true);
 
             addAndMakeVisible (startTestButton);
-            startTestButton.addListener (this);
+            startTestButton.onClick = [this]() { start(); };
 
             addAndMakeVisible (testResultsBox);
             testResultsBox.setMultiLine (true);
@@ -160,10 +158,9 @@ struct UnitTestClasses
             testResultsBox.setBounds (bounds);
         }
 
-        void buttonClicked (Button* buttonThatWasClicked) override
+        void start()
         {
-            if (buttonThatWasClicked == &startTestButton)
-                startTest (categoriesBox.getText());
+            startTest (categoriesBox.getText());
         }
 
         void startTest (const String& category)
@@ -201,7 +198,7 @@ struct UnitTestClasses
     private:
         ScopedPointer<TestRunnerThread> currentTestThread;
 
-        TextButton startTestButton;
+        TextButton startTestButton { "Run Unit Tests..." };
         ComboBox categoriesBox;
         TextEditor testResultsBox;
 

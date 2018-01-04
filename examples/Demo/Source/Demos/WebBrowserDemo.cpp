@@ -68,33 +68,28 @@ private:
 
 
 //==============================================================================
-class WebBrowserDemo    : public Component,
-                          private TextEditor::Listener,
-                          private Button::Listener
+class WebBrowserDemo    : public Component
 {
 public:
     WebBrowserDemo()
-        : goButton ("Go", "Go to URL"),
-          backButton ("<<", "Back"),
-          forwardButton (">>", "Forward")
     {
         setOpaque (true);
 
         // Create an address box..
         addAndMakeVisible (addressTextBox);
         addressTextBox.setTextToShowWhenEmpty ("Enter a web address, e.g. https://www.juce.com", Colours::grey);
-        addressTextBox.addListener (this);
+        addressTextBox.onReturnKey = [this]() { webView->goToURL (addressTextBox.getText()); };
 
         // create the actual browser component
         addAndMakeVisible (webView = new DemoBrowserComponent (addressTextBox));
 
         // add some buttons..
         addAndMakeVisible (goButton);
-        goButton.addListener (this);
+        goButton.onClick = [this]() { webView->goToURL (addressTextBox.getText()); };
         addAndMakeVisible (backButton);
-        backButton.addListener (this);
+        backButton.onClick = [this]() { webView->goBack(); };
         addAndMakeVisible (forwardButton);
-        forwardButton.addListener (this);
+        forwardButton.onClick = [this]() { webView->goForward(); };
 
         // send the browser to a start page..
         webView->goToURL ("https://www.juce.com");
@@ -119,26 +114,10 @@ private:
     ScopedPointer<DemoBrowserComponent> webView;
 
     TextEditor addressTextBox;
-    TextButton goButton, backButton, forwardButton;
 
-    void textEditorTextChanged (TextEditor&) override             {}
-    void textEditorEscapeKeyPressed (TextEditor&) override        {}
-    void textEditorFocusLost (TextEditor&) override               {}
-
-    void textEditorReturnKeyPressed (TextEditor&) override
-    {
-        webView->goToURL (addressTextBox.getText());
-    }
-
-    void buttonClicked (Button* b) override
-    {
-        if (b == &backButton)
-            webView->goBack();
-        else if (b == &forwardButton)
-            webView->goForward();
-        else if (b == &goButton)
-            webView->goToURL (addressTextBox.getText());
-    }
+    TextButton goButton      { "Go", "Go to URL" },
+               backButton    { "<<", "Back" },
+               forwardButton { ">>", "Forward" };
 
     void lookAndFeelChanged() override
     {

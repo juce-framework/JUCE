@@ -2209,6 +2209,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\geometry\juce_BorderSize.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\geometry\juce_EdgeTable.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\geometry\juce_Line.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\geometry\juce_Parallelogram.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\geometry\juce_Path.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\geometry\juce_PathIterator.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\geometry\juce_PathStrokeType.h"/>

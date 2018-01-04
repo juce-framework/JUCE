@@ -523,13 +523,17 @@ public:
                                  const MidiBuffer& inputMidi,
                                  int startSample,
                                  int numSamples)
-        { processNextBlock (outputAudio, inputMidi, startSample, numSamples); }
+    {
+        processNextBlock (outputAudio, inputMidi, startSample, numSamples);
+    }
 
     inline void renderNextBlock (AudioBuffer<double>& outputAudio,
                                  const MidiBuffer& inputMidi,
                                  int startSample,
                                  int numSamples)
-        { processNextBlock (outputAudio, inputMidi, startSample, numSamples); }
+    {
+        processNextBlock (outputAudio, inputMidi, startSample, numSamples);
+    }
 
     /** Returns the current target sample rate at which rendering is being done.
         Subclasses may need to know this so that they can pitch things correctly.

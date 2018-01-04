@@ -34,8 +34,7 @@ namespace juce
 */
 class JUCE_API  PluginListComponent   : public Component,
                                         public FileDragAndDropTarget,
-                                        private ChangeListener,
-                                        private Button::Listener
+                                        private ChangeListener
 {
 public:
     //==============================================================================
@@ -119,11 +118,11 @@ private:
     bool canShowSelectedFolder() const;
     void removeMissingPlugins();
     void removePluginItem (int index);
+    void showOptionsMenu();
 
     void resized() override;
     bool isInterestedInFileDrag (const StringArray&) override;
     void filesDropped (const StringArray&, int, int) override;
-    void buttonClicked (Button*) override;
     void changeListenerCallback (ChangeBroadcaster*) override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginListComponent)

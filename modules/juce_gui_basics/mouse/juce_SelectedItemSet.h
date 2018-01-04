@@ -78,7 +78,7 @@ public:
                 if (! other.isSelected (selectedItems.getReference (i)))
                     itemDeselected (selectedItems.removeAndReturn (i));
 
-            for (auto& i : selectedItems)
+            for (auto& i : other.selectedItems)
             {
                 if (! isSelected (i))
                 {

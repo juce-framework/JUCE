@@ -205,14 +205,10 @@ private:
 
 //==============================================================================
 class MultithreadingDemo   : public Component,
-                             private Timer,
-                             private Button::Listener
+                             private Timer
 {
 public:
     MultithreadingDemo()
-        : pool (3),
-          controlButton ("Thread type"),
-          isUsingPool (false)
     {
         setOpaque (true);
 
@@ -221,7 +217,7 @@ public:
         controlButton.setTopLeftPosition (20, 20);
         controlButton.setTriggeredOnMouseDown (true);
         controlButton.setAlwaysOnTop (true);
-        controlButton.addListener (this);
+        controlButton.onClick = [this]() { showMenu(); };
     }
 
     ~MultithreadingDemo()
@@ -251,9 +247,9 @@ public:
     }
 
 private:
-    ThreadPool pool;
-    TextButton controlButton;
-    bool isUsingPool;
+    ThreadPool pool { 3 };
+    TextButton controlButton { "Thread type" };
+    bool isUsingPool = false;
 
     OwnedArray<Component> balls;
 
@@ -319,7 +315,7 @@ private:
         }
     }
 
-    void buttonClicked (Button*) override
+    void showMenu()
     {
         PopupMenu m;
         m.addItem (1, "Use one thread per ball", true, ! isUsingPool);

@@ -290,8 +290,7 @@ private:
 };
 
 //==============================================================================
-class AudioLatencyDemo  : public Component,
-                          private Button::Listener
+class AudioLatencyDemo  : public Component
 {
 public:
     AudioLatencyDemo()
@@ -318,8 +317,8 @@ public:
                             "microphone somewhere near your speakers...");
 
         addAndMakeVisible (startTestButton);
-        startTestButton.addListener (this);
         startTestButton.setButtonText ("Test Latency");
+        startTestButton.onClick = [this]() { startTest(); };
 
         MainAppWindow::getSharedAudioDeviceManager().addAudioCallback (liveAudioScroller);
     }
@@ -327,7 +326,6 @@ public:
     ~AudioLatencyDemo()
     {
         MainAppWindow::getSharedAudioDeviceManager().removeAudioCallback (liveAudioScroller);
-        startTestButton.removeListener (this);
         latencyTester.reset();
         liveAudioScroller.reset();
     }
@@ -358,12 +356,6 @@ private:
     ScopedPointer<LiveScrollingAudioDisplay> liveAudioScroller;
     TextButton startTestButton;
     TextEditor resultsBox;
-
-    void buttonClicked (Button* buttonThatWasClicked) override
-    {
-        if (buttonThatWasClicked == &startTestButton)
-            startTest();
-    }
 
     void lookAndFeelChanged() override
     {

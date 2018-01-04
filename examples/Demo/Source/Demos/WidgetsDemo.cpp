@@ -27,7 +27,7 @@
 #include "../JuceDemoHeader.h"
 
 
-static void showBubbleMessage (Component* targetComponent, const String& textToShow,
+static void showBubbleMessage (Component& targetComponent, const String& textToShow,
                                ScopedPointer<BubbleMessageComponent>& bmc)
 {
     bmc = new BubbleMessageComponent();
@@ -39,14 +39,14 @@ static void showBubbleMessage (Component* targetComponent, const String& textToS
     }
     else
     {
-        targetComponent->getTopLevelComponent()->addChildComponent (bmc);
+        targetComponent.getTopLevelComponent()->addChildComponent (bmc);
     }
 
     AttributedString text (textToShow);
     text.setJustification (Justification::centred);
-    text.setColour (targetComponent->findColour (TextButton::textColourOffId));
+    text.setColour (targetComponent.findColour (TextButton::textColourOffId));
 
-    bmc->showAt (targetComponent, text, 2000, true, false);
+    bmc->showAt (&targetComponent, text, 2000, true, false);
 }
 
 //==============================================================================
@@ -247,8 +247,7 @@ private:
 };
 
 //==============================================================================
-struct ButtonsPage   : public Component,
-                       public Button::Listener
+struct ButtonsPage   : public Component
 {
     ButtonsPage()
     {
@@ -352,58 +351,68 @@ struct ButtonsPage   : public Component,
         down.setImage (ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize));
         down.setOverlayColour (Colours::black.withAlpha (0.3f));
 
+        auto popupMessageCallback = [this]()
+        {
+            if (auto* focused = Component::getCurrentlyFocusedComponent())
+                showBubbleMessage (*focused,
+                                   "This is a demo of the BubbleMessageComponent, which lets you pop up a message pointing "
+                                   "at a component or somewhere on the screen.\n\n"
+                                   "The message bubbles will disappear after a timeout period, or when the mouse is clicked.",
+                                   this->bubbleMessage);
+        };
+
         {
             // create an image-above-text button from these drawables..
-            DrawableButton* db = addToList (new DrawableButton ("Button 1", DrawableButton::ImageAboveTextLabel));
+            auto db = addToList (new DrawableButton ("Button 1", DrawableButton::ImageAboveTextLabel));
             db->setImages (&normal, &over, &down);
             db->setBounds (260, 60, 80, 80);
             db->setTooltip ("This is a DrawableButton with a label");
-            db->addListener (this);
+            db->onClick = popupMessageCallback;
         }
 
         {
             // create an image-only button from these drawables..
-            DrawableButton* db = addToList (new DrawableButton ("Button 2", DrawableButton::ImageFitted));
+            auto db = addToList (new DrawableButton ("Button 2", DrawableButton::ImageFitted));
             db->setImages (&normal, &over, &down);
             db->setClickingTogglesState (true);
             db->setBounds (370, 60, 80, 80);
             db->setTooltip ("This is an image-only DrawableButton");
-            db->addListener (this);
+            db->onClick = popupMessageCallback;
         }
 
         {
             // create an image-on-button-shape button from the same drawables..
-            DrawableButton* db = addToList (new DrawableButton ("Button 3", DrawableButton::ImageOnButtonBackground));
+            auto db = addToList (new DrawableButton ("Button 3", DrawableButton::ImageOnButtonBackground));
             db->setImages (&normal, 0, 0);
             db->setBounds (260, 160, 110, 25);
             db->setTooltip ("This is a DrawableButton on a standard button background");
-            db->addListener (this);
+            db->onClick = popupMessageCallback;
         }
 
         {
-            DrawableButton* db = addToList (new DrawableButton ("Button 4", DrawableButton::ImageOnButtonBackground));
+            auto db = addToList (new DrawableButton ("Button 4", DrawableButton::ImageOnButtonBackground));
             db->setImages (&normal, &over, &down);
             db->setClickingTogglesState (true);
             db->setColour (DrawableButton::backgroundColourId, Colours::white);
             db->setColour (DrawableButton::backgroundOnColourId, Colours::yellow);
             db->setBounds (400, 150, 50, 50);
             db->setTooltip ("This is a DrawableButton on a standard button background");
-            db->addListener (this);
+            db->onClick = popupMessageCallback;
         }
 
         {
-            ShapeButton* sb = addToList (new ShapeButton ("ShapeButton",
-                                                          getRandomDarkColour(),
-                                                          getRandomDarkColour(),
-                                                          getRandomDarkColour()));
+            auto sb = addToList (new ShapeButton ("ShapeButton",
+                                                  getRandomDarkColour(),
+                                                  getRandomDarkColour(),
+                                                  getRandomDarkColour()));
             sb->setShape (MainAppWindow::getJUCELogoPath(), false, true, false);
             sb->setBounds (260, 220, 200, 120);
         }
 
         {
-            ImageButton* ib = addToList (new ImageButton ("ImageButton"));
+            auto ib = addToList (new ImageButton ("ImageButton"));
 
-            Image juceImage = ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize);
+            auto juceImage = ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize);
 
             ib->setImages (true, true, true,
                            juceImage, 0.7f, Colours::transparentBlack,
@@ -428,15 +437,6 @@ private:
         components.add (newComp);
         addAndMakeVisible (newComp);
         return newComp;
-    }
-
-    void buttonClicked (Button* button) override
-    {
-        showBubbleMessage (button,
-                           "This is a demo of the BubbleMessageComponent, which lets you pop up a message pointing "
-                           "at a component or somewhere on the screen.\n\n"
-                           "The message bubbles will disappear after a timeout period, or when the mouse is clicked.",
-                           bubbleMessage);
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonsPage)
@@ -481,16 +481,15 @@ struct MiscPage   : public Component
 
 //==============================================================================
 class ToolbarDemoComp   : public Component,
-                          public Slider::Listener,
-                          public Button::Listener
+                          private Slider::Listener
 {
 public:
     ToolbarDemoComp()
-        : depthLabel (String(), "Toolbar depth:"),
-          infoLabel (String(), "As well as showing off toolbars, this demo illustrates how to store "
-                               "a set of SVG files in a Zip file, embed that in your application, and read "
-                               "them back in at runtime.\n\nThe icon images here are taken from the open-source "
-                                "Tango icon project."),
+        : depthLabel ({}, "Toolbar depth:"),
+          infoLabel ({}, "As well as showing off toolbars, this demo illustrates how to store "
+                         "a set of SVG files in a Zip file, embed that in your application, and read "
+                         "them back in at runtime.\n\nThe icon images here are taken from the open-source "
+                         "Tango icon project."),
           orientationButton ("Vertical/Horizontal"),
           customiseButton ("Customise...")
     {
@@ -517,12 +516,12 @@ public:
         depthLabel.attachToComponent (&depthSlider, false);
 
         addAndMakeVisible (orientationButton);
-        orientationButton.addListener (this);
+        orientationButton.onClick = [this]() { toolbar.setVertical (! toolbar.isVertical()); resized(); };
         orientationButton.changeWidthToFitText (22);
         orientationButton.setTopLeftPosition (depthSlider.getX(), depthSlider.getBottom() + 20);
 
         addAndMakeVisible (customiseButton);
-        customiseButton.addListener (this);
+        customiseButton.onClick = [this]() { toolbar.showCustomisationDialog (factory); };
         customiseButton.changeWidthToFitText (22);
         customiseButton.setTopLeftPosition (orientationButton.getRight() + 20, orientationButton.getY());
     }
@@ -540,19 +539,6 @@ public:
     void sliderValueChanged (Slider*) override
     {
         resized();
-    }
-
-    void buttonClicked (Button* button) override
-    {
-        if (button == &orientationButton)
-        {
-            toolbar.setVertical (! toolbar.isVertical());
-            resized();
-        }
-        else if (button == &customiseButton)
-        {
-            toolbar.showCustomisationDialog (factory);
-        }
     }
 
 private:
@@ -964,8 +950,7 @@ private:
     //==============================================================================
     // This is a custom component containing a combo box, which we're going to put inside
     // our table's "rating" column.
-    class RatingColumnCustomComponent    : public Component,
-                                           private ComboBox::Listener
+    class RatingColumnCustomComponent    : public Component
     {
     public:
         RatingColumnCustomComponent (TableDemoComponent& td)  : owner (td)
@@ -980,8 +965,7 @@ private:
             comboBox.addItem ("swingin", 6);
             comboBox.addItem ("wild", 7);
 
-            // when the combo is changed, we'll get a callback.
-            comboBox.addListener (this);
+            comboBox.onChange = [this]() { owner.setRating (row, comboBox.getSelectedId()); };
             comboBox.setWantsKeyboardFocus (false);
         }
 
@@ -996,11 +980,6 @@ private:
             row = newRow;
             columnId = newColumn;
             comboBox.setSelectedId (owner.getRating (row), dontSendNotification);
-        }
-
-        void comboBoxChanged (ComboBox*) override
-        {
-            owner.setRating (row, comboBox.getSelectedId());
         }
 
     private:
@@ -1276,8 +1255,7 @@ private:
 };
 
 //==============================================================================
-struct BurgerMenuHeader  : public Component,
-                           private Button::Listener
+struct BurgerMenuHeader  : public Component
 {
     BurgerMenuHeader()
     {
@@ -1299,7 +1277,7 @@ struct BurgerMenuHeader  : public Component,
         p.loadPathFromData (burgerMenuPathData, sizeof (burgerMenuPathData));
         burgerButton.setShape (p, true, true, false);
 
-        burgerButton.addListener (this);
+        burgerButton.onClick = [this]() { showOrHide(); };
         addAndMakeVisible (burgerButton);
     }
 
@@ -1328,7 +1306,7 @@ private:
         titleLabel.setBounds (r);
     }
 
-    void buttonClicked (Button*) override
+    void showOrHide()
     {
         auto& panel = MainAppWindow::getSharedSidePanel();
 
@@ -1344,8 +1322,7 @@ private:
 //==============================================================================
 class MenusDemo : public Component,
                   public MenuBarModel,
-                  public ChangeBroadcaster,
-                  private Button::Listener
+                  public ChangeBroadcaster
 {
 public:
     //==============================================================================
@@ -1363,7 +1340,7 @@ public:
 
         popupButton.setButtonText ("Show Popup Menu");
         popupButton.setTriggeredOnMouseDown (true);
-        popupButton.addListener (this);
+        popupButton.onClick = [this]() { getDummyPopupMenu().showMenuAsync (PopupMenu::Options().withTargetComponent (&popupButton), nullptr); };
         addAndMakeVisible (popupButton);
         addChildComponent (menuHeader);
 
@@ -1378,8 +1355,6 @@ public:
         MenuBarModel::setMacMainMenu (nullptr);
        #endif
         PopupMenu::dismissAllActiveMenus();
-
-        popupButton.removeListener (this);
     }
 
     void resized() override
@@ -1566,13 +1541,6 @@ private:
     }
 
     //==============================================================================
-    void buttonClicked (Button* button) override
-    {
-        if (button == &popupButton)
-            getDummyPopupMenu().showMenuAsync (PopupMenu::Options().withTargetComponent (&popupButton), nullptr);
-    }
-
-    //==============================================================================
     class CustomMenuComponent   : public PopupMenu::CustomComponent,
                                   private Timer
     {
@@ -1677,7 +1645,7 @@ public:
 
         void mouseDown (const MouseEvent&) override
         {
-            showBubbleMessage (this,
+            showBubbleMessage (*this,
                                "This is a custom tab component\n"
                                "\n"
                                "You can use these to implement things like close-buttons "

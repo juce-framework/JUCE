@@ -119,7 +119,6 @@ private:
 //==============================================================================
 class VideoDemo   : public Component,
                     public DragAndDropContainer,
-                    private Button::Listener,
                     private FileBrowserListener
 {
 public:
@@ -144,8 +143,8 @@ public:
         loadLeftButton.setButtonText ("Load Left");
         loadRightButton.setButtonText ("Load Right");
 
-        loadLeftButton.addListener (this);
-        loadRightButton.addListener (this);
+        loadLeftButton .onClick = [this]() { movieCompLeft .setFile (fileTree.getSelectedFile (0)); };
+        loadRightButton.onClick = [this]() { movieCompRight.setFile (fileTree.getSelectedFile (0)); };
 
         addAndMakeVisible (loadLeftButton);
         addAndMakeVisible (loadRightButton);
@@ -168,8 +167,6 @@ public:
 
     ~VideoDemo()
     {
-        loadLeftButton.removeListener (this);
-        loadRightButton.removeListener (this);
         fileTree.removeListener (this);
     }
 
@@ -213,14 +210,6 @@ private:
 
     TextButton loadLeftButton, loadRightButton;
     MovieComponentWithFileBrowser movieCompLeft, movieCompRight;
-
-    void buttonClicked (Button* button) override
-    {
-        if (button == &loadLeftButton)
-            movieCompLeft.setFile (fileTree.getSelectedFile (0));
-        else if (button == &loadRightButton)
-            movieCompRight.setFile (fileTree.getSelectedFile (0));
-    }
 
     void selectionChanged() override
     {

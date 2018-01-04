@@ -121,7 +121,6 @@ struct BallComponent  : public Component
 
 //==============================================================================
 class AnimationDemo  : public Component,
-                       private Button::Listener,
                        private Timer
 {
 public:
@@ -132,10 +131,10 @@ public:
 
         for (int i = 11; --i >= 0;)
         {
-            Button* b = createButton();
+            auto* b = createButton();
             componentsToAnimate.add (b);
             addAndMakeVisible (b);
-            b->addListener (this);
+            b->onClick = [this] { triggerAnimation(); };
         }
 
         addAndMakeVisible (ballGenerator);
@@ -253,7 +252,7 @@ private:
         return b;
     }
 
-    void buttonClicked (Button*) override
+    void triggerAnimation()
     {
         for (int i = 0; i < componentsToAnimate.size(); ++i)
         {

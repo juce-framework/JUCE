@@ -105,6 +105,7 @@ namespace juce
 #include "geometry/juce_Point.h"
 #include "geometry/juce_Line.h"
 #include "geometry/juce_Rectangle.h"
+#include "geometry/juce_Parallelogram.h"
 #include "placement/juce_Justification.h"
 #include "geometry/juce_Path.h"
 #include "geometry/juce_RectangleList.h"

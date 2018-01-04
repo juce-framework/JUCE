@@ -37,13 +37,12 @@ struct ColourMessage  : public Message
     /** Returns the colour of a ColourMessage of white if the message is not a ColourMessage. */
     static Colour getColour (const Message& message)
     {
-        if (const ColourMessage* cm = dynamic_cast<const ColourMessage*> (&message))
+        if (auto* cm = dynamic_cast<const ColourMessage*> (&message))
             return cm->colour;
 
         return Colours::white;
     }
 
-private:
     Colour colour;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ColourMessage)
@@ -61,8 +60,6 @@ class FlashingComponent   : public Component,
 {
 public:
     FlashingComponent()
-        : flashAlpha (0.0f),
-          colour (Colours::red)
     {
     }
 
@@ -107,8 +104,8 @@ public:
     }
 
 private:
-    float flashAlpha;
-    Colour colour;
+    float flashAlpha = 0;
+    Colour colour { Colours::red };
 
     void timerCallback() override
     {
@@ -130,8 +127,7 @@ private:
 
 //==============================================================================
 class TimersAndEventsDemo   : public Component,
-                              private ChangeListener,
-                              private Button::Listener
+                              private ChangeListener
 {
 public:
     TimersAndEventsDemo()
@@ -141,7 +137,7 @@ public:
         // Create and add our FlashingComponents with some random colours and sizes
         for (int i = 0; i < numFlashingComponents; ++i)
         {
-            FlashingComponent* newFlasher = new FlashingComponent();
+            auto* newFlasher = new FlashingComponent();
             flashingComponents.add (newFlasher);
 
             newFlasher->setFlashColour (getRandomBrightColour());
@@ -154,20 +150,19 @@ public:
         }
 
         addAndMakeVisible (stopButton);
-        stopButton.addListener (this);
         stopButton.setButtonText ("Stop");
+        stopButton.onClick = [this]() { stopButtonClicked(); };
 
         addAndMakeVisible (randomColourButton);
-        randomColourButton.addListener (this);
         randomColourButton.setButtonText ("Set Random Colour");
+        randomColourButton.onClick = [this]() { randomColourButtonClicked(); };
 
         // lay out our components in a psudo random grid
         Rectangle<int> area (0, 100, 150, 150);
 
-        for (int i = 0; i < flashingComponents.size(); ++i)
+        for (auto* comp : flashingComponents)
         {
-            FlashingComponent* comp = flashingComponents.getUnchecked (i);
-            Rectangle<int> buttonArea (area.withSize (comp->getWidth(), comp->getHeight()));
+            auto buttonArea = area.withSize (comp->getWidth(), comp->getHeight());
             buttonArea.translate (random.nextInt (area.getWidth() - comp->getWidth()),
                                   random.nextInt (area.getHeight() - comp->getHeight()));
             comp->setBounds (buttonArea);
@@ -185,11 +180,8 @@ public:
 
     ~TimersAndEventsDemo()
     {
-        stopButton.removeListener (this);
-        randomColourButton.removeListener (this);
-
-        for (int i = flashingComponents.size(); --i >= 0;)
-            flashingComponents.getUnchecked (i)->removeChangeListener (this);
+        for (auto* fc : flashingComponents)
+            fc->removeChangeListener (this);
     }
 
     void paint (Graphics& g) override
@@ -200,7 +192,7 @@ public:
 
     void paintOverChildren (Graphics& g) override
     {
-        const Rectangle<int> explanationArea (getLocalBounds().removeFromTop (100));
+        auto explanationArea = getLocalBounds().removeFromTop (100);
 
         AttributedString s;
         s.append ("Click on a circle to make it flash. When it has finished flashing it will send a message which causes the next circle to flash");
@@ -208,14 +200,13 @@ public:
         s.append ("Click the \"Set Random Colour\" button to change the colour of one of the circles.");
         s.append (newLine);
         s.setFont (Font (16.0f));
-        s.setColour (getUIColourIfAvailable(LookAndFeel_V4::ColourScheme::UIColour::defaultText,
-                                            Colours::lightgrey));
+        s.setColour (getUIColourIfAvailable (LookAndFeel_V4::ColourScheme::UIColour::defaultText, Colours::lightgrey));
         s.draw (g, explanationArea.reduced (10).toFloat());
     }
 
     void resized() override
     {
-        Rectangle<int> area (getLocalBounds().removeFromBottom (40));
+        auto area = getLocalBounds().removeFromBottom (40);
         randomColourButton.setBounds (area.removeFromLeft (166).reduced (8));
         stopButton.setBounds (area.removeFromRight (166).reduced (8));
     }
@@ -234,19 +225,17 @@ private:
                 flashingComponents.getUnchecked ((i + 1) % flashingComponents.size())->startFlashing();
     }
 
-    void buttonClicked (Button* button) override
+    void randomColourButtonClicked()
     {
-        if (button == &randomColourButton)
-        {
-            // Here we post a new ColourMessage with a random colour to a random flashing component.
-            // This will send a message to the component asynchronously and trigger its handleMessage callback
-            flashingComponents.getUnchecked (random.nextInt (flashingComponents.size()))->postMessage (new ColourMessage (getRandomBrightColour()));
-        }
-        else if (button == &stopButton)
-        {
-            for (int i = 0; i < flashingComponents.size(); ++i)
-                flashingComponents.getUnchecked (i)->stopFlashing();
-        }
+        // Here we post a new ColourMessage with a random colour to a random flashing component.
+        // This will send a message to the component asynchronously and trigger its handleMessage callback
+        flashingComponents.getUnchecked (random.nextInt (flashingComponents.size()))->postMessage (new ColourMessage (getRandomBrightColour()));
+    }
+
+    void stopButtonClicked()
+    {
+        for (auto* fc : flashingComponents)
+            fc->stopFlashing();
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TimersAndEventsDemo)
