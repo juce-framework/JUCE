@@ -208,6 +208,7 @@
 				INFOPLIST_FILE = Info-App.plist;
 				INFOPLIST_PREPROCESS = NO;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LLVM_LTO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.AnimationAppExample;
 				USE_HEADERMAP = NO; }; name = Release; };
 		8FB477F7B77D68FD93DC1D16 = {isa = XCBuildConfiguration; buildSettings = {

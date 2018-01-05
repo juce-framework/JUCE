@@ -158,6 +158,7 @@
 				INFOPLIST_FILE = Info-App.plist;
 				INFOPLIST_PREPROCESS = NO;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LLVM_LTO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.OSCReceiver;
 				USE_HEADERMAP = NO; }; name = Release; };
 		AEC2629A4CDDB6132D9118A8 = {isa = XCBuildConfiguration; buildSettings = {
