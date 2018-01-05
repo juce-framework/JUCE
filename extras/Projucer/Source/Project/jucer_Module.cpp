@@ -410,7 +410,7 @@ void LibraryModule::addSettingsForModuleToExporter (ProjectExporter& exporter, P
         const String extraDefs (moduleInfo.getPreprocessorDefs().trim());
 
         if (extraDefs.isNotEmpty())
-            exporter.getExporterPreprocessorDefs() = exporter.getExporterPreprocessorDefsString() + "\n" + extraDefs;
+            exporter.getExporterPreprocessorDefsValue() = exporter.getExporterPreprocessorDefsString() + "\n" + extraDefs;
     }
 
     {
@@ -489,7 +489,20 @@ void LibraryModule::getConfigFlags (Project& project, OwnedArray<Project::Config
                 }
 
                 config->description = config->description.upToFirstOccurrenceOf ("*/", false, false);
-                config->value.referTo (project.getConfigFlag (config->symbol));
+                config->value = project.getConfigFlag (config->symbol);
+
+                i += 2;
+                if (lines[i].contains ("#define " + config->symbol))
+                {
+                    auto value = lines[i].fromFirstOccurrenceOf ("#define " + config->symbol, false, true).trim();
+                    config->value.setDefault (value == "0" ? false : true);
+                }
+
+                auto currentValue = config->value.get().toString();
+
+                if      (currentValue == "enabled")     config->value = true;
+                else if (currentValue == "disabled")    config->value = false;
+
                 flags.add (config.release());
             }
         }
@@ -852,7 +865,7 @@ StringArray EnabledModuleList::getExtraDependenciesNeeded (const String& moduleI
 
 bool EnabledModuleList::doesModuleHaveHigherCppStandardThanProject (const String& moduleID)
 {
-    auto projectCppStandard = project.getCppStandardValue().toString();
+    auto projectCppStandard = project.getCppStandardString();
 
     if (projectCppStandard == "latest")
         return false;

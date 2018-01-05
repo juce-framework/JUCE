@@ -165,7 +165,7 @@ void MainWindow::setProject (Project* newProject)
     currentProject = newProject;
 
     if (currentProject != nullptr)
-        projectNameValue.referTo (currentProject->getProjectNameValue());
+        projectNameValue.referTo (currentProject->getProjectValue (Ids::name));
     else
         projectNameValue.referTo (Value());
 

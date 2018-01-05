@@ -626,12 +626,8 @@
                 resource="0" file="Source/Utility/UI/PropertyComponents/jucer_DependencyPathPropertyComponent.h"/>
           <FILE id="sfUzaf" name="jucer_FilePathPropertyComponent.h" compile="0"
                 resource="0" file="Source/Utility/UI/PropertyComponents/jucer_FilePathPropertyComponent.h"/>
-          <FILE id="gptc0E" name="jucer_TextWithDefaultPropertyComponent.h" compile="0"
-                resource="0" file="Source/Utility/UI/PropertyComponents/jucer_TextWithDefaultPropertyComponent.h"/>
-          <FILE id="szzNXP" name="jucer_TextWithDefaultPropertyComponentWithEnablement.cpp"
-                compile="1" resource="0" file="Source/Utility/UI/PropertyComponents/jucer_TextWithDefaultPropertyComponentWithEnablement.cpp"/>
-          <FILE id="JTFOwY" name="jucer_TextWithDefaultPropertyComponentWithEnablement.h"
-                compile="0" resource="0" file="Source/Utility/UI/PropertyComponents/jucer_TextWithDefaultPropertyComponentWithEnablement.h"/>
+          <FILE id="DkLOIQ" name="jucer_PropertyComponentsWithEnablement.h" compile="0"
+                resource="0" file="Source/Utility/UI/PropertyComponents/jucer_PropertyComponentsWithEnablement.h"/>
         </GROUP>
         <FILE id="VQCK4C" name="jucer_IconButton.h" compile="0" resource="0"
               file="Source/Utility/UI/jucer_IconButton.h"/>

@@ -58,11 +58,11 @@ struct AudioPluginAppWizard   : public NewProjectWizard
         File editorCppFile = getSourceFilesFolder().getChildFile ("PluginEditor.cpp");
         File editorHFile   = editorCppFile.withFileExtension (".h");
 
-        project.getProjectTypeValue() = ProjectType_AudioPlugin::getTypeName();
-        project.getShouldBuildStandalonePluginAsValue().setValue (true);
+        project.setProjectType (ProjectType_AudioPlugin::getTypeName());
+        project.getProjectValue (Ids::buildStandalone) = true;
 
         Project::Item sourceGroup (createSourceGroup (project));
-        project.getConfigFlag ("JUCE_QUICKTIME") = Project::configFlagDisabled; // disabled because it interferes with RTAS build on PC
+        project.getConfigFlag ("JUCE_QUICKTIME") = false; // disabled because it interferes with RTAS build on PC
 
         setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
 

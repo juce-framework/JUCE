@@ -33,7 +33,7 @@ struct ProjectSettingsComponent  : public Component,
 {
     ProjectSettingsComponent (Project& p)
         : project (p),
-          group (project.getProjectFilenameRoot(),
+          group (project.getProjectFilenameRootString(),
                  Icon (getIcons().settings, Colours::transparentBlack))
     {
         addAndMakeVisible (group);
@@ -60,13 +60,13 @@ struct ProjectSettingsComponent  : public Component,
         group.setProperties (props);
         group.setName ("Project Settings");
 
-        lastProjectType = project.getProjectTypeValue().getValue();
+        lastProjectType = project.getProjectTypeString();
         parentSizeChanged();
     }
 
     void changeListenerCallback (ChangeBroadcaster*) override
     {
-        if (lastProjectType != project.getProjectTypeValue().getValue())
+        if (lastProjectType != project.getProjectTypeString())
             updatePropertyList();
     }
 

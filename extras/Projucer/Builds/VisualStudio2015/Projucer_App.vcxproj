@@ -237,7 +237,6 @@
     <ClCompile Include="..\..\Source\Utility\Helpers\jucer_FileHelpers.cpp"/>
     <ClCompile Include="..\..\Source\Utility\Helpers\jucer_MiscUtilities.cpp"/>
     <ClCompile Include="..\..\Source\Utility\UI\PropertyComponents\jucer_DependencyPathPropertyComponent.cpp"/>
-    <ClCompile Include="..\..\Source\Utility\UI\PropertyComponents\jucer_TextWithDefaultPropertyComponentWithEnablement.cpp"/>
     <ClCompile Include="..\..\Source\Utility\UI\jucer_Icons.cpp"/>
     <ClCompile Include="..\..\Source\Utility\UI\jucer_JucerTreeViewBase.cpp"/>
     <ClCompile Include="..\..\Source\Utility\UI\jucer_ProjucerLookAndFeel.cpp"/>
@@ -1572,8 +1571,7 @@
     <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_ColourPropertyComponent.h"/>
     <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_DependencyPathPropertyComponent.h"/>
     <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_FilePathPropertyComponent.h"/>
-    <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_TextWithDefaultPropertyComponent.h"/>
-    <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_TextWithDefaultPropertyComponentWithEnablement.h"/>
+    <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_PropertyComponentsWithEnablement.h"/>
     <ClInclude Include="..\..\Source\Utility\UI\jucer_IconButton.h"/>
     <ClInclude Include="..\..\Source\Utility\UI\jucer_Icons.h"/>
     <ClInclude Include="..\..\Source\Utility\UI\jucer_JucerTreeViewBase.h"/>
@@ -1741,6 +1739,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_data_structures\values\juce_Value.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_data_structures\values\juce_ValueTree.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_data_structures\values\juce_ValueTreeSynchroniser.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_data_structures\values\juce_ValueWithDefault.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_data_structures\juce_data_structures.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\broadcasters\juce_ActionBroadcaster.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\broadcasters\juce_ActionListener.h"/>
