@@ -313,6 +313,7 @@ protected:
               androidAdditionalRawValueResources (config, Ids::androidAdditionalRawValueResources, nullptr, {}),
               androidCustomStringXmlElements (config, Ids::androidCustomStringXmlElements, nullptr, {})
         {
+            linkTimeOptimisationValue.setDefault (false);
             optimisationLevelValue.setDefault (isDebug() ? gccO0 : gccO3);
         }
 
