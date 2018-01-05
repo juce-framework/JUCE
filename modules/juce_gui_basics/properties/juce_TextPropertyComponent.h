@@ -70,6 +70,23 @@ public:
                            bool isMultiLine,
                            bool isEditable = true);
 
+    /** Creates a text property component with a default value.
+
+        @param valueToControl The ValueWithDefault that is controlled by the TextPropertyComponent
+        @param propertyName   The name of the property
+        @param maxNumChars    If not zero, then this specifies the maximum allowable length of
+                              the string. If zero, then the string will have no length limit.
+        @param isMultiLine    Sets whether the text editor allows carriage returns.
+        @param isEditable     Sets whether the text editor is editable. The default is true.
+
+        @see TextEditor, setEditable
+    */
+    TextPropertyComponent (const ValueWithDefault& valueToControl,
+                           const String& propertyName,
+                           int maxNumChars,
+                           bool isMultiLine,
+                           bool isEditable = true);
+
     /** Destructor. */
     ~TextPropertyComponent();
 
@@ -144,6 +161,8 @@ public:
     virtual void textWasEdited();
 
 private:
+    class RemapperValueSourceWithDefault;
+
     class LabelComp;
     friend class LabelComp;
 
