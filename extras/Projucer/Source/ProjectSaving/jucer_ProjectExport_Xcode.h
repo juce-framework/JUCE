@@ -71,9 +71,9 @@ public:
           customXcodeResourceFoldersValue              (settings, Ids::customXcodeResourceFolders,              project.getUndoManagerFor (settings)),
           customXcassetsFolderValue                    (settings, Ids::customXcassetsFolder,                    project.getUndoManagerFor (settings)),
           microphonePermissionNeededValue              (settings, Ids::microphonePermissionNeeded,              project.getUndoManagerFor (settings)),
-          uiFileSharingEnabledValue                    (settings, Ids::uiFileSharingEnabled,                    project.getUndoManagerFor (settings)),
-          uiSupportsDocumentBrowserValue               (settings, Ids::uiSupportsDocumentBrowser,               project.getUndoManagerFor (settings)),
-          uiStatusBarHiddenValue                       (settings, Ids::uiStatusBarHidden,                       project.getUndoManagerFor (settings)),
+          uiFileSharingEnabledValue                    (settings, Ids::UIFileSharingEnabled,                    project.getUndoManagerFor (settings)),
+          uiSupportsDocumentBrowserValue               (settings, Ids::UISupportsDocumentBrowser,               project.getUndoManagerFor (settings)),
+          uiStatusBarHiddenValue                       (settings, Ids::UIStatusBarHidden,                       project.getUndoManagerFor (settings)),
           documentExtensionsValue                      (settings, Ids::documentExtensions,                      project.getUndoManagerFor (settings)),
           iosInAppPurchasesValue                       (settings, Ids::iosInAppPurchases,                       project.getUndoManagerFor (settings)),
           iosBackgroundAudioValue                      (settings, Ids::iosBackgroundAudio,                      project.getUndoManagerFor (settings)),
@@ -1332,13 +1332,13 @@ public:
                 }
             }
 
-            if (owner.settings [Ids::uiFileSharingEnabled] && type != AudioUnitv3PlugIn)
+            if (owner.settings [Ids::UIFileSharingEnabled] && type != AudioUnitv3PlugIn)
                 addPlistDictionaryKeyBool (dict, "UIFileSharingEnabled", true);
 
-            if (owner.settings [Ids::uiSupportsDocumentBrowser])
+            if (owner.settings [Ids::UISupportsDocumentBrowser])
                 addPlistDictionaryKeyBool (dict, "UISupportsDocumentBrowser", true);
 
-            if (owner.settings [Ids::uiStatusBarHidden] && type != AudioUnitv3PlugIn)
+            if (owner.settings [Ids::UIStatusBarHidden] && type != AudioUnitv3PlugIn)
                 addPlistDictionaryKeyBool (dict, "UIStatusBarHidden", true);
 
             if (owner.iOS)
