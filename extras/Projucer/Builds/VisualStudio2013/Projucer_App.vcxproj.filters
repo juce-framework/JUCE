@@ -472,9 +472,6 @@
     <ClCompile Include="..\..\Source\Utility\UI\PropertyComponents\jucer_DependencyPathPropertyComponent.cpp">
       <Filter>Projucer\Utility\UI\PropertyComponents</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Utility\UI\PropertyComponents\jucer_TextWithDefaultPropertyComponentWithEnablement.cpp">
-      <Filter>Projucer\Utility\UI\PropertyComponents</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Utility\UI\jucer_Icons.cpp">
       <Filter>Projucer\Utility\UI</Filter>
     </ClCompile>
@@ -2223,10 +2220,7 @@
     <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_FilePathPropertyComponent.h">
       <Filter>Projucer\Utility\UI\PropertyComponents</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_TextWithDefaultPropertyComponent.h">
-      <Filter>Projucer\Utility\UI\PropertyComponents</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_TextWithDefaultPropertyComponentWithEnablement.h">
+    <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_PropertyComponentsWithEnablement.h">
       <Filter>Projucer\Utility\UI\PropertyComponents</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\UI\jucer_IconButton.h">
@@ -2728,6 +2722,9 @@
       <Filter>JUCE Modules\juce_data_structures\values</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_data_structures\values\juce_ValueTreeSynchroniser.h">
+      <Filter>JUCE Modules\juce_data_structures\values</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_data_structures\values\juce_ValueWithDefault.h">
       <Filter>JUCE Modules\juce_data_structures\values</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_data_structures\juce_data_structures.h">

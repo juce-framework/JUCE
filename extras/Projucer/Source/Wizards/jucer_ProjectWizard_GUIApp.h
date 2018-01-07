@@ -67,7 +67,7 @@ struct GUIAppWizard   : public NewProjectWizard
         File contentCompH   = contentCompCpp.withFileExtension (".h");
         String contentCompName = "MainContentComponent";
 
-        project.getProjectTypeValue() = ProjectType_GUIApp::getTypeName();
+        project.setProjectType (ProjectType_GUIApp::getTypeName());
 
         Project::Item sourceGroup (createSourceGroup (project));
 

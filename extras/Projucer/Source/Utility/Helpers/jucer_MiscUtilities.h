@@ -78,6 +78,12 @@ struct PropertyListBuilder
              mainHelpText + " Use semi-colons or new-lines to separate multiple paths.");
     }
 
+    void addSearchPathProperty (const ValueWithDefault& value, const String& name, const String& mainHelpText)
+    {
+        add (new TextPropertyComponent (value, name, 16384, true),
+             mainHelpText + " Use semi-colons or new-lines to separate multiple paths.");
+    }
+
     void setPreferredHeight (int height)
     {
         for (int j = components.size(); --j >= 0;)

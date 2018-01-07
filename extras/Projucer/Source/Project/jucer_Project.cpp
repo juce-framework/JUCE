@@ -51,14 +51,23 @@ Project::Project (const File& f)
 {
     Logger::writeToLog ("Loading project: " + f.getFullPathName());
     setFile (f);
+
     removeDefunctExporters();
     updateOldModulePaths();
-    setMissingDefaultValues();
+    updateOldStyleConfigList();
+    setCppVersionFromOldExporterSettings();
+    moveOldPropertyFromProjectToAllExporters (Ids::bigIcon);
+    moveOldPropertyFromProjectToAllExporters (Ids::smallIcon);
 
-    setChangedFlag (false);
+    intialiseProjectValues();
+    initialiseMainGroup();
+    initialiseAudioPluginValues();
+
+    getModules().sortAlphabetically();
 
     projectRoot.addListener (this);
 
+    setChangedFlag (false);
     modificationTime = getFile().getLastModificationTime();
 }
 
@@ -75,83 +84,20 @@ void Project::setTitle (const String& newTitle)
 {
     projectRoot.setProperty (Ids::name, newTitle, getUndoManagerFor (projectRoot));
     getMainGroup().getNameValue() = newTitle;
+
+    bundleIdentifierValue.setDefault (getDefaultBundleIdentifierString());
+    pluginAAXIdentifierValue.setDefault (getDefaultAAXIdentifierString());
 }
 
 String Project::getDocumentTitle()
 {
-    return getTitle();
+    return getProjectNameString();
 }
 
 void Project::updateProjectSettings()
 {
     projectRoot.setProperty (Ids::jucerVersion, ProjectInfo::versionString, nullptr);
     projectRoot.setProperty (Ids::name, getDocumentTitle(), nullptr);
-}
-
-void Project::setMissingDefaultValues()
-{
-    if (! projectRoot.hasProperty (Ids::ID))
-        projectRoot.setProperty (Ids::ID, createAlphaNumericUID(), nullptr);
-
-    // Create main file group if missing
-    if (! projectRoot.getChildWithName (Ids::MAINGROUP).isValid())
-    {
-        Item mainGroup (*this, ValueTree (Ids::MAINGROUP), false);
-        projectRoot.addChild (mainGroup.state, 0, 0);
-    }
-
-    getMainGroup().initialiseMissingProperties();
-
-    if (getDocumentTitle().isEmpty())
-        setTitle ("JUCE Project");
-
-    {
-        auto defaultSplashScreen = ! ProjucerApplication::getApp().isPaidOrGPL();
-
-        if (shouldDisplaySplashScreen() == var() || defaultSplashScreen)
-            shouldDisplaySplashScreen() = defaultSplashScreen;
-
-        if (ProjucerApplication::getApp().isPaidOrGPL())
-        {
-            if (shouldReportAppUsage() == var())
-                shouldReportAppUsage() = ProjucerApplication::getApp().licenseController->getState().applicationUsageDataState
-                                             == LicenseState::ApplicationUsageData::enabled;
-        }
-        else
-            shouldReportAppUsage() = true;
-    }
-
-    if (splashScreenColour() == var())
-        splashScreenColour() = "Dark";
-
-    if (! projectRoot.hasProperty (Ids::projectType))
-        getProjectTypeValue() = ProjectType_GUIApp::getTypeName();
-
-    if (! projectRoot.hasProperty (Ids::version))
-        getVersionValue() = "1.0.0";
-
-    updateOldStyleConfigList();
-    moveOldPropertyFromProjectToAllExporters (Ids::bigIcon);
-    moveOldPropertyFromProjectToAllExporters (Ids::smallIcon);
-
-    if (getProjectType().isAudioPlugin())
-        setMissingAudioPluginDefaultValues();
-
-    getModules().sortAlphabetically();
-
-    if (getBundleIdentifier().toString().isEmpty())
-        getBundleIdentifier() = getDefaultBundleIdentifier();
-
-    if (shouldIncludeBinaryInAppConfig() == var())
-        shouldIncludeBinaryInAppConfig() = true;
-
-    if (! projectRoot.hasProperty (Ids::cppLanguageStandard) && ! setCppVersionFromOldExporterSettings())
-        getCppStandardValue() = "14";
-
-    if (getCompanyCopyright().toString().isEmpty())
-        getCompanyCopyright() = getCompanyName().toString();
-
-    ProjucerApplication::getApp().updateNewlyOpenedProject (*this);
 }
 
 bool Project::setCppVersionFromOldExporterSettings()
@@ -183,7 +129,7 @@ bool Project::setCppVersionFromOldExporterSettings()
             {
                 if (cppLanguageStandard.toString().containsIgnoreCase ("latest"))
                 {
-                    getCppStandardValue() = "latest";
+                    cppStandardValue = "latest";
                     return true;
                 }
 
@@ -197,7 +143,7 @@ bool Project::setCppVersionFromOldExporterSettings()
 
     if (highestLanguageStandard != -1 && highestLanguageStandard >= 11)
     {
-        getCppStandardValue() = highestLanguageStandard;
+        cppStandardValue = highestLanguageStandard;
         return true;
     }
 
@@ -212,35 +158,92 @@ void Project::updateDeprecatedProjectSettingsInteractively()
         exporter->updateDeprecatedProjectSettingsInteractively();
 }
 
-void Project::setMissingAudioPluginDefaultValues()
+void Project::initialiseMainGroup()
 {
-    const String sanitisedProjectName (CodeHelpers::makeValidIdentifier (getTitle(), false, true, false));
+    // Create main file group if missing
+    if (! projectRoot.getChildWithName (Ids::MAINGROUP).isValid())
+    {
+        Item mainGroup (*this, ValueTree (Ids::MAINGROUP), false);
+        projectRoot.addChild (mainGroup.state, 0, 0);
+    }
 
-    setValueIfVoid (getShouldBuildVSTAsValue(),                   true);
-    setValueIfVoid (getShouldBuildVST3AsValue(),                  false);
-    setValueIfVoid (getShouldBuildAUAsValue(),                    true);
-    setValueIfVoid (getShouldBuildAUv3AsValue(),                  false);
-    setValueIfVoid (getShouldBuildRTASAsValue(),                  false);
-    setValueIfVoid (getShouldBuildAAXAsValue(),                   false);
-    setValueIfVoid (getShouldBuildStandalonePluginAsValue(),      false);
-    setValueIfVoid (getShouldEnableIAAAsValue(),                  false);
+    getMainGroup().initialiseMissingProperties();
+}
 
-    setValueIfVoid (getPluginName(),                    getTitle());
-    setValueIfVoid (getPluginDesc(),                    getTitle());
-    setValueIfVoid (getPluginManufacturer(),            "yourcompany");
-    setValueIfVoid (getPluginManufacturerCode(),        "Manu");
-    setValueIfVoid (getPluginCode(),                    makeValid4CC (getProjectUID() + getProjectUID()));
-    setValueIfVoid (getPluginChannelConfigs(),          String());
-    setValueIfVoid (getPluginIsSynth(),                 false);
-    setValueIfVoid (getPluginWantsMidiInput(),          false);
-    setValueIfVoid (getPluginProducesMidiOut(),         false);
-    setValueIfVoid (getPluginIsMidiEffectPlugin(),      false);
-    setValueIfVoid (getPluginEditorNeedsKeyFocus(),     false);
-    setValueIfVoid (getPluginAUExportPrefix(),          sanitisedProjectName + "AU");
-    setValueIfVoid (getPluginRTASCategory(),            String());
-    setValueIfVoid (getBundleIdentifier(),              getDefaultBundleIdentifier());
-    setValueIfVoid (getAAXIdentifier(),                 getDefaultAAXIdentifier());
-    setValueIfVoid (getPluginAAXCategory(),             "AAX_ePlugInCategory_Dynamics");
+void Project::intialiseProjectValues()
+{
+    projectNameValue.referTo         (projectRoot, Ids::name, getUndoManagerFor (projectRoot), "JUCE Project");
+    projectUIDValue.referTo          (projectRoot, Ids::ID, getUndoManagerFor (projectRoot), createAlphaNumericUID());
+    projectTypeValue.referTo         (projectRoot, Ids::projectType, getUndoManagerFor (projectRoot), ProjectType_GUIApp::getTypeName());
+    versionValue.referTo             (projectRoot, Ids::version, getUndoManagerFor (projectRoot), "1.0.0");
+    bundleIdentifierValue.referTo    (projectRoot, Ids::bundleIdentifier, getUndoManagerFor (projectRoot), getDefaultBundleIdentifierString());
+
+    companyNameValue.referTo         (projectRoot, Ids::companyName, getUndoManagerFor (projectRoot));
+    companyCopyrightValue.referTo    (projectRoot, Ids::companyCopyright, getUndoManagerFor (projectRoot));
+    companyWebsiteValue.referTo      (projectRoot, Ids::companyWebsite, getUndoManagerFor (projectRoot));
+    companyEmailValue.referTo        (projectRoot, Ids::companyEmail, getUndoManagerFor (projectRoot));
+
+    displaySplashScreenValue.referTo (projectRoot, Ids::displaySplashScreen, getUndoManagerFor (projectRoot), ! ProjucerApplication::getApp().isPaidOrGPL());
+    splashScreenColourValue.referTo  (projectRoot, Ids::splashScreenColour, getUndoManagerFor (projectRoot), "Dark");
+    reportAppUsageValue.referTo      (projectRoot, Ids::reportAppUsage, getUndoManagerFor (projectRoot));
+
+    if (ProjucerApplication::getApp().isPaidOrGPL())
+    {
+        reportAppUsageValue.setDefault (ProjucerApplication::getApp().licenseController->getState().applicationUsageDataState
+                                        == LicenseState::ApplicationUsageData::enabled);
+    }
+    else
+    {
+        reportAppUsageValue.setDefault (true);
+    }
+
+    cppStandardValue.referTo                   (projectRoot, Ids::cppLanguageStandard, getUndoManagerFor (projectRoot), "14");
+
+    headerSearchPathsValue.referTo             (projectRoot, Ids::headerPath, getUndoManagerFor (projectRoot));
+    preprocessorDefsValue.referTo              (projectRoot, Ids::defines, getUndoManagerFor (projectRoot));
+    userNotesValue.referTo                     (projectRoot, Ids::userNotes, getUndoManagerFor (projectRoot));
+
+    maxBinaryFileSizeValue.referTo             (projectRoot, Ids::maxBinaryFileSize, getUndoManagerFor (projectRoot), 10240 * 1024);
+    includeBinaryDataInAppConfigValue.referTo  (projectRoot, Ids::includeBinaryInAppConfig, getUndoManagerFor (projectRoot), true);
+    binaryDataNamespaceValue.referTo           (projectRoot, Ids::binaryDataNamespace, getUndoManagerFor (projectRoot), "BinaryData");
+}
+
+void Project::initialiseAudioPluginValues()
+{
+    buildVSTValue.referTo                    (projectRoot, Ids::buildVST, getUndoManagerFor (projectRoot), true);
+    buildVST3Value.referTo                   (projectRoot, Ids::buildVST3, getUndoManagerFor (projectRoot), false);
+    buildAUValue.referTo                     (projectRoot, Ids::buildAU, getUndoManagerFor (projectRoot), true);
+    buildAUv3Value.referTo                   (projectRoot, Ids::buildAUv3, getUndoManagerFor (projectRoot), false);
+    buildRTASValue.referTo                   (projectRoot, Ids::buildRTAS, getUndoManagerFor (projectRoot), false);
+    buildAAXValue.referTo                    (projectRoot, Ids::buildAAX, getUndoManagerFor (projectRoot), false);
+    buildStandaloneValue.referTo             (projectRoot, Ids::buildStandalone, getUndoManagerFor (projectRoot), false);
+    enableIAAValue.referTo                   (projectRoot, Ids::enableIAA, getUndoManagerFor (projectRoot), false);
+
+    pluginNameValue.referTo                  (projectRoot, Ids::pluginName, getUndoManagerFor (projectRoot), getProjectNameString());
+    pluginDescriptionValue.referTo           (projectRoot, Ids::pluginDesc, getUndoManagerFor (projectRoot), getProjectNameString());
+    pluginManufacturerValue.referTo          (projectRoot, Ids::pluginManufacturer, getUndoManagerFor (projectRoot), "yourcompany");
+    pluginManufacturerCodeValue.referTo      (projectRoot, Ids::pluginManufacturerCode, getUndoManagerFor (projectRoot), "Manu");
+    pluginCodeValue.referTo                  (projectRoot, Ids::pluginCode, getUndoManagerFor (projectRoot), makeValid4CC (getProjectUIDString() + getProjectUIDString()));
+    pluginChannelConfigsValue.referTo        (projectRoot, Ids::pluginChannelConfigs, getUndoManagerFor (projectRoot));
+
+    pluginIsSynthValue.referTo               (projectRoot, Ids::pluginIsSynth, getUndoManagerFor (projectRoot), false);
+    pluginWantsMidiInputValue.referTo        (projectRoot, Ids::pluginWantsMidiIn, getUndoManagerFor (projectRoot), false);
+    pluginProducesMidiOutValue.referTo       (projectRoot, Ids::pluginProducesMidiOut, getUndoManagerFor (projectRoot), false);
+    pluginIsMidiEffectPluginValue.referTo    (projectRoot, Ids::pluginIsMidiEffectPlugin, getUndoManagerFor (projectRoot), false);
+    pluginEditorNeedsKeyFocusValue.referTo   (projectRoot, Ids::pluginEditorRequiresKeys, getUndoManagerFor (projectRoot), false);
+
+    pluginVSTCategoryValue.referTo           (projectRoot, Ids::pluginVSTCategory, getUndoManagerFor (projectRoot));
+    pluginAUExportPrefixValue.referTo        (projectRoot, Ids::pluginAUExportPrefix, getUndoManagerFor (projectRoot),
+                                              CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false) + "AU");
+    pluginAUMainTypeValue.referTo            (projectRoot, Ids::pluginAUMainType, getUndoManagerFor (projectRoot));
+    pluginAUIsSandboxSafeValue.referTo       (projectRoot, Ids::pluginAUIsSandboxSafe, getUndoManagerFor (projectRoot));
+    pluginRTASCategoryValue.referTo          (projectRoot, Ids::pluginRTASCategory, getUndoManagerFor (projectRoot));
+    pluginRTASBypassDisabledValue.referTo    (projectRoot, Ids::pluginRTASDisableBypass, getUndoManagerFor (projectRoot));
+    pluginRTASMultiMonoDisabledValue.referTo (projectRoot, Ids::pluginRTASDisableMultiMono, getUndoManagerFor (projectRoot));
+    pluginAAXIdentifierValue.referTo         (projectRoot, Ids::aaxIdentifier, getUndoManagerFor (projectRoot), getDefaultAAXIdentifierString());
+    pluginAAXCategoryValue.referTo           (projectRoot, Ids::pluginAAXCategory, getUndoManagerFor (projectRoot), "AAX_ePlugInCategory_Dynamics");
+    pluginAAXBypassDisabledValue.referTo     (projectRoot, Ids::pluginAAXDisableBypass, getUndoManagerFor (projectRoot));
+    pluginAAXMultiMonoDisabledValue.referTo  (projectRoot, Ids::pluginAAXDisableMultiMono, getUndoManagerFor (projectRoot));
 }
 
 void Project::updateOldStyleConfigList()
@@ -410,8 +413,11 @@ Result Project::loadDocument (const File& file)
     enabledModulesList.reset();
     projectRoot = newTree;
 
+    intialiseProjectValues();
+    initialiseMainGroup();
+    initialiseAudioPluginValues();
+
     removeDefunctExporters();
-    setMissingDefaultValues();
     updateOldModulePaths();
     setChangedFlag (false);
 
@@ -432,7 +438,6 @@ Result Project::saveProject (const File& file, bool isCommandLineApp)
         return Result::ok();
 
     updateProjectSettings();
-    sanitiseConfigFlags();
 
     if (! isCommandLineApp)
         registerRecentFile (file);
@@ -450,14 +455,17 @@ Result Project::saveResourcesOnly (const File& file)
 }
 
 //==============================================================================
-void Project::valueTreePropertyChanged (ValueTree&, const Identifier& property)
+void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
 {
-    if (property == Ids::projectType)
-        setMissingDefaultValues();
-    else if (property == Ids::name)
-        setTitle (projectRoot [Ids::name]);
+    if (tree.getParent() == tree)
+    {
+        if (property == Ids::projectType)
+            sendChangeMessage();
+        else if (property == Ids::name)
+            setTitle (projectRoot [Ids::name]);
 
-    changed();
+        changed();
+    }
 }
 
 void Project::valueTreeChildAdded (ValueTree&, ValueTree&)          { changed(); }
@@ -623,22 +631,22 @@ ProjectType::Target::TargetFileType ProjectType::Target::getTargetFileType() con
 //==============================================================================
 void Project::createPropertyEditors (PropertyListBuilder& props)
 {
-    props.add (new TextPropertyComponent (getProjectNameValue(), "Project Name", 256, false),
+    props.add (new TextPropertyComponent (projectNameValue, "Project Name", 256, false),
                "The name of the project.");
 
-    props.add (new TextPropertyComponent (getVersionValue(), "Project Version", 16, false),
+    props.add (new TextPropertyComponent (versionValue, "Project Version", 16, false),
                "The project's version number, This should be in the format major.minor.point[.point]");
 
-    props.add (new TextPropertyComponent (getCompanyName(), "Company Name", 256, false),
+    props.add (new TextPropertyComponent (companyNameValue, "Company Name", 256, false),
                "Your company name, which will be added to the properties of the binary where possible");
 
-    props.add (new TextPropertyComponent (getCompanyCopyright(), "Company Copyright", 256, false),
+    props.add (new TextPropertyComponent (companyCopyrightValue, "Company Copyright", 256, false),
                "Your company copyright, which will be added to the properties of the binary where possible");
 
-    props.add (new TextPropertyComponent (getCompanyWebsite(), "Company Website", 256, false),
+    props.add (new TextPropertyComponent (companyWebsiteValue, "Company Website", 256, false),
                "Your company website, which will be added to the properties of the binary where possible");
 
-    props.add (new TextPropertyComponent (getCompanyEmail(), "Company E-mail", 256, false),
+    props.add (new TextPropertyComponent (companyEmailValue, "Company E-mail", 256, false),
                "Your company e-mail, which will be added to the properties of the binary where possible");
 
     {
@@ -653,10 +661,10 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 
         if (ProjucerApplication::getApp().isPaidOrGPL())
         {
-            props.add (new BooleanPropertyComponent (shouldReportAppUsage(), "Report JUCE app usage", licenseRequiredTagline),
+            props.add (new ChoicePropertyComponent (reportAppUsageValue, String ("Report JUCE App Usage") + " (" + licenseRequiredTagline + ")"),
                        description["Report JUCE app usage"] + " " + licenseRequiredInfo);
 
-            props.add (new BooleanPropertyComponent (shouldDisplaySplashScreen(), "Display the JUCE splash screen", licenseRequiredTagline),
+            props.add (new ChoicePropertyComponent (displaySplashScreenValue, String ("Display the JUCE Splash Screen") + " (" + licenseRequiredTagline + ")"),
                        description["Display the JUCE splash screen"] + " " + licenseRequiredInfo);
         }
         else
@@ -667,45 +675,35 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
             options.add (licenseRequiredTagline);
             vars.add (var());
 
-            props.add (new ChoicePropertyComponent (Value(), "Report JUCE app usage", options, vars),
+            props.add (new ChoicePropertyComponent (Value(), "Report JUCE App Usage", options, vars),
                        description["Report JUCE app usage"] + " " + licenseRequiredInfo);
 
-            props.add (new ChoicePropertyComponent (Value(), "Display the JUCE splash screen", options, vars),
+            props.add (new ChoicePropertyComponent (Value(), "Display the JUCE Splash Screen", options, vars),
                        description["Display the JUCE splash screen"] + " " + licenseRequiredInfo);
         }
     }
 
-    {
-        StringArray splashScreenColours;
-
-        splashScreenColours.add ("Dark");
-        splashScreenColours.add ("Light");
-
-        Array<var> splashScreenCodes;
-
-        for (auto& splashScreenColour : splashScreenColours)
-            splashScreenCodes.add (splashScreenColour);
-
-        props.add (new ChoicePropertyComponent (splashScreenColour(), "Splash screen colour", splashScreenColours, splashScreenCodes),
-                   "Choose the colour of the JUCE splash screen.");
-    }
+    props.add (new ChoicePropertyComponent (splashScreenColourValue, "Splash Screen Colour",
+                                            { "Dark", "Light" },
+                                            { "Dark", "Light" }),
+               "Choose the colour of the JUCE splash screen.");
 
     {
         StringArray projectTypeNames;
         Array<var> projectTypeCodes;
 
-        const Array<ProjectType*>& types = ProjectType::getAllTypes();
+        auto types = ProjectType::getAllTypes();
 
-        for (int i = 0; i < types.size(); ++i)
+        for (auto i = 0; i < types.size(); ++i)
         {
             projectTypeNames.add (types.getUnchecked(i)->getDescription());
             projectTypeCodes.add (types.getUnchecked(i)->getType());
         }
 
-        props.add (new ChoicePropertyComponent (getProjectTypeValue(), "Project Type", projectTypeNames, projectTypeCodes));
+        props.add (new ChoicePropertyComponent (projectTypeValue, "Project Type", projectTypeNames, projectTypeCodes));
     }
 
-    props.add (new TextPropertyComponent (getBundleIdentifier(), "Bundle Identifier", 256, false),
+    props.add (new TextPropertyComponent (bundleIdentifierValue, "Bundle Identifier", 256, false),
                "A unique identifier for this product, mainly for use in OSX/iOS builds. It should be something like 'com.yourcompanyname.yourproductname'");
 
     if (getProjectType().isAudioPlugin())
@@ -717,125 +715,115 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
         StringArray maxSizeNames;
         Array<var> maxSizeCodes;
 
-        maxSizeNames.add (TRANS("Default"));
-        maxSizeCodes.add (var());
-
-        maxSizeNames.add (String());
-        maxSizeCodes.add (var());
-
-        for (int i = 0; i < numElementsInArray (maxSizes); ++i)
+        for (auto i = 0; i < numElementsInArray (maxSizes); ++i)
         {
-            const int sizeInBytes = maxSizes[i] * 1024;
+            auto sizeInBytes = maxSizes[i] * 1024;
+
             maxSizeNames.add (File::descriptionOfSizeInBytes (sizeInBytes));
             maxSizeCodes.add (sizeInBytes);
         }
 
-        props.add (new ChoicePropertyComponent (getMaxBinaryFileSize(), "BinaryData.cpp size limit", maxSizeNames, maxSizeCodes),
+        props.add (new ChoicePropertyComponent (maxBinaryFileSizeValue, "BinaryData.cpp Size Limit", maxSizeNames, maxSizeCodes),
                    "When splitting binary data into multiple cpp files, the Projucer attempts to keep the file sizes below this threshold. "
                    "(Note that individual resource files which are larger than this size cannot be split across multiple cpp files).");
     }
 
-    props.add (new BooleanPropertyComponent (shouldIncludeBinaryInAppConfig(), "Include Binary",
-                                             "Include BinaryData.h in the AppConfig.h file"));
+    props.add (new ChoicePropertyComponent (includeBinaryDataInAppConfigValue, "Include BinaryData in AppConfig"),
+                                             "Include BinaryData.h in the AppConfig.h file");
 
-    props.add (new TextPropertyComponent (binaryDataNamespace(), "BinaryData Namespace", 256, false),
-                                          "The namespace containing the binary assests. If left empty this defaults to \"BinaryData\".");
+    props.add (new TextPropertyComponent (binaryDataNamespaceValue, "BinaryData Namespace", 256, false),
+                                          "The namespace containing the binary assests.");
 
-    {
-        static const char* cppLanguageStandardNames[] = { "C++11", "C++14", "Use Latest", nullptr };
-        static const var cppLanguageStandardValues[]  = { "11",    "14",    "latest" };
+    props.add (new ChoicePropertyComponent (cppStandardValue, "C++ Language Standard",
+                                            { "C++11", "C++14", "Use Latest" },
+                                            { "11",    "14",    "latest" }),
+               "The standard of the C++ language that will be used for compilation.");
 
-        props.add (new ChoicePropertyComponent (getCppStandardValue(), "C++ Language Standard",
-                                                StringArray (cppLanguageStandardNames),
-                                                Array<var>  (cppLanguageStandardValues, numElementsInArray (cppLanguageStandardValues))),
-                   "The standard of the C++ language that will be used for compilation.");
-    }
-
-    props.add (new TextPropertyComponent (getProjectPreprocessorDefs(), "Preprocessor definitions", 32768, true),
+    props.add (new TextPropertyComponent (preprocessorDefsValue, "Preprocessor Definitions", 32768, true),
                "Global preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace, commas, or "
                "new-lines to separate the items - to include a space or comma in a definition, precede it with a backslash.");
 
-    props.addSearchPathProperty (getProjectHeaderSearchPaths(), "Header search paths", "Global header search paths.");
+    props.addSearchPathProperty (headerSearchPathsValue, "Header Search Paths", "Global header search paths.");
 
-    props.add (new TextPropertyComponent (getProjectUserNotes(), "Notes", 32768, true),
+    props.add (new TextPropertyComponent (userNotesValue, "Notes", 32768, true),
                "Extra comments: This field is not used for code or project generation, it's just a space where you can express your thoughts.");
 }
 
 void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
 {
-    props.add (new BooleanPropertyComponent (getShouldBuildVSTAsValue(), "Build VST", "Enabled"),
+    props.add (new ChoicePropertyComponent (buildVSTValue, "Build VST"),
                "Whether the project should produce a VST plugin.");
-    props.add (new BooleanPropertyComponent (getShouldBuildVST3AsValue(), "Build VST3", "Enabled"),
+    props.add (new ChoicePropertyComponent (buildVST3Value, "Build VST3"),
                "Whether the project should produce a VST3 plugin.");
-    props.add (new BooleanPropertyComponent (getShouldBuildAUAsValue(), "Build AudioUnit", "Enabled"),
+    props.add (new ChoicePropertyComponent (buildAUValue, "Build AudioUnit"),
                "Whether the project should produce an AudioUnit plugin.");
-    props.add (new BooleanPropertyComponent (getShouldBuildAUv3AsValue(), "Build AudioUnit v3", "Enabled"),
+    props.add (new ChoicePropertyComponent (buildAUValue, "Build AudioUnit v3"),
                "Whether the project should produce an AudioUnit version 3 plugin.");
-    props.add (new BooleanPropertyComponent (getShouldBuildRTASAsValue(), "Build RTAS", "Enabled"),
+    props.add (new ChoicePropertyComponent (buildRTASValue, "Build RTAS"),
                "Whether the project should produce an RTAS plugin.");
-    props.add (new BooleanPropertyComponent (getShouldBuildAAXAsValue(), "Build AAX", "Enabled"),
+    props.add (new ChoicePropertyComponent (buildAAXValue, "Build AAX"),
                "Whether the project should produce an AAX plugin.");
-    props.add (new BooleanPropertyComponent (getShouldBuildStandalonePluginAsValue(), "Build Standalone Plug-In", "Enabled"),
+    props.add (new ChoicePropertyComponent (buildStandaloneValue, "Build Standalone Plug-In"),
                "Whether the project should produce a standalone version of your plugin.");
-    props.add (new BooleanPropertyComponent (getShouldEnableIAAAsValue(), "Enable Inter-App Audio", "Enabled"),
+    props.add (new ChoicePropertyComponent (enableIAAValue, "Enable Inter-App Audio"),
                "Whether a standalone plug-in should be an Inter-App Audio app. You should also enable the audio "
                "background capability in the iOS exporter.");
 
-    props.add (new TextPropertyComponent (getPluginName(), "Plugin Name", 128, false),
+    props.add (new TextPropertyComponent (pluginNameValue, "Plugin Name", 128, false),
                "The name of your plugin (keep it short!)");
-    props.add (new TextPropertyComponent (getPluginDesc(), "Plugin Description", 256, false),
+    props.add (new TextPropertyComponent (pluginDescriptionValue, "Plugin Description", 256, false),
                "A short description of your plugin.");
 
-    props.add (new TextPropertyComponent (getPluginManufacturer(), "Plugin Manufacturer", 256, false),
+    props.add (new TextPropertyComponent (pluginManufacturerValue, "Plugin Manufacturer", 256, false),
                "The name of your company (cannot be blank).");
-    props.add (new TextPropertyComponent (getPluginManufacturerCode(), "Plugin Manufacturer Code", 4, false),
+    props.add (new TextPropertyComponent (pluginManufacturerCodeValue, "Plugin Manufacturer Code", 4, false),
                "A four-character unique ID for your company. Note that for AU compatibility, this must contain at least one upper-case letter!");
-    props.add (new TextPropertyComponent (getPluginCode(), "Plugin Code", 4, false),
+    props.add (new TextPropertyComponent (pluginCodeValue, "Plugin Code", 4, false),
                "A four-character unique ID for your plugin. Note that for AU compatibility, this must contain at least one upper-case letter!");
 
-    props.add (new TextPropertyComponent (getPluginChannelConfigs(), "Plugin Channel Configurations", 1024, false),
+    props.add (new TextPropertyComponent (pluginChannelConfigsValue, "Plugin Channel Configurations", 1024, false),
                "This list is a comma-separated set list in the form {numIns, numOuts} and each pair indicates a valid plug-in "
                "configuration. For example {1, 1}, {2, 2} means that the plugin can be used either with 1 input and 1 output, "
                "or with 2 inputs and 2 outputs. If your plug-in requires side-chains, aux output buses etc., then you must leave "
                "this field empty and override the isBusesLayoutSupported callback in your AudioProcessor.");
 
-    props.add (new BooleanPropertyComponent (getPluginIsSynth(), "Plugin is a Synth", "Is a Synth"),
+    props.add (new ChoicePropertyComponent (pluginIsSynthValue, "Plugin is a Synth"),
                "Enable this if you want your plugin to be treated as a synth or generator. It doesn't make much difference to the plugin itself, but some hosts treat synths differently to other plugins.");
 
-    props.add (new BooleanPropertyComponent (getPluginWantsMidiInput(), "Plugin Midi Input", "Plugin wants midi input"),
+    props.add (new ChoicePropertyComponent (pluginWantsMidiInputValue, "Plugin Midi Input"),
                "Enable this if you want your plugin to accept midi messages.");
 
-    props.add (new BooleanPropertyComponent (getPluginProducesMidiOut(), "Plugin Midi Output", "Plugin produces midi output"),
+    props.add (new ChoicePropertyComponent (pluginProducesMidiOutValue, "Plugin Midi Output"),
                "Enable this if your plugin is going to produce midi messages.");
 
-    props.add (new BooleanPropertyComponent (getPluginIsMidiEffectPlugin(), "Midi Effect Plugin", "Plugin is a midi effect plugin"),
+    props.add (new ChoicePropertyComponent (pluginIsMidiEffectPluginValue, "Midi Effect Plugin"),
                "Enable this if your plugin only processes midi and no audio.");
 
-    props.add (new BooleanPropertyComponent (getPluginEditorNeedsKeyFocus(), "Key Focus", "Plugin editor requires keyboard focus"),
+    props.add (new ChoicePropertyComponent (pluginEditorNeedsKeyFocusValue, "Plugin Editor Requires Keyboard Focus"),
                "Enable this if your plugin needs keyboard input - some hosts can be a bit funny about keyboard focus..");
 
-    props.add (new TextPropertyComponent (getPluginAUExportPrefix(), "Plugin AU Export Prefix", 64, false),
+    props.add (new TextPropertyComponent (pluginAUExportPrefixValue, "Plugin AU Export Prefix", 64, false),
                "A prefix for the names of exported entry-point functions that the component exposes - typically this will be a version of your plugin's name that can be used as part of a C++ token.");
 
-    props.add (new TextPropertyComponent (getPluginAUMainType(), "Plugin AU Main Type", 128, false),
+    props.add (new TextPropertyComponent (pluginAUMainTypeValue, "Plugin AU Main Type", 128, false),
                "In an AU, this is the value that is set as JucePlugin_AUMainType. Leave it blank unless you want to use a custom value.");
 
-    props.add (new BooleanPropertyComponent (getPluginAUIsSandboxSafe(), "Plugin AU Sandbox Safe", "AU is compatible with Sandboxed Hosts"),
+    props.add (new ChoicePropertyComponent (pluginAUIsSandboxSafeValue, "AU is compatible with Sandboxed Hosts"),
                "Enable if your plugin is compatible with Sandboxing, for hosts such as GarageBand.");
 
-    props.add (new TextPropertyComponent (getPluginVSTCategory(), "VST Category", 64, false),
+    props.add (new TextPropertyComponent (pluginVSTCategoryValue, "VST Category", 64, false),
                "In a VST, this is the value that is set as JucePlugin_VSTCategory. Leave it blank unless you want to use a custom value.");
 
-    props.add (new TextPropertyComponent (getPluginRTASCategory(), "Plugin RTAS Category", 64, false),
+    props.add (new TextPropertyComponent (pluginRTASCategoryValue, "Plugin RTAS Category", 64, false),
                "(Leave this blank if your plugin is a synth). This is one of the RTAS categories from FicPluginEnums.h, such as: ePlugInCategory_None, ePlugInCategory_EQ, ePlugInCategory_Dynamics, "
                "ePlugInCategory_PitchShift, ePlugInCategory_Reverb, ePlugInCategory_Delay, "
                "ePlugInCategory_Modulation, ePlugInCategory_Harmonic, ePlugInCategory_NoiseReduction, "
                "ePlugInCategory_Dither, ePlugInCategory_SoundField");
 
-    props.add (new TextPropertyComponent (getPluginAAXCategory(), "Plugin AAX Category", 64, false),
+    props.add (new TextPropertyComponent (pluginAAXCategoryValue, "Plugin AAX Category", 64, false),
                "This is one of the categories from the AAX_EPlugInCategory enum");
 
-    props.add (new TextPropertyComponent (getAAXIdentifier(), "Plugin AAX Identifier", 256, false),
+    props.add (new TextPropertyComponent (pluginAAXIdentifierValue, "Plugin AAX Identifier", 256, false),
                "The value to use for the JucePlugin_AAXIdentifier setting");
 }
 
@@ -891,7 +879,7 @@ Project::Item Project::getMainGroup()
 
 PropertiesFile& Project::getStoredProperties() const
 {
-    return getAppSettings().getProjectProperties (getProjectUID());
+    return getAppSettings().getProjectProperties (getProjectUIDString());
 }
 
 static void findImages (const Project::Item& item, OwnedArray<Project::Item>& found)
@@ -1339,51 +1327,30 @@ ValueTree Project::getConfigNode()
     return projectRoot.getOrCreateChildWithName (Ids::JUCEOPTIONS, nullptr);
 }
 
-const char* const Project::configFlagDefault  = "default";
-const char* const Project::configFlagEnabled  = "enabled";
-const char* const Project::configFlagDisabled = "disabled";
-
-Value Project::getConfigFlag (const String& name)
+ValueWithDefault Project::getConfigFlag (const String& name)
 {
-    ValueTree configNode (getConfigNode());
-    Value v (configNode.getPropertyAsValue (name, getUndoManagerFor (configNode)));
+    auto configNode = getConfigNode();
 
-    if (v.getValue().toString().isEmpty())
-        v = configFlagDefault;
-
-    return v;
+    return { configNode, name, getUndoManagerFor (configNode) };
 }
 
 bool Project::isConfigFlagEnabled (const String& name, bool defaultIsEnabled) const
 {
-    String configValue = projectRoot.getChildWithName (Ids::JUCEOPTIONS).getProperty (name);
+    auto configValue = projectRoot.getChildWithName (Ids::JUCEOPTIONS).getProperty (name, "default");
 
-    if (configValue == configFlagDefault)
+    if (configValue == "default")
         return defaultIsEnabled;
 
-    return (configValue == configFlagEnabled);
-}
-
-void Project::sanitiseConfigFlags()
-{
-    ValueTree configNode (getConfigNode());
-
-    for (int i = configNode.getNumProperties(); --i >= 0;)
-    {
-        const var value (configNode [configNode.getPropertyName(i)]);
-
-        if (value != configFlagEnabled && value != configFlagDisabled)
-            configNode.removeProperty (configNode.getPropertyName(i), getUndoManagerFor (configNode));
-    }
+    return configValue;
 }
 
 //==============================================================================
 String Project::getPluginRTASCategoryCode()
 {
-    if (static_cast<bool> (getPluginIsSynth().getValue()))
+    if (static_cast<bool> (isPluginSynth()))
         return "ePlugInCategory_SWGenerators";
 
-    String s (getPluginRTASCategory().toString());
+    String s (getPluginRTASCategoryString());
     if (s.isEmpty())
         s = "ePlugInCategory_None";
 
@@ -1392,16 +1359,16 @@ String Project::getPluginRTASCategoryCode()
 
 String Project::getAUMainTypeString()
 {
-    String s (getPluginAUMainType().toString());
+    auto s = getPluginAUMainTypeString();
 
     if (s.isEmpty())
     {
         // Unfortunately, Rez uses a header where kAudioUnitType_MIDIProcessor is undefined
         // Use aumi instead.
-        if      (getPluginIsMidiEffectPlugin().getValue()) s = "'aumi'";
-        else if (getPluginIsSynth().getValue())            s = "kAudioUnitType_MusicDevice";
-        else if (getPluginWantsMidiInput().getValue())     s = "kAudioUnitType_MusicEffect";
-        else                                               s = "kAudioUnitType_Effect";
+        if      (isPluginMidiEffect())      s = "'aumi'";
+        else if (isPluginSynth())           s = "kAudioUnitType_MusicDevice";
+        else if (pluginWantsMidiInput())    s = "kAudioUnitType_MusicEffect";
+        else                                s = "kAudioUnitType_Effect";
     }
 
     return s;
@@ -1409,14 +1376,14 @@ String Project::getAUMainTypeString()
 
 String Project::getAUMainTypeCode()
 {
-    String s (getPluginAUMainType().toString());
+    auto s = getPluginAUMainTypeString();
 
     if (s.isEmpty())
     {
-        if      (getPluginIsMidiEffectPlugin().getValue()) s = "aumi";
-        else if (getPluginIsSynth().getValue())            s = "aumu";
-        else if (getPluginWantsMidiInput().getValue())     s = "aumf";
-        else                                               s = "aufx";
+        if      (isPluginMidiEffect())      s = "aumi";
+        else if (isPluginSynth())           s = "aumu";
+        else if (pluginWantsMidiInput())    s = "aumf";
+        else                                s = "aufx";
     }
 
     return s;
@@ -1425,16 +1392,16 @@ String Project::getAUMainTypeCode()
 String Project::getIAATypeCode()
 {
     String s;
-    if (getPluginWantsMidiInput().getValue())
+    if (pluginWantsMidiInput())
     {
-        if (getPluginIsSynth().getValue())
+        if (isPluginSynth())
             s = "auri";
         else
             s = "aurm";
     }
     else
     {
-        if (getPluginIsSynth().getValue())
+        if (isPluginSynth())
             s = "aurg";
         else
             s = "aurx";
@@ -1444,19 +1411,18 @@ String Project::getIAATypeCode()
 
 String Project::getIAAPluginName()
 {
-    String s = getPluginManufacturer().toString();
+    String s = getPluginManufacturerString();
     s << ": ";
-    s << getPluginName().toString();
+    s << getPluginNameString();
     return s;
 }
 
 String Project::getPluginVSTCategoryString()
 {
-    String s (getPluginVSTCategory().toString().trim());
+    auto s = pluginVSTCategoryValue.get().toString().trim();
 
     if (s.isEmpty())
-        s = static_cast<bool> (getPluginIsSynth().getValue()) ? "kPlugCategSynth"
-                                                              : "kPlugCategEffect";
+        s = isPluginSynth() ? "kPlugCategSynth" : "kPlugCategEffect";
     return s;
 }
 

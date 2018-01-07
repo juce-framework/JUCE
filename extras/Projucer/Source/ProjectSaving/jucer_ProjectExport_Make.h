@@ -36,30 +36,25 @@ protected:
     {
     public:
         MakeBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
-            : BuildConfiguration (p, settings, e)
+            : BuildConfiguration (p, settings, e),
+              architectureTypeValue (config, Ids::linuxArchitecture, getUndoManager(), "-march=native")
         {
+            linkTimeOptimisationValue.setDefault (false);
+            optimisationLevelValue.setDefault (isDebug() ? gccO0 : gccO3);
         }
-
-        Value getArchitectureType()             { return getValue (Ids::linuxArchitecture); }
-        var getArchitectureTypeVar() const      { return config [Ids::linuxArchitecture]; }
-
-        var getDefaultOptimisationLevel() const override    { return var ((int) (isDebug() ? gccO0 : gccO3)); }
 
         void createConfigProperties (PropertyListBuilder& props) override
         {
             addGCCOptimisationProperty (props);
 
-            static const char* const archNames[] = { "(Default)", "<None>",       "32-bit (-m32)", "64-bit (-m64)", "ARM v6",       "ARM v7" };
-            const var archFlags[]                = { var(),       var (String()), "-m32",         "-m64",           "-march=armv6", "-march=armv7" };
-
-            props.add (new ChoicePropertyComponent (getArchitectureType(), "Architecture",
-                                                    StringArray (archNames, numElementsInArray (archNames)),
-                                                    Array<var> (archFlags, numElementsInArray (archFlags))));
+            props.add (new ChoicePropertyComponent (architectureTypeValue, "Architecture",
+                                                    { "<None>",      "Native",        "32-bit (-m32)", "64-bit (-m64)", "ARM v6",       "ARM v7" },
+                                                    { { String() } , "-march=native", "-m32",          "-m64",          "-march=armv6", "-march=armv7" }));
         }
 
         String getModuleLibraryArchName() const override
         {
-            String archFlag = getArchitectureTypeVar();
+            auto archFlag = getArchitectureTypeString();
             String prefix ("-march=");
 
             if (archFlag.startsWith (prefix))
@@ -73,6 +68,11 @@ protected:
 
             return "${JUCE_ARCH_LABEL}";
         }
+
+        String getArchitectureTypeString() const    { return architectureTypeValue.get(); }
+
+        //==============================================================================
+        ValueWithDefault architectureTypeValue;
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const override
@@ -308,8 +308,7 @@ public:
     static const char* getNameLinux()           { return "Linux Makefile"; }
     static const char* getValueTreeTypeName()   { return "LINUX_MAKE"; }
 
-    Value getExtraPkgConfig()                   { return getSetting (Ids::linuxExtraPkgConfig); }
-    String getExtraPkgConfigString() const      { return getSettingString (Ids::linuxExtraPkgConfig); }
+    String getExtraPkgConfigString() const      { return extraPkgConfigValue.get(); }
 
     static MakefileProjectExporter* createForSettings (Project& project, const ValueTree& settings)
     {
@@ -320,12 +319,13 @@ public:
     }
 
     //==============================================================================
-    MakefileProjectExporter (Project& p, const ValueTree& t)   : ProjectExporter (p, t)
+    MakefileProjectExporter (Project& p, const ValueTree& t)
+        : ProjectExporter (p, t),
+          extraPkgConfigValue (settings, Ids::linuxExtraPkgConfig, getProject().getUndoManagerFor (settings))
     {
         name = getNameLinux();
 
-        if (getTargetLocationString().isEmpty())
-            getTargetLocationValue() = getDefaultBuildsRootFolder() + "LinuxMakefile";
+        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + "LinuxMakefile");
     }
 
     //==============================================================================
@@ -370,7 +370,7 @@ public:
 
     void createExporterProperties (PropertyListBuilder& properties) override
     {
-        properties.add (new TextPropertyComponent (getExtraPkgConfig(), "pkg-config libraries", 8192, false),
+        properties.add (new TextPropertyComponent (extraPkgConfigValue, "pkg-config libraries", 8192, false),
                    "Extra pkg-config libraries for you application. Each package should be space separated.");
     }
 
@@ -426,6 +426,9 @@ public:
     }
 
 private:
+    ValueWithDefault extraPkgConfigValue;
+
+    //==============================================================================
     StringPairArray getDefines (const BuildConfiguration& config) const
     {
         StringPairArray result;
@@ -526,7 +529,7 @@ private:
     {
         StringArray result;
 
-        auto cppStandard = project.getCppStandardValue().toString();
+        auto cppStandard = project.getCppStandardString();
 
         if (cppStandard == "latest")
             cppStandard = "1z";
@@ -865,9 +868,8 @@ private:
 
     String getArchFlags (const BuildConfiguration& config) const
     {
-        if (const MakeBuildConfiguration* makeConfig = dynamic_cast<const MakeBuildConfiguration*> (&config))
-            if (! makeConfig->getArchitectureTypeVar().isVoid())
-                return makeConfig->getArchitectureTypeVar();
+        if (auto* makeConfig = dynamic_cast<const MakeBuildConfiguration*> (&config))
+            return makeConfig->getArchitectureTypeString();
 
         return "-march=native";
     }

@@ -60,7 +60,7 @@ struct ConsoleAppWizard   : public NewProjectWizard
     {
         createSourceFolder();
 
-        project.getProjectTypeValue() = ProjectType_ConsoleApp::getTypeName();
+        project.setProjectType (ProjectType_ConsoleApp::getTypeName());
 
         Project::Item sourceGroup (createSourceGroup (project));
 
