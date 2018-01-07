@@ -64,11 +64,6 @@ public:
     /** Destructor. */
     ~var() noexcept;
 
-   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
-    /** A static var object that can be used where you need an empty variant object. */
-    static const var null;
-   #endif
-
     var (const var& valueToCopy);
     var (int value) noexcept;
     var (int64 value) noexcept;
@@ -276,6 +271,18 @@ public:
         @see JSON
     */
     static var readFromStream (InputStream& input);
+
+   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
+    /** This was a static empty var object, but is now deprecated as it's too easy to accidentally
+        use it indirectly during a static constructor, leading to hard-to-find order-of-initialisation
+        problems.
+        @deprecated If you need a default-constructed var, just use var() or {}.
+        The only time you might miss having var::null available might be if you need to return an
+        empty var from a function by reference, but if you need to do that, it's easy enough to use
+        a function-local static var and return that, avoiding any order-of-initialisation issues.
+    */
+    static const var null;
+   #endif
 
 private:
     //==============================================================================

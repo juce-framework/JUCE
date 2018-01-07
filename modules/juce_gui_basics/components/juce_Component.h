@@ -2210,8 +2210,7 @@ public:
 
         /** Attempts to set the component's position to the given rectangle.
             Unlike simply calling Component::setBounds(), this may involve the positioner
-            being smart enough to adjust itself to fit the new bounds, e.g. a RelativeRectangle's
-            positioner may try to reverse the expressions used to make them fit these new coordinates.
+            being smart enough to adjust itself to fit the new bounds.
         */
         virtual void applyNewBounds (const Rectangle<int>& newBounds) = 0;
 

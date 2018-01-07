@@ -29,25 +29,23 @@ namespace juce
 
 FilenameComponent::FilenameComponent (const String& name,
                                       const File& currentFile,
-                                      const bool canEditFilename,
-                                      const bool isDirectory,
-                                      const bool isForSaving,
+                                      bool canEditFilename,
+                                      bool isDirectory,
+                                      bool isForSaving,
                                       const String& fileBrowserWildcard,
                                       const String& suffix,
                                       const String& textWhenNothingSelected)
     : Component (name),
-      maxRecentFiles (30),
       isDir (isDirectory),
       isSaving (isForSaving),
-      isFileDragOver (false),
       wildcard (fileBrowserWildcard),
       enforcedSuffix (suffix)
 {
     addAndMakeVisible (filenameBox);
     filenameBox.setEditableText (canEditFilename);
-    filenameBox.addListener (this);
     filenameBox.setTextWhenNothingSelected (textWhenNothingSelected);
     filenameBox.setTextWhenNoChoicesAvailable (TRANS ("(no recently selected files)"));
+    filenameBox.onChange = [this]() { setCurrentFile (getCurrentFile(), true); };
 
     setBrowseButtonText ("...");
 
@@ -92,9 +90,8 @@ void FilenameComponent::lookAndFeelChanged()
 
     addAndMakeVisible (browseButton = getLookAndFeel().createFilenameComponentBrowseButton (browseButtonText));
     browseButton->setConnectedEdges (Button::ConnectedOnLeft);
+    browseButton->onClick = [this]() { showChooser(); };
     resized();
-
-    browseButton->addListener (this);
 }
 
 void FilenameComponent::setTooltip (const String& newTooltip)
@@ -114,7 +111,7 @@ File FilenameComponent::getLocationToBrowse()
                                       : getCurrentFile();
 }
 
-void FilenameComponent::buttonClicked (Button*)
+void FilenameComponent::showChooser()
 {
    #if JUCE_MODAL_LOOPS_PERMITTED
     FileChooser fc (isDir ? TRANS ("Choose a new directory")
@@ -132,11 +129,6 @@ void FilenameComponent::buttonClicked (Button*)
     ignoreUnused (isSaving);
     jassertfalse; // needs rewriting to deal with non-modal environments
    #endif
-}
-
-void FilenameComponent::comboBoxChanged (ComboBox*)
-{
-    setCurrentFile (getCurrentFile(), true);
 }
 
 bool FilenameComponent::isInterestedInFileDrag (const StringArray&)

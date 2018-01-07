@@ -180,7 +180,6 @@ private:
 //==============================================================================
 class ValueTreesDemo   : public Component,
                          public DragAndDropContainer,
-                         private Button::Listener,
                          private Timer
 {
 public:
@@ -196,8 +195,8 @@ public:
 
         addAndMakeVisible (undoButton);
         addAndMakeVisible (redoButton);
-        undoButton.addListener (this);
-        redoButton.addListener (this);
+        undoButton.onClick = [this]() { undoManager.undo(); };
+        redoButton.onClick = [this]() { undoManager.redo(); };
 
         startTimer (500);
     }
@@ -291,14 +290,6 @@ public:
         }
 
         return Component::keyPressed (key);
-    }
-
-    void buttonClicked (Button* b) override
-    {
-        if (b == &undoButton)
-            undoManager.undo();
-        else if (b == &redoButton)
-            undoManager.redo();
     }
 
 private:

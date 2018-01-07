@@ -29,8 +29,6 @@
 
 //==============================================================================
 class NetworkingDemo   : public Component,
-                         private Button::Listener,
-                         private TextEditor::Listener,
                          private Thread
 {
 public:
@@ -42,11 +40,11 @@ public:
 
         addAndMakeVisible (urlBox);
         urlBox.setText ("https://www.google.com");
-        urlBox.addListener (this);
+        urlBox.onReturnKey = [this]() { fetchButton.triggerClick(); };
 
         addAndMakeVisible (fetchButton);
         fetchButton.setButtonText ("Download URL Contents");
-        fetchButton.addListener (this);
+        fetchButton.onClick = [this]() { startThread(); };
 
         addAndMakeVisible (resultsBox);
     }
@@ -58,10 +56,10 @@ public:
 
     void resized() override
     {
-        Rectangle<int> area (getLocalBounds());
+        auto area = getLocalBounds();
 
         {
-            Rectangle<int> topArea (area.removeFromTop (40));
+            auto topArea = area.removeFromTop (40);
             fetchButton.setBounds (topArea.removeFromRight (180).reduced (8));
             urlBox.setBounds (topArea.reduced (8));
         }
@@ -106,17 +104,6 @@ private:
 
     CodeDocument resultsDocument;
     CodeEditorComponent resultsBox;
-
-    void buttonClicked (Button* button) override
-    {
-        if (button == &fetchButton)
-            startThread();
-    }
-
-    void textEditorReturnKeyPressed (TextEditor&) override
-    {
-        fetchButton.triggerClick();
-    }
 
     void lookAndFeelChanged() override
     {

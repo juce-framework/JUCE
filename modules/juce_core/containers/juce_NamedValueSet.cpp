@@ -120,12 +120,8 @@ bool NamedValueSet::isEmpty() const noexcept    { return values.isEmpty(); }
 
 static const var& getNullVarRef() noexcept
 {
-   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
-    return var::null;
-   #else
     static var nullVar;
     return nullVar;
-   #endif
 }
 
 const var& NamedValueSet::operator[] (const Identifier& name) const noexcept

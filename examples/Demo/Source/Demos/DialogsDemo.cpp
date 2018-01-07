@@ -88,8 +88,7 @@ public:
 
 
 //==============================================================================
-class DialogsDemo  : public Component,
-                     private Button::Listener
+class DialogsDemo  : public Component
 {
 public:
     enum DialogType
@@ -118,7 +117,7 @@ public:
 
         addAndMakeVisible (nativeButton);
         nativeButton.setButtonText ("Use Native Windows");
-        nativeButton.addListener (this);
+        nativeButton.onClick = [this]() { getLookAndFeel().setUsingNativeAlertWindows (nativeButton.getToggleState()); };
 
         static const char* windowNames[] =
         {
@@ -144,21 +143,12 @@ public:
 
         for (int i = 0; i < numDialogs; ++i)
         {
-            TextButton* newButton = new TextButton();
+            auto* newButton = new TextButton();
             windowButtons.add (newButton);
             addAndMakeVisible (newButton);
             newButton->setButtonText (windowNames[i]);
-            newButton->addListener (this);
+            newButton->onClick = [this, i, newButton]() { showWindow (*newButton, static_cast<DialogType> (i)); };
         }
-    }
-
-    ~DialogsDemo()
-    {
-        nativeButton.removeListener (this);
-
-        for (int i = windowButtons.size(); --i >= 0;)
-            if (TextButton* button = windowButtons.getUnchecked (i))
-                button->removeListener (this);
     }
 
     //==============================================================================
@@ -449,20 +439,6 @@ private:
                                                       "Sharing images finished\nwith " + resultString);
                 });
         }
-    }
-
-    void buttonClicked (Button* button) override
-    {
-        if (button == &nativeButton)
-        {
-            getLookAndFeel().setUsingNativeAlertWindows (nativeButton.getToggleState());
-
-            return;
-        }
-
-        for (int i = windowButtons.size(); --i >= 0;)
-            if (button == windowButtons.getUnchecked (i))
-                return showWindow (*button, static_cast<DialogType> (i));
     }
 
     ImagePreviewComponent imagePreview;

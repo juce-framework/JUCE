@@ -1068,7 +1068,10 @@ public:
             isStarted = internal->start();
 
             if (isStarted)
+            {
                 internal->setCallback (callback);
+                previousCallback = callback;
+            }
         }
     }
 
@@ -1117,7 +1120,9 @@ public:
 
                 if (isStarted)
                 {
-                    previousCallback = internal->callback;
+                    if (internal->callback != nullptr)
+                        previousCallback = internal->callback;
+
                     stop();
                 }
             }
@@ -1155,8 +1160,11 @@ private:
         stopTimer();
 
         stop();
+
+        internal->updateDetailsFromDevice();
+
         open (inputChannelsRequested, outputChannelsRequested,
-              sampleRateRequested, bufferSizeSamplesRequested);
+              getCurrentSampleRate(), getCurrentBufferSizeSamples());
         start (previousCallback);
     }
 
@@ -1396,8 +1404,45 @@ public:
         const ScopedLock sl (closeLock);
 
         close();
+
+        auto newSampleRate = sampleRateRequested;
+        auto newBufferSize = bufferSizeRequested;
+
+        for (auto* d : devices)
+        {
+            auto deviceSampleRate = d->getCurrentSampleRate();
+
+            if (deviceSampleRate != sampleRateRequested)
+            {
+                if (! getAvailableSampleRates().contains (deviceSampleRate))
+                    return;
+
+                for (auto* d2 : devices)
+                    if (d2 != d)
+                        d2->setCurrentSampleRate (deviceSampleRate);
+
+                newSampleRate = deviceSampleRate;
+                break;
+            }
+        }
+
+        for (auto* d : devices)
+        {
+            auto deviceBufferSize = d->getCurrentBufferSizeSamples();
+
+            if (deviceBufferSize != bufferSizeRequested)
+            {
+                if (! getAvailableBufferSizes().contains (deviceBufferSize))
+                    return;
+
+                newBufferSize = deviceBufferSize;
+                break;
+            }
+        }
+
         open (inputChannelsRequested, outputChannelsRequested,
-              sampleRateRequested, bufferSizeRequested);
+              newSampleRate, newBufferSize);
+
         start (cb);
     }
 
@@ -1408,7 +1453,9 @@ public:
 
             if (active)
             {
-                previousCallback = callback;
+                if (callback != nullptr)
+                    previousCallback = callback;
+
                 close();
             }
         }
@@ -1489,6 +1536,7 @@ public:
 
             const ScopedLock sl (callbackLock);
             callback = newCallback;
+            previousCallback = callback;
         }
     }
 
@@ -1917,6 +1965,7 @@ private:
 
         double getCurrentSampleRate()                        { return device->getCurrentSampleRate(); }
         bool   setCurrentSampleRate (double newSampleRate)   { return device->setCurrentSampleRate (newSampleRate); }
+        int  getCurrentBufferSizeSamples()                   { return device->getCurrentBufferSizeSamples(); }
 
         void audioDeviceAboutToStart (AudioIODevice* d) override      { owner.handleAudioDeviceAboutToStart (d); }
         void audioDeviceStopped() override                            { owner.handleAudioDeviceStopped(); }

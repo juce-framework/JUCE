@@ -235,7 +235,7 @@ public:
             return target;
         }
 
-        var getDefaultOptimisationLevel() const override    { return var ((int) (isDebug() ? optimisationOff : optimiseMaxSpeed)); }
+        var getDefaultOptimisationLevel() const override    { return var ((int) (isDebug() ? optimisationOff : optimiseFull)); }
 
         void createConfigProperties (PropertyListBuilder& props) override
         {
@@ -265,8 +265,8 @@ public:
                        "Enable this to use FAST_MATH non-IEEE mode. (Warning: this can have unexpected results!)");
 
 
-            static const char* optimisationLevels[] = { "No optimisation", "Minimise size", "Maximise speed", 0 };
-            const int optimisationLevelValues[]     = { optimisationOff, optimiseMinSize, optimiseMaxSpeed, 0 };
+            static const char* optimisationLevels[] = { "Disabled (/Od)", "Minimise size (/O1)", "Maximise speed (/O2)", "Full optimisation (/Ox)", 0 };
+            const int optimisationLevelValues[]     = { optimisationOff,  optimiseMinSize,       optimiseMaxSpeed,       optimiseFull,              0 };
 
             props.add (new ChoicePropertyComponent (getOptimisationLevel(), "Optimisation",
                                                     StringArray (optimisationLevels),
@@ -983,8 +983,9 @@ public:
         {
             switch (level)
             {
-                case optimiseMaxSpeed:  return "Full";
                 case optimiseMinSize:   return "MinSpace";
+                case optimiseMaxSpeed:  return "MaxSpeed";
+                case optimiseFull:      return "Full";
                 default:                return "Disabled";
             }
         }
@@ -1388,7 +1389,8 @@ public:
     {
         optimisationOff = 1,
         optimiseMinSize = 2,
-        optimiseMaxSpeed = 3
+        optimiseFull = 3,
+        optimiseMaxSpeed = 4
     };
 
     //==============================================================================

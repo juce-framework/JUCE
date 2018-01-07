@@ -688,12 +688,8 @@ ValueTree ValueTree::getSibling (int delta) const noexcept
 
 static const var& getNullVarRef() noexcept
 {
-   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
-    return var::null;
-   #else
     static var nullVar;
     return nullVar;
-   #endif
 }
 
 const var& ValueTree::operator[] (const Identifier& name) const noexcept

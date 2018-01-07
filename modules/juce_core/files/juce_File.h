@@ -88,15 +88,6 @@ public:
     File& operator= (File&&) noexcept;
 
     //==============================================================================
-   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
-    /** This static constant is used for referring to an 'invalid' file.
-        Bear in mind that you should avoid this kind of static variable, and always prefer
-        to use File() or {} if you need a default-constructed File object.
-    */
-    static const File nonexistent;
-   #endif
-
-    //==============================================================================
     /** Checks whether the file actually exists.
 
         @returns    true if the file exists, either as a file or a directory.
@@ -1035,6 +1026,16 @@ public:
     // Deprecated: use File::getSeparatorChar() and File::getSeparatorString() instead!
     JUCE_DEPRECATED (static const juce_wchar separator);
     JUCE_DEPRECATED (static const StringRef separatorString);
+   #endif
+
+    //==============================================================================
+   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
+    /** This was a static empty File object, but is now deprecated as it's too easy to accidentally
+        use it indirectly during a static constructor, leading to hard-to-find order-of-initialisation
+        problems.
+        @deprecated If you need a default-constructed File object, just use File() or {}.
+    */
+    static const File nonexistent;
    #endif
 
 private:

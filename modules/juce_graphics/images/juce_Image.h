@@ -153,14 +153,6 @@ public:
     */
     inline bool isNull() const noexcept                     { return image == nullptr; }
 
-   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
-    /** A null Image object that can be used when you need to return an invalid image.
-        This object is the equivalient to an Image created with the default constructor, and
-        you should always prefer to use Image() or {} when you need an empty image object.
-    */
-    static const Image null;
-   #endif
-
     //==============================================================================
     /** Returns the image's width (in pixels). */
     int getWidth() const noexcept;
@@ -419,6 +411,13 @@ public:
 
     /** @internal */
     explicit Image (ImagePixelData*) noexcept;
+
+   #if JUCE_ALLOW_STATIC_NULL_VARIABLES
+    /** A null Image object that can be used when you need to return an invalid image.
+        @deprecated If you need a default-constructed var, just use Image() or {}.
+    */
+    static const Image null;
+   #endif
 
 private:
     //==============================================================================

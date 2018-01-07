@@ -43,18 +43,18 @@ public:
 
         if (drawable != nullptr)
         {
-            Rectangle<float> contentBounds (drawable->getDrawableBounds());
+            auto contentBounds = drawable->getDrawableBounds();
 
-            if (DrawableComposite* dc = dynamic_cast<DrawableComposite*> (drawable.get()))
+            if (auto* dc = dynamic_cast<DrawableComposite*> (drawable.get()))
             {
-                Rectangle<float> r (dc->getContentArea().resolve (nullptr));
+                auto r = dc->getContentArea();
 
                 if (! r.isEmpty())
                     contentBounds = r;
             }
 
-            Rectangle<float> area = RectanglePlacement (RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize)
-                                        .appliedTo (contentBounds, Rectangle<float> (4.0f, 22.0f, getWidth() - 8.0f, getHeight() - 26.0f));
+            auto area = RectanglePlacement (RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize)
+                            .appliedTo (contentBounds, Rectangle<float> (4.0f, 22.0f, getWidth() - 8.0f, getHeight() - 26.0f));
 
             Path p;
             p.addRectangle (area);

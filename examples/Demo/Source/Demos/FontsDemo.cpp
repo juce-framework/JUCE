@@ -30,9 +30,7 @@
 //==============================================================================
 class FontsDemo  : public Component,
                    private ListBoxModel,
-                   private Slider::Listener,
-                   private Button::Listener,
-                   private ComboBox::Listener
+                   private Slider::Listener
 {
 public:
     FontsDemo()
@@ -59,9 +57,10 @@ public:
         heightSlider.addListener (this);
         kerningSlider.addListener (this);
         scaleSlider.addListener (this);
-        boldToggle.addListener (this);
-        italicToggle.addListener (this);
-        styleBox.addListener (this);
+
+        boldToggle.onClick   = [this]() { refreshPreviewBoxFont(); };
+        italicToggle.onClick = [this]() { refreshPreviewBoxFont(); };
+        styleBox.onChange    = [this]() { refreshPreviewBoxFont(); };
 
         Font::findFonts (fonts);   // Generate the list of fonts
 
@@ -157,12 +156,6 @@ public:
         else if (sliderThatWasMoved == &scaleSlider)        refreshPreviewBoxFont();
     }
 
-    void buttonClicked (Button* buttonThatWasClicked) override
-    {
-        if (buttonThatWasClicked == &boldToggle)            refreshPreviewBoxFont();
-        else if (buttonThatWasClicked == &italicToggle)     refreshPreviewBoxFont();
-    }
-
     // The following methods implement the ListBoxModel virtual methods:
     int getNumRows() override
     {
@@ -249,12 +242,6 @@ private:
             styleBox.addItemList (newStyles, 1);
             styleBox.setSelectedItemIndex (0);
         }
-    }
-
-    void comboBoxChanged (ComboBox* box) override
-    {
-        if (box == &styleBox)
-            refreshPreviewBoxFont();
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FontsDemo)

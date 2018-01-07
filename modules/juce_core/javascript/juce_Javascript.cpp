@@ -1071,8 +1071,9 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
             while (currentType != TokenTypes::closeParen)
             {
-                fo.parameters.add (currentValue.toString());
+                auto paramName = currentValue.toString();
                 match (TokenTypes::identifier);
+                fo.parameters.add (paramName);
 
                 if (currentType != TokenTypes::closeParen)
                     match (TokenTypes::comma);

@@ -75,6 +75,31 @@ public:
                              const StringArray& choices,
                              const Array<var>& correspondingValues);
 
+    /** Creates the component using a ValueWithDefault object. This will add an item to the ComboBox for the
+        default value with an ID of -1.
+
+        @param valueToControl       the ValueWithDefault object that contains the Value object that the combo box will read and control
+        @param propertyName         the name of the property
+        @param choices              the list of possible values that the drop-down list will contain
+        @param correspondingValues  a list of values corresponding to each item in the 'choices' StringArray.
+                                    These are the values that will be read and written to the
+                                    valueToControl value. This array must contain the same number of items
+                                    as the choices array
+
+    */
+    ChoicePropertyComponent (ValueWithDefault valueToControl,
+                             const String& propertyName,
+                             const StringArray& choices,
+                             const Array<var>& correspondingValues);
+
+    /** Creates the component using a ValueWithDefault object, adding an item to the ComboBox for the
+        default value with an ID of -1 as well as adding separate "Enabled" and "Disabled" options.
+
+        This is useful for simple on/off choices that also need a default value.
+    */
+    ChoicePropertyComponent (ValueWithDefault valueToControl,
+                             const String& propertyName);
+
     /** Destructor. */
     ~ChoicePropertyComponent();
 
@@ -95,10 +120,9 @@ public:
     /** Returns the list of options. */
     const StringArray& getChoices() const;
 
-
     //==============================================================================
     /** @internal */
-    void refresh();
+    void refresh() override;
 
 protected:
     /** The list of options that will be shown in the combo box.
@@ -110,12 +134,19 @@ protected:
     StringArray choices;
 
 private:
+    /** Delegating constructor. */
+    ChoicePropertyComponent (const String&, const StringArray&, const Array<var>&);
+
     ComboBox comboBox;
-    bool isCustomClass;
+    bool isCustomClass = false;
 
     class RemapperValueSource;
+    class RemapperValueSourceWithDefault;
+
     void createComboBox();
-    void comboBoxChanged (ComboBox*);
+    void createComboBoxWithDefault (const String&);
+
+    void comboBoxChanged (ComboBox*) override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChoicePropertyComponent)
 };

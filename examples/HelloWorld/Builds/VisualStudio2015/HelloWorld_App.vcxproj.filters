@@ -2025,6 +2025,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\geometry\juce_Line.h">
       <Filter>JUCE Modules\juce_graphics\geometry</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\geometry\juce_Parallelogram.h">
+      <Filter>JUCE Modules\juce_graphics\geometry</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\geometry\juce_Path.h">
       <Filter>JUCE Modules\juce_graphics\geometry</Filter>
     </ClInclude>

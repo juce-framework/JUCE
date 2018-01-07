@@ -27,8 +27,7 @@
 #include "../JuceDemoHeader.h"
 
 
-class RSAComponent  : public Component,
-                      private Button::Listener
+class RSAComponent  : public Component
 {
 public:
     RSAComponent()
@@ -44,7 +43,7 @@ public:
 
         addAndMakeVisible (generateRSAButton);
         generateRSAButton.setButtonText ("Generate RSA");
-        generateRSAButton.addListener (this);
+        generateRSAButton.onClick = [this]() { createRSAKey(); };
 
         addAndMakeVisible (rsaResultBox);
         rsaResultBox.setReadOnly (true);
@@ -53,12 +52,12 @@ public:
 
     void resized() override
     {
-        Rectangle<int> area (getLocalBounds());
+        auto area = getLocalBounds();
         rsaGroup.setBounds (area);
         area.removeFromTop (10);
         area.reduce (5, 5);
 
-        Rectangle<int> topArea (area.removeFromTop (34));
+        auto topArea = area.removeFromTop (34);
         topArea.removeFromLeft (110);
         bitSize.setBounds (topArea.removeFromLeft (topArea.getWidth() / 2).reduced (5));
         generateRSAButton.setBounds (topArea.reduced (5));
@@ -104,12 +103,6 @@ private:
     Label bitSizeLabel;
     TextEditor bitSize, rsaResultBox;
 
-    void buttonClicked (Button* buttonThatWasClicked) override
-    {
-        if (buttonThatWasClicked == &generateRSAButton)
-            createRSAKey();
-    }
-
     void lookAndFeelChanged() override
     {
         rsaGroup.setColour (GroupComponent::outlineColourId,
@@ -130,8 +123,7 @@ private:
 };
 
 //==============================================================================
-class HashesComponent  : public Component,
-                         private TextEditor::Listener
+class HashesComponent  : public Component
 {
 public:
     HashesComponent()
@@ -144,7 +136,17 @@ public:
 
         hashEntryBox.setReturnKeyStartsNewLine (true);
         hashEntryBox.setText ("Type some text in this box and the resulting MD5, SHA and Whirlpool hashes will update below");
-        hashEntryBox.addListener (this);
+
+        auto updateHashes = [this]()
+        {
+            auto text = hashEntryBox.getText();
+            updateMD5Result (text.toUTF8());
+            updateSHA256Result (text.toUTF8());
+            updateWhirlpoolResult (text.toUTF8());
+        };
+
+        hashEntryBox.onTextChange = updateHashes;
+        hashEntryBox.onReturnKey = updateHashes;
 
         hashLabel1.setText ("Text to Hash:", dontSendNotification);
         hashLabel2.setText ("MD5 Result:", dontSendNotification);
@@ -161,14 +163,6 @@ public:
         addAndMakeVisible (whirlpoolResult);
 
         updateHashes();
-    }
-
-    void updateHashes()
-    {
-        String text = hashEntryBox.getText();
-        updateMD5Result (text.toUTF8());
-        updateSHA256Result (text.toUTF8());
-        updateWhirlpoolResult (text.toUTF8());
     }
 
     void updateMD5Result (CharPointer_UTF8 text)
@@ -188,7 +182,7 @@ public:
 
     void resized() override
     {
-        Rectangle<int> area (getLocalBounds());
+        auto area = getLocalBounds();
         hashGroup.setBounds (area);
         area.removeFromLeft (120);
         area.removeFromTop (10);
@@ -204,11 +198,6 @@ private:
     TextEditor hashEntryBox;
     Label md5Result, shaResult, whirlpoolResult;
     Label hashLabel1, hashLabel2, hashLabel3, hashLabel4;
-
-    void textEditorTextChanged (TextEditor&) override        { updateHashes(); }
-    void textEditorReturnKeyPressed (TextEditor&) override   { updateHashes(); }
-    void textEditorEscapeKeyPressed (TextEditor&) override   { updateHashes(); }
-    void textEditorFocusLost (TextEditor&) override          { updateHashes(); }
 
     void lookAndFeelChanged() override
     {
