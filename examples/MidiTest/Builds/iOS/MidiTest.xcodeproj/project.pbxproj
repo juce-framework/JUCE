@@ -194,6 +194,7 @@
 				INFOPLIST_FILE = Info-App.plist;
 				INFOPLIST_PREPROCESS = NO;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LLVM_LTO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.MidiTest;
 				USE_HEADERMAP = NO; }; name = Release; };
 		E12A8778C1F50489C01F266F = {isa = XCBuildConfiguration; buildSettings = {

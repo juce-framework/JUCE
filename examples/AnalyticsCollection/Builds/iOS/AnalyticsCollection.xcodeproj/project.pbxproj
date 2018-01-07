@@ -152,6 +152,7 @@
 				INFOPLIST_FILE = Info-App.plist;
 				INFOPLIST_PREPROCESS = NO;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LLVM_LTO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.AnalyticsCollection;
 				USE_HEADERMAP = NO; }; name = Release; };
 		0399310F2F5034CFCB14437B = {isa = XCBuildConfiguration; buildSettings = {

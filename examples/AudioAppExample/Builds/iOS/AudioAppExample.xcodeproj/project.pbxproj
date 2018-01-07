@@ -216,6 +216,7 @@
 				INFOPLIST_FILE = Info-App.plist;
 				INFOPLIST_PREPROCESS = NO;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LLVM_LTO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.AudioAppExample;
 				USE_HEADERMAP = NO; }; name = Release; };
 		2DDD1A3A56EAB02179D1CFB6 = {isa = XCBuildConfiguration; buildSettings = {

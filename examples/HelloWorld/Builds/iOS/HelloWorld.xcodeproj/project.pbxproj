@@ -151,6 +151,7 @@
 				INFOPLIST_FILE = Info-App.plist;
 				INFOPLIST_PREPROCESS = NO;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LLVM_LTO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.jucehelloworld;
 				USE_HEADERMAP = NO; }; name = Release; };
 		F6DA01300C80F2338FCBD24A = {isa = XCBuildConfiguration; buildSettings = {

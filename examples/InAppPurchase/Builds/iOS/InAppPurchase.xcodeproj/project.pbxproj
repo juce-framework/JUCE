@@ -275,6 +275,7 @@
 				INFOPLIST_FILE = Info-App.plist;
 				INFOPLIST_PREPROCESS = NO;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LLVM_LTO = YES;
 				OTHER_CPLUSPLUSFLAGS = "-pedantic -Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion -Wextra-semi";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.juceInAppPurchaseSample;
 				USE_HEADERMAP = NO; }; name = Release; };

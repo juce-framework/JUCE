@@ -100,9 +100,9 @@ namespace Ids
     DECLARE_ID (customPList);
     DECLARE_ID (pListPrefixHeader);
     DECLARE_ID (pListPreprocess);
-    DECLARE_ID (uiFileSharingEnabled);
-    DECLARE_ID (uiSupportsDocumentBrowser);
-    DECLARE_ID (uiStatusBarHidden);
+    DECLARE_ID (UIFileSharingEnabled);
+    DECLARE_ID (UISupportsDocumentBrowser);
+    DECLARE_ID (UIStatusBarHidden);
     DECLARE_ID (documentExtensions);
     DECLARE_ID (keepCustomXcodeSchemes);
     DECLARE_ID (useHeaderMap);

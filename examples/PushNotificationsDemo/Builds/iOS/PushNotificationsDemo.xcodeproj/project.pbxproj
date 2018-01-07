@@ -273,6 +273,7 @@
 				INFOPLIST_FILE = Info-App.plist;
 				INFOPLIST_PREPROCESS = NO;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LLVM_LTO = YES;
 				OTHER_CPLUSPLUSFLAGS = "-pedantic -Werror -Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion -F../../../../3rd_party/FacebookSDKs-iOS-4 -F../../../../3rd_party/Firebase_ios_sdk/Analytics -F../../../../3rd_party/Firebase_ios_sdk/Messaging";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.pushnotificationsdemo;
 				USE_HEADERMAP = NO; }; name = Release; };
