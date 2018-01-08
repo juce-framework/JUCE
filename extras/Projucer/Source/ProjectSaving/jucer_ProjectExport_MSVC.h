@@ -59,14 +59,16 @@ public:
     void addToolsetProperty (PropertyListBuilder& props, const char** names, const var* values, int num)
     {
         props.add (new ChoicePropertyComponent (platformToolsetValue, "Platform Toolset",
-                                                StringArray (names, num), { values, num }));
+                                                StringArray (names, num), { values, num }),
+                   "Specifies the version of the platform toolset that will be used when building this project.");
     }
 
     void addIPPLibraryProperty (PropertyListBuilder& props)
     {
         props.add (new ChoicePropertyComponent (IPPLibraryValue, "Use IPP Library",
                                                 { "No",  "Yes (Default Linking)",  "Multi-Threaded Static Library", "Single-Threaded Static Library", "Multi-Threaded DLL", "Single-Threaded DLL" },
-                                                { var(), "true",                   "Parallel_Static",               "Sequential",                     "Parallel_Dynamic",   "Sequential_Dynamic" }));
+                                                { var(), "true",                   "Parallel_Static",               "Sequential",                     "Parallel_Dynamic",   "Sequential_Dynamic" }),
+                   "Enable this to use Intel's Integrated Performance Primitives library.");
     }
 
     void addWindowsTargetPlatformProperties (PropertyListBuilder& props)
@@ -217,7 +219,8 @@ public:
 
             props.add (new ChoicePropertyComponent (architectureTypeValue, "Architecture",
                                                     { get32BitArchName(), get64BitArchName() },
-                                                    { get32BitArchName(), get64BitArchName() }));
+                                                    { get32BitArchName(), get64BitArchName() }),
+                       "Whether to use a 32-bit or 64-bit architecture.");
 
 
             props.add (new ChoicePropertyComponentWithEnablement (debugInformationFormatValue,
@@ -244,9 +247,11 @@ public:
 
             props.add (new ChoicePropertyComponent (warningLevelValue, "Warning Level",
                                                     { "Low", "Medium", "High" },
-                                                    { 2,     3,        4 }));
+                                                    { 2,     3,        4 }),
+                       "The compilation warning level to use.");
 
-            props.add (new ChoicePropertyComponent (warningsAreErrorsValue, "Treat Warnings as Errors"));
+            props.add (new ChoicePropertyComponent (warningsAreErrorsValue, "Treat Warnings as Errors"),
+                       "Enable this to treat compilation warnings as errors.");
 
             props.add (new ChoicePropertyComponent (useRuntimeLibDLLValue, "Runtime Library",
                                                     { "Use static runtime", "Use DLL runtime" },
@@ -260,15 +265,24 @@ public:
                        "Disable to ensure that your final release build does not contain padding or thunks.");
 
             if (! isDebug())
-                props.add (new ChoicePropertyComponent (generateDebugSymbolsValue, "Force Generation of Debug Symbols"));
+            {
+                props.add (new ChoicePropertyComponent (generateDebugSymbolsValue, "Force Generation of Debug Symbols"),
+                           "Enable this to force generation of debug symbols in a release configuration.");
+            }
 
-            props.add (new TextPropertyComponent (prebuildCommandValue,  "Pre-build Command",  2048, true));
-            props.add (new TextPropertyComponent (postbuildCommandValue, "Post-build Command", 2048, true));
-            props.add (new ChoicePropertyComponent (generateManifestValue, "Generate Manifest"));
+            props.add (new TextPropertyComponent (prebuildCommandValue,  "Pre-build Command",  2048, true),
+                       "Some command that will be run before a build starts.");
+
+            props.add (new TextPropertyComponent (postbuildCommandValue, "Post-build Command", 2048, true),
+                       "Some command that will be run after a build starts.");
+
+            props.add (new ChoicePropertyComponent (generateManifestValue, "Generate Manifest"),
+                       "Enable this to generate a Manifest file.");
 
             props.add (new ChoicePropertyComponent (characterSetValue, "Character Set",
                                                     { "MultiByte", "Unicode" },
-                                                    { "MultiByte", "Unicode" }));
+                                                    { "MultiByte", "Unicode" }),
+                       "Specifies the character set used when building.");
         }
 
         String getModuleLibraryArchName() const override

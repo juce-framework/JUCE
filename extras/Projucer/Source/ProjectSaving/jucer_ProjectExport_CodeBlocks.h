@@ -230,7 +230,8 @@ private:
 
             props.add (new ChoicePropertyComponent (architectureTypeValue, "Architecture",
                                                     { "32-bit (-m32)", "64-bit (-m64)", "ARM v6",       "ARM v7" },
-                                                    { "-m32",          "-m64",          "-march=armv6", "-march=armv7" }));
+                                                    { "-m32",          "-m64",          "-march=armv6", "-march=armv7" }),
+                       "Specifies the 32/64-bit architecture to use.");
         }
 
         String getModuleLibraryArchName() const override

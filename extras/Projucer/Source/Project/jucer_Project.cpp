@@ -699,7 +699,8 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
             projectTypeCodes.add (types.getUnchecked(i)->getType());
         }
 
-        props.add (new ChoicePropertyComponent (projectTypeValue, "Project Type", projectTypeNames, projectTypeCodes));
+        props.add (new ChoicePropertyComponent (projectTypeValue, "Project Type", projectTypeNames, projectTypeCodes),
+                   "The project type for which settings should be shown.");
     }
 
     props.add (new TextPropertyComponent (bundleIdentifierValue, "Bundle Identifier", 256, false),
