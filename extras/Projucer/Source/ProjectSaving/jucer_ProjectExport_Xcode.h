@@ -286,7 +286,7 @@ public:
                    "You can find this string in the OS X app Keychain Access under \"Certificates\".");
 
         if (iOS)
-            props.add (new TextPropertyComponentWithEnablement (iosAppGroupsIDValue, iosAppGroupsValue.getPropertyAsValue(), "App Group ID", 256, false),
+            props.add (new TextPropertyComponentWithEnablement (iosAppGroupsIDValue, iosAppGroupsValue, "App Group ID", 256, false),
                        "The App Group ID to be used for allowing multiple apps to access a shared resource folder. Multiple IDs can be "
                        "added separated by a semicolon.");
 
@@ -544,28 +544,28 @@ protected:
                            "Enable this to copy plugin binaries to the specified folder after building.");
 
             if (project.shouldBuildVST())
-                props.add (new TextPropertyComponentWithEnablement (vstBinaryLocation, pluginBinaryCopyStepEnabled.getPropertyAsValue(),
-                                                                    "VST Binary Location", 1024, false),
+                props.add (new TextPropertyComponentWithEnablement (vstBinaryLocation, pluginBinaryCopyStepEnabled, "VST Binary Location",
+                                                                    1024, false),
                            "The folder in which the compiled VST binary should be placed.");
 
             if (project.shouldBuildVST3())
-                props.add (new TextPropertyComponentWithEnablement (vst3BinaryLocation, pluginBinaryCopyStepEnabled.getPropertyAsValue(),
-                                                                    "VST3 Binary Location", 1024, false),
+                props.add (new TextPropertyComponentWithEnablement (vst3BinaryLocation, pluginBinaryCopyStepEnabled, "VST3 Binary Location",
+                                                                    1024, false),
                            "The folder in which the compiled VST3 binary should be placed.");
 
             if (project.shouldBuildAU())
-                props.add (new TextPropertyComponentWithEnablement (auBinaryLocation, pluginBinaryCopyStepEnabled.getPropertyAsValue(),
-                                                                    "AU Binary Location", 1024, false),
+                props.add (new TextPropertyComponentWithEnablement (auBinaryLocation, pluginBinaryCopyStepEnabled, "AU Binary Location",
+                                                                    1024, false),
                            "The folder in which the compiled AU binary should be placed.");
 
             if (project.shouldBuildRTAS())
-                props.add (new TextPropertyComponentWithEnablement (rtasBinaryLocation, pluginBinaryCopyStepEnabled.getPropertyAsValue(),
-                                                                    "RTAS Binary Location", 1024, false),
+                props.add (new TextPropertyComponentWithEnablement (rtasBinaryLocation, pluginBinaryCopyStepEnabled, "RTAS Binary Location",
+                                                                    1024, false),
                            "The folder in which the compiled RTAS binary should be placed.");
 
             if (project.shouldBuildAAX())
-                props.add (new TextPropertyComponentWithEnablement (aaxBinaryLocation, pluginBinaryCopyStepEnabled.getPropertyAsValue(),
-                                                                    "AAX Binary Location", 1024, false),
+                props.add (new TextPropertyComponentWithEnablement (aaxBinaryLocation, pluginBinaryCopyStepEnabled, "AAX Binary Location",
+                                                                    1024, false),
                            "The folder in which the compiled AAX binary should be placed.");
         }
 

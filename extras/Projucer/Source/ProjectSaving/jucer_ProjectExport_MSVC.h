@@ -221,8 +221,7 @@ public:
 
 
             props.add (new ChoicePropertyComponentWithEnablement (debugInformationFormatValue,
-                                                                  isDebug() ? isDebugValue.getPropertyAsValue()
-                                                                            : generateDebugSymbolsValue.getPropertyAsValue(),
+                                                                  isDebug() ? isDebugValue : generateDebugSymbolsValue,
                                                                   "Debug Information Format",
                                                                   { "None", "C7 Compatible (/Z7)", "Program Database (/Zi)", "Program Database for Edit And Continue (/ZI)" },
                                                                   { "None", "OldStyle",            "ProgramDatabase",        "EditAndContinue" }),
@@ -307,23 +306,23 @@ public:
                            "Enable this to copy plugin binaries to a specified folder after building.");
 
             if (project.shouldBuildVST())
-                props.add (new TextPropertyComponentWithEnablement (vstBinaryLocation, pluginBinaryCopyStepValue.getPropertyAsValue(),
-                                                                    "VST Binary Location", 1024, false),
+                props.add (new TextPropertyComponentWithEnablement (vstBinaryLocation, pluginBinaryCopyStepValue, "VST Binary Location",
+                                                                    1024, false),
                            "The folder in which the compiled VST binary should be placed.");
 
             if (project.shouldBuildVST3())
-                props.add (new TextPropertyComponentWithEnablement (vst3BinaryLocation, pluginBinaryCopyStepValue.getPropertyAsValue(),
-                                                                              "VST3 Binary Location", 1024, false),
+                props.add (new TextPropertyComponentWithEnablement (vst3BinaryLocation, pluginBinaryCopyStepValue, "VST3 Binary Location",
+                                                                    1024, false),
                            "The folder in which the compiled VST3 binary should be placed.");
 
             if (project.shouldBuildRTAS())
-                props.add (new TextPropertyComponentWithEnablement (rtasBinaryLocation, pluginBinaryCopyStepValue.getPropertyAsValue(),
-                                                                              "RTAS Binary Location", 1024, false),
+                props.add (new TextPropertyComponentWithEnablement (rtasBinaryLocation, pluginBinaryCopyStepValue, "RTAS Binary Location",
+                                                                    1024, false),
                            "The folder in which the compiled RTAS binary should be placed.");
 
             if (project.shouldBuildAAX())
-                props.add (new TextPropertyComponentWithEnablement (aaxBinaryLocation, pluginBinaryCopyStepValue.getPropertyAsValue(),
-                                                                               "AAX Binary Location", 1024, false),
+                props.add (new TextPropertyComponentWithEnablement (aaxBinaryLocation, pluginBinaryCopyStepValue, "AAX Binary Location",
+                                                                    1024, false),
                            "The folder in which the compiled AAX binary should be placed.");
 
         }
