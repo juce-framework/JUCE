@@ -61,9 +61,6 @@ struct AudioPluginAppWizard   : public NewProjectWizard
         project.setProjectType (ProjectType_AudioPlugin::getTypeName());
         project.getProjectValue (Ids::buildStandalone) = true;
 
-        Project::Item sourceGroup (createSourceGroup (project));
-        project.getConfigFlag ("JUCE_QUICKTIME") = false; // disabled because it interferes with RTAS build on PC
-
         setExecutableNameForAllTargets (project, File::createLegalFileName (appTitle));
 
         String appHeaders (CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), filterCppFile));
@@ -102,6 +99,8 @@ struct AudioPluginAppWizard   : public NewProjectWizard
 
         if (! FileHelpers::overwriteFileWithNewDataIfDifferent (editorHFile, editorH))
             failedFiles.add (editorHFile.getFullPathName());
+
+        Project::Item sourceGroup (createSourceGroup (project));
 
         sourceGroup.addFileAtIndex (filterCppFile, -1, true);
         sourceGroup.addFileAtIndex (filterHFile,   -1, false);
