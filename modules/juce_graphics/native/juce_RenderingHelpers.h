@@ -2594,7 +2594,9 @@ public:
                 auto t = transform.getTransformWith (AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
                                                                      .followedBy (trans));
 
-                if (ScopedPointer<EdgeTable> et = font.getTypeface()->getEdgeTableForGlyph (glyphNumber, t, fontHeight))
+                ScopedPointer<EdgeTable> et (font.getTypeface()->getEdgeTableForGlyph (glyphNumber, t, fontHeight));
+
+                if (et != nullptr)
                     fillShape (new EdgeTableRegionType (*et), false);
             }
         }

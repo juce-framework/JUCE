@@ -184,7 +184,9 @@ public:
         {
             StringPairArray responseHeaders;
 
-            in = url.createInputStream (false, nullptr, nullptr, headers, 10000, &responseHeaders, &statusCode, 0);
+            in.reset (url.createInputStream (false, nullptr, nullptr, headers,
+                                             10000, &responseHeaders, &statusCode, 0));
+
             if (in == nullptr || statusCode != 302)
                 break;
 
@@ -355,11 +357,11 @@ public:
 
     void buttonClicked (Button* clickedButton) override
     {
-        if (DialogWindow* parentDialog = findParentComponentOfClass<DialogWindow>())
+        if (auto* parentDialog = findParentComponentOfClass<DialogWindow>())
         {
-            if      (clickedButton == overwriteButton) parentDialog->exitModalState (1);
-            else if (clickedButton == okButton)        parentDialog->exitModalState (2);
-            else if (clickedButton == cancelButton)    parentDialog->exitModalState (-1);
+            if      (clickedButton == overwriteButton.get()) parentDialog->exitModalState (1);
+            else if (clickedButton == okButton.get())        parentDialog->exitModalState (2);
+            else if (clickedButton == cancelButton.get())    parentDialog->exitModalState (-1);
         }
         else
             jassertfalse;

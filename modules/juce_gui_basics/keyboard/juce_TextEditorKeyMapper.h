@@ -41,7 +41,7 @@ struct TextEditorKeyMapper
     */
     static bool invokeKeyFunction (CallbackClass& target, const KeyPress& key)
     {
-        const ModifierKeys& mods = key.getModifiers();
+        auto mods = key.getModifiers();
 
         const bool isShiftDown   = mods.isShiftDown();
         const bool ctrlOrAltDown = mods.isCtrlDown() || mods.isAltDown();

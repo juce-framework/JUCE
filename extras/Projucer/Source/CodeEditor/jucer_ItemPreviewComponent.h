@@ -87,21 +87,21 @@ private:
 
             if (input != nullptr)
             {
-                const int64 totalSize = input->getTotalLength();
-
+                auto totalSize = input->getTotalLength();
                 String formatName;
-                if (ImageFileFormat* format = ImageFileFormat::findImageFormatForStream (*input))
+
+                if (auto* format = ImageFileFormat::findImageFormatForStream (*input))
                     formatName = " " + format->getFormatName();
 
                 input.reset();
 
-                Image image (ImageCache::getFromFile (file));
+                auto image = ImageCache::getFromFile (file);
 
                 if (image.isValid())
                 {
-                    DrawableImage* d = new DrawableImage();
+                    auto* d = new DrawableImage();
                     d->setImage (image);
-                    drawable = d;
+                    drawable.reset (d);
 
                     facts.add (String (image.getWidth()) + " x " + String (image.getHeight()) + formatName);
                 }
@@ -116,7 +116,7 @@ private:
             ScopedPointer<XmlElement> svg (XmlDocument::parse (file));
 
             if (svg != nullptr)
-                drawable = Drawable::createFromSVG (*svg);
+                drawable.reset (Drawable::createFromSVG (*svg));
         }
 
         facts.removeEmptyStrings (true);
