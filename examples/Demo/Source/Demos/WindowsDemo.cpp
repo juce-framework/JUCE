@@ -204,11 +204,11 @@ public:
 
         showWindowsButton.setButtonText ("Show Windows");
         addAndMakeVisible (showWindowsButton);
-        showWindowsButton.onClick = [this]() { showAllWindows(); };
+        showWindowsButton.onClick = [this] { showAllWindows(); };
 
         closeWindowsButton.setButtonText ("Close Windows");
         addAndMakeVisible (closeWindowsButton);
-        closeWindowsButton.onClick = [this]() { closeAllWindows(); };
+        closeWindowsButton.onClick = [this] { closeAllWindows(); };
     }
 
     ~WindowsDemo()

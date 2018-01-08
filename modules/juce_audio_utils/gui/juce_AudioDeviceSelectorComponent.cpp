@@ -208,7 +208,7 @@ public:
         if (hideAdvancedOptionsWithButton)
         {
             addAndMakeVisible (showAdvancedSettingsButton = new TextButton (TRANS("Show advanced settings...")));
-            showAdvancedSettingsButton->onClick = [this]() { showAdvanced(); };
+            showAdvancedSettingsButton->onClick = [this] { showAdvanced(); };
         }
 
         type.scanForDevices();
@@ -566,7 +566,7 @@ private:
         {
             addAndMakeVisible (showUIButton = new TextButton (TRANS ("Control Panel"),
                                                               TRANS ("Opens the device's own control panel")));
-            showUIButton->onClick = [this]() { showDeviceUIPanel(); };
+            showUIButton->onClick = [this] { showDeviceUIPanel(); };
         }
 
         resized();
@@ -583,7 +583,7 @@ private:
                     addAndMakeVisible (resetDeviceButton = new TextButton (TRANS ("Reset Device"),
                         TRANS ("Resets the audio interface - sometimes needed after changing a device's properties in its custom control panel")));
 
-                    resetDeviceButton->onClick = [this]() { resetDevice(); };
+                    resetDeviceButton->onClick = [this] { resetDevice(); };
                     resized();
                 }
 
@@ -601,7 +601,7 @@ private:
             if (outputDeviceDropDown == nullptr)
             {
                 outputDeviceDropDown = new ComboBox();
-                outputDeviceDropDown->onChange = [this]() { updateConfig (true, false, false, false); };
+                outputDeviceDropDown->onChange = [this] { updateConfig (true, false, false, false); };
 
                 addAndMakeVisible (outputDeviceDropDown);
 
@@ -613,7 +613,7 @@ private:
                 {
                     addAndMakeVisible (testButton = new TextButton (TRANS("Test"),
                                                                     TRANS("Plays a test tone")));
-                    testButton->onClick = [this]() { playTestSound(); };
+                    testButton->onClick = [this] { playTestSound(); };
                 }
             }
 
@@ -630,7 +630,7 @@ private:
             if (inputDeviceDropDown == nullptr)
             {
                 inputDeviceDropDown = new ComboBox();
-                inputDeviceDropDown->onChange = [this]() { updateConfig (false, true, false, false); };
+                inputDeviceDropDown->onChange = [this] { updateConfig (false, true, false, false); };
                 addAndMakeVisible (inputDeviceDropDown);
 
                 inputDeviceLabel = new Label ({}, TRANS("Input:"));
@@ -668,7 +668,7 @@ private:
         }
 
         sampleRateDropDown->setSelectedId (roundToInt (currentDevice->getCurrentSampleRate()), dontSendNotification);
-        sampleRateDropDown->onChange = [this]() { updateConfig (false, false, true, false); };
+        sampleRateDropDown->onChange = [this] { updateConfig (false, false, true, false); };
     }
 
     void updateBufferSizeComboBox (AudioIODevice* currentDevice)
@@ -695,7 +695,7 @@ private:
             bufferSizeDropDown->addItem (String (bs) + " samples (" + String (bs * 1000.0 / currentRate, 1) + " ms)", bs);
 
         bufferSizeDropDown->setSelectedId (currentDevice->getCurrentBufferSizeSamples(), dontSendNotification);
-        bufferSizeDropDown->onChange = [this]() { updateConfig (false, false, false, true); };
+        bufferSizeDropDown->onChange = [this] { updateConfig (false, false, false, true); };
     }
 
 public:
@@ -981,7 +981,7 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
             deviceTypeDropDown->addItem (types.getUnchecked(i)->getTypeName(), i + 1);
 
         addAndMakeVisible (deviceTypeDropDown);
-        deviceTypeDropDown->onChange = [this]() { updateDeviceType(); };
+        deviceTypeDropDown->onChange = [this] { updateDeviceType(); };
 
         deviceTypeDropDownLabel = new Label ({}, TRANS("Audio device type:"));
         deviceTypeDropDownLabel->setJustificationType (Justification::centredRight);
@@ -1002,7 +1002,7 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
         {
             addAndMakeVisible (bluetoothButton = new TextButton (TRANS("Bluetooth MIDI"),
                                                                  TRANS("Scan for bluetooth MIDI devices")));
-            bluetoothButton->onClick = [this]() { handleBluetoothButton(); };
+            bluetoothButton->onClick = [this] { handleBluetoothButton(); };
         }
     }
     else
@@ -1015,7 +1015,7 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
     if (showMidiOutputSelector)
     {
         addAndMakeVisible (midiOutputSelector = new ComboBox());
-        midiOutputSelector->onChange = [this]() { updateMidiOutput(); };
+        midiOutputSelector->onChange = [this] { updateMidiOutput(); };
 
         midiOutputLabel = new Label ("lm", TRANS("MIDI Output:"));
         midiOutputLabel->attachToComponent (midiOutputSelector, true);

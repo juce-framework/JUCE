@@ -393,7 +393,7 @@ KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet& mappin
     {
         addAndMakeVisible (resetButton);
 
-        resetButton.onClick = [this]()
+        resetButton.onClick = [this]
         {
             AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon,
                                           TRANS("Reset to defaults"),

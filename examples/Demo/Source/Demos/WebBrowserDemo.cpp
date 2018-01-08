@@ -78,18 +78,18 @@ public:
         // Create an address box..
         addAndMakeVisible (addressTextBox);
         addressTextBox.setTextToShowWhenEmpty ("Enter a web address, e.g. https://www.juce.com", Colours::grey);
-        addressTextBox.onReturnKey = [this]() { webView->goToURL (addressTextBox.getText()); };
+        addressTextBox.onReturnKey = [this] { webView->goToURL (addressTextBox.getText()); };
 
         // create the actual browser component
         addAndMakeVisible (webView = new DemoBrowserComponent (addressTextBox));
 
         // add some buttons..
         addAndMakeVisible (goButton);
-        goButton.onClick = [this]() { webView->goToURL (addressTextBox.getText()); };
+        goButton.onClick = [this] { webView->goToURL (addressTextBox.getText()); };
         addAndMakeVisible (backButton);
-        backButton.onClick = [this]() { webView->goBack(); };
+        backButton.onClick = [this] { webView->goBack(); };
         addAndMakeVisible (forwardButton);
-        forwardButton.onClick = [this]() { webView->goForward(); };
+        forwardButton.onClick = [this] { webView->goForward(); };
 
         // send the browser to a start page..
         webView->goToURL ("https://www.juce.com");

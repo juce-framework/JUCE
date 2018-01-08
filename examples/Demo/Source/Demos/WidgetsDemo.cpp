@@ -351,7 +351,7 @@ struct ButtonsPage   : public Component
         down.setImage (ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize));
         down.setOverlayColour (Colours::black.withAlpha (0.3f));
 
-        auto popupMessageCallback = [this]()
+        auto popupMessageCallback = [this]
         {
             if (auto* focused = Component::getCurrentlyFocusedComponent())
                 showBubbleMessage (*focused,
@@ -516,12 +516,12 @@ public:
         depthLabel.attachToComponent (&depthSlider, false);
 
         addAndMakeVisible (orientationButton);
-        orientationButton.onClick = [this]() { toolbar.setVertical (! toolbar.isVertical()); resized(); };
+        orientationButton.onClick = [this] { toolbar.setVertical (! toolbar.isVertical()); resized(); };
         orientationButton.changeWidthToFitText (22);
         orientationButton.setTopLeftPosition (depthSlider.getX(), depthSlider.getBottom() + 20);
 
         addAndMakeVisible (customiseButton);
-        customiseButton.onClick = [this]() { toolbar.showCustomisationDialog (factory); };
+        customiseButton.onClick = [this] { toolbar.showCustomisationDialog (factory); };
         customiseButton.changeWidthToFitText (22);
         customiseButton.setTopLeftPosition (orientationButton.getRight() + 20, orientationButton.getY());
     }
@@ -965,7 +965,7 @@ private:
             comboBox.addItem ("swingin", 6);
             comboBox.addItem ("wild", 7);
 
-            comboBox.onChange = [this]() { owner.setRating (row, comboBox.getSelectedId()); };
+            comboBox.onChange = [this] { owner.setRating (row, comboBox.getSelectedId()); };
             comboBox.setWantsKeyboardFocus (false);
         }
 
@@ -1277,7 +1277,7 @@ struct BurgerMenuHeader  : public Component
         p.loadPathFromData (burgerMenuPathData, sizeof (burgerMenuPathData));
         burgerButton.setShape (p, true, true, false);
 
-        burgerButton.onClick = [this]() { showOrHide(); };
+        burgerButton.onClick = [this] { showOrHide(); };
         addAndMakeVisible (burgerButton);
     }
 
@@ -1340,7 +1340,7 @@ public:
 
         popupButton.setButtonText ("Show Popup Menu");
         popupButton.setTriggeredOnMouseDown (true);
-        popupButton.onClick = [this]() { getDummyPopupMenu().showMenuAsync (PopupMenu::Options().withTargetComponent (&popupButton), nullptr); };
+        popupButton.onClick = [this] { getDummyPopupMenu().showMenuAsync (PopupMenu::Options().withTargetComponent (&popupButton), nullptr); };
         addAndMakeVisible (popupButton);
         addChildComponent (menuHeader);
 

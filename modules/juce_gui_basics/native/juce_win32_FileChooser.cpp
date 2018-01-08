@@ -279,7 +279,7 @@ private:
         threadHasReference.signal();
 
         Array<URL> r = openDialog (true);
-        MessageManager::callAsync ([safeThis, r]()
+        MessageManager::callAsync ([safeThis, r]
         {
             safeThis->results = r;
 

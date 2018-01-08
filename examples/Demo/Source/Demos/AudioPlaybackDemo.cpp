@@ -253,7 +253,7 @@ public:
 
         addAndMakeVisible (followTransportButton);
         followTransportButton.setButtonText ("Follow Transport");
-        followTransportButton.onClick = [this]() { updateFollowTransportState(); };
+        followTransportButton.onClick = [this] { updateFollowTransportState(); };
 
         addAndMakeVisible (explanation);
         explanation.setText ("Select an audio file in the treeview above, and this page will display its waveform, and let you play it..", dontSendNotification);
@@ -277,7 +277,7 @@ public:
         startStopButton.setButtonText ("Play/Stop");
         startStopButton.setColour (TextButton::buttonColourId, Colour (0xff79ed7f));
         startStopButton.setColour (TextButton::textColourOffId, Colours::black);
-        startStopButton.onClick = [this]() { startOrStop(); };
+        startStopButton.onClick = [this] { startOrStop(); };
 
         addAndMakeVisible (fileTreeComp);
 

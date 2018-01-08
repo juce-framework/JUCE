@@ -567,10 +567,10 @@ public:
         if (style == IncDecButtons)
         {
             owner.addAndMakeVisible (incButton = lf.createSliderButton (owner, true));
-            incButton->onClick = [this]() { incrementOrDecrement (interval); };
+            incButton->onClick = [this] { incrementOrDecrement (interval); };
 
             owner.addAndMakeVisible (decButton = lf.createSliderButton (owner, false));
-            decButton->onClick = [this]() { incrementOrDecrement (-interval); };
+            decButton->onClick = [this] { incrementOrDecrement (-interval); };
 
             if (incDecButtonMode != incDecButtonsNotDraggable)
             {

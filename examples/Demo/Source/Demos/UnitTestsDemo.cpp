@@ -114,7 +114,7 @@ struct UnitTestClasses
             setOpaque (true);
 
             addAndMakeVisible (startTestButton);
-            startTestButton.onClick = [this]() { start(); };
+            startTestButton.onClick = [this] { start(); };
 
             addAndMakeVisible (testResultsBox);
             testResultsBox.setMultiLine (true);

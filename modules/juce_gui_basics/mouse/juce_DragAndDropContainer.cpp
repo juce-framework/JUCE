@@ -323,7 +323,7 @@ private:
 
                     if (owner.shouldDropFilesWhenDraggedExternally (details, files, canMoveFiles) && ! files.isEmpty())
                     {
-                        MessageManager::callAsync ([=]()  { DragAndDropContainer::performExternalDragDropOfFiles (files, canMoveFiles); });
+                        MessageManager::callAsync ([=] { DragAndDropContainer::performExternalDragDropOfFiles (files, canMoveFiles); });
                         deleteSelf();
                         return;
                     }
@@ -332,7 +332,7 @@ private:
 
                     if (owner.shouldDropTextWhenDraggedExternally (details, text) && text.isNotEmpty())
                     {
-                        MessageManager::callAsync ([=]()  { DragAndDropContainer::performExternalDragDropOfText (text); });
+                        MessageManager::callAsync ([=] { DragAndDropContainer::performExternalDragDropOfText (text); });
                         deleteSelf();
                         return;
                     }

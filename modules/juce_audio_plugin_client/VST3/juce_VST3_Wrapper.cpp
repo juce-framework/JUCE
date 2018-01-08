@@ -472,7 +472,7 @@ public:
                 if (MessageManager::getInstance()->isThisTheMessageThread())
                     instance->updateTrackProperties (trackProperties);
                 else
-                    MessageManager::callAsync ([trackProperties, instance]()
+                    MessageManager::callAsync ([trackProperties, instance]
                                                { instance->updateTrackProperties (trackProperties); });
             }
         }

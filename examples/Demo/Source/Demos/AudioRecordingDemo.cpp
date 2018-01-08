@@ -233,7 +233,7 @@ public:
         recordButton.setColour (TextButton::buttonColourId, Colour (0xffff5c5c));
         recordButton.setColour (TextButton::textColourOnId, Colours::black);
 
-        recordButton.onClick = [this]()
+        recordButton.onClick = [this]
         {
             if (recorder.isRecording())
                 stopRecording();

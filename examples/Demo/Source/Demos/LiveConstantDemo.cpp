@@ -74,7 +74,7 @@ public:
         addAndMakeVisible (descriptionLabel);
         addAndMakeVisible (startButton);
         addChildComponent (demoComp);
-        startButton.onClick = [this]() { start(); };
+        startButton.onClick = [this] { start(); };
     }
 
     void paint (Graphics& g) override

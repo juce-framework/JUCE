@@ -107,10 +107,10 @@ public:
         {
             beginTest ("Lambdas");
 
-            std::function<int()> fStack ([]() { return 3; });
+            std::function<int()> fStack ([] { return 3; });
             expectEquals (fStack(), 3);
 
-            std::function<int()> fHeap ([=]() { return bigData.sum(); });
+            std::function<int()> fHeap ([=] { return bigData.sum(); });
             expectEquals (fHeap(), FunctionTestsHelpers::BigData::bigDataSum);
         }
 
@@ -130,9 +130,9 @@ public:
 
         std::function<int()> fEmpty;
 
-        std::function<int()> fStack ([]() { return 3; });
+        std::function<int()> fStack ([] { return 3; });
 
-        std::function<int()> fHeap ([=]() { return bigData.sum(); });
+        std::function<int()> fHeap ([=] { return bigData.sum(); });
 
         {
             beginTest ("copy constructor");
