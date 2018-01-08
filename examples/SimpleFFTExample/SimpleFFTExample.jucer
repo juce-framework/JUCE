@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="cgcxPd" name="SimpleFFTExample" projectType="guiapp" version="1.0.0"
-              bundleIdentifier="com.roli.SimpleFFTExample" includeBinaryInAppConfig="1"
+<JUCERPROJECT id="cgcxPd" name="SimpleFFTExample" projectType="guiapp" bundleIdentifier="com.roli.SimpleFFTExample"
               jucerVersion="5.2.0" displaySplashScreen="0" reportAppUsage="0"
-              splashScreenColour="Dark" companyName="ROLI Ltd." cppLanguageStandard="14"
-              companyCopyright="ROLI Ltd.">
+              companyName="ROLI Ltd." companyCopyright="ROLI Ltd.">
   <MAINGROUP id="rZCHr8" name="SimpleFFTExample">
     <GROUP id="{8DC23B3F-98AC-AB1C-B26A-E693AF2DF0D2}" name="Source">
       <FILE id="B1L62H" name="SpectrogramComponent.h" compile="0" resource="0"
@@ -15,10 +13,8 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
-                       isDebug="1" optimisation="1" targetName="SimpleFFTExample"/>
-        <CONFIGURATION name="Release" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
-                       isDebug="0" optimisation="3" targetName="SimpleFFTExample"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="SimpleFFTExample"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="SimpleFFTExample"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -37,10 +33,8 @@
     </XCODE_MAC>
     <VS2013 targetFolder="Builds/VisualStudio2013">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="1" optimisation="1" targetName="SimpleFFTExample"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="0" optimisation="3" targetName="SimpleFFTExample"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="SimpleFFTExample"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="SimpleFFTExample"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -59,10 +53,8 @@
     </VS2013>
     <VS2017 targetFolder="Builds/VisualStudio2017">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="SimpleFFTExample"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="SimpleFFTExample"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="SimpleFFTExample"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="SimpleFFTExample"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>

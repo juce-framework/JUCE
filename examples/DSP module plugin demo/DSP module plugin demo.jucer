@@ -1,18 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="NuI0q2" name="DSPModulePluginDemo" displaySplashScreen="0"
-              reportAppUsage="0" splashScreenColour="Dark" projectType="audioplug"
-              version="1.0.0" bundleIdentifier="com.ROLI.DSPmoduleplugindemo"
-              includeBinaryInAppConfig="1" buildVST="1" buildVST3="0" buildAU="1"
-              buildAUv3="0" buildRTAS="0" buildAAX="0" buildStandalone="1"
-              enableIAA="0" pluginName="DSP module plugin demo" pluginDesc="DSP module plugin demo"
+              reportAppUsage="0" projectType="audioplug" bundleIdentifier="com.ROLI.DSPmoduleplugindemo"
+              buildStandalone="1" pluginName="DSP module plugin demo" pluginDesc="DSP module plugin demo"
               pluginManufacturer="ROLI Ltd." pluginManufacturerCode="ROLI"
-              pluginCode="Dmpd" pluginChannelConfigs="" pluginIsSynth="0" pluginWantsMidiIn="0"
-              pluginProducesMidiOut="0" pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0"
-              pluginAUExportPrefix="DSPmoduleplugindemoAU" pluginRTASCategory=""
-              aaxIdentifier="com.yourcompany.DSPmoduleplugindemo" pluginAAXCategory="AAX_ePlugInCategory_Dynamics"
-              jucerVersion="5.2.0" companyName="ROLI Ltd." companyWebsite="www.juce.com"
-              companyEmail="info@juce.com" cppLanguageStandard="14" companyCopyright="ROLI Ltd.">
+              pluginCode="Dmpd" pluginChannelConfigs="" pluginAUExportPrefix="DSPmoduleplugindemoAU"
+              pluginRTASCategory="" aaxIdentifier="com.yourcompany.DSPmoduleplugindemo"
+              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.2.0"
+              companyName="ROLI Ltd." companyWebsite="www.juce.com" companyEmail="info@juce.com"
+              companyCopyright="ROLI Ltd.">
   <MAINGROUP id="EukfoT" name="DSPModulePluginDemo">
     <GROUP id="{03DB4847-1567-1194-A0D2-ECC6C6C5042C}" name="Resources">
       <FILE id="EWBl4v" name="Impulse1.wav" compile="0" resource="1" file="Resources/Impulse1.wav"/>
@@ -31,12 +27,10 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" extraCompilerFlags="-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion -Wextra-semi">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="DSP module plugin demo"
-                       osxSDK="default" osxCompatibility="10.9 SDK" osxArchitecture="default"
-                       cppLanguageStandard="gnu++14"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="DSP module plugin demo"
-                       osxSDK="default" osxCompatibility="10.9 SDK" osxArchitecture="default"
-                       cppLanguageStandard="gnu++14"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="DSP module plugin demo"
+                       osxCompatibility="10.9 SDK" cppLanguageStandard="gnu++14"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="DSP module plugin demo"
+                       osxCompatibility="10.9 SDK" cppLanguageStandard="gnu++14"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -57,12 +51,9 @@
     </XCODE_MAC>
     <VS2015 targetFolder="Builds/VisualStudio2015">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="DSPModulePluginDemo"
-                       warningsAreErrors="0" postbuildCommand=""/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="DSPModulePluginDemo"
-                       useRuntimeLibDLL="0" postbuildCommand=""/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="DSPModulePluginDemo" postbuildCommand=""/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="DSPModulePluginDemo" useRuntimeLibDLL="0"
+                       postbuildCommand=""/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -83,12 +74,8 @@
     </VS2015>
     <VS2017 targetFolder="Builds/VisualStudio2017" cppLanguageStandard="stdcpplatest">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="DSPModulePluginDemo"
-                       fastMath="0"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="DSPModulePluginDemo"
-                       fastMath="1"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="DSPModulePluginDemo"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="DSPModulePluginDemo" fastMath="1"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_opengl" path="../../modules"/>
@@ -125,5 +112,5 @@
     <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
   </MODULES>
-  <JUCEOPTIONS JUCE_QUICKTIME="disabled" JUCE_DSP_ENABLE_SNAP_TO_ZERO="disabled"/>
+  <JUCEOPTIONS JUCE_DSP_ENABLE_SNAP_TO_ZERO="0"/>
 </JUCERPROJECT>

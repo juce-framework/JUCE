@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="oNvA5C" name="ComponentTutorialExample" projectType="guiapp"
-              version="1.0.0" bundleIdentifier="com.roli.ComponentTutorialExample"
-              includeBinaryInAppConfig="1" jucerVersion="5.2.0" displaySplashScreen="0"
-              reportAppUsage="0" splashScreenColour="Dark" companyName="ROLI Ltd."
-              cppLanguageStandard="14" companyCopyright="ROLI Ltd.">
+              bundleIdentifier="com.roli.ComponentTutorialExample" jucerVersion="5.2.0"
+              displaySplashScreen="0" reportAppUsage="0" companyName="ROLI Ltd."
+              companyCopyright="ROLI Ltd.">
   <MAINGROUP id="WydTVz" name="ComponentTutorialExample">
     <GROUP id="{F2C8112A-EE4B-7AF1-A0A9-16152D1EF1A7}" name="Source">
       <FILE id="t4ngZQ" name="ToggleLightGridComponent.h" compile="0" resource="0"
@@ -20,10 +19,8 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
-                       isDebug="1" optimisation="1" targetName="ComponentTutorialExample"/>
-        <CONFIGURATION name="Release" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
-                       isDebug="0" optimisation="2" targetName="ComponentTutorialExample"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="ComponentTutorialExample"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="ComponentTutorialExample"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -36,10 +33,8 @@
     </XCODE_MAC>
     <VS2015 targetFolder="Builds/VisualStudio2015">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="ComponentTutorialExample"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="ComponentTutorialExample"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="ComponentTutorialExample"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="ComponentTutorialExample"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -52,10 +47,8 @@
     </VS2015>
     <VS2017 targetFolder="Builds/VisualStudio2017">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="ComponentTutorialExample"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="ComponentTutorialExample"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="ComponentTutorialExample"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="ComponentTutorialExample"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>

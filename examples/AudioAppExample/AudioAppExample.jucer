@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="PAnJXP" name="AudioAppExample" projectType="guiapp" version="1.0.0"
-              bundleIdentifier="com.roli.AudioAppExample" includeBinaryInAppConfig="1"
+<JUCERPROJECT id="PAnJXP" name="AudioAppExample" projectType="guiapp" bundleIdentifier="com.roli.AudioAppExample"
               jucerVersion="5.2.0" displaySplashScreen="0" reportAppUsage="0"
-              splashScreenColour="Dark" companyName="ROLI Ltd." cppLanguageStandard="14"
-              companyCopyright="ROLI Ltd.">
+              companyName="ROLI Ltd." companyCopyright="ROLI Ltd.">
   <MAINGROUP id="GaJIge" name="AudioAppExample">
     <GROUP id="{168FC5D4-FA65-8320-F83E-C14C416638E1}" name="Source">
       <FILE id="aHvhJ2" name="MainComponent.cpp" compile="1" resource="0"
@@ -15,10 +13,8 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
-                       isDebug="1" optimisation="1" targetName="AudioAppExample"/>
-        <CONFIGURATION name="Release" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
-                       isDebug="0" optimisation="2" targetName="AudioAppExample"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="AudioAppExample"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="AudioAppExample"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -37,13 +33,10 @@
         <MODULEPATH id="juce_audio_utils" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="portraitlandscape"
-                  iPadScreenOrientation="portraitlandscape" iosDeviceFamily="1,2">
+    <XCODE_IPHONE targetFolder="Builds/iOS">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" iosCompatibility="default" isDebug="1" optimisation="1"
-                       targetName="AudioAppExample"/>
-        <CONFIGURATION name="Release" iosCompatibility="default" isDebug="0" optimisation="2"
-                       targetName="AudioAppExample"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="AudioAppExample"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="AudioAppExample"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -64,10 +57,8 @@
     </XCODE_IPHONE>
     <VS2017 targetFolder="Builds/VisualStudio2017">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="AudioAppExample"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="AudioAppExample"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="AudioAppExample"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="AudioAppExample"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_video" path="../../modules"/>
