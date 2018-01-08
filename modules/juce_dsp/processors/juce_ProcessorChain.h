@@ -72,7 +72,17 @@ namespace ProcessorHelpers  // Internal helper classes used in building the Proc
         void process (ProcessContext& context) noexcept
         {
             Base::processor.process (context);
-            processors.process (context);
+
+            if (context.usesSeparateInputAndOutputBlocks())
+            {
+                jassert (context.getOutputBlock().getNumChannels() == context.getInputBlock().getNumChannels());
+                ProcessContextReplacing<typename ProcessContext::SampleType> replacingContext (context.getOutputBlock());
+                processors.process (replacingContext);
+            }
+            else
+            {
+                processors.process (context);
+            }
         }
 
         void reset()
