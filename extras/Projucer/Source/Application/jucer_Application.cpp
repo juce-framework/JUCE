@@ -341,7 +341,7 @@ MenuBarModel* ProjucerApplication::getMenuModel()
 
 StringArray ProjucerApplication::getMenuNames()
 {
-    return { "File", "Edit", "View", "Build", "Window", "GUI Editor", "Tools" };
+    return { "File", "Edit", "View", "Build", "Window", "GUI Editor", "Tools", "Help" };
 }
 
 void ProjucerApplication::createMenu (PopupMenu& menu, const String& menuName)
@@ -352,6 +352,7 @@ void ProjucerApplication::createMenu (PopupMenu& menu, const String& menuName)
     else if (menuName == "Build")       createBuildMenu  (menu);
     else if (menuName == "Window")      createWindowMenu (menu);
     else if (menuName == "Tools")       createToolsMenu  (menu);
+    else if (menuName == "Help")        createHelpMenu   (menu);
     else if (menuName == "GUI Editor")  createGUIEditorMenu (menu);
     else                                jassertfalse; // names have changed?
 }
@@ -508,6 +509,15 @@ void ProjucerApplication::createToolsMenu (PopupMenu& menu)
     menu.addCommandItem (commandManager, CommandIDs::showTranslationTool);
 }
 
+void ProjucerApplication::createHelpMenu (PopupMenu& menu)
+{
+    menu.addCommandItem (commandManager, CommandIDs::showForum);
+    menu.addSeparator();
+    menu.addCommandItem (commandManager, CommandIDs::showAPIModules);
+    menu.addCommandItem (commandManager, CommandIDs::showAPIClasses);
+    menu.addCommandItem (commandManager, CommandIDs::showTutorials);
+}
+
 void ProjucerApplication::createExtraAppleMenuItems (PopupMenu& menu)
 {
     menu.addCommandItem (commandManager, CommandIDs::showAboutWindow);
@@ -563,6 +573,10 @@ void ProjucerApplication::getAllCommands (Array <CommandID>& commands)
                               CommandIDs::showSVGPathTool,
                               CommandIDs::showAboutWindow,
                               CommandIDs::showAppUsageWindow,
+                              CommandIDs::showForum,
+                              CommandIDs::showAPIModules,
+                              CommandIDs::showAPIClasses,
+                              CommandIDs::showTutorials,
                               CommandIDs::loginLogout };
 
     commands.addArray (ids, numElementsInArray (ids));
@@ -614,6 +628,22 @@ void ProjucerApplication::getCommandInfo (CommandID commandID, ApplicationComman
         result.setInfo ("Application Usage Data", "Shows the application usage data agreement window", CommandCategories::general, 0);
         break;
 
+    case CommandIDs::showForum:
+        result.setInfo ("JUCE Community Forum", "Shows the JUCE community forum in a browser", CommandCategories::general, 0);
+        break;
+
+    case CommandIDs::showAPIModules:
+        result.setInfo ("API Modules", "Shows the API modules documentation in a browser", CommandCategories::general, 0);
+        break;
+
+    case CommandIDs::showAPIClasses:
+        result.setInfo ("API Classes", "Shows the API classes documentation in a browser", CommandCategories::general, 0);
+        break;
+
+    case CommandIDs::showTutorials:
+        result.setInfo ("JUCE Tutorials", "Shows the JUCE tutorials in a browser", CommandCategories::general, 0);
+        break;
+
     case CommandIDs::loginLogout:
         {
             bool isLoggedIn = false;
@@ -652,6 +682,10 @@ bool ProjucerApplication::perform (const InvocationInfo& info)
         case CommandIDs::showGlobalPathsWindow:     showPathsWindow(); break;
         case CommandIDs::showAboutWindow:           showAboutWindow(); break;
         case CommandIDs::showAppUsageWindow:        showApplicationUsageDataAgreementPopup(); break;
+        case CommandIDs::showForum:                 launchForumBrowser(); break;
+        case CommandIDs::showAPIModules:            launchModulesBrowser(); break;
+        case CommandIDs::showAPIClasses:            launchClassesBrowser(); break;
+        case CommandIDs::showTutorials:             launchTutorialsBrowser(); break;
         case CommandIDs::loginLogout:               doLogout(); break;
         default:                                    return JUCEApplication::perform (info);
     }
@@ -769,6 +803,38 @@ void ProjucerApplication::showEditorColourSchemeWindow()
                                 false,
                                 500, 500, 500, 500, 500, 500);
     }
+}
+
+void ProjucerApplication::launchForumBrowser()
+{
+    URL forumLink ("https://forum.juce.com/");
+
+    if (forumLink.isWellFormed())
+        forumLink.launchInDefaultBrowser();
+}
+
+void ProjucerApplication::launchModulesBrowser()
+{
+    URL modulesLink ("https://juce.com/doc/modules");
+
+    if (modulesLink.isWellFormed())
+        modulesLink.launchInDefaultBrowser();
+}
+
+void ProjucerApplication::launchClassesBrowser()
+{
+    URL classesLink ("https://juce.com/doc/classes");
+
+    if (classesLink.isWellFormed())
+        classesLink.launchInDefaultBrowser();
+}
+
+void ProjucerApplication::launchTutorialsBrowser()
+{
+    URL tutorialsLink ("https://juce.com/tutorials");
+
+    if (tutorialsLink.isWellFormed())
+        tutorialsLink.launchInDefaultBrowser();
 }
 
 //==============================================================================

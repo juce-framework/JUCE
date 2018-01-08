@@ -76,6 +76,7 @@ public:
     void createColourSchemeItems (PopupMenu&);
     void createWindowMenu (PopupMenu&);
     void createToolsMenu (PopupMenu&);
+    void createHelpMenu (PopupMenu&);
     void createExtraAppleMenuItems (PopupMenu&);
     void handleMainMenuCommand (int menuItemID);
 
@@ -104,6 +105,11 @@ public:
 
     void showPathsWindow();
     void showEditorColourSchemeWindow();
+
+    void launchForumBrowser();
+    void launchModulesBrowser();
+    void launchClassesBrowser();
+    void launchTutorialsBrowser();
 
     void updateAllBuildTabs();
     LatestVersionChecker* createVersionChecker() const;
