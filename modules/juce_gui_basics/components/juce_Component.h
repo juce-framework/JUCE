@@ -1281,7 +1281,7 @@ public:
         by the setFocusContainer() method). If the component isn't a focus
         container, then it will recursively ask its parents for a KeyboardFocusTraverser.
 
-        If you overrride this to return a custom KeyboardFocusTraverser, then
+        If you override this to return a custom KeyboardFocusTraverser, then
         this component and all its sub-components will use the new object to
         make their focusing decisions.
 
