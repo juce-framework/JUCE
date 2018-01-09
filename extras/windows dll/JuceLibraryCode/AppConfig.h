@@ -213,6 +213,14 @@
  //#define JUCE_ENABLE_REPAINT_DEBUGGING 0
 #endif
 
+#ifndef    JUCE_USE_XRANDR
+ //#define JUCE_USE_XRANDR 1
+#endif
+
+#ifndef    JUCE_USE_XINERAMA
+ //#define JUCE_USE_XINERAMA 1
+#endif
+
 #ifndef    JUCE_USE_XSHM
  //#define JUCE_USE_XSHM 1
 #endif
