@@ -162,7 +162,7 @@ void MainWindow::setProject (Project* newProject)
 {
     createProjectContentCompIfNeeded();
     getProjectContentComponent()->setProject (newProject);
-    currentProject = newProject;
+    currentProject.reset (newProject);
 
     if (currentProject != nullptr)
         projectNameValue.referTo (currentProject->getProjectValue (Ids::name));

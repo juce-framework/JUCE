@@ -57,7 +57,7 @@ struct FloatingToolWindow  : public DialogWindow
             centreAroundComponent (Component::getCurrentlyFocusedComponent(), defaultW, defaultH);
 
         setVisible (true);
-        owner = this;
+        owner.reset (this);
     }
 
     ~FloatingToolWindow()

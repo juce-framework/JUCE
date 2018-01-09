@@ -303,7 +303,7 @@ public:
         juceIcon = Drawable::createFromImageData (BinaryData::juce_icon_png,
                                                   BinaryData::juce_icon_pngSize);
 
-        setSize (518, overwritePath ? 345 : 269);
+        setSize (518, overwritePath != nullptr ? 345 : 269);
 
         lookAndFeelChanged();
     }

@@ -32,16 +32,15 @@
 class EditingPanelBase::MagnifierComponent  : public Component
 {
 public:
-    MagnifierComponent (Component* comp)
-        : scaleFactor (1.0), content (comp)
+    MagnifierComponent (Component* c) : content (c)
     {
-        addAndMakeVisible (content);
-        childBoundsChanged (content);
+        addAndMakeVisible (content.get());
+        childBoundsChanged (content.get());
     }
 
     void childBoundsChanged (Component* child)
     {
-        const Rectangle<int> childArea (getLocalArea (child, child->getLocalBounds()));
+        auto childArea = getLocalArea (child, child->getLocalBounds());
         setSize (childArea.getWidth(), childArea.getHeight());
     }
 
@@ -54,7 +53,7 @@ public:
     }
 
 private:
-    double scaleFactor;
+    double scaleFactor = 1.0;
     ScopedPointer<Component> content;
 };
 
@@ -62,8 +61,7 @@ private:
 class ZoomingViewport   : public Viewport
 {
 public:
-    ZoomingViewport (EditingPanelBase* const p)
-        : panel (p), isSpaceDown (false)
+    ZoomingViewport (EditingPanelBase* p) : panel (p)
     {
     }
 
@@ -88,7 +86,7 @@ public:
 
             if (isSpaceDown)
             {
-                DraggerOverlayComp* const dc = new DraggerOverlayComp();
+                auto dc = new DraggerOverlayComp();
                 addAndMakeVisible (dc);
                 dc->setBounds (getLocalBounds());
             }
@@ -102,7 +100,7 @@ public:
 
 private:
     EditingPanelBase* const panel;
-    bool isSpaceDown;
+    bool isSpaceDown = false;
 
     //==============================================================================
     class DraggerOverlayComp    : public Component

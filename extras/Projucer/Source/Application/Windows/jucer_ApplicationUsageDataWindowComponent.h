@@ -28,8 +28,7 @@
 
 
 //==============================================================================
-class ApplicationUsageDataWindowComponent    : public Component,
-                                               private Button::Listener
+class ApplicationUsageDataWindowComponent    : public Component
 {
 public:
     ApplicationUsageDataWindowComponent (bool showCheckbox)
@@ -62,29 +61,32 @@ public:
         privacyPolicyLink.setURL (URL ("https://juce.com/privacy-policy"));
 
         addAndMakeVisible (okButton);
-        okButton.setButtonText ("OK");
-        okButton.addListener (this);
 
         if (showCheckbox)
         {
-            addAndMakeVisible (shareApplicationUsageDataToggle = new ToggleButton());
+            addAndMakeVisible (shareApplicationUsageDataToggle);
 
             auto* controller = ProjucerApplication::getApp().licenseController.get();
 
             if (controller != nullptr && controller->getState().applicationUsageDataState == LicenseState::ApplicationUsageData::disabled)
-                shareApplicationUsageDataToggle->setToggleState (false, dontSendNotification);
+                shareApplicationUsageDataToggle.setToggleState (false, dontSendNotification);
             else
-                shareApplicationUsageDataToggle->setToggleState (true, dontSendNotification);
+                shareApplicationUsageDataToggle.setToggleState (true, dontSendNotification);
 
-            addAndMakeVisible(shareApplicationUsageDataLabel = new Label ({}, "Help JUCE to improve its software and services by sharing my application usage data"));
-            shareApplicationUsageDataLabel->setFont (Font (14.0f));
-            shareApplicationUsageDataLabel->setMinimumHorizontalScale (1.0f);
+            addAndMakeVisible (shareApplicationUsageDataLabel);
+            shareApplicationUsageDataLabel.setFont (Font (14.0f));
+            shareApplicationUsageDataLabel.setMinimumHorizontalScale (1.0f);
         }
         else
         {
-            addAndMakeVisible (upgradeLicenseButton = new TextButton ("Upgrade License"));
-            upgradeLicenseButton->addListener (this);
-            upgradeLicenseButton->setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
+            addAndMakeVisible (upgradeLicenseButton);
+            upgradeLicenseButton.setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
+
+            upgradeLicenseButton.onClick = []
+            {
+                if (auto* controller = ProjucerApplication::getApp().licenseController.get())
+                    controller->chooseNewLicense();
+            };
         }
     }
 
@@ -94,7 +96,7 @@ public:
         {
             auto newApplicationUsageDataState = LicenseState::ApplicationUsageData::enabled;
 
-            if (shareApplicationUsageDataToggle != nullptr && ! shareApplicationUsageDataToggle->getToggleState())
+            if (shareApplicationUsageDataToggle.isShowing() && ! shareApplicationUsageDataToggle.getToggleState())
                 newApplicationUsageDataState = LicenseState::ApplicationUsageData::disabled;
 
             controller->setApplicationUsageDataState (newApplicationUsageDataState);
@@ -113,13 +115,13 @@ public:
         juceEULALink.setBounds (linkBounds.removeFromLeft (linkBounds.getWidth() / 2).reduced (2));
         privacyPolicyLink.setBounds (linkBounds.reduced (2));
 
-        if (shareApplicationUsageDataToggle != nullptr)
+        if (shareApplicationUsageDataToggle.isShowing())
         {
             bounds.removeFromTop (10);
 
             auto toggleBounds = bounds.removeFromTop (40);
-            shareApplicationUsageDataToggle->setBounds (toggleBounds.removeFromLeft (40).reduced (5));
-            shareApplicationUsageDataLabel->setBounds (toggleBounds);
+            shareApplicationUsageDataToggle.setBounds (toggleBounds.removeFromLeft (40).reduced (5));
+            shareApplicationUsageDataLabel.setBounds (toggleBounds);
         }
 
         bounds.removeFromTop (10);
@@ -127,16 +129,17 @@ public:
         auto buttonW = 125;
         auto buttonH = 40;
 
-        if (upgradeLicenseButton != nullptr)
+        if (upgradeLicenseButton.isShowing())
         {
             auto left = bounds.removeFromLeft (bounds.getWidth() / 2);
 
-            upgradeLicenseButton->setSize (buttonW, buttonH);
-            upgradeLicenseButton->setCentrePosition (left.getCentreX(), left.getCentreY());
+            upgradeLicenseButton.setSize (buttonW, buttonH);
+            upgradeLicenseButton.setCentrePosition (left.getCentreX(), left.getCentreY());
         }
 
         okButton.setSize (buttonW, buttonH);
         okButton.setCentrePosition (bounds.getCentreX(), bounds.getCentreY());
+        okButton.onClick = [] { ProjucerApplication::getApp().dismissApplicationUsageDataAgreementPopup(); };
     }
 
     void paint (Graphics& g) override
@@ -147,28 +150,13 @@ public:
 private:
     Label headerLabel, bodyLabel;
     HyperlinkButton juceEULALink, privacyPolicyLink;
-    ScopedPointer<Label> shareApplicationUsageDataLabel;
-    ScopedPointer<ToggleButton> shareApplicationUsageDataToggle;
-    TextButton okButton;
-    ScopedPointer<TextButton> upgradeLicenseButton;
-
-    void buttonClicked (Button* b) override
-    {
-        if (b == &okButton)
-        {
-            ProjucerApplication::getApp().dismissApplicationUsageDataAgreementPopup();
-        }
-        else if (b == upgradeLicenseButton)
-        {
-            if (auto* controller = ProjucerApplication::getApp().licenseController.get())
-                controller->chooseNewLicense();
-        }
-    }
+    Label shareApplicationUsageDataLabel { {}, "Help JUCE to improve its software and services by sharing my application usage data" };
+    ToggleButton shareApplicationUsageDataToggle;
+    TextButton okButton { "OK" }, upgradeLicenseButton { "Upgrade License" };
 
     void lookAndFeelChanged() override
     {
-        if (upgradeLicenseButton != nullptr)
-            upgradeLicenseButton->setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
+        upgradeLicenseButton.setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ApplicationUsageDataWindowComponent)

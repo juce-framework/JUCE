@@ -28,15 +28,10 @@
 
 
 //==============================================================================
-class AboutWindowComponent    : public Component,
-                                private Button::Listener
+class AboutWindowComponent    : public Component
 {
 public:
     AboutWindowComponent()
-        : titleLabel ("title", "PROJUCER"),
-          versionLabel ("version"),
-          copyrightLabel ("copyright", String (CharPointer_UTF8 ("\xc2\xa9")) + String (" 2017 ROLI Ltd.")),
-          aboutButton ("About Us", URL ("https://juce.com"))
     {
         bool showPurchaseButton = false;
 
@@ -67,8 +62,13 @@ public:
 
         if (showPurchaseButton)
         {
-            addAndMakeVisible (licenseButton = new TextButton ("Purchase License"));
-            licenseButton->addListener (this);
+            addAndMakeVisible (licenseButton);
+
+            licenseButton.onClick = []
+            {
+                if (auto* controller = ProjucerApplication::getApp().licenseController.get())
+                    controller->chooseNewLicense();
+            };
         }
     }
 
@@ -105,8 +105,8 @@ public:
 
         centreSlice.removeFromTop (10);
 
-        if (licenseButton != nullptr)
-            licenseButton->setBounds (centreSlice.removeFromTop (25).reduced (25, 0));
+        if (licenseButton.isShowing())
+            licenseButton.setBounds (centreSlice.removeFromTop (25).reduced (25, 0));
 
         aboutButton.setBounds (centreSlice.removeFromBottom (20));
     }
@@ -123,27 +123,20 @@ public:
     }
 
 private:
-    Label titleLabel, versionLabel, copyrightLabel;
-    HyperlinkButton aboutButton;
-    ScopedPointer<TextButton> licenseButton;
+    Label titleLabel { "title", "PROJUCER" },
+          versionLabel { "version" },
+          copyrightLabel { "copyright", String (CharPointer_UTF8 ("\xc2\xa9")) + String (" 2017 ROLI Ltd.") };
 
-    Rectangle<float> huckleberryLogoBounds;
-    Rectangle<float> juceLogoBounds;
+    HyperlinkButton aboutButton { "About Us", URL ("https://juce.com") };
+    TextButton licenseButton { "Purchase License" };
+
+    Rectangle<float> huckleberryLogoBounds, juceLogoBounds;
 
     ScopedPointer<Drawable> juceLogo { Drawable::createFromImageData (BinaryData::juce_icon_png,
                                                                       BinaryData::juce_icon_pngSize) };
 
     ScopedPointer<Drawable> huckleberryLogo { Drawable::createFromImageData (BinaryData::huckleberry_icon_svg,
                                                                              BinaryData::huckleberry_icon_svgSize) };
-
-    void buttonClicked (Button* b) override
-    {
-        if (b == licenseButton.get())
-        {
-            if (auto* controller = ProjucerApplication::getApp().licenseController.get())
-                controller->chooseNewLicense();
-        }
-    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AboutWindowComponent)
 };
