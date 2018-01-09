@@ -62,7 +62,7 @@ struct SimpleDeviceManagerInputLevelMeter  : public Component,
     void paint (Graphics& g) override
     {
         getLookAndFeel().drawLevelMeter (g, getWidth(), getHeight(),
-                                         (float) exp (log (level) / 3.0)); // (add a bit of a skew to make the level more obvious)
+                                         (float) std::exp (std::log (level) / 3.0)); // (add a bit of a skew to make the level more obvious)
     }
 
     AudioDeviceManager& manager;

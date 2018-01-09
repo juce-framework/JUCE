@@ -53,8 +53,8 @@ struct AudioThumbnail::MinMaxValue
         values[0] = (int8) (limitedRange.getStart() * 127.0f);
         values[1] = (int8) (limitedRange.getEnd()   * 127.0f);
        #else
-        values[0] = (int8) jlimit (-128, 127, roundFloatToInt (newRange.getStart() * 127.0f));
-        values[1] = (int8) jlimit (-128, 127, roundFloatToInt (newRange.getEnd()   * 127.0f));
+        values[0] = (int8) jlimit (-128, 127, roundToInt (newRange.getStart() * 127.0f));
+        values[1] = (int8) jlimit (-128, 127, roundToInt (newRange.getEnd()   * 127.0f));
        #endif
 
         if (values[0] == values[1])
@@ -274,8 +274,7 @@ private:
 class AudioThumbnail::ThumbData
 {
 public:
-    ThumbData (const int numThumbSamples)
-        : peakLevel (-1)
+    ThumbData (int numThumbSamples)
     {
         ensureSize (numThumbSamples);
     }
@@ -356,7 +355,7 @@ public:
 
 private:
     Array<MinMaxValue> data;
-    int peakLevel;
+    int peakLevel = -1;
 
     void ensureSize (int thumbSamples)
     {

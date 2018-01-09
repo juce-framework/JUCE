@@ -313,12 +313,6 @@ inline float juce_hypot (float a, float b) noexcept
 }
 #endif
 
-/** 64-bit abs function. */
-inline int64 abs64 (const int64 n) noexcept
-{
-    return (n >= 0) ? n : -n;
-}
-
 #if JUCE_MSVC && ! defined (DOXYGEN)  // The MSVC libraries omit these functions for some reason...
  template<typename Type> Type asinh (Type x)  { return std::log (x + std::sqrt (x * x + (Type) 1)); }
  template<typename Type> Type acosh (Type x)  { return std::log (x + std::sqrt (x * x - (Type) 1)); }
@@ -491,7 +485,7 @@ inline int roundToInt (int value) noexcept
 
 /** Fast floating-point-to-integer conversion.
 
-    This is a slightly slower and slightly more accurate version of roundDoubleToInt(). It works
+    This is a slightly slower and slightly more accurate version of roundToInt(). It works
     fine for values above zero, but negative numbers are rounded the wrong way.
 */
 inline int roundToIntAccurate (double value) noexcept
@@ -501,37 +495,6 @@ inline int roundToIntAccurate (double value) noexcept
    #endif
 
     return roundToInt (value + 1.5e-8);
-}
-
-/** Fast floating-point-to-integer conversion.
-
-    This is faster than using the normal c++ cast to convert a double to an int, and
-    it will round the value to the nearest integer, rather than rounding it down
-    like the normal cast does.
-
-    Note that this routine gets its speed at the expense of some accuracy, and when
-    rounding values whose floating point component is exactly 0.5, odd numbers and
-    even numbers will be rounded up or down differently. For a more accurate conversion,
-    see roundDoubleToIntAccurate().
-*/
-inline int roundDoubleToInt (double value) noexcept
-{
-    return roundToInt (value);
-}
-
-/** Fast floating-point-to-integer conversion.
-
-    This is faster than using the normal c++ cast to convert a float to an int, and
-    it will round the value to the nearest integer, rather than rounding it down
-    like the normal cast does.
-
-    Note that this routine gets its speed at the expense of some accuracy, and when
-    rounding values whose floating point component is exactly 0.5, odd numbers and
-    even numbers will be rounded up or down differently.
-*/
-inline int roundFloatToInt (float value) noexcept
-{
-    return roundToInt (value);
 }
 
 //==============================================================================
@@ -692,5 +655,15 @@ namespace TypeHelpers
     template <>              struct UnsignedTypeWithSize<4>         { typedef uint32 type; };
     template <>              struct UnsignedTypeWithSize<8>         { typedef uint64 type; };
 }
+
+//==============================================================================
+#if ! DOXYGEN
+ // These old functions are deprecated: Just use roundToInt instead.
+ JUCE_DEPRECATED_ATTRIBUTE inline int roundDoubleToInt (double value) noexcept  { return roundToInt (value); }
+ JUCE_DEPRECATED_ATTRIBUTE inline int roundFloatToInt  (float  value) noexcept  { return roundToInt (value); }
+
+ // This old function isn't needed - just use std::abs() instead
+ JUCE_DEPRECATED_ATTRIBUTE inline int64 abs64 (int64 n) noexcept                { return std::abs (n); }
+#endif
 
 } // namespace juce
