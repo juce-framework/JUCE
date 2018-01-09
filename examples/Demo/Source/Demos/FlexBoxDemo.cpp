@@ -74,9 +74,7 @@ struct DemoFlexPanel   : public juce::Component
         te.onTextChange = [this, updateFn]
         {
             updateFn();
-
-            if (auto parent = getParentComponent())
-                parent->resized();
+            refreshLayout();
         };
 
         addAndMakeVisible (te);
@@ -101,6 +99,11 @@ struct DemoFlexPanel   : public juce::Component
             case 5:  flexItem.alignSelf = FlexItem::AlignSelf::stretch;   break;
         }
 
+        refreshLayout();
+    }
+
+    void refreshLayout()
+    {
         if (auto parent = getParentComponent())
             parent->resized();
     }
@@ -263,7 +266,13 @@ struct FlexBoxDemo   : public juce::Component
         tb->setButtonText (text);
         tb->setRadioGroupId (groupID);
         tb->setToggleState (toggleOn, dontSendNotification);
-        tb->onClick = fn;
+
+        tb->onClick = [this, fn]
+        {
+            fn();
+            resized();
+        };
+
         tb->setBounds (x, y, 130, 22);
         addAndMakeVisible (tb);
         return *tb;
