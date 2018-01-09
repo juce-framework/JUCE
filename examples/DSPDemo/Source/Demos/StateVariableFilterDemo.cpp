@@ -67,7 +67,7 @@ struct StateVariableFilterDemo
 
     ChoiceParameter typeParam {{ "Low-pass", "Band-pass", "High-pass"}, 1, "Type" };
     SliderParameter cutoffParam {{ 20.0, 20000.0 }, 0.5, 440.0f, "Cutoff", "Hz" };
-    SliderParameter qParam {{ 0.3, 20.0 }, 0.5, 1.0 / std::sqrt (2.0), "Resonance" };
+    SliderParameter qParam {{ 0.3, 20.0 }, 0.5, 1.0 / MathConstants<double>::sqrt2, "Resonance" };
 
     std::vector<DSPDemoParameterBase*> parameters { &typeParam, &cutoffParam, &qParam };
     double sampleRate = 0;
