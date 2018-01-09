@@ -542,7 +542,7 @@ public:
                     cl->createNewChildElement ("AdditionalIncludeDirectories")->addTextElement (includePaths.joinIntoString (";"));
                     cl->createNewChildElement ("PreprocessorDefinitions")->addTextElement (getPreprocessorDefs (config, ";") + ";%(PreprocessorDefinitions)");
 
-                    const bool runtimeDLL = shouldUseRuntimeDLL (config);
+                    const bool runtimeDLL = config.isUsingRuntimeLibDLL();
                     cl->createNewChildElement ("RuntimeLibrary")->addTextElement (runtimeDLL ? (isDebug ? "MultiThreadedDebugDLL" : "MultiThreadedDLL")
                                                                                   : (isDebug ? "MultiThreadedDebug"    : "MultiThreaded"));
                     cl->createNewChildElement ("RuntimeTypeInfo")->addTextElement ("true");
@@ -1262,12 +1262,6 @@ public:
             }
 
             return {};
-        }
-
-        bool shouldUseRuntimeDLL (const MSVCBuildConfiguration& config) const
-        {
-            return (config.config [Ids::useRuntimeLibDLL].isVoid() ? (getOwner().hasTarget (AAXPlugIn) || getOwner().hasTarget (RTASPlugIn))
-                                                                   : config.isUsingRuntimeLibDLL());
         }
 
         File getVCProjFile() const            { return getOwner().getProjectFile (getProjectFileSuffix(), getName()); }
