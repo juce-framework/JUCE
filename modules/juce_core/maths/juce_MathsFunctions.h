@@ -367,7 +367,7 @@ struct MathConstants
     static const FloatType euler;
 
     /** A predfined value for sqrt(2) */
-    static constexpr FloatType sqrt2;
+    static const FloatType sqrt2;
 };
 
 template <typename FloatType>
