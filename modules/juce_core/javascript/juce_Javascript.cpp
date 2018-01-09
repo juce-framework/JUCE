@@ -887,8 +887,8 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     private:
         String::CharPointerType p;
 
-        static bool isIdentifierStart (const juce_wchar c) noexcept   { return CharacterFunctions::isLetter (c)        || c == '_'; }
-        static bool isIdentifierBody  (const juce_wchar c) noexcept   { return CharacterFunctions::isLetterOrDigit (c) || c == '_'; }
+        static bool isIdentifierStart (juce_wchar c) noexcept   { return CharacterFunctions::isLetter (c)        || c == '_'; }
+        static bool isIdentifierBody  (juce_wchar c) noexcept   { return CharacterFunctions::isLetterOrDigit (c) || c == '_'; }
 
         TokenType matchNextToken()
         {
@@ -925,7 +925,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             return TokenTypes::eof;
         }
 
-        bool matchToken (TokenType name, const size_t len) noexcept
+        bool matchToken (TokenType name, size_t len) noexcept
         {
             if (p.compareUpTo (CharPointer_ASCII (name), (int) len) != 0) return false;
             p += (int) len;  return true;
@@ -1701,8 +1701,14 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             setMethod ("sqr",       Math_sqr);              setMethod ("sqrt",      Math_sqrt);
             setMethod ("ceil",      Math_ceil);             setMethod ("floor",     Math_floor);
 
-            setProperty ("PI", MathConstants<double>::pi);
-            setProperty ("E", exp (1.0));
+            setProperty ("PI",      MathConstants<double>::pi);
+            setProperty ("E",       MathConstants<double>::euler);
+            setProperty ("SQRT2",   MathConstants<double>::sqrt2);
+            setProperty ("SQRT1_2", std::sqrt (0.5));
+            setProperty ("LN2",     std::log (2.0));
+            setProperty ("LN10",    std::log (10.0));
+            setProperty ("LOG2E",   std::log (MathConstants<double>::euler) / std::log (2.0));
+            setProperty ("LOG10E",  std::log (MathConstants<double>::euler) / std::log (10.0));
         }
 
         static var Math_random    (Args)   { return Random::getSystemRandom().nextDouble(); }

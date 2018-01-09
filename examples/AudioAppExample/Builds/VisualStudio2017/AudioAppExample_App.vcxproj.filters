@@ -3180,6 +3180,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_data_structures\values\juce_ValueTreeSynchroniser.h">
       <Filter>JUCE Modules\juce_data_structures\values</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_data_structures\values\juce_ValueWithDefault.h">
+      <Filter>JUCE Modules\juce_data_structures\values</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_data_structures\juce_data_structures.h">
       <Filter>JUCE Modules\juce_data_structures</Filter>
     </ClInclude>

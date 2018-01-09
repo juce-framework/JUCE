@@ -209,7 +209,7 @@ public:
                 item.commandManager->invoke (info, true);
             }
 
-            MessageManager::callAsync ([=]()
+            MessageManager::callAsync ([=]
             {
                 if (instance != nullptr)
                     instance->invokeDirectly (item.itemID, topLevelIndex);

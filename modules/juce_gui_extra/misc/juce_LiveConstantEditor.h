@@ -161,7 +161,8 @@ namespace LiveConstantEditor
         template <typename ValueType>
         LivePropertyEditor (ValueType& v, CodeDocument& d)  : LivePropertyEditorBase (v, d)
         {
-            addAndMakeVisible (customComp = CustomEditor<Type>::create (*this));
+            customComp.reset (CustomEditor<Type>::create (*this));
+            addAndMakeVisible (customComp.get());
         }
     };
 

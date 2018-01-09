@@ -1787,7 +1787,7 @@ private:
             : owner (cd), device (d),
               useInputs (useIns), useOutputs (useOuts)
         {
-            d->setDeviceWrapperRestartCallback ([this]() { owner.restartAsync(); });
+            d->setDeviceWrapperRestartCallback ([this] { owner.restartAsync(); });
         }
 
         ~DeviceWrapper()

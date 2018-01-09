@@ -214,29 +214,17 @@ private:
                        "making it easy to browse/edit the module's classes. If disabled, then only the minimum number of files "
                        "required to compile it will appear inside your project.");
 
-            StringArray possibleValues;
-            possibleValues.add ("(Use Default)");
-            possibleValues.add ("Enabled");
-            possibleValues.add ("Disabled");
-
-            Array<var> mappings;
-            mappings.add (Project::configFlagDefault);
-            mappings.add (Project::configFlagEnabled);
-            mappings.add (Project::configFlagDisabled);
-
-            ModuleDescription info (modules.getModuleInfo (moduleID));
+            auto info = modules.getModuleInfo (moduleID);
 
             if (info.isValid())
             {
                 OwnedArray <Project::ConfigFlag> configFlags;
                 LibraryModule (info).getConfigFlags (project, configFlags);
 
-                for (int i = 0; i < configFlags.size(); ++i)
+                for (auto* flag : configFlags)
                 {
-                    ChoicePropertyComponent* c = new ChoicePropertyComponent (configFlags[i]->value,
-                                                                              configFlags[i]->symbol,
-                                                                              possibleValues, mappings);
-                    c->setTooltip (configFlags[i]->description);
+                    auto* c = new ChoicePropertyComponent (flag->value, flag->symbol);
+                    c->setTooltip (flag->description);
                     props.add (c);
                 }
             }
@@ -498,7 +486,7 @@ public:
     {
         moduleListTree.addListener (this);
 
-        projectCppStandardValue.referTo (project.getCppStandardValue());
+        projectCppStandardValue.referTo (project.getProjectValue (Ids::cppLanguageStandard));
         defaultJuceModulePathValue.referTo (getAppSettings().getStoredPath (Ids::defaultJuceModulePath));
         defaultUserModulePathValue.referTo (getAppSettings().getStoredPath (Ids::defaultUserModulePath));
 

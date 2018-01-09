@@ -380,7 +380,7 @@ private:
                 {
                     jucerComp.reset();
 
-                    jucerComp = new TestComponent (ComponentTypeHandler::findParentDocument (this), 0, false);
+                    jucerComp.reset (new TestComponent (ComponentTypeHandler::findParentDocument (this), 0, false));
                     jucerComp->setFilename (jucerComponentFile);
                     jucerComp->setToInitialSize();
 

@@ -225,6 +225,7 @@
 				INFOPLIST_FILE = Info-App.plist;
 				INFOPLIST_PREPROCESS = NO;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LLVM_LTO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.NetworkGraphicsDemo;
 				USE_HEADERMAP = NO; }; name = Release; };
 		3BF0365A560ACD4FD24D40CE = {isa = XCBuildConfiguration; buildSettings = {

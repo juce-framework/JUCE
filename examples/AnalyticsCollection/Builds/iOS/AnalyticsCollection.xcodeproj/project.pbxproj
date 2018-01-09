@@ -152,6 +152,7 @@
 				INFOPLIST_FILE = Info-App.plist;
 				INFOPLIST_PREPROCESS = NO;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LLVM_LTO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.AnalyticsCollection;
 				USE_HEADERMAP = NO; }; name = Release; };
 		0399310F2F5034CFCB14437B = {isa = XCBuildConfiguration; buildSettings = {
@@ -265,7 +266,7 @@
 					9DE971716CBA79E89467EFD0,
 					A01C1A7AFBB72E638096E0BA,
 					32F46511CABBD859FD1D427D, ); buildRules = ( ); dependencies = (  ); name = "AnalyticsCollection - App"; productName = AnalyticsCollection; productReference = 707149C59A1AF9752E428B97; productType = "com.apple.product-type.application"; };
-		8C6201B9CB81795542E3302D = {isa = PBXProject; buildConfigurationList = 65535D1056F6B2C9C545923E; attributes = { LastUpgradeCheck = 0830; ORGANIZATIONNAME = ""; TargetAttributes = { 3195ADB3A101AAE977C998D2 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 5CB45B3816ED17D0620DDEBF; projectDirPath = ""; projectRoot = ""; targets = (3195ADB3A101AAE977C998D2); };
+		8C6201B9CB81795542E3302D = {isa = PBXProject; buildConfigurationList = 65535D1056F6B2C9C545923E; attributes = { LastUpgradeCheck = 0830; ORGANIZATIONNAME = "ROLI Ltd."; TargetAttributes = { 3195ADB3A101AAE977C998D2 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 5CB45B3816ED17D0620DDEBF; projectDirPath = ""; projectRoot = ""; targets = (3195ADB3A101AAE977C998D2); };
 	};
 	rootObject = 8C6201B9CB81795542E3302D;
 }

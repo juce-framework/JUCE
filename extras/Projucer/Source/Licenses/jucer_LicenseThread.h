@@ -452,7 +452,7 @@ struct LicenseThread : NetWorkerThread
         if (owner.state.avatar.isValid() != newState.avatar.isValid())         { changed = true; }
 
         if (changed)
-            executeOnMessageThreadAndBlock ([this, updatedState]() { owner.updateState (updatedState); });
+            executeOnMessageThreadAndBlock ([this, updatedState] { owner.updateState (updatedState); });
     }
 
     //==============================================================================

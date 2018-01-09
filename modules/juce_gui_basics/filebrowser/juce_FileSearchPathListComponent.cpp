@@ -41,18 +41,18 @@ FileSearchPathListComponent::FileSearchPathListComponent()
     listBox.setOutlineThickness (1);
 
     addAndMakeVisible (addButton);
-    addButton.onClick = [this]() { addPath(); };
+    addButton.onClick = [this] { addPath(); };
     addButton.setConnectedEdges (Button::ConnectedOnLeft | Button::ConnectedOnRight | Button::ConnectedOnBottom | Button::ConnectedOnTop);
 
     addAndMakeVisible (removeButton);
-    removeButton.onClick = [this]() { deleteSelected(); };
+    removeButton.onClick = [this] { deleteSelected(); };
     removeButton.setConnectedEdges (Button::ConnectedOnLeft | Button::ConnectedOnRight | Button::ConnectedOnBottom | Button::ConnectedOnTop);
 
     addAndMakeVisible (changeButton);
-    changeButton.onClick = [this]() { editSelected(); };
+    changeButton.onClick = [this] { editSelected(); };
 
     addAndMakeVisible (upButton);
-    upButton.onClick = [this]() { moveSelection (-1); };
+    upButton.onClick = [this] { moveSelection (-1); };
 
     auto arrowColour = findColour (ListBox::textColourId);
 
@@ -67,7 +67,7 @@ FileSearchPathListComponent::FileSearchPathListComponent()
     }
 
     addAndMakeVisible (downButton);
-    downButton.onClick = [this]() { moveSelection (1); };
+    downButton.onClick = [this] { moveSelection (1); };
 
     {
         Path arrowPath;

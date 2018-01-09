@@ -32,10 +32,13 @@ class MSVCProjectExporterBase   : public ProjectExporter
 {
 public:
     MSVCProjectExporterBase (Project& p, const ValueTree& t, const char* const folderName)
-        : ProjectExporter (p, t)
+        : ProjectExporter (p, t),
+          IPPLibraryValue       (settings, Ids::IPPLibrary,                   getProject().getUndoManagerFor (settings)),
+          platformToolsetValue  (settings, Ids::toolset,                      getProject().getUndoManagerFor (settings)),
+          targetPlatformVersion (settings, Ids::windowsTargetPlatformVersion, getProject().getUndoManagerFor (settings)),
+          manifestFileValue     (settings, Ids::msvcManifestFile,             getProject().getUndoManagerFor (settings))
     {
-        if (getTargetLocationString().isEmpty())
-            getTargetLocationValue() = getDefaultBuildsRootFolder() + folderName;
+        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + folderName);
 
         updateOldSettings();
     }
@@ -48,45 +51,31 @@ public:
     virtual String getDefaultWindowsTargetPlatformVersion() const = 0;
 
     //==============================================================================
-    Value getIPPLibraryValue()                     { return getSetting (Ids::IPPLibrary); }
-    String getIPPLibrary() const                   { return settings [Ids::IPPLibrary]; }
-
-    Value getPlatformToolsetValue()                { return getSetting (Ids::toolset); }
-    String getPlatformToolset() const
-    {
-        const String s (settings [Ids::toolset].toString());
-        return s.isNotEmpty() ? s : getDefaultToolset();
-    }
-
-    Value getWindowsTargetPlatformVersionValue()   { return getSetting (Ids::windowsTargetPlatformVersion); }
-    String getWindowsTargetPlatformVersion() const
-    {
-        String targetPlatform = settings [Ids::windowsTargetPlatformVersion];
-        return (targetPlatform.isNotEmpty() ? targetPlatform : getDefaultWindowsTargetPlatformVersion());
-    }
+    String getIPPLibrary() const                      { return IPPLibraryValue.get(); }
+    String getPlatformToolset() const                 { return platformToolsetValue.get(); }
+    String getWindowsTargetPlatformVersion() const    { return targetPlatformVersion.get(); }
 
     //==============================================================================
     void addToolsetProperty (PropertyListBuilder& props, const char** names, const var* values, int num)
     {
-        props.add (new ChoicePropertyComponent (getPlatformToolsetValue(), "Platform Toolset",
-                                                StringArray (names, num), Array<var> (values, num)));
+        props.add (new ChoicePropertyComponent (platformToolsetValue, "Platform Toolset",
+                                                StringArray (names, num), { values, num }),
+                   "Specifies the version of the platform toolset that will be used when building this project.");
     }
 
     void addIPPLibraryProperty (PropertyListBuilder& props)
     {
-        static const char* ippOptions[] = { "No",  "Yes (Default Mode)", "Multi-Threaded Static Library", "Single-Threaded Static Library", "Multi-Threaded DLL", "Single-Threaded DLL" };
-        static const var ippValues[]    = { var(), "true",               "Parallel_Static",               "Sequential",                     "Parallel_Dynamic",   "Sequential_Dynamic" };
-
-        props.add (new ChoicePropertyComponent (getIPPLibraryValue(), "Use IPP Library",
-                                                StringArray (ippOptions, numElementsInArray (ippValues)),
-                                                Array<var>  (ippValues,  numElementsInArray (ippValues))));
+        props.add (new ChoicePropertyComponent (IPPLibraryValue, "Use IPP Library",
+                                                { "No",  "Yes (Default Linking)",  "Multi-Threaded Static Library", "Single-Threaded Static Library", "Multi-Threaded DLL", "Single-Threaded DLL" },
+                                                { var(), "true",                   "Parallel_Static",               "Sequential",                     "Parallel_Dynamic",   "Sequential_Dynamic" }),
+                   "Enable this to use Intel's Integrated Performance Primitives library.");
     }
 
     void addWindowsTargetPlatformProperties (PropertyListBuilder& props)
     {
         auto isWindows10SDK = getVisualStudioVersion() > 14;
 
-        props.add (new TextWithDefaultPropertyComponent<String> (windowsTargetPlatformVersion, "Windows Target Platform", 20),
+        props.add (new TextPropertyComponent (targetPlatformVersion, "Windows Target Platform", 20, false),
                    String ("Specifies the version of the Windows SDK that will be used when building this project. ")
                    + (isWindows10SDK ? "You can see which SDKs you have installed on your machine by going to \"Program Files (x86)\\Windows Kits\\10\\Lib\". " : "")
                    + "The default value for this exporter is " + getDefaultWindowsTargetPlatformVersion());
@@ -145,84 +134,73 @@ public:
                                                                 TargetOS::windows)));
     }
 
-    void initialiseWindowsTargetPlatformVersion()
-    {
-        windowsTargetPlatformVersion.referTo (settings, Ids::windowsTargetPlatformVersion,
-                                              nullptr, getDefaultWindowsTargetPlatformVersion());
-    }
-
     //==============================================================================
     class MSVCBuildConfiguration  : public BuildConfiguration
     {
     public:
         MSVCBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
-            : BuildConfiguration (p, settings, e)
+            : BuildConfiguration (p, settings, e),
+              warningLevelValue             (config, Ids::winWarningLevel,            getUndoManager(), 4),
+              warningsAreErrorsValue        (config, Ids::warningsAreErrors,          getUndoManager(), false),
+              prebuildCommandValue          (config, Ids::prebuildCommand,            getUndoManager()),
+              postbuildCommandValue         (config, Ids::postbuildCommand,           getUndoManager()),
+              generateDebugSymbolsValue     (config, Ids::alwaysGenerateDebugSymbols, getUndoManager(), false),
+              generateManifestValue         (config, Ids::generateManifest,           getUndoManager(), true),
+              enableIncrementalLinkingValue (config, Ids::enableIncrementalLinking,   getUndoManager(), false),
+              useRuntimeLibDLLValue         (config, Ids::useRuntimeLibDLL,           getUndoManager(), true),
+              intermediatesPathValue        (config, Ids::intermediatesPath,          getUndoManager()),
+              characterSetValue             (config, Ids::characterSet,               getUndoManager()),
+              architectureTypeValue         (config, Ids::winArchitecture,            getUndoManager(), get64BitArchName()),
+              fastMathValue                 (config, Ids::fastMath,                   getUndoManager()),
+              debugInformationFormatValue   (config, Ids::debugInformationFormat,     getUndoManager(), isDebug() ? "ProgramDatabase" : "None"),
+              pluginBinaryCopyStepValue     (config, Ids::enablePluginBinaryCopyStep, getUndoManager(), false)
         {
-            if (getWarningLevel() == 0)
-                getWarningLevelValue() = 4;
-
-            setValueIfVoid (shouldGenerateManifestValue(), true);
-            setValueIfVoid (getArchitectureType(), get64BitArchName());
-            setValueIfVoid (getDebugInformationFormatValue(), "ProgramDatabase");
-            setValueIfVoid (getPluginBinaryCopyStepEnabledValue(), false);
-
             if (! isDebug())
-            {
                 updateOldLTOSetting();
-                setValueIfVoid (getLinkTimeOptimisationEnabledValue(), true);
-            }
 
-            initialisePluginCachedValues();
+            initialisePluginDefaultValues();
+
+            optimisationLevelValue.setDefault (isDebug() ? optimisationOff : optimiseFull);
         }
 
-        Value getWarningLevelValue()                      { return getValue (Ids::winWarningLevel); }
-        int getWarningLevel() const                       { return config [Ids::winWarningLevel]; }
+        //==============================================================================
+        int getWarningLevel() const                       { return warningLevelValue.get(); }
+        bool areWarningsTreatedAsErrors() const           { return warningsAreErrorsValue.get(); }
 
-        Value getWarningsTreatedAsErrors()                { return getValue (Ids::warningsAreErrors); }
-        bool areWarningsTreatedAsErrors() const           { return config [Ids::warningsAreErrors]; }
+        String getPrebuildCommandString() const           { return prebuildCommandValue.get(); }
+        String getPostbuildCommandString() const          { return postbuildCommandValue.get(); }
 
-        Value getPrebuildCommand()                        { return getValue (Ids::prebuildCommand); }
-        String getPrebuildCommandString() const           { return config [Ids::prebuildCommand]; }
+        bool shouldGenerateDebugSymbols() const           { return generateDebugSymbolsValue.get(); }
+        bool shouldGenerateManifest() const               { return generateManifestValue.get(); }
 
-        Value getPostbuildCommand()                       { return getValue (Ids::postbuildCommand); }
-        String getPostbuildCommandString() const          { return config [Ids::postbuildCommand]; }
+        bool shouldLinkIncremental() const                { return enableIncrementalLinkingValue.get(); }
 
-        Value shouldGenerateDebugSymbolsValue()           { return getValue (Ids::alwaysGenerateDebugSymbols); }
-        bool shouldGenerateDebugSymbols() const           { return config [Ids::alwaysGenerateDebugSymbols]; }
+        bool isUsingRuntimeLibDLL() const                 { return useRuntimeLibDLLValue.get(); }
 
-        Value shouldGenerateManifestValue()               { return getValue (Ids::generateManifest); }
-        bool shouldGenerateManifest() const               { return config [Ids::generateManifest]; }
+        String getIntermediatesPathString() const         { return intermediatesPathValue.get(); }
 
-        Value shouldLinkIncrementalValue()                { return getValue (Ids::enableIncrementalLinking); }
-        bool shouldLinkIncremental() const                { return config [Ids::enableIncrementalLinking]; }
-
-        Value getUsingRuntimeLibDLL()                     { return getValue (Ids::useRuntimeLibDLL); }
-        bool isUsingRuntimeLibDLL() const                 { return config [Ids::useRuntimeLibDLL]; }
-
-        Value getIntermediatesPathValue()                 { return getValue (Ids::intermediatesPath); }
-        String getIntermediatesPath() const               { return config [Ids::intermediatesPath].toString(); }
-
-        Value getCharacterSetValue()                      { return getValue (Ids::characterSet); }
-        String getCharacterSet() const                    { return config [Ids::characterSet].toString(); }
-
-        Value getArchitectureType()                       { return getValue (Ids::winArchitecture); }
-        bool is64Bit() const                              { return config [Ids::winArchitecture].toString() == get64BitArchName(); }
-
-        Value getFastMathValue()                          { return getValue (Ids::fastMath); }
-        bool isFastMathEnabled() const                    { return config [Ids::fastMath]; }
+        String getCharacterSetString() const              { return characterSetValue.get(); }
 
         String get64BitArchName() const                   { return "x64"; }
         String get32BitArchName() const                   { return "Win32"; }
+        String getArchitectureString() const              { return architectureTypeValue.get(); }
+        bool is64Bit() const                              { return getArchitectureString() == get64BitArchName(); }
 
-        Value getDebugInformationFormatValue()            { return getValue (Ids::debugInformationFormat); }
-        String getDebugInformationFormatString() const    { return config [Ids::debugInformationFormat]; }
+        bool isFastMathEnabled() const                    { return fastMathValue.get(); }
 
-        Value getPluginBinaryCopyStepEnabledValue()       { return getValue (Ids::enablePluginBinaryCopyStep); }
-        bool isPluginBinaryCopyStepEnabled() const        { return config [Ids::enablePluginBinaryCopyStep]; }
+        String getDebugInformationFormatString() const    { return debugInformationFormatValue.get(); }
 
+        bool isPluginBinaryCopyStepEnabled() const        { return pluginBinaryCopyStepValue.get(); }
+
+        String getVSTBinaryLocationString() const         { return vstBinaryLocation.get(); }
+        String getVST3BinaryLocationString() const        { return vst3BinaryLocation.get(); }
+        String getRTASBinaryLocationString() const        { return rtasBinaryLocation.get();}
+        String getAAXBinaryLocationString() const         { return aaxBinaryLocation.get();}
+
+        //==============================================================================
         String createMSVCConfigName() const
         {
-            return getName() + "|" + (config [Ids::winArchitecture] == get64BitArchName() ? "x64" : "Win32");
+            return getName() + "|" + (is64Bit() ? "x64" : "Win32");
         }
 
         String getOutputFilename (const String& suffix, bool forceSuffix) const
@@ -235,88 +213,76 @@ public:
             return target;
         }
 
-        var getDefaultOptimisationLevel() const override    { return var ((int) (isDebug() ? optimisationOff : optimiseMaxSpeed)); }
-
         void createConfigProperties (PropertyListBuilder& props) override
         {
             addVisualStudioPluginInstallPathProperties (props);
 
-            const String archTypes[] = { get32BitArchName(), get64BitArchName() };
-            props.add (new ChoicePropertyComponent (getArchitectureType(), "Architecture",
-                                                    StringArray (archTypes, numElementsInArray (archTypes)),
-                                                    Array<var>  (archTypes, numElementsInArray (archTypes))));
+            props.add (new ChoicePropertyComponent (architectureTypeValue, "Architecture",
+                                                    { get32BitArchName(), get64BitArchName() },
+                                                    { get32BitArchName(), get64BitArchName() }),
+                       "Whether to use a 32-bit or 64-bit architecture.");
 
 
-            {
-                static const char* debugInfoOptions[] = { "None", "C7 Compatible (/Z7)", "Program Database (/Zi)", "Program Database for Edit And Continue (/ZI)", nullptr };
-                static const char* debugInfoValues[] = { "None", "OldStyle", "ProgramDatabase", "EditAndContinue", nullptr };
+            props.add (new ChoicePropertyComponentWithEnablement (debugInformationFormatValue,
+                                                                  isDebug() ? isDebugValue : generateDebugSymbolsValue,
+                                                                  "Debug Information Format",
+                                                                  { "None", "C7 Compatible (/Z7)", "Program Database (/Zi)", "Program Database for Edit And Continue (/ZI)" },
+                                                                  { "None", "OldStyle",            "ProgramDatabase",        "EditAndContinue" }),
+                       "The type of debugging information created for your program for this configuration."
+                       " This will always be used in a debug configuration and will be used in a release configuration"
+                       " with forced generation of debug symbols.");
 
-                props.add (new ChoicePropertyComponentWithEnablement (getDebugInformationFormatValue(),
-                                                                      isDebug() ? isDebugValue() : shouldGenerateDebugSymbolsValue(),
-                                                                      "Debug Information Format",
-                                                                      StringArray (debugInfoOptions),
-                                                                      Array<var> (debugInfoValues)),
-                           "The type of debugging information created for your program for this configuration."
-                           " This will always be used in a debug configuration and will be used in a release configuration"
-                           " with forced generation of debug symbols.");
-            }
-
-            props.add (new BooleanPropertyComponent (getFastMathValue(), "Relax IEEE compliance", "Enabled"),
+            props.add (new ChoicePropertyComponent (fastMathValue, "Relax IEEE Compliance"),
                        "Enable this to use FAST_MATH non-IEEE mode. (Warning: this can have unexpected results!)");
 
-
-            static const char* optimisationLevels[] = { "No optimisation", "Minimise size", "Maximise speed", 0 };
-            const int optimisationLevelValues[]     = { optimisationOff, optimiseMinSize, optimiseMaxSpeed, 0 };
-
-            props.add (new ChoicePropertyComponent (getOptimisationLevel(), "Optimisation",
-                                                    StringArray (optimisationLevels),
-                                                    Array<var> (optimisationLevelValues)),
+            props.add (new ChoicePropertyComponent (optimisationLevelValue, "Optimisation",
+                                                    { "Disabled (/Od)", "Minimise size (/O1)", "Maximise speed (/O2)", "Full optimisation (/Ox)" },
+                                                    { optimisationOff,  optimiseMinSize,       optimiseMaxSpeed,       optimiseFull }),
                        "The optimisation level for this configuration");
 
-            props.add (new TextPropertyComponent (getIntermediatesPathValue(), "Intermediates path", 2048, false),
+            props.add (new TextPropertyComponent (intermediatesPathValue, "Intermediates Path", 2048, false),
                        "An optional path to a folder to use for the intermediate build files. Note that Visual Studio allows "
                        "you to use macros in this path, e.g. \"$(TEMP)\\MyAppBuildFiles\\$(Configuration)\", which is a handy way to "
                        "send them to the user's temp folder.");
 
-            static const char* warningLevelNames[] = { "Low", "Medium", "High", nullptr };
-            const int warningLevels[] = { 2, 3, 4 };
+            props.add (new ChoicePropertyComponent (warningLevelValue, "Warning Level",
+                                                    { "Low", "Medium", "High" },
+                                                    { 2,     3,        4 }),
+                       "The compilation warning level to use.");
 
-            props.add (new ChoicePropertyComponent (getWarningLevelValue(), "Warning Level",
-                                                    StringArray (warningLevelNames), Array<var> (warningLevels, numElementsInArray (warningLevels))));
+            props.add (new ChoicePropertyComponent (warningsAreErrorsValue, "Treat Warnings as Errors"),
+                       "Enable this to treat compilation warnings as errors.");
 
-            props.add (new BooleanPropertyComponent (getWarningsTreatedAsErrors(), "Warnings", "Treat warnings as errors"));
+            props.add (new ChoicePropertyComponent (useRuntimeLibDLLValue, "Runtime Library",
+                                                    { "Use static runtime", "Use DLL runtime" },
+                                                    { false,                true }),
+                       "If the static runtime is selected then your app/plug-in will not be dependent upon users having Microsoft's redistributable "
+                       "C++ runtime installed. However, if you are linking libraries from different sources you must select the same type of runtime "
+                       "used by the libraries.");
 
-            {
-                static const char* runtimeNames[] = { "(Default)", "Use static runtime", "Use DLL runtime", nullptr };
-                const var runtimeValues[] = { var (true), var (false), var (true) };
-
-                props.add (new ChoicePropertyComponent (getUsingRuntimeLibDLL(), "Runtime Library",
-                                                        StringArray (runtimeNames), Array<var> (runtimeValues, numElementsInArray (runtimeValues))),
-                           "If the static runtime is selected then your app/plug-in will not be dependent upon users having Microsoft's redistributable "
-                           "C++ runtime installed. However, if you are linking libraries from different sources you must select the same type of runtime "
-                           "used by the libraries.");
-            }
-
-            {
-                props.add (new BooleanPropertyComponent (shouldLinkIncrementalValue(), "Incremental Linking", "Enable"),
-                           "Enable to avoid linking from scratch for every new build. "
-                           "Disable to ensure that your final release build does not contain padding or thunks.");
-            }
+            props.add (new ChoicePropertyComponent (enableIncrementalLinkingValue, "Incremental Linking"),
+                       "Enable to avoid linking from scratch for every new build. "
+                       "Disable to ensure that your final release build does not contain padding or thunks.");
 
             if (! isDebug())
-                props.add (new BooleanPropertyComponent (shouldGenerateDebugSymbolsValue(), "Debug Symbols", "Force generation of debug symbols"));
-
-            props.add (new TextPropertyComponent (getPrebuildCommand(),  "Pre-build Command",  2048, true));
-            props.add (new TextPropertyComponent (getPostbuildCommand(), "Post-build Command", 2048, true));
-            props.add (new BooleanPropertyComponent (shouldGenerateManifestValue(), "Manifest", "Generate Manifest"));
-
             {
-                static const char* characterSetNames[] = { "Default", "MultiByte", "Unicode", nullptr };
-                const var charSets[]                   = { var(),     "MultiByte", "Unicode", };
-
-                props.add (new ChoicePropertyComponent (getCharacterSetValue(), "Character Set",
-                                                        StringArray (characterSetNames), Array<var> (charSets, numElementsInArray (charSets))));
+                props.add (new ChoicePropertyComponent (generateDebugSymbolsValue, "Force Generation of Debug Symbols"),
+                           "Enable this to force generation of debug symbols in a release configuration.");
             }
+
+            props.add (new TextPropertyComponent (prebuildCommandValue,  "Pre-build Command",  2048, true),
+                       "Some command that will be run before a build starts.");
+
+            props.add (new TextPropertyComponent (postbuildCommandValue, "Post-build Command", 2048, true),
+                       "Some command that will be run after a build starts.");
+
+            props.add (new ChoicePropertyComponent (generateManifestValue, "Generate Manifest"),
+                       "Enable this to generate a Manifest file.");
+
+            props.add (new ChoicePropertyComponent (characterSetValue, "Character Set",
+                                                    { "MultiByte", "Unicode" },
+                                                    { "MultiByte", "Unicode" }),
+                       "Specifies the character set used when building.");
         }
 
         String getModuleLibraryArchName() const override
@@ -330,15 +296,18 @@ public:
             return result;
         }
 
-        //==============================================================================
-        CachedValue<String> vstBinaryLocation, vst3BinaryLocation, rtasBinaryLocation, aaxBinaryLocation;
-
     private:
+        ValueWithDefault warningLevelValue, warningsAreErrorsValue, prebuildCommandValue, postbuildCommandValue, generateDebugSymbolsValue,
+                         generateManifestValue, enableIncrementalLinkingValue, useRuntimeLibDLLValue, intermediatesPathValue,
+                         characterSetValue, architectureTypeValue, fastMathValue, debugInformationFormatValue, pluginBinaryCopyStepValue;
+
+        ValueWithDefault vstBinaryLocation, vst3BinaryLocation, rtasBinaryLocation, aaxBinaryLocation;
+
         //==============================================================================
         void updateOldLTOSetting()
         {
             if (config.getPropertyAsValue ("wholeProgramOptimisation", nullptr) != Value())
-                getLinkTimeOptimisationEnabledValue() = (static_cast<int> (config ["wholeProgramOptimisation"]) == 0);
+                linkTimeOptimisationValue = (static_cast<int> (config ["wholeProgramOptimisation"]) == 0);
         }
 
         void addVisualStudioPluginInstallPathProperties (PropertyListBuilder& props)
@@ -347,42 +316,42 @@ public:
                                             || project.shouldBuildRTAS() || project.shouldBuildAAX());
 
             if (isBuildingAnyPlugins)
-                props.add (new BooleanPropertyComponent (getPluginBinaryCopyStepEnabledValue(), "Enable Plugin Copy Step", "Enabled"),
+                props.add (new ChoicePropertyComponent (pluginBinaryCopyStepValue, "Enable Plugin Copy Step"),
                            "Enable this to copy plugin binaries to a specified folder after building.");
 
             if (project.shouldBuildVST())
-                props.add (new TextWithDefaultPropertyComponentWithEnablement (vstBinaryLocation, getPluginBinaryCopyStepEnabledValue(),
-                                                                               "VST Binary Location", 1024),
+                props.add (new TextPropertyComponentWithEnablement (vstBinaryLocation, pluginBinaryCopyStepValue, "VST Binary Location",
+                                                                    1024, false),
                            "The folder in which the compiled VST binary should be placed.");
 
             if (project.shouldBuildVST3())
-                props.add (new TextWithDefaultPropertyComponentWithEnablement (vst3BinaryLocation, getPluginBinaryCopyStepEnabledValue(),
-                                                                              "VST3 Binary Location", 1024),
+                props.add (new TextPropertyComponentWithEnablement (vst3BinaryLocation, pluginBinaryCopyStepValue, "VST3 Binary Location",
+                                                                    1024, false),
                            "The folder in which the compiled VST3 binary should be placed.");
 
             if (project.shouldBuildRTAS())
-                props.add (new TextWithDefaultPropertyComponentWithEnablement (rtasBinaryLocation, getPluginBinaryCopyStepEnabledValue(),
-                                                                              "RTAS Binary Location", 1024),
+                props.add (new TextPropertyComponentWithEnablement (rtasBinaryLocation, pluginBinaryCopyStepValue, "RTAS Binary Location",
+                                                                    1024, false),
                            "The folder in which the compiled RTAS binary should be placed.");
 
             if (project.shouldBuildAAX())
-                props.add (new TextWithDefaultPropertyComponentWithEnablement (aaxBinaryLocation, getPluginBinaryCopyStepEnabledValue(),
-                                                                               "AAX Binary Location", 1024),
+                props.add (new TextPropertyComponentWithEnablement (aaxBinaryLocation, pluginBinaryCopyStepValue, "AAX Binary Location",
+                                                                    1024, false),
                            "The folder in which the compiled AAX binary should be placed.");
 
         }
 
-        void initialisePluginCachedValues()
+        void initialisePluginDefaultValues()
         {
-            vstBinaryLocation.referTo  (config, Ids::vstBinaryLocation,  nullptr, ((is64Bit() ? "%ProgramW6432%"
-                                                                                              : "%programfiles(x86)%") + String ("\\Steinberg\\Vstplugins")));
+            vstBinaryLocation.referTo  (config, Ids::vstBinaryLocation,  getUndoManager(), ((is64Bit() ? "%ProgramW6432%"
+                                                                                                       : "%programfiles(x86)%") + String ("\\Steinberg\\Vstplugins")));
 
             auto prefix = is64Bit() ? "%CommonProgramW6432%"
                                     : "%CommonProgramFiles(x86)%";
 
-            vst3BinaryLocation.referTo (config, Ids::vst3BinaryLocation, nullptr, prefix + String ("\\VST3"));
-            rtasBinaryLocation.referTo (config, Ids::rtasBinaryLocation, nullptr, prefix + String ("\\Digidesign\\DAE\\Plug-Ins"));
-            aaxBinaryLocation.referTo  (config, Ids::aaxBinaryLocation,  nullptr, prefix + String ("\\Avid\\Audio\\Plug-Ins"));
+            vst3BinaryLocation.referTo (config, Ids::vst3BinaryLocation, getUndoManager(), prefix + String ("\\VST3"));
+            rtasBinaryLocation.referTo (config, Ids::rtasBinaryLocation, getUndoManager(), prefix + String ("\\Digidesign\\DAE\\Plug-Ins"));
+            aaxBinaryLocation.referTo  (config, Ids::aaxBinaryLocation,  getUndoManager(), prefix + String ("\\Avid\\Audio\\Plug-Ins"));
         }
     };
 
@@ -393,7 +362,7 @@ public:
         MSVCTargetBase (ProjectType::Target::Type targetType, const MSVCProjectExporterBase& exporter)
             : ProjectType::Target (targetType), owner (exporter)
         {
-            projectGuid = createGUID (owner.getProject().getProjectUID() + getName());
+            projectGuid = createGUID (owner.getProject().getProjectUIDString() + getName());
         }
 
         virtual ~MSVCTargetBase() {}
@@ -448,7 +417,7 @@ public:
                 e->createNewChildElement ("WholeProgramOptimization")->addTextElement (config.isLinkTimeOptimisationEnabled() ? "true"
                                                                                                                               : "false");
 
-                const String charSet (config.getCharacterSet());
+                auto charSet = config.getCharacterSetString();
 
                 if (charSet.isNotEmpty())
                     e->createNewChildElement ("CharacterSet")->addTextElement (charSet);
@@ -573,7 +542,7 @@ public:
                     cl->createNewChildElement ("AdditionalIncludeDirectories")->addTextElement (includePaths.joinIntoString (";"));
                     cl->createNewChildElement ("PreprocessorDefinitions")->addTextElement (getPreprocessorDefs (config, ";") + ";%(PreprocessorDefinitions)");
 
-                    const bool runtimeDLL = shouldUseRuntimeDLL (config);
+                    const bool runtimeDLL = config.isUsingRuntimeLibDLL();
                     cl->createNewChildElement ("RuntimeLibrary")->addTextElement (runtimeDLL ? (isDebug ? "MultiThreadedDebugDLL" : "MultiThreadedDLL")
                                                                                   : (isDebug ? "MultiThreadedDebug"    : "MultiThreaded"));
                     cl->createNewChildElement ("RuntimeTypeInfo")->addTextElement ("true");
@@ -595,7 +564,7 @@ public:
                     if (config.areWarningsTreatedAsErrors())
                         cl->createNewChildElement ("TreatWarningAsError")->addTextElement ("true");
 
-                    auto cppStandard = owner.project.getCppStandardValue().toString();
+                    auto cppStandard = owner.project.getCppStandardString();
 
                     if (cppStandard == "11") // unfortunaly VS doesn't support the C++11 flag so we have to bump it to C++14
                         cppStandard = "14";
@@ -972,7 +941,9 @@ public:
 
         String getIntermediatesPath (const MSVCBuildConfiguration& config) const
         {
-            String intDir = (config.getIntermediatesPath().isNotEmpty() ? config.getIntermediatesPath() : "$(Platform)\\$(Configuration)");
+            auto intDir = (config.getIntermediatesPathString().isNotEmpty() ? config.getIntermediatesPathString()
+                                                                            : "$(Platform)\\$(Configuration)");
+
             if (! intDir.endsWithChar (L'\\'))
                 intDir += L'\\';
 
@@ -983,8 +954,9 @@ public:
         {
             switch (level)
             {
-                case optimiseMaxSpeed:  return "Full";
                 case optimiseMinSize:   return "MinSpace";
+                case optimiseMaxSpeed:  return "MaxSpeed";
+                case optimiseFull:      return "Full";
                 default:                return "Disabled";
             }
         }
@@ -1096,8 +1068,8 @@ public:
                                      + createRebasedPath (bundleScript) + String (" ") + macOSDir.quoted() + String (" ") + createRebasedPath (iconFilePath);
 
                 if (config.isPluginBinaryCopyStepEnabled())
-                    return pkgScript + "\r\n" + String ("xcopy ") + bundleDir.quoted() + " "
-                               + String (config.aaxBinaryLocation.get() + "\\" + outputFilename + "\\").quoted() + " /E /Y /H /K";
+                    return pkgScript + "\r\n" + "xcopy " + bundleDir.quoted() + " "
+                               + String (config.getAAXBinaryLocationString() + "\\" + outputFilename + "\\").quoted() + " /E /Y /H /K";
 
                 return pkgScript;
             }
@@ -1105,9 +1077,9 @@ public:
             {
                 auto copyScript = String ("copy /Y \"$(OutDir)$(TargetFileName)\"") + String (" \"$COPYDIR$\\$(TargetFileName)\"");
 
-                if (type == VSTPlugIn)     return copyScript.replace ("$COPYDIR$", config.vstBinaryLocation.get());
-                if (type == VST3PlugIn)    return copyScript.replace ("$COPYDIR$", config.vst3BinaryLocation.get());
-                if (type == RTASPlugIn)    return copyScript.replace ("$COPYDIR$", config.rtasBinaryLocation.get());
+                if (type == VSTPlugIn)     return copyScript.replace ("$COPYDIR$", config.getVSTBinaryLocationString());
+                if (type == VST3PlugIn)    return copyScript.replace ("$COPYDIR$", config.getVST3BinaryLocationString());
+                if (type == RTASPlugIn)    return copyScript.replace ("$COPYDIR$", config.getRTASBinaryLocationString());
             }
 
             return {};
@@ -1292,12 +1264,6 @@ public:
             return {};
         }
 
-        bool shouldUseRuntimeDLL (const MSVCBuildConfiguration& config) const
-        {
-            return (config.config [Ids::useRuntimeLibDLL].isVoid() ? (getOwner().hasTarget (AAXPlugIn) || getOwner().hasTarget (RTASPlugIn))
-                                                                   : config.isUsingRuntimeLibDLL());
-        }
-
         File getVCProjFile() const            { return getOwner().getProjectFile (getProjectFileSuffix(), getName()); }
         File getVCProjFiltersFile() const     { return getOwner().getProjectFile (getFiltersFileSuffix(), getName()); }
 
@@ -1350,11 +1316,12 @@ public:
     }
 
     //==============================================================================
-    Value getManifestFile() { return getSetting (Ids::msvcManifestFile); }
     RelativePath getManifestPath() const
     {
-        const String& path = settings [Ids::msvcManifestFile].toString();
-        return path.isEmpty() ? RelativePath() : RelativePath (settings [Ids::msvcManifestFile], RelativePath::projectFolder);
+        auto path = manifestFileValue.get().toString();
+
+        return path.isEmpty() ? RelativePath()
+                              : RelativePath (path, RelativePath::projectFolder);
     }
 
     //==============================================================================
@@ -1380,7 +1347,7 @@ public:
 
     void createExporterProperties (PropertyListBuilder& props) override
     {
-        props.add(new TextPropertyComponent(getManifestFile(), "Manifest file", 8192, false),
+        props.add (new TextPropertyComponent (manifestFileValue, "Manifest file", 8192, false),
             "Path to a manifest input file which should be linked into your binary (path is relative to jucer file).");
     }
 
@@ -1388,7 +1355,8 @@ public:
     {
         optimisationOff = 1,
         optimiseMinSize = 2,
-        optimiseMaxSpeed = 3
+        optimiseFull = 3,
+        optimiseMaxSpeed = 4
     };
 
     //==============================================================================
@@ -1446,11 +1414,12 @@ protected:
     //==============================================================================
     mutable File rcFile, iconFile;
     OwnedArray<MSVCTargetBase> targets;
-    CachedValue<String> windowsTargetPlatformVersion;
+
+    ValueWithDefault IPPLibraryValue, platformToolsetValue, targetPlatformVersion, manifestFileValue;
 
     File getProjectFile (const String& extension, const String& target) const
     {
-        String filename = project.getProjectFilenameRoot();
+        auto filename = project.getProjectFilenameRootString();
 
         if (target.isNotEmpty())
             filename += String ("_") + target.removeCharacters (" ");
@@ -1479,7 +1448,7 @@ protected:
 
             if (oldStylePrebuildCommand.isNotEmpty())
                 for (ConfigIterator config (*this); config.next();)
-                    dynamic_cast<MSVCBuildConfiguration&> (*config).getPrebuildCommand() = oldStylePrebuildCommand;
+                    dynamic_cast<MSVCBuildConfiguration&> (*config).getValue (Ids::prebuildCommand) = oldStylePrebuildCommand;
         }
 
         {
@@ -1489,7 +1458,7 @@ protected:
             if (oldStyleLibName.isNotEmpty())
                 for (ConfigIterator config (*this); config.next();)
                     if (config->isDebug())
-                        config->getTargetBinaryName() = oldStyleLibName;
+                        config->getValue (Ids::targetName) = oldStyleLibName;
         }
 
         {
@@ -1499,7 +1468,7 @@ protected:
             if (oldStyleLibName.isNotEmpty())
                 for (ConfigIterator config (*this); config.next();)
                     if (! config->isDebug())
-                        config->getTargetBinaryName() = oldStyleLibName;
+                        config->getValue (Ids::targetName) = oldStyleLibName;
         }
     }
 
@@ -1765,11 +1734,11 @@ protected:
            << "    BLOCK \"040904E4\"" << newLine
            << "    BEGIN" << newLine;
 
-        writeRCValue (mo, "CompanyName", project.getCompanyName().toString());
-        writeRCValue (mo, "LegalCopyright", project.getCompanyCopyright().toString());
-        writeRCValue (mo, "FileDescription", project.getTitle());
+        writeRCValue (mo, "CompanyName", project.getCompanyNameString());
+        writeRCValue (mo, "LegalCopyright", project.getCompanyCopyrightString());
+        writeRCValue (mo, "FileDescription", project.getProjectNameString());
         writeRCValue (mo, "FileVersion", version);
-        writeRCValue (mo, "ProductName", project.getTitle());
+        writeRCValue (mo, "ProductName", project.getProjectNameString());
         writeRCValue (mo, "ProductVersion", version);
 
         mo << "    END" << newLine
@@ -1843,7 +1812,9 @@ public:
         : MSVCProjectExporterBase (p, t, "VisualStudio2013")
     {
         name = getName();
-        initialiseWindowsTargetPlatformVersion();
+
+        targetPlatformVersion.setDefault (getDefaultWindowsTargetPlatformVersion());
+        platformToolsetValue.setDefault (getDefaultToolset());
     }
 
     static const char* getName()                                     { return "Visual Studio 2013"; }
@@ -1867,8 +1838,8 @@ public:
     {
         MSVCProjectExporterBase::createExporterProperties (props);
 
-        static const char* toolsetNames[] = { "(default)", "v120", "v120_xp", "Windows7.1SDK", "CTP_Nov2013" };
-        const var toolsets[]              = { var(),       "v120", "v120_xp", "Windows7.1SDK", "CTP_Nov2013" };
+        static const char* toolsetNames[] = { "v120", "v120_xp", "Windows7.1SDK", "CTP_Nov2013" };
+        const var toolsets[]              = { "v120", "v120_xp", "Windows7.1SDK", "CTP_Nov2013" };
         addToolsetProperty (props, toolsetNames, toolsets, numElementsInArray (toolsets));
 
         addIPPLibraryProperty (props);
@@ -1887,7 +1858,9 @@ public:
         : MSVCProjectExporterBase (p, t, "VisualStudio2015")
     {
         name = getName();
-        initialiseWindowsTargetPlatformVersion();
+
+        targetPlatformVersion.setDefault (getDefaultWindowsTargetPlatformVersion());
+        platformToolsetValue.setDefault (getDefaultToolset());
     }
 
     static const char* getName()                                     { return "Visual Studio 2015"; }
@@ -1910,8 +1883,8 @@ public:
     {
         MSVCProjectExporterBase::createExporterProperties (props);
 
-        static const char* toolsetNames[] = { "(default)", "v140", "v140_xp", "CTP_Nov2013" };
-        const var toolsets[]              = { var(),       "v140", "v140_xp", "CTP_Nov2013" };
+        static const char* toolsetNames[] = { "v140", "v140_xp", "CTP_Nov2013" };
+        const var toolsets[]              = { "v140", "v140_xp", "CTP_Nov2013" };
         addToolsetProperty (props, toolsetNames, toolsets, numElementsInArray (toolsets));
 
         addIPPLibraryProperty (props);
@@ -1930,7 +1903,9 @@ public:
         : MSVCProjectExporterBase (p, t, "VisualStudio2017")
     {
         name = getName();
-        initialiseWindowsTargetPlatformVersion();
+
+        targetPlatformVersion.setDefault (getDefaultWindowsTargetPlatformVersion());
+        platformToolsetValue.setDefault (getDefaultToolset());
     }
 
     static const char* getName()                                     { return "Visual Studio 2017"; }
@@ -1953,8 +1928,8 @@ public:
     {
         MSVCProjectExporterBase::createExporterProperties (props);
 
-        static const char* toolsetNames[] = { "(default)", "v140", "v140_xp", "v141", "v141_xp" };
-        const var toolsets[]              = { var(),       "v140", "v140_xp", "v141", "v141_xp" };
+        static const char* toolsetNames[] = { "v140", "v140_xp", "v141", "v141_xp" };
+        const var toolsets[]              = { "v140", "v140_xp", "v141", "v141_xp" };
         addToolsetProperty (props, toolsetNames, toolsets, numElementsInArray (toolsets));
 
         addIPPLibraryProperty (props);

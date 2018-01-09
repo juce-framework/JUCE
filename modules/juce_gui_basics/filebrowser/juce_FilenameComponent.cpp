@@ -45,7 +45,7 @@ FilenameComponent::FilenameComponent (const String& name,
     filenameBox.setEditableText (canEditFilename);
     filenameBox.setTextWhenNothingSelected (textWhenNothingSelected);
     filenameBox.setTextWhenNoChoicesAvailable (TRANS ("(no recently selected files)"));
-    filenameBox.onChange = [this]() { setCurrentFile (getCurrentFile(), true); };
+    filenameBox.onChange = [this] { setCurrentFile (getCurrentFile(), true); };
 
     setBrowseButtonText ("...");
 
@@ -90,7 +90,7 @@ void FilenameComponent::lookAndFeelChanged()
 
     addAndMakeVisible (browseButton = getLookAndFeel().createFilenameComponentBrowseButton (browseButtonText));
     browseButton->setConnectedEdges (Button::ConnectedOnLeft);
-    browseButton->onClick = [this]() { showChooser(); };
+    browseButton->onClick = [this] { showChooser(); };
     resized();
 }
 

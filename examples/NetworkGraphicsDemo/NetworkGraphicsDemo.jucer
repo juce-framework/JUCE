@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="gWI5Ir" name="JUCE Network Graphics Demo" projectType="guiapp"
-              version="1.0.0" bundleIdentifier="com.juce.NetworkGraphicsDemo"
-              includeBinaryInAppConfig="1" jucerVersion="5.2.0" displaySplashScreen="0"
-              reportAppUsage="0" splashScreenColour="Dark" companyName="ROLI Ltd."
-              cppLanguageStandard="14" companyCopyright="ROLI Ltd.">
+              bundleIdentifier="com.juce.NetworkGraphicsDemo" jucerVersion="5.2.0"
+              displaySplashScreen="0" reportAppUsage="0" companyName="ROLI Ltd."
+              companyCopyright="ROLI Ltd.">
   <MAINGROUP id="OT9rJ2" name="JUCE Network Graphics Demo">
     <GROUP id="{48D54E6E-37F4-B20A-E038-C63E4EDFD4D9}" name="Source">
       <FILE id="BfclEZ" name="Demos.h" compile="0" resource="0" file="Source/Demos.h"/>
@@ -20,10 +19,8 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" bigIcon="Ww6bQw">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" osxSDK="default" osxCompatibility="10.9 SDK" osxArchitecture="default"
-                       isDebug="1" optimisation="1" targetName="JUCE Network Graphics Demo"/>
-        <CONFIGURATION name="Release" osxSDK="default" osxCompatibility="10.9 SDK" osxArchitecture="default"
-                       isDebug="0" optimisation="3" targetName="JUCE Network Graphics Demo"/>
+        <CONFIGURATION name="Debug" osxCompatibility="10.9 SDK" isDebug="1" targetName="JUCE Network Graphics Demo"/>
+        <CONFIGURATION name="Release" osxCompatibility="10.9 SDK" isDebug="0" targetName="JUCE Network Graphics Demo"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -44,10 +41,8 @@
     </XCODE_MAC>
     <VS2013 targetFolder="Builds/VisualStudio2013" bigIcon="Ww6bQw">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="1" optimisation="1" targetName="JUCE Network Graphics Demo"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="0" optimisation="3" targetName="JUCE Network Graphics Demo"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JUCE Network Graphics Demo"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="JUCE Network Graphics Demo"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_osc" path="../../modules"/>
@@ -68,10 +63,8 @@
     </VS2013>
     <VS2017 targetFolder="Builds/VisualStudio2017">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="JUCE Network Graphics Demo"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="JUCE Network Graphics Demo"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="JUCE Network Graphics Demo"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="JUCE Network Graphics Demo"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_osc" path="../../modules"/>
@@ -90,13 +83,10 @@
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
       </MODULEPATHS>
     </VS2017>
-    <XCODE_IPHONE targetFolder="Builds/iOS" bigIcon="Ww6bQw" iosScreenOrientation="portraitlandscape"
-                  iPadScreenOrientation="portraitlandscape" iosDeviceFamily="1,2">
+    <XCODE_IPHONE targetFolder="Builds/iOS" bigIcon="Ww6bQw">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" iosCompatibility="default" isDebug="1" optimisation="1"
-                       targetName="JUCE Network Graphics Demo"/>
-        <CONFIGURATION name="Release" iosCompatibility="default" isDebug="0" optimisation="3"
-                       targetName="JUCE Network Graphics Demo"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="JUCE Network Graphics Demo"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="JUCE Network Graphics Demo"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_osc" path="../../modules"/>
@@ -117,10 +107,8 @@
     </XCODE_IPHONE>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile" bigIcon="Ww6bQw">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" optimisation="1"
-                       targetName="JUCE Network Graphics Demo"/>
-        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/" isDebug="0" optimisation="3"
-                       targetName="JUCE Network Graphics Demo"/>
+        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" targetName="JUCE Network Graphics Demo"/>
+        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/" isDebug="0" targetName="JUCE Network Graphics Demo"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_osc" path="../../modules"/>
@@ -140,15 +128,12 @@
       </MODULEPATHS>
     </LINUX_MAKE>
     <ANDROIDSTUDIO androidActivityClass="com.juce.networkgraphicsdemo.JUCENetworkGraphicsDemo"
-                   androidInternetNeeded="1" androidBluetoothNeeded="1" androidCpp11="1"
-                   targetFolder="Builds/Android" androidSDKPath="" androidNDKPath=""
-                   bigIcon="Ww6bQw" androidScreenOrientation="unspecified" gradleToolchain="clang"
-                   gradleToolchainVersion="3.6">
+                   androidCpp11="1" targetFolder="Builds/Android" androidSDKPath=""
+                   androidNDKPath="" bigIcon="Ww6bQw" gradleToolchainVersion="3.6">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi armeabi-v7a x86" isDebug="1"
                        optimisation="6" targetName="JUCE Network Graphics Demo" defines="JUCE_DEBUG=0"/>
-        <CONFIGURATION name="Release" androidArchitectures="" isDebug="0" optimisation="3"
-                       targetName="JUCE Network Graphics Demo"/>
+        <CONFIGURATION name="Release" androidArchitectures="" isDebug="0" targetName="JUCE Network Graphics Demo"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_osc" path="../../modules"/>

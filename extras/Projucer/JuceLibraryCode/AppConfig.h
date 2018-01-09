@@ -79,7 +79,7 @@
 // juce_core flags:
 
 #ifndef    JUCE_FORCE_DEBUG
- //#define JUCE_FORCE_DEBUG 1
+ //#define JUCE_FORCE_DEBUG 0
 #endif
 
 #ifndef    JUCE_LOG_ASSERTIONS
@@ -91,7 +91,7 @@
 #endif
 
 #ifndef    JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
- //#define JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES 1
+ //#define JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES 0
 #endif
 
 #ifndef    JUCE_INCLUDE_ZLIB_CODE
@@ -114,7 +114,7 @@
 // juce_events flags:
 
 #ifndef    JUCE_EXECUTE_APP_SUSPEND_ON_IOS_BACKGROUND_TASK
- //#define JUCE_EXECUTE_APP_SUSPEND_ON_IOS_BACKGROUND_TASK 1
+ //#define JUCE_EXECUTE_APP_SUSPEND_ON_IOS_BACKGROUND_TASK 0
 #endif
 
 //==============================================================================
@@ -132,7 +132,15 @@
 // juce_gui_basics flags:
 
 #ifndef    JUCE_ENABLE_REPAINT_DEBUGGING
- //#define JUCE_ENABLE_REPAINT_DEBUGGING 1
+ //#define JUCE_ENABLE_REPAINT_DEBUGGING 0
+#endif
+
+#ifndef    JUCE_USE_XRANDR
+ //#define JUCE_USE_XRANDR 1
+#endif
+
+#ifndef    JUCE_USE_XINERAMA
+ //#define JUCE_USE_XINERAMA 1
 #endif
 
 #ifndef    JUCE_USE_XSHM
@@ -140,7 +148,7 @@
 #endif
 
 #ifndef    JUCE_USE_XRENDER
- //#define JUCE_USE_XRENDER 1
+ //#define JUCE_USE_XRENDER 0
 #endif
 
 #ifndef    JUCE_USE_XCURSOR
@@ -155,7 +163,7 @@
 #endif
 
 #ifndef    JUCE_ENABLE_LIVE_CONSTANT_EDITOR
- //#define JUCE_ENABLE_LIVE_CONSTANT_EDITOR 1
+ //#define JUCE_ENABLE_LIVE_CONSTANT_EDITOR 0
 #endif
 //==============================================================================
 #ifndef    JUCE_STANDALONE_APPLICATION

@@ -81,8 +81,8 @@ typename FIR::Coefficients<FloatType>::Ptr
     else if (attenuationdB <= 21)
         beta = static_cast<FloatType> (0.5842 * std::pow (-attenuationdB - 21, 0.4) + 0.07886 * (-attenuationdB - 21));
 
-    int order = attenuationdB < -21 ? roundDoubleToInt (ceil ((-attenuationdB - 7.95) / (2.285 * normalizedTransitionWidth * MathConstants<double>::twoPi)))
-                                    : roundDoubleToInt (ceil (5.79 / (normalizedTransitionWidth * MathConstants<double>::twoPi)));
+    int order = attenuationdB < -21 ? roundToInt (std::ceil ((-attenuationdB - 7.95) / (2.285 * normalizedTransitionWidth * MathConstants<double>::twoPi)))
+                                    : roundToInt (std::ceil (5.79 / (normalizedTransitionWidth * MathConstants<double>::twoPi)));
 
     jassert (order >= 0);
 
@@ -244,7 +244,7 @@ typename FIR::Coefficients<FloatType>::Ptr
 
     auto wpT = (0.5 - normalizedTransitionWidth) * MathConstants<double>::pi;
 
-    auto n = roundDoubleToInt (ceil ((attenuationdB - 18.18840664 * wpT + 33.64775300) / (18.54155181 * wpT - 29.13196871)));
+    auto n = roundToInt (std::ceil ((attenuationdB - 18.18840664 * wpT + 33.64775300) / (18.54155181 * wpT - 29.13196871)));
     auto kp = (n * wpT - 1.57111377 * n + 0.00665857) / (-1.01927560 * n + 0.37221484);
     auto A = (0.01525753 * n + 0.03682344 + 9.24760314 / (double) n) * kp + 1.01701407 + 0.73512298 / (double) n;
     auto B = (0.00233667 * n - 1.35418408 + 5.75145813 / (double) n) * kp + 1.02999650 - 0.72759508 / (double) n;
@@ -416,11 +416,11 @@ Array<IIR::Coefficients<FloatType>>
 
     if (type == 0)
     {
-        N = roundDoubleToInt (ceil (log (1.0 / k1) / log (1.0 / k)));
+        N = roundToInt (std::ceil (std::log (1.0 / k1) / std::log (1.0 / k)));
     }
     else if (type == 1 || type == 2)
     {
-        N = roundDoubleToInt (ceil (std::acosh (1.0 / k1) / std::acosh (1.0 / k)));
+        N = roundToInt (std::ceil (std::acosh (1.0 / k1) / std::acosh (1.0 / k)));
     }
     else
     {
@@ -429,7 +429,7 @@ Array<IIR::Coefficients<FloatType>>
         SpecialFunctions::ellipticIntegralK (k, K, Kp);
         SpecialFunctions::ellipticIntegralK (k1, K1, K1p);
 
-        N = roundDoubleToInt (ceil ((K1p * K) / (K1 * Kp)));
+        N = roundToInt (std::ceil ((K1p * K) / (K1 * Kp)));
     }
 
     const int r = N % 2;
@@ -625,7 +625,7 @@ typename FilterDesign<FloatType>::IIRPolyphaseAllpassStructure
     auto q = e + 2 * std::pow (e, 5.0) + 15 * std::pow (e, 9.0) + 150 * std::pow (e, 13.0);
 
     auto k1 = ds * ds / (1 - ds * ds);
-    int n = roundDoubleToInt (ceil (log (k1 * k1 / 16) / log (q)));
+    int n = roundToInt (std::ceil (std::log (k1 * k1 / 16) / std::log (q)));
 
     if (n % 2 == 0)
         ++n;

@@ -93,8 +93,10 @@ public:
     {
         name = getName (os);
 
-        if (getTargetLocationString().isEmpty())
-            getTargetLocationValue() = getDefaultBuildsRootFolder() + getTargetFolderName (os);
+        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderName (os));
+
+        if (isWindows())
+            targetPlatformValue.referTo (settings, Ids::codeBlocksWindowsTarget, getProject().getUndoManagerFor (settings));
     }
 
     //==============================================================================
@@ -141,9 +143,11 @@ public:
     {
         if (isWindows())
         {
-            StringArray toolsetNames = { "(default)", "Windows NT 4.0", "Windows 2000", "Windows XP", "Windows Server 2003", "Windows Vista", "Windows Server 2008", "Windows 7", "Windows 8", "Windows 8.1", "Windows 10" };
-            Array<var> toolsets      = { var(),       "0x0400",         "0x0500",       "0x0501",     "0x0502",              "0x0600",         "0x0600",             "0x0601",    "0x0602",    "0x0603",      "0x0A00" };
-            props.add (new ChoicePropertyComponent (getTargetPlatformValue(), "Target platform", toolsetNames, toolsets),
+            props.add (new ChoicePropertyComponent (targetPlatformValue, "Target platform",
+                                                    { "Windows NT 4.0", "Windows 2000", "Windows XP", "Windows Server 2003", "Windows Vista", "Windows Server 2008",
+                                                      "Windows 7", "Windows 8", "Windows 8.1", "Windows 10" },
+                                                    { "0x0400", "0x0500", "0x0501", "0x0502", "0x0600", "0x0600",
+                                                      "0x0601", "0x0602", "0x0603", "0x0A00" }),
                        "This sets the preprocessor macro WINVER to an appropriate value for the corresponding platform.");
         }
     }
@@ -151,8 +155,8 @@ public:
     //==============================================================================
     void create (const OwnedArray<LibraryModule>&) const override
     {
-        const File cbpFile (getTargetFolder().getChildFile (project.getProjectFilenameRoot())
-                                             .withFileExtension (".cbp"));
+        auto cbpFile = getTargetFolder().getChildFile (project.getProjectFilenameRootString())
+                                        .withFileExtension (".cbp");
 
         XmlElement xml ("CodeBlocks_project_file");
         addVersion (xml);
@@ -203,52 +207,37 @@ public:
     }
 
 private:
-    Value getTargetPlatformValue()                { return getSetting (Ids::codeBlocksWindowsTarget); }
-    String getTargetPlatform() const              { return settings [Ids::codeBlocksWindowsTarget].toString(); }
+    ValueWithDefault targetPlatformValue;
+
+    String getTargetPlatformString() const    { return targetPlatformValue.get(); }
 
     //==============================================================================
     class CodeBlocksBuildConfiguration  : public BuildConfiguration
     {
     public:
         CodeBlocksBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
-            : BuildConfiguration (p, settings, e)
+            : BuildConfiguration (p, settings, e),
+              architectureTypeValue (config, exporter.isWindows() ? Ids::windowsCodeBlocksArchitecture
+                                                                  : Ids::linuxCodeBlocksArchitecture, getUndoManager(), "-m64")
         {
-            if (getArchitectureType().toString().isEmpty())
-                getArchitectureType() = static_cast<const char* const> ("-m64");
+            linkTimeOptimisationValue.setDefault (false);
+            optimisationLevelValue.setDefault (isDebug() ? gccO0 : gccO3);
         }
-
-        Value getArchitectureType()
-        {
-            const auto archID = exporter.isWindows() ? Ids::windowsCodeBlocksArchitecture
-                                                     : Ids::linuxCodeBlocksArchitecture;
-            return getValue (archID);
-        }
-
-        var getArchitectureTypeVar() const
-        {
-            const auto archID = exporter.isWindows() ? Ids::windowsCodeBlocksArchitecture
-                                                     : Ids::linuxCodeBlocksArchitecture;
-            return config [archID];
-        }
-
-        var getDefaultOptimisationLevel() const override    { return var ((int) (isDebug() ? gccO0 : gccO3)); }
 
         void createConfigProperties (PropertyListBuilder& props) override
         {
             addGCCOptimisationProperty (props);
 
-            static const char* const archNames[] = { "32-bit (-m32)", "64-bit (-m64)", "ARM v6",       "ARM v7" };
-            const var archFlags[]                = { "-m32",          "-m64",          "-march=armv6", "-march=armv7" };
-
-            props.add (new ChoicePropertyComponent (getArchitectureType(), "Architecture",
-                                                    StringArray (archNames, numElementsInArray (archNames)),
-                                                    Array<var> (archFlags, numElementsInArray (archFlags))));
+            props.add (new ChoicePropertyComponent (architectureTypeValue, "Architecture",
+                                                    { "32-bit (-m32)", "64-bit (-m64)", "ARM v6",       "ARM v7" },
+                                                    { "-m32",          "-m64",          "-march=armv6", "-march=armv7" }),
+                       "Specifies the 32/64-bit architecture to use.");
         }
 
         String getModuleLibraryArchName() const override
         {
-            const String archFlag = getArchitectureTypeVar();
-            const auto prefix = String ("-march=");
+            auto archFlag = getArchitectureTypeString();
+            String prefix ("-march=");
 
             if (archFlag.startsWith (prefix))
                 return archFlag.substring (prefix.length());
@@ -260,6 +249,11 @@ private:
             jassertfalse;
             return {};
         }
+
+        String getArchitectureTypeString() const    { return architectureTypeValue.get(); }
+
+        //==============================================================================
+        ValueWithDefault architectureTypeValue;
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const override
@@ -364,7 +358,7 @@ private:
 
     void addOptions (XmlElement& xml) const
     {
-        xml.createNewChildElement ("Option")->setAttribute ("title", project.getTitle());
+        xml.createNewChildElement ("Option")->setAttribute ("title", project.getProjectNameString());
         xml.createNewChildElement ("Option")->setAttribute ("pch_mode", 2);
         xml.createNewChildElement ("Option")->setAttribute ("compiler", "gcc");
     }
@@ -378,7 +372,7 @@ private:
             defines.set ("__MINGW__", "1");
             defines.set ("__MINGW_EXTENSION", {});
 
-            auto targetPlatform = getTargetPlatform();
+            auto targetPlatform = getTargetPlatformString();
 
             if (targetPlatform.isNotEmpty())
                 defines.set ("WINVER", targetPlatform);
@@ -420,8 +414,8 @@ private:
     StringArray getCompilerFlags (const BuildConfiguration& config, CodeBlocksTarget& target) const
     {
         StringArray flags;
-        if (const auto codeBlocksConfig = dynamic_cast<const CodeBlocksBuildConfiguration*> (&config))
-            flags.add (codeBlocksConfig->getArchitectureTypeVar());
+        if (auto* codeBlocksConfig = dynamic_cast<const CodeBlocksBuildConfiguration*> (&config))
+            flags.add (codeBlocksConfig->getArchitectureTypeString());
 
         flags.add ("-O" + config.getGCCOptimisationFlag());
 
@@ -429,7 +423,7 @@ private:
             flags.add ("-flto");
 
         {
-            auto cppStandard = config.project.getCppStandardValue().toString();
+            auto cppStandard = config.project.getCppStandardString();
 
             if (cppStandard == "latest")
                 cppStandard = "1z";
@@ -475,8 +469,8 @@ private:
     {
         StringArray flags (makefileExtraLinkerFlags);
 
-        if (const auto codeBlocksConfig = dynamic_cast<const CodeBlocksBuildConfiguration*> (&config))
-            flags.add (codeBlocksConfig->getArchitectureTypeVar());
+        if (auto* codeBlocksConfig = dynamic_cast<const CodeBlocksBuildConfiguration*> (&config))
+            flags.add (codeBlocksConfig->getArchitectureTypeString());
 
         if (! config.isDebug())
             flags.add ("-s");

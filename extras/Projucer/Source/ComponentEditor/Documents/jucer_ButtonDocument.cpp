@@ -54,7 +54,7 @@ ButtonDocument::ButtonDocument (SourceCodeDocument* c)
 
     for (int i = 7; --i >= 0;)
     {
-        paintRoutines[i] = new PaintRoutine();
+        paintRoutines[i].reset (new PaintRoutine());
         paintRoutines[i]->setDocument (this);
         paintRoutines[i]->setBackgroundColour (Colours::transparentBlack);
     }

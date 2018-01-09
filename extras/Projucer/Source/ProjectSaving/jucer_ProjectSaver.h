@@ -414,16 +414,16 @@ private:
             << "// BEGIN SECTION A" << newLine
             << newLine
             << "#ifndef JUCE_DISPLAY_SPLASH_SCREEN" << newLine
-            << " #define JUCE_DISPLAY_SPLASH_SCREEN "   << (project.shouldDisplaySplashScreen().getValue() ? "1" : "0") << newLine
+            << " #define JUCE_DISPLAY_SPLASH_SCREEN "   << (project.shouldDisplaySplashScreen() ? "1" : "0") << newLine
             << "#endif" << newLine << newLine
 
             << "#ifndef JUCE_REPORT_APP_USAGE" << newLine
-            << " #define JUCE_REPORT_APP_USAGE "        << (project.shouldReportAppUsage().getValue()      ? "1" : "0") << newLine
+            << " #define JUCE_REPORT_APP_USAGE "        << (project.shouldReportAppUsage()      ? "1" : "0") << newLine
             << "#endif" << newLine
             << newLine
             << "// END SECTION A" << newLine
             << newLine
-            << "#define JUCE_USE_DARK_SPLASH_SCREEN "  << (project.splashScreenColour().toString() == "Dark" ? "1" : "0") << newLine;
+            << "#define JUCE_USE_DARK_SPLASH_SCREEN "  << (project.getSplashScreenColourString() == "Dark" ? "1" : "0") << newLine;
 
         out << newLine
             << "//==============================================================================" << newLine;
@@ -451,28 +451,15 @@ private:
                     << "//==============================================================================" << newLine
                     << "// " << m->getID() << " flags:" << newLine;
 
-                for (int i = 0; i < flags.size(); ++i)
+                for (auto* flag : flags)
                 {
-                    flags.getUnchecked(i)->value.referTo (project.getConfigFlag (flags.getUnchecked(i)->symbol));
-
-                    const Project::ConfigFlag* const f = flags[i];
-                    const String value (project.getConfigFlag (f->symbol).toString());
-
                     out << newLine
-                        << "#ifndef    " << f->symbol << newLine;
-
-                    if (value == Project::configFlagEnabled)
-                        out << " #define   " << f->symbol << " 1";
-                    else if (value == Project::configFlagDisabled)
-                        out << " #define   " << f->symbol << " 0";
-                    else if (f->defaultValue.isEmpty())
-                        out << " //#define " << f->symbol << " 1";
-                    else
-                        out << " #define " << f->symbol << " " << f->defaultValue;
-
-
-                    out << newLine
-                        << "#endif" << newLine;
+                    << "#ifndef    " << flag->symbol
+                    << newLine
+                    << (flag->value.isUsingDefault() ? " //#define " : " #define   ") << flag->symbol << " " << (flag->value.get() ? "1" : "0")
+                    << newLine
+                    << "#endif"
+                    << newLine;
                 }
             }
         }
@@ -533,7 +520,7 @@ private:
             out << newLine;
         }
 
-        if (hasBinaryData && project.shouldIncludeBinaryInAppConfig().getValue())
+        if (hasBinaryData && project.shouldIncludeBinaryInAppConfig())
             out << CodeHelpers::createIncludeStatement (project.getBinaryDataHeaderFile(), appConfigFile) << newLine;
 
         out << newLine
@@ -546,7 +533,7 @@ private:
             << "#if ! JUCE_DONT_DECLARE_PROJECTINFO" << newLine
             << "namespace ProjectInfo" << newLine
             << "{" << newLine
-            << "    const char* const  projectName    = " << CppTokeniserFunctions::addEscapeChars (project.getTitle()).quoted() << ";" << newLine
+            << "    const char* const  projectName    = " << CppTokeniserFunctions::addEscapeChars (project.getProjectNameString()).quoted() << ";" << newLine
             << "    const char* const  versionString  = " << CppTokeniserFunctions::addEscapeChars (project.getVersionString()).quoted() << ";" << newLine
             << "    const int          versionNumber  = " << project.getVersionAsHex() << ";" << newLine
             << "}" << newLine
@@ -593,7 +580,7 @@ private:
 
         if (resourceFile.getNumFiles() > 0)
         {
-            auto dataNamespace = project.binaryDataNamespace().toString().trim();
+            auto dataNamespace = project.getBinaryDataNamespaceString().trim();
             if (dataNamespace.isEmpty())
                 dataNamespace = "BinaryData";
 
@@ -601,7 +588,7 @@ private:
 
             Array<File> binaryDataFiles;
 
-            int maxSize = project.getMaxBinaryFileSize().getValue();
+            int maxSize = project.getMaxBinaryFileSize();
             if (maxSize <= 0)
                 maxSize = 10 * 1024 * 1024;
 

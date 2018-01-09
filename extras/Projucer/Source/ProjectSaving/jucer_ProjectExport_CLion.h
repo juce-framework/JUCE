@@ -41,7 +41,6 @@ protected:
         }
 
         void createConfigProperties (PropertyListBuilder&) override         {}
-        var getDefaultOptimisationLevel() const override                    { return {}; }
         String getModuleLibraryArchName() const override                    { return {}; }
     };
 
@@ -75,8 +74,7 @@ public:
     {
         name = getName();
 
-        if (getTargetLocationString().isEmpty())
-            getTargetLocationValue() = getDefaultBuildsRootFolder() + "CLion";
+        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + "CLion");
     }
 
     //==============================================================================
@@ -376,7 +374,7 @@ private:
     //==============================================================================
     void writeCMakeListsMakefileSection (OutputStream& out, MakefileProjectExporter& exporter) const
     {
-        out << "project (" << getProject().getTitle().quoted() << " C CXX)" << newLine
+        out << "project (" << getProject().getProjectNameString().quoted() << " C CXX)" << newLine
             << newLine;
 
         out << "find_package (PkgConfig REQUIRED)" << newLine;
@@ -456,7 +454,7 @@ private:
                 out << "set_target_properties (" << targetVarName << " PROPERTIES" << newLine
                     << "    OUTPUT_NAME "  <<  config.getTargetBinaryNameString().quoted() << newLine;
 
-                auto cxxStandard = project.getCppStandardValue().toString();
+                auto cxxStandard = project.getCppStandardString();
 
                 if (cxxStandard == "latest")
                     cxxStandard = "1z";
@@ -540,7 +538,7 @@ private:
     //==============================================================================
     void writeCMakeListsCodeBlocksSection (OutputStream& out, CodeBlocksProjectExporter& exporter) const
     {
-        out << "project (" << getProject().getTitle().quoted() << " C CXX)" << newLine
+        out << "project (" << getProject().getProjectNameString().quoted() << " C CXX)" << newLine
             << newLine;
 
         writeCMakeTargets (out, exporter);
@@ -585,7 +583,7 @@ private:
                 out << "set_target_properties (" << targetVarName << " PROPERTIES" << newLine
                     << "    OUTPUT_NAME "  <<  config.getTargetBinaryNameString().quoted() << newLine;
 
-                auto cxxStandard = project.getCppStandardValue().toString();
+                auto cxxStandard = project.getCppStandardString();
 
                 if (cxxStandard == "latest")
                     cxxStandard = "1z";
@@ -679,7 +677,7 @@ private:
             }
         }
 
-        out << "project (" << getProject().getTitle().quoted() << " C CXX)" << newLine << newLine;
+        out << "project (" << getProject().getProjectNameString().quoted() << " C CXX)" << newLine << newLine;
 
         writeCMakeTargets (out, exporter);
 
@@ -981,7 +979,7 @@ private:
                 out << "set_target_properties (" << targetVarName << " PROPERTIES" << newLine
                     << "    OUTPUT_NAME "  << binaryName.quoted() << newLine;
 
-                auto cxxStandard = project.getCppStandardValue().toString();
+                auto cxxStandard = project.getCppStandardString();
 
                 if (cxxStandard == "latest")
                     cxxStandard = "1z";

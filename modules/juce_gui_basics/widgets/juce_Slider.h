@@ -211,11 +211,14 @@ public:
                                 the threshold is reached
         @param userCanPressKeyToSwapMode    if true, then the user can hold down the ctrl or command
                                 key to toggle velocity-sensitive mode
+        @param modifiersToSwapModes  this is a set of modifier flags which will be tested when determining
+                                whether to enable/disable velocity-sensitive mode
     */
     void setVelocityModeParameters (double sensitivity = 1.0,
                                     int threshold = 1,
                                     double offset = 0.0,
-                                    bool userCanPressKeyToSwapMode = true);
+                                    bool userCanPressKeyToSwapMode = true,
+                                    ModifierKeys::Flags modifiersToSwapModes = ModifierKeys::ctrlAltCommandModifiers);
 
     /** Returns the velocity sensitivity setting.
         @see setVelocityModeParameters

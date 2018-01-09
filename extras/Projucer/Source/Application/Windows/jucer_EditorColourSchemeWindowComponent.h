@@ -35,9 +35,9 @@ public:
     EditorColourSchemeWindowComponent()
     {
         if (getAppSettings().monospacedFontNames.size() == 0)
-            content = new AppearanceEditor::FontScanPanel();
+            content.reset (new AppearanceEditor::FontScanPanel());
         else
-            content = new AppearanceEditor::EditorPanel();
+            content.reset (new AppearanceEditor::EditorPanel());
 
         changeContent (content.get());
     }
@@ -54,10 +54,11 @@ public:
 
     void changeContent (Component* newContent)
     {
-        content = newContent;
-        addAndMakeVisible (content);
+        content.reset (newContent);
+        addAndMakeVisible (newContent);
         content->setBounds (getLocalBounds().reduced (10));
     }
+
 private:
     ScopedPointer<Component> content;
 

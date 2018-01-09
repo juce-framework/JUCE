@@ -535,12 +535,12 @@ public:
         addLookAndFeel (slaf, "Square Look And Feel");
         setupSquareLookAndFeelColours (*slaf);
 
-        lafBox.onChange = [this]() { setAllLookAndFeels (lookAndFeels[lafBox.getSelectedItemIndex()]); };
+        lafBox.onChange = [this] { setAllLookAndFeels (lookAndFeels[lafBox.getSelectedItemIndex()]); };
         lafBox.setSelectedItemIndex (3);
 
         addAndMakeVisible (randomButton);
         randomButton.setButtonText ("Assign Randomly");
-        randomButton.onClick = [this]() { lafBox.setSelectedItemIndex (Random().nextInt (lafBox.getNumItems())); };
+        randomButton.onClick = [this] { lafBox.setSelectedItemIndex (Random().nextInt (lafBox.getNumItems())); };
     }
 
     void paint (Graphics& g) override

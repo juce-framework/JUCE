@@ -245,34 +245,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DependencyFilePathPropertyComponent)
 };
-
-//==============================================================================
-class TextPropertyComponentWithEnablement    : public TextPropertyComponent,
-                                               private Value::Listener
-{
-public:
-    TextPropertyComponentWithEnablement (const Value&, const Value&, const String&, int, bool);
-
-    ~TextPropertyComponentWithEnablement();
-
-private:
-    Value value;
-
-    void valueChanged (Value& v) override;
-};
-
-//==============================================================================
-class ChoicePropertyComponentWithEnablement    : public ChoicePropertyComponent,
-                                                 private Value::Listener
-{
-public:
-    ChoicePropertyComponentWithEnablement (const Value&, const Value&, const String&,
-                                           const StringArray&, const Array<var>&);
-
-    ~ChoicePropertyComponentWithEnablement();
-
-private:
-    Value value;
-
-    void valueChanged (Value& v) override;
-};

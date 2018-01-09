@@ -30,9 +30,8 @@
 //==============================================================================
 class UserSettingsPopup    : public Component
                             #if ! JUCER_ENABLE_GPL_MODE
-                          , private Button::Listener,
-                            private LicenseController::StateChangedCallback
-                           #endif
+                           , private LicenseController::StateChangedCallback
+                            #endif
 {
 public:
     UserSettingsPopup (bool isShownInsideWebview)
@@ -63,13 +62,24 @@ public:
         licenseTypeLabel->setMinimumHorizontalScale (1.0f);
 
         addAndMakeVisible (logoutButton = new TextButton (isInsideWebview ? "Select different account..." : "Logout"));
-        logoutButton->addListener (this);
         logoutButton->setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
+
+        logoutButton->onClick = [this]
+        {
+            dismissCalloutBox();
+            ProjucerApplication::getApp().doLogout();
+        };
 
         if (! isInsideWebview)
         {
             addAndMakeVisible (switchLicenseButton = new TextButton ("Switch License"));
-            switchLicenseButton->addListener (this);
+            switchLicenseButton->onClick = [this]
+            {
+                dismissCalloutBox();
+
+                if (auto* controller = ProjucerApplication::getApp().licenseController.get())
+                    controller->chooseNewLicense();
+            };
         }
 
         if (auto* controller = ProjucerApplication::getApp().licenseController.get())
@@ -109,35 +119,19 @@ public:
 
 private:
     //==============================================================================
-   #if ! JUCER_ENABLE_GPL_MODE
-    void buttonClicked (Button* b) override
+    void dismissCalloutBox()
     {
-        if (b == logoutButton)
-        {
-            dismissCalloutBox();
-            ProjucerApplication::getApp().doLogout();
-        }
-        else if (b == switchLicenseButton)
-        {
-            dismissCalloutBox();
-            if (auto* controller = ProjucerApplication::getApp().licenseController.get())
-                controller->chooseNewLicense();
-        }
+        if (auto* parent = findParentComponentOfClass<CallOutBox>())
+            parent->dismiss();
     }
 
-
+   #if ! JUCER_ENABLE_GPL_MODE
     void licenseStateChanged (const LicenseState& state) override
     {
         hasLicenseType = (state.type != LicenseState::Type::noLicenseChosenYet);
         licenseTypeLabel->setVisible (hasLicenseType);
         loggedInUsernameLabel->setText (state.username, NotificationType::dontSendNotification);
         licenseTypeLabel->setText (LicenseState::licenseTypeToString (state.type), NotificationType::dontSendNotification);
-    }
-
-    void dismissCalloutBox()
-    {
-        if (auto* parent = findParentComponentOfClass<CallOutBox>())
-            parent->dismiss();
     }
 
     void lookAndFeelChanged() override

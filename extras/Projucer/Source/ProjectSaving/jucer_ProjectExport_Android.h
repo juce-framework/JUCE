@@ -100,24 +100,13 @@ public:
     }
 
     //==============================================================================
-    CachedValue<String> androidRepositories, androidDependencies,
-                        androidScreenOrientation, androidActivityClass, androidActivitySubClassName,
-                        androidManifestCustomXmlElements, androidVersionCode, androidMinimumSDK, androidTheme,
-                        androidSharedLibraries, androidStaticLibraries, androidExtraAssetsFolder;
-
-    CachedValue<bool>   androidInternetNeeded, androidMicNeeded, androidBluetoothNeeded,
-                        androidExternalReadPermission, androidExternalWritePermission,
-                        androidInAppBillingPermission, androidVibratePermission;
-    CachedValue<String> androidOtherPermissions;
-
-    CachedValue<bool>   androidEnableRemoteNotifications;
-    CachedValue<String> androidRemoteNotificationsConfigFile;
-
-    CachedValue<bool>   androidEnableContentSharing;
-
-    CachedValue<String> androidKeyStore, androidKeyStorePass, androidKeyAlias, androidKeyAliasPass;
-
-    CachedValue<String> gradleVersion, androidPluginVersion, gradleToolchain, buildToolsVersion;
+    ValueWithDefault androidRepositories, androidDependencies, androidScreenOrientation, androidActivityClass,
+                     androidActivitySubClassName, androidManifestCustomXmlElements, androidVersionCode,
+                     androidMinimumSDK, androidTheme, androidSharedLibraries, androidStaticLibraries, androidExtraAssetsFolder,
+                     androidInternetNeeded, androidMicNeeded, androidBluetoothNeeded, androidExternalReadPermission,
+                     androidExternalWritePermission, androidInAppBillingPermission, androidVibratePermission,androidOtherPermissions,
+                     androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore,
+                     androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion, buildToolsVersion;
 
     //==============================================================================
     AndroidProjectExporter (Project& p, const ValueTree& t)
@@ -150,41 +139,40 @@ public:
           androidKeyAlias (settings, Ids::androidKeyAlias, nullptr, "androiddebugkey"),
           androidKeyAliasPass (settings, Ids::androidKeyAliasPass, nullptr, "android"),
           gradleVersion (settings, Ids::gradleVersion, nullptr, "4.1"),
-          androidPluginVersion (settings, Ids::androidPluginVersion, nullptr, "3.0.0"),
           gradleToolchain (settings, Ids::gradleToolchain, nullptr, "clang"),
+          androidPluginVersion (settings, Ids::androidPluginVersion, nullptr, "3.0.0"),
           buildToolsVersion (settings, Ids::buildToolsVersion, nullptr, "27.0.0"),
           AndroidExecutable (findAndroidExecutable())
     {
         name = getName();
 
-        if (getTargetLocationString().isEmpty())
-            getTargetLocationValue() = getDefaultBuildsRootFolder() + "Android";
+        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + "Android");
     }
 
     //==============================================================================
     void createToolchainExporterProperties (PropertyListBuilder& props)
     {
-        props.add (new TextWithDefaultPropertyComponent<String> (gradleVersion, "gradle version", 32),
+        props.add (new TextPropertyComponent (gradleVersion, "gradle version", 32, false),
                    "The version of gradle that is used to build this app (3.3 is fine for JUCE)");
 
-        props.add (new TextWithDefaultPropertyComponent<String> (androidPluginVersion, "android plug-in version", 32),
+        props.add (new TextPropertyComponent (androidPluginVersion, "android plug-in version", 32, false),
                    "The version of the android build plugin for gradle that is used to build this app");
 
-        static const char* toolchains[] = { "clang", "gcc", nullptr };
-
-        props.add (new ChoicePropertyComponent (gradleToolchain.getPropertyAsValue(), "NDK Toolchain", StringArray (toolchains), Array<var> (toolchains)),
+        props.add (new ChoicePropertyComponent (gradleToolchain, "NDK Toolchain",
+                                                { "clang", "gcc" },
+                                                { "clang", "gcc" }),
                    "The toolchain that gradle should invoke for NDK compilation (variable model.android.ndk.tooclhain in app/build.gradle)");
 
-        props.add (new TextWithDefaultPropertyComponent<String> (buildToolsVersion, "Android build tools version", 32),
+        props.add (new TextPropertyComponent (buildToolsVersion, "Android build tools version", 32, false),
                    "The Android build tools version that should use to build this app");
     }
 
     void createLibraryModuleExporterProperties (PropertyListBuilder& props)
     {
-        props.add (new TextPropertyComponent (androidStaticLibraries.getPropertyAsValue(), "Import static library modules", 8192, true),
+        props.add (new TextPropertyComponent (androidStaticLibraries, "Import static library modules", 8192, true),
                    "Comma or whitespace delimited list of static libraries (.a) defined in NDK_MODULE_PATH.");
 
-        props.add (new TextPropertyComponent (androidSharedLibraries.getPropertyAsValue(), "Import shared library modules", 8192, true),
+        props.add (new TextPropertyComponent (androidSharedLibraries, "Import shared library modules", 8192, true),
                    "Comma or whitespace delimited list of shared libraries (.so) defined in NDK_MODULE_PATH.");
     }
 
@@ -319,47 +307,37 @@ protected:
     {
     public:
         AndroidBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
-            : BuildConfiguration (p, settings, e)
+            : BuildConfiguration (p, settings, e),
+              androidArchitectures (config, Ids::androidArchitectures, nullptr, isDebug() ? "armeabi x86" : ""),
+              androidAdditionalXmlValueResources (config, Ids::androidAdditionalXmlValueResources, nullptr, {}),
+              androidAdditionalRawValueResources (config, Ids::androidAdditionalRawValueResources, nullptr, {}),
+              androidCustomStringXmlElements (config, Ids::androidCustomStringXmlElements, nullptr, {})
         {
-            if (getArchitectures().isEmpty())
-            {
-                if (isDebug())
-                    getArchitecturesValue() = "armeabi x86";
-                else
-                    getArchitecturesValue() = "";
-            }
+            linkTimeOptimisationValue.setDefault (false);
+            optimisationLevelValue.setDefault (isDebug() ? gccO0 : gccO3);
         }
 
-        Value getArchitecturesValue()           { return getValue (Ids::androidArchitectures); }
-        String getArchitectures() const         { return config [Ids::androidArchitectures]; }
-
-        Value getAdditionalXmlResourcesValue()    { return getValue (Ids::androidAdditionalXmlValueResources); }
-        String getAdditionalXmlResources() const  { return config [Ids::androidAdditionalXmlValueResources]; }
-
-        Value getAdditionalRawResourcesValue()    { return getValue (Ids::androidAdditionalRawValueResources); }
-        String getAdditionalRawResources() const  { return config [Ids::androidAdditionalRawValueResources]; }
-
-        Value getCustomStringsXmlValue()        { return getValue (Ids::androidCustomStringXmlElements); }
-        String getCustomStringsXml() const      { return config [Ids::androidCustomStringXmlElements]; }
-
-        var getDefaultOptimisationLevel() const override    { return var ((int) (isDebug() ? gccO0 : gccO3)); }
+        String getArchitectures() const             { return androidArchitectures.get().toString(); }
+        String getAdditionalXmlResources() const    { return androidAdditionalXmlValueResources.get().toString(); }
+        String getAdditionalRawResources() const    { return androidAdditionalRawValueResources.get().toString();}
+        String getCustomStringsXml() const          { return androidCustomStringXmlElements.get().toString(); }
 
         void createConfigProperties (PropertyListBuilder& props) override
         {
             addGCCOptimisationProperty (props);
 
-            props.add (new TextPropertyComponent (getArchitecturesValue(), "Architectures", 256, false),
+            props.add (new TextPropertyComponent (androidArchitectures, "Architectures", 256, false),
                        "A list of the ARM architectures to build (for a fat binary). Leave empty to build for all possible android archiftectures.");
 
-            props.add (new TextPropertyComponent (getAdditionalXmlResourcesValue(), "Extra Android XML Value Resources", 2048, true),
+            props.add (new TextPropertyComponent (androidAdditionalXmlValueResources, "Extra Android XML Value Resources", 2048, true),
                        "Paths to additional \"value resource\" files in XML format that should be included in the app (one per line). "
                        "If you have additional XML resources that should be treated as value resources, add them here.");
 
-            props.add (new TextPropertyComponent (getAdditionalRawResourcesValue(), "Extra Android Raw Resources", 2048, true),
+            props.add (new TextPropertyComponent (androidAdditionalRawValueResources, "Extra Android Raw Resources", 2048, true),
                        "Paths to additional \"raw resource\" files that should be included in the app (one per line). "
                        "Resource file names must contain only lowercase a-z, 0-9 or underscore.");
 
-            props.add (new TextPropertyComponent (getCustomStringsXmlValue(), "Custom string resources", 8192, true),
+            props.add (new TextPropertyComponent (androidCustomStringXmlElements, "Custom string resources", 8192, true),
                        "Custom XML resources that will be added to string.xml as children of <resources> element. "
                        "Example: \n<string name=\"value\">text</string>\n"
                        "<string name2=\"value2\">text2</string>\n");
@@ -379,6 +357,9 @@ protected:
         {
             return "${ANDROID_ABI}";
         }
+
+        ValueWithDefault androidArchitectures, androidAdditionalXmlValueResources, androidAdditionalRawValueResources,
+                         androidCustomStringXmlElements;
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
@@ -556,13 +537,13 @@ private:
     {
         MemoryOutputStream mo;
 
-        mo << "buildscript {"                                                                          << newLine;
-        mo << "   repositories {"                                                                      << newLine;
-        mo << "       jcenter()"                                                                       << newLine;
-        mo << "       google()"                                                                        << newLine;
-        mo << "   }"                                                                                   << newLine;
-        mo << "   dependencies {"                                                                      << newLine;
-        mo << "       classpath 'com.android.tools.build:gradle:" << androidPluginVersion.get() << "'" << newLine;
+        mo << "buildscript {"                                                                              << newLine;
+        mo << "   repositories {"                                                                          << newLine;
+        mo << "       jcenter()"                                                                           << newLine;
+        mo << "       google()"                                                                            << newLine;
+        mo << "   }"                                                                                       << newLine;
+        mo << "   dependencies {"                                                                          << newLine;
+        mo << "       classpath 'com.android.tools.build:gradle:" << androidPluginVersion.get().toString() << "'" << newLine;
 
         if (androidEnableRemoteNotifications.get())
             mo << "       classpath 'com.google.gms:google-services:3.1.0'" << newLine;
@@ -593,26 +574,26 @@ private:
         MemoryOutputStream mo;
         mo << "apply plugin: 'com.android." << (isLibrary() ? "library" : "application") << "'" << newLine << newLine;
 
-        mo << "android {"                                                         << newLine;
-        mo << "    compileSdkVersion " << androidMinimumSDK.get().getIntValue()   << newLine;
-        mo << "    buildToolsVersion \"" << buildToolsVersion.get() << "\""       << newLine;
-        mo << "    externalNativeBuild {"                                         << newLine;
-        mo << "        cmake {"                                                   << newLine;
-        mo << "            path \"CMakeLists.txt\""                               << newLine;
-        mo << "        }"                                                         << newLine;
-        mo << "    }"                                                             << newLine;
+        mo << "android {"                                                                    << newLine;
+        mo << "    compileSdkVersion " << static_cast<int> (androidMinimumSDK.get())         << newLine;
+        mo << "    buildToolsVersion \"" << buildToolsVersion.get().toString() << "\""       << newLine;
+        mo << "    externalNativeBuild {"                                                    << newLine;
+        mo << "        cmake {"                                                              << newLine;
+        mo << "            path \"CMakeLists.txt\""                                          << newLine;
+        mo << "        }"                                                                    << newLine;
+        mo << "    }"                                                                        << newLine;
 
-        mo << getAndroidSigningConfig()                                           << newLine;
-        mo << getAndroidDefaultConfig()                                           << newLine;
-        mo << getAndroidBuildTypes()                                              << newLine;
-        mo << getAndroidProductFlavours()                                         << newLine;
-        mo << getAndroidVariantFilter()                                           << newLine;
+        mo << getAndroidSigningConfig()                                                      << newLine;
+        mo << getAndroidDefaultConfig()                                                      << newLine;
+        mo << getAndroidBuildTypes()                                                         << newLine;
+        mo << getAndroidProductFlavours()                                                    << newLine;
+        mo << getAndroidVariantFilter()                                                      << newLine;
 
-        mo << getAndroidRepositories()                                            << newLine;
-        mo << getAndroidDependencies()                                            << newLine;
-        mo << getApplyPlugins()                                                   << newLine;
+        mo << getAndroidRepositories()                                                       << newLine;
+        mo << getAndroidDependencies()                                                       << newLine;
+        mo << getApplyPlugins()                                                              << newLine;
 
-        mo << "}"                                                                 << newLine << newLine;
+        mo << "}"                                                                            << newLine << newLine;
 
         return mo.toString();
     }
@@ -664,29 +645,29 @@ private:
     {
         MemoryOutputStream mo;
 
-        String keyStoreFilePath = androidKeyStore.get().replace ("${user.home}", "${System.properties['user.home']}")
-                                                       .replace ("/", "${File.separator}");
+        String keyStoreFilePath = androidKeyStore.get().toString().replace ("${user.home}", "${System.properties['user.home']}")
+                                                                  .replace ("/", "${File.separator}");
 
-        mo << "    signingConfigs {"                                              << newLine;
-        mo << "        juceSigning {"                                             << newLine;
-        mo << "            storeFile     file(\"" << keyStoreFilePath << "\")"    << newLine;
-        mo << "            storePassword \"" << androidKeyStorePass.get() << "\"" << newLine;
-        mo << "            keyAlias      \"" << androidKeyAlias.get() << "\""     << newLine;
-        mo << "            keyPassword   \"" << androidKeyAliasPass.get() << "\"" << newLine;
-        mo << "            storeType     \"jks\""                                 << newLine;
-        mo << "        }"                                                         << newLine;
-        mo << "    }"                                                             << newLine;
+        mo << "    signingConfigs {"                                                         << newLine;
+        mo << "        juceSigning {"                                                        << newLine;
+        mo << "            storeFile     file(\"" << keyStoreFilePath << "\")"               << newLine;
+        mo << "            storePassword \"" << androidKeyStorePass.get().toString() << "\"" << newLine;
+        mo << "            keyAlias      \"" << androidKeyAlias.get().toString() << "\""     << newLine;
+        mo << "            keyPassword   \"" << androidKeyAliasPass.get().toString() << "\"" << newLine;
+        mo << "            storeType     \"jks\""                                            << newLine;
+        mo << "        }"                                                                    << newLine;
+        mo << "    }"                                                                        << newLine;
 
         return mo.toString();
     }
 
     String getAndroidDefaultConfig() const
     {
-        const String bundleIdentifier  = project.getBundleIdentifier().toString().toLowerCase();
+        const String bundleIdentifier  = project.getBundleIdentifierString().toLowerCase();
         const StringArray& cmakeDefs = getCmakeDefinitions();
         const StringArray& cFlags   = getProjectCompilerFlags();
         const StringArray& cxxFlags = getProjectCxxCompilerFlags();
-        const int minSdkVersion = androidMinimumSDK.get().getIntValue();
+        const int minSdkVersion = static_cast<int> (androidMinimumSDK.get());
 
         MemoryOutputStream mo;
 
@@ -773,7 +754,7 @@ private:
         MemoryOutputStream mo;
 
         juce::StringArray  repositories;
-        repositories.addLines (androidRepositories.get());
+        repositories.addLines (androidRepositories.get().toString());
 
         mo << "repositories {"                << newLine;
 
@@ -790,7 +771,7 @@ private:
         MemoryOutputStream mo;
 
         juce::StringArray  dependencies;
-        dependencies.addLines (androidDependencies.get());
+        dependencies.addLines (androidDependencies.get().toString());
 
         mo << "dependencies {" << newLine;
 
@@ -834,7 +815,7 @@ private:
         String props;
 
         props << "distributionUrl=https\\://services.gradle.org/distributions/gradle-"
-              << gradleVersion.get() << "-all.zip";
+              << gradleVersion.get().toString() << "-all.zip";
 
         return props;
     }
@@ -842,26 +823,25 @@ private:
     //==============================================================================
     void createBaseExporterProperties (PropertyListBuilder& props)
     {
-        static const char* orientations[] = { "Portrait and Landscape", "Portrait", "Landscape", nullptr };
-        static const char* orientationValues[] = { "unspecified", "portrait", "landscape", nullptr };
-
-        props.add (new TextPropertyComponent (androidRepositories.getPropertyAsValue(), "Module repositories", 32768, true),
+        props.add (new TextPropertyComponent (androidRepositories, "Module repositories", 32768, true),
                    "Module repositories (one per line). These will be added to module-level gradle file repositories section. ");
 
-        props.add (new TextPropertyComponent (androidDependencies.getPropertyAsValue(), "Module dependencies", 32768, true),
+        props.add (new TextPropertyComponent (androidDependencies, "Module dependencies", 32768, true),
                    "Module dependencies (one per line). These will be added to module-level gradle file dependencies section. ");
 
-        props.add (new ChoicePropertyComponent (androidScreenOrientation.getPropertyAsValue(), "Screen orientation", StringArray (orientations), Array<var> (orientationValues)),
+        props.add (new ChoicePropertyComponent (androidScreenOrientation, "Screen orientation",
+                                                { "Portrait and Landscape", "Portrait", "Landscape" },
+                                                { "unspecified",            "portrait", "landscape" }),
                    "The screen orientations that this app should support");
 
-        props.add (new TextWithDefaultPropertyComponent<String> (androidActivityClass, "Android Activity class name", 256),
+        props.add (new TextPropertyComponent (androidActivityClass, "Android Activity class name", 256, false),
                    "The full java class name to use for the app's Activity class.");
 
-        props.add (new TextPropertyComponent (androidActivitySubClassName.getPropertyAsValue(), "Android Activity sub-class name", 256, false),
+        props.add (new TextPropertyComponent (androidActivitySubClassName, "Android Activity sub-class name", 256, false),
                    "If not empty, specifies the Android Activity class name stored in the app's manifest. "
                    "Use this if you would like to use your own Android Activity sub-class.");
 
-        props.add (new TextWithDefaultPropertyComponent<String> (androidVersionCode, "Android Version Code", 32),
+        props.add (new TextPropertyComponent (androidVersionCode, "Android Version Code", 32, false),
                    "An integer value that represents the version of the application code, relative to other versions.");
 
         props.add (new DependencyPathPropertyComponent (project.getFile().getParentDirectory(), sdkPath, "Android SDK Path"),
@@ -870,51 +850,51 @@ private:
         props.add (new DependencyPathPropertyComponent (project.getFile().getParentDirectory(), ndkPath, "Android NDK Path"),
                    "The path to the Android NDK folder on the target build machine");
 
-        props.add (new TextWithDefaultPropertyComponent<String> (androidMinimumSDK, "Minimum SDK version", 32),
+        props.add (new TextPropertyComponent (androidMinimumSDK, "Minimum SDK version", 32, false),
                    "The number of the minimum version of the Android SDK that the app requires");
 
-        props.add (new TextPropertyComponent (androidExtraAssetsFolder.getPropertyAsValue(), "Extra Android Assets", 256, false),
+        props.add (new TextPropertyComponent (androidExtraAssetsFolder, "Extra Android Assets", 256, false),
                    "A path to a folder (relative to the project folder) which contains extra android assets.");
     }
 
     //==============================================================================
     void createManifestExporterProperties (PropertyListBuilder& props)
     {
-        props.add (new BooleanPropertyComponent (androidInternetNeeded.getPropertyAsValue(), "Internet Access", "Specify internet access permission in the manifest"),
+        props.add (new ChoicePropertyComponent (androidInternetNeeded, "Internet Access"),
                    "If enabled, this will set the android.permission.INTERNET flag in the manifest.");
 
-        props.add (new BooleanPropertyComponent (androidMicNeeded.getPropertyAsValue(), "Audio Input Required", "Specify audio record permission in the manifest"),
+        props.add (new ChoicePropertyComponent (androidMicNeeded, "Audio Input Required"),
                    "If enabled, this will set the android.permission.RECORD_AUDIO flag in the manifest.");
 
-        props.add (new BooleanPropertyComponent (androidBluetoothNeeded.getPropertyAsValue(), "Bluetooth permissions Required", "Specify bluetooth permission (required for Bluetooth MIDI)"),
+        props.add (new ChoicePropertyComponent (androidBluetoothNeeded, "Bluetooth permissions Required"),
                    "If enabled, this will set the android.permission.BLUETOOTH and  android.permission.BLUETOOTH_ADMIN flag in the manifest. This is required for Bluetooth MIDI on Android.");
 
-        props.add (new BooleanPropertyComponent (androidExternalReadPermission.getPropertyAsValue(), "Read from external storage", "Specify permissions to read from external storage"),
+        props.add (new ChoicePropertyComponent (androidExternalReadPermission, "Read from external storage"),
                    "If enabled, this will set the android.permission.READ_EXTERNAL_STORAGE flag in the manifest.");
 
-        props.add (new BooleanPropertyComponent (androidExternalWritePermission.getPropertyAsValue(), "Write to external storage", "Specify permissions to write to external storage"),
+        props.add (new ChoicePropertyComponent (androidExternalWritePermission, "Write to external storage"),
                    "If enabled, this will set the android.permission.WRITE_EXTERNAL_STORAGE flag in the manifest.");
 
-        props.add (new BooleanPropertyComponent (androidInAppBillingPermission.getPropertyAsValue(), "In-App Billing", "Specify In-App Billing permission in the manifest"),
+        props.add (new ChoicePropertyComponent (androidInAppBillingPermission, "In-App Billing"),
                    "If enabled, this will set the com.android.vending.BILLING flag in the manifest.");
 
-        props.add (new BooleanPropertyComponent (androidVibratePermission.getPropertyAsValue(), "Vibrate", "Specify permissions to vibrate"),
+        props.add (new ChoicePropertyComponent (androidVibratePermission, "Vibrate"),
                    "If enabled, this will set the android.permission.VIBRATE flag in the manifest.");
 
-        props.add (new TextPropertyComponent (androidOtherPermissions.getPropertyAsValue(), "Custom permissions", 2048, false),
+        props.add (new ChoicePropertyComponent (androidEnableContentSharing, "Content Sharing"),
+                   "If enabled, your app will be able to share content with other apps.");
+
+        props.add (new TextPropertyComponent (androidOtherPermissions, "Custom permissions", 2048, false),
                    "A space-separated list of other permission flags that should be added to the manifest.");
 
-        props.add (new BooleanPropertyComponent (androidEnableRemoteNotifications.getPropertyAsValue(), "Remote Notifications", "Enabled"),
+        props.add (new ChoicePropertyComponent (androidEnableRemoteNotifications, "Remote Notifications"),
                    "Enable to be able to send remote notifications to devices running your app (min API level 14). Provide Remote Notifications Config File, "
                    "configure your app in Firebase Console and ensure you have the latest Google Repository in Android Studio's SDK Manager.");
-
-        props.add (new BooleanPropertyComponent (androidEnableContentSharing.getPropertyAsValue(), "Content Sharing", "Enabled"),
-                   "If enabled, your app will be able to share content with other apps.");
 
         props.add (new TextPropertyComponent (androidRemoteNotificationsConfigFile.getPropertyAsValue(), "Remote Notifications Config File", 2048, false),
                    "Path to google-services.json file. This will be the file provided by Firebase when creating a new app in Firebase console.");
 
-        props.add (new TextPropertyComponent (androidManifestCustomXmlElements.getPropertyAsValue(), "Custom manifest XML content", 8192, true),
+        props.add (new TextPropertyComponent (androidManifestCustomXmlElements, "Custom manifest XML content", 8192, true),
                    "You can specify custom AndroidManifest.xml content overriding the default one generated by Projucer. "
                    "Projucer will automatically create any missing and required XML elements and attributes "
                    "and merge them into your custom content.");
@@ -923,30 +903,30 @@ private:
     //==============================================================================
     void createCodeSigningExporterProperties (PropertyListBuilder& props)
     {
-        props.add (new TextWithDefaultPropertyComponent<String> (androidKeyStore, "Key Signing: key.store", 2048),
+        props.add (new TextPropertyComponent (androidKeyStore, "Key Signing: key.store", 2048, false),
                    "The key.store value, used when signing the release package.");
 
-        props.add (new TextWithDefaultPropertyComponent<String> (androidKeyStorePass, "Key Signing: key.store.password", 2048),
+        props.add (new TextPropertyComponent (androidKeyStorePass, "Key Signing: key.store.password", 2048, false),
                    "The key.store password, used when signing the release package.");
 
-        props.add (new TextWithDefaultPropertyComponent<String> (androidKeyAlias, "Key Signing: key.alias", 2048),
+        props.add (new TextPropertyComponent (androidKeyAlias, "Key Signing: key.alias", 2048, false),
                    "The key.alias value, used when signing the release package.");
 
-        props.add (new TextWithDefaultPropertyComponent<String> (androidKeyAliasPass, "Key Signing: key.alias.password", 2048),
+        props.add (new TextPropertyComponent (androidKeyAliasPass, "Key Signing: key.alias.password", 2048, false),
                    "The key.alias password, used when signing the release package.");
     }
 
     //==============================================================================
     void createOtherExporterProperties (PropertyListBuilder& props)
     {
-        props.add (new TextPropertyComponent (androidTheme.getPropertyAsValue(), "Android Theme", 256, false),
+        props.add (new TextPropertyComponent (androidTheme, "Android Theme", 256, false),
                    "E.g. @android:style/Theme.NoTitleBar or leave blank for default");
     }
 
     //==============================================================================
     String createDefaultClassName() const
     {
-        auto s = project.getBundleIdentifier().toString().toLowerCase();
+        auto s = project.getBundleIdentifierString().toLowerCase();
 
         if (s.length() > 5
             && s.containsChar ('.')
@@ -961,7 +941,7 @@ private:
             s = "com.yourcompany.";
         }
 
-        return s + CodeHelpers::makeValidIdentifier (project.getProjectFilenameRoot(), false, true, false);
+        return s + CodeHelpers::makeValidIdentifier (project.getProjectFilenameRootString(), false, true, false);
     }
 
     //==============================================================================
@@ -987,13 +967,13 @@ private:
 
     void copyActivityJavaFiles (const File& javaSourceFolder, const File& targetFolder, const String& package) const
     {
-        if (androidActivityClass.get().contains ("_"))
+        if (androidActivityClass.get().toString().contains ("_"))
             throw SaveError ("Your Android activity class name or path may not contain any underscores! Try a project name without underscores.");
 
         auto className = getActivityName();
 
         if (className.isEmpty())
-            throw SaveError ("Invalid Android Activity class name: " + androidActivityClass.get());
+            throw SaveError ("Invalid Android Activity class name: " + androidActivityClass.get().toString());
 
         createDirectoryOrThrow (targetFolder);
 
@@ -1004,7 +984,7 @@ private:
 
         juceMidiImports << newLine;
 
-        if (androidMinimumSDK.get().getIntValue() >= 23)
+        if (static_cast<int> (androidMinimumSDK.get()) >= 23)
         {
             auto javaAndroidMidi = javaSourceFolder.getChildFile ("AndroidMidi.java");
             auto javaRuntimePermissions = javaSourceFolder.getChildFile ("AndroidRuntimePermissions.java");
@@ -1026,26 +1006,26 @@ private:
 
         String juceWebViewImports, juceWebViewCodeNative, juceWebViewCode;
 
-        if (androidMinimumSDK.get().getIntValue() >= 23)
+        if (static_cast<int> (androidMinimumSDK.get()) >= 23)
             juceWebViewImports << "import android.webkit.WebResourceError;" << newLine;
 
-        if (androidMinimumSDK.get().getIntValue() >= 21)
+        if (static_cast<int> (androidMinimumSDK.get()) >= 21)
             juceWebViewImports << "import android.webkit.WebResourceRequest;" << newLine;
 
-        if (androidMinimumSDK.get().getIntValue() >= 11)
+        if (static_cast<int> (androidMinimumSDK.get()) >= 11)
             juceWebViewImports << "import android.webkit.WebResourceResponse;" << newLine;
 
         auto javaWebViewFile = javaSourceFolder.getChildFile ("AndroidWebView.java");
         auto juceWebViewCodeAll = javaWebViewFile.loadFileAsString();
 
-        if (androidMinimumSDK.get().getIntValue() <= 10)
+        if (static_cast<int> (androidMinimumSDK.get()) <= 10)
         {
             juceWebViewCode << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewApi1_10", false, false)
                                                  .upToFirstOccurrenceOf ("WebViewApi1_10$$", false, false);
         }
         else
         {
-            if (androidMinimumSDK.get().getIntValue() >= 23)
+            if (static_cast<int> (androidMinimumSDK.get()) >= 23)
             {
                 juceWebViewCodeNative << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewNativeApi23", false, false)
                                                            .upToFirstOccurrenceOf ("WebViewNativeApi23$$", false, false);
@@ -1054,7 +1034,7 @@ private:
                                                      .upToFirstOccurrenceOf ("WebViewApi23$$", false, false);
             }
 
-            if (androidMinimumSDK.get().getIntValue() >= 21)
+            if (static_cast<int> (androidMinimumSDK.get()) >= 21)
             {
                 juceWebViewCodeNative << juceWebViewCodeAll.fromFirstOccurrenceOf ("$$WebViewNativeApi21", false, false)
                                                            .upToFirstOccurrenceOf ("WebViewNativeApi21$$", false, false);
@@ -1161,7 +1141,7 @@ private:
         auto commonStart = fileContent.upToFirstOccurrenceOf ("$$ContentProviderApi11", false, false);
         auto commonEnd   = fileContent.fromFirstOccurrenceOf ("ContentProviderApi11$$", false, false);
 
-        auto middleContent = androidMinimumSDK.get().getIntValue() >= 11
+        auto middleContent = static_cast<int> (androidMinimumSDK.get()) >= 11
                                 ? fileContent.fromFirstOccurrenceOf ("$$ContentProviderApi11", false, false)
                                              .upToFirstOccurrenceOf ("ContentProviderApi11$$", false, false)
                                 : String();
@@ -1186,7 +1166,7 @@ private:
 
         if (androidEnableRemoteNotifications.get())
         {
-            File file (getProject().getFile().getChildFile (androidRemoteNotificationsConfigFile.get()));
+            File file (getProject().getFile().getChildFile (androidRemoteNotificationsConfigFile.get().toString()));
             // Settings file must be present for remote notifications to work and it must be called google-services.json.
             jassert (file.existsAsFile() && file.getFileName() == "google-services.json");
 
@@ -1216,7 +1196,7 @@ private:
 
     String getActivityName() const
     {
-        return androidActivityClass.get().fromLastOccurrenceOf (".", false, false);
+        return androidActivityClass.get().toString().fromLastOccurrenceOf (".", false, false);
     }
 
     String getActivitySubClassName() const
@@ -1228,12 +1208,12 @@ private:
 
     String getActivityClassPackage() const
     {
-        return androidActivityClass.get().upToLastOccurrenceOf (".", false, false);
+        return androidActivityClass.get().toString().upToLastOccurrenceOf (".", false, false);
     }
 
     String getJNIActivityClassName() const
     {
-        return androidActivityClass.get().replaceCharacter ('.', '/');
+        return androidActivityClass.get().toString().replaceCharacter ('.', '/');
     }
 
     static LibraryModule* getCoreModule (const OwnedArray<LibraryModule>& modules)
@@ -1253,7 +1233,7 @@ private:
 
     String getAppPlatform() const
     {
-        int ndkVersion = androidMinimumSDK.get().getIntValue();
+        int ndkVersion = static_cast<int> (androidMinimumSDK.get());
         if (ndkVersion == 9)
             ndkVersion = 10; // (doesn't seem to be a version '9')
 
@@ -1401,7 +1381,7 @@ private:
     {
         auto cxxFlags = getAndroidCompilerFlags();
 
-        auto cppStandard = project.getCppStandardValue().toString();
+        auto cppStandard = project.getCppStandardString();
 
         if (cppStandard == "latest")
             cppStandard = "1z";
@@ -1659,7 +1639,7 @@ private:
             if (glVersion == nullptr)
                 glVersion = manifest.createNewChildElement ("uses-feature");
 
-            setAttributeIfNotPresent (*glVersion, "android:glEsVersion", (androidMinimumSDK.get().getIntValue() >= 18 ? "0x00030000" : "0x00020000"));
+            setAttributeIfNotPresent (*glVersion, "android:glEsVersion", (static_cast<int> (androidMinimumSDK.get()) >= 18 ? "0x00030000" : "0x00020000"));
             setAttributeIfNotPresent (*glVersion, "android:required", "true");
         }
     }
@@ -1669,7 +1649,7 @@ private:
         auto* app = getOrCreateChildWithName (manifest, "application");
         setAttributeIfNotPresent (*app, "android:label", "@string/app_name");
 
-        if (androidTheme.get().isNotEmpty())
+        if (androidTheme.get().toString().isNotEmpty())
             setAttributeIfNotPresent (*app, "android:theme", androidTheme.get());
 
         if (! app->hasAttribute ("android:icon"))
@@ -1680,7 +1660,7 @@ private:
                 app->setAttribute ("android:icon", "@drawable/icon");
         }
 
-        if (androidMinimumSDK.get().getIntValue() >= 11)
+        if (static_cast<int> (androidMinimumSDK.get()) >= 11)
         {
             if (! app->hasAttribute ("android:hardwareAccelerated"))
                 app->setAttribute ("android:hardwareAccelerated", "false"); // (using the 2D acceleration slows down openGL)
@@ -1703,7 +1683,7 @@ private:
         if (! act->hasAttribute ("android:configChanges"))
         {
             String configChanges ("keyboardHidden|orientation");
-            if (androidMinimumSDK.get().getIntValue() >= 13)
+            if (static_cast<int> (androidMinimumSDK.get()) >= 13)
                 configChanges += "|screenSize";
 
             act->setAttribute ("android:configChanges", configChanges);
@@ -1712,7 +1692,7 @@ private:
         {
             auto configChanges = act->getStringAttribute ("android:configChanges");
 
-            if (androidMinimumSDK.get().getIntValue() < 13 && configChanges.contains ("screenSize"))
+            if (static_cast<int> (androidMinimumSDK.get()) < 13 && configChanges.contains ("screenSize"))
             {
                 configChanges = configChanges.replace ("|screenSize", "")
                                              .replace ("screenSize|", "")
@@ -1724,9 +1704,9 @@ private:
 
         if (androidScreenOrientation.get() == "landscape")
         {
-            String landscapeString = androidMinimumSDK.get().getIntValue() < 9
+            String landscapeString = static_cast<int> (androidMinimumSDK.get()) < 9
                                    ? "landscape"
-                                   : (androidMinimumSDK.get().getIntValue() < 18 ? "sensorLandscape" : "userLandscape");
+                                   : (static_cast<int> (androidMinimumSDK.get()) < 18 ? "sensorLandscape" : "userLandscape");
 
             setAttributeIfNotPresent (*act, "android:screenOrientation", landscapeString);
         }
@@ -1740,7 +1720,7 @@ private:
         // Using the 2D acceleration slows down OpenGL. We *do* enable it here for the activity though, and we disable it
         // in each ComponentPeerView instead. This way any embedded native views, which are not children of ComponentPeerView,
         // can still use hardware acceleration if needed (e.g. web view).
-        if (androidMinimumSDK.get().getIntValue() >= 11)
+        if (static_cast<int> (androidMinimumSDK.get()) >= 11)
         {
             if (! act->hasAttribute ("android:hardwareAccelerated"))
                 act->setAttribute ("android:hardwareAccelerated", "true"); // (using the 2D acceleration slows down openGL)
@@ -1815,7 +1795,7 @@ private:
     StringArray getPermissionsRequired() const
     {
         StringArray s;
-        s.addTokens (androidOtherPermissions.get(), ", ", "");
+        s.addTokens (androidOtherPermissions.get().toString(), ", ", "");
 
         if (androidInternetNeeded.get())
             s.add ("android.permission.INTERNET");
@@ -1864,7 +1844,7 @@ private:
 
     bool supportsGLv3() const
     {
-        return (androidMinimumSDK.get().getIntValue() >= 18);
+        return (static_cast<int> (androidMinimumSDK.get()) >= 18);
     }
 
     //==============================================================================

@@ -40,11 +40,11 @@ public:
 
         addAndMakeVisible (urlBox);
         urlBox.setText ("https://www.google.com");
-        urlBox.onReturnKey = [this]() { fetchButton.triggerClick(); };
+        urlBox.onReturnKey = [this] { fetchButton.triggerClick(); };
 
         addAndMakeVisible (fetchButton);
         fetchButton.setButtonText ("Download URL Contents");
-        fetchButton.onClick = [this]() { startThread(); };
+        fetchButton.onClick = [this] { startThread(); };
 
         addAndMakeVisible (resultsBox);
     }

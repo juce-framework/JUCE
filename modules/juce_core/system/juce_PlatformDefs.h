@@ -260,11 +260,13 @@ namespace juce
  #define JUCE_DEPRECATED(functionDef)
  #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)
 #elif JUCE_MSVC && ! JUCE_NO_DEPRECATION_WARNINGS
- #define JUCE_DEPRECATED(functionDef)                   __declspec(deprecated) functionDef
- #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)   __declspec(deprecated) functionDef body
+ #define JUCE_DEPRECATED_ATTRIBUTE                      __declspec(deprecated)
+ #define JUCE_DEPRECATED(functionDef)                   JUCE_DEPRECATED_ATTRIBUTE functionDef
+ #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)   JUCE_DEPRECATED_ATTRIBUTE functionDef body
 #elif (JUCE_GCC || JUCE_CLANG) && ! JUCE_NO_DEPRECATION_WARNINGS
- #define JUCE_DEPRECATED(functionDef)                   functionDef __attribute__ ((deprecated))
- #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)   functionDef __attribute__ ((deprecated)) body
+ #define JUCE_DEPRECATED_ATTRIBUTE                      __attribute__ ((deprecated))
+ #define JUCE_DEPRECATED(functionDef)                   functionDef JUCE_DEPRECATED_ATTRIBUTE
+ #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)   functionDef JUCE_DEPRECATED_ATTRIBUTE body
 #else
  #define JUCE_DEPRECATED(functionDef)                   functionDef
  #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)   functionDef body

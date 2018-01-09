@@ -38,7 +38,7 @@ CodeDocument& SourceCodeDocument::getCodeDocument()
 {
     if (codeDoc == nullptr)
     {
-        codeDoc = new CodeDocument();
+        codeDoc.reset (new CodeDocument());
         reloadInternal();
         codeDoc->clearUndoHistory();
     }
@@ -48,7 +48,7 @@ CodeDocument& SourceCodeDocument::getCodeDocument()
 
 Component* SourceCodeDocument::createEditor()
 {
-    SourceCodeEditor* e = new SourceCodeEditor (this, getCodeDocument());
+    auto* e = new SourceCodeEditor (this, getCodeDocument());
     applyLastState (*(e->editor));
     return e;
 }
@@ -105,7 +105,7 @@ bool SourceCodeDocument::saveAs()
 
 void SourceCodeDocument::updateLastState (CodeEditorComponent& editor)
 {
-    lastState = new CodeEditorComponent::State (editor);
+    lastState.reset (new CodeEditorComponent::State (editor));
 }
 
 void SourceCodeDocument::applyLastState (CodeEditorComponent& editor) const
@@ -169,7 +169,8 @@ void SourceCodeEditor::setEditor (GenericCodeEditorComponent* newEditor)
     if (editor != nullptr)
         editor->getDocument().removeListener (this);
 
-    addAndMakeVisible (editor = newEditor);
+    editor.reset (newEditor);
+    addAndMakeVisible (newEditor);
 
     editor->setFont (AppearanceSettings::getDefaultCodeFont());
     editor->setTabSize (4, true);
@@ -458,10 +459,9 @@ void GenericCodeEditorComponent::showFindPanel()
 {
     if (findPanel == nullptr)
     {
-        findPanel = new FindPanel();
+        findPanel.reset (new FindPanel());
         findPanel->setCommandManager (&ProjucerApplication::getCommandManager());
-
-        addAndMakeVisible (findPanel);
+        addAndMakeVisible (findPanel.get());
         resized();
     }
 

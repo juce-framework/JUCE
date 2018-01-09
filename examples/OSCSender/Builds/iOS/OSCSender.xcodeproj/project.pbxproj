@@ -148,6 +148,7 @@
 				INFOPLIST_FILE = Info-App.plist;
 				INFOPLIST_PREPROCESS = NO;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LLVM_LTO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.OSCSender;
 				USE_HEADERMAP = NO; }; name = Release; };
 		37EE6DAA0F0B202D10D0995B = {isa = XCBuildConfiguration; buildSettings = {

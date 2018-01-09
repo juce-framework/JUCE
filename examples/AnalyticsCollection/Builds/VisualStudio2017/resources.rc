@@ -13,6 +13,8 @@ BEGIN
   BEGIN
     BLOCK "040904E4"
     BEGIN
+      VALUE "CompanyName",  "ROLI Ltd.\0"
+      VALUE "LegalCopyright",  "ROLI Ltd.\0"
       VALUE "FileDescription",  "AnalyticsCollection\0"
       VALUE "FileVersion",  "1.0.0\0"
       VALUE "ProductName",  "AnalyticsCollection\0"

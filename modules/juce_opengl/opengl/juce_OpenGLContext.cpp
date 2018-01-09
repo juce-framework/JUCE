@@ -289,10 +289,13 @@ public:
                                                .withZeroOrigin()
                              * newScale;
 
-            if (scale != newScale || viewportArea != newArea)
+            auto newTransform = component.getTransform();
+
+            if (scale != newScale || viewportArea != newArea || transform != newTransform)
             {
                 scale = newScale;
                 viewportArea = newArea;
+                transform = newTransform;
 
                 if (canTriggerUpdate)
                     invalidateAll();
@@ -335,7 +338,7 @@ public:
             {
                 ScopedPointer<LowLevelGraphicsContext> g (createOpenGLGraphicsContext (context, cachedImageFrameBuffer));
                 g->clipToRectangleList (invalid);
-                g->addTransform (AffineTransform::scale ((float) scale));
+                g->addTransform (transform.followedBy (AffineTransform::scale ((float) scale)));
 
                 paintOwner (*g);
                 JUCE_CHECK_OPENGL_ERROR
@@ -619,6 +622,7 @@ public:
     RectangleList<int> validArea;
     Rectangle<int> viewportArea, lastScreenBounds;
     double scale = 1.0;
+    AffineTransform transform;
    #if JUCE_OPENGL3
     GLuint vertexArrayObject = 0;
    #endif

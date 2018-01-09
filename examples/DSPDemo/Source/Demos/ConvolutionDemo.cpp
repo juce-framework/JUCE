@@ -60,7 +60,7 @@ struct ConvolutionDemo
             {
                 bypass = false;
 
-                auto maxSize = static_cast<size_t> (roundDoubleToInt (8192.0 * sampleRate / 44100.0));
+                auto maxSize = static_cast<size_t> (roundToInt (sampleRate * (8192.0 / 44100.0)));
 
                 if (cabinetTypeParameter->getCurrentSelectedID() == 2)
                     convolution.loadImpulseResponse (BinaryData::guitar_amp_wav,

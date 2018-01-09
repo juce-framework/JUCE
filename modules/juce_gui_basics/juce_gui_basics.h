@@ -67,7 +67,8 @@
  #define JUCE_ENABLE_REPAINT_DEBUGGING 0
 #endif
 
-/** JUCE_USE_XRANDR: Enables Xrandr multi-monitor support (Linux only).
+/** Config: JUCE_USE_XRANDR
+    Enables Xrandr multi-monitor support (Linux only).
     Unless you specifically want to disable this, it's best to leave this option turned on.
     Note that your users do not need to have Xrandr installed for your JUCE app to run, as
     the availability of Xrandr is queried during runtime.
@@ -76,7 +77,8 @@
  #define JUCE_USE_XRANDR 1
 #endif
 
-/** JUCE_USE_XINERAMA: Enables Xinerama multi-monitor support (Linux only).
+/** Config: JUCE_USE_XINERAMA
+    Enables Xinerama multi-monitor support (Linux only).
     Unless you specifically want to disable this, it's best to leave this option turned on.
     This will be used as a fallback if JUCE_USE_XRANDR not set or libxrandr cannot be found.
     Note that your users do not need to have Xinerama installed for your JUCE app to run, as

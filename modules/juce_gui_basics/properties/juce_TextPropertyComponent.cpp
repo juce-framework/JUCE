@@ -27,6 +27,7 @@
 namespace juce
 {
 
+//==============================================================================
 class TextPropertyComponent::LabelComp  : public Label,
                                           public FileDragAndDropTarget
 {
@@ -85,11 +86,66 @@ public:
         interestedInFileDrag = isInterested;
     }
 
+    void setTextToDisplayWhenEmpty (const String& text, float alpha)
+    {
+        textToDisplayWhenEmpty = text;
+        alphaToUseForEmptyText = alpha;
+    }
+
+    void paintOverChildren (Graphics& g) override
+    {
+        if (getText().isEmpty() && ! isBeingEdited())
+        {
+            auto textArea = getBorderSize().subtractedFrom (getLocalBounds());
+            auto labelFont = owner.getLookAndFeel().getLabelFont (*this);
+
+            g.setColour (owner.findColour (TextPropertyComponent::textColourId).withAlpha (alphaToUseForEmptyText));
+            g.setFont (labelFont);
+
+            g.drawFittedText (textToDisplayWhenEmpty, textArea, getJustificationType(),
+                              jmax (1, (int) (textArea.getHeight() / labelFont.getHeight())),
+                              getMinimumHorizontalScale());
+        }
+    }
+
 private:
     TextPropertyComponent& owner;
+
     int maxChars;
     bool isMultiline;
     bool interestedInFileDrag = true;
+
+    String textToDisplayWhenEmpty;
+    float alphaToUseForEmptyText = 0.0f;
+};
+
+//==============================================================================
+class TextPropertyComponent::RemapperValueSourceWithDefault    : public Value::ValueSource
+{
+public:
+    RemapperValueSourceWithDefault (const ValueWithDefault& vwd)
+        : valueWithDefault (vwd)
+    {
+    }
+
+    var getValue() const override
+    {
+        return valueWithDefault.isUsingDefault() ? var() : valueWithDefault.get();
+    }
+
+    void setValue (const var& newValue) override
+    {
+        if (newValue.toString().isEmpty())
+            valueWithDefault.resetToDefault();
+        else
+            valueWithDefault = newValue;
+    }
+
+private:
+    ValueWithDefault valueWithDefault;
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RemapperValueSourceWithDefault)
 };
 
 //==============================================================================
@@ -107,11 +163,20 @@ TextPropertyComponent::TextPropertyComponent (const Value& valueToControl,
                                               int maxNumChars,
                                               bool isMultiLine,
                                               bool isEditable)
-    : PropertyComponent (name)
+    : TextPropertyComponent (name, maxNumChars, isMultiLine, isEditable)
 {
-    createEditor (maxNumChars, isMultiLine, isEditable);
-
     textEditor->getTextValue().referTo (valueToControl);
+}
+
+TextPropertyComponent::TextPropertyComponent (const ValueWithDefault& valueToControl,
+                                              const String& name,
+                                              int maxNumChars,
+                                              bool isMultiLine,
+                                              bool isEditable)
+    : TextPropertyComponent (name, maxNumChars, isMultiLine, isEditable)
+{
+    textEditor->getTextValue().referTo (Value (new RemapperValueSourceWithDefault (valueToControl)));
+    textEditor->setTextToDisplayWhenEmpty (valueToControl.getDefault(), 0.5f);
 }
 
 TextPropertyComponent::~TextPropertyComponent()

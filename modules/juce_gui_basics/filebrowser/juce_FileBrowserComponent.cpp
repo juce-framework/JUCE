@@ -93,7 +93,7 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
     addAndMakeVisible (currentPathBox);
     currentPathBox.setEditableText (true);
     resetRecentPaths();
-    currentPathBox.onChange = [this]() { updateSelectedPath(); };
+    currentPathBox.onChange = [this] { updateSelectedPath(); };
 
     addAndMakeVisible (filenameBox);
     filenameBox.setMultiLine (false);
@@ -106,7 +106,7 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
     fileLabel.attachToComponent (&filenameBox, true);
 
     addAndMakeVisible (goUpButton = getLookAndFeel().createFileBrowserGoUpButton());
-    goUpButton->onClick = [this]() { goUp(); };
+    goUpButton->onClick = [this] { goUp(); };
     goUpButton->setTooltip (TRANS ("Go up to parent directory"));
 
     if (previewComp != nullptr)

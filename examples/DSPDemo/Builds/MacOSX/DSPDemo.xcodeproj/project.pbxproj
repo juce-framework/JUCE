@@ -236,6 +236,7 @@
 				INFOPLIST_FILE = Info-App.plist;
 				INFOPLIST_PREPROCESS = NO;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				OTHER_CPLUSPLUSFLAGS = "-pedantic-errors -Wreorder -Wconstant-conversion -Wint-conversion -Woverloaded-virtual -Wuninitialized -Wunused-parameter -Wshorten-64-to-32 -Wstrict-aliasing -Wshadow -Wconversion -Wsign-compare -Wsign-conversion";

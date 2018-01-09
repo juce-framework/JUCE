@@ -32,7 +32,7 @@ static void setExecutableNameForAllTargets (Project& project, const String& exeN
 {
     for (Project::ExporterIterator exporter (project); exporter.next();)
         for (ProjectExporter::ConfigIterator config (*exporter); config.next();)
-            config->getTargetBinaryName() = exeName;
+            config->getValue (Ids::targetName) = exeName;
 }
 
 static Project::Item createSourceGroup (Project& project)
@@ -135,7 +135,6 @@ struct NewProjectWizard
         {
             project->setFile (projectFile);
             project->setTitle (appTitle);
-            project->getBundleIdentifier() = project->getDefaultBundleIdentifier();
 
             if (! initialiseProject (*project))
                 return nullptr;

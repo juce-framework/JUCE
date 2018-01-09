@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="aa4reI" name="BlocksDrawing" projectType="guiapp" version="1.0.0"
-              bundleIdentifier="com.yourcompany.BlocksDrawing" includeBinaryInAppConfig="1"
+<JUCERPROJECT id="aa4reI" name="BlocksDrawing" projectType="guiapp" bundleIdentifier="com.yourcompany.BlocksDrawing"
               jucerVersion="5.2.0" displaySplashScreen="0" reportAppUsage="0"
-              splashScreenColour="Dark" cppLanguageStandard="14" companyCopyright="">
+              companyCopyright="">
   <MAINGROUP id="yXiPIx" name="BlocksDrawing">
     <GROUP id="{092A4D5B-31E2-5D03-9B41-81C10EC447E8}" name="Source">
       <FILE id="qnbQP7" name="LightpadComponent.h" compile="0" resource="0"
@@ -17,8 +16,8 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" extraCompilerFlags="">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="BlocksDrawing"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="BlocksDrawing"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="BlocksDrawing"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="BlocksDrawing"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../../modules"/>
@@ -36,11 +35,10 @@
         <MODULEPATH id="juce_audio_processors" path="../../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="portraitlandscape"
-                  iPadScreenOrientation="portraitlandscape" iosDeviceFamily="1,2">
+    <XCODE_IPHONE targetFolder="Builds/iOS">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="BlocksDrawing"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="BlocksDrawing"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="BlocksDrawing"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="BlocksDrawing"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_opengl" path="../../../modules"/>
@@ -60,10 +58,8 @@
     </XCODE_IPHONE>
     <VS2015 targetFolder="Builds/VisualStudio2015">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="1" optimisation="1" targetName="BlocksDrawing"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="0" optimisation="3" targetName="BlocksDrawing"/>
+        <CONFIGURATION name="Debug" winArchitecture="32-bit" isDebug="1" targetName="BlocksDrawing"/>
+        <CONFIGURATION name="Release" winArchitecture="32-bit" isDebug="0" targetName="BlocksDrawing"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_opengl" path="../../../modules"/>
@@ -83,10 +79,8 @@
     </VS2015>
     <VS2017 targetFolder="Builds/VisualStudio2017">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="BlocksDrawing"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="BlocksDrawing"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="BlocksDrawing"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="BlocksDrawing"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_opengl" path="../../../modules"/>
@@ -106,8 +100,8 @@
     </VS2017>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="BlocksDrawing"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="BlocksDrawing"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="BlocksDrawing"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="BlocksDrawing"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_opengl" path="../../../modules"/>

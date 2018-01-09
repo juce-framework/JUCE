@@ -43,7 +43,7 @@ public:
 
         addAndMakeVisible (generateRSAButton);
         generateRSAButton.setButtonText ("Generate RSA");
-        generateRSAButton.onClick = [this]() { createRSAKey(); };
+        generateRSAButton.onClick = [this] { createRSAKey(); };
 
         addAndMakeVisible (rsaResultBox);
         rsaResultBox.setReadOnly (true);
@@ -137,7 +137,7 @@ public:
         hashEntryBox.setReturnKeyStartsNewLine (true);
         hashEntryBox.setText ("Type some text in this box and the resulting MD5, SHA and Whirlpool hashes will update below");
 
-        auto updateHashes = [this]()
+        auto updateHashes = [this]
         {
             auto text = hashEntryBox.getText();
             updateMD5Result (text.toUTF8());

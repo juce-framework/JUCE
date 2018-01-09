@@ -127,12 +127,12 @@ namespace
         {
             hideDockIcon();
 
-            File projectFile = getFileCheckingForExistence (fileToLoad);
+            auto projectFile = getFileCheckingForExistence (fileToLoad);
 
             if (! projectFile.hasFileExtension (Project::projectFileExtension))
                 throw CommandLineError (projectFile.getFullPathName() + " isn't a valid jucer project file!");
 
-            project = new Project (projectFile);
+            project.reset (new Project (projectFile));
 
             if (! project->loadFrom (projectFile, true))
             {
@@ -145,8 +145,8 @@ namespace
         {
             if (project != nullptr)
             {
-                Result error (justSaveResources ? project->saveResourcesOnly (project->getFile())
-                                                : project->saveProject (project->getFile(), true));
+                auto error = justSaveResources ? project->saveResourcesOnly (project->getFile())
+                                               : project->saveProject (project->getFile(), true);
 
                 project.reset();
 
@@ -193,7 +193,7 @@ namespace
 
         std::cout << "Setting project version: " << version << std::endl;
 
-        proj.project->getVersionValue() = version;
+        proj.project->setProjectVersion (version);
         proj.save (false);
     }
 
@@ -210,7 +210,7 @@ namespace
 
         std::cout << "Bumping project version to: " << version << std::endl;
 
-        proj.project->getVersionValue() = version;
+        proj.project->setProjectVersion (version);
         proj.save (false);
     }
 
@@ -219,7 +219,7 @@ namespace
         checkArgumentCount (args, 2);
         LoadedProject proj (args[1]);
 
-        String version (proj.project->getVersionValue().toString());
+        String version (proj.project->getVersionString());
 
         if (version.trim().isEmpty())
             throw CommandLineError ("Cannot read version number from project!");
@@ -254,8 +254,8 @@ namespace
         LoadedProject proj (args[1]);
 
         std::cout << "Project file: " << proj.project->getFile().getFullPathName() << std::endl
-                  << "Name: " << proj.project->getTitle() << std::endl
-                  << "UID: " << proj.project->getProjectUID() << std::endl;
+                  << "Name: " << proj.project->getProjectNameString() << std::endl
+                  << "UID: " << proj.project->getProjectUIDString() << std::endl;
 
         EnabledModuleList& modules = proj.project->getModules();
 

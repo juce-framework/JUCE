@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="X7eXs7" name="BlocksMonitor" projectType="guiapp" version="1.0.0"
-              bundleIdentifier="com.yourcompany.BlocksInfo" includeBinaryInAppConfig="1"
-              jucerVersion="5.2.0" displaySplashScreen="0" reportAppUsage="0"
-              splashScreenColour="Dark" cppLanguageStandard="14" companyCopyright="">
+              bundleIdentifier="com.yourcompany.BlocksInfo" jucerVersion="5.2.0"
+              displaySplashScreen="0" reportAppUsage="0" companyCopyright="">
   <MAINGROUP id="msZ9DB" name="BlocksMonitor">
     <GROUP id="{2C318C74-6596-8102-3CA6-602595447F25}" name="Source">
       <FILE id="Tw2mMp" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
@@ -15,8 +14,8 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" extraCompilerFlags="">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="BlocksMonitor"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="BlocksMonitor"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="BlocksMonitor"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="BlocksMonitor"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../../modules"/>
@@ -34,11 +33,10 @@
         <MODULEPATH id="juce_audio_processors" path="../../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="portraitlandscape"
-                  iPadScreenOrientation="portraitlandscape" iosDeviceFamily="1,2">
+    <XCODE_IPHONE targetFolder="Builds/iOS">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="BlocksMonitor"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="BlocksMonitor"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="BlocksMonitor"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="BlocksMonitor"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_opengl" path="../../../modules"/>
@@ -58,10 +56,8 @@
     </XCODE_IPHONE>
     <VS2015 targetFolder="Builds/VisualStudio2015">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="1" optimisation="1" targetName="BlocksMonitor"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="0" optimisation="3" targetName="BlocksMonitor"/>
+        <CONFIGURATION name="Debug" winArchitecture="32-bit" isDebug="1" targetName="BlocksMonitor"/>
+        <CONFIGURATION name="Release" winArchitecture="32-bit" isDebug="0" targetName="BlocksMonitor"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_opengl" path="../../../modules"/>
@@ -81,10 +77,8 @@
     </VS2015>
     <VS2017 targetFolder="Builds/VisualStudio2017">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="BlocksMonitor"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="BlocksMonitor"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="BlocksMonitor"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="BlocksMonitor"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_opengl" path="../../../modules"/>
@@ -104,8 +98,8 @@
     </VS2017>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="BlocksMonitor"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="BlocksMonitor"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="BlocksMonitor"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="BlocksMonitor"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_opengl" path="../../../modules"/>

@@ -234,7 +234,7 @@ private:
     //==============================================================================
     File file;
     Options options;
-    bool loadedOk, needsWriting;
+    bool loadedOk = false, needsWriting = false;
 
     typedef const ScopedPointer<InterProcessLock::ScopedLockType> ProcessScopedLock;
     InterProcessLock::ScopedLockType* createProcessLock() const;
@@ -245,6 +245,7 @@ private:
     bool loadAsXml();
     bool loadAsBinary();
     bool loadAsBinary (InputStream&);
+    bool writeToStream (OutputStream&);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertiesFile)
 };

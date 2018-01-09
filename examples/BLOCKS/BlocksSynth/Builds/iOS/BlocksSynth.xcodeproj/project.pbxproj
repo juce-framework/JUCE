@@ -212,6 +212,7 @@
 				INFOPLIST_FILE = Info-App.plist;
 				INFOPLIST_PREPROCESS = NO;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LLVM_LTO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourcompany.BlocksSynth;
 				USE_HEADERMAP = NO; }; name = Release; };
 		9FADB9B516D955EEE4CDF9B9 = {isa = XCBuildConfiguration; buildSettings = {

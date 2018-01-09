@@ -111,12 +111,12 @@
     <PreBuildEvent>
       <Command>if not exist &quot;$(OutDir)\MultiOutSynth.aaxplugin&quot; mkdir &quot;$(OutDir)\MultiOutSynth.aaxplugin&quot;
 if not exist &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents&quot; mkdir &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents&quot;
-if not exist &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents\x64&quot; mkdir &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents\x64&quot;
+if not exist &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents\Win32&quot; mkdir &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents\Win32&quot;
 </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>copy /Y &quot;$(OutDir)\MultiOutSynth.aaxdll&quot; &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents\x64\MultiOutSynth.aaxplugin&quot;
-call &quot;C:\\SDKs\\AAX\\Utilities\\CreatePackage.bat&quot; &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents\x64&quot; &quot;C:\\SDKs\\AAX\\Utilities\\PlugIn.ico&quot;</Command>
+      <Command>copy /Y &quot;$(OutDir)\MultiOutSynth.aaxdll&quot; &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents\Win32\MultiOutSynth.aaxplugin&quot;
+call &quot;C:\\SDKs\\AAX\\Utilities\\CreatePackage.bat&quot; &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents\Win32&quot; &quot;C:\\SDKs\\AAX\\Utilities\\PlugIn.ico&quot;</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -167,12 +167,12 @@ call &quot;C:\\SDKs\\AAX\\Utilities\\CreatePackage.bat&quot; &quot;$(OutDir)\Mul
     <PreBuildEvent>
       <Command>if not exist &quot;$(OutDir)\MultiOutSynth.aaxplugin&quot; mkdir &quot;$(OutDir)\MultiOutSynth.aaxplugin&quot;
 if not exist &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents&quot; mkdir &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents&quot;
-if not exist &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents\x64&quot; mkdir &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents\x64&quot;
+if not exist &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents\Win32&quot; mkdir &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents\Win32&quot;
 </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>copy /Y &quot;$(OutDir)\MultiOutSynth.aaxdll&quot; &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents\x64\MultiOutSynth.aaxplugin&quot;
-call &quot;C:\\SDKs\\AAX\\Utilities\\CreatePackage.bat&quot; &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents\x64&quot; &quot;C:\\SDKs\\AAX\\Utilities\\PlugIn.ico&quot;</Command>
+      <Command>copy /Y &quot;$(OutDir)\MultiOutSynth.aaxdll&quot; &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents\Win32\MultiOutSynth.aaxplugin&quot;
+call &quot;C:\\SDKs\\AAX\\Utilities\\CreatePackage.bat&quot; &quot;$(OutDir)\MultiOutSynth.aaxplugin\Contents\Win32&quot; &quot;C:\\SDKs\\AAX\\Utilities\\PlugIn.ico&quot;</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

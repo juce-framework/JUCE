@@ -228,6 +228,7 @@
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = ("../../JuceLibraryCode", "../../../../modules", "../../../../modules/juce_audio_plugin_client", "$(inherited)");
+				LLVM_LTO = YES;
 				OTHER_LDFLAGS = "-lAUv3Synth";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.development.AUv3Synth;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -293,6 +294,7 @@
 				HEADER_SEARCH_PATHS = ("../../JuceLibraryCode", "../../../../modules", "../../../../modules/juce_audio_plugin_client", "$(inherited)");
 				INFOPLIST_FILE = Info-AUv3_AppExtension.plist;
 				INFOPLIST_PREPROCESS = NO;
+				LLVM_LTO = YES;
 				OTHER_LDFLAGS = "-lAUv3Synth";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.development.AUv3Synth.AUv3SynthAUv3;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -358,6 +360,7 @@
 				HEADER_SEARCH_PATHS = ("../../JuceLibraryCode", "../../../../modules", "../../../../modules/juce_audio_plugin_client", "$(inherited)");
 				INFOPLIST_FILE = Info-Standalone_Plugin.plist;
 				INFOPLIST_PREPROCESS = NO;
+				LLVM_LTO = YES;
 				OTHER_LDFLAGS = "-lAUv3Synth";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.development.AUv3Synth;
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -422,6 +425,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = ("../../JuceLibraryCode", "../../../../modules", "../../../../modules/juce_audio_plugin_client", "$(inherited)");
 				INSTALL_PATH = "@executable_path/Frameworks";
+				LLVM_LTO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.roli.development.AUv3Synth;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				USE_HEADERMAP = NO; }; name = Release; };

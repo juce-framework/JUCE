@@ -48,7 +48,7 @@ public:
 
     File findFile() const;
 
-    JucerDocument* getDocument() const noexcept                 { return loadedDocument; }
+    JucerDocument* getDocument() const noexcept                 { return loadedDocument.get(); }
     JucerDocument* getOwnerDocument() const noexcept            { return ownerDocument; }
 
     void setToInitialSize();

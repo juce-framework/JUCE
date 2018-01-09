@@ -318,7 +318,7 @@ public:
 
         addAndMakeVisible (startTestButton);
         startTestButton.setButtonText ("Test Latency");
-        startTestButton.onClick = [this]() { startTest(); };
+        startTestButton.onClick = [this] { startTest(); };
 
         MainAppWindow::getSharedAudioDeviceManager().addAudioCallback (liveAudioScroller);
     }

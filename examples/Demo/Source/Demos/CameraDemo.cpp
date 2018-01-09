@@ -48,11 +48,11 @@ public:
         cameraSelectorComboBox.onChange = [this] { cameraChanged(); };
 
         addAndMakeVisible (snapshotButton);
-        snapshotButton.onClick = [this]() { takeSnapshot(); };
+        snapshotButton.onClick = [this] { takeSnapshot(); };
         snapshotButton.setEnabled (false);
 
         addAndMakeVisible (recordMovieButton);
-        recordMovieButton.onClick = [this]() { startRecording(); };
+        recordMovieButton.onClick = [this] { startRecording(); };
         recordMovieButton.setEnabled (false);
 
         addAndMakeVisible (lastSnapshot);

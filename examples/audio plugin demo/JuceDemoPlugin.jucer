@@ -1,29 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="0nRd9LLGO" name="JuceDemoPlugin" projectType="audioplug"
-              version="1.0.0" juceLinkage="amalg_multi" buildVST="1" buildRTAS="0"
-              buildAU="1" pluginName="Juce Demo Plugin" pluginDesc="Juce Demo Plugin"
-              pluginManufacturer="ROLI Ltd." pluginManufacturerCode="ROLI"
-              pluginCode="Jcdm" pluginChannelConfigs="" pluginIsSynth="0" pluginWantsMidiIn="1"
-              pluginProducesMidiOut="1" pluginSilenceInIsSilenceOut="0" pluginTailLength="0"
-              pluginEditorRequiresKeys="1" pluginAUExportPrefix="JuceDemoProjectAU"
+              version="1.0.0" juceLinkage="amalg_multi" pluginName="Juce Demo Plugin"
+              pluginDesc="Juce Demo Plugin" pluginManufacturer="ROLI Ltd."
+              pluginManufacturerCode="ROLI" pluginCode="Jcdm" pluginChannelConfigs=""
+              pluginWantsMidiIn="1" pluginProducesMidiOut="1" pluginSilenceInIsSilenceOut="0"
+              pluginTailLength="0" pluginEditorRequiresKeys="1" pluginAUExportPrefix="JuceDemoProjectAU"
               pluginAUViewClass="JuceDemoProjectAU_V1" pluginRTASCategory=""
               bundleIdentifier="com.juce.JuceDemoPlugin" jucerVersion="5.2.0"
               companyName="ROLI Ltd." aaxIdentifier="com.yourcompany.JuceDemoPlugin"
-              buildAAX="0" pluginAAXCategory="AAX_ePlugInCategory_Dynamics"
-              includeBinaryInAppConfig="1" buildVST3="0" pluginManufacturerEmail="support@yourcompany.com"
-              companyWebsite="www.juce.com" companyEmail="info@juce.com" pluginIsMidiEffectPlugin="0"
-              buildAUv3="1" buildStandalone="1" enableIAA="0" displaySplashScreen="0"
-              reportAppUsage="0" splashScreenColour="Dark" cppLanguageStandard="14"
-              companyCopyright="ROLI Ltd.">
+              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" includeBinaryInAppConfig="1"
+              pluginManufacturerEmail="support@yourcompany.com" companyWebsite="www.juce.com"
+              companyEmail="info@juce.com" buildAUv3="1" buildStandalone="1"
+              displaySplashScreen="0" reportAppUsage="0" companyCopyright="ROLI Ltd.">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="" rtasFolder="~/SDKs/PT_80_SDK"
                objCExtraSuffix="JuceDemo" aaxFolder="" postbuildCommand="" vst3Folder="">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemoPlugin"
-                       osxSDK="default" osxCompatibility="default" osxArchitecture="64BitUniversal"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="JuceDemoPlugin"
-                       osxSDK="default" osxCompatibility="default" osxArchitecture="64BitUniversal"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="JuceDemoPlugin" osxArchitecture="64BitUniversal"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="JuceDemoPlugin" osxArchitecture="64BitUniversal"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -42,10 +37,8 @@
     </XCODE_MAC>
     <VS2015 targetFolder="Builds/VisualStudio2015" vstFolder="" vst3Folder="">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="JuceDemoPlugin"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="JuceDemoPlugin"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemoPlugin"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="JuceDemoPlugin"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -64,10 +57,8 @@
     </VS2015>
     <VS2017 targetFolder="Builds/VisualStudio2017">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="JuceDemoPlugin"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="JuceDemoPlugin"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemoPlugin"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="JuceDemoPlugin"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -87,10 +78,8 @@
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile" vstFolder="" rtasFolder="~/SDKs/PT_80_SDK"
                 vst3Folder="">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemoPlugin"
-                       libraryPath="/usr/X11R6/lib/"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="JuceDemoPlugin"
-                       libraryPath="/usr/X11R6/lib/"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="JuceDemoPlugin" libraryPath="/usr/X11R6/lib/"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="JuceDemoPlugin" libraryPath="/usr/X11R6/lib/"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -107,12 +96,12 @@
         <MODULEPATH id="juce_audio_formats" path="../../modules"/>
       </MODULEPATHS>
     </LINUX_MAKE>
-    <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="landscape" iosBackgroundAudio="1"
-                  iosBackgroundBle="1" microphonePermissionNeeded="1" iPadScreenOrientation="landscape"
-                  iosDeviceFamily="1,2">
+    <XCODE_IPHONE targetFolder="Builds/iOS" iosBackgroundAudio="1" iosBackgroundBle="1"
+                  microphonePermissionNeeded="1" iPadScreenOrientation="landscape"
+                  iosScreenOrientation="landscape">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemoPlugin"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="JuceDemoPlugin"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="JuceDemoPlugin"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="JuceDemoPlugin"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -131,12 +120,10 @@
     </XCODE_IPHONE>
     <ANDROIDSTUDIO targetFolder="Builds/Android" androidSDKPath="" androidNDKPath=""
                    androidTheme="@android:style/Theme.NoTitleBar" androidScreenOrientation="landscape"
-                   androidMinimumSDK="23" microphonePermissionNeeded="1" androidInternetNeeded="0">
+                   microphonePermissionNeeded="1" androidInternetNeeded="0" androidMinimumSDK="23">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" androidArchitectures="armeabi x86" isDebug="1" optimisation="1"
-                       targetName="JuceDemoPlugin"/>
-        <CONFIGURATION name="Release" androidArchitectures="" isDebug="0" optimisation="3"
-                       targetName="JuceDemoPlugin"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="JuceDemoPlugin"/>
+        <CONFIGURATION name="Release" androidArchitectures="" isDebug="0" targetName="JuceDemoPlugin"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -165,7 +152,7 @@
           file="Source/PluginProcessor.h"/>
     <FILE id="obk9kG" name="SinewaveSynth.h" compile="0" resource="0" file="Source/SinewaveSynth.h"/>
   </MAINGROUP>
-  <JUCEOPTIONS JUCE_QUICKTIME="disabled" JUCE_PLUGINHOST_VST="disabled" JUCE_PLUGINHOST_AU="disabled"/>
+  <JUCEOPTIONS JUCE_PLUGINHOST_VST="0" JUCE_PLUGINHOST_AU="0"/>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1"/>
     <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0"/>

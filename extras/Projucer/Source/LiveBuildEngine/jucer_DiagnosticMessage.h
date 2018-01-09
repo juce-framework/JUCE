@@ -43,7 +43,7 @@ struct DiagnosticMessage
 
     DiagnosticMessage& operator= (const DiagnosticMessage& other)
     {
-        associatedDiagnostic = createCopyIfNotNull (other.associatedDiagnostic.get());
+        associatedDiagnostic.reset (createCopyIfNotNull (other.associatedDiagnostic.get()));
         message = other.message;
         mainFile = other.mainFile;
         range = other.range;
@@ -110,8 +110,9 @@ struct DiagnosticMessage
         d.type = (Type) static_cast<int> (v[Ids::type]);
 
         auto associated = v.getChild (0);
+
         if (associated.isValid())
-            d.associatedDiagnostic = new DiagnosticMessage (fromValueTree (associated));
+            d.associatedDiagnostic.reset (new DiagnosticMessage (fromValueTree (associated)));
 
         return d;
     }
@@ -150,7 +151,7 @@ struct DiagnosticList
             if (lastMessage.message.isEmpty())
                 return; // seems to happen sometimes, but with seemingly duplicated messages (?)
 
-            m.associatedDiagnostic = new DiagnosticMessage (lastMessage);
+            m.associatedDiagnostic.reset (new DiagnosticMessage (lastMessage));
         }
         else
         {

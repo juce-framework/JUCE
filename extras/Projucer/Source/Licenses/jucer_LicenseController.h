@@ -105,7 +105,7 @@ private:
     struct ModalCompletionCallback;
     friend struct ModalCompletionCallback;
 
-    friend class ScopedPointer<LicenseThread>;
+    friend struct ContainerDeletePolicy<LicenseThread>;
     friend struct LicenseThread;
 
     //==============================================================================

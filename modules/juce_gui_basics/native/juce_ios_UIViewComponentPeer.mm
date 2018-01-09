@@ -368,7 +368,7 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
 
     // On some devices the screen-size isn't yet updated at this point, so also trigger another
     // async update to double-check..
-    MessageManager::callAsync ([=]() { sendScreenBoundsUpdate (self); });
+    MessageManager::callAsync ([=] { sendScreenBoundsUpdate (self); });
 }
 
 - (BOOL) prefersStatusBarHidden

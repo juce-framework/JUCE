@@ -35,7 +35,7 @@ public:
                                   const bool canReset)
         : PropertyComponent (name)
     {
-        colourPropEditor = new ColourPropEditorComponent (this, canReset);
+        colourPropEditor.reset (new ColourPropEditorComponent (this, canReset));
         addAndMakeVisible (colourPropEditor);
     }
 
