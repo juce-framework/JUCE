@@ -1701,8 +1701,14 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             setMethod ("sqr",       Math_sqr);              setMethod ("sqrt",      Math_sqrt);
             setMethod ("ceil",      Math_ceil);             setMethod ("floor",     Math_floor);
 
-            setProperty ("PI", MathConstants<double>::pi);
-            setProperty ("E", exp (1.0));
+            setProperty ("PI",      MathConstants<double>::pi);
+            setProperty ("E",       MathConstants<double>::euler);
+            setProperty ("SQRT2",   sqrt (2.0));
+            setProperty ("SQRT1_2", sqrt (0.5));
+            setProperty ("LN2",     log (2.0));
+            setProperty ("LN10",    log (10.0));
+            setProperty ("LOG2E",   log (MathConstants<double>::euler) / log (2.0));
+            setProperty ("LOG10E",  log (MathConstants<double>::euler) / log (10.0));
         }
 
         static var Math_random    (Args)   { return Random::getSystemRandom().nextDouble(); }
