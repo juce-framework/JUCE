@@ -121,7 +121,7 @@ struct ReportingThread  : public Thread,
 
     void run() override
     {
-        webStream = new WebInputStream (url, true);
+        webStream.reset (new WebInputStream (url, true));
         webStream->withExtraHeaders (headers);
         webStream->connect (nullptr);
 
@@ -138,8 +138,7 @@ private:
 //==============================================================================
 void ReportingThreadContainer::sendReport (String address, String& userAgent, StringPairArray& parameters)
 {
-    reportingThread = new ReportingThread (*this, address, userAgent, parameters);
-
+    reportingThread.reset (new ReportingThread (*this, address, userAgent, parameters));
     reportingThread->startThread();
 }
 

@@ -277,7 +277,8 @@ void ResizableWindow::setResizable (const bool shouldBeResizable,
 
             if (resizableCorner == nullptr)
             {
-                Component::addChildComponent (resizableCorner = new ResizableCornerComponent (this, constrainer));
+                resizableCorner.reset (new ResizableCornerComponent (this, constrainer));
+                Component::addChildComponent (resizableCorner.get());
                 resizableCorner->setAlwaysOnTop (true);
             }
         }
@@ -286,7 +287,10 @@ void ResizableWindow::setResizable (const bool shouldBeResizable,
             resizableCorner.reset();
 
             if (resizableBorder == nullptr)
-                Component::addChildComponent (resizableBorder = new ResizableBorderComponent (this, constrainer));
+            {
+                resizableBorder.reset (new ResizableBorderComponent (this, constrainer));
+                Component::addChildComponent (resizableBorder.get());
+            }
         }
     }
     else

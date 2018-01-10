@@ -59,7 +59,7 @@ public:
         endSpeed = jmax (0.0, endSpd * invTotalDistance);
 
         if (useProxyComponent)
-            proxy = new ProxyComponent (*component);
+            proxy.reset (new ProxyComponent (*component));
         else
             proxy.reset();
 

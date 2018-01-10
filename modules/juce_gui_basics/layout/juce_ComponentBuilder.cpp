@@ -122,7 +122,7 @@ Component* ComponentBuilder::getManagedComponent()
 {
     if (component == nullptr)
     {
-        component = createComponent();
+        component.reset (createComponent());
 
        #if JUCE_DEBUG
         componentRef = component;

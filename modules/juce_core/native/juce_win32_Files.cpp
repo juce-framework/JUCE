@@ -1051,17 +1051,17 @@ void NamedPipe::close()
         SetEvent (pimpl->cancelEvent);
 
         ScopedWriteLock sl (lock);
-        pimpl = nullptr;
+        pimpl.reset();
     }
 }
 
 bool NamedPipe::openInternal (const String& pipeName, const bool createPipe, bool mustNotExist)
 {
-    pimpl = new Pimpl (pipeName, createPipe, mustNotExist);
+    pimpl.reset (new Pimpl (pipeName, createPipe, mustNotExist));
 
     if (createPipe && pimpl->pipeH == INVALID_HANDLE_VALUE)
     {
-        pimpl = nullptr;
+        pimpl.reset();
         return false;
     }
 

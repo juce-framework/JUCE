@@ -139,7 +139,7 @@ public:
         if (object.get() != newObject)
         {
             reset();
-            object = newObject;
+            object.reset (newObject);
         }
 
         shouldDelete = takeOwnership;

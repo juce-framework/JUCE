@@ -106,14 +106,14 @@ private:
 UIViewComponent::UIViewComponent() {}
 UIViewComponent::~UIViewComponent() {}
 
-void UIViewComponent::setView (void* const view)
+void UIViewComponent::setView (void* view)
 {
     if (view != getView())
     {
-        pimpl = nullptr;
+        pimpl.reset();
 
         if (view != nullptr)
-            pimpl = new Pimpl ((UIView*) view, *this);
+            pimpl.reset (new Pimpl ((UIView*) view, *this));
     }
 }
 

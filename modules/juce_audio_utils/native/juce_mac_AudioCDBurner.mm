@@ -371,7 +371,7 @@ private:
 //==============================================================================
 AudioCDBurner::AudioCDBurner (const int deviceIndex)
 {
-    pimpl = new Pimpl (*this, deviceIndex);
+    pimpl.reset (new Pimpl (*this, deviceIndex));
 }
 
 AudioCDBurner::~AudioCDBurner()

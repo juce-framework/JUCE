@@ -377,7 +377,8 @@ struct ListBoxMouseMoveSelector  : public MouseListener
 ListBox::ListBox (const String& name, ListBoxModel* const m)
     : Component (name), model (m)
 {
-    addAndMakeVisible (viewport = new ListViewport (*this));
+    viewport.reset (new ListViewport (*this));
+    addAndMakeVisible (viewport.get());
 
     ListBox::setWantsKeyboardFocus (true);
     ListBox::colourChanged();
@@ -408,7 +409,7 @@ void ListBox::setMouseMoveSelectsRows (bool b)
     if (b)
     {
         if (mouseMoveSelector == nullptr)
-            mouseMoveSelector = new ListBoxMouseMoveSelector (*this);
+            mouseMoveSelector.reset (new ListBoxMouseMoveSelector (*this));
     }
     else
     {
@@ -859,7 +860,7 @@ void ListBox::setHeaderComponent (Component* const newHeaderComponent)
 {
     if (headerComponent != newHeaderComponent)
     {
-        headerComponent = newHeaderComponent;
+        headerComponent.reset (newHeaderComponent);
 
         addAndMakeVisible (newHeaderComponent);
         ListBox::resized();

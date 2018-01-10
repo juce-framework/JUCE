@@ -145,7 +145,8 @@ void TabBarButton::setExtraComponent (Component* comp, ExtraComponentPlacement p
 {
     jassert (extraCompPlacement == beforeText || extraCompPlacement == afterText);
     extraCompPlacement = placement;
-    addAndMakeVisible (extraComponent = comp);
+    extraComponent.reset (comp);
+    addAndMakeVisible (extraComponent.get());
     resized();
 }
 
@@ -200,7 +201,8 @@ TabbedButtonBar::TabbedButtonBar (Orientation orientationToUse)
     : orientation (orientationToUse)
 {
     setInterceptsMouseClicks (false, true);
-    addAndMakeVisible (behindFrontTab = new BehindFrontTabComp (*this));
+    behindFrontTab.reset (new BehindFrontTabComp (*this));
+    addAndMakeVisible (behindFrontTab.get());
     setFocusContainer (true);
 }
 
@@ -256,7 +258,7 @@ void TabbedButtonBar::addTab (const String& tabName,
         auto* newTab = new TabInfo();
         newTab->name = tabName;
         newTab->colour = tabBackgroundColour;
-        newTab->button = createTabButton (tabName, insertIndex);
+        newTab->button.reset (createTabButton (tabName, insertIndex));
         jassert (newTab->button != nullptr);
 
         tabs.insert (insertIndex, newTab);

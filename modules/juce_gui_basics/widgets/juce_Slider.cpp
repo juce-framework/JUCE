@@ -1352,7 +1352,7 @@ void Slider::init (SliderStyle style, TextEntryBoxPosition textBoxPos)
     setWantsKeyboardFocus (false);
     setRepaintsOnMouseActivity (true);
 
-    pimpl = new Pimpl (*this, style, textBoxPos);
+    pimpl.reset (new Pimpl (*this, style, textBoxPos));
 
     Slider::lookAndFeelChanged();
     updateText();

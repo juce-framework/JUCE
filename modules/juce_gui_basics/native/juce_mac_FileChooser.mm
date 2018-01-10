@@ -137,7 +137,7 @@ public:
 
         if (panel != nil)
         {
-            [panel setDelegate:nil];
+            [panel setDelegate: nil];
 
             if (nsViewPreview != nil)
             {
@@ -152,7 +152,7 @@ public:
             [panel close];
         }
 
-        panel = nullptr;
+        panel.reset();
 
         if (delegate != nil)
         {
@@ -178,7 +178,7 @@ public:
         ScopedPointer<TemporaryMainMenuWithStandardCommands> tempMenu;
 
         if (JUCEApplicationBase::isStandaloneApp())
-            tempMenu = new TemporaryMainMenuWithStandardCommands();
+            tempMenu.reset (new TemporaryMainMenuWithStandardCommands());
 
         jassert (panel != nil);
        #if defined (MAC_OS_X_VERSION_10_6) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6)

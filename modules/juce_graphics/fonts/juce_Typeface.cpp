@@ -258,7 +258,7 @@ void Typeface::applyVerticalHintingTransform (float fontSize, Path& path)
         ScopedLock sl (hintingLock);
 
         if (hintingParams == nullptr)
-            hintingParams = new HintingParams (*this);
+            hintingParams.reset (new HintingParams (*this));
 
         return hintingParams->applyVerticalHintingTransform (fontSize, path);
     }

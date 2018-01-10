@@ -65,7 +65,7 @@ FillType& FillType::operator= (const FillType& other)
     if (this != &other)
     {
         colour = other.colour;
-        gradient = other.gradient.createCopy();
+        gradient.reset (other.gradient.createCopy());
         image = other.image;
         transform = other.transform;
     }
@@ -75,7 +75,7 @@ FillType& FillType::operator= (const FillType& other)
 
 FillType::FillType (FillType&& other) noexcept
     : colour (other.colour),
-      gradient (other.gradient.release()),
+      gradient (static_cast<ScopedPointer<ColourGradient>&&> (other.gradient)),
       image (static_cast<Image&&> (other.image)),
       transform (other.transform)
 {
@@ -86,7 +86,7 @@ FillType& FillType::operator= (FillType&& other) noexcept
     jassert (this != &other); // hopefully the compiler should make this situation impossible!
 
     colour = other.colour;
-    gradient = other.gradient.release();
+    gradient = static_cast<ScopedPointer<ColourGradient>&&> (other.gradient);
     image = static_cast<Image&&> (other.image);
     transform = other.transform;
     return *this;
@@ -112,7 +112,7 @@ bool FillType::operator!= (const FillType& other) const
 void FillType::setColour (Colour newColour) noexcept
 {
     gradient.reset();
-    image = Image();
+    image = {};
     colour = newColour;
 }
 
@@ -124,8 +124,8 @@ void FillType::setGradient (const ColourGradient& newGradient)
     }
     else
     {
-        image = Image();
-        gradient = new ColourGradient (newGradient);
+        image = {};
+        gradient.reset (new ColourGradient (newGradient));
         colour = Colours::black;
     }
 }

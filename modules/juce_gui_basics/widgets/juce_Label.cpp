@@ -206,7 +206,8 @@ void Label::showEditor()
 {
     if (editor == nullptr)
     {
-        addAndMakeVisible (editor = createEditorComponent());
+        editor.reset (createEditorComponent());
+        addAndMakeVisible (editor.get());
         editor->setText (getText(), false);
         editor->setKeyboardType (keyboardType);
         editor->addListener (this);

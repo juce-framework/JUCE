@@ -1008,8 +1008,11 @@ void TreeView::showDragHighlight (const InsertPoint& insertPos) noexcept
 
     if (dragInsertPointHighlight == nullptr)
     {
-        addAndMakeVisible (dragInsertPointHighlight = new InsertPointHighlight());
-        addAndMakeVisible (dragTargetGroupHighlight = new TargetGroupHighlight());
+        dragInsertPointHighlight.reset (new InsertPointHighlight());
+        dragTargetGroupHighlight.reset (new TargetGroupHighlight());
+
+        addAndMakeVisible (dragInsertPointHighlight.get());
+        addAndMakeVisible (dragTargetGroupHighlight.get());
     }
 
     dragInsertPointHighlight->setTargetPosition (insertPos, viewport->getViewWidth());

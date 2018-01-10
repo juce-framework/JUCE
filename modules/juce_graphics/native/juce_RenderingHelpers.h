@@ -2676,7 +2676,7 @@ public:
     {
         if (auto* top = stack.getLast())
         {
-            currentState = top;
+            currentState.reset (top);
             stack.removeLast (1, false);
         }
         else
@@ -2688,7 +2688,7 @@ public:
     void beginTransparencyLayer (float opacity)
     {
         save();
-        currentState = currentState->beginTransparencyLayer (opacity);
+        currentState.reset (currentState->beginTransparencyLayer (opacity));
     }
 
     void endTransparencyLayer()

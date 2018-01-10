@@ -430,18 +430,18 @@ private:
     Point<float> lastFakeMouseMove;
     void sendMouseMove();
 
-    int mouseClickCounter, mouseWheelCounter;
+    int mouseClickCounter = 0, mouseWheelCounter = 0;
     void incrementMouseClickCounter() noexcept;
     void incrementMouseWheelCounter() noexcept;
 
     ScopedPointer<LookAndFeel> defaultLookAndFeel;
     WeakReference<LookAndFeel> currentLookAndFeel;
 
-    Component* kioskModeComponent;
+    Component* kioskModeComponent = nullptr;
     Rectangle<int> kioskComponentOriginalBounds;
-    bool kioskModeReentrant;
+    bool kioskModeReentrant = false;
 
-    int allowedOrientations;
+    int allowedOrientations = allOrientations;
     void allowedOrientationsChanged();
 
     float masterScaleFactor;

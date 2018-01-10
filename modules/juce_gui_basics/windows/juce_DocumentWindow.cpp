@@ -145,8 +145,8 @@ Component* DocumentWindow::getMenuBarComponent() const noexcept
 
 void DocumentWindow::setMenuBarComponent (Component* newMenuBarComponent)
 {
-    // (call the Component method directly to avoid the assertion in ResizableWindow)
-    Component::addAndMakeVisible (menuBar = newMenuBarComponent);
+    menuBar.reset (newMenuBarComponent);
+    Component::addAndMakeVisible (menuBar.get()); // (call the superclass method directly to avoid the assertion in ResizableWindow)
 
     if (menuBar != nullptr)
         menuBar->setEnabled (isActiveWindow());
@@ -292,18 +292,18 @@ void DocumentWindow::lookAndFeelChanged()
 
     if (! isUsingNativeTitleBar())
     {
-        LookAndFeel& lf = getLookAndFeel();
+        auto& lf = getLookAndFeel();
 
-        if ((requiredButtons & minimiseButton) != 0)  titleBarButtons[0] = lf.createDocumentWindowButton (minimiseButton);
-        if ((requiredButtons & maximiseButton) != 0)  titleBarButtons[1] = lf.createDocumentWindowButton (maximiseButton);
-        if ((requiredButtons & closeButton)    != 0)  titleBarButtons[2] = lf.createDocumentWindowButton (closeButton);
+        if ((requiredButtons & minimiseButton) != 0)  titleBarButtons[0].reset (lf.createDocumentWindowButton (minimiseButton));
+        if ((requiredButtons & maximiseButton) != 0)  titleBarButtons[1].reset (lf.createDocumentWindowButton (maximiseButton));
+        if ((requiredButtons & closeButton)    != 0)  titleBarButtons[2].reset (lf.createDocumentWindowButton (closeButton));
 
         for (auto& b : titleBarButtons)
         {
             if (b != nullptr)
             {
                 if (buttonListener == nullptr)
-                    buttonListener = new ButtonListenerProxy (*this);
+                    buttonListener.reset (new ButtonListenerProxy (*this));
 
                 b->addListener (buttonListener);
                 b->setWantsKeyboardFocus (false);

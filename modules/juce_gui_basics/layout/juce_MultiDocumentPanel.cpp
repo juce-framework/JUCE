@@ -192,7 +192,8 @@ bool MultiDocumentPanel::addDocument (Component* const component,
     {
         if (tabComponent == nullptr && components.size() > numDocsBeforeTabsUsed)
         {
-            addAndMakeVisible (tabComponent = new TabbedComponentInternal());
+            tabComponent.reset (new TabbedComponentInternal());
+            addAndMakeVisible (tabComponent.get());
 
             auto temp = components;
 

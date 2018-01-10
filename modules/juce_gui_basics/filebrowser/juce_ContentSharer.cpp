@@ -176,7 +176,7 @@ void ContentSharer::startNewShare (std::function<void (bool, const String&)> cal
     // You should not start another sharing operation before the previous one is finished.
     // Forcibly stopping a previous sharing operation is rarely a good idea!
     jassert (pimpl == nullptr);
-    pimpl = nullptr;
+    pimpl.reset();
 
     prepareDataThread = nullptr;
     prepareImagesThread = nullptr;
@@ -187,7 +187,7 @@ void ContentSharer::startNewShare (std::function<void (bool, const String&)> cal
     jassert (callbackToUse);
     callback = static_cast<std::function<void (bool, const String&)>&&> (callbackToUse);
 
-    pimpl = createPimpl();
+    pimpl.reset (createPimpl());
 }
 #endif
 
@@ -263,7 +263,7 @@ void ContentSharer::sharingFinished (bool succeeded, const String& errorDescript
     std::swap (cb, callback);
 
   #if JUCE_IOS || JUCE_ANDROID
-    pimpl = nullptr;
+    pimpl.reset();
   #endif
 
     if (cb)

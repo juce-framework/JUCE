@@ -356,13 +356,12 @@ private:
 };
 
 //==============================================================================
-WebBrowserComponent::WebBrowserComponent (const bool unloadWhenHidden)
-    : blankPageShown (false),
-      unloadPageWhenBrowserIsHidden (unloadWhenHidden)
+WebBrowserComponent::WebBrowserComponent (bool unloadWhenHidden)
+    : unloadPageWhenBrowserIsHidden (unloadWhenHidden)
 {
     setOpaque (true);
-
-    addAndMakeVisible (browser = new Pimpl (this));
+    browser.reset (new Pimpl (this));
+    addAndMakeVisible (browser.get());
 }
 
 WebBrowserComponent::~WebBrowserComponent()

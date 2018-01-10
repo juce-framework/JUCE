@@ -64,12 +64,12 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
         filename = initialFileOrDirectory.getFileName();
     }
 
-    fileList = new DirectoryContentsList (this, thread);
+    fileList.reset (new DirectoryContentsList (this, thread));
 
     if ((flags & useTreeView) != 0)
     {
         auto tree = new FileTreeComponent (*fileList);
-        fileListComponent = tree;
+        fileListComponent.reset (tree);
 
         if ((flags & canSelectMultipleItems) != 0)
             tree->setMultiSelectEnabled (true);
@@ -79,7 +79,7 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
     else
     {
         auto list = new FileListComponent (*fileList);
-        fileListComponent = list;
+        fileListComponent.reset (list);
         list->setOutlineThickness (1);
 
         if ((flags & canSelectMultipleItems) != 0)
@@ -105,7 +105,8 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
     addAndMakeVisible (fileLabel);
     fileLabel.attachToComponent (&filenameBox, true);
 
-    addAndMakeVisible (goUpButton = getLookAndFeel().createFileBrowserGoUpButton());
+    goUpButton.reset (getLookAndFeel().createFileBrowserGoUpButton());
+    addAndMakeVisible (goUpButton.get());
     goUpButton->onClick = [this] { goUp(); };
     goUpButton->setTooltip (TRANS ("Go up to parent directory"));
 

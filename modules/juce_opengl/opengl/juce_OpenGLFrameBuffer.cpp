@@ -181,7 +181,7 @@ bool OpenGLFrameBuffer::initialise (OpenGLContext& context, int width, int heigh
     jassert (context.isActive()); // The context must be active when creating a framebuffer!
 
     pimpl.reset();
-    pimpl = new Pimpl (context, width, height, false, false);
+    pimpl.reset (new Pimpl (context, width, height, false, false));
 
     if (! pimpl->createdOk())
         pimpl.reset();

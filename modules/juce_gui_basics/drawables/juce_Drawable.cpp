@@ -111,7 +111,7 @@ void Drawable::setClipPath (Drawable* clipPath)
 {
     if (drawableClipPath != clipPath)
     {
-        drawableClipPath = clipPath;
+        drawableClipPath.reset (clipPath);
         repaint();
     }
 }

@@ -906,11 +906,11 @@ public:
         if (childComp != nullptr
              && hasActiveSubMenu (childComp->item))
         {
-            activeSubMenu = new HelperClasses::MenuWindow (*(childComp->item.subMenu), this,
-                                                           options.withTargetScreenArea (childComp->getScreenBounds())
-                                                                  .withMinimumWidth (0)
-                                                                  .withTargetComponent (nullptr),
-                                                           false, dismissOnMouseUp, managerOfChosenCommand, scaleFactor);
+            activeSubMenu.reset (new HelperClasses::MenuWindow (*(childComp->item.subMenu), this,
+                                                                options.withTargetScreenArea (childComp->getScreenBounds())
+                                                                       .withMinimumWidth (0)
+                                                                       .withTargetComponent (nullptr),
+                                                                false, dismissOnMouseUp, managerOfChosenCommand, scaleFactor));
 
             activeSubMenu->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)
             activeSubMenu->enterModalState (false);
@@ -1342,8 +1342,8 @@ PopupMenu::Item& PopupMenu::Item::operator= (const Item& other)
 {
     text = other.text;
     itemID = other.itemID;
-    subMenu = createCopyIfNotNull (other.subMenu.get());
-    image = (other.image != nullptr ? other.image->createCopy() : nullptr);
+    subMenu.reset (createCopyIfNotNull (other.subMenu.get()));
+    image.reset (other.image != nullptr ? other.image->createCopy() : nullptr);
     customComponent = other.customComponent;
     customCallback = other.customCallback;
     commandManager = other.commandManager;
@@ -1401,7 +1401,7 @@ void PopupMenu::addItem (int itemResultID, const String& itemText, bool isActive
     i.itemID = itemResultID;
     i.isEnabled = isActive;
     i.isTicked = isTicked;
-    i.image = iconToUse;
+    i.image.reset (iconToUse);
     addItem (i);
 }
 
@@ -1423,7 +1423,7 @@ void PopupMenu::addCommandItem (ApplicationCommandManager* commandManager,
         i.commandManager = commandManager;
         i.isEnabled = target != nullptr && (info.flags & ApplicationCommandInfo::isDisabled) == 0;
         i.isTicked = (info.flags & ApplicationCommandInfo::isTicked) != 0;
-        i.image = iconToUse;
+        i.image.reset (iconToUse);
         addItem (i);
     }
 }
@@ -1437,7 +1437,7 @@ void PopupMenu::addColouredItem (int itemResultID, const String& itemText, Colou
     i.colour = itemTextColour;
     i.isEnabled = isActive;
     i.isTicked = isTicked;
-    i.image = iconToUse;
+    i.image.reset (iconToUse);
     addItem (i);
 }
 
@@ -1450,7 +1450,7 @@ void PopupMenu::addColouredItem (int itemResultID, const String& itemText, Colou
     i.colour = itemTextColour;
     i.isEnabled = isActive;
     i.isTicked = isTicked;
-    i.image = createDrawableFromImage (iconToUse);
+    i.image.reset (createDrawableFromImage (iconToUse));
     addItem (i);
 }
 
@@ -1459,7 +1459,7 @@ void PopupMenu::addCustomItem (int itemResultID, CustomComponent* cc, const Popu
     Item i;
     i.itemID = itemResultID;
     i.customComponent = cc;
-    i.subMenu = createCopyIfNotNull (subMenu);
+    i.subMenu.reset (createCopyIfNotNull (subMenu));
     addItem (i);
 }
 
@@ -1489,10 +1489,10 @@ void PopupMenu::addSubMenu (const String& subMenuName, const PopupMenu& subMenu,
     Item i;
     i.text = subMenuName;
     i.itemID = itemResultID;
-    i.subMenu = new PopupMenu (subMenu);
+    i.subMenu.reset (new PopupMenu (subMenu));
     i.isEnabled = isActive && (itemResultID != 0 || subMenu.getNumItems() > 0);
     i.isTicked = isTicked;
-    i.image = iconToUse;
+    i.image.reset (iconToUse);
     addItem (i);
 }
 
@@ -1639,7 +1639,7 @@ int PopupMenu::showWithOptionalCallback (const Options& options, ModalComponentM
 
     if (auto* window = createWindow (options, &(callback->managerOfChosenCommand)))
     {
-        callback->component = window;
+        callback->component.reset (window);
 
         window->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)
         window->enterModalState (false, userCallbackDeleter.release());

@@ -195,7 +195,7 @@ public:
 
     void assignNewKey()
     {
-        currentKeyEntryWindow = new KeyEntryWindow (owner);
+        currentKeyEntryWindow.reset (new KeyEntryWindow (owner));
         currentKeyEntryWindow->enterModalState (true, ModalCallbackFunction::forComponent (keyChosen, this));
     }
 
@@ -387,7 +387,7 @@ KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet& mappin
     : mappings (mappingManager),
       resetButton (TRANS ("reset to defaults"))
 {
-    treeItem = new TopLevelItem (*this);
+    treeItem.reset (new TopLevelItem (*this));
 
     if (showResetToDefaultButton)
     {
