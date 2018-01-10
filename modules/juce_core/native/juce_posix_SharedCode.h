@@ -1257,7 +1257,7 @@ bool ChildProcess::start (const StringArray& args, int streamFlags)
     if (args.size() == 0)
         return false;
 
-    activeProcess = new ActiveProcess (args, streamFlags);
+    activeProcess.reset (new ActiveProcess (args, streamFlags));
 
     if (activeProcess->childPID == 0)
         activeProcess.reset();

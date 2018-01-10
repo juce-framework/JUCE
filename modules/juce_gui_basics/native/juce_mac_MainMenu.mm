@@ -612,7 +612,7 @@ public:
 
     ~TemporaryMainMenuWithStandardCommands()
     {
-        MenuBarModel::setMacMainMenu (oldMenu, oldAppleMenu, oldRecentItems);
+        MenuBarModel::setMacMainMenu (oldMenu, oldAppleMenu.get(), oldRecentItems);
     }
 
 private:

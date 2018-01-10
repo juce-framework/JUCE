@@ -200,7 +200,8 @@ Value& TextPropertyComponent::getValue() const
 
 void TextPropertyComponent::createEditor (int maxNumChars, bool isMultiLine, bool isEditable)
 {
-    addAndMakeVisible (textEditor = new LabelComp (*this, maxNumChars, isMultiLine, isEditable));
+    textEditor.reset (new LabelComp (*this, maxNumChars, isMultiLine, isEditable));
+    addAndMakeVisible (textEditor.get());
 
     if (isMultiLine)
     {

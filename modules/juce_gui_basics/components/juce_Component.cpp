@@ -830,7 +830,7 @@ private:
 
 void Component::setCachedComponentImage (CachedComponentImage* newCachedImage)
 {
-    if (cachedImage != newCachedImage)
+    if (cachedImage.get() != newCachedImage)
     {
         cachedImage.reset (newCachedImage);
         repaint();
@@ -2140,14 +2140,13 @@ void Component::copyAllExplicitColoursTo (Component& target) const
 }
 
 //==============================================================================
-Component::Positioner::Positioner (Component& c) noexcept
-    : component (c)
+Component::Positioner::Positioner (Component& c) noexcept  : component (c)
 {
 }
 
 Component::Positioner* Component::getPositioner() const noexcept
 {
-    return positioner;
+    return positioner.get();
 }
 
 void Component::setPositioner (Positioner* newPositioner)
@@ -2775,7 +2774,9 @@ void Component::moveKeyboardFocusToSibling (bool moveToNext)
 
     if (parentComponent != nullptr)
     {
-        if (ScopedPointer<KeyboardFocusTraverser> traverser = createFocusTraverser())
+        ScopedPointer<KeyboardFocusTraverser> traverser (createFocusTraverser());
+
+        if (traverser != nullptr)
         {
             auto* nextComp = moveToNext ? traverser->getNextComponent (this)
                                         : traverser->getPreviousComponent (this);

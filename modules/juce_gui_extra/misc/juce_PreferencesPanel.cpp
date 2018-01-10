@@ -126,7 +126,7 @@ void PreferencesPanel::setCurrentPage (const String& pageName)
 
         if (currentPage != nullptr)
         {
-            addAndMakeVisible (currentPage);
+            addAndMakeVisible (currentPage.get());
             currentPage->toBack();
             resized();
         }

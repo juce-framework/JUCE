@@ -373,13 +373,13 @@ public:
        #ifndef DOXYGEN
         /** @internal */
         void refresh();
+        /** @internal */
+        ~Displays();
        #endif
 
     private:
         friend class Desktop;
-        friend struct ContainerDeletePolicy<Displays>;
         Displays (Desktop&);
-        ~Displays();
 
         void init (Desktop&);
         void findDisplays (float masterScale);

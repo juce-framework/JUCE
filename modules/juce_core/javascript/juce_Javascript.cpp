@@ -389,7 +389,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
     struct DotOperator  : public Expression
     {
-        DotOperator (const CodeLocation& l, ExpPtr& p, const Identifier& c) noexcept : Expression (l), parent (p), child (c) {}
+        DotOperator (const CodeLocation& l, ExpPtr& p, const Identifier& c) noexcept : Expression (l), parent (p.release()), child (c) {}
 
         var getResult (const Scope& s) const override
         {
@@ -478,7 +478,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
     struct BinaryOperatorBase  : public Expression
     {
         BinaryOperatorBase (const CodeLocation& l, ExpPtr& a, ExpPtr& b, TokenType op) noexcept
-            : Expression (l), lhs (a), rhs (b), operation (op) {}
+            : Expression (l), lhs (a.release()), rhs (b.release()), operation (op) {}
 
         ExpPtr lhs, rhs;
         TokenType operation;
@@ -674,7 +674,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
 
     struct Assignment  : public Expression
     {
-        Assignment (const CodeLocation& l, ExpPtr& dest, ExpPtr& source) noexcept : Expression (l), target (dest), newValue (source) {}
+        Assignment (const CodeLocation& l, ExpPtr& dest, ExpPtr& source) noexcept : Expression (l), target (dest.release()), newValue (source.release()) {}
 
         var getResult (const Scope& s) const override
         {
@@ -1080,7 +1080,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             }
 
             match (TokenTypes::closeParen);
-            fo.body = parseBlock();
+            fo.body.reset (parseBlock());
         }
 
         Expression* parseExpression()
@@ -1270,7 +1270,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         Expression* parseFunctionCall (FunctionCall* call, ExpPtr& function)
         {
             ScopedPointer<FunctionCall> s (call);
-            s->object = function;
+            s->object.reset (function.release());
             match (TokenTypes::openParen);
 
             while (currentType != TokenTypes::closeParen)
@@ -1296,7 +1296,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
             if (matchIf (TokenTypes::openBracket))
             {
                 ScopedPointer<ArraySubscript> s (new ArraySubscript (location));
-                s->object = input;
+                s->object.reset (input.release());
                 s->index.reset (parseExpression());
                 match (TokenTypes::closeBracket);
                 return parseSuffixes (s.release());
@@ -1505,7 +1505,7 @@ struct JavascriptEngine::RootObject   : public DynamicObject
         Expression* parseTernaryOperator (ExpPtr& condition)
         {
             ScopedPointer<ConditionalOp> e (new ConditionalOp (location));
-            e->condition = condition;
+            e->condition.reset (condition.release());
             e->trueBranch.reset (parseExpression());
             match (TokenTypes::colon);
             e->falseBranch.reset (parseExpression());

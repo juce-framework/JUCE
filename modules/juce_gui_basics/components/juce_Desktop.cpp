@@ -96,7 +96,7 @@ LookAndFeel& Desktop::getDefaultLookAndFeel() noexcept
         if (defaultLookAndFeel == nullptr)
             defaultLookAndFeel.reset (new LookAndFeel_V4());
 
-        currentLookAndFeel = defaultLookAndFeel;
+        currentLookAndFeel = defaultLookAndFeel.get();
     }
 
     return *currentLookAndFeel;

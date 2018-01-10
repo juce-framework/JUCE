@@ -54,7 +54,7 @@ FillType::FillType (const Image& im, const AffineTransform& t) noexcept
 
 FillType::FillType (const FillType& other)
     : colour (other.colour),
-      gradient (other.gradient.createCopy()),
+      gradient (createCopyIfNotNull (other.gradient.get())),
       image (other.image),
       transform (other.transform)
 {
@@ -65,7 +65,7 @@ FillType& FillType::operator= (const FillType& other)
     if (this != &other)
     {
         colour = other.colour;
-        gradient.reset (other.gradient.createCopy());
+        gradient.reset (createCopyIfNotNull (other.gradient.get()));
         image = other.image;
         transform = other.transform;
     }

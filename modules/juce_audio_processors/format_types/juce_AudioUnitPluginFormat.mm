@@ -2223,7 +2223,7 @@ AudioProcessorEditor* AudioUnitPluginInstance::createEditor()
     ScopedPointer<AudioProcessorEditor> w (new AudioUnitPluginWindowCocoa (*this, false));
 
     if (! static_cast<AudioUnitPluginWindowCocoa*> (w.get())->isValid())
-        w = nullptr;
+        w.reset();
 
    #if JUCE_SUPPORT_CARBON
     if (w == nullptr)
@@ -2236,7 +2236,7 @@ AudioProcessorEditor* AudioUnitPluginInstance::createEditor()
    #endif
 
     if (w == nullptr)
-        w = new AudioUnitPluginWindowCocoa (*this, true); // use AUGenericView as a fallback
+        w.reset (new AudioUnitPluginWindowCocoa (*this, true)); // use AUGenericView as a fallback
 
     return w.release();
 }

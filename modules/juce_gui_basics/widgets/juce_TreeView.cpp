@@ -440,7 +440,7 @@ TreeView::TreeView (const String& name)
     : Component (name),
       viewport (new TreeViewport())
 {
-    addAndMakeVisible (viewport);
+    addAndMakeVisible (viewport.get());
     viewport->setViewedComponent (new ContentComponent (*this));
     setWantsKeyboardFocus (true);
 }
@@ -547,7 +547,7 @@ void TreeView::setOpenCloseButtonsVisible (const bool shouldBeVisible)
 
 Viewport* TreeView::getViewport() const noexcept
 {
-    return viewport;
+    return viewport.get();
 }
 
 //==============================================================================

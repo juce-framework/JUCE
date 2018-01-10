@@ -54,7 +54,8 @@ struct OnlineUnlockForm::OverlayComp  : public Component,
 
         if (hasCancelButton)
         {
-            addAndMakeVisible (cancelButton = new TextButton (TRANS ("Cancel")));
+            cancelButton.reset (new TextButton (TRANS ("Cancel")));
+            addAndMakeVisible (cancelButton.get());
             cancelButton->addListener (this);
         }
 
@@ -128,7 +129,7 @@ struct OnlineUnlockForm::OverlayComp  : public Component,
 
     void buttonClicked (Button* button) override
     {
-        if (button == cancelButton)
+        if (button == cancelButton.get())
         {
             form.status.userCancelled();
 
@@ -267,8 +268,8 @@ void OnlineUnlockForm::lookAndFeelChanged()
 
 void OnlineUnlockForm::showBubbleMessage (const String& text, Component& target)
 {
-    bubble = new BubbleMessageComponent (500);
-    addChildComponent (bubble);
+    bubble.reset (new BubbleMessageComponent (500));
+    addChildComponent (bubble.get());
 
     AttributedString attString;
     attString.append (text, Font (16.0f));

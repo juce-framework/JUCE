@@ -115,7 +115,7 @@ bool KnownPluginList::isListingUpToDate (const String& fileOrIdentifier,
 
 void KnownPluginList::setCustomScanner (CustomScanner* newScanner)
 {
-    scanner = newScanner;
+    scanner.reset (newScanner);
 }
 
 bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
@@ -425,7 +425,7 @@ struct PluginTreeUtils
                 {
                     current->folder = lastType;
                     tree.subFolders.add (current.release());
-                    current = new KnownPluginList::PluginTree();
+                    current.reset (new KnownPluginList::PluginTree());
                 }
 
                 lastType = thisType;

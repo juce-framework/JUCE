@@ -76,11 +76,11 @@ public:
         : ThreadPoolJob ("OpenGL Rendering"),
           context (c), component (comp)
     {
-        nativeContext = new NativeContext (component, pixFormat, contextToShare,
-                                           c.useMultisampling, c.versionRequired);
+        nativeContext.reset (new NativeContext (component, pixFormat, contextToShare,
+                                                c.useMultisampling, c.versionRequired));
 
         if (nativeContext->createdOk())
-            context.nativeContext = nativeContext;
+            context.nativeContext = nativeContext.get();
         else
             nativeContext.reset();
     }
@@ -95,7 +95,7 @@ public:
     {
         if (nativeContext != nullptr)
         {
-            renderThread = new ThreadPool (1);
+            renderThread.reset (new ThreadPool (1));
             resume();
         }
     }
@@ -886,7 +886,7 @@ void OpenGLContext::attachTo (Component& component)
     if (getTargetComponent() != &component)
     {
         detach();
-        attachment = new Attachment (*this, component);
+        attachment.reset (new Attachment (*this, component));
     }
 }
 

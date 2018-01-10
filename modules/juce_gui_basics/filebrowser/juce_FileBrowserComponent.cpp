@@ -334,15 +334,15 @@ FilePreviewComponent* FileBrowserComponent::getPreviewComponent() const noexcept
 
 DirectoryContentsDisplayComponent* FileBrowserComponent::getDisplayComponent() const noexcept
 {
-    return fileListComponent;
+    return fileListComponent.get();
 }
 
 //==============================================================================
 void FileBrowserComponent::resized()
 {
     getLookAndFeel()
-        .layoutFileBrowserComponent (*this, fileListComponent, previewComp,
-                                     &currentPathBox, &filenameBox, goUpButton);
+        .layoutFileBrowserComponent (*this, fileListComponent.get(), previewComp,
+                                     &currentPathBox, &filenameBox, goUpButton.get());
 }
 
 //==============================================================================

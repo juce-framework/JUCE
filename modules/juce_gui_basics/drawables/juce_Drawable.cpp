@@ -109,7 +109,7 @@ DrawableComposite* Drawable::getParent() const
 
 void Drawable::setClipPath (Drawable* clipPath)
 {
-    if (drawableClipPath != clipPath)
+    if (drawableClipPath.get() != clipPath)
     {
         drawableClipPath.reset (clipPath);
         repaint();

@@ -68,7 +68,7 @@ void FilenameComponent::paintOverChildren (Graphics& g)
 
 void FilenameComponent::resized()
 {
-    getLookAndFeel().layoutFilenameComponent (*this, &filenameBox, browseButton);
+    getLookAndFeel().layoutFilenameComponent (*this, &filenameBox, browseButton.get());
 }
 
 KeyboardFocusTraverser* FilenameComponent::createFocusTraverser()

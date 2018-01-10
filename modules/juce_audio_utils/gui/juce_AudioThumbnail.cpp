@@ -219,8 +219,8 @@ private:
     void createReader()
     {
         if (reader == nullptr && source != nullptr)
-            if (InputStream* audioFileStream = source->createInputStream())
-                reader = owner.formatManagerToUse.createReaderFor (audioFileStream);
+            if (auto* audioFileStream = source->createInputStream())
+                reader.reset (owner.formatManagerToUse.createReaderFor (audioFileStream));
     }
 
     bool readNextBlock()
@@ -648,7 +648,7 @@ bool AudioThumbnail::setDataSource (LevelDataSource* newSource)
 
     if (cache.loadThumb (*this, newSource->hashCode) && isFullyLoaded())
     {
-        source = newSource; // (make sure this isn't done before loadThumb is called)
+        source.reset (newSource); // (make sure this isn't done before loadThumb is called)
 
         source->lengthInSamples = totalSamples;
         source->sampleRate = sampleRate;
@@ -657,7 +657,7 @@ bool AudioThumbnail::setDataSource (LevelDataSource* newSource)
     }
     else
     {
-        source = newSource; // (make sure this isn't done before loadThumb is called)
+        source.reset (newSource); // (make sure this isn't done before loadThumb is called)
 
         const ScopedLock sl (lock);
         source->initialise (numSamplesFinished);
@@ -807,7 +807,7 @@ void AudioThumbnail::drawChannel (Graphics& g, const Rectangle<int>& area, doubl
     const ScopedLock sl (lock);
 
     window->drawChannel (g, area, startTime, endTime, channelNum, verticalZoomFactor,
-                         sampleRate, numChannels, samplesPerThumbSample, source, channels);
+                         sampleRate, numChannels, samplesPerThumbSample, source.get(), channels);
 }
 
 void AudioThumbnail::drawChannels (Graphics& g, const Rectangle<int>& area, double startTimeSeconds,

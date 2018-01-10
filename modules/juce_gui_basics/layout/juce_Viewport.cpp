@@ -291,7 +291,7 @@ void Viewport::setScrollOnDragEnabled (bool shouldScrollOnDrag)
     if (isScrollOnDragEnabled() != shouldScrollOnDrag)
     {
         if (shouldScrollOnDrag)
-            dragToScrollListener = new DragToScrollListener (*this);
+            dragToScrollListener.reset (new DragToScrollListener (*this));
         else
             dragToScrollListener.reset();
     }
@@ -490,13 +490,13 @@ int Viewport::getScrollBarThickness() const
 
 void Viewport::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart)
 {
-    const int newRangeStartInt = roundToInt (newRangeStart);
+    auto newRangeStartInt = roundToInt (newRangeStart);
 
-    if (scrollBarThatHasMoved == horizontalScrollBar)
+    if (scrollBarThatHasMoved == horizontalScrollBar.get())
     {
         setViewPosition (newRangeStartInt, getViewPositionY());
     }
-    else if (scrollBarThatHasMoved == verticalScrollBar)
+    else if (scrollBarThatHasMoved == verticalScrollBar.get())
     {
         setViewPosition (getViewPositionX(), newRangeStartInt);
     }

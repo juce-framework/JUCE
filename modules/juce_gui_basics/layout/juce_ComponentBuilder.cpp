@@ -114,7 +114,7 @@ ComponentBuilder::~ComponentBuilder()
    #if JUCE_DEBUG
     // Don't delete the managed component!! The builder owns that component, and will delete
     // it automatically when it gets deleted.
-    jassert (componentRef.get() == static_cast<Component*> (component));
+    jassert (componentRef.get() == component.get());
    #endif
 }
 
@@ -125,11 +125,11 @@ Component* ComponentBuilder::getManagedComponent()
         component.reset (createComponent());
 
        #if JUCE_DEBUG
-        componentRef = component;
+        componentRef = component.get();
        #endif
     }
 
-    return component;
+    return component.get();
 }
 
 Component* ComponentBuilder::createComponent()

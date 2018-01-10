@@ -1144,8 +1144,8 @@ void AudioProcessorGraph::clearRenderingSequence()
 
     {
         const ScopedLock sl (getCallbackLock());
-        renderSequenceFloat.swapWith (oldSequenceF);
-        renderSequenceDouble.swapWith (oldSequenceD);
+        std::swap (renderSequenceFloat, oldSequenceF);
+        std::swap (renderSequenceDouble, oldSequenceD);
     }
 }
 
@@ -1187,8 +1187,8 @@ void AudioProcessorGraph::buildRenderingSequence()
 
     const ScopedLock sl (getCallbackLock());
 
-    renderSequenceFloat.swapWith (newSequenceF);
-    renderSequenceDouble.swapWith (newSequenceD);
+    std::swap (renderSequenceFloat, newSequenceF);
+    std::swap (renderSequenceDouble, newSequenceD);
 }
 
 void AudioProcessorGraph::handleAsyncUpdate()

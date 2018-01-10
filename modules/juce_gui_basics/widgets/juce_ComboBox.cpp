@@ -418,10 +418,10 @@ void ComboBox::lookAndFeelChanged()
             newLabel->setText (label->getText(), dontSendNotification);
         }
 
-        label = newLabel;
+        std::swap (label, newLabel);
     }
 
-    addAndMakeVisible (label);
+    addAndMakeVisible (label.get());
 
     EditableState newEditableState = (label->isEditable() ? labelIsEditable : labelIsNotEditable);
 

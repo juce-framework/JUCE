@@ -181,7 +181,7 @@ void BurgerMenuComponent::paintListBoxItem (int rowIndex, Graphics& g, int w, in
                                   hasSubMenu (item),
                                   item.text,
                                   item.shortcutKeyDescription,
-                                  item.image,
+                                  item.image.get(),
                                   colour);
     }
 }

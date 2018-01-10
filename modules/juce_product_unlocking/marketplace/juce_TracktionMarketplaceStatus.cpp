@@ -57,7 +57,7 @@ String TracktionMarketplaceStatus::readReplyFromWebserver (const String& email, 
 
     {
         ScopedLock lock (streamCreationLock);
-        stream = new WebInputStream (url, true);
+        stream.reset (new WebInputStream (url, true));
     }
 
     if (stream->connect (nullptr))

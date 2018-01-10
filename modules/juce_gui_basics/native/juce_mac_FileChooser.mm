@@ -78,7 +78,7 @@ public:
         delegate = [cls.createInstance() init];
         object_setInstanceVariable (delegate, "cppObject", this);
 
-        [panel setDelegate:delegate];
+        [panel setDelegate: delegate];
 
         filters.addTokens (owner.filters.replaceCharacters (",:", ";;"), ";", String());
         filters.trim();
@@ -150,9 +150,8 @@ public:
             }
 
             [panel close];
+            [panel release];
         }
-
-        panel.reset();
 
         if (delegate != nil)
         {
@@ -292,7 +291,7 @@ private:
     NSView* nsViewPreview = nullptr;
     bool selectsDirectories, selectsFiles, isSave, selectMultiple;
 
-    ScopedPointer<NSSavePanel> panel;
+    NSSavePanel* panel;
     DelegateType* delegate;
 
     StringArray filters;

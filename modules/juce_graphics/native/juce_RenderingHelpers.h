@@ -2661,10 +2661,10 @@ public:
 
     void initialise (StateObjectType* state)
     {
-        currentState = state;
+        currentState.reset (state);
     }
 
-    inline StateObjectType* operator->() const noexcept     { return currentState; }
+    inline StateObjectType* operator->() const noexcept     { return currentState.get(); }
     inline StateObjectType& operator*()  const noexcept     { return *currentState; }
 
     void save()
@@ -2693,7 +2693,7 @@ public:
 
     void endTransparencyLayer()
     {
-        const ScopedPointer<StateObjectType> finishedTransparencyLayer (currentState);
+        ScopedPointer<StateObjectType> finishedTransparencyLayer (currentState.release());
         restore();
         currentState->endTransparencyLayer (*finishedTransparencyLayer);
     }

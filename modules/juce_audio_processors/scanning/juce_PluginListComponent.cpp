@@ -142,7 +142,7 @@ PluginListComponent::PluginListComponent (AudioPluginFormatManager& manager, Kno
       allowAsync (allowPluginsWhichRequireAsynchronousInstantiation),
       numThreads (allowAsync ? 1 : 0)
 {
-    tableModel = new TableModel (*this, listToEdit);
+    tableModel.reset (new TableModel (*this, listToEdit));
 
     TableHeaderComponent& header = table.getHeader();
 
@@ -154,7 +154,7 @@ PluginListComponent::PluginListComponent (AudioPluginFormatManager& manager, Kno
 
     table.setHeaderHeight (22);
     table.setRowHeight (20);
-    table.setModel (tableModel);
+    table.setModel (tableModel.get());
     table.setMultipleSelectionEnabled (true);
     addAndMakeVisible (table);
 
@@ -228,8 +228,8 @@ void PluginListComponent::removeSelectedPlugins()
 void PluginListComponent::setTableModel (TableListBoxModel* model)
 {
     table.setModel (nullptr);
-    tableModel = model;
-    table.setModel (tableModel);
+    tableModel.reset (model);
+    table.setModel (tableModel.get());
 
     table.getHeader().reSortTable();
     table.updateContent();
@@ -479,8 +479,8 @@ private:
     {
         pathChooserWindow.setVisible (false);
 
-        scanner = new PluginDirectoryScanner (owner.list, formatToScan, pathList.getPath(),
-                                              true, owner.deadMansPedalFile, allowAsync);
+        scanner.reset (new PluginDirectoryScanner (owner.list, formatToScan, pathList.getPath(),
+                                                   true, owner.deadMansPedalFile, allowAsync));
 
         if (propertiesToUse != nullptr)
         {
@@ -494,7 +494,7 @@ private:
 
         if (numThreads > 0)
         {
-            pool = new ThreadPool (numThreads);
+            pool.reset (new ThreadPool (numThreads));
 
             for (int i = numThreads; --i >= 0;)
                 pool->addJob (new ScanJob (*this), true);
@@ -560,9 +560,9 @@ private:
 
 void PluginListComponent::scanFor (AudioPluginFormat& format)
 {
-    currentScanner = new Scanner (*this, format, propertiesToUse, allowAsync, numThreads,
-                                  dialogTitle.isNotEmpty() ? dialogTitle : TRANS("Scanning for plug-ins..."),
-                                  dialogText.isNotEmpty()  ? dialogText  : TRANS("Searching for all possible plug-in files..."));
+    currentScanner.reset (new Scanner (*this, format, propertiesToUse, allowAsync, numThreads,
+                                       dialogTitle.isNotEmpty() ? dialogTitle : TRANS("Scanning for plug-ins..."),
+                                       dialogText.isNotEmpty()  ? dialogText  : TRANS("Searching for all possible plug-in files...")));
 }
 
 bool PluginListComponent::isScanning() const noexcept
@@ -574,8 +574,8 @@ void PluginListComponent::scanFinished (const StringArray& failedFiles)
 {
     StringArray shortNames;
 
-    for (int i = 0; i < failedFiles.size(); ++i)
-        shortNames.add (File::createFileWithoutCheckingPath (failedFiles[i]).getFileName());
+    for (auto& f : failedFiles)
+        shortNames.add (File::createFileWithoutCheckingPath (f).getFileName());
 
     currentScanner.reset(); // mustn't delete this before using the failed files array
 

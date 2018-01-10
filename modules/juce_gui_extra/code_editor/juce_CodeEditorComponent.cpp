@@ -367,14 +367,14 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& doc, CodeTokeniser* cons
 
     setLineNumbersShown (true);
 
-    verticalScrollBar.addListener (pimpl);
-    horizontalScrollBar.addListener (pimpl);
-    document.addListener (pimpl);
+    verticalScrollBar.addListener (pimpl.get());
+    horizontalScrollBar.addListener (pimpl.get());
+    document.addListener (pimpl.get());
 }
 
 CodeEditorComponent::~CodeEditorComponent()
 {
-    document.removeListener (pimpl);
+    document.removeListener (pimpl.get());
 }
 
 int CodeEditorComponent::getGutterSize() const noexcept

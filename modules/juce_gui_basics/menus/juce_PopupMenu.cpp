@@ -120,7 +120,7 @@ struct ItemComponent  : public Component
                                                 hasSubMenu (item),
                                                 item.text,
                                                 item.shortcutKeyDescription,
-                                                item.image,
+                                                item.image.get(),
                                                 getColour (item));
     }
 
@@ -561,7 +561,7 @@ public:
             if (mw == window)
                 return true;
 
-            mw = mw->activeSubMenu;
+            mw = mw->activeSubMenu.get();
         }
 
         return false;
@@ -1843,7 +1843,7 @@ bool PopupMenu::MenuItemIterator::next()
     if (searchRecursively && currentItem->subMenu != nullptr)
     {
         index.add (0);
-        menus.add (currentItem->subMenu);
+        menus.add (currentItem->subMenu.get());
     }
     else
         index.setUnchecked (index.size() - 1, index.getLast() + 1);

@@ -411,7 +411,7 @@ public:
                     {
                         toDelete.reset (data.elements[indexToChange]);
 
-                        if (toDelete == newObject)
+                        if (toDelete.get() == newObject)
                             toDelete.release();
                     }
 

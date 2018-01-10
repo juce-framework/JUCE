@@ -1711,8 +1711,8 @@ Drawable* Drawable::createFromSVGFile (const File& svgFile)
 
         if (svgDocument != nullptr)
         {
-            SVGState state (svgDocument, svgFile);
-            return state.parseSVGElement (SVGState::XmlPath (svgDocument, nullptr));
+            SVGState state (svgDocument.get(), svgFile);
+            return state.parseSVGElement (SVGState::XmlPath (svgDocument.get(), nullptr));
         }
     }
 

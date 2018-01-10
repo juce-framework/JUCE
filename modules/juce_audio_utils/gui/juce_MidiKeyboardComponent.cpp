@@ -68,8 +68,11 @@ private:
 MidiKeyboardComponent::MidiKeyboardComponent (MidiKeyboardState& s, Orientation o)
     : state (s), orientation (o)
 {
-    addChildComponent (scrollDown = new UpDownButton (*this, -1));
-    addChildComponent (scrollUp   = new UpDownButton (*this, 1));
+    scrollDown.reset (new UpDownButton (*this, -1));
+    scrollUp  .reset (new UpDownButton (*this, 1));
+
+    addChildComponent (scrollDown.get());
+    addChildComponent (scrollUp.get());
 
     // initialise with a default set of qwerty key-mappings..
     int note = 0;
