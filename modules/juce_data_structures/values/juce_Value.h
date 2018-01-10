@@ -227,11 +227,11 @@ private:
 
     // This is disallowed to avoid confusion about whether it should
     // do a by-value or by-reference copy.
-    Value& operator= (const Value&) JUCE_DELETED_FUNCTION;
+    Value& operator= (const Value&) = delete;
 
     // This declaration prevents accidental construction from an integer of 0,
     // which is possible in some compilers via an implicit cast to a pointer.
-    explicit Value (void*) JUCE_DELETED_FUNCTION;
+    explicit Value (void*) = delete;
 };
 
 /** Writes a Value to an OutputStream as a UTF8 string. */

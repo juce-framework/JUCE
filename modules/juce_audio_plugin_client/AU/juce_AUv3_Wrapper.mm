@@ -68,10 +68,6 @@
 
 #define JUCE_VIEWCONTROLLER_OBJC_NAME(x) JUCE_JOIN_MACRO (x, FactoryAUv3)
 
-#if ! JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
- #error AUv3 wrapper requires variadic template support
-#endif
-
 #if JUCE_IOS
  #define JUCE_IOS_MAC_VIEW  UIView
 #else
@@ -122,9 +118,9 @@ struct AudioProcessorHolder  : public ReferenceCountedObject
 private:
     ScopedPointer<AudioProcessor> processor;
 
-    AudioProcessorHolder& operator= (AudioProcessor*) JUCE_DELETED_FUNCTION;
-    AudioProcessorHolder (AudioProcessorHolder&) JUCE_DELETED_FUNCTION;
-    AudioProcessorHolder& operator= (AudioProcessorHolder&) JUCE_DELETED_FUNCTION;
+    AudioProcessorHolder& operator= (AudioProcessor*) = delete;
+    AudioProcessorHolder (AudioProcessorHolder&) = delete;
+    AudioProcessorHolder& operator= (AudioProcessorHolder&) = delete;
 };
 
 //==============================================================================

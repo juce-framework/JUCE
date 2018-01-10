@@ -152,7 +152,6 @@ public:
         }
 
 
-       #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
         beginTest ("Initialisation with argument list (C++11 only)");
         {
             int testInt = 42;
@@ -197,7 +196,6 @@ public:
                 expectEquals (msg[4].getInt32(), testInt);
             }
         }
-       #endif
     }
 };
 

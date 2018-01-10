@@ -1675,7 +1675,7 @@ public:
         //==============================================================================
         const XcodeProjectExporter& owner;
 
-        Target& operator= (const Target&) JUCE_DELETED_FUNCTION;
+        Target& operator= (const Target&) = delete;
     };
 
     mutable StringArray xcodeFrameworks;

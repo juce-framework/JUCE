@@ -181,7 +181,7 @@ private:
     // a scoped pointer, which is almost certainly not what you intended to do!
     // If you hit a problem with this, you probably meant to say
     //  myPointer.setOwned (myScopedPointer.release())
-    void setOwned (const ScopedPointer<ObjectType>&) JUCE_DELETED_FUNCTION;
+    void setOwned (const ScopedPointer<ObjectType>&) = delete;
 };
 
 } // namespace juce
