@@ -394,7 +394,7 @@ bool MemoryMappedAudioFormatReader::mapSectionOfFile (Range<int64> samplesToMap)
         const Range<int64> fileRange (sampleToFilePos (samplesToMap.getStart()),
                                       sampleToFilePos (samplesToMap.getEnd()));
 
-        map = new MemoryMappedFile (file, fileRange, MemoryMappedFile::readOnly);
+        map.reset (new MemoryMappedFile (file, fileRange, MemoryMappedFile::readOnly));
 
         if (map->getData() == nullptr)
             map.reset();

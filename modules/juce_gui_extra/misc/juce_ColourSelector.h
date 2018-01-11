@@ -82,9 +82,9 @@ public:
 
     /** Changes the colour that is currently being shown.
 
-        @param newColour       the new colour to show
-        @param notification    whether to send a notification of the change to listeners.
-                               A notification will only be sent if the colour has changed.
+        @param newColour           the new colour to show
+        @param notificationType    whether to send a notification of the change to listeners.
+                                   A notification will only be sent if the colour has changed.
     */
     void setCurrentColour (Colour newColour, NotificationType notificationType = sendNotification);
 

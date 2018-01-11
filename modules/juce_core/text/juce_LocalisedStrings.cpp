@@ -44,7 +44,7 @@ LocalisedStrings& LocalisedStrings::operator= (const LocalisedStrings& other)
     languageName = other.languageName;
     countryCodes = other.countryCodes;
     translations = other.translations;
-    fallback = createCopyIfNotNull (other.fallback.get());
+    fallback.reset (createCopyIfNotNull (other.fallback.get()));
     return *this;
 }
 
@@ -171,19 +171,19 @@ void LocalisedStrings::addStrings (const LocalisedStrings& other)
 
 void LocalisedStrings::setFallback (LocalisedStrings* f)
 {
-    fallback = f;
+    fallback.reset (f);
 }
 
 //==============================================================================
 void LocalisedStrings::setCurrentMappings (LocalisedStrings* newTranslations)
 {
     const SpinLock::ScopedLockType sl (currentMappingsLock);
-    currentMappings = newTranslations;
+    currentMappings.reset (newTranslations);
 }
 
 LocalisedStrings* LocalisedStrings::getCurrentMappings()
 {
-    return currentMappings;
+    return currentMappings.get();
 }
 
 String LocalisedStrings::translateWithCurrentMappings (const String& text)  { return juce::translate (text); }

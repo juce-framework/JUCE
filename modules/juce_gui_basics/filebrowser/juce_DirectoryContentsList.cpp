@@ -107,7 +107,7 @@ void DirectoryContentsList::refresh()
 
     if (root.isDirectory())
     {
-        fileFindHandle = new DirectoryIterator (root, false, "*", fileTypeFlags);
+        fileFindHandle.reset (new DirectoryIterator (root, false, "*", fileTypeFlags));
         shouldStop = false;
         thread.addTimeSliceClient (this);
     }

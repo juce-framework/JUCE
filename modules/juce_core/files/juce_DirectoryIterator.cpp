@@ -95,8 +95,8 @@ bool DirectoryIterator::next (bool* isDirResult, bool* isHiddenResult, int64* fi
                 if (isDirectory)
                 {
                     if (isRecursive && ((whatToLookFor & File::ignoreHiddenFiles) == 0 || ! isHidden))
-                        subIterator = new DirectoryIterator (File::createFileWithoutCheckingPath (path + filename),
-                                                             true, wildCard, whatToLookFor);
+                        subIterator.reset (new DirectoryIterator (File::createFileWithoutCheckingPath (path + filename),
+                                                                  true, wildCard, whatToLookFor));
 
                     matches = (whatToLookFor & File::findDirectories) != 0;
                 }

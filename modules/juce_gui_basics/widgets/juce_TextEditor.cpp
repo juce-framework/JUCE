@@ -880,7 +880,8 @@ TextEditor::TextEditor (const String& name, juce_wchar passwordChar)
 {
     setMouseCursor (MouseCursor::IBeamCursor);
 
-    addAndMakeVisible (viewport = new TextEditorViewport (*this));
+    viewport.reset (new TextEditorViewport (*this));
+    addAndMakeVisible (viewport.get());
     viewport->setViewedComponent (textHolder = new TextHolderComponent (*this));
     viewport->setWantsKeyboardFocus (false);
     viewport->setScrollBarsShown (false, false);
@@ -1082,7 +1083,8 @@ void TextEditor::recreateCaret()
     {
         if (caret == nullptr)
         {
-            textHolder->addChildComponent (caret = getLookAndFeel().createCaretComponent (this));
+            caret.reset (getLookAndFeel().createCaretComponent (this));
+            textHolder->addChildComponent (caret.get());
             updateCaretPosition();
         }
     }

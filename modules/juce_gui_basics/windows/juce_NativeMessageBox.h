@@ -213,7 +213,7 @@ public:
                                           #endif
 
 private:
-    NativeMessageBox() JUCE_DELETED_FUNCTION;
+    NativeMessageBox() = delete;
     JUCE_DECLARE_NON_COPYABLE (NativeMessageBox)
 };
 

@@ -194,7 +194,7 @@ void MessageManager::deliverBroadcastMessage (const String& value)
 void MessageManager::registerBroadcastListener (ActionListener* const listener)
 {
     if (broadcaster == nullptr)
-        broadcaster = new ActionBroadcaster();
+        broadcaster.reset (new ActionBroadcaster());
 
     broadcaster->addActionListener (listener);
 }

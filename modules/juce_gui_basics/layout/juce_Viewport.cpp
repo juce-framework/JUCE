@@ -102,8 +102,11 @@ void Viewport::recreateScrollbars()
     verticalScrollBar.reset();
     horizontalScrollBar.reset();
 
-    addChildComponent (verticalScrollBar   = createScrollBarComponent (true));
-    addChildComponent (horizontalScrollBar = createScrollBarComponent (false));
+    verticalScrollBar  .reset (createScrollBarComponent (true));
+    horizontalScrollBar.reset (createScrollBarComponent (false));
+
+    addChildComponent (verticalScrollBar.get());
+    addChildComponent (horizontalScrollBar.get());
 
     getVerticalScrollBar().addListener (this);
     getHorizontalScrollBar().addListener (this);
@@ -125,7 +128,6 @@ Point<int> Viewport::viewportPosToCompPos (Point<int> pos) const
 
     Point<int> p (jmax (jmin (0, contentHolder.getWidth()  - contentBounds.getWidth()),  jmin (0, -(pos.x))),
                   jmax (jmin (0, contentHolder.getHeight() - contentBounds.getHeight()), jmin (0, -(pos.y))));
-
 
     return p.transformedBy (contentComp->getTransform().inverted());
 }
@@ -289,7 +291,7 @@ void Viewport::setScrollOnDragEnabled (bool shouldScrollOnDrag)
     if (isScrollOnDragEnabled() != shouldScrollOnDrag)
     {
         if (shouldScrollOnDrag)
-            dragToScrollListener = new DragToScrollListener (*this);
+            dragToScrollListener.reset (new DragToScrollListener (*this));
         else
             dragToScrollListener.reset();
     }
@@ -488,13 +490,13 @@ int Viewport::getScrollBarThickness() const
 
 void Viewport::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart)
 {
-    const int newRangeStartInt = roundToInt (newRangeStart);
+    auto newRangeStartInt = roundToInt (newRangeStart);
 
-    if (scrollBarThatHasMoved == horizontalScrollBar)
+    if (scrollBarThatHasMoved == horizontalScrollBar.get())
     {
         setViewPosition (newRangeStartInt, getViewPositionY());
     }
-    else if (scrollBarThatHasMoved == verticalScrollBar)
+    else if (scrollBarThatHasMoved == verticalScrollBar.get())
     {
         setViewPosition (getViewPositionX(), newRangeStartInt);
     }

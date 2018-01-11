@@ -1587,7 +1587,7 @@ struct SavedState  : public RenderingHelpers::SavedStateBase<SavedState>
     SavedState (const SavedState& other)
         : BaseClass (other), font (other.font), state (other.state),
           transparencyLayer (other.transparencyLayer),
-          previousTarget (other.previousTarget.createCopy())
+          previousTarget (createCopyIfNotNull (other.previousTarget.get()))
     {}
 
     SavedState* beginTransparencyLayer (float opacity)
@@ -1600,7 +1600,7 @@ struct SavedState  : public RenderingHelpers::SavedStateBase<SavedState>
 
             state->flush();
             s->transparencyLayer = Image (OpenGLImageType().create (Image::ARGB, clipBounds.getWidth(), clipBounds.getHeight(), true));
-            s->previousTarget = new Target (state->target);
+            s->previousTarget.reset (new Target (state->target));
             state->target = Target (state->target.context, *OpenGLImageType::getFrameBufferFrom (s->transparencyLayer), clipBounds.getPosition());
             s->transparencyLayerAlpha = opacity;
             s->cloneClipIfMultiplyReferenced();

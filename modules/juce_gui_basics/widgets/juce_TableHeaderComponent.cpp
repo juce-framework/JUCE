@@ -695,7 +695,8 @@ void TableHeaderComponent::beginDrag (const MouseEvent& e)
             auto temp = columnIdBeingDragged;
             columnIdBeingDragged = 0;
 
-            addAndMakeVisible (dragOverlayComp = new DragOverlayComp (createComponentSnapshot (columnRect, false)));
+            dragOverlayComp.reset (new DragOverlayComp (createComponentSnapshot (columnRect, false)));
+            addAndMakeVisible (dragOverlayComp.get());
             columnIdBeingDragged = temp;
 
             dragOverlayComp->setBounds (columnRect);

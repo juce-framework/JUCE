@@ -106,7 +106,7 @@ private:
     ScopedPointer<AudioProcessor> audioProcessor;
     ScopedJuceInitialiser_GUI libraryInitialiser;
 
-    JuceAudioProcessor() JUCE_DELETED_FUNCTION;
+    JuceAudioProcessor() = delete;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceAudioProcessor)
 };
 

@@ -341,9 +341,9 @@ void CoreGraphicsContext::restoreState()
 {
     CGContextRestoreGState (context);
 
-    if (SavedState* const top = stateStack.getLast())
+    if (auto* top = stateStack.getLast())
     {
-        state = top;
+        state.reset (top);
         stateStack.removeLast (1, false);
         lastClipRectIsValid = false;
     }

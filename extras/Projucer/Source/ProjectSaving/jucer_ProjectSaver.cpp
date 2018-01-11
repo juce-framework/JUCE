@@ -60,7 +60,7 @@ namespace
 
     inline String toCharLiteral (const String& v)
     {
-        auto fourCharCode = v.trim().substring (0, 4);
+        auto fourCharCode = v.substring (0, 4);
         uint32 hexRepresentation = 0;
 
         for (int i = 0; i < 4; ++i)

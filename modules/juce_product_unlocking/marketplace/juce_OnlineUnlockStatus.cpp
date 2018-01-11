@@ -123,7 +123,7 @@ struct KeyFileUtils
             const MemoryBlock mb (val.toMemoryBlock());
 
             if (CharPointer_UTF8::isValidString (static_cast<const char*> (mb.getData()), (int) mb.getSize()))
-                xml = XmlDocument::parse (mb.toString());
+                xml.reset (XmlDocument::parse (mb.toString()));
         }
 
         return xml != nullptr ? *xml : XmlElement("key");

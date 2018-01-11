@@ -642,72 +642,116 @@ Image createSnapshotOfNativeWindow (void* nativeWindowHandle)
 //==============================================================================
 namespace IconConverters
 {
-    Image createImageFromHBITMAP (HBITMAP bitmap)
-    {
-        Image im;
-
-        if (bitmap != 0)
-        {
-            BITMAP bm;
-
-            if (GetObject (bitmap, sizeof (BITMAP), &bm)
-                 && bm.bmWidth > 0 && bm.bmHeight > 0)
-            {
-                auto tempDC = GetDC (0);
-                auto dc = CreateCompatibleDC (tempDC);
-                ReleaseDC (0, tempDC);
-
-                SelectObject (dc, bitmap);
-
-                im = Image (Image::ARGB, bm.bmWidth, bm.bmHeight, true);
-                Image::BitmapData imageData (im, Image::BitmapData::writeOnly);
-
-                for (int y = bm.bmHeight; --y >= 0;)
-                {
-                    for (int x = bm.bmWidth; --x >= 0;)
-                    {
-                        auto col = GetPixel (dc, x, y);
-
-                        imageData.setPixelColour (x, y, Colour ((uint8) GetRValue (col),
-                                                                (uint8) GetGValue (col),
-                                                                (uint8) GetBValue (col)));
-                    }
-                }
-
-                DeleteDC (dc);
-            }
-        }
-
-        return im;
-    }
-
     Image createImageFromHICON (HICON icon)
     {
-        ICONINFO info;
+        if (icon == nullptr)
+            return {};
 
-        if (GetIconInfo (icon, &info))
+        struct ScopedICONINFO   : public ICONINFO
         {
-            auto mask  = createImageFromHBITMAP (info.hbmMask);
-            auto image = createImageFromHBITMAP (info.hbmColor);
-
-            if (mask.isValid() && image.isValid())
+            ScopedICONINFO()
             {
-                for (int y = image.getHeight(); --y >= 0;)
-                {
-                    for (int x = image.getWidth(); --x >= 0;)
-                    {
-                        auto brightness = mask.getPixelAt (x, y).getBrightness();
+                hbmColor = nullptr;
+                hbmMask = nullptr;
+            }
 
-                        if (brightness > 0.0f)
-                            image.multiplyAlphaAt (x, y, 1.0f - brightness);
-                    }
+            ~ScopedICONINFO()
+            {
+                if (hbmColor != nullptr)
+                    ::DeleteObject (hbmColor);
+
+                if (hbmMask != nullptr)
+                    ::DeleteObject (hbmMask);
+            }
+        };
+
+        ScopedICONINFO info;
+
+        if (! SUCCEEDED (::GetIconInfo (icon, &info)))
+            return {};
+
+        BITMAP bm;
+
+        if (! (::GetObject (info.hbmColor, sizeof (BITMAP), &bm)
+               && bm.bmWidth > 0 && bm.bmHeight > 0))
+            return {};
+
+        if (auto* tempDC = ::GetDC (nullptr))
+        {
+            if (auto* dc = ::CreateCompatibleDC (tempDC))
+            {
+                BITMAPV5HEADER header = { 0 };
+                header.bV5Size = sizeof (BITMAPV5HEADER);
+                header.bV5Width = bm.bmWidth;
+                header.bV5Height = -bm.bmHeight;
+                header.bV5Planes = 1;
+                header.bV5Compression = BI_RGB;
+                header.bV5BitCount = 32;
+                header.bV5RedMask = 0x00FF0000;
+                header.bV5GreenMask = 0x0000FF00;
+                header.bV5BlueMask = 0x000000FF;
+                header.bV5AlphaMask = 0xFF000000;
+                header.bV5CSType = LCS_WINDOWS_COLOR_SPACE;
+                header.bV5Intent = LCS_GM_IMAGES;
+
+                uint32* bitmapImageData = nullptr;
+
+                if (auto* dib = ::CreateDIBSection (tempDC, (BITMAPINFO*) &header, DIB_RGB_COLORS,
+                                                    (void**) &bitmapImageData, nullptr, 0))
+                {
+                    auto oldObject = ::SelectObject (dc, dib);
+
+                    auto numPixels = bm.bmWidth * bm.bmHeight;
+                    auto numColourComponents = numPixels * 4;
+
+                    // Windows icon data comes as two layers, an XOR mask which contains the bulk
+                    // of the image data and an AND mask which provides the transparency. Annoyingly
+                    // the XOR mask can also contain an alpha channel, in which case the transparency
+                    // mask should not be applied, but there's no way to find out a priori if the XOR
+                    // mask contains an alpha channel.
+
+                    HeapBlock<bool> opacityMask (numPixels);
+                    memset (bitmapImageData, 0, numColourComponents);
+                    ::DrawIconEx (dc, 0, 0, icon, bm.bmWidth, bm.bmHeight, 0, nullptr, DI_MASK);
+
+                    for (int i = 0; i < numPixels; ++i)
+                        opacityMask[i] = (bitmapImageData[i] == 0);
+
+                    Image result = Image (Image::ARGB, bm.bmWidth, bm.bmHeight, true);
+                    Image::BitmapData imageData (result, Image::BitmapData::readWrite);
+
+                    memset (bitmapImageData, 0, numColourComponents);
+                    ::DrawIconEx (dc, 0, 0, icon, bm.bmWidth, bm.bmHeight, 0, nullptr, DI_NORMAL);
+                    memcpy (imageData.data, bitmapImageData, numColourComponents);
+
+                    auto imageHasAlphaChannel = [&imageData, numPixels]()
+                    {
+                        for (int i = 0; i < numPixels; ++i)
+                            if (imageData.data[i * 4] != 0)
+                                return true;
+
+                        return false;
+                    };
+
+                    if (! imageHasAlphaChannel())
+                        for (int i = 0; i < numPixels; ++i)
+                            imageData.data[i * 4] = opacityMask[i] ? 0xff : 0x00;
+
+                    ::SelectObject (dc, oldObject);
+                    ::DeleteObject(dib);
+                    ::DeleteDC (dc);
+                    ::ReleaseDC (nullptr, tempDC);
+
+                    return result;
                 }
 
-                return image;
+                ::DeleteDC (dc);
             }
+
+            ::ReleaseDC (nullptr, tempDC);
         }
 
-        return Image();
+        return {};
     }
 
     HICON createHICONFromImage (const Image& image, const BOOL isIcon, int hotspotX, int hotspotY)

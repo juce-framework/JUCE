@@ -2661,10 +2661,10 @@ public:
 
     void initialise (StateObjectType* state)
     {
-        currentState = state;
+        currentState.reset (state);
     }
 
-    inline StateObjectType* operator->() const noexcept     { return currentState; }
+    inline StateObjectType* operator->() const noexcept     { return currentState.get(); }
     inline StateObjectType& operator*()  const noexcept     { return *currentState; }
 
     void save()
@@ -2676,7 +2676,7 @@ public:
     {
         if (auto* top = stack.getLast())
         {
-            currentState = top;
+            currentState.reset (top);
             stack.removeLast (1, false);
         }
         else
@@ -2688,12 +2688,12 @@ public:
     void beginTransparencyLayer (float opacity)
     {
         save();
-        currentState = currentState->beginTransparencyLayer (opacity);
+        currentState.reset (currentState->beginTransparencyLayer (opacity));
     }
 
     void endTransparencyLayer()
     {
-        const ScopedPointer<StateObjectType> finishedTransparencyLayer (currentState);
+        ScopedPointer<StateObjectType> finishedTransparencyLayer (currentState.release());
         restore();
         currentState->endTransparencyLayer (*finishedTransparencyLayer);
     }

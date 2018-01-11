@@ -455,7 +455,7 @@ public:
         int index;
 
         // using the copy constructor is ok, but you cannot assign iterators
-        Iterator& operator= (const Iterator&) JUCE_DELETED_FUNCTION;
+        Iterator& operator= (const Iterator&) = delete;
 
         JUCE_LEAK_DETECTOR (Iterator)
     };

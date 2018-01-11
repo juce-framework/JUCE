@@ -129,7 +129,7 @@ public:
     JUCE_CONSTEXPR static bool isBigEndian() noexcept;
 
 private:
-    ByteOrder() JUCE_DELETED_FUNCTION;
+    ByteOrder() = delete;
 
     JUCE_DECLARE_NON_COPYABLE (ByteOrder)
 };

@@ -243,7 +243,8 @@ private:
 //==============================================================================
 Toolbar::Toolbar()
 {
-    addChildComponent (missingItemsButton = getLookAndFeel().createToolbarMissingItemsButton (*this));
+    missingItemsButton.reset (getLookAndFeel().createToolbarMissingItemsButton (*this));
+    addChildComponent (missingItemsButton.get());
 
     missingItemsButton->setAlwaysOnTop (true);
     missingItemsButton->onClick = [this] { showMissingItems(); };
@@ -353,7 +354,7 @@ int Toolbar::getItemId (const int itemIndex) const noexcept
 
 ToolbarItemComponent* Toolbar::getItemComponent (const int itemIndex) const noexcept
 {
-    return items [itemIndex];
+    return items[itemIndex];
 }
 
 ToolbarItemComponent* Toolbar::getNextActiveComponent (int index, const int delta) const
@@ -542,7 +543,7 @@ void Toolbar::showMissingItems()
     {
         PopupMenu m;
         m.addCustomItem (1, new MissingItemsComponent (*this, getThickness()));
-        m.showMenuAsync (PopupMenu::Options().withTargetComponent (missingItemsButton), nullptr);
+        m.showMenuAsync (PopupMenu::Options().withTargetComponent (missingItemsButton.get()), nullptr);
     }
 }
 

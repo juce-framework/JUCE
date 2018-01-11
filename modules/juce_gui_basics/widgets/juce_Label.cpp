@@ -206,7 +206,8 @@ void Label::showEditor()
 {
     if (editor == nullptr)
     {
-        addAndMakeVisible (editor = createEditorComponent());
+        editor.reset (createEditorComponent());
+        addAndMakeVisible (editor.get());
         editor->setText (getText(), false);
         editor->setKeyboardType (keyboardType);
         editor->addListener (this);
@@ -220,7 +221,7 @@ void Label::showEditor()
         resized();
         repaint();
 
-        editorShown (editor);
+        editorShown (editor.get());
 
         enterModalState (false);
         editor->grabKeyboardFocus();
@@ -253,9 +254,10 @@ void Label::hideEditor (bool discardCurrentEditorContents)
     if (editor != nullptr)
     {
         WeakReference<Component> deletionChecker (this);
-        ScopedPointer<TextEditor> outgoingEditor (editor);
+        ScopedPointer<TextEditor> outgoingEditor;
+        std::swap (outgoingEditor, editor);
 
-        editorAboutToBeHidden (outgoingEditor);
+        editorAboutToBeHidden (outgoingEditor.get());
 
         const bool changed = (! discardCurrentEditorContents)
                                && updateFromTextEditorContents (*outgoingEditor);
@@ -310,7 +312,7 @@ TextEditor* Label::createEditorComponent()
 
 TextEditor* Label::getCurrentTextEditor() const noexcept
 {
-    return editor;
+    return editor.get();
 }
 
 //==============================================================================
@@ -409,7 +411,7 @@ void Label::textEditorTextChanged (TextEditor& ed)
 {
     if (editor != nullptr)
     {
-        jassert (&ed == editor);
+        jassert (&ed == editor.get());
 
         if (! (hasKeyboardFocus (true) || isCurrentlyBlockedByAnotherModalComponent()))
         {
@@ -425,7 +427,7 @@ void Label::textEditorReturnKeyPressed (TextEditor& ed)
 {
     if (editor != nullptr)
     {
-        jassert (&ed == editor);
+        jassert (&ed == editor.get());
 
         WeakReference<Component> deletionChecker (this);
         bool changed = updateFromTextEditorContents (ed);
@@ -445,7 +447,7 @@ void Label::textEditorEscapeKeyPressed (TextEditor& ed)
 {
     if (editor != nullptr)
     {
-        jassert (&ed == editor);
+        jassert (&ed == editor.get());
         ignoreUnused (ed);
 
         editor->setText (textValue.toString(), false);

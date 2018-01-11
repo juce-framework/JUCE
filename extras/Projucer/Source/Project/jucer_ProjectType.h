@@ -94,7 +94,7 @@ public:
 
     private:
         //==============================================================================
-        Target& operator= (const Target&) JUCE_DELETED_FUNCTION;
+        Target& operator= (const Target&) = delete;
     };
 
     virtual bool supportsTargetType (Target::Type /*targetType*/) const     { return false; }

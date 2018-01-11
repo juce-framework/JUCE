@@ -118,9 +118,11 @@ URL::DownloadTask* URL::DownloadTask::createFallbackDownloader (const URL& urlTo
     const size_t bufferSize = 0x8000;
     targetFileToUse.deleteFile();
 
-    if (ScopedPointer<FileOutputStream> outputStream = targetFileToUse.createOutputStream (bufferSize))
+    ScopedPointer<FileOutputStream> outputStream (targetFileToUse.createOutputStream (bufferSize));
+
+    if (outputStream != nullptr)
     {
-        ScopedPointer<WebInputStream> stream = new WebInputStream (urlToUse, usePostRequest);
+        ScopedPointer<WebInputStream> stream (new WebInputStream (urlToUse, usePostRequest));
         stream->withExtraHeaders (extraHeadersToUse);
 
         if (stream->connect (nullptr))
@@ -650,10 +652,9 @@ InputStream* URL::createInputStream (const bool usePostCommand,
 
     ScopedPointer<WebInputStream> wi (new WebInputStream (*this, usePostCommand));
 
-    struct ProgressCallbackCaller : WebInputStream::Listener
+    struct ProgressCallbackCaller  : public WebInputStream::Listener
     {
-        ProgressCallbackCaller (OpenStreamProgressCallback* const progressCallbackToUse,
-                                void* const progressCallbackContextToUse)
+        ProgressCallbackCaller (OpenStreamProgressCallback* progressCallbackToUse, void* progressCallbackContextToUse)
             : callback (progressCallbackToUse), data (progressCallbackContextToUse)
         {}
 
@@ -670,7 +671,7 @@ InputStream* URL::createInputStream (const bool usePostCommand,
         ProgressCallbackCaller& operator= (const ProgressCallbackCaller&) { jassertfalse; return *this; }
     };
 
-    ScopedPointer<ProgressCallbackCaller> callbackCaller =
+    ScopedPointer<ProgressCallbackCaller> callbackCaller
         (progressCallback != nullptr ? new ProgressCallbackCaller (progressCallback, progressCallbackContext) : nullptr);
 
     if (headers.isNotEmpty())
@@ -686,7 +687,7 @@ InputStream* URL::createInputStream (const bool usePostCommand,
 
     wi->withNumRedirectsToFollow (numRedirectsToFollow);
 
-    bool success = wi->connect (callbackCaller);
+    bool success = wi->connect (callbackCaller.get());
 
     if (statusCode != nullptr)
         *statusCode = wi->getStatusCode();

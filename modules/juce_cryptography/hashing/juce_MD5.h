@@ -111,7 +111,7 @@ private:
 
     // This private constructor is declared here to prevent you accidentally passing a
     // String and having it unexpectedly call the constructor that takes a File.
-    explicit MD5 (const String&) JUCE_DELETED_FUNCTION;
+    explicit MD5 (const String&) = delete;
 
     JUCE_LEAK_DETECTOR (MD5)
 };

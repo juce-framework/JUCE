@@ -897,14 +897,14 @@ struct DescriptionFactory
 
                 if (pf2.loadFrom (factory))
                 {
-                    info2 = new PClassInfo2();
-                    pf2->getClassInfo2 (i, info2);
+                    info2.reset (new PClassInfo2());
+                    pf2->getClassInfo2 (i, info2.get());
                 }
 
                 if (pf3.loadFrom (factory))
                 {
-                    infoW = new PClassInfoW();
-                    pf3->getClassInfoUnicode (i, infoW);
+                    infoW.reset (new PClassInfoW());
+                    pf3->getClassInfoUnicode (i, infoW.get());
                 }
             }
 
@@ -923,7 +923,7 @@ struct DescriptionFactory
                         auto numOutputs = getNumSingleDirectionChannelsFor (component, false, true);
 
                         createPluginDescription (desc, file, companyName, name,
-                                                 info, info2, infoW, numInputs, numOutputs);
+                                                 info, info2.get(), infoW.get(), numInputs, numOutputs);
 
                         component->terminate();
                     }
@@ -1246,7 +1246,7 @@ private:
     //==============================================================================
     bool open (const File& f, const PluginDescription& description)
     {
-        dllHandle = new DLLHandle (f.getFullPathName());
+        dllHandle.reset (new DLLHandle (f.getFullPathName()));
 
         ComSmartPtr<IPluginFactory> pluginFactory (dllHandle->getPluginFactory());
 
@@ -1572,23 +1572,23 @@ struct VST3ComponentHolder
 
             if (pf2.loadFrom (factory))
             {
-                info2 = new PClassInfo2();
-                pf2->getClassInfo2 (classIdx, info2);
+                info2.reset (new PClassInfo2());
+                pf2->getClassInfo2 (classIdx, info2.get());
             }
             else
             {
-                info2 = nullptr;
+                info2.reset();
             }
 
             if (pf3.loadFrom (factory))
             {
                 pf3->setHostContext (host->getFUnknown());
-                infoW = new PClassInfoW();
-                pf3->getClassInfoUnicode (classIdx, infoW);
+                infoW.reset (new PClassInfoW());
+                pf3->getClassInfoUnicode (classIdx, infoW.get());
             }
             else
             {
-                infoW = nullptr;
+                infoW.reset();
             }
 
             Vst::BusInfo bus;
@@ -1606,7 +1606,7 @@ struct VST3ComponentHolder
 
             createPluginDescription (description, module->file,
                                      factoryInfo.vendor, module->name,
-                                     info, info2, infoW,
+                                     info, info2.get(), infoW.get(),
                                      totalNumInputChannels,
                                      totalNumOutputChannels);
 
@@ -2784,14 +2784,14 @@ void VST3PluginFormat::createPluginInstance (const PluginDescription& descriptio
 
         if (const VST3Classes::VST3ModuleHandle::Ptr module = VST3Classes::VST3ModuleHandle::findOrCreateModule (file, description))
         {
-            ScopedPointer<VST3Classes::VST3ComponentHolder> holder = new VST3Classes::VST3ComponentHolder (module);
+            ScopedPointer<VST3Classes::VST3ComponentHolder> holder (new VST3Classes::VST3ComponentHolder (module));
 
             if (holder->initialise())
             {
-                result = new VST3Classes::VST3PluginInstance (holder.release());
+                result.reset (new VST3Classes::VST3PluginInstance (holder.release()));
 
                 if (! result->initialise())
-                    result = nullptr;
+                    result.reset();
             }
         }
 

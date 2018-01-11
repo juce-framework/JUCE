@@ -128,7 +128,8 @@ struct ZipFile::ZipInputStream  : public InputStream
     {
         if (zf.inputSource != nullptr)
         {
-            inputStream = streamToDelete = file.inputSource->createInputStream();
+            streamToDelete.reset (file.inputSource->createInputStream());
+            inputStream = streamToDelete.get();
         }
         else
         {
@@ -223,7 +224,7 @@ ZipFile::ZipFile (InputStream* stream, bool deleteStreamWhenDestroyed)
    : inputStream (stream)
 {
     if (deleteStreamWhenDestroyed)
-        streamToDelete = inputStream;
+        streamToDelete.reset (inputStream);
 
     init();
 }
@@ -339,7 +340,7 @@ void ZipFile::init()
     if (inputSource != nullptr)
     {
         in = inputSource->createInputStream();
-        toDelete = in;
+        toDelete.reset (in);
     }
 
     if (in != nullptr)
@@ -516,7 +517,7 @@ private:
     {
         if (stream == nullptr)
         {
-            stream = file.createInputStream();
+            stream.reset (file.createInputStream());
 
             if (stream == nullptr)
                 return false;

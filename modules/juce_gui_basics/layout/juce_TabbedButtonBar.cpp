@@ -145,13 +145,14 @@ void TabBarButton::setExtraComponent (Component* comp, ExtraComponentPlacement p
 {
     jassert (extraCompPlacement == beforeText || extraCompPlacement == afterText);
     extraCompPlacement = placement;
-    addAndMakeVisible (extraComponent = comp);
+    extraComponent.reset (comp);
+    addAndMakeVisible (extraComponent.get());
     resized();
 }
 
 void TabBarButton::childBoundsChanged (Component* c)
 {
-    if (c == extraComponent)
+    if (c == extraComponent.get())
     {
         owner.resized();
         resized();
@@ -200,7 +201,8 @@ TabbedButtonBar::TabbedButtonBar (Orientation orientationToUse)
     : orientation (orientationToUse)
 {
     setInterceptsMouseClicks (false, true);
-    addAndMakeVisible (behindFrontTab = new BehindFrontTabComp (*this));
+    behindFrontTab.reset (new BehindFrontTabComp (*this));
+    addAndMakeVisible (behindFrontTab.get());
     setFocusContainer (true);
 }
 
@@ -256,12 +258,12 @@ void TabbedButtonBar::addTab (const String& tabName,
         auto* newTab = new TabInfo();
         newTab->name = tabName;
         newTab->colour = tabBackgroundColour;
-        newTab->button = createTabButton (tabName, insertIndex);
+        newTab->button.reset (createTabButton (tabName, insertIndex));
         jassert (newTab->button != nullptr);
 
         tabs.insert (insertIndex, newTab);
         currentTabIndex = tabs.indexOf (currentTab);
-        addAndMakeVisible (newTab->button, insertIndex);
+        addAndMakeVisible (newTab->button.get(), insertIndex);
 
         resized();
 
@@ -356,7 +358,7 @@ void TabbedButtonBar::setCurrentTabIndex (int newIndex, bool shouldSendChangeMes
 TabBarButton* TabbedButtonBar::getTabButton (const int index) const
 {
     if (auto* tab = tabs[index])
-        return static_cast<TabBarButton*> (tab->button);
+        return static_cast<TabBarButton*> (tab->button.get());
 
     return nullptr;
 }
@@ -364,7 +366,7 @@ TabBarButton* TabbedButtonBar::getTabButton (const int index) const
 int TabbedButtonBar::indexOfTabButton (const TabBarButton* button) const
 {
     for (int i = tabs.size(); --i >= 0;)
-        if (tabs.getUnchecked(i)->button == button)
+        if (tabs.getUnchecked(i)->button.get() == button)
             return i;
 
     return -1;
@@ -433,7 +435,8 @@ void TabbedButtonBar::updateTabPositions (bool animate)
     {
         if (extraTabsButton == nullptr)
         {
-            addAndMakeVisible (extraTabsButton = lf.createTabBarExtrasButton());
+            extraTabsButton.reset (lf.createTabBarExtrasButton());
+            addAndMakeVisible (extraTabsButton.get());
             extraTabsButton->setAlwaysOnTop (true);
             extraTabsButton->setTriggeredOnMouseDown (true);
             extraTabsButton->onClick = [this] { showExtraItemsMenu(); };
@@ -567,7 +570,7 @@ void TabbedButtonBar::showExtraItemsMenu()
             m.addItem (i + 1, tab->name, true, i == currentTabIndex);
     }
 
-    m.showMenuAsync (PopupMenu::Options().withTargetComponent (extraTabsButton),
+    m.showMenuAsync (PopupMenu::Options().withTargetComponent (extraTabsButton.get()),
                      ModalCallbackFunction::forComponent (extraItemsMenuCallback, this));
 }
 

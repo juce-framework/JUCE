@@ -102,7 +102,7 @@ public:
             menuBarItemsChanged (nullptr);
         }
 
-        extraAppleMenuItems = createCopyIfNotNull (newExtraAppleMenuItems);
+        extraAppleMenuItems.reset (createCopyIfNotNull (newExtraAppleMenuItems));
     }
 
     void addTopLevelMenu (NSMenu* parent, const PopupMenu& child, const String& name, int menuId, int topLevelIndex)
@@ -249,7 +249,7 @@ public:
             if (i.text == recentItemsMenuName)
             {
                 if (recent == nullptr)
-                    recent = new RecentFilesMenuItem();
+                    recent.reset (new RecentFilesMenuItem());
 
                 if (recent->recentItem != nil)
                 {
@@ -573,7 +573,7 @@ public:
         : oldMenu (MenuBarModel::getMacMainMenu())
     {
         if (auto* appleMenu = MenuBarModel::getMacExtraAppleItemsMenu())
-            oldAppleMenu = new PopupMenu (*appleMenu);
+            oldAppleMenu.reset (new PopupMenu (*appleMenu));
 
         if (auto* handler = JuceMainMenuHandler::instance)
             oldRecentItems = handler->recentItemsMenuName;
@@ -612,7 +612,7 @@ public:
 
     ~TemporaryMainMenuWithStandardCommands()
     {
-        MenuBarModel::setMacMainMenu (oldMenu, oldAppleMenu, oldRecentItems);
+        MenuBarModel::setMacMainMenu (oldMenu, oldAppleMenu.get(), oldRecentItems);
     }
 
 private:

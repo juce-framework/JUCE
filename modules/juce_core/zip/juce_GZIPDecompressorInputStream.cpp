@@ -286,7 +286,7 @@ bool GZIPDecompressorInputStream::setPosition (int64 newPos)
         isEof = false;
         activeBufferSize = 0;
         currentPos = 0;
-        helper = new GZIPDecompressHelper (format);
+        helper.reset (new GZIPDecompressHelper (format));
 
         sourceStream->setPosition (originalSourcePos);
     }

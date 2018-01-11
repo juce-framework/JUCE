@@ -156,7 +156,7 @@ bool FileChooser::showDialog (const int flags, FilePreviewComponent* const previ
 {
     FocusRestorer focusRestorer;
 
-    pimpl = createPimpl (flags, previewComp);
+    pimpl.reset (createPimpl (flags, previewComp));
     pimpl->runModally();
 
     // ensure that the finished function was invoked
@@ -177,7 +177,7 @@ void FileChooser::launchAsync (int flags, std::function<void (const FileChooser&
 
     asyncCallback = static_cast<std::function<void (const FileChooser&)>&&> (callback);
 
-    pimpl = createPimpl (flags, previewComp);
+    pimpl.reset (createPimpl (flags, previewComp));
     pimpl->launch();
 }
 
@@ -194,9 +194,9 @@ FileChooser::Pimpl* FileChooser::createPimpl (int flags, FilePreviewComponent* p
     {
         // you cannot run two file chooser dialog boxes at the same time
         jassertfalse;
-
-        pimpl = nullptr;
+        pimpl.reset();
     }
+
     // You've set the flags for both saveMode and openMode!
     jassert (! (((flags & FileBrowserComponent::saveMode) != 0)
                 && ((flags & FileBrowserComponent::openMode) != 0)));
@@ -256,7 +256,7 @@ void FileChooser::finished (const Array<URL>& asyncResults)
 
      results = asyncResults;
 
-     pimpl = nullptr;
+     pimpl.reset();
 
      if (callback)
          callback (*this);

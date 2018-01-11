@@ -37,7 +37,7 @@ bool InterprocessConnectionServer::beginWaitingForSocket (const int portNumber, 
 {
     stop();
 
-    socket = new StreamingSocket();
+    socket.reset (new StreamingSocket());
 
     if (socket->createListener (portNumber, bindAddress))
     {

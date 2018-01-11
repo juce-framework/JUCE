@@ -234,7 +234,7 @@ public:
 
 
     /** Returns the currently-active audio device. */
-    AudioIODevice* getCurrentAudioDevice() const noexcept               { return currentAudioDevice; }
+    AudioIODevice* getCurrentAudioDevice() const noexcept               { return currentAudioDevice.get(); }
 
     /** Returns the type of audio device currently in use.
         @see setCurrentAudioDeviceType
@@ -372,7 +372,7 @@ public:
         If no device has been selected, or the device can't be opened, this will return nullptr.
         @see getDefaultMidiOutputName
     */
-    MidiOutput* getDefaultMidiOutput() const noexcept               { return defaultMidiOutput; }
+    MidiOutput* getDefaultMidiOutput() const noexcept               { return defaultMidiOutput.get(); }
 
     /** Returns a list of the types of device supported. */
     const OwnedArray<AudioIODeviceType>& getAvailableDeviceTypes();
@@ -453,11 +453,11 @@ private:
     AudioDeviceSetup currentSetup;
     ScopedPointer<AudioIODevice> currentAudioDevice;
     Array<AudioIODeviceCallback*> callbacks;
-    int numInputChansNeeded, numOutputChansNeeded;
+    int numInputChansNeeded = 0, numOutputChansNeeded = 2;
     String currentDeviceType;
     BigInteger inputChannels, outputChannels;
     ScopedPointer<XmlElement> lastExplicitSettings;
-    mutable bool listNeedsScanning;
+    mutable bool listNeedsScanning = true;
     AudioBuffer<float> tempBuffer;
 
     struct MidiCallbackInfo
@@ -475,10 +475,10 @@ private:
     CriticalSection audioCallbackLock, midiCallbackLock;
 
     ScopedPointer<AudioBuffer<float>> testSound;
-    int testSoundPosition;
+    int testSoundPosition = 0;
 
-    double cpuUsageMs, timeToCpuScale, msPerBlock;
-    int xruns;
+    double cpuUsageMs = 0, timeToCpuScale = 0, msPerBlock = 0;
+    int xruns = 0;
 
     struct LevelMeter
     {

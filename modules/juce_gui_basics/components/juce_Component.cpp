@@ -830,9 +830,9 @@ private:
 
 void Component::setCachedComponentImage (CachedComponentImage* newCachedImage)
 {
-    if (cachedImage != newCachedImage)
+    if (cachedImage.get() != newCachedImage)
     {
-        cachedImage = newCachedImage;
+        cachedImage.reset (newCachedImage);
         repaint();
     }
 }
@@ -848,7 +848,7 @@ void Component::setBufferedToImage (bool shouldBeBuffered)
     if (shouldBeBuffered)
     {
         if (cachedImage == nullptr)
-            cachedImage = new StandardCachedComponentImage (*this);
+            cachedImage.reset (new StandardCachedComponentImage (*this));
     }
     else
     {
@@ -1267,7 +1267,7 @@ void Component::setTransform (const AffineTransform& newTransform)
     else if (affineTransform == nullptr)
     {
         repaint();
-        affineTransform = new AffineTransform (newTransform);
+        affineTransform.reset (new AffineTransform (newTransform));
         repaint();
         sendMovedResizedMessages (false, false);
     }
@@ -2140,21 +2140,20 @@ void Component::copyAllExplicitColoursTo (Component& target) const
 }
 
 //==============================================================================
-Component::Positioner::Positioner (Component& c) noexcept
-    : component (c)
+Component::Positioner::Positioner (Component& c) noexcept  : component (c)
 {
 }
 
 Component::Positioner* Component::getPositioner() const noexcept
 {
-    return positioner;
+    return positioner.get();
 }
 
 void Component::setPositioner (Positioner* newPositioner)
 {
     // You can only assign a positioner to the component that it was created for!
     jassert (newPositioner == nullptr || this == &(newPositioner->getComponent()));
-    positioner = newPositioner;
+    positioner.reset (newPositioner);
 }
 
 //==============================================================================
@@ -2263,7 +2262,7 @@ void Component::addMouseListener (MouseListener* newListener,
     jassert ((newListener != this) || wantsEventsForAllNestedChildComponents);
 
     if (mouseListeners == nullptr)
-        mouseListeners = new MouseListenerList();
+        mouseListeners.reset (new MouseListenerList());
 
     mouseListeners->addListener (newListener, wantsEventsForAllNestedChildComponents);
 }
@@ -2775,7 +2774,9 @@ void Component::moveKeyboardFocusToSibling (bool moveToNext)
 
     if (parentComponent != nullptr)
     {
-        if (ScopedPointer<KeyboardFocusTraverser> traverser = createFocusTraverser())
+        ScopedPointer<KeyboardFocusTraverser> traverser (createFocusTraverser());
+
+        if (traverser != nullptr)
         {
             auto* nextComp = moveToNext ? traverser->getNextComponent (this)
                                         : traverser->getPreviousComponent (this);
@@ -2928,7 +2929,7 @@ Point<int> Component::getMouseXYRelative() const
 void Component::addKeyListener (KeyListener* newListener)
 {
     if (keyListeners == nullptr)
-        keyListeners = new Array<KeyListener*>();
+        keyListeners.reset (new Array<KeyListener*>());
 
     keyListeners->addIfNotAlreadyThere (newListener);
 }

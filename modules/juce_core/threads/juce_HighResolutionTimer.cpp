@@ -23,7 +23,7 @@
 namespace juce
 {
 
-HighResolutionTimer::HighResolutionTimer()                    { pimpl = new Pimpl (*this); }
+HighResolutionTimer::HighResolutionTimer()                    { pimpl.reset (new Pimpl (*this)); }
 HighResolutionTimer::~HighResolutionTimer()                   { stopTimer(); }
 
 void HighResolutionTimer::startTimer (int periodMs)           { pimpl->start (jmax (1, periodMs)); }

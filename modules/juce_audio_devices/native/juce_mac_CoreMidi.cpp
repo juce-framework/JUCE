@@ -511,15 +511,15 @@ MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
                     MIDIPortRef port;
                     ScopedPointer<MidiPortAndCallback> mpc (new MidiPortAndCallback (*callback));
 
-                    if (CHECK_ERROR (MIDIInputPortCreate (client, name.cfString, midiInputProc, mpc, &port)))
+                    if (CHECK_ERROR (MIDIInputPortCreate (client, name.cfString, midiInputProc, mpc.get(), &port)))
                     {
                         if (CHECK_ERROR (MIDIPortConnectSource (port, endPoint, nullptr)))
                         {
-                            mpc->portAndEndpoint = new MidiPortAndEndpoint (port, endPoint);
+                            mpc->portAndEndpoint.reset (new MidiPortAndEndpoint (port, endPoint));
 
                             newInput = new MidiInput (getDevices() [index]);
                             mpc->input = newInput;
-                            newInput->internal = mpc;
+                            newInput->internal = mpc.get();
 
                             const ScopedLock sl (callbackLock);
                             activeCallbacks.add (mpc.release());
@@ -553,15 +553,15 @@ MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallba
         ScopedCFString name;
         name.cfString = deviceName.toCFString();
 
-        if (CHECK_ERROR (MIDIDestinationCreate (client, name.cfString, midiInputProc, mpc, &endPoint)))
+        if (CHECK_ERROR (MIDIDestinationCreate (client, name.cfString, midiInputProc, mpc.get(), &endPoint)))
         {
             CoreMidiHelpers::setUniqueIdForMidiPort (endPoint, deviceName, true);
 
-            mpc->portAndEndpoint = new MidiPortAndEndpoint (0, endPoint);
+            mpc->portAndEndpoint.reset (new MidiPortAndEndpoint (0, endPoint));
 
             mi = new MidiInput (deviceName);
             mpc->input = mi;
-            mi->internal = mpc;
+            mi->internal = mpc.get();
 
             const ScopedLock sl (callbackLock);
             activeCallbacks.add (mpc.release());

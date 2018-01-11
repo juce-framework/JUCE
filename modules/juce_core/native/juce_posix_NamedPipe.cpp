@@ -198,15 +198,15 @@ void NamedPipe::close()
 bool NamedPipe::openInternal (const String& pipeName, const bool createPipe, bool mustNotExist)
 {
    #if JUCE_IOS
-    pimpl = new Pimpl (File::getSpecialLocation (File::tempDirectory)
-                         .getChildFile (File::createLegalFileName (pipeName)).getFullPathName(), createPipe);
+    pimpl.reset (new Pimpl (File::getSpecialLocation (File::tempDirectory)
+                             .getChildFile (File::createLegalFileName (pipeName)).getFullPathName(), createPipe));
    #else
     String file (pipeName);
 
     if (! File::isAbsolutePath (file))
         file = "/tmp/" + File::createLegalFileName (file);
 
-    pimpl = new Pimpl (file, createPipe);
+    pimpl.reset (new Pimpl (file, createPipe));
    #endif
 
     if (createPipe && ! pimpl->createFifos (mustNotExist))

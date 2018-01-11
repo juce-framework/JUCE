@@ -245,7 +245,7 @@ void ScrollBar::paint (Graphics& g)
 {
     if (thumbAreaSize > 0)
     {
-        LookAndFeel& lf = getLookAndFeel();
+        auto& lf = getLookAndFeel();
 
         const int thumb = (thumbAreaSize > lf.getMinimumScrollbarThumbSize (*this))
                              ? thumbSize : 0;
@@ -269,9 +269,9 @@ void ScrollBar::lookAndFeelChanged()
 
 void ScrollBar::resized()
 {
-    const int length = vertical ? getHeight() : getWidth();
+    auto length = vertical ? getHeight() : getWidth();
 
-    LookAndFeel& lf = getLookAndFeel();
+    auto& lf = getLookAndFeel();
     const bool buttonsVisible = lf.areScrollbarButtonsVisible();
     int buttonSize = 0;
 
@@ -279,8 +279,11 @@ void ScrollBar::resized()
     {
         if (upButton == nullptr)
         {
-            addAndMakeVisible (upButton   = new ScrollbarButton (vertical ? 0 : 3, *this));
-            addAndMakeVisible (downButton = new ScrollbarButton (vertical ? 2 : 1, *this));
+            upButton  .reset (new ScrollbarButton (vertical ? 0 : 3, *this));
+            downButton.reset (new ScrollbarButton (vertical ? 2 : 1, *this));
+
+            addAndMakeVisible (upButton.get());
+            addAndMakeVisible (downButton.get());
 
             setButtonRepeatSpeed (initialDelayInMillisecs, repeatDelayInMillisecs, minimumDelayInMillisecs);
         }

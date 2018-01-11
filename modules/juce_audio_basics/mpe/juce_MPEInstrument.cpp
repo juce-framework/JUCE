@@ -2133,7 +2133,7 @@ private:
         void noteReleased (MPENote finishedNote) override
         {
             noteReleasedCallCounter++;
-            lastNoteFinished = new MPENote (finishedNote);
+            lastNoteFinished.reset (new MPENote (finishedNote));
         }
     };
 

@@ -113,7 +113,6 @@ public:
     bool sendToIPAddress (const String& targetIPAddress, int targetPortNumber,
                           const OSCBundle& bundle);
 
-   #if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
     /** Creates a new OSC message with the specified address pattern and list
         of arguments, and sends it to the target.
 
@@ -136,7 +135,6 @@ public:
     template <typename... Args>
     bool sendToIPAddress (const String& targetIPAddress, int targetPortNumber,
                           const OSCAddressPattern& address, Args&&... args);
-   #endif
 
 private:
     //==============================================================================
@@ -150,19 +148,17 @@ private:
 
 
 //==============================================================================
-#if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
- template <typename... Args>
- bool OSCSender::send (const OSCAddressPattern& address, Args&&... args)
- {
-     return send (OSCMessage (address, std::forward<Args> (args)...));
- }
+template <typename... Args>
+bool OSCSender::send (const OSCAddressPattern& address, Args&&... args)
+{
+    return send (OSCMessage (address, std::forward<Args> (args)...));
+}
 
- template <typename... Args>
- bool OSCSender::sendToIPAddress (const String& targetIPAddress, int targetPortNumber,
-                                  const OSCAddressPattern& address, Args&&... args)
- {
-     return sendToIPAddress (targetIPAddress, targetPortNumber, OSCMessage (address, std::forward<Args> (args)...));
- }
-#endif // JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
+template <typename... Args>
+bool OSCSender::sendToIPAddress (const String& targetIPAddress, int targetPortNumber,
+                                 const OSCAddressPattern& address, Args&&... args)
+{
+    return sendToIPAddress (targetIPAddress, targetPortNumber, OSCMessage (address, std::forward<Args> (args)...));
+}
 
 } // namespace juce

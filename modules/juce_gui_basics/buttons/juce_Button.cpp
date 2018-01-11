@@ -79,7 +79,7 @@ Button::Button (const String& name)  : Component (name), text (name)
     callbackHelper.reset (new CallbackHelper (*this));
 
     setWantsKeyboardFocus (true);
-    isOn.addListener (callbackHelper);
+    isOn.addListener (callbackHelper.get());
 }
 
 Button::~Button()
@@ -87,9 +87,9 @@ Button::~Button()
     clearShortcuts();
 
     if (commandManagerToUse != nullptr)
-        commandManagerToUse->removeListener (callbackHelper);
+        commandManagerToUse->removeListener (callbackHelper.get());
 
-    isOn.removeListener (callbackHelper);
+    isOn.removeListener (callbackHelper.get());
     callbackHelper.reset();
 }
 
@@ -509,12 +509,12 @@ void Button::parentHierarchyChanged()
     if (newKeySource != keySource.get())
     {
         if (keySource != nullptr)
-            keySource->removeKeyListener (callbackHelper);
+            keySource->removeKeyListener (callbackHelper.get());
 
         keySource = newKeySource;
 
         if (keySource != nullptr)
-            keySource->addKeyListener (callbackHelper);
+            keySource->addKeyListener (callbackHelper.get());
     }
 }
 
@@ -528,12 +528,12 @@ void Button::setCommandToTrigger (ApplicationCommandManager* const newCommandMan
     if (commandManagerToUse != newCommandManager)
     {
         if (commandManagerToUse != nullptr)
-            commandManagerToUse->removeListener (callbackHelper);
+            commandManagerToUse->removeListener (callbackHelper.get());
 
         commandManagerToUse = newCommandManager;
 
         if (commandManagerToUse != nullptr)
-            commandManagerToUse->addListener (callbackHelper);
+            commandManagerToUse->addListener (callbackHelper.get());
 
         // if you've got clickTogglesState turned on, you shouldn't also connect the button
         // up to be a command invoker. Instead, your command handler must flip the state of whatever

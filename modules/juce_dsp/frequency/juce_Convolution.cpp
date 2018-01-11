@@ -1004,7 +1004,7 @@ private:
 //==============================================================================
 Convolution::Convolution()
 {
-    pimpl = new Pimpl();
+    pimpl.reset (new Pimpl());
     pimpl->addToFifo (Convolution::Pimpl::ChangeRequest::changeEngine, juce::var (0));
 }
 

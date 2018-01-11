@@ -191,8 +191,8 @@ namespace juce
     };@endcode
 */
 #define JUCE_DECLARE_NON_COPYABLE(className) \
-    className (const className&) JUCE_DELETED_FUNCTION;\
-    className& operator= (const className&) JUCE_DELETED_FUNCTION;
+    className (const className&) = delete;\
+    className& operator= (const className&) = delete;
 
 /** This is a shorthand way of writing both a JUCE_DECLARE_NON_COPYABLE and
     JUCE_LEAK_DETECTOR macro for a class.
@@ -206,8 +206,8 @@ namespace juce
 */
 #define JUCE_PREVENT_HEAP_ALLOCATION \
    private: \
-    static void* operator new (size_t) JUCE_DELETED_FUNCTION; \
-    static void operator delete (void*) JUCE_DELETED_FUNCTION;
+    static void* operator new (size_t) = delete; \
+    static void operator delete (void*) = delete;
 
 //==============================================================================
 #if JUCE_MSVC && ! defined (DOXYGEN)

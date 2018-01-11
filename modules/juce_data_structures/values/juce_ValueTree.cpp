@@ -982,7 +982,9 @@ ValueTree ValueTree::fromXml (const XmlElement& xml)
 
 String ValueTree::toXmlString() const
 {
-    if (ScopedPointer<XmlElement> xml = createXml())
+    ScopedPointer<XmlElement> xml (createXml());
+
+    if (xml != nullptr)
         return xml->createDocument ({});
 
     return {};
@@ -1142,7 +1144,7 @@ public:
 
             ScopedPointer<XmlElement> xml1 (v1.createXml());
             ScopedPointer<XmlElement> xml2 (v2.createCopy().createXml());
-            expect (xml1->isEquivalentTo (xml2, false));
+            expect (xml1->isEquivalentTo (xml2.get(), false));
 
             auto v4 = v2.createCopy();
             expect (v1.isEquivalentTo (v4));

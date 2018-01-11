@@ -78,7 +78,7 @@ public:
         delegate = [cls.createInstance() init];
         object_setInstanceVariable (delegate, "cppObject", this);
 
-        [panel setDelegate:delegate];
+        [panel setDelegate: delegate];
 
         filters.addTokens (owner.filters.replaceCharacters (",:", ";;"), ";", String());
         filters.trim();
@@ -137,7 +137,7 @@ public:
 
         if (panel != nil)
         {
-            [panel setDelegate:nil];
+            [panel setDelegate: nil];
 
             if (nsViewPreview != nil)
             {
@@ -150,9 +150,8 @@ public:
             }
 
             [panel close];
+            [panel release];
         }
-
-        panel = nullptr;
 
         if (delegate != nil)
         {
@@ -178,7 +177,7 @@ public:
         ScopedPointer<TemporaryMainMenuWithStandardCommands> tempMenu;
 
         if (JUCEApplicationBase::isStandaloneApp())
-            tempMenu = new TemporaryMainMenuWithStandardCommands();
+            tempMenu.reset (new TemporaryMainMenuWithStandardCommands());
 
         jassert (panel != nil);
        #if defined (MAC_OS_X_VERSION_10_6) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6)
@@ -292,7 +291,7 @@ private:
     NSView* nsViewPreview = nullptr;
     bool selectsDirectories, selectsFiles, isSave, selectMultiple;
 
-    ScopedPointer<NSSavePanel> panel;
+    NSSavePanel* panel;
     DelegateType* delegate;
 
     StringArray filters;

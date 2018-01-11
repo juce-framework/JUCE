@@ -514,7 +514,7 @@ private:
     };
 };
 
-MountedVolumeListChangeDetector::MountedVolumeListChangeDetector()  { pimpl = new Pimpl (*this); }
+MountedVolumeListChangeDetector::MountedVolumeListChangeDetector()  { pimpl.reset (new Pimpl (*this)); }
 MountedVolumeListChangeDetector::~MountedVolumeListChangeDetector() {}
 #endif
 
