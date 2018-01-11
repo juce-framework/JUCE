@@ -124,7 +124,7 @@
 
 //==============================================================================
 #if JUCE_ANDROID
- #define JUCE_ATOMIC_AVAILABLE 0
+ #define JUCE_ATOMIC_AVAILABLE 1
 #elif defined(_LIBCPP_VERSION)
  #define JUCE_ATOMIC_AVAILABLE (_LIBCPP_VERSION >= 3700)
 #elif defined (__GLIBCXX__)
