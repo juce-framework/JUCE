@@ -157,7 +157,9 @@ public:
 
     bool invalidate (const Rectangle<int>& area) override
     {
-        validArea.subtract (area * scale);
+        auto scaled = area.toFloat() * scale;
+
+        validArea.subtract (scaled.transformedBy (transform).getSmallestIntegerContainer());
         triggerRepaint();
         return false;
     }
