@@ -347,6 +347,14 @@ DECLARE_JNI_CLASS (AndroidBitmapConfig, "android/graphics/Bitmap$Config");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  STATICMETHOD (dumpReferenceTables, "dumpReferenceTables", "()V")
+
+  DECLARE_JNI_CLASS (AndroidDebug, "android/os/Debug");
+#undef JNI_CLASS_MEMBERS
+
+#define JUCE_LOG_JNI_REFERENCES_TABLE getEnv()->CallStaticVoidMethod (AndroidDebug, AndroidDebug.dumpReferenceTables);
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   STATICMETHOD (createChooser, "createChooser", "(Landroid/content/Intent;Ljava/lang/CharSequence;)Landroid/content/Intent;") \
   METHOD (addCategory,                    "addCategory",    "(Ljava/lang/String;)Landroid/content/Intent;") \
   METHOD (constructor,                    "<init>",         "()V") \
