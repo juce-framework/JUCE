@@ -171,8 +171,7 @@ private:
 };
 
 //==============================================================================
-class ConcertinaTreeComponent    : public Component,
-                                   private Button::Listener
+class ConcertinaTreeComponent    : public Component
 {
 public:
     ConcertinaTreeComponent (TreePanelBase* tree, bool hasAddButton = false,
@@ -182,13 +181,13 @@ public:
         if (hasAddButton)
         {
             addAndMakeVisible (addButton = new IconButton ("Add", &getIcons().plus));
-            addButton->addListener (this);
+            addButton->onClick = [this] { showAddMenu(); };
         }
 
         if (hasSettingsButton)
         {
             addAndMakeVisible (settingsButton = new IconButton ("Settings", &getIcons().settings));
-            settingsButton->addListener (this);
+            settingsButton->onClick = [this] { showSettings(); };
         }
 
         if (hasFindPanel)
@@ -235,14 +234,6 @@ private:
     ScopedPointer<TreePanelBase> treeToDisplay;
     ScopedPointer<IconButton> addButton, settingsButton;
     ScopedPointer<FindPanel> findPanel;
-
-    void buttonClicked (Button* b) override
-    {
-        if (b == addButton)
-            showAddMenu();
-        else if (b == settingsButton)
-            showSettings();
-    }
 
     void showAddMenu()
     {

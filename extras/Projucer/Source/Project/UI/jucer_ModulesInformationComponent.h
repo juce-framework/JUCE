@@ -30,8 +30,7 @@
 //==============================================================================
 class ModulesInformationComponent  : public Component,
                                      private ListBoxModel,
-                                     private ValueTree::Listener,
-                                     private Button::Listener
+                                     private ValueTree::Listener
 {
 public:
     ModulesInformationComponent (Project& p)
@@ -55,13 +54,15 @@ public:
         addAndMakeVisible (header);
 
         addAndMakeVisible (setCopyModeButton);
-        addAndMakeVisible (copyPathButton);
-        addAndMakeVisible (globalPathsButton);
-        setCopyModeButton.addListener (this);
         setCopyModeButton.setTriggeredOnMouseDown (true);
-        copyPathButton.addListener (this);
+        setCopyModeButton.onClick = [this] { showCopyModeMenu(); };
+
+        addAndMakeVisible (copyPathButton);
         copyPathButton.setTriggeredOnMouseDown (true);
-        globalPathsButton.addListener (this);
+        copyPathButton.onClick = [this] { showSetPathsMenu(); };
+
+        addAndMakeVisible (globalPathsButton);
+        globalPathsButton.onClick = [this] { showGlobalPathsMenu(); };
 
         modulesValueTree.addListener (this);
         lookAndFeelChanged();
@@ -175,13 +176,6 @@ public:
     void deleteKeyPressed (int row) override
     {
         project.getModules().removeModule (project.getModules().getModuleID (row));
-    }
-
-    void buttonClicked (Button* b) override
-    {
-        if (b == &setCopyModeButton)   showCopyModeMenu();
-        if (b == &copyPathButton)      showSetPathsMenu();
-        if (b == &globalPathsButton)   showGlobalPathsMenu();
     }
 
     void lookAndFeelChanged() override

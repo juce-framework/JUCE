@@ -330,8 +330,7 @@ private:
         };
 
         //==============================================================================
-        class MissingDependenciesComponent  : public PropertyComponent,
-                                              public Button::Listener
+        class MissingDependenciesComponent  : public PropertyComponent
         {
         public:
             MissingDependenciesComponent (Project& p, const String& modID)
@@ -343,7 +342,7 @@ private:
                 addAndMakeVisible (fixButton);
                 fixButton.setColour (TextButton::buttonColourId, Colours::red);
                 fixButton.setColour (TextButton::textColourOffId, Colours::white);
-                fixButton.addListener (this);
+                fixButton.onClick = [this] { fixDependencies(); };
             }
 
             void refresh() override {}
@@ -358,7 +357,7 @@ private:
                 g.drawFittedText (text, getLocalBounds().reduced (10), Justification::topLeft, 3);
             }
 
-            void buttonClicked (Button*) override
+            void fixDependencies()
             {
                 ModuleList list;
 

@@ -29,7 +29,6 @@
 
 //==============================================================================
 class ModulesFolderPathBox  : public Component,
-                              private Button::Listener,
                               private ComboBox::Listener
 {
 public:
@@ -49,15 +48,22 @@ public:
         currentPathBox.addListener (this);
 
         addAndMakeVisible (openFolderButton);
-        openFolderButton.addListener (this);
         openFolderButton.setTooltip (TRANS ("Select JUCE modules folder"));
+        openFolderButton.onClick = [this] { selectJuceFolder(); };
 
         addAndMakeVisible (modulesLabel);
         modulesLabel.attachToComponent (&currentPathBox, true);
 
         addAndMakeVisible (useGlobalPathsToggle);
-        useGlobalPathsToggle.addListener (this);
         useGlobalPathsToggle.setToggleState (true, sendNotification);
+        useGlobalPathsToggle.onClick = [this]
+        {
+            isUsingGlobalPaths = useGlobalPathsToggle.getToggleState();
+
+            currentPathBox.setEnabled   (! isUsingGlobalPaths);
+            openFolderButton.setEnabled (! isUsingGlobalPaths);
+            modulesLabel.setEnabled     (! isUsingGlobalPaths);
+        };
     }
 
     void resized() override
@@ -113,23 +119,6 @@ public:
             modulesFolder = newFolder;
             currentPathBox.setText (modulesFolder.getFullPathName(), dontSendNotification);
         }
-    }
-
-    void buttonClicked (Button* b) override
-    {
-        if (b == &openFolderButton)
-        {
-            selectJuceFolder();
-        }
-        else if (b == &useGlobalPathsToggle)
-        {
-            isUsingGlobalPaths = useGlobalPathsToggle.getToggleState();
-
-            currentPathBox.setEnabled   (! isUsingGlobalPaths);
-            openFolderButton.setEnabled (! isUsingGlobalPaths);
-            modulesLabel.setEnabled     (! isUsingGlobalPaths);
-        }
-
     }
 
     void comboBoxChanged (ComboBox*) override
@@ -296,7 +285,6 @@ private:
     a list box of platform targets to generate.
 */
 class WizardComp  : public Component,
-                    private Button::Listener,
                     private ComboBox::Listener,
                     private TextEditor::Listener,
                     private FileBrowserListener
@@ -336,11 +324,11 @@ public:
         fileBrowser.addListener (this);
 
         addChildAndSetID (&createButton, "createButton");
-        createButton.addListener (this);
+        createButton.onClick = [this] { createProject(); };
 
         addChildAndSetID (&cancelButton, "cancelButton");
         cancelButton.addShortcut (KeyPress (KeyPress::escapeKey));
-        cancelButton.addListener (this);
+        cancelButton.onClick = [this] { returnToTemplatesPage(); };
 
         addChildAndSetID (&modulesPathBox, "modulesPathBox");
 
@@ -385,18 +373,6 @@ public:
 
         targetsOutline.setBounds (right);
         platformTargets.setBounds (right.reduced (25));
-    }
-
-    void buttonClicked (Button* b) override
-    {
-        if (b == &createButton)
-        {
-            createProject();
-        }
-        else if (b == &cancelButton)
-        {
-            returnToTemplatesPage();
-        }
     }
 
     void returnToTemplatesPage()

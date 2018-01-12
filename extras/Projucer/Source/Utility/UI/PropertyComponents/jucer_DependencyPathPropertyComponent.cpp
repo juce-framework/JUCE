@@ -166,7 +166,7 @@ try : TextPropertyComponent (propertyDescription, 1024, false),
     setInterestedInFileDrag (false);
 
     addAndMakeVisible (browseButton);
-    browseButton.addListener (this);
+    browseButton.onClick = [this] { browse(); };
 
     lookAndFeelChanged();
 }
@@ -244,7 +244,7 @@ void DependencyFilePathPropertyComponent::editorShown (Label*, TextEditor& edito
         editor.setText (String(), dontSendNotification);
 }
 
-void DependencyFilePathPropertyComponent::buttonClicked (Button*)
+void DependencyFilePathPropertyComponent::browse()
 {
     auto currentFile = pathRelativeTo.getChildFile (pathValue.toString());
 

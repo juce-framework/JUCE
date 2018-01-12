@@ -192,8 +192,7 @@ private:
 class DependencyFilePathPropertyComponent    : public TextPropertyComponent,
                                                public FileDragAndDropTarget,
                                                private Value::Listener,
-                                               private Label::Listener,
-                                               private Button::Listener
+                                               private Label::Listener
 {
 public:
     DependencyFilePathPropertyComponent (Value& value,
@@ -223,8 +222,6 @@ private:
     void editorHidden (Label*, TextEditor&) override {}
     void editorShown (Label*, TextEditor&) override;
 
-    void buttonClicked (Button*) override;
-
     void lookAndFeelChanged() override
     {
         browseButton.setColour (TextButton::buttonColourId,
@@ -232,6 +229,7 @@ private:
         textWasEdited();
     }
 
+    void browse();
     Colour getTextColourToDisplay() const;
 
     //==========================================================================
