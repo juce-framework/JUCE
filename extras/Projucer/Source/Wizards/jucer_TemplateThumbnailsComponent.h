@@ -162,8 +162,8 @@ public:
         addAndMakeVisible (exampleProjectButton = new TemplateOptionButton ("Open Example Project",  TemplateOptionButton::ImageOnButtonBackground, BinaryData::wizard_Openfile_svg));
         addAndMakeVisible (openProjectButton    = new TemplateOptionButton ("Open Existing Project", TemplateOptionButton::ImageOnButtonBackground, BinaryData::wizard_Openfile_svg));
 
-        blankProjectButton->addListener (this);
-        exampleProjectButton->addListener (this);
+        blankProjectButton->onClick   = [this] { createBlankProject(); };
+        exampleProjectButton->onClick = [this] { openExampleProject(); };
         openProjectButton->setCommandToTrigger (&commandManager, CommandIDs::open, true);
 
         newProjectWizard = projectWizard;
@@ -264,11 +264,7 @@ private:
 
     void buttonClicked (Button* b) override
     {
-        if (b == blankProjectButton)
-            createBlankProject();
-        else if (b == exampleProjectButton)
-            openExampleProject();
-        else if (dynamic_cast<TemplateOptionButton*> (b) != nullptr)
+        if (dynamic_cast<TemplateOptionButton*> (b) != nullptr)
             showWizard (b->getButtonText());
     }
 

@@ -345,8 +345,7 @@ void GenericCodeEditorComponent::removeListener (GenericCodeEditorComponent::Lis
 
 //==============================================================================
 class GenericCodeEditorComponent::FindPanel  : public Component,
-                                               private TextEditor::Listener,
-                                               private Button::Listener
+                                               private TextEditor::Listener
 {
 public:
     FindPanel()
@@ -364,7 +363,7 @@ public:
         addAndMakeVisible (caseButton);
         caseButton.setColour (ToggleButton::textColourId, Colours::white);
         caseButton.setToggleState (isCaseSensitiveSearch(), dontSendNotification);
-        caseButton.addListener (this);
+        caseButton.onClick = [this] { setCaseSensitiveSearch (caseButton.getToggleState()); };
 
         findPrev.setConnectedEdges (Button::ConnectedOnRight);
         findNext.setConnectedEdges (Button::ConnectedOnLeft);
@@ -405,11 +404,6 @@ public:
         caseButton.setBounds (10, y, getWidth() / 2 - 10, 22);
         findNext.setBounds (getWidth() - 40, y, 30, 22);
         findPrev.setBounds (getWidth() - 70, y, 30, 22);
-    }
-
-    void buttonClicked (Button*) override
-    {
-        setCaseSensitiveSearch (caseButton.getToggleState());
     }
 
     void textEditorTextChanged (TextEditor&) override

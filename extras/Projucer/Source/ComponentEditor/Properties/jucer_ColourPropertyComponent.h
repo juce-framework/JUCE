@@ -102,8 +102,7 @@ public:
                 setColour (cs->getCurrentColour());
         }
 
-        class ColourSelectorComp   : public Component,
-                                     public Button::Listener
+        class ColourSelectorComp   : public Component
         {
         public:
             ColourSelectorComp (ColourEditorComponent* owner_,
@@ -119,7 +118,13 @@ public:
                 if (canReset)
                 {
                     addAndMakeVisible (defaultButton);
-                    defaultButton.addListener (this);
+
+                    defaultButton.onClick = [this]
+                    {
+                        owner->resetToDefault();
+                        owner->refresh();
+                        selector.setCurrentColour (owner->getColour());
+                    };
                 }
 
                 setSize (300, 400);
@@ -137,13 +142,6 @@ public:
                 {
                     selector.setBounds (getLocalBounds());
                 }
-            }
-
-            void buttonClicked (Button*) override
-            {
-                owner->resetToDefault();
-                owner->refresh();
-                selector.setCurrentColour (owner->getColour());
             }
 
         private:

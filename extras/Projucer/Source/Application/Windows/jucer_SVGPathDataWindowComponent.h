@@ -30,8 +30,7 @@
 //==============================================================================
 class SVGPathDataComponent  : public Component,
                               public FileDragAndDropTarget,
-                              private TextEditor::Listener,
-                              private Button::Listener
+                              private TextEditor::Listener
 
 {
 public:
@@ -55,13 +54,7 @@ public:
         userText.setText (getLastText());
 
         addAndMakeVisible (copyButton);
-        copyButton.addListener (this);
-    }
-
-    void buttonClicked (Button* b) override
-    {
-        if (b == &copyButton)
-            SystemClipboard::copyTextToClipboard (resultText.getText());
+        copyButton.onClick = [this] { SystemClipboard::copyTextToClipboard (resultText.getText()); };
     }
 
     void textEditorTextChanged (TextEditor&) override

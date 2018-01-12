@@ -54,7 +54,6 @@ public:
 private:
     struct InnerComponent   : public Component,
                               public FileDragAndDropTarget,
-                              private Button::Listener,
                               private TextEditor::Listener
     {
         InnerComponent (Value v, bool isDir, const String& wc, const File& rt, const bool multiplePaths)
@@ -71,7 +70,7 @@ private:
             textbox.addListener (this);
 
             addAndMakeVisible (button);
-            button.addListener (this);
+            button.onClick = [this] { browse(); };
 
             lookAndFeelChanged();
         }
@@ -111,9 +110,9 @@ private:
             repaint();
         }
 
-        void buttonClicked (Button*) override
+        void browse()
         {
-            const File currentFile (root.getChildFile (value.toString()));
+            auto currentFile = root.getChildFile (value.toString());
 
             if (isDirectory)
             {

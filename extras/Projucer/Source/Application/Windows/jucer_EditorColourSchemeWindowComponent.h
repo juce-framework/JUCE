@@ -124,12 +124,11 @@ private:
         };
 
         //==============================================================================
-        struct EditorPanel  : public Component,
-                              private Button::Listener
+        struct EditorPanel  : public Component
         {
             EditorPanel()
-            : loadButton ("Load Scheme..."),
-            saveButton ("Save Scheme...")
+                : loadButton ("Load Scheme..."),
+                  saveButton ("Save Scheme...")
             {
                 rebuildProperties();
                 addAndMakeVisible (panel);
@@ -137,8 +136,8 @@ private:
                 addAndMakeVisible (loadButton);
                 addAndMakeVisible (saveButton);
 
-                loadButton.addListener (this);
-                saveButton.addListener (this);
+                loadButton.onClick = [this] { loadScheme(); };
+                saveButton.onClick = [this] { saveScheme (false); };
 
                 lookAndFeelChanged();
 
@@ -185,14 +184,6 @@ private:
 
             Font codeFont;
             Array<var> colourValues;
-
-            void buttonClicked (Button* b) override
-            {
-                if (b == &loadButton)
-                    loadScheme();
-                else
-                    saveScheme (false);
-            }
 
             void saveScheme (bool isExit)
             {

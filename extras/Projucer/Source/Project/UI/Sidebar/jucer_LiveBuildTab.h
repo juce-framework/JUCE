@@ -66,14 +66,17 @@ struct LiveBuildSettingsComponent  : public Component
 
 //==============================================================================
 class LiveBuildTab    : public Component,
-                        private ChangeListener,
-                        private Button::Listener
+                        private ChangeListener
 {
 public:
     LiveBuildTab (CompileEngineChildProcess* child, String lastErrorMessage)
     {
         addAndMakeVisible (settingsButton = new IconButton ("Settings", &getIcons().settings));
-        settingsButton->addListener (this);
+        settingsButton->onClick = [this]
+        {
+            if (auto* pcc = findParentComponentOfClass<ProjectContentComponent>())
+                pcc->showLiveBuildSettings();
+        };
 
         if (child != nullptr)
         {
@@ -96,7 +99,7 @@ public:
             if (showDownloadButton)
             {
                 addAndMakeVisible (downloadButton = new TextButton ("Download"));
-                downloadButton->addListener (this);
+                downloadButton->onClick = [this] { downloadDLL(); };
             }
 
             if (showEnableButton)
@@ -110,7 +113,11 @@ public:
                 }
 
                 addAndMakeVisible (enableButton = new TextButton (buttonText));
-                enableButton->addListener (this);
+                enableButton->onClick = [this]
+                {
+                    if (auto* pcc = findParentComponentOfClass<ProjectContentComponent>())
+                        pcc->setBuildEnabled (true);
+                };
             }
         }
     }
@@ -207,35 +214,20 @@ private:
         return String ("Enable compilation to use the live-build engine");
     }
 
-    void buttonClicked (Button* b) override
+    void downloadDLL()
     {
-        auto* pcc = findParentComponentOfClass<ProjectContentComponent>();
-
-        if (b == settingsButton)
+        if (DownloadCompileEngineThread::downloadAndInstall())
         {
-            if (pcc != nullptr)
-                pcc->showLiveBuildSettings();
-        }
-        else if (b == downloadButton)
-        {
-            if (DownloadCompileEngineThread::downloadAndInstall())
+            if (! CompileEngineDLL::getInstance()->tryLoadDll())
             {
-                if (! CompileEngineDLL::getInstance()->tryLoadDll())
-                {
-                    AlertWindow::showMessageBox(AlertWindow::WarningIcon,
-                                                "Download and install",
-                                                "Loading the live-build engine failed");
-                    return;
-                }
-
-                if (pcc != nullptr)
-                    pcc->rebuildProjectTabs();
+                AlertWindow::showMessageBox(AlertWindow::WarningIcon,
+                                            "Download and install",
+                                            "Loading the live-build engine failed");
+                return;
             }
-        }
-        else if (b == enableButton)
-        {
-            if (pcc != nullptr)
-                pcc->setBuildEnabled (true);
+
+            if (auto* pcc = findParentComponentOfClass<ProjectContentComponent>())
+                pcc->rebuildProjectTabs();
         }
     }
 
