@@ -32,10 +32,6 @@ Label::Label (const String& name, const String& labelText)
       textValue (labelText),
       lastTextValue (labelText)
 {
-    setColour (TextEditor::textColourId, Colours::black);
-    setColour (TextEditor::backgroundColourId, Colours::transparentBlack);
-    setColour (TextEditor::outlineColourId, Colours::transparentBlack);
-
     textValue.addListener (this);
 }
 
