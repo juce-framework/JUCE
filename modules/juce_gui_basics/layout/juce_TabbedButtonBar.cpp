@@ -436,7 +436,7 @@ void TabbedButtonBar::updateTabPositions (bool animate)
             addAndMakeVisible (extraTabsButton = lf.createTabBarExtrasButton());
             extraTabsButton->setAlwaysOnTop (true);
             extraTabsButton->setTriggeredOnMouseDown (true);
-            extraTabsButton->onClick = [this]() { showExtraItemsMenu(); };
+            extraTabsButton->onClick = [this] { showExtraItemsMenu(); };
         }
 
         auto buttonSize = jmin (proportionOfWidth (0.7f), proportionOfHeight (0.7f));

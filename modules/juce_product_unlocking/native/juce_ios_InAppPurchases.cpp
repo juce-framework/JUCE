@@ -633,7 +633,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
                         }
                     }
 
-                    MessageManager::callAsync ([this, purchases]() { owner.listeners.call ([&] (Listener& l) { l.purchasesListRestored (purchases, true, NEEDS_TRANS ("Success")); }); });
+                    MessageManager::callAsync ([this, purchases] { owner.listeners.call ([&] (Listener& l) { l.purchasesListRestored (purchases, true, NEEDS_TRANS ("Success")); }); });
                     return;
                 }
             }
@@ -649,7 +649,7 @@ struct InAppPurchases::Pimpl   : public SKDelegateAndPaymentObserver
 
     void sendReceiptFetchFailAsync()
     {
-        MessageManager::callAsync ([this]() { sendReceiptFetchFail(); });
+        MessageManager::callAsync ([this] { sendReceiptFetchFail(); });
     }
 
     static int64 getPurchaseDateMs (id date)

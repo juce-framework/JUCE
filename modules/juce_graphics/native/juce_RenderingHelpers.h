@@ -42,7 +42,7 @@ class TranslationOrTransform
 {
 public:
     TranslationOrTransform (Point<int> origin) noexcept
-        : offset (origin), isOnlyTranslated (true), isRotated (false)
+        : offset (origin)
     {
     }
 
@@ -134,7 +134,7 @@ public:
 
     AffineTransform complexTransform;
     Point<int> offset;
-    bool isOnlyTranslated, isRotated;
+    bool isOnlyTranslated = true, isRotated = false;
 };
 
 //==============================================================================
@@ -155,7 +155,7 @@ public:
 
     static GlyphCache& getInstance()
     {
-        GlyphCache*& g = getSingletonPointer();
+        auto& g = getSingletonPointer();
 
         if (g == nullptr)
             g = new GlyphCache();
@@ -169,13 +169,13 @@ public:
         const ScopedLock sl (lock);
         glyphs.clear();
         addNewGlyphSlots (120);
-        hits.set (0);
-        misses.set (0);
+        hits = 0;
+        misses = 0;
     }
 
     void drawGlyph (RenderTargetType& target, const Font& font, const int glyphNumber, Point<float> pos)
     {
-        if (ReferenceCountedObjectPtr<CachedGlyphType> glyph = findOrCreateGlyph (font, glyphNumber))
+        if (auto glyph = findOrCreateGlyph (font, glyphNumber))
         {
             glyph->lastAccessCount = ++accessCounter;
             glyph->draw (target, pos);
@@ -186,14 +186,14 @@ public:
     {
         const ScopedLock sl (lock);
 
-        if (CachedGlyphType* g = findExistingGlyph (font, glyphNumber))
+        if (auto* g = findExistingGlyph (font, glyphNumber))
         {
             ++hits;
             return g;
         }
 
         ++misses;
-        CachedGlyphType* g = getGlyphForReuse();
+        auto* g = getGlyphForReuse();
         jassert (g != nullptr);
         g->generate (font, glyphNumber);
         return g;
@@ -205,31 +205,27 @@ private:
     Atomic<int> accessCounter, hits, misses;
     CriticalSection lock;
 
-    CachedGlyphType* findExistingGlyph (const Font& font, int glyphNumber) const
+    CachedGlyphType* findExistingGlyph (const Font& font, int glyphNumber) const noexcept
     {
-        for (int i = 0; i < glyphs.size(); ++i)
-        {
-            CachedGlyphType* const g = glyphs.getUnchecked (i);
-
+        for (auto* g : glyphs)
             if (g->glyph == glyphNumber && g->font == font)
                 return g;
-        }
 
         return nullptr;
     }
 
     CachedGlyphType* getGlyphForReuse()
     {
-        if (hits.value + misses.value > glyphs.size() * 16)
+        if (hits.get() + misses.get() > glyphs.size() * 16)
         {
-            if (misses.value * 2 > hits.value)
+            if (misses.get() * 2 > hits.get())
                 addNewGlyphSlots (32);
 
-            hits.set (0);
-            misses.set (0);
+            hits = 0;
+            misses = 0;
         }
 
-        if (CachedGlyphType* g = findLeastRecentlyUsedGlyph())
+        if (auto* g = findLeastRecentlyUsedGlyph())
             return g;
 
         addNewGlyphSlots (32);
@@ -247,17 +243,15 @@ private:
     CachedGlyphType* findLeastRecentlyUsedGlyph() const noexcept
     {
         CachedGlyphType* oldest = nullptr;
-        int oldestCounter = std::numeric_limits<int>::max();
+        auto oldestCounter = std::numeric_limits<int>::max();
 
-        for (int i = glyphs.size() - 1; --i >= 0;)
+        for (auto* g : glyphs)
         {
-            CachedGlyphType* const glyph = glyphs.getUnchecked(i);
-
-            if (glyph->lastAccessCount <= oldestCounter
-                 && glyph->getReferenceCount() == 1)
+            if (g->lastAccessCount <= oldestCounter
+                 && g->getReferenceCount() == 1)
             {
-                oldestCounter = glyph->lastAccessCount;
-                oldest = glyph;
+                oldestCounter = g->lastAccessCount;
+                oldest = g;
             }
         }
 
@@ -279,7 +273,7 @@ template <class RendererType>
 class CachedGlyphEdgeTable  : public ReferenceCountedObject
 {
 public:
-    CachedGlyphEdgeTable() : glyph (0), lastAccessCount (0) {}
+    CachedGlyphEdgeTable() {}
 
     void draw (RendererType& state, Point<float> pos) const
     {
@@ -290,10 +284,10 @@ public:
             state.fillEdgeTable (*edgeTable, pos.x, roundToInt (pos.y));
     }
 
-    void generate (const Font& newFont, const int glyphNumber)
+    void generate (const Font& newFont, int glyphNumber)
     {
         font = newFont;
-        Typeface* const typeface = newFont.getTypeface();
+        auto* typeface = newFont.getTypeface();
         snapToIntegerCoordinate = typeface->isHinted();
         glyph = glyphNumber;
 
@@ -305,8 +299,8 @@ public:
 
     Font font;
     ScopedPointer<EdgeTable> edgeTable;
-    int glyph, lastAccessCount;
-    bool snapToIntegerCoordinate;
+    int glyph = 0, lastAccessCount = 0;
+    bool snapToIntegerCoordinate = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedGlyphEdgeTable)
 };
@@ -405,22 +399,21 @@ struct FloatRectangleRasterisingInfo
 namespace GradientPixelIterators
 {
     /** Iterates the colour of pixels in a linear gradient */
-    class Linear
+    struct Linear
     {
-    public:
         Linear (const ColourGradient& gradient, const AffineTransform& transform,
-                const PixelARGB* const colours, const int numColours)
+                const PixelARGB* colours, int numColours)
             : lookupTable (colours),
               numEntries (numColours)
         {
             jassert (numColours >= 0);
-            Point<float> p1 (gradient.point1);
-            Point<float> p2 (gradient.point2);
+            auto p1 = gradient.point1;
+            auto p2 = gradient.point2;
 
             if (! transform.isIdentity())
             {
                 const Line<float> l (p2, p1);
-                Point<float> p3 = l.getPointAlongLine (0.0f, 100.0f);
+                auto p3 = l.getPointAlongLine (0.0f, 100.0f);
 
                 p1.applyTransform (transform);
                 p2.applyTransform (transform);
@@ -451,21 +444,20 @@ namespace GradientPixelIterators
             }
         }
 
-        forcedinline void setY (const int y) noexcept
+        forcedinline void setY (int y) noexcept
         {
             if (vertical)
-                linePix = lookupTable [jlimit (0, numEntries, (y * scale - start) >> (int) numScaleBits)];
+                linePix = lookupTable[jlimit (0, numEntries, (y * scale - start) >> (int) numScaleBits)];
             else if (! horizontal)
                 start = roundToInt ((y - yTerm) * grad);
         }
 
-        inline PixelARGB getPixel (const int x) const noexcept
+        inline PixelARGB getPixel (int x) const noexcept
         {
             return vertical ? linePix
-                            : lookupTable [jlimit (0, numEntries, (x * scale - start) >> (int) numScaleBits)];
+                            : lookupTable[jlimit (0, numEntries, (x * scale - start) >> (int) numScaleBits)];
         }
 
-    private:
         const PixelARGB* const lookupTable;
         const int numEntries;
         PixelARGB linePix;
@@ -479,39 +471,37 @@ namespace GradientPixelIterators
 
     //==============================================================================
     /** Iterates the colour of pixels in a circular radial gradient */
-    class Radial
+    struct Radial
     {
-    public:
         Radial (const ColourGradient& gradient, const AffineTransform&,
-                const PixelARGB* const colours, const int numColours)
+                const PixelARGB* colours, int numColours)
             : lookupTable (colours),
               numEntries (numColours),
               gx1 (gradient.point1.x),
               gy1 (gradient.point1.y)
         {
             jassert (numColours >= 0);
-            const Point<float> diff (gradient.point1 - gradient.point2);
+            auto diff = gradient.point1 - gradient.point2;
             maxDist = diff.x * diff.x + diff.y * diff.y;
             invScale = numEntries / std::sqrt (maxDist);
             jassert (roundToInt (std::sqrt (maxDist) * invScale) <= numEntries);
         }
 
-        forcedinline void setY (const int y) noexcept
+        forcedinline void setY (int y) noexcept
         {
             dy = y - gy1;
             dy *= dy;
         }
 
-        inline PixelARGB getPixel (const int px) const noexcept
+        inline PixelARGB getPixel (int px) const noexcept
         {
-            double x = px - gx1;
+            auto x = px - gx1;
             x *= x;
             x += dy;
 
-            return lookupTable [x >= maxDist ? numEntries : roundToInt (std::sqrt (x) * invScale)];
+            return lookupTable[x >= maxDist ? numEntries : roundToInt (std::sqrt (x) * invScale)];
         }
 
-    protected:
         const PixelARGB* const lookupTable;
         const int numEntries;
         const double gx1, gy1;
@@ -522,11 +512,10 @@ namespace GradientPixelIterators
 
     //==============================================================================
     /** Iterates the colour of pixels in a skewed radial gradient */
-    class TransformedRadial   : public Radial
+    struct TransformedRadial   : public Radial
     {
-    public:
         TransformedRadial (const ColourGradient& gradient, const AffineTransform& transform,
-                           const PixelARGB* const colours, const int numColours)
+                           const PixelARGB* colours, int numColours)
             : Radial (gradient, transform, colours, numColours),
               inverseTransform (transform.inverted())
         {
@@ -534,25 +523,25 @@ namespace GradientPixelIterators
             tM00 = inverseTransform.mat00;
         }
 
-        forcedinline void setY (const int y) noexcept
+        forcedinline void setY (int y) noexcept
         {
-            const float floatY = (float) y;
+            auto floatY = (float) y;
             lineYM01 = inverseTransform.mat01 * floatY + inverseTransform.mat02 - gx1;
             lineYM11 = inverseTransform.mat11 * floatY + inverseTransform.mat12 - gy1;
         }
 
-        inline PixelARGB getPixel (const int px) const noexcept
+        inline PixelARGB getPixel (int px) const noexcept
         {
             double x = px;
-            const double y = tM10 * x + lineYM11;
+            auto y = tM10 * x + lineYM11;
             x = tM00 * x + lineYM01;
             x *= x;
             x += y * y;
 
             if (x >= maxDist)
-                return lookupTable [numEntries];
+                return lookupTable[numEntries];
 
-            return lookupTable [jmin (numEntries, roundToInt (std::sqrt (x) * invScale))];
+            return lookupTable[jmin (numEntries, roundToInt (std::sqrt (x) * invScale))];
         }
 
     private:
@@ -629,7 +618,7 @@ namespace EdgeTableFillers
                 blendLine (dest, p, width);
         }
 
-        forcedinline void handleEdgeTableLineFull (const int x, const int width) const noexcept
+        forcedinline void handleEdgeTableLineFull (int x, int width) const noexcept
         {
             auto* dest = getPixel (x);
 
@@ -674,10 +663,10 @@ namespace EdgeTableFillers
         const Image::BitmapData& destData;
         PixelType* linePixels;
         PixelARGB sourceColour;
-        PixelRGB filler [4];
+        PixelRGB filler[4];
         bool areRGBComponentsEqual;
 
-        forcedinline PixelType* getPixel (const int x) const noexcept
+        forcedinline PixelType* getPixel (int x) const noexcept
         {
             return addBytesToPointer (linePixels, x * destData.pixelStride);
         }
@@ -699,7 +688,7 @@ namespace EdgeTableFillers
                 {
                     if (width >> 5)
                     {
-                        const int* const intFiller = reinterpret_cast<const int*> (filler);
+                        auto intFiller = reinterpret_cast<const int*> (filler);
 
                         while (width > 8 && (((pointer_sized_int) dest) & 7) != 0)
                         {
@@ -710,7 +699,7 @@ namespace EdgeTableFillers
 
                         while (width > 4)
                         {
-                            int* d = reinterpret_cast<int*> (dest);
+                            auto d = reinterpret_cast<int*> (dest);
                             *d++ = intFiller[0];
                             *d++ = intFiller[1];
                             *d++ = intFiller[2];
@@ -946,12 +935,12 @@ namespace EdgeTableFillers
         DestPixelType* linePixels;
         SrcPixelType* sourceLineStart;
 
-        forcedinline DestPixelType* getDestPixel (int const x) const noexcept
+        forcedinline DestPixelType* getDestPixel (int x) const noexcept
         {
             return addBytesToPointer (linePixels, x * destData.pixelStride);
         }
 
-        forcedinline SrcPixelType const* getSrcPixel (int const x) const noexcept
+        forcedinline SrcPixelType const* getSrcPixel (int x) const noexcept
         {
             return addBytesToPointer (sourceLineStart, x * srcData.pixelStride);
         }
@@ -1659,8 +1648,8 @@ struct ClipRegions
     struct EdgeTableRegion  : public Base
     {
         EdgeTableRegion (const EdgeTable& e)            : edgeTable (e) {}
-        EdgeTableRegion (Rectangle<int> r)       : edgeTable (r) {}
-        EdgeTableRegion (Rectangle<float> r)     : edgeTable (r) {}
+        EdgeTableRegion (Rectangle<int> r)              : edgeTable (r) {}
+        EdgeTableRegion (Rectangle<float> r)            : edgeTable (r) {}
         EdgeTableRegion (const RectangleList<int>& r)   : edgeTable (r) {}
         EdgeTableRegion (const RectangleList<float>& r) : edgeTable (r) {}
         EdgeTableRegion (Rectangle<int> bounds, const Path& p, const AffineTransform& t) : edgeTable (bounds, p, t) {}
@@ -2460,7 +2449,7 @@ public:
             {
                 jassert (! replaceContents); // that option is just for solid colours
 
-                ColourGradient g2 (*(fillType.gradient));
+                auto g2 = *(fillType.gradient);
                 g2.multiplyOpacity (fillType.getOpacity());
                 auto t = transform.getTransformWith (fillType.transform).translated (-0.5f, -0.5f);
 
@@ -2594,7 +2583,9 @@ public:
                 auto t = transform.getTransformWith (AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
                                                                      .followedBy (trans));
 
-                if (ScopedPointer<EdgeTable> et = font.getTypeface()->getEdgeTableForGlyph (glyphNumber, t, fontHeight))
+                ScopedPointer<EdgeTable> et (font.getTypeface()->getEdgeTableForGlyph (glyphNumber, t, fontHeight));
+
+                if (et != nullptr)
                     fillShape (new EdgeTableRegionType (*et), false);
             }
         }

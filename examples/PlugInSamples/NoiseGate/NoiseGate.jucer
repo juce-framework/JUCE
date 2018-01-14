@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="kmYCMo" name="NoiseGate" projectType="audioplug" version="1.0.0"
-              bundleIdentifier="com.roli.NoiseGate" includeBinaryInAppConfig="1"
-              buildVST="1" buildVST3="1" buildAU="1" buildRTAS="0" buildAAX="1"
-              pluginName="Noise Gate" pluginDesc="Noise Gate" pluginManufacturer="ROLI Ltd."
-              pluginManufacturerCode="ROLI" pluginCode="Nois" pluginChannelConfigs=""
-              pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
-              pluginSilenceInIsSilenceOut="0" pluginEditorRequiresKeys="0"
+<JUCERPROJECT id="kmYCMo" name="NoiseGate" projectType="audioplug" bundleIdentifier="com.roli.NoiseGate"
+              buildVST3="1" buildAAX="1" pluginName="Noise Gate" pluginDesc="Noise Gate"
+              pluginManufacturer="ROLI Ltd." pluginManufacturerCode="ROLI"
+              pluginCode="Nois" pluginChannelConfigs="" pluginSilenceInIsSilenceOut="0"
               pluginAUExportPrefix="NoiseGateAU" pluginRTASCategory="" aaxIdentifier="com.roli.NoiseGate"
               pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.2.0"
-              pluginIsMidiEffectPlugin="0" buildAUv3="0" buildStandalone="0"
-              enableIAA="0" displaySplashScreen="0" reportAppUsage="0" splashScreenColour="Dark"
-              companyName="ROLI Ltd." cppLanguageStandard="14" companyCopyright="ROLI Ltd.">
+              displaySplashScreen="0" reportAppUsage="0" companyName="ROLI Ltd."
+              companyCopyright="ROLI Ltd.">
   <MAINGROUP id="FVYuyg" name="NoiseGate">
     <GROUP id="{6EB662B0-ED81-2504-8B90-DCBFA5675DFC}" name="Source">
       <FILE id="iyPpdA" name="NoiseGate.cpp" compile="1" resource="0" file="Source/NoiseGate.cpp"/>
@@ -21,10 +17,8 @@
     <XCODE_MAC targetFolder="Builds/MacOSX" extraCompilerFlags="-Wall -Wshadow -Wstrict-aliasing -Wconversion -Wsign-compare -Woverloaded-virtual -Wextra-semi"
                postbuildCommand="" vst3Folder="" vstFolder="" aaxFolder="">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" osxSDK="default" osxCompatibility="10.10 SDK" osxArchitecture="default"
-                       isDebug="1" optimisation="1" targetName="NoiseGate"/>
-        <CONFIGURATION name="Release" osxSDK="default" osxCompatibility="10.10 SDK"
-                       osxArchitecture="default" isDebug="0" optimisation="3" targetName="NoiseGate"/>
+        <CONFIGURATION name="Debug" osxCompatibility="10.10 SDK" isDebug="1" targetName="NoiseGate"/>
+        <CONFIGURATION name="Release" osxCompatibility="10.10 SDK" isDebug="0" targetName="NoiseGate"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../../modules"/>
@@ -43,12 +37,10 @@
         <MODULEPATH id="juce_audio_plugin_client" path="../../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <VS2015 targetFolder="Builds/VisualStudio2015">
+    <VS2015 targetFolder="Builds/VisualStudio2015" vst3Folder="" aaxFolder="">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="1" optimisation="1" targetName="NoiseGate"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="0" optimisation="3" targetName="NoiseGate"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="NoiseGate"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="NoiseGate"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_video" path="../../../modules"/>
@@ -67,12 +59,10 @@
         <MODULEPATH id="juce_audio_basics" path="../../../modules"/>
       </MODULEPATHS>
     </VS2015>
-    <VS2017 targetFolder="Builds/VisualStudio2017">
+    <VS2017 targetFolder="Builds/VisualStudio2017" vst3Folder="" aaxFolder="">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="NoiseGate"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="NoiseGate"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="NoiseGate"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="NoiseGate"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_video" path="../../../modules"/>
@@ -111,5 +101,5 @@
   <LIVE_SETTINGS>
     <OSX enableCxx11="1"/>
   </LIVE_SETTINGS>
-  <JUCEOPTIONS JUCE_QUICKTIME="disabled"/>
+  <JUCEOPTIONS/>
 </JUCERPROJECT>

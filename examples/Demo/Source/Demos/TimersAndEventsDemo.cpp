@@ -151,11 +151,11 @@ public:
 
         addAndMakeVisible (stopButton);
         stopButton.setButtonText ("Stop");
-        stopButton.onClick = [this]() { stopButtonClicked(); };
+        stopButton.onClick = [this] { stopButtonClicked(); };
 
         addAndMakeVisible (randomColourButton);
         randomColourButton.setButtonText ("Set Random Colour");
-        randomColourButton.onClick = [this]() { randomColourButtonClicked(); };
+        randomColourButton.onClick = [this] { randomColourButtonClicked(); };
 
         // lay out our components in a psudo random grid
         Rectangle<int> area (0, 100, 150, 150);

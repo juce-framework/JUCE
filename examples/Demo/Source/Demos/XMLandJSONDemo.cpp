@@ -227,7 +227,7 @@ public:
         typeBox.addItem ("XML", 1);
         typeBox.addItem ("JSON", 2);
 
-        typeBox.onChange = [this]()
+        typeBox.onChange = [this]
         {
             if (typeBox.getSelectedId() == 1)
                 reset (xml);

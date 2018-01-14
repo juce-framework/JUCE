@@ -49,7 +49,7 @@ public:
         editor.setReturnKeyStartsNewLine (true);
         editor.getTextValue().referTo (textValueObject);
         addAndMakeVisible (editor);
-        editor.onTextChange = [this]() { changed(); };
+        editor.onTextChange = [this] { changed(); };
     }
 
     void resized() override
@@ -155,11 +155,11 @@ public:
 
         showInTabsButton.setButtonText ("Show with tabs");
         showInTabsButton.setToggleState (false, dontSendNotification);
-        showInTabsButton.onClick = [this]() { updateLayoutMode(); };
+        showInTabsButton.onClick = [this] { updateLayoutMode(); };
         addAndMakeVisible (showInTabsButton);
 
         addNoteButton.setButtonText ("Create a new note");
-        addNoteButton.onClick = [this]() { addNote (String ("Note ") + String (multiDocumentPanel.getNumDocuments() + 1), "Hello World!"); };
+        addNoteButton.onClick = [this] { addNote (String ("Note ") + String (multiDocumentPanel.getNumDocuments() + 1), "Hello World!"); };
         addAndMakeVisible (addNoteButton);
 
         addAndMakeVisible (multiDocumentPanel);

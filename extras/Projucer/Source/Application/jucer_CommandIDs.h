@@ -95,6 +95,11 @@ namespace CommandIDs
 
         loginLogout             = 0x300090,
 
+        showForum               = 0x300100,
+        showAPIModules          = 0x300101,
+        showAPIClasses          = 0x300102,
+        showTutorials           = 0x300103,
+
         lastCommandIDEntry
     };
 }

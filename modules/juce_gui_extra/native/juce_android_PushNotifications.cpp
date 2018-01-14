@@ -492,7 +492,7 @@ struct PushNotifications::Pimpl
     void notifyListenersTokenRefreshed (const String& token)
     {
       #if defined(JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME)
-        MessageManager::callAsync ([this, token]()
+        MessageManager::callAsync ([this, token]
         {
             owner.listeners.call ([&] (Listener& l) { l.deviceTokenRefreshed (token); });
         });
@@ -587,7 +587,7 @@ struct PushNotifications::Pimpl
       #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
         GlobalRef rn (remoteNotification.get());
 
-        MessageManager::callAsync ([this, rn]()
+        MessageManager::callAsync ([this, rn]
         {
             auto notification = firebaseRemoteNotificationToJuceNotification (rn.get());
             owner.listeners.call ([&] (Listener& l) { l.handleNotification (false, notification); });
@@ -600,7 +600,7 @@ struct PushNotifications::Pimpl
     void notifyListenersAboutRemoteNotificationsDeleted()
     {
       #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
-        MessageManager::callAsync ([this]()
+        MessageManager::callAsync ([this]
         {
             owner.listeners.call ([] (Listener& l) { l.remoteNotificationsDeleted(); });
         });
@@ -612,7 +612,7 @@ struct PushNotifications::Pimpl
       #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
         GlobalRef mid (messageId);
 
-        MessageManager::callAsync ([this, mid]()
+        MessageManager::callAsync ([this, mid]
         {
             auto midString = juceString ((jstring) mid.get());
             owner.listeners.call ([&] (Listener& l) { l.upstreamMessageSent (midString); });
@@ -628,7 +628,7 @@ struct PushNotifications::Pimpl
       #if defined(JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME)
         GlobalRef mid (messageId), e (error);
 
-        MessageManager::callAsync ([this, mid, e]()
+        MessageManager::callAsync ([this, mid, e]
         {
             auto midString = juceString ((jstring) mid.get());
             auto eString   = juceString ((jstring) e.get());

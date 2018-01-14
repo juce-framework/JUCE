@@ -159,7 +159,7 @@ PluginListComponent::PluginListComponent (AudioPluginFormatManager& manager, Kno
     addAndMakeVisible (table);
 
     addAndMakeVisible (optionsButton);
-    optionsButton.onClick = [this]() { showOptionsMenu(); };
+    optionsButton.onClick = [this] { showOptionsMenu(); };
     optionsButton.setTriggeredOnMouseDown (true);
 
     setSize (400, 600);

@@ -448,12 +448,14 @@ public:
     }
 
     void setVelocityModeParameters (double sensitivity, int threshold,
-                                    double offset, bool userCanPressKeyToSwapMode)
+                                    double offset, bool userCanPressKeyToSwapMode,
+                                    ModifierKeys::Flags newModifierToSwapModes)
     {
         velocityModeSensitivity = sensitivity;
         velocityModeOffset = offset;
         velocityModeThreshold = threshold;
         userKeyOverridesVelocity = userCanPressKeyToSwapMode;
+        modifierToSwapModes = newModifierToSwapModes;
     }
 
     void setSkewFactorFromMidPoint (double sliderValueToShowAtMidPoint)
@@ -545,7 +547,8 @@ public:
                                                                : owner.getTextFromValue (currentValue.getValue()));
 
             valueBox.reset();
-            owner.addAndMakeVisible (valueBox = lf.createSliderTextBox (owner));
+            valueBox.reset (lf.createSliderTextBox (owner));
+            owner.addAndMakeVisible (valueBox.get());
 
             valueBox->setWantsKeyboardFocus (false);
             valueBox->setText (previousTextBoxContent, dontSendNotification);
@@ -566,11 +569,14 @@ public:
 
         if (style == IncDecButtons)
         {
-            owner.addAndMakeVisible (incButton = lf.createSliderButton (owner, true));
-            incButton->onClick = [this]() { incrementOrDecrement (interval); };
+            incButton.reset (lf.createSliderButton (owner, true));
+            decButton.reset (lf.createSliderButton (owner, false));
 
-            owner.addAndMakeVisible (decButton = lf.createSliderButton (owner, false));
-            decButton->onClick = [this]() { incrementOrDecrement (-interval); };
+            owner.addAndMakeVisible (incButton.get());
+            owner.addAndMakeVisible (decButton.get());
+
+            incButton->onClick = [this] { incrementOrDecrement (interval); };
+            decButton->onClick = [this] { incrementOrDecrement (-interval); };
 
             if (incDecButtonMode != incDecButtonsNotDraggable)
             {
@@ -840,7 +846,7 @@ public:
                         popupDisplay->stopTimer();
                 }
 
-                currentDrag = new DragInProgress (*this);
+                currentDrag.reset (new DragInProgress (*this));
                 mouseDrag (e);
             }
         }
@@ -979,10 +985,10 @@ public:
 
         if (popupDisplay == nullptr)
         {
-            popupDisplay = new PopupDisplayComponent (owner);
+            popupDisplay.reset (new PopupDisplayComponent (owner));
 
             if (parentForPopupDisplay != nullptr)
-                parentForPopupDisplay->addChildComponent (popupDisplay);
+                parentForPopupDisplay->addChildComponent (popupDisplay.get());
             else
                 popupDisplay->addToDesktop (ComponentPeer::windowIsTemporary);
 
@@ -1079,8 +1085,7 @@ public:
 
     bool isAbsoluteDragMode (ModifierKeys mods) const
     {
-        return isVelocityBased == (userKeyOverridesVelocity
-                                    && mods.testFlags (ModifierKeys::ctrlAltCommandModifiers));
+        return isVelocityBased == (userKeyOverridesVelocity && mods.testFlags (modifierToSwapModes));
     }
 
     void restoreMouseIfHidden()
@@ -1239,6 +1244,7 @@ public:
     int numDecimalPlaces = 7;
     int textBoxWidth = 80, textBoxHeight = 20;
     IncDecButtonMode incDecButtonMode = incDecButtonsNotDraggable;
+    ModifierKeys::Flags modifierToSwapModes = ModifierKeys::ctrlAltCommandModifiers;
 
     bool editableText = true;
     bool doubleClickToValue = false;
@@ -1376,8 +1382,7 @@ void Slider::setRotaryParameters (RotaryParameters p) noexcept
 
 void Slider::setRotaryParameters (float startAngleRadians, float endAngleRadians, bool stopAtEnd) noexcept
 {
-    RotaryParameters p = { startAngleRadians, endAngleRadians, stopAtEnd };
-    setRotaryParameters (p);
+    setRotaryParameters ({ startAngleRadians, endAngleRadians, stopAtEnd });
 }
 
 Slider::RotaryParameters Slider::getRotaryParameters() const noexcept
@@ -1392,13 +1397,16 @@ int Slider::getVelocityThreshold() const noexcept           { return pimpl->velo
 double Slider::getVelocitySensitivity() const noexcept      { return pimpl->velocityModeSensitivity; }
 double Slider::getVelocityOffset() const noexcept           { return pimpl->velocityModeOffset; }
 
-void Slider::setVelocityModeParameters (double sensitivity, int threshold, double offset, bool userCanPressKeyToSwapMode)
+void Slider::setVelocityModeParameters (double sensitivity, int threshold,
+                                        double offset, bool userCanPressKeyToSwapMode,
+                                        ModifierKeys::Flags modifierToSwapModes)
 {
     jassert (threshold >= 0);
     jassert (sensitivity > 0);
     jassert (offset >= 0);
 
-    pimpl->setVelocityModeParameters (sensitivity, threshold, offset, userCanPressKeyToSwapMode);
+    pimpl->setVelocityModeParameters (sensitivity, threshold, offset,
+                                      userCanPressKeyToSwapMode, modifierToSwapModes);
 }
 
 double Slider::getSkewFactor() const noexcept               { return pimpl->skewFactor; }
@@ -1535,7 +1543,7 @@ String Slider::getTextFromValue (double v)
 
 double Slider::getValueFromText (const String& text)
 {
-    String t (text.trimStart());
+    auto t = text.trimStart();
 
     if (t.endsWith (getTextValueSuffix()))
         t = t.substring (0, t.length() - getTextValueSuffix().length());

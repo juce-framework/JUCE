@@ -1691,12 +1691,6 @@ void TextEditor::performPopupMenuAction (const int menuItemID)
     }
 }
 
-static void textEditorMenuCallback (int menuResult, TextEditor* editor)
-{
-    if (editor != nullptr && menuResult != 0)
-        editor->performPopupMenuAction (menuResult);
-}
-
 //==============================================================================
 void TextEditor::mouseDown (const MouseEvent& e)
 {
@@ -1716,8 +1710,21 @@ void TextEditor::mouseDown (const MouseEvent& e)
             m.setLookAndFeel (&getLookAndFeel());
             addPopupMenuItems (m, &e);
 
+            menuActive = true;
+
+            SafePointer<TextEditor> safeThis (this);
+
             m.showMenuAsync (PopupMenu::Options(),
-                             ModalCallbackFunction::forComponent (textEditorMenuCallback, this));
+                             [safeThis] (int menuResult)
+                             {
+                                 if (auto* editor = safeThis.getComponent())
+                                 {
+                                     editor->menuActive = false;
+
+                                     if (menuResult != 0)
+                                         editor->performPopupMenuAction (menuResult);
+                                 }
+                             });
         }
     }
 }

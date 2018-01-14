@@ -127,12 +127,12 @@ namespace
         {
             hideDockIcon();
 
-            File projectFile = getFileCheckingForExistence (fileToLoad);
+            auto projectFile = getFileCheckingForExistence (fileToLoad);
 
             if (! projectFile.hasFileExtension (Project::projectFileExtension))
                 throw CommandLineError (projectFile.getFullPathName() + " isn't a valid jucer project file!");
 
-            project = new Project (projectFile);
+            project.reset (new Project (projectFile));
 
             if (! project->loadFrom (projectFile, true))
             {
@@ -145,8 +145,8 @@ namespace
         {
             if (project != nullptr)
             {
-                Result error (justSaveResources ? project->saveResourcesOnly (project->getFile())
-                                                : project->saveProject (project->getFile(), true));
+                auto error = justSaveResources ? project->saveResourcesOnly (project->getFile())
+                                               : project->saveProject (project->getFile(), true);
 
                 project.reset();
 

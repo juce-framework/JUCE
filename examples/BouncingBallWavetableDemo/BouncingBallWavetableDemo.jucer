@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="fyUrFS" name="BouncingBallWavetableDemo" projectType="guiapp"
-              version="1.0.0" bundleIdentifier="com.juce.BouncingBallWavetableDemo"
-              includeBinaryInAppConfig="1" jucerVersion="5.2.0" displaySplashScreen="0"
-              reportAppUsage="0" splashScreenColour="Dark" companyName="ROLI Ltd."
-              cppLanguageStandard="14" companyCopyright="ROLI Ltd.">
+              bundleIdentifier="com.juce.BouncingBallWavetableDemo" jucerVersion="5.2.0"
+              displaySplashScreen="0" reportAppUsage="0" companyName="ROLI Ltd."
+              companyCopyright="ROLI Ltd.">
   <MAINGROUP id="MgjqDB" name="BouncingBallWavetableDemo">
     <GROUP id="{D35F88A0-C242-1CAA-21A9-6D01F78F4128}" name="Source">
       <FILE id="M5GUDX" name="MainComponent.cpp" compile="1" resource="0"
@@ -15,10 +14,8 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
-                       isDebug="1" optimisation="1" targetName="WavetableBouncingEditor"/>
-        <CONFIGURATION name="Release" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
-                       isDebug="0" optimisation="2" targetName="WavetableBouncingEditor"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="WavetableBouncingEditor"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="WavetableBouncingEditor"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -38,10 +35,8 @@
     </XCODE_MAC>
     <VS2013 targetFolder="Builds/VisualStudio2013">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="1" optimisation="1" targetName="WavetableBouncingEditor"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="0" optimisation="2" targetName="WavetableBouncingEditor"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="WavetableBouncingEditor"/>
+        <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="WavetableBouncingEditor"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -61,10 +56,8 @@
     </VS2013>
     <VS2017 targetFolder="Builds/VisualStudio2017">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="BouncingBallWavetableDemo"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="BouncingBallWavetableDemo"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="BouncingBallWavetableDemo"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="BouncingBallWavetableDemo"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_video" path="../../modules"/>
@@ -84,8 +77,7 @@
     </VS2017>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" optimisation="1"
-                       targetName="WavetableBouncingEditor"/>
+        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" targetName="WavetableBouncingEditor"/>
         <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/" isDebug="0" optimisation="2"
                        targetName="WavetableBouncingEditor"/>
       </CONFIGURATIONS>

@@ -57,7 +57,7 @@ public:
         presetLabel.attachToComponent (&presetBox, true);
 
         addAndMakeVisible (presetBox);
-        presetBox.onChange = [this]() { selectPreset (presetBox.getSelectedItemIndex()); };
+        presetBox.onChange = [this] { selectPreset (presetBox.getSelectedItemIndex()); };
 
         fragmentEditorComp.setOpaque (false);
         fragmentDocument.addListener (this);

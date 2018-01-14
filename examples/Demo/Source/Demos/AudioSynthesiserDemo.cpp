@@ -245,12 +245,12 @@ public:
         sineButton.setButtonText ("Use sine wave");
         sineButton.setRadioGroupId (321);
         sineButton.setToggleState (true, dontSendNotification);
-        sineButton.onClick = [this]() { synthAudioSource.setUsingSineWaveSound(); };
+        sineButton.onClick = [this] { synthAudioSource.setUsingSineWaveSound(); };
 
         addAndMakeVisible (sampledButton);
         sampledButton.setButtonText ("Use sampled sound");
         sampledButton.setRadioGroupId (321);
-        sampledButton.onClick = [this]() { synthAudioSource.setUsingSampledSound(); };
+        sampledButton.onClick = [this] { synthAudioSource.setUsingSampledSound(); };
 
         addAndMakeVisible (liveAudioDisplayComp);
 

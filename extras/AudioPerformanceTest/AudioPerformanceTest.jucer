@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="AKfc5m" name="AudioPerformanceTest" projectType="guiapp"
-              version="1.0.0" bundleIdentifier="com.juce.AudioPerformanceTest"
-              includeBinaryInAppConfig="1" jucerVersion="5.2.0" displaySplashScreen="0"
-              reportAppUsage="0" splashScreenColour="Dark" companyName="ROLI Ltd."
-              cppLanguageStandard="14" companyCopyright="ROLI Ltd.">
+              bundleIdentifier="com.juce.AudioPerformanceTest" jucerVersion="5.2.0"
+              displaySplashScreen="0" reportAppUsage="0" companyName="ROLI Ltd."
+              companyCopyright="ROLI Ltd.">
   <MAINGROUP id="b1eVTe" name="AudioPerformanceTest">
     <GROUP id="{AB66118C-9D88-1C3A-D95C-42892D828E4B}" name="Source">
       <FILE id="SqGU9p" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
@@ -14,10 +13,8 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" extraCompilerFlags="">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
-                       isDebug="1" optimisation="1" targetName="AudioPerformanceTest"/>
-        <CONFIGURATION name="Release" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
-                       isDebug="0" optimisation="3" targetName="AudioPerformanceTest"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPerformanceTest"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="AudioPerformanceTest"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -33,13 +30,10 @@
         <MODULEPATH id="juce_audio_utils" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <XCODE_IPHONE targetFolder="Builds/iOS" extraCompilerFlags="" iosScreenOrientation="portraitlandscape"
-                  iPadScreenOrientation="portraitlandscape" iosDeviceFamily="1,2">
+    <XCODE_IPHONE targetFolder="Builds/iOS" extraCompilerFlags="">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" iosCompatibility="default" isDebug="1" optimisation="1"
-                       targetName="AudioPerformanceTest"/>
-        <CONFIGURATION name="Release" iosCompatibility="default" isDebug="0" optimisation="3"
-                       targetName="AudioPerformanceTest"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPerformanceTest"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="AudioPerformanceTest"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -57,10 +51,8 @@
     </XCODE_IPHONE>
     <VS2015 targetFolder="Builds/VisualStudio2015" extraCompilerFlags="">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="1" optimisation="1" targetName="AudioPerformanceTest"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="0" optimisation="3" targetName="AudioPerformanceTest"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPerformanceTest"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="AudioPerformanceTest"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -78,10 +70,8 @@
     </VS2015>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile" extraCompilerFlags="">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" optimisation="1"
-                       targetName="AudioPerformanceTest"/>
-        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/" isDebug="0" optimisation="3"
-                       targetName="AudioPerformanceTest"/>
+        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" targetName="AudioPerformanceTest"/>
+        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/" isDebug="0" targetName="AudioPerformanceTest"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -98,14 +88,12 @@
       </MODULEPATHS>
     </LINUX_MAKE>
     <ANDROIDSTUDIO androidActivityClass="com.juce.audioperformancetest.AudioPerformanceTest"
-                   androidInternetNeeded="1" androidBluetoothNeeded="1" androidCpp11="1"
-                   androidScreenOrientation="unspecified" targetFolder="Builds/Android"
-                   androidSDKPath="" androidNDKPath="" extraCompilerFlags="-mfpu=neon -mfloat-abi=hard -ffast-math -funroll-loops --param max-unroll-times=8 -mhard-float -D_NDK_MATH_NO_SOFTFP=1 -DJUCE_DISABLE_ASSERTIONS=1"
-                   extraDefs="" extraLinkerFlags="" externalLibraries="" gradleToolchain="clang"
-                   gradleToolchainVersion="3.6" androidMinimumSDK="23">
+                   androidCpp11="1" targetFolder="Builds/Android" androidSDKPath=""
+                   androidNDKPath="" extraCompilerFlags="-mfpu=neon -mfloat-abi=hard -ffast-math -funroll-loops --param max-unroll-times=8 -mhard-float -D_NDK_MATH_NO_SOFTFP=1 -DJUCE_DISABLE_ASSERTIONS=1"
+                   extraDefs="" extraLinkerFlags="" externalLibraries="" gradleToolchainVersion="3.6"
+                   androidMinimumSDK="23">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" androidArchitectures="arm64-v8a" isDebug="1" optimisation="1"
-                       targetName="AudioPerformanceTest"/>
+        <CONFIGURATION name="Debug" androidArchitectures="arm64-v8a" isDebug="1" targetName="AudioPerformanceTest"/>
         <CONFIGURATION name="Release" androidArchitectures="arm64-v8a" isDebug="0" optimisation="6"
                        targetName="AudioPerformanceTest"/>
       </CONFIGURATIONS>

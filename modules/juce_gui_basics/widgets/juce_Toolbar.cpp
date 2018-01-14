@@ -246,7 +246,7 @@ Toolbar::Toolbar()
     addChildComponent (missingItemsButton = getLookAndFeel().createToolbarMissingItemsButton (*this));
 
     missingItemsButton->setAlwaysOnTop (true);
-    missingItemsButton->onClick = [this]() { showMissingItems(); };
+    missingItemsButton->onClick = [this] { showMissingItems(); };
 }
 
 Toolbar::~Toolbar()
@@ -733,13 +733,13 @@ private:
 
                 styleBox.setSelectedId (selectedStyle);
 
-                styleBox.onChange = [this]() { updateStyle(); };
+                styleBox.onChange = [this] { updateStyle(); };
             }
 
             if ((optionFlags & Toolbar::showResetToDefaultsButton) != 0)
             {
                 addAndMakeVisible (defaultButton);
-                defaultButton.onClick = [this]() { toolbar.addDefaultItems (factory); };
+                defaultButton.onClick = [this] { toolbar.addDefaultItems (factory); };
             }
 
             addAndMakeVisible (instructions);

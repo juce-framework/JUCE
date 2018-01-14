@@ -360,7 +360,7 @@ struct OpenGLDemoClasses
             speedLabel.attachToComponent (&speedSlider, true);
 
             addAndMakeVisible (showBackgroundToggle);
-            showBackgroundToggle.onClick = [this]() { demo.doBackgroundDrawing = showBackgroundToggle.getToggleState(); };
+            showBackgroundToggle.onClick = [this] { demo.doBackgroundDrawing = showBackgroundToggle.getToggleState(); };
 
             addAndMakeVisible (tabbedComp);
             tabbedComp.setTabBarDepth (25);
@@ -377,11 +377,11 @@ struct OpenGLDemoClasses
             textures.add (new DynamicTexture());
 
             addAndMakeVisible (textureBox);
-            textureBox.onChange = [this]() { selectTexture (textureBox.getSelectedId()); };
+            textureBox.onChange = [this] { selectTexture (textureBox.getSelectedId()); };
             updateTexturesList();
 
             addAndMakeVisible (presetBox);
-            presetBox.onChange = [this]() { selectPreset (presetBox.getSelectedItemIndex()); };
+            presetBox.onChange = [this] { selectPreset (presetBox.getSelectedItemIndex()); };
 
             auto presets = getPresets();
             StringArray presetNames;

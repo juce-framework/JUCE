@@ -700,7 +700,8 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
             projectTypeCodes.add (types.getUnchecked(i)->getType());
         }
 
-        props.add (new ChoicePropertyComponent (projectTypeValue, "Project Type", projectTypeNames, projectTypeCodes));
+        props.add (new ChoicePropertyComponent (projectTypeValue, "Project Type", projectTypeNames, projectTypeCodes),
+                   "The project type for which settings should be shown.");
     }
 
     props.add (new TextPropertyComponent (bundleIdentifierValue, "Bundle Identifier", 256, false),
@@ -757,7 +758,7 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
                "Whether the project should produce a VST3 plugin.");
     props.add (new ChoicePropertyComponent (buildAUValue, "Build AudioUnit"),
                "Whether the project should produce an AudioUnit plugin.");
-    props.add (new ChoicePropertyComponent (buildAUValue, "Build AudioUnit v3"),
+    props.add (new ChoicePropertyComponent (buildAUv3Value, "Build AudioUnit v3"),
                "Whether the project should produce an AudioUnit version 3 plugin.");
     props.add (new ChoicePropertyComponent (buildRTASValue, "Build RTAS"),
                "Whether the project should produce an RTAS plugin.");

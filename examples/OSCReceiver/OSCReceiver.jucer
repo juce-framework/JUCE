@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="pdocPt" name="OSCReceiver" projectType="guiapp" version="1.0.0"
-              bundleIdentifier="com.roli.OSCReceiver" includeBinaryInAppConfig="1"
+<JUCERPROJECT id="pdocPt" name="OSCReceiver" projectType="guiapp" bundleIdentifier="com.roli.OSCReceiver"
               jucerVersion="5.2.0" displaySplashScreen="0" reportAppUsage="0"
-              splashScreenColour="Dark" companyName="ROLI Ltd." cppLanguageStandard="14"
-              companyCopyright="ROLI Ltd.">
+              companyName="ROLI Ltd." companyCopyright="ROLI Ltd.">
   <MAINGROUP id="Y6Q0O9" name="OSCReceiver">
     <GROUP id="{9F303ECD-83DE-CA91-97B4-C083DA897F49}" name="Source">
       <FILE id="HHuoMc" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
@@ -14,10 +12,8 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
-                       isDebug="1" optimisation="1" targetName="OSCReceiver"/>
-        <CONFIGURATION name="Release" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
-                       isDebug="0" optimisation="3" targetName="OSCReceiver"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="OSCReceiver"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="OSCReceiver"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -32,10 +28,8 @@
     </XCODE_MAC>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" optimisation="1"
-                       targetName="OSCReceiver"/>
-        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/" isDebug="0" optimisation="3"
-                       targetName="OSCReceiver"/>
+        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" targetName="OSCReceiver"/>
+        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/" isDebug="0" targetName="OSCReceiver"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_osc" path="../../modules"/>
@@ -50,10 +44,8 @@
     </LINUX_MAKE>
     <VS2015 targetFolder="Builds/VisualStudio2015">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="1" optimisation="1" targetName="OSCReceiver"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="0" optimisation="3" targetName="OSCReceiver"/>
+        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="OSCReceiver"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="OSCReceiver"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_osc" path="../../modules"/>
@@ -68,10 +60,8 @@
     </VS2015>
     <VS2017 targetFolder="Builds/VisualStudio2017">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="OSCReceiver"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="OSCReceiver"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="OSCReceiver"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="OSCReceiver"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_osc" path="../../modules"/>
@@ -84,13 +74,10 @@
         <MODULEPATH id="juce_core" path="../../modules"/>
       </MODULEPATHS>
     </VS2017>
-    <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="portraitlandscape"
-                  iPadScreenOrientation="portraitlandscape" iosDeviceFamily="1,2">
+    <XCODE_IPHONE targetFolder="Builds/iOS">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" iosCompatibility="default" isDebug="1" optimisation="1"
-                       targetName="OSCReceiver"/>
-        <CONFIGURATION name="Release" iosCompatibility="default" isDebug="0" optimisation="3"
-                       targetName="OSCReceiver"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="OSCReceiver"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="OSCReceiver"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_osc" path="../../modules"/>
@@ -104,15 +91,12 @@
       </MODULEPATHS>
     </XCODE_IPHONE>
     <ANDROIDSTUDIO androidActivityClass="com.yourcompany.oscreceiver.OSCReceiver"
-                   androidInternetNeeded="1" androidBluetoothNeeded="0" androidCpp11="1"
-                   targetFolder="Builds/Android" androidScreenOrientation="unspecified"
-                   gradleToolchain="clang" gradleToolchainVersion="3.6" androidSDKPath=""
-                   androidNDKPath="">
+                   androidBluetoothNeeded="0" androidCpp11="1" targetFolder="Builds/Android"
+                   gradleToolchainVersion="3.6" androidSDKPath="" androidNDKPath="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi armeabi-v7a x86" isDebug="1"
-                       optimisation="1" targetName="OSCReceiver"/>
-        <CONFIGURATION name="Release" androidArchitectures="" isDebug="0" optimisation="3"
                        targetName="OSCReceiver"/>
+        <CONFIGURATION name="Release" androidArchitectures="" isDebug="0" targetName="OSCReceiver"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_osc" path="../../modules"/>

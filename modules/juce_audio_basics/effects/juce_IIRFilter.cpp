@@ -56,7 +56,7 @@ IIRCoefficients::IIRCoefficients (double c1, double c2, double c3,
 IIRCoefficients IIRCoefficients::makeLowPass (double sampleRate,
                                               double frequency) noexcept
 {
-    return makeLowPass (sampleRate, frequency, 1.0 / std::sqrt (2.0));
+    return makeLowPass (sampleRate, frequency, 1.0 / MathConstants<double>::sqrt2);
 }
 
 IIRCoefficients IIRCoefficients::makeLowPass (double sampleRate,
@@ -108,7 +108,7 @@ IIRCoefficients IIRCoefficients::makeHighPass (double sampleRate,
 IIRCoefficients IIRCoefficients::makeBandPass (double sampleRate,
                                                double frequency) noexcept
 {
-    return makeBandPass (sampleRate, frequency, 1.0 / std::sqrt (2.0));
+    return makeBandPass (sampleRate, frequency, 1.0 / MathConstants<double>::sqrt2);
 }
 
 IIRCoefficients IIRCoefficients::makeBandPass (double sampleRate,
@@ -134,7 +134,7 @@ IIRCoefficients IIRCoefficients::makeBandPass (double sampleRate,
 IIRCoefficients IIRCoefficients::makeNotchFilter (double sampleRate,
                                                   double frequency) noexcept
 {
-    return makeNotchFilter (sampleRate, frequency, 1.0 / std::sqrt (2.0));
+    return makeNotchFilter (sampleRate, frequency, 1.0 / MathConstants<double>::sqrt2);
 }
 
 IIRCoefficients IIRCoefficients::makeNotchFilter (double sampleRate,
@@ -160,7 +160,7 @@ IIRCoefficients IIRCoefficients::makeNotchFilter (double sampleRate,
 IIRCoefficients IIRCoefficients::makeAllPass (double sampleRate,
                                               double frequency) noexcept
 {
-    return makeAllPass (sampleRate, frequency, 1.0 / std::sqrt (2.0));
+    return makeAllPass (sampleRate, frequency, 1.0 / MathConstants<double>::sqrt2);
 }
 
 IIRCoefficients IIRCoefficients::makeAllPass (double sampleRate,

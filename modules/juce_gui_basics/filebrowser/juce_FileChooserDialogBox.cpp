@@ -104,9 +104,9 @@ FileChooserDialogBox::FileChooserDialogBox (const String& name,
     setResizable (true, true);
     setResizeLimits (300, 300, 1200, 1000);
 
-    content->okButton.onClick        = [this]() { okButtonPressed(); };
-    content->cancelButton.onClick    = [this]() { closeButtonPressed(); };
-    content->newFolderButton.onClick = [this]() { createNewFolder(); };
+    content->okButton.onClick        = [this] { okButtonPressed(); };
+    content->cancelButton.onClick    = [this] { closeButtonPressed(); };
+    content->newFolderButton.onClick = [this] { createNewFolder(); };
 
     content->chooserComponent.addListener (this);
 

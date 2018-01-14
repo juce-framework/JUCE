@@ -117,7 +117,7 @@ public:
 
         addAndMakeVisible (nativeButton);
         nativeButton.setButtonText ("Use Native Windows");
-        nativeButton.onClick = [this]() { getLookAndFeel().setUsingNativeAlertWindows (nativeButton.getToggleState()); };
+        nativeButton.onClick = [this] { getLookAndFeel().setUsingNativeAlertWindows (nativeButton.getToggleState()); };
 
         static const char* windowNames[] =
         {
@@ -147,7 +147,7 @@ public:
             windowButtons.add (newButton);
             addAndMakeVisible (newButton);
             newButton->setButtonText (windowNames[i]);
-            newButton->onClick = [this, i, newButton]() { showWindow (*newButton, static_cast<DialogType> (i)); };
+            newButton->onClick = [this, i, newButton] { showWindow (*newButton, static_cast<DialogType> (i)); };
         }
     }
 

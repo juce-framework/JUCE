@@ -195,8 +195,8 @@ public:
 
         addAndMakeVisible (undoButton);
         addAndMakeVisible (redoButton);
-        undoButton.onClick = [this]() { undoManager.undo(); };
-        redoButton.onClick = [this]() { undoManager.redo(); };
+        undoButton.onClick = [this] { undoManager.undo(); };
+        redoButton.onClick = [this] { undoManager.redo(); };
 
         startTimer (500);
     }

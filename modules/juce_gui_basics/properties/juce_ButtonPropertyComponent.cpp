@@ -32,7 +32,7 @@ ButtonPropertyComponent::ButtonPropertyComponent (const String& name, bool trigg
 {
     addAndMakeVisible (button);
     button.setTriggeredOnMouseDown (triggerOnMouseDown);
-    button.onClick = [this]() { buttonClicked(); };
+    button.onClick = [this] { buttonClicked(); };
 }
 
 ButtonPropertyComponent::~ButtonPropertyComponent()

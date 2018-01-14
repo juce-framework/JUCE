@@ -99,7 +99,7 @@ public:
                  || dynamic_cast<FileOptionComponent*> (existing.get())->item != child)
             {
                 existing.reset();
-                existing = new FileOptionComponent (child, dynamic_cast<ListBoxHeader*> (list.getHeaderComponent()));
+                existing.reset (new FileOptionComponent (child, dynamic_cast<ListBoxHeader*> (list.getHeaderComponent())));
             }
         }
 

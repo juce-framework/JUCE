@@ -58,9 +58,9 @@ public:
         kerningSlider.addListener (this);
         scaleSlider.addListener (this);
 
-        boldToggle.onClick   = [this]() { refreshPreviewBoxFont(); };
-        italicToggle.onClick = [this]() { refreshPreviewBoxFont(); };
-        styleBox.onChange    = [this]() { refreshPreviewBoxFont(); };
+        boldToggle.onClick   = [this] { refreshPreviewBoxFont(); };
+        italicToggle.onClick = [this] { refreshPreviewBoxFont(); };
+        styleBox.onChange    = [this] { refreshPreviewBoxFont(); };
 
         Font::findFonts (fonts);   // Generate the list of fonts
 

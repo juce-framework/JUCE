@@ -540,7 +540,7 @@ bool ComponentPeer::handleDragDrop (const ComponentPeer::DragInfo& info)
 
             // We'll use an async message to deliver the drop, because if the target decides
             // to run a modal loop, it can gum-up the operating system..
-            MessageManager::callAsync ([=]()
+            MessageManager::callAsync ([=]
             {
                 if (auto* c = targetComp.get())
                 {

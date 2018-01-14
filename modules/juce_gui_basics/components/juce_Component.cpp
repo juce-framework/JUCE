@@ -1683,7 +1683,7 @@ void Component::exitModalState (int returnValue)
         {
             WeakReference<Component> target (this);
 
-            MessageManager::callAsync ([=]()
+            MessageManager::callAsync ([=]
             {
                 if (auto* c = target.get())
                     c->exitModalState (returnValue);
@@ -2238,7 +2238,7 @@ void Component::postCommandMessage (int commandID)
 {
     WeakReference<Component> target (this);
 
-    MessageManager::callAsync ([=]()
+    MessageManager::callAsync ([=]
     {
         if (auto* c = target.get())
             c->handleCommandMessage (commandID);

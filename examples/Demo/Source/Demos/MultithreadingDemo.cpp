@@ -217,7 +217,7 @@ public:
         controlButton.setTopLeftPosition (20, 20);
         controlButton.setTriggeredOnMouseDown (true);
         controlButton.setAlwaysOnTop (true);
-        controlButton.onClick = [this]() { showMenu(); };
+        controlButton.onClick = [this] { showMenu(); };
     }
 
     ~MultithreadingDemo()

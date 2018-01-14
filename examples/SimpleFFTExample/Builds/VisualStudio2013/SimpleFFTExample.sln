@@ -5,14 +5,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimpleFFTExample - App", "S
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Win32 = Debug|Win32
-		Release|Win32 = Release|Win32
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{5F11C54A-E1F5-0119-1E0A-E26E0B8E911C}.Debug|Win32.ActiveCfg = Debug|Win32
-		{5F11C54A-E1F5-0119-1E0A-E26E0B8E911C}.Debug|Win32.Build.0 = Debug|Win32
-		{5F11C54A-E1F5-0119-1E0A-E26E0B8E911C}.Release|Win32.ActiveCfg = Release|Win32
-		{5F11C54A-E1F5-0119-1E0A-E26E0B8E911C}.Release|Win32.Build.0 = Release|Win32
+		{5F11C54A-E1F5-0119-1E0A-E26E0B8E911C}.Debug|x64.ActiveCfg = Debug|x64
+		{5F11C54A-E1F5-0119-1E0A-E26E0B8E911C}.Debug|x64.Build.0 = Debug|x64
+		{5F11C54A-E1F5-0119-1E0A-E26E0B8E911C}.Release|x64.ActiveCfg = Release|x64
+		{5F11C54A-E1F5-0119-1E0A-E26E0B8E911C}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

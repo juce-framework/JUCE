@@ -37,7 +37,7 @@ SidePanel::SidePanel (StringRef title, int width, bool positionOnLeft,
 
     addAndMakeVisible (titleLabel);
 
-    dismissButton.onClick = [this]() { showOrHide (false); };
+    dismissButton.onClick = [this] { showOrHide (false); };
     addAndMakeVisible (dismissButton);
 
     Desktop::getInstance().addGlobalMouseListener (this);

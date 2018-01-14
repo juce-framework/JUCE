@@ -33,23 +33,25 @@ class TextPropertyComponentWithEnablement    : public TextPropertyComponent,
 {
 public:
     TextPropertyComponentWithEnablement (const ValueWithDefault& valueToControl,
-                                         const Value& valueToListenTo,
+                                         ValueWithDefault valueToListenTo,
                                          const String& propertyName,
                                          int maxNumChars,
                                          bool isMultiLine)
         : TextPropertyComponent (valueToControl, propertyName, maxNumChars, isMultiLine),
-          value (valueToListenTo)
+          valueWithDefault (valueToListenTo),
+          value (valueWithDefault.getPropertyAsValue())
     {
         value.addListener (this);
-        setEnabled (value.getValue());
+        setEnabled (valueWithDefault.get());
     }
 
     ~TextPropertyComponentWithEnablement()    { value.removeListener (this); }
 
 private:
+    ValueWithDefault valueWithDefault;
     Value value;
 
-    void valueChanged (Value& v) override     { setEnabled (v.getValue()); }
+    void valueChanged (Value&) override       { setEnabled (valueWithDefault.get()); }
 };
 
 //==============================================================================
@@ -58,21 +60,23 @@ class ChoicePropertyComponentWithEnablement    : public ChoicePropertyComponent,
 {
 public:
     ChoicePropertyComponentWithEnablement (const ValueWithDefault& valueToControl,
-                                           const Value& valueToListenTo,
+                                           ValueWithDefault valueToListenTo,
                                            const String& propertyName,
                                            const StringArray& choices,
                                            const Array<var>& correspondingValues)
         : ChoicePropertyComponent (valueToControl, propertyName, choices, correspondingValues),
-          value (valueToListenTo)
+          valueWithDefault (valueToListenTo),
+          value (valueToListenTo.getPropertyAsValue())
     {
         value.addListener (this);
-        setEnabled (value.getValue());
+        setEnabled (valueWithDefault.get());
     }
 
     ~ChoicePropertyComponentWithEnablement()    { value.removeListener (this); }
 
 private:
+    ValueWithDefault valueWithDefault;
     Value value;
 
-    void valueChanged (Value& v) override       { setEnabled (v.getValue()); }
+    void valueChanged (Value&) override         { setEnabled (valueWithDefault.get()); }
 };

@@ -52,12 +52,11 @@ void PaintElementGroup::ungroup (const bool undoable)
     getOwner()->removeElement (this, undoable);
 }
 
-void PaintElementGroup::groupSelected (PaintRoutine* const routine)
+void PaintElementGroup::groupSelected (PaintRoutine* routine)
 {
     if (routine->getSelectedElements().getNumSelected() > 1)
     {
-        PaintElementGroup* newGroup = new PaintElementGroup (routine);
-
+        auto* newGroup = new PaintElementGroup (routine);
         int frontIndex = -1;
 
         for (int i = 0; i < routine->getNumElements(); ++i)
@@ -66,7 +65,7 @@ void PaintElementGroup::groupSelected (PaintRoutine* const routine)
             {
                 ScopedPointer<XmlElement> xml (routine->getElement(i)->createXml());
 
-                if (PaintElement* newOne = ObjectTypes::createElementForXml (xml, routine))
+                if (auto* newOne = ObjectTypes::createElementForXml (xml, routine))
                     newGroup->subElements.add (newOne);
 
                 if (i > frontIndex)
@@ -76,7 +75,7 @@ void PaintElementGroup::groupSelected (PaintRoutine* const routine)
 
         routine->deleteSelected();
 
-        PaintElement* const g = routine->addNewElement (newGroup, frontIndex, true);
+        auto* g = routine->addNewElement (newGroup, frontIndex, true);
         routine->getSelectedElements().selectOnly (g);
     }
 }

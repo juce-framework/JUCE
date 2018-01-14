@@ -143,8 +143,8 @@ public:
         loadLeftButton.setButtonText ("Load Left");
         loadRightButton.setButtonText ("Load Right");
 
-        loadLeftButton .onClick = [this]() { movieCompLeft .setFile (fileTree.getSelectedFile (0)); };
-        loadRightButton.onClick = [this]() { movieCompRight.setFile (fileTree.getSelectedFile (0)); };
+        loadLeftButton .onClick = [this] { movieCompLeft .setFile (fileTree.getSelectedFile (0)); };
+        loadRightButton.onClick = [this] { movieCompRight.setFile (fileTree.getSelectedFile (0)); };
 
         addAndMakeVisible (loadLeftButton);
         addAndMakeVisible (loadRightButton);

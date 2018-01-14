@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="SS6MsF" name="PushNotificationsDemo" displaySplashScreen="0"
-              reportAppUsage="0" splashScreenColour="Dark" projectType="guiapp"
-              version="1.0.0" bundleIdentifier="com.juce.pushnotificationsdemo"
-              includeBinaryInAppConfig="1" cppLanguageStandard="14" jucerVersion="5.2.0"
-              companyCopyright="">
+              reportAppUsage="0" projectType="guiapp" bundleIdentifier="com.juce.pushnotificationsdemo"
+              jucerVersion="5.2.0" companyCopyright="">
   <MAINGROUP id="VaJRhp" name="PushNotificationsDemo">
     <GROUP id="{712B2C90-FAC6-CCF3-F8F9-ED82411AF5ED}" name="BinaryResources">
       <GROUP id="{DBF05B65-21C4-E232-D005-149CC3FD4CD6}" name="images">
@@ -60,15 +58,11 @@
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
-    <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="portraitlandscape"
-                  iosPushNotifications="1" extraCompilerFlags="-pedantic -Werror -Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion&#10;-F../../../../3rd_party/FacebookSDKs-iOS-4&#10;-F../../../../3rd_party/Firebase_ios_sdk/Analytics&#10;-F../../../../3rd_party/Firebase_ios_sdk/Messaging"
-                  customXcodeResourceFolders="./BinaryResources/sounds" iPadScreenOrientation="portraitlandscape"
-                  iosDeviceFamily="1,2">
+    <XCODE_IPHONE targetFolder="Builds/iOS" iosPushNotifications="1" extraCompilerFlags="-pedantic -Werror -Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion&#10;-F../../../../3rd_party/FacebookSDKs-iOS-4&#10;-F../../../../3rd_party/Firebase_ios_sdk/Analytics&#10;-F../../../../3rd_party/Firebase_ios_sdk/Messaging"
+                  customXcodeResourceFolders="./BinaryResources/sounds">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="PushNotificationsDemo"
-                       enablePluginBinaryCopyStep="1"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="PushNotificationsDemo"
-                       enablePluginBinaryCopyStep="1"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="PushNotificationsDemo"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="PushNotificationsDemo"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -90,10 +84,9 @@
                    extraCompilerFlags="-pedantic -Werror -Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion&#10;-F../../../../3rd_party/FacebookSDKs-iOS-4&#10;-F../../../../3rd_party/Firebase_ios_sdk/Analytics&#10;-F../../../../3rd_party/Firebase_ios_sdk/Messaging"
                    androidVibratePermissionNeeded="1" androidMinimumSDK="26">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" androidArchitectures="armeabi x86" isDebug="1" optimisation="1"
-                       targetName="PushNotificationsDemo" androidAdditionalRawValueResources="../BinaryResources/sounds/demonstrative.mp3&#10;../BinaryResources/sounds/isntit.mp3&#10;../BinaryResources/sounds/jinglebellssms.mp3&#10;../BinaryResources/sounds/served.mp3&#10;../BinaryResources/sounds/solemn.mp3&#10;../BinaryResources/images/ic_stat_name.png&#10;../BinaryResources/images/ic_stat_name2.png&#10;../BinaryResources/images/ic_stat_name3.png&#10;../BinaryResources/images/ic_stat_name4.png&#10;../BinaryResources/images/ic_stat_name5.png&#10;../BinaryResources/images/ic_stat_name6.png&#10;../BinaryResources/images/ic_stat_name7.png&#10;../BinaryResources/images/ic_stat_name8.png&#10;../BinaryResources/images/ic_stat_name9.png&#10;../BinaryResources/images/ic_stat_name10.png"/>
-        <CONFIGURATION name="Release" androidArchitectures="" isDebug="0" optimisation="3"
-                       targetName="PushNotificationsDemo" androidAdditionalRawValueResources="../BinaryResources/sounds/demonstrative.mp3&#10;../BinaryResources/sounds/isntit.mp3&#10;../BinaryResources/sounds/jinglebellssms.mp3&#10;../BinaryResources/sounds/served.mp3&#10;../BinaryResources/sounds/solemn.mp3&#10;../BinaryResources/images/ic_stat_name.png&#10;../BinaryResources/images/ic_stat_name2.png&#10;../BinaryResources/images/ic_stat_name3.png&#10;../BinaryResources/images/ic_stat_name4.png&#10;../BinaryResources/images/ic_stat_name5.png&#10;../BinaryResources/images/ic_stat_name6.png&#10;../BinaryResources/images/ic_stat_name7.png&#10;../BinaryResources/images/ic_stat_name8.png&#10;../BinaryResources/images/ic_stat_name9.png&#10;../BinaryResources/images/ic_stat_name10.png"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="PushNotificationsDemo" androidAdditionalRawValueResources="../BinaryResources/sounds/demonstrative.mp3&#10;../BinaryResources/sounds/isntit.mp3&#10;../BinaryResources/sounds/jinglebellssms.mp3&#10;../BinaryResources/sounds/served.mp3&#10;../BinaryResources/sounds/solemn.mp3&#10;../BinaryResources/images/ic_stat_name.png&#10;../BinaryResources/images/ic_stat_name2.png&#10;../BinaryResources/images/ic_stat_name3.png&#10;../BinaryResources/images/ic_stat_name4.png&#10;../BinaryResources/images/ic_stat_name5.png&#10;../BinaryResources/images/ic_stat_name6.png&#10;../BinaryResources/images/ic_stat_name7.png&#10;../BinaryResources/images/ic_stat_name8.png&#10;../BinaryResources/images/ic_stat_name9.png&#10;../BinaryResources/images/ic_stat_name10.png"/>
+        <CONFIGURATION name="Release" androidArchitectures="" isDebug="0" targetName="PushNotificationsDemo"
+                       androidAdditionalRawValueResources="../BinaryResources/sounds/demonstrative.mp3&#10;../BinaryResources/sounds/isntit.mp3&#10;../BinaryResources/sounds/jinglebellssms.mp3&#10;../BinaryResources/sounds/served.mp3&#10;../BinaryResources/sounds/solemn.mp3&#10;../BinaryResources/images/ic_stat_name.png&#10;../BinaryResources/images/ic_stat_name2.png&#10;../BinaryResources/images/ic_stat_name3.png&#10;../BinaryResources/images/ic_stat_name4.png&#10;../BinaryResources/images/ic_stat_name5.png&#10;../BinaryResources/images/ic_stat_name6.png&#10;../BinaryResources/images/ic_stat_name7.png&#10;../BinaryResources/images/ic_stat_name8.png&#10;../BinaryResources/images/ic_stat_name9.png&#10;../BinaryResources/images/ic_stat_name10.png"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -112,10 +105,8 @@
     </ANDROIDSTUDIO>
     <XCODE_MAC targetFolder="Builds/MacOSX" iosPushNotifications="1" customXcodeResourceFolders="./BinaryResources/images">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="PushNotificationsDemo"
-                       enablePluginBinaryCopyStep="1"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="PushNotificationsDemo"
-                       enablePluginBinaryCopyStep="1"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="PushNotificationsDemo"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="PushNotificationsDemo"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_opengl" path="../../modules"/>
@@ -134,12 +125,9 @@
     </XCODE_MAC>
     <VS2015 targetFolder="Builds/VisualStudio2015">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="PushNotificationsDemo"
-                       debugInformationFormat="ProgramDatabase" enablePluginBinaryCopyStep="0"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="PushNotificationsDemo"
-                       linkTimeOptimisation="1" debugInformationFormat="None" enablePluginBinaryCopyStep="0"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="PushNotificationsDemo"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="PushNotificationsDemo"
+                       debugInformationFormat="None"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_opengl" path="../../modules"/>

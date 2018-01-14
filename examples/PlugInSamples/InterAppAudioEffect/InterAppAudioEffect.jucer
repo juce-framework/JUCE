@@ -1,18 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="rgYEL2" name="InterAppAudioEffect" projectType="audioplug"
-              version="1.0.0" bundleIdentifier="com.roli.InterAppAudioEffect"
-              includeBinaryInAppConfig="1" buildVST="0" buildVST3="0" buildAU="0"
-              buildAUv3="0" buildRTAS="0" buildAAX="0" enableIAA="1" pluginName="InterAppAudioEffect"
-              pluginDesc="InterAppAudioEffect" pluginManufacturer="ROLI Ltd."
-              pluginManufacturerCode="ROLI" pluginCode="IAAE" pluginChannelConfigs=""
-              pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
-              pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="InterAppAudioEffectAU"
+              bundleIdentifier="com.roli.InterAppAudioEffect" buildVST="0"
+              buildAU="0" buildAUv3="0" buildRTAS="0" buildAAX="0" enableIAA="1"
+              pluginName="InterAppAudioEffect" pluginDesc="InterAppAudioEffect"
+              pluginManufacturer="ROLI Ltd." pluginManufacturerCode="ROLI"
+              pluginCode="IAAE" pluginChannelConfigs="" pluginAUExportPrefix="InterAppAudioEffectAU"
               pluginRTASCategory="" aaxIdentifier="com.yourcompany.InterAppAudioEffect"
               pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.2.0"
               companyName="ROLI Ltd." buildStandalone="1" displaySplashScreen="0"
-              reportAppUsage="0" splashScreenColour="Dark" cppLanguageStandard="14"
-              companyCopyright="ROLI Ltd.">
+              reportAppUsage="0" companyCopyright="ROLI Ltd." buildVST3="0">
   <MAINGROUP id="BhTVmm" name="InterAppAudioEffect">
     <GROUP id="{79B2188B-B073-DD2F-F997-AFE1A88B5908}" name="Source">
       <FILE id="s4nZon" name="IAAEffectProcessor.h" compile="0" resource="0"
@@ -25,12 +22,11 @@
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
-    <XCODE_IPHONE targetFolder="Builds/iOS" iosScreenOrientation="portraitlandscape"
-                  microphonePermissionNeeded="1" iosBackgroundAudio="1" extraCompilerFlags="-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion"
-                  iPadScreenOrientation="portraitlandscape" iosDeviceFamily="1,2">
+    <XCODE_IPHONE targetFolder="Builds/iOS" microphonePermissionNeeded="1" iosBackgroundAudio="1"
+                  extraCompilerFlags="-Wall -Wshadow -Wno-missing-field-initializers -Wshadow -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="InterAppAudioEffect"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="InterAppAudioEffect"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="InterAppAudioEffect"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="InterAppAudioEffect"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../../modules"/>
@@ -62,5 +58,5 @@
     <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0"/>
     <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0"/>
   </MODULES>
-  <JUCEOPTIONS JUCE_QUICKTIME="disabled"/>
+  <JUCEOPTIONS/>
 </JUCERPROJECT>

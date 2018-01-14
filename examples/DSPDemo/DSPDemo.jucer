@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="yVderJ" name="DSPDemo" displaySplashScreen="1" reportAppUsage="1"
-              splashScreenColour="Dark" projectType="guiapp" version="1.0.0"
-              bundleIdentifier="com.roli.DSPDemo" includeBinaryInAppConfig="1"
-              jucerVersion="5.2.0" cppLanguageStandard="14" companyName="ROLI Ltd."
-              companyWebsite="www.juce.com" companyEmail="info@juce.com" companyCopyright="ROLI Ltd.">
+<JUCERPROJECT id="yVderJ" name="DSPDemo" bundleIdentifier="com.roli.DSPDemo"
+              jucerVersion="5.2.0" companyName="ROLI Ltd." companyWebsite="www.juce.com"
+              companyEmail="info@juce.com" companyCopyright="ROLI Ltd." displaySplashScreen="1"
+              reportAppUsage="1" projectType="guiapp">
   <MAINGROUP id="vJBLPL" name="DSPDemo">
     <GROUP id="{EF78091C-1BFD-651B-9BAA-893A127B90F5}" name="Source">
       <GROUP id="{5F45257F-D13D-6B55-449A-8502543E2C89}" name="Resources">
@@ -44,10 +43,8 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" extraCompilerFlags="-pedantic-errors -Wreorder -Wconstant-conversion -Wint-conversion -Woverloaded-virtual -Wuninitialized -Wunused-parameter -Wshorten-64-to-32 -Wstrict-aliasing -Wshadow -Wconversion -Wsign-compare -Wsign-conversion">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="DSPDemo"
-                       cppLanguageStandard="gnu++14"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="DSPDemo"
-                       cppLanguageStandard="c++14"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="DSPDemo" cppLanguageStandard="gnu++14"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="DSPDemo" cppLanguageStandard="c++14"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -66,8 +63,8 @@
     </XCODE_MAC>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="DSPDemo"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="DSPDemo"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="DSPDemo"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="DSPDemo"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -86,10 +83,8 @@
     </LINUX_MAKE>
     <VS2017 targetFolder="Builds/VisualStudio2017">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="DSPDemo"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="DSPDemo"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="DSPDemo"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="DSPDemo"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>
@@ -121,5 +116,5 @@
     <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
   </MODULES>
-  <JUCEOPTIONS JUCE_USE_MP3AUDIOFORMAT="enabled"/>
+  <JUCEOPTIONS JUCE_USE_MP3AUDIOFORMAT="1"/>
 </JUCERPROJECT>

@@ -63,15 +63,15 @@ public:
 
         addAndMakeVisible (launchButton);
         launchButton.setButtonText ("Launch Child Process");
-        launchButton.onClick = [this]() { launchChildProcess(); };
+        launchButton.onClick = [this] { launchChildProcess(); };
 
         addAndMakeVisible (pingButton);
         pingButton.setButtonText ("Send Ping");
-        pingButton.onClick = [this]() { pingChildProcess(); };
+        pingButton.onClick = [this] { pingChildProcess(); };
 
         addAndMakeVisible (killButton);
         killButton.setButtonText ("Kill Child Process");
-        killButton.onClick = [this]() { killChildProcess(); };
+        killButton.onClick = [this] { killChildProcess(); };
 
         addAndMakeVisible (testResultsBox);
         testResultsBox.setMultiLine (true);

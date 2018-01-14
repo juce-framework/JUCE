@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="IhmIkj" name="OSCMonitor" projectType="guiapp" version="1.0.0"
-              bundleIdentifier="com.roli.OSCMonitor" includeBinaryInAppConfig="1"
+<JUCERPROJECT id="IhmIkj" name="OSCMonitor" projectType="guiapp" bundleIdentifier="com.roli.OSCMonitor"
               jucerVersion="5.2.0" displaySplashScreen="0" reportAppUsage="0"
-              splashScreenColour="Dark" companyName="ROLI Ltd." cppLanguageStandard="14"
-              companyCopyright="ROLI Ltd.">
+              companyName="ROLI Ltd." companyCopyright="ROLI Ltd.">
   <MAINGROUP id="N9NMMk" name="OSCMonitor">
     <GROUP id="{2B92546C-6B49-72D9-ACD0-0F2FCE9AD0D5}" name="Source">
       <FILE id="fqVB21" name="OSCLogListBox.h" compile="0" resource="0" file="Source/OSCLogListBox.h"/>
@@ -15,10 +13,8 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
-                       isDebug="1" optimisation="1" targetName="OSCMonitor"/>
-        <CONFIGURATION name="Release" osxSDK="default" osxCompatibility="default" osxArchitecture="default"
-                       isDebug="0" optimisation="3" targetName="OSCMonitor"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="OSCMonitor"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="OSCMonitor"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -39,10 +35,8 @@
     </XCODE_MAC>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" optimisation="1"
-                       targetName="OSCMonitor"/>
-        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/" isDebug="0" optimisation="3"
-                       targetName="OSCMonitor"/>
+        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" targetName="OSCMonitor"/>
+        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/" isDebug="0" targetName="OSCMonitor"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_video" path="../../modules"/>
@@ -63,10 +57,8 @@
     </LINUX_MAKE>
     <VS2015 targetFolder="Builds/VisualStudio2015">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="1" optimisation="1" targetName="OSCMonitor"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="32-bit"
-                       isDebug="0" optimisation="3" targetName="OSCMonitor"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="OSCMonitor"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="OSCMonitor"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_video" path="../../modules"/>
@@ -87,10 +79,8 @@
     </VS2015>
     <VS2017 targetFolder="Builds/VisualStudio2017">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="OSCMonitor"/>
-        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="OSCMonitor"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="OSCMonitor"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="OSCMonitor"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_video" path="../../modules"/>

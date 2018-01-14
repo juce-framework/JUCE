@@ -90,7 +90,7 @@ public:
 
         auto midiInputs = MidiInput::getDevices();
         midiInputList.addItemList (midiInputs, 1);
-        midiInputList.onChange = [this]() { setMidiInput (midiInputList.getSelectedItemIndex()); };
+        midiInputList.onChange = [this] { setMidiInput (midiInputList.getSelectedItemIndex()); };
 
         // find the first enabled device and use that by default
         for (int i = 0; i < midiInputs.size(); ++i)
@@ -115,7 +115,7 @@ public:
         addAndMakeVisible (midiOutputList);
         midiOutputList.setTextWhenNoChoicesAvailable ("No MIDI Output Enabled");
         midiOutputList.addItemList (MidiOutput::getDevices(), 1);
-        midiOutputList.onChange = [this]() { setMidiOutput (midiOutputList.getSelectedItemIndex()); };
+        midiOutputList.onChange = [this] { setMidiOutput (midiOutputList.getSelectedItemIndex()); };
 
         addAndMakeVisible (keyboardComponent);
         keyboardState.addListener (this);
