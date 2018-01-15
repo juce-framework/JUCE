@@ -1034,6 +1034,9 @@ public:
 
             String installPath = getInstallPathForConfiguration (config);
 
+            if (installPath.startsWith ("~"))
+                installPath = installPath.replace ("~", "$(HOME)");
+
             if (installPath.isNotEmpty())
             {
                 s.set ("INSTALL_PATH", installPath.quoted());

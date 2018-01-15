@@ -54,6 +54,8 @@ bool ChildProcess::waitForProcessToFinish (const int timeoutMs) const
     {
         if (! isRunning())
             return true;
+
+        Thread::sleep (2);
     }
     while (timeoutMs < 0 || Time::getMillisecondCounter() < timeoutTime);
 
@@ -66,8 +68,8 @@ String ChildProcess::readAllProcessOutput()
 
     for (;;)
     {
-        char buffer [512];
-        const int num = readProcessOutput (buffer, sizeof (buffer));
+        char buffer[512];
+        auto num = readProcessOutput (buffer, sizeof (buffer));
 
         if (num <= 0)
             break;

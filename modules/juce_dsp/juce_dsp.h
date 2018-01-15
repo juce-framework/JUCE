@@ -43,7 +43,7 @@
   license:            GPL/Commercial
   minimumCppStandard: 14
 
-  dependencies:       juce_core, juce_audio_basics, juce_audio_formats
+  dependencies:       juce_audio_basics, juce_audio_formats
   OSXFrameworks:      Accelerate
   iOSFrameworks:      Accelerate
 

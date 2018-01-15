@@ -24,12 +24,7 @@
   ==============================================================================
 */
 
-// Note: for the Bluetooth Midi selector overlay, we need the class
-// UIViewComponent from the juce_gui_extra module. If this module is not
-// included in your app, BluetoothMidiDevicePairingDialogue::open() will fail
-// and return false.
-// It is also not available in the iPhone/iPad simulator.
-#if JUCE_MODULE_AVAILABLE_juce_gui_extra && ! TARGET_IPHONE_SIMULATOR
+#if ! TARGET_IPHONE_SIMULATOR
 
 #include <CoreAudioKit/CoreAudioKit.h>
 

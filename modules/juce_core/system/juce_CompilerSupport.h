@@ -57,8 +57,8 @@
 // Clang
 #if JUCE_CLANG
 
- #if __clang_major__ < 5
-  #error "JUCE requires Clang 5.0 or later"
+ #if (__clang_major__ < 3) || (__clang_major__ == 3 && __clang_minor__ < 3)
+  #error "JUCE requires Clang 3.3 or later"
  #endif
 
  #define JUCE_COMPILER_SUPPORTS_NOEXCEPT 1

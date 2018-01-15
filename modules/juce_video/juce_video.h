@@ -42,7 +42,7 @@
   website:          http://www.juce.com/juce
   license:          GPL/Commercial
 
-  dependencies:     juce_data_structures juce_cryptography
+  dependencies:     juce_gui_extra
   OSXFrameworks:    AVKit AVFoundation CoreMedia
   iOSFrameworks:    AVKit AVFoundation CoreMedia
 
