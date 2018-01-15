@@ -1707,7 +1707,9 @@ struct VST3PluginInstance : public AudioPluginInstance
 
         editController->setComponentHandler (nullptr);
 
-        if (isControllerInitialised)    editController->terminate();
+        if (isControllerInitialised)
+            editController->terminate();
+
         holder->terminate();
 
         componentConnection = nullptr;
