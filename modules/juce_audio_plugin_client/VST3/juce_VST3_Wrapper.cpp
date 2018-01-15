@@ -1950,7 +1950,7 @@ public:
     {
         auto tailLengthSeconds = getPluginInstance().getTailLengthSeconds();
 
-        if (tailLengthSeconds <= 0.0 || processSetup.sampleRate > 0.0)
+        if (tailLengthSeconds <= 0.0 || processSetup.sampleRate <= 0.0)
             return Vst::kNoTail;
 
         return (Steinberg::uint32) roundToIntAccurate (tailLengthSeconds * processSetup.sampleRate);
