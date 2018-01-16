@@ -23,13 +23,13 @@
 namespace juce
 {
 
-uint16 readUnalignedLittleEndianShort (const void* buffer)
+inline uint16 readUnalignedLittleEndianShort (const void* buffer)
 {
     auto data = readUnaligned<uint16> (buffer);
     return ByteOrder::littleEndianShort (&data);
 }
 
-uint32 readUnalignedLittleEndianInt (const void* buffer)
+inline uint32 readUnalignedLittleEndianInt (const void* buffer)
 {
     auto data = readUnaligned<uint32> (buffer);
     return ByteOrder::littleEndianInt (&data);

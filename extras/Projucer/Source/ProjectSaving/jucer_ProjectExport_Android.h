@@ -1854,12 +1854,12 @@ private:
     JUCE_DECLARE_NON_COPYABLE (AndroidProjectExporter)
 };
 
-ProjectExporter* createAndroidExporter (Project& p, const ValueTree& t)
+inline ProjectExporter* createAndroidExporter (Project& p, const ValueTree& t)
 {
     return new AndroidProjectExporter (p, t);
 }
 
-ProjectExporter* createAndroidExporterForSetting (Project& p, const ValueTree& t)
+inline ProjectExporter* createAndroidExporterForSetting (Project& p, const ValueTree& t)
 {
     return AndroidProjectExporter::createForSettings (p, t);
 }

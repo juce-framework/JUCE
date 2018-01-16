@@ -121,6 +121,7 @@ public:
  #else
 
   #define JUCE_CREATE_APPLICATION_DEFINE(AppClass) \
+    juce::JUCEApplicationBase* juce_CreateApplication(); \
     juce::JUCEApplicationBase* juce_CreateApplication() { return new AppClass(); }
 
   #define JUCE_MAIN_FUNCTION_DEFINITION \
@@ -158,35 +159,36 @@ public:
        risk if you decide to use your own delegate and subtle, hard to debug bugs may occur.
 
        @interface MyCustomDelegate : NSObject <UIApplicationDelegate> { NSObject<UIApplicationDelegate>* juceDelegate; } @end
+
        @implementation MyCustomDelegate
+
        -(id) init
        {
            self = [super init];
            juceDelegate = reinterpret_cast<NSObject<UIApplicationDelegate>*> ([[NSClassFromString (@"JuceAppStartupDelegate") alloc] init]);
-
            return self;
        }
 
-       -(void)dealloc
+       -(void) dealloc
        {
            [juceDelegate release];
            [super dealloc];
        }
 
-       - (void)forwardInvocation:(NSInvocation *)anInvocation
+       - (void) forwardInvocation: (NSInvocation*) anInvocation
        {
-          if (juceDelegate != nullptr && [juceDelegate respondsToSelector:[anInvocation selector]])
-              [anInvocation invokeWithTarget:juceDelegate];
-         else
-              [super forwardInvocation:anInvocation];
+           if (juceDelegate != nullptr && [juceDelegate respondsToSelector: [anInvocation selector]])
+               [anInvocation invokeWithTarget: juceDelegate];
+           else
+               [super forwardInvocation: anInvocation];
        }
 
-       -(BOOL)respondsToSelector:(SEL)aSelector
+       -(BOOL) respondsToSelector: (SEL) aSelector
        {
-           if (juceDelegate != nullptr && [juceDelegate respondsToSelector:aSelector])
-              return YES;
+           if (juceDelegate != nullptr && [juceDelegate respondsToSelector: aSelector])
+               return YES;
 
-           return [super respondsToSelector:aSelector];
+           return [super respondsToSelector: aSelector];
        }
        @end
    */

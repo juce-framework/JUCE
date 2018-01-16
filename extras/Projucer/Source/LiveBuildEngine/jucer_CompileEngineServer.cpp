@@ -26,6 +26,7 @@
 
 #include "../Application/jucer_Headers.h"
 #include "../Application/jucer_Application.h"
+#include "jucer_CompileEngineServer.h"
 #include "jucer_CompileEngineDLL.h"
 #include "jucer_MessageIDs.h"
 #include "jucer_CppHelpers.h"
