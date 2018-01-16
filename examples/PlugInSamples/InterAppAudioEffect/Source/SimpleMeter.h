@@ -72,6 +72,7 @@ private:
         auto callbackLevel = maxLevel.exchange (0.0);
 
         auto decayFactor = 0.95;
+
         if (callbackLevel > level)
             level = callbackLevel;
         else if (level > 0.001)
