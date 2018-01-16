@@ -275,7 +275,7 @@ public:
 
             bool failed = false;
 
-            reader.forEach ([this, &failed, &buffer, &n] (int index)
+            reader.forEach ([&failed, &buffer, &n] (int index)
             {
                 failed = (buffer[index] != n++) || failed;
             });
