@@ -1915,6 +1915,24 @@ struct VST3PluginInstance : public AudioPluginInstance
 
         processor->process (data);
 
+        for (auto* q : outputParameterChanges->queues)
+        {
+            if (editController != nullptr)
+            {
+                auto numPoints = q->getPointCount();
+
+                if (numPoints > 0)
+                {
+                    Steinberg::int32 sampleOffset;
+                    Steinberg::Vst::ParamValue value;
+                    q->getPoint (numPoints - 1, sampleOffset, value);
+                    editController->setParamNormalized (q->getParameterId(), value);
+                }
+            }
+
+            q->clear();
+        }
+
         MidiEventList::toMidiBuffer (midiMessages, *midiOutputs);
 
         inputParameterChanges->clearAllQueues();
