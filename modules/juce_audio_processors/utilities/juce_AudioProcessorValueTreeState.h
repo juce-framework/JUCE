@@ -137,6 +137,10 @@ public:
         from a different thread (getStateInformation is a good example). This method
         flushes all pending audio parameter value updates and returns a copy of the
         state in a thread safe way.
+
+        Note: This method uses locks to synchronise thread access, so whilst it is
+        thread-safe, it is not realtime-safe. Do not call this method from within
+        your audio processing code!
     */
     ValueTree copyState();
 
@@ -146,6 +150,10 @@ public:
         message thread, but there may be cases when you may want to modify the state
         from a different thread (setStateInformation is a good example). This method
         allows you to replace the state in a thread safe way.
+
+        Note: This method uses locks to synchronise thread access, so whilst it is
+        thread-safe, it is not realtime-safe. Do not call this method from within
+        your audio processing code!
     */
     void replaceState (const ValueTree& newState);
 
