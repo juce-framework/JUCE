@@ -2190,6 +2190,17 @@ struct VST3PluginInstance : public AudioPluginInstance
         return false;
     }
 
+    bool isParameterAutomatable (int parameterIndex) const override
+    {
+        if (editController != nullptr)
+        {
+            auto flags = getParameterInfoForIndex (parameterIndex).flags;
+            return (flags & Steinberg::Vst::ParameterInfo::kCanAutomate) != 0;
+        }
+
+        return true;
+    }
+
     float getParameter (int parameterIndex) override
     {
         if (editController != nullptr)
