@@ -320,6 +320,12 @@ public:
 
         Component::BailOutChecker checker (&owner);
         listeners.callChecked (checker, [&] (Slider::Listener& l) { l.sliderValueChanged (&owner); });
+
+        if (checker.shouldBailOut())
+            return;
+
+        if (owner.onValueChange != nullptr)
+            owner.onValueChange();
     }
 
     void sendDragStart()
@@ -328,6 +334,12 @@ public:
 
         Component::BailOutChecker checker (&owner);
         listeners.callChecked (checker, [&] (Slider::Listener& l) { l.sliderDragStarted (&owner); });
+
+        if (checker.shouldBailOut())
+            return;
+
+        if (owner.onDragStart != nullptr)
+            owner.onDragStart();
     }
 
     void sendDragEnd()
@@ -337,6 +349,12 @@ public:
 
         Component::BailOutChecker checker (&owner);
         listeners.callChecked (checker, [&] (Slider::Listener& l) { l.sliderDragEnded (&owner); });
+
+        if (checker.shouldBailOut())
+            return;
+
+        if (owner.onDragEnd != nullptr)
+            owner.onDragEnd();
     }
 
     struct DragInProgress

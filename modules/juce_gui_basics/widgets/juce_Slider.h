@@ -587,6 +587,16 @@ public:
     void removeListener (Listener* listener);
 
     //==============================================================================
+    /** You can assign a lambda to this callback object to have it called when the slider value is changed. */
+    std::function<void()> onValueChange;
+
+    /** You can assign a lambda to this callback object to have it called when the slider's drag begins. */
+    std::function<void()> onDragStart;
+
+    /** You can assign a lambda to this callback object to have it called when the slider's drag ends. */
+    std::function<void()> onDragEnd;
+
+    //==============================================================================
     /** This lets you choose whether double-clicking moves the slider to a given position.
 
         By default this is turned off, but it's handy if you want a double-click to act

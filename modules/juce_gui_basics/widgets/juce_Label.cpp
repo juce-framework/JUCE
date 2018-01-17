@@ -191,6 +191,12 @@ void Label::editorShown (TextEditor* textEditor)
 {
     Component::BailOutChecker checker (this);
     listeners.callChecked (checker, [this, textEditor] (Label::Listener& l) { l.editorShown (this, *textEditor); });
+
+    if (checker.shouldBailOut())
+        return;
+
+    if (onEditorShow != nullptr)
+        onEditorShow();
 }
 
 void Label::editorAboutToBeHidden (TextEditor* textEditor)
@@ -200,6 +206,12 @@ void Label::editorAboutToBeHidden (TextEditor* textEditor)
 
     Component::BailOutChecker checker (this);
     listeners.callChecked (checker, [this, textEditor] (Label::Listener& l) { l.editorHidden (this, *textEditor); });
+
+    if (checker.shouldBailOut())
+        return;
+
+    if (onEditorHide != nullptr)
+        onEditorHide();
 }
 
 void Label::showEditor()
@@ -404,6 +416,12 @@ void Label::callChangeListeners()
 {
     Component::BailOutChecker checker (this);
     listeners.callChecked (checker, [this] (Listener& l) { l.labelTextChanged (this); });
+
+    if (checker.shouldBailOut())
+        return;
+
+    if (onTextChange != nullptr)
+        onTextChange();
 }
 
 //==============================================================================
