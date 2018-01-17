@@ -146,7 +146,7 @@ public:
 
             StringArray s;
 
-            const String cppflagsVarName ("JUCE_CPPFLAGS_" + getTargetVarName());
+            auto cppflagsVarName = "JUCE_CPPFLAGS_" + getTargetVarName();
 
             s.add (cppflagsVarName + " := " + defines.joinIntoString (" "));
 
@@ -160,7 +160,7 @@ public:
             if (! ldflags.isEmpty())
                 s.add ("JUCE_LDFLAGS_" + getTargetVarName() + " := " + ldflags.joinIntoString (" "));
 
-            String targetName (owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString()));
+            auto targetName = owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString());
 
             if (owner.projectType.isStaticLibrary())
                 targetName = getStaticLibbedFilename (targetName);
@@ -219,8 +219,8 @@ public:
             {
                 if (projectItem.shouldBeCompiled())
                 {
-                    const Type targetType = (owner.getProject().getProjectType().isAudioPlugin() ? type : SharedCodeTarget);
-                    const File f = projectItem.getFile();
+                    auto targetType = (owner.getProject().getProjectType().isAudioPlugin() ? type : SharedCodeTarget);
+                    auto f = projectItem.getFile();
                     RelativePath relativePath (f, owner.getTargetFolder(), RelativePath::buildTargetFolder);
 
                     if (owner.shouldFileBeCompiledByDefault (relativePath)
@@ -236,26 +236,28 @@ public:
             for (int i = 0; i < owner.getAllGroups().size(); ++i)
                 findAllFilesToCompile (owner.getAllGroups().getReference(i), targetFiles);
 
-            const String cppflagsVarName = String ("JUCE_CPPFLAGS_") + getTargetVarName();
-            const String cflagsVarName   = String ("JUCE_CFLAGS_")   + getTargetVarName();
+            auto cppflagsVarName = "JUCE_CPPFLAGS_" + getTargetVarName();
+            auto cflagsVarName   = "JUCE_CFLAGS_"   + getTargetVarName();
 
             for (int i = 0; i < targetFiles.size(); ++i)
             {
                 jassert (targetFiles.getReference(i).getRoot() == RelativePath::buildTargetFolder);
 
                 out << "$(JUCE_OBJDIR)/" << escapeSpaces (owner.getObjectFileFor (targetFiles.getReference(i)))
-                << ": " << escapeSpaces (targetFiles.getReference(i).toUnixStyle()) << newLine
-                << "\t-$(V_AT)mkdir -p $(JUCE_OBJDIR)" << newLine
-                << "\t@echo \"Compiling " << targetFiles.getReference(i).getFileName() << "\"" << newLine
-                << (targetFiles.getReference(i).hasFileExtension ("c;s;S") ? "\t$(V_AT)$(CC) $(JUCE_CFLAGS) " : "\t$(V_AT)$(CXX) $(JUCE_CXXFLAGS) ")
-                << "$(" << cppflagsVarName << ") $(" << cflagsVarName << ") -o \"$@\" -c \"$<\""
-                << newLine << newLine;
+                    << ": " << escapeSpaces (targetFiles.getReference(i).toUnixStyle())            << newLine
+                    << "\t-$(V_AT)mkdir -p $(JUCE_OBJDIR)"                                         << newLine
+                    << "\t@echo \"Compiling " << targetFiles.getReference(i).getFileName() << "\"" << newLine
+                    << (targetFiles.getReference(i).hasFileExtension ("c;s;S") ? "\t$(V_AT)$(CC) $(JUCE_CFLAGS) "
+                                                                               : "\t$(V_AT)$(CXX) $(JUCE_CXXFLAGS) ")
+                    << "$(" << cppflagsVarName << ") $(" << cflagsVarName << ") -o \"$@\" -c \"$<\""
+                    << newLine
+                    << newLine;
             }
         }
 
         String getBuildProduct() const
         {
-            return String ("$(JUCE_OUTDIR)/$(JUCE_TARGET_") + getTargetVarName() + String (")");
+            return "$(JUCE_OUTDIR)/$(JUCE_TARGET_" + getTargetVarName() + ")";
         }
 
         String getPhonyName() const
@@ -322,7 +324,7 @@ public:
     //==============================================================================
     MakefileProjectExporter (Project& p, const ValueTree& t)
         : ProjectExporter (p, t),
-          extraPkgConfigValue (settings, Ids::linuxExtraPkgConfig, getProject().getUndoManagerFor (settings))
+          extraPkgConfigValue (settings, Ids::linuxExtraPkgConfig, getUndoManager())
     {
         name = getNameLinux();
 
@@ -330,24 +332,24 @@ public:
     }
 
     //==============================================================================
-    bool canLaunchProject() override                    { return false; }
-    bool launchProject() override                       { return false; }
-    bool usesMMFiles() const override                   { return false; }
-    bool canCopeWithDuplicateFiles() override           { return false; }
+    bool canLaunchProject() override                        { return false; }
+    bool launchProject() override                           { return false; }
+    bool usesMMFiles() const override                       { return false; }
+    bool canCopeWithDuplicateFiles() override               { return false; }
     bool supportsUserDefinedConfigurations() const override { return true; }
 
-    bool isXcode() const override                       { return false; }
-    bool isVisualStudio() const override                { return false; }
-    bool isCodeBlocks() const override                  { return false; }
-    bool isMakefile() const override                    { return true; }
-    bool isAndroidStudio() const override               { return false; }
-    bool isCLion() const override                       { return false; }
+    bool isXcode() const override                           { return false; }
+    bool isVisualStudio() const override                    { return false; }
+    bool isCodeBlocks() const override                      { return false; }
+    bool isMakefile() const override                        { return true; }
+    bool isAndroidStudio() const override                   { return false; }
+    bool isCLion() const override                           { return false; }
 
-    bool isAndroid() const override                     { return false; }
-    bool isWindows() const override                     { return false; }
-    bool isLinux() const override                       { return true; }
-    bool isOSX() const override                         { return false; }
-    bool isiOS() const override                         { return false; }
+    bool isAndroid() const override                         { return false; }
+    bool isWindows() const override                         { return false; }
+    bool isLinux() const override                           { return true; }
+    bool isOSX() const override                             { return false; }
+    bool isiOS() const override                             { return false; }
 
     bool supportsTargetType (ProjectType::Target::Type type) const override
     {
@@ -380,7 +382,7 @@ public:
     {
         for (auto* target : targets)
         {
-            const ProjectType::Target::TargetFileType fileType = target->getTargetFileType();
+            auto fileType = target->getTargetFileType();
 
             if (fileType == ProjectType::Target::sharedLibraryOrDLL
              || fileType == ProjectType::Target::pluginBundle)
@@ -560,8 +562,7 @@ private:
     {
         StringArray result (linuxLibs);
 
-        StringArray libraries;
-        libraries.addTokens (getExternalLibrariesString(), ";", "\"'");
+        auto libraries = StringArray::fromTokens (getExternalLibrariesString(), ";", "\"'");
         libraries.removeEmptyStrings();
 
         for (auto& lib : libraries)
@@ -582,7 +583,7 @@ private:
 
     StringArray getLinkerFlags (const BuildConfiguration& config) const
     {
-        StringArray result (makefileExtraLinkerFlags);
+        auto result = makefileExtraLinkerFlags;
 
         if (! config.isDebug())
             result.add ("-fvisibility=hidden");
@@ -669,7 +670,7 @@ private:
 
     void writeTargetLines (OutputStream& out, const bool useLinuxPackages) const
     {
-        const int n = targets.size();
+        auto n = targets.size();
 
         for (int i = 0; i < n; ++i)
         {
@@ -712,9 +713,9 @@ private:
 
     void writeConfig (OutputStream& out, const MakeBuildConfiguration& config) const
     {
-        const String buildDirName ("build");
-        const String intermediatesDirName (buildDirName + "/intermediate/" + config.getName());
-        String outputDir (buildDirName);
+        String buildDirName ("build");
+        auto intermediatesDirName = buildDirName + "/intermediate/" + config.getName();
+        auto outputDir = buildDirName;
 
         if (config.getTargetBinaryRelativePathString().isNotEmpty())
         {
@@ -737,7 +738,7 @@ private:
 
         for (auto target : targets)
         {
-            StringArray lines = target->getTargetSettings (config);
+            auto lines = target->getTargetSettings (config);
 
             if (lines.size() > 0)
                 out << "  " << lines.joinIntoString ("\n  ") << newLine;
@@ -774,7 +775,7 @@ private:
 
     void writeIncludeLines (OutputStream& out) const
     {
-        const int n = targets.size();
+        auto n = targets.size();
 
         for (int i = 0; i < n; ++i)
         {

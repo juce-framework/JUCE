@@ -137,6 +137,8 @@ public:
     Project& getProject() noexcept              { return project; }
     const Project& getProject() const noexcept  { return project; }
 
+    UndoManager* getUndoManager() const                   { return project.getUndoManagerFor (settings); }
+
     Value getSetting (const Identifier& nm)               { return settings.getPropertyAsValue (nm, project.getUndoManagerFor (settings)); }
     String getSettingString (const Identifier& nm) const  { return settings [nm]; }
 
