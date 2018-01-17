@@ -34,8 +34,7 @@ namespace
 {
     inline int countMaxPluginChannels (const String& configString, bool isInput)
     {
-        StringArray configs;
-        configs.addTokens (configString, ", {}", StringRef());
+        auto configs = StringArray::fromTokens (configString, ", {}", {});
         configs.trim();
         configs.removeEmptyStrings();
         jassert ((configs.size() & 1) == 0);  // looks like a syntax error in the configs?
@@ -156,7 +155,7 @@ void ProjectSaver::writeProjects (const OwnedArray<LibraryModule>& modules, cons
     ThreadPool threadPool;
 
     // keep a copy of the basic generated files group, as each exporter may modify it.
-    const ValueTree originalGeneratedGroup (generatedFilesGroup.state.createCopy());
+    auto originalGeneratedGroup = generatedFilesGroup.state.createCopy();
 
     CLionProjectExporter* clionExporter = nullptr;
     OwnedArray<ProjectExporter> exporters;

@@ -56,7 +56,7 @@ private:
     Array<File> files;
     StringArray variableNames;
     Project& project;
-    String className;
+    String className  { "BinaryData" };
 
     Result writeHeader (MemoryOutputStream&);
     Result writeCpp (MemoryOutputStream&, const File& headerFile, int& index, int maxFileSize);
