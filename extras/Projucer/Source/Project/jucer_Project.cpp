@@ -456,12 +456,14 @@ Result Project::saveResourcesOnly (const File& file)
 //==============================================================================
 void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
 {
-    if (tree.getParent() == tree)
+    if (tree.getRoot() == tree)
     {
         if (property == Ids::projectType)
             sendChangeMessage();
         else if (property == Ids::name)
             setTitle (projectRoot [Ids::name]);
+        else if (property == Ids::defines)
+            parsedPreprocessorDefs = parsePreprocessorDefs (preprocessorDefsValue.get());
 
         changed();
     }
@@ -851,11 +853,6 @@ int Project::getVersionAsHexInteger() const
 String Project::getVersionAsHex() const
 {
     return "0x" + String::toHexString (getVersionAsHexInteger());
-}
-
-StringPairArray Project::getPreprocessorDefs() const
-{
-    return parsePreprocessorDefs (projectRoot [Ids::defines]);
 }
 
 File Project::getBinaryDataCppFile (int index) const

@@ -111,7 +111,7 @@ public:
 
     String getHeaderSearchPathsString() const            { return headerSearchPathsValue.get(); }
 
-    StringPairArray getPreprocessorDefs() const;
+    StringPairArray getPreprocessorDefs() const          { return parsedPreprocessorDefs; }
 
     int getMaxBinaryFileSize() const                     { return maxBinaryFileSizeValue.get(); }
     bool shouldIncludeBinaryInAppConfig() const          { return includeBinaryDataInAppConfigValue.get(); }
@@ -353,6 +353,7 @@ private:
     ScopedPointer<EnabledModuleList> enabledModulesList;
     bool isSaving;
     Time modificationTime;
+    StringPairArray parsedPreprocessorDefs;
 
     //==============================================================================
     void intialiseProjectValues();
