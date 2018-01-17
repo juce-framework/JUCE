@@ -1812,6 +1812,18 @@
     <ClInclude Include="..\..\Source\Application\jucer_MainWindow.h">
       <Filter>Projucer\Application</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AnimatedComponentSimpleTemplate.h">
+      <Filter>Projucer\BinaryData\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AnimatedComponentTemplate.h">
+      <Filter>Projucer\BinaryData\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AudioComponentSimpleTemplate.h">
+      <Filter>Projucer\BinaryData\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AudioComponentTemplate.h">
+      <Filter>Projucer\BinaryData\Templates</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AudioPluginEditorTemplate.h">
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClInclude>
@@ -1819,6 +1831,9 @@
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_ComponentTemplate.h">
+      <Filter>Projucer\BinaryData\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_ContentCompSimpleTemplate.h">
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_ContentCompTemplate.h">
@@ -1834,6 +1849,12 @@
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_NewInlineComponentTemplate.h">
+      <Filter>Projucer\BinaryData\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_OpenGLComponentSimpleTemplate.h">
+      <Filter>Projucer\BinaryData\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_OpenGLComponentTemplate.h">
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\CodeEditor\jucer_DocumentEditorComponent.h">

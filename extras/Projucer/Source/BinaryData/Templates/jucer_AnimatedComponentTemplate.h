@@ -15,7 +15,7 @@ INCLUDE_JUCE
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class CONTENTCOMPCLASS   : public Component
+class CONTENTCOMPCLASS   : public AnimatedAppComponent
 {
 public:
     //==============================================================================
@@ -23,7 +23,10 @@ public:
     ~CONTENTCOMPCLASS();
 
     //==============================================================================
-    void paint (Graphics&) override;
+    void update() override;
+
+    //==============================================================================
+    void paint (Graphics& g) override;
     void resized() override;
 
 private:

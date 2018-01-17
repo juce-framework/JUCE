@@ -190,10 +190,18 @@
               file="Source/BinaryData/Icons/wizard_StaticLibrary.svg"/>
       </GROUP>
       <GROUP id="{D5514787-89A7-C727-422F-2BF9D9C6CF70}" name="Templates">
+        <FILE id="thU560" name="jucer_AnimatedComponentSimpleTemplate.h" compile="0"
+              resource="1" file="Source/BinaryData/Templates/jucer_AnimatedComponentSimpleTemplate.h"/>
         <FILE id="GCUpe7" name="jucer_AnimatedComponentTemplate.cpp" compile="0"
               resource="1" file="Source/BinaryData/Templates/jucer_AnimatedComponentTemplate.cpp"/>
+        <FILE id="if7mRo" name="jucer_AnimatedComponentTemplate.h" compile="0"
+              resource="1" file="Source/BinaryData/Templates/jucer_AnimatedComponentTemplate.h"/>
+        <FILE id="o5WUW4" name="jucer_AudioComponentSimpleTemplate.h" compile="0"
+              resource="1" file="Source/BinaryData/Templates/jucer_AudioComponentSimpleTemplate.h"/>
         <FILE id="xynUPZ" name="jucer_AudioComponentTemplate.cpp" compile="0"
               resource="1" file="Source/BinaryData/Templates/jucer_AudioComponentTemplate.cpp"/>
+        <FILE id="zC555M" name="jucer_AudioComponentTemplate.h" compile="0"
+              resource="1" file="Source/BinaryData/Templates/jucer_AudioComponentTemplate.h"/>
         <FILE id="A3dhSd" name="jucer_AudioPluginEditorTemplate.cpp" compile="0"
               resource="1" file="Source/BinaryData/Templates/jucer_AudioPluginEditorTemplate.cpp"/>
         <FILE id="TPGNqq" name="jucer_AudioPluginEditorTemplate.h" compile="0"
@@ -206,6 +214,8 @@
               file="Source/BinaryData/Templates/jucer_ComponentTemplate.cpp"/>
         <FILE id="LZik3e" name="jucer_ComponentTemplate.h" compile="0" resource="1"
               file="Source/BinaryData/Templates/jucer_ComponentTemplate.h"/>
+        <FILE id="cTnZ6j" name="jucer_ContentCompSimpleTemplate.h" compile="0"
+              resource="1" file="Source/BinaryData/Templates/jucer_ContentCompSimpleTemplate.h"/>
         <FILE id="yYPIFT" name="jucer_ContentCompTemplate.cpp" compile="0"
               resource="1" file="Source/BinaryData/Templates/jucer_ContentCompTemplate.cpp"/>
         <FILE id="Ze6RvS" name="jucer_ContentCompTemplate.h" compile="0" resource="1"
@@ -230,8 +240,12 @@
               file="Source/BinaryData/Templates/jucer_NewCppFileTemplate.h"/>
         <FILE id="gqGzE1" name="jucer_NewInlineComponentTemplate.h" compile="0"
               resource="1" file="Source/BinaryData/Templates/jucer_NewInlineComponentTemplate.h"/>
+        <FILE id="EfEiMx" name="jucer_OpenGLComponentSimpleTemplate.h" compile="0"
+              resource="1" file="Source/BinaryData/Templates/jucer_OpenGLComponentSimpleTemplate.h"/>
         <FILE id="fSnbWk" name="jucer_OpenGLComponentTemplate.cpp" compile="0"
               resource="1" file="Source/BinaryData/Templates/jucer_OpenGLComponentTemplate.cpp"/>
+        <FILE id="Edyh5d" name="jucer_OpenGLComponentTemplate.h" compile="0"
+              resource="1" file="Source/BinaryData/Templates/jucer_OpenGLComponentTemplate.h"/>
       </GROUP>
       <FILE id="oXM3fR" name="colourscheme_dark.xml" compile="0" resource="1"
             file="Source/BinaryData/colourscheme_dark.xml"/>
