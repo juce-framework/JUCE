@@ -401,7 +401,7 @@ protected:
     //==============================================================================
     /** This method is called when the button has been clicked.
 
-        Subclasses can override this to perform whatever they actions they need to do.
+        Subclasses can override this to perform whatever actions they need to do.
         In general, you wouldn't use this method to receive clicks, but should get your callbacks
         by attaching a std::function to the onClick callback, or adding a Button::Listener.
         @see triggerClick, onClick
