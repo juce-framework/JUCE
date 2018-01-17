@@ -199,30 +199,19 @@ public:
     {
         if (source.isDirectory() && dest.createDirectory())
         {
-            Array<File> subFiles;
-            source.findChildFiles (subFiles, File::findFiles, false);
-
-            for (int i = 0; i < subFiles.size(); ++i)
+            for (auto& f : source.findChildFiles (File::findFiles, false))
             {
-                const File f (subFiles.getReference(i));
-                const File target (dest.getChildFile (f.getFileName()));
+                auto target = dest.getChildFile (f.getFileName());
                 filesCreated.add (target);
 
                 if (! f.copyFileTo (target))
                     return false;
             }
 
-            Array<File> subFolders;
-            source.findChildFiles (subFolders, File::findDirectories, false);
-
-            for (int i = 0; i < subFolders.size(); ++i)
-            {
-                const File f (subFolders.getReference(i));
-
+            for (auto& f : source.findChildFiles (File::findDirectories, false))
                 if (! shouldFolderBeIgnoredWhenCopying (f))
                     if (! copyFolder (f, dest.getChildFile (f.getFileName())))
                         return false;
-            }
 
             return true;
         }

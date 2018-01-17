@@ -438,15 +438,14 @@ struct ModuleHandle    : public ReferenceCountedObject
 
                             ok = true;
 
-                            Array<File> vstXmlFiles;
-                            file
-                               #if JUCE_MAC
-                                .getChildFile ("Contents")
-                                .getChildFile ("Resources")
-                               #endif
-                                .findChildFiles (vstXmlFiles, File::findFiles, false, "*.vstxml");
+                            auto vstXmlFiles = file
+                                                   #if JUCE_MAC
+                                                    .getChildFile ("Contents")
+                                                    .getChildFile ("Resources")
+                                                   #endif
+                                                    .findChildFiles (File::findFiles, false, "*.vstxml");
 
-                            if (vstXmlFiles.size() > 0)
+                            if (! vstXmlFiles.isEmpty())
                                 vstXml.reset (XmlDocument::parse (vstXmlFiles.getReference(0)));
                         }
                     }

@@ -114,16 +114,24 @@ public:
     //==============================================================================
     /** Searches the path for a wildcard.
 
-        This will search all the directories in the search path in order, adding any
-        matching files to the results array.
+        This will search all the directories in the search path in order and return
+        an array of the files that were found.
 
-        @param results                  an array to append the results to
         @param whatToLookFor            a value from the File::TypesOfFileToFind enum, specifying whether to
                                         return files, directories, or both.
         @param searchRecursively        whether to recursively search the subdirectories too
         @param wildCardPattern          a pattern to match against the filenames
         @returns the number of files added to the array
         @see File::findChildFiles
+    */
+    Array<File> findChildFiles (int whatToLookFor,
+                                bool searchRecursively,
+                                const String& wildCardPattern = "*") const;
+
+    /** Searches the path for a wildcard.
+        Note that there's a newer, better version of this method which returns the results
+        array, and in almost all cases, you should use that one instead! This one is kept around
+        mainly for legacy code to use.
     */
     int findChildFiles (Array<File>& results,
                         int whatToLookFor,

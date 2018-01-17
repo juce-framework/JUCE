@@ -2811,10 +2811,7 @@ private:
 
     bool xcuserdataMatchesTargets (const File& xcuserdata) const
     {
-        Array<File> xcschemeManagementPlists;
-        xcuserdata.findChildFiles (xcschemeManagementPlists, File::findFiles, true, "xcschememanagement.plist");
-
-        for (auto& plist : xcschemeManagementPlists)
+        for (auto& plist : xcuserdata.findChildFiles (File::findFiles, true, "xcschememanagement.plist"))
             if (! xcschemeManagementPlistMatchesTargets (plist))
                 return false;
 

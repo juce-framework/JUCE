@@ -555,8 +555,7 @@ String LibraryModule::CompileUnit::getFilenameForProxyFile() const
 
 Array<LibraryModule::CompileUnit> LibraryModule::getAllCompileUnits (ProjectType::Target::Type forTarget) const
 {
-    Array<File> files;
-    getFolder().findChildFiles (files, File::findFiles, false);
+    auto files = getFolder().findChildFiles (File::findFiles, false);
 
     FileSorter sorter;
     files.sort (sorter);

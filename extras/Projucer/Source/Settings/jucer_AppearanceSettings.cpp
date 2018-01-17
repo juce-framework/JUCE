@@ -80,8 +80,7 @@ void AppearanceSettings::refreshPresetSchemeList()
     writeDefaultSchemeFile (BinaryData::colourscheme_dark_xml,  "Default (Dark)");
     writeDefaultSchemeFile (BinaryData::colourscheme_light_xml, "Default (Light)");
 
-    Array<File> newSchemes;
-    getSchemesFolder().findChildFiles (newSchemes, File::findFiles, false, String ("*") + getSchemeFileSuffix());
+    auto newSchemes = getSchemesFolder().findChildFiles (File::findFiles, false, String ("*") + getSchemeFileSuffix());
 
     if (newSchemes != presetSchemeFiles)
     {
