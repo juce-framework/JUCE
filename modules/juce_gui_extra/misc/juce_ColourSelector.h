@@ -37,8 +37,7 @@ namespace juce
     when the colour changes.
 */
 class JUCE_API  ColourSelector  : public Component,
-                                  public ChangeBroadcaster,
-                                  protected Slider::Listener
+                                  public ChangeBroadcaster
 {
 public:
     //==============================================================================
@@ -160,7 +159,7 @@ private:
     void setSV (float newS, float newV);
     void updateHSV();
     void update (NotificationType);
-    void sliderValueChanged (Slider*) override;
+    void changeColour();
     void paint (Graphics&) override;
     void resized() override;
 

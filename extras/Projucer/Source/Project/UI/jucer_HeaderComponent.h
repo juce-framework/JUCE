@@ -31,7 +31,6 @@
 
 //==============================================================================
 class HeaderComponent    : public Component,
-                           private ComboBox::Listener,
                            private ValueTree::Listener,
                            private ChangeListener
 {
@@ -42,7 +41,7 @@ public:
         addAndMakeVisible (configLabel);
         addAndMakeVisible (exporterBox);
 
-        exporterBox.addListener (this);
+        exporterBox.onChange = [this] { updateExporterButton(); };
 
         addAndMakeVisible  (juceIcon = new ImageComponent ("icon"));
         juceIcon->setImage (ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize),
@@ -217,12 +216,6 @@ private:
     int tabsWidth = 200;
 
     //==========================================================================
-    void comboBoxChanged (ComboBox* c) override
-    {
-        if (c == &exporterBox)
-            updateExporterButton();
-    }
-
     void changeListenerCallback (ChangeBroadcaster* source) override
     {
         if (source == project)

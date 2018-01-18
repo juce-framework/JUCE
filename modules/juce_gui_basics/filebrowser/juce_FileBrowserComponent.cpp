@@ -99,7 +99,14 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
     filenameBox.setMultiLine (false);
     filenameBox.setSelectAllWhenFocused (true);
     filenameBox.setText (filename, false);
-    filenameBox.addListener (this);
+    filenameBox.onTextChange = [this] { sendListenerChangeMessage(); };
+    filenameBox.onReturnKey  = [this] { changeFilename(); };
+    filenameBox.onFocusLost  = [this]
+    {
+        if (! isSaveMode())
+            selectionChanged();
+    };
+
     filenameBox.setReadOnly ((flags & (filenameBoxIsReadOnly | canSelectMultipleItems)) != 0);
 
     addAndMakeVisible (fileLabel);
@@ -439,12 +446,7 @@ bool FileBrowserComponent::keyPressed (const KeyPress& key)
 }
 
 //==============================================================================
-void FileBrowserComponent::textEditorTextChanged (TextEditor&)
-{
-    sendListenerChangeMessage();
-}
-
-void FileBrowserComponent::textEditorReturnKeyPressed (TextEditor&)
+void FileBrowserComponent::changeFilename()
 {
     if (filenameBox.getText().containsChar (File::getSeparatorChar()))
     {
@@ -470,16 +472,6 @@ void FileBrowserComponent::textEditorReturnKeyPressed (TextEditor&)
     {
         fileDoubleClicked (getSelectedFile (0));
     }
-}
-
-void FileBrowserComponent::textEditorEscapeKeyPressed (TextEditor&)
-{
-}
-
-void FileBrowserComponent::textEditorFocusLost (TextEditor&)
-{
-    if (! isSaveMode())
-        selectionChanged();
 }
 
 //==============================================================================

@@ -134,8 +134,7 @@ private:
     Project Template Component for front page.
     Features multiple icon buttons to select the type of project template
 */
-class TemplateTileBrowser   : public Component,
-                              private Button::Listener
+class TemplateTileBrowser   : public Component
 {
 public:
     TemplateTileBrowser (WizardComp* projectWizard)
@@ -152,7 +151,8 @@ public:
             optionButtons.add (b);
             addAndMakeVisible (b);
             b->setDescription (wizard->getDescription());
-            b->addListener (this);
+            b->onClick = [this, b] { showWizardButton (b); };
+            b->onStateChange = [this] { repaint(); };
         }
 
         // Handle Open Project button functionality
@@ -262,15 +262,10 @@ private:
     NewProjectWizardClasses::WizardComp* newProjectWizard;
     ScopedPointer<TemplateOptionButton> blankProjectButton, openProjectButton, exampleProjectButton;
 
-    void buttonClicked (Button* b) override
+    void showWizardButton (Button* b)
     {
         if (dynamic_cast<TemplateOptionButton*> (b) != nullptr)
             showWizard (b->getButtonText());
-    }
-
-    void buttonStateChanged (Button*) override
-    {
-        repaint();
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TemplateTileBrowser)

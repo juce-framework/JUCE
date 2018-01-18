@@ -41,7 +41,11 @@ SliderPropertyComponent::SliderPropertyComponent (const String& name,
     slider.setSkewFactor (skewFactor, symmetricSkew);
     slider.setSliderStyle (Slider::LinearBar);
 
-    slider.addListener (this);
+    slider.onValueChange = [this]
+    {
+        if (getValue() != slider.getValue())
+            setValue (slider.getValue());
+    };
 }
 
 SliderPropertyComponent::SliderPropertyComponent (const Value& valueToControl,
@@ -78,12 +82,6 @@ double SliderPropertyComponent::getValue() const
 void SliderPropertyComponent::refresh()
 {
     slider.setValue (getValue(), dontSendNotification);
-}
-
-void SliderPropertyComponent::sliderValueChanged (Slider*)
-{
-    if (getValue() != slider.getValue())
-        setValue (slider.getValue());
 }
 
 } // namespace juce

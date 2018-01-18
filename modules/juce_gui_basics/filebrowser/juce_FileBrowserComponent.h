@@ -39,7 +39,6 @@ namespace juce
 */
 class JUCE_API  FileBrowserComponent  : public Component,
                                         private FileBrowserListener,
-                                        private TextEditor::Listener,
                                         private FileFilter,
                                         private Timer
 {
@@ -235,14 +234,6 @@ public:
     /** @internal */
     void lookAndFeelChanged() override;
     /** @internal */
-    void textEditorTextChanged (TextEditor&) override;
-    /** @internal */
-    void textEditorReturnKeyPressed (TextEditor&) override;
-    /** @internal */
-    void textEditorEscapeKeyPressed (TextEditor&) override;
-    /** @internal */
-    void textEditorFocusLost (TextEditor&) override;
-    /** @internal */
     bool keyPressed (const KeyPress&) override;
     /** @internal */
     void selectionChanged() override;
@@ -295,6 +286,7 @@ private:
     void sendListenerChangeMessage();
     bool isFileOrDirSuitable (const File&) const;
     void updateSelectedPath();
+    void changeFilename();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FileBrowserComponent)
 };

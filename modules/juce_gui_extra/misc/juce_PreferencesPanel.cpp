@@ -58,7 +58,7 @@ void PreferencesPanel::addSettingsPage (const String& title,
 
     button->setImages (icon, overIcon, downIcon);
     button->setRadioGroupId (1);
-    button->addListener (this);
+    button->onClick = [this] { clickedPage(); };
     button->setClickingTogglesState (true);
     button->setWantsKeyboardFocus (false);
     addAndMakeVisible (button);
@@ -142,7 +142,7 @@ void PreferencesPanel::setCurrentPage (const String& pageName)
     }
 }
 
-void PreferencesPanel::buttonClicked (Button*)
+void PreferencesPanel::clickedPage()
 {
     for (auto* b : buttons)
     {
