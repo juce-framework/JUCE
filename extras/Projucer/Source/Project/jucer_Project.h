@@ -318,6 +318,7 @@ public:
 
     //==============================================================================
     UndoManager* getUndoManagerFor (const ValueTree&) const             { return nullptr; }
+    UndoManager* getUndoManager() const                                 { return nullptr; }
 
     //==============================================================================
     static const char* projectFileExtension;
@@ -351,7 +352,7 @@ private:
     //==============================================================================
     friend class Item;
     ScopedPointer<EnabledModuleList> enabledModulesList;
-    bool isSaving;
+    bool isSaving = false;
     Time modificationTime;
     StringPairArray parsedPreprocessorDefs;
 
