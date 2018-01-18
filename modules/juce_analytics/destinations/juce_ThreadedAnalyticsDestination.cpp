@@ -184,9 +184,11 @@ namespace DestinationTestHelpers
 
                 for (auto& event : events)
                     loggedEventQueue.push_back (event);
+
+                return true;
             }
 
-            return true;
+            return false;
         }
 
         void stopLoggingEvents() override {}
