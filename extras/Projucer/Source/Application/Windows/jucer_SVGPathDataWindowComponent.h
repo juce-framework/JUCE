@@ -55,6 +55,14 @@ public:
 
         addAndMakeVisible (copyButton);
         copyButton.onClick = [this] { SystemClipboard::copyTextToClipboard (resultText.getText()); };
+
+        addAndMakeVisible (closeSubPathButton);
+        closeSubPathButton.onClick = [this] { update(); };
+        closeSubPathButton.setToggleState (true, NotificationType::dontSendNotification);
+
+        addAndMakeVisible (fillPathButton);
+        fillPathButton.onClick = [this] { update(); };
+        fillPathButton.setToggleState (true, NotificationType::dontSendNotification);
     }
 
     void textEditorTextChanged (TextEditor&) override
@@ -104,7 +112,12 @@ public:
     {
         auto r = getLocalBounds().reduced (8);
 
-        copyButton.setBounds (r.removeFromBottom (30).removeFromLeft (50));
+        auto bottomSection = r.removeFromBottom (30);
+        copyButton.setBounds (bottomSection.removeFromLeft (50));
+        bottomSection.removeFromLeft (25);
+        fillPathButton.setBounds (bottomSection.removeFromLeft (bottomSection.getWidth() / 2));
+        closeSubPathButton.setBounds (bottomSection);
+
         r.removeFromBottom (5);
         desc.setBounds (r.removeFromTop (44));
         r.removeFromTop (8);
@@ -123,7 +136,12 @@ public:
         }
 
         g.setColour (findColour (defaultTextColourId));
-        g.fillPath (path, path.getTransformToScaleToFit (previewPathArea.reduced (4).toFloat(), true));
+        path.applyTransform (path.getTransformToScaleToFit (previewPathArea.reduced (4).toFloat(), true));
+
+        if (fillPathButton.getToggleState())
+            g.fillPath (path);
+        else
+            g.strokePath (path, PathStrokeType (2.0f));
     }
 
     void lookAndFeelChanged() override
@@ -184,7 +202,8 @@ public:
                 p.lineTo ({ x, y });
         }
 
-        p.closeSubPath();
+        if (closeSubPathButton.getToggleState())
+            p.closeSubPath();
 
         return p;
     }
@@ -194,6 +213,9 @@ private:
                      "code that will load it as a Path object.." };
     TextButton copyButton { "Copy" };
     TextEditor userText, resultText;
+
+    ToggleButton closeSubPathButton { "Close sub-path" };
+    ToggleButton fillPathButton     { "Fill path" };
 
     Rectangle<int> previewPathArea;
     Path path;
