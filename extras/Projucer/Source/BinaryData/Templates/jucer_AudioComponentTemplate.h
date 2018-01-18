@@ -15,7 +15,7 @@ INCLUDE_JUCE
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class CONTENTCOMPCLASS   : public Component
+class CONTENTCOMPCLASS   : public AudioAppComponent
 {
 public:
     //==============================================================================
@@ -23,7 +23,12 @@ public:
     ~CONTENTCOMPCLASS();
 
     //==============================================================================
-    void paint (Graphics&) override;
+    void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
+    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override;
+    void releaseResources() override;
+
+    //==============================================================================
+    void paint (Graphics& g) override;
     void resized() override;
 
 private:

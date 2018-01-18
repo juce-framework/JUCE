@@ -96,6 +96,11 @@ public:
         startTimerHz (60);
     }
 
+    ~IAAEffectEditor()
+    {
+        processor.removeMeterListener (*this);
+    }
+
     //==============================================================================
     void paint (Graphics& g) override
     {
@@ -145,6 +150,7 @@ private:
     {
         auto timeInfoSuccess = processor.updateCurrentTimeInfoFromHost (lastPosInfo);
         transportText.setVisible (timeInfoSuccess);
+
         if (timeInfoSuccess)
             updateTransportTextDisplay();
 
@@ -157,6 +163,7 @@ private:
     void buttonClicked (Button* b) override
     {
         auto playHead = processor.getPlayHead();
+
         if (playHead != nullptr && playHead->canControlTransport())
         {
             if (b == &rewindButton)
@@ -215,10 +222,10 @@ private:
         MemoryOutputStream displayText;
 
         displayText << "[" << SystemStats::getJUCEVersion() << "]\n"
-        << String (lastPosInfo.bpm, 2) << " bpm\n"
-        << lastPosInfo.timeSigNumerator << '/' << lastPosInfo.timeSigDenominator << "\n"
-        << timeToTimecodeString (lastPosInfo.timeInSeconds) << "\n"
-        << quarterNotePositionToBarsBeatsString (lastPosInfo.ppqPosition,
+                    << String (lastPosInfo.bpm, 2) << " bpm\n"
+                    << lastPosInfo.timeSigNumerator << '/' << lastPosInfo.timeSigDenominator << "\n"
+                    << timeToTimecodeString (lastPosInfo.timeInSeconds) << "\n"
+                    << quarterNotePositionToBarsBeatsString (lastPosInfo.ppqPosition,
                                                  lastPosInfo.timeSigNumerator,
                                                  lastPosInfo.timeSigDenominator) << "\n";
 
@@ -257,12 +264,13 @@ private:
     void updateSwitchToHostDisplay()
     {
         PluginHostType hostType;
-        const bool visible = hostType.isInterAppAudioConnected();
+        auto visible = hostType.isInterAppAudioConnected();
 
         if (switchToHostButtonLabel.isVisible() != visible)
         {
             switchToHostButtonLabel.setVisible (visible);
             switchToHostButton.setVisible (visible);
+
             if (visible)
             {
                 auto icon = hostType.getHostIcon (buttonSize);
@@ -284,7 +292,7 @@ private:
     ShapeButton recordButton {"Record", defaultButtonColour, defaultButtonColour, defaultButtonColour};
 
     Slider gainSlider;
-    AudioProcessorValueTreeState::SliderAttachment gainAttachment = {parameters, "gain", gainSlider};
+    AudioProcessorValueTreeState::SliderAttachment gainAttachment = { parameters, "gain", gainSlider };
 
     std::array<SimpleMeter, 2> meters;
 

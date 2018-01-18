@@ -106,12 +106,8 @@ StringArray Font::findAllTypefaceNames()
 {
     StringArray results;
 
-    Array<File> fonts;
-    File ("/system/fonts").findChildFiles (fonts, File::findFiles, false, "*.ttf");
-
-    for (int i = 0; i < fonts.size(); ++i)
-        results.addIfNotAlreadyThere (fonts.getReference(i).getFileNameWithoutExtension()
-                                        .upToLastOccurrenceOf ("-", false, false));
+    for (auto& f : File ("/system/fonts").findChildFiles (File::findFiles, false, "*.ttf"))
+        results.addIfNotAlreadyThere (f.getFileNameWithoutExtension().upToLastOccurrenceOf ("-", false, false));
 
     return results;
 }
@@ -120,12 +116,8 @@ StringArray Font::findAllTypefaceStyles (const String& family)
 {
     StringArray results ("Regular");
 
-    Array<File> fonts;
-    File ("/system/fonts").findChildFiles (fonts, File::findFiles, false, family + "-*.ttf");
-
-    for (int i = 0; i < fonts.size(); ++i)
-        results.addIfNotAlreadyThere (fonts.getReference(i).getFileNameWithoutExtension()
-                                        .fromLastOccurrenceOf ("-", false, false));
+    for (auto& f : File ("/system/fonts").findChildFiles (File::findFiles, false, family + "-*.ttf"))
+        results.addIfNotAlreadyThere (f.getFileNameWithoutExtension().fromLastOccurrenceOf ("-", false, false));
 
     return results;
 }

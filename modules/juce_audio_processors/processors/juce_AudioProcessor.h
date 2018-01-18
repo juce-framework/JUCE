@@ -1609,8 +1609,9 @@ private:
    #if JucePlugin_Build_VST3
     friend class JuceVST3EditController;
     friend class JuceVST3Component;
-    Atomic<int> vst3IsPlaying { 0 };
    #endif
+
+    Atomic<int> vst3IsPlaying { 0 };
 
     // This method is no longer used - you can delete it from your AudioProcessor classes.
     JUCE_DEPRECATED_WITH_BODY (virtual bool silenceInProducesSilenceOut() const, { return false; })

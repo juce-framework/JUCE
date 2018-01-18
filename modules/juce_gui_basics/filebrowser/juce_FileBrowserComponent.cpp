@@ -577,14 +577,8 @@ void FileBrowserComponent::getDefaultRoots (StringArray& rootNames, StringArray&
     rootPaths.add ({});
     rootNames.add ({});
 
-    Array<File> volumes;
-    File vol ("/Volumes");
-    vol.findChildFiles (volumes, File::findDirectories, false);
-
-    for (int i = 0; i < volumes.size(); ++i)
+    for (auto& volume : File ("/Volumes").findChildFiles (File::findDirectories, false))
     {
-        const File& volume = volumes.getReference(i);
-
         if (volume.isDirectory() && ! volume.getFileName().startsWithChar ('.'))
         {
             rootPaths.add (volume.getFullPathName());

@@ -36,6 +36,26 @@ struct AudioAppWizard   : public NewProjectWizard
     String getDescription() const override  { return TRANS("Creates a JUCE application with a single window component and audio and MIDI in/out functions."); }
     const char* getIcon() const override    { return BinaryData::wizard_AudioApp_svg; }
 
+    StringArray getFileCreationOptions() override
+    {
+        return { "Create header and implementation files",
+                 "Create header file only" };
+    }
+
+    Result processResultsFromSetupItems (WizardComp& setupComp) override
+    {
+        createCppFile = false;
+
+        switch (setupComp.getFileCreationComboID())
+        {
+            case 0:     createCppFile = true;  break;
+            case 1:     break;
+            default:    jassertfalse; break;
+        }
+
+        return Result::ok();
+    }
+
     bool initialiseProject (Project& project) override
     {
         createSourceFolder();
@@ -43,7 +63,7 @@ struct AudioAppWizard   : public NewProjectWizard
         File mainCppFile    = getSourceFilesFolder().getChildFile ("Main.cpp");
         File contentCompCpp = getSourceFilesFolder().getChildFile ("MainComponent.cpp");
         File contentCompH   = contentCompCpp.withFileExtension (".h");
-        String contentCompName = "MainContentComponent";
+        String contentCompName = "MainComponent";
 
         project.setProjectType (ProjectType_GUIApp::getTypeName());
 
@@ -54,14 +74,33 @@ struct AudioAppWizard   : public NewProjectWizard
         String appHeaders (CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), mainCppFile));
 
         // create main window
-        String windowCpp = project.getFileTemplate ("jucer_AudioComponentTemplate_cpp")
-                            .replace ("INCLUDE_JUCE", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompCpp), false);
+        appHeaders << newLine << CodeHelpers::createIncludeStatement (contentCompH, mainCppFile);
 
-        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (contentCompCpp, windowCpp))
-            failedFiles.add (contentCompCpp.getFullPathName());
+        String windowH = project.getFileTemplate (createCppFile ? "jucer_AudioComponentTemplate_h"
+                                                                : "jucer_AudioComponentSimpleTemplate_h")
+                            .replace ("INCLUDE_JUCE", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompH), false)
+                            .replace ("CONTENTCOMPCLASS", contentCompName, false)
+                            .replace ("HEADERGUARD", CodeHelpers::makeHeaderGuardName (contentCompH), false);
 
-        sourceGroup.addFileAtIndex (contentCompCpp, -1, true);
+        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (contentCompH, windowH))
+            failedFiles.add (contentCompH.getFullPathName());
 
+        sourceGroup.addFileAtIndex (contentCompH, -1, false);
+
+        if (createCppFile)
+        {
+            String windowCpp = project.getFileTemplate ("jucer_AudioComponentTemplate_cpp")
+                                  .replace ("INCLUDE_JUCE", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompCpp), false)
+                                  .replace ("INCLUDE_CORRESPONDING_HEADER", CodeHelpers::createIncludeStatement (contentCompH, contentCompCpp), false)
+                                  .replace ("CONTENTCOMPCLASS", contentCompName, false);
+
+
+
+            if (! FileHelpers::overwriteFileWithNewDataIfDifferent (contentCompCpp, windowCpp))
+                failedFiles.add (contentCompCpp.getFullPathName());
+
+            sourceGroup.addFileAtIndex (contentCompCpp, -1, true);
+        }
 
         // create main cpp
         String mainCpp = project.getFileTemplate ("jucer_MainTemplate_SimpleWindow_cpp")
@@ -85,6 +124,9 @@ struct AudioAppWizard   : public NewProjectWizard
         s.addIfNotAlreadyThere ("juce_audio_utils");
         return s;
     }
+
+private:
+    bool createCppFile;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioAppWizard)
 };

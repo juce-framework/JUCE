@@ -38,20 +38,22 @@ struct GUIAppWizard   : public NewProjectWizard
 
     StringArray getFileCreationOptions() override
     {
-        return { "Create a Main.cpp file and a basic window",
-                 "Create a Main.cpp file",
+        return { "Create a Main.cpp file with header and implementation files",
+                 "Create a Main.cpp file with header file only",
+                 "Create a Main.cpp file only",
                  "Don't create any files" };
     }
 
     Result processResultsFromSetupItems (WizardComp& setupComp) override
     {
-        createMainCpp = createWindow = false;
+        createMainCpp = createWindow = createCppFile = false;
 
         switch (setupComp.getFileCreationComboID())
         {
-            case 0:     createMainCpp = createWindow = true;  break;
-            case 1:     createMainCpp = true;  break;
-            case 2:     break;
+            case 0:     createMainCpp = createWindow = createCppFile = true;  break;
+            case 1:     createMainCpp = createWindow = true;  break;
+            case 2:     createMainCpp = true;  break;
+            case 3:     break;
             default:    jassertfalse; break;
         }
 
@@ -65,7 +67,7 @@ struct GUIAppWizard   : public NewProjectWizard
         File mainCppFile    = getSourceFilesFolder().getChildFile ("Main.cpp");
         File contentCompCpp = getSourceFilesFolder().getChildFile ("MainComponent.cpp");
         File contentCompH   = contentCompCpp.withFileExtension (".h");
-        String contentCompName = "MainContentComponent";
+        String contentCompName = "MainComponent";
 
         project.setProjectType (ProjectType_GUIApp::getTypeName());
 
@@ -79,24 +81,29 @@ struct GUIAppWizard   : public NewProjectWizard
         {
             appHeaders << newLine << CodeHelpers::createIncludeStatement (contentCompH, mainCppFile);
 
-            String windowH = project.getFileTemplate ("jucer_ContentCompTemplate_h")
+            String windowH = project.getFileTemplate (createCppFile ? "jucer_ContentCompTemplate_h"
+                                                                    : "jucer_ContentCompSimpleTemplate_h")
                                 .replace ("INCLUDE_JUCE", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompH), false)
                                 .replace ("CONTENTCOMPCLASS", contentCompName, false)
                                 .replace ("HEADERGUARD", CodeHelpers::makeHeaderGuardName (contentCompH), false);
 
-            String windowCpp = project.getFileTemplate ("jucer_ContentCompTemplate_cpp")
-                                .replace ("INCLUDE_JUCE", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompCpp), false)
-                                .replace ("INCLUDE_CORRESPONDING_HEADER", CodeHelpers::createIncludeStatement (contentCompH, contentCompCpp), false)
-                                .replace ("CONTENTCOMPCLASS", contentCompName, false);
-
             if (! FileHelpers::overwriteFileWithNewDataIfDifferent (contentCompH, windowH))
                 failedFiles.add (contentCompH.getFullPathName());
 
-            if (! FileHelpers::overwriteFileWithNewDataIfDifferent (contentCompCpp, windowCpp))
-                failedFiles.add (contentCompCpp.getFullPathName());
-
-            sourceGroup.addFileAtIndex (contentCompCpp, -1, true);
             sourceGroup.addFileAtIndex (contentCompH, -1, false);
+
+            if (createCppFile)
+            {
+                String windowCpp = project.getFileTemplate ("jucer_ContentCompTemplate_cpp")
+                                    .replace ("INCLUDE_JUCE", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompCpp), false)
+                                    .replace ("INCLUDE_CORRESPONDING_HEADER", CodeHelpers::createIncludeStatement (contentCompH, contentCompCpp), false)
+                                    .replace ("CONTENTCOMPCLASS", contentCompName, false);
+
+                if (! FileHelpers::overwriteFileWithNewDataIfDifferent (contentCompCpp, windowCpp))
+                    failedFiles.add (contentCompCpp.getFullPathName());
+
+                sourceGroup.addFileAtIndex (contentCompCpp, -1, true);
+            }
         }
 
         if (createMainCpp)
@@ -119,7 +126,7 @@ struct GUIAppWizard   : public NewProjectWizard
     }
 
 private:
-    bool createMainCpp, createWindow;
+    bool createMainCpp, createWindow, createCppFile;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GUIAppWizard)
 };

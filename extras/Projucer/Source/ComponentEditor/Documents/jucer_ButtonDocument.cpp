@@ -71,7 +71,7 @@ static const char* const stateNames[] =
     "common background"
 };
 
-int stateNameToIndex (const String& name)
+static int stateNameToIndex (const String& name)
 {
     for (int i = 7; --i >= 0;)
         if (name.equalsIgnoreCase (stateNames[i]))

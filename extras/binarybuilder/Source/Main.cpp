@@ -146,11 +146,10 @@ int main (int argc, char* argv[])
               << " from files in " << sourceDirectory.getFullPathName()
               << "..." << std::endl << std::endl;
 
-    Array<File> files;
-    sourceDirectory.findChildFiles (files, File::findFiles, true,
-                                    (argc > 4) ? argv[4] : "*");
+    auto files = sourceDirectory.findChildFiles (File::findFiles, true,
+                                                 (argc > 4) ? argv[4] : "*");
 
-    if (files.size() == 0)
+    if (files.isEmpty())
     {
         std::cout << "Didn't find any source files in: "
                   << sourceDirectory.getFullPathName() << std::endl << std::endl;

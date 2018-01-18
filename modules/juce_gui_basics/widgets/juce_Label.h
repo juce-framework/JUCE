@@ -201,6 +201,16 @@ public:
     void removeListener (Listener* listener);
 
     //==============================================================================
+    /** You can assign a lambda to this callback object to have it called when the label text is changed. */
+    std::function<void()> onTextChange;
+
+    /** You can assign a lambda to this callback object to have it called when the label's editor is shown. */
+    std::function<void()> onEditorShow;
+
+    /** You can assign a lambda to this callback object to have it called when the label's editor is hidden. */
+    std::function<void()> onEditorHide;
+
+    //==============================================================================
     /** Makes the label turn into a TextEditor when clicked.
 
         By default this is turned off.

@@ -96,7 +96,7 @@ public:
         targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderName (os));
 
         if (isWindows())
-            targetPlatformValue.referTo (settings, Ids::codeBlocksWindowsTarget, getProject().getUndoManagerFor (settings));
+            targetPlatformValue.referTo (settings, Ids::codeBlocksWindowsTarget, getUndoManager());
     }
 
     //==============================================================================
@@ -194,8 +194,8 @@ public:
     //==============================================================================
     void initialiseDependencyPathValues() override
     {
-        DependencyPathOS pathOS = isLinux() ? TargetOS::linux
-                                            : TargetOS::windows;
+        auto pathOS = isLinux() ? TargetOS::linux
+                                : TargetOS::windows;
 
         vst3Path.referTo (Value (new DependencyPathValueSource (getSetting (Ids::vst3Folder), Ids::vst3Path, pathOS)));
 
@@ -333,7 +333,7 @@ private:
 
     StringArray getPackages() const
     {
-        StringArray result (linuxPackages);
+        auto result = linuxPackages;
 
         static String guiExtrasModule ("juce_gui_extra");
 
@@ -351,7 +351,7 @@ private:
 
     void addVersion (XmlElement& xml) const
     {
-        XmlElement* fileVersion = xml.createNewChildElement ("FileVersion");
+        auto* fileVersion = xml.createNewChildElement ("FileVersion");
         fileVersion->setAttribute ("major", 1);
         fileVersion->setAttribute ("minor", 6);
     }
@@ -395,8 +395,8 @@ private:
         defines = mergePreprocessorDefs (defines, getAllPreprocessorDefs (config, target.type));
 
         StringArray defs;
-        const auto keys = defines.getAllKeys();
-        const auto values = defines.getAllValues();
+        auto keys = defines.getAllKeys();
+        auto values = defines.getAllValues();
 
         for (int i = 0; i < defines.size(); ++i)
         {
@@ -446,7 +446,7 @@ private:
             if (target.isDynamicLibrary() || getProject().getProjectType().isAudioPlugin())
                 flags.add ("-fPIC");
 
-            const auto packages = getPackages();
+            auto packages = getPackages();
 
             if (packages.size() > 0)
             {
@@ -467,7 +467,7 @@ private:
 
     StringArray getLinkerFlags (const BuildConfiguration& config, CodeBlocksTarget& target) const
     {
-        StringArray flags (makefileExtraLinkerFlags);
+        auto flags = makefileExtraLinkerFlags;
 
         if (auto* codeBlocksConfig = dynamic_cast<const CodeBlocksBuildConfiguration*> (&config))
             flags.add (codeBlocksConfig->getArchitectureTypeString());
@@ -480,7 +480,7 @@ private:
 
         flags.addTokens (replacePreprocessorTokens (config, getExtraLinkerFlagsString()).trim(), " \n", "\"'");
 
-        const auto packages = getPackages();
+        auto packages = getPackages();
 
         if (config.exporter.isLinux())
         {
@@ -504,7 +504,7 @@ private:
 
     StringArray getLinkerSearchPaths (const BuildConfiguration& config, CodeBlocksTarget& target) const
     {
-        StringArray librarySearchPaths (config.getLibrarySearchPaths());
+        auto librarySearchPaths = config.getLibrarySearchPaths();
 
         if (getProject().getProjectType().isAudioPlugin() && target.type != ProjectType::Target::SharedCodeTarget)
             librarySearchPaths.add (RelativePath (getSharedCodePath (config), RelativePath::buildTargetFolder).getParentDirectory().toUnixStyle());
@@ -574,7 +574,7 @@ private:
 
     String getSharedCodePath (const BuildConfiguration& config) const
     {
-        const String outputPath = getOutputPathForTarget (getTargetWithType (ProjectType::Target::SharedCodeTarget), config);
+        auto outputPath = getOutputPathForTarget (getTargetWithType (ProjectType::Target::SharedCodeTarget), config);
         RelativePath path (outputPath, RelativePath::buildTargetFolder);
         auto filename = path.getFileName();
 
@@ -589,14 +589,14 @@ private:
         xml.setAttribute ("title", target.getTargetNameForConfiguration (config));
 
         {
-            XmlElement* output = xml.createNewChildElement ("Option");
+            auto* output = xml.createNewChildElement ("Option");
 
             output->setAttribute ("output", getOutputPathForTarget (target, config));
 
             if (isLinux())
             {
-                const bool keepPrefix = (target.type == ProjectType::Target::VSTPlugIn || target.type == ProjectType::Target::VST3PlugIn
-                                      || target.type == ProjectType::Target::AAXPlugIn || target.type == ProjectType::Target::RTASPlugIn);
+                bool keepPrefix = (target.type == ProjectType::Target::VSTPlugIn || target.type == ProjectType::Target::VST3PlugIn
+                                || target.type == ProjectType::Target::AAXPlugIn || target.type == ProjectType::Target::RTASPlugIn);
 
                 output->setAttribute ("prefix_auto", keepPrefix ? 0 : 1);
             }
@@ -618,7 +618,7 @@ private:
             xml.createNewChildElement ("Option")->setAttribute ("external_deps", getSharedCodePath (config));
 
         {
-            XmlElement* const compiler = xml.createNewChildElement ("Compiler");
+            auto* compiler = xml.createNewChildElement ("Compiler");
 
             {
                 StringArray flags;
@@ -638,7 +638,7 @@ private:
             }
 
             {
-                const StringArray includePaths (getIncludePaths (config));
+                auto includePaths = getIncludePaths (config);
 
                 for (auto path : includePaths)
                     setAddOption (*compiler, "directory", path);
@@ -646,7 +646,7 @@ private:
         }
 
         {
-            XmlElement* const linker = xml.createNewChildElement ("Linker");
+            auto* linker = xml.createNewChildElement ("Linker");
 
             if (getProject().getProjectType().isAudioPlugin() && target.type != ProjectType::Target::SharedCodeTarget)
                 setAddOption (*linker, "option", getSharedCodePath (config));
@@ -666,7 +666,7 @@ private:
 
     void addBuild (XmlElement& xml) const
     {
-        XmlElement* const build = xml.createNewChildElement ("Build");
+        auto* build = xml.createNewChildElement ("Build");
 
         for (ConstConfigIterator config (*this); config.next();)
             for (auto target : targets)
@@ -676,7 +676,7 @@ private:
 
     void addVirtualTargets (XmlElement& xml) const
     {
-        XmlElement* const virtualTargets = xml.createNewChildElement ("VirtualTargets");
+        auto* virtualTargets = xml.createNewChildElement ("VirtualTargets");
 
         for (ConstConfigIterator config (*this); config.next();)
         {
@@ -706,7 +706,7 @@ private:
 
     void addProjectCompilerOptions (XmlElement& xml) const
     {
-        XmlElement* const compiler = xml.createNewChildElement ("Compiler");
+        auto* compiler = xml.createNewChildElement ("Compiler");
 
         for (auto& option : getProjectCompilerOptions())
             setAddOption (*compiler, "option", option);
@@ -731,7 +731,7 @@ private:
 
     void addProjectLinkerOptions (XmlElement& xml) const
     {
-        XmlElement* const linker = xml.createNewChildElement ("Linker");
+        auto* linker = xml.createNewChildElement ("Linker");
 
         for (auto& lib : getProjectLinkerLibs())
             setAddOption (*linker, "library", lib);
@@ -794,14 +794,14 @@ private:
         }
         else if (projectItem.shouldBeAddedToTargetProject())
         {
-            const RelativePath file (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
+            RelativePath file (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
 
-            XmlElement* unit = xml.createNewChildElement ("Unit");
+            auto* unit = xml.createNewChildElement ("Unit");
             unit->setAttribute ("filename", file.toUnixStyle());
 
             for (ConstConfigIterator config (*this); config.next();)
             {
-                const String& targetName = getTargetForProjectItem (projectItem).getTargetNameForConfiguration (*config);
+                auto targetName = getTargetForProjectItem (projectItem).getTargetNameForConfiguration (*config);
                 unit->createNewChildElement ("Option")->setAttribute ("target", targetName);
             }
 

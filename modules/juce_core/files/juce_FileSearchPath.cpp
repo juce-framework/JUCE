@@ -132,6 +132,13 @@ void FileSearchPath::removeNonExistentPaths()
             directories.remove (i);
 }
 
+Array<File> FileSearchPath::findChildFiles (int whatToLookFor, bool recurse, const String& wildcard) const
+{
+    Array<File> results;
+    findChildFiles (results, whatToLookFor, recurse, wildcard);
+    return results;
+}
+
 int FileSearchPath::findChildFiles (Array<File>& results, int whatToLookFor,
                                     bool recurse, const String& wildcard) const
 {

@@ -134,25 +134,27 @@ public:
     String getName() const;
     File getTargetFolder() const;
 
-    Project& getProject() noexcept              { return project; }
-    const Project& getProject() const noexcept  { return project; }
+    Project& getProject() noexcept                        { return project; }
+    const Project& getProject() const noexcept            { return project; }
+
+    UndoManager* getUndoManager() const                   { return project.getUndoManagerFor (settings); }
 
     Value getSetting (const Identifier& nm)               { return settings.getPropertyAsValue (nm, project.getUndoManagerFor (settings)); }
     String getSettingString (const Identifier& nm) const  { return settings [nm]; }
 
-    Value getTargetLocationValue()              { return targetLocationValue.getPropertyAsValue(); }
-    String getTargetLocationString() const      { return targetLocationValue.get(); }
+    Value getTargetLocationValue()                        { return targetLocationValue.getPropertyAsValue(); }
+    String getTargetLocationString() const                { return targetLocationValue.get(); }
 
-    String getExtraCompilerFlagsString() const  { return extraCompilerFlagsValue.get().toString().replaceCharacters ("\r\n", "  "); }
-    String getExtraLinkerFlagsString() const    { return extraLinkerFlagsValue.get().toString().replaceCharacters ("\r\n", "  "); }
+    String getExtraCompilerFlagsString() const            { return extraCompilerFlagsValue.get().toString().replaceCharacters ("\r\n", "  "); }
+    String getExtraLinkerFlagsString() const              { return extraLinkerFlagsValue.get().toString().replaceCharacters ("\r\n", "  "); }
 
-    String getExternalLibrariesString() const   { return getSearchPathsFromString (externalLibrariesValue.get().toString()).joinIntoString (";"); }
+    String getExternalLibrariesString() const             { return getSearchPathsFromString (externalLibrariesValue.get().toString()).joinIntoString (";"); }
 
-    bool shouldUseGNUExtensions() const         { return gnuExtensionsValue.get();}
+    bool shouldUseGNUExtensions() const                   { return gnuExtensionsValue.get();}
 
-    Value getVST3PathValue() const              { return vst3Path; }
-    Value getRTASPathValue() const              { return rtasPath; }
-    Value getAAXPathValue() const               { return aaxPath; }
+    Value getVST3PathValue() const                        { return vst3Path; }
+    Value getRTASPathValue() const                        { return rtasPath; }
+    Value getAAXPathValue() const                         { return aaxPath; }
 
     // NB: this is the path to the parent "modules" folder that contains the named module, not the
     // module folder itself.
@@ -376,15 +378,8 @@ protected:
 
     static String getDefaultBuildsRootFolder()            { return "Builds/"; }
 
-    static String getStaticLibbedFilename (String name)
-    {
-        return addSuffix (addLibPrefix (name), ".a");
-    }
-
-    static String getDynamicLibbedFilename (String name)
-    {
-        return addSuffix (addLibPrefix (name), ".so");
-    }
+    static String getStaticLibbedFilename (String name)   { return addSuffix (addLibPrefix (name), ".a"); }
+    static String getDynamicLibbedFilename (String name)  { return addSuffix (addLibPrefix (name), ".so"); }
 
     virtual void addPlatformSpecificSettingsForProjectType (const ProjectType&) = 0;
 

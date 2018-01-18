@@ -36,7 +36,7 @@ typedef unsigned long WindowType;
 
 
 //==============================================================================
-class XWindowSystem
+class XWindowSystem :  public DeletedAtShutdown
 {
 public:
     XDisplay displayRef() noexcept;

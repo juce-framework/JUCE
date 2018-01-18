@@ -1707,7 +1707,9 @@ struct VST3PluginInstance : public AudioPluginInstance
 
         editController->setComponentHandler (nullptr);
 
-        if (isControllerInitialised)    editController->terminate();
+        if (isControllerInitialised)
+            editController->terminate();
+
         holder->terminate();
 
         componentConnection = nullptr;
@@ -1912,6 +1914,24 @@ struct VST3PluginInstance : public AudioPluginInstance
         associateTo (data, midiMessages);
 
         processor->process (data);
+
+        for (auto* q : outputParameterChanges->queues)
+        {
+            if (editController != nullptr)
+            {
+                auto numPoints = q->getPointCount();
+
+                if (numPoints > 0)
+                {
+                    Steinberg::int32 sampleOffset;
+                    Steinberg::Vst::ParamValue value;
+                    q->getPoint (numPoints - 1, sampleOffset, value);
+                    editController->setParamNormalized (q->getParameterId(), value);
+                }
+            }
+
+            q->clear();
+        }
 
         MidiEventList::toMidiBuffer (midiMessages, *midiOutputs);
 
@@ -2186,6 +2206,17 @@ struct VST3PluginInstance : public AudioPluginInstance
         }
 
         return false;
+    }
+
+    bool isParameterAutomatable (int parameterIndex) const override
+    {
+        if (editController != nullptr)
+        {
+            auto flags = getParameterInfoForIndex (parameterIndex).flags;
+            return (flags & Steinberg::Vst::ParameterInfo::kCanAutomate) != 0;
+        }
+
+        return true;
     }
 
     float getParameter (int parameterIndex) override

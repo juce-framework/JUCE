@@ -188,7 +188,7 @@ void ProjectContentComponent::setProject (Project* newProject)
 }
 
 //==============================================================================
-LiveBuildTab* findBuildTab (const TabbedComponent& tabs)
+static LiveBuildTab* findBuildTab (const TabbedComponent& tabs)
 {
     return dynamic_cast<LiveBuildTab*> (tabs.getTabContentComponent (1));
 }
@@ -742,7 +742,7 @@ struct AsyncCommandRetrier  : public Timer
     JUCE_DECLARE_NON_COPYABLE (AsyncCommandRetrier)
 };
 
-bool reinvokeCommandAfterCancellingModalComps (const ApplicationCommandTarget::InvocationInfo& info)
+static bool reinvokeCommandAfterCancellingModalComps (const ApplicationCommandTarget::InvocationInfo& info)
 {
     if (ModalComponentManager::getInstance()->cancelAllModalComponents())
     {
