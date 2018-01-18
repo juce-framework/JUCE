@@ -59,9 +59,11 @@ Project::Project (const File& f)
     moveOldPropertyFromProjectToAllExporters (Ids::bigIcon);
     moveOldPropertyFromProjectToAllExporters (Ids::smallIcon);
 
-    intialiseProjectValues();
+    initialiseProjectValues();
     initialiseMainGroup();
     initialiseAudioPluginValues();
+
+    parsedPreprocessorDefs = parsePreprocessorDefs (preprocessorDefsValue.get());
 
     getModules().sortAlphabetically();
 
@@ -170,7 +172,7 @@ void Project::initialiseMainGroup()
     getMainGroup().initialiseMissingProperties();
 }
 
-void Project::intialiseProjectValues()
+void Project::initialiseProjectValues()
 {
     projectNameValue.referTo         (projectRoot, Ids::name, getUndoManagerFor (projectRoot), "JUCE Project");
     projectUIDValue.referTo          (projectRoot, Ids::ID, getUndoManagerFor (projectRoot), createAlphaNumericUID());
@@ -412,9 +414,11 @@ Result Project::loadDocument (const File& file)
     enabledModulesList.reset();
     projectRoot = newTree;
 
-    intialiseProjectValues();
+    initialiseProjectValues();
     initialiseMainGroup();
     initialiseAudioPluginValues();
+
+    parsedPreprocessorDefs = parsePreprocessorDefs (preprocessorDefsValue.get());
 
     removeDefunctExporters();
     updateOldModulePaths();

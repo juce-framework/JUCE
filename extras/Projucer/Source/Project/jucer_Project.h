@@ -356,7 +356,7 @@ private:
     StringPairArray parsedPreprocessorDefs;
 
     //==============================================================================
-    void intialiseProjectValues();
+    void initialiseProjectValues();
     void initialiseMainGroup();
     void initialiseAudioPluginValues();
 
