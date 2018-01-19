@@ -80,10 +80,56 @@ public:
     ValueTree() noexcept;
 
     /** Creates an empty ValueTree with the given type name.
+
         Like an XmlElement, each ValueTree has a type, which you can access with
         getType() and hasType().
     */
     explicit ValueTree (const Identifier& type);
+
+   #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
+    /** Creates a value tree from nested lists of properties and ValueTrees.
+
+        This code,
+
+        @code
+        ValueTree groups
+        { "ParameterGroups", {},
+          {
+            { "Group", {{ "name", "Tone Controls" }},
+              {
+                { "Parameter", {{ "id", "distortion" }, { "value", 0.5 }}},
+                { "Parameter", {{ "id", "reverb" },     { "value", 0.5 }}}
+              }
+            },
+            { "Group", {{ "name", "Other Controls" }},
+              {
+                { "Parameter", {{ "id", "drywet" }, { "value", 0.5 }}},
+                { "Parameter", {{ "id", "gain" },   { "value", 0.5 }}}
+              }
+            }
+          }
+        };
+        @endcode
+
+        produces this tree:
+
+        @verbatim
+        <ParameterGroups>
+          <Group name="Tone Controls">
+            <Parameter id="distortion" value="0.5"/>
+            <Parameter id="reverb" value="0.5"/>
+          </Group>
+          <Group name="Other Controls">
+            <Parameter id="drywet" value="0.5"/>
+            <Parameter id="gain" value="0.5"/>
+          </Group>
+        </ParameterGroups>
+        @endverbatim
+    */
+    ValueTree (const Identifier& type,
+               std::initializer_list<std::pair<Identifier, var>> properties,
+               std::initializer_list<ValueTree> subTrees = {});
+   #endif
 
     /** Creates a reference to another ValueTree. */
     ValueTree (const ValueTree&) noexcept;
