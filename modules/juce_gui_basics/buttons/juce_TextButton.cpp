@@ -38,6 +38,7 @@ TextButton::TextButton (const String& name) : Button (name)
 TextButton::TextButton (const String& name, const String& toolTip)  : Button (name)
 {
     setTooltip (toolTip);
+    setColour (TextButton::outlineColourId, Colours::transparentBlack);
 }
 
 TextButton::~TextButton()

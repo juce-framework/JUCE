@@ -76,7 +76,8 @@ public:
                                                            'on'). The look-and-feel class might re-interpret this to add
                                                            effects, etc. */
         textColourOffId                 = 0x1000102,  /**< The colour to use for the button's text when the button's toggle state is "off". */
-        textColourOnId                  = 0x1000103   /**< The colour to use for the button's text.when the button's toggle state is "on". */
+        textColourOnId                  = 0x1000103,  /**< The colour to use for the button's text when the button's toggle state is "on". */
+        outlineColourId                 = 0x1000104   /**< The colour to use for drawing the line around the edge. */
     };
 
     //==============================================================================

@@ -38,6 +38,7 @@ public:
         registerColour (TextButton::buttonOnColourId, "background (on)", "bgColOn");
         registerColour (TextButton::textColourOffId, "text colour (normal)", "textCol");
         registerColour (TextButton::textColourOnId, "text colour (on)", "textColOn");
+        registerColour (TextButton::outlineColourId, "outline", "outlineCol");
     }
 
     Component* createNewComponent (JucerDocument*) override

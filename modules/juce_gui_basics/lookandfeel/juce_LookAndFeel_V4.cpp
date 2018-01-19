@@ -306,14 +306,14 @@ void LookAndFeel_V4::drawButtonBackground (Graphics& g,
 
         g.fillPath (path);
 
-        g.setColour (button.findColour (ComboBox::outlineColourId));
+        g.setColour (button.findColour (TextButton::outlineColourId));
         g.strokePath (path, PathStrokeType (1.0f));
     }
     else
     {
         g.fillRoundedRectangle (bounds, cornerSize);
 
-        g.setColour (button.findColour (ComboBox::outlineColourId));
+        g.setColour (button.findColour (TextButton::outlineColourId));
         g.drawRoundedRectangle (bounds, cornerSize, 1.0f);
     }
 }
@@ -1295,6 +1295,7 @@ void LookAndFeel_V4::initialiseColours()
         TextButton::buttonOnColourId,               currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedFill).getARGB(),
         TextButton::textColourOnId,                 currentColourScheme.getUIColour (ColourScheme::UIColour::highlightedText).getARGB(),
         TextButton::textColourOffId,                currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
+        TextButton::outlineColourId,                currentColourScheme.getUIColour (ColourScheme::UIColour::outline).getARGB(),
 
         ToggleButton::textColourId,                 currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
         ToggleButton::tickColourId,                 currentColourScheme.getUIColour (ColourScheme::UIColour::defaultText).getARGB(),
