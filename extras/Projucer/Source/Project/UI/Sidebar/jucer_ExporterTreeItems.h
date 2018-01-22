@@ -308,8 +308,7 @@ private:
 };
 
 //==============================================================================
-class ExportersTreeRoot    : public JucerTreeViewBase,
-                             private ValueTree::Listener
+class ExportersTreeRoot    : public ProjectTreeItemBase
 {
 public:
     ExportersTreeRoot (Project& p)

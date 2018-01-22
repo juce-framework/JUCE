@@ -125,14 +125,6 @@ struct ExportersTreePanel    : public TreePanelBase
         setRoot (new TreeItemTypes::ExportersTreeRoot (p));
         tree.setRootItemVisible (false);
     }
-
-    void deleteSelectedItems() override
-    {
-        for (int i = rootItem->getNumSubItems() - 1; i >= 0; --i)
-            if (rootItem->getSubItem (i)->isSelected())
-                if (auto* root = dynamic_cast<TreeItemTypes::ExportersTreeRoot*> (rootItem.get()))
-                    root->removeExporter (i);
-    }
 };
 
 //==============================================================================
