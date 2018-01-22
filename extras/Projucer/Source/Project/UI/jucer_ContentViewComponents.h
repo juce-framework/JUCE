@@ -112,7 +112,7 @@ public:
     int getColumnX (int index)
     {
         auto prop = 0.0f;
-        for (auto i = 0; i < index; ++i)
+        for (int i = 0; i < index; ++i)
             prop += widths.getUnchecked (i);
 
         return roundToInt (prop * getWidth());
@@ -141,7 +141,7 @@ private:
         auto diff = 1.0f - total;
         auto amount = diff / static_cast<float> (indexToIgnore == -1 ? widths.size() : widths.size() - 1);
 
-        for (auto i = 0; i < widths.size(); ++i)
+        for (int i = 0; i < widths.size(); ++i)
         {
             if (i != indexToIgnore)
             {
@@ -156,8 +156,8 @@ private:
 class InfoButton    : public Button
 {
 public:
-    InfoButton (const String& infoToDisplay = String())
-    : Button (String())
+    InfoButton (const String& infoToDisplay = {})
+        : Button ({})
     {
         if (infoToDisplay.isNotEmpty())
             setInfoToDisplay (infoToDisplay);
@@ -166,7 +166,7 @@ public:
     void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown) override
     {
         auto bounds = getLocalBounds().toFloat().reduced (2);
-        const auto& icon = getIcons().info;
+        auto& icon = getIcons().info;
 
         g.setColour (findColour (treeIconColourId).withMultipliedAlpha (isMouseOverButton || isButtonDown ? 1.0f : 0.5f));
 
@@ -211,7 +211,7 @@ private:
     struct InfoWindow    : public Component
     {
         InfoWindow (const String& s)
-        : stringToDisplay (s)
+            : stringToDisplay (s)
         {
             setSize (150, 14);
         }
@@ -241,7 +241,7 @@ public:
     {
         addAndMakeVisible (header);
 
-        description.setFont (Font (16.0f));
+        description.setFont ({ 16.0f });
         description.setColour (getLookAndFeel().findColour (defaultTextColourId));
         description.setLineSpacing (5.0f);
         description.setJustification (Justification::centredLeft);
@@ -253,17 +253,15 @@ public:
         properties.clear();
         properties.addArray (newProps.components);
 
-        for (auto i = properties.size(); --i >= 0;)
+        for (auto* prop : properties)
         {
-            auto* prop = properties.getUnchecked (i);
-
             addAndMakeVisible (prop);
 
             if (! prop->getTooltip().isEmpty())
             {
                 addAndMakeVisible (infoButtons.add (new InfoButton (prop->getTooltip())));
                 infoButtons.getLast()->setAssociatedComponent (prop);
-                prop->setTooltip (String()); // set the tooltip to empty so it only displays when its button is clicked
+                prop->setTooltip ({}); // set the tooltip to empty so it only displays when its button is clicked
             }
         }
     }
@@ -274,18 +272,16 @@ public:
         auto height = header.getBottom() + 10;
 
         descriptionLayout.createLayout (description, (float) (width - 40));
-        const auto descriptionHeight = (int) descriptionLayout.getHeight();
+        auto descriptionHeight = (int) descriptionLayout.getHeight();
 
         if (descriptionHeight > 0)
             height += (int) descriptionLayout.getHeight() + 25;
 
-        for (auto i = 0; i < properties.size(); ++i)
+        for (auto* pp : properties)
         {
-            auto* pp = properties.getUnchecked (i);
             auto propertyHeight = pp->getPreferredHeight() + (getHeightMultiplier (pp) * pp->getPreferredHeight());
 
             InfoButton* buttonToUse = nullptr;
-
             for (auto* b : infoButtons)
                 if (b->getAssociatedComponent() == pp)
                     buttonToUse = b;
@@ -337,7 +333,7 @@ public:
         if (pp->getName() == "Dependencies")
             return;
 
-        for (int i = pp->getNumChildComponents() - 1; i >= 0; --i)
+        for (auto i = pp->getNumChildComponents() - 1; i >= 0; --i)
         {
             auto* child = pp->getChildComponent (i);
 
@@ -353,7 +349,7 @@ private:
     ContentViewHeader header;
     AttributedString description;
     TextLayout descriptionLayout;
-    const int headerSize = 40;
+    int headerSize = 40;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertyGroupComponent)
 };

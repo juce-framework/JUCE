@@ -62,7 +62,7 @@ public:
     void resized() override
     {
         auto bounds = getLocalBounds();
-        configLabel.setFont (Font (bounds.getHeight() / 3.0f));
+        configLabel.setFont ({ bounds.getHeight() / 3.0f });
 
         //======================================================================
         auto projectHeaderBounds = bounds.removeFromLeft (tabsWidth);
@@ -159,7 +159,7 @@ public:
         return false;
     }
 
-    int getUserButtonWidth()            { return userSettingsButton->getWidth(); }
+    int getUserButtonWidth()    { return userSettingsButton->getWidth(); }
 
     void sidebarTabsWidthChanged (int newWidth)
     {
@@ -312,7 +312,7 @@ private:
 
     void updateUserAvatar()
     {
-        if (LicenseController* controller = ProjucerApplication::getApp().licenseController)
+        if (auto* controller = ProjucerApplication::getApp().licenseController.get())
         {
             auto state = controller->getState();
 

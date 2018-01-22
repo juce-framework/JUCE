@@ -35,7 +35,7 @@ class FileGroupInformationComponent  : public Component,
 public:
     FileGroupInformationComponent (const Project::Item& group)
         : item (group),
-          header (item.getName(), Icon (getIcons().openFolder, Colours::transparentBlack))
+          header (item.getName(), { getIcons().openFolder, Colours::transparentBlack })
     {
         list.setHeaderComponent (new ListBoxHeader ( { "File", "Binary Resource", "Xcode Resource", "Compile" },
                                                      { 0.4f, 0.2f, 0.2f, 0.2f } ));
@@ -93,7 +93,7 @@ public:
 
         if (rowNumber < getNumRows())
         {
-            Project::Item child (item.getChild (rowNumber));
+            auto child = item.getChild (rowNumber);
 
             if (existingComponentToUpdate == nullptr
                  || dynamic_cast<FileOptionComponent*> (existing.get())->item != child)

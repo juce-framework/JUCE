@@ -45,8 +45,7 @@ Project::Project (const File& f)
     : FileBasedDocument (projectFileExtension,
                          String ("*") + projectFileExtension,
                          "Choose a Jucer project to load",
-                         "Save Jucer project"),
-      projectRoot (Ids::JUCERPROJECT)
+                         "Save Jucer project")
 {
     Logger::writeToLog ("Loading project: " + f.getFullPathName());
     setFile (f);
@@ -262,7 +261,7 @@ void Project::updateOldStyleConfigList()
 
                 if (! exporter->isXcode())
                 {
-                    for (int j = newConfigs.getNumChildren(); --j >= 0;)
+                    for (auto j = newConfigs.getNumChildren(); --j >= 0;)
                     {
                         auto config = newConfigs.getChild (j);
 
@@ -322,8 +321,7 @@ void Project::updateOldModulePaths()
 //==============================================================================
 static int getVersionElement (StringRef v, int index)
 {
-    StringArray parts;
-    parts.addTokens (v, "., ", StringRef());
+    StringArray parts = StringArray::fromTokens (v, "., ", {});
 
     return parts [parts.size() - index - 1].getIntValue();
 }
@@ -344,7 +342,7 @@ static int getBuiltJuceVersion()
 
 static bool isAnyModuleNewerThanProjucer (const OwnedArray<ModuleDescription>& modules)
 {
-    for (int i = modules.size(); --i >= 0;)
+    for (auto i = modules.size(); --i >= 0;)
     {
         auto* m = modules.getUnchecked(i);
 
@@ -1145,8 +1143,8 @@ struct ItemSorterWithGroupsAtStart
 {
     static int compareElements (const ValueTree& first, const ValueTree& second)
     {
-         auto firstIsGroup = first.hasType (Ids::GROUP);
-         auto secondIsGroup = second.hasType (Ids::GROUP);
+        auto firstIsGroup = first.hasType (Ids::GROUP);
+        auto secondIsGroup = second.hasType (Ids::GROUP);
 
         if (firstIsGroup == secondIsGroup)
             return first [Ids::name].toString().compareNatural (second [Ids::name].toString());
