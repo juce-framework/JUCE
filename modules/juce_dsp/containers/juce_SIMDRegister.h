@@ -165,7 +165,7 @@ struct SIMDRegister
     /** Subtracts another SIMDRegister to the receiver. */
     inline SIMDRegister& JUCE_VECTOR_CALLTYPE operator-= (SIMDRegister v) noexcept      { value = NativeOps::sub (value, v.value); return *this; }
 
-    /** Subtracts another SIMDRegister to the receiver. */
+    /** Multiplies another SIMDRegister to the receiver. */
     inline SIMDRegister& JUCE_VECTOR_CALLTYPE operator*= (SIMDRegister v) noexcept      { value = CmplxOps::mul (value, v.value); return *this; }
 
     //==============================================================================
@@ -218,7 +218,7 @@ struct SIMDRegister
     /** Returns a vector where each element is the difference of the corresponding element in the receiver and the scalar s.*/
     inline SIMDRegister JUCE_VECTOR_CALLTYPE operator- (ElementType s) const noexcept   { return { NativeOps::sub (value, CmplxOps::expand (s)) }; }
 
-    /** Returns a vector where each element is the difference of the corresponding element in the receiver and the scalar s.*/
+    /** Returns a vector where each element is the product of the corresponding element in the receiver and the scalar s.*/
     inline SIMDRegister JUCE_VECTOR_CALLTYPE operator* (ElementType s) const noexcept   { return { CmplxOps::mul (value, CmplxOps::expand (s)) }; }
 
     //==============================================================================
