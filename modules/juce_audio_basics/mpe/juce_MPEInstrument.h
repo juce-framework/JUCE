@@ -24,7 +24,7 @@ namespace juce
 {
 
 //==============================================================================
-/*
+/**
     This class represents an instrument handling MPE.
 
     It has an MPE zone layout and maintans a state of currently
