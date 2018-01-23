@@ -35,7 +35,7 @@ namespace
             // was not within the allowed range!
             // we fit this back into the allowed range here to maintain a valid
             // state for the zone, but probably the resulting zone is not what you
-            //wanted it to be!
+            // wanted it to be!
             jassertfalse;
 
             valueToCheckAndLimit = jlimit (minValue, maxValue, valueToCheckAndLimit);
@@ -134,7 +134,7 @@ bool MPEZone::overlapsWith (MPEZone other) const noexcept
 //==============================================================================
 bool MPEZone::truncateToFit (MPEZone other) noexcept
 {
-    const int masterChannelDiff = other.masterChannel - masterChannel;
+    auto masterChannelDiff = other.masterChannel - masterChannel;
 
     // we need at least 2 channels to be left after truncation:
     // 1 master channel and 1 note channel. otherwise we can't truncate.

@@ -25,10 +25,10 @@ namespace juce
 
 MidiBuffer MPEMessages::addZone (MPEZone zone)
 {
-    MidiBuffer buffer (MidiRPNGenerator::generate (zone.getFirstNoteChannel(),
-                                                   zoneLayoutMessagesRpnNumber,
-                                                   zone.getNumNoteChannels(),
-                                                   false, false));
+    auto buffer = MidiRPNGenerator::generate (zone.getFirstNoteChannel(),
+                                              zoneLayoutMessagesRpnNumber,
+                                              zone.getNumNoteChannels(),
+                                              false, false);
 
     buffer.addEvents (perNotePitchbendRange (zone), 0, -1, 0);
     buffer.addEvents (masterPitchbendRange (zone), 0, -1, 0);

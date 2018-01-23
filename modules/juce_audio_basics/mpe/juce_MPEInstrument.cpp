@@ -26,7 +26,7 @@ namespace juce
 namespace
 {
     const uint8 noLSBValueReceived = 0xff;
-    const Range<int> allChannels = Range<int> (1, 17);
+    const Range<int> allChannels { 1, 17 };
 }
 
 //==============================================================================
@@ -45,7 +45,7 @@ MPEInstrument::MPEInstrument() noexcept
 
     legacyMode.isEnabled = false;
     legacyMode.pitchbendRange = 2;
-    legacyMode.channelRange = Range<int> (1, 17);
+    legacyMode.channelRange = allChannels;
 }
 
 MPEInstrument::~MPEInstrument()
@@ -91,7 +91,7 @@ Range<int> MPEInstrument::getLegacyModeChannelRange() const noexcept
 
 void MPEInstrument::setLegacyModeChannelRange (Range<int> channelRange)
 {
-    jassert (Range<int>(1, 17).contains (channelRange));
+    jassert (allChannels.contains (channelRange));
 
     releaseAllNotes();
     const ScopedLock sl (lock);
@@ -218,7 +218,7 @@ void MPEInstrument::processMidiAllNotesOffMessage (const MidiMessage& message)
 
     if (legacyMode.isEnabled && legacyMode.channelRange.contains (message.getChannel()))
     {
-        for (int i = notes.size(); --i >= 0;)
+        for (auto i = notes.size(); --i >= 0;)
         {
             auto& note = notes.getReference (i);
 
@@ -233,7 +233,7 @@ void MPEInstrument::processMidiAllNotesOffMessage (const MidiMessage& message)
     }
     else if (auto* zone = zoneLayout.getZoneByMasterChannel (message.getChannel()))
     {
-        for (int i = notes.size(); --i >= 0;)
+        for (auto i = notes.size(); --i >= 0;)
         {
             auto& note = notes.getReference (i);
 
@@ -251,7 +251,7 @@ void MPEInstrument::processMidiAllNotesOffMessage (const MidiMessage& message)
 //==============================================================================
 void MPEInstrument::handlePressureMSB (int midiChannel, int value) noexcept
 {
-    const uint8 lsb = lastPressureLowerBitReceivedOnChannel[midiChannel - 1];
+    auto lsb = lastPressureLowerBitReceivedOnChannel[midiChannel - 1];
 
     pressure (midiChannel, lsb == noLSBValueReceived ? MPEValue::from7BitInt (value)
                                                      : MPEValue::from14BitInt (lsb + (value << 7)));
@@ -264,7 +264,7 @@ void MPEInstrument::handlePressureLSB (int midiChannel, int value) noexcept
 
 void MPEInstrument::handleTimbreMSB (int midiChannel, int value) noexcept
 {
-    const uint8 lsb = lastTimbreLowerBitReceivedOnChannel[midiChannel - 1];
+    auto lsb = lastTimbreLowerBitReceivedOnChannel[midiChannel - 1];
 
     timbre (midiChannel, lsb == noLSBValueReceived ? MPEValue::from7BitInt (value)
                                                    : MPEValue::from14BitInt (lsb + (value << 7)));
@@ -383,7 +383,7 @@ void MPEInstrument::updateDimension (int midiChannel, MPEDimension& dimension, M
     {
         if (dimension.trackingMode == allNotesOnChannel)
         {
-            for (int i = notes.size(); --i >= 0;)
+            for (auto i = notes.size(); --i >= 0;)
             {
                 auto& note = notes.getReference (i);
 
@@ -404,7 +404,7 @@ void MPEInstrument::updateDimensionMaster (const MPEZone& zone, MPEDimension& di
 {
     auto channels = zone.getNoteChannelRange();
 
-    for (int i = notes.size(); --i >= 0;)
+    for (auto i = notes.size(); --i >= 0;)
     {
         auto& note = notes.getReference (i);
 
@@ -495,7 +495,7 @@ void MPEInstrument::handleSustainOrSostenuto (int midiChannel, bool isDown, bool
     if (legacyMode.isEnabled ? (! legacyMode.channelRange.contains (midiChannel)) : (affectedZone == nullptr))
         return;
 
-    for (int i = notes.size(); --i >= 0;)
+    for (auto i = notes.size(); --i >= 0;)
     {
         auto& note = notes.getReference (i);
 
@@ -525,7 +525,7 @@ void MPEInstrument::handleSustainOrSostenuto (int midiChannel, bool isDown, bool
         if (legacyMode.isEnabled)
             isNoteChannelSustained[midiChannel - 1] = isDown;
         else
-            for (int i = affectedZone->getFirstNoteChannel(); i <= affectedZone->getLastNoteChannel(); ++i)
+            for (auto i = affectedZone->getFirstNoteChannel(); i <= affectedZone->getLastNoteChannel(); ++i)
                 isNoteChannelSustained[i - 1] = isDown;
     }
 }
@@ -558,7 +558,7 @@ MPENote MPEInstrument::getNote (int midiChannel, int midiNoteNumber) const noexc
     if (auto* note = getNotePtr (midiChannel, midiNoteNumber))
         return *note;
 
-    return MPENote();
+    return {};
 }
 
 MPENote MPEInstrument::getNote (int index) const noexcept
@@ -572,12 +572,12 @@ MPENote MPEInstrument::getMostRecentNote (int midiChannel) const noexcept
     if (auto* note = getLastNotePlayedPtr (midiChannel))
         return *note;
 
-    return MPENote();
+    return {};
 }
 
 MPENote MPEInstrument::getMostRecentNoteOtherThan (MPENote otherThanThisNote) const noexcept
 {
-    for (int i = notes.size(); --i >= 0;)
+    for (auto i = notes.size(); --i >= 0;)
     {
         auto& note = notes.getReference (i);
 
@@ -585,7 +585,7 @@ MPENote MPEInstrument::getMostRecentNoteOtherThan (MPENote otherThanThisNote) co
             return note;
     }
 
-    return MPENote();
+    return {};
 }
 
 //==============================================================================
@@ -629,7 +629,7 @@ MPENote* MPEInstrument::getNotePtr (int midiChannel, TrackingMode mode) noexcept
 //==============================================================================
 const MPENote* MPEInstrument::getLastNotePlayedPtr (int midiChannel) const noexcept
 {
-    for (int i = notes.size(); --i >= 0;)
+    for (auto i = notes.size(); --i >= 0;)
     {
         auto& note = notes.getReference (i);
 
@@ -650,11 +650,11 @@ MPENote* MPEInstrument::getLastNotePlayedPtr (int midiChannel) noexcept
 const MPENote* MPEInstrument::getHighestNotePtr (int midiChannel) const noexcept
 {
     int initialNoteMax = -1;
-    const MPENote* result = nullptr;
+    MPENote* result = nullptr;
 
-    for (int i = notes.size(); --i >= 0;)
+    for (auto i = notes.size(); --i >= 0;)
     {
-        const auto& note = notes.getReference (i);
+        auto& note = notes.getReference (i);
 
         if (note.midiChannel == midiChannel
              && (note.keyState == MPENote::keyDown || note.keyState == MPENote::keyDownAndSustained)
@@ -676,9 +676,9 @@ MPENote* MPEInstrument::getHighestNotePtr (int midiChannel) noexcept
 const MPENote* MPEInstrument::getLowestNotePtr (int midiChannel) const noexcept
 {
     int initialNoteMin = 128;
-    const MPENote* result = nullptr;
+    MPENote* result = nullptr;
 
-    for (int i = notes.size(); --i >= 0;)
+    for (auto i = notes.size(); --i >= 0;)
     {
         auto& note = notes.getReference (i);
 
@@ -704,7 +704,7 @@ void MPEInstrument::releaseAllNotes()
 {
     const ScopedLock sl (lock);
 
-    for (int i = notes.size(); --i >= 0;)
+    for (auto i = notes.size(); --i >= 0;)
     {
         auto& note = notes.getReference (i);
         note.keyState = MPENote::off;
