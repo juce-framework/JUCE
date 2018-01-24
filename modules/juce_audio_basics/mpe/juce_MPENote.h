@@ -39,10 +39,10 @@ struct JUCE_API  MPENote
     //==============================================================================
     enum KeyState
     {
-        off                  = 0,
-        keyDown              = 1,
-        sustained            = 2,
-        keyDownAndSustained  = 3
+        off                  = 0, /**< The key is up (off). */
+        keyDown              = 1, /**< The note key is currently down (pressed). */
+        sustained            = 2, /**< The note is sustained (by a sustain or sostenuto pedal). */
+        keyDownAndSustained  = 3  /**< The note key is down and sustained (by a sustain or sostenuto pedal). */
     };
 
     //==============================================================================
@@ -64,7 +64,7 @@ struct JUCE_API  MPENote
         @param keyState       The key state of the note (whether the key is down
                               and/or the note is sustained). This value must not
                               be MPENote::off, since you are triggering a new note.
-                              (If not specified, the default value will be MPENOte::keyDown.)
+                              (If not specified, the default value will be MPENote::keyDown.)
     */
     MPENote (int midiChannel,
              int initialNote,
