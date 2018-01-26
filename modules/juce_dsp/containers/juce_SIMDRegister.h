@@ -296,7 +296,7 @@ struct SIMDRegister
     static inline SIMDRegister JUCE_VECTOR_CALLTYPE max (SIMDRegister a, SIMDRegister b) noexcept    { return { NativeOps::max (a.value, b.value) }; }
 
     //==============================================================================
-    /** Multiplies a and b and adds the result to c. */
+    /** Multiplies b and c and adds the result to a. */
     static inline SIMDRegister JUCE_VECTOR_CALLTYPE multiplyAdd (SIMDRegister a, const SIMDRegister b, SIMDRegister c) noexcept
     {
         return { CmplxOps::muladd (a.value, b.value, c.value) };
