@@ -449,7 +449,7 @@ void LookAndFeel_V4::drawAlertBox (Graphics& g, AlertWindow& alert,
         g.setColour (Colour (colour));
         g.fillPath (icon);
 
-        iconSpaceUsed = iconSize;
+        iconSpaceUsed = iconWidth;
     }
 
     g.setColour (alert.findColour (AlertWindow::textColourId));
