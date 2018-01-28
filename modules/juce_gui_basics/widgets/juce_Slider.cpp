@@ -29,7 +29,6 @@ namespace juce
 
 class Slider::Pimpl   : public AsyncUpdater, // this needs to be public otherwise it will cause an
                                              // error when JUCE_DLL_BUILD=1
-                        private Label::Listener,
                         private Value::Listener
 {
 public:
@@ -320,6 +319,12 @@ public:
 
         Component::BailOutChecker checker (&owner);
         listeners.callChecked (checker, [&] (Slider::Listener& l) { l.sliderValueChanged (&owner); });
+
+        if (checker.shouldBailOut())
+            return;
+
+        if (owner.onValueChange != nullptr)
+            owner.onValueChange();
     }
 
     void sendDragStart()
@@ -328,6 +333,12 @@ public:
 
         Component::BailOutChecker checker (&owner);
         listeners.callChecked (checker, [&] (Slider::Listener& l) { l.sliderDragStarted (&owner); });
+
+        if (checker.shouldBailOut())
+            return;
+
+        if (owner.onDragStart != nullptr)
+            owner.onDragStart();
     }
 
     void sendDragEnd()
@@ -337,6 +348,12 @@ public:
 
         Component::BailOutChecker checker (&owner);
         listeners.callChecked (checker, [&] (Slider::Listener& l) { l.sliderDragEnded (&owner); });
+
+        if (checker.shouldBailOut())
+            return;
+
+        if (owner.onDragEnd != nullptr)
+            owner.onDragEnd();
     }
 
     struct DragInProgress
@@ -380,9 +397,9 @@ public:
             setMaxValue (valueMax.getValue(), dontSendNotification, true);
     }
 
-    void labelTextChanged (Label* label) override
+    void textChanged()
     {
-        auto newValue = owner.snapValue (owner.getValueFromText (label->getText()), notDragging);
+        auto newValue = owner.snapValue (owner.getValueFromText (valueBox->getText()), notDragging);
 
         if (newValue != static_cast<double> (currentValue.getValue()))
         {
@@ -554,7 +571,7 @@ public:
             valueBox->setText (previousTextBoxContent, dontSendNotification);
             valueBox->setTooltip (owner.getTooltip());
             updateTextBoxEnablement();
-            valueBox->addListener (this);
+            valueBox->onTextChange = [this] { textChanged(); };
 
             if (style == LinearBar || style == LinearBarVertical)
             {
@@ -1352,7 +1369,7 @@ void Slider::init (SliderStyle style, TextEntryBoxPosition textBoxPos)
     setWantsKeyboardFocus (false);
     setRepaintsOnMouseActivity (true);
 
-    pimpl = new Pimpl (*this, style, textBoxPos);
+    pimpl.reset (new Pimpl (*this, style, textBoxPos));
 
     Slider::lookAndFeelChanged();
     updateText();

@@ -90,7 +90,7 @@ struct ConvolutionEngine
 
         numInputSegments = (blockSize > 128 ? numSegments : 3 * numSegments);
 
-        FFTobject = new FFT (roundDoubleToInt (log2 (FFTSize)));
+        FFTobject = new FFT (roundToInt (std::log2 (FFTSize)));
 
         bufferInput.setSize      (1, static_cast<int> (FFTSize));
         bufferOutput.setSize     (1, static_cast<int> (FFTSize * 2));
@@ -114,7 +114,7 @@ struct ConvolutionEngine
             buffersImpulseSegments.add (newImpulseSegment);
         }
 
-        ScopedPointer<FFT> FFTTempObject = new FFT (roundDoubleToInt (log2 (FFTSize)));
+        ScopedPointer<FFT> FFTTempObject = new FFT (roundToInt (std::log2 (FFTSize)));
         auto numChannels = (info.wantsStereo && info.buffer->getNumChannels() >= 2 ? 2 : 1);
 
         if (channel < numChannels)
@@ -149,7 +149,7 @@ struct ConvolutionEngine
     {
         if (FFTSize != other.FFTSize)
         {
-            FFTobject = new FFT (roundDoubleToInt (log2 (other.FFTSize)));
+            FFTobject = new FFT (roundToInt (std::log2 (other.FFTSize)));
             FFTSize = other.FFTSize;
         }
 
@@ -334,7 +334,6 @@ struct ConvolutionEngine
 */
 struct Convolution::Pimpl  : private Thread
 {
-public:
     enum class ChangeRequest
     {
         changeEngine = 0,
@@ -357,7 +356,7 @@ public:
         requestsType.resize (fifoSize);
         requestsParameter.resize (fifoSize);
 
-        for (auto i = 0u; i < 4; ++i)
+        for (int i = 0; i < 4; ++i)
             engines.add (new ConvolutionEngine());
 
         currentInfo.maximumBufferSize = 0;
@@ -764,7 +763,6 @@ private:
 
     void processImpulseResponse()
     {
-
         if (currentInfo.sourceType == SourceType::sourceBinaryData)
         {
             copyAudioStreamInAudioBuffer (new MemoryInputStream (currentInfo.sourceData, currentInfo.sourceDataSize, false));
@@ -794,7 +792,6 @@ private:
                 normalizeImpulseResponse (currentInfo.buffer->getWritePointer (0), currentInfo.buffer->getNumSamples(), 1.0);
             }
         }
-
     }
 
     /** Converts the data from an audio file into a stereo audio buffer of floats, and
@@ -808,7 +805,7 @@ private:
         if (ScopedPointer<AudioFormatReader> formatReader = manager.createReaderFor (stream))
         {
             auto maximumTimeInSeconds = 10.0;
-            int64 maximumLength = static_cast<int64> (roundDoubleToInt (maximumTimeInSeconds * formatReader->sampleRate));
+            auto maximumLength = static_cast<int64> (roundToInt (maximumTimeInSeconds * formatReader->sampleRate));
             auto numChannels = formatReader->numChannels > 1 ? 2 : 1;
 
             impulseResponseOriginal.setSize (2, static_cast<int> (jmin (maximumLength, formatReader->lengthInSamples)), false, false, true);
@@ -817,8 +814,8 @@ private:
 
             return trimAndResampleImpulseResponse (numChannels, formatReader->sampleRate, currentInfo.wantsTrimming);
         }
-        else
-            return 0.0;
+
+        return 0.0;
     }
 
     double trimAndResampleImpulseResponse (int numChannels, double bufferSampleRate, bool mustTrim)
@@ -886,7 +883,7 @@ private:
         {
             // Resampling
             factorReading = bufferSampleRate / currentInfo.sampleRate;
-            auto impulseSize = jmin (static_cast<int> (currentInfo.impulseResponseSize), roundDoubleToInt ((indexEnd - indexStart + 1) / factorReading));
+            auto impulseSize = jmin (static_cast<int> (currentInfo.impulseResponseSize), roundToInt ((indexEnd - indexStart + 1) / factorReading));
 
             impulseResponse.setSize (2, impulseSize);
             impulseResponse.clear();
@@ -1007,7 +1004,7 @@ private:
 //==============================================================================
 Convolution::Convolution()
 {
-    pimpl = new Pimpl();
+    pimpl.reset (new Pimpl());
     pimpl->addToFifo (Convolution::Pimpl::ChangeRequest::changeEngine, juce::var (0));
 }
 

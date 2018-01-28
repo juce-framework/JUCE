@@ -64,12 +64,12 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
         filename = initialFileOrDirectory.getFileName();
     }
 
-    fileList = new DirectoryContentsList (this, thread);
+    fileList.reset (new DirectoryContentsList (this, thread));
 
     if ((flags & useTreeView) != 0)
     {
         auto tree = new FileTreeComponent (*fileList);
-        fileListComponent = tree;
+        fileListComponent.reset (tree);
 
         if ((flags & canSelectMultipleItems) != 0)
             tree->setMultiSelectEnabled (true);
@@ -79,7 +79,7 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
     else
     {
         auto list = new FileListComponent (*fileList);
-        fileListComponent = list;
+        fileListComponent.reset (list);
         list->setOutlineThickness (1);
 
         if ((flags & canSelectMultipleItems) != 0)
@@ -99,13 +99,21 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
     filenameBox.setMultiLine (false);
     filenameBox.setSelectAllWhenFocused (true);
     filenameBox.setText (filename, false);
-    filenameBox.addListener (this);
+    filenameBox.onTextChange = [this] { sendListenerChangeMessage(); };
+    filenameBox.onReturnKey  = [this] { changeFilename(); };
+    filenameBox.onFocusLost  = [this]
+    {
+        if (! isSaveMode())
+            selectionChanged();
+    };
+
     filenameBox.setReadOnly ((flags & (filenameBoxIsReadOnly | canSelectMultipleItems)) != 0);
 
     addAndMakeVisible (fileLabel);
     fileLabel.attachToComponent (&filenameBox, true);
 
-    addAndMakeVisible (goUpButton = getLookAndFeel().createFileBrowserGoUpButton());
+    goUpButton.reset (getLookAndFeel().createFileBrowserGoUpButton());
+    addAndMakeVisible (goUpButton.get());
     goUpButton->onClick = [this] { goUp(); };
     goUpButton->setTooltip (TRANS ("Go up to parent directory"));
 
@@ -333,15 +341,15 @@ FilePreviewComponent* FileBrowserComponent::getPreviewComponent() const noexcept
 
 DirectoryContentsDisplayComponent* FileBrowserComponent::getDisplayComponent() const noexcept
 {
-    return fileListComponent;
+    return fileListComponent.get();
 }
 
 //==============================================================================
 void FileBrowserComponent::resized()
 {
     getLookAndFeel()
-        .layoutFileBrowserComponent (*this, fileListComponent, previewComp,
-                                     &currentPathBox, &filenameBox, goUpButton);
+        .layoutFileBrowserComponent (*this, fileListComponent.get(), previewComp,
+                                     &currentPathBox, &filenameBox, goUpButton.get());
 }
 
 //==============================================================================
@@ -438,12 +446,7 @@ bool FileBrowserComponent::keyPressed (const KeyPress& key)
 }
 
 //==============================================================================
-void FileBrowserComponent::textEditorTextChanged (TextEditor&)
-{
-    sendListenerChangeMessage();
-}
-
-void FileBrowserComponent::textEditorReturnKeyPressed (TextEditor&)
+void FileBrowserComponent::changeFilename()
 {
     if (filenameBox.getText().containsChar (File::getSeparatorChar()))
     {
@@ -469,16 +472,6 @@ void FileBrowserComponent::textEditorReturnKeyPressed (TextEditor&)
     {
         fileDoubleClicked (getSelectedFile (0));
     }
-}
-
-void FileBrowserComponent::textEditorEscapeKeyPressed (TextEditor&)
-{
-}
-
-void FileBrowserComponent::textEditorFocusLost (TextEditor&)
-{
-    if (! isSaveMode())
-        selectionChanged();
 }
 
 //==============================================================================
@@ -576,14 +569,8 @@ void FileBrowserComponent::getDefaultRoots (StringArray& rootNames, StringArray&
     rootPaths.add ({});
     rootNames.add ({});
 
-    Array<File> volumes;
-    File vol ("/Volumes");
-    vol.findChildFiles (volumes, File::findDirectories, false);
-
-    for (int i = 0; i < volumes.size(); ++i)
+    for (auto& volume : File ("/Volumes").findChildFiles (File::findDirectories, false))
     {
-        const File& volume = volumes.getReference(i);
-
         if (volume.isDirectory() && ! volume.getFileName().startsWithChar ('.'))
         {
             rootPaths.add (volume.getFullPathName());

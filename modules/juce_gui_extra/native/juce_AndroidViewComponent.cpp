@@ -138,14 +138,14 @@ private:
 AndroidViewComponent::AndroidViewComponent() {}
 AndroidViewComponent::~AndroidViewComponent() {}
 
-void AndroidViewComponent::setView (void* const view)
+void AndroidViewComponent::setView (void* view)
 {
     if (view != getView())
     {
-        pimpl = nullptr;
+        pimpl.reset();
 
         if (view != nullptr)
-            pimpl = new Pimpl ((jobject) view, *this);
+            pimpl.reset (new Pimpl ((jobject) view, *this));
     }
 }
 

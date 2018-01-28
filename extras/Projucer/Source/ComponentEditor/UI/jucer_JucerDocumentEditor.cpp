@@ -1229,9 +1229,10 @@ Image JucerDocumentEditor::createComponentLayerSnapshot() const
 const int gridSnapMenuItemBase = 0x8723620;
 const int snapSizes[] = { 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32 };
 
+void createGUIEditorMenu (PopupMenu&);
 void createGUIEditorMenu (PopupMenu& menu)
 {
-    ApplicationCommandManager* commandManager = &ProjucerApplication::getCommandManager();
+    auto* commandManager = &ProjucerApplication::getCommandManager();
 
     menu.addCommandItem (commandManager, JucerCommandIDs::editCompLayout);
     menu.addCommandItem (commandManager, JucerCommandIDs::editCompGraphics);
@@ -1269,12 +1270,12 @@ void createGUIEditorMenu (PopupMenu& menu)
     menu.addCommandItem (commandManager, JucerCommandIDs::showGrid);
     menu.addCommandItem (commandManager, JucerCommandIDs::enableSnapToGrid);
 
-    JucerDocumentEditor* holder = JucerDocumentEditor::getActiveDocumentHolder();
+    auto* holder = JucerDocumentEditor::getActiveDocumentHolder();
 
     {
-        const int currentSnapSize = holder != nullptr ? holder->getDocument()->getSnappingGridSize() : -1;
-
+        auto currentSnapSize = holder != nullptr ? holder->getDocument()->getSnappingGridSize() : -1;
         PopupMenu m;
+
         for (int i = 0; i < numElementsInArray (snapSizes); ++i)
             m.addItem (gridSnapMenuItemBase + i, String (snapSizes[i]) + " pixels",
                        true, snapSizes[i] == currentSnapSize);
@@ -1303,6 +1304,7 @@ void createGUIEditorMenu (PopupMenu& menu)
     }
 }
 
+void handleGUIEditorMenuCommand (int);
 void handleGUIEditorMenuCommand (int menuItemID)
 {
     if (auto* ed = JucerDocumentEditor::getActiveDocumentHolder())
@@ -1320,6 +1322,7 @@ void handleGUIEditorMenuCommand (int menuItemID)
     }
 }
 
+void registerGUIEditorCommands();
 void registerGUIEditorCommands()
 {
     JucerDocumentEditor dh (nullptr);

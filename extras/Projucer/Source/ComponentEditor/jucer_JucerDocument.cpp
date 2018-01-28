@@ -735,27 +735,27 @@ public:
     };
 };
 
+OpenDocumentManager::DocumentType* createGUIDocumentType();
 OpenDocumentManager::DocumentType* createGUIDocumentType()
 {
     return new JucerComponentDocument::Type();
 }
 
 //==============================================================================
-class NewGUIComponentWizard  : public NewFileWizard::Type
+struct NewGUIComponentWizard  : public NewFileWizard::Type
 {
-public:
     NewGUIComponentWizard() {}
 
     String getName() override  { return "GUI Component"; }
 
     void createNewFile (Project& project, Project::Item parent) override
     {
-        const File newFile (askUserToChooseNewFile (String (defaultClassName) + ".h", "*.h;*.cpp", parent));
+        auto newFile = askUserToChooseNewFile (String (defaultClassName) + ".h", "*.h;*.cpp", parent);
 
         if (newFile != File())
         {
-            const File headerFile (newFile.withFileExtension (".h"));
-            const File cppFile (newFile.withFileExtension (".cpp"));
+            auto headerFile = newFile.withFileExtension (".h");
+            auto cppFile = newFile.withFileExtension (".cpp");
 
             headerFile.replaceWithText (String());
             cppFile.replaceWithText (String());
@@ -787,6 +787,7 @@ public:
     }
 };
 
+NewFileWizard::Type* createGUIComponentWizard();
 NewFileWizard::Type* createGUIComponentWizard()
 {
     return new NewGUIComponentWizard();

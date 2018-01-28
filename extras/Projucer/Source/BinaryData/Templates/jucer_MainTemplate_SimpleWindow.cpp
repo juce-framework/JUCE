@@ -10,8 +10,6 @@
 
 APPHEADERS
 
-Component* createMainContentComponent();
-
 //==============================================================================
 class APPCLASSNAME  : public JUCEApplication
 {
@@ -67,7 +65,7 @@ public:
                                                     DocumentWindow::allButtons)
         {
             setUsingNativeTitleBar (true);
-            setContentOwned (createMainContentComponent(), true);
+            setContentOwned (new CONTENTCOMPCLASS(), true);
             setResizable (true, true);
 
             centreWithSize (getWidth(), getHeight());

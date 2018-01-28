@@ -236,7 +236,7 @@ AudioCDBurner::AudioCDBurner (const int deviceIndex)
     IDiscRecorder* discRecorder = CDBurnerHelpers::enumCDBurners (0, deviceIndex, &discMaster);
 
     if (discRecorder != nullptr)
-        pimpl = new Pimpl (*this, discMaster, discRecorder);
+        pimpl.reset (new Pimpl (*this, discMaster, discRecorder));
 }
 
 AudioCDBurner::~AudioCDBurner()

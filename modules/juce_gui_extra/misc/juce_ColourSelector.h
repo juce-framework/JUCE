@@ -37,8 +37,7 @@ namespace juce
     when the colour changes.
 */
 class JUCE_API  ColourSelector  : public Component,
-                                  public ChangeBroadcaster,
-                                  protected Slider::Listener
+                                  public ChangeBroadcaster
 {
 public:
     //==============================================================================
@@ -82,9 +81,9 @@ public:
 
     /** Changes the colour that is currently being shown.
 
-        @param newColour       the new colour to show
-        @param notification    whether to send a notification of the change to listeners.
-                               A notification will only be sent if the colour has changed.
+        @param newColour           the new colour to show
+        @param notificationType    whether to send a notification of the change to listeners.
+                                   A notification will only be sent if the colour has changed.
     */
     void setCurrentColour (Colour newColour, NotificationType notificationType = sendNotification);
 
@@ -160,7 +159,7 @@ private:
     void setSV (float newS, float newV);
     void updateHSV();
     void update (NotificationType);
-    void sliderValueChanged (Slider*) override;
+    void changeColour();
     void paint (Graphics&) override;
     void resized() override;
 

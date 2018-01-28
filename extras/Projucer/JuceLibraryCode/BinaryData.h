@@ -80,11 +80,23 @@ namespace BinaryData
     extern const char*   wizard_StaticLibrary_svg;
     const int            wizard_StaticLibrary_svgSize = 7488;
 
+    extern const char*   jucer_AnimatedComponentSimpleTemplate_h;
+    const int            jucer_AnimatedComponentSimpleTemplate_hSize = 2037;
+
     extern const char*   jucer_AnimatedComponentTemplate_cpp;
-    const int            jucer_AnimatedComponentTemplate_cppSize = 1887;
+    const int            jucer_AnimatedComponentTemplate_cppSize = 1482;
+
+    extern const char*   jucer_AnimatedComponentTemplate_h;
+    const int            jucer_AnimatedComponentTemplate_hSize = 1153;
+
+    extern const char*   jucer_AudioComponentSimpleTemplate_h;
+    const int            jucer_AudioComponentSimpleTemplate_hSize = 3146;
 
     extern const char*   jucer_AudioComponentTemplate_cpp;
-    const int            jucer_AudioComponentTemplate_cppSize = 3141;
+    const int            jucer_AudioComponentTemplate_cppSize = 2532;
+
+    extern const char*   jucer_AudioComponentTemplate_h;
+    const int            jucer_AudioComponentTemplate_hSize = 1326;
 
     extern const char*   jucer_AudioPluginEditorTemplate_cpp;
     const int            jucer_AudioPluginEditorTemplate_cppSize = 1310;
@@ -93,22 +105,25 @@ namespace BinaryData
     const int            jucer_AudioPluginEditorTemplate_hSize = 938;
 
     extern const char*   jucer_AudioPluginFilterTemplate_cpp;
-    const int            jucer_AudioPluginFilterTemplate_cppSize = 5638;
+    const int            jucer_AudioPluginFilterTemplate_cppSize = 5889;
 
     extern const char*   jucer_AudioPluginFilterTemplate_h;
     const int            jucer_AudioPluginFilterTemplate_hSize = 2245;
 
     extern const char*   jucer_ComponentTemplate_cpp;
-    const int            jucer_ComponentTemplate_cppSize = 2151;
+    const int            jucer_ComponentTemplate_cppSize = 2116;
 
     extern const char*   jucer_ComponentTemplate_h;
-    const int            jucer_ComponentTemplate_hSize = 2064;
+    const int            jucer_ComponentTemplate_hSize = 2029;
+
+    extern const char*   jucer_ContentCompSimpleTemplate_h;
+    const int            jucer_ContentCompSimpleTemplate_hSize = 1634;
 
     extern const char*   jucer_ContentCompTemplate_cpp;
-    const int            jucer_ContentCompTemplate_cppSize = 1029;
+    const int            jucer_ContentCompTemplate_cppSize = 1109;
 
     extern const char*   jucer_ContentCompTemplate_h;
-    const int            jucer_ContentCompTemplate_hSize = 886;
+    const int            jucer_ContentCompTemplate_hSize = 1023;
 
     extern const char*   jucer_InlineComponentTemplate_h;
     const int            jucer_InlineComponentTemplate_hSize = 1208;
@@ -120,7 +135,7 @@ namespace BinaryData
     const int            jucer_MainTemplate_NoWindow_cppSize = 1992;
 
     extern const char*   jucer_MainTemplate_SimpleWindow_cpp;
-    const int            jucer_MainTemplate_SimpleWindow_cppSize = 4001;
+    const int            jucer_MainTemplate_SimpleWindow_cppSize = 3951;
 
     extern const char*   jucer_MainTemplate_Window_cpp;
     const int            jucer_MainTemplate_Window_cppSize = 3913;
@@ -140,8 +155,14 @@ namespace BinaryData
     extern const char*   jucer_NewInlineComponentTemplate_h;
     const int            jucer_NewInlineComponentTemplate_hSize = 1635;
 
+    extern const char*   jucer_OpenGLComponentSimpleTemplate_h;
+    const int            jucer_OpenGLComponentSimpleTemplate_hSize = 2126;
+
     extern const char*   jucer_OpenGLComponentTemplate_cpp;
-    const int            jucer_OpenGLComponentTemplate_cppSize = 1716;
+    const int            jucer_OpenGLComponentTemplate_cppSize = 1555;
+
+    extern const char*   jucer_OpenGLComponentTemplate_h;
+    const int            jucer_OpenGLComponentTemplate_hSize = 1215;
 
     extern const char*   colourscheme_dark_xml;
     const int            colourscheme_dark_xmlSize = 1050;
@@ -162,7 +183,7 @@ namespace BinaryData
     extern const char* namedResourceList[];
 
     // Number of elements in the namedResourceList array.
-    const int namedResourceListSize = 50;
+    const int namedResourceListSize = 57;
 
     // If you provide the name of one of the binary resource variables above, this function will
     // return the corresponding data and its size (or a null pointer if the name isn't found).

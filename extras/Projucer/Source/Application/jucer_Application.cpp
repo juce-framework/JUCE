@@ -856,15 +856,14 @@ void ProjucerApplication::deleteLogger()
 
     if (logger != nullptr)
     {
-        Array<File> logFiles;
-        logger->getLogFile().getParentDirectory().findChildFiles (logFiles, File::findFiles, false);
+        auto logFiles = logger->getLogFile().getParentDirectory().findChildFiles (File::findFiles, false);
 
         if (logFiles.size() > maxNumLogFilesToKeep)
         {
-            Array <FileWithTime> files;
+            Array<FileWithTime> files;
 
-            for (int i = 0; i < logFiles.size(); ++i)
-                files.addUsingDefaultSort (logFiles.getReference(i));
+            for (auto& f : logFiles)
+                files.addUsingDefaultSort (f);
 
             for (int i = 0; i < files.size() - maxNumLogFilesToKeep; ++i)
                 files.getReference(i).file.deleteFile();

@@ -219,15 +219,15 @@ ProjectExporter::ProjectExporter (Project& p, const ValueTree& state)
       projectType (p.getProjectType()),
       projectName (p.getProjectNameString()),
       projectFolder (p.getProjectFolder()),
-      targetLocationValue     (settings, Ids::targetFolder,        project.getUndoManagerFor (settings)),
-      extraCompilerFlagsValue (settings, Ids::extraCompilerFlags,  project.getUndoManagerFor (settings)),
-      extraLinkerFlagsValue   (settings, Ids::extraLinkerFlags,    project.getUndoManagerFor (settings)),
-      externalLibrariesValue  (settings, Ids::externalLibraries,   project.getUndoManagerFor (settings)),
-      userNotesValue          (settings, Ids::userNotes,           project.getUndoManagerFor (settings)),
-      gnuExtensionsValue      (settings, Ids::enableGNUExtensions, project.getUndoManagerFor (settings)),
-      bigIconValue            (settings, Ids::bigIcon,             project.getUndoManagerFor (settings)),
-      smallIconValue          (settings, Ids::smallIcon,           project.getUndoManagerFor (settings)),
-      extraPPDefsValue        (settings, Ids::extraDefs,           project.getUndoManagerFor (settings))
+      targetLocationValue     (settings, Ids::targetFolder,        getUndoManager()),
+      extraCompilerFlagsValue (settings, Ids::extraCompilerFlags,  getUndoManager()),
+      extraLinkerFlagsValue   (settings, Ids::extraLinkerFlags,    getUndoManager()),
+      externalLibrariesValue  (settings, Ids::externalLibraries,   getUndoManager()),
+      userNotesValue          (settings, Ids::userNotes,           getUndoManager()),
+      gnuExtensionsValue      (settings, Ids::enableGNUExtensions, getUndoManager()),
+      bigIconValue            (settings, Ids::bigIcon,             getUndoManager()),
+      smallIconValue          (settings, Ids::smallIcon,           getUndoManager()),
+      extraPPDefsValue        (settings, Ids::extraDefs,           getUndoManager())
 {
 }
 
@@ -376,7 +376,7 @@ void ProjectExporter::addCommonAudioPluginSettings()
 
 void ProjectExporter::addVST3FolderToPath()
 {
-    const String vst3Folder (getVST3PathValue().toString());
+    auto vst3Folder = getVST3PathValue().toString();
 
     if (vst3Folder.isNotEmpty())
         addToExtraSearchPaths (RelativePath (vst3Folder, RelativePath::projectFolder), 0);
@@ -384,11 +384,11 @@ void ProjectExporter::addVST3FolderToPath()
 
 void ProjectExporter::addAAXFoldersToPath()
 {
-    const String aaxFolder = getAAXPathValue().toString();
+    auto aaxFolder = getAAXPathValue().toString();
 
     if (aaxFolder.isNotEmpty())
     {
-        const RelativePath aaxFolderPath (getAAXPathValue().toString(), RelativePath::projectFolder);
+        RelativePath aaxFolderPath (getAAXPathValue().toString(), RelativePath::projectFolder);
 
         addToExtraSearchPaths (aaxFolderPath);
         addToExtraSearchPaths (aaxFolderPath.getChildFile ("Interfaces"));
@@ -399,8 +399,8 @@ void ProjectExporter::addAAXFoldersToPath()
 //==============================================================================
 StringPairArray ProjectExporter::getAllPreprocessorDefs (const BuildConfiguration& config, const ProjectType::Target::Type targetType) const
 {
-    StringPairArray defs (mergePreprocessorDefs (config.getAllPreprocessorDefs(),
-                                                 parsePreprocessorDefs (getExporterPreprocessorDefsString())));
+    auto defs = mergePreprocessorDefs (config.getAllPreprocessorDefs(),
+                                       parsePreprocessorDefs (getExporterPreprocessorDefsString()));
     addDefaultPreprocessorDefs (defs);
     addTargetSpecificPreprocessorDefs (defs, targetType);
 
@@ -409,8 +409,8 @@ StringPairArray ProjectExporter::getAllPreprocessorDefs (const BuildConfiguratio
 
 StringPairArray ProjectExporter::getAllPreprocessorDefs() const
 {
-    StringPairArray defs (mergePreprocessorDefs (project.getPreprocessorDefs(),
-                                                 parsePreprocessorDefs (getExporterPreprocessorDefsString())));
+    auto defs = mergePreprocessorDefs (project.getPreprocessorDefs(),
+                                       parsePreprocessorDefs (getExporterPreprocessorDefsString()));
     addDefaultPreprocessorDefs (defs);
     return defs;
 }
@@ -474,9 +474,9 @@ Project::Item& ProjectExporter::getModulesGroup()
 
 void ProjectExporter::addProjectPathToBuildPathList (StringArray& pathList, const RelativePath& pathFromProjectFolder, int index) const
 {
-    const auto localPath = RelativePath (rebaseFromProjectFolderToBuildTarget (pathFromProjectFolder));
+    auto localPath = RelativePath (rebaseFromProjectFolderToBuildTarget (pathFromProjectFolder));
 
-    const auto path = isVisualStudio() ? localPath.toWindowsStyle() : localPath.toUnixStyle();
+    auto path = isVisualStudio() ? localPath.toWindowsStyle() : localPath.toUnixStyle();
 
     if (! pathList.contains (path))
         pathList.insert (index, path);
@@ -494,10 +494,10 @@ void ProjectExporter::addToExtraSearchPaths (const RelativePath& pathFromProject
 
 Value ProjectExporter::getPathForModuleValue (const String& moduleID)
 {
-    UndoManager* um = project.getUndoManagerFor (settings);
+    auto* um = getUndoManager();
 
-    ValueTree paths (settings.getOrCreateChildWithName (Ids::MODULEPATHS, um));
-    ValueTree m (paths.getChildWithProperty (Ids::ID, moduleID));
+    auto paths = settings.getOrCreateChildWithName (Ids::MODULEPATHS, um);
+    auto m = paths.getChildWithProperty (Ids::ID, moduleID);
 
     if (! m.isValid())
     {
@@ -533,8 +533,9 @@ String ProjectExporter::getPathForModuleString (const String& moduleID) const
 
 void ProjectExporter::removePathForModule (const String& moduleID)
 {
-    ValueTree paths (settings.getChildWithName (Ids::MODULEPATHS));
-    ValueTree m (paths.getChildWithProperty (Ids::ID, moduleID));
+    auto paths = settings.getChildWithName (Ids::MODULEPATHS);
+    auto m = paths.getChildWithProperty (Ids::ID, moduleID);
+
     paths.removeChild (m, project.getUndoManagerFor (settings));
 }
 
@@ -556,7 +557,7 @@ RelativePath ProjectExporter::getModuleFolderRelativeToProject (const String& mo
         return RelativePath (project.getRelativePathForFile (project.getLocalModuleFolder (moduleID)),
                              RelativePath::projectFolder);
 
-    String path (getPathForModuleString (moduleID));
+    auto path = getPathForModuleString (moduleID);
 
     if (path.isEmpty())
         return getLegacyModulePath (moduleID).getChildFile (moduleID);
@@ -576,7 +577,7 @@ RelativePath ProjectExporter::getLegacyModulePath (const String& moduleID) const
                                                                 .getChildFile ("modules")
                                                                 .getChildFile (moduleID)), RelativePath::projectFolder);
 
-    String oldJucePath (getLegacyModulePath());
+    auto oldJucePath = getLegacyModulePath();
 
     if (oldJucePath.isEmpty())
         return RelativePath();
@@ -590,13 +591,13 @@ RelativePath ProjectExporter::getLegacyModulePath (const String& moduleID) const
 
 void ProjectExporter::updateOldModulePaths()
 {
-    String oldPath (getLegacyModulePath());
+    auto oldPath = getLegacyModulePath();
 
     if (oldPath.isNotEmpty())
     {
         for (int i = project.getModules().getNumModules(); --i >= 0;)
         {
-            String modID (project.getModules().getModuleID(i));
+            auto modID = project.getModules().getModuleID(i);
             getPathForModuleValue (modID) = getLegacyModulePath (modID).getParentDirectory().toUnixStyle();
         }
 
@@ -621,7 +622,7 @@ void ProjectExporter::createDefaultModulePaths()
         {
             for (int i = project.getModules().getNumModules(); --i >= 0;)
             {
-                String modID (project.getModules().getModuleID(i));
+                auto modID = project.getModules().getModuleID (i);
                 getPathForModuleValue (modID) = exporter->getPathForModuleValue (modID).getValue();
             }
 
@@ -635,7 +636,7 @@ void ProjectExporter::createDefaultModulePaths()
         {
             for (int i = project.getModules().getNumModules(); --i >= 0;)
             {
-                String modID (project.getModules().getModuleID(i));
+                auto modID = project.getModules().getModuleID (i);
                 getPathForModuleValue (modID) = exporter->getPathForModuleValue (modID).getValue();
             }
 
@@ -645,7 +646,7 @@ void ProjectExporter::createDefaultModulePaths()
 
     for (int i = project.getModules().getNumModules(); --i >= 0;)
     {
-        String modID (project.getModules().getModuleID(i));
+        auto modID = project.getModules().getModuleID (i);
         getPathForModuleValue (modID) = "../../juce";
     }
 }
@@ -668,7 +669,7 @@ ProjectExporter::BuildConfiguration::Ptr ProjectExporter::getConfiguration (int 
 
 bool ProjectExporter::hasConfigurationNamed (const String& nameToFind) const
 {
-    const ValueTree configs (getConfigurations());
+    auto configs = getConfigurations();
     for (int i = configs.getNumChildren(); --i >= 0;)
         if (configs.getChild(i) [Ids::name].toString() == nameToFind)
             return true;
@@ -678,7 +679,7 @@ bool ProjectExporter::hasConfigurationNamed (const String& nameToFind) const
 
 String ProjectExporter::getUniqueConfigName (String nm) const
 {
-    String nameRoot (nm);
+    auto nameRoot = nm;
     while (CharacterFunctions::isDigit (nameRoot.getLastCharacter()))
         nameRoot = nameRoot.dropLastCharacters (1);
 
@@ -777,19 +778,19 @@ Image ProjectExporter::getBestIconForSize (int size, bool returnNullIfNothingBig
     }
 
     if (im == nullptr)
-        return Image();
+        return {};
 
     if (returnNullIfNothingBigEnough && im->getWidth() < size && im->getHeight() < size)
-        return Image();
+        return {};
 
     return rescaleImageForIcon (*im, size);
 }
 
 Image ProjectExporter::rescaleImageForIcon (Drawable& d, const int size)
 {
-    if (DrawableImage* drawableImage = dynamic_cast<DrawableImage*> (&d))
+    if (auto* drawableImage = dynamic_cast<DrawableImage*> (&d))
     {
-        Image im = SoftwareImageType().convert (drawableImage->getImage());
+        auto im = SoftwareImageType().convert (drawableImage->getImage());
 
         if (size == im.getWidth() && size == im.getHeight())
             return im;
@@ -845,16 +846,16 @@ bool ProjectExporter::ConstConfigIterator::next()
 //==============================================================================
 ProjectExporter::BuildConfiguration::BuildConfiguration (Project& p, const ValueTree& configNode, const ProjectExporter& e)
    : config (configNode), project (p), exporter (e),
-     isDebugValue              (config, Ids::isDebug, getUndoManager(), getValue (Ids::isDebug)),
-     configNameValue           (config, Ids::name, getUndoManager(), "Build Configuration"),
-     targetNameValue           (config, Ids::targetName, getUndoManager(), project.getProjectFilenameRootString()),
-     targetBinaryPathValue     (config, Ids::binaryPath, getUndoManager()),
-     optimisationLevelValue    (config, Ids::optimisation, getUndoManager()),
+     isDebugValue              (config, Ids::isDebug,              getUndoManager(), getValue (Ids::isDebug)),
+     configNameValue           (config, Ids::name,                 getUndoManager(), "Build Configuration"),
+     targetNameValue           (config, Ids::targetName,           getUndoManager(), project.getProjectFilenameRootString()),
+     targetBinaryPathValue     (config, Ids::binaryPath,           getUndoManager()),
+     optimisationLevelValue    (config, Ids::optimisation,         getUndoManager()),
      linkTimeOptimisationValue (config, Ids::linkTimeOptimisation, getUndoManager(), ! isDebug()),
-     ppDefinesValue            (config, Ids::defines, getUndoManager()),
-     headerSearchPathValue     (config, Ids::headerPath, getUndoManager()),
-     librarySearchPathValue    (config, Ids::libraryPath, getUndoManager()),
-     userNotesValue            (config, Ids::userNotes, getUndoManager())
+     ppDefinesValue            (config, Ids::defines,              getUndoManager()),
+     headerSearchPathValue     (config, Ids::headerPath,           getUndoManager()),
+     librarySearchPathValue    (config, Ids::libraryPath,          getUndoManager()),
+     userNotesValue            (config, Ids::userNotes,            getUndoManager())
 {
 }
 
@@ -928,17 +929,17 @@ StringPairArray ProjectExporter::BuildConfiguration::getAllPreprocessorDefs() co
 
 StringPairArray ProjectExporter::BuildConfiguration::getUniquePreprocessorDefs() const
 {
-    StringPairArray perConfigurationDefs (parsePreprocessorDefs (getBuildConfigPreprocessorDefsString()));
-    const StringPairArray globalDefs (project.getPreprocessorDefs());
+    auto perConfigurationDefs = parsePreprocessorDefs (getBuildConfigPreprocessorDefsString());
+    auto globalDefs = project.getPreprocessorDefs();
 
     for (int i = 0; i < globalDefs.size(); ++i)
     {
-        String globalKey   = globalDefs.getAllKeys()[i];
+        auto globalKey = globalDefs.getAllKeys()[i];
 
         int idx = perConfigurationDefs.getAllKeys().indexOf (globalKey);
         if (idx >= 0)
         {
-            String globalValue = globalDefs.getAllValues()[i];
+            auto globalValue = globalDefs.getAllValues()[i];
 
             if (globalValue == perConfigurationDefs.getAllValues()[idx])
                 perConfigurationDefs.remove (idx);
@@ -966,8 +967,7 @@ StringArray ProjectExporter::BuildConfiguration::getLibrarySearchPaths() const
 
 String ProjectExporter::getExternalLibraryFlags (const BuildConfiguration& config) const
 {
-    StringArray libraries;
-    libraries.addTokens (getExternalLibrariesString(), ";\n", "\"'");
+    auto libraries = StringArray::fromTokens (getExternalLibrariesString(), ";\n", "\"'");
     libraries.removeEmptyStrings (true);
 
     if (libraries.size() != 0)

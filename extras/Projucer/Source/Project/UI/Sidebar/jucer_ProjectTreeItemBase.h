@@ -53,7 +53,7 @@ struct ProjectTreeItemBase  : public JucerTreeViewBase,
 
     void deleteAllSelectedItems() override
     {
-        TreeView* const tree = getOwnerView();
+        auto* tree = getOwnerView();
         jassert (tree->getNumSelectedItems() <= 1); // multi-select should be disabled
 
         if (auto* s = dynamic_cast<ProjectTreeItemBase*> (tree->getSelectedItem (0)))
@@ -77,7 +77,7 @@ struct ProjectTreeItemBase  : public JucerTreeViewBase,
 
     static void updateSize (Component& comp, PropertyGroupComponent& group)
     {
-        const auto width = jmax (550, comp.getParentWidth() - 12);
+        auto width = jmax (550, comp.getParentWidth() - 12);
 
         auto y = 0;
         y += group.updateSize (12, y, width - 12);

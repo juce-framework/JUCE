@@ -23,13 +23,13 @@
 namespace juce
 {
 
-uint16 readUnalignedLittleEndianShort (const void* buffer)
+inline uint16 readUnalignedLittleEndianShort (const void* buffer)
 {
     auto data = readUnaligned<uint16> (buffer);
     return ByteOrder::littleEndianShort (&data);
 }
 
-uint32 readUnalignedLittleEndianInt (const void* buffer)
+inline uint32 readUnalignedLittleEndianInt (const void* buffer)
 {
     auto data = readUnaligned<uint32> (buffer);
     return ByteOrder::littleEndianInt (&data);
@@ -128,7 +128,8 @@ struct ZipFile::ZipInputStream  : public InputStream
     {
         if (zf.inputSource != nullptr)
         {
-            inputStream = streamToDelete = file.inputSource->createInputStream();
+            streamToDelete.reset (file.inputSource->createInputStream());
+            inputStream = streamToDelete.get();
         }
         else
         {
@@ -223,7 +224,7 @@ ZipFile::ZipFile (InputStream* stream, bool deleteStreamWhenDestroyed)
    : inputStream (stream)
 {
     if (deleteStreamWhenDestroyed)
-        streamToDelete = inputStream;
+        streamToDelete.reset (inputStream);
 
     init();
 }
@@ -339,7 +340,7 @@ void ZipFile::init()
     if (inputSource != nullptr)
     {
         in = inputSource->createInputStream();
-        toDelete = in;
+        toDelete.reset (in);
     }
 
     if (in != nullptr)
@@ -516,7 +517,7 @@ private:
     {
         if (stream == nullptr)
         {
-            stream = file.createInputStream();
+            stream.reset (file.createInputStream());
 
             if (stream == nullptr)
                 return false;

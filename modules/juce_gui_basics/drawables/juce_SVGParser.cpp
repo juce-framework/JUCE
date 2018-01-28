@@ -1179,8 +1179,7 @@ private:
         {
             const auto indexOfComma = link.indexOf (",");
             auto format = link.substring (5, indexOfComma).trim();
-
-            const auto indexOfSemi = format.indexOf (";");
+            auto indexOfSemi = format.indexOf (";");
 
             if (format.substring (indexOfSemi + 1).trim().equalsIgnoreCase ("base64"))
             {
@@ -1188,10 +1187,10 @@ private:
 
                 if (mime.equalsIgnoreCase ("image/png") || mime.equalsIgnoreCase ("image/jpeg"))
                 {
-                    const String base64text = link.substring (indexOfComma + 1).removeCharacters ("\t\n\r ");
+                    auto base64text = link.substring (indexOfComma + 1).removeCharacters ("\t\n\r ");
 
                     if (Base64::convertFromBase64 (imageStream, base64text))
-                        inputStream = new MemoryInputStream (imageStream.getData(), imageStream.getDataSize(), false);
+                        inputStream.reset (new MemoryInputStream (imageStream.getData(), imageStream.getDataSize(), false));
                 }
             }
         }
@@ -1200,7 +1199,7 @@ private:
             auto linkedFile = originalFile.getParentDirectory().getChildFile (link);
 
             if (linkedFile.existsAsFile())
-                inputStream = linkedFile.createInputStream();
+                inputStream.reset (linkedFile.createInputStream());
         }
 
         if (inputStream != nullptr)
@@ -1696,7 +1695,7 @@ private:
         deltaAngle = fmod (deltaAngle, MathConstants<double>::twoPi);
     }
 
-    SVGState& operator= (const SVGState&) JUCE_DELETED_FUNCTION;
+    SVGState& operator= (const SVGState&) = delete;
 };
 
 
@@ -1721,8 +1720,8 @@ Drawable* Drawable::createFromSVGFile (const File& svgFile)
 
         if (svgDocument != nullptr)
         {
-            SVGState state (svgDocument, svgFile);
-            return state.parseSVGElement (SVGState::XmlPath (svgDocument, nullptr));
+            SVGState state (svgDocument.get(), svgFile);
+            return state.parseSVGElement (SVGState::XmlPath (svgDocument.get(), nullptr));
         }
     }
 

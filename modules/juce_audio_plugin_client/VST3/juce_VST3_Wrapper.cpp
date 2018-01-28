@@ -106,7 +106,7 @@ private:
     ScopedPointer<AudioProcessor> audioProcessor;
     ScopedJuceInitialiser_GUI libraryInitialiser;
 
-    JuceAudioProcessor() JUCE_DELETED_FUNCTION;
+    JuceAudioProcessor() = delete;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceAudioProcessor)
 };
 
@@ -1953,7 +1953,7 @@ public:
     {
         auto tailLengthSeconds = getPluginInstance().getTailLengthSeconds();
 
-        if (tailLengthSeconds <= 0.0 || processSetup.sampleRate > 0.0)
+        if (tailLengthSeconds <= 0.0 || processSetup.sampleRate <= 0.0)
             return Vst::kNoTail;
 
         return (Steinberg::uint32) roundToIntAccurate (tailLengthSeconds * processSetup.sampleRate);

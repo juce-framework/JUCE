@@ -239,14 +239,14 @@ void ChoicePropertyComponent::refresh()
         if (! comboBox.isVisible())
         {
             createComboBox();
-            comboBox.addListener (this);
+            comboBox.onChange = [this] { changeIndex(); };
         }
 
         comboBox.setSelectedId (getIndex() + 1, dontSendNotification);
     }
 }
 
-void ChoicePropertyComponent::comboBoxChanged (ComboBox*)
+void ChoicePropertyComponent::changeIndex()
 {
     if (isCustomClass)
     {

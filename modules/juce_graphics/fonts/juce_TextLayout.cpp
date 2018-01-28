@@ -363,8 +363,8 @@ namespace TextLayoutHelpers
                 Array<float> xOffsets;
                 t.font.getGlyphPositions (getTrimmedEndIfNotAllWhitespace (t.text), newGlyphs, xOffsets);
 
-                if (currentRun == nullptr)  currentRun  = new TextLayout::Run();
-                if (currentLine == nullptr) currentLine = new TextLayout::Line();
+                if (currentRun == nullptr)  currentRun .reset (new TextLayout::Run());
+                if (currentLine == nullptr) currentLine.reset (new TextLayout::Line());
 
                 if (newGlyphs.size() > 0)
                 {
@@ -404,7 +404,7 @@ namespace TextLayoutHelpers
                     if (t.line != nextToken->line)
                     {
                         if (currentRun == nullptr)
-                            currentRun = new TextLayout::Run();
+                            currentRun.reset (new TextLayout::Run());
 
                         addRun (*currentLine, currentRun.release(), t, runStartPosition, charPosition);
                         currentLine->stringRange = { lineStartPosition, charPosition };

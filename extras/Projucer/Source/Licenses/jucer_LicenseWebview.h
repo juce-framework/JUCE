@@ -79,15 +79,14 @@ private:
 
         //==============================================================================
         struct Header  : public Component,
-                         private LicenseController::StateChangedCallback,
-                         private Button::Listener
+                         private LicenseController::StateChangedCallback
         {
             Header()  : avatarButton ("User Settings", &getIcons().user)
             {
                 setOpaque (true);
                 addChildComponent (avatarButton);
 
-                avatarButton.addListener (this);
+                avatarButton.onClick = [this] { showAvatarWindow(); };
 
                 if (auto* licenseController = ProjucerApplication::getApp().licenseController.get())
                 {
@@ -98,8 +97,6 @@ private:
 
             virtual ~Header()
             {
-                avatarButton.removeListener (this);
-
                 if (auto* licenseController = ProjucerApplication::getApp().licenseController.get())
                     licenseController->removeLicenseStatusChangedCallback (this);
             }
@@ -126,7 +123,7 @@ private:
                 avatarButton.repaint();
             }
 
-            void buttonClicked (Button*) override
+            void showAvatarWindow()
             {
                 if (auto* licenseController = ProjucerApplication::getApp().licenseController.get())
                 {

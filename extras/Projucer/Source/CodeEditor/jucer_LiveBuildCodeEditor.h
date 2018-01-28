@@ -446,7 +446,6 @@ private:
 
     //==============================================================================
     class ControlsComponent   : public Component,
-                                private Slider::Listener,
                                 private ChangeListener
     {
     public:
@@ -464,7 +463,8 @@ private:
             setMouseClickGrabsKeyboardFocus (false);
             addAndMakeVisible (&slider);
             updateRange();
-            slider.addListener (this);
+            slider.onValueChange = [this] { updateSliderValue(); };
+            slider.onDragEnd = [this] { updateRange(); };
 
             if (showColourSelector)
             {
@@ -511,10 +511,10 @@ private:
             g.fillRoundedRectangle (getLocalBounds().toFloat(), 8.0f);
         }
 
-        void sliderValueChanged (Slider* s) override
+        void updateSliderValue()
         {
             const String oldText (document.getTextBetween (start, end));
-            const String newText (CppParserHelpers::getReplacementStringInSameFormat (oldText, s->getValue()));
+            const String newText (CppParserHelpers::getReplacementStringInSameFormat (oldText, slider.getValue()));
 
             if (oldText != newText)
                 document.replaceSection (start.getPosition(), end.getPosition(), newText);
@@ -524,9 +524,6 @@ private:
 
             updateColourSelector();
         }
-
-        void sliderDragStarted (Slider*) override  {}
-        void sliderDragEnded (Slider*) override    { updateRange(); }
 
         void changeListenerCallback (ChangeBroadcaster*) override
         {

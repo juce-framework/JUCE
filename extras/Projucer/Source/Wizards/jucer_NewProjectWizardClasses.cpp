@@ -25,6 +25,7 @@
 */
 
 #include "../Application/jucer_Headers.h"
+#include "jucer_NewProjectWizardClasses.h"
 #include "../ProjectSaving/jucer_ProjectExporter.h"
 #include "../Utility/UI/jucer_SlidingPanelComponent.h"
 

@@ -41,7 +41,7 @@
   website:          http://www.juce.com/juce
   license:          GPL/Commercial
 
-  dependencies:     juce_events juce_graphics juce_data_structures
+  dependencies:     juce_graphics juce_data_structures
   OSXFrameworks:    Cocoa Carbon QuartzCore
   iOSFrameworks:    UIKit MobileCoreServices
   linuxPackages:    x11 xinerama xext

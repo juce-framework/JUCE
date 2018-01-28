@@ -109,7 +109,6 @@ void DspModulePluginDemoAudioProcessor::reset()
 
 void DspModulePluginDemoAudioProcessor::releaseResources()
 {
-
 }
 
 void DspModulePluginDemoAudioProcessor::process (dsp::ProcessContextReplacing<float> context) noexcept
@@ -126,12 +125,13 @@ void DspModulePluginDemoAudioProcessor::process (dsp::ProcessContextReplacing<fl
     // Upsampling
     dsp::AudioBlock<float> oversampledBlock;
 
-    setLatencySamples (audioCurrentlyOversampled ? roundFloatToInt (oversampling->getLatencyInSamples()) : 0);
+    setLatencySamples (audioCurrentlyOversampled ? roundToInt (oversampling->getLatencyInSamples()) : 0);
 
     if (audioCurrentlyOversampled)
         oversampledBlock = oversampling->processSamplesUp (context.getInputBlock());
 
-    dsp::ProcessContextReplacing<float> waveshaperContext = audioCurrentlyOversampled ? dsp::ProcessContextReplacing<float> (oversampledBlock) : context;
+    auto waveshaperContext = audioCurrentlyOversampled ? dsp::ProcessContextReplacing<float> (oversampledBlock)
+                                                       : context;
 
     // Waveshaper processing, for distortion generation, thanks to the input gain
     // The fast tanh can be used instead of std::tanh to reduce the CPU load
@@ -266,7 +266,7 @@ void DspModulePluginDemoAudioProcessor::updateParameters()
     {
         cabinetType.set(type);
 
-        auto maxSize = static_cast<size_t> (roundDoubleToInt (8192 * getSampleRate() / 44100));
+        auto maxSize = static_cast<size_t> (roundToInt (getSampleRate() * (8192.0 / 44100.0)));
 
         if (type == 0)
             convolution.loadImpulseResponse (BinaryData::Impulse1_wav, BinaryData::Impulse1_wavSize, false, true, maxSize);

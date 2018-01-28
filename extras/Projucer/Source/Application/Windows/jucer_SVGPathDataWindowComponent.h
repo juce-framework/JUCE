@@ -29,9 +29,7 @@
 
 //==============================================================================
 class SVGPathDataComponent  : public Component,
-                              public FileDragAndDropTarget,
-                              private TextEditor::Listener,
-                              private Button::Listener
+                              public FileDragAndDropTarget
 
 {
 public:
@@ -44,7 +42,8 @@ public:
         userText.setMultiLine (true, true);
         userText.setReturnKeyStartsNewLine (true);
         addAndMakeVisible (userText);
-        userText.addListener (this);
+        userText.onTextChange = [this] { update(); };
+        userText.onEscapeKey  = [this] { getTopLevelComponent()->exitModalState (0); };
 
         resultText.setFont (getAppSettings().appearance.getCodeFont().withHeight (13.0f));
         resultText.setMultiLine (true, true);
@@ -55,23 +54,15 @@ public:
         userText.setText (getLastText());
 
         addAndMakeVisible (copyButton);
-        copyButton.addListener (this);
-    }
+        copyButton.onClick = [this] { SystemClipboard::copyTextToClipboard (resultText.getText()); };
 
-    void buttonClicked (Button* b) override
-    {
-        if (b == &copyButton)
-            SystemClipboard::copyTextToClipboard (resultText.getText());
-    }
+        addAndMakeVisible (closeSubPathButton);
+        closeSubPathButton.onClick = [this] { update(); };
+        closeSubPathButton.setToggleState (true, NotificationType::dontSendNotification);
 
-    void textEditorTextChanged (TextEditor&) override
-    {
-        update();
-    }
-
-    void textEditorEscapeKeyPressed (TextEditor&) override
-    {
-        getTopLevelComponent()->exitModalState (0);
+        addAndMakeVisible (fillPathButton);
+        fillPathButton.onClick = [this] { update(); };
+        fillPathButton.setToggleState (true, NotificationType::dontSendNotification);
     }
 
     void update()
@@ -111,7 +102,12 @@ public:
     {
         auto r = getLocalBounds().reduced (8);
 
-        copyButton.setBounds (r.removeFromBottom (30).removeFromLeft (50));
+        auto bottomSection = r.removeFromBottom (30);
+        copyButton.setBounds (bottomSection.removeFromLeft (50));
+        bottomSection.removeFromLeft (25);
+        fillPathButton.setBounds (bottomSection.removeFromLeft (bottomSection.getWidth() / 2));
+        closeSubPathButton.setBounds (bottomSection);
+
         r.removeFromBottom (5);
         desc.setBounds (r.removeFromTop (44));
         r.removeFromTop (8);
@@ -130,7 +126,12 @@ public:
         }
 
         g.setColour (findColour (defaultTextColourId));
-        g.fillPath (path, path.getTransformToScaleToFit (previewPathArea.reduced (4).toFloat(), true));
+        path.applyTransform (path.getTransformToScaleToFit (previewPathArea.reduced (4).toFloat(), true));
+
+        if (fillPathButton.getToggleState())
+            g.fillPath (path);
+        else
+            g.strokePath (path, PathStrokeType (2.0f));
     }
 
     void lookAndFeelChanged() override
@@ -191,7 +192,8 @@ public:
                 p.lineTo ({ x, y });
         }
 
-        p.closeSubPath();
+        if (closeSubPathButton.getToggleState())
+            p.closeSubPath();
 
         return p;
     }
@@ -201,6 +203,9 @@ private:
                      "code that will load it as a Path object.." };
     TextButton copyButton { "Copy" };
     TextEditor userText, resultText;
+
+    ToggleButton closeSubPathButton { "Close sub-path" };
+    ToggleButton fillPathButton     { "Fill path" };
 
     Rectangle<int> previewPathArea;
     Path path;

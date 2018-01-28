@@ -31,11 +31,7 @@
 class ZoneColourPicker
 {
 public:
-    //==============================================================================
-    ZoneColourPicker()
-        : legacyModeEnabled (false)
-    {
-    }
+    ZoneColourPicker() {}
 
     //==============================================================================
     Colour getColourForMidiChannel (int midiChannel) const noexcept
@@ -46,13 +42,10 @@ public:
         if (zoneLayout.getNumZones() == 0)
             return Colours::transparentBlack;
 
-        MPEZone* zone = zoneLayout.getZoneByChannel (midiChannel);
+        if (auto* zone = zoneLayout.getZoneByChannel (midiChannel))
+            return getColourForZoneIndex (std::distance (zoneLayout.getZoneByIndex (0), zone));
 
-        if (zone == nullptr)
-            return Colours::transparentBlack;
-
-        return getColourForZoneIndex (std::distance (zoneLayout.getZoneByIndex (0), zone));
-
+        return Colours::transparentBlack;
     }
 
     //==============================================================================
@@ -64,7 +57,8 @@ public:
         if (zoneIndex >= zoneLayout.getNumZones())
             return Colours::transparentBlack;
 
-        static const std::array<Colour, 8> colours = {
+        static const std::array<Colour, 8> colours =
+        {
             Colours::red,
             Colours::yellow,
             Colours::blue,
@@ -79,13 +73,13 @@ public:
     }
 
     //==============================================================================
-    void setZoneLayout (MPEZoneLayout layout) noexcept       { zoneLayout = layout; }
-    void setLegacyModeEnabled (bool shouldBeEnabled) noexcept  { legacyModeEnabled = shouldBeEnabled; }
+    void setZoneLayout (MPEZoneLayout layout) noexcept          { zoneLayout = layout; }
+    void setLegacyModeEnabled (bool shouldBeEnabled) noexcept   { legacyModeEnabled = shouldBeEnabled; }
 
 private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ZoneColourPicker)
-
     MPEZoneLayout zoneLayout;
-    bool legacyModeEnabled;
+    bool legacyModeEnabled = false;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ZoneColourPicker)
 };

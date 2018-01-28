@@ -544,28 +544,33 @@ public:
         ignoreHiddenFiles           = 4     /**< Add this flag to avoid returning any hidden files in the results. */
     };
 
-    /** Searches inside a directory for files matching a wildcard pattern.
+    /** Searches this directory for files matching a wildcard pattern.
 
         Assuming that this file is a directory, this method will search it
         for either files or subdirectories whose names match a filename pattern.
         Note that the order in which files are returned is completely undefined!
 
-        @param results                  an array to which File objects will be added for the
-                                        files that the search comes up with
         @param whatToLookFor            a value from the TypesOfFileToFind enum, specifying whether to
                                         return files, directories, or both. If the ignoreHiddenFiles flag
                                         is also added to this value, hidden files won't be returned
         @param searchRecursively        if true, all subdirectories will be recursed into to do
                                         an exhaustive search
         @param wildCardPattern          the filename pattern to search for, e.g. "*.txt"
-        @returns                        the number of results that have been found
+        @returns                        the set of files that were found
 
         @see getNumberOfChildFiles, DirectoryIterator
     */
-    int findChildFiles (Array<File>& results,
-                        int whatToLookFor,
-                        bool searchRecursively,
-                        const String& wildCardPattern = "*") const;
+    Array<File> findChildFiles (int whatToLookFor,
+                                bool searchRecursively,
+                                const String& wildCardPattern = "*") const;
+
+    /** Searches inside a directory for files matching a wildcard pattern.
+        Note that there's a newer, better version of this method which returns the results
+        array, and in almost all cases, you should use that one instead! This one is kept around
+        mainly for legacy code to use.
+    */
+    int findChildFiles (Array<File>& results, int whatToLookFor,
+                        bool searchRecursively, const String& wildCardPattern = "*") const;
 
     /** Searches inside a directory and counts how many files match a wildcard pattern.
 

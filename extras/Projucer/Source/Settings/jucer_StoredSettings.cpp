@@ -384,7 +384,7 @@ bool StoredSettings::isGlobalPathValid (const File& relativeTo, const Identifier
     {
        #if JUCE_MAC
         fileToCheckFor = path.trim().endsWith (".app") ? "Contents/MacOS/clion" : "../clion";
-       #elif JUCE_WIDOWS
+       #elif JUCE_WINDOWS
         fileToCheckFor = "../clion64.exe";
        #else
         fileToCheckFor = "../clion.sh";

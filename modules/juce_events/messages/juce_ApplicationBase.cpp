@@ -134,7 +134,7 @@ bool JUCEApplicationBase::sendCommandLineToPreexistingInstance()
 {
     jassert (multipleInstanceHandler == nullptr); // this must only be called once!
 
-    multipleInstanceHandler = new MultipleInstanceHandler (getApplicationName());
+    multipleInstanceHandler.reset (new MultipleInstanceHandler (getApplicationName()));
     return multipleInstanceHandler->sendCommandLineToPreexistingInstance();
 }
 

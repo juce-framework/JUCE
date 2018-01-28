@@ -300,7 +300,7 @@ OSCSender::OSCSender()   : pimpl (new Pimpl())
 OSCSender::~OSCSender()
 {
     pimpl->disconnect();
-    pimpl = nullptr;
+    pimpl.reset();
 }
 
 //==============================================================================

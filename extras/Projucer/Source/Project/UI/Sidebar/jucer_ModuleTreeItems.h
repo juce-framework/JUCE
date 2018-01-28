@@ -111,8 +111,8 @@ public:
 
     void refreshModuleInfoIfCurrentlyShowing (bool juceModulePathChanged)
     {
-        const bool isJuceModule = EnabledModuleList::isJuceModule (moduleID);
-        const bool shouldRefresh = (juceModulePathChanged && isJuceModule) || (! juceModulePathChanged && ! isJuceModule);
+        auto isJuceModule = EnabledModuleList::isJuceModule (moduleID);
+        auto shouldRefresh = (juceModulePathChanged && isJuceModule) || (! juceModulePathChanged && ! isJuceModule);
 
         if (! shouldRefresh)
             return;
@@ -330,20 +330,18 @@ private:
         };
 
         //==============================================================================
-        class MissingDependenciesComponent  : public PropertyComponent,
-                                              public Button::Listener
+        class MissingDependenciesComponent  : public PropertyComponent
         {
         public:
             MissingDependenciesComponent (Project& p, const String& modID)
                 : PropertyComponent ("Dependencies", 100),
                   project (p), moduleID (modID),
-                  missingDependencies (project.getModules().getExtraDependenciesNeeded (modID)),
-                  fixButton ("Add Required Modules")
+                  missingDependencies (project.getModules().getExtraDependenciesNeeded (modID))
             {
                 addAndMakeVisible (fixButton);
                 fixButton.setColour (TextButton::buttonColourId, Colours::red);
                 fixButton.setColour (TextButton::textColourOffId, Colours::white);
-                fixButton.addListener (this);
+                fixButton.onClick = [this] { fixDependencies(); };
             }
 
             void refresh() override {}
@@ -358,7 +356,7 @@ private:
                 g.drawFittedText (text, getLocalBounds().reduced (10), Justification::topLeft, 3);
             }
 
-            void buttonClicked (Button*) override
+            void fixDependencies()
             {
                 ModuleList list;
 
@@ -396,7 +394,7 @@ private:
             Project& project;
             String moduleID;
             StringArray missingDependencies;
-            TextButton fixButton;
+            TextButton fixButton { "Add Required Modules" };
 
             bool tryToFix (ModuleList& list)
             {
@@ -430,7 +428,7 @@ private:
                     if (rootItem == nullptr)
                         return;
 
-                    for (auto i = 0; i < rootItem->getNumSubItems(); ++i)
+                    for (int i = 0; i < rootItem->getNumSubItems(); ++i)
                     {
                         if (auto* subItem = dynamic_cast<ProjectTreeItemBase*> (rootItem->getSubItem (i)))
                         {
@@ -522,7 +520,7 @@ public:
 
     bool isInterestedInFileDrag (const StringArray& files) override
     {
-        for (int i = files.size(); --i >= 0;)
+        for (auto i = files.size(); --i >= 0;)
             if (ModuleDescription (getModuleFolder (files[i])).isValid())
                 return true;
 
@@ -533,9 +531,9 @@ public:
     {
         Array<ModuleDescription> modules;
 
-        for (int i = files.size(); --i >= 0;)
+        for (auto f : files)
         {
-            ModuleDescription m (getModuleFolder (files[i]));
+            ModuleDescription m (getModuleFolder (f));
 
             if (m.isValid())
                 modules.add (m);
@@ -558,7 +556,7 @@ public:
         auto& modules = project.getModules();
         PopupMenu knownModules, jucePathModules, userPathModules, exporterPathsModules;
 
-        auto index = 100;
+        int index = 100;
         for (auto m : getAvailableModulesInGlobalJucePath())
             jucePathModules.addItem (index++, m, ! modules.isModuleEnabled (m));
 
@@ -682,7 +680,7 @@ private:
         }
         else if (v == defaultJuceModulePathValue || v == defaultUserModulePathValue)
         {
-            const bool juceModulePathChanged = (v == defaultJuceModulePathValue);
+            auto juceModulePathChanged = (v == defaultJuceModulePathValue);
 
             for (int i = 0; i < getNumSubItems(); ++i)
                 if (auto* moduleItem = dynamic_cast<ModuleItem*> (getSubItem (i)))

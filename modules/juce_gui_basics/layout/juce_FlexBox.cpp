@@ -386,6 +386,8 @@ struct FlexBoxLayoutCalculation
 
                         if (isRowDirection)
                             item.setHeightChecked (lineSize - item.item->margin.top - item.item->margin.bottom);
+                        else
+                            item.setWidthChecked (lineSize - item.item->margin.left - item.item->margin.right);
                     }
                     else if (owner.alignItems == FlexBox::AlignItems::flexStart)
                     {
@@ -393,11 +395,17 @@ struct FlexBoxLayoutCalculation
                     }
                     else if (owner.alignItems == FlexBox::AlignItems::flexEnd)
                     {
-                        item.lockedMarginTop = lineSize - item.lockedHeight - item.item->margin.bottom;
+                        if (isRowDirection)
+                            item.lockedMarginTop = lineSize - item.lockedHeight - item.item->margin.bottom;
+                        else
+                            item.lockedMarginLeft = lineSize - item.lockedWidth - item.item->margin.right;
                     }
                     else if (owner.alignItems == FlexBox::AlignItems::center)
                     {
-                        item.lockedMarginTop = (lineSize - item.lockedHeight - item.item->margin.top - item.item->margin.bottom) / 2;
+                        if (isRowDirection)
+                            item.lockedMarginTop = (lineSize - item.lockedHeight - item.item->margin.top - item.item->margin.bottom) / 2;
+                        else
+                            item.lockedMarginLeft = (lineSize - item.lockedWidth - item.item->margin.left - item.item->margin.right) / 2;
                     }
                 }
             }

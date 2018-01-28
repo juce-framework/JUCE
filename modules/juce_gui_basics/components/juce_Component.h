@@ -2374,7 +2374,7 @@ private:
 
     // This is included here to cause an error if you use or overload it - it has been deprecated in
     // favour of contains (Point<int>)
-    void contains (int, int) JUCE_DELETED_FUNCTION;
+    void contains (int, int) = delete;
    #endif
 
 protected:

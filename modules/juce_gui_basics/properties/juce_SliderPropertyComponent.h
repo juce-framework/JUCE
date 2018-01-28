@@ -33,8 +33,7 @@ namespace juce
 
     @see PropertyComponent, Slider
 */
-class JUCE_API  SliderPropertyComponent   : public PropertyComponent,
-                                            private Slider::Listener
+class JUCE_API  SliderPropertyComponent   : public PropertyComponent
 {
 protected:
     //==============================================================================
@@ -92,8 +91,6 @@ public:
     //==============================================================================
     /** @internal */
     void refresh();
-    /** @internal */
-    void sliderValueChanged (Slider*);
 
 protected:
     /** The slider component being used in this component.

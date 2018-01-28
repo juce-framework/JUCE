@@ -409,9 +409,9 @@ public:
                 {
                     if (deleteOldElement)
                     {
-                        toDelete = data.elements[indexToChange];
+                        toDelete.reset (data.elements[indexToChange]);
 
-                        if (toDelete == newObject)
+                        if (toDelete.get() == newObject)
                             toDelete.release();
                     }
 

@@ -33,7 +33,7 @@ namespace
 {
     String makeValid4CC (const String& seed)
     {
-        String s (CodeHelpers::makeValidIdentifier (seed, false, true, false) + "xxxx");
+        auto s = CodeHelpers::makeValidIdentifier (seed, false, true, false) + "xxxx";
 
         return s.substring (0, 1).toUpperCase()
              + s.substring (1, 4).toLowerCase();
@@ -45,9 +45,7 @@ Project::Project (const File& f)
     : FileBasedDocument (projectFileExtension,
                          String ("*") + projectFileExtension,
                          "Choose a Jucer project to load",
-                         "Save Jucer project"),
-      projectRoot (Ids::JUCERPROJECT),
-      isSaving (false)
+                         "Save Jucer project")
 {
     Logger::writeToLog ("Loading project: " + f.getFullPathName());
     setFile (f);
@@ -59,9 +57,11 @@ Project::Project (const File& f)
     moveOldPropertyFromProjectToAllExporters (Ids::bigIcon);
     moveOldPropertyFromProjectToAllExporters (Ids::smallIcon);
 
-    intialiseProjectValues();
+    initialiseProjectValues();
     initialiseMainGroup();
     initialiseAudioPluginValues();
+
+    parsedPreprocessorDefs = parsePreprocessorDefs (preprocessorDefsValue.get());
 
     getModules().sortAlphabetically();
 
@@ -82,7 +82,7 @@ const char* Project::projectFileExtension = ".jucer";
 //==============================================================================
 void Project::setTitle (const String& newTitle)
 {
-    projectRoot.setProperty (Ids::name, newTitle, getUndoManagerFor (projectRoot));
+    projectRoot.setProperty (Ids::name, newTitle, getUndoManager());
     getMainGroup().getNameValue() = newTitle;
 
     bundleIdentifierValue.setDefault (getDefaultBundleIdentifierString());
@@ -170,22 +170,22 @@ void Project::initialiseMainGroup()
     getMainGroup().initialiseMissingProperties();
 }
 
-void Project::intialiseProjectValues()
+void Project::initialiseProjectValues()
 {
-    projectNameValue.referTo         (projectRoot, Ids::name, getUndoManagerFor (projectRoot), "JUCE Project");
-    projectUIDValue.referTo          (projectRoot, Ids::ID, getUndoManagerFor (projectRoot), createAlphaNumericUID());
-    projectTypeValue.referTo         (projectRoot, Ids::projectType, getUndoManagerFor (projectRoot), ProjectType_GUIApp::getTypeName());
-    versionValue.referTo             (projectRoot, Ids::version, getUndoManagerFor (projectRoot), "1.0.0");
-    bundleIdentifierValue.referTo    (projectRoot, Ids::bundleIdentifier, getUndoManagerFor (projectRoot), getDefaultBundleIdentifierString());
+    projectNameValue.referTo         (projectRoot, Ids::name,             getUndoManager(), "JUCE Project");
+    projectUIDValue.referTo          (projectRoot, Ids::ID,               getUndoManager(), createAlphaNumericUID());
+    projectTypeValue.referTo         (projectRoot, Ids::projectType,      getUndoManager(), ProjectType_GUIApp::getTypeName());
+    versionValue.referTo             (projectRoot, Ids::version,          getUndoManager(), "1.0.0");
+    bundleIdentifierValue.referTo    (projectRoot, Ids::bundleIdentifier, getUndoManager(), getDefaultBundleIdentifierString());
 
-    companyNameValue.referTo         (projectRoot, Ids::companyName, getUndoManagerFor (projectRoot));
-    companyCopyrightValue.referTo    (projectRoot, Ids::companyCopyright, getUndoManagerFor (projectRoot));
-    companyWebsiteValue.referTo      (projectRoot, Ids::companyWebsite, getUndoManagerFor (projectRoot));
-    companyEmailValue.referTo        (projectRoot, Ids::companyEmail, getUndoManagerFor (projectRoot));
+    companyNameValue.referTo         (projectRoot, Ids::companyName,      getUndoManager());
+    companyCopyrightValue.referTo    (projectRoot, Ids::companyCopyright, getUndoManager());
+    companyWebsiteValue.referTo      (projectRoot, Ids::companyWebsite,   getUndoManager());
+    companyEmailValue.referTo        (projectRoot, Ids::companyEmail,     getUndoManager());
 
-    displaySplashScreenValue.referTo (projectRoot, Ids::displaySplashScreen, getUndoManagerFor (projectRoot), ! ProjucerApplication::getApp().isPaidOrGPL());
-    splashScreenColourValue.referTo  (projectRoot, Ids::splashScreenColour, getUndoManagerFor (projectRoot), "Dark");
-    reportAppUsageValue.referTo      (projectRoot, Ids::reportAppUsage, getUndoManagerFor (projectRoot));
+    displaySplashScreenValue.referTo (projectRoot, Ids::displaySplashScreen, getUndoManager(), ! ProjucerApplication::getApp().isPaidOrGPL());
+    splashScreenColourValue.referTo  (projectRoot, Ids::splashScreenColour,  getUndoManager(), "Dark");
+    reportAppUsageValue.referTo      (projectRoot, Ids::reportAppUsage,      getUndoManager());
 
     if (ProjucerApplication::getApp().isPaidOrGPL())
     {
@@ -197,58 +197,58 @@ void Project::intialiseProjectValues()
         reportAppUsageValue.setDefault (true);
     }
 
-    cppStandardValue.referTo                   (projectRoot, Ids::cppLanguageStandard, getUndoManagerFor (projectRoot), "14");
+    cppStandardValue.referTo                   (projectRoot, Ids::cppLanguageStandard, getUndoManager(), "14");
 
-    headerSearchPathsValue.referTo             (projectRoot, Ids::headerPath, getUndoManagerFor (projectRoot));
-    preprocessorDefsValue.referTo              (projectRoot, Ids::defines, getUndoManagerFor (projectRoot));
-    userNotesValue.referTo                     (projectRoot, Ids::userNotes, getUndoManagerFor (projectRoot));
+    headerSearchPathsValue.referTo             (projectRoot, Ids::headerPath, getUndoManager());
+    preprocessorDefsValue.referTo              (projectRoot, Ids::defines,    getUndoManager());
+    userNotesValue.referTo                     (projectRoot, Ids::userNotes,  getUndoManager());
 
-    maxBinaryFileSizeValue.referTo             (projectRoot, Ids::maxBinaryFileSize, getUndoManagerFor (projectRoot), 10240 * 1024);
-    includeBinaryDataInAppConfigValue.referTo  (projectRoot, Ids::includeBinaryInAppConfig, getUndoManagerFor (projectRoot), true);
-    binaryDataNamespaceValue.referTo           (projectRoot, Ids::binaryDataNamespace, getUndoManagerFor (projectRoot), "BinaryData");
+    maxBinaryFileSizeValue.referTo             (projectRoot, Ids::maxBinaryFileSize,        getUndoManager(), 10240 * 1024);
+    includeBinaryDataInAppConfigValue.referTo  (projectRoot, Ids::includeBinaryInAppConfig, getUndoManager(), true);
+    binaryDataNamespaceValue.referTo           (projectRoot, Ids::binaryDataNamespace,      getUndoManager(), "BinaryData");
 }
 
 void Project::initialiseAudioPluginValues()
 {
-    buildVSTValue.referTo                    (projectRoot, Ids::buildVST, getUndoManagerFor (projectRoot), true);
-    buildVST3Value.referTo                   (projectRoot, Ids::buildVST3, getUndoManagerFor (projectRoot), false);
-    buildAUValue.referTo                     (projectRoot, Ids::buildAU, getUndoManagerFor (projectRoot), true);
-    buildAUv3Value.referTo                   (projectRoot, Ids::buildAUv3, getUndoManagerFor (projectRoot), false);
-    buildRTASValue.referTo                   (projectRoot, Ids::buildRTAS, getUndoManagerFor (projectRoot), false);
-    buildAAXValue.referTo                    (projectRoot, Ids::buildAAX, getUndoManagerFor (projectRoot), false);
-    buildStandaloneValue.referTo             (projectRoot, Ids::buildStandalone, getUndoManagerFor (projectRoot), false);
-    enableIAAValue.referTo                   (projectRoot, Ids::enableIAA, getUndoManagerFor (projectRoot), false);
+    buildVSTValue.referTo                    (projectRoot, Ids::buildVST,        getUndoManager(), true);
+    buildVST3Value.referTo                   (projectRoot, Ids::buildVST3,       getUndoManager(), false);
+    buildAUValue.referTo                     (projectRoot, Ids::buildAU,         getUndoManager(), true);
+    buildAUv3Value.referTo                   (projectRoot, Ids::buildAUv3,       getUndoManager(), false);
+    buildRTASValue.referTo                   (projectRoot, Ids::buildRTAS,       getUndoManager(), false);
+    buildAAXValue.referTo                    (projectRoot, Ids::buildAAX,        getUndoManager(), false);
+    buildStandaloneValue.referTo             (projectRoot, Ids::buildStandalone, getUndoManager(), false);
+    enableIAAValue.referTo                   (projectRoot, Ids::enableIAA,       getUndoManager(), false);
 
-    pluginNameValue.referTo                  (projectRoot, Ids::pluginName, getUndoManagerFor (projectRoot), getProjectNameString());
-    pluginDescriptionValue.referTo           (projectRoot, Ids::pluginDesc, getUndoManagerFor (projectRoot), getProjectNameString());
-    pluginManufacturerValue.referTo          (projectRoot, Ids::pluginManufacturer, getUndoManagerFor (projectRoot), "yourcompany");
-    pluginManufacturerCodeValue.referTo      (projectRoot, Ids::pluginManufacturerCode, getUndoManagerFor (projectRoot), "Manu");
-    pluginCodeValue.referTo                  (projectRoot, Ids::pluginCode, getUndoManagerFor (projectRoot), makeValid4CC (getProjectUIDString() + getProjectUIDString()));
-    pluginChannelConfigsValue.referTo        (projectRoot, Ids::pluginChannelConfigs, getUndoManagerFor (projectRoot));
+    pluginNameValue.referTo                  (projectRoot, Ids::pluginName,             getUndoManager(), getProjectNameString());
+    pluginDescriptionValue.referTo           (projectRoot, Ids::pluginDesc,             getUndoManager(), getProjectNameString());
+    pluginManufacturerValue.referTo          (projectRoot, Ids::pluginManufacturer,     getUndoManager(), "yourcompany");
+    pluginManufacturerCodeValue.referTo      (projectRoot, Ids::pluginManufacturerCode, getUndoManager(), "Manu");
+    pluginCodeValue.referTo                  (projectRoot, Ids::pluginCode,             getUndoManager(), makeValid4CC (getProjectUIDString() + getProjectUIDString()));
+    pluginChannelConfigsValue.referTo        (projectRoot, Ids::pluginChannelConfigs,   getUndoManager());
 
-    pluginIsSynthValue.referTo               (projectRoot, Ids::pluginIsSynth, getUndoManagerFor (projectRoot), false);
-    pluginWantsMidiInputValue.referTo        (projectRoot, Ids::pluginWantsMidiIn, getUndoManagerFor (projectRoot), false);
-    pluginProducesMidiOutValue.referTo       (projectRoot, Ids::pluginProducesMidiOut, getUndoManagerFor (projectRoot), false);
-    pluginIsMidiEffectPluginValue.referTo    (projectRoot, Ids::pluginIsMidiEffectPlugin, getUndoManagerFor (projectRoot), false);
-    pluginEditorNeedsKeyFocusValue.referTo   (projectRoot, Ids::pluginEditorRequiresKeys, getUndoManagerFor (projectRoot), false);
+    pluginIsSynthValue.referTo               (projectRoot, Ids::pluginIsSynth,            getUndoManager(), false);
+    pluginWantsMidiInputValue.referTo        (projectRoot, Ids::pluginWantsMidiIn,        getUndoManager(), false);
+    pluginProducesMidiOutValue.referTo       (projectRoot, Ids::pluginProducesMidiOut,    getUndoManager(), false);
+    pluginIsMidiEffectPluginValue.referTo    (projectRoot, Ids::pluginIsMidiEffectPlugin, getUndoManager(), false);
+    pluginEditorNeedsKeyFocusValue.referTo   (projectRoot, Ids::pluginEditorRequiresKeys, getUndoManager(), false);
 
-    pluginVSTCategoryValue.referTo           (projectRoot, Ids::pluginVSTCategory, getUndoManagerFor (projectRoot));
-    pluginAUExportPrefixValue.referTo        (projectRoot, Ids::pluginAUExportPrefix, getUndoManagerFor (projectRoot),
+    pluginVSTCategoryValue.referTo           (projectRoot, Ids::pluginVSTCategory,          getUndoManager());
+    pluginAUExportPrefixValue.referTo        (projectRoot, Ids::pluginAUExportPrefix,       getUndoManager(),
                                               CodeHelpers::makeValidIdentifier (getProjectNameString(), false, true, false) + "AU");
-    pluginAUMainTypeValue.referTo            (projectRoot, Ids::pluginAUMainType, getUndoManagerFor (projectRoot));
-    pluginAUIsSandboxSafeValue.referTo       (projectRoot, Ids::pluginAUIsSandboxSafe, getUndoManagerFor (projectRoot));
-    pluginRTASCategoryValue.referTo          (projectRoot, Ids::pluginRTASCategory, getUndoManagerFor (projectRoot));
-    pluginRTASBypassDisabledValue.referTo    (projectRoot, Ids::pluginRTASDisableBypass, getUndoManagerFor (projectRoot));
-    pluginRTASMultiMonoDisabledValue.referTo (projectRoot, Ids::pluginRTASDisableMultiMono, getUndoManagerFor (projectRoot));
-    pluginAAXIdentifierValue.referTo         (projectRoot, Ids::aaxIdentifier, getUndoManagerFor (projectRoot), getDefaultAAXIdentifierString());
-    pluginAAXCategoryValue.referTo           (projectRoot, Ids::pluginAAXCategory, getUndoManagerFor (projectRoot), "AAX_ePlugInCategory_Dynamics");
-    pluginAAXBypassDisabledValue.referTo     (projectRoot, Ids::pluginAAXDisableBypass, getUndoManagerFor (projectRoot));
-    pluginAAXMultiMonoDisabledValue.referTo  (projectRoot, Ids::pluginAAXDisableMultiMono, getUndoManagerFor (projectRoot));
+    pluginAUMainTypeValue.referTo            (projectRoot, Ids::pluginAUMainType,           getUndoManager());
+    pluginAUIsSandboxSafeValue.referTo       (projectRoot, Ids::pluginAUIsSandboxSafe,      getUndoManager());
+    pluginRTASCategoryValue.referTo          (projectRoot, Ids::pluginRTASCategory,         getUndoManager());
+    pluginRTASBypassDisabledValue.referTo    (projectRoot, Ids::pluginRTASDisableBypass,    getUndoManager());
+    pluginRTASMultiMonoDisabledValue.referTo (projectRoot, Ids::pluginRTASDisableMultiMono, getUndoManager());
+    pluginAAXIdentifierValue.referTo         (projectRoot, Ids::aaxIdentifier,              getUndoManager(), getDefaultAAXIdentifierString());
+    pluginAAXCategoryValue.referTo           (projectRoot, Ids::pluginAAXCategory,          getUndoManager(), "AAX_ePlugInCategory_Dynamics");
+    pluginAAXBypassDisabledValue.referTo     (projectRoot, Ids::pluginAAXDisableBypass,     getUndoManager());
+    pluginAAXMultiMonoDisabledValue.referTo  (projectRoot, Ids::pluginAAXDisableMultiMono,  getUndoManager());
 }
 
 void Project::updateOldStyleConfigList()
 {
-    ValueTree deprecatedConfigsList (projectRoot.getChildWithName (Ids::CONFIGURATIONS));
+    auto deprecatedConfigsList = projectRoot.getChildWithName (Ids::CONFIGURATIONS);
 
     if (deprecatedConfigsList.isValid())
     {
@@ -258,17 +258,17 @@ void Project::updateOldStyleConfigList()
         {
             if (exporter->getNumConfigurations() == 0)
             {
-                ValueTree newConfigs (deprecatedConfigsList.createCopy());
+                auto newConfigs = deprecatedConfigsList.createCopy();
 
                 if (! exporter->isXcode())
                 {
-                    for (int j = newConfigs.getNumChildren(); --j >= 0;)
+                    for (auto j = newConfigs.getNumChildren(); --j >= 0;)
                     {
-                        ValueTree config (newConfigs.getChild(j));
+                        auto config = newConfigs.getChild (j);
 
-                        config.removeProperty (Ids::osxSDK, nullptr);
+                        config.removeProperty (Ids::osxSDK,           nullptr);
                         config.removeProperty (Ids::osxCompatibility, nullptr);
-                        config.removeProperty (Ids::osxArchitecture, nullptr);
+                        config.removeProperty (Ids::osxArchitecture,  nullptr);
                     }
                 }
 
@@ -291,17 +291,17 @@ void Project::moveOldPropertyFromProjectToAllExporters (Identifier name)
 
 void Project::removeDefunctExporters()
 {
-    ValueTree exporters (projectRoot.getChildWithName (Ids::EXPORTFORMATS));
+    auto exporters = projectRoot.getChildWithName (Ids::EXPORTFORMATS);
 
     StringPairArray oldExporters;
     oldExporters.set ("ANDROID", "Android Ant Exporter");
-    oldExporters.set ("MSVC6", "MSVC6");
-    oldExporters.set ("VS2010", "Visual Studio 2010");
-    oldExporters.set ("VS2012", "Visual Studio 2012");
+    oldExporters.set ("MSVC6",   "MSVC6");
+    oldExporters.set ("VS2010",  "Visual Studio 2010");
+    oldExporters.set ("VS2012",  "Visual Studio 2012");
 
     for (auto& key : oldExporters.getAllKeys())
     {
-        ValueTree oldExporter (exporters.getChildWithName (key));
+        auto oldExporter = exporters.getChildWithName (key);
 
         if (oldExporter.isValid())
         {
@@ -322,8 +322,7 @@ void Project::updateOldModulePaths()
 //==============================================================================
 static int getVersionElement (StringRef v, int index)
 {
-    StringArray parts;
-    parts.addTokens (v, "., ", StringRef());
+    StringArray parts = StringArray::fromTokens (v, "., ", {});
 
     return parts [parts.size() - index - 1].getIntValue();
 }
@@ -344,9 +343,9 @@ static int getBuiltJuceVersion()
 
 static bool isAnyModuleNewerThanProjucer (const OwnedArray<ModuleDescription>& modules)
 {
-    for (int i = modules.size(); --i >= 0;)
+    for (auto i = modules.size(); --i >= 0;)
     {
-        const ModuleDescription* m = modules.getUnchecked(i);
+        auto* m = modules.getUnchecked(i);
 
         if (m->getID().startsWith ("juce_")
               && getJuceVersion (m->getVersion()) > getBuiltJuceVersion())
@@ -404,7 +403,7 @@ Result Project::loadDocument (const File& file)
     if (xml == nullptr || ! xml->hasTagName (Ids::JUCERPROJECT.toString()))
         return Result::fail ("Not a valid Jucer project!");
 
-    ValueTree newTree (ValueTree::fromXml (*xml));
+    auto newTree = ValueTree::fromXml (*xml);
 
     if (! newTree.hasType (Ids::JUCERPROJECT))
         return Result::fail ("The document contains errors and couldn't be parsed!");
@@ -413,9 +412,11 @@ Result Project::loadDocument (const File& file)
     enabledModulesList.reset();
     projectRoot = newTree;
 
-    intialiseProjectValues();
+    initialiseProjectValues();
     initialiseMainGroup();
     initialiseAudioPluginValues();
+
+    parsedPreprocessorDefs = parsePreprocessorDefs (preprocessorDefsValue.get());
 
     removeDefunctExporters();
     updateOldModulePaths();
@@ -457,12 +458,14 @@ Result Project::saveResourcesOnly (const File& file)
 //==============================================================================
 void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
 {
-    if (tree.getParent() == tree)
+    if (tree.getRoot() == tree)
     {
         if (property == Ids::projectType)
             sendChangeMessage();
         else if (property == Ids::name)
             setTitle (projectRoot [Ids::name]);
+        else if (property == Ids::defines)
+            parsedPreprocessorDefs = parsePreprocessorDefs (preprocessorDefsValue.get());
 
         changed();
     }
@@ -476,7 +479,7 @@ void Project::valueTreeParentChanged (ValueTree&)                   {}
 //==============================================================================
 bool Project::hasProjectBeenModified()
 {
-    Time oldModificationTime = modificationTime;
+    auto oldModificationTime = modificationTime;
     modificationTime = getFile().getLastModificationTime();
 
     return (modificationTime.toMilliseconds() > (oldModificationTime.toMilliseconds() + 1000LL));
@@ -503,12 +506,12 @@ File Project::resolveFilename (String filename) const
 
 String Project::getRelativePathForFile (const File& file) const
 {
-    String filename (file.getFullPathName());
+    auto filename = file.getFullPathName();
 
-    File relativePathBase (getFile().getParentDirectory());
+    auto relativePathBase = getFile().getParentDirectory();
 
-    String p1 (relativePathBase.getFullPathName());
-    String p2 (file.getFullPathName());
+    auto p1 = relativePathBase.getFullPathName();
+    auto p2 = file.getFullPathName();
 
     while (p1.startsWithChar (File::getSeparatorChar()))
         p1 = p1.substring (1);
@@ -528,17 +531,17 @@ String Project::getRelativePathForFile (const File& file) const
 //==============================================================================
 const ProjectType& Project::getProjectType() const
 {
-    if (const ProjectType* type = ProjectType::findType (getProjectTypeString()))
+    if (auto* type = ProjectType::findType (getProjectTypeString()))
         return *type;
 
-    const ProjectType* guiType = ProjectType::findType (ProjectType_GUIApp::getTypeName());
+    auto* guiType = ProjectType::findType (ProjectType_GUIApp::getTypeName());
     jassert (guiType != nullptr);
     return *guiType;
 }
 
 bool Project::shouldBuildTargetType (ProjectType::Target::Type targetType) const noexcept
 {
-    const ProjectType& projectType = getProjectType();
+    auto& projectType = getProjectType();
 
     if (! projectType.supportsTargetType (targetType))
         return false;
@@ -650,10 +653,10 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
                "Your company e-mail, which will be added to the properties of the binary where possible");
 
     {
-        const String licenseRequiredTagline ("Required for closed source applications without an Indie or Pro JUCE license");
-        const String licenseRequiredInfo ("In accordance with the terms of the JUCE 5 End-Use License Agreement (www.juce.com/juce-5-licence), "
-                                          "this option can only be disabled for closed source applications if you have a JUCE Indie or Pro "
-                                          "license, or are using JUCE under the GPL v3 license.");
+        String licenseRequiredTagline ("Required for closed source applications without an Indie or Pro JUCE license");
+        String licenseRequiredInfo ("In accordance with the terms of the JUCE 5 End-Use License Agreement (www.juce.com/juce-5-licence), "
+                                    "this option can only be disabled for closed source applications if you have a JUCE Indie or Pro "
+                                    "license, or are using JUCE under the GPL v3 license.");
 
         StringPairArray description;
         description.set ("Report JUCE app usage", "This option controls the collection of usage data from users of this JUCE application.");
@@ -694,7 +697,7 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 
         auto types = ProjectType::getAllTypes();
 
-        for (auto i = 0; i < types.size(); ++i)
+        for (int i = 0; i < types.size(); ++i)
         {
             projectTypeNames.add (types.getUnchecked(i)->getDescription());
             projectTypeCodes.add (types.getUnchecked(i)->getType());
@@ -716,7 +719,7 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
         StringArray maxSizeNames;
         Array<var> maxSizeCodes;
 
-        for (auto i = 0; i < numElementsInArray (maxSizes); ++i)
+        for (int i = 0; i < numElementsInArray (maxSizes); ++i)
         {
             auto sizeInBytes = maxSizes[i] * 1024;
 
@@ -831,8 +834,7 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
 //==============================================================================
 static StringArray getVersionSegments (const Project& p)
 {
-    StringArray segments;
-    segments.addTokens (p.getVersionString(), ",.", "");
+    auto segments = StringArray::fromTokens (p.getVersionString(), ",.", "");
     segments.trim();
     segments.removeEmptyStrings();
     return segments;
@@ -840,11 +842,11 @@ static StringArray getVersionSegments (const Project& p)
 
 int Project::getVersionAsHexInteger() const
 {
-    const StringArray segments (getVersionSegments (*this));
+    auto segments = getVersionSegments (*this);
 
-    int value = (segments[0].getIntValue() << 16)
-                 + (segments[1].getIntValue() << 8)
-                  + segments[2].getIntValue();
+    auto value = (segments[0].getIntValue() << 16)
+               + (segments[1].getIntValue() << 8)
+               +  segments[2].getIntValue();
 
     if (segments.size() >= 4)
         value = (value << 8) + segments[3].getIntValue();
@@ -857,14 +859,9 @@ String Project::getVersionAsHex() const
     return "0x" + String::toHexString (getVersionAsHexInteger());
 }
 
-StringPairArray Project::getPreprocessorDefs() const
-{
-    return parsePreprocessorDefs (projectRoot [Ids::defines]);
-}
-
 File Project::getBinaryDataCppFile (int index) const
 {
-    const File cpp (getGeneratedCodeFolder().getChildFile ("BinaryData.cpp"));
+    auto cpp = getGeneratedCodeFolder().getChildFile ("BinaryData.cpp");
 
     if (index > 0)
         return cpp.getSiblingFile (cpp.getFileNameWithoutExtension() + String (index + 1))
@@ -875,7 +872,7 @@ File Project::getBinaryDataCppFile (int index) const
 
 Project::Item Project::getMainGroup()
 {
-    return Item (*this, projectRoot.getChildWithName (Ids::MAINGROUP), false);
+    return { *this, projectRoot.getChildWithName (Ids::MAINGROUP), false };
 }
 
 PropertiesFile& Project::getStoredProperties() const
@@ -954,9 +951,9 @@ Project::Item Project::Item::findItemWithID (const String& targetId) const
 
     if (isGroup())
     {
-        for (int i = getNumChildren(); --i >= 0;)
+        for (auto i = getNumChildren(); --i >= 0;)
         {
-            Item found (getChild(i).findItemWithID (targetId));
+            auto found = getChild(i).findItemWithID (targetId);
 
             if (found.isValid())
                 return found;
@@ -1025,7 +1022,7 @@ void Project::Item::setFile (const RelativePath& file)
 
 bool Project::Item::renameFile (const File& newFile)
 {
-    const File oldFile (getFile());
+    auto oldFile = getFile();
 
     if (oldFile.moveFileTo (newFile)
          || (newFile.exists() && ! oldFile.exists()))
@@ -1050,9 +1047,9 @@ Project::Item Project::Item::findItemForFile (const File& file) const
 
     if (isGroup())
     {
-        for (int i = getNumChildren(); --i >= 0;)
+        for (auto i = getNumChildren(); --i >= 0;)
         {
-            Item found (getChild(i).findItemForFile (file));
+            auto found = getChild(i).findItemForFile (file);
 
             if (found.isValid())
                 return found;
@@ -1075,7 +1072,7 @@ File Project::Item::determineGroupFolder() const
             return f.getParentDirectory();
     }
 
-    Item parent (getParent());
+    auto parent = getParent();
     if (parent != *this)
     {
         f = parent.determineGroupFolder();
@@ -1105,7 +1102,7 @@ void Project::Item::initialiseMissingProperties()
     }
     else if (isGroup())
     {
-        for (int i = getNumChildren(); --i >= 0;)
+        for (auto i = getNumChildren(); --i >= 0;)
             getChild(i).initialiseMissingProperties();
     }
 }
@@ -1135,7 +1132,7 @@ Project::Item Project::Item::getParent() const
     if (isMainGroup() || ! isGroup())
         return *this;
 
-    return Item (project, state.getParent(), belongsToModule);
+    return { project, state.getParent(), belongsToModule };
 }
 
 struct ItemSorter
@@ -1150,8 +1147,8 @@ struct ItemSorterWithGroupsAtStart
 {
     static int compareElements (const ValueTree& first, const ValueTree& second)
     {
-        const bool firstIsGroup = first.hasType (Ids::GROUP);
-        const bool secondIsGroup = second.hasType (Ids::GROUP);
+        auto firstIsGroup = first.hasType (Ids::GROUP);
+        auto secondIsGroup = second.hasType (Ids::GROUP);
 
         if (firstIsGroup == secondIsGroup)
             return first [Ids::name].toString().compareNatural (second [Ids::name].toString());
@@ -1182,7 +1179,7 @@ static bool isGroupSorted (const ValueTree& state, bool keepGroupsAtStart)
     if (state.getNumChildren() == 1)
         return true;
 
-    ValueTree stateCopy (state.createCopy());
+    auto stateCopy = state.createCopy();
     sortGroup (stateCopy, keepGroupsAtStart, nullptr);
     return stateCopy.isEquivalentTo (state);
 }
@@ -1192,17 +1189,17 @@ void Project::Item::sortAlphabetically (bool keepGroupsAtStart, bool recursive)
     sortGroup (state, keepGroupsAtStart, getUndoManager());
 
     if (recursive)
-        for (int i = getNumChildren(); --i >= 0;)
+        for (auto i = getNumChildren(); --i >= 0;)
             getChild(i).sortAlphabetically (keepGroupsAtStart, true);
 }
 
 Project::Item Project::Item::getOrCreateSubGroup (const String& name)
 {
-    for (int i = state.getNumChildren(); --i >= 0;)
+    for (auto i = state.getNumChildren(); --i >= 0;)
     {
-        const ValueTree child (state.getChild (i));
+        auto child = state.getChild (i);
         if (child.getProperty (Ids::name) == name && child.hasType (Ids::GROUP))
-            return Item (project, child, belongsToModule);
+            return { project, child, belongsToModule };
     }
 
     return addNewSubGroup (name, -1);
@@ -1210,13 +1207,13 @@ Project::Item Project::Item::getOrCreateSubGroup (const String& name)
 
 Project::Item Project::Item::addNewSubGroup (const String& name, int insertIndex)
 {
-    String newID (createGUID (getID() + name + String (getNumChildren())));
+    auto newID = createGUID (getID() + name + String (getNumChildren()));
 
     int n = 0;
     while (project.getMainGroup().findItemWithID (newID).isValid())
         newID = createGUID (newID + String (++n));
 
-    Item group (createGroup (project, name, newID, belongsToModule));
+    auto group = createGroup (project, name, newID, belongsToModule);
 
     jassert (canContain (group));
     addChild (group, insertIndex);
@@ -1230,7 +1227,7 @@ bool Project::Item::addFileAtIndex (const File& file, int insertIndex, const boo
 
     if (file.isDirectory())
     {
-        Item group (addNewSubGroup (file.getFileName(), insertIndex));
+        auto group = addNewSubGroup (file.getFileName(), insertIndex);
 
         for (DirectoryIterator iter (file, false, "*", File::findFilesAndDirectories); iter.next();)
             if (! project.getMainGroup().findItemForFile (iter.getFile()).isValid())
@@ -1251,8 +1248,8 @@ bool Project::Item::addFileAtIndex (const File& file, int insertIndex, const boo
 
 bool Project::Item::addFileRetainingSortOrder (const File& file, bool shouldCompile)
 {
-    const bool wasSortedGroupsNotFirst = isGroupSorted (state, false);
-    const bool wasSortedGroupsFirst    = isGroupSorted (state, true);
+    auto wasSortedGroupsNotFirst = isGroupSorted (state, false);
+    auto wasSortedGroupsFirst    = isGroupSorted (state, true);
 
     if (! addFileAtIndex (file, 0, shouldCompile))
         return false;
@@ -1298,20 +1295,20 @@ bool Project::Item::addRelativeFile (const RelativePath& file, int insertIndex, 
 
 Icon Project::Item::getIcon (bool isOpen) const
 {
-    const Icons& icons = getIcons();
+    auto& icons = getIcons();
 
     if (isFile())
     {
         if (isImageFile())
             return Icon (icons.imageDoc, Colours::transparentBlack);
 
-        return Icon (icons.file, Colours::transparentBlack);
+        return { icons.file, Colours::transparentBlack };
     }
 
     if (isMainGroup())
-        return Icon (icons.juceLogo, Colours::orange);
+        return { icons.juceLogo, Colours::orange };
 
-    return Icon (isOpen ? icons.openFolder : icons.closedFolder, Colours::transparentBlack);
+    return { isOpen ? icons.openFolder : icons.closedFolder, Colours::transparentBlack };
 }
 
 bool Project::Item::isIconCrossedOut() const
@@ -1351,7 +1348,7 @@ String Project::getPluginRTASCategoryCode()
     if (static_cast<bool> (isPluginSynth()))
         return "ePlugInCategory_SWGenerators";
 
-    String s (getPluginRTASCategoryString());
+    auto s = getPluginRTASCategoryString();
     if (s.isEmpty())
         s = "ePlugInCategory_None";
 
@@ -1412,7 +1409,7 @@ String Project::getIAATypeCode()
 
 String Project::getIAAPluginName()
 {
-    String s = getPluginManufacturerString();
+    auto s = getPluginManufacturerString();
     s << ": ";
     s << getPluginNameString();
     return s;
@@ -1504,7 +1501,7 @@ String Project::getUniqueTargetFolderSuffixForExporter (const String& exporterNa
 
     buildFolders.remove (buildFolders.indexOf (base));
 
-    auto num = 1;
+    int num = 1;
     for (auto f : buildFolders)
     {
         if (! f.endsWith ("_" + String (num)))
@@ -1521,7 +1518,7 @@ String Project::getFileTemplate (const String& templateName)
 {
     int dataSize;
 
-    if (const char* data = BinaryData::getNamedResource (templateName.toUTF8(), dataSize))
+    if (auto* data = BinaryData::getNamedResource (templateName.toUTF8(), dataSize))
         return String::fromUTF8 (data, dataSize);
 
     jassertfalse;

@@ -274,7 +274,7 @@ int64 AudioFormatReader::searchForLevel (int64 startSample,
 
     while (numSamplesToSearch != 0)
     {
-        auto numThisTime = (int) jmin (abs64 (numSamplesToSearch), (int64) bufferSize);
+        auto numThisTime = (int) jmin (std::abs (numSamplesToSearch), (int64) bufferSize);
         int64 bufferStart = startSample;
 
         if (numSamplesToSearch < 0)
@@ -394,7 +394,7 @@ bool MemoryMappedAudioFormatReader::mapSectionOfFile (Range<int64> samplesToMap)
         const Range<int64> fileRange (sampleToFilePos (samplesToMap.getStart()),
                                       sampleToFilePos (samplesToMap.getEnd()));
 
-        map = new MemoryMappedFile (file, fileRange, MemoryMappedFile::readOnly);
+        map.reset (new MemoryMappedFile (file, fileRange, MemoryMappedFile::readOnly));
 
         if (map->getData() == nullptr)
             map.reset();

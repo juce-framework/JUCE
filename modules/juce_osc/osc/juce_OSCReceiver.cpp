@@ -593,7 +593,7 @@ OSCReceiver::OSCReceiver()   : pimpl (new Pimpl())
 
 OSCReceiver::~OSCReceiver()
 {
-    pimpl = nullptr;
+    pimpl.reset();
 }
 
 bool OSCReceiver::connect (int portNumber)

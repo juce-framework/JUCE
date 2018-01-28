@@ -28,8 +28,7 @@
 #include "jucer_ResourceEditorPanel.h"
 
 //==============================================================================
-class ResourceListButton  : public Component,
-                            private Button::Listener
+class ResourceListButton  : public Component
 {
 public:
     ResourceListButton (JucerDocument& doc)
@@ -37,7 +36,12 @@ public:
     {
         setInterceptsMouseClicks (false, true);
         addAndMakeVisible (reloadButton);
-        reloadButton.addListener (this);
+        reloadButton.onClick = [this]
+        {
+            if (auto* r = document.getResources() [row])
+                document.getResources().browseForResource ("Select a file to replace this resource", "*",
+                                                           File (r->originalFilename), r->name);
+        };
     }
 
     void update (int newRow)
@@ -49,16 +53,6 @@ public:
     void resized()
     {
         reloadButton.setBoundsInset (BorderSize<int> (2));
-    }
-
-    void buttonClicked (Button*)
-    {
-        if (const BinaryResources::BinaryResource* const r = document.getResources() [row])
-            document.getResources()
-                .browseForResource ("Select a file to replace this resource",
-                                    "*",
-                                    File (r->originalFilename),
-                                    r->name);
     }
 
 private:
@@ -76,14 +70,14 @@ ResourceEditorPanel::ResourceEditorPanel (JucerDocument& doc)
       delButton ("Delete selected resources")
 {
     addAndMakeVisible (addButton);
-    addButton.addListener (this);
+    addButton.onClick = [this] { document.getResources().browseForResource ("Select a file to add as a resource", "*", {}, {}); };
 
     addAndMakeVisible (reloadAllButton);
-    reloadAllButton.addListener (this);
+    reloadAllButton.onClick = [this] { reloadAll(); };
 
     addAndMakeVisible (delButton);
-    delButton.addListener (this);
     delButton.setEnabled (false);
+    delButton.onClick = [this] { document.getResources().remove (listBox->getSelectedRow (0)); };
 
     addAndMakeVisible (listBox = new TableListBox (String(), this));
     listBox->getHeader().addColumn ("name", 1, 150, 80, 400);
@@ -259,36 +253,21 @@ void ResourceEditorPanel::changeListenerCallback (ChangeBroadcaster*)
         listBox->updateContent();
 }
 
-void ResourceEditorPanel::buttonClicked (Button* b)
+void ResourceEditorPanel::reloadAll()
 {
-    if (b == &addButton)
-    {
-        document.getResources()
-            .browseForResource ("Select a file to add as a resource",
-                                "*",
-                                File(),
-                                String());
-    }
-    else if (b == &delButton)
-    {
-        document.getResources().remove (listBox->getSelectedRow (0));
-    }
-    else if (b == &reloadAllButton)
-    {
-        StringArray failed;
+    StringArray failed;
 
-        for (int i = 0; i < document.getResources().size(); ++i)
-        {
-            if (! document.getResources().reload (i))
-                failed.add (document.getResources().getResourceNames() [i]);
-        }
+    for (int i = 0; i < document.getResources().size(); ++i)
+    {
+        if (! document.getResources().reload (i))
+            failed.add (document.getResources().getResourceNames() [i]);
+    }
 
-        if (failed.size() > 0)
-        {
-            AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                         TRANS("Reloading resources"),
-                                         TRANS("The following resources couldn't be reloaded from their original files:\n\n")
-                                            + failed.joinIntoString (", "));
-        }
+    if (failed.size() > 0)
+    {
+        AlertWindow::showMessageBox (AlertWindow::WarningIcon,
+                                     TRANS("Reloading resources"),
+                                     TRANS("The following resources couldn't be reloaded from their original files:\n\n")
+                                     + failed.joinIntoString (", "));
     }
 }

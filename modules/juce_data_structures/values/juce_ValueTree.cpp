@@ -589,6 +589,20 @@ ValueTree::ValueTree (const Identifier& type)  : object (new ValueTree::SharedOb
     jassert (type.toString().isNotEmpty()); // All objects must be given a sensible type name!
 }
 
+#if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
+ValueTree::ValueTree (const Identifier& type,
+                      std::initializer_list<std::pair<Identifier, var>> properties,
+                      std::initializer_list<ValueTree> subTrees)
+    : ValueTree (type)
+{
+    for (auto& prop : properties)
+        setProperty (prop.first, prop.second, nullptr);
+
+    for (auto& tree : subTrees)
+        addChild (tree, -1, nullptr);
+}
+#endif
+
 ValueTree::ValueTree (SharedObject* so) noexcept  : object (so)
 {
 }
@@ -982,7 +996,9 @@ ValueTree ValueTree::fromXml (const XmlElement& xml)
 
 String ValueTree::toXmlString() const
 {
-    if (ScopedPointer<XmlElement> xml = createXml())
+    ScopedPointer<XmlElement> xml (createXml());
+
+    if (xml != nullptr)
         return xml->createDocument ({});
 
     return {};
@@ -1142,7 +1158,7 @@ public:
 
             ScopedPointer<XmlElement> xml1 (v1.createXml());
             ScopedPointer<XmlElement> xml2 (v2.createCopy().createXml());
-            expect (xml1->isEquivalentTo (xml2, false));
+            expect (xml1->isEquivalentTo (xml2.get(), false));
 
             auto v4 = v2.createCopy();
             expect (v1.isEquivalentTo (v4));

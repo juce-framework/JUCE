@@ -148,8 +148,7 @@ private:
 
 //==============================================================================
 class DependencyPathPropertyComponent : public TextPropertyComponent,
-                                        private Value::Listener,
-                                        private Label::Listener
+                                        private Value::Listener
 {
 public:
     DependencyPathPropertyComponent (const File& pathRelativeToUse,
@@ -178,10 +177,7 @@ private:
     /** a reference to the value source that this value refers to. */
     DependencyPathValueSource& pathValueSource;
 
-    // Label::Listener overrides:
-    void labelTextChanged (Label* labelThatHasChanged) override;
-    void editorShown (Label*, TextEditor&) override;
-    void editorHidden (Label*, TextEditor&) override;
+    void setEditorText (Label* label);
 
     void lookAndFeelChanged() override;
 
@@ -191,9 +187,7 @@ private:
 //==============================================================================
 class DependencyFilePathPropertyComponent    : public TextPropertyComponent,
                                                public FileDragAndDropTarget,
-                                               private Value::Listener,
-                                               private Label::Listener,
-                                               private Button::Listener
+                                               private Value::Listener
 {
 public:
     DependencyFilePathPropertyComponent (Value& value,
@@ -219,11 +213,7 @@ private:
 
     void valueChanged (Value&) override;
 
-    void labelTextChanged (Label*) override {}
-    void editorHidden (Label*, TextEditor&) override {}
-    void editorShown (Label*, TextEditor&) override;
-
-    void buttonClicked (Button*) override;
+    void setEditorText (Label* label);
 
     void lookAndFeelChanged() override
     {
@@ -232,6 +222,7 @@ private:
         textWasEdited();
     }
 
+    void browse();
     Colour getTextColourToDisplay() const;
 
     //==========================================================================

@@ -62,7 +62,7 @@ static const EmptyString emptyString = { 0x3fffffff, sizeof (String::CharPointer
 class StringHolder
 {
 public:
-    StringHolder() JUCE_DELETED_FUNCTION;
+    StringHolder() = delete;
 
     typedef String::CharPointerType CharPointerType;
     typedef String::CharPointerType::CharType CharType;
@@ -463,7 +463,10 @@ namespace NumberToStringConverters
                 std::ostream o (this);
 
                 if (numDecPlaces > 0)
+                {
+                    o.setf (std::ios_base::fixed);
                     o.precision ((std::streamsize) numDecPlaces);
+                }
 
                 o << n;
             }
@@ -2481,6 +2484,8 @@ public:
             expect (String::toHexString (data, 8, 0).equalsIgnoreCase ("010203040a0b0c0d"));
             expect (String::toHexString (data, 8, 1).equalsIgnoreCase ("01 02 03 04 0a 0b 0c 0d"));
             expect (String::toHexString (data, 8, 2).equalsIgnoreCase ("0102 0304 0a0b 0c0d"));
+
+            expectEquals (String (2589410.5894, 7), String ("2589410.5894000"));
 
             beginTest ("Subsections");
             String s3;

@@ -39,10 +39,10 @@ struct JUCE_API  MPENote
     //==============================================================================
     enum KeyState
     {
-        off                  = 0,
-        keyDown              = 1,
-        sustained            = 2,
-        keyDownAndSustained  = 3
+        off                  = 0, /**< The key is up (off). */
+        keyDown              = 1, /**< The note key is currently down (pressed). */
+        sustained            = 2, /**< The note is sustained (by a sustain or sostenuto pedal). */
+        keyDownAndSustained  = 3  /**< The note key is down and sustained (by a sustain or sostenuto pedal). */
     };
 
     //==============================================================================
@@ -64,7 +64,7 @@ struct JUCE_API  MPENote
         @param keyState       The key state of the note (whether the key is down
                               and/or the note is sustained). This value must not
                               be MPENote::off, since you are triggering a new note.
-                              (If not specified, the default value will be MPENOte::keyDown.)
+                              (If not specified, the default value will be MPENote::keyDown.)
     */
     MPENote (int midiChannel,
              int initialNote,
@@ -92,17 +92,17 @@ struct JUCE_API  MPENote
         sounding notes that may use the same note number or MIDI channel.
         This should never change during the lifetime of a note object.
     */
-    uint16 noteID;
+    uint16 noteID = 0;
 
     /** The MIDI channel which this note uses.
         This should never change during the lifetime of an MPENote object.
     */
-    uint8 midiChannel;
+    uint8 midiChannel = 0;
 
     /** The MIDI note number that was sent when the note was triggered.
         This should never change during the lifetime of an MPENote object.
     */
-    uint8 initialNote;
+    uint8 initialNote = 0;
 
     //==============================================================================
     // The five dimensions of continuous expressive control
@@ -110,7 +110,7 @@ struct JUCE_API  MPENote
     /** The velocity ("strike") of the note-on.
         This dimension will stay constant after the note has been turned on.
     */
-    MPEValue noteOnVelocity;
+    MPEValue noteOnVelocity  { MPEValue::minValue() };
 
     /** Current per-note pitchbend of the note  (in units of MIDI pitchwheel
         position). This dimension can be modulated while the note sounds.
@@ -122,18 +122,18 @@ struct JUCE_API  MPENote
 
         @see totalPitchbendInSemitones, getFrequencyInHertz
     */
-    MPEValue pitchbend;
+    MPEValue pitchbend       { MPEValue::centreValue() };
 
     /** Current pressure with which the note is held down.
         This dimension can be modulated while the note sounds.
     */
-    MPEValue pressure;
+    MPEValue pressure        { MPEValue::centreValue() };
 
     /** Current value of the note's third expressive dimension, tyically
          encoding some kind of timbre parameter.
         This dimension can be modulated while the note sounds.
     */
-    MPEValue timbre;
+    MPEValue timbre          { MPEValue::centreValue() };
 
     /** The release velocity ("lift") of the note after a note-off has been
         received.
@@ -141,7 +141,7 @@ struct JUCE_API  MPENote
         been received for the note (and keyState is set to MPENote::off or
         MPENOte::sustained). Initially, the value is undefined.
     */
-    MPEValue noteOffVelocity;
+    MPEValue noteOffVelocity { MPEValue::minValue() };
 
     //==============================================================================
     /** Current effective pitchbend of the note in units of semitones, relative
@@ -158,7 +158,7 @@ struct JUCE_API  MPENote
     /** Current key state. Indicates whether the note key is currently down (pressed)
         and/or the note is sustained (by a sustain or sostenuto pedal).
     */
-    KeyState keyState;
+    KeyState keyState        { MPENote::off };
 
     //==============================================================================
     /** Returns the current frequency of the note in Hertz. This is the a sum of

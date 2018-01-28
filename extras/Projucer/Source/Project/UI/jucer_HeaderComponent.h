@@ -31,8 +31,6 @@
 
 //==============================================================================
 class HeaderComponent    : public Component,
-                           private Button::Listener,
-                           private ComboBox::Listener,
                            private ValueTree::Listener,
                            private ChangeListener
 {
@@ -43,7 +41,7 @@ public:
         addAndMakeVisible (configLabel);
         addAndMakeVisible (exporterBox);
 
-        exporterBox.addListener (this);
+        exporterBox.onChange = [this] { updateExporterButton(); };
 
         addAndMakeVisible  (juceIcon = new ImageComponent ("icon"));
         juceIcon->setImage (ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize),
@@ -64,7 +62,7 @@ public:
     void resized() override
     {
         auto bounds = getLocalBounds();
-        configLabel.setFont (Font (bounds.getHeight() / 3.0f));
+        configLabel.setFont ({ bounds.getHeight() / 3.0f });
 
         //======================================================================
         auto projectHeaderBounds = bounds.removeFromLeft (tabsWidth);
@@ -161,7 +159,7 @@ public:
         return false;
     }
 
-    int getUserButtonWidth()            { return userSettingsButton->getWidth(); }
+    int getUserButtonWidth()    { return userSettingsButton->getWidth(); }
 
     void sidebarTabsWidthChanged (int newWidth)
     {
@@ -218,24 +216,6 @@ private:
     int tabsWidth = 200;
 
     //==========================================================================
-    void buttonClicked (Button* b) override
-    {
-        auto* pcc = findParentComponentOfClass<ProjectContentComponent>();
-
-        if      (b == projectSettingsButton)      pcc->showProjectSettings();
-        else if (b == continuousRebuildButton)    pcc->setContinuousRebuildEnabled (! pcc->isContinuousRebuildEnabled());
-        else if (b == buildNowButton)             pcc->rebuildNow();
-        else if (b == exporterSettingsButton)     pcc->showExporterSettings (getSelectedExporterName());
-        else if (b == saveAndOpenInIDEButton)     pcc->openInSelectedIDE (true);
-        else if (b == userSettingsButton)         showUserSettings();
-    }
-
-    void comboBoxChanged (ComboBox* c) override
-    {
-        if (c == &exporterBox)
-            updateExporterButton();
-    }
-
     void changeListenerCallback (ChangeBroadcaster* source) override
     {
         if (source == project)
@@ -257,24 +237,48 @@ private:
         auto& icons = getIcons();
 
         addAndMakeVisible (projectSettingsButton = new IconButton ("Project Settings", &icons.settings));
-        projectSettingsButton->addListener (this);
+        projectSettingsButton->onClick = [this]
+        {
+            if (auto* pcc = findParentComponentOfClass<ProjectContentComponent>())
+                pcc->showProjectSettings();
+        };
 
         addAndMakeVisible (continuousRebuildButton = new IconButton ("Continuous Rebuild", &icons.continuousBuildStart));
-        continuousRebuildButton->addListener (this);
+        continuousRebuildButton->onClick = [this]
+        {
+            if (auto* pcc = findParentComponentOfClass<ProjectContentComponent>())
+                pcc->setContinuousRebuildEnabled (! pcc->isContinuousRebuildEnabled());
+        };
 
         addAndMakeVisible (buildNowButton = new IconButton ("Build Now", &icons.buildNow));
-        buildNowButton->addListener (this);
+        buildNowButton->onClick = [this]
+        {
+            if (auto* pcc = findParentComponentOfClass<ProjectContentComponent>())
+                pcc->rebuildNow();
+        };
 
         addAndMakeVisible (exporterSettingsButton = new IconButton ("Exporter Settings", &icons.edit));
-        exporterSettingsButton->addListener (this);
+        exporterSettingsButton->onClick = [this]
+        {
+            if (auto* pcc = findParentComponentOfClass<ProjectContentComponent>())
+                pcc->showExporterSettings (getSelectedExporterName());
+        };
 
         addAndMakeVisible (saveAndOpenInIDEButton = new IconButton ("Save and Open in IDE", nullptr));
-        saveAndOpenInIDEButton->addListener (this);
         saveAndOpenInIDEButton->isIDEButton = true;
+        saveAndOpenInIDEButton->onClick = [this]
+        {
+            if (auto* pcc = findParentComponentOfClass<ProjectContentComponent>())
+                pcc->openInSelectedIDE (true);
+        };
 
         addAndMakeVisible (userSettingsButton = new IconButton ("User Settings", &icons.user));
-        userSettingsButton->addListener (this);
         userSettingsButton->isUserButton = true;
+        userSettingsButton->onClick = [this]
+        {
+            if (auto* pcc = findParentComponentOfClass<ProjectContentComponent>())
+                showUserSettings();
+        };
 
         updateExporterButton();
         updateUserAvatar();
@@ -308,7 +312,7 @@ private:
 
     void updateUserAvatar()
     {
-        if (LicenseController* controller = ProjucerApplication::getApp().licenseController)
+        if (auto* controller = ProjucerApplication::getApp().licenseController.get())
         {
             auto state = controller->getState();
 

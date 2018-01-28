@@ -234,7 +234,7 @@ struct MountedVolumeListChangeDetector::Pimpl   : private DeviceChangeDetector
     Array<File> lastVolumeList;
 };
 
-MountedVolumeListChangeDetector::MountedVolumeListChangeDetector()  { pimpl = new Pimpl (*this); }
+MountedVolumeListChangeDetector::MountedVolumeListChangeDetector()  { pimpl.reset (new Pimpl (*this)); }
 MountedVolumeListChangeDetector::~MountedVolumeListChangeDetector() {}
 
 } // namespace juce

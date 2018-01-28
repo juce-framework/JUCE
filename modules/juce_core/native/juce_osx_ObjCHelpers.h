@@ -204,7 +204,6 @@ static NSRect makeNSRect (const RectangleType& r) noexcept
 }
 #endif
 #if JUCE_MAC || JUCE_IOS
-#if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
 
 // This is necessary as on iOS builds, some arguments may be passed on registers
 // depending on the argument type. The re-cast objc_msgSendSuper to a function
@@ -216,8 +215,6 @@ static inline ReturnValue ObjCMsgSendSuper (struct objc_super* s, SEL sel, Param
     SuperFn fn = reinterpret_cast<SuperFn> (objc_msgSendSuper);
     return fn (s, sel, params...);
 }
-
-#endif
 
 // These hacks are a workaround for newer Xcode builds which by default prevent calls to these objc functions..
 typedef id (*MsgSendSuperFn) (struct objc_super*, SEL, ...);
@@ -399,8 +396,6 @@ Class* getJuceClassFromNSObject (NSObject* obj)
     return obj != nullptr ? ObjCLifetimeManagedClass<Class>:: template getIvar<Class*> (obj, "cppObject") : nullptr;
 }
 
-#if JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES
-
 template <typename ReturnT, class Class, typename... Params>
 ReturnT (^CreateObjCBlock(Class* object, ReturnT (Class::*fn)(Params...))) (Params...)
 {
@@ -429,6 +424,5 @@ private:
     BlockType block;
 };
 
-#endif
 
 } // namespace juce

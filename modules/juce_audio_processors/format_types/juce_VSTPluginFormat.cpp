@@ -438,16 +438,15 @@ struct ModuleHandle    : public ReferenceCountedObject
 
                             ok = true;
 
-                            Array<File> vstXmlFiles;
-                            file
-                               #if JUCE_MAC
-                                .getChildFile ("Contents")
-                                .getChildFile ("Resources")
-                               #endif
-                                .findChildFiles (vstXmlFiles, File::findFiles, false, "*.vstxml");
+                            auto vstXmlFiles = file
+                                                   #if JUCE_MAC
+                                                    .getChildFile ("Contents")
+                                                    .getChildFile ("Resources")
+                                                   #endif
+                                                    .findChildFiles (File::findFiles, false, "*.vstxml");
 
-                            if (vstXmlFiles.size() > 0)
-                                vstXml = XmlDocument::parse (vstXmlFiles.getReference(0));
+                            if (! vstXmlFiles.isEmpty())
+                                vstXml.reset (XmlDocument::parse (vstXmlFiles.getReference(0)));
                         }
                     }
 
@@ -2077,10 +2076,16 @@ public:
 
         #if JUCE_SUPPORT_CARBON
         if (! plug.usesCocoaNSView)
-            addAndMakeVisible (carbonWrapper = new CarbonWrapperComponent (*this));
+        {
+            carbonWrapper.reset (new CarbonWrapperComponent (*this));
+            addAndMakeVisible (carbonWrapper.get());
+        }
         else
         #endif
-            addAndMakeVisible (cocoaWrapper = new AutoResizingNSViewComponentWithParent());
+        {
+            cocoaWrapper.reset (new AutoResizingNSViewComponentWithParent());
+            addAndMakeVisible (cocoaWrapper.get());
+        }
        #endif
 
         activeVSTWindows.add (this);
@@ -2096,9 +2101,9 @@ public:
 
        #if JUCE_MAC
         #if JUCE_SUPPORT_CARBON
-        carbonWrapper = nullptr;
+        carbonWrapper.reset();
         #endif
-        cocoaWrapper = nullptr;
+        cocoaWrapper.reset();
        #elif JUCE_LINUX
         display = XWindowSystem::getInstance()->displayUnref();
        #endif
@@ -2791,10 +2796,10 @@ void VSTPluginFormat::createPluginInstance (const PluginDescription& desc,
         {
             shellUIDToCreate = desc.uid;
 
-            result = VSTPluginInstance::create (module, sampleRate, blockSize);
+            result.reset (VSTPluginInstance::create (module, sampleRate, blockSize));
 
             if (result != nullptr && ! result->initialiseEffect (sampleRate, blockSize))
-                result = nullptr;
+                result.reset();
         }
 
         previousWorkingDirectory.setAsCurrentWorkingDirectory();
@@ -2954,9 +2959,13 @@ AudioPluginInstance* VSTPluginFormat::createCustomVSTFromMainCall (void* entryPo
     ModuleHandle::Ptr module = new ModuleHandle (File(), (MainCall) entryPointFunction);
 
     if (module->open())
-        if (ScopedPointer<VSTPluginInstance> result = VSTPluginInstance::create (module, initialSampleRate, initialBufferSize))
+    {
+        ScopedPointer<VSTPluginInstance> result (VSTPluginInstance::create (module, initialSampleRate, initialBufferSize));
+
+        if (result != nullptr)
             if (result->initialiseEffect (initialSampleRate, initialBufferSize))
                 return result.release();
+    }
 
     return nullptr;
 }
@@ -2966,7 +2975,7 @@ void VSTPluginFormat::setExtraFunctions (AudioPluginInstance* plugin, ExtraFunct
     ScopedPointer<ExtraFunctions> f (functions);
 
     if (auto* vst = dynamic_cast<VSTPluginInstance*> (plugin))
-        vst->extraFunctions = f;
+        std::swap (vst->extraFunctions, f);
 }
 
 AudioPluginInstance* VSTPluginFormat::getPluginInstanceFromVstEffectInterface (void* aEffect)

@@ -344,9 +344,7 @@ void GenericCodeEditorComponent::removeListener (GenericCodeEditorComponent::Lis
 }
 
 //==============================================================================
-class GenericCodeEditorComponent::FindPanel  : public Component,
-                                               private TextEditor::Listener,
-                                               private Button::Listener
+class GenericCodeEditorComponent::FindPanel  : public Component
 {
 public:
     FindPanel()
@@ -364,7 +362,7 @@ public:
         addAndMakeVisible (caseButton);
         caseButton.setColour (ToggleButton::textColourId, Colours::white);
         caseButton.setToggleState (isCaseSensitiveSearch(), dontSendNotification);
-        caseButton.addListener (this);
+        caseButton.onClick = [this] { setCaseSensitiveSearch (caseButton.getToggleState()); };
 
         findPrev.setConnectedEdges (Button::ConnectedOnRight);
         findNext.setConnectedEdges (Button::ConnectedOnLeft);
@@ -377,7 +375,13 @@ public:
         findNext.setWantsKeyboardFocus (false);
 
         editor.setText (getSearchString());
-        editor.addListener (this);
+        editor.onTextChange = [this] { changeSearchString(); };
+        editor.onReturnKey  = [this] { ProjucerApplication::getCommandManager().invokeDirectly (CommandIDs::findNext, true); };
+        editor.onEscapeKey  = [this]
+        {
+            if (GenericCodeEditorComponent* ed = getOwner())
+                ed->hideFindPanel();
+        };
     }
 
     void setCommandManager (ApplicationCommandManager* cm)
@@ -407,30 +411,12 @@ public:
         findPrev.setBounds (getWidth() - 70, y, 30, 22);
     }
 
-    void buttonClicked (Button*) override
-    {
-        setCaseSensitiveSearch (caseButton.getToggleState());
-    }
-
-    void textEditorTextChanged (TextEditor&) override
+    void changeSearchString()
     {
         setSearchString (editor.getText());
 
         if (GenericCodeEditorComponent* ed = getOwner())
             ed->findNext (true, false);
-    }
-
-    void textEditorFocusLost (TextEditor&) override {}
-
-    void textEditorReturnKeyPressed (TextEditor&) override
-    {
-        ProjucerApplication::getCommandManager().invokeDirectly (CommandIDs::findNext, true);
-    }
-
-    void textEditorEscapeKeyPressed (TextEditor&) override
-    {
-        if (GenericCodeEditorComponent* ed = getOwner())
-            ed->hideFindPanel();
     }
 
     GenericCodeEditorComponent* getOwner() const

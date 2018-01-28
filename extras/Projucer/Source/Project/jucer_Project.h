@@ -111,7 +111,7 @@ public:
 
     String getHeaderSearchPathsString() const            { return headerSearchPathsValue.get(); }
 
-    StringPairArray getPreprocessorDefs() const;
+    StringPairArray getPreprocessorDefs() const          { return parsedPreprocessorDefs; }
 
     int getMaxBinaryFileSize() const                     { return maxBinaryFileSizeValue.get(); }
     bool shouldIncludeBinaryInAppConfig() const          { return includeBinaryDataInAppConfigValue.get(); }
@@ -319,6 +319,7 @@ public:
 
     //==============================================================================
     UndoManager* getUndoManagerFor (const ValueTree&) const             { return nullptr; }
+    UndoManager* getUndoManager() const                                 { return nullptr; }
 
     //==============================================================================
     static const char* projectFileExtension;
@@ -336,7 +337,7 @@ public:
     String specifiedExporterToSave = {};
 
 private:
-    ValueTree projectRoot;
+    ValueTree projectRoot  { Ids::JUCERPROJECT };
 
     ValueWithDefault projectNameValue, projectUIDValue, projectTypeValue, versionValue, bundleIdentifierValue, companyNameValue, companyCopyrightValue,
                      companyWebsiteValue, companyEmailValue, displaySplashScreenValue, reportAppUsageValue, splashScreenColourValue, cppStandardValue,
@@ -352,11 +353,12 @@ private:
     //==============================================================================
     friend class Item;
     ScopedPointer<EnabledModuleList> enabledModulesList;
-    bool isSaving;
+    bool isSaving = false;
     Time modificationTime;
+    StringPairArray parsedPreprocessorDefs;
 
     //==============================================================================
-    void intialiseProjectValues();
+    void initialiseProjectValues();
     void initialiseMainGroup();
     void initialiseAudioPluginValues();
 

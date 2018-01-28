@@ -28,8 +28,7 @@
 
 
 //==============================================================================
-class GlobalSearchPathsWindowComponent    : public Component,
-                                            private ComboBox::Listener
+class GlobalSearchPathsWindowComponent    : public Component
 {
 public:
     GlobalSearchPathsWindowComponent()
@@ -60,7 +59,7 @@ public:
         osSelector.addItem ("Windows", 2);
         osSelector.addItem ("Linux", 3);
 
-        osSelector.addListener (this);
+        osSelector.onChange = [this] { updateFilePathPropertyComponents(); };
 
         auto os = TargetOS::getThisOS();
 
@@ -119,11 +118,6 @@ private:
     OwnedArray<PropertyComponent> pathPropertyComponents;
     ComboBox osSelector;
     InfoButton info;
-
-    void comboBoxChanged (ComboBox*) override
-    {
-        updateFilePathPropertyComponents();
-    }
 
     TargetOS::OS getSelectedOS() const
     {

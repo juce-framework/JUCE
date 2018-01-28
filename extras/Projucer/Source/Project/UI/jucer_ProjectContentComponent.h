@@ -142,12 +142,12 @@ private:
     friend HeaderComponent;
 
     //==============================================================================
-    Project* project;
-    OpenDocumentManager::Document* currentDocument;
+    Project* project = nullptr;
+    OpenDocumentManager::Document* currentDocument = nullptr;
     RecentDocumentList recentDocumentList;
     ScopedPointer<Component> logo, translationTool, contentView, header;
 
-    TabbedComponent sidebarTabs;
+    TabbedComponent sidebarTabs  { TabbedButtonBar::TabsAtTop };
     ScopedPointer<ResizableEdgeComponent> resizerBar;
     ComponentBoundsConstrainer sidebarSizeConstrainer;
 

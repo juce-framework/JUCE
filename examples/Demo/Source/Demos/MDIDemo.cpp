@@ -234,9 +234,8 @@ private:
 
     void addExistingNotes()
     {
-        Array<File> files;
-        File::getSpecialLocation (File::userDesktopDirectory).findChildFiles (files, File::findFiles, false, "*.jnote");
-        createNotesForFiles (files);
+        createNotesForFiles (File::getSpecialLocation (File::userDesktopDirectory)
+                                .findChildFiles (File::findFiles, false, "*.jnote"));
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MDIDemo)

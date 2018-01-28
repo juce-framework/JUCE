@@ -156,8 +156,8 @@ private:
 
         static void initialise (OpenGLFrameBuffer& frameBuffer, Image::BitmapData& bitmapData, int x, int y)
         {
-            DataReleaser* r = new DataReleaser (frameBuffer, x, y, bitmapData.width, bitmapData.height);
-            bitmapData.dataReleaser = r;
+            auto* r = new DataReleaser (frameBuffer, x, y, bitmapData.width, bitmapData.height);
+            bitmapData.dataReleaser.reset (r);
 
             bitmapData.data = (uint8*) r->data.get();
             bitmapData.lineStride = (bitmapData.width * bitmapData.pixelStride + 3) & ~3;

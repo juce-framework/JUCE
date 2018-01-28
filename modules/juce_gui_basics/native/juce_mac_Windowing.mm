@@ -364,7 +364,7 @@ public:
         if (Process::isForegroundProcess())
         {
             if (assertion == nullptr)
-                assertion = new PMAssertion();
+                assertion.reset (new PMAssertion());
         }
         else
         {
@@ -415,7 +415,7 @@ void Desktop::setScreenSaverEnabled (const bool isEnabled)
     if (isEnabled)
         screenSaverDefeater.reset();
     else if (screenSaverDefeater == nullptr)
-        screenSaverDefeater = new ScreenSaverDefeater();
+        screenSaverDefeater.reset (new ScreenSaverDefeater());
 }
 
 bool Desktop::isScreenSaverEnabled()

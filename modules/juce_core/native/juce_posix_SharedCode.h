@@ -877,7 +877,7 @@ bool InterProcessLock::enter (const int timeOutMillisecs)
 
     if (pimpl == nullptr)
     {
-        pimpl = new Pimpl (name, timeOutMillisecs);
+        pimpl.reset (new Pimpl (name, timeOutMillisecs));
 
         if (pimpl->handle == 0)
             pimpl.reset();
@@ -1257,7 +1257,7 @@ bool ChildProcess::start (const StringArray& args, int streamFlags)
     if (args.size() == 0)
         return false;
 
-    activeProcess = new ActiveProcess (args, streamFlags);
+    activeProcess.reset (new ActiveProcess (args, streamFlags));
 
     if (activeProcess->childPID == 0)
         activeProcess.reset();

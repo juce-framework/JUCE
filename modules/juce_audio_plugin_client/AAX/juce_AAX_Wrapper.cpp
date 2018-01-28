@@ -112,7 +112,6 @@ using namespace juce;
 #endif
 
 const int32_t juceChunkType = JucePlugin_AAX_Chunk_Identifier;
-const int maxAAXChannels = 8;
 
 //==============================================================================
 namespace AAXClasses

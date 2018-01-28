@@ -373,13 +373,13 @@ public:
        #ifndef DOXYGEN
         /** @internal */
         void refresh();
+        /** @internal */
+        ~Displays();
        #endif
 
     private:
         friend class Desktop;
-        friend struct ContainerDeletePolicy<Displays>;
         Displays (Desktop&);
-        ~Displays();
 
         void init (Desktop&);
         void findDisplays (float masterScale);
@@ -430,18 +430,18 @@ private:
     Point<float> lastFakeMouseMove;
     void sendMouseMove();
 
-    int mouseClickCounter, mouseWheelCounter;
+    int mouseClickCounter = 0, mouseWheelCounter = 0;
     void incrementMouseClickCounter() noexcept;
     void incrementMouseWheelCounter() noexcept;
 
     ScopedPointer<LookAndFeel> defaultLookAndFeel;
     WeakReference<LookAndFeel> currentLookAndFeel;
 
-    Component* kioskModeComponent;
+    Component* kioskModeComponent = nullptr;
     Rectangle<int> kioskComponentOriginalBounds;
-    bool kioskModeReentrant;
+    bool kioskModeReentrant = false;
 
-    int allowedOrientations;
+    int allowedOrientations = allOrientations;
     void allowedOrientationsChanged();
 
     float masterScaleFactor;

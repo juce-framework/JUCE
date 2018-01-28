@@ -1738,13 +1738,19 @@ namespace WavFileHelpers
         TemporaryFile tempFile (file);
         WavAudioFormat wav;
 
-        if (ScopedPointer<AudioFormatReader> reader = wav.createReaderFor (file.createInputStream(), true))
+        ScopedPointer<AudioFormatReader> reader (wav.createReaderFor (file.createInputStream(), true));
+
+        if (reader != nullptr)
         {
-            if (ScopedPointer<OutputStream> outStream = tempFile.getFile().createOutputStream())
+            ScopedPointer<OutputStream> outStream (tempFile.getFile().createOutputStream());
+
+            if (outStream != nullptr)
             {
-                if (ScopedPointer<AudioFormatWriter> writer = wav.createWriterFor (outStream, reader->sampleRate,
-                                                                                   reader->numChannels, (int) reader->bitsPerSample,
-                                                                                   metadata, 0))
+                ScopedPointer<AudioFormatWriter> writer (wav.createWriterFor (outStream.get(), reader->sampleRate,
+                                                                              reader->numChannels, (int) reader->bitsPerSample,
+                                                                              metadata, 0));
+
+                if (writer != nullptr)
                 {
                     outStream.release();
 
@@ -1765,7 +1771,9 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
 {
     using namespace WavFileHelpers;
 
-    if (ScopedPointer<WavAudioFormatReader> reader = static_cast<WavAudioFormatReader*> (createReaderFor (wavFile.createInputStream(), true)))
+    ScopedPointer<WavAudioFormatReader> reader (static_cast<WavAudioFormatReader*> (createReaderFor (wavFile.createInputStream(), true)));
+
+    if (reader != nullptr)
     {
         auto bwavPos  = reader->bwavChunkStart;
         auto bwavSize = reader->bwavSize;

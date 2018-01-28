@@ -8,7 +8,6 @@
 
 INCLUDE_CORRESPONDING_HEADER
 
-
 //==============================================================================
 CONTENTCOMPCLASS::CONTENTCOMPCLASS()
 {
@@ -19,6 +18,7 @@ CONTENTCOMPCLASS::~CONTENTCOMPCLASS()
 {
 }
 
+//==============================================================================
 void CONTENTCOMPCLASS::paint (Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)

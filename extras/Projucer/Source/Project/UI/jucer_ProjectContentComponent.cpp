@@ -46,7 +46,7 @@ struct LogoComponent  : public Component
     {
         g.setColour (findColour (defaultTextColourId));
 
-        Rectangle<int> r (getLocalBounds());
+        auto r = getLocalBounds();
 
         g.setFont (15.0f);
         g.drawFittedText (getVersionInfo(), r.removeFromBottom (50), Justification::centredBottom, 3);
@@ -67,9 +67,6 @@ struct LogoComponent  : public Component
 
 //==============================================================================
 ProjectContentComponent::ProjectContentComponent()
-    : project (nullptr),
-      currentDocument (nullptr),
-      sidebarTabs (TabbedButtonBar::TabsAtTop)
 {
     setOpaque (true);
     setWantsKeyboardFocus (true);
@@ -188,7 +185,7 @@ void ProjectContentComponent::setProject (Project* newProject)
 }
 
 //==============================================================================
-LiveBuildTab* findBuildTab (const TabbedComponent& tabs)
+static LiveBuildTab* findBuildTab (const TabbedComponent& tabs)
 {
     return dynamic_cast<LiveBuildTab*> (tabs.getTabContentComponent (1));
 }
@@ -204,12 +201,12 @@ void ProjectContentComponent::createProjectTabs()
 {
     jassert (project != nullptr);
 
-    const auto tabColour = Colours::transparentBlack;
+    auto tabColour = Colours::transparentBlack;
 
     auto* pTab = new ProjectTab (project);
     sidebarTabs.addTab ("Project", tabColour, pTab, true);
 
-    const CompileEngineChildProcess::Ptr childProc (getChildProcess());
+    CompileEngineChildProcess::Ptr childProc (getChildProcess());
 
     sidebarTabs.addTab ("Build", tabColour, new LiveBuildTab (childProc, lastCrashMessage), true);
 
@@ -227,7 +224,7 @@ void ProjectContentComponent::deleteProjectTabs()
 {
     if (project != nullptr && sidebarTabs.getNumTabs() > 0)
     {
-        PropertiesFile& settings = project->getStoredProperties();
+        auto& settings = project->getStoredProperties();
 
         if (sidebarTabs.getWidth() > 0)
             settings.setValue ("projectPanelWidth", sidebarTabs.getWidth());
@@ -264,7 +261,7 @@ void ProjectContentComponent::rebuildProjectTabs()
 
         auto* projectTab = getProjectTab();
         for (int i = 2; i >= 0; --i)
-            projectTab->setPanelHeightProportion (i, settings.getValue ("projectTabPanelHeight" + String (i), String ("1"))
+            projectTab->setPanelHeightProportion (i, settings.getValue ("projectTabPanelHeight" + String (i), "1")
                                                              .getFloatValue());
 
         //======================================================================
@@ -380,7 +377,7 @@ bool ProjectContentComponent::showDocument (OpenDocumentManager::Document* doc, 
 
     recentDocumentList.newDocumentOpened (doc);
 
-    bool opened = setEditorComponent (doc->createEditor(), doc);
+    auto opened = setEditorComponent (doc->createEditor(), doc);
 
     if (opened && grabFocus && isShowing())
         contentView->grabKeyboardFocus();
@@ -404,7 +401,7 @@ void ProjectContentComponent::hideDocument (OpenDocumentManager::Document* doc)
 {
     if (doc == currentDocument)
     {
-        if (OpenDocumentManager::Document* replacement = recentDocumentList.getClosestPreviousDocOtherThan (doc))
+        if (auto* replacement = recentDocumentList.getClosestPreviousDocOtherThan (doc))
             showDocument (replacement, true);
         else
             hideEditor();
@@ -492,7 +489,7 @@ void ProjectContentComponent::saveAs()
 
 bool ProjectContentComponent::goToPreviousFile()
 {
-    OpenDocumentManager::Document* doc = recentDocumentList.getCurrentDocument();
+    auto* doc = recentDocumentList.getCurrentDocument();
 
     if (doc == nullptr || doc == getCurrentDocument())
         doc = recentDocumentList.getPrevious();
@@ -515,7 +512,7 @@ bool ProjectContentComponent::goToCounterpart()
 {
     if (currentDocument != nullptr)
     {
-        const File file (currentDocument->getCounterpartFile());
+        auto file = currentDocument->getCounterpartFile();
 
         if (file.exists())
             return showEditorForFile (file, true);
@@ -537,7 +534,7 @@ bool ProjectContentComponent::saveProject (bool shouldWait)
 
 void ProjectContentComponent::closeProject()
 {
-    if (auto* const mw = findParentComponentOfClass<MainWindow>())
+    if (auto* mw = findParentComponentOfClass<MainWindow>())
         mw->closeCurrentProject();
 }
 
@@ -563,7 +560,7 @@ void ProjectContentComponent::showExporterSettings (const String& exporterName)
     {
         if (auto* exporters = dynamic_cast<TreeItemTypes::ExportersTreeRoot*>(exportersPanel->rootItem.get()))
         {
-            for (int i = exporters->getNumSubItems(); i >= 0; --i)
+            for (auto i = exporters->getNumSubItems(); i >= 0; --i)
             {
                 if (auto* e = dynamic_cast<TreeItemTypes::ExporterItem*> (exporters->getSubItem (i)))
                 {
@@ -588,7 +585,7 @@ void ProjectContentComponent::showModule (const String& moduleID)
     {
         if (auto* mods = dynamic_cast<TreeItemTypes::EnabledModulesItem*> (modsPanel->rootItem.get()))
         {
-            for (int i = mods->getNumSubItems(); --i >= 0;)
+            for (auto i = mods->getNumSubItems(); --i >= 0;)
             {
                 if (auto* m = dynamic_cast<TreeItemTypes::ModuleItem*> (mods->getSubItem (i)))
                 {
@@ -655,9 +652,9 @@ static void newExporterMenuCallback (int result, ProjectContentComponent* comp)
 {
     if (comp != nullptr && result > 0)
     {
-        if (Project* p = comp->getProject())
+        if (auto* p = comp->getProject())
         {
-            String exporterName (ProjectExporter::getExporterNames() [result - 1]);
+            auto exporterName= ProjectExporter::getExporterNames() [result - 1];
 
             if (exporterName.isNotEmpty())
                 p->addNewExporter (exporterName);
@@ -673,11 +670,11 @@ void ProjectContentComponent::showNewExporterMenu()
 
         menu.addSectionHeader ("Create a new export target:");
 
-        Array<ProjectExporter::ExporterTypeInfo> exporters (ProjectExporter::getExporterTypes());
+        auto exporters = ProjectExporter::getExporterTypes();
 
         for (int i = 0; i < exporters.size(); ++i)
         {
-            const ProjectExporter::ExporterTypeInfo& type = exporters.getReference(i);
+            auto& type = exporters.getReference(i);
 
             menu.addItem (i + 1, type.name, true, false, type.getIcon());
         }
@@ -689,7 +686,7 @@ void ProjectContentComponent::showNewExporterMenu()
 
 void ProjectContentComponent::deleteSelectedTreeItems()
 {
-    if (auto* const tree = getProjectTab()->getTreeWithSelectedItems())
+    if (auto*  tree = getProjectTab()->getTreeWithSelectedItems())
         tree->deleteSelectedItems();
 }
 
@@ -742,7 +739,7 @@ struct AsyncCommandRetrier  : public Timer
     JUCE_DECLARE_NON_COPYABLE (AsyncCommandRetrier)
 };
 
-bool reinvokeCommandAfterCancellingModalComps (const ApplicationCommandTarget::InvocationInfo& info)
+static bool reinvokeCommandAfterCancellingModalComps (const ApplicationCommandTarget::InvocationInfo& info)
 {
     if (ModalComponentManager::getInstance()->cancelAllModalComponents())
     {
@@ -761,38 +758,36 @@ ApplicationCommandTarget* ProjectContentComponent::getNextCommandTarget()
 
 void ProjectContentComponent::getAllCommands (Array <CommandID>& commands)
 {
-    const CommandID ids[] = { CommandIDs::saveProject,
-                              CommandIDs::closeProject,
-                              CommandIDs::saveDocument,
-                              CommandIDs::saveDocumentAs,
-                              CommandIDs::closeDocument,
-                              CommandIDs::goToPreviousDoc,
-                              CommandIDs::goToNextDoc,
-                              CommandIDs::goToCounterpart,
-                              CommandIDs::showProjectSettings,
-                              CommandIDs::showProjectTab,
-                              CommandIDs::showBuildTab,
-                              CommandIDs::showFileExplorerPanel,
-                              CommandIDs::showModulesPanel,
-                              CommandIDs::showExportersPanel,
-                              CommandIDs::showExporterSettings,
-                              CommandIDs::openInIDE,
-                              CommandIDs::saveAndOpenInIDE,
-                              CommandIDs::createNewExporter,
-                              CommandIDs::deleteSelectedItem,
-                              CommandIDs::showTranslationTool,
-                              CommandIDs::cleanAll,
-                              CommandIDs::toggleBuildEnabled,
-                              CommandIDs::buildNow,
-                              CommandIDs::toggleContinuousBuild,
-                              CommandIDs::launchApp,
-                              CommandIDs::killApp,
-                              CommandIDs::reinstantiateComp,
-                              CommandIDs::showWarnings,
-                              CommandIDs::nextError,
-                              CommandIDs::prevError };
-
-    commands.addArray (ids, numElementsInArray (ids));
+    commands.addArray ({ CommandIDs::saveProject,
+                         CommandIDs::closeProject,
+                         CommandIDs::saveDocument,
+                         CommandIDs::saveDocumentAs,
+                         CommandIDs::closeDocument,
+                         CommandIDs::goToPreviousDoc,
+                         CommandIDs::goToNextDoc,
+                         CommandIDs::goToCounterpart,
+                         CommandIDs::showProjectSettings,
+                         CommandIDs::showProjectTab,
+                         CommandIDs::showBuildTab,
+                         CommandIDs::showFileExplorerPanel,
+                         CommandIDs::showModulesPanel,
+                         CommandIDs::showExportersPanel,
+                         CommandIDs::showExporterSettings,
+                         CommandIDs::openInIDE,
+                         CommandIDs::saveAndOpenInIDE,
+                         CommandIDs::createNewExporter,
+                         CommandIDs::deleteSelectedItem,
+                         CommandIDs::showTranslationTool,
+                         CommandIDs::cleanAll,
+                         CommandIDs::toggleBuildEnabled,
+                         CommandIDs::buildNow,
+                         CommandIDs::toggleContinuousBuild,
+                         CommandIDs::launchApp,
+                         CommandIDs::killApp,
+                         CommandIDs::reinstantiateComp,
+                         CommandIDs::showWarnings,
+                         CommandIDs::nextError,
+                         CommandIDs::prevError });
 }
 
 void ProjectContentComponent::getCommandInfo (const CommandID commandID, ApplicationCommandInfo& result)
@@ -802,9 +797,9 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         documentName = " '" + currentDocument->getName().substring (0, 32) + "'";
 
    #if JUCE_MAC
-    const ModifierKeys cmdCtrl (ModifierKeys::ctrlModifier | ModifierKeys::commandModifier);
+    auto cmdCtrl = (ModifierKeys::ctrlModifier | ModifierKeys::commandModifier);
    #else
-    const ModifierKeys cmdCtrl (ModifierKeys::ctrlModifier | ModifierKeys::altModifier);
+    auto cmdCtrl = (ModifierKeys::ctrlModifier | ModifierKeys::altModifier);
    #endif
 
     switch (commandID)
@@ -828,7 +823,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Saves the current document",
                         CommandCategories::general, 0);
         result.setActive (currentDocument != nullptr || (project != nullptr && ! project->isCurrentlySaving()));
-        result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier, 0));
+        result.defaultKeypresses.add ({ 's', ModifierKeys::commandModifier, 0 });
         break;
 
     case CommandIDs::saveDocumentAs:
@@ -836,7 +831,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Saves the current document to a new location",
                         CommandCategories::general, 0);
         result.setActive (currentDocument != nullptr);
-        result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
+        result.defaultKeypresses.add ({ 's', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0 });
         break;
 
     case CommandIDs::closeDocument:
@@ -844,7 +839,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Closes the current document",
                         CommandCategories::general, 0);
         result.setActive (contentView != nullptr);
-        result.defaultKeypresses.add (KeyPress ('w', cmdCtrl, 0));
+        result.defaultKeypresses.add ({ 'w', cmdCtrl, 0 });
         break;
 
     case CommandIDs::goToPreviousDoc:
@@ -852,7 +847,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Go to previous document",
                         CommandCategories::general, 0);
         result.setActive (recentDocumentList.canGoToPrevious());
-        result.defaultKeypresses.add (KeyPress (KeyPress::leftKey, cmdCtrl, 0));
+        result.defaultKeypresses.add ({ KeyPress::leftKey, cmdCtrl, 0 });
         break;
 
     case CommandIDs::goToNextDoc:
@@ -860,7 +855,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Go to next document",
                         CommandCategories::general, 0);
         result.setActive (recentDocumentList.canGoToNext());
-        result.defaultKeypresses.add (KeyPress (KeyPress::rightKey, cmdCtrl, 0));
+        result.defaultKeypresses.add ({ KeyPress::rightKey, cmdCtrl, 0 });
         break;
 
     case CommandIDs::goToCounterpart:
@@ -868,7 +863,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Open corresponding header or cpp file",
                         CommandCategories::general, 0);
         result.setActive (canGoToCounterpart());
-        result.defaultKeypresses.add (KeyPress (KeyPress::upKey, cmdCtrl, 0));
+        result.defaultKeypresses.add ({ KeyPress::upKey, cmdCtrl, 0 });
         break;
 
     case CommandIDs::showProjectSettings:
@@ -876,7 +871,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Shows the main project options page",
                         CommandCategories::general, 0);
         result.setActive (project != nullptr);
-        result.defaultKeypresses.add (KeyPress ('x', cmdCtrl, 0));
+        result.defaultKeypresses.add ({ 'x', cmdCtrl, 0 });
         break;
 
     case CommandIDs::showProjectTab:
@@ -884,7 +879,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Shows the tab containing the project information",
                         CommandCategories::general, 0);
         result.setActive (project != nullptr);
-        result.defaultKeypresses.add (KeyPress ('p', cmdCtrl, 0));
+        result.defaultKeypresses.add ({ 'p', cmdCtrl, 0 });
         break;
 
     case CommandIDs::showBuildTab:
@@ -892,7 +887,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Shows the tab containing the build panel",
                         CommandCategories::general, 0);
         result.setActive (project != nullptr);
-        result.defaultKeypresses.add (KeyPress ('b', cmdCtrl, 0));
+        result.defaultKeypresses.add ({ 'b', cmdCtrl, 0 });
         break;
 
     case CommandIDs::showFileExplorerPanel:
@@ -900,7 +895,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Shows the panel containing the tree of files for this project",
                         CommandCategories::general, 0);
         result.setActive (project != nullptr);
-        result.defaultKeypresses.add (KeyPress ('f', cmdCtrl, 0));
+        result.defaultKeypresses.add ({ 'f', cmdCtrl, 0 });
         break;
 
     case CommandIDs::showModulesPanel:
@@ -908,7 +903,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Shows the panel containing the project's list of modules",
                         CommandCategories::general, 0);
         result.setActive (project != nullptr);
-        result.defaultKeypresses.add (KeyPress ('m', cmdCtrl, 0));
+        result.defaultKeypresses.add ({ 'm', cmdCtrl, 0 });
         break;
 
     case CommandIDs::showExportersPanel:
@@ -916,7 +911,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Shows the panel containing the project's list of exporters",
                         CommandCategories::general, 0);
         result.setActive (project != nullptr);
-        result.defaultKeypresses.add (KeyPress ('e', cmdCtrl, 0));
+        result.defaultKeypresses.add ({ 'e', cmdCtrl, 0 });
         break;
 
     case CommandIDs::showExporterSettings:
@@ -924,7 +919,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Shows the settings page for the currently selected exporter",
                         CommandCategories::general, 0);
         result.setActive (project != nullptr);
-        result.defaultKeypresses.add (KeyPress ('e', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
+        result.defaultKeypresses.add ({ 'e', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0 });
         break;
 
     case CommandIDs::openInIDE:
@@ -939,7 +934,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
                         "Saves the project and launches it in an external IDE",
                         CommandCategories::general, 0);
         result.setActive (ProjectExporter::canProjectBeLaunched (project) && ! project->isCurrentlySaving());
-        result.defaultKeypresses.add (KeyPress ('l', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
+        result.defaultKeypresses.add ({ 'l', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0 });
         break;
 
     case CommandIDs::createNewExporter:
@@ -953,8 +948,8 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Delete Selected File",
                         String(),
                         CommandCategories::general, 0);
-        result.defaultKeypresses.add (KeyPress (KeyPress::deleteKey, 0, 0));
-        result.defaultKeypresses.add (KeyPress (KeyPress::backspaceKey, 0, 0));
+        result.defaultKeypresses.add ({ KeyPress::deleteKey, 0, 0 });
+        result.defaultKeypresses.add ({ KeyPress::backspaceKey, 0, 0 });
         result.setActive (sidebarTabs.getCurrentTabIndex() == 0);
         break;
 
@@ -968,7 +963,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Clean All",
                         "Cleans all intermediate files",
                         CommandCategories::general, 0);
-        result.defaultKeypresses.add (KeyPress ('k', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
+        result.defaultKeypresses.add ({ 'k', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0 });
         result.setActive (project != nullptr);
         break;
 
@@ -976,7 +971,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Enable Compilation",
                         "Enables/disables the compiler",
                         CommandCategories::general, 0);
-        result.defaultKeypresses.add (KeyPress ('b', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
+        result.defaultKeypresses.add ({ 'b', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0 });
         result.setActive (project != nullptr);
         result.setTicked (childProcess != nullptr);
         break;
@@ -985,7 +980,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Build Now",
                         "Recompiles any out-of-date files and updates the JIT engine",
                         CommandCategories::general, 0);
-        result.defaultKeypresses.add (KeyPress ('b', ModifierKeys::commandModifier, 0));
+        result.defaultKeypresses.add ({ 'b', ModifierKeys::commandModifier, 0 });
         result.setActive (childProcess != nullptr);
         break;
 
@@ -1001,7 +996,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Launch Application",
                         "Invokes the app's main() function",
                         CommandCategories::general, 0);
-        result.defaultKeypresses.add (KeyPress ('r', ModifierKeys::commandModifier, 0));
+        result.defaultKeypresses.add ({ 'r', ModifierKeys::commandModifier, 0 });
         result.setActive (childProcess != nullptr && childProcess->canLaunchApp());
         break;
 
@@ -1009,7 +1004,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Stop Application",
                         "Kills the app if it's running",
                         CommandCategories::general, 0);
-        result.defaultKeypresses.add (KeyPress ('.', ModifierKeys::commandModifier, 0));
+        result.defaultKeypresses.add ({ '.', ModifierKeys::commandModifier, 0 });
         result.setActive (childProcess != nullptr && childProcess->canKillApp());
         break;
 
@@ -1017,7 +1012,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Re-instantiate Components",
                         "Re-loads any component editors that are open",
                         CommandCategories::general, 0);
-        result.defaultKeypresses.add (KeyPress ('r', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
+        result.defaultKeypresses.add ({ 'r', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0 });
         result.setActive (childProcess != nullptr);
         break;
 
@@ -1033,7 +1028,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Highlight next error",
                         "Jumps to the next error or warning",
                         CommandCategories::general, 0);
-        result.defaultKeypresses.add (KeyPress ('\'', ModifierKeys::commandModifier, 0));
+        result.defaultKeypresses.add ({ '\'', ModifierKeys::commandModifier, 0 });
         result.setActive (childProcess != nullptr && ! childProcess->errorList.isEmpty());
         break;
 
@@ -1041,7 +1036,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Highlight previous error",
                         "Jumps to the last error or warning",
                         CommandCategories::general, 0);
-        result.defaultKeypresses.add (KeyPress ('\"', ModifierKeys::commandModifier, 0));
+        result.defaultKeypresses.add ({ '\"', ModifierKeys::commandModifier, 0 });
         result.setActive (childProcess != nullptr && ! childProcess->errorList.isEmpty());
         break;
 
@@ -1110,16 +1105,16 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
 
         case CommandIDs::showTranslationTool:       showTranslationTool(); break;
 
-        case CommandIDs::cleanAll:                  cleanAll();                           break;
-        case CommandIDs::toggleBuildEnabled:        setBuildEnabled (! isBuildEnabled()); break;
-        case CommandIDs::buildNow:                  rebuildNow();                         break;
+        case CommandIDs::cleanAll:                  cleanAll();                                                   break;
+        case CommandIDs::toggleBuildEnabled:        setBuildEnabled (! isBuildEnabled());                         break;
+        case CommandIDs::buildNow:                  rebuildNow();                                                 break;
         case CommandIDs::toggleContinuousBuild:     setContinuousRebuildEnabled (! isContinuousRebuildEnabled()); break;
-        case CommandIDs::launchApp:                 launchApp();                          break;
-        case CommandIDs::killApp:                   killApp();                            break;
-        case CommandIDs::reinstantiateComp:         reinstantiateLivePreviewWindows();    break;
-        case CommandIDs::showWarnings:              toggleWarnings();                     break;
-        case CommandIDs::nextError:                 showNextError();                      break;
-        case CommandIDs::prevError:                 showPreviousError();                  break;
+        case CommandIDs::launchApp:                 launchApp();                                                  break;
+        case CommandIDs::killApp:                   killApp();                                                    break;
+        case CommandIDs::reinstantiateComp:         reinstantiateLivePreviewWindows();                            break;
+        case CommandIDs::showWarnings:              toggleWarnings();                                             break;
+        case CommandIDs::nextError:                 showNextError();                                              break;
+        case CommandIDs::prevError:                 showPreviousError();                                          break;
 
         default:
             return false;
@@ -1172,7 +1167,7 @@ void ProjectContentComponent::cleanAll()
 
     if (childProcess != nullptr)
         childProcess->cleanAll();
-    else if (Project* p = getProject())
+    else if (auto* p = getProject())
         CompileEngineChildProcess::cleanAllCachedFilesForProject (*p);
 }
 
@@ -1224,7 +1219,7 @@ void ProjectContentComponent::toggleWarnings()
 
 static ProjucerAppClasses::ErrorListComp* findErrorListComp (const TabbedComponent& tabs)
 {
-    if (LiveBuildTab* bt = findBuildTab (tabs))
+    if (auto* bt = findBuildTab (tabs))
         return bt->errorListComp;
 
     return nullptr;
@@ -1232,7 +1227,7 @@ static ProjucerAppClasses::ErrorListComp* findErrorListComp (const TabbedCompone
 
 void ProjectContentComponent::showNextError()
 {
-    if (ProjucerAppClasses::ErrorListComp* el = findErrorListComp (sidebarTabs))
+    if (auto* el = findErrorListComp (sidebarTabs))
     {
         showBuildTab();
         el->showNext();
@@ -1241,7 +1236,7 @@ void ProjectContentComponent::showNextError()
 
 void ProjectContentComponent::showPreviousError()
 {
-    if (ProjucerAppClasses::ErrorListComp* el = findErrorListComp (sidebarTabs))
+    if (auto* el = findErrorListComp (sidebarTabs))
     {
         showBuildTab();
         el->showPrevious();
@@ -1274,8 +1269,8 @@ void ProjectContentComponent::rebuildNow()
 
 void ProjectContentComponent::globalFocusChanged (Component* focusedComponent)
 {
-    const bool nowForeground = (Process::isForegroundProcess()
-                                  && (focusedComponent == this || isParentOf (focusedComponent)));
+    auto nowForeground = (Process::isForegroundProcess()
+                            && (focusedComponent == this || isParentOf (focusedComponent)));
 
     if (nowForeground != isForeground)
     {
@@ -1330,14 +1325,14 @@ ReferenceCountedObjectPtr<CompileEngineChildProcess> ProjectContentComponent::ge
 void ProjectContentComponent::handleMissingSystemHeaders()
 {
    #if JUCE_MAC
-    const String tabMessage = "Compiler not available due to missing system headers\nPlease install a recent version of Xcode";
-    const String alertWindowMessage = "Missing system headers\nPlease install a recent version of Xcode";
+    String tabMessage ("Compiler not available due to missing system headers\nPlease install a recent version of Xcode");
+    String alertWindowMessage ("Missing system headers\nPlease install a recent version of Xcode");
    #elif JUCE_WINDOWS
-    const String tabMessage = "Compiler not available due to missing system headers\nPlease install a recent version of Visual Studio and the Windows Desktop SDK";
-    const String alertWindowMessage = "Missing system headers\nPlease install a recent version of Visual Studio and the Windows Desktop SDK";
+    String tabMessage ("Compiler not available due to missing system headers\nPlease install a recent version of Visual Studio and the Windows Desktop SDK");
+    String alertWindowMessage ("Missing system headers\nPlease install a recent version of Visual Studio and the Windows Desktop SDK");
    #elif JUCE_LINUX
-    const String tabMessage = "Compiler not available due to missing system headers\nPlease do a sudo apt-get install ...";
-    const String alertWindowMessage = "Missing system headers\nPlease do sudo apt-get install ...";
+    String tabMessage ("Compiler not available due to missing system headers\nPlease do a sudo apt-get install ...");
+    String alertWindowMessage ("Missing system headers\nPlease do sudo apt-get install ...");
    #endif
 
     setBuildEnabled (false, true);

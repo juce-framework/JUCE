@@ -37,7 +37,7 @@ InterprocessConnection::InterprocessConnection (bool callbacksOnMessageThread, u
     : useMessageThread (callbacksOnMessageThread),
       magicMessageHeader (magicMessageHeaderNumber)
 {
-    thread = new ConnectionThread (*this);
+    thread.reset (new ConnectionThread (*this));
 }
 
 InterprocessConnection::~InterprocessConnection()
@@ -56,7 +56,7 @@ bool InterprocessConnection::connectToSocket (const String& hostName,
     disconnect();
 
     const ScopedLock sl (pipeAndSocketLock);
-    socket = new StreamingSocket();
+    socket.reset (new StreamingSocket());
 
     if (socket->connect (hostName, portNumber, timeOutMillisecs))
     {
@@ -179,7 +179,7 @@ int InterprocessConnection::writeData (void* data, int dataSize)
 void InterprocessConnection::initialiseWithSocket (StreamingSocket* newSocket)
 {
     jassert (socket == nullptr && pipe == nullptr);
-    socket = newSocket;
+    socket.reset (newSocket);
     connectionMadeInt();
     thread->startThread();
 }
@@ -187,7 +187,7 @@ void InterprocessConnection::initialiseWithSocket (StreamingSocket* newSocket)
 void InterprocessConnection::initialiseWithPipe (NamedPipe* newPipe)
 {
     jassert (socket == nullptr && pipe == nullptr);
-    pipe = newPipe;
+    pipe.reset (newPipe);
     connectionMadeInt();
     thread->startThread();
 }

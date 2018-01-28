@@ -221,7 +221,7 @@ void TopLevelWindow::setDropShadowEnabled (const bool useShadow)
         {
             if (shadower == nullptr)
             {
-                shadower = getLookAndFeel().createDropShadowerForComponent (this);
+                shadower.reset (getLookAndFeel().createDropShadowerForComponent (this));
 
                 if (shadower != nullptr)
                     shadower->setOwner (this);

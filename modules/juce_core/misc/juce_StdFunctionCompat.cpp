@@ -66,7 +66,7 @@ namespace FunctionTestsHelpers
 
         FunctionObject (const FunctionObject& other)
         {
-            bigData = new BigData (*other.bigData);
+            bigData.reset (new BigData (*other.bigData));
         }
 
         int operator()(int i) const { return bigData->sum() + i; }

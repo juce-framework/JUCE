@@ -146,7 +146,7 @@ AudioFormatReader* AudioFormatManager::createReaderFor (InputStream* audioFileSt
 
         for (auto* af : knownFormats)
         {
-            if (auto* r = af->createReaderFor (in, false))
+            if (auto* r = af->createReaderFor (in.get(), false))
             {
                 in.release();
                 return r;

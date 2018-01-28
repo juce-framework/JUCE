@@ -28,8 +28,7 @@
 
 
 //==============================================================================
-class UTF8Component  : public Component,
-                       private TextEditor::Listener
+class UTF8Component  : public Component
 {
 public:
     UTF8Component()
@@ -43,7 +42,8 @@ public:
         userText.setMultiLine (true, true);
         userText.setReturnKeyStartsNewLine (true);
         addAndMakeVisible (userText);
-        userText.addListener (this);
+        userText.onTextChange = [this] { update(); };
+        userText.onEscapeKey  = [this] { getTopLevelComponent()->exitModalState (0); };
 
         resultText.setFont (getAppSettings().appearance.getCodeFont().withHeight (13.0f));
         resultText.setMultiLine (true, true);
@@ -54,16 +54,6 @@ public:
         userText.setText (getLastText());
     }
 
-    void textEditorTextChanged (TextEditor&) override
-    {
-        update();
-    }
-
-    void textEditorEscapeKeyPressed (TextEditor&) override
-    {
-        getTopLevelComponent()->exitModalState (0);
-    }
-
     void update()
     {
         getLastText() = userText.getText();
@@ -72,7 +62,7 @@ public:
 
     void resized() override
     {
-        Rectangle<int> r (getLocalBounds().reduced (8));
+        auto r = getLocalBounds().reduced (8);
         desc.setBounds (r.removeFromTop (44));
         r.removeFromTop (8);
         userText.setBounds (r.removeFromTop (r.getHeight() / 2));

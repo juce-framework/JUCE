@@ -86,7 +86,7 @@ public:
 private:
     //==============================================================================
     MPEValue (int normalisedValue);
-    int normalisedValue;
+    int normalisedValue = 8192;
 };
 
 } // namespace juce

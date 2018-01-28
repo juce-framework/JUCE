@@ -965,14 +965,14 @@ public:
         }
 
         jassert (device != nullptr);
-        internal = device;
+        internal.reset (device);
 
         AudioObjectPropertyAddress pa;
         pa.mSelector = kAudioObjectPropertySelectorWildcard;
         pa.mScope    = kAudioObjectPropertyScopeWildcard;
         pa.mElement  = kAudioObjectPropertyElementWildcard;
 
-        AudioObjectAddPropertyListener (kAudioObjectSystemObject, &pa, hardwareListenerProc, internal);
+        AudioObjectAddPropertyListener (kAudioObjectSystemObject, &pa, hardwareListenerProc, internal.get());
     }
 
     ~CoreAudioIODevice()
@@ -984,7 +984,7 @@ public:
         pa.mScope = kAudioObjectPropertyScopeWildcard;
         pa.mElement = kAudioObjectPropertyElementWildcard;
 
-        AudioObjectRemovePropertyListener (kAudioObjectSystemObject, &pa, hardwareListenerProc, internal);
+        AudioObjectRemovePropertyListener (kAudioObjectSystemObject, &pa, hardwareListenerProc, internal.get());
     }
 
     StringArray getOutputChannelNames() override        { return internal->outChanNames; }
@@ -1226,7 +1226,7 @@ public:
         Array<AudioIODevice*> devs;
 
         for (auto* d : devices)
-            devs.add (d->device);
+            devs.add (d->device.get());
 
         return devs;
     }
@@ -2160,10 +2160,10 @@ public:
         ScopedPointer<CoreAudioIODevice> in, out;
 
         if (inputDeviceID != 0)
-            in = new CoreAudioIODevice (*this, inputDeviceName, inputDeviceID, inputIndex, 0, -1);
+            in.reset (new CoreAudioIODevice (*this, inputDeviceName, inputDeviceID, inputIndex, 0, -1));
 
         if (outputDeviceID != 0)
-            out = new CoreAudioIODevice (*this, outputDeviceName, 0, -1, outputDeviceID, outputIndex);
+            out.reset (new CoreAudioIODevice (*this, outputDeviceName, 0, -1, outputDeviceID, outputIndex));
 
         if (in == nullptr)   return out.release();
         if (out == nullptr)  return in.release();

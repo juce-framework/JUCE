@@ -157,9 +157,7 @@ public:
     {
         for (Project::ExporterIterator exporter (getProject()); exporter.next();)
             if (isExporterSupported (*exporter))
-                properties.add (new BooleanPropertyComponent (getExporterEnabledValue (*exporter),
-                                                              "Import settings from exporter",
-                                                              exporter->getName()),
+                properties.add (new BooleanPropertyComponent (getExporterEnabledValue (*exporter), "Import settings from exporter", exporter->getName()),
                                 "If this is enabled then settings from the corresponding exporter will "
                                 "be used in the generated CMakeLists.txt");
     }
@@ -278,7 +276,7 @@ private:
     //==============================================================================
     static String setCMakeVariable (const String& variableName, const String& value)
     {
-        return String ("set (") + variableName + " \"" + value + "\")";
+        return "set (" + variableName + " \"" + value + "\")";
     }
 
     static String addToCMakeVariable (const String& variableName, const String& value)
@@ -294,7 +292,7 @@ private:
     template <class Target, class Exporter>
     void getFileInfoList (Target& target, Exporter& exporter, const Project::Item& projectItem, std::vector<std::pair<String, bool>>& fileInfoList) const
     {
-        const auto targetType = (getProject().getProjectType().isAudioPlugin() ? target.type : Target::Type::SharedCodeTarget);
+        auto targetType = (getProject().getProjectType().isAudioPlugin() ? target.type : Target::Type::SharedCodeTarget);
 
         if (projectItem.isGroup())
         {
@@ -303,7 +301,7 @@ private:
         }
         else if (projectItem.shouldBeAddedToTargetProject() && getProject().getTargetTypeFromFilePath (projectItem.getFile(), true) == targetType )
         {
-            const auto path = RelativePath (projectItem.getFile(), exporter.getTargetFolder(), RelativePath::buildTargetFolder).toUnixStyle();
+            auto path = RelativePath (projectItem.getFile(), exporter.getTargetFolder(), RelativePath::buildTargetFolder).toUnixStyle();
             fileInfoList.push_back ({ path, projectItem.shouldBeCompiled() });
         }
     }
@@ -412,7 +410,7 @@ private:
                 << "#------------------------------------------------------------------------------" << newLine
                 << newLine;
 
-            const auto buildTypeCondition = String ("CMAKE_BUILD_TYPE STREQUAL " + config.getName());
+            auto buildTypeCondition = String ("CMAKE_BUILD_TYPE STREQUAL " + config.getName());
             out << "if (" << buildTypeCondition << ")" << newLine
                 << newLine;
 
@@ -433,7 +431,7 @@ private:
 
             for (auto& library : exporter.getLibraryNames (config))
             {
-                const String cmakeLibraryID (library.toUpperCase());
+                String cmakeLibraryID (library.toUpperCase());
                 cmakeFoundLibraries.add (String ("${") + cmakeLibraryID + "}");
                 out << "find_library (" << cmakeLibraryID << " " << library << newLine;
 
@@ -449,7 +447,7 @@ private:
                 if (target->type == ProjectType::Target::Type::AggregateTarget)
                     continue;
 
-                const auto targetVarName = getTargetVarName (*target);
+                auto targetVarName = getTargetVarName (*target);
 
                 out << "set_target_properties (" << targetVarName << " PROPERTIES" << newLine
                     << "    OUTPUT_NAME "  <<  config.getTargetBinaryNameString().quoted() << newLine;
@@ -562,7 +560,7 @@ private:
                 << "#------------------------------------------------------------------------------" << newLine
                 << newLine;
 
-            const auto buildTypeCondition = String ("CMAKE_BUILD_TYPE STREQUAL " + config.getName());
+            auto buildTypeCondition = String ("CMAKE_BUILD_TYPE STREQUAL " + config.getName());
             out << "if (" << buildTypeCondition << ")" << newLine
                 << newLine;
 
@@ -578,7 +576,7 @@ private:
                 if (target->type == ProjectType::Target::Type::AggregateTarget)
                     continue;
 
-                const auto targetVarName = getTargetVarName (*target);
+                auto targetVarName = getTargetVarName (*target);
 
                 out << "set_target_properties (" << targetVarName << " PROPERTIES" << newLine
                     << "    OUTPUT_NAME "  <<  config.getTargetBinaryNameString().quoted() << newLine;
@@ -664,8 +662,8 @@ private:
                     || target->type == ProjectType::Target::Type::AudioUnitv3PlugIn)
                     continue;
 
-                const auto targetAttributes = target->getTargetSettings (config);
-                const auto targetAttributeKeys = targetAttributes.getAllKeys();
+                auto targetAttributes = target->getTargetSettings (config);
+                auto targetAttributeKeys = targetAttributes.getAllKeys();
 
                 if (targetAttributes.getAllKeys().contains ("SDKROOT"))
                 {
@@ -709,14 +707,14 @@ private:
                 << "#------------------------------------------------------------------------------" << newLine
                 << newLine;
 
-            const auto buildTypeCondition = String ("CMAKE_BUILD_TYPE STREQUAL " + config.getName());
+            auto buildTypeCondition = String ("CMAKE_BUILD_TYPE STREQUAL " + config.getName());
             out << "if (" << buildTypeCondition << ")" << newLine
                 << newLine;
 
             out << "execute_process (COMMAND uname -m OUTPUT_VARIABLE JUCE_ARCH_LABEL OUTPUT_STRIP_TRAILING_WHITESPACE)" << newLine
                 << newLine;
 
-            const auto configSettings = exporter.getProjectSettings (config);
+            auto configSettings = exporter.getProjectSettings (config);
             auto configSettingsKeys = configSettings.getAllKeys();
 
             auto binaryName = config.getTargetBinaryNameString();
@@ -731,7 +729,7 @@ private:
                     || target->type == ProjectType::Target::Type::AudioUnitv3PlugIn)
                     continue;
 
-                const auto targetVarName = getTargetVarName (*target);
+                auto targetVarName = getTargetVarName (*target);
 
                 auto targetAttributes = target->getTargetSettings (config);
                 auto targetAttributeKeys = targetAttributes.getAllKeys();
@@ -897,8 +895,8 @@ private:
                     {
                         if (item.getName() == ProjectSaver::getJuceCodeGroupName())
                         {
-                            String resSourcesVar (targetVarName + "_REZ_SOURCES");
-                            String resOutputVar (targetVarName + "_REZ_OUTPUT");
+                            auto resSourcesVar = targetVarName + "_REZ_SOURCES";
+                            auto resOutputVar = targetVarName + "_REZ_OUTPUT";
 
                             out << "if (RC_COMPILER)" << newLine
                                 << "    set (" << resSourcesVar << newLine
@@ -964,7 +962,7 @@ private:
                             }
                         }
 
-                        File updatedPlist (getTargetFolder().getChildFile (config.getName() + "-" + plistFile.getFileName()));
+                        auto updatedPlist = getTargetFolder().getChildFile (config.getName() + "-" + plistFile.getFileName());
                         plist->writeToFile (updatedPlist, "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">");
                         targetAttributes.set ("INFOPLIST_FILE", updatedPlist.getFullPathName().quoted());
                     }
@@ -1035,8 +1033,8 @@ private:
                     if (target->getTargetFileType() == ProjectType::Target::TargetFileType::pluginBundle
                         && targetAttributeKeys.contains("INSTALL_PATH"))
                     {
-                        const auto installPath = targetAttributes["INSTALL_PATH"].unquoted().replace ("$(HOME)", "$ENV{HOME}");
-                        const auto productFilename = binaryName + (targetAttributeKeys.contains ("WRAPPER_EXTENSION") ? "." + targetAttributes["WRAPPER_EXTENSION"] : String());
+                        auto installPath = targetAttributes["INSTALL_PATH"].unquoted().replace ("$(HOME)", "$ENV{HOME}");
+                        auto productFilename = binaryName + (targetAttributeKeys.contains ("WRAPPER_EXTENSION") ? "." + targetAttributes["WRAPPER_EXTENSION"] : String());
                         auto productPath = (installPath + productFilename).quoted();
                         out << "add_custom_command (TARGET " << targetVarName << " POST_BUILD" << newLine
                             << "    COMMAND cmake -E remove_directory " << productPath << newLine

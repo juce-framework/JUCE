@@ -76,11 +76,11 @@ public:
         : ThreadPoolJob ("OpenGL Rendering"),
           context (c), component (comp)
     {
-        nativeContext = new NativeContext (component, pixFormat, contextToShare,
-                                           c.useMultisampling, c.versionRequired);
+        nativeContext.reset (new NativeContext (component, pixFormat, contextToShare,
+                                                c.useMultisampling, c.versionRequired));
 
         if (nativeContext->createdOk())
-            context.nativeContext = nativeContext;
+            context.nativeContext = nativeContext.get();
         else
             nativeContext.reset();
     }
@@ -95,7 +95,7 @@ public:
     {
         if (nativeContext != nullptr)
         {
-            renderThread = new ThreadPool (1);
+            renderThread.reset (new ThreadPool (1));
             resume();
         }
     }
@@ -294,7 +294,8 @@ public:
             auto newScale = Desktop::getInstance().getDisplays()
                               .getDisplayContaining (lastScreenBounds.getCentre()).scale;
 
-            Rectangle<int> localBounds (component.getLocalBounds());
+            auto localBounds = component.getLocalBounds();
+
             auto newArea = peer->getComponent().getLocalArea (&component, localBounds)
                                                .withZeroOrigin()
                              * newScale;
@@ -303,9 +304,8 @@ public:
             {
                 scale = newScale;
                 viewportArea = newArea;
-                transform = AffineTransform::scale (
-                    (float) newArea.getRight() / (float) localBounds.getRight(),
-                    (float) newArea.getBottom() / (float) localBounds.getBottom());
+                transform = AffineTransform::scale ((float) newArea.getRight()  / (float) localBounds.getRight(),
+                                                    (float) newArea.getBottom() / (float) localBounds.getBottom());
 
                 if (canTriggerUpdate)
                     invalidateAll();
@@ -914,7 +914,7 @@ void OpenGLContext::attachTo (Component& component)
     if (getTargetComponent() != &component)
     {
         detach();
-        attachment = new Attachment (*this, component);
+        attachment.reset (new Attachment (*this, component));
     }
 }
 

@@ -106,16 +106,12 @@ namespace LiveConstantEditor
     };
 
     //==============================================================================
-    struct JUCE_API  LivePropertyEditorBase  : public Component,
-                                               private TextEditor::Listener,
-                                               private Button::Listener
+    struct JUCE_API  LivePropertyEditorBase  : public Component
     {
         LivePropertyEditorBase (LiveValueBase&, CodeDocument&);
 
         void paint (Graphics&) override;
         void resized() override;
-        void textEditorTextChanged (TextEditor&) override;
-        void buttonClicked (Button*) override;
 
         void applyNewValue (const String&);
         void selectOriginalValue();

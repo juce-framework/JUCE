@@ -236,7 +236,7 @@ void SystemTrayIconComponent::setIconImage (const Image& newImage)
     if (newImage.isValid())
     {
         if (pimpl == nullptr)
-            pimpl = new Pimpl (*this, newImage);
+            pimpl.reset (new Pimpl (*this, newImage));
         else
             pimpl->updateIcon (newImage);
     }

@@ -1023,22 +1023,22 @@ Expression Expression::adjustedToGiveNewResult (const double targetValue, const 
 {
     ScopedPointer<Term> newTerm (term->clone());
 
-    Helpers::Constant* termToAdjust = Helpers::findTermToAdjust (newTerm, true);
+    Helpers::Constant* termToAdjust = Helpers::findTermToAdjust (newTerm.get(), true);
 
     if (termToAdjust == nullptr)
-        termToAdjust = Helpers::findTermToAdjust (newTerm, false);
+        termToAdjust = Helpers::findTermToAdjust (newTerm.get(), false);
 
     if (termToAdjust == nullptr)
     {
-        newTerm = new Helpers::Add (newTerm.release(), new Helpers::Constant (0, false));
-        termToAdjust = Helpers::findTermToAdjust (newTerm, false);
+        newTerm.reset (new Helpers::Add (newTerm.release(), new Helpers::Constant (0, false)));
+        termToAdjust = Helpers::findTermToAdjust (newTerm.get(), false);
     }
 
     jassert (termToAdjust != nullptr);
 
-    if (const Term* parent = Helpers::findDestinationFor (newTerm, termToAdjust))
+    if (const Term* parent = Helpers::findDestinationFor (newTerm.get(), termToAdjust))
     {
-        if (const Helpers::TermPtr reverseTerm = parent->createTermToEvaluateInput (scope, termToAdjust, targetValue, newTerm))
+        if (Helpers::TermPtr reverseTerm = parent->createTermToEvaluateInput (scope, termToAdjust, targetValue, newTerm.get()))
             termToAdjust->value = Expression (reverseTerm).evaluate (scope);
         else
             return Expression (targetValue);

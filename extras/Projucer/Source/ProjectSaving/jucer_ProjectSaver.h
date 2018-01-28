@@ -38,8 +38,7 @@ public:
         : project (p),
           projectFile (file),
           generatedCodeFolder (project.getGeneratedCodeFolder()),
-          generatedFilesGroup (Project::Item::createGroup (project, getJuceCodeGroupName(), "__generatedcode__", true)),
-          hasBinaryData (false)
+          generatedFilesGroup (Project::Item::createGroup (project, getJuceCodeGroupName(), "__generatedcode__", true))
     {
         generatedFilesGroup.setID (getGeneratedGroupID());
     }
@@ -49,7 +48,7 @@ public:
     public:
         SaveThread (ProjectSaver& ps, bool wait, const String& exp)
             : ThreadWithProgressWindow ("Saving...", true, false),
-              saver (ps), result (Result::ok()),
+              saver (ps),
               shouldWaitAfterSaving (wait),
               specifiedExporterToSave (exp)
         {}
@@ -61,7 +60,7 @@ public:
         }
 
         ProjectSaver& saver;
-        Result result;
+        Result result = Result::ok();
         bool shouldWaitAfterSaving;
         String specifiedExporterToSave;
 
@@ -77,9 +76,9 @@ public:
             return thread.result;
         }
 
-        const String appConfigUserContent (loadUserContentFromAppConfig());
+        auto appConfigUserContent = loadUserContentFromAppConfig();
 
-        const File oldFile (project.getFile());
+        auto oldFile = project.getFile();
         project.setFile (projectFile);
 
         OwnedArray<LibraryModule> modules;
@@ -138,17 +137,17 @@ public:
             return Project::Item (project, ValueTree(), false);
         }
 
-        const File file (generatedCodeFolder.getChildFile (filePath));
+        auto file = generatedCodeFolder.getChildFile (filePath);
 
         if (replaceFileIfDifferent (file, newData))
             return addFileToGeneratedGroup (file);
 
-        return Project::Item (project, ValueTree(), true);
+        return { project, {}, true };
     }
 
     Project::Item addFileToGeneratedGroup (const File& file)
     {
-        Project::Item item (generatedFilesGroup.findItemForFile (file));
+        auto item = generatedFilesGroup.findItemForFile (file);
 
         if (item.isValid())
             return item;
@@ -199,30 +198,19 @@ public:
     {
         if (source.isDirectory() && dest.createDirectory())
         {
-            Array<File> subFiles;
-            source.findChildFiles (subFiles, File::findFiles, false);
-
-            for (int i = 0; i < subFiles.size(); ++i)
+            for (auto& f : source.findChildFiles (File::findFiles, false))
             {
-                const File f (subFiles.getReference(i));
-                const File target (dest.getChildFile (f.getFileName()));
+                auto target = dest.getChildFile (f.getFileName());
                 filesCreated.add (target);
 
                 if (! f.copyFileTo (target))
                     return false;
             }
 
-            Array<File> subFolders;
-            source.findChildFiles (subFolders, File::findDirectories, false);
-
-            for (int i = 0; i < subFolders.size(); ++i)
-            {
-                const File f (subFolders.getReference(i));
-
+            for (auto& f : source.findChildFiles (File::findDirectories, false))
                 if (! shouldFolderBeIgnoredWhenCopying (f))
                     if (! copyFolder (f, dest.getChildFile (f.getFileName())))
                         return false;
-            }
 
             return true;
         }
@@ -241,7 +229,7 @@ private:
     CriticalSection errorLock;
 
     File appConfigFile;
-    bool hasBinaryData;
+    bool hasBinaryData = false;
 
     // Recursively clears out any files in a folder that we didn't create, but avoids
     // any folders containing hidden files that might be used by version-control systems.
@@ -254,7 +242,7 @@ private:
         bool isFolder;
         while (i.next (&isFolder, nullptr, nullptr, nullptr, nullptr, nullptr))
         {
-            const File f (i.getFile());
+            auto f = i.getFile();
 
             if (filesCreated.contains (f) || shouldFileBeKept (f.getFileName()))
             {
@@ -317,10 +305,10 @@ private:
 
     String loadUserContentFromAppConfig() const
     {
-        StringArray lines, userContent;
-        lines.addLines (getAppConfigFile().loadFileAsString());
+        StringArray userContent;
         bool foundCodeSection = false;
 
+        auto lines = StringArray::fromLines (getAppConfigFile().loadFileAsString());
         for (int i = 0; i < lines.size(); ++i)
         {
             if (lines[i].contains ("[BEGIN_USER_CODE_SECTION]"))
@@ -335,9 +323,9 @@ private:
 
         if (! foundCodeSection)
         {
-            userContent.add (String());
+            userContent.add ({});
             userContent.add ("// (You can add your own code in this section, and the Projucer will not overwrite it)");
-            userContent.add (String());
+            userContent.add ({});
         }
 
         return userContent.joinIntoString (newLine) + newLine;
@@ -354,7 +342,7 @@ private:
 
         for (LibraryModule** moduleIter = modules.begin(); moduleIter != modules.end(); ++moduleIter)
         {
-            if (const LibraryModule* const module = *moduleIter)
+            if (auto* module = *moduleIter)
             {
                 if (! module->isValid())
                 {
@@ -428,11 +416,11 @@ private:
         out << newLine
             << "//==============================================================================" << newLine;
 
-        const int longestName = findLongestModuleName (modules);
+        auto longestName = findLongestModuleName (modules);
 
         for (int k = 0; k < modules.size(); ++k)
         {
-            LibraryModule* const m = modules.getUnchecked(k);
+            auto* m = modules.getUnchecked(k);
             out << "#define JUCE_MODULE_AVAILABLE_" << m->getID()
                 << String::repeatedString (" ", longestName + 5 - m->getID().length()) << " 1" << newLine;
         }
@@ -441,7 +429,7 @@ private:
 
         for (int j = 0; j < modules.size(); ++j)
         {
-            LibraryModule* const m = modules.getUnchecked(j);
+            auto* m = modules.getUnchecked(j);
             OwnedArray<Project::ConfigFlag> flags;
             m->getConfigFlags (project, flags);
 
@@ -466,7 +454,7 @@ private:
 
         {
             int isStandaloneApplication = 1;
-            const ProjectType& type = project.getProjectType();
+            auto& type = project.getProjectType();
 
             if (type.isAudioPlugin() || type.isDynamicLibrary())
                 isStandaloneApplication = 0;
@@ -574,7 +562,7 @@ private:
 
     void writeBinaryDataFiles()
     {
-        const File binaryDataH (project.getBinaryDataHeaderFile());
+        auto binaryDataH = project.getBinaryDataHeaderFile();
 
         ResourceFile resourceFile (project);
 
@@ -588,11 +576,11 @@ private:
 
             Array<File> binaryDataFiles;
 
-            int maxSize = project.getMaxBinaryFileSize();
+            auto maxSize = project.getMaxBinaryFileSize();
             if (maxSize <= 0)
                 maxSize = 10 * 1024 * 1024;
 
-            Result r (resourceFile.write (binaryDataFiles, maxSize));
+            auto r = resourceFile.write (binaryDataFiles, maxSize);
 
             if (r.wasOk())
             {
@@ -600,7 +588,7 @@ private:
 
                 for (int i = 0; i < binaryDataFiles.size(); ++i)
                 {
-                    const File& f = binaryDataFiles.getReference(i);
+                    auto& f = binaryDataFiles.getReference(i);
 
                     filesCreated.add (f);
                     generatedFilesGroup.addFileRetainingSortOrder (f, ! f.hasFileExtension (".h"));

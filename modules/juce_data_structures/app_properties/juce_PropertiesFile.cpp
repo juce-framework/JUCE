@@ -188,7 +188,7 @@ bool PropertiesFile::loadAsXml()
 
     if (doc != nullptr && doc->hasTagName (PropertyFileConstants::fileTag))
     {
-        doc = parser.getDocumentElement();
+        doc.reset (parser.getDocumentElement());
 
         if (doc != nullptr)
         {

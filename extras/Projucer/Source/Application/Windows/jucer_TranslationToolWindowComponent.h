@@ -29,8 +29,7 @@
 #include "../../Utility/Helpers/jucer_TranslationHelpers.h"
 
 //==============================================================================
-class TranslationToolComponent  : public Component,
-                                  public Button::Listener
+class TranslationToolComponent  : public Component
 {
 public:
     TranslationToolComponent()
@@ -64,19 +63,17 @@ public:
         addAndMakeVisible (editorPost);
         addAndMakeVisible (editorResult);
 
-        generateButton.setButtonText (TRANS("Generate"));
         addAndMakeVisible (generateButton);
-        scanProjectButton.setButtonText ("Scan Project for TRANS macros");
-        addAndMakeVisible (scanProjectButton);
-        scanFolderButton.setButtonText ("Scan Folder for TRANS macros");
-        addAndMakeVisible (scanFolderButton);
-        loadTranslationButton.setButtonText ("Load existing translation File...");
-        addAndMakeVisible (loadTranslationButton);
-        generateButton.addListener (this);
+        generateButton.onClick = [this] { generate(); };
 
-        scanProjectButton.addListener (this);
-        scanFolderButton.addListener (this);
-        loadTranslationButton.addListener (this);
+        addAndMakeVisible (scanProjectButton);
+        scanProjectButton.onClick = [this] { scanProject(); };
+
+        addAndMakeVisible (scanFolderButton);
+        scanFolderButton.onClick = [this] { scanFolder(); };
+
+        addAndMakeVisible (loadTranslationButton);
+        loadTranslationButton.onClick = [this] { loadFile(); };
     }
 
     void paint (Graphics& g) override
@@ -120,22 +117,14 @@ public:
 private:
     CodeDocument documentOriginal, documentPre, documentPost, documentResult;
     CodeEditorComponent editorOriginal, editorPre, editorPost, editorResult;
-    Label label1, label2, label3, label4;
-    TextButton generateButton;
-    Label instructionsLabel;
-    TextButton scanProjectButton;
-    TextButton scanFolderButton;
-    TextButton loadTranslationButton;
 
-    void buttonClicked (Button* b) override
-    {
-        if      (b == &generateButton)        generate();
-        else if (b == &scanProjectButton)     scanProject();
-        else if (b == &scanFolderButton)      scanFolder();
-        else if (b == &loadTranslationButton) loadFile();
-        else
-            jassertfalse;
-    }
+    Label label1, label2, label3, label4;
+    Label instructionsLabel;
+
+    TextButton generateButton         { TRANS("Generate") };
+    TextButton scanProjectButton      { "Scan project for TRANS macros" };
+    TextButton scanFolderButton       { "Scan folder for TRANS macros" };
+    TextButton loadTranslationButton  { "Load existing translation file..."};
 
     void generate()
     {

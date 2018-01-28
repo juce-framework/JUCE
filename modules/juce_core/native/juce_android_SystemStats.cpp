@@ -47,7 +47,7 @@ Array<JNIClassBase*>& JNIClassBase::getClasses()
 
 void JNIClassBase::initialise (JNIEnv* env)
 {
-    classRef = (jclass) env->NewGlobalRef (env->FindClass (classPath));
+    classRef = (jclass) env->NewGlobalRef (LocalRef<jobject> (env->FindClass (classPath)));
     jassert (classRef != 0);
 
     initialiseFields (env);

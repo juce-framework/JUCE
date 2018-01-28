@@ -115,7 +115,7 @@ bool KnownPluginList::isListingUpToDate (const String& fileOrIdentifier,
 
 void KnownPluginList::setCustomScanner (CustomScanner* newScanner)
 {
-    scanner = newScanner;
+    scanner.reset (newScanner);
 }
 
 bool KnownPluginList::scanAndAddFile (const String& fileOrIdentifier,
@@ -204,13 +204,8 @@ void KnownPluginList::scanAndAddDragAndDroppedFiles (AudioPluginFormatManager& f
             {
                 StringArray s;
 
-                {
-                    Array<File> subFiles;
-                    f.findChildFiles (subFiles, File::findFilesAndDirectories, false);
-
-                    for (auto& subFile : subFiles)
-                        s.add (subFile.getFullPathName());
-                }
+                for (auto& subFile : f.findChildFiles (File::findFilesAndDirectories, false))
+                    s.add (subFile.getFullPathName());
 
                 scanAndAddDragAndDroppedFiles (formatManager, s, typesFound);
             }
@@ -425,7 +420,7 @@ struct PluginTreeUtils
                 {
                     current->folder = lastType;
                     tree.subFolders.add (current.release());
-                    current = new KnownPluginList::PluginTree();
+                    current.reset (new KnownPluginList::PluginTree());
                 }
 
                 lastType = thisType;

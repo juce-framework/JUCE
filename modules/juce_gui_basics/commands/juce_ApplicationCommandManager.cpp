@@ -29,7 +29,7 @@ namespace juce
 
 ApplicationCommandManager::ApplicationCommandManager()
 {
-    keyMappings = new KeyPressMappingSet (*this);
+    keyMappings.reset (new KeyPressMappingSet (*this));
     Desktop::getInstance().addFocusChangeListener (this);
 }
 

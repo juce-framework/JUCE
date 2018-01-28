@@ -1118,7 +1118,7 @@ private:
                     [req addValue: juceStringToNS (value) forHTTPHeaderField: juceStringToNS (key)];
             }
 
-            connection = new URLConnectionState (req, numRedirectsToFollow);
+            connection.reset (new URLConnectionState (req, numRedirectsToFollow));
         }
     }
 
