@@ -805,22 +805,22 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
     props.add (new ChoicePropertyComponent (pluginEditorNeedsKeyFocusValue, "Plugin Editor Requires Keyboard Focus"),
                "Enable this if your plugin needs keyboard input - some hosts can be a bit funny about keyboard focus..");
 
-    props.add (new TextPropertyComponent (pluginAUExportPrefixValue, "Plugin AU Export Prefix", 64, false),
+    props.add (new TextPropertyComponent (pluginAUExportPrefixValue, "Plugin AU Export Prefix", 128, false),
                "A prefix for the names of exported entry-point functions that the component exposes - typically this will be a version of your plugin's name that can be used as part of a C++ token.");
 
     props.add (new TextPropertyComponent (pluginAUMainTypeValue, "Plugin AU Main Type", 128, false),
                "In an AU, this is the value that is set as JucePlugin_AUMainType. Leave it blank unless you want to use a custom value.");
 
-    props.add (new TextPropertyComponent (pluginVSTCategoryValue, "VST Category", 64, false),
+    props.add (new TextPropertyComponent (pluginVSTCategoryValue, "VST Category", 128, false),
                "In a VST, this is the value that is set as JucePlugin_VSTCategory. Leave it blank unless you want to use a custom value.");
 
-    props.add (new TextPropertyComponent (pluginRTASCategoryValue, "Plugin RTAS Category", 64, false),
+    props.add (new TextPropertyComponent (pluginRTASCategoryValue, "Plugin RTAS Category", 128, false),
                "(Leave this blank if your plugin is a synth). This is one of the RTAS categories from FicPluginEnums.h, such as: ePlugInCategory_None, ePlugInCategory_EQ, ePlugInCategory_Dynamics, "
                "ePlugInCategory_PitchShift, ePlugInCategory_Reverb, ePlugInCategory_Delay, "
                "ePlugInCategory_Modulation, ePlugInCategory_Harmonic, ePlugInCategory_NoiseReduction, "
                "ePlugInCategory_Dither, ePlugInCategory_SoundField");
 
-    props.add (new TextPropertyComponent (pluginAAXCategoryValue, "Plugin AAX Category", 64, false),
+    props.add (new TextPropertyComponent (pluginAAXCategoryValue, "Plugin AAX Category", 128, false),
                "This is one of the categories from the AAX_EPlugInCategory enum");
 
     props.add (new TextPropertyComponent (pluginAAXIdentifierValue, "Plugin AAX Identifier", 256, false),
