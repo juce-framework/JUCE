@@ -1037,8 +1037,8 @@ private:
                         auto productFilename = binaryName + (targetAttributeKeys.contains ("WRAPPER_EXTENSION") ? "." + targetAttributes["WRAPPER_EXTENSION"] : String());
                         auto productPath = (installPath + productFilename).quoted();
                         out << "add_custom_command (TARGET " << targetVarName << " POST_BUILD" << newLine
-                            << "    COMMAND cmake -E remove_directory " << productPath << newLine
-                            << "    COMMAND cmake -E copy_directory \"${CMAKE_BINARY_DIR}/" << productFilename << "\" " << productPath << newLine
+                            << "    COMMAND ${CMAKE_COMMAND} -E remove_directory " << productPath << newLine
+                            << "    COMMAND ${CMAKE_COMMAND} -E copy_directory \"${CMAKE_BINARY_DIR}/" << productFilename << "\" " << productPath << newLine
                             << "    COMMENT \"Copying \\\"" << productFilename << "\\\" to \\\"" << installPath.unquoted() << "\\\"\"" << newLine
                             << ")" << newLine << newLine;
                     }
