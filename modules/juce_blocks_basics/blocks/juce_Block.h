@@ -38,13 +38,13 @@ public:
     */
     enum Type
     {
-        unknown = 0,
-        lightPadBlock,
-        liveBlock,
-        loopBlock,
-        developerControlBlock,
-        touchBlock,
-        seaboardBlock // on-screen seaboard view
+        unknown = 0,           /**< Unknown block type.           */
+        lightPadBlock,         /**< Lightpad block type.          */
+        liveBlock,             /**< Live control block type.      */
+        loopBlock,             /**< Loop control block type.      */
+        developerControlBlock, /**< Developer control block type. */
+        touchBlock,            /**< Touch control block type.     */
+        seaboardBlock          /**< Seaboard block type.          */
     };
 
     /** The Block class is reference-counted, so always use a Block::Ptr when
@@ -66,6 +66,7 @@ public:
     /** The Block's name */
     juce::String name;
 
+    /** This type is used for the unique block identifier. */
     using UID = uint64;
 
     /** This Block's UID.
