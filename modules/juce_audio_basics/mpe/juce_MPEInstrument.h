@@ -24,7 +24,7 @@ namespace juce
 {
 
 //==============================================================================
-/*
+/**
     This class represents an instrument handling MPE.
 
     It has an MPE zone layout and maintans a state of currently
@@ -105,10 +105,10 @@ public:
     */
     enum TrackingMode
     {
-        lastNotePlayedOnChannel, //! The most recent note on the channel that is still played (key down and/or sustained)
-        lowestNoteOnChannel,     //! The lowest note (by initialNote) on the channel with the note key still down
-        highestNoteOnChannel,    //! The highest note (by initialNote) on the channel with the note key still down
-        allNotesOnChannel        //! All notes on the channel (key down and/or sustained)
+        lastNotePlayedOnChannel, /**< The most recent note on the channel that is still played (key down and/or sustained). */
+        lowestNoteOnChannel,     /**< The lowest note (by initialNote) on the channel with the note key still down. */
+        highestNoteOnChannel,    /**< The highest note (by initialNote) on the channel with the note key still down. */
+        allNotesOnChannel        /**< All notes on the channel (key down and/or sustained). */
     };
 
     /** Set the MPE tracking mode for the pressure dimension. */

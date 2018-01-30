@@ -31,7 +31,6 @@
 
 //==============================================================================
 class HeaderComponent    : public Component,
-                           private ComboBox::Listener,
                            private ValueTree::Listener,
                            private ChangeListener
 {
@@ -42,7 +41,7 @@ public:
         addAndMakeVisible (configLabel);
         addAndMakeVisible (exporterBox);
 
-        exporterBox.addListener (this);
+        exporterBox.onChange = [this] { updateExporterButton(); };
 
         addAndMakeVisible  (juceIcon = new ImageComponent ("icon"));
         juceIcon->setImage (ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize),
@@ -63,7 +62,7 @@ public:
     void resized() override
     {
         auto bounds = getLocalBounds();
-        configLabel.setFont (Font (bounds.getHeight() / 3.0f));
+        configLabel.setFont ({ bounds.getHeight() / 3.0f });
 
         //======================================================================
         auto projectHeaderBounds = bounds.removeFromLeft (tabsWidth);
@@ -160,7 +159,7 @@ public:
         return false;
     }
 
-    int getUserButtonWidth()            { return userSettingsButton->getWidth(); }
+    int getUserButtonWidth()    { return userSettingsButton->getWidth(); }
 
     void sidebarTabsWidthChanged (int newWidth)
     {
@@ -217,12 +216,6 @@ private:
     int tabsWidth = 200;
 
     //==========================================================================
-    void comboBoxChanged (ComboBox* c) override
-    {
-        if (c == &exporterBox)
-            updateExporterButton();
-    }
-
     void changeListenerCallback (ChangeBroadcaster* source) override
     {
         if (source == project)
@@ -319,7 +312,7 @@ private:
 
     void updateUserAvatar()
     {
-        if (LicenseController* controller = ProjucerApplication::getApp().licenseController)
+        if (auto* controller = ProjucerApplication::getApp().licenseController.get())
         {
             auto state = controller->getState();
 

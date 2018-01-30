@@ -29,8 +29,7 @@
 
 //==============================================================================
 class SVGPathDataComponent  : public Component,
-                              public FileDragAndDropTarget,
-                              private TextEditor::Listener
+                              public FileDragAndDropTarget
 
 {
 public:
@@ -43,7 +42,8 @@ public:
         userText.setMultiLine (true, true);
         userText.setReturnKeyStartsNewLine (true);
         addAndMakeVisible (userText);
-        userText.addListener (this);
+        userText.onTextChange = [this] { update(); };
+        userText.onEscapeKey  = [this] { getTopLevelComponent()->exitModalState (0); };
 
         resultText.setFont (getAppSettings().appearance.getCodeFont().withHeight (13.0f));
         resultText.setMultiLine (true, true);
@@ -63,16 +63,6 @@ public:
         addAndMakeVisible (fillPathButton);
         fillPathButton.onClick = [this] { update(); };
         fillPathButton.setToggleState (true, NotificationType::dontSendNotification);
-    }
-
-    void textEditorTextChanged (TextEditor&) override
-    {
-        update();
-    }
-
-    void textEditorEscapeKeyPressed (TextEditor&) override
-    {
-        getTopLevelComponent()->exitModalState (0);
     }
 
     void update()

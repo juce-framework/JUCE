@@ -44,8 +44,7 @@ namespace juce
     and implement the createComponentForPage() method to create suitable components
     for each of these pages.
 */
-class JUCE_API  PreferencesPanel  : public Component,
-                                    private Button::Listener
+class JUCE_API  PreferencesPanel  : public Component
 {
 public:
     //==============================================================================
@@ -131,8 +130,6 @@ public:
     void resized() override;
     /** @internal */
     void paint (Graphics&) override;
-    /** @internal */
-    void buttonClicked (Button*) override;
 
 private:
     //==============================================================================
@@ -140,6 +137,8 @@ private:
     ScopedPointer<Component> currentPage;
     OwnedArray<DrawableButton> buttons;
     int buttonSize;
+
+    void clickedPage();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PreferencesPanel)
 };

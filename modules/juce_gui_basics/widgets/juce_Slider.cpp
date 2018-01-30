@@ -29,7 +29,6 @@ namespace juce
 
 class Slider::Pimpl   : public AsyncUpdater, // this needs to be public otherwise it will cause an
                                              // error when JUCE_DLL_BUILD=1
-                        private Label::Listener,
                         private Value::Listener
 {
 public:
@@ -398,9 +397,9 @@ public:
             setMaxValue (valueMax.getValue(), dontSendNotification, true);
     }
 
-    void labelTextChanged (Label* label) override
+    void textChanged()
     {
-        auto newValue = owner.snapValue (owner.getValueFromText (label->getText()), notDragging);
+        auto newValue = owner.snapValue (owner.getValueFromText (valueBox->getText()), notDragging);
 
         if (newValue != static_cast<double> (currentValue.getValue()))
         {
@@ -572,7 +571,7 @@ public:
             valueBox->setText (previousTextBoxContent, dontSendNotification);
             valueBox->setTooltip (owner.getTooltip());
             updateTextBoxEnablement();
-            valueBox->addListener (this);
+            valueBox->onTextChange = [this] { textChanged(); };
 
             if (style == LinearBar || style == LinearBarVertical)
             {

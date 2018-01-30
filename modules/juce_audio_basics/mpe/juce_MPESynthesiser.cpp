@@ -26,7 +26,7 @@ namespace juce
 MPESynthesiser::MPESynthesiser()
 {
     MPEZoneLayout zoneLayout;
-    zoneLayout.addZone (MPEZone (1, 15));
+    zoneLayout.addZone ({ 1, 15 });
     setZoneLayout (zoneLayout);
 }
 
@@ -58,7 +58,7 @@ void MPESynthesiser::noteAdded (MPENote newNote)
 {
     const ScopedLock sl (voicesLock);
 
-    if (MPESynthesiserVoice* voice = findFreeVoice (newNote, shouldStealVoices))
+    if (auto* voice = findFreeVoice (newNote, shouldStealVoices))
         startVoice (voice, newNote);
 }
 
@@ -66,10 +66,8 @@ void MPESynthesiser::notePressureChanged (MPENote changedNote)
 {
     const ScopedLock sl (voicesLock);
 
-    for (int i = 0; i < voices.size(); ++i)
+    for (auto* voice : voices)
     {
-        MPESynthesiserVoice* voice = voices.getUnchecked (i);
-
         if (voice->isCurrentlyPlayingNote (changedNote))
         {
             voice->currentlyPlayingNote = changedNote;
@@ -82,10 +80,8 @@ void MPESynthesiser::notePitchbendChanged (MPENote changedNote)
 {
     const ScopedLock sl (voicesLock);
 
-    for (int i = 0; i < voices.size(); ++i)
+    for (auto* voice : voices)
     {
-        MPESynthesiserVoice* voice = voices.getUnchecked (i);
-
         if (voice->isCurrentlyPlayingNote (changedNote))
         {
             voice->currentlyPlayingNote = changedNote;
@@ -98,10 +94,8 @@ void MPESynthesiser::noteTimbreChanged (MPENote changedNote)
 {
     const ScopedLock sl (voicesLock);
 
-    for (int i = 0; i < voices.size(); ++i)
+    for (auto* voice : voices)
     {
-        MPESynthesiserVoice* voice = voices.getUnchecked (i);
-
         if (voice->isCurrentlyPlayingNote (changedNote))
         {
             voice->currentlyPlayingNote = changedNote;
@@ -114,10 +108,8 @@ void MPESynthesiser::noteKeyStateChanged (MPENote changedNote)
 {
     const ScopedLock sl (voicesLock);
 
-    for (int i = 0; i < voices.size(); ++i)
+    for (auto* voice : voices)
     {
-        MPESynthesiserVoice* voice = voices.getUnchecked (i);
-
         if (voice->isCurrentlyPlayingNote (changedNote))
         {
             voice->currentlyPlayingNote = changedNote;
@@ -132,7 +124,7 @@ void MPESynthesiser::noteReleased (MPENote finishedNote)
 
     for (int i = voices.size(); --i >= 0;)
     {
-        MPESynthesiserVoice* const voice = voices.getUnchecked (i);
+        auto* voice = voices.getUnchecked (i);
 
         if (voice->isCurrentlyPlayingNote(finishedNote))
             stopVoice (voice, finishedNote, true);
@@ -165,10 +157,8 @@ MPESynthesiserVoice* MPESynthesiser::findFreeVoice (MPENote noteToFindVoiceFor, 
 {
     const ScopedLock sl (voicesLock);
 
-    for (int i = 0; i < voices.size(); ++i)
+    for (auto* voice : voices)
     {
-        MPESynthesiserVoice* const voice = voices.getUnchecked (i);
-
         if (! voice->isActive())
             return voice;
     }
@@ -297,7 +287,7 @@ void MPESynthesiser::reduceNumVoices (const int newNumVoices)
 
     while (voices.size() > newNumVoices)
     {
-        if (MPESynthesiserVoice* voice = findFreeVoice (MPENote(), true))
+        if (MPESynthesiserVoice* voice = findFreeVoice ({}, true))
             voices.removeObject (voice);
         else
             voices.remove (0); // if there's no voice to steal, kill the oldest voice
@@ -308,8 +298,8 @@ void MPESynthesiser::turnOffAllVoices (bool allowTailOff)
 {
     // first turn off all voices (it's more efficient to do this immediately
     // rather than to go through the MPEInstrument for this).
-    for (int i = voices.size(); --i >= 0;)
-        voices.getUnchecked (i)->noteStopped (allowTailOff);
+    for (auto* voice : voices)
+        voice->noteStopped (allowTailOff);
 
     // finally make sure the MPE Instrument also doesn't have any notes anymore.
     instrument->releaseAllNotes();
@@ -318,10 +308,8 @@ void MPESynthesiser::turnOffAllVoices (bool allowTailOff)
 //==============================================================================
 void MPESynthesiser::renderNextSubBlock (AudioBuffer<float>& buffer, int startSample, int numSamples)
 {
-    for (int i = voices.size(); --i >= 0;)
+    for (auto* voice : voices)
     {
-        MPESynthesiserVoice* voice = voices.getUnchecked (i);
-
         if (voice->isActive())
             voice->renderNextBlock (buffer, startSample, numSamples);
     }
@@ -329,10 +317,8 @@ void MPESynthesiser::renderNextSubBlock (AudioBuffer<float>& buffer, int startSa
 
 void MPESynthesiser::renderNextSubBlock (AudioBuffer<double>& buffer, int startSample, int numSamples)
 {
-    for (int i = voices.size(); --i >= 0;)
+    for (auto* voice : voices)
     {
-        MPESynthesiserVoice* voice = voices.getUnchecked (i);
-
         if (voice->isActive())
             voice->renderNextBlock (buffer, startSample, numSamples);
     }

@@ -24,7 +24,6 @@ namespace juce
 {
 
 MPESynthesiserVoice::MPESynthesiserVoice()
-    : currentSampleRate (0), noteStartTime (0)
 {
 }
 

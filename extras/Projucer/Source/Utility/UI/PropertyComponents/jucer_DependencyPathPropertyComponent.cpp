@@ -77,8 +77,8 @@ try : TextPropertyComponent (propertyName, 1024, false),
 
     getValue().addListener (this);
 
-    if (Label* label = dynamic_cast<Label*> (getChildComponent (0)))
-        label->addListener (this);
+    if (auto* label = dynamic_cast<Label*> (getChildComponent (0)))
+        label->onEditorShow = [this, label] { setEditorText (label); };
     else
         jassertfalse;
 
@@ -116,18 +116,11 @@ Colour DependencyPathPropertyComponent::getTextColourToDisplay() const
                                                         : Colours::red;
 }
 
-void DependencyPathPropertyComponent::labelTextChanged (Label*)
-{
-}
-
-void DependencyPathPropertyComponent::editorShown (Label* /*label*/, TextEditor& editor)
+void DependencyPathPropertyComponent::setEditorText (Label* label)
 {
     if (! pathValueSource.isUsingProjectSettings())
-        editor.setText (String(), dontSendNotification);
-}
-
-void DependencyPathPropertyComponent::editorHidden (Label*, TextEditor&)
-{
+        if (auto editor = label->getCurrentTextEditor())
+            editor->setText (String(), dontSendNotification);
 }
 
 void DependencyPathPropertyComponent::lookAndFeelChanged()
@@ -159,7 +152,7 @@ try : TextPropertyComponent (propertyDescription, 1024, false),
     getValue().addListener (this);
 
     if (auto* label = dynamic_cast<Label*> (getChildComponent (0)))
-        label->addListener (this);
+        label->onEditorShow = [this, label] { setEditorText (label); };
     else
         jassertfalse;
 
@@ -238,10 +231,11 @@ void DependencyFilePathPropertyComponent::valueChanged (Value& value)
         textWasEdited();
 }
 
-void DependencyFilePathPropertyComponent::editorShown (Label*, TextEditor& editor)
+void DependencyFilePathPropertyComponent::setEditorText (Label* label)
 {
     if (! pathValueSource.isUsingProjectSettings())
-        editor.setText (String(), dontSendNotification);
+        if (auto editor = label->getCurrentTextEditor())
+            editor->setText (String(), dontSendNotification);
 }
 
 void DependencyFilePathPropertyComponent::browse()

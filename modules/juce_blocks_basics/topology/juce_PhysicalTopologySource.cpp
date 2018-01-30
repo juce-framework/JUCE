@@ -370,7 +370,7 @@ struct PhysicalTopologySource::Internal
             String deviceVersion (reinterpret_cast<const char*> (d.version.version),
                                   jmin (static_cast<size_t> (d.version.length), sizeof (d.version.version)));
 
-            if (d.uid == uid && deviceVersion != version)
+            if (d.uid == uid && deviceVersion != version && deviceVersion.isNotEmpty())
                 return true;
         }
 

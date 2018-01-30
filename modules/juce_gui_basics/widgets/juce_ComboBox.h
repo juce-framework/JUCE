@@ -43,7 +43,6 @@ namespace juce
 */
 class JUCE_API  ComboBox  : public Component,
                             public SettableTooltipClient,
-                            public Label::Listener,
                             public Value::Listener,
                             private AsyncUpdater
 {
@@ -378,8 +377,6 @@ public:
     };
 
     //==============================================================================
-    /** @internal */
-    void labelTextChanged (Label*) override;
     /** @internal */
     void enablementChanged() override;
     /** @internal */

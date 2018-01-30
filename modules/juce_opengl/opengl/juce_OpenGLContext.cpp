@@ -157,9 +157,7 @@ public:
 
     bool invalidate (const Rectangle<int>& area) override
     {
-        auto scaled = area.toFloat() * scale;
-
-        validArea.subtract (scaled.transformedBy (transform).getSmallestIntegerContainer());
+        validArea.subtract (area.toFloat().transformedBy (transform).getSmallestIntegerContainer());
         triggerRepaint();
         return false;
     }
@@ -287,17 +285,18 @@ public:
             auto newScale = Desktop::getInstance().getDisplays()
                               .getDisplayContaining (lastScreenBounds.getCentre()).scale;
 
-            auto newArea = peer->getComponent().getLocalArea (&component, component.getLocalBounds())
+            auto localBounds = component.getLocalBounds();
+
+            auto newArea = peer->getComponent().getLocalArea (&component, localBounds)
                                                .withZeroOrigin()
                              * newScale;
 
-            auto newTransform = component.getTransform();
-
-            if (scale != newScale || viewportArea != newArea || transform != newTransform)
+            if (scale != newScale || viewportArea != newArea)
             {
                 scale = newScale;
                 viewportArea = newArea;
-                transform = newTransform;
+                transform = AffineTransform::scale ((float) newArea.getRight()  / (float) localBounds.getRight(),
+                                                    (float) newArea.getBottom() / (float) localBounds.getBottom());
 
                 if (canTriggerUpdate)
                     invalidateAll();
@@ -340,7 +339,7 @@ public:
             {
                 ScopedPointer<LowLevelGraphicsContext> g (createOpenGLGraphicsContext (context, cachedImageFrameBuffer));
                 g->clipToRectangleList (invalid);
-                g->addTransform (transform.followedBy (AffineTransform::scale ((float) scale)));
+                g->addTransform (transform);
 
                 paintOwner (*g);
                 JUCE_CHECK_OPENGL_ERROR

@@ -28,8 +28,7 @@
 
 
 //==============================================================================
-class ModulesFolderPathBox  : public Component,
-                              private ComboBox::Listener
+class ModulesFolderPathBox  : public Component
 {
 public:
     ModulesFolderPathBox (File initialFileOrDirectory)
@@ -45,7 +44,8 @@ public:
 
         addAndMakeVisible (currentPathBox);
         currentPathBox.setEditableText (true);
-        currentPathBox.addListener (this);
+        currentPathBox.onChange = [this] { setModulesFolder (File::getCurrentWorkingDirectory()
+                                                                  .getChildFile (currentPathBox.getText())); };
 
         addAndMakeVisible (openFolderButton);
         openFolderButton.setTooltip (TRANS ("Select JUCE modules folder"));
@@ -119,11 +119,6 @@ public:
             modulesFolder = newFolder;
             currentPathBox.setText (modulesFolder.getFullPathName(), dontSendNotification);
         }
-    }
-
-    void comboBoxChanged (ComboBox*) override
-    {
-        setModulesFolder (File::getCurrentWorkingDirectory().getChildFile (currentPathBox.getText()));
     }
 
     File modulesFolder;
@@ -285,8 +280,6 @@ private:
     a list box of platform targets to generate.
 */
 class WizardComp  : public Component,
-                    private ComboBox::Listener,
-                    private TextEditor::Listener,
                     private FileBrowserListener
 {
 public:
@@ -300,13 +293,17 @@ public:
         addChildAndSetID (&projectName, "projectName");
         projectName.setText ("NewProject");
         nameLabel.attachToComponent (&projectName, true);
-        projectName.addListener (this);
+        projectName.onTextChange = [this]
+        {
+            updateCreateButton();
+            fileBrowser.setFileName (File::createLegalFileName (projectName.getText()));
+        };
 
         addChildAndSetID (&projectType, "projectType");
         projectType.addItemList (getWizardNames(), 1);
         projectType.setSelectedId (1, dontSendNotification);
         typeLabel.attachToComponent (&projectType, true);
-        projectType.addListener (this);
+        projectType.onChange = [this] { updateFileCreationTypes(); };
 
         addChildAndSetID (&fileOutline, "fileOutline");
         fileOutline.setColour (GroupComponent::outlineColourId, Colours::black.withAlpha (0.2f));
@@ -445,17 +442,6 @@ public:
         filesToCreate.clear();
         filesToCreate.addItemList (items, 1);
         filesToCreate.setSelectedId (1, dontSendNotification);
-    }
-
-    void comboBoxChanged (ComboBox*) override
-    {
-        updateFileCreationTypes();
-    }
-
-    void textEditorTextChanged (TextEditor&) override
-    {
-        updateCreateButton();
-        fileBrowser.setFileName (File::createLegalFileName (projectName.getText()));
     }
 
     void selectionChanged() override {}

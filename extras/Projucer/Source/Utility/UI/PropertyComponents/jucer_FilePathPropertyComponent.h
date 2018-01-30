@@ -53,8 +53,7 @@ public:
 
 private:
     struct InnerComponent   : public Component,
-                              public FileDragAndDropTarget,
-                              private TextEditor::Listener
+                              public FileDragAndDropTarget
     {
         InnerComponent (Value v, bool isDir, const String& wc, const File& rt, const bool multiplePaths)
             : value (v),
@@ -67,7 +66,8 @@ private:
         {
             addAndMakeVisible (textbox);
             textbox.getTextValue().referTo (value);
-            textbox.addListener (this);
+            textbox.onReturnKey = [this] { updateEditorColour (textbox); };
+            textbox.onFocusLost = [this] { updateEditorColour (textbox); };
 
             addAndMakeVisible (button);
             button.onClick = [this] { browse(); };
@@ -129,9 +129,6 @@ private:
                     setTo (chooser.getResult());
             }
         }
-
-        void textEditorReturnKeyPressed (TextEditor& editor) override   { updateEditorColour (editor); }
-        void textEditorFocusLost (TextEditor& editor) override          { updateEditorColour (editor); }
 
         void updateEditorColour (TextEditor& editor)
         {

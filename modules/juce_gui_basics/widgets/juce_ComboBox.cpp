@@ -431,7 +431,7 @@ void ComboBox::lookAndFeelChanged()
         setWantsKeyboardFocus (labelEditableState == labelIsNotEditable);
     }
 
-    label->addListener (this);
+    label->onTextChange = [this] { triggerAsyncUpdate(); };
     label->addMouseListener (this, false);
 
     label->setColour (Label::backgroundColourId, Colours::transparentBlack);
@@ -482,12 +482,6 @@ bool ComboBox::keyStateChanged (const bool isKeyDown)
 //==============================================================================
 void ComboBox::focusGained (FocusChangeType)    { repaint(); }
 void ComboBox::focusLost (FocusChangeType)      { repaint(); }
-
-void ComboBox::labelTextChanged (Label*)
-{
-    triggerAsyncUpdate();
-}
-
 
 //==============================================================================
 void ComboBox::showPopupIfNotActive()

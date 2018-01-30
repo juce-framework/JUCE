@@ -336,7 +336,7 @@ public:
     String specifiedExporterToSave = {};
 
 private:
-    ValueTree projectRoot;
+    ValueTree projectRoot  { Ids::JUCERPROJECT };
 
     ValueWithDefault projectNameValue, projectUIDValue, projectTypeValue, versionValue, bundleIdentifierValue, companyNameValue, companyCopyrightValue,
                      companyWebsiteValue, companyEmailValue, displaySplashScreenValue, reportAppUsageValue, splashScreenColourValue, cppStandardValue,

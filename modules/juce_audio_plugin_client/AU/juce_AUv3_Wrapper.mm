@@ -1556,6 +1556,13 @@ public:
         }
     }
 
+    void didReceiveMemoryWarning()
+    {
+        if (processorHolder != nullptr)
+            if (auto* processor = processorHolder->get())
+                processor->memoryWarningReceived();
+    }
+
     CGSize getPreferredContentSize() const
     {
         return CGSizeMake (static_cast<float> (preferredSize.getWidth()),
@@ -1634,11 +1641,12 @@ private:
     ScopedPointer<JuceAUViewController> cpp;
 }
 
-- (instancetype) initWithNibName: (nullable NSString*) nib bundle: (nullable NSBundle*) bndl { self = [super initWithNibName: nib bundle: bndl]; cpp = new JuceAUViewController (self); return self;}
-- (void) loadView               { cpp->loadView(); }
-- (AUAudioUnit *)createAudioUnitWithComponentDescription:(AudioComponentDescription)desc error:(NSError **)error { return cpp->createAudioUnit (desc, error); }
-- (CGSize) preferredContentSize { return cpp->getPreferredContentSize(); }
-- (void)viewDidLayoutSubviews   { return cpp->viewDidLayoutSubviews(); }
+- (instancetype) initWithNibName: (nullable NSString*) nib bundle: (nullable NSBundle*) bndl { self = [super initWithNibName: nib bundle: bndl]; cpp = new JuceAUViewController (self); return self; }
+- (void) loadView                { cpp->loadView(); }
+- (AUAudioUnit *) createAudioUnitWithComponentDescription: (AudioComponentDescription) desc error: (NSError **) error { return cpp->createAudioUnit (desc, error); }
+- (CGSize) preferredContentSize  { return cpp->getPreferredContentSize(); }
+- (void) viewDidLayoutSubviews   { cpp->viewDidLayoutSubviews(); }
+- (void) didReceiveMemoryWarning { cpp->didReceiveMemoryWarning(); }
 @end
 
 //==============================================================================
@@ -1646,7 +1654,7 @@ private:
 bool JUCE_CALLTYPE juce_isInterAppAudioConnected() { return false; }
 void JUCE_CALLTYPE juce_switchToHostApplication()  {}
 #if JUCE_MODULE_AVAILABLE_juce_gui_basics
-Image JUCE_CALLTYPE juce_getIAAHostIcon (int)      { return Image(); }
+Image JUCE_CALLTYPE juce_getIAAHostIcon (int)      { return {}; }
 #endif
 #endif
 

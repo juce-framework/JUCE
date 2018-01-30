@@ -6233,7 +6233,7 @@ static const unsigned char temp_binary_data_36[] =
 "    }\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    void paint (Graphics&) override\r\n"
+"    void paint (Graphics& g) override\r\n"
 "    {\r\n"
 "        // (Our component is opaque, so we must completely fill the background with a solid colour)\r\n"
 "        g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));\r\n"
@@ -7415,7 +7415,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x488afa0a:  numBytes = 2245; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2116; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2029; return jucer_ComponentTemplate_h;
-        case 0x1657b643:  numBytes = 1632; return jucer_ContentCompSimpleTemplate_h;
+        case 0x1657b643:  numBytes = 1634; return jucer_ContentCompSimpleTemplate_h;
         case 0x0b66646c:  numBytes = 1109; return jucer_ContentCompTemplate_cpp;
         case 0x6fa10171:  numBytes = 1023; return jucer_ContentCompTemplate_h;
         case 0x28d496ad:  numBytes = 1208; return jucer_InlineComponentTemplate_h;

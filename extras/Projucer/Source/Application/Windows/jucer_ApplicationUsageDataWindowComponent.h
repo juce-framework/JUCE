@@ -64,14 +64,14 @@ public:
 
         if (showCheckbox)
         {
-            addAndMakeVisible (shareApplicationUsageDataToggle);
+            addAndMakeVisible (shareApplicationUsageDataToggle = new ToggleButton());
 
             auto* controller = ProjucerApplication::getApp().licenseController.get();
 
             if (controller != nullptr && controller->getState().applicationUsageDataState == LicenseState::ApplicationUsageData::disabled)
-                shareApplicationUsageDataToggle.setToggleState (false, dontSendNotification);
+                shareApplicationUsageDataToggle->setToggleState (false, dontSendNotification);
             else
-                shareApplicationUsageDataToggle.setToggleState (true, dontSendNotification);
+                shareApplicationUsageDataToggle->setToggleState (true, dontSendNotification);
 
             addAndMakeVisible (shareApplicationUsageDataLabel);
             shareApplicationUsageDataLabel.setFont (Font (14.0f));
@@ -96,7 +96,7 @@ public:
         {
             auto newApplicationUsageDataState = LicenseState::ApplicationUsageData::enabled;
 
-            if (shareApplicationUsageDataToggle.isShowing() && ! shareApplicationUsageDataToggle.getToggleState())
+            if (shareApplicationUsageDataToggle != nullptr && ! shareApplicationUsageDataToggle->getToggleState())
                 newApplicationUsageDataState = LicenseState::ApplicationUsageData::disabled;
 
             controller->setApplicationUsageDataState (newApplicationUsageDataState);
@@ -115,12 +115,12 @@ public:
         juceEULALink.setBounds (linkBounds.removeFromLeft (linkBounds.getWidth() / 2).reduced (2));
         privacyPolicyLink.setBounds (linkBounds.reduced (2));
 
-        if (shareApplicationUsageDataToggle.isShowing())
+        if (shareApplicationUsageDataToggle != nullptr)
         {
             bounds.removeFromTop (10);
 
             auto toggleBounds = bounds.removeFromTop (40);
-            shareApplicationUsageDataToggle.setBounds (toggleBounds.removeFromLeft (40).reduced (5));
+            shareApplicationUsageDataToggle->setBounds (toggleBounds.removeFromLeft (40).reduced (5));
             shareApplicationUsageDataLabel.setBounds (toggleBounds);
         }
 
@@ -151,7 +151,7 @@ private:
     Label headerLabel, bodyLabel;
     HyperlinkButton juceEULALink, privacyPolicyLink;
     Label shareApplicationUsageDataLabel { {}, "Help JUCE to improve its software and services by sharing my application usage data" };
-    ToggleButton shareApplicationUsageDataToggle;
+    ScopedPointer<ToggleButton> shareApplicationUsageDataToggle;
     TextButton okButton { "OK" }, upgradeLicenseButton { "Upgrade License" };
 
     void lookAndFeelChanged() override

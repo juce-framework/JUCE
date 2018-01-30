@@ -45,8 +45,7 @@ Project::Project (const File& f)
     : FileBasedDocument (projectFileExtension,
                          String ("*") + projectFileExtension,
                          "Choose a Jucer project to load",
-                         "Save Jucer project"),
-      projectRoot (Ids::JUCERPROJECT)
+                         "Save Jucer project")
 {
     Logger::writeToLog ("Loading project: " + f.getFullPathName());
     setFile (f);
@@ -262,7 +261,7 @@ void Project::updateOldStyleConfigList()
 
                 if (! exporter->isXcode())
                 {
-                    for (int j = newConfigs.getNumChildren(); --j >= 0;)
+                    for (auto j = newConfigs.getNumChildren(); --j >= 0;)
                     {
                         auto config = newConfigs.getChild (j);
 
@@ -322,8 +321,7 @@ void Project::updateOldModulePaths()
 //==============================================================================
 static int getVersionElement (StringRef v, int index)
 {
-    StringArray parts;
-    parts.addTokens (v, "., ", StringRef());
+    StringArray parts = StringArray::fromTokens (v, "., ", {});
 
     return parts [parts.size() - index - 1].getIntValue();
 }
@@ -344,7 +342,7 @@ static int getBuiltJuceVersion()
 
 static bool isAnyModuleNewerThanProjucer (const OwnedArray<ModuleDescription>& modules)
 {
-    for (int i = modules.size(); --i >= 0;)
+    for (auto i = modules.size(); --i >= 0;)
     {
         auto* m = modules.getUnchecked(i);
 
@@ -807,22 +805,22 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
     props.add (new ChoicePropertyComponent (pluginEditorNeedsKeyFocusValue, "Plugin Editor Requires Keyboard Focus"),
                "Enable this if your plugin needs keyboard input - some hosts can be a bit funny about keyboard focus..");
 
-    props.add (new TextPropertyComponent (pluginAUExportPrefixValue, "Plugin AU Export Prefix", 64, false),
+    props.add (new TextPropertyComponent (pluginAUExportPrefixValue, "Plugin AU Export Prefix", 128, false),
                "A prefix for the names of exported entry-point functions that the component exposes - typically this will be a version of your plugin's name that can be used as part of a C++ token.");
 
     props.add (new TextPropertyComponent (pluginAUMainTypeValue, "Plugin AU Main Type", 128, false),
                "In an AU, this is the value that is set as JucePlugin_AUMainType. Leave it blank unless you want to use a custom value.");
 
-    props.add (new TextPropertyComponent (pluginVSTCategoryValue, "VST Category", 64, false),
+    props.add (new TextPropertyComponent (pluginVSTCategoryValue, "VST Category", 128, false),
                "In a VST, this is the value that is set as JucePlugin_VSTCategory. Leave it blank unless you want to use a custom value.");
 
-    props.add (new TextPropertyComponent (pluginRTASCategoryValue, "Plugin RTAS Category", 64, false),
+    props.add (new TextPropertyComponent (pluginRTASCategoryValue, "Plugin RTAS Category", 128, false),
                "(Leave this blank if your plugin is a synth). This is one of the RTAS categories from FicPluginEnums.h, such as: ePlugInCategory_None, ePlugInCategory_EQ, ePlugInCategory_Dynamics, "
                "ePlugInCategory_PitchShift, ePlugInCategory_Reverb, ePlugInCategory_Delay, "
                "ePlugInCategory_Modulation, ePlugInCategory_Harmonic, ePlugInCategory_NoiseReduction, "
                "ePlugInCategory_Dither, ePlugInCategory_SoundField");
 
-    props.add (new TextPropertyComponent (pluginAAXCategoryValue, "Plugin AAX Category", 64, false),
+    props.add (new TextPropertyComponent (pluginAAXCategoryValue, "Plugin AAX Category", 128, false),
                "This is one of the categories from the AAX_EPlugInCategory enum");
 
     props.add (new TextPropertyComponent (pluginAAXIdentifierValue, "Plugin AAX Identifier", 256, false),
@@ -1145,8 +1143,8 @@ struct ItemSorterWithGroupsAtStart
 {
     static int compareElements (const ValueTree& first, const ValueTree& second)
     {
-         auto firstIsGroup = first.hasType (Ids::GROUP);
-         auto secondIsGroup = second.hasType (Ids::GROUP);
+        auto firstIsGroup = first.hasType (Ids::GROUP);
+        auto secondIsGroup = second.hasType (Ids::GROUP);
 
         if (firstIsGroup == secondIsGroup)
             return first [Ids::name].toString().compareNatural (second [Ids::name].toString());

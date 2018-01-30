@@ -23,9 +23,7 @@
 namespace juce
 {
 
-MPEZoneLayout::MPEZoneLayout() noexcept
-{
-}
+MPEZoneLayout::MPEZoneLayout() noexcept {}
 
 MPEZoneLayout::MPEZoneLayout (const MPEZoneLayout& other)
     : zones (other.zones)

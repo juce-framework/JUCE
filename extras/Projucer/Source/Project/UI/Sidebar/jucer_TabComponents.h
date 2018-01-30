@@ -91,7 +91,6 @@ private:
 
 //==============================================================================
 class FindPanel    : public Component,
-                     private TextEditor::Listener,
                      private Timer,
                      private FocusChangeListener
 {
@@ -100,7 +99,12 @@ public:
         : callback (cb)
     {
         addAndMakeVisible (editor);
-        editor.addListener (this);
+        editor.onTextChange = [this] { startTimer (250); };
+        editor.onFocusLost  = [this]
+        {
+            isFocused = false;
+            repaint();
+        };
 
         Desktop::getInstance().addFocusChangeListener (this);
 
@@ -139,17 +143,6 @@ private:
     void lookAndFeelChanged() override
     {
         editor.setTextToShowWhenEmpty ("Filter...", findColour (widgetTextColourId).withAlpha (0.3f));
-    }
-
-    void textEditorTextChanged (TextEditor&) override
-    {
-        startTimer (250);
-    }
-
-    void textEditorFocusLost (TextEditor&) override
-    {
-        isFocused = false;
-        repaint();
     }
 
     void globalFocusChanged (Component* focusedComponent) override

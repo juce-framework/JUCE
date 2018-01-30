@@ -46,8 +46,7 @@ namespace juce
 
     @see PropertyComponent, PropertyPanel
 */
-class JUCE_API  ChoicePropertyComponent    : public PropertyComponent,
-                                             private ComboBox::Listener
+class JUCE_API  ChoicePropertyComponent    : public PropertyComponent
 {
 protected:
     /** Creates the component.
@@ -146,7 +145,7 @@ private:
     void createComboBox();
     void createComboBoxWithDefault (const String&);
 
-    void comboBoxChanged (ComboBox*) override;
+    void changeIndex();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChoicePropertyComponent)
 };

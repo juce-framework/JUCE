@@ -335,7 +335,7 @@ ColourSelector::ColourSelector (int sectionsToShow, int edge, int gapAroundColou
         sliders[3]->setVisible ((flags & showAlphaChannel) != 0);
 
         for (int i = 4; --i >= 0;)
-            sliders[i]->addListener (this);
+            sliders[i]->onValueChange = [this] { changeColour(); };
     }
 
     if ((flags & showColourspace) != 0)
@@ -554,7 +554,7 @@ void ColourSelector::resized()
     }
 }
 
-void ColourSelector::sliderValueChanged (Slider*)
+void ColourSelector::changeColour()
 {
     if (sliders[0] != nullptr)
         setCurrentColour (Colour ((uint8) sliders[0]->getValue(),

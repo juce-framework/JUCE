@@ -173,7 +173,7 @@
 
     Enabling this will add a slight performance overhead to the DSP module's
     filters and algorithms. If your audio app already disables denormals altogether
-    (for exmaple, by using the ScopedNoDenormals class or the
+    (for example, by using the ScopedNoDenormals class or the
     FloatVectorOperations::disableDenormalisedNumberSupport method), then you
     can safely disable this flag to shave off a few cpu cycles from the DSP module's
     filters and algorithms.

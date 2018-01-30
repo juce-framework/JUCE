@@ -31,8 +31,6 @@
 struct LiveBuildSettingsComponent  : public Component
 {
     LiveBuildSettingsComponent (Project& p)
-        : group ("Live Build Settings",
-                 Icon (getIcons().settings, Colours::transparentBlack))
     {
         addAndMakeVisible (&group);
 
@@ -51,7 +49,7 @@ struct LiveBuildSettingsComponent  : public Component
 
     void parentSizeChanged() override
     {
-        const auto width = jmax (550, getParentWidth());
+        auto width = jmax (550, getParentWidth());
         auto y = group.updateSize (12, 0, width - 12);
 
         y = jmax (getParentHeight(), y);
@@ -59,7 +57,7 @@ struct LiveBuildSettingsComponent  : public Component
         setSize (width, y);
     }
 
-    PropertyGroupComponent group;
+    PropertyGroupComponent group { "Live Build Settings", Icon (getIcons().settings, Colours::transparentBlack) };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LiveBuildSettingsComponent)
 };
@@ -104,7 +102,7 @@ public:
 
             if (showEnableButton)
             {
-                auto buttonText = "Enable Now";
+                String buttonText ("Enable Now");
 
                 if (! lastErrorMessage.isEmpty())
                 {
@@ -179,39 +177,39 @@ private:
         showDownloadButton = false;
         showEnableButton = false;
 
-        const auto osType = SystemStats::getOperatingSystemType();
+        auto osType = SystemStats::getOperatingSystemType();
 
-        const bool isMac = (osType & SystemStats::MacOSX) != 0;
-        const bool isWin = (osType & SystemStats::Windows) != 0;
-        const bool isLinux = (osType & SystemStats::Linux) != 0;
+        auto isMac = (osType & SystemStats::MacOSX) != 0;
+        auto isWin = (osType & SystemStats::Windows) != 0;
+        auto isLinux = (osType & SystemStats::Linux) != 0;
 
         if (! isMac && ! isWin && ! isLinux)
-            return String ("Live-build features are not supported on your system.\n\n"
-                           "Please check supported platforms at www.juce.com!");
+            return "Live-build features are not supported on your system.\n\n"
+                   "Please check supported platforms at www.juce.com!";
 
         if (isLinux)
-            return String ("Live-build features for Linux are under development.\n\n"
-                           "Please check for updates at www.juce.com!");
+            return "Live-build features for Linux are under development.\n\n"
+                   "Please check for updates at www.juce.com!";
 
         if (isMac)
             if (osType < SystemStats::MacOSX_10_9)
-                return String ("Live-build features are available only on MacOSX 10.9 or higher.");
+                return "Live-build features are available only on MacOSX 10.9 or higher.";
 
         if (isWin)
             if (! SystemStats::isOperatingSystem64Bit() || osType < SystemStats::Windows8_0)
-                return String ("Live-build features are available only on 64-Bit Windows 8 or higher.");
+                return "Live-build features are available only on 64-Bit Windows 8 or higher.";
 
-        const auto& compileEngineDll = *CompileEngineDLL::getInstance();
-        const auto dllPresent = compileEngineDll.isLoaded();
+        auto& compileEngineDll = *CompileEngineDLL::getInstance();
+        auto dllPresent = compileEngineDll.isLoaded();
 
         if (! dllPresent)
         {
             showDownloadButton = true;
-            return String ("Download the live-build engine to get started");
+            return "Download the live-build engine to get started";
         }
 
         showEnableButton = true;
-        return String ("Enable compilation to use the live-build engine");
+        return "Enable compilation to use the live-build engine";
     }
 
     void downloadDLL()
@@ -233,7 +231,7 @@ private:
 
     void buildConcertina (CompileEngineChildProcess* child)
     {
-        for (int i = concertinaPanel.getNumPanels() - 1; i >= 0 ; --i)
+        for (auto i = concertinaPanel.getNumPanels() - 1; i >= 0 ; --i)
             concertinaPanel.removePanel (concertinaPanel.getPanel (i));
 
         headers.clear();
