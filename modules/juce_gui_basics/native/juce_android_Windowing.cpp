@@ -100,6 +100,10 @@ JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, quitApp, void, (JNIEnv* env,
     JUCEApplicationBase::appWillTerminateByForce();
 
     android.shutdown (env);
+
+    jclass systemClass = (jclass) env->FindClass ("java/lang/System");
+    jmethodID exitMethod = env->GetStaticMethodID (systemClass, "exit", "(I)V");
+    env->CallStaticVoidMethod (systemClass, exitMethod, 0);
 }
 
 JUCE_JNI_CALLBACK (JUCE_ANDROID_ACTIVITY_CLASSNAME, appActivityResult, void, (JNIEnv* env, jobject, jint requestCode, jint resultCode, jobject intentData))
