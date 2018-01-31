@@ -18,7 +18,7 @@ namespace BinaryData
     const int            guitar_amp_wavSize = 90246;
 
     extern const char*   ConvolutionDemo_cpp;
-    const int            ConvolutionDemo_cppSize = 3011;
+    const int            ConvolutionDemo_cppSize = 3007;
 
     extern const char*   FIRFilterDemo_cpp;
     const int            FIRFilterDemo_cppSize = 2674;
@@ -39,7 +39,7 @@ namespace BinaryData
     const int            SIMDRegisterDemo_cppSize = 4849;
 
     extern const char*   StateVariableFilterDemo_cpp;
-    const int            StateVariableFilterDemo_cppSize = 2718;
+    const int            StateVariableFilterDemo_cppSize = 2731;
 
     extern const char*   WaveShaperTanhDemo_cpp;
     const int            WaveShaperTanhDemo_cppSize = 2037;
