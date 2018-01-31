@@ -338,10 +338,10 @@ void PluginListComponent::setLastSearchPath (PropertiesFile& properties, AudioPl
 class PluginListComponent::Scanner    : private Timer
 {
 public:
-    Scanner (PluginListComponent& plc, AudioPluginFormat& format, PropertiesFile* properties,
-             bool allowPluginsWhichRequireAsynchronousInstantiation, int threads,
+    Scanner (PluginListComponent& plc, AudioPluginFormat& format, const StringArray& filesOrIdentifiers,
+             PropertiesFile* properties, bool allowPluginsWhichRequireAsynchronousInstantiation, int threads,
              const String& title, const String& text)
-        : owner (plc), formatToScan (format), propertiesToUse (properties),
+        : owner (plc), formatToScan (format), filesOrIdentifiersToScan (filesOrIdentifiers), propertiesToUse (properties),
           pathChooserWindow (TRANS("Select folders to scan..."), String(), AlertWindow::NoIcon),
           progressWindow (title, text, AlertWindow::NoIcon),
           progress (0.0), numThreads (threads), allowAsync (allowPluginsWhichRequireAsynchronousInstantiation),
@@ -352,7 +352,9 @@ public:
         // You need to use at least one thread when scanning plug-ins asynchronously
         jassert (! allowAsync || (numThreads > 0));
 
-        if (path.getNumPaths() > 0) // if the path is empty, then paths aren't used for this format.
+        // If the filesOrIdentifiersToScan argumnent isn't empty, we should only scan these
+        // If the path is empty, then paths aren't used for this format.
+        if (filesOrIdentifiersToScan.isEmpty() && path.getNumPaths() > 0)
         {
            #if ! JUCE_IOS
             if (propertiesToUse != nullptr)
@@ -389,6 +391,7 @@ public:
 private:
     PluginListComponent& owner;
     AudioPluginFormat& formatToScan;
+    StringArray filesOrIdentifiersToScan;
     PropertiesFile* propertiesToUse;
     ScopedPointer<PluginDirectoryScanner> scanner;
     AlertWindow pathChooserWindow, progressWindow;
@@ -482,7 +485,11 @@ private:
         scanner.reset (new PluginDirectoryScanner (owner.list, formatToScan, pathList.getPath(),
                                                    true, owner.deadMansPedalFile, allowAsync));
 
-        if (propertiesToUse != nullptr)
+        if (! filesOrIdentifiersToScan.isEmpty())
+        {
+            scanner->setFilesOrIdentifiersToScan (filesOrIdentifiersToScan);
+        }
+        else if (propertiesToUse != nullptr)
         {
             setLastSearchPath (*propertiesToUse, formatToScan, pathList.getPath());
             propertiesToUse->saveIfNeeded();
@@ -560,7 +567,12 @@ private:
 
 void PluginListComponent::scanFor (AudioPluginFormat& format)
 {
-    currentScanner.reset (new Scanner (*this, format, propertiesToUse, allowAsync, numThreads,
+    scanFor (format, StringArray());
+}
+
+void PluginListComponent::scanFor (AudioPluginFormat& format, const StringArray& filesOrIdentifiersToScan)
+{
+    currentScanner.reset (new Scanner (*this, format, filesOrIdentifiersToScan, propertiesToUse, allowAsync, numThreads,
                                        dialogTitle.isNotEmpty() ? dialogTitle : TRANS("Scanning for plug-ins..."),
                                        dialogText.isNotEmpty()  ? dialogText  : TRANS("Searching for all possible plug-in files...")));
 }
