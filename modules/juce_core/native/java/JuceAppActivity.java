@@ -77,7 +77,7 @@ $$JuceAndroidMidiImports$$         // If you get an error here, you need to re-s
 
 
 //==============================================================================
-public class JuceAppActivity   extends Activity
+public class JuceAppActivity   extends $$JuceAppActivityBaseClass$$
 {
     //==============================================================================
     static

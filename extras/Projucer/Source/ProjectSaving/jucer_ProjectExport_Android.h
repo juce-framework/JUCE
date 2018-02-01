@@ -101,7 +101,7 @@ public:
 
     //==============================================================================
     ValueWithDefault androidJavaLibs, androidRepositories, androidDependencies, androidScreenOrientation, androidActivityClass,
-                     androidActivitySubClassName, androidManifestCustomXmlElements, androidVersionCode,
+                     androidActivitySubClassName, androidActivityBaseClassName, androidManifestCustomXmlElements, androidVersionCode,
                      androidMinimumSDK, androidTheme, androidSharedLibraries, androidStaticLibraries, androidExtraAssetsFolder,
                      androidInternetNeeded, androidMicNeeded, androidBluetoothNeeded, androidExternalReadPermission,
                      androidExternalWritePermission, androidInAppBillingPermission, androidVibratePermission,androidOtherPermissions,
@@ -117,6 +117,7 @@ public:
           androidScreenOrientation             (settings, Ids::androidScreenOrientation,             getUndoManager(), "unspecified"),
           androidActivityClass                 (settings, Ids::androidActivityClass,                 getUndoManager(), createDefaultClassName()),
           androidActivitySubClassName          (settings, Ids::androidActivitySubClassName,          getUndoManager()),
+          androidActivityBaseClassName         (settings, Ids::androidActivityBaseClassName,         getUndoManager(), "Activity"),
           androidManifestCustomXmlElements     (settings, Ids::androidManifestCustomXmlElements,     getUndoManager()),
           androidVersionCode                   (settings, Ids::androidVersionCode,                   getUndoManager(), "1"),
           androidMinimumSDK                    (settings, Ids::androidMinimumSDK,                    getUndoManager(), "10"),
@@ -850,6 +851,12 @@ private:
                    "If not empty, specifies the Android Activity class name stored in the app's manifest. "
                    "Use this if you would like to use your own Android Activity sub-class.");
 
+        props.add (new TextPropertyComponent (androidActivityBaseClassName, "Android Activity base class", 256, false),
+                   "If not empty, specifies the base class to use for your activity. If custom base class is "
+                   "specified, that base class should be a sub-class of android.app.Activity. When empty, Activity "
+                   "(android.app.Activity) will be used as the base class. "
+                   "Use this if you would like to use your own Android Activity base class.");
+
         props.add (new TextPropertyComponent (androidVersionCode, "Android Version Code", 32, false),
                    "An integer value that represents the version of the application code, relative to other versions.");
 
@@ -1082,7 +1089,8 @@ private:
                 else if (line.contains ("$$JuceAndroidWebViewCode$$"))
                     newFile << juceWebViewCode;
                 else
-                    newFile << line.replace ("JuceAppActivity", className)
+                    newFile << line.replace ("$$JuceAppActivityBaseClass$$", androidActivityBaseClassName.get().toString())
+                                   .replace ("JuceAppActivity", className)
                                    .replace ("package com.juce;", "package " + package + ";") << newLine;
             }
 
