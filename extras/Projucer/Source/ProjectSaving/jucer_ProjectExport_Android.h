@@ -100,7 +100,7 @@ public:
     }
 
     //==============================================================================
-    ValueWithDefault androidRepositories, androidDependencies, androidScreenOrientation, androidActivityClass,
+    ValueWithDefault androidJavaLibs, androidRepositories, androidDependencies, androidScreenOrientation, androidActivityClass,
                      androidActivitySubClassName, androidManifestCustomXmlElements, androidVersionCode,
                      androidMinimumSDK, androidTheme, androidSharedLibraries, androidStaticLibraries, androidExtraAssetsFolder,
                      androidInternetNeeded, androidMicNeeded, androidBluetoothNeeded, androidExternalReadPermission,
@@ -111,6 +111,7 @@ public:
     //==============================================================================
     AndroidProjectExporter (Project& p, const ValueTree& t)
         : ProjectExporter (p, t),
+          androidJavaLibs                      (settings, Ids::androidJavaLibs,                      getUndoManager()),
           androidRepositories                  (settings, Ids::androidRepositories,                  getUndoManager()),
           androidDependencies                  (settings, Ids::androidDependencies,                  getUndoManager()),
           androidScreenOrientation             (settings, Ids::androidScreenOrientation,             getUndoManager(), "unspecified"),
@@ -771,19 +772,19 @@ private:
     String getAndroidDependencies() const
     {
         MemoryOutputStream mo;
-
-        auto dependencies = StringArray::fromLines (androidDependencies.get().toString());
-
         mo << "dependencies {" << newLine;
+
+        for (auto& d : StringArray::fromLines (androidDependencies.get().toString()))
+            mo << "    " << d << newLine;
+
+        for (auto& d : StringArray::fromLines (androidJavaLibs.get().toString()))
+            mo << "    implementation files('libs/" << File (d).getFileName() << "')" << newLine;
 
         if (androidEnableRemoteNotifications.get())
         {
             mo << "    'com.google.firebase:firebase-core:11.4.0'" << newLine;
             mo << "    compile 'com.google.firebase:firebase-messaging:11.4.0'" << newLine;
         }
-
-        for (auto& d : dependencies)
-            mo << "    " << d << newLine;
 
         mo << "}" << newLine;
 
@@ -824,11 +825,18 @@ private:
     //==============================================================================
     void createBaseExporterProperties (PropertyListBuilder& props)
     {
+        props.add (new TextPropertyComponent (androidJavaLibs, "Java libraries to include", 32768, true),
+                   "Java libs (JAR files) (one per line). These will be copied to app/libs folder and \"implementation files\" "
+                   "dependency will be automatically added to module \"dependencies\" section for each library, so do "
+                   "not add the dependency yourself.");
+
         props.add (new TextPropertyComponent (androidRepositories, "Module repositories", 32768, true),
                    "Module repositories (one per line). These will be added to module-level gradle file repositories section. ");
 
         props.add (new TextPropertyComponent (androidDependencies, "Module dependencies", 32768, true),
-                   "Module dependencies (one per line). These will be added to module-level gradle file dependencies section. ");
+                   "Module dependencies (one per line). These will be added to module-level gradle file \"dependencies\" section. "
+                   "If adding any java libs in \"Java libraries to include\" setting, do not add them here as "
+                   "they will be added automatically.");
 
         props.add (new ChoicePropertyComponent (androidScreenOrientation, "Screen orientation",
                                                 { "Portrait and Landscape", "Portrait", "Landscape" },
@@ -958,11 +966,14 @@ private:
             auto javaInAppBillingTarget = targetFolder.getChildFile ("app/src/main/java").getChildFile (inAppBillingPath);
             auto javaTarget = targetFolder.getChildFile ("app/src/main/java")
                                           .getChildFile (package.replaceCharacter ('.', File::getSeparatorChar()));
+            auto libTarget = targetFolder.getChildFile ("app/libs");
+            libTarget.createDirectory();
 
             copyActivityJavaFiles (javaSourceFolder, javaTarget, package);
             copyServicesJavaFiles (javaSourceFolder, javaTarget, package);
             copyProviderJavaFile  (javaSourceFolder, javaTarget, package);
             copyAdditionalJavaFiles (javaSourceFolder, javaInAppBillingTarget);
+            copyAdditionalJavaLibs (libTarget);
         }
     }
 
@@ -1099,6 +1110,21 @@ private:
 
         if (inAppBillingJavaSrcFile.existsAsFile())
             inAppBillingJavaSrcFile.copyFileTo (inAppBillingJavaDestFile);
+    }
+
+    void copyAdditionalJavaLibs (const File& targetFolder) const
+    {
+        auto libPaths = StringArray::fromLines (androidJavaLibs.get().toString());
+
+        for (auto& p : libPaths)
+        {
+            File f = getTargetFolder().getChildFile (p);
+
+            // Is the path to the java lib correct?
+            jassert (f.existsAsFile());
+
+            f.copyFileTo (targetFolder.getChildFile (f.getFileName()));
+        }
     }
 
     void copyServicesJavaFiles (const File& javaSourceFolder, const File& targetFolder, const String& package) const
