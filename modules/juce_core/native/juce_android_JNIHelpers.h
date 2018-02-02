@@ -477,6 +477,12 @@ DECLARE_JNI_CLASS (JavaArrayList, "java/util/ArrayList");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  METHOD (booleanValue, "booleanValue", "()Z")
+
+DECLARE_JNI_CLASS (JavaBoolean, "java/lang/Boolean");
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   METHOD (constructor,        "<init>",             "()V") \
   METHOD (containsKey,        "containsKey",        "(Ljava/lang/String;)Z") \
   METHOD (get,                "get",                "(Ljava/lang/String;)Ljava/lang/Object;") \
@@ -524,6 +530,12 @@ DECLARE_JNI_CLASS (JavaCharSequence, "java/lang/CharSequence");
   METHOD (getClassLoader,    "getClassLoader",    "()Ljava/lang/ClassLoader;") \
 
 DECLARE_JNI_CLASS (JavaClass, "java/lang/Class");
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  METHOD (toString, "toString", "()Ljava/lang/String;")
+
+DECLARE_JNI_CLASS (JavaEnum, "java/lang/Enum");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
