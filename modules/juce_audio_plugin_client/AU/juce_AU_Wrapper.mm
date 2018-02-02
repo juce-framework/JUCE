@@ -886,9 +886,9 @@ public:
 
             outParameterInfo.minValue = 0.0f;
             outParameterInfo.maxValue = getMaximumParameterValue (index);
-            outParameterInfo.defaultValue = juceFilter->getParameterDefaultValue (index);
+            outParameterInfo.defaultValue = juceFilter->getParameterDefaultValue (index) * getMaximumParameterValue (index);
             jassert (outParameterInfo.defaultValue >= outParameterInfo.minValue
-                      && outParameterInfo.defaultValue <= outParameterInfo.maxValue);
+                  && outParameterInfo.defaultValue <= outParameterInfo.maxValue);
 
             return noErr;
         }
