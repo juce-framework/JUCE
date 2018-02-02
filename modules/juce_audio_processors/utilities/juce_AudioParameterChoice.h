@@ -71,8 +71,9 @@ protected:
 
 private:
     //==============================================================================
-    float value, defaultValue;
+    float value;
     const int maxIndex;
+    const float defaultValue;
 
     float getValue() const override;
     void setValue (float newValue) override;

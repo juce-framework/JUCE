@@ -1037,15 +1037,29 @@ public class JUCENetworkGraphicsDemo   extends Activity
     //==============================================================================
     public static class NativeInvocationHandler implements InvocationHandler
     {
-        public NativeInvocationHandler (long nativeContextRef)
+        public NativeInvocationHandler (Activity activityToUse, long nativeContextRef)
         {
+            activity = activityToUse;
             nativeContext = nativeContextRef;
+        }
+
+        public void nativeContextDeleted()
+        {
+            nativeContext = 0;
         }
 
         @Override
         public void finalize()
         {
-            dispatchFinalize (nativeContext);
+            activity.runOnUiThread (new Runnable()
+                                    {
+                                        @Override
+                                        public void run()
+                                        {
+                                            if (nativeContext != 0)
+                                                dispatchFinalize (nativeContext);
+                                        }
+                                    });
         }
 
         @Override
@@ -1055,15 +1069,21 @@ public class JUCENetworkGraphicsDemo   extends Activity
         }
 
         //==============================================================================
+        Activity activity;
         private long nativeContext = 0;
 
         private native void dispatchFinalize (long nativeContextRef);
         private native Object dispatchInvoke (long nativeContextRef, Object proxy, Method method, Object[] args);
     }
 
-    public static InvocationHandler createInvocationHandler (long nativeContextRef)
+    public InvocationHandler createInvocationHandler (long nativeContextRef)
     {
-        return new NativeInvocationHandler (nativeContextRef);
+        return new NativeInvocationHandler (this, nativeContextRef);
+    }
+
+    public void invocationHandlerContextDeleted (InvocationHandler handler)
+    {
+        ((NativeInvocationHandler) handler).nativeContextDeleted();
     }
 
     //==============================================================================

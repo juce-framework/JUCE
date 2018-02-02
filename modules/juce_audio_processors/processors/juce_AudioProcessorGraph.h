@@ -349,7 +349,6 @@ public:
 
     void reset() override;
     void setNonRealtime (bool) noexcept override;
-    void setPlayHead (AudioPlayHead*) override;
 
     double getTailLengthSeconds() const override;
     bool acceptsMidi() const override;

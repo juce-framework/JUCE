@@ -76,6 +76,11 @@ public:
     /** Triggers an asynchronous scan for the given format. */
     void scanFor (AudioPluginFormat&);
 
+    /** Triggers an asynchronous scan for the given format and scans only the given files or identifiers.
+        @see AudioPluginFormat::searchPathsForPlugins
+    */
+    void scanFor (AudioPluginFormat&, const StringArray& filesOrIdentifiersToScan);
+
     /** Returns true if there's currently a scan in progress. */
     bool isScanning() const noexcept;
 

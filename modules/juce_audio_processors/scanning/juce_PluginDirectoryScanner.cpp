@@ -47,18 +47,7 @@ PluginDirectoryScanner::PluginDirectoryScanner (KnownPluginList& listToAddTo,
       allowAsync (allowPluginsWhichRequireAsynchronousInstantiation)
 {
     directoriesToSearch.removeRedundantPaths();
-
-    filesOrIdentifiersToScan = format.searchPathsForPlugins (directoriesToSearch, recursive, allowAsync);
-
-    // If any plugins have crashed recently when being loaded, move them to the
-    // end of the list to give the others a chance to load correctly..
-    for (auto& crashed : readDeadMansPedalFile (deadMansPedalFile))
-        for (int j = filesOrIdentifiersToScan.size(); --j >= 0;)
-            if (crashed == filesOrIdentifiersToScan[j])
-                filesOrIdentifiersToScan.move (j, -1);
-
-    applyBlacklistingsFromDeadMansPedal (listToAddTo, deadMansPedalFile);
-    nextIndex.set (filesOrIdentifiersToScan.size());
+    setFilesOrIdentifiersToScan (format.searchPathsForPlugins (directoriesToSearch, recursive, allowAsync));
 }
 
 PluginDirectoryScanner::~PluginDirectoryScanner()
@@ -67,6 +56,21 @@ PluginDirectoryScanner::~PluginDirectoryScanner()
 }
 
 //==============================================================================
+void PluginDirectoryScanner::setFilesOrIdentifiersToScan (const StringArray& filesOrIdentifiers)
+{
+    filesOrIdentifiersToScan = filesOrIdentifiers;
+
+    // If any plugins have crashed recently when being loaded, move them to the
+    // end of the list to give the others a chance to load correctly..
+    for (auto& crashed : readDeadMansPedalFile (deadMansPedalFile))
+        for (int j = filesOrIdentifiersToScan.size(); --j >= 0;)
+            if (crashed == filesOrIdentifiersToScan[j])
+                filesOrIdentifiersToScan.move (j, -1);
+
+    applyBlacklistingsFromDeadMansPedal (list, deadMansPedalFile);
+    nextIndex.set (filesOrIdentifiersToScan.size());
+}
+
 String PluginDirectoryScanner::getNextPluginFileThatWillBeScanned() const
 {
     return format.getNameOfPluginFromIdentifier (filesOrIdentifiersToScan [nextIndex.get() - 1]);

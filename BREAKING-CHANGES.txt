@@ -65,6 +65,32 @@ an improvement process that should eventually result in it being broken down
 into fundamental graph building block classes for use in other contexts.
 
 
+Change
+------
+Calling JUCEApplicationBase::quit() on Android will now really quit the app,
+rather than just placing it in background. Starting with API level 21 (Android 5.0), the
+app will not appear in recent apps list after calling quit(). Prior to API 21, the app will still
+appear in recent app lists but when a user chooses the app, a new instance of the app will be started.
+
+
+Possible Issues
+---------------
+Any code calling JUCEApplicationBase::quit() to place the app in background will close the app instead.
+
+
+Workaround
+----------
+Use Process::hide().
+
+
+Rationale
+---------
+The old behaviour JUCEApplicationBase::quit() was confusing JUCE code, as a new instance of JUCE
+app was attempted to be created, while the older instance was still running in background. This
+would result in assertions when starting a second instance.
+
+
+
 Version 5.2.0
 =============
 
