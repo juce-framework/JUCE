@@ -36,10 +36,11 @@ struct GraphRenderSequence
     {
         FloatType** audioBuffers;
         MidiBuffer* midiBuffers;
+        AudioPlayHead* audioPlayHead;
         int numSamples;
     };
 
-    void perform (AudioBuffer<FloatType>& buffer, MidiBuffer& midiMessages)
+    void perform (AudioBuffer<FloatType>& buffer, MidiBuffer& midiMessages, AudioPlayHead* audioPlayHead)
     {
         auto numSamples = buffer.getNumSamples();
         auto maxSamples = renderingBuffer.getNumSamples();
@@ -53,11 +54,11 @@ struct GraphRenderSequence
             {
                 AudioBuffer<FloatType> startAudio (buffer.getArrayOfWritePointers(), buffer.getNumChannels(), maxSamples);
                 midiMessages.clear (maxSamples, numSamples);
-                perform (startAudio, midiMessages);
+                perform (startAudio, midiMessages, audioPlayHead);
             }
 
             AudioBuffer<FloatType> endAudio (buffer.getArrayOfWritePointers(), buffer.getNumChannels(), maxSamples, numSamples - maxSamples);
-            perform (endAudio, tempMIDI);
+            perform (endAudio, tempMIDI, audioPlayHead);
             return;
         }
 
@@ -68,7 +69,7 @@ struct GraphRenderSequence
         currentMidiOutputBuffer.clear();
 
         {
-            const Context context { renderingBuffer.getArrayOfWritePointers(), midiBuffers.begin(), numSamples };
+            const Context context { renderingBuffer.getArrayOfWritePointers(), midiBuffers.begin(), audioPlayHead, numSamples };
 
             for (auto* op : renderOps)
                 op->perform (context);
@@ -210,7 +211,7 @@ private:
             buffer.calloc ((size_t) bufferSize);
         }
 
-        void perform (const Context& c)
+        void perform (const Context& c) override
         {
             auto* data = c.audioBuffers[channel];
 
@@ -249,8 +250,10 @@ private:
                 audioChannelsToUse.add (0);
         }
 
-        void perform (const Context& c)
+        void perform (const Context& c) override
         {
+            processor.setPlayHead (c.audioPlayHead);
+
             for (int i = 0; i < totalChans; ++i)
                 audioChannels[i] = c.audioBuffers[audioChannelsToUse.getUnchecked (i)];
 
@@ -1248,16 +1251,6 @@ void AudioProcessorGraph::setNonRealtime (bool isProcessingNonRealtime) noexcept
         n->getProcessor()->setNonRealtime (isProcessingNonRealtime);
 }
 
-void AudioProcessorGraph::setPlayHead (AudioPlayHead* audioPlayHead)
-{
-    const ScopedLock sl (getCallbackLock());
-
-    AudioProcessor::setPlayHead (audioPlayHead);
-
-    for (auto* n : nodes)
-        n->getProcessor()->setPlayHead (audioPlayHead);
-}
-
 double AudioProcessorGraph::getTailLengthSeconds() const            { return 0; }
 bool AudioProcessorGraph::acceptsMidi() const                       { return true; }
 bool AudioProcessorGraph::producesMidi() const                      { return true; }
@@ -1269,7 +1262,7 @@ void AudioProcessorGraph::processBlock (AudioBuffer<float>& buffer, MidiBuffer& 
     const ScopedLock sl (getCallbackLock());
 
     if (renderSequenceFloat != nullptr)
-        renderSequenceFloat->perform (buffer, midiMessages);
+        renderSequenceFloat->perform (buffer, midiMessages, getPlayHead());
 }
 
 void AudioProcessorGraph::processBlock (AudioBuffer<double>& buffer, MidiBuffer& midiMessages)
@@ -1277,7 +1270,7 @@ void AudioProcessorGraph::processBlock (AudioBuffer<double>& buffer, MidiBuffer&
     const ScopedLock sl (getCallbackLock());
 
     if (renderSequenceDouble != nullptr)
-        renderSequenceDouble->perform (buffer, midiMessages);
+        renderSequenceDouble->perform (buffer, midiMessages, getPlayHead());
 }
 
 //==============================================================================
