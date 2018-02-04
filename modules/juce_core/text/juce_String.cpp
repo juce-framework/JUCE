@@ -681,7 +681,11 @@ static int naturalStringCompare (String::CharPointerType s1, String::CharPointer
         const bool hasSpace2 = s2.isWhitespace();
 
         if ((! firstLoop) && (hasSpace1 ^ hasSpace2))
+        {
+            if (s1[0] == 0) return -1;
+            if (s2[0] == 0) return 1;
             return hasSpace2 ? 1 : -1;
+        }
 
         firstLoop = false;
 
