@@ -1560,7 +1560,7 @@ static const unsigned char temp_binary_data_3[] =
 "            {\r\n"
 "                bypass = false;\r\n"
 "\r\n"
-"                auto maxSize = static_cast<size_t> (roundDoubleToInt (8192.0 * sampleRate / 44100.0));\r\n"
+"                auto maxSize = static_cast<size_t> (roundToInt (sampleRate * (8192.0 / 44100.0)));\r\n"
 "\r\n"
 "                if (cabinetTypeParameter->getCurrentSelectedID() == 2)\r\n"
 "                    convolution.loadImpulseResponse (BinaryData::guitar_amp_wav,\r\n"
@@ -2235,7 +2235,7 @@ static const unsigned char temp_binary_data_10[] =
 "\r\n"
 "    ChoiceParameter typeParam {{ \"Low-pass\", \"Band-pass\", \"High-pass\"}, 1, \"Type\" };\r\n"
 "    SliderParameter cutoffParam {{ 20.0, 20000.0 }, 0.5, 440.0f, \"Cutoff\", \"Hz\" };\r\n"
-"    SliderParameter qParam {{ 0.3, 20.0 }, 0.5, 1.0 / std::sqrt (2.0), \"Resonance\" };\r\n"
+"    SliderParameter qParam {{ 0.3, 20.0 }, 0.5, 1.0 / MathConstants<double>::sqrt2, \"Resonance\" };\r\n"
 "\r\n"
 "    std::vector<DSPDemoParameterBase*> parameters { &typeParam, &cutoffParam, &qParam };\r\n"
 "    double sampleRate = 0;\r\n"
@@ -2325,14 +2325,14 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes) throw
         case 0x409ff6ec:  numBytes = 37902; return cassette_recorder_wav;
         case 0x69523d16:  numBytes = 628; return EditorColourScheme_xml;
         case 0x700ccf3c:  numBytes = 90246; return guitar_amp_wav;
-        case 0x5922ccdf:  numBytes = 3011; return ConvolutionDemo_cpp;
+        case 0x5922ccdf:  numBytes = 3007; return ConvolutionDemo_cpp;
         case 0x14aa0aae:  numBytes = 2674; return FIRFilterDemo_cpp;
         case 0xab621a06:  numBytes = 1809; return GainDemo_cpp;
         case 0x06a7a4b1:  numBytes = 2819; return IIRFilterDemo_cpp;
         case 0x6fc33e27:  numBytes = 3986; return OscillatorDemo_cpp;
         case 0xdfdc547d:  numBytes = 3039; return OverdriveDemo_cpp;
         case 0x3f21e597:  numBytes = 4849; return SIMDRegisterDemo_cpp;
-        case 0x54e9f84c:  numBytes = 2718; return StateVariableFilterDemo_cpp;
+        case 0x54e9f84c:  numBytes = 2731; return StateVariableFilterDemo_cpp;
         case 0x5ce06dd8:  numBytes = 2037; return WaveShaperTanhDemo_cpp;
         default: break;
     }

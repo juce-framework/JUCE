@@ -176,14 +176,15 @@ public:
         if ([view superview] != nil)
             [view removeFromSuperview];
 
-        [view release];
-
         if (! isSharedWindow)
         {
             setOwner (window, nullptr);
+            [window setContentView: nil];
             [window close];
             [window release];
         }
+
+        [view release];
     }
 
     //==============================================================================

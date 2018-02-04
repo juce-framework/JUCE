@@ -78,7 +78,7 @@ String TracktionMarketplaceStatus::readReplyFromWebserver (const String& email, 
             auto max = jmin ((int) bufferSize, contentLength < 0 ? std::numeric_limits<int>::max()
                                                                  : static_cast<int> (contentLength - downloaded));
 
-            auto actualBytesRead = stream->read (buffer.get(), max);
+            auto actualBytesRead = stream->read (buffer.get() + downloaded, max - downloaded);
 
             if (actualBytesRead < 0 || thread->threadShouldExit() || stream->isError())
                 break;

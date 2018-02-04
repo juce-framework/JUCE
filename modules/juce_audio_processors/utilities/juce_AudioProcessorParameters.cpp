@@ -148,8 +148,8 @@ AudioParameterChoice::AudioParameterChoice (const String& idToUse, const String&
                                             const StringArray& c, int def, const String& labelToUse)
    : AudioProcessorParameterWithID (idToUse, nameToUse, labelToUse), choices (c),
      value ((float) def),
-     defaultValue (convertTo0to1 (def)),
-     maxIndex (choices.size() - 1)
+     maxIndex (choices.size() - 1),
+     defaultValue (convertTo0to1 (def))
 {
     jassert (choices.size() > 0); // you must supply an actual set of items to choose from!
 }

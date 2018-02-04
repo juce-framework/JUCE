@@ -3064,8 +3064,7 @@ private:
                 return 0;
 
             case WM_NCPAINT:
-                if (wParam != 1) // (1 = a repaint of the entire NC region)
-                    handlePaintMessage(); // this must be done, even with native titlebars, or there are rendering artifacts.
+                handlePaintMessage(); // this must be done, even with native titlebars, or there are rendering artifacts.
 
                 if (hasTitleBar())
                     break; // let the DefWindowProc handle drawing the frame.

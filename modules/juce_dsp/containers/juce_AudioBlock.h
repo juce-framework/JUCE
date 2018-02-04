@@ -440,6 +440,52 @@ public:
         return *this;
     }
 
+    /** Multiplies all channels of the AudioBlock by a smoothly changing value and stores them . */
+    AudioBlock& multiply (LinearSmoothedValue<SampleType>& value) noexcept
+    {
+        if (! value.isSmoothing())
+        {
+            *this *= value.getTargetValue();
+        }
+        else
+        {
+            for (size_t i = 0; i < numSamples; ++i)
+            {
+                const auto scaler = value.getNextValue();
+
+                for (size_t ch = 0; ch < numChannels; ++ch)
+                    channelPtr (ch)[i] *= scaler;
+            }
+        }
+
+        return *this;
+    }
+
+    /** Multiplies all channels of the source by a smoothly changing value and stores them in the receiver. */
+    AudioBlock& multiply (AudioBlock src, LinearSmoothedValue<SampleType>& value) noexcept
+    {
+        jassert (numChannels == src.numChannels);
+
+        if (! value.isSmoothing())
+        {
+            copy (src);
+        }
+        else
+        {
+            auto n = static_cast<int> (jmin (numSamples, src.numSamples) * sizeFactor);
+
+            for (size_t i = 0; i < n; ++i)
+            {
+                const auto scaler = value.getNextValue();
+
+                for (size_t ch = 0; ch < numChannels; ++ch)
+                    channelPtr (ch)[i] = scaler * src.getChannelPointer (ch)[i];
+            }
+        }
+
+        return *this;
+    }
+
     /** Multiplies each value in src with factor and adds the result to the receiver. */
     forcedinline AudioBlock& JUCE_VECTOR_CALLTYPE addWithMultiply (AudioBlock src, SampleType factor) noexcept
     {
@@ -541,6 +587,7 @@ public:
     forcedinline AudioBlock&                      operator-= (AudioBlock src) noexcept   { return subtract (src); }
     forcedinline AudioBlock& JUCE_VECTOR_CALLTYPE operator*= (SampleType src) noexcept   { return multiply (src); }
     forcedinline AudioBlock&                      operator*= (AudioBlock src) noexcept   { return multiply (src); }
+    forcedinline AudioBlock&                      operator*= (LinearSmoothedValue<SampleType>& value) noexcept   { return multiply (value); }
 
     //==============================================================================
     // This class can only be used with floating point types

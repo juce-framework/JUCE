@@ -156,7 +156,19 @@ void MessageManager::stopDispatchLoop()
 
         void messageCallback() override
         {
-            android.activity.callVoidMethod (JuceAppActivity.finish);
+            auto* env = getEnv();
+
+            jmethodID quitMethod = env->GetMethodID (JuceAppActivity, "finishAndRemoveTask", "()V");
+
+            if (quitMethod != 0)
+            {
+                env->CallVoidMethod (android.activity, quitMethod);
+                return;
+            }
+
+            quitMethod = env->GetMethodID (JuceAppActivity, "finish", "()V");
+            jassert (quitMethod != 0);
+            env->CallVoidMethod (android.activity, quitMethod);
         }
     };
 

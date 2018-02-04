@@ -133,9 +133,14 @@ LocalRef<jobject> CreateJavaInterface (AndroidInterfaceImplementer* implementer,
         }
     }
 
-    auto invocationHandler = LocalRef<jobject> (env->CallStaticObjectMethod (JuceAppActivity,
-                                                                             JuceAppActivity.createInvocationHandler,
-                                                                             reinterpret_cast<jlong> (implementer)));
+    auto invocationHandler = LocalRef<jobject> (env->CallObjectMethod (android.activity,
+                                                                       JuceAppActivity.createInvocationHandler,
+                                                                       reinterpret_cast<jlong> (implementer)));
+
+    // CreateJavaInterface() is expected to be called just once for a given implementer
+    jassert (implementer->invocationHandler == nullptr);
+
+    implementer->invocationHandler = GlobalRef (invocationHandler);
 
     return LocalRef<jobject> (env->CallStaticObjectMethod (JavaProxy, JavaProxy.newProxyInstance,
                                                            classLoader.get(), classArray.get(),
@@ -154,6 +159,15 @@ LocalRef<jobject> CreateJavaInterface (AndroidInterfaceImplementer* implementer,
                                        const String& interfaceName)
 {
     return CreateJavaInterface (implementer, StringArray (interfaceName));
+}
+
+AndroidInterfaceImplementer::~AndroidInterfaceImplementer()
+
+{
+    if (invocationHandler != nullptr)
+        getEnv()->CallVoidMethod (android.activity,
+                                  JuceAppActivity.invocationHandlerContextDeleted,
+                                  invocationHandler.get());
 }
 
 jobject AndroidInterfaceImplementer::invoke (jobject /*proxy*/, jobject method, jobjectArray args)

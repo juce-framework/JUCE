@@ -30,15 +30,16 @@
 
 //==============================================================================
 DspModulePluginDemoAudioProcessorEditor::DspModulePluginDemoAudioProcessorEditor (DspModulePluginDemoAudioProcessor& p)
-    : AudioProcessorEditor (&p), processor (p),
-      inputVolumeLabel        ({ }, processor.inputVolumeParam->name),
-      outputVolumeLabel       ({ }, processor.outputVolumeParam->name),
-      lowPassFilterFreqLabel  ({ }, processor.lowPassFilterFreqParam->name),
-      highPassFilterFreqLabel ({ }, processor.highPassFilterFreqParam->name),
-      stereoLabel({}, processor.stereoParam->name),
-      slopeLabel ({ }, processor.slopeParam->name),
-      waveshaperLabel({ }, processor.waveshaperParam->name),
-      cabinetTypeLabel({ }, processor.cabinetTypeParam->name)
+    : AudioProcessorEditor    (&p),
+      processor               (p),
+      inputVolumeLabel        ({}, processor.inputVolumeParam->name),
+      outputVolumeLabel       ({}, processor.outputVolumeParam->name),
+      lowPassFilterFreqLabel  ({}, processor.lowPassFilterFreqParam->name),
+      highPassFilterFreqLabel ({}, processor.highPassFilterFreqParam->name),
+      stereoLabel             ({}, processor.stereoParam->name),
+      slopeLabel              ({}, processor.slopeParam->name),
+      waveshaperLabel         ({}, processor.waveshaperParam->name),
+      cabinetTypeLabel        ({}, processor.cabinetTypeParam->name)
 {
     //==============================================================================
     addAndMakeVisible (inputVolumeSlider        = new ParameterSlider (*processor.inputVolumeParam));
@@ -122,10 +123,12 @@ DspModulePluginDemoAudioProcessorEditor::DspModulePluginDemoAudioProcessorEditor
     addAndMakeVisible (cabinetSimButton);
     cabinetSimButton.addListener (this);
     cabinetSimButton.setButtonText (processor.cabinetSimParam->name);
+    cabinetSimButton.setToggleState (processor.cabinetSimParam->get(), NotificationType::dontSendNotification);
 
     addAndMakeVisible (oversamplingButton);
     oversamplingButton.addListener (this);
     oversamplingButton.setButtonText (processor.oversamplingParam->name);
+    oversamplingButton.setToggleState (processor.oversamplingParam->get(), NotificationType::dontSendNotification);
 
     //==============================================================================
     setSize (600, 400);

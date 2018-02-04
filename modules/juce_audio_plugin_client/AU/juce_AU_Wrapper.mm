@@ -523,11 +523,11 @@ public:
                     {
                         if (juceFilter != nullptr)
                         {
-                            const int paramID = getJuceIndexForAUParameterID (pv->inParamID);
+                            const int i = getJuceIndexForAUParameterID (pv->inParamID);
                             const String text (String::fromCFString (pv->inString));
 
-                            if (AudioProcessorParameter* param = juceFilter->getParameters() [paramID])
-                                pv->outValue = param->getValueForText (text) * getMaximumParameterValue (paramID);
+                            if (AudioProcessorParameter* param = juceFilter->getParameters()[i])
+                                pv->outValue = param->getValueForText (text) * getMaximumParameterValue (i);
                             else
                                 pv->outValue = text.getFloatValue();
 
@@ -543,12 +543,12 @@ public:
                     {
                         if (juceFilter != nullptr)
                         {
-                            const int paramID = getJuceIndexForAUParameterID (pv->inParamID);
+                            const int i = getJuceIndexForAUParameterID (pv->inParamID);
                             const float value = (float) *(pv->inValue);
                             String text;
 
-                            if (AudioProcessorParameter* param = juceFilter->getParameters() [paramID])
-                                text = param->getText (value / getMaximumParameterValue (paramID), 0);
+                            if (AudioProcessorParameter* param = juceFilter->getParameters()[i])
+                                text = param->getText (value / getMaximumParameterValue (i), 0);
                             else
                                 text = String (value);
 
@@ -774,7 +774,7 @@ public:
         return (UInt32) layouts.size();
     }
 
-    OSStatus SetAudioChannelLayout(AudioUnitScope scope, AudioUnitElement element, const AudioChannelLayout* inLayout) override
+    OSStatus SetAudioChannelLayout (AudioUnitScope scope, AudioUnitElement element, const AudioChannelLayout* inLayout) override
     {
         bool isInput;
         int busNr;
@@ -878,8 +878,8 @@ public:
             else
             {
                #if ! JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
-                outParameterInfo.unit = isParameterDiscrete ? kAudioUnitParameterUnit_Indexed
-                                                            : kAudioUnitParameterUnit_Generic;
+                if (isParameterDiscrete)
+                    outParameterInfo.unit = kAudioUnitParameterUnit_Indexed;
                #endif
             }
 
@@ -887,9 +887,9 @@ public:
 
             outParameterInfo.minValue = 0.0f;
             outParameterInfo.maxValue = getMaximumParameterValue (index);
-            outParameterInfo.defaultValue = juceFilter->getParameterDefaultValue (index);
+            outParameterInfo.defaultValue = juceFilter->getParameterDefaultValue (index) * getMaximumParameterValue (index);
             jassert (outParameterInfo.defaultValue >= outParameterInfo.minValue
-                      && outParameterInfo.defaultValue <= outParameterInfo.maxValue);
+                  && outParameterInfo.defaultValue <= outParameterInfo.maxValue);
 
             return noErr;
         }

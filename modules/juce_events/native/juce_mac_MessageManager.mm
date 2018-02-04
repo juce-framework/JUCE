@@ -116,7 +116,7 @@ private:
             addMethod (@selector (mainMenuTrackingEnded:),          mainMenuTrackingEnded,          "v@:@");
             addMethod (@selector (dummyMethod),                     dummyMethod,                    "v@:");
 
-          #if JUCE_PUSH_NOTIFICATIONS
+           #if JUCE_PUSH_NOTIFICATIONS
             //==============================================================================
             addIvar<NSObject<NSApplicationDelegate, NSUserNotificationCenterDelegate>*> ("pushNotificationsDelegate");
 
@@ -125,7 +125,7 @@ private:
             addMethod (@selector (application:didRegisterForRemoteNotificationsWithDeviceToken:), registeredForRemoteNotifications,       "v@:@@");
             addMethod (@selector (application:didFailToRegisterForRemoteNotificationsWithError:), failedToRegisterForRemoteNotifications, "v@:@@");
             addMethod (@selector (application:didReceiveRemoteNotification:),                     didReceiveRemoteNotification,           "v@:@@");
-          #endif
+           #endif
 
             registerClass();
         }
@@ -139,7 +139,7 @@ private:
                                                                 andEventID: kAEGetURL];
         }
 
-      #if JUCE_PUSH_NOTIFICATIONS
+       #if JUCE_PUSH_NOTIFICATIONS
         static void applicationDidFinishLaunching (id self, SEL, NSNotification* notification)
         {
             if (notification.userInfo != nil)
@@ -150,7 +150,7 @@ private:
                     didReceiveRemoteNotification (self, nil, [NSApplication sharedApplication], userNotification.userInfo);
             }
         }
-      #endif
+       #endif
 
         static NSApplicationTerminateReply applicationShouldTerminate (id /*self*/, SEL, NSApplication*)
         {
@@ -241,7 +241,7 @@ private:
             return s;
         }
 
-      #if JUCE_PUSH_NOTIFICATIONS
+       #if JUCE_PUSH_NOTIFICATIONS
         //==============================================================================
         static void setPushNotificationsDelegate (id self, SEL, NSObject<NSApplicationDelegate, NSUserNotificationCenterDelegate>* delegate)
         {
@@ -306,7 +306,7 @@ private:
                 [invocation invoke];
             }
         }
-      #endif
+       #endif
     };
 };
 

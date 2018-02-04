@@ -57,6 +57,7 @@ namespace juce
 - (void) applicationWillResignActive: (UIApplication*) application;
 - (void) application: (UIApplication*) application handleEventsForBackgroundURLSession: (NSString*) identifier
    completionHandler: (void (^)(void)) completionHandler;
+- (void) applicationDidReceiveMemoryWarning: (UIApplication *) application;
 #if JUCE_PUSH_NOTIFICATIONS
 - (void) application: (UIApplication*) application didRegisterUserNotificationSettings: (UIUserNotificationSettings*) notificationSettings;
 - (void) application: (UIApplication*) application didRegisterForRemoteNotificationsWithDeviceToken: (NSData*) deviceToken;
@@ -92,9 +93,9 @@ namespace juce
     self = [super init];
     appSuspendTask = UIBackgroundTaskInvalid;
 
-  #if JUCE_PUSH_NOTIFICATIONS && defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+   #if JUCE_PUSH_NOTIFICATIONS && defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
     [UNUserNotificationCenter currentNotificationCenter].delegate = self;
-  #endif
+   #endif
 
     return self;
 }
@@ -104,7 +105,7 @@ namespace juce
     ignoreUnused (application);
     initialiseJuce_GUI();
 
-    if (JUCEApplicationBase* app = JUCEApplicationBase::createInstance())
+    if (auto* app = JUCEApplicationBase::createInstance())
     {
         if (! app->initialiseApp())
             exit (app->shutdownApp());
@@ -172,6 +173,14 @@ namespace juce
     ignoreUnused (application);
     URL::DownloadTask::juce_iosURLSessionNotify (nsStringToJuce (identifier));
     completionHandler();
+}
+
+- (void) applicationDidReceiveMemoryWarning: (UIApplication*) application
+{
+    ignoreUnused (application);
+
+    if (auto* app = JUCEApplicationBase::getInstance())
+        app->memoryWarningReceived();
 }
 
 - (void) setPushNotificationsDelegateToUse: (NSObject*) delegate
