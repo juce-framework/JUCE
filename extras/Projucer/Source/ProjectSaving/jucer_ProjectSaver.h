@@ -89,7 +89,6 @@ public:
         if (errors.size() == 0)
         {
             writeMainProjectFile();
-            project.updateModificationTime();
 
             writeAppConfigFile (modules, appConfigUserContent);
             writeBinaryDataFiles();
@@ -97,6 +96,9 @@ public:
             writeModuleCppWrappers (modules);
             writeProjects (modules, specifiedExporterToSave, ! showProgressBox);
             writeAppConfigFile (modules, appConfigUserContent); // (this is repeated in case the projects added anything to it)
+
+            writeMainProjectFile(); // this is repeated so that the config flags are written correctly
+            project.updateModificationTime();
 
             if (generatedCodeFolder.exists())
                 writeReadmeFile();
