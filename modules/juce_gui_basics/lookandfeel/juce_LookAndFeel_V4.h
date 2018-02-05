@@ -113,6 +113,8 @@ public:
                       float x, float y, float w, float h,
                       bool ticked, bool isEnabled, bool isMouseOverButton, bool isButtonDown) override;
 
+    void changeToggleButtonWidthToFitText (ToggleButton&) override;
+
     //==============================================================================
     AlertWindow* createAlertWindow (const String& title, const String& message,
                                     const String& button1,

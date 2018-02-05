@@ -365,6 +365,16 @@ void LookAndFeel_V4::drawTickBox (Graphics& g, Component& component,
     }
 }
 
+void LookAndFeel_V4::changeToggleButtonWidthToFitText (ToggleButton& button)
+{
+    auto fontSize = jmin (15.0f, button.getHeight() * 0.75f);
+    auto tickWidth = fontSize * 1.1f;
+
+    Font font (fontSize);
+
+    button.setSize (font.getStringWidth (button.getButtonText()) + roundToInt (tickWidth) + 14, button.getHeight());
+}
+
 //==============================================================================
 AlertWindow* LookAndFeel_V4::createAlertWindow (const String& title, const String& message,
                                                 const String& button1, const String& button2, const String& button3,

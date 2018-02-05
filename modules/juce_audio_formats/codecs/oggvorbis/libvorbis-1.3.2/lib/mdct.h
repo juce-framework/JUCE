@@ -28,7 +28,7 @@
 #ifdef MDCT_INTEGERIZED
 
 #define DATA_TYPE int
-#define REG_TYPE  register int
+#define REG_TYPE  int
 #define TRIGBITS 14
 #define cPI3_8 6270
 #define cPI2_8 11585

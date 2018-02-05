@@ -274,7 +274,12 @@ void CoreGraphicsContext::excludeClipRectangle (const Rectangle<int>& r)
 void CoreGraphicsContext::clipToPath (const Path& path, const AffineTransform& transform)
 {
     createPath (path, transform);
-    CGContextClip (context);
+
+    if (path.isUsingNonZeroWinding())
+        CGContextClip (context);
+    else
+        CGContextEOClip (context);
+
     lastClipRectIsValid = false;
 }
 

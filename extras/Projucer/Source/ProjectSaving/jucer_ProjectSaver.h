@@ -91,12 +91,21 @@ public:
             writeMainProjectFile();
             project.updateModificationTime();
 
+            auto projectRootHash = project.getProjectRoot().toXmlString().hashCode();
+
             writeAppConfigFile (modules, appConfigUserContent);
             writeBinaryDataFiles();
             writeAppHeader (modules);
             writeModuleCppWrappers (modules);
             writeProjects (modules, specifiedExporterToSave, ! showProgressBox);
             writeAppConfigFile (modules, appConfigUserContent); // (this is repeated in case the projects added anything to it)
+
+            // if the project root has changed after writing the other files then re-save it
+            if (project.getProjectRoot().toXmlString().hashCode() != projectRootHash)
+            {
+                writeMainProjectFile();
+                project.updateModificationTime();
+            }
 
             if (generatedCodeFolder.exists())
                 writeReadmeFile();

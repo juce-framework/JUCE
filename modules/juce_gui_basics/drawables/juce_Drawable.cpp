@@ -41,6 +41,9 @@ Drawable::Drawable (const Drawable& other)
 
     setComponentID (other.getComponentID());
     setTransform (other.getTransform());
+
+    if (auto* clipPath = other.drawableClipPath.get())
+        setClipPath (clipPath->createCopy());
 }
 
 Drawable::~Drawable()
