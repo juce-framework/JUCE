@@ -681,7 +681,12 @@ static int naturalStringCompare (String::CharPointerType s1, String::CharPointer
         const bool hasSpace2 = s2.isWhitespace();
 
         if ((! firstLoop) && (hasSpace1 ^ hasSpace2))
+        {
+            if (s1.isEmpty())  return -1;
+            if (s2.isEmpty())  return 1;
+
             return hasSpace2 ? 1 : -1;
+        }
 
         firstLoop = false;
 
@@ -690,8 +695,8 @@ static int naturalStringCompare (String::CharPointerType s1, String::CharPointer
 
         if (s1.isDigit() && s2.isDigit())
         {
-            const int result = (*s1 == '0' || *s2 == '0') ? stringCompareLeft  (s1, s2)
-                                                          : stringCompareRight (s1, s2);
+            auto result = (*s1 == '0' || *s2 == '0') ? stringCompareLeft  (s1, s2)
+                                                     : stringCompareRight (s1, s2);
 
             if (result != 0)
                 return result;
@@ -748,8 +753,8 @@ void String::appendCharPointer (const CharPointerType startOfTextToAppend,
 {
     jassert (startOfTextToAppend.getAddress() != nullptr && endOfTextToAppend.getAddress() != nullptr);
 
-    const int extraBytesNeeded = getAddressDifference (endOfTextToAppend.getAddress(),
-                                                       startOfTextToAppend.getAddress());
+    auto extraBytesNeeded = getAddressDifference (endOfTextToAppend.getAddress(),
+                                                  startOfTextToAppend.getAddress());
     jassert (extraBytesNeeded >= 0);
 
     if (extraBytesNeeded > 0)
