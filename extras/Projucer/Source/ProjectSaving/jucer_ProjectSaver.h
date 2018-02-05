@@ -89,6 +89,9 @@ public:
         if (errors.size() == 0)
         {
             writeMainProjectFile();
+            project.updateModificationTime();
+
+            auto projectRootHash = project.getProjectRoot().toXmlString().hashCode();
 
             writeAppConfigFile (modules, appConfigUserContent);
             writeBinaryDataFiles();
@@ -97,8 +100,12 @@ public:
             writeProjects (modules, specifiedExporterToSave, ! showProgressBox);
             writeAppConfigFile (modules, appConfigUserContent); // (this is repeated in case the projects added anything to it)
 
-            writeMainProjectFile(); // this is repeated so that the config flags are written correctly
-            project.updateModificationTime();
+            // if the project root has changed after writing the other files then re-save it
+            if (project.getProjectRoot().toXmlString().hashCode() != projectRootHash)
+            {
+                writeMainProjectFile();
+                project.updateModificationTime();
+            }
 
             if (generatedCodeFolder.exists())
                 writeReadmeFile();
