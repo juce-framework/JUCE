@@ -171,6 +171,7 @@ namespace LiveConstantEditor
         {}
 
         operator Type() const noexcept   { return value; }
+        Type get() const noexcept        { return value; }
         operator const char*() const     { return castToCharPointer (value); }
 
         LivePropertyEditorBase* createPropertyComponent (CodeDocument& doc) override
@@ -302,7 +303,7 @@ namespace LiveConstantEditor
     @endcode
  */
  #define JUCE_LIVE_CONSTANT(initialValue) \
-    (juce::LiveConstantEditor::getValue (__FILE__, __LINE__ - 1, initialValue))
+    (juce::LiveConstantEditor::getValue (__FILE__, __LINE__ - 1, initialValue).get())
 #else
  #define JUCE_LIVE_CONSTANT(initialValue) \
     (initialValue)
