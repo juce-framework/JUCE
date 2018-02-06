@@ -321,7 +321,37 @@ private:
             return self;
         }
 
-        static void dealloc (id self, SEL)                                                          { delete _this (self); }
+        static void dealloc (id self, SEL)
+        {
+            if (! MessageManager::getInstance()->isThisTheMessageThread())
+            {
+                WaitableEvent deletionEvent;
+
+                struct AUDeleter  : public CallbackMessage
+                {
+                    AUDeleter (id selfToDelete, WaitableEvent& event)
+                        : parentSelf (selfToDelete), parentDeletionEvent (event)
+                    {
+                    }
+
+                    void messageCallback() override
+                    {
+                        delete _this (parentSelf);
+                        parentDeletionEvent.signal();
+                    }
+
+                    id parentSelf;
+                    WaitableEvent& parentDeletionEvent;
+                };
+
+                (new AUDeleter (self, deletionEvent))->post();
+                deletionEvent.wait (-1);
+            }
+            else
+            {
+                delete _this (self);
+            }
+        }
 
         //==============================================================================
         static void reset (id self, SEL)                                                            { _this (self)->reset(); }
@@ -1690,7 +1720,9 @@ public:
             creationEvent.wait (-1);
         }
         else
+        {
             retval = createAudioUnitOnMessageThread (descr, error);
+        }
 
         return [retval autorelease];
     }
