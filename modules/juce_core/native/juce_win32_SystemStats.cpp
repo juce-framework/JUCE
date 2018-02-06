@@ -253,6 +253,11 @@ String SystemStats::getDeviceDescription()
    #endif
 }
 
+String SystemStats::getDeviceManufacturer()
+{
+    return {};
+}
+
 bool SystemStats::isOperatingSystem64Bit()
 {
    #if JUCE_64BIT
