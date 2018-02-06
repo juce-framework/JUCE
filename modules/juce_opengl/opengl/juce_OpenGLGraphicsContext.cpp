@@ -1608,7 +1608,11 @@ public:
 
                 Point<float> pos (trans.getTranslationX(), trans.getTranslationY());
 
-                if (transform.isOnlyTranslated)
+                if (transform.isIdentity)
+                {
+                    cache.drawGlyph (*this, font, glyphNumber, pos);
+                }
+                else if (transform.isOnlyTranslated)
                 {
                     cache.drawGlyph (*this, font, glyphNumber, pos + transform.offset.toFloat());
                 }

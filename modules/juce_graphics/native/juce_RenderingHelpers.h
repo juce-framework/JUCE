@@ -42,13 +42,13 @@ class TranslationOrTransform
 {
 public:
     TranslationOrTransform (Point<int> origin) noexcept
-        : offset (origin), isOnlyTranslated (true), isRotated (false)
+        : offset (origin), isIdentity (origin.isOrigin()), isOnlyTranslated (true), isRotated (false)
     {
     }
 
     TranslationOrTransform (const TranslationOrTransform& other) noexcept
         : complexTransform (other.complexTransform), offset (other.offset),
-          isOnlyTranslated (other.isOnlyTranslated), isRotated (other.isRotated)
+          isIdentity (other.isIdentity), isOnlyTranslated (other.isOnlyTranslated), isRotated (other.isRotated)
     {
     }
 
@@ -67,10 +67,16 @@ public:
     void setOrigin (Point<int> delta) noexcept
     {
         if (isOnlyTranslated)
+        {
             offset += delta;
+            isIdentity = offset.isOrigin();
+        }
         else
+        {
             complexTransform = AffineTransform::translation (delta)
                                                .followedBy (complexTransform);
+            isIdentity = complexTransform.isIdentity();
+        }
     }
 
     void addTransform (const AffineTransform& t) noexcept
@@ -83,11 +89,13 @@ public:
             if (((tx | ty) & 0xf8) == 0)
             {
                 offset += Point<int> (tx >> 8, ty >> 8);
+                isIdentity = offset.isOrigin();
                 return;
             }
         }
 
         complexTransform = getTransformWith (t);
+        isIdentity = complexTransform.isIdentity();
         isOnlyTranslated = false;
         isRotated = (complexTransform.mat01 != 0.0f || complexTransform.mat10 != 0.0f
                       || complexTransform.mat00 < 0 || complexTransform.mat11 < 0);
@@ -101,9 +109,15 @@ public:
     void moveOriginInDeviceSpace (Point<int> delta) noexcept
     {
         if (isOnlyTranslated)
+        {
             offset += delta;
+            isIdentity = offset.isOrigin();
+        }
         else
+        {
             complexTransform = complexTransform.translated (delta);
+            isIdentity = complexTransform.isIdentity();
+        }
     }
 
     Rectangle<int> translated (const Rectangle<int>& r) const noexcept
@@ -134,7 +148,7 @@ public:
 
     AffineTransform complexTransform;
     Point<int> offset;
-    bool isOnlyTranslated, isRotated;
+    bool isIdentity, isOnlyTranslated, isRotated;
 };
 
 //==============================================================================
@@ -2032,7 +2046,12 @@ public:
     {
         if (clip != nullptr)
         {
-            if (transform.isOnlyTranslated)
+            if (transform.isIdentity)
+            {
+                cloneClipIfMultiplyReferenced();
+                clip = clip->clipToRectangle (r);
+            }
+            else if (transform.isOnlyTranslated)
             {
                 cloneClipIfMultiplyReferenced();
                 clip = clip->clipToRectangle (transform.translated (r));
@@ -2057,7 +2076,12 @@ public:
     {
         if (clip != nullptr)
         {
-            if (transform.isOnlyTranslated)
+            if (transform.isIdentity)
+            {
+                cloneClipIfMultiplyReferenced();
+                clip = clip->clipToRectangleList (r);
+            }
+            else if (transform.isOnlyTranslated)
             {
                 cloneClipIfMultiplyReferenced();
                 RectangleList<int> offsetList (r);
@@ -2099,7 +2123,11 @@ public:
         {
             cloneClipIfMultiplyReferenced();
 
-            if (transform.isOnlyTranslated)
+            if (transform.isIdentity)
+            {
+                clip = clip->excludeClipRectangle (getLargestIntegerWithin (r.toFloat()));
+            }
+            else if (transform.isOnlyTranslated)
             {
                 clip = clip->excludeClipRectangle (getLargestIntegerWithin (transform.translated (r.toFloat())));
             }
@@ -2152,7 +2180,9 @@ public:
     {
         if (clip != nullptr)
         {
-            if (transform.isOnlyTranslated)
+            if (transform.isIdentity)
+                return clip->clipRegionIntersects (r);
+            else if (transform.isOnlyTranslated)
                 return clip->clipRegionIntersects (transform.translated (r));
 
             return getClipBounds().intersects (r);
@@ -2214,7 +2244,11 @@ public:
     {
         if (clip != nullptr)
         {
-            if (transform.isOnlyTranslated)
+            if (transform.isIdentity)
+            {
+                fillTargetRect (r, replaceContents);
+            }
+            else if (transform.isOnlyTranslated)
             {
                 fillTargetRect (transform.translated (r), replaceContents);
             }
@@ -2234,7 +2268,9 @@ public:
     {
         if (clip != nullptr)
         {
-            if (transform.isOnlyTranslated)
+            if (transform.isIdentity)
+                fillTargetRect (r);
+            else if (transform.isOnlyTranslated)
                 fillTargetRect (transform.translated (r));
             else if (! transform.isRotated)
                 fillTargetRect (transform.transformed (r));
@@ -2247,7 +2283,11 @@ public:
     {
         if (clip != nullptr)
         {
-            if (! transform.isRotated)
+            if (transform.isIdentity)
+            {
+                fillShape (new EdgeTableRegionType (list), false);
+            }
+            else if (! transform.isRotated)
             {
                 RectangleList<float> transformed (list);
 
@@ -2493,7 +2533,11 @@ public:
 
                 Point<float> pos (trans.getTranslationX(), trans.getTranslationY());
 
-                if (transform.isOnlyTranslated)
+                if (transform.isIdentity)
+                {
+                    cache.drawGlyph (*this, font, glyphNumber, pos);
+                }
+                else if (transform.isOnlyTranslated)
                 {
                     cache.drawGlyph (*this, font, glyphNumber, pos + transform.offset.toFloat());
                 }
