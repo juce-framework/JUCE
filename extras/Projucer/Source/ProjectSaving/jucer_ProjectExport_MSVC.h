@@ -1069,7 +1069,7 @@ public:
 
                 if (config.isPluginBinaryCopyStepEnabled())
                     return pkgScript + "\r\n" + "xcopy " + bundleDir.quoted() + " "
-                               + String (config.getAAXBinaryLocationString() + "\\" + outputFilename + "\\").quoted() + " /E /Y /H /K";
+                               + String (config.getAAXBinaryLocationString() + "\\" + outputFilename + "\\").quoted() + " /E /H /K /R /Y";
 
                 return pkgScript;
             }
