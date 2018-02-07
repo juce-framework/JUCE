@@ -600,6 +600,8 @@ public:
             [menu addItem: item];
             [item release];
 
+            editMenuIndex = [mainMenu numberOfItems];
+
             item = [mainMenu addItemWithTitle: NSLocalizedString (nsStringLiteral ("Edit"), nil)
                                        action: nil  keyEquivalent: nsEmptyString()];
             [mainMenu setSubmenu: menu forItem: item];
@@ -612,6 +614,9 @@ public:
 
     ~TemporaryMainMenuWithStandardCommands()
     {
+        if (auto* mainMenu = JuceMainMenuBarHolder::getInstance()->mainMenuBar)
+            [mainMenu removeItemAtIndex:editMenuIndex];
+
         MenuBarModel::setMacMainMenu (oldMenu, oldAppleMenu.get(), oldRecentItems);
     }
 
@@ -619,6 +624,7 @@ private:
     MenuBarModel* const oldMenu;
     ScopedPointer<PopupMenu> oldAppleMenu;
     String oldRecentItems;
+    NSInteger editMenuIndex;
 
     // The OS view already plays an alert when clicking outside
     // the modal comp, so this override avoids adding extra
