@@ -343,7 +343,7 @@ void ComponentPeer::handleFocusGain()
 {
     ModifierKeys::updateCurrentModifiers();
 
-    if (component.isParentOf (lastFocusedComponent))
+    if (component.isParentOf (lastFocusedComponent)
           && lastFocusedComponent->isShowing()
           && lastFocusedComponent->getWantsKeyboardFocus())
     {
@@ -456,7 +456,7 @@ bool ComponentPeer::handleDragMove (const ComponentPeer::DragInfo& info)
     ModifierKeys::updateCurrentModifiers();
 
     auto* compUnderMouse = component.getComponentAt (info.position);
-    auto* lastTarget = dragAndDropTargetComponent;
+    auto* lastTarget = dragAndDropTargetComponent.get();
     Component* newTarget = nullptr;
 
     if (compUnderMouse != lastDragAndDropCompUnderMouse)
