@@ -1641,6 +1641,8 @@ struct VST3ComponentHolder
         if (! component.loadFrom (factory, info.cid) || component == nullptr)
             return false;
 
+        cidOfComponent = FUID (info.cid);
+
         if (warnOnFailure (component->initialize (host->getFUnknown())) != kResultOk)
             return false;
 
@@ -1675,6 +1677,7 @@ struct VST3ComponentHolder
     ComSmartPtr<IPluginFactory> factory;
     ComSmartPtr<VST3HostContext> host;
     ComSmartPtr<Vst::IComponent> component;
+    FUID cidOfComponent;
 
     bool isComponentInitialised = false;
 };
@@ -2312,6 +2315,17 @@ struct VST3PluginInstance : public AudioPluginInstance
         }
     }
 
+    bool setStateFromPresetFile (const MemoryBlock& rawData)
+    {
+        ComSmartPtr<Steinberg::MemoryStream> memoryStream = new Steinberg::MemoryStream (rawData.getData(), (int) rawData.getSize());
+
+        if (memoryStream == nullptr || holder->component == nullptr)
+            return false;
+
+        return Steinberg::Vst::PresetFile::loadPreset (memoryStream, holder->cidOfComponent,
+                                                       holder->component, editController, nullptr);
+    }
+
     //==============================================================================
     void fillInPluginDescription (PluginDescription& description) const override
     {
@@ -2794,6 +2808,14 @@ AudioPluginInstance* VST3Classes::VST3ComponentHolder::createPluginInstance()
 //==============================================================================
 VST3PluginFormat::VST3PluginFormat() {}
 VST3PluginFormat::~VST3PluginFormat() {}
+
+bool VST3PluginFormat::setStateFromVSTPresetFile (AudioPluginInstance* api, const MemoryBlock& rawData)
+{
+    if (auto vst3 = dynamic_cast<VST3Classes::VST3PluginInstance*> (api))
+        return vst3->setStateFromPresetFile (rawData);
+
+    return false;
+}
 
 void VST3PluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& results, const String& fileOrIdentifier)
 {
