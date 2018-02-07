@@ -96,6 +96,7 @@ public:
         AudioDeviceSetup();
 
         bool operator== (const AudioDeviceSetup& other) const;
+        bool operator!= (const AudioDeviceSetup& other) const;
 
         /** The name of the audio device used for output.
             The name has to be one of the ones listed by the AudioDeviceManager's currently

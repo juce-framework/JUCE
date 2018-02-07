@@ -43,6 +43,11 @@ bool AudioDeviceManager::AudioDeviceSetup::operator== (const AudioDeviceManager:
             && useDefaultOutputChannels == other.useDefaultOutputChannels;
 }
 
+bool AudioDeviceManager::AudioDeviceSetup::operator!= (const AudioDeviceManager::AudioDeviceSetup& other) const
+{
+    return ! operator== (other);
+}
+
 //==============================================================================
 class AudioDeviceManager::CallbackHandler  : public AudioIODeviceCallback,
                                              public MidiInputCallback,
