@@ -149,4 +149,14 @@ void RecentlyOpenedFilesList::registerRecentFileNatively (const File& file)
    #endif
 }
 
+void RecentlyOpenedFilesList::clearRecentFilesNatively()
+{
+   #if JUCE_MAC
+    JUCE_AUTORELEASEPOOL
+    {
+        [[NSDocumentController sharedDocumentController] clearRecentDocuments: nil];
+    }
+   #endif
+}
+
 } // namespace juce

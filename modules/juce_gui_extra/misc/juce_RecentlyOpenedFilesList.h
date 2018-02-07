@@ -103,10 +103,18 @@ public:
     void removeNonExistentFiles();
 
     /** Tells the OS to add a file to the OS-managed list of recent documents for this app.
+
         Not all OSes maintain a list of recent files for an application, so this
         function will have no effect on some OSes. Currently it's just implemented for OSX.
     */
     static void registerRecentFileNatively (const File& file);
+
+    /** Tells the OS to clear the OS-managed list of recent documents for this app.
+
+        Not all OSes maintain a list of recent files for an application, so this
+        function will have no effect on some OSes. Currently it's just implemented for OSX.
+    */
+    static void clearRecentFilesNatively();
 
     //==============================================================================
     /** Adds entries to a menu, representing each of the files in the list.
