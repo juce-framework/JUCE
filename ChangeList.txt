@@ -4,6 +4,32 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 5.2.1
+  - Added native content sharing support for iOS and Android
+  - Added iOS and Android native file chooser support
+  - Implemented WebBrowserComponent on Android
+  - Added SystemStats::getDeviceManufacturer()
+  - Ensured that JUCE will always use the high-performance audio path on Android if the device supports it
+  - Added memory warning callbacks on iOS
+  - Refactored iOSAudioDevice to support multi-channel audio devices and improve the handling of sample rate changes from other apps
+  - Added SidePanel and BurgerMenu component classes
+  - Added PushNotifications support on OSX 
+  - Added support for VST3 SDK 3.6.8
+  - Added support for loading VST3 preset files
+  - Added higher-order ambisonics support
+  - Added thread safe methods for getting and setting the AudioProcessorValueTreeState state
+  - Cleanup and refactoring work on the AudioProcessorGraph and the audio plugin host demo
+  - Changed the default language standard for new projects from C++11 to C++14 and set all JUCE projects to use C++14
+  - Made the ScopedPointer interface more compatible with std::unique_ptr
+  - Changed Windows projects to use dynamic runtime linking by default
+  - Added lambda callbacks to ListenerList, Slider, Button, Label, ComboBox and TextEditor
+  - Fixed the live-build engine on Windows
+  - Multiple DSP module fixes and features
+  - Multiple threading and undefined behaviour fixes and improvements
+  - Various graphics optimisations
+  - Multiple Projucer UI and UX improvements
+  - Various documentation tweaks and fixes
+
 Version 5.2.0
   - Added a CMake exporter to the Projucer
   - JUCE analytics module 
