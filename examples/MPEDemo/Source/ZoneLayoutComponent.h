@@ -49,9 +49,14 @@ public:
     }
 
     //==============================================================================
-    void zoneAdded (MPEZone newZone) override
+    void zoneChanged (bool isLowerZone, int numMemberChannels,
+                      int perNotePitchbendRange, int masterPitchbendRange) override
     {
-        zoneLayout.addZone (newZone);
+        if (isLowerZone)
+            zoneLayout.setLowerZone (numMemberChannels, perNotePitchbendRange, masterPitchbendRange);
+        else
+            zoneLayout.setUpperZone (numMemberChannels, perNotePitchbendRange, masterPitchbendRange);
+
         repaint();
     }
 
@@ -66,6 +71,7 @@ public:
         legacyModeEnabled = legacyModeShouldBeEnabled;
         legacyModePitchbendRange = pitchbendRange;
         legacyModeChannelRange = channelRange;
+
         repaint();
     }
 
@@ -81,11 +87,10 @@ private:
 
         for (int i = 0; i < numMidiChannels; ++i)
         {
-            float x = float (i) * channelWidth;
+            auto x = float (i) * channelWidth;
             Rectangle<int> channelArea ((int) x, 0, (int) channelWidth, getHeight());
 
-            Line<float> line (x, 0.0f, x, float (getHeight()));
-            g.drawLine (line);
+            g.drawLine ({ x, 0.0f, x, float (getHeight()) });
             g.drawText (String (i + 1), channelArea.reduced (4, 4), Justification::topLeft, false);
         }
     }
@@ -93,35 +98,40 @@ private:
     //==============================================================================
     void paintZones (Graphics& g)
     {
-        float channelWidth = getChannelRectangleWidth();
+        auto channelWidth = getChannelRectangleWidth();
 
-        for (int i = 0; i < zoneLayout.getNumZones(); ++i)
+        Array<MPEZoneLayout::Zone> activeZones;
+        if (zoneLayout.getLowerZone().isActive())  activeZones.add (zoneLayout.getLowerZone());
+        if (zoneLayout.getUpperZone().isActive())  activeZones.add (zoneLayout.getUpperZone());
+
+        for (auto zone : activeZones)
         {
-            MPEZone zone = *zoneLayout.getZoneByIndex (i);
-            Colour zoneColour = colourPicker.getColourForZoneIndex (i);
+            auto zoneColour = colourPicker.getColourForZone (zone.isLowerZone());
 
-            Rectangle<int> zoneRect (int (getChannelRectangleWidth() * (zone.getMasterChannel() - 1)), 0,
-                                     int (getChannelRectangleWidth() * (zone.getNumNoteChannels() + 1)), getHeight());
-            zoneRect.removeFromTop (20);
+            auto xPos = zone.isLowerZone() ? 0 : zone.getLastMemberChannel() - 1;
 
-            g.setColour (zoneColour.withAlpha (0.3f));
-            g.fillRect (zoneRect.withWidth ((int) channelWidth));
+            Rectangle<int> zoneRect { int (channelWidth * (xPos)), 20,
+                                      int (channelWidth * (zone.numMemberChannels + 1)), getHeight() - 20 };
 
             g.setColour (zoneColour);
             g.drawRect (zoneRect, 3);
-            g.drawText ("<>" + String (zone.getPerNotePitchbendRange()), zoneRect.withTrimmedLeft ((int) channelWidth).reduced (4, 4), Justification::bottomLeft, false);
 
-            g.setColour (Colours::black);
-            g.drawText ("ZONE " + String (i + 1), zoneRect.reduced (4, 4), Justification::topLeft, false);
-            g.drawText ("<>" + String (zone.getMasterPitchbendRange()), zoneRect.reduced (4, 4), Justification::bottomLeft, false);
+            auto masterRect = zone.isLowerZone() ? zoneRect.removeFromLeft (channelWidth) : zoneRect.removeFromRight (channelWidth);
+
+            g.setColour (zoneColour.withAlpha (0.3f));
+            g.fillRect (masterRect);
+
+            g.setColour (zoneColour.contrasting());
+            g.drawText ("<>" + String (zone.masterPitchbendRange), masterRect.reduced (4), Justification::top, false);
+            g.drawText ("<>" + String (zone.perNotePitchbendRange), masterRect.reduced (4), Justification::bottom, false);
         }
     }
 
     //==============================================================================
     void paintLegacyMode (Graphics& g)
     {
-        int startChannel = legacyModeChannelRange.getStart() - 1;
-        int numChannels = legacyModeChannelRange.getEnd() - startChannel - 1;
+        auto startChannel = legacyModeChannelRange.getStart() - 1;
+        auto numChannels = legacyModeChannelRange.getEnd() - startChannel - 1;
 
 
         Rectangle<int> zoneRect (int (getChannelRectangleWidth() * startChannel), 0,

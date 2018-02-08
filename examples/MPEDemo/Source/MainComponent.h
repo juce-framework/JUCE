@@ -41,8 +41,8 @@ public:
           visualiserComp (colourPicker)
     {
         setSize (880, 720);
-        audioDeviceManager.initialise (0, 2, 0, true, String(), 0);
-        audioDeviceManager.addMidiInputCallback (String(), this);
+        audioDeviceManager.initialise (0, 2, 0, true, {}, 0);
+        audioDeviceManager.addMidiInputCallback ({}, this);
         audioDeviceManager.addAudioCallback (this);
 
         addAndMakeVisible (audioSetupComp);
@@ -60,7 +60,7 @@ public:
 
         synth.setVoiceStealingEnabled (false);
         for (int i = 0; i < 15; ++i)
-            synth.addVoice (new MPEDemoSynthVoice);
+            synth.addVoice (new MPEDemoSynthVoice());
     }
 
     ~MainComponent()
@@ -71,16 +71,16 @@ public:
     //==============================================================================
     void resized() override
     {
-        const int visualiserCompWidth = 2800;
-        const int visualiserCompHeight = 300;
-        const int zoneLayoutCompHeight = 60;
-        const float audioSetupCompRelativeWidth = 0.55f;
+        int visualiserCompWidth = 2800;
+        int visualiserCompHeight = 300;
+        int zoneLayoutCompHeight = 60;
+        float audioSetupCompRelativeWidth = 0.55f;
 
-        Rectangle<int> r (getLocalBounds());
+        auto r = getLocalBounds();
 
         visualiserViewport.setBounds (r.removeFromBottom (visualiserCompHeight));
-        visualiserComp.setBounds (Rectangle<int> (visualiserCompWidth,
-                                                  visualiserViewport.getHeight() - visualiserViewport.getScrollBarThickness()));
+        visualiserComp.setBounds ({ visualiserCompWidth,
+                                    visualiserViewport.getHeight() - visualiserViewport.getScrollBarThickness() });
 
         zoneLayoutComp.setBounds (r.removeFromBottom (zoneLayoutCompHeight));
         audioSetupComp.setBounds (r.removeFromLeft (proportionOfWidth (audioSetupCompRelativeWidth)));
@@ -102,7 +102,8 @@ public:
 
     void audioDeviceAboutToStart (AudioIODevice* device) override
     {
-        const double sampleRate = device->getCurrentSampleRate();
+        auto sampleRate = device->getCurrentSampleRate();
+
         midiCollector.reset (sampleRate);
         synth.setCurrentPlaybackSampleRate (sampleRate);
     }
@@ -121,13 +122,23 @@ private:
     }
 
     //==============================================================================
-    void zoneAdded (MPEZone newZone) override
+    void zoneChanged (bool isLowerZone, int numMemberChannels,
+                      int perNotePitchbendRange, int masterPitchbendRange) override
     {
-        MidiOutput* midiOutput = audioDeviceManager.getDefaultMidiOutput();
+        auto* midiOutput = audioDeviceManager.getDefaultMidiOutput();
         if (midiOutput != nullptr)
-            midiOutput->sendBlockOfMessagesNow (MPEMessages::addZone (newZone));
+        {
+            if (isLowerZone)
+                midiOutput->sendBlockOfMessagesNow (MPEMessages::setLowerZone (numMemberChannels, perNotePitchbendRange, masterPitchbendRange));
+            else
+                midiOutput->sendBlockOfMessagesNow (MPEMessages::setUpperZone (numMemberChannels, perNotePitchbendRange, masterPitchbendRange));
+        }
 
-        zoneLayout.addZone (newZone);
+        if (isLowerZone)
+            zoneLayout.setLowerZone (numMemberChannels, perNotePitchbendRange, masterPitchbendRange);
+        else
+            zoneLayout.setUpperZone (numMemberChannels, perNotePitchbendRange, masterPitchbendRange);
+
         visualiserInstrument.setZoneLayout (zoneLayout);
         synth.setZoneLayout (zoneLayout);
         colourPicker.setZoneLayout (zoneLayout);
@@ -135,7 +146,7 @@ private:
 
     void allZonesCleared() override
     {
-        MidiOutput* midiOutput = audioDeviceManager.getDefaultMidiOutput();
+        auto* midiOutput = audioDeviceManager.getDefaultMidiOutput();
         if (midiOutput != nullptr)
             midiOutput->sendBlockOfMessagesNow (MPEMessages::clearAllZones());
 
@@ -172,7 +183,7 @@ private:
             synth.reduceNumVoices (numberOfVoices);
         else
             while (synth.getNumVoices() < numberOfVoices)
-                synth.addVoice (new MPEDemoSynthVoice);
+                synth.addVoice (new MPEDemoSynthVoice());
     }
 
     //==============================================================================

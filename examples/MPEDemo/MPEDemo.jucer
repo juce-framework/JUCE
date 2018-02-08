@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="IilE7R" name="MPETest" projectType="guiapp" bundleIdentifier="com.roli.MPETest"
+<JUCERPROJECT id="IilE7R" name="MPEDemo" projectType="guiapp" bundleIdentifier="com.roli.MPETest"
               jucerVersion="5.2.1" displaySplashScreen="0" reportAppUsage="0"
               companyName="ROLI Ltd." companyCopyright="ROLI Ltd.">
-  <MAINGROUP id="VCQQcn" name="MPETest">
+  <MAINGROUP id="VCQQcn" name="MPEDemo">
     <GROUP id="{D43238F0-992F-BC5A-F1AA-31BBBD3D17B0}" name="Source">
       <FILE id="uRxR7V" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
       <FILE id="UgOrHf" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
@@ -21,8 +21,8 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" osxCompatibility="10.10 SDK" isDebug="1" targetName="MPETest"/>
-        <CONFIGURATION name="Release" osxCompatibility="10.10 SDK" isDebug="0" targetName="MPETest"/>
+        <CONFIGURATION name="Debug" osxCompatibility="10.10 SDK" isDebug="1" targetName="MPEDemo"/>
+        <CONFIGURATION name="Release" osxCompatibility="10.10 SDK" isDebug="0" targetName="MPEDemo"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -43,8 +43,8 @@
     </XCODE_MAC>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" targetName="MPETest"/>
-        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/" isDebug="0" targetName="MPETest"/>
+        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" targetName="MPEDemo"/>
+        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/" isDebug="0" targetName="MPEDemo"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
@@ -66,8 +66,8 @@
     <VS2015 targetFolder="Builds/VisualStudio2015">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" winArchitecture="32-bit" isDebug="1"
-                       targetName="MPETest"/>
-        <CONFIGURATION name="Release" winArchitecture="32-bit" isDebug="0" targetName="MPETest"/>
+                       targetName="MPEDemo"/>
+        <CONFIGURATION name="Release" winArchitecture="32-bit" isDebug="0" targetName="MPEDemo"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_video" path="../../modules"/>
@@ -88,8 +88,8 @@
     </VS2015>
     <VS2017 targetFolder="Builds/VisualStudio2017">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" targetName="MPETest"/>
-        <CONFIGURATION name="Release" isDebug="0" targetName="MPETest"/>
+        <CONFIGURATION name="Debug" isDebug="1" targetName="MPEDemo"/>
+        <CONFIGURATION name="Release" isDebug="0" targetName="MPEDemo"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_video" path="../../modules"/>

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="MPETest\Source">
-      <UniqueIdentifier>{4C619D3B-22E1-04C0-C5D0-079B9D4033C5}</UniqueIdentifier>
+    <Filter Include="MPEDemo\Source">
+      <UniqueIdentifier>{A5DDD243-6BE8-6763-3B38-381FFC66A24B}</UniqueIdentifier>
     </Filter>
-    <Filter Include="MPETest">
-      <UniqueIdentifier>{B247D4B4-6F9D-8C96-A514-D55062B9D9F8}</UniqueIdentifier>
+    <Filter Include="MPEDemo">
+      <UniqueIdentifier>{9C29808E-4A1F-7792-BC99-39E90332240C}</UniqueIdentifier>
     </Filter>
     <Filter Include="JUCE Modules\juce_audio_basics\audio_play_head">
       <UniqueIdentifier>{EB58F05A-A968-CEBE-40C4-107CDD8F240F}</UniqueIdentifier>
@@ -374,7 +374,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\Main.cpp">
-      <Filter>MPETest\Source</Filter>
+      <Filter>MPEDemo\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioChannelSet.cpp">
       <Filter>JUCE Modules\juce_audio_basics\buffers</Filter>
@@ -430,10 +430,10 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPESynthesiserVoice.cpp">
       <Filter>JUCE Modules\juce_audio_basics\mpe</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEValue.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEUtils.cpp">
       <Filter>JUCE Modules\juce_audio_basics\mpe</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEZone.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEValue.cpp">
       <Filter>JUCE Modules\juce_audio_basics\mpe</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEZoneLayout.cpp">
@@ -2167,22 +2167,22 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\MainComponent.h">
-      <Filter>MPETest\Source</Filter>
+      <Filter>MPEDemo\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\MPEDemoSynthVoice.h">
-      <Filter>MPETest\Source</Filter>
+      <Filter>MPEDemo\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\MPESetupComponent.h">
-      <Filter>MPETest\Source</Filter>
+      <Filter>MPEDemo\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Visualiser.h">
-      <Filter>MPETest\Source</Filter>
+      <Filter>MPEDemo\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\ZoneColourPicker.h">
-      <Filter>MPETest\Source</Filter>
+      <Filter>MPEDemo\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\ZoneLayoutComponent.h">
-      <Filter>MPETest\Source</Filter>
+      <Filter>MPEDemo\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.h">
       <Filter>JUCE Modules\juce_audio_basics\audio_play_head</Filter>
@@ -2253,10 +2253,10 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPESynthesiserVoice.h">
       <Filter>JUCE Modules\juce_audio_basics\mpe</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEValue.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEUtils.h">
       <Filter>JUCE Modules\juce_audio_basics\mpe</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEZone.h">
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEValue.h">
       <Filter>JUCE Modules\juce_audio_basics\mpe</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEZoneLayout.h">

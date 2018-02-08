@@ -34,42 +34,29 @@ public:
     ZoneColourPicker() {}
 
     //==============================================================================
-    Colour getColourForMidiChannel (int midiChannel) const noexcept
+    Colour getColourForMidiChannel (int midiChannel) noexcept
     {
         if (legacyModeEnabled)
             return Colours::white;
 
-        if (zoneLayout.getNumZones() == 0)
-            return Colours::transparentBlack;
+        if (zoneLayout.getLowerZone().isUsingChannelAsMemberChannel (midiChannel))
+            return getColourForZone (true);
 
-        if (auto* zone = zoneLayout.getZoneByChannel (midiChannel))
-            return getColourForZoneIndex (std::distance (zoneLayout.getZoneByIndex (0), zone));
+        if (zoneLayout.getUpperZone().isUsingChannelAsMemberChannel (midiChannel))
+            return getColourForZone (false);
 
         return Colours::transparentBlack;
     }
 
-    //==============================================================================
-    Colour getColourForZoneIndex (int zoneIndex) const noexcept
+    Colour getColourForZone (bool isLowerZone) const noexcept
     {
         if (legacyModeEnabled)
             return Colours::white;
 
-        if (zoneIndex >= zoneLayout.getNumZones())
-            return Colours::transparentBlack;
+        if (isLowerZone)
+            return Colours::blue;
 
-        static const std::array<Colour, 8> colours =
-        {
-            Colours::red,
-            Colours::yellow,
-            Colours::blue,
-            Colours::magenta,
-            Colours::limegreen,
-            Colours::cyan,
-            Colours::orange,
-            Colours::salmon
-        };
-
-        return colours[zoneIndex % colours.size()];
+        return Colours::red;
     }
 
     //==============================================================================

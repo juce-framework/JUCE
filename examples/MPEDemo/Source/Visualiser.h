@@ -84,7 +84,7 @@ private:
         g.setColour (zoneColour);
         Path circle, dashedCircle;
         circle.addEllipse (translateToLocalBounds (getSquareAroundCentre (getNoteOffRadius())));
-        const float dashLengths[] = { 3.0f, 3.0f };
+        float dashLengths[] = { 3.0f, 3.0f };
         PathStrokeType (2.0, PathStrokeType::mitered).createDashedStroke (dashedCircle, circle, dashLengths, 2);
         g.fillPath (dashedCircle);
     }
@@ -92,7 +92,8 @@ private:
     //==============================================================================
     void drawNoteLabel (Graphics& g, Colour zoneColour)
     {
-        Rectangle<int> textBounds = translateToLocalBounds (getTextRectangle()).getSmallestIntegerContainer();
+        auto textBounds = translateToLocalBounds (getTextRectangle()).getSmallestIntegerContainer();
+
         g.drawText ("+", textBounds, Justification::centred);
         g.drawText (MidiMessage::getMidiNoteName (note.initialNote, true, true, 3), textBounds, Justification::centredBottom);
         g.setFont (Font (22.0f, Font::bold));
@@ -131,7 +132,7 @@ class Visualiser : public Component,
 {
 public:
     //==============================================================================
-    Visualiser (const ZoneColourPicker& zoneColourPicker)
+    Visualiser (ZoneColourPicker& zoneColourPicker)
         : colourPicker (zoneColourPicker)
     {}
 
@@ -140,11 +141,12 @@ public:
     {
         g.fillAll (Colours::black);
 
-        float noteDistance = float (getWidth()) / 128;
+        auto noteDistance = float (getWidth()) / 128;
         for (int i = 0; i < 128; ++i)
         {
-            float x = noteDistance * i;
-            int noteHeight = int (MidiMessage::isMidiNoteBlack (i) ? 0.7 * getHeight() : getHeight());
+            auto x = noteDistance * i;
+            auto noteHeight = int (MidiMessage::isMidiNoteBlack (i) ? 0.7 * getHeight() : getHeight());
+
             g.setColour (MidiMessage::isMidiNoteBlack (i) ? Colours::white : Colours::grey);
             g.drawLine (x, 0.0f, x, (float) noteHeight);
 
@@ -185,7 +187,7 @@ public:
     {
         const ScopedLock sl (lock);
 
-        for (int i = activeNotes.size(); --i >= 0;)
+        for (auto i = activeNotes.size(); --i >= 0;)
             if (activeNotes.getReference(i).noteID == finishedNote.noteID)
                 activeNotes.remove (i);
 
@@ -218,7 +220,7 @@ private:
     {
         const ScopedLock sl (lock);
 
-        for (int i = noteComponents.size(); --i >= 0;)
+        for (auto i = noteComponents.size(); --i >= 0;)
             if (findActiveNote (noteComponents.getUnchecked(i)->note.noteID) == nullptr)
                 noteComponents.remove (i);
 
@@ -234,18 +236,18 @@ private:
     //==============================================================================
     Point<float> getCentrePositionForNote (MPENote note) const
     {
-        float n = float (note.initialNote) + float (note.totalPitchbendInSemitones);
-        float x = getWidth() * n / 128;
-        float y = getHeight() * (1 - note.timbre.asUnsignedFloat());
+        auto n = float (note.initialNote) + float (note.totalPitchbendInSemitones);
+        auto x = getWidth() * n / 128;
+        auto y = getHeight() * (1 - note.timbre.asUnsignedFloat());
 
-        return Point<float> (x, y);
+        return { x, y };
     }
 
     //==============================================================================
     OwnedArray<NoteComponent> noteComponents;
     CriticalSection lock;
     Array<MPENote> activeNotes;
-    const ZoneColourPicker& colourPicker;
+    ZoneColourPicker& colourPicker;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Visualiser)
 };

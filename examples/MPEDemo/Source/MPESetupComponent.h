@@ -39,7 +39,7 @@ public:
     {
     public:
         virtual ~Listener() {}
-        virtual void zoneAdded (MPEZone newZone) = 0;
+        virtual void zoneChanged (bool isLower, int numMemberChans, int perNotePb, int masterPb) = 0;
         virtual void allZonesCleared() = 0;
         virtual void legacyModeChanged (bool legacyModeEnabled, int pitchbendRange, Range<int> channelRange) = 0;
         virtual void voiceStealingEnabledChanged (bool voiceStealingEnabled) = 0;
@@ -51,22 +51,11 @@ public:
 
     //==============================================================================
     MPESetupComponent()
-        : masterChannelLabel (String(), "Master channel:"),
-          noteChannelsLabel (String(), "Nr. of note channels:"),
-          masterPitchbendRangeLabel (String(), "Master pitchbend range (semitones):"),
-          notePitchbendRangeLabel (String(), "Note pitchbend range (semitones):"),
-          addZoneButton ("Add this zone"),
-          clearAllZonesButton ("Clear all zones"),
-          legacyStartChannelLabel (String(), "First channel:"),
-          legacyEndChannelLabel (String(), "Last channel:"),
-          legacyPitchbendRangeLabel (String(), "Pitchbend range (semitones):"),
-          legacyModeEnabledToggle ("Enable Legacy Mode"),
-          voiceStealingEnabledToggle ("Enable synth voice stealing"),
-          numberOfVoicesLabel (String(), "Number of synth voices")
     {
+        addAndMakeVisible (isLowerZoneButton);
+        isLowerZoneButton.setToggleState (true, NotificationType::dontSendNotification);
 
-        initialiseComboBoxWithConsecutiveIntegers (masterChannel, masterChannelLabel, 1, 15, defaultMasterChannel);
-        initialiseComboBoxWithConsecutiveIntegers (noteChannels, noteChannelsLabel, 1, 15, defaultNoteChannels);
+        initialiseComboBoxWithConsecutiveIntegers (memberChannels, memberChannelsLabel, 0, 16, defaultMemberChannels);
         initialiseComboBoxWithConsecutiveIntegers (masterPitchbendRange, masterPitchbendRangeLabel, 0, 96, defaultMasterPitchbendRange);
         initialiseComboBoxWithConsecutiveIntegers (notePitchbendRange, notePitchbendRangeLabel, 0, 96, defaultNotePitchbendRange);
 
@@ -74,12 +63,13 @@ public:
         initialiseComboBoxWithConsecutiveIntegers (legacyEndChannel, legacyEndChannelLabel, 1, 16, 16, false);
         initialiseComboBoxWithConsecutiveIntegers (legacyPitchbendRange, legacyPitchbendRangeLabel, 0, 96, 2, false);
 
-        initialiseButton (addZoneButton);
+        initialiseButton (setZoneButton);
         initialiseButton (clearAllZonesButton);
         initialiseButton (legacyModeEnabledToggle);
         initialiseButton (voiceStealingEnabledToggle);
 
         initialiseComboBoxWithConsecutiveIntegers (numberOfVoices, numberOfVoicesLabel, 1, 20, 15);
+
         numberOfVoices.addListener (this);
     }
 
@@ -91,29 +81,29 @@ public:
         const int hspace = 6;
         const int hbigspace = 18;
 
-        masterChannel.setBounds (r.removeFromTop (h));
+        isLowerZoneButton.setBounds (r.removeFromTop (h));
         r.removeFromTop (hspace);
-        noteChannels.setBounds (r.removeFromTop (h));
+        memberChannels.setBounds (r.removeFromTop (h));
         r.removeFromTop (hspace);
         notePitchbendRange.setBounds (r.removeFromTop (h));
         r.removeFromTop (hspace);
         masterPitchbendRange.setBounds (r.removeFromTop (h));
 
-        legacyStartChannel.setBounds (masterChannel.getBounds());
-        legacyEndChannel.setBounds (noteChannels.getBounds());
+        legacyStartChannel.setBounds (isLowerZoneButton.getBounds());
+        legacyEndChannel.setBounds (memberChannels.getBounds());
         legacyPitchbendRange.setBounds (notePitchbendRange.getBounds());
 
         r.removeFromTop (hbigspace);
 
-        int buttonLeft = proportionOfWidth (0.5f);
+        auto buttonLeft = proportionOfWidth (0.5f);
 
-        addZoneButton.setBounds (r.removeFromTop (h).withLeft (buttonLeft));
+        setZoneButton.setBounds (r.removeFromTop (h).withLeft (buttonLeft));
         r.removeFromTop (hspace);
         clearAllZonesButton.setBounds (r.removeFromTop (h).withLeft (buttonLeft));
 
         r.removeFromTop (hbigspace);
 
-        int toggleLeft = proportionOfWidth (0.25f);
+        auto toggleLeft = proportionOfWidth (0.25f);
 
         legacyModeEnabledToggle.setBounds (r.removeFromTop (h).withLeft (toggleLeft));
         r.removeFromTop (hspace);
@@ -152,33 +142,26 @@ private:
     //==============================================================================
     void buttonClicked (Button* button) override
     {
-        if (button == &addZoneButton)
-            addZoneButtonClicked();
-        else if (button == &clearAllZonesButton)
-            clearAllZonesButtonClicked();
-        else if (button == &legacyModeEnabledToggle)
-            legacyModeEnabledToggleClicked();
-        else if (button == &voiceStealingEnabledToggle)
-            voiceStealingEnabledToggleClicked();
+        if      (button == &setZoneButton)               setZoneButtonClicked();
+        else if (button == &clearAllZonesButton)         clearAllZonesButtonClicked();
+        else if (button == &legacyModeEnabledToggle)     legacyModeEnabledToggleClicked();
+        else if (button == &voiceStealingEnabledToggle)  voiceStealingEnabledToggleClicked();
     }
 
     //==============================================================================
-    void addZoneButtonClicked()
+    void setZoneButtonClicked()
     {
-        if (areMPEParametersValid())
-        {
-            MPEZone newZone (masterChannel.getText().getIntValue(),
-                                        noteChannels.getText().getIntValue(),
-                                        notePitchbendRange.getText().getIntValue(),
-                                        masterPitchbendRange.getText().getIntValue());
+        auto isLowerZone = isLowerZoneButton.getToggleState();
+        auto numMemberChannels = memberChannels.getText().getIntValue();
+        auto perNotePb = notePitchbendRange.getText().getIntValue();
+        auto masterPb = masterPitchbendRange.getText().getIntValue();
 
-            zoneLayout.addZone (newZone);
-            listeners.call ([&] (Listener& l) { l.zoneAdded (newZone); });
-        }
+        if (isLowerZone)
+            zoneLayout.setLowerZone (numMemberChannels, perNotePb, masterPb);
         else
-        {
-            handleInvalidMPEParameters();
-        }
+            zoneLayout.setUpperZone (numMemberChannels, perNotePb, masterPb);
+
+        listeners.call ([&] (Listener& l) { l.zoneChanged (isLowerZone, numMemberChannels, perNotePb, masterPb); });
     }
 
     //==============================================================================
@@ -191,17 +174,17 @@ private:
     //==============================================================================
     void legacyModeEnabledToggleClicked()
     {
-        bool legacyModeEnabled = legacyModeEnabledToggle.getToggleState();
+        auto legacyModeEnabled = legacyModeEnabledToggle.getToggleState();
 
-        masterChannel.setVisible (! legacyModeEnabled);
-        noteChannels.setVisible (! legacyModeEnabled);
-        notePitchbendRange.setVisible (! legacyModeEnabled);
+        isLowerZoneButton.setVisible    (! legacyModeEnabled);
+        memberChannels.setVisible       (! legacyModeEnabled);
+        notePitchbendRange.setVisible   (! legacyModeEnabled);
         masterPitchbendRange.setVisible (! legacyModeEnabled);
-        addZoneButton.setVisible (! legacyModeEnabled);
-        clearAllZonesButton.setVisible (! legacyModeEnabled);
+        setZoneButton.setVisible        (! legacyModeEnabled);
+        clearAllZonesButton.setVisible  (! legacyModeEnabled);
 
-        legacyStartChannel.setVisible (legacyModeEnabled);
-        legacyEndChannel.setVisible (legacyModeEnabled);
+        legacyStartChannel.setVisible   (legacyModeEnabled);
+        legacyEndChannel.setVisible     (legacyModeEnabled);
         legacyPitchbendRange.setVisible (legacyModeEnabled);
 
         if (areLegacyModeParametersValid())
@@ -219,7 +202,7 @@ private:
     //==============================================================================
     void voiceStealingEnabledToggleClicked()
     {
-        bool newState = voiceStealingEnabledToggle.getToggleState();
+        auto newState = voiceStealingEnabledToggle.getToggleState();
         listeners.call ([=] (Listener& l) { l.voiceStealingEnabledChanged (newState); });
     }
 
@@ -271,21 +254,6 @@ private:
     }
 
     //==============================================================================
-    bool areMPEParametersValid() const
-    {
-        int maxPossibleNumNoteChannels = 16 - masterChannel.getText().getIntValue();
-        return noteChannels.getText().getIntValue() <= maxPossibleNumNoteChannels;
-    }
-
-    void handleInvalidMPEParameters() const
-    {
-        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                          "Invalid zone layout",
-                                          "Cannot create MPE zone:\n"
-                                          "Invalid zone parameters selected!",
-                                          "Got it");
-    }
-
     bool areLegacyModeParametersValid() const
     {
         return legacyStartChannel.getText().getIntValue() <= legacyEndChannel.getText().getIntValue();
@@ -303,27 +271,39 @@ private:
     //==============================================================================
     Range<int> getLegacyModeChannelRange() const
     {
-        return Range<int> (legacyStartChannel.getText().getIntValue(),
-                           legacyEndChannel.getText().getIntValue() + 1);
+        return { legacyStartChannel.getText().getIntValue(),
+                 legacyEndChannel.getText().getIntValue() + 1 };
     }
 
     //==============================================================================
     MPEZoneLayout zoneLayout;
 
-    ComboBox masterChannel, noteChannels, masterPitchbendRange, notePitchbendRange;
-    Label masterChannelLabel, noteChannelsLabel, masterPitchbendRangeLabel, notePitchbendRangeLabel;
-    TextButton addZoneButton, clearAllZonesButton;
+    ComboBox memberChannels, masterPitchbendRange, notePitchbendRange;
+
+    ToggleButton isLowerZoneButton  { "Lower zone" };
+
+    Label memberChannelsLabel       { {}, "Nr. of member channels:" };
+    Label masterPitchbendRangeLabel { {}, "Master pitchbend range (semitones):" };
+    Label notePitchbendRangeLabel   { {}, "Note pitchbend range (semitones):" };
+
+    TextButton setZoneButton        { "Set zone" };
+    TextButton clearAllZonesButton  { "Clear all zones" };
 
     ComboBox legacyStartChannel, legacyEndChannel, legacyPitchbendRange;
-    Label legacyStartChannelLabel, legacyEndChannelLabel, legacyPitchbendRangeLabel;
 
-    ToggleButton legacyModeEnabledToggle, voiceStealingEnabledToggle;
+    Label legacyStartChannelLabel   { {}, "First channel:" };
+    Label legacyEndChannelLabel     { {}, "Last channel:" };
+    Label legacyPitchbendRangeLabel { {}, "Pitchbend range (semitones):"};
+
+    ToggleButton legacyModeEnabledToggle    { "Enable Legacy Mode" };
+    ToggleButton voiceStealingEnabledToggle { "Enable synth voice stealing" };
+
     ComboBox numberOfVoices;
-    Label numberOfVoicesLabel;
+    Label numberOfVoicesLabel { {}, "Number of synth voices"};
 
     ListenerList<Listener> listeners;
 
-    const int defaultMasterChannel = 1, defaultNoteChannels = 15,
+    const int defaultMasterChannel = 1, defaultMemberChannels = 15,
               defaultMasterPitchbendRange = 2, defaultNotePitchbendRange = 48;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MPESetupComponent)

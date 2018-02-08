@@ -10,9 +10,9 @@
     <key>CFBundleIdentifier</key>
     <string>com.roli.MPETest</string>
     <key>CFBundleName</key>
-    <string>MPETest</string>
+    <string>MPEDemo</string>
     <key>CFBundleDisplayName</key>
-    <string>MPETest</string>
+    <string>MPEDemo</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleSignature</key>
