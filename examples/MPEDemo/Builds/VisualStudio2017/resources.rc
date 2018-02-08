@@ -15,9 +15,9 @@ BEGIN
     BEGIN
       VALUE "CompanyName",  "ROLI Ltd.\0"
       VALUE "LegalCopyright",  "ROLI Ltd.\0"
-      VALUE "FileDescription",  "MPETest\0"
+      VALUE "FileDescription",  "MPEDemo\0"
       VALUE "FileVersion",  "1.0.0\0"
-      VALUE "ProductName",  "MPETest\0"
+      VALUE "ProductName",  "MPEDemo\0"
       VALUE "ProductVersion",  "1.0.0\0"
     END
   END

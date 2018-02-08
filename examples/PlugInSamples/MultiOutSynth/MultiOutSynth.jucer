@@ -6,7 +6,7 @@
               pluginCode="MoSy" pluginChannelConfigs="" pluginIsSynth="1" pluginWantsMidiIn="1"
               pluginSilenceInIsSilenceOut="0" pluginAUExportPrefix="MultiOutSynthAU"
               pluginRTASCategory="" aaxIdentifier="com.roli.MultiOutSynth"
-              pluginAAXCategory="AAX_ePlugInCategory_SWGenerators" jucerVersion="5.2.0"
+              pluginAAXCategory="AAX_ePlugInCategory_SWGenerators" jucerVersion="5.2.1"
               companyName="ROLI Ltd." companyWebsite="www.roli.com" companyEmail="info@juce.com"
               displaySplashScreen="0" reportAppUsage="0" companyCopyright="ROLI Ltd.">
   <MAINGROUP id="uGSDhi" name="MultiOutSynth">

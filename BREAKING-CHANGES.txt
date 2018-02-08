@@ -1,9 +1,84 @@
 JUCE breaking changes
 =====================
 
-
 Develop
 =======
+
+Change
+------
+JUCE's MPE classes have been updated to reflect the official specification recently approved 
+by the MIDI Manufacturers Association (MMA).
+
+Possible Issues
+---------------
+The most significant changes have occured in the MPEZoneLayout classes and programs 
+using the higher level MPE classes such as MPEInstrument, MPESynthesiser, MPESynthesiserBase and 
+MPESynthesiserVoice should be unaffected.
+
+Previously, any MIDI channel from 1 - 15 could be selected to be the master channel of an MPE zone, 
+with a specified number of member channels ascending from the master channel + 1. However, in the 
+new specification this has been simplified so that a device only has a lower and/or an upper zone, 
+where the lower zone has master channel 1 and assigns new member channels ascending from channel 2 
+and the upper zone has master channel 16 and assigns new member channels descending from channel 15.
+
+Workaround
+----------
+Use the MPEZoneLayout::setLowerZone() and MPEZoneLayout::setUpperZone() methods to set zone layouts.
+
+Any UI that allows users to select and set zones on an MPE instrument should also 
+be updated to reflect the specification changes.
+
+Rationale
+---------
+The MPE classes in JUCE are out of date and should be updated to reflect the new, official MPE standard.
+
+
+Version 5.2.1
+=============
+
+Change
+------
+Calling JUCEApplicationBase::quit() on Android will now really quit the app,
+rather than just placing it in background. Starting with API level 21 (Android 5.0), the
+app will not appear in recent apps list after calling quit(). Prior to API 21, the app will still
+appear in recent app lists but when a user chooses the app, a new instance of the app will be started.
+
+Possible Issues
+---------------
+Any code calling JUCEApplicationBase::quit() to place the app in background will close the app instead.
+
+Workaround
+----------
+Use Process::hide().
+
+Rationale
+---------
+The old behaviour JUCEApplicationBase::quit() was confusing JUCE code, as a new instance of JUCE
+app was attempted to be created, while the older instance was still running in background. This
+would result in assertions when starting a second instance.
+
+
+Change
+------
+Calling JUCEApplicationBase::quit() on Android will now really quit the app,
+rather than just placing it in background. Starting with API level 21 (Android 5.0), the
+app will not appear in recent apps list after calling quit(). Prior to API 21, the app will still
+appear in recent app lists but when a user chooses the app, a new instance of the app will be started.
+
+Possible Issues
+---------------
+Any code calling JUCEApplicationBase::quit() to place the app in background will close the app instead.
+
+Workaround
+----------
+Use Process::hide().
+
+Rationale
+---------
+The old behaviour JUCEApplicationBase::quit() was confusing JUCE code, as a new instance of JUCE
+app was attempted to be created, while the older instance was still running in background. This
+would result in assertions when starting a second instance.
+
 
 Change
 ------
@@ -42,7 +117,6 @@ to push plug-in vendors to use the dynamic runtime. To help with this, JUCE has 
 dynamic runtime linkage the default in JUCE.
 
 
-
 Change
 ------
 AudioProcessorGraph interface has changed in a number of ways - Node objects
@@ -63,32 +137,6 @@ Rationale
 The graph class was extremely old and creaky, and these changes is the start of
 an improvement process that should eventually result in it being broken down
 into fundamental graph building block classes for use in other contexts.
-
-
-Change
-------
-Calling JUCEApplicationBase::quit() on Android will now really quit the app,
-rather than just placing it in background. Starting with API level 21 (Android 5.0), the
-app will not appear in recent apps list after calling quit(). Prior to API 21, the app will still
-appear in recent app lists but when a user chooses the app, a new instance of the app will be started.
-
-
-Possible Issues
----------------
-Any code calling JUCEApplicationBase::quit() to place the app in background will close the app instead.
-
-
-Workaround
-----------
-Use Process::hide().
-
-
-Rationale
----------
-The old behaviour JUCEApplicationBase::quit() was confusing JUCE code, as a new instance of JUCE
-app was attempted to be created, while the older instance was still running in background. This
-would result in assertions when starting a second instance.
-
 
 
 Version 5.2.0
@@ -271,7 +319,6 @@ few are required. This change to DynamicObject is required to support
 truncating those numbers.
 
 
-
 Version 5.1.0
 =============
 
@@ -385,7 +432,6 @@ confusing and unintuitive. Furthermore, this aligns JUCE's Atomic type with
 std::atomic.
 
 
-
 Version 4.3.1
 =============
 
@@ -414,7 +460,6 @@ AudioUnits, JUCE uses a hash function to generate a numeric id. However, some
 VST3/AudioUnit hosts (specifically Studio One) have a bug that ignore any
 parameters that have a negative parameter id. Therefore, the hash function for
 VST3/AudioUnits needed to be changed to only return positive-valued hashes.
-
 
 
 Version 4.3.0
@@ -481,7 +526,6 @@ in which the channel configurations appear in the legacy "Channel layout
 configuration" field.
 
 
-
 Version 4.2.1
 =============
 
@@ -520,4 +564,3 @@ their plug-in.
 Most plug-in backends differentiate between a parameter’s id an index, so this
 distinction was adopted starting with JUCE 4.2.1 by deriving the parameter’s
 unique id from the paramID property of AudioProcessorParameterWithID class.
-

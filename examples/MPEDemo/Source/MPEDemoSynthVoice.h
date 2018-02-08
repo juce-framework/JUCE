@@ -32,10 +32,7 @@ class MPEDemoSynthVoice : public MPESynthesiserVoice
 {
 public:
     //==============================================================================
-    MPEDemoSynthVoice()
-        : phase (0.0), phaseDelta (0.0), tailOff (0.0)
-    {
-    }
+    MPEDemoSynthVoice()  {}
 
     //==============================================================================
     void noteStarted() override
@@ -49,7 +46,7 @@ public:
         timbre.setValue (currentlyPlayingNote.timbre.asUnsignedFloat());
 
         phase = 0.0;
-        const double cyclesPerSample = frequency.getNextValue() / currentSampleRate;
+        auto cyclesPerSample = frequency.getNextValue() / currentSampleRate;
         phaseDelta = MathConstants<double>::twoPi * cyclesPerSample;
 
         tailOff = 0.0;
@@ -65,8 +62,7 @@ public:
             // this and do a fade out, calling clearCurrentNote() when it's finished.
 
             if (tailOff == 0.0) // we only need to begin a tail-off if it's not already doing so - the
-                                // stopNote method could be called more than once.
-                tailOff = 1.0;
+                tailOff = 1.0;  // stopNote method could be called more than once.
         }
         else
         {
@@ -119,9 +115,9 @@ public:
             {
                 while (--numSamples >= 0)
                 {
-                    const float currentSample = getNextSample() * (float) tailOff;
+                    auto currentSample = getNextSample() * (float) tailOff;
 
-                    for (int i = outputBuffer.getNumChannels(); --i >= 0;)
+                    for (auto i = outputBuffer.getNumChannels(); --i >= 0;)
                         outputBuffer.addSample (i, startSample, currentSample);
 
                     ++startSample;
@@ -141,9 +137,9 @@ public:
             {
                 while (--numSamples >= 0)
                 {
-                    const float currentSample = getNextSample();
+                    auto currentSample = getNextSample();
 
-                    for (int i = outputBuffer.getNumChannels(); --i >= 0;)
+                    for (auto i = outputBuffer.getNumChannels(); --i >= 0;)
                         outputBuffer.addSample (i, startSample, currentSample);
 
                     ++startSample;
@@ -156,18 +152,18 @@ private:
     //==============================================================================
     float getNextSample() noexcept
     {
-        const double levelDb = (level.getNextValue() - 1.0) * maxLevelDb;
-        const double amplitude = std::pow (10.0f, 0.05f * levelDb) * maxLevel;
+        auto levelDb = (level.getNextValue() - 1.0) * maxLevelDb;
+        auto amplitude = std::pow (10.0f, 0.05f * levelDb) * maxLevel;
 
         // timbre is used to blend between a sine and a square.
-        const double f1 = std::sin (phase);
-        const double f2 = std::copysign (1.0, f1);
-        const double a2 = timbre.getNextValue();
-        const double a1 = 1.0 - a2;
+        auto f1 = std::sin (phase);
+        auto f2 = std::copysign (1.0, f1);
+        auto a2 = timbre.getNextValue();
+        auto a1 = 1.0 - a2;
 
-        const float nextSample = float (amplitude * ((a1 * f1) + (a2 * f2)));
+        auto nextSample = float (amplitude * ((a1 * f1) + (a2 * f2)));
 
-        const double cyclesPerSample = frequency.getNextValue() / currentSampleRate;
+        auto cyclesPerSample = frequency.getNextValue() / currentSampleRate;
         phaseDelta = MathConstants<double>::twoPi * cyclesPerSample;
         phase = std::fmod (phase + phaseDelta, MathConstants<double>::twoPi);
 
@@ -176,7 +172,10 @@ private:
 
     //==============================================================================
     LinearSmoothedValue<double> level, timbre, frequency;
-    double phase, phaseDelta, tailOff;
+
+    double phase = 0.0;
+    double phaseDelta = 0.0;
+    double tailOff = 0.0;
 
     const double maxLevel = 0.05f;
     const double maxLevelDb = 31.0f;

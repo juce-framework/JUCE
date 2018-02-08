@@ -75,7 +75,7 @@
 		B238642BCD1B9A2C199F4DBF = {isa = PBXFileReference; lastKnownFileType = file; name = "juce_audio_devices"; path = "../../../../modules/juce_audio_devices"; sourceTree = "SOURCE_ROOT"; };
 		B28DF2C453E72E37695C06FE = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_audio_processors.mm"; path = "../../JuceLibraryCode/include_juce_audio_processors.mm"; sourceTree = "SOURCE_ROOT"; };
 		B9D41F779C018E18CEDD66B8 = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_core.mm"; path = "../../JuceLibraryCode/include_juce_core.mm"; sourceTree = "SOURCE_ROOT"; };
-		BCC50B48B1A4B967949B2DB2 = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MPETest.app; sourceTree = "BUILT_PRODUCTS_DIR"; };
+		BCC50B48B1A4B967949B2DB2 = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MPEDemo.app; sourceTree = "BUILT_PRODUCTS_DIR"; };
 		BDEC3EEA7DFFC78C00075A2A = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = "include_juce_audio_devices.mm"; path = "../../JuceLibraryCode/include_juce_audio_devices.mm"; sourceTree = "SOURCE_ROOT"; };
 		C64527E74752ECF0B056A9F5 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		CCC23D1BCFBE5FFC700F8608 = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
@@ -100,7 +100,7 @@
 					8A339D25116C57AC5F0FFBCD,
 					AB1DE39BFBA22179B919703B, ); name = Source; sourceTree = "<group>"; };
 		C69BCE512948465235B05858 = {isa = PBXGroup; children = (
-					47DF0B5F0B14AE411808F7CE, ); name = MPETest; sourceTree = "<group>"; };
+					47DF0B5F0B14AE411808F7CE, ); name = MPEDemo; sourceTree = "<group>"; };
 		38592324982B511EF7CF4FE1 = {isa = PBXGroup; children = (
 					947FE6943BE8210665728E5A,
 					B238642BCD1B9A2C199F4DBF,
@@ -259,7 +259,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_NAME = "MPETest";
+				PRODUCT_NAME = "MPEDemo";
 				WARNING_CFLAGS = -Wreorder;
 				ZERO_LINK = NO; }; name = Debug; };
 		40FE0A8C9EA53BF7A25086B3 = {isa = XCBuildConfiguration; buildSettings = {
@@ -295,7 +295,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				PRODUCT_NAME = "MPETest";
+				PRODUCT_NAME = "MPEDemo";
 				WARNING_CFLAGS = -Wreorder;
 				ZERO_LINK = NO; }; name = Release; };
 		33F09A62C3878F91E38BA7B3 = {isa = PBXTargetDependency; target = 0DF05A38ED8E8BF6EB7D9C5C; };
@@ -341,7 +341,7 @@
 		0DF05A38ED8E8BF6EB7D9C5C = {isa = PBXNativeTarget; buildConfigurationList = 20A88B838659B5B766A08F56; buildPhases = (
 					518008B4BCAC2EDE2921458A,
 					EF758DF42F97B8D22FD35F80,
-					AF94D754542EEF998EE0EF72, ); buildRules = ( ); dependencies = (  ); name = "MPETest - App"; productName = MPETest; productReference = BCC50B48B1A4B967949B2DB2; productType = "com.apple.product-type.application"; };
+					AF94D754542EEF998EE0EF72, ); buildRules = ( ); dependencies = (  ); name = "MPEDemo - App"; productName = MPEDemo; productReference = BCC50B48B1A4B967949B2DB2; productType = "com.apple.product-type.application"; };
 		9606743A47FFF871B775B1AB = {isa = PBXProject; buildConfigurationList = CC7502C8943D2FC599DFC557; attributes = { LastUpgradeCheck = 0830; ORGANIZATIONNAME = "ROLI Ltd."; TargetAttributes = { 0DF05A38ED8E8BF6EB7D9C5C = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; }; }; }; }; compatibilityVersion = "Xcode 3.2"; hasScannedForEncodings = 0; mainGroup = 9F958921F12E7C784E909D34; projectDirPath = ""; projectRoot = ""; targets = (0DF05A38ED8E8BF6EB7D9C5C); };
 	};
 	rootObject = 9606743A47FFF871B775B1AB;

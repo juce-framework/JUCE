@@ -129,6 +129,11 @@ public:
     */
     static String getDeviceDescription();
 
+    /** This will attempt to return the manufacturer of the device.
+        If no description is available, it'll just return an empty string.
+    */
+    static String getDeviceManufacturer();
+
     /** This method calculates some IDs to uniquely identify the device.
 
         The first choice for an ID is a filesystem ID for the user's home folder or

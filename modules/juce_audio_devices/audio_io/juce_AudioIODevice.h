@@ -75,9 +75,11 @@ public:
         @param numSamples           the number of samples in each channel of the input and
                                     output arrays. The number of samples will depend on the
                                     audio device's buffer size and will usually remain constant,
-                                    although this isn't guaranteed, so make sure your code can
-                                    cope with reasonable changes in the buffer size from one
-                                    callback to the next.
+                                    although this isn't guaranteed. For example, on Android,
+                                    on devices which support it, Android will chop up your audio
+                                    processing into several smaller callbacks to ensure higher audio
+                                    performance. So make sure your code can cope with reasonable
+                                    changes in the buffer size from one callback to the next.
     */
     virtual void audioDeviceIOCallback (const float** inputChannelData,
                                         int numInputChannels,

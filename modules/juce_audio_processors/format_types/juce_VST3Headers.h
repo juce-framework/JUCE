@@ -46,6 +46,7 @@
  #pragma clang diagnostic ignored "-Wdelete-non-virtual-dtor"
  #pragma clang diagnostic ignored "-Wdeprecated-declarations"
  #pragma clang diagnostic ignored "-Wextra-semi"
+ #pragma clang diagnostic ignored "-Wmissing-braces"
  #if __has_warning("-Wcomma")
   #pragma clang diagnostic ignored "-Wcomma"
  #endif
@@ -88,6 +89,7 @@
  #include <pluginterfaces/vst/ivstchannelcontextinfo.h>
  #include <public.sdk/source/common/memorystream.h>
  #include <public.sdk/source/vst/vsteditcontroller.h>
+ #include <public.sdk/source/vst/vstpresetfile.h>
 #else
  // needed for VST_VSERION
  #include <pluginterfaces/vst/vsttypes.h>
@@ -121,6 +123,7 @@
  #include <public.sdk/source/vst/vstcomponent.cpp>
  #include <public.sdk/source/vst/vstcomponentbase.cpp>
  #include <public.sdk/source/vst/vstparameters.cpp>
+ #include <public.sdk/source/vst/vstpresetfile.cpp>
  #include <public.sdk/source/vst/hosting/hostclasses.cpp>
 
 //==============================================================================

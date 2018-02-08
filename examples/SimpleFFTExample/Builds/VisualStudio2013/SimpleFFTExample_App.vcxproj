@@ -203,10 +203,10 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPESynthesiserVoice.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEValue.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEUtils.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEZone.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEValue.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEZoneLayout.cpp">
@@ -1810,8 +1810,8 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPESynthesiser.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPESynthesiserBase.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPESynthesiserVoice.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEUtils.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEValue.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEZone.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\mpe\juce_MPEZoneLayout.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\native\juce_mac_CoreAudioLayouts.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\sources\juce_AudioSource.h"/>

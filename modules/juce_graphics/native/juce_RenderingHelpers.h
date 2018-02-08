@@ -41,10 +41,8 @@ namespace RenderingHelpers
 class TranslationOrTransform
 {
 public:
-    TranslationOrTransform (Point<int> origin) noexcept
-        : offset (origin)
-    {
-    }
+    TranslationOrTransform() noexcept {}
+    TranslationOrTransform (Point<int> origin) noexcept  : offset (origin) {}
 
     TranslationOrTransform (const TranslationOrTransform& other) noexcept
         : complexTransform (other.complexTransform), offset (other.offset),
@@ -64,6 +62,11 @@ public:
                                 : userTransform.followedBy (complexTransform);
     }
 
+    bool isIdentity() const noexcept
+    {
+        return isOnlyTranslated && offset.isOrigin();
+    }
+
     void setOrigin (Point<int> delta) noexcept
     {
         if (isOnlyTranslated)
@@ -77,8 +80,8 @@ public:
     {
         if (isOnlyTranslated && t.isOnlyTranslation())
         {
-            const int tx = (int) (t.getTranslationX() * 256.0f);
-            const int ty = (int) (t.getTranslationY() * 256.0f);
+            auto tx = (int) (t.getTranslationX() * 256.0f);
+            auto ty = (int) (t.getTranslationY() * 256.0f);
 
             if (((tx | ty) & 0xf8) == 0)
             {
@@ -412,8 +415,7 @@ namespace GradientPixelIterators
 
             if (! transform.isIdentity())
             {
-                const Line<float> l (p2, p1);
-                auto p3 = l.getPointAlongLine (0.0f, 100.0f);
+                auto p3 = Line<float> (p2, p1).getPointAlongLine (0.0f, 100.0f);
 
                 p1.applyTransform (transform);
                 p2.applyTransform (transform);
@@ -1653,7 +1655,9 @@ struct ClipRegions
         EdgeTableRegion (const RectangleList<int>& r)   : edgeTable (r) {}
         EdgeTableRegion (const RectangleList<float>& r) : edgeTable (r) {}
         EdgeTableRegion (Rectangle<int> bounds, const Path& p, const AffineTransform& t) : edgeTable (bounds, p, t) {}
+
         EdgeTableRegion (const EdgeTableRegion& other)  : Base(), edgeTable (other.edgeTable) {}
+        EdgeTableRegion& operator= (const EdgeTableRegion&) = delete;
 
         typedef typename Base::Ptr Ptr;
 
@@ -1826,8 +1830,6 @@ struct ClipRegions
             for (int y = 0; y < r.getHeight(); ++y)
                 renderer.clipEdgeTableLine (edgeTable, r.getX(), y + r.getY(), r.getWidth());
         }
-
-        EdgeTableRegion& operator= (const EdgeTableRegion&);
     };
 
     //==============================================================================
@@ -2073,7 +2075,7 @@ public:
     typedef typename ClipRegions<SavedStateType>::RectangleListRegion    RectangleListRegionType;
 
     SavedStateBase (Rectangle<int> initialClip)
-        : clip (new RectangleListRegionType (initialClip)), transform (Point<int>()),
+        : clip (new RectangleListRegionType (initialClip)),
           interpolationQuality (Graphics::mediumResamplingQuality), transparencyLayerAlpha (1.0f)
     {
     }
@@ -2111,7 +2113,7 @@ public:
             {
                 Path p;
                 p.addRectangle (r);
-                clipToPath (p, AffineTransform());
+                clipToPath (p, {});
             }
         }
 
@@ -2125,9 +2127,17 @@ public:
             if (transform.isOnlyTranslated)
             {
                 cloneClipIfMultiplyReferenced();
-                RectangleList<int> offsetList (r);
-                offsetList.offsetAll (transform.offset.x, transform.offset.y);
-                clip = clip->clipToRectangleList (offsetList);
+
+                if (transform.isIdentity())
+                {
+                    clip = clip->clipToRectangleList (r);
+                }
+                else
+                {
+                    RectangleList<int> offsetList (r);
+                    offsetList.offsetAll (transform.offset);
+                    clip = clip->clipToRectangleList (offsetList);
+                }
             }
             else if (! transform.isRotated)
             {
@@ -2141,7 +2151,7 @@ public:
             }
             else
             {
-                clipToPath (r.toPath(), AffineTransform());
+                clipToPath (r.toPath(), {});
             }
         }
 
@@ -2179,7 +2189,7 @@ public:
                 p.applyTransform (transform.complexTransform);
                 p.addRectangle (clip->getClipBounds().toFloat());
                 p.setUsingNonZeroWinding (false);
-                clip = clip->clipToPath (p, AffineTransform());
+                clip = clip->clipToPath (p, {});
             }
         }
 
@@ -2272,7 +2282,7 @@ public:
     {
         Path p;
         p.addRectangle (r);
-        fillPath (p, AffineTransform());
+        fillPath (p, {});
     }
 
     void fillRect (Rectangle<int> r, bool replaceContents)
@@ -2315,7 +2325,11 @@ public:
             if (list.getNumRectangles() == 1)
                 return fillRect (*list.begin());
 
-            if (! transform.isRotated)
+            if (transform.isIdentity())
+            {
+                fillShape (new EdgeTableRegionType (list), false);
+            }
+            else if (! transform.isRotated)
             {
                 RectangleList<float> transformed (list);
 
@@ -2328,7 +2342,7 @@ public:
             }
             else
             {
-                fillPath (list.toPath(), AffineTransform());
+                fillPath (list.toPath(), {});
             }
         }
     }
@@ -2377,12 +2391,12 @@ public:
             renderImage (sourceImage, trans, nullptr);
     }
 
-    static bool isOnlyTranslationAllowingError (const AffineTransform& t)
+    static bool isOnlyTranslationAllowingError (const AffineTransform& t, float tolerence) noexcept
     {
-        return std::abs (t.mat01) < 0.002
-            && std::abs (t.mat10) < 0.002
-            && std::abs (t.mat00 - 1.0f) < 0.002
-            && std::abs (t.mat11 - 1.0f) < 0.002;
+        return std::abs (t.mat01) < tolerence
+            && std::abs (t.mat10) < tolerence
+            && std::abs (t.mat00 - 1.0f) < tolerence
+            && std::abs (t.mat11 - 1.0f) < tolerence;
     }
 
     void renderImage (const Image& sourceImage, const AffineTransform& trans, const BaseRegionType* tiledFillClipRegion)
@@ -2390,7 +2404,7 @@ public:
         auto t = transform.getTransformWith (trans);
         auto alpha = fillType.colour.getAlpha();
 
-        if (isOnlyTranslationAllowingError (t))
+        if (isOnlyTranslationAllowingError (t, 0.002f))
         {
             // If our translation doesn't involve any distortion, just use a simple blit..
             auto tx = (int) (t.getTranslationX() * 256.0f);
@@ -2460,7 +2474,7 @@ public:
                     // If our translation doesn't involve any distortion, we can speed it up..
                     g2.point1.applyTransform (t);
                     g2.point2.applyTransform (t);
-                    t = AffineTransform();
+                    t = {};
                 }
 
                 shapeToFill->fillAllWithGradient (getThis(), g2, t, isIdentity);

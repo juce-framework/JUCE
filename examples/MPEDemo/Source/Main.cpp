@@ -29,7 +29,7 @@
 #include <array>
 
 
-struct MPETestClasses
+struct MPEDemoClasses
 {
     #include "MPESetupComponent.h"
     #include "ZoneColourPicker.h"
@@ -41,11 +41,11 @@ struct MPETestClasses
 
 
 //==============================================================================
-class MPETestApplication  : public JUCEApplication
+class MPEDemoApplication  : public JUCEApplication
 {
 public:
     //==============================================================================
-    MPETestApplication() {}
+    MPEDemoApplication() {}
 
     const String getApplicationName() override       { return ProjectInfo::projectName; }
     const String getApplicationVersion() override    { return ProjectInfo::versionString; }
@@ -74,11 +74,11 @@ public:
         MainWindow (String name)
             : DocumentWindow (name,
                               LookAndFeel::getDefaultLookAndFeel()
-                                           .findColour (ResizableWindow::backgroundColourId),
+                                          .findColour (ResizableWindow::backgroundColourId),
                               DocumentWindow::allButtons)
         {
             setUsingNativeTitleBar (true);
-            setContentOwned (new MPETestClasses::MainComponent(), true);
+            setContentOwned (new MPEDemoClasses::MainComponent(), true);
 
             centreWithSize (getWidth(), getHeight());
             setVisible (true);
@@ -98,4 +98,4 @@ private:
 };
 
 //==============================================================================
-START_JUCE_APPLICATION (MPETestApplication)
+START_JUCE_APPLICATION (MPEDemoApplication)

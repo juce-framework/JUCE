@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="fyUrFS" name="BouncingBallWavetableDemo" projectType="guiapp"
-              bundleIdentifier="com.juce.BouncingBallWavetableDemo" jucerVersion="5.2.0"
+              bundleIdentifier="com.juce.BouncingBallWavetableDemo" jucerVersion="5.2.1"
               displaySplashScreen="0" reportAppUsage="0" companyName="ROLI Ltd."
               companyCopyright="ROLI Ltd.">
   <MAINGROUP id="MgjqDB" name="BouncingBallWavetableDemo">

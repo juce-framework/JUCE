@@ -6,7 +6,7 @@
               pluginManufacturer="ROLI Ltd." pluginManufacturerCode="ROLI"
               pluginCode="AUv3" pluginChannelConfigs="" pluginIsSynth="1" pluginWantsMidiIn="1"
               pluginAUExportPrefix="AUv3SynthAU" pluginRTASCategory="" aaxIdentifier="com.roli.development.AUv3Synth"
-              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.2.0"
+              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.2.1"
               buildStandalone="1" displaySplashScreen="0" reportAppUsage="0"
               companyName="ROLI Ltd." companyCopyright="ROLI Ltd.">
   <MAINGROUP id="h0gx6L" name="AUv3Synth">

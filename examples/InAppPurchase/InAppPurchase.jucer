@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="bSx0Ct" name="InAppPurchase" displaySplashScreen="0" reportAppUsage="1"
               projectType="guiapp" version="0.0.2" bundleIdentifier="com.roli.juceInAppPurchaseSample"
-              jucerVersion="5.2.0" companyName="ROLI Ltd." companyWebsite="www.juce.com"
+              jucerVersion="5.2.1" companyName="ROLI Ltd." companyWebsite="www.juce.com"
               companyEmail="info@juce.com" companyCopyright="ROLI Ltd.">
   <MAINGROUP id="y4sxBT" name="InAppPurchase">
     <GROUP id="{D5BB0A26-3258-B6DA-ED7A-A306325E64AE}" name="BinaryData">
