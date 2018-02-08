@@ -5,7 +5,7 @@
               pluginManufacturerCode="ROLI" pluginCode="Arpg" pluginChannelConfigs=""
               pluginIsMidiEffectPlugin="1" pluginSilenceInIsSilenceOut="0"
               pluginAUExportPrefix="ArpeggiatorAU" pluginRTASCategory="" aaxIdentifier="com.roli.Arpeggiator"
-              pluginAAXCategory="AAX_EPlugInCategory_Effect" jucerVersion="5.2.0"
+              pluginAAXCategory="AAX_EPlugInCategory_Effect" jucerVersion="5.2.1"
               companyName="ROLI Ltd." companyWebsite="www.juce.com" companyEmail="info@juce.com"
               displaySplashScreen="0" reportAppUsage="0" companyCopyright="ROLI Ltd.">
   <MAINGROUP id="l0H2am" name="Arpeggiator">

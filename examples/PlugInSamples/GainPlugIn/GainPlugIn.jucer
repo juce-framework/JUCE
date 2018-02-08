@@ -5,7 +5,7 @@
               pluginManufacturer="ROLI Ltd." pluginManufacturerCode="ROLI"
               pluginCode="Gain" pluginChannelConfigs="" pluginSilenceInIsSilenceOut="1"
               pluginAUExportPrefix="GainPlugInAU" pluginRTASCategory="" aaxIdentifier="com.roli.GainPlugIn"
-              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.2.0"
+              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.2.1"
               displaySplashScreen="0" reportAppUsage="0" companyName="ROLI Ltd."
               companyCopyright="ROLI Ltd.">
   <MAINGROUP id="sXaVAU" name="GainPlugIn">

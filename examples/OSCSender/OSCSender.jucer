@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="rysVAr" name="OSCSender" projectType="guiapp" bundleIdentifier="com.roli.OSCSender"
-              jucerVersion="5.2.0" displaySplashScreen="0" reportAppUsage="0"
+              jucerVersion="5.2.1" displaySplashScreen="0" reportAppUsage="0"
               companyName="ROLI Ltd." companyCopyright="ROLI Ltd.">
   <MAINGROUP id="knnZZJ" name="OSCSender">
     <GROUP id="{F2A0007A-4D24-4DD6-DEC8-6428F36CE45D}" name="Source">

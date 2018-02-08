@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="Z3D0EG" name="AnalyticsCollection" displaySplashScreen="0"
-              companyCopyright="ROLI Ltd." jucerVersion="5.2.0" reportAppUsage="0"
+              companyCopyright="ROLI Ltd." jucerVersion="5.2.1" reportAppUsage="0"
               projectType="guiapp" companyName="ROLI Ltd.">
   <MAINGROUP id="aOi9Tf" name="AnalyticsCollection">
     <GROUP id="{527B2E17-B1B1-B919-CBEA-231058E23D74}" name="Source">

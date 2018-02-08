@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="tTAKTK1s" name="HelloWorld" projectType="guiapp" juceFolder="../../../juce"
-              jucerVersion="5.2.0" bundleIdentifier="com.roli.jucehelloworld"
+              jucerVersion="5.2.1" bundleIdentifier="com.roli.jucehelloworld"
               companyName="ROLI Ltd." displaySplashScreen="0" reportAppUsage="0"
               companyCopyright="ROLI Ltd.">
   <EXPORTFORMATS>

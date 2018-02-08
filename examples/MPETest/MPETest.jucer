@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="IilE7R" name="MPETest" projectType="guiapp" bundleIdentifier="com.roli.MPETest"
-              jucerVersion="5.2.0" displaySplashScreen="0" reportAppUsage="0"
+              jucerVersion="5.2.1" displaySplashScreen="0" reportAppUsage="0"
               companyName="ROLI Ltd." companyCopyright="ROLI Ltd.">
   <MAINGROUP id="VCQQcn" name="MPETest">
     <GROUP id="{D43238F0-992F-BC5A-F1AA-31BBBD3D17B0}" name="Source">

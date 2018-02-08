@@ -7,7 +7,7 @@
               pluginManufacturer="ROLI Ltd." pluginManufacturerCode="ROLI"
               pluginCode="IAAE" pluginChannelConfigs="" pluginAUExportPrefix="InterAppAudioEffectAU"
               pluginRTASCategory="" aaxIdentifier="com.yourcompany.InterAppAudioEffect"
-              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.2.0"
+              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.2.1"
               companyName="ROLI Ltd." buildStandalone="1" displaySplashScreen="0"
               reportAppUsage="0" companyCopyright="ROLI Ltd." buildVST3="0">
   <MAINGROUP id="BhTVmm" name="InterAppAudioEffect">
