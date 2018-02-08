@@ -37,6 +37,7 @@ namespace juce
 struct JUCE_API  MPENote
 {
     //==============================================================================
+    /** Possible values for the note key state. */
     enum KeyState
     {
         off                  = 0, /**< The key is up (off). */
@@ -48,8 +49,8 @@ struct JUCE_API  MPENote
     //==============================================================================
     /** Constructor.
 
-        @param midiChannel    The MIDI channel of the note, between 2 and 16.
-                              (Channel 1 can never be a note channel in MPE).
+        @param midiChannel    The MIDI channel of the note, between 2 and 15.
+                              (Channel 1 and channel 16 can never be note channels in MPE).
 
         @param initialNote    The MIDI note number, between 0 and 127.
 
@@ -129,8 +130,13 @@ struct JUCE_API  MPENote
     */
     MPEValue pressure        { MPEValue::centreValue() };
 
-    /** Current value of the note's third expressive dimension, tyically
-         encoding some kind of timbre parameter.
+    /** Inital value of timbre when the note was triggered.
+        This should never change during the lifetime of an MPENote object.
+    */
+    MPEValue initialTimbre   { MPEValue::centreValue() };
+
+    /** Current value of the note's third expressive dimension, typically
+        encoding some kind of timbre parameter.
         This dimension can be modulated while the note sounds.
     */
     MPEValue timbre          { MPEValue::centreValue() };
@@ -139,7 +145,7 @@ struct JUCE_API  MPENote
         received.
         This dimension will only have a meaningful value after a note-off has
         been received for the note (and keyState is set to MPENote::off or
-        MPENOte::sustained). Initially, the value is undefined.
+        MPENote::sustained). Initially, the value is undefined.
     */
     MPEValue noteOffVelocity { MPEValue::minValue() };
 
@@ -161,7 +167,7 @@ struct JUCE_API  MPENote
     KeyState keyState        { MPENote::off };
 
     //==============================================================================
-    /** Returns the current frequency of the note in Hertz. This is the a sum of
+    /** Returns the current frequency of the note in Hertz. This is the sum of
         the initialNote and the totalPitchbendInSemitones, converted to Hertz.
     */
     double getFrequencyInHertz (double frequencyOfA = 440.0) const noexcept;
