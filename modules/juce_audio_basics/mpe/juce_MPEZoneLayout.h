@@ -102,6 +102,13 @@ public:
                              : (channel < 16 && channel >= 16 - numMemberChannels);
         }
 
+        bool operator== (const Zone& other) const noexcept    { return lowerZone == other.lowerZone
+                                                                    && numMemberChannels == other.numMemberChannels
+                                                                    && perNotePitchbendRange == other.perNotePitchbendRange
+                                                                    && masterPitchbendRange == other.masterPitchbendRange; }
+
+        bool operator!= (const Zone& other) const noexcept    { return ! operator== (other); }
+
         int numMemberChannels;
         int perNotePitchbendRange;
         int masterPitchbendRange;
