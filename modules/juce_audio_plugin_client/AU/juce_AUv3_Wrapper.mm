@@ -1412,12 +1412,11 @@ private:
            #endif
 
             midiMessages.clear();
+
+          // copy back
+          audioBuffer.pop (*outBusBuffers[(int) outputBusNumber]->get(),
+                           mapper.get (false, (int) outputBusNumber));
         }
-
-        // copy back
-        audioBuffer.pop (*outBusBuffers[(int) outputBusNumber]->get(),
-                         mapper.get (false, (int) outputBusNumber));
-
         return noErr;
     }
 
