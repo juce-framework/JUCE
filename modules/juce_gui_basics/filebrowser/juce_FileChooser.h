@@ -66,7 +66,12 @@ public:
         @param initialFileOrDirectory         the file or directory that should be selected
                                               when the dialog box opens. If this parameter is
                                               set to File(), a sensible default directory will
-                                              be used instead.
+                                              be used instead. When using native dialogs, not
+                                              all platforms will actually select the file. For
+                                              example, on macOS, when initialFileOrDirectory is
+                                              a file, only the parent directory of
+                                              initialFileOrDirectory will be used as the initial
+                                              directory of the native file chooser.
 
                                               Note: on iOS when saving a file, a user will not
                                               be able to change a file name, so it may be a good

@@ -76,7 +76,7 @@ public:
 
 private:
     //==============================================================================
-    File lastDirectory;
+    File lastDirectory, fileWaitingToBeSelected;
     class ItemComponent;
 
     void changeListenerCallback (ChangeBroadcaster*) override;
