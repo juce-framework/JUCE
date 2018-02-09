@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /*
   ==============================================================================
 
@@ -748,7 +747,6 @@ public class JUCENetworkGraphicsDemo   extends Activity
         {
             if (host == 0)
                 return;
-
             handlePaint (host, canvas, paint);
         }
 
