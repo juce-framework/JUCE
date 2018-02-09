@@ -33,26 +33,6 @@
 #import <AudioToolbox/AudioToolbox.h>
 #import <AVFoundation/AVFoundation.h>
 
-#if JUCE_MAC
- #if (! defined MAC_OS_X_VERSION_MIN_REQUIRED) || (! defined MAC_OS_X_VERSION_10_11) || (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_11)
-  #error AUv3 needs Deployment Target OS X 10.11 or higher to compile
- #endif
- #if (defined MAC_OS_X_VERSION_10_13) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_13)
-  #define JUCE_AUV3_MIDI_OUTPUT_SUPPORTED 1
-  #define JUCE_AUV3_VIEW_CONFIG_SUPPORTED 1
- #endif
-#endif
-
-#if JUCE_IOS
- #if (! defined __IPHONE_OS_VERSION_MIN_REQUIRED) || (! defined __IPHONE_9_0) || (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_9_0)
-  #error AUv3 needs Deployment Target iOS 9.0 or higher to compile
- #endif
- #if (defined __IPHONE_11_0) && (__IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_11_0)
-  #define JUCE_AUV3_MIDI_OUTPUT_SUPPORTED 1
-  #define JUCE_AUV3_VIEW_CONFIG_SUPPORTED 1
- #endif
-#endif
-
 #ifndef __OBJC2__
  #error AUv3 needs Objective-C 2 support (compile with 64-bit)
 #endif
@@ -65,6 +45,8 @@
 
 #include "../../juce_audio_basics/native/juce_mac_CoreAudioLayouts.h"
 #include "../../juce_audio_processors/format_types/juce_AU_Shared.h"
+
+#include "../../juce_core/native/juce_osx_ObjCHelpers.h"
 
 #define JUCE_VIEWCONTROLLER_OBJC_NAME(x) JUCE_JOIN_MACRO (x, FactoryAUv3)
 
@@ -211,10 +193,10 @@ public:
     }
 
     //==============================================================================
-   #if JUCE_AUV3_VIEW_CONFIG_SUPPORTED
+    NS_AVAILABLE(10.3, 11)
     virtual NSIndexSet* getSupportedViewConfigurations (NSArray<AUAudioUnitViewConfiguration*>*) = 0;
+    NS_AVAILABLE(10.3, 11)
     virtual void selectViewConfiguration (AUAudioUnitViewConfiguration*)   = 0;
-   #endif
 
 private:
     struct Class  : public ObjCClass<AUAudioUnit>
@@ -264,9 +246,8 @@ private:
             addMethod (@selector (virtualMIDICableCount),           getVirtualMIDICableCount,       @encode (NSInteger), "@:");
             addMethod (@selector (supportsMPE),                     getSupportsMPE,                 @encode (BOOL),      "@:");
 
-           #if JUCE_AUV3_MIDI_OUTPUT_SUPPORTED
-            addMethod (@selector (MIDIOutputNames),                 getMIDIOutputNames,             "@@:");
-           #endif
+           if (@available(macOS 10.10, iOS 11.0, *))
+             addMethod (@selector (MIDIOutputNames),                 getMIDIOutputNames,             "@@:");
 
             //==============================================================================
             addMethod (@selector (internalRenderBlock),             getInternalRenderBlock,         @encode (AUInternalRenderBlock), "@:");
@@ -281,10 +262,11 @@ private:
             addMethod (@selector (setContextName:),                  setContextName,                 "v@:@");
 
             //==============================================================================
-           #if JUCE_AUV3_VIEW_CONFIG_SUPPORTED
+          if (@available(macOS 10.10, iOS 11.0, *))
+          {
             addMethod (@selector (supportedViewConfigurations:),    getSupportedViewConfigurations, "@@:@");
             addMethod (@selector (selectViewConfiguration:),        selectViewConfiguration,        "v@:@");
-           #endif
+          }
 
             registerClass();
         }
@@ -393,10 +375,10 @@ private:
         static void setContextName (id self, SEL, NSString* str)                                    { return _this (self)->setContextName (str); }
 
         //==============================================================================
-       #if JUCE_AUV3_VIEW_CONFIG_SUPPORTED
-        static NSIndexSet* getSupportedViewConfigurations (id self, SEL, NSArray<AUAudioUnitViewConfiguration*>* configs) { return _this (self)->getSupportedViewConfigurations (configs); }
-        static void selectViewConfiguration (id self, SEL, AUAudioUnitViewConfiguration* config)    { _this (self)->selectViewConfiguration (config); }
-       #endif
+        NS_AVAILABLE(10.3, 11)
+        static NSIndexSet* getSupportedViewConfigurations (id self, SEL, NSArray<AUAudioUnitViewConfiguration*>* configs) {return _this (self)->getSupportedViewConfigurations (configs); }
+        NS_AVAILABLE(10.3, 11)
+        static void selectViewConfiguration (id self, SEL, AUAudioUnitViewConfiguration* config) { _this (self)->selectViewConfiguration (config);}
     };
 
     static JuceAudioUnitv3Base* create (AUAudioUnit*, AudioComponentDescription, AudioComponentInstantiationOptions, NSError**);
@@ -850,7 +832,7 @@ public:
     }
 
     //==============================================================================
-   #if JUCE_AUV3_VIEW_CONFIG_SUPPORTED
+    NS_AVAILABLE(10.3, 11)
     NSIndexSet* getSupportedViewConfigurations (NSArray<AUAudioUnitViewConfiguration*>* configs) override
     {
         auto supportedViewIndecies = [[NSMutableIndexSet alloc] init];
@@ -883,11 +865,11 @@ public:
         return [supportedViewIndecies autorelease];
     }
 
+    NS_AVAILABLE(10.3, 11)
     void selectViewConfiguration (AUAudioUnitViewConfiguration* config) override
     {
         processorHolder->viewConfiguration = new AudioProcessorHolder::ViewConfig { [config width], [config height], [config hostHasController] == YES };
     }
-   #endif
 
     //==============================================================================
     void audioProcessorChanged (AudioProcessor* processor) override
@@ -1413,13 +1395,20 @@ private:
             processBlock (audioBuffer.getBuffer (frameCount), midiMessages);
 
             // send MIDI
-           #if JucePlugin_ProducesMidiOutput && JUCE_AUV3_MIDI_OUTPUT_SUPPORTED
+           #if JucePlugin_ProducesMidiOutput
+          if (@available(macOS 10.10, iOS 11.0, *))
+          {
+          
             auto midiOut = [au MIDIOutputEventBlock];
-            MidiMessage msg;
-            int samplePosition;
+            if (midiOut)
+            {
+              MidiMessage msg;
+              int samplePosition;
 
-            for (MidiBuffer::Iterator it (midiMessages); it.getNextEvent (msg, samplePosition);)
-                midiOut (samplePosition, 0, msg.getRawDataSize(), msg.getRawData());
+              for (MidiBuffer::Iterator it (midiMessages); it.getNextEvent (msg, samplePosition);)
+                  midiOut (samplePosition, 0, msg.getRawDataSize(), msg.getRawData());
+            }
+          }
            #endif
 
             midiMessages.clear();
