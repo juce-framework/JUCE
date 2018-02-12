@@ -269,6 +269,8 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
         close();
     }
 
+    virtual void *getNativeAudioEngine() {return &audioUnit;}
+
     static void setAudioSessionCategory (NSString* category)
     {
         NSUInteger options = 0;
@@ -867,6 +869,7 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                 for (int i = 0; i < channelData.inputs->numActiveChannels; ++i)
                     zeromem (inputData, sizeof (float) * numFrames);
             }
+            callback->setAudioTimestamp((void*)time);
 
             callback->audioDeviceIOCallback ((const float**) inputData,  channelData.inputs ->numActiveChannels,
                                                              outputData, channelData.outputs->numActiveChannels,
@@ -1322,10 +1325,10 @@ void iOSAudioIODevice::close()                                      { pimpl->clo
 
 void iOSAudioIODevice::start (AudioIODeviceCallback* callbackToUse) { pimpl->start (callbackToUse); }
 void iOSAudioIODevice::stop()                                       { pimpl->stop(); }
-
+void *iOSAudioIODevice::getNativeAudioEngine() {return pimpl->getNativeAudioEngine();} //UVI
 Array<double> iOSAudioIODevice::getAvailableSampleRates()           { return pimpl->availableSampleRates; }
 Array<int> iOSAudioIODevice::getAvailableBufferSizes()              { return pimpl->availableBufferSizes; }
-
+  
 bool iOSAudioIODevice::setAudioPreprocessingEnabled (bool enabled)  { return pimpl->setAudioPreprocessingEnabled (enabled); }
 
 bool iOSAudioIODevice::isPlaying()                                  { return pimpl->isRunning && pimpl->callback != nullptr; }
