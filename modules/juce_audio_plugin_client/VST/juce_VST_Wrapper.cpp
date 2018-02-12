@@ -1931,6 +1931,9 @@ private:
         if (args.index == presonusVendorID && args.value == presonusSetContentScaleFactor)
             return handleSetContentScaleFactor (args.opt);
 
+        if (args.index == plugInOpcodeGetParameterText)
+            return handleCockosGetParameterText (args.value, args.ptr, args.opt);
+
         if (auto callbackHandler = dynamic_cast<VSTCallbackHandler*> (processor))
             return callbackHandler->handleVstManufacturerSpecific (args.index, args.value, args.ptr, args.opt);
 
@@ -1987,6 +1990,9 @@ private:
             return (int32) 0xbeef0000;
         }
        #endif
+
+        if (matches ("hasCockosExtensions"))
+            return (int32) 0xbeef0000;
 
         return 0;
     }
@@ -2081,6 +2087,23 @@ private:
         }
 
         return 1;
+    }
+
+    pointer_sized_int handleCockosGetParameterText (pointer_sized_int paramIndex,
+                                                    void* destination,
+                                                    float value)
+    {
+        if (processor != nullptr && destination != nullptr)
+        {
+            if (auto* param = processor->getParameters()[(int) paramIndex])
+            {
+                String text (param->getText (value, 1024));
+                memcpy (destination, text.toRawUTF8(), text.length() + 1);
+                return 0xbeef;
+            }
+        }
+
+        return 0;
     }
 
     //==============================================================================
