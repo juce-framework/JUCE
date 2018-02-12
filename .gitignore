@@ -52,6 +52,9 @@ profile
 **/CodeBlocks/*.depend
 **/CodeBlocks/*.layout
 **/Builds/Android/.gradle
+**/Builds/Android/.idea
+**/Builds/Android/build
+**/Builds/Android/**/*.iml
 **/Builds/Android/local.properties
 **/Builds/Android/app/build
 **/Builds/Android/app/.externalNativeBuild
