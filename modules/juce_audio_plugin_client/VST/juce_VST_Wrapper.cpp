@@ -2090,15 +2090,15 @@ private:
     }
 
     pointer_sized_int handleCockosGetParameterText (pointer_sized_int paramIndex,
-                                                    void* destination,
+                                                    void* dest,
                                                     float value)
     {
-        if (processor != nullptr && destination != nullptr)
+        if (processor != nullptr && dest != nullptr)
         {
             if (auto* param = processor->getParameters()[(int) paramIndex])
             {
                 String text (param->getText (value, 1024));
-                memcpy (destination, text.toRawUTF8(), text.length() + 1);
+                memcpy (dest, text.toRawUTF8(), ((size_t) text.length()) + 1);
                 return 0xbeef;
             }
         }
