@@ -385,7 +385,7 @@ public:
 
                 status = AudioFileGetPropertyInfo (audioFileID, kAudioFilePropertyChannelLayout, &sizeOfLayout, &isWritable);
 
-                if (status == noErr)
+                if (status == noErr && sizeOfLayout >= (sizeof (AudioChannelLayout) - sizeof (AudioChannelDescription)))
                 {
                     caLayout.malloc (1, static_cast<size_t> (sizeOfLayout));
 
