@@ -376,7 +376,7 @@ private:
 
     friend class AudioGraphIOProcessor;
 
-    Atomic<bool> isPrepared { false };
+    Atomic<int> isPrepared { 0 };
 
     void topologyChanged();
     void handleAsyncUpdate() override;
