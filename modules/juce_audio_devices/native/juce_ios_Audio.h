@@ -64,6 +64,8 @@ public:
 
     int getXRunCount() const noexcept override;
 
+      void *getNativeAudioEngine() override;
+      
     //==============================================================================
     void setMidiMessageCollector (MidiMessageCollector*);
     AudioPlayHead* getAudioPlayHead() const;

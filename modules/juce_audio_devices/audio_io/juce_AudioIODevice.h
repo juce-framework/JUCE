@@ -111,6 +111,8 @@ public:
         this callback.
     */
     virtual void audioDeviceError (const String& errorMessage);
+
+  virtual void setAudioTimestamp (void *time) {} //UVI
 };
 
 
@@ -294,6 +296,9 @@ public:
         If the device doesn't support this operation, it'll return false.
     */
     virtual bool setAudioPreprocessingEnabled (bool shouldBeEnabled);
+
+  /*UVI*/
+  virtual void *getNativeAudioEngine() {return nullptr;}
 
     //==============================================================================
     /** Returns the number of under- or over runs reported by the OS since
