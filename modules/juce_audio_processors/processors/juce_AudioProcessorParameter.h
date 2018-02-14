@@ -199,10 +199,78 @@ public:
     /** Returns the index of this parameter in its parent processor's parameter list. */
     int getParameterIndex() const noexcept              { return parameterIndex; }
 
+    //==============================================================================
+    /**
+        A base class for listeners that want to know about changes to an
+        AudioProcessorParameter.
+
+        Use AudioProcessorParameter::addListener() to register your listener with
+        an AudioProcessorParameter.
+
+        This Listener replaces most of the functionality in the
+        AudioProcessorListener class, which will be deprecated and removed.
+    */
+    class JUCE_API  Listener
+    {
+    public:
+        /** Destructor. */
+        virtual ~Listener()  {}
+
+        /** Receives a callback when a parameter has been changed.
+
+            IMPORTANT NOTE: this will be called synchronously when a parameter changes, and
+            many audio processors will change their parameter during their audio callback.
+            This means that not only has your handler code got to be completely thread-safe,
+            but it's also got to be VERY fast, and avoid blocking. If you need to handle
+            this event on your message thread, use this callback to trigger an AsyncUpdater
+            or ChangeBroadcaster which you can respond to on the message thread.
+        */
+        virtual void parameterValueChanged (int parameterIndex, float newValue) = 0;
+
+        /** Indicates that a parameter change gesture has started.
+
+            E.g. if the user is dragging a slider, this would be called with gestureIsStarting
+            being true when they first press the mouse button, and it will be called again with
+            gestureIsStarting being false when they release it.
+
+            IMPORTANT NOTE: this will be called synchronously, and many audio processors will
+            call it during their audio callback. This means that not only has your handler code
+            got to be completely thread-safe, but it's also got to be VERY fast, and avoid
+            blocking. If you need to handle this event on your message thread, use this callback
+            to trigger an AsyncUpdater or ChangeBroadcaster which you can respond to later on the
+            message thread.
+        */
+        virtual void parameterGestureChanged (int parameterIndex, bool gestureIsStarting) = 0;
+    };
+
+    /** Registers a listener to receive events when the parameter's state changes.
+        If the listener is already registered, this will not register it again.
+
+        @see removeListener
+    */
+    void addListener (Listener* newListener);
+
+    /** Removes a previously registered parameter listener
+
+        @see addListener
+    */
+    void removeListener (Listener* listener);
+
+    //==============================================================================
+    /** @internal */
+    void sendValueChangedMessageToListeners (float newValue);
+
 private:
+    //==============================================================================
     friend class AudioProcessor;
     AudioProcessor* processor = nullptr;
     int parameterIndex = -1;
+    CriticalSection listenerLock;
+    Array<Listener*> listeners;
+
+   #if JUCE_DEBUG
+    bool isPerformingGesture = false;
+   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorParameter)
 };

@@ -416,8 +416,15 @@ void AudioProcessor::setLatencySamples (const int newLatency)
 
 void AudioProcessor::setParameterNotifyingHost (int parameterIndex, float newValue)
 {
-    setParameter (parameterIndex, newValue);
-    sendParamChangeMessageToListeners (parameterIndex, newValue);
+    if (auto* param = getParameters()[parameterIndex])
+    {
+        param->setValueNotifyingHost (newValue);
+    }
+    else
+    {
+        setParameter (parameterIndex, newValue);
+        sendParamChangeMessageToListeners (parameterIndex, newValue);
+    }
 }
 
 AudioProcessorListener* AudioProcessor::getListenerLocked (int index) const noexcept
@@ -428,58 +435,79 @@ AudioProcessorListener* AudioProcessor::getListenerLocked (int index) const noex
 
 void AudioProcessor::sendParamChangeMessageToListeners (int parameterIndex, float newValue)
 {
-    if (isPositiveAndBelow (parameterIndex, getNumParameters()))
+    if (auto* param = getParameters()[parameterIndex])
     {
-        for (int i = listeners.size(); --i >= 0;)
-            if (auto* l = getListenerLocked (i))
-                l->audioProcessorParameterChanged (this, parameterIndex, newValue);
+        param->sendValueChangedMessageToListeners (newValue);
     }
     else
     {
-        jassertfalse; // called with an out-of-range parameter index!
+        if (isPositiveAndBelow (parameterIndex, getNumParameters()))
+        {
+            for (int i = listeners.size(); --i >= 0;)
+                if (auto* l = getListenerLocked (i))
+                    l->audioProcessorParameterChanged (this, parameterIndex, newValue);
+        }
+        else
+        {
+            jassertfalse; // called with an out-of-range parameter index!
+        }
     }
 }
 
 void AudioProcessor::beginParameterChangeGesture (int parameterIndex)
 {
-    if (isPositiveAndBelow (parameterIndex, getNumParameters()))
+    if (auto* param = getParameters()[parameterIndex])
     {
-       #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
-        // This means you've called beginParameterChangeGesture twice in succession without a matching
-        // call to endParameterChangeGesture. That might be fine in most hosts, but better to avoid doing it.
-        jassert (! changingParams[parameterIndex]);
-        changingParams.setBit (parameterIndex);
-       #endif
-
-        for (int i = listeners.size(); --i >= 0;)
-            if (auto* l = getListenerLocked (i))
-                l->audioProcessorParameterChangeGestureBegin (this, parameterIndex);
+        param->beginChangeGesture();
     }
     else
     {
-        jassertfalse; // called with an out-of-range parameter index!
+        if (isPositiveAndBelow (parameterIndex, getNumParameters()))
+        {
+           #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
+            // This means you've called beginParameterChangeGesture twice in succession without a matching
+            // call to endParameterChangeGesture. That might be fine in most hosts, but better to avoid doing it.
+            jassert (! changingParams[parameterIndex]);
+            changingParams.setBit (parameterIndex);
+           #endif
+
+            for (int i = listeners.size(); --i >= 0;)
+                if (auto* l = getListenerLocked (i))
+                    l->audioProcessorParameterChangeGestureBegin (this, parameterIndex);
+        }
+        else
+        {
+            jassertfalse; // called with an out-of-range parameter index!
+        }
     }
 }
 
 void AudioProcessor::endParameterChangeGesture (int parameterIndex)
 {
-    if (isPositiveAndBelow (parameterIndex, getNumParameters()))
+    if (auto* param = getParameters()[parameterIndex])
     {
-       #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
-        // This means you've called endParameterChangeGesture without having previously called
-        // beginParameterChangeGesture. That might be fine in most hosts, but better to keep the
-        // calls matched correctly.
-        jassert (changingParams[parameterIndex]);
-        changingParams.clearBit (parameterIndex);
-       #endif
-
-        for (int i = listeners.size(); --i >= 0;)
-            if (auto* l = getListenerLocked (i))
-                l->audioProcessorParameterChangeGestureEnd (this, parameterIndex);
+        param->endChangeGesture();
     }
     else
     {
-        jassertfalse; // called with an out-of-range parameter index!
+        if (isPositiveAndBelow (parameterIndex, getNumParameters()))
+        {
+           #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
+            // This means you've called endParameterChangeGesture without having previously called
+            // beginParameterChangeGesture. That might be fine in most hosts, but better to keep the
+            // calls matched correctly.
+            jassert (changingParams[parameterIndex]);
+            changingParams.clearBit (parameterIndex);
+           #endif
+
+            for (int i = listeners.size(); --i >= 0;)
+                if (auto* l = getListenerLocked (i))
+                    l->audioProcessorParameterChangeGestureEnd (this, parameterIndex);
+        }
+        else
+        {
+            jassertfalse; // called with an out-of-range parameter index!
+        }
     }
 }
 
@@ -1340,7 +1368,8 @@ void AudioProcessorParameter::setValueNotifyingHost (float newValue)
     // This method can't be used until the parameter has been attached to a processor!
     jassert (processor != nullptr && parameterIndex >= 0);
 
-    return processor->setParameterNotifyingHost (parameterIndex, newValue);
+    setValue (newValue);
+    sendValueChangedMessageToListeners (newValue);
 }
 
 void AudioProcessorParameter::beginChangeGesture()
@@ -1348,7 +1377,25 @@ void AudioProcessorParameter::beginChangeGesture()
     // This method can't be used until the parameter has been attached to a processor!
     jassert (processor != nullptr && parameterIndex >= 0);
 
-    processor->beginParameterChangeGesture (parameterIndex);
+   #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
+    // This means you've called beginChangeGesture twice in succession without
+    // a matching call to endChangeGesture. That might be fine in most hosts,
+    // but it would be better to avoid doing it.
+    jassert (! isPerformingGesture);
+    isPerformingGesture = true;
+   #endif
+
+    ScopedLock lock (listenerLock);
+
+    for (int i = listeners.size(); --i >= 0;)
+        if (auto* l = listeners[i])
+            l->parameterGestureChanged (getParameterIndex(), true);
+
+    // audioProcessorParameterChangeGestureBegin callbacks will shortly be deprecated and
+    // this code will be removed.
+    for (int i = processor->listeners.size(); --i >= 0;)
+        if (auto* l = processor->listeners[i])
+            l->audioProcessorParameterChangeGestureBegin (processor, getParameterIndex());
 }
 
 void AudioProcessorParameter::endChangeGesture()
@@ -1356,7 +1403,40 @@ void AudioProcessorParameter::endChangeGesture()
     // This method can't be used until the parameter has been attached to a processor!
     jassert (processor != nullptr && parameterIndex >= 0);
 
-    processor->endParameterChangeGesture (parameterIndex);
+   #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
+    // This means you've called endChangeGesture without having previously
+    // called beginChangeGesture. That might be fine in most hosts, but it
+    // would be better to keep the calls matched correctly.
+    jassert (isPerformingGesture);
+    isPerformingGesture = false;
+   #endif
+
+    ScopedLock lock (listenerLock);
+
+    for (int i = listeners.size(); --i >= 0;)
+        if (auto* l = listeners[i])
+            l->parameterGestureChanged (getParameterIndex(), false);
+
+    // audioProcessorParameterChangeGestureEnd callbacks will shortly be deprecated and
+    // this code will be removed.
+    for (int i = processor->listeners.size(); --i >= 0;)
+        if (auto* l = processor->listeners[i])
+            l->audioProcessorParameterChangeGestureEnd (processor, getParameterIndex());
+}
+
+void AudioProcessorParameter::sendValueChangedMessageToListeners (float newValue)
+{
+    ScopedLock lock (listenerLock);
+
+    for (int i = listeners.size(); --i >= 0;)
+        if (auto* l = listeners [i])
+            l->parameterValueChanged (getParameterIndex(), newValue);
+
+    // audioProcessorParameterChanged callbacks will shortly be deprecated and
+    // this code will be removed.
+    for (int i = processor->listeners.size(); --i >= 0;)
+        if (auto* l = processor->listeners[i])
+            l->audioProcessorParameterChanged (processor, getParameterIndex(), newValue);
 }
 
 bool AudioProcessorParameter::isOrientationInverted() const                      { return false; }
@@ -1370,6 +1450,18 @@ bool AudioProcessorParameter::isBoolean() const                                 
 String AudioProcessorParameter::getText (float value, int /*maximumStringLength*/) const
 {
     return String (value, 2);
+}
+
+void AudioProcessorParameter::addListener (AudioProcessorParameter::Listener* newListener)
+{
+    const ScopedLock sl (listenerLock);
+    listeners.addIfNotAlreadyThere (newListener);
+}
+
+void AudioProcessorParameter::removeListener (AudioProcessorParameter::Listener* listenerToRemove)
+{
+    const ScopedLock sl (listenerLock);
+    listeners.removeFirstMatchingValue (listenerToRemove);
 }
 
 //==============================================================================
