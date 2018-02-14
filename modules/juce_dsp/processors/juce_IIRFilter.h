@@ -101,7 +101,13 @@ namespace IIR
 
         /** Processes as a block of samples */
         template <typename ProcessContext>
-        void process (const ProcessContext& context) noexcept;
+        void process (const ProcessContext& context) noexcept
+        {
+            if (context.isBypassed)
+                processInternal<ProcessContext, true> (context);
+            else
+                processInternal<ProcessContext, false> (context);
+        }
 
         /** Processes a single sample, without any locking.
 
@@ -121,6 +127,10 @@ namespace IIR
     private:
         //==============================================================================
         void check();
+
+        /** Processes as a block of samples */
+        template <typename ProcessContext, bool isBypassed>
+        void processInternal (const ProcessContext& context) noexcept;
 
         //==============================================================================
         HeapBlock<SampleType> memory;

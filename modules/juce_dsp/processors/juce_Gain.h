@@ -103,6 +103,16 @@ public:
         auto len         = inBlock.getNumSamples();
         auto numChannels = inBlock.getNumChannels();
 
+        if (context.isBypassed)
+        {
+            gain.skip (static_cast<int> (len));
+
+            if (context.usesSeparateInputAndOutputBlocks())
+                outBlock.copy (inBlock);
+
+            return;
+        }
+
         if (numChannels == 1)
         {
             auto* src = inBlock.getChannelPointer (0);

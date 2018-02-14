@@ -129,6 +129,9 @@ public:
         auto numChannels   = outBlock.getNumChannels();
         auto baseIncrement = MathConstants<NumericType>::twoPi / sampleRate;
 
+        if (context.isBypassed)
+            context.getOutputBlock().clear();
+
         if (frequency.isSmoothing())
         {
             auto* buffer = rampBuffer.getRawDataPointer();
@@ -137,12 +140,15 @@ public:
                 buffer[i] = phase.advance (baseIncrement * frequency.getNextValue())
                               - MathConstants<NumericType>::pi;
 
-            for (size_t ch = 0; ch < numChannels; ++ch)
+            if (! context.isBypassed)
             {
-                auto* dst = outBlock.getChannelPointer (ch);
+                for (size_t ch = 0; ch < numChannels; ++ch)
+                {
+                    auto* dst = outBlock.getChannelPointer (ch);
 
-                for (size_t i = 0; i < len; ++i)
-                    dst[i] = generator (buffer[i]);
+                    for (size_t i = 0; i < len; ++i)
+                        dst[i] = generator (buffer[i]);
+                }
             }
         }
         else
@@ -150,13 +156,21 @@ public:
             auto freq = baseIncrement * frequency.getNextValue();
             auto p = phase;
 
-            for (size_t ch = 0; ch < numChannels; ++ch)
+            if (context.isBypassed)
             {
-                p = phase;
-                auto* dst = outBlock.getChannelPointer (ch);
+                frequency.skip (static_cast<int> (len));
+                p.advance (freq * static_cast<NumericType> (len));
+            }
+            else
+            {
+                for (size_t ch = 0; ch < numChannels; ++ch)
+                {
+                    p = phase;
+                    auto* dst = outBlock.getChannelPointer (ch);
 
-                for (size_t i = 0; i < len; ++i)
-                    dst[i] = generator (p.advance (freq) - MathConstants<NumericType>::pi);
+                    for (size_t i = 0; i < len; ++i)
+                        dst[i] = generator (p.advance (freq) - MathConstants<NumericType>::pi);
+                }
             }
 
             phase = p;
