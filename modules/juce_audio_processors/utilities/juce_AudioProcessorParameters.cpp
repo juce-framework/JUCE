@@ -121,6 +121,13 @@ AudioParameterBool::AudioParameterBool (const String& idToUse, const String& nam
      value (def ? 1.0f : 0.0f),
      defaultValue (value)
 {
+    onStrings.add (TRANS("on"));
+    onStrings.add (TRANS("yes"));
+    onStrings.add (TRANS("true"));
+
+    offStrings.add (TRANS("off"));
+    offStrings.add (TRANS("no"));
+    offStrings.add (TRANS("false"));
 }
 
 AudioParameterBool::~AudioParameterBool() {}
@@ -130,9 +137,28 @@ void AudioParameterBool::setValue (float newValue)                       { value
 float AudioParameterBool::getDefaultValue() const                        { return defaultValue; }
 int AudioParameterBool::getNumSteps() const                              { return 2; }
 bool AudioParameterBool::isDiscrete() const                              { return true; }
-float AudioParameterBool::getValueForText (const String& text) const     { return text.getIntValue() != 0 ? 1.0f : 0.0f; }
-String AudioParameterBool::getText (float v, int /*length*/) const       { return String ((int) (v > 0.5f ? 1 : 0)); }
+bool AudioParameterBool::isBoolean() const                               { return true; }
 void AudioParameterBool::valueChanged (bool)                             {}
+
+float AudioParameterBool::getValueForText (const String& text) const
+{
+    String lowercaseText (text.toLowerCase());
+
+    for (auto& testText : onStrings)
+        if (lowercaseText == testText)
+            return 1.0f;
+
+    for (auto& testText : offStrings)
+        if (lowercaseText == testText)
+            return 0.0f;
+
+    return text.getIntValue() != 0 ? 1.0f : 0.0f;
+}
+
+String AudioParameterBool::getText (float v, int /*length*/) const
+{
+    return v < 0.5f ? TRANS("Off") : TRANS("On");
+}
 
 AudioParameterBool& AudioParameterBool::operator= (bool newValue)
 {

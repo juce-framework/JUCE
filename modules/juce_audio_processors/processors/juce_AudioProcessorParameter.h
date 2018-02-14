@@ -133,6 +133,18 @@ public:
     */
     virtual bool isDiscrete() const;
 
+    /** Returns whether the parameter represents a boolean switch, typically with
+        "On" and "Off" states.
+
+        This information may or may not be used, depending on the host. If you
+        want the host to display a switch, rather than a two item dropdown menu,
+        override this method to return true. You also need to override
+        isDiscrete() to return `true` and getNumSteps() to return `2`.
+
+        @see isDiscrete getNumSteps
+    */
+    virtual bool isBoolean() const;
+
     /** Returns a textual version of the supplied parameter value.
         The default implementation just returns the floating point value
         as a string, but this could do anything you need for a custom type

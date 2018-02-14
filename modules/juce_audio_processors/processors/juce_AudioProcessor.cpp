@@ -1365,6 +1365,7 @@ bool AudioProcessorParameter::isMetaParameter() const                           
 AudioProcessorParameter::Category AudioProcessorParameter::getCategory() const   { return genericParameter; }
 int AudioProcessorParameter::getNumSteps() const                                 { return AudioProcessor::getDefaultNumParameterSteps(); }
 bool AudioProcessorParameter::isDiscrete() const                                 { return false; }
+bool AudioProcessorParameter::isBoolean() const                                  { return false; }
 
 String AudioProcessorParameter::getText (float value, int /*maximumStringLength*/) const
 {
