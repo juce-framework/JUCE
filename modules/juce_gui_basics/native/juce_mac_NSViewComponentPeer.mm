@@ -162,6 +162,11 @@ public:
             if ([window respondsToSelector: @selector (setRestorable:)])
                 [window setRestorable: NO];
            #endif
+
+           #if defined (MAC_OS_X_VERSION_10_13) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_13)
+            if ([window respondsToSelector: @selector (setTabbingMode:)])
+                [window setTabbingMode:NSWindowTabbingModeDisallowed];
+           #endif
         }
 
         auto alpha = component.getAlpha();
