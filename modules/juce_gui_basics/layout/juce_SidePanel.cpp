@@ -77,7 +77,16 @@ void SidePanel::showOrHide (bool show)
 
         Desktop::getInstance().getAnimator().animateComponent (this, calculateBoundsInParent (*parent),
                                                                1.0f, 250, true, 1.0, 0.0);
+
+        if (onPanelShowHide != nullptr)
+            onPanelShowHide (isShowing);
     }
+}
+
+void SidePanel::moved()
+{
+    if (onPanelMove != nullptr)
+        onPanelMove();
 }
 
 void SidePanel::resized()
