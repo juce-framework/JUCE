@@ -322,6 +322,32 @@ public class OSCSender   extends Activity
                    getApplicationInfo().dataDir);
     }
 
+    // Need to override this as the default implementation always finishes the activity.
+    @Override
+    public void onBackPressed()
+    {
+        ComponentPeerView focusedView = getViewWithFocusOrDefaultView();
+
+        if (focusedView == null)
+            return;
+
+        focusedView.backButtonPressed();
+    }
+
+    private ComponentPeerView getViewWithFocusOrDefaultView()
+    {
+        for (int i = 0; i < viewHolder.getChildCount(); ++i)
+        {
+            if (viewHolder.getChildAt (i).hasFocus())
+                return (ComponentPeerView) viewHolder.getChildAt (i);
+        }
+
+        if (viewHolder.getChildCount() > 0)
+            return (ComponentPeerView) viewHolder.getChildAt (0);
+
+        return null;
+    }
+
     //==============================================================================
     private void hideActionBar()
     {
@@ -777,6 +803,14 @@ public class OSCSender   extends Activity
             }
         }
 
+        public void backButtonPressed()
+        {
+            if (host == 0)
+                return;
+
+            handleBackButton (host);
+        }
+
         @Override
         public boolean onKeyDown (int keyCode, KeyEvent event)
         {
@@ -790,7 +824,7 @@ public class OSCSender   extends Activity
                     return super.onKeyDown (keyCode, event);
                 case KeyEvent.KEYCODE_BACK:
                 {
-                    handleBackButton (host);
+                    ((Activity) getContext()).onBackPressed();
                     return true;
                 }
 

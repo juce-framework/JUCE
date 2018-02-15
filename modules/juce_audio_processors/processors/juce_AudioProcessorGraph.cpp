@@ -851,7 +851,7 @@ void AudioProcessorGraph::topologyChanged()
 {
     sendChangeMessage();
 
-    if (isPrepared)
+    if (isPrepared.get() != 0)
         triggerAsyncUpdate();
 }
 
@@ -1197,6 +1197,7 @@ void AudioProcessorGraph::buildRenderingSequence()
 void AudioProcessorGraph::handleAsyncUpdate()
 {
     buildRenderingSequence();
+    isPrepared = 1;
 }
 
 //==============================================================================
@@ -1209,9 +1210,7 @@ void AudioProcessorGraph::prepareToPlay (double /*sampleRate*/, int estimatedSam
         renderSequenceDouble->prepareBuffers (estimatedSamplesPerBlock);
 
     clearRenderingSequence();
-    buildRenderingSequence();
-
-    isPrepared = true;
+    triggerAsyncUpdate();
 }
 
 bool AudioProcessorGraph::supportsDoublePrecisionProcessing() const
@@ -1221,7 +1220,7 @@ bool AudioProcessorGraph::supportsDoublePrecisionProcessing() const
 
 void AudioProcessorGraph::releaseResources()
 {
-    isPrepared = false;
+    isPrepared = 0;
 
     for (auto* n : nodes)
         n->unprepare();

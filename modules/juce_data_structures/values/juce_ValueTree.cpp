@@ -639,11 +639,13 @@ ValueTree& ValueTree::operator= (const ValueTree& other)
 ValueTree::ValueTree (ValueTree&& other) noexcept
     : object (static_cast<SharedObject::Ptr&&> (other.object))
 {
+    if (object != nullptr)
+        object->valueTreesWithListeners.removeValue (&other);
 }
 
 ValueTree::~ValueTree()
 {
-    if (listeners.size() > 0 && object != nullptr)
+    if (! listeners.isEmpty() && object != nullptr)
         object->valueTreesWithListeners.removeValue (this);
 }
 

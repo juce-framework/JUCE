@@ -162,6 +162,11 @@ public:
             if ([window respondsToSelector: @selector (setRestorable:)])
                 [window setRestorable: NO];
            #endif
+
+           #if defined (MAC_OS_X_VERSION_10_13) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_13)
+            if ([window respondsToSelector: @selector (setTabbingMode:)])
+                [window setTabbingMode:NSWindowTabbingModeDisallowed];
+           #endif
         }
 
         auto alpha = component.getAlpha();
@@ -240,9 +245,13 @@ public:
     void setRepresentedFile (const File& file) override
     {
         if (! isSharedWindow)
+        {
             [window setRepresentedFilename: juceStringToNS (file != File()
                                                                 ? file.getFullPathName()
                                                                 : String())];
+
+            windowRepresentsFile = (file != File());
+        }
     }
 
     void setBounds (const Rectangle<int>& newBounds, bool isNowFullScreen) override
@@ -514,9 +523,16 @@ public:
         }
     }
 
-    void setIcon (const Image&) override
+    void setIcon (const Image& newIcon) override
     {
-        // to do..
+        if (! isSharedWindow)
+        {
+            // need to set a dummy represented file here to show the file icon (which we then set to the new icon)
+            if (! windowRepresentsFile)
+                [window setRepresentedFilename:juceStringToNS (" ")]; // can't just use an empty string for some reason...
+
+            [[window standardWindowButton:NSWindowDocumentIconButton] setImage:imageToNSImage (newIcon)];
+        }
     }
 
     StringArray getAvailableRenderingEngines() override
@@ -1365,6 +1381,7 @@ public:
    #endif
     bool isZooming = false, isFirstLiveResize = false, textWasInserted = false;
     bool isStretchingTop = false, isStretchingLeft = false, isStretchingBottom = false, isStretchingRight = false;
+    bool windowRepresentsFile = false;
     String stringBeingComposed;
     NSNotificationCenter* notificationCenter = nil;
 
@@ -1866,17 +1883,21 @@ struct JuceNSWindowClass   : public ObjCClass<NSWindow>
     {
         addIvar<NSViewComponentPeer*> ("owner");
 
-        addMethod (@selector (canBecomeKeyWindow),            canBecomeKeyWindow,        "c@:");
-        addMethod (@selector (canBecomeMainWindow),           canBecomeMainWindow,       "c@:");
-        addMethod (@selector (becomeKeyWindow),               becomeKeyWindow,           "v@:");
-        addMethod (@selector (windowShouldClose:),            windowShouldClose,         "c@:@");
-        addMethod (@selector (constrainFrameRect:toScreen:),  constrainFrameRect,        @encode (NSRect), "@:",  @encode (NSRect), "@");
-        addMethod (@selector (windowWillResize:toSize:),      windowWillResize,          @encode (NSSize), "@:@", @encode (NSSize));
-        addMethod (@selector (windowDidExitFullScreen:),      windowDidExitFullScreen,   "v@:@");
-        addMethod (@selector (zoom:),                         zoom,                      "v@:@");
-        addMethod (@selector (windowWillMove:),               windowWillMove,            "v@:@");
-        addMethod (@selector (windowWillStartLiveResize:),    windowWillStartLiveResize, "v@:@");
-        addMethod (@selector (windowDidEndLiveResize:),       windowDidEndLiveResize,    "v@:@");
+        addMethod (@selector (canBecomeKeyWindow),                  canBecomeKeyWindow,        "c@:");
+        addMethod (@selector (canBecomeMainWindow),                 canBecomeMainWindow,       "c@:");
+        addMethod (@selector (becomeKeyWindow),                     becomeKeyWindow,           "v@:");
+        addMethod (@selector (windowShouldClose:),                  windowShouldClose,         "c@:@");
+        addMethod (@selector (constrainFrameRect:toScreen:),        constrainFrameRect,        @encode (NSRect), "@:",  @encode (NSRect), "@");
+        addMethod (@selector (windowWillResize:toSize:),            windowWillResize,          @encode (NSSize), "@:@", @encode (NSSize));
+        addMethod (@selector (windowDidExitFullScreen:),            windowDidExitFullScreen,   "v@:@");
+        addMethod (@selector (zoom:),                               zoom,                      "v@:@");
+        addMethod (@selector (windowWillMove:),                     windowWillMove,            "v@:@");
+        addMethod (@selector (windowWillStartLiveResize:),          windowWillStartLiveResize, "v@:@");
+        addMethod (@selector (windowDidEndLiveResize:),             windowDidEndLiveResize,    "v@:@");
+        addMethod (@selector (window:shouldPopUpDocumentPathMenu:), shouldPopUpPathMenu, "B@:@", @encode (NSMenu*));
+
+        addMethod (@selector (window:shouldDragDocumentWithEvent:from:withPasteboard:),
+                   shouldAllowIconDrag, "B@:@", @encode (NSEvent*), @encode (NSPoint), @encode (NSPasteboard*));
 
        #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
         addProtocol (@protocol (NSWindowDelegate));
@@ -1988,6 +2009,22 @@ private:
     {
         if (auto* owner = getOwner (self))
             owner->liveResizingEnd();
+    }
+
+    static bool shouldPopUpPathMenu (id self, SEL, id /*window*/, NSMenu*)
+    {
+        if (auto* owner = getOwner (self))
+            return owner->windowRepresentsFile;
+
+        return false;
+    }
+
+    static bool shouldAllowIconDrag (id self, SEL, id /*window*/, NSEvent*, NSPoint, NSPasteboard*)
+    {
+        if (auto* owner = getOwner (self))
+            return owner->windowRepresentsFile;
+
+        return false;
     }
 };
 

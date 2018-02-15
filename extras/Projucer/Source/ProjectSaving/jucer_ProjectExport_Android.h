@@ -100,8 +100,8 @@ public:
     }
 
     //==============================================================================
-    ValueWithDefault androidRepositories, androidDependencies, androidScreenOrientation, androidActivityClass,
-                     androidActivitySubClassName, androidManifestCustomXmlElements, androidVersionCode,
+    ValueWithDefault androidJavaLibs, androidRepositories, androidDependencies, androidScreenOrientation, androidActivityClass,
+                     androidActivitySubClassName, androidActivityBaseClassName, androidManifestCustomXmlElements, androidVersionCode,
                      androidMinimumSDK, androidTheme, androidSharedLibraries, androidStaticLibraries, androidExtraAssetsFolder,
                      androidInternetNeeded, androidMicNeeded, androidBluetoothNeeded, androidExternalReadPermission,
                      androidExternalWritePermission, androidInAppBillingPermission, androidVibratePermission,androidOtherPermissions,
@@ -111,11 +111,13 @@ public:
     //==============================================================================
     AndroidProjectExporter (Project& p, const ValueTree& t)
         : ProjectExporter (p, t),
+          androidJavaLibs                      (settings, Ids::androidJavaLibs,                      getUndoManager()),
           androidRepositories                  (settings, Ids::androidRepositories,                  getUndoManager()),
           androidDependencies                  (settings, Ids::androidDependencies,                  getUndoManager()),
           androidScreenOrientation             (settings, Ids::androidScreenOrientation,             getUndoManager(), "unspecified"),
           androidActivityClass                 (settings, Ids::androidActivityClass,                 getUndoManager(), createDefaultClassName()),
           androidActivitySubClassName          (settings, Ids::androidActivitySubClassName,          getUndoManager()),
+          androidActivityBaseClassName         (settings, Ids::androidActivityBaseClassName,         getUndoManager(), "Activity"),
           androidManifestCustomXmlElements     (settings, Ids::androidManifestCustomXmlElements,     getUndoManager()),
           androidVersionCode                   (settings, Ids::androidVersionCode,                   getUndoManager(), "1"),
           androidMinimumSDK                    (settings, Ids::androidMinimumSDK,                    getUndoManager(), "10"),
@@ -771,19 +773,19 @@ private:
     String getAndroidDependencies() const
     {
         MemoryOutputStream mo;
-
-        auto dependencies = StringArray::fromLines (androidDependencies.get().toString());
-
         mo << "dependencies {" << newLine;
+
+        for (auto& d : StringArray::fromLines (androidDependencies.get().toString()))
+            mo << "    " << d << newLine;
+
+        for (auto& d : StringArray::fromLines (androidJavaLibs.get().toString()))
+            mo << "    implementation files('libs/" << File (d).getFileName() << "')" << newLine;
 
         if (androidEnableRemoteNotifications.get())
         {
             mo << "    'com.google.firebase:firebase-core:11.4.0'" << newLine;
             mo << "    compile 'com.google.firebase:firebase-messaging:11.4.0'" << newLine;
         }
-
-        for (auto& d : dependencies)
-            mo << "    " << d << newLine;
 
         mo << "}" << newLine;
 
@@ -824,11 +826,18 @@ private:
     //==============================================================================
     void createBaseExporterProperties (PropertyListBuilder& props)
     {
+        props.add (new TextPropertyComponent (androidJavaLibs, "Java libraries to include", 32768, true),
+                   "Java libs (JAR files) (one per line). These will be copied to app/libs folder and \"implementation files\" "
+                   "dependency will be automatically added to module \"dependencies\" section for each library, so do "
+                   "not add the dependency yourself.");
+
         props.add (new TextPropertyComponent (androidRepositories, "Module repositories", 32768, true),
                    "Module repositories (one per line). These will be added to module-level gradle file repositories section. ");
 
         props.add (new TextPropertyComponent (androidDependencies, "Module dependencies", 32768, true),
-                   "Module dependencies (one per line). These will be added to module-level gradle file dependencies section. ");
+                   "Module dependencies (one per line). These will be added to module-level gradle file \"dependencies\" section. "
+                   "If adding any java libs in \"Java libraries to include\" setting, do not add them here as "
+                   "they will be added automatically.");
 
         props.add (new ChoicePropertyComponent (androidScreenOrientation, "Screen orientation",
                                                 { "Portrait and Landscape", "Portrait", "Landscape" },
@@ -841,6 +850,12 @@ private:
         props.add (new TextPropertyComponent (androidActivitySubClassName, "Android Activity sub-class name", 256, false),
                    "If not empty, specifies the Android Activity class name stored in the app's manifest. "
                    "Use this if you would like to use your own Android Activity sub-class.");
+
+        props.add (new TextPropertyComponent (androidActivityBaseClassName, "Android Activity base class", 256, false),
+                   "If not empty, specifies the base class to use for your activity. If custom base class is "
+                   "specified, that base class should be a sub-class of android.app.Activity. When empty, Activity "
+                   "(android.app.Activity) will be used as the base class. "
+                   "Use this if you would like to use your own Android Activity base class.");
 
         props.add (new TextPropertyComponent (androidVersionCode, "Android Version Code", 32, false),
                    "An integer value that represents the version of the application code, relative to other versions.");
@@ -958,11 +973,14 @@ private:
             auto javaInAppBillingTarget = targetFolder.getChildFile ("app/src/main/java").getChildFile (inAppBillingPath);
             auto javaTarget = targetFolder.getChildFile ("app/src/main/java")
                                           .getChildFile (package.replaceCharacter ('.', File::getSeparatorChar()));
+            auto libTarget = targetFolder.getChildFile ("app/libs");
+            libTarget.createDirectory();
 
             copyActivityJavaFiles (javaSourceFolder, javaTarget, package);
             copyServicesJavaFiles (javaSourceFolder, javaTarget, package);
             copyProviderJavaFile  (javaSourceFolder, javaTarget, package);
             copyAdditionalJavaFiles (javaSourceFolder, javaInAppBillingTarget);
+            copyAdditionalJavaLibs (libTarget);
         }
     }
 
@@ -1071,7 +1089,8 @@ private:
                 else if (line.contains ("$$JuceAndroidWebViewCode$$"))
                     newFile << juceWebViewCode;
                 else
-                    newFile << line.replace ("JuceAppActivity", className)
+                    newFile << line.replace ("$$JuceAppActivityBaseClass$$", androidActivityBaseClassName.get().toString())
+                                   .replace ("JuceAppActivity", className)
                                    .replace ("package com.juce;", "package " + package + ";") << newLine;
             }
 
@@ -1099,6 +1118,21 @@ private:
 
         if (inAppBillingJavaSrcFile.existsAsFile())
             inAppBillingJavaSrcFile.copyFileTo (inAppBillingJavaDestFile);
+    }
+
+    void copyAdditionalJavaLibs (const File& targetFolder) const
+    {
+        auto libPaths = StringArray::fromLines (androidJavaLibs.get().toString());
+
+        for (auto& p : libPaths)
+        {
+            File f = getTargetFolder().getChildFile (p);
+
+            // Is the path to the java lib correct?
+            jassert (f.existsAsFile());
+
+            f.copyFileTo (targetFolder.getChildFile (f.getFileName()));
+        }
     }
 
     void copyServicesJavaFiles (const File& javaSourceFolder, const File& targetFolder, const String& package) const

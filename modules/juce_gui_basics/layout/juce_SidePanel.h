@@ -112,6 +112,7 @@ public:
     void setTitleBarHeight (int newHeight) noexcept    { titleBarHeight = newHeight; }
 
     //==============================================================================
+    void moved() override;
     void resized() override;
     void paint (Graphics& g) override;
 
@@ -149,6 +150,13 @@ public:
         dismissButtonOverColour   = 0x100f004,
         dismissButtonDownColour   = 0x100f005
     };
+
+    //==============================================================================
+    /** You can assign a lambda to this callback object and it will be called when the panel is moved. */
+    std::function<void()> onPanelMove;
+
+    /** You can assign a lambda to this callback object and it will be called when the panel is shown or hidden. */
+    std::function<void(bool)> onPanelShowHide;
 
 private:
     //==========================================================================

@@ -103,12 +103,29 @@ void MainWindow::createProjectContentCompIfNeeded()
     }
 }
 
+void MainWindow::setTitleBarIcon()
+{
+    if (auto* peer = getPeer())
+    {
+        if (currentProject != nullptr)
+        {
+            peer->setRepresentedFile (currentProject->getFile());
+            peer->setIcon (ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize));
+        }
+        else
+        {
+            peer->setRepresentedFile ({});
+        }
+    }
+}
+
 void MainWindow::makeVisible()
 {
     restoreWindowPosition();
     setVisible (true);
     addToDesktop();  // (must add before restoring size so that fullscreen will work)
     restoreWindowPosition();
+    setTitleBarIcon();
 
     getContentComponent()->grabKeyboardFocus();
 }

@@ -32,28 +32,6 @@ namespace juce
 //==============================================================================
 namespace MouseCursorHelpers
 {
-    NSImage* createNSImage (const Image&, float scaleFactor = 1.0f);
-    NSImage* createNSImage (const Image& image, float scaleFactor)
-    {
-        JUCE_AUTORELEASEPOOL
-        {
-            NSImage* im = [[NSImage alloc] init];
-            auto requiredSize = NSMakeSize (image.getWidth() / scaleFactor, image.getHeight() / scaleFactor);
-
-            [im setSize: requiredSize];
-            CGColorSpaceRef colourSpace = CGColorSpaceCreateDeviceRGB();
-            CGImageRef imageRef = juce_createCoreGraphicsImage (image, colourSpace, true);
-            CGColorSpaceRelease (colourSpace);
-
-            NSBitmapImageRep* imageRep = [[NSBitmapImageRep alloc] initWithCGImage: imageRef];
-            [imageRep setSize: requiredSize];
-            [im addRepresentation: imageRep];
-            [imageRep release];
-            CGImageRelease (imageRef);
-            return im;
-        }
-    }
-
     static NSCursor* fromNSImage (NSImage* im, NSPoint hotspot)
     {
         NSCursor* c = [[NSCursor alloc] initWithImage: im
@@ -110,7 +88,7 @@ namespace MouseCursorHelpers
 
 void* CustomMouseCursorInfo::create() const
 {
-    return MouseCursorHelpers::fromNSImage (MouseCursorHelpers::createNSImage (image, scaleFactor),
+    return MouseCursorHelpers::fromNSImage (imageToNSImage (image, scaleFactor),
                                             NSMakePoint (hotspot.x, hotspot.y));
 }
 

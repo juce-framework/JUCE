@@ -268,6 +268,7 @@ namespace juce
  #define JUCE_DEPRECATED(functionDef)                   functionDef JUCE_DEPRECATED_ATTRIBUTE
  #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)   functionDef JUCE_DEPRECATED_ATTRIBUTE body
 #else
+ #define JUCE_DEPRECATED_ATTRIBUTE
  #define JUCE_DEPRECATED(functionDef)                   functionDef
  #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)   functionDef body
 #endif

@@ -1615,6 +1615,12 @@ double Slider::snapValue (double attemptedValue, DragMode)
 
 int Slider::getNumDecimalPlacesToDisplay() const noexcept   { return pimpl->numDecimalPlaces; }
 
+void Slider::setNumDecimalPlacesToDisplay (int decimalPlacesToDisplay)
+{
+    pimpl->numDecimalPlaces = decimalPlacesToDisplay;
+    updateText();
+}
+
 //==============================================================================
 int Slider::getThumbBeingDragged() const noexcept           { return pimpl->sliderBeingDragged; }
 void Slider::startedDragging() {}

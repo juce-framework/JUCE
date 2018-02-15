@@ -186,6 +186,26 @@ public:
         }
     }
 
+    //==============================================================================
+    /** Skip the next numSamples samples.
+
+        This is identical to calling getNextValue numSamples times.
+        @see getNextValue
+    */
+    void skip (int numSamples) noexcept
+    {
+        if (numSamples >= countdown)
+        {
+            currentValue = target;
+            countdown = 0;
+        }
+        else
+        {
+            currentValue += (step * static_cast<FloatType> (numSamples));
+            countdown -= numSamples;
+        }
+    }
+
 private:
     //==============================================================================
     FloatType currentValue = 0, target = 0, step = 0;

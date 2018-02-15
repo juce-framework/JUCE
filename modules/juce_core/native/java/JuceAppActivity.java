@@ -77,7 +77,7 @@ $$JuceAndroidMidiImports$$         // If you get an error here, you need to re-s
 
 
 //==============================================================================
-public class JuceAppActivity   extends Activity
+public class JuceAppActivity   extends $$JuceAppActivityBaseClass$$
 {
     //==============================================================================
     static
@@ -238,6 +238,32 @@ public class JuceAppActivity   extends Activity
     {
         launchApp (getApplicationInfo().publicSourceDir,
                    getApplicationInfo().dataDir);
+    }
+
+    // Need to override this as the default implementation always finishes the activity.
+    @Override
+    public void onBackPressed()
+    {
+        ComponentPeerView focusedView = getViewWithFocusOrDefaultView();
+
+        if (focusedView == null)
+            return;
+
+        focusedView.backButtonPressed();
+    }
+
+    private ComponentPeerView getViewWithFocusOrDefaultView()
+    {
+        for (int i = 0; i < viewHolder.getChildCount(); ++i)
+        {
+            if (viewHolder.getChildAt (i).hasFocus())
+                return (ComponentPeerView) viewHolder.getChildAt (i);
+        }
+
+        if (viewHolder.getChildCount() > 0)
+            return (ComponentPeerView) viewHolder.getChildAt (0);
+
+        return null;
     }
 
     //==============================================================================
@@ -695,6 +721,14 @@ public class JuceAppActivity   extends Activity
             }
         }
 
+        public void backButtonPressed()
+        {
+            if (host == 0)
+                return;
+
+            handleBackButton (host);
+        }
+
         @Override
         public boolean onKeyDown (int keyCode, KeyEvent event)
         {
@@ -708,7 +742,7 @@ public class JuceAppActivity   extends Activity
                     return super.onKeyDown (keyCode, event);
                 case KeyEvent.KEYCODE_BACK:
                 {
-                    handleBackButton (host);
+                    ((Activity) getContext()).onBackPressed();
                     return true;
                 }
 

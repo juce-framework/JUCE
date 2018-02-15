@@ -912,17 +912,40 @@ CGContextRef juce_getImageContext (const Image& image)
 }
 
 #if JUCE_IOS
-Image juce_createImageFromUIImage (UIImage* img)
-{
-    CGImageRef image = [img CGImage];
+ Image juce_createImageFromUIImage (UIImage* img)
+ {
+     CGImageRef image = [img CGImage];
 
-    Image retval (Image::ARGB, (int) CGImageGetWidth (image), (int) CGImageGetHeight (image), true);
-    CGContextRef ctx = juce_getImageContext (retval);
+     Image retval (Image::ARGB, (int) CGImageGetWidth (image), (int) CGImageGetHeight (image), true);
+     CGContextRef ctx = juce_getImageContext (retval);
 
-    CGContextDrawImage (ctx, CGRectMake (0.0f, 0.0f, CGImageGetWidth (image), CGImageGetHeight (image)), image);
+     CGContextDrawImage (ctx, CGRectMake (0.0f, 0.0f, CGImageGetWidth (image), CGImageGetHeight (image)), image);
 
-    return retval;
-}
+     return retval;
+ }
+#endif
+
+#if JUCE_MAC
+ NSImage* imageToNSImage (const Image& image, float scaleFactor)
+ {
+     JUCE_AUTORELEASEPOOL
+     {
+         NSImage* im = [[NSImage alloc] init];
+         auto requiredSize = NSMakeSize (image.getWidth() / scaleFactor, image.getHeight() / scaleFactor);
+
+         [im setSize: requiredSize];
+         CGColorSpaceRef colourSpace = CGColorSpaceCreateDeviceRGB();
+         CGImageRef imageRef = juce_createCoreGraphicsImage (image, colourSpace, true);
+         CGColorSpaceRelease (colourSpace);
+
+         NSBitmapImageRep* imageRep = [[NSBitmapImageRep alloc] initWithCGImage: imageRef];
+         [imageRep setSize: requiredSize];
+         [im addRepresentation: imageRep];
+         [imageRep release];
+         CGImageRelease (imageRef);
+         return im;
+     }
+ }
 #endif
 
 }

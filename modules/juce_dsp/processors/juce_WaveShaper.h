@@ -53,9 +53,17 @@ struct WaveShaper
     template <typename ProcessContext>
     void process (const ProcessContext& context) const noexcept
     {
-        AudioBlock<FloatType>::process (context.getInputBlock(),
-                                        context.getOutputBlock(),
-                                        functionToUse);
+        if (context.isBypassed)
+        {
+            if (context.usesSeparateInputAndOutputBlocks())
+                context.getOutputBlock().copy (context.getInputBlock());
+        }
+        else
+        {
+            AudioBlock<FloatType>::process (context.getInputBlock(),
+                                            context.getOutputBlock(),
+                                            functionToUse);
+        }
     }
 
     void reset() noexcept {}

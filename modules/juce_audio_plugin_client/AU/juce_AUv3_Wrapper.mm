@@ -1182,7 +1182,7 @@ private:
                 {
                     if (param->isDiscrete())
                     {
-                        unit = kAudioUnitParameterUnit_Indexed;
+                        unit = param->isBoolean() ? kAudioUnitParameterUnit_Boolean : kAudioUnitParameterUnit_Indexed;
                         auto maxValue = getMaximumParameterValue (idx);
                         auto numSteps = param->getNumSteps();
 
