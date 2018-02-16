@@ -314,6 +314,7 @@ protected:
         AndroidBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
             : BuildConfiguration (p, settings, e),
               androidArchitectures               (config, Ids::androidArchitectures,               getUndoManager(), isDebug() ? "armeabi x86" : ""),
+              androidBuildConfigRemoteNotifsConfigFile (config, Ids::androidBuildConfigRemoteNotifsConfigFile, getUndoManager()),
               androidAdditionalXmlValueResources (config, Ids::androidAdditionalXmlValueResources, getUndoManager()),
               androidAdditionalRawValueResources (config, Ids::androidAdditionalRawValueResources, getUndoManager()),
               androidCustomStringXmlElements     (config, Ids::androidCustomStringXmlElements,     getUndoManager())
@@ -323,6 +324,7 @@ protected:
         }
 
         String getArchitectures() const             { return androidArchitectures.get().toString(); }
+        String getRemoteNotifsConfigFile() const    { return androidBuildConfigRemoteNotifsConfigFile.get().toString(); }
         String getAdditionalXmlResources() const    { return androidAdditionalXmlValueResources.get().toString(); }
         String getAdditionalRawResources() const    { return androidAdditionalRawValueResources.get().toString();}
         String getCustomStringsXml() const          { return androidCustomStringXmlElements.get().toString(); }
@@ -333,6 +335,10 @@ protected:
 
             props.add (new TextPropertyComponent (androidArchitectures, "Architectures", 256, false),
                        "A list of the ARM architectures to build (for a fat binary). Leave empty to build for all possible android archiftectures.");
+
+            props.add (new TextPropertyComponent (androidBuildConfigRemoteNotifsConfigFile.getPropertyAsValue(), "Remote Notifications Config File", 2048, false),
+                       "Path to google-services.json file. This will be the file provided by Firebase when creating a new app in Firebase console. "
+                       "This will override the setting from the main Android exporter node.");
 
             props.add (new TextPropertyComponent (androidAdditionalXmlValueResources, "Extra Android XML Value Resources", 2048, true),
                        "Paths to additional \"value resource\" files in XML format that should be included in the app (one per line). "
@@ -363,7 +369,8 @@ protected:
             return "${ANDROID_ABI}";
         }
 
-        ValueWithDefault androidArchitectures, androidAdditionalXmlValueResources, androidAdditionalRawValueResources,
+        ValueWithDefault androidArchitectures, androidBuildConfigRemoteNotifsConfigFile,
+                         androidAdditionalXmlValueResources, androidAdditionalRawValueResources,
                          androidCustomStringXmlElements;
     };
 
@@ -1192,20 +1199,26 @@ private:
         for (ConstConfigIterator config (*this); config.next();)
         {
             auto& cfg = dynamic_cast<const AndroidBuildConfiguration&> (*config);
+            String cfgPath = cfg.isDebug() ? "app/src/debug" : "app/src/release";
             String xmlValuesPath = cfg.isDebug() ? "app/src/debug/res/values" : "app/src/release/res/values";
             String rawPath = cfg.isDebug() ? "app/src/debug/res/raw" : "app/src/release/res/raw";
 
             copyExtraResourceFiles (cfg.getAdditionalXmlResources(), xmlValuesPath);
             copyExtraResourceFiles (cfg.getAdditionalRawResources(), rawPath);
-        }
 
-        if (androidEnableRemoteNotifications.get())
-        {
-            File file (getProject().getFile().getChildFile (androidRemoteNotificationsConfigFile.get().toString()));
-            // Settings file must be present for remote notifications to work and it must be called google-services.json.
-            jassert (file.existsAsFile() && file.getFileName() == "google-services.json");
+            if (androidEnableRemoteNotifications.get())
+            {
+                auto remoteNotifsConfigFilePath = cfg.getRemoteNotifsConfigFile();
 
-            copyExtraResourceFiles (androidRemoteNotificationsConfigFile.get(), "app");
+                if (remoteNotifsConfigFilePath.isEmpty())
+                    remoteNotifsConfigFilePath = androidRemoteNotificationsConfigFile.get().toString();
+
+                File file (getProject().getFile().getChildFile (remoteNotifsConfigFilePath));
+                // Settings file must be present for remote notifications to work and it must be called google-services.json.
+                jassert (file.existsAsFile() && file.getFileName() == "google-services.json");
+
+                copyExtraResourceFiles (remoteNotifsConfigFilePath, cfgPath);
+            }
         }
     }
 
