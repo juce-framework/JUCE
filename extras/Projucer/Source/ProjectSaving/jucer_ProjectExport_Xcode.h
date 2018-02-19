@@ -71,7 +71,7 @@ public:
           customXcodeResourceFoldersValue              (settings, Ids::customXcodeResourceFolders,              getUndoManager()),
           customXcassetsFolderValue                    (settings, Ids::customXcassetsFolder,                    getUndoManager()),
           microphonePermissionNeededValue              (settings, Ids::microphonePermissionNeeded,              getUndoManager()),
-          microphonePermissionsTextValue               (settings, Ids::microphonePermissionsText,               getUndoManager(), "This app requires microphone input."),
+          microphonePermissionsTextValue               (settings, Ids::microphonePermissionsText,               getUndoManager(), "This is an audio app which requires audio input. If you do not have a USB audio interface connected it will use the microphone."),
           uiFileSharingEnabledValue                    (settings, Ids::UIFileSharingEnabled,                    getUndoManager()),
           uiSupportsDocumentBrowserValue               (settings, Ids::UISupportsDocumentBrowser,               getUndoManager()),
           uiStatusBarHiddenValue                       (settings, Ids::UIStatusBarHidden,                       getUndoManager()),
