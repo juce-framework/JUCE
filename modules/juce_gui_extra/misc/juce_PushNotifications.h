@@ -53,6 +53,7 @@ public:
     struct Notification
     {
         Notification() = default;
+        Notification (const Notification& other);
 
         /** Checks whether a given notification is correctly configured for a given OS. */
         bool isValid() const noexcept;
