@@ -177,6 +177,7 @@ namespace Ids
     DECLARE_ID (useLocalCopy);
     DECLARE_ID (overwriteOnSave);
     DECLARE_ID (microphonePermissionNeeded);
+    DECLARE_ID (microphonePermissionsText);
     DECLARE_ID (androidJavaLibs);
     DECLARE_ID (androidRepositories);
     DECLARE_ID (androidDependencies);

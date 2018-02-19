@@ -71,6 +71,7 @@ public:
           customXcodeResourceFoldersValue              (settings, Ids::customXcodeResourceFolders,              getUndoManager()),
           customXcassetsFolderValue                    (settings, Ids::customXcassetsFolder,                    getUndoManager()),
           microphonePermissionNeededValue              (settings, Ids::microphonePermissionNeeded,              getUndoManager()),
+          microphonePermissionsTextValue               (settings, Ids::microphonePermissionsText,               getUndoManager(), "This app requires microphone input."),
           uiFileSharingEnabledValue                    (settings, Ids::UIFileSharingEnabled,                    getUndoManager()),
           uiSupportsDocumentBrowserValue               (settings, Ids::UISupportsDocumentBrowser,               getUndoManager()),
           uiStatusBarHiddenValue                       (settings, Ids::UIStatusBarHidden,                       getUndoManager()),
@@ -119,7 +120,9 @@ public:
     String getCustomResourceFoldersString() const    { return customXcodeResourceFoldersValue.get().toString().replaceCharacters ("\r\n", "::"); }
     String getCustomXcassetsFolderString() const     { return customXcassetsFolderValue.get(); }
 
-    bool isMicrophonePermissionEnabled() const       { return microphonePermissionNeededValue.get(); }
+    bool isMicrophonePermissionEnabled() const         { return microphonePermissionNeededValue.get(); }
+    String getMicrophonePermissionsTextString() const  { return microphonePermissionsTextValue.get(); }
+
     bool isInAppPurchasesEnabled() const             { return iosInAppPurchasesValue.get(); }
     bool isBackgroundAudioEnabled() const            { return iosBackgroundAudioValue.get(); }
     bool isBackgroundBleEnabled() const              { return iosBackgroundBleValue.get(); }
@@ -227,6 +230,10 @@ public:
             props.add (new ChoicePropertyComponent (microphonePermissionNeededValue, "Microphone Access"),
                        "Enable this to allow your app to use the microphone. "
                        "The user of your app will be prompted to grant microphone access permissions.");
+
+            props.add (new TextPropertyComponentWithEnablement (microphonePermissionsTextValue, microphonePermissionNeededValue,
+                                                                "Microphone Access Text", 1024, false),
+                       "A short description of why your app requires microphone access.");
         }
         else if (projectType.isGUIApplication())
         {
@@ -1280,7 +1287,7 @@ public:
             {
                 addPlistDictionaryKeyBool (dict, "LSRequiresIPhoneOS", true);
                 if (owner.isMicrophonePermissionEnabled())
-                    addPlistDictionaryKey (dict, "NSMicrophoneUsageDescription", "This app requires microphone input.");
+                    addPlistDictionaryKey (dict, "NSMicrophoneUsageDescription", owner.getMicrophonePermissionsTextString());
 
                 if (type != AudioUnitv3PlugIn)
                     addPlistDictionaryKeyBool (dict, "UIViewControllerBasedStatusBarAppearance", false);
@@ -1700,7 +1707,7 @@ private:
 
     ValueWithDefault customPListValue, pListPrefixHeaderValue, pListPreprocessValue, extraFrameworksValue, postbuildCommandValue,
                      prebuildCommandValue, iosAppExtensionDuplicateResourcesFolderValue, iosDeviceFamilyValue, iPhoneScreenOrientationValue,
-                     iPadScreenOrientationValue, customXcodeResourceFoldersValue, customXcassetsFolderValue, microphonePermissionNeededValue,
+                     iPadScreenOrientationValue, customXcodeResourceFoldersValue, customXcassetsFolderValue, microphonePermissionNeededValue, microphonePermissionsTextValue,
                      uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, documentExtensionsValue, iosInAppPurchasesValue,
                      iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
                      iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue;
