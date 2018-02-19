@@ -37,4 +37,3 @@ When your overriden <code>buttonPressed</code> or <code>buttonReleased</code> me
 
 You will find multiple examples of control button listeners in the @ref example_applications pages.
 */
-
