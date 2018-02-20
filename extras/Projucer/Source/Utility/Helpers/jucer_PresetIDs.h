@@ -183,6 +183,7 @@ namespace Ids
     DECLARE_ID (androidDependencies);
     DECLARE_ID (androidBuildConfigRemoteNotifsConfigFile);
     DECLARE_ID (androidAdditionalXmlValueResources);
+    DECLARE_ID (androidAdditionalDrawableResources);
     DECLARE_ID (androidAdditionalRawValueResources);
     DECLARE_ID (androidActivityClass);
     DECLARE_ID (androidActivitySubClassName);

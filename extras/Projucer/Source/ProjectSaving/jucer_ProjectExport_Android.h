@@ -316,6 +316,7 @@ protected:
               androidArchitectures               (config, Ids::androidArchitectures,               getUndoManager(), isDebug() ? "armeabi x86" : ""),
               androidBuildConfigRemoteNotifsConfigFile (config, Ids::androidBuildConfigRemoteNotifsConfigFile, getUndoManager()),
               androidAdditionalXmlValueResources (config, Ids::androidAdditionalXmlValueResources, getUndoManager()),
+              androidAdditionalDrawableResources (config, Ids::androidAdditionalDrawableResources, getUndoManager()),
               androidAdditionalRawValueResources (config, Ids::androidAdditionalRawValueResources, getUndoManager()),
               androidCustomStringXmlElements     (config, Ids::androidCustomStringXmlElements,     getUndoManager())
         {
@@ -323,11 +324,12 @@ protected:
             optimisationLevelValue.setDefault (isDebug() ? gccO0 : gccO3);
         }
 
-        String getArchitectures() const             { return androidArchitectures.get().toString(); }
-        String getRemoteNotifsConfigFile() const    { return androidBuildConfigRemoteNotifsConfigFile.get().toString(); }
-        String getAdditionalXmlResources() const    { return androidAdditionalXmlValueResources.get().toString(); }
-        String getAdditionalRawResources() const    { return androidAdditionalRawValueResources.get().toString();}
-        String getCustomStringsXml() const          { return androidCustomStringXmlElements.get().toString(); }
+        String getArchitectures() const               { return androidArchitectures.get().toString(); }
+        String getRemoteNotifsConfigFile() const      { return androidBuildConfigRemoteNotifsConfigFile.get().toString(); }
+        String getAdditionalXmlResources() const      { return androidAdditionalXmlValueResources.get().toString(); }
+        String getAdditionalDrawableResources() const { return androidAdditionalDrawableResources.get().toString(); }
+        String getAdditionalRawResources() const      { return androidAdditionalRawValueResources.get().toString();}
+        String getCustomStringsXml() const            { return androidCustomStringXmlElements.get().toString(); }
 
         void createConfigProperties (PropertyListBuilder& props) override
         {
@@ -340,11 +342,18 @@ protected:
                        "Path to google-services.json file. This will be the file provided by Firebase when creating a new app in Firebase console. "
                        "This will override the setting from the main Android exporter node.");
 
-            props.add (new TextPropertyComponent (androidAdditionalXmlValueResources, "Extra Android XML Value Resources", 2048, true),
+            props.add (new TextPropertyComponent (androidAdditionalXmlValueResources, "Extra Android XML Value Resources", 8192, true),
                        "Paths to additional \"value resource\" files in XML format that should be included in the app (one per line). "
                        "If you have additional XML resources that should be treated as value resources, add them here.");
 
-            props.add (new TextPropertyComponent (androidAdditionalRawValueResources, "Extra Android Raw Resources", 2048, true),
+            props.add (new TextPropertyComponent (androidAdditionalDrawableResources, "Extra Android Drawable Resources", 8192, true),
+                       "Paths to additional \"drawable resource\" directories that should be included in the app (one per line). "
+                       "They will be added to \"res\" directory of Android project. "
+                       "Each path should point to a directory named \"drawable\" or \"drawable-<size>\" where <size> should be "
+                       "something like \"hdpi\", \"ldpi\", \"xxxhdpi\" etc, for instance \"drawable-xhdpi\". "
+                       "Refer to Android Studio documentation for available sizes.");
+
+            props.add (new TextPropertyComponent (androidAdditionalRawValueResources, "Extra Android Raw Resources", 8192, true),
                        "Paths to additional \"raw resource\" files that should be included in the app (one per line). "
                        "Resource file names must contain only lowercase a-z, 0-9 or underscore.");
 
@@ -370,8 +379,8 @@ protected:
         }
 
         ValueWithDefault androidArchitectures, androidBuildConfigRemoteNotifsConfigFile,
-                         androidAdditionalXmlValueResources, androidAdditionalRawValueResources,
-                         androidCustomStringXmlElements;
+                         androidAdditionalXmlValueResources, androidAdditionalDrawableResources,
+                         androidAdditionalRawValueResources, androidCustomStringXmlElements;
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
@@ -1201,9 +1210,11 @@ private:
             auto& cfg = dynamic_cast<const AndroidBuildConfiguration&> (*config);
             String cfgPath = cfg.isDebug() ? "app/src/debug" : "app/src/release";
             String xmlValuesPath = cfg.isDebug() ? "app/src/debug/res/values" : "app/src/release/res/values";
+            String drawablesPath = cfg.isDebug() ? "app/src/debug/res" : "app/src/release/res";
             String rawPath = cfg.isDebug() ? "app/src/debug/res/raw" : "app/src/release/res/raw";
 
             copyExtraResourceFiles (cfg.getAdditionalXmlResources(), xmlValuesPath);
+            copyExtraResourceFiles (cfg.getAdditionalDrawableResources(), drawablesPath);
             copyExtraResourceFiles (cfg.getAdditionalRawResources(), rawPath);
 
             if (androidEnableRemoteNotifications.get())
@@ -1234,9 +1245,9 @@ private:
         {
             auto file = getProject().getFile().getChildFile (path);
 
-            jassert (file.existsAsFile());
+            jassert (file.exists());
 
-            if (file.existsAsFile())
+            if (file.exists())
                 file.copyFileTo (parentFolder.getChildFile (file.getFileName()));
         }
     }
