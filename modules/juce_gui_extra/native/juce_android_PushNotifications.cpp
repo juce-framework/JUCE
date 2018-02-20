@@ -1322,15 +1322,22 @@ struct PushNotifications::Pimpl
 
                 auto key            = LocalRef<jstring> ((jstring) env->CallObjectMethod (iterator, JavaIterator.next));
                 auto object         = LocalRef<jobject> (env->CallObjectMethod (bundle, JavaBundle.get, key.get()));
-                auto objectAsString = LocalRef<jstring> ((jstring) env->CallObjectMethod (object, JavaObject.toString));
-                auto objectClass    = LocalRef<jobject> (env->CallObjectMethod (object, JavaObject.getClass));
-                auto classAsString  = LocalRef<jstring> ((jstring) env->CallObjectMethod (objectClass, JavaClass.getName));
 
-                // Note: seems that Firebase delivers values as strings always, so this check is rather unnecessary,
-                //       at least till they change the behaviour.
-                const var value = juceString (classAsString) == "java.lang.Bundle" ? bundleToVar (object) : var (juceString (objectAsString.get()));
+                if (object.get() != nullptr)
+                {
+                    auto objectAsString = LocalRef<jstring> ((jstring) env->CallObjectMethod (object, JavaObject.toString));
+                    auto objectClass    = LocalRef<jobject> (env->CallObjectMethod (object, JavaObject.getClass));
+                    auto classAsString  = LocalRef<jstring> ((jstring) env->CallObjectMethod (objectClass, JavaClass.getName));
 
-                dynamicObject->setProperty (juceString (key.get()), value);
+                    // Note: seems that Firebase delivers values as strings always, so this check is rather unnecessary,
+                    //       at least till they change the behaviour.
+                    var value = juceString (classAsString) == "java.lang.Bundle" ? bundleToVar (object) : var (juceString (objectAsString.get()));
+                    dynamicObject->setProperty (juceString (key.get()), value);
+                }
+                else
+                {
+                    dynamicObject->setProperty (juceString (key.get()), {});
+                }
             }
 
             return var (dynamicObject);
