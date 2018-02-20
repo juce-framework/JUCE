@@ -50,6 +50,8 @@ SidePanel::SidePanel (StringRef title, int width, bool positionOnLeft,
 
 SidePanel::~SidePanel()
 {
+    Desktop::getInstance().removeGlobalMouseListener (this);
+
     if (parent != nullptr)
         parent->removeComponentListener (this);
 }
