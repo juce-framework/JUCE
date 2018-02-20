@@ -88,7 +88,7 @@ namespace IIR
             Note that this clears the processing state, but the type of filter and
             its coefficients aren't changed.
         */
-        void reset()            { reset (SampleType {}); }
+        void reset()            { reset (SampleType {0}); }
 
         /** Resets the filter's processing pipeline to a specific value.
             @see reset
