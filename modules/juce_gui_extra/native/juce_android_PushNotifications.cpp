@@ -1288,7 +1288,10 @@ struct PushNotifications::Pimpl
         auto notificationData = LocalRef<jobject> (env->CallObjectMethod (extras, JavaBundle.getBundle,
                                                                           javaString ("notificationData").get()));
 
-        return localNotificationBundleToJuceNotification (notificationData);
+        if (notificationData.get() != nullptr)
+            return localNotificationBundleToJuceNotification (notificationData);
+        else
+            return remoteNotificationBundleToJuceNotification (extras);
       #else
         ignoreUnused (notification);
         return {};
