@@ -880,7 +880,9 @@ public:
                                    // avoids getting warning messages about the parameter being unused
 
         const ScopedLockType lock (getLock());
-        sortArray (comparator, data.elements.get(), 0, size() - 1, retainOrderOfEquivalentItems);
+
+        if (size() > 1)
+            sortArray (comparator, data.elements.get(), 0, size() - 1, retainOrderOfEquivalentItems);
     }
 
     //==============================================================================
