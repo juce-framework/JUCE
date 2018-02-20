@@ -72,6 +72,13 @@ public:
         other.numUsed = 0;
     }
 
+   #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
+    OwnedArray (const std::initializer_list<ObjectClass*>& items)
+    {
+        addArray (items);
+    }
+   #endif
+
     /** Move assignment operator */
     OwnedArray& operator= (OwnedArray&& other) noexcept
     {
@@ -468,6 +475,21 @@ public:
             ++numUsed;
         }
     }
+
+   #if JUCE_COMPILER_SUPPORTS_INITIALIZER_LISTS
+    template <typename OtherArrayType>
+    void addArray (const std::initializer_list<OtherArrayType>& items)
+    {
+        const ScopedLockType lock (getLock());
+        data.ensureAllocatedSize (numUsed + (int) items.size());
+
+        for (auto* item : items)
+        {
+            data.elements[numUsed] = item;
+            ++numUsed;
+        }
+    }
+   #endif
 
     /** Adds copies of the elements in another array to the end of this array.
 
