@@ -136,7 +136,7 @@ void MPEChannelRemapper::remapMidiChannelIfNeeded (MidiMessage& message, uint32 
     if (! zone.isUsingChannelAsMemberChannel (channel))
         return;
 
-    if (channel == zone.getMasterChannel() && message.isResetAllControllers())
+    if (channel == zone.getMasterChannel() && (message.isResetAllControllers() || message.isAllNotesOff()))
     {
         clearSource (mpeSourceID);
         return;

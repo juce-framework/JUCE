@@ -146,7 +146,8 @@ void MPEInstrument::processNextMidiEvent (const MidiMessage& message)
 
     if (message.isNoteOn (true))              processMidiNoteOnMessage (message);
     else if (message.isNoteOff (false))       processMidiNoteOffMessage (message);
-    else if (message.isResetAllControllers()) processMidiResetAllControllersMessage (message);
+    else if (message.isResetAllControllers()
+             || message.isAllNotesOff())      processMidiResetAllControllersMessage (message);
     else if (message.isPitchWheel())          processMidiPitchWheelMessage (message);
     else if (message.isChannelPressure())     processMidiChannelPressureMessage (message);
     else if (message.isController())          processMidiControllerMessage (message);
@@ -378,11 +379,7 @@ void MPEInstrument::updateDimension (int midiChannel, MPEDimension& dimension, M
     if (notes.isEmpty())
         return;
 
-    if (isMasterChannel (midiChannel))
-    {
-        updateDimensionMaster (midiChannel == 1, dimension, value);
-    }
-    else if (isMemberChannel (midiChannel))
+    if (isMemberChannel (midiChannel))
     {
         if (dimension.trackingMode == allNotesOnChannel)
         {
@@ -399,6 +396,10 @@ void MPEInstrument::updateDimension (int midiChannel, MPEDimension& dimension, M
             if (auto* note = getNotePtr (midiChannel, dimension.trackingMode))
                 updateDimensionForNote (*note, dimension, value);
         }
+    }
+    else if (isMasterChannel (midiChannel))
+    {
+        updateDimensionMaster (midiChannel == 1, dimension, value);
     }
 }
 

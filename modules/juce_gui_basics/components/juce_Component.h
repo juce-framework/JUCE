@@ -141,8 +141,8 @@ public:
         a lot more CPU to operate (and might not even be possible on some platforms).
 
         If the component is inside a parent component at the time this method is called, it
-        will be first be removed from that parent. Likewise if a component on the desktop
-        is subsequently added to another component, it'll be removed from the desktop.
+        will first be removed from that parent. Likewise if a component is on the desktop
+        and is subsequently added to another component, it'll be removed from the desktop.
 
         @param windowStyleFlags             a combination of the flags specified in the
                                             ComponentPeer::StyleFlags enum, which define the
@@ -151,7 +151,7 @@ public:
                                             in which the juce component should place itself. On Windows,
                                             this would be a HWND, a HIViewRef on the Mac. Not necessarily
                                             supported on all platforms, and best left as 0 unless you know
-                                            what you're doing
+                                            what you're doing.
         @see removeFromDesktop, isOnDesktop, userTriedToCloseWindow,
              getPeer, ComponentPeer::setMinimised, ComponentPeer::StyleFlags,
              ComponentPeer::getStyleFlags, ComponentPeer::setFullScreen

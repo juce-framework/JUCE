@@ -71,7 +71,7 @@ public:
         (Don't add or remove any child components directly using the normal
         Component::addChildComponent() methods).
 
-        @param newContentComponent   the component to add to this SidePanel, or null to remove
+        @param newContentComponent   the component to add to this SidePanel, or nullptr to remove
                                      the current component.
         @param deleteComponentWhenNoLongerNeeded    if true, the component will be deleted automatically when
                                    the SidePanel is deleted or when a different component is added. If false,
@@ -86,7 +86,31 @@ public:
 
         @see setViewedComponent
     */
-    Component* getContent()    { return contentComponent.get(); }
+    Component* getContent() const noexcept    { return contentComponent.get(); }
+
+    /** Sets a custom component to be used for the title bar of this SidePanel, replacing
+        the default. You can pass a nullptr to revert to the default title bar.
+
+        @param titleBarComponentToUse  the component to use as the title bar, or nullptr to use
+                                       the default
+        @param keepDismissButton       if false the specified component will take up the full width of
+                                       the title bar including the dismiss button but if true, the default
+                                       dismiss button will be kept
+        @param deleteComponentWhenNoLongerNeeded  if true, the component will be deleted automatically when
+                                       the SidePanel is deleted or when a different component is added. If false,
+                                       the caller must manage the lifetime of the component
+
+        @see getTitleBarComponent
+    */
+    void setTitleBarComponent (Component* titleBarComponentToUse,
+                               bool keepDismissButton,
+                               bool deleteComponentWhenNoLongerNeeded = true);
+
+    /** Returns the component that is currently being used as the title bar of the SidePanel.
+
+        @see setTitleBarComponent
+    */
+    Component* getTitleBarComponent() const noexcept    { return titleBarComponent.get(); }
 
     /** Shows or hides the SidePanel.
 
@@ -108,8 +132,17 @@ public:
     /** Sets the width of the shadow that will be drawn on the side of the panel. */
     void setShadowWidth (int newWidth) noexcept        { shadowWidth = newWidth; }
 
+    /** Returns the width of the shadow that will be drawn on the side of the panel. */
+    int getShadowWidth() const noexcept                { return shadowWidth; }
+
     /** Sets the height of the title bar at the top of the SidePanel. */
     void setTitleBarHeight (int newHeight) noexcept    { titleBarHeight = newHeight; }
+
+    /** Returns the height of the title bar at the top of the SidePanel. */
+    int getTitleBarHeight() const noexcept             { return titleBarHeight; }
+
+    /** Returns the text that is displayed in the title bar at the top of the SidePanel. */
+    String getTitleText() const noexcept               { return titleLabel.getText(); }
 
     //==============================================================================
     void moved() override;
@@ -162,6 +195,7 @@ private:
     //==========================================================================
     Component* parent = nullptr;
     OptionalScopedPointer<Component> contentComponent;
+    OptionalScopedPointer<Component> titleBarComponent;
 
     Label titleLabel;
     ShapeButton dismissButton { "dismissButton", Colours::lightgrey, Colours::lightgrey, Colours::white };
@@ -178,6 +212,8 @@ private:
     Rectangle<int> startingBounds;
     bool shouldResize = false;
     int amountMoved = 0;
+
+    bool shouldShowDismissButton = true;
 
     //==========================================================================
     void lookAndFeelChanged() override;

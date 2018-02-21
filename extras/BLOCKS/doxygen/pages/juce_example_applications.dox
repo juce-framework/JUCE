@@ -27,4 +27,3 @@ You can choose from a palette of 9 base colours and paint them on the 15x15 LED 
 
 BlocksSynth is a JUCE application that turns your Lightpad into a simple monophonic synthesiser capable of playing 4 different waveshapes - sine, square, sawtooth and triangle.
 */
-

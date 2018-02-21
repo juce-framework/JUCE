@@ -13,7 +13,7 @@ Version 5.2.1
   - Added memory warning callbacks on iOS
   - Refactored iOSAudioDevice to support multi-channel audio devices and improve the handling of sample rate changes from other apps
   - Added SidePanel and BurgerMenu component classes
-  - Added PushNotifications support on OSX 
+  - Added PushNotifications support on OSX
   - Added support for VST3 SDK 3.6.8
   - Added support for loading VST3 preset files
   - Added higher-order ambisonics support
@@ -32,7 +32,7 @@ Version 5.2.1
 
 Version 5.2.0
   - Added a CMake exporter to the Projucer
-  - JUCE analytics module 
+  - JUCE analytics module
   - Added support for push notifications on iOS and Android
   - Added in-app purchase support for macOS
   - Added a plugin binary copy step to the Visual Studio exporter
@@ -47,8 +47,7 @@ Version 5.2.0
   - Implement Process::hide on mobile platforms
   - Added support for multi-touch drag and drop
   - Improved the performance of 3D rendering when multiple OpenGL contexts are used at the same time
-  - Tweaked the rate at which EdgeTable grows its internal storage, to improve performance 
-    rendering large and complex paths
+  - Tweaked the rate at which EdgeTable grows its internal storage, to improve performance rendering large and complex paths
 
 
 Version 5.1.2
