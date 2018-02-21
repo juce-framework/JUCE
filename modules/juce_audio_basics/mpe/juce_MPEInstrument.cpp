@@ -379,11 +379,7 @@ void MPEInstrument::updateDimension (int midiChannel, MPEDimension& dimension, M
     if (notes.isEmpty())
         return;
 
-    if (isMasterChannel (midiChannel))
-    {
-        updateDimensionMaster (midiChannel == 1, dimension, value);
-    }
-    else if (isMemberChannel (midiChannel))
+    if (isMemberChannel (midiChannel))
     {
         if (dimension.trackingMode == allNotesOnChannel)
         {
@@ -400,6 +396,10 @@ void MPEInstrument::updateDimension (int midiChannel, MPEDimension& dimension, M
             if (auto* note = getNotePtr (midiChannel, dimension.trackingMode))
                 updateDimensionForNote (*note, dimension, value);
         }
+    }
+    else if (isMasterChannel (midiChannel))
+    {
+        updateDimensionMaster (midiChannel == 1, dimension, value);
     }
 }
 
