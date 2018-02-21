@@ -41,7 +41,7 @@ namespace juce
     Bear in mind that some fields will not be available when receiving a remote
     notification.
 */
-class JUCE_API PushNotifications
+class JUCE_API PushNotifications    : private DeletedAtShutdown
 {
 public:
    #ifndef DOXYGEN
