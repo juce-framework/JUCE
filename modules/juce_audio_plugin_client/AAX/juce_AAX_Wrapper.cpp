@@ -780,12 +780,25 @@ namespace AAXClasses
             return AAX_SUCCESS;
         }
 
+        void setAudioProcessorParameter (int index, float value)
+        {
+            if (auto* param = pluginInstance->getParameters()[index])
+            {
+                param->setValue (value);
+                param->sendValueChangedMessageToListeners (value);
+            }
+            else
+            {
+                pluginInstance->setParameter (index, value);
+            }
+        }
+
         AAX_Result UpdateParameterNormalizedValue (AAX_CParamID paramID, double value, AAX_EUpdateSource source) override
         {
             auto result = AAX_CEffectParameters::UpdateParameterNormalizedValue (paramID, value, source);
 
             if (! isBypassParam (paramID))
-                pluginInstance->setParameter (getParamIndexFromID (paramID), (float) value);
+                setAudioProcessorParameter (getParamIndexFromID (paramID), (float) value);
 
             return result;
         }
@@ -856,7 +869,8 @@ namespace AAXClasses
             if (auto* p = mParameterManager.GetParameterByID (paramID))
                 p->SetValueWithFloat ((float) newValue);
 
-            pluginInstance->setParameter (getParamIndexFromID (paramID), (float) newValue);
+            setAudioProcessorParameter (getParamIndexFromID (paramID), (float) newValue);
+
             return AAX_SUCCESS;
         }
 
@@ -867,7 +881,8 @@ namespace AAXClasses
 
             auto paramIndex = getParamIndexFromID (paramID);
             auto newValue = pluginInstance->getParameter (paramIndex) + (float) newDeltaValue;
-            pluginInstance->setParameter (paramIndex, jlimit (0.0f, 1.0f, newValue));
+
+            setAudioProcessorParameter (paramIndex, jlimit (0.0f, 1.0f, newValue));
 
             if (auto* p = mParameterManager.GetParameterByID (paramID))
                 p->SetValueWithFloat (newValue);

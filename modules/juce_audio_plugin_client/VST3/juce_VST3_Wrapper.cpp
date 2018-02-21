@@ -246,7 +246,19 @@ public:
                 // otherwise we get parallel streams of parameter value updates
                 // during playback
                 if (owner.vst3IsPlaying.get() == 0)
-                    owner.setParameter (paramIndex, static_cast<float> (v));
+                {
+                    auto value = static_cast<float> (v);
+
+                    if (auto* param = owner.getParameters()[paramIndex])
+                    {
+                        param->setValue (value);
+                        param->sendValueChangedMessageToListeners (value);
+                    }
+                    else
+                    {
+                        owner.setParameter (paramIndex, value);
+                    }
+                }
 
                 changed();
                 return true;
@@ -1998,9 +2010,17 @@ public:
                     else
                     {
                         auto index = getJuceIndexForVSTParamID (vstParamID);
+                        auto floatValue = static_cast<float> (value);
 
-                        if (isPositiveAndBelow (index, pluginInstance->getNumParameters()))
-                            pluginInstance->setParameter (index, static_cast<float> (value));
+                        if (auto* param = pluginInstance->getParameters()[index])
+                        {
+                            param->setValue (floatValue);
+                            param->sendValueChangedMessageToListeners (floatValue);
+                        }
+                        else if (isPositiveAndBelow (index, pluginInstance->getNumParameters()))
+                        {
+                            pluginInstance->setParameter (index, floatValue);
+                        }
                     }
                 }
             }

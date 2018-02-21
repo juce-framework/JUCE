@@ -720,8 +720,16 @@ public:
     {
         if (processor != nullptr)
         {
-            jassert (isPositiveAndBelow (index, processor->getNumParameters()));
-            processor->setParameter (index, value);
+            if (auto* param = processor->getParameters()[index])
+            {
+                param->setValue (value);
+                param->sendValueChangedMessageToListeners (value);
+            }
+            else
+            {
+                jassert (isPositiveAndBelow (index, processor->getNumParameters()));
+                processor->setParameter (index, value);
+            }
         }
     }
 
@@ -1816,9 +1824,12 @@ private:
         {
             jassert (isPositiveAndBelow (args.index, processor->getNumParameters()));
 
-            if (auto* p = processor->getParameters()[args.index])
+            if (auto* param = processor->getParameters()[args.index])
             {
-                processor->setParameter (args.index, p->getValueForText (String::fromUTF8 ((char*) args.ptr)));
+                auto value = param->getValueForText (String::fromUTF8 ((char*) args.ptr));
+                param->setValue (value);
+                param->sendValueChangedMessageToListeners (value);
+
                 return 1;
             }
         }

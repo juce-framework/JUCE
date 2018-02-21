@@ -957,8 +957,19 @@ public:
     {
         if (inScope == kAudioUnitScope_Global && juceFilter != nullptr)
         {
-            const auto index = getJuceIndexForAUParameterID (inID);
-            juceFilter->setParameter (index, inValue / getMaximumParameterValue (index));
+            auto index = getJuceIndexForAUParameterID (inID);
+            auto value = inValue / getMaximumParameterValue (index);
+
+            if (auto* param = juceFilter->getParameters()[index])
+            {
+                param->setValue (value);
+                param->sendValueChangedMessageToListeners (value);
+            }
+            else
+            {
+                juceFilter->setParameter (index, value);
+            }
+
             return noErr;
         }
 
