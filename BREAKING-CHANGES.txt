@@ -6,6 +6,43 @@ Develop
 
 Change
 ------
+InAppPurchases class is now a JUCE Singleton. This means that you need
+to get an instance via InAppPurchases::getInstance(), instead of storing a 
+InAppPurchases object yourself.
+
+
+Possible Issues
+---------------
+Any code using InAppPurchases needs to be updated to retrieve a singleton pointer
+to InAppPurchases.
+
+
+Workaround
+----------
+Instead of holding a InAppPurchase member yourself, you should get an instance 
+via InAppPurchases::getInstance(), e.g.
+
+instead of:
+
+InAppPurchases iap;
+iap.purchaseProduct (…);
+
+call:
+
+InAppPurchases::getInstance()->purchaseProduct (…);
+
+
+Rationale
+---------
+This change was required to fix an issue on Android where on failed transaction
+a listener would not get called. 
+
+
+Develop
+=======
+
+Change
+------
 JUCE's MPE classes have been updated to reflect the official specification
 recently approved by the MIDI Manufacturers Association (MMA).
 

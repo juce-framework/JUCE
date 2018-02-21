@@ -109,6 +109,7 @@ public:
         void updateDisplay()
         {
             voiceListBox.updateContent();
+            voiceListBox.setEnabled (! getInstance()->getPurchases().isPurchaseInProgress());
             voiceListBox.repaint();
         }
 

@@ -79,8 +79,6 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
 {
     Pimpl (InAppPurchases& parent)  : owner (parent)
     {
-        getInAppPurchaseInstances().add (this);
-
         auto* env = getEnv();
         auto intent = env->NewObject (AndroidIntent, AndroidIntent.constructWithString,
                                       javaString ("com.android.vending.billing.InAppBillingService.BIND").get());
@@ -103,8 +101,6 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
             android.activity.callVoidMethod (JuceAppActivity.unbindService, serviceConnection.get());
             serviceConnection.clear();
         }
-
-        getInAppPurchaseInstances().removeFirstMatchingValue (this);
     }
 
     //==============================================================================
@@ -221,7 +217,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
 
         auto skuString         = javaString (productIdentifier);
         auto productTypeString = javaString (isSubscription ? "subs" : "inapp");
-        auto devString         = javaString (getDeveloperExtraData());
+        auto devString         = javaString ("");
 
         if (subscriptionIdentifiers.isEmpty())
             return LocalRef<jobject> (inAppBillingService.callObjectMethod (IInAppBillingService.getBuyIntent, 3,
@@ -769,13 +765,7 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
     }
 
     //==============================================================================
-    static Array<Pimpl*>& getInAppPurchaseInstances() noexcept
-    {
-        static Array<Pimpl*> instances;
-        return instances;
-    }
-
-    static void inAppPurchaseCompleted (jobject intentData)
+    void inAppPurchaseCompleted (jobject intentData)
     {
         auto* env = getEnv();
 
@@ -811,47 +801,16 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
             var purchaseToken    = props[purchaseTokenIdentifier];
             var developerPayload = props[developerPayloadIdentifier];
 
-            if (auto* target = getPimplFromDeveloperExtraData (developerPayload))
-            {
-                auto purchaseTimeString = Time (purchaseTime.toString().getLargeIntValue())
-                                            .toString (true, true, true, true);
+            auto purchaseTimeString = Time (purchaseTime.toString().getLargeIntValue())
+                                        .toString (true, true, true, true);
 
-                target->notifyAboutPurchaseResult ({ orderId.toString(), productId.toString(), packageName.toString(),
-                                                     purchaseTimeString, purchaseToken.toString() },
-                                                   true, statusCodeUserString);
-            }
-        }
-    }
-
-    //==============================================================================
-    String getDeveloperExtraData()
-    {
-        static const Identifier inAppPurchaseInstance ("inAppPurchaseInstance");
-        DynamicObject::Ptr developerString (new DynamicObject());
-
-        developerString->setProperty (inAppPurchaseInstance,
-                                      "0x" + String::toHexString (reinterpret_cast<pointer_sized_int> (this)));
-        return JSON::toString (var (developerString));
-    }
-
-    static Pimpl* getPimplFromDeveloperExtraData (const String& developerExtra)
-    {
-        static const Identifier inAppPurchaseInstance ("inAppPurchaseInstance");
-
-        if (DynamicObject::Ptr developerData = JSON::fromString (developerExtra).getDynamicObject())
-        {
-            String hexAddr = developerData->getProperty (inAppPurchaseInstance);
-
-            if (hexAddr.startsWith ("0x"))
-                hexAddr = hexAddr.fromFirstOccurrenceOf ("0x", false, false);
-
-            auto* target = reinterpret_cast<Pimpl*> (static_cast<pointer_sized_int> (hexAddr.getHexValue64()));
-
-            if (getInAppPurchaseInstances().contains (target))
-                return target;
+            notifyAboutPurchaseResult ({ orderId.toString(), productId.toString(), packageName.toString(),
+                                         purchaseTimeString, purchaseToken.toString() },
+                                       true, statusCodeUserString);
+            return;
         }
 
-        return nullptr;
+        notifyAboutPurchaseResult ({}, false, statusCodeUserString);
     }
 
     //==============================================================================
@@ -890,7 +849,8 @@ struct InAppPurchases::Pimpl    : private AsyncUpdater,
 //==============================================================================
 void juce_inAppPurchaseCompleted (void* intentData)
 {
-    InAppPurchases::Pimpl::inAppPurchaseCompleted (static_cast<jobject> (intentData));
+    if (auto* instance = InAppPurchases::getInstance())
+        instance->pimpl->inAppPurchaseCompleted (static_cast<jobject> (intentData));
 }
 
 } // namespace juce

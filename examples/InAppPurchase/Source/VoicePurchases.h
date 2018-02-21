@@ -52,7 +52,7 @@ public:
 
     ~VoicePurchases()
     {
-        inAppPurchases.removeListener (this);
+        InAppPurchases::getInstance()->removeListener (this);
     }
 
     //==============================================================================
@@ -61,9 +61,9 @@ public:
         if (! havePurchasesBeenRestored)
         {
             havePurchasesBeenRestored = true;
-            inAppPurchases.addListener (this);
+            InAppPurchases::getInstance()->addListener (this);
 
-            inAppPurchases.restoreProductsBoughtList (true);
+            InAppPurchases::getInstance()->restoreProductsBoughtList (true);
         }
 
         return voiceProducts[voiceIndex];
@@ -77,8 +77,12 @@ public:
 
             if (! product.isPurchased)
             {
+                purchaseInProgress = true;
+
                 product.purchaseInProgress = true;
-                inAppPurchases.purchaseProduct (product.identifier, false);
+                InAppPurchases::getInstance()->purchaseProduct (product.identifier, false);
+
+                guiUpdater.triggerAsyncUpdate();
             }
         }
     }
@@ -93,11 +97,13 @@ public:
         return names;
     }
 
+    bool isPurchaseInProgress() const noexcept { return purchaseInProgress; }
+
 private:
     //==============================================================================
     void productsInfoReturned (const Array<InAppPurchases::Product>& products) override
     {
-        if (! inAppPurchases.isInAppPurchasesSupported())
+        if (! InAppPurchases::getInstance()->isInAppPurchasesSupported())
         {
             for (auto idx = 1; idx < voiceProducts.size(); ++idx)
             {
@@ -142,6 +148,8 @@ private:
 
     void productPurchaseFinished (const PurchaseInfo& info, bool success, const String&) override
     {
+        purchaseInProgress = false;
+
         auto idx = findVoiceIndexFromIdentifier (info.purchase.productId);
 
         if (isPositiveAndBelow (idx, voiceProducts.size()))
@@ -150,6 +158,15 @@ private:
 
             voiceProduct.isPurchased = success;
             voiceProduct.purchaseInProgress = false;
+            guiUpdater.triggerAsyncUpdate();
+        }
+        else
+        {
+            // On failure Play Store will not tell us which purchase failed
+
+            for (auto& voiceProduct : voiceProducts)
+                voiceProduct.purchaseInProgress = false;
+
             guiUpdater.triggerAsyncUpdate();
         }
     }
@@ -181,7 +198,7 @@ private:
             for (auto& voiceProduct : voiceProducts)
                 identifiers.add (voiceProduct.identifier);
 
-            inAppPurchases.getProductsInformation(identifiers);
+            InAppPurchases::getInstance()->getProductsInformation (identifiers);
         }
     }
 
@@ -199,8 +216,7 @@ private:
 
     //==============================================================================
     AsyncUpdater& guiUpdater;
-    bool havePurchasesBeenRestored = false, havePricesBeenFetched = false;
-    InAppPurchases inAppPurchases;
+    bool havePurchasesBeenRestored = false, havePricesBeenFetched = false, purchaseInProgress = false;
     Array<VoiceProduct> voiceProducts;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VoicePurchases)
