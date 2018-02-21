@@ -146,7 +146,8 @@ void MPEInstrument::processNextMidiEvent (const MidiMessage& message)
 
     if (message.isNoteOn (true))              processMidiNoteOnMessage (message);
     else if (message.isNoteOff (false))       processMidiNoteOffMessage (message);
-    else if (message.isResetAllControllers()) processMidiResetAllControllersMessage (message);
+    else if (message.isResetAllControllers()
+             || message.isAllNotesOff())      processMidiResetAllControllersMessage (message);
     else if (message.isPitchWheel())          processMidiPitchWheelMessage (message);
     else if (message.isChannelPressure())     processMidiChannelPressureMessage (message);
     else if (message.isController())          processMidiControllerMessage (message);
