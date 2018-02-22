@@ -25,7 +25,6 @@
 */
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "../../GenericEditor.h"
 
 //==============================================================================
 /**
@@ -105,7 +104,7 @@ public:
     bool isMidiEffect() const override                  { return true; }
 
     //==============================================================================
-    AudioProcessorEditor* createEditor() override       { return new GenericEditor (*this); }
+    AudioProcessorEditor* createEditor() override       { return new GenericAudioProcessorEditor (this); }
     bool hasEditor() const override                     { return true;   }
 
     //==============================================================================
