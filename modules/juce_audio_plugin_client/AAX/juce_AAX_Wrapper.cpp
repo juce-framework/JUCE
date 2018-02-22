@@ -1031,15 +1031,29 @@ namespace AAXClasses
 
         AAX_Result NotificationReceived (AAX_CTypeID type, const void* data, uint32_t size) override
         {
-            if (type == AAX_eNotificationEvent_EnteringOfflineMode)  pluginInstance->setNonRealtime (true);
-            if (type == AAX_eNotificationEvent_ExitingOfflineMode)   pluginInstance->setNonRealtime (false);
-
-            if (type == AAX_eNotificationEvent_TrackNameChanged && data != nullptr)
+            switch (type)
             {
-                AudioProcessor::TrackProperties props;
-                props.name = static_cast<const AAX_IString*> (data)->Get();
+                case AAX_eNotificationEvent_EnteringOfflineMode:  pluginInstance->setNonRealtime (true);  break;
+                case AAX_eNotificationEvent_ExitingOfflineMode:   pluginInstance->setNonRealtime (false); break;
 
-                pluginInstance->updateTrackProperties (props);
+                case AAX_eNotificationEvent_TrackNameChanged:
+                    if (data != nullptr)
+                    {
+                        AudioProcessor::TrackProperties props;
+                        props.name = static_cast<const AAX_IString*> (data)->Get();
+
+                        pluginInstance->updateTrackProperties (props);
+                    }
+                    break;
+
+                case AAX_eNotificationEvent_SideChainBeingConnected:
+                case AAX_eNotificationEvent_SideChainBeingDisconnected:
+                {
+                    processingSidechainChange.set (1);
+                    sidechainDesired.set (type == AAX_eNotificationEvent_SideChainBeingConnected ? 1 : 0);
+                    updateSidechainState();
+                    break;
+                }
             }
 
             return AAX_CEffectParameters::NotificationReceived (type, data, size);
@@ -1532,7 +1546,7 @@ namespace AAXClasses
 
                 canDisableSidechain = audioProcessor.checkBusesLayoutSupported (disabledSidechainLayout);
 
-                if (canDisableSidechain)
+                if (canDisableSidechain && ! lastSideChainState)
                 {
                     sidechainDesired.set (0);
                     newLayout = disabledSidechainLayout;
@@ -1632,7 +1646,7 @@ namespace AAXClasses
         }
 
         //==============================================================================
-        void handleAsyncUpdate() override
+        void updateSidechainState()
         {
             if (processingSidechainChange.get() == 0)
                 return;
@@ -1642,6 +1656,8 @@ namespace AAXClasses
 
             if (hasSidechain && canDisableSidechain && (sidechainDesired.get() != 0) != sidechainActual)
             {
+                lastSideChainState = (sidechainDesired.get() != 0);
+
                 if (isPrepared)
                 {
                     isPrepared = false;
@@ -1649,14 +1665,19 @@ namespace AAXClasses
                 }
 
                 if (auto* bus = audioProcessor.getBus (true, 1))
-                    bus->setCurrentLayout (sidechainDesired.get() != 0 ? AudioChannelSet::mono()
-                                                                       : AudioChannelSet::disabled());
+                    bus->setCurrentLayout (lastSideChainState ? AudioChannelSet::mono()
+                                                              : AudioChannelSet::disabled());
 
                 audioProcessor.prepareToPlay (audioProcessor.getSampleRate(), audioProcessor.getBlockSize());
                 isPrepared = true;
             }
 
             processingSidechainChange.set (0);
+        }
+
+        void handleAsyncUpdate() override
+        {
+            updateSidechainState();
         }
 
         //==============================================================================
@@ -1715,7 +1736,7 @@ namespace AAXClasses
         int32_t juceChunkIndex = 0;
         AAX_CSampleRate sampleRate = 0;
         int lastBufferSize = 1024, maxBufferSize = 1024;
-        bool hasSidechain = false, canDisableSidechain = false;
+        bool hasSidechain = false, canDisableSidechain = false, lastSideChainState = false;
 
         Atomic<int> processingSidechainChange, sidechainDesired;
 
