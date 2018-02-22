@@ -46,10 +46,10 @@ The usual control-flow operators are provided, all with C++ style syntax:
 Arithmetic ops are the usual suspects, (with the standard operator precedence):
 
     +, -, *, /, %
-    ||, &&, |, &, |, ~
-    ++, --, +=, -=, *=, /=, %=, ^=, |=, &=, ^=
+    ||, &&, |, &, ~, ^
+    ++, --, +=, -=, *=, /=, %=, |=, &=, ^=
     ==, !=, <, >, <=, >=, !
-    <<, >>, <<=, >>=
+    <<, >>, <<=, >>=, >>>
     Ternary operator (x ? y : z)
 
 Local variables are declared in C++-style syntax:

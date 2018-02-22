@@ -64,7 +64,7 @@ public:
         */
         float yVelocity;
 
-        /** The current pressure of this touch, in the range 0.0 (no pressure) to 1.o (very hard). */
+        /** The current pressure of this touch, in the range 0.0 (no pressure) to 1.0 (very hard). */
         float z;
 
         /** The rate at which pressure is currently changing, measured in units/second. This is
