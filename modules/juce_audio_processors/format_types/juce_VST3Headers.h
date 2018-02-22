@@ -91,7 +91,7 @@
  #include <public.sdk/source/vst/vsteditcontroller.h>
  #include <public.sdk/source/vst/vstpresetfile.h>
 #else
- // needed for VST_VSERION
+ // needed for VST_VERSION
  #include <pluginterfaces/vst/vsttypes.h>
 
  #include <base/source/baseiids.cpp>
