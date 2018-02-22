@@ -684,8 +684,8 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
 {
     const ScopedLock sl (audioCallbackLock);
 
-    inputLevelMeter.updateLevel (inputChannelData, numInputChannels, numSamples);
-    outputLevelMeter.updateLevel (const_cast<const float**> (outputChannelData), numOutputChannels, numSamples);
+    inputLevelGetter->updateLevel (inputChannelData, numInputChannels, numSamples);
+    outputLevelGetter->updateLevel (const_cast<const float**> (outputChannelData), numOutputChannels, numSamples);
 
     if (callbacks.size() > 0)
     {
@@ -912,9 +912,12 @@ AudioDeviceManager::LevelMeter::LevelMeter() noexcept : level() {}
 
 void AudioDeviceManager::LevelMeter::updateLevel (const float* const* channelData, int numChannels, int numSamples) noexcept
 {
+    if (getReferenceCount() <= 1)
+        return;
+
     auto localLevel = level.get();
 
-    if (enabled.get() != 0 && numChannels > 0)
+    if (numChannels > 0)
     {
         for (int j = 0; j < numSamples; ++j)
         {
@@ -943,15 +946,9 @@ void AudioDeviceManager::LevelMeter::updateLevel (const float* const* channelDat
     level = localLevel;
 }
 
-void AudioDeviceManager::LevelMeter::setEnabled (bool shouldBeEnabled) noexcept
-{
-    enabled.set (shouldBeEnabled ? 1 : 0);
-    level = 0;
-}
-
 double AudioDeviceManager::LevelMeter::getCurrentLevel() const noexcept
 {
-    jassert (enabled.get() != 0); // you need to call setEnabled (true) before using this!
+    jassert (getReferenceCount() > 1);
     return level.get();
 }
 
@@ -996,11 +993,5 @@ int AudioDeviceManager::getXRunCount() const noexcept
     auto deviceXRuns = (currentAudioDevice != nullptr ? currentAudioDevice->getXRunCount() : -1);
     return (deviceXRuns >= 0 ? deviceXRuns : xruns);
 }
-
-double AudioDeviceManager::getCurrentInputLevel() const noexcept    { return inputLevelMeter.getCurrentLevel(); }
-double AudioDeviceManager::getCurrentOutputLevel() const noexcept   { return outputLevelMeter.getCurrentLevel(); }
-
-void AudioDeviceManager::enableInputLevelMeasurement  (bool enable) noexcept  { inputLevelMeter.setEnabled (enable); }
-void AudioDeviceManager::enableOutputLevelMeasurement (bool enable) noexcept  { outputLevelMeter.setEnabled (enable); }
 
 } // namespace juce
