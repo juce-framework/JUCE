@@ -1620,6 +1620,8 @@ private:
 
     friend class JuceVST3EditController;
     friend class JuceVST3Component;
+    friend class AudioUnitPluginInstance;
+    friend class LADSPAPluginInstance;
 
     Atomic<int> vst3IsPlaying { 0 };
 

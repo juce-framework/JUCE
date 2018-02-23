@@ -673,10 +673,6 @@ void AudioProcessor::addParameter (AudioProcessorParameter* p)
     p->parameterIndex = managedParameters.size();
     managedParameters.add (p);
 
-    // if you're using parameter objects, then you must not override the
-    // deprecated getNumParameters() method!
-    jassert (getNumParameters() == AudioProcessor::getNumParameters());
-
    #ifdef JUCE_DEBUG
     shouldCheckParamsForDupeIDs = true;
    #endif
@@ -1354,14 +1350,21 @@ int32 AudioProcessor::getAAXPluginIDForMainBusConfig (const AudioChannelSet& mai
     return (idForAudioSuite ? 0x6a796161 /* 'jyaa' */ : 0x6a636161 /* 'jcaa' */) + uniqueFormatId;
 }
 
-
 //==============================================================================
 void AudioProcessorListener::audioProcessorParameterChangeGestureBegin (AudioProcessor*, int) {}
 void AudioProcessorListener::audioProcessorParameterChangeGestureEnd   (AudioProcessor*, int) {}
 
 //==============================================================================
 AudioProcessorParameter::AudioProcessorParameter() noexcept {}
-AudioProcessorParameter::~AudioProcessorParameter() {}
+
+AudioProcessorParameter::~AudioProcessorParameter()
+{
+   #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
+    // This will fail if you've called beginChangeGesture() without having made
+    // a corresponding call to endChangeGesture...
+    jassert (! isPerformingGesture);
+   #endif
+}
 
 void AudioProcessorParameter::setValueNotifyingHost (float newValue)
 {
@@ -1450,6 +1453,24 @@ bool AudioProcessorParameter::isBoolean() const                                 
 String AudioProcessorParameter::getText (float value, int /*maximumStringLength*/) const
 {
     return String (value, 2);
+}
+
+String AudioProcessorParameter::getCurrentValueAsText() const
+{
+    return getText (getValue(), 1024);
+}
+
+StringArray AudioProcessorParameter::getAllValueStrings() const
+{
+    if (isDiscrete() && valueStrings.isEmpty())
+    {
+        auto maxIndex = getNumSteps() - 1;
+
+        for (int i = 0; i < getNumSteps(); ++i)
+            valueStrings.add (getText ((float) i / maxIndex, 1024));
+    }
+
+    return valueStrings;
 }
 
 void AudioProcessorParameter::addListener (AudioProcessorParameter::Listener* newListener)

@@ -6,36 +6,60 @@ Develop
 
 Change
 ------
-InAppPurchases class is now a JUCE Singleton. This means that you need
-to get an instance via InAppPurchases::getInstance(), instead of storing a 
-InAppPurchases object yourself.
+When hosting plug-ins all AudioProcessor methods of managing parameters that
+take a parameter index as an argument have been deprecated.
 
+Possible Issues
+---------------
+A single assertion will be fired in debug builds on the first use of a
+deprecated function.
+
+Workaround
+----------
+When hosting plug-ins you should use the AudioProcessor::getParameters() method
+and interact with parameters via the returned array of
+AudioProcessorParameters. For a short-term fix you can also continue past the
+assertion in your debugger, or temporarily modify the JUCE source code to
+remove it.
+
+Rationale
+---------
+Given the structure of JUCE's API it is impossible to deprecate these functions
+using only complile-time messages. Therefore a single assertion, which can be
+safely ignored, serves to indicate that these functions should no longer be
+used. The move away from the AudioProcessor methods both improves the interface
+to that class and makes ongoing development work much easier.
+
+
+Change
+------
+This InAppPurchases class is now a JUCE Singleton. This means that you need
+to get an instance via InAppPurchases::getInstance(), instead of storing a
+InAppPurchases object yourself.
 
 Possible Issues
 ---------------
 Any code using InAppPurchases needs to be updated to retrieve a singleton pointer
 to InAppPurchases.
 
-
 Workaround
 ----------
-Instead of holding a InAppPurchase member yourself, you should get an instance 
+Instead of holding a InAppPurchase member yourself, you should get an instance
 via InAppPurchases::getInstance(), e.g.
 
 instead of:
 
 InAppPurchases iap;
-iap.purchaseProduct (…);
+iap.purchaseProduct (...);
 
 call:
 
-InAppPurchases::getInstance()->purchaseProduct (…);
-
+InAppPurchases::getInstance()->purchaseProduct (...);
 
 Rationale
 ---------
 This change was required to fix an issue on Android where on failed transaction
-a listener would not get called. 
+a listener would not get called.
 
 
 Change

@@ -1835,7 +1835,7 @@ private:
         // using the default number of steps.
         for (auto* param : juceFilter->getParameters())
             if (param->isDiscrete())
-                jassert (param->getNumSteps() != juceFilter->getDefaultNumParameterSteps());
+                jassert (param->getNumSteps() != AudioProcessor::getDefaultNumParameterSteps());
        #endif
 
         parameterValueStringArrays.ensureStorageAllocated (numParams);

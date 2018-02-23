@@ -1483,7 +1483,7 @@ private:
         return 0;
     }
 
-    void valueChangedForObserver(AUParameterAddress, AUValue)
+    void valueChangedForObserver (AUParameterAddress, AUValue)
     {
         // this will have already been handled by valueChangedFromHost
     }
