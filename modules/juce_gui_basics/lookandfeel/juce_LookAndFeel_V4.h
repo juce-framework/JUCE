@@ -199,6 +199,8 @@ public:
     void drawPointer (Graphics&, float x, float y, float diameter,
                       const Colour&, int direction) noexcept;
 
+    Label* createSliderTextBox (Slider&) override;
+
     //==============================================================================
     void drawTooltip (Graphics&, const String& text, int width, int height) override;
 

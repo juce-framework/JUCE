@@ -1105,6 +1105,19 @@ void LookAndFeel_V4::drawPointer (Graphics& g, const float x, const float y, con
     g.fillPath (p);
 }
 
+Label* LookAndFeel_V4::createSliderTextBox (Slider& slider)
+{
+    auto* l = LookAndFeel_V2::createSliderTextBox (slider);
+
+    if (getCurrentColourScheme() == LookAndFeel_V4::getGreyColourScheme() && (slider.getSliderStyle() == Slider::LinearBar
+                                                                               || slider.getSliderStyle() == Slider::LinearBarVertical))
+    {
+        l->setColour (Label::textColourId, Colours::black.withAlpha (0.7f));
+    }
+
+    return l;
+}
+
 //==============================================================================
 void LookAndFeel_V4::drawTooltip (Graphics& g, const String& text, int width, int height)
 {
