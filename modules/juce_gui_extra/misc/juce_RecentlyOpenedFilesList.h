@@ -109,6 +109,13 @@ public:
     */
     static void registerRecentFileNatively (const File& file);
 
+    /** Tells the OS to remove a file from the OS-managed list of recent documents for this app.
+
+        Not all OSes maintain a list of recent files for an application, so this
+        function will have no effect on some OSes. Currently it's just implemented for OSX.
+    */
+    static void forgetRecentFileNatively (const File& file);
+
     /** Tells the OS to clear the OS-managed list of recent documents for this app.
 
         Not all OSes maintain a list of recent files for an application, so this
