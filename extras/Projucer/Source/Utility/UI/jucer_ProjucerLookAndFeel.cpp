@@ -197,11 +197,6 @@ void ProjucerLookAndFeel::drawToggleButton (Graphics& g, ToggleButton& button, b
     }
 }
 
-Font ProjucerLookAndFeel::getTextButtonFont (TextButton&, int buttonHeight)
-{
-    return Font (jmin (12.0f, buttonHeight * 0.6f));
-}
-
 void ProjucerLookAndFeel::fillTextEditorBackground (Graphics& g, int width, int height, TextEditor& textEditor)
 {
     g.setColour (textEditor.findColour (TextEditor::backgroundColourId));

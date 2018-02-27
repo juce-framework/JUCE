@@ -46,7 +46,6 @@ public:
                                bool isMouseOverButton, bool isButtonDown) override;
     void drawButtonText (Graphics&, TextButton&, bool isMouseOverButton, bool isButtonDown) override;
     void drawToggleButton (Graphics&, ToggleButton&, bool isMouseOverButton, bool isButtonDown) override;
-    Font getTextButtonFont (TextButton&, int buttonHeight) override;
 
     void drawTextEditorOutline (Graphics&, int, int, TextEditor&) override {}
     void fillTextEditorBackground (Graphics&, int width, int height, TextEditor&) override;
