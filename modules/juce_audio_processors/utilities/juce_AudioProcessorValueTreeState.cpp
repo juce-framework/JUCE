@@ -225,6 +225,21 @@ NormalisableRange<float> AudioProcessorValueTreeState::getParameterRange (String
     return NormalisableRange<float>();
 }
 
+std::function<String (float)> AudioProcessorValueTreeState::getValueToTextFunction (StringRef paramID) const noexcept
+{
+    if (Parameter* p = Parameter::getParameterForID (processor, paramID))
+        return p->valueToTextFunction;
+    return nullptr;
+}
+
+
+std::function<float (const String&)> AudioProcessorValueTreeState::getTextToValueFunction (StringRef paramID) const noexcept
+{
+    if (Parameter* p = Parameter::getParameterForID (processor, paramID))
+        return p->textToValueFunction;
+    return nullptr;
+}
+
 AudioProcessorParameterWithID* AudioProcessorValueTreeState::getParameter (StringRef paramID) const noexcept
 {
     return Parameter::getParameterForID (processor, paramID);
@@ -424,6 +439,9 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
         NormalisableRange<float> range (s.getParameterRange (paramID));
         slider.setRange (range.start, range.end, range.interval);
         slider.setSkewFactor (range.skew, range.symmetricSkew);
+
+        slider.convertTextFromValue = state.getValueToTextFunction (paramID);
+        slider.convertValueFromText = state.getTextToValueFunction (paramID);
 
         if (AudioProcessorParameter* param = state.getParameter (paramID))
             slider.setDoubleClickReturnValue (true, range.convertFrom0to1 (param->getDefaultValue()));

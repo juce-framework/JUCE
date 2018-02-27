@@ -596,6 +596,12 @@ public:
     /** You can assign a lambda to this callback object to have it called when the slider's drag ends. */
     std::function<void()> onDragEnd;
 
+    /** You can assign a lambda to customise how a value is converted for the text box. */
+    std::function<float(const String&)> convertValueFromText;
+
+    /** You can assign a lambda to customise how a text from the text box is converted into a value. */
+    std::function<String(float)> convertTextFromValue;
+
     //==============================================================================
     /** This lets you choose whether double-clicking moves the slider to a given position.
 

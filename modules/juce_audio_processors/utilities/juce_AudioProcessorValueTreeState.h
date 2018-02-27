@@ -130,6 +130,12 @@ public:
     /** Returns the range that was set when the given parameter was created. */
     NormalisableRange<float> getParameterRange (StringRef parameterID) const noexcept;
 
+    /** Returns the value to text function that was set when the given parameter was created. */
+    std::function<String (float)> getValueToTextFunction (StringRef parameterID) const noexcept;
+
+    /** Returns the text to value function that was set when the given parameter was created. */
+    std::function<float (const String&)> getTextToValueFunction (StringRef parameterID) const noexcept;
+
     /** Returns a copy of the state value tree.
 
         The AudioProcessorValueTreeState's ValueTree is updated internally on the
