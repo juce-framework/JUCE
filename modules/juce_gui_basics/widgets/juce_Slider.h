@@ -596,10 +596,10 @@ public:
     /** You can assign a lambda to this callback object to have it called when the slider's drag ends. */
     std::function<void()> onDragEnd;
 
-    /** You can assign a lambda to customise how a value is converted for the text box. */
+    /** You can assign a lambda to customise how the text in the text box is converted to a value. */
     std::function<float(const String&)> convertValueFromText;
 
-    /** You can assign a lambda to customise how a text from the text box is converted into a value. */
+    /** You can assign a lambda to customise how a value is displayed in the text box. */
     std::function<String(float)> convertTextFromValue;
 
     //==============================================================================
