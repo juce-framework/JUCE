@@ -276,6 +276,11 @@ void LookAndFeel_V4::drawDocumentWindowTitleBar (DocumentWindow& window, Graphic
 }
 
 //==============================================================================
+Font LookAndFeel_V4::getTextButtonFont (TextButton&, int buttonHeight)
+{
+    return { jmin (18.0f, buttonHeight * 0.6f) };
+}
+
 void LookAndFeel_V4::drawButtonBackground (Graphics& g,
                                            Button& button,
                                            const Colour& backgroundColour,

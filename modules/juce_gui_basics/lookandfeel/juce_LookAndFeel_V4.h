@@ -105,6 +105,8 @@ public:
     void drawDocumentWindowTitleBar (DocumentWindow&, Graphics&, int, int, int, int, const Image*, bool) override;
 
     //==============================================================================
+    Font getTextButtonFont (TextButton&, int buttonHeight) override;
+
     void drawButtonBackground (Graphics&, Button&, const Colour& backgroundColour,
                                bool isMouseOverButton, bool isButtonDown) override;
 
