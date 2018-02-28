@@ -1020,6 +1020,22 @@ private:
                     {
                         lastBounds = getLocalBounds();
                         isResizingChildToFitParent = true;
+
+                        if (auto* constrainer = pluginEditor->getConstrainer())
+                        {
+                            auto aspectRatio = constrainer->getFixedAspectRatio();
+                            auto width = (double) lastBounds.getWidth();
+                            auto height = (double) lastBounds.getHeight();
+
+                            if (aspectRatio != 0)
+                            {
+                                if (width / height > aspectRatio)
+                                    setBounds ({ 0, 0, roundToInt (height * aspectRatio), lastBounds.getHeight() });
+                                else
+                                    setBounds ({ 0, 0, lastBounds.getWidth(), roundToInt (width / aspectRatio) });
+                            }
+                        }
+
                         pluginEditor->setTopLeftPosition (0, 0);
                         pluginEditor->setBounds (pluginEditor->getLocalArea (this, getLocalBounds()));
                         isResizingChildToFitParent = false;
