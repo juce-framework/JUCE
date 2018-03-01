@@ -69,6 +69,16 @@ const String AudioPluginInstance::getParameterName (int parameterIndex)
     return {};
 }
 
+String AudioPluginInstance::getParameterName (int parameterIndex, int maximumStringLength)
+{
+    assertOnceOnDeprecatedMethodUse();
+
+    if (auto* param = getParameters()[parameterIndex])
+        return param->getName (maximumStringLength);
+
+    return {};
+}
+
 const String AudioPluginInstance::getParameterText (int parameterIndex)
 {
     assertOnceOnDeprecatedMethodUse();

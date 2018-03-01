@@ -82,6 +82,7 @@ public:
     JUCE_DEPRECATED (float getParameter (int parameterIndex) override);
     JUCE_DEPRECATED (void setParameter (int parameterIndex, float newValue) override);
     JUCE_DEPRECATED (const String getParameterName (int parameterIndex) override);
+    JUCE_DEPRECATED (String getParameterName (int parameterIndex, int maximumStringLength) override);
     JUCE_DEPRECATED (const String getParameterText (int parameterIndex) override);
     JUCE_DEPRECATED (String getParameterText (int parameterIndex, int maximumStringLength) override);
     JUCE_DEPRECATED (int getParameterNumSteps (int parameterIndex) override);
