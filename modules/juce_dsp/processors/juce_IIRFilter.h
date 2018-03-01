@@ -161,7 +161,7 @@ namespace IIR
         Coefficients (NumericType b0, NumericType b1, NumericType b2,
                       NumericType a0, NumericType a1, NumericType a2);
 
-        Coefficients (NumericType b0, NumericType, NumericType b2, NumericType b3,
+        Coefficients (NumericType b0, NumericType b1, NumericType b2, NumericType b3,
                       NumericType a0, NumericType a1, NumericType a2, NumericType a3);
 
         Coefficients (const Coefficients&) = default;
