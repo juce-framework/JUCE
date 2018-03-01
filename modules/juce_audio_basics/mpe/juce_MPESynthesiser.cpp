@@ -26,7 +26,7 @@ namespace juce
 MPESynthesiser::MPESynthesiser()
 {
     MPEZoneLayout zoneLayout;
-    zoneLayout.addZone ({ 1, 15 });
+    zoneLayout.setLowerZone (15);
     setZoneLayout (zoneLayout);
 }
 
@@ -122,7 +122,7 @@ void MPESynthesiser::noteReleased (MPENote finishedNote)
 {
     const ScopedLock sl (voicesLock);
 
-    for (int i = voices.size(); --i >= 0;)
+    for (auto i = voices.size(); --i >= 0;)
     {
         auto* voice = voices.getUnchecked (i);
 
@@ -139,7 +139,7 @@ void MPESynthesiser::setCurrentPlaybackSampleRate (const double newRate)
 
     turnOffAllVoices (false);
 
-    for (int i = voices.size(); --i >= 0;)
+    for (auto i = voices.size(); --i >= 0;)
         voices.getUnchecked (i)->setCurrentSampleRate (newRate);
 }
 
@@ -287,7 +287,7 @@ void MPESynthesiser::reduceNumVoices (const int newNumVoices)
 
     while (voices.size() > newNumVoices)
     {
-        if (MPESynthesiserVoice* voice = findFreeVoice ({}, true))
+        if (auto* voice = findFreeVoice ({}, true))
             voices.removeObject (voice);
         else
             voices.remove (0); // if there's no voice to steal, kill the oldest voice

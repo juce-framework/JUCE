@@ -623,6 +623,12 @@ bool MidiMessage::isAllSoundOff() const noexcept
     return data[1] == 120 && (data[0] & 0xf0) == 0xb0;
 }
 
+bool MidiMessage::isResetAllControllers() const noexcept
+{
+    auto data = getRawData();
+    return (data[0] & 0xf0) == 0xb0 && data[1] == 121;
+}
+
 MidiMessage MidiMessage::allControllersOff (const int channel) noexcept
 {
     return controllerEvent (channel, 121, 0);

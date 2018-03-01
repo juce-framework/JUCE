@@ -164,14 +164,23 @@ public:
     /** Returns the typeface that should be used for a given font.
         The default implementation just does what you'd expect it to, but you can override
         this if you want to intercept fonts and use your own custom typeface object.
+        @see setDefaultTypeface
     */
     virtual Typeface::Ptr getTypefaceForFont (const Font&);
 
-    /** Allows you to change the default sans-serif font.
+    /** Allows you to supply a default typeface that will be returned as the default
+        sans-serif font.
+        Instead of a typeface object, you can specify a typeface by name using the
+        setDefaultSansSerifTypefaceName() method.
+        You can perform more complex typeface substitutions by overloading
+        getTypefaceForFont() but this lets you easily set a global typeface.
+    */
+    void setDefaultSansSerifTypeface (Typeface::Ptr newDefaultTypeface);
 
+    /** Allows you to change the default sans-serif font.
         If you need to supply your own Typeface object for any of the default fonts, rather
         than just supplying the name (e.g. if you want to use an embedded font), then
-        you should instead override getTypefaceForFont() to create and return the typeface.
+        you can instead call setDefaultSansSerifTypeface() with an object to use.
     */
     void setDefaultSansSerifTypefaceName (const String& newName);
 
@@ -224,6 +233,7 @@ private:
 
     SortedSet<ColourSetting> colours;
     String defaultSans, defaultSerif, defaultFixed;
+    Typeface::Ptr defaultTypeface;
     bool useNativeAlertWindows = false;
 
     JUCE_DECLARE_WEAK_REFERENCEABLE (LookAndFeel)

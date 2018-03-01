@@ -33,19 +33,18 @@ struct SimpleDeviceManagerInputLevelMeter  : public Component,
     SimpleDeviceManagerInputLevelMeter (AudioDeviceManager& m)  : manager (m)
     {
         startTimerHz (20);
-        manager.enableInputLevelMeasurement (true);
+        inputLevelGetter = manager.getInputLevelGetter();
     }
 
     ~SimpleDeviceManagerInputLevelMeter()
     {
-        manager.enableInputLevelMeasurement (false);
     }
 
     void timerCallback() override
     {
         if (isShowing())
         {
-            auto newLevel = (float) manager.getCurrentInputLevel();
+            auto newLevel = (float) inputLevelGetter->getCurrentLevel();
 
             if (std::abs (level - newLevel) > 0.005f)
             {
@@ -66,6 +65,7 @@ struct SimpleDeviceManagerInputLevelMeter  : public Component,
     }
 
     AudioDeviceManager& manager;
+    AudioDeviceManager::LevelMeter::Ptr inputLevelGetter;
     float level = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleDeviceManagerInputLevelMeter)

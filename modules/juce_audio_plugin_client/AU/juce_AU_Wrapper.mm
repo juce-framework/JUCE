@@ -878,7 +878,15 @@ public:
             {
                #if ! JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
                 if (isParameterDiscrete)
+                {
                     outParameterInfo.unit = kAudioUnitParameterUnit_Indexed;
+
+                    if (auto* param = juceFilter->getParameters()[index])
+                    {
+                        if (param->isBoolean())
+                            outParameterInfo.unit = kAudioUnitParameterUnit_Boolean;
+                    }
+                }
                #endif
             }
 
@@ -949,8 +957,19 @@ public:
     {
         if (inScope == kAudioUnitScope_Global && juceFilter != nullptr)
         {
-            const auto index = getJuceIndexForAUParameterID (inID);
-            juceFilter->setParameter (index, inValue / getMaximumParameterValue (index));
+            auto index = getJuceIndexForAUParameterID (inID);
+            auto value = inValue / getMaximumParameterValue (index);
+
+            if (auto* param = juceFilter->getParameters()[index])
+            {
+                param->setValue (value);
+                param->sendValueChangedMessageToListeners (value);
+            }
+            else
+            {
+                juceFilter->setParameter (index, value);
+            }
+
             return noErr;
         }
 
@@ -1816,7 +1835,7 @@ private:
         // using the default number of steps.
         for (auto* param : juceFilter->getParameters())
             if (param->isDiscrete())
-                jassert (param->getNumSteps() != juceFilter->getDefaultNumParameterSteps());
+                jassert (param->getNumSteps() != AudioProcessor::getDefaultNumParameterSteps());
        #endif
 
         parameterValueStringArrays.ensureStorageAllocated (numParams);
@@ -1826,18 +1845,18 @@ private:
             OwnedArray<const __CFString>* stringValues = nullptr;
 
            #if ! JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
-            if (juceFilter->isParameterDiscrete (index))
+            if (auto* param = juceFilter->getParameters()[index])
             {
-                if (auto* param = juceFilter->getParameters()[index])
+                if (param->isDiscrete())
                 {
-                    const auto numSteps = juceFilter->getParameterNumSteps (index);
+                    const auto numSteps = param->getNumSteps();
                     stringValues = new OwnedArray<const __CFString>();
                     stringValues->ensureStorageAllocated (numSteps);
 
                     const auto maxValue = getMaximumParameterValue (index);
 
                     for (int i = 0; i < numSteps; ++i)
-                        stringValues->add (CFStringCreateCopy (nullptr, (param->getText ((float) i / maxValue, 0)).toCFString())); ;
+                        stringValues->add (CFStringCreateCopy (nullptr, (param->getText ((float) i / maxValue, 0)).toCFString()));
                 }
             }
            #endif

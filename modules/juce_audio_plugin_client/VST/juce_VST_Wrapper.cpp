@@ -720,8 +720,16 @@ public:
     {
         if (processor != nullptr)
         {
-            jassert (isPositiveAndBelow (index, processor->getNumParameters()));
-            processor->setParameter (index, value);
+            if (auto* param = processor->getParameters()[index])
+            {
+                param->setValue (value);
+                param->sendValueChangedMessageToListeners (value);
+            }
+            else
+            {
+                jassert (isPositiveAndBelow (index, processor->getNumParameters()));
+                processor->setParameter (index, value);
+            }
         }
     }
 
@@ -1816,9 +1824,12 @@ private:
         {
             jassert (isPositiveAndBelow (args.index, processor->getNumParameters()));
 
-            if (auto* p = processor->getParameters()[args.index])
+            if (auto* param = processor->getParameters()[args.index])
             {
-                processor->setParameter (args.index, p->getValueForText (String::fromUTF8 ((char*) args.ptr)));
+                auto value = param->getValueForText (String::fromUTF8 ((char*) args.ptr));
+                param->setValue (value);
+                param->sendValueChangedMessageToListeners (value);
+
                 return 1;
             }
         }
@@ -1931,6 +1942,9 @@ private:
         if (args.index == presonusVendorID && args.value == presonusSetContentScaleFactor)
             return handleSetContentScaleFactor (args.opt);
 
+        if (args.index == plugInOpcodeGetParameterText)
+            return handleCockosGetParameterText (args.value, args.ptr, args.opt);
+
         if (auto callbackHandler = dynamic_cast<VSTCallbackHandler*> (processor))
             return callbackHandler->handleVstManufacturerSpecific (args.index, args.value, args.ptr, args.opt);
 
@@ -1987,6 +2001,9 @@ private:
             return (int32) 0xbeef0000;
         }
        #endif
+
+        if (matches ("hasCockosExtensions"))
+            return (int32) 0xbeef0000;
 
         return 0;
     }
@@ -2081,6 +2098,23 @@ private:
         }
 
         return 1;
+    }
+
+    pointer_sized_int handleCockosGetParameterText (pointer_sized_int paramIndex,
+                                                    void* dest,
+                                                    float value)
+    {
+        if (processor != nullptr && dest != nullptr)
+        {
+            if (auto* param = processor->getParameters()[(int) paramIndex])
+            {
+                String text (param->getText (value, 1024));
+                memcpy (dest, text.toRawUTF8(), ((size_t) text.length()) + 1);
+                return 0xbeef;
+            }
+        }
+
+        return 0;
     }
 
     //==============================================================================

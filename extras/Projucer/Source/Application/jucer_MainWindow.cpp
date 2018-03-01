@@ -103,12 +103,29 @@ void MainWindow::createProjectContentCompIfNeeded()
     }
 }
 
+void MainWindow::setTitleBarIcon()
+{
+    if (auto* peer = getPeer())
+    {
+        if (currentProject != nullptr)
+        {
+            peer->setRepresentedFile (currentProject->getFile());
+            peer->setIcon (ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize));
+        }
+        else
+        {
+            peer->setRepresentedFile ({});
+        }
+    }
+}
+
 void MainWindow::makeVisible()
 {
     restoreWindowPosition();
     setVisible (true);
     addToDesktop();  // (must add before restoring size so that fullscreen will work)
     restoreWindowPosition();
+    setTitleBarIcon();
 
     getContentComponent()->grabKeyboardFocus();
 }
@@ -509,8 +526,15 @@ bool MainWindowList::openFile (const File& file, bool openInBackground)
         auto* w = getOrCreateEmptyWindow();
         bool ok = w->openFile (file);
 
-        w->makeVisible();
-        avoidSuperimposedWindows (w);
+        if (ok)
+        {
+            w->makeVisible();
+            avoidSuperimposedWindows (w);
+        }
+        else
+        {
+            closeWindow (w);
+        }
 
         if (openInBackground && (previousFrontWindow != nullptr))
             previousFrontWindow->toFront (true);

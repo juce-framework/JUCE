@@ -15,4 +15,3 @@ void setAllButtonsRed (Block& block)
 }
 @endcode
 */
-

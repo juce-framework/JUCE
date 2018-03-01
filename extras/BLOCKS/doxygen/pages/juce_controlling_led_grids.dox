@@ -34,4 +34,3 @@ void setLED (Block& block, int x, int y, Colour c)
 Using a custom %LEDGrid::Program allows more precise control over the operation of the LEDs.
 The code which will actually execute on the device, returned by your overriden LEDGrid::Program::getLittleFootProgram() function, must be specified in the LittleFoot language.
 */
-

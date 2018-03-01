@@ -34,7 +34,7 @@ MPEInstrument::MPEInstrument() noexcept
 {
     std::fill_n (lastPressureLowerBitReceivedOnChannel, 16, noLSBValueReceived);
     std::fill_n (lastTimbreLowerBitReceivedOnChannel, 16, noLSBValueReceived);
-    std::fill_n (isNoteChannelSustained, 16, false);
+    std::fill_n (isMemberChannelSustained, 16, false);
 
     pitchbendDimension.value = &MPENote::pitchbend;
     pressureDimension.value = &MPENote::pressure;
@@ -144,12 +144,13 @@ void MPEInstrument::processNextMidiEvent (const MidiMessage& message)
 {
     zoneLayout.processNextMidiEvent (message);
 
-    if (message.isNoteOn (true))           processMidiNoteOnMessage (message);
-    else if (message.isNoteOff (false))    processMidiNoteOffMessage (message);
-    else if (message.isAllNotesOff())      processMidiAllNotesOffMessage (message);
-    else if (message.isPitchWheel())       processMidiPitchWheelMessage (message);
-    else if (message.isChannelPressure())  processMidiChannelPressureMessage (message);
-    else if (message.isController())       processMidiControllerMessage (message);
+    if (message.isNoteOn (true))              processMidiNoteOnMessage (message);
+    else if (message.isNoteOff (false))       processMidiNoteOffMessage (message);
+    else if (message.isResetAllControllers()
+             || message.isAllNotesOff())      processMidiResetAllControllersMessage (message);
+    else if (message.isPitchWheel())          processMidiPitchWheelMessage (message);
+    else if (message.isChannelPressure())     processMidiChannelPressureMessage (message);
+    else if (message.isController())          processMidiControllerMessage (message);
 }
 
 //==============================================================================
@@ -211,10 +212,10 @@ void MPEInstrument::processMidiControllerMessage (const MidiMessage& message)
 }
 
 //==============================================================================
-void MPEInstrument::processMidiAllNotesOffMessage (const MidiMessage& message)
+void MPEInstrument::processMidiResetAllControllersMessage (const MidiMessage& message)
 {
-    // in MPE mode, "all notes off" is per-zone and expected on the master channel;
-    // in legacy mode, "all notes off" is per MIDI channel (within the channel range used).
+    // in MPE mode, "reset all controllers" is per-zone and expected on the master channel;
+    // in legacy mode, it is per MIDI channel (within the channel range used).
 
     if (legacyMode.isEnabled && legacyMode.channelRange.contains (message.getChannel()))
     {
@@ -231,13 +232,16 @@ void MPEInstrument::processMidiAllNotesOffMessage (const MidiMessage& message)
             }
         }
     }
-    else if (auto* zone = zoneLayout.getZoneByMasterChannel (message.getChannel()))
+    else if (isMasterChannel (message.getChannel()))
     {
+        auto zone = (message.getChannel() == 1 ? zoneLayout.getLowerZone()
+                                               : zoneLayout.getUpperZone());
+
         for (auto i = notes.size(); --i >= 0;)
         {
             auto& note = notes.getReference (i);
 
-            if (zone->isUsingChannelAsNoteChannel (note.midiChannel))
+            if (zone.isUsingChannelAsMemberChannel (note.midiChannel))
             {
                 note.keyState = MPENote::off;
                 note.noteOffVelocity = MPEValue::from7BitInt (64); // some reasonable number
@@ -280,7 +284,7 @@ void MPEInstrument::noteOn (int midiChannel,
                             int midiNoteNumber,
                             MPEValue midiNoteOnVelocity)
 {
-    if (! isNoteChannel (midiChannel))
+    if (! isMemberChannel (midiChannel))
         return;
 
     MPENote newNote (midiChannel,
@@ -289,7 +293,7 @@ void MPEInstrument::noteOn (int midiChannel,
                      getInitialValueForNewNote (midiChannel, pitchbendDimension),
                      getInitialValueForNewNote (midiChannel, pressureDimension),
                      getInitialValueForNewNote (midiChannel, timbreDimension),
-                     isNoteChannelSustained[midiChannel - 1] ? MPENote::keyDownAndSustained : MPENote::keyDown);
+                     isMemberChannelSustained[midiChannel - 1] ? MPENote::keyDownAndSustained : MPENote::keyDown);
 
     const ScopedLock sl (lock);
     updateNoteTotalPitchbend (newNote);
@@ -312,7 +316,7 @@ void MPEInstrument::noteOff (int midiChannel,
                              int midiNoteNumber,
                              MPEValue midiNoteOffVelocity)
 {
-    if (notes.isEmpty() || ! isNoteChannel (midiChannel))
+    if (notes.isEmpty() || ! isMemberChannel (midiChannel))
         return;
 
     const ScopedLock sl (lock);
@@ -375,11 +379,7 @@ void MPEInstrument::updateDimension (int midiChannel, MPEDimension& dimension, M
     if (notes.isEmpty())
         return;
 
-    if (auto* zone = zoneLayout.getZoneByMasterChannel (midiChannel))
-    {
-        updateDimensionMaster (*zone, dimension, value);
-    }
-    else if (isNoteChannel (midiChannel))
+    if (isMemberChannel (midiChannel))
     {
         if (dimension.trackingMode == allNotesOnChannel)
         {
@@ -397,18 +397,26 @@ void MPEInstrument::updateDimension (int midiChannel, MPEDimension& dimension, M
                 updateDimensionForNote (*note, dimension, value);
         }
     }
+    else if (isMasterChannel (midiChannel))
+    {
+        updateDimensionMaster (midiChannel == 1, dimension, value);
+    }
 }
 
 //==============================================================================
-void MPEInstrument::updateDimensionMaster (const MPEZone& zone, MPEDimension& dimension, MPEValue value)
+void MPEInstrument::updateDimensionMaster (bool isLowerZone, MPEDimension& dimension, MPEValue value)
 {
-    auto channels = zone.getNoteChannelRange();
+    auto zone = (isLowerZone ? zoneLayout.getLowerZone()
+                             : zoneLayout.getUpperZone());
+
+    if (! zone.isActive())
+        return;
 
     for (auto i = notes.size(); --i >= 0;)
     {
         auto& note = notes.getReference (i);
 
-        if (! channels.contains (note.midiChannel))
+        if (! zone.isUsingChannelAsMemberChannel (note.midiChannel))
             continue;
 
         if (&dimension == &pitchbendDimension)
@@ -457,17 +465,29 @@ void MPEInstrument::updateNoteTotalPitchbend (MPENote& note)
     }
     else
     {
-        if (auto* zone = zoneLayout.getZoneByNoteChannel (note.midiChannel))
+        auto zone = zoneLayout.getLowerZone();
+
+        if (! zone.isUsingChannelAsMemberChannel (note.midiChannel))
         {
-            auto notePitchbendInSemitones = note.pitchbend.asSignedFloat() * zone->getPerNotePitchbendRange();
-            auto masterPitchbendInSemitones = pitchbendDimension.lastValueReceivedOnChannel[zone->getMasterChannel() - 1].asSignedFloat() * zone->getMasterPitchbendRange();
-            note.totalPitchbendInSemitones = notePitchbendInSemitones + masterPitchbendInSemitones;
+            if (zoneLayout.getUpperZone().isUsingChannelAsMemberChannel (note.midiChannel))
+            {
+                zone = zoneLayout.getUpperZone();
+            }
+            else
+            {
+                // this note doesn't belong to any zone!
+                jassertfalse;
+                return;
+            }
         }
-        else
-        {
-            // oops - this note seems to not belong to any zone!
-            jassertfalse;
-        }
+
+        auto notePitchbendInSemitones = note.pitchbend.asSignedFloat() * zone.perNotePitchbendRange;
+
+        auto masterPitchbendInSemitones = pitchbendDimension.lastValueReceivedOnChannel[zone.getMasterChannel() - 1]
+                                                            .asSignedFloat()
+                                          * zone.masterPitchbendRange;
+
+        note.totalPitchbendInSemitones = notePitchbendInSemitones + masterPitchbendInSemitones;
     }
 }
 
@@ -490,16 +510,17 @@ void MPEInstrument::handleSustainOrSostenuto (int midiChannel, bool isDown, bool
     // in MPE mode, sustain/sostenuto is per-zone and expected on the master channel;
     // in legacy mode, sustain/sostenuto is per MIDI channel (within the channel range used).
 
-    auto* affectedZone = zoneLayout.getZoneByMasterChannel (midiChannel);
-
-    if (legacyMode.isEnabled ? (! legacyMode.channelRange.contains (midiChannel)) : (affectedZone == nullptr))
+    if (legacyMode.isEnabled ? (! legacyMode.channelRange.contains (midiChannel)) : (! isMasterChannel (midiChannel)))
         return;
+
+    auto zone = (midiChannel == 1 ? zoneLayout.getLowerZone()
+                                  : zoneLayout.getUpperZone());
 
     for (auto i = notes.size(); --i >= 0;)
     {
         auto& note = notes.getReference (i);
 
-        if (legacyMode.isEnabled ? (note.midiChannel == midiChannel) : affectedZone->isUsingChannel (note.midiChannel))
+        if (legacyMode.isEnabled ? (note.midiChannel == midiChannel) : zone.isUsingChannelAsMemberChannel (note.midiChannel))
         {
             if (note.keyState == MPENote::keyDown && isDown)
                 note.keyState = MPENote::keyDownAndSustained;
@@ -523,20 +544,29 @@ void MPEInstrument::handleSustainOrSostenuto (int midiChannel, bool isDown, bool
     if (! isSostenuto)
     {
         if (legacyMode.isEnabled)
-            isNoteChannelSustained[midiChannel - 1] = isDown;
+        {
+            isMemberChannelSustained[midiChannel - 1] = isDown;
+        }
         else
-            for (auto i = affectedZone->getFirstNoteChannel(); i <= affectedZone->getLastNoteChannel(); ++i)
-                isNoteChannelSustained[i - 1] = isDown;
+        {
+            if (zone.isLowerZone())
+                for (auto i = zone.getFirstMemberChannel(); i <= zone.getLastMemberChannel(); ++i)
+                    isMemberChannelSustained[i - 1] = isDown;
+            else
+                for (auto i = zone.getFirstMemberChannel(); i >= zone.getLastMemberChannel(); --i)
+                    isMemberChannelSustained[i - 1] = isDown;
+        }
     }
 }
 
 //==============================================================================
-bool MPEInstrument::isNoteChannel (int midiChannel) const noexcept
+bool MPEInstrument::isMemberChannel (int midiChannel) noexcept
 {
     if (legacyMode.isEnabled)
         return legacyMode.channelRange.contains (midiChannel);
 
-    return zoneLayout.getZoneByNoteChannel (midiChannel) != nullptr;
+    return zoneLayout.getLowerZone().isUsingChannelAsMemberChannel (midiChannel)
+            || zoneLayout.getUpperZone().isUsingChannelAsMemberChannel (midiChannel);
 }
 
 bool MPEInstrument::isMasterChannel (int midiChannel) const noexcept
@@ -544,9 +574,8 @@ bool MPEInstrument::isMasterChannel (int midiChannel) const noexcept
     if (legacyMode.isEnabled)
         return false;
 
-    return zoneLayout.getZoneByMasterChannel (midiChannel) != nullptr;
+    return (midiChannel == 1 || midiChannel == 16);
 }
-
 //==============================================================================
 int MPEInstrument::getNumPlayingNotes() const noexcept
 {
@@ -725,13 +754,13 @@ public:
     MPEInstrumentTests()
         : UnitTest ("MPEInstrument class", "MIDI/MPE")
     {
-        // using two MPE zones with the following layout for testing
+        // using lower and upper MPE zones with the following layout for testing
         //
         // 1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16
-        //     * ...................|      * ........................|
+        // * ...................|             |........................ *
 
-        testLayout.addZone (MPEZone (2, 5));
-        testLayout.addZone (MPEZone (9, 6));
+        testLayout.setLowerZone (5);
+        testLayout.setUpperZone (6);
     }
 
     void runTest() override
@@ -739,7 +768,8 @@ public:
         beginTest ("initial zone layout");
         {
             MPEInstrument test;
-            expectEquals (test.getZoneLayout().getNumZones(), 0);
+            expect (! test.getZoneLayout().getLowerZone().isActive());
+            expect (! test.getZoneLayout().getUpperZone().isActive());
         }
 
         beginTest ("get/setZoneLayout");
@@ -747,12 +777,14 @@ public:
             MPEInstrument test;
             test.setZoneLayout (testLayout);
 
-            MPEZoneLayout newLayout = test.getZoneLayout();
-            expectEquals (newLayout.getNumZones(), 2);
-            expectEquals (newLayout.getZoneByIndex (0)->getMasterChannel(), 2);
-            expectEquals (newLayout.getZoneByIndex (0)->getNumNoteChannels(), 5);
-            expectEquals (newLayout.getZoneByIndex (1)->getMasterChannel(), 9);
-            expectEquals (newLayout.getZoneByIndex (1)->getNumNoteChannels(), 6);
+            auto newLayout = test.getZoneLayout();
+
+            expect (test.getZoneLayout().getLowerZone().isActive());
+            expect (test.getZoneLayout().getUpperZone().isActive());
+            expectEquals (newLayout.getLowerZone().getMasterChannel(), 1);
+            expectEquals (newLayout.getLowerZone().numMemberChannels, 5);
+            expectEquals (newLayout.getUpperZone().getMasterChannel(), 16);
+            expectEquals (newLayout.getUpperZone().numMemberChannels, 6);
         }
 
         beginTest ("noteOn / noteOff");
@@ -767,16 +799,16 @@ public:
                 test.setZoneLayout (testLayout);
 
                 // note-on on master channel - ignore
-                test.noteOn (9, 60, MPEValue::from7BitInt (100));
-                expectEquals (test.getNumPlayingNotes(), 0);
-                expectEquals (test.noteAddedCallCounter, 0);
-
-                // note-on on any other channel - ignore
                 test.noteOn (1, 60, MPEValue::from7BitInt (100));
                 expectEquals (test.getNumPlayingNotes(), 0);
                 expectEquals (test.noteAddedCallCounter, 0);
 
-                // note-on on note channel - create new note
+                // note-on on any other channel - ignore
+                test.noteOn (7, 60, MPEValue::from7BitInt (100));
+                expectEquals (test.getNumPlayingNotes(), 0);
+                expectEquals (test.noteAddedCallCounter, 0);
+
+                // note-on on member channel - create new note
                 test.noteOn (3, 60, MPEValue::from7BitInt (100));
                 expectEquals (test.getNumPlayingNotes(), 1);
                 expectEquals (test.noteAddedCallCounter, 1);
@@ -861,38 +893,37 @@ public:
         {
             UnitTestInstrument test;
             test.setZoneLayout (testLayout);
-            test.noteOn (3, 60, MPEValue::from7BitInt (100));  // note in Zone 1
-            test.noteOn (10, 60, MPEValue::from7BitInt (100));  // note in Zone 2
+            test.noteOn (3, 60, MPEValue::from7BitInt (100));  // note in lower zone
+            test.noteOn (10, 60, MPEValue::from7BitInt (100));  // note in upper zone
 
             // sustain pedal on per-note channel shouldn't do anything.
             test.sustainPedal (3, true);
             expectNote (test.getNote (3, 60), 100, 0, 8192, 64, MPENote::keyDown);
-
 
             expectNote (test.getNote (3, 60), 100, 0, 8192, 64, MPENote::keyDown);
             expectNote (test.getNote (10, 60), 100, 0, 8192, 64, MPENote::keyDown);
             expectEquals (test.noteKeyStateChangedCallCounter, 0);
 
             // sustain pedal on non-zone channel shouldn't do anything either.
-            test.sustainPedal (1, true);
+            test.sustainPedal (7, true);
             expectNote (test.getNote (3, 60), 100, 0, 8192, 64, MPENote::keyDown);
             expectNote (test.getNote (10, 60), 100, 0, 8192, 64, MPENote::keyDown);
             expectEquals (test.noteKeyStateChangedCallCounter, 0);
 
-            // sustain pedal on master channel should sustain notes on *that* zone.
-            test.sustainPedal (2, true);
+            // sustain pedal on master channel should sustain notes on _that_ zone.
+            test.sustainPedal (1, true);
             expectNote (test.getNote (3, 60), 100, 0, 8192, 64, MPENote::keyDownAndSustained);
             expectNote (test.getNote (10, 60), 100, 0, 8192, 64, MPENote::keyDown);
             expectEquals (test.noteKeyStateChangedCallCounter, 1);
 
             // release
-            test.sustainPedal (2, false);
+            test.sustainPedal (1, false);
             expectNote (test.getNote (3, 60), 100, 0, 8192, 64, MPENote::keyDown);
             expectNote (test.getNote (10, 60), 100, 0, 8192, 64, MPENote::keyDown);
             expectEquals (test.noteKeyStateChangedCallCounter, 2);
 
             // should also sustain new notes added after the press
-            test.sustainPedal (2, true);
+            test.sustainPedal (1, true);
             expectEquals (test.noteKeyStateChangedCallCounter, 3);
             test.noteOn (4, 51, MPEValue::from7BitInt (100));
             expectNote (test.getNote (4, 51), 100, 0, 8192, 64, MPENote::keyDownAndSustained);
@@ -916,7 +947,7 @@ public:
             expectNote (test.getNote (4, 51), 100, 0, 8192, 64, MPENote::sustained);
 
             // notes should be turned off when pedal is released
-            test.sustainPedal (2, false);
+            test.sustainPedal (1, false);
             expectEquals (test.getNumPlayingNotes(), 0);
             expectEquals (test.noteReleasedCallCounter, 4);
         }
@@ -925,8 +956,8 @@ public:
         {
             UnitTestInstrument test;
             test.setZoneLayout (testLayout);
-            test.noteOn (3, 60, MPEValue::from7BitInt (100));  // note in Zone 1
-            test.noteOn (10, 60, MPEValue::from7BitInt (100));  // note in Zone 2
+            test.noteOn (3, 60, MPEValue::from7BitInt (100));  // note in lower zone
+            test.noteOn (10, 60, MPEValue::from7BitInt (100));  // note in upper zone
 
             // sostenuto pedal on per-note channel shouldn't do anything.
             test.sostenutoPedal (3, true);
@@ -935,25 +966,25 @@ public:
             expectEquals (test.noteKeyStateChangedCallCounter, 0);
 
             // sostenuto pedal on non-zone channel shouldn't do anything either.
-            test.sostenutoPedal (1, true);
+            test.sostenutoPedal (9, true);
             expectNote (test.getNote (3, 60), 100, 0, 8192, 64, MPENote::keyDown);
             expectNote (test.getNote (10, 60), 100, 0, 8192, 64, MPENote::keyDown);
             expectEquals (test.noteKeyStateChangedCallCounter, 0);
 
             // sostenuto pedal on master channel should sustain notes on *that* zone.
-            test.sostenutoPedal (2, true);
+            test.sostenutoPedal (1, true);
             expectNote (test.getNote (3, 60), 100, 0, 8192, 64, MPENote::keyDownAndSustained);
             expectNote (test.getNote (10, 60), 100, 0, 8192, 64, MPENote::keyDown);
             expectEquals (test.noteKeyStateChangedCallCounter, 1);
 
             // release
-            test.sostenutoPedal (2, false);
+            test.sostenutoPedal (1, false);
             expectNote (test.getNote (3, 60), 100, 0, 8192, 64, MPENote::keyDown);
             expectNote (test.getNote (10, 60), 100, 0, 8192, 64, MPENote::keyDown);
             expectEquals (test.noteKeyStateChangedCallCounter, 2);
 
             // should only sustain notes turned on *before* the press (difference to sustain pedal)
-            test.sostenutoPedal (2, true);
+            test.sostenutoPedal (1, true);
             expectEquals (test.noteKeyStateChangedCallCounter, 3);
             test.noteOn (4, 51, MPEValue::from7BitInt (100));
             expectEquals (test.getNumPlayingNotes(), 3);
@@ -973,7 +1004,7 @@ public:
             expectEquals (test.noteKeyStateChangedCallCounter, 4);
 
             // notes should be turned off when pedal is released
-            test.sustainPedal (2, false);
+            test.sustainPedal (1, false);
             expectEquals (test.getNumPlayingNotes(), 0);
             expectEquals (test.noteReleasedCallCounter, 3);
         }
@@ -987,31 +1018,31 @@ public:
             test.noteOn (3, 61, MPEValue::from7BitInt (100));
 
             {
-                MPENote note = test.getMostRecentNote (2);
+                auto note = test.getMostRecentNote (2);
                 expect (! note.isValid());
             }
             {
-                MPENote note = test.getMostRecentNote (3);
+                auto note = test.getMostRecentNote (3);
                 expect (note.isValid());
                 expectEquals (int (note.midiChannel), 3);
                 expectEquals (int (note.initialNote), 61);
             }
 
-            test.sustainPedal (2, true);
+            test.sustainPedal (1, true);
             test.noteOff (3, 61, MPEValue::from7BitInt (100));
 
             {
-                MPENote note = test.getMostRecentNote (3);
+                auto note = test.getMostRecentNote (3);
                 expect (note.isValid());
                 expectEquals (int (note.midiChannel), 3);
                 expectEquals (int (note.initialNote), 60);
             }
 
-            test.sustainPedal (2, false);
+            test.sustainPedal (1, false);
             test.noteOff (3, 60, MPEValue::from7BitInt (100));
 
             {
-                MPENote note = test.getMostRecentNote (3);
+                auto note = test.getMostRecentNote (3);
                 expect (! note.isValid());
             }
         }
@@ -1074,14 +1105,14 @@ public:
                 expectEquals (test.notePressureChangedCallCounter, 1);
 
                 // applying pressure on a master channel should modulate all notes in this zone
-                test.pressure (2, MPEValue::from7BitInt (44));
+                test.pressure (1, MPEValue::from7BitInt (44));
                 expectNote (test.getNote (3, 60), 100, 44, 8192, 64, MPENote::keyDown);
                 expectNote (test.getNote (4, 60), 100, 44, 8192, 64, MPENote::keyDown);
                 expectNote (test.getNote (10, 60), 100, 0, 8192, 64, MPENote::keyDown);
                 expectEquals (test.notePressureChangedCallCounter, 3);
 
                 // applying pressure on an unrelated channel should be ignored
-                test.pressure (1, MPEValue::from7BitInt (55));
+                test.pressure (8, MPEValue::from7BitInt (55));
                 expectNote (test.getNote (3, 60), 100, 44, 8192, 64, MPENote::keyDown);
                 expectNote (test.getNote (4, 60), 100, 44, 8192, 64, MPENote::keyDown);
                 expectNote (test.getNote (10, 60), 100, 0, 8192, 64, MPENote::keyDown);
@@ -1179,14 +1210,14 @@ public:
                 // value of per-note pitchbend. Tests covering master pitchbend below.
                 // Note: noteChanged will be called anyway for notes in that zone
                 // because the total pitchbend for those notes has changed
-                test.pitchbend (2, MPEValue::from14BitInt (2222));
+                test.pitchbend (1, MPEValue::from14BitInt (2222));
                 expectNote (test.getNote (3, 60), 100, 0, 1111, 64, MPENote::keyDown);
                 expectNote (test.getNote (4, 60), 100, 0, 8192, 64, MPENote::keyDown);
                 expectNote (test.getNote (10, 60), 100, 0, 8192, 64, MPENote::keyDown);
                 expectEquals (test.notePitchbendChangedCallCounter, 3);
 
                 // applying pitchbend on an unrelated channel should do nothing.
-                test.pitchbend (1, MPEValue::from14BitInt (3333));
+                test.pitchbend (8, MPEValue::from14BitInt (3333));
                 expectNote (test.getNote (3, 60), 100, 0, 1111, 64, MPENote::keyDown);
                 expectNote (test.getNote (4, 60), 100, 0, 8192, 64, MPENote::keyDown);
                 expectNote (test.getNote (10, 60), 100, 0, 8192, 64, MPENote::keyDown);
@@ -1231,7 +1262,7 @@ public:
                 // - the first note should not be bent, only the second one.
 
                 test.noteOn (3, 60, MPEValue::from7BitInt (100));
-                test.sustainPedal (2, true);
+                test.sustainPedal (1, true);
                 test.noteOff (3, 60, MPEValue::from7BitInt (64));
                 expectEquals (test.getNumPlayingNotes(), 1);
                 expectNote (test.getNote (3, 60), 100, 0, 8192, 64, MPENote::sustained);
@@ -1275,19 +1306,19 @@ public:
                 test.pitchbend (3, MPEValue::from14BitInt (4096));
                 expectDoubleWithinRelativeError (test.getMostRecentNote (3).totalPitchbendInSemitones, -24.0, 0.01);
 
-                layout.getZoneByIndex (0)->setPerNotePitchbendRange (96);
+                layout.setLowerZone (5, 96);
                 test.setZoneLayout (layout);
                 test.noteOn (3, 60, MPEValue::from7BitInt (100));
                 test.pitchbend (3, MPEValue::from14BitInt (0)); // -max
                 expectDoubleWithinRelativeError (test.getMostRecentNote (3).totalPitchbendInSemitones, -96.0, 0.01);
 
-                layout.getZoneByIndex (0)->setPerNotePitchbendRange (1);
+                layout.setLowerZone (5, 1);
                 test.setZoneLayout (layout);
                 test.noteOn (3, 60, MPEValue::from7BitInt (100));
                 test.pitchbend (3, MPEValue::from14BitInt (16383)); // +max
                 expectDoubleWithinRelativeError (test.getMostRecentNote (3).totalPitchbendInSemitones, 1.0, 0.01);
 
-                layout.getZoneByIndex (0)->setPerNotePitchbendRange (0); // pitchbendrange = 0 --> no pitchbend at all
+                layout.setLowerZone (5, 0); // pitchbendrange = 0 --> no pitchbend at all
                 test.setZoneLayout (layout);
                 test.noteOn (3, 60, MPEValue::from7BitInt (100));
                 test.pitchbend (3, MPEValue::from14BitInt (12345));
@@ -1301,25 +1332,25 @@ public:
                 MPEZoneLayout layout = testLayout;
                 test.setZoneLayout (layout);  // default should be +/- 2 semitones
                 test.noteOn (3, 60, MPEValue::from7BitInt (100));
-                test.pitchbend (2, MPEValue::from14BitInt (4096)); //halfway between -max and centre
+                test.pitchbend (1, MPEValue::from14BitInt (4096)); //halfway between -max and centre
                 expectDoubleWithinRelativeError (test.getMostRecentNote (3).totalPitchbendInSemitones, -1.0, 0.01);
 
-                layout.getZoneByIndex (0)->setMasterPitchbendRange (96);
+                layout.setLowerZone (5, 48, 96);
                 test.setZoneLayout (layout);
                 test.noteOn (3, 60, MPEValue::from7BitInt (100));
-                test.pitchbend (2, MPEValue::from14BitInt (0)); // -max
+                test.pitchbend (1, MPEValue::from14BitInt (0)); // -max
                 expectDoubleWithinRelativeError (test.getMostRecentNote (3).totalPitchbendInSemitones, -96.0, 0.01);
 
-                layout.getZoneByIndex (0)->setMasterPitchbendRange (1);
+                layout.setLowerZone (5, 48, 1);
                 test.setZoneLayout (layout);
                 test.noteOn (3, 60, MPEValue::from7BitInt (100));
-                test.pitchbend (2, MPEValue::from14BitInt (16383)); // +max
+                test.pitchbend (1, MPEValue::from14BitInt (16383)); // +max
                 expectDoubleWithinRelativeError (test.getMostRecentNote (3).totalPitchbendInSemitones, 1.0, 0.01);
 
-                layout.getZoneByIndex (0)->setMasterPitchbendRange (0); // pitchbendrange = 0 --> no pitchbend at all
+                layout.setLowerZone (5, 48, 0); // pitchbendrange = 0 --> no pitchbend at all
                 test.setZoneLayout (layout);
                 test.noteOn (3, 60, MPEValue::from7BitInt (100));
-                test.pitchbend (2, MPEValue::from14BitInt (12345));
+                test.pitchbend (1, MPEValue::from14BitInt (12345));
                 expectDoubleWithinRelativeError (test.getMostRecentNote (3).totalPitchbendInSemitones, 0.0, 0.01);
             }
             {
@@ -1329,11 +1360,10 @@ public:
                 UnitTestInstrument test;
 
                 MPEZoneLayout layout = testLayout;
-                layout.getZoneByIndex (0)->setPerNotePitchbendRange (12);
-                layout.getZoneByIndex (0)->setMasterPitchbendRange (1);
+                layout.setLowerZone (5, 12, 1);
                 test.setZoneLayout (layout);
 
-                test.pitchbend (2, MPEValue::from14BitInt (4096)); // master pitchbend 0.5 semitones down
+                test.pitchbend (1, MPEValue::from14BitInt (4096)); // master pitchbend 0.5 semitones down
                 test.pitchbend (3, MPEValue::from14BitInt (0)); // per-note pitchbend 12 semitones down
                 // additionally, note should react to both pitchbend messages
                 // correctly even if they arrived before the note-on.
@@ -1360,14 +1390,14 @@ public:
                 expectEquals (test.noteTimbreChangedCallCounter, 1);
 
                 // modulating timbre on a master channel should modulate all notes in this zone
-                test.timbre (2, MPEValue::from7BitInt (44));
+                test.timbre (1, MPEValue::from7BitInt (44));
                 expectNote (test.getNote (3, 60), 100, 0, 8192, 44, MPENote::keyDown);
                 expectNote (test.getNote (4, 60), 100, 0, 8192, 44, MPENote::keyDown);
                 expectNote (test.getNote (10, 60), 100, 0, 8192, 64, MPENote::keyDown);
                 expectEquals (test.noteTimbreChangedCallCounter, 3);
 
                 // modulating timbre on an unrelated channel should be ignored
-                test.timbre (1, MPEValue::from7BitInt (55));
+                test.timbre (9, MPEValue::from7BitInt (55));
                 expectNote (test.getNote (3, 60), 100, 0, 8192, 44, MPENote::keyDown);
                 expectNote (test.getNote (4, 60), 100, 0, 8192, 44, MPENote::keyDown);
                 expectNote (test.getNote (10, 60), 100, 0, 8192, 64, MPENote::keyDown);
@@ -1727,8 +1757,8 @@ public:
             MPEInstrument test;
 
             MidiBuffer buffer;
-            buffer.addEvents (MPEMessages::addZone (MPEZone (2, 5)), 0, -1, 0);
-            buffer.addEvents (MPEMessages::addZone (MPEZone (9, 6)), 0, -1, 0);
+            buffer.addEvents (MPEMessages::setLowerZone (5), 0, -1, 0);
+            buffer.addEvents (MPEMessages::setUpperZone (6), 0, -1, 0);
 
             MidiBuffer::Iterator iter (buffer);
             MidiMessage message;
@@ -1737,11 +1767,12 @@ public:
             while (iter.getNextEvent (message, samplePosition))
                 test.processNextMidiEvent (message);
 
-            expectEquals (test.getZoneLayout().getNumZones(), 2);
-            expectEquals (test.getZoneLayout().getZoneByIndex (0)->getMasterChannel(), 2);
-            expectEquals (test.getZoneLayout().getZoneByIndex (0)->getNumNoteChannels(), 5);
-            expectEquals (test.getZoneLayout().getZoneByIndex (1)->getMasterChannel(), 9);
-            expectEquals (test.getZoneLayout().getZoneByIndex (1)->getNumNoteChannels(), 6);
+            expect (test.getZoneLayout().getLowerZone().isActive());
+            expect (test.getZoneLayout().getUpperZone().isActive());
+            expectEquals (test.getZoneLayout().getLowerZone().getMasterChannel(), 1);
+            expectEquals (test.getZoneLayout().getLowerZone().numMemberChannels, 5);
+            expectEquals (test.getZoneLayout().getUpperZone().getMasterChannel(), 16);
+            expectEquals (test.getZoneLayout().getUpperZone().numMemberChannels, 6);
         }
 
         beginTest ("MIDI all notes off");
@@ -1755,17 +1786,17 @@ public:
             expectEquals (test.getNumPlayingNotes(), 4);
 
             // on note channel: ignore.
-            test.processNextMidiEvent (MidiMessage::allNotesOff (3));
+            test.processNextMidiEvent (MidiMessage::allControllersOff (3));
             expectEquals (test.getNumPlayingNotes(), 4);
 
             // on unused channel: ignore.
-            test.processNextMidiEvent (MidiMessage::allNotesOff (1));
+            test.processNextMidiEvent (MidiMessage::allControllersOff (9));
             expectEquals (test.getNumPlayingNotes(), 4);
 
             // on master channel: release notes in that zone only.
-            test.processNextMidiEvent (MidiMessage::allNotesOff (2));
+            test.processNextMidiEvent (MidiMessage::allControllersOff (1));
             expectEquals (test.getNumPlayingNotes(), 2);
-            test.processNextMidiEvent (MidiMessage::allNotesOff (9));
+            test.processNextMidiEvent (MidiMessage::allControllersOff (16));
             expectEquals (test.getNumPlayingNotes(), 0);
         }
 
@@ -1779,13 +1810,13 @@ public:
             test.noteOn (15, 63, MPEValue::from7BitInt (100));
             expectEquals (test.getNumPlayingNotes(), 4);
 
-            test.processNextMidiEvent (MidiMessage::allNotesOff (3));
+            test.processNextMidiEvent (MidiMessage::allControllersOff (3));
             expectEquals (test.getNumPlayingNotes(), 3);
 
-            test.processNextMidiEvent (MidiMessage::allNotesOff (15));
+            test.processNextMidiEvent (MidiMessage::allControllersOff (15));
             expectEquals (test.getNumPlayingNotes(), 1);
 
-            test.processNextMidiEvent (MidiMessage::allNotesOff (4));
+            test.processNextMidiEvent (MidiMessage::allControllersOff (4));
             expectEquals (test.getNumPlayingNotes(), 0);
         }
 

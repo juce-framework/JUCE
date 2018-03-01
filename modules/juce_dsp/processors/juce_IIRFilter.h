@@ -88,7 +88,7 @@ namespace IIR
             Note that this clears the processing state, but the type of filter and
             its coefficients aren't changed.
         */
-        void reset()            { reset (SampleType {}); }
+        void reset()            { reset (SampleType {0}); }
 
         /** Resets the filter's processing pipeline to a specific value.
             @see reset
@@ -101,7 +101,13 @@ namespace IIR
 
         /** Processes as a block of samples */
         template <typename ProcessContext>
-        void process (const ProcessContext& context) noexcept;
+        void process (const ProcessContext& context) noexcept
+        {
+            if (context.isBypassed)
+                processInternal<ProcessContext, true> (context);
+            else
+                processInternal<ProcessContext, false> (context);
+        }
 
         /** Processes a single sample, without any locking.
 
@@ -121,6 +127,10 @@ namespace IIR
     private:
         //==============================================================================
         void check();
+
+        /** Processes as a block of samples */
+        template <typename ProcessContext, bool isBypassed>
+        void processInternal (const ProcessContext& context) noexcept;
 
         //==============================================================================
         HeapBlock<SampleType> memory;
@@ -151,7 +161,7 @@ namespace IIR
         Coefficients (NumericType b0, NumericType b1, NumericType b2,
                       NumericType a0, NumericType a1, NumericType a2);
 
-        Coefficients (NumericType b0, NumericType, NumericType b2, NumericType b3,
+        Coefficients (NumericType b0, NumericType b1, NumericType b2, NumericType b3,
                       NumericType a0, NumericType a1, NumericType a2, NumericType a3);
 
         Coefficients (const Coefficients&) = default;

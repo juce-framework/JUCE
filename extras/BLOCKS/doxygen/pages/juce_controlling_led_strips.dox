@@ -15,4 +15,3 @@ void setWholeLEDRowOrange (Block& block)
 }
 @endcode
 */
-

@@ -66,4 +66,3 @@ Whilst in the event loop, the <tt>finder</tt> object receives TopologySource::Li
 - alsa
 - libcurl
 */
-

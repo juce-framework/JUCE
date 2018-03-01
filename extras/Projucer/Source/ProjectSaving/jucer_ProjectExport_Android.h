@@ -100,8 +100,8 @@ public:
     }
 
     //==============================================================================
-    ValueWithDefault androidRepositories, androidDependencies, androidScreenOrientation, androidActivityClass,
-                     androidActivitySubClassName, androidManifestCustomXmlElements, androidVersionCode,
+    ValueWithDefault androidJavaLibs, androidRepositories, androidDependencies, androidScreenOrientation, androidActivityClass,
+                     androidActivitySubClassName, androidActivityBaseClassName, androidManifestCustomXmlElements, androidVersionCode,
                      androidMinimumSDK, androidTheme, androidSharedLibraries, androidStaticLibraries, androidExtraAssetsFolder,
                      androidInternetNeeded, androidMicNeeded, androidBluetoothNeeded, androidExternalReadPermission,
                      androidExternalWritePermission, androidInAppBillingPermission, androidVibratePermission,androidOtherPermissions,
@@ -111,11 +111,13 @@ public:
     //==============================================================================
     AndroidProjectExporter (Project& p, const ValueTree& t)
         : ProjectExporter (p, t),
+          androidJavaLibs                      (settings, Ids::androidJavaLibs,                      getUndoManager()),
           androidRepositories                  (settings, Ids::androidRepositories,                  getUndoManager()),
           androidDependencies                  (settings, Ids::androidDependencies,                  getUndoManager()),
           androidScreenOrientation             (settings, Ids::androidScreenOrientation,             getUndoManager(), "unspecified"),
           androidActivityClass                 (settings, Ids::androidActivityClass,                 getUndoManager(), createDefaultClassName()),
           androidActivitySubClassName          (settings, Ids::androidActivitySubClassName,          getUndoManager()),
+          androidActivityBaseClassName         (settings, Ids::androidActivityBaseClassName,         getUndoManager(), "Activity"),
           androidManifestCustomXmlElements     (settings, Ids::androidManifestCustomXmlElements,     getUndoManager()),
           androidVersionCode                   (settings, Ids::androidVersionCode,                   getUndoManager(), "1"),
           androidMinimumSDK                    (settings, Ids::androidMinimumSDK,                    getUndoManager(), "10"),
@@ -312,7 +314,9 @@ protected:
         AndroidBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
             : BuildConfiguration (p, settings, e),
               androidArchitectures               (config, Ids::androidArchitectures,               getUndoManager(), isDebug() ? "armeabi x86" : ""),
+              androidBuildConfigRemoteNotifsConfigFile (config, Ids::androidBuildConfigRemoteNotifsConfigFile, getUndoManager()),
               androidAdditionalXmlValueResources (config, Ids::androidAdditionalXmlValueResources, getUndoManager()),
+              androidAdditionalDrawableResources (config, Ids::androidAdditionalDrawableResources, getUndoManager()),
               androidAdditionalRawValueResources (config, Ids::androidAdditionalRawValueResources, getUndoManager()),
               androidCustomStringXmlElements     (config, Ids::androidCustomStringXmlElements,     getUndoManager())
         {
@@ -320,10 +324,12 @@ protected:
             optimisationLevelValue.setDefault (isDebug() ? gccO0 : gccO3);
         }
 
-        String getArchitectures() const             { return androidArchitectures.get().toString(); }
-        String getAdditionalXmlResources() const    { return androidAdditionalXmlValueResources.get().toString(); }
-        String getAdditionalRawResources() const    { return androidAdditionalRawValueResources.get().toString();}
-        String getCustomStringsXml() const          { return androidCustomStringXmlElements.get().toString(); }
+        String getArchitectures() const               { return androidArchitectures.get().toString(); }
+        String getRemoteNotifsConfigFile() const      { return androidBuildConfigRemoteNotifsConfigFile.get().toString(); }
+        String getAdditionalXmlResources() const      { return androidAdditionalXmlValueResources.get().toString(); }
+        String getAdditionalDrawableResources() const { return androidAdditionalDrawableResources.get().toString(); }
+        String getAdditionalRawResources() const      { return androidAdditionalRawValueResources.get().toString();}
+        String getCustomStringsXml() const            { return androidCustomStringXmlElements.get().toString(); }
 
         void createConfigProperties (PropertyListBuilder& props) override
         {
@@ -332,11 +338,22 @@ protected:
             props.add (new TextPropertyComponent (androidArchitectures, "Architectures", 256, false),
                        "A list of the ARM architectures to build (for a fat binary). Leave empty to build for all possible android archiftectures.");
 
-            props.add (new TextPropertyComponent (androidAdditionalXmlValueResources, "Extra Android XML Value Resources", 2048, true),
+            props.add (new TextPropertyComponent (androidBuildConfigRemoteNotifsConfigFile.getPropertyAsValue(), "Remote Notifications Config File", 2048, false),
+                       "Path to google-services.json file. This will be the file provided by Firebase when creating a new app in Firebase console. "
+                       "This will override the setting from the main Android exporter node.");
+
+            props.add (new TextPropertyComponent (androidAdditionalXmlValueResources, "Extra Android XML Value Resources", 8192, true),
                        "Paths to additional \"value resource\" files in XML format that should be included in the app (one per line). "
                        "If you have additional XML resources that should be treated as value resources, add them here.");
 
-            props.add (new TextPropertyComponent (androidAdditionalRawValueResources, "Extra Android Raw Resources", 2048, true),
+            props.add (new TextPropertyComponent (androidAdditionalDrawableResources, "Extra Android Drawable Resources", 8192, true),
+                       "Paths to additional \"drawable resource\" directories that should be included in the app (one per line). "
+                       "They will be added to \"res\" directory of Android project. "
+                       "Each path should point to a directory named \"drawable\" or \"drawable-<size>\" where <size> should be "
+                       "something like \"hdpi\", \"ldpi\", \"xxxhdpi\" etc, for instance \"drawable-xhdpi\". "
+                       "Refer to Android Studio documentation for available sizes.");
+
+            props.add (new TextPropertyComponent (androidAdditionalRawValueResources, "Extra Android Raw Resources", 8192, true),
                        "Paths to additional \"raw resource\" files that should be included in the app (one per line). "
                        "Resource file names must contain only lowercase a-z, 0-9 or underscore.");
 
@@ -361,8 +378,9 @@ protected:
             return "${ANDROID_ABI}";
         }
 
-        ValueWithDefault androidArchitectures, androidAdditionalXmlValueResources, androidAdditionalRawValueResources,
-                         androidCustomStringXmlElements;
+        ValueWithDefault androidArchitectures, androidBuildConfigRemoteNotifsConfigFile,
+                         androidAdditionalXmlValueResources, androidAdditionalDrawableResources,
+                         androidAdditionalRawValueResources, androidCustomStringXmlElements;
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
@@ -771,19 +789,19 @@ private:
     String getAndroidDependencies() const
     {
         MemoryOutputStream mo;
-
-        auto dependencies = StringArray::fromLines (androidDependencies.get().toString());
-
         mo << "dependencies {" << newLine;
+
+        for (auto& d : StringArray::fromLines (androidDependencies.get().toString()))
+            mo << "    " << d << newLine;
+
+        for (auto& d : StringArray::fromLines (androidJavaLibs.get().toString()))
+            mo << "    implementation files('libs/" << File (d).getFileName() << "')" << newLine;
 
         if (androidEnableRemoteNotifications.get())
         {
             mo << "    'com.google.firebase:firebase-core:11.4.0'" << newLine;
             mo << "    compile 'com.google.firebase:firebase-messaging:11.4.0'" << newLine;
         }
-
-        for (auto& d : dependencies)
-            mo << "    " << d << newLine;
 
         mo << "}" << newLine;
 
@@ -824,11 +842,18 @@ private:
     //==============================================================================
     void createBaseExporterProperties (PropertyListBuilder& props)
     {
+        props.add (new TextPropertyComponent (androidJavaLibs, "Java libraries to include", 32768, true),
+                   "Java libs (JAR files) (one per line). These will be copied to app/libs folder and \"implementation files\" "
+                   "dependency will be automatically added to module \"dependencies\" section for each library, so do "
+                   "not add the dependency yourself.");
+
         props.add (new TextPropertyComponent (androidRepositories, "Module repositories", 32768, true),
                    "Module repositories (one per line). These will be added to module-level gradle file repositories section. ");
 
         props.add (new TextPropertyComponent (androidDependencies, "Module dependencies", 32768, true),
-                   "Module dependencies (one per line). These will be added to module-level gradle file dependencies section. ");
+                   "Module dependencies (one per line). These will be added to module-level gradle file \"dependencies\" section. "
+                   "If adding any java libs in \"Java libraries to include\" setting, do not add them here as "
+                   "they will be added automatically.");
 
         props.add (new ChoicePropertyComponent (androidScreenOrientation, "Screen orientation",
                                                 { "Portrait and Landscape", "Portrait", "Landscape" },
@@ -841,6 +866,12 @@ private:
         props.add (new TextPropertyComponent (androidActivitySubClassName, "Android Activity sub-class name", 256, false),
                    "If not empty, specifies the Android Activity class name stored in the app's manifest. "
                    "Use this if you would like to use your own Android Activity sub-class.");
+
+        props.add (new TextPropertyComponent (androidActivityBaseClassName, "Android Activity base class", 256, false),
+                   "If not empty, specifies the base class to use for your activity. If custom base class is "
+                   "specified, that base class should be a sub-class of android.app.Activity. When empty, Activity "
+                   "(android.app.Activity) will be used as the base class. "
+                   "Use this if you would like to use your own Android Activity base class.");
 
         props.add (new TextPropertyComponent (androidVersionCode, "Android Version Code", 32, false),
                    "An integer value that represents the version of the application code, relative to other versions.");
@@ -958,11 +989,14 @@ private:
             auto javaInAppBillingTarget = targetFolder.getChildFile ("app/src/main/java").getChildFile (inAppBillingPath);
             auto javaTarget = targetFolder.getChildFile ("app/src/main/java")
                                           .getChildFile (package.replaceCharacter ('.', File::getSeparatorChar()));
+            auto libTarget = targetFolder.getChildFile ("app/libs");
+            libTarget.createDirectory();
 
             copyActivityJavaFiles (javaSourceFolder, javaTarget, package);
             copyServicesJavaFiles (javaSourceFolder, javaTarget, package);
             copyProviderJavaFile  (javaSourceFolder, javaTarget, package);
             copyAdditionalJavaFiles (javaSourceFolder, javaInAppBillingTarget);
+            copyAdditionalJavaLibs (libTarget);
         }
     }
 
@@ -1071,7 +1105,8 @@ private:
                 else if (line.contains ("$$JuceAndroidWebViewCode$$"))
                     newFile << juceWebViewCode;
                 else
-                    newFile << line.replace ("JuceAppActivity", className)
+                    newFile << line.replace ("$$JuceAppActivityBaseClass$$", androidActivityBaseClassName.get().toString())
+                                   .replace ("JuceAppActivity", className)
                                    .replace ("package com.juce;", "package " + package + ";") << newLine;
             }
 
@@ -1099,6 +1134,21 @@ private:
 
         if (inAppBillingJavaSrcFile.existsAsFile())
             inAppBillingJavaSrcFile.copyFileTo (inAppBillingJavaDestFile);
+    }
+
+    void copyAdditionalJavaLibs (const File& targetFolder) const
+    {
+        auto libPaths = StringArray::fromLines (androidJavaLibs.get().toString());
+
+        for (auto& p : libPaths)
+        {
+            File f = getTargetFolder().getChildFile (p);
+
+            // Is the path to the java lib correct?
+            jassert (f.existsAsFile());
+
+            f.copyFileTo (targetFolder.getChildFile (f.getFileName()));
+        }
     }
 
     void copyServicesJavaFiles (const File& javaSourceFolder, const File& targetFolder, const String& package) const
@@ -1158,20 +1208,28 @@ private:
         for (ConstConfigIterator config (*this); config.next();)
         {
             auto& cfg = dynamic_cast<const AndroidBuildConfiguration&> (*config);
+            String cfgPath = cfg.isDebug() ? "app/src/debug" : "app/src/release";
             String xmlValuesPath = cfg.isDebug() ? "app/src/debug/res/values" : "app/src/release/res/values";
+            String drawablesPath = cfg.isDebug() ? "app/src/debug/res" : "app/src/release/res";
             String rawPath = cfg.isDebug() ? "app/src/debug/res/raw" : "app/src/release/res/raw";
 
             copyExtraResourceFiles (cfg.getAdditionalXmlResources(), xmlValuesPath);
+            copyExtraResourceFiles (cfg.getAdditionalDrawableResources(), drawablesPath);
             copyExtraResourceFiles (cfg.getAdditionalRawResources(), rawPath);
-        }
 
-        if (androidEnableRemoteNotifications.get())
-        {
-            File file (getProject().getFile().getChildFile (androidRemoteNotificationsConfigFile.get().toString()));
-            // Settings file must be present for remote notifications to work and it must be called google-services.json.
-            jassert (file.existsAsFile() && file.getFileName() == "google-services.json");
+            if (androidEnableRemoteNotifications.get())
+            {
+                auto remoteNotifsConfigFilePath = cfg.getRemoteNotifsConfigFile();
 
-            copyExtraResourceFiles (androidRemoteNotificationsConfigFile.get(), "app");
+                if (remoteNotifsConfigFilePath.isEmpty())
+                    remoteNotifsConfigFilePath = androidRemoteNotificationsConfigFile.get().toString();
+
+                File file (getProject().getFile().getChildFile (remoteNotifsConfigFilePath));
+                // Settings file must be present for remote notifications to work and it must be called google-services.json.
+                jassert (file.existsAsFile() && file.getFileName() == "google-services.json");
+
+                copyExtraResourceFiles (remoteNotifsConfigFilePath, cfgPath);
+            }
         }
     }
 
@@ -1187,9 +1245,9 @@ private:
         {
             auto file = getProject().getFile().getChildFile (path);
 
-            jassert (file.existsAsFile());
+            jassert (file.exists());
 
-            if (file.existsAsFile())
+            if (file.exists())
                 file.copyFileTo (parentFolder.getChildFile (file.getFileName()));
         }
     }

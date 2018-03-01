@@ -201,36 +201,36 @@ struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give e
     {
         static const Mapping mappings[] =
         {
-            { vstSpeakerConfigTypeMono,           { centre, unknown } },
-            { vstSpeakerConfigTypeLR,             { left, right, unknown } },
-            { vstSpeakerConfigTypeLsRs,           { leftSurround, rightSurround, unknown } },
-            { vstSpeakerConfigTypeLcRc,           { leftCentre, rightCentre, unknown } },
-            { vstSpeakerConfigTypeSlSr,           { leftSurroundRear, rightSurroundRear, unknown } },
-            { vstSpeakerConfigTypeCLfe,           { centre, LFE, unknown } },
-            { vstSpeakerConfigTypeLRC,            { left, right, centre, unknown } },
-            { vstSpeakerConfigTypeLRS,            { left, right, surround, unknown } },
-            { vstSpeakerConfigTypeLRCLfe,         { left, right, centre, LFE, unknown } },
-            { vstSpeakerConfigTypeLRLfeS,         { left, right, LFE, surround, unknown } },
-            { vstSpeakerConfigTypeLRCS,           { left, right, centre, surround, unknown } },
-            { vstSpeakerConfigTypeLRLsRs,         { left, right, leftSurround, rightSurround, unknown } },
-            { vstSpeakerConfigTypeLRCLfeS,        { left, right, centre, LFE, surround, unknown } },
-            { vstSpeakerConfigTypeLRLfeLsRs,      { left, right, LFE, leftSurround, rightSurround, unknown } },
-            { vstSpeakerConfigTypeLRCLsRs,        { left, right, centre, leftSurround, rightSurround, unknown } },
-            { vstSpeakerConfigTypeLRCLfeLsRs,     { left, right, centre, LFE, leftSurround, rightSurround, unknown } },
-            { vstSpeakerConfigTypeLRCLsRsCs,      { left, right, centre, leftSurround, rightSurround, surround, unknown } },
-            { vstSpeakerConfigTypeLRLsRsSlSr,     { left, right, leftSurround, rightSurround, leftSurroundRear, rightSurroundRear, unknown } },
-            { vstSpeakerConfigTypeLRCLfeLsRsCs,   { left, right, centre, LFE, leftSurround, rightSurround, surround, unknown } },
-            { vstSpeakerConfigTypeLRLfeLsRsSlSr,  { left, right, LFE, leftSurround, rightSurround, leftSurroundRear, rightSurroundRear, unknown } },
-            { vstSpeakerConfigTypeLRCLsRsLcRc,    { left, right, centre, leftSurround, rightSurround, topFrontLeft, topFrontRight, unknown } },
-            { vstSpeakerConfigTypeLRCLsRsSlSr,    { left, right, centre, leftSurround, rightSurround, leftSurroundRear, rightSurroundRear, unknown } },
-            { vstSpeakerConfigTypeLRCLfeLsRsLcRc, { left, right, centre, LFE, leftSurround, rightSurround, topFrontLeft, topFrontRight, unknown } },
-            { vstSpeakerConfigTypeLRCLfeLsRsSlSr, { left, right, centre, LFE, leftSurround, rightSurround, leftSurroundRear, rightSurroundRear, unknown } },
-            { vstSpeakerConfigTypeLRCLsRsLcRcCs,  { left, right, centre, leftSurround, rightSurround, topFrontLeft, topFrontRight, surround, unknown } },
-            { vstSpeakerConfigTypeLRCLsRsCsSlSr,  { left, right, centre, leftSurround, rightSurround, surround, leftSurroundRear, rightSurroundRear, unknown } },
-            { vstSpeakerConfigTypeLRCLfeLsRsLcRcCs,   { left, right, centre, LFE, leftSurround, rightSurround, topFrontLeft, topFrontRight, surround, unknown } },
-            { vstSpeakerConfigTypeLRCLfeLsRsCsSlSr,   { left, right, centre, LFE, leftSurround, rightSurround, surround, leftSurroundRear, rightSurroundRear, unknown } },
-            { vstSpeakerConfigTypeLRCLfeLsRsTflTfcTfrTrlTrrLfe2,            { left, right, centre, LFE, leftSurround, rightSurround, topFrontLeft, topFrontCentre, topFrontRight, topRearLeft, topRearRight, LFE2, unknown } },
-            { vstSpeakerConfigTypeEmpty,          { unknown } }
+            { vstSpeakerConfigTypeMono,                          { centre, unknown } },
+            { vstSpeakerConfigTypeLR,                            { left, right, unknown } },
+            { vstSpeakerConfigTypeLsRs,                          { leftSurround, rightSurround, unknown } },
+            { vstSpeakerConfigTypeLcRc,                          { leftCentre, rightCentre, unknown } },
+            { vstSpeakerConfigTypeSlSr,                          { leftSurroundRear, rightSurroundRear, unknown } },
+            { vstSpeakerConfigTypeCLfe,                          { centre, LFE, unknown } },
+            { vstSpeakerConfigTypeLRC,                           { left, right, centre, unknown } },
+            { vstSpeakerConfigTypeLRS,                           { left, right, surround, unknown } },
+            { vstSpeakerConfigTypeLRCLfe,                        { left, right, centre, LFE, unknown } },
+            { vstSpeakerConfigTypeLRLfeS,                        { left, right, LFE, surround, unknown } },
+            { vstSpeakerConfigTypeLRCS,                          { left, right, centre, surround, unknown } },
+            { vstSpeakerConfigTypeLRLsRs,                        { left, right, leftSurround, rightSurround, unknown } },
+            { vstSpeakerConfigTypeLRCLfeS,                       { left, right, centre, LFE, surround, unknown } },
+            { vstSpeakerConfigTypeLRLfeLsRs,                     { left, right, LFE, leftSurround, rightSurround, unknown } },
+            { vstSpeakerConfigTypeLRCLsRs,                       { left, right, centre, leftSurround, rightSurround, unknown } },
+            { vstSpeakerConfigTypeLRCLfeLsRs,                    { left, right, centre, LFE, leftSurround, rightSurround, unknown } },
+            { vstSpeakerConfigTypeLRCLsRsCs,                     { left, right, centre, leftSurround, rightSurround, surround, unknown } },
+            { vstSpeakerConfigTypeLRLsRsSlSr,                    { left, right, leftSurround, rightSurround, leftSurroundRear, rightSurroundRear, unknown } },
+            { vstSpeakerConfigTypeLRCLfeLsRsCs,                  { left, right, centre, LFE, leftSurround, rightSurround, surround, unknown } },
+            { vstSpeakerConfigTypeLRLfeLsRsSlSr,                 { left, right, LFE, leftSurround, rightSurround, leftSurroundRear, rightSurroundRear, unknown } },
+            { vstSpeakerConfigTypeLRCLsRsLcRc,                   { left, right, centre, leftSurround, rightSurround, topFrontLeft, topFrontRight, unknown } },
+            { vstSpeakerConfigTypeLRCLsRsSlSr,                   { left, right, centre, leftSurround, rightSurround, leftSurroundRear, rightSurroundRear, unknown } },
+            { vstSpeakerConfigTypeLRCLfeLsRsLcRc,                { left, right, centre, LFE, leftSurround, rightSurround, topFrontLeft, topFrontRight, unknown } },
+            { vstSpeakerConfigTypeLRCLfeLsRsSlSr,                { left, right, centre, LFE, leftSurround, rightSurround, leftSurroundRear, rightSurroundRear, unknown } },
+            { vstSpeakerConfigTypeLRCLsRsLcRcCs,                 { left, right, centre, leftSurround, rightSurround, topFrontLeft, topFrontRight, surround, unknown } },
+            { vstSpeakerConfigTypeLRCLsRsCsSlSr,                 { left, right, centre, leftSurround, rightSurround, surround, leftSurroundRear, rightSurroundRear, unknown } },
+            { vstSpeakerConfigTypeLRCLfeLsRsLcRcCs,              { left, right, centre, LFE, leftSurround, rightSurround, topFrontLeft, topFrontRight, surround, unknown } },
+            { vstSpeakerConfigTypeLRCLfeLsRsCsSlSr,              { left, right, centre, LFE, leftSurround, rightSurround, surround, leftSurroundRear, rightSurroundRear, unknown } },
+            { vstSpeakerConfigTypeLRCLfeLsRsTflTfcTfrTrlTrrLfe2, { left, right, centre, LFE, leftSurround, rightSurround, topFrontLeft, topFrontCentre, topFrontRight, topRearLeft, topRearRight, LFE2, unknown } },
+            { vstSpeakerConfigTypeEmpty,                         { unknown } }
         };
 
         return mappings;
@@ -243,7 +243,7 @@ struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give e
             case AudioChannelSet::left:              return vstIndividualSpeakerTypeLeft;
             case AudioChannelSet::right:             return vstIndividualSpeakerTypeRight;
             case AudioChannelSet::centre:            return vstIndividualSpeakerTypeCentre;
-            case AudioChannelSet::LFE:           return vstIndividualSpeakerTypeLFE;
+            case AudioChannelSet::LFE:               return vstIndividualSpeakerTypeLFE;
             case AudioChannelSet::leftSurround:      return vstIndividualSpeakerTypeLeftSurround;
             case AudioChannelSet::rightSurround:     return vstIndividualSpeakerTypeRightSurround;
             case AudioChannelSet::leftCentre:        return vstIndividualSpeakerTypeLeftCentre;
@@ -258,7 +258,7 @@ struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give e
             case AudioChannelSet::topRearLeft:       return vstIndividualSpeakerTypeTopRearLeft;
             case AudioChannelSet::topRearCentre:     return vstIndividualSpeakerTypeTopRearCentre;
             case AudioChannelSet::topRearRight:      return vstIndividualSpeakerTypeTopRearRight;
-            case AudioChannelSet::LFE2:          return vstIndividualSpeakerTypeLFE2;
+            case AudioChannelSet::LFE2:              return vstIndividualSpeakerTypeLFE2;
             default: break;
         }
 
@@ -272,7 +272,7 @@ struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give e
             case vstIndividualSpeakerTypeLeft:                 return AudioChannelSet::left;
             case vstIndividualSpeakerTypeRight:                return AudioChannelSet::right;
             case vstIndividualSpeakerTypeCentre:               return AudioChannelSet::centre;
-            case vstIndividualSpeakerTypeLFE:              return AudioChannelSet::LFE;
+            case vstIndividualSpeakerTypeLFE:                  return AudioChannelSet::LFE;
             case vstIndividualSpeakerTypeLeftSurround:         return AudioChannelSet::leftSurround;
             case vstIndividualSpeakerTypeRightSurround:        return AudioChannelSet::rightSurround;
             case vstIndividualSpeakerTypeLeftCentre:           return AudioChannelSet::leftCentre;
@@ -287,7 +287,7 @@ struct SpeakerMappings  : private AudioChannelSet // (inheritance only to give e
             case vstIndividualSpeakerTypeTopRearLeft:          return AudioChannelSet::topRearLeft;
             case vstIndividualSpeakerTypeTopRearCentre:        return AudioChannelSet::topRearCentre;
             case vstIndividualSpeakerTypeTopRearRight:         return AudioChannelSet::topRearRight;
-            case vstIndividualSpeakerTypeLFE2:             return AudioChannelSet::LFE2;
+            case vstIndividualSpeakerTypeLFE2:                 return AudioChannelSet::LFE2;
             default: break;
         }
 

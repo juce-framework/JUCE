@@ -48,6 +48,7 @@ MPENote::MPENote (int midiChannel_,
       noteOnVelocity (noteOnVelocity_),
       pitchbend (pitchbend_),
       pressure (pressure_),
+      initialTimbre (timbre_),
       timbre (timbre_),
       keyState (keyState_)
 {

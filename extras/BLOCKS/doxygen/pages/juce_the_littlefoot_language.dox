@@ -21,4 +21,3 @@ To update the heap, and hence the LEDS, your application code calls BitmapLEDPro
 
 A more advanced example can be found in the source code of the DrumPadGridProgram class or in the @ref example_blocks_synth example.
 */
-

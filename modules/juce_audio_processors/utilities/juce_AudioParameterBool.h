@@ -60,16 +60,18 @@ protected:
 
 private:
     //==============================================================================
-    float value;
-    const float defaultValue;
-
     float getValue() const override;
     void setValue (float newValue) override;
     float getDefaultValue() const override;
     int getNumSteps() const override;
     bool isDiscrete() const override;
+    bool isBoolean() const override;
     String getText (float, int) const override;
     float getValueForText (const String&) const override;
+
+    float value;
+    const float defaultValue;
+    StringArray onStrings, offStrings;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioParameterBool)
 };

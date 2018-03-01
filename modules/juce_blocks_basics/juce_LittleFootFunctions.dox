@@ -226,9 +226,9 @@ void sendChannelPressure (int channel, int pressure);
 
 /** Sets the MIDI channel range.
 
-    @param useMPE
-    @param lowChannel
-    @param highChannel
+    @param useMPE         whether to use MPE mode
+    @param lowChannel     the lowest MIDI channel
+    @param highChannel    the highest MIDI channel
 */
 void setChannelRange (bool useMPE, int lowChannel, int highChannel);
 
@@ -292,6 +292,9 @@ void onControlRelease (int buttonIndex);
 
 /** Called when a touch event starts.
 
+    Block units follow the number of DNA connectors on the side of the device.
+    For instance, a Lightpad Block is 2x2 and a Control Block is 2x1.
+
     @param index    the touch index, which will stay constant for each finger as it is tracked
     @param x        the X position of this touch on the device, in block units starting from 0 (left)
     @param y        the Y position of this touch on the device, in block units starting from 0 (top)
@@ -302,6 +305,9 @@ void touchStart (int index, float x, float y, float z, float vz);
 
 /** Called when a touch event moves.
 
+    Block units follow the number of DNA connectors on the side of the device.
+    For instance, a Lightpad Block is 2x2 and a Control Block is 2x1.
+
     @param index    the touch index, which will stay constant for each finger as it is tracked
     @param x        the X position of this touch on the device, in block units starting from 0 (left)
     @param y        the Y position of this touch on the device, in block units starting from 0 (top)
@@ -311,6 +317,9 @@ void touchStart (int index, float x, float y, float z, float vz);
 void touchMove (int index, float x, float y, float z, float vz);
 
 /** Called when a touch event ends.
+
+    Block units follow the number of DNA connectors on the side of the device.
+    For instance, a Lightpad Block is 2x2 and a Control Block is 2x1.
 
     @param index    the touch index, which will stay constant for each finger as it is tracked
     @param x        the X position of this touch on the device, in block units starting from 0 (left)
