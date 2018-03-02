@@ -549,6 +549,10 @@ public:
     {
         if (auto* app = JUCEApplicationBase::getInstance())
             app->backButtonPressed();
+
+        if (Component* kiosk = Desktop::getInstance().getKioskModeComponent())
+            if (kiosk->getPeer() == this)
+                setNavBarsHidden (navBarsHidden);
     }
 
     void handleKeyboardHiddenCallback()
