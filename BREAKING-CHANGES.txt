@@ -25,7 +25,7 @@ remove it.
 Rationale
 ---------
 Given the structure of JUCE's API it is impossible to deprecate these functions
-using only complile-time messages. Therefore a single assertion, which can be
+using only compile-time messages. Therefore a single assertion, which can be
 safely ignored, serves to indicate that these functions should no longer be
 used. The move away from the AudioProcessor methods both improves the interface
 to that class and makes ongoing development work much easier.
@@ -69,7 +69,7 @@ recently approved by the MIDI Manufacturers Association (MMA).
 
 Possible Issues
 ---------------
-The most significant changes have occured in the MPEZoneLayout classes and
+The most significant changes have occurred in the MPEZoneLayout classes and
 programs using the higher level MPE classes such as MPEInstrument,
 MPESynthesiser, MPESynthesiserBase and MPESynthesiserVoice should be
 unaffected.
@@ -231,7 +231,7 @@ Workaround section.
 Workaround
 ----------
 For any elements previously used, simply embed them explicitly in
-<manifest><application> elements,for example instead of:
+<manifest><application> elements, for example instead of:
 
 <meta-data android:name="paramId1" android:value="paramValue1"/>
 <meta-data android:name="paramId2" android:value="paramValue2"/>
