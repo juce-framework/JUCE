@@ -357,6 +357,61 @@ public:
         return { start, getPointAlongLine (length - jmin (distanceToShortenBy, length)) };
     }
 
+    /** Returns true if a given x value is in this line's domain
+        @param x an x value
+        @returns true if a given x value is in this line's domain
+        @see rangeContains
+    */
+    bool domainContains(ValueType x)
+    {
+        return jmin(start.x, end.x) <= x && jmax(start.x, end.x) >= x;
+    }
+
+    /** Returns true if a given y value is in this line's range
+        @param y a y value
+        @returns true if a given y value is in this line's range
+        @see domainContains
+    */
+    bool rangeContains(ValueType y)
+    {
+        return jmin(start.y, end.y) <= y && jmax(start.y, end.y) >= y;
+    }
+
+    //==============================================================================
+    /** Find the y value for a given x value.
+        @param x an x value
+        @returns the y value for the given x value
+        @see getXFromY
+    */
+    ValueType getYFromX(ValueType x)
+    {
+        jassert(domainContains(x));
+        jassert(!isVertical()); // a vertical line will produce NaN!
+
+        // solve via y = mx + b
+        auto delta = end - start;
+        auto m = delta.y / delta.x;
+        auto b = start.y - m * start.x;
+        return static_cast<ValueType> (m * x + b);
+    }
+    //==============================================================================
+    /** Find the x value for a given y value.
+        @param y a y value
+        @returns the x value for the given y value.
+        @see getYFromX
+    */
+    ValueType getXFromY(ValueType y)
+    {
+        jassert(rangeContains(y));
+        jassert(isHorizontal()); // a horiontal line will produce NaN!
+
+        // solve via y = mx + b
+        auto delta = end - start;
+        auto m = delta.y / delta.x;
+        auto b = start.y - m * start.x;
+        return static_cast<ValueType> ((y - b) / m);
+    }
+
 private:
     //==============================================================================
     Point<ValueType> start, end;
