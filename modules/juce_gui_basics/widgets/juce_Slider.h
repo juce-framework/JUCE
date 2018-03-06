@@ -602,6 +602,12 @@ public:
     /** You can assign a lambda to this callback object to have it called when the slider's drag ends. */
     std::function<void()> onDragEnd;
 
+    /** You can assign a lambda that will be used to convert textual values to the slider's normalised position. */
+    std::function<double (const String&)> valueFromTextFunction;
+
+    /** You can assign a lambda that will be used to convert the slider's normalised position to a textual value. */
+    std::function<String (double)> textFromValueFunction;
+
     //==============================================================================
     /** This lets you choose whether double-clicking moves the slider to a given position.
 

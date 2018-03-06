@@ -421,7 +421,7 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
     Pimpl (AudioProcessorValueTreeState& s, const String& p, Slider& sl)
         : AttachedControlBase (s, p), slider (sl), ignoreCallbacks (false)
     {
-        NormalisableRange<float> range (s.getParameterRange (paramID));
+        NormalisableRange<float> range (state.getParameterRange (paramID));
 
         if (range.interval != 0 || range.skew != 0)
         {
@@ -463,8 +463,13 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
                                            snapToLegalValueFunction });
         }
 
-        if (auto* param = state.getParameter (paramID))
+        if (auto* param = dynamic_cast<AudioProcessorValueTreeState::Parameter*> (state.getParameter (paramID)))
+        {
+            slider.valueFromTextFunction = [param] (const String& text) { return (double) param->textToValueFunction (text); };
+            slider.textFromValueFunction = [param] (double value)       { return param->valueToTextFunction ((float) value); };
+
             slider.setDoubleClickReturnValue (true, range.convertFrom0to1 (param->getDefaultValue()));
+        }
 
         sendInitialUpdate();
         slider.addListener (this);
