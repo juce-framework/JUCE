@@ -1670,7 +1670,7 @@ public:
                     JUCE_IOS_MAC_VIEW* view = [[[JUCE_IOS_MAC_VIEW alloc] initWithFrame: convertToCGRect (editor->getBounds())] autorelease];
                     [myself setView: view];
 
-                    editor->setVisible (true);
+                    editor->setVisible (false);
                     editor->addToDesktop (0, view);
                 }
             }
@@ -1705,6 +1705,20 @@ public:
         if (processorHolder != nullptr)
             if (auto* processor = processorHolder->get())
                 processor->memoryWarningReceived();
+    }
+
+    void viewDidAppear (bool)
+    {
+        if (processorHolder != nullptr)
+            if (AudioProcessorEditor* editor = getAudioProcessor().getActiveEditor())
+                editor->setVisible (true);
+    }
+
+    void viewDidDisappear (bool)
+    {
+        if (processorHolder != nullptr)
+            if (AudioProcessorEditor* editor = getAudioProcessor().getActiveEditor())
+                editor->setVisible (false);
     }
 
     CGSize getPreferredContentSize() const
@@ -1793,6 +1807,8 @@ private:
 - (CGSize) preferredContentSize  { return cpp->getPreferredContentSize(); }
 - (void) viewDidLayoutSubviews   { cpp->viewDidLayoutSubviews(); }
 - (void) didReceiveMemoryWarning { cpp->didReceiveMemoryWarning(); }
+- (void) viewDidAppear: (BOOL) animated { cpp->viewDidAppear (animated); [super viewDidAppear:animated]; }
+- (void) viewDidDisappear: (BOOL) animated { cpp->viewDidDisappear (animated); [super viewDidDisappear:animated]; }
 @end
 
 //==============================================================================
