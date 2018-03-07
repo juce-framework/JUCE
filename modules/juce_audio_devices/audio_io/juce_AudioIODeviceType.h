@@ -161,6 +161,8 @@ public:
     static AudioIODeviceType* createAudioIODeviceType_Android();
     /** Creates an Android OpenSLES device type if it's available on this platform, or returns null. */
     static AudioIODeviceType* createAudioIODeviceType_OpenSLES();
+    /** Creates an Oboe device type if it's available on this platform, or returns null. */
+    static AudioIODeviceType* createAudioIODeviceType_Oboe();
 
 protected:
     explicit AudioIODeviceType (const String& typeName);

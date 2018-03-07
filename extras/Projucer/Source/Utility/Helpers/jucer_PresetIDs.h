@@ -191,6 +191,7 @@ namespace Ids
     DECLARE_ID (androidVersionCode);
     DECLARE_ID (androidSDKPath);
     DECLARE_ID (androidNDKPath);
+    DECLARE_ID (androidOboeRepositoryPath);
     DECLARE_ID (androidInternetNeeded);
     DECLARE_ID (androidArchitectures);
     DECLARE_ID (androidManifestCustomXmlElements);

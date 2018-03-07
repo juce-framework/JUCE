@@ -103,7 +103,7 @@ public:
     ValueWithDefault androidJavaLibs, androidRepositories, androidDependencies, androidScreenOrientation, androidActivityClass,
                      androidActivitySubClassName, androidActivityBaseClassName, androidManifestCustomXmlElements, androidVersionCode,
                      androidMinimumSDK, androidTheme, androidSharedLibraries, androidStaticLibraries, androidExtraAssetsFolder,
-                     androidInternetNeeded, androidMicNeeded, androidBluetoothNeeded, androidExternalReadPermission,
+                     androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidBluetoothNeeded, androidExternalReadPermission,
                      androidExternalWritePermission, androidInAppBillingPermission, androidVibratePermission,androidOtherPermissions,
                      androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore,
                      androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion, buildToolsVersion;
@@ -125,6 +125,7 @@ public:
           androidSharedLibraries               (settings, Ids::androidSharedLibraries,               getUndoManager()),
           androidStaticLibraries               (settings, Ids::androidStaticLibraries,               getUndoManager()),
           androidExtraAssetsFolder             (settings, Ids::androidExtraAssetsFolder,             getUndoManager()),
+          androidOboeRepositoryPath            (settings, Ids::androidOboeRepositoryPath,            getUndoManager()),
           androidInternetNeeded                (settings, Ids::androidInternetNeeded,                getUndoManager(), true),
           androidMicNeeded                     (settings, Ids::microphonePermissionNeeded,           getUndoManager(), false),
           androidBluetoothNeeded               (settings, Ids::androidBluetoothNeeded,               getUndoManager(), true),
@@ -402,6 +403,14 @@ private:
         if (! isLibrary())
             mo << "SET(BINARY_NAME \"juce_jni\")" << newLine << newLine;
 
+        if (project.getConfigFlag ("JUCE_USE_ANDROID_OBOE").get())
+        {
+            String oboePath (androidOboeRepositoryPath.get().toString().quoted());
+
+            mo << "SET(OBOE_DIR " << oboePath << ")" << newLine << newLine;
+            mo << "add_subdirectory (${OBOE_DIR} ./oboe)" << newLine << newLine;
+        }
+
         String cpufeaturesPath ("${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c");
         mo << "add_library(\"cpufeatures\" STATIC \"" << cpufeaturesPath << "\")" << newLine
            << "set_source_files_properties(\"" << cpufeaturesPath << "\" PROPERTIES COMPILE_FLAGS \"-Wno-sign-conversion -Wno-gnu-statement-expression\")" << newLine << newLine;
@@ -419,6 +428,10 @@ private:
                 mo << "    \"" << escapeDirectoryForCmake (path) << "\"" << newLine;
 
             mo << "    \"${ANDROID_NDK}/sources/android/cpufeatures\"" << newLine;
+
+            if (project.getConfigFlag ("JUCE_USE_ANDROID_OBOE").get())
+                mo << "    \"${OBOE_DIR}/include\"" << newLine;
+
             mo << ")" << newLine << newLine;
         }
 
@@ -548,6 +561,10 @@ private:
 
             mo << "    \"cpufeatures\"" << newLine;
         }
+
+        if (project.getConfigFlag ("JUCE_USE_ANDROID_OBOE").get())
+            mo << "    \"oboe\"" << newLine;
+
         mo << ")" << newLine;
 
         overwriteFileIfDifferentOrThrow (file, mo);
@@ -892,6 +909,10 @@ private:
     //==============================================================================
     void createManifestExporterProperties (PropertyListBuilder& props)
     {
+        props.add (new TextPropertyComponent (androidOboeRepositoryPath, "Oboe repository path", 2048, false),
+                   "Path to the root of Oboe repository. Make sure to point Oboe repository to "
+                   "commit with SHA 44c6b6ea9c8fa9b5b74cbd60f355068b57b50b37 before building.");
+
         props.add (new ChoicePropertyComponent (androidInternetNeeded, "Internet Access"),
                    "If enabled, this will set the android.permission.INTERNET flag in the manifest.");
 

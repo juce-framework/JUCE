@@ -482,10 +482,16 @@ private:
 
 
 //==============================================================================
+extern bool isOboeAvailable();
 extern bool isOpenSLAvailable();
 
 AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_Android()
 {
+   #if JUCE_USE_ANDROID_OBOE
+    if (isOboeAvailable())
+        return nullptr;
+   #endif
+
    #if JUCE_USE_ANDROID_OPENSLES
     if (isOpenSLAvailable())
         return nullptr;

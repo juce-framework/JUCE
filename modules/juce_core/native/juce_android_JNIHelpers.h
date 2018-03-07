@@ -570,7 +570,8 @@ DECLARE_JNI_CLASS (JavaHashMap, "java/util/HashMap");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
-  STATICMETHOD (valueOf, "valueOf", "(I)Ljava/lang/Integer;")
+  STATICMETHOD (parseInt, "parseInt", "(Ljava/lang/String;I)I") \
+  STATICMETHOD (valueOf,  "valueOf",  "(I)Ljava/lang/Integer;")
 
 DECLARE_JNI_CLASS (JavaInteger, "java/lang/Integer");
 #undef JNI_CLASS_MEMBERS
