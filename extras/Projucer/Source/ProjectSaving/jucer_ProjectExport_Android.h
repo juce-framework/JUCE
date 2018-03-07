@@ -1441,7 +1441,7 @@ private:
 
         auto cppStandard = project.getCppStandardString();
 
-        if (cppStandard == "latest")
+        if (cppStandard == "latest" || cppStandard == "17") // C++17 flag isn't supported yet so use 1z for now
             cppStandard = "1z";
 
         cppStandard = "-std=" + String (shouldUseGNUExtensions() ? "gnu++" : "c++") + cppStandard;
