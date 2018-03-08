@@ -1256,20 +1256,53 @@ bool AudioProcessorGraph::producesMidi() const                      { return tru
 void AudioProcessorGraph::getStateInformation (juce::MemoryBlock&)  {}
 void AudioProcessorGraph::setStateInformation (const void*, int)    {}
 
+template <typename Type>
+static void processBlockForBuffer (AudioBuffer<Type>& buffer, MidiBuffer& midiMessages,
+                                   AudioProcessorGraph& graph,
+                                   GraphRenderSequence<Type>* renderSequence,
+                                   Atomic<int>& isPrepared)
+{
+    if (graph.isNonRealtime())
+    {
+        while (isPrepared.get() == 0)
+            Thread::sleep (1);
+
+        const ScopedLock sl (graph.getCallbackLock());
+
+        if (renderSequence != nullptr)
+            renderSequence->perform (buffer, midiMessages, graph.getPlayHead());
+    }
+    else
+    {
+        const ScopedLock sl (graph.getCallbackLock());
+
+        if (isPrepared.get() == 1)
+        {
+            if (renderSequence != nullptr)
+                renderSequence->perform (buffer, midiMessages, graph.getPlayHead());
+        }
+        else
+        {
+            buffer.clear();
+            midiMessages.clear();
+        }
+    }
+}
+
 void AudioProcessorGraph::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
 {
-    const ScopedLock sl (getCallbackLock());
+    if (isPrepared.get() == 0 && MessageManager::getInstance()->isThisTheMessageThread())
+        handleAsyncUpdate();
 
-    if (renderSequenceFloat != nullptr)
-        renderSequenceFloat->perform (buffer, midiMessages, getPlayHead());
+    processBlockForBuffer<float> (buffer, midiMessages, *this, renderSequenceFloat, isPrepared);
 }
 
 void AudioProcessorGraph::processBlock (AudioBuffer<double>& buffer, MidiBuffer& midiMessages)
 {
-    const ScopedLock sl (getCallbackLock());
+    if (isPrepared.get() == 0 && MessageManager::getInstance()->isThisTheMessageThread())
+        handleAsyncUpdate();
 
-    if (renderSequenceDouble != nullptr)
-        renderSequenceDouble->perform (buffer, midiMessages, getPlayHead());
+    processBlockForBuffer<double> (buffer, midiMessages, *this, renderSequenceDouble, isPrepared);
 }
 
 //==============================================================================
