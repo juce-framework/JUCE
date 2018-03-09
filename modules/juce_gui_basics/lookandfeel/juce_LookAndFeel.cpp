@@ -118,20 +118,36 @@ void LookAndFeel::setDefaultLookAndFeel (LookAndFeel* newDefaultLookAndFeel) noe
 //==============================================================================
 Typeface::Ptr LookAndFeel::getTypefaceForFont (const Font& font)
 {
-    if (defaultSans.isNotEmpty() && font.getTypefaceName() == Font::getDefaultSansSerifFontName())
+    if (font.getTypefaceName() == Font::getDefaultSansSerifFontName())
     {
-        Font f (font);
-        f.setTypefaceName (defaultSans);
-        return Typeface::createSystemTypefaceFor (f);
+        if (defaultTypeface != nullptr)
+            return defaultTypeface;
+
+        if (defaultSans.isNotEmpty())
+        {
+            Font f (font);
+            f.setTypefaceName (defaultSans);
+            return Typeface::createSystemTypefaceFor (f);
+        }
     }
 
     return Font::getDefaultTypefaceForFont (font);
+}
+
+void LookAndFeel::setDefaultSansSerifTypeface (Typeface::Ptr newDefaultTypeface)
+{
+    if (defaultTypeface != newDefaultTypeface)
+    {
+        defaultTypeface = newDefaultTypeface;
+        Typeface::clearTypefaceCache();
+    }
 }
 
 void LookAndFeel::setDefaultSansSerifTypefaceName (const String& newName)
 {
     if (defaultSans != newName)
     {
+        defaultTypeface = {};
         Typeface::clearTypefaceCache();
         defaultSans = newName;
     }

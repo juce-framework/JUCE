@@ -6,12 +6,70 @@ Develop
 
 Change
 ------
+When hosting plug-ins all AudioProcessor methods of managing parameters that
+take a parameter index as an argument have been deprecated.
+
+Possible Issues
+---------------
+A single assertion will be fired in debug builds on the first use of a
+deprecated function.
+
+Workaround
+----------
+When hosting plug-ins you should use the AudioProcessor::getParameters() method
+and interact with parameters via the returned array of
+AudioProcessorParameters. For a short-term fix you can also continue past the
+assertion in your debugger, or temporarily modify the JUCE source code to
+remove it.
+
+Rationale
+---------
+Given the structure of JUCE's API it is impossible to deprecate these functions
+using only compile-time messages. Therefore a single assertion, which can be
+safely ignored, serves to indicate that these functions should no longer be
+used. The move away from the AudioProcessor methods both improves the interface
+to that class and makes ongoing development work much easier.
+
+
+Change
+------
+This InAppPurchases class is now a JUCE Singleton. This means that you need
+to get an instance via InAppPurchases::getInstance(), instead of storing a
+InAppPurchases object yourself.
+
+Possible Issues
+---------------
+Any code using InAppPurchases needs to be updated to retrieve a singleton pointer
+to InAppPurchases.
+
+Workaround
+----------
+Instead of holding a InAppPurchase member yourself, you should get an instance
+via InAppPurchases::getInstance(), e.g.
+
+instead of:
+
+InAppPurchases iap;
+iap.purchaseProduct (...);
+
+call:
+
+InAppPurchases::getInstance()->purchaseProduct (...);
+
+Rationale
+---------
+This change was required to fix an issue on Android where on failed transaction
+a listener would not get called.
+
+
+Change
+------
 JUCE's MPE classes have been updated to reflect the official specification
 recently approved by the MIDI Manufacturers Association (MMA).
 
 Possible Issues
 ---------------
-The most significant changes have occured in the MPEZoneLayout classes and
+The most significant changes have occurred in the MPEZoneLayout classes and
 programs using the higher level MPE classes such as MPEInstrument,
 MPESynthesiser, MPESynthesiserBase and MPESynthesiserVoice should be
 unaffected.
@@ -40,31 +98,6 @@ new, official MPE standard.
 
 Version 5.2.1
 =============
-
-Change
-------
-Calling JUCEApplicationBase::quit() on Android will now really quit the app,
-rather than just placing it in background. Starting with API level 21 (Android
-5.0), the app will not appear in recent apps list after calling quit(). Prior
-to API 21, the app will still appear in recent app lists but when a user
-chooses the app, a new instance of the app will be started.
-
-Possible Issues
----------------
-Any code calling JUCEApplicationBase::quit() to place the app in background
-will close the app instead.
-
-Workaround
-----------
-Use Process::hide().
-
-Rationale
----------
-The old behaviour JUCEApplicationBase::quit() was confusing JUCE code, as a new
-instance of JUCE app was attempted to be created, while the older instance was
-still running in background. This would result in assertions when starting a
-second instance.
-
 
 Change
 ------
@@ -198,7 +231,7 @@ Workaround section.
 Workaround
 ----------
 For any elements previously used, simply embed them explicitly in
-<manifest><application> elements,for example instead of:
+<manifest><application> elements, for example instead of:
 
 <meta-data android:name="paramId1" android:value="paramValue1"/>
 <meta-data android:name="paramId2" android:value="paramValue2"/>

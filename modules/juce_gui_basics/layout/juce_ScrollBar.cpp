@@ -195,8 +195,7 @@ void ScrollBar::updateThumbPosition()
         newThumbStart += roundToInt (((visibleRange.getStart() - totalRange.getStart()) * (thumbAreaSize - newThumbSize))
                                          / (totalRange.getLength() - visibleRange.getLength()));
 
-    setVisible ((! autohides) || (totalRange.getLength() > visibleRange.getLength()
-                                    && visibleRange.getLength() > 0.0));
+    Component::setVisible (getVisibility());
 
     if (thumbStart != newThumbStart  || thumbSize != newThumbSize)
     {
@@ -420,6 +419,24 @@ bool ScrollBar::keyPressed (const KeyPress& key)
     }
 
     return false;
+}
+
+void ScrollBar::setVisible (bool shouldBeVisible)
+{
+    if (userVisibilityFlag != shouldBeVisible)
+    {
+        userVisibilityFlag = shouldBeVisible;
+        Component::setVisible (getVisibility());
+    }
+}
+
+bool ScrollBar::getVisibility() const noexcept
+{
+    if (! userVisibilityFlag)
+        return false;
+
+    return (! autohides) || (totalRange.getLength() > visibleRange.getLength()
+                                    && visibleRange.getLength() > 0.0);
 }
 
 } // namespace juce

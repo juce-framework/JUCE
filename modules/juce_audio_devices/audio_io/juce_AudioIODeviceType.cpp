@@ -78,4 +78,8 @@ AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_Android()         
 AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_OpenSLES()        { return nullptr; }
 #endif
 
+#if ! (JUCE_ANDROID && JUCE_USE_ANDROID_OBOE)
+AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_Oboe()            { return nullptr; }
+#endif
+
 } // namespace juce

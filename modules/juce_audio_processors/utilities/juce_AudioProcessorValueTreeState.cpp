@@ -422,10 +422,48 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
         : AttachedControlBase (s, p), slider (sl), ignoreCallbacks (false)
     {
         NormalisableRange<float> range (s.getParameterRange (paramID));
-        slider.setRange (range.start, range.end, range.interval);
-        slider.setSkewFactor (range.skew, range.symmetricSkew);
 
-        if (AudioProcessorParameter* param = state.getParameter (paramID))
+        if (range.interval != 0 || range.skew != 0)
+        {
+            slider.setRange (range.start, range.end, range.interval);
+            slider.setSkewFactor (range.skew, range.symmetricSkew);
+        }
+        else
+        {
+            auto convertFrom0To1Function = [range] (double currentRangeStart,
+                                                    double currentRangeEnd,
+                                                    double normalisedValue) mutable
+            {
+                range.start = (float) currentRangeStart;
+                range.end = (float) currentRangeEnd;
+                return (double) range.convertFrom0to1 ((float) normalisedValue);
+            };
+
+            auto convertTo0To1Function = [range] (double currentRangeStart,
+                                                  double currentRangeEnd,
+                                                  double mappedValue) mutable
+            {
+                range.start = (float) currentRangeStart;
+                range.end = (float) currentRangeEnd;
+                return (double) range.convertTo0to1 ((float) mappedValue);
+            };
+
+            auto snapToLegalValueFunction = [range] (double currentRangeStart,
+                                                     double currentRangeEnd,
+                                                     double valueToSnap) mutable
+            {
+                range.start = (float) currentRangeStart;
+                range.end = (float) currentRangeEnd;
+                return (double) range.snapToLegalValue ((float) valueToSnap);
+            };
+
+            slider.setNormalisableRange ({ (double) range.start, (double) range.end,
+                                           convertFrom0To1Function,
+                                           convertTo0To1Function,
+                                           snapToLegalValueFunction });
+        }
+
+        if (auto* param = state.getParameter (paramID))
             slider.setDoubleClickReturnValue (true, range.convertFrom0to1 (param->getDefaultValue()));
 
         sendInitialUpdate();

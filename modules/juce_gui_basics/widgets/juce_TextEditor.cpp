@@ -1242,7 +1242,13 @@ void TextEditor::removeListener (Listener* l)   { listeners.remove (l); }
 void TextEditor::timerCallbackInt()
 {
     if (hasKeyboardFocus (false) && ! isCurrentlyBlockedByAnotherModalComponent())
+    {
         wasFocused = true;
+
+        if (auto* peer = getPeer())
+            if (! isReadOnly())
+                peer->textInputRequired (peer->globalToLocal (getScreenPosition()), *this);
+    }
 
     auto now = Time::getApproximateMillisecondCounter();
 
@@ -2062,10 +2068,6 @@ void TextEditor::focusGained (FocusChangeType)
 
     repaint();
     updateCaretPosition();
-
-    if (auto* peer = getPeer())
-        if (! isReadOnly())
-            peer->textInputRequired (peer->globalToLocal (getScreenPosition()), *this);
 }
 
 void TextEditor::focusLost (FocusChangeType)

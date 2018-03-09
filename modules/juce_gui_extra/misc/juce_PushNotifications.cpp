@@ -32,6 +32,46 @@ namespace juce
 bool PushNotifications::Notification::isValid() const noexcept { return true; }
 #endif
 
+PushNotifications::Notification::Notification (const Notification& other)
+    : identifier (other.identifier),
+      title (other.title),
+      body (other.body),
+      subtitle (other.subtitle),
+      groupId (other.groupId),
+      badgeNumber (other.badgeNumber),
+      soundToPlay (other.soundToPlay),
+      properties (other.properties),
+      category (other.category),
+      triggerIntervalSec (other.triggerIntervalSec),
+      repeat (other.repeat),
+      icon (other.icon),
+      channelId (other.channelId),
+      largeIcon (other.largeIcon),
+      tickerText (other.tickerText),
+      actions (other.actions),
+      progress (other.progress),
+      person (other.person),
+      type (other.type),
+      priority (other.priority),
+      lockScreenAppearance (other.lockScreenAppearance),
+      publicVersion (other.publicVersion.get() != nullptr ? new Notification (*other.publicVersion) : nullptr),
+      groupSortKey (other.groupSortKey),
+      groupSummary (other.groupSummary),
+      accentColour (other.accentColour),
+      ledColour (other.ledColour),
+      ledBlinkPattern (other.ledBlinkPattern),
+      vibrationPattern (other.vibrationPattern),
+      shouldAutoCancel (other.shouldAutoCancel),
+      localOnly (other.localOnly),
+      ongoing (other.ongoing),
+      alertOnlyOnce (other.alertOnlyOnce),
+      timestampVisibility (other.timestampVisibility),
+      badgeIconType (other.badgeIconType),
+      groupAlertBehaviour (other.groupAlertBehaviour),
+      timeoutAfterMs (other.timeoutAfterMs)
+{
+}
+
 //==============================================================================
 JUCE_IMPLEMENT_SINGLETON (PushNotifications)
 

@@ -103,7 +103,7 @@ public:
     ValueWithDefault androidJavaLibs, androidRepositories, androidDependencies, androidScreenOrientation, androidActivityClass,
                      androidActivitySubClassName, androidActivityBaseClassName, androidManifestCustomXmlElements, androidVersionCode,
                      androidMinimumSDK, androidTheme, androidSharedLibraries, androidStaticLibraries, androidExtraAssetsFolder,
-                     androidInternetNeeded, androidMicNeeded, androidBluetoothNeeded, androidExternalReadPermission,
+                     androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidBluetoothNeeded, androidExternalReadPermission,
                      androidExternalWritePermission, androidInAppBillingPermission, androidVibratePermission,androidOtherPermissions,
                      androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore,
                      androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion, buildToolsVersion;
@@ -125,6 +125,7 @@ public:
           androidSharedLibraries               (settings, Ids::androidSharedLibraries,               getUndoManager()),
           androidStaticLibraries               (settings, Ids::androidStaticLibraries,               getUndoManager()),
           androidExtraAssetsFolder             (settings, Ids::androidExtraAssetsFolder,             getUndoManager()),
+          androidOboeRepositoryPath            (settings, Ids::androidOboeRepositoryPath,            getUndoManager()),
           androidInternetNeeded                (settings, Ids::androidInternetNeeded,                getUndoManager(), true),
           androidMicNeeded                     (settings, Ids::microphonePermissionNeeded,           getUndoManager(), false),
           androidBluetoothNeeded               (settings, Ids::androidBluetoothNeeded,               getUndoManager(), true),
@@ -314,7 +315,9 @@ protected:
         AndroidBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
             : BuildConfiguration (p, settings, e),
               androidArchitectures               (config, Ids::androidArchitectures,               getUndoManager(), isDebug() ? "armeabi x86" : ""),
+              androidBuildConfigRemoteNotifsConfigFile (config, Ids::androidBuildConfigRemoteNotifsConfigFile, getUndoManager()),
               androidAdditionalXmlValueResources (config, Ids::androidAdditionalXmlValueResources, getUndoManager()),
+              androidAdditionalDrawableResources (config, Ids::androidAdditionalDrawableResources, getUndoManager()),
               androidAdditionalRawValueResources (config, Ids::androidAdditionalRawValueResources, getUndoManager()),
               androidCustomStringXmlElements     (config, Ids::androidCustomStringXmlElements,     getUndoManager())
         {
@@ -322,10 +325,12 @@ protected:
             optimisationLevelValue.setDefault (isDebug() ? gccO0 : gccO3);
         }
 
-        String getArchitectures() const             { return androidArchitectures.get().toString(); }
-        String getAdditionalXmlResources() const    { return androidAdditionalXmlValueResources.get().toString(); }
-        String getAdditionalRawResources() const    { return androidAdditionalRawValueResources.get().toString();}
-        String getCustomStringsXml() const          { return androidCustomStringXmlElements.get().toString(); }
+        String getArchitectures() const               { return androidArchitectures.get().toString(); }
+        String getRemoteNotifsConfigFile() const      { return androidBuildConfigRemoteNotifsConfigFile.get().toString(); }
+        String getAdditionalXmlResources() const      { return androidAdditionalXmlValueResources.get().toString(); }
+        String getAdditionalDrawableResources() const { return androidAdditionalDrawableResources.get().toString(); }
+        String getAdditionalRawResources() const      { return androidAdditionalRawValueResources.get().toString();}
+        String getCustomStringsXml() const            { return androidCustomStringXmlElements.get().toString(); }
 
         void createConfigProperties (PropertyListBuilder& props) override
         {
@@ -334,11 +339,22 @@ protected:
             props.add (new TextPropertyComponent (androidArchitectures, "Architectures", 256, false),
                        "A list of the ARM architectures to build (for a fat binary). Leave empty to build for all possible android archiftectures.");
 
-            props.add (new TextPropertyComponent (androidAdditionalXmlValueResources, "Extra Android XML Value Resources", 2048, true),
+            props.add (new TextPropertyComponent (androidBuildConfigRemoteNotifsConfigFile.getPropertyAsValue(), "Remote Notifications Config File", 2048, false),
+                       "Path to google-services.json file. This will be the file provided by Firebase when creating a new app in Firebase console. "
+                       "This will override the setting from the main Android exporter node.");
+
+            props.add (new TextPropertyComponent (androidAdditionalXmlValueResources, "Extra Android XML Value Resources", 8192, true),
                        "Paths to additional \"value resource\" files in XML format that should be included in the app (one per line). "
                        "If you have additional XML resources that should be treated as value resources, add them here.");
 
-            props.add (new TextPropertyComponent (androidAdditionalRawValueResources, "Extra Android Raw Resources", 2048, true),
+            props.add (new TextPropertyComponent (androidAdditionalDrawableResources, "Extra Android Drawable Resources", 8192, true),
+                       "Paths to additional \"drawable resource\" directories that should be included in the app (one per line). "
+                       "They will be added to \"res\" directory of Android project. "
+                       "Each path should point to a directory named \"drawable\" or \"drawable-<size>\" where <size> should be "
+                       "something like \"hdpi\", \"ldpi\", \"xxxhdpi\" etc, for instance \"drawable-xhdpi\". "
+                       "Refer to Android Studio documentation for available sizes.");
+
+            props.add (new TextPropertyComponent (androidAdditionalRawValueResources, "Extra Android Raw Resources", 8192, true),
                        "Paths to additional \"raw resource\" files that should be included in the app (one per line). "
                        "Resource file names must contain only lowercase a-z, 0-9 or underscore.");
 
@@ -363,8 +379,9 @@ protected:
             return "${ANDROID_ABI}";
         }
 
-        ValueWithDefault androidArchitectures, androidAdditionalXmlValueResources, androidAdditionalRawValueResources,
-                         androidCustomStringXmlElements;
+        ValueWithDefault androidArchitectures, androidBuildConfigRemoteNotifsConfigFile,
+                         androidAdditionalXmlValueResources, androidAdditionalDrawableResources,
+                         androidAdditionalRawValueResources, androidCustomStringXmlElements;
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
@@ -386,6 +403,14 @@ private:
         if (! isLibrary())
             mo << "SET(BINARY_NAME \"juce_jni\")" << newLine << newLine;
 
+        if (project.getConfigFlag ("JUCE_USE_ANDROID_OBOE").get())
+        {
+            String oboePath (androidOboeRepositoryPath.get().toString().quoted());
+
+            mo << "SET(OBOE_DIR " << oboePath << ")" << newLine << newLine;
+            mo << "add_subdirectory (${OBOE_DIR} ./oboe)" << newLine << newLine;
+        }
+
         String cpufeaturesPath ("${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c");
         mo << "add_library(\"cpufeatures\" STATIC \"" << cpufeaturesPath << "\")" << newLine
            << "set_source_files_properties(\"" << cpufeaturesPath << "\" PROPERTIES COMPILE_FLAGS \"-Wno-sign-conversion -Wno-gnu-statement-expression\")" << newLine << newLine;
@@ -403,6 +428,10 @@ private:
                 mo << "    \"" << escapeDirectoryForCmake (path) << "\"" << newLine;
 
             mo << "    \"${ANDROID_NDK}/sources/android/cpufeatures\"" << newLine;
+
+            if (project.getConfigFlag ("JUCE_USE_ANDROID_OBOE").get())
+                mo << "    \"${OBOE_DIR}/include\"" << newLine;
+
             mo << ")" << newLine << newLine;
         }
 
@@ -532,6 +561,10 @@ private:
 
             mo << "    \"cpufeatures\"" << newLine;
         }
+
+        if (project.getConfigFlag ("JUCE_USE_ANDROID_OBOE").get())
+            mo << "    \"oboe\"" << newLine;
+
         mo << ")" << newLine;
 
         overwriteFileIfDifferentOrThrow (file, mo);
@@ -876,6 +909,10 @@ private:
     //==============================================================================
     void createManifestExporterProperties (PropertyListBuilder& props)
     {
+        props.add (new TextPropertyComponent (androidOboeRepositoryPath, "Oboe repository path", 2048, false),
+                   "Path to the root of Oboe repository. Make sure to point Oboe repository to "
+                   "commit with SHA 44c6b6ea9c8fa9b5b74cbd60f355068b57b50b37 before building.");
+
         props.add (new ChoicePropertyComponent (androidInternetNeeded, "Internet Access"),
                    "If enabled, this will set the android.permission.INTERNET flag in the manifest.");
 
@@ -1192,20 +1229,28 @@ private:
         for (ConstConfigIterator config (*this); config.next();)
         {
             auto& cfg = dynamic_cast<const AndroidBuildConfiguration&> (*config);
+            String cfgPath = cfg.isDebug() ? "app/src/debug" : "app/src/release";
             String xmlValuesPath = cfg.isDebug() ? "app/src/debug/res/values" : "app/src/release/res/values";
+            String drawablesPath = cfg.isDebug() ? "app/src/debug/res" : "app/src/release/res";
             String rawPath = cfg.isDebug() ? "app/src/debug/res/raw" : "app/src/release/res/raw";
 
             copyExtraResourceFiles (cfg.getAdditionalXmlResources(), xmlValuesPath);
+            copyExtraResourceFiles (cfg.getAdditionalDrawableResources(), drawablesPath);
             copyExtraResourceFiles (cfg.getAdditionalRawResources(), rawPath);
-        }
 
-        if (androidEnableRemoteNotifications.get())
-        {
-            File file (getProject().getFile().getChildFile (androidRemoteNotificationsConfigFile.get().toString()));
-            // Settings file must be present for remote notifications to work and it must be called google-services.json.
-            jassert (file.existsAsFile() && file.getFileName() == "google-services.json");
+            if (androidEnableRemoteNotifications.get())
+            {
+                auto remoteNotifsConfigFilePath = cfg.getRemoteNotifsConfigFile();
 
-            copyExtraResourceFiles (androidRemoteNotificationsConfigFile.get(), "app");
+                if (remoteNotifsConfigFilePath.isEmpty())
+                    remoteNotifsConfigFilePath = androidRemoteNotificationsConfigFile.get().toString();
+
+                File file (getProject().getFile().getChildFile (remoteNotifsConfigFilePath));
+                // Settings file must be present for remote notifications to work and it must be called google-services.json.
+                jassert (file.existsAsFile() && file.getFileName() == "google-services.json");
+
+                copyExtraResourceFiles (remoteNotifsConfigFilePath, cfgPath);
+            }
         }
     }
 
@@ -1221,9 +1266,9 @@ private:
         {
             auto file = getProject().getFile().getChildFile (path);
 
-            jassert (file.existsAsFile());
+            jassert (file.exists());
 
-            if (file.existsAsFile())
+            if (file.exists())
                 file.copyFileTo (parentFolder.getChildFile (file.getFileName()));
         }
     }
@@ -1417,7 +1462,7 @@ private:
 
         auto cppStandard = project.getCppStandardString();
 
-        if (cppStandard == "latest")
+        if (cppStandard == "latest" || cppStandard == "17") // C++17 flag isn't supported yet so use 1z for now
             cppStandard = "1z";
 
         cppStandard = "-std=" + String (shouldUseGNUExtensions() ? "gnu++" : "c++") + cppStandard;

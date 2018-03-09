@@ -200,6 +200,28 @@ public:
     int getParameterIndex() const noexcept              { return parameterIndex; }
 
     //==============================================================================
+    /** Returns the current value of the parameter as a String.
+
+        This function can be called when you are hosting plug-ins to get a
+        more specialsed textual represenation of the current value from the
+        plug-in, for example "On" rather than "1.0".
+
+        If you are implementing a plug-in then you should ignore this function
+        and instead override getText.
+    */
+    virtual String getCurrentValueAsText() const;
+
+    /** Returns the set of strings which represent the possible states a parameter
+        can be in.
+
+        If you are hosting a plug-in you can use the result of this funtion to
+        populate a ComboBox listing the allowed values.
+
+        If you are implementing a plug-in then you do not need to override this.
+    */
+    virtual StringArray getAllValueStrings() const;
+
+    //==============================================================================
     /**
         A base class for listeners that want to know about changes to an
         AudioProcessorParameter.
@@ -267,6 +289,7 @@ private:
     int parameterIndex = -1;
     CriticalSection listenerLock;
     Array<Listener*> listeners;
+    mutable StringArray valueStrings;
 
    #if JUCE_DEBUG
     bool isPerformingGesture = false;

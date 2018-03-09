@@ -472,7 +472,7 @@ public:
         }
         else
         {
-            auto n = static_cast<int> (jmin (numSamples, src.numSamples) * sizeFactor);
+            auto n = jmin (numSamples, src.numSamples) * sizeFactor;
 
             for (size_t i = 0; i < n; ++i)
             {

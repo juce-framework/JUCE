@@ -181,7 +181,9 @@ namespace Ids
     DECLARE_ID (androidJavaLibs);
     DECLARE_ID (androidRepositories);
     DECLARE_ID (androidDependencies);
+    DECLARE_ID (androidBuildConfigRemoteNotifsConfigFile);
     DECLARE_ID (androidAdditionalXmlValueResources);
+    DECLARE_ID (androidAdditionalDrawableResources);
     DECLARE_ID (androidAdditionalRawValueResources);
     DECLARE_ID (androidActivityClass);
     DECLARE_ID (androidActivitySubClassName);
@@ -189,6 +191,7 @@ namespace Ids
     DECLARE_ID (androidVersionCode);
     DECLARE_ID (androidSDKPath);
     DECLARE_ID (androidNDKPath);
+    DECLARE_ID (androidOboeRepositoryPath);
     DECLARE_ID (androidInternetNeeded);
     DECLARE_ID (androidArchitectures);
     DECLARE_ID (androidManifestCustomXmlElements);

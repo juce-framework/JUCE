@@ -426,7 +426,7 @@ private:
             auto cppStandard = config.project.getCppStandardString();
 
             if (cppStandard == "latest")
-                cppStandard = "1z";
+                cppStandard = "17";
 
             cppStandard = "-std=" + String (shouldUseGNUExtensions() ? "gnu++" : "c++") + cppStandard;
 

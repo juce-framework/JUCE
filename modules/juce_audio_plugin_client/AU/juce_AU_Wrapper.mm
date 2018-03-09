@@ -957,8 +957,19 @@ public:
     {
         if (inScope == kAudioUnitScope_Global && juceFilter != nullptr)
         {
-            const auto index = getJuceIndexForAUParameterID (inID);
-            juceFilter->setParameter (index, inValue / getMaximumParameterValue (index));
+            auto index = getJuceIndexForAUParameterID (inID);
+            auto value = inValue / getMaximumParameterValue (index);
+
+            if (auto* param = juceFilter->getParameters()[index])
+            {
+                param->setValue (value);
+                param->sendValueChangedMessageToListeners (value);
+            }
+            else
+            {
+                juceFilter->setParameter (index, value);
+            }
+
             return noErr;
         }
 
@@ -1824,7 +1835,7 @@ private:
         // using the default number of steps.
         for (auto* param : juceFilter->getParameters())
             if (param->isDiscrete())
-                jassert (param->getNumSteps() != juceFilter->getDefaultNumParameterSteps());
+                jassert (param->getNumSteps() != AudioProcessor::getDefaultNumParameterSteps());
        #endif
 
         parameterValueStringArrays.ensureStorageAllocated (numParams);

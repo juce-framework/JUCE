@@ -28,6 +28,12 @@ namespace juce
 {
 
 AudioAppComponent::AudioAppComponent()
+    : deviceManager (defaultDeviceManager)
+{
+}
+
+AudioAppComponent::AudioAppComponent (AudioDeviceManager& adm)
+    : deviceManager (adm)
 {
 }
 

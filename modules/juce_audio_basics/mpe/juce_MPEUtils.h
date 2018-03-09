@@ -35,8 +35,17 @@ namespace juce
 class MPEChannelAssigner
 {
 public:
-    /** Constructor */
+    /** Constructor.
+
+        This will assign channels within the range of the specified MPE zone.
+    */
     MPEChannelAssigner (MPEZoneLayout::Zone zoneToUse);
+
+    /** Legacy mode constructor.
+
+        This will assign channels within the specified range.
+    */
+    MPEChannelAssigner (Range<int> channelRange = Range<int> (1, 17));
 
     /** This method will use a set of rules recommended in the MPE specification to
         determine which member channel the specified MIDI note should be assigned to
@@ -61,7 +70,8 @@ public:
     void allNotesOff();
 
 private:
-    MPEZoneLayout::Zone zone;
+    bool isLegacy = false;
+    ScopedPointer<MPEZoneLayout::Zone> zone;
     int channelIncrement, numChannels, firstChannel, lastChannel, midiChannelLastAssigned;
 
     //==============================================================================

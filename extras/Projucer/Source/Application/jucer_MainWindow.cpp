@@ -526,8 +526,15 @@ bool MainWindowList::openFile (const File& file, bool openInBackground)
         auto* w = getOrCreateEmptyWindow();
         bool ok = w->openFile (file);
 
-        w->makeVisible();
-        avoidSuperimposedWindows (w);
+        if (ok)
+        {
+            w->makeVisible();
+            avoidSuperimposedWindows (w);
+        }
+        else
+        {
+            closeWindow (w);
+        }
 
         if (openInBackground && (previousFrontWindow != nullptr))
             previousFrontWindow->toFront (true);

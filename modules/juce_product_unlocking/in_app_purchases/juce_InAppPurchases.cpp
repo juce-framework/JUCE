@@ -27,13 +27,16 @@
 namespace juce
 {
 
+//==============================================================================
+JUCE_IMPLEMENT_SINGLETON (InAppPurchases)
+
 InAppPurchases::InAppPurchases()
    #if JUCE_ANDROID || JUCE_IOS || JUCE_MAC
     : pimpl (new Pimpl (*this))
    #endif
 {}
 
-InAppPurchases::~InAppPurchases() {}
+InAppPurchases::~InAppPurchases() { clearSingletonInstance(); }
 
 bool InAppPurchases::isInAppPurchasesSupported() const
 {

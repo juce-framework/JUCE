@@ -416,6 +416,12 @@ public:
     */
     void setRange (Range<double> newRange, double newInterval);
 
+    /** Sets a NormalisableRange to use for the Slider values.
+
+        @param newNormalisableRange     the NormalisableRange to use
+    */
+    void setNormalisableRange (NormalisableRange<double> newNormalisableRange);
+
     /** Returns the slider's range. */
     Range<double> getRange() const noexcept;
 

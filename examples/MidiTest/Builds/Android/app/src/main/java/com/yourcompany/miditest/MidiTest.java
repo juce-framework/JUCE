@@ -1716,6 +1716,7 @@ public class MidiTest   extends Activity
         private native void handleKeyDown (long host, int keycode, int textchar);
         private native void handleKeyUp (long host, int keycode, int textchar);
         private native void handleBackButton (long host);
+        private native void handleKeyboardHidden (long host);
 
         public void showKeyboard (String type)
         {
@@ -1727,10 +1728,12 @@ public class MidiTest   extends Activity
                 {
                     imm.showSoftInput (this, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);
                     imm.setInputMethod (getWindowToken(), type);
+                    keyboardDismissListener.startListening();
                 }
                 else
                 {
                     imm.hideSoftInputFromWindow (getWindowToken(), 0);
+                    keyboardDismissListener.stopListening();
                 }
             }
         }
@@ -1796,6 +1799,47 @@ public class MidiTest   extends Activity
 
             return false;
         }
+
+        //==============================================================================
+        private final class KeyboardDismissListener
+        {
+            public KeyboardDismissListener (ComponentPeerView viewToUse)
+            {
+                view = viewToUse;
+            }
+
+            private void startListening()
+            {
+                view.getViewTreeObserver().addOnGlobalLayoutListener(viewTreeObserver);
+            }
+
+            private void stopListening()
+            {
+                view.getViewTreeObserver().removeGlobalOnLayoutListener(viewTreeObserver);
+            }
+
+            private class TreeObserver implements ViewTreeObserver.OnGlobalLayoutListener
+            {
+                @Override
+                public void onGlobalLayout()
+                {
+                    Rect r = new Rect();
+
+                    view.getWindowVisibleDisplayFrame(r);
+
+                    int diff = view.getHeight() - (r.bottom - r.top);
+
+                    // Arbitrary threshold, surely keyboard would take more than 20 pix.
+                    if (diff < 20)
+                        handleKeyboardHidden (view.host);
+                };
+            };
+
+            private ComponentPeerView view;
+            private TreeObserver viewTreeObserver = new TreeObserver();
+        }
+
+        private KeyboardDismissListener keyboardDismissListener = new KeyboardDismissListener(this);
 
         // this is here to make keyboard entry work on a Galaxy Tab2 10.1
         @Override

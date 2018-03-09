@@ -105,6 +105,8 @@ public:
     void drawDocumentWindowTitleBar (DocumentWindow&, Graphics&, int, int, int, int, const Image*, bool) override;
 
     //==============================================================================
+    Font getTextButtonFont (TextButton&, int buttonHeight) override;
+
     void drawButtonBackground (Graphics&, Button&, const Colour& backgroundColour,
                                bool isMouseOverButton, bool isButtonDown) override;
 
@@ -198,6 +200,8 @@ public:
 
     void drawPointer (Graphics&, float x, float y, float diameter,
                       const Colour&, int direction) noexcept;
+
+    Label* createSliderTextBox (Slider&) override;
 
     //==============================================================================
     void drawTooltip (Graphics&, const String& text, int width, int height) override;

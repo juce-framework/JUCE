@@ -24,15 +24,27 @@ namespace juce
 {
 
 MPEChannelAssigner::MPEChannelAssigner (MPEZoneLayout::Zone zoneToUse)
-    : zone                    (zoneToUse),
-      channelIncrement        (zone.isLowerZone() ? 1 : -1),
-      numChannels             (zone.numMemberChannels),
-      firstChannel            (zone.getFirstMemberChannel()),
-      lastChannel             (zone.getLastMemberChannel()),
+    : zone                    (new MPEZoneLayout::Zone (zoneToUse)),
+      channelIncrement        (zone->isLowerZone() ? 1 : -1),
+      numChannels             (zone->numMemberChannels),
+      firstChannel            (zone->getFirstMemberChannel()),
+      lastChannel             (zone->getLastMemberChannel()),
       midiChannelLastAssigned (firstChannel - channelIncrement)
 {
     // must be an active MPE zone!
     jassert (numChannels > 0);
+}
+
+MPEChannelAssigner::MPEChannelAssigner (Range<int> channelRange)
+    : isLegacy                (true),
+      channelIncrement        (1),
+      numChannels             (channelRange.getLength()),
+      firstChannel            (channelRange.getStart()),
+      lastChannel             (channelRange.getEnd() - 1),
+      midiChannelLastAssigned (firstChannel - channelIncrement)
+{
+    // must have at least one channel!
+    jassert (! channelRange.isEmpty());
 }
 
 int MPEChannelAssigner::findMidiChannelForNewNote (int noteNumber) noexcept
@@ -40,7 +52,7 @@ int MPEChannelAssigner::findMidiChannelForNewNote (int noteNumber) noexcept
     if (numChannels == 1)
         return firstChannel;
 
-    for (auto ch = firstChannel; (zone.isLowerZone() ? ch <= lastChannel : ch >= lastChannel); ch += channelIncrement)
+    for (auto ch = firstChannel; (isLegacy || zone->isLowerZone() ? ch <= lastChannel : ch >= lastChannel); ch += channelIncrement)
     {
         if (midiChannels[ch].isFree() && midiChannels[ch].lastNotePlayed == noteNumber)
         {
@@ -100,7 +112,7 @@ int MPEChannelAssigner::findMidiChannelPlayingClosestNonequalNote (int noteNumbe
     auto channelWithClosestNote = firstChannel;
     int closestNoteDistance = 127;
 
-    for (auto ch = firstChannel; (zone.isLowerZone() ? ch <= lastChannel : ch >= lastChannel); ch += channelIncrement)
+    for (auto ch = firstChannel; (isLegacy || zone->isLowerZone() ? ch <= lastChannel : ch >= lastChannel); ch += channelIncrement)
     {
         for (auto note : midiChannels[ch].notes)
         {
@@ -259,6 +271,7 @@ struct MPEUtilsUnitTests  : public UnitTest
         {
             MPEZoneLayout layout;
 
+            // lower
             {
                 layout.setLowerZone (15);
 
@@ -301,6 +314,7 @@ struct MPEUtilsUnitTests  : public UnitTest
                 expectEquals (channelAssigner.findMidiChannelForNewNote (20), 4);
             }
 
+            // upper
             {
                 layout.setUpperZone (15);
 
@@ -341,6 +355,46 @@ struct MPEUtilsUnitTests  : public UnitTest
                 // normal assignment
                 expectEquals (channelAssigner.findMidiChannelForNewNote (101), 14);
                 expectEquals (channelAssigner.findMidiChannelForNewNote (20), 13);
+            }
+
+            // legacy
+            {
+                MPEChannelAssigner channelAssigner;
+
+                // check that channels are assigned in correct order
+                int noteNum = 60;
+                for (int ch = 1; ch <= 16; ++ch)
+                    expectEquals (channelAssigner.findMidiChannelForNewNote (noteNum++), ch);
+
+                // check that note-offs are processed
+                channelAssigner.noteOff (60);
+                expectEquals (channelAssigner.findMidiChannelForNewNote (60), 1);
+
+                channelAssigner.noteOff (61);
+                expectEquals (channelAssigner.findMidiChannelForNewNote (61), 2);
+
+                // check that assigned channel was last to play note
+                channelAssigner.noteOff (65);
+                channelAssigner.noteOff (66);
+                expectEquals (channelAssigner.findMidiChannelForNewNote (66), 7);
+                expectEquals (channelAssigner.findMidiChannelForNewNote (65), 6);
+
+                // find closest channel playing nonequal note
+                expectEquals (channelAssigner.findMidiChannelForNewNote (80), 16);
+                expectEquals (channelAssigner.findMidiChannelForNewNote (55), 1);
+
+                // all notes off
+                channelAssigner.allNotesOff();
+
+                // last note played
+                expectEquals (channelAssigner.findMidiChannelForNewNote (66), 7);
+                expectEquals (channelAssigner.findMidiChannelForNewNote (65), 6);
+                expectEquals (channelAssigner.findMidiChannelForNewNote (80), 16);
+                expectEquals (channelAssigner.findMidiChannelForNewNote (55), 1);
+
+                // normal assignment
+                expectEquals (channelAssigner.findMidiChannelForNewNote (101), 2);
+                expectEquals (channelAssigner.findMidiChannelForNewNote (20), 3);
             }
         }
 
