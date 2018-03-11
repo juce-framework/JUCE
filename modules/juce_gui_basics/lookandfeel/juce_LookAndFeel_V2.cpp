@@ -2787,7 +2787,7 @@ Justification LookAndFeel_V2::getSidePanelTitleJustification (SidePanel& panel)
 
 Path LookAndFeel_V2::getSidePanelDismissButtonShape (SidePanel& panel)
 {
-    return getCrossShape (panel.getTitleBarHeight());
+    return getCrossShape ((float) panel.getTitleBarHeight());
 }
 
 //==============================================================================
