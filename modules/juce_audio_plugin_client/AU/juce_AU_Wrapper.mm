@@ -976,6 +976,12 @@ public:
             outCurrentSampleInTimeLine = lastTimeStamp.mSampleTime;
         }
 
+        if (getHostType().isLogic())
+        {
+            // Use the sample time from lastTimeStamp to work around bug in Logic Pro 10.1
+            outCurrentSampleInTimeLine = lastTimeStamp.mSampleTime;
+        }
+
         info.isPlaying = playing;
         info.timeInSamples = (int64) (outCurrentSampleInTimeLine + 0.5);
         info.timeInSeconds = info.timeInSamples / getSampleRate();
