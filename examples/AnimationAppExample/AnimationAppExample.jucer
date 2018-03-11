@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="LrATE6" name="AnimationAppExample" projectType="guiapp" jucerVersion="5.2.0"
+<JUCERPROJECT id="LrATE6" name="AnimationAppExample" projectType="guiapp" jucerVersion="5.2.1"
               displaySplashScreen="0" reportAppUsage="0" companyName="ROLI Ltd."
               companyCopyright="ROLI Ltd." bundleIdentifier="com.roli.AnimationAppExample">
   <MAINGROUP id="F3keCY" name="AnimationAppExample">

@@ -276,6 +276,11 @@ void LookAndFeel_V4::drawDocumentWindowTitleBar (DocumentWindow& window, Graphic
 }
 
 //==============================================================================
+Font LookAndFeel_V4::getTextButtonFont (TextButton&, int buttonHeight)
+{
+    return { jmin (16.0f, buttonHeight * 0.6f) };
+}
+
 void LookAndFeel_V4::drawButtonBackground (Graphics& g,
                                            Button& button,
                                            const Colour& backgroundColour,
@@ -363,6 +368,16 @@ void LookAndFeel_V4::drawTickBox (Graphics& g, Component& component,
         auto tick = getTickShape (0.75f);
         g.fillPath (tick, tick.getTransformToScaleToFit (tickBounds.reduced (4, 5).toFloat(), false));
     }
+}
+
+void LookAndFeel_V4::changeToggleButtonWidthToFitText (ToggleButton& button)
+{
+    auto fontSize = jmin (15.0f, button.getHeight() * 0.75f);
+    auto tickWidth = fontSize * 1.1f;
+
+    Font font (fontSize);
+
+    button.setSize (font.getStringWidth (button.getButtonText()) + roundToInt (tickWidth) + 14, button.getHeight());
 }
 
 //==============================================================================
@@ -1093,6 +1108,19 @@ void LookAndFeel_V4::drawPointer (Graphics& g, const float x, const float y, con
                                                  x + diameter * 0.5f, y + diameter * 0.5f));
     g.setColour (colour);
     g.fillPath (p);
+}
+
+Label* LookAndFeel_V4::createSliderTextBox (Slider& slider)
+{
+    auto* l = LookAndFeel_V2::createSliderTextBox (slider);
+
+    if (getCurrentColourScheme() == LookAndFeel_V4::getGreyColourScheme() && (slider.getSliderStyle() == Slider::LinearBar
+                                                                               || slider.getSliderStyle() == Slider::LinearBarVertical))
+    {
+        l->setColour (Label::textColourId, Colours::black.withAlpha (0.7f));
+    }
+
+    return l;
 }
 
 //==============================================================================

@@ -11,7 +11,7 @@
     <key>LSRequiresIPhoneOS</key>
     <true/>
     <key>NSMicrophoneUsageDescription</key>
-    <string>This app requires microphone input.</string>
+    <string>This is an audio app which requires audio input. If you do not have a USB audio interface connected it will use the microphone.</string>
     <key>UIViewControllerBasedStatusBarAppearance</key>
     <false/>
     <key>CFBundleExecutable</key>

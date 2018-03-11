@@ -55,10 +55,12 @@ public:
     void resized() override
     {
         auto area = getLocalBounds().reduced (10);
+
+        auto bottomSlice = area.removeFromBottom (24);
+        linkButton.setBounds (bottomSlice.removeFromRight (getWidth() / 4));
+        versionLabel.setBounds (bottomSlice);
+
         logo.setBounds (area);
-        area = area.removeFromBottom (24);
-        linkButton.setBounds (area.removeFromRight (getWidth() / 4));
-        versionLabel.setBounds (area);
     }
 
 private:

@@ -134,17 +134,13 @@ struct AudioProcessorValueTreeState::Parameter   : public AudioProcessorParamete
 
     static Parameter* getParameterForID (AudioProcessor& processor, StringRef paramID) noexcept
     {
-        const int numParams = processor.getParameters().size();
-
-        for (int i = 0; i < numParams; ++i)
+        for (auto* ap : processor.getParameters())
         {
-            AudioProcessorParameter* const ap = processor.getParameters().getUnchecked(i);
-
             // When using this class, you must allow it to manage all the parameters in your AudioProcessor, and
             // not add any parameter objects of other types!
             jassert (dynamic_cast<Parameter*> (ap) != nullptr);
 
-            Parameter* const p = static_cast<Parameter*> (ap);
+            auto* p = static_cast<Parameter*> (ap);
 
             if (paramID == p->paramID)
                 return p;
@@ -274,14 +270,11 @@ void AudioProcessorValueTreeState::updateParameterConnectionsToChildTrees()
 {
     ScopedLock lock (valueTreeChanging);
 
-    const int numParams = processor.getParameters().size();
-
-    for (int i = 0; i < numParams; ++i)
+    for (auto* param : processor.getParameters())
     {
-        AudioProcessorParameter* const ap = processor.getParameters().getUnchecked(i);
-        jassert (dynamic_cast<Parameter*> (ap) != nullptr);
+        jassert (dynamic_cast<Parameter*> (param) != nullptr);
+        auto* p = static_cast<Parameter*> (param);
 
-        Parameter* p = static_cast<Parameter*> (ap);
         p->setNewState (getOrCreateChildValueTree (p->paramID));
     }
 }
@@ -295,13 +288,15 @@ void AudioProcessorValueTreeState::valueTreePropertyChanged (ValueTree& tree, co
 void AudioProcessorValueTreeState::valueTreeChildAdded (ValueTree& parent, ValueTree& tree)
 {
     if (parent == state && tree.hasType (valueType))
-        updateParameterConnectionsToChildTrees();
+        if (auto* param = Parameter::getParameterForID (processor, tree.getProperty (idPropertyID).toString()))
+            param->setNewState (getOrCreateChildValueTree (param->paramID));
 }
 
 void AudioProcessorValueTreeState::valueTreeChildRemoved (ValueTree& parent, ValueTree& tree, int)
 {
     if (parent == state && tree.hasType (valueType))
-        updateParameterConnectionsToChildTrees();
+        if (auto* param = Parameter::getParameterForID (processor, tree.getProperty (idPropertyID).toString()))
+            param->setNewState (getOrCreateChildValueTree (param->paramID));
 }
 
 void AudioProcessorValueTreeState::valueTreeRedirected (ValueTree& v)
@@ -317,14 +312,11 @@ bool AudioProcessorValueTreeState::flushParameterValuesToValueTree()
 {
     ScopedLock lock (valueTreeChanging);
 
-    auto numParams = processor.getParameters().size();
     auto anythingUpdated = false;
 
-    for (int i = 0; i < numParams; ++i)
+    for (auto* ap : processor.getParameters())
     {
-        auto* ap = processor.getParameters().getUnchecked(i);
         jassert (dynamic_cast<Parameter*> (ap) != nullptr);
-
         auto* p = static_cast<Parameter*> (ap);
 
         if (p->needsUpdate.compareAndSetBool (0, 1))
@@ -368,7 +360,7 @@ struct AttachedControlBase  : public AudioProcessorValueTreeState::Listener,
         if (AudioProcessorParameter* p = state.getParameter (paramID))
         {
             const float newValue = state.getParameterRange (paramID)
-                                      .convertTo0to1 (newUnnormalisedValue);
+                                        .convertTo0to1 (newUnnormalisedValue);
 
             if (p->getValue() != newValue)
                 p->setValueNotifyingHost (newValue);
@@ -430,10 +422,48 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
         : AttachedControlBase (s, p), slider (sl), ignoreCallbacks (false)
     {
         NormalisableRange<float> range (s.getParameterRange (paramID));
-        slider.setRange (range.start, range.end, range.interval);
-        slider.setSkewFactor (range.skew, range.symmetricSkew);
 
-        if (AudioProcessorParameter* param = state.getParameter (paramID))
+        if (range.interval != 0 || range.skew != 0)
+        {
+            slider.setRange (range.start, range.end, range.interval);
+            slider.setSkewFactor (range.skew, range.symmetricSkew);
+        }
+        else
+        {
+            auto convertFrom0To1Function = [range] (double currentRangeStart,
+                                                    double currentRangeEnd,
+                                                    double normalisedValue) mutable
+            {
+                range.start = (float) currentRangeStart;
+                range.end = (float) currentRangeEnd;
+                return (double) range.convertFrom0to1 ((float) normalisedValue);
+            };
+
+            auto convertTo0To1Function = [range] (double currentRangeStart,
+                                                  double currentRangeEnd,
+                                                  double mappedValue) mutable
+            {
+                range.start = (float) currentRangeStart;
+                range.end = (float) currentRangeEnd;
+                return (double) range.convertTo0to1 ((float) mappedValue);
+            };
+
+            auto snapToLegalValueFunction = [range] (double currentRangeStart,
+                                                     double currentRangeEnd,
+                                                     double valueToSnap) mutable
+            {
+                range.start = (float) currentRangeStart;
+                range.end = (float) currentRangeEnd;
+                return (double) range.snapToLegalValue ((float) valueToSnap);
+            };
+
+            slider.setNormalisableRange ({ (double) range.start, (double) range.end,
+                                           convertFrom0To1Function,
+                                           convertTo0To1Function,
+                                           snapToLegalValueFunction });
+        }
+
+        if (auto* param = state.getParameter (paramID))
             slider.setDoubleClickReturnValue (true, range.convertFrom0to1 (param->getDefaultValue()));
 
         sendInitialUpdate();

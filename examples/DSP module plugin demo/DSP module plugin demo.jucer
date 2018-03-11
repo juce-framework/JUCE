@@ -6,7 +6,7 @@
               pluginManufacturer="ROLI Ltd." pluginManufacturerCode="ROLI"
               pluginCode="Dmpd" pluginChannelConfigs="" pluginAUExportPrefix="DSPmoduleplugindemoAU"
               pluginRTASCategory="" aaxIdentifier="com.yourcompany.DSPmoduleplugindemo"
-              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.2.0"
+              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.2.1"
               companyName="ROLI Ltd." companyWebsite="www.juce.com" companyEmail="info@juce.com"
               companyCopyright="ROLI Ltd.">
   <MAINGROUP id="EukfoT" name="DSPModulePluginDemo">

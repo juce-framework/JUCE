@@ -50,6 +50,8 @@ SidePanel::SidePanel (StringRef title, int width, bool positionOnLeft,
 
 SidePanel::~SidePanel()
 {
+    Desktop::getInstance().removeGlobalMouseListener (this);
+
     if (parent != nullptr)
         parent->removeComponentListener (this);
 }
@@ -69,6 +71,25 @@ void SidePanel::setContent (Component* newContent, bool deleteComponentWhenNoLon
     }
 }
 
+void SidePanel::setTitleBarComponent (Component* titleBarComponentToUse,
+                                      bool keepDismissButton,
+                                      bool deleteComponentWhenNoLongerNeeded)
+{
+    if (titleBarComponent.get() != titleBarComponentToUse)
+    {
+        if (deleteComponentWhenNoLongerNeeded)
+            titleBarComponent.setOwned (titleBarComponentToUse);
+        else
+            titleBarComponent.setNonOwned (titleBarComponentToUse);
+
+        addAndMakeVisible (titleBarComponent);
+
+        resized();
+    }
+
+    shouldShowDismissButton = keepDismissButton;
+}
+
 void SidePanel::showOrHide (bool show)
 {
     if (parent != nullptr)
@@ -77,7 +98,16 @@ void SidePanel::showOrHide (bool show)
 
         Desktop::getInstance().getAnimator().animateComponent (this, calculateBoundsInParent (*parent),
                                                                1.0f, 250, true, 1.0, 0.0);
+
+        if (onPanelShowHide != nullptr)
+            onPanelShowHide (isShowing);
     }
+}
+
+void SidePanel::moved()
+{
+    if (onPanelMove != nullptr)
+        onPanelMove();
 }
 
 void SidePanel::resized()
@@ -88,11 +118,22 @@ void SidePanel::resized()
 
     auto titleBounds = bounds.removeFromTop (titleBarHeight);
 
-    dismissButton.setBounds (isOnLeft ? titleBounds.removeFromRight (30).withTrimmedRight (10)
-                                      : titleBounds.removeFromLeft  (30).withTrimmedLeft  (10));
+    if (titleBarComponent != nullptr)
+    {
+        if (shouldShowDismissButton)
+            dismissButton.setBounds (isOnLeft ? titleBounds.removeFromRight (30).withTrimmedRight (10)
+                                              : titleBounds.removeFromLeft  (30).withTrimmedLeft  (10));
 
-    titleLabel.setBounds (isOnLeft ? titleBounds.withTrimmedRight (40)
-                                   : titleBounds.withTrimmedLeft (40));
+        titleBarComponent->setBounds (titleBounds);
+    }
+    else
+    {
+        dismissButton.setBounds (isOnLeft ? titleBounds.removeFromRight (30).withTrimmedRight (10)
+                                          : titleBounds.removeFromLeft  (30).withTrimmedLeft  (10));
+
+        titleLabel.setBounds (isOnLeft ? titleBounds.withTrimmedRight (40)
+                                       : titleBounds.withTrimmedLeft (40));
+    }
 
     if (contentComponent != nullptr)
         contentComponent->setBounds (bounds);

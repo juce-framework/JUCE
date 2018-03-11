@@ -75,6 +75,7 @@ public:
     void createBuildMenu (PopupMenu&);
     void createColourSchemeItems (PopupMenu&);
     void createWindowMenu (PopupMenu&);
+    void createDocumentMenu (PopupMenu&);
     void createToolsMenu (PopupMenu&);
     void createHelpMenu (PopupMenu&);
     void createExtraAppleMenuItems (PopupMenu&);
@@ -92,6 +93,8 @@ public:
     bool openFile (const File&);
     bool closeAllDocuments (bool askUserToSave);
     bool closeAllMainWindows();
+    void closeAllMainWindowsAndQuitIfNeeded();
+    void clearRecentFiles();
 
     PropertiesFile::Options getPropertyFileOptionsFor (const String& filename, bool isProjectSettings);
 

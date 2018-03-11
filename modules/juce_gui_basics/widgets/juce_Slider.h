@@ -416,6 +416,12 @@ public:
     */
     void setRange (Range<double> newRange, double newInterval);
 
+    /** Sets a NormalisableRange to use for the Slider values.
+
+        @param newNormalisableRange     the NormalisableRange to use
+    */
+    void setNormalisableRange (NormalisableRange<double> newNormalisableRange);
+
     /** Returns the slider's range. */
     Range<double> getRange() const noexcept;
 
@@ -746,8 +752,17 @@ public:
         slider's value.
         It calculates the fewest decimal places needed to represent numbers with
         the slider's interval setting.
+
+        @see setNumDecimalPlacesToDisplay
     */
     int getNumDecimalPlacesToDisplay() const noexcept;
+
+    /** Modifies the best number of decimal places to use when displaying this
+        slider's value.
+
+        @see getNumDecimalPlacesToDisplay
+    */
+    void setNumDecimalPlacesToDisplay (int decimalPlacesToDisplay);
 
     //==============================================================================
     /** Allows a user-defined mapping of distance along the slider to its value.

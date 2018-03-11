@@ -42,6 +42,13 @@ public:
     ~VST3PluginFormat();
 
     //==============================================================================
+    /** Attempts to reload a VST3 plugin's state from some preset file data.
+
+        @see VSTPluginFormat::loadFromFXBFile
+    */
+    static bool setStateFromVSTPresetFile (AudioPluginInstance*, const MemoryBlock&);
+
+    //==============================================================================
     String getName() const override             { return "VST3"; }
     void findAllTypesForFile (OwnedArray<PluginDescription>&, const String& fileOrIdentifier) override;
     bool fileMightContainThisPluginType (const String& fileOrIdentifier) override;

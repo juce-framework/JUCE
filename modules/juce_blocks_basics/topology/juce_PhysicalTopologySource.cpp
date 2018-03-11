@@ -878,6 +878,7 @@ struct PhysicalTopologySource::Internal
                         bi->sendCommandMessage (BlocksProtocol::endAPIMode);
 
                 currentTopology = {};
+                topologyBroadcastThrottle.lastTopology = {};
 
                 auto& d = getDefaultDetectorPointer();
 
@@ -922,7 +923,7 @@ struct PhysicalTopologySource::Internal
 
                 for (int i = currentTopology.blocks.size(); --i >= 0;)
                 {
-                    auto block = currentTopology.blocks.getUnchecked(i);
+                    auto block = currentTopology.blocks.getUnchecked (i);
 
                     if (! containsBlockWithUID (newDeviceInfo, block->uid))
                     {

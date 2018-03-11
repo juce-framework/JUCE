@@ -65,6 +65,7 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
     }
 
     fileList.reset (new DirectoryContentsList (this, thread));
+    fileList->setDirectory (currentRoot, true, true);
 
     if ((flags & useTreeView) != 0)
     {
@@ -123,6 +124,9 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
     lookAndFeelChanged();
 
     setRoot (currentRoot);
+
+    if (filename.isNotEmpty())
+        setFileName (filename);
 
     thread.startThread (4);
 

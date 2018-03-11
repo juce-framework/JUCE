@@ -25,7 +25,6 @@
 */
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "../../GenericEditor.h"
 
 class NoiseGate  : public AudioProcessor
 {
@@ -86,7 +85,7 @@ public:
     }
 
     //==============================================================================
-    AudioProcessorEditor* createEditor() override            { return new GenericEditor (*this); }
+    AudioProcessorEditor* createEditor() override            { return new GenericAudioProcessorEditor (this); }
     bool hasEditor() const override                          { return true; }
     const String getName() const override                    { return "NoiseGate"; }
     bool acceptsMidi() const override                        { return false; }

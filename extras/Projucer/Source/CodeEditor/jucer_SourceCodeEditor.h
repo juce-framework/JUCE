@@ -71,7 +71,7 @@ public:
     {
         while (*extensions != nullptr)
         {
-            const File f (file.withFileExtension (*extensions++));
+            auto f = file.withFileExtension (*extensions++);
 
             if (f.existsAsFile())
                 return f;

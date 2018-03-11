@@ -616,6 +616,8 @@ namespace AAXClasses
         JuceAAX_Processor()
             : pluginInstance (createPluginFilterOfType (AudioProcessor::wrapperType_AAX))
         {
+            inParameterChangedCallback = false;
+
             pluginInstance->setPlayHead (this);
             pluginInstance->addListener (this);
 
@@ -780,12 +782,30 @@ namespace AAXClasses
             return AAX_SUCCESS;
         }
 
+        void setAudioProcessorParameter (int index, float value)
+        {
+            if (auto* param = pluginInstance->getParameters()[index])
+            {
+                if (value != param->getValue())
+                {
+                    param->setValue (value);
+
+                    inParameterChangedCallback = true;
+                    param->sendValueChangedMessageToListeners (value);
+                }
+            }
+            else
+            {
+                pluginInstance->setParameter (index, value);
+            }
+        }
+
         AAX_Result UpdateParameterNormalizedValue (AAX_CParamID paramID, double value, AAX_EUpdateSource source) override
         {
             auto result = AAX_CEffectParameters::UpdateParameterNormalizedValue (paramID, value, source);
 
             if (! isBypassParam (paramID))
-                pluginInstance->setParameter (getParamIndexFromID (paramID), (float) value);
+                setAudioProcessorParameter (getParamIndexFromID (paramID), (float) value);
 
             return result;
         }
@@ -856,7 +876,8 @@ namespace AAXClasses
             if (auto* p = mParameterManager.GetParameterByID (paramID))
                 p->SetValueWithFloat ((float) newValue);
 
-            pluginInstance->setParameter (getParamIndexFromID (paramID), (float) newValue);
+            setAudioProcessorParameter (getParamIndexFromID (paramID), (float) newValue);
+
             return AAX_SUCCESS;
         }
 
@@ -867,7 +888,8 @@ namespace AAXClasses
 
             auto paramIndex = getParamIndexFromID (paramID);
             auto newValue = pluginInstance->getParameter (paramIndex) + (float) newDeltaValue;
-            pluginInstance->setParameter (paramIndex, jlimit (0.0f, 1.0f, newValue));
+
+            setAudioProcessorParameter (paramIndex, jlimit (0.0f, 1.0f, newValue));
 
             if (auto* p = mParameterManager.GetParameterByID (paramID))
                 p->SetValueWithFloat (newValue);
@@ -978,6 +1000,12 @@ namespace AAXClasses
 
         void audioProcessorParameterChanged (AudioProcessor* /*processor*/, int parameterIndex, float newValue) override
         {
+            if (inParameterChangedCallback.get())
+            {
+                inParameterChangedCallback = false;
+                return;
+            }
+
             if (auto paramID = getAAXParamIDFromJuceIndex (parameterIndex))
                 SetParameterNormalizedValue (paramID, (double) newValue);
         }
@@ -1016,15 +1044,29 @@ namespace AAXClasses
 
         AAX_Result NotificationReceived (AAX_CTypeID type, const void* data, uint32_t size) override
         {
-            if (type == AAX_eNotificationEvent_EnteringOfflineMode)  pluginInstance->setNonRealtime (true);
-            if (type == AAX_eNotificationEvent_ExitingOfflineMode)   pluginInstance->setNonRealtime (false);
-
-            if (type == AAX_eNotificationEvent_TrackNameChanged && data != nullptr)
+            switch (type)
             {
-                AudioProcessor::TrackProperties props;
-                props.name = static_cast<const AAX_IString*> (data)->Get();
+                case AAX_eNotificationEvent_EnteringOfflineMode:  pluginInstance->setNonRealtime (true);  break;
+                case AAX_eNotificationEvent_ExitingOfflineMode:   pluginInstance->setNonRealtime (false); break;
 
-                pluginInstance->updateTrackProperties (props);
+                case AAX_eNotificationEvent_TrackNameChanged:
+                    if (data != nullptr)
+                    {
+                        AudioProcessor::TrackProperties props;
+                        props.name = static_cast<const AAX_IString*> (data)->Get();
+
+                        pluginInstance->updateTrackProperties (props);
+                    }
+                    break;
+
+                case AAX_eNotificationEvent_SideChainBeingConnected:
+                case AAX_eNotificationEvent_SideChainBeingDisconnected:
+                {
+                    processingSidechainChange.set (1);
+                    sidechainDesired.set (type == AAX_eNotificationEvent_SideChainBeingConnected ? 1 : 0);
+                    updateSidechainState();
+                    break;
+                }
             }
 
             return AAX_CEffectParameters::NotificationReceived (type, data, size);
@@ -1517,7 +1559,7 @@ namespace AAXClasses
 
                 canDisableSidechain = audioProcessor.checkBusesLayoutSupported (disabledSidechainLayout);
 
-                if (canDisableSidechain)
+                if (canDisableSidechain && ! lastSideChainState)
                 {
                     sidechainDesired.set (0);
                     newLayout = disabledSidechainLayout;
@@ -1617,7 +1659,7 @@ namespace AAXClasses
         }
 
         //==============================================================================
-        void handleAsyncUpdate() override
+        void updateSidechainState()
         {
             if (processingSidechainChange.get() == 0)
                 return;
@@ -1627,6 +1669,8 @@ namespace AAXClasses
 
             if (hasSidechain && canDisableSidechain && (sidechainDesired.get() != 0) != sidechainActual)
             {
+                lastSideChainState = (sidechainDesired.get() != 0);
+
                 if (isPrepared)
                 {
                     isPrepared = false;
@@ -1634,14 +1678,19 @@ namespace AAXClasses
                 }
 
                 if (auto* bus = audioProcessor.getBus (true, 1))
-                    bus->setCurrentLayout (sidechainDesired.get() != 0 ? AudioChannelSet::mono()
-                                                                       : AudioChannelSet::disabled());
+                    bus->setCurrentLayout (lastSideChainState ? AudioChannelSet::mono()
+                                                              : AudioChannelSet::disabled());
 
                 audioProcessor.prepareToPlay (audioProcessor.getSampleRate(), audioProcessor.getBlockSize());
                 isPrepared = true;
             }
 
             processingSidechainChange.set (0);
+        }
+
+        void handleAsyncUpdate() override
+        {
+            updateSidechainState();
         }
 
         //==============================================================================
@@ -1700,7 +1749,7 @@ namespace AAXClasses
         int32_t juceChunkIndex = 0;
         AAX_CSampleRate sampleRate = 0;
         int lastBufferSize = 1024, maxBufferSize = 1024;
-        bool hasSidechain = false, canDisableSidechain = false;
+        bool hasSidechain = false, canDisableSidechain = false, lastSideChainState = false;
 
         Atomic<int> processingSidechainChange, sidechainDesired;
 
@@ -1726,6 +1775,8 @@ namespace AAXClasses
         // in a hash map with the thread id as a key.
         mutable ThreadLocalValue<ChunkMemoryBlock> perThreadFilterData;
         CriticalSection perThreadDataLock;
+
+        ThreadLocalValue<bool> inParameterChangedCallback;
 
         JUCE_DECLARE_NON_COPYABLE (JuceAAX_Processor)
     };

@@ -107,11 +107,11 @@ public:
 
     //==============================================================================
     /** Returns the result of processing a single sample. */
-    SampleType JUCE_VECTOR_CALLTYPE processSample (SampleType) noexcept
+    SampleType JUCE_VECTOR_CALLTYPE processSample (SampleType input) noexcept
     {
         jassert (isInitialised());
         auto increment = MathConstants<NumericType>::twoPi * frequency.getNextValue() / sampleRate;
-        return generator (phase.advance (increment) - MathConstants<NumericType>::pi);
+        return input + generator (phase.advance (increment) - MathConstants<NumericType>::pi);
     }
 
     /** Processes the input and output buffers supplied in the processing context. */
@@ -120,14 +120,18 @@ public:
     {
         jassert (isInitialised());
         auto&& outBlock = context.getOutputBlock();
+        auto&& inBlock  = context.getInputBlock();
 
         // this is an output-only processory
-        jassert (context.getInputBlock().getNumChannels() == 0 || (! context.usesSeparateInputAndOutputBlocks()));
         jassert (outBlock.getNumSamples() <= static_cast<size_t> (rampBuffer.size()));
 
         auto len           = outBlock.getNumSamples();
         auto numChannels   = outBlock.getNumChannels();
+        auto inputChannels = inBlock.getNumChannels();
         auto baseIncrement = MathConstants<NumericType>::twoPi / sampleRate;
+
+        if (context.isBypassed)
+            context.getOutputBlock().clear();
 
         if (frequency.isSmoothing())
         {
@@ -137,12 +141,39 @@ public:
                 buffer[i] = phase.advance (baseIncrement * frequency.getNextValue())
                               - MathConstants<NumericType>::pi;
 
-            for (size_t ch = 0; ch < numChannels; ++ch)
+            if (! context.isBypassed)
             {
-                auto* dst = outBlock.getChannelPointer (ch);
+                size_t ch;
 
-                for (size_t i = 0; i < len; ++i)
-                    dst[i] = generator (buffer[i]);
+                if (context.usesSeparateInputAndOutputBlocks())
+                {
+                    for (ch = 0; ch < jmin (numChannels, inputChannels); ++ch)
+                    {
+                        auto* dst = outBlock.getChannelPointer (ch);
+                        auto* src = inBlock.getChannelPointer (ch);
+
+                        for (size_t i = 0; i < len; ++i)
+                            dst[i] = src[i] + generator (buffer[i]);
+                    }
+                }
+                else
+                {
+                    for (ch = 0; ch < jmin (numChannels, inputChannels); ++ch)
+                    {
+                        auto* dst = outBlock.getChannelPointer (ch);
+
+                        for (size_t i = 0; i < len; ++i)
+                            dst[i] += generator (buffer[i]);
+                    }
+                }
+
+                for (; ch < numChannels; ++ch)
+                {
+                    auto* dst = outBlock.getChannelPointer (ch);
+
+                    for (size_t i = 0; i < len; ++i)
+                        dst[i] = generator (buffer[i]);
+                }
             }
         }
         else
@@ -150,13 +181,47 @@ public:
             auto freq = baseIncrement * frequency.getNextValue();
             auto p = phase;
 
-            for (size_t ch = 0; ch < numChannels; ++ch)
+            if (context.isBypassed)
             {
-                p = phase;
-                auto* dst = outBlock.getChannelPointer (ch);
+                frequency.skip (static_cast<int> (len));
+                p.advance (freq * static_cast<NumericType> (len));
+            }
+            else
+            {
+                size_t ch;
 
-                for (size_t i = 0; i < len; ++i)
-                    dst[i] = generator (p.advance (freq) - MathConstants<NumericType>::pi);
+                if (context.usesSeparateInputAndOutputBlocks())
+                {
+                    for (ch = 0; ch < jmin (numChannels, inputChannels); ++ch)
+                    {
+                        p = phase;
+                        auto* dst = outBlock.getChannelPointer (ch);
+                        auto* src = inBlock.getChannelPointer (ch);
+
+                        for (size_t i = 0; i < len; ++i)
+                            dst[i] = src[i] + generator (p.advance (freq) - MathConstants<NumericType>::pi);
+                    }
+                }
+                else
+                {
+                    for (ch = 0; ch < jmin (numChannels, inputChannels); ++ch)
+                    {
+                        p = phase;
+                        auto* dst = outBlock.getChannelPointer (ch);
+
+                        for (size_t i = 0; i < len; ++i)
+                            dst[i] += generator (p.advance (freq) - MathConstants<NumericType>::pi);
+                    }
+                }
+
+                for (; ch < numChannels; ++ch)
+                {
+                    p = phase;
+                    auto* dst = outBlock.getChannelPointer (ch);
+
+                    for (size_t i = 0; i < len; ++i)
+                        dst[i] = generator (p.advance (freq) - MathConstants<NumericType>::pi);
+                }
             }
 
             phase = p;

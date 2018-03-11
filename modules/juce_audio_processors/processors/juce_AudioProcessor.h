@@ -158,8 +158,7 @@ public:
 
         If your plug-in has more than one input or output buses then the buffer passed
         to the processBlock methods will contain a bundle of all channels of each bus.
-        Use AudiobusLayout::getBusBuffer to obtain an audio buffer for a
-        particular bus.
+        Use getBusBuffer to obtain an audio buffer for a particular bus.
 
         Note that if you have more outputs than inputs, then only those channels that
         correspond to an input channel are guaranteed to contain sensible data - e.g.
@@ -195,7 +194,7 @@ public:
         processBlock() method to send out an asynchronous message. You could also use
         the AsyncUpdater class in a similar way.
 
-        @see AudiobusLayout::getBusBuffer
+        @see getBusBuffer
     */
     virtual void processBlock (AudioBuffer<float>& buffer,
                                MidiBuffer& midiMessages) = 0;
@@ -219,8 +218,7 @@ public:
 
         If your plug-in has more than one input or output buses then the buffer passed
         to the processBlock methods will contain a bundle of all channels of
-        each bus. Use AudiobusLayout::getBusBuffer to obtain a audio buffer
-        for a particular bus.
+        each bus. Use getBusBuffer to obtain a audio buffer for a particular bus.
 
         Note that if you have more outputs than inputs, then only those channels that
         correspond to an input channel are guaranteed to contain sensible data - e.g.
@@ -232,9 +230,9 @@ public:
         but you should only read/write from the ones that your processor is supposed to
         be using.
 
-        If your plugin uses buses, then you should use AudiobusLayout::getBusBuffer()
-        or AudiobusLayout::getChannelIndexInProcessBlockBuffer() to find out which
-        of the input and output channels correspond to which of the buses.
+        If your plugin uses buses, then you should use getBusBuffer() or
+        getChannelIndexInProcessBlockBuffer() to find out which of the input and output
+        channels correspond to which of the buses.
 
         The number of samples in these buffers is NOT guaranteed to be the same for every
         callback, and may be more or less than the estimated value given to prepareToPlay().
@@ -260,7 +258,7 @@ public:
         processBlock() method to send out an asynchronous message. You could also use
         the AsyncUpdater class in a similar way.
 
-        @see AudiobusLayout::getBusBuffer
+        @see getBusBuffer
     */
     virtual void processBlock (AudioBuffer<double>& buffer,
                                MidiBuffer& midiMessages);
@@ -1394,7 +1392,9 @@ public:
     /** Returns the name of one of the processor's input channels.
 
         These functions are deprecated: your audio processor can inform the host
-        on channel layouts and names via the methods in the AudiobusLayout class.
+        on channel layouts and names via the methods in the AudioChannelSet class.
+
+        @see getBus, Bus::getCurrentLayout, AudioChannelSet
      */
     JUCE_DEPRECATED (virtual const String getInputChannelName  (int channelIndex) const);
     JUCE_DEPRECATED (virtual const String getOutputChannelName (int channelIndex) const);
@@ -1627,10 +1627,12 @@ private:
     template <typename floatType>
     void processBypassed (AudioBuffer<floatType>&, MidiBuffer&);
 
-   #if JucePlugin_Build_VST3
+    friend class AudioProcessorParameter;
+
     friend class JuceVST3EditController;
     friend class JuceVST3Component;
-   #endif
+    friend class AudioUnitPluginInstance;
+    friend class LADSPAPluginInstance;
 
     Atomic<int> vst3IsPlaying { 0 };
 

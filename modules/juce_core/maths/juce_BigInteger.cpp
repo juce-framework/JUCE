@@ -221,7 +221,7 @@ int64 BigInteger::toInt64() const noexcept
 BigInteger BigInteger::getBitRange (int startBit, int numBits) const
 {
     BigInteger r;
-    numBits = jmin (numBits, getHighestBit() + 1 - startBit);
+    numBits = jmax (0, jmin (numBits, getHighestBit() + 1 - startBit));
     auto* destValues = r.ensureSize (sizeNeededToHold (numBits));
     r.highestBit = numBits;
 

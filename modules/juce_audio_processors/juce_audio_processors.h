@@ -35,7 +35,7 @@
 
   ID:               juce_audio_processors
   vendor:           juce
-  version:          5.2.0
+  version:          5.2.1
   name:             JUCE audio processor classes
   description:      Classes for loading and playing VST, AU, or internally-generated audio processors.
   website:          http://www.juce.com/juce

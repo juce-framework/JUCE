@@ -69,8 +69,8 @@ void Filter<SampleType>::prepare (const ProcessSpec&) noexcept     { reset(); }
 
 
 template <typename SampleType>
-template <typename ProcessContext>
-void Filter<SampleType>::process (const ProcessContext& context) noexcept
+template <typename ProcessContext, bool bypassed>
+void Filter<SampleType>::processInternal (const ProcessContext& context) noexcept
 {
     static_assert (std::is_same<typename ProcessContext::SampleType, SampleType>::value,
                    "The sample-type of the IIR filter must match the sample-type supplied to this process callback");
@@ -89,6 +89,11 @@ void Filter<SampleType>::process (const ProcessContext& context) noexcept
     auto* dst = outputBlock.getChannelPointer (0);
     auto* coeffs = coefficients->getRawCoefficients();
 
+    // we need to copy this template parameter into a constexpr
+    // otherwise MSVC will moan that the tenary expressions below
+    // are constant conditional expressions
+    constexpr bool isBypassed = bypassed;
+
     switch (order)
     {
         case 1:
@@ -103,7 +108,8 @@ void Filter<SampleType>::process (const ProcessContext& context) noexcept
             {
                 auto in = src[i];
                 auto out = in * b0 + lv1;
-                dst[i] = out;
+
+                dst[i] = isBypassed ? in : out;
 
                 lv1 = (in * b1) - (out * a1);
             }
@@ -127,7 +133,7 @@ void Filter<SampleType>::process (const ProcessContext& context) noexcept
             {
                 auto in = src[i];
                 auto out = (in * b0) + lv1;
-                dst[i] = out;
+                dst[i] = isBypassed ? in : out;
 
                 lv1 = (in * b1) - (out * a1) + lv2;
                 lv2 = (in * b2) - (out * a2);
@@ -156,7 +162,7 @@ void Filter<SampleType>::process (const ProcessContext& context) noexcept
             {
                 auto in = src[i];
                 auto out = (in * b0) + lv1;
-                dst[i] = out;
+                dst[i] = isBypassed ? in : out;
 
                 lv1 = (in * b1) - (out * a1) + lv2;
                 lv2 = (in * b2) - (out * a2) + lv3;
@@ -175,7 +181,7 @@ void Filter<SampleType>::process (const ProcessContext& context) noexcept
             {
                 auto in = src[i];
                 auto out = (in * coeffs[0]) + state[0];
-                dst[i] = out;
+                dst[i] = isBypassed ? in : out;
 
                 for (size_t j = 0; j < order - 1; ++j)
                     state[j] = (in * coeffs[j + 1]) - (out * coeffs[order + j + 1]) + state[j + 1];

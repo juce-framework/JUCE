@@ -321,7 +321,37 @@ private:
             return self;
         }
 
-        static void dealloc (id self, SEL)                                                          { delete _this (self); }
+        static void dealloc (id self, SEL)
+        {
+            if (! MessageManager::getInstance()->isThisTheMessageThread())
+            {
+                WaitableEvent deletionEvent;
+
+                struct AUDeleter  : public CallbackMessage
+                {
+                    AUDeleter (id selfToDelete, WaitableEvent& event)
+                        : parentSelf (selfToDelete), parentDeletionEvent (event)
+                    {
+                    }
+
+                    void messageCallback() override
+                    {
+                        delete _this (parentSelf);
+                        parentDeletionEvent.signal();
+                    }
+
+                    id parentSelf;
+                    WaitableEvent& parentDeletionEvent;
+                };
+
+                (new AUDeleter (self, deletionEvent))->post();
+                deletionEvent.wait (-1);
+            }
+            else
+            {
+                delete _this (self);
+            }
+        }
 
         //==============================================================================
         static void reset (id self, SEL)                                                            { _this (self)->reset(); }
@@ -425,6 +455,8 @@ public:
     //==============================================================================
     void init()
     {
+        inParameterChangedCallback = false;
+
         AudioProcessor& processor = getAudioProcessor();
         const AUAudioFrameCount maxFrames = [getAudioUnit() maximumFramesToRender];
 
@@ -871,6 +903,12 @@ public:
 
     void audioProcessorParameterChanged (AudioProcessor*, int idx, float newValue) override
     {
+        if (inParameterChangedCallback.get())
+        {
+            inParameterChangedCallback = false;
+            return;
+        }
+
         if (isPositiveAndBelow (idx, getAudioProcessor().getNumParameters()))
         {
             if (AUParameter* param = [paramTree parameterWithAddress: getAUParameterAddressForIndex (idx)])
@@ -1155,7 +1193,7 @@ private:
                 {
                     if (param->isDiscrete())
                     {
-                        unit = kAudioUnitParameterUnit_Indexed;
+                        unit = param->isBoolean() ? kAudioUnitParameterUnit_Boolean : kAudioUnitParameterUnit_Indexed;
                         auto maxValue = getMaximumParameterValue (idx);
                         auto numSteps = param->getNumSteps();
 
@@ -1224,6 +1262,24 @@ private:
         }
     }
 
+    void setAudioProcessorParameter (int index, float value)
+    {
+        if (auto* param = getAudioProcessor().getParameters()[index])
+        {
+            if (value != param->getValue())
+            {
+                param->setValue (value);
+
+                inParameterChangedCallback = true;
+                param->sendValueChangedMessageToListeners (value);
+            }
+        }
+        else if (isPositiveAndBelow (index, getAudioProcessor().getNumParameters()))
+        {
+            getAudioProcessor().setParameter (index, value);
+        }
+    }
+
     void addPresets()
     {
         factoryPresets = [[NSMutableArray<AUAudioUnitPreset*> alloc] init];
@@ -1276,8 +1332,7 @@ private:
                     const AUParameterEvent& paramEvent = event->parameter;
                     const int idx = getJuceParameterIndexForAUAddress (paramEvent.parameterAddress);
 
-                    if (isPositiveAndBelow (idx, numParams))
-                        getAudioProcessor().setParameter (idx, paramEvent.value);
+                    setAudioProcessorParameter (idx, paramEvent.value);
                 }
                 break;
 
@@ -1423,11 +1478,10 @@ private:
     {
         if (param != nullptr)
         {
-            const int idx = getJuceParameterIndexForAUAddress ([param address]);
-            auto& processor = getAudioProcessor();
+            int idx = getJuceParameterIndexForAUAddress ([param address]);
+            auto normalisedValue = value / getMaximumParameterValue (idx);
 
-            if (isPositiveAndBelow (idx, processor.getNumParameters()))
-                processor.setParameter (idx, value / getMaximumParameterValue (idx));
+            setAudioProcessorParameter (idx, normalisedValue);
         }
     }
 
@@ -1445,7 +1499,7 @@ private:
         return 0;
     }
 
-    void valueChangedForObserver(AUParameterAddress, AUValue)
+    void valueChangedForObserver (AUParameterAddress, AUValue)
     {
         // this will have already been handled by valueChangedFromHost
     }
@@ -1565,6 +1619,8 @@ private:
     CurrentPositionInfo lastAudioHead;
 
     String contextName;
+
+    ThreadLocalValue<bool> inParameterChangedCallback;
 };
 
 const double JuceAudioUnitv3::kDefaultSampleRate = 44100.0;
@@ -1693,7 +1749,9 @@ public:
             creationEvent.wait (-1);
         }
         else
+        {
             retval = createAudioUnitOnMessageThread (descr, error);
+        }
 
         return [retval autorelease];
     }

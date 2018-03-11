@@ -501,6 +501,11 @@ public:
     */
     bool isAllSoundOff() const noexcept;
 
+    /** Checks whether this message is a reset all controllers message.
+        @see allControllerOff
+    */
+    bool isResetAllControllers() const noexcept;
+
     /** Creates an all-notes-off message.
         @param channel              the midi channel, in the range 1 to 16
         @see isAllNotesOff

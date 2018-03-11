@@ -98,10 +98,10 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_basics/mpe/juce_MPESynthesiserBase.h"
     "../../../../../modules/juce_audio_basics/mpe/juce_MPESynthesiserVoice.cpp"
     "../../../../../modules/juce_audio_basics/mpe/juce_MPESynthesiserVoice.h"
+    "../../../../../modules/juce_audio_basics/mpe/juce_MPEUtils.cpp"
+    "../../../../../modules/juce_audio_basics/mpe/juce_MPEUtils.h"
     "../../../../../modules/juce_audio_basics/mpe/juce_MPEValue.cpp"
     "../../../../../modules/juce_audio_basics/mpe/juce_MPEValue.h"
-    "../../../../../modules/juce_audio_basics/mpe/juce_MPEZone.cpp"
-    "../../../../../modules/juce_audio_basics/mpe/juce_MPEZone.h"
     "../../../../../modules/juce_audio_basics/mpe/juce_MPEZoneLayout.cpp"
     "../../../../../modules/juce_audio_basics/mpe/juce_MPEZoneLayout.h"
     "../../../../../modules/juce_audio_basics/native/juce_mac_CoreAudioLayouts.h"
@@ -337,6 +337,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_processors/format_types/juce_VSTMidiEventList.h"
     "../../../../../modules/juce_audio_processors/format_types/juce_VSTPluginFormat.cpp"
     "../../../../../modules/juce_audio_processors/format_types/juce_VSTPluginFormat.h"
+    "../../../../../modules/juce_audio_processors/processors/juce_AudioPluginInstance.cpp"
     "../../../../../modules/juce_audio_processors/processors/juce_AudioPluginInstance.h"
     "../../../../../modules/juce_audio_processors/processors/juce_AudioProcessor.cpp"
     "../../../../../modules/juce_audio_processors/processors/juce_AudioProcessor.h"
@@ -1349,10 +1350,10 @@ set_source_files_properties("../../../../../modules/juce_audio_basics/mpe/juce_M
 set_source_files_properties("../../../../../modules/juce_audio_basics/mpe/juce_MPESynthesiserBase.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/mpe/juce_MPESynthesiserVoice.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/mpe/juce_MPESynthesiserVoice.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/mpe/juce_MPEUtils.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/mpe/juce_MPEUtils.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/mpe/juce_MPEValue.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/mpe/juce_MPEValue.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_basics/mpe/juce_MPEZone.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_basics/mpe/juce_MPEZone.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/mpe/juce_MPEZoneLayout.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/mpe/juce_MPEZoneLayout.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/native/juce_mac_CoreAudioLayouts.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -1588,6 +1589,7 @@ set_source_files_properties("../../../../../modules/juce_audio_processors/format
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/juce_VSTMidiEventList.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/juce_VSTPluginFormat.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/juce_VSTPluginFormat.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioPluginInstance.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioPluginInstance.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioProcessor.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioProcessor.h" PROPERTIES HEADER_FILE_ONLY TRUE)

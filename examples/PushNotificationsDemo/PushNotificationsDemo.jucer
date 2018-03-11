@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="SS6MsF" name="PushNotificationsDemo" displaySplashScreen="0"
               reportAppUsage="0" projectType="guiapp" bundleIdentifier="com.juce.pushnotificationsdemo"
-              jucerVersion="5.2.0" companyCopyright="">
+              jucerVersion="5.2.1" companyCopyright="">
   <MAINGROUP id="VaJRhp" name="PushNotificationsDemo">
     <GROUP id="{712B2C90-FAC6-CCF3-F8F9-ED82411AF5ED}" name="BinaryResources">
       <GROUP id="{DBF05B65-21C4-E232-D005-149CC3FD4CD6}" name="images">

@@ -626,13 +626,16 @@ public:
         {
             x = target.getX();
 
-            auto spaceUnder = parentArea.getHeight() - (target.getBottom() - parentArea.getY());
+            auto spaceUnder = parentArea.getBottom() - target.getBottom();
             auto spaceOver = target.getY() - parentArea.getY();
+            auto bufferHeight = 30;
 
-            if (heightToUse < spaceUnder - 30 || spaceUnder >= spaceOver)
-                y = target.getBottom();
+            if (options.getPreferredPopupDirection() == Options::PopupDirection::upwards)
+                y = (heightToUse < spaceOver - bufferHeight  || spaceOver >= spaceUnder) ? target.getY() - heightToUse
+                                                                                         : target.getBottom();
             else
-                y = target.getY() - heightToUse;
+                y = (heightToUse < spaceUnder - bufferHeight || spaceUnder >= spaceOver) ? target.getBottom()
+                                                                                         : target.getY() - heightToUse;
         }
         else
         {
@@ -669,20 +672,17 @@ public:
                 tendTowardsRight = (parentArea.getRight() - target.getRight()) >= (target.getX() - parentArea.getX());
             }
 
-            if (tendTowardsRight)
-                x = jmin (parentArea.getRight() - widthToUse - 4, target.getRight());
-            else
-                x = jmax (parentArea.getX() + 4, target.getX() - widthToUse);
+            x = tendTowardsRight ? jmin (parentArea.getRight() - widthToUse - 4, target.getRight())
+                                 : jmax (parentArea.getX() + 4, target.getX() - widthToUse);
 
             if (getLookAndFeel().getPopupMenuBorderSize() == 0) // workaround for dismissing the window on mouse up when border size is 0
                 x += tendTowardsRight ? 1 : -1;
 
-            y = target.getY();
-            if (target.getCentreY() > parentArea.getCentreY())
-                y = jmax (parentArea.getY(), target.getBottom() - heightToUse);
+            y = target.getCentreY() > parentArea.getCentreY() ? jmax (parentArea.getY(), target.getBottom() - heightToUse)
+                                                              : target.getY();
         }
 
-        x = jmax (parentArea.getX() + 1, jmin (parentArea.getRight() - (widthToUse + 6), x));
+        x = jmax (parentArea.getX() + 1, jmin (parentArea.getRight()  - (widthToUse  + 6), x));
         y = jmax (parentArea.getY() + 1, jmin (parentArea.getBottom() - (heightToUse + 6), y));
 
         windowPos.setBounds (x, y, widthToUse, heightToUse);
@@ -1577,6 +1577,13 @@ PopupMenu::Options PopupMenu::Options::withParentComponent (Component* parent) c
 {
     Options o (*this);
     o.parentComponent = parent;
+    return o;
+}
+
+PopupMenu::Options PopupMenu::Options::withPreferredPopupDirection (PopupDirection direction) const noexcept
+{
+    Options o (*this);
+    o.preferredPopupDirection = direction;
     return o;
 }
 

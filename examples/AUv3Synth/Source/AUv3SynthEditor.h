@@ -35,9 +35,9 @@ class AUv3SynthEditor   : public AudioProcessorEditor,
 public:
     //==============================================================================
     AUv3SynthEditor (AudioProcessor& processor)
-        :   AudioProcessorEditor (processor),
-            recordButton ("Record"),
-            roomSizeSlider (Slider::LinearHorizontal, Slider::NoTextBox)
+        : AudioProcessorEditor (processor),
+          recordButton ("Record"),
+          roomSizeSlider (Slider::LinearHorizontal, Slider::NoTextBox)
     {
         LookAndFeel::setDefaultLookAndFeel (&materialLookAndFeel);
 

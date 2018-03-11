@@ -153,6 +153,10 @@
   #include <SLES/OpenSLES_AndroidConfiguration.h>
  #endif
 
+ #if JUCE_USE_ANDROID_OBOE
+  #include <oboe/Oboe.h>
+ #endif
+
 #endif
 
 #include "audio_io/juce_AudioDeviceManager.cpp"
@@ -210,6 +214,10 @@
 
  #if JUCE_USE_ANDROID_OPENSLES
   #include "native/juce_android_OpenSL.cpp"
+ #endif
+
+ #if JUCE_USE_ANDROID_OBOE
+  #include "native/juce_android_Oboe.cpp"
  #endif
 #endif
 

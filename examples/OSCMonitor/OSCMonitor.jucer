@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="IhmIkj" name="OSCMonitor" projectType="guiapp" bundleIdentifier="com.roli.OSCMonitor"
-              jucerVersion="5.2.0" displaySplashScreen="0" reportAppUsage="0"
+              jucerVersion="5.2.1" displaySplashScreen="0" reportAppUsage="0"
               companyName="ROLI Ltd." companyCopyright="ROLI Ltd.">
   <MAINGROUP id="N9NMMk" name="OSCMonitor">
     <GROUP id="{2B92546C-6B49-72D9-ACD0-0F2FCE9AD0D5}" name="Source">

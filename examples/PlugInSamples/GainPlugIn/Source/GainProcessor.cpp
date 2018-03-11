@@ -25,7 +25,6 @@
 */
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "../../GenericEditor.h"
 
 //==============================================================================
 /**
@@ -54,7 +53,7 @@ public:
     }
 
     //==============================================================================
-    AudioProcessorEditor* createEditor() override { return new GenericEditor (*this); }
+    AudioProcessorEditor* createEditor() override { return new GenericAudioProcessorEditor (this); }
     bool hasEditor() const override               { return true;   }
 
     //==============================================================================

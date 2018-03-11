@@ -549,6 +549,15 @@ public:
     {
         if (auto* app = JUCEApplicationBase::getInstance())
             app->backButtonPressed();
+
+        if (Component* kiosk = Desktop::getInstance().getKioskModeComponent())
+            if (kiosk->getPeer() == this)
+                setNavBarsHidden (navBarsHidden);
+    }
+
+    void handleKeyboardHiddenCallback()
+    {
+        Component::unfocusAllComponents();
     }
 
     void handleAppResumedCallback()
@@ -606,7 +615,16 @@ public:
     void dismissPendingTextInput() override
     {
         view.callVoidMethod (ComponentPeerView.showKeyboard, javaString ("").get());
+
+        // updating the nav bar visibility is a bit odd on Android - need to wait for
+        if (! isTimerRunning())
+            hideNavBarDelayed();
      }
+
+    void hideNavBarDelayed()
+    {
+        startTimer (500);
+    }
 
     //==============================================================================
     void handlePaintCallback (JNIEnv* env, jobject canvas, jobject paint)
@@ -782,16 +800,17 @@ AndroidComponentPeer* AndroidComponentPeer::frontWindow = nullptr;
           peer->juceMethodInvocation; \
   }
 
-JUCE_VIEW_CALLBACK (void, handlePaint,      (JNIEnv* env, jobject /*view*/, jlong host, jobject canvas, jobject paint),                          handlePaintCallback (env, canvas, paint))
-JUCE_VIEW_CALLBACK (void, handleMouseDown,  (JNIEnv* env, jobject /*view*/, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseDownCallback (i, Point<float> ((float) x, (float) y), (int64) time))
-JUCE_VIEW_CALLBACK (void, handleMouseDrag,  (JNIEnv* env, jobject /*view*/, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseDragCallback (i, Point<float> ((float) x, (float) y), (int64) time))
-JUCE_VIEW_CALLBACK (void, handleMouseUp,    (JNIEnv* env, jobject /*view*/, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseUpCallback   (i, Point<float> ((float) x, (float) y), (int64) time))
-JUCE_VIEW_CALLBACK (void, viewSizeChanged,  (JNIEnv* env, jobject /*view*/, jlong host),                                          handleMovedOrResized())
-JUCE_VIEW_CALLBACK (void, focusChanged,     (JNIEnv* env, jobject /*view*/, jlong host, jboolean hasFocus),                       handleFocusChangeCallback (hasFocus))
-JUCE_VIEW_CALLBACK (void, handleKeyDown,    (JNIEnv* env, jobject /*view*/, jlong host, jint k, jint kc),                         handleKeyDownCallback ((int) k, (int) kc))
-JUCE_VIEW_CALLBACK (void, handleKeyUp,      (JNIEnv* env, jobject /*view*/, jlong host, jint k, jint kc),                         handleKeyUpCallback ((int) k, (int) kc))
-JUCE_VIEW_CALLBACK (void, handleBackButton, (JNIEnv* env, jobject /*view*/, jlong host),                                          handleBackButtonCallback())
-JUCE_VIEW_CALLBACK (void, handleAppResumed, (JNIEnv* env, jobject /*view*/, jlong host),                                          handleAppResumedCallback())
+JUCE_VIEW_CALLBACK (void, handlePaint,          (JNIEnv* env, jobject /*view*/, jlong host, jobject canvas, jobject paint),                          handlePaintCallback (env, canvas, paint))
+JUCE_VIEW_CALLBACK (void, handleMouseDown,      (JNIEnv* env, jobject /*view*/, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseDownCallback (i, Point<float> ((float) x, (float) y), (int64) time))
+JUCE_VIEW_CALLBACK (void, handleMouseDrag,      (JNIEnv* env, jobject /*view*/, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseDragCallback (i, Point<float> ((float) x, (float) y), (int64) time))
+JUCE_VIEW_CALLBACK (void, handleMouseUp,        (JNIEnv* env, jobject /*view*/, jlong host, jint i, jfloat x, jfloat y, jlong time),  handleMouseUpCallback   (i, Point<float> ((float) x, (float) y), (int64) time))
+JUCE_VIEW_CALLBACK (void, viewSizeChanged,      (JNIEnv* env, jobject /*view*/, jlong host),                                          handleMovedOrResized())
+JUCE_VIEW_CALLBACK (void, focusChanged,         (JNIEnv* env, jobject /*view*/, jlong host, jboolean hasFocus),                       handleFocusChangeCallback (hasFocus))
+JUCE_VIEW_CALLBACK (void, handleKeyDown,        (JNIEnv* env, jobject /*view*/, jlong host, jint k, jint kc),                         handleKeyDownCallback ((int) k, (int) kc))
+JUCE_VIEW_CALLBACK (void, handleKeyUp,          (JNIEnv* env, jobject /*view*/, jlong host, jint k, jint kc),                         handleKeyUpCallback ((int) k, (int) kc))
+JUCE_VIEW_CALLBACK (void, handleBackButton,     (JNIEnv* env, jobject /*view*/, jlong host),                                          handleBackButtonCallback())
+JUCE_VIEW_CALLBACK (void, handleKeyboardHidden, (JNIEnv* env, jobject /*view*/, jlong host),                                          handleKeyboardHiddenCallback())
+JUCE_VIEW_CALLBACK (void, handleAppResumed,     (JNIEnv* env, jobject /*view*/, jlong host),                                          handleAppResumedCallback())
 
 //==============================================================================
 ComponentPeer* Component::createNewPeer (int styleFlags, void*)

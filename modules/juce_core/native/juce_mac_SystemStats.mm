@@ -153,6 +153,11 @@ String SystemStats::getDeviceDescription()
    #endif
 }
 
+String SystemStats::getDeviceManufacturer()
+{
+    return "Apple";
+}
+
 bool SystemStats::isOperatingSystem64Bit()
 {
    #if JUCE_IOS

@@ -138,8 +138,19 @@ namespace FIR
             auto* fir = coefficients->getRawCoefficients();
             size_t p = pos;
 
-            for (size_t i = 0; i < numSamples; ++i)
-                dst[i] = processSingleSample (src[i], fifo, fir, size, p);
+            if (context.isBypassed)
+            {
+                for (size_t i = 0; i < numSamples; ++i)
+                {
+                    fifo[p] = dst[i] = src[i];
+                    p = (p == 0 ? size - 1 : p - 1);
+                }
+            }
+            else
+            {
+                for (size_t i = 0; i < numSamples; ++i)
+                    dst[i] = processSingleSample (src[i], fifo, fir, size, p);
+            }
 
             pos = p;
         }

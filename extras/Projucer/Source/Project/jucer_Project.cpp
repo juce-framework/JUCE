@@ -739,8 +739,8 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
                                           "The namespace containing the binary assests.");
 
     props.add (new ChoicePropertyComponent (cppStandardValue, "C++ Language Standard",
-                                            { "C++11", "C++14", "Use Latest" },
-                                            { "11",    "14",    "latest" }),
+                                            { "C++11", "C++14", "C++17", "Use Latest" },
+                                            { "11",    "14",    "17",    "latest" }),
                "The standard of the C++ language that will be used for compilation.");
 
     props.add (new TextPropertyComponent (preprocessorDefsValue, "Preprocessor Definitions", 32768, true),

@@ -80,6 +80,7 @@ private:
 
     static const char* getProjectWindowPosName()   { return "projectWindowPos"; }
     void createProjectContentCompIfNeeded();
+    void setTitleBarIcon();
 
     void valueChanged (Value&) override;
 

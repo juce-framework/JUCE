@@ -96,6 +96,7 @@ public:
         AudioDeviceSetup();
 
         bool operator== (const AudioDeviceSetup& other) const;
+        bool operator!= (const AudioDeviceSetup& other) const;
 
         /** The name of the audio device used for output.
             The name has to be one of the ones listed by the AudioDeviceManager's currently
@@ -402,28 +403,45 @@ public:
     void playTestSound();
 
     //==============================================================================
-    /** Turns on level-measuring for input channels.
-        @see getCurrentInputLevel()
-    */
-    void enableInputLevelMeasurement (bool enableMeasurement) noexcept;
+    /**
+        A simple reference-counted struct that holds a level-meter value that can be read
+        using getCurrentLevel().
 
-    /** Turns on level-measuring for output channels.
-        @see getCurrentOutputLevel()
-    */
-    void enableOutputLevelMeasurement (bool enableMeasurement) noexcept;
+        This is used to ensure that the level processing code is only executed when something
+        holds a reference to one of these objects and will be bypassed otherwise.
 
-    /** Returns the current input level.
-        To use this, you must first enable it by calling enableInputLevelMeasurement().
-        @see enableInputLevelMeasurement()
+        @see getInputLevelGetter, getOutputLevelGetter
     */
-    double getCurrentInputLevel() const noexcept;
+    struct LevelMeter    : public ReferenceCountedObject
+    {
+        typedef ReferenceCountedObjectPtr<LevelMeter> Ptr;
 
-    /** Returns the current output level.
-        To use this, you must first enable it by calling enableOutputLevelMeasurement().
-        @see enableOutputLevelMeasurement()
+        LevelMeter() noexcept;
+
+        double getCurrentLevel() const noexcept;
+
+    private:
+        friend class AudioDeviceManager;
+
+        Atomic<float> level { 0 };
+        void updateLevel (const float* const*, int numChannels, int numSamples) noexcept;
+    };
+
+    /** Returns a reference-counted object that can be used to get the current input level.
+
+        You need to store this object locally to ensure that the reference count is incremented
+        and decremented properly. The current input level value can be read using getCurrentLevel().
     */
-    double getCurrentOutputLevel() const noexcept;
+    LevelMeter::Ptr getInputLevelGetter() noexcept          { return inputLevelGetter; }
 
+    /** Returns a reference-counted object that can be used to get the current input level.
+
+        You need to store this object locally to ensure that the reference count is incremented
+        and decremented properly. The current input level value can be read using getCurrentLevel().
+    */
+    LevelMeter::Ptr getOutputLevelGetter() noexcept         { return outputLevelGetter; }
+
+    //==============================================================================
     /** Returns the a lock that can be used to synchronise access to the audio callback.
         Obviously while this is locked, you're blocking the audio thread from running, so
         it must only be used for very brief periods when absolutely necessary.
@@ -480,18 +498,8 @@ private:
     double cpuUsageMs = 0, timeToCpuScale = 0, msPerBlock = 0;
     int xruns = 0;
 
-    struct LevelMeter
-    {
-        LevelMeter() noexcept;
-        void updateLevel (const float* const*, int numChannels, int numSamples) noexcept;
-        void setEnabled (bool) noexcept;
-        double getCurrentLevel() const noexcept;
-
-        Atomic<int> enabled;
-        Atomic<float> level;
-    };
-
-    LevelMeter inputLevelMeter, outputLevelMeter;
+    LevelMeter::Ptr inputLevelGetter   { new LevelMeter() },
+                    outputLevelGetter  { new LevelMeter() };
 
     //==============================================================================
     class CallbackHandler;

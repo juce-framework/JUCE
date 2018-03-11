@@ -5,7 +5,7 @@
               pluginManufacturer="ROLI Ltd." pluginManufacturerCode="ROLI"
               pluginCode="Nois" pluginChannelConfigs="" pluginSilenceInIsSilenceOut="0"
               pluginAUExportPrefix="NoiseGateAU" pluginRTASCategory="" aaxIdentifier="com.roli.NoiseGate"
-              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.2.0"
+              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.2.1"
               displaySplashScreen="0" reportAppUsage="0" companyName="ROLI Ltd."
               companyCopyright="ROLI Ltd.">
   <MAINGROUP id="FVYuyg" name="NoiseGate">

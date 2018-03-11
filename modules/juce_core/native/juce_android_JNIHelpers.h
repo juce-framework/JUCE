@@ -477,6 +477,12 @@ DECLARE_JNI_CLASS (JavaArrayList, "java/util/ArrayList");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  METHOD (booleanValue, "booleanValue", "()Z")
+
+DECLARE_JNI_CLASS (JavaBoolean, "java/lang/Boolean");
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
   METHOD (constructor,        "<init>",             "()V") \
   METHOD (containsKey,        "containsKey",        "(Ljava/lang/String;)Z") \
   METHOD (get,                "get",                "(Ljava/lang/String;)Ljava/lang/Object;") \
@@ -527,6 +533,12 @@ DECLARE_JNI_CLASS (JavaClass, "java/lang/Class");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
+  METHOD (toString, "toString", "()Ljava/lang/String;")
+
+DECLARE_JNI_CLASS (JavaEnum, "java/lang/Enum");
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
  METHOD (constructor,     "<init>",          "(Ljava/lang/String;)V") \
  METHOD (getAbsolutePath, "getAbsolutePath", "()Ljava/lang/String;") \
  METHOD (length,          "length",          "()J")
@@ -558,7 +570,8 @@ DECLARE_JNI_CLASS (JavaHashMap, "java/util/HashMap");
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD) \
-  STATICMETHOD (valueOf, "valueOf", "(I)Ljava/lang/Integer;")
+  STATICMETHOD (parseInt, "parseInt", "(Ljava/lang/String;I)I") \
+  STATICMETHOD (valueOf,  "valueOf",  "(I)Ljava/lang/Integer;")
 
 DECLARE_JNI_CLASS (JavaInteger, "java/lang/Integer");
 #undef JNI_CLASS_MEMBERS

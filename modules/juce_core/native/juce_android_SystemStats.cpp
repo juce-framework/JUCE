@@ -380,6 +380,11 @@ String SystemStats::getDeviceDescription()
             + "-" + AndroidStatsHelpers::getAndroidOsBuildValue ("SERIAL");
 }
 
+String SystemStats::getDeviceManufacturer()
+{
+    return AndroidStatsHelpers::getAndroidOsBuildValue ("MANUFACTURER");
+}
+
 bool SystemStats::isOperatingSystem64Bit()
 {
    #if JUCE_64BIT

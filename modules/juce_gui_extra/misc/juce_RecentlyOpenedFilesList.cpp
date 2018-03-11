@@ -149,4 +149,41 @@ void RecentlyOpenedFilesList::registerRecentFileNatively (const File& file)
    #endif
 }
 
+void RecentlyOpenedFilesList::forgetRecentFileNatively (const File& file)
+{
+   #if JUCE_MAC
+    JUCE_AUTORELEASEPOOL
+    {
+        // for some reason, OSX doesn't provide a method to just remove a single file
+        // from the recent list, so we clear them all and add them back excluding
+        // the specified file
+
+        auto* sharedDocController = [NSDocumentController sharedDocumentController];
+        auto* recentDocumentURLs =  [sharedDocController recentDocumentURLs];
+
+        [sharedDocController clearRecentDocuments: nil];
+
+        auto* nsFile = createNSURLFromFile (file);
+
+        auto* reverseEnumerator = [recentDocumentURLs reverseObjectEnumerator];
+
+        for (NSURL* url : reverseEnumerator)
+            if (! [url isEqual:nsFile])
+                [sharedDocController noteNewRecentDocumentURL:url];
+    }
+   #else
+    ignoreUnused (file);
+   #endif
+}
+
+void RecentlyOpenedFilesList::clearRecentFilesNatively()
+{
+   #if JUCE_MAC
+    JUCE_AUTORELEASEPOOL
+    {
+        [[NSDocumentController sharedDocumentController] clearRecentDocuments: nil];
+    }
+   #endif
+}
+
 } // namespace juce

@@ -394,6 +394,12 @@ public:
         bool operator!= (const Iterator&) const noexcept;
         ValueTree operator*() const;
 
+        using difference_type    = std::ptrdiff_t;
+        using value_type         = ValueTree;
+        using reference          = ValueTree&;
+        using pointer            = ValueTree*;
+        using iterator_category  = std::forward_iterator_tag;
+
     private:
         void* internal;
     };

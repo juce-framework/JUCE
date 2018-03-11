@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="aa4reI" name="BlocksDrawing" projectType="guiapp" bundleIdentifier="com.yourcompany.BlocksDrawing"
-              jucerVersion="5.2.0" displaySplashScreen="0" reportAppUsage="0"
+              jucerVersion="5.2.1" displaySplashScreen="0" reportAppUsage="0"
               companyCopyright="">
   <MAINGROUP id="yXiPIx" name="BlocksDrawing">
     <GROUP id="{092A4D5B-31E2-5D03-9B41-81C10EC447E8}" name="Source">

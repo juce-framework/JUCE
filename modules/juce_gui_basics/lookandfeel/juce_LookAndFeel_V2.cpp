@@ -367,11 +367,12 @@ void LookAndFeel_V2::drawToggleButton (Graphics& g, ToggleButton& button,
 
 void LookAndFeel_V2::changeToggleButtonWidthToFitText (ToggleButton& button)
 {
-    Font font (jmin (15.0f, button.getHeight() * 0.6f));
+    auto fontSize = jmin (15.0f, button.getHeight() * 0.75f);
+    auto tickWidth = fontSize * 1.1f;
 
-    const int tickWidth = jmin (24, button.getHeight());
+    Font font (fontSize);
 
-    button.setSize (font.getStringWidth (button.getButtonText()) + tickWidth + 8,
+    button.setSize (font.getStringWidth (button.getButtonText()) + roundToInt (tickWidth) + 9,
                     button.getHeight());
 }
 

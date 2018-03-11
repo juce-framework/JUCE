@@ -105,6 +105,8 @@ public:
     void drawDocumentWindowTitleBar (DocumentWindow&, Graphics&, int, int, int, int, const Image*, bool) override;
 
     //==============================================================================
+    Font getTextButtonFont (TextButton&, int buttonHeight) override;
+
     void drawButtonBackground (Graphics&, Button&, const Colour& backgroundColour,
                                bool isMouseOverButton, bool isButtonDown) override;
 
@@ -112,6 +114,8 @@ public:
     void drawTickBox (Graphics&, Component&,
                       float x, float y, float w, float h,
                       bool ticked, bool isEnabled, bool isMouseOverButton, bool isButtonDown) override;
+
+    void changeToggleButtonWidthToFitText (ToggleButton&) override;
 
     //==============================================================================
     AlertWindow* createAlertWindow (const String& title, const String& message,
@@ -196,6 +200,8 @@ public:
 
     void drawPointer (Graphics&, float x, float y, float diameter,
                       const Colour&, int direction) noexcept;
+
+    Label* createSliderTextBox (Slider&) override;
 
     //==============================================================================
     void drawTooltip (Graphics&, const String& text, int width, int height) override;
