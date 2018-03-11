@@ -643,17 +643,22 @@ namespace TypeHelpers
         type; for anything else, they return a float type.
     */
     template <typename Type> struct SmallestFloatType               { typedef float  type; };
-    template <>              struct SmallestFloatType <double>      { typedef double type; };
 
+   #if ! DOXYGEN
+    template <>              struct SmallestFloatType <double>      { typedef double type; };
+   #endif
 
     /** These templates are designed to take an integer type, and return an unsigned int
         version with the same size.
     */
     template <int bytes>     struct UnsignedTypeWithSize            {};
+
+   #if ! DOXYGEN
     template <>              struct UnsignedTypeWithSize<1>         { typedef uint8  type; };
     template <>              struct UnsignedTypeWithSize<2>         { typedef uint16 type; };
     template <>              struct UnsignedTypeWithSize<4>         { typedef uint32 type; };
     template <>              struct UnsignedTypeWithSize<8>         { typedef uint64 type; };
+   #endif
 }
 
 //==============================================================================

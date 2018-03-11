@@ -152,6 +152,7 @@ namespace juce
   #define JUCE_64BIT_ATOMICS_UNAVAILABLE 1
  #endif
 
+ /** @internal */
  template <typename Type> class AtomicBase;
 
  //==============================================================================
@@ -257,6 +258,8 @@ namespace juce
      /** Implements a memory read/write barrier. */
      static inline void memoryBarrier() noexcept   { AtomicBase<Type>::memoryBarrier(); }
  };
+
+ #if ! DOXYGEN
 
  //==============================================================================
  // Internal implementation follows
@@ -415,6 +418,8 @@ namespace juce
 
  template <typename Type>
  inline void AtomicBase<Type>::memoryBarrier() noexcept   { __sync_synchronize(); }
+
+ #endif // ! DOXYGEN
 
 #endif
 

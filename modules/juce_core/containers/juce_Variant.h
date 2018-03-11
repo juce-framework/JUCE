@@ -336,7 +336,7 @@ struct VariantConverter
     static var toVar (const Type& t)               { return t; }
 };
 
-/** This template-overloaded class can be used to convert between var and custom types. */
+/** @internal */
 template <>
 struct VariantConverter<String>
 {

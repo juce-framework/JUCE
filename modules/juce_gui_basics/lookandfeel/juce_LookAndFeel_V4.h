@@ -27,6 +27,11 @@
 namespace juce
 {
 
+//==============================================================================
+/**
+    The latest JUCE look-and-feel style, as introduced in 2017.
+    @see LookAndFeel, LookAndFeel_V1, LookAndFeel_V2, LookAndFeel_V3
+*/
 class JUCE_API  LookAndFeel_V4   : public LookAndFeel_V3
 {
 public:

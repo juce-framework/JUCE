@@ -24,6 +24,8 @@
   ==============================================================================
 */
 
+#if ! DOXYGEN
+
 namespace juce
 {
 
@@ -673,3 +675,5 @@ template <> struct VST3FloatAndDoubleBusMapCompositeHelper<double>
 };
 
 } // namespace juce
+
+#endif // ! DOXYGEN

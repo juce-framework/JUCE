@@ -68,6 +68,7 @@ public:
     virtual int getNumRows() const = 0;
 
     //==============================================================================
+    /** An interface to use for LEDGrid rendering. */
     struct Renderer     : public juce::ReferenceCountedObject
     {
         virtual ~Renderer();

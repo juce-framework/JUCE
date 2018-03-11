@@ -60,6 +60,8 @@ namespace juce
  #define T(stringLiteral)   JUCE_T(stringLiteral)
 #endif
 
+#if ! DOXYGEN
+
 //==============================================================================
 // GNU libstdc++ does not have std::make_unsigned
 namespace internal
@@ -72,6 +74,8 @@ namespace internal
     template <> struct make_unsigned<long>                      { typedef unsigned long      type; };
     template <> struct make_unsigned<long long>                 { typedef unsigned long long type; };
 }
+
+#endif
 
 //==============================================================================
 /**

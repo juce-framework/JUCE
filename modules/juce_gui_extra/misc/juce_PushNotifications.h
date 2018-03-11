@@ -60,7 +60,7 @@ public:
 
         /** Represents an action on a notification that can be presented as a button or a text input.
             On Android, each notification has its action specified explicitly, on iOS you configure an
-            allowed set of actions on startup and pack them into categories (see @class Settings).
+            allowed set of actions on startup and pack them into categories (see Settings).
         */
         struct Action
         {
@@ -462,7 +462,7 @@ public:
         Notification::LockScreenAppearance lockScreenAppearance = Notification::showPartially;  /**< Optional. */
 
         String description;                 /**< Optional: user visible description of the channel. */
-        String groupId;                     /**< Required: group this channel belongs to (see @class ChannelGroup). */
+        String groupId;                     /**< Required: group this channel belongs to (see ChannelGroup). */
         Colour ledColour;                   /**< Optional: sets the led colour for notifications in this channel. */
         bool bypassDoNotDisturb = false;    /**< Optional: true if notifications in this channel can bypass do not disturb setting. */
         bool canShowBadge = false;          /**< Optional: true if notifications in this channel can show badges in a Launcher application. */
