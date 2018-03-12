@@ -302,6 +302,7 @@ namespace juce
 #include "network/juce_Socket.h"
 #include "network/juce_URL.h"
 #include "network/juce_WebInputStream.h"
+#include "streams/juce_URLInputSource.h"
 #include "system/juce_SystemStats.h"
 #include "time/juce_PerformanceCounter.h"
 #include "unit_tests/juce_UnitTest.h"
