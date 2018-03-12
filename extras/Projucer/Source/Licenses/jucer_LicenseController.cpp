@@ -113,7 +113,7 @@ LicenseController::LicenseController()
 
 LicenseController::~LicenseController()
 {
-   #if !JUCER_ENABLE_GPL_MODE
+   #if ! JUCER_ENABLE_GPL_MODE
     thread.reset();
     closeWebview (-1);
    #endif
