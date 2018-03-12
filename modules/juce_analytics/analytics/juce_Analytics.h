@@ -64,14 +64,14 @@ public:
 
         @param newUserId            the userId to add to AnalyticsEvents
     */
-    void setUserId (const String& newUserId);
+    void setUserId (String newUserId);
 
     /** Sets some user properties that will be added to all AnalyticsEvents sent
         to AnalyticsDestinations.
 
         @param properties           the userProperties to add to AnalyticsEvents
     */
-    void setUserProperties (const StringPairArray& properties);
+    void setUserProperties (StringPairArray properties);
 
     /** Sends an AnalyticsEvent to all AnalyticsDestinations.
 
