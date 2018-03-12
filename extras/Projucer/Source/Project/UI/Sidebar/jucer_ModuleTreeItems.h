@@ -111,7 +111,7 @@ public:
 
     void refreshModuleInfoIfCurrentlyShowing (bool juceModulePathChanged)
     {
-        auto isJuceModule = EnabledModuleList::isJuceModule (moduleID);
+        auto isJuceModule = isJUCEModule (moduleID);
         auto shouldRefresh = (juceModulePathChanged && isJuceModule) || (! juceModulePathChanged && ! isJuceModule);
 
         if (! shouldRefresh)
@@ -170,8 +170,8 @@ private:
                 if (exporter->isCLion())
                     continue;
 
-                auto key = modules.isJuceModule (moduleID) ? Ids::defaultJuceModulePath
-                                                           : Ids::defaultUserModulePath;
+                auto key = isJUCEModule (moduleID) ? Ids::defaultJuceModulePath
+                                                   : Ids::defaultUserModulePath;
 
                 Value src (modulePathValueSources.add (new DependencyPathValueSource (exporter->getPathForModuleValue (moduleID),
                                                                                       key, exporter->getTargetOSForExporter())));

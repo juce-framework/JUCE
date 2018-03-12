@@ -31,8 +31,8 @@ class ProjectExporter;
 class ProjectSaver;
 
 //==============================================================================
-bool isJuceModulesFolder (const File&);
-bool isJuceFolder (const File&);
+bool isJUCEModulesFolder (const File&);
+bool isJUCEFolder (const File&);
 
 //==============================================================================
 struct ModuleDescription
@@ -140,7 +140,6 @@ public:
 
     static File findGlobalModulesFolder();
     static File findDefaultModulesFolder (Project&);
-    static bool isJuceModule (const String& moduleID);
 
     bool isModuleEnabled (const String& moduleID) const;
 

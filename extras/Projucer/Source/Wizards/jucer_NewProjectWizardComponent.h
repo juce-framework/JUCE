@@ -91,7 +91,7 @@ public:
             if (! fc.browseForDirectory())
                 return false;
 
-            if (isJuceModulesFolder (fc.getResult()))
+            if (isJUCEModulesFolder (fc.getResult()))
             {
                 result = fc.getResult();
                 return true;
@@ -406,7 +406,7 @@ public:
             wizard->modulesFolder = modulesPathBox.isUsingGlobalPaths ? File (getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString())
                                                                       : modulesPathBox.modulesFolder;
 
-            if (! isJuceModulesFolder (wizard->modulesFolder))
+            if (! isJUCEModulesFolder (wizard->modulesFolder))
             {
                 if (modulesPathBox.isUsingGlobalPaths)
                     AlertWindow::showMessageBox (AlertWindow::AlertIconType::WarningIcon, "Invalid Global Path",

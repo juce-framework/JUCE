@@ -99,14 +99,6 @@ namespace
         return files;
     }
 
-    static String joinLinesIntoSourceFile (StringArray& lines)
-    {
-        while (lines.size() > 10 && lines [lines.size() - 1].isEmpty())
-            lines.remove (lines.size() - 1);
-
-        return lines.joinIntoString (getLineEnding()) + getLineEnding();
-    }
-
     static void replaceFile (const File& file, const String& newText, const String& message)
     {
         std::cout << message << file.getFullPathName() << std::endl;
@@ -371,7 +363,7 @@ namespace
 
         for (int i = 0; i < lines.size(); ++i)
         {
-            String& line = lines.getReference(i);
+            String& line = lines.getReference (i);
 
             if (options.removeTabs && line.containsChar ('\t'))
             {
@@ -380,6 +372,7 @@ namespace
                 for (;;)
                 {
                     const int tabPos = line.indexOfChar ('\t');
+
                     if (tabPos < 0)
                         break;
 
@@ -761,7 +754,7 @@ namespace
     {
         hideDockIcon();
 
-        const String appName (JUCEApplication::getInstance()->getApplicationName());
+        auto appName = JUCEApplication::getInstance()->getApplicationName();
 
         std::cout << appName << std::endl
                   << std::endl

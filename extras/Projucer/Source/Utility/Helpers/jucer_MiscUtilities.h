@@ -28,6 +28,11 @@
 
 
 //==============================================================================
+const char* getLineEnding();
+String joinLinesIntoSourceFile (StringArray& lines);
+
+String trimCommentCharsFromStartOfLine (const String& line);
+
 String hexString8Digits (int value);
 
 String createAlphaNumericUID();
@@ -52,6 +57,8 @@ void addPlistDictionaryKeyBool (XmlElement* xml, const String& key, bool value);
 void addPlistDictionaryKeyInt (XmlElement* xml, const String& key, int value);
 
 bool fileNeedsCppSyntaxHighlighting (const File& file);
+
+bool isJUCEModule (const String& moduleID) noexcept;
 
 //==============================================================================
 int indexOfLineStartingWith (const StringArray& lines, const String& text, int startIndex);

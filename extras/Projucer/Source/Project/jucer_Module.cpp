@@ -30,11 +30,6 @@
 #include "../ProjectSaving/jucer_ProjectExport_Xcode.h"
 
 //==============================================================================
-static String trimCommentCharsFromStartOfLine (const String& line)
-{
-    return line.trimStart().trimCharactersAtStart ("*/").trimStart();
-}
-
 static var parseModuleDesc (const StringArray& lines)
 {
     DynamicObject* o = new DynamicObject();
@@ -735,7 +730,7 @@ File EnabledModuleList::getModuleFolder (const String& moduleID)
 {
     if (shouldUseGlobalPath (moduleID))
     {
-        if (isJuceModule (moduleID))
+        if (isJUCEModule (moduleID))
             return getModuleFolderFromPathIfItExists (getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString(), moduleID, project);
 
         return findUserModuleFolder (getAppSettings().getStoredPath (Ids::defaultUserModulePath).toString(), moduleID);
@@ -940,36 +935,6 @@ File EnabledModuleList::findDefaultModulesFolder (Project& project)
     return File::getCurrentWorkingDirectory();
 }
 
-bool EnabledModuleList::isJuceModule (const String& moduleID)
-{
-    static StringArray juceModuleIds =
-    {
-        "juce_analytics",
-        "juce_audio_basics",
-        "juce_audio_devices",
-        "juce_audio_formats",
-        "juce_audio_plugin_client",
-        "juce_audio_processors",
-        "juce_audio_utils",
-        "juce_blocks_basics",
-        "juce_box2d",
-        "juce_core",
-        "juce_cryptography",
-        "juce_data_structures",
-        "juce_dsp",
-        "juce_events",
-        "juce_graphics",
-        "juce_gui_basics",
-        "juce_gui_extra",
-        "juce_opengl",
-        "juce_osc",
-        "juce_product_unlocking",
-        "juce_video"
-    };
-
-    return juceModuleIds.contains (moduleID);
-}
-
 void EnabledModuleList::addModuleFromUserSelectedFile()
 {
     static auto lastLocation = findDefaultModulesFolder (project);
@@ -1030,12 +995,12 @@ void EnabledModuleList::addModuleOfferingToCopy (const File& f, bool isFromUserS
                                                                                         : areMostModulesUsingGlobalPath());
 }
 
-bool isJuceFolder (const File& f)
+bool isJUCEFolder (const File& f)
 {
-    return isJuceModulesFolder (f.getChildFile ("modules"));
+    return isJUCEModulesFolder (f.getChildFile ("modules"));
 }
 
-bool isJuceModulesFolder (const File& f)
+bool isJUCEModulesFolder (const File& f)
 {
     return f.isDirectory() && f.getChildFile ("juce_core").isDirectory();
 }

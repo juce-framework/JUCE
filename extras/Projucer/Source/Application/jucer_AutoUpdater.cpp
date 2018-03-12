@@ -744,7 +744,7 @@ void LatestVersionChecker::askUserForLocationToDownload (URL& newVersionToDownlo
 {
     File targetFolder (EnabledModuleList::findGlobalModulesFolder());
 
-    if (isJuceModulesFolder (targetFolder))
+    if (isJUCEModulesFolder (targetFolder))
         targetFolder = targetFolder.getParentDirectory();
 
     FileChooser chooser (TRANS("Please select the location into which you'd like to install the new version"),
@@ -754,7 +754,7 @@ void LatestVersionChecker::askUserForLocationToDownload (URL& newVersionToDownlo
     {
         targetFolder = chooser.getResult();
 
-        if (isJuceModulesFolder (targetFolder))
+        if (isJUCEModulesFolder (targetFolder))
             targetFolder = targetFolder.getParentDirectory();
 
         if (targetFolder.getChildFile ("JUCE").isDirectory())
@@ -772,7 +772,7 @@ void LatestVersionChecker::askUserForLocationToDownload (URL& newVersionToDownlo
             return;
         }
 
-        if (isJuceFolder (targetFolder))
+        if (isJUCEFolder (targetFolder))
         {
             if (! AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
                                                 TRANS("Overwrite existing JUCE folder?"),
