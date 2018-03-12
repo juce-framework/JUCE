@@ -8,23 +8,23 @@
 
 #pragma once
 
-INCLUDE_JUCE
+%%include_juce%%
 
 //==============================================================================
 /*
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class CONTENTCOMPCLASS   : public Component
+class %%content_component_class%%   : public Component
 {
 public:
     //==============================================================================
-    CONTENTCOMPCLASS()
+    %%content_component_class%%()
     {
         setSize (600, 400);
     }
 
-    ~CONTENTCOMPCLASS()
+    ~%%content_component_class%%()
     {
     }
 
@@ -41,7 +41,7 @@ public:
 
     void resized() override
     {
-        // This is called when the CONTENTCOMPCLASS is resized.
+        // This is called when the %%content_component_class%% is resized.
         // If you add any child components, this is where you should
         // update their positions.
     }
@@ -52,5 +52,5 @@ private:
     // Your private member variables go here...
 
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CONTENTCOMPCLASS)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)
 };

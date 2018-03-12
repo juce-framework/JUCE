@@ -8,19 +8,18 @@
   ==============================================================================
 */
 
-APPHEADERS
-
+%%app_headers%%
 
 //==============================================================================
-class APPCLASSNAME  : public JUCEApplication
+class %%app_class_name%%  : public JUCEApplication
 {
 public:
     //==============================================================================
-    APPCLASSNAME() {}
+    %%app_class_name%%() {}
 
     const String getApplicationName() override       { return ProjectInfo::projectName; }
     const String getApplicationVersion() override    { return ProjectInfo::versionString; }
-    bool moreThanOneInstanceAllowed() override       { return ALLOWMORETHANONEINSTANCE; }
+    bool moreThanOneInstanceAllowed() override       { return %%allow_more_than_one_instance%%; }
 
     //==============================================================================
     void initialise (const String& commandLine) override
@@ -51,4 +50,4 @@ public:
 
 //==============================================================================
 // This macro generates the main() routine that launches the app.
-START_JUCE_APPLICATION (APPCLASSNAME)
+START_JUCE_APPLICATION (%%app_class_name%%)

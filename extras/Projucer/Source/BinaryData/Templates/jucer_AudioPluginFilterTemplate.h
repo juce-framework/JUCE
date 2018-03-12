@@ -10,18 +10,17 @@
 
 #pragma once
 
-APPHEADERS
-
+%%app_headers%%
 
 //==============================================================================
 /**
 */
-class FILTERCLASSNAME  : public AudioProcessor
+class %%filter_class_name%%  : public AudioProcessor
 {
 public:
     //==============================================================================
-    FILTERCLASSNAME();
-    ~FILTERCLASSNAME();
+    %%filter_class_name%%();
+    ~%%filter_class_name%%();
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -58,5 +57,5 @@ public:
 
 private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FILTERCLASSNAME)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%filter_class_name%%)
 };

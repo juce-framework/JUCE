@@ -327,29 +327,29 @@ void GeneratedCode::applyToCode (String& code,
     replaceTemplate (code, "version", JUCEApplicationBase::getInstance()->getApplicationVersion());
     replaceTemplate (code, "creationTime", Time::getCurrentTime().toString (true, true, true));
 
-    replaceTemplate (code, "className", className);
-    replaceTemplate (code, "constructorParams", constructorParams);
+    replaceTemplate (code, "class_name", className);
+    replaceTemplate (code, "constructor_params", constructorParams);
     replaceTemplate (code, "initialisers", getInitialiserList());
 
-    replaceTemplate (code, "classDeclaration", getClassDeclaration());
-    replaceTemplate (code, "privateMemberDeclarations", privateMemberDeclarations);
-    replaceTemplate (code, "publicMemberDeclarations", getCallbackDeclarations() + newLine + publicMemberDeclarations);
+    replaceTemplate (code, "class_declaration", getClassDeclaration());
+    replaceTemplate (code, "private_member_declarations", privateMemberDeclarations);
+    replaceTemplate (code, "public_member_declarations", getCallbackDeclarations() + newLine + publicMemberDeclarations);
 
-    replaceTemplate (code, "methodDefinitions", getCallbackDefinitions());
+    replaceTemplate (code, "method_definitions", getCallbackDefinitions());
 
     File juceHeaderFile = project != nullptr ? project->getAppIncludeFile()
                                              : targetFile.getSiblingFile ("JuceHeader.h");
 
-    replaceTemplate (code, "includeJUCEHeader", CodeHelpers::createIncludeStatement (juceHeaderFile, targetFile));
+    replaceTemplate (code, "include_juce_header", CodeHelpers::createIncludeStatement (juceHeaderFile, targetFile));
 
-    replaceTemplate (code, "includeFilesH", getIncludeFileCode (includeFilesH, targetFile));
-    replaceTemplate (code, "includeFilesCPP", getIncludeFileCode (includeFilesCPP, targetFile));
+    replaceTemplate (code, "include_files_h", getIncludeFileCode (includeFilesH, targetFile));
+    replaceTemplate (code, "include_files_cpp", getIncludeFileCode (includeFilesCPP, targetFile));
 
     replaceTemplate (code, "constructor", constructorCode);
     replaceTemplate (code, "destructor", destructorCode);
 
     replaceTemplate (code, "metadata", jucerMetadata);
-    replaceTemplate (code, "staticMemberDefinitions", staticMemberDefinitions);
+    replaceTemplate (code, "static_member_definitions", staticMemberDefinitions);
 
     copyAcrossUserSections (code, oldFileWithUserData);
 }

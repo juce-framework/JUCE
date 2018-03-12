@@ -83,9 +83,8 @@ struct GUIAppWizard   : public NewProjectWizard
 
             String windowH = project.getFileTemplate (createCppFile ? "jucer_ContentCompTemplate_h"
                                                                     : "jucer_ContentCompSimpleTemplate_h")
-                                .replace ("INCLUDE_JUCE", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompH), false)
-                                .replace ("CONTENTCOMPCLASS", contentCompName, false)
-                                .replace ("HEADERGUARD", CodeHelpers::makeHeaderGuardName (contentCompH), false);
+                                .replace ("%%include_juce%%", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompH), false)
+                                .replace ("%%content_component_class%%", contentCompName, false);
 
             if (! FileHelpers::overwriteFileWithNewDataIfDifferent (contentCompH, windowH))
                 failedFiles.add (contentCompH.getFullPathName());
@@ -95,9 +94,9 @@ struct GUIAppWizard   : public NewProjectWizard
             if (createCppFile)
             {
                 String windowCpp = project.getFileTemplate ("jucer_ContentCompTemplate_cpp")
-                                    .replace ("INCLUDE_JUCE", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompCpp), false)
-                                    .replace ("INCLUDE_CORRESPONDING_HEADER", CodeHelpers::createIncludeStatement (contentCompH, contentCompCpp), false)
-                                    .replace ("CONTENTCOMPCLASS", contentCompName, false);
+                                    .replace ("%%include_juce%%", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), contentCompCpp), false)
+                                    .replace ("%%include_corresponding_header%%", CodeHelpers::createIncludeStatement (contentCompH, contentCompCpp), false)
+                                    .replace ("%%content_component_class%%", contentCompName, false);
 
                 if (! FileHelpers::overwriteFileWithNewDataIfDifferent (contentCompCpp, windowCpp))
                     failedFiles.add (contentCompCpp.getFullPathName());
@@ -110,11 +109,10 @@ struct GUIAppWizard   : public NewProjectWizard
         {
             String mainCpp = project.getFileTemplate (createWindow ? "jucer_MainTemplate_Window_cpp"
                                                                    : "jucer_MainTemplate_NoWindow_cpp")
-                                .replace ("APPHEADERS", appHeaders, false)
-                                .replace ("APPCLASSNAME", CodeHelpers::makeValidIdentifier (appTitle + "Application", false, true, false), false)
-                                .replace ("APPNAME", CppTokeniserFunctions::addEscapeChars (appTitle), false)
-                                .replace ("CONTENTCOMPCLASS", contentCompName, false)
-                                .replace ("ALLOWMORETHANONEINSTANCE", "true", false);
+                                .replace ("%%app_headers%%", appHeaders, false)
+                                .replace ("%%app_class_name%%", CodeHelpers::makeValidIdentifier (appTitle + "Application", false, true, false), false)
+                                .replace ("%%content_component_class%%", contentCompName, false)
+                                .replace ("%%allow_more_than_one_instance%%", "true", false);
 
             if (! FileHelpers::overwriteFileWithNewDataIfDifferent (mainCppFile, mainCpp))
                 failedFiles.add (mainCppFile.getFullPathName());
