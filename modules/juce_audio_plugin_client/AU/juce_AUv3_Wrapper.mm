@@ -1312,6 +1312,8 @@ private:
     //==============================================================================
     void processEvents (const AURenderEvent *__nullable realtimeEventListHead, int numParams, AUEventSampleTime startTime)
     {
+        ignoreUnused (numParams);
+
         for (const AURenderEvent* event = realtimeEventListHead; event != nullptr; event = event->head.next)
         {
             switch (event->head.eventType)
