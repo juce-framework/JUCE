@@ -465,8 +465,11 @@ struct AudioProcessorValueTreeState::SliderAttachment::Pimpl  : private Attached
 
         if (auto* param = dynamic_cast<AudioProcessorValueTreeState::Parameter*> (state.getParameter (paramID)))
         {
-            slider.valueFromTextFunction = [param] (const String& text) { return (double) param->textToValueFunction (text); };
-            slider.textFromValueFunction = [param] (double value)       { return param->valueToTextFunction ((float) value); };
+            if (param->textToValueFunction != nullptr)
+                slider.valueFromTextFunction = [param] (const String& text) { return (double) param->textToValueFunction (text); };
+
+            if (param->valueToTextFunction != nullptr)
+                slider.textFromValueFunction = [param] (double value)       { return param->valueToTextFunction ((float) value); };
 
             slider.setDoubleClickReturnValue (true, range.convertFrom0to1 (param->getDefaultValue()));
         }
