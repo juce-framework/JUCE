@@ -1670,7 +1670,12 @@ public:
                     JUCE_IOS_MAC_VIEW* view = [[[JUCE_IOS_MAC_VIEW alloc] initWithFrame: convertToCGRect (editor->getBounds())] autorelease];
                     [myself setView: view];
 
+                   #if JUCE_IOS
                     editor->setVisible (false);
+                   #else
+                    editor->setVisible (true);
+                   #endif
+
                     editor->addToDesktop (0, view);
                 }
             }
@@ -1807,8 +1812,10 @@ private:
 - (CGSize) preferredContentSize  { return cpp->getPreferredContentSize(); }
 - (void) viewDidLayoutSubviews   { cpp->viewDidLayoutSubviews(); }
 - (void) didReceiveMemoryWarning { cpp->didReceiveMemoryWarning(); }
+#if JUCE_IOS
 - (void) viewDidAppear: (BOOL) animated { cpp->viewDidAppear (animated); [super viewDidAppear:animated]; }
 - (void) viewDidDisappear: (BOOL) animated { cpp->viewDidDisappear (animated); [super viewDidDisappear:animated]; }
+#endif
 @end
 
 //==============================================================================
