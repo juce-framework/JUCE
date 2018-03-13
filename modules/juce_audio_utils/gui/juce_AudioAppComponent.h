@@ -126,6 +126,7 @@ private:
     //=============================================================================
     AudioDeviceManager defaultDeviceManager;
     AudioSourcePlayer audioSourcePlayer;
+    bool usingCustomDeviceManager;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioAppComponent)
 };
