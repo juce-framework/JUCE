@@ -66,8 +66,9 @@ private:
         {
             addAndMakeVisible (textbox);
             textbox.getTextValue().referTo (value);
-            textbox.onReturnKey = [this] { updateEditorColour (textbox); };
-            textbox.onFocusLost = [this] { updateEditorColour (textbox); };
+            textbox.onReturnKey  = [this] { updateEditorColour (textbox); };
+            textbox.onFocusLost  = [this] { updateEditorColour (textbox); };
+            textbox.onTextChange = [this] { updateEditorColour (textbox); };
 
             addAndMakeVisible (button);
             button.onClick = [this] { browse(); };
@@ -163,10 +164,10 @@ private:
                 if (pathToCheck.contains ("${user.home}"))
                     pathToCheck = pathToCheck.replace ("${user.home}", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
 
-              #if JUCE_WINDOWS
+               #if JUCE_WINDOWS
                 if (pathToCheck.startsWith ("~"))
                     pathToCheck = pathToCheck.replace ("~", File::getSpecialLocation (File::userHomeDirectory).getFullPathName());
-              #endif
+               #endif
 
                 const auto currentFile = root.getChildFile (pathToCheck);
 
