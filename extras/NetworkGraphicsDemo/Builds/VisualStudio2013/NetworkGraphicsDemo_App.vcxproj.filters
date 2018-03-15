@@ -1012,6 +1012,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\streams\juce_SubregionStream.cpp">
       <Filter>JUCE Modules\juce_core\streams</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\streams\juce_URLInputSource.cpp">
+      <Filter>JUCE Modules\juce_core\streams</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\system\juce_SystemStats.cpp">
       <Filter>JUCE Modules\juce_core\system</Filter>
     </ClCompile>
@@ -2989,6 +2992,9 @@
       <Filter>JUCE Modules\juce_core\streams</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\streams\juce_SubregionStream.h">
+      <Filter>JUCE Modules\juce_core\streams</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\streams\juce_URLInputSource.h">
       <Filter>JUCE Modules\juce_core\streams</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\system\juce_CompilerSupport.h">

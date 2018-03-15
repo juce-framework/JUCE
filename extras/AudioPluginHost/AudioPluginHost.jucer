@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="NTe0XB0ij" name="AudioPluginHost" projectType="guiapp" version="1.0.0"
               juceFolder="../../../juce" vstFolderMac="~/SDKs/vstsdk2.4" vstFolderPC="c:\SDKs\vstsdk2.4"
-              bundleIdentifier="com.roli.pluginhost" jucerVersion="5.2.1" companyName="ROLI Ltd."
+              bundleIdentifier="com.roli.pluginhost" jucerVersion="5.3.0" companyName="ROLI Ltd."
               displaySplashScreen="0" reportAppUsage="0" companyCopyright="ROLI Ltd.">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="" rtasFolder="~/SDKs/PT_80_SDK"

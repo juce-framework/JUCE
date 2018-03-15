@@ -514,6 +514,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/streams/juce_OutputStream.h"
     "../../../../../modules/juce_core/streams/juce_SubregionStream.cpp"
     "../../../../../modules/juce_core/streams/juce_SubregionStream.h"
+    "../../../../../modules/juce_core/streams/juce_URLInputSource.cpp"
+    "../../../../../modules/juce_core/streams/juce_URLInputSource.h"
     "../../../../../modules/juce_core/system/juce_CompilerSupport.h"
     "../../../../../modules/juce_core/system/juce_PlatformDefs.h"
     "../../../../../modules/juce_core/system/juce_StandardHeader.h"
@@ -1675,6 +1677,8 @@ set_source_files_properties("../../../../../modules/juce_core/streams/juce_Outpu
 set_source_files_properties("../../../../../modules/juce_core/streams/juce_OutputStream.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/streams/juce_SubregionStream.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/streams/juce_SubregionStream.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_core/streams/juce_URLInputSource.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_core/streams/juce_URLInputSource.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/system/juce_CompilerSupport.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/system/juce_PlatformDefs.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/system/juce_StandardHeader.h" PROPERTIES HEADER_FILE_ONLY TRUE)
