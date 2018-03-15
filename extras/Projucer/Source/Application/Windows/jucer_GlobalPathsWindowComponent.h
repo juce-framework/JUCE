@@ -28,7 +28,8 @@
 
 
 //==============================================================================
-class GlobalPathsWindowComponent    : public Component
+class GlobalPathsWindowComponent    : public Component,
+                                      private Timer
 {
 public:
     GlobalPathsWindowComponent()
@@ -66,6 +67,12 @@ public:
         g.fillAll (findColour (backgroundColourId));
     }
 
+    void paintOverChildren (Graphics& g) override
+    {
+        g.setColour (findColour (defaultHighlightColourId).withAlpha (flashAlpha));
+        g.fillRect (boundsToHighlight);
+    }
+
     void resized() override
     {
         auto b = getLocalBounds().reduced (10);
@@ -77,6 +84,8 @@ public:
         info.setBounds (osSelector.getBounds().withWidth (osSelector.getHeight()).translated ((osSelector.getWidth() + 5), 0).reduced (2));
 
         int labelIndex = 0;
+        bool isFirst = true;
+
         for (auto* pathComp : pathPropertyComponents)
         {
             if (pathComp == nullptr)
@@ -87,9 +96,28 @@ public:
             }
             else
             {
+                if (isFirst)
+                    b.removeFromTop (20);
+
                 pathComp->setBounds (b.removeFromTop (pathComp->getPreferredHeight()));
                 b.removeFromTop (5);
             }
+
+            isFirst = false;
+        }
+    }
+
+    void highlightJUCEPath()
+    {
+        if (! isTimerRunning() && isSelectedOSThisOS())
+        {
+            if (auto* jucePathComp = pathPropertyComponents.getFirst())
+                boundsToHighlight = jucePathComp->getBounds();
+
+            flashAlpha = 0.0f;
+            hasFlashed = false;
+
+            startTimer (25);
         }
     }
 
@@ -99,6 +127,30 @@ private:
 
     ComboBox osSelector;
     InfoButton info;
+
+    Rectangle<int> boundsToHighlight;
+    float flashAlpha = 0.0f;
+    bool hasFlashed = false;
+
+    //==============================================================================
+    void timerCallback() override
+    {
+        flashAlpha += (hasFlashed ? -0.05f : 0.05f);
+
+        if (flashAlpha > 0.75f)
+        {
+            hasFlashed = true;
+        }
+        else if (flashAlpha < 0.0f)
+        {
+            flashAlpha = 0.0f;
+            boundsToHighlight = {};
+
+            stopTimer();
+        }
+
+        repaint();
+    }
 
     //==============================================================================
     bool isSelectedOSThisOS()    { return TargetOS::getThisOS() == getSelectedOS(); }
@@ -126,6 +178,9 @@ private:
 
         if (isSelectedOSThisOS())
         {
+            addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::jucePath),
+                                                                                          "Path to JUCE", true)));
+
             pathPropertyComponents.add (nullptr);
 
             addAndMakeVisible (pathPropertyComponents.add (new FilePathPropertyComponent (settings.getStoredPath (Ids::defaultJuceModulePath),

@@ -256,15 +256,15 @@ void PIPGenerator::createFiles (ValueTree& jucerTree)
 
         if (relativeFiles.size() > 0)
         {
-            ValueTree resources (Ids::GROUP);
-            resources.setProperty (Ids::ID, createAlphaNumericUID(), nullptr);
-            resources.setProperty (Ids::name, "Resources", nullptr);
+            ValueTree assets (Ids::GROUP);
+            assets.setProperty (Ids::ID, createAlphaNumericUID(), nullptr);
+            assets.setProperty (Ids::name, "Assets", nullptr);
 
             for (auto& f : relativeFiles)
                 if (copyRelativeFileToLocalSourceDirectory (f))
-                    addFileToTree (resources, f.getFileName(), f.getFileExtension() == ".cpp", "Source/" + f.getFileName());
+                    addFileToTree (assets, f.getFileName(), f.getFileExtension() == ".cpp", "Source/" + f.getFileName());
 
-            mainGroup.addChild (resources, -1, nullptr);
+            mainGroup.addChild (assets, -1, nullptr);
         }
     }
 
@@ -400,7 +400,7 @@ Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
         if (isValidJUCEExamplesDirectory (examplesDirectory))
         {
              defines += ((defines.isEmpty() ? "" : " ") + String ("PIP_JUCE_EXAMPLES_DIRECTORY=")
-                         + examplesDirectory.getFullPathName());
+                         + Base64::toBase64 (examplesDirectory.getFullPathName()));
         }
         else
         {

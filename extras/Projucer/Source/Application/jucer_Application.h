@@ -108,7 +108,7 @@ public:
     void showApplicationUsageDataAgreementPopup();
     void dismissApplicationUsageDataAgreementPopup();
 
-    void showPathsWindow();
+    void showPathsWindow (bool highlightJUCEPath = false);
     void showEditorColourSchemeWindow();
 
     void launchForumBrowser();
@@ -193,6 +193,9 @@ private:
 
     void resetAnalytics() noexcept;
     void setupAnalytics();
+
+    void showSetJUCEPathAlert();
+    ScopedPointer<AlertWindow> pathAlert;
 
     //==============================================================================
     void setColourScheme (int index, bool saveSetting);

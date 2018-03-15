@@ -65,6 +65,7 @@ namespace Ids
     DECLARE_ID (osxFallback);
     DECLARE_ID (windowsFallback);
     DECLARE_ID (linuxFallback);
+    DECLARE_ID (jucePath);
     DECLARE_ID (defaultJuceModulePath);
     DECLARE_ID (defaultUserModulePath);
     DECLARE_ID (vst3Folder);

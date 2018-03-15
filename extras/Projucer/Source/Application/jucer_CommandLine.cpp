@@ -717,10 +717,6 @@ namespace
        #endif
 
         auto settingsFile = userAppData.getChildFile ("Projucer").getChildFile ("Projucer.settings");
-
-        if (! settingsFile.existsAsFile())
-            throw CommandLineError ("Expected settings file at " + settingsFile.getFullPathName() + " not found!");
-
         ScopedPointer<XmlElement> xml (XmlDocument::parse (settingsFile));
         auto settingsTree = ValueTree::fromXml (*xml);
 
@@ -743,15 +739,14 @@ namespace
         if (! childToSet.isValid())
             throw CommandLineError ("Failed to set the requested setting!");
 
-        childToSet.setProperty (args[2], args[3], nullptr);
+        childToSet.setProperty (args[2], File::getCurrentWorkingDirectory().getChildFile (args[3]).getFullPathName(), nullptr);
 
         settingsFile.replaceWithText (settingsTree.toXmlString());
     }
 
     static void createProjectFromPIP (const StringArray& args)
     {
-        if (args.size() < 3)
-            throw CommandLineError ("Not enough arguments. Usage: --create-project-from-pip path/to/PIP path/to/output.");
+        checkArgumentCount (args, 3);
 
         auto pipFile = File::getCurrentWorkingDirectory().getChildFile (args[1].unquoted());
         if (! pipFile.existsAsFile())

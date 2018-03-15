@@ -405,7 +405,12 @@ bool isPIPFile (const File& file) noexcept
 
 File getJUCEExamplesDirectoryPathFromGlobal() noexcept
 {
-    return File (getAppSettings().getStoredPath (Ids::defaultJuceModulePath).toString()).getSiblingFile ("examples");
+    auto globalPath = getAppSettings().getStoredPath (Ids::jucePath).toString();
+
+    if (globalPath.isNotEmpty())
+        return File (getAppSettings().getStoredPath (Ids::jucePath).toString()).getChildFile ("examples");
+
+    return {};
 }
 
 bool isValidJUCEExamplesDirectory (const File& directory) noexcept
@@ -413,5 +418,5 @@ bool isValidJUCEExamplesDirectory (const File& directory) noexcept
     if (! directory.exists() || ! directory.isDirectory() || ! directory.containsSubDirectories())
         return false;
 
-    return directory.getChildFile ("Resources").getChildFile ("juce_icon.png").existsAsFile();
+    return directory.getChildFile ("Assets").getChildFile ("juce_icon.png").existsAsFile();
 }

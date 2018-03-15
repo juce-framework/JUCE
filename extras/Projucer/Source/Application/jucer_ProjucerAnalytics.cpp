@@ -37,6 +37,9 @@ ProjucerAnalyticsDestination::ProjucerAnalyticsDestination()
     }
 
     auto dataDir = File::getSpecialLocation (File::userApplicationDataDirectory)
+                        #if JUCE_MAC
+                        .getChildFile ("Application Support")
+                        #endif
                         .getChildFile ("Projucer")
                         .getChildFile ("Analytics");
 

@@ -491,13 +491,39 @@ void Project::moveTemporaryDirectory (const File& newParentDirectory)
     auto newDirectory = newParentDirectory.getChildFile (tempDirectory.getFileName());
     auto oldJucerFileName = getFile().getFileName();
 
+    saveProjectRootToFile();
+
     tempDirectory.copyDirectoryTo (newDirectory);
     tempDirectory.deleteRecursively();
     tempDirectory = File();
 
     // reload project from new location
     if (auto* window = ProjucerApplication::getApp().mainWindowList.getMainWindowForFile (getFile()))
-        window->moveProject (newDirectory.getChildFile (oldJucerFileName));
+    {
+        Component::SafePointer<MainWindow> safeWindow (window);
+
+        MessageManager::callAsync ([safeWindow, newDirectory, oldJucerFileName]
+        {
+            if (safeWindow != nullptr)
+                safeWindow.getComponent()->moveProject (newDirectory.getChildFile (oldJucerFileName));
+        });
+    }
+}
+
+bool Project::saveProjectRootToFile()
+{
+    ScopedPointer<XmlElement> xml (projectRoot.createXml());
+
+    if (xml == nullptr)
+    {
+        jassertfalse;
+        return false;
+    }
+
+    MemoryOutputStream mo;
+    xml->writeToStream (mo, {});
+
+    return FileHelpers::overwriteFileWithNewDataIfDifferent (getFile(), mo);
 }
 
 //==============================================================================

@@ -177,6 +177,9 @@ void ProjucerApplication::handleAsyncUpdate()
         setAnalyticsEnabled (licenseController->getState().applicationUsageDataState == LicenseState::ApplicationUsageData::enabled);
         Analytics::getInstance()->logEvent ("Startup", {}, ProjucerAnalyticsEvent::appEvent);
     }
+
+    if (! isRunningCommandLine && settings->shouldAskUserToSetJUCEPath())
+        showSetJUCEPathAlert();
 }
 
 void ProjucerApplication::initialiseWindows (const String& commandLine)
@@ -345,7 +348,8 @@ enum
     activeDocumentsBaseID = 400,
     colourSchemeBaseID = 1000,
     codeEditorColourSchemeBaseID = 1500,
-    examplesBaseID = 2000,
+    showPathsID = 1999,
+    examplesBaseID = 2000
 };
 
 MenuBarModel* ProjucerApplication::getMenuModel()
@@ -592,7 +596,7 @@ void ProjucerApplication::createExamplesPopupMenu (PopupMenu& menu) noexcept
 
     if (numExamples == 0)
     {
-        menu.addCommandItem (commandManager, CommandIDs::showGlobalPathsWindow, "Set path to JUCE...");
+        menu.addItem (showPathsID, "Set path to JUCE...");
     }
     else
     {
@@ -615,7 +619,7 @@ Array<File> ProjucerApplication::getSortedExampleDirectories() const noexcept
     {
         auto exampleDirectory = iter.getFile();
 
-        if (exampleDirectory.getFileName() != "DemoRunner" && exampleDirectory.getFileName() != "Resources")
+        if (exampleDirectory.getFileName() != "DemoRunner" && exampleDirectory.getFileName() != "Assets")
             exampleDirectories.add (exampleDirectory);
     }
 
@@ -860,6 +864,10 @@ void ProjucerApplication::handleMainMenuCommand (int menuItemID)
     {
         showEditorColourSchemeWindow();
     }
+    else if (menuItemID == showPathsID)
+    {
+        showPathsWindow (true);
+    }
     else if (menuItemID >= examplesBaseID && menuItemID < (examplesBaseID + numExamples))
     {
         findAndLaunchExample (menuItemID - examplesBaseID);
@@ -1028,7 +1036,7 @@ bool ProjucerApplication::perform (const InvocationInfo& info)
         case CommandIDs::clearRecentFiles:          clearRecentFiles(); break;
         case CommandIDs::showUTF8Tool:              showUTF8ToolWindow(); break;
         case CommandIDs::showSVGPathTool:           showSVGPathDataToolWindow(); break;
-        case CommandIDs::showGlobalPathsWindow:     showPathsWindow(); break;
+        case CommandIDs::showGlobalPathsWindow:     showPathsWindow (false); break;
         case CommandIDs::showAboutWindow:           showAboutWindow(); break;
         case CommandIDs::showAppUsageWindow:        showApplicationUsageDataAgreementPopup(); break;
         case CommandIDs::showForum:                 launchForumBrowser(); break;
@@ -1166,7 +1174,7 @@ void ProjucerApplication::dismissApplicationUsageDataAgreementPopup()
         applicationUsageDataWindow.reset();
 }
 
-void ProjucerApplication::showPathsWindow()
+void ProjucerApplication::showPathsWindow (bool highlightJUCEPath)
 {
     if (pathsWindow != nullptr)
         pathsWindow->toFront (true);
@@ -1174,7 +1182,11 @@ void ProjucerApplication::showPathsWindow()
         new FloatingToolWindow ("Global Paths",
                                 "pathsWindowPos",
                                 new GlobalPathsWindowComponent(), pathsWindow, false,
-                                600, 550, 600, 550, 600, 550);
+                                600, 650, 600, 650, 600, 650);
+
+    if (highlightJUCEPath)
+        if (auto* pathsComp = dynamic_cast<GlobalPathsWindowComponent*> (pathsWindow->getChildComponent (0)))
+            pathsComp->highlightJUCEPath();
 }
 
 void ProjucerApplication::showEditorColourSchemeWindow()
@@ -1343,6 +1355,27 @@ void ProjucerApplication::setupAnalytics()
     userData.set ("cd5", SystemStats::getOperatingSystemName());
 
     Analytics::getInstance()->setUserProperties (userData);
+}
+
+void ProjucerApplication::showSetJUCEPathAlert()
+{
+    auto& lf = Desktop::getInstance().getDefaultLookAndFeel();
+    pathAlert = lf.createAlertWindow ("Set JUCE Path", "Your global JUCE path is invalid. This path is used to access the JUCE examples and demo project - "
+                                      "would you like to set it now?",
+                                      "Set path", "Cancel", "Don't ask again",
+                                      AlertWindow::WarningIcon, 3,
+                                      mainWindowList.getFrontmostWindow (false));
+
+    pathAlert->enterModalState (true, ModalCallbackFunction::create ([this] (int retVal)
+                                                                    {
+                                                                        pathAlert.reset (nullptr);
+
+                                                                        if (retVal == 1)
+                                                                            showPathsWindow (true);
+                                                                        else if (retVal == 0)
+                                                                            settings->setDontAskAboutJUCEPathAgain();
+                                                                    }));
+
 }
 
 void ProjucerApplication::selectEditorColourSchemeWithName (const String& schemeName)

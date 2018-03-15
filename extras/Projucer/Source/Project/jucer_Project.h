@@ -367,6 +367,7 @@ private:
 
     void askUserWhereToSaveProject();
     void moveTemporaryDirectory (const File&);
+    bool saveProjectRootToFile();
 
     //==============================================================================
     bool hasSentGUIBuilderAnalyticsEvent = false;
