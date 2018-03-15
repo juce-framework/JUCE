@@ -344,6 +344,9 @@ public:
     void setOpenInIDEAfterSaving (bool open) noexcept    { openInIDEAfterSaving = open; }
     bool shouldOpenInIDEAfterSaving() const noexcept     { return openInIDEAfterSaving; }
 
+    //==============================================================================
+    bool shouldSendGUIBuilderAnalyticsEvent() noexcept;
+
 private:
     ValueTree projectRoot  { Ids::JUCERPROJECT };
 

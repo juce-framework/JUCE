@@ -72,6 +72,7 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/jucer_CommandLine_f35de107.o \
   $(JUCE_OBJDIR)/jucer_Main_f8488f5b.o \
   $(JUCE_OBJDIR)/jucer_MainWindow_1e163aeb.o \
+  $(JUCE_OBJDIR)/jucer_ProjucerAnalytics_5740f336.o \
   $(JUCE_OBJDIR)/jucer_DocumentEditorComponent_bc853a2f.o \
   $(JUCE_OBJDIR)/jucer_OpenDocumentManager_ba866622.o \
   $(JUCE_OBJDIR)/jucer_SourceCodeEditor_55965985.o \
@@ -121,6 +122,7 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/jucer_NewFileWizard_fac97f47.o \
   $(JUCE_OBJDIR)/jucer_NewProjectWizardClasses_891f6fa2.o \
   $(JUCE_OBJDIR)/BinaryData_ce4232d4.o \
+  $(JUCE_OBJDIR)/include_juce_analytics_f8e9fa94.o \
   $(JUCE_OBJDIR)/include_juce_core_f26d17db.o \
   $(JUCE_OBJDIR)/include_juce_cryptography_8cb807a8.o \
   $(JUCE_OBJDIR)/include_juce_data_structures_7471b1e3.o \
@@ -158,6 +160,11 @@ $(JUCE_OBJDIR)/jucer_Main_f8488f5b.o: ../../Source/Application/jucer_Main.cpp
 $(JUCE_OBJDIR)/jucer_MainWindow_1e163aeb.o: ../../Source/Application/jucer_MainWindow.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling jucer_MainWindow.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/jucer_ProjucerAnalytics_5740f336.o: ../../Source/Application/jucer_ProjucerAnalytics.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling jucer_ProjucerAnalytics.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/jucer_DocumentEditorComponent_bc853a2f.o: ../../Source/CodeEditor/jucer_DocumentEditorComponent.cpp
@@ -403,6 +410,11 @@ $(JUCE_OBJDIR)/jucer_NewProjectWizardClasses_891f6fa2.o: ../../Source/Wizards/ju
 $(JUCE_OBJDIR)/BinaryData_ce4232d4.o: ../../JuceLibraryCode/BinaryData.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling BinaryData.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/include_juce_analytics_f8e9fa94.o: ../../JuceLibraryCode/include_juce_analytics.cpp
+	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
+	@echo "Compiling include_juce_analytics.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/include_juce_core_f26d17db.o: ../../JuceLibraryCode/include_juce_core.cpp

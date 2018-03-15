@@ -585,6 +585,7 @@ public:
     void handlePopupMenuResult (int resultCode) override
     {
         auto& modules = project.getModules();
+        auto numModulesBefore = modules.getNumModules();
 
         if (resultCode == 1001)
         {
@@ -598,6 +599,14 @@ public:
                 modules.addModuleInteractive (getAvailableModulesInGlobalUserPath() [resultCode - 200]);
             else if (resultCode < 400)
                 modules.addModuleInteractive (getAvailableModulesInExporterPaths() [resultCode - 300]);
+        }
+
+        if (modules.getNumModules() == numModulesBefore + 1)
+        {
+            StringPairArray data;
+            data.set ("label",  modules.getModuleID (modules.getNumModules() - 1));
+
+            Analytics::getInstance()->logEvent ("Module Added", data, ProjucerAnalyticsEvent::projectEvent);
         }
     }
 

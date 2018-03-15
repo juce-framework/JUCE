@@ -171,6 +171,12 @@ void ProjucerApplication::handleAsyncUpdate()
    #endif
 
     versionChecker = new LatestVersionChecker();
+
+    if (licenseController != nullptr)
+    {
+        setAnalyticsEnabled (licenseController->getState().applicationUsageDataState == LicenseState::ApplicationUsageData::enabled);
+        Analytics::getInstance()->logEvent ("Startup", {}, ProjucerAnalyticsEvent::appEvent);
+    }
 }
 
 void ProjucerApplication::initialiseWindows (const String& commandLine)
@@ -232,6 +238,8 @@ void ProjucerApplication::shutdown()
         Logger::writeToLog ("Shutdown");
 
     deleteLogger();
+
+    Analytics::getInstance()->logEvent ("Shutdown", {}, ProjucerAnalyticsEvent::appEvent);
 }
 
 struct AsyncQuitRetrier  : private Timer
@@ -669,6 +677,11 @@ void ProjucerApplication::findAndLaunchExample (int selectedIndex)
     jassert (example != File());
 
     findWindowAndOpenPIP (example);
+
+    StringPairArray data;
+    data.set ("label", example.getFileNameWithoutExtension());
+
+    Analytics::getInstance()->logEvent ("Example Opened", data, ProjucerAnalyticsEvent::exampleEvent);
 }
 
 File ProjucerApplication::findDemoRunnerExecutable() const noexcept
@@ -765,6 +778,11 @@ void ProjucerApplication::launchDemoRunner()
             AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "Error", "There was an error opening the Demo Runner file.");
             succeeded = false;
         }
+
+        StringPairArray data;
+        data.set ("label", succeeded ? "Success" : "Failure");
+
+        Analytics::getInstance()->logEvent ("Launch DemoRunner", data, ProjucerAnalyticsEvent::exampleEvent);
     }
     else if (findDemoRunnerProject() != File())
     {
@@ -783,6 +801,11 @@ void ProjucerApplication::launchDemoRunner()
         demoRunnerAlert->enterModalState (true, ModalCallbackFunction::create ([this] (int retVal)
                                                 {
                                                     demoRunnerAlert.reset (nullptr);
+
+                                                    StringPairArray data;
+                                                    data.set ("label", retVal == 1 ? "Opened" : "Cancelled");
+
+                                                    Analytics::getInstance()->logEvent ("Open DemoRunner Project", data, ProjucerAnalyticsEvent::exampleEvent);
 
                                                     if (retVal == 1)
                                                     {
@@ -1284,6 +1307,42 @@ void ProjucerApplication::deleteTemporaryFiles() const noexcept
 
     if (tempDirectory.exists())
         tempDirectory.deleteRecursively();
+}
+
+void ProjucerApplication::setAnalyticsEnabled (bool enabled)
+{
+    resetAnalytics();
+
+    if (enabled)
+        setupAnalytics();
+}
+
+void ProjucerApplication::resetAnalytics() noexcept
+{
+    auto analyticsInstance = Analytics::getInstance();
+
+    analyticsInstance->setUserId ({});
+    analyticsInstance->setUserProperties ({});
+    analyticsInstance->getDestinations().clear();
+}
+
+void ProjucerApplication::setupAnalytics()
+{
+    Analytics::getInstance()->addDestination (new ProjucerAnalyticsDestination());
+
+    auto deviceString = SystemStats::getDeviceIdentifiers().joinIntoString (":");
+    auto deviceIdentifier = String::toHexString (deviceString.hashCode64());
+
+    Analytics::getInstance()->setUserId (deviceIdentifier);
+
+    StringPairArray userData;
+    userData.set ("cd1", getApplicationName());
+    userData.set ("cd2", getApplicationVersion());
+    userData.set ("cd3", SystemStats::getDeviceDescription());
+    userData.set ("cd4", deviceString);
+    userData.set ("cd5", SystemStats::getOperatingSystemName());
+
+    Analytics::getInstance()->setUserProperties (userData);
 }
 
 void ProjucerApplication::selectEditorColourSchemeWithName (const String& schemeName)

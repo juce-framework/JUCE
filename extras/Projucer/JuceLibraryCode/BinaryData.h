@@ -173,6 +173,9 @@ namespace BinaryData
     extern const char*   colourscheme_light_xml;
     const int            colourscheme_light_xmlSize = 1050;
 
+    extern const char*   nothingtoseehere_txt;
+    const int            nothingtoseehere_txtSize = 20;
+
     extern const char*   offlinepage_html;
     const int            offlinepage_htmlSize = 1155;
 
@@ -186,7 +189,7 @@ namespace BinaryData
     extern const char* namedResourceList[];
 
     // Number of elements in the namedResourceList array.
-    const int namedResourceListSize = 58;
+    const int namedResourceListSize = 59;
 
     // If you provide the name of one of the binary resource variables above, this function will
     // return the corresponding data and its size (or a null pointer if the name isn't found).

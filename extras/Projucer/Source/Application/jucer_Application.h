@@ -32,6 +32,7 @@
 #include "../CodeEditor/jucer_SourceCodeEditor.h"
 #include "../Utility/UI/jucer_ProjucerLookAndFeel.h"
 #include "../Licenses/jucer_LicenseController.h"
+#include "jucer_ProjucerAnalytics.h"
 
 struct ChildProcessCache;
 
@@ -130,6 +131,9 @@ public:
     static int getEditorColourSchemeForGUIColourScheme (const StringArray& schemes, int guiColourSchemeIndex);
 
     //==============================================================================
+    void setAnalyticsEnabled (bool);
+
+    //==============================================================================
     ProjucerLookAndFeel lookAndFeel;
 
     ScopedPointer<StoredSettings> settings;
@@ -186,6 +190,9 @@ private:
    #if JUCE_LINUX
     ChildProcess makeProcess;
    #endif
+
+    void resetAnalytics() noexcept;
+    void setupAnalytics();
 
     //==============================================================================
     void setColourScheme (int index, bool saveSetting);

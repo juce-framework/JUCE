@@ -501,6 +501,14 @@ void Project::moveTemporaryDirectory (const File& newParentDirectory)
 }
 
 //==============================================================================
+static void sendProjectSettingAnalyticsEvent (StringRef label)
+{
+    StringPairArray data;
+    data.set ("label", label);
+
+    Analytics::getInstance()->logEvent ("Project Setting",  data, ProjucerAnalyticsEvent::projectEvent);
+}
+
 void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
 {
     if (tree.getRoot() == tree)
@@ -508,6 +516,8 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
         if (property == Ids::projectType)
         {
             sendChangeMessage();
+
+            sendProjectSettingAnalyticsEvent ("Project Type = " + projectTypeValue.get().toString());
         }
         else if (property == Ids::name)
         {
@@ -516,6 +526,10 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
         else if (property == Ids::defines)
         {
             parsedPreprocessorDefs = parsePreprocessorDefs (preprocessorDefsValue.get());
+        }
+        else if (property == Ids::cppLanguageStandard)
+        {
+            sendProjectSettingAnalyticsEvent ("C++ Standard = " + cppStandardValue.get().toString());
         }
 
         changed();
@@ -1559,6 +1573,18 @@ String Project::getUniqueTargetFolderSuffixForExporter (const String& exporterNa
     }
 
     return "_" + String (num);
+}
+
+//==============================================================================
+bool Project::shouldSendGUIBuilderAnalyticsEvent() noexcept
+{
+    if (! hasSentGUIBuilderAnalyticsEvent)
+    {
+        hasSentGUIBuilderAnalyticsEvent = true;
+        return true;
+    }
+
+    return false;
 }
 
 //==============================================================================

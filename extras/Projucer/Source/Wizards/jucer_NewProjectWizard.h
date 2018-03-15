@@ -158,6 +158,11 @@ struct NewProjectWizard
             return nullptr;
         }
 
+        StringPairArray data;
+        data.set ("label", "Project Type = " + project->getProjectTypeString());
+
+        Analytics::getInstance()->logEvent ("Project Setting", data, ProjucerAnalyticsEvent::projectEvent);
+
         return project.release();
     }
 

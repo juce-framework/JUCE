@@ -28,6 +28,7 @@
 #include "jucer_Module.h"
 #include "../ProjectSaving/jucer_ProjectSaver.h"
 #include "../ProjectSaving/jucer_ProjectExport_Xcode.h"
+#include "../Application/jucer_ProjucerAnalytics.h"
 
 //==============================================================================
 static var parseModuleDesc (const StringArray& lines)
@@ -799,6 +800,11 @@ void EnabledModuleList::addModule (const File& moduleFolder, bool copyLocally, b
 
             for (Project::ExporterIterator exporter (project); exporter.next();)
                 exporter->getPathForModuleValue (moduleID) = path.toUnixStyle();
+
+            StringPairArray data;
+            data.set ("label", moduleID);
+
+            Analytics::getInstance()->logEvent ("Module Added", data, ProjucerAnalyticsEvent::projectEvent);
         }
     }
 }
