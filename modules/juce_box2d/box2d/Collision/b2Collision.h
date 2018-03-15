@@ -31,7 +31,7 @@ class b2CircleShape;
 class b2EdgeShape;
 class b2PolygonShape;
 
-const uint8 b2_nullFeature = UCHAR_MAX;
+const juce::uint8 b2_nullFeature = UCHAR_MAX;
 
 /// The features that intersect to form the contact point
 /// This must be 4 bytes or less.
@@ -43,17 +43,17 @@ struct b2ContactFeature
 		e_face = 1
 	};
 
-	uint8 indexA;		///< Feature index on shapeA
-	uint8 indexB;		///< Feature index on shapeB
-	uint8 typeA;		///< The feature type on shapeA
-	uint8 typeB;		///< The feature type on shapeB
+	juce::uint8 indexA;		///< Feature index on shapeA
+	juce::uint8 indexB;		///< Feature index on shapeB
+	juce::uint8 typeA;		///< The feature type on shapeA
+	juce::uint8 typeB;		///< The feature type on shapeB
 };
 
 /// Contact ids to facilitate warm starting.
 union b2ContactID
 {
 	b2ContactFeature cf;
-	uint32 key;					///< Used to quickly compare contact ids.
+	juce::uint32 key;					///< Used to quickly compare contact ids.
 };
 
 /// A manifold point is a contact point belonging to a contact
@@ -103,7 +103,7 @@ struct b2Manifold
 	b2Vec2 localNormal;								///< not use for Type::e_points
 	b2Vec2 localPoint;								///< usage depends on manifold type
 	Type type;
-	int32 pointCount;								///< the number of manifold points
+	juce::int32 pointCount;								///< the number of manifold points
 };
 
 /// This is used to compute the current state of a contact manifold.
@@ -240,12 +240,12 @@ void b2CollideEdgeAndPolygon(b2Manifold* manifold,
 							   const b2PolygonShape* circleB, const b2Transform& xfB);
 
 /// Clipping for contact manifolds.
-int32 b2ClipSegmentToLine(b2ClipVertex vOut[2], const b2ClipVertex vIn[2],
-							const b2Vec2& normal, float32 offset, int32 vertexIndexA);
+juce::int32 b2ClipSegmentToLine(b2ClipVertex vOut[2], const b2ClipVertex vIn[2],
+							    const b2Vec2& normal, float32 offset, juce::int32 vertexIndexA);
 
 /// Determine if two generic shapes overlap.
-bool b2TestOverlap(	const b2Shape* shapeA, int32 indexA,
-					const b2Shape* shapeB, int32 indexB,
+bool b2TestOverlap(	const b2Shape* shapeA, juce::int32 indexA,
+					const b2Shape* shapeB, juce::int32 indexB,
 					const b2Transform& xfA, const b2Transform& xfB);
 
 // ---------------- Inline Functions ------------------------------------------

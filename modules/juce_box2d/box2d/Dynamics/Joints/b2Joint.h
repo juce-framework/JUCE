@@ -171,7 +171,7 @@ protected:
 	b2Body* m_bodyA;
 	b2Body* m_bodyB;
 
-	int32 m_index;
+	juce::int32 m_index;
 
 	bool m_islandFlag;
 	bool m_collideConnected;

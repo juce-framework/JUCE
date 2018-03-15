@@ -92,8 +92,8 @@ public:
 	/// @param velocityIterations for the velocity constraint solver.
 	/// @param positionIterations for the position constraint solver.
 	void Step(	float32 timeStep,
-				int32 velocityIterations,
-				int32 positionIterations);
+				juce::int32 velocityIterations,
+				juce::int32 positionIterations);
 
 	/// Manually clear the force buffer on all bodies. By default, forces are cleared automatically
 	/// after each call to Step. The default behavior is modified by calling SetAutoClearForces.
@@ -158,22 +158,22 @@ public:
 	bool GetSubStepping() const { return m_subStepping; }
 
 	/// Get the number of broad-phase proxies.
-	int32 GetProxyCount() const;
+	juce::int32 GetProxyCount() const;
 
 	/// Get the number of bodies.
-	int32 GetBodyCount() const;
+	juce::int32 GetBodyCount() const;
 
 	/// Get the number of joints.
-	int32 GetJointCount() const;
+	juce::int32 GetJointCount() const;
 
 	/// Get the number of contacts (each may have 0 or more contact points).
-	int32 GetContactCount() const;
+	juce::int32 GetContactCount() const;
 
 	/// Get the height of the dynamic tree.
-	int32 GetTreeHeight() const;
+	juce::int32 GetTreeHeight() const;
 
 	/// Get the balance of the dynamic tree.
-	int32 GetTreeBalance() const;
+	juce::int32 GetTreeBalance() const;
 
 	/// Get the quality metric of the dynamic tree. The smaller the better.
 	/// The minimum is 1.
@@ -228,15 +228,15 @@ private:
 	b2BlockAllocator m_blockAllocator;
 	b2StackAllocator m_stackAllocator;
 
-	int32 m_flags;
+	juce::int32 m_flags;
 
 	b2ContactManager m_contactManager;
 
 	b2Body* m_bodyList;
 	b2Joint* m_jointList;
 
-	int32 m_bodyCount;
-	int32 m_jointCount;
+	juce::int32 m_bodyCount;
+	juce::int32 m_jointCount;
 
 	b2Vec2 m_gravity;
 	bool m_allowSleep;
@@ -288,17 +288,17 @@ inline const b2Contact* b2World::GetContactList() const
 	return m_contactManager.m_contactList;
 }
 
-inline int32 b2World::GetBodyCount() const
+inline juce::int32 b2World::GetBodyCount() const
 {
 	return m_bodyCount;
 }
 
-inline int32 b2World::GetJointCount() const
+inline juce::int32 b2World::GetJointCount() const
 {
 	return m_jointCount;
 }
 
-inline int32 b2World::GetContactCount() const
+inline juce::int32 b2World::GetContactCount() const
 {
 	return m_contactManager.m_contactCount;
 }

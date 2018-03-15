@@ -113,7 +113,7 @@ protected:
 	float32 m_impulse;
 
 	// Solver temp
-	int32 m_indexA, m_indexB, m_indexC, m_indexD;
+	juce::int32 m_indexA, m_indexB, m_indexC, m_indexD;
 	b2Vec2 m_lcA, m_lcB, m_lcC, m_lcD;
 	float32 m_mA, m_mB, m_mC, m_mD;
 	float32 m_iA, m_iB, m_iC, m_iD;

@@ -40,12 +40,12 @@ public:
 	/// Create a loop. This automatically adjusts connectivity.
 	/// @param vertices an array of vertices, these are copied
 	/// @param count the vertex count
-	void CreateLoop(const b2Vec2* vertices, int32 count);
+	void CreateLoop(const b2Vec2* vertices, juce::int32 count);
 
 	/// Create a chain with isolated end vertices.
 	/// @param vertices an array of vertices, these are copied
 	/// @param count the vertex count
-	void CreateChain(const b2Vec2* vertices, int32 count);
+	void CreateChain(const b2Vec2* vertices, juce::int32 count);
 
 	/// Establish connectivity to a vertex that precedes the first vertex.
 	/// Don't call this for loops.
@@ -59,10 +59,10 @@ public:
 	b2Shape* Clone(b2BlockAllocator* allocator) const;
 
 	/// @see b2Shape::GetChildCount
-	int32 GetChildCount() const;
+	juce::int32 GetChildCount() const;
 
 	/// Get a child edge.
-	void GetChildEdge(b2EdgeShape* edge, int32 index) const;
+	void GetChildEdge(b2EdgeShape* edge, juce::int32 index) const;
 
 	/// This always return false.
 	/// @see b2Shape::TestPoint
@@ -70,10 +70,10 @@ public:
 
 	/// Implement b2Shape.
 	bool RayCast(b2RayCastOutput* output, const b2RayCastInput& input,
-					const b2Transform& transform, int32 childIndex) const;
+					const b2Transform& transform, juce::int32 childIndex) const;
 
 	/// @see b2Shape::ComputeAABB
-	void ComputeAABB(b2AABB* aabb, const b2Transform& transform, int32 childIndex) const;
+	void ComputeAABB(b2AABB* aabb, const b2Transform& transform, juce::int32 childIndex) const;
 
 	/// Chains have zero mass.
 	/// @see b2Shape::ComputeMass
@@ -83,7 +83,7 @@ public:
 	b2Vec2* m_vertices;
 
 	/// The vertex count.
-	int32 m_count;
+	juce::int32 m_count;
 
 	b2Vec2 m_prevVertex, m_nextVertex;
 	bool m_hasPrevVertex, m_hasNextVertex;

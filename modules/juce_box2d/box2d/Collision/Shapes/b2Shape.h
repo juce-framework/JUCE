@@ -62,7 +62,7 @@ public:
 	Type GetType() const;
 
 	/// Get the number of child primitives.
-	virtual int32 GetChildCount() const = 0;
+	virtual juce::int32 GetChildCount() const = 0;
 
 	/// Test a point for containment in this shape. This only works for convex shapes.
 	/// @param xf the shape world transform.
@@ -75,13 +75,13 @@ public:
 	/// @param transform the transform to be applied to the shape.
 	/// @param childIndex the child shape index
 	virtual bool RayCast(b2RayCastOutput* output, const b2RayCastInput& input,
-						const b2Transform& transform, int32 childIndex) const = 0;
+						const b2Transform& transform, juce::int32 childIndex) const = 0;
 
 	/// Given a transform, compute the associated axis aligned bounding box for a child shape.
 	/// @param aabb returns the axis aligned box.
 	/// @param xf the world transform of the shape.
 	/// @param childIndex the child shape
-	virtual void ComputeAABB(b2AABB* aabb, const b2Transform& xf, int32 childIndex) const = 0;
+	virtual void ComputeAABB(b2AABB* aabb, const b2Transform& xf, juce::int32 childIndex) const = 0;
 
 	/// Compute the mass properties of this shape using its dimensions and density.
 	/// The inertia tensor is computed about the local origin.

@@ -113,8 +113,8 @@ protected:
 	float32 m_gamma;
 
 	// Solver temp
-	int32 m_indexA;
-	int32 m_indexB;
+	juce::int32 m_indexA;
+	juce::int32 m_indexB;
 	b2Vec2 m_rB;
 	b2Vec2 m_localCenterB;
 	float32 m_invMassB;
