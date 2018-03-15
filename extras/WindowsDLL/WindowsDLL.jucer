@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="IvabE4" name="juce_dll" projectType="library" juceLinkage="none"
+<JUCERPROJECT id="IvabE4" name="WindowsDLL" projectType="library" juceLinkage="none"
               bundleIdentifier="com.roli.jucedll" jucerVersion="5.2.1" defines="JUCE_DLL_BUILD=1"
               displaySplashScreen="0" reportAppUsage="0" companyName="ROLI Ltd."
               companyCopyright="ROLI Ltd.">
@@ -28,7 +28,7 @@
       </MODULEPATHS>
     </VS2017>
   </EXPORTFORMATS>
-  <MAINGROUP id="tNa6Wh" name="juce_dll">
+  <MAINGROUP id="tNa6Wh" name="WindowsDLL">
     <GROUP id="N2ZGxS" name="Source"/>
   </MAINGROUP>
   <MODULES>
