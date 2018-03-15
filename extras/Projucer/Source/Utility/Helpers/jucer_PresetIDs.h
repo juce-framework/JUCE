@@ -316,10 +316,15 @@ namespace Ids
     DECLARE_ID (pluginAAXCategory);
     DECLARE_ID (pluginAAXDisableBypass);
     DECLARE_ID (pluginAAXDisableMultiMono);
+    DECLARE_ID (exporters);
+    DECLARE_ID (website);
+    DECLARE_ID (mainClass);
+    DECLARE_ID (moduleFlags);
 
     const Identifier ID ("id");
     const Identifier ID_uppercase ("ID");
     const Identifier class_ ("class");
+    const Identifier dependencies_ ("dependencies");
 
     #undef DECLARE_ID
 }

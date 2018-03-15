@@ -246,6 +246,8 @@
               resource="1" file="Source/BinaryData/Templates/jucer_OpenGLComponentTemplate.cpp"/>
         <FILE id="Edyh5d" name="jucer_OpenGLComponentTemplate.h" compile="0"
               resource="1" file="Source/BinaryData/Templates/jucer_OpenGLComponentTemplate.h"/>
+        <FILE id="aCJeWQ" name="jucer_PIPMain.cpp" compile="0" resource="1"
+              file="Source/BinaryData/Templates/jucer_PIPMain.cpp"/>
       </GROUP>
       <FILE id="oXM3fR" name="colourscheme_dark.xml" compile="0" resource="1"
             file="Source/BinaryData/colourscheme_dark.xml"/>
@@ -617,6 +619,12 @@
               file="Source/Utility/Helpers/jucer_TranslationHelpers.h"/>
         <FILE id="EuC4K4" name="jucer_ValueSourceHelpers.h" compile="0" resource="0"
               file="Source/Utility/Helpers/jucer_ValueSourceHelpers.h"/>
+      </GROUP>
+      <GROUP id="{9CDC769F-B6DC-952F-DF4C-8B81CA3240B7}" name="PIPs">
+        <FILE id="rTSxOx" name="jucer_PIPGenerator.cpp" compile="1" resource="0"
+              file="Source/Utility/PIPs/jucer_PIPGenerator.cpp"/>
+        <FILE id="MCzXe7" name="jucer_PIPGenerator.h" compile="0" resource="0"
+              file="Source/Utility/PIPs/jucer_PIPGenerator.h"/>
       </GROUP>
       <GROUP id="{35F9B4BB-E683-1394-4BF2-C8F0C772168F}" name="UI">
         <GROUP id="{FE8C76CF-7C05-EC86-8997-C9941B88670B}" name="PropertyComponents">

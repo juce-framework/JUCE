@@ -59,6 +59,17 @@ void addPlistDictionaryKeyInt (XmlElement* xml, const String& key, int value);
 bool fileNeedsCppSyntaxHighlighting (const File& file);
 
 bool isJUCEModule (const String& moduleID) noexcept;
+bool isValidExporterName (const String& exporterName) noexcept;
+String getTargetFolderForExporter (const String& exporterName) noexcept;
+
+StringArray getModulesRequiredForConsole() noexcept;
+StringArray getModulesRequiredForComponent() noexcept;
+StringArray getModulesRequiredForAudioProcessor() noexcept;
+
+bool isPIPFile (const File&) noexcept;
+
+File getJUCEExamplesDirectoryPathFromGlobal() noexcept;
+bool isValidJUCEExamplesDirectory (const File&) noexcept;
 
 //==============================================================================
 int indexOfLineStartingWith (const StringArray& lines, const String& text, int startIndex);

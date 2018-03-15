@@ -68,6 +68,9 @@
     <Filter Include="Projucer\Utility\Helpers">
       <UniqueIdentifier>{A353D068-8C43-A573-8460-59B6BA167F83}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Projucer\Utility\PIPs">
+      <UniqueIdentifier>{A4B9C07E-05B1-BCE9-E075-7E573FFD23B0}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Projucer\Utility\UI\PropertyComponents">
       <UniqueIdentifier>{ACCBC32A-58D5-1EC6-FC4D-B3B32CB6588E}</UniqueIdentifier>
     </Filter>
@@ -349,6 +352,9 @@
     <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_OpenGLComponentTemplate.cpp">
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_PIPMain.cpp">
+      <Filter>Projucer\BinaryData\Templates</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\CodeEditor\jucer_DocumentEditorComponent.cpp">
       <Filter>Projucer\CodeEditor</Filter>
     </ClCompile>
@@ -468,6 +474,9 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\Utility\Helpers\jucer_MiscUtilities.cpp">
       <Filter>Projucer\Utility\Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Utility\PIPs\jucer_PIPGenerator.cpp">
+      <Filter>Projucer\Utility\PIPs</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Utility\UI\PropertyComponents\jucer_DependencyPathPropertyComponent.cpp">
       <Filter>Projucer\Utility\UI\PropertyComponents</Filter>
@@ -2231,6 +2240,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\Helpers\jucer_ValueSourceHelpers.h">
       <Filter>Projucer\Utility\Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\PIPs\jucer_PIPGenerator.h">
+      <Filter>Projucer\Utility\PIPs</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Utility\UI\PropertyComponents\jucer_ColourPropertyComponent.h">
       <Filter>Projucer\Utility\UI\PropertyComponents</Filter>
