@@ -732,14 +732,20 @@ File ProjucerApplication::findDemoRunnerExecutable() const noexcept
     extension = {};
    #endif
 
-    auto precompiledFile = getJUCEExamplesDirectoryPathFromGlobal().getChildFile ("DemoRunner" + extension);
+    auto juceDir = getAppSettings().getStoredPath (Ids::jucePath).toString();
 
-   #if JUCE_MAC
-    if (precompiledFile.exists())
-   #else
-    if (precompiledFile.existsAsFile())
-   #endif
-        return precompiledFile;
+    if (juceDir.isNotEmpty())
+    {
+        auto precompiledFile = File (juceDir).getChildFile ("DemoRunner" + extension);
+
+       #if JUCE_MAC
+        if (precompiledFile.exists())
+       #else
+        if (precompiledFile.existsAsFile())
+       #endif
+            return precompiledFile;
+    }
+
 
     return {};
 }
