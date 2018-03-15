@@ -67,13 +67,15 @@ void JUCEDemos::registerDemo (std::function<Component*()> constructorCallback, c
 File JUCEDemos::findExamplesDirectoryFromExecutable (File exec)
 {
     int numTries = 15;
+    auto exampleDir = exec.getParentDirectory().getChildFile ("examples");
+
+    if (exampleDir.exists())
+        return exampleDir;
 
     while (exec.getFileName() != "examples" && numTries-- > 0)
         exec = exec.getParentDirectory();
-
     if (exec.getFileName() == "examples")
         return exec;
-
     return {};
 }
 

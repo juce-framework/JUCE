@@ -59,6 +59,10 @@ inline File getExamplesDirectory() noexcept
     return mo.toString();
    #else
     auto currentFile = File::getSpecialLocation (File::SpecialLocationType::currentExecutableFile);
+    auto exampleDir = currentFile.getParentDirectory().getChildFile ("examples");
+
+    if (exampleDir.exists())
+        return exampleDir;
 
     int numTries = 0; // keep track of the number of parent directories so we don't go on endlessly
 
