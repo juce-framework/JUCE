@@ -74,6 +74,8 @@ namespace juce
         ...etc
     }
     @endcode
+
+    @tags{GUI}
 */
 class JUCE_API  PopupMenu
 {

@@ -35,6 +35,8 @@ namespace juce
  //==============================================================================
  /**
      A simple wrapper around std::atomic.
+
+     @tags{Core}
  */
  template <typename Type>
  struct Atomic  final
@@ -152,8 +154,9 @@ namespace juce
   #define JUCE_64BIT_ATOMICS_UNAVAILABLE 1
  #endif
 
- /** @internal */
- template <typename Type> class AtomicBase;
+ #ifndef DOXYGEN
+  template <typename Type> class AtomicBase;
+ #endif
 
  //==============================================================================
  /**
@@ -161,6 +164,8 @@ namespace juce
 
      The type used must be a 32 or 64 bit primitive, like an int, pointer, etc.
      There are methods to perform most of the basic atomic operations.
+
+     @tags{Core}
  */
  template <typename Type>
  class Atomic  final  : public AtomicBase<Type>

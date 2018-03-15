@@ -36,6 +36,8 @@ class AudioIODevice;
     the next block of data.
 
     @see AudioIODevice, AudioDeviceManager
+
+    @tags{Audio}
 */
 class JUCE_API  AudioIODeviceCallback
 {
@@ -128,6 +130,8 @@ public:
     AudioDeviceManager class.
 
     @see AudioIODeviceType, AudioDeviceManager
+
+    @tags{Audio}
 */
 class JUCE_API  AudioIODevice
 {

@@ -30,6 +30,8 @@ namespace juce
 /**
     Defines an item in a Grid
     @see Grid
+
+    @tags{GUI}
 */
 class JUCE_API  GridItem
 {

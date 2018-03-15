@@ -43,6 +43,8 @@ namespace juce
     progress, see the ThreadWithProgressWindow class.
 
     @see ThreadWithProgressWindow
+
+    @tags{GUI}
 */
 class JUCE_API  ProgressBar  : public Component,
                                public SettableTooltipClient,

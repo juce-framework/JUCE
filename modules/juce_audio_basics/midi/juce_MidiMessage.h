@@ -28,6 +28,8 @@ namespace juce
     Encapsulates a MIDI message.
 
     @see MidiMessageSequence, MidiOutput, MidiInput
+
+    @tags{Audio}
 */
 class JUCE_API  MidiMessage
 {

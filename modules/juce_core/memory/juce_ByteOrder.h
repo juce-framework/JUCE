@@ -26,6 +26,8 @@ namespace juce
 //==============================================================================
 /** Contains static methods for converting the byte order between different
     endiannesses.
+
+    @tags{Core}
 */
 class JUCE_API  ByteOrder
 {

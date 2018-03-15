@@ -42,6 +42,8 @@ namespace juce
         https://www.cosic.esat.kuleuven.ac.be/nessie/workshop/submissions/whirlpool.zip
 
     @see SHA256, MD5
+
+    @tags{Cryptography}
 */
 class JUCE_API  Whirlpool
 {

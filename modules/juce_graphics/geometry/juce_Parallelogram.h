@@ -31,6 +31,8 @@ namespace juce
 /**
     Represents a parallelogram that is defined by 3 points.
     @see Rectangle, Point, Line
+
+    @tags{Graphics}
 */
 template <typename ValueType>
 class Parallelogram

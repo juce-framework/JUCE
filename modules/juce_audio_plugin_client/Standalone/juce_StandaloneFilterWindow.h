@@ -38,12 +38,15 @@ namespace juce
     The object will create your processor using the same createPluginFilter()
     function that the other plugin wrappers use, and will run it through the
     computer's audio/MIDI devices using AudioDeviceManager and AudioProcessorPlayer.
+
+    @tags{Audio}
 */
 class StandalonePluginHolder    : private AudioIODeviceCallback,
                                   private Timer
 {
 public:
     //==============================================================================
+    /** Structure used for the number of inputs and outputs. */
     struct PluginInOuts   { short numIns, numOuts; };
 
     //==============================================================================
@@ -558,6 +561,8 @@ private:
     Just create one of these objects in your JUCEApplicationBase::initialise() method, and
     let it do its work. It will create your filter object using the same createPluginFilter() function
     that the other plugin wrappers use.
+
+    @tags{Audio}
 */
 class StandaloneFilterWindow    : public DocumentWindow,
                                   public Button::Listener

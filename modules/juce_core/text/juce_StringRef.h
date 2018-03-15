@@ -55,6 +55,8 @@ namespace juce
     argument to already be a String.
 
     @see String
+
+    @tags{Core}
 */
 class JUCE_API  StringRef  final
 {

@@ -59,6 +59,8 @@ namespace juce
     be open or closed.
 
     @see PathFlatteningIterator, PathStrokeType, Graphics
+
+    @tags{Graphics}
 */
 class JUCE_API  Path  final
 {

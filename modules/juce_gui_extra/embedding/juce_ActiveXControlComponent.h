@@ -40,6 +40,8 @@ namespace juce
 
     Of course, since the control is a heavyweight window, it'll obliterate any
     JUCE components that may overlap this component, but that's life.
+
+    @tags{GUI}
 */
 class JUCE_API  ActiveXControlComponent   : public Component
 {

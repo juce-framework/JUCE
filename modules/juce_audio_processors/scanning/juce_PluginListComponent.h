@@ -31,6 +31,8 @@ namespace juce
 /**
     A component displaying a list of plugins, with options to scan for them,
     add, remove and sort them.
+
+    @tags{Audio}
 */
 class JUCE_API  PluginListComponent   : public Component,
                                         public FileDragAndDropTarget,

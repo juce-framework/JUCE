@@ -47,6 +47,8 @@ namespace juce
     the value changes.
 
     @see Slider::Listener
+
+    @tags{GUI}
 */
 class JUCE_API  Slider  : public Component,
                           public SettableTooltipClient
@@ -139,6 +141,7 @@ public:
     SliderStyle getSliderStyle() const noexcept;
 
     //==============================================================================
+    /** Structure defining rotary parameters for a slider */
     struct RotaryParameters
     {
         /** The angle (in radians, clockwise from the top) at which

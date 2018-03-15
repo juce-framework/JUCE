@@ -44,6 +44,8 @@ namespace juce
     it will make itself visible to show the tooltip in the appropriate place.
 
     @see TooltipClient, SettableTooltipClient, SharedResourcePointer
+
+    @tags{GUI}
 */
 class JUCE_API  TooltipWindow  : public Component,
                                  private Timer

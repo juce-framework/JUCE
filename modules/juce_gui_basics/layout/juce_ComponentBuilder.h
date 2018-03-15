@@ -42,6 +42,8 @@ namespace juce
     Once you've got the component you can either take it and delete the ComponentBuilder
     object, or if you keep the ComponentBuilder around, it'll monitor any changes in the
     ValueTree and automatically update the component to reflect these changes.
+
+    @tags{GUI}
 */
 class JUCE_API  ComponentBuilder  : private ValueTree::Listener
 {

@@ -28,6 +28,8 @@ namespace juce
     Represents a set of folders that make up a search path.
 
     @see File
+
+    @tags{Core}
 */
 class JUCE_API  FileSearchPath
 {

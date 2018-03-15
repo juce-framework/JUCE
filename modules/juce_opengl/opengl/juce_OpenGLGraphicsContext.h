@@ -53,6 +53,8 @@ LowLevelGraphicsContext* createOpenGLGraphicsContext (OpenGLContext& context,
 
     Given a GL-based rendering context, you can write a fragment shader that applies some
     kind of per-pixel effect.
+
+    @tags{OpenGL}
 */
 struct JUCE_API  OpenGLGraphicsContextCustomShader
 {

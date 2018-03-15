@@ -40,6 +40,8 @@ class ThreadPoolThread;
     true, the runJob() method must return immediately.
 
     @see ThreadPool, Thread
+
+    @tags{Core}
 */
 class JUCE_API  ThreadPoolJob
 {
@@ -150,6 +152,8 @@ private:
     will be called by the next pooled thread that becomes free.
 
     @see ThreadPoolJob, Thread
+
+    @tags{Core}
 */
 class JUCE_API  ThreadPool
 {

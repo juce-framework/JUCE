@@ -38,6 +38,8 @@ namespace juce
 
     After creating an instance of this, use addListener to get callbacks when
     the activity status changes.
+
+    @tags{GUI}
 */
 class JUCE_API  MouseInactivityDetector  : private Timer,
                                            private MouseListener

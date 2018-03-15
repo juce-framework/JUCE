@@ -28,6 +28,8 @@ namespace juce
     A random number generator.
 
     You can create a Random object and use it to generate a sequence of random numbers.
+
+    @tags{Core}
 */
 class JUCE_API  Random  final
 {

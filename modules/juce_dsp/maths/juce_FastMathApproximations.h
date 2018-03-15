@@ -31,6 +31,8 @@ namespace dsp
 
 /**
     This class contains various fast mathematical function approximations.
+
+    @tags{DSP}
 */
 struct FastMathApproximations
 {

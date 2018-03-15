@@ -32,6 +32,8 @@ namespace juce
     A menu bar component.
 
     @see MenuBarModel
+
+    @tags{GUI}
 */
 class JUCE_API  MenuBarComponent  : public Component,
                                     private MenuBarModel::Listener,

@@ -33,6 +33,8 @@ namespace juce
 
     This class is used to store sets of X and Y marker points in components.
     @see Component::getMarkers().
+
+    @tags{GUI}
 */
 class JUCE_API  MarkerList
 {

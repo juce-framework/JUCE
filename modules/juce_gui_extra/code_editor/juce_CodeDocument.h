@@ -40,6 +40,8 @@ class CodeDocumentLine;
     quick to insert and delete.
 
     @see CodeEditorComponent
+
+    @tags{GUI}
 */
 class JUCE_API  CodeDocument
 {

@@ -32,6 +32,8 @@ namespace juce
     integer value with a given range.
 
     @see AudioParameterFloat, AudioParameterBool, AudioParameterChoice
+
+    @tags{Audio}
 */
 class JUCE_API  AudioParameterInt  : public AudioProcessorParameterWithID
 {

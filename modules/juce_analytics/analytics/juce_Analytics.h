@@ -36,6 +36,8 @@ namespace juce
 
     @see AnalyticsDestination, ThreadedAnalyticsDestination,
          AnalyticsDestination::AnalyticsEvent
+
+    @tags{Analytics}
 */
 class JUCE_API  Analytics   : public DeletedAtShutdown
 {

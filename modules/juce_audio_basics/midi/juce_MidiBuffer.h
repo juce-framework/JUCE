@@ -36,6 +36,8 @@ namespace juce
     midi data.
 
     @see MidiMessage
+
+    @tags{Audio}
 */
 class JUCE_API  MidiBuffer
 {

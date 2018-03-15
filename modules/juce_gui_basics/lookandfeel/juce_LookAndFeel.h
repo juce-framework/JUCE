@@ -31,6 +31,8 @@ namespace juce
 /** This class is used to hold a few look and feel base classes which are associated
     with classes that may not be present because they're from modules other than
     juce_gui_basics.
+
+    @tags{GUI}
 */
 struct JUCE_API  ExtraLookAndFeelBaseClasses
 {
@@ -72,6 +74,8 @@ struct JUCE_API  ExtraLookAndFeelBaseClasses
     instantiate, see LookAndFeel_V1, LookAndFeel_V2 and LookAndFeel_V3.
 
     @see LookAndFeel_V1, LookAndFeel_V2, LookAndFeel_V3
+
+    @tags{GUI}
 */
 class JUCE_API  LookAndFeel   : public ScrollBar::LookAndFeelMethods,
                                 public Button::LookAndFeelMethods,

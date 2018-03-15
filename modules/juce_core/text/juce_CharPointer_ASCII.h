@@ -31,6 +31,8 @@ namespace juce
     A valid ASCII string is assumed to not contain any characters above 127.
 
     @see CharPointer_UTF8, CharPointer_UTF16, CharPointer_UTF32
+
+    @tags{Core}
 */
 class CharPointer_ASCII  final
 {

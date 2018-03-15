@@ -31,6 +31,8 @@ namespace juce
     sockets, you could also try the InterprocessConnection class.
 
     @see DatagramSocket, InterprocessConnection, InterprocessConnectionServer
+
+    @tags{Core}
 */
 class JUCE_API  StreamingSocket  final
 {
@@ -193,6 +195,8 @@ private:
     sockets, you could also try the InterprocessConnection class.
 
     @see StreamingSocket, InterprocessConnection, InterprocessConnectionServer
+
+    @tags{Core}
 */
 class JUCE_API  DatagramSocket  final
 {

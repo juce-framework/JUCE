@@ -31,6 +31,8 @@ namespace dsp
 
 /**
     Generates a signal based on a user-supplied function.
+
+    @tags{DSP}
 */
 template <typename SampleType>
 class Oscillator

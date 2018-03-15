@@ -30,6 +30,8 @@ namespace juce
     (corresponding to 1 or 2 MIDI bytes, respectively). It also offers helper
     functions to query the value in a variety of representations that can be
     useful in an audio or MIDI context.
+
+    @tags{Audio}
 */
 class JUCE_API  MPEValue
 {

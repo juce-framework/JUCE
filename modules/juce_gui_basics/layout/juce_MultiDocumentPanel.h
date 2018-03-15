@@ -39,6 +39,8 @@ class MultiDocumentPanel;
     everything works nicely inside a MultiDocumentPanel.
 
     @see MultiDocumentPanel
+
+    @tags{GUI}
 */
 class JUCE_API  MultiDocumentPanelWindow  : public DocumentWindow
 {
@@ -81,6 +83,8 @@ private:
     Use addDocument() and closeDocument() to add or remove components from the
     panel - never use any of the Component methods to access the panel's child
     components directly, as these are managed internally.
+
+    @tags{GUI}
 */
 class JUCE_API  MultiDocumentPanel  : public Component,
                                       private ComponentListener

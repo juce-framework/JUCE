@@ -32,6 +32,8 @@ namespace juce
     This maintains a list of known AudioPluginFormats.
 
     @see AudioPluginFormat
+
+    @tags{Audio}
 */
 class JUCE_API  AudioPluginFormatManager
 {

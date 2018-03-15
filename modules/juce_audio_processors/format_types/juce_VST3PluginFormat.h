@@ -31,6 +31,8 @@ namespace juce
 
 /**
     Implements a plugin format for VST3s.
+
+    @tags{Audio}
 */
 class JUCE_API VST3PluginFormat   : public AudioPluginFormat
 {

@@ -124,6 +124,10 @@ using BatteryCharging   = IntegerWithBitSize<1>;
 using ConnectorPort = IntegerWithBitSize<5>;
 
 //==============================================================================
+/** Structure describing a block's serial number
+
+    @tags{Blocks}
+*/
 struct BlockSerialNumber
 {
     uint8 serial[16];
@@ -149,18 +153,30 @@ struct BlockSerialNumber
     bool hasPrefix (const char* prefix) const noexcept  { return memcmp (serial, prefix, 3) == 0; }
 };
 
+/** Structure for the version number
+
+    @tags{Blocks}
+*/
 struct VersionNumber
 {
     uint8 version[21] = {};
     uint8 length = 0;
 };
 
+/** Structure for the block name
+
+    @tags{Blocks}
+*/
 struct BlockName
 {
     uint8 name[33] = {};
     uint8 length = 0;
 };
 
+/** Structure for the device status
+
+    @tags{Blocks}
+*/
 struct DeviceStatus
 {
     BlockSerialNumber serialNumber;
@@ -169,18 +185,30 @@ struct DeviceStatus
     BatteryCharging batteryCharging;
 };
 
+/** Structure for the device connection
+
+    @tags{Blocks}
+*/
 struct DeviceConnection
 {
     TopologyIndex device1, device2;
     ConnectorPort port1, port2;
 };
 
+/** Structure for the device version
+
+    @tags{Blocks}
+*/
 struct DeviceVersion
 {
     TopologyIndex index;
     VersionNumber version;
 };
 
+/** Structure used for the device name
+
+    @tags{Blocks}
+*/
 struct DeviceName
 {
     TopologyIndex index;
@@ -272,7 +300,10 @@ static constexpr uint8 configMaxOptions = 8;
 static constexpr uint8 configOptionNameLength = 16;
 
 //==============================================================================
-/** The coordinates of a touch. */
+/** The coordinates of a touch.
+
+    @tags{Blocks}
+*/
 struct TouchPosition
 {
     using Xcoord = IntegerWithBitSize<12>;
@@ -286,7 +317,10 @@ struct TouchPosition
     enum { bits = Xcoord::bits + Ycoord::bits + Zcoord::bits };
 };
 
-/** The velocities for each dimension of a touch. */
+/** The velocities for each dimension of a touch.
+
+    @tags{Blocks}
+*/
 struct TouchVelocity
 {
     using VXcoord = IntegerWithBitSize<8>;

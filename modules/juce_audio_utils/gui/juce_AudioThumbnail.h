@@ -45,6 +45,8 @@ namespace juce
     be loaded and saved to avoid having to scan the file again.
 
     @see AudioThumbnailCache, AudioThumbnailBase
+
+    @tags{Audio}
 */
 class JUCE_API  AudioThumbnail    : public AudioThumbnailBase
 {

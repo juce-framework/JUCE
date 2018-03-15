@@ -60,6 +60,8 @@ namespace juce
     operation. For an example of a bail-out checker, see the Component::BailOutChecker class,
     which can be used to check when a Component has been deleted. See also
     ListenerList::DummyBailOutChecker, which is a dummy checker that always returns false.
+
+    @tags{Core}
 */
 template <class ListenerClass,
           class ArrayType = Array<ListenerClass*>>

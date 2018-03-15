@@ -32,6 +32,8 @@ namespace juce
     A table of horizontal scan-line segments - used for rasterising Paths.
 
     @see Path, Graphics
+
+    @tags{Graphics}
 */
 class JUCE_API  EdgeTable
 {

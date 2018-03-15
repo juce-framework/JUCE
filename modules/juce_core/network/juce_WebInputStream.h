@@ -26,10 +26,13 @@ namespace juce
 //==============================================================================
 /**
     An InputStream which can be used to read from a given url.
+
+    @tags{Core}
 */
 class JUCE_API WebInputStream : public InputStream
 {
  public:
+    /** Used to receive callbacks for data send progress */
     class JUCE_API Listener
     {
     public:

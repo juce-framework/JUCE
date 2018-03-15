@@ -51,7 +51,10 @@ template <typename type>
 struct SIMDNativeOps;
 
 //==============================================================================
-/** Single-precision floating point AVX intrinsics. */
+/** Single-precision floating point AVX intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<float>
 {
@@ -111,7 +114,10 @@ struct SIMDNativeOps<float>
 };
 
 //==============================================================================
-/** Double-precision floating point AVX intrinsics. */
+/** Double-precision floating point AVX intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<double>
 {
@@ -167,7 +173,10 @@ struct SIMDNativeOps<double>
 };
 
 //==============================================================================
-/** Signed 8-bit integer AVX intrinsics */
+/** Signed 8-bit integer AVX intrinsics
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<int8_t>
 {
@@ -238,7 +247,10 @@ struct SIMDNativeOps<int8_t>
 };
 
 //==============================================================================
-/** Unsigned 8-bit integer AVX intrinsics. */
+/** Unsigned 8-bit integer AVX intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<uint8_t>
 {
@@ -312,7 +324,10 @@ struct SIMDNativeOps<uint8_t>
 };
 
 //==============================================================================
-/** Signed 16-bit integer AVX intrinsics. */
+/** Signed 16-bit integer AVX intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<int16_t>
 {
@@ -365,7 +380,10 @@ struct SIMDNativeOps<int16_t>
 };
 
 //==============================================================================
-/** Unsigned 16-bit integer AVX intrinsics. */
+/** Unsigned 16-bit integer AVX intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<uint16_t>
 {
@@ -421,7 +439,10 @@ struct SIMDNativeOps<uint16_t>
 };
 
 //==============================================================================
-/** Signed 32-bit integer AVX intrinsics. */
+/** Signed 32-bit integer AVX intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<int32_t>
 {
@@ -472,7 +493,10 @@ struct SIMDNativeOps<int32_t>
 };
 
 //==============================================================================
-/** Unsigned 32-bit integer AVX intrinsics. */
+/** Unsigned 32-bit integer AVX intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<uint32_t>
 {
@@ -526,7 +550,10 @@ struct SIMDNativeOps<uint32_t>
 };
 
 //==============================================================================
-/** Signed 64-bit integer AVX intrinsics. */
+/** Signed 64-bit integer AVX intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<int64_t>
 {
@@ -596,7 +623,10 @@ struct SIMDNativeOps<int64_t>
 };
 
 //==============================================================================
-/** Unsigned 64-bit integer AVX intrinsics. */
+/** Unsigned 64-bit integer AVX intrinsics.
+
+    @tags{DSP}
+*/
 template <>
 struct SIMDNativeOps<uint64_t>
 {

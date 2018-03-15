@@ -40,6 +40,8 @@ namespace juce
     as an indication to the actual layout of the speakers.
 
     @see Bus
+
+    @tags{Audio}
 */
 class JUCE_API  AudioChannelSet
 {

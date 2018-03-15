@@ -35,6 +35,8 @@ namespace juce
     or blob (raw binary data).
 
     OSCMessage objects are essentially arrays of OSCArgument objects.
+
+    @tags{OSC}
 */
 class JUCE_API  OSCArgument
 {

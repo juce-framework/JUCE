@@ -31,6 +31,8 @@ namespace dsp
 
 /**
     Contains miscellaneous filter design and windowing functions.
+
+    @tags{DSP}
 */
 struct SpecialFunctions
 {

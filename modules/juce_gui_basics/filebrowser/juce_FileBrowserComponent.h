@@ -36,6 +36,8 @@ namespace juce
     be used for loading or saving a file, or for choosing a directory.
 
     @see FileChooserDialogBox, FileChooser, FileListComponent
+
+    @tags{GUI}
 */
 class JUCE_API  FileBrowserComponent  : public Component,
                                         private FileBrowserListener,

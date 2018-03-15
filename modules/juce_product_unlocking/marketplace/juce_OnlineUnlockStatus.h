@@ -53,6 +53,8 @@ namespace juce
     register, see the OnlineUnlockForm class.
 
     @see OnlineUnlockForm, KeyGeneration
+
+    @tags{ProductUnlocking}
 */
 class JUCE_API  OnlineUnlockStatus
 {

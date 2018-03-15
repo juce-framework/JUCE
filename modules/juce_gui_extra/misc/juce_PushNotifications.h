@@ -40,6 +40,8 @@ namespace juce
     remote notifications, inspect the Notification's fields for notification details.
     Bear in mind that some fields will not be available when receiving a remote
     notification.
+
+    @tags{GUI}
 */
 class JUCE_API PushNotifications    : private DeletedAtShutdown
 {

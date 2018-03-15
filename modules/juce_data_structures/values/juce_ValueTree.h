@@ -66,6 +66,8 @@ namespace juce
     sub-trees are added or removed.
 
     @see var, XmlElement
+
+    @tags{DataStructures}
 */
 class JUCE_API  ValueTree  final
 {

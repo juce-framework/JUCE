@@ -56,7 +56,10 @@ private:
 };
 
 //==============================================================================
-/** Creates and holds a reference to the X display. */
+/** Creates and holds a reference to the X display.
+
+    @tags{GUI}
+*/
 struct ScopedXDisplay
 {
     ScopedXDisplay();
@@ -68,6 +71,8 @@ struct ScopedXDisplay
 //==============================================================================
 /** A handy class that uses XLockDisplay and XUnlockDisplay to lock the X server
     using RAII (Only available in Linux!).
+
+    @tags{GUI}
 */
 class ScopedXLock
 {

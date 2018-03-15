@@ -35,6 +35,8 @@ namespace juce
     any previously pending transactions will be resumed.
 
     Once an InAppPurchases object is created, call addListener() to attach listeners.
+
+    @tags{ProductUnlocking}
 */
 class JUCE_API  InAppPurchases  : private DeletedAtShutdown
 {
@@ -126,6 +128,7 @@ public:
         /** Called whenever a product info is returned after a call to InAppPurchases::getProductsInformation(). */
         virtual void productsInfoReturned (const Array<Product>& /*products*/) {}
 
+        /** Structure holding purchase information */
         struct PurchaseInfo
         {
             Purchase purchase;

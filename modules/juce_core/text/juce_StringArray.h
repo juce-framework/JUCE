@@ -28,6 +28,8 @@ namespace juce
     A special array for holding a list of strings.
 
     @see String, StringPairArray
+
+    @tags{Core}
 */
 class JUCE_API  StringArray
 {

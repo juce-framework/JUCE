@@ -38,6 +38,8 @@ class TabbedButtonBar;
     method to create it instead of the default one.
 
     @see TabbedButtonBar
+
+    @tags{GUI}
 */
 class JUCE_API  TabBarButton  : public Button
 {
@@ -145,6 +147,8 @@ private:
     and other housekeeping.
 
     @see TabbedComponent
+
+    @tags{GUI}
 */
 class JUCE_API  TabbedButtonBar  : public Component,
                                    public ChangeBroadcaster

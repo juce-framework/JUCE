@@ -59,6 +59,8 @@ namespace juce
     ScopedPointer contains an overloaded constructor that should cause a syntax error in these
     circumstances, but it does mean that instead of returning a ScopedPointer from a function,
     you'd need to return a raw pointer (or use a std::auto_ptr instead).
+
+    @tags{Core}
 */
 template <class ObjectType>
 class ScopedPointer

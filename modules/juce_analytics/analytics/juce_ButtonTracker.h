@@ -33,6 +33,8 @@ namespace juce
     when a button is clicked.
 
     @see Analytics, AnalyticsDestination::AnalyticsEvent
+
+    @tags{Analytics}
 */
 class JUCE_API  ButtonTracker   : private Button::Listener
 {

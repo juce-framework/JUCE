@@ -33,6 +33,8 @@ namespace juce
 
     So if you've got a singleton and don't want to have to explicitly delete it, just
     inherit from this and it'll be taken care of.
+
+    @tags{Events}
 */
 class JUCE_API  DeletedAtShutdown
 {

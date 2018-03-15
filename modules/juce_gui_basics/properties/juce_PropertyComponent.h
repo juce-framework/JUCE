@@ -42,6 +42,8 @@ namespace juce
 
     @see PropertyPanel, TextPropertyComponent, SliderPropertyComponent,
          ChoicePropertyComponent, ButtonPropertyComponent, BooleanPropertyComponent
+
+    @tags{GUI}
 */
 class JUCE_API  PropertyComponent  : public Component,
                                      public SettableTooltipClient

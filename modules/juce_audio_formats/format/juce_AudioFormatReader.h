@@ -38,6 +38,8 @@ class AudioFormat;
     an AudioFormat object.
 
     @see AudioFormat, AudioFormatWriter
+
+    @tags{Audio}
 */
 class JUCE_API  AudioFormatReader
 {

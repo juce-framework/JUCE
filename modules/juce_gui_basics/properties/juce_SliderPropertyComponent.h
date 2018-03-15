@@ -32,6 +32,8 @@ namespace juce
     A PropertyComponent that shows its value as a slider.
 
     @see PropertyComponent, Slider
+
+    @tags{GUI}
 */
 class JUCE_API  SliderPropertyComponent   : public PropertyComponent
 {

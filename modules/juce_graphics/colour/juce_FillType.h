@@ -35,6 +35,8 @@ namespace juce
     a brush type. It can either be a solid colour, a gradient, or a tiled image.
 
     @see Graphics::setFillType, DrawablePath::setFill
+
+    @tags{Graphics}
 */
 class JUCE_API  FillType  final
 {

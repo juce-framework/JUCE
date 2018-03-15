@@ -28,6 +28,8 @@ namespace juce
     A container for holding a set of strings which are keyed by another string.
 
     @see StringArray
+
+    @tags{Core}
 */
 class JUCE_API  StringPairArray
 {

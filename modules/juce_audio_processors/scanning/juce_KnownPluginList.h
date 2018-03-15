@@ -35,6 +35,8 @@ namespace juce
     the plugin types in it.
 
     @see PluginListComponent
+
+    @tags{Audio}
 */
 class JUCE_API  KnownPluginList   : public ChangeBroadcaster
 {
@@ -185,6 +187,7 @@ public:
     PluginTree* createTree (const SortMethod sortMethod) const;
 
     //==============================================================================
+    /** Class to define a custom plugin scanner */
     class CustomScanner
     {
     public:

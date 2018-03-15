@@ -46,6 +46,8 @@ namespace juce
     instead of handling a scrollbar directly.
 
     @see ScrollBar::Listener
+
+    @tags{GUI}
 */
 class JUCE_API  ScrollBar  : public Component,
                              public AsyncUpdater,

@@ -48,6 +48,8 @@ namespace juce
     they can pitch their output correctly.
 
     @see MPESynthesiserBase, MPESynthesiserVoice, MPENote, MPEInstrument
+
+    @tags{Audio}
 */
 class JUCE_API  MPESynthesiser   : public MPESynthesiserBase
 {

@@ -35,6 +35,8 @@ namespace juce
     button state changes.
 
     @see Button, ShapeButton, TextButton
+
+    @tags{GUI}
 */
 class JUCE_API  ImageButton  : public Button
 {

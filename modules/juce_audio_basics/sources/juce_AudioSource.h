@@ -26,6 +26,8 @@ namespace juce
 //==============================================================================
 /**
     Used by AudioSource::getNextAudioBlock().
+
+    @tags{Audio}
 */
 struct JUCE_API  AudioSourceChannelInfo
 {
@@ -103,6 +105,8 @@ struct JUCE_API  AudioSourceChannelInfo
     back into an 'unprepared' state.
 
     @see AudioFormatReaderSource, ResamplingAudioSource
+
+    @tags{Audio}
 */
 class JUCE_API  AudioSource
 {

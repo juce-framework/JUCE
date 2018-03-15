@@ -33,6 +33,8 @@ namespace juce
      loaded.
 
      Declare a PluginHostType object in your class to use it.
+
+    @tags{Audio}
 */
 class PluginHostType
 {

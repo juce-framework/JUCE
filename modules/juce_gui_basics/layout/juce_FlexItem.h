@@ -31,6 +31,8 @@ namespace juce
     Describes the properties of an item inside a FlexBox container.
 
     @see FlexBox
+
+    @tags{GUI}
 */
 class JUCE_API  FlexItem  final
 {

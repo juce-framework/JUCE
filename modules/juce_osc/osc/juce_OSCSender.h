@@ -33,7 +33,9 @@ namespace juce
 
     An OSCSender object can connect to a network port. It then can send OSC
     messages and bundles to a specified host over an UDP socket.
- */
+
+    @tags{OSC}
+*/
 class JUCE_API  OSCSender
 {
 public:

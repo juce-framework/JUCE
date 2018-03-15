@@ -34,6 +34,8 @@ namespace juce
     E.g. a KeyPress might represent CTRL+C, SHIFT+ALT+H, Spacebar, Escape, etc.
 
     @see Component, KeyListener, KeyPressMappingSet, Button::addShortcut
+
+    @tags{GUI}
 */
 class JUCE_API  KeyPress
 {

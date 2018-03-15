@@ -42,6 +42,8 @@ namespace juce
     MIDI zone layout of your C++ code and of the MPE device are kept in sync.
 
     @see MidiMessage, MPEZoneLayout
+
+    @tags{Audio}
 */
 class JUCE_API  MPEMessages
 {

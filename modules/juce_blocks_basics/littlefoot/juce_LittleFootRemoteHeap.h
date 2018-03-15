@@ -30,6 +30,8 @@ namespace littlefoot
 
     Data in the block can be changed by calling setByte, setBytes, setBits etc, and
     these changes will be flushed to the device when sendChanges is called.
+
+    @tags{Blocks}
 */
 template <typename ImplementationClass>
 struct LittleFootRemoteHeap

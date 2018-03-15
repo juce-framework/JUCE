@@ -33,6 +33,8 @@ namespace juce
     is returned every time a matching string is asked for. This means that it's trivial to
     compare two pooled strings for equality, as you can simply compare their pointers. It
     also cuts down on storage if you're using many copies of the same string.
+
+    @tags{Core}
 */
 class JUCE_API  StringPool
 {

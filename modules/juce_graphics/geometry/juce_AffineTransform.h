@@ -37,6 +37,8 @@ namespace juce
     These are used for various 2D transformation tasks, e.g. with Path objects.
 
     @see Path, Point, Line
+
+    @tags{Graphics}
 */
 class JUCE_API  AffineTransform  final
 {

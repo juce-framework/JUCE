@@ -34,6 +34,8 @@ namespace juce
 
     Each section has its own header bar which can be dragged up and down
     to resize it, or double-clicked to fully expand that section.
+
+    @tags{GUI}
 */
 class JUCE_API  ConcertinaPanel   : public Component
 {

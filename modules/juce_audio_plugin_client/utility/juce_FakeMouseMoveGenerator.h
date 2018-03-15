@@ -27,6 +27,8 @@
 namespace juce
 {
 
+#ifndef DOXYGEN
+
 #if JUCE_MAC
 
 //==============================================================================
@@ -88,6 +90,8 @@ private:
 
 #else
 struct FakeMouseMoveGenerator {};
+#endif
+
 #endif
 
 } // namespace juce

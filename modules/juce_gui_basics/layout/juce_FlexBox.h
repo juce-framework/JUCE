@@ -37,6 +37,8 @@ namespace juce
     Component.
 
     @see FlexItem
+
+    @tags{GUI}
 */
 class JUCE_API  FlexBox  final
 {

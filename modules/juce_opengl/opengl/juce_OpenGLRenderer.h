@@ -33,6 +33,8 @@ namespace juce
     on a background thread.
 
     @see OpenGLContext
+
+    @tags{OpenGL}
 */
 class JUCE_API  OpenGLRenderer
 {

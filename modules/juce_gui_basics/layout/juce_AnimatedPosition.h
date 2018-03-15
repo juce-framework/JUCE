@@ -47,6 +47,8 @@ namespace juce
 
     @see AnimatedPositionBehaviours::ContinuousWithMomentum,
          AnimatedPositionBehaviours::SnapToPageBoundaries
+
+    @tags{GUI}
 */
 template <typename Behaviour>
 class AnimatedPosition  : private Timer

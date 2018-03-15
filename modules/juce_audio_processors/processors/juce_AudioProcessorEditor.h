@@ -38,6 +38,8 @@ class AudioProcessorEditorListener;
     by overriding the AudioProcessor::createEditor() method.
 
     @see AudioProcessor, GenericAudioProcessorEditor
+
+    @tags{Audio}
 */
 class JUCE_API  AudioProcessorEditor  : public Component
 {

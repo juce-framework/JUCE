@@ -30,21 +30,26 @@ namespace dsp
 {
 
 /**
-    An IIR filter that can perform low, band and high-pass filtering on an audio
-    signal, with 12 dB of attenuation / octave, using a TPT structure, designed
-    for fast modulation (see Vadim Zavalishin's documentation about TPT
-    structures for more information). Its behaviour is based on the analog
-    state variable filter circuit.
-
-    Note : the bandpass here is not the one in the RBJ CookBook, its gain can be
-    higher than 0 dB. For the classic 0 dB bandpass, we need to multiply the
-    result with R2
+    Classes for state variable filter processing.
 */
 namespace StateVariableFilter
 {
     template <typename NumericType>
     struct Parameters;
 
+    /**
+        An IIR filter that can perform low, band and high-pass filtering on an audio
+        signal, with 12 dB of attenuation / octave, using a TPT structure, designed
+        for fast modulation (see Vadim Zavalishin's documentation about TPT
+        structures for more information). Its behaviour is based on the analog
+        state variable filter circuit.
+
+        Note : the bandpass here is not the one in the RBJ CookBook, its gain can be
+        higher than 0 dB. For the classic 0 dB bandpass, we need to multiply the
+        result with R2
+
+        @tags{DSP}
+    */
     template <typename SampleType>
     class Filter
     {
@@ -174,6 +179,11 @@ namespace StateVariableFilter
     };
 
     //==============================================================================
+    /**
+        Structure used for the state variable filter parameters.
+
+        @tags{DSP}
+    */
     template <typename NumericType>
     struct Parameters  : public ProcessorState
     {

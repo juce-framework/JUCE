@@ -32,6 +32,8 @@ namespace juce
     directly, or use it indirectly using an AudioTransportSource.
 
     @see PositionableAudioSource, AudioTransportSource
+
+    @tags{Audio}
 */
 class JUCE_API  BufferingAudioSource  : public PositionableAudioSource,
                                         private TimeSliceClient

@@ -36,6 +36,8 @@ namespace juce
 
     You can then retrieve this checksum as a 16-byte block, or as a hex string.
     @see SHA256
+
+    @tags{Cryptography}
 */
 class JUCE_API  MD5
 {

@@ -41,6 +41,8 @@ namespace juce
 
     It's currently used by the TableHeaderComponent for stretching out the table
     headings to fill the table's width.
+
+    @tags{GUI}
 */
 class StretchableObjectResizer
 {

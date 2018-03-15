@@ -33,6 +33,8 @@ namespace juce
     MPEValue objects.
 
     @see MPEValue
+
+    @tags{Audio}
 */
 struct JUCE_API  MPENote
 {

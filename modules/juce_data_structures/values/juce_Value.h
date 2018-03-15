@@ -45,6 +45,8 @@ namespace juce
     Important note! The Value class is not thread-safe! If you're accessing one from
     multiple threads, then you'll need to use your own synchronisation around any code
     that accesses it.
+
+    @tags{DataStructures}
 */
 class JUCE_API  Value  final
 {

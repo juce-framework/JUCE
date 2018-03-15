@@ -26,6 +26,8 @@ namespace juce
 //==============================================================================
 /**
     A multi-channel buffer containing floating point audio samples.
+
+    @tags{Audio}
 */
 template <typename Type>
 class AudioBuffer

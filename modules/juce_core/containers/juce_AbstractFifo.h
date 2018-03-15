@@ -78,6 +78,8 @@ namespace juce
         int myBuffer [1024];
     };
     @endcode
+
+    @tags{Core}
 */
 class JUCE_API  AbstractFifo
 {
@@ -210,6 +212,7 @@ private:
     };
 
 public:
+    /** Class for a scoped reader/writer */
     template <ReadOrWrite mode>
     class ScopedReadWrite final
     {

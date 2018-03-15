@@ -36,6 +36,8 @@ namespace juce
     The browser itself will be platform-dependent. On the Mac, probably Safari, on
     Windows, probably IE.
 
+
+    @tags{GUI}
 */
 class JUCE_API  WebBrowserComponent      : public Component
 {

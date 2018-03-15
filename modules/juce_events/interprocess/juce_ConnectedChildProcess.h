@@ -41,6 +41,8 @@ namespace juce
     The juce demo app has a good example of this class in action.
 
     @see ChildProcessMaster, InterprocessConnection, ChildProcess
+
+    @tags{Events}
 */
 class JUCE_API  ChildProcessSlave
 {
@@ -126,6 +128,8 @@ private:
     The juce demo app has a good example of this class in action.
 
     @see ChildProcessSlave, InterprocessConnection, ChildProcess
+
+    @tags{Events}
 */
 class JUCE_API ChildProcessMaster
 {

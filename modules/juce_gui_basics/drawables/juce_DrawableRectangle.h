@@ -34,6 +34,8 @@ namespace juce
     For details on how to change the fill and stroke, see the DrawableShape class.
 
     @see Drawable, DrawableShape
+
+    @tags{GUI}
 */
 class JUCE_API  DrawableRectangle  : public DrawableShape
 {

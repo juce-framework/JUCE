@@ -46,6 +46,11 @@ static uint8 calculatePacketChecksum (const uint8* data, uint32 size) noexcept
 
 
 //==============================================================================
+/**
+    Helper class to define an integer with a specific bit size.
+
+    @tags{Blocks}
+*/
 template <int numBits>
 struct IntegerWithBitSize
 {
@@ -96,6 +101,8 @@ struct IntegerWithBitSize
 /**
     This helper class allocates a block of 7-bit bytes and can push sequences of bits into it.
     @see Packed7BitArrayReader
+
+    @tags{Blocks}
 */
 template <int allocatedBytes>
 struct Packed7BitArrayBuilder
@@ -188,6 +195,7 @@ struct Packed7BitArrayBuilder
         }
     }
 
+    /** Describes the current building state */
     struct State
     {
         int bytesWritten, bitsInCurrentByte;
@@ -214,6 +222,8 @@ private:
 /**
     This helper class reads from a block of 7-bit bytes as sequences of bits.
     @see Packed7BitArrayBuilder
+
+    @tags{Blocks}
 */
 struct Packed7BitArrayReader
 {

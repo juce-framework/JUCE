@@ -35,6 +35,8 @@ namespace juce
     kind of action.
 
     @see PropertyComponent
+
+    @tags{GUI}
 */
 class JUCE_API  ButtonPropertyComponent  : public PropertyComponent
 {

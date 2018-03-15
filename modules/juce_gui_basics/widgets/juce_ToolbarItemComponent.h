@@ -44,6 +44,8 @@ namespace juce
     ToolbarButton class.
 
     @see ToolbarButton, Toolbar, ToolbarItemFactory
+
+    @tags{GUI}
 */
 class JUCE_API  ToolbarItemComponent  : public Button
 {

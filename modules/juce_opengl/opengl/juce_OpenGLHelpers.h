@@ -30,6 +30,8 @@ namespace juce
 //==============================================================================
 /**
     A set of miscellaneous openGL helper functions.
+
+    @tags{OpenGL}
 */
 class JUCE_API  OpenGLHelpers
 {

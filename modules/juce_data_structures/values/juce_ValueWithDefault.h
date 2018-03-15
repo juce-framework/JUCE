@@ -33,6 +33,8 @@ namespace juce
 
     If the property inside the ValueTree is missing or empty the ValueWithDefault will automatically
     return a default value, which can be specified when initialising the ValueWithDefault.
+
+    @tags{DataStructures}
 */
 class ValueWithDefault
 {

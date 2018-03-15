@@ -35,6 +35,8 @@ namespace juce
 
     OSC messages are the elementary objects that are used to exchange any data
     via OSC. An OSCSender can send OSCMessage objects to an OSCReceiver.
+
+    @tags{OSC}
 */
 class JUCE_API  OSCMessage
 {

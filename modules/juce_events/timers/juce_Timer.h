@@ -45,6 +45,8 @@ namespace juce
     internally, each one identified by an ID number.
 
     @see HighResolutionTimer, MultiTimer
+
+    @tags{Events}
 */
 class JUCE_API  Timer
 {

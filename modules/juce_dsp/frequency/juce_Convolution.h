@@ -44,6 +44,8 @@ namespace dsp
     the impulse response is higher than 64 samples.
 
     @see FIRFilter, FIRFilter::Coefficients, FFT
+
+    @tags{DSP}
 */
 class JUCE_API  Convolution
 {

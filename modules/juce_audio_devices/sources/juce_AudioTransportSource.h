@@ -35,6 +35,8 @@ namespace juce
     to control playback of an audio file.
 
     @see AudioSource, AudioSourcePlayer
+
+    @tags{Audio}
 */
 class JUCE_API  AudioTransportSource  : public PositionableAudioSource,
                                         public ChangeBroadcaster

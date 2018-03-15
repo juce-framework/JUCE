@@ -40,6 +40,8 @@ namespace juce
     to manually sort them using your preferred comparator after collecting the list.
 
     It also provides an estimate of its progress, using a (highly inaccurate!) algorithm.
+
+    @tags{Core}
 */
 class JUCE_API  DirectoryIterator  final
 {

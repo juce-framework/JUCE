@@ -72,6 +72,8 @@ namespace juce
     @endcode
 
     @see WeakReference::Master
+
+    @tags{Core}
 */
 template <class ObjectType, class ReferenceCountingType = ReferenceCountedObject>
 class WeakReference

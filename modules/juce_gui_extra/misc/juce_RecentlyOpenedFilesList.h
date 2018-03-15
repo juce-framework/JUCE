@@ -36,6 +36,8 @@ namespace juce
     adding them to a menu, and making persistence easy.
 
     @see File, FileBasedDocument
+
+    @tags{GUI}
 */
 class JUCE_API  RecentlyOpenedFilesList
 {

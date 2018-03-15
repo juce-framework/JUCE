@@ -37,6 +37,8 @@ namespace juce
     it'll produce silence.
 
     @see AudioSource
+
+    @tags{Audio}
 */
 class ChannelRemappingAudioSource  : public AudioSource
 {

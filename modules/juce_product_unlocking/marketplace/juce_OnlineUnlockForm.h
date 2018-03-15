@@ -45,6 +45,8 @@ namespace juce
     if you need to get rid of it sooner.
 
     @see OnlineUnlockStatus
+
+    @tags{ProductUnlocking}
 */
 class JUCE_API  OnlineUnlockForm  : public Component,
                                     private Button::Listener

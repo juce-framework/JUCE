@@ -35,6 +35,8 @@ namespace dsp
     for processing directly audio as an equalizer, in resampling algorithms etc.
 
     see FIRFilter::Coefficients, FIRFilter, WindowingFunction, IIRFilter::Coefficients, IIRFilter
+
+    @tags{DSP}
 */
 template <typename FloatType>
 struct FilterDesign

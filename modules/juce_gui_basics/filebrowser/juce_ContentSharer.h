@@ -32,6 +32,8 @@ namespace juce
 /** A singleton class responsible for sharing content between apps and devices.
 
     You can share text, images, files or an arbitrary data block.
+
+    @tags{GUI}
 */
 class JUCE_API ContentSharer
 {

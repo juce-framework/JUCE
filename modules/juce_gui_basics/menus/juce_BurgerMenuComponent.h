@@ -34,8 +34,9 @@ namespace juce
     for so-called "burger" menus in mobile apps.
 
     @see MenuBarModel
+
+    @tags{GUI}
 */
-//==============================================================================
 class BurgerMenuComponent     : public Component,
                                 private ListBoxModel,
                                 private MenuBarModel::Listener

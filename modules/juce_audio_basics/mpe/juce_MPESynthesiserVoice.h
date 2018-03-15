@@ -31,7 +31,9 @@ namespace juce
     voices so that it can play polyphonically.
 
     @see MPESynthesiser, MPENote
- */
+
+    @tags{Audio}
+*/
 class JUCE_API  MPESynthesiserVoice
 {
 public:

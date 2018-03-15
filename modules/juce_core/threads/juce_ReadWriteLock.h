@@ -41,6 +41,8 @@ namespace juce
     - Recursive locking is supported.
 
     @see ScopedReadLock, ScopedWriteLock, CriticalSection
+
+    @tags{Core}
 */
 class JUCE_API  ReadWriteLock
 {

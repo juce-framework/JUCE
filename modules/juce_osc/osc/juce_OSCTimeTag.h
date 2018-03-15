@@ -44,6 +44,8 @@ namespace juce
 
     For a more user-friendly time format, convert OSCTimeTag to a juce::Time object
     using toTime().
+
+    @tags{OSC}
 */
 class JUCE_API  OSCTimeTag
 {

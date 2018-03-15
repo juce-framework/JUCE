@@ -32,6 +32,8 @@
 namespace juce
 {
 
+#ifndef DOXYGEN
+
 struct AudioUnitHelpers
 {
     class ChannelRemapper
@@ -529,5 +531,7 @@ struct AudioUnitHelpers
        #endif
     }
 };
+
+#endif // ! DOXYGEN
 
 } // namespace juce

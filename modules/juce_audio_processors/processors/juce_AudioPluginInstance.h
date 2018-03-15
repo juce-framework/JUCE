@@ -39,6 +39,8 @@ namespace juce
     return AudioPluginInstance objects which wrap external plugins.
 
     @see AudioProcessor, AudioPluginFormat
+
+    @tags{Audio}
 */
 class JUCE_API  AudioPluginInstance   : public AudioProcessor
 {
@@ -96,6 +98,7 @@ public:
 
 protected:
     //==============================================================================
+    /** Structure used to describe plugin parameters */
     struct Parameter   : public AudioProcessorParameter
     {
         Parameter();

@@ -41,6 +41,8 @@ namespace juce
     read has been mapped.
 
     @see AudioFormat::createMemoryMappedReader, AudioFormatReader
+
+    @tags{Audio}
 */
 class JUCE_API  MemoryMappedAudioFormatReader  : public AudioFormatReader
 {

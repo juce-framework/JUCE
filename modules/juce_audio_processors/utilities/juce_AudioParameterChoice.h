@@ -32,6 +32,8 @@ namespace juce
     an indexed, named choice from a list.
 
     @see AudioParameterFloat, AudioParameterInt, AudioParameterBool
+
+    @tags{Audio}
 */
 class JUCE_API  AudioParameterChoice  : public AudioProcessorParameterWithID
 {

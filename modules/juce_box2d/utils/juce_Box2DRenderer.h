@@ -32,6 +32,8 @@ namespace juce
 
     To use it, simply create an instance of this class in your paint() method,
     and call its render() method.
+
+    @tags{Box2D}
 */
 class Box2DRenderer   : public b2Draw
 

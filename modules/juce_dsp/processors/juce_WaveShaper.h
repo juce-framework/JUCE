@@ -31,6 +31,8 @@ namespace dsp
 
 /**
     Applies waveshaping to audio samples as single samples or AudioBlocks.
+
+    @tags{DSP}
 */
 template <typename FloatType, typename Function = FloatType (*) (FloatType)>
 struct WaveShaper

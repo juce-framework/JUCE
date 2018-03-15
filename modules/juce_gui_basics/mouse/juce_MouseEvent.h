@@ -33,6 +33,8 @@ namespace juce
 
     @see MouseListener, Component::mouseMove, Component::mouseEnter, Component::mouseExit,
          Component::mouseDown, Component::mouseUp, Component::mouseDrag
+
+    @tags{GUI}
 */
 class JUCE_API  MouseEvent  final
 {
@@ -377,6 +379,8 @@ private:
     Contains status information about a mouse wheel event.
 
     @see MouseListener, MouseEvent
+
+    @tags{GUI}
 */
 struct MouseWheelDetails  final
 {
@@ -417,6 +421,8 @@ struct MouseWheelDetails  final
     Contains status information about a pen event.
 
     @see MouseListener, MouseEvent
+
+    @tags{GUI}
 */
 struct PenDetails  final
 {

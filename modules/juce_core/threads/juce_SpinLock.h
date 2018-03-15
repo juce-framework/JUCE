@@ -35,6 +35,8 @@ namespace juce
     lock for a very brief time.
 
     @see CriticalSection
+
+    @tags{Core}
 */
 class JUCE_API  SpinLock
 {

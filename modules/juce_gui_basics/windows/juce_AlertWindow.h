@@ -39,6 +39,8 @@ namespace juce
     user pressed to dismiss the box.
 
     @see ThreadWithProgressWindow
+
+    @tags{GUI}
 */
 class JUCE_API  AlertWindow  : public TopLevelWindow
 {

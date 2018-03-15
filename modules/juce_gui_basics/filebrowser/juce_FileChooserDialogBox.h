@@ -61,6 +61,8 @@ namespace juce
     @endcode
 
     @see FileChooser
+
+    @tags{GUI}
 */
 class JUCE_API  FileChooserDialogBox : public ResizableWindow,
                                        private FileBrowserListener

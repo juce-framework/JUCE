@@ -45,6 +45,8 @@ namespace juce
     simply by overriding FileDragAndDropTarget::filesDropped().
 
     @see DragAndDropTarget
+
+    @tags{GUI}
 */
 class JUCE_API  DragAndDropContainer
 {

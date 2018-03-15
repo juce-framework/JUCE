@@ -85,6 +85,8 @@ namespace internal
     classes, but some of them may be useful to call directly.
 
     @see String, CharPointer_UTF8, CharPointer_UTF16, CharPointer_UTF32
+
+    @tags{Core}
 */
 class JUCE_API  CharacterFunctions
 {
@@ -403,6 +405,7 @@ public:
         return isNeg ? - (IntType) v : (IntType) v;
     }
 
+    /** Parses a character string, to read a hexadecimal value. */
     template <typename ResultType>
     struct HexParser
     {

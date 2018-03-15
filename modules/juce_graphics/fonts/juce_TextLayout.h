@@ -35,6 +35,8 @@ namespace juce
     quickly drawn into a Graphics context.
 
     @see AttributedString
+
+    @tags{Graphics}
 */
 class JUCE_API  TextLayout  final
 {

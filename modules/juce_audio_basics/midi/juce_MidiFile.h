@@ -35,6 +35,8 @@ namespace juce
     it out.
 
     @see MidiMessageSequence
+
+    @tags{Audio}
 */
 class JUCE_API  MidiFile
 {

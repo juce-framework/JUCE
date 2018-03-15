@@ -28,6 +28,8 @@ namespace juce
     An output stream that writes into a local file.
 
     @see OutputStream, FileInputStream, File::createOutputStream
+
+    @tags{Core}
 */
 class JUCE_API  FileOutputStream  : public OutputStream
 {

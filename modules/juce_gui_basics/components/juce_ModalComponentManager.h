@@ -37,6 +37,8 @@ namespace juce
 
     @see Component::enterModalState, Component::exitModalState, Component::isCurrentlyModal,
          Component::getCurrentlyModalComponent, Component::isCurrentlyBlockedByAnotherModalComponent
+
+    @tags{GUI}
 */
 class JUCE_API  ModalComponentManager   : private AsyncUpdater,
                                           private DeletedAtShutdown
@@ -156,6 +158,8 @@ private:
 /**
     This class provides some handy utility methods for creating ModalComponentManager::Callback
     objects that will invoke a static function with some parameters when a modal component is dismissed.
+
+    @tags{GUI}
 */
 class ModalCallbackFunction
 {

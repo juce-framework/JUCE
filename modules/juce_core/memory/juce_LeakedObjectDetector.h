@@ -35,6 +35,8 @@ namespace juce
     To use it, use the JUCE_LEAK_DETECTOR macro as a simple way to put one in your
     class declaration. Have a look through the juce codebase for examples, it's used
     in most of the classes.
+
+    @tags{Core}
 */
 template <class OwnerClass>
 class LeakedObjectDetector

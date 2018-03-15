@@ -31,6 +31,8 @@ class MidiKeyboardState;
     Receives events from a MidiKeyboardState object.
 
     @see MidiKeyboardState
+
+    @tags{Audio}
 */
 class JUCE_API  MidiKeyboardStateListener
 {
@@ -78,6 +80,8 @@ public:
     It also allows key up/down events to be triggered with its noteOn() and noteOff()
     methods, and midi messages for these events will be merged into the
     midi stream that gets processed by processNextMidiBuffer().
+
+    @tags{Audio}
 */
 class JUCE_API  MidiKeyboardState
 {
